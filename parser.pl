@@ -221,8 +221,8 @@ swrite_numbered('$petta_variable'(Index)) --> !, "$_", { number_codes(Index, Cs)
 %is the other half of that map: without it the round trip renamed the
 %language's own constants and `!(== 1 2)` answered `false` where the arbiter
 %answers `False` [source: LeaTTa tests/semantics/grounded/07-partial-core.metta,
-%04-boolean.metta]. It also closes a seam: python/petta already writes `True`,
-%which python/tools/example_parity.py had to compare around
+%04-boolean.metta]. It also closes a seam: bindings/python/petta already writes `True`,
+%which bindings/python/tools/example_parity.py had to compare around
 %[tested: parser_roundtrip:booleans_print_in_the_languages_own_spelling].
 swrite_numbered(true)  --> !, "True".
 swrite_numbered(false) --> !, "False".
@@ -387,7 +387,7 @@ sread_codes(Cs, Source, T) :-
 %raises syntax_error(float_overflow) on a literal past binary64 rather than
 %answering. So `(holds 1e400)` did not parse and did not report a parse error
 %either: the raise went straight out through sread/2 and killed the run with
-%`number_codes/2: Syntax error: float_overflow` naming src/main.pl
+%`number_codes/2: Syntax error: float_overflow` naming engine/main.pl
 %[measured 2026-08-19; found by the generated-spelling law in
 %tests/prolog/property_lane.pl].
 %
@@ -746,7 +746,7 @@ metta_number_writable(Number) :-
 %text seam was declared. A number is the second, and it is the same failure
 %with the same consequence at the same four call sites, so it is answered here
 %rather than left for each of them to discover
-%[source: src/ext_points.pl, the swrite/sread service contract].
+%[source: engine/ext_points.pl, the swrite/sread service contract].
 metta_unwritable_symbol(Term, Bad) :-
     metta_unwritable_walk(Term, Bad), !.
 

@@ -24,13 +24,13 @@
 %a predicate the ENGINE defines and an extension is allowed to CALL. A foreign
 %space backend needs one: it speaks text over a wire, so it has to turn a term
 %into text and back, and before this kind existed it reached into
-%src/parser.pl to do it. SQLite publishes the same half of its own contract
+%engine/parser.pl to do it. SQLite publishes the same half of its own contract
 %and for the same reason, handing an extension an sqlite3_api_routines table
 %of the host functions it may call so that an extension never links against
 %internals [source: https://www.sqlite.org/vtab.html and loadext.html]. Naming
 %the surface is what makes "reaches past the seam" a question a checker can
 %answer, and two extensions had already answered it wrongly: morkspaces.pl and
-%python/petta/shim.pl each wrapped metta_unwritable_symbol/2 under a private
+%bindings/python/petta/shim.pl each wrapped metta_unwritable_symbol/2 under a private
 %name of its own, which is what an undeclared dependency looks like from the
 %outside [measured 2026-08-17].
 %
@@ -119,7 +119,7 @@ ext_point_kind(metta_dispatch_call/4, ownership).
 %reason the atom hooks below are: a handler needed only once a feature is used
 %should cost nothing until then, so it is installed when that feature first
 %runs rather than when its file loads. A resident handler clause costs four
-%inferences on EVERY compiled equation [measured 2026-08-15: src/duals.pl's
+%inferences on EVERY compiled equation [measured 2026-08-15: engine/duals.pl's
 %invalidation handler, 4001 on source-load's thousand equations].
 :- multifile metta_on_function_changed/1.
 ext_point_kind(metta_on_function_changed/1, event).
@@ -136,7 +136,7 @@ ext_point_kind(metta_on_function_removed/1, event).
 %two coincide for a ground request and diverge for a pattern: removal is
 %multiset subtraction, so (remove-atom &s (p $x)) takes one of the atoms
 %matching (p $x) and the hook cannot say which. A handler that needs the
-%occurrence re-reads the space; python/petta/structures.py's LiveView is the
+%occurrence re-reads the space; bindings/python/petta/structures.py's LiveView is the
 %worked instance [tested: test_liveview_mirrors_the_space].
 :- multifile metta_on_atom_added/2.
 ext_point_kind(metta_on_atom_added/2, event).
@@ -199,7 +199,7 @@ ext_point_kind(metta_foreign_remove/3, ownership).
 :- multifile metta_foreign_atoms/2.
 ext_point_kind(metta_foreign_atoms/2, ownership).
 %Clear was the sixth of these all along and was declared nowhere: it lived in
-%python/petta/shim.pl, so a Prolog provider that implemented clear, as
+%bindings/python/petta/shim.pl, so a Prolog provider that implemented clear, as
 %lib/lib_redis.pl does, was reachable only when Python was in the process.
 :- multifile metta_foreign_clear/1.
 ext_point_kind(metta_foreign_clear/1, ownership).
@@ -342,7 +342,7 @@ ext_point_kind(metta_foreign_plan/5, ownership).
 %in this tree writes ONE clause with a variable space and an ownership guard
 %in the body, which unifies with any space at all.
 %
-%So it is declared, the way python/petta/foreign.py derives it from the narrow
+%So it is declared, the way bindings/python/petta/foreign.py derives it from the narrow
 %protocols a provider implements. The capabilities are add, remove, match,
 %enumerate, clear, PLAN and RULES.
 %
@@ -508,12 +508,12 @@ ext_point_kind(metta_grounded_text/2, ownership).
 %The builtins a backend's bridge provides. Declared by the file that DEFINES
 %them, so they exist exactly when the predicates behind them do: registering a
 %name whose predicate is absent records no arity, and every call to it then
-%compiles to a partial application. src/metta.pl registers whatever is declared
+%compiles to a partial application. engine/metta.pl registers whatever is declared
 %here, and names nothing.
 :- multifile metta_backend_builtin/1.
 ext_point_kind(metta_backend_builtin/1, declaration).
 
-%A backend's smoke test, run by src/main.pl's demo. Every handler runs, so a
+%A backend's smoke test, run by engine/main.pl's demo. Every handler runs, so a
 %process with two backends tests both, and one with none tests nothing and says
 %so by being silent.
 :- multifile metta_backend_selftest/0.
@@ -534,7 +534,7 @@ ext_point_kind(metta_backend_selftest/0, event).
 %TEXT. What being a shared library costs. A backend's atoms live on the far
 %side of an FFI boundary that carries bytes, so every atom it stores is written
 %and every atom it returns is read, and before these were declared MORK reached
-%into src/parser.pl for all four, wrapping one under a private name.
+%into engine/parser.pl for all four, wrapping one under a private name.
 %
 %swrite/2 and sread/2 are one rule about spelling rather than two conveniences.
 %swrite/2 will print a value that sread/2 does not read back as itself, and
@@ -551,7 +551,7 @@ ext_point_kind(metta_backend_selftest/0, event).
 %narrower than what it reports because names were the only class known to fail
 %when this surface was declared.
 %HOST SERVICE: a service again, engine-defined and engine-owned, but for
-%the other caller: the HOST BINDING's transport (python/petta's shim today,
+%the other caller: the HOST BINDING's transport (bindings/python/petta's shim today,
 %any future binding's transport tomorrow). The backend direction has
 %a_backend_calls_only_published_surface; this kind is what the host
 %direction's twin reads, so the binding can no longer grow a dependency on
@@ -704,7 +704,7 @@ ext_point_kind(current_metta_module/1, service).
 %space has to ask. lib_memo.pl and lib_tabling.pl each carried a hand-written
 %copy of the inverse before this
 %[source: ai-phase11-module-survey.md section 1.3, which counted four copies
-%of it, three of them outside src/spaces.pl].
+%of it, three of them outside engine/spaces.pl].
 ext_point_kind(space_module/2, service).
 ext_point_kind(metta_module_space/2, service).
 
@@ -722,7 +722,7 @@ ext_point_kind(metta_grounded_extra_type/2, declaration).
 %consulted either way, because a declaration seam is additive and reading
 %this one as owning the whole answer silently dropped every declared type
 %in the shipped configuration
-%[tested: python/tests/test_ops.py::test_a_declared_type_survives_the_library_being_loaded].
+%[tested: bindings/python/tests/test_ops.py::test_a_declared_type_survives_the_library_being_loaded].
 :- multifile metta_grounded_type_names/2.
 ext_point_kind(metta_grounded_type_names/2, ownership).
 
@@ -788,7 +788,7 @@ metta_atom_hook_clause(removed, Ref) :- clause(metta_on_atom_removed(_, _), _, R
 %installer being made unable to fail quietly rather than a live bug
 %[tested: a_handler_survives_its_own_installation].
 %The wrapped predicate is the ENGINE's, so the module is asked rather than
-%written: petta_engine_module/1 (src/metta.pl) answers where this file's
+%written: petta_engine_module/1 (engine/metta.pl) answers where this file's
 %clauses went. Writing `user` here meant "the engine" in one breath and "the
 %host" in the next, and only the second reading survives Phase 11.
 %

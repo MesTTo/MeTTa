@@ -185,7 +185,7 @@
 ;NOT honoured at call sites, because several of those declarations
 ;describe the argument a CALLER writes rather than the value the
 ;predicate receives, and honouring them broke every maplist call
-;[source: call_site_type_chains/2 in src/translator.pl]. get-type has no
+;[source: call_site_type_chains/2 in engine/translator.pl]. get-type has no
 ;such gap: the declaration and the predicate agree that the argument
 ;arrives unreduced, so the prelude register, which IS honoured at call
 ;sites, is where it belongs.
@@ -502,7 +502,7 @@
 ; Prolog-bodied by measurement: the same chain written here as equations
 ; cost 131.01 inferences per add against the builtin body, the two
 ; collapse-over-match reads of &petta being the gap, and a pool is a
-; millions-of-adds surface (python/benchmarks/extension_cost.py's
+; millions-of-adds surface (bindings/python/benchmarks/extension_cost.py's
 ; write-door table is the record). The declaration below is the half of
 ; its contract that lives at this level: the Atom mask keeps the offered
 ; atom unreduced, so a pool judges the atom AS ITSELF

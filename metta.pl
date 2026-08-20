@@ -67,34 +67,34 @@
 %     Symbol as an unknown name does [tested 2026-08-20: metta_metatypes].
 %   - petta_transaction/1 answers everything its body answers, and every
 %     answer's writes commit or roll back together [tested 2026-08-19:
-%     python/tests/test_atomic_forms.py::test_a_transaction_preserves_every_answer_of_its_body].
+%     bindings/python/tests/test_atomic_forms.py::test_a_transaction_preserves_every_answer_of_its_body].
 %   - Every guarded_input_position/3 refuses an unbound argument and names the
 %     MeTTa operation, so no builtin binds the caller's variable, invents an
 %     answer, runs away or reports a host predicate [tested 2026-08-19:
 %     builtin_input_guards:every_builtin_refuses_an_unbound_input_by_name,
-%     python/tests/test_builtin_inputs.py::test_a_raising_builtin_names_the_metta_operation_not_the_host_predicate].
+%     bindings/python/tests/test_builtin_inputs.py::test_a_raising_builtin_names_the_metta_operation_not_the_host_predicate].
 %   - ==/3 and !=/3 refuse two operands of known and different types and
 %     answer for every other pair, at no cost on two numbers [tested
 %     2026-08-19:
-%     python/tests/test_equality.py::test_cross_kind_equality_answers_what_the_arbiter_answers]
+%     bindings/python/tests/test_equality.py::test_cross_kind_equality_answers_what_the_arbiter_answers]
 %     [measured 2026-08-19: 4487.45 inferences per thousand-iteration loop,
 %     unchanged].
 %   - %Undefined% is consistent with every type in both directions, so a call
 %     site refuses only a PROVEN conflict, while has_declared_type/2 demands a
 %     witness for a contract [tested 2026-08-19:
-%     python/tests/test_gradual_typing.py::test_an_unknown_type_is_consistent_with_every_declared_type,
-%     python/tests/test_answer_protocol.py::test_admission_types_the_pool].
+%     bindings/python/tests/test_gradual_typing.py::test_an_unknown_type_is_consistent_with_every_declared_type,
+%     bindings/python/tests/test_answer_protocol.py::test_admission_types_the_pool].
 %   - An expression no arrow types reads element-wise, and the tuple it reads
 %     is %Undefined% as soon as one member's type is [tested 2026-08-19:
 %     metta_type_answers:a_tuple_with_an_untyped_member_is_undefined].
 %   - get-type/2 and get-type-space/3 answer from declarations without running
 %     the inspected expression, so inspection has no effects of its own
 %     [tested 2026-08-19:
-%     python/tests/test_type_inspection.py::test_get_type_does_not_run_its_arguments_effects].
+%     bindings/python/tests/test_type_inspection.py::test_get_type_does_not_run_its_arguments_effects].
 %   - get-type-space/3 reads only the selected space, and the upstream doc
 %     family builds @doc-formal answers from that scoped type and prose
 %     [tested 2026-08-20:
-%     python/tests/test_doc_family.py::test_the_doc_family_answers_what_upstream_answers].
+%     bindings/python/tests/test_doc_family.py::test_the_doc_family_answers_what_upstream_answers].
 %   - builtin_type_declaration/2 rows are the union of lib_builtin_types.metta
 %     and the prelude's, with each row written once and evicted only by the
 %     register that wrote it [tested 2026-08-19:
@@ -109,7 +109,7 @@
 %   - petta_assertion_failure/4 classifies the three assertion formals, so a
 %     harness tells a false claim from a broken engine by TYPE rather than by
 %     reading the message [tested 2026-08-19:
-%     python/tests/test_assertion_failures.py::test_a_failing_assertion_is_a_different_exception_from_an_engine_fault].
+%     bindings/python/tests/test_assertion_failures.py::test_a_failing_assertion_is_a_different_exception_from_an_engine_fault].
 %   - Runtime builtins reject prebound outputs that they would not produce
 %     [tested 2026-08-14: metta_builtin_outputs].
 %   - Function registration performed by a source load participates in that
@@ -120,7 +120,7 @@
 %   - Every metta_grounded_extra_type/2 clause is consulted whether or not a host
 %     bridge answers metta_grounded_type_names/2, so a (py-atom f Type)
 %     declaration survives the Python library being loaded [tested 2026-08-18:
-%     python/tests/test_ops.py::test_a_declared_type_survives_the_library_being_loaded]
+%     bindings/python/tests/test_ops.py::test_a_declared_type_survives_the_library_being_loaded]
 %     [measured 2026-08-18: +2 inferences per get-type on a Python object and
 %     0 on every other value].
 %   - The engine loads and runs the full examples/ corpus with
@@ -131,7 +131,7 @@
 %     every foldl-atom/map-atom/filter-atom/'|->' compile, both silently
 %     supplied by autoload before now [measured 2026-08-18: NO_AUTOLOAD=1
 %     sh test.sh, 200/200 examples; run.sh's own header has the mechanism].
-%     Cost: +1.50% instructions:u on a bare boot (swipl -s src/metta.pl,
+%     Cost: +1.50% instructions:u on a bare boot (swipl -s engine/metta.pl,
 %     no backends), +0.54% with backends loaded too, +0.14% over a full
 %     example run that also exercises the opt-in libraries' own fixes
 %     (lib/lib_constraints.pl, lib/lib_memo.pl) [measured 2026-08-18:
@@ -269,7 +269,7 @@ register_metta_library_path(Alias, Directory0, true) :-
 %pulls library(gensym) in, so today it resolves by autoload on the first
 %such compile. With autoload=false that call raises
 %existence_error(procedure,gensym/2) from inside the engine's own prelude
-%(src/prelude.metta's type-cast-holds is the one equation there that uses
+%(engine/prelude.metta's type-cast-holds is the one equation there that uses
 %foldl-atom with an inline body), and SWI's OWN initialization-error
 %reporting then masks that primary error: building a source-location
 %diagnostic for it calls into library(prolog_clause)'s
@@ -342,14 +342,15 @@ goal_expansion(metta_exec_module_prefix(Prefix), Prefix = '$petta_exec:').
 :- ensure_loaded([ext_points, parser, translator, specializer, filereader,
                   '../lib/lib_gitimport', spaces, tracer, duals, kernel]).
 
-%A host is a file in hosts/, the backends split one directory over: the
+%A host is a seat's decider file under bindings/, the backends split one
+%directory over: the
 %decider file loads unconditionally and whether its bridge is usable is its
-%own business, so the engine names no host and the next host is a dropped
-%file. Hosts load here, before the standard library and the registry
+%own business, so the engine names no host and the next host is a new
+%seat folder with a decider.pl. Hosts load here, before the standard library and the registry
 %directive, so a bridge's declared builtins and seams exist by the time
 %anything reads them.
 :- prolog_load_context(directory, Src),
-   directory_file_path(Src, '../hosts/*.pl', Pattern),
+   directory_file_path(Src, '../bindings/*/decider.pl', Pattern),
    expand_file_name(Pattern, Found),
    msort(Found, Files),
    forall(member(File, Files), ensure_loaded(File)).
@@ -361,14 +362,15 @@ goal_expansion(metta_exec_module_prefix(Prefix), Prefix = '$petta_exec:').
 %file knows nothing more about it; what it needs from the engine is somewhere
 %to be loaded FROM, and that is all this does.
 %
-%One backend used to be named here instead, twice: `'../mork_ffi/morkspaces'`
+%One backend used to be named here instead, twice: `'../backends/mork/mork_ffi/morkspaces'`
 %in a second copy of the whole load list, and its three builtin names in a
 %second argv test further down. So a second native backend could not be added
 %without editing this file, which is the one thing EXTENDING.md promises an
 %extension author never has to do, and MORK was reaching the engine through a
 %door no other provider had. It goes through the seam now like everyone else.
 %
-%A backend is a file in backends/. Loading one is consulting that file, and
+%A backend is an integration folder in backends/ with a decider.pl at its
+%top. Loading one is consulting that decider, and
 %what it pulls in, where its build artefacts are, and whether they are present
 %at all is the backend's own business: a backend that is not built loads
 %nothing and says nothing, and one that is built and broken raises, which is
@@ -381,7 +383,7 @@ goal_expansion(metta_exec_module_prefix(Prefix), Prefix = '$petta_exec:').
 :- prolog_load_context(directory, Src),
    current_prolog_flag(argv, Argv),
    (   memberchk(backends, Argv)
-   ->  directory_file_path(Src, '../backends/*.pl', Pattern),
+   ->  directory_file_path(Src, '../backends/*/decider.pl', Pattern),
        expand_file_name(Pattern, Found),
        msort(Found, Files),
        forall(member(File, Files), ensure_loaded(File))
@@ -1402,7 +1404,7 @@ non_list(X) :- compound(X), X \= [_|_].
 %The POSITIONS are read off builtin_type_declaration/2 rather than listed, so
 %declaring a type for a new builtin strengthens its guard in the same stroke
 %and the table and the guards cannot drift apart. The probe in
-%python/tests/test_builtin_inputs.py enumerates the same table.
+%bindings/python/tests/test_builtin_inputs.py enumerates the same table.
 %
 %Each guard is a LEADING clause on a var first argument, and it costs nothing
 %where it would be felt: 'car-atom'([1,2], _) is 2.0000 inferences per call
@@ -1447,7 +1449,7 @@ relational_input_position(xor, 1).      relational_input_position(xor, 2).
 relational_input_position(implies, 1).  relational_input_position(implies, 2).
 %cons builds a PATTERN, and an open tail is what makes it one: the engine's
 %own prelude writes (cons Error $_) to test whether a value is an error
-%[source: src/prelude.metta, if-error]. cons-atom is the same operation under
+%[source: engine/prelude.metta, if-error]. cons-atom is the same operation under
 %its MeTTa name.
 relational_input_position(cons, 2).
 relational_input_position('cons-atom', 2).
@@ -1485,9 +1487,9 @@ guarded_input_position(Name, Arity, Position) :-
 %The three positions this rule does NOT yet cover, named rather than hidden.
 %Each predicate lives in a file the change that added this guard does not
 %own, and each is measured 2026-08-19: get-atoms/2 and match/4 are in
-%src/spaces.pl and raise an instantiation_error with no context at all, so a
+%engine/spaces.pl and raise an instantiation_error with no context at all, so a
 %program is told a value is missing and not which one; sread/2 is in
-%src/parser.pl and raises naming system:atom_codes/2, a predicate the MeTTa
+%engine/parser.pl and raises naming system:atom_codes/2, a predicate the MeTTa
 %program never wrote. parse/2 is the same operation under PeTTa's own name
 %and IS guarded, so the gap is the direct sread call only.
 %git-import!/2 is in lib/lib_gitimport.pl and sleep/2 in a library too; both
@@ -1500,7 +1502,7 @@ unguarded_input_position(sread, 1).
 %A fourth of the same shape: add-reduct/3 refuses, and by name, but names the
 %operation it DELEGATES to. `!(add-reduct $u a)` answers
 %(Error (add-atom $u a) "add-atom expects a space as the first argument"), so
-%a program that wrote add-reduct is told about add-atom. src/spaces.pl again.
+%a program that wrote add-reduct is told about add-atom. engine/spaces.pl again.
 
 %Names the MeTTa operation and the argument, in the program's own vocabulary.
 %The formal stays ISO so a MeTTa (catch ...) and the Python boundary can both
@@ -1673,7 +1675,7 @@ type_declaration(X, T) :- current_metta_module(Module),
 %The prelude tier comes LAST in each clause, so a declaration a program
 %writes for the same name wins over the engine's prelude, the order the
 %type surface already keeps for get-type. The my-if tutorial mechanism is
-%what this tier carries: an Atom parameter declared in src/prelude.metta
+%what this tier carries: an Atom parameter declared in engine/prelude.metta
 %masks that argument at every call site, which is how the prelude's
 %assertEqualToResult receives its expected set unevaluated.
 %In the user clause the prelude branch comes FIRST, and the order is
@@ -1885,7 +1887,7 @@ has_type_in(Module, X, T) :-
 %nothing declares is not evidence of a Space. The directed BigInt-to-Number
 %case is explicit here too, so reflective and compiled call checks use the same
 %operational rule
-%[tested: python/tests/test_answer_protocol.py::test_admission_types_the_pool].
+%[tested: bindings/python/tests/test_answer_protocol.py::test_admission_types_the_pool].
 type_witness_in(Module, X, T) :-
     (   T == 'Number', once(type_candidate_in(Module, X, 'BigInt'))
     ->  true
@@ -2360,7 +2362,7 @@ scoped_super_type_rounds(Space, Frontier, Accumulated, Widened) :-
 %THROWS is the registrant's bug, and reading the throw as "no bridge answered"
 %ran the class walk instead: one broken protocol predicate silently destroyed
 %typing for every host object in the process, and get-type answered Box, the
-%envelope's own class, for all of them. python/petta/_ops.py says the rule in
+%envelope's own class, for all of them. bindings/python/petta/_ops.py says the rule in
 %as many words for the same probe on the Python side: "A broken probe is the
 %registrant's bug: surface it with the protocol's name attached, never as a
 %type quietly missing." The fallback is for a bridge that is ABSENT, which is
@@ -2373,7 +2375,7 @@ metta_grounded_type(X, T) :- ( metta_grounded_type_names(X, Names)
 %(py-atom f Type) declaration, both through metta_grounded_extra_type/2, so a
 %declared (-> DLTensor ...) holds for every array library at once. This is a
 %DECLARATION seam, where every clause has to stay reachable, and not an
-%ownership one [source: src/ext_points.pl, ext_point_every_clause_runs/1]. It
+%ownership one [source: engine/ext_points.pl, ext_point_every_clause_runs/1]. It
 %used to hang off the class walk, which is the ELSE arm above, and
 %the shipped library answers the bridge for every Python object: the arm was
 %dead in that configuration and a declared type was accepted and then
@@ -2381,7 +2383,7 @@ metta_grounded_type(X, T) :- ( metta_grounded_type_names(X, Names)
 %`(builtin_function_or_method)` through the library and
 %`(builtin_function_or_method (-> Number Number Number))` through run.sh
 %[measured 2026-08-18]
-%[tested: python/tests/test_ops.py::test_a_declared_type_survives_the_library_being_loaded].
+%[tested: bindings/python/tests/test_ops.py::test_a_declared_type_survives_the_library_being_loaded].
 %Two relations rather than one wider if-then-else, for the reason Sterling and
 %Shapiro give for lifting entitlement/2 out of pension/2: a cut that picks a
 %default correctly still prevents the alternatives being found
@@ -2544,7 +2546,7 @@ metta_grounded_token('unique-atom'). metta_grounded_token('xor').
 %Both of the engine's registers are asked, because a head has meaning here two
 %ways and fun/1 alone is not the question: 29 of the translator's special-form
 %heads answer false to it, `superpose` and `nop` among them
-%[source: metta_translated_head/1 in src/translator.pl, which is the same
+%[source: metta_translated_head/1 in engine/translator.pl, which is the same
 %question the linter asks]. `&self` is in neither register and is always here,
 %being the space every program starts in, which is why the arbiter grounds it
 %for the same reason it grounds `+`
@@ -4014,7 +4016,7 @@ prolog:error_message(petta_test_no_answer) -->
 %formals are the ENGINE's, so the two cannot drift: adding a fourth
 %assertion form and forgetting this predicate leaves that form unclassified
 %here, where it is read, rather than in a file the engine never loads
-%[tested: python/tests/test_assertion_failures.py].
+%[tested: bindings/python/tests/test_assertion_failures.py].
 %
 %Actual and Expected are handed out as WRITTEN MeTTa terms; a caller that
 %has to cross them to another language converts them itself, because the
@@ -6123,7 +6125,7 @@ current_metta_module(Module) :-
 %out. It saved 4 inferences on every Python evaluation and cost 2 on every
 %annotated typed call, which is the wrong side of that trade: the crossing
 %happens once and the typed call happens in a loop. Measured 2026-08-16, the
-%@m.define annotated tier of python/benchmarks/extension_cost.py went 20.00 to
+%@m.define annotated tier of bindings/python/benchmarks/extension_cost.py went 20.00 to
 %22.00 with the test in place, against m.fn 68.00 to 64.00.
 %The argument is a MODULE, and refusing anything else is what keeps this
 %honest now that a space and its module are different atoms. They used to be
@@ -6581,7 +6583,7 @@ load_builtin_type_surface :- index_masking_data_heads.
 
 %%%%%%%%%% The engine's prelude %%%%%%%%%%
 %
-%src/prelude.metta holds standard vocabulary promoted from the libraries:
+%engine/prelude.metta holds standard vocabulary promoted from the libraries:
 %forms every program may use with no import!, compiled here at startup by
 %the same translator that compiles a program's own equations. The clauses
 %land in the base tier and each head registers as a builtin, so the names
@@ -6627,7 +6629,7 @@ load_builtin_type_surface :- index_masking_data_heads.
 %Which builtin_type_declaration/2 rows the prelude PUT THERE, as opposed to
 %found there. The two registers overlap once a name needs its Atom mask
 %honoured at call sites AND belongs to the engine's reported type surface:
-%get-type is declared by lib_builtin_types.metta and again by src/prelude.metta,
+%get-type is declared by lib_builtin_types.metta and again by engine/prelude.metta,
 %for the two different readers. Without this ledger the prelude's eviction
 %would retract a row the FILE owns, since the two rows are identical and
 %retractall/1 cannot tell them apart.
@@ -6707,7 +6709,7 @@ load_engine_prelude_forms :-
     ->  true
     ;   throw(error(existence_error(source_sink, Path),
                     context(load_engine_prelude/0,
-                            'src/prelude.metta is part of the engine')))
+                            'engine/prelude.metta is part of the engine')))
     ),
     read_file_to_string(Path, Text, []),
     parse_metta_source(Text, Forms),

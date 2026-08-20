@@ -129,7 +129,7 @@ native_storage_module_ready(Space, Module) :-
 %on demand here, so the second half cannot be the registry, and the rule for it
 %is the engine's own: an atom beginning with `&`, which is what is-space/2
 %answers, what evalc/3 has enforced at its door since it was written, and what
-%python/petta/space.py enforces at the library's
+%bindings/python/petta/space.py enforces at the library's
 %[tested: space_argument_refusals].
 petta_space_name(S) :- atom(S), sub_atom(S, 0, 1, _, '&'), !.
 petta_space_name(S) :- petta_space_operand(S).
@@ -843,7 +843,7 @@ remove_sexp(Space, Atom) :- remove_sexp(Space, Atom, _).
 %This engine had already decided it everywhere else. The seam declares
 %metta_foreign_remove/3 as "remove one" (EXTENDING.md), and drop_fun_meta/4
 %takes "one variant-equivalent retained equation" at a time
-%(src/translator.pl:115). The native store was the one holdout.
+%(engine/translator.pl:115). The native store was the one holdout.
 %
 %retract/1 under double negation, which makes the answer and the removal one
 %lookup instead of two. retractall/1 succeeds whether or not it matched, so
@@ -859,7 +859,7 @@ remove_sexp(Space, Atom) :- remove_sexp(Space, Atom, _).
 %
 %Double negation rather than a copy because the bindings must NOT escape.
 %That is the engine's own rule for the compiled half, "retraction must not
-%bind the caller's variables" (src/translator.pl:115), and the language's:
+%bind the caller's variables" (engine/translator.pl:115), and the language's:
 %remove-atom answers unit, so (remove-atom &self (pair $x)) is a request, not
 %a query, and $x is no more bound afterwards than before. It is also the
 %cheaper of the two isolations. Measured 2026-08-19 over 20,000 removals, min
@@ -982,13 +982,13 @@ ensure_metta_exec_module_locked(Space, Module) :-
     protect_engine_emitted(Module).
 
 %Bind the engine's own emitted goals into this module so a MeTTa equation
-%cannot take one over. See metta_engine_emitted/1 (src/translator.pl) for what
+%cannot take one over. See metta_engine_emitted/1 (engine/translator.pl) for what
 %that means and why an import rather than a guard.
 %
 %The export half is what keeps it quiet: import/1 warns when the source module
 %does not export the name, and the engine's module has no export list at all.
 %current_predicate/1 guards the order: this runs for &self's module at LOAD,
-%before src/duals.pl is consulted, so the one predicate that file emits is not
+%before engine/duals.pl is consulted, so the one predicate that file emits is not
 %there yet and the initialization below sweeps it in afterwards.
 protect_engine_emitted(Module) :-
     petta_engine_module(Engine),
@@ -996,11 +996,11 @@ protect_engine_emitted(Module) :-
            ( Engine:export(PI), Module:import(Engine:PI) )).
 
 %Every module that already exists, which at boot is &self's. Called from
-%src/metta.pl's own initialization rather than from one here, and BEFORE the
+%engine/metta.pl's own initialization rather than from one here, and BEFORE the
 %prelude compiles: an initialization/1 goal runs after the file it appears in
-%finishes, so one here would run before src/metta.pl had defined half the
+%finishes, so one here would run before engine/metta.pl had defined half the
 %names above, and initialization goals do not reliably order against each
-%other either [source: src/metta.pl's own note on that].
+%other either [source: engine/metta.pl's own note on that].
 protect_metta_exec_modules :-
     forall(metta_exec_module_known(_, Module), protect_engine_emitted(Module)).
 
@@ -1019,7 +1019,7 @@ metta_module_space(Module, Space) :-
 
 %&self's execution module exists from load, the way its storage module does,
 %so nothing has to create it on a first write and metta_self_module/1
-%(src/metta.pl) names a module that is already based.
+%(engine/metta.pl) names a module that is already based.
 :- space_module('&self', _).
 
 %Whether anything still holds a clause for a function, which decides whether
@@ -1041,7 +1041,7 @@ metta_module_space(Module, Space) :-
 %and the engine's module holds plenty of those. Removing an equation for any
 %system-builtin name reached one and raised out of remove-atom
 %[measured 2026-08-19: with_output_to/2]. The property is true for exactly the
-%predicates clause/3 accepts [source: src/tracer.pl, metta_trace_target/1
+%predicates clause/3 accepts [source: engine/tracer.pl, metta_trace_target/1
 %measured 2026-08-16].
 %A BUILTIN is defined by the engine and by no equation, so no removal can
 %undefine it. Without this, a space that extended an engine operation by
@@ -1667,7 +1667,7 @@ prolog:error_message(petta_builtin_redefinition(Name, Arity, Space)) -->
 %thing. That reading was wrong on its own terms, and the engine already
 %disagreed with it in three places: is-space/2 answers False for a name without
 %`&`, evalc/3 refuses one as a type error rather than reading a silently empty
-%space, and python/petta/space.py refuses one with "the prefix is
+%space, and bindings/python/petta/space.py refuses one with "the prefix is
 %load-bearing". Only these doors did not, so `(add-atom not-a-space (bad add))`
 %made a space called `not-a-space` while `(is-space not-a-space)` answered
 %False in the same program.
@@ -2106,7 +2106,7 @@ unstore_atom(Space, Term, Removed) :- remove_sexp(Space, Term, Removed).
 %inferences a row cheaper and is the traffic: under bool an answer's k can
 %only be 1, because a provider handing one to an undeclared context raises
 %rather than setting it ("a real k is admitted exactly when its context
-%declared a non-Boolean semiring", python/petta/shim.pl), and the engine's own
+%declared a non-Boolean semiring", bindings/python/petta/shim.pl), and the engine's own
 %join writes nothing when both sides read 1. Measured on direct-join
 %[measured 2026-08-19: 320,322 inferences with the capture on every row
 %against 289,819 without it, over 10,000 rows]
@@ -2164,7 +2164,7 @@ match(Space, Pattern, OutPattern, Result) :-
 %calling each body through call/1, where a cut in an earlier body cannot prune
 %this clause. Written without the guard, every match against a real space grew
 %a second answer, the refusal, and `(anc-d $x $y)` recursed on it until the
-%process hung [reproduced 2026-08-20: python/tests/test_derivation.py]. Every
+%process hung [reproduced 2026-08-20: bindings/python/tests/test_derivation.py]. Every
 %clause of a predicate a proof can walk has to say for itself when it applies,
 %which is what the three clauses above already do.
 match(Space, Pattern, OutPattern, Result) :-
@@ -2231,7 +2231,7 @@ match_routed(Space, [','|[Head|Tail]], OutPattern, Result) :-
 %the shared bindings; then a grounded operand's own matching logic runs,
 %left before right, which is how a space becomes queryable inside unify
 %(Hyperon: `impl CustomMatch for DynSpace` is query, hyperon-space
-%src/lib.rs); a host value with declared matching runs its hook the same
+%engine/lib.rs); a host value with declared matching runs its hook the same
 %way; numbers compare promoted, so 1 matches 1.0 [source: LeaTTa
 %tests/semantics/matching/grounded_value_matching.metta, measured
 %2026-08-11]; everything else is ground equality. A space is named by a
@@ -2553,7 +2553,7 @@ petta_match_error_outcome(Error, keep, kept(Error)).
 
 %A bound pattern went straight to the match hook, so a provider that
 %implements only enumeration answered NOTHING to every real query while the
-%space demonstrably held matching atoms. python/petta/foreign.py states the
+%space demonstrably held matching atoms. bindings/python/petta/foreign.py states the
 %opposite contract for the same seam, in as many words: "An Enumerable
 %provider need not implement Matcher: enumeration is the correct default
 %candidate set". Porting a working Python provider to Prolog for speed, which
@@ -2565,7 +2565,7 @@ petta_match_error_outcome(Error, keep, kept(Error)).
 %for. Unification staying on this side is also what makes over-approximation
 %sound, which is the seam's central claim.
 %The same match, carrying what the caller intends to do with it. Honouring an
-%option is the provider's decision and not the engine's; see src/ext_points.pl.
+%option is the provider's decision and not the engine's; see engine/ext_points.pl.
 %Unification and the engine's own bound stay here whatever the provider does,
 %so an option cannot make an answer wrong, only cheaper.
 match_foreign(Space, Pattern, Options, OutPattern, Result) :-
@@ -3034,7 +3034,7 @@ native_expression(Module, Space, Rel, PatArgs) :-
 %predicates, so a caller that wipes only the space predicate would leave the
 %scalars standing and a pooled name's next life would inherit them.
 %Clearing a foreign space is the provider's own operation, and it lived in
-%python/petta/shim.pl, so a Prolog provider that implemented clear (as
+%bindings/python/petta/shim.pl, so a Prolog provider that implemented clear (as
 %lib/lib_redis.pl does) was reachable only when Python was in the process:
 %under run.sh the engine had no path to it at all. The shim now calls this.
 clear_foreign_atoms(Space) :-
@@ -3048,7 +3048,7 @@ clear_foreign_atoms(Space) :-
 %space [measured 2026-08-19, ai-tmp/spaces-p1/probe_p116h.pl]. Space names
 %are POOLED, so that is a previous life answering through a recycled name.
 %
-%It was masked rather than absent: python/petta/shim.pl's clear removes
+%It was masked rather than absent: bindings/python/petta/shim.pl's clear removes
 %equations through the removal funnel before calling this, so the Python door
 %was whole and the ENGINE's own door was not. Every other caller got the half
 %clear, and P1.14's reload will come through this one.
@@ -3119,7 +3119,7 @@ petta_capacity_count_uninstall(Space) :-
 %removals retain their old inference count instead of paying a failed counter
 %probe [measured: register-op 44334 inferences on 2026-08-21, min of 3;
 %command=cd python && python bench.py --counter-only --keep-going;
-%fixture=python/benchmarks/test_benchmarks.py::test_register_operation;
+%fixture=bindings/python/benchmarks/test_benchmarks.py::test_register_operation;
 %commit=819b139c7cdbdaa673f854713e8beb988eb12ead]. The clause and its reference are dynamic database state,
 %hence an enclosing transaction rolls their installation back with the claim.
 petta_capacity_remove_hook_install(Space) :-
