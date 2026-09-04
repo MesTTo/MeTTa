@@ -641,11 +641,12 @@ m.algebra(name, *, combine, extend, zero, one, laws=(), carrier=(),
           requires=(), order=None)
         add one catalog algebra; equational laws are exhaustively checked over
         the finite carrier before they may license answer fusion
-        A declared algebra is PROCESS-GLOBAL: the row carries no context, so
-        one declared on any space is visible from every space and from a fresh
-        MeTTa() context. Its neighbour below is not. Equational checking
-        evaluates the operations in &self, so a host op registered anywhere
-        qualifies while a MeTTa equation must be defined in &self.
+        A declared algebra is OWNED BY THE SPACE THAT DECLARES IT: the row's
+        last field is that context, and lookup reads it before falling back to
+        the shipped presets, whose owner is `global`. The same key annotations
+        use, so a sibling space does not inherit it. Equational checking runs
+        in the declaring space's equation module, so a MeTTa equation defined
+        there certifies the algebra that names it.
 metta.algebra(name, *, plus, times, zero, one, laws=(), carrier=(),
               requires=(), order=None) -> DeclaredAlgebra
         construct an arbitrary algebra through the callable `metta.algebra`
@@ -656,8 +657,8 @@ metta.algebra(name, *, plus, times, zero, one, laws=(), carrier=(),
 m.annotations(algebra, *, capabilities=())
 m.annotations(operation, algebra, *, capabilities=())
         choose any declared algebra for this space or an operation; required
-        capabilities are checked before the catalog row lands. This row IS
-        context-keyed, unlike the algebra row above
+        capabilities are checked before the catalog row lands. This row is
+        keyed by the same context the algebra row above is owned by
 m.add_tagged_fact(tag, proposition)     store ordinary (fact tag proposition)
 m.add_tagged_rule(tag, head, *premises) store the generic threaded rule form
 m.match(query, under=algebra) / m.answers(call, under=algebra)

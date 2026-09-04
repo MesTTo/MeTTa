@@ -143,6 +143,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   on its first call. Enabling now recompiles through the engine's own door and
   touches no stored atom.
 
+- A declared algebra belongs to the space that declared it. The catalog row
+  carried no context, so one declared anywhere was visible everywhere,
+  including from a fresh `MeTTa()`, while the `(annotations <ctx> ...)` row
+  that SELECTS an algebra has always been context-keyed: two rows about the
+  same thing with two different lifetimes. `(algebra ...)` takes a tenth field
+  naming its owner, `global` for the ten shipped presets and the exact
+  annotation context for a declared one, and descriptor lookup, its cache, and
+  the requirement check all read that context first and `global` second. A
+  program that declared on one space and evaluated on a sibling now declares
+  where it evaluates. The Node seat writes and reads the same row, so
+  `Algebra.atom` there becomes `Algebra.rowOwnedBy(owner)`, `declare(space,
+  ...)` names that space, and its catalog reader prefers the asking context's
+  row before the shipped `global` ones.
+
 - A law-bearing `metta.algebra(...)` declaration is certified once, in the
   space that declares it. Python walked the finite carrier itself and then the
   engine walked it again in `&self`, so an algebra whose `combine` is a MeTTa

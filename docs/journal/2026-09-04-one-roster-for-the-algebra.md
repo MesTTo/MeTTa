@@ -20,6 +20,13 @@ Rejected: applying the documented roster edits in this worktree, because the che
 Decided: derive semirings and effect classes from the live catalog, provider capabilities from `foreign.py:CAPABILITIES`, and fail closed only in the root and Python sheets that promise this surface. Generated `Semiring` remains covered by the existing vocabulary-sync lane.
 Open: paths to build products also fail before a build produces them. Constructor behavior and prose are still a separate fifth blind spot: a closed-set parser cannot prove whether `Answer(k=...)` is accepted or refused, so its docstring needs an executable regression rather than pretending this lane covers it.
 
+## 2026-09-04 - D3 one context lifetime
+Tried: declared `same-life` on one anonymous space, then called `get` from a sibling -> the sibling received the declaration, proving the nine-field row was process-global.
+Rejected: treating a whole equation world as one algebra context, because sibling spaces have independent `(annotations <context> ...)` rows and the defect is specifically the mismatch between those keys.
+Rejected: an optional owner field preserving ambiguous nine-field custom rows, because that would retain two lifetimes and make global scope implicit.
+Decided: every algebra row has a required final owner. Shipped presets spell that owner `global`; Python and direct custom rows spell the exact annotation context. Descriptor caches, requirement checks and the Python registry use `(context, name)`, with `global` only as the explicit preset fallback.
+Tried: the six affected Python algebra files plus `tests/prolog/suites/spaces/catalog.plt` -> 39 passed, 1 intentionally skipped, and 27 Prolog cases passed.
+
 ## 2026-09-06 - D1 landing: half of it was already on trunk
 Tried: rebasing this thread onto `petta` -> the catalog half of D1 had landed
 independently as `2026-09-05-the-carrier-the-vocabulary-would-not-admit.md`.
@@ -76,3 +83,44 @@ told a reader to declare an effect class and named only the four shorthands,
 so the five names `effect=` actually takes were nowhere on that sheet.
 Tried: `tests/checks/check_llms_selftest.py` -> 59 planted cases, 0 failures;
 `tests/checks/check_llms_names.py` -> 5 sheets, 0 findings.
+
+## 2026-09-06 - D3 landing: the consumers the tenth field reached
+Tried: the algebra suites on trunk with the owner field in place ->
+`test_demand_retains_custom_operation_effects` and
+`test_demand_keeps_lawless_integer_proof_order` failed with
+`algebra_not_declared`. Both arrived on trunk after this thread was cut and
+both declare the algebra on the fixture space and evaluate in a sibling, which
+is the process-global reading D3 removes. Each declares on the space it
+evaluates in now; the host op it names stays engine-wide.
+Tried: `examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/`
+`09-carrier_vocabulary.metta`, also newer than this thread, matched
+`(algebra budget $combine ... $requires)` with eight fields after the name and
+answered nothing once there were nine. It reads the owner now and asserts it is
+`global`, which is the field teaching itself; its Python twin does the same.
+Tried: min-of-3 on both arms, `petta` at 4f20c052 and this tree -> the twin is
+119 either way, so its BUDGET does not move. The MeTTa half is 2,621 -> 2,794,
++173 for one more variable in two matches and a wider template. The 13,733 that
+pin's prose states is trunk's drift, not this change's: the unchanged tree reads
+2,621.
+Tried: the same pair for `01-identity.metta`, which this thread never touches.
+Against `petta` at 903a42e6 it read 3,422 unchanged and 3,417 here, outside the
+twin lane's +-4 allowance, and the controls said what the move was: extracting
+`metta_check_algebra_fields/9` alone read 3,417, an inert nine-arity predicate
+at the same point read 3,417, while a no-op goal inside the same clause and
+inert clauses in `engine/metta/effects.pl` both read 3,422. One more predicate
+in `engine/spaces/catalog.pl`, which is the move this corpus records elsewhere.
+Decided: no re-pin. Against `petta` at fcfac73f both arms read 3,432, the value
+trunk itself re-pinned to for the specialization coverage report, so on the tree
+this lands on the row does not move and trunk's number stands unedited.
+Decided: `EXTENDING.md`'s row shape and `llms.txt`'s "PROCESS-GLOBAL" paragraph
+are corrected here, because both state the lifetime this commit changes.
+Tried: `cd extensions/node && npm test` -> 3 of 600 failed. That seat writes
+the row itself, so the tenth field is its obligation too: `Algebra.atom` became
+`rowOwnedBy(owner)` and `declare(space, ...)` names that space, its catalog
+reader takes ten items and prefers the asking context's row before `global` the
+way the engine does, and two of its own tests declared on `m.self` and
+evaluated in a `fresh()` space, which is the reading this removes.
+Tried: the owner read back with `instanceof Sym` -> `algebra_catalog_owner_malformed`.
+A space name is an ordinary symbol in the row a preset writes and a space
+operand in the row a declaration writes, so the reader compares the atom's text.
+Tried: `npm test` again -> 600 pass, 0 fail.
