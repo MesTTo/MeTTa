@@ -671,249 +671,249 @@ unregister_fun_in(Module, N) :-
 unregister_fun_everywhere(N) :- retractall(fun_in(_, N)),
                                 retractall(fun_scoped(N)).
 %A core declaration owns both the existing name registration and its exact
-%implementation facet. Names therefore occur once: adding a row passes it
-%through register_builtin_fun/1 rather than growing a parallel name registry.
-%The key uses MeTTa arity; ordinary implementations have one additional Prolog
-%result argument. `engine` is symbolic because this plain file may be loaded
-%into a different execution module, while named modules identify their actual
-%predicate owner.
-register_builtin_definition(builtin(Name/Arity, Implementation)) :-
+%implementation facet. Names therefore occur once: the directive below reads
+%each facet and passes its name through register_builtin_fun/1 rather than
+%maintaining a parallel name registry. The key uses MeTTa arity; ordinary
+%implementations have one additional Prolog result argument. `engine` is
+%symbolic because this plain file may be loaded into a different execution
+%module, while named modules identify their actual predicate owner.
+builtin_implementation(superpose/1, prolog(engine)).
+builtin_implementation(empty/0, prolog(engine)).
+builtin_implementation(let/3, compiler(translator, metta_special_form_head, 1)).
+builtin_implementation('let*'/2, compiler(translator, metta_special_form_head, 1)).
+builtin_implementation('+'/2, prolog(engine)).
+builtin_implementation('-'/2, prolog(engine)).
+builtin_implementation('*'/2, prolog(engine)).
+builtin_implementation('/'/2, prolog(engine)).
+builtin_implementation('%'/2, prolog(engine)).
+builtin_implementation(min/2, prolog(engine)).
+builtin_implementation(max/2, prolog(engine)).
+builtin_implementation('new-state'/1, prolog(engine)).
+builtin_implementation('change-state!'/2, prolog(engine)).
+builtin_implementation('get-state'/1, prolog(engine)).
+builtin_implementation('bind!'/2, prolog(engine)).
+builtin_implementation('register-token!'/2, prolog(parser)).
+builtin_implementation('unregister-token!'/1, prolog(parser)).
+builtin_implementation('declare-pre-add!'/2, prolog(engine)).
+builtin_implementation('undeclare-pre-add!'/1, prolog(engine)).
+builtin_implementation('declare-post-add!'/2, prolog(engine)).
+builtin_implementation('undeclare-post-add!'/1, prolog(engine)).
+builtin_implementation('space-atom-count'/1, prolog(kernel)).
+builtin_implementation('has-declared-type'/2, prolog(kernel)).
+builtin_implementation('space-admission-verdict'/2, prolog(kernel)).
+builtin_implementation('space-contains'/2, prolog(kernel)).
+builtin_implementation('<'/2, prolog(engine)).
+builtin_implementation('>'/2, prolog(engine)).
+builtin_implementation('=='/2, prolog(engine)).
+builtin_implementation('!='/2, prolog(engine)).
+builtin_implementation('='/2, prolog(engine)).
+builtin_implementation('=?'/2, prolog(engine)).
+builtin_implementation('<='/2, prolog(engine)).
+builtin_implementation('>='/2, prolog(engine)).
+builtin_implementation(and/2, prolog(engine)).
+builtin_implementation(or/2, prolog(engine)).
+builtin_implementation(xor/2, prolog(engine)).
+builtin_implementation(implies/2, prolog(engine)).
+builtin_implementation(not/1, prolog(engine)).
+builtin_implementation(exp/1, prolog(engine)).
+builtin_implementation('first-from-pair'/1, prolog(engine)).
+builtin_implementation('second-from-pair'/1, prolog(engine)).
+builtin_implementation('car-atom'/1, prolog(engine)).
+builtin_implementation('cdr-atom'/1, prolog(engine)).
+builtin_implementation('unique-atom'/1, prolog(engine)).
+builtin_implementation('alpha-unique-atom'/1, prolog(engine)).
+builtin_implementation(repr/1, prolog(engine)).
+builtin_implementation(repra/1, prolog(engine)).
+builtin_implementation(parse/1, prolog(engine)).
+builtin_implementation('pretty-atom'/1, prolog(engine)).
+builtin_implementation('println!'/1, prolog(engine)).
+builtin_implementation('readln!'/0, prolog(engine)).
+builtin_implementation('read-form!'/0, prolog(engine)).
+builtin_implementation('parse-command'/1, prolog(engine)).
+builtin_implementation(test/2, prolog(engine)).
+builtin_implementation('test-no-answer'/1, prolog(engine)).
+builtin_implementation(assert/1, prolog(engine)).
+builtin_implementation(atom_concat/2, prolog(system)).
+builtin_implementation(atom_chars/1, prolog(system)).
+builtin_implementation(copy_term/1, prolog(system)).
+builtin_implementation(term_hash/1, prolog(system)).
+builtin_implementation(foldl/4, prolog(apply)).
+builtin_implementation(foldl/3, prolog(apply)).
+builtin_implementation(foldl/5, prolog(apply)).
+builtin_implementation(foldl/6, prolog(apply)).
+builtin_implementation(first/1, prolog(engine)).
+builtin_implementation(last/1, prolog(lists)).
+builtin_implementation(append/2, prolog(lists)).
+builtin_implementation(append/1, prolog(lists)).
+builtin_implementation(length/1, prolog(system)).
+builtin_implementation('size-atom'/1, prolog(engine)).
+builtin_implementation(sort/1, prolog(system)).
+builtin_implementation(msort/1, prolog(system)).
+builtin_implementation(member/1, prolog(lists)).
+builtin_implementation(member/2, prolog(engine)).
+builtin_implementation('is-member'/2, prolog(engine)).
+builtin_implementation('is-alpha-member'/2, prolog(engine)).
+builtin_implementation('exclude-item'/2, prolog(engine)).
+builtin_implementation(list_to_set/1, prolog(lists)).
+builtin_implementation(maplist/3, prolog(apply)).
+builtin_implementation(maplist/4, prolog(apply)).
+builtin_implementation(maplist/1, prolog(apply)).
+builtin_implementation(maplist/2, prolog(apply)).
+builtin_implementation(eval/1, prolog(engine)).
+builtin_implementation(evalc/2, prolog(engine)).
+builtin_implementation(reduce/2, prolog(translator)).
+builtin_implementation(reduce/1, prolog(translator)).
+builtin_implementation('import!'/2, prolog(engine)).
+builtin_implementation('git-import!'/3, prolog(engine)).
+builtin_implementation('git-import!'/4, prolog(engine)).
+builtin_implementation('git-import!'/2, prolog(engine)).
+builtin_implementation('git-import!'/1, prolog(engine)).
+builtin_implementation('require-extension!'/1, prolog(engine)).
+builtin_implementation('add-atom'/2, prolog(spaces)).
+builtin_implementation('remove-atom'/2, prolog(spaces)).
+builtin_implementation('subtract-atom'/2, prolog(spaces)).
+builtin_implementation('add-atoms'/2, prolog(spaces)).
+builtin_implementation('add-reduct'/2, prolog(spaces)).
+builtin_implementation('add-reducts'/2, prolog(spaces)).
+builtin_implementation('get-atoms'/1, prolog(spaces)).
+builtin_implementation(match/3, prolog(spaces)).
+builtin_implementation('is-var'/1, prolog(engine)).
+builtin_implementation('is-ground'/1, prolog(engine)).
+builtin_implementation('is-expr'/1, prolog(engine)).
+builtin_implementation('is-space'/1, prolog(engine)).
+builtin_implementation(decons/1, prolog(engine)).
+builtin_implementation('decons-atom'/1, prolog(engine)).
+builtin_implementation('if-decons-expr'/5, prolog(engine)).
+builtin_implementation(noeval/1, prolog(engine)).
+builtin_implementation('new-space'/0, prolog(engine)).
+builtin_implementation('new-space'/2, prolog(engine)).
+builtin_implementation('new-space'/1, prolog(engine)).
+builtin_implementation('get-type'/1, prolog(engine)).
+builtin_implementation('get-type-space'/2, prolog(engine)).
+builtin_implementation('get-metatype'/1, prolog(engine)).
+builtin_implementation('=alpha'/2, prolog(engine)).
+builtin_implementation(sread/1, prolog(parser)).
+builtin_implementation(cons/2, prolog(engine)).
+builtin_implementation(reverse/1, prolog(lists)).
+builtin_implementation('get-doc'/2, prolog(engine)).
+builtin_implementation('get-doc'/1, prolog(engine)).
+builtin_implementation('get-doc-space'/2, prolog(engine)).
+builtin_implementation('get-doc-atom'/2, prolog(engine)).
+builtin_implementation('get-doc-single-atom'/2, prolog(engine)).
+builtin_implementation('get-doc-function'/3, prolog(engine)).
+builtin_implementation('get-doc-params'/3, prolog(engine)).
+builtin_implementation('help!'/1, prolog(engine)).
+builtin_implementation(documented/0, prolog(engine)).
+builtin_implementation('documented-space'/1, prolog(engine)).
+builtin_implementation('defined-name'/0, prolog(engine)).
+builtin_implementation(undocumented/0, prolog(engine)).
+builtin_implementation('undocumented-space'/1, prolog(engine)).
+builtin_implementation('#+'/2, prolog(engine)).
+builtin_implementation('#-'/2, prolog(engine)).
+builtin_implementation('#*'/2, prolog(engine)).
+builtin_implementation('#div'/2, prolog(engine)).
+builtin_implementation('#//'/2, prolog(engine)).
+builtin_implementation('#mod'/2, prolog(engine)).
+builtin_implementation('#min'/2, prolog(engine)).
+builtin_implementation('#max'/2, prolog(engine)).
+builtin_implementation('#<'/2, prolog(engine)).
+builtin_implementation('#>'/2, prolog(engine)).
+builtin_implementation('#='/2, prolog(engine)).
+builtin_implementation('#\\='/2, prolog(engine)).
+builtin_implementation('#=<'/2, prolog(engine)).
+builtin_implementation('#>='/2, prolog(engine)).
+builtin_implementation('union-atom'/2, prolog(engine)).
+builtin_implementation('cons-atom'/2, prolog(engine)).
+builtin_implementation('intersection-atom'/2, prolog(engine)).
+builtin_implementation('subtraction-atom'/2, prolog(engine)).
+builtin_implementation('index-atom'/2, prolog(engine)).
+builtin_implementation('atom-subst'/3, prolog(engine)).
+builtin_implementation(id/1, prolog(engine)).
+builtin_implementation(function/1, prolog(engine)).
+builtin_implementation('collapse-bind'/1, prolog(engine)).
+builtin_implementation('superpose-bind'/1, prolog(engine)).
+builtin_implementation('pow-math'/2, prolog(engine)).
+builtin_implementation('sqrt-math'/1, prolog(engine)).
+builtin_implementation('sort-atom'/1, prolog(engine)).
+builtin_implementation('abs-math'/1, prolog(engine)).
+builtin_implementation('log-math'/2, prolog(engine)).
+builtin_implementation('exp-math'/1, prolog(engine)).
+builtin_implementation('trunc-math'/1, prolog(engine)).
+builtin_implementation('ceil-math'/1, prolog(engine)).
+builtin_implementation('floor-math'/1, prolog(engine)).
+builtin_implementation('round-math'/1, prolog(engine)).
+builtin_implementation('sin-math'/1, prolog(engine)).
+builtin_implementation('cos-math'/1, prolog(engine)).
+builtin_implementation('tan-math'/1, prolog(engine)).
+builtin_implementation('asin-math'/1, prolog(engine)).
+builtin_implementation('random-int'/2, prolog(engine)).
+builtin_implementation('random-int'/3, prolog(engine)).
+builtin_implementation('random-float'/3, prolog(engine)).
+builtin_implementation('random-float'/2, prolog(engine)).
+builtin_implementation('acos-math'/1, prolog(engine)).
+builtin_implementation('atan-math'/1, prolog(engine)).
+builtin_implementation('isnan-math'/1, prolog(engine)).
+builtin_implementation('isinf-math'/1, prolog(engine)).
+builtin_implementation('min-atom'/1, prolog(engine)).
+builtin_implementation('max-atom'/1, prolog(engine)).
+builtin_implementation('bit-shift-left'/2, prolog(engine)).
+builtin_implementation('bit-shift-right'/2, prolog(engine)).
+builtin_implementation('bit-and'/2, prolog(engine)).
+builtin_implementation('bit-or'/2, prolog(engine)).
+builtin_implementation('bit-xor'/2, prolog(engine)).
+builtin_implementation('bit-not'/1, prolog(engine)).
+builtin_implementation('floor-div'/2, prolog(engine)).
+builtin_implementation('foldl-atom'/3, prolog(engine)).
+builtin_implementation('map-atom'/2, prolog(engine)).
+builtin_implementation('filter-atom'/2, prolog(engine)).
+builtin_implementation('current-time'/0, prolog(engine)).
+builtin_implementation('format-time'/1, prolog(engine)).
+builtin_implementation('context-space'/0, prolog(engine)).
+builtin_implementation(library/1, prolog(engine)).
+builtin_implementation(library/2, prolog(engine)).
+builtin_implementation(exists_file/1, prolog(engine)).
+builtin_implementation(exists_file/0, prolog(engine)).
+builtin_implementation('format-args'/2, prolog(engine)).
+builtin_implementation('sort-strings'/1, prolog(engine)).
+builtin_implementation(include/1, prolog(engine)).
+builtin_implementation(include/2, prolog(apply)).
+builtin_implementation(sleep/1, prolog(engine)).
+builtin_implementation('pragma!'/2, prolog(engine)).
+builtin_implementation(metta/3, prolog(engine)).
+builtin_implementation('metta-thread'/3, prolog(engine)).
+builtin_implementation(import_prolog_function/1, prolog(engine)).
+builtin_implementation(check_prolog_function_names/2, prolog(engine)).
+builtin_implementation(import_prolog_functions/1, prolog(engine)).
+builtin_implementation('Predicate'/1, prolog(engine)).
+builtin_implementation(callPredicate/1, prolog(engine)).
+builtin_implementation(assertaPredicate/1, prolog(engine)).
+builtin_implementation(assertzPredicate/1, prolog(engine)).
+builtin_implementation(retractPredicate/1, prolog(engine)).
+builtin_implementation('add-translator-rule!'/1, prolog(translator_rules)).
+builtin_implementation('add-translator-rule!'/2, prolog(translator_rules)).
+builtin_implementation('remove-translator-rule!'/1, prolog(translator_rules)).
+builtin_implementation('add-typing-rule!'/5, prolog(type_rules)).
+builtin_implementation('remove-typing-rule!'/1, prolog(type_rules)).
+builtin_implementation(argv/1, prolog(engine)).
+builtin_implementation(register_metta_library_path/2, prolog(engine)).
+builtin_implementation(dif/1, prolog(dif)).
+builtin_implementation(dif/2, prolog(duals)).
+builtin_implementation('residual-goals'/1, prolog(duals)).
+
+register_declared_builtin_name(Name) :-
     (   builtin_fun(Name)
     ->  true
     ;   register_builtin_fun(Name)
-    ),
-    register_builtin_implementation(Name/Arity, Implementation).
+    ).
+
+:- forall(builtin_implementation(Name/_, _),
+          register_declared_builtin_name(Name)).
 
 register_builtin_implementation(Key, Implementation) :-
     (   builtin_implementation(Key, Implementation)
     ->  true
     ;   assertz(builtin_implementation(Key, Implementation))
     ).
-
-:- maplist(register_builtin_definition,
- [ builtin(superpose/1, prolog(engine)),
-   builtin(empty/0, prolog(engine)),
-   builtin(let/3, compiler(translator, metta_special_form_head, 1)),
-   builtin('let*'/2, compiler(translator, metta_special_form_head, 1)),
-   builtin('+'/2, prolog(engine)),
-   builtin('-'/2, prolog(engine)),
-   builtin('*'/2, prolog(engine)),
-   builtin('/'/2, prolog(engine)),
-   builtin('%'/2, prolog(engine)),
-   builtin(min/2, prolog(engine)),
-   builtin(max/2, prolog(engine)),
-   builtin('new-state'/1, prolog(engine)),
-   builtin('change-state!'/2, prolog(engine)),
-   builtin('get-state'/1, prolog(engine)),
-   builtin('bind!'/2, prolog(engine)),
-   builtin('register-token!'/2, prolog(parser)),
-   builtin('unregister-token!'/1, prolog(parser)),
-   builtin('declare-pre-add!'/2, prolog(engine)),
-   builtin('undeclare-pre-add!'/1, prolog(engine)),
-   builtin('declare-post-add!'/2, prolog(engine)),
-   builtin('undeclare-post-add!'/1, prolog(engine)),
-   builtin('space-atom-count'/1, prolog(kernel)),
-   builtin('has-declared-type'/2, prolog(kernel)),
-   builtin('space-admission-verdict'/2, prolog(kernel)),
-   builtin('space-contains'/2, prolog(kernel)),
-   builtin('<'/2, prolog(engine)),
-   builtin('>'/2, prolog(engine)),
-   builtin('=='/2, prolog(engine)),
-   builtin('!='/2, prolog(engine)),
-   builtin('='/2, prolog(engine)),
-   builtin('=?'/2, prolog(engine)),
-   builtin('<='/2, prolog(engine)),
-   builtin('>='/2, prolog(engine)),
-   builtin(and/2, prolog(engine)),
-   builtin(or/2, prolog(engine)),
-   builtin(xor/2, prolog(engine)),
-   builtin(implies/2, prolog(engine)),
-   builtin(not/1, prolog(engine)),
-   builtin(exp/1, prolog(engine)),
-   builtin('first-from-pair'/1, prolog(engine)),
-   builtin('second-from-pair'/1, prolog(engine)),
-   builtin('car-atom'/1, prolog(engine)),
-   builtin('cdr-atom'/1, prolog(engine)),
-   builtin('unique-atom'/1, prolog(engine)),
-   builtin('alpha-unique-atom'/1, prolog(engine)),
-   builtin(repr/1, prolog(engine)),
-   builtin(repra/1, prolog(engine)),
-   builtin(parse/1, prolog(engine)),
-   builtin('pretty-atom'/1, prolog(engine)),
-   builtin('println!'/1, prolog(engine)),
-   builtin('readln!'/0, prolog(engine)),
-   builtin('read-form!'/0, prolog(engine)),
-   builtin('parse-command'/1, prolog(engine)),
-   builtin(test/2, prolog(engine)),
-   builtin('test-no-answer'/1, prolog(engine)),
-   builtin(assert/1, prolog(engine)),
-   builtin(atom_concat/2, prolog(system)),
-   builtin(atom_chars/1, prolog(system)),
-   builtin(copy_term/1, prolog(system)),
-   builtin(term_hash/1, prolog(system)),
-   builtin(foldl/4, prolog(apply)),
-   builtin(foldl/3, prolog(apply)),
-   builtin(foldl/5, prolog(apply)),
-   builtin(foldl/6, prolog(apply)),
-   builtin(first/1, prolog(engine)),
-   builtin(last/1, prolog(lists)),
-   builtin(append/2, prolog(lists)),
-   builtin(append/1, prolog(lists)),
-   builtin(length/1, prolog(system)),
-   builtin('size-atom'/1, prolog(engine)),
-   builtin(sort/1, prolog(system)),
-   builtin(msort/1, prolog(system)),
-   builtin(member/1, prolog(lists)),
-   builtin(member/2, prolog(engine)),
-   builtin('is-member'/2, prolog(engine)),
-   builtin('is-alpha-member'/2, prolog(engine)),
-   builtin('exclude-item'/2, prolog(engine)),
-   builtin(list_to_set/1, prolog(lists)),
-   builtin(maplist/3, prolog(apply)),
-   builtin(maplist/4, prolog(apply)),
-   builtin(maplist/1, prolog(apply)),
-   builtin(maplist/2, prolog(apply)),
-   builtin(eval/1, prolog(engine)),
-   builtin(evalc/2, prolog(engine)),
-   builtin(reduce/2, prolog(translator)),
-   builtin(reduce/1, prolog(translator)),
-   builtin('import!'/2, prolog(engine)),
-   builtin('git-import!'/3, prolog(engine)),
-   builtin('git-import!'/4, prolog(engine)),
-   builtin('git-import!'/2, prolog(engine)),
-   builtin('git-import!'/1, prolog(engine)),
-   builtin('require-extension!'/1, prolog(engine)),
-   builtin('add-atom'/2, prolog(spaces)),
-   builtin('remove-atom'/2, prolog(spaces)),
-   builtin('subtract-atom'/2, prolog(spaces)),
-   builtin('add-atoms'/2, prolog(spaces)),
-   builtin('add-reduct'/2, prolog(spaces)),
-   builtin('add-reducts'/2, prolog(spaces)),
-   builtin('get-atoms'/1, prolog(spaces)),
-   builtin(match/3, prolog(spaces)),
-   builtin('is-var'/1, prolog(engine)),
-   builtin('is-ground'/1, prolog(engine)),
-   builtin('is-expr'/1, prolog(engine)),
-   builtin('is-space'/1, prolog(engine)),
-   builtin(decons/1, prolog(engine)),
-   builtin('decons-atom'/1, prolog(engine)),
-   builtin('if-decons-expr'/5, prolog(engine)),
-   builtin(noeval/1, prolog(engine)),
-   builtin('new-space'/0, prolog(engine)),
-   builtin('new-space'/2, prolog(engine)),
-   builtin('new-space'/1, prolog(engine)),
-   builtin('get-type'/1, prolog(engine)),
-   builtin('get-type-space'/2, prolog(engine)),
-   builtin('get-metatype'/1, prolog(engine)),
-   builtin('=alpha'/2, prolog(engine)),
-   builtin(sread/1, prolog(parser)),
-   builtin(cons/2, prolog(engine)),
-   builtin(reverse/1, prolog(lists)),
-   builtin('get-doc'/2, prolog(engine)),
-   builtin('get-doc'/1, prolog(engine)),
-   builtin('get-doc-space'/2, prolog(engine)),
-   builtin('get-doc-atom'/2, prolog(engine)),
-   builtin('get-doc-single-atom'/2, prolog(engine)),
-   builtin('get-doc-function'/3, prolog(engine)),
-   builtin('get-doc-params'/3, prolog(engine)),
-   builtin('help!'/1, prolog(engine)),
-   builtin(documented/0, prolog(engine)),
-   builtin('documented-space'/1, prolog(engine)),
-   builtin('defined-name'/0, prolog(engine)),
-   builtin(undocumented/0, prolog(engine)),
-   builtin('undocumented-space'/1, prolog(engine)),
-   builtin('#+'/2, prolog(engine)),
-   builtin('#-'/2, prolog(engine)),
-   builtin('#*'/2, prolog(engine)),
-   builtin('#div'/2, prolog(engine)),
-   builtin('#//'/2, prolog(engine)),
-   builtin('#mod'/2, prolog(engine)),
-   builtin('#min'/2, prolog(engine)),
-   builtin('#max'/2, prolog(engine)),
-   builtin('#<'/2, prolog(engine)),
-   builtin('#>'/2, prolog(engine)),
-   builtin('#='/2, prolog(engine)),
-   builtin('#\\='/2, prolog(engine)),
-   builtin('#=<'/2, prolog(engine)),
-   builtin('#>='/2, prolog(engine)),
-   builtin('union-atom'/2, prolog(engine)),
-   builtin('cons-atom'/2, prolog(engine)),
-   builtin('intersection-atom'/2, prolog(engine)),
-   builtin('subtraction-atom'/2, prolog(engine)),
-   builtin('index-atom'/2, prolog(engine)),
-   builtin('atom-subst'/3, prolog(engine)),
-   builtin(id/1, prolog(engine)),
-   builtin(function/1, prolog(engine)),
-   builtin('collapse-bind'/1, prolog(engine)),
-   builtin('superpose-bind'/1, prolog(engine)),
-   builtin('pow-math'/2, prolog(engine)),
-   builtin('sqrt-math'/1, prolog(engine)),
-   builtin('sort-atom'/1, prolog(engine)),
-   builtin('abs-math'/1, prolog(engine)),
-   builtin('log-math'/2, prolog(engine)),
-   builtin('exp-math'/1, prolog(engine)),
-   builtin('trunc-math'/1, prolog(engine)),
-   builtin('ceil-math'/1, prolog(engine)),
-   builtin('floor-math'/1, prolog(engine)),
-   builtin('round-math'/1, prolog(engine)),
-   builtin('sin-math'/1, prolog(engine)),
-   builtin('cos-math'/1, prolog(engine)),
-   builtin('tan-math'/1, prolog(engine)),
-   builtin('asin-math'/1, prolog(engine)),
-   builtin('random-int'/2, prolog(engine)),
-   builtin('random-int'/3, prolog(engine)),
-   builtin('random-float'/3, prolog(engine)),
-   builtin('random-float'/2, prolog(engine)),
-   builtin('acos-math'/1, prolog(engine)),
-   builtin('atan-math'/1, prolog(engine)),
-   builtin('isnan-math'/1, prolog(engine)),
-   builtin('isinf-math'/1, prolog(engine)),
-   builtin('min-atom'/1, prolog(engine)),
-   builtin('max-atom'/1, prolog(engine)),
-   builtin('bit-shift-left'/2, prolog(engine)),
-   builtin('bit-shift-right'/2, prolog(engine)),
-   builtin('bit-and'/2, prolog(engine)),
-   builtin('bit-or'/2, prolog(engine)),
-   builtin('bit-xor'/2, prolog(engine)),
-   builtin('bit-not'/1, prolog(engine)),
-   builtin('floor-div'/2, prolog(engine)),
-   builtin('foldl-atom'/3, prolog(engine)),
-   builtin('map-atom'/2, prolog(engine)),
-   builtin('filter-atom'/2, prolog(engine)),
-   builtin('current-time'/0, prolog(engine)),
-   builtin('format-time'/1, prolog(engine)),
-   builtin('context-space'/0, prolog(engine)),
-   builtin(library/1, prolog(engine)),
-   builtin(library/2, prolog(engine)),
-   builtin(exists_file/1, prolog(engine)),
-   builtin(exists_file/0, prolog(engine)),
-   builtin('format-args'/2, prolog(engine)),
-   builtin('sort-strings'/1, prolog(engine)),
-   builtin(include/1, prolog(engine)),
-   builtin(include/2, prolog(apply)),
-   builtin(sleep/1, prolog(engine)),
-   builtin('pragma!'/2, prolog(engine)),
-   builtin(metta/3, prolog(engine)),
-   builtin('metta-thread'/3, prolog(engine)),
-   builtin(import_prolog_function/1, prolog(engine)),
-   builtin(check_prolog_function_names/2, prolog(engine)),
-   builtin(import_prolog_functions/1, prolog(engine)),
-   builtin('Predicate'/1, prolog(engine)),
-   builtin(callPredicate/1, prolog(engine)),
-   builtin(assertaPredicate/1, prolog(engine)),
-   builtin(assertzPredicate/1, prolog(engine)),
-   builtin(retractPredicate/1, prolog(engine)),
-   builtin('add-translator-rule!'/1, prolog(translator_rules)),
-   builtin('add-translator-rule!'/2, prolog(translator_rules)),
-   builtin('remove-translator-rule!'/1, prolog(translator_rules)),
-   builtin('add-typing-rule!'/5, prolog(type_rules)),
-   builtin('remove-typing-rule!'/1, prolog(type_rules)),
-   builtin(argv/1, prolog(engine)),
-   builtin(register_metta_library_path/2, prolog(engine)),
-   builtin(dif/1, prolog(dif)),
-   builtin(dif/2, prolog(duals)),
-   builtin('residual-goals'/1, prolog(duals))
- ]).
 %An EXTENSION's own builtins -- a host bridge's and a backend's alike --
 %register here, from that extension's own seam:extension_builtin/2 declarations
 %rather than from a list here that would name it. This was two directives over
@@ -1169,7 +1169,7 @@ builtin_project_implementation_file(File) :-
 
 builtin_project_root(Root) :-
     metta_engine_module(Engine),
-    source_file(Engine:register_builtin_definition(_), RegistrationFile),
+    source_file(Engine:register_declared_builtin_name(_), RegistrationFile),
     file_directory_name(RegistrationFile, MettaDirectory),
     file_directory_name(MettaDirectory, EngineDirectory),
     file_directory_name(EngineDirectory, Root).
