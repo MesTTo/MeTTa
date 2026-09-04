@@ -161,3 +161,22 @@ re-pinning them here would hide rather than repair the frozen-base condition.
 Open: the frozen base's eight full-gate lanes remain red for the failures above
 and its other pre-existing performance pins. The distribution surface itself
 has no open obligation.
+
+Tried: place an invalid distribution before another input to
+`ws-average-independent`. The fold continued with the first `(Error ...)` as
+its accumulator, and the next product normalized that error as if it were
+weight rows. The result wrapped the original empty-support refusal in a new
+positive-mass refusal. This supersedes the earlier conclusion that checking the
+fold's final result alone preserved every average refusal.
+
+Rejected: inspecting only the completed fold, because it is already too late
+after another iteration has consumed an error as data. Decided: each fold step
+tests its accumulator with `if-error` before invoking
+`ws-map2-independent`. The first refusal is now returned unchanged whether the
+invalid distribution is first, interior, or last. The regression test crosses
+all three positions with empty, zero-mass, and negative-mass inputs. The full
+module reports 19 passing tests, including the same 800 generated law cases
+[tested: test_distribution.py under HYPOTHESIS_PROFILE=ci; commit=WORKTREE].
+
+Open: no distribution-surface obligation remains. The frozen-base gate failures
+remain as recorded above.
