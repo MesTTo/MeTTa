@@ -16,10 +16,104 @@
 %   retain their established fast path [tested:
 %   test_a_static_parameter_proof_yields_to_a_later_typing_rule;
 %   commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
+%   - metta_arrow_type_shape(+Raw,-Inputs,-Output,-Product,-Explicitness)
+%   recognizes one proper prefix arrow declaration. Raw is the source list;
+%   Inputs and Output are its unchanged type terms; Product is the normalized
+%   cardinality/EffectClass product; Explicitness is implicit for `->` and
+%   explicit for every `-[...]->` spelling. A non-arrow or malformed annotated
+%   head fails instead of passing through or throwing.
+%   - metta_arrow_type_chain(+Raw,-Types) projects both unannotated
+%   `(-> A B)` and annotated `(-[det]-> A B)` declarations to the identical
+%   runtime chain `[A,B]`. The annotation remains available only through
+%   metta_arrow_type_shape/5.
+%   - metta_presented_arrow_chain(+Raw,+Arity,-Presented) applies the existing
+%   arrow-arity and `%Rest%` presentation rules to either spelling. Arity is
+%   the call's input count; Presented is the headless parameter/result chain.
+%   A named arrow-arity refusal or an invalid Raw makes the projection fail.
+%   - This plain unit is consulted into the engine implementation module.
+%   Sibling engine/metta/*.pl consumers call both predicates unqualified; a
+%   declared module resolves them through its engine-module base or qualifies
+%   that owning module, and must not load this unit as a module.
+%   - Arrow projection classifies syntax only. It neither accepts a value nor
+%   discharges a typing-rule check, so it reads no typing-rule family and does
+%   not extend typing_policy_fast_path_family/1
+%   [tested: tests/prolog/suites/typecheck/arrow_projection.plt;
+%   commit=48cf04fb8dd80149b5e46e15f499f19f6c45348f].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
 %%% Type system: %%%
+
+% One surface parser feeds old runtime consumers and the compile-time checker.
+% The output keeps binder names as canonical data: two `$e` slots therefore
+% denote the same binder without exposing a fabricated Prolog variable.
+metta_arrow_type_shape(Raw, Inputs, Output, Product, Explicitness) :-
+    nonvar(Raw),
+    Raw = [Head|Tail],
+    Tail = [_|_],
+    is_list(Raw),
+    atom(Head),
+    append(Inputs, [Output], Tail),
+    (   Head == '->'
+    ->  Product = effect(nondet, oracleIO),
+        Explicitness = implicit
+    ;   atom_concat('-[', Rest, Head),
+        atom_concat(Inside, ']->', Rest),
+        Inside \== '',
+        atomic_list_concat(Slots, ',', Inside),
+        (   Slots = [Slot]
+        ->  (   memberchk(Slot-Cardinality,
+                          [ det-det,
+                            deterministic-det,
+                            semidet-semidet,
+                            semideterministic-semidet,
+                            nondet-nondet,
+                            nondeterministic-nondet
+                          ])
+            ->  Product = effect(Cardinality, oracleIO)
+            ;   atom_concat('$', Name, Slot),
+                Name \== '',
+                Product = effect_variable(Name)
+            )
+        ;   Slots = [CardinalitySlot, ClassSlot],
+            (   memberchk(CardinalitySlot-Cardinality,
+                          [ det-det,
+                            deterministic-det,
+                            semidet-semidet,
+                            semideterministic-semidet,
+                            nondet-nondet,
+                            nondeterministic-nondet
+                          ])
+            ->  true
+            ;   atom_concat('$', CardinalityName, CardinalitySlot),
+                CardinalityName \== '',
+                Cardinality = cardinality_variable(CardinalityName)
+            ),
+            (   atom_concat('$', ClassName, ClassSlot),
+                ClassName \== ''
+            ->  Class0 = effect_class_variable(ClassName)
+            ;   catch(spaces:metta_effect_class_canonical(ClassSlot, Class0),
+                      _, fail)
+            ),
+            (   Cardinality == nondet,
+                \+ Class0 = effect_class_variable(_)
+            ->  metta_effect_join(Class0, nondeterministicReadOnly, Class)
+            ;   Class = Class0
+            ),
+            Product = effect(Cardinality, Class)
+        ),
+        Explicitness = explicit
+    ),
+    !.
+
+metta_arrow_type_chain(Raw, Types) :-
+    metta_arrow_type_shape(Raw, Inputs, Output, _, _),
+    append(Inputs, [Output], Types).
+
+metta_presented_arrow_chain(Raw, Arity, Presented) :-
+    metta_arrow_type_chain(Raw, Types),
+    fitting_type_chains([[->|Types]], Arity, [[->|Presented]]),
+    !.
 
 %The space whose ':' declarations are in scope. A space's compiled clauses live
 %in a module named after it, and space_module/2 is '&self' -> user and the
