@@ -65,6 +65,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   in-engine goal now, beside the inference budget that already worked, and
   raises `TimeLimitError` at the bound. It checks between answers, so a goal
   stuck before its first answer is still `inferences=`'s to bound.
+- Tagged algebra evaluation now carries `timeout=` and `inferences=` through
+  `answers(under=)`, `match(under=)` and `eval(under=)`. Its wall bound is one
+  absolute deadline across fixpoint rounds, and custom operations debit one
+  shared inference quota instead of receiving a fresh quota per operation.
+  Ordered carriers also interrupt their collect-and-sort phase before the
+  first answer, so an untabled cyclic tropical query raises `TimeLimitError`
+  at six seconds instead of reaching a stack error after about a minute.
 
 ### Changed
 
