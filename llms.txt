@@ -713,10 +713,15 @@ all constructible straight from `metta`.
 Engine calls belong to the thread that made the engine. `m.pool(workers)` gives
 each worker its OWN attached engine, which is what makes the calls genuinely
 concurrent (measured 2026-08-15: 1.94x, 3.90x and 7.26x at 2, 4 and 8 workers).
+Its `map(fn, items)` handles unary work and `starmap(fn, argument_rows)` spreads
+each row into a multi-argument call; both preserve input order.
 `m.parallel(*targets)` and its language-side name `m.hyperpose(*targets)`
 evaluate targets at once. `metta.aio.AsyncMeTTa` runs engine calls on one worker
 thread behind `async`; `metta.parallel.engine_thread()` and `metta.current_space()`
 report the crossing.
+`metta.channel(max=)` creates a mailbox. `send` may block on capacity,
+`recv(deadline=)` waits, and `try_recv()` takes a waiting term or returns
+`None` immediately; close it with a context manager.
 
 In MeTTa, `(transaction EXPR)` and `(atomically EXPR)` run one atomic block.
 Both answer EVERY answer their body has and commit or roll back the whole

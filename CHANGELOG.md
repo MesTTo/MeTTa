@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The concurrency sheet and a checked example now expose
+  `EnginePool.starmap` for multi-argument work and `Channel.try_recv` for a
+  nonblocking mailbox take.
+
 - The consumer sheet and first-steps example now expose the Python-safe root
   builders `not_` and `in_` beside the existing logic builders.
 

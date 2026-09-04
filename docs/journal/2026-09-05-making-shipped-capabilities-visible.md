@@ -170,6 +170,16 @@ keywords; generated reference pages and tests were the only readers.
 Decided: name the complete five-builder logic family together and check the
 exact `(not ...)` and `(in ... ...)` terms in the first-steps example.
 
+Tried: searched `llms.txt` and both example corpora for `starmap` and
+`try_recv` -> no occurrences. Tests alone used the returned pool and channel
+methods, so a caller could obtain either handle without finding its
+multi-argument or nonblocking operation.
+
+Decided: document both methods at the concurrency entry and add one checked
+handle-lifecycle example. `starmap` evaluates two engine calls through separate
+argument rows in input order; `try_recv` is checked both empty and carrying a
+waiting term.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 
