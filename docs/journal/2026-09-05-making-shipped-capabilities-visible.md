@@ -85,6 +85,17 @@ configures before startup, observes the freeze, and changes a live setting.
 Tried: `operations/runtime_configuration.py` with the required interpreter ->
 four checked claims, `OK runtime_configuration`, exit 0.
 
+Tried: compared the provider interface with its consumer sheet ->
+`SpaceProvider.can_run` described implemented capabilities, while
+`should_run(capability, **request)` and `refusal(capability, **request)` were
+the actual per-request policy and explanation hooks; neither latter spelling
+occurred in `llms.txt` or an executable example.
+
+Decided: distinguish structural support from request policy in the existing
+provider paragraph and add one curated-store example. The example admits a
+user fact, declines a reserved system fact before it reaches `add`, and checks
+that the exception carries the provider's own remedy.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

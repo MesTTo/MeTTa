@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Foreign-provider authors now have a consumer-sheet entry and checked example
+  for the distinction between structural `can_run` support, request-specific
+  `should_run` policy, and provider-owned `refusal` messages.
+
 - The consumer sheet and a checked runtime-configuration example now expose
   the root `metta.config` object, its four environment variables, the atomic
   `configure` method, and which settings freeze after engine startup.

@@ -767,7 +767,12 @@ A space can be backed by anything, and the seam is universal rather than
 per-backend. From Python, implement `Matcher` / `Enumerable` / `Adder` /
 `BulkAdder` / `Remover` / `Clearer` / `Planner` / `Transactional` / `CustomMatch`
 and call `metta.foreign.register_provider(runtime, name, provider)` with a name
-starting with `&`; or subclass `SpaceProvider` and answer `can_run` per call.
+starting with `&`; or subclass `SpaceProvider`. `can_run(capability, **request)`
+declares that the operation exists. Override
+`should_run(capability, **request)` to accept or decline each concrete request,
+and `refusal(capability, **request)` to give a declined request its own reason.
+For example, an add policy reads `request["atom"]`; it runs before the write,
+including before any bulk write.
 Capabilities are declared, not guessed: `match`, `enumerate`, `add`, `add-many`,
 `remove`, `clear`, `subscribe`, `plan`, `rules`, and an unsupported operation
 refuses loudly rather than degrading. A provider's `match` may yield
