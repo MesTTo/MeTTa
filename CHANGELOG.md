@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Remote-backend authors can now find `is_transport_failure(error)` in the
+  error model, with checked positive and negative classifications in the
+  remote-controls example.
+
 - Performance authors can now find the general `measure_counters` and
   `CounterRuns` surface beside the narrower instruction helper, including the
   baseline methods that decide deterministic and noisy counters.

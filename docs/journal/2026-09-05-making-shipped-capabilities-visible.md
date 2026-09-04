@@ -267,6 +267,16 @@ executable positive control. A topical example was rejected because a normal
 example run cannot require exclusive PMU access; the current PMU is held by
 another repository, so live `instructions:u` remains unrun in this thread.
 
+Tried: searched the consumer sheet and executable examples for
+`is_transport_failure` -> no occurrence. Git history and its public docstring
+identify remote-backend authors as the audience for the shared outage
+classifier; the foreign seam also uses it internally, but it remains exported
+from `metta.errors` for transports outside that seam.
+
+Decided: name the classifier beside `TransportFailure` and add positive
+`ConnectionError` and negative `ValueError` controls to the remote example.
+The classification implementation remains unchanged.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

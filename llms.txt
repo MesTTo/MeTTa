@@ -702,6 +702,9 @@ Errors: `MettaError` is the base, then `EngineError`, `MettaSyntaxError`,
 `CastError`, `CompileError`, `SourceNotFound`,
 `MettaResultError`, `AssertionFailure`, `TransportFailure`, and `ResourceLimitError` with
 `TimeLimitError` and `InferenceLimitError` under it, plus `Interrupted`.
+Remote-backend authors use `metta.errors.is_transport_failure(error)` to
+classify an absent connection, timeout, or closed stream before choosing retry
+or abandonment; ordinary application errors answer false.
 `AssertionFailure` means a `(test ...)` or `(assert ...)` claim was false, not
 that the engine broke; `.operation`, `.actual`, and `.expected` are structured
 fields for a harness.
