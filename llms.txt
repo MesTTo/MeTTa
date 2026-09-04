@@ -701,6 +701,10 @@ Errors: `MettaError` is the base, then `EngineError`, `MettaSyntaxError`,
 `AssertionFailure` means a `(test ...)` or `(assert ...)` claim was false, not
 that the engine broke; `.operation`, `.actual`, and `.expected` are structured
 fields for a harness.
+`Rows.raise_for_errors()` and `Answers.raise_for_errors()` are the explicit
+bridge from `(Error culprit reason)` values to `MettaResultError`: one raises
+plainly, several as an `ExceptionGroup`, and a clean collection returns itself
+for chaining.
 `MettaOperationError(EngineError)` is a builtin refusing a value, with the parts
 as data: `.operation` is what the source wrote (`+`, `min-atom`), `.kind` the
 formal's functor, `.expected` and `.culprit` the type and offending value.

@@ -200,6 +200,14 @@ small provider implementing all three. Its example checks that an exact
 one-answer query passes `limit=1`, a reified write leaves the provider
 untouched, and `Space.commit` hands the provider one base-relative atomic diff.
 
+Tried: searched the sheet and examples for `raise_for_errors` -> no
+occurrences, although query rows deliberately preserve stored `(Error ...)`
+atoms as data and the website guide named this opt-in exception bridge.
+
+Decided: put both `Rows` and `Answers` spellings in the error model and extend
+the error-handling example. A clean row set is the positive chaining control;
+a stored error row must raise `MettaResultError` with its culprit intact.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

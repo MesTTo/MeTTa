@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `Rows.raise_for_errors` and `Answers.raise_for_errors` now appear in the
+  consumer error model, and the checked error-handling example proves both its
+  clean chaining and stored-error exception paths.
+
 - Foreign backend authors now have exact consumer-sheet and executable doors
   for `BoundedMatcher`, `Snapshotter`, and `WorldCommitter`, including an exact
   bound pushdown and a provider-owned immutable-world commit.
