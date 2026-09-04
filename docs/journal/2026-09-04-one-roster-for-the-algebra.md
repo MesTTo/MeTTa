@@ -8,6 +8,11 @@ Rejected: deleting `budget` and `amplitude`, because both have shipped algebra d
 Decided: the catalog vocabulary remains the generated-enum authority, and one regression asserts that its ten values exactly equal `_PRESETS` and the root object surface. `python extensions/python/tools/vocabgen.py --write` carries the catalog change into the generated enum.
 Open: the integrator-owned cheat sheets still carry stale rosters; the closed-value lane added later in this thread will report them.
 
+## 2026-09-04 - D2 one law checker in one space
+Tried: `METTA_PATH="$PWD" PYTHONPATH="$PWD/extensions/python" "$CHECK_PY" ai-tmp/probe_d2.py` -> local `(pmax ...)` evaluated to `1.0`, then declaration failed with `algebra_carrier_not_closed` because the engine retried it in `&self`.
+Rejected: retaining Python's exhaustive checker as a preflight, because two executable certificates can diverge again and direct catalog declarations must still be checked by the engine.
+Decided: remove Python's duplicate law walk. `metta_py_declare_algebra/2` adds the row through the ordinary catalog door while the declaring space's equation module is active, so the engine checker is the sole certificate and uses the same definitions later evaluation sees.
+
 ## 2026-09-06 - D1 landing: half of it was already on trunk
 Tried: rebasing this thread onto `petta` -> the catalog half of D1 had landed
 independently as `2026-09-05-the-carrier-the-vocabulary-would-not-admit.md`.

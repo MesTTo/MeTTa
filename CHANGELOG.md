@@ -143,6 +143,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   on its first call. Enabling now recompiles through the engine's own door and
   touches no stored atom.
 
+- A law-bearing `metta.algebra(...)` declaration is certified once, in the
+  space that declares it. Python walked the finite carrier itself and then the
+  engine walked it again in `&self`, so an algebra whose `combine` is a MeTTa
+  equation defined in a scratch space failed with `algebra_carrier_not_closed`:
+  the second walk could not see the definition the first one used. The Python
+  walk is gone and the declaration goes through the catalog door with the
+  declaring space's equation module active, so one checker sees the same
+  definitions later evaluation sees. A violated law still raises
+  `AlgebraLawError`; its text is now the engine's,
+  `algebra_law_violation: <name> law <law> fails at <inputs>`.
+
 - The example corpus reads in its own order again. `08-case-duals.metta` sat in
   chapter 7, whose subject is `case`, and negated its arms with `not-provable`,
   which chapter 22 teaches; it is
