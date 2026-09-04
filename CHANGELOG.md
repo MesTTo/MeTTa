@@ -8,6 +8,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Python-authored programs can now be inspected and exported as MeTTa.
+  `Space.source()` returns the receiver's directly stored program as the exact
+  loadable text written by `Space.save(format="metta")`; `Defined` and `Space`
+  show the same source in rich notebooks; and
+  `python -m metta convert program.py [-o out.metta]` imports a Python file
+  into a fresh space and prints or writes that text.
+  `Space.consumption(kind)` now declares linear, repeated, or peek consumption
+  while preserving `(source <space> <kind>)`; it replaces the colliding
+  `Space.source(kind)`.
+
 - `current_source_identity/2` answers the file a record made during a compile
   belongs to and the digest of that file's text, for anything that files a
   record alongside a compile and needs a reload to replace its old set. It takes

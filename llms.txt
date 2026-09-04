@@ -165,6 +165,7 @@ m.register_token(pattern, constructor) -> None
 m.unregister_token(pattern) -> None
 m.load(path, *, timeout=, inferences=) -> list[list[Atom]]
 m.save(path, format="metta"|"fast") -> int   (atomic, fsynced)
+m.source() -> str   direct atoms as loadable MeTTa; exactly m.save(format="metta")
 m.digest() -> str, 64-hex content hash of the space, store-independent
 ```
 
@@ -513,7 +514,7 @@ m.handles(pattern, "Exact"|"Partial"|"Sound"|"Refuse", det=)
         queries arriving with it bound, so a scan-only source is three words.
 m.emits("depth"|"fair"|"best-first")                 answer order
 m.merge(pattern, "depth"|"fair"|"best-first")        how answers merge
-m.source("linear"|"repeated"|"peek")                 consumption discipline
+m.consumption("linear"|"repeated"|"peek")            consumption discipline; writes (source <space> <kind>)
 m.atomicity("transactional"|"atomic-single"|"best-effort")
 m.context("closed-world"|"open-world")               what absence means
 m.on_error(pattern, "keep"|"empty"|"abort")
@@ -790,9 +791,11 @@ performed form is stored as its own atom, so the running app answers
 mid-way keeps its performed prefix's writes, closes any servers it started, and
 names the failing form.
 
-`python -m metta` has six subcommands: `run` (files, printing each `!` answer
+`python -m metta` has seven subcommands: `run` (files, printing each `!` answer
 group), `repl` (paren-balance aware, readline), `serve`, `boot`, `lint` (nonzero
-exit on findings), `doc` (a name's `(@doc ...)`).
+exit on findings), `doc` (a name's `(@doc ...)`), and `convert`
+(`program.py [-o out.metta]`, emitting the module's fresh-space declarations
+as loadable MeTTa source).
 
 `metta.remote`: `serve(m, spaces=, token=, authorize=, ssl_context=)`,
 `connect(url, token=, headers=)`, `attach`. Credentials require https, tokens
