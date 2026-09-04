@@ -13,7 +13,8 @@ Source: `extensions/python/metta/integrate.py`.
 > reasoning over any object.
 > Owns:
 >   - _INSTALLED retains one target per live space and integration name;
->     MeTTa.drop releases every record for that space
+>     MeTTa.drop releases every record for that space and a containing
+>     transaction rollback releases completed nested installations
 
 The entries below reproduce the source signatures and docstrings.
 
@@ -69,10 +70,21 @@ def integrate(m, target: Any) -> str:
 > m may be a context or a space; the installer is handed the space either
 > way, which is the object whose storage doors it needs.
 >
-> Idempotence is per SPACE, because equations and facts an installer
-> writes land in the space it was handed: installing into a second space
-> installs again there. Operations are process-wide either way, and
-> re-registering them is the registry's ordinary replacement.
+> Idempotence is per SPACE, because equations and facts an installer writes
+> land in the space it was handed: installing into a second space installs
+> again there. Operations are process-wide either way, and re-registering
+> them is the registry's ordinary replacement.
+>
+> Installation is one unit of work. A failure restores engine state and each
+> framework-owned Python registry to the state before this call. A home space
+> declaring best-effort writes is refused before the installer runs because
+> those writes explicitly survive rollback.
+>
+> Source consultation, native-library loading, custom listener effects, and
+> arbitrary process-global side effects have no general safe inverse. The
+> original installer exception carries that boundary as a note; a
+> METTA_PROLOG integration also names every source path that may remain
+> consulted.
 
 ## `installed`
 
@@ -191,6 +203,30 @@ def wrap_object(
 > engine's own convention for an effectful builtin, since a Python method
 > returning None almost always is one. The object itself also lands in the
 > space as (wrapped name &lt;obj>), so rules can enumerate what is wrapped.
+
+## `register_type`
+
+```python
+def register_type(
+    cls: type,
+    *,
+    image: str = 'expression',
+    to_atom: Callable[[Any], Any] | None = None,
+    from_atom: Callable[..., Any] | None = None,
+    name: str | None = None,
+    fields: tuple[str, ...] = (),
+) -> type:
+```
+
+> Register a converted type, enlisted in an enclosing transaction.
+
+## `unregister_type`
+
+```python
+def unregister_type(cls: type) -> None:
+```
+
+> Remove one converted type, restoring its exact preimage on rollback.
 
 ## `register_object_type`
 

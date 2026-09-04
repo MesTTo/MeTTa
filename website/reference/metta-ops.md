@@ -23,12 +23,18 @@ class EffectPlan:
 def registry_undo() -> Iterator[None]:
 ```
 
-> Undo this block's registry changes when it does not complete.
+> Undo this block's enlisted registry changes when it does not complete.
 >
 > Frames nest the way SWI's transactions do: an inner block that completes
 > hands its records to its parent, so an outer rollback discards inner work
-> too. This is the undo log a savepoint keeps, and it exists because an
-> engine rollback cannot reach a Python dict.
+> too. Callbacks run in reverse mutation order and every callback is attempted;
+> a broken inverse is attached to the original exception instead of masking
+> it. This is the undo log a savepoint keeps, and it exists because an engine
+> rollback cannot reach a Python dict.
+>
+> The context is paired with an engine transaction by Space.transaction().
+> Registry callbacks therefore restore Python state only; the engine
+> transaction restores reflected atoms and other dynamic engine state.
 
 ## `class_declarations`
 
