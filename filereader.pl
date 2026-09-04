@@ -60,7 +60,7 @@
 %     filereader_source_identity:an_identity_taken_during_a_compile_names_the_file_and_its_digest,
 %     filereader_source_identity:a_pinned_owner_names_its_own_file_after_that_load_closed,
 %     filereader_source_identity:the_identity_and_the_journal_charge_name_the_same_load;
-%     commit=WORKTREE].
+%     commit=5a274dfb79a66b0bc984606ed246fd5ca308ffaf].
 %   - Loader diagnostics contain ANSI escapes only on terminal streams
 %     [tested 2026-08-14: filereader_terminal_output].
 %   - A type declaration that cannot type a function the same source defines
