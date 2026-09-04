@@ -226,6 +226,15 @@ Decided: show `object_view(obj, relation=...)` at the existing object-view
 door and query a checked live view under `robot-field`. The provider and its
 default remain unchanged.
 
+Tried: searched root `llms.txt` and both executable example corpora for
+`metta.speculate()` -> no occurrence. The object-tier speculative scope was
+documented, and the generated phrasebook named the root spelling, but a lazy
+module-tier consumer did not encounter it in either required consumer door.
+
+Decided: put `with metta.speculate():` beside `Space.speculative()` and execute
+a default-context write whose absence after the scope proves that it was
+discarded.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

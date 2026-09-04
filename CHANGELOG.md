@@ -140,6 +140,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The exact module-tier `metta.speculate()` spelling now appears beside
+  `Space.speculative()` and runs in the checked engine-controls example.
+
 - `object_view(obj, relation=...)` now has an exact consumer-sheet spelling,
   and the checked object-integration example queries a view under a custom
   relation name.

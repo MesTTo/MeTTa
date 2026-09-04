@@ -273,6 +273,8 @@ by a weighted proof, without any one of them overwriting another.
 `with m.capture() as output:` collects printed text in `output.text` without
 changing either return shape. `with m.atomic():` makes each whole run one
 transaction; `with m.speculative():` answers and rolls its writes back.
+`with metta.speculate():` is the same discarded execution scope for the lazy
+module-tier default context.
 
 `Rows` is a list of `Row` with `.columns`. `row.x` and `row["x"]` both work.
 `rows.one()` (exactly one), `.first()`, `.column(name)` -> that column's atoms,
