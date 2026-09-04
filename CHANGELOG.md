@@ -62,6 +62,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   now include `Undefined` through direct, saga, and reified-world routes, and
   `AsyncMeTTa.eval` distinguishes the flat one-target result from grouped batch
   results through overloads.
+- `py-iter` now gives each repeated or nested enumeration an independent lazy
+  cursor over one shared cache, so two reads of the same one-shot iterator do
+  not silently lose answers. `py-iter-once` exposes explicit consumptive
+  iteration, and compiled Python `for` statements use it to retain Python's
+  one-shot iterator behavior.
 - `answers(timeout=)` and `match(timeout=)` bound the evaluation. They did
   nothing at all: a non-terminating recursion ran past sixty seconds under
   `timeout=3` where `eval(timeout=3)` raised at 3.01 seconds on the same
