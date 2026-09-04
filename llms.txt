@@ -228,10 +228,12 @@ call. Ten carriers ship. The answers below are one program's: two facts tagged
 | `prov` | `plus` `times` | `(plus (times 1.0 0.6) (times 1.0 0.3))` | a TERM, not a number |
 | `amplitude` | `amplitude-add` `amplitude-multiply` | refuses | outside its declared fragment |
 
-Five are objects, `metta.counting`, `.prob`, `.prov`, `.ranked` and `.tropical`.
-The other five are reachable by name only, `under="budget"`, and
-`metta.vocabularies.Semiring` names eight of the ten, omitting budget and
-amplitude.
+Ten are objects: `metta.bool`, `.bag`, `.counting`, `.set`, `.ranked`,
+`.tropical`, `.prob`, `.prov`, `.budget` and `.amplitude`. The bare name works
+wherever an object does, `under="budget"`.
+
+`metta.vocabularies.Semiring` names the closed set: `bool`, `bag`, `counting`,
+`set`, `ranked`, `tropical`, `prob`, `prov`, `budget`, `amplitude`.
 
 `under=counting` answers the integer ITSELF, so those answers are `int` and
 `.one()` reads the count, where every other carrier yields `TaggedAnswer` with

@@ -13,6 +13,13 @@ Tried: `METTA_PATH="$PWD" PYTHONPATH="$PWD/extensions/python" "$CHECK_PY" ai-tmp
 Rejected: retaining Python's exhaustive checker as a preflight, because two executable certificates can diverge again and direct catalog declarations must still be checked by the engine.
 Decided: remove Python's duplicate law walk. `metta_py_declare_algebra/2` adds the row through the ordinary catalog door while the declaring space's equation module is active, so the engine checker is the sole certificate and uses the same definitions later evaluation sees.
 
+## 2026-09-04 - closed-value contract lane
+Tried: `METTA_PATH="$PWD" PYTHONPATH="$PWD/extensions/python" "$CHECK_PY" tests/checks/check_llms_selftest.py` -> 47 planted cases and 0 failures, including missing, extra, reordered, miscounted and absent rosters.
+Tried: ran `tests/checks/check_llms_names.py` against the untouched cheat sheets -> exit 1, with the root module-object and `Semiring` disagreements plus all three absent Python-sheet rosters named exactly.
+Rejected: applying the documented roster edits in this worktree, because the cheat sheets are shared integrator-owned files.
+Decided: derive semirings and effect classes from the live catalog, provider capabilities from `foreign.py:CAPABILITIES`, and fail closed only in the root and Python sheets that promise this surface. Generated `Semiring` remains covered by the existing vocabulary-sync lane.
+Open: paths to build products also fail before a build produces them. Constructor behavior and prose are still a separate fifth blind spot: a closed-set parser cannot prove whether `Answer(k=...)` is accepted or refused, so its docstring needs an executable regression rather than pretending this lane covers it.
+
 ## 2026-09-06 - D1 landing: half of it was already on trunk
 Tried: rebasing this thread onto `petta` -> the catalog half of D1 had landed
 independently as `2026-09-05-the-carrier-the-vocabulary-would-not-admit.md`.
@@ -45,3 +52,27 @@ are qualified and the identifiers read `resources`, which is what they hold;
 `_algebra_demand.evaluate_demand` keeps its own `budget=` keyword, the one call
 that crosses the module. Three pylint findings remain and are trunk's: the same
 E1101 pair and E1133 read on the unchanged tree.
+
+## 2026-09-06 - closed-value lane landing: who has to carry a roster
+Tried: running the lane against trunk's cheat sheets -> the six predicted
+findings, exactly. The root sheet still said "Five are objects" and
+"`Semiring` names eight of the ten"; the seat sheet stated none of the three
+rosters and was reported for all three.
+Rejected: writing a Semiring roster into `extensions/python/llms.txt` to
+satisfy the lane. That sheet is 347 lines about the Python seat and never
+mentions semirings or `under=`; a lane that makes a sheet document a set it
+does not cover is dictating scope, not checking a claim.
+Decided: split it the way `library_findings` already splits. The ROOT sheet
+must carry every roster, so deleting one cannot silence its check, and any
+other sheet is held only to what it states. Two planted cases now hold that
+door: a seat sheet with no roster is silent, a seat sheet with an invented
+member is reported.
+Tried: the effect and capability expressions ended at a specific FOLLOWING
+clause, `. A plan's class` and `, and an unsupported operation`, which forces
+every sheet stating the set into the root sheet's exact wording. Both now end
+at the roster sentence, and only backticked values are read out of it.
+Decided: the seat sheet gains the `EffectClass` roster on its own merits. It
+told a reader to declare an effect class and named only the four shorthands,
+so the five names `effect=` actually takes were nowhere on that sheet.
+Tried: `tests/checks/check_llms_selftest.py` -> 59 planted cases, 0 failures;
+`tests/checks/check_llms_names.py` -> 5 sheets, 0 findings.

@@ -154,6 +154,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `AlgebraLawError`; its text is now the engine's,
   `algebra_law_violation: <name> law <law> fails at <inputs>`.
 
+- The `llms` lane reads the closed VALUE sets a cheat sheet states. Its blind
+  spot was named in `docs/journal/2026-09-05-a-count-the-lane-could-not-see.md`:
+  the semiring carriers, the module carrier objects, the `EffectClass` members
+  and the `SpaceProvider` capability words are closed sets with no source-table
+  row, so nothing derived them. Each is now compared against the engine catalog
+  or the Python constant that owns it, in both directions and, for
+  `EffectClass`, in order. The root sheet must carry each roster, so deleting
+  one cannot silence its check; another sheet is held to what it states. It
+  caught the root sheet saying five carriers are objects where ten are, and
+  `Semiring` naming eight of ten where it names all ten.
+
 - The example corpus reads in its own order again. `08-case-duals.metta` sat in
   chapter 7, whose subject is `case`, and negated its arms with `not-provable`,
   which chapter 22 teaches; it is
