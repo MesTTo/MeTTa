@@ -1007,8 +1007,14 @@ repeated named variable and draw anonymous occurrences independently, the compli
 (`SpaceComplianceSuite`, `GatewayComplianceSuite`, `check_space_provider`,
 `check_twin`, `check_replay`, `check_minted_handles`), and the deterministic
 benchmark gates (`benchmark_case`, `benchmark_counter_slope`,
-`measure_instructions`, `BenchmarkBaseline`, `count_atoms`), also exported from
-`metta.benchmarking`. `metta.pytest_plugin` gives the `metta` and
+`measure_counters(command, events=("instructions:u",), rounds=3,
+controlled=False, timeout=60) -> CounterRuns`, `measure_instructions`,
+`BenchmarkBaseline`, `count_atoms`), also exported from `metta.benchmarking`.
+`CounterRuns.events` maps each requested perf event to its samples and
+`.outputs` retains each measured command's stdout. Use
+`BenchmarkBaseline.observe_counter` for deterministic engine counts,
+`observe_measurement` for a declared noisy-counter band, and
+`observe_configuration` before comparing either. `metta.pytest_plugin` gives the `metta` and
 `scratch_space` fixtures; `metta.ipython` gives `%%metta` in a notebook.
 
 These submodules and names, forty-three of them, load on first access rather than during

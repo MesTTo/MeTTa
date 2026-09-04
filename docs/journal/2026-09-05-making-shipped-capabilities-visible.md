@@ -254,6 +254,19 @@ Decided: name `EmbeddingStore.keys()` and `vector_for(key)` at the existing
 embedding door and read a checked stored vector in the custom-matcher example.
 No search or storage behavior changes.
 
+Tried: searched the consumer sheet and both executable example corpora for
+`measure_counters`, `CounterRuns`, and `observe_measurement` -> no occurrence.
+The sheet named only the older one-event `measure_instructions` helper, even
+though performance authors need the general result shape when one command
+reports engine inferences while perf counts foreign work.
+
+Decided: document the full general signature, returned event/output mappings,
+and the three baseline comparison doors beside the existing benchmark roster.
+The existing `test_measure_counters_reads_every_requested_event` is the
+executable positive control. A topical example was rejected because a normal
+example run cannot require exclusive PMU access; the current PMU is held by
+another repository, so live `instructions:u` remains unrun in this thread.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Performance authors can now find the general `measure_counters` and
+  `CounterRuns` surface beside the narrower instruction helper, including the
+  baseline methods that decide deterministic and noisy counters.
+
 - `EmbeddingStore.vector_for(key)` and `keys()` now appear beside the
   embedding operation door, and the checked matcher example reads a stored
   vector back by atom key.
