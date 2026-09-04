@@ -24,6 +24,10 @@
 %     [tested:
 %     filereader_source_rollback:a_failed_source_rule_restores_discharged_contracts;
 %     commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
+%   - The source identity a compile reads is the file and digest its finished
+%     load publishes, survives its load closing behind an ownership pin, and
+%     agrees with the load record_source_assertion/1 charges [tested:
+%     filereader_source_identity; commit=WORKTREE].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -1048,6 +1052,117 @@ test(a_digest_separates_texts_and_joins_equal_ones) :-
     One \== Other.
 
 :- end_tests(filereader_source_digest).
+
+:- begin_tests(filereader_source_identity).
+
+identity_scratch_file(Path) :-
+    tmp_file(plunit_identity, Base),
+    file_name_extension(Base, metta, Path).
+
+forget_identity_source(Path) :-
+    retractall(filereader:metta_source_load(Path, _, _, _)),
+    retractall(filereader:compiled_metta_source(Path)),
+    retractall(user:imported_metta_source(_, Path)),
+    absolute_file_name(Path, Canon, [access(none)]),
+    retractall(filereader:metta_source_load(Canon, _, _, _)),
+    retractall(filereader:compiled_metta_source(Canon)),
+    retractall(user:imported_metta_source(_, Canon)),
+    ( exists_file(Path) -> delete_file(Path) ; true ).
+
+%The identity is READ from inside the compile it describes, which is the only
+%place it means anything, so the probe is an ordinary MeTTa call the loaded
+%source makes while the load is still open.
+test(an_identity_taken_during_a_compile_names_the_file_and_its_digest) :-
+    F = 'plunit-identity-probe',
+    identity_scratch_file(Path),
+    setup_call_cleanup(
+        ( setup_call_cleanup(open(Path, write, Stream),
+                             write(Stream, "!(plunit-identity-probe)\n"),
+                             close(Stream)),
+          retractall(user:plunit_identity_seen(_, _)),
+          assertz((user:'plunit-identity-probe'(observed) :-
+                       filereader:current_source_identity(Key, Revision),
+                       assertz(user:plunit_identity_seen(Key, Revision))),
+                  ClauseRef),
+          user:import_prolog_function(F, _) ),
+        ( filereader:load_metta_file(Path, _),
+          absolute_file_name(Path, Canon, [access(read)]),
+          once(user:plunit_identity_seen(Key, Revision)),
+          Key == file(Canon),
+          atom_length(Revision, 64),
+          %The revision the compile saw is the one the finished load published.
+          once(filereader:metta_source_load(Canon, _, _, Published)),
+          Revision == Published ),
+        ( erase(ClauseRef),
+          user:unregister_fun_everywhere(F),
+          retractall(user:fun(F)),
+          retractall(user:arity(F, _)),
+          retractall(user:plunit_identity_seen(_, _)),
+          cleanup_test_function(F),
+          forget_identity_source(Path) )).
+
+%Outside every load there is no source and therefore no revision, and the
+%answer says exactly that instead of failing or inventing one.
+test(outside_every_load_the_identity_is_the_named_absence) :-
+    \+ filereader:active_source_load(_),
+    filereader:current_source_identity(Key, Revision),
+    Key == immediate,
+    Revision == none.
+
+%A deferred equation is compiled when something first calls it, which can be
+%inside an unrelated import or after every load has closed. The pin names the
+%file that DEFINED it, and by then that load's read-time digest row is gone, so
+%this is the branch that reads the published row instead.
+test(a_pinned_owner_names_its_own_file_after_that_load_closed) :-
+    F = 'plunit-identity-pinned',
+    identity_scratch_file(Path),
+    setup_call_cleanup(
+        setup_call_cleanup(open(Path, write, Stream),
+                           write(Stream, "(= (plunit-identity-pinned) 1)\n"),
+                           close(Stream)),
+        ( filereader:load_metta_file(Path, _),
+          absolute_file_name(Path, Canon, [access(read)]),
+          once(filereader:metta_source_load(Canon, _, LoadId, Digest)),
+          \+ filereader:source_load_digest(LoadId, _, _),
+          filereader:with_owning_source_load(
+              LoadId,
+              filereader:current_source_identity(Key, Revision)),
+          Key == file(Canon),
+          Revision == Digest ),
+        ( cleanup_test_function(F),
+          forget_identity_source(Path) )).
+
+%The identity and the journal must name ONE load. A record filed by
+%record_source_assertion/1 dies when its owning file reloads, so an identity
+%that named a different file would print a path that outlives the record.
+test(the_identity_and_the_journal_charge_name_the_same_load) :-
+    F = 'plunit-identity-charge',
+    identity_scratch_file(Path),
+    setup_call_cleanup(
+        setup_call_cleanup(open(Path, write, Stream),
+                           write(Stream, "(= (plunit-identity-charge) 1)\n"),
+                           close(Stream)),
+        ( filereader:load_metta_file(Path, _),
+          absolute_file_name(Path, Canon, [access(read)]),
+          once(filereader:metta_source_load(Canon, _, LoadId, _)),
+          filereader:with_owning_source_load(
+              LoadId,
+              ( filereader:current_source_identity(file(Named), _),
+                assertz(user:plunit_identity_charged(marker), Ref),
+                filereader:record_source_assertion(Ref) )),
+          Named == Canon,
+          once(filereader:source_load_assertion(Charged, artifact, Ref)),
+          Charged == LoadId ),
+        ( ( nonvar(Ref)
+            -> erase(Ref),
+               retractall(filereader:source_load_assertion(_, artifact, Ref))
+            ;  true ),
+          retractall(user:plunit_identity_charged(_)),
+          cleanup_test_function(F),
+          forget_identity_source(Path) )).
+
+:- end_tests(filereader_source_identity).
+
 
 :- begin_tests(filereader_late_definition_cost).
 

@@ -1011,6 +1011,49 @@ current_owning_source_load(Load) :-
     ;   Load = none
     ).
 
+%The source a derived artifact made HERE AND NOW belongs to, and the revision
+%of that source's text. Written for anything that keeps a record ALONGSIDE a
+%compile, a diagnostic or a warning or a coverage row, and needs a reload of
+%the source to REPLACE its old set instead of accumulating a second one.
+%
+%The charge is record_source_assertion/1's, pin UNWRAPPED, and it has to be
+%that one: a clause journalled through that door is withdrawn when the OWNING
+%file reloads, so an identity naming whichever file happened to force the work
+%would print one path and die with another. A deferred equation first called
+%inside an unrelated import is exactly that case, which is why the pin exists.
+%
+%Two digest tables, because the owning load may be OPEN or CLOSED.
+%source_load_digest/3 is written at the load's own read and retracted in its
+%cleanup, so it answers while the file is still compiling; metta_source_load/4
+%is written at publish and answers afterwards, which is every pinned owner. The
+%pair is exhaustive: publish_source_load/3 throws rather than let a load finish
+%without having read its own source, so a load that ran has a row in one.
+%
+%`immediate` is support_recompile_pending/3's word for this absence and `none`
+%is journal_load_now/1's. A definition asserted outside every load has no
+%source revision and answering so is the point: a caller wanting
+%replace-on-change for one has to key it on the definition, because nothing
+%about a source can.
+%
+%DETERMINISTIC and total. A caller asking what it is compiling for gets an
+%answer or the named absence, never a failure it could read as "nothing here".
+current_source_identity(Key, Revision) :-
+    (   journal_load_now(Load),
+        Load \== none,
+        source_load_identity(Load, Path, Digest)
+    ->  Key = file(Path),
+        Revision = Digest
+    ;   Key = immediate,
+        Revision = none
+    ).
+
+source_load_identity(Load, Path, Digest) :-
+    (   source_load_digest(Load, P, D)
+    ->  Path = P, Digest = D
+    ;   metta_source_load(P, _, Load, D)
+    ->  Path = P, Digest = D
+    ).
+
 %Run Goal with the source-load JOURNAL charging LOAD, whatever load is
 %active here and now. A deferred equation's compiled clause belongs to the
 %source that DEFINED it: journalled under the load that happened to force

@@ -6,6 +6,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `current_source_identity/2` answers the file a record made during a compile
+  belongs to and the digest of that file's text, for anything that files a
+  record alongside a compile and needs a reload to replace its old set. It takes
+  `record_source_assertion/1`'s charge, so a record and the source it reports
+  name one load even when a deferred equation is compiled inside an unrelated
+  import, and it names the absence, `immediate` and `none`, outside every load
+  rather than failing or inventing a revision.
+
 ### Fixed
 
 - `ws-softmax` works on scores a network produced. It exponentiated each score
