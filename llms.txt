@@ -300,7 +300,10 @@ without firing, unless that provider declares `rules`.
 variable renaming), `PatternMap` (a MutableMapping keyed by atoms),
 `MatchIndex` (many patterns, one atom, which match), `LiveView` (a materialised
 view kept current by the space's own writes), `ClosureView` (reachability over a
-stored relation), `TabledMap` (a computed cache that stays correct).
+stored relation, tabled from birth, which is what makes a closure over CYCLIC
+or symmetric data terminate at all: the same reachability written as recursive
+equations does not terminate over a cycle, so reach for this rather than
+writing the rules), `TabledMap` (a computed cache that stays correct).
 
 `&metta` is the space in which the library describes itself, and it is where
 every declaration below is stored. The catalog describes its own kinds there:
