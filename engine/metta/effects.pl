@@ -546,6 +546,8 @@ metta_builtin_effect(Name, Effect) :-
     ->  Effect = Reviewed
     ;   seam:extension_builtin(Name, Declared)
     ->  Effect = Declared
+    ;   metta_builtin_enumerates(Name)
+    ->  Effect = nondeterministicReadOnly
     ;   metta_builtin_structural(Name)
     ->  Effect = pureStructural
     ;   Effect = oracleIO
@@ -565,7 +567,13 @@ metta_semantic_effect(function, pureStructural).
 metta_semantic_effect('context-space', readOnlyLookup).
 metta_semantic_effect('get-metatype', readOnlyLookup).
 metta_semantic_effect('get-state', readOnlyLookup).
-metta_semantic_effect('get-atoms', readOnlyLookup).
+%get-atoms answers once per atom in the space, so it reads mutable state AND
+%enumerates. readOnlyLookup named only the read
+%[measured: (get-atoms &self) answers 3 times over a 3-atom space, and a world
+%declaring (covers Ctx readOnlyLookup) admitted it;
+%tested: effects_lattice:no_operation_below_the_nondeterministic_rank_answers_more_than_once;
+%commit=WORKTREE].
+metta_semantic_effect('get-atoms', nondeterministicReadOnly).
 metta_semantic_effect('get-deps', readOnlyLookup).
 metta_semantic_effect('module-tree!', readOnlyLookup).
 metta_semantic_effect('loaded-mods!', readOnlyLookup).
@@ -642,8 +650,16 @@ metta_semantic_effect(return, pureStructural).
 metta_semantic_effect(super, pureStructural).
 metta_semantic_effect(switch, pureStructural).
 metta_semantic_effect(take, pureStructural).
-metta_semantic_effect(test, pureStructural).
-metta_semantic_effect('test-no-answer', pureStructural).
+%Both write their verdict line to current_output, which is the oracle door and
+%not a structural computation. A world admitting only structural operations
+%admitted two that print
+%[measured: with_output_to captured "is $_0, should $_0." from test/1 and
+%"is ($_0), should ()." from test-no-answer/1 while sweeping the builtins
+%ranked below nondeterministicReadOnly;
+%tested: effects_lattice:no_operation_below_the_lattice_floor_writes_output;
+%commit=WORKTREE].
+metta_semantic_effect(test, oracleIO).
+metta_semantic_effect('test-no-answer', oracleIO).
 metta_semantic_effect(transaction, pureStructural).
 metta_semantic_effect(translatePredicate, oracleIO).
 metta_semantic_effect('with-pragma!', pureStructural).
@@ -661,9 +677,40 @@ metta_semantic_effect(top, readOnlyLookup).
 metta_semantic_effect(elapsed, oracleIO).
 metta_semantic_effect(timeout, oracleIO).
 
-%member/2 is safe to repeat for cache purposes but can answer more than once.
-%World admission classifies observable answer cardinality, not cache safety.
-metta_builtin_effect_override(member, nondeterministicReadOnly).
+%World admission classifies observable answer cardinality, not cache safety,
+%so an operation that can answer more than once ranks here however structural
+%its computation is. member/2 is the shape: safe to repeat for cache purposes,
+%and still an enumerator.
+%
+%The families under metta_builtin_structural/1 answer "does this observe
+%mutable state", and that is a different axis from "how many answers". Reading
+%determinism off them classified sixteen enumerators as pureStructural, and a
+%world declaring (covers Ctx pureStructural) admitted every one. The lift is
+%about answer COUNT rather than about observing anything, which is the same
+%reading lib_memo's generator lift already takes.
+%
+%The rows are measured, not read off the predicates: each names an
+%instantiation the sweep drove to a second answer. An unbound argument is not
+%an exotic mode -- a constructor application leaves its fields unfilled, so
+%ordinary well-typed code reaches every one of these relational modes.
+%[measured: 16 rows, each with a witness call, over 150 builtins ranked below
+%nondeterministicReadOnly;
+%tested: effects_lattice:no_operation_below_the_nondeterministic_rank_answers_more_than_once;
+%commit=WORKTREE]
+metta_builtin_enumerates(member).         %(member $x (1 2 3))
+metta_builtin_enumerates(and).            %(and $a $b) walks the truth table
+metta_builtin_enumerates(or).
+metta_builtin_enumerates(xor).
+metta_builtin_enumerates(implies).
+metta_builtin_enumerates(not).            %(not $a) answers False then True
+metta_builtin_enumerates(last).           %(last $l) enumerates open-list shapes
+metta_builtin_enumerates(append).         %inverts to solve for a prefix
+metta_builtin_enumerates(length).
+metta_builtin_enumerates(reverse).
+metta_builtin_enumerates('is-member').
+metta_builtin_enumerates('union-atom').
+metta_builtin_enumerates('index-atom').   %(index-atom (a b c) $i) answers 0,1,2
+
 
 %The names below are the remainder of builtin_fun/1 after the established
 %primitive families and the engine/host doors. Keeping every shipped name in
@@ -742,18 +789,22 @@ metta_builtin_effect_override(import_prolog_functions, oracleIO).
 metta_builtin_effect_override(register_metta_library_path, oracleIO).
 
 metta_builtin_effect_override('context-space', readOnlyLookup).
-metta_builtin_effect_override('get-atoms', readOnlyLookup).
+metta_builtin_effect_override('get-atoms', nondeterministicReadOnly).
 metta_builtin_effect_override('get-metatype', readOnlyLookup).
 metta_builtin_effect_override('get-state', readOnlyLookup).
 metta_builtin_effect_override('has-declared-type', readOnlyLookup).
 metta_builtin_effect_override('is-space', readOnlyLookup).
-metta_builtin_effect_override('defined-name', readOnlyLookup).
-metta_builtin_effect_override('get-doc', readOnlyLookup).
+%These four read a registry and answer once per row that matches, which is the
+%same shape as get-atoms: the read was named and the enumeration was not.
+%defined-name is the one that only shows itself against a populated space,
+%which is why the lane seeds atoms before sweeping.
+metta_builtin_effect_override('defined-name', nondeterministicReadOnly).
+metta_builtin_effect_override('get-doc', nondeterministicReadOnly).
 metta_builtin_effect_override('get-doc-atom', readOnlyLookup).
-metta_builtin_effect_override('get-doc-function', readOnlyLookup).
+metta_builtin_effect_override('get-doc-function', nondeterministicReadOnly).
 metta_builtin_effect_override('get-doc-params', readOnlyLookup).
 metta_builtin_effect_override('get-doc-single-atom', readOnlyLookup).
-metta_builtin_effect_override('get-doc-space', readOnlyLookup).
+metta_builtin_effect_override('get-doc-space', nondeterministicReadOnly).
 metta_builtin_effect_override('space-admission-verdict', readOnlyLookup).
 metta_builtin_effect_override('space-atom-count', readOnlyLookup).
 metta_builtin_effect_override('space-contains', readOnlyLookup).

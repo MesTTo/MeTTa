@@ -57,6 +57,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Eighteen builtins declared an effect class weaker than their behaviour, so a
+  world admitted operations its `(covers Ctx Class)` declaration excluded.
+  Sixteen answer more than once and were ranked below `nondeterministicReadOnly`:
+  the boolean connectives `and`, `or`, `xor`, `implies` and `not`, which walk
+  their truth tables when an argument is unbound; the list operations `append`,
+  `length`, `reverse`, `last`, `is-member`, `union-atom` and `index-atom`, which
+  invert; and the registry readers `get-atoms`, `defined-name`, `get-doc`,
+  `get-doc-space` and `get-doc-function`, which answer once per matching row.
+  `test` and `test-no-answer` write a verdict line to standard output and were
+  ranked `pureStructural`, the class that promises no oracle door at all; both
+  are now `oracleIO`. `llms.txt` already stated the rule the classifications
+  missed, that generators and generator inverses require at least
+  `nondeterministicReadOnly`.
+
 - The root `metta.space(journal=)` type now accepts `os.PathLike[str]`, matching
   the persistence path it already forwarded at runtime. Async evaluation types
   now include `Undefined` through direct, saga, and reified-world routes, and

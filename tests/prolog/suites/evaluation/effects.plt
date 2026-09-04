@@ -51,13 +51,13 @@ effect_test_interpreter_profile(
     [chain, 'cons-atom', 'decons-atom', function]).
 effect_test_interpreter_profile(
     readOnlyLookup,
-    ['context-space', 'get-metatype', 'get-state', 'get-atoms',
+    ['context-space', 'get-metatype', 'get-state',
      'module-tree!', 'loaded-mods!',
      'skel-swap-pair-native', 'fuzzy-match-space',
      'fuzzy-match-context']).
 effect_test_interpreter_profile(
     nondeterministicReadOnly,
-    [unify, 'unify%', 'superpose-bind']).
+    [unify, 'unify%', 'superpose-bind', 'get-atoms']).
 effect_test_interpreter_profile(
     writesState,
     [eval, evalc, 'collapse-bind', metta, 'metta-thread', capture,
@@ -68,6 +68,56 @@ effect_test_interpreter_profile(
     oracleIO,
     ['git-import!', 'git-module!', 'import!', 'import-into!',
      'import-item!', include, 'mod-space!']).
+
+%A sample per metatype the engine distinguishes, plus the unbound mode that
+%ordinary well-typed code produces: a constructor application leaves its
+%fields unfilled, so an unbound argument is not an exotic mode to reach.
+effect_test_sample(_).
+effect_test_sample(3).
+effect_test_sample(a).
+effect_test_sample([a,b,c]).
+effect_test_sample('True').
+effect_test_sample('&self').
+
+effect_test_pattern(0, []) :- !.
+effect_test_pattern(N, [A|As]) :-
+    N > 0, M is N - 1, effect_test_sample(A), effect_test_pattern(M, As).
+
+%Every builtin the lattice ranks below nondeterministicReadOnly, with an arity
+%small enough to drive every instantiation of. The '!' names are skipped
+%because deciding whether one writes is the question the rank already answers.
+effect_test_below_nondet(Name, Args) :-
+    builtin_fun(Name),
+    \+ sub_atom(Name, _, _, 0, '!'),
+    metta_operation_effect(Name, Effect),
+    metta_effect_rank(Effect, Rank),
+    metta_effect_rank(nondeterministicReadOnly, NondetRank),
+    Rank < NondetRank,
+    arity(Name, Arity), Arity =< 4,
+    Args is Arity - 1.
+
+%call_nth/2 asks for the SECOND answer and stops there, so an operation with
+%unboundedly many (length/2 over an open list) is decided in bounded work
+%where collecting every answer would not return.
+effect_test_answers_twice(Name, Args, Call) :-
+    effect_test_pattern(Args, Vs),
+    Call = [Name|Vs],
+    catch(call_with_inference_limit(call_nth(eval(Call, _), 2), 60000, R),
+          _, fail),
+    R \== inference_limit_exceeded.
+
+effect_test_cardinality_understated(Name-Call) :-
+    effect_test_below_nondet(Name, Args),
+    with_output_to(string(_), effect_test_answers_twice(Name, Args, Call)).
+
+effect_test_writes_output(Name-Text) :-
+    effect_test_below_nondet(Name, Args),
+    length(Vs, Args),
+    with_output_to(string(Text),
+                   (   catch(call_with_inference_limit(
+                               eval([Name|Vs], _), 60000, _), _, true)
+                   ->  true ;  true )),
+    Text \== "".
 
 :- begin_tests(effects_lattice).
 
@@ -434,5 +484,26 @@ test(an_unclassified_bridge_and_dynamic_call_fail_closed_at_oracle_io) :-
                                 DynamicOperations, DynamicEffect),
     assertion(DynamicOperations == [['<dynamic-operation>', oracleIO]]),
     assertion(DynamicEffect == oracleIO).
+
+%The lattice orders observable answer cardinality, not just what an operation
+%observes: member/2 carried that reading alone until the rest were measured.
+%A world declaring (covers Ctx pureStructural) admitted sixteen enumerators,
+%because the structural families answer "does this touch mutable state" and
+%were read as if they answered "how many answers".
+test(no_operation_below_the_nondeterministic_rank_answers_more_than_once,
+     [ setup(forall(member(F, [[edge,a,b],[edge,c,d],[edge,e,f]]),
+                    metta_add_atom('&self', F, true))),
+       cleanup(forall(member(F, [[edge,a,b],[edge,c,d],[edge,e,f]]),
+                      metta_remove_atom('&self', F, _))) ]) :-
+    %The fixture is what makes a space reader visible: get-atoms answers once
+    %per atom, so against an empty space it looks deterministic.
+    findall(Row, effect_test_cardinality_understated(Row), Rows),
+    assertion(Rows == []).
+
+%The floor of the lattice claims no oracle door at all, so an operation that
+%reaches current_output belongs at the top of it rather than the bottom.
+test(no_operation_below_the_lattice_floor_writes_output) :-
+    findall(Row, effect_test_writes_output(Row), Rows),
+    assertion(Rows == []).
 
 :- end_tests(effects_lattice).
