@@ -968,6 +968,8 @@ read-modify-write needs coordination. State has no events, history, or
 transactions. With `under=algebra`, omit the step: zero initializes the fold,
 merge is its step, ordinary events contribute one, and `(fact tag value)`
 events contribute `tag`.
+`EventStream.folds(space_name)` lists that space's live folds in registration
+order, so an observability owner can inspect what is still subscribed.
 
 `metta.subscribe`: `m.subscribe(pattern, callback, on="add", queue_max=10000)`
 is the delivering fold, run INSIDE the write that matched it; without a

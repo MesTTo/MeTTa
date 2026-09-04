@@ -208,6 +208,14 @@ Decided: put both `Rows` and `Answers` spellings in the error model and extend
 the error-handling example. A clean row set is the positive chaining control;
 a stored error row must raise `MettaResultError` with its culprit intact.
 
+Tried: searched the sheet and examples for `.folds(` -> no occurrence. The
+event stream retained a public registration-order roster, but only generated
+reference exposed it to the observability owner responsible for live folds.
+
+Decided: name `EventStream.folds(space_name)` beside fold construction and
+extend the standing-query example. Four active subscriptions are the positive
+control; cancelling all four must leave an empty roster.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

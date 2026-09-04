@@ -140,6 +140,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `EventStream.folds(space_name)` now has a consumer-sheet door, and the
+  standing-query example checks its live roster before and after cancellation.
+
 - `Rows.raise_for_errors` and `Answers.raise_for_errors` now appear in the
   consumer error model, and the checked error-handling example proves both its
   clean chaining and stored-error exception paths.
