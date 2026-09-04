@@ -380,6 +380,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- A bounded slice of a ranked match reaches the provider as a bound.
+  `m.match(q, under=ranked)[:3]` pulled the ordinary cursor and sliced in
+  Python, so a store that could have answered three rows answered all of them.
+  The slice now reopens the query with `limit=3` when, and only when, the
+  space is foreign, its source is not `linear`, it declares
+  `(emits <ctx> best-first)`, its effective algebra is the carrier the query
+  selected, and the query is one pattern with no `where=`. Anything short of
+  that keeps the shared cursor, so the answers are the same either way and
+  only the work changes.
+
 - Tensor shapes flow through type inference. `metta.arrays.Shape(...)` builds
   the dimension metadata a Python `Annotated[DLTensor, Shape(...)]` carries, a
   declared `(Annotated DLTensor (Shape ...))` symbol satisfies an ordinary

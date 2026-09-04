@@ -269,3 +269,21 @@ Tried: `test_the_ruff_configuration_enables_every_family_or_records_why_not`
 -> the N family reads 38 against a maximum of 37, for `Shape`. Python spells an
 `Annotated[...]` metadata position with a type, so the ledger rises with that
 reason.
+
+## 2026-09-06 - F1 landing: the viewer half, and the Open above is closed
+The entry above ends "VIEWER owns the match source constructors in
+`_space.py`; it must pass factories that retain the ordinary cursor unless the
+ranked source has ordered annotations and a best-first emission declaration".
+That half was written on the same branch and is landed here rather than left
+open, because the seam alone has no caller and a producer bound nothing offers
+is a parameter, not a feature.
+Decided: `Space.match`'s bounded factory refuses unless all five hold: one
+pattern, no `where=`, an ordered carrier, a foreign space, and a source that is
+not `linear` whose effective algebra is the selected one and which declares
+`(emits <ctx> best-first)`. Anything else returns the shared source it was
+handed, so the slice reads the same answers.
+Tried: `test_pristine_ranked_slice_pushes_only_the_licensed_provider_bound` ->
+a licensed provider is asked with `limit=2` for `[:2]` and `limit=None` for the
+full view; the same provider under `tropical`, one without the `best-first`
+declaration, and one declaring `Partial` rather than `Exact` are each asked
+`limit=None`.
