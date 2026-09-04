@@ -10,7 +10,7 @@ and say so in two places for three days without a red lane [measured
 
 A cheat sheet is the one document read by something that cannot notice a stale
 claim, so the file that asserts its own gate and has none is worse off than one
-admitting it is hand-kept. Seven checks cover both directions of each promise:
+admitting it is hand-kept. Eight checks cover both directions of each promise:
 
   PATHS       every backticked token that names a file or directory resolves,
               a glob resolving to at least one match. This is the "real file
@@ -30,6 +30,11 @@ admitting it is hand-kept. Seven checks cover both directions of each promise:
               questions are asked, `fun/1` and the translator's own
               metta_translated_head/1, because a head has meaning through
               either and asking one alone reports the other's names as unknown.
+  NEAR MISS   a head-shaped token the vocabulary does not know while its bang
+              variant IS known, which is the typo the engine's own name ladder
+              would have resolved. Library heads are read here, 289 across 24
+              libraries, because the engine vocabulary does not carry them and
+              nothing else checked them.
   USED HEADS  every engine-known call head exercised by the example corpus is
               named somewhere in the root cheat sheet. This is the reverse
               question HEADS did not ask.
@@ -56,6 +61,10 @@ Guarantees:
   - source-table counts and reverse corpus-head coverage are derived from the
     files and live vocabulary, with independently planted omissions
     [tested: tests/checks/check_llms_selftest.py; commit=2c376be0bca6f85920288863ac89f09a44e6c0c7]
+  - a documented head the vocabulary does not know while its bang variant does
+    is reported both ways, library heads are read so all 24 libraries' surface
+    is covered, and a path, a non-head and a real head are each left alone
+    [tested: tests/checks/check_llms_selftest.py; commit=WORKTREE]
   - the operator-word count and roster are derived from the live `S` by the
     claim's own definition, so a wrong count, a dropped word, a plain spelling
     given a row, and deletion of the claim itself each fail separately
@@ -279,6 +288,15 @@ _COUNT_CLAIMS = (
         for kind in ("host_service", "service", "ownership", "event", "declaration")
     ),
 )
+
+#: A clause head defined by a shipped library. The engine vocabulary answers
+#: only the engine's own names, so all 24 libraries' surface, 289 heads, was
+#: outside every check until this existed: a sheet could name a library head
+#: that does not exist and nothing would say so.
+_LIBRARY_HEAD = re.compile(r"^\(=\s*\(([^\s()]+)", re.MULTILINE)
+#: A backticked token shaped like a call head. Paths, prose and signatures are
+#: excluded by the characters they contain rather than by a list to maintain.
+_HEAD_SHAPED = re.compile(r"`([^`\n]+)`")
 
 #: The operator-word claim, which sits OUTSIDE the sources table. That is the
 #: class COUNTS was blind to: a number in prose has no row to anchor it and
@@ -642,6 +660,62 @@ def count_findings(
     return findings
 
 
+def library_vocabulary(root: Path = REPO) -> dict[str, str]:
+    """Every clause head a shipped library defines, mapped to its library."""
+    heads: dict[str, str] = {}
+    for path in sorted((root / "lib").glob("lib_*/*.metta")):
+        for match in _LIBRARY_HEAD.finditer(path.read_text(encoding="utf-8")):
+            heads.setdefault(match.group(1), path.parent.name)
+    return heads
+
+
+def _head_shaped(text: str) -> set[str]:
+    """Backticked tokens that could name a call head."""
+    found: set[str] = set()
+    for match in _HEAD_SHAPED.finditer(text):
+        token = match.group(1).strip()
+        if any(character in token for character in " /.(="):
+            continue
+        if "-" in token or token.endswith("!"):
+            found.add(token)
+    return found
+
+
+def near_miss_findings(
+    sheet: Path,
+    text: str,
+    known: set[str] | None = None,
+) -> list[str]:
+    """A documented head the engine does not know but nearly does.
+
+    Asking whether every head-shaped token is known would be useless: 47 of the
+    root sheet's 195 are carrier names, type names and vocabulary words that
+    are not heads at all, and no list of those stays current. The NEAR MISS is
+    the precise question. A token that is unknown while its bang variant IS
+    known is a typo, because the bang is the engine's own side-effect suffix
+    and `resolve_known_name` climbs exactly that ladder. Nothing else in the
+    tree is shaped like that: the live sheets produce zero of these, and
+    writing `ws-sample` for `ws-sample!` produces one.
+    """
+    vocabulary = set(library_vocabulary())
+    if known:
+        vocabulary |= known
+    findings: list[str] = []
+    for token in sorted(_head_shaped(text)):
+        if token in vocabulary:
+            continue
+        for variant in (f"{token}!", token.rstrip("!")):
+            if variant == token or variant not in vocabulary:
+                continue
+            index = text.find(f"`{token}`")
+            findings.append(
+                f"{sheet.relative_to(REPO)}:{_line_of(text, index)}: "
+                f"`{token}` names nothing; the engine knows `{variant}`"
+            )
+            break
+    return findings
+
+
 def operator_words() -> dict[str, str]:
     """Every `S` attribute the mechanical name map does not explain.
 
@@ -939,6 +1013,7 @@ def main(argv: list[str] | None = None) -> int:
         findings.extend(library_findings(sheet, text))
         findings.extend(count_findings(sheet, text))
         findings.extend(operator_word_findings(sheet, text))
+        findings.extend(near_miss_findings(sheet, text, known))
         findings.extend(method_findings(sheet, text))
         findings.extend(return_findings(sheet, text))
         if known is not None:

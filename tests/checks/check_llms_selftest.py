@@ -55,6 +55,7 @@ from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
     head_findings,
     library_findings,
     method_findings,
+    near_miss_findings,
     omitted_head_findings,
     operator_word_findings,
     operator_words,
@@ -380,9 +381,32 @@ def main() -> int:
         "deleting the operator-word claim silently disabled its check",
     )
 
+    # NEAR MISS: the bang ladder both ways, and the two shapes that must NOT
+    # fire. Library heads carry these, so no engine is needed.
+    expect(
+        near_miss_findings(SHEET, "`ws-sample!` draws from it") == [],
+        "a real library head was reported as a near miss",
+    )
+    expect(
+        len(near_miss_findings(SHEET, "`ws-sample` draws from it")) == 1,
+        "a dropped bang on a library head was NOT reported",
+    )
+    expect(
+        len(near_miss_findings(SHEET, "`car-atom!` takes the head", {"car-atom"})) == 1,
+        "a bang wrongly added to an engine head was NOT reported",
+    )
+    expect(
+        near_miss_findings(SHEET, "`not-a-head-at-all-xyz` is prose") == [],
+        "a head-shaped token with no bang variant was reported",
+    )
+    expect(
+        near_miss_findings(SHEET, "`engine/metta.pl` and `lib/lib_soft/`") == [],
+        "a path was read as a call head",
+    )
+
     for failure in failures:
         print(failure, file=sys.stderr)
-    print(f"llms selftest: 42 planted case(s), {len(failures)} failure(s)")
+    print(f"llms selftest: 47 planted case(s), {len(failures)} failure(s)")
     return 1 if failures else 0
 
 
