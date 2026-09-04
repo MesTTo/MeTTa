@@ -94,12 +94,12 @@ Measured: eight Hypothesis properties generated 100 passing distributions or
 distribution tuples each, 800 law cases total, with weights from 1 through 8,
 integer outcomes from -8 through 8, one through four rows per support, duplicate
 outcomes admitted, and Bernoulli probabilities from the five dyadic endpoints.
-The module reported 18 passing tests in 4.74 seconds under
-`HYPOTHESIS_PROFILE=ci`. The repository registers only `metta` and `ci`, so the
-requested but nonexistent `petta` profile was not used [tested:
+The module reported 18 passing tests under `HYPOTHESIS_PROFILE=ci`. The
+repository registers only `metta` and `ci`, so the requested but nonexistent
+`petta` profile was not used [tested:
 test_distribution.py under HYPOTHESIS_PROFILE=ci; commit=WORKTREE].
 
-Measured: the numbered example passed all 16 runnable checks, and the
+Measured: the numbered example passed all 15 test forms, and the
 engine-versus-Python parity runner reported `1/1 examples agree across both
 configurations`. `jscpd --reporters ai --min-lines 5 --min-tokens 40` over the
 new library, example, and test reported zero clones and 0.0 percent duplication,
