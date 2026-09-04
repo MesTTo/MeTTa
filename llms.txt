@@ -221,6 +221,25 @@ under the three declarations Contracts names. `m.sample(q, k=10, seed=7)`
 samples with replacement from implicit `(rate n)` tags using a local seeded
 generator.
 
+THREE DIFFERENT QUESTIONS WEAR THE WORD "PROBABILITY" AND EACH HAS ITS OWN
+MECHANISM. Picking the wrong one answers a number that means something else,
+so choose by the question you are asking:
+
+- is this PROPOSITION true, and how confident am I: `lib_pln` and `lib_nars`
+  truth functions. The value belongs to the fact.
+- what VALUE does this quantity take, over a distribution: `lib_measure`
+  weighted superpositions, where `ws-normalize` is the distribution and
+  `ws-sample!` draws from it, its bang naming the choice it makes. The value
+  belongs to the quantity.
+- how did this DERIVATION combine the tags it passed through: `under=`, above.
+  The value belongs to the proof.
+
+`under=prob` is the THIRD of those. It weights a derivation and is not a random
+variable's distribution, so a query asking what a height is will not get one
+from it; that is `lib_measure`'s question. Keeping the three apart is what lets
+a fact carry a truth value AND range over a distributed quantity AND be reached
+by a weighted proof, without any one of them overwriting another.
+
 `with m.capture() as output:` collects printed text in `output.text` without
 changing either return shape. `with m.atomic():` makes each whole run one
 transaction; `with m.speculative():` answers and rolls its writes back.
