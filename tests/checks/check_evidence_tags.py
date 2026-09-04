@@ -125,6 +125,11 @@ SOURCES = (
     "extensions/*/extension.pl",
     "lib/*/*.pl",
     "lib/*/*.py",
+    # A library's MeTTa half makes the same claims its Prolog half does,
+    # and pin_provenance reported them as "OUTSIDE the evidence gate's
+    # globs, so nothing reads this file's claims and nothing would ever
+    # resolve them" when lib_pln2 arrived carrying one.
+    "lib/*/*.metta",
     "extensions/python/metta/*.py",
     "extensions/python/metta/*.pl",
     "extensions/python/examples/*.py",

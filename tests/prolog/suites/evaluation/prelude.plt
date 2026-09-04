@@ -246,6 +246,21 @@ doc_eval(Text, Results) :-
     sread(Text, Term),
     findall(R, eval(Term, R), Results).
 
+%lib_doc.metta is 44 lines and every one of them is a comment: the vocabulary
+%it used to define is in the engine now, and the file exists only so an
+%existing `!(import! &self (library lib_doc))` keeps working. Its own header
+%claims exactly that and nothing proved it, because the evidence gate did not
+%read `lib/*/*.metta` until this claim went looking for a test that was never
+%written.
+test(the_old_library_import_is_a_noop) :-
+    space_atom_count('&self', CountBefore),
+    doc_eval("(get-doc type-cast)", [DocBefore]),
+    process_metta_string("!(import! &self (library lib_doc))", _),
+    space_atom_count('&self', CountAfter),
+    doc_eval("(get-doc type-cast)", [DocAfter]),
+    assertion(CountAfter == CountBefore),
+    assertion(DocAfter == DocBefore).
+
 test(get_doc_answers_the_engine_register_with_no_import) :-
     doc_eval("(get-doc type-cast)", [Doc]),
     Doc = ['@doc', 'type-cast' | _].
