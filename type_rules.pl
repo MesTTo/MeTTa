@@ -192,8 +192,25 @@ remove_typing_rule_locked(Module, Name, Changed) :-
 
 erase_typing_rule_entry(_-Ref) :- erase(Ref).
 
+%The families a STATIC FAST PATH depends on, which is what makes a user rule in
+%one of them a policy change rather than a registry change: a compiled shortcut
+%was chosen on the shipped relation and has to be withdrawn when that relation
+%moves.
+%
+%`metatype` joined this list on 2026-09-05 with the metatype shape test in
+%engine/metta/terms.pl. Before that test existed a metatype check always walked
+%the registry, so a user metatype rule was honoured whatever this list said;
+%the shape test decides the common case without the registry, so a user rule in
+%that family would have been BYPASSED. Caught by
+%metta_metatype_guards:a_user_metatype_rule_is_not_bypassed, which refuses
+%'Symbol' for a symbol and requires the check to refuse it.
+%
+%The list is therefore not a preference: a fast path that reads a family and a
+%family missing from here is an unsoundness, and adding the fast path means
+%adding the family.
 typing_policy_fast_path_family(ordinary).
 typing_policy_fast_path_family(widening).
+typing_policy_fast_path_family(metatype).
 
 typing_policy_change_kind(Family, policy) :-
     typing_policy_fast_path_family(Family),

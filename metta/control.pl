@@ -31,6 +31,9 @@ metta_pragma_key('max-time', 'bound every runnable by wall-clock seconds').
 metta_pragma_key('max-inferences', 'bound every runnable by inference count').
 metta_pragma_key('verify-specializations',
                  'check every specialization against the generic call once').
+metta_pragma_key('verify-discharges',
+                 'run every type check the compiler discharged, and raise a \c
+                  disagreement instead of trusting it').
 metta_pragma_key('max-stack-depth',
                  'branch-local reduction fuel; zero selects the default').
 metta_pragma_key('stack-limit',
@@ -97,6 +100,10 @@ require_metta_pragma_value('stack-limit', Value, Door) :- !,
     ).
 require_metta_pragma_value(_, _, _).
 
+%A pragma write REFRESHES anything materialised from it. verify-discharges is
+%read on the per-call path, so its answer is kept as a marker rather than
+%re-derived; a write that did not refresh the marker would set a pragma that
+%does nothing [tested: metta_metatype_guards:the_pragma_turns_verification_on].
 set_metta_pragma(Key, Value) :-
     retractall(metta_pragma(Key, _)),
     (   Value == none
@@ -106,6 +113,8 @@ set_metta_pragma(Key, Value) :-
     sync_metta_pragma_bounds,
     (   Key == 'max-stack-depth'
     ->  metta_fuel_ensure_charges
+    ;   Key == 'verify-discharges'
+    ->  metta_refresh_discharge_verification
     ;   true
     ).
 

@@ -354,13 +354,223 @@ metta_argument_type_origin(_, _, ordinary).
 %and a query workload pays it once per row: routing the two relations through
 %a helper cost query-where 140 inferences, 0.02%, for a decision the clause
 %head already makes [measured 2026-08-24].
+%A METATYPE argument goes through one door, metta_metatype_check/3 below, which
+%tries the shape before the registry walk and, under
+%(pragma! verify-discharges true), runs the walk beside it and raises a
+%disagreement. This clause is what a TRACKED equation emits under the enabled
+%mode; check_argument_type_in/4 carries the same call for the route a runnable
+%takes, and the relation is the only thing that differs.
 check_argument_type(Argument, Expected, metatype) :-
     !,
-    current_metta_module(Module),
-    metatype_argument_admitted(Module, Argument, Expected, ordinary).
+    metta_metatype_check(Argument, Expected, ordinary).
 check_argument_type(Argument, Expected, Origin) :-
     current_metta_module(Module),
     check_argument_type_in(Module, Argument, Expected, Origin).
+
+%%%%%%%%%% Verifying what the compiler decided not to check %%%%%%%%%%
+%
+%This engine DISCHARGES type checks statically in four places: a literal whose
+%type is settled at compile time (statically_typed_literal/2), an argument a
+%caller's declaration already proved (static_parameter_proof_goal/3), a
+%registry walk replaced by a VM test (intrinsic_type_shortcut_goal/4), and a
+%registry walk replaced by the metatype ladder (the clause above). Each is a
+%claim that "for every value reaching this site, the check I removed would have
+%passed", and until this mode existed the only evidence for any of them was a
+%battery someone wrote by hand.
+%
+%Under (pragma! verify-discharges true) the fast side still DECIDES, so the
+%audited program keeps its meaning, and the slow side it replaced runs beside
+%it with a disagreement raised rather than absorbed. That is translation
+%validation, the same discipline engine/specializer.pl applies to
+%specializations [source: Pnueli, Siegel and Singerman, Translation Validation,
+%TACAS 1998], and it compares two INDEPENDENTLY WRITTEN relations rather than
+%re-asking one. Upstream's own oracle records that as the limitation it could
+%not escape: an oracle built on the checker's own value relation "can only ever
+%re-ask the same question ... Auditing the model needs an INDEPENDENT value
+%relation, which is out of scope"
+%[source: trueagi-io/PeTTa@e038e4db src/typecheck/oracles.pl].
+%
+%SAFER to run than the specialization verifier it borrows from. That one is
+%opt-in partly because running both paths can duplicate a program's EFFECTS; a
+%type check has none, so re-running a discharged one duplicates nothing and the
+%opt-in here is for cost alone.
+
+%The pragma door and the environment door, the pair verify-specializations
+%already uses, so an operator turns this on the same way for both.
+%The mode is MATERIALISED, not asked. Reading the pragma costs a dynamic probe
+%plus a getenv on every check, and this sits on the path a Symbol parameter
+%takes per call; the marker below is one failing clause probe when the mode is
+%off, which is what keeps the discharge cheap in the case that matters. The
+%pragma WRITE installs it, the same way a typing policy is materialised rather
+%than re-derived.
+:- dynamic metta_discharges_verified/0.
+
+metta_verifying_discharges :-
+    (   metta_pragma('verify-discharges', V), V \== false, V \== none
+    ->  true
+    ;   getenv('METTA_VERIFY_DISCHARGES', Set), Set \== '0'
+    ).
+
+%Called by the pragma door and once at boot, so the environment variable and
+%the pragma reach the same marker.
+metta_refresh_discharge_verification :-
+    (   metta_verifying_discharges
+    ->  (   metta_discharges_verified
+        ->  true
+        ;   %Turning the mode ON starts a fresh count. Without this the tally
+            %is the process's whole history, so a positive `agreed` could
+            %describe an earlier file and coverage would stop being a
+            %statement about the run in front of the reader.
+            metta_discharge_reset,
+            assertz(metta_discharges_verified)
+        )
+    ;   metta_discharges_verified
+    ->  %Turning the mode OFF is where its coverage becomes visible. A tally
+        %nothing reads is a shipped capability with no door, which is the
+        %defect class this audit exists to catch, so the mode reports what it
+        %checked rather than leaving the number to whoever knows the
+        %predicate's name. Silent when it checked nothing, so a program that
+        %never set the pragma prints nothing on the way past.
+        metta_discharge_report,
+        retractall(metta_discharges_verified)
+    ;   true
+    ).
+
+metta_discharge_report :-
+    metta_discharge_coverage(Counts),
+    (   memberchk(agreed-0, Counts),
+        memberchk(disagreed-0, Counts),
+        memberchk(unverified-0, Counts)
+    ->  true
+    ;   memberchk(agreed-A, Counts),
+        memberchk(disagreed-D, Counts),
+        memberchk(unverified-U, Counts),
+        Total is A + D + U,
+        %To user_error DIRECTLY, not print_message/2 at `informational`, which
+        %is what this was first: `sh run.sh` passes -q, so the report never
+        %appeared and the door was still invisible [measured 2026-09-05]. This
+        %is the deliberate output of a mode someone opted into, not a log line
+        %a quiet run is right to drop.
+        format(user_error,
+               "verify-discharges checked ~w discharge(s): ~w agreed, \c
+                ~w disagreed, ~w could not be checked inside the bound~n",
+               [Total, A, D, U])
+    ).
+
+
+%%%%%%%%%% The metatype check, one place for both doors %%%%%%%%%%
+%
+%engine/metta/terms.pl has THREE runtime entry points, and a metatype check
+%arrives through two of them: check_argument_type/3, which a tracked equation
+%emits under the enabled mode, and check_argument_type_in/4, which a RUNNABLE
+%reaches through check_argument_type_under_live_policy/3 once that has
+%established the module's policy is the shipped one. They differ only in which
+%relation the walk uses, `ordinary` or `reporting`, so the shape test lives
+%here once and takes the relation as an argument. Putting it in only the first
+%left `!(f abc)` paying the full walk while `(= (g $x) (f $x))` did not.
+%
+%The user-policy route is closed in check_argument_type_under_policy_in/4
+%rather than tested here, so every caller that arrives has already established
+%the precondition the shape test needs.
+metta_metatype_check(Argument, Expected, Relation) :-
+    (   metta_discharges_verified
+    ->  current_metta_module(Module),
+        verified_discharge(( metatype_of(Argument, Computed),
+                             Computed == Expected ),
+                           metatype_argument_admitted(Module, Argument,
+                                                      Expected, Relation),
+                           discharge(metatype, Relation, Argument, Expected))
+    ;   metatype_of(Argument, Computed),
+        Computed == Expected
+    ->  true
+    ;   current_metta_module(Module),
+        metatype_argument_admitted(Module, Argument, Expected, Relation)
+    ).
+
+%COVERAGE IS A NUMBER, not a claim of completeness, which is the specialization
+%verifier's own discipline: a mode that says how much it could check is worth
+%more than one that implies it checked everything.
+metta_discharge_coverage(Counts) :-
+    findall(Outcome-N,
+            ( metta_discharge_outcome(Outcome, Key),
+              flag(Key, N, N) ),
+            Counts).
+
+metta_discharge_reset :-
+    forall(metta_discharge_outcome(_, Key), flag(Key, _, 0)).
+
+%flag/3 rather than retract-then-assert: the update is ATOMIC, where the pair
+%loses an increment if two threads interleave between them, and a counter that
+%undercounts silently is worse than no counter.
+metta_discharge_note(Outcome) :-
+    metta_discharge_outcome(Outcome, Key),
+    flag(Key, N, N + 1).
+
+%A CLOSED set, so the key space stays bounded: a refusal carries its detail in
+%the exception it raises rather than in a counter key, which is what stops one
+%flag per distinct refusal accumulating for the process's life.
+%
+%Each outcome gets its OWN ATOM. flag/3 does not distinguish the arguments of a
+%compound key, so the three tallies written as metta_discharge_tally(agreed)
+%and its siblings were ONE counter wearing three names: a single agreeing
+%discharge read back as agreed-1, disagreed-1 and unverified-1
+%[measured 2026-09-05; caught by
+%discharge_audit:an_agreeing_discharge_is_silent_and_counted].
+metta_discharge_outcome(agreed, metta_discharge_agreed).
+metta_discharge_outcome(disagreed, metta_discharge_disagreed).
+metta_discharge_outcome(unverified, metta_discharge_unverified).
+
+%The one relation every discharge reduces to. A check DROPPED outright is this
+%with `true` as its fast side, so nothing needs a second shape.
+%
+%The slow side is BOUNDED. Comparing forces work the program did not ask for,
+%and a check over a deeply parametric type can walk a long way; exceeding the
+%bound records `unverified` and leaves the fast side's answer standing, rather
+%than turning a verification mode into a hang. call_with_inference_limit/3
+%disarms the limit before it throws, so catching the ball here is sound and
+%does not leak the caller's own budget
+%[source: SWI-Prolog pl-prims.c, raiseInferenceLimitException sets
+%INFERENCE_NO_LIMIT before the throw].
+:- meta_predicate verified_discharge(0, 0, +).
+verified_discharge(Fast, Slow, Site) :-
+    (   call(Fast)
+    ->  (   metta_discharge_agrees(Slow, Site)
+        ->  true
+        ;   metta_discharge_note(disagreed),
+            throw(error(discharge_disagreement(Site), typecheck))
+        )
+    ;   call(Slow)
+    ).
+
+metta_discharge_bound(200000).
+
+%The whole point of the mode is a reader who can act on the answer, so the
+%disagreement says which discharge, against which type, on which value. Without
+%this clause SWI renders it as `Unknown error term`, which is the mode telling
+%someone that something is wrong and nothing else.
+:- multifile prolog:message//1.
+prolog:message(error(discharge_disagreement(discharge(Kind, Type, Value)), _))
+--> { sdisplay(Value, ValueText) },
+    [ 'the ~w discharge for ~w accepted ~w, and the check it replaced \c
+       refuses it. The compiler decided this check could not fail and it \c
+       can'-[Kind, Type, ValueText] ].
+
+metta_discharge_agrees(Slow, Site) :-
+    metta_discharge_bound(Limit),
+    catch(call_with_inference_limit(Slow, Limit, Outcome),
+          Ball,
+          Raised = Ball),
+    (   nonvar(Raised)
+    ->  %The slow side REFUSED loudly where the fast side accepted, which is a
+        %disagreement and not an error of this mode's own making.
+        metta_discharge_note(refused(Site, Raised)),
+        fail
+    ;   Outcome == inference_limit_exceeded
+    ->  metta_discharge_note(unverified),
+        true
+    ;   metta_discharge_note(agreed)
+    ).
+
 
 % A generated check whose static shortcut was invalidated must bypass only
 % the global grounded-number shortcut. The derived relation below still uses
@@ -385,6 +595,16 @@ check_argument_type_under_policy_in(Module, Argument, Expected, Origin) :-
         metta_types_match_in(Module, Actual, Expected)
     ;   has_type_under_policy(Module, Argument, Expected)
     ).
+%A metatype under a USER policy goes straight to the walk. The shape test in
+%check_argument_type_in/4 below is only sound where the module's typing policy
+%is the shipped one, and this is the one route into that clause that is not:
+%a user rule may widen or narrow the metatype family for its own module, and
+%metatype_of/2 knows nothing about it
+%[source: engine/type_rules.pl, typing_rule_expected/3's family widening;
+%tested: metta_metatype_guards:a_user_metatype_rule_is_not_bypassed].
+check_argument_type_under_policy_in(Module, Argument, Expected, metatype) :-
+    !,
+    metatype_argument_admitted(Module, Argument, Expected, reporting).
 check_argument_type_under_policy_in(Module, Argument, Expected, Origin) :-
     check_argument_type_in(Module, Argument, Expected, Origin).
 
@@ -400,8 +620,16 @@ check_argument_type_under_live_policy(Argument, Expected, Origin) :-
             Module, Argument, Expected, Origin)
     ).
 
-check_argument_type_in(Module, Argument, Expected, metatype) :-
-    metatype_argument_admitted(Module, Argument, Expected, reporting).
+%The SAME shape test the ordinary door carries, on the route a RUNNABLE takes.
+%A runnable and an untracked translation emit
+%check_argument_type_under_live_policy/3, which lands here once it has
+%established that the module's policy is the shipped one, so the test that made
+%a Symbol parameter cheap in a compiled equation was doing nothing for
+%`!(f abc)` until this clause existed. The user-policy route into this
+%predicate is closed above rather than tested here, so the precondition holds
+%for every caller that arrives.
+check_argument_type_in(_Module, Argument, Expected, metatype) :-
+    metta_metatype_check(Argument, Expected, reporting).
 check_argument_type_in(Module, Argument, Expected, derived_variable) :-
     metta_runtime_type_candidate(Module, Argument, Actual),
     metta_derived_types_match_in(Module, Actual, Expected).

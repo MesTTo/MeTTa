@@ -602,6 +602,10 @@ seam:engine_emitted(check_argument_type_under_policy/3).
 seam:engine_emitted(check_argument_type_under_live_policy/3).
 seam:engine_emitted(include/3).
 seam:engine_emitted(letstar_runtime/3).
+%Emitted only under (pragma! verify-discharges true), so an ordinary
+%compile holds none of these; the name is protected all the same,
+%because a space that defined it could capture an audit goal.
+seam:engine_emitted(verified_discharge/3).
 seam:engine_emitted(metta_ensure_duals/1).
 %engine/duals.pl emits these two, into the dual clause it builds.
 seam:engine_emitted(metta_negation/5).
