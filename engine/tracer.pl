@@ -18,6 +18,10 @@
 %   - A registered predicate whose clauses clause/3 refuses, a foreign one or
 %     a builtin, is skipped rather than raising out of the whole trace
 %     [tested 2026-08-16: test_a_foreign_predicate_does_not_break_tracing].
+%   - Every bound that can stop a traced run answers the prefix it recorded
+%     and names itself, the recording pair from the recorder and the run
+%     triple by catching their balls
+%     [tested 2026-09-04: tracer:a_run_bound_answers_the_prefix_it_recorded].
 % Owns:
 %   - metta_trace_source/4 removes every metta_tracer wrapper and state fact,
 %     including after an event-limit error [tested 2026-08-14:
@@ -53,7 +57,7 @@
 :- dynamic metta_trace_limit/1.
 :- dynamic metta_trace_next_seq/1.
 :- dynamic metta_trace_session/0.
-:- dynamic metta_trace_truncated/0.
+:- dynamic metta_trace_stopped/1.
 :- dynamic metta_trace_cells/1.
 :- dynamic metta_trace_wrapped/1.
 
@@ -154,15 +158,60 @@ metta_trace_record(Depth, Kind, Term, Answer) :-
                  Cells1 is Cells + EventCells,
                  metta_trace_cell_budget(Budget),
                  N1 is N + 1,
-                 ( ( N1 > Max ; Cells1 > Budget )
-                   -> ( metta_trace_truncated -> true
-                      ; assertz(metta_trace_truncated) ),
+                 ( metta_trace_recording_bound(N1, Max, Cells1, Budget,
+                                               Why)
+                   -> metta_trace_note_stop(Why),
                       throw('$metta_trace_bound_reached')
                  ; retractall(metta_trace_next_seq(_)),
                    assertz(metta_trace_next_seq(N1)),
                    retractall(metta_trace_cells(_)),
                    assertz(metta_trace_cells(Cells1)),
                    assertz(metta_trace_event(N, Event)) ) )).
+
+%Which recording bound this event would cross. The count is asked first
+%because it is the one the caller set and the one a caller can act on; the
+%cell budget is the engine's own and stops a trace whose events are large
+%rather than numerous.
+metta_trace_recording_bound(Seq, Max, _, _, events) :- Seq > Max, !.
+metta_trace_recording_bound(_, _, Cells, Budget, memory) :- Cells > Budget.
+
+%The first bound to stop the recording is the one reported. Worker threads
+%record through this same mutex, so a second one crossing a different bound
+%a moment later does not rewrite what stopped the run.
+metta_trace_note_stop(Why) :-
+    ( metta_trace_stopped(_) -> true ; assertz(metta_trace_stopped(Why)) ).
+
+%One row per RUN bound that can stop a traced run, pairing the ball it
+%arrives as with the name the caller set it under. The two RECORDING bounds
+%are not here: they arrive as this module's own control atom and have
+%already named themselves through metta_trace_stopped/1.
+%
+%Catching these inside the traced goal is what keeps the events, and it is
+%sound rather than a trick played on the guard. SWI disarms the inference
+%limit BEFORE it throws (pl-prims.c raiseInferenceLimitException sets
+%INFERENCE_NO_LIMIT, then raises the bare atom), so the harvest below runs
+%unbounded and call_with_inference_limit/3 restores the caller's outer limit
+%and reports success rather than inference_limit_exceeded; the time limit is
+%a one-shot alarm with remove(true) and behaves the same [measured
+%2026-09-04: 200,000 further inferences after the catch, outer Result=!, and
+%the NEXT bounded call still bounded;
+%docs/journal/2026-09-04-bounded-trace-keeps-its-events.md].
+metta_trace_stop_ball(inference_limit_exceeded, inferences).
+metta_trace_stop_ball(time_limit_exceeded, timeout).
+metta_trace_stop_ball(error(resource_error(stack), _), stack).
+
+%What stopped the run, as one of the limit vocabulary's words, or false when
+%nothing did. Anything that is not a bound is rethrown: a trace must not
+%turn a program's own error into a short answer.
+metta_trace_stop(Ball, Stopped) :-
+    (   var(Ball)
+    ->  Stopped = false
+    ;   Ball == '$metta_trace_bound_reached'
+    ->  metta_trace_stopped(Stopped)
+    ;   metta_trace_stop_ball(Ball, Stopped)
+    ->  true
+    ;   throw(Ball)
+    ).
 
 %The throw still ABORTS the run, and metta_trace_source/5 catches it and
 %answers the events recorded so far. Both halves matter and the earlier
@@ -209,7 +258,7 @@ metta_trace_begin_unlocked(Max) :-
     ; retractall(metta_trace_event(_, _)),
       retractall(metta_trace_limit(_)),
       retractall(metta_trace_next_seq(_)),
-      retractall(metta_trace_truncated),
+      retractall(metta_trace_stopped(_)),
       retractall(metta_trace_cells(_)),
       assertz(metta_trace_cells(0)),
       retractall(metta_trace_wrapped(_)),
@@ -232,17 +281,17 @@ metta_trace_end_unlocked :-
     retractall(metta_trace_session),
     retractall(metta_trace_limit(_)),
     retractall(metta_trace_next_seq(_)),
-    retractall(metta_trace_truncated),
+    retractall(metta_trace_stopped(_)),
     retractall(metta_trace_cells(_)),
     retractall(metta_trace_event(_, _)).
 
 %Run Source in Space with the trace armed; Events come back oldest
-%first, at most Max of them. Past the bound the recording STOPS and
-%Truncated is true, so the caller keeps the prefix it asked to be bounded
-%to: an event costs the size of its term and nothing bounds that, so a
-%throw at the bound discarded everything already recorded and charged the
-%full memory of the bound for no answer. The five-argument form reports
-%whether the events are a prefix; the four- and three-argument forms drop
+%first, at most Max of them. Past any bound the recording STOPS and
+%Stopped names the bound, so the caller keeps the prefix it asked to be
+%bounded to: an event costs the size of its term and nothing bounds that, so
+%a throw at the bound discarded everything already recorded and charged the
+%full memory of the bound for no answer. The five-argument form reports the
+%bound, false when the run finished; the four- and three-argument forms drop
 %that and carry the default bound. Each event is
 %event(Depth, Kind, Term, Answer, VariableNames), Answer being '' on a
 %call, and VariableNames pairing $_0, $_1 with the term's variables.
@@ -265,10 +314,12 @@ metta_trace_end_unlocked :-
 %because that is what a caller can reason about, and the bound that keeps
 %the process alive is this, in cells of the Prolog store.
 %
-%Both truncate identically, so a caller never has to know which one
-%stopped it; Truncated says only that the events are a prefix. Charged on
-%the term ALREADY copied, so it costs a term_size walk over a term
-%copy_term has just walked anyway.
+%The two stop the recording identically and answer different words,
+%because their remedies differ and a caller told only "cut" acts on the
+%wrong one: raising max_events after the CELL budget stopped a trace
+%returns the same prefix again, at the same cost, for the same reason.
+%Charged on the term ALREADY copied, so it costs a term_size walk over a
+%term copy_term has just walked anyway.
 %
 %4 million cells is 32MB at 8 bytes a cell, and it is chosen from the
 %measurement rather than the arithmetic: answering a trace collects,
@@ -292,22 +343,40 @@ metta_trace_source(Source, Space, Events) :-
     metta_trace_source(Source, Space, Max, Events).
 
 metta_trace_source(Source, Space, Max, Events) :-
-    metta_trace_source(Source, Space, Max, Events, _Truncated).
+    metta_trace_source(Source, Space, Max, Events, _Stopped).
 
-metta_trace_source(Source, Space, Max, Events, Truncated) :-
+metta_trace_source(Source, Space, Max, Events, Stopped) :-
     ( integer(Max), Max > 0 -> true
     ; throw(error(domain_error(positive_integer, Max),
                   context(metta_trace_source/5, 'max_events bound')))),
+    catch(metta_trace_session(Source, Space, Max, Events0, Stopped0),
+          Ball, true),
+    (   var(Ball)
+    ->  Events = Events0, Stopped = Stopped0
+        %Arming the tracer wraps every compiled function, which is itself
+        %work, so a bound tight enough to run out before the first event is
+        %recorded exists. It names itself over an empty prefix rather than
+        %raising: where inside the setup a counter runs out is not something
+        %a caller can reason about, and a bound that sometimes raises and
+        %sometimes answers, on nothing the caller can see, is worse than
+        %either. metta_trace_begin/1 has already torn the session down by
+        %here, so there is nothing left to harvest.
+    ;   metta_trace_stop_ball(Ball, Stopped)
+    ->  Events = []
+    ;   throw(Ball)
+    ).
+
+metta_trace_session(Source, Space, Max, Events, Stopped) :-
     setup_call_cleanup(
         metta_trace_begin(Max),
         ( b_setval('$metta_trace_depth', 0),
-          catch(process_metta_string(Source, _Results, Space),
-                '$metta_trace_bound_reached',
-                true),
+          %Every ball, so a RUN bound stopped by the guard around this
+          %call keeps its events too; metta_trace_stop/2 rethrows anything
+          %that is not a bound before a single event is harvested.
+          catch(process_metta_string(Source, _Results, Space), Ball, true),
           with_mutex('$metta_trace_events',
-                     ( findall(N-E, metta_trace_event(N, E), Pairs),
-                       ( metta_trace_truncated -> Truncated = true
-                       ; Truncated = false ) )),
+                     ( metta_trace_stop(Ball, Stopped),
+                       findall(N-E, metta_trace_event(N, E), Pairs) )),
           keysort(Pairs, Sorted),
           pairs_values(Sorted, Events) ),
         metta_trace_end).

@@ -6,6 +6,35 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- A bounded trace answers the events it recorded instead of discarding them.
+  `max_events` has answered its prefix since 0.7.0; the RUN bounds still
+  raised, and the events went with the exception. Measured on
+  `examples/ch07-control-flow/07-05-recursion/06-peano.metta`'s own head at
+  `max_events=10_000`, `with m.limits(inferences=2_000_000)` answered nothing
+  but an `InferenceLimitError` where the events give 302 frames to a renderer
+  reading them. `timeout`, `inferences` and `stack` now stop the trace the way
+  the event bound does.
+- A trace's run bound no longer pays for the trace's own answer. It wrapped the
+  whole door, and encoding the events costs more than producing them: 686,743
+  inferences for that program's traced run and harvest against 4,825,600 to
+  encode its 10,000 events. A 2,000,000-inference trace therefore reached its
+  event bound during the run and then died encoding events it had already
+  recorded. The bound now applies to the run alone, which is what the door
+  always documented.
+
+### Changed
+
+- `Trace.stopped` names the bound that cut a trace, one of `Limit.events`,
+  `Limit.memory`, `Limit.inferences`, `Limit.timeout` and `Limit.stack`, or
+  `None` when the run finished. `truncated` remains as the yes-or-no reading
+  of the same fact. The bounds have different remedies and one flag sent a
+  caller to the wrong one: the same program above stops at 7,972 events on the
+  engine's store-cell budget, where raising `max_events` returns the same
+  7,972 at the same cost. `limit` is a catalog vocabulary, so MeTTa, Python
+  and the Node package read one list.
+
 ## [0.7.3] - 2026-09-04
 
 ### Fixed

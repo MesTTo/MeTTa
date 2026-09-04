@@ -1329,6 +1329,20 @@ metta_catalog_preset([vocabulary, 'agenda-policy',
 metta_catalog_preset([vocabulary, volatility, volatile, stable, immutable]).
 metta_catalog_preset([vocabulary, 'route-key', context, global]).
 metta_catalog_preset([vocabulary, 'space-capability', file, process, network]).
+%Which bound stopped a piece of engine work that answers what it managed
+%before the stop. The five words are the names a caller SETS them under, so
+%the value is also the remedy: max_events for events, m.limits(inferences=),
+%(timeout=) and (stack=) for the other three, and for memory the engine's own
+%store-cell budget, which no caller sets and which asking for more events
+%cannot lift. A bounded run that answered only "yes, something cut this"
+%told a caller to raise the wrong bound; naming it is what makes a prefix
+%actionable [source: GDB's trace-experiment stop reasons, which report tfull
+%against tstop against terror rather than one truncated flag, GDB manual,
+%Tracepoints; call_with_inference_limit/3 is SWI's own reading of the same
+%decision, reporting inference_limit_exceeded as a RESULT rather than an
+%exception].
+metta_catalog_preset([vocabulary, limit,
+                      events, memory, inferences, timeout, stack]).
 metta_catalog_preset([vocabulary, 'MismatchEnum',
                       'MismatchOriginal', 'MismatchError', 'MismatchFail']).
 metta_catalog_preset([vocabulary, 'NoMatchEnum',

@@ -30,12 +30,14 @@ setup_trace_test :-
     cleanup_trace_function(plunit_trace_named),
     retractall(user:'&plunit_trace_named'(=,
                                           [plunit_trace_named|_], _)),
-    cleanup_trace_function(plunit_trace_hyperpose).
+    cleanup_trace_function(plunit_trace_hyperpose),
+    cleanup_trace_function(plunit_trace_walk).
 
 cleanup_trace_test :-
     cleanup_trace_function(plunit_trace_new),
     cleanup_trace_function(plunit_trace_named),
     cleanup_trace_function(plunit_trace_hyperpose),
+    cleanup_trace_function(plunit_trace_walk),
     retractall(user:'&plunit_trace_named'(=,
                                           [plunit_trace_named|_], _)),
     retractall(user:silent(_)),
@@ -146,8 +148,8 @@ test(event_limit_truncates_and_removes_every_wrapper,
      [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
     process_metta_string("(= (plunit_trace_hyperpose $x) (+ $x 1))", _),
     tracer:metta_trace_source("!(plunit_trace_hyperpose 1)", '&self', 1,
-                              Bounded, Truncated),
-    Truncated == true,
+                              Bounded, Stopped),
+    Stopped == events,
     Bounded == [event(0, call, [plunit_trace_hyperpose, 1], '', [])],
     \+ tracer:metta_trace_session,
     \+ current_predicate_wrapper(user:plunit_trace_hyperpose(_, _),
@@ -156,15 +158,46 @@ test(event_limit_truncates_and_removes_every_wrapper,
     Events == [event(0, call, [plunit_trace_hyperpose, 2], '', []),
                event(0, exit, [plunit_trace_hyperpose, 2], 3, [])].
 
-%A trace that fits its bound says so, which is the other half: `truncated`
+%A trace that fits its bound says so, which is the other half: `Stopped`
 %is what a caller reads to know whether the events are all of them.
 test(a_trace_inside_its_bound_is_not_truncated,
      [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
     process_metta_string("(= (plunit_trace_hyperpose $x) (+ $x 1))", _),
     tracer:metta_trace_source("!(plunit_trace_hyperpose 3)", '&self', 1000,
-                              Events, Truncated),
-    Truncated == false,
+                              Events, Stopped),
+    Stopped == false,
     Events == [event(0, call, [plunit_trace_hyperpose, 3], '', []),
                event(0, exit, [plunit_trace_hyperpose, 3], 4, [])].
+
+%A RUN bound stops the recording too, and answers the prefix rather than
+%letting the exception carry the events off with it. The guard is left
+%reporting success, which is what tells the seat above to read the answer
+%instead of classifying an exception, and the events kept are a genuine
+%prefix of the unbounded run.
+%
+%The budget is half what the unbounded trace cost rather than a number
+%written here, so the test follows the engine instead of going stale.
+test(a_run_bound_answers_the_prefix_it_recorded,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    process_metta_string(
+        "(= (plunit_trace_walk $n) \c
+             (if (> $n 0) (plunit_trace_walk (- $n 1)) done))", _),
+    statistics(inferences, Before),
+    tracer:metta_trace_source("!(plunit_trace_walk 300)", '&self', 100000,
+                              Whole, false),
+    statistics(inferences, After),
+    Budget is (After - Before) // 2,
+    length(Whole, Full),
+    Full > 20,
+    call_with_inference_limit(
+        tracer:metta_trace_source("!(plunit_trace_walk 300)", '&self', 100000,
+                                  Prefix, Stopped),
+        Budget, Result),
+    Result == (!),
+    Stopped == inferences,
+    length(Prefix, Cut),
+    Cut > 0,
+    Cut < Full,
+    append(Prefix, _, Whole).
 
 :- end_tests(tracer).

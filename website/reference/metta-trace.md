@@ -28,13 +28,27 @@ class TraceEvent:
 class Trace(list):
 ```
 
-> The events, and whether the bound stopped the recording early.
+> The events, and which bound stopped the recording early.
 >
 > A list, because that is what a trace IS and every consumer wants to
-> iterate it, index it and take its length. `truncated` is the one thing a
-> plain list cannot say, and it has to be said: the bound is a COUNT and the
-> memory an event costs is its term's size, so the honest answer to "trace
+> iterate it, index it and take its length. `stopped` is the one thing a
+> plain list cannot say, and it has to be said: the honest answer to "trace
 > this if it is cheap" is a prefix that admits to being one.
+>
+> It names the bound rather than raising a flag because the five bounds
+> have five remedies, and a caller told only that something cut the trace
+> acts on the wrong one: raising `max_events` after `Limit.memory` stopped
+> a trace returns the same prefix again, and raising it after
+> `Limit.inferences` runs the same program into the same wall. `truncated`
+> stays as the yes-or-no reading of the same fact.
+
+### `Trace.truncated`
+
+```python
+def truncated(self) -> bool:
+```
+
+> Whether these events are a prefix, whichever bound cut them.
 
 ## `trace`
 
@@ -51,15 +65,18 @@ def trace(
 
 > Run a term, or source, in this space under the engine's reduction trace.
 >
-> max_events bounds the RECORDING. Past it the recording STOPS and the
-> result's `truncated` is True, so what was already recorded is answered
-> rather than discarded: through 2026-09-03 the bound raised, which threw
-> away every event and charged the full memory of the bound for no answer.
->
-> timeout and inferences bound the RUN, the same pair every evaluating door
-> takes and the same scoped `m.limits()` default behind them. The two bounds
-> are independent because they stop different things: a program can retire
-> millions of inferences inside a handful of recorded events, and through
-> 0.7.1 this door passed no limits at all, so `with m.limits(inferences=100)`
-> let a traced program run 209,322 of them to completion
+> max_events bounds the RECORDING. timeout, inferences and stack bound the
+> RUN, the same triple every evaluating door takes and the same scoped
+> `m.limits()` default behind them. The bounds are independent because they
+> stop different things: a program can retire millions of inferences inside
+> a handful of recorded events, and through 0.7.1 this door passed no limits
+> at all, so `with m.limits(inferences=100)` let a traced program run
+> 209,322 of them to completion
 > .
+>
+> Whichever one stops it, the events already recorded are ANSWERED and
+> `stopped` names the bound. Discarding them was the whole shape 0.7.0
+> removed for the recording bound and the run bounds still had: measured
+> 2026-09-04 on 06-peano.metta's own head, a 2,000,000-inference limit took
+> a 10,000-event trace to an InferenceLimitError and nothing else, and the
+> renderer reading it drew 4 frames where the events give 302.

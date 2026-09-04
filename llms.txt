@@ -483,8 +483,9 @@ m.events("at-most-once"|"at-least-once"|"per-write-exactly",
 m.trace(src, max_events=10_000, *, timeout=, inferences=) -> Trace of TraceEvent
         (depth, kind, term, answer); kinds "call" and "exit", and a reduction
         that fails leaves a call with no exit
-        Trace is a list; .truncated is True when max_events cut the recording
-        max_events bounds the RECORDING, timeout and inferences bound the RUN
+        Trace is a list; .stopped names the bound that cut it, or None
+        max_events bounds the RECORDING, timeout and inferences bound the RUN;
+        either way the events recorded so far are answered, never discarded
 m.derivation(target, depth=None, *, timeout=, inferences=) -> list[Derivation]
         proof trees in MeTTa terms: .rules, .facts, .complete, .truncations
 m.why(pattern) -> str            one empty match explained in words
