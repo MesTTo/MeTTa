@@ -68,3 +68,11 @@ Tried: `sh /home/user/Dev/PyPeTTa1/ai-gate-lock.sh viewer env CHECK_PY=/home/use
 Tried: the same serialized run's MORK benchmark -> every controlled counter-open attempt failed with `RuntimeError: perf stat failed with exit 2: Events disabled`; inspection identified another repository's long-running `perf stat` process as the exclusive PMU holder.
 Decided: classify that MORK instruction lane as unrun rather than measured or failed. An unopened counter supplied no sample, and no claim in this change requires an instruction count; correctness and the engine-owned inference counters remain usable.
 Open: finish the isolated `space-name` inference retry, then test the algebra-owned bounded-source hunk only on a throwaway branch containing the algebra tip.
+
+## 2026-09-05
+Tried: merge `17c8e66546cfc011ea0919b3f84cc1d365da02e3` into the throwaway `probe-algebra` branch, apply the supplied `_space.py` and regression hunks as patches, regenerate with `/home/user/Dev/.venv-pypetta/bin/python extensions/python/tools/aiogen.py --write`, then run `sh /home/user/Dev/PyPeTTa1/ai-gate-lock.sh viewer env PYTHONPATH=extensions/python /home/user/Dev/.venv-pypetta/bin/python -m pytest -q extensions/python/tests/ch06_many_answers/test_under_algebra.py` -> all 32 tests passed. The bounded slice passed `limit=2`; replay used `limit=None`; algebra mismatch, absent best-first emission, and Partial handling all retained the unbounded route.
+Decided: leave that hunk off the delivery branch. It calls the algebra tip's new `Answers(bound_source=...)` API and therefore belongs to the algebra/viewer merge unit, not either branch in isolation. The integration proof remains at throwaway commit `90614a6a`.
+
+Tried: under one gate lock, run the exact three-sample `space-name` inference workload first at viewer commit `483646b7f0471be828783f2b936fadb1ea75375c`, then with its six changed Python runtime files restored to base `dca33c9ff692e9a0624c7ee2126b37e4b11fcf15` -> viewer `[4200420, 4202799, 4202770]`, base `[4200419, 4202801, 4202770]`; both minima satisfy the 4-inference allowance above 4,200,416.
+Decided: the full gate's 4,200,421 minimum was the row's documented upper harness mode, not a source-view cost. The isolated current and base arms both pass and differ by one inference.
+Open: None.
