@@ -9,6 +9,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- **Breaking.** `under=counting` answers a `TaggedAnswer` rather than a bare
+  `int`. The count is `.annotation`; `.value` is `()`, which says no
+  proposition row was manufactured, and `.plan`, `.why()` and `.under(other)`
+  work as they do for every other carrier. Nine carriers spoke the tagged
+  protocol and counting alone answered a scalar, so a caller writing one
+  generic reader had to special-case it. The aggregate still crosses the seam
+  once and still opens no row cursor, on the match, call, scoped and async
+  routes alike. `m.match(q, under=counting).one()` becomes
+  `m.match(q, under=counting).one().annotation`.
+
 - A written cache declaration is carried out as written. `!(memoize f)`,
   `!(memoize-exact f)` and `!(tabled (f $x))` are honoured whatever `f` does:
   over a body that prints, writes a space, reads a space or calls an operation

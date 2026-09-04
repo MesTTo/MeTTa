@@ -33,6 +33,15 @@ Rejected: passing a receiver into the module constructor, because the root alrea
 Decided: resolve the constructor target through that established ambient-space path before registering callable operations or declaring the row.
 Tried: `test_algebra_module_constructor_targets_the_ambient_space` -> the declaration and a tagged query resolve in the scratch space, while `&self` reports `algebra_not_declared`.
 
+## 2026-09-04 - D5 one answer protocol
+Tried: listed ordinary and tagged queries under `counting` -> each crossed one engine aggregate but yielded a bare `int`, unlike all nine sibling carriers.
+Rejected: materializing the contributing rows to make a full derivation tree, because it would discard the counting route's measured no-row-crossing property.
+Decided: preserve the aggregate and wrap its scalar as `TaggedAnswer(value=(), tag=Grounded(count))`. The empty value states that no proposition row was manufactured; `annotation`, `why()`, and `under()` remain available through the shared protocol.
+Tried: the counting match, call, scoped, async, and tagged regressions -> both engine count routes yield one TaggedAnswer and continue to open no materializing cursor.
+Tried: `jscpd --min-lines 5 --min-tokens 50` over the three implementation files -> it reported the pre-existing nine-line signature overlap between `evaluate_count` and `evaluate_count_if_repeatable`, and no new cross-file clone.
+Rejected: merging those two functions, because the repeatable form is an optional cardinality hint for a view that also owns rows, while the counting-carrier form is the answer itself and now deliberately changes its public element type.
+Tried: `twin_coverage.py --measure --rounds 1` on `04-peanofast.metta` and `03-matespace.metta` -> the protocol-shaped aggregate completed at 89,211 and 24,108,963 twin inferences respectively, still crossing no proposition rows.
+
 ## 2026-09-06 - D1 landing: half of it was already on trunk
 Tried: rebasing this thread onto `petta` -> the catalog half of D1 had landed
 independently as `2026-09-05-the-carrier-the-vocabulary-would-not-admit.md`.
@@ -130,3 +139,42 @@ Tried: the owner read back with `instanceof Sym` -> `algebra_catalog_owner_malfo
 A space name is an ordinary symbol in the row a preset writes and a space
 operand in the row a declaration writes, so the reader compares the atom's text.
 Tried: `npm test` again -> 600 pass, 0 fail.
+
+## 2026-09-06 - D5 landing: the consumers a changed element type reached
+Tried: the full Python suite with counting wrapped -> the gallery program
+`family_algebras.py` rendered `(Count <TaggedAnswer>)` against its own shown
+output `(Count 1)`, because it did `S.Count(answers.one())`. It reads
+`.annotation` now, and its shown output is unchanged.
+Tried: `README.md`, which asserts the same call in the doctested snippet, and
+`llms.txt`'s "answers the integer ITSELF, so those answers are `int`" -> both
+stated the old element type and are corrected here.
+Decided: `_space.py`, `aio.py` and `__init__.py`'s `under=counting` docstrings,
+the counting view's `Answers[int]` annotation and the three refusal messages
+that call the fold "one number" move with the behaviour rather than in a later
+commit; `website/reference/metta-space.md` and `metta-aio.md` are regenerated
+from them.
+Tried: `lint-imports` after wrapping the count inside `query_count` and
+`evaluate_count` -> two of the three contracts BROKEN over seven modules. Those
+two modules are imported BY `_space`, so reaching `algebra` from them made
+`core does not import satellites` false for `_space`, `_space_diagnostics`,
+`_space_execution`, `_space_objects`, `_space_persistence` and `_space_query`,
+and importing `Space` back to build the receiver made `leaf modules do not
+import the facade` false for `_debug` and `_trace`. Deferring both imports
+inside the function did not help: import-linter reads a function-local import
+as an edge, which is why `_space` reaches its own satellites through
+`_satellite(name)` and `importlib` instead.
+Rejected: two `ignore_imports` lines beside the `_space -> _world` and
+`_space -> _saga` pair. Those two are one-directional deferrals; this one was a
+CYCLE, `_space -> _space_execution -> _space`, and an ignore would have written
+it down as intended. Revisit if a future edge is genuinely one-directional.
+Decided: the count doors stay `-> int` and `Space` puts the protocol on. It
+already holds `algebra_api` and `self` at both call sites, so the wrap is one
+call there and `counting_answer` joins `captured_answer` and `count_tagged` as
+a builder the facade calls. Three contracts kept.
+Tried: the stdlib phrasebook lane, which the per-commit verification had not
+run -> `match: the python side raised assertionerror`, from
+`assert space.match(S.f(V.x), under=metta.counting).one() == 1` in
+`phrasebook_entries.py`. It is the eleventh reader of the element type and the
+only one outside `metta/`, `examples/` and the docs, so the sweep that found
+the other ten missed it. It reads `.one().annotation` now and the row's frozen
+answer is unchanged, because the row's VALUE is its last expression.

@@ -235,12 +235,12 @@ wherever an object does, `under="budget"`.
 `metta.vocabularies.Semiring` names the closed set: `bool`, `bag`, `counting`,
 `set`, `ranked`, `tropical`, `prob`, `prov`, `budget`, `amplitude`.
 
-`under=counting` answers the integer ITSELF, so those answers are `int` and
-`.one()` reads the count, where every other carrier yields `TaggedAnswer` with
-`.annotation`, `.plan`, `.why()` and `.under(other)`. A `prov` tag is a
-symbolic term over the source tags, so an interpreter outside the engine can
-walk it, which is how one query's fused derivation carries derivatives;
-`.why()` renders the retained derivation and `.under(other)` reinterprets that
+`under=counting` answers one `TaggedAnswer` whose `.annotation` is the count
+and whose `.value` is `()`, the empty value saying no proposition row was
+manufactured; every carrier yields `TaggedAnswer` with `.annotation`, `.plan`,
+`.why()` and `.under(other)`. A `prov` tag is a symbolic term over the source
+tags, so an interpreter outside the engine can walk it, which is how one
+query's fused derivation carries derivatives; `.why()` renders the retained derivation and `.under(other)` reinterprets that
 same derivation without querying again, including under an algebra whose
 operations are plain Python callables. `amplitude` refuses until
 `m.annotations` declares its fragment with the capabilities `finite`,

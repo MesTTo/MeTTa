@@ -512,7 +512,7 @@ found = m.match(S.suggests(V.agent, S.raynaud), where=near_fish_oil, under=prov)
 assert str(found.value) == "(suggests omega-3 raynaud)"
 
 # How much independent support? The same question under a different algebra.
-assert m.match(S.suggests(S["omega-3"], S.raynaud), under=counting).one() == 2
+assert m.match(S.suggests(S["omega-3"], S.raynaud), under=counting).one().annotation == 2
 
 # Which papers? A provenance polynomial: `times` is joint use, `plus` is an
 # alternative derivation. Read it as "the rule with p1 and p2, or with p4 and p5".
