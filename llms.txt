@@ -58,6 +58,12 @@ engine-known call head the example corpus exercises must be named here.
 
 `pip install .` (the runtime is bundled) or point `METTA_PATH` at a clone.
 
+Run one MeTTa file with `sh run.sh path/to/program.metta`. Add `--verbose`
+before the path when the program's authoring diagnostics matter, including
+equation-head interpretation and source-reload reports; the default suppresses
+informational messages. Python callers make the same choice with
+`MeTTa(verbose=True)`.
+
 ```python
 from metta import MeTTa, S, V, G, ground, Expression, equation, rules, parse, forms
 from metta.vocabularies import EffectClass

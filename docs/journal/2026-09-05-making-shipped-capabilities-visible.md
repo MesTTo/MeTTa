@@ -39,6 +39,26 @@ Tried: the `spec-differential-selftest` gate through `ai-gate-lock.sh` -> 0
 problems across one planted disagreement, one nonspecializing control, one
 agreed control, and one one-inference-bounded control.
 
+Tried: enumerated every executable `print_message/2` in the 42-file Prolog
+engine corpus -> seven calls, two at `informational`, none at `silent` or
+`debug`. The informational calls are the equation-head authoring note in
+`engine/translator/analysis.pl` and the source-replacement report in
+`engine/filereader/source_lifecycle.pl`. `sh run.sh` always supplied `-q`, so
+neither had a standalone user-visible invocation.
+
+Rejected: raising either message to `warning`, because both are optional
+authoring detail and the default quiet invocation is intentional.
+
+Decided: `sh run.sh --verbose file.metta` omits SWI's `-q` and the engine strips
+the option before choosing the file. One general launcher door exposes both
+reports at their existing level; Python already has the equivalent
+`MeTTa(verbose=True)` door.
+
+Tried: the `runner-verbose` and `llms` gates through `ai-gate-lock.sh` -> both
+passed. The runner control saw no head-pattern note by default and the exact
+note under `--verbose`; the cheat-sheet check covered all 154 corpus-used
+callable names.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 
@@ -123,3 +143,17 @@ report coming from `at_halt/1` with the mode still on.
 
 Re-pinned: that twin's budget 44455 -> 49767. Unlike the identity row this is
 work, not shape: the twin now runs the block the example runs.
+
+Found: `run.sh` now goes through `bounded.sh`, which gives every process this
+repository starts a deadline and a parent-death link, and
+`tests/checks/check_process_bounds.py` reads every `tests/shell/*.sh` for a
+command position that skipped it. The verbosity lane's two launcher calls were
+written before that existed, so they are `bounded sh run.sh ...` here and the
+probe directory is a plain `mktemp -d`, which the gate's repository-local
+scratch supplies through `TMPDIR`. Nesting is what `bounded.sh` documents: the
+tighter of the outer and inner ceilings is the one in force.
+
+Tried: `sh tests/shell/test_run_verbose.sh` on the rebased tree -> exit 0, the
+default run silent about the head-pattern note and the `--verbose` run carrying
+it, so trunk's `-q`-suppressed informational channel behaves as it did when the
+door was written.

@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `sh run.sh --verbose program.metta` exposes informational compiler and
+  source-reload reports at the standalone user's invocation point. The default
+  remains quiet.
+
 - Specialization verification now reports its coverage. Turning
   `(pragma! verify-specializations true)` off, or exiting a process started
   with `METTA_VERIFY_SPECIALIZATIONS=1`, writes the checked, agreed, and

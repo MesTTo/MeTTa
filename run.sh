@@ -13,11 +13,19 @@
 #     header) [measured 2026-08-18: NO_AUTOLOAD=1 sh test.sh, 200/200
 #     examples/ pass; unset, the default GATE_ONLY=1 sh check.sh is
 #     unaffected, all 35 lanes still green].
+#   - `--verbose` preserves SWI informational reports while the default stays
+#     quiet [tested: tests/shell/test_run_verbose.sh; commit=WORKTREE].
 # Open Obligations:
 #   To Do: None
 #   Hacks: None
 #   Future Enhancements: None
 SCRIPT_DIR=$(cd -- "$(dirname -- "$0")" && pwd)
+QUIET=-q
+for argument do
+    if [ "$argument" = --verbose ]; then
+        QUIET=
+    fi
+done
 if [ "${NO_AUTOLOAD:-}" = "1" ]; then
     BOOT=$SCRIPT_DIR/tests/fixtures/no_autoload_boot.pl
 else
@@ -29,4 +37,4 @@ fi
 # it runs used to leave it running. The ceiling is bounded.sh's hour unless the
 # caller says otherwise; test.sh sets 290 for the corpus.
 bounded() { sh "$SCRIPT_DIR/bounded.sh" "$@"; }
-bounded swipl --stack_limit=8g -q -s "$BOOT" -- "$@" extensions
+bounded swipl --stack_limit=8g $QUIET -s "$BOOT" -- "$@" extensions
