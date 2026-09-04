@@ -59,7 +59,7 @@ Guarantees:
   - the operator-word count and roster are derived from the live `S` by the
     claim's own definition, so a wrong count, a dropped word, a plain spelling
     given a row, and deletion of the claim itself each fail separately
-    [tested: tests/checks/check_llms_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_llms_selftest.py; commit=d2e52f700bac9063b27d20fcf7001b35f6aa8bd1]
   - the library count is attached to the shipped directories rather than a
     `.metta`-only glob that omits a Prolog-only implementation [tested:
     tests/checks/check_llms_selftest.py;
