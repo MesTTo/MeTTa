@@ -38,7 +38,7 @@
 %   discharges a typing-rule check, so it reads no typing-rule family and does
 %   not extend typing_policy_fast_path_family/1
 %   [tested: tests/prolog/suites/typecheck/arrow_projection.plt;
-%   commit=WORKTREE].
+%   commit=48cf04fb8dd80149b5e46e15f499f19f6c45348f].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
