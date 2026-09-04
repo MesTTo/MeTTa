@@ -899,9 +899,14 @@ exit on findings), `doc` (a name's `(@doc ...)`), and `convert`
 (`program.py [-o out.metta]`, emitting the module's fresh-space declarations
 as loadable MeTTa source).
 
-`metta.remote`: `serve(m, spaces=, token=, authorize=, ssl_context=)`,
-`connect(url, token=, headers=)`, `attach`. Credentials require https, tokens
-compare in constant time, and only http/https schemes are accepted.
+`metta.remote`: `serve(m, spaces=, token=, authorize=, ssl_context=,
+cursor_idle=300, cursor_limit=100)`, `connect(url, timeout=30, token=,
+headers=, ssl_context=)`, `RemoteSpace.server_capabilities()`, and `attach`.
+`authorize(Request(operation, space, headers)) -> bool` can express read-only,
+per-space, and tenant policy. The cursor settings bound how long an abandoned
+answer cursor survives and how many the server owns at once. Credentials
+require https, tokens compare in constant time, and only http/https schemes
+are accepted.
 
 `metta.events`: `m.events()` is the engine's stream of `(action, space, atom)`
 changes as a first-class object, and `EventStream.fold(step=None, space=,

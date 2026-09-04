@@ -96,6 +96,16 @@ provider paragraph and add one curated-store example. The example admits a
 user fact, declines a reserved system fact before it reaches `add`, and checks
 that the exception carries the provider's own remedy.
 
+Tried: searched `llms.txt`, root examples, and Python examples for `Request`,
+`cursor_idle`, `cursor_limit`, and `server_capabilities` -> no occurrences,
+although the remote server already accepted every control and the generated
+protocol reference described them.
+
+Decided: expand the existing remote roster rather than add another API. A
+loopback example exercises the actual HTTP authorization boundary, reads the
+server advertisement before writing, and proves a one-cursor ceiling refuses
+the second live stream and releases the first explicitly.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

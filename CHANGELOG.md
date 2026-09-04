@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Remote deployers now have a checked example and exact consumer-sheet
+  spellings for `Request` authorization, client capability discovery, TLS and
+  timeout controls, and the server's idle and live-cursor resource bounds.
+
 - Foreign-provider authors now have a consumer-sheet entry and checked example
   for the distinction between structural `can_run` support, request-specific
   `should_run` policy, and provider-owned `refusal` messages.
