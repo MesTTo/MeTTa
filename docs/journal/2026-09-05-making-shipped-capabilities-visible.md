@@ -1,0 +1,125 @@
+# Making shipped capabilities visible
+Goal: give every shipped user-facing capability an observable and discoverable
+entry point from the surface where its intended user works.
+Constraint: add the smallest door that exposes existing behavior; leave policy
+choices open rather than choosing them through an audit.
+
+## 2026-09-05
+Tried: searched all 42 tracked Prolog engine files for dynamic state, flag and
+non-backtrackable writes, then correlated each write with readers inside and
+outside its owner file. Of 180 dynamic or thread-local declarations covering
+174 unique predicate indicators, 95 had no cross-file reader; manual call-site
+classification reduced that set to two engine-internal predicates and one
+user-facing tally, `ho_specialization_unverified/2`.
+
+Tried: ran a higher-order function under
+`(pragma! verify-specializations true)` through `sh run.sh` -> the test passed,
+the verifier recorded its result, and neither stdout nor stderr named coverage.
+
+Rejected: `print_message(informational, ...)`, because `sh run.sh` invokes SWI
+with `-q` and suppresses that channel. Revisit for diagnostics a user did not
+explicitly request.
+
+Decided: one lifecycle marker starts a fresh specialization tally when the
+mode becomes active, reports it when the mode is disabled, and reports an
+environment-selected run at process exit. The report writes to `user_error`,
+matching the discharge verifier's already-corrected mechanism, because it is
+requested output rather than ambient logging.
+
+Decided: the corpus differential parses and aggregates the report. A clean run
+with zero reported checks fails as vacuous; inference-bounded checks remain
+visible without silently changing the verifier's existing acceptance policy.
+
+Tried: `sh run.sh examples/ch14-seeing-your-program/01-time_and_pragmas.metta`
+-> exit 0 and stderr contained `verify-specializations checked 1
+specialization(s): 1 agreed, 0 could not be checked inside the
+200000-inference bound` under the launcher's normal `-q` path.
+
+Tried: the `spec-differential-selftest` gate through `ai-gate-lock.sh` -> 0
+problems across one planted disagreement, one nonspecializing control, one
+agreed control, and one one-inference-bounded control.
+
+Open: the audit's remaining surface findings are recorded below as their doors
+land or are left for a product decision.
+
+## 2026-09-06
+
+Landing the thread on trunk, 273 commits later. Each entry below is a change
+the rebase required, with the trunk work that required it.
+
+Found: `set_metta_pragma/2`'s refresh chain had grown a third arm,
+`verify-cardinality`, from the annotated-arrow product. Both sides edited the
+same if-then-else, so the merge conflicted; the resolution keeps all three and
+the comment above it names what each key materialises instead of counting the
+verification modes, which is the sentence that went stale.
+
+Found: `llms.txt`'s `pragma!` roster was a closed set that had fallen three
+keys behind the engine's own registry. `verify-cardinality`,
+`plan-cyclic-joins` and `materialize-source-relations` are in
+`metta_pragma_key/2` and were in no consumer sentence. The `llms` lane cannot
+see this class: it derives libraries, source-table counts, operator words and
+call heads, and a pragma key is none of those. Completed the roster and gave
+the three keys one sentence each from the registry's own description, because
+this thread's whole subject is a shipped capability with no reader.
+
+Open, recorded rather than fixed: `verify-discharges` reports its coverage on
+the pragma's OFF transition only, so `METTA_VERIFY_DISCHARGES=1` with no
+closing pragma still reports nothing at process exit. The specialization half
+takes the `at_halt/1` route for exactly that reason; the discharge half is
+`engine/metta/terms.pl`'s and is left to its own thread.
+
+Found: `tests/prolog/layering.pl` is trunk's engine layering contract, an
+allow-list over every cross-subsystem call, and the pragma door's new call into
+the specializer is one: `metta:set_metta_pragma/2 calls
+specializer:metta_refresh_specialization_verification/0, and no contract line
+lets it`. The lane printed the remedy, so the line is
+`reaches(metta, specializer, ...)` with the reason. It creates no NEW tangle,
+because metta and specializer already sit in the declared SCC, and the contract
+also requires a cross-subsystem call to reach an EXPORT, which is why both
+lifecycle predicates stay in the module's export list even though every caller
+qualifies them.
+
+Measured: the corpus differential reads `0 disagreements; 71 checked, 66
+agreed, 5 unverified` over the example corpus. The five inference-bounded
+checks are the first ones this engine has ever reported; the discharge
+verifier's own thread recorded that nothing in the corpus reached its bound, so
+the 200,000-inference ceiling is now known to bind for the specializer half.
+
+Measured, and re-pinned: the identity twin's budget moves 3422 -> 3432 (+10).
+It is the predicate-count class the row's own chain already records twice. The
+positive control is decisive: an UNREACHABLE set of the same shape, one dynamic
+and five static predicates that nothing calls, added to trunk's own
+`engine/specializer.pl`, reads the identical 3432; the same set in
+`engine/tracer.pl` leaves the row at 3422; and the dynamic marker alone reads
+3417, which is BELOW the pin, so the relation is not even monotone in the count.
+The MeTTa side is 2357 on every arm, which is what says the work is unchanged.
+Open: what makes this row read `engine/specializer.pl`'s predicate table at
+all. It is not `tracer`'s, so it is not the whole-process predicate count, and
+naming the scan belongs to the engine's own cost thread rather than this one.
+
+Found: `examples/ch14-seeing-your-program/01-time_and_pragmas.metta` is TWINNED,
+and the twin lane read the new block as a divergence: `the twin's space does not
+answer a (= $head $body) match with verified-inc/1 verified-twice/2
+verified-twice_Spec_[verified-inc]/2, so a definition the example makes
+matchable is hidden in Python`. The example half was written before the twin
+corpus covered this file's chapter.
+
+Decided: give the twin the same block rather than move the example. A compiled
+`def verified_twice(f, x): return f(f(x))` lowers to `($_1 ($_1 $_2))`, the
+example's own form, so the twin specializes the same call and the generated
+`verified-twice_Spec_[verified-inc]/2` matches on both sides. `verified_inc`
+takes `x: int`, because without the annotation the body compiles to
+`(py-operator add $x 1)` where the example writes `(+ $x 1)`; the annotation
+costs one twin-only type declaration, which is the class this row already
+carries for `spin`. The pragma value is `S.true`/`S.false`, the symbols the
+example writes: a Python `False` also disables the mode, but only by comparing
+unequal to `false` rather than by being it, and ruff's FBT003 refuses the
+positional boolean.
+
+Tried: turning the pragma off, then defining and calling a SECOND higher-order
+specialization -> exactly one report, at the off-write, and nothing at process
+exit. That is the control saying `S.false` disables the mode rather than the
+report coming from `at_halt/1` with the mode still on.
+
+Re-pinned: that twin's budget 44455 -> 49767. Unlike the identity row this is
+work, not shape: the twin now runs the block the example runs.

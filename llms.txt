@@ -992,10 +992,11 @@ modules: `add-translator-rule!`, `remove-translator-rule!`,
 `assertAlphaEqualMsg`, `assertAlphaEqualToResult`, `assertEqualToResultMsg`,
 `assertAlphaEqualToResultMsg`. `undocumented` reports what `doc` lacks.
 
-`pragma!` accepts `max-time`, `max-inferences`,
-`verify-specializations`, `max-stack-depth`, `type-check`, and
-`interpreter`. The two bounds and `verify-specializations` change live
-engine mechanisms. `max-stack-depth` is validated exactly as the
+`pragma!` accepts `max-time`, `max-inferences`, `verify-specializations`,
+`verify-discharges`, `verify-cardinality`, `max-stack-depth`, `stack-limit`,
+`plan-cyclic-joins`, `materialize-source-relations`, `type-check`, and
+`interpreter`. The bounds, the verification modes and the two planning
+switches change live engine mechanisms. `max-stack-depth` is validated exactly as the
 arbiter validates it: a value that is not a non-negative integer
 answers an `(Error ...)` atom while the program keeps running.
 `type-check` and `interpreter` are HE spellings, accepted and not
@@ -1003,6 +1004,19 @@ enforced. A key outside the registry is refused rather than stored
 inertly. `max-time` takes a positive number of seconds,
 `max-inferences` a positive integer, and `none` explicitly disables
 either bound; an invalid value leaves the previous setting unchanged.
+`stack-limit` takes positive SWI combined-stack bytes and scopes the setting to
+the current thread. `verify-specializations` compares the first use of each
+generated higher-order call with its generic form; turning the pragma off, or
+leaving a process started with `METTA_VERIFY_SPECIALIZATIONS=1`, reports the
+agreed and inference-bounded counts even under `sh run.sh`'s quiet launch.
+`METTA_VERIFY_BUDGET` replaces the default 200000-inference comparison bound
+with a positive integer. `verify-discharges` similarly audits type checks the
+compiler omitted and reports its coverage when disabled, and
+`verify-cardinality` checks annotated `det` and `semidet` calls for failure or
+leftover choicepoints. `plan-cyclic-joins` plans a full native cyclic
+conjunction as a Generic Join instead of the retained nested loop, and
+`materialize-source-relations` derives the finite function-free fragment once
+at each source boundary and answers admitted ground calls from it.
 
 `if-decons-expr` reads a held expression, unifies its head and tail with the
 provided patterns, and evaluates the selected branch. Empty expressions and

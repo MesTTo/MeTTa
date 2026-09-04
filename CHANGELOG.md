@@ -140,6 +140,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Specialization verification now reports its coverage. Turning
+  `(pragma! verify-specializations true)` off, or exiting a process started
+  with `METTA_VERIFY_SPECIALIZATIONS=1`, writes the checked, agreed, and
+  inference-bounded counts to the requested report channel even when the
+  standalone launcher uses quiet logging. The corpus differential reads and
+  aggregates those counts, and refuses a vacuous run that checked nothing.
+
 - `metta.llms()` prints `llms.txt`, the sheet that teaches this library, and
   answers None the way `help()` does. It is the document an agent reads before
   writing anything against this surface, and until now reading it meant finding

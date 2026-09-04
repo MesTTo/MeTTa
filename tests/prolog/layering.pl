@@ -368,6 +368,7 @@ reaches(metta, materialize, 'effect classification retains operation identity an
 reaches(metta, filereader, 'import! and the file builtins are the loader\'s surface').
 reaches(metta, parser, 'sread, swrite and sdisplay are the core\'s text builtins').
 reaches(metta, spaces, 'the space builtins are the space subsystem\'s surface').
+reaches(metta, specializer, 'the verify-specializations pragma write opens a fresh coverage tally and closing it reports one').
 reaches(metta, support_graph, 'a world admits a program write only after walking who its recompilation reaches').
 reaches(metta, translator, 'a runnable form is compiled before it runs').
 reaches(metta, translator_rules, 'add-translator-rule! is the rule registry\'s door').

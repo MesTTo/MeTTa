@@ -45,6 +45,11 @@
 %     translator_literal_type_checks:a_repeated_parameter_contract_has_a_live_static_proof,
 %     specializer:a_specialization_keeps_the_generic_call_arity;
 %     commit=1aebfc7b41e7d89893903a3a5f614e5b7c7f8eac].
+%   - Specialization verification reports its agreed and inference-bounded
+%     counts when the mode ends, including at process exit, on output that
+%     survives the standalone launcher's quiet logging policy [tested:
+%     tests/checks/check_specialization_differential_selftest.py;
+%     commit=WORKTREE].
 % Guarded by: '$metta_typing_policy' is acquired before '$metta_specializer'
 %   and before the publication transaction, so a specialization cannot retain
 %   a static type proof across a concurrent policy change. '$metta_specializer'
@@ -63,6 +68,8 @@
 :- module(specializer,
           [ maybe_specialize_call/4,
             prepare_specialization_invalidation/2,
+            metta_refresh_specialization_verification/0,
+            metta_finish_specialization_verification/0,
             %The generated-specialization table, read by engine/spaces.pl when a
             %function's clauses change under one.
             ho_specialization/3,
@@ -92,6 +99,9 @@
 %Held while a specialization's own check is running, so the recursive
 %calls inside it do not each start another check.
 :- dynamic ho_specialization_checking/1.
+%The report lifecycle, distinct from the per-specialization memo tables: the
+%marker says this run opted into a coverage statement and still needs one.
+:- dynamic metta_specializations_verified/0.
 
 % Specialize HV(AVs), or fold an exact recursive specialization back to the
 % predicate currently being generated. A same-function call with a different
@@ -511,6 +521,50 @@ metta_verifying_specializations :-
     ->  true
     ;   getenv('METTA_VERIFY_SPECIALIZATIONS', Set), Set \== '0'
     ).
+
+%The pragma and environment doors share one reporting lifecycle. Turning the
+%mode on starts a fresh tally; turning it off reports that tally. An environment
+%mode normally stays on until process exit, so metta.pl registers the finish
+%half as an at-halt action after all pragma predicates have loaded.
+metta_refresh_specialization_verification :-
+    (   metta_verifying_specializations
+    ->  (   metta_specializations_verified
+        ->  true
+        ;   metta_specialization_reset,
+            assertz(metta_specializations_verified)
+        )
+    ;   metta_finish_specialization_verification
+    ).
+
+metta_finish_specialization_verification :-
+    (   retract(metta_specializations_verified)
+    ->  metta_specialization_report
+    ;   true
+    ).
+
+metta_specialization_report :-
+    metta_specialization_coverage(Agreed, Unverified),
+    Total is Agreed + Unverified,
+    (   Total =:= 0
+    ->  true
+    ;   metta_specialization_budget(Budget),
+        %Requested verification output is a report, not a diagnostic log.
+        %user_error survives `swipl -q`, while informational print_message/2
+        %does not, which is the standalone launcher's normal path.
+        format(user_error,
+               "verify-specializations checked ~w specialization(s): ~w \c
+                agreed, ~w could not be checked inside the \c
+                ~w-inference bound~n",
+               [Total, Agreed, Unverified, Budget])
+    ).
+
+metta_specialization_coverage(Agreed, Unverified) :-
+    aggregate_all(count, ho_specialization_agrees(_), Agreed),
+    aggregate_all(count, ho_specialization_unverified(_, _), Unverified).
+
+metta_specialization_reset :-
+    retractall(ho_specialization_agrees(_)),
+    retractall(ho_specialization_unverified(_, _)).
 
 %Answers exactly what the specialization answers, after establishing once
 %per specialization that the generic call agrees. The comparison is over
