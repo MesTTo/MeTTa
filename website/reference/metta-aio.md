@@ -123,7 +123,7 @@ async def eval(
     under: Any = _UNSET,
     theory: Any | None = None,
     interpreter: Any | None = None,
-) -> list[Atom] | list[list[Atom]]:
+) -> list[Atom | Undefined] | list[list[Atom | Undefined]]:
 ```
 
 > Evaluate a term and return every answer.
@@ -1965,7 +1965,7 @@ class AsyncSaga:
 ### `AsyncSaga.run`
 
 ```python
-async def run(self, target: Any) -> list[Atom]:
+async def run(self, target: Any) -> list[Atom | Undefined]:
 ```
 
 > Commit one forward step and its receipt on the owning worker.
@@ -2011,7 +2011,7 @@ async def eval(
     *,
     timeout: float | None = None,
     inferences: int | None = None,
-) -> tuple[list[Atom], AsyncWorld]:
+) -> tuple[list[Atom | Undefined], AsyncWorld]:
 ```
 
 > Evaluate on the worker and return answers plus a successor value.

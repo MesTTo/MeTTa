@@ -66,6 +66,20 @@
 ;small one.
 !(test (collapse (py-iter (py-atom "iter([10, 20, 30])"))) (10 20 30))
 
+;An iterator is one value, so repeated and nested py-iter readings each start at
+;its beginning. The source stays lazy: the furthest reader extends one shared
+;cache, and every other reader follows it without pulling the source again.
+!(bind! replaying (py-atom "iter([1, 2])"))
+!(test (collapse (let $x (py-iter replaying)
+                   (let $y (py-iter replaying) ($x $y))))
+       ((1 1) (1 2) (2 1) (2 2)))
+
+;py-iter-once is the explicit Python reading. It consumes the source and is the
+;door compiled Python for statements use, so their twin keeps Python's law.
+!(bind! consumptive (py-atom "iter([4, 5])"))
+!(test (collapse (py-iter-once consumptive)) (4 5))
+!(test (collapse (py-iter-once consumptive)) ())
+
 ;One element out of a billion, without materialising a billion. `once` takes
 ;the first answer and stops, which is only possible because py-iter yields one
 ;at a time: draining the iterator first would never return.
