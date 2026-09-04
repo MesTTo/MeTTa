@@ -1,7 +1,9 @@
 % Purpose: test the Python bridge's wire codec directly, in Prolog.
 % Assumes:
-%   - shim.pl loads without the engine, since the codec touches no engine
-%     state [tested: every suite below consults only shim.pl].
+%   - extensions/python/metta/shim.pl loads without the engine, since the
+%     codec touches no engine state. The suites here consult it alone, so a
+%     decode that needed engine state would fail to load rather than pass
+%     [tested: shim_wire_decoding:every_tag_decodes].
 % Guarantees:
 %   - Every wire tag decodes to its term in both the atom and the string
 %     spelling janus may deliver [tested: shim_wire_decoding].

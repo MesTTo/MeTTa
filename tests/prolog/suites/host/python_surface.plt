@@ -73,6 +73,24 @@ test(a_grounded_value_that_is_not_callable_stays_unreduced) :-
     assertion(Status == 'not-reducible'),
     assertion(Out = [List, 0]).
 
+% A Python object with no MeTTa literal has no text form, and the writer says
+% so rather than emitting Python syntax that would not read back. The header
+% claimed this and named a test that was never written; the evidence gate could
+% not see it until tests/prolog/suites/*/*.plt entered its globs.
+test(a_python_value_without_a_metta_literal_is_refused) :-
+    'py-atom'("object()", Opaque),
+    assertion(py_is_object(Opaque)),
+    catch(( swrite(Opaque, Text), Outcome = wrote(Text) ),
+          Error,
+          Outcome = refused(Error)),
+    %The SPECIFIC refusal, not merely some error: metta_unwritable_text is the
+    %writer saying it has no text form for this value. Asserting `refused(_)`
+    %would pass on any unrelated failure.
+    assertion(Outcome = refused(error(metta_unwritable_text(_), _))),
+    %And the control, so the test cannot pass by the writer being broken.
+    swrite(hello, Plain),
+    assertion(Plain == "hello").
+
 test(an_attribute_is_read_rather_than_called) :-
     'py-atom'("complex(3, 4)", Complex),
     'py-dot'(Complex, real, Real),

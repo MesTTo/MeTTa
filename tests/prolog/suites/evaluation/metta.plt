@@ -1185,7 +1185,7 @@ expected_outputs(clp_equal, [true]).
 expected_outputs(clp_different, [true]).
 %`True`, not `true`: repr/2 is swrite/2, which writes the language's own
 %spelling of the boolean the reader mapped onto Prolog's
-%[tested: parser_roundtrip:booleans_print_in_the_languages_own_spelling].
+%[tested: parser_roundtrip:booleans_print_in_the_engines_own_spelling].
 expected_outputs(representation, ["true"]).
 
 test(prebound_outputs_must_be_producible,
@@ -1774,7 +1774,8 @@ test(a_list_argument_stays_a_list,
 %LIST and runs the ordinary check against the wider list, so the matcher learns
 %nothing about subtyping and `get-type` is where it shows. Every expectation
 %below is the arbiter's measured answer from pinned hyperon 0.2.10 at 3f76dc4
-%[source: LeaTTa ai-report-subtype-graph.md].
+%[source: LeaTTa ai-report-subtype-graph.md, measured 2026 against pinned
+%hyperon 0.2.10 at 3f76dc4, which the two lines above name].
 
 subtype_case(Setup, Query, Expected) :-
     forall(member(Form, Setup), process_metta_string(Form, _)),

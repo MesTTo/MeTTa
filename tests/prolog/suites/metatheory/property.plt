@@ -13,9 +13,19 @@
 %     METTA_PROPERTY_TESTS=10000 swipl -g run_tests -t halt property.plt
 %     METTA_PROPERTY_SEED=random swipl -g run_tests -t halt property.plt
 % Guarantees:
-%   - a failing law throws quickcheck's counter_example carrying the shrunken
-%     value, so the test output names the term that broke it rather than only
-%     the law that broke.
+%   - a failing law is CAUGHT: each planted defect makes the law fail, and the
+%     shipped printer and reader do not
+%     [tested: property_lane_plants:every_plant_is_caught,
+%     property_lane_plants:the_shipped_printer_and_reader_pass_the_law;
+%     commit=WORKTREE]
+%   - that the throw carries quickcheck's counter_example with the SHRUNKEN
+%     value, so the output names the term rather than only the law, is the
+%     library's documented behaviour and is not checked here:
+%     property_plant_verdict/2 catches any error and asks only whether the law
+%     failed, and `counter_example` appears nowhere in property_lane.pl
+%     [assumed: quickcheck's shrinking and counter_example payload are taken on
+%     the library's contract; a test would have to assert on a third-party
+%     error term; commit=WORKTREE]
 %   - the run is the same run every time under the gate's own environment
 %     [tested: property_lane_determinism].
 % Open Obligations:

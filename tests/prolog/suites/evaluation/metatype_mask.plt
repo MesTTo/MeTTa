@@ -14,6 +14,8 @@
 %   - the compiled door and the dynamic door agree on every row, which is what
 %     lets a self-interpreter dispatch a family call through `metta` and get
 %     the answer a written call gets
+%     [tested: metatype_mask:the_two_doors_answer_alike_on_every_row;
+%     commit=WORKTREE]
 %   - each element receives fresh case, switch, unify and let* body bindings
 %     when a collection reuses one compiled closure
 %     [tested: a_collection_closure_keeps_each_binding_form_local_to_one_element;

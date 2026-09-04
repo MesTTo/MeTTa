@@ -16,9 +16,14 @@
 % Guarantees:
 %   - the binding-time analysis is shown to PROPAGATE rather than to return its
 %     input: four different declarations over the same rule set produce four
-%     different divisions, and each is the one the call graph dictates.
+%     different divisions, and each is the one the call graph dictates
+%     [tested: narrowing_filtering:one_declaration_infers_the_rest_through_the_call_graph,
+%     narrowing_termination:a_ground_declaration_decides_what_an_unknown_one_cannot;
+%     commit=WORKTREE]
 %   - every precondition the theory needs is shown to be checked, by a rule set
-%     that breaks exactly one of them and is named for it.
+%     that breaks exactly one of them and is named for it
+%     [tested: narrowing_preconditions:every_precondition_is_checked_and_named;
+%     commit=WORKTREE]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

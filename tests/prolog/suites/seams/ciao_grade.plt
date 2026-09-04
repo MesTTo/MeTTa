@@ -1,8 +1,12 @@
 % Purpose: gate the packaged Ciao-style assertion side file against the live
 %   engine, including a clean smoke and a planted violation collected as data.
 % Guarantees:
-%   - all four removal and translation funnels have external pred assertions.
-%   - the declared package versions are the reviewed versions.
+%   - all four removal and translation funnels have external pred assertions
+%     [tested: ciao_grade:the_external_side_file_covers_every_selected_engine_funnel;
+%     commit=WORKTREE]
+%   - the declared package versions are the reviewed versions
+%     [tested: ciao_grade:the_ciao_grade_uses_the_reviewed_pack_versions;
+%     commit=WORKTREE]
 %   - a valid engine smoke emits no assrchk/1 findings, while the planted bad
 %     call emits the expected calls finding
 %     [tested: test_the_ciao_grade_collects_a_planted_assertion_violation_as_data;

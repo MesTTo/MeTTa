@@ -136,6 +136,9 @@ SOURCES = (
     "extensions/mork/mork_ffi/*.pl",
     "extensions/python/tools/*.py",
     "tests/checks/*.py",
+    # The plunit suites make the same claims their subjects do, in their
+    # own headers, and 271 of them across 50 files went unread.
+    "tests/prolog/suites/*/*.plt",
     # The Node binding is TypeScript, and its sources make the same kind of
     # claim the Python ones do. Its Prolog half is here for the same reason
     # extensions/python/metta/*.pl is.

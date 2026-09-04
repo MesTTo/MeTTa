@@ -6,8 +6,12 @@
 % Guarantees:
 %   - a declared nominal parameter, which no intrinsic test decides, is
 %     reported as residual against the function that carries it
+%     [tested: residual_checks:a_nominal_parameter_is_reported_as_a_residual_check;
+%     commit=7e071e5f787c24deba4f1a08328e77116a99b9f4]
 %   - a declared Number parameter is NOT reported, because number/1 decides it
 %     and the check is the fallback of a shortcut rather than a goal that runs
+%     [tested: residual_checks:an_intrinsic_parameter_is_not_reported;
+%     commit=7e071e5f787c24deba4f1a08328e77116a99b9f4]
 %   - the reader answers from the compiled clauses, so it costs nothing until
 %     it is called: the translate case measures 380730 inferences with and
 %     without it, byte-identical, where recording the same information on the

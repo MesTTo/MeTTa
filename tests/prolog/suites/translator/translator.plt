@@ -2808,7 +2808,7 @@ test(the_modifier_position_becomes_a_variable_and_the_equality_a_guard) :-
 
 %The same walk answers whether the pattern carries a sequence variable, which
 %is what lets the match door decide once per call site instead of walking again
-%[tested: segments:a_written_gap_is_reported_by_the_modifier_walk].
+%[tested: translator_match_modifiers:the_walk_reports_a_written_gap].
 test(the_walk_reports_a_written_gap) :-
     lift_pattern_modifiers([fact, '...', X], _, _, Anonymous),
     lift_pattern_modifiers([fact, [':seg', X]], _, _, Named),

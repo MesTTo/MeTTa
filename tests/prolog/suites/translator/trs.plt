@@ -12,10 +12,14 @@
 %     directly and boots nothing.
 % Guarantees:
 %   - the documented 10-rule completion of the three group axioms is the one
-%     the original documents, rule for rule.
+%     the original documents, rule for rule
+%     [tested: trs_port:the_group_axioms_complete_to_the_documented_ten_rules;
+%     commit=WORKTREE]
 %   - the documented "May not terminate!" caveat is REPRODUCED, not just
 %     quoted: the counter-example the original names is run and the loop is
-%     observed under an inference limit.
+%     observed under an inference limit
+%     [tested: trs_port:normal_form_loops_on_the_documented_counter_example,
+%     trs_port:the_looping_term_does_have_a_normal_form; commit=WORKTREE]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

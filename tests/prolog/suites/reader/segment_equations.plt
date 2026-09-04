@@ -4,10 +4,20 @@
 %   engine path resolves against that directory.
 % Guarantees:
 %   - nested and empty captures project as expressions
+%     [tested: segment_equations:nested_and_zero_length_segments_project_as_expressions;
+%     commit=WORKTREE]
 %   - `(:seg $x)` in a body splices while ordinary `$x` projects one expression
+%     [tested: segment_equations:a_written_rhs_segment_splices_its_bound_run;
+%     commit=WORKTREE]
 %   - a top-level segment changes call arity, and every split is shortest-first
+%     [tested: segment_equations:top_level_segment_accepts_zero_arguments_and_wider_arities,
+%     segment_equations:two_segments_enumerate_splits_shortest_first; commit=WORKTREE]
 %   - ordinary overlapping rules remain additive
+%     [tested: segment_equations:segment_and_ordinary_rules_remain_additive_in_source_order;
+%     commit=WORKTREE]
 %   - one name can occur in segment and ordinary roles in an equation head
+%     [tested: segment_equations:a_segment_name_projects_in_an_ordinary_head_position;
+%     commit=WORKTREE]
 %   - the compiled and variable-headed dynamic doors answer alike
 %   [source: LeaTTa MettaHyperonFull/Core/SeqOneSided.lean:65-89 and
 %   MettaHyperonFull/Core/SeqSyntax.lean:300-314; commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87]
