@@ -1,0 +1,770 @@
+{
+  "purpose": "Content-address the unlicensed PeTTaChainer source snapshot used for research without redistributing source bytes.",
+  "repository": "https://github.com/rTreutlein/PeTTaChainer.git",
+  "commit": "b0e24f9b9d7106ccabf51917f1703abf3ab8c570",
+  "algorithm": "sha256",
+  "ordering": "target-root-relative path in C locale byte order",
+  "scope": {
+    "extensions": [
+      ".metta",
+      ".py",
+      ".pl",
+      ".md"
+    ],
+    "file_count": 186,
+    "line_count": 27905,
+    "byte_count": 1086496,
+    "aggregate_manifest_sha256_by_extension": {
+      ".metta": "0d4760125b2bbb98ca138a1aef463032ef15b0852b1a75cd209a537c35d4aea3",
+      ".py": "91a7293f6c90b7ea1fced6d16f618a7883000b66cb9457574c41bb983b1cbf4e",
+      ".pl": "b2a3e75d6bb0d5e2a56daa8791893d0b79de3eb9c21027253813d72a88f50dd1",
+      ".md": "2821701050f9d5c3a58e08d5e55bd058dee2d4a37942c217629c9f9d973d1b45"
+    }
+  },
+  "files": [
+    {
+      "path": ".githooks/README.md",
+      "sha256": "066609813de501c4849ac2c0a35b018c52f097bc8e2922210adf19e15ac9d8d1"
+    },
+    {
+      "path": "README.md",
+      "sha256": "0068649e335f6bfbfc54a843cbfffef72faf8b01b96cfe58051d7ad23df51f65"
+    },
+    {
+      "path": "TODO.md",
+      "sha256": "14d73cbdbf2aa1a72c825f4e81fa63dad0dc6ecb3c84ba5c2c6ea6adfe0fa852"
+    },
+    {
+      "path": "lib_pettachainer.metta",
+      "sha256": "9533d7ce52a8963a9c9809664667aa4cf4cada542b380d53775d174235d00fe6"
+    },
+    {
+      "path": "pettachainer/AGENTS.md",
+      "sha256": "f6e8d213adbed9962ac66f0cf5e208b1b188b4548038d7e4e3bb8ce979f2a01d"
+    },
+    {
+      "path": "pettachainer/LANGUAGE_SPEC.md",
+      "sha256": "c346951aac3dbc7950c38ee871572740d000e205a7725961a949b7579750d0c7"
+    },
+    {
+      "path": "pettachainer/LLM_RULE_SPEC.md",
+      "sha256": "023a04b1de34dc589d0c220b667709eaed7af5f584d01fb17419e2fc4f9a50c9"
+    },
+    {
+      "path": "pettachainer/__init__.py",
+      "sha256": "8e93d04ccad37bc9e5415d2c7ec86991df6f04bdf296d1bb18f131164432599f"
+    },
+    {
+      "path": "pettachainer/benchmarks/README.md",
+      "sha256": "8eec98b2015229fb244cf414e8cd4044e06ad4b329711e4a48529dd1347727d8"
+    },
+    {
+      "path": "pettachainer/benchmarks/backward_materialize.py",
+      "sha256": "cd43d528e8c0a8ca191bb78158ac0a4a0295e492544c6a4ba3f63e0f3e269d35"
+    },
+    {
+      "path": "pettachainer/benchmarks/bounded_queue.py",
+      "sha256": "11397df2b0c663c6183daf70afc006b07c171227e471791d24db5b010b30600a"
+    },
+    {
+      "path": "pettachainer/benchmarks/export_rule_dump.py",
+      "sha256": "ccc17c783d690996482ef8eaf29deec7660d9d6396798d2a4f9c84809969f677"
+    },
+    {
+      "path": "pettachainer/benchmarks/forward_vs_backward.py",
+      "sha256": "34d7ba76cbea0c0cc324784ef75aa6c34c1bfe7fa439ae01ca15dc3bb42fa191"
+    },
+    {
+      "path": "pettachainer/benchmarks/particle_vs_nat.py",
+      "sha256": "1966e0e7be5048738a4077f5481742b740d9a758a1f37f5d3279d6045a23084c"
+    },
+    {
+      "path": "pettachainer/metta/API.md",
+      "sha256": "b015331d268668f41eeac1b0f856b8ee91ad5b94b4b679c1682222ddea8f1698"
+    },
+    {
+      "path": "pettachainer/metta/backward_chainer.metta",
+      "sha256": "99db737aa53ad622da7f792051a64646e56544f46aff7188b34f24165d09fcb5"
+    },
+    {
+      "path": "pettachainer/metta/backward_proof_store.metta",
+      "sha256": "726297578871466b77f4404dd04e704f911385faccf74e8307d9560abcea1cea"
+    },
+    {
+      "path": "pettachainer/metta/benchmarks/benchgen_metta.metta",
+      "sha256": "581ecfa5e9b80ec5bacb3ec247b70381bbb34bc99e34900bae80eaaae288659a"
+    },
+    {
+      "path": "pettachainer/metta/benchmarks/benchgen_pln_compare.metta",
+      "sha256": "fa1c5e1b56f3cca4fc9d4ff76814c0483e21a18a8bc197df9e19b839b92b8cf6"
+    },
+    {
+      "path": "pettachainer/metta/benchmarks/demo_benchgen_case_small_a.metta",
+      "sha256": "43f64fc3e8693a6939dbe7e270d2fcc41cbc5554c5ca57ae95a30fc26ef839ed"
+    },
+    {
+      "path": "pettachainer/metta/benchmarks/demo_benchgen_case_small_b.metta",
+      "sha256": "d2e3f3a7223c69e7f33e31a34f90645409e523968f78f0cd329371b6c949ef55"
+    },
+    {
+      "path": "pettachainer/metta/benchmarks/demo_benchgen_compare_tuffy.metta",
+      "sha256": "e0bfa9f700f3beed6ad754c6d6cf89e6d625550070c46fdb6878f369d27ed8e5"
+    },
+    {
+      "path": "pettachainer/metta/benchmarks/demo_benchgen_forward_backward_compare.metta",
+      "sha256": "230ecdf9fa982d7cd45fa36f85ee55fd2c32472a88d63c8ab04bbf7d07df5063"
+    },
+    {
+      "path": "pettachainer/metta/benchmarks/query_timer.pl",
+      "sha256": "dbd29ee8306425d831ddb425f69473fa263ace618e22755099490f80961008f3"
+    },
+    {
+      "path": "pettachainer/metta/benchmarks/typecheck_compileadd_probe.metta",
+      "sha256": "95303dadd78967981f425302b0449b4096859737ca04976199e291cdeab985de"
+    },
+    {
+      "path": "pettachainer/metta/benchmarks/typecheck_import_probe.metta",
+      "sha256": "23f2f21a715268bd4d4e3e6dcc538181cecf10f9060d4aa59fad0d91adbeefa6"
+    },
+    {
+      "path": "pettachainer/metta/benchmarks/typecheck_inheritance_query_probe.metta",
+      "sha256": "a88ff1568cecdcc119d9128387b55d45374b6a47ee709e75ce3879bb0cd09263"
+    },
+    {
+      "path": "pettachainer/metta/benchmarks/typecheck_query_probe.metta",
+      "sha256": "82eefdf50fa4632493c3a92c37d1ffa6d81f133f1ab8baac7f28bcad29a70b04"
+    },
+    {
+      "path": "pettachainer/metta/chainer_runtime_core.metta",
+      "sha256": "fe5e2032623f39bbc52bb05afb1f951af0dc24bf364845044aa29a5345cec652"
+    },
+    {
+      "path": "pettachainer/metta/chainer_types.metta",
+      "sha256": "7e39585ca18a0d74a639861ec81cab927f83058a8348e8f6aa9fe407ed0a0c1a"
+    },
+    {
+      "path": "pettachainer/metta/chainer_utils.metta",
+      "sha256": "15d6608e585c27ac930795891370682e94f0eca48356360d9a55fa8385656783"
+    },
+    {
+      "path": "pettachainer/metta/compile.metta",
+      "sha256": "6fdd921157a8d2b7df9896833f0ef2403b67df0179e9a4da5ae3e698404047f7"
+    },
+    {
+      "path": "pettachainer/metta/compiled_query_runtime.metta",
+      "sha256": "7a8c61c574621193873db064dc07a626c84802f9daa7dba24413feae2a91f189"
+    },
+    {
+      "path": "pettachainer/metta/compute_inverse.metta",
+      "sha256": "cdc9b865a5b86cba02478bd5010304bdd3d258df2684c6cc12bd0a037395472d"
+    },
+    {
+      "path": "pettachainer/metta/conceptnet_own_pet_query.metta",
+      "sha256": "e354043dfd80063c4483e43db02814a32e96e11e44050a9fe8fbc1af490d740e"
+    },
+    {
+      "path": "pettachainer/metta/conceptnet_revision_stress_query.metta",
+      "sha256": "6edc4f3b53fb9db6684c666634839c566d6f76fb92197ba00bfbfb0b737c56c1"
+    },
+    {
+      "path": "pettachainer/metta/dist_formulas.metta",
+      "sha256": "3d0ecb2e204e41484d083fac31b68d5427be0404bdb79efaed76cf9b0b0a7a11"
+    },
+    {
+      "path": "pettachainer/metta/docs/equation_dispatch_audit.md",
+      "sha256": "cdad13dda1a3423bae990479815a038f79696f2c7acf621a377b023da26f0398"
+    },
+    {
+      "path": "pettachainer/metta/docs/hash_foldall_design_note.md",
+      "sha256": "235c257e82d8e2a76e3b973ca991e4e0351fe9a4757377350e69fff916f963b8"
+    },
+    {
+      "path": "pettachainer/metta/docs/mm2_followup_candidates.md",
+      "sha256": "1fe041dea4b91ed1a2c176ba4d3cf616a10ad6a00cdc10060e60da3e4874aa12"
+    },
+    {
+      "path": "pettachainer/metta/docs/module_dependencies.md",
+      "sha256": "2ed78dc4eb04e7173c1845a89acaa7495d4de92938994e94696c1e4d3c51262e"
+    },
+    {
+      "path": "pettachainer/metta/docs/runtime_design_assumptions.md",
+      "sha256": "4ef648ee1727724728c2167373661113d67ae11af45e7d4452d8eb61cea1e84a"
+    },
+    {
+      "path": "pettachainer/metta/docs/typechecker_soundness_followup.md",
+      "sha256": "24f66a7b1169ad33f192285b5f5df226e4145dca1604c2df2bfae335a4d9ce68"
+    },
+    {
+      "path": "pettachainer/metta/examples/README.md",
+      "sha256": "369d52d3ef882fd4984863e540bff4dcc09811c2d50feb316488e46540ce9574"
+    },
+    {
+      "path": "pettachainer/metta/examples/base_rate_acceptance_game_libpln.metta",
+      "sha256": "4571eb39bc43a6343c0a6bebc315f5602b06a1a737f12499a704b72980192261"
+    },
+    {
+      "path": "pettachainer/metta/examples/base_rate_acceptance_game_pettachainer.metta",
+      "sha256": "abc9afe7c6706e7c6535c443814960543af9a1dbd3bee7452bb0074c173d8a2f"
+    },
+    {
+      "path": "pettachainer/metta/examples/deductionrevision.metta",
+      "sha256": "9dc014bb16f96d58dbe686634fa585deb857b12910c2f4e5ab5d69013b10bf37"
+    },
+    {
+      "path": "pettachainer/metta/examples/direct.metta",
+      "sha256": "b8cd2f0854cbc4558a6434f1fb6e2312ea49934c544b165b3fcf6f2218ecf7c1"
+    },
+    {
+      "path": "pettachainer/metta/examples/existential_residual.metta",
+      "sha256": "593b3d39cc2d7102febfec19d9fbe4af7e84b008e6f72c35f41dcb3359125efc"
+    },
+    {
+      "path": "pettachainer/metta/examples/experimental_flyingraven_member.metta",
+      "sha256": "f632817bffcb3cf9384e8a8a3b3473343910b236801af9314b166021506d9780"
+    },
+    {
+      "path": "pettachainer/metta/examples/experimental_raveninduction_member.metta",
+      "sha256": "293d06eca115313b7fc0f7630065c7ae6522bfbe1c819da0617f96d6e3f39941"
+    },
+    {
+      "path": "pettachainer/metta/examples/experimental_toothbrush_member.metta",
+      "sha256": "d144ded7a84329acd0e609f5714e114028e9160ff54d9d18fcb1b665d2749004"
+    },
+    {
+      "path": "pettachainer/metta/examples/flyingraven.metta",
+      "sha256": "9ff994d2f28658add2575bd5eeddbbb07fdf06a5ae2dbd93b007dfb8e3d9d129"
+    },
+    {
+      "path": "pettachainer/metta/examples/lifting_merge_prototype.metta",
+      "sha256": "d5252cc6607d56231bff62942f1570c99f3de8a0a7edb7dbaf15bdc960aab33c"
+    },
+    {
+      "path": "pettachainer/metta/examples/live_reeval_prototype.metta",
+      "sha256": "5fb5bdab4fddd5869fbcc719ece03124a636ce088d589c63991bf46d787b9cca"
+    },
+    {
+      "path": "pettachainer/metta/examples/machine_failure_inversion.metta",
+      "sha256": "f81b5ca6b66ff4b573b8be8586e20a5563c8b1c958bb8039bed81e2a5b6f0ff4"
+    },
+    {
+      "path": "pettachainer/metta/examples/raveninduction.metta",
+      "sha256": "50afae5338ed46694d93124318c7b779b747cec97c04681e5087ed473d124e6e"
+    },
+    {
+      "path": "pettachainer/metta/examples/raveninduction_implication_pettachainer.metta",
+      "sha256": "a9d5da9b5d489d46b332d75998c59469cd605aa4d5d3079ae90b41153c5946e6"
+    },
+    {
+      "path": "pettachainer/metta/examples/robot.metta",
+      "sha256": "fbb46febb4de35561e6560548490f7e55747d9844baf9883af6e4036bfc8fde0"
+    },
+    {
+      "path": "pettachainer/metta/examples/simple_base_rate_deduction_libpln.metta",
+      "sha256": "8c22f13d4aaa77ec15d1997a170cb9ff414bf86e78c94e1399813efa24c69789"
+    },
+    {
+      "path": "pettachainer/metta/examples/simple_base_rate_deduction_pettachainer.metta",
+      "sha256": "5328e03046e660e5c496e712d75a0b7d744e606350ecfd633b082ecb2d10778c"
+    },
+    {
+      "path": "pettachainer/metta/examples/smokes.metta",
+      "sha256": "11806e2b43a398f598f17c23965c27b3ed6005fe8a5ea9a20dc4adcb9da4368b"
+    },
+    {
+      "path": "pettachainer/metta/examples/stationops_fold_inverse.metta",
+      "sha256": "a841819ede1aae80ea18e7a246cbaf99469c0639dcac2b9d3b0fb3a9af73fd0f"
+    },
+    {
+      "path": "pettachainer/metta/examples/toothbrush.metta",
+      "sha256": "37a4f204a2013d390b239f72e26f51fcd934847eed2d2fa0082217a8deaef1a0"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/README.md",
+      "sha256": "78470b64fc5e6621872246b88c8136f2841fc6f147ca089f5228d1b7acf27caf"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/brand_after_control_flow.metta",
+      "sha256": "4036a24be371b1dddd13b68c65592373957ccbc5a9c39010324e992c56b2b43c"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/car_atom_after_collapse.metta",
+      "sha256": "f7a6a9443b31722e0a9296c6cd143bec9627aeeaa6623130c2e3cbfb39bbb152"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/case_structural_union.metta",
+      "sha256": "cf00db40ca90e4c520fc389b4aa409a44ee8cfdc94a4252b21083d9a66352f19"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_add_atom_expression.metta",
+      "sha256": "26bbf6f7cfbbe3722fbf8b44540b2a00dae451a1648962236b483d9a0ec71829"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_and_bool.metta",
+      "sha256": "eaf6efac7ec091b732ceeab35f42757caa429bdda58693d3fcff73472530ed40"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_bool_call_operand.metta",
+      "sha256": "d51d839f7da9e681b6a6f2fa57acf55e0a1b4d7ca668f947048d6a40e20aa25c"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_callpredicate_assertz.metta",
+      "sha256": "a15bef512278b2bd1eafae79872c858e9d0b7f3f129e31cf267dd98f77826997"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_callpredicate_erase.metta",
+      "sha256": "94eee2f76e0cfcd4e001fce3b36fd23b5b04321e4a31f9a27ffe19f629a0f815"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_collapse_union_bound_list.metta",
+      "sha256": "c40785385764c983491e36899640bdc9e81f8c6883226d248adc875e5d8daab7"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_forward_mutual_bool_operand.metta",
+      "sha256": "c94b2f3b28e9629d12127e57990fd18d7fecf6840a6826d82177b36db629f8b1"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_is_member_concrete_list.metta",
+      "sha256": "6bd929b5166f496699bcbd31e66373a29beca798cb767a734d624df1ce0147a4"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_min_computed_nonempty.metta",
+      "sha256": "e04846b3d28cf9c398a0b4f2cbd6e1eff3b9bc6c7dc01e1f5a028c5a3ba12b1e"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_mutual_bool_output.metta",
+      "sha256": "2501fc7fff8c5538ad98925473368258f04fe561beef649462ac2a297ce71168"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_nested_bool_operand.metta",
+      "sha256": "93b56c95a74c1fb94b234932a239d0cd610cacf9bc3300a4c0707b60fd532a68"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_nominal_pattern_if.metta",
+      "sha256": "bf1806351002d3e86da07b364ff2b212fd7129bfeae5b3106fd458d1c382ba05"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_nonempty_collapse_binding.metta",
+      "sha256": "3ad34932637216b2ef3d32e54d31c2947c4e91e60666e7ab39f2a05e8e98b751"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_nonempty_collapse_let_star.metta",
+      "sha256": "ccf1b11c43df44e0c5665506cc0a7e18a84b697d0ed273850ecc9aa9071929a2"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_nonempty_min_atom.metta",
+      "sha256": "dab7f22e2655a93fa47922e88b0c9c19a2499783cb28f2450c429b0703c7d4ae"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_nonempty_semidet_branch.metta",
+      "sha256": "61fe998e75dd2b3dedfd204cd28ae724ac6879fe83cba1e8a32ad4fb3d2ac716"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_not_bool.metta",
+      "sha256": "42642614fb42fc3877e16fcbdb393e3a08861aea6f89e263697833f9bdc9b099"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_or_bool.metta",
+      "sha256": "677e88a9aef73d008b6647a2be1da8864b6751a860e585416481f9440695ae87"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/det_remove_atom_typed_expression.metta",
+      "sha256": "35265d275de195bd498063ba8097dbf48ff556922455b9517c01b12057c9281c"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/foldall_compileadd_timeout.metta",
+      "sha256": "3c1cd6fe4fe318abdea2ae05c4544e7eb366861caaaa3c439fdbe6abcc82b0eb"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/if_union_subtraction_variable_head.metta",
+      "sha256": "75d0ba107b94d55da95a7429d0ada0ad9985c4a96667ce473fb2529f0071a6d8"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/import_only_control.metta",
+      "sha256": "0897b70d47460f38319e1b4443797ff6f8991718e1c070183ff97585a1e5bce8"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/malformed_import_missing_paren_defs.metta",
+      "sha256": "738e730c0d8d3a020a5990b9f1dfea57b382820d1b4cd589045f3af85ac4c720"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/malformed_import_missing_paren_main.metta",
+      "sha256": "3ea2be48f2028439ea983dc817ffff9c55bbe20f76a72115089a7276b3b13b07"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/mixed_list_atom_widening.metta",
+      "sha256": "d1fbc0a14afeec835c3c1d93a783ede3818684ff1087450d4772cf738bf92808"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/named_union_alias.metta",
+      "sha256": "35200e653dc17f61307897f4c7955be89f35c9bd7a5688a6653c340d1bfb78a7"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/nested_constructed_tuple_case_newtype_field.metta",
+      "sha256": "71f7958649003f930693725e13be42e7a371ef05be49a6f50aac0efc47e0fc8a"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/nested_nominal_call_argument_not_reduced.metta",
+      "sha256": "8eb9c87bd76514ed933bbd8430719e3e8e3d31d7edba8729cde5c53d51b96b0a"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/outer_brand_case_open_fallthrough.metta",
+      "sha256": "6326b5a71de0d6b0cbb5ccfefc0660c6f227166561212b3115364cac8e01ab67"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/outer_brand_let_binding.metta",
+      "sha256": "997c36f798d82ebf72cd74dc6f0a528c42e8957ecea4c7a018306be3da607ebc"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/semidet_nested_arguments.metta",
+      "sha256": "e02ce500c1bca8aba1161fec6625fcb4e35d19a906d34b705dbded4d632256fb"
+    },
+    {
+      "path": "pettachainer/metta/examples/typechecker_repros/strict_lib_import_missing_types.metta",
+      "sha256": "16ea7b3f3bab8844520e07187dbdcecfddb0ec1f2f8cfbed86edc7fcf83e77ce"
+    },
+    {
+      "path": "pettachainer/metta/fold_inverse.metta",
+      "sha256": "a91043e9082250732103db4d3979aebe529ce65adc7547abbfa049df7809d2d1"
+    },
+    {
+      "path": "pettachainer/metta/forward_chainer.metta",
+      "sha256": "5efd4f45bf69fa0b96fc74d8a4360883ad57c2667d71475179365ab6cf295f0d"
+    },
+    {
+      "path": "pettachainer/metta/heap_helpers.pl",
+      "sha256": "15176cc02ddc09ecb14e9ad9e153247440e6ccb65d391d36831589d35d3c9709"
+    },
+    {
+      "path": "pettachainer/metta/linter/metta_linter.metta",
+      "sha256": "8c08f6471de07b691f9b551843ca63879258804d26e225b0af5f2f3b7e79adcd"
+    },
+    {
+      "path": "pettachainer/metta/linter/metta_linter_source.pl",
+      "sha256": "13388b51a44d6ae08936d2281a1f3cca3d2f85015eb672e2adbd0cef87430452"
+    },
+    {
+      "path": "pettachainer/metta/linter/metta_linter_todos.md",
+      "sha256": "4b31088bf2873711f507a2e053efd51b5505dc14bb40acc52ccd89ef89739b35"
+    },
+    {
+      "path": "pettachainer/metta/linter/tests/fixtures/lint_sample.metta",
+      "sha256": "069e7f5ff45e2310698dc5194eb11c564d075af5b3425601a4942595bb56a65a"
+    },
+    {
+      "path": "pettachainer/metta/linter/tests/test_metta_linter.metta",
+      "sha256": "4ab81dfb3abaad0840379b61de6a4695e3e6027f5e98290de698bf50e94a3a0d"
+    },
+    {
+      "path": "pettachainer/metta/logic_config.metta",
+      "sha256": "70f0709f0a48ce9fa2c0f2bdd1a915c8a15cfdf2eae46d21f382c4f5d74660f0"
+    },
+    {
+      "path": "pettachainer/metta/logic_configs/pln.metta",
+      "sha256": "f58126974d79f24225f06ab61adf852205279feb2c65592495603a12a8b63eab"
+    },
+    {
+      "path": "pettachainer/metta/logic_configs/predicate_logic.metta",
+      "sha256": "0ef7076d5333d6a22f15ae373c24fd07f24afb0365336256c2d5737aadebb75d"
+    },
+    {
+      "path": "pettachainer/metta/m.metta",
+      "sha256": "eeb7bb75cf6684299fcb6e8c7c8ef155d8ff1a805c4a53f245ab600ddc84f1ae"
+    },
+    {
+      "path": "pettachainer/metta/petta_chainer.metta",
+      "sha256": "6ecf0259085e27c22186046f9abff713be334969a35cfcea6953e74d6c99eea9"
+    },
+    {
+      "path": "pettachainer/metta/piPLN_paper_explained/README.md",
+      "sha256": "e5a98aa04dd584881a63311b8276685b3125dedb74a1d9ee66dcae13685a5445"
+    },
+    {
+      "path": "pettachainer/metta/piPLN_paper_explained/chart_selection_prototype.metta",
+      "sha256": "3abc211b9c3c6afb8f2c34e4830a5a9d6796f28d2e3765b1805fab8c31ce5b7b"
+    },
+    {
+      "path": "pettachainer/metta/piPLN_paper_explained/paper_translation.metta",
+      "sha256": "ab06d61190814decb2540ba2854234f8acef107b95bde2c5d9d90d00db8ef010"
+    },
+    {
+      "path": "pettachainer/metta/profile_no_show_hook.pl",
+      "sha256": "9366550ed2b32a0f5c5fa1f1c7144688e4a9aeac362ef66c7e30b34c55e0a1ce"
+    },
+    {
+      "path": "pettachainer/metta/proof_semantics.metta",
+      "sha256": "50340a85b80ebfd2192c64d75be876a0d0f3dac5523db9c8d41251b4bd3eeb22"
+    },
+    {
+      "path": "pettachainer/metta/query_runtime.metta",
+      "sha256": "7208678c3a54f1df6bcc4f61075de6c3af361eeecf1cebc1bb73abf441970595"
+    },
+    {
+      "path": "pettachainer/metta/tests/repro_petta_ax_k_revision.metta",
+      "sha256": "b5d9664543b64373703e6bdd0c659388c249df8a09f7a2c4794473a719d4846a"
+    },
+    {
+      "path": "pettachainer/metta/tests/test.metta",
+      "sha256": "3dd434902184d2ce2f1dded009f7914cd72ee8128e1d193c287456ac4c81dd80"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_backward_dag_helpers.metta",
+      "sha256": "c7a118fb2085980650a64f21ab997970475287d2f62c3fe0ff081eaf67409b8c"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_backward_open_query_results.metta",
+      "sha256": "80afc24a9dd6a5361476f7fd52bfeadd7d20d7d1bf547b313c0f6b2d3309d50b"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_base_rate_cache.metta",
+      "sha256": "60b5872a0cc2543a51eba07b788e065a2493aee30177c8954765ef84ae8a3e3a"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_benchgen_metta.metta",
+      "sha256": "6445384e214756efc16abc9b23e99e47f581786a6256f640b1d7257be80fe56a"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_best_first_runtime.metta",
+      "sha256": "7259ecf6e8d79543cf9b2f3442c3d6d48f719747dff7a0bf7dd2bfabc0e8ef97"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_chainer_add_atom.metta",
+      "sha256": "47a782d3c4671a2749173a2f02c978f44ea21616a48e54ca85c219dc09939530"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_compute_inversion.metta",
+      "sha256": "47f029804fc57a4fc6779b931ef562baee877cfcb29424fc436b9532efe4a66d"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_direct_compound_fact.metta",
+      "sha256": "1adac0e941fa553740fd537b0482e261906501764d3327751d0758f58bd78570"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_dispatch_determinism.metta",
+      "sha256": "b25b75782fe7a0efdd1d66dbb658bda39f54651a3ef4cfbfc24ac2f3e54cf373"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_distribution_values.metta",
+      "sha256": "d9a85655076cd13d0074b11422b045b76f9575b8c77e8feb1dafc4c16afb88f0"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_empty_member_inheritance_cache.metta",
+      "sha256": "e5bfaea145e7ea9bc178364f575ad0245cb878bc130c97307bf6b72a10667299"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_evidence_semantics.metta",
+      "sha256": "d0b70d4b1cfee1be00b16340adb8cb353e6a66e785d3afea2814e27d20b2a3a1"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_explicit_exists.metta",
+      "sha256": "8c9546905f51f7084eafab09888c6a90b90e660590a7cb3e11983dbd6f851ec5"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_foldall_merged_outputs.metta",
+      "sha256": "1c58e5403ac6981b1ba68a24879b8ff784a8349d8561b5228acc84d7fd63278c"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_foldall_query_goal.metta",
+      "sha256": "6760f80a91bd5943098e272cff36375b3bba953f1e3dbf6e726525a20b072206"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_forward_backward_compose.metta",
+      "sha256": "cf6d7d7d8962ce36123191bacde86e077d0586ff4c27bc1647d379d43ecf1460"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_forward_chainer.metta",
+      "sha256": "062a42b4a88aacd90fe1cd2884a0b2f5ac8eb6a7a453f0eb97a18be01232bacd"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_forward_incremental_base_rates.metta",
+      "sha256": "daa44518384c68df7f0f1e61c8a39e5c6516d7000fbe42f918bfd361c599839e"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_forward_incremental_member_inheritance.metta",
+      "sha256": "8fe2d027931a0d219f62bec8cd0c36669ee75d1d6aee4d7f46b3434279801604"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_frontier_pooling.metta",
+      "sha256": "f5989236c8074a71070cc4724c8ca09fe4a650ca3eacda7497a8c1812440d95b"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_height_average.metta",
+      "sha256": "5b64eabe15d36003e3ce983f82af7ef7ec25d1e6133460aa7999ef9548aad81a"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_idealized_confidence.metta",
+      "sha256": "df1159a7d284677b9d6fe3ecac0dc4de7dda51b5993d1117ae44e07985a391f2"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_implication_inversion.metta",
+      "sha256": "0ce47a3e11c88cb075d64bdeba3d7fd01f4aabc92fe57e1d11cbae2cc71ae09d"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_implication_premise.metta",
+      "sha256": "6b1d078b31adb305c77f024a826108bd4ebc0291702a305aa79cfa43c78aa2f2"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_inheritance_aggregate_cycle.metta",
+      "sha256": "bc82ba9524cbf3839a8aee1c654df8366fe736a9beb0ac1ca1cfd450b9c93ba3"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_inheritance_query_proof.metta",
+      "sha256": "abca878b9aeb2b00dba3d5b1e18e24900f2e68acd321da7dd7fe3fcfdcb1cb90"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_inverse_compound_adapters.metta",
+      "sha256": "aaa370f9dd91a593248837be4202e5a01b455c83dd3fd4baad3c75991d5ac199"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_lifting_merge.metta",
+      "sha256": "89a37a165f55ff637ca6fe93f0d6eb9621a23b406432742e892a8a6a778c2ea4"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_logic_config.metta",
+      "sha256": "b7a9d3f920b45dea253fb334008a33219707efe569937350dffa8d65d457c3e3"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_math.metta",
+      "sha256": "441fdec9e5822f5de2bddb2e0fc6066cb2b9c34a748ba49573f230272bcd5251"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_member_compat.metta",
+      "sha256": "320166f6b672a4d889ad8b8f8565ce03f96b82b71ed258ccf7f37838a382aae8"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_member_concept_node.metta",
+      "sha256": "b427f3be277673072c3ab6d9cf5b817e26825139a25eae5703ecb903aa46de05"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_member_inheritance_premise.metta",
+      "sha256": "ab56526397e2c6216329e8f798349c03ce11348462a23a492d10849df0b40137"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_merged_subgoal_rule_application.metta",
+      "sha256": "8630e445a39d16b8936461631e1e909ec617410e6f7567239623d34b1279e143"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_module_boundaries.metta",
+      "sha256": "42078c48dceb3671be18ccacc8107c3f69144691959efa22dbf5067cf96064a4"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_multi_root_query.metta",
+      "sha256": "7eb7484e6feed2be4ee61ce2bb5ecb95936d34db4d2a6baa1bc30c6e6286a512"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_nary_conjuction.metta",
+      "sha256": "4412fa7f558072c7fc787bf27b0f2b08ef96c195c43167c8856482ecb85ef7a6"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_negated_evidence_merge.metta",
+      "sha256": "1d5d182b9b7f248ca384e8d9e0aa23c153ace45ce7a36251a7fbf31f0dbfe6da"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_negated_facts.metta",
+      "sha256": "5dc64cd8018dec8da2306cb8143a5765b9407b309a0872265222a5a96fbae171"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_numeric_pattern_dist.metta",
+      "sha256": "112d1a941147af853e39a15cfd6beb65c4c38f0d1e7576a44319c7bafe5a6f18"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_or_inversion_conditioned_merge.metta",
+      "sha256": "18a023f89621cd652e82401155548159ec9b8833a02e317b40fce8faf14c8271"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_particle_values.metta",
+      "sha256": "305f70b23cfc222a0869468d44ea5f304cb8794ad1c4237d950911158fcc4e2a"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_query_adds.metta",
+      "sha256": "0ade19caf0e7309a1fd4f5a9638f11dd70a22e981c5b6587cf4c490813743adf"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_query_compute_in_compound.metta",
+      "sha256": "639a8df772a754d908b05684c103b122bfc3514d1a52428078276d69125448d5"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_query_materialize.metta",
+      "sha256": "a2718f58e1edeb4ddbf8fc7acc6d6bd9e51501dbcd6dbec21e547b6210a66576"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_rectangle_area.metta",
+      "sha256": "da099f4b4d28f09f0f8473ea40e801e853032e8635b3a87aecbc833a7f91f06b"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_rule_query_pattern.metta",
+      "sha256": "09a6d45bb6717509c97b4095befbe238750e2d5948b01db07ef70ded7f537391"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_specializing_rule.metta",
+      "sha256": "c8a665ff296bef4ebb6d189d838f506771d795aacef1d58dead138748b43cdc5"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_structural_conclusion_prefilter.metta",
+      "sha256": "1b32f615c1cd034fadabaad20868d72c0cae9e972d3530553cfbe2e318d42b4b"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_stv_implication_derived_ctv.metta",
+      "sha256": "8845ad6361b0771875e2bd26952fa4b3e2e34085adb446bf8e4a8de3895e177e"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_total_implication_aggregate.metta",
+      "sha256": "a69bcbaf8c3ccb598c308d496316dafbc611915ad189c174f378cc0eb47fb9d0"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_uniform_prior.metta",
+      "sha256": "e34c4addb6c0097be0cf95ec119ec9e9b18b348319443086dffd75efea5f3f39"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_var_head.metta",
+      "sha256": "f7e4cbb5cd1a1930837581df5ca111fe26bb58d137c7432a7d491451bfecc0ea"
+    },
+    {
+      "path": "pettachainer/metta/tests/test_weighted_subset_sum_inverse.metta",
+      "sha256": "e4be34fa53ec01ab7c306dd2fd04d8cb37b22a626dc563110802695b736c4850"
+    },
+    {
+      "path": "pettachainer/metta/tv_formulas.metta",
+      "sha256": "47cc63d87fafa144ae9db05e48fd1718342256ba675aa964682a0f8f5c5a7d92"
+    },
+    {
+      "path": "pettachainer/pettachainer.py",
+      "sha256": "4e6b6e8a458d448203460f0abc829e15ccee702673fb3dd96005dca9a91c06a2"
+    },
+    {
+      "path": "pettachainer/pln_validator.py",
+      "sha256": "37ab93a651c18dcad05211036204e41031c78d80a7c1a839bac3cde2a95c1a2c"
+    },
+    {
+      "path": "pettachainer/simulations/__init__.py",
+      "sha256": "828bd568ccb232332bddcd2a9c7639fc798d1c1e5447b708cd5410ebeee35d69"
+    },
+    {
+      "path": "pettachainer/simulations/base_rate_acceptance_game.py",
+      "sha256": "420f1fb77ee4bce8c2fa1c4d7753f4c42d21dcd6355991e5b8a1ca92ccb5046d"
+    },
+    {
+      "path": "pettachainer/simulations/stationops_base_rate.py",
+      "sha256": "0ed3a5269913a953ef7a84ea42cf9caefa6989ca888ceee94c73b15bc0728ba4"
+    },
+    {
+      "path": "profile_no_show_hook.pl",
+      "sha256": "879eac96d3874d95b675214631165b5a7e99ac9640396f1ce577c00a9d8dbe70"
+    },
+    {
+      "path": "tests/__init__.py",
+      "sha256": "ca29bf9437f206964426695a09a2d8a24acee61f685432bf5c14f84681bc6dab"
+    },
+    {
+      "path": "tests/test_base_rate_acceptance_game.py",
+      "sha256": "b6804fbcb1f184ca5243433b0276f072214e3263057f2ba3ce8ec34f774f1628"
+    },
+    {
+      "path": "tests/test_pettachainer.py",
+      "sha256": "2a1f2ac06d537d31a4afd9eb8cc8e15c3b5da4e497a90f2b8a848aacbc0be50c"
+    },
+    {
+      "path": "tests/test_pln_validator.py",
+      "sha256": "715c82a051e75aa6e7706f01aa702fdae812f9ecbcc6d059eef08da6e6df9638"
+    }
+  ]
+}

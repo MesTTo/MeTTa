@@ -20,7 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 239 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 241 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 24 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms | `extensions/python/tools/libdoc.py` |
@@ -39,7 +39,7 @@ re-runs them.
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
 | `engine/**/*.pl` | `engine/metta.pl` engine bootstrap consulting the ten `engine/metta/*.pl` units (terms, operators, input_guards, types, effects, space_hooks, runtime, control, interop, registration), `engine/translator.pl` compilation facade over the five `engine/translator/*.pl` units (analysis, lowering, special_forms, typing, runtime), `engine/spaces.pl` store facade over the six `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching), `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 923 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.metta`. Each unit is a plain source file consulted by its umbrella, so predicate ownership and load order are the umbrella's | |
 | `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 83, `service` 56, `ownership` 36, `event` 14, `declaration` 12. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
-| `lib/lib_*/` | 34 MeTTa libraries, implemented in `.metta`, `.pl`, or both, loaded with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
+| `lib/lib_*/` | 35 MeTTa libraries, implemented in `.metta`, `.pl`, or both, loaded with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
 | `extensions/*/extension.pl` | one control file per seat, read when argv carries `extensions` and never read without it; a seat's `entry(engine, _)` loads only where its declared needs hold and its `entry(host, _)` is recorded for the seat's own runtime to consult, so the engine names neither a host nor a backend | |
 | `extensions/node/src/*.ts` | MeTTa as a TypeScript library, the engine embedded in a Node process over swipl-wasm and the seam's second consumer: interned atoms, spaces as collections, lazy thenable answers, a lowered-source `define`, a traced generator `define`, host `op`s the engine calls back into, and `using` scopes. `extensions/node/bridge.pl` is its Prolog half and calls published surface only | the `node-binding` gate lane, and `extensions/python/tests/ch21_another_language_at_the_seam/test_node_binding.py` answers the same corpus in both hosts |
@@ -49,7 +49,7 @@ re-runs them.
 | `check.sh` | the gate. `GATE_ONLY=1 sh check.sh` is what CI blocks on | |
 | `extensions/python/metta/*.py` | the library. `extensions/python/metta/_space.py` is the `MeTTa` context and the `Space` handle; a leading `_` means internal | |
 
-Counts re-measured 2026-09-03. The `llms` lane derives every explicit count in
+Counts re-measured 2026-09-05. The `llms` lane derives every explicit count in
 this table, checks the library roster and every backticked path, rejects names
 the live engine does not know, and asks the reverse question too: every
 engine-known call head the example corpus exercises must be named here.
@@ -225,7 +225,7 @@ THREE DIFFERENT QUESTIONS WEAR THE WORD "PROBABILITY" AND EACH HAS ITS OWN
 MECHANISM. Picking the wrong one answers a number that means something else,
 so choose by the question you are asking:
 
-- is this PROPOSITION true, and how confident am I: `lib_pln` and `lib_nars`
+- is this PROPOSITION true, and how confident am I: `lib_pln`, `lib_pln2`, and `lib_nars`
   truth functions. The value belongs to the fact.
 - what VALUE does this quantity take, over a distribution: `lib_measure`
   weighted superpositions, where `ws-normalize` is the distribution and
@@ -989,7 +989,7 @@ three `mork-add-atoms`, `mork-flush` and `mm2-exec` heads come from:
 `or-else` `parse` `parse-command` `pow-math` `pragma!` `pretty-atom`
 `println!` `prog1` `progn` `py-at` `py-atom` `py-call` `py-container-kind`
 `py-dict` `py-dict-pairs` `py-dot` `py-eq` `py-format` `py-global-read`
-`py-global-write` `py-in` `py-iter` `py-len` `py-list` `py-operator`
+`py-global-write` `py-in` `py-iter` `py-iter-once` `py-len` `py-list` `py-operator`
 `py-range` `py-repr` `py-round` `py-set` `py-set-pairs` `py-slice` `py-str`
 `py-str-join` `py-truthy` `py-tuple` `quote` `random-float` `random-int`
 `read-form!` `readln!` `reduce` `register-token!`
@@ -1050,9 +1050,10 @@ unknowns and refuses; the `#` operators POST rather than solve and compose
 across several operations, which is what they are for.
 `examples/ch05-equations-and-evaluation/05-04-arithmetic-that-runs-backwards/02-relational_arithmetic.metta` runs all of it.
 
-34 libraries load with `!(import! &self (library lib_x))`, each one line of
+35 libraries load with `!(import! &self (library lib_x))`, each one line of
 what it is for: `lib_builtin_types` the declared type surface of the shipped
-builtins; `lib_combinatorics` range, take and choose-k; `lib_conformance` proves
+builtins; `lib_combinatorics` range, take, choose-k, and exact independent
+weighted-subset posterior marginals; `lib_conformance` proves
 a foreign space provider before its users find out; `lib_constraints` CLP(Q)
 over rationals and CLP(B) over booleans; `lib_crypto` hashes and secure
 randomness, refusing by name where OpenSSL is absent; `lib_datastructures` an
@@ -1069,7 +1070,8 @@ weighted superpositions: normalize, softmax, rank, top-k, sample; `lib_memo` the
 resident automatic and explicit memoisation controls; `lib_mm2` notation over
 &mork, loaded on demand; `lib_nars` NARS truth functions, inference rules and
 bounded derivation; `lib_patrick` compose, for, iterate; `lib_pln` PLN truth
-formulas, consistency and ranking; `lib_redis` shared spaces over Redis;
+formulas, consistency and ranking; `lib_pln2` selected Beta and moment formulas
+with explicit evidence scale and support-checked independence; `lib_redis` shared spaces over Redis;
 `lib_reflect` the engine's own surface as data you can match; `lib_regex` PCRE2
 over strings; `lib_roman` a list and fold basis, head, init, fold-flat,
 foldr-flat; `lib_soft` soft structural unification, match quality as a measure;
@@ -1111,8 +1113,12 @@ makes `(top k ...)` answer the wrong rows, not a permutation of the right ones.
 A Python `[:k]` slice never pushes: it drains the provider and orders here,
 which is correct whatever the provider promises and costs the whole store.
 `py-iter` is lazy and yields one answer at a time; a Python generator is not
-drained. `py-atom` takes a metatype argument, `Grounded` for the live reference
-and `Expression` for a snapshot.
+drained. Each enumeration gets its OWN cursor over a shared cache, so reading
+the same iterator twice, or nesting two reads of it, answers the cartesian
+product rather than exhausting it once. `py-iter-once` is the other rule, kept
+by name: Python's own consumptive iteration, which is what a compiled `for`
+statement wants. `py-atom` takes a metatype argument, `Grounded` for the live
+reference and `Expression` for a snapshot.
 Strings carry hyperon's five escapes (quote, backslash, `\n`, `\t`, `\r`).
 Symbols containing whitespace, parentheses or quotes are refused at save and
 digest rather than written unreadably.
