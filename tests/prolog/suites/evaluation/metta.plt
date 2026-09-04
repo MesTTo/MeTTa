@@ -74,6 +74,153 @@ test(assertion_errors_have_engine_messages) :-
 
 :- end_tests(metta_assertions).
 
+:- begin_tests(metta_metatype_guards).
+
+% Every shape metatype_of/2 can classify, the adversarial ones included: a
+% space name, the empty list, a bignum, a string, and a compound no clause
+% above the catch-all matches.
+guard_value(1).
+guard_value(-3).
+guard_value(2.5).
+guard_value(100000000000000000000000).
+guard_value("text").
+guard_value("").
+guard_value(true).
+guard_value(false).
+guard_value(sym).
+guard_value('Symbol').
+guard_value('%Undefined%').
+guard_value([]).
+guard_value([a, b]).
+guard_value([+, 1, 2]).
+guard_value('&self').
+guard_value('&plunit-guard-unbound-space').
+guard_value(f(1)).
+guard_value(_Fresh).
+
+guard_metatype('Variable').
+guard_metatype('Grounded').
+guard_metatype('Expression').
+guard_metatype('Symbol').
+
+%The invariant the shape test rests on, and the only one that matters: putting
+%metatype_of/2 in front of the registry walk must change NO decision. Not
+%"the fast path is sound" in the abstract, but this exact pair of answers
+%agreeing on every value, because a shape test that admits one thing the walk
+%refuses is a type hole and one that refuses something the walk admits is a
+%wrong refusal.
+%
+%Quantified rather than sampled, because a value shape nobody thought of is
+%how this breaks.
+guard_agrees(Value, Metatype) :-
+    current_metta_module(Module),
+    (   catch(user:check_argument_type(Value, Metatype, metatype), _, fail)
+    ->  Fast = admitted
+    ;   Fast = refused
+    ),
+    (   catch(user:metatype_argument_admitted(Module, Value, Metatype,
+                                              ordinary), _, fail)
+    ->  Walk = admitted
+    ;   Walk = refused
+    ),
+    (   Fast == Walk
+    ->  true
+    ;   format(user_error,
+               "metatype guard disagrees on ~p against ~w: shape ~w, walk ~w~n",
+               [Value, Metatype, Fast, Walk]),
+        fail
+    ).
+
+test(the_shape_test_decides_exactly_what_the_registry_walk_decides) :-
+    forall(( guard_value(V), guard_metatype(T) ), guard_agrees(V, T)).
+
+%Why the test computes and compares instead of calling metatype_of/2 with the
+%metatype bound. The ladder cuts on the VALUE, so a head naming a different
+%metatype does not unify and the atom catch-all at the bottom claims the call.
+%This is the one case that makes the difference visible, and it is the shape
+%'get-metatype'/2 guards against by unifying afterwards.
+test(the_ladder_answers_wrongly_when_the_metatype_is_bound) :-
+    user:metatype_of(true, 'Symbol'),
+    \+ user:check_argument_type(true, 'Symbol', metatype),
+    user:check_argument_type(true, 'Grounded', metatype).
+
+%A check DECIDES; it must not bind. ==/2 rather than =/2 in the shape test is
+%what makes that true, and an unbound argument is where the difference shows:
+%metatype_of/2 answers 'Variable' for one, so a test written with =/2 would
+%bind the argument to whatever it was compared against.
+%
+%Every metatype admits an unbound argument, which is the gradual reading and
+%is what the walk answered before the shape test existed. That is asserted
+%here so the day it changes is a red test rather than a quiet one.
+test(a_metatype_check_decides_an_unbound_argument_without_binding_it) :-
+    forall(guard_metatype(T),
+           ( user:check_argument_type(Free, T, metatype),
+             var(Free) )).
+
+%The shape test is sound only where the module's typing policy is the shipped
+%one. A user rule that REFUSES a metatype the ladder would admit must still
+%refuse, which is why check_argument_type_under_policy_in/4 sends a metatype
+%straight to the walk instead of letting it reach the clause the shape test
+%sits in.
+test(a_user_metatype_rule_is_not_bypassed) :-
+    current_metta_module(Module),
+    Admitted0 = user:check_argument_type(sym, 'Symbol', metatype),
+    ( call(Admitted0) -> true ; throw(shape_test_should_admit_a_symbol) ),
+    setup_call_cleanup(
+        user:'add-typing-rule!'('plunit-refuse-symbol', metatype,
+                                'Symbol', 'Symbol', [refuse, 'plunit refusal'],
+                                _),
+        ( \+ type_rules:typing_policy_is_default(Module),
+          \+ user:check_argument_type_under_policy(sym, 'Symbol', metatype) ),
+        user:'remove-typing-rule!'('plunit-refuse-symbol', _)),
+    call(Admitted0).
+
+%The pragma WRITE is what installs the marker the per-call path reads, and
+%with-pragma! restores it on the way out, because both doors go through
+%set_metta_pragma/2.
+test(the_pragma_turns_verification_on) :-
+    \+ user:metta_discharges_verified,
+    user:metta_with_pragmas(
+        [['verify-discharges', true]],
+        ( user:metta_discharges_verified -> true
+        ; throw(marker_not_installed_inside_the_scope) ),
+        _),
+    \+ user:metta_discharges_verified.
+
+%Turning the mode off REPORTS what it checked. A tally nothing reads is a
+%shipped capability with no door, which is the class this audit exists to
+%catch, so the number arrives without anyone having to know a predicate's name.
+%
+%This tests the MECHANISM: that a run which audited something has a non-zero
+%tally at the moment the mode is turned off, and that the reporter runs over
+%it. That the line is actually VISIBLE is proved end to end by
+%examples/ch09-types/17-verify-discharges.metta, which turns the mode off and
+%prints "verify-discharges checked 6 discharge(s): 6 agreed ..." under the
+%corpus lane's own `sh run.sh`. Capturing user_error here instead would have
+%meant reshaping the engine's output for a test to watch it, and the corpus
+%already watches it from outside.
+test(a_run_that_audited_has_a_tally_for_the_reporter) :-
+    setup_call_cleanup(
+        user:'pragma!'('verify-discharges', true, _),
+        ( user:check_argument_type(sym, 'Symbol', metatype),
+          user:metta_discharge_coverage(Counts),
+          memberchk(agreed-Agreed, Counts),
+          Agreed >= 1,
+          user:metta_discharge_report ),
+        user:'pragma!'('verify-discharges', false, _)).
+
+%A run that never audited anything reports nothing, so the mode leaves no trace
+%on a program that did not ask for it.
+test(a_run_that_never_audited_reports_nothing) :-
+    user:metta_discharge_reset,
+    user:metta_discharge_coverage(Counts),
+    memberchk(agreed-0, Counts),
+    memberchk(disagreed-0, Counts),
+    memberchk(unverified-0, Counts),
+    user:metta_discharge_report.
+
+:- end_tests(metta_metatype_guards).
+
 :- begin_tests(metta_metatypes).
 
 metatype_case(partial(f, [1]), 'Grounded').

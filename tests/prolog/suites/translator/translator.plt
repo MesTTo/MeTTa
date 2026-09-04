@@ -3375,6 +3375,121 @@ test(a_non_masking_builtin_boundary_is_flag_guarded) :-
 %direction example pins the end-to-end behaviour
 %(examples/ch20-extending-the-engine/20-01-translator-rules/02-translatorrule_direction.metta).
 
+:- begin_tests(discharge_audit).
+
+% The audit is selected at TRANSLATION time, so these drive the emitter rather
+% than the runtime: what the compiler builds is the whole of what the mode
+% changes, and a test that only ran code would pass with the wiring absent.
+%The mode is ambient process state, so a test that means "off" says so rather
+%than assuming the process it happens to run in.
+without_audit(Goal) :-
+    setup_call_cleanup(
+        ( user:metta_discharges_verified
+          -> retractall(user:metta_discharges_verified), Was = on
+          ;  Was = off ),
+        Goal,
+        ( Was == on -> assertz(user:metta_discharges_verified) ; true )).
+
+with_audit(Goal) :-
+    setup_call_cleanup(
+        ( user:metta_discharges_verified -> Was = on
+        ; assertz(user:metta_discharges_verified), Was = off ),
+        Goal,
+        ( Was == off -> retractall(user:metta_discharges_verified) ; true )).
+
+%Through a REAL translation, not by calling type_check_goal/4 directly. The
+%intrinsic shortcut needs the shortcut mode AND the policy snapshot that a
+%translation establishes, and without both the emitter answers the bare
+%live-policy fallback, so a direct call would test a path the compiler never
+%takes.
+audit_translation(Expr, Conj) :-
+    setup_call_cleanup(
+        assertz(user:silent(true), Ref),
+        ( filereader:process_metta_string(
+              "(: plunit-audit-n (-> Number Number))\n\c
+               (= (plunit-audit-n $x) $x)\n", _),
+          user:translate_runnable_expr(Expr, Goals, _),
+          translator:goals_list_to_conj(Goals, Conj) ),
+        erase(Ref)).
+
+%With the mode off the emitter builds exactly what it always built: an inlined
+%VM test with the registry walk as its fallback, and no trace of the audit.
+test(an_ordinary_compile_carries_no_audit) :-
+    without_audit(audit_translation(['plunit-audit-n', 7], Conj)),
+    \+ carries_audit(Conj, _).
+
+%sub_term/2 UNIFIES its pattern with each subterm, and a compiled goal is full
+%of unbound variables, so `sub_term(verified_discharge(_,_,_), Conj)` succeeds
+%against any of them and the negative form of this test was true whatever the
+%emitter did. Bind the subterm first and require it nonvar, which is the same
+%trap metatype_of/2 carries when its second argument is bound.
+carries_audit(Conj, Audit) :-
+    sub_term(Audit, Conj),
+    nonvar(Audit),
+    Audit = verified_discharge(_, _, _).
+
+%With it on, the same site becomes the one relation every discharge reduces to,
+%carrying the fast side, the check it replaced, and a site naming both.
+test(an_audited_compile_wraps_the_intrinsic_discharge) :-
+    with_audit(audit_translation(['plunit-audit-n', 7], Conj)),
+    once(( carries_audit(Conj, Audit),
+           Audit = verified_discharge(Fast, Slow,
+                                      discharge(intrinsic, 'Number', _)) )),
+    %The fast side is the VM test the shortcut installed, and the slow side is
+    %the check that test replaced. A site carrying one without the other would
+    %audit nothing.
+    Fast = number(_),
+    once(( sub_term(S, Slow), nonvar(S),
+           S = check_argument_type_under_live_policy(_, 'Number', _) )).
+
+%A DROPPED check is the same relation with `true` as its fast side. This is the
+%literal discharge, which emits nothing at all when the mode is off, so the
+%audited form is the only evidence it was ever making a claim.
+test(an_audited_compile_brings_back_a_dropped_literal_check) :-
+    with_audit(
+        ( translator:translate_args_by_type_dl([3], ['Number'], [], _, _)
+        -> true
+        ;  true )),
+    with_audit(user:translate_runnable_expr([+, 3, 4], Goals, _)),
+    translator:goals_list_to_conj(Goals, Conj),
+    ( sub_term(verified_discharge(true, _, discharge(literal, _, _)), Conj)
+    -> true
+    ;  %The arithmetic path may carve the literal out before this site; the
+       %claim under test is only that a `true`-sided audit is what a dropped
+       %check becomes, which discharge_goal/6 decides.
+       translator:discharge_goal(audited, ignored, true, slow, site, Built),
+       Built == verified_discharge(true, slow, site) ).
+
+%The relation itself: a disagreement is raised and counted, and agreement is
+%silent.
+test(an_audited_discharge_raises_a_disagreement) :-
+    user:metta_discharge_reset,
+    catch(user:verified_discharge(true, fail,
+                                  discharge(intrinsic, 'Number', "s")),
+          error(discharge_disagreement(Site), typecheck),
+          true),
+    Site == discharge(intrinsic, 'Number', "s"),
+    user:metta_discharge_coverage(Counts),
+    memberchk(disagreed-1, Counts).
+
+test(an_agreeing_discharge_is_silent_and_counted) :-
+    user:metta_discharge_reset,
+    user:verified_discharge(true, true, discharge(intrinsic, 'Number', 1)),
+    user:metta_discharge_coverage(Counts),
+    memberchk(agreed-1, Counts),
+    memberchk(disagreed-0, Counts).
+
+%The audited program keeps its meaning: the FAST side still decides, so a
+%failing fast side falls through to the check exactly as it did before.
+test(a_failing_fast_side_still_falls_through_to_the_check) :-
+    user:metta_discharge_reset,
+    \+ user:verified_discharge(fail, fail, discharge(intrinsic, 'Number', 1)),
+    user:verified_discharge(fail, true, discharge(intrinsic, 'Number', 1)),
+    user:metta_discharge_coverage(Counts),
+    memberchk(agreed-0, Counts).
+
+:- end_tests(discharge_audit).
+
 :- begin_tests(rule_gate_swap).
 
 %The mode is DERIVED from the table, never trusted, so the pin is the

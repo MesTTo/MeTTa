@@ -1335,6 +1335,13 @@ prolog:error_message(metta_extension_required(Name, Cause)) -->
 :- consult('metta/space_hooks.pl').
 :- consult('metta/runtime.pl').
 :- consult('metta/control.pl').
+
+%The environment half of verify-discharges is materialised HERE, not beside its
+%own predicates in metta/terms.pl, because metta_pragma/2 belongs to
+%metta/control.pl and that file is consulted after terms.pl: read any earlier
+%and the boot raises `Unknown procedure: metta_pragma/2`. The pragma half
+%refreshes on write in set_metta_pragma/2.
+:- initialization(metta_refresh_discharge_verification).
 :- consult('metta/interop.pl').
 :- consult('metta/registration.pl').
 %%%%%%%%%% The engine's own type surface %%%%%%%%%%

@@ -16,6 +16,33 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   import, and it names the absence, `immediate` and `none`, outside every load
   rather than failing or inventing a revision.
 
+### Added
+
+- `(pragma! verify-discharges true)` verifies the type checks the compiler
+  decided not to emit. A literal whose type is settled at compile time, an
+  argument a caller's declaration proved, a `Number` parameter compiled to a VM
+  test and a metatype parameter compiled to the metatype ladder are each a
+  claim that the removed check could not have failed; under the pragma the fast
+  side still decides and the check it replaced runs beside it, raising a
+  disagreement that names the discharge, the type and the value. Turning the
+  mode off reports what it checked, as agreed, disagreed and could-not-be-
+  checked counts, so coverage is a number rather than a claim of completeness.
+  The mode costs nothing when off: the three emitted discharges choose their
+  form while compiling, so an ordinary compile carries no trace of it.
+
+### Changed
+
+- A metatype argument check tries the shape first. `Symbol`, `Expression`,
+  `Grounded` and `Variable` are decided by the engine's own metatype ladder
+  before the typing-rule registry is walked, so a `Symbol` parameter costs 20
+  inferences per call rather than 56, an `Expression` one 14 rather than 68 and
+  a `Grounded` one 6 rather than 54, against 2 for a `Number` parameter.
+  `lib_soft` declares `Symbol` again where it had retreated to `%Undefined%`,
+  at 150,971 inferences over its 400-candidate scorer where the metatype
+  declaration used to cost 218,975. No decision changes: the shape test admits exactly what the walk
+  admits over every value shape the ladder can classify, and where it fails the
+  walk still runs.
+
 ### Fixed
 
 - `ws-softmax` works on scores a network produced. It exponentiated each score

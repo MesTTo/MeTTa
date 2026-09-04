@@ -565,10 +565,23 @@ translate_args_by_type_dl([A|As], [T|Ts], [Origin|Origins],
       %two refusals: `(: p (-> Expression %Undefined%))` answered 3 for
       %`(p (+ 1 2))` where upstream refuses, and atom-subst stopped refusing a
       %second operand that is not a variable [measured 2026-08-30].
-      ( ( T == '%Undefined%' ; T == '_'
-        ; statically_typed_literal(AV, T),
-          retained_static_type_shortcuts_allowed )
+      %The literal discharge is split out of the first disjunct so the audit
+      %mode can reach it. `%Undefined%` and `_` constrain nothing and there is
+      %no check to audit; a settled literal HAS a check and it was dropped, so
+      %under the mode it comes back as an audited one whose fast side is
+      %`true`. Its own note says a get-type extension may legitimately give a
+      %literal a second type, which is exactly the claim worth auditing.
+      ( ( T == '%Undefined%' ; T == '_' )
         -> AfterCheck = Checks0
+      ; statically_typed_literal(AV, T),
+        retained_static_type_shortcuts_allowed
+        -> ( metta_discharges_verified
+             -> contract_fallback_goal(check_argument_type(AV, T, Origin),
+                                       LiteralSlow),
+                Checks0 = [verified_discharge(true, LiteralSlow,
+                                              discharge(literal, T, AV))
+                          |AfterCheck]
+             ;  AfterCheck = Checks0 )
       ; type_check_goal(AV, T,
                         check_argument_type(AV, T, Origin),
                         ArgGoal),
@@ -749,14 +762,38 @@ type_check_goal(Value, Type, General, Goal) :-
     % command=python -m benchmarks.declared_contracts --calls 100000
     % --reflective-calls 2000 --rounds 7; fixture=compiled-proved-number;
     % commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
+    %A discharge claims the check it replaced could not have failed. Under
+    %(pragma! verify-discharges true) that claim is AUDITED: the fast side
+    %still decides, so the audited program answers what it answered, and the
+    %check it replaced runs beside it with a disagreement raised rather than
+    %absorbed. This is engine/specializer.pl's translation validation applied
+    %to type checks instead of to specializations
+    %[source: Pnueli, Siegel and Singerman, Translation Validation, TACAS 1998].
+    %
+    %The mode is read HERE, at translation time, so a clause compiled without
+    %it carries no trace and the mode costs nothing when off. That is the same
+    %bargain verify-specializations strikes, and it means the pragma has to
+    %precede the code it audits. The metatype discharge in engine/metta/terms.pl
+    %is the exception: it is not emitted, so it reads a runtime marker and
+    %audits code that was already compiled
+    %[tested: metta_metatype_guards:an_audited_discharge_raises_a_disagreement].
+    ( metta_discharges_verified -> Audit = audited ; Audit = plain ),
     (   nonvar(Type),
         intrinsic_type_test(Type, Value, Fast),
-        intrinsic_type_shortcut_goal(Fast, Fallback, Goal)
-    ->  true
+        intrinsic_type_shortcut_goal(Fast, Fallback, Shortcut)
+    ->  discharge_goal(Audit, Shortcut, Fast, Fallback,
+                       discharge(intrinsic, Type, Value), Goal)
     ;   static_parameter_proof_goal(Value, Type, Proof)
-    ->  Goal = ( Proof -> true ; Fallback )
+    ->  discharge_goal(Audit, ( Proof -> true ; Fallback ), Proof, Fallback,
+                       discharge(proved_parameter, Type, Value), Goal)
     ;   Goal = Fallback
     ).
+
+%`plain` keeps exactly the goal the emitter built. `audited` replaces it with
+%the one relation every discharge reduces to, Fast still deciding.
+discharge_goal(plain, Goal, _, _, _, Goal).
+discharge_goal(audited, _, Fast, Slow, Site,
+               verified_discharge(Fast, Slow, Site)).
 
 % Only generated argument checks need the policy-strict fallback. Arbitrary
 % goals passed by translator tests and other internal users retain their exact
