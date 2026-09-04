@@ -569,10 +569,10 @@ metta_semantic_effect('get-metatype', readOnlyLookup).
 metta_semantic_effect('get-state', readOnlyLookup).
 %get-atoms answers once per atom in the space, so it reads mutable state AND
 %enumerates. readOnlyLookup named only the read
-%[measured: (get-atoms &self) answers 3 times over a 3-atom space, and a world
+%[measured 2026-09-05: (get-atoms &self) answers 3 times over a 3-atom space, and a world
 %declaring (covers Ctx readOnlyLookup) admitted it;
 %tested: effects_lattice:no_operation_below_the_nondeterministic_rank_answers_more_than_once;
-%commit=WORKTREE].
+%commit=94e4aae42d1223d63500ffb5a9a413852f559192].
 metta_semantic_effect('get-atoms', nondeterministicReadOnly).
 metta_semantic_effect('get-deps', readOnlyLookup).
 metta_semantic_effect('module-tree!', readOnlyLookup).
@@ -653,11 +653,11 @@ metta_semantic_effect(take, pureStructural).
 %Both write their verdict line to current_output, which is the oracle door and
 %not a structural computation. A world admitting only structural operations
 %admitted two that print
-%[measured: with_output_to captured "is $_0, should $_0." from test/1 and
+%[measured 2026-09-05: with_output_to captured "is $_0, should $_0." from test/1 and
 %"is ($_0), should ()." from test-no-answer/1 while sweeping the builtins
 %ranked below nondeterministicReadOnly;
 %tested: effects_lattice:no_operation_below_the_lattice_floor_writes_output;
-%commit=WORKTREE].
+%commit=94e4aae42d1223d63500ffb5a9a413852f559192].
 metta_semantic_effect(test, oracleIO).
 metta_semantic_effect('test-no-answer', oracleIO).
 metta_semantic_effect(transaction, pureStructural).
@@ -693,10 +693,10 @@ metta_semantic_effect(timeout, oracleIO).
 %instantiation the sweep drove to a second answer. An unbound argument is not
 %an exotic mode -- a constructor application leaves its fields unfilled, so
 %ordinary well-typed code reaches every one of these relational modes.
-%[measured: 16 rows, each with a witness call, over 150 builtins ranked below
+%[measured 2026-09-05: 16 rows, each with a witness call, over 150 builtins ranked
 %nondeterministicReadOnly;
 %tested: effects_lattice:no_operation_below_the_nondeterministic_rank_answers_more_than_once;
-%commit=WORKTREE]
+%commit=94e4aae42d1223d63500ffb5a9a413852f559192]
 metta_builtin_enumerates(member).         %(member $x (1 2 3))
 metta_builtin_enumerates(and).            %(and $a $b) walks the truth table
 metta_builtin_enumerates(or).
