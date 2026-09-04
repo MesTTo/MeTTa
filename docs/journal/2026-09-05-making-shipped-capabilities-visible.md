@@ -244,6 +244,16 @@ Decided: add the exact strategy signature to the testing roster and a checked
 Hypothesis example. One generated instance proves repeated named variables
 share a value; a second finds distinct values for two anonymous holes.
 
+Tried: searched root `llms.txt` and both executable example corpora for
+`vector_for` -> no occurrence. The website reference and tests used the
+method, but the embedding-store paragraph exposed only its registered MeTTa
+operations, leaving a Python retrieval caller with no door to the stored
+vector by key.
+
+Decided: name `EmbeddingStore.keys()` and `vector_for(key)` at the existing
+embedding door and read a checked stored vector in the custom-matcher example.
+No search or storage behavior changes.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

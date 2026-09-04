@@ -784,7 +784,9 @@ Entry-point groups: `metta.integrations`, `metta.spaces`, `metta.libraries`.
 `metta.arrays`: one operation vocabulary over any DLPack library.
 `install(m, default=xp)` makes numpy, torch or JAX first-class with the same
 words; `namespace_of`, `is_array`, `data_of`, `ARRAY_OPS`, and `EmbeddingStore`
-with an exact faiss backend. `EmbeddingStore` registers `(name-knn $q $k)` and
+with an exact faiss backend. `EmbeddingStore.keys()` lists stored atom keys and
+`EmbeddingStore.vector_for(key)` retrieves a key's original vector.
+`EmbeddingStore` registers `(name-knn $q $k)` and
 `(name-embed $key)` as OPERATIONS rather than backing a space, so it is called
 beside a match rather than being one. Its 44 installed names all carry `(-> ...)`
 declarations. `broadcast-shape` is a CLP(FD) relation over shape expressions,

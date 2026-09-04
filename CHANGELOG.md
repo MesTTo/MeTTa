@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `EmbeddingStore.vector_for(key)` and `keys()` now appear beside the
+  embedding operation door, and the checked matcher example reads a stored
+  vector back by atom key.
+
 - `metta.testing.from_pattern(pattern)` now has a consumer-sheet entry and a
   checked property-testing example covering both repeated named variables and
   independent anonymous occurrences.
