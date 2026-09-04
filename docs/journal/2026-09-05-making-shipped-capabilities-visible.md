@@ -162,6 +162,14 @@ first-steps example with one direct `template.subs(pattern.unify(fact))`
 round-trip. The check uses both variables so a partial or name-keyed mapping
 cannot pass accidentally.
 
+Tried: compared all 107 root package exports with the sheet and executable
+examples -> `not_` and `in_` were the only atom builders absent from both.
+Their trailing underscores are the package's usable spellings for Python
+keywords; generated reference pages and tests were the only readers.
+
+Decided: name the complete five-builder logic family together and check the
+exact `(not ...)` and `(in ... ...)` terms in the first-steps example.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

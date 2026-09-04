@@ -101,6 +101,8 @@ Applying a symbol builds an expression: `S.likes(S.Ada, S.Music)` ->
 atom: `Expression((S.f, 1, 2))` is `S.f(1, 2)`.
 `parse("(f $x)")` reads exactly one form without evaluating it.
 `forms("(a) (b)")` reads every top-level form without evaluating any.
+Root builders `if_`, `and_`, `or_`, `not_`, and `in_` spell language heads
+that are Python keywords or need variadic folding without raw bracket syntax.
 
 FOURTEEN ATTRIBUTE NAMES ON `S` ARE OPERATOR WORDS, NOT SPELLINGS. Python's
 `operator` module owns these words, and `S.<word>` reaches the engine head the

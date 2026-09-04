@@ -140,6 +140,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The consumer sheet and first-steps example now expose the Python-safe root
+  builders `not_` and `in_` beside the existing logic builders.
+
 - `Atom.subs` now appears beside `Atom.unify` in the consumer sheet and the
   first-steps example proves a unifier can be applied directly to a template.
 
