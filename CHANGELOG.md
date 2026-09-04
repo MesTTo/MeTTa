@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Class-owned `__metta__` and `__from_metta__` conversion now appears in the
+  consumer sheet and executable object-integration example, including the
+  unregistered `build(atom, Class)` round trip.
+
 - Python class authors can now discover and execute
   `space.define(Class, accessors=False, methods=False)` to register a type
   without exposing its host fields or methods as MeTTa callables.

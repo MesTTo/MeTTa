@@ -134,6 +134,16 @@ example uses a default-exposed class as its positive control, then proves both
 registrations are absent for a class declared with the two controls disabled.
 Supporting a keyword-only decorator remains a separate API decision.
 
+Tried: searched `llms.txt`, both example corpora, the README, extension guide,
+and website for `__from_metta__` -> no occurrence. Source and tests showed it
+is the reverse half of the already-supported class-owned `__metta__` hook and
+needs no registry entry.
+
+Decided: name the paired hooks at the existing conversion door and extend the
+object example with an unregistered projection and `build(atom, Class)`
+round-trip. Registry-based dataclass conversion remains beside it as a positive
+control for the other ownership model.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

@@ -736,7 +736,10 @@ reverse commit order; a failed compensation keeps its receipt for an explicit
 expression, `build(atom)` -> object (returning the atom unchanged when it
 cannot), `register_type`, `unregister_type`, `declarations`, `auto_image`.
 Dataclasses, enums, pydantic models and annotated classes all cross; enums
-project to symbols. `@space.define` on a class declares it INTO the space
+project to symbols. A class owner can instead implement `obj.__metta__()` and
+`Class.__from_metta__(*fields)` for a two-way conversion without process-wide
+registration; pass the class as `build(atom, Class)`. `@space.define` on a
+class declares it INTO the space
 for the round trip; the separate record decorator is gone. Use the direct
 `space.define(Class, accessors=False, methods=False)` form when the type may
 cross but its fields or public methods must not become MeTTa callables. The
