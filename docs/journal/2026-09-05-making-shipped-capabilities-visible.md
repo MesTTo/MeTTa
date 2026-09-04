@@ -216,6 +216,16 @@ Decided: name `EventStream.folds(space_name)` beside fold construction and
 extend the standing-query example. Four active subscriptions are the positive
 control; cancelling all four must leave an empty roster.
 
+Tried: searched `llms.txt` and both executable example corpora for the
+`relation` keyword on `object_view` -> no occurrence. The default `py-field`
+form was visible, but an application whose fact vocabulary already owns that
+head had no discoverable spelling for the implemented collision-avoidance
+control.
+
+Decided: show `object_view(obj, relation=...)` at the existing object-view
+door and query a checked live view under `robot-field`. The provider and its
+default remain unchanged.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

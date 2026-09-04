@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `object_view(obj, relation=...)` now has an exact consumer-sheet spelling,
+  and the checked object-integration example queries a view under a custom
+  relation name.
+
 - `EventStream.folds(space_name)` now has a consumer-sheet door, and the
   standing-query example checks its live roster before and after cancellation.
 

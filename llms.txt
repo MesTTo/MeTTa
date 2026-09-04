@@ -152,9 +152,11 @@ The object-level round trip is `bindings = pattern.unify(fact)` followed by
 `path("profile", "age", to=V.age)` occupies an opaque handle's pattern
 position, reads only those live attributes after the stored match, and binds
 the reached value. `Key("name")` selects a subscription key instead.
-`metta.spaces.object_view(obj)` exposes the same object's current public fields
-as `(py-field obj name value)` atoms. Compose it with a stored space through
-`spaces.union`, or register it directly so adding a field atom calls `setattr`.
+`metta.spaces.object_view(obj, relation="py-field")` exposes the same object's
+current public fields as `(py-field obj name value)` atoms. Pass another
+relation name to avoid colliding with an application's existing facts. Compose
+it with a stored space through `spaces.union`, or register it directly so
+adding a field atom calls `setattr`.
 
 Arithmetic and logic operators BUILD terms: `S.x + 1` is `(+ x 1)`,
 `&` `|` `~` build `and`/`or`/`not`, unary `-` builds the subtraction image
