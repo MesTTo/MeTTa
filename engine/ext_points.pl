@@ -982,6 +982,13 @@ kind(metta_host_with_stack_limit/2, host_service).
 %both made the same mistake, which is why the wrapper is built here and handed
 %back rather than described. engine/metta/control.pl carries the measurements.
 kind(metta_host_inference_budget/3, host_service).
+%The same bargain on the other axis. A wall-clock bound cannot be placed around
+%engine_next/2 either, and for a sharper reason: call_with_time_limit/2 cannot
+%interrupt a goal running inside an engine, so a host that wraps its pull loop
+%in one waits for the current pull to return before the alarm is ever seen.
+%The wrapper is built engine-side and handed back, where the deadline sits
+%inside the engine's own goal and can act.
+kind(metta_host_time_budget/3, host_service).
 kind(metta_host_function_generation/1, host_service).
 %Setting the engine-wide print-suppression flag. engine/filereader.pl decides
 %it from argv at load time and an embedded host has no argv, so two seats had each
