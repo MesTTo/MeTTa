@@ -380,6 +380,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Tensor shapes flow through type inference. `metta.arrays.Shape(...)` builds
+  the dimension metadata a Python `Annotated[DLTensor, Shape(...)]` carries, a
+  declared `(Annotated DLTensor (Shape ...))` symbol satisfies an ordinary
+  `DLTensor` argument, and `get-type` derives the result shape before any array
+  is built: elementwise operations through the existing `broadcast-shape`
+  relation, rank-two `matmul` by unifying the shared inner dimension. So
+  `(: image (Annotated DLTensor (Shape (4 1))))` with
+  `(: bias (Annotated DLTensor (Shape (3))))` gives
+  `!(get-type (t+ image bias))` the shape `(4 3)`, and an incompatible pair
+  yields no shaped type at all. The elementwise operations keep their existing
+  scalar-capable second argument.
+
 - `metta.current_algebra()` answers the algebra a query here would run under,
   or None. `current_space()` had no partner: a program could scope a carrier
   with `with metta.under(...)`, declare one on a space, or pass one to a call,

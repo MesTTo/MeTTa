@@ -15,6 +15,18 @@ Source: `extensions/python/metta/arrays.py`.
 
 The entries below reproduce the source signatures and docstrings.
 
+## `Shape`
+
+```python
+def Shape(*dimensions: Any) -> Expression:
+```
+
+> Build tensor dimension metadata.
+>
+> ``Annotated[DLTensor, Shape(...)]`` accepts integers or MeTTa variables.
+> The dimensions stay in one expression so the same metadata is both a
+> Python annotation claim and an input to ``broadcast-shape``.
+
 ## `is_array`
 
 ```python
@@ -66,6 +78,15 @@ def install(m, default: Any = None) -> list[str]:
 >
 > t-shape remains observation of an existing tensor. Use broadcast-shape
 > when compatibility or inference must happen before materialisation.
+>
+> ``Shape`` carries those expressions through Python ``Annotated`` claims.
+> A declared ``(Annotated DLTensor (Shape ...))`` remains a valid DLTensor
+> argument, elementwise binary operations derive their output shape with
+> ``broadcast-shape``, and rank-two matmul unifies the two inner dimensions:
+>
+>     (: image (Annotated DLTensor (Shape (4 1))))
+>     (: bias  (Annotated DLTensor (Shape (3))))
+>     !(get-type (t+ image bias))  ; (Annotated DLTensor (Shape (4 3)))
 >
 > m may be a context or a space. The operations are registered into the
 > space either way, which is the object whose storage and introspection

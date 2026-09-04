@@ -54,6 +54,12 @@ Rejected: returning `metta_effective_algebra/2` directly, because its intentiona
 Decided: one engine service resolves active per-call selection, a singleton task-scope input, then the current context's annotations row. The root observer returns `None` only when all three are absent.
 Tried: `test_current_algebra_follows_each_selection_layer` -> two context declarations remain distinct, a task scope overrides its context, and an explicit call carrier overrides the task scope from inside a Python operation.
 
+## 2026-09-05 - F3 shape-carrying tensor types
+Tried: declared two tensor symbols with `(Annotated DLTensor (Shape ...))`, then supplied them to an ordinary `(-> DLTensor ...)` operation -> the declaration was preserved by `get-type` but did not satisfy the base arrow.
+Rejected: changing the elementwise Python arrows from their existing scalar-capable second argument to two strict DLTensor inputs, because that would trade shape reporting for a runtime regression.
+Decided: install one module-scoped compatibility rule from shaped DLTensor to its base, publish symbolic `Shape` metadata through Python `Annotated`, and add module-local `get-type` equations. Elementwise equations call the existing `broadcast-shape` relation; rank-two matmul unifies one shared dimension directly.
+Tried: `test_annotated_tensor_shapes_flow_through_broadcast_and_matmul` -> `(4 1)` with `(3)` inferred `(4 3)` through a nested operation, `(2 3)` by `(3 4)` inferred `(2 4)`, both incompatible pairs produced no shaped type, and a shaped symbol satisfied a DLTensor input before any array was built.
+
 ## 2026-09-06 - D1 landing: half of it was already on trunk
 Tried: rebasing this thread onto `petta` -> the catalog half of D1 had landed
 independently as `2026-09-05-the-carrier-the-vocabulary-would-not-admit.md`.
@@ -225,3 +231,34 @@ Tried: the llms lane on the landing tip -> `llms.txt:41: the sources table says
 also counted by a cheat sheet, and `check_llms_selftest` uses the real table as
 its clean control, so one stale number failed two GATE lanes rather than one.
 Decided: the count moves in this commit, with the row it counts.
+
+## 2026-09-06 - F3 landing: a shape rule that claimed an unbound subject
+Tried: the full Python suite -> `test_the_empty_expressions_type_follows_the_arbiters_ruling`
+and two cost tests failed, in different combinations on different runs, and the
+suite was green on trunk. Reproduced in fifteen lines: install the arrays
+operations into the process home space, then ask a sibling space
+`!(get-type $subject)` -> `Stack limit (7.5Gb) exceeded`, depth 44,071,263.
+`(get-type (t+ $l $r))` unifies with an unbound subject, and the body then asks
+`(get-type $l)` about a variable it has just invented, which invents two more.
+Decided: every shape equation reads its operand through one guarded reader,
+`metta-arrays-tensor-shape`, whose first act is to refuse a subject whose
+`get-metatype` is `Variable`. The equation then fails, which is the answer a
+shape rule owes a subject that has no shape yet, and the engine's own answer
+stands. The regression asks the same question and was proven to discriminate:
+without the guard it does not fail, it exhausts the stack.
+Decided: the arrays fixture removes the typing rule and every equation
+`install()` added, not only the operations. This suite drives the process home
+space, so what `install()` leaves there is left for every later test in that
+worker.
+Tried: three full Python runs with the teardown removing only the `get-type`
+equations, leaving the shape reader behind -> one failure per run, a different
+test each time and none reproducible alone: an extension-cost row, a
+first-evaluation cost row, a gradual-typing answer, a grounded-iterator cache.
+Three runs of the same suite on `petta` in the same configuration were clean.
+With the reader removed too, three runs read 3,400 passed and 48 skipped, one
+of them interrupted only by a Hypothesis wall-clock deadline in
+`test_segments.py`, which is unrelated and timing-only.
+Tried: `test_the_ruff_configuration_enables_every_family_or_records_why_not`
+-> the N family reads 38 against a maximum of 37, for `Shape`. Python spells an
+`Annotated[...]` metadata position with a type, so the ledger rises with that
+reason.
