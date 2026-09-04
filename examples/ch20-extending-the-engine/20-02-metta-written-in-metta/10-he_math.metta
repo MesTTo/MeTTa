@@ -2,8 +2,8 @@
 ;Guarantees: real-valued math promotes integers, while POW KEEPS ITS OPERANDS'
 ;OWN KINDS -- `(pow-math 2 3)` is the integer 8, as upstream's `Out is A ** B`
 ;answers -- and enforces the signed-i32 bound only for integer exponents
-;[tested: test_real_valued_math_treats_integer_and_float_operands_alike;
-;source: PeTTa@ae66fa8 src/metta.pl:69].
+;[tested: test_real_valued_math_treats_integer_and_float_operands_alike]
+;[source: PeTTa@ae66fa8 src/metta.pl:69].
 
 !(test (pow-math 2 3) 8)
 !(test (isnan-math (sqrt-math -1)) True)

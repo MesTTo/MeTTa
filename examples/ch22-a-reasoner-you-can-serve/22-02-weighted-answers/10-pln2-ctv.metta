@@ -2,8 +2,7 @@
 ; support-checked independent uncertainty propagation.
 ; Assumes: support IDs name stable source evidence, not query-local positions.
 ; Guarantees: every asserted formula runs through the public lib_pln2 surface
-; [tested: sh run.sh examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/10-pln2-ctv.metta;
-; commit=WORKTREE].
+; [tested: examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/10-pln2-ctv.metta; commit=WORKTREE].
 ; Fails when: two independent operands name the same support; factor that
 ; support inside an owned reasoner before combining their residuals.
 

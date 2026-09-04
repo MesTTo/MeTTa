@@ -3,7 +3,7 @@
 ; Assumes: each row is (candidate ID LOSS (ratio NUMERATOR DENOMINATOR)); IDs
 ; are unique ground terms and every loss uses one shared integer scale.
 ; Guarantees: all examples return exact reduced ratios in input order [tested:
-; sh run.sh examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/11-weighted_subset_posterior.metta;
+; examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/11-weighted_subset_posterior.metta;
 ; commit=WORKTREE].
 ; Fails when: the observation has zero mass; call
 ; weighted-subset-mass-independent to distinguish impossibility before asking

@@ -1,8 +1,8 @@
 ;Purpose: executable examples for numeric and real-valued math operations.
 ;Guarantees: == and != are TERM equality, so the integer 1 and the float 1.0
 ;are NOT equal; comparing two different kinds answers False rather than
-;refusing [tested: test_mixed_numeric_equality_is_term_equality;
-;source: PeTTa@ae66fa8 src/metta.pl:40-41].
+;refusing [tested: test_mixed_numeric_equality_is_term_equality]
+;[source: PeTTa@ae66fa8 src/metta.pl:40-41].
 ;A computed string reaches each math operation's own guard and is refused
 ;before the host can treat one character as its code [tested:
 ;test_a_string_operand_to_math_refuses_instead_of_answering_its_char_code].
@@ -12,8 +12,8 @@
 ;NOT: it keeps its operands' own numeric kinds, so `(pow-math 2 3)` is the
 ;integer 8, which is what upstream's `Out is A ** B` answers. Pow additionally
 ;bounds integer exponents to signed i32 [tested:
-;test_real_valued_math_treats_integer_and_float_operands_alike;
-;source: PeTTa@ae66fa8 src/metta.pl:69].
+;test_real_valued_math_treats_integer_and_float_operands_alike]
+;[source: PeTTa@ae66fa8 src/metta.pl:69].
 
 !(test (== 1 1.0) False)
 !(test (!= 1.0 1) True)
