@@ -17,6 +17,17 @@
 !(test (< (abs-math (- (first-weight (ws-softmax ((1.0 a) (3.0 b)) 1000.0)) 0.5)) 0.01) true)
 ;A softmax is a distribution whatever the temperature:
 !(test (< (abs-math (- (ws-total (ws-softmax ((2.0 a) (5.0 b) (1.0 c)) 0.7)) 1.0)) 1.0e-9) true)
+;And whatever the SIZE of the scores, because the peak is subtracted before
+;exponentiating. The same one-unit gap answers the same distribution at 1.0,
+;at 1000.0 and at -1000.0; exponentiating directly gave NaN at the top end
+;and an "ws-normalize requires nonzero total mass" refusal at the bottom.
+;Scores a network produced are exactly the ones that reach those ends.
+(= (both-weights $ps) ((first-weight $ps) (first-weight (cdr-atom $ps))))
+!(test (both-weights (ws-softmax ((1.0 a) (2.0 b)) 1.0))
+       (both-weights (ws-softmax ((1000.0 a) (1001.0 b)) 1.0)))
+!(test (both-weights (ws-softmax ((1.0 a) (2.0 b)) 1.0))
+       (both-weights (ws-softmax ((-1000.0 a) (-999.0 b)) 1.0)))
+!(test (ws-peak ((1.0 a) (7.0 b) (3.0 c))) 7.0)
 
 ;Sampling draws only values the superposition carries, every time:
 !(test (is-member (ws-sample! ((0.5 heads) (0.5 tails))) (heads tails)) true)

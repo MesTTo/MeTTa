@@ -8,6 +8,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `ws-softmax` works on scores a network produced. It exponentiated each score
+  directly, so a large one overflowed the whole distribution to NaN and a large
+  negative one underflowed it to an "ws-normalize requires nonzero total mass"
+  refusal: `((1000.0 a) (1001.0 b))` and `((-1000.0 a) (-1001.0 b))` both broke
+  where the same one-unit gap at `((1.0 a) (2.0 b))` answers 0.2689 and 0.7311.
+  The peak is subtracted before exponentiating, which is what every array
+  library does and changes no answer in the safe range.
+- `soft-score` no longer runs the program it is scoring. Both operands are
+  `Atom`, so an equation is compared as written:
+  `(soft-score (= (tepid $x) $b) (= (warm $y) (* $y 2)))` answered a refusal
+  about arithmetic running backwards and now answers a degree. The atoms in a
+  space that most deserve scoring are its equations, which is the library's own
+  stated purpose.
+
 - A JAX tracer crosses an array operation untouched. `metta.arrays` converted
   the right operand whenever its Python CLASS differed from the left's, and a
   traced value and a concrete array are two classes of one namespace: the
@@ -40,6 +54,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   event bound during the run and then died encoding events it had already
   recorded. The bound now applies to the run alone, which is what the door
   always documented.
+
+### Added
+
+- The aggregation over a soft match's positions is a choice. `min`, the fuzzy
+  t-norm, stays the default and is right for logic, where a term is as close as
+  its worst position; it flattens a ranking, because one unrelated symbol takes
+  an otherwise strong match to zero. `(soft-aggregate mean)` in a space selects
+  the other, which is Bousi~Prolog's own shape for the same decision, and
+  `soft-score-by` takes one explicitly. Adding a third is two clauses.
 
 ### Changed
 
