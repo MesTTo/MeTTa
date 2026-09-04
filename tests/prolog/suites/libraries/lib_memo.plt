@@ -617,3 +617,34 @@ test(one_head_is_found_without_walking_the_other_equations) :-
     assertion(Wide < Narrow * 4).
 
 :- end_tests(memo_equation_lookup).
+
+% A worker thread that only ever HITS still records what it sees. The cache is
+% shared and the sketch is not, so this is the arm that used to record nothing.
+:- begin_tests(memo_admission_sketch).
+
+test(a_hit_only_thread_records_its_own_frequency) :-
+    %metta_memo_entry/6 is `dynamic`, so the cache is SHARED across threads,
+    %while the sketch lives in nb_setval and is THREAD-LOCAL. A worker reading a
+    %cache another thread warmed therefore hits constantly and misses never, and
+    %record_hit/4 used to require a sketch that only record_miss/4 ever built:
+    %it fell to its `; true` arm and recorded nothing, for ever. Measured then:
+    %main 1 miss and 20 hits reported 21, the worker 20 hits reported 0.
+    record_miss(sketchfn, user, 1, [a]),
+    forall(between(1, 20, _), record_hit(sketchfn, user, 1, [a])),
+    get_freq(sketchfn, user, 1, [a], MainFreq),
+    assertion(MainFreq >= 20),
+    message_queue_create(Answer),
+    thread_create(
+        ( forall(between(1, 20, _), record_hit(sketchfn, user, 1, [a])),
+          ( catch(get_freq(sketchfn, user, 1, [a], WorkerFreq), _, fail)
+          -> true
+          ;  WorkerFreq = failed ),
+          thread_send_message(Answer, WorkerFreq) ),
+        Worker, []),
+    thread_join(Worker),
+    thread_get_message(Answer, Seen),
+    message_queue_destroy(Answer),
+    assertion(integer(Seen)),
+    assertion(Seen >= 20).
+
+:- end_tests(memo_admission_sketch).
