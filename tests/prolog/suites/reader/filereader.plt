@@ -27,7 +27,7 @@
 %   - The source identity a compile reads is the file and digest its finished
 %     load publishes, survives its load closing behind an ownership pin, and
 %     agrees with the load record_source_assertion/1 charges [tested:
-%     filereader_source_identity; commit=WORKTREE].
+%     filereader_source_identity; commit=5a274dfb79a66b0bc984606ed246fd5ca308ffaf].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
