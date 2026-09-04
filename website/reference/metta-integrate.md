@@ -210,7 +210,7 @@ def wrap_object(
 def register_type(
     cls: type,
     *,
-    image: str = 'expression',
+    image: str | None = None,
     to_atom: Callable[[Any], Any] | None = None,
     from_atom: Callable[..., Any] | None = None,
     name: str | None = None,
@@ -219,6 +219,12 @@ def register_type(
 ```
 
 > Register a converted type, enlisted in an enclosing transaction.
+>
+> `image` defaults to None rather than to a literal, so that a bare call
+> reaches convert.register_type's derivation from the class shape. Passing
+> "expression" here on its behalf was enough to defeat it, and an Enum, a
+> dataclass or a NamedTuple registered through this door then lost the
+> projection it already had.
 
 ## `unregister_type`
 
