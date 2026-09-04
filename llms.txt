@@ -999,7 +999,9 @@ no transport under it, for mounting on another HTTP framework.
 
 `metta.testing` ships what the suite fuzzes itself with: hypothesis strategies
 (`atoms`, `expressions`, `patterns`, `names`, `numbers`, `texts`, `symbols`,
-`variables`, `grounded`, `ground_atoms`, `numpy_scalars`), the compliance suites
+`variables`, `grounded`, `ground_atoms`, `numpy_scalars`),
+`from_pattern(pattern, max_leaves=8)` for ground instances that share every
+repeated named variable and draw anonymous occurrences independently, the compliance suites
 (`SpaceComplianceSuite`, `GatewayComplianceSuite`, `check_space_provider`,
 `check_twin`, `check_replay`, `check_minted_handles`), and the deterministic
 benchmark gates (`benchmark_case`, `benchmark_counter_slope`,

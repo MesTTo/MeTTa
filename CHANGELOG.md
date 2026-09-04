@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `metta.testing.from_pattern(pattern)` now has a consumer-sheet entry and a
+  checked property-testing example covering both repeated named variables and
+  independent anonymous occurrences.
+
 - The exact module-tier `metta.speculate()` spelling now appears beside
   `Space.speculative()` and runs in the checked engine-controls example.
 

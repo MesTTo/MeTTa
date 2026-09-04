@@ -235,6 +235,15 @@ Decided: put `with metta.speculate():` beside `Space.speculative()` and execute
 a default-context write whose absence after the scope proves that it was
 discarded.
 
+Tried: searched root `llms.txt` and both executable example corpora for
+`from_pattern` -> no occurrence. Source tests and the generated website
+phrasebook exercised it, but the property-test author named by the public
+`metta.testing` module had no required consumer-sheet or runnable-example door.
+
+Decided: add the exact strategy signature to the testing roster and a checked
+Hypothesis example. One generated instance proves repeated named variables
+share a value; a second finds distinct values for two anonymous holes.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 
