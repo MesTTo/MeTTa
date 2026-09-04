@@ -447,6 +447,58 @@ metta_inference_bound_exceeded(Limit) :-
     throw(error(metta_control_signal(inference_limit, Limit),
                 context(metta, inference_limit))).
 
+%The WALL CLOCK for a resumable cursor, built the same way and for the same
+%reason the inference budget is: the check rides the goal that runs INSIDE the
+%engine, so it survives every resume and needs no alarm.
+%
+%It is not call_with_time_limit/2, and that is not a preference. A time limit
+%in the CALLER cannot interrupt a goal running inside an engine at all:
+%
+%    engine_create(X, ( between(1, inf, _), fail ; X = done ), E),
+%    catch(call_with_time_limit(2, engine_next(E, _)), Ball, true)
+%
+%ran ninety seconds without firing [measured 2026-09-05, plain SWI, nothing of
+%this engine in it]. That is why a cursor's timeout did nothing however
+%correctly it was threaded. Moving the alarm INSIDE the engine does fire, and
+%is worse: with the engine suspended past its own limit the alarm has no
+%context to land in, the caller survives, and the next pull FAILS rather than
+%raising, so a held view silently truncates and looks drained.
+%
+%LIMIT, stated because it is the honest half: this checks BETWEEN answers, so
+%it bounds an enumeration that is producing and cannot see a goal stuck before
+%its first answer. SWI offers an interrupting inference limit inside an engine
+%and no interrupting time limit, so `inferences=` is the bound for that case
+%and this one cannot be made to cover it without a watchdog thread.
+:- meta_predicate metta_host_time_budget(0, +, -).
+metta_host_time_budget(Goal, Seconds, Bounded) :-
+    (   \+ number(Seconds)
+    ->  type_error(number, Seconds)
+    ;   Seconds =< 0
+    ->  Bounded = Goal
+    ;   Bounded = ( get_time(Start),
+                    Deadline is Start + Seconds,
+                    call(Goal),
+                    metta_time_budget_spent(Deadline, Seconds) )
+    ).
+
+%THE COMMON OUTCOME IS THE `then` BRANCH, the rule
+%metta_inference_budget_spent/3 above is written to and for the measured reason
+%recorded there: SWI charges an if-then-else one more inference when its
+%condition fails, and this condition succeeds on every answer within budget.
+metta_time_budget_spent(Deadline, Seconds) :-
+    get_time(Now),
+    (   Now =< Deadline
+    ->  true
+    ;   metta_time_bound_exceeded(Seconds)
+    ).
+
+%The same reserved envelope, so a pragma bound, a per-call kwarg bound and a
+%cursor budget all classify identically one level up, and Python's own
+%"time_limit" row turns it into TimeLimitError with no new mapping.
+metta_time_bound_exceeded(Limit) :-
+    throw(error(metta_control_signal(time_limit, Limit),
+                context(metta, time_limit))).
+
 %SWI's stack_limit is a changeable flag local to the calling thread. Its
 %push/pop pair is nestable and records absence as well as a prior value; the
 %cleanup wrapper performs the pop after deterministic success, failure, cut,

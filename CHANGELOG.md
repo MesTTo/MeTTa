@@ -30,6 +30,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   The mode costs nothing when off: the three emitted discharges choose their
   form while compiling, so an ordinary compile carries no trace of it.
 
+### Fixed
+
+- `answers(timeout=)` and `match(timeout=)` bound the evaluation. They did
+  nothing at all: a non-terminating recursion ran past sixty seconds under
+  `timeout=3` where `eval(timeout=3)` raised at 3.01 seconds on the same
+  program. A time limit in the caller cannot interrupt a goal running inside an
+  SWI engine, so wrapping each crossing left the bound inert; it rides the
+  in-engine goal now, beside the inference budget that already worked, and
+  raises `TimeLimitError` at the bound. It checks between answers, so a goal
+  stuck before its first answer is still `inferences=`'s to bound.
+
 ### Changed
 
 - A metatype argument check tries the shape first. `Symbol`, `Expression`,
