@@ -140,6 +140,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `Defined.free_variables` now has an exact consumer-sheet spelling and a
+  checked compiled-definition example with one lexical dependency.
+
 - Remote-backend authors can now find `is_transport_failure(error)` in the
   error model, with checked positive and negative classifications in the
   remote-controls example.

@@ -483,8 +483,8 @@ Stacked clauses become a first-match dispatcher. It takes `name=`, and
 reference twin. A local assignment such as `result: int = value`
 becomes the enforceable in-place claim `(: $result Number)` inside its `let*`.
 The parsed AST also supplies each definition's absolute source span, source
-docstring, lexical free variables, and a conservative effect class. Those
-values are available on `Defined`; each clause joins the classes of the
+docstring, lexical free variables, and a conservative effect class through
+`Defined.source_span`, `.doc`, `.free_variables`, and `.effect`; each clause joins the classes of the
 operations it calls, stacked clauses join again, and `source-span`,
 `free-variable`, and the resulting `effect ... <class>` atom reflect in
 `&metta`. Replacement and `clear()` retire stale facts. `Defined.pure` remains

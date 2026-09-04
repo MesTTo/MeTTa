@@ -277,6 +277,15 @@ Decided: name the classifier beside `TransportFailure` and add positive
 `ConnectionError` and negative `ValueError` controls to the remote example.
 The classification implementation remains unchanged.
 
+Tried: searched the sheet and executable examples for `free_variables` -> no
+exact property spelling. The sheet said lexical captures were available on a
+`Defined` value and the generated guide named the property, but neither
+canonical door showed a compiled function reading it.
+
+Decided: name all four AST-derived `Defined` properties together and add one
+compiled definition whose sole lexical dependency is observed as
+`("anyatom",)`.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 
