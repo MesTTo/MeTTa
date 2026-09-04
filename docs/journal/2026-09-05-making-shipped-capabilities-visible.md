@@ -115,6 +115,15 @@ Decided: add `stack` to the existing `m.limits` roster and execute a finite
 call under a four-megabyte scoped ceiling in the engine-controls example. This
 uses the same public block that carries the byte count to `metta_py_limited/6`.
 
+Tried: searched `llms.txt`, root examples, and runnable Python examples for
+`saga` and `compensates` -> neither appeared, although the public runner,
+receipt model, reverse recovery, and async twin were complete and tested.
+
+Decided: put sagas beside transactions and add a checked example using the
+built-in `add-atom` effect. Its MeTTa recovery equation removes the recorded
+atom; the example observes the committed receipt before an application
+exception, then observes both the effect and receipt gone after recovery.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

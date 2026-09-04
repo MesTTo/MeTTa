@@ -722,6 +722,14 @@ stop, not even by a program's own `(catch ...)`: a bound, a Ctrl-C and an
 `interrupt()` all reach a running goal, the same reasoning that puts
 `KeyboardInterrupt` outside `Exception`.
 
+An ordinary transaction cannot undo an external effect after it commits. For
+that boundary, declare `space.compensates(operation, recovery)`, then run each
+forward term through `with space.saga(receipts) as saga: saga.run(term)`.
+Committed `writesState` and `oracleIO` steps leave queryable
+`(did operation args result)` receipts. Exceptional exit compensates them in
+reverse commit order; a failed compensation keeps its receipt for an explicit
+`saga.rollback()` retry.
+
 ## Integrating any library
 
 `metta.convert`: `project(obj) -> Projected` whose `.atom` is the constructor

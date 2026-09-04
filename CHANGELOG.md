@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Saga compensation now has a consumer-sheet entry and checked example showing
+  a committed step's queryable receipt, exceptional-exit recovery, and receipt
+  retirement after successful compensation.
+
 - The checked engine-controls example now executes `Space.limits(stack=...)`,
   and the consumer sheet identifies it as a scoped SWI combined-stack byte
   ceiling beside the other call bounds.
