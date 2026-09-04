@@ -57,6 +57,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `lib_pln2` refusals name the complaint, not its shape. Each of its fifteen
+  error terms threw with a remedy but without a message clause, so a caller who
+  passed a value distribution where a truth value belongs read `Unknown error
+  term: pln2_invalid_probability(mean,170)`. The same call now answers `the mean
+  is 170, which is not a probability (use a finite probability between 0 and 1
+  inclusive)`.
+
 - Eighteen builtins declared an effect class weaker than their behaviour, so a
   world admitted operations its `(covers Ctx Class)` declaration excluded.
   Sixteen answer more than once and were ranked below `nondeterministicReadOnly`:

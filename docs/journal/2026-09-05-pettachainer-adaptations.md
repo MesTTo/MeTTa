@@ -211,3 +211,86 @@ the two PLUnit suites completed with 9 passing tests; both executable examples
 ran with every check green; and the repository example integration checks
 completed with 12 passing tests. Full-gate evidence is appended after the
 functional tree is frozen.
+
+## 2026-09-05, later: the findings the first pass did not reach
+
+The sweep has SEVENTEEN findings; the section above settles eight. This pass
+checked the rest against the live tree rather than against the sweep's line
+anchors, which had already moved once.
+
+### Finding 12: already shipped, and now measured
+
+Verified by driving the public door, not by reading:
+`derivation()` under an inference budget raises `InferenceLimitError`, under a
+`timeout` raises `TimeLimitError` (0.5ms trips a 19ms proof; 1ms does not),
+under a `depth` cutoff answers a NON-EMPTY partial tree, and answers `[]` only
+for a target with no proof. A larger budget refines: the 1,000-inference call
+raises where the 10,000 one proves. Adding a matching fact turns a previously
+empty answer into a proof, so nothing cached the empty.
+
+Decided: **NO WORK**. `test_an_empty_proof_list_can_only_mean_no_proof` and
+`test_a_derivation_sees_new_evidence_without_being_invalidated` already pin all
+four cases, and the first one's docstring states the finding's own reasoning:
+a reasoner that cannot tell "no proof" from "out of budget" must cache the
+distinction against the budget, and PeTTa needs no cache because the three
+outcomes have three different shapes.
+
+### Findings 3 and 8 share a precondition the sweep did not name
+
+Both want a determinism verdict: finding 3 an argument-aware one for
+`callPredicate`, finding 8 a `lib_chainer` whose cost list ends with
+"determinism". Neither is implementable usefully yet, for a reason established
+this session rather than assumed: **the cardinality axis has no consumer.**
+`metta_arrow_type_shape/5` parses `-[det]->` into `effect(Cardinality, Class)`
+and its one caller passes `_` for the Product; `cardinality_variable` and
+`effect_class_variable` have no consumers at all; and no `.metta` file in the
+tree, `llms.txt` included, writes an annotated arrow. A verdict computed today
+would be discarded.
+
+Verified: `callPredicate`'s live state is `(: callPredicate (-> %Undefined% Bool))`
+with `metta_builtin_effect_override(callPredicate, oracleIO)`. The effect class
+is right and fail-closed; the missing thing is the cardinality channel.
+
+Decided: **BLOCKED ON A CONSUMER**, which is a different verdict from the
+sweep's "belongs to the determinism agent". Revisit when an explicit arrow's
+cardinality is read by something. See
+`2026-09-05-the-rank-that-counted-answers.md`, which measured that axis for the
+builtins and left the arrow's consumer open.
+
+### Finding 4: the contract is enforced, structurally
+
+The three-way separation is not a document here, it is a domain restriction.
+`pln2_moments/4` accepts the moments of a PROBABILITY-valued variable and
+enforces `0 <= VARIANCE <= MEAN*(1-MEAN)`, so a value distribution cannot
+occupy the truth slot at all: `(moments 170 25)` is refused on the mean.
+Measured through the public door, `(pln2-moments-stv (moments 170 25) 100)`
+refuses, `(moments 0.7 0.02)` answers `(stv 0.7 0.0867...)`, and an `(stv ...)`
+where moments are expected refuses.
+
+Decided: **SATISFIED for the two implementable axes.** The third channel,
+approximation error from a particle representation, still needs its own
+evidence type and propagation policy, exactly as the sweep says.
+
+### The refusals said "Unknown error term"
+
+Tried: reading what a caller actually sees when the contract above refuses ->
+`'pln2-moments-stv'/2: Unknown error term: pln2_invalid_probability(mean,170)`.
+The remedy rendered because it rides in the context half; the formal half had
+no clause, so the caller was shown the SHAPE of the complaint instead of the
+complaint. Fifteen error terms, zero renderers.
+
+Decided: a `prolog:error_message//1` clause per term, each naming what was
+wrong and leaving what to do to the remedy already carried, so the halves do
+not repeat. `error_message//1` and not `message//1`, the distinction
+`extensions/cmetta/bridge.pl` measured on 2026-08-27: SWI dispatches the formal
+half of `error(Formal, Context)` through that hook alone. The same reading now
+answers `the mean is 170, which is not a probability (use a finite probability
+between 0 and 1 inclusive)`.
+
+Verified: all fifteen terms exercised through the library's public surface, and
+the regression fails on three cases with the clauses removed, so it is a lane
+rather than a restatement.
+
+Also pinned six `commit=WORKTREE` placeholders this thread left behind, five to
+`afc4024c` and `example_parity.py`'s to `88ba8f12`, each after checking the
+named test and the claim coexist in that tree.
