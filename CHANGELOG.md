@@ -434,6 +434,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Node's `Semiring` vocabulary now includes the catalog's `budget` and
   `amplitude` values in their declared order.
 
+- `lib_distribution` adds pure unary map, independence-named binary map and
+  convolution, inclusive threshold mass, strict independent win probability,
+  exact joint conditioning, independent average, and additive Bernoulli update
+  over `lib_measure`'s transparent weight-first rows. Equal outcomes collapse
+  at their first position. `ws-normalize` now rejects empty, negative,
+  nonfinite, and zero-mass inputs with remedy-bearing errors instead of
+  returning an empty or silently invalid distribution [tested:
+  test_distribution.py and 12-distribution.metta; commit=WORKTREE].
 - Integration installation is transactional across framework-managed state.
   A failed installer now restores operations and declaration ownership,
   protocol types and reprs, reflectors, converted types, library paths,
