@@ -43,6 +43,7 @@ is_engine_flag(silent).
 is_engine_flag('--silent').
 is_engine_flag('-s').
 is_engine_flag(extensions).
+is_engine_flag('--verbose').
 
 strip_engine_flags([], []).
 strip_engine_flags([Arg|Rest], Filtered) :-
