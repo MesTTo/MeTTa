@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Integration authors now have consumer-sheet spellings for unloaded and
+  explicit entry-point loading, dependency-ordered discovery, and exact
+  process-wide hook cleanup, plus a checked registration-lifecycle example.
+
 - The concurrency sheet and a checked example now expose
   `EnginePool.starmap` for multi-argument work and `Channel.try_recv` for a
   nonblocking mailbox take.

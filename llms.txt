@@ -763,8 +763,14 @@ transport="raw")` registers a whole module's callables, `facts(m, atoms)` bulk-w
 `wrap_callable(m, name, target, effect=)`,
 `wrap_object(m, name, obj, methods, effects=)`, `reflect(m, name, obj)`,
 `install_reflection_ops(m)`, `integrate(m, target)`, `Integration`,
-`SpaceProvider`, and `discover(m)` over entry points. Installation is idempotent
-for a live space, and dropping a space releases its installation record.
+`SpaceProvider`, `entry_points(group=)` for unloaded discovery,
+`load_entry_point(name, group=)` for explicit provider/library loading, and
+`discover(m)` for integrations. An integration may declare `METTA_REQUIRES` as
+entry-point names; discovery checks missing names and cycles, then installs in
+dependency order. Installation is idempotent for a live space, and dropping a
+space releases its installation record. Pair `register_object_type`,
+`register_repr`, and `register_reflector` with their exact `unregister_` twins
+when an integration or test stops owning those process-wide hooks.
 Entry-point groups: `metta.integrations`, `metta.spaces`, `metta.libraries`.
 
 `metta.arrays`: one operation vocabulary over any DLPack library.

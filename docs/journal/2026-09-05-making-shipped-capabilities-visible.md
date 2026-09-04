@@ -180,6 +180,16 @@ handle-lifecycle example. `starmap` evaluates two engine calls through separate
 argument rows in input order; `try_recv` is checked both empty and carrying a
 waiting term.
 
+Tried: searched the sheet and examples for `entry_points`, `load_entry_point`,
+`METTA_REQUIRES`, and the exact integration `unregister_` names -> no
+occurrences. Generated reference and tests proved unloaded discovery,
+factory-by-name loading, dependency ordering, and symmetric hook removal.
+
+Decided: expand the existing integration paragraph with those lifecycle doors
+and add a checked example that discovers without loading, installs three
+process-wide protocol hooks, observes each effect, removes all three in a
+`finally` block, and proves reflection no longer claims the object.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 
