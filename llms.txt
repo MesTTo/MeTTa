@@ -277,7 +277,8 @@ column. Both keep `cls` for type checkers.
 
 `m.assuming(*facts)` is a with-block where those facts exist and then do not.
 `m.batch()` collects `add()` calls and crosses once at exit.
-`m.limits(timeout=, inferences=)` sets scoped defaults for every call inside.
+`m.limits(timeout=, inferences=, stack=)` sets scoped defaults for every call
+inside; `stack` is SWI's combined-stack ceiling in bytes.
 
 ## The three seams anything plugs into
 

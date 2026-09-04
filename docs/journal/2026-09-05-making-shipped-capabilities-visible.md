@@ -106,6 +106,15 @@ loopback example exercises the actual HTTP authorization boundary, reads the
 server advertisement before writing, and proves a one-cursor ceiling refuses
 the second live stream and releases the first explicitly.
 
+Tried: searched the consumer sheet and executable examples for `stack-limit`
+and `limits(stack=...)` -> the pragma roster named `stack-limit` after the
+verification-mode repair, but no runnable example selected either door and
+the general limits paragraph omitted the Python keyword.
+
+Decided: add `stack` to the existing `m.limits` roster and execute a finite
+call under a four-megabyte scoped ceiling in the engine-controls example. This
+uses the same public block that carries the byte count to `metta_py_limited/6`.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

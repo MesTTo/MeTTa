@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The checked engine-controls example now executes `Space.limits(stack=...)`,
+  and the consumer sheet identifies it as a scoped SWI combined-stack byte
+  ceiling beside the other call bounds.
+
 - Remote deployers now have a checked example and exact consumer-sheet
   spellings for `Request` authorization, client capability discovery, TLS and
   timeout controls, and the server's idle and live-cursor resource bounds.
