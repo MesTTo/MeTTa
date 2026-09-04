@@ -143,6 +143,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   on its first call. Enabling now recompiles through the engine's own door and
   touches no stored atom.
 
+- The `metta.algebra(...)` module constructor declares into the ambient space.
+  It resolved its receiver as the process-default home, so a row built inside
+  `with scratch:` landed in `&self` and, once algebra rows became context-owned,
+  `scratch` reported `algebra_not_declared` for the algebra it had just built.
+  It reads `current_space()` now, the path the other context-sensitive
+  module-tier helpers already take.
+
 - A declared algebra belongs to the space that declared it. The catalog row
   carried no context, so one declared anywhere was visible everywhere,
   including from a fresh `MeTTa()`, while the `(annotations <ctx> ...)` row

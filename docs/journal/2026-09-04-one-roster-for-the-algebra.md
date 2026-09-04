@@ -27,6 +27,12 @@ Rejected: an optional owner field preserving ambiguous nine-field custom rows, b
 Decided: every algebra row has a required final owner. Shipped presets spell that owner `global`; Python and direct custom rows spell the exact annotation context. Descriptor caches, requirement checks and the Python registry use `(context, name)`, with `global` only as the explicit preset fallback.
 Tried: the six affected Python algebra files plus `tests/prolog/suites/spaces/catalog.plt` -> 39 passed, 1 intentionally skipped, and 27 Prolog cases passed.
 
+## 2026-09-04 - D4 ambient constructor target
+Tried: called the module constructor inside `with scratch:` -> its row landed in `&self`, so the new context-owned registry made the old fixed target observable as a missing declaration in `scratch`.
+Rejected: passing a receiver into the module constructor, because the root already has `current_space()` and module-tier context-sensitive helpers use `engine().space(current_space())`.
+Decided: resolve the constructor target through that established ambient-space path before registering callable operations or declaring the row.
+Tried: `test_algebra_module_constructor_targets_the_ambient_space` -> the declaration and a tagged query resolve in the scratch space, while `&self` reports `algebra_not_declared`.
+
 ## 2026-09-06 - D1 landing: half of it was already on trunk
 Tried: rebasing this thread onto `petta` -> the catalog half of D1 had landed
 independently as `2026-09-05-the-carrier-the-vocabulary-would-not-admit.md`.

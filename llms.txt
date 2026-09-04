@@ -651,9 +651,9 @@ metta.algebra(name, *, plus, times, zero, one, laws=(), carrier=(),
               requires=(), order=None) -> DeclaredAlgebra
         construct an arbitrary algebra through the callable `metta.algebra`
         module, whose plus and times may be plain Python callables; it targets
-        the process default engine, not an enclosing MeTTa() context. Ten
-        carriers ship, tabled under `under=` above; counting, tropical, prob,
-        prov and ranked are also objects
+        the space `metta.current_space()` names, so inside `with scratch:` the
+        row is owned by `scratch`. Ten carriers ship, tabled under `under=`
+        above, and each is also an object
 m.annotations(algebra, *, capabilities=())
 m.annotations(operation, algebra, *, capabilities=())
         choose any declared algebra for this space or an operation; required
