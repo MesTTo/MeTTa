@@ -27,6 +27,9 @@
 %     commit=a5c34eb71ea5b078c55023ed988dd20b2c675323].
 %   - Every native space stores its atoms in a private data module that does
 %     not inherit user predicates [tested: spaces_storage_modules].
+%   - the algebra descriptor cache includes its context owner, so a same-name
+%     declaration in another context cannot reuse its value [tested:
+%     test_custom_algebras_are_context_owned; commit=WORKTREE].
 %   - subscribe follows the (events ...) declaration rather than what a host
 %     registered, and a standing query or a reaction on a context that
 %     declares none is refused at the catalog door naming the missing
@@ -305,7 +308,7 @@
             %The same chain read downward, for a change whose reach is the
             %spaces that inherit through the module it lands in.
             metta_exec_module_descendant/2,
-            metta_algebra_descriptor_cache/8,
+            metta_algebra_descriptor_cache/9,
             metta_annotations_cache/2,
             metta_ctx_declared/1,
             metta_events_declared/1,
