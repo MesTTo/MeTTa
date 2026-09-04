@@ -79,9 +79,10 @@ atom: `Expression((S.f, 1, 2))` is `S.f(1, 2)`.
 `parse("(f $x)")` reads exactly one form without evaluating it.
 `forms("(a) (b)")` reads every top-level form without evaluating any.
 
-THIRTEEN ATTRIBUTE NAMES ON `S` ARE OPERATOR WORDS, NOT SPELLINGS. Python's
+FOURTEEN ATTRIBUTE NAMES ON `S` ARE OPERATOR WORDS, NOT SPELLINGS. Python's
 `operator` module owns these words, and `S.<word>` reaches the engine head the
-word NAMES rather than a symbol spelled like the word:
+word NAMES rather than a symbol spelled like the word. Thirteen reach a head
+and `S.floordiv` refuses, for the reason given under the table:
 
 | `S.<attr>` | builds | | `S.<attr>` | builds |
 |---|---|---|---|---|

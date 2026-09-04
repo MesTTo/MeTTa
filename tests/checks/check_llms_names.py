@@ -10,7 +10,7 @@ and say so in two places for three days without a red lane [measured
 
 A cheat sheet is the one document read by something that cannot notice a stale
 claim, so the file that asserts its own gate and has none is worse off than one
-admitting it is hand-kept. Six checks cover both directions of each promise:
+admitting it is hand-kept. Seven checks cover both directions of each promise:
 
   PATHS       every backticked token that names a file or directory resolves,
               a glob resolving to at least one match. This is the "real file
@@ -20,6 +20,11 @@ admitting it is hand-kept. Six checks cover both directions of each promise:
               roster, and both are read.
   COUNTS      every explicit source-table count is derived from the path or
               source it describes.
+  OPERATORS   the count and the roster of `S` attributes that are operator
+              words rather than spellings, derived from the live `S` by the
+              claim's own definition. This is a PROSE count, the class COUNTS
+              cannot reach, and it read thirteen against fourteen until the
+              check existed.
   HEADS       every name in the language-surface block is one the engine gives
               meaning to, asked of the ENGINE rather than of a list. Both
               questions are asked, `fun/1` and the translator's own
@@ -51,6 +56,10 @@ Guarantees:
   - source-table counts and reverse corpus-head coverage are derived from the
     files and live vocabulary, with independently planted omissions
     [tested: tests/checks/check_llms_selftest.py; commit=2c376be0bca6f85920288863ac89f09a44e6c0c7]
+  - the operator-word count and roster are derived from the live `S` by the
+    claim's own definition, so a wrong count, a dropped word, a plain spelling
+    given a row, and deletion of the claim itself each fail separately
+    [tested: tests/checks/check_llms_selftest.py; commit=WORKTREE]
   - the library count is attached to the shipped directories rather than a
     `.metta`-only glob that omits a Prolog-only implementation [tested:
     tests/checks/check_llms_selftest.py;
@@ -271,6 +280,19 @@ _COUNT_CLAIMS = (
     ),
 )
 
+#: The operator-word claim, which sits OUTSIDE the sources table. That is the
+#: class COUNTS was blind to: a number in prose has no row to anchor it and
+#: nothing derives it, so `S`'s thirteen mapping words plus the one that
+#: refuses were written as thirteen and went unread for as long as the claim
+#: existed. The roster is checked as well as the count, because swapping one
+#: word for another keeps the count right and the table wrong.
+_OPERATOR_CLAIM = re.compile(
+    r"(?P<count>[A-Za-z]+) ATTRIBUTE NAMES ON `S` ARE OPERATOR WORDS"
+)
+#: One table cell naming an operator word. Pipes on both sides keep prose
+#: mentions of `S.floordiv` and `S.sub(a, b)` out of the roster.
+_OPERATOR_ROW = re.compile(r"\|\s*`S\.(?P<word>\w+)`\s*\|")
+
 _NUMBER_WORDS = {
     "zero": 0,
     "one": 1,
@@ -283,6 +305,16 @@ _NUMBER_WORDS = {
     "eight": 8,
     "nine": 9,
     "ten": 10,
+    "eleven": 11,
+    "twelve": 12,
+    "thirteen": 13,
+    "fourteen": 14,
+    "fifteen": 15,
+    "sixteen": 16,
+    "seventeen": 17,
+    "eighteen": 18,
+    "nineteen": 19,
+    "twenty": 20,
 }
 
 #: Receiver names used by the Python examples. The same spelling can denote a
@@ -610,6 +642,84 @@ def count_findings(
     return findings
 
 
+def operator_words() -> dict[str, str]:
+    """Every `S` attribute the mechanical name map does not explain.
+
+    This is the sheet's own sentence made executable. An operator word is one
+    where `S.<word>` is not the symbol `attribute_name(word)` would name, which
+    is exactly what "reaches the engine head the word NAMES rather than a
+    symbol spelled like the word" says. Deriving it that way excludes
+    `S.and_` -> `and` and `S.is_none` -> `is-none` on their own, because the
+    keyword escape and the underscore map already account for them, so no
+    hand-kept exclusion list exists to fall out of date. Reading the live
+    attribute rather than `OPERATOR_WORDS` also keeps the check honest about
+    the refusal, which is a fourteenth word with no row in that table.
+    """
+    python_path = str(REPO / "extensions" / "python")
+    if python_path not in sys.path:
+        sys.path.insert(0, python_path)
+    # Imported here, not at the top, so the lane costs nothing until it runs.
+    import operator
+
+    from metta import S
+    from metta._name_mapping import attribute_name
+
+    words: dict[str, str] = {}
+    for name in sorted(name for name in dir(operator) if not name.startswith("_")):
+        try:
+            reached = str(getattr(S, name))
+        except AttributeError:
+            # A refusal is still an operator word: the attribute declines to
+            # answer the symbol its own spelling names.
+            words[name] = "refused"
+            continue
+        if reached != attribute_name(name):
+            words[name] = reached
+    return words
+
+
+def operator_word_findings(sheet: Path, text: str) -> list[str]:
+    """The operator-word count and roster against the live `S`."""
+    if sheet != _ROOT_SHEET:
+        return []
+    match = _OPERATOR_CLAIM.search(text)
+    if match is None:
+        return [
+            f"{sheet.relative_to(REPO)}: the operator-word claim is gone, so "
+            "the `S` attributes that are not spellings go unchecked"
+        ]
+    try:
+        live = operator_words()
+    except ImportError as absent:
+        # The package is in this tree, so a failed import is a finding rather
+        # than a skip, the same way the receiver check treats it.
+        return [
+            f"{sheet.relative_to(REPO)}: the metta package under "
+            f"extensions/python did not import, so the operator words went "
+            f"unchecked: {absent}"
+        ]
+    line = _line_of(text, match.start())
+    where = f"{sheet.relative_to(REPO)}:{line}"
+    findings: list[str] = []
+    stated = _number(match.group("count"))
+    if stated != len(live):
+        findings.append(
+            f"{where}: the sheet says {stated} operator words on `S`, the "
+            f"package has {len(live)}"
+        )
+    tabled = {row.group("word") for row in _OPERATOR_ROW.finditer(text)}
+    findings.extend(
+        f"{where}: `S.{word}` reaches {live[word]} and the table omits it"
+        for word in sorted(set(live) - tabled)
+    )
+    findings.extend(
+        f"{where}: the table names `S.{word}`, which is its own spelling "
+        "rather than an operator word"
+        for word in sorted(tabled - set(live))
+    )
+    return findings
+
+
 def path_findings(sheet: Path, text: str) -> list[str]:
     """Every backticked path claim that no longer resolves."""
     findings: list[str] = []
@@ -828,6 +938,7 @@ def main(argv: list[str] | None = None) -> int:
         findings.extend(path_findings(sheet, text))
         findings.extend(library_findings(sheet, text))
         findings.extend(count_findings(sheet, text))
+        findings.extend(operator_word_findings(sheet, text))
         findings.extend(method_findings(sheet, text))
         findings.extend(return_findings(sheet, text))
         if known is not None:

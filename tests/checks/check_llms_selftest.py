@@ -56,6 +56,8 @@ from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
     library_findings,
     method_findings,
     omitted_head_findings,
+    operator_word_findings,
+    operator_words,
     path_findings,
     return_findings,
 )
@@ -72,6 +74,14 @@ def _roster(names: list[str], count: int | None = None) -> str:
     listed = ", ".join(f"`{name}`" for name in names)
     total = len(names) if count is None else count
     return f"{total} libraries load with `!(import! ...)`: {listed}. Scored answers"
+
+
+def _operators(words: list[str], count: str = "FOURTEEN") -> str:
+    rows = "\n".join(f"| `S.{word}` | `x` |" for word in words)
+    return (
+        f"{count} ATTRIBUTE NAMES ON `S` ARE OPERATOR WORDS, NOT SPELLINGS.\n\n"
+        f"{rows}\n"
+    )
 
 
 def _surface(body: str) -> str:
@@ -343,9 +353,36 @@ def main() -> int:
         "a call example with no `->` was read as a signature",
     )
 
+    # OPERATORS: the claim is prose, so removing it must not disable the check,
+    # and the roster is read as well as the count so a swap cannot hide.
+    live = sorted(operator_words())
+    expect(
+        operator_word_findings(SHEET, _operators(live)) == [],
+        "the true operator-word count and roster were reported",
+    )
+    expect(
+        len(operator_word_findings(SHEET, _operators(live, "THIRTEEN"))) == 1,
+        "an operator-word count one short of the package was NOT reported",
+    )
+    expect(
+        len(operator_word_findings(SHEET, _operators(live[1:]))) == 1,
+        "a word dropped from the table went unreported while the count still agreed",
+    )
+    expect(
+        any(
+            "its own spelling" in finding
+            for finding in operator_word_findings(SHEET, _operators([*live, "truth"]))
+        ),
+        "a table row naming a plain spelling was NOT reported",
+    )
+    expect(
+        len(operator_word_findings(SHEET, "S has some operator words")) == 1,
+        "deleting the operator-word claim silently disabled its check",
+    )
+
     for failure in failures:
         print(failure, file=sys.stderr)
-    print(f"llms selftest: 37 planted case(s), {len(failures)} failure(s)")
+    print(f"llms selftest: 42 planted case(s), {len(failures)} failure(s)")
     return 1 if failures else 0
 
 
