@@ -121,4 +121,43 @@ assigns both the tag and test to MesTTo. Decided: correct the suite qualifier to
 `discharge_audit` so the evidence lane resolves the test it already intended to
 name.
 
-Open: the serialized full gate and immutable evidence-commit pin.
+Tried: `GATE_ONLY=1 sh check.sh` under the shared gate lock on the functional
+snapshot. It ran for 989.13 seconds and passed the distribution example,
+engine/Python example parity, `lib-surface`, `layering`, `plunit`, `llms`,
+`evidence`, `libdoc`, and the other functional lanes, but exited 1 with eight
+red lanes: `engine-bench`, `prolog-static`, `c-bench`, `mork-bench`, `pytest`,
+`benchmarks`, `policy-inventory`, and `parity-perf`. The MORK lane included
+`perf stat failed with exit 2: Events disabled` and a second-session PMU
+ownership error, so that measurement cannot support a performance conclusion
+[tested: GATE_ONLY=1 sh check.sh; commit=WORKTREE].
+
+Tried: the same focused failure checks in a detached `e8356642` control. Its
+Python suite already had three failures: the unpublished
+`metta_host_time_budget/3` transport call, a Ruff `D` count of 2232 against a
+2231 maximum, and absolute paths in two earlier journal files. Its
+`prolog-static` lane had the same unpublished transport call, and its
+`policy-inventory` lane had the same two missing closed-policy exemptions in
+`engine/metta/types.pl` [tested: repository pytest, prolog-static, and
+policy-inventory controls; commit=e8356642aca8366e21b9e0f4517601cc9b657a04].
+Decided: remove this work's one avoidable `D103` suppression so the feature
+leaves the Ruff count at the base's 2232, and do not fold unrelated engine and
+earlier-journal repairs into this distribution change [tested:
+test_the_ruff_configuration_enables_every_family_or_records_why_not;
+commit=WORKTREE].
+
+Tried: a locked A/B run of `python bench.py --counter-only --keep-going
+alpha-unique annotated-relation eval-arith source-load typed-call add-single`
+on the feature tree and detached `e8356642`. `add-single` passed on both. The
+same other five cases failed on both, with equal minima for `alpha-unique`
+(3752466), `eval-arith` (278811), `source-load` (234733), and `typed-call`
+(12505948); `annotated-relation` differed by two inferences, 308330 versus
+308332 [measured: five matching failures and one matching pass; command=python
+bench.py --counter-only --keep-going alpha-unique annotated-relation eval-arith
+source-load typed-call add-single; fixture=feature tree and detached e8356642
+control under the shared gate lock; commit=WORKTREE].
+Decided: the full lane's 16 stale counter pins predate the new library;
+re-pinning them here would hide rather than repair the frozen-base condition.
+
+Open: the frozen base's eight full-gate lanes remain red for the failures above
+and its other pre-existing performance pins. The distribution surface itself
+has no open obligation.
