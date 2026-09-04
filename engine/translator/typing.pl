@@ -776,7 +776,7 @@ type_check_goal(Value, Type, General, Goal) :-
     %precede the code it audits. The metatype discharge in engine/metta/terms.pl
     %is the exception: it is not emitted, so it reads a runtime marker and
     %audits code that was already compiled
-    %[tested: metta_metatype_guards:an_audited_discharge_raises_a_disagreement].
+    %[tested: discharge_audit:an_audited_discharge_raises_a_disagreement].
     ( metta_discharges_verified -> Audit = audited ; Audit = plain ),
     (   nonvar(Type),
         intrinsic_type_test(Type, Value, Fast),
