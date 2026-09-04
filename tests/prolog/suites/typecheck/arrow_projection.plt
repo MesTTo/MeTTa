@@ -4,7 +4,8 @@
 % Guarantees: legacy and annotated prefix arrows expose one unchanged runtime
 %   chain, while shape projection preserves normalized product metadata and
 %   malformed or infix-looking terms fail closed
-%   [tested: run_tests(metta_arrow_projection); commit=WORKTREE].
+%   [tested: run_tests(metta_arrow_projection);
+%   commit=48cf04fb8dd80149b5e46e15f499f19f6c45348f].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
