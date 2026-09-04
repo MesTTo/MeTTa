@@ -140,6 +140,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `Atom.subs` now appears beside `Atom.unify` in the consumer sheet and the
+  first-steps example proves a unifier can be applied directly to a template.
+
 - Test and conformance harness authors can now find `AssertionFailure` in the
   error taxonomy and a checked example that reads its operation, actual, and
   expected fields.

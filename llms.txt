@@ -144,6 +144,9 @@ Four kinds, all immutable with `__slots__` and one-subpattern
 `order_key`, `pretty(atom, width=78)`, `encode`/`decode`, `atom_from_wire`,
 `register_object_repr` and `register_object_repr_protocol` (and their
 `unregister_` twins) to control how a foreign object prints as an atom.
+The object-level round trip is `bindings = pattern.unify(fact)` followed by
+`template.subs(bindings)`. Its keys are variable atoms, not their names;
+`Atom.subs` also accepts a query `Row` directly.
 `path("profile", "age", to=V.age)` occupies an opaque handle's pattern
 position, reads only those live attributes after the stored match, and binds
 the reached value. `Key("name")` selects a subscription key instead.

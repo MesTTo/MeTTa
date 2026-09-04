@@ -152,6 +152,16 @@ Decided: add the exception to that taxonomy and execute one false `(test ...)`
 in a checked example. The catch verifies `operation`, `actual`, and `expected`
 as data rather than parsing the diagnostic sentence.
 
+Tried: searched the consumer sheet and both example corpora for `.subs(` -> no
+executable occurrence. The generated reference alone showed that `Atom.unify`
+returns exactly the atom-keyed mapping `Atom.subs` consumes, while the sheet
+named only the older free functions.
+
+Decided: put the producer and consumer beside each other and extend the
+first-steps example with one direct `template.subs(pattern.unify(fact))`
+round-trip. The check uses both variables so a partial or name-keyed mapping
+cannot pass accidentally.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 
