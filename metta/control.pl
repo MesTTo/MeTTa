@@ -41,6 +41,72 @@ metta_pragma_key('stack-limit',
 metta_pragma_key('type-check', 'HE spelling; accepted, NOT enforced').
 metta_pragma_key(interpreter, 'HE spelling; accepted, NOT enforced').
 
+%Which argument type checks the translator left in the compiled code, and
+%which it discharged. Adapted from upstream's --warn-runtime-checks
+%[source: PeTTa@75b26598ef32bfa09d49943b27999c04f0eb8679
+%src/typecheck/value_checks.pl:380, MIT], with two departures that came out of
+%measuring the obvious build first.
+%
+%Upstream RECORDS during compilation, from a warn_residual_check/2 call on the
+%emission path. Built that way here it cost +1093 inferences on the translate
+%case with the mode OFF, because the hook is reached once per typed call and a
+%dynamic mode lookup is not free at that frequency [measured 2026-09-05: 381823
+%against a same-tree 380730, three identical samples; command=CHECK_PY=$CHECK_PY
+%$CHECK_PY engine/bench.py --counter-only translate; fixture=warm main-checkout
+%engine artifacts]. So this READS the compiled image instead and costs exactly
+%nothing until it is called. It is also the stronger claim: the answer is what
+%the code CONTAINS rather than what the translator meant to emit.
+%
+%The discrimination is the one the translator's own tests already use: a check
+%inside `( Fast -> true ; Check )` was DISCHARGED to an intrinsic test, and a
+%bare one is residual. The nonvar/1 guards are load-bearing, because sub_term/2
+%unifies with the clause's own unbound variables and a test written without
+%them is vacuously true
+%[tested: translator:a_fuel_recompile_keeps_intrinsic_type_shortcuts].
+metta_residual_check(Function, Type, Origin) :-
+    current_metta_module(Module),
+    current_predicate(Module:Name/Arity),
+    \+ sub_atom(Name, 0, 1, _, '$'),
+    functor(Head, Name, Arity),
+    catch(clause(Module:Head, Body), _, fail),
+    discharged_checks(Body, Discharged),
+    sub_term(Check, Body),
+    nonvar(Check),
+    check_goal_type(Check, Type, Origin),
+    \+ memberchk(Check, Discharged),
+    Function = Name.
+
+%Every check that appears as the fallback of an intrinsic shortcut. Collected
+%once per clause so the membership test below is against a list rather than a
+%re-walk.
+discharged_checks(Body, Discharged) :-
+    findall(Check,
+            ( sub_term(Shortcut, Body),
+              nonvar(Shortcut),
+              Shortcut = ( Fast -> true ; Check ),
+              nonvar(Fast),
+              nonvar(Check),
+              check_goal_type(Check, _, _)
+            ),
+            Discharged).
+
+check_goal_type(check_argument_type(_, Type, Origin), Type, Origin).
+check_goal_type(check_argument_type_under_policy(_, Type, Origin), Type, Origin).
+check_goal_type(check_argument_type_under_live_policy(_, Type, Origin),
+                Type, Origin).
+
+metta_runtime_check_report :-
+    findall(Function-Type-Origin,
+            metta_residual_check(Function, Type, Origin),
+            Rows0),
+    sort(Rows0, Rows),
+    length(Rows, Count),
+    format(user_error, "runtime checks: ~w left in the compiled code~n",
+           [Count]),
+    forall(member(Function-Type-Origin, Rows),
+           format(user_error, "  ~w checks ~p at run time (~w)~n",
+                  [Function, Type, Origin])).
+
 'pragma!'(Key, _, _) :- var(Key), !, refuse_unbound_input('pragma!', 1).
 'pragma!'(Key, _, _) :-
     \+ metta_pragma_key(Key, _),
