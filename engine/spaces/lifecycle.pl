@@ -3,6 +3,10 @@
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
+%   capability guards named by the effect planner declare their non-builtin
+%   status beside their implementations [tested:
+%   builtin_facets:the_effect_planner_helpers_are_exempt_in_place;
+%   commit=WORKTREE].
 %   A foreign space life releases tabled, generated, deferred-translation, and
 %   support state before its execution-module name can be reused [tested:
 %   test_a_recycled_mork_name_inherits_nothing; commit=d843bb6d17a525c36afd21cab077d63b34447535].
@@ -939,6 +943,18 @@ metta_declare_restricted_space_locked(Space, Grants) :-
 metta_restricted_exec_module(Module, Space) :-
     metta_exec_module_known(Space, Module),
     space_restricted(Space, _).
+
+:- multifile seam:builtin_implementation_exemption/2.
+:- dynamic seam:builtin_implementation_exemption/2.
+seam:builtin_implementation_exemption(
+    spaces:metta_require_current_capability/2,
+    compiled_capability_guard_is_not_a_language_operation).
+seam:builtin_implementation_exemption(
+    spaces:metta_require_safe_goal/1,
+    compiled_safe_goal_guard_is_not_a_language_operation).
+seam:builtin_implementation_exemption(
+    spaces:metta_require_space_update_capability/2,
+    compiled_space_update_guard_is_not_a_language_operation).
 
 metta_require_current_capability(Operation, Capability) :-
     current_metta_module(Module),

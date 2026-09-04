@@ -1,6 +1,12 @@
 % Purpose: register function names and arities, protect callable surface, and import host and backend builtins
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
+%   builtin_fun/1 remains the only builtin name authority, while
+%   builtin_implementation/2 records the exact callable or compiler facet
+%   registered through that authority. Final boot rejects missing names,
+%   arities, hooks, reverse-surface descriptions, and unreasoned exemptions
+%   [tested: tests/prolog/suites/evaluation/builtin_facets.plt;
+%   commit=WORKTREE].
 %   register_fun_in/2 lets a definition in any execution module take over a
 %   prelude translator-rule name, and unregister_fun_in/2 retires a global rule
 %   whose owning module lost its final body clause
@@ -119,6 +125,8 @@ register_prolog_arities(N) :-
 %arities because register_prolog_arities/1 put them there, so binding A first
 %turns a scan into a lookup.
 snapshot_builtin_function_sources :-
+    finalize_builtin_implementations,
+    validate_builtin_registry,
     forall(builtin_fun(N),
            (   builtin_function_source(N, _)
            ->  true
@@ -605,6 +613,17 @@ fun_here_in(Module, F) :-
 %runtime_guarded_builtin_call/1 uses to decide a builtin was overridden. One
 %fact for each meaning, so neither reading breaks the other.
 :- dynamic builtin_fun/1.
+:- dynamic builtin_implementation/2.
+:- dynamic builtin_registration_exemption/2.
+%The exemption is a DECLARATION seam and therefore lives in `seam`, the module
+%every handler seam lives in, rather than beside its reader in the engine core.
+%Declared unqualified here it was homed in the engine module, which
+%seam_module:test_every_seam_is_reached_under_its_module rejects: the engine
+%core holds control_exception/1 and nothing else, because the translator emits
+%that one and a space's execution module has to import it from there.
+:- multifile seam:builtin_implementation_exemption/2.
+:- dynamic seam:builtin_implementation_exemption/2.
+seam:kind(builtin_implementation_exemption/2, declaration).
 register_builtin_fun(N) :- register_fun(N),
                            register_prolog_arities(N),
                            ( builtin_fun(N) -> true ; assertz(builtin_fun(N)) ).
@@ -651,36 +670,250 @@ unregister_fun_in(Module, N) :-
 
 unregister_fun_everywhere(N) :- retractall(fun_in(_, N)),
                                 retractall(fun_scoped(N)).
-:- maplist(register_builtin_fun, [superpose, empty, let, 'let*', '+','-','*','/', '%', min, max, 'new-state', 'change-state!', 'get-state', 'bind!', 'register-token!', 'unregister-token!', 'declare-pre-add!', 'undeclare-pre-add!', 'declare-post-add!', 'undeclare-post-add!', 'space-atom-count', 'has-declared-type', 'space-admission-verdict', 'space-contains',
-                          '<','>','==', '!=', '=', '=?', '<=', '>=', and, or, xor, implies, not, exp,
-                          'first-from-pair', 'second-from-pair', 'car-atom', 'cdr-atom', 'unique-atom', 'alpha-unique-atom',
-                          repr, repra, parse, 'pretty-atom', 'println!', 'readln!', 'read-form!', 'parse-command', test, 'test-no-answer', assert, atom_concat, atom_chars, copy_term, term_hash,
-                          foldl, first, last, append, length, 'size-atom', sort, msort, member, 'is-member', 'is-alpha-member', 'exclude-item', list_to_set, maplist, eval, evalc, reduce, 'import!',
-                          'git-import!', 'require-extension!',
-                          'add-atom', 'remove-atom', 'subtract-atom', 'add-atoms', 'add-reduct', 'add-reducts', 'get-atoms', match, 'is-var', 'is-ground', 'is-expr', 'is-space',
-                          decons, 'decons-atom', 'if-decons-expr', noeval, 'new-space',
-                          'get-type', 'get-type-space', 'get-metatype', '=alpha', sread, cons, reverse,
-                          'get-doc', 'get-doc-space', 'get-doc-atom',
-                          'get-doc-single-atom', 'get-doc-function', 'get-doc-params',
-                          'help!', documented, 'documented-space',
-                          'defined-name', undocumented, 'undocumented-space',
-                          '#+','#-','#*','#div','#//','#mod','#min','#max','#<','#>','#=','#\\=','#=<','#>=',
-                          'union-atom', 'cons-atom', 'intersection-atom', 'subtraction-atom', 'index-atom', 'atom-subst', id,
-                          function, 'collapse-bind', 'superpose-bind',
-                          'pow-math', 'sqrt-math', 'sort-atom','abs-math', 'log-math', 'exp-math', 'trunc-math', 'ceil-math',
-                          'floor-math', 'round-math', 'sin-math', 'cos-math', 'tan-math', 'asin-math','random-int','random-float',
-                          'acos-math', 'atan-math', 'isnan-math', 'isinf-math', 'min-atom', 'max-atom',
-                          'bit-shift-left', 'bit-shift-right',
-                          'bit-and', 'bit-or', 'bit-xor', 'bit-not', 'floor-div',
-                          'foldl-atom', 'map-atom', 'filter-atom','current-time','format-time', 'context-space', library, exists_file,
-                          'format-args', 'sort-strings', include,
-                          sleep, 'pragma!', metta, 'metta-thread',
-                          import_prolog_function, check_prolog_function_names, import_prolog_functions,
-                          'Predicate', callPredicate, assertaPredicate, assertzPredicate, retractPredicate,
-                          'add-translator-rule!', 'remove-translator-rule!',
-                          'add-typing-rule!', 'remove-typing-rule!', argv,
-                          register_metta_library_path,
-                          dif, 'residual-goals']).
+%A core declaration owns both the existing name registration and its exact
+%implementation facet. Names therefore occur once: adding a row passes it
+%through register_builtin_fun/1 rather than growing a parallel name registry.
+%The key uses MeTTa arity; ordinary implementations have one additional Prolog
+%result argument. `engine` is symbolic because this plain file may be loaded
+%into a different execution module, while named modules identify their actual
+%predicate owner.
+register_builtin_definition(builtin(Name/Arity, Implementation)) :-
+    (   builtin_fun(Name)
+    ->  true
+    ;   register_builtin_fun(Name)
+    ),
+    register_builtin_implementation(Name/Arity, Implementation).
+
+register_builtin_implementation(Key, Implementation) :-
+    (   builtin_implementation(Key, Implementation)
+    ->  true
+    ;   assertz(builtin_implementation(Key, Implementation))
+    ).
+
+:- maplist(register_builtin_definition,
+ [ builtin(superpose/1, prolog(engine)),
+   builtin(empty/0, prolog(engine)),
+   builtin(let/3, compiler(translator, metta_special_form_head, 1)),
+   builtin('let*'/2, compiler(translator, metta_special_form_head, 1)),
+   builtin('+'/2, prolog(engine)),
+   builtin('-'/2, prolog(engine)),
+   builtin('*'/2, prolog(engine)),
+   builtin('/'/2, prolog(engine)),
+   builtin('%'/2, prolog(engine)),
+   builtin(min/2, prolog(engine)),
+   builtin(max/2, prolog(engine)),
+   builtin('new-state'/1, prolog(engine)),
+   builtin('change-state!'/2, prolog(engine)),
+   builtin('get-state'/1, prolog(engine)),
+   builtin('bind!'/2, prolog(engine)),
+   builtin('register-token!'/2, prolog(parser)),
+   builtin('unregister-token!'/1, prolog(parser)),
+   builtin('declare-pre-add!'/2, prolog(engine)),
+   builtin('undeclare-pre-add!'/1, prolog(engine)),
+   builtin('declare-post-add!'/2, prolog(engine)),
+   builtin('undeclare-post-add!'/1, prolog(engine)),
+   builtin('space-atom-count'/1, prolog(kernel)),
+   builtin('has-declared-type'/2, prolog(kernel)),
+   builtin('space-admission-verdict'/2, prolog(kernel)),
+   builtin('space-contains'/2, prolog(kernel)),
+   builtin('<'/2, prolog(engine)),
+   builtin('>'/2, prolog(engine)),
+   builtin('=='/2, prolog(engine)),
+   builtin('!='/2, prolog(engine)),
+   builtin('='/2, prolog(engine)),
+   builtin('=?'/2, prolog(engine)),
+   builtin('<='/2, prolog(engine)),
+   builtin('>='/2, prolog(engine)),
+   builtin(and/2, prolog(engine)),
+   builtin(or/2, prolog(engine)),
+   builtin(xor/2, prolog(engine)),
+   builtin(implies/2, prolog(engine)),
+   builtin(not/1, prolog(engine)),
+   builtin(exp/1, prolog(engine)),
+   builtin('first-from-pair'/1, prolog(engine)),
+   builtin('second-from-pair'/1, prolog(engine)),
+   builtin('car-atom'/1, prolog(engine)),
+   builtin('cdr-atom'/1, prolog(engine)),
+   builtin('unique-atom'/1, prolog(engine)),
+   builtin('alpha-unique-atom'/1, prolog(engine)),
+   builtin(repr/1, prolog(engine)),
+   builtin(repra/1, prolog(engine)),
+   builtin(parse/1, prolog(engine)),
+   builtin('pretty-atom'/1, prolog(engine)),
+   builtin('println!'/1, prolog(engine)),
+   builtin('readln!'/0, prolog(engine)),
+   builtin('read-form!'/0, prolog(engine)),
+   builtin('parse-command'/1, prolog(engine)),
+   builtin(test/2, prolog(engine)),
+   builtin('test-no-answer'/1, prolog(engine)),
+   builtin(assert/1, prolog(engine)),
+   builtin(atom_concat/2, prolog(system)),
+   builtin(atom_chars/1, prolog(system)),
+   builtin(copy_term/1, prolog(system)),
+   builtin(term_hash/1, prolog(system)),
+   builtin(foldl/4, prolog(apply)),
+   builtin(foldl/3, prolog(apply)),
+   builtin(foldl/5, prolog(apply)),
+   builtin(foldl/6, prolog(apply)),
+   builtin(first/1, prolog(engine)),
+   builtin(last/1, prolog(lists)),
+   builtin(append/2, prolog(lists)),
+   builtin(append/1, prolog(lists)),
+   builtin(length/1, prolog(system)),
+   builtin('size-atom'/1, prolog(engine)),
+   builtin(sort/1, prolog(system)),
+   builtin(msort/1, prolog(system)),
+   builtin(member/1, prolog(lists)),
+   builtin(member/2, prolog(engine)),
+   builtin('is-member'/2, prolog(engine)),
+   builtin('is-alpha-member'/2, prolog(engine)),
+   builtin('exclude-item'/2, prolog(engine)),
+   builtin(list_to_set/1, prolog(lists)),
+   builtin(maplist/3, prolog(apply)),
+   builtin(maplist/4, prolog(apply)),
+   builtin(maplist/1, prolog(apply)),
+   builtin(maplist/2, prolog(apply)),
+   builtin(eval/1, prolog(engine)),
+   builtin(evalc/2, prolog(engine)),
+   builtin(reduce/2, prolog(translator)),
+   builtin(reduce/1, prolog(translator)),
+   builtin('import!'/2, prolog(engine)),
+   builtin('git-import!'/3, prolog(engine)),
+   builtin('git-import!'/4, prolog(engine)),
+   builtin('git-import!'/2, prolog(engine)),
+   builtin('git-import!'/1, prolog(engine)),
+   builtin('require-extension!'/1, prolog(engine)),
+   builtin('add-atom'/2, prolog(spaces)),
+   builtin('remove-atom'/2, prolog(spaces)),
+   builtin('subtract-atom'/2, prolog(spaces)),
+   builtin('add-atoms'/2, prolog(spaces)),
+   builtin('add-reduct'/2, prolog(spaces)),
+   builtin('add-reducts'/2, prolog(spaces)),
+   builtin('get-atoms'/1, prolog(spaces)),
+   builtin(match/3, prolog(spaces)),
+   builtin('is-var'/1, prolog(engine)),
+   builtin('is-ground'/1, prolog(engine)),
+   builtin('is-expr'/1, prolog(engine)),
+   builtin('is-space'/1, prolog(engine)),
+   builtin(decons/1, prolog(engine)),
+   builtin('decons-atom'/1, prolog(engine)),
+   builtin('if-decons-expr'/5, prolog(engine)),
+   builtin(noeval/1, prolog(engine)),
+   builtin('new-space'/0, prolog(engine)),
+   builtin('new-space'/2, prolog(engine)),
+   builtin('new-space'/1, prolog(engine)),
+   builtin('get-type'/1, prolog(engine)),
+   builtin('get-type-space'/2, prolog(engine)),
+   builtin('get-metatype'/1, prolog(engine)),
+   builtin('=alpha'/2, prolog(engine)),
+   builtin(sread/1, prolog(parser)),
+   builtin(cons/2, prolog(engine)),
+   builtin(reverse/1, prolog(lists)),
+   builtin('get-doc'/2, prolog(engine)),
+   builtin('get-doc'/1, prolog(engine)),
+   builtin('get-doc-space'/2, prolog(engine)),
+   builtin('get-doc-atom'/2, prolog(engine)),
+   builtin('get-doc-single-atom'/2, prolog(engine)),
+   builtin('get-doc-function'/3, prolog(engine)),
+   builtin('get-doc-params'/3, prolog(engine)),
+   builtin('help!'/1, prolog(engine)),
+   builtin(documented/0, prolog(engine)),
+   builtin('documented-space'/1, prolog(engine)),
+   builtin('defined-name'/0, prolog(engine)),
+   builtin(undocumented/0, prolog(engine)),
+   builtin('undocumented-space'/1, prolog(engine)),
+   builtin('#+'/2, prolog(engine)),
+   builtin('#-'/2, prolog(engine)),
+   builtin('#*'/2, prolog(engine)),
+   builtin('#div'/2, prolog(engine)),
+   builtin('#//'/2, prolog(engine)),
+   builtin('#mod'/2, prolog(engine)),
+   builtin('#min'/2, prolog(engine)),
+   builtin('#max'/2, prolog(engine)),
+   builtin('#<'/2, prolog(engine)),
+   builtin('#>'/2, prolog(engine)),
+   builtin('#='/2, prolog(engine)),
+   builtin('#\\='/2, prolog(engine)),
+   builtin('#=<'/2, prolog(engine)),
+   builtin('#>='/2, prolog(engine)),
+   builtin('union-atom'/2, prolog(engine)),
+   builtin('cons-atom'/2, prolog(engine)),
+   builtin('intersection-atom'/2, prolog(engine)),
+   builtin('subtraction-atom'/2, prolog(engine)),
+   builtin('index-atom'/2, prolog(engine)),
+   builtin('atom-subst'/3, prolog(engine)),
+   builtin(id/1, prolog(engine)),
+   builtin(function/1, prolog(engine)),
+   builtin('collapse-bind'/1, prolog(engine)),
+   builtin('superpose-bind'/1, prolog(engine)),
+   builtin('pow-math'/2, prolog(engine)),
+   builtin('sqrt-math'/1, prolog(engine)),
+   builtin('sort-atom'/1, prolog(engine)),
+   builtin('abs-math'/1, prolog(engine)),
+   builtin('log-math'/2, prolog(engine)),
+   builtin('exp-math'/1, prolog(engine)),
+   builtin('trunc-math'/1, prolog(engine)),
+   builtin('ceil-math'/1, prolog(engine)),
+   builtin('floor-math'/1, prolog(engine)),
+   builtin('round-math'/1, prolog(engine)),
+   builtin('sin-math'/1, prolog(engine)),
+   builtin('cos-math'/1, prolog(engine)),
+   builtin('tan-math'/1, prolog(engine)),
+   builtin('asin-math'/1, prolog(engine)),
+   builtin('random-int'/2, prolog(engine)),
+   builtin('random-int'/3, prolog(engine)),
+   builtin('random-float'/3, prolog(engine)),
+   builtin('random-float'/2, prolog(engine)),
+   builtin('acos-math'/1, prolog(engine)),
+   builtin('atan-math'/1, prolog(engine)),
+   builtin('isnan-math'/1, prolog(engine)),
+   builtin('isinf-math'/1, prolog(engine)),
+   builtin('min-atom'/1, prolog(engine)),
+   builtin('max-atom'/1, prolog(engine)),
+   builtin('bit-shift-left'/2, prolog(engine)),
+   builtin('bit-shift-right'/2, prolog(engine)),
+   builtin('bit-and'/2, prolog(engine)),
+   builtin('bit-or'/2, prolog(engine)),
+   builtin('bit-xor'/2, prolog(engine)),
+   builtin('bit-not'/1, prolog(engine)),
+   builtin('floor-div'/2, prolog(engine)),
+   builtin('foldl-atom'/3, prolog(engine)),
+   builtin('map-atom'/2, prolog(engine)),
+   builtin('filter-atom'/2, prolog(engine)),
+   builtin('current-time'/0, prolog(engine)),
+   builtin('format-time'/1, prolog(engine)),
+   builtin('context-space'/0, prolog(engine)),
+   builtin(library/1, prolog(engine)),
+   builtin(library/2, prolog(engine)),
+   builtin(exists_file/1, prolog(engine)),
+   builtin(exists_file/0, prolog(engine)),
+   builtin('format-args'/2, prolog(engine)),
+   builtin('sort-strings'/1, prolog(engine)),
+   builtin(include/1, prolog(engine)),
+   builtin(include/2, prolog(apply)),
+   builtin(sleep/1, prolog(engine)),
+   builtin('pragma!'/2, prolog(engine)),
+   builtin(metta/3, prolog(engine)),
+   builtin('metta-thread'/3, prolog(engine)),
+   builtin(import_prolog_function/1, prolog(engine)),
+   builtin(check_prolog_function_names/2, prolog(engine)),
+   builtin(import_prolog_functions/1, prolog(engine)),
+   builtin('Predicate'/1, prolog(engine)),
+   builtin(callPredicate/1, prolog(engine)),
+   builtin(assertaPredicate/1, prolog(engine)),
+   builtin(assertzPredicate/1, prolog(engine)),
+   builtin(retractPredicate/1, prolog(engine)),
+   builtin('add-translator-rule!'/1, prolog(translator_rules)),
+   builtin('add-translator-rule!'/2, prolog(translator_rules)),
+   builtin('remove-translator-rule!'/1, prolog(translator_rules)),
+   builtin('add-typing-rule!'/5, prolog(type_rules)),
+   builtin('remove-typing-rule!'/1, prolog(type_rules)),
+   builtin(argv/1, prolog(engine)),
+   builtin(register_metta_library_path/2, prolog(engine)),
+   builtin(dif/1, prolog(dif)),
+   builtin(dif/2, prolog(duals)),
+   builtin('residual-goals'/1, prolog(duals))
+ ]).
 %An EXTENSION's own builtins -- a host bridge's and a backend's alike --
 %register here, from that extension's own seam:extension_builtin/2 declarations
 %rather than from a list here that would name it. This was two directives over
@@ -701,3 +934,318 @@ unregister_fun_everywhere(N) :- retractall(fun_in(_, N)),
 %answered (partial mm2-exec (&mork 1)) instead of running or failing. Declaring
 %the names beside the predicates is what makes that unable to happen again.
 :- forall(seam:extension_builtin(Name, _), register_builtin_fun(Name)).
+
+%%%% Exact implementation facets and bidirectional coverage %%%%
+
+%Prelude equations and extensions already own their names in their source
+%declarations. Materialise only their dependent implementation facets after
+%the final arity cleanup, then validate the complete boot image. Refresh first
+%so a repeated snapshot observes a replaced prelude or extension rather than
+%retaining its earlier hooks.
+finalize_builtin_implementations :-
+    retractall(builtin_implementation(_, prelude(_))),
+    retractall(builtin_implementation(_, extension(_))),
+    forall(prelude_builtin_implementation(Key, Implementation),
+           register_builtin_implementation(Key, Implementation)),
+    forall(extension_builtin_implementation(Key, Implementation),
+           register_builtin_implementation(Key, Implementation)).
+
+prelude_builtin_implementation(Name/Arity, prelude(equation)) :-
+    prelude_owned(Name),
+    prelude_equation(Name, ['=', [Name|Arguments], _]),
+    length(Arguments, Arity).
+
+extension_builtin_implementation(Name/Arity, extension(ModuleRef)) :-
+    seam:extension_builtin(Name, _),
+    arity(Name, PrologArity),
+    PrologArity > 0,
+    Arity is PrologArity - 1,
+    builtin_callable_module(Name, PrologArity, Module),
+    builtin_module_reference(Module, ModuleRef).
+
+builtin_callable_module(Name, Arity, Module) :-
+    metta_engine_module(Engine),
+    current_predicate(Engine:Name/Arity),
+    functor(Head, Name, Arity),
+    predicate_property(Engine:Head, implementation_module(Module)).
+
+builtin_module_reference(Module, engine) :-
+    metta_engine_module(Engine),
+    Module == Engine, !.
+builtin_module_reference(Module, self) :-
+    metta_self_module(Self),
+    Module == Self, !.
+builtin_module_reference(Module, Module).
+
+builtin_reference_module(engine, Module) :- !, metta_engine_module(Module).
+builtin_reference_module(self, Module) :- !, metta_self_module(Module).
+builtin_reference_module(Module, Module).
+
+validate_builtin_registry :-
+    validate_builtin_implementation_schema,
+    validate_builtin_implementation_unique,
+    validate_builtin_implementation_hooks,
+    validate_builtin_exemptions,
+    validate_builtin_registration_coverage,
+    validate_builtin_implementation_coverage.
+
+validate_builtin_implementation_schema :-
+    forall(builtin_implementation(Key, Implementation),
+           (   valid_builtin_implementation(Key, Implementation)
+           ->  true
+           ;   throw(error(invalid_builtin_implementation(Key, Implementation),
+                           builtin_registry))
+           )).
+
+valid_builtin_implementation(Name/Arity, Implementation) :-
+    atom(Name),
+    integer(Arity),
+    Arity >= 0,
+    valid_builtin_implementation_descriptor(Implementation).
+
+valid_builtin_implementation_descriptor(prolog(ModuleRef)) :-
+    atom(ModuleRef).
+valid_builtin_implementation_descriptor(prelude(equation)).
+valid_builtin_implementation_descriptor(extension(ModuleRef)) :-
+    atom(ModuleRef).
+valid_builtin_implementation_descriptor(compiler(ModuleRef, Hook, Arity)) :-
+    atom(ModuleRef),
+    atom(Hook),
+    integer(Arity),
+    Arity >= 1.
+
+validate_builtin_implementation_unique :-
+    findall(Key, builtin_implementation(Key, _), Keys),
+    msort(Keys, Sorted),
+    (   first_duplicate(Sorted, Duplicate)
+    ->  throw(error(duplicate_builtin_implementation_key(Duplicate),
+                    builtin_registry))
+    ;   true
+    ).
+
+first_duplicate([Key, Key|_], Key) :- !.
+first_duplicate([_|Keys], Key) :- first_duplicate(Keys, Key).
+
+validate_builtin_implementation_hooks :-
+    forall(builtin_implementation(Key, Implementation),
+           (   builtin_implementation_hook_exists(Key, Implementation)
+           ->  true
+           ;   throw(error(undefined_builtin_implementation_hook(
+                               Key, Implementation),
+                           builtin_registry))
+           )).
+
+builtin_implementation_hook_exists(Name/Arity, Implementation) :-
+    builtin_callable_descriptor(Implementation, ModuleRef), !,
+    PrologArity is Arity + 1,
+    builtin_reference_module(ModuleRef, Module),
+    current_predicate(Module:Name/PrologArity),
+    functor(Head, Name, PrologArity),
+    predicate_property(Module:Head, implementation_module(Actual)),
+    Actual == Module.
+builtin_implementation_hook_exists(Name/Arity, prelude(equation)) :- !,
+    prelude_owned(Name),
+    prelude_equation(Name, ['=', [Name|Arguments], _]),
+    length(Arguments, Arity), !.
+builtin_implementation_hook_exists(
+        Name/_, compiler(ModuleRef, Hook, HookArity)) :-
+    builtin_reference_module(ModuleRef, Module),
+    functor(Head, Hook, HookArity),
+    arg(1, Head, Name),
+    current_predicate(Module:Hook/HookArity),
+    once(call(Module:Head)).
+
+builtin_callable_descriptor(prolog(ModuleRef), ModuleRef).
+builtin_callable_descriptor(extension(ModuleRef), ModuleRef).
+
+%The forward inventory deliberately ignores exemptions. It is the exact list
+%to report before policy is applied: a name with no facet, or a callable arity
+%whose exact key has no facet.
+builtin_registration_coverage_inventory(Inventory) :-
+    findall(Gap, builtin_registration_gap(Gap), Gaps),
+    sort(Gaps, Inventory).
+
+builtin_registration_gap(Name) :-
+    builtin_fun(Name),
+    \+ builtin_implementation(Name/_, _).
+builtin_registration_gap(Name/Arity) :-
+    builtin_fun(Name),
+    arity(Name, PrologArity),
+    PrologArity > 0,
+    Arity is PrologArity - 1,
+    \+ builtin_implementation(Name/Arity, _).
+
+validate_builtin_registration_coverage :-
+    forall(builtin_registration_gap(Gap),
+           (   registration_gap_exempted(Gap)
+           ->  true
+           ;   throw(error(unregistered_builtin_spec(Gap), builtin_registry))
+           )).
+
+registration_gap_exempted(Gap) :-
+    registration_gap_name(Gap, Name),
+    builtin_registration_exemption(Name, _).
+
+registration_gap_name(Name/_, Name) :- !.
+registration_gap_name(Name, Name).
+
+%The reverse inventory combines declared implementation facets with actual
+%project predicates named by an independent surface. The surface union is what
+%makes the scan useful: a predicate mentioned by typing, grounded-token,
+%effect, semantic-operation, extension, or special-form metadata cannot hide
+%merely because nobody added it to builtin_fun/1.
+builtin_implementation_coverage_inventory(Inventory) :-
+    findall(Gap, builtin_implementation_gap(Gap), Gaps),
+    sort(Gaps, Inventory).
+
+builtin_implementation_gap(description(Name/Arity, Implementation)) :-
+    builtin_implementation(Name/Arity, Implementation),
+    (   \+ builtin_fun(Name)
+    ;   builtin_callable_descriptor(Implementation, _),
+        PrologArity is Arity + 1,
+        \+ arity(Name, PrologArity)
+    ).
+builtin_implementation_gap(predicate(Predicate)) :-
+    builtin_surface_predicate(Predicate, _),
+    \+ builtin_predicate_described(Predicate).
+
+validate_builtin_implementation_coverage :-
+    forall(builtin_implementation_gap(Gap),
+           (   implementation_gap_exempted(Gap)
+           ->  true
+           ;   implementation_gap_subject(Gap, Subject),
+               throw(error(unregistered_builtin_implementation(Subject),
+                           builtin_registry))
+           )).
+
+implementation_gap_exempted(predicate(Predicate)) :-
+    seam:builtin_implementation_exemption(Subject, _),
+    builtin_exemption_predicate(Subject, Predicate).
+
+implementation_gap_subject(description(Key, _), Key).
+implementation_gap_subject(predicate(Predicate), Predicate).
+
+builtin_predicate_described(Module:Name/PrologArity) :-
+    Arity is PrologArity - 1,
+    builtin_implementation(Name/Arity, Implementation),
+    builtin_callable_descriptor(Implementation, ModuleRef),
+    builtin_reference_module(ModuleRef, DescribedModule),
+    DescribedModule == Module.
+
+builtin_surface_predicate(Module:Name/Arity, File) :-
+    setof(SurfaceName,
+          ( builtin_surface_name(SurfaceName), atom(SurfaceName) ),
+          Names),
+    member(Name, Names),
+    current_predicate(Module:Name/Arity),
+    Arity > 0,
+    functor(Head, Name, Arity),
+    predicate_property(Module:Head, implementation_module(Module)),
+    source_file(Module:Head, File),
+    builtin_project_implementation_file(File).
+
+builtin_surface_name(Name) :- metta_grounded_token(Name).
+builtin_surface_name(Name) :- metta_effect_prolog_primitive(Name).
+builtin_surface_name(Name) :- metta_builtin_effect_override(Name, _).
+builtin_surface_name(Name) :- metta_semantic_effect(Name, _).
+builtin_surface_name(Name) :- seam:builtin_type_declaration(Name, _).
+builtin_surface_name(Name) :- seam:extension_builtin(Name, _).
+%translator:embedded_operation_head/1 is NOT read here. It is the translator's
+%own classification of which heads may hold a redex, is not on the module's
+%export list, and the engine reaching it is what the layering contract refuses
+%[tested: engine_layering:test_the_engine_layering_contract_holds_and_a_violation_is_named].
+%Nothing is lost while every one of its 47 heads is already named by one of
+%the seven sources above, which the suite asserts rather than assuming
+%[tested: builtin_facets:the_translators_embedded_operations_add_no_surface_name].
+builtin_surface_name(Name) :- translator:metta_special_form_head(Name).
+
+builtin_project_implementation_file(File) :-
+    builtin_project_root(Root),
+    % policy-inventory-exempt: mechanism-internal; reason=the three directories are this repository's own layout, the roots a shipped predicate can be defined under, not a policy a program chooses; evidence=engine/metta/registration.pl:builtin_project_root/1
+    member(Directory, [engine, lib, extensions]),
+    directory_file_path(Root, Directory, ProjectDirectory),
+    atom_concat(ProjectDirectory, '/', Prefix),
+    sub_atom(File, 0, _, _, Prefix), !.
+
+builtin_project_root(Root) :-
+    metta_engine_module(Engine),
+    source_file(Engine:register_builtin_definition(_), RegistrationFile),
+    file_directory_name(RegistrationFile, MettaDirectory),
+    file_directory_name(MettaDirectory, EngineDirectory),
+    file_directory_name(EngineDirectory, Root).
+
+%%%% Reason-bearing coverage exemptions %%%%
+
+validate_builtin_exemptions :-
+    validate_builtin_exemption_schema,
+    validate_builtin_exemption_unique,
+    validate_builtin_exemption_liveness.
+
+validate_builtin_exemption_schema :-
+    forall(builtin_registration_exemption(Name, Reason),
+           (   atom(Name), valid_builtin_exemption_reason(Reason)
+           ->  true
+           ;   throw(error(invalid_builtin_registration_exemption(Name, Reason),
+                           builtin_registry))
+           )),
+    forall(seam:builtin_implementation_exemption(Subject, Reason),
+           (   valid_builtin_implementation_exemption_subject(Subject),
+               valid_builtin_exemption_reason(Reason)
+           ->  true
+           ;   throw(error(invalid_builtin_implementation_exemption(
+                               Subject, Reason),
+                           builtin_registry))
+           )).
+
+valid_builtin_exemption_reason(Reason) :-
+    atom(Reason),
+    Reason \== ''.
+
+valid_builtin_implementation_exemption_subject(Subject) :-
+    builtin_exemption_predicate(Subject, Module:Name/Arity),
+    atom(Module),
+    atom(Name),
+    integer(Arity),
+    Arity > 0.
+
+builtin_exemption_predicate(ModuleRef:(Name/Arity), Module:Name/Arity) :- !,
+    builtin_reference_module(ModuleRef, Module).
+builtin_exemption_predicate(Name/Arity, Module:Name/Arity) :-
+    metta_engine_module(Module).
+
+validate_builtin_exemption_unique :-
+    findall(Name, builtin_registration_exemption(Name, _), Registration),
+    msort(Registration, SortedRegistration),
+    (   first_duplicate(SortedRegistration, DuplicateRegistration)
+    ->  throw(error(duplicate_builtin_registration_exemption(
+                        DuplicateRegistration),
+                    builtin_registry))
+    ;   true
+    ),
+    findall(Predicate,
+            ( seam:builtin_implementation_exemption(Subject, _),
+              builtin_exemption_predicate(Subject, Predicate) ),
+            Implementations),
+    msort(Implementations, SortedImplementations),
+    (   first_duplicate(SortedImplementations, DuplicateImplementation)
+    ->  throw(error(duplicate_builtin_implementation_exemption(
+                        DuplicateImplementation),
+                    builtin_registry))
+    ;   true
+    ).
+
+validate_builtin_exemption_liveness :-
+    forall(builtin_registration_exemption(Name, _),
+           (   builtin_registration_gap(Gap),
+               registration_gap_name(Gap, Name)
+           ->  true
+           ;   throw(error(stale_builtin_registration_exemption(Name),
+                           builtin_registry))
+           )),
+    forall(seam:builtin_implementation_exemption(Subject, _),
+           (   builtin_exemption_predicate(Subject, Predicate),
+               builtin_implementation_gap(predicate(Predicate))
+           ->  true
+           ;   throw(error(stale_builtin_implementation_exemption(Subject),
+                           builtin_registry))
+           )).

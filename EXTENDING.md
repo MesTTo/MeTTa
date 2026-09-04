@@ -666,6 +666,39 @@ extension's lifetime [tested:
 `test_a_library_types_its_own_blob_without_destroying_the_table`;
 commit=1a5459b9e81b168ee402bf9eda2c407e55f7eae0].
 
+### Say that a predicate of yours is not a language operation
+
+Every builtin the engine registers carries an exact implementation facet, and
+the boot reads the relation the other way too: a predicate your files define,
+whose name also appears on the type, grounded-token, effect, semantic-operation,
+extension or special-form surface, has to be either described as a builtin or
+declared not to be one. A predicate that is neither stops the boot with
+`unregistered_builtin_implementation(<module>:<name>/<arity>)`.
+
+Compiled helpers hit this. The effect planner names the guards and pruning
+helpers the translator emits, so their names are on the effect surface while
+the predicates themselves are Prolog primitives with no MeTTa spelling. Say so
+beside the implementation:
+
+```prolog
+:- multifile seam:builtin_implementation_exemption/2.
+:- dynamic seam:builtin_implementation_exemption/2.
+seam:builtin_implementation_exemption(
+    my_space:my_capacity_guard/2,
+    compiled_capacity_guard_is_not_a_language_operation).
+```
+
+The subject is `Module:Name/Arity`, or a bare `Name/Arity` for the engine's own
+module, and the reason is a nonempty atom that says why. The declaration goes
+in the file that defines the predicate, so the reason is read beside the code
+it excuses rather than in a list somewhere else. An exemption whose predicate
+stops being reported is itself refused, with
+`stale_builtin_implementation_exemption(<subject>)`, so the list cannot outlive
+what it was written for [tested:
+`builtin_facets:the_effect_planner_helpers_are_exempt_in_place`,
+`builtin_facets:a_stale_implementation_exemption_is_rejected`;
+commit=WORKTREE].
+
 ### Taking an argument unevaluated
 
 Declare the parameter `Atom` and the argument arrives as written:
