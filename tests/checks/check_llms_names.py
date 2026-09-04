@@ -64,7 +64,7 @@ Guarantees:
   - a documented head the vocabulary does not know while its bang variant does
     is reported both ways, library heads are read so all 24 libraries' surface
     is covered, and a path, a non-head and a real head are each left alone
-    [tested: tests/checks/check_llms_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_llms_selftest.py; commit=b4091abea5e9562c910d1284719b2a096b0fe2b7]
   - the operator-word count and roster are derived from the live `S` by the
     claim's own definition, so a wrong count, a dropped word, a plain spelling
     given a row, and deletion of the claim itself each fail separately
