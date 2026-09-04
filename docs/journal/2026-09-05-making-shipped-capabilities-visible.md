@@ -144,6 +144,14 @@ object example with an unregistered projection and `build(atom, Class)`
 round-trip. Registry-based dataclass conversion remains beside it as a positive
 control for the other ownership model.
 
+Tried: searched all consumer material for `AssertionFailure` -> only source
+and tests named it. The error taxonomy listed its siblings but gave harness
+authors no way to distinguish a false program claim from a broken engine.
+
+Decided: add the exception to that taxonomy and execute one false `(test ...)`
+in a checked example. The catch verifies `operation`, `actual`, and `expected`
+as data rather than parsing the diagnostic sentence.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

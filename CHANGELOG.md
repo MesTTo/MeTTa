@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Test and conformance harness authors can now find `AssertionFailure` in the
+  error taxonomy and a checked example that reads its operation, actual, and
+  expected fields.
+
 - Class-owned `__metta__` and `__from_metta__` conversion now appears in the
   consumer sheet and executable object-integration example, including the
   unregistered `build(atom, Class)` round trip.

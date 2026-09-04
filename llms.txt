@@ -691,8 +691,11 @@ metta.engine().info() -> versions of metta, janus, swi_prolog, python, metta_pat
 
 Errors: `MettaError` is the base, then `EngineError`, `MettaSyntaxError`,
 `CastError`, `CompileError`, `SourceNotFound`,
-`MettaResultError`, `TransportFailure`, and `ResourceLimitError` with
+`MettaResultError`, `AssertionFailure`, `TransportFailure`, and `ResourceLimitError` with
 `TimeLimitError` and `InferenceLimitError` under it, plus `Interrupted`.
+`AssertionFailure` means a `(test ...)` or `(assert ...)` claim was false, not
+that the engine broke; `.operation`, `.actual`, and `.expected` are structured
+fields for a harness.
 `MettaOperationError(EngineError)` is a builtin refusing a value, with the parts
 as data: `.operation` is what the source wrote (`+`, `min-atom`), `.kind` the
 formal's functor, `.expected` and `.culprit` the type and offending value.
