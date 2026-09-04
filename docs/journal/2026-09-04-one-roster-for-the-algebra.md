@@ -60,6 +60,13 @@ Rejected: changing the elementwise Python arrows from their existing scalar-capa
 Decided: install one module-scoped compatibility rule from shaped DLTensor to its base, publish symbolic `Shape` metadata through Python `Annotated`, and add module-local `get-type` equations. Elementwise equations call the existing `broadcast-shape` relation; rank-two matmul unifies one shared dimension directly.
 Tried: `test_annotated_tensor_shapes_flow_through_broadcast_and_matmul` -> `(4 1)` with `(3)` inferred `(4 3)` through a nested operation, `(2 3)` by `(3 4)` inferred `(2 4)`, both incompatible pairs produced no shaped type, and a shaped symbol satisfied a DLTensor input before any array was built.
 
+## 2026-09-05 - F1 bounded Answers source seam
+Tried: applied `[:k]` to an ordered Answers view -> `_slice` pulled the original cursor through `islice`, so no producer ever learned `k`.
+Rejected: inspecting a generator's frame to find and mutate its captured cursor, because closure layout is not an interface and ordered cursors deliberately withhold their limit until the best-first promise is proved.
+Rejected: replacing a source after any answer was observed, because replay state and effects make a second query observably different.
+Decided: an Answers producer may supply a bounded-source factory. Only a finite nonnegative slice of a pristine view offers its `stop`; `stop` covers both skip and fetch, and an observed, negative, open-ended, or empty slice stays on the shared source. The factory receives that shared source as its exact fallback, so the producer can defer its own correctness test until pull.
+Open: VIEWER owns the match source constructors in `_space.py`; it must pass factories that retain the ordinary cursor unless the ranked source has ordered annotations and a best-first emission declaration.
+
 ## 2026-09-06 - D1 landing: half of it was already on trunk
 Tried: rebasing this thread onto `petta` -> the catalog half of D1 had landed
 independently as `2026-09-05-the-carrier-the-vocabulary-would-not-admit.md`.
