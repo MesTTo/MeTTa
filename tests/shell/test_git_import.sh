@@ -106,6 +106,30 @@ grep -q dirty_git_checkout "$fixture/dirty.log"
 test "$(git -C "$target" rev-parse HEAD)" = "$second"
 git -C "$target" checkout -q -- payload.txt
 
+# An option-looking URL is refused before it reaches git, and nothing is left
+# behind. Without this, the value is parsed as an OPTION rather than as the
+# repository: `git clone --depth 1 --no-such-option d` answers "unknown option"
+# where `git clone --depth 1 -- --no-such-option d` answers "repository does not
+# exist". `--upload-pack=` is the shape that matters, because git runs it.
+for option_like in '--upload-pack=false' -x; do
+    if run_import "$option_like" '' "$fixture/optionlike" "$first" \
+        >"$fixture/optionlike.log" 2>&1; then
+        echo "option-like URL unexpectedly succeeded: $option_like" >&2
+        exit 1
+    fi
+    grep -q git_option_like_argument "$fixture/optionlike.log"
+    test ! -e "$fixture/optionlike"
+done
+
+# A build script is the other value that reaches a program, and takes the same
+# refusal. The revision needs none: it is already required to be 40 hex digits.
+if run_import "$remote" '-c' "$fixture/optionbuild" "$first" \
+    >"$fixture/optionbuild.log" 2>&1; then
+    echo "option-like build unexpectedly succeeded" >&2
+    exit 1
+fi
+grep -q git_option_like_argument "$fixture/optionbuild.log"
+
 # The pinned form accepts only a full SHA, never an abbreviation, branch, or tag.
 short=$(printf '%s' "$first" | cut -c1-12)
 for invalid_revision in "$short" main v1.0.0; do
