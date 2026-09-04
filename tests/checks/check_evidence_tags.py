@@ -136,6 +136,9 @@ SOURCES = (
     "extensions/mork/mork_ffi/*.pl",
     "extensions/python/tools/*.py",
     "tests/checks/*.py",
+    # The Python suites carry 536 tags of their own, the largest block
+    # the lane could not see.
+    "extensions/python/tests/*/*.py",
     # The plunit suites make the same claims their subjects do, in their
     # own headers, and 271 of them across 50 files went unread.
     "tests/prolog/suites/*/*.plt",
