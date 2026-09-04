@@ -79,6 +79,38 @@ atom: `Expression((S.f, 1, 2))` is `S.f(1, 2)`.
 `parse("(f $x)")` reads exactly one form without evaluating it.
 `forms("(a) (b)")` reads every top-level form without evaluating any.
 
+THIRTEEN ATTRIBUTE NAMES ON `S` ARE OPERATOR WORDS, NOT SPELLINGS. Python's
+`operator` module owns these words, and `S.<word>` reaches the engine head the
+word NAMES rather than a symbol spelled like the word:
+
+| `S.<attr>` | builds | | `S.<attr>` | builds |
+|---|---|---|---|---|
+| `S.eq` | `==` | | `S.add` | `+` |
+| `S.ne` | `!=` | | `S.sub` | `-` |
+| `S.lt` | `<` | | `S.mul` | `*` |
+| `S.le` | `<=` | | `S.mod` | `%` |
+| `S.gt` | `>` | | `S.truediv` | `/` |
+| `S.ge` | `>=` | | `S.pow` | `pow-math` |
+| `S.neg` | `(- 0 x)` | | `S.floordiv` | refused, see below |
+
+So `S.sub(a, b)` is `(- a b)`, a SUBTRACTION, and nothing downstream can tell:
+it stores, matches, digests and round-trips like any other expression. If you
+wanted a symbol named `sub`, the bracket door gives it exactly:
+`S["sub"]` is `sub`, and `S["add"]` is `add`. That is the general rule
+(brackets are exact, attributes map) applied to a case where the map is a
+lookup table rather than the underscore-to-hyphen rewrite, so unlike
+`S.car_atom` -> `car-atom` the name you typed is not visibly present in what
+you get.
+
+The failure this produces is quiet. A relation genuinely named `sub`, built
+with `S.sub(a, b)`, is stored as arithmetic; a later query for `sub` facts
+answers `[]` against a graph that obviously connects, and the first suspicion
+falls on the query rather than on the write.
+
+`S.floordiv` REFUSES rather than guessing, because its settled image is
+composite (`floor-math` over `/`) and no single head spells it. `S.neg` is
+composite too but settled, so it builds `(- 0 x)`.
+
 Four kinds, all immutable with `__slots__` and one-subpattern
 `__match_args__`: `Symbol`, `Variable`, `Grounded`, `Expression`. So
 `match atom: case Expression([head, *args]): ...`, `case Symbol(name):`,
@@ -254,7 +286,11 @@ is a handle rather than a value that dwindles.
 one, `overlay(front, back)` reads both and writes to the front, `readonly(s)`
 refuses writes by capability, `mapped(s, shape)` is a shape view from one
 declaration, and `diff(a, b)` says HOW two spaces differ where `digest()` only
-says THAT they do. Each composes STORAGE and is a provider, not an evaluation
+says THAT they do. Each ANSWERS a provider, not a space, so attach it to query
+it: `metta.attach("&all", metta.spaces.overlay(front, back))` then
+`all.match(...)` joins across both layers with `where=`, `under=` and Answers,
+where the composed object's own `match(pattern)` is the provider protocol's
+narrow one. Each composes STORAGE and is a provider, not an evaluation
 context: equations reachable through one are data, and read back by `atoms()`
 without firing, unless that provider declares `rules`.
 
@@ -307,7 +343,10 @@ code and an existing `(effect name class)` declaration atom retained as a
 compatibility input. The remaining options are `name=`,
 `transport="encoded"|"raw"`, `declarations=` (ordinary Atom claims),
 `arities=`, and `inverse=` (the callable that runs it backwards).
-`m.unregister_op(name)` removes every arity and declaration.
+`m.unregister_op(name)` removes every arity and declaration. A coroutine
+operation answers a FutureSpace immediately rather than suspending the call:
+the future IS a space, so awaiting it is matching it, and `(async-op <name>
+<future-space> launch|landing)` makes both ends observable.
 
 The ordered `EffectClass` members are `pureStructural`, `readOnlyLookup`,
 `nondeterministicReadOnly`, `writesState`, and `oracleIO`. A plan's class is
@@ -538,6 +577,10 @@ m.derivation(target, depth=None, *, timeout=, inferences=) -> list[Derivation]
 m.why(pattern) -> str            one empty match explained in words
 rows.why()                       pattern miss, failed join, or rejecting guard
 m.lint() -> list[lint.Finding]   the silently-wrong class, from stored structure
+        `# metta: ok(<kind>)` on a statement, or on the line above the lint
+        CALL to cover a space built entirely from Python, suppresses that one
+        kind there; it is kept as a (lint-intent ...) atom, not dropped as a
+        comment
 metta.lint.lint_file(path, m=None)   the same findings anchored to file:line
 m.effect_plan(target) -> EffectPlan(operations, effect), translates and follows
         nested compiled calls without executing the target
