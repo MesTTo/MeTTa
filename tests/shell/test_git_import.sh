@@ -106,20 +106,32 @@ grep -q dirty_git_checkout "$fixture/dirty.log"
 test "$(git -C "$target" rev-parse HEAD)" = "$second"
 git -C "$target" checkout -q -- payload.txt
 
-# An option-looking URL is refused before it reaches git, and nothing is left
-# behind. Without this, the value is parsed as an OPTION rather than as the
-# repository: `git clone --depth 1 --no-such-option d` answers "unknown option"
-# where `git clone --depth 1 -- --no-such-option d` answers "repository does not
-# exist". `--upload-pack=` is the shape that matters, because git runs it.
-for option_like in '--upload-pack=false' -x; do
-    if run_import "$option_like" '' "$fixture/optionlike" "$first" \
-        >"$fixture/optionlike.log" 2>&1; then
-        echo "option-like URL unexpectedly succeeded: $option_like" >&2
-        exit 1
-    fi
-    grep -q git_option_like_argument "$fixture/optionlike.log"
-    test ! -e "$fixture/optionlike"
+# An option-looking URL is refused before it reaches git, at EVERY arity, and
+# nothing is left behind. Without this, the value is parsed as an OPTION rather
+# than as the repository: `git clone --depth 1 --no-such-option d` answers
+# "unknown option" where `git clone --depth 1 -- --no-such-option d` answers
+# "repository does not exist". `--upload-pack=` is the shape that matters,
+# because git runs it. The arity loop is here for the reason the unit loop
+# below is: the guard is wired into three separate normalisation sites, and a
+# refusal proven at one of them says nothing about the other two.
+option_base="$fixture/optionlike"
+for bad_url in '--upload-pack=false' -x; do
+    for bad_call in \
+        "'$bad_url',R" \
+        "'$bad_url','',R" \
+        "'$bad_url','','$option_base/a',R" \
+        "'$bad_url','','$option_base/b','$first',R"
+    do
+        if (cd "$fixture" && swipl -q -g \
+            "consult('$project_dir/engine/main.pl'),'git-import!'($bad_call),halt" \
+            >"$fixture/optionlike.log" 2>&1); then
+            echo "option-like URL unexpectedly succeeded: $bad_call" >&2
+            exit 1
+        fi
+        grep -q git_option_like_argument "$fixture/optionlike.log"
+    done
 done
+test ! -e "$option_base"
 
 # A build script is the other value that reaches a program, and takes the same
 # refusal. The revision needs none: it is already required to be 40 hex digits.
