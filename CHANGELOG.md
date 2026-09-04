@@ -8,6 +8,23 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A JAX tracer crosses an array operation untouched. `metta.arrays` converted
+  the right operand whenever its Python CLASS differed from the left's, and a
+  traced value and a concrete array are two classes of one namespace: the
+  conversion was unnecessary, and impossible, because a tracer carries
+  `__dlpack__` without the `__dlpack_device__` half that `from_dlpack`
+  requires. `(t+ <concrete> <tracer>)` under `jax.jit` raised a TypeError
+  where it now answers, and `jax.grad` reaches through the MeTTa computation.
+  The gate asks which LIBRARY an operand belongs to; the class test stays in
+  front of it as a fast path, since two values of one class are always of one
+  library.
+- `metta.arrays.install(m)` and `metta.integrate.integrate(m, target)` take a
+  context as well as a space. Both need the space's storage doors, and `MeTTa`
+  refuses a Space door rather than forwarding it, so the natural spelling
+  raised `MeTTa has no 'is_function'` with every array operation left
+  unregistered. `metta.integrate.space_of` is the resolution, and an installer
+  is handed the space either way.
+
 - A bounded trace answers the events it recorded instead of discarding them.
   `max_events` has answered its prefix since 0.7.0; the RUN bounds still
   raised, and the events went with the exception. Measured on

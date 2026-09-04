@@ -66,6 +66,11 @@ def install(m, default: Any = None) -> list[str]:
 >
 > t-shape remains observation of an existing tensor. Use broadcast-shape
 > when compatibility or inference must happen before materialisation.
+>
+> m may be a context or a space. The operations are registered into the
+> space either way, which is the object whose storage and introspection
+> doors this needs; `install(m)` on a context used to raise
+> `MeTTa has no 'is_function'` and leave every operation unregistered.
 
 ## `EmbeddingStore`
 

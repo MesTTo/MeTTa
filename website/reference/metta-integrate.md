@@ -33,6 +33,27 @@ def install(self, m) -> None:
 
 No docstring is defined.
 
+## `space_of`
+
+```python
+def space_of(m: Any) -> Any:
+```
+
+> The space an installer writes into, given a context or a space.
+>
+> An installer is handed a SPACE, because "equations and facts an installer
+> writes land in the space it was handed" is what makes integrate()
+> idempotent per space. What a caller holds is usually a context, and MeTTa
+> refuses a Space door rather than forwarding it, deliberately, so an
+> installer written the natural way failed on the first storage door it
+> reached: `metta.arrays.install(m)` raised `MeTTa has no 'is_function'`
+> with every array operation left unregistered.
+>
+> Resolving once, here, is what lets `install(m)` work without erasing the
+> distinction the two classes draw, because the installer still receives a
+> space. A context is exactly the object that has a home space to give; a
+> space has none, and answers for itself.
+
 ## `integrate`
 
 ```python
@@ -44,6 +65,9 @@ def integrate(m, target: Any) -> str:
 > target may be: a module (or dotted module name) defining install_metta(m),
 > an Integration object, or the name of an installed package's entry point
 > in the metta.integrations group. Returns the integration's name.
+>
+> m may be a context or a space; the installer is handed the space either
+> way, which is the object whose storage doors it needs.
 >
 > Idempotence is per SPACE, because equations and facts an installer
 > writes land in the space it was handed: installing into a second space
