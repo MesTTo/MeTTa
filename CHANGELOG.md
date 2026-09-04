@@ -153,6 +153,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   on its first call. Enabling now recompiles through the engine's own door and
   touches no stored atom.
 
+- `Answer`'s docstring states the contract the engine actually runs. It said
+  `residue` and `k` "complete the wire form; the engine's support for them
+  lands by phase, and until it does a non-default value is a loud error",
+  which had stopped being true: a residue is evaluated under theta and a false
+  one drops its answer, and a `k` is admitted wherever the context declares a
+  non-Boolean annotation algebra. It also records what `get-metatype` observes
+  about an encoded value, the atom class rather than the Python one.
+
 - The `metta.algebra(...)` module constructor declares into the ambient space.
   It resolved its receiver as the process-default home, so a row built inside
   `with scratch:` landed in `&self` and, once algebra rows became context-owned,

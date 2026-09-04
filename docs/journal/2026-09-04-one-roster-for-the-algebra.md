@@ -42,6 +42,12 @@ Tried: `jscpd --min-lines 5 --min-tokens 50` over the three implementation files
 Rejected: merging those two functions, because the repeatable form is an optional cardinality hint for a view that also owns rows, while the counting-carrier form is the answer itself and now deliberately changes its public element type.
 Tried: `twin_coverage.py --measure --rounds 1` on `04-peanofast.metta` and `03-matespace.metta` -> the protocol-shaped aggregate completed at 89,211 and 24,108,963 twin inferences respectively, still crossing no proposition rows.
 
+## 2026-09-04 - Answer's four live slots
+Tried: compared `Answer`'s docstring with the provider and operation regressions -> the prose said residue and k were staged and refused, while both were already executed end to end.
+Rejected: extending the closed-value-set lane to parse this promise, because a roster parser can prove spellings and order but cannot prove constructor behavior or engine interpretation.
+Decided: document `Answer(theta, *, value=, residue=, k=)` as the live wire contract, including the annotation declaration fence and `get-metatype` as the observer of encoded value content.
+Tried: `test_every_answer_constructor_slot_is_live` -> one Answer used all four slots, its false residue alternative dropped, its k arrived as `0.75`, and its numeric content reported `Grounded`.
+
 ## 2026-09-06 - D1 landing: half of it was already on trunk
 Tried: rebasing this thread onto `petta` -> the catalog half of D1 had landed
 independently as `2026-09-05-the-carrier-the-vocabulary-would-not-admit.md`.
