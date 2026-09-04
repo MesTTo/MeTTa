@@ -28,6 +28,10 @@
 %   - annotation algebra lookup reads a custom descriptor only from the
 %     declaring context, with shipped global rows as fallbacks [tested:
 %     test_custom_algebras_are_context_owned; commit=WORKTREE].
+%   - metta_current_algebra/3 exposes the selected declaration without
+%     confusing the implicit Boolean execution default for an explicit choice
+%     [tested: test_current_algebra_follows_each_selection_layer;
+%     commit=WORKTREE].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: observe-source owns its diagnostic writes as oracleIO; ordinary
@@ -2099,6 +2103,20 @@ metta_under_pop(none) :-
 metta_effective_algebra(_, Algebra) :-
     nb_current('$metta_under_algebras', [Algebra|_]), !.
 metta_effective_algebra(Ctx, Algebra) :-
+    metta_annotations(Ctx, Algebra).
+
+%The public observer is narrower than metta_effective_algebra/2: silence means
+%None to its host caller, while execution still defaults silence to bool.
+%A singleton list distinguishes an actual scoped algebra named "none" from no
+%Python scope. The engine-held per-call override wins because it encloses the
+%operation that can ask this question.
+metta_current_algebra(_, _, Algebra) :-
+    nb_current('$metta_under_algebras', [Algebra|_]), !.
+metta_current_algebra(_, [Algebra], Algebra) :- !.
+metta_current_algebra(Ctx, [], Algebra) :-
+    (   metta_contract_fact([annotations, Ctx, _])
+    ;   metta_contract_fact([annotations, Ctx, _, _])
+    ), !,
     metta_annotations(Ctx, Algebra).
 
 metta_algebra_descriptor(Name, Combine, Extend, Zero, One, Laws,

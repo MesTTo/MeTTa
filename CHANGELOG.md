@@ -380,6 +380,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `metta.current_algebra()` answers the algebra a query here would run under,
+  or None. `current_space()` had no partner: a program could scope a carrier
+  with `with metta.under(...)`, declare one on a space, or pass one to a call,
+  and had no way to read back which of the three was in force, including from
+  inside an operation the engine has already entered. The observer follows the
+  same precedence the query does, per-call carrier over task scope over the
+  current context's annotations row, and answers None when none of the three
+  is present rather than reporting execution's implicit Boolean default as a
+  declaration.
+
 - Every shipped semiring is a root object. `metta.counting`, `.prob`, `.prov`,
   `.ranked` and `.tropical` were exported and `bool`, `bag`, `set`, `budget`
   and `amplitude` were reachable only as strings, so `metta.budget` raised

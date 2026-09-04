@@ -48,6 +48,12 @@ Rejected: extending the closed-value-set lane to parse this promise, because a r
 Decided: document `Answer(theta, *, value=, residue=, k=)` as the live wire contract, including the annotation declaration fence and `get-metatype` as the observer of encoded value content.
 Tried: `test_every_answer_constructor_slot_is_live` -> one Answer used all four slots, its false residue alternative dropped, its k arrived as `0.75`, and its numeric content reported `Grounded`.
 
+## 2026-09-04 - F2 current algebra observer
+Tried: derived the answer from `_under.selected()` alone -> it cannot observe an explicit `under=` while a held engine goal invokes a Python operation.
+Rejected: returning `metta_effective_algebra/2` directly, because its intentional silent-context default is `bool`, while the observer's contract is an explicitly selected name or `None`.
+Decided: one engine service resolves active per-call selection, a singleton task-scope input, then the current context's annotations row. The root observer returns `None` only when all three are absent.
+Tried: `test_current_algebra_follows_each_selection_layer` -> two context declarations remain distinct, a task scope overrides its context, and an explicit call carrier overrides the task scope from inside a Python operation.
+
 ## 2026-09-06 - D1 landing: half of it was already on trunk
 Tried: rebasing this thread onto `petta` -> the catalog half of D1 had landed
 independently as `2026-09-05-the-carrier-the-vocabulary-would-not-admit.md`.
@@ -184,3 +190,38 @@ run -> `match: the python side raised assertionerror`, from
 only one outside `metta/`, `examples/` and the docs, so the sweep that found
 the other ten missed it. It reads `.one().annotation` now and the row's frozen
 answer is unchanged, because the row's VALUE is its last expression.
+
+## 2026-09-06 - F2 landing: a twin row that tracks engine shape, not work
+Tried: the full Python suite -> `01-identity.metta`'s twin missed its pin, and
+a twelve-point bisect across `petta` and every landed commit found two moves,
+one at the algebra-owner commit and one here.
+Tried: the same bisect on the previous base, `petta` at 754df32f -> the moves
+were 0 and +5 there and are -5 and -30 here, and on that base removing the
+single line `kind(metta_current_algebra/3, host_service)` restored the earlier
+number while removing the predicate it names, the root door or the algebra
+door each did not. Replacing `engine/` with trunk's at the branch tip restored
+it too, while replacing `extensions/python/metta/` changed nothing.
+Tried: the same row on the unchanged tree at 84bb5aa9 -> 3,437 against its own
+pinned 3,432, so trunk's lane is red on this row before this branch touches the
+file; +5 of the distance is trunk's own drift and is reported rather than
+absorbed.
+Decided: re-pin, and record the base with it. Trunk's own memoisation work
+reached the same row on the same day and wrote the same conclusion at length,
+including a four-base table showing the sign of an identical change flipping
+with the surrounding image; this thread's twelve-point bisect saw exactly that,
+0 and +5 against 754df32f and -5 and -30 against 84bb5aa9, db307494 and
+9b944a94. On the base this lands on the two movers read 3432 and 3402, so the
+pin follows. What the row tracks is the engine's shape: `metta=2357` on every
+one of those arms and on every base, which is the control saying no reduction,
+clause or answer differs.
+Tried: `pylint metta/algebra.py` -> the module-level `current_space` this
+commit adds is shadowed inside `_construct`, which imported the root door of
+the same name. That import goes: the two doors answer the same space and the
+root's only difference is the implementation-module rehide, so the constructor
+reads the module-level one `current_algebra` already reads.
+Tried: the llms lane on the landing tip -> `llms.txt:41: the sources table says
+86 host_service extension points, the tree has 87`. The same
+`kind(metta_current_algebra/3, host_service)` line that moved the twin row is
+also counted by a cheat sheet, and `check_llms_selftest` uses the real table as
+its clean control, so one stale number failed two GATE lanes rather than one.
+Decided: the count moves in this commit, with the row it counts.
