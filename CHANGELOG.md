@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The consumer sheet and a checked runtime-configuration example now expose
+  the root `metta.config` object, its four environment variables, the atomic
+  `configure` method, and which settings freeze after engine startup.
+
 - `MeTTa.space(..., journal=..., rename=...)`, the module-level `metta.space`
   factory and `AsyncMeTTa.space` now expose the persistent store's one-open
   schema migration. Users no longer need to import the private provider class

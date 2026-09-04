@@ -72,6 +72,19 @@ Tried: the two public-factory regression cases with the required Python -> 2
 passed; `integration/persistent_migration.py` then migrated and reopened the
 journal through root `metta.space`, printed both checked claims, and exited 0.
 
+Tried: compared the 107 root Python exports with `llms.txt` and all runnable
+Python examples -> `Config` and `config` were the only process-control exports
+with neither a consumer-sheet spelling nor an example. Tests exercised the
+object, but a package user had no discovery path to its four settings or their
+startup boundary.
+
+Decided: document the exact settings and environment variables beside first
+engine construction, and add one checked example that inspects the roster,
+configures before startup, observes the freeze, and changes a live setting.
+
+Tried: `operations/runtime_configuration.py` with the required interpreter ->
+four checked claims, `OK runtime_configuration`, exit 0.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

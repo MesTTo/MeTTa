@@ -83,6 +83,15 @@ metta.llms() -> None    # print THIS file to stdout, the way help() prints
 inside the wheel beside the engine tree, so an install answers it without a
 checkout, and it never pages: the door writes and returns whatever stdout is.
 
+`metta.config` is the process-wide `Config` object. Inspect all four settings
+with `config.as_dict()` and set them atomically with
+`config.configure(stack_limit=..., heartbeat_interval=...,
+declaration_limit=..., display_rows=...)`. The stack byte ceiling and Janus
+heartbeat interval freeze after the first engine starts; declaration expansion
+and displayed-row limits remain live. Set the same values before import with
+`METTA_STACK_LIMIT`, `METTA_HEARTBEAT_INTERVAL`, `METTA_DECLARATION_LIMIT`, and
+`METTA_DISPLAY_ROWS`; invalid or nonpositive values stop import by name.
+
 ## Atoms: built in Python, no engine call
 
 `S.likes` is the symbol `likes`; `S["+"]`, `S["my-name"]` for non-identifiers.
