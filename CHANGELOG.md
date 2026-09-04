@@ -57,6 +57,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The root `metta.space(journal=)` type now accepts `os.PathLike[str]`, matching
+  the persistence path it already forwarded at runtime. Async evaluation types
+  now include `Undefined` through direct, saga, and reified-world routes, and
+  `AsyncMeTTa.eval` distinguishes the flat one-target result from grouped batch
+  results through overloads.
 - `answers(timeout=)` and `match(timeout=)` bound the evaluation. They did
   nothing at all: a non-terminating recursion ran past sixty seconds under
   `timeout=3` where `eval(timeout=3)` raised at 3.01 seconds on the same
