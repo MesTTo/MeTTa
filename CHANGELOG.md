@@ -8,6 +8,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Integration installation is transactional across framework-managed state.
+  A failed installer now restores operations and declaration ownership,
+  protocol types and reprs, reflectors, converted types, library paths,
+  dynamic Prolog registrations, atoms, and nested installation receipts.
+  Best-effort home spaces are refused before execution, while consulted Prolog,
+  loaded native code, custom listeners, and other process-global residue are
+  reported on the original exception because they cannot be safely unwound.
+- Every engine consumer reads a declaration chain through one projection.
+  `metta_arrow_type_shape/5`, `metta_arrow_type_chain/2` and
+  `metta_presented_arrow_chain/3` replace nine literal `[->|...]` matches, so an
+  annotated arrow such as `(-[det]-> A B)` is read rather than admitted and
+  then failed at run time. An unannotated arrow and an annotated one project to
+  the identical runtime chain; a malformed form fails rather than passing
+  through.
+
 - Python-authored programs can now be inspected and exported as MeTTa.
   `Space.source()` returns the receiver's directly stored program as the exact
   loadable text written by `Space.save(format="metta")`; `Defined` and `Space`
