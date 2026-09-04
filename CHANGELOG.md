@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Foreign backend authors now have exact consumer-sheet and executable doors
+  for `BoundedMatcher`, `Snapshotter`, and `WorldCommitter`, including an exact
+  bound pushdown and a provider-owned immutable-world commit.
+
 - Integration authors now have consumer-sheet spellings for unloaded and
   explicit entry-point loading, dependency-ordered discovery, and exact
   process-wide hook cleanup, plus a checked registration-lifecycle example.

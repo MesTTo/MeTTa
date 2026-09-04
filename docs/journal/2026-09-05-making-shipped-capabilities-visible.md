@@ -190,6 +190,16 @@ and add a checked example that discovers without loading, installs three
 process-wide protocol hooks, observes each effect, removes all three in a
 `finally` block, and proves reflection no longer claims the object.
 
+Tried: searched the sheet and examples for `BoundedMatcher`, `Snapshotter`,
+and `WorldCommitter` -> no occurrences. Their protocols were public and their
+engine routes were tested, but a backend author could not discover which
+method signatures unlock bound pushdown and provider-owned worlds.
+
+Decided: document the three signatures in the provider section and add one
+small provider implementing all three. Its example checks that an exact
+one-answer query passes `limit=1`, a reified write leaves the provider
+untouched, and `Space.commit` hands the provider one base-relative atomic diff.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

@@ -820,6 +820,11 @@ it a space holds DATA, and an equation written there is refused rather than
 stored where it could never fire. Conjunctive queries route per conjunct, so
 a foreign space joins with a native one; on such a conjunction `rows.why()`
 prints which conjunct went where and whether its class was exact.
+`BoundedMatcher.match(pattern, *, limit=)` may stop at the caller's count only
+when `MatchClassifier.pushdown(pattern)` says `"exact"`; ignoring the limit is
+always sound. `Snapshotter.snapshot() -> tuple[Atom, ...]` makes a provider
+reifiable, and `WorldCommitter.commit_world(base, removed, added)` is the
+provider-owned atomic boundary for landing that world's checked multiset diff.
 
 From Prolog, `engine/ext_points.pl` declares every seam WITH ITS KIND: an EVENT runs
 for effect and every handler runs; an OWNERSHIP seam is claimed by the first
