@@ -52,6 +52,15 @@
 %     under fresh process identities and share the source reload lifecycle [tested:
 %     test_fast_cache_restores_translator_rules_and_bound_spaces;
 %     commit=d2279ea320e54790dab4484421a168e93755b185].
+%   - current_source_identity/2 answers the file and text digest a record made
+%     during a compile belongs to, taking record_source_assertion/1's charge so
+%     a record and its reported source name one load, reading the published
+%     row once the owning load has closed, and naming the absence outside every
+%     load rather than failing [tested:
+%     filereader_source_identity:an_identity_taken_during_a_compile_names_the_file_and_its_digest,
+%     filereader_source_identity:a_pinned_owner_names_its_own_file_after_that_load_closed,
+%     filereader_source_identity:the_identity_and_the_journal_charge_name_the_same_load;
+%     commit=WORKTREE].
 %   - Loader diagnostics contain ANSI escapes only on terminal streams
 %     [tested 2026-08-14: filereader_terminal_output].
 %   - A type declaration that cannot type a function the same source defines
@@ -211,6 +220,10 @@
             source_load_receipt_current/4,
             with_owning_source_load/2,
             current_owning_source_load/1,
+            %The file and text revision a record made during a compile belongs
+            %to, for anything that must be replaced rather than accumulated
+            %when that file is loaded again.
+            current_source_identity/2,
             record_translated_from/3,
             forget_translated_from/3,
             forget_space_source_loads/1,
