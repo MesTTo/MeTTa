@@ -124,6 +124,16 @@ built-in `add-atom` effect. Its MeTTa recovery equation removes the recorded
 atom; the example observes the committed receipt before an application
 exception, then observes both the effect and receipt gone after recovery.
 
+Tried: searched `llms.txt` and both example corpora for `accessors=False` and
+`methods=False` -> no occurrences. A direct `space.define(Class, ...)` probe
+kept the type declaration while suppressing the requested field equations and
+method operations; the natural keyword-only decorator form raised `TypeError`.
+
+Decided: document and execute the supported direct form. The definitions
+example uses a default-exposed class as its positive control, then proves both
+registrations are absent for a class declared with the two controls disabled.
+Supporting a keyword-only decorator remains a separate API decision.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 

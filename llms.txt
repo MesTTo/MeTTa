@@ -737,7 +737,10 @@ expression, `build(atom)` -> object (returning the atom unchanged when it
 cannot), `register_type`, `unregister_type`, `declarations`, `auto_image`.
 Dataclasses, enums, pydantic models and annotated classes all cross; enums
 project to symbols. `@space.define` on a class declares it INTO the space
-for the round trip; the separate record decorator is gone.
+for the round trip; the separate record decorator is gone. Use the direct
+`space.define(Class, accessors=False, methods=False)` form when the type may
+cross but its fields or public methods must not become MeTTa callables. The
+keyword-only decorator form is not supported.
 
 `metta.integrate`: `module_ops(m, module, names=, effect=, prefix=, rename=,
 transport="raw")` registers a whole module's callables, `facts(m, atoms)` bulk-writes,

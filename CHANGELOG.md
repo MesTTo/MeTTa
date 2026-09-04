@@ -140,6 +140,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Python class authors can now discover and execute
+  `space.define(Class, accessors=False, methods=False)` to register a type
+  without exposing its host fields or methods as MeTTa callables.
+
 - Saga compensation now has a consumer-sheet entry and checked example showing
   a committed step's queryable receipt, exceptional-exit recovery, and receipt
   retirement after successful compensation.
