@@ -59,6 +59,19 @@ passed. The runner control saw no head-pattern note by default and the exact
 note under `--verbose`; the cheat-sheet check covered all 154 corpus-used
 callable names.
 
+Tried: correlated persistent-provider constructor keywords with the sole
+public space factory -> `PersistentFactSpace(rename=...)` performed a complete
+one-open schema migration, while `MeTTa.space` and root `metta.space` exposed
+`journal`, `schema`, and `sync` but dropped `rename` before construction.
+
+Decided: forward `rename` through the existing factory and reject it without
+`journal`, matching `sync`'s boundary rule. The provider and migration
+algorithm stay unchanged; the new door is one keyword at each public tier.
+
+Tried: the two public-factory regression cases with the required Python -> 2
+passed; `integration/persistent_migration.py` then migrated and reopened the
+journal through root `metta.space`, printed both checked claims, and exited 0.
+
 Open: the audit's remaining surface findings are recorded below as their doors
 land or are left for a product decision.
 
@@ -157,3 +170,27 @@ Tried: `sh tests/shell/test_run_verbose.sh` on the rebased tree -> exit 0, the
 default run silent about the head-pattern note and the `--verbose` run carrying
 it, so trunk's `-q`-suppressed informational channel behaves as it did when the
 door was written.
+
+Found: trunk grew a THIRD public space factory while this thread was open.
+`AsyncMeTTa.space` took `journal`, `schema` and `sync` and had none of them
+when the sync door's `rename` was written, and
+`tests/repository/test_async_mirror.py::test_every_async_counterpart_has_the_sync_parameters`
+compares the two parameter lists, so adding one keyword to `MeTTa.space` alone
+turns that lane red. It did: `DRIFT space: MeTTa.space (... 'rename' ...);
+AsyncMeTTa (... no rename ...)`.
+
+Decided: forward the keyword rather than record a divergence. A migration
+keyword the async surface cannot spell is the same defect this thread is
+about, one surface further out, and the sibling test's own planted failure
+uses `journal` for the same reason. `tools/reference.py --write` republishes
+the two docstrings that changed.
+
+Tried: the async door against a journal the sync door wrote under old heads ->
+migrated to `(new value)` and the reopen without `rename=` answered the same,
+which is the one-open rule holding across the worker crossing
+[tested: test_the_async_space_factory_exposes_replay_rename].
+
+Found: the public factory's refusal regression wrote
+`pytest.raises(TypeError, match="rename.*journal")`, and trunk's ruff
+configuration now gates RUF043, which refuses a `match=` pattern carrying
+metacharacters in a plain string. Raw string; the pattern is unchanged.

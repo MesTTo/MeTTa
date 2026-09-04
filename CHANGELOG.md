@@ -140,6 +140,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `MeTTa.space(..., journal=..., rename=...)`, the module-level `metta.space`
+  factory and `AsyncMeTTa.space` now expose the persistent store's one-open
+  schema migration. Users no longer need to import the private provider class
+  to rename journal heads.
+
 - `sh run.sh --verbose program.metta` exposes informational compiler and
   source-reload reports at the standalone user's invocation point. The default
   remains quiet.

@@ -743,7 +743,12 @@ rejects incompatible shapes before a tensor is materialised.
 `metta.tables`: `declare(...)` writes one ctx-scoped bridge declaration into
 `&metta` and `TableBridge` derives every provider operation from it, so a
 DB-API connection (the `Executes` slice) answers MeTTa matches.
-`metta.space(journal=path)` is journalled and crash-recovering, and
+`metta.space(backing={"edge": 2}, journal=path, sync="flush")` is journalled
+and crash-recovering. Reopen an old schema once with
+`metta.space(backing={"new": 2}, journal=path, rename={"old": "new"})`; every
+old head must occur, the journal is atomically rewritten, and the next open
+omits `rename`. `metta.space(journal=path)` without a schema refuses.
+Likewise,
 `metta.space(backing=url)` mounts a remote store; both ride the one
 space-factory door rather than their own modules.
 

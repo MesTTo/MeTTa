@@ -182,6 +182,7 @@ async def space(
     journal: str | os.PathLike[str] | None = None,
     schema: _abc.Mapping[str, Any] | None = None,
     sync: str = 'none',
+    rename: _abc.Mapping[str, str] | None = None,
     _created_at: tuple[str, int] | None = None,
 ) -> AsyncMeTTa:
 ```
@@ -189,9 +190,10 @@ async def space(
 > Create or open a space through MeTTa.space on this connection's worker.
 >
 > Native, provider, remote, and journaled construction use the synchronous
-> context door. Returned spaces borrow the connection's worker, so closing
-> one does not stop the connection. Anonymous handles record the submitting
-> coroutine's creation site.
+> context door, including a journal's one-open ``rename`` migration.
+> Returned spaces borrow the connection's worker, so closing one does not
+> stop the connection. Anonymous handles record the submitting coroutine's
+> creation site.
 
 ### `AsyncMeTTa.op`
 

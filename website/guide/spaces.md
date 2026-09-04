@@ -93,7 +93,8 @@ For facts that should persist as they change rather than at save points,
 `metta.space(backing={"edge": 2}, journal=path)` creates a schema-bound
 journal-backed store whose writes append to text and replay when a new
 process opens the same journal, `library(persistency)` underneath. A schema
-rename is a one-time migration at that replay: `PersistentFactSpace(path, {"new": 2}, rename={"old": "new"})` requires every old head to occur,
+rename is a one-time migration at that replay:
+`metta.space(backing={"new": 2}, journal=path, rename={"old": "new"})` requires every old head to occur,
 validates the transformed actions, and atomically materializes the new
 journal before attachment. Omit `rename=` on the next open; repeating it
 refuses because the old name is now absent, and no write-time alias remains.
