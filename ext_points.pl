@@ -4,12 +4,12 @@
 %   - libraries can distinguish an author's annotated effect from inferred
 %     operation metadata [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 %   - host query carriers enter the engine-owned algebra scope, read its
-%     effective carrier and identity, and compose operation-answer weights
-%     only through declared host services
+%     effective or explicitly selected carrier and identity, and compose
+%     operation-answer weights only through declared host services
 %     [tested: a_host_binding_calls_only_published_surface,
 %     test_the_host_service_scoreboard_matches_the_tree,
 %     test_two_annotated_operation_calls_multiply_all_four_joint_weights;
-%     commit=fc0f512887da08a19a0ec8422a3a8d5716262a64].
+%     commit=WORKTREE].
 %   - atom events raised inside an observation frame are retained in write
 %     order, merged into an enclosing frame on nested commit, published only
 %     after the outer commit, and discarded on rollback [tested:
@@ -966,6 +966,7 @@ kind(metta_deprecation/3, host_service).
 %from reproducing the scope stack, declaration fallback, or descriptor lookup.
 kind(metta_with_under/2, host_service).
 kind(metta_effective_algebra/2, host_service).
+kind(metta_current_algebra/3, host_service).
 kind(metta_algebra_one/2, host_service).
 kind(metta_annotation/2, host_service).
 kind(metta_k_extend/4, host_service).
