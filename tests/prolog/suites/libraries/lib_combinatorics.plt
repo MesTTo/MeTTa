@@ -3,11 +3,11 @@
 %   - equivalent exact input ratios canonicalize to the same answer and
 %     integer and float identities remain distinct [tested:
 %     weighted_subset:equivalent_input_ratios_are_canonical,
-%     weighted_subset:numeric_lookalikes_are_distinct_ids; commit=WORKTREE]
+%     weighted_subset:numeric_lookalikes_are_distinct_ids; commit=afc4024cef7d4b7bcdd194bb030a112187b676d0]
 %   - twenty-four unit-loss choices truncated at target twelve retain thirteen
 %     cells, rather than one cell per configuration [tested:
 %     weighted_subset:repeated_unit_losses_have_target_bounded_rows;
-%     commit=WORKTREE]
+%     commit=afc4024cef7d4b7bcdd194bb030a112187b676d0]
 
 :- initialization(consult('../../lib/lib_combinatorics/lib_combinatorics.pl')).
 

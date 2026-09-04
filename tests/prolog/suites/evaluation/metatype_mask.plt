@@ -15,7 +15,7 @@
 %     lets a self-interpreter dispatch a family call through `metta` and get
 %     the answer a written call gets
 %     [tested: metatype_mask:the_two_doors_answer_alike_on_every_row;
-%     commit=WORKTREE]
+%     commit=37e23dcdaafd0bcf218b31a8a6455bcd59d645cc]
 %   - each element receives fresh case, switch, unify and let* body bindings
 %     when a collection reuses one compiled closure
 %     [tested: a_collection_closure_keeps_each_binding_form_local_to_one_element;

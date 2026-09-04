@@ -2,9 +2,9 @@
 % Guarantees:
 %   - Beta moments, independent product, and conditional total probability
 %     answer their independently calculated fixtures [tested: pln2;
-%     commit=WORKTREE]
+%     commit=afc4024cef7d4b7bcdd194bb030a112187b676d0]
 %   - repeated support refuses with the reasoner-owned factoring remedy
-%     [tested: pln2:overlap_names_the_factoring_remedy; commit=WORKTREE]
+%     [tested: pln2:overlap_names_the_factoring_remedy; commit=afc4024cef7d4b7bcdd194bb030a112187b676d0]
 
 :- initialization(consult('../../lib/lib_pln2/lib_pln2.pl')).
 

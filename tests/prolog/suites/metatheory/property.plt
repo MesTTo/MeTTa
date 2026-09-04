@@ -17,7 +17,7 @@
 %     shipped printer and reader do not
 %     [tested: property_lane_plants:every_plant_is_caught,
 %     property_lane_plants:the_shipped_printer_and_reader_pass_the_law;
-%     commit=WORKTREE]
+%     commit=37e23dcdaafd0bcf218b31a8a6455bcd59d645cc]
 %   - that the throw carries quickcheck's counter_example with the SHRUNKEN
 %     value, so the output names the term rather than only the law, is the
 %     library's documented behaviour and is not checked here:
@@ -25,7 +25,7 @@
 %     failed, and `counter_example` appears nowhere in property_lane.pl
 %     [assumed: quickcheck's shrinking and counter_example payload are taken on
 %     the library's contract; a test would have to assert on a third-party
-%     error term; commit=WORKTREE]
+%     error term; commit=37e23dcdaafd0bcf218b31a8a6455bcd59d645cc]
 %   - the run is the same run every time under the gate's own environment
 %     [tested: property_lane_determinism].
 % Open Obligations:
