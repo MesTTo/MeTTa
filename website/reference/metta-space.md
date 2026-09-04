@@ -266,11 +266,13 @@ def save(
 > spaces, aliases bound to those spaces, and translator rules. Loading
 > the image mints fresh runtime space identities and preserves their
 > graph relationships. The returned count remains the receiver's own
-> atom count. A path ending .gz writes gzip compressed in either format,
-> and load and import! read it back under the same name. The completed
-> sibling file is synced and then atomically replaces the target, so a
-> failed save leaves the old file intact. Atoms carrying live host
-> objects cannot survive either file and are refused.
+> atom count. Text variables are numbered by first occurrence within
+> each atom, so saving unchanged content twice is byte-stable. A path
+> ending .gz writes gzip compressed in either format, and load and
+> import! read it back under the same name. The completed sibling file
+> is synced and then atomically replaces the target, so a failed save
+> leaves the old file intact. Atoms carrying live host objects cannot
+> survive either file and are refused.
 >
 > `timeout` (seconds) and `inferences` (engine steps) bound the save with
 > the engine's own guards, exactly as they bound load(). A text save
@@ -282,6 +284,23 @@ def save(
 > There is no `format` on load(), and that is not an omission. When you
 > save, the file does not exist and something has to say which of the two
 > to write; when you load, load() reads which it is, `.gz` included.
+
+### `Space.source`
+
+```python
+def source(self) -> str:
+```
+
+> Return this space's directly stored atoms as loadable MeTTa text.
+>
+> This is exactly the text that ``save(path, format="metta")`` writes:
+> one atom per line, including equations, with a final newline when the
+> space is nonempty. Variables are numbered by first occurrence within
+> each atom, making independent views of unchanged content byte-stable.
+> Inherited prelude and library atoms, the global
+> ``&metta`` catalog, and child spaces are outside that save boundary.
+> Live host objects and atoms whose printed form cannot round-trip are
+> refused for the same reason a text save refuses them.
 
 ### `Space.load`
 
@@ -2066,10 +2085,10 @@ def sample(self, query: str | Atom, *, k: int = 10, seed: int = 7) -> list[Atom]
 > seeded generator makes repeated calls reproducible without changing
 > Python's process-global random state.
 
-### `Space.source`
+### `Space.consumption`
 
 ```python
-def source(self, kind: SourceKind) -> Atom:
+def consumption(self, kind: SourceKind) -> Atom:
 ```
 
 > Declare a space's consumption discipline.
@@ -2080,7 +2099,9 @@ def source(self, kind: SourceKind) -> Atom:
 > silently empty set from the drained object; re-registering the
 > provider resets the mark, because a fresh provider is a fresh
 > source. peek promises reads do not consume, which the conformance
-> kit checks by enumerating twice.
+> kit checks by enumerating twice. The Python door is named
+> ``consumption`` so ``source()`` can show program text; the MeTTa
+> catalog row deliberately keeps its language-level ``source`` head.
 
 ### `Space.on_error`
 
