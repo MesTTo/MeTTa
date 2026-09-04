@@ -156,7 +156,7 @@ The three affected Python test files pass together: 112 passed in 12.72
 seconds. The configured Ruff invocation, mypy over the three changed modules,
 Python compilation, direct shim load and `git diff --check` also pass.
 
-Tried: `sh /home/user/Dev/PyPeTTa1/ai-gate-lock.sh tagged-bounds env
+Tried: `sh ../ai-gate-lock.sh tagged-bounds env
 GATE_ONLY=1 sh check.sh` -> exit 1 after 87 of 98 lanes passed. None of the 11
 failed lanes named a tagged-bounds test or changed Python line. The failures
 were `build` changing under concurrent commits; the engine, C, Python and

@@ -30,6 +30,7 @@ beside its definitions.
 | lib_nars | 38 | 0 |
 | lib_patrick | 4 | 0 |
 | lib_pln | 49 | 0 |
+| lib_pln2 | 0 | 0 |
 | lib_redis | 0 | 0 |
 | lib_reflect | 10 | 9 |
 | lib_regex | 6 | 0 |
