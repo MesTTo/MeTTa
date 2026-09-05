@@ -147,6 +147,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- An engine that never asks for an observation no longer pays for the source
+  observer. `observe-source` shipped with its module loaded at boot and with a
+  resident `prolog:prolog_exception_hook/5` clause, which SWI consults on every
+  exception once the hook holds one. Loading it cost 3,696 inferences on every
+  boot, and the hook cost 119 on the engine's translate case and 2 on every
+  compiled host request, which is 3,998 across the foreign-space match
+  benchmark's 2,000 runs. The observer is now loaded by whoever asks for it and
+  installs both SWI hooks only while an observation runs, so boot, translate,
+  evaluate, match and every host benchmark return to their pre-observer counts
+  exactly. `observe-source` itself is unchanged.
+
+- `observe-source` works in an engine booted with autoload disabled. It called
+  `pairs_keys_values/3` without declaring `library(pairs)`, so with autoload
+  off every observation returned `exception` instead of its report.
+
 - `serve` and `boot` finish their shutdown when the interrupt repeats. A second
   SIGINT arriving inside the close landed in `socketserver.shutdown`'s wait and
   was collected as a close FAILURE, which `close()` re-raised, so the graceful

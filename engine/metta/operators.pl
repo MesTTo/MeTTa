@@ -3,8 +3,9 @@
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
-% Guarantees: decons-atom/2 and atom-subst/4 retain their refusal answers while
-%   explicit observation records them [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
+% Guarantees: decons-atom/2 and atom-subst/4 retain their refusal answers, and
+%   announce them through metta_record_error/1, which reaches an observer only
+%   while one is running [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
 
 %%% Arithmetic & Comparison: %%%
 %An arithmetic operand is a number. Everything else is refused here, before
@@ -871,7 +872,7 @@ empty(_) :- fail.
     Error = ['Error', ['decons-atom', []],
              "expected: (decons-atom (: <expr> Expression)), \c
               found: (decons-atom ())"],
-    source_observation:record_error(Error).
+    metta_record_error(Error).
 'first-from-pair'(Pair, _) :- var(Pair), !, refuse_unbound_input('first-from-pair', 1).
 'first-from-pair'([A, _], A).
 first(Pair, _) :- var(Pair), !, refuse_unbound_input(first, 1).
@@ -939,7 +940,7 @@ alpha_bucket_insert(Key, Term, SeenIn, SeenOut, IsNew) :-
     (   var(Variable)
     ->  substitute_written_variable(Variable, Value, Template, Out)
     ;   Out = ['Error', ['atom-subst', Value, Variable, Template], 'NoReturn'],
-        source_observation:record_error(Out)
+        metta_record_error(Out)
     ).
 
 %A term that can never become a list, no matter how it gets instantiated:
