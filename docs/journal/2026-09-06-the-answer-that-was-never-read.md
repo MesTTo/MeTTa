@@ -107,3 +107,25 @@ baseline carries `our_instructions` per example, which is load-independent and
 is the right input for that, but converting instructions to a wall bound needs
 an assumed rate and the rate is exactly what load moves. Revisit if a cheap
 example's cost class changes without a lane noticing.
+
+Measured after the fix, forty-one whole-corpus runs of 253 examples with the
+lane as it ships, under a busy-loop pool and whatever else the box was
+carrying:
+
+    twenty at one-minute loadavg 49 to 83   253/253 every run, slowest child
+                                            39.8s to 69.4s
+    twenty-one at 22 to 114                 253/253 every run, slowest child
+                                            60.3s to 173.3s
+
+No bare zero, no `no verdict`, no retry, in either set. Against the sixteen
+runs before the fix, which gave five bare zeros at loadavg 26 to 108, that is
+the property the lane was missing.
+
+Re-derived from those: 173.3s is the corpus's worst case with four times this
+box's cores runnable, not the 90.3s the first derivation had that morning. The
+ceiling does not move -- 300s is still eleven times the slowest member's quiet
+26.7s, which is where test.sh's 290s over the same corpus sits -- but the
+claim that load leaves 3.3 times under it was wrong and reads 1.7 now. A
+ceiling that IS reached is a named `no verdict` rather than a wrong verdict,
+which is what lets it sit where waiting sensibly stops instead of where no
+load could ever reach it.
