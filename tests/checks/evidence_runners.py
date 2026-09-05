@@ -38,6 +38,9 @@ Guarantees:
     [tested 2026-08-18: tests/checks/check_evidence_selftest.py]
   - a declared collector whose anchor has left its runner is reported instead
     of being applied [tested 2026-08-18: tests/checks/check_evidence_selftest.py]
+  - a lane written across a backslash-newline runs what it names, because the
+    shell reads that as one logical line and so does this
+    [tested 2026-09-05: tests/checks/check_evidence_selftest.py]
   - gate_scripts() answers the root driver AND every component check.sh it
     sources, so a lane that moved into a component is still the gate's lane;
     both selftests build a fixture whose pytest lane lives in a component and
@@ -136,6 +139,15 @@ def gate_scripts() -> tuple[Path, ...]:
 LANE = re.compile(r"^run\s+(GATE|REPORT)\s+(\S+)\s+(.*)$", re.MULTILINE)
 FUNCTION = re.compile(r"^([a-z_][a-z0-9_]*)\(\)\s*\{\n(.*?)^\}", re.MULTILINE | re.DOTALL)
 ONE_LINE_FUNCTION = re.compile(r"^([a-z_][a-z0-9_]*)\(\)\s*\{([^\n]*)\}[ \t]*$", re.MULTILINE)
+# A backslash-newline is ONE logical line to the shell, and LANE's `.` does not
+# cross a newline, so a lane written that way carried the backslash as its whole
+# command and everything it runs was recorded as run by nothing. Two GATE lanes
+# in check.sh are written that way, and both of their scripts read as executed
+# by no runner: check_generated_artifact_group.py and
+# check_gate_scratch_selftest.py, one of them CITED by check.sh's own Guarantees
+# block [measured 2026-09-05]. Joined here rather than in LANE itself because
+# every pattern below reads the same text and all of them want logical lines.
+LINE_CONTINUATION = re.compile(r"\\\n[ \t]*")
 
 # A path written into a runner. Anchored on a suffix this repository executes,
 # so `$SUMMARY` and `*.plt` are not mistaken for files.
@@ -358,6 +370,7 @@ def _literal(token: str) -> str | None:
 
 def _lane_texts(runner: str, text: str) -> list[tuple[str, str, str]]:
     """(tier, lane, text) for each unit of work the runner declares."""
+    text = LINE_CONTINUATION.sub(" ", text)
     functions = dict(FUNCTION.findall(text)) | dict(ONE_LINE_FUNCTION.findall(text))
     lanes = []
     for tier, name, command in LANE.findall(text):

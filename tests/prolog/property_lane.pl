@@ -11,8 +11,8 @@
 %     is the part quickcheck cannot supply: what a MeTTa term IS, what the
 %     engine promises about one, and a seed so a gate does not flake.
 %
-%     Three laws, each one already stated somewhere in this tree over a fixed
-%     corpus and re-stated here over generated values:
+%     Four laws, three of them already stated somewhere in this tree over a
+%     fixed corpus and re-stated here over generated values:
 %
 %       roundtrip     engine/parser.pl's header promises swrite/2 and sread/2 are
 %                     inverse. tests/prolog/suites/reader/parser.plt checks six hand-written
@@ -25,14 +25,23 @@
 %                     This asks the same question of generated forms, with the
 %                     head drawn from translator:translate_special_dl/5's own clause heads
 %                     so the special-form dispatch is where the generator aims.
+%       eval variant  eval(X) =@= eval(copy(X)). Nothing in this tree stated
+%                     it: MeTTaLog mines the same observation from whatever
+%                     program was run and calls it x_not_xx, and this asks it
+%                     of forms nobody wrote. The domain is the ENGINE'S OWN
+%                     effect lattice rather than a list kept here, because
+%                     running a generated form is only safe and only stable
+%                     where the form has no effects.
 %
 %     A green property run means nothing unless the generator generates
-%     something that could go red, so five PLANTS stand in for five defects,
+%     something that could go red, so six PLANTS stand in for six defects,
 %     each one caught only if the generator produces a particular feature:
 %     a string holding a quote, a SHARED variable, a symbol outside ASCII, a
-%     number, and a nested expression. property_lane_selftest/0 requires every
-%     plant to be caught and the shipped pair not to be, which is the same
-%     shape as translator_confluence.pl's five planted rule sets and
+%     number, a nested expression, and an answer holding a variable. Each plant
+%     names the LAW that sees it, because they no longer all belong to the
+%     round trip. property_lane_selftest/0 requires every plant to be caught
+%     and the shipped engine to pass every law a plant is caught by, which is
+%     the same shape as translator_confluence.pl's five planted rule sets and
 %     reachability.pl's eleven mutations.
 % Assumes:
 %     - the working directory is tests/prolog, which is where check.sh runs
@@ -49,10 +58,16 @@
 %     - a gate run is deterministic: the seed and the test count are fixed
 %       constants unless METTA_PROPERTY_SEED or METTA_PROPERTY_TESTS override
 %       them [tested: property_lane_determinism].
-%     - property_lane_selftest/0 fails unless each of the five plants is caught
-%       and the shipped printer and reader are not, so "100 tests OK" cannot
-%       come from a generator that generates nothing
+%     - property_lane_selftest/0 fails unless each of the six plants is caught
+%       by the law that names it and the shipped engine is not, so "100 tests
+%       OK" cannot come from a generator that generates nothing
 %       [tested: test_a_prolog_property_lane_catches_a_planted_roundtrip_violation].
+%     - the eval law's domain is the engine's own effect lattice, so a form
+%       that changes class changes the domain with it rather than leaving a
+%       hand-kept exclusion list behind
+%       [tested: property_lane_laws:evaluating_a_term_and_a_copy_of_it_answers_the_same_up_to_renaming;
+%       measured 2026-09-05: 31 of 60 special forms are pureStructural and
+%       none is unclassified].
 %     - the roundtrip law's domain is the engine's own answer to "can this term
 %       cross as text", metta_unwritable_symbol/2, rather than a second copy of
 %       the rule kept here. A term the service passes and the round trip loses
@@ -324,6 +339,47 @@ property_equation([=, [Function|Arguments], Body]) :-
     maplist(property_form(1), Arguments),
     property_form(2, Body).
 
+% A form the eval law may RUN, which is a narrower thing than a form the
+% translator may compile. The domain is the ENGINE'S OWN answer rather than a
+% list kept here: metta_operation_effect/2 ranks every operation on the
+% five-class lattice whose bottom is pureStructural, and 31 of the 60 special
+% forms sit there with none unclassified [measured 2026-09-05]. MeTTaLog's own
+% x_not_xx keeps a hand-written dont_subtest_function/1 naming superpose,
+% collapse and TupleConcat, and that is the list that goes stale; asking the
+% lattice means a form that CHANGES class changes this domain with it.
+property_pure_form_heads(Heads) :-
+    findall(Name,
+            ( clause(translator:translate_special_dl(Name, _, _, _, _), _),
+              atom(Name),
+              catch(metta_operation_effect(Name, pureStructural), _, fail) ),
+            Names),
+    sort(Names, Heads).
+
+property_pure_form(Form) :-
+    property_pure_form(2, Form).
+
+property_pure_form(Depth, Form) :-
+    (   Depth =< 0
+    ->  property_form_leaf(Form)
+    ;   random_between(1, 10, Draw),
+        (   Draw =< 4
+        ->  property_form_leaf(Form)
+        ;   property_pure_form_head(Head),
+            random_between(0, 3, Width),
+            Shallower is Depth - 1,
+            length(Arguments, Width),
+            maplist(property_pure_form(Shallower), Arguments),
+            Form = [Head|Arguments]
+        )
+    ).
+
+property_pure_form_head(Head) :-
+    random_between(1, 2, Draw),
+    (   Draw =:= 1
+    ->  property_pure_form_heads(Heads), random_member(Head, Heads)
+    ;   random_member(Head, [a, b, foo, 'my-symbol'])
+    ).
+
 %%%%%%%%%% The quickcheck types %%%%%%%%%%
 
 quickcheck:arbitrary(metta_term(Alphabet), Term) :- property_term(Alphabet, Term).
@@ -331,12 +387,14 @@ quickcheck:arbitrary(metta_number, Number) :- property_number(Number).
 quickcheck:arbitrary(metta_spelling(Alphabet), Spelling) :- property_spelling(Alphabet, Spelling).
 quickcheck:arbitrary(metta_form, Form) :- property_form(Form).
 quickcheck:arbitrary(metta_equation, Equation) :- property_equation(Equation).
+quickcheck:arbitrary(metta_pure_form, Form) :- property_pure_form(Form).
 
 % Shrinking, so a counter-example is one a reader can act on. Each clause makes
 % the value strictly smaller and FAILS when it cannot, which is what the pack's
 % loop needs to stop.
 quickcheck:shrink(metta_term(_), Term, Smaller) :- property_smaller(Term, Smaller).
 quickcheck:shrink(metta_form, Form, Smaller) :- property_smaller(Form, Smaller).
+quickcheck:shrink(metta_pure_form, Form, Smaller) :- property_smaller(Form, Smaller).
 quickcheck:shrink(metta_equation, [=, Head, Body], [=, Head, Smaller]) :-
     property_smaller(Body, Smaller).
 quickcheck:shrink(metta_spelling(_), Spelling, Smaller) :-
@@ -370,14 +428,20 @@ property_plant(Plant) :-
 property_with_plant(Plant, Goal) :-
     setup_call_cleanup(asserta(property_planted(Plant), Ref), Goal, erase(Ref)).
 
-% Every plant, and the one generator feature each one needs in order to be
-% caught. This table is the anti-vacuity claim written down: a plant that stops
-% being caught names the feature the generator stopped producing.
-property_plant_feature(unescaped_quote,     'a string holding a quote').
-property_plant_feature(unnumbered_variable, 'a variable occurring twice').
-property_plant_feature(ascii_folded,        'a symbol outside ASCII').
-property_plant_feature(number_blind,        'a number').
-property_plant_feature(flattened_nesting,   'a nested expression').
+% Every plant, the LAW it is caught by, and the one generator feature it needs
+% in order to be caught. This table is the anti-vacuity claim written down: a
+% plant that stops being caught names the feature the generator stopped
+% producing. The law is named because the plants no longer all belong to the
+% round trip: identity_leak damages EVALUATION and only prop_eval_variant sees
+% it, and a selftest that checked every plant against one law would report a
+% plant as uncaught for the ordinary reason that it was asked the wrong
+% question.
+property_plant_feature(unescaped_quote,     prop_roundtrip_full/1, 'a string holding a quote').
+property_plant_feature(unnumbered_variable, prop_roundtrip_full/1, 'a variable occurring twice').
+property_plant_feature(ascii_folded,        prop_roundtrip_full/1, 'a symbol outside ASCII').
+property_plant_feature(number_blind,        prop_roundtrip_full/1, 'a number').
+property_plant_feature(flattened_nesting,   prop_roundtrip_full/1, 'a nested expression').
+property_plant_feature(identity_leak,       prop_eval_variant/1,   'an answer holding a variable').
 
 property_print(Term, Text) :-
     property_plant(Plant),
@@ -426,6 +490,25 @@ property_reader_damage(number_blind, Read, Damaged) :-
 %A reader that lost a level of nesting.
 property_reader_damage(flattened_nesting, Read, Damaged) :-
     property_flatten_once(Read, Damaged).
+
+%An evaluator that let variable IDENTITY reach the answer. Comparing the
+%PRINTED form with term_to_atom/2 is exactly that: SWI prints an unbound
+%variable as its own `_G` name, so two runs of the same program over copies of
+%one term disagree whenever an answer holds a variable and agree whenever every
+%answer is ground. That is the x_not_xx defect itself rather than a stand-in
+%for it [source: ai-mettalog-ideas-worth-taking.md section 20, record_subchain/4].
+%Two atoms and ==/2 rather than one atom used twice: term_to_atom/2 with its
+%second argument BOUND reads instead of writing, so `term_to_atom(Left, T),
+%term_to_atom(Right, T)` parses Left's printed form back and unifies it with
+%Right, which succeeds for any two variable-carrying answers and makes the
+%plant uncatchable [measured 2026-09-05: 0 of 200 caught that way, 49 of 200
+%this way].
+property_eval_compare(identity_leak, Left, Right) :- !,
+    term_to_atom(Left, LeftText),
+    term_to_atom(Right, RightText),
+    LeftText == RightText.
+property_eval_compare(_, Left, Right) :-
+    Left =@= Right.
 
 property_drop_quote_escapes([], []).
 property_drop_quote_escapes([0'\\, 0'"|Rest], [0'"|Fewer]) :- !,
@@ -549,6 +632,48 @@ property_translate_expr_is_a_function(Form) :-
 property_translate_clause_is_a_function(Equation) :-
     property_one_translation(translate_clause(Equation, Clause), Clause).
 
+% eval(X) =@= eval(copy(X)). Evaluation must depend on the STRUCTURE of a term
+% and not on the identity of the variables in it, so a term and a renamed copy
+% of it answer the same thing up to renaming. MeTTaLog records the same
+% observation per subexpression under the name x_not_xx: record_subchain/4 does
+% `copy_term(X+XVs, XX+XXVs)` and evaluates both, and a divergence is a
+% recorded finding [source: ai-mettalog-ideas-worth-taking.md section 20].
+% There it is mined from whatever program was run; here it is asked of forms
+% nobody wrote.
+%
+% =@= is the relation the law names and SWI's own primitive for it: two terms
+% are variants when one bijective renaming of variables carries each to the
+% other, which is exactly "the same answer up to the names"
+% [source: https://www.swi-prolog.org/pldoc/man?predicate=%3D%40%3D%2F2].
+% The whole answer LIST is compared rather than each answer separately,
+% because multiplicity and order are both part of what the two runs must
+% agree on and findall/3 copies, so no sharing across answers exists to lose.
+property_eval_variant_agrees(Form) :-
+    copy_term(Form, Copy),
+    property_eval_answers(Form, Answers),
+    property_eval_answers(Copy, CopyAnswers),
+    property_plant(Plant),
+    property_eval_compare(Plant, Answers, CopyAnswers).
+
+% What running one form answers, or `untranslatable` when it does not compile.
+% The inference limit is a guard rather than a law: a generated form is not
+% required to terminate, and a run that does not is the same non-answer on
+% both sides. Everything is caught, because a form that RAISES answers the
+% same way twice and the law is about the two runs agreeing.
+property_eval_answers(Form, Answers) :-
+    metta_self_module(Self),
+    (   catch(call_with_inference_limit(
+                  once(translator:translate_expr(Form, Goals, Out)),
+                  200000, _),
+              _, fail)
+    ->  findall(Out,
+                catch(call_with_inference_limit(call_goals_in_(Self, Goals),
+                                                200000, _),
+                      _, fail),
+                Answers)
+    ;   Answers = untranslatable
+    ).
+
 %%%%%%%%%% The properties quickcheck runs %%%%%%%%%%
 
 prop_roundtrip_ascii(Term:metta_term(ascii)) :- property_roundtrip(Term).
@@ -558,6 +683,7 @@ prop_symbol_text_full(Spelling:metta_spelling(full)) :- property_symbol_text_agr
 prop_number_shortcut(Number:metta_number) :- property_number_shortcut(Number).
 prop_translate_expr(Form:metta_form) :- property_translate_expr_is_a_function(Form).
 prop_translate_clause(Equation:metta_equation) :- property_translate_clause_is_a_function(Equation).
+prop_eval_variant(Form:metta_pure_form) :- property_eval_variant_agrees(Form).
 
 %%%%%%%%%% The selftest %%%%%%%%%%
 
@@ -568,35 +694,45 @@ property_lane_selftest :-
     consult('../../engine/qlf_boot.pl'),
     consult('../../engine/metta.pl'),
     findall(Plant-Verdict,
-            ( property_plant_feature(Plant, _),
-              property_plant_verdict(Plant, Verdict) ),
+            ( property_plant_feature(Plant, Law, _),
+              property_plant_verdict(Plant, Law, Verdict) ),
             Verdicts),
-    property_plant_verdict(shipped, Shipped),
+    % The shipped engine against EVERY law a plant is caught by, not against
+    % one of them: a plant that damages evaluation says nothing about the
+    % shipped reader, and the shipped side of each law is the control for that
+    % law's plants.
+    findall(Law, property_plant_feature(_, Law, _), Laws0),
+    sort(Laws0, Laws),
+    findall(Law-Shipped,
+            ( member(Law, Laws), property_plant_verdict(shipped, Law, Shipped) ),
+            ShippedVerdicts),
     forall(member(Plant-Verdict, Verdicts),
-           ( property_plant_feature(Plant, Feature),
+           ( property_plant_feature(Plant, _, Feature),
              format("plant ~w (~w): ~w~n", [Plant, Feature, Verdict]) )),
-    format("shipped printer and reader: ~w~n", [Shipped]),
+    forall(member(Law-Shipped, ShippedVerdicts),
+           format("shipped engine under ~w: ~w~n", [Law, Shipped])),
     findall(Plant, member(Plant-uncaught, Verdicts), Missed),
+    findall(Law, member(Law-caught, ShippedVerdicts), Broken),
     length(Verdicts, Count),
-    (   Missed == [], Shipped == uncaught
-    ->  format("property lane selftest: ~d plants, each caught, and the \c
-                shipped pair clean~n", [Count])
+    length(Laws, LawCount),
+    (   Missed == [], Broken == []
+    ->  format("property lane selftest: ~d plants over ~d laws, each caught, \c
+                and the shipped engine clean under every one~n",
+               [Count, LawCount])
     ;   forall(member(Plant, Missed),
-               ( property_plant_feature(Plant, Feature),
+               ( property_plant_feature(Plant, _, Feature),
                  format("plant ~w was NOT caught, so the generator stopped \c
                          producing ~w~n", [Plant, Feature]) )),
-        (   Shipped == caught
-        ->  format("the shipped printer and reader failed the law, which is \c
-                    a defect rather than a selftest result~n", [])
-        ;   true ),
+        forall(member(Law, Broken),
+               format("the shipped engine failed ~w, which is a defect rather \c
+                       than a selftest result~n", [Law])),
         halt(1) ).
 
-% One run of the roundtrip law under one printer and reader pair. `caught` is
-% quickcheck throwing its counter-example, which for a plant is the wanted
-% outcome and for the shipped pair is a defect.
-property_plant_verdict(Plant, Verdict) :-
-    (   property_with_plant(Plant,
-                            catch(property_check(prop_roundtrip_full/1), _, fail))
+% One run of ONE law under one plant. `caught` is quickcheck throwing its
+% counter-example, which for a plant is the wanted outcome and for the shipped
+% engine is a defect.
+property_plant_verdict(Plant, Law, Verdict) :-
+    (   property_with_plant(Plant, catch(property_check(Law), _, fail))
     ->  Verdict = uncaught
     ;   Verdict = caught
     ).

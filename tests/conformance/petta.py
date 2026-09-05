@@ -21,6 +21,16 @@ Guarantees:
     meaning, so a mismatch is re-compared after first-occurrence alpha
     renaming and reported as renamed-only when that is all it was, the
     technique tests/upstream_bench.sh already uses.
+  - that renaming is SYNTAX-AWARE and scoped to one printed term: a `$_7`
+    inside a string literal is data and is left alone, and two independent
+    answers that reuse an allocation slot are not one variable, while sharing
+    inside one term still decides
+    [tested: test_a_variable_identifier_inside_a_string_is_data,
+    test_two_answers_reusing_a_slot_are_not_one_variable,
+    test_sharing_inside_one_printed_term_still_decides; commit=819393cb9608052a198ef0b2a8c0676d9ef9e824]
+  - a recorded skip whose capability has since arrived is reported on every
+    run, so a stale exclusion is visible rather than believed
+    [tested: test_a_skip_whose_capability_arrived_is_reported; commit=819393cb9608052a198ef0b2a8c0676d9ef9e824]
   - a file whose status is `diverges` carries the difference it is ALLOWED to
     have, so it cannot drift further without failing: a recorded divergence is
     a ruling, not an exemption.
@@ -51,6 +61,7 @@ import re
 import signal
 import subprocess
 import sys
+from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -65,18 +76,215 @@ EXPECTED = PIN / "expected"
 MANIFEST = PIN / "MANIFEST.json"
 
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
-VARID = re.compile(r"\$_\d+")
+
+#: The stable spelling the writer emits for a variable, and one of exactly two:
+#: `$_<index>` from the numbervars path and `$<name>` from the named one, whose
+#: name already carries its `#<epoch>` where one written name covers distinct
+#: variables [source: engine/parser.pl:682-683, swrite_mode//2]. The stable one
+#: is matched positively so it stops at its last DIGIT rather than at the next
+#: token boundary: `should $_0.` then yields `$_0` and leaves the harness's own
+#: full stop as text to compare.
+STABLE_VARIABLE = re.compile(r"\$_\d+")
+#: Where a MeTTa token ends, taken from the engine rather than restated: the
+#: Unicode White_Space property plus `(`, `)` and `;`. The four ASCII
+#: information separators look like whitespace to Python and are NOT boundaries
+#: here, which is the reader's own pinned answer [source: engine/parser.pl:27-34,
+#: metta_token_boundary/2; tests/prolog/suites/reader/parser.plt,
+#: parser_unicode_layout].
+INFORMATION_SEPARATORS = "\x1c\x1d\x1e\x1f"
+#: `is <actual>, should <expected>. <mark>` is what the corpus is mostly made
+#: of: 559 of the pin's 1,439 expected lines are one, every one of them carrying
+#: this delimiter and one of these suffixes [measured 2026-09-05].
+VERDICT_OPEN = "is "
+VERDICT_DELIMITER = ", should "
+VERDICT_SUFFIXES = (". ✅ ", ". ❌ ", ". ✅", ". ❌")
+
+
+def _ends_token(character: str) -> bool:
+    """Whether this character ends a MeTTa token."""
+    if character in INFORMATION_SEPARATORS:
+        return False
+    return character.isspace() or character in "();"
+
+
+def _variable_end(text: str, at: int) -> int:
+    """Where the variable token opening at `at` ends, or `at` if none does."""
+    stable = STABLE_VARIABLE.match(text, at)
+    if stable is not None:
+        return stable.end()
+    end = at + 1
+    while end < len(text) and not _ends_token(text[end]):
+        end += 1
+    return end if end > at + 1 else at
+
+
+def _canonical_term(text: str) -> str:
+    """One printed term, its variables renamed by first occurrence.
+
+    First-occurrence numbering in a fixed traversal order is the canonical form
+    for VARIANT equality of a first-order term, which is the relation this gate
+    wants: two terms are variants when one bijective renaming of variables
+    carries each to the other, and their numbered forms are then identical.
+    SWI spells the same construction as copy_term/2 plus numbervars/3 and
+    decides it with =@=/2 [source:
+    https://www.swi-prolog.org/pldoc/man?predicate=%3D%40%3D%2F2]. What must
+    survive is SHARING: `(pair $_0 $_0)` and `(pair $_0 $_1)` stay different.
+
+    A STRING LITERAL is data and is copied through untouched. The regex this
+    replaced renamed inside one, so two engines that printed different text in
+    a string compared EQUAL and the gate passed on a real divergence
+    [tested: test_a_variable_identifier_inside_a_string_is_data].
+
+    An unterminated quote makes the rest of the term string data. That is the
+    conservative direction on purpose: leaving text alone can only report a
+    difference that is not there, never hide one that is.
+    """
+    renamed: dict[str, str] = {}
+    out: list[str] = []
+    index = 0
+    while index < len(text):
+        character = text[index]
+        if character == '"':
+            end = index + 1
+            while end < len(text) and text[end] != '"':
+                end += 2 if text[end] == "\\" else 1
+            out.append(text[index : end + 1])
+            index = end + 1
+            continue
+        if character != "$":
+            out.append(character)
+            index += 1
+            continue
+        end = _variable_end(text, index)
+        if end == index:
+            out.append(character)
+            index += 1
+            continue
+        out.append(renamed.setdefault(text[index:end], f"$V{len(renamed)}"))
+        index = end
+    return "".join(out)
+
+
+def _top_level(text: str, needle: str) -> int:
+    """Where `needle` sits outside every bracket and string literal, or -1."""
+    depth = 0
+    index = 0
+    while index < len(text):
+        character = text[index]
+        if character == '"':
+            index += 1
+            while index < len(text) and text[index] != '"':
+                index += 2 if text[index] == "\\" else 1
+            index += 1
+            continue
+        if character in "([{":
+            depth += 1
+        elif character in ")]}":
+            depth -= 1
+        elif depth == 0 and text.startswith(needle, index):
+            return index
+        index += 1
+    return -1
+
+
+def _canonical_record(record: str) -> str:
+    """One record, with a verdict line's two halves scoped apart.
+
+    `is <actual>, should <expected>` prints two SEPARATE terms and each numbers
+    its own variables from zero: `!(test (foo $x) (foo $y))`, whose variables
+    are distinct, prints `is (foo $_0), should (foo $_0)` [measured 2026-09-05
+    against engine/main.pl]. Canonicalising the line as one namespace therefore
+    invents a coreference the writer never expressed, and splitting it loses
+    none. CeTTa's own corpus generator draws the line in the same place
+    [source: CETTA_PATH/scripts/petta_corpus_manifest.py, test_diagnostic_parts
+    and alpha_canonicalize_output; CETTA_PATH is the override cetta.py resolves
+    the fork through].
+    """
+    body = record.rstrip("\r\n")
+    ending = record[len(body) :]
+    if body.startswith(VERDICT_OPEN):
+        suffix = next((s for s in VERDICT_SUFFIXES if body.endswith(s)), "")
+        middle = body[len(VERDICT_OPEN) : len(body) - len(suffix)]
+        cut = _top_level(middle, VERDICT_DELIMITER)
+        if cut >= 0:
+            actual = _canonical_term(middle[:cut])
+            expected = _canonical_term(middle[cut + len(VERDICT_DELIMITER) :])
+            return f"{VERDICT_OPEN}{actual}{VERDICT_DELIMITER}{expected}{suffix}{ending}"
+    return _canonical_term(body) + ending
+
+
+def _records(text: str) -> Iterator[str]:
+    """The text cut into records, each one lexically complete.
+
+    A record ends at a newline where no bracket and no string literal is open,
+    so a term printed over several lines stays ONE record and keeps its
+    variable sharing. Resetting at every physical line would destroy it:
+    `(pair $_7` / `$_7)` and `(pair $_8` / `$_9)` are different terms and a
+    per-line reset makes them the same text. FileCheck draws the same
+    distinction, clearing pattern variables at a CHECK-LABEL block rather than
+    at a line [source:
+    https://llvm.org/docs/CommandGuide/FileCheck.html#the-check-label-directive].
+    Unbalanced text WIDENS a record, which is the safe direction: a wider
+    namespace can report a difference that is not there, never hide one.
+    """
+    held: list[str] = []
+    depth = 0
+    quoted = False
+    for line in text.splitlines(keepends=True):
+        held.append(line)
+        index = 0
+        while index < len(line):
+            character = line[index]
+            if quoted:
+                if character == "\\":
+                    index += 1
+                elif character == '"':
+                    quoted = False
+            elif character == '"':
+                quoted = True
+            elif character in "([{":
+                depth += 1
+            elif character in ")]}":
+                depth -= 1
+            index += 1
+        if depth <= 0 and not quoted:
+            yield "".join(held)
+            held, depth = [], 0
+    if held:
+        yield "".join(held)
 
 
 def alpha(text: str) -> str:
-    """First-occurrence renaming of SWI variable identifiers."""
-    seen: dict[str, str] = {}
-    def rename(match: re.Match) -> str:
-        ident = match.group(0)
-        if ident not in seen:
-            seen[ident] = f"$_V{len(seen) + 1}"
-        return seen[ident]
-    return VARID.sub(rename, text)
+    """Printed variables renamed to their first-occurrence position, per term.
+
+    The identifiers expose allocation history rather than meaning, so two runs
+    that mean the same thing spell it differently. The SCOPE is one printed
+    term rather than the whole file: two independent answers that happen to
+    reuse an allocation slot are not sharing a variable, and a file-wide
+    namespace reported that as a divergence nobody wrote
+    [tested: test_two_answers_reusing_a_slot_are_not_one_variable].
+    """
+    return "".join(_canonical_record(record) for record in _records(text))
+
+
+def stale_skips(manifest: dict) -> dict[str, str]:
+    """Recorded skips whose capability has since ARRIVED, with the reason given.
+
+    A skip is derived from a declared capability, so it can stop being true
+    without anyone noticing: torch.metta was skipped for "needs torch
+    installed" on a box where torch imports [measured 2026-09-05]. REPORTED
+    and not failed, because whether a machine has torch is an environment fact
+    and refusing on it would make the gate red for having more, not less
+    [tested: test_a_skip_whose_capability_arrived_is_reported].
+    """
+    sys.path.insert(0, str(HERE))
+    import petta_capture  # noqa: PLC0415  -- the record side, imported only for its declaration
+
+    recorded = manifest.get("skips", {})
+    live = petta_capture.skips()
+    return {
+        name: why for name, why in recorded.items() if name not in live
+    }
 
 
 def run_ours(name: str, timeout: int) -> tuple[int | None, str, bool]:
@@ -153,6 +361,8 @@ def main() -> int:
     print(f"agreeing        : {len(agree)}/{total}")
     print(f"recorded rulings: {len(ruled)}")
     print(f"blocking        : {len(blocking)}")
+    for name, why in sorted(stale_skips(manifest).items()):
+        print(f"stale skip      : {name} was left out because it {why}")
     for r in blocking[: args.show]:
         print(f"\n--- {r['name']}  (status {r['status']}, "
               f"exit {r['want_rc']} -> {r['rc']}"

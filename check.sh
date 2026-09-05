@@ -14,7 +14,7 @@
 #                                            xenon refurb vulture slotscheck
 #                                            bandit deptry audit interrogate
 #                                            codespell imports imports-selftest
-#                                            jscpd prolog
+#                                            jscpd jscpd-prolog prolog
 #                                            ciao-grade
 #                                            codec-doc petta parity-perf
 #                                            policy-inventory
@@ -86,8 +86,8 @@ trap 'metta_gate_scratch_close' EXIT
 # because Janus follows VIRTUAL_ENV rather than the executable a script chose:
 # an inherited environment from another tool made the shell and parity lanes
 # load that tool's empty Python installation while their Python-side commands
-# used $PY [measured: py_numpy resolves numpy.absolute through numpy after
-# alignment; command=sh check.sh no-autoload parity; fixture=inherited MCP
+# used $PY [measured 2026-08-20: py_numpy resolves numpy.absolute through numpy
+# after alignment; command=sh check.sh no-autoload parity; fixture=inherited MCP
 # VIRTUAL_ENV with CHECK_PY auto-selected;
 # commit=d90a3c9620e56e42d3a2f5982b4353da8423e873].
 METTA_ROOT="$HERE"
@@ -624,6 +624,27 @@ run GATE   codespell   sh -c "cd '$HERE' && '$PY' -m codespell_lib extensions/py
 # The remaining clones are small facade, protocol, and test-fixture mirrors;
 # extracting them would couple layers or hide the local contract.
 run REPORT jscpd       sh -c "cd '$HERE' && npx --yes jscpd --reporters ai --format python --min-lines 8 --ignore '**/__pycache__/**' extensions/python/metta extensions/python/tests"
+# The same question of the PROLOG surface, which no duplication check reached:
+# the lane above reads Python and vulture reads Python, so 54,000 lines of
+# engine, library and seat Prolog had nothing looking for copies in them at all.
+# It reports 12 [measured 2026-09-05], among them a cross-seat pair
+# (extensions/cmetta/bridge.pl and extensions/python/metta/shim.pl) that only
+# surfaces once comments are out of the comparison.
+#
+# `--format perl` because that is the format jscpd maps `.pl` to; `--format
+# prolog` names an extension this tree does not use and analysed zero files.
+# The tokenizer is therefore Perl's, which is why the comment rule is passed
+# explicitly: `--skip-comments` drops `#` comments and leaves Prolog's `%`
+# ones, and every obligation header in the tree then reads as a nine-line
+# clone of every other. `--ignore-pattern` drops the `%` tail instead, at the
+# price of also dropping one inside a quoted atom or string; that is a
+# tolerable false-clone risk in a lane that prints and never fails.
+#
+# The GENERATED half of the engine is not text and cannot be read here: the
+# translator asserts its clauses at run time. `prolog-reach` in
+# engine/check.sh is what sees them, through prolog_walk_code/1 against a
+# loaded database.
+run REPORT jscpd-prolog sh -c "cd '$HERE' && npx --yes jscpd --reporters ai --format perl --min-lines 8 --skip-comments --ignore-pattern '%[^\\n]*' --ignore '**/vendor/**' engine lib extensions tests/prolog"
 
 # -------------------------------------------------------------------- report
 printf '\n================ summary ================\n'

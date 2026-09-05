@@ -13,15 +13,15 @@
 %     METTA_PROPERTY_TESTS=10000 swipl -g run_tests -t halt property.plt
 %     METTA_PROPERTY_SEED=random swipl -g run_tests -t halt property.plt
 % Guarantees:
-%   - a failing law is CAUGHT: each planted defect makes the law fail, and the
-%     shipped printer and reader do not
+%   - a failing law is CAUGHT: each planted defect makes the law it names fail,
+%     and the shipped engine passes every one of those laws
 %     [tested: property_lane_plants:every_plant_is_caught,
-%     property_lane_plants:the_shipped_printer_and_reader_pass_the_law;
-%     commit=37e23dcdaafd0bcf218b31a8a6455bcd59d645cc]
+%     property_lane_plants:the_shipped_engine_passes_every_law_a_plant_is_caught_by;
+%     commit=819393cb9608052a198ef0b2a8c0676d9ef9e824]
 %   - that the throw carries quickcheck's counter_example with the SHRUNKEN
 %     value, so the output names the term rather than only the law, is the
 %     library's documented behaviour and is not checked here:
-%     property_plant_verdict/2 catches any error and asks only whether the law
+%     property_plant_verdict/3 catches any error and asks only whether the law
 %     failed, and `counter_example` appears nowhere in property_lane.pl
 %     [assumed: quickcheck's shrinking and counter_example payload are taken on
 %     the library's contract; a test would have to assert on a third-party
@@ -82,6 +82,15 @@ test(a_generated_expression_has_at_most_one_translation) :-
 test(a_generated_equation_has_at_most_one_translation) :-
     property_check(prop_translate_clause/1).
 
+% Evaluation depends on the STRUCTURE of a term and not on the identity of the
+% variables in it, so a term and a renamed copy answer the same thing up to
+% renaming. MeTTaLog mines the same observation from whatever program was run
+% and calls it x_not_xx; this asks it of forms nobody wrote. The domain is the
+% engine's own effect lattice, pureStructural and below, which is what makes
+% RUNNING a generated form safe and its answers stable.
+test(evaluating_a_term_and_a_copy_of_it_answers_the_same_up_to_renaming) :-
+    property_check(prop_eval_variant/1).
+
 :- end_tests(property_lane_laws).
 
 
@@ -94,11 +103,13 @@ test(a_generated_equation_has_at_most_one_translation) :-
 
 :- begin_tests(property_lane_plants).
 
-test(every_plant_is_caught, [forall(property_plant_feature(Plant, _))]) :-
-    property_plant_verdict(Plant, caught).
+test(every_plant_is_caught, [forall(property_plant_feature(Plant, Law, _))]) :-
+    property_plant_verdict(Plant, Law, caught).
 
-test(the_shipped_printer_and_reader_pass_the_law) :-
-    property_plant_verdict(shipped, uncaught).
+test(the_shipped_engine_passes_every_law_a_plant_is_caught_by,
+     [forall(( setof(L, P^F^property_plant_feature(P, L, F), Laws),
+               member(Law, Laws) ))]) :-
+    property_plant_verdict(shipped, Law, uncaught).
 
 :- end_tests(property_lane_plants).
 

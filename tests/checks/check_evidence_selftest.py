@@ -96,6 +96,21 @@ CITATIONS = (
     (False, "python tests/printer.py --gate",
      "an interpreter-led command naming a script that cannot fail, which the "
      "word split used to read as a test named `python`"),
+    (True, "CHECK_PY=$VENV/bin/python sh extensions/python/test.sh tests/test_collected.py",
+     "a SHELL runner a GATE lane runs, with an environment assignment in "
+     "front of it that the word split used to read as a file that is not in "
+     "the tree"),
+    (False, "sh tests/absent.sh",
+     "a shell runner that is not in the tree"),
+    (False, "sh tests/printer.py",
+     "a shell command naming something that cannot report a failure"),
+    (True, "make -C extensions/cmetta test",
+     "a MAKE command naming a target the seat's Makefile defines, whose "
+     "`-C <seat>` argument the word split used to read as a missing file"),
+    (False, "make -C extensions/cmetta no-such-target",
+     "a make command naming a target the seat's Makefile does not define"),
+    (False, "make -C extensions/nowhere test",
+     "a make command naming a seat that holds no Makefile"),
 )
 
 CHECK_SH = """\
@@ -128,7 +143,12 @@ PYTHON_CHECK_SH = """\
 run GATE pytest env CHECK_PY="$PY" sh "$HERE/extensions/python/test.sh"
 """
 
+# `set -eu` because the real one has it, and because a claim naming this script
+# is only evidence if the script can report a failure. Without it the fixture
+# modelled a runner that always exits 0, and a shell-command citation of it
+# read as unbacked while the same citation in the tree is backed.
 PYTHON_TEST_SH = """\
+set -eu
 exec "$PY" -m {pytest_anchor} -n auto
 """
 
@@ -336,6 +356,86 @@ def seat_relative_path_complaints() -> list[str]:
     return complaints
 
 
+def line_continuation_complaints() -> list[str]:
+    """A lane written across a backslash-newline runs what it names.
+
+    A backslash-newline is ONE logical line to the shell, and the lane pattern
+    read only the physical one, so the command was the backslash and every
+    script such a lane runs was modelled as run by nothing. Two GATE lanes in
+    the real check.sh are written that way and both of their scripts read as
+    unexecuted [measured 2026-09-05]. The negative half matters as much: a
+    script no lane names at all must still be reported, or joining the lines
+    would have made the model believe everything.
+    """
+    complaints = []
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        build(root, "pytest tests -q -p no:benchmark")
+        (root / "check.sh").write_text(
+            CHECK_SH.replace(
+                "run GATE checked sh -c \"cd '$HERE' && '$PY' tests/checked.py\"",
+                "run GATE checked \\\n    sh -c \"cd '$HERE' && '$PY' tests/checked.py\"",
+            )
+        )
+        fixture = root / "engine/fixture.pl"
+        lines = fixture.read_text().splitlines()
+        head = lines.index("% Open Obligations:")
+        planted = [
+            f"%   - a continued lane's script [{TAG} {WHEN}: tests/checked.py].",
+            f"%   - a script no lane names [{TAG} {WHEN}: tests/orphan/orphan_check.pl].",
+        ]
+        at_continued, at_orphan = head + 1, head + 2
+        fixture.write_text("\n".join(lines[:head] + planted + lines[head:]) + "\n")
+
+        output = run(root)
+        if any(line.startswith(f"engine/fixture.pl:{at_continued}:") for line in output):
+            complaints.append(
+                "a lane written across a line continuation still reads as running nothing"
+            )
+        if not any(line.startswith(f"engine/fixture.pl:{at_orphan}:") for line in output):
+            complaints.append(
+                "joining line continuations made a script no lane names read as executed"
+            )
+    return complaints
+
+
+def seat_root_path_complaints() -> list[str]:
+    """A path in a citation is read from the SEAT root as well.
+
+    extensions/python/tests/ch17_concurrency_and_the_loop/test_async_space.py
+    cites its own path from extensions/python/, which is neither beside it nor
+    at the repository root; a reader standing in the seat types exactly that.
+    A seat is a directory holding its own control file, which is the test
+    build.sh and check.sh already apply, so the negative control is a path
+    that resolves under NO seat.
+    """
+    complaints = []
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        build(root, "pytest tests -q -p no:benchmark")
+        probe = root / "extensions/cmetta/tests/seat_probe.c"
+        probe.write_text(
+            "/* Purpose: a fixture one directory inside the C seat.\n"
+            " * Guarantees:\n"
+            f" *   - the seat's suite backs this [{TAG} {WHEN}: tests/c_suite.c].\n"
+            f" *   - this names nothing under any seat [{TAG} {WHEN}: tests/absent.c].\n"
+            " * Open Obligations:\n"
+            " *   To Do: None\n"
+            " *   Hacks: None\n"
+            " *   Future Enhancements: None\n"
+            " */\n"
+        )
+        output = run(root)
+        mine = [line for line in output if line.startswith("extensions/cmetta/tests/seat_probe.c:")]
+        if [line for line in mine if "tests/c_suite.c" in line]:
+            complaints.append(
+                "rejected a path cited from the seat root rather than from beside the file"
+            )
+        if not [line for line in mine if "tests/absent.c" in line]:
+            complaints.append("accepted tests/absent.c, which resolves under no seat")
+    return complaints
+
+
 def commit_pin_complaints() -> list[str]:
     """A commit= must name a real commit, and WORKTREE must not survive a release.
 
@@ -443,6 +543,8 @@ def main() -> int:
             complaints.append("a collector whose anchor left the runner went unreported")
 
     complaints += seat_relative_path_complaints()
+    complaints += seat_root_path_complaints()
+    complaints += line_continuation_complaints()
     complaints += commit_pin_complaints()
 
     for complaint in complaints:
@@ -450,7 +552,8 @@ def main() -> int:
     print(
         f"{len(complaints)} defect(s) in the evidence gate, over "
         f"{len(CITATIONS)} planted citations, one moved anchor, three commit "
-        f"pins and a path cited from beside its own file"
+        f"pins, a path cited from beside its own file, a path cited from its "
+        f"seat root, and a lane written across a line continuation"
     )
     return 1 if complaints else 0
 

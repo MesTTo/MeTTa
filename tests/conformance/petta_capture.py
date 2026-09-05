@@ -20,11 +20,24 @@ Guarantees:
   - every captured file is reproducible from the recorded commit: rerunning
     this against the same commit rewrites identical bytes, or the run is
     reported as nondeterministic and the file is ruled out of the corpus.
-  - a skip carries its reason in the manifest, never a bare name.
+  - an input git does not TRACK cannot enter the artefact, so the commit the
+    pin names contains every byte it froze
+    [tested: test_an_untracked_corpus_input_is_refused; commit=819393cb9608052a198ef0b2a8c0676d9ef9e824]
+  - a skip is DERIVED from a declared capability rather than listed by name,
+    and carries that capability's own sentence, so the reason and the decision
+    cannot disagree [tested: test_a_skip_is_derived_from_a_declared_capability;
+    commit=819393cb9608052a198ef0b2a8c0676d9ef9e824]
 Fails when:
-  - asked to capture from a dirty or unresolvable checkout.
+  - asked to capture from a dirty or unresolvable checkout, or from one whose
+    corpus holds an untracked file.
   - upstream itself prints a ❌ for a file: the oracle must be green before it
     can be an oracle, so that file is reported and left out.
+Decides:
+  - membership moves with the ENVIRONMENT, because that is what "derived"
+    means: a box with torch captures the torch examples and one without skips
+    them, and the manifest records which it was so a reader can tell. The
+    verify side reports a recorded skip whose capability has since arrived
+    rather than leaving it to be believed.
 Open Obligations:
   To Do: None
   Hacks: None
@@ -34,6 +47,7 @@ Open Obligations:
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import re
@@ -53,20 +67,94 @@ MANIFEST = PIN / "MANIFEST.json"
 
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 
-# Not part of the corpus, with the reason each is out. The first three upstream
-# skips itself in test.sh; greedy_chess and repl need a terminal, and under a
-# runner greedy_chess does not terminate at all, printing ~18M lines because
-# readln!/1 answers end_of_file forever once stdin is at EOF; the git ones
-# clone over the network, which an offline gate cannot do.
-SKIPS = {
-    "repl.metta": "needs an interactive terminal",
-    "llm_cities.metta": "needs a network and an API key",
-    "torch.metta": "needs torch installed",
-    "torch_lib.metta": "needs torch installed",
-    "greedy_chess.metta": "needs a terminal: its command loop never ends at EOF",
-    "git_import.metta": "clones from the network",
-    "git_import2.metta": "clones from the network",
+# What a corpus entry may need from the ENVIRONMENT, how each is decided, and
+# what an entry needing it is without. Membership is DERIVED from this rather
+# than from a list of names: a hand-kept skip carries a sentence nobody checks,
+# and this one was wrong here on 2026-09-05, when torch.metta and
+# torch_lib.metta were skipped for "needs torch installed" on a box where
+# importlib.util.find_spec("torch") answers a module. The same lesson is
+# recorded against the CeTTa generator's own capability table, which named 3
+# cases where measurement names 28: deriving a classification by running the
+# thing beats keeping a list by hand
+# [source: ai-report-cetta-corpus-repin.md, "Its hand-kept capability table
+# was incomplete and nothing checked it"].
+#
+# Deliberately NOT the engine's metta_platform_capability/3 census. That one
+# answers whether this BUILD has library(process) or library(zlib), and says
+# in its own comment that it is the PLATFORM's vocabulary and not the
+# allow-a-space-to-do-it one [source: engine/metta.pl:570-581]. These are the
+# environment's, which neither vocabulary covers.
+#
+# A capability is decided by a PROBE or by a stated repository RULING, never by
+# prose. `network` is a ruling: this repository's gates do not reach the
+# network, because a gate that does fails for reasons that are not the tree,
+# which check.sh states where it refuses to provision [source: check.sh, the
+# component build loop].
+#
+# lib_llm.metta constructs openai.OpenAI(), whose documented default is to read
+# OPENAI_API_KEY from the environment, which is what `api-key` asks
+# [source: the upstream arbiter's lib/lib_llm.metta:26].
+CAPABILITIES: dict[str, tuple[bool, str]] = {
+    "terminal": (sys.stdin.isatty(), "needs an interactive terminal"),
+    "network": (False, "reaches the network, which this repository's gates do not"),
+    "torch": (importlib.util.find_spec("torch") is not None, "needs torch installed"),
+    "api-key": (
+        bool(os.environ.get("OPENAI_API_KEY")),
+        "needs an OpenAI API key in OPENAI_API_KEY",
+    ),
 }
+
+# What each upstream example needs, which is the part a person writes down. The
+# reason a skip carries is then BUILT from the capability rather than typed
+# beside it, so the two cannot disagree.
+REQUIREMENTS: dict[str, tuple[str, ...]] = {
+    # readln!/1 is read_line_to_string/2, which answers end_of_file forever
+    # once stdin is at EOF, so under a runner the command loop never ends
+    # rather than running long [source: tests/data/example_skips.txt].
+    "greedy_chess.metta": ("terminal",),
+    "repl.metta": ("terminal",),
+    "llm_cities.metta": ("network", "api-key"),
+    "torch.metta": ("torch",),
+    "torch_lib.metta": ("torch",),
+    "git_import.metta": ("network",),
+    "git_import2.metta": ("network",),
+}
+
+
+def skips() -> dict[str, str]:
+    """The derived skip set: a name is out when something it needs is absent."""
+    out: dict[str, str] = {}
+    for name, wanted in sorted(REQUIREMENTS.items()):
+        missing = [need for need in wanted if not CAPABILITIES[need][0]]
+        if missing:
+            out[name] = "; ".join(CAPABILITIES[need][1] for need in missing)
+    return out
+
+
+def capability_state() -> dict[str, bool]:
+    """What each declared capability answered here, for the manifest to record."""
+    return {name: present for name, (present, _) in sorted(CAPABILITIES.items())}
+
+
+def tracked_examples(upstream: Path) -> frozenset[str]:
+    """The example basenames git tracks, so a scratch file cannot become an oracle.
+
+    A frozen artefact is pinned to a COMMIT, so every byte it copies has to be
+    reachable from that commit or the pin names a state nobody can return to.
+    upstream_commit's cleanliness check cannot answer this and must not try: it
+    deliberately ignores `??` lines because an upstream checkout carries build
+    output and editor files that have nothing to do with the corpus, and that
+    same tolerance is the hole. CeTTa's generator recorded
+    `git_state: untracked` for 21 such files and froze them anyway, so from
+    2026-08-03 its differential compared against 21 files no PeTTa checkout has
+    [source: ai-report-cetta-corpus-repin.md, "It froze 21 untracked scratch
+    files into a shared artefact"]. Recording is not refusing.
+    """
+    listed = subprocess.run(
+        ["git", "-C", str(upstream), "ls-files", "-z", "--", "examples", "lib"],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    return frozenset(name for name in listed.split("\0") if name)
 
 
 def run(main_pl: Path, cwd: Path, rel: str, timeout: int) -> tuple[int | None, str, bool]:
@@ -99,6 +187,27 @@ def upstream_commit(upstream: Path) -> str:
                           capture_output=True, text=True, check=True).stdout.strip()
 
 
+def refuse_untracked(upstream: Path, wanted: list[str]) -> None:
+    """Stop before an input git does not track enters the frozen artefact.
+
+    Every path this copies is checked, not just the examples: the corpus keeps
+    upstream's lib/ beside its examples/ and two examples import a sibling that
+    is not a .metta file, so an untracked one of those is the same hole with a
+    different extension.
+    """
+    tracked = tracked_examples(upstream)
+    missing = sorted(name for name in wanted if name not in tracked)
+    if not missing:
+        return
+    listed = "\n".join(f"  {name}" for name in missing)
+    sys.exit(
+        f"petta_capture: {len(missing)} corpus input(s) in {upstream} are not "
+        f"tracked by git, so the commit this pin names does not contain them "
+        f"and nobody can reproduce the capture:\n{listed}\n"
+        f"Commit them upstream, or remove them from the checkout."
+    )
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--upstream", required=True, type=Path,
@@ -113,9 +222,21 @@ def main() -> int:
         sys.exit(f"petta_capture: {main_pl} does not exist")
     commit = upstream_commit(upstream)
 
+    excluded_by_capability = skips()
     names = sorted(p.name for p in (upstream / "examples").glob("*.metta")
-                   if p.name not in SKIPS)
+                   if p.name not in excluded_by_capability)
+    # Everything this copies, checked against git before the first engine runs.
+    refuse_untracked(
+        upstream,
+        [f"examples/{name}" for name in names]
+        + [f"examples/{name}" for name in ("prologimport_example.pl", "python_import_file.py")
+           if (upstream / "examples" / name).exists()]
+        + [f"lib/{support.name}" for support in (upstream / "lib").iterdir()
+           if support.is_file()],
+    )
     print(f"capturing {len(names)} examples from {upstream} @ {commit[:8]}", flush=True)
+    for capability, present in sorted(capability_state().items()):
+        print(f"  capability {capability}: {'present' if present else 'absent'}")
 
     def capture(name: str) -> dict:
         rel = f"examples/{name}"
@@ -168,7 +289,12 @@ def main() -> int:
         "commit": commit,
         "captured_with": "tests/conformance/petta_capture.py",
         "engine_flag": "silent",
-        "skips": SKIPS,
+        "skips": excluded_by_capability,
+        # What each capability answered HERE, so a skip can be re-decided
+        # later instead of being believed: the verify side reports a recorded
+        # skip whose capability has since arrived.
+        "capabilities": capability_state(),
+        "requirements": {name: list(need) for name, need in sorted(REQUIREMENTS.items())},
         "excluded": excluded,
         "entries": entries,
     }, indent=1, sort_keys=True) + "\n")
@@ -177,7 +303,9 @@ def main() -> int:
     print(f"excluded: {len(excluded)}")
     for name, why in sorted(excluded.items()):
         print(f"    {name}: {why}")
-    print(f"skipped : {len(SKIPS)}")
+    print(f"skipped : {len(excluded_by_capability)}")
+    for name, why in sorted(excluded_by_capability.items()):
+        print(f"    {name}: {why}")
     return 0
 
 
