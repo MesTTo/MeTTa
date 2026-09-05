@@ -193,6 +193,7 @@
             clear_foreign_atoms/1,
             clear_native_atoms/1,
             compile_metta_equation/4,
+            compile_metta_equation/5,
             defer_metta_equation/3,
             metta_add_program_atoms/2,
             metta_add_program_atoms/3,

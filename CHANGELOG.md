@@ -201,6 +201,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Tagged queries propagate bound arguments through certified acyclic integer
   programs. They derive the requested proof bags while preserving duplicate
   source occurrences and the existing failure behavior outside that fragment.
+- Source loading materializes eligible finite function-free derivations once.
+  Ground calls reuse counted results, while open calls, multiple distinct
+  outputs, cyclic proof graphs, tracing and bounded reductions keep their
+  original execution. Transactional loads validate their prepared source
+  receipts on the first query after commit.
 
 - The MeTTa file library now creates directories, copies bytes with staged
   replacement, returns queryable metadata snapshots, composes lexical paths,
@@ -553,6 +558,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Node answers and traces now carry partial applications and other Prolog
   compounds as expressions using the Python wire grammar. Improper lists
   cross as `(cons Head Tail)` rather than raising an untaggable-term error.
+- Fast-cache version 4 preserves resolved reader bindings beside exact stored
+  equations, including duplicate native/reader occurrences and later
+  recompilation. Deferred reconstruction no longer compiles a resolved sibling
+  again from its raw `&self` form. Older cache schemas are refused; rebuild
+  them from the original MeTTa source, as described in the spaces guide.
 
 - `MeTTa.profile()`'s second answer is a table like every other. `EngineProfile`
   held bare tuples, so self-ticks were `node[3]` counted out against a
