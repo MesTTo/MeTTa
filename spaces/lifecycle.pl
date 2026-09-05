@@ -388,7 +388,7 @@ metta_restore_inherited_predicate(_, Name, _) :-
 %remove one equation for a function nothing above the space defines
 %[measured 2026-09-06: 200 such cycles through 'remove-atom'/3, 1,069,438
 %inferences before and 858,838 after; fixture=ai-tmp/autoload-traps/removal2.pl;
-%commit=WORKTREE].
+%commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
 %
 %Two arms, in this ORDER, which the benchmarks decided. current_predicate/1
 %answers yes for a local definition, an import and an inherited one alike, for
@@ -402,7 +402,7 @@ metta_restore_inherited_predicate(_, Name, _) :-
 %Python benchmark cases against +15 for this order
 %[measured 2026-09-06: op-raw 298,847 at the merge base, 298,937 that way and
 %298,864 this way; command=extensions/python/bench.py --counter-only op-raw;
-%commit=WORKTREE].
+%commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
 %
 %Neither arm can change which branch is taken: Home \== Module holds exactly
 %where imported_from/1 answers, on every one of the 7,949 module/name pairs of
@@ -417,7 +417,7 @@ metta_restore_inherited_predicate(_, Name, _) :-
 %side effect this clause needs
 %[measured 2026-09-06: 12 shadow-repair probes, one fresh module each, the
 %sumlist/2 row alone diverging; fixture=ai-tmp/autoload-traps/spaces_diff.pl;
-%commit=WORKTREE].
+%commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
 metta_restore_inherited_predicate(Module, Name, Arity) :-
     retractall('$metta_repaired_shadow_import'(Module, Name, Arity, _)),
     functor(Head, Name, Arity),

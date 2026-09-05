@@ -174,7 +174,7 @@ metta_effect_construct(_:Goal, [Goal]).
 %properties SWI answers through the undefined-procedure trap, which reads the
 %module's autoload declarations and the whole library index before raising the
 %existence error: 1,030 inferences to learn "not a meta-predicate", 253 times
-%over the 271 shipped examples [measured 2026-09-06; commit=WORKTREE].
+%over the 271 shipped examples [measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
 %
 %Both arms of the guard are needed and neither may be dropped.
 %current_predicate/1 admits every meta-predicate the engine already has;
