@@ -212,14 +212,15 @@ def test_algebra_law_claims_are_derived_and_validated() -> None:
             "metta_vocabulary_claim(semiring, Semiring, ordered).\n",
         )
         # Each ordered semiring claims its direction beside orderedness:
-        # ranked and prob count down from the best, tropical up from the
-        # cheapest, mirroring the shipped catalog rows.
+        # ranked and prob count down from the best, tropical and budget up
+        # from the cheapest, mirroring the shipped catalog rows.
         good = [
             {"semiring": "ranked", "laws": ["ordered", "descending"]},
             {"semiring": "prob", "laws": ["ordered", "descending"]},
             {"semiring": "tropical", "laws": ["ordered", "ascending"]},
+            {"semiring": "budget", "laws": ["ordered", "ascending"]},
         ]
-        declared = ["bool", "ranked", "prob", "tropical"]
+        declared = ["bool", "ranked", "prob", "tropical", "budget"]
         assert validate_algebra_laws(root, good, declared) == []
         findings = validate_algebra_laws(
             root,
@@ -227,6 +228,7 @@ def test_algebra_law_claims_are_derived_and_validated() -> None:
                 {"semiring": "ranked", "laws": []},
                 {"semiring": "prob", "laws": ["ordered", "descending"]},
                 {"semiring": "tropical", "laws": ["ordered", "descending"]},
+                {"semiring": "budget", "laws": ["ordered", "ascending"]},
                 {"semiring": "missing", "laws": ["ordered"]},
             ],
             declared,

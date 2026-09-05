@@ -92,6 +92,11 @@ REQUIRED_ALGEBRA_LAWS = {
     "ranked": frozenset({"ordered", "descending"}),
     "prob": frozenset({"ordered", "descending"}),
     "tropical": frozenset({"ordered", "ascending"}),
+    # budget counts the way tropical does, min over a cost with an ascending
+    # reading, and declares order=ascending in its own preset. It reached this
+    # table late because it was a carrier the semiring VOCABULARY did not admit,
+    # so it had no claim row to be required of.
+    "budget": frozenset({"ordered", "ascending"}),
 }
 ALGEBRA_LAW_SEAM = (
     "engine/metta/effects.pl",

@@ -57,6 +57,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The `budget` and `amplitude` carriers are nameable. Both shipped in
+  `algebra._PRESETS` and both worked through `metta.under(...)`, but the
+  catalog's `(vocabulary semiring ...)` row admitted only eight of the ten
+  algebras the same catalog defines, so the generated `Semiring` enum could not
+  spell either and `Semiring.budget` raised `AttributeError`. `budget` also
+  gains the `(claim semiring budget ordered ascending)` row it was missing,
+  which is how a program asks which way a carrier counts.
+
 - The cumulative-syntax table records `pragma!` at the example that actually
   introduces it, `09-00-17`, rather than five chapters later, and carries the
   `py-iter-once` row it was missing.
