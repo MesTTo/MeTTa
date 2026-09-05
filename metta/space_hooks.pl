@@ -729,7 +729,7 @@ metta_transaction_result(threw(Error), _, _) :- throw(Error).
 %extensions/python/metta/shim.pl, removed with this]. Answering it here means
 %every caller of the seam inherits it
 %[tested: transaction_answers:speculation_answers_every_answer_and_still_discards_its_writes;
-%commit=WORKTREE].
+%commit=f5eb8775b78519c080da4ea7c6dff81f7be21ef9].
 :- meta_predicate metta_speculate(0).
 metta_speculate(Goal) :-
     term_variables(Goal, Vars),
