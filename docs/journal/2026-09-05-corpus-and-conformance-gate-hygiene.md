@@ -189,3 +189,73 @@ Open: a `commit=WORKTREE` pin in a file that is in both SOURCES and
 PROVENANCE_SOURCES is counted twice. Pre-existing, and independent of the
 widening: the placeholder count reads 31 under the parent's scope and 31 under
 the widened one.
+
+## 2026-09-05, the gate, and four differences that are not this work
+
+`GATE_ONLY=1 sh check.sh` twice: on the unmodified parent and on the pinned
+tree. Both exit 1, because the parent does, so the comparison is which lanes
+fail rather than whether any do.
+
+    baseline 5ec49f07  exit 1  1024s  loadavg 46.83 -> 26.93
+    verify   6dbb407a  exit 1  1218s  loadavg 39.15 -> 37.17
+
+Both durations are contended and only their difference is reported. Six agents
+ran the gate on this box during the window and loadavg moved between 19 and 87
+on 32 cores; the documented 286-second figure is from a quiet box. The cost
+claim rests on isolated per-lane runs instead, which load cannot reach: the
+claim scan is 154.9 ms at the old scope and 155.0 ms at the new, the
+canonicaliser 0.09 ms against 7.62 ms over the whole corpus twice, the eval law
+13 ms, the combinator property 227 ms at 120 examples, and jscpd-prolog is a
+REPORT lane. About 250 ms.
+
+Four lanes differ between the runs and none is a lane this work broke.
+
+`pytest` went GREEN, `2 failed, 3159 passed` to `3202 passed, 52 skipped`. The
+baseline's two were test_a_shipped_twin_agrees_with_its_example_end_to_end on
+01-identity.metta and test_a_row_value_becomes_an_atom_without_being_reparsed.
+
+`scaling` went green. It read `CONFIGURATION DRIFT mork_backend: pinned under
+'foreign', measuring under 'native'` on the baseline, because a worktree omits
+the MORK artefacts; copying them in resolved it. `artifact-paths` fell from 2
+findings to 1 for the same reason. The remaining one is the sibling anchor at
+measured_corpus.py:38, which resolves from the checkout and not from a worktree
+four directories deeper:
+
+    checkout anchor  : /home/user/Dev/LeaTTa               True
+    worktree anchor  : <a worktree four levels deeper>/LeaTTa  False
+
+`build` and `mork-bench` are NEW and are the same provisioning from the other
+side: a symlink created mid-session let cargo build the MORK seat in a worktree
+for the first time, and `build` then fails with `sccache: error: path must be
+shorter than SUN_LEN`, cargo's socket path against this worktree's depth, while
+`mork-bench` measures a freshly built MORK against baselines pinned in the main
+checkout. Nothing under extensions/mork/ is touched here.
+
+Two things this run found that WERE this work, both fixed before the pin.
+
+The widened evidence lane caught its own author: property.plt:18 still cited
+`property_lane_plants:the_shipped_printer_and_reader_pass_the_law`, the name
+the sixth plant's law column replaced. One finding became two, and the header
+was the thing out of date.
+
+`test_the_ruff_configuration_enables_every_family_or_records_why_not` went red
+with `P0.13 suppression burn-down increased (observed, maximum): {'D': (2233,
+2232)}`. Three new `# noqa: D205` directives were one over the burn-down.
+Decided: rewrite the three docstrings as a summary line, a blank line and a
+body, which removes the suppressions rather than raising the limit. 2231.
+
+One flake identified rather than chased: an intermediate run's pytest lane read
+`1 failed, 1637 passed` where a full run collects 3,254, which is
+`--max-worker-restart=0` aborting the session on a worker crash rather than a
+red suite. Its named failure and the other run's
+`test_nominal_subtyping_does_not_scan_unrelated_declarations` both pass in
+isolation.
+
+Two numbers above were true when they were measured and are superseded by the
+pinned tree, which is what an appended result is for. The claim count reads
+5,046 rather than 5,029 and the modelled runner files 741 rather than 740, after
+`*.sh` and `extensions/*/*.sh` joined the tag half once their last three
+findings were closed. And `_serving` answers TRIPLES rather than pairs: a
+review of the diff found that `mapped` forwarding a match was asking its member
+about the OUTER pattern while handing it the INWARD one at call time, so the
+route carries the request it is asked with as well as the capability.
