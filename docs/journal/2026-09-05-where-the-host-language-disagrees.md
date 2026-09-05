@@ -340,3 +340,33 @@ Open: `MettaError` sets `this.name` from `new.target.name`, deliberately, so a
 bundler that renames the class renames the error too; the browser case asserts
 `code`, which src/errors.ts pins as the stable identity, and says so where it
 does.
+
+## 2026-09-05, what the number wire cost
+
+The whole benchmark suite, run after the wire change, put `wire-roundtrip`
+outside its band as an IMPROVEMENT the two-sided harness refuses to leave
+unpinned. A/B in one worktree, same configuration, to attribute it rather than
+assume it:
+
+    af0eeb6c   2,942,976,441 instructions   inside the band
+    this tree  2,706,907,747               -8.02%
+
+So it is this work's own. The portable transport stopped spelling every
+numeric leaf as decimal text: a `String()` and a concat out, two regex tests
+and a `BigInt()` back, per number. The measured term carries three numeric
+leaves and the case runs 50,000 trips, so 150,000 numbers, and the saving is
+1,573 instructions a number.
+
+Re-pinned to 2,706,729,143 with the mechanism beside it. Only that row's two
+values move; the rest of the file's diff is the shared harness normalising the
+indent from one space to two, which is what `json.dump(..., indent=2)` writes
+and what any `--update` would do. Checked by a semantic diff of the parsed
+document against HEAD rather than by reading the textual one.
+
+`wall_seconds_per_operation` rose in the same step and decides nothing here:
+the row is an instructions row and the box was at loadavg 29 to 45 against the
+loadavg 9 of the 08-28 pin.
+
+`define-call` stays red and stays unpinned. It reads 85262 at af0eeb6c and
+85262 here, identically, so it is not this work's; it is attributed elsewhere
+and being re-pinned there.
