@@ -3131,7 +3131,7 @@ test(test_the_residual_positions_refuse_by_their_own_names) :-
 %the caller discarded -- so those 13 of the table's 119 asks cost 1,043
 %inferences each against 30 for a name that has a predicate, and the whole
 %enumeration cost 17,748 inferences where it now costs 3,854
-%[measured 2026-09-06; commit=WORKTREE].
+%[measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
 %
 %A RATIO rather than a count, because the honest number moves a few
 %inferences with clause layout: what must hold is that a declared name

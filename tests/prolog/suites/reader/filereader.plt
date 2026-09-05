@@ -943,7 +943,7 @@ test(the_capture_pass_refuses_swi_and_engine_bookkeeping,
 % defines above, and 2,067 against 36 through metta_repair_shadow_import/3,
 % which asks number_of_clauses/1 the same way. Over the plunit suites the
 % repair took that path 7,351 times
-% [measured 2026-09-06; commit=WORKTREE].
+% [measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
 %
 % A RATIO rather than a count, because the honest number moves a few
 % inferences with clause layout: what must hold is that a name no module

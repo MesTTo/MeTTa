@@ -1889,7 +1889,7 @@ remove_equation(Space, Term, F, Args, Body, Removed) :-
     %before raising the existence error, so asking it about such a name cost
     %1,030 inferences to learn "no predicate"
     %[source: /usr/lib/swi-prolog/boot/syspred.pl, define_or_generate/1;
-    %measured 2026-09-06; commit=WORKTREE]. The guard cannot change the
+    %measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19]. The guard cannot change the
     %answer: a name current_predicate/1 does not find has no clause count
     %here, so the branch is not taken either way.
     (   Erased == true,

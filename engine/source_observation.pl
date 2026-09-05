@@ -207,7 +207,7 @@ clause_shape_matches(Ref, (Head:-Body)) :-
 % implementation_module/1 admits what it would autoload, for 33, so the ask
 % below still autoloads exactly when it used to
 % [source: /usr/lib/swi-prolog/boot/syspred.pl, property_predicate/2;
-% measured 2026-09-06; commit=WORKTREE].
+% measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
 goal_attribution(_, token(Name), ['generated-by',['token-constructor',Name]]) :- !.
 goal_attribution(Goal, Construct, ['generated-by', Construct]) :-
     strip_module(Goal, Module, Plain),

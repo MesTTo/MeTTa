@@ -781,7 +781,7 @@ test(a_later_definition_retargets_an_earlier_super,
 % before raising the existence error the caller discarded -- so a name no
 % ancestor defines cost 1,031 inferences per module against 22 for one that
 % resolves, and refusing over a space's two-module chain cost 2,120 against
-% the 28 it costs now [measured 2026-09-06; commit=WORKTREE].
+% the 28 it costs now [measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
 %
 % A RATIO rather than a count, because the honest number moves a few
 % inferences with clause layout: what must hold is that a name no module

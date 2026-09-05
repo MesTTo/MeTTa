@@ -222,7 +222,7 @@ test(a_declaration_lands_in_the_module_that_is_speaking,
 %compiled yet with imported_from/1 ran SWI's undefined-procedure trap: it
 %searches the whole autoload library index before raising the existence error
 %memo_owner_module/4 discards. 1,033 inferences against 10 for a name the
-%space inherits [measured 2026-09-06; commit=WORKTREE]. A RATIO rather than a
+%space inherits [measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19]. A RATIO rather than a
 %count, because the honest number moves a few inferences with clause layout.
 test(asking_who_owns_an_undefined_name_costs_what_asking_about_an_inherited_one_costs) :-
     space_module('&memo_iso', Iso),
@@ -245,7 +245,7 @@ memo_owner_cost(Fun, Module, PredArity, Per) :-
 %by running its undefined-procedure trap, which searches the whole autoload
 %library index before raising the existence error, so learning "already gone"
 %cost 1,030 inferences against 8 for a name the module has
-%[measured 2026-09-06; commit=WORKTREE]. A RATIO rather than a count, because
+%[measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19]. A RATIO rather than a count, because
 %the honest number moves a few inferences with clause layout.
 test(clearing_a_table_that_is_already_gone_costs_what_clearing_a_present_name_costs) :-
     metta_engine_module(Engine),

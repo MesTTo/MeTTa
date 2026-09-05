@@ -262,7 +262,7 @@ test(ordinary_other_thread_execution_does_not_enter_observation) :-
 % the properties SWI answers by running its undefined-procedure trap, which
 % searches the whole autoload library index before raising the existence error
 % the caller discards: 1,029 inferences against 8 for maplist/3
-% [measured 2026-09-06; commit=WORKTREE]. A RATIO rather than a count, because
+% [measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19]. A RATIO rather than a count, because
 % the honest number moves a few inferences with clause layout.
 test(attributing_a_goal_that_is_not_a_host_predicate_costs_what_one_that_is_costs) :-
     metta_engine_module(Engine),

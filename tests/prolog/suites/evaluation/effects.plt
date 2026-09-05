@@ -513,7 +513,7 @@ test(no_operation_below_the_lattice_floor_writes_output) :-
 %undefined-procedure trap, which reads the module's autoload declarations and
 %the whole library index before raising the existence error the caller
 %discards: 1,031 inferences against 16 for maplist/3, and 253 such asks over
-%the 271 shipped examples [measured 2026-09-06; commit=WORKTREE].
+%the 271 shipped examples [measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
 %
 %A RATIO rather than a count, because the honest number moves a few inferences
 %with clause layout. What must hold is that a name the engine module does not
