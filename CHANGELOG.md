@@ -567,6 +567,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Node answers and traces now carry partial applications and other Prolog
   compounds as expressions using the Python wire grammar. Improper lists
   cross as `(cons Head Tail)` rather than raising an untaggable-term error.
+- Reconsulting a Prolog library while a materialized relation exists no longer
+  crashes the process. The clause-erase callback tests the reference's type
+  alone, where asking it for its predicate reached SWI's clause metadata
+  during the reconsult that was replacing it.
 - An unrelated native call no longer reads planning mode and module context
   for every materialized relation in the process. Each relation owns one
   dispatch clause per admitted signature, and removing one leaves another

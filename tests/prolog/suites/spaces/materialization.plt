@@ -779,19 +779,25 @@ test(a_cleanup_engine_finds_an_owner_hidden_from_the_gc_callers_snapshot) :-
         ( message_queue_destroy(Ready), message_queue_destroy(Proceed),
           spaces:metta_release_space(Space), set_prolog_gc_thread(GCThread) )).
 
-test(unrelated_clause_and_record_erasure_create_no_cleanup_engines) :-
-    current_prolog_flag(gc_thread, GCThread),
-    setup_call_cleanup(
-        set_prolog_gc_thread(false),
-        ( collect_materialization_owners,
-          statistics(engines_created, Before),
-          forall(between(1, 1000, N),
-                 ( assertz(materialization_nonowner(N), Ref), erase(Ref) )),
-          recordz(materialization_nonowner, recorded, Record),
-          assertz(materialization_gc_tick, Tick), erase(Tick),
-          \+ transaction((erase(Record), collect_materialization_owners, fail)),
-          statistics(engines_created, After),
-          assertion(After == Before) ),
-        set_prolog_gc_thread(GCThread)).
+test(static_library_reconsult_preserves_materialized_answer_bags) :-
+    source_with_reach("(edge a b) (edge a b) (edge b c)\n", Source),
+    with_program(Source,
+        ( assertion(materialize:materialized_snapshot(
+                        '&plunit_materialized', _, _, _, _)),
+          user:consult('../../lib/lib_memo/lib_memo.pl'),
+          same_bag("!(reach a c)"),
+          query_bag('&plunit_materialized', "!(reach a c)", Bag),
+          assertion(Bag == [true,true]) )).
+
+% erase/1 on a clause reference retires nothing physically, so the channel
+% carries clause references only from collection; a record reference arrives
+% immediately and can never own an image.
+test(an_unrelated_record_erasure_creates_no_cleanup_engine) :-
+    collect_materialization_owners,
+    recordz(materialization_nonowner, recorded, Record),
+    statistics(engines_created, Before),
+    \+ transaction(( erase(Record), fail )),
+    statistics(engines_created, After),
+    assertion(After == Before).
 
 :- end_tests(function_free_materialization).

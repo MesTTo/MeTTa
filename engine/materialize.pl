@@ -662,15 +662,21 @@ discard_image_rows(Space, Token) :-
 % https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-proc.c#L1849-L1850
 % [tested: an_unmanaged_stale_release_retires_its_image_at_source_collection;
 % commit=WORKTREE]
-% Derive the storage name directly: a caller transaction may predate the
-% owner's registry rows, or release may already have erased those rows.
-% [source: engine/spaces.pl, native_storage_module/2; commit=WORKTREE]
+% An owner is always a clause of a space's storage predicate, so a record
+% reference is never one and needs no fresh view. Nothing else about the
+% reference may be asked here: this event also fires from $fixup_reconsult/1,
+% and SWI 10.1.13 segfaults in $get_clause_attribute/3 when clause_property/2
+% asks a clause being replaced by that reconsult for its predicate. Identity
+% is the only remaining test, and a transaction can predate the owner row, so
+% an apparently unrelated clause still needs the fresh cleanup engine.
+% [tested: an_unrelated_record_erasure_creates_no_cleanup_engine,
+% static_library_reconsult_preserves_materialized_answer_bags,
+% a_cleanup_engine_finds_an_owner_hidden_from_the_gc_callers_snapshot;
+% commit=WORKTREE]
 source_owner_erased(Reference) :-
-    blob(Reference, clause),
-    clause_property(Reference, predicate(Storage:Space/3)),
-    spaces:native_storage_module(Space, Storage),
-    !,
-    (   current_transaction(_)
+    (   \+ blob(Reference, clause)
+    ->  true
+    ;   current_transaction(_)
     ->  with_mutex('$metta_materialization',
             setup_call_cleanup(
                 engine_create(true, materialize:retire_source_owner(Reference),
@@ -681,7 +687,6 @@ source_owner_erased(Reference) :-
     ->  with_mutex('$metta_materialization', retire_source_owner(Reference))
     ;   true
     ).
-source_owner_erased(_).
 
 % The caller engine owns the mutex. A child engine supplies the fresh view
 % when synchronous GC runs inside a transaction; its erasures must survive

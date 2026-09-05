@@ -150,3 +150,49 @@ Decided before the repair: follow the ground function heads in `lib_memo:memo_in
 
 Current and target materialization classes remain unchanged. The repair restores the existing unrelated-call ceiling and prevents the number of other images from entering that path. The new dispatch differential is written before changing publication; it covers 0, 1, 16 and 64 unrelated images, same-name images in distinct spaces, exact removal and rollback. The full owner, concurrency and source-bag differential remains required.
 
+## 2026-09-05: historical failure attribution and static reconsult
+
+Correction: the killed ten-case process's last named goal was `function_free_materialization:a_ground_chain_query_reuses_the_load_time_relation`. It started before the owned-transaction marker existed. Its loaded source bytes and Prolog stack were not captured, so its cause cannot be confirmed. The old list scheduler's cost is consistent with that chronology, but the later `current_transaction/1` enumerator defect is a separate reproduced failure. The old process's status remains 137, and no result from it is counted as passing evidence.
+
+Rejected: the optional native-predicate prefilter in `source_owner_erased/1`. Dynamic lifetime probes passed, including a thousand unrelated clause references, but they did not establish static reconsult safety. The full engine gate and isolated `lib_memo.plt` and `lib_strategy.plt` loads crash with status -11 in `$get_clause_attribute`, displaying a `<garbage_collected>` module. An initialization containing only the normal engine boot and `consult(lib_memo.pl)` reproduces the same failure. During these erase events, predicate metadata can already have been reclaimed. Identity-only owner lookup is restored. Outside a transaction it uses the indexed owner table; inside a transaction, even an apparently unrelated reference may require the fresh cleanup engine because the caller's old view can hide its owner row. Exact diagnostics are `ai-tmp/ai-erased-reference-library-initialization-red.log` and its status file.
+
+## 2026-09-05: the reconsult segfault, reproduced from the committed source
+
+Tried: `swipl -g true -t halt` over a file that consults the engine and then
+`consult('lib/lib_memo/lib_memo.pl')`, with `engine/materialize.pl` at commit
+`988fb647` -> SIGSEGV, status 139, in `system:$get_clause_attribute/3` under
+`materialize:source_owner_erased/1` under `system:$fixup_reconsult/1`. Planting
+only the `blob/2` plus `clause_property/2` prefilter into the current source
+reproduces it three times out of three, and the current source without that
+prefilter exits 0. So the prefilter alone is the cause, not any other part of
+the committed file. Restoring the same two goals through `wrap_predicate/4`
+instead does NOT reproduce it; an interposed wrapper frame changes the outcome
+and why is not established. Logs:
+`ai-tmp/qp-finish/reconsult-prefilter-only-red-{1,2,3}.log`,
+`ai-tmp/qp-finish/reconsult-headsource-red.log`, `ai-tmp/qp-finish/reconsult-green.log`.
+
+Found: dropping the whole prefilter also dropped a resource guarantee, and the
+test that held it was deleted rather than repaired. Measured which operations
+reach the `erase` channel at all: `erase/1` on a clause reference fires nothing,
+`erase/1` on a recorded reference fires immediately, and clause collection fires
+once per physically removed clause. The deleted test's real content was
+therefore the recorded reference: one erase of a record inside a transaction,
+which the identity-only callback answers by creating a cleanup engine.
+
+Decided: keep `blob(Reference, clause)` and drop only `clause_property/2`. An
+owner is always a clause of a space's storage predicate, so the type test is
+exact for records, costs one builtin, and never asks the reference about its
+predicate, which is where SWI crashes. `an_unrelated_record_erasure_creates_no_cleanup_engine`
+replaces the deleted test with the half that is still true; it fails `1==0`
+without the guard.
+
+Open, with its price: a clause collection that runs inside a transaction still
+creates one cleanup engine per collected clause, because the caller's view can
+hide a newer image's owner row. Measured with `gc_thread` false, 5,000 collected
+clauses inside a transaction cost 331 engines and 0.0030 CPU seconds against
+0.00033 with the callback disabled. `gc_thread` is true by default, so ordinary
+collection runs on a thread with no transaction and takes the indexed path.
+Revisit if a workload collects inside transactions: a non-transactional owner
+index, keyed by the clause reference in a store transactions do not govern,
+would make the membership test exact without a fresh view.
+
