@@ -87,6 +87,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The TypeScript surface boots in browsers and module workers. Browser export
+  conditions select a shared browser bundle; the runtime assets are packaged
+  beside it and fetched before wasm starts. Missing assets raise a named source
+  error. Node boot selects its wasm factory through dynamic import.
+
 - Node answers and traces now carry partial applications and other Prolog
   compounds as expressions using the Python wire grammar. Improper lists
   cross as `(cons Head Tail)` rather than raising an untaggable-term error.

@@ -1,3 +1,6 @@
+# Purpose: verify the engine, language surfaces and package artifacts in CI.
+# Guarantees: the browser bundle executes in Chromium, not only in Node.
+#   [tested: npm run test:browser; commit=WORKTREE]
 name: Checks
 
 # The existing ci.yml gates pull requests into main only, so work on any
@@ -86,6 +89,13 @@ jobs:
 
       - name: Install the Node binding's dependencies
         run: npm ci --prefix extensions/node
+
+      - name: Install Chromium for the browser binding
+        working-directory: extensions/node
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify the browser binding
+        run: npm run test:browser --prefix extensions/node
 
       - name: Install the documentation site's dependencies
         run: npm ci --prefix website
