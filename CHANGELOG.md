@@ -87,6 +87,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Node answers and traces now carry partial applications and other Prolog
+  compounds as expressions using the Python wire grammar. Improper lists
+  cross as `(cons Head Tail)` rather than raising an untaggable-term error.
+
 - `MeTTa.profile()`'s second answer is a table like every other. `EngineProfile`
   held bare tuples, so self-ticks were `node[3]` counted out against a
   docstring; `nodes` and `top()` answer `Rows` now, with columns
