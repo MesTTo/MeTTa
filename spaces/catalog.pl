@@ -617,6 +617,32 @@ metta_legacy_effect_class(immutable, pureStructural).
 metta_legacy_effect_class(stable, readOnlyLookup).
 metta_legacy_effect_class(volatile, oracleIO).
 
+%The determinism vocabulary resolved the same way its effect-class sibling is,
+%and for the same reason: the canonical members come from the catalog row, so
+%adding one there reaches the arrow reader without a second edit, and a long
+%spelling maps IN without becoming a fourth public member.
+%
+%metta_arrow_type_shape/5 read its effect class through the canonicaliser above
+%while deciding its CARDINALITY from a literal list repeated in both of its
+%branches. One predicate, two ownership rules; the policy-inventory lane names
+%a closed list with no owner, and it named these two
+%[tested: metta_arrow_projection:the_long_determinism_spellings_map_to_the_catalog_members;
+%commit=WORKTREE].
+metta_determinism_canonical(Value, Canonical) :-
+    nonvar(Value),
+    !,
+    (   metta_vocabulary_value(determinism, Value)
+    ->  Canonical = Value
+    ;   metta_long_determinism(Value, Canonical)
+    ).
+metta_determinism_canonical(Canonical, Canonical) :-
+    metta_vocabulary_values(determinism, Values),
+    member(Canonical, Values).
+
+metta_long_determinism(deterministic, det).
+metta_long_determinism(semideterministic, semidet).
+metta_long_determinism(nondeterministic, nondet).
+
 %The positional walk. Position counts declaration arguments from 1, the way
 %the refusal prints them; the Expected a refusal carries is the argspec as
 %declared, so the message shows the row's own words.

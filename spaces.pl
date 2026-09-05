@@ -285,6 +285,7 @@
             metta_space_prefixed_name/1,
             metta_space_operand/1,
             metta_effect_class_canonical/2,
+            metta_determinism_canonical/2,
             metta_vocabulary_value/2,
             protect_engine_emitted/1,
             protect_metta_exec_modules/0,
