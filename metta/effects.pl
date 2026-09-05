@@ -669,6 +669,11 @@ metta_semantic_effect(foldall, pureStructural).
 metta_semantic_effect('foldl-atom', pureStructural).
 metta_semantic_effect(forall, pureStructural).
 metta_semantic_effect(if, pureStructural).
+% The selector returns one branch term; the source walk below accounts for
+% either branch's effects when the result mask evaluates that term.
+% [tested: if_decons_expr:the_selector_has_an_explicit_structural_effect,
+% if_decons_expr:the_planner_checks_both_selected_branch_candidates; commit=WORKTREE]
+metta_semantic_effect('if-decons-expr', pureStructural).
 metta_semantic_effect(inferences, pureStructural).
 metta_semantic_effect(let, pureStructural).
 metta_semantic_effect('let*', pureStructural).
@@ -1499,6 +1504,10 @@ metta_effect_plan_source_special_arguments(_, Operation,
                                             metta_evaluated_source_root(Else)]) :-
 % policy-inventory-exempt: mechanism-internal; reason=the three builtins whose two possible branches the planner walks, mirroring the translator's own clauses rather than a catalog vocabulary; evidence=extensions/python/tests/ch15_writing_transactions_and_worlds/test_worlds.py:test_native_control_profiles_keep_pure_calls_and_nested_effects_distinct
     memberchk(Operation, ['if-equal', 'if-equal2', 'match-types']).
+metta_effect_plan_source_special_arguments(_, 'if-decons-expr',
+                                           [_, _, _, Then, Else],
+                                           [metta_evaluated_source_root(Then),
+                                            metta_evaluated_source_root(Else)]).
 metta_effect_plan_source_special_arguments(_, 'if-error',
                                            [Expression, Then, Else],
                                            [metta_evaluated_source_root(Expression),
