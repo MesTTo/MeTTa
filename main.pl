@@ -15,36 +15,24 @@
 %   Future Enhancements: None
 
 %The engine loads through SWI's Quick Load Format: engine/qlf_boot.pl
-%purges stale .qlf transitively first (its header carries the staleness
-%story and the read-only fallback), then qcompile(auto) during this one
-%load makes every engine source compile to a .qlf beside itself on the
-%first boot and load from it afterwards. Measured on this box: warm boot
-%0.08s against 0.19s from source, generation 0.24s once; the earlier
-%study measured the same idiom at 2.37x in instructions with
-%byte-identical output over 25 examples, re-checked 2026-08-25 at 5/5
-%byte-identical either way. The flag is scoped to this load and
-%restored, so a user program's own load_files never inherits it. The
-%.qlf files and engine/.qlf-stamp are build artifacts and .gitignored: a
-%committed .qlf whose mtime beats its source would shadow edits
-%silently, the exact hazard lib/lib_import/lib_import.pl's cascade documents.
+%purges stale .qlf transitively first, then its qlf_load_engine/0 consults
+%the umbrella under qcompile(auto), so every engine source compiles to a
+%.qlf beside itself on the first boot and loads from it afterwards.
+%Measured on this box: warm boot 0.08s against 0.19s from source,
+%generation 0.24s once; the earlier study measured the same idiom at 2.37x
+%in instructions with byte-identical output over 25 examples, re-checked
+%2026-08-25 at 5/5 byte-identical either way. The .qlf files and
+%engine/.qlf-stamp are build artifacts and .gitignored: a committed .qlf
+%whose mtime beats its source would shadow edits silently, the exact
+%hazard lib/lib_import/lib_import.pl's cascade documents.
+%
+%The load itself lives there rather than here because this file is not the
+%only host that runs it: extensions/cmetta/cmetta.c consults the same two
+%files in the same order, and used to spell the second one itself. That
+%header carries the staleness story, the read-only fallback, the flag
+%scoping and what the recovery does and does not cover.
 :- ensure_loaded(qlf_boot).
-%The retry is the torn-artifact recovery: concurrent FIRST boots can race
-%qcompile writing the same .qlf (SWI writes it in place), and a torn file
-%would otherwise hard-fail every later boot while looking fresh to the
-%purge. On any load error the whole .qlf set is purged and the load runs
-%once more from source; metta_qlf_boot:purge_all_qlf is the same purge the
-%staleness check uses. The gate's own runners warm the engine once before
-%their concurrent lanes, so this path is the safety net rather than the
-%common case.
-:- current_prolog_flag(qcompile, OldQcompile),
-   setup_call_cleanup(
-       set_prolog_flag(qcompile, auto),
-       catch(ensure_loaded(metta),
-             Error,
-             ( print_message(warning, Error),
-               metta_qlf_boot:purge_all_qlf,
-               ensure_loaded(metta) )),
-       set_prolog_flag(qcompile, OldQcompile)).
+:- metta_qlf_boot:qlf_load_engine.
 
 %Tokens the engine reads for itself, which are therefore not the file to run.
 %`extensions` asks engine/metta.pl to read every seat's control file and load
