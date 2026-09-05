@@ -9,6 +9,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Booting the engine no longer searches the autoload library index once per
+  declared extension seam. Publishing a seam asked
+  `predicate_property(Module:Head, defined)` to find out whether its predicate
+  exists yet, and on a name nothing defines that question runs SWI's
+  undefined-procedure trap, which searches the whole index before raising the
+  existence error the caller discarded. The boot sweep asks it twice per seam,
+  and it runs before most seams' defining files have loaded, so 325 of its 707
+  probes paid 1,030 inferences to learn "not yet". Boot cost
+  543,929 inferences and now costs 240,641; a declared seam costs 53 inferences
+  instead of 2,100, and thirty added declarations cost 1,755 instead of
+  124,185. Nothing about which seam is published from which module changed:
+  every module's export list, every seam's home module and the whole kind table
+  are identical before and after.
 - The engine layering gate loads the source observer again. It asked for it in
   a file-level directive, which runs before the gate consults the engine, so
   the lane raised `Unknown procedure: metta_ensure_source_observation/0`,
