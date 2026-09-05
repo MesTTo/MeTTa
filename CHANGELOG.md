@@ -32,8 +32,22 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   both file loading and separate declaration/equation loads. Argument checks,
   application types, higher-order arguments and declaration readers use the
   plain runtime arrow. Stored atoms, `get-type f`, documentation and source
-  export retain the written annotation. The catalog still validates the
-  annotation; its determinism and effect product are not enforced.
+  export retain the written annotation. Concrete products now publish owned
+  effect rows consumed by planning, world admission and memoization. A `nondet`
+  product joins its effect with `nondeterministicReadOnly`. Removing or reloading
+  a declaration withdraws only its owned rows.
+- `(pragma! verify-cardinality true)` audits annotated ordinary function calls
+  using SWI's failure and choicepoint rule. `det` requires one success without
+  a choicepoint, `semidet` permits failure, and `nondet` has no answer-count
+  restriction. The checker executes the original dispatch once; by default
+  cardinality assertions are trusted. Plain `->` calls gain no runtime check.
+  Unresolved products, nested products and annotations on translated forms
+  are refused at load because their claims have no runtime consumer.
+  Foreign spaces require transactional storage so partial writes cannot
+  separate an annotation from its effect. A conflicting late effect is refused
+  while a dependent cache is enabled. Removing the last cached equation now
+  releases its owner's memoization state, even when another space still defines
+  the name or the host has already untabled its implementation.
 
 - Python-authored programs can now be inspected and exported as MeTTa.
   `Space.source()` returns the receiver's directly stored program as the exact

@@ -1,6 +1,8 @@
 % Purpose: direct PlUnit coverage for core runtime builtins, their error
 %   contracts, and Python import state cleanup.
 % Guarantees:
+%   - recovery preserves the engine's bound-control exceptions [tested:
+%     limit_expiry_is_a_control_signal_no_recovery_catch_eats; commit=WORKTREE].
 %   - test/3 displays host-only partial applications without claiming they are
 %     serializable MeTTa text [tested:
 %     a_partial_application_remains_visible_in_test_output; commit=c1eaa36c7a2089801fe9da3cbec3fc02833d66fe].
@@ -2441,8 +2443,10 @@ test(with_pragma_restores_a_previous_value) :-
     'pragma!'('max-time', none, _).
 
 test(limit_expiry_is_a_control_signal_no_recovery_catch_eats) :-
-    control_exception(error(metta_control_signal(inference_limit, 200), c)),
-    control_exception(error(metta_control_signal(time_limit, 1.0), c)).
+    forall(member(Error, [error(metta_control_signal(inference_limit, 200), c),
+                          error(metta_control_signal(time_limit, 1.0), c)]),
+           ( catch(catch_recover(throw(Error), fail), Caught, true),
+             assertion(Caught == Error) )).
 
 test(with_pragma_refuses_a_malformed_setting,
      [throws(error(domain_error(metta_pragma_setting, _), _))]) :-

@@ -1,4 +1,6 @@
 % Purpose: plan and execute indexed native-space matches and relational conjunction joins
+% Guarantees: annotated arrow effects reach catalog policy and follow their
+%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=WORKTREE].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
@@ -271,7 +273,8 @@ get_atom_read_link(Space, Pattern) :-
 %lib/lib_redis/lib_redis.pl does) was reachable only when Python was in the process:
 %under run.sh the engine had no path to it at all. The shim now calls this.
 clear_foreign_atoms(Space) :-
-    foreign_write(Space, clear, seam:foreign_clear(Space)).
+    foreign_write(Space, clear, seam:foreign_clear(Space)),
+    metta_clear_arrow_products(Space).
 
 %A space has two halves and this used to empty one of them. The storage sweep
 %below drops every stored atom, and the atoms that also COMPILED left their
@@ -505,6 +508,7 @@ clear_native_atoms(Space) :-
         retractall(Module:'$metta_native_scalar'(_))
     ;   SupportModule = none
     ),
+    metta_clear_arrow_products(Space),
     metta_capacity_count_cleared(Space),
     retractall(import_life(Space, _, _)),
     (   SupportModule \== none

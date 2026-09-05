@@ -1,6 +1,8 @@
 % Purpose: store MeTTa atoms, compile equations into per-space modules,
 %   route matching to native and foreign space providers, and validate
 %   '&metta' declarations against the self-describing catalog.
+% Guarantees: annotated arrow effects reach catalog policy and follow their
+%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=WORKTREE].
 % Assumes:
 %   - the removal funnel takes a space NAME rather than a handle, so
 %     metta_remove_atom/3, unstore_atom/3 and remove_equation/6 each take a
@@ -206,6 +208,11 @@
             match_foreign/5,
             match_stored/4,
             metta_add_atom/3,
+            metta_arrow_product_in/4,
+            metta_with_arrow_product_update/1,
+            metta_refuse_annotated_translator_rule/1,
+            metta_verify_annotated_call/5,
+            metta_set_cardinality_verification/1,
             metta_add_atoms/2,
             metta_add_hooks_idle/1,
             metta_assert_space_releasable/1,
@@ -375,6 +382,7 @@ space_canonical_atom(Space, Encoded) :-
 
 :- consult('spaces/catalog.pl').
 :- consult('spaces/lifecycle.pl').
+:- consult('spaces/arrow_products.pl').
 :- consult('spaces/foreign.pl').
 :- consult('spaces/bounded_matching.pl').
 :- consult('spaces/native_matching.pl').

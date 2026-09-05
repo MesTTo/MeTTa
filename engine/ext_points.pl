@@ -1,6 +1,8 @@
 % Purpose: declare each engine extension seam, its direction and its cut
 %   semantics, and publish the predicates extensions and host bindings may call.
 % Guarantees:
+%   - libraries can distinguish an author's annotated effect from inferred
+%     operation metadata [tested: run_tests(metta_arrow_products); commit=WORKTREE].
 %   - host query carriers enter the engine-owned algebra scope, read its
 %     effective carrier and identity, and compose operation-answer weights
 %     only through declared host services
@@ -1346,6 +1348,8 @@ kind(metta_effect_join/3, service).
 kind(metta_effect_compose/2, service).
 kind(metta_effect_class_canonical/2, service).
 kind(metta_operation_effect/2, service).
+%Only an owned arrow declaration qualifies; ordinary inferred catalog rows do not.
+kind(metta_annotated_operation_effect/2, service).
 kind(metta_operation_plan_effect/2, service).
 kind(metta_effect_walk/3, service).
 kind(metta_function_cacheable/1, service).

@@ -1,4 +1,6 @@
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
+% Guarantees: verify-cardinality checks annotated calls while plain calls
+%   retain their generated goal [tested: run_tests(metta_arrow_products); commit=WORKTREE].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
 %   state writes are refused while speculative or reified-world execution is
@@ -34,6 +36,8 @@ metta_pragma_key('verify-specializations',
 metta_pragma_key('verify-discharges',
                  'run every type check the compiler discharged, and raise a \c
                   disagreement instead of trusting it').
+metta_pragma_key('verify-cardinality',
+                 'check annotated det and semidet calls for failure or choicepoints').
 metta_pragma_key('max-stack-depth',
                  'branch-local reduction fuel; zero selects the default').
 metta_pragma_key('stack-limit',
@@ -181,6 +185,8 @@ set_metta_pragma(Key, Value) :-
     ->  metta_fuel_ensure_charges
     ;   Key == 'verify-discharges'
     ->  metta_refresh_discharge_verification
+    ;   Key == 'verify-cardinality'
+    ->  metta_set_cardinality_verification(Value)
     ;   true
     ).
 

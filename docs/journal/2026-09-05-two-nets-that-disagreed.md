@@ -320,3 +320,147 @@ functional commit. Seven historical placeholders already exist at the
 baseline, including one older identity measurement. Preserve those claims
 instead of assigning measurements this work did not perform to a new commit.
 The final provenance diff must contain only the new claim pins.
+
+
+## 2026-09-05: Giving the arrow product a consumer
+
+Goal: retain the written arrow while making its effect and cardinality claims reach execution policy.
+
+Tried: the base identity declared `writesState` planned as `pureStructural`; a function declared `det` with two equations returned both answers. A direct SWI `det/1` probe rejected the latter with `error(determinism_error(two/2,det,nondet,property),context(_, _))`.
+
+Rejected: `library(prolog_wrap)` wrappers, because both installing and removing a wrapper survived a failed SWI transaction in `ai-tmp/ai-wrap-probe.pl`. Transactional declaration removal could therefore lose a checker even when its declaration came back. Revisit if the wrapper operation itself becomes transactional.
+
+Decided: publish ordinary `(effect Name Class)` catalog rows owned by each annotated declaration. Record their references before the declaration reference so source withdrawal removes the declaration before its derived row. Removal, clear and rollback withdraw owned rows; other declarations and handwritten rows retain their ownership. The existing catalog joins effects globally by operation name, so declarations in different spaces conservatively join too. Planning follows bodies and joins author declarations; memo admission treats an explicit nonstructural declaration as the author's refusal.
+
+Decided: compile a check around completed dispatch only for an annotated name in scope. `(pragma! verify-cardinality true)` materialises a dynamic marker. Its off branch trusts the cardinality assertion and calls the same dispatch; plain calls retain their generated goal. Enabled checks follow SWI's failure and choicepoint rule, without draining or replaying a body. `det` requires a success without a choicepoint; `semidet` permits failure; `nondet` places no answer-count restriction. A constrained output can fail, so only its upper bound is checked. Empty answers do not discharge a `det` obligation. Applicable overlapping declarations all hold, with `det` stronger than `semidet`. Product variables and nested higher-order products are refused because there is no consumer that can bind or enforce them yet.
+
+Source: SWI `det/1`, https://www.swi-prolog.org/pldoc/man?predicate=det/1, and Mercury's determinism categories, https://www.mercurylang.org/information/doc-release/mercury_ref/Determinism-categories.html. The local `verify-discharges` implementation supplies the materialised-mode precedent. Cardinality observation is independent of the written assertion, and executes the original dispatch once.
+
+Open: implementation, removal controls, all-file baseline comparison, Python suite and warmed inference/instruction measurements.
+
+
+Tried: the first Python consumer run used the session-scoped `&self` fixture, so equal names accumulated across parameters and effects correctly joined. The new cases now own fresh spaces. The same run showed that treating every definition's catalog row as an author assertion rejects existing generator memoization: `_EffectAnalysis` writes inferred rows, including conservative `oracleIO` for attribute-shaped constructor calls. The existing `lib_memo` guard deliberately excludes those rows. The new consumer therefore requires annotated-declaration ownership for a definition, then joins its ordinary catalog policy. Registered operations keep their existing guard. This preserves plain `->` behavior while making an explicitly written arrow binding.
+
+
+Tried: `(: superpose (-[det,pureStructural]-> Atom %Undefined%))` with verification enabled still returned both `1` and `2`, because `translate_special_dl/5` bypasses ordinary function dispatch. Decided: refuse annotated products on translated forms and function importers at declaration load, with an ordinary wrapper function as the remedy. Translator-rule registration and fast-cache registry restoration likewise refuse an already annotated name. The two declaration writers share the product mutex. The effect and cardinality of a wrapper remain observable at its ordinary dispatch boundary.
+
+Tried: a manual exact cache remained enabled after a late `writesState` annotation. Clearing existing answers alone cannot honour the new assertion, because the next call can cache again. Decided: use the existing cache-policy event before publishing the stored type to refuse an annotation whose effect plan reaches an active cache. The refusal names the cache and asks the caller to clear memoization first. This preserves the previous program on refusal and avoids nontransactional table removal during declaration rollback.
+
+Tried: the first full Python run measured the plain identity twin at 3,649 inferences against its 3,592 pin. The runtime clauses were unchanged, but scanning every declaration and probing every translated call added compile work. Decided: install a name-indexed compiler clause only for annotated declarations, using the existing dynamic-clause ownership pattern from memo dispatch. Its clause reference participates in declaration and source rollback. The ordinary compiler clause retains its original body. Nested-product refusal still requires inspecting a newly written type.
+
+Tried: the unmodified base reproduced a dropped exact cache retaining `memo_enabled/3` and `exact_memo_specialization/5`, then raising `Unknown procedure: '$metta_exec:&pyspace_2':'$metta_exact_replay$drop-probe$2'/2` when the pooled space name was reused. The clear path untables first; `reset_exact_memo_table/3` then failed because the table implementation was already gone, interrupting equation removal before its memo metadata was retired. Decided: a reset succeeds when the owner already untabled it. A name-indexed change handler also retires an individual module's memo state when its last equation disappears, without waiting for every other space to lose that name.
+
+Correction: `clear-memoize` clears entries but keeps memoization enabled. The late-annotation refusal therefore names the cached definition and requires its removal before adding the annotation; it does not suggest clearing entries as a remedy.
+
+Tried: MORK with no `(writes ...)` declaration refused the product transaction because its write could not roll back. `best-effort` would permit a type to survive a failed catalog transaction, so it cannot preserve the product's ownership invariant. Decided: refuse annotated products on nontransactional foreign stores before writing either side; plain arrows keep their existing provider path. The diagnostic names transactional storage as the missing capability.
+
+Tried: eight removal controls each failed their targeted regression, and restoring the implementation passed 20 Python cases and 34 expanded Prolog cases. The cardinality-off mutation also exposed two weak tests: unifying an unbound exception variable with an expected term did not prove an exception occurred. Added explicit nonvar assertions to those tests and the transitive effect-walk test before repeating the controls.
+
+
+Verified: nine independent source-removal controls failed for the intended assertion: missing effect rows (6 Python failures), skipped memo refusal (5), missing nondet floor (2), bypassed cardinality check (6 Prolog failures), instrumented plain caller (1), leaked owned rows (17), ignored late cache conflict (4 Python failures), permitted nontransactional foreign storage (2), and interrupted cache-owner cleanup (1). Restoring every source passed 20 Python cases and 35 expanded Prolog cases. The new dispatch-policy control verifies that a deterministic result policy still selects the first equation before cardinality is audited.
+
+Measured: equal-path controls use a mount namespace to expose only this worktree at the shipping checkout path; the physical main checkout remains untouched. Each arm clears engine QLF and warms before three fresh processes. Base/product inference triples are boot 544246/544336, evaluate 559467/559427 and translate 384479/383698. Their instruction minima are 820945446/823034149, 505798797/505830979 and 387213369/388504602 respectively. All instruction movements stay inside the existing one-percent bands. The base evaluate pin was 559471, four above its measured count. Re-pin only those three inference fields; retain every instruction and advisory wall pin.
+
+Measured: replacing only metta_annotated_type/1 with failure leaves all three engine inference totals unchanged. The plain identity define-and-call twin is 3592 at base, 3609 in that scanner control and 3614 in the product, each repeated three times. Five of the added 22 inferences are therefore type-write scanning; the other seventeen are not attributed further. The scanner never runs on the compiled plain call: a 100000-call probe costs 700002 inferences and has compiled-body hash e2159d920a9888e5baf53b33aac3738eb8d6a2b7 in every arm and repetition.
+
+Tried: running the twin re-pin immediately after an engine-only warm produced one cold 3588 sample followed by 3614, so the minimum-based tool correctly left the old pin. A full Python warm followed by three fresh 3614 samples supplies the re-pin through twin_coverage.repinned. QLF files are cleared and warmed again whenever entering or leaving the normalized-path namespace; compiled absolute source paths must not cross that boundary.
+
+
+Tried: the full Python seat returned 3012 passed, two failed, 48 skipped and one expected failure. Ruff identified RUF043 in the new regex expectation; changed it to a raw string. The other failure was the unchanged atom-cache CPU-ratio check, 1157 ns versus 678 ns, or 1.71 against its 1.6 bound. Both the unmodified base and product pass that case alone. No atom-cache code was changed.
+
+Tried: the complete gate inside the canonical-path namespace exposed Python bytecode retaining original worktree filenames, causing inspect.getsourcelines to raise OSError: could not get source code. QLF clearing alone cannot make that namespace transparent. The next run clears Python bytecode and library QLF artifacts as well as engine QLF on both sides of the boundary.
+
+Tried: the first root engine benchmark read boot 544352, sixteen above the direct measurement; all six other engine rows passed. Adding zero, one or two Python directories to PATH leaves the unmodified base at 544246 in every sample, so PATH does not explain it. A later read of the same running namespace gives product 544336 with either the direct or gate TMPDIR, so neither the private Git metadata nor that scratch-directory choice explains the earlier sixteen. No pin is advanced on an unconfirmed explanation.
+
+Verified: Node's vocabulary test fails on the unmodified base because its Semiring table lacks budget and amplitude while the live catalog includes both. This is separate from the arrow product. The original full gate also reports wider Python benchmark pin movement; those results require a base comparison before attribution.
+
+### 2026-09-05: deferred cache integration
+
+Tried: the full gate exposed `02-memo_aggregate.metta` answering `[5,6,7]`
+instead of `[18]`. The new cache cleanup listened to `function_changed/1` and
+mistook deferred equations for removal because it read `translated_from/2`.
+The isolated `ai-tmp/ai-forward-probe.py aggregate` reproduced that result.
+Decided: cleanup listens to the scoped atom-removal event and asks stored
+source whether the owner still has an equation. Arrivals do not withdraw a
+forward declaration. The same probe now answers `[18]`.
+Tried: after preserving forward caches, the forward-caller probe cached a
+function calling an annotated writer and returned `is-memoized=True`.
+Decided: the cache's name-bound compiled-clause event validates annotated
+dependencies before the first call. The retained-source effect planner decides
+which terms execute. Pending direct caches also refuse a conflicting late
+annotation before its type is stored. Unchecked admission cannot override an
+explicit annotated effect. The four new Python regressions pass with the
+other twenty annotated-product cases.
+Tried: the root surface and evidence lanes found an unpublished
+`metta_annotated_operation_effect/2` service and two test paths lacking their
+`extensions/python/` prefix. The service is now published and both paths are
+repository-relative. The static checker also exposed an existing failing-only
+`Raw` branch in lexical declaration lookup; writing its equivalent negated
+ownership guard preserves the rule and makes the variable flow explicit.
+Open: repeat the mutation controls, complete suites and warmed measurements
+on the final source state, then pin the verified commits.
+
+## 2026-09-05, product verification after the catalog and library merges
+
+Tried: rebased the preserved product implementation onto
+`763b7f2d1b0c6882b171cfa0e6a56374e0e8d167`. Kept that base's benchmark pins
+and identity budget, because measurements from the earlier base cannot price
+the catalog arity correction or the newly shipped libraries. Resolved the
+source-table counts with seven space units, 57 services, and 37 libraries.
+
+Verified: the focused Python product and lint files pass 76 tests. The product
+Prolog file passes 36 expanded cases across two units, including the new
+recovery-catch witness. Running every suite in a separate SWI process gives
+60 base files and 61 product files. Their seven failing files and failing test
+names match: `metta` 2, `prelude` 3, `prolog_interface` 4, `python_surface` 49,
+`shim` 18, `conformance2` 1, and `extensions` 1. These runs deliberately omit
+the Python bridge environment; the root gate owns the provisioned run.
+
+Verified: twelve independently disabled consumers make their regressions fail:
+effect publication, unchecked memo admission, the nondet floor, cardinality
+checking, plain-call isolation, owned-row removal, late cache conflict,
+forward cache conflict, transactional storage admission, recovery propagation,
+cache-owner withdrawal, and already-untabled cache teardown. Restoring every
+source file makes all 25 Python product tests and all 36 Prolog cases pass.
+The former separate pending-cache branch is absent: its mutation survived
+because the existing effect planner already detects the pending cache. The
+late-cache negative control now exercises that case through the shared path.
+
+Verified: the independent PeTTaChainer journal probes now find
+`(effect w writesState)`, plan `w` as `writesState`, and raise on the
+two-equation `det` declaration when `verify-cardinality` is enabled. Their
+missing-consumer blocker clears; the argument-aware `callPredicate` verdict
+and optional `lib_chainer` remain separate adaptations.
+
+Open: current-base performance measurements, the full Python seat, the root
+gate, and final provenance pins.
+
+## 2026-09-05, consumer verification after rebase onto 763b7f2d
+
+Verified: the expanded ownership control now includes a handwritten effect row
+with exactly the same class. Suppressing owned-row erasure fails both ownership
+cases; restoration passes 25 Python product tests and 37 Prolog cases. The
+other eleven mutation controls also fail their intended assertions.
+
+Measured: all seven engine benchmark cases and all fifteen Python instruction
+cases pass. Equal-path source-only controls retain identical plain-call bodies
+and 700,002 inferences for 100,000 calls. The engine inference triples are
+base/product: boot 532,010/533,927; evaluate 558,637/560,400; translate
+362,374/364,379. Match 263,602, match-skew 208,002, parse 152 and Prolog parse
+3,076,184 are unchanged. The identity twin moves 3,399 to 3,413; disabling
+annotation detection accounts for five, and nine remain unattributed.
+
+Measured: the wider Python counter suite locates a fixed 34-inference move in
+several unchanged workloads and 1,398 in 100 operation registrations. The
+existing slope checks retain their rates. Automatic memoization remains
+linear while its refused control remains exponential. Its size sweep, the
+C boot and C term-input samples, and all changed pins are recorded beside
+their existing baseline entries. No allowance was widened and no advisory
+timing was repinned. The first C control used a source-only boot, which did
+not create QLF files; it was rejected and repeated after the benchmark's own
+qcompile(auto) boot.
+
+Open: the full root gate also exposed an inconsistent copied MORK build cache,
+an upstream Git mount omitted by the attribution fixture, and pre-existing
+comparison and evidence problems. Those are being checked independently of
+the consumer before the final gate result is recorded.
