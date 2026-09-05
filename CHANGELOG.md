@@ -41,7 +41,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   effect rows consumed by planning, world admission and memoization. A `nondet`
   product joins its effect with `nondeterministicReadOnly`. Removing or reloading
   a declaration withdraws only its owned rows. Direct removal of owned rows
-  and catalog clears that would orphan another space's declaration are refused. Ordinary clear retains provider callback suspension and removes only metadata for declarations no longer stored.
+  and catalog clears that would orphan another space's declaration are refused.
+  The removal guard also covers catalogs with capacity counters. Ordinary clear
+  retains provider callback suspension and removes only metadata for declarations
+  no longer stored.
 - `(pragma! verify-cardinality true)` audits annotated ordinary function calls
   using SWI's failure and choicepoint rule. `det` requires one success without
   a choicepoint, `semidet` permits failure, and `nondet` has no answer-count
@@ -53,7 +56,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   separate an annotation from its effect. A conflicting late effect is refused
   while a dependent cache is enabled. Removing the last cached equation now
   releases its owner's memoization state, even when another space still defines
-  the name or the host has already untabled its implementation.
+  the name or the host has already untabled its implementation. Memo handlers
+  retain exact clause references and retire with their owners. Native clear
+  keeps bulk data removal when its observers watch only compiled equations.
 
 - Python-authored programs can now be inspected and exported as MeTTa.
   `Space.source()` returns the receiver's directly stored program as the exact

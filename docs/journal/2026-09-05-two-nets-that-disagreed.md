@@ -554,3 +554,48 @@ Its existing runner limits each configuration to 300 seconds. The same
 example passes both configurations when run alone on unmodified 763b7f2d.
 The repaired consumer is being checked separately before repeating the
 complete lane; no workload, runner limit or skip list has changed.
+
+
+## 2026-09-05, the observer that made clear visit every atom
+
+Tried: the isolated product parity run still reports `engine 0 against
+library None`, after 310.34 seconds. The engine finishes in about ten seconds;
+the library reaches its existing 300-second limit. At rewrite depth 12,
+base/product load costs are 515,807/515,887 inferences, but closing the space
+costs 0.01143/0.72550 seconds. The product's removal census contains the new
+memo-owner observer for `rewriteK`. That observer watches equations, yet its
+presence makes native clear remove every stored `num` through the individual
+removal funnel. The 200/2,000-atom regression measures 17,376/131,864 clear
+inferences and fails before repair.
+
+Decided: preserve the strict idle-census contract. After that census refuses,
+native clear can separately prove that every remaining observer is covered
+by its existing compiled-equation removal pass. Only a closed three-element
+equation pattern with an atomic function head qualifies. Open outer lists,
+variable relation names and unclassified patterns keep individual atom
+notification. The existing host and filtered-observer census still decides
+whether other handlers are idle. No new event or ownership assertion is added.
+The depth-12 and depth-14 closes now take 0.03353 and 0.02738 seconds.
+
+Tried: the first bulk-clear repair still adds about 547 inferences per cache
+life. Listing `seam:atom_removed/2` after repeated clears shows one, two,
+three, four and five retained memo observers. Removal by clause text does
+not match their stored module-qualified bodies. Decided: retain and erase
+exact clause references for memo dispatch and all three lifecycle handlers.
+The same cache-life probe now leaves no observer clauses behind. After one
+warm-up life, clear measures exactly 4,582 inferences at 200, 2,000 and
+20,000 ordinary atoms, including a descending-size control. The permanent
+regression warms one complete cache life before comparing its two sizes.
+
+Tried: capacity-counted catalog removal bypasses the ordinary effect-row
+guard. Its regression fails with a missing exception, a missing effect row,
+and a changed counter, `382 == 383`. Decided: the counted removal clause
+consults the same ownership guard before retracting a row or changing its
+counter. The catalog-clear refusal remains independent of this removal door.
+
+Verified: nineteen mutations now fail on their intended assertions, including
+bulk clear, open-pattern and variable-relation observers, counted catalog
+removal, and separate memo lifecycle/dispatch retirement. None fails because
+of a syntax error or missing predicate. Restored source passes 27 Python
+product tests and 41 expanded Prolog cases. The complete gate and the original
+large parity workload will be repeated at this state.

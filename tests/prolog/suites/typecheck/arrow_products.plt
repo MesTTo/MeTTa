@@ -3,7 +3,8 @@
 %   plain-arrow controls and checking rollback as well as successful calls
 %   [tested: run_tests(metta_arrow_products); commit=WORKTREE].
 % Owns resources: each case releases its named spaces; pragma writes restore
-%   the disabled mode before the next case.
+%   the disabled mode before the next case. Observer cases erase their clause
+%   references and destroy their message queues even when an assertion fails.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -101,6 +102,25 @@ test(an_owned_effect_is_removed_through_its_declaration,
        throws(error(permission_error(remove, annotated_arrow_effect, _), _)) ]) :-
     metta_remove_atom('&metta', [effect, 'product-f', writesState], _).
 
+test(a_counted_catalog_keeps_the_owned_effect_removal_guard,
+     [ setup(product_fixture(
+          "(: product-f (-[det,writesState]-> Number Number))", Space, _)),
+       cleanup((metta_undeclare_hook(pre_add, '&metta'),
+                metta_remove_atom('&metta', [capacity, '&metta', 100000], _),
+                metta_remove_atom('&self',
+                    [=, ['space-admission-guard-&metta', _], _], _),
+                product_cleanup(Space))) ]) :-
+    metta_add_atom('&metta', [capacity, '&metta', 100000], true),
+    metta_admission_claim('&metta', '&self'),
+    metta_capacity_count('&metta', Before),
+    catch(metta_remove_atom('&metta', [effect, 'product-f', writesState], _),
+          Error, true),
+    assertion(nonvar(Error)),
+    assertion(Error = error(permission_error(remove, annotated_arrow_effect, _), _)),
+    assertion(metta_catalog_row([effect, 'product-f', writesState])),
+    metta_capacity_count('&metta', After),
+    assertion(After == Before).
+
 test(clearing_the_catalog_cannot_orphan_another_spaces_product,
      [ setup(product_fixture(
           "(: product-f (-[det,writesState]-> Number Number))
@@ -122,6 +142,19 @@ test(clearing_an_undefined_declaration_withdraws_its_effect,
        cleanup(product_cleanup(Space)) ]) :-
     clear_native_atoms(Space),
     assertion(\+ metta_operation_effect('product-f', _)).
+
+test(a_clear_observer_still_sees_atoms_outside_the_compiled_half,
+     [ forall(member(Pattern-Term,
+          [[=, ['product-f'|_]|_]-[=, ['product-f', 1]],
+           [_, ['product-f'|_], _]-[data, ['product-f', 1], kept]])),
+       setup(('new-space'(Space), message_queue_create(Queue))),
+       cleanup(((nonvar(Ref) -> erase(Ref) ; true),
+                product_cleanup(Space), message_queue_destroy(Queue))) ]) :-
+    metta_add_atom(Space, Term, true),
+    assertz(seam:(atom_removed(Space, Pattern) :-
+                     thread_send_message(Queue, observed)), Ref),
+    metta_host_clear_space(Space),
+    assertion(thread_get_message(Queue, observed, [timeout(0)])).
 
 test(a_batch_cannot_store_an_annotation_as_inert_data,
      [ setup('new-space'(Space)), cleanup(product_cleanup(Space)) ]) :-

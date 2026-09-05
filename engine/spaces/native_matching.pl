@@ -376,6 +376,7 @@ metta_capacity_remove_hook_install(Space) :-
 metta_capacity_remove_sexp('&metta', [Rel|Args], Removed) :- !,
     (   native_storage_module_ready('&metta', Module)
     ->  Term =.. ['&metta', Rel|Args],
+        ( Rel == effect -> metta_refuse_owned_effect_removal(Module, Term) ; true ),
         native_retract_one(Module:Term, Removed),
         (   Removed == true
         ->  metta_catalog_note_removed([Rel|Args])
