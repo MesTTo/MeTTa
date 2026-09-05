@@ -22,6 +22,9 @@
 % translator_literal_type_checks:a_stale_transaction_keeps_the_dynamic_contract;
 % commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
 % [tested: tests/prolog/suites/spaces/spaces.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: withdrawing a declaration repairs aliases and compiled callers
+%   through the existing support graph in the same transaction [tested:
+%   structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
 
 %%%% Who owns a space name: the claim door %%%%
 %
@@ -1602,7 +1605,24 @@ metta_space_expression(Operation, Terms, _) :-
 metta_remove_atom(Space, _, _) :-
     metta_refuse_module_for_space(Space, metta_remove_atom/3),
     fail.
-metta_remove_atom(Space, Term, Removed) :- var(Term), !,
+metta_remove_atom(Space, Term, Removed) :-
+    nonvar(Term), Term = [':', _, _], !,
+    space_module(Space, Module),
+    with_typing_policy_stable(
+        transaction(
+            ( findall(Name,
+                      ( copy_term(Term, Probe), Probe = [':', Name, _],
+                        match_stored(Space, Probe, Name, Name), atom(Name) ),
+                      Names0),
+              sort(Names0, Names),
+              metta_remove_atom_raw(Space, Term, Removed),
+              ( Removed == true
+              -> type_alias_lookups_changed(Module, Names)
+              ;  true ) ))).
+metta_remove_atom(Space, Term, Removed) :-
+    metta_remove_atom_raw(Space, Term, Removed).
+
+metta_remove_atom_raw(Space, Term, Removed) :- var(Term), !,
     findall(A, metta_host_stored(Space, A), Atoms),
     (   Atoms == []
     ->  Removed = false
@@ -1610,10 +1630,10 @@ metta_remove_atom(Space, Term, Removed) :- var(Term), !,
                ( metta_remove_atom(Space, A, _) -> true ; true )),
         Removed = true
     ).
-metta_remove_atom(Space, Term, Removed) :- Term = [=, [F|Args], Body], !,
+metta_remove_atom_raw(Space, Term, Removed) :- Term = [=, [F|Args], Body], !,
                                            remove_equation(Space, Term, F, Args,
                                                            Body, Removed).
-metta_remove_atom(Space, Term, Removed) :-
+metta_remove_atom_raw(Space, Term, Removed) :-
     Term = [=, Scalar, _],
     atom(Scalar),
     !,
@@ -1623,7 +1643,7 @@ metta_remove_atom(Space, Term, Removed) :-
         announce_function_changed(Module, Scalar)
     ;   true
     ).
-metta_remove_atom(Space, Term, Removed) :-
+metta_remove_atom_raw(Space, Term, Removed) :-
     Term = [':', Type, Marker],
     atom(Type),
     ( Marker == 'DontEvalType' ; var(Marker) ),
@@ -1635,7 +1655,7 @@ metta_remove_atom(Space, Term, Removed) :-
         type_marker_changed(DeclModule, Type)
     ;   true
     ).
-metta_remove_atom(Space, Term, Removed) :-
+metta_remove_atom_raw(Space, Term, Removed) :-
     Term = [':', Type, Marker],
     var(Type),
     ( Marker == 'DontEvalType' ; var(Marker) ),
@@ -1657,12 +1677,12 @@ metta_remove_atom(Space, Term, Removed) :-
 %stale exactly as adding one did, and for the same reason: the argument that
 %arrived as written now arrives evaluated. The write path learned this and the
 %removal path did not.
-metta_remove_atom(Space, Term, Removed) :- Term = [':', F, _], atom(F), fun(F), !,
+metta_remove_atom_raw(Space, Term, Removed) :- Term = [':', F, _], atom(F), fun(F), !,
                                            result_finality(F, Before),
                                            unstore_atom(Space, Term, Removed),
                                            space_module(Space, DeclModule),
                                            announce_declaration_changed(DeclModule, F, Before).
-metta_remove_atom(Space, Term, Removed) :- unstore_atom(Space, Term, Removed).
+metta_remove_atom_raw(Space, Term, Removed) :- unstore_atom(Space, Term, Removed).
 
 type_marker_changed(Module, Type) :-
     findall(Function-Context,

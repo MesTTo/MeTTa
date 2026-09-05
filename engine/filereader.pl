@@ -197,6 +197,10 @@
 %     walk would collect all three, but acquire_declared_dependencies/1
 %     belongs to lib/lib_gitimport/lib_gitimport.pl and takes the form list itself, so
 %     merging changes a library's interface; left alone here for that reason.
+% Guarantees: prepare_parsed_summary_in/5 validates aliases in source order;
+%   record_translated_supports/3 retains raw annotation dependencies in the
+%   existing support graph, including previously missing aliases [tested:
+%   tests/prolog/suites/typecheck/structural_aliases.plt; commit=acad923476d21110870f235192757281a737ee71].
 
 %The loader's surface: what the engine core asks of it, what a write records
 %with it, the host services a binding calls, and the parser doors it publishes
@@ -239,6 +243,8 @@
             support_invalidate_definition/1,
             typing_policy_changed/1,
             repair_support_invalidations/0,
+            repair_typing_policy_invalidations/0,
+            set_type_alias_support_scope/2,
             %engine/main.pl's command line runs a file through this one,
             %and engine/translator.pl asks whether a source load is active
             %before it defers a runnable's definition.
@@ -518,7 +524,7 @@ load_metta_source_groups_impl(Filename, Space, Groups) :-
 
 read_metta_source_groups(Filename, Space, Groups) :-
     read_metta_source(Filename, Source),
-    prepare_metta_source(Source, Forms, Names),
+    prepare_metta_source_in(Space, Source, Forms, Names),
     with_named_program_order(
         Names,
         with_runnable_variable_epochs(
@@ -600,11 +606,11 @@ metta_host_run_source(Source0, Space, Bindings, Groups) :-
         %rewrite any subterm, heads included, so the substituted branch
         %below recomputes everything from the forms it actually runs.
         metta_host_tagged_parse_summary(Source, Parsed, Sigs, Decls),
-        prepare_parsed_summary(Parsed, Sigs, Decls, Names)
+        prepare_parsed_summary_in(space(Space), Parsed, Sigs, Decls, Names)
     ;   metta_host_tagged_parse(Source, Parsed0),
         maplist(metta_host_substitute_form(Bindings), Parsed0, Parsed),
         source_summary_of_forms(Parsed, Sigs, Decls),
-        prepare_parsed_summary(Parsed, Sigs, Decls, Names)
+        prepare_parsed_summary_in(space(Space), Parsed, Sigs, Decls, Names)
     ),
     with_named_program_order(
         Names,
@@ -650,11 +656,12 @@ metta_host_run_source_status(Source0, Space, Groups) :-
     metta_host_default_working_dir,
     ( string(Source0) -> Source = Source0 ; atom_string(Source0, Source) ),
     metta_host_tagged_parse(Source, Parsed),
-    prepare_parsed_forms(Parsed),
     (   space_module(Space, Module)
     ->  true
     ;   Module = user
     ),
+    source_summary_of_forms(Parsed, Sigs, Decls),
+    prepare_parsed_summary_in(module(Module), Parsed, Sigs, Decls, _),
     with_source_program_order(
         Parsed,
         metta_host_status_groups(Parsed, Space, Module, Groups)),
@@ -720,7 +727,7 @@ process_metta_string(S, Results, Space) :-
     with_mutex(metta_loader,
                process_direct_metta_string(S, Results, Space)).
 process_direct_metta_string(S, Results, Space) :-
-    prepare_metta_source(S, ParsedForms, Names),
+    prepare_metta_source_in(Space, S, ParsedForms, Names),
     with_named_program_order(
         Names,
         with_runnable_variable_epochs(
@@ -728,7 +735,7 @@ process_direct_metta_string(S, Results, Space) :-
               append(ResultsList, Carried),
               maplist(metta_answer_term, Carried, Results) ))).
 process_loader_string(S, Results, Space) :-
-    prepare_metta_source(S, ParsedForms, Names),
+    prepare_metta_source_in(Space, S, ParsedForms, Names),
     with_named_program_order(
         Names,
         with_runnable_variable_epochs(
@@ -868,7 +875,11 @@ prepare_metta_source(S, ParsedForms) :-
 %inferences per atom of the fun doorbench and a fifth of the data one.
 prepare_metta_source(S, ParsedForms, Names) :-
     parse_metta_source_summary(S, ParsedForms, Sigs, Decls),
-    prepare_parsed_summary(ParsedForms, Sigs, Decls, Names).
+    prepare_parsed_summary_in(current, ParsedForms, Sigs, Decls, Names).
+
+prepare_metta_source_in(Space, S, ParsedForms, Names) :-
+    parse_metta_source_summary(S, ParsedForms, Sigs, Decls),
+    prepare_parsed_summary_in(space(Space), ParsedForms, Sigs, Decls, Names).
 
 parse_metta_source_summary(S, ParsedForms, Sigs, Decls) :-
     (   metta_c_reader_active,
@@ -976,12 +987,21 @@ flush_source_prefix_repairs.
 %[measured 2026-08-18: 193 of 200 examples agreed, all seven the same root].
 prepare_parsed_forms(ParsedForms) :-
     source_summary_of_forms(ParsedForms, Sigs, Decls),
-    prepare_parsed_summary(ParsedForms, Sigs, Decls, _).
+    prepare_parsed_summary_in(current, ParsedForms, Sigs, Decls, _).
 
 prepare_parsed_summary(ParsedForms, Sigs, Decls, Names) :-
+    prepare_parsed_summary_in(current, ParsedForms, Sigs, Decls, Names).
+
+prepare_parsed_summary_in(Context, ParsedForms, Sigs, Decls, Names) :-
     findall(F, member(F-_, Sigs), Names0),
     sort(Names0, Names),
-    refuse_untypable_from_summary(Names, Decls),
+    (   Decls == []
+    ->  true
+    ;   ( Context = space(Space) -> space_module(Space, Module)
+        ; Context = module(Module) -> true
+        ; current_metta_module(Module) ),
+        refuse_untypable_from_summary_in(Module, Names, Decls)
+    ),
     register_function_signatures(Sigs),
     % Pinned git dependencies declared in this file are fetched before any of
     % its forms run (gitimport.pl).
@@ -1037,6 +1057,38 @@ source_declaration(ParsedForms, DefinedNames, Name, Type) :-
 %reintroducing it through ord_memberchk before it ever shipped
 %[tested: filereader_source_declaration_pass:checking_a_sources_declarations_costs_nothing_that_grows_with_the_source].
 refuse_untypable_from_summary(Names, Decls) :-
+    (   Decls == []
+    ->  true
+    ;   current_metta_module(Module),
+        refuse_untypable_from_summary_in(Module, Names, Decls)
+    ).
+
+% The ordinary filter already visits declarations. Recognize Alias during
+% that pass; only a source that contains or inherits aliases needs the
+% source-order substitution view. A failed fast filter has no side effects.
+:- dynamic refuse_untypable_from_summary_in/3.
+refuse_untypable_from_summary_in(Module, Names, Decls) :-
+    findall(Name-defined, member(Name, Names), Defined0),
+    ord_list_to_assoc(Defined0, Defined),
+    (   plain_source_declarations(Decls, Defined, Selected)
+    ->  keysort(Selected, Sorted),
+        group_pairs_by_key(Sorted, Grouped),
+        forall(member(Name-Types, Grouped),
+               refuse_untypable_declaration(Name, Types))
+    ;   normalize_source_type_declarations(Module, Decls, Normalized),
+        refuse_untypable_normalized_summary(Names, Normalized)
+    ).
+
+plain_source_declarations([], _, []).
+plain_source_declarations([Name-Type|Decls], Defined, Selected) :-
+    \+ (nonvar(Type), Type = [Head|_], Head == 'Alias'),
+    (   get_assoc(Name, Defined, _)
+    ->  Selected = [Name-Type|Rest]
+    ;   Selected = Rest
+    ),
+    plain_source_declarations(Decls, Defined, Rest).
+
+refuse_untypable_normalized_summary(Names, Decls) :-
     Names \== [],
     Decls \== [],
     findall(Name-defined, member(Name, Names), Defined0),
@@ -1046,9 +1098,19 @@ refuse_untypable_from_summary(Names, Decls) :-
     !,
     keysort(Declarations0, Declarations),
     group_pairs_by_key(Declarations, Grouped),
-    forall(member(Name-Types, Grouped),
-           refuse_untypable_declaration(Name, Types)).
-refuse_untypable_from_summary(_, _).
+    forall(member(Name-Syntax, Grouped),
+           refuse_untypable_source_declaration(Name, Syntax)).
+refuse_untypable_normalized_summary(_, _).
+
+refuse_untypable_source_declaration(Name, Syntax) :-
+    findall(Type, member(type_syntax(_, Type), Syntax), Types),
+    (   untypable_declarations(Types, Offender)
+    ->  member(type_syntax(Raw, Canonical), Syntax),
+        Canonical =@= Offender,
+        !,
+        throw(error(metta_untypable_declaration(Name, Raw), none))
+    ;   true
+    ).
 
 summary_declaration_of_defined(Defined, Name-_) :-
     get_assoc(Name, Defined, _).
@@ -1229,6 +1291,7 @@ recompile_function_in_module(Module, G) :-
     with_typing_policy_stable(recompile_function_in_module_stable(Module, G)).
 
 recompile_function_in_module_stable(Module, G) :-
+    retained_recompile_types(Module, G, TypeGroups),
     findall(compiled(Ref, SourceRef, Term, Owners),
             ( translated_equation_of(G, Ref, Term),
               clause_property(Ref, module(Module)),
@@ -1237,7 +1300,9 @@ recompile_function_in_module_stable(Module, G) :-
                       source_load_assertion(LoadId, artifact, Ref),
                       Owners0),
               sort(Owners0, Owners) ),
-            Recorded),
+            Recorded0),
+    attach_recompile_types(Recorded0, TypeGroups, Recorded),
+    clear_fun_meta(Module, G),
     %The erase is also the LIVENESS TEST, and the rebuild runs only over what
     %it took out. A recorded reference can outlive its clause, because a
     %compiled predicate can be retracted outside the engine's own door:
@@ -1259,21 +1324,21 @@ recompile_function_in_module_stable(Module, G) :-
     %
     %The bookkeeping goes for every recorded reference either way; only the
     %rebuild is conditional.
-    forall(member(compiled(Ref, SourceRef, Term, _), Recorded),
+    forall(member(compiled(Ref, SourceRef, Term, _, _), Recorded),
            ( retractall(source_load_assertion(_, artifact, Ref)),
              retractall(source_load_assertion(_, artifact, SourceRef)),
              forget_translated_from(Module, Ref, Term) )),
-    findall(rebuild(Term, Owners),
-            ( member(compiled(Ref, _, Term, Owners), Recorded),
+    findall(rebuild(Term, Owners, Types),
+            ( member(compiled(Ref, _, Term, Owners, Types), Recorded),
               erase(Ref) ),
             Rebuilds),
-    forall(member(rebuild(Term, Owners), Rebuilds),
+    forall(member(rebuild(Term, Owners, Types), Rebuilds),
            with_source_recompile_owners(
                Owners,
                ( copy_term(Term, Fresh),
                  once(with_metta_module(Module,
-                                        translate_tracked_clause(
-                                            Fresh, RawClause))),
+                                        filereader:translate_recompiled_clause(
+                                            Module, G, Fresh, Types, RawClause))),
                  %A rebuilt clause is the same equation, so it carries the same
                  %recursion fuel the compile door gave it. Re-translating without
                  %this left a recursive definition unbounded the moment anything
@@ -1287,6 +1352,38 @@ recompile_function_in_module_stable(Module, G) :-
                  record_recompiled_source_assertion(Owners, NewRef),
                  record_translated_from(NewRef, Term, NewSourceRef),
                  record_recompiled_source_assertion(Owners, NewSourceRef) ))).
+
+% Preserve arrival groups only while the written declaration set is unchanged.
+% Alias edits change expansions, not those raw groups. A declaration edit still
+% selects live types, as the ordinary compilation door does.
+retained_recompile_types(Module, G, Groups) :-
+    findall(group([=,[G|Args],Body], Types),
+            translator:fun_meta_clause_types(Module, G, Args, Body, Types),
+            Newest),
+    findall(Type, (member(group(_, Types), Newest), member(Type, Types)), Old),
+    findall(Type, raw_definition_type_declaration_in(Module, G, Type), Current),
+    (   forall(member(Type, Old), variant_type_member(Type, Current)),
+        forall(member(Type, Current), variant_type_member(Type, Old))
+    ->  reverse(Newest, Groups)
+    ;   Groups = []
+    ).
+
+variant_type_member(Type, Types) :- member(Other, Types), Type =@= Other, !.
+
+attach_recompile_types([], _, []).
+attach_recompile_types([compiled(Ref, Source, Term, Owners)|Rest], Groups,
+                       [compiled(Ref, Source, Term, Owners, Saved)|Prepared]) :-
+    (   select(group(Original, Types), Groups, Remaining), Term =@= Original
+    ->  Saved = types(Types)
+    ;   Saved = live, Remaining = Groups
+    ),
+    attach_recompile_types(Rest, Remaining, Prepared).
+
+translate_recompiled_clause(_, _, Term, live, Clause) :-
+    translate_tracked_clause(Term, Clause).
+translate_recompiled_clause(Module, G, Term, types(Types), Clause) :-
+    translator:with_equation_types(Module, G, Types,
+                                   translate_tracked_clause(Term, Clause)).
 
 %A dependent recompile replaces an artifact; it does not transfer that
 %artifact to the source whose change triggered the repair. Keep the original
@@ -1310,14 +1407,18 @@ recompile_definitions_mentioning(F) :-
 
 record_translated_from(Ref, Term, SourceRef) :-
     assertz(translated_from(Ref, Term), SourceRef),
-    record_translated_supports(Ref, Term).
+    (   clause_property(Ref, module(Module))
+    ->  record_translated_supports(Module, Ref, Term)
+    ;   true
+    ).
 
 % One source-form node per executable clause keeps multiple equations for one
 % function additive. Removing or retranslating one clause can retire exactly
 % its edges without replacing the supports of its siblings.
-record_translated_supports(Ref, [=, [G|_], Body]) :-
+:- dynamic record_translated_supports/3, type_alias_support_scope_ref/2.
+
+record_translated_supports(Module, Ref, [=, [G|_], Body]) :-
     atom(G),
-    clause_property(Ref, module(Module)),
     !,
     findall(Support,
             ( mentioned_symbol(Body, Symbol),
@@ -1326,7 +1427,54 @@ record_translated_supports(Ref, [=, [G|_], Body]) :-
             Supports0),
     sort(Supports0, Supports),
     support_publish_compiled_form(Module, G, Ref, Supports, Body).
-record_translated_supports(_, _).
+record_translated_supports(_, _, _).
+
+% Each installed clause has a module in its first argument, so an unrelated
+% scope retains the ordinary publication path. A shared alias governs all
+% scopes, including ones that will be created after this transaction.
+set_type_alias_support_scope(Scope, enabled) :-
+    type_alias_scope_module(Scope, Module),
+    asserta((refuse_untypable_from_summary_in(Module, Names, Decls) :- !,
+                normalize_source_type_declarations(Module, Decls, Normalized),
+                refuse_untypable_normalized_summary(Names, Normalized)), Source),
+    assertz(type_alias_support_scope_ref(Scope, Source)),
+    asserta((record_translated_supports(Module, Ref, [=,[G|_],Body]) :-
+                atom(G), !,
+                record_translated_alias_supports(Module, Ref, G, Body)), Gate),
+    assertz(type_alias_support_scope_ref(Scope, Gate)),
+    forall(( translated_from(Ref, [=,[G|_],Body]), atom(G),
+             clause_property(Ref, module(Module)),
+             support_graph:support_translated_form_id(Ref, Module, Id),
+             type_annotation_supports(Module, G, Body, Supports),
+             member(Support, Supports) ),
+           support_record(translated_form(Module, Id), Support)).
+set_type_alias_support_scope(Scope, disabled) :-
+    forall(retract(type_alias_support_scope_ref(Scope, Ref)), erase(Ref)).
+
+record_translated_alias_supports(Module, Ref, G, Body) :-
+    type_annotation_supports(Module, G, Body, AnnotationSupports),
+    findall(function_view(Module, Symbol),
+            ( mentioned_symbol(Body, Symbol), Symbol \== G ), Views),
+    append(Views, AnnotationSupports, Supports0),
+    sort(Supports0, Supports),
+    support_publish_compiled_form(Module, G, Ref, Supports, Body).
+
+type_annotation_supports(Module, G, Body, Supports) :-
+    findall(Symbol, mentioned_symbol(Body, Symbol), Symbols0),
+    sort([G|Symbols0], Symbols),
+    findall(Support,
+            ( member(Symbol, Symbols),
+              type_annotation_support(Module, Symbol, Support)
+            ; raw_registered_typing_rule(user, Module, _, _, Actual, Expected, _),
+              normalize_type_in(Module, [Actual, Expected], _, RuleDependencies),
+              member(Support, RuleDependencies)
+            ; sub_term(Marker, Body), nonvar(Marker),
+              Marker = [MarkerHead, Annotation], MarkerHead == '__metta_typed_binding__',
+              nonvar(Annotation), Annotation = [':', _, RawType],
+              normalize_type_in(Module, RawType, _, Dependencies),
+              member(Support, Dependencies) ),
+            Supports0),
+    sort(Supports0, Supports).
 
 forget_translated_from(Module, Ref, [=, [G|_], _]) :-
     !,
@@ -1462,8 +1610,7 @@ repair_support_invalidations(Context) :-
             Repairs0),
     sort(Repairs0, Repairs),
     forall(member(Module-G, Repairs),
-           ( clear_fun_meta(Module, G),
-             recompile_function_in_module(Module, G) )).
+           recompile_function_in_module(Module, G)).
 repair_support_invalidations(_).
 
 mentioned_symbol(Term, _) :- var(Term), !, fail.

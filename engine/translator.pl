@@ -264,6 +264,7 @@
             clear_module_translation_state/1,
             queue_deferred_equation_types/2,
             materialize_with_queued_types/3,
+            with_equation_types/4,
             metta_function_translated/2,
             head_pattern_notes_for/2,
             invalidate_translated_forms/1,

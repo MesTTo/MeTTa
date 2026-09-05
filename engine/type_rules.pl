@@ -34,21 +34,32 @@
 %   To Do: None
 %   Hacks: None
 %   Future Enhancements: None
+% Guarantees: raw compatibility inputs and user patterns resolve aliases at
+%   their lexical owner; resolved inputs preserve that meaning. Concrete
+%   witness targets retain ordinary refusals and target-only wildcards
+%   [tested: test_aliases_keep_the_fast_path_and_registry_in_agreement,
+%   test_alias_casts_keep_the_strict_witness_and_obey_user_refusals;
+%   commit=acad923476d21110870f235192757281a737ee71].
 
-%The surface is the two builtins a program calls, the four questions the
-%engine's checkers ask, and the registry read the confluence reporter analyses
-%so it does not keep a second inventory. typing_rule_entry/7 itself is NOT on
-%it: it is the storage those six are the meaning of, and a caller that wants
-%the raw rows says type_rules: and means it
-%[tested: engine_layering:test_the_engine_layering_contract_holds_and_a_violation_is_named].
+% The public families and registry views share one declaration inventory.
+% registered_typing_rule/7 exposes the patterns the checker matches;
+% raw_registered_typing_rule/7 preserves written names for dependency tracking.
+% typing_rule_entry/7 stays private storage [tested:
+% engine_layering:test_the_engine_layering_contract_holds_and_a_violation_is_named;
+% commit=acad923476d21110870f235192757281a737ee71].
 :- module(type_rules,
           [ 'add-typing-rule!'/6,
             'remove-typing-rule!'/2,
             typing_rule_accepts/4,
+            typing_rule_accepts_resolved/4,
             typing_rule_decision/7,
+            typing_rule_decision_resolved/7,
             typing_rule_expected/3,
+            typing_rule_expected_resolved/3,
             typing_rule_refusal/6,
+            typing_rule_refusal_resolved/6,
             registered_typing_rule/7,
+            raw_registered_typing_rule/7,
             typing_policy_is_default/1,
             typing_policy_shortcuts_allowed/1,
             with_typing_policy_stable/1,
@@ -94,6 +105,18 @@ typing_rule_entry(shipped, '*', 'typing-reporting-unknown-expected',
 typing_rule_entry(shipped, '*', 'typing-reporting-exact',
                   reporting, Same, Same, accept).
 
+% A bound observation needs evidence. Only the expected side is gradual;
+% an unknown actual does not establish Person. This is the strict cast door's
+% existing target-only wildcard law, distinct from ordinary consistency.
+typing_rule_entry(shipped, '*', 'typing-witness-unknown-expected',
+                  witness, _, '%Undefined%', accept).
+typing_rule_entry(shipped, '*', 'typing-witness-atom-expected',
+                  witness, _, 'Atom', accept).
+typing_rule_entry(shipped, '*', 'typing-witness-unchecked-expected',
+                  witness, _, '_', accept).
+typing_rule_entry(shipped, '*', 'typing-witness-exact',
+                  witness, Same, Same, accept).
+
 % Arrow arity is compared after a chain has been reduced to its declared
 % input count. The rule, not type_chain_takes/2, decides equality.
 typing_rule_entry(shipped, '*', 'typing-arrow-arity-exact',
@@ -125,6 +148,7 @@ typing_rule_entry(shipped, '*', 'typing-metatype-expression',
 typing_rule_family(ordinary).
 typing_rule_family(derived).
 typing_rule_family(reporting).
+typing_rule_family(witness).
 typing_rule_family('arrow-arity').
 typing_rule_family(widening).
 typing_rule_family('declared-widening').
@@ -271,7 +295,7 @@ require_typing_rule_family(Family) :-
     ->  true
     ;   throw(error(domain_error(typing_rule_family, Family),
                     context('add-typing-rule!'/6,
-                            'use ordinary, derived, reporting, arrow-arity, widening, declared-widening, or metatype')))
+                            'use ordinary, derived, reporting, witness, arrow-arity, widening, declared-widening, or metatype')))
     ).
 
 require_typing_rule_outcome(Outcome) :-
@@ -285,12 +309,42 @@ require_typing_rule_outcome(Outcome) :-
 prolog:error_message(metta_duplicate_typing_rule(Name, Existing)) -->
     [ 'typing rule ~w already names ~w'-[Name, Existing] ].
 
-% typing_rule_decision(+Module, +Family, ?Actual, ?Expected, -Outcome,
+% typing_rule_decision_resolved(+Module, +Family, ?Actual, ?Expected, -Outcome,
 %                      -Name, -Tier).
 % `defer` is an explicit decline, not a negative decision: continue through
 % the remaining user entries and then the shipped tier. If none decides, the
 % registry itself returns defer.
-typing_rule_decision(Module, Family, Actual, Expected, Outcome, Name, Tier) :-
+% The public relation owns alias substitution. A resolved input is a type
+% observer's result, not syntax to reinterpret in the observer's caller.
+% Compiled checks use the resolved entry points after the declaration reader
+% has fixed lexical meaning and chosen argument masks.
+typing_rule_input(Module, Raw, Type) :-
+    (   nonvar(Raw), Raw = '$metta_resolved_type'(Resolved)
+    ->  metta_runtime_type(Resolved, Type)
+    ;   normalize_callable_type_in(Module, Raw, Type)
+    ).
+
+typing_rule_decision(Module, Family, RawActual, RawExpected, Outcome, Name, Tier) :-
+    typing_rule_input(Module, RawActual, Actual),
+    typing_rule_input(Module, RawExpected, Expected),
+    typing_rule_decision_resolved(Module, Family, Actual, Expected,
+                                  Outcome, Name, Tier).
+
+typing_rule_accepts(Module, Family, RawActual, RawExpected) :-
+    typing_rule_input(Module, RawActual, Actual),
+    typing_rule_input(Module, RawExpected, Expected),
+    typing_rule_accepts_resolved(Module, Family, Actual, Expected).
+
+typing_rule_refusal(Module, Family, RawActual, RawExpected, Name, Reason) :-
+    typing_rule_input(Module, RawActual, Actual),
+    typing_rule_input(Module, RawExpected, Expected),
+    typing_rule_refusal_resolved(Module, Family, Actual, Expected, Name, Reason).
+
+typing_rule_expected(Module, Family, RawExpected) :-
+    typing_rule_input(Module, RawExpected, Expected),
+    typing_rule_expected_resolved(Module, Family, Expected).
+
+typing_rule_decision_resolved(Module, Family, Actual, Expected, Outcome, Name, Tier) :-
     (   decisive_typing_rule(user, Module, Family, Actual, Expected,
                              Outcome, Name)
     ->  Tier = user
@@ -303,8 +357,13 @@ typing_rule_decision(Module, Family, Actual, Expected, Outcome, Name, Tier) :-
     ).
 
 decisive_typing_rule(Tier, Module, Family, Actual, Expected, Outcome, Name) :-
-    typing_rule_entry(Tier, Module, Name, Family, ActualPattern,
-                      ExpectedPattern, Candidate),
+    typing_rule_entry(Tier, Module, Name, Family, RawActual,
+                      RawExpected, Candidate),
+    (   Tier == user
+    ->  normalize_callable_type_in(Module, RawActual, ActualPattern),
+        normalize_callable_type_in(Module, RawExpected, ExpectedPattern)
+    ;   ActualPattern = RawActual, ExpectedPattern = RawExpected
+    ),
     typing_pattern_openness(ActualPattern, ActualOpen),
     typing_pattern_openness(ExpectedPattern, ExpectedOpen),
     typing_rule_pattern_matches(Actual, ActualPattern, ActualOpen),
@@ -328,32 +387,51 @@ typing_rule_pattern_matches(Value, Pattern, closed) :-
 
 % Ordinary and derived compatibility delegate their unmatched pairs to the
 % widening family. A decisive refusal never falls through.
-typing_check_decision(Module, Family, Actual, Expected, Outcome, Name, Tier) :-
-    typing_rule_decision(Module, Family, Actual, Expected,
+% A witness wildcard target asks for no evidence. These shipped rows have an
+% unconstrained actual and a literal target; the exact row shares its variable
+% and therefore does not qualify. This preserves casting.py:_UNCHECKED even
+% when an alias reaches the engine instead of Python's literal-target shortcut
+% [tested: test_aliases_of_unchecked_cast_targets_stay_unchecked;
+% commit=acad923476d21110870f235192757281a737ee71]. Concrete witness targets still honor ordinary refusals.
+typing_check_decision_resolved(_, witness, _, Expected, accept, Name, shipped) :-
+    nonvar(Expected),
+    typing_rule_entry(shipped, '*', Name, witness, AnyActual, Target, accept),
+    var(AnyActual), nonvar(Target), Expected == Target,
+    !.
+typing_check_decision_resolved(Module, Family, Actual, Expected, Outcome, Name, Tier) :-
+    typing_rule_decision_resolved(Module, Family, Actual, Expected,
                          Direct, DirectName, DirectTier),
     (   Direct == defer,
-        ( Family == ordinary ; Family == derived ; Family == reporting )
-    ->  typing_rule_decision(Module, widening, Actual, Expected,
-                             Outcome, Name, Tier)
-    ;   Outcome = Direct,
-        Name = DirectName,
-        Tier = DirectTier
+        ( Family == ordinary ; Family == derived ; Family == reporting
+        ; Family == witness )
+    ->  typing_rule_decision_resolved(Module, widening, Actual, Expected,
+                                      Candidate, CandidateName, CandidateTier)
+    ;   Candidate = Direct,
+        CandidateName = DirectName,
+        CandidateTier = DirectTier
+    ),
+    (   Family == witness, Candidate == accept,
+        typing_check_decision_resolved(Module, ordinary, Actual, Expected,
+                                        [refuse, Reason], Rule, RuleTier)
+    ->  Outcome = [refuse, Reason], Name = Rule, Tier = RuleTier
+    ;   Outcome = Candidate, Name = CandidateName, Tier = CandidateTier
     ).
 
-typing_rule_accepts(Module, Family, Actual, Expected) :-
-    typing_check_decision(Module, Family, Actual, Expected,
+typing_rule_accepts_resolved(Module, Family, Actual, Expected) :-
+    typing_check_decision_resolved(Module, Family, Actual, Expected,
                           accept, _, _).
 
-typing_rule_refusal(Module, Family, Actual, Expected, Name, Reason) :-
-    typing_check_decision(Module, Family, Actual, Expected,
+typing_rule_refusal_resolved(Module, Family, Actual, Expected, Name, Reason) :-
+    typing_check_decision_resolved(Module, Family, Actual, Expected,
                           [refuse, Reason], Name, _).
 
 % A checker can ask whether an expected type belongs to a declared family
 % without inventing a parallel list. This is used to classify metatype
 % parameters before their actual argument is known. A user rule with a broad
 % expected pattern deliberately widens that family for its own module.
-typing_rule_expected(Module, Family, Expected) :-
-    (   typing_rule_entry(user, Module, _, Family, _, Pattern, _)
+typing_rule_expected_resolved(Module, Family, Expected) :-
+    (   typing_rule_entry(user, Module, _, Family, _, RawPattern, _),
+        normalize_callable_type_in(Module, RawPattern, Pattern)
     ;   typing_rule_entry(shipped, '*', _, Family, _, Pattern, _)
     ),
     typing_pattern_openness(Pattern, Openness),
@@ -363,4 +441,15 @@ typing_rule_expected(Module, Family, Expected) :-
 % The reporter reads this predicate, so it analyzes the exact entries the
 % checker resolves rather than maintaining a second inventory.
 registered_typing_rule(Tier, Module, Name, Family, Actual, Expected, Outcome) :-
+    typing_rule_entry(Tier, Module, Name, Family, RawActual, RawExpected, Outcome),
+    (   Tier == user
+    ->  normalize_callable_type_in(Module, RawActual, Actual),
+        normalize_callable_type_in(Module, RawExpected, Expected)
+    ;   Actual = RawActual, Expected = RawExpected
+    ).
+
+% Source dependency discovery needs the written names, including aliases that
+% are still missing. Reflection through the rule-family view above needs the
+% patterns the checker actually matches, including their lexical expansion.
+raw_registered_typing_rule(Tier, Module, Name, Family, Actual, Expected, Outcome) :-
     typing_rule_entry(Tier, Module, Name, Family, Actual, Expected, Outcome).

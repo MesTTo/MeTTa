@@ -44,8 +44,13 @@
 %   commit=48cf04fb8dd80149b5e46e15f499f19f6c45348f].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: scoped declaration readers resolve aliases in their declaration
+%   tier; bound observers use the shared witness family while enumeration
+%   reports expanded types [tested: structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
 
 %%% Type system: %%%
+
+:- consult('type_aliases.pl').
 
 % One surface parser feeds old runtime consumers and the compile-time checker.
 % The output keeps binder names as canonical data: two `$e` slots therefore
@@ -166,6 +171,9 @@ type_declaration(X, T) :- current_metta_module(Module),
 %the space it reads is the engine's own context rather than anything a program
 %wrote [measured 2026-08-20: py-method-call paid three inferences per
 %evaluation through the door].
+:- dynamic type_declaration_in/3, governing_type_declaration_in/3.
+:- dynamic definition_type_declaration_in/3.
+
 type_declaration_in(Module, X, T) :- metta_self_module(Module), !,
                                      (   prelude_type_declaration(X, T)
                                      ;   match_stored('&self', [':', X, T], T, _) ).
@@ -173,6 +181,16 @@ type_declaration_in(Module, X, T) :- metta_module_space(Module, Space),
                                      (   prelude_type_declaration(X, T)
                                      ;   match_stored(Space, [':', X, T], T, _)
                                      ;   match_stored('&self', [':', X, T], T, _) ).
+raw_type_declaration_in(Module, X, T, Owner) :-
+    metta_self_module(Module), !,
+    Owner = Module,
+    ( prelude_type_declaration(X, T)
+    ; match_stored('&self', [':', X, T], T, _) ).
+raw_type_declaration_in(Module, X, T, Owner) :-
+    metta_module_space(Module, Space),
+    ( prelude_type_declaration(X, T), metta_self_module(Owner)
+    ; match_stored(Space, [':', X, T], T, _), Owner = Module
+    ; match_stored('&self', [':', X, T], T, _), metta_self_module(Owner) ).
 
 %Call-site declarations are name lookup, not reporting. C++ unqualified
 %lookup chooses the nearest nonempty declaration set before overload
@@ -204,6 +222,20 @@ governing_type_declaration_in(Module, X, T) :-
         )
     ),
     metta_runtime_type(Raw, T).
+raw_governing_type_declaration_in(Module, X, T, Owner) :-
+    metta_self_module(Module), !,
+    raw_type_declaration_in(Module, X, T, Owner).
+raw_governing_type_declaration_in(Module, X, T, Owner) :-
+    (   prelude_type_declaration(X, T), metta_self_module(Owner)
+    ;   metta_module_space(Module, Space),
+        (   once(match_stored(Space, [':', X, _], _, _))
+        ->  match_stored(Space, [':', X, T], T, _), Owner = Module
+        ;   fun_in(Module, X)
+        ->  fail
+        ;   match_stored('&self', [':', X, T], T, _),
+            metta_self_module(Owner)
+        )
+    ).
 
 %An arriving equation owns its module before deferred compilation has made a
 %fun_meta row. Its retained OrderFittest types therefore come only from the
@@ -218,6 +250,11 @@ definition_type_declaration_in(Module, X, T) :-
     metta_module_space(Module, Space),
     match_stored(Space, [':', X, Raw], Raw, _),
     metta_runtime_type(Raw, T).
+raw_definition_type_declaration_in(_Module, X, T) :-
+    prelude_type_declaration(X, T).
+raw_definition_type_declaration_in(Module, X, T) :-
+    metta_module_space(Module, Space),
+    match_stored(Space, [':', X, T], T, _).
 
 %Filter an already nonempty visible set. Keeping the emptiness test at the
 %caller means the extra ownership lookup is paid only by typed heads.
@@ -263,8 +300,8 @@ governing_type_chains_in(Module, X, InScope, Unique) :-
 %direct-call door needs exactly this disjunction, and the shim used to
 %carry its own copy.
 metta_typed_dispatch_applies(Module, F) :-
-    (   catch_recover(type_declaration_in(Module, F, _), fail),
-        catch_recover(governing_type_declaration_in(Module, F, _), fail)
+    (   catch_recover(raw_type_declaration_in(Module, F, _, _), fail),
+        catch_recover(raw_governing_type_declaration_in(Module, F, _, _), fail)
     ->  true
     ;   translator_rules:translator_rule(F, _, _)
     ).
@@ -332,7 +369,7 @@ refuse_untypable_declaration(Name, Types) :-
 %from exactly this route [source: LeaTTa
 %tests/semantics/types-meta/30_evaluation_control.metta].
 get_function_type([F|Args], T) :- nonvar(F),
-                                  (   '$metta_atoms:&self':'&self'(':', F, Chain0)
+                                  (   normalized_self_type_declaration(F, Chain0)
                                   *-> true
                                   ;   seam:builtin_type_declaration(F, Chain0)
                                   ),
@@ -364,7 +401,7 @@ get_function_type_in(Module, [F|Args], T) :- \+ metta_self_module(Module),
 
 application_arrow_declared([F|_]) :-
     nonvar(F),
-    (   '$metta_atoms:&self':'&self'(':', F, Raw),
+    (   normalized_self_type_declaration(F, Raw),
         metta_runtime_type(Raw, [->, _|_])
     ->  true
     ;   seam:builtin_type_declaration(F, [->, _|_])
@@ -390,9 +427,14 @@ application_arrow_declared_in(Module, [F|_]) :-
 %Internal checks call has_type/2 instead: a fixed expected type stops at its
 %first witness, while an unbound shared type variable still enumerates the
 %distinct choices needed to make later arguments consistent.
-'get-type'(X, T) :- current_metta_module(Module),
-                    reported_type_answers(Module, X, Types),
-                    member(T, Types).
+'get-type'(X, T) :-
+    current_metta_module(Module),
+    reported_type_answers(Module, X, Types),
+    (   var(T)
+    ->  member(T, Types)
+    ;   member(Actual, Types),
+        typing_rule_accepts(Module, witness, '$metta_resolved_type'(Actual), T)
+    ).
 
 %LeaTTa rules that the reporting observers see the empty expression's unit
 %type while the classifier derives no type and therefore uses its gradual
@@ -419,7 +461,7 @@ reported_type_answers(Module, X, Types) :- type_answers(Module, X, Types).
 reported_rest_arrow(Module, F, Result) :-
     nonvar(F),
     (   metta_self_module(Module)
-    ->  (   '$metta_atoms:&self':'&self'(':', F, Raw),
+    ->  (   normalized_self_type_declaration(F, Raw),
             metta_runtime_type(Raw, [->, ['%Rest%', _], Result])
         *-> true
         ;   seam:builtin_type_declaration(F, [->, ['%Rest%', _], Result])
@@ -433,6 +475,9 @@ reported_rest_arrow(Module, F, Result) :-
 
 has_type(X, T) :- current_metta_module(Module),
                   has_type_in(Module, X, T).
+
+has_resolved_type(X, T) :- current_metta_module(Module),
+                           has_resolved_type_in(Module, X, T).
 
 %The first-witness shortcut is only sound for a GROUND expected type. A
 %parametric one such as (Pair $t) is nonvar but still carries a variable the
@@ -498,8 +543,13 @@ has_type(X, T) :- current_metta_module(Module),
 %and a cache it can search has to be non-backtrackable to survive the retry that
 %creates the duplicate in the first place, which puts the O(d) copy back.
 %Not asking twice is cheaper than any way of remembering the answer.
+:- dynamic has_type_in/3.
+
 has_type_in(_, X, T) :- metta_grounded_numeric_type(X, T), !.
 has_type_in(Module, X, T) :- has_type_derive(Module, X, T).
+
+has_resolved_type_in(_, X, T) :- metta_grounded_numeric_type(X, T), !.
+has_resolved_type_in(Module, X, T) :- has_type_derive(Module, X, T).
 
 
 has_type_derive(Module, X, T) :-
@@ -520,7 +570,7 @@ has_type_derive(Module, X, T) :-
                                 Module, Widened, T) ))
                  ->  true
                  ;   member(Actual, Types),
-                     metta_types_match_in(Module, Actual, T)
+                     metta_resolved_types_match_in(Module, Actual, T)
                  )
              )
          )
@@ -556,6 +606,7 @@ has_type_derive(Module, X, T) :-
 %here too, so reflective and compiled call checks use the same operational rule
 %[tested:
 %extensions/python/tests/ch04_spaces_and_matching/test_answer_protocol.py::test_admission_types_the_pool].
+:- dynamic type_witness_in/3.
 type_witness_in(Module, X, T) :-
     type_witness_direct(Module, X, T, Outcome),
     (   Outcome == found
@@ -612,7 +663,7 @@ type_witness_direct(Module, X, T, Outcome) :-
 type_witness_candidate_matches(Module, RawActual, RawExpected) :-
     metta_runtime_type(RawActual, Actual),
     metta_runtime_type(RawExpected, Expected),
-    (   typing_rule_accepts(Module, widening, Actual, Expected)
+    (   typing_rule_accepts_resolved(Module, widening, Actual, Expected)
     ;   Actual = Expected
     ).
 
@@ -644,7 +695,7 @@ has_type_under_policy(Module, X, T) :-
                            Module, Widened, T) ))
             ->  true
             ;   member(Other, Types),
-                metta_types_match_in(Module, Other, T)
+                metta_resolved_types_match_in(Module, Other, T)
             )
         )
     ).
@@ -652,10 +703,10 @@ has_type_under_policy(Module, X, T) :-
 type_witness_candidate_matches_under_policy(Module, RawActual, RawExpected) :-
     metta_runtime_type(RawActual, Actual),
     metta_runtime_type(RawExpected, Expected),
-    (   typing_rule_accepts(Module, widening, Actual, Expected)
+    (   typing_rule_accepts_resolved(Module, widening, Actual, Expected)
     ;   Actual = Expected
     ),
-    typing_rule_accepts(Module, ordinary, Actual, Expected).
+    typing_rule_accepts_resolved(Module, ordinary, Actual, Expected).
 
 %CHECKING a tuple against a KNOWN tuple type, decided per position instead of
 %by finding it in the product.
@@ -732,7 +783,7 @@ tuple_positions_hold(Module, [Member|Members], [Type|Types]) :-
 member_holds_type(Module, Member, Type) :-
     (   tuple_positions_witness(Module, Member, Type)
     ->  true
-    ;   once(( has_type_in(Module, Member, Candidate), Candidate == Type ))
+    ;   once(( has_resolved_type_in(Module, Member, Candidate), Candidate == Type ))
     ).
 
 %A ground declaration is the admission common case, so probe its indexed
@@ -748,17 +799,15 @@ has_declared_type(X, T) :-
 
 direct_type_declaration_in(Module, X, T) :-
     metta_self_module(Module), !,
-    '$metta_atoms:&self':'&self'(':', X, T),
-    acyclic_term(T).
+    normalized_self_type_declaration(X, T).
 direct_type_declaration_in(Module, X, T) :-
     metta_module_space(Module, Space),
     (   native_storage_module_ready(Space, Storage),
         native_storage_functor(Space, Functor),
-        Head =.. [Functor, ':', X, T],
+        Head =.. [Functor, ':', X, Raw],
         call(Storage:Head),
-        acyclic_term(T)
-    ;   '$metta_atoms:&self':'&self'(':', X, T),
-        acyclic_term(T)
+        normalize_type_in(Module, Raw, T)
+    ;   normalized_self_type_declaration(X, T)
     ).
 
 %The first clause is the whole common case and pays no bookkeeping at
@@ -858,9 +907,10 @@ widen_to_super_types(Module, X, Types0, Types) :-
         widening_applies_to(Module, X)
     ->  findall(Declared, type_declaration_in(Module, X, Declared), Directs),
         partition(type_already_listed(Directs), Types0, Direct, Products),
-        add_super_types(Module, Direct, DirectWidened),
+        type_edge_view(visible(Module), Edges),
+        add_super_types(Module, Edges, Direct, DirectWidened),
         append(Products, DirectWidened, Combined),
-        add_super_types(Module, Combined, Types)
+        add_super_types(Module, Edges, Combined, Types)
     ;   Types = Types0
     ).
 
@@ -892,7 +942,7 @@ any_super_type_edge(Module) :-
     ->  native_edge_probe('&self')
     ;   metta_module_space(Module, Space),
         seam:foreign_space(Space)
-    ->  \+ \+ super_type_in(Module, _, _)
+    ->  \+ \+ type_edge_from_view(visible(Module), _, _)
     ;   metta_module_space(Module, Space2),
         native_edge_probe(Space2)
     ->  true
@@ -916,14 +966,6 @@ native_edge_probe(Space) :-
         Head =.. [Functor, ':<', _, _],
         \+ \+ clause(StorageModule:Head, _)
     ).
-
-%match_stored/4 for type_declaration_in/3's reason: a supertype lookup reads
-%the engine's own context and never a space a program named.
-super_type_in(Module, T, S) :- metta_self_module(Module), !,
-                               match_stored('&self', [':<', T, S], S, _).
-super_type_in(Module, T, S) :- metta_module_space(Module, Space),
-                               (   match_stored(Space, [':<', T, S], S, _)
-                               ;   match_stored('&self', [':<', T, S], S, _) ).
 
 %add_super_types, round by round: each round asks for the supertypes of exactly
 %what the PREVIOUS round appended, and appends every one that was not present
@@ -965,7 +1007,7 @@ super_type_in(Module, T, S) :- metta_module_space(Module, Space),
 %is the same relation type_already_listed/2 tests and not unification. The keys
 %can carry variables, from a polymorphic supertype, and stay sound because
 %findall/3 hands back fresh copies whose variables nothing here binds: the
-%bindings super_type_in/3 makes are undone when the findall completes, before
+%bindings type_edge_from_view/3 makes are undone when the findall completes, before
 %any lookup runs.
 %
 %The AVL is extended only AFTER the round's exclude, which is what preserves the
@@ -973,22 +1015,26 @@ super_type_in(Module, T, S) :- metta_module_space(Module, Space),
 %sees the other's D, and the diamond still answers (A B C D D)
 %[tested: the_diamond_reproduces_upstreams_duplicate].
 add_super_types(Module, Types, Widened) :-
+    type_edge_view(visible(Module), Edges),
+    add_super_types(Module, Edges, Types, Widened).
+
+add_super_types(Module, Edges, Types, Widened) :-
     seen_types(Types, Seen),
-    super_type_rounds(Module, Types, Seen, Fresh),
+    super_type_rounds(Module, Edges, Types, Seen, Fresh),
     append(Types, Fresh, Widened).
 
-super_type_rounds(_, [], _, []) :- !.
-super_type_rounds(Module, Frontier, Seen, Widened) :-
+super_type_rounds(_, _, [], _, []) :- !.
+super_type_rounds(Module, Edges, Frontier, Seen, Widened) :-
     findall(Super,
             ( member(Type, Frontier),
-              super_type_in(Module, Type, Super),
-              typing_rule_accepts(Module, 'declared-widening', Type, Super) ),
+              type_edge_from_view(Edges, Type, Super),
+              typing_rule_accepts_resolved(Module, 'declared-widening', Type, Super) ),
             Supers),
     exclude(type_seen(Seen), Supers, Fresh),
     (   Fresh == []
     ->  Widened = []
     ;   add_seen_types(Fresh, Seen, Grown),
-        super_type_rounds(Module, Fresh, Grown, Rest),
+        super_type_rounds(Module, Edges, Fresh, Grown, Rest),
         append(Fresh, Rest, Widened)
     ).
 
@@ -1175,10 +1221,9 @@ get_type_candidate(X, T) :- X = [_|_],
                             metta_self_module(Self),
                             tuple_first_in(X, Self, First),
                             (   tuple_fold(First, T)
-                            ;   tuple_rest_types(has_type_in(Self), X, T)
+                            ;   tuple_rest_types(has_resolved_type_in(Self), X, T)
                             ).
-get_type_candidate(X, T) :- '$metta_atoms:&self':'&self'(':', X, T),
-                            acyclic_term(T).
+get_type_candidate(X, T) :- normalized_self_type_declaration(X, T).
 get_type_candidate(X, T) :- seam:builtin_type_declaration(X, T).
 %A space handle's own type, which no declaration carries because no program
 %wrote the handle. `(get-type &self)` and the type of a space a program made
@@ -1222,7 +1267,7 @@ get_type_candidate_in(Module, X, T) :- X = [_|_],
                                        \+ application_arrow_declared_in(Module, X),
                                        tuple_first_in(X, Module, First),
                                        (   tuple_fold(First, T)
-                                       ;   tuple_rest_types(has_type_in(Module),
+                                       ;   tuple_rest_types(has_resolved_type_in(Module),
                                                             X, T)
                                        ).
 
@@ -1295,7 +1340,7 @@ get_type_candidate_in(_, X, T) :- metta_state_cell_type(X, T).
 %type_answers/3, differenced with statistics/2 on inferences].
 tuple_first_in([], _, []).
 tuple_first_in([Member|Members], Module, [T|Ts]) :-
-    has_type_in(Module, Member, T),
+    has_resolved_type_in(Module, Member, T),
     !,
     tuple_first_in(Members, Module, Ts).
 
@@ -1410,16 +1455,15 @@ scoped_type_candidate(Space, Module, X, T) :-
     is_list(X),
     \+ scoped_function_type(Space, Module, X, _),
     tuple_types_scoped(Space, Module, X, T).
-scoped_type_candidate(Space, _, X, T) :-
-    match_stored(Space, [':', X, T], T, _),
-    acyclic_term(T).
+scoped_type_candidate(Space, Module, X, T) :-
+    scoped_type_declaration(Space, Module, X, T).
 scoped_type_candidate(_, _, X, T) :- seam:builtin_type_declaration(X, T).
 scoped_type_candidate(_, _, X, 'SpaceType') :- atom(X), metta_space_operand(X).
 scoped_type_candidate(_, _, X, T) :- metta_state_cell_type(X, T).
 
 scoped_function_type(Space, Module, [F|Args], T) :-
     nonvar(F),
-    (   match_stored(Space, [':', F, Raw], Raw, _),
+    (   scoped_type_declaration(Space, Module, F, Raw),
         metta_runtime_type(Raw, [->|Ts0])
     *-> Ts = Ts0
     ;   seam:builtin_type_declaration(F, [->|Ts])
@@ -1436,7 +1480,7 @@ scoped_has_type(Space, Module, X, T) :-
         ->  true
         ;   scoped_type_answers(Space, X, Types),
             member(Actual, Types),
-            metta_types_match_in(Module, Actual, T)
+            metta_resolved_types_match_in(Module, Actual, T)
         )
     ;   scoped_type_answers(Space, X, Types),
         member(Raw, Types),
@@ -1470,12 +1514,13 @@ scoped_widen_to_super_types(Space, Module, X, Types0, Types) :-
     (   scoped_any_super_type_edge(Space),
         scoped_widening_applies(Space, Module, X)
     ->  findall(Declared,
-                match_stored(Space, [':', X, Declared], Declared, _),
+                scoped_type_declaration(Space, Module, X, Declared),
                 Directs),
         partition(type_already_listed(Directs), Types0, Direct, Products),
-        scoped_add_super_types(Space, Direct, DirectWidened),
+        type_edge_view(space(Space), Edges),
+        scoped_super_type_rounds(Module, Edges, Direct, Direct, DirectWidened),
         append(Products, DirectWidened, Combined),
-        scoped_add_super_types(Space, Combined, Types)
+        scoped_super_type_rounds(Module, Edges, Combined, Combined, Types)
     ;   Types = Types0
     ).
 
@@ -1490,21 +1535,22 @@ scoped_any_super_type_edge(Space) :-
     \+ \+ match_stored(Space, [':<', _, _], true, _).
 
 scoped_add_super_types(Space, Types, Widened) :-
-    scoped_super_type_rounds(Space, Types, Types, Widened).
-
-scoped_super_type_rounds(_, [], Widened, Widened) :- !.
-scoped_super_type_rounds(Space, Frontier, Accumulated, Widened) :-
     space_module(Space, Module),
+    type_edge_view(space(Space), Edges),
+    scoped_super_type_rounds(Module, Edges, Types, Types, Widened).
+
+scoped_super_type_rounds(_, _, [], Widened, Widened) :- !.
+scoped_super_type_rounds(Module, Edges, Frontier, Accumulated, Widened) :-
     findall(Super,
             ( member(Type, Frontier),
-              match_stored(Space, [':<', Type, Super], Super, _),
-              typing_rule_accepts(Module, 'declared-widening', Type, Super) ),
+              type_edge_from_view(Edges, Type, Super),
+              typing_rule_accepts_resolved(Module, 'declared-widening', Type, Super) ),
             Supers),
     exclude(type_already_listed(Accumulated), Supers, Fresh),
     (   Fresh == []
     ->  Widened = Accumulated
     ;   append(Accumulated, Fresh, Grown),
-        scoped_super_type_rounds(Space, Fresh, Grown, Widened)
+        scoped_super_type_rounds(Module, Edges, Fresh, Grown, Widened)
     ).
 
 %A grounded Python object is Grounded, and its Python classes are its types:
@@ -1559,7 +1605,14 @@ metta_grounded_type(X, T) :- seam:grounded_extra_type(X, T).
 %translator compiles around every declared parameter, so a parameter declared
 %`Grounded` accepted anything at all
 %[tested: a_grounded_parameter_admits_an_unknown_and_refuses_a_declared_other].
-'get-metatype'(X, Metatype) :- metatype_of(X, Computed), Metatype = Computed.
+'get-metatype'(X, Metatype) :-
+    metatype_of(X, Computed),
+    (   var(Metatype)
+    ->  Metatype = Computed
+    ;   current_metta_module(Module),
+        typing_rule_accepts(Module, witness,
+                            '$metta_resolved_type'(Computed), Metatype)
+    ).
 
 metatype_of(X, 'Variable') :- var(X), !.
 metatype_of(X, 'Grounded') :- number(X), !.
@@ -1782,4 +1835,4 @@ satisfies_metatype(X, Metatype) :-
 
 satisfies_metatype_in(Module, X, Metatype) :-
     metatype_of(X, Actual),
-    typing_rule_accepts(Module, metatype, Actual, Metatype).
+    typing_rule_accepts_resolved(Module, metatype, Actual, Metatype).

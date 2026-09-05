@@ -27,6 +27,10 @@
 % Guarded by: '$metta_metta_exec' serializes execution-module identity,
 %   relationship declarations, fresh cache-child minting, and release.
 % [tested: tests/prolog/suites/spaces/spaces.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: alias conflicts and cycles visible in the current transaction
+%   fail before publication; alias reader and mutation clauses retire with
+%   their scope [tested:
+%   structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
 
 %The inverse of add_sexp_in/4, written here beside it for the same reason
 %metta_module_space/2 is written beside space_module/2: the mapping is
@@ -1422,6 +1426,40 @@ compiled_predicate_arity(F, Module, Predicate, Arity) :-
 %by a differential rather than by sharing code: every shape is added alone and
 %in a batch and the resulting state compared
 %[tested: spaces_batch_is_only_a_transport].
+% Scopes with aliases install indexed declaration observers. Their ordinary
+% bodies remain the source of mutation semantics, and scopes without aliases
+% execute those bodies directly. All installed references share alias lifetime.
+:- dynamic metta_add_atom/3, atoms_store_only/3.
+:- dynamic announce_declaration_changed/3, type_marker_changed/2.
+:- dynamic type_alias_mutation_scope_ref/2.
+
+set_type_alias_mutation_scope(Scope, enabled) :-
+    type_alias_scope_module(Scope, Module),
+    ( Scope = local(_) -> metta_module_space(Module, Space) ; true ),
+    asserta((metta_add_atom(Space, Term, true) :-
+                Term = [':', Name, Type], atom(Name),
+                \+ type_alias_declaration_type(Type),
+                \+ (Type = 'DontEvalType'), \+ fun(Name), !,
+                ( existing_duplicate_declaration(Space, Term, First)
+                -> print_message(warning,
+                                 metta_duplicate_declaration(Space, Term, First))
+                ;  store_atom(Space, Term), space_module(Space, Owner),
+                   type_alias_lookup_changed(Owner, Name) )), Add),
+    assertz(type_alias_mutation_scope_ref(Scope, Add)),
+    asserta((atoms_store_only(Space, [[':', _, _]|_], _) :- !, fail), Batch),
+    assertz(type_alias_mutation_scope_ref(Scope, Batch)),
+    % Copy the standing body once at activation, so its policy is not repeated
+    % in a second implementation. Filter earlier scopes' installed observers.
+    forall(( member(Head, [announce_declaration_changed(Module, Name, _),
+                          type_marker_changed(Module, Name)]),
+             clause(Head, Body, Original),
+             \+ type_alias_mutation_scope_ref(_, Original) ),
+           ( asserta((Head :- !, Body, type_alias_lookup_changed(Module, Name)),
+                     Observer),
+             assertz(type_alias_mutation_scope_ref(Scope, Observer)) )).
+set_type_alias_mutation_scope(Scope, disabled) :-
+    forall(retract(type_alias_mutation_scope_ref(Scope, Ref)), erase(Ref)).
+
 metta_add_atom(Space, Term, true) :- Term = [=, [FAtom|W], _], !,
                                      must_be(atom, FAtom),
                                      add_equation(Space, Term, FAtom, W).
@@ -1438,6 +1476,23 @@ metta_add_atom(Space, Term, true) :-
     store_atom(Space, Term),
     space_module(Space, Module),
     announce_function_changed(Module, Scalar).
+% Alias validation and publication share the typing lock and transaction.
+% The raw RHS remains the stored atom, including its variable relationships.
+metta_add_atom(Space, Term, true) :-
+    Term = [':', Name, Type],
+    nonvar(Type), Type = [Alias|_], Alias == 'Alias',
+    !,
+    space_module(Space, Module),
+    with_typing_policy_stable(
+        transaction(
+            ( validate_type_alias_declaration(Module, Name, Type),
+              ( existing_duplicate_declaration(Space, Term, _)
+              -> true
+              ;  store_atom(Space, Term),
+                 enable_type_alias_scope(Module),
+                 type_alias_lookup_changed(Module, Name)
+              ) ))).
+
 %Type declarations are a multimap because distinct arrows and distinct data
 %types are meaningful. A variant-identical second row is not: every type walk
 %would enumerate it again. A direct source add is idempotent and warns while
@@ -1562,6 +1617,8 @@ atoms_store_only(Space, Terms) :- atoms_store_only(Space, Terms, []).
 
 atoms_store_only(_, [], _).
 atoms_store_only(_, [[=|_]|_], _) :- !, fail.
+atoms_store_only(_, [[':', _, Type]|_], _) :-
+    nonvar(Type), Type = [Alias|_], Alias == 'Alias', !, fail.
 atoms_store_only(_, [[':', _, 'DontEvalType']|_], _) :- !, fail.
 atoms_store_only(_, [[':', FAtom, _]|_], _) :-
     atom(FAtom), fun(FAtom), !, fail.
@@ -1880,7 +1937,8 @@ metta_host_clear_space(Space) :-
         clear_generated_predicates(Module),
         retractall(deferred_metta_function(_, Module, Space, _, _, _)),
         clear_module_translation_state(Module),
-        support_forget_module(Module)
+        support_forget_module(Module),
+        retire_type_alias_scope(Module)
     ;   metta_host_clear_foreign_storage(Space)
     ).
 
@@ -1919,6 +1977,7 @@ metta_host_clear_space(Space) :-
         forall(member(Atom, Atoms), 'remove-atom'(Space, Atom, _))
     ),
     clear_native_atoms(Space),
+    retire_type_alias_scope(Module),
     clear_generated_predicates(Module),
     retractall(deferred_metta_function(_, Module, Space, _, _, _)),
     clear_module_translation_state(Module).

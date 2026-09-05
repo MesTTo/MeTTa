@@ -20,6 +20,9 @@
 %   commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: argument origins and masks consume expanded types, while
+%   BadArgType retains the written alias and can show TypeExpansion [tested:
+%   structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
 
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 
@@ -135,25 +138,42 @@ metta_bad_argument_error(Operation, Arguments, Error) :-
 %built, so the work removed is work no answer depended on.
 metta_bad_argument_refusal(Operation, Arguments, Error) :-
     current_metta_module(Module),
-    registered_typing_rule(user, Module, _, _, _, _, _),
+    raw_registered_typing_rule(user, Module, _, _, _, _, _),
     !,
-    metta_operation_parameters(Operation, Arguments, ParameterTypes, Origins),
+    metta_operation_parameters(Operation, Arguments, ParameterTypes, Origins,
+                               RawChain, Chain),
     metta_named_rule_refusal(Module, ParameterTypes, Origins, Arguments, 1,
                              Position, Expected, Actual, Rule, Reason),
     !,
-    metta_error_atom(Operation, Arguments,
-                     ['BadArgType', Position, Expected, Actual,
-                      ['TypingRuleRefusal', Rule, Reason]], Error).
+    metta_type_refusal_reason(RawChain, Chain, Position, Expected, Actual,
+                              [['TypingRuleRefusal', Rule, Reason]], Refusal),
+    metta_error_atom(Operation, Arguments, Refusal, Error).
 
 %One error per declared ARROW and per rejected ACTUAL type, arrows in
 %declaration order and actual types in the order get-type reports them, which
 %is the multiplicity and the order the arbiter pins.
 metta_bad_argument_refusal(Operation, Arguments, Error) :-
-    metta_operation_parameters(Operation, Arguments, ParameterTypes, Origins),
+    metta_operation_parameters(Operation, Arguments, ParameterTypes, Origins,
+                               RawChain, Chain),
     metta_bad_argument(ParameterTypes, Origins, Arguments, 1,
                        Position, Expected, Actual),
-    metta_error_atom(Operation, Arguments,
-                     ['BadArgType', Position, Expected, Actual], Error).
+    metta_type_refusal_reason(RawChain, Chain, Position, Expected, Actual, [],
+                              Refusal),
+    metta_error_atom(Operation, Arguments, Refusal, Error).
+
+% Preserve the source parameter spelling and carry the complete expansion for
+% a whole-arrow alias, where no source parameter position exists to project.
+metta_type_refusal_reason(Raw, Canonical, Position, Expected, Actual, Details,
+                          ['BadArgType', Position, Written, Actual|More]) :-
+    (   Raw =@= Canonical
+    ->  Written = Expected, More = Details
+    ;   (   nonvar(Raw), metta_arrow_type_chain(Raw, RawTypes),
+            nth1(Position, RawTypes, RawExpected)
+        ->  declared_type_for_check(RawExpected, Written)
+        ;   Written = Expected
+        ),
+        append(Details, [['TypeExpansion', Raw, Canonical]], More)
+    ).
 
 %A type-position modifier is REPORTED and CHECKED by its value type: the
 %arbiter answers `(BadArgType 1 Number String)` for a `(:Atom Number)`
@@ -167,7 +187,7 @@ metta_named_rule_refusal(Module, [Declared|_], [Origin|_],
     declared_type_for_check(Declared, Expected),
     typing_origin_family(Origin, Family),
     typing_refusal_actual(Module, Family, Argument, Actual),
-    typing_rule_refusal(Module, Family, Actual, Expected, Rule, Reason).
+    typing_rule_refusal_resolved(Module, Family, Actual, Expected, Rule, Reason).
 metta_named_rule_refusal(Module, [_|Expected], [_|Origins], [_|Arguments], N,
                          Position, Reported, Actual, Rule, Reason) :-
     Next is N + 1,
@@ -288,12 +308,20 @@ declared_type_for_check(Type, ValueType) :-
     ).
 
 metta_operation_parameters(Operation, Arguments, ParameterTypes, Origins) :-
+    metta_operation_parameters(Operation, Arguments, ParameterTypes, Origins,
+                               _, _).
+
+metta_operation_parameters(Operation, Arguments, ParameterTypes, Origins,
+                           Raw, Canonical) :-
     current_metta_module(Module),
-    (   governing_type_declaration_in(Module, Operation, Chain0)
-    ;   \+ type_declaration_in(Module, Operation, _),
-        seam:builtin_type_declaration(Operation, Chain0)
+    (   raw_governing_type_declaration_in(Module, Operation, Chain0, Owner)
+    ;   \+ raw_type_declaration_in(Module, Operation, _, _),
+        seam:builtin_type_declaration(Operation, Chain0),
+        metta_self_module(Owner)
     ),
-    copy_term(Chain0, [->|Types]),
+    copy_term(Chain0, Raw),
+    normalize_type_in(Owner, Raw, Canonical),
+    metta_runtime_type(Canonical, [->|Types]),
     %The types are read AS DECLARED. A type-position modifier is projected by
     %the consumers below, and only there: every declared argument check runs
     %through this reader, so projecting each parameter here costs an inference
@@ -334,7 +362,7 @@ metta_argument_type_origin(_, Expected, variable) :- var(Expected), !.
 metta_argument_type_origin(_, Expected, metatype) :-
     nonvar(Expected),
     current_metta_module(Module),
-    typing_rule_expected(Module, metatype, Expected),
+    typing_rule_expected_resolved(Module, metatype, Expected),
     !.
 metta_argument_type_origin(_, _, ordinary).
 
@@ -595,7 +623,7 @@ check_argument_type_under_policy_in(Module, Argument, Expected, Origin) :-
     (   metta_evaluating_type_rule
     ->  metta_argument_types_in(Module, Argument, Types),
         member(Actual, Types),
-        metta_types_match_in(Module, Actual, Expected)
+        metta_resolved_types_match_in(Module, Actual, Expected)
     ;   has_type_under_policy(Module, Argument, Expected)
     ).
 %A metatype under a USER policy goes straight to the walk. The shape test in
@@ -668,8 +696,8 @@ check_argument_type_in(Module, Argument, Expected, Origin) :-
     (   metta_evaluating_type_rule
     ->  metta_argument_types_in(Module, Argument, Types),
         member(Actual, Types),
-        metta_types_match_in(Module, Actual, Expected)
-    ;   has_type_in(Module, Argument, Expected)
+        metta_resolved_types_match_in(Module, Actual, Expected)
+    ;   has_resolved_type_in(Module, Argument, Expected)
     ).
 
 %The metatype is asked first and decides on its own where it can; only where
@@ -677,7 +705,7 @@ check_argument_type_in(Module, Argument, Expected, Origin) :-
 %relation.
 metatype_argument_admitted(Module, Argument, Expected, Relation) :-
     metatype_of(Argument, Actual),
-    typing_rule_decision(Module, metatype, Actual, Expected,
+    typing_rule_decision_resolved(Module, metatype, Actual, Expected,
                          Outcome, _, _),
     (   Outcome == accept
     ->  true
@@ -685,7 +713,7 @@ metatype_argument_admitted(Module, Argument, Expected, Relation) :-
     ->  fail
     ;   metta_argument_types_in(Module, Argument, Types),
         member(Reported, Types),
-        typing_rule_accepts(Module, Relation, Reported, Expected)
+        typing_rule_accepts_resolved(Module, Relation, Reported, Expected)
     ).
 
 metta_runtime_type_candidate(Module, Argument, Actual) :-
@@ -695,13 +723,13 @@ metta_runtime_type_candidate(Module, Argument, '%Undefined%') :-
     \+ once(type_candidate_in(Module, Argument, _)).
 
 metta_argument_type_matches(Actual, Expected, variable) :-
-    metta_types_match(Actual, Expected).
+    metta_resolved_types_match(Actual, Expected).
 metta_argument_type_matches(Actual, Expected, derived_variable) :-
     metta_derived_types_match(Actual, Expected).
 metta_argument_type_matches(Actual, Expected, metatype) :-
-    metta_types_match(Actual, Expected).
+    metta_resolved_types_match(Actual, Expected).
 metta_argument_type_matches(Actual, Expected, ordinary) :-
-    metta_types_match(Actual, Expected).
+    metta_resolved_types_match(Actual, Expected).
 
 %Every rejected actual type at a position, and then the positions after it,
 %which is what the arbiter reports when one actual type of an argument matched
@@ -792,8 +820,8 @@ shallow_argument_types([H|_], Types) :-
     atom(H), !,
     (   '$metta_atoms:&self':'&self'(':', H, _)
     ->  findall(Return,
-                ( '$metta_atoms:&self':'&self'(':', H, Raw),
-                  metta_runtime_type(Raw, Chain),
+                ( normalized_self_type_declaration(H, Expanded),
+                  metta_runtime_type(Expanded, Chain),
                   nonvar(Chain), Chain = [->|Rest], last(Rest, Return) ),
                 Types),
         Types \== []
@@ -806,8 +834,8 @@ shallow_argument_types(X, Types) :-
     atom(X),
     (   '$metta_atoms:&self':'&self'(':', X, _)
     ->  findall(Type,
-                ( '$metta_atoms:&self':'&self'(':', X, Raw),
-                  metta_runtime_type(Raw, Type),
+                ( normalized_self_type_declaration(X, Expanded),
+                  metta_runtime_type(Expanded, Type),
                   \+ ( nonvar(Type), Type = [->|_] ) ),
                 Types),
         Types \== []
@@ -822,7 +850,8 @@ shallow_argument_types(X, Types) :-
 %path [measured 2026-08-19].
 shallow_declared_type(Name, Type) :-
     '$metta_atoms:&self':'&self'(':', Name, Raw),
-    metta_runtime_type(Raw, Type).
+    metta_self_module(Self),
+    normalize_callable_type_in(Self, Raw, Type).
 shallow_declared_type(Name, Type) :-
     \+ '$metta_atoms:&self':'&self'(':', Name, _),
     seam:builtin_type_declaration(Name, Type).
@@ -844,6 +873,10 @@ metta_argument_types_in(Module, Argument, Types) :-
 metta_types_match(Left, Right) :-
     current_metta_module(Module),
     metta_types_match_in(Module, Left, Right).
+
+metta_resolved_types_match(Left, Right) :-
+    current_metta_module(Module),
+    metta_resolved_types_match_in(Module, Left, Right).
 
 %THE SHIPPED ANSWER WITHOUT THE SEARCH. This is the call site's compatibility
 %relation and the hottest type predicate the engine has; every typed argument
@@ -873,11 +906,21 @@ metta_types_match(Left, Right) :-
 %checked for agreement AND for standing aside
 %[tested: test_the_shipped_fast_path_answers_what_the_registry_answers;
 %commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
+:- dynamic metta_types_match_in/3.
+
 metta_types_match_in(Module, RawLeft, RawRight) :-
     metta_runtime_type(RawLeft, Left),
     metta_runtime_type(RawRight, Right),
     (   metta_user_typing_rule_present(Module)
-    ->  typing_rule_accepts(Module, ordinary, Left, Right)
+    ->  typing_rule_accepts_resolved(Module, ordinary, Left, Right)
+    ;   metta_shipped_types_match(Left, Right)
+    ).
+
+metta_resolved_types_match_in(Module, RawLeft, RawRight) :-
+    metta_runtime_type(RawLeft, Left),
+    metta_runtime_type(RawRight, Right),
+    (   metta_user_typing_rule_present(Module)
+    ->  typing_rule_accepts_resolved(Module, ordinary, Left, Right)
     ;   metta_shipped_types_match(Left, Right)
     ).
 
@@ -885,9 +928,9 @@ metta_types_match_in(Module, RawLeft, RawRight) :-
 %because typing_check_decision/7 defers an ordinary rule to widening, so a
 %user rule in either family changes what this relation answers.
 metta_user_typing_rule_present(Module) :-
-    (   registered_typing_rule(user, Module, _, ordinary, _, _, _)
+    (   raw_registered_typing_rule(user, Module, _, ordinary, _, _, _)
     ->  true
-    ;   registered_typing_rule(user, Module, _, widening, _, _, _)
+    ;   raw_registered_typing_rule(user, Module, _, widening, _, _, _)
     ).
 
 metta_shipped_types_match(Left, Right) :-
@@ -908,7 +951,7 @@ metta_derived_types_match(Left, Right) :-
 metta_derived_types_match_in(Module, RawLeft, RawRight) :-
     metta_runtime_type(RawLeft, Left),
     metta_runtime_type(RawRight, Right),
-    typing_rule_accepts(Module, derived, Left, Right).
+    typing_rule_accepts_resolved(Module, derived, Left, Right).
 
 %The operations that refuse BY NAME rather than leaving the call. Each text is
 %upstream's own, quoted from the arbiter's transcript rather than invented, and
