@@ -343,16 +343,23 @@ assert(Form, true) :-
 'get-type-space'(Space, X, T) :- \+ metta_space_name(Space), !,
                                  space_argument_error('get-type-space',
                                                       [Space, X], T).
-'get-type-space'(Space, X, T) :- metta_space_name(Space),
-                                 reported_scoped_type_answers(Space, X, Types),
-                                 member(T, Types).
+'get-type-space'(Space, X, T) :-
+    metta_space_name(Space),
+    reported_scoped_type_answers(Space, X, Types),
+    (   var(T)
+    ->  member(T, Types)
+    ;   member(Actual, Types),
+        space_module(Space, Module),
+        typing_rule_accepts(Module, witness, '$metta_resolved_type'(Actual), T)
+    ).
 
 %get-type-space is the other reporting observer. Its underlying scoped answer
 %function stays unchanged because scoped_has_type/4 is a classifier consumer.
 reported_scoped_type_answers(_, X, [['->']]) :- X == [], !.
 reported_scoped_type_answers(Space, [F], [Result]) :-
     nonvar(F),
-    (   match_stored(Space, [':', F, Raw], Raw, _),
+    (   space_module(Space, Module),
+        scoped_type_declaration(Space, Module, F, Raw),
         metta_runtime_type(Raw, [->, ['%Rest%', _], Result])
     *-> true
     ;   seam:builtin_type_declaration(F, [->, ['%Rest%', _], Result])

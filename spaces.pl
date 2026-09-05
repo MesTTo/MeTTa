@@ -184,6 +184,7 @@
             add_sexp/3,
             announce_function_changed/2,
             announce_declaration_changed/3,
+            set_type_alias_mutation_scope/2,
             result_finality/2,
             announce_function_removed/1,
             assert_function_clause/3,

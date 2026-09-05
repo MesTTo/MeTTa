@@ -1577,6 +1577,7 @@ metta_internal_catalog_name('get-doc-function').
 metta_internal_catalog_name('get-doc-params').
 metta_internal_catalog_name('get-doc-single-atom').
 metta_internal_catalog_name(interpret).
+metta_internal_catalog_name('__metta_type_syntax__').
 metta_internal_catalog_name('match-type-or').
 
 metta_builtin_visibility(Name, 'INTERNAL') :-

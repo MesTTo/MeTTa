@@ -634,6 +634,8 @@ metta_semantic_effect('pragma!', writesState).
 metta_semantic_effect(match, writesState).
 metta_semantic_effect('match%', writesState).
 metta_semantic_effect('get-type', writesState).
+% Resolving an explicitly named cast space may create its execution module.
+metta_semantic_effect('__metta_type_syntax__', writesState).
 metta_semantic_effect('get-type-space', writesState).
 metta_semantic_effect('_new-state', writesState).
 metta_semantic_effect('change-state!', writesState).

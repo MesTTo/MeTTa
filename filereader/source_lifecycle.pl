@@ -27,6 +27,11 @@
 %   commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/reader/filereader.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: rollback_source_load/1 repairs surviving callers after
+%   withdrawing alias declarations from a failed load [tested:
+%   test_a_failed_first_file_load_restores_existing_callers,
+%   test_file_replacement_updates_aliases_and_failed_replacement_restores_them;
+%   commit=WORKTREE].
 
 %%%% The fast cache and the content digest %%%%
 %
@@ -1151,6 +1156,12 @@ rollback_source_load(LoadId) :-
 
 rollback_source_load_stable(LoadId) :-
     source_typing_policy_modules(LoadId, PolicyModules),
+    findall(Module-Name,
+            ( source_load_assertion(LoadId, stored, Ref),
+              stored_atom_of_ref(Ref, Space, [':', Name, _]),
+              atom(Name), space_module(Space, Module) ),
+            TypeLookups0),
+    sort(TypeLookups0, TypeLookups),
     findall(F,
             ( source_load_assertion(LoadId, stored, Ref),
               stored_atom_of_ref(Ref, _, [=, [F|_], _]),
@@ -1178,7 +1189,14 @@ rollback_source_load_stable(LoadId) :-
     retractall(source_load_resource(LoadId, _)),
     forall(member(Module, PolicyModules), typing_policy_changed(Module)),
     support_prune_orphans,
-    repair_after_source_rollback(Functions).
+    repair_after_source_rollback(Functions),
+    repair_type_aliases_after_rollback(TypeLookups).
+
+repair_type_aliases_after_rollback(_) :- current_transaction(_), !.
+repair_type_aliases_after_rollback(Lookups) :-
+    transaction(
+        forall(member(Module-Name, Lookups),
+               type_alias_lookup_changed(Module, Name))).
 
 rollback_source_owned_space(Space) :-
     (   once('get-atoms'(Space, _))

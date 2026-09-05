@@ -18,6 +18,9 @@
 %   commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: presented_parameter_type_chains/4 expands aliases before
+%   parameter masks and static proofs are chosen [tested:
+%   structural_aliases; commit=WORKTREE].
 
 :- meta_predicate with_static_parameter_environment(+, +, +, +, 0).
 
@@ -109,7 +112,7 @@ inherited_stored_declaration_owns_arity(Module, Fun) :-
     metta_module_space(Module, Space),
     \+ match_stored(Space, [':', Fun, _], _, _),
     \+ fun_in(Module, Fun),
-    match_stored('&self', [':', Fun, Raw], Raw, _),
+    normalized_self_type_declaration(Fun, Raw),
     metta_runtime_type(Raw, [->|_]).
 
 %THE FIRST ARROW THAT ANSWERS IS THE ONE THAT ANSWERS, and the soft cut has to
@@ -243,7 +246,7 @@ present_type_chain([->|Types], InputArity, [->|Presented]) :-
         append(PresentedParameters, [Out], Presented)
     ;   length(Parameters, DeclaredInputArity),
         current_metta_module(Module),
-        typing_rule_accepts(Module, 'arrow-arity', InputArity,
+        typing_rule_accepts_resolved(Module, 'arrow-arity', InputArity,
                             DeclaredInputArity),
         Presented = Types
     ).
@@ -277,12 +280,12 @@ rest_parameter(Rest, Element) :-
 %candidate and answers the same thing every time.
 type_chain_refusal(Chains, InputArity, Rule, Reason) :-
     current_metta_module(Module),
-    registered_typing_rule(user, Module, _, 'arrow-arity', _, _, _),
+    raw_registered_typing_rule(user, Module, _, 'arrow-arity', _, _, _),
     !,
     member([->|Types], Chains),
     length(Types, Count),
     DeclaredInputArity is Count - 1,
-    typing_rule_refusal(Module, 'arrow-arity', InputArity,
+    typing_rule_refusal_resolved(Module, 'arrow-arity', InputArity,
                         DeclaredInputArity, Rule, Reason),
     !.
 
@@ -679,9 +682,20 @@ restore_static_parameter_environment(absent) :-
 
 static_parameter_entries(Module, Function, Arguments, Chains, Entries) :-
     length(Arguments, Arity),
-    presented_type_chains(Chains, Arity, Presented),
+    presented_parameter_type_chains(Module, Chains, Arity, Presented),
     static_parameter_entries(Arguments, Presented, Module, Function, Arity,
                              1, Entries).
+
+% Arrival groups retain source syntax; normalize in the presentation walk
+% that static parameter proofs already need, before choosing argument origins.
+presented_parameter_type_chains(_, [], _, []).
+presented_parameter_type_chains(Module, [Raw|Chains], Arity, Presented) :-
+    normalize_callable_type_in(Module, Raw, Chain),
+    (   present_type_chain(Chain, Arity, Expanded)
+    ->  Presented = [Expanded|Rest]
+    ;   Presented = Rest
+    ),
+    presented_parameter_type_chains(Module, Chains, Arity, Rest).
 
 static_parameter_entries([], _, _, _, _, _, []).
 static_parameter_entries([Argument|Arguments], Chains, Module, Function,

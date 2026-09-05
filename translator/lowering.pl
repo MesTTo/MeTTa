@@ -484,7 +484,8 @@ dispatch_selected_goal(Order, ClauseMode, Module, Fun, Args, _, Out) :-
 dispatch_meta_clauses(Module, Fun, Clauses) :-
     fun_meta_module(Module, Fun, Owner),
     findall(dispatch_clause(HeadArgs, Body, Types),
-            fun_meta_clause_types(Owner, Fun, HeadArgs, Body, Types),
+            ( fun_meta_clause_types(Owner, Fun, HeadArgs, Body, RawTypes),
+              maplist(normalize_callable_type_in(Owner), RawTypes, Types) ),
             NewestFirst),
     reverse(NewestFirst, Clauses),
     Clauses \== [].
@@ -1298,11 +1299,13 @@ data_head_answer_dl(HV, Written, AVs, Out, Goals0, Goals) :-
 %single declaration tier that controls dispatch.
 written_args_settled(self, HV, Written) :-
     current_metta_module(SelfTierModule),
-    self_tier_clause(SelfTierModule, HV, Chain),
+    self_tier_clause(SelfTierModule, HV, _),
+    governing_type_declaration_in(SelfTierModule, HV, Chain),
     written_args_settled_by_chain(Chain, Written).
 written_args_settled(local(Space), HV, Written) :-
     match_stored(Space, [':', HV, Raw], Raw, _),
-    metta_runtime_type(Raw, Chain),
+    space_module(Space, Module),
+    normalize_callable_type_in(Module, Raw, Chain),
     written_args_settled_by_chain(Chain, Written).
 
 written_args_settled_by_chain(Chain, Written) :-
@@ -1329,7 +1332,8 @@ written_arg_settled(Expected, Written) :-
 arrow_declared_data_head(HV, DeclarationTier) :-
     atom(HV),
     current_metta_module(SelfTierModule),
-    self_tier_clause(SelfTierModule, HV, Chain),
+    self_tier_clause(SelfTierModule, HV, _),
+    governing_type_declaration_in(SelfTierModule, HV, Chain),
     nonvar(Chain),
     Chain = [->|_],
     current_metta_module(Module),
@@ -1406,7 +1410,7 @@ inherited_data_head_arrow_tier(Module, HV, DeclarationTier) :-
     metta_module_space(Module, Space),
     (   once(match_stored(Space, [':', HV, _], _, _))
     ->  once(( match_stored(Space, [':', HV, Raw], Raw, _),
-               metta_runtime_type(Raw, [->|_]) )),
+               normalize_callable_type_in(Module, Raw, [->|_]) )),
         DeclarationTier = local(Space)
     ;   \+ fun_in(Module, HV),
         DeclarationTier = self
