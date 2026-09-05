@@ -17,9 +17,9 @@
 #     under every measurement any other agent had running. A symlinked FILE
 #     is no safer: File::create and cp both truncate in place through it
 #     [measured 2026-09-05: write through a file symlink reached the target;
-#     only unlink-then-create did not; commit=WORKTREE]. A copy costs 2.5 MB
+#     only unlink-then-create did not; commit=7f3473649f8e54e6265f9b054cb8bdb4f6d1fdff]. A copy costs 2.5 MB
 #     and a build in the worktree lands in the worktree
-#     [tested: tests/shell/test_worktree_configuration.sh; commit=WORKTREE].
+#     [tested: tests/shell/test_worktree_configuration.sh; commit=7f3473649f8e54e6265f9b054cb8bdb4f6d1fdff].
 #   - the C extension example's cbump and handle shared objects are built in
 #     the worktree exactly as check.sh builds them, so a direct pytest run
 #     here exercises the same integration surface instead of skipping it.
