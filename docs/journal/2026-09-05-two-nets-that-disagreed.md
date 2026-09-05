@@ -676,6 +676,18 @@ its minimum lands 5 over a 4,200,424 pin in some batch runs and passes eight
 runs out of eight on its own, with the three samples of one run spread by
 2,470. The seven engine benchmark cases match their pins exactly.
 
+The C seat's lane carries the same shape and is also left un-pinned. Its boot
+case reads 1,564,794 inferences against a 1,512,524 pin, three identical
+samples, unchanged with this session's two engine files reverted to a2cd219f;
+the warmed merge base reads 1,508,413 against the 1,506,093 pin it carried. So
+the branch moved that case by about 56,000 inferences and re-pinned about
+6,400 of them early. Its instruction and CPU bands are outside too, agreeing
+between the two engine arms to within 0.09% on a box at loadavg 26 to 57, so
+those readings price the branch's engine additions and the contention together
+and neither is isolated. The MORK and Node lanes both pass. Each finding is
+written into the baseline it belongs to, so the next reader of that lane meets
+it there rather than here.
+
 ## 2026-09-05, the observer that watched one space and stopped every clear
 
 Tried: running the Python suite twice on the same tree -> once green and once
