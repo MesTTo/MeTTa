@@ -1,4 +1,6 @@
 % Purpose: validate foreign-provider capabilities and route foreign and native space operations
+% Guarantees: annotated arrow effects reach catalog policy and follow their
+%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=WORKTREE].
 % Guarantees: stored_arrow_chain/3 reads annotated parameter types through
 %   metta_runtime_type/2 for type-marker invalidation
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
@@ -1897,6 +1899,18 @@ metta_repair_emptied_shadows :-
 %whether the store actually held it.
 
 %% unstore_atom(+Space, ?Atom, -Removed:boolean) is semidet.
+unstore_atom(Space, [':', Name, Type], Removed) :-
+    \+ \+ metta_arrow_product(Name, Space, _, _, _),
+    !,
+    with_mutex('$metta_arrow_products',
+        once(metta_transaction(
+            (   (   seam:foreign_space(Space)
+                ->  foreign_write(Space, remove,
+                        seam:foreign_remove(Space, [':', Name, Type], Removed))
+                ;   remove_sexp(Space, [':', Name, Type], Removed)
+                ),
+                ( Removed == true -> metta_prune_arrow_products(Space) ; true )
+            )))).
 unstore_atom(Space, Term, Removed) :- seam:foreign_space(Space), !,
                                       foreign_write(Space, remove,
                                                     seam:foreign_remove(Space, Term,

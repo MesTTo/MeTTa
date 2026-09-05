@@ -12,7 +12,7 @@
 %   complete in-scope declaration set [tested:
 %   test_an_inherited_arrow_does_not_veto_a_local_definition,
 %   lib_strategy:an_inherited_arrow_does_not_veto_a_local_definition;
-%   commit=7b238053d2907cd514e3fd9a29927d43a53c5a3c].
+%   commit=WORKTREE].
 %   A generated contract whose static shortcut is invalidated uses the
 %   policy-strict witness relation, so an ordinary user refusal remains
 %   decisive over numeric and exact witnesses while unrelated type queries
@@ -198,9 +198,8 @@ governing_type_declaration_in(Module, X, T) :-
     ;   metta_module_space(Module, Space),
         (   once(match_stored(Space, [':', X, _], _, _))
         ->  match_stored(Space, [':', X, Raw], Raw, _)
-        ;   fun_in(Module, X)
-        ->  fail
-        ;   match_stored('&self', [':', X, Raw], Raw, _)
+        ;   \+ fun_in(Module, X),
+            match_stored('&self', [':', X, Raw], Raw, _)
         )
     ),
     metta_runtime_type(Raw, T).

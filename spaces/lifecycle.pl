@@ -1,4 +1,6 @@
 % Purpose: decode stored atoms and manage source, subscription, reaction, table, and clear lifecycles
+% Guarantees: annotated arrow effects reach catalog policy and follow their
+%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=WORKTREE].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
 %   A foreign space life releases tabled, generated, deferred-translation, and
@@ -148,6 +150,7 @@ remove_sexp(Space, Atom) :- remove_sexp(Space, Atom, _).
 remove_sexp('&metta', [Rel|Args], Removed) :- !,
     (   native_storage_module_ready('&metta', Module)
     ->  Term =.. ['&metta', Rel|Args],
+        ( Rel == effect -> metta_refuse_owned_effect_removal(Module, Term) ; true ),
         native_retract_one(Module:Term, Removed),
         (   Removed == true
         ->  metta_catalog_note_removed([Rel|Args])
@@ -1450,6 +1453,11 @@ metta_add_atom(Space, Term, true) :-
     existing_duplicate_declaration(Space, Term, First),
     !,
     print_message(warning, metta_duplicate_declaration(Space, Term, First)).
+metta_add_atom(Space, [':', Name, Type], true) :-
+    metta_annotated_type(Type),
+    !,
+    metta_require_arrow_product(Name, Type, Product),
+    metta_add_annotated_declaration(Space, Name, Type, Product).
 % DontEvalType changes how every arrow parameter naming this type compiles,
 % even when the type symbol is not itself a function. Store first so repairs
 % observe the new marker, then invalidate its module-qualified support root.
@@ -1563,6 +1571,8 @@ atoms_store_only(Space, Terms) :- atoms_store_only(Space, Terms, []).
 atoms_store_only(_, [], _).
 atoms_store_only(_, [[=|_]|_], _) :- !, fail.
 atoms_store_only(_, [[':', _, 'DontEvalType']|_], _) :- !, fail.
+atoms_store_only(_, [[':', _, Type]|_], _) :-
+    metta_annotated_type(Type), !, fail.
 atoms_store_only(_, [[':', FAtom, _]|_], _) :-
     atom(FAtom), fun(FAtom), !, fail.
 atoms_store_only(Space, [Term|Terms], Earlier) :-

@@ -274,6 +274,8 @@
             metta_special_form/1,
             metta_special_form_head/1,
             metta_translated_head/1,
+            prolog_function_importer/1,
+            install_annotated_dispatch/2,
             metta_reducible_head/2,
             %The one question the SPACES ask of a name's declarations while a
             %program is being built: whether some declared arrow answers the
