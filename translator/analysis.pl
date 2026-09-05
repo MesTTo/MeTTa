@@ -17,6 +17,12 @@
 %   expansion [tested: specializer:a_specialization_keeps_the_generic_call_arity;
 %   commit=1aebfc7b41e7d89893903a3a5f614e5b7c7f8eac].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
+% Owns resources: fun_meta_head/3 and fun_meta_projection/4 are compiler
+%   artifacts journalled with their source occurrence and retired by
+%   drop_fun_meta/4, clear_fun_meta/2, or source withdrawal.
+% Guarded by: '$metta_fun_metadata' serializes metadata writers; transaction/1
+%   publishes the source and its projections together and rolls back failures
+%   [tested: run_tests(translator_metadata_projection); commit=WORKTREE].
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: retained and deferred equation type groups preserve written
 %   aliases, and with_equation_types/4 restores its enclosing translation
@@ -38,6 +44,19 @@
 :- dynamic metta_any_segment_equation/0.
 :- dynamic fun_meta_clause/4.
 :- dynamic fun_meta_clause_types/5.
+:- dynamic fun_meta_head/3.
+:- dynamic fun_meta_projection/4.
+
+% A covering index keeps every field a read needs beside its source identity.
+% PostgreSQL 18 also requires source visibility for index-only scans:
+% https://www.postgresql.org/docs/18/indexes-index-only-scans.html
+% Here both projections share the original clause's transaction and source
+% journal. The compact row supports presence reads without copying a head;
+% the head row supports matching without copying the retained body. Exact
+% clause references distinguish duplicate occurrences on removal.
+% [tested: translator_metadata_projection:projected_head_bags_and_bindings_equal_the_source,
+% translator_metadata_projection:removing_an_occurrence_retires_its_exact_projection;
+% commit=WORKTREE]
 
 %THE SEGMENT QUESTION IS ASKED ONCE PER EQUATION, not once per call. Every
 %call used to reach metta_segment_equation_in/3, which walks a function's
@@ -58,6 +77,10 @@ record_fun_meta(F, Args, Body) :-
 
 record_fun_meta(F, Args, Body, Types) :-
     current_metta_module(Module),
+    with_mutex('$metta_fun_metadata',
+               transaction(record_fun_meta_rows(Module, F, Args, Body, Types))).
+
+record_fun_meta_rows(Module, F, Args, Body, Types) :-
     (   metta_seq_present(Args)
     ->  (   metta_any_segment_equation
         ->  true
@@ -67,6 +90,10 @@ record_fun_meta(F, Args, Body, Types) :-
     ),
     asserta(fun_meta_clause(Module, F, Args, Body), Ref),
     record_source_assertion(Ref),
+    asserta(fun_meta_head(Module, F, Args), HeadRef),
+    record_source_assertion(HeadRef),
+    asserta(fun_meta_projection(Module, F, Ref, HeadRef), ProjectionRef),
+    record_source_assertion(ProjectionRef),
     (   nb_current('$metta_queued_equation_types', queued(QModule, QF, QTypes)),
         QModule == Module, QF == F
     ->  RawTypes = QTypes
@@ -184,7 +211,7 @@ fun_meta_type_is_new(Module, F, Chain) :-
 %equation joins clauses that already stand, and clauses inherited from a
 %parent are not this module's to join.
 metta_function_translated(Module, F) :-
-    fun_meta_clause(Module, F, _, _),
+    fun_meta_projection(Module, F, _, _),
     !.
 
 fun_meta_clauses(Module, F, Clauses) :-
@@ -193,20 +220,25 @@ fun_meta_clauses(Module, F, Clauses) :-
             fun_meta_clause(Owner, F, Args, Body), Clauses),
     Clauses \== [].
 
-fun_meta_module(Module, F, Module) :- fun_meta_clause(Module, F, _, _), !.
+fun_meta_module(Module, F, Module) :- fun_meta_projection(Module, F, _, _), !.
 fun_meta_module(Module, F, Owner) :-
     super_chain(Module, Candidate),
-    fun_meta_clause(Candidate, F, _, _),
+    fun_meta_projection(Candidate, F, _, _),
     !,
     Owner = Candidate.
 
 % Remove one variant-equivalent retained equation. Retraction must not bind the
 % caller's variables, and duplicate equations are removed one at a time.
 drop_fun_meta(Module, F, Args, Body) :-
+    with_mutex('$metta_fun_metadata',
+               transaction(drop_fun_meta_rows(Module, F, Args, Body))).
+
+drop_fun_meta_rows(Module, F, Args, Body) :-
     ( once(( clause(fun_meta_clause(Module, F, StoredArgs, StoredBody), true, Ref),
-             (StoredArgs-StoredBody) =@= (Args-Body),
-             erase(Ref) ))
-    -> true
+             (StoredArgs-StoredBody) =@= (Args-Body) ))
+    -> retract(fun_meta_projection(Module, F, Ref, HeadRef)),
+       erase(HeadRef),
+       erase(Ref)
     ; true ),
     drop_fun_meta_types(Module, F, Args, Body).
 drop_fun_meta_types(Module, F, Args, Body) :-
@@ -217,12 +249,15 @@ drop_fun_meta_types(Module, F, Args, Body) :-
     -> true
     ; true ).
 
-% Both retractalls, so an unbound Module means every module. That is what a
+% An unbound Module means every module. That is what a
 % teardown wants and what the engine must never pass.
 clear_fun_meta(Module, F) :-
-    retractall(fun_meta_clause(Module, F, _, _)),
-    retractall(fun_meta_clause_types(Module, F, _, _, _)),
-    retractall(head_pattern_note(Module, F, _, _, _)).
+    with_mutex('$metta_fun_metadata',
+               transaction(( retractall(fun_meta_clause(Module, F, _, _)),
+                             retractall(fun_meta_clause_types(Module, F, _, _, _)),
+                             retractall(fun_meta_head(Module, F, _)),
+                             retractall(fun_meta_projection(Module, F, _, _)),
+                             retractall(head_pattern_note(Module, F, _, _, _)) ))).
 
 % WHAT THE COMPILER DECIDED ABOUT A HEAD PATTERN POSITION, one row per
 % position, and every decision it can take there is recorded because all of
