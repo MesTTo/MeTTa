@@ -13,15 +13,15 @@
 %   source_load_receipt_current/4 accepts a receipt only while its source row, digest, and every tagged stored output remain current;
 %   version-4 images preserve original atoms and each compiled equation's
 %   resolved source across relocation and later recompilation [tested:
-%   test_fast_images_preserve_each_equations_binding; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d];
+%   test_fast_images_preserve_each_equations_binding; commit=3c64e2e24787362a5a5081513bc24b880711a1d7];
 %   fast-image nodes materialize only after their source and registry restore
 %   completes [tested: test_reloading_a_materialized_program_preserves_its_bag;
-%   commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d];
+%   commit=3c64e2e24787362a5a5081513bc24b880711a1d7];
 %   fast-cache restore batches unchanged atoms and compiles resolved equations
 %   against their stored references; program analysis reconciles once at the
 %   image boundary [tested:
 %   test_fast_restore_batches_content_dependent_program_analysis;
-%   commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d];
+%   commit=3c64e2e24787362a5a5081513bc24b880711a1d7];
 %   a fast cache captures one consistent equation-world graph and restores its
 %   child spaces, space-valued token bindings, and translator registry through
 %   fresh runtime identities [tested:
@@ -222,7 +222,7 @@ metta_fast_capture_space_node(
 % Racket's serializer keeps module-path indices separately and shifts them on
 % restore; this image uses its existing world-node relocation for bound terms.
 % https://github.com/racket/racket/blob/v8.17/racket/src/expander/syntax/serialize.rkt
-% [source: syntax-serialize and syntax-deserialize; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% [source: syntax-serialize and syntax-deserialize; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 metta_fast_capture_space_atoms(Space, Atoms, Bindings) :-
     (   metta_fast_read_space(Space, Owner),
         translated_equation_binding(Owner, _, _)
@@ -252,7 +252,7 @@ metta_fast_read_space(Space, Each) :-
 % This is get-atoms' native enumeration with its clause reference retained.
 % The reference identifies the occurrence directly; compiled-clause order and
 % equality between duplicate source equations cannot recover that identity.
-% [source: engine/spaces/native_matching.pl, get_native_atom/3; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% [source: engine/spaces/native_matching.pl, get_native_atom/3; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 metta_fast_atom_binding(Space, Atom, Bound) :-
     metta_fast_read_space(Space, Each),
     (   seam:foreign_space(Each)

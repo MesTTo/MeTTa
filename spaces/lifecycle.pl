@@ -27,7 +27,7 @@
 %   commit=d2279ea320e54790dab4484421a168e93755b185].
 %   Clearing a space removes materialized relations transactionally before
 %   their source clauses; a running reader owns a copied result descriptor
-%   [tested: function_free_materialization; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+%   [tested: function_free_materialization; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % Guarded by: '$metta_metta_exec' serializes execution-module identity,
 %   relationship declarations, fresh cache-child minting, and release.

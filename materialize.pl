@@ -1,7 +1,7 @@
 % Purpose: materialize finite function-free equation bags at source boundaries.
 % Guarantees: only ground acyclic dependency graphs replace ordinary dispatch;
 %   every tuple retains its proof count and unsupported calls retain compiled
-%   execution [tested: function_free_materialization; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+%   execution [tested: function_free_materialization; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % Assumes: constant query lookup is data complexity for fixed source signatures
 %   and arities; validating a generation stamp walks those program properties.
 % Owns resources: each snapshot owns one immutable trie through its blob handle.
@@ -63,7 +63,7 @@
 % reconcile only the spaces it touched against the global commit view.
 % https://github.com/SWI-Prolog/swipl-devel/blob/V10.0.0/src/pl-transaction.c#L632-L650
 % [tested: overlapping_owned_publications_leave_one_image,
-% an_older_owned_release_retires_a_concurrently_published_image; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% an_older_owned_release_retires_a_concurrently_published_image; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 materialization_transaction(Goal) :-
     materialization_transaction(Goal, true).
 
@@ -76,7 +76,7 @@ materialization_transaction(Goal) :-
 % user, so serializing user transactions here instead is a superset.
 % [tested: overlapping_owned_publications_leave_one_image,
 % structural_aliases:overlapping_transactions_leave_one_alias_and_name_the_loser;
-% commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 materialization_transaction(Goal, Constraint) :-
     (   current_transaction(_)
     ->  transaction(Goal, Constraint, '$metta_materialization')
@@ -131,7 +131,7 @@ materialize_source(Space) :-
 % [measured: 786829 SWI inferences over 2000 completed runnable-only calls,
 % equal to the pre-subsystem tree at 8f853f99; command=cd extensions/python
 % && PYTHONPATH=. $VENV/bin/python bench.py --counter-only foreign-match;
-% commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 source_materialization_dormant(Space) :-
     \+ source_relation_materialization_enabled,
     \+ materialized_snapshot(Space, _, _, _, _).
@@ -167,9 +167,9 @@ source_materialization_cleanup(_, Space) :- discard_space(Space).
 % the retained compiled clauses, which answer the same bag. This is the
 % batching boundary the loader already uses for deferred support repairs.
 % [source: engine/filereader/source_lifecycle.pl, run_source_repairs/1,
-% with_source_load/3; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% with_source_load/3; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 % [tested: extensions/python/tests/ch18_performance/test_materialization.py,
-% test_a_reloaded_program_builds_its_relation_once; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% test_a_reloaded_program_builds_its_relation_once; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 with_source_materialization_batch(Space, Prepare, Publish) :-
     gensym(materialization_batch_, Id),
     setup_call_catcher_cleanup(
@@ -228,7 +228,7 @@ flush_space_materialization(Space, Names) :-
     % after the owner check fails repeats an ancestor on SWI 10.1.13.
     % https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-transaction.c#L721-L745
     % [tested: nested_source_transactions_finish_and_restore_the_rolled_back_bag;
-    % commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+    % commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
     (   once(current_transaction(_)), \+ materialization_transaction_owner
     ->  true
     ;   materialized_snapshot(Space, Module, _, Stamp, _),
@@ -261,7 +261,7 @@ flush_space_materialization(Space, Names) :-
 % [measured: 4300722 against 5189 load inferences and 283 against 2989 warmed
 % query inferences; command=PYTHONPATH=extensions/python $VENV/bin/python -m
 % benchmarks.query_planning_materialization {materialized,original} --sizes 128;
-% fixture=the two-rule reach chain; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% fixture=the two-rule reach chain; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 source_relation_materialization_enabled :-
     metta_pragma('materialize-source-relations', Value),
     Value \== false,
@@ -271,7 +271,7 @@ source_relation_materialization_enabled :-
 % restriction and co-materialized terminal calls. Retaining the source avoids
 % its catchall and equation-introspection changes.
 % https://github.com/MesTTo/metta-on-mork/blob/a5f312063529ab7d8df92275c83b288d493edb7e/src/program/mod.rs
-% [source: compile_routing and compile_routed_body; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% [source: compile_routing and compile_routed_body; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 source_candidates(Space, Names, Module, Candidates) :-
     source_relation_materialization_enabled,
     atom(Space),
@@ -365,7 +365,7 @@ equation_arity(F, Arity, [=, [F|Args], _]) :- length(Args, Arity).
 % Native add-atom retains literal &self, while the reader binds it to the
 % receiving space. The compiled clause's recorded source carries that choice;
 % the stored atom alone does not prove local relational semantics.
-% [tested: a_native_literal_self_does_not_acquire_reader_binding; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% [tested: a_native_literal_self_does_not_acquire_reader_binding; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 compiled_equation_rule(Space, Names, Equation, Rule) :-
     equation_rule(Space, Names, Equation, Rule),
     Equation = [=, _, Body], compiled_local_matches(Body, Space).
@@ -464,7 +464,7 @@ domain_member(Domain, Value) :- member(Value, Domain).
 % sufficient. Cycles are declined before evaluating any rule: a finite set
 % closure need not have a finite bag of proofs.
 % https://ojs.aaai.org/index.php/AAAI/article/view/8730/8589
-% [source: Motik et al., algorithm 1 and section 4; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% [source: Motik et al., algorithm 1 and section 4; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 derive_ground_bags(GroundRules, Rows) :-
     pairs_keys(GroundRules, Vertices),
     findall(Call-Callee, member(Call-invoke(Callee), GroundRules), Edges),
@@ -482,7 +482,7 @@ derive_ground_bags(GroundRules, Rows) :-
 % quadratic in the number of ground calls. An AVL index retains O(log V)
 % edge updates, and this difference-list queue costs O(1) per insertion.
 % https://github.com/python/cpython/blob/v3.13.0/Lib/graphlib.py
-% [source: TopologicalSorter.done; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% [source: TopologicalSorter.done; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 indexed_topological_order(Graph, Order) :-
     maplist(topological_node, Graph, Nodes), list_to_assoc(Nodes, Initial),
     foldl(count_successors, Graph, Initial, Index),
@@ -526,7 +526,7 @@ derive_call(RuleIndex, Call, Before, After) :-
 % premises. Arbitrary precision counts do not collapse duplicate derivations.
 % https://doi.org/10.1145/1265530.1265535
 % [source: Green, Karvounarakis and Tannen, Provenance Semirings, section 3;
-% commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 premise_value(value(Value), _, Value, 1).
 premise_value(invoke(Call), Computed, Value, Ways) :-
     get_assoc(Call, Computed, Values), member(Value-Ways, Values).
@@ -563,7 +563,7 @@ storage_generation(Space, Arity, Generation) :-
 % whose clauses are invisible to a transaction. Record the entire read set
 % in the build snapshot; checking only live references would miss additions.
 % https://github.com/SWI-Prolog/swipl-devel/blob/V10.0.0/man/builtin.doc
-% [source: Impact of transactions, Last modified generation; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% [source: Impact of transactions, Last modified generation; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 materialization_receipt(Space, Module, Arities, Signatures,
                         receipt(Storage, Life, Arities, References, Self,
                                 Rules, Funs, Signatures, Clauses)) :-
@@ -609,7 +609,7 @@ receipt_current(Space, Module, Receipt) :-
 % admission. A transactional load retains its receipt until after commit;
 % only this one-time validation, never derivation, remains for the first query.
 % [tested: a_transaction_receipt_detects_an_invisible_concurrent_addition;
-% commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 validated_stamp(Space, Module, pending(Receipt), Stamp) :-
     !,
     (   current_transaction(_)
@@ -654,7 +654,7 @@ publish_if_current(Space, Module, Stamp, Signatures, Trie, Owner) :-
 % The blob owns its nodes through atom GC, so retracting a reference preserves
 % rollback and readers without explicitly destroying a published index.
 % https://github.com/SWI-Prolog/swipl-devel/blob/V10.0.0/src/pl-trie.c#L155-L164
-% [source: release_trie_ref; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% [source: release_trie_ref; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 publish_materialization(Space, Module, Stamp, Signatures, Trie, Owner) :-
     materialization_changed(Space),
     forall(member(F/Arity, Signatures),
@@ -672,7 +672,7 @@ publish_materialization(Space, Module, Stamp, Signatures, Trie, Owner) :-
 % Copying k distinct outputs before the first answer would turn constant
 % startup into O(k). One value plus its count preserves duplicate streaming;
 % calls with several distinct values keep the original enumerator.
-% [tested: a_many_value_call_keeps_constant_prefix_startup; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% [tested: a_many_value_call_keeps_constant_prefix_startup; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 result_descriptor([], none).
 result_descriptor([Value-Count], one(Value, Count)).
 result_descriptor([_,_|_], original).
@@ -689,7 +689,7 @@ materialized_query_context(Module) :-
     % including nested lambdas.
     % [source: engine/translator/analysis.pl, translate_tracked_clause/3,
     % translate_clause/3; engine/translator/lowering.pl,
-    % translate_runnable_expr/3; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+    % translate_runnable_expr/3; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
     ( nb_current('$metta_static_contract_shortcuts', Mode) -> Mode == guarded
     ; true ),
     current_metta_module(Module).
@@ -732,7 +732,7 @@ select_relation(Space, Module, F, Args, Selected) :-
 
 % One copied descriptor survives removal of its image by ordinary term life.
 % [tested: a_running_reader_keeps_its_result_after_the_relation_is_removed;
-% commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 selected_call(one(Out, Count), _, _, _, Out) :-
     system:between(1, Count, _).
 selected_call(original, Module, F, Args, Out) :-
@@ -753,7 +753,7 @@ discard_space_rows(Space) :-
 % The caller owns both the publication lock and its transaction. Exact refs
 % preserve rollback and another image's handlers even for the same function.
 % [tested: materialization_dispatch, function_free_materialization;
-% commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 discard_image_rows(Space, Token) :-
     forall(retract(materialized_dispatch_ref(Token, Ref)), erase(Ref)),
     retractall(materialized_snapshot(Space, _, Token, _, _)),
@@ -765,7 +765,7 @@ discard_image_rows(Space, Token) :-
 % source owner therefore outlives every transaction able to publish its image.
 % https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-proc.c#L1849-L1850
 % [tested: an_unmanaged_stale_release_retires_its_image_at_source_collection;
-% commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 % An owner is always a clause of a space's storage predicate, so a record
 % reference is never one and needs no fresh view. Nothing else about the
 % reference may be asked here: this event also fires from $fixup_reconsult/1,
@@ -776,7 +776,7 @@ discard_image_rows(Space, Token) :-
 % [tested: an_unrelated_record_erasure_creates_no_cleanup_engine,
 % static_library_reconsult_preserves_materialized_answer_bags,
 % a_cleanup_engine_finds_an_owner_hidden_from_the_gc_callers_snapshot;
-% commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 source_owner_erased(Reference) :-
     (   \+ blob(Reference, clause)
     ->  true
@@ -796,7 +796,7 @@ source_owner_erased(Reference) :-
 % when synchronous GC runs inside a transaction; its erasures must survive
 % that caller's rollback, and reacquiring the parent's mutex would deadlock.
 % [tested: source_collection_inside_rollback_keeps_the_orphan_image_retired;
-% commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 retire_source_owner(Reference) :-
     transaction(forall(retract(materialized_owner(Reference, Space, Token)),
                        discard_image_rows(Space, Token))).

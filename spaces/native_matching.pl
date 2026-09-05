@@ -10,7 +10,7 @@
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
-% [tested: tests/prolog/suites/spaces/spaces.plt, native_generic_join; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% [tested: tests/prolog/suites/spaces/spaces.plt, native_generic_join; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 
 :- consult('generic_join.pl').
 
