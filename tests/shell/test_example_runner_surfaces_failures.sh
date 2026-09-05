@@ -63,7 +63,6 @@ printf '!(foo\n'              > "$probe/syntax_error.metta"
 # be told from a walk that sees nothing. Same shape as the planted reaches in
 # tests/prolog/surface_walk.pl.
 crippled="$probe/test-stdout-only.sh"
-# unbounded: a sed EXPRESSION naming the line it rewrites, not a command.
 sed 's|sh run.sh "$f" 2>&1|sh run.sh "$f"|' "$project_dir/test.sh" > "$crippled"
 if cmp -s "$crippled" "$project_dir/test.sh"; then
     echo "FAIL: the stdout-only copy of test.sh is identical to test.sh, so \

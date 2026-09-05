@@ -47,6 +47,34 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The `process-bounds` gate reads a shell line by the shell's own grammar
+  instead of by a pattern, so a spawn is judged by the command that wraps it
+  rather than by the first recognised word on the line. One line holds more
+  than one command, and the pattern answered about the wrong one: it called
+  `reading=$(bounded swipl ...)` an unbounded swipl, because the assignment
+  prefix swallowed `$(bounded` and `swipl` was the next word; it spared
+  ``bad=`swipl ...` `` entirely, because a backtick was not an operator it
+  knew; it spared an unbounded spawn written in an `if` or `while` condition,
+  a `for` body or a `case` arm; it spared
+  `RUSTFLAGS="-C target-cpu=native" ... cargo build`, because the prefix
+  pattern stopped at the space inside the quotes; and it reported
+  `sed 's|sh run.sh ...|'`, whose expression names a command and is not one.
+  Over nine planted command positions, each written bounded and unbounded, the
+  pattern answered 6 findings across 8 spawns and got seven of the nine
+  shapes wrong, five of them by sparing the unbounded half; the grammar
+  answers 9 across 18 and gets all nine right. The gate now sees 128 spawn
+  sites in this tree where it saw 123, and the one unbounded spawn among them,
+  `cargo +nightly build -p mork_ffi --release` in
+  `extensions/mork/mork_ffi/build.sh`, carries the bound.
+
+  Two shapes that had been written around the old pattern are written the way
+  they read best again. `tests/shell/test_boot_inference_determinism.sh` takes
+  its eight boot samples with `reading=$(bounded swipl ... | sed ...)` rather
+  than through a helper introduced so that `bounded` would be the first word,
+  and the `# unbounded:` opt-out that spared the `sed` expression in
+  `tests/shell/test_example_runner_surfaces_failures.sh` is gone, because that
+  line was never a spawn.
+
 - The example corpus reads in its own order again. `08-case-duals.metta` sat in
   chapter 7, whose subject is `case`, and negated its arms with `not-provable`,
   which chapter 22 teaches; it is

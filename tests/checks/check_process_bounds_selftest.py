@@ -44,6 +44,19 @@ Guarantees:
     one-line function, a continued command bounded on its first line, and a
     line carrying `# unbounded: <reason>` are NOT reported
     [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+  - every shell shape that opens a command position is judged by the command
+    that WRAPS the spawn: a `$( )`, a backtick, a pipeline, an `&&` chain, an
+    `if` and a `while` condition, a `for` body, a `case` arm and an assignment
+    prefix holding a quoted space, each planted bounded and unbounded, are
+    reported in the second form and spared in the first. The old
+    command-position pattern got seven of the nine wrong, five of them by
+    sparing the unbounded half [measured 2026-09-06: the pattern answered 6
+    findings over 8 spawns where the grammar answers 9 over 18, over the
+    POSITIONS fixture below]
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+  - a spawner NAMED inside a quoted argument, `sed 's|sh run.sh ...|'`, is not
+    a command and is not reported
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
 Open Obligations:
   To Do: None
@@ -172,6 +185,64 @@ command -v swipl >/dev/null 2>&1 || exit 0
 exec "$PY" -m pytest tests
 """
 
+#: Every shell shape that opens a command position, planted TWICE: once with
+#: the bound in front of the spawn and once without. The marker in each
+#: command's last argument is what the assertions name, so a shape that flips
+#: reads as itself rather than as a line number.
+#:
+#: Nine shapes, because a pass that reads the first word after an assignment
+#: prefix gets three of them backwards at once. `reading=$(bounded swipl ...)`
+#: is BOUNDED and read as an unbounded swipl, which is what
+#: tests/shell/test_boot_inference_determinism.sh was reworded around; ``
+#: `swipl ...` `` after an assignment is UNBOUNDED and was spared entirely,
+#: because a backtick is not an operator the old pattern knew; and
+#: `RUSTFLAGS="-C target-cpu=native" cargo build` is unbounded and was spared
+#: because the prefix pattern's `\\S*` stopped at the space inside the quotes.
+#: That last one was real: extensions/mork/mork_ffi/build.sh carried it.
+#:
+#: The `sed` line is the negative the other shapes need. Its expression NAMES
+#: `sh run.sh`, and reading a quoted word as a command reported it; the
+#: opt-out that spared it in tests/shell/test_example_runner_surfaces_failures.sh
+#: was a workaround for this pass and is gone with it.
+POSITIONS = """#!/bin/sh
+HERE=$(cd -- "$(dirname -- "$0")" && pwd)
+""" + GOOD_HELPER + """
+substitution_bound=$(bounded swipl -g halt substitution-bound.pl)
+substitution_loose=$(swipl -g halt substitution-loose.pl)
+
+backtick_bound=`bounded swipl -g halt backtick-bound.pl`
+backtick_loose=`swipl -g halt backtick-loose.pl`
+
+bounded swipl -g halt pipeline-bound.pl | sed -n 1p
+swipl -g halt pipeline-loose.pl | sed -n 1p
+
+cd "$HERE" && bounded swipl -g halt chain-bound.pl
+cd "$HERE" && swipl -g halt chain-loose.pl
+
+if bounded swipl -g halt condition-bound.pl; then echo yes; fi
+if swipl -g halt condition-loose.pl; then echo yes; fi
+
+while bounded swipl -g halt loop-bound.pl; do break; done
+while swipl -g halt loop-loose.pl; do break; done
+
+for suite in a b; do bounded swipl -g halt body-bound.pl; done
+for suite in a b; do swipl -g halt body-loose.pl; done
+
+case "$mode" in
+    fast) bounded swipl -g halt arm-bound.pl ;;
+    slow) swipl -g halt arm-loose.pl ;;
+esac
+
+RUSTFLAGS="-C target-cpu=native" TMPDIR="$HERE" bounded cargo build prefix-bound
+RUSTFLAGS="-C target-cpu=native" TMPDIR="$HERE" cargo build prefix-loose
+
+sed 's|sh run.sh "$f" 2>&1|sh run.sh "$f"|' "$HERE/test.sh" > quoted-argument.sh
+"""
+
+#: The nine, in the order they are planted above.
+SHAPES = ("substitution", "backtick", "pipeline", "chain", "condition",
+          "loop", "body", "arm", "prefix")
+
 
 #: A harness script, read as Python rather than as shell. Six shapes: an engine
 #: spawn with no bound, the same one wrapped, an argv the pass cannot read, a
@@ -279,6 +350,37 @@ def main() -> int:
             "is the mistake that produced 32 false findings."
         )
 
+    # Every command position, bounded and unbounded, one pair per shape.
+    positions, positions_total = report(GOOD_HELPER + BOUND_IN_PY, POSITIONS)
+    reported = "\n".join(positions)
+    problems.extend(
+        f"{shape}-loose: an unbounded spawn at this command position was NOT "
+        f"reported. A position the pass cannot see is one an unbounded spawn "
+        f"can be written at forever."
+        for shape in SHAPES if f"{shape}-loose" not in reported
+    )
+    problems.extend(
+        f"{shape}-bound: a spawn WRAPPED at this command position WAS "
+        f"reported. A false finding here is what gets the shape reworded "
+        f"around the pass instead of the pass fixed."
+        for shape in SHAPES if f"{shape}-bound" in reported
+    )
+    if len(positions) != len(SHAPES):
+        problems.append(
+            f"expected {len(SHAPES)} findings over the command positions, got "
+            f"{len(positions)}: {positions}")
+    if positions_total != 2 * len(SHAPES):
+        problems.append(
+            f"expected {2 * len(SHAPES)} spawns to be looked at over the "
+            f"command positions, got {positions_total}. Each shape is planted "
+            f"twice and both halves are spawns; a pass that stops seeing the "
+            f"bounded half reports the same findings while covering less.")
+    if "run.sh" in reported:
+        problems.append(
+            "the planted `sed 's|sh run.sh ...|'` was reported. Its expression "
+            "NAMES a command and is not one, and reading it as a spawn is what "
+            "put an opt-out on that line in the tree.")
+
     # in_py losing its bound is a finding even when every caller looks bounded.
     loose, _ = report(GOOD_HELPER + LOOSE_IN_PY + TOP_LEVEL + LANES)
     if not any("in_py no longer calls" in line for line in loose):
@@ -366,7 +468,8 @@ def main() -> int:
 
     for problem in problems:
         print(f"  {problem}")
-    print(f"{len(problems)} finding(s) over 29 planted cases")
+    print(f"{len(problems)} finding(s) over {29 + 2 * len(SHAPES) + 1} "
+          f"planted cases")
     return 1 if problems else 0
 
 

@@ -27,13 +27,36 @@ session of its own with `start_new_session=True` so their own timeout handler
 can killpg it. That is the one shape no group signal from the lane above can
 reach, which leaves a `subprocess.TimeoutExpired` handler in the parent as the
 only bound -- the mechanism that already cost 122 CPU-hours here when the
-parent was killed. Their argv is read with `ast` rather than with the regex
-above: a Python list is a Python list, and guessing at one with a pattern is
-how a check starts sparing what it cannot see.
+parent was killed. Their argv is read with `ast` rather than with a pattern:
+a Python list is a Python list, and guessing at one with a regex is how a
+check starts sparing what it cannot see.
+
+The SHELL is read the same way, by its own grammar rather than by a pattern,
+for the reason the Python half already had. A line holds more than one
+command: a pipeline, an `&&` chain, an `if` or `while` condition, a `for`
+body, a `case` arm, a subshell and a `$( )` each open a command position, and
+each command there is bounded or not on its own. A pattern that finds the
+first recognised word after an assignment prefix answers about the wrong one.
+It called `reading=$(bounded swipl ...)` an unbounded swipl, which is what
+tests/shell/test_boot_inference_determinism.sh was reworded around rather than
+this file being fixed; it spared ``bad=`swipl ...` `` entirely, because a
+backtick is not an operator it knew; it spared an unbounded spawn in every
+`if`, `while`, `for` and `case` position; and it spared
+`RUSTFLAGS="-C target-cpu=native" ... cargo build`, because its prefix pattern
+stopped at the space inside the quotes. That last one was the tree's one
+unbounded spawn when this was written [measured 2026-09-06: over the nine
+planted command positions the pattern answered 6 findings across 8 spawns and
+got seven shapes wrong, five by sparing; the grammar answers 9 across 18 and
+gets all nine right; fixture=tests/checks/check_process_bounds_selftest.py's
+POSITIONS].
 
 Assumes:
   - a lane function is `name() {` at column 0 in one of the check scripts, and
     ends at a `}` at column 0, which is how every one of them is written
+  - a logical line is POSIX sh: quoting, `$( )`, backticks and `${ }` nest the
+    way the shell nests them, and a `#` opening a word comments out the rest.
+    A `$( )` a line leaves open is read as the commands the lines below it
+    are, which is what they are
   - `bounded`, `in_py` and `bounded.sh` are the three spellings of the bound.
     `in_py` carries it because its own body calls `bounded`, and each script's
     `bounded` carries it because its own body names `bounded.sh`; both are
@@ -65,6 +88,7 @@ from __future__ import annotations
 
 import ast
 import re
+from dataclasses import dataclass
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -105,26 +129,372 @@ PY_SPAWNERS = frozenset({"swipl", "swipl-ld", "node", "npx", "npm", "make",
 #: bare `run` is not a spawn.
 PY_STARTERS = frozenset({"run", "Popen", "call", "check_call", "check_output"})
 
-#: Command position: start of line, or after a shell operator, optionally
-#: preceded by `exec` and by environment assignments. `$(dirname "$(dirname
-#: "$PY")")` must not match, which is why the executable has to sit at a command
-#: position rather than merely appear on the line. `exec` does, and every seat's
-#: test.sh ends with one; without it, deleting the wrapper from `exec sh
-#: bounded.sh "$PY" -m pytest` left `exec "$PY" -m pytest` reading as clean.
-#: `command` is deliberately NOT here: `command -v swipl` asks PATH a question
-#: and starts nothing, and this file has fourteen of them.
-POSITION = re.compile(
-    r"(?:^|\(|&&|\|\||;|\||!|\$\()\s*"
-    r"(?:exec\s+)?"
-    r"(?:[A-Za-z_][A-Za-z_0-9]*=\S*\s+)*"
-    r"(?:exec\s+)?"
-    r"(" + "|".join(re.escape(s) for s in SPAWNERS + BOUNDING) + r")(?![\w-])"
-)
+#: The shell OPERATORS that end one command and open the position where the
+#: next one begins. Longest first, because `;;` is not two `;` and `&&` is not
+#: two `&`. `(` and `)` are here because a subshell and a `case` pattern both
+#: open a command position with one.
+OPERATORS = (";;", "&&", "||", ";", "&", "|", "(", ")")
+
+#: Reserved words that stand in FRONT of a command without being one, so the
+#: word after them is still the command word. `exec` replaces the shell with
+#: what follows and every seat's test.sh ends with one: deleting the wrapper
+#: from `exec sh bounded.sh "$PY" -m pytest` leaves `exec "$PY" -m pytest`, and
+#: that read as clean until `exec` was recognised. `{` and `}` group commands
+#: and are RESERVED WORDS rather than operators, which is why they are matched
+#: as whole words and `${VAR}` is not one.
+LEADING = frozenset({"exec", "!", "time", "if", "then", "elif", "else",
+                     "while", "until", "do", "done", "fi", "esac"})
+
+#: The words that separate one command from the next without being operators.
+BLOCK = frozenset({"{", "}"})
+
+#: Reserved words whose remaining words are a NAME and a word LIST rather than
+#: a command: `for f in a b`, `case "$x" in`, `select f in a b`. The list is
+#: not run. A `$( )` inside it IS, which is why `commands` reads a word's
+#: substitutions whether or not the word names a program.
+WORD_LISTS = frozenset({"for", "case", "select"})
+
+#: An assignment standing in front of a command, `LC_ALL=C sort`, or standing
+#: alone as the whole command, `reading=$(bounded swipl ...)`. Reading the word
+#: after this prefix as the command word is what made the second shape read as
+#: an unbounded swipl: the prefix swallowed `$(bounded` and `swipl` was the
+#: next word. The command a `$( )` runs is inside the substitution and is read
+#: there, at its own command position, with its own bound.
+ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*(\[[^]]*\])?\+?=")
+
+#: A redirection standing in front of the command word, `>out cmd` or
+#: `2>&1 cmd`. When the operator is the whole word its target is the next one.
+REDIRECTION = re.compile(r"^\d*(>>|<>|>\||<&|>&|<<-?|<|>)")
 
 #: The door, so a line that must not be bounded says so in place rather than
 #: being excluded from somewhere else. The reason is required: a marker with
 #: nothing after it is a finding of its own.
 OPT_OUT = re.compile(r"#\s*unbounded:\s*(?P<reason>\S.*)")
+
+
+@dataclass(frozen=True, slots=True)
+class _Token:
+    """One word or operator of a logical line, with where it sits in it."""
+
+    text: str
+    start: int
+    end: int
+    operator: bool = False
+    #: The source of each command substitution inside this word, in order.
+    #: `$( )` and backticks only: a command inside one runs, at a command
+    #: position of its own, and carries its own bound or does not.
+    substitutions: tuple[str, ...] = ()
+
+
+def _quoted(text: str, index: int, quote: str) -> int:
+    """Just past the closing quote of the span opening at index.
+
+    An unterminated span ends at the end of the text, which is what the shell
+    itself does across a newline and what a line read on its own leaves.
+    """
+    index += 1
+    while index < len(text):
+        if text[index] == "\\" and quote != "'":
+            index += 2
+            continue
+        if text[index] == quote:
+            return index + 1
+        index += 1
+    return len(text)
+
+
+def _double(text: str, index: int) -> int:
+    """Just past the closing double quote, over the substitutions inside it.
+
+    Inside `$( )` the quoting starts over, so `"$(dirname "$PY")"` closes at
+    the LAST quote and not at the one in front of `$PY`. Reading it as three
+    spans instead of one is how a substitution's own words get attributed to
+    the line around it.
+    """
+    index += 1
+    while index < len(text):
+        if text[index] == "\\":
+            index += 2
+            continue
+        if text.startswith("$(", index):
+            index = _closing(text, index + 2, "(", ")")
+            continue
+        if text[index] == "`":
+            index = _quoted(text, index, "`")
+            continue
+        if text[index] == '"':
+            return index + 1
+        index += 1
+    return len(text)
+
+
+def _closing(text: str, start: int, opener: str, closer: str) -> int:
+    """Just past the CLOSER matching an opener the caller has consumed.
+
+    Depth-counted and quote-aware, so `$(printf ')')` closes at the second
+    paren rather than the first and `$(sh -c "cmd; cmd")` does not end at the
+    semicolon inside the string.
+    """
+    depth = 0
+    index = start
+    while index < len(text):
+        char = text[index]
+        if char == "\\":
+            index += 2
+            continue
+        if char == "'":
+            index = _quoted(text, index, "'")
+            continue
+        if char == '"':
+            index = _double(text, index)
+            continue
+        if text.startswith(opener, index):
+            depth += 1
+            index += len(opener)
+            continue
+        if text.startswith(closer, index):
+            if depth == 0:
+                return index + len(closer)
+            depth -= 1
+            index += len(closer)
+            continue
+        index += 1
+    return len(text)
+
+
+def _arithmetic(text: str, index: int) -> int:
+    """Just past a `$(( ... ))`, which computes rather than running anything."""
+    end = _closing(text, index + 3, "(", ")")
+    return end + 1 if end < len(text) and text[end] == ")" else end
+
+
+def _substitutions(text: str, *, quoted: bool = False) -> list[str]:
+    """The source of every command substitution in one word.
+
+    `quoted` says the text is the INSIDE of a double-quoted span, where a
+    single quote is an ordinary character and a `$( )` still runs. Only the
+    outermost substitution of each nest is answered: its source is read as a
+    command list of its own, and the words in THAT are scanned again.
+    """
+    found: list[str] = []
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if char == "\\":
+            index += 2
+        elif not quoted and char == "'":
+            index = _quoted(text, index, "'")
+        elif not quoted and char == '"':
+            end = _double(text, index)
+            found.extend(_substitutions(text[index + 1:max(index + 1, end - 1)],
+                                        quoted=True))
+            index = end
+        elif text.startswith("$((", index):
+            index = _arithmetic(text, index)
+        elif text.startswith("$(", index):
+            end = _closing(text, index + 2, "(", ")")
+            found.append(text[index + 2:max(index + 2, end - 1)])
+            index = end
+        elif char == "`":
+            end = _quoted(text, index, "`")
+            found.append(text[index + 1:max(index + 1, end - 1)])
+            index = end
+        else:
+            index += 1
+    return found
+
+
+def _tokens(line: str) -> list[_Token]:
+    """One logical line as words and operators, with its quoting respected.
+
+    A quoted or substituted span is part of the WORD that holds it, so the
+    `;` in `sh -c 'while :; do :; done'` does not open a command position and
+    the `swipl` in `$(bounded swipl ...)` is not a word of this line at all.
+    """
+    found: list[_Token] = []
+    index = 0
+    start: int | None = None
+
+    def flush(at: int) -> None:
+        nonlocal start
+        if start is not None:
+            text = line[start:at]
+            found.append(_Token(text, start, at,
+                                substitutions=tuple(_substitutions(text))))
+            start = None
+
+    while index < len(line):
+        char = line[index]
+        if char in " \t":
+            flush(index)
+            index += 1
+            continue
+        # A `#` opening a word comments out the rest of the line; one inside a
+        # word, `sed 's/#.*//'`, is data.
+        if start is None and char == "#":
+            break
+        symbol = next((op for op in OPERATORS if line.startswith(op, index)),
+                      None)
+        if symbol is not None:
+            flush(index)
+            found.append(_Token(symbol, index, index + len(symbol),
+                                operator=True))
+            index += len(symbol)
+            continue
+        if start is None:
+            start = index
+        if char == "\\":
+            index += 2
+        elif char == "'":
+            index = _quoted(line, index, "'")
+        elif char == '"':
+            index = _double(line, index)
+        elif char == "`":
+            index = _quoted(line, index, "`")
+        elif line.startswith("$((", index):
+            index = _arithmetic(line, index)
+        elif line.startswith("$(", index):
+            index = _closing(line, index + 2, "(", ")")
+        elif line.startswith("${", index):
+            index = _closing(line, index + 2, "{", "}")
+        else:
+            index += 1
+    flush(len(line))
+    return found
+
+
+def _simple_commands(line: str) -> list[list[_Token]]:
+    """The line's words, split at every operator and at `{` and `}`.
+
+    Each group is one simple command: the words a single program is started
+    with, or the words of something that starts nothing.
+    """
+    groups: list[list[_Token]] = [[]]
+    for token in _tokens(line):
+        if token.operator or token.text in BLOCK:
+            groups.append([])
+            continue
+        groups[-1].append(token)
+    return [group for group in groups if group]
+
+
+def _unquote(word: str) -> str:
+    """The word with its quoting removed, `'$PY'` and `"$PY"` both to `$PY`.
+
+    Only ever asked about a word that might NAME a program, so dropping every
+    quote character is enough: a program name does not contain one.
+    """
+    return re.sub(r"\\(.)|['\"]", lambda m: m.group(1) or "", word)
+
+
+def _name(word: str) -> str:
+    """The last path component of a word, `"$HERE/bounded.sh"` to bounded.sh."""
+    return _unquote(word).rsplit("/", 1)[-1]
+
+
+def _through_command(words: list[_Token], index: int) -> int | None:
+    """The word `command` runs, or None when it is only asking about one.
+
+    `command -v swipl` asks PATH a question and starts nothing, and the check
+    scripts hold fourteen of those; `command grep -v ...` in test.sh runs a
+    grep. POSIX gives `command` three options and only -p leaves it running
+    the operand, so the presence of -v or -V is the whole distinction.
+    """
+    index += 1
+    while index < len(words) and words[index].text.startswith("-"):
+        if set(words[index].text[1:]) & {"v", "V"}:
+            return None
+        index += 1
+    return index if index < len(words) else None
+
+
+def _head(words: list[_Token]) -> int | None:
+    """The index of the word that NAMES the program this command runs.
+
+    Assignments, redirections and the reserved words that stand in front of a
+    command are stepped over. A command that is ONLY assignments names no
+    program: `reading=$(bounded swipl ...)` runs its swipl inside the
+    substitution, at a command position of its own, where the `bounded` in
+    front of it is the command word it actually has.
+    """
+    index = 0
+    while index < len(words):
+        text = words[index].text
+        if text in LEADING or ASSIGNMENT.match(text):
+            index += 1
+            continue
+        redirection = REDIRECTION.match(text)
+        if redirection:
+            index += 1 if redirection.end() < len(text) else 2
+            continue
+        break
+    if index >= len(words):
+        return None
+    head = _unquote(words[index].text)
+    if head in WORD_LISTS:
+        return None
+    return _through_command(words, index) if head == "command" else index
+
+
+def commands(line: str) -> list[tuple[str, tuple[str, ...], str]]:
+    """Every command this line RUNS: its head, its arguments and its text.
+
+    One line holds more than one. A pipeline, an `&&` chain, an `if` or
+    `while` condition, a `for` body, a subshell and a `case` arm each open a
+    command position, and a `$( )` or a backtick opens a whole command list
+    whose commands are read here too. Each is judged by the head IT has, which
+    is what makes `reading=$(bounded swipl ...)` bounded and
+    ``bad=`swipl ...` `` not: the first names `bounded` and the second names
+    `swipl`, where reading the first word after the assignment prefix called
+    the one bounded command in this tree unbounded and spared the backticked
+    one entirely.
+    """
+    found: list[tuple[str, tuple[str, ...], str]] = []
+    for words in _simple_commands(line):
+        for word in words:
+            for inner in word.substitutions:
+                found.extend(commands(inner))
+        index = _head(words)
+        if index is not None:
+            found.append((words[index].text,
+                          tuple(word.text for word in words[index + 1:]),
+                          line[words[index].start:words[-1].end]))
+    return found
+
+
+def _bound(head: str, arguments: tuple[str, ...]) -> bool:
+    """Whether this command IS the bound rather than something needing one.
+
+    Three spellings reach the same file: the `bounded` and `in_py` helpers,
+    and `sh bounded.sh` written out, which is what the helpers themselves and
+    every `exec` at the end of a seat's test.sh use. Only the first operand is
+    read, so a bounded.sh named inside a `-g` goal or a `-c` script is not
+    mistaken for the wrapper.
+    """
+    if _name(head) in BOUNDING or _name(head) == IMPLEMENTATION:
+        return True
+    operand = next((word for word in arguments if not word.startswith("-")), None)
+    return operand is not None and _name(operand) == IMPLEMENTATION
+
+
+def _spawner(head: str) -> bool:
+    """Whether this head names a program that can outlive the script."""
+    return head in SPAWNERS or _unquote(head) in SPAWNERS
+
+
+def line_spawns(line: str) -> list[tuple[str, bool]]:
+    """Every spawn one logical line makes, as its text and whether it is bound.
+
+    A command that IS the bound counts as a spawn too, so a pass that stops
+    recognising `bounded` reports the same findings over a smaller population
+    and says so in its own count instead of reading clean.
+    """
+    found: list[tuple[str, bool]] = []
+    for head, arguments, text in commands(line):
+        bound = _bound(head, arguments)
+        if bound or _spawner(head):
+            found.append((text, bound))
+    return found
 
 
 def scripts() -> list[Path]:
@@ -228,11 +598,8 @@ def spawns(path: Path) -> list[tuple[int, str, str, bool, str | None]]:
         if line.startswith("}"):
             lane = None
             continue
-        words = POSITION.findall(line)
-        if not words:
-            continue
-        bound = any(w in BOUNDING for w in words) or IMPLEMENTATION in line
-        out.append((number, lane, line.strip(), bound, excused))
+        out.extend((number, lane, text.strip(), bound, excused)
+                   for text, bound in line_spawns(line))
     return out
 
 
@@ -253,11 +620,8 @@ def runner_spawns(path: Path) -> list[tuple[int, str, str, bool, str | None]]:
         # of every file that gains one and report the same defect twice.
         if re.match(r"^bounded\(\)\s*\{.*\}\s*$", line):
             continue
-        words = POSITION.findall(line)
-        if not words:
-            continue
-        bound = any(w in BOUNDING for w in words) or IMPLEMENTATION in line
-        out.append((number, name, line.strip(), bound, excused))
+        out.extend((number, name, text.strip(), bound, excused)
+                   for text, bound in line_spawns(line))
     return out
 
 
@@ -394,7 +758,8 @@ def helper_defects(paths: list[Path], root: Path) -> list[str]:
         for number, line, _excused in _uncommented(text.splitlines()):
             if number >= defined_at:
                 break
-            if "bounded" in POSITION.findall(line):
+            if any(_name(head) == "bounded" for head, _args, _text
+                   in commands(line)):
                 found.append(
                     f"{name}:{number}: `bounded` is called here and defined at "
                     f"line {defined_at}, below it. A shell function that is "
