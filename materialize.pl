@@ -2,6 +2,10 @@
 % Guarantees: only ground acyclic dependency graphs replace ordinary dispatch;
 %   every tuple retains its proof count and unsupported calls retain compiled
 %   execution [tested: function_free_materialization; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
+%   A process that publishes no image registers no erase listener, so clause
+%   garbage collection runs no Prolog in it and its inference counts repeat
+%   exactly [tested: sh tests/shell/test_boot_inference_determinism.sh;
+%   commit=001c97213388e39b14ba3789a60e59a5e2c79f41].
 % Assumes: constant query lookup is data complexity for fixed source signatures
 %   and arities; validating a generation stamp walks those program properties.
 % Owns resources: each snapshot owns one immutable trie through its blob handle.
@@ -14,6 +18,10 @@
 %   including unmanaged clear transactions whose old view missed the image.
 %   A transactional erase callback retires it in a temporary synchronous
 %   engine, destroyed on every outcome.
+%   One process-wide erase listener carries that channel, registered by
+%   flush_space_materialization/2 before the first publication, outside
+%   '$metta_materialization' because the callback takes it, and held for the
+%   life of the process because the registration is not transactional.
 % Guarded by: '$metta_materialization' protects publication, lookup and removal.
 %   Owned outer transactions reconcile touched images in their commit
 %   constraint while holding that mutex through commit. Building reads one
@@ -241,7 +249,8 @@ flush_space_materialization(Space, Names) :-
                 forall(member(F, Candidates), spaces:metta_ensure_compiled(F))),
             snapshot(build_materialization(Space, Module, Candidates,
                                            Stamp, Signatures, Trie, Owner))
-        ->  with_mutex('$metta_materialization',
+        ->  ensure_source_owner_listener,
+            with_mutex('$metta_materialization',
                 publish_if_current(Space, Module, Stamp, Signatures, Trie,
                                    Owner)),
             forall(member(F/_, Signatures),
@@ -760,6 +769,71 @@ discard_image_rows(Space, Token) :-
     retractall(materialized_predicate(_, _, _, Token)),
     retractall(materialized_owner(_, Space, Token)).
 
+% The channel opens with the first image instead of at load time. SWI delivers
+% this event from clause garbage collection, which runs on the `gc` thread or
+% on whichever thread trips the collector first, and statistics/2 counts every
+% inference retired on the thread that reads it, so a callback landing on the
+% main thread is charged to whatever measurement is open there. Registered at
+% load time it ran over every clause any program collected, including the 322
+% an engine boot collects, and made the engine's own counters
+% nondeterministic: the boot case read 264,281 to 265,616 over eight samples
+% with it registered that way and 265,016 eight times with this, against a
+% four-inference harness band. That is this file's whole share of the spread;
+% the residual excursion those eight did not show came from a different place
+% and is recorded at metta_rule_gates_refresh/0
+% [measured 2026-09-06; command=sh tests/shell/test_boot_inference_determinism.sh;
+% fixture=engine/bench.pl boot case with the .qlf set warm; commit=001c97213388e39b14ba3789a60e59a5e2c79f41].
+%
+% It is registered by flush_space_materialization/2, which is the only path to
+% a FIRST publication: reconcile_materialization/1 republishes an image whose
+% materialized_owner/3 row it just read, so a publication came before it.
+%
+% EXACTLY ONCE, and that is not tidiness. A registration under a name replaces
+% the handler of that name [source: SWI-Prolog 10.1.13 prolog_listen/3, the
+% name(Atom) option, `swipl -g "help(prolog_listen/3)"`; commit=001c97213388e39b14ba3789a60e59a5e2c79f41], and
+% replacing this one while the collector is inside it deadlocks: registering on
+% every publication stopped the suite in
+% a_transaction_receipt_detects_an_invisible_concurrent_addition with the
+% publishing thread and the `gc` thread both in pthread_mutex_lock on one
+% address, the `gc` thread's stack showing PL_call_predicate under it, and the
+% main thread in pthread_join waiting for the publisher. Fifteen minutes
+% against 23.4 seconds for the whole unit, and it happened whether or not the
+% load-time directive was also present, so it is the run-time call and not the
+% absence of the old one [measured 2026-09-06: gdb `thread apply all bt` over
+% the hung process, and the same run with the directive restored beside this
+% call]. The single registration this does perform runs when no handler of
+% that name exists, so no delivery of it can be in flight to contend with.
+%
+% The flag is flag/3 rather than a clause because this is reached from inside a
+% caller's transaction and a rollback must not forget that the listener is
+% installed: a forgotten registration is a repeated one, which is the deadlock
+% above [measured 2026-09-06: after a rolled-back transaction that set all
+% three, flag/3 reads 1, the asserted clause is gone and the recorded term
+% survives]. The mutex is this listener's own and the handler never takes it,
+% so the two cannot invert; '$metta_materialization' could not be used here for
+% exactly that reason.
+%
+% It is never removed: the registration is not transactional, and a publication
+% still inside another thread's uncommitted transaction is invisible to any
+% emptiness test a remover could run, so removing it would race a commit into
+% an image nothing retires.
+ensure_source_owner_listener :-
+    flag(materialized_source_owner_listener, Installed, Installed),
+    (   Installed == 1
+    ->  true
+    ;   with_mutex('$metta_materialization_listener',
+                   register_source_owner_listener)
+    ).
+
+register_source_owner_listener :-
+    flag(materialized_source_owner_listener, Installed, Installed),
+    (   Installed == 1
+    ->  true
+    ;   prolog_listen(erase, materialize:source_owner_erased,
+                      [name(materialized_source_owner)]),
+        flag(materialized_source_owner_listener, _, 1)
+    ).
+
 % Clause GC emits erase before unlinking even when a DBREF_CLAUSE still owns
 % the allocation. Active transaction generations postpone this event. One
 % source owner therefore outlives every transaction able to publish its image.
@@ -800,9 +874,6 @@ source_owner_erased(Reference) :-
 retire_source_owner(Reference) :-
     transaction(forall(retract(materialized_owner(Reference, Space, Token)),
                        discard_image_rows(Space, Token))).
-
-:- prolog_listen(erase, materialize:source_owner_erased,
-                 [name(materialized_source_owner)]).
 
 support_graph:support_invalidation_action(derived(Module, materialization)) :-
     spaces:metta_module_space(Module, Space), materialize:discard_space(Space).
