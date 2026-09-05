@@ -1531,11 +1531,16 @@ call_goals_in_(Module, [G|Gs]) :- call(Module:G),
 %THE OPERATOR ARRIVES AS WRITTEN. The closure spelling of these three declares
 %it `Expression`, which is on the evaluation mask, so a written
 %`(|-> ($y) (q $y))` reaches here as the three-element term the reader built
-%rather than as the partial the call site used to evaluate it into
-%[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean,
-%(: map-atom (-> Expression Expression Expression))]. reduce/3 dispatches on an
-%ATOM head and left the application standing as data, so the map answered
-%`((|-> ($y) (q $y)) cdr-atom)` where the arbiter answers `(q cdr-atom)`.
+%rather than as the partial the call site used to evaluate it into.
+%reduce/3 dispatches on an ATOM head and left the application standing as
+%data, so the map answered
+%`((|-> ($y) (q $y)) cdr-atom)` where upstream applies the operator. Upstream
+%reaches the same answer by a different route, evaluating the written lambda
+%into a registered name and dispatching that through reduce/2
+%[source: PeTTa@43705f5d src/metta.pl:281-283, 'map-atom'/3, and
+%src/translator.pl:266-283, the '|->' arm]. Measured on
+%`!(map-atom (1 2 3) (|-> ($y) (q $y)))`: `((q 1) (q 2) (q 3))` on both
+%engines [measured 2026-09-05 against PeTTa@43705f5d].
 %
 %Compiled ONCE at the door rather than per element, so the applications below
 %stay the reduce/3 calls they were and a 100,000-element map pays one

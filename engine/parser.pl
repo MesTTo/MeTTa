@@ -1097,13 +1097,17 @@ metta_token_boundary(0x0028, punctuation).  %LEFT PARENTHESIS
 metta_token_boundary(0x0029, punctuation).  %RIGHT PARENTHESIS
 metta_token_boundary(0x003B, punctuation).  %SEMICOLON, which opens a comment
 
-%Semicolon comments are inter-token layout. LeaTTa's tokenizer changes out of
-%its comment state only for '\n'; CR, NEL and U+2028 remain comment text
-%[source 2026-08-21: LeaTTa MettaHyperonFull/Runtime/Parser.lean:58,
-%tokenizeAux comment branch at lines 66-67]. This deliberately rejects the
-%row's original wider-terminator premise. Keeping comments in the DCG avoids a
-%separate source-sized code list before parsing. These clauses combine blank
-%and comment scanning so the ordinary no-comment path has no wrapper grammar.
+%Semicolon comments are inter-token layout, and a comment ends at '\n' and at
+%nothing else: CR, NEL and U+2028 stay comment text. Upstream's stripper says
+%the same, in one clause that skips from a `;` to the next 0'\n
+%[source: PeTTa@43705f5d src/filereader.pl:79, strip/3]. Measured across both
+%engines on `!(+ 1 2) ; comment<CR>still-comment (+ 9 9)` followed by
+%`!(+ 3 4)`: each answers 3 then 7, so the sum written after the CR runs on
+%neither [measured 2026-09-05 against PeTTa@43705f5d]. This deliberately
+%rejects the row's original wider-terminator premise. Keeping comments in the
+%DCG avoids a separate source-sized code list before parsing. These clauses
+%combine blank and comment scanning so the ordinary no-comment path has no
+%wrapper grammar.
 metta_layout --> ";", !, metta_comment_body, metta_layout.
 metta_layout --> [C], { metta_token_boundary(C, layout) }, !, metta_layout.
 metta_layout --> [].

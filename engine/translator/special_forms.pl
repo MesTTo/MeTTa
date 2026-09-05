@@ -654,22 +654,26 @@ translate_special_dl(if, [Cond, Then, Else], AfterHead, Goals, Out) :-
         AfterHead = [(CondConj, Decision)|Goals] ).
 %unify: the stdlib's matching conditional. All four arguments are typed
 %Atom, so the two operands cross unevaluated exactly as quote's argument
-%does, and only the selected branch runs [source: LeaTTa
-%tests/semantics/matching/unify_branch_evaluation.metta, branch markers
-%measured 2026-08-11]. Every solution of metta_match_atoms/2 is one
+%does, and only the selected branch runs. That declaration and that reading
+%are upstream's own, in the library this engine promoted the form out of
+%[source: PeTTa@43705f5d lib/lib_he.metta:24-35,
+%`(: unify (-> Atom Atom Atom Atom %Undefined%))` over a space case and a
+%term case]. Every solution of metta_match_atoms/2 is one
 %binding set and instantiates its own then-branch answer; the soft cut
 %runs the else-branch exactly when no binding set exists. Bindings made
 %by the match flow into the branch through the shared variables, which
 %is how (unify &kb (friend $who Alice) $who no-friends) answers each
 %friend.
 %unify is the ONE branching form whose pattern can bind a name to an unreduced
-%term, because its two operands are declared `Atom` and reach it as written
-%[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean:907,
-%`(: unify (-> Atom Atom Atom Atom %Undefined%))`]. A branch that is that bare
+%term, because its two operands are declared `Atom` and reach it as written.
+%A branch that is that bare
 %name compiles to no goal at all, so the unreduced term walks straight out,
 %and the `%Undefined%` result is what reduces it:
-%`!(unify (a $x) (a (+ 1 2)) $x nope)` is `3` and was `(+ 1 2)` here
-%[measured 2026-08-24 against LeaTTa 9ea9f9d].
+%`!(unify (a $x) (a (+ 1 2)) $x nope)` is `3` here and 3 upstream with
+%lib_he imported, and it was `(+ 1 2)` here before this
+%[measured 2026-09-05 against PeTTa@43705f5d]. The space case agrees too:
+%with `(friend Bob Alice)` stored, `(unify &kb (friend $who Alice) $who
+%no-friends)` is `Bob` on both.
 %
 %`case`, `if` and `let` need nothing: their scrutinee and value are evaluated
 %before the branch runs, so no branch of theirs can hold an unreduced term.

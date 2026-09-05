@@ -1153,9 +1153,11 @@ translate_segment_body_plan(F, BodyExpr, GoalsPrefix, BodyPlan) :-
 %The common result-rule compiler, shared by ordinary and segment heads.  An
 %Atom-returning function answers its body as data, except for the `function`
 %frame whose purpose is to execute a plan until `return`.  Every other result
-%keeps the existing continuation rule [source: LeaTTa
-%MettaHyperonFull/Minimal/Interpreter.lean:348-368 and :3786-3799;
-%commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
+%keeps the existing continuation rule [source: PeTTa@43705f5d
+%src/translator.pl:25-28, which is the same two branches without the frame
+%exception; measured 2026-09-05 against PeTTa@43705f5d: `(: ab (-> Number
+%Atom))` with `(= (ab $n) (+ $n 1))` answers `(+ 1 1)` on both engines].
+%The `function` frame is this engine's own arm; upstream has no such form.
 translate_equation_body_result(F, BodyExpr, GoalsBody, ExpOut) :-
     (   declared_output_type(F, 'Atom'),
         \+ function_frame_body(BodyExpr)

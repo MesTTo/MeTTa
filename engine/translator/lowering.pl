@@ -929,12 +929,16 @@ translate_expr_to_conj(Input, Conj, Out) :- translate_expr(Input, Goals, Out),
 %`(= (usem6) (m6 a))` to the call `usem6(A) :- m6(a, A)`.
 %
 %That is the settled ruling and not an accident of call/1, and it is what
-%every system this rule set is modelled on does:
+%upstream and every system this rule set is modelled on do:
 %
-%  - the arbiter's own conditional metatheory defines an oriented conditional
+%  - upstream answers the same. `(= (m5 a) (empty))` ahead of
+%    `(= (m5 $x) two)`, with `(= (usem5) (m5 a))`, answers `two` on both
+%    engines, so the first arm's empty body declines rather than committing
+%    [measured 2026-09-05 against PeTTa@43705f5d];
+%  - the conditional-rewriting metatheory defines an oriented conditional
 %    rewrite rule as one that "fires when its left side matches and each
 %    condition `s ~> t` holds", following Avenhaus-Loria-Saenz 1994 and Lucas
-%    JLAMP 2024 [source 2026-08-21: LeaTTa
+%    JLAMP 2024, mechanised in LeaTTa [source 2026-08-21: LeaTTa
 %    MeTTaILProofs/ConditionalCP.lean, module header];
 %  - CHR: "If the guard succeeds, the rule applies. Otherwise the next rule is
 %    tried" [source 2026-08-21: sicstus.sics.se CHR, "How CHR Work"];
@@ -1585,10 +1589,14 @@ builtin_result_type(Fun, Args, ResultType) :-
 %implementation, it is what makes a closure-taking overload mask: `map-atom`'s
 %first declared arrow is the three-argument one, so a two-argument call reads
 %`Expression` and `Variable` off the raw list and holds BOTH back, which is
-%what a call whose second argument is a function needs
-%[source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean:3735-3744 and
-%3775-3784; measured 2026-08-24, `!(get-type map-atom)` on LeaTTa 9ea9f9d
-%answers the three-argument arrow first].
+%what a call whose second argument is a function needs. Upstream declares
+%nothing for map-atom and reaches the same answer by evaluating the closure
+%into a registered name, so the two-argument call agrees where it can be
+%compared: `!(map-atom (1 2) (|-> ($y) (q $y)))` is `((q 1) (q 2))` on both
+%engines [source: PeTTa@43705f5d src/metta.pl:281-283, 'map-atom'/3;
+%measured 2026-09-05 against PeTTa@43705f5d]. The declaration itself is this
+%engine's own: `!(get-type map-atom)` answers both arrows here and
+%`%Undefined%` upstream.
 %
 %Where several arrows are declared, one whose arity FITS is preferred over the
 %first. The reference takes the first unconditionally and guards the choice
@@ -1788,11 +1796,14 @@ application_protocol_goal(Source, Runtime, Produced, Out,
                                                    Out)).
 
 %A declared result type that is not the metatype `Atom` sends the value it
-%produced back through evaluation; `Atom` answers it as produced. This is
-%`returnsAtom`, and the two views that re-enter are the two the source
-%self-interpreter names [source: LeaTTa
-%MettaHyperonFull/Minimal/Interpreter.lean:3786-3799 and
-%MettaHyperonFull/Minimal/Stdlib.lean:4370-4381].
+%produced back through evaluation; `Atom` answers it as produced. Upstream
+%draws the same line in one test, treating `Atom`, `%Undefined%` and `_`
+%alike and appending an output check for every other declared result
+%[source: PeTTa@43705f5d src/translator.pl:25-28 and :382-383]. Measured on
+%both engines: `(: ab (-> Number Atom))` with `(= (ab $n) (+ $n 1))` answers
+%`(+ 1 1)`, `(: r1 (-> Number Number))` with the same body answers 2, and
+%`(: e1 (-> Number Expression))` with `(= (e1 $n) (cons-atom (+ 1 2) (b)))`
+%answers `(3 b)` [measured 2026-09-05 against PeTTa@43705f5d].
 %
 %A DATA-typed result is left alone rather than sent round again. It is already
 %a value: `!(size-atom ((+ 1 2) b))` answers the number 2 on both engines, and

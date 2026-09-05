@@ -1204,27 +1204,22 @@ collapse_runtime(Expr, Out) :-
             All),
     metta_prune_empty(All, Out).
 
-%THE RESULT HALF of the arbiter's typed dispatch. A call whose declared result
-%is the metatype `Atom` answers AS PRODUCED and stops; every other declared
-%result re-enters evaluation:
-%
-%    declaredTypeForEvaluation declared == Atom
-%
-%is the whole test [source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean:
-%3786-3799, `returnsAtom`, applied at :7454-7456 and :7520-7523]. The source
-%self-interpreter states the same rule and names the two views that re-enter,
-%mapping `Expression` onto `%Undefined%` before comparing
-%[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean:4370-4381,
-%`interpret-result-type`].
+%THE RESULT HALF of typed dispatch. A call whose declared result is the
+%metatype `Atom` answers AS PRODUCED and stops; every other declared result
+%re-enters evaluation. Upstream draws the same line, and draws it once: its
+%output check is skipped for `Atom`, `%Undefined%` and `_` alike and appended
+%for every other declared result, which is `Expression` mapping onto
+%`%Undefined%` before the comparison
+%[source: PeTTa@43705f5d src/translator.pl:382-383 and :25-28].
 %
 %WHY IT MATTERS ONLY AFTER A MASKED CALL. Before the evaluation mask reached
 %written builtin calls, every operand a call received had already been reduced,
 %so its result was in normal form and re-entering evaluation was the identity.
 %A masked operand is the one way an unreduced subterm reaches a result, which
-%is what `!(car-atom ((+ 1 2) b))` shows: the arbiter holds the operand back,
-%car-atom hands out `(+ 1 2)`, and the `%Undefined%` result is what turns it
-%into 3 [measured 2026-08-24 against LeaTTa 9ea9f9d, both engines answering 3
-%by different routes before this and by the same route after].
+%is what `!(car-atom ((+ 1 2) b))` shows: the operand is held back, car-atom
+%hands out `(+ 1 2)`, and the `%Undefined%` result is what turns it into 3.
+%That answer is 3 on both engines, by different routes before this and by the
+%same route after [measured 2026-09-05 against PeTTa@43705f5d].
 %
 %The reducibility test comes first and is what keeps the walk off the ordinary
 %path: a result with no redex in it is answered unchanged without compiling
@@ -1318,10 +1313,14 @@ metta_condition_holds(Closure, Item) :- call(Closure, Item, true).
 %written [source: LeaTTa/MettaHyperonFull/Proofs/Modifiers.lean, the checked
 %matcher's modifier law].
 %
-%THE ARITY GATE IS COPIED, NOT INVENTED. The reference recognises a modifier
-%only at `Atom.expr [Atom.sym s, x]`, exactly two elements
-%[source: LeaTTa/MettaHyperonFull/Core/Modifiers.lean, registeredMod?], and
-%the reason is in this repository too: examples/ch20-extending-the-engine/20-02-metta-written-in-metta/04-minimal_metta.metta
+%THE ARITY GATE IS COPIED, NOT INVENTED. A modifier is recognised only at
+%`Atom.expr [Atom.sym s, x]`, exactly two elements
+%[source: LeaTTa/MettaHyperonFull/Core/Modifiers.lean, registeredMod?].
+%Upstream has no modifier registry at all, so its three-element forms are
+%data by construction and the gate keeps this engine agreeing with it:
+%`(add-atom &m (:= a b))` then `(match &m (:= $x $y) ($x $y))` collapses to
+%`((a b))` on both engines [measured 2026-09-05 against PeTTa@43705f5d].
+%The reason is in this repository too: examples/ch20-extending-the-engine/20-02-metta-written-in-metta/04-minimal_metta.metta
 %asserts that the THREE-element (:= a b) is ordinary data and matches the
 %pattern (:= $x $y) structurally. Recognising := by name alone would
 %reinterpret it [tested: translator_match_modifiers].
