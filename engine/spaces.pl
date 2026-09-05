@@ -300,6 +300,9 @@
             %Shared tables engine/metta.pl reads and writes: the execution
             %module parent chain and four caches the contract vocabulary keeps.
             metta_exec_module_parent/2,
+            %The same chain read downward, for a change whose reach is the
+            %spaces that inherit through the module it lands in.
+            metta_exec_module_descendant/2,
             metta_algebra_descriptor_cache/8,
             metta_annotations_cache/2,
             metta_ctx_declared/1,

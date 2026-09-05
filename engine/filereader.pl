@@ -232,6 +232,7 @@
             forget_translated_from/3,
             forget_space_source_loads/1,
             recompile_function_impl/1,
+            recompile_function_impl_in/2,
             repair_after_late_registration/1,
             %engine/spaces.pl's bulk program door registers a whole batch of
             %equation signatures in one pass, for the reason the batch itself
@@ -1287,6 +1288,29 @@ recompile_function_impl(G) :-
     forall(member(Module, Modules), recompile_function_in_module(Module, G)),
     repair_support_invalidations.
 
+%The same rebuild for a change that is CONFINED to one module's own resolution
+%of the name, which is what a per-module dispatch decision is: the equations
+%compiled here, and the call sites here and in the spaces that inherit through
+%here, and nothing a sibling compiled. recompile_function_impl/1 above answers
+%the other question, "this name changed everywhere", and its three callers ask
+%exactly that -- a max-stack-depth pragma and a `super` retarget are global
+%facts.
+%
+%Rebuilding every module's copy for a one-module change made a first
+%evaluation cost one whole retranslation per OTHER live space defining the
+%same head: six spaces each holding (= (fib $n) ...) and evaluating !(fib 12)
+%cost 17,457 inferences in the first and 29,084 in the sixth, +2,325 a space,
+%and 15,369 to 15,437 once the rebuild follows the module whose decision moved
+%[measured 2026-09-05]
+%[tested: test_a_first_evaluation_costs_the_same_in_every_space].
+recompile_function_impl_in(Module, G) :-
+    with_typing_policy_stable(transaction(recompile_function_change_in(Module, G))).
+
+recompile_function_change_in(Module, G) :-
+    support_invalidate_function_change(Module, G),
+    recompile_function_in_module(Module, G),
+    repair_support_invalidations.
+
 recompile_function_in_module(Module, G) :-
     with_typing_policy_stable(recompile_function_in_module_stable(Module, G)).
 
@@ -1504,6 +1528,12 @@ support_invalidate_function(F) :-
     support_invalidate_many(Nodes).
 support_invalidate_function(_).
 
+%The probe before the findall is not a duplicated walk to fold away. Most
+%equation arrivals name a function with no compiled form and no view yet, and
+%the probe answers that at its first goal where a findall allocates a list to
+%say the same thing: folding the pair into one findall cost the source-load
+%benchmark 245,539 inferences against 237,537 with the probe kept and
+%everything else equal [measured 2026-09-05].
 support_invalidate_function_change(Module, F) :-
     support_function_change_node(Module, F, _),
     !,
@@ -1514,12 +1544,54 @@ support_invalidate_function_change(Module, F) :-
     support_invalidate_many(Nodes).
 support_invalidate_function_change(_, _).
 
-support_function_change_node(Module, F, Node) :-
-    support_function_module(F, Module),
-    Node = function(Module, F).
-support_function_change_node(_, F, Node) :-
-    support_view_module(F, ViewModule),
-    Node = function_view(ViewModule, F).
+support_function_change_node(Module, F, function(Module, F)) :-
+    support_function_module(F, Module).
+support_function_change_node(Module, F, function_view(ViewModule, F)) :-
+    function_change_view_module(Module, F, ViewModule).
+
+%The module views an equation arriving in Module can move. A name resolves UP
+%a space's own chain and never sideways, so a sibling space's view of F cannot
+%see a definition that lands here: fun_here_in/2 asks this module, then its
+%parents, then &self, and stops. &self is on every chain as the global
+%fallback, which is why a definition there still reaches every view; that is
+%the same split type_marker_visible_in/2 draws in engine/spaces/foreign.pl for
+%a marker's scope [tested: filereader_global_function_scope].
+%
+%Enumerating every view of the NAME instead made an equation arrival cost one
+%support invalidation per space that had ever called F, so N spaces defining
+%one name cost O(N) per definition and O(N^2) over the program: defining fib
+%in 40 successive live spaces and evaluating it in each cost 71,390 inferences
+%of definition against 23,111 here [measured 2026-09-05]
+%[tested: test_defining_a_shared_head_costs_the_same_in_every_space].
+%
+%&self FIRST and unguarded, because a program that names no space writes
+%there and its arrivals are the ones every workload makes: putting the probe
+%below in front of that clause cost the register-op benchmark 116,427
+%inferences against 116,329 [measured 2026-09-05].
+%
+%The PROBE then leads for a named space, which is what keeps this off the
+%ordinary program's bill. Most arrivals name a function nothing has called
+%yet, so it has no view rows at all, and that question is the one indexed read
+%the old enumeration was; deciding which modules are reachable in front of it
+%charges every arrival for the decision and cost the source-load benchmark
+%236,539 inferences against 234,998 before the repair.
+%
+%Rejected: FILTERING the name's views rather than generating the reachable
+%ones, which costs nothing on source-load and reinstates the walk this exists
+%to remove at a fourteenth of its size -- defining the same head in six live
+%spaces read 574, 578, 582, 586, 590 against a flat 576 here
+%[measured 2026-09-05]. A smaller quadratic is still quadratic.
+function_change_view_module(Module, F, ViewModule) :-
+    metta_self_module(Module),
+    !,
+    support_view_module(F, ViewModule).
+function_change_view_module(Module, F, ViewModule) :-
+    once(support_view_module(F, _)),
+    (   support_view_module(F, Module),
+        ViewModule = Module
+    ;   metta_exec_module_descendant(Module, ViewModule),
+        support_view_module(F, ViewModule)
+    ).
 
 support_function_node(F, Node) :-
     support_function_module(F, Module),

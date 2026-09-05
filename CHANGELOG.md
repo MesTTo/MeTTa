@@ -428,6 +428,25 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   is. The MeTTa surface's `json-decode` is unaffected; it asks the same codec
   for the classic shape, which keeps both pairs.
 
+- Defining a head in a space no longer costs anything that grows with the
+  number of other live spaces defining the same head name. Three separate
+  mechanisms priced the multi-space idiom that way: the automatic-memo
+  reconciliation rebuilt a changed name in every module holding it, an
+  equation arrival invalidated the compiled-form view of every module that had
+  ever called the name, and a recycled space name walked its execution
+  module's whole visible predicate table looking for weak imports to rebase.
+  Six live spaces each holding `(= (fib $n) ...)` cost 17,457 inferences for
+  the first `!(fib 12)` in the first space and 29,084 in the sixth; they now
+  cost 17,407 and 15,437, matching the control where every space defines its
+  own head name. Forty such spaces cost 2,811,897 inferences of evaluation and
+  71,390 of definition, and now cost 628,131 and 23,111: the per-space cost is
+  flat where it grew with the number of spaces, so the total is linear rather
+  than quadratic. Defining in a reused space name cost 3,022 inferences
+  against 644 in a fresh one and now costs 607. What a definition reaches is
+  unchanged: a space that inherits from another still retargets to its
+  parent's later definition, a sibling still cannot move it, and every space's
+  copy of a recursive head is still memoized on its own account.
+
 - `serve` and `boot` finish their shutdown when the interrupt repeats. A second
   SIGINT arriving inside the close landed in `socketserver.shutdown`'s wait and
   was collected as a close FAILURE, which `close()` re-raised, so the graceful

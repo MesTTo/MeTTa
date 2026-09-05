@@ -278,6 +278,23 @@ metta_exec_module_base(Space, Base) :-
     ;   space_module('&self', Base)
     ).
 
+%The chain read DOWNWARD, for a change whose reach is the modules that resolve
+%THROUGH this one. metta_exec_module_parent/2 is only asserted for a declared
+%parent or equation home, so the answer is empty for the ordinary named space
+%and never enumerates &self's implicit children; a caller that has to include
+%those tests metta_self_module/1 itself, as
+%filereader:function_change_view_module/3 does. Cycles cannot arise:
+%metta_declare_space_parent_locked/2 refuses one at the declaration
+%[tested: test_a_definition_reaches_an_inheriting_spaces_view].
+%
+%ONE clause, so the ordinary space with no children answers in one indexed
+%read rather than failing the same read twice.
+metta_exec_module_descendant(Module, Descendant) :-
+    metta_exec_module_parent(Child, Module),
+    (   Descendant = Child
+    ;   metta_exec_module_descendant(Child, Descendant)
+    ).
+
 %set_module/1 is idempotent and works on a module that already holds clauses
 %[measured 2026-08-19: import_module went [user] -> ['$metta_exec:&self'] in
 %place and the module's own predicates still answered], so recovering a cache
@@ -292,7 +309,26 @@ ensure_metta_exec_module_locked(Space, Module) :-
     metta_exec_module_known(Space, Module), !.
 ensure_metta_exec_module_locked(Space, Module) :-
     metta_exec_module_base(Space, Base),
-    metta_capture_default_imports(Module),
+    %Only a module about to CHANGE base has anything to capture. The pass
+    %below exists so a weak import materialised in the previous life can be
+    %rebound to the new chain, and a life that keeps the same base leaves
+    %every such import pointing where it already points. What it guards is a
+    %walk over every predicate the module can see, which is the whole engine
+    %surface, so a space that merely reuses a retired name was paying it for
+    %nothing: creating, defining and dropping a space in a loop cost 644
+    %inferences to define in the first round and 3,022 in every later one, and
+    %costs 607 from the second round on here [measured 2026-09-05]
+    %[tested: test_a_recycled_space_name_defines_for_a_fresh_names_cost,
+    %filereader_import_lifecycle:a_repaired_shadow_import_follows_a_recycled_modules_new_parent].
+    %current_module/1 first because import_module/2 CREATES the module it is
+    %asked about, which would send every fresh space down the capture branch
+    %[measured 2026-09-05: import_module(no_such_module, user) answers true
+    %and current_module/1 then answers true for it].
+    (   current_module(Module),
+        \+ import_module(Module, Base)
+    ->  metta_capture_default_imports(Module)
+    ;   true
+    ),
     set_module(Module:base(Base)),
     metta_refresh_repaired_shadow_imports(Module),
     flag('$metta_exec_module_generation', Previous, Previous + 1),
