@@ -1154,6 +1154,14 @@ kind(metta_space_operand/1, host_service).
 kind(metta_string_declarations/2, host_service).
 kind(metta_substitute_self/3, host_service).
 kind(metta_trace_source/5, host_service).
+%The debugger's session pair. A transport creates and steps the engine that
+%holds a suspended program, the way it does for a lazy cursor, but the
+%WRAPPERS a breakpoint needs are the tracer's and only one session may own
+%them at a time, so beginning and ending a session is the engine's to decide
+%and refuse. metta_debug_run/3 is the goal that goes inside the engine.
+kind(metta_debug_begin/1, host_service).
+kind(metta_debug_run/3, host_service).
+kind(metta_debug_end/0, host_service).
 kind(metta_annotations/2, host_service).
 kind(metta_contract_fact/1, host_service).
 kind(metta_error_answer/3, host_service).

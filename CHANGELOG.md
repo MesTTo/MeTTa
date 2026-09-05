@@ -689,6 +689,67 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   7,972 at the same cost. `limit` is a catalog vocabulary, so MeTTa, Python
   and the Node package read one list.
 
+- `m.debug(term, on=[S.double])` stops a running program at a breakpoint and
+  hands it to Python. Iterating the Debugger runs the program to each
+  breakpoint, the loop body is where it is SUSPENDED, and leaving the body
+  resumes that same execution rather than starting a new one. `d.step()` stops
+  at the very next reduction whether or not it carries a breakpoint and lasts
+  one advance; `d.breakpoints` is a live set, so one added at a stop stops the
+  program next time; `d.answers` is what the program produced once it
+  finished. The division is CPython's own `bdb`, where the stop callback is
+  the suspension and the mode selects how execution goes on; the suspension
+  itself is SWI's `engine_yield/1` from inside the reduction, the one
+  mechanism that returns control from deep in a running goal and leaves it
+  resumable. What is debugged executes for real, writes included, and inherits
+  the caller's scope. `inferences=` bounds the whole session cumulatively, so
+  a resume with no breakpoint ahead of it stops; there is no timeout, because
+  a session is suspended by design and a clock would run while a person reads
+  a stop. A breakpoint reached from inside a Python operation that calls back
+  into MeTTa cannot suspend, and says so with the remedy rather than being
+  skipped.
+
+- `python -m metta repl` completes names and keeps its history. TAB completes
+  the token under the cursor against every name the language knows, functions
+  and translator special forms alike, and against the engine's spaces when the
+  token opens with `&`; a name defined in the session is offered at once.
+  readline's default delimiters break a token on `-`, `!`, `?`, `*` and `&`,
+  every one of which is ordinary inside a MeTTa head, so with them `car-a`
+  completed against `a` and answered nothing: the delimiters are now whitespace,
+  parentheses and the string quote. History is read at startup from
+  `~/.metta_history`, or wherever `METTA_HISTORY` points, and written back on
+  exit without the `exit` that ended the session, which would otherwise be the
+  first thing Up recalled. A read-only home says so on stderr rather than
+  ending the session.
+
+- `m.trace(filter=...)` also takes a bound function handle, `m.fn.double`, and
+  anything else that mentions as one head symbol, because the debugger's `on=`
+  and the trace's `filter=` now read their names through one normaliser rather
+  than two. Every refusal it already made it still makes.
+
+### Fixed
+
+- `m.why()` and `lint()` answer from one head verdict instead of two. Asking
+  why `(if $c $t $e)` matched nothing used to answer "nothing here is headed by
+  if, and no function has that name; did you mean if?", because why() asked
+  `fun/1` alone and `if` is a form the translator compiles rather than a
+  function; lint has asked both questions since it learned that the hard way.
+  why() now names the special form, and it reports a wrong arity too, so
+  `(double 1 2 3)` against a one-argument `double` says so rather than sending
+  the caller to `eval`, where nothing answers either. Near-miss suggestions
+  come from one pool at one threshold: the whole catalogue, special forms
+  included, so a mistyped `collapes` is offered `collapse` by both doors where
+  lint could offer nothing, and a name is never suggested for itself.
+
+- One annotation the runtime cannot name no longer discards the rest of a
+  signature. `from decimal import Decimal` under `TYPE_CHECKING` is a name that
+  exists for a type checker and never at runtime, and resolving a signature was
+  all-or-nothing over it: `def joiner(a: int, *rest: Decimal) -> int` refused
+  registration outright, including at `arities=[1]`, where nothing ever asks
+  what `rest` is. Annotations now resolve one at a time, so the two that resolve
+  declare `(-> Number Number)` and the call runs. An annotation a declared call
+  form does reach still refuses, and the refusal now names the parameter rather
+  than the callable.
+
 ## [0.7.3] - 2026-09-04
 
 ### Fixed
