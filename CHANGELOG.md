@@ -97,6 +97,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `serve` and `boot` finish their shutdown when the interrupt repeats. A second
+  SIGINT arriving inside the close landed in `socketserver.shutdown`'s wait and
+  was collected as a close FAILURE, which `close()` re-raised, so the graceful
+  shutdown the first signal asked for was aborted and the process exited
+  nonzero half torn down. Reproduced 10 times out of 10 with two signals 20ms
+  apart after serving one request. SIGINT is now held off for the duration of
+  the close and the previous handler restored afterwards, the shape
+  `asyncio.Runner` uses.
+
 - `MeTTa.profile()`'s second answer is a table like every other. `EngineProfile`
   held bare tuples, so self-ticks were `node[3]` counted out against a
   docstring; `nodes` and `top()` answer `Rows` now, with columns
