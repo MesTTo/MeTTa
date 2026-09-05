@@ -233,6 +233,17 @@ PROVENANCE_SOURCES = (
     "*.sh",
     "engine/*.sh",
     "extensions/*/*.sh",
+    # Three more the out-of-glob net named on 2026-09-05, each carrying pins
+    # written by the annotated-arrow work that nothing read and nothing would
+    # resolve: a seat's benchmark SUITE, which pins the measurements whose
+    # numbers its neighbouring baseline.json already pins; the conformance
+    # helpers, whose Guarantees block cites its own cases; and the upstream
+    # parity baseline, a commentless format like the seat baselines above and
+    # covered for the same reason. They join the PIN half only, the staging
+    # this list's entries take.
+    "extensions/python/benchmarks/*.py",
+    "tests/conformance/*.pl",
+    "tests/data/*.json",
 )
 
 # Where a name may be defined. metta/_compliance.py holds real tests, shipped
