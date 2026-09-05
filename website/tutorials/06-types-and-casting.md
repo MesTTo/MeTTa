@@ -100,8 +100,8 @@ You can put a cardinality and an effect class in a function arrow:
 
 The written type stays visible through `get-type`. Its effect publishes
 `(effect w writesState)` in `&metta`, so `space.effect_plan(S.w(1))` reports
-`writesState`. A world covering only `pureStructural` refuses the call, and
-`lib_memo` refuses to cache it, even though this example's body is an identity.
+`writesState`. A world covering only `pureStructural` refuses the call, even
+though this example's body is an identity.
 Removing the declaration removes its owned effect row. Effects join by name
 across the catalog, including declarations in other spaces; one declaration
 cannot weaken another or the effects found in a body.
@@ -113,12 +113,11 @@ remove those declarations first.
 `(-[nondet,pureStructural]-> Number Number)` has that joined class. Omitting
 the class, as in `(-[det]-> Number Number)`, uses `oracleIO`.
 
-An effect annotation added after memoization is enabled is refused if an
-existing cache includes that function, including a cache on a caller. Remove
-the cached definition before loading the new annotation. `clear-memoize`
-only clears entries and does not disable memoization.
-Forward memo declarations are checked when their bodies compile, including
-annotated dependencies reached through an unchecked caller.
+An effect annotation reaches effect planning and world admission. It does not
+reach `lib_memo`: a written `!(memoize w)` is honoured over an annotated body,
+and an annotation added afterwards lands beside the live cache rather than
+withdrawing it. Whether a cache belongs on a function is the program's own
+decision.
 
 Cardinality is an author assertion. By default it is trusted and does not
 prune answers. Enable auditing when you want execution to check it:

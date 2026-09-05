@@ -6,6 +6,13 @@
 %   - a read this cannot resolve to one space predicate, and one that names a
 %     foreign space, are both refused rather than tabled without the
 %     incremental guarantee [tested: tabling_refuses_unresolvable_reads]
+%   - a body whose effects the walk cannot classify is tabled PLAIN, and one it
+%     can is tabled incremental, through every wrapper a compiled body can put
+%     between the walk and the goal [tested:
+%     an_impure_goal_is_seen_inside_every_wrapper,
+%     a_pure_body_inside_a_wrapper_still_tables_incrementally,
+%     an_effectful_body_tables_plain, a_higher_order_body_tables_plain;
+%     commit=ccad9f6d588270ec2f0810fc56c30e9e59207e7c]
 %   - changing an equation drops every table
 %     [tested: tabling_equation_change_drops_tables]
 %   - the change hook does not prune the handlers loaded after it, so a dual
@@ -268,29 +275,53 @@ test(the_removal_hook_does_not_prune_either,
 
 :- begin_tests(lib_tabling_purity).
 
-%The guard used to be FAIL-OPEN: a goal it did not recognise fell through as
-%inert, so tabling accepted seven kinds of impure body and cached four of them
-%demonstrably wrong. A random draw answered twice from one draw, a println!
-%printed once for two calls, a space write happened once for two calls, and a
-%Python operation kept answering after the data it reads had changed
-%[measured 2026-08-16, ai-metta-python-seams.md item 1].
+%The walk used to be FAIL-OPEN: a goal it did not recognise fell through as
+%inert, so tabling built an INCREMENTAL table over seven kinds of impure body
+%and cached four of them demonstrably wrong. A random draw answered twice from
+%one draw, a println! printed once for two calls, a space write happened once
+%for two calls, and a Python operation kept answering after the data it reads
+%had changed [measured 2026-08-16, ai-metta-python-seams.md item 1].
 %
-%An unrecognised goal is UNKNOWN, and unknown in a soundness check is refusal.
+%An unrecognised goal is UNKNOWN, and unknown means the incremental property
+%has nothing to hang on. That is what these pin, and it is a property of the
+%TABLE rather than a verdict on the program: whether to table is the
+%declaration's to say (user ruling, 2026-09-06), and the four wrong caches
+%above were wrong because they claimed an invalidation they could not do.
 
 %These call metta_tabled_decl/2 directly, as the suite's other tests do: this
 %file consults lib_tabling.pl rather than importing the MeTTa library, so the
 %`tabled` form is not in scope here and the predicate behind it is.
-%Asserting WHICH goal is refused, not merely that something was. Without the
+%
+%Two assertions, because the walk's judgement stopped being a refusal and
+%became a CHOICE OF TABLE. A body the walk classifies gets the incremental
+%property against the storage predicates its reads resolve to; a body it cannot
+%classify has nothing to hang that on and is tabled plain. The declaration is
+%carried out either way.
+%
+%Asserting WHICH goal the walk names, not merely that it named one. Without the
 %name these passed for the wrong reason: two pure Prolog primitives were
-%missing from the allow-list, so the refusal fired on `atom_string/2` before it
-%ever reached the impure goal, and a test that only checks "an error happened"
-%cannot tell those apart.
-tabling_refuses(Definition, Call, Expected) :-
+%missing from the allow-list, so the walk stopped at `atom_string/2` before it
+%ever reached the impure goal, and a test that only checks "something happened"
+%cannot tell those apart. The plain-versus-incremental assertion is the second
+%half of the same discrimination: a wrapper the walk does not descend reports
+%no impurity, and the table comes out incremental.
+tabling_names_and_tables_plain(Definition, Call, Expected) :-
     process_metta_string(Definition, _),
-    catch(( metta_tabled_decl(Call, _), Refused = none ),
-          error(metta_impure_goal(Name/_), _),
-          Refused = Name),
-    assertion(Refused == Expected).
+    metta_tabling_target(Call, Module, Name, CompiledArity),
+    catch(( metta_tabling_reads(Module, Name, CompiledArity, _),
+            Named = none ),
+          error(metta_impure_goal(Named0/_), _),
+          Named = Named0),
+    assertion(Named == Expected),
+    metta_tabled_decl(Call, Answer),
+    assertion(Answer == true),
+    assert_table_is_plain(Module, Name, CompiledArity),
+    metta_untabled_decl(Call, true).
+
+assert_table_is_plain(Module, Name, CompiledArity) :-
+    functor(Head, Name, CompiledArity),
+    assertion(predicate_property(Module:Head, tabled(shared))),
+    assertion(\+ predicate_property(Module:Head, tabled(incremental))).
 
 test(a_pure_body_still_tables) :-
     process_metta_string("(= (purity-pure $k) (+ $k 1))", _),
@@ -337,20 +368,23 @@ purity_wrapper(mapping,   "(map-atom (1 2) $x ~s)").
 purity_wrapper(folding,   "(foldl-atom (1 2) 0 $a $x ~s)").
 purity_wrapper(filtering, "(filter-atom (1 2) $x ~s)").
 
-test(an_impure_goal_is_refused_inside_every_wrapper,
-     [forall(( purity_impure_body(Body, Refused),
+test(an_impure_goal_is_seen_inside_every_wrapper,
+     [forall(( purity_impure_body(Body, Named),
                purity_wrapper(Wrapper, Shape) ))]) :-
-    format(atom(Name), 'purity-~w-~w', [Wrapper, Refused]),
+    format(atom(Name), 'purity-~w-~w', [Wrapper, Named]),
     format(string(Wrapped), Shape, [Body]),
     format(string(Definition), "(= (~w $k) ~s)", [Name, Wrapped]),
-    tabling_refuses(Definition, [Name, _], Refused).
+    tabling_names_and_tables_plain(Definition, [Name, _], Named).
 
 %The other half of the same change. Descending forall exposed the engine's own
 %reduce/3, its runtime dispatcher, and refusing THAT would have made every
 %pure forall body uncacheable while naming an internal the program never
 %wrote. The template's head is fixed at compile time, so the call it reaches
 %is classified exactly as a direct call would be.
-test(a_pure_body_inside_a_wrapper_still_tables,
+%And the CONTROL for the plain-table assertion above: a body the walk does
+%classify is tabled incremental, so a run in which every table came out plain
+%would fail here rather than pass everywhere.
+test(a_pure_body_inside_a_wrapper_still_tables_incrementally,
      [forall(member(Wrapper, [bare, once, collapse, forall, iff, taking,
                              mapping, folding, filtering]))]) :-
     purity_wrapper(Wrapper, Shape),
@@ -360,36 +394,45 @@ test(a_pure_body_inside_a_wrapper_still_tables,
     process_metta_string(Definition, _),
     metta_tabled_decl([Name, _], Answer),
     assertion(Answer == true),
+    metta_tabling_target([Name, _], Module, Compiled, CompiledArity),
+    functor(Head, Compiled, CompiledArity),
+    assertion(predicate_property(Module:Head, tabled(incremental))),
     metta_untabled_decl([Name, _], true).
 
 %A template whose head is a VALUE rather than a name is a higher-order call,
 %and which function it reaches is decided while the program runs. No
-%declaration can answer that, so the refusal says so instead of naming
-%reduce/3 and advising a declaration that could not match.
-test(a_higher_order_call_is_refused_as_one) :-
+%declaration can answer that, so the walk says so instead of naming reduce/3
+%and advising a declaration that could not match. Its table is plain for the
+%same reason an effectful body's is: an unanswerable question leaves nothing to
+%carry the incremental property.
+test(a_higher_order_body_tables_plain,
+     [cleanup(metta_untabled_decl(['purity-ho', _, _], true))]) :-
     process_metta_string("(= (purity-ho $f $k) (forall (+ $k 1) ($f $k)))", _),
-    catch(( metta_tabled_decl(['purity-ho', _, _], _), Refused = none ),
+    metta_tabling_target(['purity-ho', _, _], Module, Name, CompiledArity),
+    catch(( metta_tabling_reads(Module, Name, CompiledArity, _), Named = none ),
           error(Formal, _),
-          Refused = Formal),
-    assertion(Refused = metta_higher_order_goal(_)),
-    message_to_codes(error(Refused, none), Codes),
+          Named = Formal),
+    assertion(Named = metta_higher_order_goal(_)),
+    message_to_codes(error(Named, none), Codes),
     string_codes(Text, Codes),
-    assertion(sub_string(Text, _, _, _, "value rather than a name")).
+    assertion(sub_string(Text, _, _, _, "value rather than a name")),
+    metta_tabled_decl(['purity-ho', _, _], Answer),
+    assertion(Answer == true),
+    assert_table_is_plain(Module, Name, CompiledArity).
 
-%The refusal names the goal and says what to do about it, rather than being an
-%anonymous failure.
-test(the_refusal_names_the_goal) :-
+%The report names the goal and the one declaration that would change the walk's
+%own answer, rather than being an anonymous failure. It no longer tells anyone
+%not to cache: what to do about an unclassifiable body is the caller's, and
+%both libraries carry out what the caller wrote.
+test(the_walk_names_the_goal) :-
     catch(throw(error(metta_impure_goal('py-call'/3), none)),
           Error,
           message_to_codes(Error, Codes)),
     string_codes(Text, Codes),
     assertion(sub_string(Text, _, _, _, "py-call/3")),
     assertion(sub_string(Text, _, _, _, "(effect py-call pureStructural)")),
-    %Both doors, because the walk's judgement is advice and the DECLARATION
-    %decides: a developer who means to cache this anyway is told how rather
-    %than left with a wall [tested with the memo half in
-    %lib_memo_volatility:an_impure_refusal_names_the_canonical_effect_remedy].
-    assertion(sub_string(Text, _, _, _, "(cache <function> unchecked)")).
+    assertion(sub_string(Text, _, _, _, "not cached automatically")),
+    assertion(sub_string(Text, _, _, _, "honoured as written")).
 
 message_to_codes(error(Formal, _), Codes) :-
     phrase(prolog:error_message(Formal), Lines),
@@ -397,21 +440,20 @@ message_to_codes(error(Formal, _), Codes) :-
 
 %catch/3 is a control construct, so what is INSIDE it is judged. Waving the
 %catch through would have hidden every impure goal behind one.
-test(an_impure_goal_inside_a_catch_is_still_refused) :-
-    tabling_refuses("(= (purity-caught $k) (catch (println! $k)))",
-                    ['purity-caught', _], 'println!').
+test(an_impure_goal_inside_a_catch_is_still_seen) :-
+    tabling_names_and_tables_plain(
+        "(= (purity-caught $k) (catch (println! $k)))",
+        ['purity-caught', _], 'println!').
 
-%(cache Name unchecked) in &metta is the caller's declared acceptance of
-%staleness: the walk is skipped and the table is PLAIN, not incremental,
-%because with reads unresolved there is nothing sound to invalidate on.
-test(an_unchecked_declaration_tables_an_impure_body,
-     [cleanup(( metta_untabled_decl(['purity-unchecked', _], true),
-                'remove-atom'('&metta',
-                              [cache, 'purity-unchecked', unchecked], _) ))]) :-
-    process_metta_string("(= (purity-unchecked $k) (let $i (println! $k) $k))", _),
-    process_metta_string("!(add-atom &metta (cache purity-unchecked unchecked))", _),
-    metta_tabled_decl(['purity-unchecked', _], Answer),
-    assertion(Answer == true).
+%The declaration is the developer's and needs no second atom beside it. This
+%case took (cache purity-effectful unchecked) to reach the same plain table.
+test(an_effectful_body_tables_plain,
+     [cleanup(metta_untabled_decl(['purity-effectful', _], true))]) :-
+    process_metta_string("(= (purity-effectful $k) (let $i (println! $k) $k))", _),
+    metta_tabled_decl(['purity-effectful', _], Answer),
+    assertion(Answer == true),
+    metta_tabling_target(['purity-effectful', _], Module, Name, CompiledArity),
+    assert_table_is_plain(Module, Name, CompiledArity).
 
 %The bottom effect-class atom register_op accepts from Python, made from
 %inside the language instead: the walk reads

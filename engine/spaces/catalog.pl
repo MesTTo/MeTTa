@@ -1330,7 +1330,7 @@ metta_catalog_preset([vocabulary, atomicity,
 metta_catalog_preset([vocabulary, 'memo-strategy', wtinylfu, lru]).
 metta_catalog_preset([vocabulary, 'memo-aggregate', none, min, max, sum, count]).
 metta_catalog_preset([vocabulary, 'save-format', metta, fast]).
-metta_catalog_preset([vocabulary, 'cache-mode', unchecked, force, refuse]).
+metta_catalog_preset([vocabulary, 'cache-mode', force, refuse]).
 metta_catalog_preset([vocabulary, 'effect-class',
                       pureStructural, readOnlyLookup,
                       nondeterministicReadOnly, writesState, oracleIO]).

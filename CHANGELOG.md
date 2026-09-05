@@ -7,6 +7,44 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- A written cache declaration is carried out as written. `!(memoize f)`,
+  `!(memoize-exact f)` and `!(tabled (f $x))` are honoured whatever `f` does:
+  over a body that prints, writes a space, reads a space or calls an operation
+  declared `writesState`, over a function a library exported with
+  `(volatility f volatile)`, over an annotated `(-[det,writesState]->)` arrow,
+  and over a forward declaration whose annotated body arrives afterwards. An
+  effect annotation added while a cache is live now lands beside it instead of
+  being refused. `(cache f force)` overrides the automatic mode's effect
+  analysis as well as its profitability rule.
+
+  What decides a cache remains the program's; what keeps one correct remains
+  the library's. Automatic memoization still declines a function nobody
+  declared whose body the effect walk cannot classify, invalidation on equation
+  change is unchanged, and tabling still resolves a body's space reads to the
+  storage predicates that carry SWI's incremental property. A body the walk
+  cannot classify is now tabled PLAIN rather than refused, because there is no
+  read to invalidate on; a read that cannot be resolved to one space predicate,
+  or that names a foreign space, is still refused, because that is a table this
+  library cannot build. Two memoization refusals remain and neither judges a
+  body: a name no function answers to, and a predicate SWI already tables,
+  which `force` does not open, along with a bounded-search body whose `once`,
+  `take` or `top` pruning eager bag collection would change.
+
+  `(cache <name> unchecked)` is removed with the refusals it existed to waive,
+  along with the `metta_cache_unchecked/1` service and the `unchecked` member
+  of the `cache-mode` vocabulary; the seams' derived `service` count is 57.
+
+  One compile-time consequence goes with it. The forward-declaration re-check
+  was guarded by an "any annotated arrow exists anywhere in this process" test,
+  so a single unrelated `(: h (-[det]-> Number Number))` made every first
+  evaluation of a cached head compute a host goal effect plan in each module
+  holding that name. Over eight spaces sharing a head that cost
+  `[13484, 16353, 19090, 21823, 24548, 27297, 30010, 32773]` inferences, about
+  2,735 a space; it now costs
+  `[15582, 13538, 13557, 13578, 13583, 13618, 13613, 13662]`, flat within 0.92%.
+
 ### Fixed
 
 - The example corpus reads in its own order again. `08-case-duals.metta` sat in
@@ -496,7 +534,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   application types, higher-order arguments and declaration readers use the
   plain runtime arrow. Stored atoms, `get-type f`, documentation and source
   export retain the written annotation. Concrete products now publish owned
-  effect rows consumed by planning, world admission and memoization. A `nondet`
+  effect rows consumed by planning and world admission. A `nondet`
   product joins its effect with `nondeterministicReadOnly`. Removing or reloading
   a declaration withdraws only its owned rows. Direct removal of owned rows
   and catalog clears that would orphan another space's declaration are refused.
@@ -511,8 +549,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   Unresolved products, nested products and annotations on translated forms
   are refused at load because their claims have no runtime consumer.
   Foreign spaces require transactional storage so partial writes cannot
-  separate an annotation from its effect. A conflicting late effect is refused
-  while a dependent cache is enabled. Removing the last cached equation now
+  separate an annotation from its effect. Removing the last cached equation now
   releases its owner's memoization state, even when another space still defines
   the name or the host has already untabled its implementation. Memo handlers
   retain exact clause references and retire with their owners. Native clear
@@ -6298,7 +6335,7 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
   Two facts had been read backwards. An SWI engine has its OWN inference
   counter and the thread that created it cannot see that counter, so a bound
   placed around a pull charges the pull loop: 1,000 pulls of a goal costing
-  about 402 inferences each moved the calling thread's counter by 2,003, 0.50%
+  about 402 inferences each moved the calling thread's counter by 2,003, 0.92%
   of the work. And `call_with_inference_limit/3` bounds inferences per SOLUTION
   of its goal, which is what SWI's manual says, so a generator answering cheaply
   forever is re-armed at every answer and never reaches it.

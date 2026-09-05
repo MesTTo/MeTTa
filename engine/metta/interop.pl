@@ -674,23 +674,25 @@ record_metta_export(File, Parsed) :-
 %the same answer forever so a call on constant arguments may be folded at
 %plan time [source: PostgreSQL documentation, Function Volatility Categories].
 %
-%The gap this closes was demonstrated rather than imagined: lib_memo will
-%happily cache a side-effecting registered predicate, because nothing records
-%whether caching it is sound, and the second call then skips the effect.
+%WHO IT ANSWERS. A declaration here reaches a cache that nobody asked for:
+%lib_memo's automatic mode chooses a cache on its own initiative and reads this
+%to decide, and `volatile` is how a library keeps its function out of that
+%[source: lib/lib_memo/lib_memo.pl, memo_automatic_unsafe_reason/3]. It does
+%not reach a WRITTEN (memoize f), which is the caller saying what to do with
+%their own program; that declaration is carried out as written and a cache in
+%the wrong place is a bug in the program that put it there (user ruling,
+%2026-09-06) [tested: a_volatile_function_still_memoizes_on_the_declaration].
 %
 %SILENCE STAYS PERMISSION. PostgreSQL's default is the pessimistic rung and
-%this one's is not, deliberately: memoization here is already opt-in by the
-%CALLER, so making an undeclared function refuse would break every existing
-%(memoize f) without telling anyone anything they did not know. What was
-%missing is the library's ability to say NO, and a declared `volatile` is
-%that no [tested: a_volatile_function_refuses_memoization].
+%this one's is not, deliberately: an undeclared function that a library never
+%said anything about is one the automatic mode judges by its body instead.
 :- dynamic metta_function_volatility/2.
 
 declare_function_volatility(Name, Level) :-
     retractall(metta_function_volatility(Name, _)),
     assertz(metta_function_volatility(Name, Level)).
 
-%True when a cache may serve this function's answers.
+%True when a cache MAY BE CHOSEN for this function without being asked for.
 metta_function_cacheable(Name) :- \+ metta_function_volatility(Name, volatile).
 
 %How many answers a caller may expect. Only det is ENFORCED, by handing the
