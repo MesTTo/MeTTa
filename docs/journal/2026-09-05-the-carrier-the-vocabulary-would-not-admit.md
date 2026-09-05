@@ -71,3 +71,17 @@ the source table and cannot see a count written anywhere else.
 Decided: correct the number and add `str(total)` to the required tuple, so all
 three are recomputed. Proven to discriminate: planting 254 back fails with
 `assert '255' in ...`, restoring it passes.
+
+## 2026-09-05, later still: the second count the example moved
+
+`llms.txt:23` said 241 executable example programs against a tree of 242. Same
+cause as the README total above, different document, and this time the lane
+caught it: the `llms` lane DERIVES the counts in the sources table, which is
+exactly the difference recorded in the workspace notes between counts inside
+that table and counts written anywhere else.
+
+`llms-selftest` was failing beside it, reporting "a wrong source-table count
+was NOT reported" among 2 failures over 47 planted cases. The real wrong count
+was masking the planted one: a lane already red on a genuine finding cannot
+demonstrate that it catches a synthetic one. Correcting 241 to 242 cleared
+both, 0 findings and 0 of 47 failures.
