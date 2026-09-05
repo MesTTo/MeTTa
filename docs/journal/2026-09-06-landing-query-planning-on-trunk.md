@@ -72,3 +72,54 @@ them.
 
 Open: trunk carries fifteen benchmark rows that exceed their own pins, which
 `22ce91dd` records as deliberate. This branch moves three more and moves no pin.
+
+Tried: attributing the other suite failure,
+`test_shared_head_cost.py::test_a_first_evaluation_costs_the_same_in_every_space`,
+which failed two of three full runs here and one of three on `ad711777`. A
+directory sweep makes it deterministic: `pytest tests/ch14_seeing_your_program
+tests/ch18_performance/test_shared_head_cost.py -n 0` fails on BOTH trees with
+the same slope, 3,744 inferences per space here and 3,746 there. Bisecting the
+directory reaches one test,
+`test_lint.py::test_an_annotated_arrow_is_diagnosed_like_its_plain_twin`, and
+bisecting that test's body reaches one line of it: a live annotated arrow
+declaration. `(: h (-[det]-> Number Number))` in any space, `&self` or a child,
+makes every later first evaluation of a shared head cost
+`[17550, 19269, 23000, 26728, 30468, 34206, 37926, 41650]` over eight spaces;
+`(: h (-> Number Number))` in the same place leaves it flat at
+`[17554, 15451, 15475, ...]`, and dropping the holding space restores flat. The
+effect class does not matter, `det`, `semidet` and `nondet` all do it.
+
+Decided: the slope is per call rather than per reduction, because it is 3,707,
+3,718, 3,729 and 3,742 at evaluation depths 4, 8, 12 and 16, and it is linear
+in spaces, 3,734 with 4 rooms and 3,729 with 16.
+
+Tried: SWI's own profiler around the second and the eighth room's first call in
+one process. The work that grows is `metta_host_goal_effect_plan/4`, 1 call to
+7, with `metta_operation_effect/2` 13 to 85, `metta_declared_effect_classes/2`
+64 to 136, `spaces:match_stored/4` 44 to 212 and
+`spaces:metta_catalog_ref_erased/1` 38 to 218.
+
+Decided: the owner is `memo_refuse_compiled_arrow_effect/1`,
+`lib/lib_memo/lib_memo.pl:362`, from `c455fdc4`. Its guard is
+`metta_annotated_operation_effect(_, _)` with both arguments unbound, which is
+an "any annotated arrow exists anywhere in this process" test rather than a
+question about the name being compiled, so one live annotated declaration turns
+the body on for every compiled memoized name. The body then walks
+`memo_state_modules(Cached, Modules)`, every module where that name is
+memoized, and `memo_compiled_operation/3` computes a full host goal effect plan
+in each, so the cost is O(spaces holding the head) per first evaluation. That
+is the shape `22ce91dd` removed from three other mechanisms.
+
+Tried: the positive control. Wrapping `user:memo_refuse_compiled_arrow_effect/1`
+to `true` with `library(prolog_wrap)` in the same process takes the row from
+`SLOPED [17550, 19269, ..., 41650]` to `FLAT [15440, 15447, ..., 15537]`, with
+the predicate reporting `not wrapped` before and `wrapped by [slope_control]`
+after, so the control is known to have run.
+
+Open, and not fixed here: the repair is a design choice inside lib_memo rather
+than a repair. `seam:function_clauses_changed/1` carries no module, so the scan
+over every module holding the cache is how the check copes with a
+module-less event; narrowing it means either widening that seam, caching the
+per-module effect plan with its own invalidation, or recording a per-module
+generation and skipping unchanged ones. Each is the subsystem author's call.
+The reproduction above is deterministic and the control names the predicate.
