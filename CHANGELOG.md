@@ -280,6 +280,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Nineteen engine and library comments now cite upstream PeTTa at `43705f5d`
+  for the behaviour they explain, in place of LeaTTa. Each carries the
+  differential that established the two engines answer alike: the comment
+  terminator, the closure spelling of `map-atom`, the conjunctive-match
+  snapshot, the Atom-result rule and `returnsAtom`, conditional-rule order,
+  the modifier arity gate, `unify`'s branch evaluation, the `assert*`
+  verdicts, `pragma!`'s absent declaration, and the registered SWI predicates.
+  No behaviour changed; every line in the diff is a comment.
+
 - A metatype argument check tries the shape first. `Symbol`, `Expression`,
   `Grounded` and `Variable` are decided by the engine's own metatype ladder
   before the typing-rule registry is walked, so a `Symbol` parameter costs 20
