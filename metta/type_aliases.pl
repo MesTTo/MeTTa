@@ -435,7 +435,12 @@ type_edge_from_view(space(Space), Left, Right) :-
 type_edge_from_view(expanded(All, Ground, Polymorphic), Left, Right) :-
     (   ground(Left)
     ->  ( get_assoc(Left, Ground, Exact) -> true ; Exact = [] ),
-        merge(Exact, Polymorphic, Candidates)
+        % append/3, not merge/3: the two lists are enumerated by member/2
+        % below so their interleaving is immaterial, and merge/3 is a
+        % deprecated autoload from library(backward_compatibility) that a
+        % NO_AUTOLOAD=1 boot reports undefined [tested: prolog-static and
+        % no-autoload lanes; commit=WORKTREE].
+        append(Exact, Polymorphic, Candidates)
     ;   Candidates = All
     ),
     member(_-Raw, Candidates),
