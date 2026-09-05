@@ -272,3 +272,18 @@ Rejected: leaving construction on by default and documenting the cost. The load
 regression is unbounded in the relation size, which is the shape of the
 7,540-second run this thread opened with.
 
+## 2026-09-05: an index is collected in one round or two
+
+Found: `test_a_rolled_back_index_is_collected_while_the_live_index_answers` and
+`test_a_released_index_is_collected_after_its_query_boundary` were intermittent,
+three of four whole-file runs red for the first and about one in eight for the
+second. Neither is a leak. `garbage_collect_clauses/0` returns immediately when
+the collector thread already owns the collection flag, so the clauses that hold
+a retired index survive the call; stopping and joining that thread first, which
+is what the Prolog suite's `collect_materialization_owners/0` already does, makes
+the first case deterministic. The second needs a second round: over 25 released
+images the retired index disappeared after one or two collections and the live
+trie population returned to 22 every time, so the atom pass that reclaims the
+blob can already have run when the clause pass drops the last reference to it.
+The helper now collects to a fixed point, bounded at four rounds; a retained root
+survives all of them. Ten consecutive whole-file runs are green.
