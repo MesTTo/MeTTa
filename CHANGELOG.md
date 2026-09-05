@@ -9,6 +9,29 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A program that materializes nothing pays nothing for the machinery that
+  retires materialized relations, and its inference counts repeat exactly.
+  Source materialization installed a process-wide listener on clause erasure
+  when the engine loaded, and SWI delivers that event from clause garbage
+  collection, which runs on the `gc` thread or on whichever thread trips the
+  collector first. Every callback that landed on the main thread was charged
+  to whatever measurement was open there, so the engine's own `boot` benchmark
+  read anywhere from 264,281 to 265,616 inferences over eight samples where a
+  case is allowed four, and any measurement a program took around its own
+  clause churn moved for the same reason. The listener is installed by the
+  first published relation instead, which is the point from which it has
+  anything to say.
+
+- The engine boot no longer searches the whole autoload library index for a
+  name it defines itself. The translator decides at load time whether any
+  cost-ordered rule is registered, and it asked by calling the register and
+  catching the existence error, which is how SWI is asked to search every
+  library it can see. The answer was always the same and the search never
+  found anything, and it cost the boot 2,744 inferences, 1,021 of them only
+  sometimes. Asking `current_predicate/1` first costs nothing and answers the
+  same, so the boot now reads one number: 262,279 inferences over 260
+  consecutive samples, against 264,281 to 265,616 over eight before.
+
 - The engine boots on a build whose platform libraries lend a builtin its
   name. The pass that drops an arity belonging to a namesake predicate rather
   than to the operation asked whether that predicate was `built_in`, which is a

@@ -813,13 +813,22 @@ test(static_library_reconsult_preserves_materialized_answer_bags) :-
 % erase/1 on a clause reference retires nothing physically, so the channel
 % carries clause references only from collection; a record reference arrives
 % immediately and can never own an image.
+%
+% The publication is what OPENS that channel: publish_materialization/6
+% registers the listener with the first image rather than at load time, so a
+% run of this test alone would otherwise ask a channel nobody is listening to
+% and pass without touching source_owner_erased/1.
 test(an_unrelated_record_erasure_creates_no_cleanup_engine) :-
-    collect_materialization_owners,
-    recordz(materialization_nonowner, recorded, Record),
-    statistics(engines_created, Before),
-    \+ transaction(( erase(Record), fail )),
-    statistics(engines_created, After),
-    assertion(After == Before).
+    source_with_reach("(edge a b) (edge b c)\n", Source),
+    with_program(Source,
+        ( assertion(materialize:materialized_owner(
+                        _, '&plunit_materialized', _)),
+          collect_materialization_owners,
+          recordz(materialization_nonowner, recorded, Record),
+          statistics(engines_created, Before),
+          \+ transaction(( erase(Record), fail )),
+          statistics(engines_created, After),
+          assertion(After == Before) )).
 
 % The pragma is the whole gate: without it a source boundary derives nothing
 % and every admitted call keeps its compiled clauses.
