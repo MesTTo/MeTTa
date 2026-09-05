@@ -691,6 +691,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `m.why()` and `lint()` answer from one head verdict instead of two. Asking
+  why `(if $c $t $e)` matched nothing used to answer "nothing here is headed by
+  if, and no function has that name; did you mean if?", because why() asked
+  `fun/1` alone and `if` is a form the translator compiles rather than a
+  function; lint has asked both questions since it learned that the hard way.
+  why() now names the special form, and it reports a wrong arity too, so
+  `(double 1 2 3)` against a one-argument `double` says so rather than sending
+  the caller to `eval`, where nothing answers either. Near-miss suggestions
+  come from one pool at one threshold: the whole catalogue, special forms
+  included, so a mistyped `collaps` is offered `collapse` by both doors where
+  lint could offer nothing, and a name is never suggested for itself.
+
 - One annotation the runtime cannot name no longer discards the rest of a
   signature. `from decimal import Decimal` under `TYPE_CHECKING` is a name that
   exists for a type checker and never at runtime, and resolving a signature was

@@ -55,3 +55,35 @@ Decided: an unresolvable annotation stands in the map as `Unresolved` and
 funnel every consumer reaches to turn an annotation into a type. Value
 conversion reads `Any` for one instead, through `for_conversion`, since "we
 could not name this type" is what `Any` already means at that boundary.
+
+Tried: reproducing L088 (`share unknown-head and arity analysis between why()
+and lint()`) by asking both doors the same three questions ->
+`m.why((if $c $t $e))` answered "nothing here is headed by if, and no function
+has that name; did you mean if?" while lint reported nothing, correctly.
+`m.why((double 1 2 3))` against a one-argument `double` answered "try eval",
+where lint reported the arity mismatch. Reproduces, and the first one is a
+wrong diagnosis rather than a missing one.
+
+Found the shared question already answered engine-side:
+`head_meaning_route/3` in engine/translator/special_forms.pl, published for
+hosts, whose own comment says "One place asks both questions, so a route added
+to either is covered wherever the pair is consulted". lint asks both through
+`EngineRegistry`; why() asked only `fun/1`.
+Decided: keep the Python-side registry as the shared cache rather than adding a
+seam predicate, because lint already crosses through it once per name and why()
+needs the same three facts.
+
+Rejected: leaving the shared verdict in `_lint_model.py`. The module is named
+for lint and `_space_diagnostics` is core, so the dependency would have read as
+a layering accident. `_head_meaning.py` carries `EngineRegistry` and the
+verdict; `_lint_model.py` keeps the `Finding` record. Added to the
+import-linter core list so the new module is held to the same rule.
+
+Decided: one suggestion pool and one cutoff. why() drew from `m.builtins()` at
+0.75 and lint from `fun/1` alone at 0.8, which is two drifts at once: lint could
+not offer `collapse` for `collaps` because `metta_translated_head/1` does not
+enumerate, and why() could suggest a name for ITSELF, which is where
+"did you mean if?" came from. The pool is now the catalogue plus the caller's
+stored heads, minus the queried name; 0.8 is the tighter of the two thresholds
+and every near miss the suite pins clears it (car-atmo/car-atom 0.875,
+car-atomm/car-atom 0.941, doubl/double 0.909, collaps/collapse 0.933).

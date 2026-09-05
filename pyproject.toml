@@ -452,6 +452,7 @@ source_modules = [
     "metta._define_twins",
     "metta._documentation",
     "metta._engine",
+    "metta._head_meaning",
     "metta._object_fields",
     "metta._operator_lowerings",
     "metta._ops",
