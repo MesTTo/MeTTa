@@ -1,6 +1,6 @@
 # Purpose: verify the engine, language surfaces and package artifacts in CI.
 # Guarantees: the browser bundle executes in Chromium, not only in Node.
-#   [tested: npm run test:browser; commit=WORKTREE]
+#   [tested: npm run test:browser; commit=04fde431963bd063ef4ab5dc9b579ff2faba9fe8]
 name: Checks
 
 # The existing ci.yml gates pull requests into main only, so work on any
