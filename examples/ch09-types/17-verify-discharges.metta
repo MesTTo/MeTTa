@@ -44,6 +44,22 @@
 !(test (vd-double "not a number")
        (Error (vd-double "not a number") (BadArgType 1 Number String)))
 
+;A proved-parameter discharge over a UNION, which is the case where the fast
+;side and the slow side are two different relations rather than a VM test and a
+;walk. `vd-inner`'s check is removed because `vd-scalar`'s own boundary already
+;proved the same ground union of the same variable, and under the pragma the
+;removed check runs beside the proof. The callee comes FIRST because a call to
+;a function that is not compiled yet becomes a runtime dispatch, and a dispatch
+;has no call-site check to discharge.
+(: vd-inner (-> (| Number String) %Undefined%))
+(= (vd-inner $x) (held $x))
+(: vd-scalar (-> (| Number String) %Undefined%))
+(= (vd-scalar $x) (vd-inner $x))
+!(test (vd-scalar 21) (held 21))
+!(test (vd-scalar "text") (held "text"))
+!(test (vd-scalar True)
+       (Error (vd-scalar True) (BadArgType 1 (| Number String) Bool)))
+
 ;And the mode turns off, leaving the engine as it found it.
 !(pragma! verify-discharges false)
 !(test (vd-double 4) 8)

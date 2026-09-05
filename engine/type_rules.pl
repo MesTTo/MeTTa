@@ -40,6 +40,15 @@
 %   [tested: test_aliases_keep_the_fast_path_and_registry_in_agreement,
 %   test_alias_casts_keep_the_strict_witness_and_obey_user_refusals;
 %   commit=acad923476d21110870f235192757281a737ee71].
+% Guarantees: a union type decomposes in every family only after both tiers
+%   have declined the pair as written, so a user rule naming the whole union
+%   stays decisive and a refused alternative never refuses a permitted one; an
+%   accepted union remains nondeterministic so a shared type variable is
+%   assigned once across the whole call [tested:
+%   union_types:a_user_refusal_of_the_whole_pair_is_decisive_in_retained_and_runnable_code,
+%   union_types:a_refused_alternative_does_not_refuse_a_permitted_one,
+%   union_types:the_upstream_witness_cannot_discharge_a_shared_variable;
+%   commit=WORKTREE].
 
 % The public families and registry views share one declaration inventory.
 % registered_typing_rule/7 exposes the patterns the checker matches;
@@ -344,6 +353,13 @@ typing_rule_expected(Module, Family, RawExpected) :-
     typing_rule_input(Module, RawExpected, Expected),
     typing_rule_expected_resolved(Module, Family, Expected).
 
+%A union decomposes only AFTER both tiers have been asked about the pair as
+%written, which is what makes a user rule naming the whole union decisive: a
+%refusal of `(Number, (| Number String))` is answered here and never reaches
+%the alternatives, while a rule that says nothing about the pair leaves the
+%alternatives to decide under this same family's rules. Its guard is inlined
+%in the existing chain, so a pair with no `|` on either side reaches the
+%unchanged `defer` at no extra cost.
 typing_rule_decision_resolved(Module, Family, Actual, Expected, Outcome, Name, Tier) :-
     (   decisive_typing_rule(user, Module, Family, Actual, Expected,
                              Outcome, Name)
@@ -351,6 +367,11 @@ typing_rule_decision_resolved(Module, Family, Actual, Expected, Outcome, Name, T
     ;   decisive_typing_rule(shipped, '*', Family, Actual, Expected,
                              Outcome, Name)
     ->  Tier = shipped
+    ;   (   nonvar(Actual), Actual = [ActualHead|_], ActualHead == '|'
+        ;   nonvar(Expected), Expected = [ExpectedHead|_], ExpectedHead == '|'
+        )
+    ->  typing_union_decision(Module, Family, Actual, Expected,
+                              Outcome, Name, Tier)
     ;   Outcome = defer,
         Name = none,
         Tier = none
