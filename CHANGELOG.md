@@ -570,6 +570,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- A C host's boot loads the compiled engine instead of recompiling it.
+  `mt_open()` consulted `engine/metta.pl` by name, and an explicit `.pl` names
+  the source, so every boot compiled the umbrella and its eleven
+  `engine/metta/*.pl` units again; it now runs the engine's own
+  `metta_qlf_boot:qlf_load_engine/0`, which is the load `engine/main.pl` runs.
+  The seat's `boot` benchmark falls from 1,563,321 inferences to 633,848 and
+  from 1,885,311,169 retired instructions to 1,107,958,359, with the other
+  five cases identical to the inference. On a tree with no artifacts a C host
+  read 3,417,125 inferences and generated none, and its next boot read
+  3,417,141, so an installation that only ever ran a C program paid the whole
+  source compile on every run; the first boot now costs 3,459,587, leaves the
+  fourteen artifacts, and the second reads 633,837. A tree the process may not
+  write still boots from source, writes nothing and says nothing.
+
 - `get-metatype` classifies a NAME by whether this engine holds a function for
   it, which is upstream PeTTa's whole rule, in place of a 115-name table taken
   from another arbiter. `car-atom`, `cdr-atom`, `cons-atom`, `decons-atom`,

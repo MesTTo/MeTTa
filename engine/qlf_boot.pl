@@ -1,7 +1,8 @@
 % Purpose: decide Quick Load Format freshness for the engine tree before
-%   any engine file loads: purge every engine and lib .qlf when any source
-%   is newer than any of them or when the .qlf set was written by a
-%   different SWI version, so the boot that follows regenerates them under
+%   any engine file loads, then LOAD the engine under that regime: purge
+%   every engine and lib .qlf when any source is newer than any of them or
+%   when the .qlf set was written by a different SWI version, and hand every
+%   host one qlf_load_engine/0 that consults the umbrella under
 %   qcompile(auto). Exports nothing and lives in its own module for
 %   user-surface hygiene; note that ANY boot-content change, however
 %   inert, can move a twin's pinned inference count by a few tens
@@ -24,11 +25,18 @@
 %     mtime and would serve the OLD code [measured 2026-08-25: a fact
 %     appended to engine/translator/lowering.pl was invisible on the next
 %     boot until this purge ran].
-%   - a read-only tree stays correct: delete_file failures are absorbed
-%     and SWI falls back to source for absent .qlf
-%     [assumed: exercised only by inspection of the catch sites below and
-%     SWI's own '$qlf_file' fallback; no lane boots a read-only checkout;
-%     commit=a7db7299e025b17618cf22d5fe18ad3e9b2f64b1].
+%   - a read-only tree stays correct: delete_file failures are absorbed,
+%     SWI falls back to source for absent .qlf, and qlf_load_engine/0 writes
+%     nothing and says nothing
+%     [tested: test_a_read_only_engine_tree_boots_from_source;
+%     commit=48b6cb4eea09e6f2f9637c7186e77c628d61b7e3].
+%   - every host loads the engine the same way, through qlf_load_engine/0:
+%     engine/main.pl and the C host in extensions/cmetta/cmetta.c call the
+%     one predicate, so the compiled regime and its recovery have one
+%     implementation rather than a copy per host, and the engine a
+%     .qlf boot exposes is the engine a source boot exposes
+%     [tested: test_the_compiled_boot_is_the_same_engine;
+%     commit=48b6cb4eea09e6f2f9637c7186e77c628d61b7e3].
 %   - the engine reads its own sources and writes its own output as UTF-8
 %     whatever the ambient locale says, and a .qlf set compiled under a
 %     different encoding is purged rather than served
@@ -147,8 +155,8 @@ qlf_write_stamp(StampFile) :-
               _, true)
     ).
 
-%The recovery door main.pl opens on a failed load: purge everything so
-%the retry runs from source, whatever state a torn artifact left.
+%The recovery door qlf_load_engine/0 below opens on a failed load: purge
+%everything so the retry runs from source, whatever state the failure left.
 purge_all_qlf :-
     (   qlf_boot_directory(Here)
     ->  qlf_files(Here, QlfFiles),
@@ -176,5 +184,67 @@ purge_stale_qlf :-
                catch(delete_file(Q), _, true))
     ),
     qlf_write_stamp(StampFile).
+
+%The engine load, so every host runs ONE of it: engine/main.pl calls this and
+%so does the C host, extensions/cmetta/cmetta.c, which used to consult
+%engine/metta.pl by an explicit .pl path of its own and therefore recompiled
+%the umbrella and its eleven engine/metta/*.pl units from SOURCE at every
+%boot. That was 929,473 of that seat's 1,563,321 boot inferences, 59.5%
+%[measured 2026-09-05: extensions/cmetta/bench.sh boot, three identical
+%samples on each side of the spelling]. It also charged every engine edit to
+%the seat two orders of magnitude harder than to the engine's own boot row:
+%the commit that added engine/metta/type_aliases.pl cost +433 inferences there
+%and +48,190 here [measured 2026-09-05 by the boot-row bisection this file's
+%journal entry records, one extraction per commit across the five merges since
+%the seat's pin].
+%
+%The umbrella is named WITHOUT its extension, which is what lets SWI resolve
+%it through the prolog file type and take engine/metta.qlf when the purge
+%above has left one standing; naming metta.pl names the SOURCE and loads it.
+%The nested unit consults inside engine/metta.pl need no change, because
+%under qcompile(auto) a nested consult is recorded INTO the parent being
+%compiled rather than beside it: dropping one unit's .pl produced no
+%engine/metta/<unit>.qlf and no saving [measured 2026-09-05].
+%
+%The path is qlf_boot_directory/1, asserted by purge_stale_qlf/0 above from
+%this file's own load context, so a host passes no file name and an
+%apostrophe in a directory name cannot reach a goal as text. user: is the
+%module engine/metta.pl loads into and ensure_loaded/1 takes its context
+%module from the caller, so an unqualified call from this module would load
+%the engine into metta_qlf_boot. The qcompile flag is scoped to this one load
+%and restored, so a program the host runs afterwards does not inherit it.
+%
+%A tree the process may not write stays correct and silent: SWI compiles from
+%source, writes nothing, and the boot pays what a source boot always paid,
+%3,400,895 inferences against 617,044 through the artifacts [measured
+%2026-09-05 on a copy of this tree with engine/, lib/ and lib/*/ at mode 555
+%and every .qlf deleted: exit 0, no artifact written, no warning printed].
+%
+%The catch is the net for a load ERROR, and it is narrower than it looks.
+%SWI writes each artifact to `.<name>.qlf.<pid>` and rename(2)s it into
+%place, so concurrent first boots CANNOT tear one [measured 2026-09-05:
+%strace -e trace=openat,rename over one generating boot, fourteen
+%temp-then-rename pairs]; and an artifact damaged some other way is not a
+%catchable condition at all -- an empty or header-short one SWI recompiles by
+%itself and exits 0, one truncated to 64 bytes aborts the process from inside
+%the loader with `[FATAL ERROR: Unexpected EOF on QLF file at offset 22]` and
+%one truncated to 4 kB with `[FATAL ERROR: Illegal XR entry at index 21: -1]`,
+%both at exit 134, and one truncated to a quarter, half or three quarters
+%hangs the loader with no output at all [measured 2026-09-05: eight damage
+%sizes against engine/main.pl]. What it does catch is a
+%Prolog-level failure of the load itself, and the purge is what stops the
+%retry meeting the same artifact set again.
+qlf_load_engine :-
+    qlf_boot_directory(Here),
+    atom_concat(Here, '/metta', Umbrella),
+    current_prolog_flag(qcompile, Previous),
+    setup_call_cleanup(
+        set_prolog_flag(qcompile, auto),
+        catch(user:ensure_loaded(Umbrella),
+              Error,
+              ( print_message(warning, Error),
+                purge_all_qlf,
+                user:ensure_loaded(Umbrella) )),
+        set_prolog_flag(qcompile, Previous)).
 
 :- purge_stale_qlf.
