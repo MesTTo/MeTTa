@@ -59,6 +59,14 @@
 %   - MeTTa True and False are the Prolog atoms true and false
 %     [source: engine/parser.pl:133].
 % Guarantees:
+%   - case_default/3 selects only a written Empty pattern without binding
+%     wildcard patterns, including nested case towers [tested:
+%     case_dual_patterns; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67].
+%   - generator_bound_variables/2 treats case pattern variables as bindings
+%     rather than universally quantified free variables [tested:
+%     case_dual_patterns; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67].
+%   - an empty body's dual succeeds because it has no True answer [tested:
+%     case_dual_patterns; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67].
 %   - (not-provable G) answers False once per way G reduces to True and True
 %     once per solution of G's dual, so for a ground G exactly one of the two
 %     holds and for a non-ground G the two partition the answers
@@ -818,11 +826,26 @@ let_bound_variables(['let*', Bindings, Body], Vars, Tail) :-
     !,
     letstar_to_rec_let(Bindings, Body, RecursiveLet),
     let_bound_variables(RecursiveLet, Vars, Tail).
+%A case pattern binds from the key just as a let pattern binds from its value.
+%Quantifying a wildcard separately demands it match every term, so even a
+%ground key selecting a False arm would have no dual answer.
+let_bound_variables([case, Key, Pairs], Vars, Tail) :-
+    arrived_pairs(Pairs),
+    !,
+    let_bound_variables(Key, Vars, Middle),
+    case_bound_variables(Pairs, Middle, Tail).
 let_bound_variables([Head|Rest], Vars, Tail) :-
     !,
     let_bound_variables(Head, Vars, Middle),
     let_bound_variables(Rest, Middle, Tail).
 let_bound_variables(_, Vars, Vars).
+
+case_bound_variables([], Vars, Vars).
+case_bound_variables([[Pattern, Body]|Pairs], Vars, Tail) :-
+    term_variables(Pattern, Bound),
+    append(Bound, Rest, Vars),
+    let_bound_variables(Body, Rest, Next),
+    case_bound_variables(Pairs, Next, Tail).
 
 occurs_among(Vars, Var) :- memberchk_eq(Var, Vars).
 
@@ -1130,6 +1153,8 @@ body_form_dual(case, [KeyExpr, Pairs], Module, Local, Goal) :-
 %(== (collapse (f $x)) ()) being the usual shape, and that path evaluates it
 %through the ordinary translator and never reaches here.
 body_form_dual(collapse, [_], _, _Local, true).
+%empty has no answers, the same answer set as (superpose ()).
+body_form_dual(empty, [], _, _Local, true).
 %A superpose answers each of its elements in turn, so it is not True exactly
 %when none of them is: the conjunction of the elements' duals. The elements
 %are known here, so unlike let and match this generator needs no enumeration.
@@ -1227,10 +1252,12 @@ comparison_dual('#>=', '#<').
 comparison_dual('#=', '#\\=').
 comparison_dual('#\\=', '#=').
 
+%Read the written tag without binding a wildcard or posting its constraints.
 case_default(Pairs, Cases, Default) :-
     (   select(Found, Pairs, Rest),
         nonvar(Found),
-        Found = ['Empty', DefaultExpr]
+        Found = [Pattern, DefaultExpr],
+        Pattern == 'Empty'
     ->  Cases = Rest,
         Default = DefaultExpr
     ;   Cases = Pairs,
