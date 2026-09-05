@@ -7,6 +7,9 @@
 :- encoding(utf8).
 
 % Purpose: provide test diagnostics, assertions, formatting, timing, and bounded execution helpers
+% Guarantees: Rest-arrow reporting and documentation inspect metta_runtime_type/2
+%   while the reported declaration retains its written type
+%   [tested: run_tests(metta_arrow_projection); commit=WORKTREE].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees:
 %   - every definition retains engine/metta.pl's implementation module and original load order
@@ -349,8 +352,8 @@ assert(Form, true) :-
 reported_scoped_type_answers(_, X, [['->']]) :- X == [], !.
 reported_scoped_type_answers(Space, [F], [Result]) :-
     nonvar(F),
-    (   match_stored(Space, [':', F, [->, ['%Rest%', _], Result]],
-                       Result, _)
+    (   match_stored(Space, [':', F, Raw], Raw, _),
+        metta_runtime_type(Raw, [->, ['%Rest%', _], Result])
     *-> true
     ;   seam:builtin_type_declaration(F, [->, ['%Rest%', _], Result])
     ),
@@ -447,7 +450,7 @@ doc_type_error(['Error'|_]).
     'get-type-space'(Space, Atom, Type),
     (   doc_type_error(Type)
     ->  Doc = Type
-    ;   Type = [->|_]
+    ;   metta_runtime_type(Type, [->|_])
     ->  (   \+ \+ formal_doc_atom(Space, Atom,
                                   ['@doc', Atom, _, ['@params', _], _])
         ->  'get-doc-function'(Space, Atom, Type, Doc)
@@ -487,7 +490,7 @@ doc_function_types('%Undefined%', Params, Types) :- !,
     TypeCount is ParameterCount + 1,
     length(Types, TypeCount),
     maplist(=('%Undefined%'), Types).
-doc_function_types([->|Types], _, Types).
+doc_function_types(Raw, _, Types) :- metta_runtime_type(Raw, [->|Types]).
 
 'get-doc-params'(Params, _, Types, _) :-
     (   var(Params)

@@ -1,4 +1,7 @@
 % Purpose: lower runnable expressions, calls, arguments, and dispatch policies into Prolog goals
+% Guarantees: Direct declaration probes use metta_runtime_type/2 before masking
+%   or settling arguments
+%   [tested: run_tests(metta_arrow_projection); commit=WORKTREE].
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
 %   apply_translator_rule_dl/7 receives a rule's declarations and owning
@@ -1298,7 +1301,8 @@ written_args_settled(self, HV, Written) :-
     self_tier_clause(SelfTierModule, HV, Chain),
     written_args_settled_by_chain(Chain, Written).
 written_args_settled(local(Space), HV, Written) :-
-    match_stored(Space, [':', HV, Chain], Chain, _),
+    match_stored(Space, [':', HV, Raw], Raw, _),
+    metta_runtime_type(Raw, Chain),
     written_args_settled_by_chain(Chain, Written).
 
 written_args_settled_by_chain(Chain, Written) :-
@@ -1348,7 +1352,8 @@ arrow_declared_data_head(HV, DeclarationTier) :-
 :- dynamic self_tier_clause/3.
 
 self_tier_clause(_, HV, Chain) :-
-    '$metta_atoms:&self':'&self'(':', HV, Chain).
+    '$metta_atoms:&self':'&self'(':', HV, Raw),
+    metta_runtime_type(Raw, Chain).
 
 %The lifecycle's two doors: a born execution module notes its tier, a
 %released space forgets it. Exported so engine/spaces/lifecycle.pl can call
@@ -1360,12 +1365,13 @@ self_tier_note(Module, Space) :-
         Space \== '&self',
         \+ self_tier_ref(Module, _),
         native_storage_module_cache(Space, AtomsModule)
-    ->  Row =.. [Space, ':', HV, Chain],
+    ->  Row =.. [Space, ':', HV, Raw],
         asserta((self_tier_clause(Module, HV, Chain) :-
                     (   AtomsModule:Row
                     ->  true
-                    ;   '$metta_atoms:&self':'&self'(':', HV, Chain)
-                    )), Ref),
+                    ;   '$metta_atoms:&self':'&self'(':', HV, Raw)
+                    ),
+                    metta_runtime_type(Raw, Chain)), Ref),
         assertz(self_tier_ref(Module, Ref))
     ;   true
     ).
@@ -1399,7 +1405,8 @@ inherited_data_head_arrow_tier(Module, _, self) :-
 inherited_data_head_arrow_tier(Module, HV, DeclarationTier) :-
     metta_module_space(Module, Space),
     (   once(match_stored(Space, [':', HV, _], _, _))
-    ->  once(match_stored(Space, [':', HV, [->|_]], _, _)),
+    ->  once(( match_stored(Space, [':', HV, Raw], Raw, _),
+               metta_runtime_type(Raw, [->|_]) )),
         DeclarationTier = local(Space)
     ;   \+ fun_in(Module, HV),
         DeclarationTier = self

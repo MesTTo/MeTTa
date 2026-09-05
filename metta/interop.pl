@@ -1,4 +1,7 @@
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
+% Guarantees: Export readers use metta_runtime_type/2 to recognise annotated
+%   arrows and derive arity while retaining the declared type
+%   [tested: run_tests(metta_arrow_projection); commit=WORKTREE].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order;
 %   a named-space MeTTa import is reusable only while its committed source receipt validates its life,
@@ -641,7 +644,8 @@ declaring_file(File) :-
 
 record_metta_export(File, Parsed) :-
     parsed_form_parts(Parsed, _, Text, Term),
-    (   Term = [':', Name, Type], atom(Name), is_list(Type), Type = [->|_]
+    (   Term = [':', Name, Type], atom(Name), is_list(Type),
+        metta_runtime_type(Type, [->|_])
     ->  assertz(pending_metta_export(File, Name, Type))
     ;   Term = [export, Name, Arity], atom(Name), integer(Arity)
     ->  assertz(pending_metta_export(File, Name, arity(Arity)))
@@ -790,7 +794,8 @@ unload_declared_source(Source) :- catch(unload_file(Source), _, true).
 %The MeTTa arity is the type chain's length less one, and the predicate's is
 %one more than that: (-> Number Number Number) is two inputs and an output,
 %so 'vec-dot'/3.
-declared_predicate_arity([->|Types], Arity) :- !, length(Types, Arity).
+declared_predicate_arity(Raw, Arity) :-
+    metta_runtime_type(Raw, [->|Types]), !, length(Types, Arity).
 declared_predicate_arity(arity(MettaArity), Arity) :- Arity is MettaArity + 1.
 
 %Answers the arity it checked, so the caller can register THAT rather than
@@ -1095,7 +1100,8 @@ declaration_of(_, []).
 claimed_export_name(Forms, Name) :-
     member(Parsed, Forms),
     parsed_form_parts(Parsed, _, _, Term),
-    ( Term = [':', Name, [->|_]] ; Term = [export, Name, Arity], integer(Arity) ),
+    ( Term = [':', Name, Raw], metta_runtime_type(Raw, [->|_])
+    ; Term = [export, Name, Arity], integer(Arity) ),
     atom(Name).
 
 %The same load, importing chosen exports under chosen names. SWI's own import
