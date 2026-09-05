@@ -153,6 +153,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   on its first call. Enabling now recompiles through the engine's own door and
   touches no stored atom.
 
+- The provenance pass resolves a pin written in a Prolog block comment. ISO
+  Prolog has both `%` and `/* ... */`, and the plunit suites write their
+  contract headers in the second one, but `pin_provenance.py` recognised a pin
+  only where a `%` opened the line. `tests/prolog/suites/spaces/catalog.plt`'s
+  pin was therefore reported as "left alone, no % opens a comment before it on
+  its line" and no run would ever have replaced it, so the file would have
+  shipped a claim naming the word WORKTREE as its evidence tree. The `%`
+  grammar now takes the block form the `//` grammar already took.
+
 - `Answer`'s docstring states the contract the engine actually runs. It said
   `residue` and `k` "complete the wire form; the engine's support for them
   lands by phase, and until it does a non-default value is a loud error",

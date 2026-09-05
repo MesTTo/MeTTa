@@ -21,7 +21,12 @@ than per byte:
                 belongs to code that EMITS or MATCHES pins, and is left alone.
                 The distinction is `ast`'s, not a regex's.
   .pl .plt      a placeholder is a pin when a `%` opens a comment before it on
-                its line, which is where all 218 of this tree's Prolog pins sit.
+                its line, where most of this tree's Prolog pins sit, or when it
+                sits inside a `/* ... */` block, which is Prolog's other
+                comment form and how the plunit suites write their contract:
+                tests/prolog/suites/spaces/catalog.plt keeps its whole
+                Guarantees block in one, and its pin was declined for having no
+                `%` until this rule matched the one `//` already had.
   .sh .mk       the same rule with `#`, and a Makefile by NAME, since it
   Makefile      carries the same contract header its neighbours do and has no
                 suffix at all to key on.
@@ -99,6 +104,12 @@ PERCENT_COMMENT = (".pl", ".plt")
 HASH_COMMENT = (".sh", ".mk")
 SLASH_COMMENT = (".ts", ".mjs", ".c", ".h")
 MAKEFILE_NAMES = ("Makefile", "GNUmakefile")
+
+#: The grammars whose language ALSO has `/* ... */`, so a line marker is one of
+#: two ways in rather than the only one. Prolog is here for the same reason C
+#: is: ISO 13211-1 gives it both forms and the plunit suites use the block one
+#: for their contract headers.
+BLOCK_GRAMMARS = ("//", "%")
 
 
 def _grammar(path: Path) -> str | None:
@@ -219,7 +230,7 @@ def sites(path: Path, text: str) -> list[tuple[int, int, str | None]]:
     found = []
     if grammar == "py":
         skip = _docstring_spans(text)
-    elif grammar == "//":
+    elif grammar in BLOCK_GRAMMARS:
         skip = [match.span() for match in BLOCK_COMMENT.finditer(text)]
     else:
         skip = []
@@ -232,14 +243,14 @@ def sites(path: Path, text: str) -> list[tuple[int, int, str | None]]:
         elif grammar == "py":
             if any(low <= at < high for low, high in skip):
                 reason = "a string literal that is not a docstring: this code emits or matches pins"
-        elif grammar in ("%", "#"):
+        elif grammar == "#":
             head = text[text.rfind("\n", 0, at) + 1 : at]
-            if grammar not in head:
-                reason = f"no {grammar} opens a comment before it on its line"
-        elif grammar == "//":
+            if "#" not in head:
+                reason = "no # opens a comment before it on its line"
+        elif grammar in BLOCK_GRAMMARS:
             head = text[text.rfind("\n", 0, at) + 1 : at]
-            if "//" not in head and not any(low <= at < high for low, high in skip):
-                reason = "neither // nor a /* */ block opens a comment around it"
+            if grammar not in head and not any(low <= at < high for low, high in skip):
+                reason = f"neither {grammar} nor a /* */ block opens a comment around it"
         elif grammar is None:
             reason = f"{path.suffix or path.name} has no comment rule here; add one rather than guessing"
         found.append((at, line, reason))

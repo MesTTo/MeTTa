@@ -287,3 +287,26 @@ a licensed provider is asked with `limit=2` for `[:2]` and `limit=None` for the
 full view; the same provider under `tropical`, one without the `best-first`
 declaration, and one declaring `Partial` rather than `Exact` are each asked
 `limit=None`.
+
+## 2026-09-06 - the pin this branch wrote that nothing would ever resolve
+Tried: `pin_provenance.py --check` on the landing tip -> 64 pins awaiting and 5
+left alone, one of them
+`tests/prolog/suites/spaces/catalog.plt:19: left alone, no % opens a comment
+before it on its line`. That is the D3 guarantee this branch added, and it sits
+in the file's `/* ... */` contract header, which is where every claim in that
+suite sits.
+Tried: reading the pass -> it maps `.pl` and `.plt` to the `%` grammar and only
+the `//` grammar takes a block, so a `.plt` written the way this tree writes
+its plunit suites had no way in. The gate reads the CLAIM anyway,
+`claim_sites()` scans whole file text, so the tag was checked and only its
+provenance was unreachable: the file would have shipped a claim naming the word
+WORKTREE as its evidence tree forever.
+Rejected: rewriting `catalog.plt`'s header into `%` lines. It would reformat a
+trunk file to suit a tool, and the next suite written the same way would hit
+the same wall.
+Decided: `%` takes the block form `//` already took, as one `BLOCK_GRAMMARS`
+pair rather than a second branch, since ISO 13211-1 gives Prolog both comment
+forms exactly as C has them. The self-test gains a `.plt` plant whose block pin
+must be rewritten and whose bare `an_atom('...')` must not; it was proven to
+discriminate by running the new plant against a copy of the pass with the
+change reverted -> 2 defects, and 0 with it.

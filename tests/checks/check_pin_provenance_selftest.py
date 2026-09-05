@@ -17,7 +17,7 @@ these fixtures are deliberately unbacked.
 
 Assumes: git on PATH, and a writable temporary directory.
 Guarantees:
-  - each of the seven planted shapes lands on the side the pass documents, and
+  - each planted shape lands on the side the pass documents, and
     the pass reports the declined ones with a reason
     [tested: tests/checks/check_pin_provenance_selftest.py]
   - a placeholder outside the evidence gate's own globs is REPORTED and fails
@@ -63,6 +63,20 @@ PLANTS = (
         ],
         [2],
         [3],
+    ),
+    # Prolog's OTHER comment form. A plunit suite writes its whole contract in
+    # one `/* ... */`, so a pin there has no `%` on its line and was declined
+    # as code until the `%` grammar learned the block the `//` grammar knew.
+    (
+        "tests/prolog/suites/spaces/plant.plt",
+        [
+            "/* Purpose: a fixture suite.",
+            f"   Guarantees: a block pin [{TAG} {WHEN}: a_plunit_test; {WORD}].",
+            "*/",
+            f"an_atom('{WORD}').",
+        ],
+        [2],
+        [4],
     ),
     (
         "extensions/python/tools/plant.py",
