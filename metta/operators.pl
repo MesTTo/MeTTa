@@ -1,6 +1,10 @@
 % Purpose: implement arithmetic, comparisons, booleans, list operators, and expression-shape guards
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
+%   '=@='/3 is declared locally as a deliberate non-builtin implementation,
+%   so reverse builtin coverage cannot silently treat it as language-visible
+%   [tested: builtin_facets:the_legacy_variant_predicate_is_exempt_in_place;
+%   commit=90aa1e67c6d1cda45e27dbaa565f2c537f70ad40].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: decons-atom/2 and atom-subst/4 retain their refusal answers, and
@@ -255,6 +259,11 @@ error_shaped_operand(A) :-
 '='(A,B,R) :-  (A=B -> R=true ; R=false).
 '=?'(A,B,R) :- (\+ \+ A=B -> R=true ; R=false).
 '=alpha'(A,B,R) :- (A =@= B -> R=true ; R=false).
+:- multifile seam:builtin_implementation_exemption/2.
+:- dynamic seam:builtin_implementation_exemption/2.
+seam:builtin_implementation_exemption(
+    '=@='/3,
+    legacy_alpha_equivalence_spelling_is_not_language_visible).
 '=@='(A,B,R) :- (A =@= B -> R=true ; R=false).
 '<='(A,B,R) :- ( number(A), number(B) -> (A =< B -> R=true ; R=false)
                 ; metta_arith_operands(A, B)
