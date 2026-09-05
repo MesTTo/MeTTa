@@ -319,6 +319,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Every shipped semiring is a root object. `metta.counting`, `.prob`, `.prov`,
+  `.ranked` and `.tropical` were exported and `bool`, `bag`, `set`, `budget`
+  and `amplitude` were reachable only as strings, so `metta.budget` raised
+  AttributeError for a carrier `under="budget"` already answered and no typed
+  annotation could name it. All ten are lazy root exports now, in the order the
+  catalog declares them.
+
 - `metta_ensure_source_observation/0` is a published `service`, so a library
   may ask for the source observer by name. The engine does not load
   `engine/source_observation.pl` at boot, and `observe_source/4` cannot be its
