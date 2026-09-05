@@ -328,3 +328,30 @@ Decided: pre-existing flake, recorded rather than repaired. The evidence is
 keeping is the control's own defect: a fixed arm order in a paired experiment
 gives the first arm a systematically different machine state, and it produced a
 2^-5 "signal" from nothing.
+
+## 2026-09-05: verification on the committed tree
+
+Every arm below ran with `engine` and `lib` QLF cleared and the engine booted
+once first.
+
+| Lane | Result |
+| --- | --- |
+| `run_tests suites/typecheck/union_types.plt -- extensions` | 35/35, exit 0 |
+| `run_tests suites/typecheck/structural_aliases.plt -- extensions` | 28/28, exit 0 |
+| `sh engine/test.sh` | exit 0, 66 files, 298 units, no FAILED |
+| `sh test.sh` | exit 0, 248 examples OK |
+| `CHECK_PY=$PY sh extensions/python/test.sh` | 3,191 passed, 52 skipped, 0 failed on one run; a repeat read 3,190 passed with `test_a_transaction_commits_async_launch_before_its_landing` failing on `assert [launch] == [launch, landing]`, the flake the alias thread already recorded reproducing on a clean base, and it passes alone |
+| `tests/checks/check_evidence_tags.py` | 0 unbacked tags in 4,898 claims |
+| `tests/checks/check_llms_names.py` | 0 findings |
+| `layering_gate` | 856 cross-subsystem calls over 73 contract lines |
+| `translator_confluence_gate` | exit 0 |
+| `check_cumulative_syntax.py` | 5 findings, the same 5 the base has, none naming this thread's files |
+
+Pre-existing and reproduced with this thread's changes reverted: `typed-call`
+above its pin by the same seven inferences; `prolog-static` exiting 1 on two
+var-branch warnings in `engine/spaces/lifecycle.pl` and
+`governing_type_declaration_in/3`; `list_undefined` naming
+`source_observation:pairs_keys_values/3` and `merge/3`; and
+`test_a_user_typing_rule_participates_like_a_shipped_one` failing when the whole
+`tests/ch09_types/` directory runs in one process, which is `&self` state
+carried between tests there.
