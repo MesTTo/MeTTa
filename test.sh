@@ -1,5 +1,22 @@
 #!/bin/sh
 # Purpose: run the engine's own test suites, as the gate runs them.
+#
+#   Usage: sh engine/test.sh [SUITE ...]
+#
+#   With no argument it runs every suite. With one it runs the named ones,
+#   given as a path from tests/prolog or from the repository root:
+#
+#     sh engine/test.sh suites/spaces/materialization.plt
+#     sh engine/test.sh tests/prolog/suites/reader/parser.plt
+#
+#   The argument exists because the alternative was typed by hand instead. The
+#   documented way to run one suite used to be a raw
+#   `cd tests/prolog && swipl -g "set_test_options([format(log)]), run_tests"
+#   -t halt <suite>`, which carries no bound, no VIRTUAL_ENV, no
+#   `-- extensions`, no choicepoint scan and no load-error scan; one such
+#   command ran 7,540 seconds at 97.8% CPU on 2026-09-05 and needed SIGKILL.
+#   This form is shorter than that one and gets all six.
+#
 # Assumes:
 #   - swipl on PATH. This suite drives the engine directly and needs no host,
 #     no janus and no Python, which is why it is the one component test.sh that
@@ -9,9 +26,10 @@
 #     ONE body. Everything that makes the run trustworthy lives here: the
 #     redirect that keeps swipl's exit status out of a pipeline, the working
 #     directory the suites' relative paths resolve against, the choicepoint
-#     scan, and the load-time error scan that catches a test which never ran.
+#     scan, the load-time error scan that catches a test which never ran, and
+#     the bound that keeps a suite from outliving the run or the session.
 #   - the exit status is nonzero when any suite fails, prints an error while
-#     LOADING, or leaves a choicepoint.
+#     LOADING, leaves a choicepoint, or names a suite that does not exist.
 # Open Obligations:
 #   To Do: None
 #   Hacks: None
@@ -21,6 +39,11 @@ set -u
 
 HERE=$(cd -- "$(dirname -- "$0")" && pwd)/..
 
+# One spelling of the bound, implemented in bounded.sh. A plunit suite that
+# does not terminate is the exact shape this repository has been bitten by
+# twice, and a suite run BY HAND is the case a gate lane cannot reach.
+bounded() { sh "$HERE/bounded.sh" "$@"; }
+
 # The suites drive Python through Janus, which follows VIRTUAL_ENV rather than
 # any interpreter this script picks, so a run BY HAND has to export the same
 # environment the gate does or shim.plt's 18 scalar-semantics cases fail on a
@@ -29,6 +52,8 @@ METTA_ROOT="$HERE"
 . "$HERE/select-python.sh"
 
 run_plunit() {
+    # The named suites are resolved AFTER this cd, so a path given from the
+    # repository root has to be rewritten; the loop below does that.
     cd "$HERE/tests/prolog" || return 1
     ok=0
     log=$(mktemp)
@@ -44,9 +69,27 @@ run_plunit() {
     # names the engine, and so does every path a test body builds. The LOAD
     # time directives are the other half and are file-relative, which is why
     # `:- ensure_loaded('../../../../engine/metta.pl')` sits beside them.
-    for suite in suites/*/*.plt; do
+    #
+    # A named suite is accepted either as the path from here that the suites
+    # themselves use, or as the path from the repository root that `find` and
+    # an editor both print. Neither resolving is guessed: the one that exists
+    # wins, and a name that is neither is an error rather than a silent skip.
+    if [ "$#" -eq 0 ]; then
+        set -- suites/*/*.plt
+    else
+        for named in "$@"; do
+            [ -e "$named" ] || [ -e "${named#tests/prolog/}" ] || {
+                echo "engine/test.sh: no such suite: $named" >&2
+                echo "  Suites live under tests/prolog/suites/<group>/." >&2
+                rm -f "$log" "$out"
+                return 1
+            }
+        done
+    fi
+    for suite in "$@"; do
+        [ -e "$suite" ] || suite=${suite#tests/prolog/}
         [ -e "$suite" ] || continue
-        swipl -g "set_test_options([format(log)]), run_tests" \
+        bounded swipl -g "set_test_options([format(log)]), run_tests" \
             -t halt "$suite" -- extensions >"$out" 2>&1 || ok=1
         cat "$out"; cat "$out" >>"$log"
     done
@@ -84,4 +127,4 @@ run_plunit() {
     return $ok
 }
 
-run_plunit
+run_plunit "$@"

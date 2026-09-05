@@ -52,6 +52,10 @@ set -eu
 HERE=$(cd -- "$(dirname -- "$0")" && pwd)
 ROOT=$(dirname -- "$HERE")
 
+# One spelling of the bound, implemented in bounded.sh, which every runner in
+# this tree and a command typed by hand all reach.
+bounded() { sh "$ROOT/bounded.sh" "$@"; }
+
 if ! command -v swipl >/dev/null 2>&1; then
     echo "engine/bench.sh: swipl not found; the engine benchmark suite will not run" >&2
     exit 0
@@ -70,7 +74,7 @@ fi
 # metta.testing is the comparison protocol. A tree whose Python dependencies
 # are not installed says which step is missing rather than failing for a reason
 # that is not the engine.
-if ! METTA_BENCH_HARNESS="$ROOT/extensions/python" "$PY" -c \
+if ! METTA_BENCH_HARNESS="$ROOT/extensions/python" bounded "$PY" -c \
         'import os, sys; sys.path.insert(0, os.environ["METTA_BENCH_HARNESS"]); import metta.testing' \
         >/dev/null 2>&1; then
     echo "engine/bench.sh: cannot import metta.testing; run 'uv sync' in \
@@ -78,4 +82,4 @@ extensions/python. The engine benchmark suite will not run" >&2
     exit 0
 fi
 
-exec "$PY" "$HERE/bench.py" "$@"
+exec sh "$ROOT/bounded.sh" "$PY" "$HERE/bench.py" "$@"
