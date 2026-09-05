@@ -63,3 +63,21 @@ Verified again with `PYTHONPATH=extensions/python $VENV/bin/python ai-tmp/ai-dem
 | 128 | 2163072 | 3 / 266 | 1404.887 | 4.286 | 19241 / 19239 |
 
 The command exits 0; `ai-tmp/ai-demand-sweep-final.json` retains all CPU samples and counts. The table supports the cubic-to-linear work change across four sizes, while the nearly equal transport counts show why SWI alone would miss it.
+
+## 2026-09-05, demand growth beyond fixed overhead
+
+Verified: `PYTHONPATH=extensions/python $VENV/bin/python ai-tmp/ai-demand-sweep-extended.py` exits 0. At 256 seeds the full reference and demand paths have identical value, tag, token ledger, proof ID and rendered proof. Larger demand-only cases independently require the single proof `(n, 0, 0)`, tag one and source token zero; these larger rows are not additional reference-path differentials. Every CPU sample repeats its complete-bag check.
+
+SWI inferences below count transport only and exclude Python matching, certification and indexing. Five unprofiled complete-call process CPU samples per row include that work. Matcher and shape counters were measured in separate profiled calls.
+
+| Seeds | Route | Matcher calls | Shape checks | Complete-call CPU ms, median [min, max] | SWI transport inferences; excludes Python evaluator |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 256 | reference | 17,040,128 | 0 | 6308.654 [5919.982, 6446.865] | 22,697 |
+| 256 | demand | 3 | 522 | 4.309 [4.135, 6.120] | 22,695 |
+| 512 | demand | 3 | 1,034 | 8.637 [7.933, 8.839] | 29,609 |
+| 1,024 | demand | 3 | 2,058 | 14.836 [13.042, 15.084] | 43,431 |
+| 2,048 | demand | 3 | 4,106 | 19.765 [18.972, 21.942] | 71,083 |
+| 4,096 | demand | 3 | 8,202 | 36.795 [34.521, 47.348] | 126,381 |
+| 8,192 | demand | 3 | 16,394 | 93.249 [72.522, 111.426] | 236,977 |
+
+The reference matcher count at 256 is 7.88 times its count at 128. Demand shape checks remain exactly `2*n+10` through 8,192 seeds. CPU rises past the fixed overhead as those inputs grow; it is not a constant-cost claim. The sample variation prevents assigning a precise exponent from CPU alone. The exact work counters and source loop bounds establish cubic-to-linear work on this family. All samples and full counts are retained in `ai-tmp/ai-demand-sweep-extended.json`, with the command log and separate zero status in `ai-tmp/query-a20256a5-demand-extended-sweep.log` and `.status`.
