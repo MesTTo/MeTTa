@@ -689,6 +689,25 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   7,972 at the same cost. `limit` is a catalog vocabulary, so MeTTa, Python
   and the Node package read one list.
 
+- `m.debug(term, on=[S.double])` stops a running program at a breakpoint and
+  hands it to Python. Iterating the Debugger runs the program to each
+  breakpoint, the loop body is where it is SUSPENDED, and leaving the body
+  resumes that same execution rather than starting a new one. `d.step()` stops
+  at the very next reduction whether or not it carries a breakpoint and lasts
+  one advance; `d.breakpoints` is a live set, so one added at a stop stops the
+  program next time; `d.answers` is what the program produced once it
+  finished. The division is CPython's own `bdb`, where the stop callback is
+  the suspension and the mode selects how execution goes on; the suspension
+  itself is SWI's `engine_yield/1` from inside the reduction, the one
+  mechanism that returns control from deep in a running goal and leaves it
+  resumable. What is debugged executes for real, writes included, and inherits
+  the caller's scope. `inferences=` bounds the whole session cumulatively, so
+  a resume with no breakpoint ahead of it stops; there is no timeout, because
+  a session is suspended by design and a clock would run while a person reads
+  a stop. A breakpoint reached from inside a Python operation that calls back
+  into MeTTa cannot suspend, and says so with the remedy rather than being
+  skipped.
+
 - `python -m metta repl` completes names and keeps its history. TAB completes
   the token under the cursor against every name the language knows, functions
   and translator special forms alike, and against the engine's spaces when the
@@ -702,17 +721,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   first thing Up recalled. A read-only home says so on stderr rather than
   ending the session.
 
-- `m.trace(term, only=...)` narrows a trace to named functions. Name them the
-  way this surface names anything, `only=[S.double]`, `only=m.fn.double`, or
-  `only="double"` for a head Python cannot spell. The engine narrows at the
-  WRAP rather than at the recording, so what is not named keeps its bare
-  predicate and runs at its untraced cost: tracing one of five functions in a
-  62-event program costs 3,091 inferences against 9,418 for the whole trace,
-  67.2% fewer, where the untraced run costs 541. A narrowed event's depth is
-  nesting among the TRACED functions, since a wrapper can only count the frames
-  it wraps. A named function the traced source defines is still recorded; a
-  name nothing defines records nothing, the way an unknown head matches
-  nothing.
+- `m.trace(filter=...)` also takes a bound function handle, `m.fn.double`, and
+  anything else that mentions as one head symbol, because the debugger's `on=`
+  and the trace's `filter=` now read their names through one normaliser rather
+  than two. Every refusal it already made it still makes.
 
 ### Fixed
 
@@ -725,7 +737,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `(double 1 2 3)` against a one-argument `double` says so rather than sending
   the caller to `eval`, where nothing answers either. Near-miss suggestions
   come from one pool at one threshold: the whole catalogue, special forms
-  included, so a mistyped `collaps` is offered `collapse` by both doors where
+  included, so a mistyped `collapes` is offered `collapse` by both doors where
   lint could offer nothing, and a name is never suggested for itself.
 
 - One annotation the runtime cannot name no longer discards the rest of a

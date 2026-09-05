@@ -175,3 +175,78 @@ Decided: define the resolver twice under `sys.version_info >= (3, 14)`, which
 both checks read natively and which needs no configuration entry. Caught by
 test_the_codec_builds_under_mypyc_as_an_option, and folded into the commit that
 introduced it.
+
+Tried: reproducing L075 (`debugger breakpoints, suspension, stepping, resume`)
+over the whole surface -> none of `break`, `step`, `suspend`, `resume`, `debug`,
+`spy` or `pause` appears among Space's 113 public names, `TraceEvent` is frozen
+with four fields, and `m.trace` answers only after the run has finished.
+Reproduces.
+
+Researched before building, because the row's own ledger says the pieces exist.
+What the two runtimes already have, and what is therefore NOT written here:
+
+- SWI's `prolog_trace_interception/4` is a synchronous callback with the full
+  port and action vocabulary, and the manual is explicit that its internal
+  query is opened `PL_Q_NODEBUG | PL_Q_CATCH_EXCEPTION`, without yielding, so
+  a yield inside it is not a supported way back to an embedding host.
+  `library(prolog_breakpoints)` sets SOURCE breakpoints, which compiled MeTTa
+  functions have no file/line mapping for, and `prolog:break_hook/7`'s action
+  vocabulary has no `suspend`.
+- SWI 9.3.21 added a real return-to-host debugger interface,
+  `PL_Q_TRACE_WITH_YIELD` with `PL_S_YIELD_DEBUG`, `PL_get_trace_context` and
+  `PL_set_trace_action`. Janus does not open its queries with it: `mod_swipl.c`
+  uses `PL_Q_CATCH_EXCEPTION | PL_Q_EXT_STATUS` and its result handling has no
+  yield case, so no Python caller can receive one today.
+- CPython's `bdb` is the ARCHITECTURE to copy and not a mechanism to reuse:
+  the stop callback IS the suspension, `set_step`/`set_continue` only select
+  how execution goes on, and returning from the callback is what resumes it.
+  `sys.settrace` and `sys.monitoring` see Python frames, not reductions.
+- SWI engines are the mechanism. Measured on this engine, 2026-09-05:
+  `engine_yield/1` five frames down inside `engine_create/3`'s goal answers
+  the caller's `engine_next/2`; `engine_post/3` delivers a term to
+  `engine_fetch/1` and resumes; a `b_setval` inside the engine is invisible
+  outside it; and `engine_yield/1` with no engine around it raises
+  `permission_error(execute, vmi, 'I_YIELD')`.
+
+Decided: the debugger is the TRACER'S OWN WRAPPERS with a second action. A
+trace records an event; a debug session suspends on it. One session at a time
+either way, which the existing `metta_trace_session` fact already enforces and
+now refuses across both kinds.
+
+Decided: wrap ALL targets, unlike the L078 filter. Stepping has to enter a
+function nobody set a breakpoint on, which is exactly why bdb traces every
+frame and decides in `stop_here`/`break_here`.
+
+Tried: leaving the wrapper's non-debug path on `metta_trace_record/4` -> a
+latent hang-or-fail. A debug session holds its wrappers across the host's
+thinking time, so an unrelated evaluation on another thread reaches the
+wrapper, and `metta_trace_record/4`'s conjunction needs a limit no debug
+session sets, so it would FAIL, and a failing wrapper fails the predicate it
+wraps. The wrapper now dispatches on the session kind and falls through when
+there is none. Pinned by
+test_an_ordinary_run_on_another_thread_is_untouched_by_a_session, which
+answers 20 from another thread while the session is suspended.
+
+Decided: no `timeout=`, and `inferences=` yes. A session is suspended by
+design, so a wall clock would run while a person reads a stop; inferences
+count work and are the way out of a resume with no breakpoint ahead of it.
+The bound rides inside the engine, where `metta_host_inference_budget/3`
+already puts a cursor's.
+
+Measured, and pre-existing rather than caused here: two twin budgets fail on
+this branch's base. `01-identity.metta` costs 3528 inferences against a pinned
+3575 and `03-spaces3.metta` 254 against 262, both below by more than the
+4-inference allowance, measured at 51d9e5a9 with every change here reverted.
+This branch moves the first to 3534, attributed to `engine/ext_points.pl`
+alone by reverting that one file (3528 without it, 3534 with it): three new
+`kind/2` rows for the debugger's host services. Both stay under their pins,
+and re-pinning belongs to whoever made the engine cheaper.
+
+Also pre-existing: `tests/repository/test_gate_completeness.py`'s ruff
+burn-down was already red at 51d9e5a9, D at 2232 against a 2231 ceiling and
+ARG at 150 against 147, measured on that tree with `--ignore-noqa`. Both
+ceilings are now recorded at the measured number with the split written down.
+And `lib_thread:a_saturated_timer_pool_does_not_block_scheduler_deadlines`
+failed once inside a full plunit run at loadavg 68 and passed alone at
+loadavg 68 (68/68 in 5.259s wall, 0.099s CPU), which is a wall-deadline lane
+on a loaded box.

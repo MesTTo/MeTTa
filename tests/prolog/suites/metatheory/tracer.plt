@@ -30,8 +30,11 @@ setup_trace_test :-
     cleanup_trace_function(plunit_trace_named),
     retractall(user:'&plunit_trace_named'(=,
                                           [plunit_trace_named|_], _)),
+    cleanup_trace_function(plunit_trace_inner),
+    cleanup_trace_function(plunit_trace_outer),
     cleanup_trace_function(plunit_trace_hyperpose),
-    cleanup_trace_function(plunit_trace_walk).
+    cleanup_trace_function(plunit_trace_walk),
+    catch(tracer:metta_debug_end, _, true).
 
 cleanup_trace_test :-
     cleanup_trace_function(plunit_trace_new),
@@ -40,6 +43,7 @@ cleanup_trace_test :-
     cleanup_trace_function(plunit_trace_walk),
     retractall(user:'&plunit_trace_named'(=,
                                           [plunit_trace_named|_], _)),
+    catch(tracer:metta_debug_end, _, true),
     retractall(user:silent(_)),
     assertz(user:silent(false)).
 
@@ -284,5 +288,78 @@ test(a_trace_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarmed,
     tracer:metta_trace_source("!(plunit_trace_leak 1)", '&self', 1000, Again),
     assertion(Again == [event(0, call, [plunit_trace_leak, 1], '', []),
                         event(0, exit, [plunit_trace_leak, 1], 42, [])]).
+
+%The debug twin of the leak above, because a breakpoint session takes the same
+%wrappers and would leave them the same way. metta_debug_end_unlocked/0 calls
+%the trace's teardown rather than listing the state again, so this is that
+%totality asserted through the other door: on a tracer whose unwrap sweep still
+%stopped at the first already-removed target, the session flag would stand and
+%every later session on the engine would refuse.
+test(a_debug_session_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarmed,
+     [setup(setup_trace_leak(Box)), cleanup(cleanup_trace_leak(Box))]) :-
+    format(atom(Source), "!(plunit_trace_clear ~w)", [Box]),
+    tracer:metta_debug_begin([]),
+    engine_create(done(Groups),
+                  tracer:metta_debug_run(Source, '&self', Groups),
+                  Engine),
+    engine_next_reified(Engine, Event),
+    assertion(Event = the(done(_))),
+    engine_destroy(Engine),
+    tracer:metta_debug_end,
+    assertion(\+ tracer:metta_trace_session),
+    assertion(\+ tracer:metta_trace_wrapped(_)),
+    assertion(\+ tracer:metta_debug_mode(_)),
+    %The engine still arms, which is what the leak took away.
+    tracer:metta_trace_source("!(plunit_trace_leak 1)", '&self', 1000, Again),
+    assertion(Again == [event(0, call, [plunit_trace_leak, 1], '', []),
+                        event(0, exit, [plunit_trace_leak, 1], 42, [])]).
+
+%The debug session's own contract, on the transport's side of the seam: the
+%engine holds a suspended program, a yield answers the host and a post
+%carries the command back, and the wrappers stay on until the session ends.
+%The transport that creates the engine is the shim's, so this drives the
+%three published services directly.
+debug_engine(Source, Armed, Engine) :-
+    tracer:metta_debug_begin(Armed),
+    engine_create(done(Groups), tracer:metta_debug_run(Source, '&self', Groups),
+                  Engine).
+
+test(a_breakpoint_suspends_the_program_and_a_post_resumes_it,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    process_metta_string("(= (plunit_trace_inner $x) (+ $x 1))", _),
+    process_metta_string(
+        "(= (plunit_trace_outer $x) (plunit_trace_inner (plunit_trace_inner $x)))",
+        _),
+    debug_engine("!(plunit_trace_outer 1)", [plunit_trace_inner], Engine),
+    engine_next_reified(Engine, First),
+    First = the(stop(1, call, [plunit_trace_inner, 1], '', [])),
+    engine_post(Engine, resume(run, [plunit_trace_inner])),
+    engine_next_reified(Engine, Second),
+    Second = the(stop(1, exit, [plunit_trace_inner, 1], 2, [])),
+    %Stepping stops at the very next reduction, which no breakpoint names.
+    engine_post(Engine, resume(step, [])),
+    engine_next_reified(Engine, Third),
+    Third = the(stop(1, call, [plunit_trace_inner, 2], '', [])),
+    %And with nothing armed and no step, the program runs to its answer.
+    engine_post(Engine, resume(run, [])),
+    engine_next_reified(Engine, Fourth),
+    Fourth = the(done(_)),
+    engine_destroy(Engine),
+    tracer:metta_debug_end,
+    \+ current_predicate_wrapper(user:plunit_trace_inner(_, _),
+                                 metta_tracer, _, _).
+
+%A session and a trace take the same wrappers, so the second to ask is
+%refused rather than quietly sharing them.
+test(a_session_refuses_a_second_one,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    process_metta_string("(= (plunit_trace_inner $x) (+ $x 1))", _),
+    tracer:metta_debug_begin([plunit_trace_inner]),
+    catch(tracer:metta_debug_begin([]), Error, true),
+    Error = error(permission_error(debug, evaluation, nested), _),
+    catch(tracer:metta_trace_source("!(plunit_trace_inner 1)", '&self', _),
+          TraceError, true),
+    TraceError = error(permission_error(trace, evaluation, nested), _),
+    tracer:metta_debug_end.
 
 :- end_tests(tracer).

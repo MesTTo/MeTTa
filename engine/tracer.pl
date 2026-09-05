@@ -11,6 +11,11 @@
 %   - Exact function filters retain execution depth and charge only selected
 %     events [tested: tracer:filter_precedes_the_bound_and_keeps_depth;
 %     commit=504f8dddfa890ced97e795a13ab10e239b1de2ce].
+%   - A DEBUG session suspends the program at a breakpoint through
+%     engine_yield/1 and resumes the same execution on the command the host
+%     posts back, and only one session, trace or debug, holds the wrappers
+%     [tested: tracer:a_breakpoint_suspends_the_program_and_a_post_resumes_it,
+%     tracer:a_session_refuses_a_second_one; commit=WORKTREE].
 %   - Functions defined by the traced source and calls from hyperpose workers
 %     produce events [tested 2026-08-14: tracer].
 %   - A symbol whose spelling reads back as something else survives the
@@ -35,6 +40,11 @@
 %     a later trace on the same engine still arms
 %     [tested: tracer:a_trace_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarmed;
 %     commit=f5eb8775b78519c080da4ea7c6dff81f7be21ef9].
+%   - a DEBUG session's teardown is the trace's, so it is total for the same
+%     reason and stays total when the trace's grows: metta_debug_end_unlocked/0
+%     calls metta_trace_end_unlocked/0 rather than listing the state again
+%     [tested: tracer:a_debug_session_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarmed;
+%     commit=WORKTREE].
 % Guarded by:
 %   - '$metta_trace_state' serializes trace sessions and wrapper changes
 %     [tested 2026-08-14: tracer:event_limit_truncates_and_removes_every_wrapper].
@@ -55,7 +65,10 @@
             metta_trace_source/6,
             metta_trace_default_events/1,
             metta_trace_target/1,
-            metta_trace_wrap_once/1
+            metta_trace_wrap_once/1,
+            metta_debug_begin/1,
+            metta_debug_run/3,
+            metta_debug_end/0
           ]).
 
 %metta_trace_source/4 reads the values off a pairs list. Imported here rather
@@ -158,12 +171,32 @@ metta_trace_call(F, In, Head, Closure) :-
     length(InArgs, In),
     append(InArgs, [Out], Args),
     ( nb_current('$metta_trace_depth', D) -> true ; D = 0 ),
-    metta_trace_record(D, call, [F|InArgs], ''),
+    metta_trace_observe(D, call, [F|InArgs], ''),
     D1 is D + 1,
     b_setval('$metta_trace_depth', D1),
     call(Closure),
     b_setval('$metta_trace_depth', D),
-    metta_trace_record(D, exit, [F|InArgs], Out).
+    metta_trace_observe(D, exit, [F|InArgs], Out).
+
+%What the wrapper does with one event, which is the session's business and
+%not the wrapper's. A debug session SUSPENDS on it and a trace session
+%RECORDS it.
+%
+%The third arm is not a fallback, it is the correctness of the second. A
+%debug session holds its wrappers on across the host's thinking time, so an
+%unrelated evaluation on another thread reaches this while a debug session
+%owns the wrap; sending it to metta_trace_record/4 would fail, because that
+%predicate's conjunction needs a limit no debug session sets, and a failing
+%wrapper FAILS THE PREDICATE IT WRAPS. The debug flag is engine-local
+%(b_setval inside the engine, invisible outside it, measured), which is what
+%keeps the suspend to the one execution the host is driving.
+metta_trace_observe(Depth, Kind, Term, Answer) :-
+    (   nb_current('$metta_debug_active', true)
+    ->  metta_debug_event(Depth, Kind, Term, Answer)
+    ;   metta_trace_limit(_)
+    ->  metta_trace_record(Depth, Kind, Term, Answer)
+    ;   true
+    ).
 
 %An event carries the term, not the term's text. Written with swrite and
 %read back by the receiver, every symbol whose spelling reads as something
@@ -282,6 +315,144 @@ metta_trace_variable_names([Variable|Rest], Index, [Name-Variable|Names]) :-
     atom_concat('_', Index, Name),
     Next is Index + 1,
     metta_trace_variable_names(Rest, Next, Names).
+
+%%%%%%%%%%% The debugger %%%%%%%%%%
+%
+% Same wrappers, different action: where a trace RECORDS an event and runs
+% on, a debug session SUSPENDS on one and hands the host the term, then
+% resumes with whatever the host posts back.
+%
+% Suspension is engine_yield/1 from inside the wrapper, which is the one
+% mechanism SWI documents for returning control from deep inside a running
+% goal, and the only one that leaves the goal resumable: a yield from five
+% frames down answers the host's engine_next/2 and the next engine_post/3
+% delivers a command through engine_fetch/1 and carries on
+% [source: https://www.swi-prolog.org/pldoc/man?predicate=engine_yield/1;
+% measured 2026-09-05 against this engine]. The alternative shape, a
+% callback that blocks until the host answers, is what CPython's bdb and
+% SWI's own debug_adapter do; it cannot be used across janus, whose query
+% iterator is not opened for yielding, so the host would have to hold a
+% thread inside the callback.
+%
+% ALL targets are wrapped, not just the armed ones, which is the one place
+% this differs from the trace filter above. Stepping has to be able to enter
+% a function nobody set a breakpoint on, which is exactly why bdb traces
+% every frame and decides in stop_here/break_here rather than instrumenting
+% only the breakpoints.
+%
+% The armed set arrives WHOLE on every resume rather than as edits. The host
+% owns it, so there is no second copy here to drift, and arming a function
+% mid-session is the same operation as resuming.
+:- dynamic metta_debug_armed/1.
+:- dynamic metta_debug_mode/1.
+
+metta_debug_event(Depth, Kind, Term, Answer) :-
+    (   metta_debug_stops(Term)
+    ->  metta_debug_suspend(Depth, Kind, Term, Answer)
+    ;   true
+    ).
+
+metta_debug_stops([F|_]) :-
+    (   metta_debug_mode(step)
+    ->  true
+    ;   metta_debug_armed(F)
+    ).
+
+%The names travel with the term for the same reason a trace event's do: a
+%receiver that encodes variables by name reads the same spelling the writer
+%would have produced.
+metta_debug_suspend(Depth, Kind, Term, Answer) :-
+    copy_term(Term-Answer, TermCopy-AnswerCopy),
+    term_variables(TermCopy-AnswerCopy, Variables),
+    metta_trace_variable_names(Variables, 0, Names),
+    metta_debug_yield(stop(Depth, Kind, TermCopy, AnswerCopy, Names)),
+    engine_fetch(Command),
+    metta_debug_command(Command).
+
+%A breakpoint reached from inside a host callback cannot suspend, and says
+%so rather than being skipped. SWI refuses engine_yield/1 when the engine is
+%inside a foreign predicate that called back into Prolog, and a Python
+%operation that evaluates MeTTa is exactly that path; the refusal it raises
+%names the VM instruction and nothing else, so it is translated here into
+%the one sentence that says what to do about it.
+metta_debug_yield(Stop) :-
+    catch(engine_yield(Stop),
+          error(permission_error(execute, vmi, 'I_YIELD'), _),
+          throw(error(permission_error(suspend, metta_breakpoint, Stop),
+                      context(metta_debug_run/3,
+                              'a breakpoint inside a host operation cannot \c
+suspend; set it on a function the program reaches outside one')))).
+
+metta_debug_command(resume(Mode, Armed)) :-
+    retractall(metta_debug_mode(_)),
+    assertz(metta_debug_mode(Mode)),
+    retractall(metta_debug_armed(_)),
+    metta_debug_arm(Armed).
+
+metta_debug_arm([]).
+metta_debug_arm([Name0|Rest]) :-
+    ( atom(Name0) -> Name = Name0 ; atom_string(Name, Name0) ),
+    assertz(metta_debug_armed(Name)),
+    metta_debug_arm(Rest).
+
+%The debugged run itself, the goal a transport puts inside an engine and
+%steps. The flag is set INSIDE the engine, so it travels with this execution
+%and no other; a concurrent evaluation on another thread meets the same
+%wrappers and falls straight through them.
+%
+%A transport creates the engine rather than this file, for the reason the
+%cursor's own comment gives: a policy wrapping engine_next/2 on the caller
+%cannot roll back work the engine performs, so the transaction has to be
+%part of the suspended goal, and the policy constructor lives with the
+%transport that knows which scope is open. Sessions begin and end here
+%because the WRAPPERS are this file's.
+metta_debug_run(Source, Space, Groups) :-
+    b_setval('$metta_debug_active', true),
+    b_setval('$metta_trace_depth', 0),
+    once(metta_host_run_source(Source, Space, [], Groups)).
+
+metta_debug_begin(Armed) :-
+    with_mutex('$metta_trace_state', metta_debug_begin_unlocked(Armed)).
+
+%One session at a time, trace or debug, because they take the same wrappers.
+%
+%The clean slate comes from metta_trace_end_unlocked/0 rather than a second
+%list of retractalls. A debug session must not inherit a fact a trace session
+%left, and the set of those facts is the trace's to know: it has grown twice
+%already, by the truncation flag and again by the filter pair, and each time a
+%copy here would have gone stale silently. No metta_trace_limit/1 is asserted,
+%which is what metta_trace_observe/4 reads to tell the two sessions apart.
+metta_debug_begin_unlocked(Armed) :-
+    (   metta_trace_session
+    ->  throw(error(permission_error(debug, evaluation, nested),
+                    context(metta_debug_begin/1,
+                            'a trace or debug session is already running')))
+    ;   metta_trace_end_unlocked,
+        retractall(metta_debug_mode(_)),
+        assertz(metta_debug_mode(run)),
+        retractall(metta_debug_armed(_)),
+        metta_debug_arm(Armed),
+        assertz(metta_trace_session),
+        catch(( findall(Target, metta_trace_target(Target), Targets0),
+                sort(Targets0, Targets),
+                maplist(metta_trace_wrap_once, Targets) ),
+              Error,
+              ( metta_debug_end_unlocked, throw(Error) ))
+    ).
+
+metta_debug_end :-
+    with_mutex('$metta_trace_state', metta_debug_end_unlocked).
+
+%The trace's own teardown, so a debug session inherits its TOTALITY: a
+%recorded target whose wrapper a traced program abolished stops neither the
+%rest of the sweep nor the state retractions, and a session that could not
+%disarm itself would refuse every later trace and debug on the engine.
+metta_debug_end_unlocked :-
+    metta_trace_end_unlocked,
+    retractall(metta_debug_armed(_)),
+    retractall(metta_debug_mode(_)).
+
+%%%%%%%%%%% Trace sessions %%%%%%%%%%
 
 metta_trace_begin(Max, Filter) :-
     with_mutex('$metta_trace_state', metta_trace_begin_unlocked(Max, Filter)).
