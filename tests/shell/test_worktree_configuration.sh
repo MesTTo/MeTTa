@@ -91,4 +91,30 @@ if command -v swipl-ld >/dev/null 2>&1 &&
     done
 fi
 
-echo "ok: a worktree runs one backend fewer, and no engine C, until worktree.sh provisions it"
+# The provisioned artefacts must be the worktree's OWN bytes. They were
+# symlinks until 2026-09-05, and check.sh runs build.sh at the top of every
+# gate: cargo rebuilt in each worktree (its fingerprint is keyed on the crate's
+# path) and wrote the new libmork_ffi.so THROUGH the link into the main
+# checkout, under every other agent's running measurement. A symlinked file is
+# no safer than a symlinked directory, since File::create and cp truncate in
+# place through it. So this appends one byte to the worktree's copy and asserts
+# the main checkout's file did not change, which a link of either kind fails.
+for product in target/release/libmork_ffi.so morklib.so; do
+    main_file="$project_dir/extensions/mork/mork_ffi/$product"
+    tree_file="$tree/extensions/mork/mork_ffi/$product"
+    if [ -L "$tree_file" ]; then
+        echo "FAIL: worktree.sh left $product as a symlink; a build here would" >&2
+        echo "      write through it into the main checkout" >&2
+        exit 1
+    fi
+    before=$(wc -c < "$main_file")
+    printf 'x' >> "$tree_file"
+    after=$(wc -c < "$main_file")
+    if [ "$before" != "$after" ]; then
+        echo "FAIL: writing to the worktree's $product changed the main checkout's" >&2
+        echo "      ($before -> $after bytes); the artefact is shared, not copied" >&2
+        exit 1
+    fi
+done
+
+echo "ok: a worktree runs one backend fewer, and no engine C, until worktree.sh provisions it, and its artefacts are its own"

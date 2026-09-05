@@ -1,6 +1,6 @@
 #!/bin/sh
 # Purpose: make a git worktree of this repository run the SAME configuration
-#   the main checkout runs, by linking the build artefacts git does not track.
+#   the main checkout runs, by copying the build artefacts git does not track.
 # Assumes:
 #   - run from inside the worktree that needs setting up, and the main
 #     checkout has been built (`sh build.sh`).
@@ -8,6 +8,18 @@
 #   - after this, the artefact `extensions/mork/extension.pl` declares is there
 #     and the MORK backend loads, so the suites gate the same configuration in
 #     both trees [tested: tests/shell/test_worktree_configuration.sh].
+#   - the worktree's artefacts are COPIES, so a build in the worktree cannot
+#     change the main checkout's engine. They were symlinks, and the target
+#     directory itself was one, until 2026-09-05: check.sh runs build.sh on
+#     every gate, cargo's fingerprint is keyed on the crate's path so every
+#     worktree rebuilt on its first gate, and `cargo build --release` wrote
+#     the new libmork_ffi.so THROUGH the link into the shared checkout,
+#     under every measurement any other agent had running. A symlinked FILE
+#     is no safer: File::create and cp both truncate in place through it
+#     [measured 2026-09-05: write through a file symlink reached the target;
+#     only unlink-then-create did not; commit=WORKTREE]. A copy costs 2.5 MB
+#     and a build in the worktree lands in the worktree
+#     [tested: tests/shell/test_worktree_configuration.sh; commit=WORKTREE].
 #   - the C extension example's cbump and handle shared objects are built in
 #     the worktree exactly as check.sh builds them, so a direct pytest run
 #     here exercises the same integration surface instead of skipping it.
@@ -50,8 +62,8 @@ if [ "$MAIN" = "$HERE" ]; then
     exit 0
 fi
 
-linked=0
-for artefact in extensions/mork/mork_ffi/target extensions/mork/mork_ffi/morklib.so; do
+copied=0
+for artefact in extensions/mork/mork_ffi/target/release/libmork_ffi.so extensions/mork/mork_ffi/morklib.so; do
     product=${artefact#extensions/mork/mork_ffi/}
     source=''
     # This product does not travel with git, which is the whole reason this
@@ -76,11 +88,14 @@ for artefact in extensions/mork/mork_ffi/target extensions/mork/mork_ffi/morklib
         exit 1
     fi
     mkdir -p "$(dirname "$HERE/$artefact")"
-    ln -sfn "$source" "$HERE/$artefact"
-    linked=$((linked + 1))
+    # rm first: if an earlier run left a symlink here, cp would write THROUGH
+    # it into the main checkout, which is the exact fault the copy prevents.
+    rm -f "$HERE/$artefact"
+    cp "$source" "$HERE/$artefact"
+    copied=$((copied + 1))
 done
 
-echo "worktree.sh: linked $linked artefact(s) from $MAIN"
+echo "worktree.sh: copied $copied artefact(s) from $MAIN"
 
 # The C extension example's shared objects are build output check.sh compiles
 # on every run; a worktree used for DIRECT suite runs needs them too, or the
