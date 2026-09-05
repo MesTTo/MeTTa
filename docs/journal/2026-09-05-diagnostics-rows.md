@@ -81,9 +81,53 @@ import-linter core list so the new module is held to the same rule.
 
 Decided: one suggestion pool and one cutoff. why() drew from `m.builtins()` at
 0.75 and lint from `fun/1` alone at 0.8, which is two drifts at once: lint could
-not offer `collapse` for `collaps` because `metta_translated_head/1` does not
+not offer `collapse` for `collapes` because `metta_translated_head/1` does not
 enumerate, and why() could suggest a name for ITSELF, which is where
 "did you mean if?" came from. The pool is now the catalogue plus the caller's
 stored heads, minus the queried name; 0.8 is the tighter of the two thresholds
 and every near miss the suite pins clears it (car-atmo/car-atom 0.875,
-car-atomm/car-atom 0.941, doubl/double 0.909, collaps/collapse 0.933).
+car-atomm/car-atom 0.941, doubl/double 0.909, collapes/collapse 0.875).
+
+Tried: reproducing L078 (`trace(filter=...)`) -> `m.trace("!(quad 3)",
+filter="double")` raised `TypeError: Space.trace() got an unexpected keyword
+argument 'filter'`, and `inspect.signature` confirms no target parameter.
+Reproduced, built, and then SUPERSEDED before it could land: petta merged
+a0580a1b for the same row while this branch was in flight, so `trace(filter=)`
+ships from there and nothing of this row's implementation remains here. What is
+worth keeping is the measurement and the decision it lost.
+
+Rejected: this branch's wrap-site narrowing, in favour of a0580a1b's
+record-site filter. The two differ in one choice and each pays for it:
+
+- Filtering at the RECORD keeps every wrapper running, so an excluded call
+  still contributes DEPTH and a selected descendant reads at its true nesting
+  level. That is what shipped, and its own comment cites CPython 3.13
+  `trace.py globaltrace_lt`, which decides before recording for the same
+  reason.
+- Filtering at the WRAP leaves an unnamed function its bare predicate, so it
+  runs at exactly its untraced cost. Measured here on a five-function program
+  whose whole trace is 62 events: 9,418 inferences for the whole trace, 3,091
+  narrowed to one function, 67.2% fewer, against 541 for the untraced run
+  (`m.stats()` inferences, deterministic; loadavg 24, which is why no wall
+  clock is quoted). The price is that a narrowed event's depth is nesting
+  among the TRACED functions only: tracing `double` inside
+  `(quad (double (double 3)))` answers two calls at depth 0, not depth 1.
+
+Decided: depth beats cost here, so the shipped design stands. A filtered trace
+is read by a person looking for where a call sits, and a depth that silently
+means something else is a wrong answer where a slower trace is only a slow one.
+Revisit if a filtered trace is measured to be too expensive on a real program
+rather than a five-function fixture, in which case the wrap-site variant is
+recoverable from this branch's history and the depth it loses can be restored
+by recording an unfiltered depth counter alongside.
+
+Also rejected on the way, and worth recording because the shipped door chose
+otherwise: `only=` rather than `filter=`, on the grounds that ruff's
+flake8-builtins A002 refuses an argument shadowing a builtin. a0580a1b keeps
+the row's own word and carries `# noqa: A002 -- public trace selector`, which
+is the better answer: the name a caller reads is worth one narrow suppression.
+
+Also superseded: the seam move. This branch published `metta_trace_source/6`
+and retired `/5`; a0580a1b keeps `/5` published and carries the filter inside
+its bound argument as a two-item request, which leaves the Node bridge and the
+shim floor untouched. One fewer moving part for the same feature.
