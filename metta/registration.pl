@@ -6,7 +6,7 @@
 %   registered through that authority. Final boot rejects missing names,
 %   arities, hooks, reverse-surface descriptions, and unreasoned exemptions
 %   [tested: tests/prolog/suites/evaluation/builtin_facets.plt;
-%   commit=WORKTREE].
+%   commit=90aa1e67c6d1cda45e27dbaa565f2c537f70ad40].
 %   register_fun_in/2 lets a definition in any execution module take over a
 %   prelude translator-rule name, and unregister_fun_in/2 retires a global rule
 %   whose owning module lost its final body clause
@@ -1139,7 +1139,7 @@ builtin_predicate_described(Module:Name/PrologArity) :-
 %inferences of setof plus a 385-element member/2 walk before the 81 of work
 %each ask actually needs, which was 9,214 of a boot over five exemptions
 %[tested: builtin_facets:a_bound_surface_question_does_not_synthesise_the_whole_union;
-%commit=WORKTREE].
+%commit=90aa1e67c6d1cda45e27dbaa565f2c537f70ad40].
 builtin_surface_predicate(Module:Name/Arity, File) :-
     builtin_project_implementation_prefixes(Prefixes),
     builtin_surface_predicate_name(Name),
@@ -1183,7 +1183,7 @@ builtin_surface_name(Name) :- translator:metta_special_form_head(Name).
 %from 281,411 to 265,924, with the six other benchmark cases identical
 %[measured 2026-09-06; command=swipl -g "metta_bench:bench_run(boot)" -t halt
 %engine/bench.pl; fixture=three samples per arm, .qlf purged and warmed;
-%commit=WORKTREE].
+%commit=90aa1e67c6d1cda45e27dbaa565f2c537f70ad40].
 builtin_project_implementation_prefixes(Prefixes) :-
     builtin_project_root(Root),
     findall(Prefix,

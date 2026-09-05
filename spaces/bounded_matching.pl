@@ -4,7 +4,7 @@
 %   metta_prune_empty/2 is declared locally as an effect-planner primitive,
 %   not a language builtin [tested:
 %   builtin_facets:the_effect_planner_helpers_are_exempt_in_place;
-%   commit=WORKTREE].
+%   commit=90aa1e67c6d1cda45e27dbaa565f2c537f70ad40].
 % Guarantees: a full native cyclic query builds Generic Join tries only under
 % the plan-cyclic-joins pragma, while bounded queries retain streaming startup
 % cost [tested:

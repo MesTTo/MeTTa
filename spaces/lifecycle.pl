@@ -6,7 +6,7 @@
 %   capability guards named by the effect planner declare their non-builtin
 %   status beside their implementations [tested:
 %   builtin_facets:the_effect_planner_helpers_are_exempt_in_place;
-%   commit=WORKTREE].
+%   commit=90aa1e67c6d1cda45e27dbaa565f2c537f70ad40].
 %   A foreign space life releases tabled, generated, deferred-translation, and
 %   support state before its execution-module name can be reused [tested:
 %   test_a_recycled_mork_name_inherits_nothing; commit=d843bb6d17a525c36afd21cab077d63b34447535].
