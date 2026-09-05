@@ -18,6 +18,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - `trace(filter=...)` selects named functions before recording limits apply.
   MeTTa programs can query selected trace events through `lib_observe`.
 
+- Transparent structural type aliases use `(: Count (Alias Number))`.
+  Aliases work in parameters, results, positional tuples and complete arrows,
+  including `Atom` evaluation barriers. Each alias resolves names where it was
+  declared. Adding, removing or reloading declarations repairs compiled
+  callers; cycles report their path and conflicting definitions roll back.
+  Type observers and Python casts accept the expanded type while stored
+  source and diagnostics retain the alias spelling.
+
 - Integration installation is transactional across framework-managed state.
   A failed installer now restores operations and declaration ownership,
   protocol types and reprs, reflectors, converted types, library paths,

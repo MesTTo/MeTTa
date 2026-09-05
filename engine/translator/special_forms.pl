@@ -13,6 +13,9 @@
 % Guarantees: match, unify and let classify a written gap pattern ONCE while the call site compiles and hand the plan to the door in a wrapper, so a gap-free form emits the goal it always emitted [tested: tests/prolog/suites/reader/segments.plt, examples/ch08-data/08-02-sequence-variables/01-segments.metta; commit=a3dff3abc83b9d82f3652093246e1d693d526cdb].
 % Guarantees: a collection closure excludes every variable bound by case, switch, unify and let* from its captured environment, preserving the written variable identities used by each binding form [tested: a_collection_closure_keeps_each_binding_form_local_to_one_element; commit=09e34db01c8e3ebeff375ca18d3424c483172e7d].
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: explicit cast targets and typed bindings resolve aliases inside
+%   the engine; emitted checks preserve already resolved type observations
+%   [tested: structural_aliases; commit=WORKTREE].
 
 %%% An evaluated operand that produced an Error finishes the call %%%
 %
@@ -367,6 +370,12 @@ translate_special_dl(noeval, [Arg], AfterHead, Goals, Out) :-
     \+ metta_builtin_overridden(noeval),
     AfterHead = Goals,
     Out = Arg.
+
+% The prelude casts receive type syntax as data. Normalize in their explicit
+% space without evaluating names or projecting away arrow annotations.
+translate_special_dl('__metta_type_syntax__', [Raw, Space], AfterHead, Goals, Out) :-
+    metta_engine_module(Engine),
+    AfterHead = [Engine:normalize_cast_type(Space, Raw, Out)|Goals].
 
 translate_special_dl(superpose, [Args], AfterHead, Goals, Out) :-
     is_list(Args),
@@ -1399,11 +1408,14 @@ prolog:error_message(metta_seam_expansion_as_data(Rule, Seam)) -->
 %lets retain the occurrence-sensitive fast path below [tested:
 %test_an_annotated_binding_emits_its_claim,
 %translator_typed_let:a_source_colon_pair_stays_a_pattern].
-typed_binding_constraint([Colon, Fresh, Type], Fresh,
-                         [(has_type(Fresh, Type) *-> true
-                          ; 'get-metatype'(Fresh, Type))]) :-
+typed_binding_constraint([Colon, Fresh, Raw], Fresh,
+                         [(Engine:has_resolved_type(Fresh, Type) *-> true
+                          ; 'get-metatype'(Fresh, '$metta_resolved_type'(Type)))]) :-
     nonvar(Colon), Colon == ':',
-    var(Fresh).
+    var(Fresh),
+    current_metta_module(Module),
+    metta_engine_module(Engine),
+    normalize_type_in(Module, Raw, Type).
 
 translate_let_dl([[__metta_typed_binding__, Pattern], Value, In],
                  AfterHead, Goals, Out) :-

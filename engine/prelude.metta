@@ -391,10 +391,11 @@
 ;single-pass compiler sees an executable function rather than a constructor.
 ;foldl-atom's list parameter is Expression, so the collected declarations are
 ;named before it reads them.
-(= (type-cast-holds $atom $type $space)
-   (let $declarations (collapse (get-type-space $space $atom))
-     (foldl-atom $declarations False $acc $declared
-        (match-type-or $acc $declared $type))))
+(= (type-cast-holds $atom $raw-type $space)
+   (let $type (__metta_type_syntax__ $raw-type $space)
+     (let $declarations (collapse (get-type-space $space $atom))
+       (foldl-atom $declarations False $acc $declared
+          (match-type-or $acc $declared $type)))))
 
 ;type-cast, upstream's contract: the atom when the cast holds, the flat
 ;(Error $atom BadType) when it does not. UNDECLARED ON PURPOSE, and the
@@ -411,13 +412,14 @@
 ;instead of with `Symbol`; the reference's own type-cast names the same value
 ;first, through a chain [source: LeaTTa MettaHyperonFull/Minimal/
 ;Stdlib.lean:4206-4209, `(chain (eval (get-metatype $atom)) $meta ...)`].
-(= (type-cast $atom $type $space)
-   (let $meta (get-metatype $atom)
-     (if (=alpha $type $meta)
-         $atom
-         (if (type-cast-holds $atom $type $space)
-             $atom
-             (Error $atom BadType)))))
+(= (type-cast $atom $raw-type $space)
+   (let $type (__metta_type_syntax__ $raw-type $space)
+     (let $meta (get-metatype $atom)
+       (if (=alpha $type $meta)
+           $atom
+           (if (type-cast-holds $atom $raw-type $space)
+               $atom
+               (Error $atom BadType))))))
 
 ;;; Documentation ;;;
 ;

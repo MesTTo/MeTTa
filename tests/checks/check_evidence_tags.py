@@ -142,6 +142,8 @@ SOURCES = (
     # The plunit suites make the same claims their subjects do, in their
     # own headers, and 271 of them across 50 files went unread.
     "tests/prolog/suites/*/*.plt",
+    # Diagnostic probes carry measured claims even when no gate runs them.
+    "tests/prolog/probes/*.pl",
     # The example corpus is the semantics documentation and runs under the
     # gate, so an example that cites a test is making the same kind of
     # claim as the engine unit it demonstrates. Two levels, because the

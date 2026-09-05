@@ -18,6 +18,9 @@
 %   commit=1aebfc7b41e7d89893903a3a5f614e5b7c7f8eac].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: retained and deferred equation type groups preserve written
+%   aliases, and with_equation_types/4 restores its enclosing translation
+%   context [tested: structural_aliases; commit=WORKTREE].
 
 % Function source retained for higher-order specialization. Each equation is
 % one independently indexed fact, so compiling a new equation does not copy
@@ -64,13 +67,14 @@ record_fun_meta(F, Args, Body, Types) :-
     ),
     asserta(fun_meta_clause(Module, F, Args, Body), Ref),
     record_source_assertion(Ref),
-    (   nb_current('$metta_queued_equation_types', queued(QF, QTypes)),
-        QF == F
-    ->  Types = QTypes
-    ;   fun_meta_types_for_new_clause(Module, F, Types)
+    (   nb_current('$metta_queued_equation_types', queued(QModule, QF, QTypes)),
+        QModule == Module, QF == F
+    ->  RawTypes = QTypes
+    ;   fun_meta_types_for_new_clause(Module, F, RawTypes)
     ),
-    asserta(fun_meta_clause_types(Module, F, Args, Body, Types), TypeRef),
-    record_source_assertion(TypeRef).
+    asserta(fun_meta_clause_types(Module, F, Args, Body, RawTypes), TypeRef),
+    record_source_assertion(TypeRef),
+    Types = RawTypes.
 
 %The arrow association above is an ARRIVAL-ORDER property: "the declarations
 %that appeared since the previous equation" is decided by when each equation
@@ -89,10 +93,10 @@ record_fun_meta(F, Args, Body, Types) :-
 :- dynamic deferred_equation_types/3.
 
 queue_deferred_equation_types(Module, F) :-
-    (   catch_recover(definition_type_declaration_in(Module, F, _), fail)
+    (   catch_recover(raw_definition_type_declaration_in(Module, F, _), fail)
     ->  findall(Chain,
                 catch_recover(
-                    definition_type_declaration_in(Module, F, Chain), fail),
+                    raw_definition_type_declaration_in(Module, F, Chain), fail),
                 Current0),
         list_to_set(Current0, Current),
         exclude(deferred_seen_chain(Module, F), Current, New),
@@ -130,12 +134,22 @@ last_queued_types_group(Module, F, Group) :-
 :- meta_predicate materialize_with_queued_types(+, +, 0).
 materialize_with_queued_types(Module, F, Goal) :-
     (   retract(deferred_equation_types(F, Module, Types))
-    ->  setup_call_cleanup(
-            b_setval('$metta_queued_equation_types', queued(F, Types)),
-            call(Goal),
-            nb_delete('$metta_queued_equation_types'))
+    ->  with_equation_types(Module, F, Types, Goal)
     ;   call(Goal)
     ).
+
+:- meta_predicate with_equation_types(+, +, +, 0).
+with_equation_types(Module, F, Types, Goal) :-
+    ( nb_current('$metta_queued_equation_types', Old) -> Saved = some(Old)
+    ; Saved = none ),
+    setup_call_cleanup(
+        nb_linkval('$metta_queued_equation_types', queued(Module, F, Types)),
+        call(Goal),
+        restore_equation_types(Saved)).
+
+restore_equation_types(some(Old)) :-
+    nb_linkval('$metta_queued_equation_types', Old).
+restore_equation_types(none) :- nb_delete('$metta_queued_equation_types').
 
 %Associate each equation with the arrow declarations that appeared since the
 %previous equation for the same function. Source commonly writes an arrow and
@@ -144,7 +158,7 @@ materialize_with_queued_types(Module, F, Goal) :-
 %dispatch remains the compiled Prolog path.
 fun_meta_types_for_new_clause(Module, F, Types) :-
     findall(Chain,
-            catch_recover(governing_type_declaration_in(Module, F, Chain),
+            catch_recover(raw_governing_type_declaration_in(Module, F, Chain, _),
                           fail),
             Current0),
     list_to_set(Current0, Current),

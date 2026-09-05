@@ -785,7 +785,7 @@ test(a_later_definition_retargets_an_earlier_super,
 % declarations describe the argument a CALLER writes rather than the value the
 % predicate receives; the reasoning is at call_site_type_chains/2.
 expected_special_heads([
-    'add-atom', 'add-atoms', 'add-reduct', 'add-reducts', annotation,
+    '__metta_type_syntax__', 'add-atom', 'add-atoms', 'add-reduct', 'add-reducts', annotation,
     'catch', 'filter-atom', 'foldall',
     'with-pragma!',
     'foldl-atom', 'forall', 'get-atoms', 'get-metatype', 'let*', 'map-atom',
