@@ -306,3 +306,61 @@ stack printed empty. It has not recurred in 30 isolated runs of the two
 unmanaged cases, 11 whole-suite runs before the collector change or 25 after, at
 loadavg between 29 and 64. No cause established; the next occurrence should not
 be treated as the first.
+
+## 2026-09-05: what the source doors paid when nothing was materialized
+
+Found by a benchmark lane neither gate here runs: 2,000 completed
+`(collapse (match &bench-provider (edge a $x) $x))` calls in one space, with
+nothing materialized and both pragmas off, cost 816,831 SWI inferences against
+786,829 at `8f853f99`. Exactly +15.001 per completed source. Bisecting the ten
+commits puts all of it at `4d0713ac`, the commit that introduced this file, and
+none of it at the nine others.
+
+Rejected: the clause-collection listener as the cause. `prolog_listen(erase,
+...)` is installed unconditionally and takes `current_transaction(_) ->
+engine_create(...)`, which reads like a per-erase engine allocation gated on a
+feature that is off. It is not what the workload pays.
+`statistics(engines_created)` reports a delta of zero across all three samples,
+counting the events shows 0, 47 and 157 erase events across a whole 2,000-call
+run rather than several per call, and removing the listener with
+`prolog_unlisten/2` moves the count by two inferences. Revisit only with an
+event count that shows erases arriving per query.
+
+Measured instead by replacing the two entry points with pass-throughs:
+`with_source_materialization/3` and `flush_source_materialization/0` cost 12
+inferences of body per completed source, and their two call frames cost the
+other 3. Each runs exactly once per `space.run`, confirmed by wrapping them and
+counting 2,000 of each.
+
+Decided: three gates, each on a condition the caller already holds. A parse
+that found no equation cannot make a relation admissible, so
+`with_named_program_order/3` keeps its pre-subsystem shape for that case. The
+per-runnable flush moves onto the compiled-definition boundary that already
+decides when a prefix can have changed. And `source_materialization_dormant/1`,
+two indexed lookups, lets `with_source_materialization/3` and
+`materialize_source/1` return before walking every stored atom for candidate
+names when the pragma is off and the space has no image. A relation the change
+invalidated is still discarded, by `select_relation/5`'s stamp check, which
+already answered the same bag from the retained clauses.
+
+Verified: foreign-match returns to 786,829, equal to the base. Twenty other
+benchmark rows return with it: `space-name` -240,013, `source-load` -92,778,
+`table-bridge-match` -30,004, `op-raw` and `op-encoded` -16,000 each,
+`eval-arith` -16,000, `register-op` -9,282, `run-source` -22,000,
+`annotated-relation` -11,000, `query-where` -480, `save-load-metta` -905,
+`loop-1m` -479, `file-load` -422.
+
+Found while measuring: a data-only source rebuilt the relation while `add()`
+never did. Both doors now leave the invalidated relation for the next lookup to
+discard, and `test_a_source_that_defines_nothing_costs_no_construction` pins
+them together rather than pinning the asymmetry.
+
+Open, attributed and not ours: after these gates, `run-source` remains +7,002,
+`annotated-relation` +1,500 and `query-where` +240 against the base, and every
+one of those appears at `b1bd8646` and at no earlier commit, which is the
+constant-folding admission probe running at each compiled call site.
+`save-load-fast` remains +20,079, appearing at `4d0713ac`, which is the
+fast-cache equation-binding half of that commit recording a binding per
+restored equation. Both are proportional to the work their feature does rather
+than fixed costs on unrelated paths, which is what separates them from the tax
+removed here.

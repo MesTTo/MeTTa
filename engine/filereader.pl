@@ -933,6 +933,15 @@ with_source_program_order(Space, ParsedForms, Goal) :-
 :- meta_predicate with_named_program_order(+, +, 0).
 :- meta_predicate with_named_definition_order(+, 0).
 
+%A source with no equation cannot make a relation admissible, and a stale one
+%is caught by the lookup's own stamp check rather than here, so the empty case
+%keeps the shape it had before materialization existed. Entering the wrapper
+%anyway cost 5 of the 15 inferences the subsystem added to every completed
+%runnable-only source [measured: 816831 against 786829 SWI inferences over
+%2000 completed calls; command=cd extensions/python && PYTHONPATH=.
+%$VENV/bin/python bench.py --counter-only foreign-match; fixture=the
+%foreign-match benchmark space; commit=WORKTREE].
+with_named_program_order(_Space, [], Goal) :- !, call(Goal).
 with_named_program_order(Space, Names, Goal) :-
     materialize:with_source_materialization(
         Space, Names, filereader:with_named_definition_order(Names, Goal)).
@@ -964,14 +973,19 @@ source_definition_arrived(_).
 %so it never enters the extension event door. Definitions are analyzed once
 %before the next runnable, or once at source exit, rather than once per
 %equation.
+%The materialization flush rides the same boundary for the same reason: a
+%prefix relation can only have become buildable when a definition compiled,
+%and a relation the prefix made stale is discarded by the lookup's stamp
+%check. Calling it on every runnable cost the other 10 inferences of the 15
+%above, on sources that define nothing at all.
 flush_source_program_analysis_if_needed :-
     (   retract(source_compiled_definition(Id))
     ->  active_source_program(Id),
-        forall(seam:source_program_compiled, true)
+        forall(seam:source_program_compiled, true),
+        materialize:flush_source_materialization
     ;   true
     ),
-    flush_source_prefix_repairs,
-    materialize:flush_source_materialization.
+    flush_source_prefix_repairs.
 
 %A file load journals dependent recompilations until the source transaction
 %commits.  A runnable in that SAME file is earlier than the commit, however,

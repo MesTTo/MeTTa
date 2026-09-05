@@ -116,9 +116,30 @@ reconcile_materialization([proposal(Space, Images)|Rest]) :-
     reconcile_materialization(Rest).
 
 materialize_source(Space) :-
-    findall(F, (spaces:get_native_atom(Space, [=, [F|_], _]), atom(F)), Names),
-    with_source_materialization(Space, Names, true).
+    (   source_materialization_dormant(Space)
+    ->  true
+    ;   findall(F, (spaces:get_native_atom(Space, [=, [F|_], _]), atom(F)), Names),
+        with_source_materialization(Space, Names, true)
+    ).
 
+% Nothing to prepare and nothing prepared: the source doors take the shape
+% they had before this subsystem existed. Reading the candidate names walks
+% every stored atom, and even the empty walk plus its sort, context row and
+% flush cost the loader on every completed source. Both goals are one indexed
+% lookup, and the second is what keeps a live relation on the maintained path
+% when a program has asked for one.
+% [measured: 786829 SWI inferences over 2000 completed runnable-only calls,
+% equal to the pre-subsystem tree at 8f853f99; command=cd extensions/python
+% && PYTHONPATH=. $VENV/bin/python bench.py --counter-only foreign-match;
+% commit=WORKTREE]
+source_materialization_dormant(Space) :-
+    \+ source_relation_materialization_enabled,
+    \+ materialized_snapshot(Space, _, _, _, _).
+
+with_source_materialization(Space, _Names, Goal) :-
+    source_materialization_dormant(Space),
+    !,
+    call(Goal).
 with_source_materialization(Space, Names, Goal) :-
     findall(F, (materialized_snapshot(Space, _, _, _, Signatures),
                 member(F/_, Signatures)), Previous),
