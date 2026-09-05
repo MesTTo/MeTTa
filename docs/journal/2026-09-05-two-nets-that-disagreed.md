@@ -525,3 +525,32 @@ registration workload from a 105,121 inference minimum to
 inferences over this control, and 1,500 over base 763b7f2d. Its native fact
 insertion improvement is recorded above; ordinary compiled calls still have
 no annotation goal. The next complete gate verifies both lanes together.
+
+
+## 2026-09-05, clear callbacks and the publication boundary
+
+Tried: the complete gate at 5d9b511b passes 3,061 Python tests with 48
+skipped, all seven engine cases, all 35 Python counter cases and all fifteen
+instruction cases. The C, MORK and Node benchmark lanes also pass. Two lanes
+fail: Node binding and example parity. The Node regression is
+`does not carry clear across the wire, and says why`: the expected provider
+refusal, `destructive and tenant-wide`, is replaced by `the engine has no
+suspension point`. The ordinary clear lock introduced in the preceding
+section prevents `engine_yield/1` from reaching the host callback. SWI's
+engine documentation explicitly forbids yielding through a C callback.
+
+Decided: supersede the preceding whole-clear locking decision. Only catalog
+clear needs the ordered publication lock across its ownership check and
+sweep. Ordinary native and foreign clears retain their provider callback
+boundary, then reconcile metadata against declarations still stored. A
+product published after the sweep therefore keeps its effect row. Reuse
+`metta_prune_arrow_products/1` and remove the unconditional withdrawal helper.
+The twelve Node remote tests, 25 Python product tests and 38 expanded Prolog
+cases pass after this change. The catalog-orphan refusal remains covered.
+
+Tried: the parity lane reports `engine 0 against library None` for
+`examples/ch18-performance/18-01-larger-workloads/05-matespacefast.metta`.
+Its existing runner limits each configuration to 300 seconds. The same
+example passes both configurations when run alone on unmodified 763b7f2d.
+The repaired consumer is being checked separately before repeating the
+complete lane; no workload, runner limit or skip list has changed.

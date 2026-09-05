@@ -41,7 +41,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   effect rows consumed by planning, world admission and memoization. A `nondet`
   product joins its effect with `nondeterministicReadOnly`. Removing or reloading
   a declaration withdraws only its owned rows. Direct removal of owned rows
-  and catalog clears that would orphan another space's declaration are refused.
+  and catalog clears that would orphan another space's declaration are refused. Ordinary clear retains provider callback suspension and removes only metadata for declarations no longer stored.
 - `(pragma! verify-cardinality true)` audits annotated ordinary function calls
   using SWI's failure and choicepoint rule. `det` requires one success without
   a choicepoint, `semidet` permits failure, and `nondet` has no answer-count

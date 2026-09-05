@@ -135,12 +135,6 @@ metta_prune_arrow_products(Space) :-
                           Stored =@= Type ) ),
                    metta_erase_arrow_product(Ref)))).
 
-metta_clear_arrow_products(Space) :-
-    with_mutex('$metta_arrow_products',
-        transaction(
-            forall(metta_arrow_product(_, Space, _, _, Ref),
-                   metta_erase_arrow_product(Ref)))).
-
 metta_erase_arrow_product(Ref) :-
     retractall(metta_arrow_product(_, _, _, _, Ref)),
     forall(retract(metta_arrow_dispatch(Ref, DispatchRef)),
