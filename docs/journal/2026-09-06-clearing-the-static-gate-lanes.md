@@ -229,3 +229,30 @@ this branch's version, .qlf cleared and warmed for every arm:
 Decided: state the direction and the arms, not a delta. This is the
 non-monotonic load-structure class `engine/bench-baseline.json`'s boot row
 documents, and the merged measurement is the only one true of what ships.
+
+Found, and not this branch's: `suites/spaces/materialization.plt` segfaults
+intermittently. `sh engine/test.sh` exited 1 on one run with
+`ERROR: Received fatal signal 11 (segv)` inside
+`function_free_materialization:a_cleanup_engine_finds_an_owner_hidden_from_the_gc_callers_snapshot`,
+test 48 of 51, and the C stack names `__pthread_clockjoin_ex` under
+`PL_thread_raise`. That test sets `gc_thread` false, starts a collector thread
+inside a transaction and joins it around a clause GC.
+
+Measured rather than called an intermittent and left: the suite alone reproduces
+it 1 run in 6 at loadavg 65-71, and with `engine/` reverted to trunk it
+reproduces 1 run in 12 at the same load, in the same test with the same stack.
+So the crash is trunk's, in the materialization work, and this branch neither
+causes nor cures it. A full `sh engine/test.sh` afterwards reads 74 suites,
+2,153 tests, exit 0, no signal.
+
+Found afterwards, and it is the same defect already on record:
+`2026-09-05-function-free-materialization.md` ends its collector section with
+"Recorded unexplained: one run in that same period died with signal 11 during
+`an_unmanaged_stale_release_retires_its_image_at_source_collection`. The C stack
+is inside `__pthread_clockjoin_ex` under the signal handler, which is the join
+`set_prolog_gc_thread(false)` performs on the clause collector", and closes with
+"the next occurrence should not be treated as the first". This is that next
+occurrence: same stack, a sibling test that makes the same
+`set_prolog_gc_thread(false)` join, at loadavg 65-71. What is new is a
+reproduction rate, 1 in 6 and 1 in 12 on the two arms, where the earlier record
+had none in 30 isolated runs and 36 whole-suite runs.
