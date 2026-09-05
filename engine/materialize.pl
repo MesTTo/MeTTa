@@ -25,6 +25,7 @@
 
 :- module(materialize,
           [ with_source_materialization/3,
+            with_source_materialization_batch/3,
             materialization_transaction/1,
             materialization_transaction/2,
             materialize_source/1,
@@ -39,11 +40,14 @@
 :- use_module(library(ugraphs)).
 
 :- meta_predicate with_source_materialization(+, +, 0).
+:- meta_predicate with_source_materialization_batch(+, 0, 0).
 :- meta_predicate materialization_transaction(0).
 :- meta_predicate materialization_transaction(0, 0).
 :- thread_local source_materialization/2.
 :- thread_local materialization_transaction_owner/0.
 :- thread_local materialization_changed_space/1.
+:- thread_local materialization_batch/1.
+:- thread_local materialization_pending/1.
 :- dynamic materialized_snapshot/5.
 :- dynamic materialized_predicate/4.
 :- dynamic materialized_owner/3.
@@ -133,9 +137,72 @@ source_materialization_cleanup(exit, _) :- !.
 source_materialization_cleanup(!, _) :- !.
 source_materialization_cleanup(_, Space) :- discard_space(Space).
 
+% One completed load prepares each space it touched once. A relation built
+% while the file body is still running is discarded work, because the loader's
+% dependency repairs run after the last form and invalidate it; a fast image
+% additionally restores child spaces the caller never names, so the queue and
+% not the caller's argument decides what gets prepared. Deferring is invisible
+% to a form inside the file: a lookup revalidates its stamp and falls back to
+% the retained compiled clauses, which answer the same bag. This is the
+% batching boundary the loader already uses for deferred support repairs.
+% [source: engine/filereader/source_lifecycle.pl, run_source_repairs/1,
+% with_source_load/3; commit=WORKTREE]
+% [tested: extensions/python/tests/ch18_performance/test_materialization.py,
+% test_a_reloaded_program_builds_its_relation_once; commit=WORKTREE]
+with_source_materialization_batch(Space, Prepare, Publish) :-
+    gensym(materialization_batch_, Id),
+    setup_call_catcher_cleanup(
+        assertz(materialization_batch(Id)),
+        ( call(Prepare),
+          close_materialization_batch(Id, Space),
+          call(Publish) ),
+        Catcher,
+        abandon_materialization_batch(Id, Catcher)).
+
+% The queue closes before publication, so every prepared relation is still
+% inside the load's own rollback boundary. A nested load forwards its spaces
+% to the enclosing batch, which is the boundary that runs the last repair.
+close_materialization_batch(Id, Space) :-
+    retractall(materialization_batch(Id)),
+    queue_materialization(Space),
+    (   materialization_batch(_)
+    ->  true
+    ;   forall(materialization_pending(Queued), materialize_source(Queued))
+    ).
+
+queue_materialization(Space) :-
+    (   materialization_pending(Space)
+    ->  true
+    ;   assertz(materialization_pending(Space))
+    ).
+
+% The queue outlives construction and publication, so a throw after one image
+% was installed discards every space this load touched rather than only the
+% one the caller named.
+abandon_materialization_batch(Id, Catcher) :-
+    retractall(materialization_batch(Id)),
+    (   materialization_batch(_)
+    ->  true
+    ;   (   batch_completed(Catcher)
+        ->  true
+        ;   forall(materialization_pending(Queued), discard_space(Queued))
+        ),
+        retractall(materialization_pending(_))
+    ).
+
+batch_completed(exit).
+batch_completed(!).
+
 flush_source_materialization :-
     source_materialization(Space, Names),
     !,
+    (   materialization_batch(_)
+    ->  queue_materialization(Space)
+    ;   flush_space_materialization(Space, Names)
+    ).
+flush_source_materialization.
+
+flush_space_materialization(Space, Names) :-
     % This asks whether any transaction exists. Enumerating its ancestors
     % after the owner check fails repeats an ancestor on SWI 10.1.13.
     % https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-transaction.c#L721-L745
@@ -162,7 +229,6 @@ flush_source_materialization :-
         ;   true
         )
     ).
-flush_source_materialization.
 
 % The routing compiler in metta-on-mork requires finite flat inputs, range
 % restriction and co-materialized terminal calls. Retaining the source avoids

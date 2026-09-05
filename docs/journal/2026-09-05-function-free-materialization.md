@@ -196,3 +196,44 @@ Revisit if a workload collects inside transactions: a non-transactional owner
 index, keyed by the clause reference in a store transactions do not govern,
 would make the membership test exact without a fresh view.
 
+## 2026-09-05: finalize each completed load once
+
+Found: a wrapped `build_materialization/7` probe records one construction for plain source, a first text load and a first fast load, but two for text and fast replacements. The source-final flush builds before `run_source_repairs/1`; the repair then invalidates that image and the existing final hook builds again. `ai-tmp/ai-materialization-load-build-count.log` records counts `1, 1, 2, 0, 1, 2` for direct run, first text load, text replacement, fast save, first fast load and fast replacement respectively, with status 0. The full 12-process sweep completed and retained unchanged source hashes, but it is a checkpoint preceding this once-at-load repair and the sparse-dispatch repair.
+
+Design before the repair: this is the same batching boundary as the loader's existing deferred support repairs in commit `0446cb05a8b09358dea492dc09d7e58aa9b9d9cb`. Database deferred constraints, compiler final passes, reactive notification batches and transaction commit callbacks all separate intermediate observations from final reconciliation. Here an explicit `with_source_materialization_batch/3` owns preparation, final materialization and source publication. Source-final requests collect distinct spaces under a thread-local batch; runnable-prefix requests stay eager. After preparation and dependency repair, the active batch marker is removed and each queued space is materialized once. Nested batches forward their final requests into the restored outer batch, including fast-image children.
+
+Failure ownership: the pending-space rows survive through final construction and source publication. If a later child build or publication throws after another image was installed, cleanup discards every pending space before removing those rows. First loads retain their existing nontransactional source journal and worker visibility; replacement loads retain their existing owned transaction. No derivation moves after commit. The cleanup shape follows SWI's [`setup_call_catcher_cleanup/4`](https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/man/builtin.doc) resource lifetime contract. A named `library(prolog_wrap)` wrapper counts actual successful construction only inside the differential test and is removed on every outcome.
+
+Complexity: the admitted chain's preparation remains `O(n^2 log n)` and the paid workload remains `O(n^2 log n + q)`, compared with original `Theta(q n)`. Removing a second identical preparation does not establish a further complexity-class change. It fulfills the explicit once-at-load requirement; the final phase-separated sweep must remeasure the changed load paths. Correctness gates cover exact duplicate bags, one construction per completed plain/text/fast load, intermediate source prefixes, nested batches, partial finalization failure and publication failure.
+
+## 2026-09-05: one preparation per completed load
+
+Found: the once-at-load requirement recorded above was designed and not built.
+`with_source_materialization_batch/3` did not exist, and a wrapped
+`build_materialization/7` counter still reads 1, 1, 2, 0, 1, 2 for direct run,
+first text load, text replacement, fast save, first fast load and fast
+replacement. Two backtraces at the second build show the first from
+`flush_source_materialization/0` inside `metta_host_run_source/4`, and the
+second from `materialize_source/1` in `with_source_load/3`, after
+`run_source_repairs/1`. Instrumenting the repair set separates the two shapes
+the earlier pytest could not: a load that defines a self-recursive function
+records `repairs ['materialized-reach']` and rebuilds, while a load of a name
+another space already defined records `repairs []` and does not. The committed
+pytest used the second shape, so it asserted 1 and passed with the defect
+present.
+
+Decided: `with_source_materialization_batch(Space, Prepare, Publish)` owns
+preparation, final materialization and publication in `with_source_load/3`. A
+flush inside the batch queues its space instead of building; the batch closes
+before publication and materializes each queued space once; a nested load
+forwards its queue to the enclosing batch, which is what covers a fast image's
+child spaces, none of which the caller names. Deferring is invisible inside the
+file because every lookup revalidates its stamp and falls back to the retained
+compiled clauses. Cleanup discards every queued space when the load does not
+exit cleanly.
+
+Verified: the six load paths now read 1, 1, 1, 0, 1, 1.
+`test_a_reloaded_program_builds_its_relation_once` uses function names no other
+case defines, so the repair fires; it fails `assert 2 == 1` with the loader hunk
+reverted and passes with it.
+

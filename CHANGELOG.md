@@ -571,6 +571,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   crashes the process. The clause-erase callback tests the reference's type
   alone, where asking it for its predicate reached SWI's clause metadata
   during the reconsult that was replacing it.
+- A source replacement prepares its materialized relation once rather than
+  twice. The loader's dependency repair pass runs before preparation instead
+  of invalidating a relation the file body had already derived.
 - An unrelated native call no longer reads planning mode and module context
   for every materialized relation in the process. Each relation owns one
   dispatch clause per admitted signature, and removing one leaves another
