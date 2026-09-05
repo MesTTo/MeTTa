@@ -78,4 +78,25 @@ test(non_arrows_and_malformed_annotations_fail_instead_of_passing_through) :-
                   ]),
            assertion(\+ metta_arrow_type_chain(Raw, _))).
 
+%The canonical members come from the catalog's (vocabulary determinism ...)
+%row and the long spellings map onto them, the same two-part rule the
+%effect-class slot beside them already followed. Reading them from a literal
+%list repeated in both branches was one predicate keeping two ownership rules,
+%and the policy-inventory lane named it.
+test(the_long_determinism_spellings_map_to_the_catalog_members) :-
+    forall(member(Spelling-Canonical,
+                  [ 'det'-det, 'deterministic'-det,
+                    'semidet'-semidet, 'semideterministic'-semidet,
+                    'nondet'-nondet, 'nondeterministic'-nondet
+                  ]),
+           ( atomic_list_concat(['-[', Spelling, ']->'], Head),
+             assertion(metta_arrow_type_shape([Head, 'Number', 'Number'],
+                                              _, _, effect(Canonical, _), explicit)) )),
+    %A spelling the catalog does not own is still refused, so mapping IN has
+    %not made a fourth member.
+    assertion(\+ metta_arrow_type_shape(['-[bogus]->', 'Number'], _, _, _, _)),
+    %And the canonical members are the catalog's, not a copy of them.
+    findall(V, spaces:metta_determinism_canonical(V, V), Members),
+    assertion(msort(Members, [det, nondet, semidet])).
+
 :- end_tests(metta_arrow_projection).

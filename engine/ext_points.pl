@@ -1345,6 +1345,7 @@ kind(metta_effect_rank/2, service).
 kind(metta_effect_join/3, service).
 kind(metta_effect_compose/2, service).
 kind(metta_effect_class_canonical/2, service).
+kind(metta_determinism_canonical/2, service).
 kind(metta_operation_effect/2, service).
 kind(metta_operation_plan_effect/2, service).
 kind(metta_effect_walk/3, service).

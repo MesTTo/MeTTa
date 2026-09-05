@@ -76,3 +76,38 @@ after the author had fixed the first.
 Open: the engine still stores a declaration it will not honour. The linter now
 says so, which is the net working as designed, but the 49-site normalisation is
 the real repair.
+
+## 2026-09-05, after the gate: one predicate, two ownership rules
+
+Ran `GATE_ONLY=1 sh check.sh` once the box quietened. 8 of 100 lanes red, five
+of them benchmark lanes at loadavg 7 to 10. Of the three that are not timing,
+two were already recorded elsewhere; `policy-inventory` was not, and it named
+`engine/metta/types.pl:65` and `:79`:
+
+    closed policy list [det-det, deterministic-det, semidet-semidet, ...]
+    has no adjacent exemption
+
+Both are inside `metta_arrow_type_shape/5`, which resolves its EFFECT CLASS
+through `spaces:metta_effect_class_canonical/2`, catalog-owned, and decided its
+CARDINALITY from a literal list repeated in both of its branches. One
+predicate keeping two ownership rules, and the catalog already ships
+`[vocabulary, determinism, det, semidet, nondet]`.
+
+Decided: derive, not exempt. `metta_determinism_canonical/2` mirrors its
+effect-class sibling exactly, including the two-part rule that a long spelling
+maps IN without becoming a fourth public member: `-[deterministic]->` reads as
+`det` and `-[bogus]->` is still refused. The lane goes from 2 findings to 0
+because the closed list is GONE, not because it acquired a note.
+
+Tried: shipping it with only the `kind/2` declaration -> `ext_points.plt` and
+`layering.plt` went red, two suites that had been green. A declared seam must
+also be EXPORTED and reachable under its module, which is the declaration doing
+its job: `metta_determinism_canonical/2` joins the export list in
+engine/spaces.pl and both suites return to green. The whole plunit set then
+matches its pre-change baseline suite for suite.
+
+Re-pinned the identity twin 3553 -> 3558, and this one is attributed in FULL,
+which the -12 recorded in that file earlier today was not. A/B in the main
+checkout with the QLF cleared: HEAD reads 3553 and the lane passes; with the
+four changed files restored it reads 3558. Four facts added to a file the boot
+consults, the same first-argument-index shape the file already documents twice.

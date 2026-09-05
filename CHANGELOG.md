@@ -57,6 +57,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The arrow reader's determinism slot is owned by the catalog, like the effect
+  class beside it. `metta_arrow_type_shape/5` resolved `-[det,oracleIO]->`'s
+  class through the catalog vocabulary while deciding its cardinality from a
+  literal list repeated in both branches; `metta_determinism_canonical/2` now
+  reads `(vocabulary determinism det semidet nondet)`, so the long spellings
+  still map in and a value the catalog does not own is still refused.
+
 - `space.lint()` reports a declaration the engine will not honour as a call
   type. `(: f (-[det]-> Number Number))` loaded apart from its definition was
   accepted, reported by nothing, and left every `(f ...)` answering

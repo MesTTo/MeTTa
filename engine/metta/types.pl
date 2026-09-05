@@ -62,28 +62,17 @@ metta_arrow_type_shape(Raw, Inputs, Output, Product, Explicitness) :-
         Inside \== '',
         atomic_list_concat(Slots, ',', Inside),
         (   Slots = [Slot]
-        ->  (   memberchk(Slot-Cardinality,
-                          [ det-det,
-                            deterministic-det,
-                            semidet-semidet,
-                            semideterministic-semidet,
-                            nondet-nondet,
-                            nondeterministic-nondet
-                          ])
+        ->  (   catch(spaces:metta_determinism_canonical(Slot, Cardinality),
+                      _, fail)
             ->  Product = effect(Cardinality, oracleIO)
             ;   atom_concat('$', Name, Slot),
                 Name \== '',
                 Product = effect_variable(Name)
             )
         ;   Slots = [CardinalitySlot, ClassSlot],
-            (   memberchk(CardinalitySlot-Cardinality,
-                          [ det-det,
-                            deterministic-det,
-                            semidet-semidet,
-                            semideterministic-semidet,
-                            nondet-nondet,
-                            nondeterministic-nondet
-                          ])
+            (   catch(spaces:metta_determinism_canonical(CardinalitySlot,
+                                                          Cardinality),
+                      _, fail)
             ->  true
             ;   atom_concat('$', CardinalityName, CardinalitySlot),
                 CardinalityName \== '',
