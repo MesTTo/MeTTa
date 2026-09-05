@@ -72,6 +72,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   materialize, so `list()` over an effectful island executed it twice and
   delivered the second value: a probe that must answer `1` answered `2`.
 
+- `AsyncMeTTa.space` delegates to the synchronous context constructor, so
+  journal schemas, validation, remote/provider attachment, anonymous equation
+  resolution, and failed-construction cleanup have the same behavior. Caller
+  creation sites and borrowed worker/provider lifetimes are preserved. The async
+  mirror gate now covers handwritten methods against both `Space` and `MeTTa`,
+  with the subscription callback difference recorded in the shared ledger.
+
 - A `|->` whose parameter position is a bare variable rather than a list is
   left as data, the way `(|-> foo ...)` and `(|-> 5 ...)` already were. The
   arity is read off that term and an unbound one read as zero, so
