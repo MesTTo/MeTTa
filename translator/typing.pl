@@ -1,7 +1,7 @@
 % Purpose: compile declared input and output types while preserving shared branch variables
 % Guarantees: Inherited annotated arrows retain their typed arity refusal through
 %   metta_runtime_type/2
-%   [tested: run_tests(metta_arrow_projection); commit=WORKTREE].
+%   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
 %   A named space's local binding cannot inherit a typed arity refusal, while
