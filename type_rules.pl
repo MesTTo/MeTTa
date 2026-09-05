@@ -48,7 +48,7 @@
 %   union_types:a_user_refusal_of_the_whole_pair_is_decisive_in_retained_and_runnable_code,
 %   union_types:a_refused_alternative_does_not_refuse_a_permitted_one,
 %   union_types:the_upstream_witness_cannot_discharge_a_shared_variable;
-%   commit=WORKTREE].
+%   commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 
 % The public families and registry views share one declaration inventory.
 % registered_typing_rule/7 exposes the patterns the checker matches;

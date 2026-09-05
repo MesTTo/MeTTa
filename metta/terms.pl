@@ -29,7 +29,7 @@
 %   comparisons decline [tested:
 %   union_types:the_shipped_fast_path_decides_union_membership_on_its_own,
 %   test_unions_keep_the_fast_path_and_registry_in_agreement;
-%   commit=WORKTREE].
+%   commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 % Guarantees: metta_error_atom/4 preserves Error data and records diagnostics only
 %   during explicit observation [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
 
@@ -949,7 +949,7 @@ metta_user_typing_rule_present(Module) :-
 %whole chain including this guard where a HIT stops at the sixth comparison,
 %so the two costing the same is the measurable form of that claim
 %[tested: union_types:the_union_guards_retire_no_inference_on_a_pair_with_no_union;
-%commit=WORKTREE].
+%commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 %
 %Last also because `Left = Right` must keep binding an unbound side to the type
 %expression AS WRITTEN: a union is what such a variable should become, not one
