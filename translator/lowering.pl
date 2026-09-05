@@ -5,6 +5,9 @@
 %   or settling arguments
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.
+%   fun_meta_head/3 and fun_meta_projection/4 retain source occurrence order,
+%   aliases and ownership [tested: run_tests(translator_metadata_projection);
+%   commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
 %   apply_translator_rule_dl/7 receives a rule's declarations and owning
 %   module from one generation-checked registry row, explicitly materialises
@@ -24,6 +27,9 @@
 %   translator_literal_type_checks:an_intrinsic_type_check_is_specialised,
 %   translator_literal_type_checks:a_stale_transaction_keeps_the_dynamic_contract;
 %   commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
+%   Tracked clauses fold admitted immutable scalar calls while retaining their
+%   source dependencies and the ordinary call's type and error guards
+%   [tested: run_tests(translator_constant_folding); commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: dispatch refusals retain their Error answers and declared_arity_refusal/3
@@ -304,7 +310,10 @@ install_annotated_dispatch(Fun, Ref) :-
 
 dispatch_call_goal_in(Module, Fun, Args, Out, Goal, PolicyGoal) :-
     metta_ensure_compiled(Fun),
-    dispatch_call_goal_for(Module, Fun, Args, Out, Goal, PolicyGoal).
+    (   fold_native_scalar_call(Module, Fun, Args, Out, Goal)
+    ->  PolicyGoal = true
+    ;   dispatch_call_goal_for(Module, Fun, Args, Out, Goal, PolicyGoal)
+    ).
 
 %The two list constructors compile INLINE, because each is a rule holding the
 %proper-list invariant and a rule costs what a fact does not: the same tests
@@ -406,7 +415,7 @@ dispatch_selection_override(Fun) :-
 
 dispatch_head_covers(Module, Fun, Args, _) :-
     fun_meta_module(Module, Fun, Owner),
-    fun_meta_clause(Owner, Fun, Head0, _),
+    fun_meta_head(Owner, Fun, Head0),
     (   metta_seq_present(Head0)
     ->  ground(Args),
         metta_seq_head_matches(Head0, Args)
@@ -589,7 +598,7 @@ dispatch_any_head_matches(Module, Fun, Args) :-
 
 dispatch_any_head_matches(Module, Fun, Args, _) :-
     fun_meta_module(Module, Fun, Owner),
-    fun_meta_clause(Owner, Fun, Head0, _),
+    fun_meta_head(Owner, Fun, Head0),
     % unifiable/3 neither binds the live call nor copies it. copy_term/2 here
     % copied an entire remaining list for each recursive step even though an
     % equation head decides from its outer constructors, making map/fold over
@@ -768,7 +777,7 @@ reduce([F|Args], Out, Status) :- !,
             % [tested: prolog_interface:a_registered_predicate_costs_no_more_than_a_metta_function;
             % commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3]
             (   Module == Self,
-                \+ fun_meta_clause(Module, F, _, _)
+                \+ fun_meta_projection(Module, F, _, _)
             ->  call(Module:Goal)
             ;   dispatch_policy_execute(Module, F, Args, Goal, Produced)
             ),
@@ -1802,7 +1811,7 @@ functioncall_dl(Fun, Chains, Args, IsPartial, Bound, Out, Goals0, Goals) :-
 metta_equation_call(Fun, InputArity) :-
     current_metta_module(Module),
     fun_meta_module(Module, Fun, Owner),
-    fun_meta_clause(Owner, Fun, Head, _),
+    fun_meta_head(Owner, Fun, Head),
     (   length(Head, InputArity)
     ;   metta_seq_present(Head)
     ),

@@ -1,6 +1,12 @@
 % Purpose: propagate output bounds through conjunction matching, ordering, and best-first merge policies
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
+% Guarantees: a full native cyclic query builds Generic Join tries only under
+% the plan-cyclic-joins pragma, while bounded queries retain streaming startup
+% cost [tested:
+% native_generic_join:a_bounded_triangle_retains_streaming_first_answer_cost,
+% native_generic_join:planning_is_declared_rather_than_the_default;
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % Guarantees: metta_match_atoms/2 dispatches a gap operand by its wrapper alone, and a merged read routes a gap pattern while reading its declared policy from what the program wrote [tested: tests/prolog/suites/reader/segments.plt; commit=a3dff3abc83b9d82f3652093246e1d693d526cdb].
 % Guarantees: an ordered carrier's declared ascending or descending direction
@@ -44,7 +50,8 @@
 match_bounded(Bound, Space, Pattern, OutPattern, Result) :-
     (   bounded_conjunction(Bound, Space, Pattern)
     ->  conjunctive_match(limit(Bound,
-                                match_conjunction(Space, Pattern, OutPattern)),
+                                match_conjunction(prefix, Space, Pattern,
+                                                  OutPattern)),
                           Space, Pattern, OutPattern, Result)
     ;   match(Space, Pattern, OutPattern, Result)
     ).
@@ -88,17 +95,27 @@ match_stored(Space, Pattern, OutPattern, Result) :-
 %probe every time. A native space is a Prolog predicate named after the space
 %and stays on the direct helper; anything else routes each conjunct back
 %through match/4, which is how a space implemented by its own clause sees it.
-match_conjunction(Space, Pattern, OutPattern) :- seam:foreign_space(Space), !,
-                                                 match_foreign(Space, Pattern, OutPattern, _).
-match_conjunction(Space, Pattern, OutPattern) :- native_storage_module_cache(Space, Module), !,
-                                                 (   space_parent(Space, _)
-                                                 ->  match_routed(Space, Pattern,
-                                                                  OutPattern, _)
-                                                 ;   match_native(Module, Space,
-                                                                  Pattern,
-                                                                  OutPattern, _)
-                                                 ).
-match_conjunction(Space, Pattern, OutPattern) :- match_routed(Space, Pattern, OutPattern, _).
+match_conjunction(Space, Pattern, OutPattern) :-
+    match_conjunction(full, Space, Pattern, OutPattern).
+
+match_conjunction(_, Space, Pattern, OutPattern) :-
+    seam:foreign_space(Space), !,
+    match_foreign(Space, Pattern, OutPattern, _).
+match_conjunction(Extent, Space, Pattern, OutPattern) :-
+    native_storage_module_cache(Space, Module), !,
+    (   space_parent(Space, _)
+    ->  match_routed(Space, Pattern, OutPattern, _)
+    ;   Extent == full,
+        cyclic_join_planning_enabled,
+        nonvar(Pattern), Pattern = [Comma|Conjuncts], Comma == ',',
+        is_list(Conjuncts),
+        native_conjunction_plan(Module, Space, Conjuncts, Plan)
+    ->  native_conjunction_answer(Plan),
+        acyclic_term(OutPattern)
+    ;   match_native(Module, Space, Pattern, OutPattern, _)
+    ).
+match_conjunction(_, Space, Pattern, OutPattern) :-
+    match_routed(Space, Pattern, OutPattern, _).
 
 match_inherited_space(Space, OwnModule, Pattern, OutPattern, Result) :-
     space_read_chain(Space, Each),
