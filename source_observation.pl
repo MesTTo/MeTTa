@@ -197,11 +197,36 @@ clause_shape_matches(Ref, (Head:-Body)) :-
 
 % A meta predicate executes a generated closure. SWI reports its parent's PC,
 % which identifies the generating construct, not an inner source instruction.
+%
+% The goals walked here are a compiled clause's own, so most of them are MeTTa
+% functions in their space's module and not host predicates. meta_predicate/1
+% is one of the properties SWI answers through the undefined-procedure trap,
+% which searches the whole autoload library index before raising the existence
+% error, so asking it about such a name cost 1,030 inferences to learn "no".
+% current_predicate/1 admits what the module already has and
+% implementation_module/1 admits what it would autoload, for 33, so the ask
+% below still autoloads exactly when it used to
+% [source: /usr/lib/swi-prolog/boot/syspred.pl, property_predicate/2;
+% measured 2026-09-06; commit=WORKTREE].
 goal_attribution(_, token(Name), ['generated-by',['token-constructor',Name]]) :- !.
 goal_attribution(Goal, Construct, ['generated-by', Construct]) :-
     strip_module(Goal, Module, Plain),
+    resolves_for_property(Module, Plain),
     predicate_property(Module:Plain, meta_predicate(_)), !.
 goal_attribution(_, _, exact).
+
+% Whether asking Module for a property of Head can answer at all, without
+% paying the search that answering "no" costs. True for a name the module
+% holds, imports or inherits, and for one the autoloader would supply;
+% implementation_module/1 reports the module itself when nothing resolves the
+% name, which is the case worth not paying for.
+resolves_for_property(Module, Head) :-
+    functor(Head, Name, Arity),
+    (   current_predicate(Module:Name/Arity)
+    ->  true
+    ;   predicate_property(Module:Head, implementation_module(Home)),
+        Home \== Module
+    ).
 
 containing_construct(span(A,B,_,_,_,_), Ref, Construct) :-
     findall(Width-Name,
