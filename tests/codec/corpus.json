@@ -104,7 +104,7 @@
       "text": "&not-a-space",
       "wire": ["s", "&not-a-space"],
       "written": "&not-a-space",
-      "note": "The ampersand alone does not make a space. A name no space exists under is a Symbol, which is what the engine's own get-metatype answers for it, and it is why p is a species rather than a spelling."
+      "note": "The ampersand alone does not make a space. A name no space exists under crosses as a symbol, which is what the engine's own metta_space_operand/1 answers for it, and it is why p is a species rather than a spelling."
     },
     {
       "id": "space-in-expression",

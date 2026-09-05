@@ -1397,9 +1397,9 @@ backend_scan_sees_a_planted_reach :-
 % metta_require_space_name/2, register_provider in the Python seat, and both
 % wire decoders -- but seam:foreign_space/1 is an open ownership seam, so a
 % provider can name a space those doors would have refused. The consequence is
-% not an error: the matcher, get-metatype, the three type-candidate resolvers,
-% operation admission, the translator and the codec would all quietly answer
-% that the name is no space. This scan is what turns that into a refusal.
+% not an error: the matcher, the three type-candidate resolvers, the
+% translator and the codec would all quietly answer that the name is no
+% space. This scan is what turns that into a refusal.
 %
 % Checked twice over, for the reason the cut checks above are: neither reading
 % sees the other's names. The LIVE reading enumerates the seam after every

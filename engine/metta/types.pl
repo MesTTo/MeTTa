@@ -1619,35 +1619,62 @@ metatype_of(X, 'Grounded') :- number(X), !.
 metatype_of(X, 'Grounded') :- string(X), !.
 metatype_of(true,  'Grounded') :- !.
 metatype_of(false, 'Grounded') :- !.
-%THE FIVE CLAUSES BELOW ARE COST-ORDERED, WHICH IS FREE BECAUSE THEY AGREE.
+%A NAME is Grounded when this engine holds a function for it and a Symbol
+%when it does not. That is upstream PeTTa's entire rule, one clause asking
+%one register [source: PeTTa@43705f5d src/metta.pl:202, `'get-metatype'(X,
+%'Grounded') :- atom(X), fun(X), !.`; commit=7bc8e2ac2a2adfa252d5251ee123f320c2dd5ce7].
+%
+%It replaced a 115-name table adopted from LeaTTa's `groundedTokens`, which
+%classified a name by what MINIMAL MeTTa calls grounded rather than by what
+%this engine holds. Over the 268 names in the union of both engines' fun/1
+%and that table, the two rules disagreed on 108 and 74 of those were names
+%whose fun/1 membership is IDENTICAL in both engines -- `car-atom`, `let`,
+%`eval`, `empty`, `min`, `nop` and `&self` among them -- so on those 74 the
+%disagreement was the rule and nothing else. Under this clause that number
+%is 0 and the surviving 115 are exactly the names one engine ships and the
+%other does not [measured 2026-09-05; command=one generated file of 268
+%labelled `!(get-metatype ...)` forms run through `sh run.sh` and through the
+%pinned upstream checkout's own run.sh; fixture=the union of both engines'
+%fun/1 and this table; commit=7bc8e2ac2a2adfa252d5251ee123f320c2dd5ce7]. The run and its residues are
+%recorded in docs/journal/2026-09-05-get-metatype-follows-fun.md.
+%
+%fun/1 rather than builtin_fun/1, because the classification is a fact about
+%the CONTEXT and not about the language: a `(= (my-f $x) $x)` in the program
+%makes `my-f` Grounded on BOTH engines, upstream's src/filereader.pl:22
+%registering the head of every equation it reads exactly as this engine's
+%does [measured 2026-09-05: `!(get-metatype my-f)` after that equation is
+%Grounded on upstream and on this tree].
+metatype_of(X, 'Grounded') :- atom(X), fun(X), !.
+%A SPACE HANDLE and a STATE CELL are atoms here, so they answer through the
+%clause above and are Symbols unless a function carries their name. Upstream
+%answers Symbol for all three of `&self`, a handle bound with
+%`!(bind! &space-a (new-space))`, and a state name bound with
+%`!(bind! &st (new-state 5))` [measured 2026-09-05, both engines]. Two
+%clauses answered Grounded for them until then; they went with the table,
+%because keeping either would have restored an exception list of exactly the
+%kind this change retired. What carries their SPECIES is get-type, which
+%still answers `SpaceType` and `(StateMonad $t)` and which is what the
+%engine's own paths and lib_builtin_types' declarations consult
+%[tested: spaces:space_handle_type].
+%
+%THE THREE CLAUSES BELOW ARE COST-ORDERED, WHICH IS FREE BECAUSE THEY AGREE.
 %Every one of them answers 'Grounded' and every one of them cuts, so no
 %permutation of them can change the answer for any term: whichever fires
 %first ends the call with the same second argument. That is stronger than
 %mutual exclusivity and does not depend on it, which matters because
 %seam:host_object/1 is an open ownership seam and an extension may claim a
-%term that also spells a grounded token, a space handle or a state cell.
+%term that also spells a function name or a parametric space.
 %They are therefore ordered by what they cost an ordinary SYMBOL, the atom
-%this ladder decides most often, cheapest first: an indexed table lookup, one
-%prefix test, one prefix test, a head that does not unify, and last the seam,
-%which is the only one that leaves the engine
-%[measured 2026-08-28 in the shipped Python configuration, 20,000 iterations:
-%metatype_of(+) 8 inferences before and 4 after; the ordinary-symbol answer is
-%unchanged at 11 because a symbol still fails every one of them].
+%this ladder decides most often, cheapest first: an indexed registry lookup,
+%a head that does not unify, and last the seam, which is the only one that
+%leaves the engine
+%[measured 2026-09-05 in the shipped Python configuration, per-call slope
+%between 20,000 and 40,000 iterations: metatype_of(+) 4 inferences, an
+%ordinary symbol 9, a number 3, an expression 8; the probe is in
+%docs/journal/2026-09-05-get-metatype-follows-fun.md; commit=7bc8e2ac2a2adfa252d5251ee123f320c2dd5ce7].
 %The order below CANNOT be extended past list_shaped/1 or the 'Symbol'
 %clause: those answer something else, so a term claimed by the seam and
 %shaped like a list would change its metatype.
-metatype_of(X, 'Grounded') :- atom(X), metta_grounded_token(X),
-                              metta_operation_admitted(X), !.
-%A SPACE HANDLE is a value and not a name that happens to spell one, which is
-%why this asks the registry rather than the table: `&self` is in upstream's
-%table because upstream registers a token for it, and a space a program makes
-%at runtime is in no table at all yet answers the same. Measured on hyperon
-%0.2.10: `!(get-metatype &self)` and `!(get-metatype &space-a)` after
-%`!(bind! &space-a (new-space))` both print `[Grounded]`
-%[source: LeaTTa tests/semantics/spaces/space_identity.metta, STATUS conforms]
-%[tested: space_handle_type].
-metatype_of(X, 'Grounded') :- atom(X), metta_space_operand(X), !.
-metatype_of(X, 'Grounded') :- metta_state_cell(X), !.
 metatype_of([Family|Parameters], 'Grounded') :-
     Space = [Family|Parameters],
     space_parametric(Space),
@@ -1657,25 +1684,25 @@ metatype_of(X, 'Expression') :- list_shaped(X), !. % e.g., (+ 1 2), (a b)
 metatype_of(X, 'Symbol') :- atom(X), !.            % e.g., a
 metatype_of(_, 'Grounded').                        % e.g., partial(f,[1]), f(1)
 
-%The names whose ATOM is grounded, which is what CLASSIFIES a name as Grounded
-%rather than Symbol. A MeTTa program cannot derive it and neither can this
-%engine's own registry, because the classification is about the language and
-%not about the route an engine took to implement a name: `car-atom` is a Prolog
-%predicate HERE and a standard-library equation there, `superpose` is a
-%compiled special form here and a grounded token there. Asking fun/1 answered
-%Grounded for nine names the arbiter answers Symbol for (car-atom, cdr-atom,
-%eval, cons-atom, decons-atom, empty, let, get-doc, type-cast) and Symbol for
-%two it answers Grounded for (nop and &self).
+%The names MINIMAL MeTTa treats as GROUNDED TOKENS. It decided `get-metatype`
+%until 2026-09-05, when the user ruled that this engine follows upstream
+%PeTTa, whose rule is fun/1 and nothing else; metatype_of/2 above carries that
+%rule now and the differential behind it. What still reads this table is
+%minimal `eval`, which must RUN a grounded operation rather than take one
+%equality step over equations that happen to share its name: the prelude
+%writes `(eval (if-equal ...))` eight times and `if-equal` and `trace!` are
+%the only two names that are both in this table and carry equations, so they
+%are the two the guard decides [source: engine/translator/runtime.pl,
+%metta_minimal_equation_step/3; measured 2026-09-05 by enumerating
+%metta_grounded_token(N), fun_meta_module(_, N, _)].
 %
-%So the list is UPSTREAM's, adopted whole rather than re-derived, and generated
-%from the arbiter's own table rather than typed out
+%The list stays LeaTTa's, which is the right arbiter for what it now answers:
+%minimal MeTTa is a form upstream PeTTa does not have at all, so the PeTTa
+%ruling does not reach it
 %[source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean, groundedTokens, 98
-%names read 2026-08-19; tests/semantics/types-meta/
-%02_grounded_token_metatypes.metta and 03_instruction_and_equation_metatypes
-%.metta, both STATUS conforms and both byte-for-byte transcripts]. A name it
-%does not carry is a Symbol, which is what the arbiter answers for one too:
-%`!(get-metatype no-such-operation)` is `[Symbol]` there
-%[tested: metta_metatypes:an_instruction_or_equation_name_is_a_symbol].
+%names read 2026-08-19 and 115 here since]. The engine's vocabulary lane also
+%reads it, as one of the four registers that make a name one this engine
+%speaks about [source: tests/checks/check_llms_names.py, engine_vocabulary].
 metta_grounded_token('%'). metta_grounded_token('&self').
 metta_grounded_token('*'). metta_grounded_token('+').
 metta_grounded_token('-'). metta_grounded_token('/').
@@ -1774,32 +1801,6 @@ metta_grounded_token('tan-math'). metta_grounded_token('trace!').
 metta_grounded_token('trunc-math').
 metta_grounded_token('union-atom').
 metta_grounded_token('unique-atom'). metta_grounded_token('xor').
-
-%The other half of the metatype answer: the table says which names are grounded
-%and this says which of them THIS engine holds an operation for. The arbiter
-%asks both, `groundedTokenNames.contains s && w.opAdmitted s`, and it measured
-%why: hyperon answers Symbol for `flip` and Grounded for it after
-%`!(import! &self random)`, because "WHICH names a tokenizer has bound is a
-%fact about the context, not about the language"
-%[source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean, metaTypeOf and the
-%note above groundedTokens, read 2026-08-19]. Without it a name this engine has
-%no operation for reported Grounded, which is a claim it cannot make and which
-%contradicts the `no-such-operation` answer the same corpus pins: 33 of the 98
-%are LeaTTa or hyperon operations this engine does not ship [measured 2026-08-20].
-%
-%Both of the engine's registers are asked, because a head has meaning here two
-%ways and fun/1 alone is not the question: 29 of the translator's special-form
-%heads answer false to it, `superpose` and `nop` among them
-%[source: metta_translated_head/1 in engine/translator.pl, which is the same
-%question the linter asks]. `&self` is in neither register and is always here,
-%being the space every program starts in, which is why the arbiter grounds it
-%for the same reason it grounds `+`
-%[tested: metta_metatypes:a_token_this_engine_does_not_hold_is_a_symbol].
-metta_operation_admitted(Name) :- fun(Name), !.
-metta_operation_admitted(Name) :- metta_translated_head(Name), !.
-%`&self` reaches this through the space registry rather than through either
-%register, which is also how every space a program makes at runtime reaches it.
-metta_operation_admitted(Name) :- metta_space_operand(Name).
 
 %A parameter declared with a METATYPE accepts any atom of that kind, which is
 %what makes a variadic constructor declarable: a container has no fixed arity
