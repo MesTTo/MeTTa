@@ -59,3 +59,36 @@ Evidence: 3,037 Python tests pass, against 3,035 before. One unrelated
 intermittent, `test_serve_and_boot_expose_spaces_until_interrupted`, fails about
 one run in three at loadavg 42 and migrates between its two parameters; it is
 filed against the backlog's own intermittent row.
+
+## 2026-09-05, the other half of the same promise
+
+The same lens turned on PeTTaChainer's findings 3 and 8, which rest on a
+measurement the adaptations journal records: `(: two (-[det]-> Number Number))`
+with `(= (two $x) $x)` and `(= (two $x) (+ $x 1))` answers 1 AND 2, because the
+arrow is read and its product dropped. Re-probed and it still does.
+
+That is the mirror of the constructor case. `uncovered-constructor` catches too
+FEW answers under a det claim; two equations sharing a head catch too MANY, and
+the same guard decides both, so `_claims_det/1` is now one helper with two
+callers rather than a condition written twice.
+
+Neither existing overlap rule reaches it and both are right not to:
+`duplicate-equation` needs equal bodies and these differ, `subsumed-equation`
+needs one head to be a strict INSTANCE of the other and these are variants.
+What makes it wrong is the declaration, not the overlap.
+
+Measured across the arrows with the same two equations: `-[det]->` fires, plain
+`->` is silent because a function is a relation, `-[nondet]->` is silent because
+it is the remedy the message names. Distinct heads, a single equation, and an
+undeclared function are all silent.
+
+Deliberately conservative on PARTIAL overlap: `(= (f 1) 10)` beside
+`(= (f $x) $x)` does answer twice for `(f 1)` and is not reported, because
+deciding it needs unification against every stored head rather than an
+alpha-key comparison. The certain case is the one that fires.
+
+This is the STATIC half of findings 3 and 8. The runtime half, enforcing the
+product rather than reporting the contradiction, is separate work and is not
+claimed here.
+
+Evidence: 3,041 Python tests pass, against 3,039 before.
