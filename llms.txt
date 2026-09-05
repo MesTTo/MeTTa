@@ -433,6 +433,14 @@ refusals that remain cite their ground in one of the two languages: an
 unresolvable name is Python's own NameError, a `nonlocal` targets a frame no
 stored equation outlives, and a `finally` reading a name its `try` rebinds
 is a stale read the compiler names.
+Inside a compiled body `match(pattern, template)` is LOWERED rather than run,
+against `(context-space)`; a leading handle, space parameter or `"&kb"` names
+another space, and two or more patterns before the template are the engine's
+own conjunction `(, p q)`, the same join the read door spells as `m[p1, p2]`.
+A Python `match` STATEMENT is a `case`: its arms lower to flat case rows over
+the subject, so an `Empty` arm answers for a subject with no answers, and an
+arm carrying a guard or an as-name nests the arms from there under a variable
+row.
 Stacked clauses become a first-match dispatcher. It takes `name=`, and
 `prolog=` to make a Prolog file the function with the Python kept as the
 reference twin. A local assignment such as `result: int = value`

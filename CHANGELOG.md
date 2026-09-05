@@ -9,6 +9,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A second `@m.define` clause publishes the arrow its own signature states. One
+  boolean per name recorded only whether it had declared anything, so every
+  later clause's declaration was suppressed; a ledger of what the name has
+  published here adds the new arrow and skips a repeat.
+- A case row that is not a `(pattern body)` pair no longer makes a negation over
+  its function answer nothing. The bound-variable walk failed on the row, which
+  failed the whole dual build and left `(not-provable (f 1))` with no answer at
+  all where the form does not reduce and its dual is therefore true. The walk
+  steps over such a row now, so the refusal comes from the place this engine
+  puts one: it raises rather than answering from an incomplete dual.
+- A declared class answers its OWN type name. `ensure_registered` walks the MRO,
+  so a subclass adding nothing projected through its base's entry: declaring
+  `Dog(Animal)` restated `(: Animal (-> String Animal))`, which the engine
+  reported as a duplicate declaration, and left no `Dog` type at all. Conversion
+  still inherits, which is right there; declaration does not.
 - Clearing a space no longer walks its stored atoms one at a time because an
   unrelated library watches a different space. A hook clause whose head names
   the space it watches, as `lib_tabling` names `&metta`, is now idle for every
@@ -29,6 +44,32 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- A compiled `match(...)` call takes a CONJUNCTION. Two or more patterns before
+  the template lower to the engine's own `(, p q)`, so
+  `match(S.edge(V.x, V.y), S.edge(V.y, V.z), (V.x, V.z))` stores
+  `(match (context-space) (, (edge $x $y) (edge $y $z)) ($x $z))` and joins on
+  the shared middle node. It is the spelling the read door already takes,
+  `m[p1, p2]` and `Space.match(p1, p2)`, and a leading handle, space parameter
+  or `"&kb"` still names the space. Writing the two patterns as a TUPLE builds a
+  two-element pattern term instead, which the space cannot hold, and answered
+  nothing without saying so; a conjunct that is not a whole pattern now refuses
+  and names both readings.
+- Declaring a class into a space writes its subtype edges. Python's class
+  hierarchy IS a subtype relation, so `m.define(Animal)` then `m.define(Dog)`
+  for `class Dog(Animal)` stores `(:< Dog Animal)`, and `get-type` on a
+  `(: Rex Dog)` widens to `[Dog, Animal]`. Only DECLARED classes count as
+  supertypes, which keeps `object`, a NamedTuple's `tuple` and an enum's `Enum`
+  out of the answer, and only REAL bases do, since a virtual `abc` registration
+  never reaches `__mro__`. Multiple inheritance answers one edge per direct
+  base, and a base declared after its subclass fills that edge in then.
+- An ATOM in annotation position is the type itself. `typed(S.a, S.Number)` and
+  `arrow(S.Number, S.Bool)` already read an atom or a Python type either way; a
+  signature read only the Python type, so `def speak(a: S.Animal) -> S.Sound`
+  declared `(-> %Undefined% %Undefined%)` and said nothing. It declares
+  `(-> Animal Sound)` now, and the doc's `(@type ...)` field carries the same
+  atom. It is the escape hatch the projection table needs, since the table is
+  finite and many-to-one: a MeTTa type with no Python class had to be given an
+  empty one to be nameable in a signature.
 - `csv-snapshot!` reads a CSV file ONCE into an ordinary space of
   `(row Number Field...)` atoms, beside `csv-space`'s live view. The view holds
   no rows and reparses per query; the snapshot pays one parse and then about two

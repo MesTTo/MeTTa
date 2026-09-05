@@ -67,6 +67,13 @@
 %     case_dual_patterns; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67].
 %   - an empty body's dual succeeds because it has no True answer [tested:
 %     case_dual_patterns; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67].
+%   - building a dual READS the equation and never writes to it, so the
+%     ordinary direction still answers afterwards, and a case row that is not a
+%     [Pattern, Body] pair RAISES rather than leaving the negation with no
+%     answer at all [tested:
+%     case_dual_patterns:building_a_dual_leaves_the_equation_answering,
+%     case_dual_patterns:a_malformed_case_row_refuses_rather_than_vanishing;
+%     commit=d4dc76461b7a0a22b89825660977c46dfef3ae69].
 %   - (not-provable G) answers False once per way G reduces to True and True
 %     once per solution of G's dual, so for a ground G exactly one of the two
 %     holds and for a non-ground G the two partition the answers
@@ -841,10 +848,22 @@ let_bound_variables([Head|Rest], Vars, Tail) :-
 let_bound_variables(_, Vars, Vars).
 
 case_bound_variables([], Vars, Vars).
-case_bound_variables([[Pattern, Body]|Pairs], Vars, Tail) :-
-    term_variables(Pattern, Bound),
-    append(Bound, Rest, Vars),
-    let_bound_variables(Body, Rest, Next),
+%A row that is not a [Pattern, Body] pair binds nothing and is stepped over
+%rather than failing the walk. Failing it made generator_bound_variables/2 fail,
+%which made equation_dual/4 and then the whole build fail, and a negation over
+%the function answered NOTHING: `(= (f $n) (case $n ((1 2 3))))` gave
+%`(not-provable (f 1))` no answer at all where the form does not reduce and the
+%dual is therefore true. Stepping over it lets case_dual_chain/5 meet the same
+%row and refuse through body_nottrue/4, which is where this file puts a form it
+%cannot dualise: raise, never answer from an incomplete dual
+%[tested: case_dual_patterns:a_malformed_case_row_refuses_rather_than_vanishing].
+case_bound_variables([Row|Pairs], Vars, Tail) :-
+    (   Row = [Pattern, Body]
+    ->  term_variables(Pattern, Bound),
+        append(Bound, Rest, Vars),
+        let_bound_variables(Body, Rest, Next)
+    ;   Next = Vars
+    ),
     case_bound_variables(Pairs, Next, Tail).
 
 occurs_among(Vars, Var) :- memberchk_eq(Var, Vars).
