@@ -12,7 +12,9 @@
 %     lib_thread:a_saturated_timer_pool_does_not_block_scheduler_deadlines,
 %     lib_thread:a_cancelled_scheduler_deadline_cannot_wake_its_task,
 %     lib_thread:full_channel_sends_suspend_engines_instead_of_all_carriers;
-%     commit=39092863ae34184a9f955f185ff57c1ff177ec40].
+%     commit=WORKTREE].
+% Owns resources: the saturation case cancels its timers and future and closes
+%   its channel in cleanup, including when waiting for saturation fails.
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -505,6 +507,12 @@ timer_pool_reaches_one_running(Pool, Attempts) :-
         timer_pool_reaches_one_running(Pool, Left)
     ).
 
+%Pool properties are replies from the pool manager, not clause updates to
+%thread_pool_property/2. Its default one-second retry can miss the entire
+%one-second callback overlap. Start after the wait begins and sample that
+%external state every 5ms; the setup and scheduler-deadline bounds stay fixed.
+%[source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/thread_pool.pl,
+%thread_pool_property/2; commit=WORKTREE].
 test(a_saturated_timer_pool_does_not_block_scheduler_deadlines,
      [ setup(metta_test_ensure_thread_surface),
        cleanup(( metta_test_cancel_all(Timers),
@@ -514,9 +522,9 @@ test(a_saturated_timer_pool_does_not_block_scheduler_deadlines,
     thread_pool_property(Pool, size(PoolSize)),
     Saturating is PoolSize + 1,
     length(Timers, Saturating),
-    maplist(timer_after(0, [sleep, 1.0]), Timers),
+    maplist(timer_after(0.05, [sleep, 1.0]), Timers),
     thread_wait(thread_pool_property(Pool, running(PoolSize)),
-                [ wait_preds([thread_pool_property/2]),
+                [ db(false), retry_every(0.005),
                   module(user), timeout(10) ]),
     channel_new(Channel),
     thread_spawn([recv, Channel, 0.05], DeadlineFuture),
