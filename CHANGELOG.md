@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `Space.drop()` retains subscriptions and provider ownership when engine
+  teardown fails. A later cleanup failure keeps the anonymous name reserved
+  and can be retried without repeating engine teardown or clearing a journal.
+
 - `EnginePool.close(wait=True)` joins owned workers after an earlier nonwaiting
   close. `AsyncMeTTa.define` requires the reference function with `prolog=` and
   applies the synchronous decorator on its owning worker.
