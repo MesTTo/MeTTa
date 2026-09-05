@@ -1232,7 +1232,7 @@ kind(observe/3, service).
 %to call it needs a published way to make it exist; the only alternative on
 %offer is a library running load_files/2 over an engine path, which is the
 %reach this gate exists to refuse
-%[tested: sh check.sh lib-surface; commit=WORKTREE].
+%[tested: sh check.sh lib-surface; commit=60d6ca9089f50521bba869c3b7a87c92fd6a990f].
 kind(metta_ensure_source_observation/0, service).
 
 %The declared source discipline of a context, (source Ctx Kind): the

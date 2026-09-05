@@ -47,7 +47,7 @@
 %   a local scope's own space, and every space for the shared one, whose
 %   aliases every module reads [tested:
 %   structural_aliases:a_shared_alias_is_hidden_by_a_declaration_added_to_another_space;
-%   commit=WORKTREE].
+%   commit=60d6ca9089f50521bba869c3b7a87c92fd6a990f].
 
 %The inverse of add_sexp_in/4, written here beside it for the same reason
 %metta_module_space/2 is written beside space_module/2: the mapping is
