@@ -221,7 +221,7 @@ findings to 1 for the same reason. The remaining one is the sibling anchor at
 measured_corpus.py:38, which resolves from the checkout and not from a worktree
 four directories deeper:
 
-    checkout anchor  : /home/user/Dev/LeaTTa               True
+    checkout anchor  : <LEATTA_PATH>               True
     worktree anchor  : <a worktree four levels deeper>/LeaTTa  False
 
 `build` and `mork-bench` are NEW and are the same provisioning from the other
