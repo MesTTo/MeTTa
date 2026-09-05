@@ -97,3 +97,83 @@ refuses an unknown VERB and deliberately has no catch-all under the command
 table, because a catch-all would fire when a real command runs out of answers.
 Closing it wants either an arity beside each verb in `metta_node_verb/1` or a
 dispatcher that separates "no clause matched" from "no more answers".
+
+## 2026-09-05, later the same day
+
+The Open item above is closed. It was left documented and that was the wrong
+call: every future signature change on this wire would have done the same thing
+in the same silence, and the two that already had were caught by luck rather
+than by the dispatcher.
+
+Measured first, through the raw door, on the tip before the fix:
+
+```text
+unknown verb                            -> threw
+known verb, too few  (atoms/1 given 0)  -> NO THROW, sync() answered null
+known verb, too many (atoms/1 given 2)  -> NO THROW, sync() answered null
+known verb, too few  (run/2 given 1)    -> NO THROW, sync() answered null
+known verb, too many (spacenames/0 g 1) -> NO THROW, sync() answered null
+```
+
+Four of five silent, and `null` is what a caller reads as "there are no
+answers".
+
+Decided: a DECLARED arity beside each verb, checked in the dispatcher before
+any call, with the two failures kept in different words. Both halves are
+borrowed rather than invented. Redis's command table carries an arity per
+command and `processCommand` refuses on it before the command function runs,
+which is where the "check it centrally, from a declared field" shape comes from
+[source: redis/redis `src/server.c`, the arity test answering
+`wrong number of arguments for '%s' command`; Redis spells "at least n" with a
+negative arity, which this table does not need because every verb here takes
+exactly one count]. JSON-RPC 2.0 keeps `-32601` "method not found" apart from
+`-32602` "invalid params" because a caller acts on them differently, which is
+why the unknown verb and the wrong count stay separate refusals here
+[source: the Model Context Protocol Python SDK's `jsonrpc.py`, carrying the
+spec's own descriptions].
+
+Rejected: deriving the count from `metta_node_command/3`'s clause heads at
+dispatch time. It reads well and cannot go stale, and it loses on two counts:
+`clause/2` on the dispatch path is a clause walk per command, and it makes the
+refusal depend on `protect_static_code` being false, a flag nothing in this
+tree sets and whose flip would turn every command into a refusal. Revisit if
+the table ever grows a verb whose accepted count is not decidable by reading
+the file.
+
+Rejected: deriving once at load time into cached facts. It removes the walk and
+keeps the flag dependency, just earlier, where an empty derivation would refuse
+everything instead of one thing.
+
+Decided: the staleness a declared table can suffer is answered by a GATE, not
+by the run-time path. `tests/prolog/static_checks.pl` derives the same table
+from the clause heads and compares both ways, so `clause/2` lives off the
+dispatch path where losing it fails the check rather than the binding. The
+check cannot pass by looking at nothing: a `clause/2` that stopped answering
+reports every declared row as unbacked, an empty table reports every clause as
+undeclared, and both empty at once is what the row count refuses. Proved by
+mutation rather than by assertion:
+
+```text
+metta_node_verb(atoms, 1) -> (atoms, 3):
+  the Node command table declares atoms/3 and no clause of it has that arity …
+  the Node command atoms has arity 1 and the table declares no such row …
+metta_node_verb(digest, 1) removed:
+  the Node command digest has arity 1 and the table declares no such row …
+```
+
+Also decided: the scope dispatcher beside it takes the same split. A known
+scope word with the wrong details fell through to the catch-all and was
+reported as a scope this binding does not have, which is loud but the wrong
+diagnosis and the one a caller cannot act on.
+
+Measured, because the comment claimed it: the lookup is 2 inferences as the
+`memberchk` it replaces and 0 as an indexed fact, on the first, last and a
+middle row. SWI's `memberchk/2` is foreign, so neither was ever paid for and
+the fact table was not chosen for speed.
+
+Not closed: `metta_node_command/3` and `metta_node_scope/3` are still the only
+dispatchers in the tree with a verb table. The Python shim reaches named
+predicates through janus with a fixed arity, so a wrong count there is Prolog's
+own `existence_error`, and the C seat has no verb table at all; there is no
+sibling shape to match here, which is why this one is stated in Redis's and
+JSON-RPC's words rather than in a sibling binding's.

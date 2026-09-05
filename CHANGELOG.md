@@ -123,6 +123,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Node binding refuses a command whose argument count is not the one its
+  verb takes, instead of answering nothing. A wrong count unified with no
+  clause head, so the command simply FAILED and a caller pulling one event read
+  that as "there are no answers": adding the space argument to `run` disarmed
+  `Space.capacity`'s admission guard and stopped the conformance kit's
+  streaming definitions from loading, both in silence. The verb's argument
+  count is declared beside it and checked before any call, and an unknown verb
+  stays a separate refusal from a wrong count, because a caller acts on them
+  differently. A known scope word given the wrong details is refused by its own
+  name too, where it used to be reported as a scope the binding does not have.
+
 - The Node binding's `&self` is the space the ask was made in, at the term door
   as at the source door. `&self` is a substitution for the running space that
   the engine's source loader applies, and a term built on the host side never
