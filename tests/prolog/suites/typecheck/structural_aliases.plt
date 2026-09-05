@@ -2,7 +2,8 @@
 % Assumes: each fixture owns a fresh native space; scratch files stay in ai-tmp.
 % Guarantees: alias and direct-RHS programs agree through source, file and
 %   reflective doors; edits repair retained callers without losing lexical
-%   scope or raw source [tested: run_tests(structural_aliases); commit=acad923476d21110870f235192757281a737ee71].
+%   scope or raw source, and neither door installs a clause in a scope that
+%   holds none [tested: run_tests(structural_aliases); commit=e471c116647ffc9d3949501b3f2d3869a9153bc2].
 % Owns resources: setup/cleanup releases each space and deletes each source file.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
@@ -363,5 +364,42 @@ test(a_rolled_back_nested_declaration_does_not_refuse_the_outer_commit,
           metta_add_atom(S, [':','Count',['Alias','String']], true) )),
     findall(T, match_stored(S, [':','Count',T], T, _), Rows),
     assertion(Rows == [['Alias','String']]).
+
+removal_door_clauses(Count) :-
+    findall(Ref, clause(spaces:metta_remove_atom(_, _, _), _, Ref), Refs),
+    length(Refs, Count).
+
+withdrawal_cost(Space, Name, Count) :-
+    metta_add_atom(Space, [':', Name, 'Number'], true),
+    statistics(inferences, Before),
+    metta_remove_atom(Space, [':', Name, 'Number'], true),
+    statistics(inferences, After),
+    Count is After - Before.
+
+% The rule the readers above obey holds for the WITHDRAWAL door as well: a
+% scope with no alias keeps the ordinary removal clauses and installs nothing
+% in front of them. This clause left standing unconditionally cost the
+% register-op benchmark 12,502 inferences over 100 registrations in a space
+% that declares no alias at all, 2,899 of them once for the execution module
+% its space_module/2 materialized and 97 per later cycle for a transaction and
+% an invalidation sweep over a support graph holding no alias root
+% [measured 2026-09-05, 103723 -> 116225;
+% command=extensions/python/bench.py --counter-only register-op].
+test(a_scope_without_an_alias_installs_no_withdrawal_clause,
+     [setup(context(S, M)), cleanup(metta_release_space(S))]) :-
+    withdrawal_cost(S, 'Warm', _),
+    removal_door_clauses(Plain),
+    withdrawal_cost(S, 'Tally', Ordinary),
+    removal_door_clauses(Unchanged),
+    assertion(Unchanged =:= Plain),
+    metta_add_atom(S, [':', 'Count', ['Alias', 'Number']], true),
+    removal_door_clauses(Gated),
+    assertion(Gated =:= Plain + 1),
+    assertion(spaces:type_alias_mutation_scope_ref(local(M), _)),
+    withdrawal_cost(S, 'Ledger', Aliased),
+    assertion(Aliased > Ordinary),
+    metta_remove_atom(S, [':', 'Count', ['Alias', 'Number']], true),
+    removal_door_clauses(Retired),
+    assertion(Retired =:= Plain).
 
 :- end_tests(structural_aliases).
