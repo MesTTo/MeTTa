@@ -58,6 +58,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `MeTTa.profile()`'s second answer is a table like every other. `EngineProfile`
+  held bare tuples, so self-ticks were `node[3]` counted out against a
+  docstring; `nodes` and `top()` answer `Rows` now, with columns
+  `(predicate, calls, redos, ticks_self, ticks_siblings)`, so a column reads by
+  name and a notebook renders it. `Row` subclasses `tuple`, so anything already
+  reading positions is unaffected.
+
 - `list(view)` over a lazy evaluation view no longer pays for a count it then
   throws away. `list()` asks for an iterator before its length hint, which is
   how a count source tells it from a bare `len(view)`; the evaluation door
