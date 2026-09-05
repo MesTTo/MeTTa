@@ -256,6 +256,9 @@ async def define(
 > returned handle's own calls are synchronous methods; evaluate
 > through fn(name) or run() from async code.
 >
+> The reference function is required, including with prolog=. The
+> synchronous decorator is constructed and applied on the owning worker.
+>
 > `name=` preserves an exact spelling on the async surface. Without it,
 > an async caller installing `prime?` or an authored underscore had no
 > equivalent of the synchronous define method.
@@ -481,6 +484,11 @@ async def drop(self) -> None:
 > Subscriptions on the space cancel with it: a pooled name reused later
 > must not deliver to the old life's watchers. The handle itself dies
 > here, and dropping twice is a no-op, as closing twice is.
+>
+> Engine teardown must succeed before Python cleanup is discarded.
+> If later cleanup fails, call drop() again to finish it. The handle
+> refuses other operations in that state and retains its anonymous name
+> until cleanup succeeds; retrying does not repeat engine teardown.
 
 ### `AsyncMeTTa.run`
 

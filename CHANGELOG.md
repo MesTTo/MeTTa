@@ -9,6 +9,24 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Remote mutations negotiate scoped, expiring idempotency keys. Lost or
+  indeterminate replies raise `OutcomeUnknown`; its `retry()` replays the
+  retained request without repeating its effects. Legacy peers expose the
+  same uncertainty but refuse recovery without negotiated replay. Late
+  reentrant completions cannot restore pruned replay reservations.
+- Remote responses validate their envelope and complete atom list before
+  delivery. Malformed replies raise `ProtocolError`, which remains a transport
+  failure through engine error policies. Invalid initial cursor replies
+  release their token or retain it on the reported cleanup failure.
+
+- `Space.drop()` retains subscriptions and provider ownership when engine
+  teardown fails. A later cleanup failure keeps the anonymous name reserved
+  and can be retried without repeating engine teardown or clearing a journal.
+
+- `EnginePool.close(wait=True)` joins owned workers after an earlier nonwaiting
+  close. `AsyncMeTTa.define` requires the reference function with `prolog=` and
+  applies the synchronous decorator on its owning worker.
+
 - The MeTTa file library now creates directories, copies bytes with staged
   replacement, returns queryable metadata snapshots, composes lexical paths,
   reads stdin through EOF, writes stderr, and exits with an explicit status.

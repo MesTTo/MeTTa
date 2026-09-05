@@ -20,6 +20,34 @@ Source: `extensions/python/metta/remote.py`.
 
 The entries below reproduce the source signatures and docstrings.
 
+## `OutcomeUnknown`
+
+```python
+class OutcomeUnknown(TransportFailure):
+```
+
+> A mutation may have executed; ``retry()`` replays its keyed request.
+>
+> ``outcome`` is always ``"unknown"``. A retry returns the original wire
+> acknowledgement. Without a negotiated replay contract it refuses to send;
+> callers must reconcile the operation with the serving application.
+
+### `OutcomeUnknown.retry`
+
+```python
+def retry(self) -> dict:
+```
+
+> Recover the original result without issuing a new logical write.
+
+## `ProtocolError`
+
+```python
+class ProtocolError(TransportFailure):
+```
+
+> A response violates its schema; cursor retains a rejected reply's token.
+
 ## `Request`
 
 ```python
@@ -193,12 +221,10 @@ def add(self, atom: Atom) -> None:
 
 > Store one atom on the serving side.
 >
-> A transport TIMEOUT means UNKNOWN, not failed: the server may
-> still be processing the request when the client stops waiting, so
-> a mutation behind a timeout can have committed. Exactly-once
-> delivery needs idempotency keys and server-side deduplication,
-> which the remote protocol does not carry yet; until it does,
-> re-checking with a read is the caller's disambiguation.
+> A lost response raises OutcomeUnknown. Its retry() replays the
+> original acknowledgement when the server advertised idempotency;
+> otherwise retry refuses to send and the caller must reconcile with
+> the server. Calling add again starts a NEW logical mutation.
 
 ### `RemoteSpace.add_many`
 
@@ -239,7 +265,10 @@ def connect(
 > Python's own ssl.SSLContext for https urls, certificate pinning
 > included, so the transport composes with whatever security the
 > serving side asks for. Only absolute http and https URLs are accepted.
-> Credentials require https.
+> Credentials require https. Each mutation negotiates a replay key through
+> GET /health before its POST; authorization policies must permit that read.
+> An unadvertised extension leaves mutations unkeyed, and OutcomeUnknown
+> refuses to resend those requests after a lost response.
 
 ## `Gateway`
 
@@ -256,6 +285,12 @@ class Gateway:
 > it directly, which is how a test watches the engine's own counters
 > while the protocol runs, an HTTP server answering on a thread of its
 > own.
+>
+> Keyed mutations retain their acknowledgements for mutation_ttl seconds
+> (300 by default), up to mutation_limit entries (4096). Full ledgers refuse
+> new keys before execution. Expired keys and keys for another gateway
+> instance refuse instead of becoming new writes. The ledger is in memory;
+> restarting a gateway requires reconciling outstanding unknown outcomes.
 >
 > A Gateway OWNS the cursors ask/next/stop hold open, so close() it when
 > the process is done with it. Server.close() does that for the one
@@ -337,6 +372,8 @@ def serve(
     ssl_context: Any = None,
     cursor_idle: float = _CURSOR_IDLE,
     cursor_limit: int = _CURSOR_LIMIT,
+    mutation_ttl: float = _MUTATION_TTL,
+    mutation_limit: int = _MUTATION_LIMIT,
 ) -> Server:
 ```
 
@@ -357,6 +394,10 @@ def serve(
 > server-side state: how long a cursor nobody pulls from survives, and
 > how many live at once before a further ask is refused. The defaults
 > are pengines' own, 300 seconds and a ceiling.
+>
+> mutation_ttl and mutation_limit bound the keyed mutation replay ledger,
+> as documented on Gateway. Authorization must admit health for clients
+> that negotiate mutation keys.
 >
 > A context is a PROCESS: serving and attaching within one process
 > cannot join through the local engine, because one runtime lock guards
