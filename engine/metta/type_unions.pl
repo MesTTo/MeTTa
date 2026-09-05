@@ -8,7 +8,7 @@
 %     through metta_runtime_type/2 so an annotated arrow member reaches the
 %     arrow relation, and keeps the first of any structurally identical members
 %     in written order [tested:
-%     tests/prolog/suites/typecheck/union_types.plt; commit=WORKTREE].
+%     tests/prolog/suites/typecheck/union_types.plt; commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 %   - metta_union_relates/3 admits an ACTUAL union only when every alternative
 %     satisfies the requirement under ONE assignment of the type variables they
 %     share, and a REQUIRED union when some alternative is satisfied. A pair
@@ -16,15 +16,15 @@
 %     its alternatives so the enclosing argument group can still solve a shared
 %     variable [tested:
 %     union_types:the_upstream_witness_cannot_discharge_a_shared_variable;
-%     commit=WORKTREE].
+%     commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 % Fails when: the written union is empty or improperly terminated. Those throw
 %   metta_type_union_syntax rather than standing as a type name nothing can
 %   satisfy [tested: union_types:an_empty_union_is_refused_as_type_syntax;
-%   commit=WORKTREE].
+%   commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 % Decides: `|` heads a union only where a type is read. An expression atom whose
 %   head begins with `|`, the corpus's `(|-> ($x) ...)` lambdas included, stays
 %   data [tested: union_types:a_pipe_expression_outside_a_type_stays_data;
-%   commit=WORKTREE].
+%   commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 
 % Every caller reaches this behind an inlined `Head == '|'` test at its own
 % reader, so a program that writes no union pays nothing for the feature. A
@@ -33,7 +33,7 @@
 % before the guard, with a miss, which runs through it
 % [tested: union_types:the_union_guards_retire_no_inference_on_a_pair_with_no_union,
 % union_types:a_union_free_check_does_not_scan_declared_unions;
-% commit=WORKTREE].
+% commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 %
 % The head is compared with ==/2 after binding a fresh variable, never unified
 % against the literal `'|'`: a partial list whose head is unbound would
@@ -106,7 +106,7 @@ metta_union_canonical(Raw, Canonical) :-
 % case is a plain `for/or`
 % [source: https://github.com/racket/typed-racket/blob/57b7edab6074dbf4361354b546185f41e4a4c572/typed-racket-lib/typed-racket/types/subtype.rkt,
 % the `(case: Union (Union/set: base1 ts1 elems1))` clause of `subtype*` and the
-% `Union/set:` arm of `continue<:`; commit=WORKTREE].
+% `Union/set:` arm of `continue<:`; commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 %
 % Upstream PeTTa writes the left rule as `\+ ( member(MA, As), \+
 % type_compat_soft(MA, B) )` over `type_compat_soft(A, B) :- \+ \+
@@ -114,7 +114,7 @@ metta_union_canonical(Raw, Canonical) :-
 % alternative needed: `(| Number String)` is then accepted against `(| T Bool)`
 % with `T` still free, and `T = 'Number'` afterwards succeeds
 % [source: trueagi-io/PeTTa@e038e4dbb587e48fdb9d14990966108d38fde0b3
-% src/typecheck/type_lang.pl:27-30, 94; commit=WORKTREE]. Neither forall/2 nor
+% src/typecheck/type_lang.pl:27-30, 94; commit=78d1d8946990498965fa940a676d1b91fb8bd35f]. Neither forall/2 nor
 % \+ \+ appears below for that reason.
 %
 % A pair that is ground on both sides carries no assignment for a later
@@ -180,7 +180,7 @@ metta_union_admits(Base, Value, Expected) :-
 % extensions/python/tools/twin_coverage.py --measure --rounds 3
 % examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/01-identity.metta;
 % fixture=examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/01-identity.metta;
-% commit=WORKTREE]. type_rules keeps the one arm that selects this decision,
+% commit=78d1d8946990498965fa940a676d1b91fb8bd35f]. type_rules keeps the one arm that selects this decision,
 % and the alternatives are put back to it through its PUBLIC surface,
 % typing_rule_accepts_resolved/4 and typing_rule_refusal_resolved/6, which
 % engine/metta.pl's ensure_loaded of that module imports here.

@@ -54,7 +54,7 @@
 %   [tested: union_types:a_union_flattens_deduplicates_and_collapses_to_one_member,
 %   union_types:an_actual_union_fits_a_wider_union_and_not_a_narrower_one,
 %   union_types:a_union_of_tuples_keeps_the_positional_walk;
-%   commit=WORKTREE].
+%   commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 
 %%% Type system: %%%
 
@@ -129,7 +129,7 @@ metta_arrow_type_chain(Raw, Types) :-
 % to both of its sides. Doing it anywhere else would leave one family reading
 % `(| Number Number)` where another reads `Number`. The guard is three inlined
 % instructions and only a term whose head is `|` reaches
-% metta_union_canonical/2 [tested: run_tests(union_types); commit=WORKTREE].
+% metta_union_canonical/2 [tested: run_tests(union_types); commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 metta_runtime_type(Raw, Type) :-
     (   nonvar(Raw), Raw = [Head|_], Head \== '->',
         metta_arrow_type_chain(Raw, Types)
