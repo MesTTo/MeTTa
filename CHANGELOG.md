@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `EnginePool.close(wait=True)` joins owned workers after an earlier nonwaiting
+  close. `AsyncMeTTa.define` requires the reference function with `prolog=` and
+  applies the synchronous decorator on its owning worker.
+
 - The MeTTa file library now creates directories, copies bytes with staged
   replacement, returns queryable metadata snapshots, composes lexical paths,
   reads stdin through EOF, writes stderr, and exits with an explicit status.
