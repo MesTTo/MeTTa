@@ -581,6 +581,41 @@ metta_semantic_effect('skel-swap-pair-native', readOnlyLookup).
 metta_semantic_effect('fuzzy-match-space', readOnlyLookup).
 metta_semantic_effect('fuzzy-match-context', readOnlyLookup).
 
+% Library effects describe observable behavior, independently of the host
+% language used to implement the operation. Metadata snapshots allocate a
+% space; directory listings and filesystem existence checks only read.
+% [tested: lib_file_surface:effect_rows; commit=504f8dddfa890ced97e795a13ab10e239b1de2ce]
+metta_semantic_effect('path-join', pureStructural).
+metta_semantic_effect('path-parent', pureStructural).
+metta_semantic_effect('path-name', pureStructural).
+metta_semantic_effect('path-extension', pureStructural).
+metta_semantic_effect('list-dir!', readOnlyLookup).
+metta_semantic_effect('file-exists', readOnlyLookup).
+metta_semantic_effect('dir-exists', readOnlyLookup).
+metta_semantic_effect('file-get-size!', readOnlyLookup).
+metta_semantic_effect('read-file!', readOnlyLookup).
+metta_semantic_effect('file-lines!', readOnlyLookup).
+metta_semantic_effect('csv-space', readOnlyLookup).
+metta_semantic_effect('make-dir!', writesState).
+metta_semantic_effect('delete-dir!', writesState).
+metta_semantic_effect('copy-file!', writesState).
+metta_semantic_effect('file-metadata!', writesState).
+metta_semantic_effect('file-open!', writesState).
+metta_semantic_effect('file-close!', writesState).
+metta_semantic_effect('file-read-to-string!', writesState).
+metta_semantic_effect('file-read-exact!', writesState).
+metta_semantic_effect('file-write!', writesState).
+metta_semantic_effect('file-seek!', writesState).
+metta_semantic_effect('write-file!', writesState).
+metta_semantic_effect('append-file!', writesState).
+metta_semantic_effect('delete-file!', writesState).
+metta_semantic_effect('file-space!', writesState).
+metta_semantic_effect('temp-path!', writesState).
+metta_semantic_effect('stderr!', oracleIO).
+metta_semantic_effect('stdin-to-string!', oracleIO).
+metta_semantic_effect('exit!', oracleIO).
+metta_semantic_effect('trace-source', oracleIO).
+
 metta_semantic_effect(empty, nondeterministicReadOnly).
 metta_semantic_effect(hyperpose, nondeterministicReadOnly).
 metta_semantic_effect('near-match', nondeterministicReadOnly).

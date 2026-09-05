@@ -58,12 +58,17 @@ def trace(
     source: Atom | str,
     max_events: int | None = None,
     *,
+    filter: Symbol | str | Iterable[Symbol | str] | None = None,
     timeout: float | None = None,
     inferences: int | None = None,
 ) -> Trace:
 ```
 
 > Run a term, or source, in this space under the engine's reduction trace.
+>
+> filter selects exact function names before recording; None selects all
+> and an empty iterable selects none. Excluded calls still contribute depth
+> and execute normally, including their writes.
 >
 > max_events bounds the RECORDING. timeout, inferences and stack bound the
 > RUN, the same triple every evaluating door takes and the same scoped

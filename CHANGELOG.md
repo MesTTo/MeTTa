@@ -9,6 +9,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The MeTTa file library now creates directories, copies bytes with staged
+  replacement, returns queryable metadata snapshots, composes lexical paths,
+  reads stdin through EOF, writes stderr, and exits with an explicit status.
+- `lib_csv` exposes UTF-8 CSV files as read-only row spaces through the native
+  provider seam. Queries stream cells as strings and report malformed records,
+  missing files and denied permissions by name.
+- `trace(filter=...)` selects named functions before recording limits apply.
+  MeTTa programs can query selected trace events through `lib_observe`.
+
 - Integration installation is transactional across framework-managed state.
   A failed installer now restores operations and declaration ownership,
   protocol types and reprs, reflectors, converted types, library paths,

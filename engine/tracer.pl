@@ -8,6 +8,9 @@
 %   itself, depth, kind, term, answer, and the names of the term's
 %   variables.
 % Guarantees:
+%   - Exact function filters retain execution depth and charge only selected
+%     events [tested: tracer:filter_precedes_the_bound_and_keeps_depth;
+%     commit=504f8dddfa890ced97e795a13ab10e239b1de2ce].
 %   - Functions defined by the traced source and calls from hyperpose workers
 %     produce events [tested 2026-08-14: tracer].
 %   - A symbol whose spelling reads back as something else survives the
@@ -43,6 +46,7 @@
 :- module(tracer,
           [ metta_trace_source/4,
             metta_trace_source/5,
+            metta_trace_source/6,
             metta_trace_default_events/1,
             metta_trace_target/1,
             metta_trace_wrap_once/1
@@ -60,6 +64,8 @@
 :- dynamic metta_trace_stopped/1.
 :- dynamic metta_trace_cells/1.
 :- dynamic metta_trace_wrapped/1.
+:- dynamic metta_trace_filter/1.
+:- dynamic metta_trace_selected/1.
 
 %Every name the translator compiled from equations, in &self's module and in
 %each other space module that registered it: exactly the predicates owning at
@@ -145,6 +151,15 @@ metta_trace_call(F, In, Head, Closure) :-
 %at the comment it starts, and a tab inside a symbol split the record into
 %the wrong fields altogether. Variables are named by first occurrence,
 %which is the one thing the text form did that a reader wants kept.
+% Filter before copying terms or charging either recording budget. Wrappers
+% still run for excluded functions, so selected descendants keep their depth.
+% CPython 3.13 trace.py globaltrace_lt likewise decides before recording:
+% https://github.com/python/cpython/blob/v3.13.0/Lib/trace.py
+metta_trace_accepts(_) :- metta_trace_filter(all), !.
+metta_trace_accepts(F) :- metta_trace_selected(F).
+
+metta_trace_record(_, _, [F|_], _) :-
+    \+ metta_trace_accepts(F), !.
 metta_trace_record(Depth, Kind, Term, Answer) :-
     copy_term(Term-Answer, TermCopy-AnswerCopy),
     term_variables(TermCopy-AnswerCopy, Variables),
@@ -247,15 +262,17 @@ metta_trace_variable_names([Variable|Rest], Index, [Name-Variable|Names]) :-
     Next is Index + 1,
     metta_trace_variable_names(Rest, Next, Names).
 
-metta_trace_begin(Max) :-
-    with_mutex('$metta_trace_state', metta_trace_begin_unlocked(Max)).
+metta_trace_begin(Max, Filter) :-
+    with_mutex('$metta_trace_state', metta_trace_begin_unlocked(Max, Filter)).
 
-metta_trace_begin_unlocked(Max) :-
+metta_trace_begin_unlocked(Max, Filter) :-
     ( metta_trace_session
       -> throw(error(permission_error(trace, evaluation, nested),
                      context(metta_trace_source/3,
                              'a trace is already running')))
-    ; retractall(metta_trace_event(_, _)),
+    ; retractall(metta_trace_filter(_)),
+      retractall(metta_trace_selected(_)),
+      retractall(metta_trace_event(_, _)),
       retractall(metta_trace_limit(_)),
       retractall(metta_trace_next_seq(_)),
       retractall(metta_trace_stopped(_)),
@@ -265,7 +282,8 @@ metta_trace_begin_unlocked(Max) :-
       assertz(metta_trace_limit(Max)),
       assertz(metta_trace_next_seq(0)),
       assertz(metta_trace_session),
-      catch(( findall(Target, metta_trace_target(Target), Targets0),
+      catch(( metta_trace_install_filter(Filter),
+              findall(Target, metta_trace_target(Target), Targets0),
               sort(Targets0, Targets),
               maplist(metta_trace_wrap_once, Targets) ),
             Error,
@@ -279,6 +297,8 @@ metta_trace_end_unlocked :-
     maplist(metta_trace_unwrap, Targets),
     retractall(metta_trace_wrapped(_)),
     retractall(metta_trace_session),
+    retractall(metta_trace_filter(_)),
+    retractall(metta_trace_selected(_)),
     retractall(metta_trace_limit(_)),
     retractall(metta_trace_next_seq(_)),
     retractall(metta_trace_stopped(_)),
@@ -345,11 +365,42 @@ metta_trace_source(Source, Space, Events) :-
 metta_trace_source(Source, Space, Max, Events) :-
     metta_trace_source(Source, Space, Max, Events, _Stopped).
 
-metta_trace_source(Source, Space, Max, Events, Stopped) :-
+% The existing host door transports its bound unchanged. A two-item request
+% adds a filter without changing that door or bypassing its execution guards.
+metta_trace_source(Source, Space, Request, Events, Stopped) :-
+    ( nonvar(Request), Request = [Max, Filter]
+    -> metta_trace_source(Source, Space, Max, Filter, Events, Stopped)
+    ;  metta_trace_source(Source, Space, Request, all, Events, Stopped) ).
+
+% all selects every compiled logical name; [] selects none. Names need not
+% exist yet because Source itself can define them. Invalid filters refuse
+% before source executes or a session is armed.
+metta_trace_filter_names(Filter, Names) :-
+    ( Filter == all
+    -> Names = all
+    ; is_list(Filter), maplist(metta_trace_filter_name, Filter, Atoms)
+    -> sort(Atoms, Names)
+    ; throw(error(domain_error(trace_function_filter, Filter),
+                  context(metta_trace_source/6,
+                          'use all or a list of nonempty function names'))) ).
+
+metta_trace_filter_name(Name, Atom) :-
+    ( atom(Name) -> Atom = Name
+    ; string(Name) -> atom_string(Atom, Name) ),
+    Atom \== ''.
+
+metta_trace_install_filter(all) :- !,
+    assertz(metta_trace_filter(all)).
+metta_trace_install_filter(Names) :-
+    assertz(metta_trace_filter(selected)),
+    forall(member(Name, Names), assertz(metta_trace_selected(Name))).
+
+metta_trace_source(Source, Space, Max, Filter, Events, Stopped) :-
+    metta_trace_filter_names(Filter, Names),
     ( integer(Max), Max > 0 -> true
     ; throw(error(domain_error(positive_integer, Max),
                   context(metta_trace_source/5, 'max_events bound')))),
-    catch(metta_trace_session(Source, Space, Max, Events0, Stopped0),
+    catch(metta_trace_session(Source, Space, Max, Names, Events0, Stopped0),
           Ball, true),
     (   var(Ball)
     ->  Events = Events0, Stopped = Stopped0
@@ -359,16 +410,16 @@ metta_trace_source(Source, Space, Max, Events, Stopped) :-
         %raising: where inside the setup a counter runs out is not something
         %a caller can reason about, and a bound that sometimes raises and
         %sometimes answers, on nothing the caller can see, is worse than
-        %either. metta_trace_begin/1 has already torn the session down by
+        %either. metta_trace_begin/2 has already torn the session down by
         %here, so there is nothing left to harvest.
     ;   metta_trace_stop_ball(Ball, Stopped)
     ->  Events = []
     ;   throw(Ball)
     ).
 
-metta_trace_session(Source, Space, Max, Events, Stopped) :-
+metta_trace_session(Source, Space, Max, Filter, Events, Stopped) :-
     setup_call_cleanup(
-        metta_trace_begin(Max),
+        metta_trace_begin(Max, Filter),
         ( b_setval('$metta_trace_depth', 0),
           %Every ball, so a RUN bound stopped by the guard around this
           %call keeps its events too; metta_trace_stop/2 rethrows anything
