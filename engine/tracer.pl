@@ -15,7 +15,7 @@
 %     engine_yield/1 and resumes the same execution on the command the host
 %     posts back, and only one session, trace or debug, holds the wrappers
 %     [tested: tracer:a_breakpoint_suspends_the_program_and_a_post_resumes_it,
-%     tracer:a_session_refuses_a_second_one; commit=WORKTREE].
+%     tracer:a_session_refuses_a_second_one; commit=39dd4c9014bf8c38d78df8c8fdc9c114b372dc1f].
 %   - Functions defined by the traced source and calls from hyperpose workers
 %     produce events [tested 2026-08-14: tracer].
 %   - A symbol whose spelling reads back as something else survives the
@@ -44,7 +44,7 @@
 %     reason and stays total when the trace's grows: metta_debug_end_unlocked/0
 %     calls metta_trace_end_unlocked/0 rather than listing the state again
 %     [tested: tracer:a_debug_session_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarmed;
-%     commit=WORKTREE].
+%     commit=39dd4c9014bf8c38d78df8c8fdc9c114b372dc1f].
 % Guarded by:
 %   - '$metta_trace_state' serializes trace sessions and wrapper changes
 %     [tested 2026-08-14: tracer:event_limit_truncates_and_removes_every_wrapper].
