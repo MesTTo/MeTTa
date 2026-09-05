@@ -506,4 +506,32 @@ test(no_operation_below_the_lattice_floor_writes_output) :-
     findall(Row, effect_test_writes_output(Row), Rows),
     assertion(Rows == []).
 
+%WHAT THE WALK PAYS FOR A NAME THAT IS NOT A HOST PREDICATE. Most goals in a
+%compiled body are MeTTa functions, which live in their space's module, so the
+%catch-all clause asks the engine module about a name it does not have.
+%meta_predicate/1 is one of the properties SWI answers by running its
+%undefined-procedure trap, which reads the module's autoload declarations and
+%the whole library index before raising the existence error the caller
+%discards: 1,031 inferences against 16 for maplist/3, and 253 such asks over
+%the 271 shipped examples [measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
+%
+%A RATIO rather than a count, because the honest number moves a few inferences
+%with clause layout. What must hold is that a name the engine module does not
+%have is priced like one it does.
+test(a_goal_that_is_not_a_host_predicate_is_priced_like_one_that_is) :-
+    metta_engine_module(Engine),
+    assertion(current_predicate(Engine:maplist/3)),
+    assertion(\+ current_predicate(Engine:'plunit-not-a-host-predicate'/3)),
+    effect_construct_cost(maplist(c, a, b), Present),
+    effect_construct_cost('plunit-not-a-host-predicate'(a, b, c), Missing),
+    assertion(Missing =< 4 * Present).
+
+effect_construct_cost(Meta, Per) :-
+    Rounds = 1000,
+    statistics(inferences, Before),
+    forall(between(1, Rounds, _),
+           ( metta_effect_construct(Meta, _) -> true ; true )),
+    statistics(inferences, After),
+    Per is (After - Before - 3 * Rounds) // Rounds.
+
 :- end_tests(effects_lattice).

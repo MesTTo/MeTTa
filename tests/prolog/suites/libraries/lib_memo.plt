@@ -217,6 +217,53 @@ test(a_declaration_lands_in_the_module_that_is_speaking,
     IsoSaysHome == Self,
     IsoSaysForward == Iso.
 
+%The forward-declaration branch above is the COMMON one, because a declaration
+%may precede the definitions it governs, and asking about a name nothing has
+%compiled yet with imported_from/1 ran SWI's undefined-procedure trap: it
+%searches the whole autoload library index before raising the existence error
+%memo_owner_module/4 discards. 1,033 inferences against 10 for a name the
+%space inherits [measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19]. A RATIO rather than a
+%count, because the honest number moves a few inferences with clause layout.
+test(asking_who_owns_an_undefined_name_costs_what_asking_about_an_inherited_one_costs) :-
+    space_module('&memo_iso', Iso),
+    assertion(\+ current_predicate(Iso:'plunit-memo-no-such-name'/2)),
+    memo_owner_cost('car-atom', Iso, 2, Present),
+    memo_owner_cost('plunit-memo-no-such-name', Iso, 2, Missing),
+    assertion(Missing =< 4 * Present).
+
+memo_owner_cost(Fun, Module, PredArity, Per) :-
+    Rounds = 1000,
+    statistics(inferences, Before),
+    forall(between(1, Rounds, _),
+           ( memo_owner_module(Fun, Module, PredArity, _) -> true ; true )),
+    statistics(inferences, After),
+    Per is (After - Before - 3 * Rounds) // Rounds.
+
+%A released table is the case the invalidation sweep is written for -- space
+%teardown untables before removing equations, so by the time invalidation runs
+%there is nothing left to clear. tabled/0 is one of the properties SWI answers
+%by running its undefined-procedure trap, which searches the whole autoload
+%library index before raising the existence error, so learning "already gone"
+%cost 1,030 inferences against 8 for a name the module has
+%[measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19]. A RATIO rather than a count, because
+%the honest number moves a few inferences with clause layout.
+test(clearing_a_table_that_is_already_gone_costs_what_clearing_a_present_name_costs) :-
+    metta_engine_module(Engine),
+    assertion(\+ current_predicate(Engine:'plunit-memo-released-table'/4)),
+    assertion(lib_memo:reset_exact_memo_table(Engine, 'plunit-memo-released-table', 2)),
+    reset_table_cost(Engine, 'car-atom', 0, Present),
+    reset_table_cost(Engine, 'plunit-memo-released-table', 2, Missing),
+    assertion(Missing =< 4 * Present).
+
+reset_table_cost(Module, TableName, Arity, Per) :-
+    Rounds = 500,
+    statistics(inferences, Before),
+    forall(between(1, Rounds, _),
+           ( lib_memo:reset_exact_memo_table(Module, TableName, Arity)
+           -> true ; true )),
+    statistics(inferences, After),
+    Per is (After - Before - 3 * Rounds) // Rounds.
+
 :- end_tests(memo_space_isolation).
 
 

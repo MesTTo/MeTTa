@@ -167,9 +167,32 @@ metta_effect_construct(_:Goal, [Goal]).
 %maplist(2,?,?) is argument one applied to two more, foldl(3,+,+,-) to three.
 %Reading that covers include/3, exclude/3 and whatever a library adds next,
 %none of which anyone would have listed.
+%
+%Most goals reaching this clause are MeTTa FUNCTIONS, which are compiled into
+%their space's module and are not host predicates at all, so this asks about a
+%name the engine module does not have. meta_predicate/1 is one of the
+%properties SWI answers through the undefined-procedure trap, which reads the
+%module's autoload declarations and the whole library index before raising the
+%existence error: 1,030 inferences to learn "not a meta-predicate", 253 times
+%over the 271 shipped examples [measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
+%
+%Both arms of the guard are needed and neither may be dropped.
+%current_predicate/1 admits every meta-predicate the engine already has;
+%implementation_module/1 admits the ones it would AUTOLOAD, which is 249 names
+%including assertion/1, call_cleanup/3, catch/4 and debug/3, and losing them
+%would make an impure closure inside one of them read as pure -- the exact
+%defect the paragraph above records. It answers the library's module for 33
+%inferences without loading it, so the ask below still autoloads exactly when
+%it used to [source: /usr/lib/swi-prolog/boot/syspred.pl, property_predicate/2].
 metta_effect_construct(Meta, [Goal]) :-
     functor(Meta, Name, Arity),
     functor(Head, Name, Arity),
+    (   current_predicate(Name/Arity)
+    ->  true
+    ;   context_module(Here),
+        predicate_property(Head, implementation_module(Home)),
+        Home \== Here
+    ),
     predicate_property(Head, meta_predicate(Spec)),
     arg(Position, Spec, Extra),
     integer(Extra),

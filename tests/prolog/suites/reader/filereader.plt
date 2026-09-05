@@ -934,6 +934,49 @@ test(the_capture_pass_refuses_swi_and_engine_bookkeeping,
              functor(Head, Name, Arity),
              assertion(\+ predicate_property(Module:Head, built_in)) )).
 
+% WHAT THE COMMON CASE COSTS. The repair runs after every abolish of a local
+% shadow, and for a space's own function -- gone with its last equation --
+% nothing above resolves the name at all. Asked with imported_from/1 that
+% answer ran SWI's undefined-procedure trap, which reads the module's autoload
+% declarations and the whole library index before raising the existence error
+% the clause discards: 1,033 inferences against 21 for a name the engine
+% defines above, and 2,067 against 36 through metta_repair_shadow_import/3,
+% which asks number_of_clauses/1 the same way. Over the plunit suites the
+% repair took that path 7,351 times
+% [measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
+%
+% A RATIO rather than a count, because the honest number moves a few
+% inferences with clause layout: what must hold is that a name no module
+% resolves is priced like one a parent defines.
+test(a_name_no_module_resolves_is_priced_like_one_a_parent_defines,
+     [ cleanup(catch(user:metta_release_space('&plunit_repair_cost'),
+                     _, true)) ]) :-
+    Space = '&plunit_repair_cost',
+    user:space_module(Space, Module),
+    % the engine defines car-atom/2 above every space, and nothing anywhere
+    % defines the other one
+    assertion(spaces:metta_restore_inherited_predicate(Module, 'car-atom', 2)),
+    assertion(\+ current_predicate(Module:'plunit-no-such-repair-name'/2)),
+    repair_cost(spaces:metta_restore_inherited_predicate(Module, 'car-atom', 2),
+                Present),
+    repair_cost(spaces:metta_restore_inherited_predicate(
+                    Module, 'plunit-no-such-repair-name', 2),
+                Missing),
+    assertion(Missing =< 4 * Present),
+    repair_cost(spaces:metta_repair_shadow_import(Module, 'car-atom', 2),
+                PresentRepair),
+    repair_cost(spaces:metta_repair_shadow_import(
+                    Module, 'plunit-no-such-repair-name', 2),
+                MissingRepair),
+    assertion(MissingRepair =< 4 * PresentRepair).
+
+repair_cost(Goal, Per) :-
+    Rounds = 500,
+    statistics(inferences, Before),
+    forall(between(1, Rounds, _), ( Goal -> true ; true )),
+    statistics(inferences, After),
+    Per is (After - Before - 3 * Rounds) // Rounds.
+
 :- end_tests(filereader_import_lifecycle).
 
 :- begin_tests(filereader_untypable_declaration).

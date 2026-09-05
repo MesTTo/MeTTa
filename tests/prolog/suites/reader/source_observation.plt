@@ -256,4 +256,29 @@ test(ordinary_other_thread_execution_does_not_enter_observation) :-
         unwrap_predicate(source_observation:install_runtime_observers/0,concurrent_probe),
         message_queue_destroy(Queue) )).
 
+% Attribution asks whether a goal is a meta predicate, and the goals it walks
+% are a compiled clause's own, so most of them are MeTTa functions living in
+% their space's module rather than host predicates. meta_predicate/1 is one of
+% the properties SWI answers by running its undefined-procedure trap, which
+% searches the whole autoload library index before raising the existence error
+% the caller discards: 1,029 inferences against 8 for maplist/3
+% [measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19]. A RATIO rather than a count, because
+% the honest number moves a few inferences with clause layout.
+test(attributing_a_goal_that_is_not_a_host_predicate_costs_what_one_that_is_costs) :-
+    metta_engine_module(Engine),
+    assertion(current_predicate(Engine:maplist/3)),
+    assertion(\+ current_predicate(Engine:'plunit-not-a-host-goal'/3)),
+    attribution_cost(Engine:maplist(a, b, c), Present),
+    attribution_cost(Engine:'plunit-not-a-host-goal'(a, b, c), Missing),
+    assertion(Missing =< 4 * Present).
+
+attribution_cost(Goal, Per) :-
+    Rounds = 1000,
+    statistics(inferences, Before),
+    forall(between(1, Rounds, _),
+           ( source_observation:goal_attribution(Goal, plunit_construct, _)
+           -> true ; true )),
+    statistics(inferences, After),
+    Per is (After - Before - 3 * Rounds) // Rounds.
+
 :- end_tests(source_observation).

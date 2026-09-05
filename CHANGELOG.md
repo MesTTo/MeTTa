@@ -25,6 +25,58 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   reported as a duplicate declaration, and left no `Dog` type at all. Conversion
   still inherits, which is right there; declaration does not.
 
+- Declaring a Python twin of a Prolog predicate, and clearing a memo table a
+  space has already released, no longer search the autoload library index. The
+  twin check asks the engine for the function's shape, which walks the
+  name-wide arity register asking `indexed/1` about pairs the module does not
+  have; the memo sweep asks `tabled/0` about a table teardown already dropped.
+  Both are properties SWI answers by running its undefined-procedure trap:
+  1,030 inferences each, now 37 and 3.
+
+- The effect walk, source attribution and memoisation no longer search the
+  autoload library index for every name that is not a host predicate. All three
+  ask a `predicate_property/2` question about a goal or a function name, and
+  most of those are MeTTa functions, which live in their space's module rather
+  than the engine's, so the question is asked about a name the engine module
+  does not have. On such a name `meta_predicate/1` and `imported_from/1` run
+  SWI's undefined-procedure trap, which searches the whole index before raising
+  the existence error the caller discards: 1,031, 1,029 and 1,033 inferences,
+  now 40, 39 and 43. Classifying the shipped examples took that path 253 times.
+  What each site sees is unchanged, including the 249 meta-predicates the
+  engine would autoload rather than already hold, measured over 9,459 answers
+  spanning every name in the autoload index.
+
+- Removing an equation no longer searches the autoload library index once per
+  name. When a space's last equation for a function goes, the engine abolishes
+  the emptied local predicate and asks what the module now resolves that name
+  to, so an already-compiled call reaches the parent instead of the empty
+  shadow. Asked with `imported_from/1` that question runs SWI's
+  undefined-procedure trap on a name nothing resolves, which is the ordinary
+  case: 1,033 inferences to learn "nothing above me has it", and 2,067 through
+  the repair sweep, which asks `number_of_clauses/1` the same way. They now
+  cost 45 and 51, and adding then removing 200 equations for functions nothing
+  above the space defines costs 858,838 inferences instead of 1,069,438. The
+  engine's own test suites took that path 7,351 times. The repairs that DO
+  resolve pay one inference more than before, which eight benchmark cases see
+  as +15 and the two save-load cases as +105.
+  Which name is repaired from which module is unchanged, over twelve probes
+  covering a local definition, an explicit import, three autoloadable library
+  names, two system built-ins and an inherited engine builtin.
+
+- `super` and the builtin input-guard table no longer search the autoload
+  library index when they ask about a name nothing defines. `(super (f ...))`
+  resolves at definition time by walking the modules above the space and asking
+  each whether it defines the function, and asking with
+  `predicate_property(Module:Head, defined)` runs SWI's undefined-procedure
+  trap on a miss, which searches the whole index before raising the existence
+  error the caller discarded. Refusing a `super` that names nothing above it
+  cost 2,120 inferences over a space's two-module chain and now costs 28; the
+  table of guarded builtin input positions cost 17,748 inferences to enumerate
+  and now costs 3,854. Asking also stopped LOADING: a space with a function
+  called `last` or `subtract` used to pull SWI's library of that name into the
+  process as a side effect of the question. Every answer is unchanged, over 82
+  guard-table rows and 1,440 `super` resolutions across eight modules.
+
 - Booting the engine no longer searches the autoload library index once per
   declared extension seam. Publishing a seam asked
   `predicate_property(Module:Head, defined)` to find out whether its predicate

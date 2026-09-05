@@ -150,3 +150,389 @@ of them are already documented as load-sensitive in their own source --
 both ways" -- and `test_shared_head_cost.py` measures a per-space slope that a
 sibling test's live spaces reproduce. Re-run a named pytest failure alone
 before believing it here.
+
+## 2026-09-06, the four sites left open above
+
+Tried: pricing each of the four on a name that exists and one that does not,
+after a full boot, `swipl -g <case> -t halt ai-tmp/autoload-traps/cost.pl` ->
+
+| site | hit | miss |
+|---|---|---|
+| `engine/translator/analysis.pl` `super_defines/3` | 22 | 1,031 |
+| `engine/metta/input_guards.pl` `guarded_input_position/3` | 30 | 1,043 |
+| `engine/spaces/catalog.pl` `native_storage_module_occupied/1` | 30 | 11 |
+| `engine/spaces/lifecycle.pl` `restricted_core_predicate/1` | 18 | 4 |
+
+Found: only two of the four carry the trap, and the two that do not are safe
+for reasons worth writing down. `native_storage_module_occupied/1` asks with an
+UNBOUND head, and `define_or_generate/1`'s first two clauses both require
+`callable(Head)`, so an unbound one reaches the third clause and GENERATES over
+the module's own table instead of calling `'$define_predicate'/1`; its miss
+(an empty module, the case that matters) is cheaper than its hit.
+`restricted_core_predicate/1` already has `current_predicate(Engine:Name/Arity)`
+in front of the property ask, and its only caller passes an unbound
+`Name/Arity`, so every ask it makes is a hit. Neither is touched.
+
+Decided: `current_predicate/1` in front of the two live ones, the same
+spelling `implemented_in/3` and `visible_predicate_definition/3` use.
+
+    super_defines(Module, Fun, Arity) :-
+        compiled_function_name(Fun, Predicate),
+        current_predicate(Module:Predicate/Arity),
+        functor(Head, Predicate, Arity),
+        \+ predicate_property(Module:Head, imported_from(_)),
+        ...
+
+|  | before | after |
+|---|---|---|
+| `super_defines/3`, a name that resolves | 22 | 17 |
+| `super_defines/3`, a name nothing defines | 1,031 | 3 |
+| `super_target_module/4` refusing over a space's chain | 2,120 | 28 |
+| `guarded_input_position/3`, a declared name with a predicate | 30 | 25 |
+| `guarded_input_position/3`, a declared name without one | 1,043 | 15 |
+| the whole guard table, `findall` over the 82 rows | 17,748 | 3,854 |
+
+The two spellings answer the same question at both sites, and the one case
+where they differ does not reach the answer: `current_predicate/1` sees a local
+definition, an import and an inherited one alike, and says no only for a name
+that nothing has loaded but the autoload index could supply -- which the old
+spelling autoloaded and then rejected on the `\+ imported_from(_)` that follows
+in both. Measured case by case in an engine-free probe
+(`ai-tmp/autoload-traps/semantics.pl`), and then over the engine:
+
+Differential, 82 `guarded_input_position/3` rows plus 720 `super_defines/3`
+and 720 `super_target_module/4` answers over 8 modules x 18 names x 5 arities
+-- the engine module, a library, `system`, `translator`, `spaces`, a MeTTa
+space module, `&self`'s and a module created by naming alone, against engine
+builtins, autoloadable library names, system built-ins, a dynamic predicate
+with no clauses, a multifile one with no clauses, a `$`-prefixed name and
+names nothing defines. **Byte-identical**, one arm per process because the old
+spelling autoloads as it runs.
+
+The process image is not identical, and the difference is the trap's other
+half. Dumping every module, every export list, every import link and every
+loaded source file after the same probe set: the old arm has one module more
+(`backward_compatibility`), one source file more (`library/backcomp.pl`) and
+nine import links more, all of them created by ASKING -- `system-append/3-lists`,
+`system-last/2-lists`, `system-permutation/2-lists`, `system-subtract/3-lists`,
+`user-sumlist/2-backward_compatibility` and four others. Nothing was added on
+the new arm. So asking whether a space defines a MeTTa function called `last`
+or `subtract` used to pull SWI's library of that name into the process.
+
+Tried: attributing the 1,030 rather than assuming it is the index search ->
+it is not. `'$find_library'/5`, the index lookup itself, is 19 inferences and
+`'$in_library'/3` is 18; `library_index/3` is 1. The cost is in
+`'$autoload':autoload_from/3` around them, which reads the asking module's own
+`:- autoload/2` declarations before the index is consulted: 1,004 inferences
+for the engine module against 39 for `lists`.
+
+Found while attributing: `predicate_property(M:Head, implementation_module(IM))`
+answers "what would this module resolve this name to" for **33 inferences on a
+name nothing defines**, because SWI special-cases it in `property_predicate/2`
+and reaches `'$find_library'/5` directly rather than through the trap. It also
+answers `pairs` for `pairs_keys_values/3` WITHOUT loading `library(pairs)`.
+That matters for the sites below, where the autoload answer is load-bearing
+and a bare `current_predicate/1` would change it.
+
+Also found, with a detector rather than a grep: `user:exception/3` is a
+documented hook `'$undefined_procedure'/4` calls before it tries the
+autoloader, so a clause that records and then FAILS counts every trap the
+engine takes without changing what happens next
+[source: /usr/lib/swi-prolog/boot/init.pl:944-953]. A trap whose recorded
+asker is the trapped predicate itself is a genuine call; any other asker is a
+probe. Over the 271 examples and the 69 plunit suites:
+
+| asker | traps, corpus | traps, suites |
+|---|---|---|
+| `engine/spaces/lifecycle.pl` `metta_restore_inherited_predicate/3` | 9 | 7,351 |
+| `engine/metta/effects.pl` `metta_effect_construct/2` | 253 | 26 |
+| `engine/spaces/lifecycle.pl` `metta_repair_shadow_import/3` | 0 | 8 |
+| `engine/spaces/foreign.pl` `remove_equation/6` | 0 | 5 |
+| `lib/lib_memo/lib_memo.pl` `memo_owner_module/4` | 2 | 3 |
+| `engine/source_observation.pl` `goal_attribution/3` | 1 | 2 |
+| `engine/metta/input_guards.pl` `guarded_input_position/3` | 0 | 13 |
+| `engine/translator/analysis.pl` `super_defines/3` | 0 | 1 |
+
+Neither of the two fixed here is where the class costs most: the grep for
+`predicate_property(_, defined)` finds the spelling, not the cost, because
+every property except `undefined`, `visible`, `autoload/1`,
+`implementation_module/1`, `iso` and `built_in` falls through to
+`define_or_generate/1` and traps the same way. `imported_from/1`,
+`number_of_clauses/1` and `meta_predicate/1` all do.
+
+Open: the six sites in the table above that are not fixed here. Each is
+the same class and each needs its own reading of what the autoload answer
+is worth to it, which is not the same at all six.
+
+## 2026-09-06, the shadow repair, and the property that answers without searching
+
+Goal for this section: the site the detector found costs most, 7,351 traps over
+the plunit suites, against 1 for the `super` walk fixed above.
+
+Found: `predicate_property(M:Head, implementation_module(Home))` answers "what
+would this module resolve this name to" for **33 inferences on a name nothing
+defines**, where `defined` and `imported_from/1` cost 1,030. SWI special-cases
+it in `property_predicate/2` and reaches `'$find_library'/5` directly instead
+of falling through `define_or_generate/1` to the undefined-procedure trap
+[source: /usr/lib/swi-prolog/boot/syspred.pl, `property_predicate/2`].
+
+Tried: whether it can simply REPLACE `imported_from/1`. It answers the same
+module everywhere the older property answers: identical on all 7,949
+module/name pairs of a booted image, identical across a two-hop import chain
+(`chain_c` importing from `chain_b` importing from `chain_a`, both say
+`chain_a`), `no` for a name the module defines itself, and `pairs` for
+`pairs_keys_values/3` which nothing has loaded.
+
+Rejected: replacing it. `implementation_module/1` names the library WITHOUT
+loading it, and `metta_restore_inherited_predicate/3`'s next goal is
+`import/1`, which then binds the space module to a module that has no export
+list yet: SWI warns `backward_compatibility:sumlist/2 is not exported (still
+imported into ...)` and the repaired call resolves to nothing. The differential
+caught it -- 12 shadow-repair probes, one fresh module each, the `sumlist/2`
+row alone diverging. `imported_from/1` LOADS the library, and that side effect
+is what the clause needs.
+
+Decided: `implementation_module/1` as a GUARD, `imported_from/1` still
+deciding. The guard fails exactly where the old property failed, so no branch
+changes, and it fails for 33 inferences instead of 1,033.
+
+    (   predicate_property(Module:Head, implementation_module(Home)),
+        Home \== Module,
+        predicate_property(Module:Head, imported_from(Source)),
+        ...
+
+Decided: `current_predicate/1` at the three sites that ask
+`number_of_clauses/1` about a name that may not be there --
+`metta_repair_shadow_import/3`, and `remove_equation/6` with the deferred
+sweep `metta_repair_emptied_shadows/0` beside it. `number_of_clauses/1` is one
+of the properties that falls through to the trap, and at all three a name
+`current_predicate/1` does not find takes the same branch either way: it has
+no clause count, and an autoloaded one is imported and rejected by the
+`\+ imported_from(_)` next to it.
+
+| site, per call | before | after |
+|---|---|---|
+| `metta_restore_inherited_predicate/3`, a name a parent defines | 21 | 27 |
+| `metta_restore_inherited_predicate/3`, a name nothing resolves | 1,033 | 43 |
+| `metta_repair_shadow_import/3`, a name a parent defines | 36 | 43 |
+| `metta_repair_shadow_import/3`, a name nothing resolves | 2,067 | 49 |
+| the bare `number_of_clauses(0)` ask on a name nothing resolves | 1,029 | 1 |
+
+Differential: 12 probes covering a name nothing defines, the module's own
+definition, its own with no clauses, an explicit import, a MeTTa-shaped miss,
+three autoloadable names from three libraries, two system built-ins, an
+inherited engine builtin and the `$`-prefixed early exit -- each in its own
+fresh module so one probe cannot change what the next one sees, recording the
+repair row, the resulting import link, the clause count and any error.
+Byte-identical, including the `car-atom/2` import warning both arms print.
+
+Detector, plunit suites, before and after: `metta_restore_inherited_predicate/3`
+7,351 -> 11, `metta_repair_shadow_import/3` 8 -> 0, `remove_equation/6` 5 -> 0.
+The 11 that remain are names that DO resolve into a library, where
+`imported_from/1` autoloads it on purpose.
+
+`sh engine/test.sh` exits 0, 68 suites, on the changed tree.
+
+## 2026-09-06, the three sites where the autoload answer is load-bearing
+
+Constraint for this section: `metta_effect_construct/2` classifies EFFECTS, so
+a meta-predicate it fails to recognise makes an impure closure read as pure --
+the defect its own comment records, where `maplist/3` was inert and what it
+called was never looked at. Nothing here may narrow what it sees.
+
+Tried: `current_predicate/1` alone, as at the two sites above -> rejected.
+Loading every library the autoload index names and asking which of them are
+meta-predicates the booted engine does NOT already have gives **249**, among
+them `assertion/1`, `call_cleanup/3`, `catch/4`, `debug/3`, `call_time/2` and
+`checklist/2`. `current_predicate/1` says no for every one of those until
+something loads it, so the guard would have silently narrowed the walk.
+
+Decided: two arms. `current_predicate/1` admits what the module already has;
+`predicate_property(Head, implementation_module(Home)), Home \== Here` admits
+what it would AUTOLOAD, for 33 inferences and without loading anything, so the
+`meta_predicate/1` ask behind the guard still autoloads exactly when it used
+to. `implementation_module/1` names the module itself when nothing resolves the
+name, which is the case worth not paying for.
+
+Applied at `engine/metta/effects.pl`'s catch-all clause, at
+`engine/source_observation.pl`'s `goal_attribution/3`, and at
+`lib/lib_memo/lib_memo.pl`'s `memo_owner_module/4`, where the same shape guards
+`imported_from/1` rather than `meta_predicate/1` -- a memo declaration may
+PRECEDE the definitions it governs, so that site is routinely asked about a
+name nothing has compiled yet.
+
+| site, per call | before | after |
+|---|---|---|
+| `metta_effect_construct/2`, `maplist/3` | 16 | 17 |
+| `metta_effect_construct/2`, a MeTTa function name | 1,031 | 40 |
+| `metta_effect_construct/2`, `atom_length/2`, host but not meta | 9 | 10 |
+| `goal_attribution/3`, `maplist/3` | 8 | 11 |
+| `goal_attribution/3`, a MeTTa function name | 1,029 | 39 |
+| `memo_owner_module/4`, a name the space inherits | 10 | 16 |
+| `memo_owner_module/4`, a name nothing has compiled | 1,033 | 43 |
+
+Differential: 9,459 answers over every name that can reach the three sites --
+the corpus's own twelve, every meta-predicate the engine module has, all 1,833
+names in the autoload index, and 240 names nothing defines -- byte-identical,
+one arm per process.
+
+Found while running it: the first attempt was VACUOUS on one of the three.
+`engine/source_observation.pl` is not loaded at boot, so
+`source_observation:goal_attribution/3` raised in both arms and every row read
+`no`; the site also priced at 1,024 both ways, which was the trap on the
+CALL rather than on anything inside it. `metta_ensure_source_observation` at
+the head of the probe fixed both, and the corrected run has 2,478 real
+attribution rows.
+
+## 2026-09-06, the last two, and the sites that are safe
+
+Decided: `current_predicate/1` in front of `lib_memo`'s
+`reset_exact_memo_table/3`, whose whole reason for existing is the case where
+the table is ALREADY GONE (space teardown untables before removing equations),
+and the two-arm guard in front of `extensions/python/metta/shim.pl`'s
+`metta_py_index_quality/5`, which walks the engine's name-wide `arity/2`
+register and so is asked about pairs the reported module does not have.
+
+| site, per call | before | after |
+|---|---|---|
+| `reset_exact_memo_table/3`, a released table | 1,030 | 3 |
+| `reset_exact_memo_table/3`, a name the module has | 8 | 9 |
+| `metta_py_index_quality/5`, a name the module lacks | 1,030 | 37 |
+| `metta_py_index_quality/5`, a name the module has | 8 | 9 |
+
+Differential: 33 rows over both sites, byte-identical. The first version of it
+was WEAK and said so -- every row took the negative branch, so it could not
+have caught a change to the positive one. Planting 400 clauses and calling them
+until SWI builds a JIT index (`speedup:400.0, realised:true`) and a real
+`table/1` declaration made both positive branches answer, and the rows still
+match.
+
+Tried: putting the shim's regression in `tests/prolog/suites/host/shim.plt` ->
+it passes on the parent. That suite's documented load contract is engine-free,
+and without the engine the asking module carries almost no `:- autoload/2`
+declarations, so the same miss costs 58 inferences rather than 1,030 and no
+honest ratio separates the two spellings. Moved to the Python lane, where the
+shim runs with the engine: 1,037 against 22 on the parent, red, and 37 against
+22 here.
+
+### Every other `predicate_property/2` site, and why it is safe
+
+Sixteen more sites ask a trapping property. None is live, and the reasons are
+worth keeping because they are the shapes that make one safe:
+
+- a `current_predicate/1` enumeration or test already stands in front:
+  `engine/specializer.pl` `forget_symbol/2`, `engine/tracer.pl`
+  `metta_trace_target/1`, `engine/spaces/native_matching.pl`
+  `space_atom_count_uncached/2`, `engine/spaces/lifecycle.pl`
+  `metta_capture_default_imports/1`, `metta_exec_module_owns_clauses/1`,
+  `clear_generated_predicates/1`, `function_still_defined/1` and
+  `metta_module_owns_function/2` through `compiled_predicate_arity/4`,
+  `engine/spaces/catalog.pl` `native_storage_ready/1`,
+  `engine/translator/lowering.pl` `compiled_lambda_live/2`,
+  `engine/metta/registration.pl` `imported_predicate/2`,
+  `engine/metta/effects.pl` `metta_effect_plan_named_call/5`,
+  `lib/lib_tabling/lib_tabling.pl`'s four (all downstream of
+  `metta_tabling_visible_owner/4`, which throws when the name is not current),
+  `lib/lib_memo/lib_memo.pl` `memo_automatic_unsafe_reason/3` and
+  `memoizable_fun/3`, and `extensions/python/metta/shim.pl`
+  `metta_py_name_still_defined/1`, `metta_py_saga_compensation_callable/2` and
+  `metta_py_saga_owner/3`;
+- a `clause/2` probe stands in front, which FAILS on an undefined name rather
+  than raising, so the property is reached only for a predicate that exists:
+  `engine/metta/interop.pl` `ready_hook_admits/2`,
+  `lib/lib_conformance/lib_conformance.pl` `conformance_hook_defined/2`;
+- the property is one SWI special-cases and does not answer through the trap:
+  `built_in` (`extensions/python/metta/shim.pl` and
+  `extensions/node/bridge.pl`'s solver, which asks it directly) and
+  `implementation_module/1` (`engine/ext_points.pl` `write_door_module/2`,
+  `extensions/python/metta/shim.pl` `metta_py_clause_owner/3`);
+- the name is one the engine defines and always has: `engine/metta.pl`
+  `metta_host_function_generation/1` on `fun/1`,
+  `engine/metta/interop.pl` `ensure_conformance_kit/0` on a predicate declared
+  dynamic above it, `engine/metta/interop.pl` `metta_host_refuse_taken_name/3`
+  which is reached only after `assertz` raised `permission_error(modify,
+  static_procedure, _)`.
+
+Measured, not assumed, for the one that looked live: `engine/json_codec.pl`'s
+`json_codec_no_write_hook/0` runs on EVERY JSON write and asks
+`number_of_clauses/1` about two `library(json)` multifile hooks. Priced at
+1,023 inferences on the first attempt and at **16** once
+`engine/json_codec.pl` was actually LOADED -- that file is a module nothing
+loads at boot, so the first number was the trap on the unresolvable CALL rather
+than on anything inside it. `library(json)` declares both hooks multifile, so
+they exist with zero clauses and the count answers cheaply. Its own comment,
+"asking costs two lookups per call", is right. The same mistake voided the
+first `goal_attribution/3` measurement; the rule it leaves is to assert the
+site is reachable before believing its price.
+
+## 2026-09-06, what the benchmarks said about the guard's ORDER
+
+Tried: the whole benchmark suite, both lanes, against the merge base ->
+`engine/bench.sh` moves exactly one case, `translate` 364,432 -> 308,579,
+-15.3%. Attributed by reverting one file at a time: `engine/metta/effects.pl`
+alone accounts for all of it, and the detector counts **58 probe traps in that
+case on the base and 0 after**, which at the measured 1,031-versus-40 per ask
+is 57,478 against the 55,853 the row actually lost.
+
+Found, and it is the reason this section exists: the Python lane read **+90
+inferences on eight cases**. Bisected to `engine/spaces/lifecycle.pl`, and
+inside it to the ORDER of the guard. Asking `implementation_module/1` first
+costs six inferences on every call that RESOLVES, and the shadow repair
+resolves on almost every call a benchmark makes; asking `current_predicate/1`
+first costs one, and reaches `implementation_module/1` only where the name
+resolves nowhere.
+
+| `op-raw`, min of three | inferences |
+|---|---|
+| merge base | 298,847 |
+| `implementation_module/1` first | 298,937 |
+| `current_predicate/1` first | 298,864 |
+
+Decided: `current_predicate/1` first. What remains is one inference per
+resolving repair call, and the whole Python lane against the merge base is:
+
+| case | base | branch | delta |
+|---|---|---|---|
+| annotated-relation | 311,370 | 311,385 | +15 |
+| eval-arith | 278,847 | 278,862 | +15 |
+| foreign-match | 784,865 | 784,882 | +17 |
+| handle-round-trip | 1,502,897 | 1,502,912 | +15 |
+| op-encoded | 318,849 | 318,864 | +15 |
+| op-raw | 298,847 | 298,864 | +17 |
+| run-source | 420,853 | 420,868 | +15 |
+| table-bridge-match | 784,865 | 784,880 | +15 |
+| save-load-fast | 2,929,354 | 2,929,459 | +105 |
+| save-load-metta | within 4 of its 927,685 pin | 927,793 | +104 to +112 |
+| automatic-tabling, `automatic` mode | 16,229 / 17,363 / 18,497 / 19,253 | 14,290 / 15,424 / 16,558 / 17,314 | **-1,939 each** |
+| let-heavy, loop-1m, register-op, typed-call | unchanged | unchanged | 0 |
+| the other 21 cases | within their pins | within their pins | 0 |
+
+Priced against what the guard buys, on the door the stack says reaches it
+(`'remove-atom'/3` -> `remove_equation/6` ->
+`metta_restore_inherited_predicate/3`): adding and removing 200 equations in
+`&self` for functions nothing above defines costs **1,069,438 inferences with
+200 traps before and 858,838 with none after**, 1,053 a removal. So the trade
+is one inference on every repair that resolves against 1,053 on every one that
+does not, and `engine/bench-baseline.json` is NOT edited here.
+
+Two probes measured NOTHING before that number was right, and both said so the
+same way: identical readings on both arms. The first wrote `'$x'` as an atom
+instead of reading the equation with `sread/2`, so nothing compiled, nothing
+was erased and the repair never ran; the second reloaded a source file, which
+is not the door. `chain.pl` records the whole ancestor chain of the first trap
+and named the door in one run. Guessing at a workload costs more than
+instrumenting it.
+
+Also recorded because it cost a full verification pass: `git checkout petta --
+<files>` STAGES what it writes, and `git status` shows that in the first
+column, which reads as "modified" at a glance. Six files were left at the base
+that way and the next three measurements -- a whole engine suite, an engine
+benchmark run and a Python benchmark run -- were made on a tree that had one
+of the eight changes rather than all eight. The seven new regressions all went
+red together, which is what caught it. Worse, `petta` MOVED under the work,
+from `ad711777` to `26f479ba`, so a later `git checkout petta -- <file>` pulled
+a newer engine into a tree that could not load it (`Unknown procedure:
+materialize:discard_space/1`). Every arm switch now goes through
+`ai-tmp/autoload-traps/arm.sh`, which names the merge-base COMMIT rather than
+the branch, resets the index, and PRINTS which files differ from HEAD and from
+the base before anything is measured.

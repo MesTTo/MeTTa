@@ -773,6 +773,51 @@ test(a_later_definition_retargets_an_earlier_super,
     with_metta_module(Module, reduce(['car-atom', [1, 2, 3]], Second, _)),
     assertion(Second == [outer, [middle, [1, 2, 3]]]).
 
+% The walk asks every ancestor, so what a MISS costs is what the refusal
+% above costs, multiplied by the depth of the chain. Asked with
+% predicate_property(Module:Head, defined) that answer ran SWI's
+% undefined-procedure trap -- define_or_generate/1 falls through to
+% '$define_predicate'/1, which searches the whole autoload library index
+% before raising the existence error the caller discarded -- so a name no
+% ancestor defines cost 1,031 inferences per module against 22 for one that
+% resolves, and refusing over a space's two-module chain cost 2,120 against
+% the 28 it costs now [measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
+%
+% A RATIO rather than a count, because the honest number moves a few
+% inferences with clause layout: what must hold is that a name no module
+% defines is priced like one that is, and the trap is sixty times the
+% present one, so anything that reintroduces it lands far outside.
+test(a_super_over_a_missing_name_is_priced_like_one_that_resolves) :-
+    metta_engine_module(Engine),
+    assertion(translator:super_defines(Engine, 'car-atom', 2)),
+    assertion(\+ translator:super_defines(Engine, 'plunit-super-no-such-name', 2)),
+    super_defines_cost(Engine, 'car-atom', 2, Present),
+    super_defines_cost(Engine, 'plunit-super-no-such-name', 2, Missing),
+    assertion(Missing =< 4 * Present).
+
+super_defines_cost(Module, Fun, Arity, Per) :-
+    Rounds = 1000,
+    statistics(inferences, Before),
+    forall(between(1, Rounds, _),
+           ( translator:super_defines(Module, Fun, Arity) -> true ; true )),
+    statistics(inferences, After),
+    Per is (After - Before - 3 * Rounds) // Rounds.
+
+% The other half of the same trap: the old spelling RESOLVED the name, so
+% asking whether a module defines a MeTTa function whose name a library also
+% carries pulled that library into the process and cached the import link.
+% sumlist/2 is library(backcomp)'s and nothing in this engine loads it, so
+% before this the ask alone made sumlist/2 a current predicate of the engine
+% module and loaded backward_compatibility beside it. engine/spaces/foreign.pl's
+% visible_predicate_definition/3 records the same hazard from the other side,
+% where the cached resolution shadowed a local definition about to arrive.
+test(asking_whether_a_module_defines_a_name_loads_nothing) :-
+    metta_engine_module(Engine),
+    assertion(\+ current_predicate(Engine:sumlist/2)),
+    assertion(\+ translator:super_defines(Engine, sumlist, 2)),
+    assertion(\+ current_predicate(Engine:sumlist/2)),
+    assertion(\+ current_module(backward_compatibility)).
+
 :- end_tests(translator_super).
 
 :- begin_tests(translator_special_dispatch).

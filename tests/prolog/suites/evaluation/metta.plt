@@ -3122,6 +3122,38 @@ test(every_builtin_refuses_an_unbound_input_by_name) :-
 test(test_the_residual_positions_refuse_by_their_own_names) :-
     assertion(\+ unguarded_input_position(_, _)).
 
+%A declared name with NO predicate at that arity is ordinary here: `case`,
+%`if`, `switch` and ten more are declared and COMPILED rather than called, so
+%the type surface names them and the engine module has no case/3. Asked with
+%predicate_property(Head, defined) that answer ran SWI's undefined-procedure
+%trap -- define_or_generate/1 falls through to '$define_predicate'/1, which
+%searches the whole autoload library index before raising the existence error
+%the caller discarded -- so those 13 of the table's 119 asks cost 1,043
+%inferences each against 30 for a name that has a predicate, and the whole
+%enumeration cost 17,748 inferences where it now costs 3,854
+%[measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
+%
+%A RATIO rather than a count, because the honest number moves a few
+%inferences with clause layout: what must hold is that a declared name
+%without a predicate is priced like one with a predicate.
+test(the_guard_table_prices_a_declared_name_with_no_predicate_like_one_with_a_predicate) :-
+    metta_engine_module(Engine),
+    assertion(seam:builtin_type_declaration(case, _)),
+    assertion(\+ current_predicate(Engine:case/3)),
+    assertion(\+ guarded_input_position(case, 3, 2)),
+    assertion(guarded_input_position('car-atom', 2, 1)),
+    guard_position_cost('car-atom', 2, 1, Present),
+    guard_position_cost(case, 3, 2, Missing),
+    assertion(Missing =< 4 * Present).
+
+guard_position_cost(Name, Arity, Position, Per) :-
+    Rounds = 1000,
+    statistics(inferences, Before),
+    forall(between(1, Rounds, _),
+           ( guarded_input_position(Name, Arity, Position) -> true ; true )),
+    statistics(inferences, After),
+    Per is (After - Before - 3 * Rounds) // Rounds.
+
 :- end_tests(builtin_input_guards).
 
 
