@@ -175,7 +175,8 @@ type_alias_source_step(Module, Name, Raw, Prefix, Next) :-
         Raw = ['Alias', RHS],
         forall(( member(Old, Rows), type_alias_declaration_type(Old),
                  Old = ['Alias', Standing] ),
-               require_same_type_alias(Module, Name, Standing, RHS))
+               require_same_type_alias(Module, Name, Standing, RHS)),
+        note_pending_type_alias(Module, Name, RHS)
     ;   true
     ),
     put_assoc(Name, Prefix, [Raw|Rows], Next),
@@ -194,6 +195,68 @@ validate_type_alias_syntax(Name, Raw) :-
     ),
     (   type_alias_form_head(Name)
     ->  throw(error(permission_error(redefine, type_form, Name), none))
+    ;   true
+    ).
+
+%The check above reads the rows this transaction can SEE, which under SWI's
+%snapshot isolation is the state as of its start plus its own writes. Two
+%overlapping transactions therefore each find no conflict and both commit, and
+%the space ends holding `(: Count (Alias Number))` and `(: Count (Alias
+%String))` together [measured 2026-09-05 on the clean base, reproduced without
+%aliases with two typing rules, so it is the substrate rather than this
+%feature].
+%
+%So the same check runs a SECOND time at commit, where it sees the merged
+%state. `transaction/3` is built for this and SWI names the pattern: it calls
+%Goal, locks the mutex, "changes the visibility to the current global state
+%combined with the changes made by Goal", calls the constraint, and only then
+%commits, discarding everything on failure or exception
+%[source: SWI-Prolog transaction/3, and the outer branch of pl-transaction.c
+%is the one that refreshes gen_start under the constraint mutex and holds it
+%through commit].
+%
+%Recorded per thread and only inside a transaction, so an ordinary declaration
+%pays one metta_in_user_transaction/0 check and nothing else.
+note_pending_type_alias(Module, Name, RHS) :-
+    (   metta_in_user_transaction
+    ->  (   nb_current('$metta_tx_aliases', Pending)
+        ->  true
+        ;   Pending = []
+        ),
+        nb_setval('$metta_tx_aliases', [pending(Module, Name, RHS)|Pending])
+    ;   true
+    ).
+
+%The commit constraint. Re-reads each name's standing rows in the refreshed
+%state and re-runs the same requirement, so a conflict another transaction
+%committed while this one ran is refused HERE rather than silently accepted.
+%Throwing rather than failing, because a bare failure would discard the
+%transaction without saying why, and the error already renders.
+metta_validate_pending_type_aliases :-
+    (   nb_current('$metta_tx_aliases', Pending)
+    ->  nb_setval('$metta_tx_aliases', []),
+        forall(member(pending(Module, Name, RHS), Pending),
+               validate_committed_type_alias(Module, Name, RHS))
+    ;   true
+    ).
+
+%The recorded list is nb_setval, which does not unwind on backtracking, so a
+%NESTED transaction that declared an alias and then rolled back leaves its
+%entry behind. Validating that entry would refuse the outer commit for a
+%declaration that no longer exists, which is a worse failure than the one this
+%repairs. So the presence of our own row in the refreshed state is the first
+%question: if the declaration did not survive, there is nothing to conflict
+%with and nothing to check.
+validate_committed_type_alias(Module, Name, RHS) :-
+    metta_module_space(Module, Space),
+    findall(Standing,
+            ( match_stored(Space, [':', Name, T], T, _),
+              type_alias_declaration_type(T),
+              T = ['Alias', Standing] ),
+            Committed),
+    (   member(Ours, Committed), Ours =@= RHS
+    ->  forall(member(Standing, Committed),
+               require_same_type_alias(Module, Name, Standing, RHS))
     ;   true
     ).
 
