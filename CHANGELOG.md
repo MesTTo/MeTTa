@@ -192,6 +192,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Native cyclic conjunctions intersect indexed variable domains before
   producing answers. Duplicate facts retain their full contribution to every
   answer bag; unsupported patterns continue through the existing matcher.
+- Retained clauses fold admitted immutable integer computations during
+  planning. Redefining a dependency rebuilds its folded callers, and host
+  operations remain deferred until demanded.
 
 - The MeTTa file library now creates directories, copies bytes with staged
   replacement, returns queryable metadata snapshots, composes lexical paths,

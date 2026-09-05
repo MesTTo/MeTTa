@@ -24,6 +24,9 @@
 %   translator_literal_type_checks:an_intrinsic_type_check_is_specialised,
 %   translator_literal_type_checks:a_stale_transaction_keeps_the_dynamic_contract;
 %   commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
+%   Tracked clauses fold admitted immutable scalar calls while retaining their
+%   source dependencies and the ordinary call's type and error guards
+%   [tested: run_tests(translator_constant_folding); commit=WORKTREE].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: dispatch refusals retain their Error answers and declared_arity_refusal/3
@@ -304,7 +307,10 @@ install_annotated_dispatch(Fun, Ref) :-
 
 dispatch_call_goal_in(Module, Fun, Args, Out, Goal, PolicyGoal) :-
     metta_ensure_compiled(Fun),
-    dispatch_call_goal_for(Module, Fun, Args, Out, Goal, PolicyGoal).
+    (   fold_native_scalar_call(Module, Fun, Args, Out, Goal)
+    ->  PolicyGoal = true
+    ;   dispatch_call_goal_for(Module, Fun, Args, Out, Goal, PolicyGoal)
+    ).
 
 %The two list constructors compile INLINE, because each is a rule holding the
 %proper-list invariant and a rule costs what a fact does not: the same tests
