@@ -57,6 +57,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The cumulative-syntax table records `pragma!` at the example that actually
+  introduces it, `09-00-17`, rather than five chapters later, and carries the
+  `py-iter-once` row it was missing.
+
 - The arrow reader's determinism slot is owned by the catalog, like the effect
   class beside it. `metta_arrow_type_shape/5` resolved `-[det,oracleIO]->`'s
   class through the catalog vocabulary while deciding its cardinality from a

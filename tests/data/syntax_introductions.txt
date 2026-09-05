@@ -164,6 +164,7 @@ match-types                       09-00-14
 new-state                         09-00-15
 add-typing-rule!                  09-00-16
 remove-typing-rule!               09-00-16
+pragma!                           09-00-17
 return                            10-00-01
 return-on-error                   10-00-01
 py-atom                           11-00-01
@@ -172,6 +173,7 @@ py-dot                            11-00-01
 get-state                         11-00-04
 py-dict                           11-00-04
 py-iter                           11-00-04
+py-iter-once                      11-00-04
 py-list                           11-00-04
 py-tuple                          11-00-04
 assertAlphaEqual                  12-00-01
@@ -187,7 +189,6 @@ elapsed                           14-00-01
 evalc                             14-00-01
 inferences                        14-00-01
 metta                             14-00-01
-pragma!                           14-00-01
 sleep                             14-00-01
 timeout                           14-00-01
 read-form!                        14-00-02
