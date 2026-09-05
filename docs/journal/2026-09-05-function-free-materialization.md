@@ -107,3 +107,38 @@ Superseded outcome: the original list-scheduler ten-case run did not complete it
 Root cause: the flush admission conjunction used `current_transaction(_), \+ materialization_transaction_owner`. When an owned transaction made the second goal fail, Prolog backtracked into the transaction enumerator. SWI 10.1.13 `pl-transaction.c:current_transaction/1` repeats the same ancestor on `FRG_REDO` at lines 721-745. Testing existence with `once(current_transaction(_))` avoids that enumerator path. The transaction owner remains a thread-local fact. A backtrackable global marker was rejected because the marker was not the cause. The bounded public reproducer now returns three `True` occurrences inside the inner transaction and two after the outer rollback, status 0; the full native/public gates follow this change.
 
 The exact repaired public output is recorded in `ai-tmp/query-a20256a5-nested-fixed.log` with separate status 0. The enumerator branch is pinned to [SWI 10.1.13 `pl-transaction.c`](https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-transaction.c#L721-L745); it was read alongside that witness before recording the cause.
+
+## 2026-09-05: the divergent gate run, attributed
+
+Tried: the shipped tree's `suites/spaces/materialization.plt` under the 60-second
+containment -> 49 tests pass in 19.6 seconds, exit 0. The 512-edge growth gate
+`a_ground_chain_query_reuses_the_load_time_relation` is 18.2 of those seconds.
+
+Found: planting `library(ugraphs)` `top_sort/2` over `indexed_topological_order/2`
+with `wrap_predicate/4`, and changing nothing else, stops the same suite at
+`[28/49] a_ground_chain_query_reuses_the_load_time_relation` and it does not
+finish inside 60 seconds. Two stack samples ten seconds apart, taken by an
+`alarm/4` goal running on top of the interrupted one, both read
+`ugraphs:incr_list/4` under `ugraphs:count_edges/4` at ugraphs.pl:476, under
+`top_sort/2`, under `derive_ground_bags/2` at materialize.pl:352, at frame
+depths 21,634 then 43,683: the in-degree count is still walking. The goal burns
+552,299,187 inferences in 35 seconds without finishing one 512-edge build. This
+is the cause of the killed run recorded above, whose last named goal was that
+test: `count_edges/4` calls `incr_list/4` once per edge and `incr_list/4` walks
+the whole vertex list, so it is `O(V*E)`, and the two-rule chain's ground call
+graph has `V = E = Theta(n^2)`, giving `Theta(n^4)`.
+
+Measured, plain source load of the chain, CPU seconds, indexed scheduler against
+planted `top_sort/2`: 0.0054/0.0230 at 16, 0.0142/0.1471 at 32, 0.0618/1.7946 at
+64 and 0.2561/24.4322 at 128. The planted arm's doubling factors are 6.4, 12.2
+and 13.6, consistent with `n^4`; extrapolated to 512 that is about 6,250 seconds
+for the last case alone, against the 7,540 seconds the killed process ran. At
+512 the shipped scheduler builds in 5.06 CPU seconds and the planted one is
+still running when SIGKILL arrives at 60. Logs: `ai-tmp/qp-finish/scheduler-*.log`,
+`ai-tmp/qp-finish/mat-list-scheduler-red.log`, `ai-tmp/qp-finish/scheduler-stack.log`.
+
+Correction to the note above: the killed process was not left unattributed for
+want of evidence. Its cause is reproducible by planting the scheduler it ran
+with. The `current_transaction/1` enumerator defect remains a separate, also
+reproduced failure.
+
