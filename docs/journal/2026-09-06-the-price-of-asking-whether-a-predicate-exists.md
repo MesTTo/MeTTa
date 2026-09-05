@@ -464,3 +464,75 @@ they exist with zero clauses and the count answers cheaply. Its own comment,
 "asking costs two lookups per call", is right. The same mistake voided the
 first `goal_attribution/3` measurement; the rule it leaves is to assert the
 site is reachable before believing its price.
+
+## 2026-09-06, what the benchmarks said about the guard's ORDER
+
+Tried: the whole benchmark suite, both lanes, against the merge base ->
+`engine/bench.sh` moves exactly one case, `translate` 364,432 -> 308,579,
+-15.3%. Attributed by reverting one file at a time: `engine/metta/effects.pl`
+alone accounts for all of it, and the detector counts **58 probe traps in that
+case on the base and 0 after**, which at the measured 1,031-versus-40 per ask
+is 57,478 against the 55,853 the row actually lost.
+
+Found, and it is the reason this section exists: the Python lane read **+90
+inferences on eight cases**. Bisected to `engine/spaces/lifecycle.pl`, and
+inside it to the ORDER of the guard. Asking `implementation_module/1` first
+costs six inferences on every call that RESOLVES, and the shadow repair
+resolves on almost every call a benchmark makes; asking `current_predicate/1`
+first costs one, and reaches `implementation_module/1` only where the name
+resolves nowhere.
+
+| `op-raw`, min of three | inferences |
+|---|---|
+| merge base | 298,847 |
+| `implementation_module/1` first | 298,937 |
+| `current_predicate/1` first | 298,864 |
+
+Decided: `current_predicate/1` first. What remains is one inference per
+resolving repair call, and the whole Python lane against the merge base is:
+
+| case | base | branch | delta |
+|---|---|---|---|
+| annotated-relation | 311,370 | 311,385 | +15 |
+| eval-arith | 278,847 | 278,862 | +15 |
+| foreign-match | 784,865 | 784,882 | +17 |
+| handle-round-trip | 1,502,897 | 1,502,912 | +15 |
+| op-encoded | 318,849 | 318,864 | +15 |
+| op-raw | 298,847 | 298,864 | +17 |
+| run-source | 420,853 | 420,868 | +15 |
+| table-bridge-match | 784,865 | 784,880 | +15 |
+| save-load-fast | 2,929,354 | 2,929,459 | +105 |
+| save-load-metta | within 4 of its 927,685 pin | 927,793 | +104 to +112 |
+| automatic-tabling, `automatic` mode | 16,229 / 17,363 / 18,497 / 19,253 | 14,290 / 15,424 / 16,558 / 17,314 | **-1,939 each** |
+| let-heavy, loop-1m, register-op, typed-call | unchanged | unchanged | 0 |
+| the other 21 cases | within their pins | within their pins | 0 |
+
+Priced against what the guard buys, on the door the stack says reaches it
+(`'remove-atom'/3` -> `remove_equation/6` ->
+`metta_restore_inherited_predicate/3`): adding and removing 200 equations in
+`&self` for functions nothing above defines costs **1,069,438 inferences with
+200 traps before and 858,838 with none after**, 1,053 a removal. So the trade
+is one inference on every repair that resolves against 1,053 on every one that
+does not, and `engine/bench-baseline.json` is NOT edited here.
+
+Two probes measured NOTHING before that number was right, and both said so the
+same way: identical readings on both arms. The first wrote `'$x'` as an atom
+instead of reading the equation with `sread/2`, so nothing compiled, nothing
+was erased and the repair never ran; the second reloaded a source file, which
+is not the door. `chain.pl` records the whole ancestor chain of the first trap
+and named the door in one run. Guessing at a workload costs more than
+instrumenting it.
+
+Also recorded because it cost a full verification pass: `git checkout petta --
+<files>` STAGES what it writes, and `git status` shows that in the first
+column, which reads as "modified" at a glance. Six files were left at the base
+that way and the next three measurements -- a whole engine suite, an engine
+benchmark run and a Python benchmark run -- were made on a tree that had one
+of the eight changes rather than all eight. The seven new regressions all went
+red together, which is what caught it. Worse, `petta` MOVED under the work,
+from `ad711777` to `26f479ba`, so a later `git checkout petta -- <file>` pulled
+a newer engine into a tree that could not load it (`Unknown procedure:
+materialize:discard_space/1`). Every arm switch now goes through
+`ai-tmp/autoload-traps/arm.sh`, which names the merge-base COMMIT rather than
+the branch, resets the index, and PRINTS which files differ from HEAD and from
+the base before anything is measured.

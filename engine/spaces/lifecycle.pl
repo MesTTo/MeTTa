@@ -378,19 +378,32 @@ metta_abolish_local_predicate(Module, Name, Arity) :-
 metta_restore_inherited_predicate(_, Name, _) :-
     sub_atom(Name, 0, 1, _, '$'),
     !.
-%implementation_module/1 asks first, and imported_from/1 still decides. The
-%abolish above leaves most names resolving NOWHERE -- a space's own function,
-%gone with its last equation -- and imported_from/1 on such a name runs SWI's
+%A cheap guard asks first, and imported_from/1 still decides. The abolish
+%above leaves most names resolving NOWHERE -- a space's own function, gone
+%with its last equation -- and imported_from/1 on such a name runs SWI's
 %undefined-procedure trap, which reads the asking module's autoload
 %declarations and the library index before raising the existence error this
 %clause discards: 1,033 inferences to learn "nothing above me has it", 7,351
-%times over the plunit suites. implementation_module/1 is special-cased in
-%SWI's property_predicate/2 and reaches '$find_library'/5 directly, so the
-%same question costs 33 and the whole clause 43
-%[source: /usr/lib/swi-prolog/boot/syspred.pl, property_predicate/2;
-%measured 2026-09-06; commit=WORKTREE].
+%times over the plunit suites, and 1,053 of the 5,347 it costs to add and
+%remove one equation for a function nothing above the space defines
+%[measured 2026-09-06: 200 such cycles through 'remove-atom'/3, 1,069,438
+%inferences before and 858,838 after; fixture=ai-tmp/autoload-traps/removal2.pl;
+%commit=WORKTREE].
 %
-%The guard cannot change which branch is taken: Home \== Module holds exactly
+%Two arms, in this ORDER, which the benchmarks decided. current_predicate/1
+%answers yes for a local definition, an import and an inherited one alike, for
+%one inference, and that is the whole cost on every call that resolves.
+%implementation_module/1 is asked only when it fails, and is what admits a
+%name the autoloader would supply: SWI special-cases that property and reaches
+%'$find_library'/5 directly instead of the trap, so it answers for 33
+%[source: /usr/lib/swi-prolog/boot/syspred.pl, property_predicate/2]. Asking
+%implementation_module/1 FIRST also works and was measured; it costs six
+%inferences on every resolving call rather than one, which is +90 on eight
+%Python benchmark cases against +15 for this order
+%[measured 2026-09-06: op-raw 298,847 at the merge base, 298,937 that way and
+%298,864 this way; command=extensions/python/bench.py --counter-only op-raw].
+%
+%Neither arm can change which branch is taken: Home \== Module holds exactly
 %where imported_from/1 answers, on every one of the 7,949 module/name pairs of
 %a booted image, across a two-hop import chain, for a name the module defines
 %itself (both say no) and for an autoloadable name (both name the library).
@@ -406,8 +419,11 @@ metta_restore_inherited_predicate(_, Name, _) :-
 metta_restore_inherited_predicate(Module, Name, Arity) :-
     retractall('$metta_repaired_shadow_import'(Module, Name, Arity, _)),
     functor(Head, Name, Arity),
-    (   predicate_property(Module:Head, implementation_module(Home)),
-        Home \== Module,
+    (   (   current_predicate(Module:Name/Arity)
+        ->  true
+        ;   predicate_property(Module:Head, implementation_module(Home)),
+            Home \== Module
+        ),
         predicate_property(Module:Head, imported_from(Source)),
         Source \== system,
         \+ predicate_property(Module:Head, built_in),

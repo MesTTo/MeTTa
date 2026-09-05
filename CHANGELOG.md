@@ -54,7 +54,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   undefined-procedure trap on a name nothing resolves, which is the ordinary
   case: 1,033 inferences to learn "nothing above me has it", and 2,067 through
   the repair sweep, which asks `number_of_clauses/1` the same way. They now
-  cost 43 and 49. The engine's own test suites took that path 7,351 times.
+  cost 45 and 51, and adding then removing 200 equations for functions nothing
+  above the space defines costs 858,838 inferences instead of 1,069,438. The
+  engine's own test suites took that path 7,351 times. The repairs that DO
+  resolve pay one inference more than before, which eight benchmark cases see
+  as +15 and the two save-load cases as +105.
   Which name is repaired from which module is unchanged, over twelve probes
   covering a local definition, an explicit import, three autoloadable library
   names, two system built-ins and an inherited engine builtin.
