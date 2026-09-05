@@ -44,6 +44,8 @@ import statistics
 import subprocess
 import sys
 
+from bounded_spawn import bounded
+
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parents[1]
 #The checkout this tree is aligned to, and the one
@@ -106,7 +108,7 @@ CHILD_ENVIRONMENT = _child_environment()
 
 def _perf(command: list[str]) -> tuple[int, subprocess.CompletedProcess]:
     completed = subprocess.run(
-        ["perf", "stat", "-e", "instructions:u", "-x", ",", *command],
+        bounded(["perf", "stat", "-e", "instructions:u", "-x", ",", *command]),
         capture_output=True,
         text=True,
         timeout=TIMEOUT,

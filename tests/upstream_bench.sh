@@ -97,7 +97,7 @@ echo "corpus: $total shared identical examples"
 # because the base keeps examples flat and HEAD groups them by topic.
 run_one() {
     tree="$1"; rel="$2"
-    ( cd "$tree" && timeout "$FILE_TIMEOUT" \
+    ( cd "$tree" && bounded --ceiling "$FILE_TIMEOUT" \
         swipl --stack_limit=8g -q -s engine/main.pl -- "./$rel" silent )
 }
 
@@ -209,7 +209,7 @@ if command -v perf >/dev/null 2>&1; then
         count=$(
             { while IFS="$(printf '\t')" read -r name head_rel; do
                   [ "$side" = base ] && rel="examples/$name" || rel="$head_rel"
-                  ( cd "$tree" && timeout "$FILE_TIMEOUT" \
+                  ( cd "$tree" && bounded --ceiling "$FILE_TIMEOUT" \
                       perf stat -x, -e instructions:u \
                       swipl --stack_limit=8g -q -s engine/main.pl -- "./$rel" \
                       >/dev/null 2>"$WORK/perf.csv" )

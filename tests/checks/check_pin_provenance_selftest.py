@@ -208,6 +208,7 @@ def build(root: Path) -> str:
         ["git", "add", "-A"],
         ["git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "fixture"],
     ):
+        # unbounded: git over a temporary directory, which returns.
         subprocess.run(command, cwd=root, check=True, capture_output=True)
     return subprocess.run(
         ["git", "rev-parse", "HEAD"], cwd=root, check=True, capture_output=True, text=True

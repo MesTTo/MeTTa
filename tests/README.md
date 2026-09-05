@@ -49,14 +49,14 @@ passes against it. `engine/main.pl` loads the purge that defeats this, and
 `check.sh` warms one boot through it before any lane, but a suite run by hand
 or through `engine/test.sh` alone reaches neither. Loading `qlf_boot.pl` before
 the engine makes each suite correct on its own; `tests/checks/check_qlf_freshness.py`
-refuses a loader that omits it. Run one suite by hand the way `check.sh` does,
-from `tests/prolog`:
+refuses a loader that omits it. Run one suite by hand the way `check.sh` does, from the repository root:
 
-    cd tests/prolog && swipl -g "set_test_options([format(log)]), run_tests" \
-        -t halt suites/reader/parser.plt
+    sh engine/test.sh suites/reader/parser.plt
 
-Run it from anywhere else and SWI finds the load-time half through its
-deprecated working-directory fallback and says so.
+That script does the `cd` for you, exports the environment janus follows,
+scans for the load-time errors the exit code cannot see, and bounds the
+process. Calling `swipl` on a suite directly does none of the four; one such
+command ran 7,540 seconds at 97.8% CPU on 2026-09-05 before it was noticed.
 
 ## The cumulative-syntax law
 

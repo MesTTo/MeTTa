@@ -9,6 +9,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `bounded.sh` is the one bound on every process this repository starts. It
+  holds a deadline in a process of the child's own, so an orphan still ends,
+  and links that child to the process that started it through
+  `prctl(PR_SET_PDEATHSIG)`, so a killed session reaps its children in
+  milliseconds instead of leaving them to the deadline. Every runner calls it,
+  the harness scripts reach it through `tests/checks/bounded_spawn.py`, and
+  `sh bounded.sh swipl ...` is the form to type by hand. `sh engine/test.sh
+  suites/<group>/<suite>.plt` runs one PlUnit suite through it, with the
+  working directory, the janus environment and the load-error scan a bare
+  `swipl` call does not carry.
+
+- The five CI jobs carry `timeout-minutes` rather than GitHub's 360-minute
+  default: 45 for the gate and the version matrix, 20 for the rest, against
+  measured costs of 18 to 19, 10 to 14, and 0 to 2 minutes.
+
 - Remote mutations negotiate scoped, expiring idempotency keys. Lost or
   indeterminate replies raise `OutcomeUnknown`; its `retry()` replays the
   retained request without repeating its effects. Legacy peers expose the

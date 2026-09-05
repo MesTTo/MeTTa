@@ -44,6 +44,8 @@ from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
+from bounded_spawn import bounded
+
 ROOT = Path(__file__).resolve().parents[2]
 
 EXEMPTION_REASONS = frozenset(
@@ -207,7 +209,7 @@ def runtime_inventory(
 ) -> tuple[list[dict[str, str]], list[dict[str, object]], list[str]]:
     """Ask the running catalog for policies, semirings and algebra laws."""
     completed = subprocess.run(
-        ["swipl", "-q", "-g", QUERY, "-t", "halt"],
+        bounded(["swipl", "-q", "-g", QUERY, "-t", "halt"]),
         cwd=root,
         capture_output=True,
         text=True,

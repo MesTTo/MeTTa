@@ -4,6 +4,10 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+
+# One spelling of the bound, implemented in bounded.sh, which every runner in
+# this tree and a command typed by hand all reach.
+bounded() { sh "$ROOT/bounded.sh" "$@"; }
 PATH="$ROOT/../../local/swipl-9.3.36/bin:$PATH"
 export PATH
 TMPDIR=${TMPDIR:-/tmp}
@@ -12,7 +16,7 @@ run_ok() {
     name="$1"
     file="$2"
     log="$TMPDIR/metta-${name}-$$.log"
-    timeout 15s sh "$ROOT/run.sh" "$ROOT/$file" > "$log" 2>&1
+    bounded --ceiling 15 sh "$ROOT/run.sh" "$ROOT/$file" > "$log" 2>&1
     printf '%s\n' "$log"
 }
 
@@ -44,7 +48,8 @@ grep -q 'partial wrap' "$log" || { echo "repro3 missing parent wrap type output"
 # key generated before the arithmetic error.
 log="$TMPDIR/metta-repro4-$$.log"
 set +e
-timeout 15s sh "$ROOT/run.sh" "$ROOT/tests/fixtures/repro4_variant_normalization.metta" > "$log" 2>&1
+bounded --ceiling 15 sh "$ROOT/run.sh" \
+    "$ROOT/tests/fixtures/repro4_variant_normalization.metta" > "$log" 2>&1
 status=$?
 set -e
 [ "$status" -eq 2 ] || { echo "repro4 expected current arithmetic instantiation error status 2, got $status"; cat "$log"; exit 1; }
@@ -54,6 +59,6 @@ grep -Eq 'app_Spec_k[0-9a-fz]+' "$log" || { echo "repro4 missing encoded special
 
 # Generated-clause properties are checked in PlUnit, including per-clause
 # binding, absence of reduce/2, and recursive folding to the specialized name.
-(cd "$ROOT/tests/prolog" && swipl -q -s suites/translator/specializer.plt -g run_tests,halt)
+(cd "$ROOT/tests/prolog" && bounded swipl -q -s suites/translator/specializer.plt -g run_tests,halt)
 
 printf 'specializer regression checks passed\n'

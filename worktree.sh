@@ -43,6 +43,10 @@ HERE=$(cd -- "$(dirname -- "$0")" && pwd)
 # The main checkout is the first line of `git worktree list`, which git
 # guarantees is the primary one. Deriving it beats naming a path, so this
 # keeps working wherever the repository lives.
+# One spelling of the bound, implemented in bounded.sh, which every runner in
+# this tree and a command typed by hand all reach.
+bounded() { sh "$HERE/bounded.sh" "$@"; }
+
 MAIN=$(cd "$HERE" && git worktree list | head -1 | awk '{print $1}')
 
 if [ "$MAIN" = "$HERE" ]; then
@@ -91,7 +95,7 @@ if command -v swipl-ld >/dev/null 2>&1; then
         [ -f "$source" ] || continue
         directory=$(dirname "$source")
         unit=$(basename "$source" .c)
-        ( cd "$directory" && swipl-ld -shared -o "$unit" "$unit.c" ) ||
+        ( cd "$directory" && bounded swipl-ld -shared -o "$unit" "$unit.c" ) ||
             echo "worktree.sh: the C example $unit failed to build" >&2
     done
 else
@@ -115,7 +119,7 @@ elif ! command -v cc >/dev/null 2>&1 &&
     # fails, so this rung notes the fallback the way engine/build.sh does.
     echo "worktree.sh: swipl-ld found but no C compiler, this worktree runs the engine's Prolog implementations and its counters will not compare against pins measured with the C ones" >&2
 else
-    sh "$HERE/engine/build.sh" ||
+    bounded sh "$HERE/engine/build.sh" ||
         { echo "worktree.sh: an engine C artefact failed to build; suites here would measure a Prolog fallback against pins measured with the C one" >&2
           exit 1; }
 fi
@@ -123,4 +127,4 @@ fi
 # Warm the engine once so the Quick Load Format artifacts generate in a
 # single process before any concurrent lane first-boots this tree
 # (engine/qlf_boot.pl carries the staleness and recovery story).
-swipl -g halt -s "$(dirname -- "$0")/engine/main.pl" -- extensions >/dev/null 2>&1 || true
+bounded swipl -g halt -s "$HERE/engine/main.pl" -- extensions >/dev/null 2>&1 || true

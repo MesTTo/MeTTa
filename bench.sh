@@ -32,6 +32,10 @@ set -u
 
 HERE=$(cd -- "$(dirname -- "$0")" && pwd)
 
+# One spelling of the bound, implemented in bounded.sh, which every runner in
+# this tree and a command typed by hand all reach.
+bounded() { sh "$HERE/bounded.sh" "$@"; }
+
 found=''
 failed=''
 for component in "$HERE/engine" \
@@ -42,7 +46,7 @@ for component in "$HERE/engine" \
     name=$(printf '%s' "${component%/}" | sed "s|^$HERE/||")
     found="$found $name"
     printf '\n=== %s ===\n' "$name"
-    if ! sh "$script" "$@"; then
+    if ! bounded sh "$script" "$@"; then
         failed="$failed $name"
     fi
 done

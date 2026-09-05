@@ -18,6 +18,11 @@ concurrency:
 jobs:
   # Correctness. A failure here blocks.
   gate:
+    # 18 and 19 minutes over the two runs before 2026-09-05, so this is
+    # two and a half times the observed cost and eight times better than
+    # GitHub's 360-minute default, which was the only bound a hung swipl
+    # here had.
+    timeout-minutes: 45
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/mestto/metta-kernel-ci:latest
@@ -124,6 +129,7 @@ jobs:
   # The burn-down surface. Always runs, never blocks, and the log is the
   # record of what section of ai-code-organisation-and-fixes.md is left.
   report:
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/mestto/metta-kernel-ci:latest
@@ -156,6 +162,7 @@ jobs:
   # ecosystem package; the gate job installs the checks extra and runs all
   # six. Add a version here and it is covered from then on.
   versions:
+    timeout-minutes: 45
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/mestto/metta-kernel-ci:latest
@@ -211,6 +218,7 @@ jobs:
   # or value`. It must now install cleanly and refuse at the first engine call
   # with words of ours. Only then is SWI installed and the engine extra added.
   platforms:
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -309,6 +317,7 @@ jobs:
   # that packaging works. The runtime resources setup.py copies into
   # metta/_runtime are exactly what a fresh install has to find.
   wheel:
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/mestto/metta-kernel-ci:latest

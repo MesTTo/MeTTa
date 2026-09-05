@@ -43,6 +43,10 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+# The bound every runner in this tree reaches, one directory over.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "checks"))
+from bounded_spawn import CHILD_GRACE, bounded  # noqa: E402  -- the path is installed above
+
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 PIN = HERE / "petta"
@@ -74,7 +78,11 @@ def run(main_pl: Path, cwd: Path, rel: str, timeout: int) -> tuple[int | None, s
     orphaning it behind the shell, the shape
     extensions/python/tests/repository/test_example_parity.py already uses."""
     proc = subprocess.Popen(
-        ["swipl", "--stack_limit=8g", "-q", "-s", str(main_pl), "--", rel, "silent"],
+        # Bounded because start_new_session puts this engine in a session of
+        # its own, out of reach of any group signal from above.
+        bounded(["swipl", "--stack_limit=8g", "-q", "-s", str(main_pl),
+                 "--", rel, "silent"],
+                ceiling=timeout + CHILD_GRACE),
         cwd=cwd, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, text=True, start_new_session=True,
     )

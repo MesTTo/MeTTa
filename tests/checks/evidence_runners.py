@@ -323,11 +323,15 @@ COLLECTORS = (
     # run one body; the collector follows the loop rather than the lane. It also
     # ends an ambiguity: the anchor used to match twice inside check.sh, in this
     # lane and in dev-typed's, so removing either loop alone went undetected.
+    # The anchor moved from the `for` to the `set --` on 2026-09-05, when
+    # engine/test.sh gained a suite argument: the glob is what the runner
+    # selects when it is given none, which is how the gate calls it, and the
+    # `for` now walks whatever the argument list holds.
     Collector(
         runner="engine/test.sh",
         tier="GATE",
         lane="plunit",
-        anchor="for suite in suites/*/*.plt",
+        anchor="set -- suites/*/*.plt",
         root="tests/prolog/suites",
         patterns=("*.plt",),
         recursive=True,

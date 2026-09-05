@@ -14,6 +14,19 @@
 #   Hacks: None
 #   Future Enhancements: None
 
+# One spelling of the bound, defined here and implemented in bounded.sh, which
+# is the file check.sh, engine/test.sh and every seat's test.sh also call. A
+# runner that spelled its own `timeout` reached only its own children and left
+# them to whatever wrapper happened to be on PATH.
+#
+# Resolved against the WORKING DIRECTORY, like the `sh run.sh` below and like
+# every other path in this file, rather than against this script's own
+# location. tests/shell/test_example_runner_surfaces_failures.sh copies this
+# file into a scratch directory and runs the copy from the repository root, to
+# have a variant with one redirection removed; a self-relative path would look
+# for bounded.sh beside the copy and find nothing.
+bounded() { sh bounded.sh "$@"; }
+
 run_test() {
     f="$1"
     echo "Running $f"
@@ -38,8 +51,11 @@ run_test() {
     # no bound, a catastrophic slowdown still exits 0 and reads as OK.
     # The slowest example clears 30s on a loaded box; 290 leaves room for
     # contention while still failing anything in a different cost class,
-    # and timeout's exit 124 reaches the FAILURE block like any other red.
-    output=$(timeout 290 sh run.sh "$f" 2>&1)
+    # and the wrapper's exit 124 reaches the FAILURE block like any other red.
+    # Through `bounded` rather than a bare `timeout`, so the example is also
+    # reaped when THIS script is killed: 200 runners are started here at once
+    # and a killed session used to leave every one of them spinning.
+    output=$(bounded --ceiling 290 --grace 5 sh run.sh "$f" 2>&1)
     error=$?
     if [ "$error" -ne 0 ]; then
         echo "FAILURE in $f:"

@@ -131,37 +131,37 @@ is why the route above exists and why the two halves are not interchangeable.
 
 The suites live under `suites/<group>/`, grouped by the engine unit each one
 tests: `reader/`, `translator/`, `evaluation/`, `spaces/`, `libraries/`,
-`host/`, `seams/`, `metatheory/`. Run all of them directly with:
+`host/`, `seams/`, `metatheory/`. Run all of them, or one while working on it,
+from the repository root:
 
-    cd tests/prolog
-    export VIRTUAL_ENV=<the project venv> PATH="$VIRTUAL_ENV/bin:$PATH"
-    for suite in suites/*/*.plt; do
-        swipl -g "set_test_options([format(log)]), run_tests" \
-            -t halt "$suite" -- extensions || exit
-    done
+    sh engine/test.sh
+    sh engine/test.sh suites/translator/translator.plt
 
-Run one suite while working on it:
+That is one command, and it is the command `engine/check.sh` gates on, so a
+run by hand and the gate cannot disagree. It supplies four things a bare
+`swipl` call does not, each of which has cost a session.
 
-    cd tests/prolog
-    VIRTUAL_ENV=<the project venv> PATH="$VIRTUAL_ENV/bin:$PATH" \
-        swipl -g "set_test_options([format(log)]), run_tests" \
-            -t halt suites/translator/translator.plt -- extensions
+`extensions` in argv is what makes the engine glob
+`extensions/*/extension.pl`: without it the Python seat never loads, `py-call`
+is not a builtin but ordinary data, and suites/host/shim.plt's oracle and
+suites/seams/extensions.plt's seat record have nothing to read. `VIRTUAL_ENV`
+is what janus follows when it starts the embedded interpreter, not the
+`python3` on PATH, so without it the oracle imports the system interpreter's
+packages and fails on the first one the project installed. Measured 2026-08-31
+on this tree: the bare command in an earlier revision of this file left 28
+tests failing across three suites, every one of them the environment rather
+than the engine. A scan of the log catches an error printed while a suite
+LOADS, which the exit code cannot see because `-t halt` halts 0 and a test that
+failed to compile does not run, does not fail, and does not appear in the
+count. And the run is BOUNDED through `bounded.sh`: a bare
+`swipl -g "set_test_options([format(log)]), run_tests" -t halt
+suites/spaces/materialization.plt` ran 7,540 seconds at 97.8% CPU on
+2026-09-05 and needed SIGKILL.
 
-BOTH halves of that environment decide what the suites test, and this is the
-command `engine/test.sh` runs, which `engine/check.sh` gates on. `extensions`
-in argv is what makes the engine glob `extensions/*/extension.pl`: without it
-the Python seat never loads, `py-call` is not a builtin but ordinary data, and
-suites/host/shim.plt's oracle and suites/seams/extensions.plt's seat record
-have nothing to read. `VIRTUAL_ENV` is what janus follows when it starts the
-embedded interpreter, not the `python3` on PATH, so without it the oracle
-imports the system interpreter's packages and fails on the first one the
-project installed. Measured 2026-08-31 on this tree: the bare command in an
-earlier revision of this file left 28 tests failing across three suites, every
-one of them the environment rather than the engine.
-
-Run it from `tests/prolog`, not from the group directory and not from the
-repository root. A suite writes paths at two depths and both are correct: a
-LOAD-time directive resolves against its own file, so it says
+The working directory is `tests/prolog`, not the group directory and not the
+repository root; `engine/test.sh` does that `cd` for you. A suite writes
+paths at two depths and both are correct: a LOAD-time directive resolves
+against its own file, so it says
 `:- ensure_loaded('../../../../engine/metta.pl')`, while an
 `initialization(consult(...))` and anything a test body builds resolve against
 the WORKING DIRECTORY, so those say `'../../engine/metta.pl'`. Start from
