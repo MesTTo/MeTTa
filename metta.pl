@@ -1395,6 +1395,12 @@ prolog:error_message(metta_extension_required(Name, Cause)) -->
 %and the boot raises `Unknown procedure: metta_pragma/2`. The pragma half
 %refreshes on write in set_metta_pragma/2.
 :- initialization(metta_refresh_discharge_verification).
+%Specialization verification is selected while calls compile, but its coverage
+%is accumulated while those calls run. The environment door therefore starts
+%the tally after control.pl has made metta_pragma/2 available, and process exit
+%finishes the run that has no closing pragma.
+:- initialization(specializer:metta_refresh_specialization_verification).
+:- at_halt(specializer:metta_finish_specialization_verification).
 :- consult('metta/interop.pl').
 :- consult('metta/registration.pl').
 %%%%%%%%%% The engine's own type surface %%%%%%%%%%
