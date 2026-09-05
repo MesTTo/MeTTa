@@ -81,3 +81,29 @@ SWI inferences below count transport only and exclude Python matching, certifica
 | 8,192 | demand | 3 | 16,394 | 93.249 [72.522, 111.426] | 236,977 |
 
 The reference matcher count at 256 is 7.88 times its count at 128. Demand shape checks remain exactly `2*n+10` through 8,192 seeds. CPU rises past the fixed overhead as those inputs grow; it is not a constant-cost claim. The sample variation prevents assigning a precise exponent from CPU alone. The exact work counters and source loop bounds establish cubic-to-linear work on this family. All samples and full counts are retained in `ai-tmp/ai-demand-sweep-extended.json`, with the command log and separate zero status in `ai-tmp/query-a20256a5-demand-extended-sweep.log` and `.status`.
+
+## 2026-09-05, committed benchmark driver verification
+
+The self-contained `benchmarks.query_planning demand` command and a separate `--control` process complete the paired 16,32,64,128,256 sweep with exit 0. A third process uses `--sizes 512 1024 2048 4096 8192` for the independent exact single-proof oracle. All three commands use `PYTHONPATH=extensions/python $VENV/bin/python -m` and a distinct `--metadata ai-tmp/<name>.json` output. Every source fingerprint agrees before and after all three runs.
+
+SWI counts below measure transport only and exclude the Python evaluator. Exact Python matcher/shape counts and complete-call process CPU establish the evaluator curve. CPU is the median of five unprofiled calls, including the complete rendered proof-bag comparison.
+
+| Seeds | Reference matches | Demand matches | Demand shapes | SWI transport only, reference/demand | Reference CPU ms | Demand CPU ms |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 16 | 5168 | 3 | 42 | 16215/16215 | 9.301 | 3.216 |
+| 32 | 36960 | 3 | 74 | 16647/16647 | 40.916 | 3.049 |
+| 64 | 278720 | 3 | 138 | 17511/17511 | 159.074 | 3.928 |
+| 128 | 2163072 | 3 | 266 | 19241/19241 | 1025.471 | 3.668 |
+| 256 | 17040128 | 3 | 522 | 22697/22697 | 7214.893 | 6.509 |
+
+Larger demand-only cases preserve the exact independent single-proof oracle. They extend the CPU and deterministic shape-count curve beyond the fixed overhead; they do not claim a new paired reference differential.
+
+| Seeds | Matcher calls | Shape calls | SWI transport only | Complete-call CPU ms |
+| ---: | ---: | ---: | ---: | ---: |
+| 512 | 3 | 1034 | 29609 | 10.006 |
+| 1024 | 3 | 2058 | 43433 | 15.928 |
+| 2048 | 3 | 4106 | 71081 | 29.896 |
+| 4096 | 3 | 8202 | 126381 | 50.127 |
+| 8192 | 3 | 16394 | 236977 | 78.630 |
+
+Raw output prefixes are `ai-tmp/query-a20256a5-module-demand`, `-demand-reference`, and `-demand-extended`, each with `.jsonl`, `.log`, `.status` and `-metadata.json` artifacts. All three statuses are 0.

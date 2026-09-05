@@ -56,3 +56,22 @@ Verified on the combined query-planning tree with `PYTHONPATH=extensions/python 
 | 8192 | 50579836 | 785195 | 2880.377 | 36.251 |
 
 The final two inference doublings are 3.96 and 3.98 for the source-order control, and 2.00 and 2.00 for the plan. CPU separates the curves over the full size range while retaining its visible sample variation. The class claim remains `O(N log N)` for this family, because SWI's internal ordered-key comparisons do not retire Prolog inferences. Raw samples and exit status 0 for both arms are in `query-a20256a5-join-final-{control,planned}.{jsonl,status}` under `ai-tmp/`.
+
+## 2026-09-05, committed benchmark driver verification
+
+The self-contained command `PYTHONPATH=extensions/python $VENV/bin/python -m benchmarks.query_planning join --metadata ai-tmp/query-a20256a5-module-join-planned-metadata.json` and its separate `--control` process both exit 0. The driver checks every empty answer bag and records matching source hashes before and after. The same source snapshot also supplied the final demand curves.
+
+SWI inferences exclude Python and operations inside native predicates. The adjacent CPU column is the median of five complete public calls, including the answer check. The inference doublings approach four for the control and two for the indexed plan; the remaining native sorting bound remains O(N log N).
+
+| Edges | Control SWI inferences | Planned SWI inferences | Control CPU ms | Planned CPU ms |
+| ---: | ---: | ---: | ---: | ---: |
+| 64 | 5396 | 6907 | 0.421 | 0.331 |
+| 128 | 16532 | 13035 | 0.628 | 0.673 |
+| 256 | 57238 | 25293 | 2.195 | 1.257 |
+| 512 | 212380 | 49803 | 8.532 | 2.816 |
+| 1024 | 817590 | 98831 | 33.062 | 4.125 |
+| 2048 | 3207700 | 196881 | 138.794 | 7.522 |
+| 4096 | 12706704 | 392987 | 546.282 | 14.444 |
+| 8192 | 50579836 | 785193 | 2163.845 | 33.151 |
+
+Raw rows, all samples, meter scope and statuses are `ai-tmp/query-a20256a5-module-join-{planned,control}.{jsonl,log,status}`. Metadata files have the same prefix and `-metadata.json` suffix.
