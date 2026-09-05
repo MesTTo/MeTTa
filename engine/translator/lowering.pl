@@ -7,7 +7,7 @@
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.
 %   fun_meta_head/3 and fun_meta_projection/4 retain source occurrence order,
 %   aliases and ownership [tested: run_tests(translator_metadata_projection);
-%   commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+%   commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
 %   apply_translator_rule_dl/7 receives a rule's declarations and owning
 %   module from one generation-checked registry row, explicitly materialises
@@ -29,7 +29,7 @@
 %   commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
 %   Tracked clauses fold admitted immutable scalar calls while retaining their
 %   source dependencies and the ordinary call's type and error guards
-%   [tested: run_tests(translator_constant_folding); commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+%   [tested: run_tests(translator_constant_folding); commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: dispatch refusals retain their Error answers and declared_arity_refusal/3

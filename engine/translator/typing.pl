@@ -4,7 +4,7 @@
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.
 %   fun_meta_head/3 preserves each source head's bindings and multiplicity
-%   [tested: run_tests(translator_metadata_projection); commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+%   [tested: run_tests(translator_metadata_projection); commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
 %   A named space's local binding cannot inherit a typed arity refusal, while
 %   an inherited typed meaning still owns its own wrong-arity refusal

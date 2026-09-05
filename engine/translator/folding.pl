@@ -4,7 +4,7 @@
 % Guarantees: the admitted fragment produces the same complete answer bag as
 %   runtime dispatch; untracked plans, shadows, effects, variable inputs and
 %   ordinary evaluation failures retain the original call
-%   [tested: run_tests(translator_constant_folding); commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+%   [tested: run_tests(translator_constant_folding); commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % Decides: only bounded-result integer primitives and integer-list scalar
 %   queries are pre-evaluated; host calls and recursive functions require a
 %   termination and result-lifetime contract that their effect rank lacks.
@@ -14,7 +14,7 @@
 % mode and retains source dependencies; pureStructural alone cannot establish
 % either for a user function.
 % https://github.com/postgres/postgres/blob/REL_18_0/src/backend/optimizer/util/clauses.c
-% [source: PostgreSQL REL_18_0, evaluate_function; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% [source: PostgreSQL REL_18_0, evaluate_function; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 fold_native_scalar_call(Module, Fun, Args, Out, Goal) :-
     constant_scalar_arguments(Fun, Args),
     retained_static_type_shortcuts_allowed,
@@ -37,16 +37,16 @@ fold_native_scalar_call(Module, Fun, Args, Out, Goal) :-
     % the question is worth asking
     % [measured: 427855 against 429855 SWI inferences; command=cd
     % extensions/python && PYTHONPATH=. $VENV/bin/python bench.py
-    % --counter-only run-source; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+    % --counter-only run-source; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
     % [tested: source_observation:nested_controls_preserve_each_source_branch;
-    % commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+    % commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
     \+ nb_current('$metta_observation', _),
     % findall copies each answer and unwinds every speculative binding. The
     % exact singleton check retains failure and duplicate multiplicity, even
     % if the native implementation ceases to satisfy the expected mode.
     % DuckDB's TryEvaluateScalar similarly leaves a failed expression intact.
     % https://github.com/duckdb/duckdb/blob/v1.4.0/src/optimizer/rule/constant_folding.cpp
-    % [source: DuckDB v1.4.0, ConstantFoldingRule::Apply; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+    % [source: DuckDB v1.4.0, ConstantFoldingRule::Apply; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
     catch_recover(findall(Out, call(Module:Goal), Results), fail),
     Results = [Value],
     integer(Value),
@@ -57,7 +57,7 @@ fold_native_scalar_call(Module, Fun, Args, Out, Goal) :-
 % particular, shifts and powers can request enormous allocations from tiny
 % source terms and are left for the branch that actually demands them.
 % [source: engine/metta/operators.pl, '+', '-', '*', '%', min, max,
-% 'floor-div', metta_bit_binary/4, 'bit-not', 'abs-math'; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% 'floor-div', metta_bit_binary/4, 'bit-not', 'abs-math'; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 constant_scalar_arguments(Fun, [Left, Right]) :-
     constant_integer_binary(Fun),
     integer(Left),

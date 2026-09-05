@@ -22,7 +22,7 @@
 %   drop_fun_meta/4, clear_fun_meta/2, or source withdrawal.
 % Guarded by: '$metta_fun_metadata' serializes metadata writers; transaction/1
 %   publishes the source and its projections together and rolls back failures
-%   [tested: run_tests(translator_metadata_projection); commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+%   [tested: run_tests(translator_metadata_projection); commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: retained and deferred equation type groups preserve written
 %   aliases, and with_equation_types/4 restores its enclosing translation
@@ -56,7 +56,7 @@
 % clause references distinguish duplicate occurrences on removal.
 % [tested: translator_metadata_projection:projected_head_bags_and_bindings_equal_the_source,
 % translator_metadata_projection:removing_an_occurrence_retires_its_exact_projection;
-% commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 
 %THE SEGMENT QUESTION IS ASKED ONCE PER EQUATION, not once per call. Every
 %call used to reach metta_segment_equation_in/3, which walks a function's

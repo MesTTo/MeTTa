@@ -1,7 +1,7 @@
 % Purpose: compare scalar constant folding with the retained runtime evaluator.
 % Guarantees: every differential compares complete answer bags and variable
 %   bindings, including failed and duplicate-producing contexts
-%   [tested: run_tests(translator_constant_folding); commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+%   [tested: run_tests(translator_constant_folding); commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % Assumes: the existing tracked/untracked translation doors select the two
 %   plans; reaching the compiler here is necessary to compare their code.
 

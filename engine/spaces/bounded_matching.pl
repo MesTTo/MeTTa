@@ -6,7 +6,7 @@
 % cost [tested:
 % native_generic_join:a_bounded_triangle_retains_streaming_first_answer_cost,
 % native_generic_join:planning_is_declared_rather_than_the_default;
-% commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % Guarantees: metta_match_atoms/2 dispatches a gap operand by its wrapper alone, and a merged read routes a gap pattern while reading its declared policy from what the program wrote [tested: tests/prolog/suites/reader/segments.plt; commit=a3dff3abc83b9d82f3652093246e1d693d526cdb].
 % Guarantees: an ordered carrier's declared ascending or descending direction

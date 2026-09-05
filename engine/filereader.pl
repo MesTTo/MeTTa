@@ -5,10 +5,10 @@
 %     deferred reconstruction, recompilation and fast-cache relocation
 %     [tested: test_forcing_a_deferred_equation_keeps_a_resolved_sibling_once,
 %     test_fast_images_keep_pending_equations_beside_resolved_equations;
-%     commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+%     commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 %   - source exits and runnable prefixes materialize the arrived function-free
 %     fragment through materialize:flush_source_materialization/0
-%     [tested: function_free_materialization; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+%     [tested: function_free_materialization; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 %   - source_lifecycle.pl is a plain source unit consulted into this module, so
 %     cache, digest, transactional reload, and assertion records retain their
 %     filereader predicate identities and load position
@@ -940,7 +940,7 @@ with_source_program_order(Space, ParsedForms, Goal) :-
 %runnable-only source [measured: 816831 against 786829 SWI inferences over
 %2000 completed calls; command=cd extensions/python && PYTHONPATH=.
 %$VENV/bin/python bench.py --counter-only foreign-match; fixture=the
-%foreign-match benchmark space; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+%foreign-match benchmark space; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 with_named_program_order(_Space, [], Goal) :- !, call(Goal).
 with_named_program_order(Space, Names, Goal) :-
     materialize:with_source_materialization(

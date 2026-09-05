@@ -1,12 +1,12 @@
 % Purpose: compare planned native conjunctions with the original bag join.
 % Guarantees: the oracle executes each conjunct separately and retains every
 % duplicate; the growth test distinguishes quadratic intermediate enumeration
-% from variable-domain intersection [tested: native_generic_join; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+% from variable-domain intersection [tested: native_generic_join; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % Assumes: planning is off unless a program asks for it, so the unit declares
 % the plan-cyclic-joins pragma for its own scope and restores the previous
 % value; a differential run without it would compare the nested loop with
 % itself [tested: native_generic_join:planning_is_declared_rather_than_the_default;
-% commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
