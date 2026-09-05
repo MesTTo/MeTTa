@@ -1292,8 +1292,14 @@ metta_catalog_preset([vocabulary, 'image-mode', opaque, transparent, auto]).
 metta_catalog_preset([vocabulary, 'registry-image',
                       expression, symbol, handle, operations]).
 metta_catalog_preset([vocabulary, 'answer-policy', depth, fair, 'best-first']).
+%Every algebra this catalog DEFINES below is nameable here. The row carried
+%eight while the [algebra, ...] rows defined ten, so `budget` and `amplitude`
+%were shipped presets the vocabulary would not admit and the generated
+%Semiring enum therefore could not spell. The runtime already named all ten:
+%an undeclared carrier is refused with "shipped presets are bool, bag,
+%counting, set, ranked, tropical, prob, prov, budget, amplitude".
 metta_catalog_preset([vocabulary, semiring, bool, bag, counting, set, ranked,
-                      tropical, prob, prov]).
+                      tropical, prob, prov, budget, amplitude]).
 metta_catalog_preset([vocabulary, 'source-kind', linear, repeated, peek]).
 metta_catalog_preset([vocabulary, world, 'closed-world', 'open-world']).
 metta_catalog_preset([vocabulary, atomicity,
@@ -1458,6 +1464,10 @@ metta_catalog_preset([policy, determinism, determinism, nondet]).
 metta_catalog_preset([claim, semiring, ranked, ordered, descending]).
 metta_catalog_preset([claim, semiring, tropical, ordered, ascending]).
 metta_catalog_preset([claim, semiring, prob, ordered, descending]).
+%budget is ordered the way tropical is, min over the reals with an ascending
+%reading, and declares order=ascending in its own preset. Its claim row was
+%the one an ordered carrier was missing.
+metta_catalog_preset([claim, semiring, budget, ordered, ascending]).
 metta_catalog_preset([algebra, bool, max, '*', 0, 1,
                       [laws, 'combine-associative', 'combine-commutative',
                        'extend-associative', 'left-distributive',
