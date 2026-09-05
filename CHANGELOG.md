@@ -9,6 +9,30 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `(stdin)`, `(stdout)` and `(stderr)` answer handles 0, 1 and 2, POSIX's own
+  numbering, in the table `file-open!` already fills. So `file-read-exact!`,
+  `file-write!` and `file-get-size!` reach the three streams a process always
+  has, and standard output has a spelling. They are a second spelling rather
+  than a second mechanism: `stderr!` is a handle write and `stdin-to-string!` is
+  `(file-read-to-string! (stdin))`, and both stay as they are. `file-close!`
+  refuses all three, because closing stdout or stderr takes it from the whole
+  process with no way back.
+
+- `temp-dir!` mints a fresh directory the way `temp-path!` mints a fresh file,
+  so a caller who needs somewhere to put files no longer derives a directory
+  name from a temporary FILE name. A prefix names the directory and may not
+  contain a separator: `tmp_file/2` pastes it into the path unsanitised, so one
+  would place the result outside the temporary directory.
+
+### Fixed
+
+- `examples/README.md` stated its corpus size, its derived-program count and its
+  written-here count twice each, with different numbers, from a merge that kept
+  both sides of all three sentences. They are one line each again, derived from
+  the tree.
+
+### Added
+
 - The writer's variable-identity invariant is pinned under garbage
   collection: one variable shared across a 40,000-string filler reparses as
   one, two as two, and 5,000 shared variables keep their count. Upstream's

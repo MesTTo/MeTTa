@@ -20,7 +20,7 @@ beside its definitions.
 | lib_derived | 1 | 1 |
 | lib_dict | 7 | 0 |
 | lib_doc | 0 | 0 |
-| lib_file | 14 | 14 |
+| lib_file | 18 | 18 |
 | lib_gitimport | 0 | 0 |
 | lib_he | 0 | 0 |
 | lib_import | 2 | 2 |
@@ -172,7 +172,7 @@ Returns: Its first answer
 
 ### `make-dir!`
 
-*lib_file.metta:55*
+*lib_file.metta:64*
 
 Create a directory and missing parents; an existing directory succeeds
 
@@ -182,7 +182,7 @@ Returns: Bool
 
 ### `delete-dir!`
 
-*lib_file.metta:56*
+*lib_file.metta:65*
 
 Remove an empty directory; missing or nonempty directories raise
 
@@ -192,7 +192,7 @@ Returns: Bool
 
 ### `copy-file!`
 
-*lib_file.metta:57*
+*lib_file.metta:66*
 
 Copy bytes to a destination filename with staged replacement; copying onto the source raises
 
@@ -203,7 +203,7 @@ Returns: Bool
 
 ### `file-metadata!`
 
-*lib_file.metta:58*
+*lib_file.metta:67*
 
 Snapshot kind, modified Unix time and file size as queryable atoms in a new space
 
@@ -213,7 +213,7 @@ Returns: Space
 
 ### `path-join`
 
-*lib_file.metta:59*
+*lib_file.metta:68*
 
 Join lexical paths; an absolute second path replaces the first
 
@@ -224,7 +224,7 @@ Returns: String
 
 ### `path-parent`
 
-*lib_file.metta:60*
+*lib_file.metta:69*
 
 Lexical parent directory; a bare filename has parent dot
 
@@ -234,7 +234,7 @@ Returns: String
 
 ### `path-name`
 
-*lib_file.metta:61*
+*lib_file.metta:70*
 
 Lexical final path component
 
@@ -244,7 +244,7 @@ Returns: String
 
 ### `path-extension`
 
-*lib_file.metta:62*
+*lib_file.metta:71*
 
 Text after the final dot in the filename, without the dot; empty when absent
 
@@ -252,9 +252,43 @@ Text after the final dot in the filename, without the dot; empty when absent
 
 Returns: String
 
+### `temp-dir!`
+
+*lib_file.metta:72*
+
+A unique fresh directory in the system temporary directory, created exclusively so concurrent runners cannot mint the same name; the caller owns it and removes it with delete-dir!
+
+1. a name prefix, which may not contain a path separator
+
+Returns: String
+
+### `stdin`
+
+*lib_file.metta:73*
+
+The handle for standard input, which is 0; every handle operation takes it, so (file-read-to-string! (stdin)) reads standard input through EOF
+
+Returns: Number
+
+### `stdout`
+
+*lib_file.metta:74*
+
+The handle for standard output, which is 1; (file-write! (stdout) $text) writes without a newline
+
+Returns: Number
+
+### `stderr`
+
+*lib_file.metta:75*
+
+The handle for standard error, which is 2; (file-write! (stderr) $text) is stderr! reached through the handle surface
+
+Returns: Number
+
 ### `stderr!`
 
-*lib_file.metta:63*
+*lib_file.metta:76*
 
 Write text to stderr and flush, without adding a newline
 
@@ -264,7 +298,7 @@ Returns: Bool
 
 ### `stdin-to-string!`
 
-*lib_file.metta:64*
+*lib_file.metta:77*
 
 Consume standard input through EOF as UTF-8 text
 
@@ -272,7 +306,7 @@ Returns: String
 
 ### `exit!`
 
-*lib_file.metta:65*
+*lib_file.metta:78*
 
 Terminate the entire process with integer status 0 through 255; not an application-level return
 
@@ -280,7 +314,7 @@ Terminate the entire process with integer status 0 through 255; not an applicati
 
 ### `temp-path!`
 
-*lib_file.metta:69*
+*lib_file.metta:82*
 
 A unique fresh path in the system temporary directory, created exclusively so concurrent runners cannot mint the same name; the caller owns the file
 
@@ -290,7 +324,7 @@ Returns: String
 
 ### `file-exists`
 
-*lib_file.metta:73*
+*lib_file.metta:86*
 
 True when a regular file exists at the path, False otherwise
 
@@ -300,7 +334,7 @@ Returns: Bool
 
 ### `dir-exists`
 
-*lib_file.metta:77*
+*lib_file.metta:90*
 
 True when a directory exists at the path, False otherwise
 
