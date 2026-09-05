@@ -48,3 +48,18 @@ Measured: `PYTHONPATH=extensions/python $VENV/bin/python ai-tmp/ai-demand-sweep-
 | 128 | 2,163,072 | 3 / 266 | 1,133.515 [1,039.318, 1,420.445] | 5.124 [4.725, 6.555] | 19,241 / 19,239 |
 
 CPU samples varied; allocator, garbage-collector and execution conditions were not isolated. The samples confirm that the removed Python work dominated the complete call at larger sizes. The exact matcher formula and linear certification/indexing count establish the complexity change; the noisy CPU ratios are supplementary evidence. The source-level inference counts remain nearly equal because that counter cannot observe the optimized code.
+
+## 2026-09-05, final bag review and paired sweep
+
+Read during final review: Mumick, Pirahesh and Ramakrishnan, [*The Magic of Duplicates and Aggregates*, VLDB 1990, section 2.3.2 and theorem 2.5](https://www.vldb.org/conf/1990/P264.PDF). Their multiset transformation makes magic predicates sets and proves a one-to-one correspondence after guard erasure. The implementation uses that same separation between unique control demands and original proof occurrences; it restricts execution to the certified acyclic fragment and does not implement their aggregate machinery. The determining code now cites this bag-specific result beside its demand representation.
+
+Verified again with `PYTHONPATH=extensions/python $VENV/bin/python ai-tmp/ai-demand-sweep-final.py`: every profiling and CPU sample preserves values, tags, tokens, proof IDs and rendered proof trees. SWI inferences below count transport only and exclude the Python join. Exact matcher calls and five-sample whole-call CPU medians are the paired work evidence.
+
+| Seeds | Reference matches | Demand matches / shape checks | Reference CPU ms | Demand CPU ms | SWI transport inferences, reference / demand |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 16 | 5168 | 3 / 42 | 12.906 | 3.448 | 16215 / 16215 |
+| 32 | 36960 | 3 / 74 | 30.415 | 3.315 | 16647 / 16647 |
+| 64 | 278720 | 3 / 138 | 157.228 | 3.515 | 17511 / 17511 |
+| 128 | 2163072 | 3 / 266 | 1404.887 | 4.286 | 19241 / 19239 |
+
+The command exits 0; `ai-tmp/ai-demand-sweep-final.json` retains all CPU samples and counts. The table supports the cubic-to-linear work change across four sizes, while the nearly equal transport counts show why SWI alone would miss it.

@@ -39,3 +39,20 @@ Found by independent review: a missing ground factor beside a dense triangle pro
 Decided before repair: test every flat native factor for the existence of one candidate before building any trie. Probing under negation leaves query variables unchanged. A factor with no unifying row makes the complete conjunction empty under every later substitution; represent that plan with a single zero-count leaf. MeTTa.jl `src/join.jl` stops descent through an empty variable domain, but a ground factor has no variable domain; the explicit probe extends that treatment using multiplication by zero in the bag model. The target for the missing indexed-factor family is constant work in relation size; a missing candidate that itself requires a scan still pays for that scan.
 
 Verified: the empty-factor growth test failed before repair at `985329 =< 132433+4` and `7606321 =< 132433+4`. It passes after repair. The original witness now costs 127 inferences for the first size and 88 at domains 16, 32 and 64; its reference costs 45, 43, 43 and 43. All seventeen native join tests pass, including four new differentials for four-cycles, ternary relations, disconnected cycles and repeated ground factors. A separate generated hypergraph differential passed 360 bag comparisons. Focused duplication checking found no clones.
+
+## 2026-09-05, paired completed-query sweep
+
+Verified on the combined query-planning tree with `PYTHONPATH=extensions/python $VENV/bin/python ai-tmp/ai-join-final-sweep.py`, and a separate process using `--control` to disable only `native_conjunction_plan/4`. Every completed public call returned the same empty bag. SWI inferences exclude Python work and C sorting/comparison internals; each inference row is therefore paired with the median of five whole-call process CPU samples.
+
+| Edges | Control inferences | Planned inferences | Control CPU ms | Planned CPU ms |
+| ---: | ---: | ---: | ---: | ---: |
+| 64 | 5398 | 6907 | 0.446 | 0.311 |
+| 128 | 16532 | 13035 | 0.947 | 0.429 |
+| 256 | 57238 | 25293 | 2.571 | 1.017 |
+| 512 | 212380 | 49805 | 13.826 | 1.787 |
+| 1024 | 817588 | 98831 | 48.217 | 4.166 |
+| 2048 | 3207702 | 196883 | 159.499 | 11.695 |
+| 4096 | 12706704 | 392987 | 802.889 | 23.036 |
+| 8192 | 50579836 | 785195 | 2880.377 | 36.251 |
+
+The final two inference doublings are 3.96 and 3.98 for the source-order control, and 2.00 and 2.00 for the plan. CPU separates the curves over the full size range while retaining its visible sample variation. The class claim remains `O(N log N)` for this family, because SWI's internal ordered-key comparisons do not retire Prolog inferences. Raw samples and exit status 0 for both arms are in `query-a20256a5-join-final-{control,planned}.{jsonl,status}` under `ai-tmp/`.
