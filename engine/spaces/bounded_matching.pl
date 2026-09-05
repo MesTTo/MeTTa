@@ -297,20 +297,45 @@ metta_space_names(Names) :-
     append(Native, Foreign, All),
     sort(All, Names).
 
-%The Empty prune behind every computed collapse. The gate is memberchk
-%NEGATED, which makes it sound AND C-fast: when nothing in the list
-%unifies with Empty (the overwhelmingly common all-ground case,
-%4 inferences however long the list), the list is shared untouched; when
-%something unified, the negation has already undone the binding, and the
-%identity (==) walk decides whether it was a real Empty or an unbound
-%answer variable. Bare memberchk once BOUND such a variable and pruned
-%it, which turned `!(let $b (is-alpha-member (1 $x) ...) $x)`'s unbound
-%answer into nothing
+%The Empty prune behind every computed collapse. It asks ONE question, by
+%IDENTITY: is any element the atom Empty. Nothing here unifies, and that is
+%the whole point rather than a detail.
+%
+%This used to open with `\+ memberchk('Empty', All)` as a C-fast pre-filter,
+%on the reasoning that "when something unified, the negation has already
+%undone the binding". Unification is undone by FAILING, and an attributed
+%variable does not fail: clpfd's attribute_unify_hook RAISES on a value that
+%is not an integer, so probing an answer that still carries a constraint threw
+%type_error(integer, 'Empty') out of the runnable path, which catches nothing.
+%`!(#+ $x $y)`, `!(#* $x $y)` and every other residual answer aborted the whole
+%run with an uncaught Prolog error instead of answering
+%[tested: a_residual_constraint_survives_the_empty_prune,
+%a_nonlinear_constraint_answers_instead_of_raising].
+%
+%The identity walk was already here, as the second half of that gate, and it
+%is what the pre-filter was protecting. Deleting the pre-filter rather than
+%guarding it is what makes the throw UNREACHABLE instead of caught: a catch
+%would also swallow every other error the prune could raise, and would cost on
+%a path every runnable takes.
+%
+%It is not a slower shape in the cases that matter. Measured per call, against
+%the memberchk pre-filter it replaces: one ground answer 3.00 against 3.00,
+%one unbound answer 3.00 against 5.00, three hundred answers whose first is
+%unbound 302.00 against 304.00. It is dearer on exactly one shape, a long
+%all-ground list, 302.00 against 3.00, because the pre-filter's C scan
+%answered that one in constant time. The pinned counter rows measure that
+%shape and do not move
+%[measured 2026-09-05: each shape called 20,000 times between two
+%statistics(inferences, _) reads, minus the 2 the driver loop retires;
+%SWI's memberchk/2 retires 4.00 at n=1 and at n=1000 alike, so the pre-filter
+%was O(1) in inferences and any Prolog walk is O(n)].
+%
+%A bare memberchk once BOUND an unbound answer variable and pruned it, which
+%turned `!(let $b (is-alpha-member (1 $x) ...) $x)`'s unbound answer into
+%nothing; identity has never been able to do that
 %[tested translated_success_leaves_the_query_variable_unbound].
 metta_prune_empty(All, Kept) :-
-    (   \+ memberchk('Empty', All)
-    ->  Kept = All
-    ;   metta_member_empty_(All)
+    (   metta_member_empty_(All)
     ->  metta_drop_empty_(All, Kept)
     ;   Kept = All
     ).
@@ -334,10 +359,14 @@ metta_drop_empty_([X|Xs], Kept) :-
 %This mirrors metta_prune_empty/2's identity test, so a free answer variable
 %is not mistaken for Empty [tested: test_variable_names_survive_to_the_printer;
 %commit=916def0562c211143bb91cd0bd8b2c9dac7ab4fa].
+%
+%It mirrors the removed pre-filter as well, and THIS is the site the crash
+%reached: every runnable's answers pass through here, so a residual constraint
+%threw before it could be printed. The reasoning is written out over
+%metta_prune_empty/2 above
+%[tested: a_residual_constraint_survives_the_empty_prune].
 metta_prune_empty_answers(All, Kept) :-
-    (   \+ memberchk('$metta_answer'('Empty', _), All)
-    ->  Kept = All
-    ;   metta_member_empty_answer_(All)
+    (   metta_member_empty_answer_(All)
     ->  metta_drop_empty_answers_(All, Kept)
     ;   Kept = All
     ).

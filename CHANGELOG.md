@@ -216,6 +216,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   transaction boundary re-runs the requirement at commit, where the state has
   refreshed, and refuses the second by name.
 
+- An answer that still carries a constraint is answered rather than raised.
+  `!(#+ $x $y)`, `!(#* $x $y)` and every other residual CLP(FD) answer aborted
+  the whole run with an uncaught `Type error: integer expected, found 'Empty'`.
+  The Empty prune probed the answer list with `memberchk/2`, and unification
+  against an attributed variable runs clpfd's `attribute_unify_hook`, which
+  RAISES on a non-integer instead of failing, so the "the negation has already
+  undone the binding" reasoning did not hold for the one case that mattered.
+  Both prune doors now ask by identity, the walk that already sat behind the
+  probe. Propagation still cannot decide a nonlinear product, so
+  `(let 12 (#* $x $y) ($x $y))` answers two free variables as before; what
+  changed is that a residual answer reaches the printer at all.
+
 - `serve` and `boot` finish their shutdown when the interrupt repeats. A second
   SIGINT arriving inside the close landed in `socketserver.shutdown`'s wait and
   was collected as a close FAILURE, which `close()` re-raised, so the graceful
