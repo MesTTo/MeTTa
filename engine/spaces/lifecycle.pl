@@ -25,6 +25,9 @@
 %   children without reusing a persisted runtime identity [tested:
 %   test_fast_cache_restores_translator_rules_and_bound_spaces;
 %   commit=d2279ea320e54790dab4484421a168e93755b185].
+%   Clearing a space removes materialized relations transactionally before
+%   their source clauses; a running reader owns a copied result descriptor
+%   [tested: function_free_materialization; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % Guarded by: '$metta_metta_exec' serializes execution-module identity,
 %   relationship declarations, fresh cache-child minting, and release.
@@ -2050,6 +2053,7 @@ seam:atom_hook_ref_idle(Space, Ref) :-
 metta_host_clear_space(Space) :-
     seam:foreign_space(Space), !,
     metta_assert_space_destructible(clear, Space),
+    materialize:discard_space(Space),
     (   metta_exec_module_known(Space, Module)
     ->  % A foreign clear removes stored equations, so untabling must precede
         % the provider's removal funnel just as it does for native storage.
@@ -2090,6 +2094,7 @@ metta_host_clear_space(Space) :-
 %spaces_drop_untables_first; commit=b33102fbd50a30ae44d58eca08abd49e447ea60d].
 metta_host_clear_space(Space) :-
     metta_assert_space_destructible(clear, Space),
+    materialize:discard_space(Space),
     space_module(Space, Module),
     metta_host_clear_tabling(Space, Module),
     (   metta_remove_hooks_idle(Space)

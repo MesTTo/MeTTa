@@ -189,6 +189,29 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   incompatible existing bindings take the fallback branch.
 - Constructive negation now preserves wildcard and structural bindings in
   nested case towers and recognizes the complement of an empty answer set.
+- `(pragma! plan-cyclic-joins True)` plans a full native cyclic conjunction as
+  a Generic Join, intersecting indexed variable domains before producing
+  answers. Duplicate facts retain their full contribution to every answer bag;
+  unsupported patterns and every conjunction without the pragma continue
+  through the existing matcher, which is faster wherever the data is not
+  skewed.
+- Retained clauses fold admitted immutable integer computations during
+  planning. Redefining a dependency rebuilds its folded callers, and host
+  operations remain deferred until demanded.
+- Function metadata keeps source-owned head and presence indexes. Repeated
+  calls no longer copy an unused definition body during dispatch; duplicate
+  equations, source reload and transaction rollback retain their bindings.
+- Tagged queries propagate bound arguments through certified acyclic integer
+  programs. They derive the requested proof bags while preserving duplicate
+  source occurrences and the existing failure behavior outside that fragment.
+- `(pragma! materialize-source-relations True)` makes source loading derive
+  eligible finite function-free relations once, at each source boundary and
+  once per completed load. Ground calls then reuse counted results, while open
+  calls, multiple distinct outputs, cyclic proof graphs, tracing and bounded
+  reductions keep their original execution, and transactional loads validate
+  their prepared source receipts on the first query after commit. Preparation
+  is quadratic in the derived relation, so a load without the pragma prepares
+  nothing.
 
 - The MeTTa file library now creates directories, copies bytes with staged
   replacement, returns queryable metadata snapshots, composes lexical paths,
@@ -541,6 +564,26 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Node answers and traces now carry partial applications and other Prolog
   compounds as expressions using the Python wire grammar. Improper lists
   cross as `(cons Head Tail)` rather than raising an untaggable-term error.
+- Running or loading a source no longer pays for materialization when no
+  program asked for it. A source that defines no equation, and any source at
+  all while the relation pragma is off and the space holds no relation, take
+  the doors they took before the subsystem existed.
+- Reconsulting a Prolog library while a materialized relation exists no longer
+  crashes the process. The clause-erase callback tests the reference's type
+  alone, where asking it for its predicate reached SWI's clause metadata
+  during the reconsult that was replacing it.
+- A source replacement prepares its materialized relation once rather than
+  twice. The loader's dependency repair pass runs before preparation instead
+  of invalidating a relation the file body had already derived.
+- An unrelated native call no longer reads planning mode and module context
+  for every materialized relation in the process. Each relation owns one
+  dispatch clause per admitted signature, and removing one leaves another
+  relation's clause for the same function standing.
+- Fast-cache version 4 preserves resolved reader bindings beside exact stored
+  equations, including duplicate native/reader occurrences and later
+  recompilation. Deferred reconstruction no longer compiles a resolved sibling
+  again from its raw `&self` form. Older cache schemas are refused; rebuild
+  them from the original MeTTa source, as described in the spaces guide.
 
 - `MeTTa.profile()`'s second answer is a table like every other. `EngineProfile`
   held bare tuples, so self-ticks were `node[3]` counted out against a

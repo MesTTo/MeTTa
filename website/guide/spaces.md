@@ -2,13 +2,17 @@
 Purpose: explain Space handles, journal-backed stores, composition, and
 external backing providers.
 Guarantees:
+  - version 4 fast images preserve each stored equation's resolved reader
+    bindings and refuse earlier cache schemas
+    [tested: test_fast_images_preserve_each_equations_binding,
+    test_fast_load_refuses_other_incompatible_headers; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
   - examples use the public metta.space() and metta.attach() functions
   - journal replay renames are documented as one-time migrations, and content
     digests state that renamed heads change their hashes
 [tested: test_guides_keep_documentation_law_explainers,
 test_a_second_replay_does_not_reapply_the_rename;
 commit=ee43d4a0585593b4f40d0c3c0557db8214688829]
-[tested: npm run docs:build; commit=f88aa8be03cb64cb59d3307515ded8701f418321]
+[tested: npm run docs:build; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
 -->
 
 # Spaces
@@ -34,6 +38,17 @@ the payload, so a version mismatch refuses with a re-save message and a
 corrupt payload, even one flipped byte, refuses on integrity before the
 binary reader sees any of it. The proof costs about six milliseconds on the
 twenty-thousand-atom corpus, and text stays the durable interchange format.
+Version 4 also records resolved equation bindings alongside the original
+atoms. A reader-loaded equation keeps the space that its `&self` referred
+to, relocated to the restored space. An identical equation added with
+`add()` keeps its literal `&self` meaning. Duplicate occurrences retain
+their individual bindings, including after a later recompile. Earlier
+cache schemas are refused with a re-save message because they lack that
+provenance. Rebuild a cache from its original MeTTa source with the current
+engine. If only an older cache remains, open it with the matching older
+engine, export its atoms as MeTTa text, then load that text and save a new
+fast image. Older schemas did not retain reader/native binding provenance,
+so the original program is the authoritative way to recover that distinction.
 A path ending `.gz` compresses either format, through zlib on the engine
 side and gzip on the Python side, interchangeably. Over the same twenty
 thousand atoms, text shrank 4.7x and the fast cache 5.1x, and load time

@@ -1,6 +1,8 @@
 % Purpose: provide MeTTa's Prolog runtime, builtins, type system, evaluator,
 %   imports, function registration, and named-space execution context.
 % Guarantees:
+%   - materialize.pl loads before source processing and shares the engine's
+%     runtime context [tested: function_free_materialization; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 %   - Files below engine/metta/ are plain source units consulted into this
 %     implementation module in their original order; builtin, runtime, and
 %     registration predicates retain their existing ownership and clause order
@@ -982,7 +984,7 @@ metta_import_shared_registries(Subsystem) :-
    ).
 
 :- ensure_loaded([parser, type_rules, translator, translator_rules,
-                  support_graph, specializer, filereader,
+                  support_graph, specializer, materialize, filereader,
                   '../lib/lib_gitimport/lib_gitimport', spaces, tracer,
                   duals, kernel, '../lib/lib_memo/lib_memo',
                   '../lib/minimal_metta_lib/minimal_metta_lib']).

@@ -1,0 +1,134 @@
+# Query planning with bag equivalence
+Goal: remove repeated derivation and quadratic join intermediates while preserving answer multiplicity.
+Constraint: existing declaration, snapshot, failure and lifecycle laws remain observable through the public doors.
+
+## 2026-09-05
+
+Tried: the current native two-hub triangle, through a completed `Space.run` within `m.stats()`. At 64, 128, 256, 512, 1024 and 2048 edges the empty answer costs 5346, 16482, 57188, 212330, 817538 and 3207652 inferences. The final doubling is 3.92 times. Duplicating one triangle edge produces six projected answers; repeating an atom stored twice produces four answers.
+
+Tried: measuring `Space.match` by draining its lazy cursor inside `m.stats()` gave 29 inferences for the empty query at every large size. The cursor runs in another SWI engine, whose inferences the calling thread cannot see. Rejected that meter for this fixture; `Space.run` completes the join on the measured evaluation path.
+
+Research: Ngo, Porat, Re and Rudra, *Worst-case Optimal Join Algorithms*, PODS 2012; Veldhuizen, *Leapfrog Triejoin*, ICDT 2014, sections 2 and 3; Wang, Willsey and Suciu, *Free Join*, SIGMOD 2023, sections 2.1 and 2.3. The last paper explicitly defines bag semantics, stores repeated tuples at trie leaves and intersects one variable's domains before advancing. Read the native reference in MeTTa.jl `src/join.jl` at `5526d3f73f15beede118a625ce432ae5398d04f9`, and Datafrog `src/treefrog.rs` for smallest-proposer/intersection control flow.
+
+Decided before implementation: native cyclic relational conjunctions use per-query prefix tries with exact ground Prolog terms as keys. A leaf retains its occurrence count; the completed join emits the product of all leaf counts. The query's GYO cyclicity check and the ground/acyclic row checks form the admission gate. Nested free pattern variables, attributed variables and non-ground candidate rows keep the existing matcher. Constants and repeated variables are filtered by the ordinary native unification call before indexing. No derived state outlives the query, so mutation, rollback and name recycling cannot leave a stale plan.
+
+Current complexity: quadratic intermediate enumeration on the two-hub triangle despite the existing at-most-one reordering heuristic. Target complexity: `O(N log N + AGM log N + output occurrences)` for a fixed eligible query, with linear-sized trie storage. On the empty two-hub family, intersections inspect only the smaller domains, targeting `O(N log N)`. Emitting duplicate answers has an unavoidable lower bound of their occurrence count.
+
+Rejected: substituting the shipping MORK provider for native storage. MORK removes duplicates at insertion, and its pinned stock kernel has no `query_multi_dispatch`. The separately developed MORK fork has that entry point behind its opt-in leapfrog feature; replacing the entire kernel and PathMap dependencies would still not preserve native bag storage. The native integration follows the existing Generic Join design while using SWI's exact term keys and backtracking for emission. Result order has no preservation requirement here.
+
+Verification design: `native_generic_join` compares every result as a sorted multiset against separately matched source-order conjuncts, including generated duplicate bags, projections, repeated variables, numeric and compound keys, open patterns, nonground stored rows and cyclic bindings. A three-size inference ratio test must fail on the old path before implementation.
+
+Verified: before dispatch changed, nine bag/failure checks passed and the growth check failed with `817227 < 2.8*212043` and `3207243 < 2.8*817227` both false. After dispatch changed, all ten checks passed. The completed public query at 64, 128, 256, 512, 1024 and 2048 edges costs 6834, 12960, 25218, 49730, 98754 and 196808 inferences; the final doubling is 1.99 times. Ground term comparisons inside SWI's AVL lookup are C work, so this inference curve establishes the Prolog-work reduction while the algorithm retains the logarithmic lookup bound.
+
+Found: an open-tail conjunct already raises `error(instantiation_error, _)` in the old whole-conjunction matcher, while the separately matched source-order oracle can return no answers. The new planner declines that malformed shape. A separate test pins the existing error; the bag differential uses proper conjunct lists.
+
+Tried: the existing long-conjunction gate caught a planning regression: 64 conjuncts cost 9462.86 inferences per answer against 92.07 at eight, failing the permitted factor of sixteen. Repeated GYO subset comparisons were dominating acyclic chain queries before any row was read. Decided: precede column construction and GYO with disjoint-set cycle detection on a copied incidence graph. A forest cannot contain a cyclic join hypergraph. The copied logical variables represent disjoint sets, so unions affect no query binding; GYO still decides every surviving candidate. The established long-chain gate remains unchanged.
+
+Verified: the forest admission check changes the public sweep to 6854, 12980, 25236, 49750, 98776 and 196828 inferences. The existing spaces suite passes 216 tests plus 114 generated subtests. A process-local control disabling only `native_conjunction_plan/4` makes the growth gate fail; replacing only `join_multiplicity/3` with a constant one makes the six-answer duplicate gate fail. Both controls are detected.
+
+Verified after rebasing onto `8f853f992a4c732eca39de34ff0a3dfe161508dd`: `native_generic_join` passes all eleven tests. The differential additionally checks positive and negative zero, NaN, and an attributed query variable. SWI's `compare/3`, identity and unification distinguish signed zero and integer/float pairs consistently; both NaN occurrences compare and unify identically. These are the same key relations that the AVL trie uses.
+
+Found before final integration: a bounded cyclic query with its first triangle stored before an unrelated chain regresses when all candidate tries are built. At 19, 67, 259 and 1027 edges, public `once` costs 3102, 9726, 36224 and 142212 inferences, while the original path costs 469 at every size. The existing two-conjunct bound test cannot exercise cyclic admission. A variable-headed output list does not lower to the bounded door; using the fixed data constructor `(triple $x $y $z)` isolates the actual bounded path.
+
+Decided before repair: carry the already-known full-versus-prefix request through conjunction dispatch. Only a full native conjunction may build Generic Join tries. A bounded conjunction keeps the ordinary streaming join, preserving its constant first-answer cost on this family without claiming a constant cost for an absent or late answer. PostgreSQL's distinction between startup and total cost explains this choice: [PostgreSQL 18 `costsize.c`, lines 37-50](https://github.com/postgres/postgres/blob/REL_18_0/src/backend/optimizer/path/costsize.c#L37-L50). No runtime tuning option or durable planner state is needed.
+
+Verified: the new bound regression first failed at `35852 =< 9356+4` and `141836 =< 9356+4`. After propagating the request extent, all twelve `native_generic_join` tests pass and the public first-answer sweep returns 469 inferences at every size, matching its original control. The thirteen existing public match snapshot and bound tests also pass.
+
+Found by independent review: a missing ground factor beside a dense triangle produced the correct empty bag but deferred its zero multiplicity until all triangle assignments had been enumerated. At domains 8, 16, 32 and 64 the planned path cost 19370, 132427, 985323 and 7606315 inferences; the preserved nested matcher cost 44, 43, 43 and 43. Input has n squared edges, so this was an unnecessary cubic enumeration in n despite an indexed empty factor.
+
+Decided before repair: test every flat native factor for the existence of one candidate before building any trie. Probing under negation leaves query variables unchanged. A factor with no unifying row makes the complete conjunction empty under every later substitution; represent that plan with a single zero-count leaf. MeTTa.jl `src/join.jl` stops descent through an empty variable domain, but a ground factor has no variable domain; the explicit probe extends that treatment using multiplication by zero in the bag model. The target for the missing indexed-factor family is constant work in relation size; a missing candidate that itself requires a scan still pays for that scan.
+
+Verified: the empty-factor growth test failed before repair at `985329 =< 132433+4` and `7606321 =< 132433+4`. It passes after repair. The original witness now costs 127 inferences for the first size and 88 at domains 16, 32 and 64; its reference costs 45, 43, 43 and 43. All seventeen native join tests pass, including four new differentials for four-cycles, ternary relations, disconnected cycles and repeated ground factors. A separate generated hypergraph differential passed 360 bag comparisons. Focused duplication checking found no clones.
+
+## 2026-09-05, paired completed-query sweep
+
+Verified on the combined query-planning tree with `PYTHONPATH=extensions/python $VENV/bin/python ai-tmp/ai-join-final-sweep.py`, and a separate process using `--control` to disable only `native_conjunction_plan/4`. Every completed public call returned the same empty bag. SWI inferences exclude Python work and C sorting/comparison internals; each inference row is therefore paired with the median of five whole-call process CPU samples.
+
+| Edges | Control inferences | Planned inferences | Control CPU ms | Planned CPU ms |
+| ---: | ---: | ---: | ---: | ---: |
+| 64 | 5398 | 6907 | 0.446 | 0.311 |
+| 128 | 16532 | 13035 | 0.947 | 0.429 |
+| 256 | 57238 | 25293 | 2.571 | 1.017 |
+| 512 | 212380 | 49805 | 13.826 | 1.787 |
+| 1024 | 817588 | 98831 | 48.217 | 4.166 |
+| 2048 | 3207702 | 196883 | 159.499 | 11.695 |
+| 4096 | 12706704 | 392987 | 802.889 | 23.036 |
+| 8192 | 50579836 | 785195 | 2880.377 | 36.251 |
+
+The final two inference doublings are 3.96 and 3.98 for the source-order control, and 2.00 and 2.00 for the plan. CPU separates the curves over the full size range while retaining its visible sample variation. The class claim remains `O(N log N)` for this family, because SWI's internal ordered-key comparisons do not retire Prolog inferences. Raw samples and exit status 0 for both arms are in `query-a20256a5-join-final-{control,planned}.{jsonl,status}` under `ai-tmp/`.
+
+## 2026-09-05, committed benchmark driver verification
+
+The self-contained command `PYTHONPATH=extensions/python $VENV/bin/python -m benchmarks.query_planning join --metadata ai-tmp/query-a20256a5-module-join-planned-metadata.json` and its separate `--control` process both exit 0. The driver checks every empty answer bag and records matching source hashes before and after. The same source snapshot also supplied the final demand curves.
+
+SWI inferences exclude Python and operations inside native predicates. The adjacent CPU column is the median of five complete public calls, including the answer check. The inference doublings approach four for the control and two for the indexed plan; the remaining native sorting bound remains O(N log N).
+
+| Edges | Control SWI inferences | Planned SWI inferences | Control CPU ms | Planned CPU ms |
+| ---: | ---: | ---: | ---: | ---: |
+| 64 | 5396 | 6907 | 0.421 | 0.331 |
+| 128 | 16532 | 13035 | 0.628 | 0.673 |
+| 256 | 57238 | 25293 | 2.195 | 1.257 |
+| 512 | 212380 | 49803 | 8.532 | 2.816 |
+| 1024 | 817590 | 98831 | 33.062 | 4.125 |
+| 2048 | 3207700 | 196881 | 138.794 | 7.522 |
+| 4096 | 12706704 | 392987 | 546.282 | 14.444 |
+| 8192 | 50579836 | 785193 | 2163.845 | 33.151 |
+
+Raw rows, all samples, meter scope and statuses are `ai-tmp/query-a20256a5-module-join-{planned,control}.{jsonl,log,status}`. Metadata files have the same prefix and `-metadata.json` suffix.
+
+## 2026-09-05: the plan is a declared choice, not a default
+
+Found by measuring families the sweep above never covered: dispatching every
+eligible cyclic conjunction to the trie plan is a loss on three shapes out of
+four. Both arms of `benchmarks.query_planning join` return identical answer
+bags at every size.
+
+| family | size | answers | planned | nested | planned/nested |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| two-hub | 8192 | 0 | 785,193 | 50,579,836 | 0.02 |
+| two-hub | 128 | 0 | 13,037 | 16,532 | 0.79 |
+| two-hub | 64 | 0 | 6,909 | 5,396 | 1.28 |
+| uniform | 2048 | 13 | 383,927 | 107,304 | 3.58 |
+| uniform | 64 | 5 | 12,769 | 3,834 | 3.33 |
+| clique | 48 | 103,776 | 7,017,703 | 5,049,530 | 1.39 |
+| clique | 8 | 336 | 27,555 | 18,208 | 1.51 |
+| small-third | 2048 | 512 | 103,672 | 25,000 | 4.15 |
+| small-third | 64 | 16 | 3,972 | 1,190 | 3.34 |
+
+`uniform` is a random graph with `n` nodes and `2n` edges; `clique` is the
+complete graph on `n` nodes; `small-third` is the two-hub graph with the
+triangle closed by a one-row `tag` relation instead of a third `edge`.
+
+Cause: the plan pays `library(assoc)` AVL lookups in Prolog for the same probes
+the retained nested loop pays SWI's C clause index for, so its per-probe
+constant is roughly an order of magnitude worse. It is ahead only when the
+nested loop's intermediate product is far larger than the output, which needs
+skew. `uniform` and `clique` have none, and `small-third` gives the nested loop
+a one-row relation to drive from while the plan still builds a trie for every
+conjunct.
+
+Decided: `plan-cyclic-joins`, an engine pragma, off unless a program asks.
+Every statistic that separates the winning shape from the losing ones needs at
+least a scan and a sort per conjunct, which is the plan's own dominant cost, so
+there is nothing cheap to gate on. `native_generic_join` declares the pragma for
+its own unit and `planning_is_declared_rather_than_the_default` pins the
+default; the whole differential would otherwise compare the nested loop with
+itself. The benchmark's control arm is now simply the shipping behaviour.
+Measured after the change: the default costs exactly what the disabled-planner
+control costs, 1.00 on every family and size, and the plan reaches 0.02 on
+two-hub at 8192 when a program asks for it.
+
+Rejected: a size or skew threshold computed before planning. Relation sizes do
+not separate `uniform` from `two-hub`, which differ only in degree
+distribution; the degree distribution is the trie's own first level, so
+computing it costs what it was meant to save.
+
+Revisit with Free Join's column-oriented lazy tries (Wang, Willsey and Suciu,
+SIGMOD 2023, section 5), which build a trie level at a time and so converge to
+the nested loop on the unskewed instances and to Generic Join on the skewed
+ones without any statistic. That is the shape that would justify a default, and
+it is not built here. An adaptive retry is the other candidate: run the nested
+loop under a budget proportional to inferences per answer produced, and rebuild
+as a plan when the ratio trips. It needs the full answer bag buffered, which
+changes the streaming contract for a full request, and its constant would need
+its own measurement.

@@ -10,7 +10,9 @@
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
-% [tested: tests/prolog/suites/spaces/spaces.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% [tested: tests/prolog/suites/spaces/spaces.plt, native_generic_join; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
+
+:- consult('generic_join.pl').
 
 %Native conjunctions call their space predicate directly. The recursive helper
 %keeps the provider decision outside the candidate loop.
@@ -33,13 +35,15 @@
 %leapfrog triejoin seeks in its smallest relation
 %[source: Veldhuizen, Leapfrog Triejoin, ICDT 2014, arXiv:1210.0481].
 %
-%It is NOT worst-case optimal, and the difference is worth stating: no ordering
+%The fallback below is NOT worst-case optimal: no ordering
 %of a nested loop attains the AGM bound on the instance that bound is tight
 %for, which is why a worst-case-optimal join intersects a variable's candidate
 %sets across every conjunct that mentions it rather than generating from one
 %and testing in the rest. That needs sorted access per variable, which the
-%whole-conjunction seam foreign_plan/5 exists to delegate. This removes the
-%SKEW, which is where the measured quadratic came from.
+%whole-conjunction seam foreign_plan/5 exists to delegate for providers.
+%Full native conjunctions reach generic_join.pl through match_conjunction/3;
+%its per-variable domains remove the intermediate product. Bounded callers
+%retain this streaming path so finding one answer need not read every input.
 %
 %MULTIPLICITY is preserved exactly because the atom combinations are the same
 %ones, merely visited in another order: `(, (edge $x $y) (edge $x $y))` over a

@@ -11,7 +11,7 @@
 %       lib_tabling into an engine subsystem, is named in the contract below,
 %       or the lane exits nonzero naming caller, callee and the missing line
 %       [tested: test_the_engine_layering_contract_holds_and_a_violation_is_named;
-%       commit=718612504d462497a6ec2f6aa4b957e3b20319b8]
+%       commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 %     - a contract line no call needs any more is reported, so the allow-list
 %       cannot silently widen the surface as the engine changes
 %     - a cross-subsystem call into a subsystem that declares a module reaches
@@ -344,6 +344,7 @@ reaches(ext_points, filereader, 'a function-changed handler recompiles the affec
 reaches(ext_points, tracer, 'the tracer is the shipped consumer of the function-changed seam').
 reaches(ext_points, translator, 'names the compiled predicate a seam is about, and asks whether a function uses super').
 reaches(filereader, metta, 'a load runs forms, which is the engine core\'s job').
+reaches(filereader, materialize, 'source prefixes and completed loads prepare counted relations inside their rollback boundary').
 reaches(filereader, ext_points, 'a completed source batch announces its compile-time analysis boundary').
 reaches(filereader, parser, 'reading a source file is parsing it').
 reaches(filereader, spaces, 'a load writes atoms and compiles equations into a space').
@@ -357,7 +358,13 @@ reaches(lib_tabling, ext_points, 'declared ownership and event seams route table
 reaches(lib_tabling, metta, 'declared context, effect-walk and cache-policy services decide the executable owner and admissible table').
 reaches(lib_tabling, parser, 'the published writer renders a rejected reflection row in the language\'s syntax').
 reaches(lib_tabling, spaces, 'declared space, storage and module services resolve table dependencies; the ordinary atom doors store reflection rows').
+reaches(materialize, ext_points, 'admission preserves existing dispatch ownership').
+reaches(materialize, metta, 'module context, type declarations, algebra and reduction bounds gate relation construction and lookup').
+reaches(materialize, spaces, 'native storage, compiled source signatures and dispatch policies define the relation being materialized').
+reaches(materialize, support_graph, 'prepared relations depend on their compiled function definitions').
+reaches(materialize, translator_rules, 'rewritten match calls and evaluated result constructors remain outside relational admission').
 reaches(metta, ext_points, 'installs the atom-write wrappers when a handler exists').
+reaches(metta, materialize, 'effect classification retains operation identity and user transactions own image publication').
 reaches(metta, filereader, 'import! and the file builtins are the loader\'s surface').
 reaches(metta, parser, 'sread, swrite and sdisplay are the core\'s text builtins').
 reaches(metta, spaces, 'the space builtins are the space subsystem\'s surface').
@@ -369,6 +376,7 @@ reaches(parser, metta, 'refuses an unbound input in the core\'s error vocabulary
 reaches(spaces, ext_points, 'announces function changes and asks whether an atom hook is installed').
 reaches(spaces, filereader, 'a write records or forgets what its source assertion supports').
 reaches(spaces, metta, 'a space write reaches the core\'s registries, contract atoms and error vocabulary').
+reaches(spaces, materialize, 'clearing or releasing a space retires its counted relations transactionally').
 reaches(spaces, specializer, 'a changed function invalidates the specializations built over it').
 reaches(spaces, support_graph, 'a cleared space forgets the support edges of its module').
 reaches(spaces, translator, 'storing an equation compiles it').
@@ -376,6 +384,7 @@ reaches(spaces, translator_rules, 'a release retires global translator registrat
 reaches(spaces, type_rules, 'equation compilation holds the typing policy stable while installing translated clauses').
 reaches(specializer, filereader, 'records and forgets the assertion of a generated specialization').
 reaches(specializer, metta, 'reads the module and space context and the type declarations it specializes over').
+reaches(specializer, materialize, 'the shared support-invalidation action retires materialized relations as well as specializations').
 reaches(specializer, parser, 'a minted specialization name must be a symbol the reader reads back').
 reaches(specializer, spaces, 'a specialization is stored and compiled into the space it belongs to').
 reaches(specializer, support_graph, 'a specialization is a derived artifact with support edges').
@@ -422,8 +431,15 @@ reaches(type_rules, translator, 'a changed typing rule clears the translation ca
 %   observation buffer carries, so no engine or translator clause names a
 %   predicate of either file and both became leaf consumers of the surfaces
 %   they read. That is also what lets the engine load neither of them at boot.
+%
+%   materialize joined it the same day, and is not a leaf for the reason
+%   source_observation stopped being one: the engine names its predicates. The
+%   loader prepares relations inside its own rollback boundary, a space clear
+%   retires them, the shared support-invalidation action reaches it, and it
+%   reads module context, storage and dispatch policy back, so it sits on a
+%   cycle rather than at the end of one.
 
-tangle([duals, ext_points, filereader, metta, parser,
+tangle([duals, ext_points, filereader, materialize, metta, parser,
         spaces, specializer,
         support_graph, tracer, translator, translator_rules, type_rules]).
 

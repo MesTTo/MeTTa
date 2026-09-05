@@ -388,6 +388,7 @@
 :- use_module(library(ansi_term)).
 
 :- consult('translator/analysis.pl').
+:- consult('translator/folding.pl').
 :- consult('translator/lowering.pl').
 :- consult('translator/special_forms.pl').
 :- consult('translator/typing.pl').
