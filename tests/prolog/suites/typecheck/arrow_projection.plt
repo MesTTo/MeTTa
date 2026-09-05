@@ -154,8 +154,8 @@ test(annotated_function_values_satisfy_higher_order_and_shared_types,
          (: arrow-plain (-> Number Number))
          (= (arrow-plain $x) $x)
          (: arrow-many (-[det,pureStructural]-> Number Symbol))
-         (= (arrow-many $x) first)
-         (= (arrow-many $x) second)", _, Space),
+         (= (arrow-many $x) arrow-first)
+         (= (arrow-many $x) arrow-second)", _, Space),
     space_module(Space, Module),
     findall(Value, eval_metta_in_module(
                        Module, ['arrow-apply', 'arrow-runtime-f', 1], Value),
@@ -165,8 +165,13 @@ test(annotated_function_values_satisfy_higher_order_and_shared_types,
                        Module, ['arrow-same', 'arrow-runtime-f', 'arrow-plain'],
                        Value), Same),
     assertion(Same == [true]),
+    %The two answers are named `arrow-*` rather than `first` and `second`
+    %because the declared result is `Symbol` and `first` is a name the engine
+    %holds a function for, so it has been Grounded since 2026-09-05 and the
+    %result check refuses it. The fixture is about answering BOTH values under
+    %an annotated arrow, not about those two spellings.
     findall(Value, eval_metta_in_module(Module, ['arrow-many', 1], Value), Many),
-    assertion(Many == [first, second]).
+    assertion(Many == ['arrow-first', 'arrow-second']).
 
 test(replacing_a_plain_arrow_with_its_annotation_preserves_compiled_clauses,
      [ setup('new-space'(Space)), cleanup(metta_release_space(Space)) ]) :-

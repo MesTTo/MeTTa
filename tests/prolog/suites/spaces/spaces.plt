@@ -2370,21 +2370,27 @@ test(wrapper_forms_run_in_named_spaces,
 
 :- end_tests(named_space_wrappers).
 
-% A space handle is a VALUE of the language rather than a bare symbol, and both
-% questions about it have an answer: its metatype is Grounded and its declared
-% type is SpaceType, which is upstream's own name for it
-% [source: LeaTTa tests/semantics/spaces/space_identity.metta, STATUS conforms,
-% whose transcript is hyperon 0.2.10 printing Grounded and SpaceType for &self,
-% the same pair for a bound space, and SpaceType for a fresh (new-space) that
-% nothing has been written to yet].
+% A space handle answers TWO questions and they are decided by different
+% rules. Its declared type is SpaceType, which is what every path that cares
+% about the species consults, lib_builtin_types' own space declarations
+% included. Its METATYPE is Symbol, because a handle is an atom and this
+% engine classifies an atom by whether a function carries its name, which is
+% upstream PeTTa's rule [source: PeTTa@43705f5d src/metta.pl:202]. Upstream
+% answers Symbol for `&self`, and Symbol for `&space-a` and `&st` after
+% `!(bind! &space-a (new-space))` and `!(bind! &st (new-state 5))`, though it
+% has no `new-space` of its own so nothing was created under the first
+% [measured 2026-09-05 through both engines' own run.sh]. This engine answered
+% Grounded for all three until 2026-09-05, through two registry clauses inside
+% metatype_of/2 that went when the user ruled that this engine follows
+% upstream.
 %
-% The engine's own registry answers both, so a handle a program makes at
-% runtime is covered the moment it exists rather than by naming it here.
+% What the metatype does NOT decide is the type, and these keep both halves
+% together so a later change cannot move one and leave the other.
 :- begin_tests(space_handle_type).
 
-test(the_ambient_space_is_grounded_and_typed) :-
+test(the_ambient_space_is_a_symbol_typed_as_a_space) :-
     findall(M, 'get-metatype'('&self', M), Metatypes),
-    assertion(Metatypes == ['Grounded']),
+    assertion(Metatypes == ['Symbol']),
     findall(T, 'get-type'('&self', T), Types),
     assertion(Types == ['SpaceType']).
 
@@ -2393,7 +2399,7 @@ test(the_ambient_space_is_grounded_and_typed) :-
 test(a_fresh_space_is_one_before_anything_is_written_to_it) :-
     'new-space'(Space),
     findall(M, 'get-metatype'(Space, M), Metatypes),
-    assertion(Metatypes == ['Grounded']),
+    assertion(Metatypes == ['Symbol']),
     findall(T, 'get-type'(Space, T), Types),
     assertion(Types == ['SpaceType']).
 
@@ -2405,13 +2411,14 @@ test(a_bound_space_answers_the_same_through_its_token,
     process_metta_string("!(add-atom &plunit-handle-space (handle-canary 1))",
                          _),
     process_metta_string("!(get-metatype &plunit-handle-space)", Metatypes),
-    assertion(Metatypes == ['Grounded']),
+    assertion(Metatypes == ['Symbol']),
     process_metta_string("!(get-type &plunit-handle-space)", Types),
     assertion(Types == ['SpaceType']).
 
-% A symbol that names no space is untouched by any of it, which is the half
-% that keeps the answer a fact about the handle rather than about the spelling.
-test(a_symbol_that_names_no_space_is_unchanged) :-
+% A symbol that names no space shares the METATYPE and differs on the TYPE,
+% which is what keeps the species question answerable at all now that the
+% metatype no longer carries it.
+test(a_symbol_that_names_no_space_differs_only_in_its_type) :-
     findall(M, 'get-metatype'('plunit-handle-not-a-space', M), Metatypes),
     assertion(Metatypes == ['Symbol']),
     findall(T, 'get-type'('plunit-handle-not-a-space', T), Types),
@@ -2453,16 +2460,20 @@ test(a_fresh_space_is_an_operand_and_carries_the_prefix) :-
     assertion(metta_space_operand(Space)),
     assertion(sub_atom(Space, 0, 1, _, '&')).
 
-% A State cell spells its handle with the same '&', and is Grounded for its
-% own reason rather than by being a space. The prefix admitting it to the
-% registry probe and the probe answering no is exactly the arrangement.
+% A State cell spells its handle with the same '&' and is no space. Its
+% metatype is Symbol, because it is an atom no function carries and that is
+% the whole of the rule since 2026-09-05; what says it is a cell is get-type,
+% which answers `(StateMonad Number)` for this one. The prefix admitting it to
+% the registry probe and the probe answering no is exactly the arrangement.
 test(a_state_cell_carries_the_prefix_and_is_still_no_operand) :-
     'new-state'(41, Cell),
     assertion(metta_state_cell(Cell)),
     assertion(sub_atom(Cell, 0, 1, _, '&')),
     assertion(\+ metta_space_operand(Cell)),
     findall(M, 'get-metatype'(Cell, M), Metatypes),
-    assertion(Metatypes == ['Grounded']).
+    assertion(Metatypes == ['Symbol']),
+    findall(T, 'get-type'(Cell, T), Types),
+    assertion(Types == [['StateMonad', 'Number']]).
 
 test(a_value_that_is_no_name_at_all_is_no_operand) :-
     assertion(\+ metta_space_operand(42)),

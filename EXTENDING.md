@@ -1553,8 +1553,8 @@ that creates a space refuses any other spelling, `new-space` refuses it,
 `register_provider` refuses it on the Python side, and neither wire codec can
 carry it. `metta_space_operand/1` reads the prefix before it asks either
 registry, so a provider that skips it is answered "no space" by the matcher,
-`get-metatype`, the type-candidate resolvers, the translator and the codec,
-without an error anywhere. `sh check.sh prolog-static` scans the loaded database
+the type-candidate resolvers, the translator and the codec, without an error
+anywhere. `sh check.sh prolog-static` scans the loaded database
 and refuses such a name by name. A **parametric** space is named by a ground
 expression rather than an atom and carries no prefix.
 

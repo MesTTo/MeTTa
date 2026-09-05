@@ -289,6 +289,36 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- `get-metatype` classifies a NAME by whether this engine holds a function for
+  it, which is upstream PeTTa's whole rule, in place of a 115-name table taken
+  from another arbiter. `car-atom`, `cdr-atom`, `cons-atom`, `decons-atom`,
+  `eval`, `empty`, `let` and `min` answer `Grounded` where they answered
+  `Symbol`; `nop`, `hyperpose`, `sealed` and every space handle and state cell,
+  `&self` included, answer `Symbol` where they answered `Grounded`; and a name
+  the running program defines answers `Grounded` from the moment its equation
+  exists. Over the 268 names both engines register, the two now disagree only
+  where their function inventories do, on none whose registration they share,
+  where 74 such names disagreed before. What a handle IS is unchanged and is
+  read with `get-type`, which still answers `SpaceType` and `(StateMonad $t)`;
+  both wire codecs ask the space registry directly and are unaffected.
+  `lib_soft`'s three aggregation-name parameters move from `Symbol` to
+  `%Undefined%`, because `min` is one of the engine's own operations and a
+  `Symbol` parameter refused the library's own default.
+
+- `lib_strategy` recognises a user strategy by its name being a NAME rather
+  than by its metatype being `Symbol`. Defining a strategy is what gives its
+  name a function, so under the rule above a Symbol-only test stopped
+  recognising every strategy that had been defined; compound plans it does not
+  know, and an unbound strategy, still decline.
+
+- The Python contract ontology declares its eleven NAME positions `Atom` in
+  place of `Symbol`, so `(op ...)`, `(defined ...)`, `(source-span ...)`,
+  `(free-variable ...)`, `(effect ...)`, `(arguments ...)`, `(image ...)`,
+  `(type-image ...)`, `(lint-evidence ...)` and `(lint-intent ...)` answer
+  their declared type again. Registering an operation is what makes its name
+  `Grounded`, so a `Symbol` position refused the very facts the ontology
+  exists to type. Fields naming a closed set keep their own type.
+
 - Nineteen engine and library comments now cite upstream PeTTa at `43705f5d`
   for the behaviour they explain, in place of LeaTTa. Each carries the
   differential that established the two engines answer alike: the comment

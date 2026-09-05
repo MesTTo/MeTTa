@@ -101,12 +101,20 @@ silently naming another kind of term.
 `p` is a **species** tag, exactly as `s` and `n` and `b` are: it says what the
 atom IS, and a decoder builds a space handle from it where `s` builds a
 symbol. So the question an encoder must ask is the language's own species
-question, and the engine already owns it. `get-metatype` answers `Grounded`
-for a space and `Symbol` for a name that merely looks like one, and the clause
-that decides it is `metta_space_operand/1`
-(`engine/metta/types.pl`, `metatype_of(X, 'Grounded') :- atom(X),
-metta_space_operand(X)`). That is the test both shipped seats ask, so
-`get-metatype` and the wire cannot disagree about an atom.
+question, and the engine owns it as `metta_space_operand/1`
+(`engine/spaces/bounded_matching.pl`), the registry test that answers yes for
+a space that exists and no for a name that merely spells one. That is the test
+every shipped seat asks, so the seats cannot disagree about an atom.
+
+**It is not `get-metatype`, and since 2026-09-05 it has not been.** The
+metatype answers a different question, whether the engine holds a FUNCTION of
+that name, which is upstream PeTTa's rule and the one this engine follows
+(`PeTTa@43705f5d src/metta.pl:202`). `&self` is therefore a `Symbol` to
+`get-metatype` and a `p` on the wire, and both are right about their own
+question. The species question a codec needs has a second answer beside the
+registry one: `get-type` reports `SpaceType` for exactly the atoms
+`metta_space_operand/1` accepts, and that is the answer a binding without
+Prolog access should ask for.
 
 The payload is text beginning with `&`, which is how the engine mints a space
 name and what its doors require of one a program writes. A **parametric**
@@ -115,11 +123,10 @@ that expression, `e`, because a `p` payload is text.
 
 **The ampersand alone decides nothing**, and this is the part a new binding
 gets wrong. `&not-a-space` reads as an ordinary atom; nothing has created a
-space under that name, so it crosses as `["s", "&not-a-space"]` and
-`get-metatype` calls it a `Symbol`. The engine reuses the `&` spelling for
-things that are not spaces at all: a `State` cell is `&state-#0`, which is
-`Grounded` for a different reason and is no space. An encoder that read the
-prefix instead of asking would send both across as space handles.
+space under that name, so it crosses as `["s", "&not-a-space"]`. The engine
+reuses the `&` spelling for things that are not spaces at all: a `State` cell
+is `&state-#0`, which is a cell and no space. An encoder that read the prefix
+instead of asking would send both across as space handles.
 
 There is a wider test next to it, `metta_space_name/1`, which is what the
 builtin `(is-space ...)` answers, and it is deliberately not this. It asks
@@ -132,11 +139,12 @@ to "what is this".
 so the same atom crosses as `s` before anything creates a space under its name
 and as `p` afterwards. `metta.space("&kb")` in Python hands back a handle
 immediately, but the engine has no space under `&kb` until something writes to
-it, so `&kb` coming back out of an evaluation before that write is a `Symbol`.
-That is the engine's create-on-demand model showing through and it is what
-`get-metatype` reports too. A conformance corpus therefore has to name either
-a space that exists in every runtime, as `space-handle` does with `&self`, or
-one no runtime creates, as `symbol-ampersand` does.
+it, so `&kb` coming back out of an evaluation before that write crosses as
+`s`. That is the engine's create-on-demand model showing through and it is
+what `get-type` reports too, `%Undefined%` before the write and `SpaceType`
+after it. A conformance corpus therefore has to name either a space that
+exists in every runtime, as `space-handle` does with `&self`, or one no
+runtime creates, as `symbol-ampersand` does.
 
 Both shipped seats ask this one question, per atom, and neither holds a list
 of names. The Python host asks it in `metta_py_encode/2` while encoding; the C

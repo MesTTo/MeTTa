@@ -233,79 +233,104 @@ test(every_runtime_term_has_a_metatype,
     'get-metatype'(Term, Actual),
     Actual == Expected.
 
-% A NAME's metatype is the one answer that is not read off the term, and no
-% registry of this engine's own decides it: `car-atom` is a Prolog predicate
-% here and a standard-library equation there, `superpose` is a compiled special
-% form here and a grounded token there, and the arbiter answers for the name
-% rather than for whichever route an engine took. So the classification is
-% upstream's, adopted whole [source: LeaTTa
-% MettaHyperonFull/Minimal/Interpreter.lean, groundedTokens], and these are the
-% names its corpus pins, tests/semantics/types-meta/02 and 03 and
-% grounded/12-metatypes.metta, all three STATUS conforms and byte-for-byte
-% transcripts of hyperon 0.2.10.
-grounded_name_case('+').             % arithmetic, and a fun/1 here
+% A NAME is Grounded when this engine HOLDS A FUNCTION for it and a Symbol
+% when it does not, which is upstream PeTTa's whole rule, one clause over one
+% register [source: PeTTa@43705f5d src/metta.pl:202]. It replaced a 115-name
+% table taken from LeaTTa's `groundedTokens` on 2026-09-05, when the user
+% ruled that this engine follows upstream PeTTa. Reproduce the rows below on
+% both engines by putting one `!(get-metatype <name>)` per line in a file and
+% running
+%
+%     sh run.sh <file>
+%     sh ../PeTTa-base/run.sh <the same file, absolute path>
+%
+% Over the 268 names in the union of both engines' fun/1 and that table, the
+% two engines now disagree on exactly the names one of them ships and the
+% other does not, and on no name whose fun/1 membership they share
+% [measured 2026-09-05; the run and its residues are in
+% docs/journal/2026-09-05-get-metatype-follows-fun.md].
+grounded_name_case('+').             % arithmetic, a fun/1 on both engines
 grounded_name_case('/').
 grounded_name_case('==').
 grounded_name_case(and).
 grounded_name_case('sqrt-math').
 grounded_name_case('size-atom').
-grounded_name_case(superpose).       % a special form here, a token there
-grounded_name_case(nop).             % the same, since MeTTa's nop is variadic
+grounded_name_case(superpose).
 grounded_name_case(match).
 grounded_name_case('add-atom').
 grounded_name_case('println!').
-grounded_name_case('&self').         % a space handle, grounded for that reason
+% The eight the table answered Symbol for while BOTH engines held a function
+% for them. Every one of these eight is `Grounded` upstream too, measured.
+grounded_name_case('car-atom').
+grounded_name_case('cdr-atom').
+grounded_name_case('cons-atom').
+grounded_name_case('decons-atom').
+grounded_name_case(empty).
+grounded_name_case(let).
+grounded_name_case(eval).
+grounded_name_case(min).            % lib_soft names an aggregation with it
+% A prelude EQUATION registers a function too, which is why this one moved
+% with them. Upstream answers Symbol for it, because upstream ships no
+% `trace!` at all: an inventory difference and not a rule difference.
+grounded_name_case('trace!').
 
-symbol_name_case('car-atom').        % a fun/1 here, a stdlib equation there
-symbol_name_case('cdr-atom').
-symbol_name_case('cons-atom').       % a fun/1 here, an instruction there
-symbol_name_case('decons-atom').
-symbol_name_case(empty).
-symbol_name_case('get-doc').
-symbol_name_case('new-state').       % the token is `_new-state`, not this
-symbol_name_case('type-cast').
-symbol_name_case(eval).              % a special form here, an instruction there
+% A SPECIAL FORM the translator compiles has no function, so it is a Symbol
+% however central it is. Upstream answers Symbol for all nine, measured, and
+% compiles `hyperpose` and `sealed` in its own translator exactly as this one
+% does.
+symbol_name_case(nop).
 symbol_name_case(chain).
 symbol_name_case(unify).
 symbol_name_case(if).
-symbol_name_case(let).
 symbol_name_case(case).
 symbol_name_case(quote).
 symbol_name_case(collapse).
+symbol_name_case(hyperpose).
+symbol_name_case(sealed).
+% A SPACE NAME is a name like any other and no function carries it. It
+% answered Grounded through a registry clause of its own until 2026-09-05;
+% upstream answers Symbol, and get-type still answers `SpaceType`
+% [tested: spaces:space_handle_type].
+symbol_name_case('&self').
+% A name nothing in this engine gives meaning to, which is what upstream
+% answers for one too.
 symbol_name_case('no-such-operation').
 
-test(a_grounded_token_this_engine_holds_is_grounded,
+test(a_name_this_engine_holds_a_function_for_is_grounded,
      [forall(grounded_name_case(Name))]) :-
+    assertion(fun(Name)),
     'get-metatype'(Name, Metatype),
     Metatype == 'Grounded'.
 
-test(an_instruction_or_equation_name_is_a_symbol,
+test(a_name_no_function_carries_is_a_symbol,
      [forall(symbol_name_case(Name))]) :-
+    assertion(\+ fun(Name)),
     'get-metatype'(Name, Metatype),
     Metatype == 'Symbol'.
 
-% Membership in the table is half the answer and this engine holding the
-% operation is the other half, which is the arbiter's own rule: its metaTypeOf
-% asks `groundedTokenNames.contains s && w.opAdmitted s`, and it measured
-% hyperon answering Symbol for `flip` before `!(import! &self random)` and
-% Grounded after. A name nothing here gives meaning to gets the answer an
-% unknown name gets, which is what `no-such-operation` above pins.
-test(a_token_this_engine_does_not_hold_is_a_symbol,
+% The minimal-MeTTa token table no longer decides this. These four are in it
+% and this engine ships no operation for any of them, so the rule that
+% replaced it answers Symbol for all four; before 2026-09-05 the table plus
+% an admission test answered the same way for a different reason, and a name
+% the table carries that this engine DOES hold, `if-equal`, has moved to
+% Grounded with the rest.
+test(a_minimal_token_this_engine_does_not_hold_is_a_symbol,
      [forall(member(Name, ['fuzzy-match', 'near-match', 'div-euclid',
                            'skel-swap-pair-native']))]) :-
     assertion(metta_grounded_token(Name)),
-    assertion(\+ metta_operation_admitted(Name)),
+    assertion(\+ fun(Name)),
     'get-metatype'(Name, Metatype),
     Metatype == 'Symbol'.
 
-% The registry decides, so a name the engine gains answers for it. Registering
-% a fun/1 is how a library or a Python binding arrives, and the metatype has to
-% follow the same day rather than at the next edit of the table.
-test(a_token_becomes_grounded_when_the_engine_gains_it,
-     [ setup(( \+ metta_operation_admitted('fuzzy-match'),
-               assertz(user:fun('fuzzy-match')) )),
-       cleanup(retractall(user:fun('fuzzy-match'))) ]) :-
-    'get-metatype'('fuzzy-match', Metatype),
+% The registry decides, so a name the engine GAINS answers for it, and it is
+% the same register upstream grows when it reads an equation: a program's own
+% `(= (my-f $x) $x)` makes `my-f` Grounded on both engines
+% [measured 2026-09-05, both engines on one file].
+test(a_name_becomes_grounded_when_the_engine_gains_a_function,
+     [ setup(( \+ fun('plunit-gained-name'),
+               assertz(user:fun('plunit-gained-name')) )),
+       cleanup(retractall(user:fun('plunit-gained-name'))) ]) :-
+    'get-metatype'('plunit-gained-name', Metatype),
     Metatype == 'Grounded'.
 
 :- end_tests(metta_metatypes).
@@ -2606,8 +2631,9 @@ test(skel_admits_both_tiers_and_is_idempotent,
                  forget_registered_function('skel-swap-pair'),
                  remove_sexp('&self', [':', 'PairType', _]),
                  remove_sexp('&self', [':', 'Pair', _]) )) ]) :-
-    %The tier discriminator before the import: an operation the engine does not
-    %hold yet is a Symbol, which is the arbiter's own answer for it.
+    %Before the import the engine holds no function of either name, so both
+    %are Symbols, which is upstream's answer for a name it does not hold
+    %either [source: PeTTa@43705f5d src/metta.pl:202].
     process_metta_string("!(get-metatype skel-swap-pair-native)", Before),
     assertion(Before == ['Symbol']),
     process_metta_string("!(import! &self skel)", Imported),
@@ -2621,11 +2647,17 @@ test(skel_admits_both_tiers_and_is_idempotent,
     assertion(Again == [true]),
     process_metta_string("!(skel-swap-pair (Pair a b))", Once),
     assertion(Once == [['Pair', b, a]]),
-    %The two tiers report what they are.
+    %After it, BOTH tiers are Grounded, because a function of each name now
+    %exists and that is the whole of the rule. The metatype stopped telling
+    %the tiers apart on 2026-09-05; what does is whether equations carry the
+    %name, which is a different question and has its own answer.
     process_metta_string("!(get-metatype skel-swap-pair)", EquationKind),
-    assertion(EquationKind == ['Symbol']),
+    assertion(EquationKind == ['Grounded']),
+    metta_self_module(Self),
+    assertion(fun_meta_module(Self, 'skel-swap-pair', _)),
     process_metta_string("!(get-metatype skel-swap-pair-native)", NativeKind),
-    assertion(NativeKind == ['Grounded']).
+    assertion(NativeKind == ['Grounded']),
+    assertion(\+ fun_meta_module(Self, 'skel-swap-pair-native', _)).
 
 %A module cannot reach a built-in by its bare name, because a built-in is a
 %child of the TOP and the same name written inside a module is relative to that

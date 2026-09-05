@@ -20,8 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 252 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
-| `examples/**/*.metta` | 250 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 253 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 24 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms | `extensions/python/tools/libdoc.py` |
@@ -485,7 +484,16 @@ overlaps as conditional proof obligations.
 the value does admit. Its bound type observation uses `witness`: the wildcard
 applies to the target only, so an unknown actual cannot establish a concrete
 target. This is stricter than ordinary typed-call acceptance. Aliases inherit
-that rule and ordinary user refusals. `Atom`, `%Undefined%` and `_` are unchecked. The
+that rule and ordinary user refusals. `Atom`, `%Undefined%` and `_` are unchecked. A NAME's metatype is
+`Grounded` when the engine holds a function for it and `Symbol` when it does
+not, which is upstream PeTTa's rule and nothing else: `car-atom`, `eval`,
+`let`, `empty` and `min` are `Grounded`, the special forms `if`, `chain`,
+`case`, `nop`, `hyperpose` and `sealed` are `Symbol` because the translator
+compiles them rather than registering a function, a space handle and a state
+cell are `Symbol` too, and a name the running program defines is `Grounded`
+from the moment its equation exists. So a parameter declared `Symbol` refuses
+a name the engine has an operation for, and `Atom` is the declaration for a
+position that holds any name. The
 metatypes `Atom`, `Variable` and `Expression` mask evaluation: a parameter
 declared with one receives its argument as written at every door, and a call
 whose declared result is the metatype `Atom` answers as produced where any
@@ -513,8 +521,10 @@ its type as `(->)`. That is an observer rule; argument checking continues to
 treat `()` as gradual rather than forcing a unit-type constraint.
 A state cell has type `(StateMonad $t)`: `(new-state 0.4)` is
 `(StateMonad Number)` and arithmetic on it is a `BadArgType`, so a cell is
-dereferenced with `get-state` before use. `get-metatype` answers `Grounded` for
-a cell and a number alike, so a guard that tells them apart needs `get-type`.
+dereferenced with `get-state` before use. `get-metatype` answers `Symbol` for a
+cell, because a cell handle is an atom and a metatype says only whether the
+engine holds a function of that name, so a guard that tells a cell from
+anything else needs `get-type`.
 `metta.State[T](value, space=None)` is the Python handle: `.value` reads and
 writes the same engine cell, `__metta__` carries it across any atom boundary,
 and the write answers `true` rather than the cell. Because a cell is an
