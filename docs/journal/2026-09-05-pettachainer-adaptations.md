@@ -294,3 +294,59 @@ rather than a restatement.
 Also pinned six `commit=WORKTREE` placeholders this thread left behind, five to
 `afc4024c` and `example_parity.py`'s to `88ba8f12`, each after checking the
 named test and the claim coexist in that tree.
+
+## 2026-09-05, later still: findings 1, 2, 15, 16 and 17
+
+That completes all seventeen.
+
+### Finding 15 was half done, and the other half had opened a hole
+
+The sweep's two integration costs were `_arrow_inputs` and `_declared_arrows`
+recognising only `->`. The first was fixed on 2026-09-05 so the arity and
+declared-function diagnostics stop skipping annotated declarations. Measured
+what that left: `declaration-types-the-symbol`, the rule that exists for
+declarations the loader never judges, now believed an annotated arrow was an
+arrow while the engine still refused it, so a function declared with one was
+reported by NOTHING and answered IncorrectNumberOfArguments for every call.
+
+Decided: **ADAPTED**, by asking the engine rather than deciding in Python. The
+full account is `2026-09-05-two-nets-that-disagreed.md`. The architecture and
+both `case` autofixes stay refused, unchanged.
+
+### Finding 1 shares findings 3 and 8's precondition
+
+Verified the sweep's counts at its own pin rather than in a working checkout,
+because both local checkouts have moved off it and answer zero:
+
+    git -C PeTTaChainer-fork grep -o -- '-[det]->' b0e24f9b -- '*.metta'
+
+At `b0e24f9b9d7106ccabf51917f1703abf3ab8c570`: 148 MeTTa files, 917 `-[det]->`
+in 66 files, 240 `-[semidet]->`, 113 `-[nondet]->`. Exactly the sweep's
+figures.
+
+Measured against that: PeTTa REFUSES an annotated arrow declaration at file
+load, `(: z (-[det]-> Number Number))` answering "is not an arrow". So the
+whole-import lane finding 1 asks for cannot load the application at all; it
+stops at the first of 1,270 annotated declarations. The sweep names the
+missing downstream TYPES as the obstacle and does not connect them to the load
+refusal, which is the nearer one.
+
+Decided: **BLOCKED ON THE SAME CONSUMER as findings 3 and 8**, and the vendored
+fixture stays blocked on provenance independently. One precondition now gates
+three findings, and its shape is measured: 49 literal `[->|` sites across 12
+files, most of them clause heads in the typing and lowering path.
+
+### Findings 2, 16, 17: refusals that still hold, on stronger ground
+
+Finding 2 defers itself to a future `lib_pln` or `lib_chainer` boundary, which
+does not exist, so there is nothing to do until one does.
+
+Finding 16 refuses the global particle store. Verified `lib_measure` and the
+`_PRESETS` annotation carriers are still the substrate the refusal rests on.
+
+Finding 17 refuses the global logic-profile singleton. Its ground is stronger
+than when written: the sweep cites `lib_pln` and `lib_nars` as the separated
+alternative, and `lib_pln2` landed as a third, so "better isolated" now has one
+more instance. Catalog rows remain schema-checked.
+
+Neither refusal needs work, and neither condition has triggered.
