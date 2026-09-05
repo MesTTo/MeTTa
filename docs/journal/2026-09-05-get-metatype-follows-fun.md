@@ -24,7 +24,7 @@ registry clauses of its own for space handles and state cells.
 
 Tried: the eleven names the ruling named, one `!(get-metatype <name>)` per
 line, run through `sh run.sh` here and through the sibling checkout's own
-`sh /home/user/Dev/PyPeTTa1/PeTTa-base/run.sh`. Two of the eleven, `get-doc`
+`sh ../PeTTa-base/run.sh`, the upstream checkout beside this one. Two of the eleven, `get-doc`
 and `type-cast`, already AGREED (Symbol on both) because upstream ships no
 function of either name; the list had been read off a comment that compared
 this engine's `fun/1` against LeaTTa rather than against upstream.
