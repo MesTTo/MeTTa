@@ -439,7 +439,7 @@ type_edge_from_view(expanded(All, Ground, Polymorphic), Left, Right) :-
         % below so their interleaving is immaterial, and merge/3 is a
         % deprecated autoload from library(backward_compatibility) that a
         % NO_AUTOLOAD=1 boot reports undefined [tested: prolog-static and
-        % no-autoload lanes; commit=WORKTREE].
+        % no-autoload lanes; commit=4f2bd4835d3bae3eb68ccb668072d19558eeae1e].
         append(Exact, Polymorphic, Candidates)
     ;   Candidates = All
     ),
