@@ -39,6 +39,15 @@ is the payoff of building on declarations rather than a bespoke registry:
 same shape a MeTTa program writes by hand, so an enum with an uncovered member
 is found by the same set difference.
 
+Corrected again, after the first version shipped: it counted a covered
+argument only when it was a bare SYMBOL, so it saw enums and missed every
+algebraic type, which is the more important half and the shape the upstream
+fixture is actually written in. A constructor is a member of the type it
+RETURNS, so `(: Circle (-> Number Shape))` makes Circle one of Shape's beside
+the nullary `(: Point Shape)`, and `(area (Circle $r))` covers Circle by
+pattern rather than by name. The fixture's own case now reports exactly
+`area` missing `Point`.
+
 Recorded limit, from the same upstream fixture: the verdict is a LOWER BOUND on
 incompleteness. A constructor declared later, or in a file not yet loaded,
 cannot be seen; `lint()` reports the space as it stands. Upstream's
