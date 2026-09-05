@@ -16,6 +16,23 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   been reporting them; they are corrected here because the file now ships in
   the wheel, where a reader has nothing else to check it against.
 
+- The async landing contract now states which way its ordering runs. A
+  coroutine operation settles its future and then publishes `(async-op <name>
+  <space> landing)`, both inside one engine transition on one transient landing
+  thread, so a `wait()` that has returned promises terminal state and promises
+  nothing about landing subscriptions: the waiter it released races the rest of
+  that same transition. Two suite tests read a landing observation directly
+  after a `wait()` and saw an empty list whenever the box was loaded enough to
+  deschedule the landing thread in that window; they wait on the observation's
+  own signal now, and a new test pins the guarantee that produced the race, that
+  a landing observer blocked inside its callback does not delay the future.
+  Holding the notification back by 250 ms failed the old pair 20 runs out of 20
+  and passes all 28 tests in the file 20 out of 20. Reversing the two steps is
+  not the alternative: it puts every waiter behind an arbitrary subscriber and
+  deadlocks an observer that awaits the future it observes, measured as an
+  indefinite hang. It is the order `concurrent.futures.Future` uses too, waking
+  `result()` inside the lock and running the done-callbacks after releasing it.
+
 - A second `@m.define` clause publishes the arrow its own signature states. One
   boolean per name recorded only whether it had declared anything, so every
   later clause's declaration was suppressed; a ledger of what the name has

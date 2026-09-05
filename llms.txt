@@ -378,7 +378,11 @@ compatibility input. The remaining options are `name=`,
 `m.unregister_op(name)` removes every arity and declaration. A coroutine
 operation answers a FutureSpace immediately rather than suspending the call:
 the future IS a space, so awaiting it is matching it, and `(async-op <name>
-<future-space> launch|landing)` makes both ends observable.
+<future-space> launch|landing)` makes both ends observable. Landing is
+published after the future settles, so an await that has returned says the
+operation is terminal and says nothing about whether a landing subscriber has
+run yet; wait on that subscriber's own signal when the observation is what you
+need.
 
 The ordered `EffectClass` members are `pureStructural`, `readOnlyLookup`,
 `nondeterministicReadOnly`, `writesState`, and `oracleIO`. A plan's class is
