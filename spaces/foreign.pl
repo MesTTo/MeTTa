@@ -1931,12 +1931,16 @@ unstore_atom(Space, Term, Removed) :- remove_sexp(Space, Term, Removed).
 %which is evaluated outside match. If remove-atom and add-atom would be
 %executed right away for each found matching, the condition of circular links
 %would be broken after the first rewrite" [source: the language's Working with
-%spaces, the graph-rewriting example]. The arbiter pins it with an experiment
-%built to tell an eager snapshot from a lazy query that happens to be fully
-%consumed: both implementations retain every row through a template that
-%removes the other one, and only the effect ORDER is a recorded free
-%divergence [source: LeaTTa tests/semantics/matching/
-%nondeterministic_match_snapshot.metta and its EVIDENCE entry].
+%spaces, the graph-rewriting example]. The experiment that tells an eager
+%snapshot from a lazy query which happens to be fully consumed is a template
+%that removes the row the OTHER answer needs: both engines retain every row
+%through it, and only the effect ORDER is a free divergence. Upstream reaches
+%the retention from the other side, one Prolog goal per pattern under SWI's
+%logical update view [source: PeTTa@43705f5d src/spaces.pl:47-67, match/4].
+%Measured on `(link a b)` and `(link b a)` in one space:
+%`!(collapse (match &g (link $x $y) (remove-atom &g (link $y $x))))` is
+%`(true true)` and the space is empty afterwards, on both engines
+%[measured 2026-09-05 against PeTTa@43705f5d].
 %
 %A SINGLE pattern needs nothing here and still streams. It is one goal over
 %one dynamic predicate, and the logical update view already fixes what it sees

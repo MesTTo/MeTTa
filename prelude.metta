@@ -97,12 +97,14 @@
 ;The comparison is NAMED here and the verdict is what crosses to assert.
 ;assert holds its operand and evaluates it, so handing it `(== $Actual $B)`
 ;would evaluate $B's value a second time and `(assertEqualToResult (+ 1 1)
-;((+ 1 1)))` would pass, where the arbiter answers
-;`(Error ... "\nExpected: [(+ 1 1)]\nGot: [2]...")`
-;[measured 2026-08-24 against LeaTTa 9ea9f9d]. A Bool has no structure left to
-;re-evaluate, which is why the verdict travels and the comparison does not.
-;The arbiter reaches the same place by routing these forms around assert
-;entirely, through the quoting `_assert-results-are-equal`
+;((+ 1 1)))` would pass, where it has to fail.  A Bool has no structure left
+;to re-evaluate, which is why the verdict travels and the comparison does not.
+;Upstream reaches the same verdict from a different mechanism: its
+;`assertEqualToResult` is `assertEqual` is `(assert (== $A $B))`, checked once
+;per answer of the first expression
+;[source: PeTTa@43705f5d lib/lib_he.metta:12-22 over src/metta.pl:224-227].
+;LeaTTa reaches it by routing these forms around assert entirely, through the
+;quoting `_assert-results-are-equal`
 ;[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean:2871-2874 and :759-760].
 ;That operation compares MULTISETS: order is ignored, but one occurrence on
 ;one side consumes exactly one occurrence on the other.  The two directed
@@ -111,6 +113,10 @@
 ;not equal `(a b b)` even though their ordinary sets agree
 ;[source: LeaTTa@9ea9f9d MettaHyperonFull/Minimal/Stdlib.lean:364-438,
 ;`bagDiffBy` and `assertResultsEqOp`; commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
+;Both verdicts were measured across the two engines on 2026-09-05 against
+;PeTTa@43705f5d: `(assertEqualToResult (+ 1 1) ((+ 1 1)))` and
+;`(assertEqualToResult (superpose (a a b)) (a b b))` each fail on both, and
+;`(assertEqual (+ 1 1) 2)` passes on both.
 ;Only the comparison changes.  The public MeTTa contract remains the existing
 ;True answer on success and metta_assertion_failed exception on failure.
 (: assertEqualToResult (-> Atom Atom %Undefined%))
