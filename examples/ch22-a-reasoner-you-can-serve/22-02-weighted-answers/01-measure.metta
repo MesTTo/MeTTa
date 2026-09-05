@@ -20,7 +20,7 @@
 ;And whatever the SIZE of the scores, because the peak is subtracted before
 ;exponentiating. The same one-unit gap answers the same distribution at 1.0,
 ;at 1000.0 and at -1000.0; exponentiating directly gave NaN at the top end
-;and an "ws-normalize requires nonzero total mass" refusal at the bottom.
+;and an "ws-normalize requires positive total mass" refusal at the bottom.
 ;Scores a network produced are exactly the ones that reach those ends.
 (= (both-weights $ps) ((first-weight $ps) (first-weight (cdr-atom $ps))))
 !(test (both-weights (ws-softmax ((1.0 a) (2.0 b)) 1.0))

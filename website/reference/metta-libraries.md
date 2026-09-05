@@ -19,6 +19,7 @@ beside its definitions.
 | lib_datetime | 2 | 0 |
 | lib_derived | 1 | 1 |
 | lib_dict | 7 | 0 |
+| lib_distribution | 7 | 0 |
 | lib_doc | 0 | 0 |
 | lib_file | 18 | 18 |
 | lib_gitimport | 0 | 0 |
