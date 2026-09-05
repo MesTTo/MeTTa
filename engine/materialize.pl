@@ -5,7 +5,7 @@
 %   A process that publishes no image registers no erase listener, so clause
 %   garbage collection runs no Prolog in it and its inference counts repeat
 %   exactly [tested: sh tests/shell/test_boot_inference_determinism.sh;
-%   commit=WORKTREE].
+%   commit=001c97213388e39b14ba3789a60e59a5e2c79f41].
 % Assumes: constant query lookup is data complexity for fixed source signatures
 %   and arities; validating a generation stamp walks those program properties.
 % Owns resources: each snapshot owns one immutable trie through its blob handle.
@@ -782,7 +782,7 @@ discard_image_rows(Space, Token) :-
 % the residual excursion those eight did not show came from a different place
 % and is recorded at metta_rule_gates_refresh/0
 % [measured 2026-09-06; command=sh tests/shell/test_boot_inference_determinism.sh;
-% fixture=engine/bench.pl boot case with the .qlf set warm; commit=WORKTREE].
+% fixture=engine/bench.pl boot case with the .qlf set warm; commit=001c97213388e39b14ba3789a60e59a5e2c79f41].
 %
 % It is registered by flush_space_materialization/2, which is the only path to
 % a FIRST publication: reconcile_materialization/1 republishes an image whose
@@ -790,7 +790,7 @@ discard_image_rows(Space, Token) :-
 %
 % EXACTLY ONCE, and that is not tidiness. A registration under a name replaces
 % the handler of that name [source: SWI-Prolog 10.1.13 prolog_listen/3, the
-% name(Atom) option, `swipl -g "help(prolog_listen/3)"`; commit=WORKTREE], and
+% name(Atom) option, `swipl -g "help(prolog_listen/3)"`; commit=001c97213388e39b14ba3789a60e59a5e2c79f41], and
 % replacing this one while the collector is inside it deadlocks: registering on
 % every publication stopped the suite in
 % a_transaction_receipt_detects_an_invisible_concurrent_addition with the
