@@ -1132,17 +1132,32 @@ builtin_predicate_described(Module:Name/PrologArity) :-
     builtin_reference_module(ModuleRef, DescribedModule),
     DescribedModule == Module.
 
+%Both modes are answered by the shape each is asked in. The scan enumerates
+%the surface union once and walks it; a bound predicate, which is how the
+%exemption liveness check asks, tests its own name against the seven sources
+%directly. Synthesising the whole union to check one name cost 1,584
+%inferences of setof plus a 385-element member/2 walk before the 81 of work
+%each ask actually needs, which was 9,214 of a boot over five exemptions
+%[tested: builtin_facets:a_bound_surface_question_does_not_synthesise_the_whole_union;
+%commit=WORKTREE].
 builtin_surface_predicate(Module:Name/Arity, File) :-
-    setof(SurfaceName,
-          ( builtin_surface_name(SurfaceName), atom(SurfaceName) ),
-          Names),
-    member(Name, Names),
+    builtin_project_implementation_prefixes(Prefixes),
+    builtin_surface_predicate_name(Name),
     current_predicate(Module:Name/Arity),
     Arity > 0,
     functor(Head, Name, Arity),
     predicate_property(Module:Head, implementation_module(Module)),
     source_file(Module:Head, File),
-    builtin_project_implementation_file(File).
+    builtin_project_implementation_file(Prefixes, File).
+
+builtin_surface_predicate_name(Name) :-
+    (   nonvar(Name)
+    ->  once(( builtin_surface_name(Name), atom(Name) ))
+    ;   setof(SurfaceName,
+              ( builtin_surface_name(SurfaceName), atom(SurfaceName) ),
+              Names),
+        member(Name, Names)
+    ).
 
 builtin_surface_name(Name) :- metta_grounded_token(Name).
 builtin_surface_name(Name) :- metta_effect_prolog_primitive(Name).
@@ -1159,12 +1174,27 @@ builtin_surface_name(Name) :- seam:extension_builtin(Name, _).
 %[tested: builtin_facets:the_translators_embedded_operations_add_no_surface_name].
 builtin_surface_name(Name) :- translator:metta_special_form_head(Name).
 
-builtin_project_implementation_file(File) :-
+%The three prefixes are the same three atoms for every candidate, so they are
+%built once per scan rather than once per candidate. Rebuilding them in place
+%charged builtin_project_root/1 and three directory_file_path/3 and
+%atom_concat/3 pairs at each of the 545 candidates a boot walks, against a
+%member/2 over a list already in hand. That hoist and the mode fix above took
+%validate_builtin_registry from 35,275 inferences to 19,796 and the boot case
+%from 281,411 to 265,924, with the six other benchmark cases identical
+%[measured 2026-09-06; command=swipl -g "metta_bench:bench_run(boot)" -t halt
+%engine/bench.pl; fixture=three samples per arm, .qlf purged and warmed;
+%commit=WORKTREE].
+builtin_project_implementation_prefixes(Prefixes) :-
     builtin_project_root(Root),
-    % policy-inventory-exempt: mechanism-internal; reason=the three directories are this repository's own layout, the roots a shipped predicate can be defined under, not a policy a program chooses; evidence=engine/metta/registration.pl:builtin_project_root/1
-    member(Directory, [engine, lib, extensions]),
-    directory_file_path(Root, Directory, ProjectDirectory),
-    atom_concat(ProjectDirectory, '/', Prefix),
+    findall(Prefix,
+            % policy-inventory-exempt: mechanism-internal; reason=the three directories are this repository's own layout, the roots a shipped predicate can be defined under, not a policy a program chooses; evidence=engine/metta/registration.pl:builtin_project_root/1
+            ( member(Directory, [engine, lib, extensions]),
+              directory_file_path(Root, Directory, ProjectDirectory),
+              atom_concat(ProjectDirectory, '/', Prefix) ),
+            Prefixes).
+
+builtin_project_implementation_file(Prefixes, File) :-
+    member(Prefix, Prefixes),
     sub_atom(File, 0, _, _, Prefix), !.
 
 builtin_project_root(Root) :-
