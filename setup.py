@@ -13,7 +13,7 @@ Guarantees:
     ask for [tested test_the_codec_builds_under_mypyc_as_an_option]
   - the wheel carries llms.txt at metta/_runtime/llms.txt, so metta.llms()
     prints the same document from an install as from a checkout [tested:
-    tests/shell/test_packaged_cli.sh; commit=WORKTREE]
+    tests/shell/test_packaged_cli.sh; commit=d4f129e1d977239c2e25b5042e3b1df30d9d32d3]
 Owns:
   - build_py_with_runtime writes only beneath setuptools' build directory;
     the wheel gate builds and boots that copy outside the checkout
@@ -138,7 +138,7 @@ def compiled_modules():
 # who has pip-installed the package has no checkout to read it from. Without
 # it here the door raises in every wheel while a source tree stays green,
 # which is the failure only a packaging check sees
-# [tested: tests/shell/test_packaged_cli.sh; commit=WORKTREE].
+# [tested: tests/shell/test_packaged_cli.sh; commit=d4f129e1d977239c2e25b5042e3b1df30d9d32d3].
 RUNTIME_RESOURCES = {
     "engine": "engine",
     "lib": "lib",
