@@ -1622,7 +1622,7 @@ metatype_of(false, 'Grounded') :- !.
 %A NAME is Grounded when this engine holds a function for it and a Symbol
 %when it does not. That is upstream PeTTa's entire rule, one clause asking
 %one register [source: PeTTa@43705f5d src/metta.pl:202, `'get-metatype'(X,
-%'Grounded') :- atom(X), fun(X), !.`; commit=WORKTREE].
+%'Grounded') :- atom(X), fun(X), !.`; commit=7bc8e2ac2a2adfa252d5251ee123f320c2dd5ce7].
 %
 %It replaced a 115-name table adopted from LeaTTa's `groundedTokens`, which
 %classified a name by what MINIMAL MeTTa calls grounded rather than by what
@@ -1635,7 +1635,7 @@ metatype_of(false, 'Grounded') :- !.
 %other does not [measured 2026-09-05; command=one generated file of 268
 %labelled `!(get-metatype ...)` forms run through `sh run.sh` and through the
 %pinned upstream checkout's own run.sh; fixture=the union of both engines'
-%fun/1 and this table; commit=WORKTREE]. The run and its residues are
+%fun/1 and this table; commit=7bc8e2ac2a2adfa252d5251ee123f320c2dd5ce7]. The run and its residues are
 %recorded in docs/journal/2026-09-05-get-metatype-follows-fun.md.
 %
 %fun/1 rather than builtin_fun/1, because the classification is a fact about
@@ -1671,7 +1671,7 @@ metatype_of(X, 'Grounded') :- atom(X), fun(X), !.
 %[measured 2026-09-05 in the shipped Python configuration, per-call slope
 %between 20,000 and 40,000 iterations: metatype_of(+) 4 inferences, an
 %ordinary symbol 9, a number 3, an expression 8; the probe is in
-%docs/journal/2026-09-05-get-metatype-follows-fun.md; commit=WORKTREE].
+%docs/journal/2026-09-05-get-metatype-follows-fun.md; commit=7bc8e2ac2a2adfa252d5251ee123f320c2dd5ce7].
 %The order below CANNOT be extended past list_shaped/1 or the 'Symbol'
 %clause: those answer something else, so a term claimed by the seam and
 %shaped like a list would change its metatype.
