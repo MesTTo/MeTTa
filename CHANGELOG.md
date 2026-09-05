@@ -356,6 +356,22 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `(let 12 (#* $x $y) ($x $y))` answers two free variables as before; what
   changed is that a residual answer reaches the printer at all.
 
+- The Empty prune asks its identity question in C, so a computed collapse no
+  longer pays one inference per collected answer. Removing the unifying
+  `memberchk/2` pre-filter above fixed the crash and left the identity walk
+  behind it, which is O(n) in inferences by construction; the engine's own
+  `match-skew` benchmark collapses 20 lists of 5,000 ground answers and went
+  from 207,982 inferences to 307,962. `engine/empty_prune.c` answers the same
+  question without unifying and without retiring an inference per cell, and
+  `match-skew` reads 207,982 again. The four Prolog walks stay the
+  specification and the fallback: a tree with no `swipl-ld`, or one running
+  `METTA_C_EMPTY_PRUNE=off`, answers identically, and a differential runs both
+  arms over 38 shapes. Two shapes now REFUSE where the walk did not terminate:
+  a partial list raises `instantiation_error` and a cyclic one
+  `type_error(list, _)`, through both arms, where each previously grew the
+  global stack or spun. No caller can construct either; all four pass a
+  `findall/3` result.
+
 - An engine that never asks for an observation no longer pays for the source
   observer. `observe-source` shipped with its module loaded at boot and with a
   resident `prolog:prolog_exception_hook/5` clause, which SWI consults on every
