@@ -123,3 +123,18 @@ module-less event; narrowing it means either widening that seam, caching the
 per-module effect plan with its own invalidation, or recording a per-module
 generation and skipping unchanged ones. Each is the subsystem author's call.
 The reproduction above is deterministic and the control names the predicate.
+
+Tried: attributing the whole order-dependent class at once instead of one test
+at a time, by running the suite serially, `pytest tests -n 0`, so every file's
+state accumulates in one engine. That is not the shipping configuration,
+`-n 4 --dist loadfile` is, but both trees then meet the same accumulated state.
+This branch fails five: `ch09_types/test_typing_rules`,
+`ch11_python_as_a_notation/test_compiled_vocabulary`, two in
+`ch14_seeing_your_program/test_trace`, and `ch18_performance/test_shared_head_cost`.
+`ad711777` fails the same five plus the identity twin, 3,364 passed in 506s here
+against 3,282 in 583s there.
+
+Decided: the branch's order-dependent failures are a strict subset of trunk's,
+and it removes one. That is a stronger statement than counting intermittent
+runs, which had read two of three here against one of three there and said
+nothing, since which files share an xdist worker changes between runs.
