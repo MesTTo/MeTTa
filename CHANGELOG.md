@@ -195,6 +195,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Retained clauses fold admitted immutable integer computations during
   planning. Redefining a dependency rebuilds its folded callers, and host
   operations remain deferred until demanded.
+- Function metadata keeps source-owned head and presence indexes. Repeated
+  calls no longer copy an unused definition body during dispatch; duplicate
+  equations, source reload and transaction rollback retain their bindings.
 - Tagged queries propagate bound arguments through certified acyclic integer
   programs. They derive the requested proof bags while preserving duplicate
   source occurrences and the existing failure behavior outside that fragment.

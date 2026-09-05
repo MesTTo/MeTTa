@@ -5,6 +5,9 @@
 %   or settling arguments
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.
+%   fun_meta_head/3 and fun_meta_projection/4 retain source occurrence order,
+%   aliases and ownership [tested: run_tests(translator_metadata_projection);
+%   commit=WORKTREE].
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
 %   apply_translator_rule_dl/7 receives a rule's declarations and owning
 %   module from one generation-checked registry row, explicitly materialises
@@ -412,7 +415,7 @@ dispatch_selection_override(Fun) :-
 
 dispatch_head_covers(Module, Fun, Args, _) :-
     fun_meta_module(Module, Fun, Owner),
-    fun_meta_clause(Owner, Fun, Head0, _),
+    fun_meta_head(Owner, Fun, Head0),
     (   metta_seq_present(Head0)
     ->  ground(Args),
         metta_seq_head_matches(Head0, Args)
@@ -595,7 +598,7 @@ dispatch_any_head_matches(Module, Fun, Args) :-
 
 dispatch_any_head_matches(Module, Fun, Args, _) :-
     fun_meta_module(Module, Fun, Owner),
-    fun_meta_clause(Owner, Fun, Head0, _),
+    fun_meta_head(Owner, Fun, Head0),
     % unifiable/3 neither binds the live call nor copies it. copy_term/2 here
     % copied an entire remaining list for each recursive step even though an
     % equation head decides from its outer constructors, making map/fold over
@@ -774,7 +777,7 @@ reduce([F|Args], Out, Status) :- !,
             % [tested: prolog_interface:a_registered_predicate_costs_no_more_than_a_metta_function;
             % commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3]
             (   Module == Self,
-                \+ fun_meta_clause(Module, F, _, _)
+                \+ fun_meta_projection(Module, F, _, _)
             ->  call(Module:Goal)
             ;   dispatch_policy_execute(Module, F, Args, Goal, Produced)
             ),
@@ -1808,7 +1811,7 @@ functioncall_dl(Fun, Chains, Args, IsPartial, Bound, Out, Goals0, Goals) :-
 metta_equation_call(Fun, InputArity) :-
     current_metta_module(Module),
     fun_meta_module(Module, Fun, Owner),
-    fun_meta_clause(Owner, Fun, Head, _),
+    fun_meta_head(Owner, Fun, Head),
     (   length(Head, InputArity)
     ;   metta_seq_present(Head)
     ),
