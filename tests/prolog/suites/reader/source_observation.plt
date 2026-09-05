@@ -4,10 +4,14 @@
 %   [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
-:- use_module(library(assoc), [empty_assoc/1]).
 :- use_module(library(prolog_wrap)).
 
 :- begin_tests(source_observation).
+
+% The engine does not load the observer at boot, so this suite asks for it the
+% same way lib_observe's observe-source does, and at load time because the
+% tests below wrap and inspect the module's own predicates.
+:- metta_ensure_source_observation.
 
 observe(Source,Rows) :-
     setup_call_cleanup('new-space'(Space),
@@ -68,7 +72,8 @@ test(exception_keeps_source_frames_and_restores_debugger, [nondet]) :-
     current_prolog_flag(last_call_optimisation,LCO),
     '$visible'(Visible,Visible),
     \+ nb_current('$metta_observation',_),
-    \+ source_observation:source_document(_,_,_).
+    \+ source_observation:source_document(_,_,_),
+    \+ source_observation:installed_hook(_).
 
 test(repeated_observations_do_not_retain_errors_or_documents, [nondet]) :-
     observe("!(/ 1 0)",First), member(['source-error',_,_],First),
@@ -85,7 +90,7 @@ test(decons_refusal_is_observed_as_unchanged_data, [nondet]) :-
 test(error_hooks_keep_each_existing_refusal_shape) :-
     % These failure policies are internal dispatch branches, so exercising each
     % exact branch isolates recording from unrelated function-policy lookup.
-    empty_assoc(Hits), Buffer=observations(Hits,[]),
+    source_observation:new_observation_buffer(Buffer),
     setup_call_cleanup(nb_setval('$metta_observation',Buffer),
       ( translator:dispatch_no_match('NoMatchError',missing,[1],A),
         translator:dispatch_out_of_clauses('FailureError',emptying,[2],B),
@@ -99,6 +104,35 @@ test(error_hooks_keep_each_existing_refusal_shape) :-
         length(Errors,4) ),
       nb_delete('$metta_observation')).
 
+% SWI consults prolog:prolog_exception_hook/5 whenever the predicate HOLDS A
+% CLAUSE rather than whenever it exists, so one resident clause taxes every
+% exception the process throws for as long as the module is loaded: it cost
+% 119 inferences on the engine's translate case and 3 on a caught
+% DivisionByZero [measured 2026-09-05]. The clauses therefore exist only while
+% an observation runs. installed_hook/1 is the bookkeeping and this asks the
+% database instead, because a receipt is not the payload. Both hooks are
+% proved to WORK while installed by error_atom_and_exact_caller_frames_survive
+% and identical_branches_have_distinct_coverage above, so a clean answer here
+% is not a broken mechanism reading as a clean one.
+observer_hook_clause(Head) :-
+    clause(Head, Body),
+    term_to_atom(Body, Text),
+    sub_atom(Text, _, _, _, source_observation).
+
+no_observer_hooks :-
+    \+ observer_hook_clause(prolog:prolog_exception_hook(_,_,_,_,_)),
+    \+ observer_hook_clause(user:prolog_trace_interception(_,_,_,_)),
+    \+ source_observation:installed_hook(_).
+
+test(the_observer_holds_no_hook_outside_an_observation) :-
+    \+ nb_current('$metta_observation',_),
+    no_observer_hooks.
+
+test(an_observation_takes_its_process_wide_hooks_away_again) :-
+    observe("!(/ 1 0)",Rows),
+    memberchk(['source-error',_,_],Rows),
+    no_observer_hooks.
+
 test(ordinary_errors_keep_no_observation_buffer) :-
     metta_error_atom('/',[1,0],'DivisionByZero',Error),
     Error==['Error',['/',1,0],'DivisionByZero'],
@@ -109,8 +143,8 @@ test(invalid_source_type_refuses,
     source_observation:observe_source('&self',"unit.metta",42,_).
 
 test(nested_observation_refuses_without_destroying_outer_buffer) :-
-    empty_assoc(Hits),
-    setup_call_cleanup(nb_setval('$metta_observation',observations(Hits,[])),
+    source_observation:new_observation_buffer(Buffer),
+    setup_call_cleanup(nb_setval('$metta_observation',Buffer),
         ( catch(source_observation:observe_source('&self',"nested","!(+ 1 2)",_),Error,true),
           nonvar(Error), Error=error(permission_error(observe,execution,nested),_),
           nb_current('$metta_observation',_) ),
@@ -196,7 +230,8 @@ test(partial_install_failure_releases_wrappers_and_state) :-
         \+ (predicate_property(translator:translate_expr_dl(_,_,_,_),wrapped(Names)),
              memberchk(source_map,Names)),
         \+ (predicate_property(filereader:metta_host_run_source(_,_,_,_),wrapped(Names)),
-             memberchk(source_observer,Names)) ),
+             memberchk(source_observer,Names)),
+        \+ source_observation:installed_hook(_) ),
       unwrap_predicate(source_observation:install_runtime_observers/0,setup_failure)).
 
 observation_worker(Queue) :-

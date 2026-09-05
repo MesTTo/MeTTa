@@ -44,7 +44,21 @@
 %     Hacks: None
 %     Future Enhancements: None
 % Guarantees: source observation reaches only the reviewed published subsystem
-%   surfaces below [tested: engine_layering; commit=df1367c75148ca6c7262134a8736b237e1150383].
+%   surfaces below, and nothing reaches IT: the engine announces a constructed
+%   Error through a sink the observation buffer carries, so source_observation
+%   and source_positions are leaf consumers and left the declared tangle
+%   [tested: engine_layering, scc_components; commit=WORKTREE].
+% Assumes: engine/metta.pl no longer loads the observer at boot, so this file
+%   asks for it through metta_ensure_source_observation/0 before the walk; the
+%   walk reads the database and would otherwise report every one of that
+%   subsystem's contract rows as stale.
+
+%The engine does not load engine/source_observation.pl at boot, because an
+%engine nobody asks for an observation from must not pay for one. The walk
+%reads the DATABASE, so the contract's rows for that subsystem are only
+%measurable once it is in it, and this is the same door lib_observe's
+%observe-source uses.
+:- metta_ensure_source_observation.
 
 :- ensure_loaded(surface_walk).
 :- use_module('../../engine/scc', [nodes_arcs_sccs/3]).
@@ -334,7 +348,6 @@ reaches(lib_tabling, spaces, 'declared space, storage and module services resolv
 reaches(metta, ext_points, 'installs the atom-write wrappers when a handler exists').
 reaches(metta, filereader, 'import! and the file builtins are the loader\'s surface').
 reaches(metta, parser, 'sread, swrite and sdisplay are the core\'s text builtins').
-reaches(metta, source_observation, 'records diagnostics at Error construction inside explicit observation').
 reaches(metta, spaces, 'the space builtins are the space subsystem\'s surface').
 reaches(metta, support_graph, 'a world admits a program write only after walking who its recompilation reaches').
 reaches(metta, translator, 'a runnable form is compiled before it runs').
@@ -366,7 +379,6 @@ reaches(translator, ext_points, 'a call may be claimed by a dispatch owner').
 reaches(translator, filereader, 'reads whether a head is reducible in the source being loaded').
 reaches(translator, metta, 'the core holds the function, arity and type registries the compiler writes and reads').
 reaches(translator, parser, 'writes a term as MeTTa text for a compile-time diagnostic').
-reaches(translator, source_observation, 'records dispatch refusals without changing their Error answers').
 reaches(translator, spaces, 'compiles into a space\'s execution module and asks that space its capabilities').
 reaches(translator, specializer, 'a higher-order call may specialize').
 reaches(translator, translator_rules, 'the shipped rule set is the compiler\'s own first tier').
@@ -391,9 +403,16 @@ reaches(type_rules, translator, 'a changed typing rule clears the translation ca
 %   are declared rather than tolerated silently: a new cycle fails the lane,
 %   and shrinking one is a visible edit here. Untangling them is the work a
 %   layer order would need first, and this is its measure.
+%
+%   It shrank by two on 2026-09-05. source_observation and source_positions
+%   left it when the engine stopped calling into the observer: a constructed
+%   Error is announced through metta_record_error/1, whose sink the
+%   observation buffer carries, so no engine or translator clause names a
+%   predicate of either file and both became leaf consumers of the surfaces
+%   they read. That is also what lets the engine load neither of them at boot.
 
-tangle([duals, ext_points, filereader, metta, parser, source_observation,
-        source_positions, spaces, specializer,
+tangle([duals, ext_points, filereader, metta, parser,
+        spaces, specializer,
         support_graph, tracer, translator, translator_rules, type_rules]).
 
 %%%% What the lane checks %%%%

@@ -195,3 +195,164 @@ open compiler-position question is closed by clause side tables and explicit
 generated-construct provenance. The baseline C-reader custom-token dispatch
 issue remains separate: the scanner consumes the authoritative parser output
 and does not change parser dispatch.
+
+
+## 2026-09-05: what the boot and the exception hook cost
+
+Supersedes the "identical compiled clause bodies and zero successful-runtime
+tax" reading in the section above, which stands as what was measured on its
+date. That table is still true of what it measured and is still the reason to
+believe the compiled bodies are unchanged. It measured the wrong two things
+for the claim it was used to support.
+
+Found by bisection: the merge 9f0bae48 moved engine boot from 532,368 to
+536,114 inferences (+3,746), engine translate from 362,397 to 362,516 (+119),
+evaluate by +7, and the host benchmarks foreign-match and table-bridge-match
+from 784,831 to 788,827 and 788,829. Reproduced exactly on a worktree at
+9f0bae48 and at its first parent 74da44b8, three identical samples each, with
+the .qlf set cleared and regenerated for both arms.
+
+Both blind spots are structural, not careless. The eight-row `m.stats()` table
+brackets an already-compiled recursive body, so it cannot see a per-COMPILATION
+cost; and `m.stats()` opens after the engine is up, so it cannot see boot at
+all. The fixture also never raises, which is exactly what the second cost is
+charged on.
+
+Decomposed on a worktree at a94f804c with positive controls, three identical
+samples per arm:
+
+| arm | boot | translate | evaluate |
+| --- | --- | --- | --- |
+| every engine edit of the branch reverted | 532,591 | 362,397 | 558,636 |
+| only `use_module(source_observation, [])` removed | 532,641 | 362,397 | 558,636 |
+| as shipped | 536,337 | 362,516 | 558,643 |
+| shipped with the exception-hook clause removed | 536,327 | 362,397 | 558,636 |
+
+So the module load carries 3,696 of the boot move and the six Error-site edits
+carry 50, and the entire per-workload remainder is one clause:
+`prolog:prolog_exception_hook/5`. SWI consults that hook whenever it HOLDS A
+CLAUSE, not whenever the predicate exists, so a resident clause taxes every
+exception the process throws. Declaring the hook `multifile` and `dynamic` with
+no clause measures 362,397 and 558,636, the untaxed values, which is the
+control that pins the mechanism to the clause rather than to the declaration.
+
+Where the 3,696 sat, by replacing engine/source_observation.pl with cut-down
+files and booting each, three identical samples per arm:
+
+| what the boot loaded | boot | its own share |
+| --- | --- | --- |
+| nothing | 532,642 | |
+| a bare module shell, two dummy clauses | 533,271 | 629 |
+| plus `use_module(source_positions, [source_positions/3])` | 534,343 | 1,072 |
+| plus `library(assoc)`, `library(prolog_wrap)`, `library(prolog_code)` | 536,243 | 1,900 |
+| the real 560-line module | 536,337 | 94 |
+
+The observer's own code is 94 of it. The rest is the position scanner and
+three SWI libraries, none of which an engine that never observes calls. A
+`profile/1` call tree was not the instrument: every arm here REMOVES a
+candidate and re-measures a deterministic counter, which names the cause
+rather than sampling where time went.
+
+Found: the host rows are not boot. `metta.benchmarking._counter_samples`
+opens its `stats()` block after `setup()`, so foreign-match's +3,998 is
+2,000 `space.run(...)` calls at +2 each, and query-where's +40 is its 20
+`space.match(...)` calls at the same +2. Every request compiles, every
+compilation throws and catches, and every throw ran the hook.
+
+Decided: the engine announces a constructed Error through
+`metta_record_error/1` in engine/metta/terms.pl, and the observation buffer
+carries the sink that receives it. No engine or translator clause names a
+predicate of engine/source_observation.pl, so nothing forces the load and no
+load configuration can leave a dangling reference. Two contract lines and two
+tangle members left tests/prolog/layering.pl as a result: the observer and the
+position scanner are leaf consumers of the surfaces they read.
+
+Decided: engine/metta.pl loads the observer through
+`metta_ensure_source_observation/0`, which also re-runs the base-module pass so
+a module loaded after boot still resolves `metta_engine_module/1` and
+`current_metta_module/1` through the engine. The base pass became a predicate
+for that reason. Its callers are lib_observe's `observe-source`, the reader
+suite and the layering lane.
+
+Decided: both SWI hooks are declared here and claused only while an
+observation runs, asserted beside the compiler wrappers and erased with them.
+`library(prolog_stack)` declares the same hook `dynamic` and `multifile` and
+adds a clause of its own, so removal erases ours by reference rather than
+retracting the predicate.
+
+Rejected: `autoload/2` on `record_error/1`. It defers the load correctly and
+is the mechanism engine/metta.pl already uses for `library(uuid)`, but the
+first Error any program constructs would then pay the 3,696-inference load,
+and Error construction is ordinary. Revisit if the engine ever needs a lazy
+subsystem that only an explicit request can reach.
+
+Rejected: leaving the six Error sites as facts and having the observer wrap
+them, the way it wraps `translate_clause_impl/4` and
+`assert_function_clause/3`. That would take the resident cost to zero instead
+of 51, but five of the six do not go through `metta_error_atom/4`, so it needs
+six more wrappers on hot dispatch predicates plus an Error-shape test inside
+each, and `dispatch_no_match/4` and `declared_arity_refusal/3` are called in
+determinism contexts a wrapper changes. Fifty-one inferences of load structure
+is not worth that. Revisit if the resident cost ever has to be exactly zero.
+
+Measured after the fix, three identical samples per row, same worktree and the
+same cleared-and-warmed .qlf discipline:
+
+| row | before the branch | as shipped | after this fix |
+| --- | --- | --- | --- |
+| engine boot | 532,591 | 536,337 | 532,642 |
+| engine translate | 362,397 | 362,516 | 362,397 |
+| engine evaluate | 558,636 | 558,643 | 558,636 |
+| engine match | 263,002 | 263,002 | 263,002 |
+| engine parse | 152 | 152 | 152 |
+| foreign-match | 784,829 | 788,827 | 784,831 |
+| table-bridge-match | 784,831 | 788,829 | 784,831 |
+| query-where | within its pin | 58,604 | 58,564 |
+| save-load-fast | within its pin | 2,929,342 | 2,929,340 |
+| typed-call | 12,505,719 | 12,505,721 | 12,505,719 |
+| loop-1m | 11,004,781 | 11,004,783 | 11,004,781 |
+
+Every row returns to its pre-branch value. Boot keeps +51 over it: the six
+Error sites became rules that announce what they built, the effect row for
+`observe-source` is one more fact, and `metta_record_error/1` is one more
+predicate. That is the load-structure class engine/bench-baseline.json's boot
+row documents at length, where one inert fact moves boot by about 142, and it
+is what the announcement costs an engine that never observes. Nothing else
+moves.
+
+The asker pays for the load instead: `metta_ensure_source_observation/0`
+costs 94,661 inferences on its first call and 1 on every call after, against
+67,349 for the first small observation and 59,624 for the next. That is the
+compile from source, where the boot's own load read a warm .qlf for 3,696.
+
+Rejected: making the door write a .qlf. SWI's `qcompile(auto)` reaches the
+files a LOADED FILE loads and not the file the goal names, whether it is set
+as a flag or passed to `load_files/2`: with it on, engine/source_positions.qlf
+appeared and engine/source_observation.qlf did not, and the door measured
+94,666 against 94,661 without. Writing one needs an explicit `qcompile/1` and
+a second load, a second artifact policy beside engine/qlf_boot.pl's, for a
+cost a caller already running a whole program under the debugger pays once.
+Revisit if a process is ever measured observing often enough for it to matter.
+
+Found while checking the move: `observe-source` never worked with autoload
+off. `with_source/4` calls `pairs_keys_values/3` and the module declares no
+`library(pairs)`, so `NO_AUTOLOAD=1 sh run.sh
+examples/ch20-extending-the-engine/20-05-observing-execution/02-source-coverage.metta`
+returned `observation-status exception` carrying
+`existence_error(procedure, source_observation:pairs_keys_values/3)` and the
+example's first assertion failed. It predates this work, arrived with the
+module, and no lane covers it: engine/metta.pl's own Open Obligations record
+that check.sh does not yet gate autoload=false. Declaring the import fixes it,
+and all three observation examples then pass with autoload off, twelve
+assertions. A `list_undefined` run in that configuration, after an
+observation, now reports exactly one name and it is not the observer's:
+`merge/3` in engine/metta/type_aliases.pl:429, which arrived with `acad9234`
+and is left alone here.
+
+Open: `typed-call` sits 5 above and `loop-1m` 59 above their committed pins on
+this tree, and by the same amounts with every engine edit of this branch
+reverted, so that movement predates the observation work and belongs to
+whatever landed between those pins and a94f804c. `foreign-match` and
+`table-bridge-match` now sit 2,000 BELOW their 786,831 pins, again by the same
+amount on the reverted control, so those two pins are stale in the other
+direction. All four are for the integrator to re-pin on the merged tree.

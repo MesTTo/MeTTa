@@ -1,17 +1,40 @@
 % Purpose: retain source maps beside compiled clauses and collect observations.
-% Owns resources: source maps, compiler wrappers, observation buffers and debugger
-%   settings are released at observation exit.
+% Assumes: nothing loads this file at boot. engine/metta.pl reaches it only
+%   through metta_ensure_source_observation/0, which also gives it the engine's
+%   base module, and the only callers of that door are lib_observe's
+%   observe-source and the tests that drive this module directly.
+% Owns resources: source maps, compiler wrappers, observation buffers, the two
+%   SWI hook clauses and debugger settings are released at observation exit.
 % Guarded by: an observation mutex serializes compiler wrapper installation;
 %   source maps and execution buffers are thread-local.
 % Guarantees: compiler observation emits no runtime goals and changes no atom
 %   representation [tested: source_observation:compiled_goals_are_unchanged;
 %   commit=df1367c75148ca6c7262134a8736b237e1150383].
+% Guarantees: an engine that never runs observe-source loads none of this and
+%   pays nothing for it. Loading it at boot cost 3,696 inferences, and its
+%   resident prolog:prolog_exception_hook/5 clause cost another 119 on the
+%   engine's translate case and 2 on every compiled host request, none of it
+%   work any of those cases performs [measured 2026-09-05: boot 536,337 with
+%   the boot load against 532,641 without, translate 362,516 against 362,397,
+%   evaluate 558,643 against 558,636, foreign-match 788,827 against 784,829
+%   over its 2,000 runs; command=engine/bench.py and extensions/python/bench.py
+%   --counter-only; fixture=worktree at a94f804c with the MORK artifacts
+%   present and the .qlf set cleared and warmed for every arm; three identical
+%   samples per arm; commit=WORKTREE].
 
-:- module(source_observation, [record_error/1, observe_source/4]).
+:- module(source_observation, [record_error/2, observe_source/4]).
 :- use_module(source_positions, [source_positions/3]).
 :- use_module(library(assoc)).
 :- use_module(library(prolog_wrap)).
 :- use_module(library(prolog_code), [comma_list/2]).
+%Declared rather than left to autoload, because the engine supports booting
+%with set_prolog_flag(autoload, false) and nothing else in its module chain
+%imports library(pairs): with autoload off, observing any source raised
+%existence_error(procedure, source_observation:pairs_keys_values/3) from
+%with_source/4 and the observation returned `exception` where the example
+%expects `complete` [measured 2026-09-05: NO_AUTOLOAD=1 sh run.sh
+%examples/ch20-extending-the-engine/20-05-observing-execution/02-source-coverage.metta].
+:- use_module(library(pairs), [pairs_keys_values/3]).
 
 :- meta_predicate with_source(+, +, +, 0).
 :- meta_predicate compile_clause(+, -, 0).
@@ -255,12 +278,13 @@ most_specific_span(Goal, Records, Span, Construct) :-
     findall(Other,member(Minimum-Other,Rest),Ties),
     sort([First|Ties],[Span-Construct]).
 
-% The only permanently installed runtime calls are in Error construction
-% branches. The observer is oracleIO; outside it this predicate writes nothing.
-record_error(Error) :-
-    ( nb_current('$metta_observation', Buffer)
-    -> current_source_frames(Frames), observation_error(Buffer, Error, Frames)
-    ; true ).
+% The engine announces a constructed Error through the sink this module puts
+% in the observation buffer, so nothing here is installed while no observation
+% is running and the engine names no predicate of this module
+% [source: engine/metta/terms.pl metta_record_error/1].
+record_error(Buffer, Error) :-
+    current_source_frames(Frames),
+    observation_error(Buffer, Error, Frames).
 
 % Follow the actual environment chain without a guessed depth limit. The PC
 % on a child frame belongs to its suspended parent, as in SWI prolog_stack.pl.
@@ -302,20 +326,68 @@ observation_error(Buffer, Error, Frames) :-
     copy_term(Error-Frames, Copy-FrozenFrames),
     nb_setarg(2,Buffer,[error(Copy,FrozenFrames)|Errors]).
 
+% Both hooks are DECLARED here and CLAUSED only while an observation runs.
+% SWI decides whether to consult prolog:prolog_exception_hook/5 by whether it
+% holds a clause, not by whether the predicate exists, so one resident clause
+% taxes every exception the process throws for as long as the module is
+% loaded: it cost 119 inferences on the engine's translate case and 2 per
+% compiled host request, which is 3,998 over foreign-match's 2,000 runs
+% [measured 2026-09-05: engine/bench.py translate reads 362,516 with the
+% clause resident and 362,397 with it removed or merely declared, three
+% identical samples each]. Its clause is asserted beside the compiler
+% wrappers and erased with them. Loading this module then costs a caught
+% DivisionByZero nothing, against 3 inferences with a resident clause, and one
+% completed observation leaves that same exception 1 inference dearer for the
+% rest of the process where a resident clause leaves it 2; the remaining 1 is
+% SWI's own hook machinery staying armed once a clause has existed, it does
+% not accumulate over further observations, and no clause of ours survives
+% [measured 2026-09-05: 34 before loading, 34 after loading, 35 after one
+% observation and 35 after two, against 34/37/36/36 with the clause resident;
+% command=statistics(inferences) around a caught (/ 1 0) through
+% metta_run_named/3, taken before loading this module, after loading it, and
+% after each of two observations, in one swipl that consulted
+% engine/qlf_boot.pl and engine/metta.pl; tested:
+% source_observation:the_observer_holds_no_hook_outside_an_observation].
+% library(prolog_stack) declares the same hook dynamic and multifile and adds
+% a clause of its own, so removal erases THIS clause by reference and never
+% retracts the predicate [source: /usr/lib/swi-prolog/library/prolog_stack.pl
+% lines 699-702, SWI-Prolog 10.1.13].
 :- multifile prolog:prolog_exception_hook/5.
-prolog:prolog_exception_hook(Error, Error, Frame, _, _) :-
-    nb_current('$metta_observation', Buffer),
-    source_observation:source_frames(Frame,call,Frames),
-    Frames \== [],
-    source_observation:observation_error(Buffer,Error,Frames).
+:- dynamic prolog:prolog_exception_hook/5.
 
 % Dynamic clauses are omitted by SWI's native coverage counters. Its debugger
 % still exposes the caller clause and program counter at each call port, so
 % the observer maps those events through the same code metadata as errors.
 :- multifile user:prolog_trace_interception/4.
-user:prolog_trace_interception(Port, Frame, _, continue) :-
-    nb_current('$metta_observation', Buffer),
-    source_observation:observe_port(Port,Frame,Buffer).
+:- dynamic user:prolog_trace_interception/4.
+
+%The clause refs of the two hooks above, erased when the observation that
+%asserted them ends. observe_source/4 holds '$metta_observation_session' for
+%the whole observation, so one process-wide record is enough.
+:- dynamic installed_hook/1.
+
+install_exception_observers :-
+    assertz((prolog:prolog_exception_hook(Error, Error, Frame, _, _) :-
+                 nb_current('$metta_observation', Buffer),
+                 source_observation:source_frames(Frame,call,Frames),
+                 Frames \== [],
+                 source_observation:observation_error(Buffer,Error,Frames)),
+            ExceptionReference),
+    assertz(installed_hook(ExceptionReference)),
+    assertz((user:prolog_trace_interception(Port, Frame, _, continue) :-
+                 nb_current('$metta_observation', Buffer),
+                 source_observation:observe_port(Port,Frame,Buffer)),
+            TraceReference),
+    assertz(installed_hook(TraceReference)).
+
+%Total, like remove_wrapper/2 below, because this runs in the cleanup that
+%also takes the eleven wrappers off: a raise here would strand them, and a
+%hook clause outlives the whole rest of the process. Nothing hides behind the
+%catch, because the_observer_holds_no_hook_outside_an_observation asks the
+%database whether the clauses are actually gone.
+remove_exception_observers :-
+    forall(retract(installed_hook(Reference)),
+           catch(erase(Reference), _, true)).
 
 observe_port(call, Frame, Buffer) :- !,
     ( prolog_frame_attribute(Frame,pc,PC),
@@ -400,6 +472,7 @@ source_forms(Parsed,Space,Goal) :-
     ; call(Goal) ).
 
 install_runtime_observers :-
+    install_exception_observers,
     wrap_predicate(filereader:metta_host_run_source(Source,_,_,_), source_observer,
                    Host, source_observation:source_input(Source,Host)),
     wrap_predicate(filereader:process_direct_metta_string(Source,_,_), source_observer,
@@ -423,6 +496,7 @@ install_runtime_observers :-
                    OriginalGoals, source_observation:observe_goals(Module,Goals,OriginalGoals)).
 
 remove_runtime_observers :-
+    remove_exception_observers,
     % policy-inventory-exempt: mechanism-internal; reason=the eight loader predicates this observer wraps at install, listed so removal unwraps exactly the set installation wrapped; evidence=engine/source_observation.pl:remove_wrapper/2
     forall(member(PI,[metta_host_run_source/4,process_direct_metta_string/3,
                       process_loader_string/3,metta_host_process_groups/3,
@@ -457,8 +531,19 @@ observation_string(Value,Remedy) :-
     ( string(Value) -> true
     ; throw(error(type_error(string,Value),context('observe-source',Remedy))) ).
 
+%The shape the engine reads. Argument five is the sink engine/metta/terms.pl
+%calls for a constructed Error, which is what keeps the engine free of any
+%reference to this module; the other four are the hit set, the recorded
+%errors, the completed root-form answers and the document being observed.
+%One constructor because the shape has two readers, this file and
+%tests/prolog/suites/reader/source_observation.plt, and a second spelling of
+%it in the suite is a shape that can drift.
+new_observation_buffer(observations(Hits,[],answers(0,[]),none,
+                                    source_observation:record_error)) :-
+    empty_assoc(Hits).
+
 observe_source_locked(Space,Label,Source,Atoms) :-
-    empty_assoc(Hits), Buffer=observations(Hits,[],answers(0,[]),none),
+    new_observation_buffer(Buffer),
     save_context('$metta_observe_label', PreviousLabel),
     current_prolog_flag(debug, Debug),
     current_prolog_flag(last_call_optimisation,LCO),

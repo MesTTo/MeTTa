@@ -986,7 +986,6 @@ metta_import_shared_registries(Subsystem) :-
                   '../lib/lib_gitimport/lib_gitimport', spaces, tracer,
                   duals, kernel, '../lib/lib_memo/lib_memo',
                   '../lib/minimal_metta_lib/minimal_metta_lib']).
-:- use_module(source_observation, []).
 
 %A subsystem that declares a module gets THIS module as its base, so the calls
 %it makes the other way -- into the engine core, into another subsystem's
@@ -1003,14 +1002,65 @@ metta_import_shared_registries(Subsystem) :-
 %spaces_execution_modules:the_chain_is_engine_then_self_then_space].
 
 
+%A predicate rather than the bare directive it used to be, because a
+%subsystem that is NOT loaded at boot still has to inherit the same base when
+%something later asks for it. metta_ensure_source_observation/0 below is the
+%one such caller today.
+metta_base_engine_subsystems(EngineSource) :-
+    atom_concat(EngineSource, '/', EngineDirectory),
+    metta_engine_module(Engine),
+    forall(( source_file(SubsystemFile),
+             sub_atom(SubsystemFile, 0, _, _, EngineDirectory),
+             module_property(Subsystem, file(SubsystemFile)),
+             Subsystem \== Engine ),
+           set_module(Subsystem:base(Engine))).
+
 :- prolog_load_context(directory, EngineSource),
-   atom_concat(EngineSource, '/', EngineDirectory),
-   metta_engine_module(Engine),
-   forall(( source_file(SubsystemFile),
-            sub_atom(SubsystemFile, 0, _, _, EngineDirectory),
-            module_property(Subsystem, file(SubsystemFile)),
-            Subsystem \== Engine ),
-          set_module(Subsystem:base(Engine))).
+   metta_base_engine_subsystems(EngineSource).
+
+%engine/source_observation.pl is deliberately NOT in the load list above.
+%Nothing an ordinary program does needs it: the engine announces a constructed
+%Error through metta_record_error/1 (engine/metta/terms.pl), whose sink lives
+%in the observation buffer, so no engine clause names a predicate of that
+%file. Loading it at boot cost 3,696 inferences, and the
+%prolog:prolog_exception_hook/5 clause it left resident cost another 119 on
+%the engine's translate case and 2 on every compiled host request, which is
+%3,998 across foreign-match's 2,000 runs [measured 2026-09-05: boot 536,337
+%against 532,641, translate 362,516 against 362,397, evaluate 558,643 against
+%558,636, foreign-match 788,827 against 784,829; command=engine/bench.py and
+%extensions/python/bench.py --counter-only; three identical samples per arm
+%with the .qlf set cleared and warmed for each; commit=WORKTREE].
+%
+%So whoever wants an observation loads it, through here. The pass above is
+%re-run because a module loaded after that directive would otherwise keep
+%SWI's default base of `user`, and this one resolves metta_engine_module/1 and
+%current_metta_module/1 through the engine.
+%
+%What the asker pays: 94,661 inferences on the first call and 1 on every call
+%after it, against 67,349 for the first small observation itself and 59,624
+%for the next, so a process that observes at all pays this roughly once per
+%one and a half observations and never again [measured 2026-09-05;
+%command=statistics(inferences) either side of this predicate and of two
+%source_observation:observe_source/4 calls on `(= (o $x) (+ $x 2)) !(o 3)`,
+%in one swipl that consulted engine/qlf_boot.pl and engine/metta.pl]. It is
+%the compile from source: the boot's own load read a warm .qlf for 3,696.
+%There is no .qlf here and the option that looks like it would make one does
+%not, because SWI's qcompile(auto), whether set as a flag or passed to
+%load_files/2, reaches the files a LOADED FILE loads and not the file the goal
+%names: with it on, engine/source_positions.qlf appeared and
+%engine/source_observation.qlf did not, and the door measured 94,666 with it
+%against 94,661 without [measured 2026-09-05]. Writing one would take an explicit
+%qcompile/1 and a second load, which is a second artifact policy beside
+%engine/qlf_boot.pl's for a cost paid once by a caller that is already running
+%a whole program under the debugger.
+metta_ensure_source_observation :-
+    (   current_predicate(source_observation:observe_source/4)
+    ->  true
+    ;   metta_engine_src_dir(EngineSource),
+        atomic_list_concat([EngineSource, '/source_observation.pl'], File),
+        load_files(File, [if(not_loaded), imports([])]),
+        metta_base_engine_subsystems(EngineSource)
+    ).
 
 
 %%%% Extensions: the control file, its vocabulary, and the loader %%%%
