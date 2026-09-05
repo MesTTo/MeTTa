@@ -26,6 +26,12 @@
 % commit=173eeed021beb360b5e5f9f8461889e27190affc]. [tested:
 % tests/prolog/suites/spaces/spaces.plt, tests/prolog/static_checks.pl;
 % commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: fixed-width metta_catalog_clause/2 queries select their storage
+% predicate directly, preserving clause references and duplicate order;
+% open-tail queries enumerate stored arities [tested:
+% catalog_self_description:catalog_queries_preserve_width_multiplicity_and_references,
+% catalog_self_description:fixed_width_catalog_lookup_ignores_unrelated_arities;
+% commit=WORKTREE].
 
 :- dynamic native_storage_module_cache/2.
 :- dynamic space_parametric/1.
@@ -475,17 +481,22 @@ metta_cache_policy_changed(Function) :-
 
 %One catalog row as a list, whatever its arity: '&metta'(kind, handles,
 %symbol, ...) reads back as [kind, handles, symbol, ...]. The walk over the
-%arities the storage module holds runs on catalog edits and cache misses,
-%never on a match path and never on the per-write fast path below.
+%arities is needed only when the query leaves its width open. A fixed-width
+%query already names one storage predicate, as get_native_atom/3 does
+%[source: engine/spaces/native_matching.pl:get_native_atom/3;
+%commit=2458294ae03b8dc1c982a5bc7d31601cc6332dd3].
 metta_catalog_row(Row) :-
     metta_catalog_clause(Row, _).
 
 metta_catalog_clause([Rel|Args], Ref) :-
     native_storage_module('&metta', Module),
-    current_predicate(Module:'&metta'/N),
-    N >= 1,
-    functor(Goal, '&metta', N),
-    Goal =.. ['&metta', Rel|Args],
+    (   is_list(Args)
+    ->  Goal =.. ['&metta', Rel|Args]
+    ;   current_predicate(Module:'&metta'/N),
+        N >= 1,
+        functor(Goal, '&metta', N),
+        Goal =.. ['&metta', Rel|Args]
+    ),
     clause(Module:Goal, true, Ref).
 
 %The write-path cache. The checker runs on every '&metta' write, and the

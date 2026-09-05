@@ -57,6 +57,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Fixed-width catalog lookups select their storage predicate directly. Adding
+  an unrelated catalog row width no longer adds work to every dispatch-policy
+  check. Open-tail queries still enumerate all matching row widths, and reads
+  retain live clause references, duplicate order and transaction visibility.
+
 - The `budget` and `amplitude` carriers are nameable. Both shipped in
   `algebra._PRESETS` and both worked through `metta.under(...)`, but the
   catalog's `(vocabulary semiring ...)` row admitted only eight of the ten
