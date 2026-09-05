@@ -64,6 +64,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `(| Number String)` is a union type, usable as an argument type, a result
+  type, a tuple field and an alias right side. A value is admitted when some
+  member admits it, and a value whose own type is a union only when every
+  alternative is, under one assignment of the type variables they share, so
+  `(| Number String)` fits `(| Number String Bool)` and not `(| Number Bool)`.
+  Nested unions flatten, a repeated member is one member, and a one-member
+  union is that member; `(|)` and an improper union raise a type-syntax error.
+  `|` heads a union only where a type is read, so `(|-> ($x) ...)` is still a
+  lambda and `(| a b)` is still data. There is no occurrence typing: testing a
+  union-typed value does not narrow it, and `match-types` with the `type-cast`
+  built on it keep comparing written types by unification with wildcards.
+  `examples/ch09-types/19-union-types.metta` is the executable description.
+
 - The writer's variable-identity invariant is pinned under garbage
   collection: one variable shared across a 40,000-string filler reparses as
   one, two as two, and 5,000 shared variables keep their count. Upstream's
