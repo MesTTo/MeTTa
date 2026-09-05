@@ -22,28 +22,28 @@ Assumes: a writable ai-tmp/ in this repository.
 Guarantees:
   - a planted unbounded swipl, sh, "$PY" and make inside a lane function are
     each reported with lane and line
-    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=b0d85db82c8069fa5c2bb864b1ce8a93bccf40f8]
   - a planted unbounded spawn in a RUNNER, which has no lane functions at all,
     is reported. That population is the one the 7,540-second spinner of
     2026-09-05 came from, and the pass did not read it until that day
-    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=b0d85db82c8069fa5c2bb864b1ce8a93bccf40f8]
   - a `bounded` helper that stops naming bounded.sh is reported, even though
     every `bounded ...` call in the same file still looks bounded
-    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=b0d85db82c8069fa5c2bb864b1ce8a93bccf40f8]
   - an `in_py` that stops calling `bounded` is reported for the same reason
-    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=b0d85db82c8069fa5c2bb864b1ce8a93bccf40f8]
   - a `bounded ...` written ABOVE its own definition is reported. In POSIX sh
     that call is a `not found` exiting 127, and an `if !` around it reads the
     thing it was probing for as absent
-    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=b0d85db82c8069fa5c2bb864b1ce8a93bccf40f8]
   - a planted unbounded engine spawn in a HARNESS script's Python is reported,
     and so is an argv the pass cannot read, while a wrapped one, a `git` call
     and a `sys.executable` call are not
-    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=b0d85db82c8069fa5c2bb864b1ce8a93bccf40f8]
   - a `bounded` spawn, an `in_py` spawn, a comment, a dirname substitution, a
     one-line function, a continued command bounded on its first line, and a
     line carrying `# unbounded: <reason>` are NOT reported
-    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=b0d85db82c8069fa5c2bb864b1ce8a93bccf40f8]
   - every shell shape that opens a command position is judged by the command
     that WRAPS the spawn: a `$( )`, a backtick, a pipeline, an `&&` chain, a
     `||` alternative, a `{ ...; }` group, an `if` and a `while` condition, a
@@ -54,10 +54,10 @@ Guarantees:
     nine of them by sparing the unbounded half [measured 2026-09-06: the
     pattern answered 7 findings over 11 spawns where the grammar answers 13
     over 26, over the POSITIONS fixture below]
-    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=b0d85db82c8069fa5c2bb864b1ce8a93bccf40f8]
   - a spawner NAMED inside a quoted argument, `sed 's|sh run.sh ...|'`, is not
     a command and is not reported
-    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=b0d85db82c8069fa5c2bb864b1ce8a93bccf40f8]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
 Open Obligations:
   To Do: None
