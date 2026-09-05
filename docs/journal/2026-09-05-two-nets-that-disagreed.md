@@ -599,3 +599,79 @@ removal, and separate memo lifecycle/dispatch retirement. None fails because
 of a syntax error or missing predicate. Restored source passes 27 Python
 product tests and 41 expanded Prolog cases. The complete gate and the original
 large parity workload will be repeated at this state.
+
+## 2026-09-05, the reload that removed another space's row
+
+Tried: reconstructing what a library reconsultation does to a published
+product. A library is a file more than one space loads, so a reload calls
+`withdraw_source_load/3` once per space. Loading one file declaring
+`(: probe-f (-[det,writesState]-> Number Number))` into `&self` and one
+`new-space`, editing it and reloading raised
+
+    permission_error(remove, annotated_arrow_effect,
+                     '&metta'(effect,'probe-f',writesState))
+    context(metta_remove_atom/3,
+            remove_declaration('&metta-space-1', [':','probe-f',...]))
+
+part way through the first withdrawal, after `metta_source_load/4` was already
+retracted and before `rollback_source_load/1` released a single reference. A
+single-space reload of the same file passes, which is why nothing had caught
+it: the shape needs two owners of one file. The equivalent through the Python
+door, `space.load(path)` into two spaces, fails the same way.
+
+Decided: the withdrawal reads the load's STORED references rather than every
+reference it recorded. Its atom pass decodes each reference back to a space and
+an atom and removes it BY VALUE, and an annotated declaration's catalog effect
+row is the one derived artifact that is also a stored atom, so the pass met it
+twice: once implicitly when the declaration's own removal pruned the product,
+and once explicitly, where by value it is indistinguishable from the equal row
+the other space owns. `record_source_atom_assertion/1` already separates the
+two kinds and every storage door journals through it; the atom pass now asks
+for `stored` and leaves artifacts to the reference sweep, which erases them
+with the guard it already has.
+
+Tried: keeping the by-value pass and skipping references whose clause is
+already gone -> does not work, and the reason is worth writing down. A
+withdrawal runs inside the reload's transaction, and inside `transaction/1`
+SWI answers "is this clause still there" two different ways
+[measured 2026-09-05: after a nested `transaction/1` erased a clause,
+`clause_property(Ref, erased)` is false and `clause(_, true, Ref)` still
+answers it, while `clause/3` enumeration of the same predicate already does
+not; both agree once the outer transaction commits]. `stored_atom_of_ref/3`
+reads a bound reference, so it decoded and removed an atom the same
+transaction had already taken out, and instrumenting the loop showed the
+recorded reference reported live while the catalog enumeration listed only the
+other space's row.
+
+Verified: the regression fails at a2cd219f on both doors with that exact
+refusal and passes after the change,
+`metta_arrow_products:a_reloaded_library_declaration_withdraws_only_its_own_effect_row`
+and `test_a_library_reloaded_into_two_spaces_keeps_both_products`. The whole
+Prolog battery and the 3,063-test Python suite both exit 0. The reload's
+informational count for a one-declaration file drops from three atoms to two,
+because the derived catalog row is no longer counted as one the file wrote.
+
+Measured: an unannotated call pays nothing for the machinery. Against
+763b7f2d, whose `engine/` and `lib/` trees are byte-identical to facbcbf1, a
+compiled `plain-f` call costs 2 inferences on both trees, with the compiled
+body identical, whether the process holds no annotated declaration or fifty.
+Loading and first-calling `plain-f` in a space that already holds K sibling
+declarations costs 1,819 inferences at base and 1,826 on the branch for every
+K in 0, 1, 10 and 50, and the annotated and plain sibling arms are equal at
+each K: a constant seven, and no slope in the number of installed dispatch
+hooks. A control confirms the annotated arm really installs them, reporting 50
+products, 51 `dispatch_call_goal_in/6` clauses and 50 catalog rows at K=50,
+with no `metta_verify_annotated_call/5` goal in `plain-f`'s body.
+
+Open: four counter rows do not match their pins and are left as they are.
+`let-heavy`, `loop-1m` and `typed-call` measure 16,006,040, 11,004,798 and
+12,505,790 against pins of 16,006,016, 11,004,776 and 12,505,766, and the
+`automatic-tabling` growth pins are out by -146 to +19 across their eight
+cells. All four pass at c455fdc4 and 5d9b511b and fail at a2cd219f, and
+reverting only `lib/lib_memo/lib_memo.pl` to 5c6a4d57 makes `typed-call` pass
+while reverting `engine/spaces/lifecycle.pl` or
+`engine/spaces/native_matching.pl` does not, so a2cd219f's exact-reference
+retirement is what moved them. `space-name` is borderline rather than moved:
+its minimum lands 5 over a 4,200,424 pin in some batch runs and passes eight
+runs out of eight on its own, with the three samples of one run spread by
+2,470. The seven engine benchmark cases match their pins exactly.

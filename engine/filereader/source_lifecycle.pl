@@ -24,7 +24,12 @@
 %   a failed load erases its typing rules and recompiles affected retained
 %   clauses under the restored policy [tested:
 %   filereader_source_rollback:a_failed_source_rule_restores_discharged_contracts;
-%   commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
+%   commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd];
+%   withdraw_source_load/3 removes the atoms a load STORED and leaves every
+%   clause it derived to the reference sweep, so a reload never removes an
+%   equal atom another space still owns [tested:
+%   metta_arrow_products:a_reloaded_library_declaration_withdraws_only_its_own_effect_row;
+%   commit=WORKTREE].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/reader/filereader.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
@@ -910,9 +915,35 @@ replace_source_load(CanonPath, Space, Replaced, LoadInto, Goal) :-
 %funnel sees the state the program was actually running with; the references
 %then go the way a rolled-back load's do, and erase/1 on a reference the funnel
 %already erased is why rollback_source_load/1 guards it.
+%
+%The atom pass reads the load's STORED references, the ones every storage door
+%journals through record_source_atom_assertion/1, and not its artifacts. An
+%artifact is a clause a load DERIVED and owns by reference: it is released by
+%the reference sweep below, and its owner releases it earlier when the atom it
+%was derived from goes. An annotated arrow declaration is the case where the
+%difference shows, because its derived artifact is itself a stored '&metta'
+%catalog row. Decoding it here removed it a second time BY VALUE, and by value
+%a catalog row is indistinguishable from the equal row another space's copy of
+%the same file owns: importing a library that declares `-[det,writesState]->`
+%into two spaces and reloading it raised
+%permission_error(remove, annotated_arrow_effect, ...) part way through the
+%withdrawal, leaving metta_source_load/4 retracted and the load's references
+%never rolled back
+%[tested:
+%metta_arrow_products:a_reloaded_library_declaration_withdraws_only_its_own_effect_row;
+%commit=WORKTREE].
+%
+%Asking whether the clause is still there instead does not work, because a
+%withdrawal runs inside the reload's transaction and SWI answers that question
+%two different ways there [measured 2026-09-05: inside transaction/1, after a
+%nested transaction/1 erased a clause, clause_property(Ref, erased) is false
+%and clause(_, true, Ref) still answers it, while clause/3 enumeration of the
+%same predicate already does not; both agree once the outer transaction
+%commits; commit=WORKTREE]. stored_atom_of_ref/3 reads a bound reference, so
+%it decodes an atom the same transaction has already taken out.
 withdraw_source_load(CanonPath, Space, Count) :-
     retract(metta_source_load(CanonPath, Space, LoadId, _)),
-    findall(Ref, source_load_assertion(LoadId, _, Ref), Asserted),
+    findall(Ref, source_load_assertion(LoadId, stored, Ref), Asserted),
     reverse(Asserted, Refs),
     findall(AtomSpace-Atom,
             ( member(Ref, Refs), stored_atom_of_ref(Ref, AtomSpace, Atom) ),

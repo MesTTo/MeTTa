@@ -28,6 +28,26 @@ cardinality_goal_in(Body) :-
 product_answers(Module, Expr, Answers) :-
     findall(Value, eval_metta_in_module(Module, Expr, Value), Answers).
 
+%A file the reload cases edit between loads. tmp_file/2 answers under TMPDIR,
+%which tests/checks/gate_scratch.sh points inside the checkout.
+product_source_file(Path) :-
+    tmp_file(plunit_arrow_product, Base),
+    file_name_extension(Base, metta, Path).
+
+write_product_source(Path, Body) :-
+    setup_call_cleanup(
+        open(Path, write, Stream),
+        format(Stream,
+               "(: product-f (-[det,writesState]-> Number Number))~n~w~n",
+               [Body]),
+        close(Stream)).
+
+forget_product_source(Path) :-
+    absolute_file_name(Path, Canon, [access(none)]),
+    retractall(filereader:metta_source_load(Canon, _, _, _)),
+    retractall(filereader:compiled_metta_source(Canon)),
+    ( exists_file(Path) -> delete_file(Path) ; true ).
+
 test(explicit_effect_reaches_catalog_and_plan,
      [ setup(product_fixture(
           "(: product-f (-[det,writesState]-> Number Number))
@@ -188,6 +208,35 @@ test(transaction_rollback_restores_the_declaration_and_its_effect,
     metta_remove_atom(Space, Decl, true),
     assertion(\+ transaction((metta_add_atom(Space, Decl, true), fail))),
     assertion(\+ metta_operation_effect('product-f', _)).
+
+%A library is a file more than one space imports, so its reload withdraws
+%every space's copy before it reads the new text. Each copy's declaration
+%owns a catalog effect row of its own, and the rows are equal, so a
+%withdrawal that removed one of them BY VALUE reached the row the other
+%space still owned: the reload raised permission_error(remove,
+%annotated_arrow_effect, ...) after retracting the source record and before
+%rolling back a single reference.
+test(a_reloaded_library_declaration_withdraws_only_its_own_effect_row,
+     [ setup(( 'new-space'(Left), 'new-space'(Right),
+               product_source_file(Path),
+               write_product_source(Path, "(= (product-f $x) $x)"),
+               filereader:load_metta_file(Path, _, Left),
+               filereader:load_metta_file(Path, _, Right) )),
+       cleanup(( forget_product_source(Path),
+                 product_cleanup(Left), product_cleanup(Right) )) ]) :-
+    Decl = [':', 'product-f', ['-[det,writesState]->', 'Number', 'Number']],
+    findall(Class, metta_catalog_row([effect, 'product-f', Class]), Before),
+    assertion(Before == [writesState, writesState]),
+    write_product_source(Path, "(= (product-f $x) (+ $x 100))"),
+    filereader:load_metta_file(Path, _, Left),
+    findall(Class, metta_catalog_row([effect, 'product-f', Class]), After),
+    assertion(After == [writesState, writesState]),
+    assertion(metta_host_stored(Left, Decl)),
+    assertion(metta_host_stored(Right, Decl)),
+    space_module(Left, LeftModule),
+    space_module(Right, RightModule),
+    product_answers(LeftModule, ['product-f', 1], [101]),
+    product_answers(RightModule, ['product-f', 1], [101]).
 
 test(cardinality_is_trusted_when_verification_is_disabled,
      [ setup(product_fixture(

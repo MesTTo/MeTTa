@@ -9,6 +9,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Reloading a file that declares an annotated arrow now succeeds when more than
+  one space holds that file, which is the ordinary shape for a library. The
+  withdrawal removed the declaration's own catalog effect row a second time by
+  value, where it is indistinguishable from the equal row another space owns,
+  so the reload refused with `permission_error(remove,
+  annotated_arrow_effect, ...)` after retracting the source record and before
+  releasing any of the load's references. A withdrawal now removes the atoms
+  its load stored and leaves the clauses it derived to the reference sweep.
 - The example parity reporter preserves SWI process exits without reporting
   their `unwind(halt(Status))` control signal as an application error.
 
