@@ -17,7 +17,7 @@
 %     and the shipped engine passes every one of those laws
 %     [tested: property_lane_plants:every_plant_is_caught,
 %     property_lane_plants:the_shipped_engine_passes_every_law_a_plant_is_caught_by;
-%     commit=WORKTREE]
+%     commit=819393cb9608052a198ef0b2a8c0676d9ef9e824]
 %   - that the throw carries quickcheck's counter_example with the SHRUNKEN
 %     value, so the output names the term rather than only the law, is the
 %     library's documented behaviour and is not checked here:

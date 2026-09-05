@@ -27,10 +27,10 @@ Guarantees:
     inside one term still decides
     [tested: test_a_variable_identifier_inside_a_string_is_data,
     test_two_answers_reusing_a_slot_are_not_one_variable,
-    test_sharing_inside_one_printed_term_still_decides; commit=WORKTREE]
+    test_sharing_inside_one_printed_term_still_decides; commit=819393cb9608052a198ef0b2a8c0676d9ef9e824]
   - a recorded skip whose capability has since arrived is reported on every
     run, so a stale exclusion is visible rather than believed
-    [tested: test_a_skip_whose_capability_arrived_is_reported; commit=WORKTREE]
+    [tested: test_a_skip_whose_capability_arrived_is_reported; commit=819393cb9608052a198ef0b2a8c0676d9ef9e824]
   - a file whose status is `diverges` carries the difference it is ALLOWED to
     have, so it cannot drift further without failing: a recorded divergence is
     a ruling, not an exemption.

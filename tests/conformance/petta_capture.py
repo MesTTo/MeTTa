@@ -22,11 +22,11 @@ Guarantees:
     reported as nondeterministic and the file is ruled out of the corpus.
   - an input git does not TRACK cannot enter the artefact, so the commit the
     pin names contains every byte it froze
-    [tested: test_an_untracked_corpus_input_is_refused; commit=WORKTREE]
+    [tested: test_an_untracked_corpus_input_is_refused; commit=819393cb9608052a198ef0b2a8c0676d9ef9e824]
   - a skip is DERIVED from a declared capability rather than listed by name,
     and carries that capability's own sentence, so the reason and the decision
     cannot disagree [tested: test_a_skip_is_derived_from_a_declared_capability;
-    commit=WORKTREE]
+    commit=819393cb9608052a198ef0b2a8c0676d9ef9e824]
 Fails when:
   - asked to capture from a dirty or unresolvable checkout, or from one whose
     corpus holds an untracked file.
