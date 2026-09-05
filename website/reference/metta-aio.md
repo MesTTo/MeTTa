@@ -173,22 +173,25 @@ def saga(self, receipts: AsyncMeTTa) -> AsyncSaga:
 ```python
 async def space(
     self,
-    name: str | None = None,
+    name: str | Symbol | Expression | Space | None = None,
     backing: Any = None,
     *,
     inherits: AsyncMeTTa | None = None,
     restricted: bool = False,
-    grants: Sequence[str] = (),
+    grants: _abc.Iterable[str] = (),
+    journal: str | os.PathLike[str] | None = None,
+    schema: _abc.Mapping[str, Any] | None = None,
+    sync: str = 'none',
+    _created_at: tuple[str, int] | None = None,
 ) -> AsyncMeTTa:
 ```
 
-> Create or open one space through this connection's worker.
+> Create or open a space through MeTTa.space on this connection's worker.
 >
-> An omitted name creates an anonymous space. ``inherits``, ``restricted``
-> and ``grants`` choose the space MODEL and apply to a named space as
-> well as an anonymous one. A provider supplied as ``backing`` is
-> attached to the resulting handle. The connection owns the worker;
-> returned spaces borrow it, so closing one does not stop the connection.
+> Native, provider, remote, and journaled construction use the synchronous
+> context door. Returned spaces borrow the connection's worker, so closing
+> one does not stop the connection. Anonymous handles record the submitting
+> coroutine's creation site.
 
 ### `AsyncMeTTa.op`
 

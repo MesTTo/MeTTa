@@ -2386,6 +2386,7 @@ def space(
     journal: str | os.PathLike[str] | None = None,
     schema: _abc.Mapping[str, Any] | None = None,
     sync: str = 'none',
+    _created_at: tuple[str, int] | None = None,
 ) -> Space:
 ```
 
