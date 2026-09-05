@@ -338,3 +338,31 @@ All three mode metadata files report `source_unchanged=true`; their engine, libr
 Outcome: for the fixed-head list fixture, preparation is linear in source length and every answer is the integer 1. At q=n, the largest fourfold size increase raises total process CPU from 2,020,111,088 to 29,762,280,850 ns with folding disabled, from 575,268,254 to 6,698,298,395 ns with source-reading metadata restored, and from 145,891,654 to 523,609,731 ns with both changes enabled. The complete workload changes from O(n+q*n) to O(n+q). This includes first compilation rather than relying only on a warmed plateau. At fixed q=256, optimized repeated CPU stays between 8,190,682 and 9,983,791 ns over n=256 through 16,384, while the two controls rise to 457,679,117 and 122,865,476 ns respectively.
 
 The metadata control and optimized mode have identical q=n total SWI counts for every list size, ending at 6,752,276 ports, despite their different CPU classes. Folding disabled ends at 1,080,553,357 ports. Thus the source-reading control proves why inference counts alone did not establish the earlier total-cost claim. The retained input consumes O(n) source memory; preparation must inspect the input, and q completed calls must return q values. Arbitrary-precision operands and results keep their bit-size costs; the nested-addition fixture is supplementary evidence rather than a claim that all scalar arithmetic has constant-size values.
+
+## 2026-09-05: folding yields to an open observation
+
+Found by rebasing onto the trunk that had gained source observation:
+`source_observation:nested_controls_preserve_each_source_branch` failed, and
+disabling `fold_native_scalar_call/5` alone made it pass. The fixture is
+`(= (obs-nested $a $b) (if $a (if $b (+ 1 2) (+ 3 4)) (+ 5 6)))`, three
+constant integer calls, all foldable. A folded call leaves no goal to attribute,
+so the three `source-coverage` rows do not read zero, they are absent: the
+report stops naming the branch that ran as well as the two that did not.
+
+Decided: the optimization yields while an observation is open, tested as
+`\+ nb_current('$metta_observation', _)` placed after every other admission
+test rather than first, which is what makes it free: run-source reads 427,855
+with it last and 429,855 with it first, because most of what passes the
+argument shape is rejected by the effect or mode test before the question is
+worth asking. This is what a coverage build
+does everywhere else, and coverage is what the observation is for. Rejected:
+teaching the observer to attribute a span whose goal was folded away, which
+would need the pre-folding tree carried into the compiled clause; that is the
+observer's own design and a larger change than the interaction warrants.
+
+Limitation: an equation compiled before an observation opens stays folded, so
+observing it later still misses those spans. Deferred translation compiles at
+first call, and the observer's own door takes source text, so the shipped path
+compiles inside the observation; a program that ran a definition first and
+observed it afterwards is the case this does not cover.
+

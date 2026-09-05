@@ -25,6 +25,22 @@ fold_native_scalar_call(Module, Fun, Args, Out, Goal) :-
     append(Args, [Out], DirectArgs),
     Direct =.. [Fun|DirectArgs],
     Goal == Direct,
+    % A folded call has no goal left to attribute, so every span it covered
+    % leaves the coverage report entirely rather than reading zero: the taken
+    % branch of an observed `(if $a (if $b (+ 1 2) (+ 3 4)) (+ 5 6))` lost the
+    % row that says it ran. Coverage is what the observation is for, so the
+    % optimization yields to it while one is open, which is what a coverage
+    % build does everywhere else. It sits after every other admission test
+    % rather than first, which is what makes it free: run-source reads 427,855
+    % with it here and 429,855 with it ahead of them, because most of what
+    % passes the argument shape is rejected by the effect or mode test before
+    % the question is worth asking
+    % [measured: 427855 against 429855 SWI inferences; command=cd
+    % extensions/python && PYTHONPATH=. $VENV/bin/python bench.py
+    % --counter-only run-source; commit=WORKTREE].
+    % [tested: source_observation:nested_controls_preserve_each_source_branch;
+    % commit=WORKTREE]
+    \+ nb_current('$metta_observation', _),
     % findall copies each answer and unwinds every speculative binding. The
     % exact singleton check retains failure and duplicate multiplicity, even
     % if the native implementation ceases to satisfy the expected mode.
