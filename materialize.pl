@@ -230,12 +230,29 @@ flush_space_materialization(Space, Names) :-
         )
     ).
 
+% Preparation derives the whole relation, which is quadratic in the chain
+% family the admission gate is built for, and a load pays it whether or not
+% the program ever asks. Loading the two-rule chain costs 6181 inferences and
+% 0.0017 CPU seconds at 512 edges without construction and 78622783 and 7.26
+% with it, against 11012 inferences saved per completed ground query: about
+% 7100 queries to break even at that size and 1670 at 128. A load has no way
+% to know how many queries follow, so the program says whether to prepare.
+% [measured: 78622783 against 6181 load inferences and 724 against 11736
+% query inferences; command=swipl -g main -t halt ai-tmp/qp-finish/load-cost.pl
+% -- extensions with MATERIALIZE_MODE unset and =control;
+% fixture=the two-rule reach chain at 32 through 512 edges; commit=WORKTREE]
+source_relation_materialization_enabled :-
+    metta_pragma('materialize-source-relations', Value),
+    Value \== false,
+    Value \== none.
+
 % The routing compiler in metta-on-mork requires finite flat inputs, range
 % restriction and co-materialized terminal calls. Retaining the source avoids
 % its catchall and equation-introspection changes.
 % https://github.com/MesTTo/metta-on-mork/blob/a5f312063529ab7d8df92275c83b288d493edb7e/src/program/mod.rs
 % [source: compile_routing and compile_routed_body; commit=WORKTREE]
 source_candidates(Space, Names, Module, Candidates) :-
+    source_relation_materialization_enabled,
     atom(Space),
     spaces:native_storage_module_ready(Space, _),
     spaces:metta_exec_module_known(Space, Module),
