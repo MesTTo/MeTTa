@@ -136,9 +136,10 @@ materialize_source(Space) :-
 % flush cost the loader on every completed source. Both goals are one indexed
 % lookup, and the second is what keeps a live relation on the maintained path
 % when a program has asked for one.
-% [measured: 786829 SWI inferences over 2000 completed runnable-only calls,
-% equal to the pre-subsystem tree at 8f853f99; command=cd extensions/python
-% && PYTHONPATH=. $VENV/bin/python bench.py --counter-only foreign-match;
+% [measured 2026-09-05: 786829 SWI inferences over 2000 completed
+% runnable-only calls, equal to the pre-subsystem tree at 8f853f99;
+% command=cd extensions/python && PYTHONPATH=. $VENV/bin/python bench.py
+% --counter-only foreign-match;
 % commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 source_materialization_dormant(Space) :-
     \+ source_relation_materialization_enabled,
@@ -267,10 +268,11 @@ flush_space_materialization(Space, Names) :-
 % completed ground query: about 1600 queries to break even. Nothing bounds the
 % derived relation, and a load has no way to know how many queries follow, so
 % the program says whether to prepare.
-% [measured: 4300722 against 5189 load inferences and 283 against 2989 warmed
-% query inferences; command=PYTHONPATH=extensions/python $VENV/bin/python -m
-% benchmarks.query_planning_materialization {materialized,original} --sizes 128;
-% fixture=the two-rule reach chain; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
+% [measured 2026-09-05: 4300722 against 5189 load inferences and 283 against
+% 2989 warmed query inferences; command=PYTHONPATH=extensions/python
+% $VENV/bin/python -m benchmarks.query_planning_materialization
+% {materialized,original} --sizes 128; fixture=the two-rule reach chain;
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 source_relation_materialization_enabled :-
     metta_pragma('materialize-source-relations', Value),
     Value \== false,
@@ -490,8 +492,9 @@ derive_ground_bags(GroundRules, Rows) :-
 % vertex list per edge; on a materialized relation that makes preparation
 % quadratic in the number of ground calls. An AVL index retains O(log V)
 % edge updates, and this difference-list queue costs O(1) per insertion.
-% https://github.com/python/cpython/blob/v3.13.0/Lib/graphlib.py
-% [source: TopologicalSorter.done; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
+% [source: TopologicalSorter.done in
+% https://github.com/python/cpython/blob/v3.13.0/Lib/graphlib.py;
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 indexed_topological_order(Graph, Order) :-
     maplist(topological_node, Graph, Nodes), list_to_assoc(Nodes, Initial),
     foldl(count_successors, Graph, Initial, Index),
@@ -662,8 +665,9 @@ publish_if_current(Space, Module, Stamp, Signatures, Trie, Owner) :-
 % by the first query and can disappear when a surrounding transaction finishes.
 % The blob owns its nodes through atom GC, so retracting a reference preserves
 % rollback and readers without explicitly destroying a published index.
-% https://github.com/SWI-Prolog/swipl-devel/blob/V10.0.0/src/pl-trie.c#L155-L164
-% [source: release_trie_ref; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
+% [source: release_trie_ref in
+% https://github.com/SWI-Prolog/swipl-devel/blob/V10.0.0/src/pl-trie.c#L155-L164;
+% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 publish_materialization(Space, Module, Stamp, Signatures, Trie, Owner) :-
     materialization_changed(Space),
     forall(member(F/Arity, Signatures),

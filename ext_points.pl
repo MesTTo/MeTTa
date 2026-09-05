@@ -1218,6 +1218,23 @@ kind(observation_discard/0, service).
 kind(observation_defer/2, service).
 kind(observe/3, service).
 
+%A DIFFERENT observation, next to those five because a reader looking for one
+%finds the other. Those enter a transaction's post-commit stream; this is the
+%door to engine/source_observation.pl, the coverage and Error-frame observer
+%engine/metta.pl deliberately does not load at boot: nothing an ordinary
+%program does needs it, and the exception hook it leaves resident is charged
+%to every compiled host request [source: engine/metta.pl, the comment above
+%metta_ensure_source_observation/0]. So whoever wants an observation loads it,
+%and lib/lib_observe/lib_observe.pl's observe-source/4 is the shipped caller.
+%
+%Published rather than reached around. source_observation:observe_source/4 is
+%exported by its own module and cannot be its own loader, so a library allowed
+%to call it needs a published way to make it exist; the only alternative on
+%offer is a library running load_files/2 over an engine path, which is the
+%reach this gate exists to refuse
+%[tested: sh check.sh lib-surface; commit=60d6ca9089f50521bba869c3b7a87c92fd6a990f].
+kind(metta_ensure_source_observation/0, service).
+
 %The declared source discipline of a context, (source Ctx Kind): the
 %conformance kit reads the declaration the enforcement reads instead
 %of trusting a caller's claim, so the read is a published service.
