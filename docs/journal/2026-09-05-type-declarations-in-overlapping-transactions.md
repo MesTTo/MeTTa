@@ -42,3 +42,63 @@ Verified the substrate behavior in SWI-Prolog's own **10.1.13** source, the vers
 Rejected: replacing only the alias's nested transaction with `transaction/3`, because it cannot validate against the final outer commit state. A fix must change the outer transaction boundary. A caller requiring serializability across a compound operation takes the lock the thread guide already prescribes, covering the whole operation; a transaction is not a substitute for that lock.
 
 Decided: keep this transaction-consistency item open and separate. No transaction boundary, scheduler, or casting behavior was changed for this finding. Revisit when that boundary's consistency policy is designed and measured, or a later SWI version changes the pinned behavior.
+
+## 2026-09-05, later the same day
+
+**Fixed at the engine's own transaction boundary.** The "Not fixed" entry above
+is superseded for the ENGINE's `metta_transaction/1`; it still stands for a raw
+`transaction/1` a caller opens directly, which has no commit hook to carry a
+check.
+
+Tried: `transaction/3` at the two places the write can be outermost. SWI states
+the order it needs: call Goal, lock the mutex, change visibility to the current
+global state combined with Goal's changes, call the Constraint, then commit,
+discarding everything on failure or exception. Only the OUTER branch refreshes,
+which is why one placement cannot do it: a bare declaration's own transaction in
+`engine/spaces/lifecycle.pl` is outermost for a bare write, and a declaration
+made INSIDE a user transaction is nested there, so
+`metta_outer_transaction_prepare/5` carries the second constraint over a
+per-thread list of pending aliases.
+
+Tried: a terminating two-thread probe, `tests/prolog/probes/type_alias_transaction_race.pl`,
+driving both transactions from one thread so the interleaving is fixed rather
+than sampled. Both snapshots open before either declares, both declare before
+either commits, and the commits are ordered, so which transaction loses is the
+probe's decision. Every receive carries a timeout and the whole orchestration
+runs under `call_with_time_limit/2`; a worker still running at cleanup is
+signalled and DETACHED rather than joined, because a join would put back the
+hang the timeouts remove. Result on this tree:
+
+```text
+declarations=[['Alias','Number']]
+outcomes=[a-committed,b-threw(error(metta_type_alias_conflict('&metta-space-1','Count','Number','String'),none))]
+```
+
+Control, the same probe with both `transaction/3` calls reverted to
+`transaction/1` and nothing else changed:
+
+```text
+declarations=[['Alias','Number'],['Alias','String']]
+outcomes=[a-committed,b-committed]
+```
+
+exit 1 against exit 0, so the constraint is what changes the outcome.
+
+Tried: removing the survival guard in `validate_committed_type_alias/3`, which
+asks whether the declaration being validated is in the refreshed state at all.
+The pending list is recorded with `nb_setval`, which does not unwind on
+backtracking, so a nested transaction that declares an alias and then rolls back
+leaves its entry behind. Without the guard the outer commit is refused for a
+declaration that no longer exists: `structural_aliases:a_rolled_back_nested_declaration_does_not_refuse_the_outer_commit`
+fails with `conflicting type alias Count in &metta-space-43: 'String' versus
+'Number'`, and it is the ONLY test that fails, so the guard does not weaken the
+concurrent case it sits beside.
+
+Decided: both placements, the guard, and both cases gated in
+`tests/prolog/suites/typecheck/structural_aliases.plt`. The suite loads the
+probe rather than restating its orchestration, so the standalone arm and the
+gated arm cannot drift.
+
+Open: a raw `transaction/1` the caller opens itself is still snapshot isolation
+and nothing else; `tests/prolog/probes/type_declaration_snapshot.pl` reproduces
+that and stays outside the gate.

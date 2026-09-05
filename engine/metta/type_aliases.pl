@@ -11,8 +11,15 @@
 % Guarded by: mutation callers hold with_typing_policy_stable/1 while validating,
 %   storing and repairing declarations [tested:
 %   tests/prolog/suites/typecheck/structural_aliases.plt; commit=acad923476d21110870f235192757281a737ee71].
-% Fails when: callers expect serializability from overlapping raw outer
-%   transactions; the existing snapshot-isolation limitation is reproduced by
+%   Two overlapping ENGINE transactions cannot both commit a different alias for
+%   one name: metta_validate_pending_type_aliases/0 re-runs the requirement at
+%   the outer commit, where the snapshot has refreshed, and the second commit is
+%   refused by name [tested:
+%   structural_aliases:overlapping_transactions_leave_one_alias_and_name_the_loser;
+%   commit=f5eb8775b78519c080da4ea7c6dff81f7be21ef9].
+% Fails when: callers expect serializability from overlapping RAW outer
+%   transactions a caller opened with transaction/1 itself; the engine has no
+%   commit hook inside one of those and the limitation is reproduced by
 %   tests/prolog/probes/type_declaration_snapshot.pl [source:
 %   docs/journal/2026-09-05-type-declarations-in-overlapping-transactions.md;
 %   commit=acad923476d21110870f235192757281a737ee71].

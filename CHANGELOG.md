@@ -147,6 +147,75 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Node binding refuses a command whose argument count is not the one its
+  verb takes, instead of answering nothing. A wrong count unified with no
+  clause head, so the command simply FAILED and a caller pulling one event read
+  that as "there are no answers": adding the space argument to `run` disarmed
+  `Space.capacity`'s admission guard and stopped the conformance kit's
+  streaming definitions from loading, both in silence. The verb's argument
+  count is declared beside it and checked before any call, and an unknown verb
+  stays a separate refusal from a wrong count, because a caller acts on them
+  differently. A known scope word given the wrong details is refused by its own
+  name too, where it used to be reported as a scope the binding does not have.
+
+- The Node binding's `&self` is the space the ask was made in, at the term door
+  as at the source door. `&self` is a substitution for the running space that
+  the engine's source loader applies, and a term built on the host side never
+  reached it, so `eval` in a scratch space answered the ENGINE ROOT's atoms
+  where `runStatus` answered the scratch's. An analysis that copies a program
+  into a scratch therefore saw the program's rows in both places. The Python
+  binding already substituted at both of its doors.
+
+- `MeTTa.spaces()` lists a space whose name has no ampersand instead of
+  refusing the whole registry. Any symbol something writes through is a
+  registered space name, which `07-add_atom_fun_space.metta` uses, and the
+  host's `p` tag required the prefix; because the registry crosses as one
+  expression, one such name cost every other space in the answer. The prefix is
+  how the built-in spaces are spelled and the tag is what says a name is a
+  space, so the tag now carries the engine's own name and that identity
+  addresses the space. `m.space("name")` still MINTS `&name`, which is a
+  different space, so the handle from `spaces()` is the way to the bare one.
+  The answer is also total: it used to `filter`, silently answering a shorter
+  list.
+
+- `MeTTa.run` and `MeTTa.loadFile` take the space to load into, which every
+  other door already took; they wrote to the engine root whatever the caller
+  was working in.
+
+- `MeTTa.speculate` refuses a host callable with the reason and the remedy,
+  where it used to lift it into a grounded atom, answer `(js Function)` and
+  never call it. This seat reaches JavaScript by suspending the engine and
+  `engine_yield/1` cannot unwind through the frame `snapshot/1` opens, which is
+  what `Space.transaction` already said in the same situation.
+
+- `speculate` answers every answer of its body. `snapshot/1` runs its goal as
+  `once/1`, so a scope over three answers answered one and dropped two with
+  nothing said, the same opacity violation `transaction` was repaired for: the
+  answers are collected inside the snapshot and replayed after it, so every
+  write still belongs to one discarded execution. The Python shim's lazy cursor
+  carried a hand-written findall-then-member for this, which the seam now
+  answers for every caller.
+
+- A trace whose program abolished a wrapped predicate no longer leaves the
+  tracer armed for the rest of the process. Tearing a session down unwraps each
+  recorded target, and `unwrap_predicate/2` FAILS rather than raising when the
+  indicator names no wrapper, which is what a clearing program leaves behind:
+  the child module's copy is abolished and the parent's is imported in its
+  place, so the child's indicator removes the PARENT's wrapper and the parent's
+  own target then finds nothing. The failure stopped the sweep before any state
+  was retracted, and because the teardown runs as a cleanup, whose failure is
+  not reported, the trace answered normally and every later trace on that engine
+  refused with `permission_error(trace, evaluation, nested)`. Reproduced with a
+  space holding two equations, a copy of them in a second space, and a program
+  that clears that space: `session=yes wrapped=4` afterwards.
+
+- Two overlapping engine transactions cannot both commit a different alias for
+  one name. Under snapshot isolation each read a state the other's write was
+  not in, so both declaration-time checks passed and a space ended up holding
+  `(: Count (Alias Number))` and `(: Count (Alias String))` together; the outer
+  transaction boundary re-runs the requirement at commit, where the state has
+  refreshed, and refuses the second by name.
+
 - `serve` and `boot` finish their shutdown when the interrupt repeats. A second
   SIGINT arriving inside the close landed in `socketserver.shutdown`'s wait and
   was collected as a close FAILURE, which `close()` re-raised, so the graceful

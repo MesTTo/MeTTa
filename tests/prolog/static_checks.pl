@@ -136,6 +136,7 @@ main :-
     check,
     a_backend_calls_only_published_surface,
     a_host_binding_calls_only_published_surface,
+    every_dispatch_row_declares_the_arity_its_clause_accepts,
     no_cut_in_a_live_hook_clause,
     every_engine_emitted_goal_is_protected,
     every_emitted_goal_is_reachable,
@@ -1263,6 +1264,77 @@ a_host_binding_calls_only_published_surface :-
                        engine/ext_points.pl if the host transport is meant to \c
                        call it~n',
                       [Caller, Callee, Callee])),
+        fail
+    ).
+
+%%%% A dispatch table declares the arity its clauses accept %%%%
+%
+% The Node bridge refuses a command whose argument count is not the one its
+% verb DECLARES, rather than letting the call unify with no clause head and
+% fail into silence. A declared table is what makes that check cost one indexed
+% lookup instead of a clause walk, and what keeps it independent of
+% protect_static_code, a flag nothing here sets and whose flip would otherwise
+% turn every command into a refusal.
+%
+% What a declared table can do is go stale, and this is the thing that stops
+% it: the same table derived from the clause heads and compared BOTH ways, so a
+% verb whose signature moves and a verb added without a row are each named.
+% clause/2 lives here, off the run-time path, which is the whole point of the
+% split.
+%
+% It cannot pass by looking at nothing. If clause/2 stopped answering, every
+% declared row would be reported as undeclared-by-its-clauses; if the tables
+% went empty, every clause would be reported as missing a row; and both empty
+% at once is what the row count refuses.
+dispatch_row(command, Verb, Arity) :- bridge_fact(metta_node_verb(Verb, Arity)).
+dispatch_row(scope, Word, Arity) :- bridge_fact(metta_node_scope_word(Word, Arity)).
+
+% The bridge is consulted at RUN time, by the check above, so naming one of its
+% predicates as a GOAL here would leave list_undefined reporting it at COMPILE
+% time, when the file that defines it has not been read. Asking whether the
+% definition arrived is also what turns an unloaded table into the loud empty
+% result below rather than an existence error out of the middle of a findall.
+bridge_fact(Goal) :-
+    functor(Goal, Name, Arity),
+    current_predicate(Name/Arity),
+    call(Goal).
+
+% The catch-all clause of each dispatcher takes a variable where the others
+% take a literal list, which is what is_list/1 is filtering out: it is the
+% refusal itself and accepts every count by construction.
+dispatch_clause(command, Verb, Arity) :-
+    clause(metta_node_command(Verb, Args, _), _),
+    atom(Verb), is_list(Args), length(Args, Arity).
+dispatch_clause(scope, Word, Arity) :-
+    clause(metta_node_scope(Word, Details, _), _),
+    atom(Word), is_list(Details), length(Details, Arity).
+
+every_dispatch_row_declares_the_arity_its_clause_accepts :-
+    findall(K-N-A, dispatch_row(K, N, A), Declared0), sort(Declared0, Declared),
+    findall(K-N-A, dispatch_clause(K, N, A), Accepted0), sort(Accepted0, Accepted),
+    subtract(Declared, Accepted, Unbacked),
+    subtract(Accepted, Declared, Undeclared),
+    (   Declared == []
+    ->  format(user_error,
+               'the Node dispatch tables answered nothing, so this check \c
+                proved nothing: it reads metta_node_verb/2 and \c
+                metta_node_scope_word/2 out of extensions/node/bridge.pl~n',
+               []),
+        fail
+    ;   Unbacked == [], Undeclared == []
+    ->  length(Declared, Rows),
+        format("static: every one of ~d Node dispatch rows declares the \c
+                argument count its clause accepts~n", [Rows])
+    ;   forall(member(Kind-Name-Arity, Unbacked),
+               format(user_error,
+                      'the Node ~w table declares ~w/~w and no clause of it \c
+                       has that arity, so every call to ~w would be \c
+                       refused~n', [Kind, Name, Arity, Name])),
+        forall(member(Kind-Name-Arity, Undeclared),
+               format(user_error,
+                      'the Node ~w ~w has arity ~w and the table declares \c
+                       no such row, so the dispatcher would refuse every call \c
+                       to it~n', [Kind, Name, Arity])),
         fail
     ).
 

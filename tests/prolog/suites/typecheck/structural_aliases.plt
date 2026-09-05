@@ -7,6 +7,10 @@
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
+% The two-thread orchestration lives in the probe so that the same sequence can
+% be run against another checkout, which is how the commit constraint below was
+% shown to be the thing that changes the outcome.
+:- ensure_loaded('../../probes/type_alias_transaction_race.pl').
 
 :- begin_tests(structural_aliases).
 
@@ -337,5 +341,27 @@ test(alias_readers_cost_only_their_visible_scope_and_retire_transactionally,
     assertion(Retired == Plain),
     assertion(type_alias_gate_ref(local(MA), _)),
     assertion(\+ spaces:type_alias_mutation_scope_ref(local(MB), _)).
+
+% Two transactions whose snapshots overlap each read a state the other's write
+% is not in, so the declaration-time check passes in both and the space used to
+% end up holding both aliases. The probe fixes the interleaving, so this asserts
+% an outcome rather than sampling a race.
+test(overlapping_transactions_leave_one_alias_and_name_the_loser) :-
+    overlapping_alias_declarations(Declarations, Outcomes),
+    assertion(one_alias_survives(Declarations, Outcomes)).
+
+% The pending list a commit re-validates is recorded with nb_setval, which does
+% not unwind on backtracking, so a nested transaction that declares an alias and
+% then rolls back leaves its entry behind. Validating that entry would refuse
+% the outer commit over a declaration that is no longer there.
+test(a_rolled_back_nested_declaration_does_not_refuse_the_outer_commit,
+     [setup(context(S, _)), cleanup(metta_release_space(S))]) :-
+    metta_transaction(
+        ( \+ metta_transaction(( metta_add_atom(S, [':','Count',['Alias','Number']],
+                                                true),
+                                 fail )),
+          metta_add_atom(S, [':','Count',['Alias','String']], true) )),
+    findall(T, match_stored(S, [':','Count',T], T, _), Rows),
+    assertion(Rows == [['Alias','String']]).
 
 :- end_tests(structural_aliases).

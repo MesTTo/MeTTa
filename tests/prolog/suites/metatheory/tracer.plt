@@ -239,4 +239,50 @@ test(variable_filter_does_not_unify_to_all,
      [throws(error(domain_error(trace_function_filter, _), _))]) :-
     tracer:metta_trace_source("", '&self', 100, _, _, _).
 
+%The same two equations in &self and in a second space, so both modules compile
+%their own predicates and both are wrapped when a trace arms.
+setup_trace_leak(Box) :-
+    setup_trace_test,
+    cleanup_trace_function(plunit_trace_leak),
+    cleanup_trace_function(plunit_trace_clear),
+    'new-space'(Box),
+    trace_leak_program(Program),
+    process_metta_string(Program, _),
+    process_metta_string(Program, _, Box).
+
+trace_leak_program("(= (plunit_trace_leak $x) 42)\n\
+(= (plunit_trace_clear $s) (collapse (match $s $x (remove-atom $s $x))))\n\
+!(plunit_trace_leak 1)").
+
+%The tracer is disarmed FIRST, so a failure here costs this test rather than
+%every trace test after it. Through ignore/1 because the teardown is the thing
+%under test: on a tree where it still fails, a cleanup that failed with it would
+%report the cleanup rather than the assertions that name the defect.
+cleanup_trace_leak(Box) :-
+    ignore(catch(tracer:metta_trace_end, _, true)),
+    catch(metta_release_space(Box), _, true),
+    cleanup_trace_function(plunit_trace_leak),
+    cleanup_trace_function(plunit_trace_clear),
+    cleanup_trace_test.
+
+%A traced program that clears the second space abolishes that space's copies,
+%and the shadow repair imports &self's in their place, so the recorded child
+%targets start denoting the PARENT's procedures and unwrapping them removes the
+%parents' wrappers. The parents' own recorded targets then find nothing to
+%remove, and unwrap_predicate/2 FAILS rather than raising there. The failure
+%used to stop maplist/2 before metta_trace_end_unlocked/0 retracted anything,
+%leaving session=yes and four wrapped targets standing, after which every trace
+%on the engine refused [measured 2026-09-05 on the same fixture: two targets at
+%arm, four recorded at teardown, and the second trace below raised
+%permission_error(trace, evaluation, nested)].
+test(a_trace_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarmed,
+     [setup(setup_trace_leak(Box)), cleanup(cleanup_trace_leak(Box))]) :-
+    format(atom(Source), "!(plunit_trace_clear ~w)", [Box]),
+    tracer:metta_trace_source(Source, '&self', 1000, _Cleared),
+    assertion(\+ tracer:metta_trace_session),
+    assertion(\+ tracer:metta_trace_wrapped(_)),
+    tracer:metta_trace_source("!(plunit_trace_leak 1)", '&self', 1000, Again),
+    assertion(Again == [event(0, call, [plunit_trace_leak, 1], '', []),
+                        event(0, exit, [plunit_trace_leak, 1], 42, [])]).
+
 :- end_tests(tracer).

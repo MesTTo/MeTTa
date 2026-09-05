@@ -29,6 +29,12 @@
 %   - metta_trace_source/4 removes every metta_tracer wrapper and state fact,
 %     including after an event-limit error [tested 2026-08-14:
 %     tracer:event_limit_truncates_and_removes_every_wrapper].
+%   - the teardown is TOTAL. A recorded target whose wrapper is already gone,
+%     which is what a traced program that abolishes a wrapped predicate leaves
+%     behind, stops neither the rest of the sweep nor the state retractions, so
+%     a later trace on the same engine still arms
+%     [tested: tracer:a_trace_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarmed;
+%     commit=f5eb8775b78519c080da4ea7c6dff81f7be21ef9].
 % Guarded by:
 %   - '$metta_trace_state' serializes trace sessions and wrapper changes
 %     [tested 2026-08-14: tracer:event_limit_truncates_and_removes_every_wrapper].
@@ -105,8 +111,23 @@ metta_trace_wrap(Module:F/A) :-
     wrap_predicate(Module:Head, metta_tracer, Closure,
                    metta_trace_call(LogicalF, In, Head, Closure)).
 
+%Tolerant of BOTH outcomes, and the FAILURE is the one that bites.
+%unwrap_predicate/2 is semidet and fails when the indicator names no
+%metta_tracer wrapper, which is what a traced program that abolishes a wrapped
+%predicate produces: clear_generated_predicate/3 abolishes the child module's
+%copy and metta_restore_inherited_predicate/3 imports the parent's, so the
+%child's recorded indicator starts denoting the PARENT's procedure and removes
+%ITS wrapper, and the parent's own recorded target then finds nothing left to
+%remove. The catch alone let that failure through maplist/2 in
+%metta_trace_end_unlocked/0, which never reached its nine retractalls, so the
+%session flag stayed asserted; metta_trace_source/6 runs the teardown as a
+%cleanup, whose failure is not reported, so the trace answered normally and
+%every later trace on that engine refused with
+%permission_error(trace, evaluation, nested)
+%[tested: tracer:a_trace_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarmed;
+%commit=f5eb8775b78519c080da4ea7c6dff81f7be21ef9].
 metta_trace_unwrap(Module:F/A) :-
-    catch(unwrap_predicate(Module:F/A, metta_tracer), _, true).
+    ignore(catch(unwrap_predicate(Module:F/A, metta_tracer), _, true)).
 
 metta_trace_wrap_once(Target) :-
     ( metta_trace_wrapped(Target) -> true
