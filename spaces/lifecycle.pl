@@ -1,4 +1,6 @@
 % Purpose: decode stored atoms and manage source, subscription, reaction, table, and clear lifecycles
+% Guarantees: annotated arrow effects reach catalog policy and follow their
+%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
 %   A foreign space life releases tabled, generated, deferred-translation, and
@@ -155,6 +157,7 @@ remove_sexp(Space, Atom) :- remove_sexp(Space, Atom, _).
 remove_sexp('&metta', [Rel|Args], Removed) :- !,
     (   native_storage_module_ready('&metta', Module)
     ->  Term =.. ['&metta', Rel|Args],
+        ( Rel == effect -> metta_refuse_owned_effect_removal(Module, Term) ; true ),
         native_retract_one(Module:Term, Removed),
         (   Removed == true
         ->  metta_catalog_note_removed([Rel|Args])
@@ -1527,10 +1530,15 @@ metta_add_atom(Space, Term, true) :-
 %from its promised all-or-nothing write. Host registrations that need exclusive
 %ownership use metta_py_add_strict_declaration/2 in shim.pl.
 metta_add_atom(Space, Term, true) :-
-    Term = [':', _, _],
-    existing_duplicate_declaration(Space, Term, First),
-    !,
-    print_message(warning, metta_duplicate_declaration(Space, Term, First)).
+    Term = [':', Name, Type],
+    (   existing_duplicate_declaration(Space, Term, First)
+    ->  !,
+        print_message(warning, metta_duplicate_declaration(Space, Term, First))
+    ;   metta_annotated_type(Type)
+    ->  !,
+        metta_require_arrow_product(Name, Type, Product),
+        metta_add_annotated_declaration(Space, Name, Type, Product)
+    ).
 % DontEvalType changes how every arrow parameter naming this type compiles,
 % even when the type symbol is not itself a function. Store first so repairs
 % observe the new marker, then invalidate its module-qualified support root.
@@ -1646,6 +1654,8 @@ atoms_store_only(_, [[=|_]|_], _) :- !, fail.
 atoms_store_only(_, [[':', _, Type]|_], _) :-
     nonvar(Type), Type = [Alias|_], Alias == 'Alias', !, fail.
 atoms_store_only(_, [[':', _, 'DontEvalType']|_], _) :- !, fail.
+atoms_store_only(_, [[':', _, Type]|_], _) :-
+    metta_annotated_type(Type), !, fail.
 atoms_store_only(_, [[':', FAtom, _]|_], _) :-
     atom(FAtom), fun(FAtom), !, fail.
 atoms_store_only(Space, [Term|Terms], Earlier) :-
@@ -1938,6 +1948,55 @@ metta_remove_hooks_idle(Space) :-
     ;   metta_filtered_census_idle(removed, Space, Refs)
     ).
 
+%Native clear already removes compiled equations through metta_remove_atom/3.
+%An observer whose head can match only that shape is covered by this pass;
+%walking plain data for it made memo-owner teardown quadratic in stored data.
+%Open outer lists, variable relation names and non-atomic function heads must
+%keep the full census, since compiled_half_atom/3 does not cover them.
+%[tested: test_equation_observers_keep_plain_data_clear_bulk,
+%a_clear_observer_still_sees_atoms_outside_the_compiled_half; commit=bbb512316280110a747e31c26adfc31e8c5104be].
+metta_remove_hooks_compiled_only(Space) :-
+    findall(Ref, seam:atom_hook_clause(removed, Ref), Refs),
+    exclude(metta_compiled_removal_hook, Refs, Watching),
+    Watching \== Refs,
+    (   Watching == []
+    ->  true
+    ;   metta_host_census_idle(removed, Space, Watching)
+    ->  true
+    ;   metta_filtered_census_idle(removed, Space, Watching)
+    ).
+
+metta_compiled_removal_hook(Ref) :-
+    clause(seam:atom_removed(_, Pattern), _, Ref),
+    is_list(Pattern),
+    Pattern = [Relation, Head, _], Relation == (=),
+    nonvar(Head), Head = [Name|_], atom(Name).
+
+%A hook clause that NAMES its space answers the census from its own head: the
+%funnel calls it with the space bound, so a head whose first argument does not
+%unify with that space never runs for it. This is the same shape as the
+%reaction bridge's answer in engine/metta/effects.pl, from the other side: that
+%one is a clause with an unbound space whose TABLE says which spaces it
+%watches, and this one is a clause whose head already said.
+%
+%lib/lib_tabling/lib_tabling.pl carries `atom_removed('&metta', Fact)` for its
+%(tabled ...) rows, and that single standing clause turned the bulk clear off
+%for every OTHER space: no host owns it, so the census answered "not idle"
+%everywhere. Clearing a space holding a memoized function and plain data cost
+%17,843 inferences at 200 atoms and 131,247 at 2,000 once lib_tabling was in
+%the process, against 4,598 at both sizes without it, which is the per-atom
+%funnel rather than the bulk pass [measured 2026-09-05; tested:
+%test_a_hook_that_names_another_space_keeps_the_bulk_clear; commit=bbb512316280110a747e31c26adfc31e8c5104be].
+:- multifile seam:atom_hook_ref_idle/2.
+seam:atom_hook_ref_idle(Space, Ref) :-
+    catch(clause(Clause, _, Ref), _, fail),
+    strip_module(Clause, _, Head),
+    functor(Head, Name, 2),
+    ( Name == atom_added -> true ; Name == atom_removed ),
+    arg(1, Head, Watched),
+    nonvar(Watched),
+    \+ Watched = Space.
+
 %Clear a space, whoever holds it: a Prolog foreign provider clears through
 %its own seam (or refuses, loudly, when it cannot); a native space
 %announces the atoms it drops through the removal funnel exactly when
@@ -1998,6 +2057,8 @@ metta_host_clear_space(Space) :-
     space_module(Space, Module),
     metta_host_clear_tabling(Space, Module),
     (   metta_remove_hooks_idle(Space)
+    ->  true
+    ;   metta_remove_hooks_compiled_only(Space)
     ->  true
     ;   findall(Atom, metta_host_stored(Space, Atom), Atoms),
         forall(member(Atom, Atoms), 'remove-atom'(Space, Atom, _))

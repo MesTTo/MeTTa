@@ -1,6 +1,8 @@
 % Purpose: classify compiled effects, compose the five-rank effect lattice,
 %   plan reified-world admission, and manage memoization, dependencies, and
 %   bridge cascades.
+% Guarantees: annotated arrow effects reach catalog policy and follow their
+%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees:
 %   - every definition retains engine/metta.pl's implementation module and
@@ -65,6 +67,11 @@ metta_effect_walk_(Module, [PI|Rest], Seen, Reads0, Reads) :-
     memberchk(PI, Seen), !,
     metta_effect_walk_(Module, Rest, Seen, Reads0, Reads).
 metta_effect_walk_(Module, [Name/Arity|Rest], Seen, Reads0, Reads) :-
+    (   metta_annotated_operation_effect(Name, Declared),
+        Declared \== pureStructural
+    ->  throw(error(metta_impure_goal(Name/Arity), none))
+    ;   true
+    ),
     functor(Head, Name, Arity),
     findall(Body, catch_recover(clause(Module:Head, Body), fail), Bodies),
     foldl(metta_effect_body(Module), Bodies, Rest-Reads0, Next-Reads1),
@@ -131,6 +138,7 @@ metta_effect_construct(metta_top(_, A, _), [A]).
 %effect lives, so the purity walk must descend it rather than refuse the
 %engine helper or, worse, call the helper pure as a whole.
 metta_effect_construct(dispatch_policy_execute(_, _, _, Goal, _), [Goal]).
+metta_effect_construct(metta_verify_annotated_call(_, _, _, _, Goal), [Goal]).
 %A MODULE-QUALIFIED goal holds its effect in the goal, not in the module, and
 %it has to be here rather than left to the meta_predicate clause below: that
 %clause reads `functor(Meta, Name, Arity)` for a `:`/2 term, SWI answers a
@@ -498,6 +506,15 @@ metta_operation_effect(Name, Effect) :-
     ),
     Classes = [_|_],
     metta_effect_compose(Classes, Effect).
+
+%Only an annotated arrow makes this an author assertion on a definition.
+%Python definition reflection also writes inferred effect rows, including a
+%generator's answer-count lift; those remain governed by the body walk.
+%[source: extensions/python/metta/_define_facts.py:_EffectAnalysis;
+%commit=bbb512316280110a747e31c26adfc31e8c5104be].
+metta_annotated_operation_effect(Name, Effect) :-
+    once(spaces:metta_arrow_product(Name, _, _, _, _)),
+    metta_operation_effect(Name, Effect).
 
 %The catalog's own rows for one operation, canonicalised. Shared by the
 %reflection above and by the cache's narrower question at
@@ -1143,6 +1160,10 @@ metta_effect_plan_walk(Module, [PI|Rest], Seen, Effects0, Effects) :-
     !,
     metta_effect_plan_walk(Module, Rest, Seen, Effects0, Effects).
 metta_effect_plan_walk(Module, [Name/Arity|Rest], Seen, Effects0, Effects) :-
+    (   metta_annotated_operation_effect(Name, Declared)
+    ->  DeclaredEffects = [Name-Declared|Effects0]
+    ;   DeclaredEffects = Effects0
+    ),
     functor(Head, Name, Arity),
     findall(effect_clause(Body, Source),
             catch_recover(
@@ -1157,9 +1178,9 @@ metta_effect_plan_walk(Module, [Name/Arity|Rest], Seen, Effects0, Effects) :-
         Name, Arity, LocalClauses, Clauses),
     (   Clauses == []
     ->  Next = Rest,
-        Effects1 = [Name-oracleIO|Effects0]
+        Effects1 = [Name-oracleIO|DeclaredEffects]
     ;   foldl(metta_effect_plan_clause(Module), Clauses,
-              Rest-Effects0, Next-Effects1)
+              Rest-DeclaredEffects, Next-Effects1)
     ),
     metta_effect_plan_walk(Module, Next, [Name/Arity|Seen], Effects1, Effects).
 

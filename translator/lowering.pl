@@ -1,4 +1,6 @@
 % Purpose: lower runnable expressions, calls, arguments, and dispatch policies into Prolog goals
+% Guarantees: verify-cardinality checks annotated calls while plain calls
+%   retain their generated goal [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarantees: Direct declaration probes use metta_runtime_type/2 before masking
 %   or settling arguments
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
@@ -287,6 +289,19 @@ dispatch_call_goal(Fun, Args, Out, Goal,
 %s(CASP)'s query slice arrived at by recursion rather than by walking a call
 %graph first [source: SWI-Prolog pack scasp, prolog/scasp/dyncall.pl,
 %scasp_query_clauses/2].
+%The declaration owns a name-indexed clause, like lib_memo's dispatch hook.
+%An unrelated name skips it in SWI's index and keeps the original compile path.
+:- dynamic dispatch_call_goal_in/6.
+
+install_annotated_dispatch(Fun, Ref) :-
+    asserta((dispatch_call_goal_in(Module, Fun, Args, Out, Goal, PolicyGoal) :-
+                 spaces:metta_arrow_product_in(Module, Fun, _, _),
+                 !,
+                 metta_ensure_compiled(Fun),
+                 dispatch_call_goal_for(Module, Fun, Args, Out, Goal, Dispatched),
+                 PolicyGoal = metta_verify_annotated_call(
+                     Module, Fun, Args, Out, Module:Dispatched)), Ref).
+
 dispatch_call_goal_in(Module, Fun, Args, Out, Goal, PolicyGoal) :-
     metta_ensure_compiled(Fun),
     dispatch_call_goal_for(Module, Fun, Args, Out, Goal, PolicyGoal).
