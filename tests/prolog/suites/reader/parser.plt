@@ -131,7 +131,7 @@ test(stable_names_roundtrip_with_sharing) :-
 % 73ef1100b11a1a1d4573728d4b8a8cc3daf2da3a "fix(parser): preserve variable
 % identity across swrite GC"; commit=41a7c7d9fd07925210d4e9cb89bf3de0e171893b]. That mechanism is live on
 % this SWI: term_to_atom/2 on one variable answered `_186` before a forced
-% garbage_collect and `_182` after it [measured: ai-tmp probe, SWI 10.1.13;
+% garbage_collect and `_182` after it [measured 2026-09-05: ai-tmp probe, SWI 10.1.13;
 % commit=41a7c7d9fd07925210d4e9cb89bf3de0e171893b]. Our writer names from copy_term_nat+numbervars in one
 % pass and the C writer is the default, so this pins the invariant
 % structurally rather than by naming: reparse and COUNT variables.
@@ -141,7 +141,7 @@ test(stable_names_roundtrip_with_sharing) :-
 % fires a collection between the two occurrences. An integer filler of
 % 200,000 cells allocates nothing during the walk and a planted
 % per-occurrence term_to_atom writer passed it; the string filler made the
-% same plant answer 2 distinct variables for 1 [measured: planted
+% same plant answer 2 distinct variables for 1 [measured 2026-09-05: planted
 % swrite_prolog/2 naming each occurrence live, distinct=2 expected=1;
 % commit=41a7c7d9fd07925210d4e9cb89bf3de0e171893b].
 identity_survives_gc(Term, Distinct) :-

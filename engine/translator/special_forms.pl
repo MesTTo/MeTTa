@@ -958,7 +958,7 @@ translate_special_dl('|->', [Args, Body0], AfterHead, Goals, Out) :-
     %compiled a lambda taking no parameters at all, with $x bound to the empty
     %list; applying it raised `function_input_arities(lambda_2,[0])' expected,
     %found `1'`, and `((|-> $x $x))` answered `()` rather than refusing
-    %[measured 2026-09-05; tested: translator_a_lambda_parameter_list_is_a_list].
+    %[measured 2026-09-05; tested: a_variable_where_the_parameter_list_goes_stays_data].
     %
     %Every other malformed parameter already leaves the form as data: `(|-> foo
     %...)` and `(|-> 5 ...)` answer themselves, because this clause fails and
