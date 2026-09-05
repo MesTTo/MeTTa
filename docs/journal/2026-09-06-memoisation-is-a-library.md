@@ -149,3 +149,78 @@ Measured on both trees through `(cache dw unchecked)` on trunk and a plain
 against `[3]` and one write per call uncached. A body whose effect is a Python
 operation rather than a space write does not do this, so the doubling is
 specific to the space the cache's own support view watches.
+
+## 2026-09-06, later: the two Open lines above, closed
+
+Both turned out to be one error wearing two faces, and neither was about
+effects: the library was reaching around the engine's own doors. It guessed
+which module a declaration governs instead of asking where the calls resolve,
+and it re-added stored atoms instead of asking the engine to recompile.
+
+Decided: a declaration is recorded in the module the calls resolve in.
+`memo_dispatch_call/4` keys every call by `memo_owner_module/4`, so a
+declaration recorded anywhere else is admitted and then never read.
+`memo_scope_module/2` used to answer the SPEAKING module, with a hand-written
+exception for a function `&self` defines. Those agree only when the speaking
+space is also the owner, which is the ordinary case and is why this went unseen.
+The rule is now: this module's own equations, else the module the name resolves
+in, else `&self`'s equations, else the speaking module. The four cases the
+2026-09-05 entry pinned all still answer what they answered, and two cases that
+were dead now work.
+
+Tried: reading the candidate arities with `current_predicate/2` from the
+speaking module -> a registered operation answered nothing until some body that
+called it had been compiled, so a declaration written before the first caller
+still landed in the wrong module. Decided: `arity/2`, the engine's own record,
+which is written when the name is registered or defined.
+
+Measured: a registered operation, its caller compiled BEFORE the declaration.
+Before, `memoize-exact` answered true, `is-memoized` answered true, the caller
+kept its direct goal and the operation ran on every call. After, the caller's
+body carries `cache_call/4` and two calls run the operation once. Reached from
+a second space the same cache answers, which is what caching an operation
+means: one predicate, imported into every space's execution module, so one
+cache. Two spaces that each DEFINE a name still key separately, because each
+has its own clauses
+[tested: lib_memo_reach:memoizing_an_operation_reaches_a_caller_compiled_before_it,
+test_memoizing_an_operation_caches_its_calls].
+
+Rejected: refusing a registered operation at admission with a mechanism ground,
+the way a name that is no function is refused. It looked right at first --
+an operation has no equations to recompile, nothing to invalidate on, and no
+per-space copy to key against -- and the experiment killed it. With the memo
+state planted in the module `memo_owner_module/4` itself resolves to, every
+guard in `memo_dispatch_call/4` holds, the seam answers `cache_call/4`, and
+`recompile_function_impl/1` rebuilds the callers through the support graph,
+which knows them (`support_view_module/2` answered `$metta_exec:&self` for the
+operation). A mechanism that works is not a mechanism ground for refusing.
+Revisit only if operations stop sharing one predicate across spaces.
+
+Decided: enabling recompiles through `recompile_function_impl_in/2`, or
+`recompile_function_impl/1` for a name with no equations of its own. The narrow
+door for the ordinary case is what keeps a first evaluation from paying one
+retranslation per other live space holding the head; the wide one is the only
+thing that reaches an operation's callers.
+
+Measured: the doubled bag. The body ran ONCE -- a wrapper on the compiled
+predicate counted one entry -- and yet two rows were written and the stored
+entry was `[answer(3), answer(3)]`. It was not the fill re-running anything:
+`memoize` had left the function with TWO clauses. `memo_recompile/3` removed
+each stored equation and added it back, using the retained form the compiler
+kept, and for a body written `(add-atom &self ...)` in a named space the
+retained form carries the resolved name while the stored atom keeps `&self`, so
+the removal matched nothing and the add duplicated. Counted directly: compiled
+clauses 1 -> 2 and stored equations 1 -> 2 across `memoize` for the writer, and
+1 -> 1 for an identity body in the same space.
+
+Decided: touch no stored atom. The engine's recompile does the whole job, and
+the duplicate-preservation note the round trip carried -- `metta_remove_atom/3`
+rather than `'remove-atom'/3`, so three identical equations came back as three
+-- is moot when nothing is removed.
+
+Open: none of this is visible from `&self`, where the source name and the
+resolved name are the same word. The plunit case therefore runs through
+`metta_host_run_source/4` into a named space, and asserts the divergence it
+depends on (`\+ RetainedBody =@= SoleStored`) before asserting the repair, so a
+future change that stops the two forms differing turns the case red rather than
+leaving it passing for the wrong reason.

@@ -108,6 +108,26 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `tests/shell/test_example_runner_surfaces_failures.sh` is gone, because that
   line was never a spawn.
 
+- A cache declaration now takes effect where it used to be admitted and then
+  ignored. `!(memoize f)` and `!(memoize-exact f)` are recorded in the module
+  the calls to `f` resolve in rather than in the space that spoke, so a
+  registered operation and a function a space only INHERITS are cached instead
+  of answering `is-memoized` true while running on every call. An operation has
+  no equations, so its call sites are its callers' bodies: enabling rebuilds
+  those, and a caller compiled before the declaration is reached too. An
+  operation is one predicate shared by every space, so its cache is
+  process-wide; two spaces that each DEFINE a name still keep separate caches,
+  which is what the per-module keying is for.
+
+- Memoizing a function no longer rewrites the program it is enabled over.
+  Enabling used to remove each stored equation and add it back around the
+  enable, and that is not the same term: the source says `(add-atom &self ...)`
+  and the retained form the compiler kept carries the space's resolved name, so
+  the removal matched nothing and the add left a second copy. A one-equation
+  function became a two-equation one, wrote twice, and answered a doubled bag
+  on its first call. Enabling now recompiles through the engine's own door and
+  touches no stored atom.
+
 - The example corpus reads in its own order again. `08-case-duals.metta` sat in
   chapter 7, whose subject is `case`, and negated its arms with `not-provable`,
   which chapter 22 teaches; it is
