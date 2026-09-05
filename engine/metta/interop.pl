@@ -1,7 +1,7 @@
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
 % Guarantees: Export readers use metta_runtime_type/2 to recognise annotated
 %   arrows and derive arity while retaining the declared type
-%   [tested: run_tests(metta_arrow_projection); commit=WORKTREE].
+%   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order;
 %   a named-space MeTTa import is reusable only while its committed source receipt validates its life,

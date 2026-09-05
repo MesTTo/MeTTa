@@ -1,7 +1,7 @@
 % Purpose: resolve scoped declarations, type compatibility, metatypes, and typed-call introspection
 % Guarantees: Callable declaration readers and type witnesses use metta_runtime_type/2;
 %   get-type and stored atoms retain the written annotation
-%   [tested: run_tests(metta_arrow_projection); commit=WORKTREE].
+%   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
 %   A host-owned numeric object satisfies a concrete Number requirement
@@ -105,11 +105,11 @@ metta_arrow_type_chain(Raw, Types) :-
 % Callable readers inspect canonical structure while reporting retains spelling.
 % Clang's written and canonical type views motivate this split.
 % [source: https://github.com/llvm/llvm-project/blob/llvmorg-20.1.8/clang/docs/InternalsManual.rst#canonical-types;
-% commit=WORKTREE].
+% commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 % The parser owns annotation validity; passing other types through preserves
 % existing plain-arrow, unit and type-variable behaviour. Only the head is
 % projected, so parameter and result variables still share their bindings.
-% [tested: run_tests(metta_arrow_projection); commit=WORKTREE].
+% [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 metta_runtime_type(Raw, Type) :-
     (   nonvar(Raw), Raw = [Head|_], Head \== '->',
         metta_arrow_type_chain(Raw, Types)

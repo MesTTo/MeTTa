@@ -9,7 +9,7 @@
 % Purpose: provide test diagnostics, assertions, formatting, timing, and bounded execution helpers
 % Guarantees: Rest-arrow reporting and documentation inspect metta_runtime_type/2
 %   while the reported declaration retains its written type
-%   [tested: run_tests(metta_arrow_projection); commit=WORKTREE].
+%   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees:
 %   - every definition retains engine/metta.pl's implementation module and original load order

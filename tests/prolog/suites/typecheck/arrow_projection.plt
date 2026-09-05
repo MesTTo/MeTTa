@@ -5,10 +5,10 @@
 %   chain, while shape projection preserves normalized product metadata and
 %   malformed or infix-looking terms fail closed
 %   [tested: run_tests(metta_arrow_projection);
-%   commit=WORKTREE].
+%   commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 % Guarantees: loaded annotated declarations execute, check arguments, type
 %   applications and compile like plain arrows while stored types retain their
-%   spelling [tested: run_tests(metta_arrow_projection); commit=WORKTREE].
+%   spelling [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 % Owns resources: each test releases its space; the export-reader fixture
 %   retracts its pending export row even when an assertion fails.
 
