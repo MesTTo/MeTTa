@@ -17,6 +17,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   missing files and denied permissions by name.
 - `trace(filter=...)` selects named functions before recording limits apply.
   MeTTa programs can query selected trace events through `lib_observe`.
+- Node's `Semiring` vocabulary now includes the catalog's `budget` and
+  `amplitude` values in their declared order.
 
 - Integration installation is transactional across framework-managed state.
   A failed installer now restores operations and declaration ownership,
