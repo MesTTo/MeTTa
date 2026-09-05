@@ -200,4 +200,43 @@ test(a_run_bound_answers_the_prefix_it_recorded,
     Cut < Full,
     append(Prefix, _, Whole).
 
+test(filter_precedes_the_bound_and_keeps_depth,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    Source = "(= (plunit_trace_new $x) (plunit_trace_walk $x)) \c
+              (= (plunit_trace_walk $x) (+ $x 1)) !(plunit_trace_new 2)",
+    tracer:metta_trace_source(Source, '&self', 2, [plunit_trace_walk],
+                              Events, false),
+    Events == [event(1, call, [plunit_trace_walk, 2], '', []),
+               event(1, exit, [plunit_trace_walk, 2], 3, [])],
+    tracer:metta_trace_source("!(plunit_trace_new 2)", '&self', 100, Whole, false),
+    include(selected_walk_event, Whole, Expected),
+    Events == Expected.
+
+selected_walk_event(event(_, _, [plunit_trace_walk|_], _, _)).
+
+test(empty_filter_runs_source_and_does_not_leak,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    Source = "(= (plunit_trace_new $x) (+ $x 1)) !(plunit_trace_new 2)",
+    tracer:metta_trace_source(Source, '&self', 1, [], [], false),
+    tracer:metta_trace_source("!(plunit_trace_new 4)", '&self', Events),
+    Events == [event(0, call, [plunit_trace_new, 4], '', []),
+               event(0, exit, [plunit_trace_new, 4], 5, [])].
+
+test(filter_request_crosses_the_existing_host_door,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    Source = "(= (plunit_trace_new $x) (+ $x 1)) !(plunit_trace_new 2)",
+    tracer:metta_trace_source(Source, '&self', [2, ["plunit_trace_new"]],
+                              Events, false),
+    Events == [event(0, call, [plunit_trace_new, 2], '', []),
+               event(0, exit, [plunit_trace_new, 2], 3, [])].
+
+test(invalid_filter_refuses_with_remedy,
+     [throws(error(domain_error(trace_function_filter, [42]),
+                   context(metta_trace_source/6, _)))]) :-
+    tracer:metta_trace_source("", '&self', 100, [42], _, _).
+
+test(variable_filter_does_not_unify_to_all,
+     [throws(error(domain_error(trace_function_filter, _), _))]) :-
+    tracer:metta_trace_source("", '&self', 100, _, _, _).
+
 :- end_tests(tracer).

@@ -508,6 +508,7 @@ def trace(
     source: Atom | str,
     max_events: int | None = None,
     *,
+    filter: Symbol | str | Iterable[Symbol | str] | None = None,
     timeout: float | None = None,
     inferences: int | None = None,
 ) -> Trace:
@@ -527,6 +528,9 @@ def trace(
 > events. Whichever one stops it, the events already recorded are
 > ANSWERED and `stopped` names the bound, so a caller told a trace
 > was cut knows which bound to raise.
+> filter selects exact function Symbols or names, singly or in an iterable.
+> None records all functions; [] records none. Selection happens before
+> the recording bounds, while excluded calls still execute and add depth.
 
 ### `Space.lint`
 
@@ -3133,6 +3137,7 @@ def trace(
     source: Atom | str,
     max_events: int | None = None,
     *,
+    filter: Symbol | str | Iterable[Symbol | str] | None = None,
     timeout: float | None = None,
     inferences: int | None = None,
 ) -> Trace:
@@ -3152,6 +3157,9 @@ def trace(
 > events. Whichever one stops it, the events already recorded are
 > ANSWERED and `stopped` names the bound, so a caller told a trace
 > was cut knows which bound to raise.
+> filter selects exact function Symbols or names, singly or in an iterable.
+> None records all functions; [] records none. Selection happens before
+> the recording bounds, while excluded calls still execute and add depth.
 > Runs against this context's self space.
 
 ### `MeTTa.register_prolog`

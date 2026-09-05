@@ -14,12 +14,13 @@ beside its definitions.
 | lib_conformance | 1 | 0 |
 | lib_constraints | 5 | 0 |
 | lib_crypto | 2 | 0 |
+| lib_csv | 1 | 1 |
 | lib_datastructures | 26 | 9 |
 | lib_datetime | 2 | 0 |
 | lib_derived | 1 | 1 |
 | lib_dict | 7 | 0 |
 | lib_doc | 0 | 0 |
-| lib_file | 3 | 3 |
+| lib_file | 14 | 14 |
 | lib_gitimport | 0 | 0 |
 | lib_he | 0 | 0 |
 | lib_import | 2 | 2 |
@@ -28,6 +29,7 @@ beside its definitions.
 | lib_memo | 0 | 0 |
 | lib_mm2 | 5 | 0 |
 | lib_nars | 38 | 0 |
+| lib_observe | 1 | 1 |
 | lib_patrick | 4 | 0 |
 | lib_pln | 49 | 0 |
 | lib_pln2 | 0 | 0 |
@@ -44,6 +46,18 @@ beside its definitions.
 | lib_torch | 20 | 0 |
 | lib_vector | 5 | 0 |
 | lib_zar | 4 | 0 |
+
+## lib_csv
+
+### `csv-space`
+
+*lib_csv.metta:13*
+
+A read-only CSV row space; each query streams the file anew, every cell is a String, and the first record is data
+
+1. a readable UTF-8 CSV file path
+
+Returns: Space
 
 ## lib_datastructures
 
@@ -156,9 +170,117 @@ Returns: Its first answer
 
 ## lib_file
 
+### `make-dir!`
+
+*lib_file.metta:55*
+
+Create a directory and missing parents; an existing directory succeeds
+
+1. directory path
+
+Returns: Bool
+
+### `delete-dir!`
+
+*lib_file.metta:56*
+
+Remove an empty directory; missing or nonempty directories raise
+
+1. directory path
+
+Returns: Bool
+
+### `copy-file!`
+
+*lib_file.metta:57*
+
+Copy bytes to a destination filename with staged replacement; copying onto the source raises
+
+1. source file
+2. destination filename
+
+Returns: Bool
+
+### `file-metadata!`
+
+*lib_file.metta:58*
+
+Snapshot kind, modified Unix time and file size as queryable atoms in a new space
+
+1. file or directory path
+
+Returns: Space
+
+### `path-join`
+
+*lib_file.metta:59*
+
+Join lexical paths; an absolute second path replaces the first
+
+1. directory
+2. name
+
+Returns: String
+
+### `path-parent`
+
+*lib_file.metta:60*
+
+Lexical parent directory; a bare filename has parent dot
+
+1. path
+
+Returns: String
+
+### `path-name`
+
+*lib_file.metta:61*
+
+Lexical final path component
+
+1. path
+
+Returns: String
+
+### `path-extension`
+
+*lib_file.metta:62*
+
+Text after the final dot in the filename, without the dot; empty when absent
+
+1. path
+
+Returns: String
+
+### `stderr!`
+
+*lib_file.metta:63*
+
+Write text to stderr and flush, without adding a newline
+
+1. text
+
+Returns: Bool
+
+### `stdin-to-string!`
+
+*lib_file.metta:64*
+
+Consume standard input through EOF as UTF-8 text
+
+Returns: String
+
+### `exit!`
+
+*lib_file.metta:65*
+
+Terminate the entire process with integer status 0 through 255; not an application-level return
+
+1. process status
+
 ### `temp-path!`
 
-*lib_file.metta:40*
+*lib_file.metta:69*
 
 A unique fresh path in the system temporary directory, created exclusively so concurrent runners cannot mint the same name; the caller owns the file
 
@@ -168,7 +290,7 @@ Returns: String
 
 ### `file-exists`
 
-*lib_file.metta:44*
+*lib_file.metta:73*
 
 True when a regular file exists at the path, False otherwise
 
@@ -178,7 +300,7 @@ Returns: Bool
 
 ### `dir-exists`
 
-*lib_file.metta:48*
+*lib_file.metta:77*
 
 True when a directory exists at the path, False otherwise
 
@@ -209,6 +331,25 @@ Loads a Prolog module and registers the named predicates as MeTTa functions
 2. the predicate names to register
 
 Returns: unit
+
+## lib_observe
+
+### `trace-source`
+
+*lib_observe.metta:6*
+
+```metta
+(: trace-source (-> SpaceType String Atom Number SpaceType))
+```
+
+Run source in a space and return a space of trace-event atoms. The filter is all or a tuple of exact function names. The limit counts only selected events. trace-stopped records false or the exhausted bound. Evaluation performs the source's writes.
+
+1. the execution space
+2. MeTTa source text
+3. all or a tuple of function names
+4. positive event limit
+
+Returns: a space of (trace-event depth kind term answer) and (trace-stopped reason) atoms
 
 ## lib_reflect
 
