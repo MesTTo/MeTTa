@@ -117,3 +117,41 @@ the path: it has no ORIGINS row (it was written here, not derived), the twin
 pairing is a pure path transform so `orphans()` stays empty at 224 twins, and
 the twin's self-citing measurement command names the new path. `parity` reads
 252/252 examples agreeing across both configurations.
+
+Tried: reading pylint's three `algebra.py` findings as a question about shape
+rather than a false positive. They agree with each other: `_derive_rule_steps`
+is annotated `Generator[Atom, Sequence[TaggedAnswer], list[TaggedAnswer]]` and
+pylint reports its caller's `.send` and `.close` as members a LIST does not
+have, and its result as non-iterable, which is what you would see if astroid
+did not know the function is a generator.
+
+Measured: it does not. A ten-line probe with two functions differing only in
+`for item in (yield 1):` against `items = yield 1; for item in items:` gets
+`E1101` on the first and nothing on the second. The suspension point is now its
+own statement, which is what a reader wants anyway.
+
+Measured: that alone leaves the `E1133`, because `StopIteration.value` is
+untyped and `_derive_rule`'s only exit was `return completed.value`. Five
+shapes were probed. A `typing.cast` and an annotated local inside the `except`
+are both still reported; declaring `answers: list[TaggedAnswer]` before the
+`try` and returning it once after the `finally` is not, and it is also the
+spelling that names what crosses the untyped boundary.
+
+Decided: `_algebra_demand.py`'s five `assert x is not None` become three
+different things, because they are not one problem. Two are the same shape
+computed twice: `_certify`'s first pass already reads every premise's relation,
+so it keeps them in `rule_relations` and the topological walk reads that
+instead of shaping every premise again. One is a guard on a list built
+immediately above it, which becomes an early return inside the loop that builds
+it. The remaining three are the evaluator asking for a shape certification has
+already admitted; they share `_certified_shape/1`, which raises
+`AlgebraEvaluationError` naming the atom. `test_an_atom_the_certifier_would_
+decline_is_refused_by_name` pins it, and 294 ch18 tests pass.
+
+Decided: FURB143 on `readline.__doc__ or ""` is suppressed at the line rather
+than obeyed. mypy reveals `str` for a module's `__doc__` and refurb reads that
+as a fact; a module object's docstring is `str | None` and `"libedit" in None`
+raises. `metta/__init__.py:234` is the precedent for the form. Two things this
+cost: ruff's `external` list needs `FURB143` or RUF100 calls the directive
+unused, and a comment beginning `# noqa below:` IS a blanket noqa to ruff, which
+reported it as one.
