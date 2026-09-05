@@ -101,7 +101,7 @@ register_prolog_arities(N) :-
 %builtin_facets:the_pass_removes_a_foreign_arity_and_keeps_the_described_one,
 %builtin_facets:a_tree_defined_arity_is_told_from_a_foreign_one,
 %builtin_facets:the_retraction_set_is_the_same_nine_on_every_build;
-%commit=WORKTREE].
+%commit=7eff330776f703cb603d7eea03fc1166d9e08e5e].
 %
 %IT RUNS AFTER THE DECLARATIONS AND THE PRELUDE, not while the names register,
 %and that ordering is the whole reason it is a separate pass:
