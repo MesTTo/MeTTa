@@ -73,7 +73,7 @@
 %     answer at all [tested:
 %     case_dual_patterns:building_a_dual_leaves_the_equation_answering,
 %     case_dual_patterns:a_malformed_case_row_refuses_rather_than_vanishing;
-%     commit=WORKTREE].
+%     commit=d4dc76461b7a0a22b89825660977c46dfef3ae69].
 %   - (not-provable G) answers False once per way G reduces to True and True
 %     once per solution of G's dual, so for a ground G exactly one of the two
 %     holds and for a non-ground G the two partition the answers
