@@ -40,6 +40,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   nothing without saying so; a conjunct that is not a whole pattern now refuses
   and names both readings.
 
+- An ATOM in annotation position is the type itself. `typed(S.a, S.Number)` and
+  `arrow(S.Number, S.Bool)` already read an atom or a Python type either way; a
+  signature read only the Python type, so `def speak(a: S.Animal) -> S.Sound`
+  declared `(-> %Undefined% %Undefined%)` and said nothing. It declares
+  `(-> Animal Sound)` now, and the doc's `(@type ...)` field carries the same
+  atom. It is the escape hatch the projection table needs, since the table is
+  finite and many-to-one: a MeTTa type with no Python class had to be given an
+  empty one to be nameable in a signature.
 - `csv-snapshot!` reads a CSV file ONCE into an ordinary space of
   `(row Number Field...)` atoms, beside `csv-space`'s live view. The view holds
   no rows and reparses per query; the snapshot pays one parse and then about two
