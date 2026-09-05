@@ -1385,7 +1385,6 @@ kind(metta_annotated_operation_effect/2, service).
 kind(metta_operation_plan_effect/2, service).
 kind(metta_effect_walk/3, service).
 kind(metta_function_cacheable/1, service).
-kind(metta_cache_unchecked/1, service).
 %A library that batches a compile-time analysis needs to distinguish one
 %source program from an isolated equation and recompile the affected call
 %surface through the loader's established invalidation path.

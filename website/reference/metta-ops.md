@@ -97,7 +97,10 @@ def register(
 > the operation's complete lifecycle: type atoms live in its declaration
 > space, while its canonical effect row and other policy atoms live in
 > &metta and can be matched there. Only ``pureStructural`` enters the
-> compatibility allow-list for tabled or memoized bodies.
+> compatibility allow-list the caching libraries read: a body calling an
+> operation outside it is not memoized automatically and tables plain
+> rather than incremental, while a written declaration is honoured either
+> way.
 
 ## `unregister`
 

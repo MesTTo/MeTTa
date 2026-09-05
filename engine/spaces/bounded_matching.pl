@@ -1040,7 +1040,8 @@ foreign_pushdown_declared_class(Space, Pattern, Class) :-
         %the method stays as the dynamic floor for the undeclared. Exact
         %licenses the bound; Partial and Sound are candidates needing
         %re-unification, today's inexact; Refuse is the author's NO and it
-        %is loud, the same precedence volatile has over unchecked.
+        %is loud, the same precedence a written declaration has over the
+        %floor the engine would otherwise pick for itself.
         (   Fidelity == 'Exact'  -> Class = exact
         ;   Fidelity == 'Refuse' -> throw(error(metta_refused_shape(Space,
                                                                     Pattern,

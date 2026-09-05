@@ -1200,14 +1200,16 @@ Three things follow, and the middle one is the reason to bother:
 
 PostgreSQL's ladder, because purity is not a boolean: `volatile` makes no
 assumptions, `stable` gives the same answer within one evaluation, and
-`immutable` gives the same answer forever. A `volatile` function refuses to be
-memoized, naming itself, because caching a function whose answers are not
-reproducible skips whatever the call does on the second one.
+`immutable` gives the same answer forever.
 
-Silence stays permission, deliberately. Memoization is already opt-in by the
-CALLER, so making an undeclared function refuse would break every existing
-`(memoize f)` without telling anyone anything they did not know. What was
-missing is the LIBRARY's ability to say no.
+`volatile` keeps a function out of the cache nobody asked for. `lib_memo`'s
+automatic mode selects pure recursive functions on its own initiative, and it
+reads this to leave yours alone. It does not veto a written `(memoize now)`:
+that is the calling program saying what to do with itself, and a cache in the
+wrong place is a bug in the program that put it there.
+
+Silence stays permission, deliberately. An undeclared function is one the
+automatic mode judges by its body instead.
 
 ### Say how many answers there are
 
@@ -2624,9 +2626,7 @@ operation it calls, and stacked clauses join again, so the definition's
 reflected effect follows the strongest reachable call rather than a hand-written
 boolean.
 
-Only `pureStructural` projects to the cache-safe allow-list. Tabling and
-memoization refuse every stronger class unless the caller explicitly chooses the
-existing unchecked policy:
+Only `pureStructural` projects to the cache-safe allow-list:
 
 ```prolog
 :- multifile seam:pure_operation/1.
@@ -2634,22 +2634,33 @@ existing unchecked policy:
 seam:pure_operation(my_lookup).
 ```
 
-Anything that may hand back a CACHED answer later reads this. Declare an
-operation here when it only inspects its arguments, and leave it out when it
-reads or writes a space, reads or writes state, prints, draws at random, reads
-the clock, or crosses to a host.
+Anything that decides for itself whether to hand back a CACHED answer later
+reads this. Declare an operation here when it only inspects its arguments, and
+leave it out when it reads or writes a space, reads or writes state, prints,
+draws at random, reads the clock, or crosses to a host.
 
-It is an **allow-list**, and the asymmetry is the whole argument. A missing entry
-in a deny-list is a silent wrong answer; a missing entry here is a loud refusal
-that someone adds a line for. Before this list existed, tabling treated an
-unrecognised goal as inert, and that cached a random draw so two calls answered
-from one draw, printed a `println!` once for two calls, performed a space write
-once for two calls, and kept answering from the cache after the Python data
-behind an operation had changed.
+Two consumers, and they do different things with the same answer. `lib_memo`'s
+automatic mode picks pure recursive functions to cache with nobody asking, so
+an operation it cannot classify makes the function it appears in `declined`.
+`lib_tabling` carries out a written `(tabled ...)`, so an operation it cannot
+classify makes the table PLAIN instead of incremental: there is no read it
+could resolve, so there is nothing to invalidate on. Neither refuses a written
+declaration. Whether to cache a function is the program's own decision, and a
+cache in the wrong place is a bug in the program that put it there.
+
+It is an **allow-list**, and the asymmetry is the whole argument. A missing
+entry in a deny-list silently claims an invalidation nobody can perform; a
+missing entry here costs the weaker cache, which someone adds a line to fix.
+Before this list existed, tabling treated an unrecognised goal as inert and
+built an INCREMENTAL table over it, and that cached a random draw so two calls
+answered from one draw, printed a `println!` once for two calls, performed a
+space write once for two calls, and kept answering from the cache after the
+Python data behind an operation had changed.
 
 Your library's operations are yours to declare. The engine ships its own core
-list and knows nothing about yours, so an operation nobody declares is refused
-rather than assumed, which is the safe direction to be wrong in.
+list and knows nothing about yours, so an operation nobody declares is treated
+as unclassifiable rather than assumed pure, which is the safe direction to be
+wrong in.
 
 The former volatility spellings remain accepted only as compatibility input, and
 canonicalize conservatively: `immutable` to `pureStructural`, `stable` to
@@ -2979,8 +2990,7 @@ they disagree on.
 |---|---|---|
 | `(op <name> <arity> <kind>)` | how a registered operation compiles; `op` asserts these and compiles FROM them | `op` |
 | `(effect <name> pureStructural\|readOnlyLookup\|nondeterministicReadOnly\|writesState\|oracleIO)` | the operation's required effect rank; a composition and a compiled definition take the strongest member | `op(effect=...)` |
-| `(cache <name> unchecked)` | the caller accepts stale answers for an impure body | add the atom |
-| `(cache <name> force\|refuse)` | override automatic memo profitability for one function; purity remains a hard refusal | add or remove the atom |
+| `(cache <name> force\|refuse)` | whether automatic memoization takes this function; `force` overrides both profitability and the library's own effect analysis, and neither an explicit table nor a bounded-search body opens to it | add or remove the atom |
 | `(handles <ctx> <pattern> Exact\|Partial\|Sound\|Refuse [det])` | how faithful a context's own filtering is, per shape; `Exact` licenses count pushdown, `Refuse` makes the query a loud error; `(in $x)` marks a position that must arrive bound | `space.handles` |
 | `(source <ctx> linear\|repeated\|peek)` | consumption discipline; a linear source's second touch is loud where the floor answered silently empty | `space.source` |
 | `(on-error <ctx> <shape> keep\|empty\|abort)` | what a provider failure becomes: an `(Error ...)` answer, declared silence, or the abort floor | `space.on_error` |

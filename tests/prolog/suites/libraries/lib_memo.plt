@@ -5,10 +5,14 @@
 %     while an unrelated cache survives [tested:
 %     memo_support_graph:a_leaf_change_invalidates_transitive_callers_only;
 %     commit=7ade2b90e2631451fd6ffc23d22dd8c2d4a7a7aa].
-%   - An impure memo refusal points at the canonical effect declaration door
-%     and names pureStructural as its cache-safe class [tested:
-%     lib_memo_volatility:an_impure_refusal_names_the_canonical_effect_remedy;
-%     commit=3cfbe0d7417b1c453c2dc12d47e2e47e7de461f7].
+%   - A written declaration is honoured over a body the effect walk cannot
+%     classify, over one that reads a space, and over a function a library
+%     declared volatile; the one refusal left names a mechanism rather than a
+%     body [tested: lib_memo_volatility:a_declaration_memoizes_an_impure_body,
+%     lib_memo_volatility:a_declaration_memoizes_a_space_reading_body,
+%     lib_memo_volatility:a_volatile_function_still_memoizes_on_the_declaration,
+%     lib_memo_volatility:a_name_that_is_not_a_function_is_still_refused;
+%     commit=WORKTREE].
 %   - Exact-cache invalidation advances a hidden table generation seen by
 %     already-live worker engines [tested:
 %     lib_memo_stats:invalidation_moves_a_live_worker_to_a_fresh_exact_table_generation;
@@ -420,28 +424,30 @@ test(a_leaf_change_invalidates_transitive_callers_only) :-
 :- end_tests(memo_support_graph).
 
 
-% The gap this closes was demonstrated rather than imagined: lib_memo will
-% happily cache a side-effecting registered predicate, because nothing recorded
-% whether caching it was sound, and the second call then skips the effect.
-% PostgreSQL's ladder is the shape, with one deliberate difference: its default
-% is the pessimistic rung and this one's is not, because memoization here is
-% already opt-in by the CALLER and making silence a refusal would break every
-% existing (memoize f) without telling anyone anything they did not know.
+% WHOSE QUESTION IT IS. `(memoize f)` is the developer saying what they want
+% done with their own program, and this library's job is to do it. It used to
+% answer back on five grounds -- a library's (volatility f volatile) export, a
+% declared or annotated effect class, an effect walk over the body, a space
+% read anywhere in it, and an annotation arriving while a cache was live -- and
+% every one of them judged whether the developer should have asked. A cache put
+% somewhere it does not belong is a bug in the program that put it there
+% (user ruling, 2026-09-06). These pin the acceptances that replaced them, and
+% the one refusal left, which is not about the body at all.
 :- begin_tests(lib_memo_volatility).
 
 user:plunit_memo_volatile(X, X).
 user:plunit_memo_pure(X, X).
 
-test(a_volatile_function_refuses_memoization,
+test(a_volatile_function_still_memoizes_on_the_declaration,
      [ setup(( import_prolog_function(plunit_memo_volatile, _),
                declare_function_volatility(plunit_memo_volatile, volatile) )),
        cleanup(( retractall(user:metta_function_volatility(plunit_memo_volatile, _)),
+                 catch('clear-memoize'(plunit_memo_volatile, _), _, true),
                  release_function_name(plunit_memo_volatile),
                  unregister_fun_everywhere(plunit_memo_volatile),
                  retractall(user:fun(plunit_memo_volatile)),
-                 retractall(user:arity(plunit_memo_volatile, _)) )),
-       throws(error(permission_error(memoize, volatile_function,
-                                     plunit_memo_volatile), _)) ]) :-
+                 retractall(user:arity(plunit_memo_volatile, _)) )) ]) :-
+    assertion(\+ metta_function_cacheable(plunit_memo_volatile)),
     'memoize'(plunit_memo_volatile, true).
 
 test(an_undeclared_function_still_memoizes,
@@ -454,44 +460,26 @@ test(an_undeclared_function_still_memoizes,
     assertion(metta_function_cacheable(plunit_memo_pure)),
     'memoize'(plunit_memo_pure, true).
 
-%(cache Name unchecked) in &metta is the caller's declared acceptance of
-%staleness: the purity walk is skipped for that function, so an impure body
-%memoizes. The declaration is loud and queryable, which is what separates it
-%from the silent fail-open default this library used to have.
-test(an_unchecked_declaration_memoizes_an_impure_body,
+%The body prints. Nothing above it says anything, and the declaration alone
+%carries it; it used to need (cache plunit-memo-impure unchecked) beside it.
+test(a_declaration_memoizes_an_impure_body,
      [ setup(process_metta_string(
-                 "(= (plunit-memo-unchecked $k) (let $i (println! $k) $k))", _)),
-       cleanup(( catch('clear-memoize'('plunit-memo-unchecked', _), _, true),
-                 catch('remove-atom'('&metta',
-                                     [cache, 'plunit-memo-unchecked', unchecked],
-                                     _), _, true) )) ]) :-
-    catch(( 'memoize'('plunit-memo-unchecked', _), Refused = none ),
-          error(permission_error(memoize, impure_function, _), _),
-          Refused = impure),
-    assertion(Refused == impure),
-    process_metta_string(
-        "!(add-atom &metta (cache plunit-memo-unchecked unchecked))", _),
-    'memoize'('plunit-memo-unchecked', true).
+                 "(= (plunit-memo-impure $k) (let $i (println! $k) $k))", _)),
+       cleanup(catch('clear-memoize'('plunit-memo-impure', _), _, true)) ]) :-
+    'memoize'('plunit-memo-impure', true),
+    assertion('is-memoized'('plunit-memo-impure', true)).
 
-%The precedence, pinned: a library's explicit volatile outranks the caller's
-%unchecked, because the author said the answers are not reproducible and the
-%caller cannot know better.
-test(a_volatile_declaration_outranks_unchecked,
-     [ setup(( import_prolog_function(plunit_memo_volatile, _),
-               declare_function_volatility(plunit_memo_volatile, volatile),
-               process_metta_string(
-                   "!(add-atom &metta (cache plunit_memo_volatile unchecked))", _) )),
-       cleanup(( retractall(user:metta_function_volatility(plunit_memo_volatile, _)),
-                 catch('remove-atom'('&metta',
-                                     [cache, plunit_memo_volatile, unchecked],
-                                     _), _, true),
-                 release_function_name(plunit_memo_volatile),
-                 unregister_fun_everywhere(plunit_memo_volatile),
-                 retractall(user:fun(plunit_memo_volatile)),
-                 retractall(user:arity(plunit_memo_volatile, _)) )),
-       throws(error(permission_error(memoize, volatile_function,
-                                     plunit_memo_volatile), _)) ]) :-
-    'memoize'(plunit_memo_volatile, true).
+%A body that READS a space, which memoization cannot invalidate on: the cache
+%outlives the atoms it was computed from, and that is the caller's own trade
+%rather than something to refuse.
+test(a_declaration_memoizes_a_space_reading_body,
+     [ setup(process_metta_string(
+                 "(plunit-memo-fact 1) \c
+                  (= (plunit-memo-reader $k) \c
+                     (match &self (plunit-memo-fact $v) $v))", _)),
+       cleanup(catch('clear-memoize'('plunit-memo-reader', _), _, true)) ]) :-
+    'memoize'('plunit-memo-reader', true),
+    assertion('is-memoized'('plunit-memo-reader', true)).
 
 test(an_immutable_function_memoizes,
      [ setup(( import_prolog_function(plunit_memo_pure, _),
@@ -504,17 +492,13 @@ test(an_immutable_function_memoizes,
                  retractall(user:arity(plunit_memo_pure, _)) )) ]) :-
     'memoize'(plunit_memo_pure, true).
 
-test(an_impure_refusal_names_the_canonical_effect_remedy) :-
-    message_to_string(
-        error(permission_error(memoize, impure_function, memo_caller), none),
-        Text),
-    assertion(sub_string(Text, _, _, _, "not classified pureStructural")),
-    assertion(sub_string(Text, _, _, _,
-                         "(effect <operation> pureStructural)")),
-    %And the other door, named with the function's own name: the walk's
-    %judgement is advice, and a developer who means to memoize this anyway is
-    %told how rather than left with a wall.
-    assertion(sub_string(Text, _, _, _, "(cache memo_caller unchecked)")).
+%The refusal that stays, and its ground is a mechanism rather than a judgement:
+%a name no function answers to has no equations to recompile and no predicate
+%to dispatch, so there is nothing a cache could be put on.
+test(a_name_that_is_not_a_function_is_still_refused,
+     [ throws(error(domain_error(function_symbol,
+                                 'plunit-memo-nosuchname'), _)) ]) :-
+    'memoize'('plunit-memo-nosuchname', true).
 
 :- end_tests(lib_memo_volatility).
 

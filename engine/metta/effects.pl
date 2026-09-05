@@ -91,7 +91,7 @@ metta_effect_body(Module, Body, Queue0-Reads0, Queue-Reads) :-
 %forall/2 it emits for forall fell to the catch-all, and then a name list said
 %both were inert. A body refused in the open was accepted one word inside a
 %collapse, and cached a random draw
-%[tested: lib_tabling_purity:an_impure_goal_is_refused_inside_every_wrapper].
+%[tested: lib_tabling_purity:an_impure_goal_is_seen_inside_every_wrapper].
 %
 %So the shape changed rather than the list. metta_effect_construct/2 says which
 %ARGUMENTS of a construct hold goals, the walk yields those and nothing for the
@@ -148,7 +148,7 @@ metta_effect_construct(metta_verify_annotated_call(_, _, _, _, Goal), [Goal]).
 %program never wrote and advising a declaration for a module. The engine writes
 %a qualifier where a space-local equation of the same name must not capture the
 %goal, which the inlined fuel charge relies on
-%[tested: lib_tabling_purity:an_impure_goal_is_refused_inside_every_wrapper;
+%[tested: lib_tabling_purity:an_impure_goal_is_seen_inside_every_wrapper;
 %commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
 metta_effect_construct(_:Goal, [Goal]).
 %Anything else that CALLS one of its arguments, read from SWI's own
@@ -259,8 +259,8 @@ metta_effect_classify(Module, Dispatch, Queue-Reads, Next-Reads) :-
 %direct call to it would be. A head that is a VARIABLE is a higher-order call
 %whose target is decided by a value the walk cannot see, and that is refused
 %under its own description rather than the dispatcher's
-%[tested: lib_tabling_purity:a_pure_body_inside_a_wrapper_still_tables,
-%a_higher_order_call_is_refused_as_one].
+%[tested: lib_tabling_purity:a_pure_body_inside_a_wrapper_still_tables_incrementally,
+%a_higher_order_body_tables_plain].
 metta_effect_classify(Module, reduce(Template, _, _), Queue, Next) :- !,
     metta_effect_reduced(Module, Template, Queue, Next).
 
@@ -268,7 +268,7 @@ metta_effect_classify(Module, reduce(Template, _, _), Queue, Next) :- !,
 %reaches is decided by a value, which is exactly the case the reduce/3 walk
 %above refuses as higher-order, so it is classified by the same
 %reconstruction rather than refused under the dispatcher's own name
-%[tested: lib_tabling_purity:a_higher_order_call_is_refused_as_one;
+%[tested: lib_tabling_purity:a_higher_order_body_tables_plain;
 %commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
 metta_effect_classify(Module, metta_dynamic_call(Head, Args, _), Queue,
                       Next) :- !,
@@ -411,7 +411,7 @@ metta_effect_prolog_primitive(unify_with_occurs_check).
 %What every computed collapse compiles to beside its findall: the Empty
 %prune is a read-free list transformation, and leaving it unlisted
 %refused a pure body one word inside a collapse
-%[tested: a_pure_body_inside_a_wrapper_still_tables].
+%[tested: a_pure_body_inside_a_wrapper_still_tables_incrementally].
 metta_effect_prolog_primitive(metta_prune_empty).
 %The balance the inlined fuel charge reads and writes, module-qualified in the
 %emitted goal so a program may still name them. b_setval/2 is a WRITE, and
@@ -425,7 +425,7 @@ metta_effect_prolog_primitive(b_setval).
 %must not hide the operation from the effect walk: classifying them as inert
 %lets the next add-atom, evalc, import or raw goal supply the user-facing
 %effect name [tested:
-%lib_tabling_purity:an_impure_goal_is_refused_inside_every_wrapper;
+%lib_tabling_purity:an_impure_goal_is_seen_inside_every_wrapper;
 %commit=f46e45074286c08c4bd8b3d7892b3d7933f11f77].
 metta_effect_prolog_primitive(metta_require_current_capability).
 metta_effect_prolog_primitive(metta_require_safe_goal).
@@ -449,18 +449,26 @@ metta_effect_prolog_primitive(compound_name_arity).
 %between an author declaring the right thing and an author declaring
 %reduce/3 and watching nothing change.
 prolog:error_message(metta_higher_order_goal(Arity)) -->
-    [ 'caching refuses a call of arity ~w whose function is a value rather \c
-       than a name. Which function it reaches is decided while the program \c
-       RUNS, so no declaration can say whether a cached answer would hide \c
-       anything. Name the function, or do not cache this one'-[Arity] ].
+    [ 'this walk cannot classify a call of arity ~w whose function is a value \c
+       rather than a name. Which function it reaches is decided while the \c
+       program RUNS, so no declaration can say whether a cached answer would \c
+       hide anything. Name the function to make it answerable; a written \c
+       declaration is honoured over such a body as it stands'-[Arity] ].
 
+%The walk reports what it CANNOT establish; it does not decide what is done
+%about it. A library that chose the cache on its own initiative reads this as
+%its answer -- lib_memo's automatic mode declines a function whose body reaches
+%here -- and a library carrying out an explicit declaration builds what it can
+%instead: lib_tabling tables such a body plain. So the message names the goal
+%and the one declaration that would change the walk's own answer, and does not
+%tell anyone not to cache.
 prolog:error_message(metta_impure_goal(Name/Arity)) -->
-    [ 'caching refuses ~w/~w: it is not classified pureStructural, and a \c
-       cached answer would hide its effect. Declare (effect ~w \c
-       pureStructural) only when it inspects its arguments without observing \c
-       mutable state; or, if the staleness is what you want, declare the \c
-       function you are caching (cache <function> unchecked), which caches it \c
-       on your word and skips this walk; or do not cache it'
+    [ '~w/~w is not classified pureStructural, so this walk cannot say what a \c
+       cached answer would hide. Declare (effect ~w pureStructural) only when \c
+       it inspects its arguments without observing mutable state. A function \c
+       whose body reaches this is not cached automatically; (cache <function> \c
+       force) declares one anyway, and (memoize <function>) and \c
+       (tabled (<function> ...)) are honoured as written'
       -[Name, Arity, Name] ].
 
 %%%% The five-rank operation-effect lattice %%%%
@@ -2021,13 +2029,6 @@ metta_contract_fact(Args) :-
     native_storage_module('&metta', Module),
     Goal =.. ['&metta'|Args],
     catch(call(Module:Goal), error(existence_error(procedure, _), _), fail).
-
-%The deliberate override: (cache Name unchecked) in &metta says the CALLER
-%accepts stale answers for this function. lib_tabling and lib_memo consult
-%it before their purity walk; an explicit non-pureStructural declaration
-%still refuses, because the author's NO outranks the caller's insistence.
-metta_cache_unchecked(Name) :-
-    metta_contract_fact([cache, Name, unchecked]).
 
 %(annotations Ctx Algebra [Capabilities]) declares the value algebra a
 %context's answer annotations live in; silence is the shipped bool algebra.
