@@ -123,6 +123,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Two overlapping engine transactions cannot both commit a different alias for
+  one name. Under snapshot isolation each read a state the other's write was
+  not in, so both declaration-time checks passed and a space ended up holding
+  `(: Count (Alias Number))` and `(: Count (Alias String))` together; the outer
+  transaction boundary re-runs the requirement at commit, where the state has
+  refreshed, and refuses the second by name.
+
 - `serve` and `boot` finish their shutdown when the interrupt repeats. A second
   SIGINT arriving inside the close landed in `socketserver.shutdown`'s wait and
   was collected as a close FAILURE, which `close()` re-raised, so the graceful
