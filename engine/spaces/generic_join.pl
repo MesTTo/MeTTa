@@ -1,13 +1,15 @@
 % Purpose: plan native cyclic conjunctions as bag-preserving Generic Join.
 % Assumes: spaces consults this file; conjunct_goal/4 enumerates stored rows
 % without evaluating them [source: engine/spaces/native_matching.pl, conjunct_goal/4; commit=WORKTREE].
-% Guarantees: only flat, attribute-free patterns with finite ground candidate
-% rows are admitted; every completed assignment emits the product of its row
-% multiplicities [tested: native_generic_join; commit=WORKTREE].
+% Guarantees: patterns are flat and attribute-free; trie plans require finite
+% ground candidate rows and emit the product of their occurrence counts;
+% an empty factor proves the empty bag directly
+% [tested: native_generic_join; commit=WORKTREE].
 % Owns resources: immutable Prolog terms hold one query's tries and are released
 % with its stack; no cache, database entry or external handle survives the query.
-% Decides: GYO-cyclic queries use variable-at-a-time intersection; other shapes
-% retain match_relational_conjuncts/5 [tested: native_generic_join; commit=WORKTREE].
+% Decides: nonempty GYO-cyclic queries use variable-at-a-time intersection;
+% other nonempty shapes retain match_relational_conjuncts/5
+% [tested: native_generic_join; commit=WORKTREE].
 
 :- use_module(library(assoc), [ord_list_to_assoc/2, gen_assoc/3]).
 :- use_module(library(ordsets), [ord_intersection/3, ord_subset/2]).
@@ -20,17 +22,25 @@
 % equivalence hashes, AVL maps add a logarithmic lookup factor, and counts
 % replace repeated identical rows. Backtracking emits the bag without sorting
 % its output or retaining it. Query variables keep first-occurrence order.
-native_conjunction_plan(Module, Space, Conjuncts, join(Vars, Relations)) :-
+native_conjunction_plan(Module, Space, Conjuncts, Plan) :-
     Conjuncts = [_,_,_|_],
     acyclic_term(Conjuncts),
     term_attvars(Conjuncts, []),
     maplist(join_flat_pattern, Conjuncts),
-    join_incidence_cycle(Conjuncts),
-    term_variables(Conjuncts, Vars),
-    maplist(join_columns(Vars), Conjuncts, Columns, Projections),
-    join_cyclic(Columns),
-    maplist(join_relation(Module, Space),
-            Conjuncts, Columns, Projections, Relations).
+    (   member(Pattern, Conjuncts),
+        conjunct_goal(Module, Space, Pattern, Goal),
+        \+ call(Goal)
+    ->  % An empty factor annihilates the bag before any trie is built.
+        % Each probe stops after one candidate and unwinds its bindings.
+        Plan = join([], [rel([], leaf(0))])
+    ;   join_incidence_cycle(Conjuncts),
+        term_variables(Conjuncts, Vars),
+        maplist(join_columns(Vars), Conjuncts, Columns, Projections),
+        join_cyclic(Columns),
+        maplist(join_relation(Module, Space),
+                Conjuncts, Columns, Projections, Relations),
+        Plan = join(Vars, Relations)
+    ).
 
 join_flat_pattern([Head|Args]) :-
     atom(Head),

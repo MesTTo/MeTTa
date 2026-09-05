@@ -49,6 +49,26 @@ test(ground_and_duplicate_bags_match_the_nested_reference) :-
     with_join_atoms([[edge,a,b],[edge,a,b],[edge,b,c],[edge,c,a],
                      [edge,a,a],[edge,c,c]], triangle_differential).
 
+test(a_four_relation_cycle_retains_duplicate_bags) :-
+    with_join_atoms([[r,a,b],[r,a,b],[r,a,other],[s,b,c],
+                     [t,c,d],[u,d,a],[u,d,other]],
+        same_bag([[r,X,Y],[s,Y,Z],[t,Z,W],[u,W,X]], [X,Y,Z,W])).
+
+test(ternary_relations_intersect_every_shared_column) :-
+    with_join_atoms([[r,a,b,c],[r,a,b,c],[s,b,c,d],[s,b,other,d],
+                     [t,c,d,a],[t,c,d,other],[u,d,a,b]],
+        same_bag([[r,X,Y,Z],[s,Y,Z,W],[t,Z,W,X],[u,W,X,Y]], [X,Y,Z,W])).
+
+test(disconnected_cycles_retain_the_product_of_their_bags) :-
+    with_join_atoms([[r,a,b],[r,a,b],[s,b,c],[t,c,a],
+                     [u,d,e],[v,e,f],[w,f,d],[w,f,d]],
+        same_bag([[r,X,Y],[u,A,B],[s,Y,Z],[v,B,C],[t,Z,X],[w,C,A]],
+                 [X,Y,Z,A,B,C])).
+
+test(repeated_ground_factors_retain_each_occurrence) :-
+    with_join_atoms([[r,a,b],[s,b,c],[t,c,a],[guard],[guard]],
+        same_bag([[r,X,Y],[s,Y,Z],[t,Z,X],[guard],[guard]], hit)).
+
 test(a_projection_retains_each_duplicate_derivation) :-
     with_join_atoms([[edge,a,b],[edge,a,b],[edge,b,c],[edge,c,a]],
         ( answer_bag(match('&plunit_generic_join',
@@ -148,6 +168,27 @@ test(a_bounded_triangle_retains_streaming_first_answer_cost) :-
     prefix_join_cost(64, Small),
     prefix_join_cost(256, Medium),
     prefix_join_cost(1024, Large),
+    assertion(Medium =< Small + 4),
+    assertion(Large =< Small + 4).
+
+empty_factor_cost(N, Cost) :-
+    findall([edge,A,B], (between(1, N, A), between(1, N, B)), Atoms),
+    with_join_atoms(Atoms,
+        ( Patterns = [[edge,X,Y],[edge,Y,Z],[edge,Z,X],[absent]],
+          statistics(inferences, Before),
+          findall([X,Y,Z],
+                  match('&plunit_generic_join', [','|Patterns], [X,Y,Z], _),
+                  Answers),
+          statistics(inferences, After),
+          Cost is After - Before,
+          assertion(Answers == []),
+          same_bag(Patterns, [X,Y,Z]) )).
+
+test(an_empty_factor_prevents_dense_triangle_enumeration) :-
+    empty_factor_cost(8, _),
+    empty_factor_cost(16, Small),
+    empty_factor_cost(32, Medium),
+    empty_factor_cost(64, Large),
     assertion(Medium =< Small + 4),
     assertion(Large =< Small + 4).
 
