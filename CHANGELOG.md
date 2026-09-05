@@ -123,6 +123,36 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Node binding's `&self` is the space the ask was made in, at the term door
+  as at the source door. `&self` is a substitution for the running space that
+  the engine's source loader applies, and a term built on the host side never
+  reached it, so `eval` in a scratch space answered the ENGINE ROOT's atoms
+  where `runStatus` answered the scratch's. An analysis that copies a program
+  into a scratch therefore saw the program's rows in both places. The Python
+  binding already substituted at both of its doors.
+
+- `MeTTa.spaces()` lists a space whose name has no ampersand instead of
+  refusing the whole registry. Any symbol something writes through is a
+  registered space name, which `07-add_atom_fun_space.metta` uses, and the
+  host's `p` tag required the prefix; because the registry crosses as one
+  expression, one such name cost every other space in the answer. The prefix is
+  how the built-in spaces are spelled and the tag is what says a name is a
+  space, so the tag now carries the engine's own name and that identity
+  addresses the space. `m.space("name")` still MINTS `&name`, which is a
+  different space, so the handle from `spaces()` is the way to the bare one.
+  The answer is also total: it used to `filter`, silently answering a shorter
+  list.
+
+- `MeTTa.run` and `MeTTa.loadFile` take the space to load into, which every
+  other door already took; they wrote to the engine root whatever the caller
+  was working in.
+
+- `MeTTa.speculate` refuses a host callable with the reason and the remedy,
+  where it used to lift it into a grounded atom, answer `(js Function)` and
+  never call it. This seat reaches JavaScript by suspending the engine and
+  `engine_yield/1` cannot unwind through the frame `snapshot/1` opens, which is
+  what `Space.transaction` already said in the same situation.
+
 - `speculate` answers every answer of its body. `snapshot/1` runs its goal as
   `once/1`, so a scope over three answers answered one and dropped two with
   nothing said, the same opacity violation `transaction` was repaired for: the
