@@ -22,9 +22,12 @@
 % translator_literal_type_checks:a_stale_transaction_keeps_the_dynamic_contract;
 % commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
 % [tested: tests/prolog/suites/spaces/spaces.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
-% Guarantees: withdrawing a declaration repairs aliases and compiled callers
-%   through the existing support graph in the same transaction [tested:
-%   structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
+% Guarantees: in a scope holding an alias, withdrawing a declaration repairs
+%   aliases and compiled callers through the existing support graph in the same
+%   transaction; a scope with none installs no clause on metta_remove_atom/3 and
+%   withdraws exactly as it did before aliases existed [tested:
+%   structural_aliases:a_scope_without_an_alias_installs_no_withdrawal_clause;
+%   commit=e471c116647ffc9d3949501b3f2d3869a9153bc2].
 
 %%%% Who owns a space name: the claim door %%%%
 %
@@ -1601,12 +1604,35 @@ metta_space_expression(Operation, Terms, _) :-
 %path keeps equations, their compiled clauses, and foreign providers
 %all handled by the code that owns them.
 
+%A scope that holds a type alias installs a declaration clause in front of
+%this door, from set_type_alias_mutation_scope/2, and that clause routes a
+%[':' |_] term to metta_remove_declaration_atom/3 below. A scope with no alias
+%has no such clause and withdraws a declaration exactly as it did before
+%aliases existed, which is the rule the feature states for every other reader
+%and writer it gates: a space that never declares an alias pays nothing
+%[source: docs/journal/2026-09-05-structural-type-aliases.md, "A scope with no
+%aliases retains identity normalization and ordinary support publication"].
+%Standing here unconditionally, it cost the register-op benchmark 2899
+%inferences once and 97 per later cycle in a space holding no alias at all:
+%the space_module/2 materialized an execution module that benchmark never
+%uses, and the transaction plus type_alias_lookups_changed/2 swept a support
+%graph with no alias root in it [measured 2026-09-05, 103723 -> 116225 over
+%100 cycles; command=extensions/python/bench.py --counter-only register-op].
+:- dynamic metta_remove_atom/3.
+
 %% metta_remove_atom(+Space, ?Atom, -Removed:boolean) is semidet.
 metta_remove_atom(Space, _, _) :-
     metta_refuse_module_for_space(Space, metta_remove_atom/3),
     fail.
 metta_remove_atom(Space, Term, Removed) :-
-    nonvar(Term), Term = [':', _, _], !,
+    metta_remove_atom_raw(Space, Term, Removed).
+
+%Withdrawing a declaration while aliases are live. The names are read out of
+%the store BEFORE the removal, because the pattern may leave the name unbound
+%and the rows are gone afterwards. The typing lock and one transaction hold
+%the whole step, so no reader sees the declaration withdrawn while the alias
+%readers it justified are still installed.
+metta_remove_declaration_atom(Space, Term, Removed) :-
     space_module(Space, Module),
     with_typing_policy_stable(
         transaction(
@@ -1619,8 +1645,6 @@ metta_remove_atom(Space, Term, Removed) :-
               ( Removed == true
               -> type_alias_lookups_changed(Module, Names)
               ;  true ) ))).
-metta_remove_atom(Space, Term, Removed) :-
-    metta_remove_atom_raw(Space, Term, Removed).
 
 metta_remove_atom_raw(Space, Term, Removed) :- var(Term), !,
     findall(A, metta_host_stored(Space, A), Atoms),

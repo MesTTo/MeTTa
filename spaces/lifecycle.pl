@@ -28,9 +28,12 @@
 %   relationship declarations, fresh cache-child minting, and release.
 % [tested: tests/prolog/suites/spaces/spaces.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: alias conflicts and cycles visible in the current transaction
-%   fail before publication; alias reader and mutation clauses retire with
-%   their scope [tested:
-%   structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
+%   fail before publication; alias reader, mutation and withdrawal clauses are
+%   installed only by set_type_alias_mutation_scope/2 and retire with their
+%   scope [tested:
+%   structural_aliases:a_scope_without_an_alias_installs_no_withdrawal_clause,
+%   structural_aliases:alias_readers_cost_only_their_visible_scope_and_retire_transactionally;
+%   commit=e471c116647ffc9d3949501b3f2d3869a9153bc2].
 
 %The inverse of add_sexp_in/4, written here beside it for the same reason
 %metta_module_space/2 is written beside space_module/2: the mapping is
@@ -1426,9 +1429,11 @@ compiled_predicate_arity(F, Module, Predicate, Arity) :-
 %by a differential rather than by sharing code: every shape is added alone and
 %in a batch and the resulting state compared
 %[tested: spaces_batch_is_only_a_transport].
-% Scopes with aliases install indexed declaration observers. Their ordinary
-% bodies remain the source of mutation semantics, and scopes without aliases
-% execute those bodies directly. All installed references share alias lifetime.
+% Scopes with aliases install indexed declaration observers on both write
+% doors. Their ordinary bodies remain the source of mutation semantics, and
+% scopes without aliases execute those bodies directly, which is what keeps a
+% space that never declares an alias paying nothing for the feature. All
+% installed references share alias lifetime.
 :- dynamic metta_add_atom/3, atoms_store_only/3.
 :- dynamic announce_declaration_changed/3, type_marker_changed/2.
 :- dynamic type_alias_mutation_scope_ref/2.
@@ -1448,6 +1453,10 @@ set_type_alias_mutation_scope(Scope, enabled) :-
     assertz(type_alias_mutation_scope_ref(Scope, Add)),
     asserta((atoms_store_only(Space, [[':', _, _]|_], _) :- !, fail), Batch),
     assertz(type_alias_mutation_scope_ref(Scope, Batch)),
+    asserta((metta_remove_atom(Space, Withdrawn, Verdict) :-
+                nonvar(Withdrawn), Withdrawn = [':', _, _], !,
+                metta_remove_declaration_atom(Space, Withdrawn, Verdict)), Remove),
+    assertz(type_alias_mutation_scope_ref(Scope, Remove)),
     % Copy the standing body once at activation, so its policy is not repeated
     % in a second implementation. Filter earlier scopes' installed observers.
     % policy-inventory-exempt: mechanism-internal; reason=the two declaration-change observer heads whose standing bodies an alias mutation scope copies, a shape of the observer seam rather than a catalog value; evidence=engine/spaces/lifecycle.pl:set_type_alias_mutation_scope/2
