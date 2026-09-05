@@ -65,6 +65,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   The mode costs nothing when off: the three emitted discharges choose their
   form while compiling, so an ordinary compile carries no trace of it.
 
+### Added
+
+- `lint()` reports `builtin-equation-shadow` when an equation redefines a head
+  the engine ships. The dangerous cases already refused by name; this is the
+  case the engine PERMITS, where the equation compiles into the space's own
+  module and shadows the builtin there, so `!(max-atom (1 5 3))` answers `5`
+  before it and `shadowed` after with nothing said. A warning, because the
+  write is lawful and scoped, and the sibling of
+  `interpreter-equation-shadow` for translator-owned heads.
+
 ### Fixed
 
 - `MeTTa.profile()`'s second answer is a table like every other. `EngineProfile`
