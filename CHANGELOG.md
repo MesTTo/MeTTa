@@ -9,6 +9,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `llms.txt`'s source table names every engine unit again. The query-planning
+  work added `engine/translator/folding.pl` and `engine/spaces/generic_join.pl`
+  without naming them, so the table read five translator units against six and
+  seven spaces units against eight. The `llms` lane derives both counts and had
+  been reporting them; they are corrected here because the file now ships in
+  the wheel, where a reader has nothing else to check it against.
+
 - A second `@m.define` clause publishes the arrow its own signature states. One
   boolean per name recorded only whether it had declared anything, so every
   later clause's declaration was suppressed; a ledger of what the name has
