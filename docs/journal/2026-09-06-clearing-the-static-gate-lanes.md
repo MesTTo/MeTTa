@@ -82,3 +82,38 @@ the selftest exit 1 with `modules the first mode line loaded:
 Rejected: weakening the test's `\+ current_module(backward_compatibility)`
 assertion. The load was real and was the tooling's, so the assertion was right
 and the build was not transparent.
+
+Tried: deciding the three `cumulative-syntax` findings one construct at a time,
+reading the table as the record of where a construct is TAUGHT. It is grouped
+that way: all eight `assert*` forms sit at 12-00-01 and `dif`, `not` and
+`not-provable` at 22-01-03, each the file that explains them.
+
+Decided: `if-decons-expr` gains the row it never had, at 08-01-16.
+`examples/ch08-data/08-01-atoms-lists-and-folds/16-if_decons_expr.metta` is its
+only use in the corpus and demonstrates it from nothing, so that file is where
+it is introduced.
+
+Decided: `ch09-types/18-compiled_overloads.metta` drops `assertEqualToResult`,
+which `ch12-testing/01-he_assert.metta` teaches with the explanation of what a
+ToResult form does, for `(test (collapse (get-type ...)) (...))`. That is not an
+invention: `01-types`, `09-recursive_types`, `11-subtyping` and
+`15-engine_surface` all check a multi-answer `get-type` that way, and
+`09-recursive_types.metta:7` checks two arrows of one name exactly so. Three
+checks, three passes, and the claim count and stored content the twin lane
+compares are unchanged, so `18-compiled_overloads.py` needs no edit.
+
+Rejected: moving `not-provable`'s row to 07-02-08. It would leave a chapter-7
+file using constructive negation with nothing explaining it, which is the
+failure the ordering exists to prevent, and it would make 22-01-03 -- 150 lines
+teaching negation from "the engine had no negation at all" -- a re-introduction.
+Rejected: rewriting `08-case-duals.metta` without `not-provable`, because
+negating a nested case is the whole of what the file exists to pin.
+
+Decided: move the file instead, `07-02-case/08-case-duals.metta` to
+`22-01-logic-programs/06-case-duals.metta`, with its Python twin. It lands three
+files after the negation chapter's own "case, and the forms that answer nothing"
+section, which teaches the same lesson over a FLAT case. Nothing else keyed on
+the path: it has no ORIGINS row (it was written here, not derived), the twin
+pairing is a pure path transform so `orphans()` stays empty at 224 twins, and
+the twin's self-citing measurement command names the new path. `parity` reads
+252/252 examples agreeing across both configurations.
