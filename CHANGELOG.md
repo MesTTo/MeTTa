@@ -92,6 +92,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   import, and it names the absence, `immediate` and `none`, outside every load
   rather than failing or inventing a revision.
 
+### Fixed
+
+- A composed space's capability set is its members' rather than its own
+  methods'. `spaces.overlay(readonly_space, store)` used to answer
+  `can_run("add")` with `True` and then raise when add was called, and that
+  same false set was registered into `&metta` as the space's queryable
+  capabilities, so a MeTTa program reading them was told something untrue and
+  the engine's pre-check admitted an operation it exists to refuse. `union`,
+  `readonly`, `mapped` and `overlay` now derive the answer from the members
+  each capability is routed to, and a capability refusal names the member that
+  lacks it rather than the combinator. Measured over 400 generated trees: 388
+  of 2,000 claims were false before, none after.
+
 ### Added
 
 - `(pragma! verify-discharges true)` verifies the type checks the compiler

@@ -70,6 +70,18 @@ Guarantees:
   - a tested claim naming a target that cannot fail, that no runner executes,
     or that only a REPORT lane runs, fails the run
     [tested 2026-08-18: tests/checks/check_evidence_selftest.py]
+  - the four command shapes a claim may name instead of a test are each
+    resolved and each falsified: a check.sh lane, an npm script, a `make -C
+    <seat> <target>`, and a `sh <script>` with environment assignments in
+    front of it [tested 2026-09-05: tests/checks/check_evidence_selftest.py]
+  - a path in a claim resolves from the repository root, from beside the
+    citing file, and from the citing file's SEAT root, and one that resolves
+    under none of the three is reported
+    [tested 2026-09-05: tests/checks/check_evidence_selftest.py]
+  - reading a file's tags and requiring its Guarantees lines to carry one are
+    separate scopes, so a class can clear the first without clearing the
+    second; SOURCES is the first and GUARANTEE_SOURCES the second
+    [tested 2026-09-05: tests/checks/check_evidence_selftest.py]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs
@@ -105,7 +117,11 @@ from pathlib import Path
 
 from evidence_runners import ROOT, Execution, executed, gate_scripts, prolog_loads
 
-SOURCES = (
+#: Where BOTH obligations apply: a tag that names something must be backed,
+#: and a Guarantees line must carry a tag at all. The second is the stricter
+#: one and is the reason this list is smaller than SOURCES; CLAIM_SOURCES
+#: below carries the classes that have cleared the first and not the second.
+GUARANTEE_SOURCES = (
     "engine/*.pl",
     # The engine is mostly its SUBDIRECTORIES: 22 of its 42 Prolog files sit
     # one or two levels down, control.pl, space_hooks.pl, effects.pl and
@@ -187,6 +203,63 @@ SOURCES = (
     "extensions/*/tools/*.mjs",
 )
 
+#: The classes whose TAGS this reads and whose Guarantees block it does not.
+#: Measured before promoting each one, per glob, with the two obligations
+#: separated: every glob here carries zero unbacked tags today, and the only
+#: thing that kept them out was `untagged_guarantees`, which is a different
+#: and stricter obligation on a burn-down of its own. Holding one file class
+#: hostage to the other left 101 written claims unread across seventeen
+#: classes, the shell runners among them, and the shell runners are where the
+#: gate itself states what it guarantees [measured 2026-09-05: 4,875 claims
+#: read before this split and 5,029 after, over 1,977 tracked files of which
+#: 170 held a tag no glob reached].
+#:
+#: What is NOT here, and why, so the queue is a number rather than a shrug
+#: [measured 2026-09-05, unbacked tags per glob with the command shapes below
+#: in place]: `extensions/python/benchmarks/*.py` 22;
+#: `extensions/mork/tests/*.plt` 8; `tests/prolog/*.pl` 8;
+#: `extensions/python/examples/*/*.py` 6; `extensions/python/*.py` 3;
+#: `tests/prolog/vendor/*.pl` 3; `tests/fixtures/*.pl` 2; `engine/*.metta` 1;
+#: `extensions/cmetta/kit/*.c` 1; `tests/conformance/*.py` 1.
+CLAIM_SOURCES = (
+    # THE GATE'S OWN RUNNERS. Every shell script the repository ships, which
+    # is where the gate states what it guarantees and where the largest single
+    # block of unread claims sat: 63 tags across sixteen files. Three of them
+    # were broken and the three are why this could not join sooner -- a lane
+    # written across a line continuation, a `make -C <seat> <target>` whose
+    # seat argument read as a missing file, and a measurement with no date.
+    # The first two are fixed in the checker below and in evidence_runners;
+    # the third was fixed in check.sh itself.
+    "*.sh",
+    "engine/*.sh",
+    "extensions/*/*.sh",
+    "tests/shell/*.sh",
+    "tests/checks/*.sh",
+    # The Python seat's Prolog half, 26 claims. `extensions/python/metta/*.pl`
+    # was globbed and the seat root beside it was not, so bridge.pl's whole
+    # Guarantees block went unread.
+    "extensions/python/*.pl",
+    "tests/prolog/*.py",
+    "tests/conformance/*.pl",
+    # The MORK seat's Rust, the one shipped language the list had never named.
+    "extensions/mork/mork_ffi/src/*.rs",
+    # A seat that grows benchmarks makes the same kind of claim its subject
+    # does; four seats had, in three languages.
+    "extensions/mork/benchmarks/*.py",
+    "extensions/mork/benchmarks/*.pl",
+    "extensions/cmetta/benchmarks/*.c",
+    "extensions/cmetta/benchmarks/*.py",
+    "extensions/node/benchmarks/*.py",
+    # The C and Python an example ships beside its .metta, which the corpus
+    # globs above reach only in their MeTTa half.
+    "examples/ch19-*/*/*.c",
+    "examples/ch18-*/*/*.py",
+    "website/scripts/*.py",
+    "website/scripts/*.mjs",
+    # The stub file states the surface's types and cites what proves them.
+    "extensions/python/metta/*.pyi",
+)
+
 # Commentless formats, scanned for PROVENANCE ONLY. A JSON baseline is exempt
 # from the obligation header, which is why it is not in SOURCES, but a
 # commentless format is not exempt from pinning its evidence: leaving these out
@@ -206,13 +279,13 @@ SOURCES = (
 # hardcoded list would leave that seat's commit pins unchecked in the same
 # silence this lane exists to end.
 #
-# The shell runners are here for the pin half and not yet for the claim half.
-# They carry measured claims like any other file -- check.sh's own VIRTUAL_ENV
-# note is one -- and their commit pins went unchecked and, worse, unresolvable
-# by the provenance pass, whose scope is this list. Their Guarantees blocks are
-# a burn-down of 34 untagged claims recorded in
-# ai-code-organisation-and-fixes.md rather than a gate today, which is the same
-# staging every REPORT lane in check.sh follows.
+# The shell runners were here for the pin half and not for the claim half; they
+# have since joined CLAIM_SOURCES, where their tags ARE read. They stay here
+# too, and so does every other glob that has moved: this pass reads a `commit=`
+# on ANY line, including the long re-pin prose no tag encloses, which is a
+# wider net than the claim half's rather than a subset of it. Their Guarantees
+# blocks remain a burn-down against GUARANTEE_SOURCES, which is a different
+# obligation and is why the two lists are no longer one list.
 PROVENANCE_SOURCES = (
     # The twins and the suites, named by the out-of-glob net on 2026-08-31: a
     # twin's BUDGET carries a whole provenance history in comments and a
@@ -237,10 +310,29 @@ PROVENANCE_SOURCES = (
     "extensions/*/*.sh",
 )
 
+#: Every file whose evidence TAGS are read. Both halves, because a tag is a
+#: tag wherever it is written.
+SOURCES = GUARANTEE_SOURCES + CLAIM_SOURCES
+
 # Where a name may be defined. metta/_compliance.py holds real tests, shipped
 # for a provider author to inherit; they run here too, under each
 # SpaceComplianceSuite subclass, which is why the package is walked at all.
-PYTHON_TREES = ("extensions/python/tests", "extensions/python/benchmarks", "extensions/python/metta", "tests")
+#
+# DISCOVERED for the seats rather than listed: a seat owns its own tests/
+# directory and extensions/cmetta/tests/test_kit.py sits in one, so a claim
+# naming a test defined there read as naming nothing while sanitize.sh ran it
+# [measured 2026-09-05].
+PYTHON_TREES = (
+    "extensions/python/tests",
+    "extensions/python/benchmarks",
+    "extensions/python/metta",
+    "tests",
+    *sorted(
+        str(path.relative_to(ROOT))
+        for path in ROOT.glob("extensions/*/tests")
+        if path.is_dir()
+    ),
+)
 
 # The tag and everything up to its closing bracket, across newlines: a claim
 # listing three tests wraps, and a per-line scan reads the first line as an
@@ -473,8 +565,24 @@ def _prolog_report(text: str) -> str:
     return ""
 
 
+def _prolog_suites() -> list[Path]:
+    """Every Prolog file a suite could live in, seat-owned ones included.
+
+    Rooted at tests/ alone until 2026-09-05, which left a seat's OWN plunit
+    suite invisible: extensions/mork/tests/mork_seat.plt defines eight tests
+    and cites all eight in its header, and every one of them read as naming a
+    test that is not in the tree. Discovered per seat rather than listed, so a
+    seat that grows a suite is covered without an edit here, which is the rule
+    build.sh and check.sh already follow for a component.
+    """
+    found = list((ROOT / "tests").rglob("*.pl*"))
+    for seat in sorted(ROOT.glob("extensions/*/tests")):
+        found += seat.rglob("*.pl*")
+    return sorted(set(found))
+
+
 def _prolog_reports() -> dict[Path, str]:
-    """How each Prolog file under tests/ reports a failure, or "" when it cannot.
+    """How each Prolog suite file reports a failure, or "" when it cannot.
 
     A FILE property, not a per-predicate one. Whether a particular predicate is
     reached cannot be decided by reading the text: plunit runs goals written in
@@ -487,7 +595,7 @@ def _prolog_reports() -> dict[Path, str]:
     """
     reports = {
         path.resolve(): _prolog_report(_text(path))
-        for path in sorted((ROOT / "tests").rglob("*.pl*"))
+        for path in _prolog_suites()
     }
     # A file with no entry of its own still runs, and still fails, when one
     # that has an entry loads it. static_checks.pl reaches its published
@@ -526,7 +634,7 @@ def _prolog_test_units(text: str) -> Iterator[tuple[str | None, str]]:
 def _prolog_targets(reports: dict[Path, str]) -> dict[str, list[Target]]:
     """Plunit units and tests, and the named checks a Prolog script runs."""
     targets: dict[str, list[Target]] = {}
-    for path in sorted((ROOT / "tests").rglob("*.pl*")):
+    for path in _prolog_suites():
         text = _text(path)
         run_path = path.resolve()
         why = reports[run_path]
@@ -764,16 +872,41 @@ def _path_in(token: str, where: Path | None) -> Path | None:
     file beside it and exactly what a reader of that seat types; resolving only
     against the repository root called ten such citations unbacked on the day
     the C seat first came under this lane. Root first, so a repository-relative
-    spelling keeps its meaning, and the citing file's own directory second.
+    spelling keeps its meaning, the citing file's own directory second, and the
+    SEAT root third: extensions/cmetta/kit/driver.c cites `tests/test_kit.py`,
+    which is neither beside it nor at the repository root but is exactly what a
+    reader standing in extensions/cmetta/ types, and
+    extensions/python/tests/ch17_concurrency_and_the_loop/test_async_space.py
+    cites its own path from extensions/python/ the same way [measured
+    2026-09-05: three citations, all of them real files, all of them read as
+    naming nothing].
     """
     candidate = ROOT / token
     if candidate.is_file():
         return candidate
-    if where is not None:
-        beside = where.parent / token
-        if beside.is_file():
-            return beside
-    return None
+    if where is None:
+        return None
+    beside = where.parent / token
+    if beside.is_file():
+        return beside
+    return next(
+        (seat / token for seat in _seat_roots(where) if (seat / token).is_file()),
+        None,
+    )
+
+
+def _seat_roots(where: Path) -> Iterator[Path]:
+    """The seat directories a file sits under, innermost first.
+
+    A seat is a directory holding its own control file, which is the same test
+    build.sh and check.sh apply when they DISCOVER a component, so nothing here
+    is a second list of what the seats are.
+    """
+    for parent in where.resolve().parents:
+        if parent == ROOT:
+            return
+        if (parent / "check.sh").is_file() or (parent / "build.sh").is_file():
+            yield parent
 
 
 def resolve(token: str, known: Evidence, where: Path | None = None) -> list[Target] | str:
@@ -856,6 +989,28 @@ SCRIPT_COMMAND = re.compile(
 #: still a finding.
 NPM_COMMAND = re.compile(r"\bnpm\s+run\s+([A-Za-z0-9:_-]+)")
 
+#: A shell RUNNER, which is the fourth shape and the one this repository writes
+#: most: `sh extensions/python/test.sh <suite>` and `sh tests/shell/<name>.sh`.
+#: Without it the body was split into words and the ENVIRONMENT ASSIGNMENT in
+#: front of the command was read as a path, so
+#: `CHECK_PY=$VENV/bin/python sh extensions/python/test.sh ...` reported
+#: `CHECK_PY=$VENV/bin/python` as a file that is not in the tree [measured
+#: 2026-09-05]. The script is what makes the command evidence, exactly as the
+#: interpreter shape above decides on its script.
+SHELL_COMMAND = re.compile(r"\bsh\s+((?:[\w.$-]+/)*[\w.-]+\.sh)\b")
+
+#: The fifth, and the one the C seat writes: `make -C <seat> <target>`. Its
+#: `-C <dir>` argument contains a slash, so word-splitting read the SEAT
+#: DIRECTORY as a file and reported it missing; extensions/cmetta/sanitize.sh
+#: cited its own lane that way. A make claim is backed when the seat's Makefile
+#: defines the target, which is the same question evidence_runners already asks
+#: with MAKE_RULE when it models what a lane runs.
+MAKE_COMMAND = re.compile(r"\bmake\b[^\n]*?-C\s+([\w./-]+)\s+(?:--?\S+\s+)*([a-z][\w-]*)")
+
+#: A Makefile target opens in column 1 and is followed by `:`, which `:=` is
+#: not: a variable assignment names sources without defining a target.
+MAKE_RULE = re.compile(r"^([A-Za-z][\w.-]*)\s*:(?!=)")
+
 
 def npm_scripts() -> frozenset[str]:
     """Every script name a shipped package.json defines, node_modules aside."""
@@ -895,7 +1050,18 @@ def gate_lanes() -> frozenset[str]:
     )
 
 
-def gate_command_problems(body: str, known: Evidence) -> list[str] | None:
+def make_targets(recipe: Path) -> frozenset[str]:
+    """Every target one Makefile defines."""
+    return frozenset(
+        matched.group(1)
+        for line in _text(recipe).splitlines()
+        if (matched := MAKE_RULE.match(line))
+    )
+
+
+def gate_command_problems(
+    body: str, known: Evidence, where: Path | None = None
+) -> list[str] | None:
     """None when the body is not a gate command; otherwise what is wrong with it."""
     match = GATE_COMMAND.search(body)
     if match is not None:
@@ -909,20 +1075,29 @@ def gate_command_problems(body: str, known: Evidence) -> list[str] | None:
         if script in npm_scripts():
             return []
         return [f"names the npm script {script}, which no package.json defines"]
-    match = SCRIPT_COMMAND.search(body)
+    match = MAKE_COMMAND.search(body)
+    if match is not None:
+        seat, target = match.group(1), match.group(2)
+        recipe = ROOT / seat / "Makefile"
+        if not recipe.is_file():
+            return [f"names make -C {seat}, which holds no Makefile"]
+        if target in make_targets(recipe):
+            return []
+        return [f"names the {seat} make target {target}, which its Makefile does not define"]
+    match = SHELL_COMMAND.search(body) or SCRIPT_COMMAND.search(body)
     if match is None:
         return None
-    where = match.group(1)
-    found = resolve(where, known)
+    named = match.group(1)
+    found = resolve(named, known, where)
     if isinstance(found, str):
         return [found]
-    verdicts = [target_problem(where, target, known) for target in found]
+    verdicts = [target_problem(named, target, known) for target in found]
     return [verdicts[0]] if verdicts and all(verdicts) else []
 
 
 def tested_problems(body: str, known: Evidence, where: Path | None = None) -> list[str]:
     """What is wrong with one `tested` tag, or nothing when every name it gives holds up."""
-    command = gate_command_problems(body, known)
+    command = gate_command_problems(body, known, where)
     if command is not None:
         return command
     stripped = DATE.sub("", body)
@@ -1063,6 +1238,13 @@ def untagged_guarantees() -> list[str]:
 
     `[assumed <date>]` is a pass here, deliberately. It costs nothing to write
     and it is the only thing that makes an unverified claim visible as one.
+
+    GUARANTEE_SOURCES rather than SOURCES, and the split is the point: this
+    obligation is stricter than "a tag that names something must be backed",
+    and coupling them meant a file class could only join the tag check by
+    clearing this one first. Seventeen classes had already cleared the tag
+    check and were held out by fifty untagged shell guarantees
+    [measured 2026-09-05].
     """
     block = re.compile(
         r"Guarantees:\n(.*?)\n(?:%|#|\s)*?"
@@ -1070,7 +1252,7 @@ def untagged_guarantees() -> list[str]:
         re.DOTALL,
     )
     findings: list[str] = []
-    for glob in SOURCES:
+    for glob in GUARANTEE_SOURCES:
         for path in sorted(ROOT.glob(glob)):
             found = block.search(_text(path))
             if found is None:
