@@ -697,7 +697,7 @@ stops being reported is itself refused, with
 what it was written for [tested:
 `builtin_facets:the_effect_planner_helpers_are_exempt_in_place`,
 `builtin_facets:a_stale_implementation_exemption_is_rejected`;
-commit=WORKTREE].
+commit=90aa1e67c6d1cda45e27dbaa565f2c537f70ad40].
 
 ### Taking an argument unevaluated
 

@@ -5,7 +5,7 @@
 % Guarantees: both coverage directions reject omissions at the exact name,
 %   MeTTa arity, and Prolog hook; exemptions are local, reasoned, unique, and
 %   live [tested: tests/prolog/suites/evaluation/builtin_facets.plt;
-%   commit=WORKTREE].
+%   commit=90aa1e67c6d1cda45e27dbaa565f2c537f70ad40].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
