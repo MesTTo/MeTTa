@@ -405,7 +405,7 @@ test(a_declaration_without_a_definition_is_not_exported) :-
 % no cost 2,065 inferences against 31 for the yes, 2,114 per seam over the two
 % sweeps, and 305,970 of a 543,929-inference boot. Thirty added kind/2 rows
 % cost 124,185 inferences there and 1,755 here [measured 2026-09-06:
-% engine/bench.pl bench_run(boot); commit=WORKTREE].
+% engine/bench.pl bench_run(boot); commit=8ec7de241ef3cdd2753f24a97c86e9e9c7240b06].
 %
 % The bound is a RATIO rather than a count because the honest number moves a
 % few inferences with clause layout: what must hold is that a missing

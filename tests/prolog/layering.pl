@@ -143,7 +143,7 @@ subsystem_name(Base, Name) :- file_name_extension(Name, pl, Base).
 %[measured 2026-09-06: `swipl -q --on-error=status -g layering_gate -t
 %'halt(0)' layering.pl` from tests/prolog, exit 1 with six findings before and
 %exit 0 with 874 cross-subsystem calls over 71 contract lines after;
-%commit=WORKTREE].
+%commit=8ec7de241ef3cdd2753f24a97c86e9e9c7240b06].
 measure_layer_edges :-
     ensure_loaded('../../lib/lib_tabling/lib_tabling.pl'),
     metta_ensure_source_observation,
