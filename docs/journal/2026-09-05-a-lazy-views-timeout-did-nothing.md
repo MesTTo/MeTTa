@@ -162,7 +162,7 @@ failed lanes named a tagged-bounds test or changed Python line. The failures
 were `build` changing under concurrent commits; the engine, C, Python and
 instruction benchmark pins; the already reported cumulative-syntax pair;
 PMU-contended MORK rows; four unrelated Python-suite failures; `refurb`; the
-`on-error` policy row in `engine/metta/space_hooks.pl`; and four frozen parity
+two determinism-alias lists in `engine/metta/types.pl`; and four frozen parity
 rows. The gate's Python suite ran 2,944 tests, and the focused tagged suite
 above supplies the task-local verdict independently of those four failures.
 
