@@ -25,8 +25,8 @@
 % rather than inferred. Free Join's lazy column-oriented tries (Wang, Willsey
 % and Suciu, SIGMOD 2023, section 5) decide it without statistics and are not
 % built here.
-% [measured: planned 785193, 383927, 7017703 and 103672 against nested
-% 50579836, 107304, 5049530 and 25000 SWI inferences;
+% [measured 2026-09-05: planned 785193, 383927, 7017703 and 103672 against
+% nested 50579836, 107304, 5049530 and 25000 SWI inferences;
 % command=PYTHONPATH=extensions/python $VENV/bin/python -m
 % benchmarks.query_planning join --family FAMILY [--control];
 % fixture=two-hub at 8192, uniform at 2048, clique at 48, small-third at 2048;
