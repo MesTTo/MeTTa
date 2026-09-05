@@ -145,6 +145,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   write is lawful and scoped, and the sibling of
   `interpreter-equation-shadow` for translator-owned heads.
 
+### Added
+
+- The Node package exports `metta-node/atom` and `metta-node/errors`, the atom
+  algebra and the errors it throws, with no engine behind either. A consumer
+  that only builds terms had to come through the main entry, which resolves 166
+  modules and reaches `node:fs`, `node:path` and `node:url`; the two new
+  subpaths resolve three between them and reach none of those, so a browser
+  page that builds atoms pays for none of the engine.
+
 ### Fixed
 
 - The Node binding refuses a command whose argument count is not the one its
@@ -253,6 +262,52 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   inferences: 2,899 once for that module and 97 for each later cycle. The
   clause is now installed only while a scope holds an alias, beside the three
   the feature already installs, and retires with them.
+
+- The Node remote wire carries a number the way `CODEC.md` says, so the two
+  seats can exchange one at all. It sent `["n", "1.5"]` where the Python seat
+  sends `["n", 1.5]`, and each end refused the other's: every Python-to-Node
+  and Node-to-Python exchange carrying a number failed, against a header
+  claiming interoperability. The portable transport now carries the VALUE, a
+  `bigint` for an integer at any width and a `number` for a float, which is the
+  same split Python makes with `int` and `float`; the JSON text carries the
+  literal, so an integer past 2^53 is exact and an integral float still reads
+  back as a float. A payload that is text is refused, naming the tag and what
+  arrived. A non-finite float is refused on the JSON wire in the engine's own
+  sentence, because JSON has no literal for one. The engine's own flat
+  transport is unchanged and still spells a number as decimal text, which is
+  what tells 2 from 2.0 across the WebAssembly boundary.
+
+- The Node seat orders text by code point wherever the order is an answer, so
+  the two seats order identically. `Array.prototype.sort` with no comparator
+  compares UTF-16 code UNITS, which parts from Python's `sorted` on every
+  astral character: an algebra's `(requires ...)` row, a lowered definition's
+  free names and the order integrations install in each landed differently
+  here. The same survey found two sorts over NUMBERS taking the default
+  comparator, which orders them as text, so a head defined at 2 and 10 linted
+  as "defined with 10 or 2". A gate lane now refuses a comparator-less `.sort()`
+  in the seat's sources unless the line says why its order decides nothing.
+
+- A float prints in the Node seat the way it prints in the Python seat and in
+  the engine. The seat took JavaScript's own layout, which is a third spelling:
+  a plus in the exponent (`1e+21`), positional up to 1e21 where the law leaves
+  at 1e16, and positional down to 1e-6 where the law leaves at 1e-5. 796 of
+  4,033 doubles spelled differently across the two seats, `1e16` reading
+  `10000000000000000.0` here. The digits were already right; the seat now lays
+  them out the arbiter's way, the same five branches the engine's
+  `metta_float_layout/4` and the Python seat's `_float_text` carry. The wire
+  encoder is unchanged and still spells canonical Prolog text, which is a
+  different job.
+
+- The Node gateway and its client refuse a JSON body that names one key twice,
+  the way the engine's codec and the Python seat already do. `JSON.parse`'s
+  reviver runs after each object is built, so the repeat had already collapsed
+  to the last value: a request naming `space` twice was served under the second
+  value while a reader of the first saw a different request, and the Python
+  gateway answered 400 for the same bytes. Both ends now read through
+  `readJson`, which parses with `JSON.parse` and then walks the same text for
+  its keys, comparing the decoded name so `{"a":1,"a":2}` is the repeat it
+  is. The MeTTa surface's `json-decode` is unaffected; it asks the same codec
+  for the classic shape, which keeps both pairs.
 
 - `serve` and `boot` finish their shutdown when the interrupt repeats. A second
   SIGINT arriving inside the close landed in `socketserver.shutdown`'s wait and
