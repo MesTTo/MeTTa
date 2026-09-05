@@ -57,6 +57,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `space.lint()` reports a declaration the engine will not honour as a call
+  type. `(: f (-[det]-> Number Number))` loaded apart from its definition was
+  accepted, reported by nothing, and left every `(f ...)` answering
+  `IncorrectNumberOfArguments`: the loader judges a definition's own forms, and
+  the lint net had been taught that the annotated spelling is an arrow while
+  the engine still decides with a literal `->`. The linter now asks the engine
+  instead of deciding, so the answer follows the engine when it learns the
+  spelling.
+
 - `lib_pln2` refusals name the complaint, not its shape. Each of its fifteen
   error terms threw with a remedy but without a message clause, so a caller who
   passed a value distribution where a truth value belongs read `Unknown error
