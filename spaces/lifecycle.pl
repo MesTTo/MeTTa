@@ -1865,6 +1865,30 @@ metta_remove_hooks_idle(Space) :-
     ;   metta_filtered_census_idle(removed, Space, Refs)
     ).
 
+%Native clear already removes compiled equations through metta_remove_atom/3.
+%An observer whose head can match only that shape is covered by this pass;
+%walking plain data for it made memo-owner teardown quadratic in stored data.
+%Open outer lists, variable relation names and non-atomic function heads must
+%keep the full census, since compiled_half_atom/3 does not cover them.
+%[tested: test_equation_observers_keep_plain_data_clear_bulk,
+%a_clear_observer_still_sees_atoms_outside_the_compiled_half; commit=WORKTREE].
+metta_remove_hooks_compiled_only(Space) :-
+    findall(Ref, seam:atom_hook_clause(removed, Ref), Refs),
+    exclude(metta_compiled_removal_hook, Refs, Watching),
+    Watching \== Refs,
+    (   Watching == []
+    ->  true
+    ;   metta_host_census_idle(removed, Space, Watching)
+    ->  true
+    ;   metta_filtered_census_idle(removed, Space, Watching)
+    ).
+
+metta_compiled_removal_hook(Ref) :-
+    clause(seam:atom_removed(_, Pattern), _, Ref),
+    is_list(Pattern),
+    Pattern = [Relation, Head, _], Relation == (=),
+    nonvar(Head), Head = [Name|_], atom(Name).
+
 %Clear a space, whoever holds it: a Prolog foreign provider clears through
 %its own seam (or refuses, loudly, when it cannot); a native space
 %announces the atoms it drops through the removal funnel exactly when
@@ -1924,6 +1948,8 @@ metta_host_clear_space(Space) :-
     space_module(Space, Module),
     metta_host_clear_tabling(Space, Module),
     (   metta_remove_hooks_idle(Space)
+    ->  true
+    ;   metta_remove_hooks_compiled_only(Space)
     ->  true
     ;   findall(Atom, metta_host_stored(Space, Atom), Atoms),
         forall(member(Atom, Atoms), 'remove-atom'(Space, Atom, _))
