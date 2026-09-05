@@ -47,12 +47,13 @@ Guarantees:
   - every shell shape that opens a command position is judged by the command
     that WRAPS the spawn: a `$( )`, a backtick, a pipeline, an `&&` chain, a
     `||` alternative, a `{ ...; }` group, an `if` and a `while` condition, a
-    `for` body, a `case` arm and an assignment prefix holding a quoted space,
-    each planted bounded and unbounded, are reported in the second form and
-    spared in the first. The old command-position pattern got eight of the
-    eleven wrong, six of them by sparing the unbounded half [measured
-    2026-09-06: the pattern answered 7 findings over 10 spawns where the
-    grammar answers 11 over 22, over the POSITIONS fixture below]
+    `for` body, a `case` arm, an assignment prefix holding a quoted space, a
+    leading `>&2` redirection and an `env NAME=value` wrapper, each planted
+    bounded and unbounded, are reported in the second form and spared in the
+    first. The old command-position pattern got ten of the thirteen wrong,
+    nine of them by sparing the unbounded half [measured 2026-09-06: the
+    pattern answered 7 findings over 11 spawns where the grammar answers 13
+    over 26, over the POSITIONS fixture below]
     [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
   - a spawner NAMED inside a quoted argument, `sed 's|sh run.sh ...|'`, is not
     a command and is not reported
@@ -190,8 +191,8 @@ exec "$PY" -m pytest tests
 #: command's last argument is what the assertions name, so a shape that flips
 #: reads as itself rather than as a line number.
 #:
-#: Eleven shapes, because a pass that reads the first word after an assignment
-#: prefix gets three of them backwards at once. `reading=$(bounded swipl ...)`
+#: Thirteen shapes, because a pass that reads the first word after an
+#: assignment prefix gets three backwards at once. `reading=$(bounded swipl ...)`
 #: is BOUNDED and read as an unbounded swipl, which is what
 #: tests/shell/test_boot_inference_determinism.sh was reworded around; ``
 #: `swipl ...` `` after an assignment is UNBOUNDED and was spared entirely,
@@ -242,16 +243,32 @@ esac
 RUSTFLAGS="-C target-cpu=native" TMPDIR="$HERE" bounded cargo build prefix-bound
 RUSTFLAGS="-C target-cpu=native" TMPDIR="$HERE" cargo build prefix-loose
 
+>&2 bounded swipl -g halt redirect-bound.pl
+>&2 swipl -g halt redirect-loose.pl
+
+bounded env METTA_PROBE=1 swipl -g halt env-bound.pl
+env METTA_PROBE=1 swipl -g halt env-loose.pl
+
 sed 's|sh run.sh "$f" 2>&1|sh run.sh "$f"|' "$HERE/test.sh" > quoted-argument.sh
 """
 
-#: The eleven, in the order they are planted above. `chain` and `alternative`
-#: are the two halves of an and-or list and `block` is the brace group a
-#: `|| { ...; }` opens, which build.sh at the root writes; they are separate
-#: cases because a reader checking a shape against this list should find the
-#: shape rather than have to know which ones share a code path.
+#: The thirteen, in the order they are planted above. `chain` and
+#: `alternative` are the two halves of an and-or list and `block` is the brace
+#: group a `|| { ...; }` opens, which build.sh at the root writes; they are
+#: separate cases because a reader checking a shape against this list should
+#: find the shape rather than have to know which ones share a code path.
+#:
+#: `redirect` and `env` each separate a WORKING pass from a plausible one.
+#: `>&2 swipl ...` is a leading redirection in front of a spawn, and it reads
+#: as `2 swipl ...` with the spawn spared for any tokenizer that treats the
+#: `&` in `2>&1` as the control operator it is everywhere else. `env NAME=v
+#: swipl ...` is a command that RUNS its operand, and a head that stops at it
+#: spares the spawn behind it; four lines in this tree write `bounded env
+#: NAME=value sh <script>` and dropping the `bounded` from one of them is
+#: exactly the regression this check exists to catch.
 SHAPES = ("substitution", "backtick", "pipeline", "chain", "alternative",
-          "block", "condition", "loop", "body", "arm", "prefix")
+          "block", "condition", "loop", "body", "arm", "prefix", "redirect",
+          "env")
 
 
 #: A harness script, read as Python rather than as shell. Six shapes: an engine

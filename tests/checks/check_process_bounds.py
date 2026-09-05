@@ -45,9 +45,9 @@ backtick is not an operator it knew; it spared an unbounded spawn in every
 and it spared `RUSTFLAGS="-C target-cpu=native" ... cargo build`, because its
 prefix pattern stopped at the space inside the quotes. That last one was the
 tree's one unbounded spawn when this was written [measured 2026-09-06: over
-the eleven planted command positions the pattern answered 7 findings across 10
-spawns and got eight shapes wrong, six by sparing; the grammar answers 11
-across 22 and gets all eleven right;
+the thirteen planted command positions the pattern answered 7 findings across
+11 spawns and got ten shapes wrong, nine by sparing; the grammar answers 13
+across 26 and gets all thirteen right;
 fixture=tests/checks/check_process_bounds_selftest.py's POSITIONS].
 
 Assumes:
@@ -135,14 +135,22 @@ PY_STARTERS = frozenset({"run", "Popen", "call", "check_call", "check_output"})
 #: open a command position with one.
 OPERATORS = (";;", "&&", "||", ";", "&", "|", "(", ")")
 
-#: Reserved words that stand in FRONT of a command without being one, so the
-#: word after them is still the command word. `exec` replaces the shell with
-#: what follows and every seat's test.sh ends with one: deleting the wrapper
-#: from `exec sh bounded.sh "$PY" -m pytest` leaves `exec "$PY" -m pytest`, and
-#: that read as clean until `exec` was recognised. `{` and `}` group commands
-#: and are RESERVED WORDS rather than operators, which is why they are matched
-#: as whole words and `${VAR}` is not one.
-LEADING = frozenset({"exec", "!", "time", "if", "then", "elif", "else",
+#: Words that stand in FRONT of a command without being one, so the word after
+#: them is still the command word. `exec` replaces the shell with what follows
+#: and every seat's test.sh ends with one: deleting the wrapper from `exec sh
+#: bounded.sh "$PY" -m pytest` leaves `exec "$PY" -m pytest`, and that read as
+#: clean until `exec` was recognised. `{` and `}` group commands and are
+#: RESERVED WORDS rather than operators, which is why they are matched as whole
+#: words and `${VAR}` is not one.
+#:
+#: `env` is here for the same reason `exec` is. It is not a reserved word, it
+#: is a command that runs its operand, and this tree writes it: four lines in
+#: engine/check.sh and extensions/cmetta/check.sh read `bounded env NAME=value
+#: sh <script>`. Drop the `bounded` from one of those and the spawn is `sh`,
+#: which is exactly the regression this check exists to catch and which a head
+#: stopping at `env` would spare. The assignments after it are stepped over by
+#: the same rule that steps over a `LC_ALL=C sort` prefix.
+LEADING = frozenset({"exec", "env", "!", "time", "if", "then", "elif", "else",
                      "while", "until", "do", "done", "fi", "esac"})
 
 #: The words that separate one command from the next without being operators.
@@ -335,6 +343,12 @@ def _tokens(line: str) -> list[_Token]:
             break
         symbol = next((op for op in OPERATORS if line.startswith(op, index)),
                       None)
+        # An `&` that follows a redirection is part of it. `2>&1` is one word
+        # and `cmd &` is two; splitting the first at the `&` left 221 phantom
+        # commands headed `1` and `2` across the scanned scripts, none of them
+        # a spawn but every one a word the head resolution had to answer about.
+        if symbol == "&" and start is not None and line[index - 1] in "<>":
+            symbol = None
         if symbol is not None:
             flush(index)
             found.append(_Token(symbol, index, index + len(symbol),
