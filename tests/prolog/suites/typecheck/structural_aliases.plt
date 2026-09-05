@@ -3,7 +3,7 @@
 % Guarantees: alias and direct-RHS programs agree through source, file and
 %   reflective doors; edits repair retained callers without losing lexical
 %   scope or raw source, and neither door installs a clause in a scope that
-%   holds none [tested: run_tests(structural_aliases); commit=WORKTREE].
+%   holds none [tested: run_tests(structural_aliases); commit=e471c116647ffc9d3949501b3f2d3869a9153bc2].
 % Owns resources: setup/cleanup releases each space and deletes each source file.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
