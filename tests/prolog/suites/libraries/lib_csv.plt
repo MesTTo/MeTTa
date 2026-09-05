@@ -118,8 +118,110 @@ test(clear_refusal,
     'csv-space'(Path, Space),
     spaces:metta_host_clear_space(Space).
 
+% The snapshot door reads once into an ordinary space and keeps the record
+% number, which is the thing csv-space's (row Field...) cannot carry.
+snapshot_rows(Path, Rows) :-
+    'csv-snapshot!'(Path, Space),
+    findall(Row, 'get-atoms'(Space, Row), Unsorted),
+    msort(Unsorted, Rows),
+    spaces:metta_release_space(Space).
+
+test(snapshot_rows_carry_their_record_number,
+     [setup(csv_fixture("id,amount\n001,12.50\n002,9\n", Path)),
+      cleanup(delete_file(Path))]) :-
+    snapshot_rows(Path, Rows),
+    assertion(Rows == [[row,1,"id","amount"], [row,2,"001","12.50"], [row,3,"002","9"]]).
+
+% The differential the two doors owe each other: the same file must answer the
+% same bag of records whichever door read it, or moving between them would
+% change a program's answers. Duplicates included, since both keep them.
+test(both_doors_answer_the_same_bag,
+     [setup(csv_fixture("id,amount\n001,\"a,b\"\n002,9\n002,9\n004,\n", Path)),
+      cleanup(delete_file(Path))]) :-
+    csv_rows(Path, Streamed),
+    snapshot_rows(Path, Numbered),
+    findall(Fields, ( member([row,_|Fields], Numbered) ), Snapshot),
+    findall(Fields, ( member([row|Fields], Streamed) ), View),
+    msort(Snapshot, SortedSnapshot), msort(View, SortedView),
+    assertion(SortedSnapshot == SortedView),
+    assertion(length(SortedView, 5)).
+
+% A snapshot is a snapshot: the view follows the file and this does not, which
+% is what makes its record number an identity rather than a position in
+% whatever the file currently says.
+test(a_snapshot_does_not_move_when_the_file_does,
+     [setup(csv_fixture("before\n", Path)), cleanup(delete_file(Path))]) :-
+    'csv-snapshot!'(Path, Space),
+    'csv-space'(Path, View),
+    setup_call_cleanup(true,
+        ( setup_call_cleanup(open(Path, write, Stream), write(Stream, "after\n"),
+                             close(Stream)),
+          findall(X, 'get-atoms'(Space, X), Kept),
+          findall(X, seam:foreign_atoms(View, X), Followed),
+          assertion(Kept == [[row,1,"before"]]),
+          assertion(Followed == [[row,"after"]]) ),
+        spaces:metta_release_space(Space)).
+
+% An ordinary space, so it takes the writes the view refuses.
+test(a_snapshot_takes_writes,
+     [setup(csv_fixture("a,1\n", Path)), cleanup(delete_file(Path))]) :-
+    'csv-snapshot!'(Path, Space),
+    setup_call_cleanup(true,
+        ( 'add-atom'(Space, [row,99,"derived","2"], _),
+          findall(X, 'get-atoms'(Space, [row,99|X]), Added),
+          assertion(Added == [["derived","2"]]) ),
+        spaces:metta_release_space(Space)).
+
+% Two snapshots of one file are two spaces, so one program's rows cannot land
+% in another's.
+test(two_snapshots_are_two_spaces,
+     [setup(csv_fixture("a,1\n", Path)), cleanup(delete_file(Path))]) :-
+    'csv-snapshot!'(Path, First),
+    'csv-snapshot!'(Path, Second),
+    setup_call_cleanup(true,
+        ( assertion(First \== Second),
+          'add-atom'(First, [row,99,"only here"], _),
+          findall(X, 'get-atoms'(Second, X), Rows),
+          assertion(Rows == [[row,1,"a","1"]]) ),
+        ( spaces:metta_release_space(First),
+          spaces:metta_release_space(Second) )).
+
+% Every refusal is csv-space's, named for the door the program used.
+test(snapshot_refusals_are_the_same_kinds,
+     [setup(csv_fixture("a,b\nc\n", Path)), cleanup(delete_file(Path)),
+      throws(error(csv_malformed_row(_,2,width(2,1)), context('csv-snapshot!', _)))]) :-
+    snapshot_rows(Path, _).
+
+test(snapshot_unterminated_quote,
+     [setup(csv_fixture("a,\"b\n", Path)), cleanup(delete_file(Path)),
+      throws(error(csv_malformed_row(_,1,invalid_quoting), context('csv-snapshot!', _)))]) :-
+    snapshot_rows(Path, _).
+
+test(snapshot_missing_file,
+     [setup((csv_fixture("", Path), delete_file(Path))),
+      throws(error(csv_file_missing(_), context('csv-snapshot!', _)))]) :-
+    'csv-snapshot!'(Path, _).
+
+% A failed read leaves no space behind, which is what the release arm is for.
+test(snapshot_of_an_empty_file_is_an_empty_space,
+     [setup(csv_fixture("", Path)), cleanup(delete_file(Path))]) :-
+    snapshot_rows(Path, Rows), assertion(Rows == []).
+
+% csv-space's own messages are unchanged by carrying the caller: this is the
+% context the shipped door still names.
+test(the_streaming_door_still_names_itself,
+     [setup(csv_fixture("a,b\nc\n", Path)), cleanup(delete_file(Path)),
+      throws(error(csv_malformed_row(_,2,_), context('csv-space', _)))]) :-
+    csv_rows(Path, _).
+
 test(effect_is_the_weakest_read_class) :-
     findall(Effect, metta_operation_effect('csv-space', Effect), Effects),
     assertion(Effects == [readOnlyLookup]).
+
+% The snapshot allocates and fills a space, so it is a write like file-space!
+% and file-metadata!, not a lookup.
+test(the_snapshot_declares_that_it_writes) :-
+    findall(Effect, metta_operation_effect('csv-snapshot!', Effect), Effects),
+    assertion(Effects == [writesState]).
 
 :- end_tests(lib_csv).

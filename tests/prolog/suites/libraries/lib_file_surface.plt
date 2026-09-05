@@ -129,6 +129,98 @@ test(invalid_exit_status_has_a_remedy,
       throws(error(domain_error(exit_status, Status), context('exit!', _)))]) :-
     'exit!'(Status, _).
 
+% A fresh directory, so a caller who needs somewhere to put files does not
+% derive one from a temporary FILE name the way this suite's own fixture/1 and
+% the shipped example both had to.
+test(temp_dir_mints_a_fresh_empty_directory) :-
+    'temp-dir!'("file-surface-a", Path),
+    setup_call_cleanup(true,
+        ( assertion(exists_directory(Path)),
+          directory_files(Path, Files), msort(Files, Sorted),
+          assertion(Sorted == ['.', '..']) ),
+        delete_directory(Path)).
+
+% Two mints in one process must not answer the same path, which is the whole
+% reason this exists rather than a fixed name under the temporary directory.
+test(two_temp_dirs_are_different_directories) :-
+    'temp-dir!'("file-surface-b", First),
+    'temp-dir!'("file-surface-b", Second),
+    setup_call_cleanup(true, assertion(First \== Second),
+        ( delete_directory(First), delete_directory(Second) )).
+
+% A prefix NAMES the directory. tmp_file/2 pastes it into the path without
+% sanitising, so a separator would place the result outside the temporary
+% directory entirely.
+test(a_temp_prefix_carrying_a_separator_is_refused,
+     [throws(error('file-name-not-a-path'('temp-dir!', _), context('temp-dir!', _)))]) :-
+    'temp-dir!'("logs/run", _).
+
+% POSIX's numbering, so the handle surface reaches the three streams a process
+% always has without a further operation each.
+test(standard_streams_are_handles_zero_one_and_two) :-
+    'stdin'(In), assertion(In == 0),
+    'stdout'(Out), assertion(Out == 1),
+    'stderr'(Err), assertion(Err == 2).
+
+% Every handle operation takes them: this reads standard input through the same
+% predicate that reads a file, which is what makes the handles a spelling
+% rather than a second mechanism.
+test(the_stdin_handle_reads_through_the_file_surface) :- with_fixture(stdin_handle_case).
+stdin_handle_case(Dir) :-
+    directory_file_path(Dir, input, Path),
+    'write-file!'(Path, "alpha\nbeta\n", true),
+    with_stdin_from(Path, 'file-read-to-string!'(0, Whole)),
+    assertion(Whole == "alpha\nbeta\n"),
+    with_stdin_from(Path, 'stdin-to-string!'(Short)),
+    assertion(Short == "alpha\nbeta\n").
+
+% The written text is the same either way, so stderr! is the short spelling of
+% a handle write rather than a different operation.
+test(the_stderr_handle_writes_what_stderr_writes) :- with_fixture(stderr_handle_case).
+stderr_handle_case(Dir) :-
+    directory_file_path(Dir, through_handle, ViaHandle),
+    directory_file_path(Dir, through_stderr, ViaShort),
+    with_error_to(ViaHandle, 'file-write!'(2, "exact text", true)),
+    with_error_to(ViaShort, 'stderr!'("exact text", true)),
+    read_file_to_string(ViaHandle, Handled, [encoding(utf8)]),
+    read_file_to_string(ViaShort, Shorted, [encoding(utf8)]),
+    assertion(Handled == "exact text"),
+    assertion(Handled == Shorted).
+
+% Minting starts past them, so an ordinary handle can never collide with one.
+test(a_minted_handle_never_collides_with_a_standard_stream) :- with_fixture(mint_case).
+mint_case(Dir) :-
+    directory_file_path(Dir, data, Path),
+    'write-file!'(Path, "x", true),
+    'file-open!'(Path, "r", Handle),
+    setup_call_cleanup(true, assertion(Handle >= 3), 'file-close!'(Handle, true)).
+
+% Closing 1 or 2 takes stdout or stderr from everything else in the process,
+% the engine's own diagnostics included, and there is no way to put it back.
+test(closing_a_standard_stream_is_refused,
+     [forall(member(Handle, [0, 1, 2])),
+      throws(error('standard-stream-not-closable'('file-close!', _),
+                   context('file-close!', _)))]) :-
+    'file-close!'(Handle, _).
+
+% Re-aliasing rather than a child process, so these run here: set_stream/2
+% moves the alias every reader resolves, and the restore sits in the CLEANUP
+% arm because a goal that throws while user_error points at a stream about to
+% be closed would leave the process without one.
+with_stdin_from(Path, Goal) :-
+    once(stream_property(Original, alias(user_input))),
+    setup_call_cleanup(open(Path, read, Reader, [encoding(utf8)]),
+        setup_call_cleanup(set_stream(Reader, alias(user_input)), Goal,
+                           set_stream(Original, alias(user_input))),
+        close(Reader)).
+
+with_error_to(Path, Goal) :-
+    once(stream_property(Original, alias(user_error))),
+    setup_call_cleanup(open(Path, write, Writer, [encoding(utf8)]),
+        setup_call_cleanup(set_stream(Writer, alias(user_error)), Goal,
+                           set_stream(Original, alias(user_error))),
+        close(Writer)).
+
 effect_row('path-join', pureStructural).
 effect_row('path-parent', pureStructural).
 effect_row('path-name', pureStructural).
@@ -141,6 +233,10 @@ effect_row('file-metadata!', writesState).
 effect_row('stderr!', oracleIO).
 effect_row('stdin-to-string!', oracleIO).
 effect_row('exit!', oracleIO).
+effect_row('temp-dir!', writesState).
+effect_row(stdin, pureStructural).
+effect_row(stdout, pureStructural).
+effect_row(stderr, pureStructural).
 test(effect_rows, [forall(effect_row(Name, Expected))]) :-
     metta_operation_effect(Name, Actual), assertion(Actual == Expected).
 
