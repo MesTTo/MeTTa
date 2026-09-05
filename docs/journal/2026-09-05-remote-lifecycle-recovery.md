@@ -40,3 +40,18 @@ to the valid-cursor lifecycle. A real Gateway probe confirmed that close before
 first next stops the initial token. Abandonment emits ResourceWarning and the
 gateway retains ownership until expiry sweeping or close. No destructor does
 network I/O.
+
+Tried: A reentrant mutation advanced beyond its expiry, then admitted a nested
+mutation after pruning. The outer completion restored its expired record
+without an expiry-heap entry, permanently occupying capacity. The probe failed
+`expiry during a reentrant write must not resurrect a pruned reservation`.
+Decided: Completion updates its retained response only if its original
+reservation object still occupies the key. Expired work cannot restore a
+pruned entry or overwrite a later reservation. This is the ownership-check
+principle documented for expired Redis locks at
+https://redis.io/docs/latest/develop/clients/patterns/distributed-locks:
+release or completion must compare the current owner before changing state.
+Verification: The added expiry regression failed before the ownership check
+and passed afterwards. The complete mutation/schema set passed 42 tests.
+`npm run --prefix website docs:build` rendered the site successfully. Ruff
+passed for the changed remote files; mypy reported no issues in remote.py.

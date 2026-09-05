@@ -12,7 +12,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Remote mutations negotiate scoped, expiring idempotency keys. Lost or
   indeterminate replies raise `OutcomeUnknown`; its `retry()` replays the
   retained request without repeating its effects. Legacy peers expose the
-  same uncertainty but refuse recovery without negotiated replay.
+  same uncertainty but refuse recovery without negotiated replay. Late
+  reentrant completions cannot restore pruned replay reservations.
 - Remote responses validate their envelope and complete atom list before
   delivery. Malformed replies raise `ProtocolError`, which remains a transport
   failure through engine error policies. Invalid initial cursor replies
