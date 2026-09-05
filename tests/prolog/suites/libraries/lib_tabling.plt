@@ -12,7 +12,7 @@
 %     an_impure_goal_is_seen_inside_every_wrapper,
 %     a_pure_body_inside_a_wrapper_still_tables_incrementally,
 %     an_effectful_body_tables_plain, a_higher_order_body_tables_plain;
-%     commit=WORKTREE]
+%     commit=ccad9f6d588270ec2f0810fc56c30e9e59207e7c]
 %   - changing an equation drops every table
 %     [tested: tabling_equation_change_drops_tables]
 %   - the change hook does not prune the handlers loaded after it, so a dual

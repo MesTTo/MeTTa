@@ -12,7 +12,7 @@
 %     lib_memo_volatility:a_declaration_memoizes_a_space_reading_body,
 %     lib_memo_volatility:a_volatile_function_still_memoizes_on_the_declaration,
 %     lib_memo_volatility:a_name_that_is_not_a_function_is_still_refused;
-%     commit=WORKTREE].
+%     commit=ccad9f6d588270ec2f0810fc56c30e9e59207e7c].
 %   - Exact-cache invalidation advances a hidden table generation seen by
 %     already-live worker engines [tested:
 %     lib_memo_stats:invalidation_moves_a_live_worker_to_a_fresh_exact_table_generation;
