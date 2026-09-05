@@ -672,7 +672,7 @@ metta_semantic_effect(if, pureStructural).
 % The selector returns one branch term; the source walk below accounts for
 % either branch's effects when the result mask evaluates that term.
 % [tested: if_decons_expr:the_selector_has_an_explicit_structural_effect,
-% if_decons_expr:the_planner_checks_both_selected_branch_candidates; commit=WORKTREE]
+% if_decons_expr:the_planner_checks_both_selected_branch_candidates; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67]
 metta_semantic_effect('if-decons-expr', pureStructural).
 metta_semantic_effect(inferences, pureStructural).
 metta_semantic_effect(let, pureStructural).

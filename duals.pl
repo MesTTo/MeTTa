@@ -61,12 +61,12 @@
 % Guarantees:
 %   - case_default/3 selects only a written Empty pattern without binding
 %     wildcard patterns, including nested case towers [tested:
-%     case_dual_patterns; commit=WORKTREE].
+%     case_dual_patterns; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67].
 %   - generator_bound_variables/2 treats case pattern variables as bindings
 %     rather than universally quantified free variables [tested:
-%     case_dual_patterns; commit=WORKTREE].
+%     case_dual_patterns; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67].
 %   - an empty body's dual succeeds because it has no True answer [tested:
-%     case_dual_patterns; commit=WORKTREE].
+%     case_dual_patterns; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67].
 %   - (not-provable G) answers False once per way G reduces to True and True
 %     once per solution of G's dual, so for a ground G exactly one of the two
 %     holds and for a non-ground G the two partition the answers
