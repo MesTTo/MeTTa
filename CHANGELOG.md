@@ -9,6 +9,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The writer's variable-identity invariant is pinned under garbage
+  collection: one variable shared across a 40,000-string filler reparses as
+  one, two as two, and 5,000 shared variables keep their count. Upstream's
+  `swrite` named variables from `term_to_atom/2`, which reflects a stack
+  address, so a collection mid-serialization printed one variable under two
+  names; that mechanism is live on SWI 10.1.13 and the planted pre-fix
+  writer fails the new tests. Our writer never read an address, so no
+  engine change was needed.
+
 - Remote mutations negotiate scoped, expiring idempotency keys. Lost or
   indeterminate replies raise `OutcomeUnknown`; its `retry()` replays the
   retained request without repeating its effects. Legacy peers expose the

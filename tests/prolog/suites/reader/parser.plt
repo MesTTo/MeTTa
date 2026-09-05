@@ -123,6 +123,51 @@ test(stable_names_roundtrip_with_sharing) :-
     A == C,
     A \== B.
 
+% Identity must survive a garbage collection DURING the write. Upstream's
+% swrite derived names from term_to_atom/2, which reflects a variable's stack
+% address, so a GC that moved the stack mid-serialization printed one
+% variable under two names and a reparse fabricated independence; reused
+% addresses did the reverse [source: upstream commit
+% 73ef1100b11a1a1d4573728d4b8a8cc3daf2da3a "fix(parser): preserve variable
+% identity across swrite GC"; commit=WORKTREE]. That mechanism is live on
+% this SWI: term_to_atom/2 on one variable answered `_186` before a forced
+% garbage_collect and `_182` after it [measured: ai-tmp probe, SWI 10.1.13;
+% commit=WORKTREE]. Our writer names from copy_term_nat+numbervars in one
+% pass and the C writer is the default, so this pins the invariant
+% structurally rather than by naming: reparse and COUNT variables.
+%
+% The filler is 40,000 STRINGS, not integers. A serializer allocates a code
+% list per string it visits, so the walk itself generates the garbage that
+% fires a collection between the two occurrences. An integer filler of
+% 200,000 cells allocates nothing during the walk and a planted
+% per-occurrence term_to_atom writer passed it; the string filler made the
+% same plant answer 2 distinct variables for 1 [measured: planted
+% swrite_prolog/2 naming each occurrence live, distinct=2 expected=1;
+% commit=WORKTREE].
+identity_survives_gc(Term, Distinct) :-
+    swrite(Term, Written),
+    sread(Written, Back),
+    term_variables(Back, Vars),
+    length(Vars, Distinct).
+
+gc_provoking_filler(Filler) :-
+    length(Filler, 40000),
+    maplist(=("abcdefghij"), Filler).
+
+test(one_variable_shared_across_a_gc_prints_as_one) :-
+    gc_provoking_filler(Filler),
+    identity_survives_gc([:, ax1, [->, X, [->, Filler, X]]], 1).
+
+test(two_variables_across_a_gc_stay_two) :-
+    gc_provoking_filler(Filler),
+    identity_survives_gc([:, pair, [->, _A, [->, Filler, _B]]], 2).
+
+test(thousands_of_variables_keep_their_count_when_each_is_shared) :-
+    length(Many, 5000),
+    identity_survives_gc([many|Many], 5000),
+    append(Many, Many, Twice),
+    identity_survives_gc([twice|Twice], 5000).
+
 test(writer_dcg_has_one_compilation) :-
     findall(Codes, phrase(parser:seq([1, 2, 3]), Codes), Solutions),
     Solutions == [[0'1, 0' , 0'2, 0' , 0'3]].
