@@ -2080,6 +2080,70 @@ test(each_application_gets_its_own_sealed_variable) :-
 
 :- end_tests(translator_sealed).
 
+:- begin_tests(translator_lambda_parameters).
+
+%The parameter position is a LIST, and the lambda's arity is read off it. An
+%unbound one read as ZERO: append/3 leaves the full argument list unbound when
+%the parameters are a variable, and length/2 on an unbound list is generative,
+%so it bound the list to [] and answered 0. `(|-> $x (+ $x 1))` therefore
+%compiled a lambda with no parameters at all and $x bound to the empty list.
+%Applying it raised `function_input_arities(lambda_2,[0])' expected, found
+%`1'`, and `((|-> $x $x))` answered `()`, which is a wrong answer rather than
+%a refusal [measured 2026-09-05].
+%
+%Every other malformed parameter already left the form as data, `(|-> foo ..)`
+%and `(|-> 5 ..)` among them, so the variable was the one shape that compiled
+%instead of falling through. LeaTTa pins the same surface: its
+%tests/regression/lambda.metta says the parameters are a "parenthesized tuple,
+%following PeTTa's shipped `|->` surface", and every one of this repository's
+%own six lambda examples writes the list.
+
+malformed_lambda("((|-> $x (+ $x 1)) 5)").
+malformed_lambda("((|-> $x $x))").
+malformed_lambda("(|-> $x (+ $x 1))").
+
+test(a_variable_where_the_parameter_list_goes_stays_data,
+     [forall(malformed_lambda(Source))]) :-
+    sread(Source, Term),
+    sread(Source, Expected),
+    once(eval(Term, Answer)),
+    Answer =@= Expected.
+
+applying_lambda("((|-> ($x) (+ $x 1)) 5)", 6).
+applying_lambda("((|-> ($x $y) (+ $x $y)) 5 6)", 11).
+applying_lambda("((|-> () 7))", 7).
+
+test(a_parenthesised_parameter_list_still_applies,
+     [forall(applying_lambda(Source, Expected))]) :-
+    sread(Source, Term),
+    once(eval(Term, Answer)),
+    Answer == Expected.
+
+%A member that is not a variable is a PATTERN the application has to match, so
+%this is Empty rather than an error, and the guard above must not reach it.
+test(a_non_variable_parameter_stays_a_pattern) :-
+    sread("((|-> (foo) 1) 5)", Term),
+    \+ eval(Term, _).
+
+%The binder reader carries the same guard, for the reason lambda_pair_patterns/2
+%gives: a lambda that does not compile has not bound anything, so its variables
+%are still the enclosing body's and stay captured. Without it the inner form
+%was read as a binder while no inner lambda existed, and $b was excluded from
+%the outer lambda's capture set: `lambda_2` with no captures, against
+%`partial(lambda_2,[_])` here [measured 2026-09-05, by removing the guard].
+test(a_malformed_inner_lambda_binds_nothing_and_leaves_its_variable_captured) :-
+    sread("(|-> ($a) (pair $a (|-> $b (q $b))))", Term),
+    translate_expr(Term, _, Out),
+    Out = partial(_, Captured),
+    length(Captured, 1).
+
+test(a_well_formed_inner_lambda_binds_its_own_parameter) :-
+    sread("(|-> ($a) (pair $a (|-> ($b) (q $b))))", Term),
+    translate_expr(Term, _, Out),
+    atom(Out).
+
+:- end_tests(translator_lambda_parameters).
+
 :- begin_tests(translator_occurs_checks).
 
 % A let binds RAW under the petta alignment: a self-containing binding is a

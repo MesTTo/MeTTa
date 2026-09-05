@@ -935,6 +935,22 @@ translate_special_dl('filter-atom', [ListExpr, ItemVar, Condition],
     AfterList = [include(metta_condition_holds(Closure), ListValue, Out)|Goals].
 
 translate_special_dl('|->', [Args, Body0], AfterHead, Goals, Out) :-
+    %A PROPER LIST, checked before anything is compiled, because the arity is
+    %read off this term and an unbound one reads as ZERO. append/3 below leaves
+    %FullArgs unbound when Args is a variable, and length/2 on an unbound list
+    %is generative: it binds it to [] and answers 0. So `(|-> $x (+ $x 1))`
+    %compiled a lambda taking no parameters at all, with $x bound to the empty
+    %list; applying it raised `function_input_arities(lambda_2,[0])' expected,
+    %found `1'`, and `((|-> $x $x))` answered `()` rather than refusing
+    %[measured 2026-09-05; tested: translator_a_lambda_parameter_list_is_a_list].
+    %
+    %Every other malformed parameter already leaves the form as data: `(|-> foo
+    %...)` and `(|-> 5 ...)` answer themselves, because this clause fails and
+    %reduce/3 keeps the term. The variable was the one shape that compiled
+    %instead. is_list/1 is the guard lambda_pair_patterns/2 uses for the same
+    %reason, and a list MEMBER that is not a variable stays a pattern the
+    %application must match, so `((|-> (foo) 1) 5)` is Empty and not an error.
+    is_list(Args),
     %Apply every nested sealed's rename BEFORE deciding which variables are
     %free. A variable that a sealed form localises is not free in the enclosing
     %lambda, and counting it as one made the lambda capture it as an extra
@@ -1558,7 +1574,12 @@ lambda_binder_form(['map-atom', _, Binder, _], Binder).
 lambda_binder_form(['filter-atom', _, Binder, _], Binder).
 lambda_binder_form(['foldl-atom', _, _, Accumulator, Item, _],
                    [Accumulator, Item]).
-lambda_binder_form(['|->', Parameters, _], Parameters).
+%is_list/1 for the reason the row readers below give: a lambda whose
+%parameters are not a list does not compile, so its variables are still the
+%enclosing body's and must stay captured. Without this the two disagreed, and
+%an inner `(|-> $x ...)` excluded $x from the outer lambda's capture set while
+%no inner lambda existed to bind it.
+lambda_binder_form(['|->', Parameters, _], Parameters) :- is_list(Parameters).
 
 %Read binding rows without findall/3 or copy_term/2: those copy the pattern
 %variables, and free-variable exclusion is deliberately based on identity.

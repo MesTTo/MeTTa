@@ -58,6 +58,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A `|->` whose parameter position is a bare variable rather than a list is
+  left as data, the way `(|-> foo ...)` and `(|-> 5 ...)` already were. The
+  arity is read off that term and an unbound one read as zero, so
+  `(|-> $x (+ $x 1))` compiled a lambda taking no parameters with `$x` bound to
+  the empty list: applying it raised `function_input_arities(lambda_2,[0])`,
+  and `((|-> $x $x))` answered `()` instead of refusing. A list member that is
+  not a variable is still a pattern the application must match, so
+  `((|-> (foo) 1) 5)` remains Empty.
+
 - A duplicate declaration reads as a sentence on both of its doors. The batch
   door throws and rendered correctly; the direct add keeps the first row and
   warns with the bare term, which had no `prolog:message//1` clause and printed
