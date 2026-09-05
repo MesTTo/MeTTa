@@ -67,6 +67,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lint()` reports `uncovered-constructor` when a `-[det]->` claim is broken by
+  a member no equation covers. The arrow promises exactly one answer and an
+  uncovered constructor gives zero, so the declaration and the equations
+  contradict each other; the message names both remedies, cover it or declare
+  `-[semidet]->`. A plain `->` promises nothing about answer count, so
+  partiality under one is not a finding. `@m.define` on an `Enum` declares its
+  members as ordinary declarations, so a Python enum with an uncovered member
+  is found by the same check. The verdict is a lower bound: a constructor
+  declared later cannot be seen from the space as it stands.
+
 - `lint()` reports `builtin-equation-shadow` when an equation redefines a head
   the engine ships. The dangerous cases already refused by name; this is the
   case the engine PERMITS, where the equation compiles into the space's own
