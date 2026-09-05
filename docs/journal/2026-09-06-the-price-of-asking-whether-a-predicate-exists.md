@@ -150,3 +150,116 @@ of them are already documented as load-sensitive in their own source --
 both ways" -- and `test_shared_head_cost.py` measures a per-space slope that a
 sibling test's live spaces reproduce. Re-run a named pytest failure alone
 before believing it here.
+
+## 2026-09-06, the four sites left open above
+
+Tried: pricing each of the four on a name that exists and one that does not,
+after a full boot, `swipl -g <case> -t halt ai-tmp/autoload-traps/cost.pl` ->
+
+| site | hit | miss |
+|---|---|---|
+| `engine/translator/analysis.pl` `super_defines/3` | 22 | 1,031 |
+| `engine/metta/input_guards.pl` `guarded_input_position/3` | 30 | 1,043 |
+| `engine/spaces/catalog.pl` `native_storage_module_occupied/1` | 30 | 11 |
+| `engine/spaces/lifecycle.pl` `restricted_core_predicate/1` | 18 | 4 |
+
+Found: only two of the four carry the trap, and the two that do not are safe
+for reasons worth writing down. `native_storage_module_occupied/1` asks with an
+UNBOUND head, and `define_or_generate/1`'s first two clauses both require
+`callable(Head)`, so an unbound one reaches the third clause and GENERATES over
+the module's own table instead of calling `'$define_predicate'/1`; its miss
+(an empty module, the case that matters) is cheaper than its hit.
+`restricted_core_predicate/1` already has `current_predicate(Engine:Name/Arity)`
+in front of the property ask, and its only caller passes an unbound
+`Name/Arity`, so every ask it makes is a hit. Neither is touched.
+
+Decided: `current_predicate/1` in front of the two live ones, the same
+spelling `implemented_in/3` and `visible_predicate_definition/3` use.
+
+    super_defines(Module, Fun, Arity) :-
+        compiled_function_name(Fun, Predicate),
+        current_predicate(Module:Predicate/Arity),
+        functor(Head, Predicate, Arity),
+        \+ predicate_property(Module:Head, imported_from(_)),
+        ...
+
+|  | before | after |
+|---|---|---|
+| `super_defines/3`, a name that resolves | 22 | 17 |
+| `super_defines/3`, a name nothing defines | 1,031 | 3 |
+| `super_target_module/4` refusing over a space's chain | 2,120 | 28 |
+| `guarded_input_position/3`, a declared name with a predicate | 30 | 25 |
+| `guarded_input_position/3`, a declared name without one | 1,043 | 15 |
+| the whole guard table, `findall` over the 82 rows | 17,748 | 3,854 |
+
+The two spellings answer the same question at both sites, and the one case
+where they differ does not reach the answer: `current_predicate/1` sees a local
+definition, an import and an inherited one alike, and says no only for a name
+that nothing has loaded but the autoload index could supply -- which the old
+spelling autoloaded and then rejected on the `\+ imported_from(_)` that follows
+in both. Measured case by case in an engine-free probe
+(`ai-tmp/autoload-traps/semantics.pl`), and then over the engine:
+
+Differential, 82 `guarded_input_position/3` rows plus 720 `super_defines/3`
+and 720 `super_target_module/4` answers over 8 modules x 18 names x 5 arities
+-- the engine module, a library, `system`, `translator`, `spaces`, a MeTTa
+space module, `&self`'s and a module created by naming alone, against engine
+builtins, autoloadable library names, system built-ins, a dynamic predicate
+with no clauses, a multifile one with no clauses, a `$`-prefixed name and
+names nothing defines. **Byte-identical**, one arm per process because the old
+spelling autoloads as it runs.
+
+The process image is not identical, and the difference is the trap's other
+half. Dumping every module, every export list, every import link and every
+loaded source file after the same probe set: the old arm has one module more
+(`backward_compatibility`), one source file more (`library/backcomp.pl`) and
+nine import links more, all of them created by ASKING -- `system-append/3-lists`,
+`system-last/2-lists`, `system-permutation/2-lists`, `system-subtract/3-lists`,
+`user-sumlist/2-backward_compatibility` and four others. Nothing was added on
+the new arm. So asking whether a space defines a MeTTa function called `last`
+or `subtract` used to pull SWI's library of that name into the process.
+
+Tried: attributing the 1,030 rather than assuming it is the index search ->
+it is not. `'$find_library'/5`, the index lookup itself, is 19 inferences and
+`'$in_library'/3` is 18; `library_index/3` is 1. The cost is in
+`'$autoload':autoload_from/3` around them, which reads the asking module's own
+`:- autoload/2` declarations before the index is consulted: 1,004 inferences
+for the engine module against 39 for `lists`.
+
+Found while attributing: `predicate_property(M:Head, implementation_module(IM))`
+answers "what would this module resolve this name to" for **33 inferences on a
+name nothing defines**, because SWI special-cases it in `property_predicate/2`
+and reaches `'$find_library'/5` directly rather than through the trap. It also
+answers `pairs` for `pairs_keys_values/3` WITHOUT loading `library(pairs)`.
+That matters for the sites below, where the autoload answer is load-bearing
+and a bare `current_predicate/1` would change it.
+
+Also found, with a detector rather than a grep: `user:exception/3` is a
+documented hook `'$undefined_procedure'/4` calls before it tries the
+autoloader, so a clause that records and then FAILS counts every trap the
+engine takes without changing what happens next
+[source: /usr/lib/swi-prolog/boot/init.pl:944-953]. A trap whose recorded
+asker is the trapped predicate itself is a genuine call; any other asker is a
+probe. Over the 271 examples and the 69 plunit suites:
+
+| asker | traps, corpus | traps, suites |
+|---|---|---|
+| `engine/spaces/lifecycle.pl` `metta_restore_inherited_predicate/3` | 9 | 7,351 |
+| `engine/metta/effects.pl` `metta_effect_construct/2` | 253 | 26 |
+| `engine/spaces/lifecycle.pl` `metta_repair_shadow_import/3` | 0 | 8 |
+| `engine/spaces/foreign.pl` `remove_equation/6` | 0 | 5 |
+| `lib/lib_memo/lib_memo.pl` `memo_owner_module/4` | 2 | 3 |
+| `engine/source_observation.pl` `goal_attribution/3` | 1 | 2 |
+| `engine/metta/input_guards.pl` `guarded_input_position/3` | 0 | 13 |
+| `engine/translator/analysis.pl` `super_defines/3` | 0 | 1 |
+
+Neither of the two fixed here is where the class costs most: the grep for
+`predicate_property(_, defined)` finds the spelling, not the cost, because
+every property except `undefined`, `visible`, `autoload/1`,
+`implementation_module/1`, `iso` and `built_in` falls through to
+`define_or_generate/1` and traps the same way. `imported_from/1`,
+`number_of_clauses/1` and `meta_predicate/1` all do.
+
+Open: the six sites in the table above that are not fixed here. Each is
+the same class and each needs its own reading of what the autoload answer
+is worth to it, which is not the same at all six.

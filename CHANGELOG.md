@@ -25,6 +25,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   reported as a duplicate declaration, and left no `Dog` type at all. Conversion
   still inherits, which is right there; declaration does not.
 
+- `super` and the builtin input-guard table no longer search the autoload
+  library index when they ask about a name nothing defines. `(super (f ...))`
+  resolves at definition time by walking the modules above the space and asking
+  each whether it defines the function, and asking with
+  `predicate_property(Module:Head, defined)` runs SWI's undefined-procedure
+  trap on a miss, which searches the whole index before raising the existence
+  error the caller discarded. Refusing a `super` that names nothing above it
+  cost 2,120 inferences over a space's two-module chain and now costs 28; the
+  table of guarded builtin input positions cost 17,748 inferences to enumerate
+  and now costs 3,854. Asking also stopped LOADING: a space with a function
+  called `last` or `subtract` used to pull SWI's library of that name into the
+  process as a side effect of the question. Every answer is unchanged, over 82
+  guard-table rows and 1,440 `super` resolutions across eight modules.
+
 - Booting the engine no longer searches the autoload library index once per
   declared extension seam. Publishing a seam asked
   `predicate_property(Module:Head, defined)` to find out whether its predicate

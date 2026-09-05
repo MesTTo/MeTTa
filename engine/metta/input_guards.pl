@@ -100,6 +100,21 @@ relational_input_position('is-alpha-member', 2).
 %its own errors, because under that name it IS the Prolog predicate; that is
 %a boundary rather than an omission, and imported_from/1 is where the engine
 %already records it.
+%
+%current_predicate/1 asks whether the engine has the predicate, never
+%predicate_property(Head, defined): on a name nothing defines that property
+%runs SWI's undefined-procedure trap, which searches the whole autoload
+%library index before raising the existence error
+%[source: /usr/lib/swi-prolog/boot/syspred.pl, define_or_generate/1;
+%engine/ext_points.pl implemented_in/3 carries the full account]. A declared
+%type whose arity names no predicate is ordinary here -- a special form like
+%`case` or `if` is declared and compiled rather than called -- so 13 of the
+%119 asks this table makes were searches, 13,390 of its 17,748 inferences
+%[measured 2026-09-06]. Both spellings answer the same question: the one case
+%where they differ, a name nothing has loaded but the autoload index could
+%supply, is rejected either way, because the old spelling autoloaded it and
+%then failed the imported_from/1 test on the next line
+%[tested: builtin_input_guards:the_guard_table_prices_a_declared_name_with_no_predicate_like_one_with_a_predicate].
 guarded_input_position(Name, Arity, Position) :-
     seam:builtin_type_declaration(Name, ['->'|Chain]),
     \+ relational_builtin(Name),
@@ -108,8 +123,8 @@ guarded_input_position(Name, Arity, Position) :-
     nonvar(Type),
     strict_input_type(Type),
     length(Chain, Arity),
+    current_predicate(Name/Arity),
     functor(Head, Name, Arity),
-    predicate_property(Head, defined),
     \+ predicate_property(Head, imported_from(_)),
     \+ relational_input_position(Name, Position),
     \+ unguarded_input_position(Name, Position).

@@ -823,10 +823,27 @@ super_chain(Module, Ancestor) :-
 %[tested: translator_super:a_later_definition_retargets_an_earlier_super].
 %A foreign or built-in predicate has no clause count and does answer, so the
 %count is required only where it exists.
+%
+%current_predicate/1 asks whether the name exists, never
+%predicate_property(Module:Head, defined): on a name nothing defines that
+%property runs SWI's undefined-procedure trap, which searches the whole
+%autoload library index before raising the existence error
+%[source: /usr/lib/swi-prolog/boot/syspred.pl, define_or_generate/1;
+%engine/ext_points.pl implemented_in/3 carries the full account]. Here the
+%chain walk above asks once per ancestor, so `(super (f ...))` naming a
+%function no ancestor defines paid the search at EVERY non-system module
+%before refusing [measured 2026-09-06: a miss 1,031 inferences against 22 for
+%a hit, and the refusal over a two-module chain 2,120 against 65].
+%The two spellings answer the same question here: current_predicate/1 sees a
+%local definition, an import and an inherited one alike, and the one case
+%where they differ -- a name nothing has loaded but the autoload index could
+%supply -- is rejected either way, since the old spelling autoloaded it and
+%then failed the imported_from/1 test below
+%[tested: translator_super:a_super_over_a_missing_name_is_priced_like_one_that_resolves].
 super_defines(Module, Fun, Arity) :-
     compiled_function_name(Fun, Predicate),
+    current_predicate(Module:Predicate/Arity),
     functor(Head, Predicate, Arity),
-    predicate_property(Module:Head, defined),
     \+ predicate_property(Module:Head, imported_from(_)),
     (   predicate_property(Module:Head, number_of_clauses(Clauses))
     ->  Clauses > 0
