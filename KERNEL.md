@@ -1,8 +1,8 @@
 # The kernel and the forms built on it
 
-The translator gives 67 heads a meaning of their own. 59 of them are clauses
-of `translate_special_dl/5` in `engine/translator/special_forms.pl`, 64 clauses
-over those 59 heads, and the remaining 8 are equations in
+The translator gives 68 heads a meaning of their own. 60 of them are clauses
+of `translate_special_dl/5` in `engine/translator/special_forms.pl`, 65 clauses
+over those 60 heads, and the remaining 8 are equations in
 `engine/prelude.metta` registered with `add-translator-rule!`. Ask the engine
 rather than this paragraph: `metta_special_form_head/1` is
 `clause(translate_special_dl(Name,_,_,_,_), _)` and answers the first number,
@@ -49,7 +49,7 @@ derived form that is already a prelude rule says `prelude`; a derived form
 still fused into the compiler says why, and every one of those reasons is
 measured.
 
-## `translate_special_dl/5`, 59 heads
+## `translate_special_dl/5`, 60 heads
 
 | head | kind | reason |
 |---|---|---|
@@ -112,6 +112,7 @@ measured.
 | `with-seed` | core, divergence | a dynamically scoped random generator: the body is compiled in place, and `setup_call_cleanup/3` restores the prior state after success, failure, cut or exception; two scopes with the same seed repeat their draws without moving the outside generator [tested: `test_a_seed_scope_repeats_its_draws_and_leaves_the_outside_alone`] |
 | `sealed` | core, divergence | renames the listed variables at COMPILE time, which is the only place the rename can work |
 | `\|->` | core, divergence | a lambda, compiled into a generated predicate in the space that wrote it |
+| `__metta_type_syntax__` | core, divergence | the prelude casts' door for type syntax as DATA: normalizes a written type in its explicit space through `normalize_cast_type/3` without evaluating names or projecting away arrow annotations, which is what lets `(: x (Alias Number))` read through a structural alias; internal, double-underscored, and `metta_internal_catalog_name/1` keeps it out of the user-facing catalog |
 
 ## The prelude's derived forms, 8 heads
 

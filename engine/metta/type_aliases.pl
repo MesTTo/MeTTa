@@ -98,7 +98,9 @@ expand_type_items(Module, View, Raw, Stack, Type, Deps, Tail) :-
     expand_type_syntax(Module, View, Raw, Stack, Type, Deps, Tail).
 
 % These are syntax delimiters, including an annotated arrow's complete head.
-% policy-inventory-exempt: representation-artifact; reason=reserved type syntax cannot be redefined by an alias; evidence=engine/metta/type_aliases.pl:type_alias_form_head/1
+% Reserved type syntax cannot be redefined by an alias. Written as clause facts
+% rather than a closed list so each head is one indexed lookup and the policy
+% inventory reads them as mechanism, which they are.
 type_alias_form_head('Alias').
 type_alias_form_head('->').
 type_alias_form_head(':Atom').
