@@ -17,7 +17,7 @@
 %   commit=3ded7552797b66d78e666141eb51f3bc14686bd2].
 %   user transactions reconcile prepared relation ownership in the outer
 %   commit constraint, including concurrent clear and release
-%   [tested: function_free_materialization; commit=WORKTREE].
+%   [tested: function_free_materialization; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
 %   speculative calls create a provider savepoint, then roll it and their
 %   observation frame back on success, failure, and throw [tested:
 %   test_a_speculative_journal_write_is_neither_persisted_nor_published;

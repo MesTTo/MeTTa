@@ -4,7 +4,7 @@
 % Guarantees: compile_metta_equation/5 retains a resolved reader equation's
 % stored occurrence, and deferred translation consumes that same source
 % [tested: test_forcing_a_deferred_equation_keeps_a_resolved_sibling_once;
-% commit=WORKTREE].
+% commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
 % Guarantees: stored_arrow_chain/3 reads annotated parameter types through
 %   metta_runtime_type/2 for type-marker invalidation
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
