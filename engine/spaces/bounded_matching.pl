@@ -297,6 +297,113 @@ metta_space_names(Names) :-
     append(Native, Foreign, All),
     sort(All, Names).
 
+%The C identity scan rides beside the engine as empty_prune.c, compiled to
+%empty_prune.so by engine/build.sh, and is consulted the way parser.pl
+%consults the C reader and engine/translator/runtime.pl the C branch-return
+%analyzer: artifact present and loadable, METTA_C_EMPTY_PRUNE=off keeps the
+%Prolog walks, which stay the specification and the fallback.
+%
+%It is a unit of its OWN rather than four functions added to one of the .so
+%files already here, because PL_register_foreign with a NULL module binds into
+%the module whose frame called load_foreign_library/1, and these four
+%predicates have to land in `spaces` while reader.so and writer.so load into
+%`parser`, mbr.so into `translator` and json_codec.so into `json_codec`
+%[source: swipl-devel src/pl-fli.c resolveModule(), which answers
+%contextModule(environment_frame) for a NULL module].
+%
+%shlib exists to load empty_prune.so, and a refused shlib is the same absence
+%as a missing artifact, parser.pl's own reasoning for its reader and writer.
+%The import is INTO THIS MODULE and is load-bearing rather than tidy: with it
+%deleted, an autoload=false boot -- which is a shipped lane, run over the whole
+%example corpus as NO_AUTOLOAD=1 sh test.sh -- leaves load_foreign_library/1
+%unresolvable in `spaces`, the catch below reads that as "no artifact" and the
+%engine runs the Prolog walk with the .so sitting on disk
+%[measured 2026-09-05: set_prolog_flag(autoload, false) then engine/metta.pl,
+%metta_c_empty_prune_active and predicate_property(foreign) both true with this
+%line and both false with it removed, the prune answering [a,b] either way;
+%commit=WORKTREE].
+:- catch(use_module(library(shlib)), _, true).
+:- dynamic metta_c_empty_prune_active/0.
+:- dynamic metta_empty_prune_artifact/1.
+%The ENGINE's directory, not this file's. This unit is consulted into
+%engine/spaces.pl, so its directives are stored in THAT umbrella's .qlf and
+%prolog_load_context(directory, D) would answer engine/spaces/ on a source
+%boot and engine/ once spaces.qlf served it, which is the hole the C
+%branch-return analyzer fell into. metta_engine_src_dir/1 is recorded by
+%engine/metta.pl, whose own load context is engine/ in both modes
+%[tested: tests/prolog/static_checks.pl no_unit_computes_its_own_directory].
+:- metta_engine_src_dir(EngineDir),
+   directory_file_path(EngineDir, 'empty_prune.so', EmptyPruneSo),
+   assertz(metta_empty_prune_artifact(EmptyPruneSo)).
+
+%A named directive, matching parser.pl's reader and writer loaders and
+%runtime.pl's analyzer loader. It makes the artifact path inspectable as
+%metta_empty_prune_artifact/1 and the activation a predicate a test can call,
+%which is what lets the artifact and the flag be checked against each other:
+%the differential unit is CONDITIONED on metta_c_empty_prune_active/0 and
+%plunit SKIPS a unit whose condition fails, so an activation step that stops
+%running would read as a suite with fewer tests rather than as a failure
+%[tested: empty_prune_c_fallback:the_c_scan_is_active_exactly_when_its_artifact_loads].
+metta_try_load_c_empty_prune :-
+    (   \+ getenv('METTA_C_EMPTY_PRUNE', off),
+        metta_empty_prune_artifact(SO),
+        exists_file(SO),
+        catch(load_foreign_library(SO), _, fail),
+        %The FOREIGN arities, never a wrapper: a stale artifact registering
+        %fewer than four must fall back whole rather than half-activate.
+        current_predicate(metta_c_has_empty/1),
+        current_predicate(metta_c_drop_empty/2),
+        current_predicate(metta_c_has_empty_answer/1),
+        current_predicate(metta_c_drop_empty_answer/2)
+    ->  assertz(metta_c_empty_prune_active)
+    ;   metta_c_empty_prune_stub
+    ).
+
+%The stub keeps the four foreign names defined for the engine's
+%undefined-predicate gate when the artifact is absent; the
+%metta_c_empty_prune_active/0 guard on both doors makes a stub unreachable.
+metta_c_empty_prune_stub :-
+    (   current_predicate(metta_c_has_empty/1)
+    ->  true
+    ;   assertz((metta_c_has_empty(_) :- fail)),
+        assertz((metta_c_drop_empty(_, _) :- fail)),
+        assertz((metta_c_has_empty_answer(_) :- fail)),
+        assertz((metta_c_drop_empty_answer(_, _) :- fail))
+    ).
+
+:- metta_try_load_c_empty_prune.
+
+%A list with no end for the walk to reach. The identity walks below unify an
+%open tail with [X|Xs] and recurse, so a PARTIAL list grows the global stack
+%forever and a CYCLIC one spins; neither terminates, so neither has a "what
+%the Prolog walk does" to match. Classify first and refuse, which is
+%library(error)'s own not_a_list/2 shape -- '$skip_list'/3, then var(Rest)
+%apart from Rest == [] -- with one difference: an IMPROPER list whose tail is
+%bound falls through to the walk, because that is where this door's answer for
+%it has always come from. The walk finds an Empty before the bad tail
+%(succeeding) or fails when it gets there, and the door answers Kept = All
+%[source: /usr/lib/swi-prolog/library/error.pl not_a_list/2].
+%
+%Flat in inferences, so it is O(1) on a branch that is O(n) by construction:
+%'$skip_list'/3 is C and retires 2.00 whether the list holds 10 elements or
+%1,000 [measured 2026-09-05: 1,005.01 against the bare walk's 1,003.01 at
+%n=1000 and 15.00 against 13.00 at n=10, each shape called between two
+%statistics(inferences, _) reads; commit=WORKTREE]. It sits on the PROLOG
+%branch alone; the C scan classifies the same three ways from PL_skip_list,
+%which is one pass of the walk it was going to make anyway
+%[tested: empty_prune_c_differential:the_two_prune_doors_agree_shape_for_shape,
+%empty_prune_c_fallback:a_list_with_no_end_refuses_rather_than_spinning_with_the_c_scan_off].
+metta_prune_scan_ok_(All) :-
+    '$skip_list'(_, All, Tail),
+    (   Tail == []
+    ->  true
+    ;   var(Tail)
+    ->  throw(error(instantiation_error, _))
+    ;   Tail = [_|_]
+    ->  throw(error(type_error(list, All), _))
+    ;   true
+    ).
+
 %The Empty prune behind every computed collapse. It asks ONE question, by
 %IDENTITY: is any element the atom Empty. Nothing here unifies, and that is
 %the whole point rather than a detail.
@@ -318,26 +425,55 @@ metta_space_names(Names) :-
 %would also swallow every other error the prune could raise, and would cost on
 %a path every runnable takes.
 %
-%It is not a slower shape in the cases that matter. Measured per call, against
-%the memberchk pre-filter it replaces: one ground answer 3.00 against 3.00,
-%one unbound answer 3.00 against 5.00, three hundred answers whose first is
-%unbound 302.00 against 304.00. It is dearer on exactly one shape, a long
-%all-ground list, 302.00 against 3.00, because the pre-filter's C scan
-%answered that one in constant time. The pinned counter rows measure that
-%shape and do not move
+%WHAT THE DELETION COST. Measured per call against the memberchk pre-filter it
+%replaced: one ground answer 3.00 against 3.00, one unbound answer 3.00
+%against 5.00, three hundred answers whose first is unbound 302.00 against
+%304.00. It is dearer on exactly one shape, a long all-ground list, 302.00
+%against 3.00, because the pre-filter's C scan answered that one in constant
+%time
 %[measured 2026-09-05: each shape called 20,000 times between two
 %statistics(inferences, _) reads, minus the 2 the driver loop retires;
 %SWI's memberchk/2 retires 4.00 at n=1 and at n=1000 alike, so the pre-filter
 %was O(1) in inferences and any Prolog walk is O(n)].
+%
+%That paragraph used to end "the pinned counter rows measure that shape and do
+%not move", and it was WRONG: it had been checked against the Python counter
+%rows alone. engine/bench.pl's match-skew row collapses 20 lists of 5,000
+%ground answers, which IS the dear shape, and it went from 207,982 inferences
+%to 307,962, +48%, exactly the 20 x 4,999 the walk adds; foreign-match and
+%table-bridge-match carried +2,000 each
+%[measured 2026-09-05: swipl -g "metta_bench:bench_run('match-skew')" -t halt
+%engine/bench.pl, three identical samples at each of a94f804c, b3753db7 and
+%046b0054; commit=WORKTREE].
+%
+%The answer is not to put unification back. engine/empty_prune.c asks the SAME
+%identity question in C: PL_get_atom compares an atom handle and answers false
+%for an attributed variable without touching it, so no hook can fire, and one
+%foreign call retires one inference where the walk retires n. A 10,000-element
+%all-ground list costs 3 inferences through the C scan against 10,003 through
+%the walk, and match-skew reads 207,982
+%[measured 2026-09-05; commit=WORKTREE;
+%tested: empty_prune_c_differential:the_c_scan_is_constant_where_the_prolog_walk_is_linear].
+%The walks below stay the specification and the fallback, and a differential
+%runs both arms over every shape either can meet
+%[tested: empty_prune_c_differential:the_two_prune_doors_agree_shape_for_shape,
+%empty_prune_c_differential:the_c_scan_and_the_prolog_walk_agree_shape_for_shape].
 %
 %A bare memberchk once BOUND an unbound answer variable and pruned it, which
 %turned `!(let $b (is-alpha-member (1 $x) ...) $x)`'s unbound answer into
 %nothing; identity has never been able to do that
 %[tested translated_success_leaves_the_query_variable_unbound].
 metta_prune_empty(All, Kept) :-
-    (   metta_member_empty_(All)
-    ->  metta_drop_empty_(All, Kept)
-    ;   Kept = All
+    (   metta_c_empty_prune_active
+    ->  (   metta_c_has_empty(All)
+        ->  metta_c_drop_empty(All, Kept)
+        ;   Kept = All
+        )
+    ;   metta_prune_scan_ok_(All),
+        (   metta_member_empty_(All)
+        ->  metta_drop_empty_(All, Kept)
+        ;   Kept = All
+        )
     ).
 
 metta_member_empty_([X|Xs]) :-
@@ -365,10 +501,26 @@ metta_drop_empty_([X|Xs], Kept) :-
 %threw before it could be printed. The reasoning is written out over
 %metta_prune_empty/2 above
 %[tested: a_residual_constraint_survives_the_empty_prune].
+%
+%It takes the C scan the same way, through metta_c_has_empty_answer/1 and
+%metta_c_drop_empty_answer/2, which read '$metta_answer'(Value, _)'s first
+%argument where the bare pair reads the cell. The one thing the C does
+%differently is SHARE the surviving '$metta_answer' cell where
+%metta_drop_empty_answers_/2 rebuilds it around the same two arguments; the
+%results are ==, and the twin's own rebuild is why nothing could ever have
+%relied on the wrapper's identity
+%[tested: empty_prune_c_differential:the_two_prune_doors_agree_shape_for_shape].
 metta_prune_empty_answers(All, Kept) :-
-    (   metta_member_empty_answer_(All)
-    ->  metta_drop_empty_answers_(All, Kept)
-    ;   Kept = All
+    (   metta_c_empty_prune_active
+    ->  (   metta_c_has_empty_answer(All)
+        ->  metta_c_drop_empty_answer(All, Kept)
+        ;   Kept = All
+        )
+    ;   metta_prune_scan_ok_(All),
+        (   metta_member_empty_answer_(All)
+        ->  metta_drop_empty_answers_(All, Kept)
+        ;   Kept = All
+        )
     ).
 
 metta_member_empty_answer_(['$metta_answer'(X, _)|Xs]) :-
