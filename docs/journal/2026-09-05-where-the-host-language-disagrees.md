@@ -78,3 +78,57 @@ npm itself is last-wins and refusing to load a package over an unrelated
 repeat is worse than the repeat), `src/platform.ts` and the tools (this
 package's own files), and `kit/driver.ts` (a line of protocol this
 repository's own test writes).
+
+## 2026-09-05, a float's text
+
+`floatText` took `String(value)` and added a point when the spelling had none.
+The digits are right that way, but the LAYOUT is JavaScript's, and JavaScript's
+is a third spelling that neither authority uses.
+
+The obvious target is Python's `repr`, and it is the wrong one. Reading the
+Python seat is what says so:
+`extensions/python/metta/_atoms_core.py`'s `_float_text` names the four places
+`repr` differs from the law it implements, "the plus sign (1e+16), the exponent
+padding (1e-05), the small-magnitude threshold (1e-05 where the law says
+0.00001), and nan against the engine's NaN". So the target is the ARBITER's
+layout, which the Python seat reaches by relaying repr's digits, and which the
+engine reaches at `engine/parser.pl` `metta_float_layout/4` and again in C at
+`engine/writer.c` `emit_finite_float`, both over LeaTTa
+RyuLean4/Runtime.lean:371-396.
+
+Checked that the two authorities agree before matching either. 4,030 finite
+doubles (the eight hard cases, the layout's boundaries, and 4,000 generated),
+printed by `swrite/2` and by `_float_text`:
+
+    engine against Python seat      0 mismatches of 4,030
+    Node seat against Python seat   796 mismatches of 4,033
+
+Three classes, all layout and none digits: the exponent's plus sign
+(`1.7976931348623157e+308` against `...e308`), the top of the positional range
+(`1e16` printed `10000000000000000.0`), and the bottom of it (`1e-6` printed
+`0.000001`).
+
+Decided: port the five branches, taking the digits from
+`Number.prototype.toString`. ECMAScript defines those as the shortest decimal
+that reads back to the same double, ties to even, which is the same selection
+CPython's `repr` and SWI's `number_codes/2` make; the 4,033-value diff going to
+zero is what says the three agree in practice and not only on paper.
+
+Left alone: `src/wire.ts`'s `numberToText`, which is the TRANSPORT spelling and
+a different job. It writes `1.0e+21` where the atom now prints `1e21`, and the
+cross-host kit says in as many words that this is allowed, comparing a
+transport number as the number because "only the engine's own writer is
+canonical about how it spells"
+(`test_node_binding.py`, `_comparable_transport`). Checked it anyway: all 4,030
+spellings read back through SWI to the identical double. A comment now says
+why it differs, because the obvious next edit is to make it match and that
+would be the wrong fix.
+
+Red, with 3c025a0e's `src/atom.ts`: both cases fail, the first on
+`10000000000000000.0` against `1e16`. Green on this tree; the seat's suite goes
+581 to 583 and `test_node_binding.py`'s four cross-host cases stay green.
+
+The sweep is in the suite rather than only in the evidence: 2,000 seeded
+doubles plus one per power of ten from -20 to 24, each compared against the
+engine in the same process, 67ms. The engine beside the test is the oracle, so
+the cases only have to reach the branches.
