@@ -33,6 +33,10 @@ command -v swipl >/dev/null
 
 project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 
+# One spelling of the bound, implemented in bounded.sh, which every runner in
+# this tree and a command typed by hand all reach.
+bounded() { sh "$project_dir/bounded.sh" "$@"; }
+
 # The mark is built from its code point rather than written literally, so
 # this file stays ASCII and cannot itself be the thing that breaks.
 mark=$(printf '\342\234\205')
@@ -78,13 +82,13 @@ rm -f "$tree/engine/.qlf-stamp"
 
 # The poisoning boot: no locale at all, which is what a container, a cron
 # entry, or a CI runner with a scrubbed environment gives the engine.
-( cd "$tree" && LC_ALL=C LANG=C swipl -g halt -s engine/main.pl -- extensions ) \
+( cd "$tree" && LC_ALL=C LANG=C bounded swipl -g halt -s engine/main.pl -- extensions ) \
     >/dev/null 2>&1 || {
     echo "FAIL: the engine did not boot under LC_ALL=C" >&2
     exit 1
 }
 
-verdicts=$( cd "$tree" && sh run.sh examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/01-measure.metta 2>/dev/null |
+verdicts=$( cd "$tree" && bounded sh run.sh examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/01-measure.metta 2>/dev/null |
             grep ' should ' || true )
 if [ -z "$verdicts" ]; then
     echo "FAIL: the example printed no verdict lines at all, so this test" >&2
@@ -104,7 +108,7 @@ fi
 # The same run under a C locale reading a CORRECT set: an ASCII output
 # stream does not fail, it escapes, so this half of the property needs its
 # own check rather than riding on the one above.
-escaped=$( cd "$tree" && LC_ALL=C LANG=C sh run.sh examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/01-measure.metta 2>/dev/null |
+escaped=$( cd "$tree" && LC_ALL=C LANG=C bounded sh run.sh examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/01-measure.metta 2>/dev/null |
            grep ' should ' | grep -cv "$mark" || true )
 if [ "$escaped" != 0 ]; then
     echo "FAIL: $escaped verdict line(s) lost the mark when the RUN itself" >&2
@@ -130,7 +134,7 @@ fi
 # before the fix carries: the next boot must purge rather than trust it.
 printf 'qlf_stamp(1).\n' > "$stamp"
 before=$(find "$tree/engine" -name '*.qlf' | wc -l)
-( cd "$tree" && swipl -g halt -s engine/main.pl -- extensions ) >/dev/null 2>&1
+( cd "$tree" && bounded swipl -g halt -s engine/main.pl -- extensions ) >/dev/null 2>&1
 if ! grep -q 'utf8' "$stamp"; then
     echo "FAIL: an old-shape stamp survived a boot, so a set compiled" >&2
     echo "      under another encoding would keep being served" >&2

@@ -36,6 +36,8 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from bounded_spawn import bounded
+
 ROOT = Path(__file__).resolve().parents[2]
 PAGE = ROOT / "KERNEL.md"
 
@@ -129,7 +131,7 @@ class KernelLedgerError(RuntimeError):
 def engine_inventory(root: Path = ROOT) -> Inventory:
     """Ask one engine process for the live KERNEL.md roster."""
     completed = subprocess.run(
-        ["swipl", "-q", "-g", _QUERY, "-t", "halt"],
+        bounded(["swipl", "-q", "-g", _QUERY, "-t", "halt"]),
         cwd=root,
         capture_output=True,
         text=True,

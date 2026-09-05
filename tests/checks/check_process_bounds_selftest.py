@@ -5,24 +5,45 @@ nothing about whether the pass can find an unbounded spawn at all, which is the
 whole of its job. Both halves are planted here in a fixture the test writes and
 throws away.
 
-Two negatives are load-bearing. `$(dirname "$(dirname "$PY")")` holds `$PY`
+Four negatives are load-bearing. `$(dirname "$(dirname "$PY")")` holds `$PY`
 without starting a Python, so a pass matching the line rather than the command
-POSITION would report it and be turned off within a day. And `in_py() { ...; }`
-is a one-line function whose closing brace is not at column 0, so a parser
+POSITION would report it and be turned off within a day. `in_py() { ...; }` is
+a one-line function whose closing brace is not at column 0, so a parser
 tracking only `^}` would treat the remaining 400 lines of check.sh as its body
 and report every top-level lane in it: that exact mistake produced 32 false
-findings while this check was being written.
+findings while this check was being written. A command CONTINUED over two lines
+is one command, and reading the halves apart reported the bound on the first
+line and an unbounded spawn on the second. And a line that must not be bounded
+says so in place, with a reason, because the two such lines in the tree are the
+reaping suite's own fixtures and excluding them from somewhere else would put
+the exclusion where nobody reading the line can see it.
 
 Assumes: a writable ai-tmp/ in this repository.
 Guarantees:
-  - a planted unbounded swipl, sh and "$PY" are each reported with lane and
-    line [tested: tests/checks/check_process_bounds_selftest.py; commit=4cec2abab7187ad87c0550113f8be50d128ad970]
-  - a `bounded` spawn, an `in_py` spawn, a comment, a dirname substitution and
-    a one-line function are NOT reported
-    [tested: tests/checks/check_process_bounds_selftest.py; commit=4cec2abab7187ad87c0550113f8be50d128ad970]
-  - an `in_py` that stops calling `bounded` is reported even though every lane
-    reaching its command through it still LOOKS bounded
-    [tested: tests/checks/check_process_bounds_selftest.py; commit=4cec2abab7187ad87c0550113f8be50d128ad970]
+  - a planted unbounded swipl, sh, "$PY" and make inside a lane function are
+    each reported with lane and line
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+  - a planted unbounded spawn in a RUNNER, which has no lane functions at all,
+    is reported. That population is the one the 7,540-second spinner of
+    2026-09-05 came from, and the pass did not read it until that day
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+  - a `bounded` helper that stops naming bounded.sh is reported, even though
+    every `bounded ...` call in the same file still looks bounded
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+  - an `in_py` that stops calling `bounded` is reported for the same reason
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+  - a `bounded ...` written ABOVE its own definition is reported. In POSIX sh
+    that call is a `not found` exiting 127, and an `if !` around it reads the
+    thing it was probing for as absent
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+  - a planted unbounded engine spawn in a HARNESS script's Python is reported,
+    and so is an argv the pass cannot read, while a wrapped one, a `git` call
+    and a `sys.executable` call are not
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+  - a `bounded` spawn, an `in_py` spawn, a comment, a dirname substitution, a
+    one-line function, a continued command bounded on its first line, and a
+    line carrying `# unbounded: <reason>` are NOT reported
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
 Open Obligations:
   To Do: None
@@ -44,6 +65,21 @@ from check_process_bounds import findings  # noqa: E402  -- the path is installe
 BOUND_IN_PY = 'in_py() { ( cd "$PYDIR" && bounded "$@" ); }\n'
 LOOSE_IN_PY = 'in_py() { ( cd "$PYDIR" && "$@" ); }\n'
 
+GOOD_HELPER = 'bounded() { sh "$HERE/bounded.sh" "$@"; }\n'
+LOOSE_HELPER = 'bounded() { timeout --preserve-status -k 10 3600 "$@"; }\n'
+
+#: The helper defined BELOW its first call. In POSIX sh that call is a `not
+#: found` and exits 127, and an `if !` above it then reads a present toolchain
+#: as absent: extensions/mork/mork_ffi/build.sh did exactly this on 2026-09-05
+#: and a gate run printed "missing: rust-nightly-toolchain" for an installed
+#: one.
+LATE_HELPER = """#!/bin/sh
+HERE=$(cd -- "$(dirname -- "$0")" && pwd)
+if command -v cargo >/dev/null 2>&1 && ! bounded cargo --version >/dev/null; then
+    echo "no cargo" >&2
+fi
+""" + GOOD_HELPER
+
 #: Top-level lines that follow the one-line function, which is the shape
 #: check.sh actually has: in_py() { ...; } and then 400 lines of `run` calls
 #: before the next function opens. A parser that treats the one-liner as open
@@ -51,7 +87,6 @@ LOOSE_IN_PY = 'in_py() { ( cd "$PYDIR" && "$@" ); }\n'
 #: `run()` already wraps a lane whose command word is a program.
 TOP_LEVEL = """
 run GATE   evidence   "$PY" "$HERE/tests/checks/check_evidence_tags.py"
-swipl -g halt -s "$HERE/engine/main.pl" -- extensions >/dev/null 2>&1 || true
 run GATE   petta      sh -c "cd '$HERE' && '$PY' tests/conformance/petta.py"
 """
 
@@ -102,27 +137,107 @@ network" >&2
 }
 """
 
+#: A runner has no lane functions. Every command position in it belongs to a
+#: process a person can start directly, so all four cases below are top level.
+RUNNER = """#!/bin/sh
+set -u
+HERE=$(cd -- "$(dirname -- "$0")" && pwd)
+""" + GOOD_HELPER + """
+bounded swipl -g halt -s "$HERE/engine/main.pl" -- extensions
 
-def report(text: str) -> tuple[list[str], int]:
-    """The pass's findings over a planted check.sh, and its spawn count.
+# unbounded: the child under test; giving it the link would remove the subject.
+sh -c 'while :; do :; done' &
 
-    The count is asserted too, because a pass that stops RECOGNISING a spawn
-    reports the same findings over fewer of them, and only the count tells
-    those two apart.
-    """
+bounded sh "$HERE/engine/test.sh" \\
+    suites/reader/parser.plt
+
+npm run --silent build
+"""
+
+RUNNER_CONTINUED = """#!/bin/sh
+HERE=$(cd -- "$(dirname -- "$0")" && pwd)
+""" + GOOD_HELPER + """
+"$PY" -m pytest tests \\
+    -q -p no:benchmark
+"""
+
+#: `exec` keeps the command position open, and every seat's test.sh ends with
+#: one. Deleting the wrapper from `exec sh bounded.sh "$PY" -m pytest` leaves
+#: `exec "$PY" -m pytest`, which read as clean until this case was planted.
+#: `command -v` must NOT match for the same reason it never has: it asks PATH a
+#: question and starts nothing.
+RUNNER_EXEC = """#!/bin/sh
+HERE=$(cd -- "$(dirname -- "$0")" && pwd)
+command -v swipl >/dev/null 2>&1 || exit 0
+exec "$PY" -m pytest tests
+"""
+
+
+#: A harness script, read as Python rather than as shell. Six shapes: an engine
+#: spawn with no bound, the same one wrapped, an argv the pass cannot read, a
+#: `git` call, a `sys.executable` call, and an excused one. Only the first and
+#: the third are findings.
+HARNESS = '''"""A planted harness script."""
+import subprocess
+import sys
+from bounded_spawn import bounded
+
+
+def unbounded_engine():
+    return subprocess.run(["swipl", "-q", "-g", "halt"], check=False)
+
+
+def bounded_engine():
+    return subprocess.run(bounded(["swipl", "-q", "-g", "halt"]), check=False)
+
+
+def argv_in_a_variable(command):
+    return subprocess.run(command, check=False)
+
+
+def git_is_not_a_spawner():
+    return subprocess.run(["git", "rev-parse", "HEAD"], check=False)
+
+
+def another_check_is_not_an_engine():
+    return subprocess.run([sys.executable, "-c", "pass"], check=False)
+
+
+def excused():
+    # unbounded: the child under test; the bound would remove the subject.
+    return subprocess.Popen(["swipl", "-q", "-g", "halt"])
+'''
+
+
+def report(check_text: str, runner_text: str | None = None,
+           python_text: str | None = None):
+    """The pass's findings over a planted tree, and its spawn count."""
     with tempfile.TemporaryDirectory(dir=ROOT / "ai-tmp") as work:
         root = Path(work)
-        (root / "check.sh").write_text(text, encoding="utf-8")
-        return findings([root / "check.sh"], root)
+        (root / "check.sh").write_text(check_text, encoding="utf-8")
+        runners = []
+        if runner_text is not None:
+            (root / "test.sh").write_text(runner_text, encoding="utf-8")
+            runners = [root / "test.sh"]
+        harness = []
+        if python_text is not None:
+            (root / "harness.py").write_text(python_text, encoding="utf-8")
+            harness = [root / "harness.py"]
+        return findings([root / "check.sh"], root, runners, harness)
+
+
+def lane_names(found: list[str]) -> set[str]:
+    """The lane or file each spawn finding names, for the assertions below."""
+    return {line.split(": ")[1].split(" starts")[0]
+            for line in found if " starts a process" in line}
 
 
 def main() -> int:
     """Every planted case, positive and negative."""
     problems: list[str] = []
 
-    found, total = report(BOUND_IN_PY + TOP_LEVEL + LANES)
-    lanes = {line.split(": ")[1].split(" starts")[0]
-             for line in found if " starts a process" in line}
+    found, total = report(GOOD_HELPER + BOUND_IN_PY + TOP_LEVEL + LANES, RUNNER)
+    lanes = lane_names(found)
     problems.extend(
         f"{expected}: an unbounded spawn was NOT reported"
         for expected in ("check_bad_swipl", "check_bad_sh", "check_bad_python",
@@ -136,20 +251,27 @@ def main() -> int:
                        "check_prose_only")
         if spared in lanes
     )
-    if len(found) != 4:
-        problems.append(f"expected exactly 4 findings, got {len(found)}: {found}")
-    #: Four unbounded, one `bounded swipl`, one `in_py`. A pass that forgot
-    #: how to see a bounded spawn would still report exactly the four above.
-    if total != 6:
+    if "test.sh" not in lanes:
         problems.append(
-            f"expected 6 spawns to be looked at, got {total}. A pass that "
+            "the planted `npm run build` in a RUNNER was not reported. A "
+            "runner has no lane functions, and reading only lane functions is "
+            "what let a hand-started swipl run 7,540 seconds outside every "
+            "lane on 2026-09-05."
+        )
+    if len(found) != 5:
+        problems.append(f"expected exactly 5 findings, got {len(found)}: {found}")
+    #: Four unbounded lane spawns, one `bounded swipl`, one `in_py`, and four in
+    #: the runner: its own `bounded swipl`, the excused child, the continued
+    #: `bounded sh`, and the unbounded npm. A pass that forgot how to see a
+    #: bounded spawn would still report the same findings over fewer of them.
+    if total != 10:
+        problems.append(
+            f"expected 10 spawns to be looked at, got {total}. A pass that "
             f"stops recognising `bounded` as a spawn line reports the same "
             f"findings while covering less."
         )
 
-    # The one-line function must not swallow what follows it. With BOUND_IN_PY
-    # first, the three bad lanes below it are still found; a parser that treated
-    # in_py as open would attribute them to in_py instead.
+    # The one-line function must not swallow what follows it.
     if "in_py" in lanes:
         problems.append(
             "the one-line in_py was treated as an open function body, so the "
@@ -158,13 +280,93 @@ def main() -> int:
         )
 
     # in_py losing its bound is a finding even when every caller looks bounded.
-    loose, _ = report(LOOSE_IN_PY + TOP_LEVEL + LANES)
+    loose, _ = report(GOOD_HELPER + LOOSE_IN_PY + TOP_LEVEL + LANES)
     if not any("in_py no longer calls" in line for line in loose):
         problems.append("in_py without `bounded` was NOT reported")
 
+    # A helper defined below its first call is a `not found`, not a bound.
+    late, _ = report(GOOD_HELPER + BOUND_IN_PY, LATE_HELPER)
+    if not any("defined at line" in line for line in late):
+        problems.append(
+            "a `bounded ...` ABOVE its own definition was not reported. That "
+            "call exits 127, and the `if !` around it reads the thing it was "
+            "probing for as absent.")
+
+    # And the same for the helper every `bounded ...` in a file reaches.
+    helper, _ = report(LOOSE_HELPER + BOUND_IN_PY + TOP_LEVEL + LANES)
+    if not any("does not name bounded.sh" in line for line in helper):
+        problems.append(
+            "a `bounded` helper that stopped naming bounded.sh was NOT "
+            "reported. Every `bounded ...` in that file still reads as bounded "
+            "here while none of them is."
+        )
+
+    # A continued command is one command: the bound sits at its front.
+    joined, joined_total = report(GOOD_HELPER + BOUND_IN_PY, RUNNER_CONTINUED)
+    if not any("test.sh" in line for line in joined):
+        problems.append(
+            "a continued `\"$PY\" -m pytest` with no bound was NOT reported")
+    if len(joined) != 1:
+        problems.append(
+            f"a two-line continuation was counted as {len(joined)} findings, "
+            f"not one: {joined}")
+    if joined_total != 1:
+        problems.append(
+            f"a two-line continuation was counted as {joined_total} spawns, "
+            f"not one")
+
+    # `exec` keeps the command position open; `command -v` does not open one.
+    execed, exec_total = report(GOOD_HELPER + BOUND_IN_PY, RUNNER_EXEC)
+    if len(execed) != 1:
+        problems.append(
+            f"a bare `exec \"$PY\" -m pytest` was counted as {len(execed)} "
+            f"findings, not one: {execed}. Either exec does not open a command "
+            f"position here, or `command -v swipl` opened one and must not."
+        )
+    if exec_total != 1:
+        problems.append(
+            f"expected 1 spawn in the exec fixture, got {exec_total}: "
+            f"`command -v swipl` asks PATH a question and starts nothing."
+        )
+
+    # The Python half. A harness script's own subprocess calls are read as
+    # Python, because two of them put their engine in a session of its own
+    # where no group signal from the lane above can reach it.
+    harness_found, harness_total = report(
+        GOOD_HELPER + BOUND_IN_PY, None, HARNESS)
+    reported = {line.split(":")[1] for line in harness_found}
+    if len(harness_found) != 2:
+        problems.append(
+            f"expected 2 findings over the planted harness, got "
+            f"{len(harness_found)}: {harness_found}")
+    if harness_total != 4:
+        problems.append(
+            f"expected 4 harness spawns to be looked at, got {harness_total}. "
+            f"The unbounded engine, the bounded one, the argv it cannot read "
+            f"and the excused one are all LOOKED AT; the `git` call and the "
+            f"`sys.executable` call are not a spawn this asks about at all. A "
+            f"pass that stopped seeing the bounded one, or the excused one, "
+            f"would report the same two findings while covering less.")
+    if not any("swipl" in line for line in harness_found):
+        problems.append("the planted unbounded swipl in Python was NOT reported")
+    if not any("subprocess.run(command" in line for line in harness_found):
+        problems.append(
+            "an argv the pass cannot read was SPARED. A check that spares what "
+            "it cannot see reports a clean run over a gap.")
+    if any("bounded([" in line for line in harness_found):
+        problems.append("a `bounded([...])` call was reported, and must not be")
+    if any('"git"' in line for line in harness_found):
+        problems.append("a `git` call was reported; git returns")
+    if any("sys.executable" in line for line in harness_found):
+        problems.append(
+            "a `sys.executable` call was reported; it starts another check, "
+            "which runs and returns")
+    del reported
+
+
     for problem in problems:
         print(f"  {problem}")
-    print(f"{len(problems)} finding(s) over 16 planted cases")
+    print(f"{len(problems)} finding(s) over 29 planted cases")
     return 1 if problems else 0
 
 

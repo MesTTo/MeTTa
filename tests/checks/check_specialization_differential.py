@@ -28,6 +28,8 @@ from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from bounded_spawn import bounded
+
 ROOT = Path(__file__).resolve().parents[2]
 TOOLS = ROOT / "extensions" / "python" / "tools"
 sys.path.insert(0, str(TOOLS))
@@ -71,7 +73,7 @@ def specialization_finding(
     environment = os.environ.copy()
     environment["METTA_VERIFY_SPECIALIZATIONS"] = "1"
     done = subprocess.run(
-        [
+        bounded([
             "swipl",
             "--stack_limit=8g",
             "-q",
@@ -81,7 +83,7 @@ def specialization_finding(
             argument,
             "extensions",
             "silent",
-        ],
+        ]),
         cwd=root,
         env=environment,
         stdin=subprocess.DEVNULL,

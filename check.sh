@@ -29,8 +29,10 @@
 #                                            shell examples layering
 #                                            generated-artifacts
 #                                            scratch-retention
+#                                            process-bounds reaping
 #          CHECK_PY=/path/to/python   pick the interpreter
 #          GATE_ONLY=1                skip the REPORT tier
+#          METTA_CHILD_CEILING=3600   seconds any spawn may live (bounded.sh)
 # Guarantees:
 #   - the runtime-derived policy inventory and its nine-case discrimination
 #     selftest are GATE lanes [tested:
@@ -70,6 +72,10 @@
 #   - every lane inherits a repository-local scratch directory, and a later
 #     run reclaims one left by SIGKILL without touching a concurrent run
 #     [tested: scratch-retention; commit=c96093349e37cc7153f31b3dd9af10246a325301].
+#   - every process a lane starts carries both a deadline and a link to the
+#     process that started it, and the link is checked against a real orphan
+#     rather than against the text that installs it
+#     [tested: reaping, process-bounds; commit=WORKTREE].
 # Open Obligations:
 #   To Do: None
 #   Hacks: None
@@ -118,26 +124,35 @@ trap check_cleanup EXIT
 # The bound in the CHILD, for the lanes that cannot take a wrapper.
 #
 # `run()` below wraps a lane whose command word is an external program, and
-# cannot wrap one that names a shell function: `timeout` execs, and a function
-# is not on disk. 25 of the 33 lane functions spawn swipl, node or a Python of
-# their own, so most of what this gate runs would otherwise carry no bound at
-# all -- which is how two swipl children spawned under it spun for 122 CPU-hours
-# between 2026-09-01 and 2026-09-03 after the session that started them was
-# killed.
+# cannot wrap one that names a shell function: the wrapper execs, and a
+# function is not on disk. 25 of the 33 lane functions spawn swipl, node or a
+# Python of their own, so most of what this gate runs would otherwise carry no
+# bound at all -- which is how two swipl children spawned under it spun for 122
+# CPU-hours between 2026-09-01 and 2026-09-03 after the session that started
+# them was killed.
 #
-# Written as a prefix rather than as a `timeout` spelled out 25 times so the
-# ceiling has ONE definition, and so `tests/checks/check_process_bounds.py` can
-# name the spawn that forgot it.
-bounded() {
-    # --preserve-status, because without it `timeout` answers 124 for a
-# command that was SIGNALLED and the child's own exit status is lost:
-# measured 2026-09-03, a child exiting 42 from its SIGINT handler is
-# reported as 124 by a plain wrapper and as 42 with this flag, and
-# tests/ch10_errors_and_refusals/test_interrupt.py reads that status.
-# Reaping is unaffected: an orphaned wrapper still leaves 0 survivors
-# after its bound.
-    timeout --preserve-status -k 10 "${METTA_CHILD_CEILING:-3600}" "$@"
+# The body of the bound moved to bounded.sh on 2026-09-05, because a definition
+# that lives inside this file reaches only this file's lanes: a hand-started
+# `swipl ... materialization.plt` ran 7,540 seconds at 97.8% CPU that day with
+# no bound at all, and test.sh, run.sh, engine/test.sh and every seat's test.sh
+# each spawned outside it. bounded.sh is one file every runner and every person
+# can call, and it adds the OWNER LINK this had no way to express: a deadline
+# alone leaves an orphan burning a core until the deadline.
+#
+# Still a prefix rather than the script spelled out 25 times, so the ceiling has
+# ONE definition and `tests/checks/check_process_bounds.py` can name the spawn
+# that forgot it.
+bounded() { sh "$HERE/bounded.sh" "$@"; }
+
+# Which program holds the deadline, resolved ONCE for the whole run rather than
+# per spawn: bounded.sh prefers a GNU `timeout` over the uutils reimplementation
+# Ubuntu 25.10 installs over /usr/bin/timeout, and asking costs a `--version`
+# exec that a gate making hundreds of spawns should not repeat.
+METTA_TIMEOUT=${METTA_TIMEOUT:-$(sh "$HERE/bounded.sh" --enforcer)} || {
+    echo "check.sh: no \`timeout\` on PATH; see bounded.sh" >&2
+    exit 2
 }
+export METTA_TIMEOUT
 
 # run TIER NAME COMMAND...
 # A GATE failure is recorded; a REPORT failure is printed and forgiven.
@@ -154,33 +169,30 @@ run() {
     # is killed, and sessions here are killed routinely: two swipl children
     # spawned under this gate survived from 2026-09-01 to 2026-09-03, spinning
     # at 100% for 122 CPU-hours between them, because the only bound on them
-    # lived in a parent that was gone. test.sh already spells the fix
-    # (`timeout 290 sh run.sh`); this is the same convention, applied to the
-    # lanes rather than only to the examples. GNU timeout runs the lane in its
-    # own process group and signals the GROUP, so it reaches whatever the lane
-    # spawned [measured 2026-09-03: a child that spawns a grandchild leaves no
-    # survivor when the wrapper fires].
+    # lived in a parent that was gone. `bounded` puts the deadline in a process
+    # of the lane's own and links the lane to THIS one, so a killed driver takes
+    # its lanes with it instead of leaving them to the deadline.
     #
-    # LANE_CEILING is an orphan reaper, not a regression detector. test.sh's
-    # 290 is tight on purpose and catches a cost-class change; an hour is
-    # twelve times the ENTIRE GATE_ONLY run [measured 2026-08-21: 286s], so a
-    # lane can only reach it by hanging.
+    # The ceiling is an orphan reaper, not a regression detector. test.sh's 290
+    # is tight on purpose and catches a cost-class change; an hour is twelve
+    # times the ENTIRE GATE_ONLY run [measured 2026-08-21: 286s on a quiet box],
+    # so a lane can only reach it by hanging.
     #
-    # 36 of the 106 lanes name a SHELL FUNCTION rather than a command, and
-    # timeout cannot exec one. Those are counted and named at the end of the
-    # run instead of being quietly skipped, because a guard that silently
-    # covers two thirds of what it claims is the defect this repository has
-    # already been bitten by three times.
-    # A lane naming a shell function cannot take a wrapper -- `timeout` execs,
-    # and a function is not on disk -- so its bound sits at the external
-    # command INSIDE the function, written `bounded swipl ...`.
-    # tests/checks/check_process_bounds.py is what says every such spawn has
-    # one, so this branch is a division of labour rather than a gap.
+    # 36 of the 106 lanes name a SHELL FUNCTION rather than a command, and a
+    # wrapper cannot exec one: it execs, and a function is not on disk. Those
+    # are counted and named at the end of the run instead of being quietly
+    # skipped, because a guard that silently covers two thirds of what it
+    # claims is the defect this repository has already been bitten by three
+    # times. Their bound sits at the external command INSIDE the function,
+    # written `bounded swipl ...`, and tests/checks/check_process_bounds.py is
+    # what says every such spawn has one, so this branch is a division of
+    # labour rather than a gap.
+    lane_status=0
     case "$(command -v "$1" 2>/dev/null)" in
-        /*) lane_runner="timeout --preserve-status -k 10 ${METTA_LANE_CEILING:-3600}" ;;
-        *)  lane_runner="" ;;
+        /*) bounded "$@" || lane_status=$? ;;
+        *)  "$@" || lane_status=$? ;;
     esac
-    if $lane_runner "$@"; then
+    if [ "$lane_status" -eq 0 ]; then
         status=ok
     else
         # A REPORT that exits nonzero has FINDINGS, which is its working state
@@ -239,7 +251,7 @@ for component in "$HERE/engine" \
     [ -f "$script" ] || continue
     name=$(printf '%s' "${component%/}" | sed "s|^$HERE/||")
     build_log=$(mktemp "${TMPDIR:-/tmp}/metta-build.XXXXXX")
-    if ! sh "$script" >"$build_log" 2>&1; then
+    if ! bounded sh "$script" >"$build_log" 2>&1; then
         cat "$build_log" >&2
         # The engine's own units are fatal rather than recorded: the C reader
         # and the C writer gate every lane below. Everything else degrades to a
@@ -262,7 +274,7 @@ done
 # artifact set (engine/qlf_boot.pl carries the staleness and recovery
 # story). `|| true` because a boot problem belongs to the lanes, which
 # report it against their own expectations rather than at a warm-up.
-swipl -g halt -s "$HERE/engine/main.pl" -- extensions >/dev/null 2>&1 || true
+bounded swipl -g halt -s "$HERE/engine/main.pl" -- extensions >/dev/null 2>&1 || true
 
 # A git worktree of this repository silently runs one backend fewer than the
 # checkout it was cut from: extensions/mork/mork_ffi/target/ and extensions/mork/mork_ffi/morklib.so are
@@ -471,11 +483,21 @@ run GATE artifact-paths-selftest "$PY" "$HERE/tests/checks/check_artifact_paths_
 # process that was gone. `run()` above wraps a lane whose command word is a
 # program; the 25 lane functions that start swipl, node or a Python of their
 # own carry `bounded` at that call instead, and this is what says every one of
-# them still does. The selftest plants three unbounded spawns and five shapes
-# that must not be flagged, and seven mutations each disabling one rule were
-# each caught [measured 2026-09-03].
+# them still does. It reads the runner scripts too, because the spawn that ran
+# 7,540 seconds at 97.8% CPU on 2026-09-05 was in none of these lanes. The
+# selftest plants unbounded spawns and the shapes that must not be flagged.
 run GATE process-bounds "$PY" "$HERE/tests/checks/check_process_bounds.py"
 run GATE process-bounds-selftest "$PY" "$HERE/tests/checks/check_process_bounds_selftest.py"
+
+# And the mechanism itself, against real processes rather than against the text
+# that installs it. Every case starts a child that spins at 100% and ignores
+# SIGTERM, kills the process that started it, and asks whether the child is
+# still burning a core; the ceiling stays at an hour so that nothing but the
+# owner link can explain a death. Run it with a wrapper argument to see the
+# same cases fail: `sh tests/shell/test_bounded_reaping.sh timeout
+# --preserve-status -k 10 3600` is the deadline-only bound this repository used
+# until 2026-09-05, and it leaves all three orphans running.
+run GATE reaping sh -c "cd '$HERE' && sh tests/shell/test_bounded_reaping.sh"
 
 # KERNEL.md is the engine's ledger of which translator head is primitive and
 # which is derived, and it requires every derived form still fused into the

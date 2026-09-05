@@ -102,7 +102,8 @@ run GATE plunit sh "$HERE/engine/test.sh"
 
 ENGINE_TEST_SH = """\
 cd "$HERE/tests/prolog" || exit 1
-for suite in suites/*/*.plt; do swipl -g run_tests -t halt "$suite"; done
+[ "$#" -eq 0 ] && set -- suites/*/*.plt
+for suite in "$@"; do bounded swipl -g run_tests -t halt "$suite"; done
 """
 
 TEST_SH = """\

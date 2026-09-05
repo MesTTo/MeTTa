@@ -34,6 +34,10 @@ if ! command -v cc >/dev/null 2>&1 &&
     exit 0
 fi
 
+# One spelling of the bound, implemented in bounded.sh, which every runner in
+# this tree and a command typed by hand all reach.
+bounded() { sh "$HERE/../bounded.sh" "$@"; }
+
 # Discovered rather than listed, so adding a C unit beside its Prolog file
 # needs no edit here.
 for source in "$HERE"/*.c; do
@@ -41,6 +45,6 @@ for source in "$HERE"/*.c; do
     unit=$(basename "$source" .c)
     if [ ! -f "$HERE/$unit.so" ] || [ "$source" -nt "$HERE/$unit.so" ] ||
        [ "$HERE/metta_token.h" -nt "$HERE/$unit.so" ]; then
-        ( cd "$HERE" && swipl-ld -shared -O2 -o "$unit.so" "$unit.c" )
+        ( cd "$HERE" && bounded swipl-ld -shared -O2 -o "$unit.so" "$unit.c" )
     fi
 done

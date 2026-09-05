@@ -257,6 +257,24 @@ instructions live in `tests/prolog/README.md`, which is in this tree.
 `engine/check.sh` is the authoritative list of engine-side gate commands, and
 the root `check.sh` sources it, so `sh check.sh <lane>` still names any of them.
 
+Start anything long-running through `bounded.sh`, which every runner in the
+tree already calls:
+
+```sh
+sh engine/test.sh suites/spaces/materialization.plt   # one PlUnit suite
+sh bounded.sh swipl -q -s engine/main.pl -- program.metta
+sh bounded.sh --ceiling 60 npm --prefix extensions/node run test
+```
+
+It holds two bounds. The deadline lives in a process of the child's own rather
+than in the caller's wait loop, so an orphan still ends; and
+`prctl(PR_SET_PDEATHSIG)` links the child to the process that started it, so a
+killed session reaps its children in milliseconds instead of leaving them to
+the deadline. Both have been paid for: two swipl children spun for 122
+CPU-hours over 2026-09-01 to 09-03 with only a parent-side timeout on them, and
+a hand-started `swipl ... materialization.plt` ran 7,540 seconds at 97.8% CPU
+on 2026-09-05 with nothing on it at all.
+
 ## Change requirements
 
 Every behavior change carries a regression test in the matching tier and

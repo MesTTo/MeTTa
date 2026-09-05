@@ -32,6 +32,10 @@ set -eu
 command -v git >/dev/null
 
 project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+
+# One spelling of the bound, implemented in bounded.sh, which every runner in
+# this tree and a command typed by hand all reach.
+bounded() { sh "$project_dir/bounded.sh" "$@"; }
 workspace=$(dirname -- "$project_dir")
 
 # Skip rather than provision: build.sh clones the siblings when they are absent,
@@ -57,7 +61,8 @@ trap cleanup EXIT HUP INT TERM
 
 run=1
 while [ "$run" -le 2 ]; do
-    if ! ( cd "$elsewhere" && sh "$project_dir/build.sh" >"$elsewhere/run$run.log" 2>&1 ); then
+    if ! ( cd "$elsewhere" && bounded sh "$project_dir/build.sh" \
+           >"$elsewhere/run$run.log" 2>&1 ); then
         echo "FAIL: run $run of build.sh exited nonzero" >&2
         cat "$elsewhere/run$run.log" >&2
         exit 1

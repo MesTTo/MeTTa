@@ -181,8 +181,11 @@ run GATE plunit check_plunit
 
 ENGINE_TEST_SH = """\
 cd "$HERE/tests/prolog" || exit 1
-for suite in suites/*/*.plt; do
-    swipl -g "run_tests" -t halt "$suite" || exit 1
+if [ "$#" -eq 0 ]; then
+    set -- suites/*/*.plt
+fi
+for suite in "$@"; do
+    bounded swipl -g "run_tests" -t halt "$suite" || exit 1
 done
 """
 
@@ -454,6 +457,7 @@ def commit_pin_complaints() -> list[str]:
             ["git", "add", "-A"],
             ["git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "fixture"],
         ):
+            # unbounded: git over a temporary directory, which returns.
             subprocess.run(command, cwd=root, check=True, capture_output=True)
         live = subprocess.run(
             ["git", "rev-parse", "HEAD"],

@@ -83,21 +83,38 @@ configuration made explicit:
 python -m pytest extensions/python/tests/ -q --rootdir=extensions/python -c extensions/python/pyproject.toml
 ```
 
-The engine's suites are PlUnit files under `tests/prolog/`. Run one from
-inside that directory:
+The engine's suites are PlUnit files under `tests/prolog/`. Run one, or
+all of them, from the repository root:
 
 ```sh
-cd tests/prolog
-swipl -g "set_test_options([format(log)]), run_tests" -t halt parser.plt
+sh engine/test.sh                                    # every suite
+sh engine/test.sh suites/reader/parser.plt           # one of them
 ```
 
-The `cd` is load-bearing and its absence is easy to misread. Each suite
-consults `../../engine/metta.pl` from an initialization goal, and an
+Run the suite through that script rather than calling `swipl` on it directly.
+The script is what supplies the four things a bare call does not, each of which
+has cost a session: the working directory the suites' relative paths resolve
+against, the `VIRTUAL_ENV` janus follows when it starts the embedded
+interpreter, the load-time error scan that catches a test which never ran, and
+a bound on the process. A bare `swipl -g "..., run_tests" -t halt <suite>` ran
+7,540 seconds at 97.8% CPU on 2026-09-05 and needed SIGKILL.
+
+The working directory is load-bearing and its absence is easy to misread. Each
+suite consults `../../engine/metta.pl` from an initialization goal, and an
 initialization goal resolves a relative path against the working directory at
-run time, not against the file. Started from the repository root, the same
-command fails every test in the file with `Unknown procedure:
+run time, not against the file. Called by hand from the repository root, the
+bare command fails every test in the file with `Unknown procedure:
 plunit_<unit>:swrite/2`, and the line that says why is a single
 `source_sink '../../engine/metta.pl' does not exist` above the first failure.
+
+Anything else that starts a long-running process goes through `bounded.sh`,
+which holds a deadline in a process of the child's own and links that child to
+the process that started it:
+
+```sh
+sh bounded.sh swipl -q -s engine/main.pl -- program.metta
+sh bounded.sh --ceiling 60 npm --prefix extensions/node run test
+```
 
 The MeTTa corpus under `examples/` is self-checking and each file runs as a
 program. `sh test.sh` runs the examples the shell suite covers and takes each

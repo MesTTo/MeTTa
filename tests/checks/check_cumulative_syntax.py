@@ -45,6 +45,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from bounded_spawn import bounded
+
 ROOT = Path(__file__).resolve().parents[2]
 SCANNER_DIRECTORY = ROOT / "tests" / "prolog"
 SCANNER = "example_constructs.pl"
@@ -113,7 +115,7 @@ def read_coordinate(text: str) -> Coordinate:
 def run_scanner(*arguments: str) -> str:
     """The scanner's stdout, run from tests/prolog as every Prolog gate is."""
     finished = subprocess.run(
-        ["swipl", SCANNER, *arguments],
+        bounded(["swipl", SCANNER, *arguments]),
         cwd=SCANNER_DIRECTORY,
         capture_output=True,
         text=True,

@@ -92,6 +92,8 @@ import sys
 from collections.abc import Mapping
 from pathlib import Path
 
+from bounded_spawn import bounded
+
 REPO = Path(__file__).resolve().parents[2]
 
 #: A backticked token is a PATH claim only when it is unambiguously one: it
@@ -867,7 +869,7 @@ def _query_vocabulary(disjunction: str) -> set[str]:
     )
     try:
         finished = subprocess.run(
-            ["swipl", "-g", goal, "-t", "halt", "--", "extensions"],
+            bounded(["swipl", "-g", goal, "-t", "halt", "--", "extensions"]),
             cwd=REPO,
             capture_output=True,
             text=True,

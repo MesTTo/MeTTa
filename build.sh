@@ -32,6 +32,10 @@ set -eu
 HERE=$(cd -- "$(dirname -- "$0")" && pwd)
 WORKSPACE=$(dirname -- "$HERE")
 
+# One spelling of the bound, implemented in bounded.sh, which every runner in
+# this tree and a command typed by hand all reach.
+bounded() { sh "$HERE/bounded.sh" "$@"; }
+
 command -v git >/dev/null 2>&1 || {
     echo "build.sh: git is not on PATH, and the sibling checkouts below need it" >&2
     exit 1
@@ -88,7 +92,7 @@ for component in "$HERE/engine" \
     [ -f "$script" ] || continue
     name=$(printf '%s' "${component%/}" | sed "s|^$HERE/||")
     echo "build.sh: $name"
-    if ! sh "$script"; then
+    if ! bounded sh "$script"; then
         failed="$failed $name"
     fi
 done

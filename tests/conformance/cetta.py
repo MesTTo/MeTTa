@@ -37,6 +37,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+# The bound every runner in this tree reaches, one directory over.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "checks"))
+from bounded_spawn import CHILD_GRACE, bounded  # noqa: E402  -- the path is installed above
 import measured_corpus  # noqa: E402  -- the corpus reader and canonical comparison
 
 DEFAULT_CHECKOUT = Path(__file__).resolve().parents[2].parent / "CeTTa"
@@ -84,7 +87,8 @@ def observe(binary: Path, path: Path, timeout: float) -> tuple[list[str], int, s
     were printed output rather than groups, and a harness error if any."""
     try:
         finished = subprocess.run(
-            [str(binary), "--lang", "he", "--profile", "he-compat", str(path)],
+            bounded([str(binary), "--lang", "he", "--profile", "he-compat",
+                     str(path)], ceiling=timeout + CHILD_GRACE),
             capture_output=True, text=True, timeout=timeout,
             cwd=binary.parent,
         )

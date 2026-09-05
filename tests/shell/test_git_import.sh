@@ -24,6 +24,10 @@
 set -eu
 
 project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+
+# One spelling of the bound, implemented in bounded.sh, which every runner in
+# this tree and a command typed by hand all reach.
+bounded() { sh "$project_dir/bounded.sh" "$@"; }
 fixture=$(mktemp -d)
 trap 'rm -rf "$fixture"' EXIT HUP INT TERM
 
@@ -53,7 +57,7 @@ run_import() {
     build=$2
     import_base=$3
     sha=$4
-    swipl -q -g "consult('$project_dir/engine/main.pl'),'git-import!'('$url','$build','$import_base','$sha',_),halt"
+    bounded swipl -q -g "consult('$project_dir/engine/main.pl'),'git-import!'('$url','$build','$import_base','$sha',_),halt"
 }
 
 # Fresh non-tip checkout and build.
@@ -65,7 +69,7 @@ test "$(cat "$target/.build-count")" = 1
 
 # An exact-SHA checkout without a matching build stamp must still be built.
 missing_stamp_base="$fixture/missing-stamp"
-swipl -q -g "consult('$project_dir/engine/main.pl'),'git-import!'('$remote','','$missing_stamp_base',_),halt"
+bounded swipl -q -g "consult('$project_dir/engine/main.pl'),'git-import!'('$remote','','$missing_stamp_base',_),halt"
 test ! -e "$missing_stamp_base/fixture/.build-count"
 run_import "$remote" build.sh "$missing_stamp_base" "$second"
 test "$(cat "$missing_stamp_base/fixture/.build-count")" = 1
@@ -82,7 +86,7 @@ metta_base="$fixture/metta-imports"
 metta_program="$fixture/pinned-import.metta"
 printf '!(git-import! "%s" "" "%s" "%s")\n!(import! &self (library fixture module))\n!(test (fixture-core-result) core-git-ok)\n' \
     "$remote" "$metta_base" "$first" > "$metta_program"
-metta_output=$(cd "$project_dir" && sh run.sh "$metta_program")
+metta_output=$(cd "$project_dir" && bounded sh run.sh "$metta_program")
 printf '%s\n' "$metta_output"
 printf '%s\n' "$metta_output" | grep -q '✅'
 test "$(git -C "$metta_base/fixture" rev-parse HEAD)" = "$first"
@@ -122,7 +126,7 @@ for bad_url in '--upload-pack=false' -x; do
         "'$bad_url','','$option_base/a',R" \
         "'$bad_url','','$option_base/b','$first',R"
     do
-        if (cd "$fixture" && swipl -q -g \
+        if (cd "$fixture" && bounded swipl -q -g \
             "consult('$project_dir/engine/main.pl'),'git-import!'($bad_call),halt" \
             >"$fixture/optionlike.log" 2>&1); then
             echo "option-like URL unexpectedly succeeded: $bad_call" >&2
@@ -201,7 +205,7 @@ test "$(git -C "$fixture/concurrent/fixture" rev-parse HEAD)" = "$first"
 
 # URL-only behavior clones a local deterministic remote without lib_import.
 mkdir -p "$fixture/legacy"
-(cd "$fixture/legacy" && swipl -q -g "consult('$project_dir/engine/main.pl'),'git-import!'('$remote',_),halt")
+(cd "$fixture/legacy" && bounded swipl -q -g "consult('$project_dir/engine/main.pl'),'git-import!'('$remote',_),halt")
 test -d "$fixture/legacy/repos/fixture/.git"
 
 # Every arity answers the SAME `true`, which is what every effectful builtin in
@@ -219,7 +223,7 @@ for arity_call in \
     "'$remote','','$unit_base/a',R" \
     "'$remote','','$unit_base/b','$first',R"
 do
-    answer=$(cd "$fixture" && swipl -q -g \
+    answer=$(cd "$fixture" && bounded swipl -q -g \
         "consult('$project_dir/engine/main.pl'),'git-import!'($arity_call),print(R),nl,halt" 2>/dev/null | tail -1)
     if [ "$answer" != "true" ]; then
         echo "git-import! answered '$answer' rather than true for: $arity_call" >&2

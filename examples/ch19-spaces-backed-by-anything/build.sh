@@ -25,12 +25,16 @@ if ! command -v swipl-ld >/dev/null 2>&1; then
     exit 0
 fi
 
+# One spelling of the bound, implemented in bounded.sh, which every runner in
+# this tree and a command typed by hand all reach.
+bounded() { sh "$HERE/../../bounded.sh" "$@"; }
+
 status=0
 for source in "$HERE"/*/*.c; do
     [ -f "$source" ] || continue
     directory=$(dirname "$source")
     unit=$(basename "$source" .c)
-    if ! ( cd "$directory" && swipl-ld -shared -o "$unit" "$unit.c" ); then
+    if ! ( cd "$directory" && bounded swipl-ld -shared -o "$unit" "$unit.c" ); then
         echo "ch19/build.sh: the C example $unit failed to build" >&2
         status=1
     fi

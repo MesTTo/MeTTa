@@ -27,6 +27,10 @@ command -v swipl >/dev/null
 
 project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 
+# One spelling of the bound, implemented in bounded.sh, which every runner in
+# this tree and a command typed by hand all reach.
+bounded() { sh "$project_dir/bounded.sh" "$@"; }
+
 if [ ! -e "$project_dir/extensions/mork/mork_ffi/target/release/libmork_ffi.so" ]; then
     echo "skipped: the main checkout has no MORK build to compare against"
     exit 0
@@ -48,7 +52,7 @@ git -C "$project_dir" worktree add --quiet -b "$branch" "$tree"
 # looking for a file, because the file being present is not the property
 # that matters.
 probe_backend() {
-    swipl --stack_limit=2g -q -g "
+    bounded swipl --stack_limit=2g -q -g "
         consult('$1/engine/main.pl'),
         ( current_predicate(mork/3) -> writeln(loaded) ; writeln(absent) ),
         halt" -t 'halt(1)' -- extensions 2>/dev/null | tail -1
@@ -62,7 +66,7 @@ if [ "$before" != absent ]; then
 fi
 
 cp "$project_dir/worktree.sh" "$tree/worktree.sh"
-sh "$tree/worktree.sh" >/dev/null
+bounded sh "$tree/worktree.sh" >/dev/null
 
 after=$(probe_backend "$tree")
 if [ "$after" != loaded ]; then

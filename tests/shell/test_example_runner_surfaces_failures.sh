@@ -43,6 +43,10 @@ command -v swipl >/dev/null
 
 project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 
+# One spelling of the bound, implemented in bounded.sh, which every runner in
+# this tree and a command typed by hand all reach.
+bounded() { sh "$project_dir/bounded.sh" "$@"; }
+
 probe=$(mktemp -d)
 trap 'rm -rf "$probe"' EXIT HUP INT TERM
 
@@ -59,6 +63,7 @@ printf '!(foo\n'              > "$probe/syntax_error.metta"
 # be told from a walk that sees nothing. Same shape as the planted reaches in
 # tests/prolog/surface_walk.pl.
 crippled="$probe/test-stdout-only.sh"
+# unbounded: a sed EXPRESSION naming the line it rewrites, not a command.
 sed 's|sh run.sh "$f" 2>&1|sh run.sh "$f"|' "$project_dir/test.sh" > "$crippled"
 if cmp -s "$crippled" "$project_dir/test.sh"; then
     echo "FAIL: the stdout-only copy of test.sh is identical to test.sh, so \
@@ -76,7 +81,7 @@ run_fixture() {
     runner=$1
     shape=$2
     tag=$3
-    ( cd "$project_dir" && sh "$runner" "$probe/$shape.metta" ) \
+    ( cd "$project_dir" && bounded sh "$runner" "$probe/$shape.metta" ) \
         > "$probe/$tag.out" 2>&1 && rc=0 || rc=$?
     printf '%s\n' "$rc" > "$probe/$tag.rc"
     awk '/^FAILURE in /{found=1; next} found' "$probe/$tag.out" \

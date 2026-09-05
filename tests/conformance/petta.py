@@ -65,6 +65,10 @@ from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+# The bound every runner in this tree reaches, one directory over.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "checks"))
+from bounded_spawn import CHILD_GRACE, bounded  # noqa: E402  -- the path is installed above
+
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 #The pin directory, overridable so the gate itself can be tested. A gate that
@@ -293,8 +297,17 @@ def run_ours(name: str, timeout: int) -> tuple[int | None, str, bool]:
         # and the pin was captured from an engine that had it. Without the
         # seat every python-touching entry differs on this side alone
         # [measured 2026-08-30: python.metta and python_import.metta].
-        ["swipl", "--stack_limit=8g", "-q", "-s", str(ROOT / "engine" / "main.pl"),
-         "--", f"examples/{name}", "silent", "extensions"],
+        # start_new_session below puts this engine in a SESSION of its own,
+        # so no group signal from the lane above can reach it and the only
+        # bound left would be the `communicate(timeout=)` in this process --
+        # which is the mechanism that already cost 122 CPU-hours when the
+        # process holding it was killed. The bound travels WITH the command
+        # instead. `communicate` still fires first and still decides the
+        # outcome; this is what remains when nobody is waiting.
+        bounded(["swipl", "--stack_limit=8g", "-q",
+                 "-s", str(ROOT / "engine" / "main.pl"),
+                 "--", f"examples/{name}", "silent", "extensions"],
+                ceiling=timeout + CHILD_GRACE),
         cwd=PIN, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, text=True, start_new_session=True,
     )

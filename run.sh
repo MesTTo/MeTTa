@@ -23,4 +23,10 @@ if [ "${NO_AUTOLOAD:-}" = "1" ]; then
 else
     BOOT=$SCRIPT_DIR/engine/main.pl
 fi
-swipl --stack_limit=8g -q -s "$BOOT" -- "$@" extensions
+# Through bounded.sh, because this is the command a person types to run one
+# file and it is where a runaway lands: a MeTTa program with a non-terminating
+# equation spins at 100% with nothing watching it, and a session killed while
+# it runs used to leave it running. The ceiling is bounded.sh's hour unless the
+# caller says otherwise; test.sh sets 290 for the corpus.
+bounded() { sh "$SCRIPT_DIR/bounded.sh" "$@"; }
+bounded swipl --stack_limit=8g -q -s "$BOOT" -- "$@" extensions
