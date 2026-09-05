@@ -860,10 +860,10 @@ with_source_load(CanonPath, Space, Goal) :-
     gensym(source_load_, LoadId),
     setup_call_catcher_cleanup(
         asserta(active_source_load(LoadId), ContextRef),
-        once(( call(Goal),
-               run_source_repairs(LoadId),
-               materialize:materialize_source(Space),
-               publish_source_load(CanonPath, Space, LoadId) )),
+        once(materialize:with_source_materialization_batch(
+                 Space,
+                 filereader:( call(Goal), run_source_repairs(LoadId) ),
+                 filereader:publish_source_load(CanonPath, Space, LoadId))),
         Catcher,
         ( erase(ContextRef),
           retractall(source_load_repair(LoadId, _)),
