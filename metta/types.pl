@@ -1,4 +1,7 @@
 % Purpose: resolve scoped declarations, type compatibility, metatypes, and typed-call introspection
+% Guarantees: Callable declaration readers and type witnesses use metta_runtime_type/2;
+%   get-type and stored atoms retain the written annotation
+%   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
 %   A host-owned numeric object satisfies a concrete Number requirement
@@ -99,6 +102,21 @@ metta_arrow_type_chain(Raw, Types) :-
     metta_arrow_type_shape(Raw, Inputs, Output, _, _),
     append(Inputs, [Output], Types).
 
+% Callable readers inspect canonical structure while reporting retains spelling.
+% Clang's written and canonical type views motivate this split.
+% [source: https://github.com/llvm/llvm-project/blob/llvmorg-20.1.8/clang/docs/InternalsManual.rst#canonical-types;
+% commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
+% The parser owns annotation validity; passing other types through preserves
+% existing plain-arrow, unit and type-variable behaviour. Only the head is
+% projected, so parameter and result variables still share their bindings.
+% [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
+metta_runtime_type(Raw, Type) :-
+    (   nonvar(Raw), Raw = [Head|_], Head \== '->',
+        metta_arrow_type_chain(Raw, Types)
+    ->  Type = [->|Types]
+    ;   Type = Raw
+    ).
+
 metta_presented_arrow_chain(Raw, Arity, Presented) :-
     metta_arrow_type_chain(Raw, Types),
     fitting_type_chains([[->|Types]], Arity, [[->|Presented]]),
@@ -119,8 +137,11 @@ current_metta_space(Space) :- current_metta_module(Module),
 %A ':' declaration in scope here: this space's, and &self's, since &self is the
 %shared space. That is the rule fun_here/1 already applies to functions.
 type_declaration(X, T) :- current_metta_module(Module),
-                          type_declaration_in(Module, X, T).
+                          type_declaration_in(Module, X, Raw),
+                          metta_runtime_type(Raw, T).
 
+%This reader retains written types for get-type; callable readers project
+%each answer after lookup, even when their requested output is already bound.
 %The prelude tier comes LAST in each clause, so a declaration a program
 %writes for the same name wins over the engine's prelude, the order the
 %type surface already keeps for get-type. The my-if tutorial mechanism is
@@ -170,17 +191,19 @@ governing_type_declaration(X, T) :-
 governing_type_declaration_in(Module, X, T) :-
     metta_self_module(Module),
     !,
-    type_declaration_in(Module, X, T).
+    type_declaration_in(Module, X, Raw),
+    metta_runtime_type(Raw, T).
 governing_type_declaration_in(Module, X, T) :-
-    (   prelude_type_declaration(X, T)
+    (   prelude_type_declaration(X, Raw)
     ;   metta_module_space(Module, Space),
         (   once(match_stored(Space, [':', X, _], _, _))
-        ->  match_stored(Space, [':', X, T], T, _)
+        ->  match_stored(Space, [':', X, Raw], Raw, _)
         ;   fun_in(Module, X)
         ->  fail
-        ;   match_stored('&self', [':', X, T], T, _)
+        ;   match_stored('&self', [':', X, Raw], Raw, _)
         )
-    ).
+    ),
+    metta_runtime_type(Raw, T).
 
 %An arriving equation owns its module before deferred compilation has made a
 %fun_meta row. Its retained OrderFittest types therefore come only from the
@@ -189,10 +212,12 @@ governing_type_declaration_in(Module, X, T) :-
 %lib_strategy:an_inherited_arrow_does_not_veto_a_local_definition;
 %commit=7b238053d2907cd514e3fd9a29927d43a53c5a3c].
 definition_type_declaration_in(_Module, X, T) :-
-    prelude_type_declaration(X, T).
+    prelude_type_declaration(X, Raw),
+    metta_runtime_type(Raw, T).
 definition_type_declaration_in(Module, X, T) :-
     metta_module_space(Module, Space),
-    match_stored(Space, [':', X, T], T, _).
+    match_stored(Space, [':', X, Raw], Raw, _),
+    metta_runtime_type(Raw, T).
 
 %Filter an already nonempty visible set. Keeping the emptiness test at the
 %caller means the extra ownership lookup is paid only by typed heads.
@@ -278,7 +303,8 @@ metta_typed_dispatch_applies(Module, F) :-
 %space.lint(), which reads the finished space instead of an intermediate one.
 untypable_declarations(Types, Offender) :-
     Types \== [],
-    \+ ( member(Arrow, Types), nonvar(Arrow), Arrow = [->|_] ),
+    \+ ( member(Raw, Types), nonvar(Raw),
+         metta_runtime_type(Raw, Arrow), Arrow = [->|_] ),
     member(Offender, Types),
     nonvar(Offender),
     Offender \== '%Undefined%'.
@@ -310,8 +336,9 @@ get_function_type([F|Args], T) :- nonvar(F),
                                   *-> true
                                   ;   seam:builtin_type_declaration(F, Chain0)
                                   ),
+                                  metta_runtime_type(Chain0, Chain),
                                   length(Args, Arity),
-                                  fitting_type_chains([Chain0], Arity,
+                                  fitting_type_chains([Chain], Arity,
                                                       [[->|Ts]]),
                                   append(As,[T],Ts),
                                   metta_self_module(Self),
@@ -325,8 +352,9 @@ get_function_type_in(Module, [F|Args], T) :- \+ metta_self_module(Module),
                                              ;   seam:builtin_type_declaration(F,
                                                                                 Chain0)
                                              ),
+                                             metta_runtime_type(Chain0, Chain),
                                              length(Args, Arity),
-                                             fitting_type_chains([Chain0], Arity,
+                                             fitting_type_chains([Chain], Arity,
                                                                  [[->|Ts]]),
                                              append(As,[T],Ts),
                                              metta_argument_type_origins(As,
@@ -336,14 +364,16 @@ get_function_type_in(Module, [F|Args], T) :- \+ metta_self_module(Module),
 
 application_arrow_declared([F|_]) :-
     nonvar(F),
-    (   '$metta_atoms:&self':'&self'(':', F, [->, _|_])
+    (   '$metta_atoms:&self':'&self'(':', F, Raw),
+        metta_runtime_type(Raw, [->, _|_])
     ->  true
     ;   seam:builtin_type_declaration(F, [->, _|_])
     ).
 
 application_arrow_declared_in(Module, [F|_]) :-
     nonvar(F),
-    (   type_declaration_in(Module, F, [->, _|_])
+    (   type_declaration_in(Module, F, Raw),
+        metta_runtime_type(Raw, [->, _|_])
     ->  true
     ;   seam:builtin_type_declaration(F, [->, _|_])
     ).
@@ -389,13 +419,13 @@ reported_type_answers(Module, X, Types) :- type_answers(Module, X, Types).
 reported_rest_arrow(Module, F, Result) :-
     nonvar(F),
     (   metta_self_module(Module)
-    ->  (   '$metta_atoms:&self':'&self'(':', F,
-                                        [->, ['%Rest%', _], Result])
+    ->  (   '$metta_atoms:&self':'&self'(':', F, Raw),
+            metta_runtime_type(Raw, [->, ['%Rest%', _], Result])
         *-> true
         ;   seam:builtin_type_declaration(F, [->, ['%Rest%', _], Result])
         )
-    ;   (   type_declaration_in(Module, F,
-                                [->, ['%Rest%', _], Result])
+    ;   (   type_declaration_in(Module, F, Raw),
+            metta_runtime_type(Raw, [->, ['%Rest%', _], Result])
         *-> true
         ;   seam:builtin_type_declaration(F, [->, ['%Rest%', _], Result])
         )
@@ -496,7 +526,9 @@ has_type_derive(Module, X, T) :-
          )
        ; any_super_type_edge(Module)
          -> type_answers(Module, X, Types),
-            member(T, Types)
+            member(Raw, Types),
+            metta_runtime_type(Raw, Actual),
+            metta_runtime_type(T, Actual)
         ; % No (:< ...) edge anywhere: the full set's order IS candidate
           % order, so the answers can stream, deduplicated by variance
           % exactly as unique_type_answers decides, first occurrence kept,
@@ -510,7 +542,8 @@ has_type_derive(Module, X, T) :-
           % 1.6x the whole findall it replaced at one or two candidates
           % per call [measured 2026-08-17: 17.6e9 to 28.4e9 and back].
           (   lazy_unique_candidate(Module, X, C)
-          *-> T = C
+          *-> metta_runtime_type(C, Actual),
+              metta_runtime_type(T, Actual)
           ;   T = '%Undefined%'
           ) ).
 
@@ -576,7 +609,9 @@ type_witness_direct(Module, X, T, Outcome) :-
 %structural relation on the default hot path. A generated contract whose
 %static proof was invalidated calls has_type_under_policy/3 instead, so
 %unrelated type reporting does not pay a registry probe.
-type_witness_candidate_matches(Module, Actual, Expected) :-
+type_witness_candidate_matches(Module, RawActual, RawExpected) :-
+    metta_runtime_type(RawActual, Actual),
+    metta_runtime_type(RawExpected, Expected),
     (   typing_rule_accepts(Module, widening, Actual, Expected)
     ;   Actual = Expected
     ).
@@ -614,7 +649,9 @@ has_type_under_policy(Module, X, T) :-
         )
     ).
 
-type_witness_candidate_matches_under_policy(Module, Actual, Expected) :-
+type_witness_candidate_matches_under_policy(Module, RawActual, RawExpected) :-
+    metta_runtime_type(RawActual, Actual),
+    metta_runtime_type(RawExpected, Expected),
     (   typing_rule_accepts(Module, widening, Actual, Expected)
     ;   Actual = Expected
     ),
@@ -1382,7 +1419,8 @@ scoped_type_candidate(_, _, X, T) :- metta_state_cell_type(X, T).
 
 scoped_function_type(Space, Module, [F|Args], T) :-
     nonvar(F),
-    (   match_stored(Space, [':', F, [->|Ts0]], Ts0, _)
+    (   match_stored(Space, [':', F, Raw], Raw, _),
+        metta_runtime_type(Raw, [->|Ts0])
     *-> Ts = Ts0
     ;   seam:builtin_type_declaration(F, [->|Ts])
     ),
@@ -1401,7 +1439,9 @@ scoped_has_type(Space, Module, X, T) :-
             metta_types_match_in(Module, Actual, T)
         )
     ;   scoped_type_answers(Space, X, Types),
-        member(T, Types)
+        member(Raw, Types),
+        metta_runtime_type(Raw, Actual),
+        metta_runtime_type(T, Actual)
     ).
 
 %The same one-enumeration shape type_witness_in/3 above uses, for the same

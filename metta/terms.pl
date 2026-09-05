@@ -1,4 +1,7 @@
 % Purpose: provide representation, parsing, grounded-operation errors, and numeric term recovery
+% Guarantees: Runtime argument checking and shallow declaration reads use
+%   metta_runtime_type/2 for annotated function types
+%   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
 %   Python numeric objects reach their owning operator seam only after the
@@ -686,7 +689,8 @@ metatype_argument_admitted(Module, Argument, Expected, Relation) :-
     ).
 
 metta_runtime_type_candidate(Module, Argument, Actual) :-
-    type_candidate_in(Module, Argument, Actual).
+    type_candidate_in(Module, Argument, Raw),
+    metta_runtime_type(Raw, Actual).
 metta_runtime_type_candidate(Module, Argument, '%Undefined%') :-
     \+ once(type_candidate_in(Module, Argument, _)).
 
@@ -788,7 +792,8 @@ shallow_argument_types([H|_], Types) :-
     atom(H), !,
     (   '$metta_atoms:&self':'&self'(':', H, _)
     ->  findall(Return,
-                ( '$metta_atoms:&self':'&self'(':', H, Chain),
+                ( '$metta_atoms:&self':'&self'(':', H, Raw),
+                  metta_runtime_type(Raw, Chain),
                   nonvar(Chain), Chain = [->|Rest], last(Rest, Return) ),
                 Types),
         Types \== []
@@ -801,7 +806,8 @@ shallow_argument_types(X, Types) :-
     atom(X),
     (   '$metta_atoms:&self':'&self'(':', X, _)
     ->  findall(Type,
-                ( '$metta_atoms:&self':'&self'(':', X, Type),
+                ( '$metta_atoms:&self':'&self'(':', X, Raw),
+                  metta_runtime_type(Raw, Type),
                   \+ ( nonvar(Type), Type = [->|_] ) ),
                 Types),
         Types \== []
@@ -815,7 +821,8 @@ shallow_argument_types(X, Types) :-
 %which is the door data_head_answer_dl/6's note measures at +44% on a compile
 %path [measured 2026-08-19].
 shallow_declared_type(Name, Type) :-
-    '$metta_atoms:&self':'&self'(':', Name, Type).
+    '$metta_atoms:&self':'&self'(':', Name, Raw),
+    metta_runtime_type(Raw, Type).
 shallow_declared_type(Name, Type) :-
     \+ '$metta_atoms:&self':'&self'(':', Name, _),
     seam:builtin_type_declaration(Name, Type).
@@ -866,7 +873,9 @@ metta_types_match(Left, Right) :-
 %checked for agreement AND for standing aside
 %[tested: test_the_shipped_fast_path_answers_what_the_registry_answers;
 %commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
-metta_types_match_in(Module, Left, Right) :-
+metta_types_match_in(Module, RawLeft, RawRight) :-
+    metta_runtime_type(RawLeft, Left),
+    metta_runtime_type(RawRight, Right),
     (   metta_user_typing_rule_present(Module)
     ->  typing_rule_accepts(Module, ordinary, Left, Right)
     ;   metta_shipped_types_match(Left, Right)
@@ -896,7 +905,9 @@ metta_derived_types_match(Left, Right) :-
     current_metta_module(Module),
     metta_derived_types_match_in(Module, Left, Right).
 
-metta_derived_types_match_in(Module, Left, Right) :-
+metta_derived_types_match_in(Module, RawLeft, RawRight) :-
+    metta_runtime_type(RawLeft, Left),
+    metta_runtime_type(RawRight, Right),
     typing_rule_accepts(Module, derived, Left, Right).
 
 %The operations that refuse BY NAME rather than leaving the call. Each text is
