@@ -627,7 +627,7 @@ metta_legacy_effect_class(volatile, oracleIO).
 %branches. One predicate, two ownership rules; the policy-inventory lane names
 %a closed list with no owner, and it named these two
 %[tested: metta_arrow_projection:the_long_determinism_spellings_map_to_the_catalog_members;
-%commit=WORKTREE].
+%commit=8fdcfd754d0916544667751e0c959a2f113f96f0].
 metta_determinism_canonical(Value, Canonical) :-
     nonvar(Value),
     !,
