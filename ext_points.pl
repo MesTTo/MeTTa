@@ -42,6 +42,13 @@
 %     rather than reaching the walk's private queue predicates [tested:
 %     a_host_binding_calls_only_published_surface,
 %     test_the_host_service_scoreboard_matches_the_tree; commit=6917bef7ca902671999eafcae3a7a86db8f69723].
+%   - declaring a seam is priced the same whether or not its defining file has
+%     loaded, so the boot sweep costs the size of the table rather than a
+%     library-index search per row [tested:
+%     a_missing_definition_is_priced_like_a_present_one]
+%     [measured 2026-09-06: engine/bench.pl bench_run(boot) 543,929 to
+%     240,641, and thirty added kind/2 rows 124,185 to 1,755;
+%     commit=8ec7de241ef3cdd2753f24a97c86e9e9c7240b06].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -1529,17 +1536,41 @@ seam_home(Name/Arity, Home) :-
         implemented_in(Engine, Head, Home)
     ).
 
-%The `defined` half is load-bearing and not a belt-and-braces check. Asking
+%The definedness half is load-bearing and not a belt-and-braces check. Asking
 %implementation_module/1 about a name nothing has defined answers with the
 %module that was ASKED, so every seam declared before its definition loads
 %came back owned by whoever asked first: the boot directive in this file
 %exported forty-odd engine services out of `seam` and SWI then reported each
 %as "Exported procedure seam:refuse_unbound_input/2 is not defined"
 %[measured 2026-08-22].
+%
+%It asks current_predicate/1 down the module inheritance chain, and never
+%predicate_property(Module:Head, defined), because on a name nothing defines
+%that property runs SWI's undefined-procedure trap: define_or_generate/1 falls
+%through to '$define_predicate'/1, which searches the whole autoload library
+%index before raising the existence error a catch/3 here would swallow
+%[source: /usr/lib/swi-prolog/boot/syspred.pl, define_or_generate/1 and
+%property_predicate/2]. The miss costs 1,030 inferences where this spelling
+%costs 12, and the sweep below asks it twice per seam -- once in `seam` and
+%once in the engine module -- for every seam whose defining file has not
+%loaded yet, which at the boot directive is most of them. That was 2,114
+%inferences per seam and 305,970 of a 543,929-inference boot, 56%, and it is
+%why three added kind/2 rows cost 6,300
+%[measured 2026-09-06: engine/bench.pl bench_run(boot), 543,929 before and
+%240,641 after, per-seam publish/1 meter over both sweeps; commit=8ec7de241ef3cdd2753f24a97c86e9e9c7240b06].
+%engine/spaces/foreign.pl's visible_predicate_definition/3 is spelled this way
+%for the trap's other half: probing a name an inherited static defines caches
+%the resolution as an import link and poisons the module against the local
+%definition that was about to arrive. implementation_module/1 is then asked
+%only about a name that exists, so its own '$find_library'/5 fallback -- the
+%same index search by another door -- is never reached, and nothing here can
+%raise the error the catch/3 used to absorb.
 implemented_in(Module, Head, Home) :-
-    catch(( predicate_property(Module:Head, defined),
-            predicate_property(Module:Head, implementation_module(Home)) ),
-          _, fail).
+    functor(Head, Name, Arity),
+    default_module(Module, Inherited),
+    current_predicate(Inherited:Name/Arity),
+    !,
+    predicate_property(Module:Head, implementation_module(Home)).
 
 defined_in(Module, Head) :- implemented_in(Module, Head, Module).
 
