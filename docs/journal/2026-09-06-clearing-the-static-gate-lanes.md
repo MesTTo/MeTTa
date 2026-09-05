@@ -155,3 +155,53 @@ raises. `metta/__init__.py:234` is the precedent for the form. Two things this
 cost: ruff's `external` list needs `FURB143` or RUF100 calls the directive
 unused, and a comment beginning `# noqa below:` IS a blanket noqa to ruff, which
 reported it as one.
+
+Tried: `lib-surface`'s one finding,
+`metta_ensure_source_observation/0 [observe-source/4]`, read against the work
+that created it. The source-observability thread deliberately took
+`engine/source_observation.pl` off the boot path: nothing an ordinary program
+does needs it, and the exception hook it leaves resident is charged to every
+compiled host request, so the asker loads it.
+`2026-09-05-source-observability.md` names the three askers: lib_observe's
+`observe-source/4`, the reader suite and the layering lane.
+
+Rejected: changing the library not to need it. The two shapes on offer are a
+library calling `load_files/2` over an engine path, which is the reach this
+gate exists to refuse, and `observe_source/4` loading its own file, which it
+cannot do because it lives in that file. `observe_source/4` and
+`record_error/2` are already exported by that module, so the pair was reachable
+and the door to it was not.
+
+Decided: `kind(metta_ensure_source_observation/0, service)`. `service` rather
+than `host_service` for the reason `parse_metta_source/2` moved between them on
+2026-08-20: the callers are extension libraries, not host bindings.
+
+Measured: the row costs boot 97 inferences, 265,860 to 265,957, min of three
+samples per arm with the .qlf set cleared and warmed for each. That is the
+load-structure class `engine/bench-baseline.json`'s boot row documents.
+
+Open: the boot row's pin is 531,984 and this tree measures 265,957, so
+`engine-bench` reports an unpinned improvement whatever this branch does.
+`8ec7de24` left it there when it took boot from 543,929 to 240,641. That is the
+attributed re-pin pass's, not this branch's.
+
+Superseding the two figures in "Tried: `lib-surface`'s one finding" above, on
+the tree that landed rather than the one they were taken on. Trunk moved 30
+commits under this branch while it ran, and the specialization coverage report
+in `694dff93` changed the same two counts.
+
+Measured on the merged tree, `engine/ext_points.pl` reverted to trunk against
+this branch's version, .qlf cleared and warmed for every arm:
+
+- the identity twin reads 3,432 on BOTH arms, three identical samples each. The
+  -5 recorded above was true against the pre-report engine and is 0 against
+  this one, so trunk's own 3,432 pin stands and this branch re-pins nothing.
+- boot reads 265,421 and 265,313 without the row against 265,006 and 265,090
+  with it, min-of-three over two A/B/A pairs. The row does not cost boot
+  anything on this tree and reads a few hundred inferences cheaper. No exact
+  figure: boot's own within-arm spread is up to 83 here, where it was 0 on the
+  earlier tree, so the count has stopped being exactly repeatable.
+
+Decided: state the direction and the arms, not a delta. This is the
+non-monotonic load-structure class `engine/bench-baseline.json`'s boot row
+documents, and the merged measurement is the only one true of what ships.

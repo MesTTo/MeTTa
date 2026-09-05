@@ -185,6 +185,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `metta_ensure_source_observation/0` is a published `service`, so a library
+  may ask for the source observer by name. The engine does not load
+  `engine/source_observation.pl` at boot, and `observe_source/4` cannot be its
+  own loader, so an extension that may call the published observer needs a
+  published way to make it exist; without one the only route was a library
+  running `load_files/2` over an engine path. `lib_observe`'s `observe-source`
+  is the shipped caller.
+
 - `Defined.free_variables` now has an exact consumer-sheet spelling and a
   checked compiled-definition example with one lexical dependency.
 
