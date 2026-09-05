@@ -689,6 +689,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   7,972 at the same cost. `limit` is a catalog vocabulary, so MeTTa, Python
   and the Node package read one list.
 
+### Fixed
+
+- One annotation the runtime cannot name no longer discards the rest of a
+  signature. `from decimal import Decimal` under `TYPE_CHECKING` is a name that
+  exists for a type checker and never at runtime, and resolving a signature was
+  all-or-nothing over it: `def joiner(a: int, *rest: Decimal) -> int` refused
+  registration outright, including at `arities=[1]`, where nothing ever asks
+  what `rest` is. Annotations now resolve one at a time, so the two that resolve
+  declare `(-> Number Number)` and the call runs. An annotation a declared call
+  form does reach still refuses, and the refusal now names the parameter rather
+  than the callable.
+
 ## [0.7.3] - 2026-09-04
 
 ### Fixed
