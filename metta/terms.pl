@@ -23,8 +23,12 @@
 % Guarantees: argument origins and masks consume expanded types, while
 %   BadArgType retains the written alias and can show TypeExpansion [tested:
 %   structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
-% Guarantees: metta_error_atom/4 preserves Error data and records diagnostics only
-%   during explicit observation [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
+% Guarantees: metta_error_atom/4 preserves Error data, and metta_record_error/1
+%   reaches an observer only while one is running: outside an observation it is
+%   one failing nb_current/2 read and engine/source_observation.pl is not loaded
+%   [tested: source_observation, tests/prolog/suites/reader/source_observation.plt;
+%   measured 2026-09-05: boot 536,337 with that file loaded at boot against
+%   532,641 without; commit=WORKTREE].
 
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 
@@ -102,7 +106,24 @@ metta_error_operand([_|As], Error) :- metta_error_operand(As, Error).
 
 metta_error_atom(Operation, Arguments, Reason, Error) :-
     Error = ['Error', [Operation|Arguments], Reason],
-    source_observation:record_error(Error).
+    metta_record_error(Error).
+
+%A constructed Error is announced to whoever asked to observe this execution,
+%and to nobody otherwise. The buffer carries its own sink, so the engine names
+%no predicate of engine/source_observation.pl and an engine that never runs
+%observe-source does not load that file at all: the whole cost of an
+%unobserved Error is one global read that fails.
+%'$metta_observation' is set only by source_observation:observe_source_locked/4,
+%which is in the module that supplies the sink, so the sink is always callable
+%by the time this reads one. The four sites in engine/translator/lowering.pl
+%reach this name through the translator's base module, the way they already
+%reach metta_bad_argument_error/3 below.
+metta_record_error(Error) :-
+    (   nb_current('$metta_observation', Buffer)
+    ->  arg(5, Buffer, Sink),
+        call(Sink, Buffer, Error)
+    ;   true
+    ).
 
 %A declared refusal retains both names: the rule that made the decision and
 %the reason its author supplied. The ordinary BadArgType shape remains exact
