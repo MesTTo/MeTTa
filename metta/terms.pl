@@ -29,6 +29,15 @@
 %   [tested: source_observation, tests/prolog/suites/reader/source_observation.plt;
 %   measured 2026-09-05: boot 536,337 with that file loaded at boot against
 %   532,641 without; commit=WORKTREE].
+% Guarantees: metta_shipped_types_match/2 decides union membership itself, in
+%   the same direction and with the same shared-variable discipline as the
+%   registry route, and its arm is reached only after the six shipped
+%   comparisons decline [tested:
+%   union_types:the_shipped_fast_path_decides_union_membership_on_its_own,
+%   test_unions_keep_the_fast_path_and_registry_in_agreement;
+%   commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
+% Guarantees: metta_error_atom/4 preserves Error data and records diagnostics only
+%   during explicit observation [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
 
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 
@@ -957,13 +966,28 @@ metta_user_typing_rule_present(Module) :-
     ;   raw_registered_typing_rule(user, Module, _, widening, _, _, _)
     ).
 
+%The union arm is LAST and its guard is inlined, so the six comparisons above
+%decide exactly what they decided before and a pair with no `|` on either side
+%retires no extra inference reaching the end of the chain. A MISS runs the
+%whole chain including this guard where a HIT stops at the sixth comparison,
+%so the two costing the same is the measurable form of that claim
+%[tested: union_types:the_union_guards_retire_no_inference_on_a_pair_with_no_union;
+%commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
+%
+%Last also because `Left = Right` must keep binding an unbound side to the type
+%expression AS WRITTEN: a union is what such a variable should become, not one
+%alternative of it.
 metta_shipped_types_match(Left, Right) :-
     (   Left == '%Undefined%' -> true
     ;   Right == '%Undefined%' -> true
     ;   Left == 'Atom' -> true
     ;   Right == 'Atom' -> true
     ;   Left == 'BigInt', Right == 'Number' -> true
-    ;   Left = Right
+    ;   Left = Right -> true
+    ;   (   nonvar(Left), Left = [LeftHead|_], LeftHead == '|'
+        ;   nonvar(Right), Right = [RightHead|_], RightHead == '|'
+        )
+    ->  metta_union_relates(metta_shipped_types_match, Left, Right)
     ).
 
 %A raw type variable uses Atom as an ordinary bound once another formal has

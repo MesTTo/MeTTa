@@ -47,10 +47,19 @@
 % Guarantees: scoped declaration readers resolve aliases in their declaration
 %   tier; bound observers use the shared witness family while enumeration
 %   reports expanded types [tested: structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
+% Guarantees: metta_runtime_type/2 canonicalises union syntax beside the arrow
+%   projection, and the value doors admit a required union through some
+%   alternative while a value whose own type is a union needs every alternative
+%   admitted; a union is never read as a positional tuple
+%   [tested: union_types:a_union_flattens_deduplicates_and_collapses_to_one_member,
+%   union_types:an_actual_union_fits_a_wider_union_and_not_a_narrower_one,
+%   union_types:a_union_of_tuples_keeps_the_positional_walk;
+%   commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 
 %%% Type system: %%%
 
 :- consult('type_aliases.pl').
+:- consult('type_unions.pl').
 
 % One surface parser feeds old runtime consumers and the compile-time checker.
 % The output keeps binder names as canonical data: two `$e` slots therefore
@@ -115,10 +124,18 @@ metta_arrow_type_chain(Raw, Types) :-
 % existing plain-arrow, unit and type-variable behaviour. Only the head is
 % projected, so parameter and result variables still share their bindings.
 % [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
+% A union is canonicalised HERE, beside the arrow projection, because this is
+% the one written-to-canonical step every compatibility relation already applies
+% to both of its sides. Doing it anywhere else would leave one family reading
+% `(| Number Number)` where another reads `Number`. The guard is three inlined
+% instructions and only a term whose head is `|` reaches
+% metta_union_canonical/2 [tested: run_tests(union_types); commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 metta_runtime_type(Raw, Type) :-
     (   nonvar(Raw), Raw = [Head|_], Head \== '->',
         metta_arrow_type_chain(Raw, Types)
     ->  Type = [->|Types]
+    ;   nonvar(Raw), Raw = [UnionHead|_], UnionHead == '|'
+    ->  metta_union_canonical(Raw, Type)
     ;   Type = Raw
     ).
 
@@ -573,6 +590,18 @@ has_type_derive(Module, X, T) :-
                  )
              )
          )
+      %A GROUND union needs nothing here: the branch above compares the value's
+      %own type against it through type_witness_candidate_matches/3, which is
+      %what lets a value whose declared type is ITSELF a union be admitted by a
+      %wider one. The two relational branches below instead compare by
+      %unification, and a union does not unify with the alternative that
+      %satisfies it, so a union carrying a type variable is taken apart per
+      %alternative. Each alternative then runs the whole relation again, so the
+      %variable is bound by the alternative that fits and the choice point the
+      %next argument may need is still there. The guard sits after ground/1 and
+      %is inlined, so nothing outside this case pays for it.
+       ; nonvar(T), T = [UnionHead|_], UnionHead == '|'
+         -> metta_union_admits(has_type_derive(Module), X, T)
        ; any_super_type_edge(Module)
          -> type_answers(Module, X, Types),
             member(Raw, Types),
@@ -659,11 +688,19 @@ type_witness_direct(Module, X, T, Outcome) :-
 %structural relation on the default hot path. A generated contract whose
 %static proof was invalidated calls has_type_under_policy/3 instead, so
 %unrelated type reporting does not pay a registry probe.
+%A union reaches this relation as the ACTUAL type, from a value whose own
+%declaration names one, and identity is the half it fails: `(| Number String)`
+%satisfies a Number requirement only if BOTH alternatives do. The lift is a
+%third disjunct over the whole relation rather than a wrapper on the widening
+%call, because exact identity is the half a union alternative is usually
+%admitted by. Every caller of this relation commits with once/1 or `->`.
 type_witness_candidate_matches(Module, RawActual, RawExpected) :-
     metta_runtime_type(RawActual, Actual),
     metta_runtime_type(RawExpected, Expected),
     (   typing_rule_accepts_resolved(Module, widening, Actual, Expected)
     ;   Actual = Expected
+    ;   metta_union_witness(type_witness_candidate_matches(Module),
+                            Actual, Expected)
     ).
 
 %The policy-strict ground check mirrors has_type_derive/3's candidate order
@@ -704,6 +741,9 @@ type_witness_candidate_matches_under_policy(Module, RawActual, RawExpected) :-
     metta_runtime_type(RawExpected, Expected),
     (   typing_rule_accepts_resolved(Module, widening, Actual, Expected)
     ;   Actual = Expected
+    ;   metta_union_witness(
+            type_witness_candidate_matches_under_policy(Module),
+            Actual, Expected)
     ),
     typing_rule_accepts_resolved(Module, ordinary, Actual, Expected).
 
@@ -754,14 +794,29 @@ type_witness_candidate_matches_under_policy(Module, RawActual, RawExpected) :-
 %tuple_positions_hold/3 before it instead costs 66, so the probe is cheaper
 %than the per-position derivation it would skip
 %[measured 2026-08-23, ai-tmp/synth/probe10.pl].
+%A union is a list too, so `(| (Number Bool) (String Bool))` would be read here
+%as a three-position tuple whose first position wants the type `|`. The head
+%test separates the two readings before any of the work below, and an unbound
+%head is not the union head, so a parametric tuple type still reaches the
+%positional walk.
+%
+%A union of tuples takes each alternative through this same positional walk,
+%which is what keeps the fast path's whole point. Falling through to the
+%candidate enumeration instead would decide `(| (A B) (C D))` by finding the
+%alternative in the product of the members' type sets, the Theta(c^k) synthesis
+%the walk below exists to avoid, and having it only for the union spelling
+%would be that exponential displaced rather than removed.
 tuple_positions_witness(Module, X, T) :-
-    T = [_|_],
+    T = [Tag|_],
     X = [_|_],
-    \+ application_arrow_declared_in(Module, X),
-    is_list(T),
-    is_list(X),
-    same_length(X, T),
-    tuple_positions_hold(Module, X, T).
+    (   Tag == '|'
+    ->  metta_union_admits(tuple_positions_witness(Module), X, T)
+    ;   \+ application_arrow_declared_in(Module, X),
+        is_list(T),
+        is_list(X),
+        same_length(X, T),
+        tuple_positions_hold(Module, X, T)
+    ).
 
 tuple_positions_hold(_, [], []).
 tuple_positions_hold(Module, [Member|Members], [Type|Types]) :-
@@ -779,8 +834,14 @@ tuple_positions_hold(Module, [Member|Members], [Type|Types]) :-
 %[measured 2026-08-23, ai-tmp/synth/probe11.pl].
 %The fallback enumerates that member's own types and stops at the first match,
 %which is Theta(c) for that member rather than Theta(c^k) for the expression.
+%A union AT A POSITION descends here too, and it has to: the fallback below
+%decides by exact identity, so `((| Number String) Bool)` would fail its first
+%position against every candidate `1` has and push the whole check back into
+%the product enumeration this clause exists to avoid.
 member_holds_type(Module, Member, Type) :-
-    (   tuple_positions_witness(Module, Member, Type)
+    (   nonvar(Type), Type = [UnionHead|_], UnionHead == '|'
+    ->  metta_union_admits(member_holds_type(Module), Member, Type)
+    ;   tuple_positions_witness(Module, Member, Type)
     ->  true
     ;   once(( has_resolved_type_in(Module, Member, Candidate), Candidate == Type ))
     ).
