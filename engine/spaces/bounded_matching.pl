@@ -1,9 +1,11 @@
 % Purpose: propagate output bounds through conjunction matching, ordering, and best-first merge policies
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
-% Guarantees: full native cyclic queries may build Generic Join tries, while
-% bounded queries retain streaming startup cost [tested:
-% native_generic_join:a_bounded_triangle_retains_streaming_first_answer_cost;
+% Guarantees: a full native cyclic query builds Generic Join tries only under
+% the plan-cyclic-joins pragma, while bounded queries retain streaming startup
+% cost [tested:
+% native_generic_join:a_bounded_triangle_retains_streaming_first_answer_cost,
+% native_generic_join:planning_is_declared_rather_than_the_default;
 % commit=WORKTREE].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % Guarantees: metta_match_atoms/2 dispatches a gap operand by its wrapper alone, and a merged read routes a gap pattern while reading its declared policy from what the program wrote [tested: tests/prolog/suites/reader/segments.plt; commit=a3dff3abc83b9d82f3652093246e1d693d526cdb].
@@ -104,6 +106,7 @@ match_conjunction(Extent, Space, Pattern, OutPattern) :-
     (   space_parent(Space, _)
     ->  match_routed(Space, Pattern, OutPattern, _)
     ;   Extent == full,
+        cyclic_join_planning_enabled,
         nonvar(Pattern), Pattern = [Comma|Conjuncts], Comma == ',',
         is_list(Conjuncts),
         native_conjunction_plan(Module, Space, Conjuncts, Plan)

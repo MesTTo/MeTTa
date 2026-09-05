@@ -2,11 +2,22 @@
 % Guarantees: the oracle executes each conjunct separately and retains every
 % duplicate; the growth test distinguishes quadratic intermediate enumeration
 % from variable-domain intersection [tested: native_generic_join; commit=WORKTREE].
+% Assumes: planning is off unless a program asks for it, so the unit declares
+% the plan-cyclic-joins pragma for its own scope and restores the previous
+% value; a differential run without it would compare the nested loop with
+% itself [tested: native_generic_join:planning_is_declared_rather_than_the_default;
+% commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 
-:- begin_tests(native_generic_join).
+:- begin_tests(native_generic_join,
+               [setup(enable_join_planning(Previous)),
+                cleanup(set_metta_pragma('plan-cyclic-joins', Previous))]).
+
+enable_join_planning(Previous) :-
+    ( metta_pragma('plan-cyclic-joins', Previous) -> true ; Previous = none ),
+    set_metta_pragma('plan-cyclic-joins', true).
 
 with_join_atoms(Atoms, Goal) :-
     setup_call_cleanup(
@@ -191,5 +202,16 @@ test(an_empty_factor_prevents_dense_triangle_enumeration) :-
     empty_factor_cost(64, Large),
     assertion(Medium =< Small + 4),
     assertion(Large =< Small + 4).
+
+% The pragma is the whole gate: without it a cyclic conjunction keeps the
+% nested loop, which is what every unskewed instance measures faster.
+test(planning_is_declared_rather_than_the_default) :-
+    assertion(spaces:cyclic_join_planning_enabled),
+    setup_call_cleanup(
+        set_metta_pragma('plan-cyclic-joins', none),
+        ( assertion(\+ spaces:cyclic_join_planning_enabled),
+          with_join_atoms([[edge,a,b],[edge,b,c],[edge,c,a],[edge,a,b]],
+              same_bag([[edge,X,Y],[edge,Y,Z],[edge,Z,X]], [X,Y,Z])) ),
+        set_metta_pragma('plan-cyclic-joins', true)).
 
 :- end_tests(native_generic_join).

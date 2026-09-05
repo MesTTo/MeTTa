@@ -45,6 +45,9 @@ metta_pragma_key('max-stack-depth',
                  'branch-local reduction fuel; zero selects the default').
 metta_pragma_key('stack-limit',
                  'scope SWI combined stack bytes for the current thread').
+metta_pragma_key('plan-cyclic-joins',
+                 'plan a full native cyclic conjunction as a Generic Join \c
+                  instead of the retained nested loop').
 metta_pragma_key('type-check', 'HE spelling; accepted, NOT enforced').
 metta_pragma_key(interpreter, 'HE spelling; accepted, NOT enforced').
 

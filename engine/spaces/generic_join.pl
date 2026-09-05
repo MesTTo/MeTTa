@@ -14,6 +14,28 @@
 :- use_module(library(assoc), [ord_list_to_assoc/2, gen_assoc/3]).
 :- use_module(library(ordsets), [ord_intersection/3, ord_subset/2]).
 
+% Shape alone does not say which plan wins. The trie plan pays library(assoc)
+% AVL lookups in Prolog where the retained nested loop pays SWI's C clause
+% index, so it is ahead only when the nested loop's intermediate product is
+% far larger than the output, which needs skew. It is a 64.4x win on a
+% two-hub graph whose triangle bag is empty, and a 3.58x, 1.39x and 4.15x
+% loss on a uniform graph, a clique and a triangle closed by a one-row
+% relation. Every statistic that separates those costs a scan and a sort per
+% conjunct, which is the plan's own dominant cost, so the choice is declared
+% rather than inferred. Free Join's lazy column-oriented tries (Wang, Willsey
+% and Suciu, SIGMOD 2023, section 5) decide it without statistics and are not
+% built here.
+% [measured: planned 785193, 383927, 7017703 and 103672 against nested
+% 50579836, 107304, 5049530 and 25000 SWI inferences;
+% command=PYTHONPATH=extensions/python $VENV/bin/python -m
+% benchmarks.query_planning join --family FAMILY [--control];
+% fixture=two-hub at 8192, uniform at 2048, clique at 48, small-third at 2048;
+% commit=WORKTREE]
+cyclic_join_planning_enabled :-
+    metta_pragma('plan-cyclic-joins', Value),
+    Value \== false,
+    Value \== none.
+
 % Generic Join, including bags at the leaves: Wang, Willsey and Suciu,
 % Free Join, SIGMOD 2023, sections 2.1 and 2.3:
 % https://arxiv.org/html/2301.10841v2#S2.SS3

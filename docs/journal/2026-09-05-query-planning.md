@@ -75,3 +75,60 @@ SWI inferences exclude Python and operations inside native predicates. The adjac
 | 8192 | 50579836 | 785193 | 2163.845 | 33.151 |
 
 Raw rows, all samples, meter scope and statuses are `ai-tmp/query-a20256a5-module-join-{planned,control}.{jsonl,log,status}`. Metadata files have the same prefix and `-metadata.json` suffix.
+
+## 2026-09-05: the plan is a declared choice, not a default
+
+Found by measuring families the sweep above never covered: dispatching every
+eligible cyclic conjunction to the trie plan is a loss on three shapes out of
+four. Both arms of `benchmarks.query_planning join` return identical answer
+bags at every size.
+
+| family | size | answers | planned | nested | planned/nested |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| two-hub | 8192 | 0 | 785,193 | 50,579,836 | 0.02 |
+| two-hub | 128 | 0 | 13,037 | 16,532 | 0.79 |
+| two-hub | 64 | 0 | 6,909 | 5,396 | 1.28 |
+| uniform | 2048 | 13 | 383,927 | 107,304 | 3.58 |
+| uniform | 64 | 5 | 12,769 | 3,834 | 3.33 |
+| clique | 48 | 103,776 | 7,017,703 | 5,049,530 | 1.39 |
+| clique | 8 | 336 | 27,555 | 18,208 | 1.51 |
+| small-third | 2048 | 512 | 103,672 | 25,000 | 4.15 |
+| small-third | 64 | 16 | 3,972 | 1,190 | 3.34 |
+
+`uniform` is a random graph with `n` nodes and `2n` edges; `clique` is the
+complete graph on `n` nodes; `small-third` is the two-hub graph with the
+triangle closed by a one-row `tag` relation instead of a third `edge`.
+
+Cause: the plan pays `library(assoc)` AVL lookups in Prolog for the same probes
+the retained nested loop pays SWI's C clause index for, so its per-probe
+constant is roughly an order of magnitude worse. It is ahead only when the
+nested loop's intermediate product is far larger than the output, which needs
+skew. `uniform` and `clique` have none, and `small-third` gives the nested loop
+a one-row relation to drive from while the plan still builds a trie for every
+conjunct.
+
+Decided: `plan-cyclic-joins`, an engine pragma, off unless a program asks.
+Every statistic that separates the winning shape from the losing ones needs at
+least a scan and a sort per conjunct, which is the plan's own dominant cost, so
+there is nothing cheap to gate on. `native_generic_join` declares the pragma for
+its own unit and `planning_is_declared_rather_than_the_default` pins the
+default; the whole differential would otherwise compare the nested loop with
+itself. The benchmark's control arm is now simply the shipping behaviour.
+Measured after the change: the default costs exactly what the disabled-planner
+control costs, 1.00 on every family and size, and the plan reaches 0.02 on
+two-hub at 8192 when a program asks for it.
+
+Rejected: a size or skew threshold computed before planning. Relation sizes do
+not separate `uniform` from `two-hub`, which differ only in degree
+distribution; the degree distribution is the trie's own first level, so
+computing it costs what it was meant to save.
+
+Revisit with Free Join's column-oriented lazy tries (Wang, Willsey and Suciu,
+SIGMOD 2023, section 5), which build a trie level at a time and so converge to
+the nested loop on the unskewed instances and to Generic Join on the skewed
+ones without any statistic. That is the shape that would justify a default, and
+it is not built here. An adaptive retry is the other candidate: run the nested
+loop under a budget proportional to inferences per answer produced, and rebuild
+as a plan when the ratio trips. It needs the full answer bag buffered, which
+changes the streaming contract for a full request, and its constant would need
+its own measurement.
