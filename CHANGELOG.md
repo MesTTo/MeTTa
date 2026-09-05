@@ -58,6 +58,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `list(view)` over a lazy evaluation view no longer pays for a count it then
+  throws away. `list()` asks for an iterator before its length hint, which is
+  how a count source tells it from a bare `len(view)`; the evaluation door
+  asked the engine for a separate count first and tested that hint afterwards,
+  then returned the number it had already paid for. Measured over 400 answers:
+  90,399 inferences against 8,563 for the equivalent comprehension, now at
+  parity. A bare `len(view)` keeps the separate count, which crosses one
+  integer instead of encoding every answer.
+
+- An effectful body reached through a lazy drain executes once. The same
+  ordering ran the goal to probe it for repeatability and then ran it again to
+  materialize, so `list()` over an effectful island executed it twice and
+  delivered the second value: a probe that must answer `1` answered `2`.
+
 - A `|->` whose parameter position is a bare variable rather than a list is
   left as data, the way `(|-> foo ...)` and `(|-> 5 ...)` already were. The
   arity is read off that term and an unbound one read as zero, so
