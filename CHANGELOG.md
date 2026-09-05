@@ -689,6 +689,31 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   7,972 at the same cost. `limit` is a catalog vocabulary, so MeTTa, Python
   and the Node package read one list.
 
+- `python -m metta repl` completes names and keeps its history. TAB completes
+  the token under the cursor against every name the language knows, functions
+  and translator special forms alike, and against the engine's spaces when the
+  token opens with `&`; a name defined in the session is offered at once.
+  readline's default delimiters break a token on `-`, `!`, `?`, `*` and `&`,
+  every one of which is ordinary inside a MeTTa head, so with them `car-a`
+  completed against `a` and answered nothing: the delimiters are now whitespace,
+  parentheses and the string quote. History is read at startup from
+  `~/.metta_history`, or wherever `METTA_HISTORY` points, and written back on
+  exit without the `exit` that ended the session, which would otherwise be the
+  first thing Up recalled. A read-only home says so on stderr rather than
+  ending the session.
+
+- `m.trace(term, only=...)` narrows a trace to named functions. Name them the
+  way this surface names anything, `only=[S.double]`, `only=m.fn.double`, or
+  `only="double"` for a head Python cannot spell. The engine narrows at the
+  WRAP rather than at the recording, so what is not named keeps its bare
+  predicate and runs at its untraced cost: tracing one of five functions in a
+  62-event program costs 3,091 inferences against 9,418 for the whole trace,
+  67.2% fewer, where the untraced run costs 541. A narrowed event's depth is
+  nesting among the TRACED functions, since a wrapper can only count the frames
+  it wraps. A named function the traced source defines is still recorded; a
+  name nothing defines records nothing, the way an unknown head matches
+  nothing.
+
 ### Fixed
 
 - `m.why()` and `lint()` answer from one head verdict instead of two. Asking

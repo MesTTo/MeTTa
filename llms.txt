@@ -838,7 +838,9 @@ mid-way keeps its performed prefix's writes, closes any servers it started, and
 names the failing form.
 
 `python -m metta` has seven subcommands: `run` (files, printing each `!` answer
-group), `repl` (paren-balance aware, readline), `serve`, `boot`, `lint` (nonzero
+group), `repl` (paren-balance aware; on a terminal, TAB completes a head or a
+`&space` against the live engine and history persists in `~/.metta_history`, or
+wherever `METTA_HISTORY` points), `serve`, `boot`, `lint` (nonzero
 exit on findings), `doc` (a name's `(@doc ...)`), and `convert`
 (`program.py [-o out.metta]`, emitting the module's fresh-space declarations
 as loadable MeTTa source).

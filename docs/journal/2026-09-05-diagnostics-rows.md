@@ -131,3 +131,47 @@ Also superseded: the seam move. This branch published `metta_trace_source/6`
 and retired `/5`; a0580a1b keeps `/5` published and carries the filter inside
 its bound argument as a two-item request, which leaves the Node bridge and the
 shim floor untouched. One fewer moving part for the same feature.
+
+Tried: reproducing L074 (`REPL completion and persistent history`) on a real
+pty -> TAB after `(car-a` inserted a literal tab, `Up` in a second session
+recalled nothing, and no history file existed anywhere under $HOME afterwards.
+Reproduces. Within-session line editing and history already worked, from the
+bare `import readline` that was there; what was missing is a completer and a
+file.
+
+Found: CPython's own `site.register_readline` is this exact feature, and it is
+what the change follows -- bind the completion key for the backend present
+(`tab: complete`, or `bind ^I rl_complete` under editline), read the user's
+init file if there is one, then read the history file and write it back
+[source: https://github.com/python/cpython/blob/3.14/Lib/site.py]. The
+completer's protocol, one call per candidate with the matches computed at
+state 0, is rlcompleter's. So nothing here is a line-editor: it is readline
+and rlcompleter's own shapes, pointed at the engine's catalogue.
+
+Decided: the delimiters are the one part that had to be ours. readline's
+default set is
+`' \t\n`~!@#$%^&*()-=+[{]}\\|;:\'",<>/?'`, which breaks a token on `-`, `!`,
+`?`, `*` and `&`, every one ordinary inside a MeTTa head. Measured before the
+change: `(car-a` plus TAB inserted a tab; after setting the delimiters to
+whitespace, parentheses and the string quote, it completes to `(car-atom`,
+`(coll` completes to `(collapse` (a translator special form, which `fun/1`
+alone would not have offered) and `&s` completes to `&self`.
+
+Decided: drop the terminator from the saved history. `exit` is always the last
+line and never worth recalling; leaving it in made the next session's first Up
+answer `exit`, measured on the first working build.
+
+Rejected: `atexit` for the write, which is what site.py uses. The REPL owns its
+own loop here, so a `finally` around it writes on every exit path and is
+testable without a process boundary.
+
+Tried: `annotationlib` behind a try/except ImportError, for L081's resolver ->
+the optional mypyc build failed with
+`_type_annotations.py:55: error: Incompatible types in assignment (expression
+has type "None", variable has type Module)`. The two type checks disagree by
+version: this tree's mypy targets 3.12, where the module does not resolve at
+all, while mypyc runs mypy at the interpreter's own 3.14, where it resolves.
+Decided: define the resolver twice under `sys.version_info >= (3, 14)`, which
+both checks read natively and which needs no configuration entry. Caught by
+test_the_codec_builds_under_mypyc_as_an_option, and folded into the commit that
+introduced it.
