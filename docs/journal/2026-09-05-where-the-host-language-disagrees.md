@@ -132,3 +132,55 @@ The sweep is in the suite rather than only in the evidence: 2,000 seeded
 doubles plus one per power of ten from -20 to 24, each compared against the
 engine in the same process, 67ms. The engine beside the test is the oracle, so
 the cases only have to reach the branches.
+
+## 2026-09-05, the order two hosts compute
+
+`Array.prototype.sort` with no comparator orders strings by UTF-16 code UNIT.
+Python's `sorted` orders by code POINT. They agree on the whole BMP and part on
+every astral character, so a corpus without one cannot tell them apart, which
+is why nothing had.
+
+    U+1D400 (astral, surrogates D835 DC00) against U+F900 (BMP)
+    python  sorted([...])   ->  ['0xf900', '0x1d400']
+    js      [...].sort()    ->  ['0x1d400', '0xf900']
+
+The comparator was already here and already right: `compareText` in
+`src/atom.ts`, walking code points because SWI does, private to
+`byStandardOrder`. So the fix is to EXPORT it rather than write one:
+`byCodePoint`, one comparator, used everywhere the order is an answer.
+
+Which sorts those are took a survey, and the survey found the classification
+in two places that a reading of the call sites alone would have got wrong:
+
+- `integrate.ts`'s ready set looks like a message and is not. It decides the
+  order integrations install in, and the function's own comment fixes it as
+  name order "so the answer is reproducible rather than dependent on which
+  manifest was read first".
+- `algebra.ts`'s `equational` list looks like a message and is not. It is also
+  what `checkLaw` walks, so it decides WHICH counterexample an algebra failing
+  two laws reports.
+
+Two more were not a host-order question at all. `algebra.ts`'s answer signature
+and `lint.ts`'s arity message sort NUMBERS with the default comparator, which
+compares them as text: a head defined at 2 and at 10 linted as "defined with 10
+or 2". The signature was not mis-deduplicating, because a lexicographic order
+is still a canonical spelling of a set, but it was not the order the code
+means. Both take `(a, b) => a - b`.
+
+Decided: leave the sorts whose order really is only a sentence, and say so
+where they stand rather than in a document nobody reads at the call site. Four
+of those, plus four multiset comparisons that give BOTH sides the same order
+and are therefore decided identically by any total order.
+
+Decided: make the invariant a lane rather than a habit. A comparator-less
+`.sort()` in `src/` is a finding unless the line or the comment block above it
+carries `sort order is not an answer`, and the failure message names the exact
+edit. The lane proves its own eyesight on a planted call and on the same call
+with the declaration added, which is the shape the file's other rules already
+take. Run against 3c025a0e it names all sixteen sites, which is the survey the
+work started from, produced by the tool instead of by hand.
+
+Red, with the five changed sources at 3c025a0e and `byCodePoint` shimmed to the
+default order: 6 of 6 fail, the algebra one reading `(requires 𝐀 豈)` against
+`(requires 豈 𝐀)` and the lint one `defined with 10 or 2` against `2 or 10`.
+Green here; the seat's suite goes 583 to 589 and the browser suite stays at 9.

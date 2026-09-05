@@ -147,6 +147,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Node seat orders text by code point wherever the order is an answer, so
+  the two seats order identically. `Array.prototype.sort` with no comparator
+  compares UTF-16 code UNITS, which parts from Python's `sorted` on every
+  astral character: an algebra's `(requires ...)` row, a lowered definition's
+  free names and the order integrations install in each landed differently
+  here. The same survey found two sorts over NUMBERS taking the default
+  comparator, which orders them as text, so a head defined at 2 and 10 linted
+  as "defined with 10 or 2". A gate lane now refuses a comparator-less `.sort()`
+  in the seat's sources unless the line says why its order decides nothing.
+
 - A float prints in the Node seat the way it prints in the Python seat and in
   the engine. The seat took JavaScript's own layout, which is a third spelling:
   a plus in the exponent (`1e+21`), positional up to 1e21 where the law leaves
