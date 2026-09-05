@@ -366,3 +366,32 @@ first call, and the observer's own door takes source text, so the shipped path
 compiles inside the observation; a program that ran a definition first and
 observed it afterwards is the case this does not cover.
 
+## 2026-09-05: the fixture that tested the process, not the rebuild
+
+Found by the same rebase: `test_folded_dependencies_rebuild_after_override_and_removal`
+passed alone and failed three whole-suite runs out of three, and the failure was
+not about folding at all. It defined `(= (+ 1 2) 42)` to move the folded
+caller's dependency, and the engine refused with
+`metta_builtin_redefinition('+', 2, ...)`.
+
+Measured on both trees: a fresh interpreter accepts that override and one that
+has run `tests/ch04_spaces_and_matching/test_space.py` refuses it, identically
+at `f2946e17` and on this branch, so it is the trunk's own rule and the fixture
+was reading the process's history. Twelve spaces created and released in a loop
+do not reproduce it, so it is not plain module reuse; what in that suite arms
+the refusal is not established here.
+
+Decided: the fixture moves to `abs-math`, equally foldable, licensed by the
+same `constant_scalar_arguments/2` clause set, and not one of Prolog's own
+predicates. The rebuild it tests is unchanged: 3, then 42 under the override,
+then 3 again after the removal.
+
+Rejected: bypassing the runnable-form translation cache while an observation is
+open. It was written on a hypothesis about the cache carrying a folded form
+across the boundary, and neither direction reproduces: the same source run in
+`&self` and then observed in `&self` yields five coverage rows with the guard
+and five without, and a folded runnable yields one either way. The cache holds
+runnable expressions, while the coverage rows come from compiling an equation,
+which does not pass through it. Revisit only with a case that shows a
+difference.
+
