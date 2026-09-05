@@ -7,6 +7,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- The example parity reporter preserves SWI process exits without reporting
+  their `unwind(halt(Status))` control signal as an application error.
+
 ### Added
 
 - The MeTTa file library now creates directories, copies bytes with staged
