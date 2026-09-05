@@ -1889,6 +1889,31 @@ metta_compiled_removal_hook(Ref) :-
     Pattern = [Relation, Head, _], Relation == (=),
     nonvar(Head), Head = [Name|_], atom(Name).
 
+%A hook clause that NAMES its space answers the census from its own head: the
+%funnel calls it with the space bound, so a head whose first argument does not
+%unify with that space never runs for it. This is the same shape as the
+%reaction bridge's answer in engine/metta/effects.pl, from the other side: that
+%one is a clause with an unbound space whose TABLE says which spaces it
+%watches, and this one is a clause whose head already said.
+%
+%lib/lib_tabling/lib_tabling.pl carries `atom_removed('&metta', Fact)` for its
+%(tabled ...) rows, and that single standing clause turned the bulk clear off
+%for every OTHER space: no host owns it, so the census answered "not idle"
+%everywhere. Clearing a space holding a memoized function and plain data cost
+%17,843 inferences at 200 atoms and 131,247 at 2,000 once lib_tabling was in
+%the process, against 4,598 at both sizes without it, which is the per-atom
+%funnel rather than the bulk pass [measured 2026-09-05; tested:
+%test_a_hook_that_names_another_space_keeps_the_bulk_clear; commit=WORKTREE].
+:- multifile seam:atom_hook_ref_idle/2.
+seam:atom_hook_ref_idle(Space, Ref) :-
+    catch(clause(Clause, _, Ref), _, fail),
+    strip_module(Clause, _, Head),
+    functor(Head, Name, 2),
+    ( Name == atom_added -> true ; Name == atom_removed ),
+    arg(1, Head, Watched),
+    nonvar(Watched),
+    \+ Watched = Space.
+
 %Clear a space, whoever holds it: a Prolog foreign provider clears through
 %its own seam (or refuses, loudly, when it cannot); a native space
 %announces the atoms it drops through the removal funnel exactly when

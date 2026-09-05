@@ -9,6 +9,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Clearing a space no longer walks its stored atoms one at a time because an
+  unrelated library watches a different space. A hook clause whose head names
+  the space it watches, as `lib_tabling` names `&metta`, is now idle for every
+  other space, so importing it stops turning the bulk clear off everywhere.
+  Clearing a space holding a memoized function and 2,000 plain atoms cost
+  131,247 inferences with `lib_tabling` in the process and 4,759 without it;
+  both now cost 4,759.
 - Reloading a file that declares an annotated arrow now succeeds when more than
   one space holds that file, which is the ordinary shape for a library. The
   withdrawal removed the declaration's own catalog effect row a second time by

@@ -675,3 +675,82 @@ retirement is what moved them. `space-name` is borderline rather than moved:
 its minimum lands 5 over a 4,200,424 pin in some batch runs and passes eight
 runs out of eight on its own, with the three samples of one run spread by
 2,470. The seven engine benchmark cases match their pins exactly.
+
+## 2026-09-05, the observer that watched one space and stopped every clear
+
+Tried: running the Python suite twice on the same tree -> once green and once
+red on `test_equation_observers_keep_plain_data_clear_bulk`, the bulk-clear
+case added three sections above. Its measured `counts` were `[36709, 152444]`
+for 200 and 2,000 plain atoms, which is the per-atom funnel rather than the
+4,582 the bulk pass costs at every size. Running the file alone is green, so
+whatever turned the bulk pass off arrived from another file in the same
+worker; `-n 4 --dist loadfile` decides which files share a worker, which is
+why it is a coin toss.
+
+Tried: reading the census contract for what could refuse. `lib_tabling` carries
+one standing clause, `seam:atom_removed('&metta', Fact)`, for the `(tabled ...)`
+rows it reflects. It is not equation-shaped, so `metta_compiled_removal_hook/1`
+keeps it in the watching set; no host owns it, so `host_remove_hooks_idle/2`
+declines it; and `atom_hook_ref_idle/2` had exactly one answer, the reaction
+bridge's, which speaks only for itself. So one import turned the bulk clear off
+for every space in the process.
+
+Measured that directly rather than through the suite: in one process, clearing
+a space holding a memoized function and 200 then 2,000 plain atoms costs
+`[4598, 4598]` inferences before `!(import! &self (library lib_tabling))` and
+`[17843, 131247]` after it.
+
+Decided: let a hook clause answer the census from its own head. The funnel
+calls `seam:atom_removed(Space, Atom)` with the space bound, so a head whose
+first argument does not unify with that space never runs for it. One more
+`seam:atom_hook_ref_idle/2` clause says so, which is the mirror of the reaction
+bridge's answer in engine/metta/effects.pl: that one is a clause with an
+unbound space whose table says which spaces it watches, and this one is a
+clause whose head already said. The same probe now reads `[4602, 4602]` before
+the import and `[4759, 4759]` after it.
+
+Verified: `test_a_hook_that_names_another_space_keeps_the_bulk_clear` measures
+`[19846, 131472]` without the clause and passes with it. The four counter rows
+recorded above move by exactly nothing.
+
+Tried: the new case in the whole suite -> red at `[15498, 15709]`, and the
+existing one had the same fault waiting; a later run failed it at
+`[14617, 18503]`. Both compared the 2,000-atom clear against the 200-atom
+clear plus a FIXED 100 inferences, and neither the base nor the growth is
+fixed: the same clear costs 4,602 inferences in a fresh process and 14,617 in
+a pytest worker that has already run other files.
+
+Measured the healthy per-atom cost in a controlled process rather than
+assuming it: at 0, 200, 2,000 and 20,000 stored atoms the clear costs the same
+number of inferences to three decimal places, 0.000 an atom, on the idle path
+and on the memo-owner path, and it stays flat with a capacity counter
+installed, with lib_tabling loaded, and with a live Python subscription on
+another space. So the 2.2 an atom the worker charged is neither storage nor
+any of those, and it is NOT the funnel either, which charges about 65.
+
+Decided: bound the GROWTH between the two data sizes at ten inferences per
+additional atom, six times from the worst healthy reading and six times from
+the funnel, and make each case print the live removed-hook clause heads when
+it trips. A red bulk-clear case is unattributable without them, because which
+hooks are live depends on what else ran in the same process. Both cases now
+read one helper, so the threshold and its reason are written once. The
+controls confirm the looser bound still discriminates: with
+engine/spaces/lifecycle.pl at b5e65103 the named-hook case fails at
+`[19846, 131472]`, and at 5c6a4d57, before the compiled-only pass existed,
+both cases fail at `[19669, 131233]` and `[19806, 131434]`.
+
+Open: what makes a pytest worker charge 2.2 inferences an atom for a clear
+that charges 0.000 in every controlled state tried. Running the whole suite
+serially in one process to find it is not available: it aborts at 50% with a
+fatal Python error, which the 4-worker runner the gate uses does not. The
+diagnostic above is the instrument for the next occurrence.
+
+Re-pinned: boot 533,927 to 533,937 (+10), three identical samples per arm,
+attributed by a positive control rather than inferred: reverting
+engine/spaces/lifecycle.pl alone measures 533,927 and restoring it measures
+533,937. The other six engine cases move by exactly 0. This is the
+load-structure class engine/bench-baseline.json documents at length, where one
+inert fact moves boot by about 142. `wall_seconds_per_operation` and
+`instructions` are not re-pinned: the box carried other work at loadavg 45 to
+60 throughout. The four Python counter rows that a2cd219f moved are left
+un-pinned and reported.
