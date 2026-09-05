@@ -2428,6 +2428,7 @@ def space(
     journal: str | os.PathLike[str] | None = None,
     schema: _abc.Mapping[str, Any] | None = None,
     sync: str = 'none',
+    rename: _abc.Mapping[str, str] | None = None,
     _created_at: tuple[str, int] | None = None,
 ) -> Space:
 ```
@@ -2443,7 +2444,8 @@ def space(
 > headers, or its own timeout, and hand THAT in as the backing); and
 > ``journal=`` constructs ``PersistentFactSpace`` from ``schema=`` or
 > a schema mapping supplied as the backing. ``sync`` paces the
-> journal and means nothing without one, so it refuses alone.
+> journal and ``rename`` performs its one-open schema migration; neither
+> means anything without ``journal``, so either refuses alone.
 >
 > ``inherits``, ``restricted`` and ``grants`` choose the space MODEL and
 > are independent of whether the space is named. MeTTa's own

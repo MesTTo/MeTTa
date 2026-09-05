@@ -14,6 +14,11 @@ Guarantees:
     planted selftest, so the selftest cannot drift from the production scan
     [tested: tests/checks/check_specialization_differential_selftest.py;
     commit=de2a69fbea43d7bbc641fd93240cf7572285bb5c]
+  - a clean corpus is accepted only when the engine reports at least one
+    checked specialization, and the final line gives agreed and inference-
+    bounded totals rather than discarding the verifier's coverage
+    [tested: tests/checks/check_specialization_differential_selftest.py;
+    commit=694dff934a11dbc2ee99267b60f39564053baf87]
 Fails when:
   - SWI-Prolog or the engine cannot start; infrastructure failure is loud
     rather than being mistaken for a corpus with no disagreements.
@@ -22,10 +27,12 @@ Fails when:
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 from pathlib import Path
 
 from bounded_spawn import bounded
@@ -37,6 +44,28 @@ sys.path.insert(0, str(TOOLS))
 from example_parity import corpus  # noqa: E402
 
 MARKER = "metta_specialization_disagrees"
+COVERAGE = re.compile(
+    r"verify-specializations checked (?P<checked>\d+) specialization\(s\): "
+    r"(?P<agreed>\d+) agreed, (?P<unverified>\d+) could not be checked inside "
+    r"the (?P<budget>\d+)-inference bound"
+)
+
+
+@dataclass(frozen=True, slots=True)
+class SpecializationCoverage:
+    """One engine process's reported specialization-verification coverage."""
+
+    checked: int
+    agreed: int
+    unverified: int
+
+
+@dataclass(frozen=True, slots=True)
+class SpecializationResult:
+    """One source's failure, if any, and every reported coverage count."""
+
+    finding: str | None
+    coverage: SpecializationCoverage
 
 
 def _display(path: Path, root: Path) -> str:
@@ -59,19 +88,22 @@ def _diagnostic_lines(text: str, marker: str | None = None) -> str:
     return "\n".join(lines[index:index + 3])
 
 
-def specialization_finding(
+def specialization_result(
     path: Path,
     *,
     root: Path = ROOT,
     entrypoint: Path | None = None,
-) -> str | None:
-    """Return the named reason one source did not prove specialization parity."""
+    environment: Mapping[str, str] | None = None,
+) -> SpecializationResult:
+    """Return one source's parity failure and observable verifier coverage."""
     label = _display(path, root)
     argument = label if path.resolve().is_relative_to(root.resolve()) else str(path)
     entrypoint = root / "engine" / "main.pl" if entrypoint is None else entrypoint
     entrypoint_argument = _display(entrypoint, root)
-    environment = os.environ.copy()
-    environment["METTA_VERIFY_SPECIALIZATIONS"] = "1"
+    process_environment = os.environ.copy()
+    process_environment["METTA_VERIFY_SPECIALIZATIONS"] = "1"
+    if environment is not None:
+        process_environment.update(environment)
     done = subprocess.run(
         bounded([
             "swipl",
@@ -85,7 +117,7 @@ def specialization_finding(
             "silent",
         ]),
         cwd=root,
-        env=environment,
+        env=process_environment,
         stdin=subprocess.DEVNULL,
         capture_output=True,
         text=True,
@@ -93,38 +125,80 @@ def specialization_finding(
     )
 
     output = done.stdout + done.stderr
+    reports = tuple(COVERAGE.finditer(output))
+    coverage = SpecializationCoverage(
+        checked=sum(int(report["checked"]) for report in reports),
+        agreed=sum(int(report["agreed"]) for report in reports),
+        unverified=sum(int(report["unverified"]) for report in reports),
+    )
     if MARKER in output:
-        return f"{label}: {_diagnostic_lines(output, MARKER)}"
+        finding = f"{label}: {_diagnostic_lines(output, MARKER)}"
+        return SpecializationResult(finding, coverage)
     if any(line.lstrip().startswith("ERROR:") for line in output.splitlines()):
-        return f"{label}: verifier reported an error\n{_diagnostic_lines(output)}"
+        finding = f"{label}: verifier reported an error\n{_diagnostic_lines(output)}"
+        return SpecializationResult(finding, coverage)
     if done.returncode != 0:
-        return (
+        finding = (
             f"{label}: specialization verifier exited {done.returncode}\n"
             f"{_diagnostic_lines(output)}"
         )
-    return None
+        return SpecializationResult(finding, coverage)
+    return SpecializationResult(None, coverage)
+
+
+def specialization_finding(
+    path: Path,
+    *,
+    root: Path = ROOT,
+    entrypoint: Path | None = None,
+) -> str | None:
+    """Return the named reason one source did not prove specialization parity."""
+    return specialization_result(path, root=root, entrypoint=entrypoint).finding
+
+
+def specialization_results(
+    paths: Iterable[Path], *, root: Path = ROOT
+) -> list[SpecializationResult]:
+    """Run independent source files concurrently and preserve corpus order."""
+    ordered = list(paths)
+    with ThreadPoolExecutor() as pool:
+        return list(
+            pool.map(lambda path: specialization_result(path, root=root), ordered)
+        )
 
 
 def specialization_findings(
     paths: Iterable[Path], *, root: Path = ROOT
 ) -> list[str]:
     """Run independent source files concurrently and preserve corpus order."""
-    ordered = list(paths)
-    with ThreadPoolExecutor() as pool:
-        checked = pool.map(
-            lambda path: specialization_finding(path, root=root), ordered
-        )
-        return [finding for finding in checked if finding is not None]
+    return [
+        result.finding
+        for result in specialization_results(paths, root=root)
+        if result.finding is not None
+    ]
 
 
 def main() -> int:
     """Print every corpus failure and return whether the differential held."""
-    findings = specialization_findings(corpus(ROOT))
+    results = specialization_results(corpus(ROOT))
+    findings = [result.finding for result in results if result.finding is not None]
     for finding in findings:
         print(finding)
     if findings:
         return 1
-    print("specialization differential: 0 disagreements")
+    checked = sum(result.coverage.checked for result in results)
+    agreed = sum(result.coverage.agreed for result in results)
+    unverified = sum(result.coverage.unverified for result in results)
+    if checked == 0:
+        print(
+            "specialization differential: no specialization coverage was reported",
+            file=sys.stderr,
+        )
+        return 1
+    print(
+        "specialization differential: 0 disagreements; "
+        f"{checked} checked, {agreed} agreed, {unverified} unverified"
+    )
     return 0
 
 

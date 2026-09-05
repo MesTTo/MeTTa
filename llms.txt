@@ -58,6 +58,12 @@ engine-known call head the example corpus exercises must be named here.
 
 `pip install .` (the runtime is bundled) or point `METTA_PATH` at a clone.
 
+Run one MeTTa file with `sh run.sh path/to/program.metta`. Add `--verbose`
+before the path when the program's authoring diagnostics matter, including
+equation-head interpretation and source-reload reports; the default suppresses
+informational messages. Python callers make the same choice with
+`MeTTa(verbose=True)`.
+
 ```python
 from metta import MeTTa, S, V, G, ground, Expression, equation, rules, parse, forms
 from metta.vocabularies import EffectClass
@@ -77,6 +83,15 @@ metta.llms() -> None    # print THIS file to stdout, the way help() prints
 inside the wheel beside the engine tree, so an install answers it without a
 checkout, and it never pages: the door writes and returns whatever stdout is.
 
+`metta.config` is the process-wide `Config` object. Inspect all four settings
+with `config.as_dict()` and set them atomically with
+`config.configure(stack_limit=..., heartbeat_interval=...,
+declaration_limit=..., display_rows=...)`. The stack byte ceiling and Janus
+heartbeat interval freeze after the first engine starts; declaration expansion
+and displayed-row limits remain live. Set the same values before import with
+`METTA_STACK_LIMIT`, `METTA_HEARTBEAT_INTERVAL`, `METTA_DECLARATION_LIMIT`, and
+`METTA_DISPLAY_ROWS`; invalid or nonpositive values stop import by name.
+
 ## Atoms: built in Python, no engine call
 
 `S.likes` is the symbol `likes`; `S["+"]`, `S["my-name"]` for non-identifiers.
@@ -86,6 +101,8 @@ Applying a symbol builds an expression: `S.likes(S.Ada, S.Music)` ->
 atom: `Expression((S.f, 1, 2))` is `S.f(1, 2)`.
 `parse("(f $x)")` reads exactly one form without evaluating it.
 `forms("(a) (b)")` reads every top-level form without evaluating any.
+Root builders `if_`, `and_`, `or_`, `not_`, and `in_` spell language heads
+that are Python keywords or need variadic folding without raw bracket syntax.
 
 FOURTEEN ATTRIBUTE NAMES ON `S` ARE OPERATOR WORDS, NOT SPELLINGS. Python's
 `operator` module owns these words, and `S.<word>` reaches the engine head the
@@ -129,12 +146,17 @@ Four kinds, all immutable with `__slots__` and one-subpattern
 `order_key`, `pretty(atom, width=78)`, `encode`/`decode`, `atom_from_wire`,
 `register_object_repr` and `register_object_repr_protocol` (and their
 `unregister_` twins) to control how a foreign object prints as an atom.
+The object-level round trip is `bindings = pattern.unify(fact)` followed by
+`template.subs(bindings)`. Its keys are variable atoms, not their names;
+`Atom.subs` also accepts a query `Row` directly.
 `path("profile", "age", to=V.age)` occupies an opaque handle's pattern
 position, reads only those live attributes after the stored match, and binds
 the reached value. `Key("name")` selects a subscription key instead.
-`metta.spaces.object_view(obj)` exposes the same object's current public fields
-as `(py-field obj name value)` atoms. Compose it with a stored space through
-`spaces.union`, or register it directly so adding a field atom calls `setattr`.
+`metta.spaces.object_view(obj, relation="py-field")` exposes the same object's
+current public fields as `(py-field obj name value)` atoms. Pass another
+relation name to avoid colliding with an application's existing facts. Compose
+it with a stored space through `spaces.union`, or register it directly so
+adding a field atom calls `setattr`.
 
 Arithmetic and logic operators BUILD terms: `S.x + 1` is `(+ x 1)`,
 `&` `|` `~` build `and`/`or`/`not`, unary `-` builds the subtraction image
@@ -251,6 +273,8 @@ by a weighted proof, without any one of them overwriting another.
 `with m.capture() as output:` collects printed text in `output.text` without
 changing either return shape. `with m.atomic():` makes each whole run one
 transaction; `with m.speculative():` answers and rolls its writes back.
+`with metta.speculate():` is the same discarded execution scope for the lazy
+module-tier default context.
 
 `Rows` is a list of `Row` with `.columns`. `row.x` and `row["x"]` both work.
 `rows.one()` (exactly one), `.first()`, `.column(name)` -> that column's atoms,
@@ -262,7 +286,8 @@ column. Both keep `cls` for type checkers.
 
 `m.assuming(*facts)` is a with-block where those facts exist and then do not.
 `m.batch()` collects `add()` calls and crosses once at exit.
-`m.limits(timeout=, inferences=)` sets scoped defaults for every call inside.
+`m.limits(timeout=, inferences=, stack=)` sets scoped defaults for every call
+inside; `stack` is SWI's combined-stack ceiling in bytes.
 
 ## The three seams anything plugs into
 
@@ -458,8 +483,8 @@ Stacked clauses become a first-match dispatcher. It takes `name=`, and
 reference twin. A local assignment such as `result: int = value`
 becomes the enforceable in-place claim `(: $result Number)` inside its `let*`.
 The parsed AST also supplies each definition's absolute source span, source
-docstring, lexical free variables, and a conservative effect class. Those
-values are available on `Defined`; each clause joins the classes of the
+docstring, lexical free variables, and a conservative effect class through
+`Defined.source_span`, `.doc`, `.free_variables`, and `.effect`; each clause joins the classes of the
 operations it calls, stacked clauses join again, and `source-span`,
 `free-variable`, and the resulting `effect ... <class>` atom reflect in
 `&metta`. Replacement and `clear()` retire stale facts. `Defined.pure` remains
@@ -675,8 +700,18 @@ metta.engine().info() -> versions of metta, janus, swi_prolog, python, metta_pat
 
 Errors: `MettaError` is the base, then `EngineError`, `MettaSyntaxError`,
 `CastError`, `CompileError`, `SourceNotFound`,
-`MettaResultError`, `TransportFailure`, and `ResourceLimitError` with
+`MettaResultError`, `AssertionFailure`, `TransportFailure`, and `ResourceLimitError` with
 `TimeLimitError` and `InferenceLimitError` under it, plus `Interrupted`.
+Remote-backend authors use `metta.errors.is_transport_failure(error)` to
+classify an absent connection, timeout, or closed stream before choosing retry
+or abandonment; ordinary application errors answer false.
+`AssertionFailure` means a `(test ...)` or `(assert ...)` claim was false, not
+that the engine broke; `.operation`, `.actual`, and `.expected` are structured
+fields for a harness.
+`Rows.raise_for_errors()` and `Answers.raise_for_errors()` are the explicit
+bridge from `(Error culprit reason)` values to `MettaResultError`: one raises
+plainly, several as an `ExceptionGroup`, and a clean collection returns itself
+for chaining.
 `MettaOperationError(EngineError)` is a builtin refusing a value, with the parts
 as data: `.operation` is what the source wrote (`+`, `min-atom`), `.kind` the
 formal's functor, `.expected` and `.culprit` the type and offending value.
@@ -689,10 +724,15 @@ all constructible straight from `metta`.
 Engine calls belong to the thread that made the engine. `m.pool(workers)` gives
 each worker its OWN attached engine, which is what makes the calls genuinely
 concurrent (measured 2026-08-15: 1.94x, 3.90x and 7.26x at 2, 4 and 8 workers).
+Its `map(fn, items)` handles unary work and `starmap(fn, argument_rows)` spreads
+each row into a multi-argument call; both preserve input order.
 `m.parallel(*targets)` and its language-side name `m.hyperpose(*targets)`
 evaluate targets at once. `metta.aio.AsyncMeTTa` runs engine calls on one worker
 thread behind `async`; `metta.parallel.engine_thread()` and `metta.current_space()`
 report the crossing.
+`metta.channel(max=)` creates a mailbox. `send` may block on capacity,
+`recv(deadline=)` waits, and `try_recv()` takes a waiting term or returns
+`None` immediately; close it with a context manager.
 
 In MeTTa, `(transaction EXPR)` and `(atomically EXPR)` run one atomic block.
 Both answer EVERY answer their body has and commit or roll back the whole
@@ -706,28 +746,50 @@ stop, not even by a program's own `(catch ...)`: a bound, a Ctrl-C and an
 `interrupt()` all reach a running goal, the same reasoning that puts
 `KeyboardInterrupt` outside `Exception`.
 
+An ordinary transaction cannot undo an external effect after it commits. For
+that boundary, declare `space.compensates(operation, recovery)`, then run each
+forward term through `with space.saga(receipts) as saga: saga.run(term)`.
+Committed `writesState` and `oracleIO` steps leave queryable
+`(did operation args result)` receipts. Exceptional exit compensates them in
+reverse commit order; a failed compensation keeps its receipt for an explicit
+`saga.rollback()` retry.
+
 ## Integrating any library
 
 `metta.convert`: `project(obj) -> Projected` whose `.atom` is the constructor
 expression, `build(atom)` -> object (returning the atom unchanged when it
 cannot), `register_type`, `unregister_type`, `declarations`, `auto_image`.
 Dataclasses, enums, pydantic models and annotated classes all cross; enums
-project to symbols. `@space.define` on a class declares it INTO the space
-for the round trip; the separate record decorator is gone.
+project to symbols. A class owner can instead implement `obj.__metta__()` and
+`Class.__from_metta__(*fields)` for a two-way conversion without process-wide
+registration; pass the class as `build(atom, Class)`. `@space.define` on a
+class declares it INTO the space
+for the round trip; the separate record decorator is gone. Use the direct
+`space.define(Class, accessors=False, methods=False)` form when the type may
+cross but its fields or public methods must not become MeTTa callables. The
+keyword-only decorator form is not supported.
 
 `metta.integrate`: `module_ops(m, module, names=, effect=, prefix=, rename=,
 transport="raw")` registers a whole module's callables, `facts(m, atoms)` bulk-writes,
 `wrap_callable(m, name, target, effect=)`,
 `wrap_object(m, name, obj, methods, effects=)`, `reflect(m, name, obj)`,
 `install_reflection_ops(m)`, `integrate(m, target)`, `Integration`,
-`SpaceProvider`, and `discover(m)` over entry points. Installation is idempotent
-for a live space, and dropping a space releases its installation record.
+`SpaceProvider`, `entry_points(group=)` for unloaded discovery,
+`load_entry_point(name, group=)` for explicit provider/library loading, and
+`discover(m)` for integrations. An integration may declare `METTA_REQUIRES` as
+entry-point names; discovery checks missing names and cycles, then installs in
+dependency order. Installation is idempotent for a live space, and dropping a
+space releases its installation record. Pair `register_object_type`,
+`register_repr`, and `register_reflector` with their exact `unregister_` twins
+when an integration or test stops owning those process-wide hooks.
 Entry-point groups: `metta.integrations`, `metta.spaces`, `metta.libraries`.
 
 `metta.arrays`: one operation vocabulary over any DLPack library.
 `install(m, default=xp)` makes numpy, torch or JAX first-class with the same
 words; `namespace_of`, `is_array`, `data_of`, `ARRAY_OPS`, and `EmbeddingStore`
-with an exact faiss backend. `EmbeddingStore` registers `(name-knn $q $k)` and
+with an exact faiss backend. `EmbeddingStore.keys()` lists stored atom keys and
+`EmbeddingStore.vector_for(key)` retrieves a key's original vector.
+`EmbeddingStore` registers `(name-knn $q $k)` and
 `(name-embed $key)` as OPERATIONS rather than backing a space, so it is called
 beside a match rather than being one. Its 44 installed names all carry `(-> ...)`
 declarations. `broadcast-shape` is a CLP(FD) relation over shape expressions,
@@ -737,7 +799,12 @@ rejects incompatible shapes before a tensor is materialised.
 `metta.tables`: `declare(...)` writes one ctx-scoped bridge declaration into
 `&metta` and `TableBridge` derives every provider operation from it, so a
 DB-API connection (the `Executes` slice) answers MeTTa matches.
-`metta.space(journal=path)` is journalled and crash-recovering, and
+`metta.space(backing={"edge": 2}, journal=path, sync="flush")` is journalled
+and crash-recovering. Reopen an old schema once with
+`metta.space(backing={"new": 2}, journal=path, rename={"old": "new"})`; every
+old head must occur, the journal is atomically rewritten, and the next open
+omits `rename`. `metta.space(journal=path)` without a schema refuses.
+Likewise,
 `metta.space(backing=url)` mounts a remote store; both ride the one
 space-factory door rather than their own modules.
 
@@ -747,7 +814,12 @@ A space can be backed by anything, and the seam is universal rather than
 per-backend. From Python, implement `Matcher` / `Enumerable` / `Adder` /
 `BulkAdder` / `Remover` / `Clearer` / `Planner` / `Transactional` / `CustomMatch`
 and call `metta.foreign.register_provider(runtime, name, provider)` with a name
-starting with `&`; or subclass `SpaceProvider` and answer `can_run` per call.
+starting with `&`; or subclass `SpaceProvider`. `can_run(capability, **request)`
+declares that the operation exists. Override
+`should_run(capability, **request)` to accept or decline each concrete request,
+and `refusal(capability, **request)` to give a declined request its own reason.
+For example, an add policy reads `request["atom"]`; it runs before the write,
+including before any bulk write.
 Capabilities are declared, not guessed: `match`, `enumerate`, `add`, `add-many`,
 `remove`, `clear`, `subscribe`, `plan`, `rules`, and an unsupported operation
 refuses loudly rather than degrading. A provider's `match` may yield
@@ -761,6 +833,11 @@ it a space holds DATA, and an equation written there is refused rather than
 stored where it could never fire. Conjunctive queries route per conjunct, so
 a foreign space joins with a native one; on such a conjunction `rows.why()`
 prints which conjunct went where and whether its class was exact.
+`BoundedMatcher.match(pattern, *, limit=)` may stop at the caller's count only
+when `MatchClassifier.pushdown(pattern)` says `"exact"`; ignoring the limit is
+always sound. `Snapshotter.snapshot() -> tuple[Atom, ...]` makes a provider
+reifiable, and `WorldCommitter.commit_world(base, removed, added)` is the
+provider-owned atomic boundary for landing that world's checked multiset diff.
 
 From Prolog, `engine/ext_points.pl` declares every seam WITH ITS KIND: an EVENT runs
 for effect and every handler runs; an OWNERSHIP seam is claimed by the first
@@ -874,9 +951,14 @@ exit on findings), `doc` (a name's `(@doc ...)`), and `convert`
 (`program.py [-o out.metta]`, emitting the module's fresh-space declarations
 as loadable MeTTa source).
 
-`metta.remote`: `serve(m, spaces=, token=, authorize=, ssl_context=)`,
-`connect(url, token=, headers=)`, `attach`. Credentials require https, tokens
-compare in constant time, and only http/https schemes are accepted.
+`metta.remote`: `serve(m, spaces=, token=, authorize=, ssl_context=,
+cursor_idle=300, cursor_limit=100)`, `connect(url, timeout=30, token=,
+headers=, ssl_context=)`, `RemoteSpace.server_capabilities()`, and `attach`.
+`authorize(Request(operation, space, headers)) -> bool` can express read-only,
+per-space, and tenant policy. The cursor settings bound how long an abandoned
+answer cursor survives and how many the server owns at once. Credentials
+require https, tokens compare in constant time, and only http/https schemes
+are accepted.
 
 `metta.events`: `m.events()` is the engine's stream of `(action, space, atom)`
 changes as a first-class object, and `EventStream.fold(step=None, space=,
@@ -895,6 +977,8 @@ read-modify-write needs coordination. State has no events, history, or
 transactions. With `under=algebra`, omit the step: zero initializes the fold,
 merge is its step, ordinary events contribute one, and `(fact tag value)`
 events contribute `tag`.
+`EventStream.folds(space_name)` lists that space's live folds in registration
+order, so an observability owner can inspect what is still subscribed.
 
 `metta.subscribe`: `m.subscribe(pattern, callback, on="add", queue_max=10000)`
 is the delivering fold, run INSIDE the write that matched it; without a
@@ -920,12 +1004,20 @@ no transport under it, for mounting on another HTTP framework.
 
 `metta.testing` ships what the suite fuzzes itself with: hypothesis strategies
 (`atoms`, `expressions`, `patterns`, `names`, `numbers`, `texts`, `symbols`,
-`variables`, `grounded`, `ground_atoms`, `numpy_scalars`), the compliance suites
+`variables`, `grounded`, `ground_atoms`, `numpy_scalars`),
+`from_pattern(pattern, max_leaves=8)` for ground instances that share every
+repeated named variable and draw anonymous occurrences independently, the compliance suites
 (`SpaceComplianceSuite`, `GatewayComplianceSuite`, `check_space_provider`,
 `check_twin`, `check_replay`, `check_minted_handles`), and the deterministic
 benchmark gates (`benchmark_case`, `benchmark_counter_slope`,
-`measure_instructions`, `BenchmarkBaseline`, `count_atoms`), also exported from
-`metta.benchmarking`. `metta.pytest_plugin` gives the `metta` and
+`measure_counters(command, events=("instructions:u",), rounds=3,
+controlled=False, timeout=60) -> CounterRuns`, `measure_instructions`,
+`BenchmarkBaseline`, `count_atoms`), also exported from `metta.benchmarking`.
+`CounterRuns.events` maps each requested perf event to its samples and
+`.outputs` retains each measured command's stdout. Use
+`BenchmarkBaseline.observe_counter` for deterministic engine counts,
+`observe_measurement` for a declared noisy-counter band, and
+`observe_configuration` before comparing either. `metta.pytest_plugin` gives the `metta` and
 `scratch_space` fixtures; `metta.ipython` gives `%%metta` in a notebook.
 
 These submodules and names, forty-three of them, load on first access rather than during
@@ -992,10 +1084,11 @@ modules: `add-translator-rule!`, `remove-translator-rule!`,
 `assertAlphaEqualMsg`, `assertAlphaEqualToResult`, `assertEqualToResultMsg`,
 `assertAlphaEqualToResultMsg`. `undocumented` reports what `doc` lacks.
 
-`pragma!` accepts `max-time`, `max-inferences`,
-`verify-specializations`, `max-stack-depth`, `type-check`, and
-`interpreter`. The two bounds and `verify-specializations` change live
-engine mechanisms. `max-stack-depth` is validated exactly as the
+`pragma!` accepts `max-time`, `max-inferences`, `verify-specializations`,
+`verify-discharges`, `verify-cardinality`, `max-stack-depth`, `stack-limit`,
+`plan-cyclic-joins`, `materialize-source-relations`, `type-check`, and
+`interpreter`. The bounds, the verification modes and the two planning
+switches change live engine mechanisms. `max-stack-depth` is validated exactly as the
 arbiter validates it: a value that is not a non-negative integer
 answers an `(Error ...)` atom while the program keeps running.
 `type-check` and `interpreter` are HE spellings, accepted and not
@@ -1003,6 +1096,19 @@ enforced. A key outside the registry is refused rather than stored
 inertly. `max-time` takes a positive number of seconds,
 `max-inferences` a positive integer, and `none` explicitly disables
 either bound; an invalid value leaves the previous setting unchanged.
+`stack-limit` takes positive SWI combined-stack bytes and scopes the setting to
+the current thread. `verify-specializations` compares the first use of each
+generated higher-order call with its generic form; turning the pragma off, or
+leaving a process started with `METTA_VERIFY_SPECIALIZATIONS=1`, reports the
+agreed and inference-bounded counts even under `sh run.sh`'s quiet launch.
+`METTA_VERIFY_BUDGET` replaces the default 200000-inference comparison bound
+with a positive integer. `verify-discharges` similarly audits type checks the
+compiler omitted and reports its coverage when disabled, and
+`verify-cardinality` checks annotated `det` and `semidet` calls for failure or
+leftover choicepoints. `plan-cyclic-joins` plans a full native cyclic
+conjunction as a Generic Join instead of the retained nested loop, and
+`materialize-source-relations` derives the finite function-free fragment once
+at each source boundary and answers admitted ground calls from it.
 
 `if-decons-expr` reads a held expression, unifies its head and tail with the
 provided patterns, and evaluates the selected branch. Empty expressions and

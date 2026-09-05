@@ -9,6 +9,9 @@ Run one:
 
     sh run.sh ./examples/ch02-programming-a-family-tree/04-the-whole-program.metta
 
+Add `--verbose` before the file to see informational compiler and source-reload
+notes. The default keeps those diagnostics quiet.
+
 Run all of them:
 
     sh test.sh

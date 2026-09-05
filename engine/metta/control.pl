@@ -179,10 +179,14 @@ require_metta_pragma_value('stack-limit', Value, Door) :- !,
     ).
 require_metta_pragma_value(_, _, _).
 
-%A pragma write REFRESHES anything materialised from it. verify-discharges is
-%read on the per-call path, so its answer is kept as a marker rather than
-%re-derived; a write that did not refresh the marker would set a pragma that
-%does nothing [tested: metta_metatype_guards:the_pragma_turns_verification_on].
+%A pragma write REFRESHES anything materialised from it. Each verification key
+%holds something the write has to renew: verify-discharges a marker read on the
+%per-call path, verify-cardinality the audit's live setting, and
+%verify-specializations the coverage tally its report reads. A write that did
+%not refresh them would set a pragma that does nothing [tested:
+%tests/checks/check_specialization_differential_selftest.py;
+%commit=694dff934a11dbc2ee99267b60f39564053baf87] [tested:
+%metta_metatype_guards:the_pragma_turns_verification_on].
 set_metta_pragma(Key, Value) :-
     retractall(metta_pragma(Key, _)),
     (   Value == none
@@ -196,6 +200,8 @@ set_metta_pragma(Key, Value) :-
     ->  metta_refresh_discharge_verification
     ;   Key == 'verify-cardinality'
     ->  metta_set_cardinality_verification(Value)
+    ;   Key == 'verify-specializations'
+    ->  specializer:metta_refresh_specialization_verification
     ;   true
     ).
 

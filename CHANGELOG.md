@@ -140,6 +140,105 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `Defined.free_variables` now has an exact consumer-sheet spelling and a
+  checked compiled-definition example with one lexical dependency.
+
+- Remote-backend authors can now find `is_transport_failure(error)` in the
+  error model, with checked positive and negative classifications in the
+  remote-controls example.
+
+- Performance authors can now find the general `measure_counters` and
+  `CounterRuns` surface beside the narrower instruction helper, including the
+  baseline methods that decide deterministic and noisy counters.
+
+- `EmbeddingStore.vector_for(key)` and `keys()` now appear beside the
+  embedding operation door, and the checked matcher example reads a stored
+  vector back by atom key.
+
+- `metta.testing.from_pattern(pattern)` now has a consumer-sheet entry and a
+  checked property-testing example covering both repeated named variables and
+  independent anonymous occurrences.
+
+- The exact module-tier `metta.speculate()` spelling now appears beside
+  `Space.speculative()` and runs in the checked engine-controls example.
+
+- `object_view(obj, relation=...)` now has an exact consumer-sheet spelling,
+  and the checked object-integration example queries a view under a custom
+  relation name.
+
+- `EventStream.folds(space_name)` now has a consumer-sheet door, and the
+  standing-query example checks its live roster before and after cancellation.
+
+- `Rows.raise_for_errors` and `Answers.raise_for_errors` now appear in the
+  consumer error model, and the checked error-handling example proves both its
+  clean chaining and stored-error exception paths.
+
+- Foreign backend authors now have exact consumer-sheet and executable doors
+  for `BoundedMatcher`, `Snapshotter`, and `WorldCommitter`, including an exact
+  bound pushdown and a provider-owned immutable-world commit.
+
+- Integration authors now have consumer-sheet spellings for unloaded and
+  explicit entry-point loading, dependency-ordered discovery, and exact
+  process-wide hook cleanup, plus a checked registration-lifecycle example.
+
+- The concurrency sheet and a checked example now expose
+  `EnginePool.starmap` for multi-argument work and `Channel.try_recv` for a
+  nonblocking mailbox take.
+
+- The consumer sheet and first-steps example now expose the Python-safe root
+  builders `not_` and `in_` beside the existing logic builders.
+
+- `Atom.subs` now appears beside `Atom.unify` in the consumer sheet and the
+  first-steps example proves a unifier can be applied directly to a template.
+
+- Test and conformance harness authors can now find `AssertionFailure` in the
+  error taxonomy and a checked example that reads its operation, actual, and
+  expected fields.
+
+- Class-owned `__metta__` and `__from_metta__` conversion now appears in the
+  consumer sheet and executable object-integration example, including the
+  unregistered `build(atom, Class)` round trip.
+
+- Python class authors can now discover and execute
+  `space.define(Class, accessors=False, methods=False)` to register a type
+  without exposing its host fields or methods as MeTTa callables.
+
+- Saga compensation now has a consumer-sheet entry and checked example showing
+  a committed step's queryable receipt, exceptional-exit recovery, and receipt
+  retirement after successful compensation.
+
+- The checked engine-controls example now executes `Space.limits(stack=...)`,
+  and the consumer sheet identifies it as a scoped SWI combined-stack byte
+  ceiling beside the other call bounds.
+
+- Remote deployers now have a checked example and exact consumer-sheet
+  spellings for `Request` authorization, client capability discovery, TLS and
+  timeout controls, and the server's idle and live-cursor resource bounds.
+
+- Foreign-provider authors now have a consumer-sheet entry and checked example
+  for the distinction between structural `can_run` support, request-specific
+  `should_run` policy, and provider-owned `refusal` messages.
+
+- The consumer sheet and a checked runtime-configuration example now expose
+  the root `metta.config` object, its four environment variables, the atomic
+  `configure` method, and which settings freeze after engine startup.
+
+- `MeTTa.space(..., journal=..., rename=...)`, the module-level `metta.space`
+  factory and `AsyncMeTTa.space` now expose the persistent store's one-open
+  schema migration. Users no longer need to import the private provider class
+  to rename journal heads.
+
+- `sh run.sh --verbose program.metta` exposes informational compiler and
+  source-reload reports at the standalone user's invocation point. The default
+  remains quiet.
+
+- Specialization verification now reports its coverage. Turning
+  `(pragma! verify-specializations true)` off, or exiting a process started
+  with `METTA_VERIFY_SPECIALIZATIONS=1`, writes the checked, agreed, and
+  inference-bounded counts to the requested report channel even when the
+  standalone launcher uses quiet logging. The corpus differential reads and
+  aggregates those counts, and refuses a vacuous run that checked nothing.
+
 - `metta.llms()` prints `llms.txt`, the sheet that teaches this library, and
   answers None the way `help()` does. It is the document an agent reads before
   writing anything against this surface, and until now reading it meant finding

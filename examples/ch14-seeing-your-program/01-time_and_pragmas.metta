@@ -2,6 +2,10 @@
 ; Guarantees:
 ;   - every demonstrated pragma changes a live execution bound.
 ;   [tested: interpreter_pragmas; commit=e8270f8551083f236ce5134ca299adf5347d6898]
+;   - verify-specializations reports how many generated calls agreed and how
+;     many reached its inference bound when the mode turns off [tested:
+;     tests/checks/check_specialization_differential_selftest.py;
+;     commit=694dff934a11dbc2ee99267b60f39564053baf87].
 ;
 ;Time control and interpreter pragmas, all core: no import needed.
 ;
@@ -87,6 +91,15 @@
 !(test (with-pragma! ((max-inferences 100000)) (+ 20 22)) 42)
 !(test (with-pragma! ((max-time 30) (max-inferences 100000)) (spin 100)) done)
 !(test (spin 2000) done)
+
+;;; Specialization verification runs each generated higher-order call beside
+;;; its generic form on first use. Turning it off reports the coverage tally on
+;;; the normal quiet launcher, so a checked run says what it actually checked.
+!(pragma! verify-specializations true)
+(= (verified-inc $x) (+ $x 1))
+(= (verified-twice $f $x) ($f ($f $x)))
+!(test (verified-twice verified-inc 20) 22)
+!(pragma! verify-specializations false)
 
 ;;; Relational integer arithmetic: one unbound argument among integers
 ;;; solves for it, so arithmetic runs BACKWARDS through let and unify.

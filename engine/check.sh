@@ -54,6 +54,11 @@ run GATE shell        run_example_corpus
 # the shell lane above still caught it, but a human reading a red run saw
 # the file name and nothing about why.
 run GATE shell-failure sh -c "cd '$HERE' && sh tests/shell/test_example_runner_surfaces_failures.sh"
+# Informational compiler and reload notes are deliberately suppressible, but a
+# person who opts into them needs a spelling at the launcher they use. The
+# black-box check requires the default to stay quiet and --verbose to expose a
+# real head-pattern note.
+run GATE runner-verbose sh -c "cd '$HERE' && sh tests/shell/test_run_verbose.sh"
 # Written 2026-08-15 in 68cffe2, the commit that REMOVED glyph-based gating, to
 # prove the runner's oracle is process status and not the assertion glyphs it
 # stopped reading. It was wired into nothing: not check.sh, test.sh, bench.sh,
