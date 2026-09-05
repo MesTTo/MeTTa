@@ -123,6 +123,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `metta.llms()` prints `llms.txt`, the sheet that teaches this library, and
+  answers None the way `help()` does. It is the document an agent reads before
+  writing anything against this surface, and until now reading it meant finding
+  the repository: a `pip install` carried the engine, the libraries and the
+  codec corpus but not the one file that explains them. `setup.py` ships it into
+  the runtime tree, so a checkout and an install print the same bytes, and
+  `python -m metta llms` is the same document from a shell. It never pages,
+  unlike `help()`, because the reader is usually a program holding a pipe.
+
 - A compiled `match(...)` call takes a CONJUNCTION. Two or more patterns before
   the template lower to the engine's own `(, p q)`, so
   `match(S.edge(V.x, V.y), S.edge(V.y, V.z), (V.x, V.z))` stores

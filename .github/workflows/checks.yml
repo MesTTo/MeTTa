@@ -376,5 +376,18 @@ jobs:
           # copy would pass a file test.
           from metta.testing import codec_corpus
           assert codec_corpus()['grammar'] == 'CODEC.md', 'the codec corpus did not ship'
+          # metta.llms() prints the sheet that teaches this library, and a
+          # reader who installed from PyPI has no checkout to read instead.
+          # This install came from the SDIST, so it is the one place a
+          # RUNTIME_RESOURCES entry MANIFEST.in does not carry shows up: the
+          # wheel is built from the archive. The oracle is the checkout the
+          # archive was built from, so a truncated copy fails as loudly as an
+          # absent one.
+          import contextlib, io, os
+          printed = io.StringIO()
+          with contextlib.redirect_stdout(printed):
+              metta.llms()
+          checkout = Path(os.environ['GITHUB_WORKSPACE']) / 'llms.txt'
+          assert printed.getvalue() == checkout.read_text(encoding='utf-8'), 'llms.txt did not ship whole'
           print('wheel boots, evaluates outside the checkout, and carries the backend seam')
           "

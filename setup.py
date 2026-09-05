@@ -11,6 +11,9 @@ Guarantees:
   - PYMETTA_USE_MYPYC=1 without mypy installed stops the build naming the fix,
     rather than quietly producing the pure-Python wheel the builder did not
     ask for [tested test_the_codec_builds_under_mypyc_as_an_option]
+  - the wheel carries llms.txt at metta/_runtime/llms.txt, so metta.llms()
+    prints the same document from an install as from a checkout [tested:
+    tests/shell/test_packaged_cli.sh; commit=WORKTREE]
 Owns:
   - build_py_with_runtime writes only beneath setuptools' build directory;
     the wheel gate builds and boots that copy outside the checkout
@@ -129,11 +132,19 @@ def compiled_modules():
 # own codec installs this package rather than cloning the repository. It is
 # language-neutral JSON, so a binding in another language reads the same file
 # out of an installed tree.
+#
+# llms.txt ships for the same class of reason, one step further along: it is
+# the sheet that teaches this library, metta.llms() prints it, and a reader
+# who has pip-installed the package has no checkout to read it from. Without
+# it here the door raises in every wheel while a source tree stays green,
+# which is the failure only a packaging check sees
+# [tested: tests/shell/test_packaged_cli.sh; commit=WORKTREE].
 RUNTIME_RESOURCES = {
     "engine": "engine",
     "lib": "lib",
     "extensions/mork/extension.pl": "extensions/mork/extension.pl",
     "tests/codec": "tests/codec",
+    "llms.txt": "llms.txt",
     "extensions/python/extension.pl": "extensions/python/extension.pl",
     "extensions/python/bridge.pl": "extensions/python/bridge.pl",
     "extensions/python/metta_py.py": "extensions/python/metta_py.py",

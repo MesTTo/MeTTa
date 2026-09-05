@@ -443,6 +443,7 @@ python -m metta repl                     # interactive loop
 python -m metta serve kb.metta --port 8700
 python -m metta lint program.metta       # nonzero exit on findings
 python -m metta doc car-atom
+python -m metta llms                     # print llms.txt, the sheet for an agent
 ```
 
 ## A motivating example

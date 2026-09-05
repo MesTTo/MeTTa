@@ -69,6 +69,14 @@ m.run("(= (f) 1) !(f) !(+ 1 2)")         # [[Grounded(1)], [Grounded(3)]]
 Module-level `metta.run/match/eval/add/remove/parse/fn/trace` act on one lazily
 created default engine, for scripts that never need a second space.
 
+```python
+metta.llms() -> None    # print THIS file to stdout, the way help() prints
+```
+
+`python -m metta llms` prints the same document from a shell. `llms.txt` ships
+inside the wheel beside the engine tree, so an install answers it without a
+checkout, and it never pages: the door writes and returns whatever stdout is.
+
 ## Atoms: built in Python, no engine call
 
 `S.likes` is the symbol `likes`; `S["+"]`, `S["my-name"]` for non-identifiers.

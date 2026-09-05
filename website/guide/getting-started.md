@@ -75,9 +75,12 @@ python -m metta serve kb.metta --port 8700   # expose spaces over HTTP
 python -m metta boot app.metta           # assemble a (boot ...) manifest
 python -m metta lint program.metta       # diagnostics; nonzero exit on findings
 python -m metta doc car-atom             # a name's (@doc ...) documentation
+python -m metta llms                     # print llms.txt, the sheet for an agent
 ```
 
 Each subcommand exits nonzero on failure, so all of them script. The bare `metta` console command keeps the direct-file launcher contract, running a file through `swipl` directly.
+
+`llms.txt` is the one document an LLM agent reads before writing anything against this library, and it ships inside the wheel. `metta.llms()` prints it from Python the way `help()` prints, so neither a person nor an agent needs a checkout to read it.
 
 Examples that need DuckDB, NumPy, or PyTorch skip when that optional dependency is absent.
 
