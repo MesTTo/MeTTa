@@ -584,7 +584,7 @@ metta_semantic_effect('fuzzy-match-context', readOnlyLookup).
 % Library effects describe observable behavior, independently of the host
 % language used to implement the operation. Metadata snapshots allocate a
 % space; directory listings and filesystem existence checks only read.
-% [tested: lib_file_surface:effect_rows; commit=WORKTREE]
+% [tested: lib_file_surface:effect_rows; commit=504f8dddfa890ced97e795a13ab10e239b1de2ce]
 metta_semantic_effect('path-join', pureStructural).
 metta_semantic_effect('path-parent', pureStructural).
 metta_semantic_effect('path-name', pureStructural).
