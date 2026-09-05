@@ -118,22 +118,18 @@ bounded swipl -q -g "
 # measure loading it; the same file is what engine/bench.sh runs, so a sample
 # here and a sample there are the same workload.
 #
-# It is a function of its own so that `bounded` is the command word. Written
-# `reading=$(bounded swipl ...)` the bound is inside an assignment's VALUE, and
-# tests/checks/check_process_bounds.py reads that line as an unbounded swipl.
-boot_sample() {
-    bounded swipl -g "metta_bench:bench_run(boot)" -t halt engine/bench.pl |
-        sed -n 's/.*inferences=\([0-9][0-9]*\).*/\1/p'
-}
-
-# The .qlf set is warm after this one, which is why it is discarded: the first
-# boot after a purge COMPILES, and that is a different workload from loading.
-boot_sample >/dev/null
+# The .qlf set is warm after this first boot, which is why it is discarded: the
+# first boot after a purge COMPILES, and that is a different workload from
+# loading. It is the same command as the eight below, and a drift between them
+# shows up as the first sample disagreeing with the other seven rather than as
+# a silent pass.
+bounded swipl -g "metta_bench:bench_run(boot)" -t halt engine/bench.pl >/dev/null
 
 readings=""
 sample=1
 while [ "$sample" -le 8 ]; do
-    reading=$(boot_sample)
+    reading=$(bounded swipl -g "metta_bench:bench_run(boot)" -t halt engine/bench.pl |
+        sed -n 's/.*inferences=\([0-9][0-9]*\).*/\1/p')
     if [ -z "$reading" ]; then
         printf 'boot sample %s produced no counter line\n' "$sample" >&2
         exit 1

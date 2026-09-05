@@ -47,6 +47,67 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The `parity` gate's verdict no longer depends on how loaded the box is. It
+  reported `engine 0 verdicts` (or `library 0 verdicts`) for a different
+  example on each run, five times over sixteen whole-corpus runs at loadavg
+  26 to 108, and the configuration it named had in fact printed everything it
+  should: the parent threw the output away unread. Its read loop stopped when
+  a `select` had seen nothing AND a `poll()` then reported the child gone,
+  which are observations from two different instants. On a loaded box the gap
+  between them holds a whole child: `epoll_wait` returned nothing at 0.25s
+  because the child had not written yet, the thread was not scheduled again
+  for another 1.6s, and by then the child had printed everything and exited.
+  Measured with the loop instrumented, three reproductions, one on each door:
+  5,564, 567 and 358 bytes still readable from the pipes after the loop, each
+  reproduced byte for byte by re-running the same command. A pipe is finished
+  when it reports EOF; a process exiting is not a reason to stop reading one,
+  and the deadline is what bounds a child that leaks a pipe to something that
+  outlives it.
+
+  A configuration that did not answer is now a reported outcome rather than a
+  count of zero. It is run again, both doors, because a run the box did not
+  let finish is not reproducible and a real failure is; if it still answers
+  nothing it is reported as `no verdict: the <door> configuration answered
+  nothing, twice`, with what stopped it, what it cost, the ceiling and the
+  loadavg, and counted apart from the disagreements. Two configurations that
+  were both killed at the ceiling are that too: they used to carry the same
+  empty groups, empty verdicts and `None` status, compare equal, and pass.
+
+  The 300-second ceiling is derived rather than assumed. The corpus has one
+  worst case on either door, `22-01-logic-programs/04-nilbc.metta`, which
+  costs 26.7s on a quiet box and 90.3s on one carrying three times its cores,
+  so the ceiling is 3.3 times the worst measured cost and 11 times the quiet
+  one. The lane prints the slowest child it saw against that number each run,
+  so the derivation cannot go stale without saying so.
+
+- The `process-bounds` gate reads a shell line by the shell's own grammar
+  instead of by a pattern, so a spawn is judged by the command that wraps it
+  rather than by the first recognised word on the line. One line holds more
+  than one command, and the pattern answered about the wrong one: it called
+  `reading=$(bounded swipl ...)` an unbounded swipl, because the assignment
+  prefix swallowed `$(bounded` and `swipl` was the next word; it spared
+  ``bad=`swipl ...` `` entirely, because a backtick was not an operator it
+  knew; it spared an unbounded spawn written in an `if` or `while` condition,
+  a `for` body or a `case` arm; it spared
+  `RUSTFLAGS="-C target-cpu=native" ... cargo build`, because the prefix
+  pattern stopped at the space inside the quotes; and it reported
+  `sed 's|sh run.sh ...|'`, whose expression names a command and is not one.
+  Over nine planted command positions, each written bounded and unbounded, the
+  pattern answered 6 findings across 8 spawns and got seven of the nine
+  shapes wrong, five of them by sparing the unbounded half; the grammar
+  answers 9 across 18 and gets all nine right. The gate now sees 128 spawn
+  sites in this tree where it saw 123, and the one unbounded spawn among them,
+  `cargo +nightly build -p mork_ffi --release` in
+  `extensions/mork/mork_ffi/build.sh`, carries the bound.
+
+  Two shapes that had been written around the old pattern are written the way
+  they read best again. `tests/shell/test_boot_inference_determinism.sh` takes
+  its eight boot samples with `reading=$(bounded swipl ... | sed ...)` rather
+  than through a helper introduced so that `bounded` would be the first word,
+  and the `# unbounded:` opt-out that spared the `sed` expression in
+  `tests/shell/test_example_runner_surfaces_failures.sh` is gone, because that
+  line was never a spawn.
+
 - The example corpus reads in its own order again. `08-case-duals.metta` sat in
   chapter 7, whose subject is `case`, and negated its arms with `not-provable`,
   which chapter 22 teaches; it is
