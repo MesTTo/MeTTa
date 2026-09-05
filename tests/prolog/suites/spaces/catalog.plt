@@ -362,4 +362,29 @@ test(the_bulk_door_checks_before_it_writes) :-
           true),
     \+ 'get-atoms'('&metta', [source, '&cat4', repeated]).
 
+%A duplicate declaration leaves &self by TWO doors and both have to say the
+%same thing. The batch door throws error(metta_duplicate_declaration(..), _)
+%and the direct add keeps the first row and WARNS with the bare term
+%[source: engine/spaces/lifecycle.pl:1452, engine/spaces/lifecycle.pl:1531].
+%error_message//1 answers only the thrown form, so the warning route printed
+%`Unknown message: metta_duplicate_declaration(...)` and told the operator the
+%term instead of what happened. The message//1 clause delegates to the error
+%one, which is what makes the two routes agree by construction rather than by
+%two texts kept in step.
+duplicate_declaration_message(Message) :-
+    Term = metta_duplicate_declaration('&self',
+                                       [':', 'cat-dup-f', ['->', 'Number']],
+                                       [':', 'cat-dup-f', ['->', 'Number']]),
+    member(Message, [Term, error(Term, none)]).
+
+%message_to_string/2 rather than phrase/2 on the clause, because the defect was
+%never that the text was wrong: it was that SWI's dispatch never reached a
+%clause for the bare form and printed `Unknown message: ...`. Only rendering
+%through the same door print_message/2 uses can see that.
+test(both_doors_render_a_duplicate_declaration,
+     [forall(duplicate_declaration_message(Message))]) :-
+    message_to_string(Message, Text),
+    once(sub_string(Text, _, _, _, "is a duplicate in")),
+    \+ sub_string(Text, _, _, _, "Unknown message").
+
 :- end_tests(catalog_self_description).

@@ -1275,6 +1275,18 @@ prolog:error_message(metta_duplicate_declaration(Space, Second, First)) -->
     [ 'the declaration ~w is a duplicate in ~w; the first declaration is ~w'-
       [SecondText, Space, FirstText] ].
 
+%The same term reaches print_message/2 as a bare WARNING as well as a thrown
+%error: metta_add_atom/3 keeps the first declaration and warns rather than
+%refusing [source: engine/spaces/lifecycle.pl:1452]. error_message//1 covers
+%only the error(Formal, Context) form, so the warning route printed `Unknown
+%message: metta_duplicate_declaration(...)` and the operator was told the term
+%rather than what happened. Delegating keeps one text for both routes
+%[tested: discharge_audit:an_audited_compile_wraps_the_intrinsic_discharge,
+%which fails on the unknown-message warning it provokes].
+:- multifile prolog:message//1.
+prolog:message(metta_duplicate_declaration(Space, Second, First)) -->
+    prolog:error_message(metta_duplicate_declaration(Space, Second, First)).
+
 %The shipped catalog, as data. Every row becomes an ordinary '&metta' atom
 %when the directive below runs, matchable and removable like any other.
 %Vocabularies come first; (kind kind ...) enters while no kind row exists

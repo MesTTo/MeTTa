@@ -58,6 +58,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A duplicate declaration reads as a sentence on both of its doors. The batch
+  door throws and rendered correctly; the direct add keeps the first row and
+  warns with the bare term, which had no `prolog:message//1` clause and printed
+  `Unknown message: metta_duplicate_declaration(...)`.
+
 - The `budget` and `amplitude` carriers are nameable. Both shipped in
   `algebra._PRESETS` and both worked through `metta.under(...)`, but the
   catalog's `(vocabulary semiring ...)` row admitted only eight of the ten

@@ -3410,7 +3410,20 @@ audit_translation(Expr, Conj) :-
                (= (plunit-audit-n $x) $x)\n", _),
           user:translate_runnable_expr(Expr, Goals, _),
           translator:goals_list_to_conj(Goals, Conj) ),
-        erase(Ref)).
+        ( erase(Ref), withdraw_audit_subject )).
+
+%Each call declares plunit-audit-n, so each call takes it away again. Left in
+%place, the SECOND caller's identical declaration is a duplicate, which
+%metta_add_atom/3 keeps the first of and WARNS about, and plunit fails any test
+%that emits an unexpected warning. Both tests below call this helper, so the
+%second failed on the first's residue rather than on anything it measures:
+%`Generated unexpected warning or error ... the declaration (: plunit-audit-n
+%(-> Number Number)) is a duplicate in &self`. The equations go first because
+%removing the declaration announces the change to every call site, and there is
+%no reason to recompile a body that is about to leave.
+withdraw_audit_subject :-
+    ignore(metta_remove_atom('&self', [=, ['plunit-audit-n', _], _], _)),
+    ignore(metta_remove_atom('&self', [':', 'plunit-audit-n', _], _)).
 
 %With the mode off the emitter builds exactly what it always built: an inlined
 %VM test with the registry walk as its fallback, and no trace of the audit.
