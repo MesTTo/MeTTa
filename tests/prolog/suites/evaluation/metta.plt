@@ -1131,6 +1131,49 @@ test(translated_success_leaves_the_query_variable_unbound) :-
 
 :- end_tests(metta_alpha_membership).
 
+:- begin_tests(metta_answer_prune).
+
+%The Empty prune asks its question by IDENTITY, so an answer that still carries
+%a constraint survives it. It used to open with memberchk/2, whose UNIFICATION
+%runs clpfd's attribute_unify_hook, and that hook raises type_error(integer,
+%'Empty') rather than failing, so the probe threw out of a path that catches
+%nothing. Both prune doors are asserted: the runnable collector reaches the
+%answer-shaped one and a computed collapse reaches the bare one.
+test(a_residual_constraint_survives_the_empty_prune) :-
+    X in 1..10,
+    metta_prune_empty_answers(['$metta_answer'(X, names)], Kept),
+    Kept = ['$metta_answer'(Answer, names)],
+    assertion(Answer == X),
+    metta_prune_empty([X], Bare),
+    assertion(Bare == [X]).
+
+%Removing the pre-filter must not remove the pruning. An Empty beside a
+%constrained answer is still dropped, and the constrained answer is still kept.
+test(an_empty_beside_a_constrained_answer_is_still_pruned) :-
+    Y in 1..10,
+    metta_prune_empty([Y, 'Empty', kept], Kept),
+    assertion(Kept == [Y, kept]),
+    metta_prune_empty_answers(['$metta_answer'(Y, a),
+                               '$metta_answer'('Empty', b),
+                               '$metta_answer'(kept, c)],
+                              KeptAnswers),
+    assertion(KeptAnswers == ['$metta_answer'(Y, a), '$metta_answer'(kept, c)]).
+
+%End to end, which is where the defect was seen. Propagation cannot decide a
+%nonlinear product, so both operands stay constrained and the answer reaches
+%the printer as a residual variable. It used to reach it as an uncaught Prolog
+%type error, and `!(#+ $x $y)` did the same, so this is not about nonlinearity.
+test(a_nonlinear_constraint_answers_instead_of_raising) :-
+    setup_call_cleanup(
+        assertz(silent(true), Ref),
+        ( process_metta_string("!(#* $x $y)", [Product]),
+          process_metta_string("!(#+ $x $y)", [Sum]) ),
+        erase(Ref)),
+    assertion(var(Product)),
+    assertion(var(Sum)).
+
+:- end_tests(metta_answer_prune).
+
 :- begin_tests(metta_alpha_unique).
 
 test(synthetic_hash_collision_keeps_inequivalent_terms) :-
