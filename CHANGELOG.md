@@ -147,6 +147,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Node gateway and its client refuse a JSON body that names one key twice,
+  the way the engine's codec and the Python seat already do. `JSON.parse`'s
+  reviver runs after each object is built, so the repeat had already collapsed
+  to the last value: a request naming `space` twice was served under the second
+  value while a reader of the first saw a different request, and the Python
+  gateway answered 400 for the same bytes. Both ends now read through
+  `readJson`, which parses with `JSON.parse` and then walks the same text for
+  its keys, comparing the decoded name so `{"a":1,"a":2}` is the repeat it
+  is. The MeTTa surface's `json-decode` is unaffected; it asks the same codec
+  for the classic shape, which keeps both pairs.
+
 - `serve` and `boot` finish their shutdown when the interrupt repeats. A second
   SIGINT arriving inside the close landed in `socketserver.shutdown`'s wait and
   was collected as a close FAILURE, which `close()` re-raised, so the graceful
