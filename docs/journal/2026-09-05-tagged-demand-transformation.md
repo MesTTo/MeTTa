@@ -107,3 +107,37 @@ Larger demand-only cases preserve the exact independent single-proof oracle. The
 | 8192 | 3 | 16394 | 236977 | 78.630 |
 
 Raw output prefixes are `ai-tmp/query-a20256a5-module-demand`, `-demand-reference`, and `-demand-extended`, each with `.jsonl`, `.log`, `.status` and `-metadata.json` artifacts. All three statuses are 0.
+
+## 2026-09-05: a proof number is a position in an unordered enumeration
+
+Found by running the ch18 directory in file order: two cases failed
+deterministically there and in three whole-suite runs out of six, while either
+file alone passed. `algebra._program/1` numbers every declaration by its
+position in `space.atoms()`, and `answer.proof` and `answer.tokens` carry those
+numbers. That enumeration is `get_native_atom/3`'s
+`current_predicate(Module:Space/Arity)` loop, which walks SWI's predicate table
+rather than the arity order, so atoms group by arity and which group comes
+first depends on what the process has already compiled. Measured directly:
+adding `(wide 1 2 3)`, `(narrow 1)`, `(wide 4 5 6)`, `(narrow 2)` in that order
+enumerates as narrow, narrow, wide, wide. `(fact tag prop)` is three wide and
+`(rule tag head premises)` is four, so a rule's number was 2 in one process and
+0 in another.
+
+Decided: the two cases read the same enumeration and assert the proof's shape
+against it, rather than asserting the numbers. The subject is unchanged: four
+proof trees still name one rule four times, and the eighty-rule chain still
+resolves depth-80 down to the fact through every rule in order. The ch18
+directory passes three runs out of three.
+
+Rejected: sorting the atoms canonically inside `_program/1`. It makes the
+numbering stable, but by a lexicographic order in which `depth-10` precedes
+`depth-2`, so a proof would no longer read as the chain it is and both cases
+would need rewriting around a numbering that means less than the current one.
+Rejected: ordering `get_native_atom/3`'s arity enumeration, which is the
+matcher's hot path and would pay a sort per stored-atom read.
+
+Open: `answer.proof` and `answer.tokens` are public, and a number in them is
+comparable only within one process. Giving provenance an identity that survives
+a restart needs a per-atom sequence in storage or a content key, and is a
+design choice for this surface rather than a repair to it.
+
