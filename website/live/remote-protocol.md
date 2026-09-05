@@ -1,7 +1,7 @@
 <!--
 Purpose: specify the HTTP remote-space protocol and its satellite cursor lifecycle.
 Guarantees: comparisons distinguish eager core queries from remote satellite streaming.
-[tested: npm run docs:build; commit=WORKTREE]
+[tested: npm run docs:build; commit=ec64336e16ebb0299f9794d277daaee3cf234493]
 -->
 
 # The remote space protocol
