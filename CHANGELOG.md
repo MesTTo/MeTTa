@@ -25,6 +25,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   reported as a duplicate declaration, and left no `Dog` type at all. Conversion
   still inherits, which is right there; declaration does not.
 
+- Declaring a Python twin of a Prolog predicate, and clearing a memo table a
+  space has already released, no longer search the autoload library index. The
+  twin check asks the engine for the function's shape, which walks the
+  name-wide arity register asking `indexed/1` about pairs the module does not
+  have; the memo sweep asks `tabled/0` about a table teardown already dropped.
+  Both are properties SWI answers by running its undefined-procedure trap:
+  1,030 inferences each, now 37 and 3.
+
 - The effect walk, source attribution and memoisation no longer search the
   autoload library index for every name that is not a host predicate. All three
   ask a `predicate_property/2` question about a goal or a function name, and

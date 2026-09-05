@@ -239,6 +239,31 @@ memo_owner_cost(Fun, Module, PredArity, Per) :-
     statistics(inferences, After),
     Per is (After - Before - 3 * Rounds) // Rounds.
 
+%A released table is the case the invalidation sweep is written for -- space
+%teardown untables before removing equations, so by the time invalidation runs
+%there is nothing left to clear. tabled/0 is one of the properties SWI answers
+%by running its undefined-procedure trap, which searches the whole autoload
+%library index before raising the existence error, so learning "already gone"
+%cost 1,030 inferences against 8 for a name the module has
+%[measured 2026-09-06; commit=WORKTREE]. A RATIO rather than a count, because
+%the honest number moves a few inferences with clause layout.
+test(clearing_a_table_that_is_already_gone_costs_what_clearing_a_present_name_costs) :-
+    metta_engine_module(Engine),
+    assertion(\+ current_predicate(Engine:'plunit-memo-released-table'/4)),
+    assertion(lib_memo:reset_exact_memo_table(Engine, 'plunit-memo-released-table', 2)),
+    reset_table_cost(Engine, 'car-atom', 0, Present),
+    reset_table_cost(Engine, 'plunit-memo-released-table', 2, Missing),
+    assertion(Missing =< 4 * Present).
+
+reset_table_cost(Module, TableName, Arity, Per) :-
+    Rounds = 500,
+    statistics(inferences, Before),
+    forall(between(1, Rounds, _),
+           ( lib_memo:reset_exact_memo_table(Module, TableName, Arity)
+           -> true ; true )),
+    statistics(inferences, After),
+    Per is (After - Before - 3 * Rounds) // Rounds.
+
 :- end_tests(memo_space_isolation).
 
 

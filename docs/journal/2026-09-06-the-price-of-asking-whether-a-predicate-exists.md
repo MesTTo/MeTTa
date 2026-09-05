@@ -383,3 +383,84 @@ Found while running it: the first attempt was VACUOUS on one of the three.
 CALL rather than on anything inside it. `metta_ensure_source_observation` at
 the head of the probe fixed both, and the corrected run has 2,478 real
 attribution rows.
+
+## 2026-09-06, the last two, and the sites that are safe
+
+Decided: `current_predicate/1` in front of `lib_memo`'s
+`reset_exact_memo_table/3`, whose whole reason for existing is the case where
+the table is ALREADY GONE (space teardown untables before removing equations),
+and the two-arm guard in front of `extensions/python/metta/shim.pl`'s
+`metta_py_index_quality/5`, which walks the engine's name-wide `arity/2`
+register and so is asked about pairs the reported module does not have.
+
+| site, per call | before | after |
+|---|---|---|
+| `reset_exact_memo_table/3`, a released table | 1,030 | 3 |
+| `reset_exact_memo_table/3`, a name the module has | 8 | 9 |
+| `metta_py_index_quality/5`, a name the module lacks | 1,030 | 37 |
+| `metta_py_index_quality/5`, a name the module has | 8 | 9 |
+
+Differential: 33 rows over both sites, byte-identical. The first version of it
+was WEAK and said so -- every row took the negative branch, so it could not
+have caught a change to the positive one. Planting 400 clauses and calling them
+until SWI builds a JIT index (`speedup:400.0, realised:true`) and a real
+`table/1` declaration made both positive branches answer, and the rows still
+match.
+
+Tried: putting the shim's regression in `tests/prolog/suites/host/shim.plt` ->
+it passes on the parent. That suite's documented load contract is engine-free,
+and without the engine the asking module carries almost no `:- autoload/2`
+declarations, so the same miss costs 58 inferences rather than 1,030 and no
+honest ratio separates the two spellings. Moved to the Python lane, where the
+shim runs with the engine: 1,037 against 22 on the parent, red, and 37 against
+22 here.
+
+### Every other `predicate_property/2` site, and why it is safe
+
+Sixteen more sites ask a trapping property. None is live, and the reasons are
+worth keeping because they are the shapes that make one safe:
+
+- a `current_predicate/1` enumeration or test already stands in front:
+  `engine/specializer.pl` `forget_symbol/2`, `engine/tracer.pl`
+  `metta_trace_target/1`, `engine/spaces/native_matching.pl`
+  `space_atom_count_uncached/2`, `engine/spaces/lifecycle.pl`
+  `metta_capture_default_imports/1`, `metta_exec_module_owns_clauses/1`,
+  `clear_generated_predicates/1`, `function_still_defined/1` and
+  `metta_module_owns_function/2` through `compiled_predicate_arity/4`,
+  `engine/spaces/catalog.pl` `native_storage_ready/1`,
+  `engine/translator/lowering.pl` `compiled_lambda_live/2`,
+  `engine/metta/registration.pl` `imported_predicate/2`,
+  `engine/metta/effects.pl` `metta_effect_plan_named_call/5`,
+  `lib/lib_tabling/lib_tabling.pl`'s four (all downstream of
+  `metta_tabling_visible_owner/4`, which throws when the name is not current),
+  `lib/lib_memo/lib_memo.pl` `memo_automatic_unsafe_reason/3` and
+  `memoizable_fun/3`, and `extensions/python/metta/shim.pl`
+  `metta_py_name_still_defined/1`, `metta_py_saga_compensation_callable/2` and
+  `metta_py_saga_owner/3`;
+- a `clause/2` probe stands in front, which FAILS on an undefined name rather
+  than raising, so the property is reached only for a predicate that exists:
+  `engine/metta/interop.pl` `ready_hook_admits/2`,
+  `lib/lib_conformance/lib_conformance.pl` `conformance_hook_defined/2`;
+- the property is one SWI special-cases and does not answer through the trap:
+  `built_in` (`extensions/python/metta/shim.pl` and
+  `extensions/node/bridge.pl`'s solver, which asks it directly) and
+  `implementation_module/1` (`engine/ext_points.pl` `write_door_module/2`,
+  `extensions/python/metta/shim.pl` `metta_py_clause_owner/3`);
+- the name is one the engine defines and always has: `engine/metta.pl`
+  `metta_host_function_generation/1` on `fun/1`,
+  `engine/metta/interop.pl` `ensure_conformance_kit/0` on a predicate declared
+  dynamic above it, `engine/metta/interop.pl` `metta_host_refuse_taken_name/3`
+  which is reached only after `assertz` raised `permission_error(modify,
+  static_procedure, _)`.
+
+Measured, not assumed, for the one that looked live: `engine/json_codec.pl`'s
+`json_codec_no_write_hook/0` runs on EVERY JSON write and asks
+`number_of_clauses/1` about two `library(json)` multifile hooks. Priced at
+1,023 inferences on the first attempt and at **16** once
+`engine/json_codec.pl` was actually LOADED -- that file is a module nothing
+loads at boot, so the first number was the trap on the unresolvable CALL rather
+than on anything inside it. `library(json)` declares both hooks multifile, so
+they exist with zero clauses and the count answers cheaply. Its own comment,
+"asking costs two lookups per call", is right. The same mistake voided the
+first `goal_attribution/3` measurement; the rule it leaves is to assert the
+site is reachable before believing its price.
