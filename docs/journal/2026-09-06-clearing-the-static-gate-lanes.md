@@ -54,3 +54,31 @@ Tried: `a_shared_alias_is_hidden_by_a_declaration_added_to_another_space` in
 `late_addition_and_removal_repair_already_compiled_callers`. It passes on the
 tree and the planted `&self` binding kills it and nothing else: 31 of 32 pass,
 and it fails with `Assertion: 7=['Error',_,['BadArgType',1,'Count','Number']]`.
+
+Tried: finding what loads `library(backcomp)` under the typed build, which is
+what fails `translator_super:asking_whether_a_module_defines_a_name_loads_nothing`
+there and nowhere else. Bisected by asking after each step rather than reading
+code: absent at boot, absent after `use_module(library(quickcheck))`, absent
+after `use_module(library(mavis))`, PRESENT after consulting a two-line fixture
+whose only content is one clause under a mode line. So it is the EXPANSION, not
+the engine and not an inserted check.
+
+Decided: `vendor/mavis.pl:82`'s `string_to_list/2`. `backcomp.pl:308` defines it
+as a call to `string_codes/2` and deprecates it, and it is not a builtin, so the
+first mode line the build expands autoloads the module. Swept the other 51
+backcomp exports across the three vendored files: `current_module` there is
+arity 1 and `call_cleanup` arity 2, both builtins, and `index` is inside a URL.
+`string_codes/2` in its place leaves the same two checks on the clause
+(`the(integer,A),the(integer,B),B is A*2`) and no new module.
+
+Decided: measure the property rather than only fix the instance. Two directives
+in `dev_typed.pl` bracket the file's own first mode line and record which
+modules that expansion added; `dev_typed_expansion_is_transparent/0` is the
+verdict, called by both `dev_typed_selftest/0` and `dev_typed_report/0`, so both
+lanes hold it. It reads `[]` on the tree, and restoring `string_to_list/2` makes
+the selftest exit 1 with `modules the first mode line loaded:
+[backward_compatibility]`.
+
+Rejected: weakening the test's `\+ current_module(backward_compatibility)`
+assertion. The load was real and was the tooling's, so the assertion was right
+and the build was not transparent.

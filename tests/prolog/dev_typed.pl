@@ -39,10 +39,11 @@
 %     current_prolog_flag(optimise), so the two builds are two processes and
 %     never one process choosing [source: vendor/mavis.pl, its
 %     `:- if(current_prolog_flag(optimise,true)).`].
-%   - vendor/quickcheck.pl declares has_type/2 multifile and vendor/mavis.pl
-%     drops its no-op checks with subsumes_term/2. Both are changes this build
-%     needs and both are recorded where they were made; without the first,
-%     every must_be/2 in the engine became a binding type INFERENCE
+%   - vendor/quickcheck.pl declares has_type/2 multifile, and vendor/mavis.pl
+%     drops its no-op checks with subsumes_term/2 and reads a structured
+%     comment with string_codes/2. All three are changes this build needs and
+%     all three are recorded where they were made; without the first, every
+%     must_be/2 in the engine became a binding type INFERENCE
 %     [measured 2026-08-19].
 % Guarantees:
 %   - the development build is TRANSPARENT: every plunit suite in this
@@ -57,6 +58,13 @@
 %     violation and never guesses which build it is in: it reads the same
 %     optimise flag mavis reads
 %     [tested: test_the_dev_build_checks_a_planted_type_violation_and_optimise_strips_it].
+%   - expanding a mode line loads NO module, so a suite asking which modules
+%     are resident reads the same answer under both builds. Both entry points
+%     a lane runs check it, and it names the module and the remedy when it
+%     fails [measured 2026-09-06: [] here, [backward_compatibility] with
+%     vendor/mavis.pl's string_to_list/2 restored; command=swipl -q
+%     --on-error=status -g dev_typed_selftest -t 'halt(0)' dev_typed.pl;
+%     commit=WORKTREE].
 % Decides:
 %   - the fixture lives here rather than in engine/, because a planted defect in
 %     the engine's own source is a defect in the engine's own source.
@@ -86,6 +94,24 @@
 
 %%%%%%%%%% The planted violation, and it is planted in BOTH directions %%%%%%%%%%
 
+% Which modules are resident with mavis loaded and no mode line expanded yet.
+% The pair of directives around the first annotated clause below measures what
+% RUNNING the expansion adds, with the tooling's own libraries already in the
+% Before set, so the difference is the expansion and nothing else.
+%
+% This is a transparency check, not bookkeeping. mavis's expansion runs inside
+% every load this build performs, so a library IT reaches for is resident in a
+% process the production build never puts it in, and the engine's own suites
+% ask about resident modules: the vendored mode_declaration/2 called
+% string_to_list/2, library(backcomp)'s deprecated spelling of string_codes/2,
+% which autoloaded module backward_compatibility and failed
+% translator_super:asking_whether_a_module_defines_a_name_loads_nothing --
+% whose whole subject is that asking a module whether it defines a name loads
+% nothing -- as though the engine had loaded it [measured 2026-09-06].
+:- findall(Module, current_module(Module), Loaded),
+   sort(Loaded, Before),
+   nb_setval('$dev_typed_modules_before', Before).
+
 % A mode line and a body that disagree with it the moment a caller passes a
 % non-integer. Under the dev build the clause gains `the(integer, X)` before the
 % body and the call is refused naming the type; under `swipl -O` the clause body
@@ -98,6 +124,34 @@ dev_typed_planted_double(Number, Doubled) :- Doubled is Number * 2.
 % And a control with no mode line at all, so "the body changed" cannot be
 % confused with "every body changed".
 dev_typed_unannotated_double(Number, Doubled) :- Doubled is Number * 2.
+
+:- findall(Module, current_module(Module), Loaded),
+   sort(Loaded, After),
+   nb_getval('$dev_typed_modules_before', Before),
+   subtract(After, Before, Added),
+   nb_setval('$dev_typed_expansion_modules', Added).
+
+dev_typed_expansion_modules(Added) :-
+    nb_getval('$dev_typed_expansion_modules', Added).
+
+% The verdict on that measurement, called by BOTH entry points a lane runs, so
+% neither the selftest nor the report can pass while the tooling drags a
+% library into the process. Under -O the expansion is not compiled at all and
+% the set is empty for that reason, which is the same answer for the other
+% build's reason and is why this is not split by build.
+dev_typed_expansion_is_transparent :-
+    dev_typed_expansion_modules(Added),
+    format("modules the first mode line loaded: ~q~n", [Added]),
+    (   Added == []
+    ->  true
+    ;   format(user_error,
+               "expanding a mode line loaded ~q, so the development build is \c
+                not the production one: a suite that asks which modules are \c
+                resident reads the tooling's load as the engine's. Find the \c
+                autoloaded predicate the expansion in vendor/mavis.pl reaches \c
+                for and spell it with the builtin it deprecates~n", [Added]),
+        halt(1)
+    ).
 
 %%%%%%%%%% Reading the two builds apart %%%%%%%%%%
 
@@ -136,6 +190,7 @@ dev_typed_leading_checks(Goal, Seen, Count) :-
 % "stripped" mean "raised something", and under -O the raw arithmetic raises a
 % type_error too, just about a different thing.
 dev_typed_selftest :-
+    dev_typed_expansion_is_transparent,
     dev_typed_build(Build),
     dev_typed_inserted_checks(dev_typed_planted_double(_, _), Annotated),
     dev_typed_inserted_checks(dev_typed_unannotated_double(_, _), Control),
@@ -193,6 +248,7 @@ dev_typed_selftest_verdict(optimised, Annotated, Control, Bodies,
 % check that no annotation is malformed, and it FAILS if the total is zero,
 % because a mode line that stopped parsing would otherwise read as success.
 dev_typed_report :-
+    dev_typed_expansion_is_transparent,
     dev_typed_engine,
     dev_typed_build(Build),
     format("build: ~w~n", [Build]),

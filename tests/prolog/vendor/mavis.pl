@@ -6,9 +6,13 @@
 %   VENDORED, not written here. This is Michael Hendricks' `mavis` pack
 %   version 0.2.3, PUBLIC DOMAIN under the Unlicense (vendor/LICENSE)
 %   [source: https://github.com/mndrix/mavis at db1153d, read 2026-08-19].
-%   Nothing changed: the file is the pack's prolog/mavis.pl verbatim under the
-%   banner below. Its own readme says the repository is archived and points at
-%   https://github.com/GavinMendelGleason/mavis as the current maintainer.
+%   The file is the pack's prolog/mavis.pl under the banner below with two
+%   changes, each marked `CHANGED HERE` at the line it touches and each with
+%   the measurement behind it: `exclude(subsumes_term(the(any,_)), ...)` in
+%   build_type_assertions/2, and string_codes/2 for string_to_list/2 in
+%   mode_declaration/2. Its own readme says the repository is archived and
+%   points at https://github.com/GavinMendelGleason/mavis as the current
+%   maintainer.
 % Assumes:
 %   - the insertion is decided at LOAD time by current_prolog_flag(optimise),
 %     so the two builds are two loads and never one process choosing
@@ -78,7 +82,16 @@ user:goal_expansion(the(_,_), true).
 
 % extract mode declaration from a structured comment
 mode_declaration(Comment, ModeCodes) :-
-    string_to_list(Comment, Codes),
+    %CHANGED HERE, `string_codes` was `string_to_list`. The two are the same
+    %conversion -- backcomp.pl:308 defines string_to_list/2 as a call to
+    %string_codes/2 and deprecates it -- but string_to_list/2 is not a builtin,
+    %so the first mode line this build expanded AUTOLOADED library(backcomp)
+    %and left module backward_compatibility resident in a process the
+    %production build never puts it in. translator_super:asking_whether_a_
+    %module_defines_a_name_loads_nothing asserts the opposite and read it as
+    %the engine's defect [measured 2026-09-06: absent after use_module(
+    %library(mavis)), present after consulting one clause under a mode line].
+    string_codes(Comment, Codes),
     phrase(pldoc_process:structured_comment(Prefixes,_), Codes, _),
     indented_lines(Codes, Prefixes, Lines),
     pldoc_modes:mode_lines(Lines, ModeCodes, [], _).
