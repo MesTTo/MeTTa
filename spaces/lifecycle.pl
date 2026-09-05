@@ -378,10 +378,37 @@ metta_abolish_local_predicate(Module, Name, Arity) :-
 metta_restore_inherited_predicate(_, Name, _) :-
     sub_atom(Name, 0, 1, _, '$'),
     !.
+%implementation_module/1 asks first, and imported_from/1 still decides. The
+%abolish above leaves most names resolving NOWHERE -- a space's own function,
+%gone with its last equation -- and imported_from/1 on such a name runs SWI's
+%undefined-procedure trap, which reads the asking module's autoload
+%declarations and the library index before raising the existence error this
+%clause discards: 1,033 inferences to learn "nothing above me has it", 7,351
+%times over the plunit suites. implementation_module/1 is special-cased in
+%SWI's property_predicate/2 and reaches '$find_library'/5 directly, so the
+%same question costs 33 and the whole clause 43
+%[source: /usr/lib/swi-prolog/boot/syspred.pl, property_predicate/2;
+%measured 2026-09-06; commit=WORKTREE].
+%
+%The guard cannot change which branch is taken: Home \== Module holds exactly
+%where imported_from/1 answers, on every one of the 7,949 module/name pairs of
+%a booted image, across a two-hop import chain, for a name the module defines
+%itself (both say no) and for an autoloadable name (both name the library).
+%
+%It is a GUARD and not a replacement, which a differential decided rather than
+%taste: implementation_module/1 names the library WITHOUT loading it, and the
+%import/1 below then binds this module to one that has no export list yet --
+%SWI warns `sumlist/2 is not exported (still imported into ...)` and the
+%repaired call resolves to nothing. imported_from/1 loads it, which is the
+%side effect this clause needs
+%[measured 2026-09-06: 12 shadow-repair probes, one fresh module each, the
+%sumlist/2 row alone diverging; fixture=ai-tmp/autoload-traps/spaces_diff.pl].
 metta_restore_inherited_predicate(Module, Name, Arity) :-
     retractall('$metta_repaired_shadow_import'(Module, Name, Arity, _)),
     functor(Head, Name, Arity),
-    (   predicate_property(Module:Head, imported_from(Source)),
+    (   predicate_property(Module:Head, implementation_module(Home)),
+        Home \== Module,
+        predicate_property(Module:Head, imported_from(Source)),
         Source \== system,
         \+ predicate_property(Module:Head, built_in),
         catch(Module:import(Source:Name/Arity), _, fail)
@@ -533,9 +560,18 @@ metta_repair_shadow_imports :-
     forall(member(Module-Name-Arity, Dependencies),
            metta_repair_shadow_import(Module, Name, Arity)).
 
+%current_predicate/1 first, because the question is whether this module has
+%its OWN non-empty definition and a receipt names a name that may resolve
+%nowhere at all now. number_of_clauses/1 is one of the properties SWI answers
+%through the undefined-procedure trap, so asking it about such a name searched
+%the autoload library index to learn "no" [see
+%metta_restore_inherited_predicate/3 above]. The guard cannot change the
+%answer: a name current_predicate/1 does not find is imported or absent, and
+%both take the repair branch either way.
 metta_repair_shadow_import(Module, Name, Arity) :-
     functor(Head, Name, Arity),
-    (   predicate_property(Module:Head, number_of_clauses(Clauses)),
+    (   current_predicate(Module:Name/Arity),
+        predicate_property(Module:Head, number_of_clauses(Clauses)),
         \+ predicate_property(Module:Head, imported_from(_)),
         Clauses > 0
     ->  true

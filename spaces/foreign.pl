@@ -1882,11 +1882,22 @@ remove_equation(Space, Term, F, Args, Body, Removed) :-
     %a removal by open pattern, [Head|_], leaves Args a partial list, and
     %length/2 on a partial list generates arities for ever
     %[tested: removing_a_self_shadow_restores_the_builtin].
+    %current_predicate/1 before the count, because the arity comes from the
+    %stored equation and need not name a predicate this module has at all.
+    %number_of_clauses/1 is one of the properties SWI answers through the
+    %undefined-procedure trap, which searches the whole autoload library index
+    %before raising the existence error, so asking it about such a name cost
+    %1,030 inferences to learn "no predicate"
+    %[source: /usr/lib/swi-prolog/boot/syspred.pl, define_or_generate/1;
+    %measured 2026-09-06; commit=WORKTREE]. The guard cannot change the
+    %answer: a name current_predicate/1 does not find has no clause count
+    %here, so the branch is not taken either way.
     (   Erased == true,
         Probe = [=, [_|StoredArgs], _],
         is_list(StoredArgs),
         length(StoredArgs, NArgs),
         PredArity is NArgs + 1,
+        current_predicate(Module:F/PredArity),
         functor(EmptyHead, F, PredArity),
         predicate_property(Module:EmptyHead, number_of_clauses(0))
     ->  (   current_transaction(_)
@@ -1928,11 +1939,15 @@ remove_equation(Space, Term, F, Args, Body, Removed) :-
 %because a reload that REDEFINES a function empties it in withdrawal and
 %refills it in the load, and only a function still empty at the sweep is
 %a shadow to drop. abolish refusing (a tabled shadow) leaves the old
-%behaviour, an empty local predicate.
+%behaviour, an empty local predicate. current_predicate/1 guards the count
+%for the reason remove_equation/6 gives above: a row written before the
+%transaction committed can name a predicate this module no longer has, and
+%number_of_clauses/1 answers that through the autoload search.
 metta_repair_emptied_shadows :-
     forall(retract('$metta_shadow_repair_pending'(Module, F, PredArity)),
            (   functor(Head, F, PredArity),
-               (   predicate_property(Module:Head, number_of_clauses(0))
+               (   current_predicate(Module:F/PredArity),
+                   predicate_property(Module:Head, number_of_clauses(0))
                ->  metta_abolish_local_predicate(Module, F, PredArity)
                ;   true
                )
