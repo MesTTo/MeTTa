@@ -332,3 +332,54 @@ The 11 that remain are names that DO resolve into a library, where
 `imported_from/1` autoloads it on purpose.
 
 `sh engine/test.sh` exits 0, 68 suites, on the changed tree.
+
+## 2026-09-06, the three sites where the autoload answer is load-bearing
+
+Constraint for this section: `metta_effect_construct/2` classifies EFFECTS, so
+a meta-predicate it fails to recognise makes an impure closure read as pure --
+the defect its own comment records, where `maplist/3` was inert and what it
+called was never looked at. Nothing here may narrow what it sees.
+
+Tried: `current_predicate/1` alone, as at the two sites above -> rejected.
+Loading every library the autoload index names and asking which of them are
+meta-predicates the booted engine does NOT already have gives **249**, among
+them `assertion/1`, `call_cleanup/3`, `catch/4`, `debug/3`, `call_time/2` and
+`checklist/2`. `current_predicate/1` says no for every one of those until
+something loads it, so the guard would have silently narrowed the walk.
+
+Decided: two arms. `current_predicate/1` admits what the module already has;
+`predicate_property(Head, implementation_module(Home)), Home \== Here` admits
+what it would AUTOLOAD, for 33 inferences and without loading anything, so the
+`meta_predicate/1` ask behind the guard still autoloads exactly when it used
+to. `implementation_module/1` names the module itself when nothing resolves the
+name, which is the case worth not paying for.
+
+Applied at `engine/metta/effects.pl`'s catch-all clause, at
+`engine/source_observation.pl`'s `goal_attribution/3`, and at
+`lib/lib_memo/lib_memo.pl`'s `memo_owner_module/4`, where the same shape guards
+`imported_from/1` rather than `meta_predicate/1` -- a memo declaration may
+PRECEDE the definitions it governs, so that site is routinely asked about a
+name nothing has compiled yet.
+
+| site, per call | before | after |
+|---|---|---|
+| `metta_effect_construct/2`, `maplist/3` | 16 | 17 |
+| `metta_effect_construct/2`, a MeTTa function name | 1,031 | 40 |
+| `metta_effect_construct/2`, `atom_length/2`, host but not meta | 9 | 10 |
+| `goal_attribution/3`, `maplist/3` | 8 | 11 |
+| `goal_attribution/3`, a MeTTa function name | 1,029 | 39 |
+| `memo_owner_module/4`, a name the space inherits | 10 | 16 |
+| `memo_owner_module/4`, a name nothing has compiled | 1,033 | 43 |
+
+Differential: 9,459 answers over every name that can reach the three sites --
+the corpus's own twelve, every meta-predicate the engine module has, all 1,833
+names in the autoload index, and 240 names nothing defines -- byte-identical,
+one arm per process.
+
+Found while running it: the first attempt was VACUOUS on one of the three.
+`engine/source_observation.pl` is not loaded at boot, so
+`source_observation:goal_attribution/3` raised in both arms and every row read
+`no`; the site also priced at 1,024 both ways, which was the trap on the
+CALL rather than on anything inside it. `metta_ensure_source_observation` at
+the head of the probe fixed both, and the corrected run has 2,478 real
+attribution rows.

@@ -25,6 +25,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   reported as a duplicate declaration, and left no `Dog` type at all. Conversion
   still inherits, which is right there; declaration does not.
 
+- The effect walk, source attribution and memoisation no longer search the
+  autoload library index for every name that is not a host predicate. All three
+  ask a `predicate_property/2` question about a goal or a function name, and
+  most of those are MeTTa functions, which live in their space's module rather
+  than the engine's, so the question is asked about a name the engine module
+  does not have. On such a name `meta_predicate/1` and `imported_from/1` run
+  SWI's undefined-procedure trap, which searches the whole index before raising
+  the existence error the caller discards: 1,031, 1,029 and 1,033 inferences,
+  now 40, 39 and 43. Classifying the shipped examples took that path 253 times.
+  What each site sees is unchanged, including the 249 meta-predicates the
+  engine would autoload rather than already hold, measured over 9,459 answers
+  spanning every name in the autoload index.
+
 - Removing an equation no longer searches the autoload library index once per
   name. When a space's last equation for a function goes, the engine abolishes
   the emptied local predicate and asks what the module now resolves that name
