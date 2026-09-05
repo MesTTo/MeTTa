@@ -2,7 +2,7 @@
 %   clauses, including duplicate proofs, source prefixes and space mutations.
 % Guarantees: the differential compares complete answer bags and the growth
 %   gate measures completed queries [tested: function_free_materialization;
-%   commit=WORKTREE].
+%   commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
 % Owns resources: fixture spaces, reader engines and message queues are
 %   released by cleanup goals; collection probes restore the GC thread flag.
 
@@ -13,7 +13,7 @@
 % Preparation is off unless a program asks for it, so the unit declares the
 % pragma for its own scope and restores the previous value. A differential run
 % without it would compare the compiled program with itself.
-% [tested: preparation_is_declared_rather_than_the_default; commit=WORKTREE]
+% [tested: preparation_is_declared_rather_than_the_default; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
 :- begin_tests(function_free_materialization,
                 [setup(( filereader:metta_host_set_silent(true),
                          enable_source_materialization(Previous) )),

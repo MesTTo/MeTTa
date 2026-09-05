@@ -5,14 +5,14 @@ Guarantees:
   - version 4 fast images preserve each stored equation's resolved reader
     bindings and refuse earlier cache schemas
     [tested: test_fast_images_preserve_each_equations_binding,
-    test_fast_load_refuses_other_incompatible_headers; commit=WORKTREE]
+    test_fast_load_refuses_other_incompatible_headers; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
   - examples use the public metta.space() and metta.attach() functions
   - journal replay renames are documented as one-time migrations, and content
     digests state that renamed heads change their hashes
 [tested: test_guides_keep_documentation_law_explainers,
 test_a_second_replay_does_not_reapply_the_rename;
 commit=ee43d4a0585593b4f40d0c3c0557db8214688829]
-[tested: npm run docs:build; commit=WORKTREE]
+[tested: npm run docs:build; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
 -->
 
 # Spaces

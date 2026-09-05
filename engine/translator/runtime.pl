@@ -1,7 +1,7 @@
 % Purpose: evaluate data terms and provide runtime helpers emitted by translated forms
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.
 %   fun_meta_head/3 preserves each source head's bindings and multiplicity
-%   [tested: run_tests(translator_metadata_projection); commit=WORKTREE].
+%   [tested: run_tests(translator_metadata_projection); commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % Guarantees: lift_pattern_modifiers/4 answers whether a pattern carries a sequence variable from the walk it already makes, and a case arm with one compiles to the gap matcher [tested: tests/prolog/suites/translator/translator.plt:the_walk_reports_a_written_gap, tests/prolog/suites/reader/segments.plt; commit=a3dff3abc83b9d82f3652093246e1d693d526cdb].

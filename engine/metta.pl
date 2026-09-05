@@ -2,7 +2,7 @@
 %   imports, function registration, and named-space execution context.
 % Guarantees:
 %   - materialize.pl loads before source processing and shares the engine's
-%     runtime context [tested: function_free_materialization; commit=WORKTREE].
+%     runtime context [tested: function_free_materialization; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
 %   - Files below engine/metta/ are plain source units consulted into this
 %     implementation module in their original order; builtin, runtime, and
 %     registration predicates retain their existing ownership and clause order

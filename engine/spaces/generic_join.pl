@@ -1,15 +1,15 @@
 % Purpose: plan native cyclic conjunctions as bag-preserving Generic Join.
 % Assumes: spaces consults this file; conjunct_goal/4 enumerates stored rows
-% without evaluating them [source: engine/spaces/native_matching.pl, conjunct_goal/4; commit=WORKTREE].
+% without evaluating them [source: engine/spaces/native_matching.pl, conjunct_goal/4; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
 % Guarantees: patterns are flat and attribute-free; trie plans require finite
 % ground candidate rows and emit the product of their occurrence counts;
 % an empty factor proves the empty bag directly
-% [tested: native_generic_join; commit=WORKTREE].
+% [tested: native_generic_join; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
 % Owns resources: immutable Prolog terms hold one query's tries and are released
 % with its stack; no cache, database entry or external handle survives the query.
 % Decides: nonempty GYO-cyclic queries use variable-at-a-time intersection;
 % other nonempty shapes retain match_relational_conjuncts/5
-% [tested: native_generic_join; commit=WORKTREE].
+% [tested: native_generic_join; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
 
 :- use_module(library(assoc), [ord_list_to_assoc/2, gen_assoc/3]).
 :- use_module(library(ordsets), [ord_intersection/3, ord_subset/2]).
@@ -30,7 +30,7 @@
 % command=PYTHONPATH=extensions/python $VENV/bin/python -m
 % benchmarks.query_planning join --family FAMILY [--control];
 % fixture=two-hub at 8192, uniform at 2048, clique at 48, small-third at 2048;
-% commit=WORKTREE]
+% commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
 cyclic_join_planning_enabled :-
     metta_pragma('plan-cyclic-joins', Value),
     Value \== false,

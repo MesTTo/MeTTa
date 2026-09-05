@@ -1,7 +1,7 @@
 % Purpose: verify that materialized dispatch owns only its selected functions.
 % Guarantees: unrelated native calls retain the existing inference ceiling;
 %   same-name images, rollback and removal retain exact bags and clause owners
-%   [tested: materialization_dispatch; commit=WORKTREE].
+%   [tested: materialization_dispatch; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d].
 % Owns resources: fixture spaces and the host registration are removed by
 %   cleanup goals. Clause references are inspected to test retained handlers,
 %   whose resource lifetime is not observable from a returned answer bag.
