@@ -33,7 +33,7 @@
 %   scope [tested:
 %   structural_aliases:a_scope_without_an_alias_installs_no_withdrawal_clause,
 %   structural_aliases:alias_readers_cost_only_their_visible_scope_and_retire_transactionally;
-%   commit=WORKTREE].
+%   commit=e471c116647ffc9d3949501b3f2d3869a9153bc2].
 
 %The inverse of add_sexp_in/4, written here beside it for the same reason
 %metta_module_space/2 is written beside space_module/2: the mapping is

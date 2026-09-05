@@ -27,7 +27,7 @@
 %   transaction; a scope with none installs no clause on metta_remove_atom/3 and
 %   withdraws exactly as it did before aliases existed [tested:
 %   structural_aliases:a_scope_without_an_alias_installs_no_withdrawal_clause;
-%   commit=WORKTREE].
+%   commit=e471c116647ffc9d3949501b3f2d3869a9153bc2].
 
 %%%% Who owns a space name: the claim door %%%%
 %
