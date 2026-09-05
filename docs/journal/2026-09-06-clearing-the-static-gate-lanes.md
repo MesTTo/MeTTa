@@ -185,7 +185,31 @@ Open: the boot row's pin is 531,984 and this tree measures 265,957, so
 `8ec7de24` left it there when it took boot from 543,929 to 240,641. That is the
 attributed re-pin pass's, not this branch's.
 
-Superseding the two figures in "Tried: `lib-surface`'s one finding" above, on
+Found, after the first full Python run: two failures, and the vendored one was
+this branch's own. `test_the_vendored_runner_records_its_provenance[mavis.pl]`
+requires the header to carry the literal phrase `What the vendoring changed` or
+`Nothing changed`, and rewording the mavis header to stop claiming "nothing
+changed" dropped both. `vendor/list_util.pl` shows the form the test is written
+against, a `What the vendoring changed, and nothing else:` line over one bullet
+per change, and mavis reads that way now. The header check is the reason the
+claim was wrong for two weeks and not longer.
+
+Measured: the other failure is this branch's too, and it is the seam row.
+`test_a_shipped_twin_agrees_with_its_example_end_to_end` read the identity twin
+at 3,417 against its 3,422 pin. Reverting `engine/` to trunk reads 3,422;
+restoring `engine/ext_points.pl` alone reads 3,417; keeping that file's comment
+and deleting its one `kind/2` clause reads 3,422 again. Three identical samples
+per arm, same worktree, .qlf cleared and warmed for each.
+
+Decided: the cost is ONE MORE PUBLISHED SERVICE and nothing about which name. A
+row planted for the unrelated `metta_base_engine_subsystems/1` instead of the
+observation door reads 3,417, the same figure. That is the load-structure class
+`engine/bench-baseline.json`'s boot row documents; why a published name takes
+five inferences off that twin is not established, and the re-pin says so rather
+than inventing a mechanism.
+
+Superseding every figure above for the seam row, both in "Tried:
+`lib-surface`'s one finding" and in the paragraph before this one, on
 the tree that landed rather than the one they were taken on. Trunk moved 30
 commits under this branch while it ran, and the specialization coverage report
 in `694dff93` changed the same two counts.

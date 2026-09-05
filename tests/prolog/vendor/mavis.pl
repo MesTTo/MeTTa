@@ -6,13 +6,16 @@
 %   VENDORED, not written here. This is Michael Hendricks' `mavis` pack
 %   version 0.2.3, PUBLIC DOMAIN under the Unlicense (vendor/LICENSE)
 %   [source: https://github.com/mndrix/mavis at db1153d, read 2026-08-19].
-%   The file is the pack's prolog/mavis.pl under the banner below with two
-%   changes, each marked `CHANGED HERE` at the line it touches and each with
-%   the measurement behind it: `exclude(subsumes_term(the(any,_)), ...)` in
-%   build_type_assertions/2, and string_codes/2 for string_to_list/2 in
-%   mode_declaration/2. Its own readme says the repository is archived and
-%   points at https://github.com/GavinMendelGleason/mavis as the current
-%   maintainer.
+%   What the vendoring changed, and nothing else, each marked `CHANGED HERE`
+%   at the line it touches with the measurement behind it:
+%
+%   - build_type_assertions/2 drops its no-op checks with
+%     `exclude(subsumes_term(the(any, _)), ...)` where the pack wrote `=@=`.
+%   - mode_declaration/2 reads the structured comment with string_codes/2
+%     where the pack wrote string_to_list/2.
+%
+%   Its own readme says the repository is archived and points at
+%   https://github.com/GavinMendelGleason/mavis as the current maintainer.
 % Assumes:
 %   - the insertion is decided at LOAD time by current_prolog_flag(optimise),
 %     so the two builds are two loads and never one process choosing
