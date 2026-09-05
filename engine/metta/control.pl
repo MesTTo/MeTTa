@@ -3,7 +3,7 @@
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
 %   if-decons-expr selects its fallback on empty input or incompatible binders,
 %   preserving selected-branch evaluation through its declared result mask
-%   [tested: if_decons_expr; commit=WORKTREE].
+%   [tested: if_decons_expr; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67].
 %   state writes are refused while speculative or reified-world execution is
 %   active, including new-state and change-state!, while reads remain valid
 %   [tested: test_speculative_state_write_is_fenced,
@@ -1590,7 +1590,7 @@ filter_atom_([H|T], Operator, Out) :-
 % the chosen template lets the existing result mask evaluate it, including
 % every nondeterministic answer. Failure unwinds both binder assignments.
 % Type refusals inspect declarations without propagating a held Error branch.
-% [source: https://github.com/MesTTo/LeaTTa/blob/9afd0a5144f60e9d9195971bbda8ab60a6a2990b/MettaHyperonFull/Minimal/Stdlib.lean#L3169-L3183; commit=WORKTREE]
+% [source: https://github.com/MesTTo/LeaTTa/blob/9afd0a5144f60e9d9195971bbda8ab60a6a2990b/MettaHyperonFull/Minimal/Stdlib.lean#L3169-L3183; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67]
 'if-decons-expr'(Expression, Head, Tail, Then, Else, Out) :-
     (   nonvar(Expression), Expression = [Head|Tail]
     ->  Out = Then

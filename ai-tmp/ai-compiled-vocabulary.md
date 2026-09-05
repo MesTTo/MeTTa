@@ -1,6 +1,7 @@
 # Compiled vocabulary evidence
 
 Branch: `compiled-vocabulary-3d96d263`.
+Functional evidence snapshot: `9958c72363d2fbc640d2ae39ee6f0670ecfbff67`.
 Worktree: `../ai-compiled-vocabulary-3d96d263`, relative to the primary PeTTa checkout.
 Original probe baseline: `e7cc36d2e5d8e38927fa821f8cb3130f55047bfa`.
 Resumed baseline: `8f853f992a4c732eca39de34ff0a3dfe161508dd`.
