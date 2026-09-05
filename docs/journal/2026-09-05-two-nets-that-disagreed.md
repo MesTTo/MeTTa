@@ -111,3 +111,45 @@ which the -12 recorded in that file earlier today was not. A/B in the main
 checkout with the QLF cleared: HEAD reads 3553 and the lane passes; with the
 four changed files restored it reads 3558. Four facts added to a file the boot
 consults, the same first-argument-index shape the file already documents twice.
+
+## 2026-09-05, the seam declaration that cost 1.2%
+
+The gate's `instructions` lane went from ok to FAIL on the commit above, on two
+LOAD benchmarks: `source-load` +1.7% over its baseline and `save-load-fast`
++1.3%, both outside the 1% band.
+
+Isolated it a file at a time, with the QLF warmed before each measurement
+because a cold first sample charges the recompile and inverts the reading:
+
+    HEAD (all four files changed)   225,364,670
+    spaces.pl reverted alone        225,397,903   no change
+    ext_points.pl reverted alone    222,694,800   <- the whole cost
+    catalog.pl reverted alone       226,123,375   no change
+    types.pl reverted alone         225,415,270   no change
+
+One line. `kind(metta_determinism_canonical/2, service).`, the 198th clause of
+`kind/2`.
+
+Tried: attributing it to work. INFERENCES are identical either way, 239,281
+over the thousand-definition source load, so the engine executes exactly the
+same goals. Moving the same declaration to a different position in the file
+changes nothing either (225,633,460 against 225,607,063). What costs is the
+clause EXISTING, at a count where SWI's clause indexing spends instructions
+that retire no inferences.
+
+Decided: the declaration was wrong on its own terms, and removing it is not a
+concession to the benchmark. `metta_effect_class_canonical/2` is a declared
+seam because EXTENSIONS resolve an effect class they themselves declared; it
+is reached from five files. `metta_determinism_canonical/2` resolves a slot
+inside an arrow the engine reads, and it has exactly one caller,
+`engine/metta/types.pl`, through an explicit `spaces:` qualification. Mirroring
+the sibling's `kind/2` row was mirroring one attribute too many.
+
+The EXPORT stays: `layering.plt` requires it, naming the exact remedy ("add it
+to the module's export list or change the caller"), and the isolation above
+shows the export is free. So the fix is one removed line, and both benchmarks
+return inside the band, `source-load` at 222,614,639 and `save-load-fast` at
+4,127,710,479, the latter now under its baseline.
+
+`llms.txt`'s service count follows the tree in both directions: 56 to 57 when
+the declaration landed, and back to 56 when it left. The lane caught both.
