@@ -19,6 +19,11 @@
        documentation helpers stay classified without leaving the callable set
        [tested: every_shipped_callable_has_one_visibility;
        commit=8779452fed89853c3f77c3469f7a6ec7b12e9efa]
+     - fixed-width catalog lookup preserves clause references and ignores
+       unrelated storage arities [tested:
+       catalog_self_description:catalog_queries_preserve_width_multiplicity_and_references,
+       catalog_self_description:fixed_width_catalog_lookup_ignores_unrelated_arities;
+       commit=8bd37f3042555ee016a7b917234ce44c75a97c3e]
    Open Obligations:
      To Do: None
      Hacks: None
@@ -28,6 +33,72 @@
 :- ensure_loaded('../../../../engine/metta.pl').
 
 :- begin_tests(catalog_self_description).
+
+test(catalog_queries_preserve_width_multiplicity_and_references) :-
+    setup_call_cleanup(
+        ( add_sexp('&metta', [cat_width, marker, first], Ref1),
+          add_sexp('&metta', [cat_width, marker, first], Ref2),
+          add_sexp('&metta', [cat_width, marker, extra, tail], Ref3) ),
+        ( findall(Head-Value-Ref,
+                  spaces:metta_catalog_clause([Head, marker, Value], Ref),
+                  Fixed),
+          assertion(Fixed == [cat_width-first-Ref1, cat_width-first-Ref2]),
+          findall(Tail-Ref,
+                  spaces:metta_catalog_clause([cat_width, marker|Tail], Ref),
+                  Open0),
+          msort(Open0, Open),
+          msort([[first]-Ref1, [first]-Ref2, [extra, tail]-Ref3], Expected),
+          assertion(Open == Expected),
+          findall(Tail-Ref,
+                  ( spaces:metta_catalog_clause(Row, Ref),
+                    Row = [cat_width, marker|Tail] ),
+                  All0),
+          msort(All0, All),
+          assertion(All == Expected) ),
+        ( erase(Ref1), erase(Ref2), erase(Ref3) )).
+
+test(an_improper_catalog_query_keeps_its_type_error,
+     [error(type_error(list, improper))]) :-
+    spaces:metta_catalog_clause([cat_width|improper], _).
+
+test(catalog_queries_keep_shared_variables_and_transaction_visibility) :-
+    snapshot(
+        ( add_sexp('&metta', [cat_shared, [pair, X, X]], Stored),
+          once(spaces:metta_catalog_clause([cat_shared, [pair, A, B]], Ref)),
+          assertion(Ref == Stored),
+          assertion(A == B),
+          \+ spaces:metta_catalog_clause([cat_shared, [pair, left, right]], _) )),
+    \+ spaces:metta_catalog_clause([cat_shared, _], _).
+
+test(a_missing_catalog_width_does_not_read_user_predicates,
+     [ setup(\+ current_predicate(user:'&metta'/31)),
+       cleanup(abolish(user:'&metta'/31)) ]) :-
+    length(Tail, 30),
+    maplist(=(padding), Tail),
+    Goal =.. ['&metta', cat_outside|Tail],
+    assertz(user:Goal),
+    \+ spaces:metta_catalog_clause([cat_outside|Tail], _).
+
+% Empty dynamic predicates also enter the arity inventory. The cost must depend
+% on the requested width rather than on how many other widths have been stored.
+test(fixed_width_catalog_lookup_ignores_unrelated_arities,
+     [ setup(( \+ current_predicate('$metta_atoms:&metta':'&metta'/31),
+               \+ current_predicate('$metta_atoms:&metta':'&metta'/32) )),
+       cleanup(( abolish('$metta_atoms:&metta':'&metta'/31),
+                 abolish('$metta_atoms:&metta':'&metta'/32) )) ]) :-
+    cat_fixed_lookup_cost(_),
+    cat_fixed_lookup_cost(Before),
+    dynamic('$metta_atoms:&metta':'&metta'/31),
+    dynamic('$metta_atoms:&metta':'&metta'/32),
+    cat_fixed_lookup_cost(After),
+    assertion(After == Before).
+
+cat_fixed_lookup_cost(Cost) :-
+    statistics(inferences, Start),
+    forall(between(1, 100, _),
+           \+ metta_catalog_row([cat_missing, subject, axis, value])),
+    statistics(inferences, End),
+    Cost is End - Start.
 
 %The presets are ordinary atoms: the schema of handles is matchable the
 %way any data is, which is the self-description the row asks for.

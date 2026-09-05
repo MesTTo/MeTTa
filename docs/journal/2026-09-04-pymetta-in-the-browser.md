@@ -172,7 +172,7 @@ in-process is the open question, and it is the one that decides how much of the
 current shim survives.
 
 Second correction, same day, from the SWI source at
-`/home/user/Dev/swipl-devel-10.1.13/src`. The C8 constraint quoted above
+the `swipl-devel-10.1.13` source tree, `src/`. The C8 constraint quoted above
 explains the yield refusal as a nested C-level query frame the yield cannot
 unwind through. The guard is narrower and worth stating exactly, because it
 changes who can fix it.
