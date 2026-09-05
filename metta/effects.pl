@@ -25,6 +25,8 @@
 %     commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: observe-source owns its diagnostic writes as oracleIO; ordinary
+%   arithmetic remains pureStructural [tested: source_observation:observing_errors_does_not_reclassify_arithmetic; commit=df1367c75148ca6c7262134a8736b237e1150383].
 
 %%%% Walking a compiled body for the effects a cache would hide %%%%
 %
@@ -615,6 +617,9 @@ metta_semantic_effect('stderr!', oracleIO).
 metta_semantic_effect('stdin-to-string!', oracleIO).
 metta_semantic_effect('exit!', oracleIO).
 metta_semantic_effect('trace-source', oracleIO).
+% Diagnostic state is owned by this explicit execution operation. Error
+% constructors outside it do not record state; arithmetic keeps its own row.
+metta_semantic_effect('observe-source', oracleIO).
 
 metta_semantic_effect(empty, nondeterministicReadOnly).
 metta_semantic_effect(hyperpose, nondeterministicReadOnly).

@@ -23,6 +23,8 @@
 % Guarantees: argument origins and masks consume expanded types, while
 %   BadArgType retains the written alias and can show TypeExpansion [tested:
 %   structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
+% Guarantees: metta_error_atom/4 preserves Error data and records diagnostics only
+%   during explicit observation [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
 
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 
@@ -98,8 +100,9 @@ metta_error_operand([A|_], A) :-
     nonvar(A), A = [Head|Tail], Head == 'Error', nonvar(Tail), !.
 metta_error_operand([_|As], Error) :- metta_error_operand(As, Error).
 
-metta_error_atom(Operation, Arguments, Reason,
-                 ['Error', [Operation|Arguments], Reason]).
+metta_error_atom(Operation, Arguments, Reason, Error) :-
+    Error = ['Error', [Operation|Arguments], Reason],
+    source_observation:record_error(Error).
 
 %A declared refusal retains both names: the rule that made the decision and
 %the reason its author supplied. The ordinary BadArgType shape remains exact
