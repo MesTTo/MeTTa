@@ -29,14 +29,14 @@
 %     SWI falls back to source for absent .qlf, and qlf_load_engine/0 writes
 %     nothing and says nothing
 %     [tested: test_a_read_only_engine_tree_boots_from_source;
-%     commit=WORKTREE].
+%     commit=48b6cb4eea09e6f2f9637c7186e77c628d61b7e3].
 %   - every host loads the engine the same way, through qlf_load_engine/0:
 %     engine/main.pl and the C host in extensions/cmetta/cmetta.c call the
 %     one predicate, so the compiled regime and its recovery have one
 %     implementation rather than a copy per host, and the engine a
 %     .qlf boot exposes is the engine a source boot exposes
 %     [tested: test_the_compiled_boot_is_the_same_engine;
-%     commit=WORKTREE].
+%     commit=48b6cb4eea09e6f2f9637c7186e77c628d61b7e3].
 %   - the engine reads its own sources and writes its own output as UTF-8
 %     whatever the ambient locale says, and a .qlf set compiled under a
 %     different encoding is purged rather than served
