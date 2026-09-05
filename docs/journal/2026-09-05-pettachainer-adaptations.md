@@ -350,3 +350,57 @@ alternative, and `lib_pln2` landed as a third, so "better isolated" now has one
 more instance. Catalog rows remain schema-checked.
 
 Neither refusal needs work, and neither condition has triggered.
+
+## 2026-09-05, after the annotated arrow landed: findings 1, 3 and 8 re-verdicted
+
+The earlier section gave those three a shared verdict, BLOCKED ON A CONSUMER,
+because a determinism verdict had nowhere to go: `metta_arrow_type_shape/5`
+parsed `-[det]->` and its one caller discarded the Product, and no `.metta`
+file in the tree wrote an annotated arrow because the loader refused one. The
+arrow now types a call, so that verdict is re-examined rather than left
+standing.
+
+### Finding 1's precondition is cleared, and it was not the one the sweep named
+
+Measured: a file carrying `-[det]->`, `-[semidet]->`, `-[nondet]->` and
+`-[det,writesState]->` declarations, each with a definition and a `!(test ...)`,
+LOADS and passes. Before today the first such declaration was refused with "is
+not an arrow", so the whole-import acceptance lane finding 1 asks for could not
+have loaded PeTTaChainer at all: 1,270 annotated declarations across 66 of its
+148 MeTTa files at `b0e24f9b`, counted at that pin.
+
+The sweep named the missing downstream TYPES as the obstacle and did not name
+the load refusal, which was the nearer one. That half is now gone. What remains
+for finding 1 is the sweep's own list, aliases and unions and brand and
+`Foreign` and `SpaceOf`, assessed on their own merits in
+`ai-tmp/ai-typecheck-items-5-6.md`, where aliases are ADAPT-first and are being
+implemented; and the license blocker on a vendored fixture, which is unchanged
+and independent.
+
+### Findings 3 and 8 stay blocked, one step further along
+
+The arrow is READ but its PRODUCT is still dropped, which the arrow work's own
+journal states plainly: "no product is enforced". Measured:
+
+    (: two (-[det]-> Number Number))
+    (= (two $x) $x)
+    (= (two $x) (+ $x 1))
+    !(two 1)   ->   1 and 2, from a function declared det
+
+    (: w (-[det,writesState]-> Number Number))
+    effect_plan(w 1)  ->  pureStructural, and no (effect w ...) catalog row
+
+So an argument-aware determinism verdict, which is what finding 3 asks for,
+would still be computed and discarded. The verdict stands.
+
+It is now a sharper defect than when it was merely absent. A declaration
+carrying `writesState` is treated as `pureStructural`, which is the cache-safe
+class and the one a world admits when it has declared it will run nothing
+effectful. That is the shape eighteen builtins were corrected for this morning,
+reachable now through a documented notation, and worse than the builtin case
+because the author wrote the truth down and the engine ignored it. It is filed
+for its own work rather than left in this ledger.
+
+Revisit findings 3 and 8 when the product has a consumer. Finding 8 additionally
+remains optional `lib_chainer` work by its own decision and is not gated on this
+alone.
