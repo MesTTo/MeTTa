@@ -78,3 +78,75 @@ It is the translator's own classification of which heads may hold a redex, and
 putting a private table on a module's public surface to satisfy a reader that
 gains nothing from it is the wrong half of the contract to change. Revisit if
 the table ever names a head no other surface does.
+Tried: price the boot the facets and their validation add -> `boot` 245,276 on
+`petta` against 281,411 with the branch replayed, +36,135. A positive control
+with `validate_builtin_registry` alone replaced by `true` reads 246,123, so the
+declarations and their name registration cost about +850 of load structure and
+the validation the rest. Under a per-validator meter the pass read 35,275
+inferences, 20,440 of it the reverse coverage scan and 9,291 the five exemption
+liveness questions.
+Found: the liveness questions were paying for a mode. Each asks
+`builtin_surface_predicate/2` about ONE bound predicate, and the clause opened
+by synthesising the whole 385-name union with `setof/3` and then walking it
+with `member/2`: 1,584 plus about 190 inferences in front of the 81 the answer
+needs. The scan's own project-file test rebuilt `builtin_project_root/1` and
+three `directory_file_path/3` and `atom_concat/3` pairs at every one of the 548
+candidates it walks.
+Decided: answer each mode in the shape it is asked in, and build the three
+prefixes once per scan. `validate_builtin_registry` reads 19,796 against
+35,275, and `boot` 265,924 against 281,411. A bound question now costs 81
+against a 12,237 scan, a factor of 151 where the union-synthesising spelling
+put it at 6.6, which is what
+`builtin_facets:a_bound_surface_question_does_not_synthesise_the_whole_union`
+holds as a ratio rather than a pin. The registry's own answers are byte
+identical across the change: the registration and implementation inventories,
+all 198 surface predicates with their files, all 254 facets, all 232 names and
+all 5 exemptions dumped before and after and diffed.
+Measured: `boot` is the ONLY row that moves. parse 152, parse-prolog
+3,113,384, translate 310,376, match 265,002, match-skew 208,042 and evaluate
+560,493 are byte identical on `petta` and on this tip, three samples each
+[measured 2026-09-06; command=swipl -g "metta_bench:bench_run(<case>)" -t halt
+engine/bench.pl; fixture=C reader, writer, JSON codec and chapter 19 built,
+.qlf purged and warmed per tree; commit=WORKTREE].
+Rejected: moving the whole validation out of the boot and into a gate lane,
+where it would cost nothing at run time. The audit's value is that an
+extension loaded at run time is checked in the image it actually joins, and
+19,796 inferences over 254 facets, 232 names, 385 surface names and 548
+candidates is about 20 a row, the same order as the seam publication sweep
+trunk settled at (53 a row, about 15,000 for two sweeps of 201). Revisit if
+the facet table or the surface union grows by an order of magnitude, or if a
+boot budget makes 7.4% of the row worth moving.
+Rejected: asking `predicate_property(Module:Head, file(File))` instead of
+`source_file/2` in the scan. It agrees on every one of the 548 candidates and
+costs 2,805 inferences against 5,189, but `source_file/2` is the documented way
+to ask which file a predicate's clauses came from and answers for all of them
+rather than one. Revisit if the scan ever shows in a profile again.
+
+Re-verified, because the provenance pass pins the 2026-09-05 tags above to THIS
+tree and four of their numbers moved with the 278 trunk commits in between. The
+reverse inventory is still exactly those five predicates. The described arity
+keys with no type declaration read 46 against 42. The implementation-owning
+files read 22 with 1,572 predicate indicators against 20 and 1,435, and that
+line's command no longer runs as written because
+`builtin_project_implementation_file/1` is `/2` here. Copy-paste detection over
+the same three directories reports 3 clones and 26 duplicated lines over 31
+Prolog files against 1 and 9 over 27: an obligation-header preamble shared by
+`engine/metta/runtime.pl` and `engine/metta/space_hooks.pl`, a pair inside
+`engine/metta/terms.pl`, and one between `engine/spaces/lifecycle.pl` and
+`engine/spaces/native_matching.pl`, none of them inside a line this work
+changed. The first locked-run row, `boot` 584,873, is superseded outright by
+the arms above [measured 2026-09-06; command=npx jscpd --format prolog
+--min-lines 8 --min-tokens 60 engine/metta engine/spaces
+tests/prolog/suites/evaluation, and swipl -g over
+builtin_implementation_coverage_inventory/1 and seam:builtin_type_declaration/2;
+commit=WORKTREE].
+
+Open: `boot` is no longer deterministic on this box. Six samples on `petta`
+itself read 245,264, 245,276 three times, 245,330 and 245,240, and the same
+spread appears on this tip; the arms above use the mode. Nothing in this work
+introduces it, and the harness's inference allowance is 4, so the engine-bench
+lane can draw a false red from it. Not diagnosed here.
+Open: `llms.txt` line 40 says 5 engine translator units against 6 and 7 engine
+spaces units against 8. Both are on `petta` before this branch and both are
+left alone; only the `declaration` seam count this work moves, 12 to 13, is
+updated here.

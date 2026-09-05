@@ -57,6 +57,28 @@ test(extension_facets_are_derived_from_extension_ownership) :-
              Arity is PrologArity - 1 ),
            assertion(builtin_implementation(Name/Arity, extension(_)))).
 
+% Asking about ONE predicate must not synthesise the whole surface union to
+% answer. Synthesising it made each of the five exemption liveness questions
+% cost 1,842 inferences of setof and member/2 walk before its own 81 of work,
+% which was 9,214 of a boot's 35,275 inferences of registry validation.
+% A RATIO rather than a pin, because both sides move with the size of the
+% union and the number of loaded predicates: the bound ask reads 81 and the
+% scan 12,237, a factor of 151, where synthesising put the same factor at 6.6
+% [measured 2026-09-06: 81 and 12,237 inferences].
+surface_question_cost(Question, Cost) :-
+    statistics(inferences, Before),
+    ( call(Question) -> true ; true ),
+    statistics(inferences, After),
+    Cost is After - Before - 3.
+
+test(a_bound_surface_question_does_not_synthesise_the_whole_union) :-
+    surface_question_cost(
+        builtin_surface_predicate(spaces:metta_prune_empty/2, _), Bound),
+    surface_question_cost(
+        findall(_, builtin_surface_predicate(_, _), _), Scan),
+    assertion(Bound > 0),
+    assertion(Scan > 20 * Bound).
+
 % The reverse scan does not read translator:embedded_operation_head/1: the
 % engine may only reach what the translator's module exports, and that table
 % is not on the export list. Nothing is lost while every head it names is
