@@ -6,12 +6,26 @@
 %   MeTTa arity, and Prolog hook; exemptions are local, reasoned, unique, and
 %   live [tested: tests/prolog/suites/evaluation/builtin_facets.plt;
 %   commit=90aa1e67c6d1cda45e27dbaa565f2c537f70ad40].
+%   A predicate outside this tree that lends a builtin its name loses the arity
+%   nothing describes, whether or not the build calls that predicate built_in,
+%   and the nine the pass removes are named
+%   [tested: builtin_facets:the_retraction_set_is_the_same_nine_on_every_build;
+%   commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 
 'plunit-builtin-facet-one'(Input, Input).
 'plunit-builtin-facet-reverse'(Input, Input).
+
+% The shape a platform library lends a builtin name, reproduced natively. Both
+% clauses land in the engine's own module, because a .plt with no module
+% directive loads into `user`, and both are ordinary module predicates rather
+% than built_in ones -- which is exactly how swipl-wasm 8.0.6 presents its
+% library(wasm) sleep/1. The file they come from is under tests/, outside
+% engine/, lib/ and extensions/, so the tree does not own them either.
+'plunit-foreign-lender'(_).
+'plunit-foreign-lender'(Input, Input).
 
 with_assertions([], Goal) :- call(Goal).
 with_assertions([Fact|Facts], Goal) :-
@@ -233,6 +247,63 @@ test(an_empty_exemption_reason_is_rejected,
     with_assertions(
         [ builtin_registration_exemption('plunit-empty-reason', '') ],
         validate_builtin_exemption_schema).
+
+% Under swipl-wasm the engine's own sleep/2 shares its name with
+% library(wasm)'s sleep/1, an ordinary module predicate the old rule could not
+% see because it asked `built_in`. arity(sleep, 1) survived the pass, and the
+% registration coverage check then stopped every Node boot with
+% `unregistered_builtin_spec(sleep/0)`. The lender below is that shape natively:
+% not built_in, not this tree's, at a name the engine describes.
+test(a_foreign_predicate_lending_a_builtin_name_loses_its_arity) :-
+    assertion(\+ predicate_property('plunit-foreign-lender'(_), built_in)),
+    with_assertions(
+        [ builtin_implementation('plunit-foreign-lender'/1, prolog(engine)) ],
+        ( assertion(unrelated_system_predicate('plunit-foreign-lender', 1)),
+          assertion(\+ unrelated_system_predicate('plunit-foreign-lender', 2)) )).
+
+% The same lender, through the pass itself rather than its rule: the undescribed
+% arity goes and the described one stays.
+test(the_pass_removes_a_foreign_arity_and_keeps_the_described_one) :-
+    setup_call_cleanup(
+        ( assertz(arity('plunit-foreign-lender', 1)),
+          assertz(arity('plunit-foreign-lender', 2)) ),
+        with_assertions(
+            [ builtin_implementation('plunit-foreign-lender'/1, prolog(engine)) ],
+            ( retract_unrelated_system_arities,
+              assertion(\+ arity('plunit-foreign-lender', 1)),
+              assertion(arity('plunit-foreign-lender', 2)) )),
+        retractall(arity('plunit-foreign-lender', _))).
+
+% A name the engine says nothing about is not judged at all, which is what keeps
+% the pass off a host's or a backend's own registrations.
+test(an_undescribed_name_is_not_judged) :-
+    assertion(\+ builtin_described_name('plunit-foreign-lender')),
+    assertion(\+ unrelated_system_predicate('plunit-foreign-lender', 1)).
+
+% Ownership is asked through the file the clauses came from, the same question
+% the reverse coverage scan asks, so it answers the same on any build.
+% exists_file/1 is the engine's own in engine/metta/runtime.pl and is kept for
+% that reason as much as for its facet.
+test(a_tree_defined_arity_is_told_from_a_foreign_one) :-
+    assertion(builtin_tree_defined_arity(exists_file, 1)),
+    assertion(\+ builtin_tree_defined_arity('plunit-foreign-lender', 1)),
+    assertion(\+ builtin_tree_defined_arity(sleep, 1)).
+
+% The nine the pass removes, named, so a build that stops removing one of them
+% or starts removing a tenth fails here rather than at a seat's boot.
+test(the_retraction_set_is_the_same_nine_on_every_build) :-
+    forall(builtin_fun(Name), register_prolog_arities(Name)),
+    findall(Key,
+            ( arity(Name, Arity),
+              unrelated_system_predicate(Name, Arity),
+              Key = Name/Arity ),
+            Keys0),
+    msort(Keys0, Keys),
+    assertion(Keys == [ append/1, assert/1, copy_term/3, copy_term/4, not/1,
+                        sleep/1, sort/4, term_hash/4, throw/1 ]),
+    retract_unrelated_system_arities,
+    builtin_registration_coverage_inventory(Inventory),
+    assertion(Inventory == []).
 
 test(a_stale_implementation_exemption_is_rejected,
      [ throws(error(stale_builtin_implementation_exemption('+'/3),

@@ -9,6 +9,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The engine boots on a build whose platform libraries lend a builtin its
+  name. The pass that drops an arity belonging to a namesake predicate rather
+  than to the operation asked whether that predicate was `built_in`, which is a
+  property of the build: swipl-wasm 8.0.6 defines `sleep/1` in `library(wasm)`,
+  an ordinary module predicate, so `arity(sleep, 1)` survived there and the
+  boot's own registration coverage check then refused every Node boot with
+  `unregistered_builtin_spec(sleep/0)`, taking 44 of the seat's tests with it.
+  An arity now survives when the operation's implementation facet claims it, its
+  arrow declaration claims it, or a file in this tree defines it, and a name the
+  engine describes in neither way is not judged at all. The nine arities the
+  pass removes are the same nine natively and under swipl-wasm.
+
 - `llms.txt`'s source table names every engine unit again. The query-planning
   work added `engine/translator/folding.pl` and `engine/spaces/generic_join.pl`
   without naming them, so the table read five translator units against six and
