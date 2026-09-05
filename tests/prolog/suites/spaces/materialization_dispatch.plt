@@ -12,7 +12,16 @@
 user:plunit_materialization_double(X, Y) :- Y is X*2.
 
 :- begin_tests(materialization_dispatch,
-               [setup(filereader:metta_host_set_silent(true))]).
+               [setup(( filereader:metta_host_set_silent(true),
+                        enable_source_materialization(Previous) )),
+                cleanup(set_metta_pragma('materialize-source-relations',
+                                         Previous))]).
+
+enable_source_materialization(Previous) :-
+    (   metta_pragma('materialize-source-relations', Previous)
+    ->  true
+    ;   Previous = none ),
+    set_metta_pragma('materialize-source-relations', true).
 
 fixture_source("(seed a) (seed a)\n\c
                 (= (materialized-dispatch-pick $x) (match &self (seed $x) yes))").

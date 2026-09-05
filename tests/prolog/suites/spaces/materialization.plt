@@ -10,8 +10,21 @@
 :- ensure_loaded('../../../../engine/metta.pl').
 :- use_module(library(random)).
 
+% Preparation is off unless a program asks for it, so the unit declares the
+% pragma for its own scope and restores the previous value. A differential run
+% without it would compare the compiled program with itself.
+% [tested: preparation_is_declared_rather_than_the_default; commit=WORKTREE]
 :- begin_tests(function_free_materialization,
-                [setup(filereader:metta_host_set_silent(true))]).
+                [setup(( filereader:metta_host_set_silent(true),
+                         enable_source_materialization(Previous) )),
+                 cleanup(set_metta_pragma('materialize-source-relations',
+                                          Previous))]).
+
+enable_source_materialization(Previous) :-
+    (   metta_pragma('materialize-source-relations', Previous)
+    ->  true
+    ;   Previous = none ),
+    set_metta_pragma('materialize-source-relations', true).
 
 :- meta_predicate with_program(+, 0).
 
@@ -799,5 +812,20 @@ test(an_unrelated_record_erasure_creates_no_cleanup_engine) :-
     \+ transaction(( erase(Record), fail )),
     statistics(engines_created, After),
     assertion(After == Before).
+
+% The pragma is the whole gate: without it a source boundary derives nothing
+% and every admitted call keeps its compiled clauses.
+test(preparation_is_declared_rather_than_the_default) :-
+    source_with_reach("(edge a b) (edge a b) (edge b c)\n", Source),
+    setup_call_cleanup(
+        set_metta_pragma('materialize-source-relations', none),
+        ( spaces:metta_host_clear_space('&plunit_materialized'),
+          process_metta_string(Source, _, '&plunit_materialized'),
+          assertion(\+ materialize:materialized_snapshot(
+                            '&plunit_materialized', _, _, _, _)),
+          query_bag('&plunit_materialized', "!(reach a c)", Bag),
+          assertion(Bag == [true,true]) ),
+        ( set_metta_pragma('materialize-source-relations', true),
+          spaces:metta_host_clear_space('&plunit_materialized') )).
 
 :- end_tests(function_free_materialization).

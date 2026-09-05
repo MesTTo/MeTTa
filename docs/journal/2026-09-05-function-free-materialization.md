@@ -237,3 +237,38 @@ Verified: the six load paths now read 1, 1, 1, 0, 1, 1.
 case defines, so the repair fires; it fails `assert 2 == 1` with the loader hunk
 reverted and passes with it.
 
+## 2026-09-05: preparation is a declared choice
+
+Found: preparation is quadratic in the derived relation and a load pays it
+whether or not the program ever asks. Loading the two-rule chain costs 6,181
+inferences and 0.0017 CPU seconds at 512 edges without construction, and
+78,622,783 inferences and 7.26 CPU seconds with it: 4,243 times the CPU. Load
+inferences at 32, 64, 128, 256 and 512 edges are 258,626, 1,023,717, 4,290,475,
+18,291,605 and 78,622,783 against 3,410, 3,493, 3,877, 4,645 and 6,181. A
+completed ground query costs 724 inferences either way against 1,176, 1,880,
+3,288, 6,104 and 11,736, so the saving per query is 11,012 at 512 edges and the
+break-even is about 7,100 queries there and 1,670 at 128. Command:
+`swipl -g main -t halt ai-tmp/qp-finish/load-cost.pl -- extensions`, with
+`MATERIALIZE_MODE` unset and `=control`.
+
+Decided: gate construction on the `materialize-source-relations` pragma, off
+unless a program asks. A load cannot know how many queries follow, and the
+existing admission gate places no bound on the derived relation, so a knowledge
+base with a transitive rule over a few thousand facts would spend the load in
+derivation. The pragma is the engine's existing per-run declaration registry,
+the same shape `verify-specializations` and `verify-discharges` use. Both
+materialization suites and the ch18 cases declare it for their own scope and
+restore the unset value, and `preparation_is_declared_rather_than_the_default`
+pins the default in each surface.
+
+Rejected: a work budget that declines construction past a fixed number of ground
+rules. It keeps small programs automatic, but it picks a constant, it makes
+behaviour discontinuous in the data, and it still pays the budget on every
+admitted load that ends up declining. Revisit if a measured workload wants
+automatic preparation: the budget belongs on the `findnsols/4` that enumerates
+ground rules, where it bounds the enumeration rather than checking after it.
+
+Rejected: leaving construction on by default and documenting the cost. The load
+regression is unbounded in the relation size, which is the shape of the
+7,540-second run this thread opened with.
+

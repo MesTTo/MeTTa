@@ -48,6 +48,9 @@ metta_pragma_key('stack-limit',
 metta_pragma_key('plan-cyclic-joins',
                  'plan a full native cyclic conjunction as a Generic Join \c
                   instead of the retained nested loop').
+metta_pragma_key('materialize-source-relations',
+                 'derive the finite function-free fragment once at each source \c
+                  boundary and answer admitted ground calls from it').
 metta_pragma_key('type-check', 'HE spelling; accepted, NOT enforced').
 metta_pragma_key(interpreter, 'HE spelling; accepted, NOT enforced').
 
