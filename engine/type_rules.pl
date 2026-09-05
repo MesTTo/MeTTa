@@ -39,14 +39,14 @@
 %   witness targets retain ordinary refusals and target-only wildcards
 %   [tested: test_aliases_keep_the_fast_path_and_registry_in_agreement,
 %   test_alias_casts_keep_the_strict_witness_and_obey_user_refusals;
-%   commit=WORKTREE].
+%   commit=acad923476d21110870f235192757281a737ee71].
 
 % The public families and registry views share one declaration inventory.
 % registered_typing_rule/7 exposes the patterns the checker matches;
 % raw_registered_typing_rule/7 preserves written names for dependency tracking.
 % typing_rule_entry/7 stays private storage [tested:
 % engine_layering:test_the_engine_layering_contract_holds_and_a_violation_is_named;
-% commit=WORKTREE].
+% commit=acad923476d21110870f235192757281a737ee71].
 :- module(type_rules,
           [ 'add-typing-rule!'/6,
             'remove-typing-rule!'/2,
@@ -392,7 +392,7 @@ typing_rule_pattern_matches(Value, Pattern, closed) :-
 % and therefore does not qualify. This preserves casting.py:_UNCHECKED even
 % when an alias reaches the engine instead of Python's literal-target shortcut
 % [tested: test_aliases_of_unchecked_cast_targets_stay_unchecked;
-% commit=WORKTREE]. Concrete witness targets still honor ordinary refusals.
+% commit=acad923476d21110870f235192757281a737ee71]. Concrete witness targets still honor ordinary refusals.
 typing_check_decision_resolved(_, witness, _, Expected, accept, Name, shipped) :-
     nonvar(Expected),
     typing_rule_entry(shipped, '*', Name, witness, AnyActual, Target, accept),

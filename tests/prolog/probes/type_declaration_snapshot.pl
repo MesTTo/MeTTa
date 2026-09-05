@@ -5,7 +5,7 @@
 %   thread publishes its declaration [measured 2026-09-05: both declarations
 %   survive; command=swipl -q --on-error=status -s
 %   tests/prolog/probes/type_declaration_snapshot.pl -g main -t halt -- . alias;
-%   fixture=SWI-Prolog 10.1.13; commit=WORKTREE].
+%   fixture=SWI-Prolog 10.1.13; commit=acad923476d21110870f235192757281a737ee71].
 % Owns resources: the probe joins its worker, destroys its message queue,
 %   removes its typing rules and releases its private space on every outcome.
 % Fails when: the engine no longer allows both conflicting declarations; this

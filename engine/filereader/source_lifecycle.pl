@@ -31,7 +31,7 @@
 %   withdrawing alias declarations from a failed load [tested:
 %   test_a_failed_first_file_load_restores_existing_callers,
 %   test_file_replacement_updates_aliases_and_failed_replacement_restores_them;
-%   commit=WORKTREE].
+%   commit=acad923476d21110870f235192757281a737ee71].
 
 %%%% The fast cache and the content digest %%%%
 %

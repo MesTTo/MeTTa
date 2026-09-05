@@ -2,7 +2,7 @@
 % Assumes: each fixture owns a fresh native space; scratch files stay in ai-tmp.
 % Guarantees: alias and direct-RHS programs agree through source, file and
 %   reflective doors; edits repair retained callers without losing lexical
-%   scope or raw source [tested: run_tests(structural_aliases); commit=WORKTREE].
+%   scope or raw source [tested: run_tests(structural_aliases); commit=acad923476d21110870f235192757281a737ee71].
 % Owns resources: setup/cleanup releases each space and deletes each source file.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

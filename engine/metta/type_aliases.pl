@@ -3,22 +3,22 @@
 % Guarantees: normalize_type_in/4 preserves raw variables, freshens each alias
 %   occurrence, reports successful and missing lookup dependencies, and rejects
 %   cycles with their owner-qualified path [tested:
-%   tests/prolog/suites/typecheck/structural_aliases.plt; commit=WORKTREE].
+%   tests/prolog/suites/typecheck/structural_aliases.plt; commit=acad923476d21110870f235192757281a737ee71].
 % Owns resources: type_alias_gate_ref/2 owns installed reader clauses and
 %   retires them transactionally on last-alias removal or scope release. The
 %   raw store owns declarations and support_graph owns type_alias(Name) roots;
-%   no expansion cache is retained [tested: structural_aliases; commit=WORKTREE].
+%   no expansion cache is retained [tested: structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
 % Guarded by: mutation callers hold with_typing_policy_stable/1 while validating,
 %   storing and repairing declarations [tested:
-%   tests/prolog/suites/typecheck/structural_aliases.plt; commit=WORKTREE].
+%   tests/prolog/suites/typecheck/structural_aliases.plt; commit=acad923476d21110870f235192757281a737ee71].
 % Fails when: callers expect serializability from overlapping raw outer
 %   transactions; the existing snapshot-isolation limitation is reproduced by
 %   tests/prolog/probes/type_declaration_snapshot.pl [source:
 %   docs/journal/2026-09-05-type-declarations-in-overlapping-transactions.md;
-%   commit=WORKTREE].
+%   commit=acad923476d21110870f235192757281a737ee71].
 % Decides: aliases substitute syntax, never evaluate terms; their declaration
 %   tier fixes the meaning of names inside the RHS [tested:
-%   tests/prolog/suites/typecheck/structural_aliases.plt; commit=WORKTREE].
+%   tests/prolog/suites/typecheck/structural_aliases.plt; commit=acad923476d21110870f235192757281a737ee71].
 
 % Keep the native miss first. Untyped data heads need no alias lookup.
 normalized_self_type_declaration(X, Type) :-

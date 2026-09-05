@@ -20,7 +20,7 @@
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: presented_parameter_type_chains/4 expands aliases before
 %   parameter masks and static proofs are chosen [tested:
-%   structural_aliases; commit=WORKTREE].
+%   structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
 
 :- meta_predicate with_static_parameter_environment(+, +, +, +, 0).
 
