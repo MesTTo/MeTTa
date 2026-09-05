@@ -38,8 +38,8 @@ body must be one JSON object.
 `space` defaults to `&self` and selects which of the server's spaces
 answers. `add_many` carries a batch in one request, the engine's own
 bulk-write law on the wire: a batch is a transport optimisation and
-never a semantic one, and `metta.space(name).add(a, b, c)` against an
-attached gateway crosses once.
+never a semantic one. A bulk add carries all atoms in one POST; the Python
+client also reads health before a mutation to negotiate recovery.
 
 `bound` on `/match` and `/ask` is optional and carries the caller's
 answer limit. A server MAY honor it, and only exactly: at most `bound`
@@ -69,6 +69,86 @@ unknown operation is a 400 naming it; a non-POST method other than
 `GET /health` is a 405. With a Bearer token configured,
 a missing or wrong credential is refused with a 401 before the body is
 read, and the comparison must be constant-time.
+
+## Mutation recovery
+
+Revision 3 supports an optional idempotency extension. A gateway advertising
+it adds an `idempotency` object to health:
+
+```json
+{"scope": "<gateway instance>", "expires": 123456.75}
+```
+
+The client copies both values verbatim into the mutation body and adds its own
+random `key`, a nonempty string of at most 255 characters. `expires` is a finite
+number on the server's monotonic clock; clients must not interpret it as wall
+time. The same logical mutation must reuse the entire request:
+
+```json
+{"space": "&self", "atom": ["s", "example"],
+ "idempotency": {"scope": "<gateway instance>", "expires": 123456.75,
+                 "key": "<random client key>"}}
+```
+
+The gateway reserves the key before executing and retains the first response
+before delivery. Reusing it with a different operation, space, atom, atom batch
+or expiry is refused. Identical requests replay the retained response. This
+follows [Stripe's saved-result contract](https://docs.stripe.com/api/idempotent_requests)
+and [AWS EC2's parameter-bound, scoped client tokens](https://docs.aws.amazon.com/ec2/latest/devguide/ec2-api-idempotency.html).
+
+`serve()` and `Gateway()` accept `mutation_ttl` (300 seconds by default) and
+`mutation_limit` (4096 entries). The expiry is issued during negotiation, so
+network delay consumes part of the retention window. A full ledger refuses
+new keys before execution; it never evicts a live entry to admit another.
+Expired keys and keys issued by an earlier gateway instance are refused.
+The ledger is in memory. Restart, expiry, and a provider's partial failure
+require reconciliation with the serving application; they do not establish
+that a mutation failed or that its effects were rolled back.
+
+The Python transport performs GET health before each new mutation, followed
+by its POST. Authorization policies must allow that health read. This adds a
+round trip and the server's health-count work per mutation. Servers without
+replay metadata remain usable, but their mutations cannot be safely resent
+through automatic recovery. The client never blindly retries an unkeyed write.
+
+A lost, invalid or indeterminate mutation response raises
+`metta.remote.OutcomeUnknown`, with `outcome == "unknown"`. The server uses
+`{"error": "<reason>", "outcome": "unknown"}` for an indeterminate execution.
+Recover using the exception's `retry()`, which retains the original request
+and returns its wire acknowledgement. Calling the original mutation method
+again would create a new logical write:
+
+```python
+try:
+    remote_space.add(atom)
+except metta.remote.OutcomeUnknown as uncertain:
+    acknowledgement = uncertain.retry()
+```
+
+A retry that remains indeterminate raises another `OutcomeUnknown` retaining
+the same recovery request. An expired or restarted gateway cannot turn this
+recovery into a fresh write. Without negotiated replay, `retry()` refuses to
+send. A provider failure after possible effects is retained as unknown, so
+replaying it never calls that provider again. A directly shared `Gateway`
+requires caller serialization; `serve()` serializes requests on its worker.
+
+## Response validation
+
+The client validates response envelopes at the transport boundary. Boolean
+fields must be JSON booleans; counts must be nonnegative integers, with
+`add_many` acknowledging the exact requested count. Every atom in a response
+is decoded before any atom from that response is delivered. A malformed
+response raises `metta.remote.ProtocolError`, a transport failure that cannot
+be turned into data by the engine's `keep` or `empty` error policies.
+Malformed mutation acknowledgements instead raise `OutcomeUnknown`, because
+the mutation may already have executed.
+
+A cursor response requires a nonempty string token or `null`. A continuation
+cannot change its token, exceed its requested batch or keep a short chunk
+live. A failed stop acknowledgement retains the release token for retry.
+If validation rejects the initial response after receiving a valid token,
+the client attempts to stop it. If that cleanup also fails, both exceptions
+are reported and `ProtocolError.cursor` retains the token for recovery.
 
 ## Lazy answers: the ask/next/stop lifecycle
 

@@ -9,6 +9,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Remote mutations negotiate scoped, expiring idempotency keys. Lost or
+  indeterminate replies raise `OutcomeUnknown`; its `retry()` replays the
+  retained request without repeating its effects. Legacy peers expose the
+  same uncertainty but refuse recovery without negotiated replay.
+- Remote responses validate their envelope and complete atom list before
+  delivery. Malformed replies raise `ProtocolError`, which remains a transport
+  failure through engine error policies. Invalid initial cursor replies
+  release their token or retain it on the reported cleanup failure.
+
 - `Space.drop()` retains subscriptions and provider ownership when engine
   teardown fails. A later cleanup failure keeps the anonymous name reserved
   and can be retried without repeating engine teardown or clearing a journal.
