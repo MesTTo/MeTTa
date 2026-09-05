@@ -401,7 +401,8 @@ metta_restore_inherited_predicate(_, Name, _) :-
 %inferences on every resolving call rather than one, which is +90 on eight
 %Python benchmark cases against +15 for this order
 %[measured 2026-09-06: op-raw 298,847 at the merge base, 298,937 that way and
-%298,864 this way; command=extensions/python/bench.py --counter-only op-raw].
+%298,864 this way; command=extensions/python/bench.py --counter-only op-raw;
+%commit=WORKTREE].
 %
 %Neither arm can change which branch is taken: Home \== Module holds exactly
 %where imported_from/1 answers, on every one of the 7,949 module/name pairs of
@@ -415,7 +416,8 @@ metta_restore_inherited_predicate(_, Name, _) :-
 %repaired call resolves to nothing. imported_from/1 loads it, which is the
 %side effect this clause needs
 %[measured 2026-09-06: 12 shadow-repair probes, one fresh module each, the
-%sumlist/2 row alone diverging; fixture=ai-tmp/autoload-traps/spaces_diff.pl].
+%sumlist/2 row alone diverging; fixture=ai-tmp/autoload-traps/spaces_diff.pl;
+%commit=WORKTREE].
 metta_restore_inherited_predicate(Module, Name, Arity) :-
     retractall('$metta_repaired_shadow_import'(Module, Name, Arity, _)),
     functor(Head, Name, Arity),
