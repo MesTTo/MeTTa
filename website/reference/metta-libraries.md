@@ -14,7 +14,7 @@ beside its definitions.
 | lib_conformance | 1 | 0 |
 | lib_constraints | 5 | 0 |
 | lib_crypto | 2 | 0 |
-| lib_csv | 1 | 1 |
+| lib_csv | 2 | 2 |
 | lib_datastructures | 26 | 9 |
 | lib_datetime | 2 | 0 |
 | lib_derived | 1 | 1 |
@@ -51,9 +51,19 @@ beside its definitions.
 
 ### `csv-space`
 
-*lib_csv.metta:13*
+*lib_csv.metta:22*
 
 A read-only CSV row space; each query streams the file anew, every cell is a String, and the first record is data
+
+1. a readable UTF-8 CSV file path
+
+Returns: Space
+
+### `csv-snapshot!`
+
+*lib_csv.metta:26*
+
+Read a CSV file ONCE into an ordinary space of (row Number Field...) atoms; the record number is 1-based, the rows do not change under the program, and repeated queries pay one parse between them
 
 1. a readable UTF-8 CSV file path
 

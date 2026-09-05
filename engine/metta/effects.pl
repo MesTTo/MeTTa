@@ -615,6 +615,7 @@ metta_semantic_effect('write-file!', writesState).
 metta_semantic_effect('append-file!', writesState).
 metta_semantic_effect('delete-file!', writesState).
 metta_semantic_effect('file-space!', writesState).
+metta_semantic_effect('csv-snapshot!', writesState).
 metta_semantic_effect('temp-path!', writesState).
 metta_semantic_effect('temp-dir!', writesState).
 metta_semantic_effect('stderr!', oracleIO).

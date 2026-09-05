@@ -9,6 +9,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `csv-snapshot!` reads a CSV file ONCE into an ordinary space of
+  `(row Number Field...)` atoms, beside `csv-space`'s live view. The view holds
+  no rows and reparses per query; the snapshot pays one parse and then about two
+  inferences per answer, which is 27x to 30x cheaper per query and pays for
+  itself on the second one [measured over 1,000 rows: 59,856 inferences per
+  query through the view against 63,960 to build plus 2,015 per query]. The
+  record number comes with the snapshot because a space is unordered: without it
+  a space of rows can neither say which record came first nor skip a header, and
+  a number is an identity only once the rows are fixed. `csv-space`'s
+  `(row Field...)` is unchanged.
+
 - `(stdin)`, `(stdout)` and `(stderr)` answer handles 0, 1 and 2, POSIX's own
   numbering, in the table `file-open!` already fills. So `file-read-exact!`,
   `file-write!` and `file-get-size!` reach the three streams a process always
