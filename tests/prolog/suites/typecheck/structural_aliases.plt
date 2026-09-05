@@ -4,7 +4,13 @@
 %   reflective doors; edits repair retained callers without losing lexical
 %   scope or raw source, and neither door installs a clause in a scope that
 %   holds none [tested: run_tests(structural_aliases); commit=e471c116647ffc9d3949501b3f2d3869a9153bc2].
+%   A shared scope's declaration observers cover every space, not &self's
+%   alone [tested:
+%   structural_aliases:a_shared_alias_is_hidden_by_a_declaration_added_to_another_space;
+%   commit=WORKTREE].
 % Owns resources: setup/cleanup releases each space and deletes each source file.
+%   The shared-scope case declares an alias in the process-wide &self and
+%   withdraws it in its body and again in its cleanup.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -145,6 +151,35 @@ test(late_addition_and_removal_repair_already_compiled_callers,
     metta_remove_atom(S, [':','Count',['Alias','Number']], true),
     answers_in(M, [caller,7], [After]),
     assertion(After = ['Error',_,_]).
+
+% The same repair for the OTHER scope. &self's aliases are visible from every
+% module, so the declaration observers a shared scope installs cover every
+% space rather than &self's own: a plain declaration added to a named space
+% hides the shared alias for that space's readers, and the callers compiled
+% under the expansion have to be repaired for it. set_type_alias_mutation_scope/2
+% asks type_alias_scope_space/2 which space a scope covers and gets no binding
+% back for `shared`, which is what installs those clauses as templates over
+% every space; binding them to &self's space instead leaves this program
+% answering 7 at every step [measured 2026-09-06 by planting exactly that
+% binding].
+test(a_shared_alias_is_hidden_by_a_declaration_added_to_another_space,
+     [setup(context(S, M)),
+      cleanup((metta_release_space(S),
+               ignore(metta_remove_atom('&self',
+                                        [':','Count',['Alias','Number']],
+                                        true))))]) :-
+    metta_add_atom('&self', [':','Count',['Alias','Number']], true),
+    assertion(spaces:type_alias_mutation_scope_ref(shared, _)),
+    run_in(S, "(: identity (-> Count Count)) (= (identity $x) $x) (= (caller $x) (identity $x)) !(caller 7)", Before),
+    assertion(Before == [7]),
+    metta_add_atom(S, [':','Count','String'], true),
+    answers_in(M, [caller,7], [Hidden]),
+    assertion(Hidden = ['Error',_,['BadArgType',1,'Count','Number']]),
+    metta_remove_atom(S, [':','Count','String'], true),
+    answers_in(M, [caller,7], Revealed),
+    assertion(Revealed == [7]),
+    metta_remove_atom('&self', [':','Count',['Alias','Number']], true),
+    assertion(\+ spaces:type_alias_mutation_scope_ref(shared, _)).
 
 test(deferred_equations_keep_raw_type_groups_until_they_compile,
      [setup(context(S, M)), cleanup(metta_release_space(S))]) :-
