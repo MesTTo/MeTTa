@@ -9,6 +9,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A declared class answers its OWN type name. `ensure_registered` walks the MRO,
+  so a subclass adding nothing projected through its base's entry: declaring
+  `Dog(Animal)` restated `(: Animal (-> String Animal))`, which the engine
+  reported as a duplicate declaration, and left no `Dog` type at all. Conversion
+  still inherits, which is right there; declaration does not.
 - Clearing a space no longer walks its stored atoms one at a time because an
   unrelated library watches a different space. A hook clause whose head names
   the space it watches, as `lib_tabling` names `&metta`, is now idle for every
@@ -39,7 +44,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   two-element pattern term instead, which the space cannot hold, and answered
   nothing without saying so; a conjunct that is not a whole pattern now refuses
   and names both readings.
-
+- Declaring a class into a space writes its subtype edges. Python's class
+  hierarchy IS a subtype relation, so `m.define(Animal)` then `m.define(Dog)`
+  for `class Dog(Animal)` stores `(:< Dog Animal)`, and `get-type` on a
+  `(: Rex Dog)` widens to `[Dog, Animal]`. Only DECLARED classes count as
+  supertypes, which keeps `object`, a NamedTuple's `tuple` and an enum's `Enum`
+  out of the answer, and only REAL bases do, since a virtual `abc` registration
+  never reaches `__mro__`. Multiple inheritance answers one edge per direct
+  base, and a base declared after its subclass fills that edge in then.
 - An ATOM in annotation position is the type itself. `typed(S.a, S.Number)` and
   `arrow(S.Number, S.Bool)` already read an atom or a Python type either way; a
   signature read only the Python type, so `def speak(a: S.Animal) -> S.Sound`
