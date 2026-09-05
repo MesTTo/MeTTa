@@ -1,6 +1,10 @@
 % Purpose: propagate output bounds through conjunction matching, ordering, and best-first merge policies
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
+%   metta_prune_empty/2 is declared locally as an effect-planner primitive,
+%   not a language builtin [tested:
+%   builtin_facets:the_effect_planner_helpers_are_exempt_in_place;
+%   commit=90aa1e67c6d1cda45e27dbaa565f2c537f70ad40].
 % Guarantees: a full native cyclic query builds Generic Join tries only under
 % the plan-cyclic-joins pragma, while bounded queries retain streaming startup
 % cost [tested:
@@ -480,6 +484,12 @@ metta_prune_scan_ok_(All) :-
 %turned `!(let $b (is-alpha-member (1 $x) ...) $x)`'s unbound answer into
 %nothing; identity has never been able to do that
 %[tested translated_success_leaves_the_query_variable_unbound].
+:- multifile seam:builtin_implementation_exemption/2.
+:- dynamic seam:builtin_implementation_exemption/2.
+seam:builtin_implementation_exemption(
+    spaces:metta_prune_empty/2,
+    compiled_collapse_helper_is_not_a_language_operation).
+
 metta_prune_empty(All, Kept) :-
     (   metta_c_empty_prune_active
     ->  (   metta_c_has_empty(All)

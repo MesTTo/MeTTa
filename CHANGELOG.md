@@ -351,6 +351,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   while preserving `(source <space> <kind>)`; it replaces the colliding
   `Space.source(kind)`.
 
+- Builtin registration now owns an exact implementation facet for every core,
+  prelude, and extension operation. Boot-time checks reject a registered name
+  or arity without a description, a description without its registered name
+  and dispatch arity, a missing implementation hook, and an independently
+  surfaced project predicate without either a description or a local reasoned
+  exemption. `seam:builtin_implementation_exemption/2` is the declaration seam
+  that says a predicate of yours is a compiled helper rather than a language
+  operation; it is written beside the implementation it excuses, carries the
+  reason, and is refused once the predicate it names stops being reported.
+  `EXTENDING.md` documents it.
+
 - `current_source_identity/2` answers the file a record made during a compile
   belongs to and the digest of that file's text, for anything that files a
   record alongside a compile and needs a reload to replace its old set. It takes
