@@ -68,8 +68,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 ### Added
 
 - `lint()` reports `det-equations-overlap` when two equations share a head up
-  to variable renaming under a `-[det]->` claim, so every call matching one
-  matches both and answers twice. Not `duplicate-equation`, whose bodies are
+  to variable renaming under a `-[det]->` claim, so each equation
+  is tried for every call. The claim holds only while at most one body
+  succeeds, which nothing checks, so this is a hint rather than a proof: a
+  guarded second body keeps it for some calls and breaks it for others. Not
+  `duplicate-equation`, whose bodies are
   equal, nor `subsumed-equation`, whose heads are instances rather than
   variants; what makes this one wrong is the declaration. Merge them, separate
   the heads, or declare `-[nondet]->`.

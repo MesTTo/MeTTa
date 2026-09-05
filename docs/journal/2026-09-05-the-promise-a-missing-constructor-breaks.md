@@ -87,6 +87,22 @@ Deliberately conservative on PARTIAL overlap: `(= (f 1) 10)` beside
 deciding it needs unification against every stored head rather than an
 alpha-key comparison. The certain case is the one that fires.
 
+Corrected before it settled: the first message said "every call that matches
+one matches both and answers twice", which is more than head overlap proves.
+Overlapping heads mean both equations are TRIED; whether both ANSWER is a
+question about the bodies. Measured:
+
+    (= (guarded $x) $x)
+    (= (guarded $x) (if (> $x 100) 999 (empty)))
+    !(guarded 1)   -> one answer, the claim HOLDS
+    !(guarded 200) -> two, the claim breaks
+
+So the finding is a HINT, at the severity `possibly-undefined-reference`
+carries, and its message now says the claim "holds only while at most one body
+succeeds, which nothing checks". Deciding which calls break it needs the body
+analysis the typechecker audit refused as interprocedural; reporting the overlap
+costs an alpha-key comparison.
+
 This is the STATIC half of findings 3 and 8. The runtime half, enforcing the
 product rather than reporting the contradiction, is separate work and is not
 claimed here.
