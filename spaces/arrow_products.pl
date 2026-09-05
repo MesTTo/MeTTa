@@ -180,7 +180,7 @@ metta_applicable_cardinality(Module, Name, Args, Cardinality) :-
 %observes that choicepoint without asking for a second answer or replaying an
 %effect. Empty is not an observable MeTTa answer. A constrained output checks
 %only the upper bound, since unification can legitimately remove its answer.
-%[source: https://github.com/SWI-Prolog/swipl-devel/blob/V9.3.10/man/builtin.doc,
+%[source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/man/builtin.plx,
 %det/1 and call_cleanup/2; commit=WORKTREE].
 metta_check_cardinality(Module, Name, Required, Out, Goal) :-
     (   call_cleanup((call(Goal), Out \== 'Empty'), Finished = true)
