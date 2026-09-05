@@ -195,6 +195,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Retained clauses fold admitted immutable integer computations during
   planning. Redefining a dependency rebuilds its folded callers, and host
   operations remain deferred until demanded.
+- Tagged queries propagate bound arguments through certified acyclic integer
+  programs. They derive the requested proof bags while preserving duplicate
+  source occurrences and the existing failure behavior outside that fragment.
 
 - The MeTTa file library now creates directories, copies bytes with staged
   replacement, returns queryable metadata snapshots, composes lexical paths,
