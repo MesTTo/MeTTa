@@ -464,3 +464,64 @@ Open: the full root gate also exposed an inconsistent copied MORK build cache,
 an upstream Git mount omitted by the attribution fixture, and pre-existing
 comparison and evidence problems. Those are being checked independently of
 the consumer before the final gate result is recorded.
+
+
+## 2026-09-05, declaration dispatch and the remaining gate controls
+
+Tried: native insertion in the MORK comparison rose from 5,759,851 to
+5,983,996 instructions at 500 atoms, and from 22,983,877 to 23,870,006 at
+2,000, while inference counts stayed 7,533 and 30,033. Removing only the
+separate annotated-declaration clause reduced the 500-atom count to
+5,880,332. Combining its decision with the existing colon branch measured
+5,876,782 and retained the product's behavior. A failed clause probe can
+retire instructions without adding an inference.
+
+Decided: classify duplicate and annotated declarations in that existing
+branch. The final calibration reads 5,881,262 and 23,461,481 instructions;
+all three inference samples at each size still equal the base. The residual
+instruction movement is recorded without claiming a deeper attribution.
+Only the two displaced instruction pins change; their one-percent bands,
+CPU observations and all other MORK rows remain as before.
+
+Verified: after combining the branch, twelve consumer-removal controls fail
+on their intended assertions. Restoring the source passes 25 Python product
+tests and 37 expanded Prolog cases. The combined product, async-space and
+parity-harness Python files pass 58 tests. The evidence checker reports zero
+unbacked claims after correcting a lambda test name and a repository-relative
+async test path that already failed at the rebased base.
+
+Measured: the four parity drift rows also fail their old pins at unmodified
+763b7f2d. Base/product inferences are builtin types 54,589/55,949, C extension
+87,799/87,797, C handle 93,598/93,596, and nilbc
+324,825,344/324,827,492. Three processes agree per example. The corresponding
+net instruction minima are 42,624,311/43,898,010,
+108,030,420/113,627,817, 115,393,277/120,765,591 and
+156,378,969,117/155,175,829,651. Re-pin only those four within-tree inference
+fields. Preserve every upstream observation, cross-engine waiver and band.
+
+Tried: the full build reached a global sccache daemon outside the worktree
+namespace. Its retained temporary directory had been deleted, producing
+`sccache: error: Failed to create temp dir`. Building MORK with
+`RUSTC_WRAPPER=` succeeds and produces exactly the original shared-library
+SHA-256, b818b98a736184a43d88b1d93e35f03679c99d19172ce2c207634058a7a1af7f.
+The next complete gate bypasses that daemon for its own build only. The
+attribution fixture uses a private clone of the pinned upstream checkout,
+because its original worktree pointer resolves through the surrounding
+checkout's Git metadata. Neither workaround changes a tracked build rule.
+
+
+Tried: a final lifetime probe cleared `&metta` and left an annotated type in
+its original space, while the owned effect disappeared. The new
+`clearing_the_catalog_cannot_orphan_another_spaces_product` test fails on both
+its missing-refusal and missing-effect assertions before the repair.
+Decided: refuse that clear until the other spaces' owning declarations are
+removed. Native and foreign clears hold the same ordered typing/product
+locks as declaration publication across storage and metadata withdrawal, so
+a concurrent declaration cannot arrive between those two removals.
+
+Measured: the colon-branch consolidation changes the 100-operation
+registration workload from a 105,121 inference minimum to
+[116,547, 105,223, 105,225], minimum 105,223. That is 102 additional
+inferences over this control, and 1,500 over base 763b7f2d. Its native fact
+insertion improvement is recorded above; ordinary compiled calls still have
+no annotation goal. The next complete gate verifies both lanes together.

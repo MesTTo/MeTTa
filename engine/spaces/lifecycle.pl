@@ -1449,15 +1449,15 @@ metta_add_atom(Space, Term, true) :-
 %from its promised all-or-nothing write. Host registrations that need exclusive
 %ownership use metta_py_add_strict_declaration/2 in shim.pl.
 metta_add_atom(Space, Term, true) :-
-    Term = [':', _, _],
-    existing_duplicate_declaration(Space, Term, First),
-    !,
-    print_message(warning, metta_duplicate_declaration(Space, Term, First)).
-metta_add_atom(Space, [':', Name, Type], true) :-
-    metta_annotated_type(Type),
-    !,
-    metta_require_arrow_product(Name, Type, Product),
-    metta_add_annotated_declaration(Space, Name, Type, Product).
+    Term = [':', Name, Type],
+    (   existing_duplicate_declaration(Space, Term, First)
+    ->  !,
+        print_message(warning, metta_duplicate_declaration(Space, Term, First))
+    ;   metta_annotated_type(Type)
+    ->  !,
+        metta_require_arrow_product(Name, Type, Product),
+        metta_add_annotated_declaration(Space, Name, Type, Product)
+    ).
 % DontEvalType changes how every arrow parameter naming this type compiles,
 % even when the type symbol is not itself a function. Store first so repairs
 % observe the new marker, then invalidate its module-qualified support root.

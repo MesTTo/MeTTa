@@ -69,6 +69,9 @@ The written type stays visible through `get-type`. Its effect publishes
 Removing the declaration removes its owned effect row. Effects join by name
 across the catalog, including declarations in other spaces; one declaration
 cannot weaken another or the effects found in a body.
+Removing an owned effect row directly is refused. Clearing `&metta` is also
+refused while declarations in other spaces still own effect rows there;
+remove those declarations first.
 
 `nondet` joins its class with `nondeterministicReadOnly`. For example,
 `(-[nondet,pureStructural]-> Number Number)` has that joined class. Omitting

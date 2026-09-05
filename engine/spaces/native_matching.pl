@@ -1,6 +1,10 @@
 % Purpose: plan and execute indexed native-space matches and relational conjunction joins
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=WORKTREE].
+% Guarded by: clear operations acquire '$metta_typing_policy' before
+%   '$metta_arrow_products', matching annotated declaration publication
+%   [source: engine/spaces/arrow_products.pl:metta_with_arrow_product_update/1;
+%   commit=WORKTREE].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
@@ -273,8 +277,9 @@ get_atom_read_link(Space, Pattern) :-
 %lib/lib_redis/lib_redis.pl does) was reachable only when Python was in the process:
 %under run.sh the engine had no path to it at all. The shim now calls this.
 clear_foreign_atoms(Space) :-
-    foreign_write(Space, clear, seam:foreign_clear(Space)),
-    metta_clear_arrow_products(Space).
+    metta_with_arrow_product_update(
+        ( foreign_write(Space, clear, seam:foreign_clear(Space)),
+          metta_clear_arrow_products(Space) )).
 
 %A space has two halves and this used to empty one of them. The storage sweep
 %below drops every stored atom, and the atoms that also COMPILED left their
@@ -496,6 +501,19 @@ space_atom_count_uncached(Space, Count) :-
     ).
 
 clear_native_atoms(Space) :-
+    metta_with_arrow_product_update(clear_native_atoms_locked(Space)).
+
+clear_native_atoms_locked(Space) :-
+    %A catalog clear cannot withdraw a declaration stored in another space.
+    %Keep its owned effect until that declaration is removed through its door.
+    (   Space == '&metta',
+        metta_arrow_product(Name, Owner, Type, _, _),
+        Owner \== Space
+    ->  throw(error(permission_error(clear, annotated_arrow_catalog, Space),
+                    context(clear_native_atoms/1,
+                            remove_declaration(Owner, [':', Name, Type]))))
+    ;   true
+    ),
     (   native_storage_module_ready(Space, Module)
     ->  space_module(Space, SupportModule),
         findall(Atom, compiled_half_atom(Space, Module, Atom), Compiled),

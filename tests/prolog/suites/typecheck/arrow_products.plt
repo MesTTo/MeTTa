@@ -101,6 +101,21 @@ test(an_owned_effect_is_removed_through_its_declaration,
        throws(error(permission_error(remove, annotated_arrow_effect, _), _)) ]) :-
     metta_remove_atom('&metta', [effect, 'product-f', writesState], _).
 
+test(clearing_the_catalog_cannot_orphan_another_spaces_product,
+     [ setup(product_fixture(
+          "(: product-f (-[det,writesState]-> Number Number))
+           (= (product-f $x) $x)", Space, Module)),
+       cleanup(product_cleanup(Space)) ]) :-
+    catch(clear_native_atoms('&metta'), Error, true),
+    assertion(nonvar(Error)),
+    assertion(Error = error(permission_error(clear, annotated_arrow_catalog,
+                                             '&metta'), _)),
+    assertion(metta_host_stored(Space,
+        [':', 'product-f', ['-[det,writesState]->', 'Number', 'Number']])),
+    assertion(metta_catalog_row([effect, 'product-f', writesState])),
+    metta_host_source_effect_plan(Module, ['product-f', 1], _, Effect),
+    assertion(Effect == writesState).
+
 test(clearing_an_undefined_declaration_withdraws_its_effect,
      [ setup(product_fixture(
           "(: product-f (-[det,writesState]-> Number Number))", Space, _)),
