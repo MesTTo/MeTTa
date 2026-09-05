@@ -11,11 +11,17 @@
 % Guarantees: every definition retains engine/filereader.pl's implementation module and original load order;
 %   each source load is atomic with every dependent recompile it triggers;
 %   source_load_receipt_current/4 accepts a receipt only while its source row, digest, and every tagged stored output remain current;
-%   fast-cache restore admits equations through metta_add_program_atoms/3 and
-%   reconciles program analysis once at the image boundary rather than once
-%   per atom [tested:
+%   version-4 images preserve original atoms and each compiled equation's
+%   resolved source across relocation and later recompilation [tested:
+%   test_fast_images_preserve_each_equations_binding; commit=WORKTREE];
+%   fast-image nodes materialize only after their source and registry restore
+%   completes [tested: test_reloading_a_materialized_program_preserves_its_bag;
+%   commit=WORKTREE];
+%   fast-cache restore batches unchanged atoms and compiles resolved equations
+%   against their stored references; program analysis reconciles once at the
+%   image boundary [tested:
 %   test_fast_restore_batches_content_dependent_program_analysis;
-%   commit=d2279ea320e54790dab4484421a168e93755b185];
+%   commit=WORKTREE];
 %   a fast cache captures one consistent equation-world graph and restores its
 %   child spaces, space-valued token bindings, and translator registry through
 %   fresh runtime identities [tested:
@@ -57,9 +63,15 @@
 %The version prefix of the header; the file appends a tab, the sha256 of
 %the payload bytes, and a newline, so integrity refuses before fast_read
 %sees a single payload byte.
+% Version 4 payloads are metta_fast_image(Spaces, Tokens, Rules, Derived).
+% Each space(Id, Parent, Atoms, Bindings) preserves its original atom list.
+% binding(Index, ResolvedEquation) names one one-based atom occurrence; indexes
+% are strictly increasing. Resolved terms use the same world-node relocation
+% as atoms, tokens and rules. Earlier schemas lack this source provenance and
+% are refused by the exact header comparison before payload decoding.
 metta_host_fast_header(Header) :-
     current_prolog_flag(version_data, swi(Major, Minor, Patch, _)),
-    format(string(Header), 'METTA-CACHE\tMETTA-FAST\t3\t~d.~d.~d',
+    format(string(Header), 'METTA-CACHE\tMETTA-FAST\t4\t~d.~d.~d',
            [Major, Minor, Patch]).
 
 %A file whose path ends .gz reads and writes through zlib's stream; Python's
@@ -153,7 +165,7 @@ metta_host_fast_capture_image(Root, Image, Count, Problem) :-
     translator_rules:translator_rule_snapshot(NodeSpaces, RawRules,
                                                 RawDerived),
     Raw = fast_raw(RawSpaces, RawTokens, RawRules, RawDerived),
-    RawSpaces = [raw_space(0, root, Root, RootAtoms)|_],
+    RawSpaces = [raw_space(0, root, Root, RootAtoms, _)|_],
     length(RootAtoms, Count),
     (   metta_fast_persisted_term(RawSpaces, RawTokens, Term),
         metta_host_atom_carries_object(Term)
@@ -166,8 +178,11 @@ metta_host_fast_capture_image(Root, Image, Count, Problem) :-
     ).
 
 metta_fast_persisted_term(RawSpaces, _, Term) :-
-    member(raw_space(_, _, _, Atoms), RawSpaces),
+    member(raw_space(_, _, _, Atoms, _), RawSpaces),
     member(Term, Atoms).
+metta_fast_persisted_term(RawSpaces, _, Term) :-
+    member(raw_space(_, _, _, _, Bindings), RawSpaces),
+    member(binding(_, Term), Bindings).
 metta_fast_persisted_term(_, RawTokens, Value) :-
     member(token(_, _, Value), RawTokens).
 
@@ -178,7 +193,7 @@ metta_fast_capture_space_graph(Root, RawSpaces, NodeSpaces) :-
 
 metta_fast_capture_space_node(
         Id, Parent, Space, Next0, Seen0, Seen, Next,
-        [raw_space(Id, Parent, Space, Atoms)|Rows0], Rows,
+        [raw_space(Id, Parent, Space, Atoms, Bindings)|Rows0], Rows,
         [Id-Space|NodeSpaces0], NodeSpaces) :-
     %The throw is a GUARD rather than one arm of a choice: binding Seen1 inside
     %the else arm leaves it unbound in a branch the analyser cannot see is
@@ -198,10 +213,72 @@ metta_fast_capture_space_node(
                              contract before it can enter a fast cache')))
     ;   true
     ),
-    findall(Atom, 'get-atoms'(Space, Atom), Atoms),
+    metta_fast_capture_space_atoms(Space, Atoms, Bindings),
     metta_space_equation_children(Space, Children),
     metta_fast_capture_space_children(Children, Id, Next0, Seen1, Seen, Next,
                                       Rows0, Rows, NodeSpaces0, NodeSpaces).
+
+% A syntax image needs its resolved references beside its original datum.
+% Racket's serializer keeps module-path indices separately and shifts them on
+% restore; this image uses its existing world-node relocation for bound terms.
+% https://github.com/racket/racket/blob/v8.17/racket/src/expander/syntax/serialize.rkt
+% [source: syntax-serialize and syntax-deserialize; commit=WORKTREE]
+metta_fast_capture_space_atoms(Space, Atoms, Bindings) :-
+    (   metta_fast_read_space(Space, Owner),
+        translated_equation_binding(Owner, _, _)
+    ->  findall(Atom-Bound,
+                metta_fast_atom_binding(Space, Atom, Bound), Rows),
+        metta_fast_binding_rows(Rows, 1, Atoms, Bindings)
+    ;   findall(Atom, 'get-atoms'(Space, Atom), Atoms),
+        Bindings = []
+    ).
+
+metta_fast_signatures(Atoms, Signatures) :-
+    findall(F-Arity,
+            ( member(Term, Atoms), metta_fast_equation(Term, F, Args),
+              length(Args, Inputs), Arity is Inputs+1 ), Rows),
+    sort(Rows, Signatures).
+
+metta_fast_equation(Term, F, Args) :-
+    is_list(Term), Term = [Equal, Head, _], Equal == (=),
+    nonvar(Head), Head = [F|Args], atom(F), is_list(Args).
+
+metta_fast_read_space(Space, Each) :-
+    (   spaces:space_parent(Space, _)
+    ->  spaces:space_read_chain(Space, Each)
+    ;   Each = Space
+    ).
+
+% This is get-atoms' native enumeration with its clause reference retained.
+% The reference identifies the occurrence directly; compiled-clause order and
+% equality between duplicate source equations cannot recover that identity.
+% [source: engine/spaces/native_matching.pl, get_native_atom/3; commit=WORKTREE]
+metta_fast_atom_binding(Space, Atom, Bound) :-
+    metta_fast_read_space(Space, Each),
+    (   seam:foreign_space(Each)
+    ->  'get-atoms'(Each, Atom), Bound = none
+    ;   spaces:native_storage_module_ready(Each, Storage),
+        spaces:native_storage_functor(Each, Functor),
+        (   current_predicate(Storage:Functor/Arity),
+            functor(Head, Functor, Arity),
+            clause(Storage:Head, true, StoredRef), Head =.. [_|Atom]
+        ;   clause(Storage:'$metta_native_scalar'(Atom), true, StoredRef)
+        ),
+        (   translated_equation_binding(Each, StoredRef, Ref),
+            translated_from(Ref, Resolved)
+        ->  Bound = resolved(Resolved)
+        ;   Bound = none
+        )
+    ).
+
+metta_fast_binding_rows([], _, [], []).
+metta_fast_binding_rows([Atom-Bound|Rows], Index, [Atom|Atoms], Bindings) :-
+    (   Bound = resolved(Resolved)
+    ->  Bindings = [binding(Index, Resolved)|Rest]
+    ;   Bindings = Rest
+    ),
+    Next is Index+1,
+    metta_fast_binding_rows(Rows, Next, Atoms, Rest).
 
 metta_fast_capture_space_children([], _, Next, Seen, Seen, Next,
                                   Rows, Rows, NodeSpaces, NodeSpaces).
@@ -235,9 +312,10 @@ metta_fast_index_spaces([Id-Space|Rows], SpaceIds0, SpaceIds) :-
     put_assoc(Space, SpaceIds0, Id, SpaceIds1),
     metta_fast_index_spaces(Rows, SpaceIds1, SpaceIds).
 
-metta_fast_encode_space(SpaceIds, raw_space(Id, Parent, _, Atoms),
-                        space(Id, Parent, Encoded)) :-
-    maplist(metta_fast_encode_term(SpaceIds), Atoms, Encoded).
+metta_fast_encode_space(SpaceIds, raw_space(Id, Parent, _, Atoms, Bindings),
+                        space(Id, Parent, Encoded, EncodedBindings)) :-
+    maplist(metta_fast_encode_term(SpaceIds), Atoms, Encoded),
+    maplist(metta_fast_encode_term(SpaceIds), Bindings, EncodedBindings).
 
 metta_fast_encode_token(SpaceIds, token(Name, OwnerId, Value),
                         token(Name, OwnerId, Encoded)) :-
@@ -307,7 +385,7 @@ metta_host_fast_read(In, File, Image, Seen) :-
     ->  Image = Read
     ;   throw(error(metta_fast_payload_invalid(File),
                     context(metta_host_fast_read/4,
-                            'the cache payload is not a complete version-3 \c
+                            'the cache payload is not a complete version-4 \c
                              equation-world image')))
     ).
 
@@ -330,8 +408,8 @@ metta_fast_image_valid(Image, Seen) :-
     is_list(Tokens),
     is_list(Rules),
     is_list(Derived),
-    Spaces = [space(0, root, _)|_],
-    findall(Id, member(space(Id, _, _), Spaces), Ids),
+    Spaces = [space(0, root, _, _)|_],
+    findall(Id, member(space(Id, _, _, _), Spaces), Ids),
     length(Ids, Count),
     Last is Count - 1,
     numlist(0, Last, Ids),
@@ -347,14 +425,28 @@ metta_fast_image_valid(Image, Seen) :-
     foldl(metta_fast_derived_row_valid(Last, UniqueRuleNames), Derived,
           SeenRules, Seen).
 
-metta_fast_space_row_valid(Last, space(Id, Parent, Atoms), Seen0, Seen) :-
+metta_fast_space_row_valid(Last, space(Id, Parent, Atoms, Bindings), Seen0, Seen) :-
     integer(Id),
-    is_list(Atoms),
+    is_list(Atoms), is_list(Bindings),
     (   Id =:= 0
     ->  Parent == root
     ;   integer(Parent), Parent >= 0, Parent < Id, Parent =< Last
     ),
-    foldl(metta_fast_term_scan(Last), Atoms, Seen0, Seen).
+    foldl(metta_fast_term_scan(Last), Atoms, Seen0, SeenAtoms),
+    length(Atoms, Count),
+    metta_fast_bindings_valid(Bindings, Atoms, 1, Count),
+    foldl(metta_fast_term_scan(Last), Bindings, SeenAtoms, Seen).
+
+metta_fast_bindings_valid([], _, _, _).
+metta_fast_bindings_valid([Binding|Bindings], Atoms, Position, Count) :-
+    nonvar(Binding), Binding = binding(Index, Resolved),
+    integer(Index), Index >= Position, Index =< Count,
+    Skip is Index-Position,
+    length(Prefix, Skip), append(Prefix, [Original|Rest], Atoms),
+    metta_fast_equation(Original, _, _),
+    metta_fast_equation(Resolved, _, _),
+    Next is Index+1,
+    metta_fast_bindings_valid(Bindings, Rest, Next, Count).
 
 metta_fast_token_row_valid(Last, token(Name, OwnerId, Value), Seen0, Seen) :-
     atom(Name),
@@ -514,16 +606,21 @@ metta_host_fast_restore_image(Target,
     metta_host_fast_restore_spaces(NodeSpaces, Spaces),
     translator_rules:restore_translator_rule_derived_snapshot(
         Derived, NodeSpaces, DerivedRefs),
-    forall(member(Ref, DerivedRefs), record_source_assertion(Ref)).
+    forall(member(Ref, DerivedRefs), record_source_assertion(Ref)),
+    forall(member(space(Id, _, Atoms, _), Spaces),
+           ( memberchk(Id-Space, NodeSpaces),
+             findall(F, metta_fast_equation_name(Atoms, F), Names0),
+             sort(Names0, Names),
+             materialize:with_source_materialization(Space, Names, true) )).
 
-metta_fast_allocate_space_nodes([space(0, root, _)|Rows], Target,
+metta_fast_allocate_space_nodes([space(0, root, _, _)|Rows], Target,
                                 [0-Target|NodeSpaces]) :-
     empty_assoc(Empty),
     put_assoc(0, Empty, Target, Known),
     metta_fast_allocate_space_rows(Rows, Known, NodeSpaces).
 
 metta_fast_allocate_space_rows([], _, []).
-metta_fast_allocate_space_rows([space(Id, ParentId, _)|Rows], Known,
+metta_fast_allocate_space_rows([space(Id, ParentId, _, _)|Rows], Known,
                                [Id-Space|NodeSpaces]) :-
     get_assoc(ParentId, Known, Parent),
     metta_mint_space_equation_child(Parent, Space),
@@ -536,9 +633,10 @@ record_source_resource(Resource) :-
     LoadId \= '$metta_owner_pin'(_),
     assertz(source_load_resource(LoadId, Resource)).
 
-metta_fast_decode_space(IdSpaces, space(Id, Parent, Atoms),
-                        space(Id, Parent, Decoded)) :-
-    maplist(metta_fast_decode_term(IdSpaces), Atoms, Decoded).
+metta_fast_decode_space(IdSpaces, space(Id, Parent, Atoms, Bindings),
+                        space(Id, Parent, Decoded, DecodedBindings)) :-
+    maplist(metta_fast_decode_term(IdSpaces), Atoms, Decoded),
+    maplist(metta_fast_decode_term(IdSpaces), Bindings, DecodedBindings).
 
 metta_fast_decode_token(IdSpaces, token(Name, OwnerId, Value),
                         token(Name, OwnerId, Decoded)) :-
@@ -575,23 +673,44 @@ metta_fast_decode_term(IdSpaces, Term, Decoded) :-
 %one batch while the shared boundary rebuilds derived analyses once.
 metta_host_fast_restore_spaces(NodeSpaces, Spaces) :-
     findall(F,
-            ( member(space(_, _, Atoms), Spaces),
+            ( member(space(_, _, Atoms, _), Spaces),
               metta_fast_equation_name(Atoms, F) ),
             Names0),
     sort(Names0, Names),
-    with_named_program_order(
+    with_named_definition_order(
         Names,
         ( metta_fast_restore_space_rows(Spaces, NodeSpaces, Arrived0),
           sort(Arrived0, Arrived),
           forall(member(F, Arrived), source_definition_arrived(F)) )).
 
 metta_fast_restore_space_rows([], _, []).
-metta_fast_restore_space_rows([space(Id, _, Atoms)|Rows], NodeSpaces,
+metta_fast_restore_space_rows([space(Id, _, Atoms, Bindings)|Rows], NodeSpaces,
                               Arrived) :-
     memberchk(Id-Space, NodeSpaces),
-    metta_add_program_atoms(Space, Atoms, Here),
+    (   Bindings == []
+    ->  metta_add_program_atoms(Space, Atoms, Here)
+    ;   metta_fast_signatures(Atoms, Signatures),
+        register_function_signatures(Signatures),
+        metta_fast_restore_bound_atoms(Bindings, Atoms, 1, Space),
+        pairs_keys(Signatures, Here)
+    ),
     metta_fast_restore_space_rows(Rows, NodeSpaces, Rest),
     append(Here, Rest, Arrived).
+
+metta_fast_restore_bound_atoms([], Atoms, _, Space) :-
+    metta_add_program_atoms(Space, Atoms).
+metta_fast_restore_bound_atoms([binding(Index, Resolved)|Bindings], Atoms,
+                               Position, Space) :-
+    Skip is Index-Position,
+    length(Prefix, Skip), append(Prefix, [Original|Rest], Atoms),
+    metta_add_program_atoms(Space, Prefix),
+    Original = [=, [F|_], _],
+    metta_ensure_compiled(F),
+    add_sexp(Space, Original, Ref), record_source_atom_assertion(Ref),
+    space_module(Space, Module),
+    compile_metta_equation(Module, Resolved, Ref, _, _),
+    Next is Index+1,
+    metta_fast_restore_bound_atoms(Bindings, Rest, Next, Space).
 
 metta_fast_equation_name(Atoms, F) :-
     member([=, [F|_], _], Atoms),
@@ -743,13 +862,15 @@ with_source_load(CanonPath, Space, Goal) :-
         asserta(active_source_load(LoadId), ContextRef),
         once(( call(Goal),
                run_source_repairs(LoadId),
+               materialize:materialize_source(Space),
                publish_source_load(CanonPath, Space, LoadId) )),
         Catcher,
         ( erase(ContextRef),
           retractall(source_load_repair(LoadId, _)),
           retractall(support_recompile_pending(LoadId, _, _)),
           retractall(source_load_digest(LoadId, _, _)),
-          ( Catcher == exit -> true ; rollback_source_load(LoadId) ),
+          ( Catcher == exit -> true
+          ; materialize:discard_space(Space), rollback_source_load(LoadId) ),
           (   current_transaction(_)
           ->  true
           ;   metta_repair_emptied_shadows
@@ -869,8 +990,9 @@ replacing_previous_load(CanonPath, Space, LoadInto, Goal) :-
         (   Replaced == []
         ->  call(Goal)
         ;   call_cleanup(
-                transaction(replace_source_load(CanonPath, Space, Replaced,
-                                                LoadInto, Goal)),
+                materialize:materialization_transaction(
+                    filereader:replace_source_load(CanonPath, Space, Replaced,
+                                                   LoadInto, Goal)),
                 metta_repair_emptied_shadows),
             %After the commit, because the repair drops predicate entries
             %and abolish/1 is not clause-level: remove_equation/6 records
@@ -966,6 +1088,8 @@ withdraw_source_load(CanonPath, Space, Count) :-
 %[tested: test_a_cleared_space_forgets_what_a_file_put_in_it,
 %test_a_recycled_space_name_inherits_no_clauses_from_its_past_life].
 forget_space_source_loads(Space) :-
+    forall(translated_equation_binding(Space, _, Ref),
+           forget_translated_equation_binding(Ref)),
     forall(retract(metta_source_load(_, Space, LoadId, _)),
            ( retractall(source_load_assertion(LoadId, _, _)),
              retractall(source_load_support_assertions(LoadId, _)),

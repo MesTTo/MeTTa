@@ -15,6 +15,9 @@
 %   test_events_publish_only_after_transaction_commit,
 %   test_rollback_and_outer_rollback_discard_every_buffered_event;
 %   commit=3ded7552797b66d78e666141eb51f3bc14686bd2].
+%   user transactions reconcile prepared relation ownership in the outer
+%   commit constraint, including concurrent clear and release
+%   [tested: function_free_materialization; commit=WORKTREE].
 %   speculative calls create a provider savepoint, then roll it and their
 %   observation frame back on success, failure, and throw [tested:
 %   test_a_speculative_journal_write_is_neither_persisted_nor_published;
@@ -554,9 +557,9 @@ metta_outer_transaction_prepare(Goal, Vars, Answers,
     %only the outer boundary carries this].
     catch(( setup_call_cleanup(
                 b_setval('$metta_user_tx', true),
-                transaction(metta_transaction_answers(Goal, Vars, Answers),
-                            metta_validate_pending_type_aliases,
-                            '$metta_tx_constraint'),
+                materialization_transaction(
+                    metta_transaction_answers(Goal, Vars, Answers),
+                    metta_validate_pending_type_aliases),
                 b_setval('$metta_user_tx', false))
         ->  Outcome = committed ; Outcome = failed ),
           Error,

@@ -1,6 +1,10 @@
 % Purpose: validate foreign-provider capabilities and route foreign and native space operations
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
+% Guarantees: compile_metta_equation/5 retains a resolved reader equation's
+% stored occurrence, and deferred translation consumes that same source
+% [tested: test_forcing_a_deferred_equation_keeps_a_resolved_sibling_once;
+% commit=WORKTREE].
 % Guarantees: stored_arrow_chain/3 reads annotated parameter types through
 %   metta_runtime_type/2 for type-marker invalidation
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
@@ -591,8 +595,11 @@ equation_walk_class(Module, F, Q0, Q, Class) :-
 %answering stale clauses. One door means the next such rule lands once
 %[tested specializer_invalidation:string_run_equation_invalidates_specializations].
 compile_metta_equation(Module, Term, Clause, Ref) :-
+    compile_metta_equation(Module, Term, none, Clause, Ref).
+
+compile_metta_equation(Module, Term, StoredRef, Clause, Ref) :-
     note_metta_equation(Module, Term),
-    translate_metta_equation(Module, Term, Clause, Ref).
+    translate_metta_equation(Module, Term, StoredRef, Clause, Ref).
 
 %What an arriving equation settles immediately: the name is a function, the
 %prelude's definition of it is gone, and everything compiled against the
@@ -619,9 +626,9 @@ note_metta_function(Module, F) :-
     prepare_specialization_invalidation(Module, F),
     support_invalidate_function_change(Module, F).
 
-translate_metta_equation(Module, Term, Clause, Ref) :-
+translate_metta_equation(Module, Term, StoredRef, Clause, Ref) :-
     Term = [=, [F|_], _],
-    assert_translated_equation(Module, Term, Clause, Ref),
+    assert_translated_equation(Module, Term, StoredRef, Clause, Ref),
     %The dependent-recompile hooks run AFTER the clause is in place, so
     %a definition that mentions F recompiles against the new one.
     announce_equation_arrival(Module, F).
@@ -637,10 +644,13 @@ translate_metta_equation(Module, Term, Clause, Ref) :-
 %where the eager load read one [measured 2026-08-24:
 %examples/ch18-performance/18-02-memoisation-and-tabling/12-tabling_statistics.metta].
 assert_translated_equation(Module, Term, Clause, Ref) :-
-    with_typing_policy_stable(
-        assert_translated_equation_stable(Module, Term, Clause, Ref)).
+    assert_translated_equation(Module, Term, none, Clause, Ref).
 
-assert_translated_equation_stable(Module, Term, Clause, Ref) :-
+assert_translated_equation(Module, Term, StoredRef, Clause, Ref) :-
+    with_typing_policy_stable(
+        assert_translated_equation_stable(Module, Term, StoredRef, Clause, Ref)).
+
+assert_translated_equation_stable(Module, Term, StoredRef, Clause, Ref) :-
     Term = [=, [F|Inputs], _],
     %Mainline's shadow-repair pre-step is CLAUSE-level: under deferral the
     %assert can run in a later module life than the arrival, and the weak
@@ -655,7 +665,7 @@ assert_translated_equation_stable(Module, Term, Clause, Ref) :-
     metta_instrument_recursive_clause(Term, RawClause, Clause),
     assert_function_clause(Module, Clause, Ref),
     record_source_assertion(Ref),
-    record_translated_from(Ref, Term, SourceRef),
+    record_translated_from(Ref, Term, StoredRef, SourceRef),
     record_source_assertion(SourceRef),
     forall(seam:function_clauses_changed(F), true).
 
@@ -971,8 +981,8 @@ translate_deferred_equations(Space, Module, F, InputArities, Budgeted) :-
 
 translate_deferred_equations_stable(Space, Module, F, InputArities,
                                     Budgeted) :-
-    findall([=, [F|W], Body],
-            ( get_native_atom(Space, [=, [F|W], Body]),
+    findall(Equation,
+            ( stored_equation_source(Space, [=, [F|W], _], Equation),
               is_list(W),
               length(W, InputArity),
               memberchk(InputArity, InputArities) ),
@@ -1850,8 +1860,35 @@ metta_host_native_fact(Module, Goal, Space, Fact) :-
 
 %% remove_equation(+Space, +Equation, +Function:atom, +Arguments, ?Body, -Removed:boolean) is semidet.
 remove_equation(Space, Term, F, Args, Body, Removed) :-
+    (   translated_equation_binding(Space, _, _)
+    ->  transaction(
+            ( resolved_equation_removal(Space, Term, Source, Origin),
+              remove_equation_source(Space, Term, Source, Origin, Removed) ))
+    ;   copy_term([=, [F|Args], Body], Source),
+        remove_equation_source(Space, Term, Source, ordinary, Removed)
+    ).
+
+% Resolve the occurrence before retracting it, under the same transaction
+% snapshot. The binding names its exact executable clause, so a native copy
+% with the same written equation cannot retire a reader copy's source owner.
+resolved_equation_removal(Space, Term, Source, Origin) :-
+    copy_term(Term, Pattern),
+    (   \+ seam:foreign_space(Space),
+        native_storage_module_ready(Space, Storage),
+        native_atom_clause(Space, Pattern, Head),
+        once(clause(Storage:Head, true, StoredRef))
+    ->  (   translated_equation_binding(Space, StoredRef, Ref),
+            translated_from(Ref, Bound)
+        ->  Source = Bound, Origin = bound(Ref)
+        ;   stored_atom_of_ref(StoredRef, Space, Source), Origin = ordinary
+        )
+    ;   Source = Pattern, Origin = ordinary
+    ).
+
+remove_equation_source(Space, Term, Probe, Origin, Removed) :-
     unstore_atom(Space, Term, Stored),
     space_module(Space, Module),
+    Probe = [=, [F|Args], Body],
     drop_fun_meta(Module, F, Args, Body),
     %ONE compiled clause, the multiset law applied to the compiled half. The
     %retained-equation half above already worked this way and said so, "remove
@@ -1867,8 +1904,11 @@ remove_equation(Space, Term, F, Args, Body, Removed) :-
     %
     %The probe is a COPY for drop_fun_meta/4's reason: a lookup that binds the
     %caller's Term would narrow every later use of it in this clause.
-    copy_term(Term, Probe),
-    (   translated_from(Ref, Probe), clause_property(Ref, module(Module))
+    (   (   Origin = bound(Ref)
+        ->  clause_property(Ref, module(Module))
+        ;   translated_from(Ref, Probe), clause_property(Ref, module(Module)),
+            \+ translated_equation_binding(_, _, Ref)
+        )
     ->  forget_translated_from(Module, Ref, Probe), erase(Ref), Erased = true
     ;   Erased = false
     ),

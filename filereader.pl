@@ -1,6 +1,14 @@
 % Purpose: read MeTTa source, split it into complete top-level forms, and
 % dispatch each parsed form to the evaluator.
 % Guarantees:
+%   - resolved reader equations retain their stored clause reference through
+%     deferred reconstruction, recompilation and fast-cache relocation
+%     [tested: test_forcing_a_deferred_equation_keeps_a_resolved_sibling_once,
+%     test_fast_images_keep_pending_equations_beside_resolved_equations;
+%     commit=WORKTREE].
+%   - source exits and runnable prefixes materialize the arrived function-free
+%     fragment through materialize:flush_source_materialization/0
+%     [tested: function_free_materialization; commit=WORKTREE].
 %   - source_lifecycle.pl is a plain source unit consulted into this module, so
 %     cache, digest, transactional reload, and assertion records retain their
 %     filereader predicate identities and load position
@@ -229,6 +237,9 @@
             %when that file is loaded again.
             current_source_identity/2,
             record_translated_from/3,
+            record_translated_from/4,
+            translated_equation_binding/3,
+            stored_equation_source/3,
             forget_translated_from/3,
             forget_space_source_loads/1,
             recompile_function_impl/1,
@@ -323,6 +334,7 @@
 %the first function ever compiles (a virgin-engine remove-atom read it
 %undefined and crashed).
 :- dynamic translated_from/2.
+:- dynamic translated_equation_binding/3.
 
 :- multifile prolog:error_message//1.
 
@@ -527,7 +539,7 @@ read_metta_source_groups(Filename, Space, Groups) :-
     read_metta_source(Filename, Source),
     prepare_metta_source_in(Space, Source, Forms, Names),
     with_named_program_order(
-        Names,
+        Space, Names,
         with_runnable_variable_epochs(
             ( maplist(process_loader_form(Space), Forms, PerForm),
               !,
@@ -614,7 +626,7 @@ metta_host_run_source(Source0, Space, Bindings, Groups) :-
         prepare_parsed_summary_in(space(Space), Parsed, Sigs, Decls, Names)
     ),
     with_named_program_order(
-        Names,
+        Space, Names,
         with_runnable_variable_epochs(
             metta_host_process_groups(Parsed, Space, Groups))),
     !.
@@ -664,7 +676,7 @@ metta_host_run_source_status(Source0, Space, Groups) :-
     source_summary_of_forms(Parsed, Sigs, Decls),
     prepare_parsed_summary_in(module(Module), Parsed, Sigs, Decls, _),
     with_source_program_order(
-        Parsed,
+        Space, Parsed,
         metta_host_status_groups(Parsed, Space, Module, Groups)),
     !.
 
@@ -730,7 +742,7 @@ process_metta_string(S, Results, Space) :-
 process_direct_metta_string(S, Results, Space) :-
     prepare_metta_source_in(Space, S, ParsedForms, Names),
     with_named_program_order(
-        Names,
+        Space, Names,
         with_runnable_variable_epochs(
             ( process_forms(process_form(Space), Space, ParsedForms, ResultsList), !,
               append(ResultsList, Carried),
@@ -738,7 +750,7 @@ process_direct_metta_string(S, Results, Space) :-
 process_loader_string(S, Results, Space) :-
     prepare_metta_source_in(Space, S, ParsedForms, Names),
     with_named_program_order(
-        Names,
+        Space, Names,
         with_runnable_variable_epochs(
             ( process_forms(process_loader_form(Space), Space, ParsedForms,
                             ResultsList), !,
@@ -909,19 +921,24 @@ source_summary_of_forms(Forms, Sigs, Decls) :-
 :- thread_local active_source_program/1.
 :- thread_local source_pending_definition/2.
 :- thread_local source_compiled_definition/1.
-:- meta_predicate with_source_program_order(+, 0).
+:- meta_predicate with_source_program_order(+, +, 0).
 
-with_source_program_order(ParsedForms, Goal) :-
+with_source_program_order(Space, ParsedForms, Goal) :-
     findall(F, source_equation_name(ParsedForms, F), Names0),
     sort(Names0, Names),
-    with_named_program_order(Names, Goal).
+    with_named_program_order(Space, Names, Goal).
 
 %The same context from names already in hand: every hot door now carries the
 %parse summary, so the walk above serves only callers holding bare forms.
-:- meta_predicate with_named_program_order(+, 0).
+:- meta_predicate with_named_program_order(+, +, 0).
+:- meta_predicate with_named_definition_order(+, 0).
 
-with_named_program_order([], Goal) :- !, call(Goal).
-with_named_program_order(Names, Goal) :-
+with_named_program_order(Space, Names, Goal) :-
+    materialize:with_source_materialization(
+        Space, Names, filereader:with_named_definition_order(Names, Goal)).
+
+with_named_definition_order([], Goal) :- !, call(Goal).
+with_named_definition_order(Names, Goal) :-
     gensym(source_program_, Id),
     with_source_definition_order(Id, Names, Goal).
 
@@ -953,7 +970,8 @@ flush_source_program_analysis_if_needed :-
         forall(seam:source_program_compiled, true)
     ;   true
     ),
-    flush_source_prefix_repairs.
+    flush_source_prefix_repairs,
+    materialize:flush_source_materialization.
 
 %A file load journals dependent recompilations until the source transaction
 %commits.  A runnable in that SAME file is earlier than the commit, however,
@@ -1316,14 +1334,16 @@ recompile_function_in_module(Module, G) :-
 
 recompile_function_in_module_stable(Module, G) :-
     retained_recompile_types(Module, G, TypeGroups),
-    findall(compiled(Ref, SourceRef, Term, Owners),
+    findall(compiled(Ref, SourceRef, Term, Owners, StoredRef),
             ( translated_equation_of(G, Ref, Term),
               clause_property(Ref, module(Module)),
               clause(translated_from(Ref, Term), true, SourceRef),
               findall(LoadId,
                       source_load_assertion(LoadId, artifact, Ref),
                       Owners0),
-              sort(Owners0, Owners) ),
+              sort(Owners0, Owners),
+              ( translated_equation_binding(_, Origin, Ref)
+              -> StoredRef = Origin ; StoredRef = none ) ),
             Recorded0),
     attach_recompile_types(Recorded0, TypeGroups, Recorded),
     clear_fun_meta(Module, G),
@@ -1348,15 +1368,15 @@ recompile_function_in_module_stable(Module, G) :-
     %
     %The bookkeeping goes for every recorded reference either way; only the
     %rebuild is conditional.
-    forall(member(compiled(Ref, SourceRef, Term, _, _), Recorded),
+    forall(member(compiled(Ref, SourceRef, Term, _, _, _), Recorded),
            ( retractall(source_load_assertion(_, artifact, Ref)),
              retractall(source_load_assertion(_, artifact, SourceRef)),
              forget_translated_from(Module, Ref, Term) )),
-    findall(rebuild(Term, Owners, Types),
-            ( member(compiled(Ref, _, Term, Owners, Types), Recorded),
+    findall(rebuild(Term, Owners, StoredRef, Types),
+            ( member(compiled(Ref, _, Term, Owners, StoredRef, Types), Recorded),
               erase(Ref) ),
             Rebuilds),
-    forall(member(rebuild(Term, Owners, Types), Rebuilds),
+    forall(member(rebuild(Term, Owners, StoredRef, Types), Rebuilds),
            with_source_recompile_owners(
                Owners,
                ( copy_term(Term, Fresh),
@@ -1374,7 +1394,7 @@ recompile_function_in_module_stable(Module, G) :-
                  metta_instrument_recursive_clause(Fresh, RawClause, Clause),
                  assertz(Module:Clause, NewRef),
                  record_recompiled_source_assertion(Owners, NewRef),
-                 record_translated_from(NewRef, Term, NewSourceRef),
+                 record_translated_from(NewRef, Term, StoredRef, NewSourceRef),
                  record_recompiled_source_assertion(Owners, NewSourceRef) ))).
 
 % Preserve arrival groups only while the written declaration set is unchanged.
@@ -1395,8 +1415,10 @@ retained_recompile_types(Module, G, Groups) :-
 variant_type_member(Type, Types) :- member(Other, Types), Type =@= Other, !.
 
 attach_recompile_types([], _, []).
-attach_recompile_types([compiled(Ref, Source, Term, Owners)|Rest], Groups,
-                       [compiled(Ref, Source, Term, Owners, Saved)|Prepared]) :-
+attach_recompile_types([compiled(Ref, Source, Term, Owners, StoredRef)|Rest],
+                       Groups,
+                       [compiled(Ref, Source, Term, Owners, StoredRef,
+                                 Saved)|Prepared]) :-
     (   select(group(Original, Types), Groups, Remaining), Term =@= Original
     ->  Saved = types(Types)
     ;   Saved = live, Remaining = Groups
@@ -1430,10 +1452,35 @@ recompile_definitions_mentioning(F) :-
     repair_support_invalidations.
 
 record_translated_from(Ref, Term, SourceRef) :-
+    record_translated_from(Ref, Term, none, SourceRef).
+
+record_translated_from(Ref, Term, StoredRef, SourceRef) :-
     assertz(translated_from(Ref, Term), SourceRef),
+    (   StoredRef \== none,
+        stored_atom_of_ref(StoredRef, Space, Original),
+        \+ Original =@= Term
+    ->  assertz(translated_equation_binding(Space, StoredRef, Ref), BindingRef),
+        ( source_recompile_owners(Owners)
+        -> record_recompiled_source_assertion(Owners, BindingRef)
+        ; record_source_assertion(BindingRef) )
+    ;   true
+    ),
     (   clause_property(Ref, module(Module))
     ->  record_translated_supports(Module, Ref, Term)
     ;   true
+    ).
+
+% Read the exact stored occurrence that a deferred translation is visiting.
+% A resolved sibling already owns its executable clause even when an older
+% equation of the same function is still waiting to compile.
+stored_equation_source(Space, Original, Resolved) :-
+    spaces:native_storage_module_ready(Space, Storage),
+    native_atom_clause(Space, Original, Head),
+    clause(Storage:Head, true, StoredRef),
+    (   translated_equation_binding(Space, StoredRef, Ref),
+        translated_from(Ref, Bound)
+    ->  Resolved = Bound
+    ;   Resolved = Original
     ).
 
 % One source-form node per executable clause keeps multiple equations for one
@@ -1502,6 +1549,7 @@ type_annotation_supports(Module, G, Body, Supports) :-
 
 forget_translated_from(Module, Ref, [=, [G|_], _]) :-
     !,
+    forget_translated_equation_binding(Ref),
     retractall(translated_from(Ref, _)),
     %The node carries the stable id, not the reference; resolve it first
     %[source: engine/support_graph.pl, support_translated_form_node/3].
@@ -1515,7 +1563,13 @@ forget_translated_from(Module, Ref, [=, [G|_], _]) :-
     ;   support_forget(compiled_function(Module, G))
     ).
 forget_translated_from(_, Ref, _) :-
+    forget_translated_equation_binding(Ref),
     retractall(translated_from(Ref, _)).
+
+forget_translated_equation_binding(Ref) :-
+    forall(clause(translated_equation_binding(_, _, Ref), true, BindingRef),
+           ( retractall(source_load_assertion(_, artifact, BindingRef)),
+             erase(BindingRef) )).
 
 % All module views already present in the graph are the callers a late global
 % registration can have made stale. Each support_invalidate/1 is itself
@@ -1742,7 +1796,7 @@ process_form(Space, parsed(function, FormStr, Term), []) :-
     %The one compile door (compile_metta_equation/4 in spaces.pl) carries
     %the eviction, registration, translation, provenance, and the complete
     %change notification this clause used to restate.
-    store_metta_equation(Space, Module, Term, BoundTerm, FormStr),
+    store_metta_equation(Space, Module, Term, BoundTerm, SpaceRef, FormStr),
     source_definition_arrived(F).
 process_form(_, In, _) :-
     throw(error(metta_translation_failed(In),
@@ -1783,7 +1837,7 @@ process_loader_form(Space, parsed(function, FormStr, Term), []) :-
     record_source_atom_assertion(SpaceRef),
     rewrite_parsed_form(Space, FormStr, Term, BoundTerm),
     space_module(Space, Module),
-    store_metta_equation(Space, Module, Term, BoundTerm, FormStr),
+    store_metta_equation(Space, Module, Term, BoundTerm, SpaceRef, FormStr),
     source_definition_arrived(F).
 process_loader_form(_, In, _) :-
     throw(error(metta_translation_failed(In),
@@ -1824,13 +1878,13 @@ print_runnable_form(FormStr, Goals) :-
 %Equality by ==, never head unification: Term and BoundTerm both carry
 %variables, and unifying them can succeed by BINDING across the two where
 %the rewrite in fact changed the term.
-store_metta_equation(Space, Module, Term, BoundTerm, _) :-
+store_metta_equation(Space, Module, Term, BoundTerm, _, _) :-
     silent(true),
     Term == BoundTerm,
     !,
     defer_metta_equation(Space, Module, Term).
-store_metta_equation(_, Module, _, BoundTerm, FormStr) :-
-    compile_metta_equation(Module, BoundTerm, _Clause, Ref),
+store_metta_equation(_, Module, _, BoundTerm, StoredRef, FormStr) :-
+    compile_metta_equation(Module, BoundTerm, StoredRef, _Clause, Ref),
     print_function_form(FormStr, Ref).
 
 print_function_form(_, _) :- silent(true), !.
