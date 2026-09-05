@@ -29,7 +29,7 @@ beside its definitions.
 | lib_memo | 0 | 0 |
 | lib_mm2 | 5 | 0 |
 | lib_nars | 38 | 0 |
-| lib_observe | 1 | 1 |
+| lib_observe | 2 | 2 |
 | lib_patrick | 4 | 0 |
 | lib_pln | 49 | 0 |
 | lib_pln2 | 0 | 0 |
@@ -350,6 +350,22 @@ Run source in a space and return a space of trace-event atoms. The filter is all
 4. positive event limit
 
 Returns: a space of (trace-event depth kind term answer) and (trace-stopped reason) atoms
+
+### `observe-source`
+
+*lib_observe.metta:16*
+
+```metta
+(: observe-source (-> SpaceType String String SpaceType))
+```
+
+Run source with coverage and error diagnostics. Source coordinates are one-based Unicode codepoint locations, with exclusive ends. Reports include binary source-coverage flags (0 unexecuted, 1 executed), unchanged source-error values, and source-frame atoms. A generated-by attribution identifies the construct which generated a closure; source-coverage-unavailable explains sites without an independent counter. source-function-unavailable and source-frame-unavailable identify code that has no captured source map. Completed root-form answers survive a later exception. Ordinary execution outside this operation retains no diagnostic state. The source performs its writes in the execution space.
+
+1. the execution space
+2. a source label
+3. MeTTa source text
+
+Returns: a queryable space of observation-status, observation-answer, observation-exception, source-coverage, source-coverage-unavailable, source-function-unavailable, source-error, source-frame, and source-frame-unavailable atoms
 
 ## lib_reflect
 

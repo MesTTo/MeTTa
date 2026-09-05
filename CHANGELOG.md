@@ -17,6 +17,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   missing files and denied permissions by name.
 - `trace(filter=...)` selects named functions before recording limits apply.
   MeTTa programs can query selected trace events through `lib_observe`.
+- `observe-source` in `lib_observe` returns source coverage, Error values and
+  attributed MeTTa stack frames as queryable atoms. Positions count Unicode
+  codepoints. Generated calls name their originating construct, and missing
+  source metadata is explicit. Ordinary execution keeps its atom representation
+  and does not collect diagnostic state.
 
 - Integration installation is transactional across framework-managed state.
   A failed installer now restores operations and declaration ownership,

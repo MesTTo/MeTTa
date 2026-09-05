@@ -1,0 +1,224 @@
+% Purpose: verify opt-in source coverage and Error-frame observations.
+% Guarantees: source coordinates distinguish repeated expressions; generated
+%   closures disclose their origin and uncompiled functions disclose absent maps
+%   [tested: source_observation; commit=WORKTREE].
+:- ensure_loaded('../../../../engine/qlf_boot.pl').
+:- ensure_loaded('../../../../engine/metta.pl').
+:- use_module(library(assoc), [empty_assoc/1]).
+:- use_module(library(prolog_wrap)).
+
+:- begin_tests(source_observation).
+
+observe(Source,Rows) :-
+    setup_call_cleanup('new-space'(Space),
+        source_observation:observe_source(Space,"unit.metta",Source,Rows),
+        spaces:metta_release_space(Space)).
+
+test(identical_branches_have_distinct_coverage) :-
+    observe("(= (obs-pick $flag $x)\n  (if $flag\n    (+ $x 2)\n    (+ $x 2)))\n!(obs-pick True 1)",Rows),
+    memberchk(['observation-answer',0,3],Rows),
+    memberchk(['source-coverage',"unit.metta",3,5,3,13,1],Rows),
+    memberchk(['source-coverage',"unit.metta",4,5,4,13,0],Rows).
+
+test(error_atom_and_exact_caller_frames_survive, [nondet]) :-
+    observe("(= (obs-divide $x)\n  (+ 1 (/ 1 $x)))\n(= (obs-caller $x)\n  (+ 2 (obs-divide $x)))\n!(obs-caller 0)",Rows),
+    Error=['Error',['/',1,0],'DivisionByZero'],
+    memberchk(['observation-answer',0,Error],Rows),
+    member(['source-error',Id,Error],Rows),
+    memberchk(['source-frame',Id,0,'obs-divide',"unit.metta",2,8,2,16,exact],Rows),
+    memberchk(['source-frame',Id,1,'obs-caller',"unit.metta",4,8,4,23,exact],Rows).
+
+test(generated_closure_reports_its_construct, [nondet]) :-
+    observe("(= (obs-collect $x)\n  (collapse (+ 1 (/ 1 $x))))\n!(obs-collect 0)",Rows),
+    member(['source-frame',_,_,'obs-collect',"unit.metta",2,3,2,28,
+            ['generated-by',collapse]],Rows),
+    memberchk(['source-coverage-unavailable',"unit.metta",2,13,2,27,
+               ['generated-by',collapse]],Rows),
+    \+ member(['source-coverage',"unit.metta",2,13,2,27,_],Rows).
+
+test(identical_generated_siblings_keep_separate_origins, [nondet]) :-
+    observe("(= (obs-twice $x)\n  (cons-atom (collapse (/ 1 $x)) (collapse (/ 1 $x))))\n!(obs-twice 0)",Rows),
+    member(['source-frame',_,_,'obs-twice',"unit.metta",2,14,2,33,
+            ['generated-by',collapse]],Rows),
+    member(['source-frame',_,_,'obs-twice',"unit.metta",2,34,2,53,
+            ['generated-by',collapse]],Rows).
+
+test(unexecuted_definition_has_zero_entry_coverage) :-
+    observe("(= (obs-unused $x) (+ $x 2))\n!(+ 1 2)",Rows),
+    memberchk(['source-coverage',"unit.metta",1,1,1,29,0],Rows),
+    ( memberchk(['source-coverage-unavailable',"unit.metta",1,20,1,28,'not-compiled'],Rows)
+    ; memberchk(['source-coverage',"unit.metta",1,20,1,28,0],Rows) ).
+
+test(previously_compiled_function_reports_absent_metadata, [nondet]) :-
+    setup_call_cleanup('new-space'(Space),
+        ( filereader:metta_host_run_source("(= (obs-old $x) (/ 1 $x)) !(obs-old 1)",Space,[],_),
+          source_observation:observe_source(Space,"later.metta","!(obs-old 0)",Rows),
+          memberchk(['source-function-unavailable','obs-old','source-not-observed'],Rows),
+          member(['source-frame-unavailable',_,_,'obs-old','source-not-observed'],Rows) ),
+        spaces:metta_release_space(Space)).
+
+test(exception_keeps_source_frames_and_restores_debugger, [nondet]) :-
+    current_prolog_flag(debug,Debug),
+    current_prolog_flag(last_call_optimisation,LCO),
+    '$visible'(Visible,Visible),
+    observe("(= (obs-check $x) (assertEqual $x 3)) !(obs-check 0)",Rows),
+    memberchk(['observation-status',exception],Rows),
+    member(['source-frame',_,_,'obs-check',"unit.metta",1,_,1,_,_],Rows),
+    current_prolog_flag(debug,Debug),
+    current_prolog_flag(last_call_optimisation,LCO),
+    '$visible'(Visible,Visible),
+    \+ nb_current('$metta_observation',_),
+    \+ source_observation:source_document(_,_,_).
+
+test(repeated_observations_do_not_retain_errors_or_documents, [nondet]) :-
+    observe("!(/ 1 0)",First), member(['source-error',_,_],First),
+    observe("!(+ 1 2)",Second),
+    \+ member(['source-error',_,_],Second),
+    memberchk(['observation-answer',0,3],Second).
+
+test(decons_refusal_is_observed_as_unchanged_data, [nondet]) :-
+    observe("!(decons-atom ())",Rows),
+    member(['observation-answer',0,Error],Rows),
+    Error=['Error',['decons-atom',[]],_],
+    member(['source-error',_,Error],Rows).
+
+test(error_hooks_keep_each_existing_refusal_shape) :-
+    % These failure policies are internal dispatch branches, so exercising each
+    % exact branch isolates recording from unrelated function-policy lookup.
+    empty_assoc(Hits), Buffer=observations(Hits,[]),
+    setup_call_cleanup(nb_setval('$metta_observation',Buffer),
+      ( translator:dispatch_no_match('NoMatchError',missing,[1],A),
+        translator:dispatch_out_of_clauses('FailureError',emptying,[2],B),
+        translator:dispatch_mismatch('MismatchError',typed,[3],C),
+        translator:declared_arity_refusal(declared,[4],D),
+        A==['Error',[missing,1],'NoMatchingClause'],
+        B==['Error',[emptying,2],'OutOfClauses'],
+        C==['Error',[typed,3],'ArgumentTypeMismatch'],
+        D==['Error',[declared,4],'IncorrectNumberOfArguments'],
+        nb_getval('$metta_observation',Recorded), arg(2,Recorded,Errors),
+        length(Errors,4) ),
+      nb_delete('$metta_observation')).
+
+test(ordinary_errors_keep_no_observation_buffer) :-
+    metta_error_atom('/',[1,0],'DivisionByZero',Error),
+    Error==['Error',['/',1,0],'DivisionByZero'],
+    \+ nb_current('$metta_observation',_).
+
+test(invalid_source_type_refuses,
+     [throws(error(type_error(string,42),_))]) :-
+    source_observation:observe_source('&self',"unit.metta",42,_).
+
+test(nested_observation_refuses_without_destroying_outer_buffer) :-
+    empty_assoc(Hits),
+    setup_call_cleanup(nb_setval('$metta_observation',observations(Hits,[])),
+        ( catch(source_observation:observe_source('&self',"nested","!(+ 1 2)",_),Error,true),
+          nonvar(Error), Error=error(permission_error(observe,execution,nested),_),
+          nb_current('$metta_observation',_) ),
+        nb_delete('$metta_observation')).
+
+
+test(exception_preserves_completed_form_answers) :-
+    observe("!(+ 1 2) !(assertEqual 0 1)",Rows),
+    memberchk(['observation-status',exception],Rows),
+    memberchk(['observation-answer',0,3],Rows).
+
+test(invalid_label_has_remedy,
+     [throws(error(type_error(string,label),
+                   context('observe-source','pass the source label as a string')))]) :-
+    source_observation:observe_source('&self',label,"!(+ 1 2)",_).
+
+test(invalid_space_refuses_before_running_source,
+     [throws(error(type_error('SpaceType',not_a_space),context('observe-source',_)))]) :-
+    source_observation:observe_source(not_a_space,"unit.metta","!(assertEqual 0 1)",_).
+
+test(compiled_goals_are_unchanged) :-
+    Source="(= (obs-identical $x) (+ $x 1)) !(obs-identical 4)",
+    setup_call_cleanup(('new-space'(A),'new-space'(B)),
+      ( filereader:metta_host_run_source(Source,A,[],_),
+        source_observation:observe_source(B,"unit.metta",Source,_),
+        spaces:space_module(A,MA), spaces:space_module(B,MB),
+        clause(MA:'obs-identical'(X,Y),BodyA),
+        clause(MB:'obs-identical'(U,V),BodyB),
+        (X,Y,BodyA) =@= (U,V,BodyB) ),
+      (spaces:metta_release_space(A),spaces:metta_release_space(B))).
+
+test(imported_function_uses_its_file_identity, [nondet]) :-
+    tmp_file(obs_source,Stem), atom_concat(Stem,'.metta',File),
+    setup_call_cleanup(
+      ( setup_call_cleanup(open(File,write,Stream,[encoding(utf8)]),
+                           write(Stream,'(= (obs-imported $x) (/ 1 $x))'),close(Stream)),
+        'new-space'(Space) ),
+      ( format(string(Source),'!(import! &self "~w") !(obs-imported 0)',[File]),
+        source_observation:observe_source(Space,"driver.metta",Source,Rows),
+        atom_string(File,Label),
+        member(['source-frame',_,_,'obs-imported',Label,1,22,1,30,exact],Rows),
+        \+ member(['source-frame',_,_,'obs-imported',"driver.metta",_,_,_,_,_],Rows) ),
+      (spaces:metta_release_space(Space),delete_file(File))).
+
+test(binary_coverage_records_nondeterministic_execution_once) :-
+    observe("(= (obs-many $x) (+ $x 1)) !(obs-many (superpose (1 2 3)))",Rows),
+    findall(Answer,member(['observation-answer',0,Answer],Rows),[2,3,4]),
+    forall(member(['source-coverage',_,_,_,_,_,Covered],Rows),
+           memberchk(Covered,[0,1])).
+
+test(nested_controls_preserve_each_source_branch) :-
+    observe("(= (obs-nested $a $b)\n  (if $a (if $b (+ 1 2) (+ 3 4)) (+ 5 6)))\n!(obs-nested True False)",Rows),
+    memberchk(['observation-answer',0,7],Rows),
+    memberchk(['source-coverage',"unit.metta",2,17,2,24,0],Rows),
+    memberchk(['source-coverage',"unit.metta",2,25,2,32,1],Rows),
+    memberchk(['source-coverage',"unit.metta",2,34,2,41,0],Rows).
+
+
+test(observing_errors_does_not_reclassify_arithmetic) :-
+    metta_operation_effect('observe-source',oracleIO),
+    metta_operation_effect('/',Before),
+    observe("!(/ 1 0)",_),
+    metta_operation_effect('/',After), Before==After, Before==pureStructural.
+
+test(generated_token_owns_only_its_lexical_span) :-
+    % The scanner accepts an already-parsed constructor result. Its children
+    % were synthesized by the reader and therefore have no written spans.
+    Term=[token_constructor,"12x"], Tree=node(span(0,3,1,1,1,4),[]),
+    source_observation:source_subterm(Term,Tree,Term,span(0,3,1,1,1,4),token),
+    source_observation:goal_attribution(token_constructor("12x",_),
+        token(token_constructor),['generated-by',['token-constructor',token_constructor]]).
+
+test(partial_install_failure_releases_wrappers_and_state) :-
+    setup_call_cleanup(
+      wrap_predicate(source_observation:install_runtime_observers, setup_failure, _,
+        ( wrap_predicate(filereader:metta_host_run_source(_,_,_,_),
+                         source_observer,Call,Call),
+          throw(error(observer_install_probe,context(test,partial_install))) )),
+      ( catch(source_observation:observe_source('&self',"unit.metta","!(+ 1 2)",_),
+              Error,true),
+        nonvar(Error), Error=error(observer_install_probe,_),
+        \+ nb_current('$metta_observation',_),
+        \+ (predicate_property(translator:translate_expr_dl(_,_,_,_),wrapped(Names)),
+             memberchk(source_map,Names)),
+        \+ (predicate_property(filereader:metta_host_run_source(_,_,_,_),wrapped(Names)),
+             memberchk(source_observer,Names)) ),
+      unwrap_predicate(source_observation:install_runtime_observers/0,setup_failure)).
+
+observation_worker(Queue) :-
+    catch((observe("!(+ 5 6)",Rows),Outcome=success(Rows)),Error,Outcome=error(Error)),
+    thread_send_message(Queue,finished(Outcome)).
+
+test(ordinary_other_thread_execution_does_not_enter_observation) :-
+    setup_call_cleanup(
+      ( message_queue_create(Queue),
+        wrap_predicate(source_observation:install_runtime_observers, concurrent_probe, Call,
+          ( Call, thread_send_message(Queue,installed),
+            thread_get_message(Queue,continue) )),
+        thread_create(observation_worker(Queue),Worker,[]) ),
+      ( thread_get_message(Queue,installed),
+        filereader:metta_host_run_source("!(/ 1 0)",'&self',[],_),
+        \+ nb_current('$metta_observation',_),
+        thread_send_message(Queue,continue),
+        thread_get_message(Queue,finished(success(Rows))),
+        memberchk(['observation-answer',0,11],Rows),
+        \+ member(['source-error',_,_],Rows) ),
+      ( thread_send_message(Queue,continue), thread_join(Worker,_),
+        unwrap_predicate(source_observation:install_runtime_observers/0,concurrent_probe),
+        message_queue_destroy(Queue) )).
+
+:- end_tests(source_observation).

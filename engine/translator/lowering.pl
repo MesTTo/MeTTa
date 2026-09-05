@@ -24,6 +24,8 @@
 %   commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: dispatch refusals retain their Error answers; declared_arity_refusal/3
+%   still answers rather than throws [tested: source_observation; commit=WORKTREE].
 
 %% translate_cached_expr(+Expression, -Goals, -Value) is det.
 % This cache stores translation templates, not evaluation answers. Any future
@@ -596,13 +598,15 @@ dispatch_no_match('NoMatchOriginal', Fun, Args, Out) :-
     ;   Out = [Fun|Args]
     ).
 dispatch_no_match('NoMatchFail', _, _, _) :- fail.
-dispatch_no_match('NoMatchError', Fun, Args,
-                  ['Error', [Fun|Args], 'NoMatchingClause']).
+dispatch_no_match('NoMatchError', Fun, Args, Error) :-
+    Error = ['Error', [Fun|Args], 'NoMatchingClause'],
+    source_observation:record_error(Error).
 
 dispatch_out_of_clauses('FailureOriginal', _, _, _) :- fail.
 dispatch_out_of_clauses('FailureEmpty', _, _, []).
-dispatch_out_of_clauses('FailureError', Fun, Args,
-                        ['Error', [Fun|Args], 'OutOfClauses']).
+dispatch_out_of_clauses('FailureError', Fun, Args, Error) :-
+    Error = ['Error', [Fun|Args], 'OutOfClauses'],
+    source_observation:record_error(Error).
 
 dispatch_mismatch_result(Fun, Args, Out) :-
     dispatch_policy_value(Fun, 'MismatchEnum', Policy),
@@ -610,8 +614,9 @@ dispatch_mismatch_result(Fun, Args, Out) :-
 
 dispatch_mismatch('MismatchOriginal', Fun, Args, Out) :-
     metta_bad_argument_error(Fun, Args, Out).
-dispatch_mismatch('MismatchError', Fun, Args,
-                  ['Error', [Fun|Args], 'ArgumentTypeMismatch']).
+dispatch_mismatch('MismatchError', Fun, Args, Error) :-
+    Error = ['Error', [Fun|Args], 'ArgumentTypeMismatch'],
+    source_observation:record_error(Error).
 dispatch_mismatch('MismatchFail', _, _, _) :- fail.
 
 dispatch_no_match_result(Fun, Args, Out) :-
@@ -654,8 +659,9 @@ incomplete_application_kind(_, _, overapplied).
 %contradicts its equations is a static fault the form after it survives
 %[tested: conformance2:a_declared_wrong_arity_is_an_error,
 %lib_strategy:an_inherited_arrow_does_not_veto_a_local_definition].
-declared_arity_refusal(Fun, Arguments,
-                       ['Error', [Fun|Arguments], 'IncorrectNumberOfArguments']).
+declared_arity_refusal(Fun, Arguments, Error) :-
+    Error = ['Error', [Fun|Arguments], 'IncorrectNumberOfArguments'],
+    source_observation:record_error(Error).
 
 function_overapplication(Fun, Arguments, _) :-
     length(Arguments, AskedInputArity),

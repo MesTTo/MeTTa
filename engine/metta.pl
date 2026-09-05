@@ -986,6 +986,7 @@ metta_import_shared_registries(Subsystem) :-
                   '../lib/lib_gitimport/lib_gitimport', spaces, tracer,
                   duals, kernel, '../lib/lib_memo/lib_memo',
                   '../lib/minimal_metta_lib/minimal_metta_lib']).
+:- use_module(source_observation, []).
 
 %A subsystem that declares a module gets THIS module as its base, so the calls
 %it makes the other way -- into the engine core, into another subsystem's
