@@ -257,6 +257,7 @@
             native_storage_module_cache/2,
             native_storage_cache_forget/1,
             native_storage_module_ready/2,
+            space_read_chain/2,
             metta_answer_terms/3,
             metta_capacity_count/2,
             metta_capacity_count_added/2,
