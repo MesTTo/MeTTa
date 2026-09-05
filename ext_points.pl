@@ -1355,6 +1355,10 @@ kind(metta_cache_unchecked/1, service).
 %surface through the loader's established invalidation path.
 kind(active_source_program/1, service).
 kind(recompile_function_impl/1, service).
+%The same recompile bounded to ONE module, for a decision that is per module
+%and per name: rebuilding the name everywhere priced a first evaluation by how
+%many other live spaces defined the same head.
+kind(recompile_function_impl_in/2, service).
 
 %THE SUPPORT GRAPH's other direction. Its handler seams are declared in
 %engine/support_graph.pl (support_invalidation_action/1 and four more), so an
