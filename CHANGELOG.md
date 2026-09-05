@@ -145,6 +145,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   write is lawful and scoped, and the sibling of
   `interpreter-equation-shadow` for translator-owned heads.
 
+### Added
+
+- The Node package exports `metta-node/atom` and `metta-node/errors`, the atom
+  algebra and the errors it throws, with no engine behind either. A consumer
+  that only builds terms had to come through the main entry, which resolves 166
+  modules and reaches `node:fs`, `node:path` and `node:url`; the two new
+  subpaths resolve three between them and reach none of those, so a browser
+  page that builds atoms pays for none of the engine.
+
 ### Fixed
 
 - The Node remote wire carries a number the way `CODEC.md` says, so the two

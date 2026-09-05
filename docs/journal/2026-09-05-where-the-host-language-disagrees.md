@@ -278,3 +278,65 @@ cross-seat cases fail, the client one reading
 `ValueError: wire number payload must be numeric, got '0'` and the non-finite
 one reading `ACCEPTED`. Green here, with the seat's suite at 590 and the
 cross-seat lane at 8.
+
+## 2026-09-05, an atom without an engine
+
+A consumer of this package wanted `Symbol`, `Expression`, `Grounded` and the
+rest without the engine behind them, and had written a shim to get there. The
+exports map named thirty subpaths and none of them was `./atom`, so the only
+door was the main entry, and the main entry reaches the module that boots
+WebAssembly.
+
+Measured what each door actually costs, through a `module.registerHooks`
+resolve recorder in a child process, which is the ESM answer to
+`require.cache`:
+
+    import("metta-node")        166 specifiers, three of them node: builtins
+                                (node:fs, node:path, node:url)
+    import("metta-node/atom")   3 specifiers, none of them
+
+So the cost is NOT swipl-wasm, which is loaded lazily by an `await import`
+inside src/wasm.ts and never reached by merely importing the root. It is the
+static reach into the `node:` builtins, which is what a browser bundler trips
+over. Recorded because the obvious claim, "the root pulls in the engine", is
+the wrong one and would have made the test assert something vacuous.
+
+Checked the two shims the consumer wrote. The `./atom` one is answered here.
+The other, a browser field for `node:util`, targets an older published
+version: an installed metta-node 0.0.1-alpha.0 found in a sibling checkout's
+node_modules carries `dist/present.js:24: import { inspect } from "node:util"`,
+and its exports map has thirty subpaths and no browser key, while this tree's
+`src/present.ts` reaches the same hook through
+`Symbol.for("nodejs.util.inspect.custom")` and imports nothing. Already fixed
+here; the shim can go when that consumer updates.
+
+`src/atom.ts` imports `./errors.ts` and `./present.ts` and nothing else,
+`errors.ts` and `present.ts` import nothing at all, so the subpath is browser
+clean transitively without any source change. `./errors` ships beside it
+because they sit on one import path and a consumer of the atom classes catches
+what they throw.
+
+Decided: no build-script edit. `tools/build-browser.mjs` derives its esbuild
+entry points from the exports map, so the two new subpaths produce
+`browser/atom.js` and `browser/errors.js` on their own.
+
+Three checks, at three layers, because each can pass while another fails:
+
+- the seat's own suite walks `src/atom.ts`'s SOURCE imports and requires that
+  none leaves the package, which fails before anything is emitted;
+- the browser lane bundles a consumer that imports the two subpaths BY NAME,
+  so the exports map's `browser` key is what resolves, and asserts the page
+  fetched no engine asset and started no engine;
+- the `node-dist` lane resolves both through Node's own resolver, from a
+  directory whose `node_modules` links to the package, which is the only way
+  to exercise the map rather than a path the test already knows.
+
+Red without the two entries: `Could not resolve "metta-node/atom"` from
+esbuild takes all ten browser tests down, and the dist lane answers
+`ERR_PACKAGE_PATH_NOT_EXPORTED`. Green with them, at 592 Node tests and 10
+browser tests.
+
+Open: `MettaError` sets `this.name` from `new.target.name`, deliberately, so a
+bundler that renames the class renames the error too; the browser case asserts
+`code`, which src/errors.ts pins as the stable identity, and says so where it
+does.
