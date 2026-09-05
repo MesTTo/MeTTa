@@ -41,4 +41,28 @@ test(a_symbolic_wildcard_can_reach_a_true_nested_arm) :-
          !(not-provable (nested-symbol-case third))", Results)),
     assertion(Results == [true, false, true]).
 
+%Building the dual READS the equation. Selecting the Empty row by unification
+%wrote Empty into the stored wildcard pattern, so the ORDINARY direction broke
+%with it: this asks the positive question on both sides of the negation.
+test(building_a_dual_leaves_the_equation_answering) :-
+    with_output_to(string(_), filereader:process_metta_string(
+        "(= (anykey $n) (case $n ((90 True) ($x False))))\n\c
+         !(anykey 40)\n\c
+         !(not-provable (anykey 40))\n\c
+         !(anykey 40)", Results)),
+    assertion(Results == [false, true, false]).
+
+%A row that is not a [Pattern, Body] pair has no dual, and this file's rule is
+%to RAISE rather than answer from an incomplete one. Failing the bound-variable
+%walk instead made the whole build fail and the negation answer nothing at all.
+test(a_malformed_case_row_refuses_rather_than_vanishing) :-
+    with_output_to(string(_), filereader:process_metta_string(
+        "(= (malformed $n) (case $n ((1 2 3))))", _)),
+    catch(
+        with_output_to(string(_), filereader:process_metta_string(
+            "!(not-provable (malformed 1))", _)),
+        Error,
+        true),
+    assertion(nonvar(Error)).
+
 :- end_tests(case_dual_patterns).

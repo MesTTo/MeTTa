@@ -13,6 +13,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   boolean per name recorded only whether it had declared anything, so every
   later clause's declaration was suppressed; a ledger of what the name has
   published here adds the new arrow and skips a repeat.
+- A case row that is not a `(pattern body)` pair no longer makes a negation over
+  its function answer nothing. The bound-variable walk failed on the row, which
+  failed the whole dual build and left `(not-provable (f 1))` with no answer at
+  all where the form does not reduce and its dual is therefore true. The walk
+  steps over such a row now, so the refusal comes from the place this engine
+  puts one: it raises rather than answering from an incomplete dual.
 - A declared class answers its OWN type name. `ensure_registered` walks the MRO,
   so a subclass adding nothing projected through its base's entry: declaring
   `Dog(Animal)` restated `(: Animal (-> String Animal))`, which the engine
