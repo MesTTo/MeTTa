@@ -1450,6 +1450,7 @@ set_type_alias_mutation_scope(Scope, enabled) :-
     assertz(type_alias_mutation_scope_ref(Scope, Batch)),
     % Copy the standing body once at activation, so its policy is not repeated
     % in a second implementation. Filter earlier scopes' installed observers.
+    % policy-inventory-exempt: mechanism-internal; reason=the two declaration-change observer heads whose standing bodies an alias mutation scope copies, a shape of the observer seam rather than a catalog value; evidence=engine/spaces/lifecycle.pl:set_type_alias_mutation_scope/2
     forall(( member(Head, [announce_declaration_changed(Module, Name, _),
                           type_marker_changed(Module, Name)]),
              clause(Head, Body, Original),

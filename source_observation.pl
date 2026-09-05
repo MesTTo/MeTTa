@@ -200,6 +200,7 @@ goal_path((Head:-Body), Path0, Path, Goal) :- !,
     append(Path0,[2],BodyPath), goal_path(Canonical,BodyPath,Path,Goal).
 goal_path(Term, Path0, Path, Goal) :-
     nonvar(Term), compound(Term), compound_name_arity(Term,Name,2),
+    % policy-inventory-exempt: mechanism-internal; reason=the four binary control functors are Prolog's own clause-body syntax, the shapes the debugger's goal paths descend, not a MeTTa policy value; evidence=engine/source_observation.pl:canonical_control/2
     memberchk(Name, [',',';','->','*->']), !,
     ( arg(1,Term,Child), append(Path0,[1],Next)
     ; arg(2,Term,Child), append(Path0,[2],Next) ),
@@ -211,9 +212,11 @@ goal_path(Goal, Path, Path, Goal) :- compound(Goal).
 % identities. Without this, ((a,b),c) puts b at a path that the VM assigns c.
 canonical_control(Goal, Canonical) :-
     compound(Goal), compound_name_arity(Goal,Name,2),
+    % policy-inventory-exempt: mechanism-internal; reason=the same four control functors, reassociated the way assertz compiles them so debugger paths match the VM; evidence=engine/source_observation.pl:goal_path/4
     memberchk(Name,[',',';','->','*->']), !,
     arg(1,Goal,Left), arg(2,Goal,Right),
     canonical_control(Left,A), canonical_control(Right,B),
+    % policy-inventory-exempt: mechanism-internal; reason=only conjunction and disjunction are associative, so only these two reassociate and the arrows keep their shape; evidence=engine/source_observation.pl:join_control/4
     ( memberchk(Name,[',',';']) -> join_control(Name,A,B,Canonical)
     ; compound_name_arguments(Canonical,Name,[A,B]) ).
 canonical_control(Goal,Goal).
@@ -420,6 +423,7 @@ install_runtime_observers :-
                    OriginalGoals, source_observation:observe_goals(Module,Goals,OriginalGoals)).
 
 remove_runtime_observers :-
+    % policy-inventory-exempt: mechanism-internal; reason=the eight loader predicates this observer wraps at install, listed so removal unwraps exactly the set installation wrapped; evidence=engine/source_observation.pl:remove_wrapper/2
     forall(member(PI,[metta_host_run_source/4,process_direct_metta_string/3,
                       process_loader_string/3,metta_host_process_groups/3,
                       process_forms/4,record_source_atom_assertion/1,
