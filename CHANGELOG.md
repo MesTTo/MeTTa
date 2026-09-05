@@ -25,6 +25,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   reported as a duplicate declaration, and left no `Dog` type at all. Conversion
   still inherits, which is right there; declaration does not.
 
+- Removing an equation no longer searches the autoload library index once per
+  name. When a space's last equation for a function goes, the engine abolishes
+  the emptied local predicate and asks what the module now resolves that name
+  to, so an already-compiled call reaches the parent instead of the empty
+  shadow. Asked with `imported_from/1` that question runs SWI's
+  undefined-procedure trap on a name nothing resolves, which is the ordinary
+  case: 1,033 inferences to learn "nothing above me has it", and 2,067 through
+  the repair sweep, which asks `number_of_clauses/1` the same way. They now
+  cost 43 and 49. The engine's own test suites took that path 7,351 times.
+  Which name is repaired from which module is unchanged, over twelve probes
+  covering a local definition, an explicit import, three autoloadable library
+  names, two system built-ins and an inherited engine builtin.
+
 - `super` and the builtin input-guard table no longer search the autoload
   library index when they ask about a name nothing defines. `(super (f ...))`
   resolves at definition time by walking the modules above the space and asking

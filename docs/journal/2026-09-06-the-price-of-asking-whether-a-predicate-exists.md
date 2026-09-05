@@ -263,3 +263,72 @@ every property except `undefined`, `visible`, `autoload/1`,
 Open: the six sites in the table above that are not fixed here. Each is
 the same class and each needs its own reading of what the autoload answer
 is worth to it, which is not the same at all six.
+
+## 2026-09-06, the shadow repair, and the property that answers without searching
+
+Goal for this section: the site the detector found costs most, 7,351 traps over
+the plunit suites, against 1 for the `super` walk fixed above.
+
+Found: `predicate_property(M:Head, implementation_module(Home))` answers "what
+would this module resolve this name to" for **33 inferences on a name nothing
+defines**, where `defined` and `imported_from/1` cost 1,030. SWI special-cases
+it in `property_predicate/2` and reaches `'$find_library'/5` directly instead
+of falling through `define_or_generate/1` to the undefined-procedure trap
+[source: /usr/lib/swi-prolog/boot/syspred.pl, `property_predicate/2`].
+
+Tried: whether it can simply REPLACE `imported_from/1`. It answers the same
+module everywhere the older property answers: identical on all 7,949
+module/name pairs of a booted image, identical across a two-hop import chain
+(`chain_c` importing from `chain_b` importing from `chain_a`, both say
+`chain_a`), `no` for a name the module defines itself, and `pairs` for
+`pairs_keys_values/3` which nothing has loaded.
+
+Rejected: replacing it. `implementation_module/1` names the library WITHOUT
+loading it, and `metta_restore_inherited_predicate/3`'s next goal is
+`import/1`, which then binds the space module to a module that has no export
+list yet: SWI warns `backward_compatibility:sumlist/2 is not exported (still
+imported into ...)` and the repaired call resolves to nothing. The differential
+caught it -- 12 shadow-repair probes, one fresh module each, the `sumlist/2`
+row alone diverging. `imported_from/1` LOADS the library, and that side effect
+is what the clause needs.
+
+Decided: `implementation_module/1` as a GUARD, `imported_from/1` still
+deciding. The guard fails exactly where the old property failed, so no branch
+changes, and it fails for 33 inferences instead of 1,033.
+
+    (   predicate_property(Module:Head, implementation_module(Home)),
+        Home \== Module,
+        predicate_property(Module:Head, imported_from(Source)),
+        ...
+
+Decided: `current_predicate/1` at the three sites that ask
+`number_of_clauses/1` about a name that may not be there --
+`metta_repair_shadow_import/3`, and `remove_equation/6` with the deferred
+sweep `metta_repair_emptied_shadows/0` beside it. `number_of_clauses/1` is one
+of the properties that falls through to the trap, and at all three a name
+`current_predicate/1` does not find takes the same branch either way: it has
+no clause count, and an autoloaded one is imported and rejected by the
+`\+ imported_from(_)` next to it.
+
+| site, per call | before | after |
+|---|---|---|
+| `metta_restore_inherited_predicate/3`, a name a parent defines | 21 | 27 |
+| `metta_restore_inherited_predicate/3`, a name nothing resolves | 1,033 | 43 |
+| `metta_repair_shadow_import/3`, a name a parent defines | 36 | 43 |
+| `metta_repair_shadow_import/3`, a name nothing resolves | 2,067 | 49 |
+| the bare `number_of_clauses(0)` ask on a name nothing resolves | 1,029 | 1 |
+
+Differential: 12 probes covering a name nothing defines, the module's own
+definition, its own with no clauses, an explicit import, a MeTTa-shaped miss,
+three autoloadable names from three libraries, two system built-ins, an
+inherited engine builtin and the `$`-prefixed early exit -- each in its own
+fresh module so one probe cannot change what the next one sees, recording the
+repair row, the resulting import link, the clause count and any error.
+Byte-identical, including the `car-atom/2` import warning both arms print.
+
+Detector, plunit suites, before and after: `metta_restore_inherited_predicate/3`
+7,351 -> 11, `metta_repair_shadow_import/3` 8 -> 0, `remove_equation/6` 5 -> 0.
+The 11 that remain are names that DO resolve into a library, where
+`imported_from/1` autoloads it on purpose.
+
+`sh engine/test.sh` exits 0, 68 suites, on the changed tree.
