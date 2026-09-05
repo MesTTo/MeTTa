@@ -1,0 +1,29 @@
+# Query planning with bag equivalence
+Goal: remove repeated derivation and quadratic join intermediates while preserving answer multiplicity.
+Constraint: existing declaration, snapshot, failure and lifecycle laws remain observable through the public doors.
+
+## 2026-09-05
+
+Tried: the current native two-hub triangle, through a completed `Space.run` within `m.stats()`. At 64, 128, 256, 512, 1024 and 2048 edges the empty answer costs 5346, 16482, 57188, 212330, 817538 and 3207652 inferences. The final doubling is 3.92 times. Duplicating one triangle edge produces six projected answers; repeating an atom stored twice produces four answers.
+
+Tried: measuring `Space.match` by draining its lazy cursor inside `m.stats()` gave 29 inferences for the empty query at every large size. The cursor runs in another SWI engine, whose inferences the calling thread cannot see. Rejected that meter for this fixture; `Space.run` completes the join on the measured evaluation path.
+
+Research: Ngo, Porat, Re and Rudra, *Worst-case Optimal Join Algorithms*, PODS 2012; Veldhuizen, *Leapfrog Triejoin*, ICDT 2014, sections 2 and 3; Wang, Willsey and Suciu, *Free Join*, SIGMOD 2023, sections 2.1 and 2.3. The last paper explicitly defines bag semantics, stores repeated tuples at trie leaves and intersects one variable's domains before advancing. Read the native reference in MeTTa.jl `src/join.jl` at `5526d3f73f15beede118a625ce432ae5398d04f9`, and Datafrog `src/treefrog.rs` for smallest-proposer/intersection control flow.
+
+Decided before implementation: native cyclic relational conjunctions use per-query prefix tries with exact ground Prolog terms as keys. A leaf retains its occurrence count; the completed join emits the product of all leaf counts. The query's GYO cyclicity check and the ground/acyclic row checks form the admission gate. Nested free pattern variables, attributed variables and non-ground candidate rows keep the existing matcher. Constants and repeated variables are filtered by the ordinary native unification call before indexing. No derived state outlives the query, so mutation, rollback and name recycling cannot leave a stale plan.
+
+Current complexity: quadratic intermediate enumeration on the two-hub triangle despite the existing at-most-one reordering heuristic. Target complexity: `O(N log N + AGM log N + output occurrences)` for a fixed eligible query, with linear-sized trie storage. On the empty two-hub family, intersections inspect only the smaller domains, targeting `O(N log N)`. Emitting duplicate answers has an unavoidable lower bound of their occurrence count.
+
+Rejected: substituting the shipping MORK provider for native storage. MORK removes duplicates at insertion, and its pinned stock kernel has no `query_multi_dispatch`. The separately developed MORK fork has that entry point behind its opt-in leapfrog feature; replacing the entire kernel and PathMap dependencies would still not preserve native bag storage. The native integration follows the existing Generic Join design while using SWI's exact term keys and backtracking for emission. Result order has no preservation requirement here.
+
+Verification design: `native_generic_join` compares every result as a sorted multiset against separately matched source-order conjuncts, including generated duplicate bags, projections, repeated variables, numeric and compound keys, open patterns, nonground stored rows and cyclic bindings. A three-size inference ratio test must fail on the old path before implementation.
+
+Verified: before dispatch changed, nine bag/failure checks passed and the growth check failed with `817227 < 2.8*212043` and `3207243 < 2.8*817227` both false. After dispatch changed, all ten checks passed. The completed public query at 64, 128, 256, 512, 1024 and 2048 edges costs 6834, 12960, 25218, 49730, 98754 and 196808 inferences; the final doubling is 1.99 times. Ground term comparisons inside SWI's AVL lookup are C work, so this inference curve establishes the Prolog-work reduction while the algorithm retains the logarithmic lookup bound.
+
+Found: an open-tail conjunct already raises `error(instantiation_error, _)` in the old whole-conjunction matcher, while the separately matched source-order oracle can return no answers. The new planner declines that malformed shape. A separate test pins the existing error; the bag differential uses proper conjunct lists.
+
+Tried: the existing long-conjunction gate caught a planning regression: 64 conjuncts cost 9462.86 inferences per answer against 92.07 at eight, failing the permitted factor of sixteen. Repeated GYO subset comparisons were dominating acyclic chain queries before any row was read. Decided: precede column construction and GYO with disjoint-set cycle detection on a copied incidence graph. A forest cannot contain a cyclic join hypergraph. The copied logical variables represent disjoint sets, so unions affect no query binding; GYO still decides every surviving candidate. The established long-chain gate remains unchanged.
+
+Verified: the forest admission check changes the public sweep to 6854, 12980, 25236, 49750, 98776 and 196828 inferences. The existing spaces suite passes 216 tests plus 114 generated subtests. A process-local control disabling only `native_conjunction_plan/4` makes the growth gate fail; replacing only `join_multiplicity/3` with a constant one makes the six-answer duplicate gate fail. Both controls are detected.
+
+Verified after rebasing onto `8f853f992a4c732eca39de34ff0a3dfe161508dd`: `native_generic_join` passes all eleven tests. The differential additionally checks positive and negative zero, NaN, and an attributed query variable. SWI's `compare/3`, identity and unification distinguish signed zero and integer/float pairs consistently; both NaN occurrences compare and unify identically. These are the same key relations that the AVL trie uses.
