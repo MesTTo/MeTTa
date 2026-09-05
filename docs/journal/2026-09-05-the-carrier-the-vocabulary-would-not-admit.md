@@ -54,3 +54,20 @@ discriminate by reverting the fix and watching them go red.
 `check_policy_inventory.py` gains budget in REQUIRED_ALGEBRA_LAWS and its
 selftest fixture gains the matching row, because that lane requires every
 semiring carrying law claims to be listed there.
+
+## 2026-09-05, later: the count the example moved
+
+The example added for this carrier is the 255th `examples/**/*.metta`, and
+`examples/README.md` still said "143 of the 254 programs". The next sentence in
+the same paragraph says "the other 112", and 143 + 112 = 255, so the paragraph
+contradicted itself.
+
+`test_the_examples_readme_states_the_split` was green throughout. It recomputes
+`derived` and `total - derived` and requires both in the section, but never
+`total` itself -- the one number in that sentence nothing derived is the one
+that went stale. Same shape as the `llms.txt` lane, which derives the counts in
+the source table and cannot see a count written anywhere else.
+
+Decided: correct the number and add `str(total)` to the required tuple, so all
+three are recomputed. Proven to discriminate: planting 254 back fails with
+`assert '255' in ...`, restoring it passes.
