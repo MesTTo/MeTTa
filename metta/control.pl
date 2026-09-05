@@ -185,7 +185,7 @@ require_metta_pragma_value(_, _, _).
 %verify-specializations the coverage tally its report reads. A write that did
 %not refresh them would set a pragma that does nothing [tested:
 %tests/checks/check_specialization_differential_selftest.py;
-%commit=WORKTREE] [tested:
+%commit=694dff934a11dbc2ee99267b60f39564053baf87] [tested:
 %metta_metatype_guards:the_pragma_turns_verification_on].
 set_metta_pragma(Key, Value) :-
     retractall(metta_pragma(Key, _)),
