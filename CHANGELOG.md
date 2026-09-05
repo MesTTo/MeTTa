@@ -1,3 +1,4 @@
+<!-- Purpose: record shipped behaviour changes and their release history. -->
 # Changelog
 
 All notable user-facing changes to MeTTa are recorded here. The format follows
@@ -15,13 +16,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   Best-effort home spaces are refused before execution, while consulted Prolog,
   loaded native code, custom listeners, and other process-global residue are
   reported on the original exception because they cannot be safely unwound.
-- Every engine consumer reads a declaration chain through one projection.
-  `metta_arrow_type_shape/5`, `metta_arrow_type_chain/2` and
-  `metta_presented_arrow_chain/3` replace nine literal `[->|...]` matches, so an
-  annotated arrow such as `(-[det]-> A B)` is read rather than admitted and
-  then failed at run time. An unannotated arrow and an annotated one project to
-  the identical runtime chain; a malformed form fails rather than passing
-  through.
+- Annotated function types such as `(: f (-[det]-> Number Number))` now
+  govern execution and compilation like `(: f (-> Number Number))`, through
+  both file loading and separate declaration/equation loads. Argument checks,
+  application types, higher-order arguments and declaration readers use the
+  plain runtime arrow. Stored atoms, `get-type f`, documentation and source
+  export retain the written annotation. The catalog still validates the
+  annotation; its determinism and effect product are not enforced.
 
 - Python-authored programs can now be inspected and exported as MeTTa.
   `Space.source()` returns the receiver's directly stored program as the exact

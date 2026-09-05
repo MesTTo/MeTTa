@@ -5,7 +5,12 @@
 %   chain, while shape projection preserves normalized product metadata and
 %   malformed or infix-looking terms fail closed
 %   [tested: run_tests(metta_arrow_projection);
-%   commit=48cf04fb8dd80149b5e46e15f499f19f6c45348f].
+%   commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
+% Guarantees: loaded annotated declarations execute, check arguments, type
+%   applications and compile like plain arrows while stored types retain their
+%   spelling [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
+% Owns resources: each test releases its space; the export-reader fixture
+%   retracts its pending export row even when an assertion fails.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -73,6 +78,7 @@ test(non_arrows_and_malformed_annotations_fail_instead_of_passing_through) :-
                     ['Number', '-[det]->', 'String'],
                     ['-[det]', 'Number'],
                     ['-[bogus]->', 'Number'],
+                    ['-[]->', 'Number'],
                     ['-[det,bogus]->', 'Number'],
                     ['->']
                   ]),
@@ -98,5 +104,171 @@ test(the_long_determinism_spellings_map_to_the_catalog_members) :-
     %And the canonical members are the catalog's, not a copy of them.
     findall(V, spaces:metta_determinism_canonical(V, V), Members),
     assertion(msort(Members, [det, nondet, semidet])).
+
+test(annotated_declarations_execute_and_keep_the_written_type,
+     [ forall((member(Head, ['->', '-[det]->', '-[semidet,pureStructural]->',
+                            '-[$e]->']),
+               member(Mode, [together, separate]))),
+       setup('new-space'(Space)), cleanup(metta_release_space(Space)) ]) :-
+    load_arrow_identity(Space, Head, Mode),
+    space_module(Space, Module),
+    findall(Value, eval_metta_in_module(Module, ['arrow-runtime-f', 1], Value),
+            Values),
+    assertion(Values == [1]),
+    findall(Error,
+            eval_metta_in_module(Module, ['arrow-runtime-f', "s"], Error),
+            Errors),
+    assertion(Errors == [['Error', ['arrow-runtime-f', "s"],
+                          ['BadArgType', 1, 'Number', 'String']]]),
+    findall(Type,
+            eval_metta_in_module(Module, ['get-type', ['arrow-runtime-f', 1]],
+                                 Type), Types),
+    assertion(Types == ['Number']),
+    findall(Type, 'get-type-space'(Space, ['arrow-runtime-f', 1], Type), Scoped),
+    assertion(Scoped == Types),
+    findall(Type, eval_metta_in_module(Module, ['get-type', 'arrow-runtime-f'],
+                                      Type), Written),
+    assertion(Written == [[Head, 'Number', 'Number']]),
+    assertion(match_stored(Space,
+                           [':', 'arrow-runtime-f', [Head, 'Number', 'Number']],
+                           true, true)).
+
+load_arrow_identity(Space, Head, Mode) :-
+    format(string(Declaration), "(: arrow-runtime-f (~w Number Number))", [Head]),
+    Equation = "(= (arrow-runtime-f $x) $x)",
+    (   Mode == together
+    ->  string_concat(Declaration, Equation, Source),
+        process_metta_string(Source, _, Space)
+    ;   process_metta_string(Declaration, _, Space),
+        process_metta_string(Equation, _, Space)
+    ).
+
+test(annotated_function_values_satisfy_higher_order_and_shared_types,
+     [ setup('new-space'(Space)), cleanup(metta_release_space(Space)) ]) :-
+    load_arrow_identity(Space, '-[det]->', together),
+    process_metta_string(
+        "(: arrow-apply (-> (-> Number Number) Number Number))
+         (= (arrow-apply $f $x) ($f $x))
+         (: arrow-same (-> $t $t Bool))
+         (= (arrow-same $x $y) True)
+         (: arrow-plain (-> Number Number))
+         (= (arrow-plain $x) $x)
+         (: arrow-many (-[det,pureStructural]-> Number Symbol))
+         (= (arrow-many $x) first)
+         (= (arrow-many $x) second)", _, Space),
+    space_module(Space, Module),
+    findall(Value, eval_metta_in_module(
+                       Module, ['arrow-apply', 'arrow-runtime-f', 1], Value),
+            Applied),
+    assertion(Applied == [1]),
+    findall(Value, eval_metta_in_module(
+                       Module, ['arrow-same', 'arrow-runtime-f', 'arrow-plain'],
+                       Value), Same),
+    assertion(Same == [true]),
+    findall(Value, eval_metta_in_module(Module, ['arrow-many', 1], Value), Many),
+    assertion(Many == [first, second]).
+
+test(replacing_a_plain_arrow_with_its_annotation_preserves_compiled_clauses,
+     [ setup('new-space'(Space)), cleanup(metta_release_space(Space)) ]) :-
+    load_arrow_identity(Space, '->', together),
+    process_metta_string(
+        "(= (arrow-caller $x) (arrow-runtime-f $x))
+         (= (arrow-literal) (arrow-runtime-f 1))", _, Space),
+    space_module(Space, Module),
+    Predicates = ['arrow-runtime-f'/2, 'arrow-caller'/2, 'arrow-literal'/1],
+    forall(member(Predicate/_, Predicates), metta_ensure_compiled(Predicate)),
+    findall((Head :- Body),
+            (member(Predicate/Arity, Predicates), functor(Head, Predicate, Arity),
+             clause(Module:Head, Body)), Plain),
+    assertion(length(Plain, 3)),
+    metta_remove_atom(Space, [':', 'arrow-runtime-f', ['->', 'Number', 'Number']],
+                      true),
+    metta_add_atom(Space,
+                   [':', 'arrow-runtime-f', ['-[det]->', 'Number', 'Number']], _),
+    forall(member(Predicate/_, Predicates), metta_ensure_compiled(Predicate)),
+    findall((Head :- Body),
+            (member(Predicate/Arity, Predicates), functor(Head, Predicate, Arity),
+             clause(Module:Head, Body)), Annotated),
+    assertion(Annotated =@= Plain).
+
+test(rest_reporting_and_documentation_read_annotated_arrows,
+     [ setup('new-space'(Space)), cleanup(metta_release_space(Space)) ]) :-
+    process_metta_string(
+        "(: arrow-rest (-[det]-> (%Rest% Atom) Bool))
+         (: arrow-doc (-[det]-> Number Number))
+         (@doc arrow-doc (@desc identity) (@params ((@param input)))
+                         (@return output))", _, Space),
+    space_module(Space, Module),
+    findall(Type, eval_metta_in_module(Module, ['get-type', ['arrow-rest']], Type),
+            Types),
+    assertion(Types == ['Bool']),
+    findall(Type, 'get-type-space'(Space, ['arrow-rest'], Type), Scoped),
+    assertion(Scoped == Types),
+    findall(Doc, 'get-doc-single-atom'(Space, 'arrow-doc', Doc), Docs),
+    assertion(Docs == [['@doc-formal', ['@item', 'arrow-doc'], ['@kind', function],
+                        ['@type', ['-[det]->', 'Number', 'Number']],
+                        ['@desc', identity],
+                        ['@params', [['@param', ['@type', 'Number'],
+                                                ['@desc', input]]]],
+                        ['@return', ['@type', 'Number'], ['@desc', output]]]]).
+
+test(export_readers_preserve_the_annotated_declaration,
+     [ cleanup(retractall(user:pending_metta_export('arrow-test-export', _, _))) ]) :-
+    parse_metta_source("(: arrow-export (-[det]-> Number Number))", [Parsed]),
+    record_metta_export('arrow-test-export', Parsed),
+    assertion(pending_metta_export('arrow-test-export', 'arrow-export',
+                                    ['-[det]->', 'Number', 'Number'])),
+    assertion(declared_predicate_arity(['-[det]->', 'Number', 'Number'], 2)),
+    assertion(claimed_export_name([Parsed], 'arrow-export')).
+
+test(runtime_projection_preserves_plain_types_and_variable_sharing) :-
+    Plain = ['->', Shared, Shared],
+    metta_runtime_type(Plain, Same),
+    assertion(Same == Plain),
+    metta_runtime_type(['-[$e]->', Shared, Shared], ['->', Input, Output]),
+    assertion(Input == Shared),
+    assertion(Output == Shared),
+    forall(member(Raw, ['Number', ['->'], ['-[]->', 'Number'],
+                        ['-[bogus]->', 'Number']]),
+           (metta_runtime_type(Raw, Unchanged), assertion(Unchanged == Raw))).
+
+test(native_readers_and_inherited_arity_see_the_annotated_arrow,
+     [ setup(('new-space'(Space),
+              assertz('$metta_atoms:&self':'&self'(':', 'arrow-native',
+                        ['-[det]->', 'Number', 'Number']), Ref))),
+       cleanup((erase(Ref), metta_release_space(Space))) ]) :-
+    space_module(Space, Module),
+    assertion(get_function_type(['arrow-native', 1], 'Number')),
+    assertion(application_arrow_declared(['arrow-native', "s"])),
+    assertion(shallow_declared_type('arrow-native', ['->', 'Number', 'Number'])),
+    assertion(shallow_argument_types(['arrow-native', 1], ['Number'])),
+    assertion(\+ shallow_argument_types('arrow-native', _)),
+    assertion(translator:inherited_stored_declaration_owns_arity(Module,
+                                                                 'arrow-native')),
+    assertion(with_metta_module(Module,
+                translator:arrow_declared_data_head('arrow-native', self))),
+    metta_add_atom(Space, [':', 'arrow-native', ['-[det]->', 'String', 'String']], _),
+    assertion(\+ translator:inherited_stored_declaration_owns_arity(Module,
+                                                                    'arrow-native')),
+    assertion(with_metta_module(Module,
+                translator:arrow_declared_data_head('arrow-native', local(Space)))).
+
+test(an_annotated_type_marker_rebuilds_its_compiled_caller,
+     [ setup('new-space'(Space)), cleanup(metta_release_space(Space)) ]) :-
+    process_metta_string(
+        "(: ArrowPayload Type)
+         (: arrow-inspect (-[det]-> ArrowPayload Symbol))
+         (= (arrow-inspect $value) (get-metatype $value))
+         (= (arrow-inspection) (arrow-inspect (+ 1 2)))", _, Space),
+    space_module(Space, Module),
+    findall(Value, eval_metta_in_module(Module, ['arrow-inspection'], Value), Before),
+    assertion(Before == [['Error', ['arrow-inspect', [+, 1, 2]],
+                          ['BadArgType', 1, 'ArrowPayload', 'Number']]]),
+    metta_add_atom(Space, [':', 'ArrowPayload', 'DontEvalType'], _),
+    findall(Value, eval_metta_in_module(Module, ['arrow-inspection'], Value), Masked),
+    assertion(Masked == ['Expression']),
+    metta_remove_atom(Space, [':', 'ArrowPayload', 'DontEvalType'], true),
+    findall(Value, eval_metta_in_module(Module, ['arrow-inspection'], Value), After),
+    assertion(After == Before).
 
 :- end_tests(metta_arrow_projection).

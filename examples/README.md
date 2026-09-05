@@ -74,7 +74,7 @@ website.
 `test.sh` discovers examples recursively. It excludes `_fixtures` and the six
 interactive, network-backed, or optional-dependency examples named in
 `tests/data/example_skips.txt`, each with its reason.
-The merged corpus contains 236 examples that run in the shell suite.
+The merged corpus contains 237 examples that run in the shell suite.
 That count is `len(example_parity.corpus())`, the corpus's one definition in
 `extensions/python/tools/example_parity.py`; the `pytest` gate lane fails the
 moment this sentence and the tree disagree.
@@ -97,7 +97,7 @@ https://github.com/patham9/PeTTa, MIT licensed, at commit
 into the reading order above, and some were edited. Thirteen people wrote them
 there, most of them Patrick Hammer; the rest are credited file by file, because
 naming only the most prolific contributor would miscredit the others. The other
-111 examples were written for this repository.
+112 examples were written for this repository.
 
 `ORIGINS.tsv` names every derived file beside the upstream file it came from,
 how much of the original body survives with comments ignored, and who wrote it
