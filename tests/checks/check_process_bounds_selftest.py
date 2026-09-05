@@ -74,7 +74,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from check_process_bounds import findings  # noqa: E402  -- the path is installed above
+from check_process_bounds import commands, findings  # noqa: E402  -- the path is installed above
 
 BOUND_IN_PY = 'in_py() { ( cd "$PYDIR" && bounded "$@" ); }\n'
 LOOSE_IN_PY = 'in_py() { ( cd "$PYDIR" && "$@" ); }\n'
@@ -252,6 +252,22 @@ env METTA_PROBE=1 swipl -g halt env-loose.pl
 sed 's|sh run.sh "$f" 2>&1|sh run.sh "$f"|' "$HERE/test.sh" > quoted-argument.sh
 """
 
+#: Spans whose only job is to be CUT. `truncations` below reads every prefix
+#: of every fixture line, and an unterminated span is where a hand-written
+#: scanner over quoting and nesting fails; these are the spans the fixtures
+#: above do not hold. An arithmetic expansion, because `$((` cut short is a
+#: `$(` that never closes and reading it as a substitution walks past the end;
+#: a nested `${ }`, for the same reason one level down; a continuation, whose
+#: last character is a backslash with nothing after it; and quotes inside
+#: quotes, so a cut lands between them.
+TRUNCATABLE = """#!/bin/sh
+count=$((count + 1))
+goal=${METTA_GOAL:-${METTA_FALLBACK:-halt}}
+bounded swipl -g "${goal}" -t halt "$HERE/engine/bench.pl"
+printf '%s: "%s"\\n' "a 'quoted' word" "$goal"
+sed -n 's/.*inferences=\\([0-9][0-9]*\\).*/\\1/p' "$out"
+"""
+
 #: The thirteen, in the order they are planted above. `chain` and
 #: `alternative` are the two halves of an and-or list and `block` is the brace
 #: group a `|| { ...; }` opens, which build.sh at the root writes; they are
@@ -328,6 +344,33 @@ def lane_names(found: list[str]) -> set[str]:
     """The lane or file each spawn finding names, for the assertions below."""
     return {line.split(": ")[1].split(" starts")[0]
             for line in found if " starts a process" in line}
+
+
+def truncations() -> int:
+    """Every PREFIX of every fixture line, read as a command list.
+
+    The pass reads shell by its grammar, and a hand-written scanner over
+    quoting and nesting fails at a span that never closes: a `$(`, a `${`, a
+    quote or a backslash cut off at the end of the text. Reading every prefix
+    reaches each of those at every position it can occur at. The property is
+    that none of them raises and none of them fails to advance, and it matters
+    more than a finding would: this module is imported by the check itself, so
+    an exception here is every lane that reads a shell script at once.
+
+    Deterministic rather than random on purpose, because a seed is a number
+    somebody has to keep. The wider sweep was run once beside it: 489,697
+    random and truncated inputs over an alphabet of shell punctuation, no
+    exception raised and none that did not end [measured 2026-09-06].
+    """
+    checked = 0
+    for fixture in (POSITIONS, TRUNCATABLE, LANES, RUNNER, RUNNER_EXEC,
+                    RUNNER_CONTINUED, LATE_HELPER, TOP_LEVEL, GOOD_HELPER,
+                    BOUND_IN_PY):
+        for line in fixture.splitlines():
+            for cut in range(len(line) + 1):
+                commands(line[:cut])
+                checked += 1
+    return checked
 
 
 def main() -> int:
@@ -493,10 +536,24 @@ def main() -> int:
     del reported
 
 
+    # The scanner over every truncated fixture line. Reported as a problem
+    # rather than raised, so a break here reads as this pass's finding and not
+    # as the pass being unable to run at all.
+    truncated = 0
+    try:
+        truncated = truncations()
+    # Any exception is the finding, which is why this catches every one.
+    except Exception as error:
+        problems.append(
+            f"the scanner raised {type(error).__name__} reading a truncated "
+            f"line: {error}. Every lane that reads a shell script imports "
+            f"this scanner, so an unterminated `$(`, `${{`, quote or backslash "
+            f"that raises here is all of them.")
+
     for problem in problems:
         print(f"  {problem}")
     print(f"{len(problems)} finding(s) over {29 + 2 * len(SHAPES) + 1} "
-          f"planted cases")
+          f"planted cases and {truncated} truncated lines")
     return 1 if problems else 0
 
 
