@@ -7,7 +7,7 @@
 %   A shared scope's declaration observers cover every space, not &self's
 %   alone [tested:
 %   structural_aliases:a_shared_alias_is_hidden_by_a_declaration_added_to_another_space;
-%   commit=WORKTREE].
+%   commit=60d6ca9089f50521bba869c3b7a87c92fd6a990f].
 % Owns resources: setup/cleanup releases each space and deletes each source file.
 %   The shared-scope case declares an alias in the process-wide &self and
 %   withdraws it in its body and again in its cleanup.

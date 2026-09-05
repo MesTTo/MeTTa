@@ -64,7 +64,7 @@
 %     fails [measured 2026-09-06: [] here, [backward_compatibility] with
 %     vendor/mavis.pl's string_to_list/2 restored; command=swipl -q
 %     --on-error=status -g dev_typed_selftest -t 'halt(0)' dev_typed.pl;
-%     commit=WORKTREE].
+%     commit=60d6ca9089f50521bba869c3b7a87c92fd6a990f].
 % Decides:
 %   - the fixture lives here rather than in engine/, because a planted defect in
 %     the engine's own source is a defect in the engine's own source.
