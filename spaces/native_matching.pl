@@ -1,12 +1,12 @@
 % Purpose: plan and execute indexed native-space matches and relational conjunction joins
 % Guarantees: annotated arrow effects reach catalog policy and follow their
-%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=WORKTREE].
+%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarded by: catalog clear acquires '$metta_typing_policy' before
 %   '$metta_arrow_products', matching annotated declaration publication
 %   [source: engine/spaces/arrow_products.pl:metta_with_arrow_product_update/1;
-%   commit=WORKTREE]. Ordinary clear lets provider callbacks suspend before
+%   commit=bbb512316280110a747e31c26adfc31e8c5104be]. Ordinary clear lets provider callbacks suspend before
 %   reconciling product ownership [tested: extensions/node/test/remote.test.ts
-%   "does not carry clear across the wire, and says why"; commit=WORKTREE].
+%   "does not carry clear across the wire, and says why"; commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.

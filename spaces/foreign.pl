@@ -1,6 +1,6 @@
 % Purpose: validate foreign-provider capabilities and route foreign and native space operations
 % Guarantees: annotated arrow effects reach catalog policy and follow their
-%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=WORKTREE].
+%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarantees: stored_arrow_chain/3 reads annotated parameter types through
 %   metta_runtime_type/2 for type-marker invalidation
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].

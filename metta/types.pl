@@ -12,7 +12,7 @@
 %   complete in-scope declaration set [tested:
 %   test_an_inherited_arrow_does_not_veto_a_local_definition,
 %   lib_strategy:an_inherited_arrow_does_not_veto_a_local_definition;
-%   commit=WORKTREE].
+%   commit=bbb512316280110a747e31c26adfc31e8c5104be].
 %   A generated contract whose static shortcut is invalidated uses the
 %   policy-strict witness relation, so an ordinary user refusal remains
 %   decisive over numeric and exact witnesses while unrelated type queries

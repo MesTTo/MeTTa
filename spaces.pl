@@ -2,7 +2,7 @@
 %   route matching to native and foreign space providers, and validate
 %   '&metta' declarations against the self-describing catalog.
 % Guarantees: annotated arrow effects reach catalog policy and follow their
-%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=WORKTREE].
+%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes:
 %   - the removal funnel takes a space NAME rather than a handle, so
 %     metta_remove_atom/3, unstore_atom/3 and remove_equation/6 each take a

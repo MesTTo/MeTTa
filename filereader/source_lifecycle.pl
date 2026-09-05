@@ -29,7 +29,7 @@
 %   clause it derived to the reference sweep, so a reload never removes an
 %   equal atom another space still owns [tested:
 %   metta_arrow_products:a_reloaded_library_declaration_withdraws_only_its_own_effect_row;
-%   commit=WORKTREE].
+%   commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/reader/filereader.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
@@ -931,7 +931,7 @@ replace_source_load(CanonPath, Space, Replaced, LoadInto, Goal) :-
 %never rolled back
 %[tested:
 %metta_arrow_products:a_reloaded_library_declaration_withdraws_only_its_own_effect_row;
-%commit=WORKTREE].
+%commit=bbb512316280110a747e31c26adfc31e8c5104be].
 %
 %Asking whether the clause is still there instead does not work, because a
 %withdrawal runs inside the reload's transaction and SWI answers that question
@@ -939,7 +939,7 @@ replace_source_load(CanonPath, Space, Replaced, LoadInto, Goal) :-
 %nested transaction/1 erased a clause, clause_property(Ref, erased) is false
 %and clause(_, true, Ref) still answers it, while clause/3 enumeration of the
 %same predicate already does not; both agree once the outer transaction
-%commits; commit=WORKTREE]. stored_atom_of_ref/3 reads a bound reference, so
+%commits; commit=bbb512316280110a747e31c26adfc31e8c5104be]. stored_atom_of_ref/3 reads a bound reference, so
 %it decodes an atom the same transaction has already taken out.
 withdraw_source_load(CanonPath, Space, Count) :-
     retract(metta_source_load(CanonPath, Space, LoadId, _)),
