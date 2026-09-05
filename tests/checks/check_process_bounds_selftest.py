@@ -16,13 +16,13 @@ findings while this check was being written.
 Assumes: a writable ai-tmp/ in this repository.
 Guarantees:
   - a planted unbounded swipl, sh and "$PY" are each reported with lane and
-    line [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+    line [tested: tests/checks/check_process_bounds_selftest.py; commit=4cec2abab7187ad87c0550113f8be50d128ad970]
   - a `bounded` spawn, an `in_py` spawn, a comment, a dirname substitution and
     a one-line function are NOT reported
-    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=4cec2abab7187ad87c0550113f8be50d128ad970]
   - an `in_py` that stops calling `bounded` is reported even though every lane
     reaching its command through it still LOOKS bounded
-    [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_process_bounds_selftest.py; commit=4cec2abab7187ad87c0550113f8be50d128ad970]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
 Open Obligations:
   To Do: None

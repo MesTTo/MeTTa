@@ -154,6 +154,19 @@ SOURCES = (
     "extensions/node/*.pl",
     "extensions/node/src/*.ts",
     "extensions/node/src/*/*.ts",
+    # The seat's own suites and benchmarks make the same claims their subject
+    # does, and _node_targets/1 was already harvesting names FROM these files
+    # while nothing read the claims they carry. Same shape as the plunit and
+    # Python suites above. `build/` stays out: it is tsc output, generated,
+    # and its tags are copies of the ones here.
+    "extensions/node/test/*.ts",
+    "extensions/node/benchmarks/*.ts",
+    # The site config states what its navigation guarantees, and the
+    # TypeScript space example states the protocol it speaks, both in this
+    # grammar and neither read by anything.
+    "website/.vitepress/*.ts",
+    "extensions/python/examples/integration/*/*.ts",
+    "extensions/python/examples/integration/*/*.js",
     # The C seat, whose header IS its contract: 21 of its claims carried
     # commit pins and named tests while nothing read them, because C was the
     # one shipped language missing from this list. Its Prolog half joins for
@@ -266,7 +279,10 @@ C_EXIT = re.compile(r"\breturn\s+[1-9]|\bexit\s*\(\s*[1-9]|\bEXIT_FAILURE\b")
 # prose, so the match spans newlines and the name's whitespace is normalised
 # to the single spaces the test's own title carries.
 QUOTED_NAME = re.compile(r'"([^"]{4,}?)"', re.DOTALL)
-COMMENT_PREFIX = re.compile(r"^[ \t]*[%#*]*[ \t]*", re.MULTILINE)
+#`/` joins them for the `//` grammars. A tag that wraps in TypeScript
+#carries the marker on its continuation line, and without it here the
+#second half of a two-line test name reads as `// ...`, so four copies of
+COMMENT_PREFIX = re.compile(r"^[ \t]*[%#*/]*[ \t]*", re.MULTILINE)
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(?::[A-Za-z_][A-Za-z0-9_]*)*$")
 #: What makes a token READ as a name rather than as the sentence around it.
@@ -280,7 +296,11 @@ IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(?::[A-Za-z_][A-Za-z0-9_]*)*$")
 #: what keeps a single-word example name like `quiet` checkable and a
 #: mistyped one the price.
 NAME_SHAPED = re.compile(r"[_:./0-9-]")
-REFERENCE = re.compile(r"https?://|\w+\.\w+:\d+|\w+/[\w./-]+")
+#The last alternative is a MAN PAGE, `perf-stat(1)`, which this repository
+#cites twelve times and which is as precise a reference as a URL: the
+#section number picks the page. Eleven of the twelve passed only because
+#they ran to three words; naming the form says why they are citations.
+REFERENCE = re.compile(r"https?://|\w+\.\w+:\d+|\w+/[\w./-]+|\b[\w-]+\([1-8]\)")
 SUFFIXES = (".py", ".pl", ".plt", ".metta", ".sh", ".c")
 
 # `translator.plt:malformed_seam_is_refused` and
@@ -824,6 +844,33 @@ SCRIPT_COMMAND = re.compile(
     r"\b(?:python3?|swipl|node)\s+((?:[\w.-]+/)*[\w.-]+\.(?:py|pl|mjs|ts))\b"
 )
 
+#: The third shape, and the one the JavaScript seats actually use. The Node
+#: seat's suite IS `npm run test:source` and the site's build IS
+#: `npm run docs:build`; neither the lane shape nor the interpreter shape
+#: reaches them, so the body was split into words and the path inside the
+#: command was read as a test that is not in the tree. The script name is
+#: checked against the manifests the repository ships, the same way a lane name
+#: is checked against check.sh, so a command naming a script nobody defines is
+#: still a finding.
+NPM_COMMAND = re.compile(r"\bnpm\s+run\s+([A-Za-z0-9:_-]+)")
+
+
+def npm_scripts() -> frozenset[str]:
+    """Every script name a shipped package.json defines, node_modules aside."""
+    import json
+
+    names: set[str] = set()
+    for pattern in ("package.json", "*/package.json", "*/*/package.json"):
+        for manifest in ROOT.glob(pattern):
+            if "node_modules" in manifest.parts:
+                continue
+            try:
+                names.update(json.loads(manifest.read_text()).get("scripts", {}))
+            except (OSError, ValueError):
+                continue
+    return frozenset(names)
+
+
 #: How check.sh names a lane, so a command naming a lane that does not exist is
 #: still a finding.
 CHECK_LANE = re.compile(r"^run\s+(?:GATE|REPORT)\s+([a-z0-9-]+)", re.MULTILINE)
@@ -854,6 +901,12 @@ def gate_command_problems(body: str, known: Evidence) -> list[str] | None:
         if lane in gate_lanes():
             return []
         return [f"names the check.sh lane {lane}, which the gate does not run"]
+    match = NPM_COMMAND.search(body)
+    if match is not None:
+        script = match.group(1)
+        if script in npm_scripts():
+            return []
+        return [f"names the npm script {script}, which no package.json defines"]
     match = SCRIPT_COMMAND.search(body)
     if match is None:
         return None

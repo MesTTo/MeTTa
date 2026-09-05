@@ -318,9 +318,16 @@ def resolve(commit: str) -> str:
 def main(argv: list[str] | None = None) -> int:
     """Resolve the placeholders, or report the ones still open under --check."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    #No default. A bare run REPORTS, the way its sibling example_origins.py
+    #does, because "resolve every placeholder in the tree to HEAD" is not what
+    #someone typing the tool's name with no argument is asking for. With
+    #default="HEAD" it was: three sets of pins were written and reverted in one
+    #session that way, each carrying a measurement taken days earlier onto a
+    #commit whose tree never produced it. The two documented forms, --check and
+    #--commit <A>, are unchanged.
     parser.add_argument(
         "--commit",
-        default="HEAD",
+        default=None,
         help="the commit whose tree supplied the evidence; its full object ID replaces the placeholder",
     )
     parser.add_argument(
@@ -338,7 +345,8 @@ def main(argv: list[str] | None = None) -> int:
     ]
     total = sum(len(items) for _, items, _ in pins)
 
-    if arguments.check:
+    reporting = arguments.check or arguments.commit is None
+    if reporting:
         for path, items, _ in pins:
             for _, line, _reason in items:
                 print(f"{path.relative_to(ROOT)}:{line}: placeholder awaiting a provenance pin")
@@ -362,12 +370,12 @@ def main(argv: list[str] | None = None) -> int:
             f"add its glob to check_evidence_tags.SOURCES"
         )
     print(
-        f"{total} pin(s) {'awaiting' if arguments.check else 'resolved'}, "
+        f"{total} pin(s) {'awaiting' if reporting else 'resolved'}, "
         f"{len(declined)} occurrence(s) left alone, "
         f"{len(missed)} file(s) outside the globs, over "
         f"{len(found)} file(s) carrying the placeholder"
     )
-    return 1 if (arguments.check and total) or missed else 0
+    return 1 if (reporting and total) or missed else 0
 
 
 if __name__ == "__main__":
