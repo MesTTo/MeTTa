@@ -147,6 +147,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Withdrawing a type declaration costs what it did before structural type
+  aliases existed, in a space that declares none. The alias-aware removal
+  clause stood in front of `metta_remove_atom/3` unconditionally, so every
+  `(: _ _)` withdrawal anywhere opened a transaction and swept the support
+  graph for alias roots it could not have. It also called `space_module/2`,
+  which materialized the space's execution module on the first withdrawal.
+  Registering and unregistering an operation 100 times cost 12,502 extra
+  inferences: 2,899 once for that module and 97 for each later cycle. The
+  clause is now installed only while a scope holds an alias, beside the three
+  the feature already installs, and retires with them.
+
 - `serve` and `boot` finish their shutdown when the interrupt repeats. A second
   SIGINT arriving inside the close landed in `socketserver.shutdown`'s wait and
   was collected as a close FAILURE, which `close()` re-raised, so the graceful
