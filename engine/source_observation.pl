@@ -5,7 +5,7 @@
 %   source maps and execution buffers are thread-local.
 % Guarantees: compiler observation emits no runtime goals and changes no atom
 %   representation [tested: source_observation:compiled_goals_are_unchanged;
-%   commit=WORKTREE].
+%   commit=df1367c75148ca6c7262134a8736b237e1150383].
 
 :- module(source_observation, [record_error/1, observe_source/4]).
 :- use_module(source_positions, [source_positions/3]).

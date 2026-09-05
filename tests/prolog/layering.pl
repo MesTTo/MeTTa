@@ -44,7 +44,7 @@
 %     Hacks: None
 %     Future Enhancements: None
 % Guarantees: source observation reaches only the reviewed published subsystem
-%   surfaces below [tested: engine_layering; commit=WORKTREE].
+%   surfaces below [tested: engine_layering; commit=df1367c75148ca6c7262134a8736b237e1150383].
 
 :- ensure_loaded(surface_walk).
 :- use_module('../../engine/scc', [nodes_arcs_sccs/3]).

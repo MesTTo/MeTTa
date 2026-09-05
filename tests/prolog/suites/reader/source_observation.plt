@@ -1,7 +1,7 @@
 % Purpose: verify opt-in source coverage and Error-frame observations.
 % Guarantees: source coordinates distinguish repeated expressions; generated
 %   closures disclose their origin and uncompiled functions disclose absent maps
-%   [tested: source_observation; commit=WORKTREE].
+%   [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 :- use_module(library(assoc), [empty_assoc/1]).

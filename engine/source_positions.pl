@@ -2,11 +2,11 @@
 % Assumes: source_positions/3 receives forms parsed from the supplied source.
 % Guarantees: offsets count Unicode codepoints, lines and columns start at one,
 %   and ends are exclusive [tested: source_positions:unicode_nested_spans;
-%   commit=WORKTREE].
+%   commit=df1367c75148ca6c7262134a8736b237e1150383].
 % Guarantees: mismatched form text refuses instead of finding another occurrence
-%   [tested: source_positions:mismatched_text_refuses; commit=WORKTREE].
+%   [tested: source_positions:mismatched_text_refuses; commit=df1367c75148ca6c7262134a8736b237e1150383].
 % Decides: only LF advances a line, following filereader:source_layout//2
-%   [tested: source_positions:comments_end_only_at_lf; commit=WORKTREE].
+%   [tested: source_positions:comments_end_only_at_lf; commit=df1367c75148ca6c7262134a8736b237e1150383].
 
 :- module(source_positions, [source_positions/2, source_positions/3]).
 :- use_module(parser, [metta_token_boundary/2, string_state/3]).
