@@ -2,7 +2,7 @@
 %   contracts, and Python import state cleanup.
 % Guarantees:
 %   - recovery preserves the engine's bound-control exceptions [tested:
-%     limit_expiry_is_a_control_signal_no_recovery_catch_eats; commit=WORKTREE].
+%     limit_expiry_is_a_control_signal_no_recovery_catch_eats; commit=bbb512316280110a747e31c26adfc31e8c5104be].
 %   - test/3 displays host-only partial applications without claiming they are
 %     serializable MeTTa text [tested:
 %     a_partial_application_remains_visible_in_test_output; commit=c1eaa36c7a2089801fe9da3cbec3fc02833d66fe].

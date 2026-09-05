@@ -12,7 +12,7 @@
 %   a rule's body is EVALUATED while the program compiles.
 % Guarantees: translator-rule registration and cache restore refuse an
 %   annotated function whose cardinality checkpoint they would bypass
-%   [tested: run_tests(metta_arrow_products); commit=WORKTREE].
+%   [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarded by: '$metta_arrow_products' serializes rule registration against
 %   annotated-declaration publication.
 % Assumes:

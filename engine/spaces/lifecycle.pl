@@ -1,6 +1,6 @@
 % Purpose: decode stored atoms and manage source, subscription, reaction, table, and clear lifecycles
 % Guarantees: annotated arrow effects reach catalog policy and follow their
-%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=WORKTREE].
+%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
 %   A foreign space life releases tabled, generated, deferred-translation, and
@@ -1871,7 +1871,7 @@ metta_remove_hooks_idle(Space) :-
 %Open outer lists, variable relation names and non-atomic function heads must
 %keep the full census, since compiled_half_atom/3 does not cover them.
 %[tested: test_equation_observers_keep_plain_data_clear_bulk,
-%a_clear_observer_still_sees_atoms_outside_the_compiled_half; commit=WORKTREE].
+%a_clear_observer_still_sees_atoms_outside_the_compiled_half; commit=bbb512316280110a747e31c26adfc31e8c5104be].
 metta_remove_hooks_compiled_only(Space) :-
     findall(Ref, seam:atom_hook_clause(removed, Ref), Refs),
     exclude(metta_compiled_removal_hook, Refs, Watching),
@@ -1903,7 +1903,7 @@ metta_compiled_removal_hook(Ref) :-
 %17,843 inferences at 200 atoms and 131,247 at 2,000 once lib_tabling was in
 %the process, against 4,598 at both sizes without it, which is the per-atom
 %funnel rather than the bulk pass [measured 2026-09-05; tested:
-%test_a_hook_that_names_another_space_keeps_the_bulk_clear; commit=WORKTREE].
+%test_a_hook_that_names_another_space_keeps_the_bulk_clear; commit=bbb512316280110a747e31c26adfc31e8c5104be].
 :- multifile seam:atom_hook_ref_idle/2.
 seam:atom_hook_ref_idle(Space, Ref) :-
     catch(clause(Clause, _, Ref), _, fail),

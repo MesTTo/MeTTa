@@ -1,6 +1,6 @@
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
 % Guarantees: verify-cardinality checks annotated calls while plain calls
-%   retain their generated goal [tested: run_tests(metta_arrow_products); commit=WORKTREE].
+%   retain their generated goal [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
 %   state writes are refused while speculative or reified-world execution is

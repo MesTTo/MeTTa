@@ -4,7 +4,7 @@
 % Guarantees: an accepted annotation publishes its effect; removing its last
 %   stored declaration withdraws only its owned catalog row. Unsupported
 %   products raise before storage [tested: run_tests(metta_arrow_products);
-%   commit=WORKTREE].
+%   commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Owns resources: metta_arrow_product/5 and metta_arrow_dispatch/2 retain exact
 %   catalog and compiler clause references; declaration removal, space clear
 %   and source rollback release them.
@@ -12,7 +12,7 @@
 %   SWI transactions own rollback of the metadata and catalog clauses.
 % Decides: cardinality assertions are trusted unless verify-cardinality is on;
 %   enabled det and semidet checks reject a surviving choicepoint and never
-%   replay the body [tested: run_tests(metta_arrow_products); commit=WORKTREE].
+%   replay the body [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 
 %Each declaration owns both references; equal declarations in other spaces
 %remain independent when one source is withdrawn.
@@ -175,7 +175,7 @@ metta_applicable_cardinality(Module, Name, Args, Cardinality) :-
 %effect. Empty is not an observable MeTTa answer. A constrained output checks
 %only the upper bound, since unification can legitimately remove its answer.
 %[source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/man/builtin.plx,
-%det/1 and call_cleanup/2; commit=WORKTREE].
+%det/1 and call_cleanup/2; commit=bbb512316280110a747e31c26adfc31e8c5104be].
 metta_check_cardinality(Module, Name, Required, Out, Goal) :-
     (   call_cleanup((call(Goal), Out \== 'Empty'), Finished = true)
     *-> (   Finished == true

@@ -2,7 +2,7 @@
 %   semantics, and publish the predicates extensions and host bindings may call.
 % Guarantees:
 %   - libraries can distinguish an author's annotated effect from inferred
-%     operation metadata [tested: run_tests(metta_arrow_products); commit=WORKTREE].
+%     operation metadata [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 %   - host query carriers enter the engine-owned algebra scope, read its
 %     effective carrier and identity, and compose operation-answer weights
 %     only through declared host services

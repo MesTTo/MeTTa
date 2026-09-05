@@ -1,7 +1,7 @@
 % Purpose: exercise annotated effects, cardinality auditing and declaration lifetime.
 % Guarantees: tests enter through declaration and evaluation doors, retaining
 %   plain-arrow controls and checking rollback as well as successful calls
-%   [tested: run_tests(metta_arrow_products); commit=WORKTREE].
+%   [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Owns resources: each case releases its named spaces; pragma writes restore
 %   the disabled mode before the next case. Observer cases erase their clause
 %   references and destroy their message queues even when an assertion fails.

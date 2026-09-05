@@ -12,7 +12,7 @@
 %     lib_thread:a_saturated_timer_pool_does_not_block_scheduler_deadlines,
 %     lib_thread:a_cancelled_scheduler_deadline_cannot_wake_its_task,
 %     lib_thread:full_channel_sends_suspend_engines_instead_of_all_carriers;
-%     commit=WORKTREE].
+%     commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Owns resources: the saturation case cancels its timers and future and closes
 %   its channel in cleanup, including when waiting for saturation fails.
 % Open Obligations:
@@ -512,7 +512,7 @@ timer_pool_reaches_one_running(Pool, Attempts) :-
 %one-second callback overlap. Start after the wait begins and sample that
 %external state every 5ms; the setup and scheduler-deadline bounds stay fixed.
 %[source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/thread_pool.pl,
-%thread_pool_property/2; commit=WORKTREE].
+%thread_pool_property/2; commit=bbb512316280110a747e31c26adfc31e8c5104be].
 test(a_saturated_timer_pool_does_not_block_scheduler_deadlines,
      [ setup(metta_test_ensure_thread_surface),
        cleanup(( metta_test_cancel_all(Timers),

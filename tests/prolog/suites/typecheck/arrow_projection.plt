@@ -9,7 +9,7 @@
 % Guarantees: concrete annotated declarations execute, check arguments and
 %   type applications while stored types retain their spelling. Annotated
 %   callers gain a cardinality checkpoint; callees retain their typed bodies
-%   [tested: run_tests(metta_arrow_projection); commit=WORKTREE].
+%   [tested: run_tests(metta_arrow_projection); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Owns resources: each test releases its space; the export-reader fixture
 %   retracts its pending export row even when an assertion fails.
 
