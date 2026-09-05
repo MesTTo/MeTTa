@@ -16,7 +16,7 @@
 %   the outer commit, where the snapshot has refreshed, and the second commit is
 %   refused by name [tested:
 %   structural_aliases:overlapping_transactions_leave_one_alias_and_name_the_loser;
-%   commit=WORKTREE].
+%   commit=f5eb8775b78519c080da4ea7c6dff81f7be21ef9].
 % Fails when: callers expect serializability from overlapping RAW outer
 %   transactions a caller opened with transaction/1 itself; the engine has no
 %   commit hook inside one of those and the limitation is reproduced by

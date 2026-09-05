@@ -9,7 +9,7 @@
 %   before either commits, and the commits happen in a stated order, so the
 %   loser is decided here and not by the scheduler [tested:
 %   structural_aliases:overlapping_transactions_leave_one_alias_and_name_the_loser;
-%   commit=WORKTREE].
+%   commit=f5eb8775b78519c080da4ea7c6dff81f7be21ef9].
 % Owns resources: one private space, one message queue and two worker threads,
 %   all released on every outcome. Every receive carries a timeout and the
 %   whole orchestration runs under call_with_time_limit/2, so a lost message

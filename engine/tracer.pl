@@ -34,7 +34,7 @@
 %     behind, stops neither the rest of the sweep nor the state retractions, so
 %     a later trace on the same engine still arms
 %     [tested: tracer:a_trace_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarmed;
-%     commit=WORKTREE].
+%     commit=f5eb8775b78519c080da4ea7c6dff81f7be21ef9].
 % Guarded by:
 %   - '$metta_trace_state' serializes trace sessions and wrapper changes
 %     [tested 2026-08-14: tracer:event_limit_truncates_and_removes_every_wrapper].
@@ -125,7 +125,7 @@ metta_trace_wrap(Module:F/A) :-
 %every later trace on that engine refused with
 %permission_error(trace, evaluation, nested)
 %[tested: tracer:a_trace_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarmed;
-%commit=WORKTREE].
+%commit=f5eb8775b78519c080da4ea7c6dff81f7be21ef9].
 metta_trace_unwrap(Module:F/A) :-
     ignore(catch(unwrap_predicate(Module:F/A, metta_tracer), _, true)).
 
