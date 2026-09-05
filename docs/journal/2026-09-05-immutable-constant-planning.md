@@ -91,3 +91,250 @@ Tried before implementation: the new `translator_metadata_projection` differenti
 Tried: a separate preparation sweep uses one-digit repeated list elements, making source length proportional to list length. At list sizes 256, 1,024, 4,096, 16,384 and 65,536, folded first-query CPU medians were 518,230; 846,701; 2,547,451; 9,742,222; and 40,741,449 ns. Control medians were 705,980; 802,910; 2,786,831; 10,958,413; and 51,315,542 ns. At nested-addition depths 128, 512, 2,048, 8,192 and 16,384, folded first-query CPU medians were 1,820,710; 5,941,301; 26,701,506; 99,077,223; and 194,112,715 ns; control medians were 1,507,951; 6,418,492; 20,783,135; 75,082,077; and 150,981,685 ns. These pre-projection CPU curves are consistent with linear preparation over the measured range; they do not show the suspected quadratic nested-AST preparation. Raw registration, first-answer and combined preparation values are preserved in `ai-tmp/ai-folding-final-a20256a5-preprojection-preparation-*.jsonl`.
 
 Verified: the metadata projection and existing folding, metadata-store and source-rollback selection passes 448 Prolog cases with no warnings or errors. The public projection lifecycle and folding tests pass 11 cases. Ruff and `git diff --check` pass. Logs and separate zero statuses are `ai-tmp/ai-folding-final-a20256a5-projection-prolog-final.log`, `ai-tmp/ai-folding-final-a20256a5-projection-python.log`, and `ai-tmp/ai-folding-final-a20256a5-projection-ruff.log`. Final paired CPU sweeps remain a separate evidence obligation.
+
+## 2026-09-05 paired complete-workload checkpoint
+
+Tried: `PYTHONPATH=extensions/python "$VENV/bin/python" ai-tmp/ai-folding-final-a20256a5-complete-sweep.py --mode MODE --metadata ai-tmp/ai-folding-final-a20256a5-complete-MODE-metadata.json` for `optimized`, `folding-control`, and `metadata-control`. Each process exited 0 and recorded 69 complete workloads at three samples per point. Their source hash dictionaries match and every before/after comparison is unchanged. The source snapshot is commit `14702fd4ab37f5c9af33f1cd327733eae9aea82f` plus the concurrent materialization and persistence work recorded by those hashes. These numbers precede the later materialization transaction-publication repair; they are a preserved attribution checkpoint, not pins carried onto that later source.
+
+Tried: the summary audit checked all 207 workloads, exact per-sample phase sums, completed answer counts, deferred registration, completed compilation, and absence of materialized arithmetic predicates -> exit 0. The report and all raw samples are in `ai-tmp/ai-folding-final-a20256a5-complete-summary.md` and `.json`.
+
+### Complete public workloads at q=n
+
+Each number is the median of three completed workloads on the same source bytes. Registration stores the definition; the first query compiles it and returns one answer; the repeated phase completes q additional public calls and checks every full bag. Preparation is registration plus first query, and total is preparation plus repeated calls. The raw per-sample phases sum exactly. Medians of different columns need not add, because their middle samples can differ.
+
+The folding control disables only `fold_native_scalar_call/5`. The metadata control restores source-reading existence/head consumers while retaining the ownership tables and folding. The optimized mode uses both changes. Every fixed-list fixture contains n one-digit integers and answers 1, so its source length is linear in n and output length stays fixed.
+
+SWI inferences count predicate ports and omit work inside native predicates and Python. The metadata control demonstrates that blind spot directly: similar port counts coexist with quadratic total CPU. `process_time_ns` measures process user plus system CPU, including transport, decoding and the `m.stats()` calls; it excludes interpreter startup, source-string construction and diagnostics.
+
+#### fixed-list-maximum: SWI inferences
+
+| n=q | Mode | Registration | First query | Preparation | Repeated q calls | Total |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| 256 | folding-control | 553 | 5,247 | 5,800 | 363,795 | 369,595 |
+| 256 | metadata-control | 553 | 5,838 | 6,391 | 100,873 | 107,264 |
+| 256 | optimized | 553 | 5,838 | 6,391 | 100,873 | 107,264 |
+| 1,024 | folding-control | 553 | 17,535 | 18,088 | 4,601,021 | 4,619,109 |
+| 1,024 | metadata-control | 553 | 19,662 | 20,215 | 403,477 | 423,692 |
+| 1,024 | optimized | 553 | 19,662 | 20,217 | 403,477 | 423,694 |
+| 4,096 | folding-control | 553 | 66,689 | 67,242 | 68,737,731 | 68,804,973 |
+| 4,096 | metadata-control | 553 | 74,960 | 75,513 | 1,613,893 | 1,689,406 |
+| 4,096 | optimized | 553 | 74,960 | 75,513 | 1,613,893 | 1,689,406 |
+| 16,384 | folding-control | 553 | 263,303 | 263,856 | 1,080,289,489 | 1,080,553,345 |
+| 16,384 | metadata-control | 553 | 296,152 | 296,705 | 6,455,559 | 6,752,264 |
+| 16,384 | optimized | 553 | 296,152 | 296,705 | 6,455,559 | 6,752,264 |
+
+#### fixed-list-maximum: Process CPU, nanoseconds
+
+| n=q | Mode | Registration | First query | Preparation | Repeated q calls | Total |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| 256 | folding-control | 250,830 | 379,901 | 630,731 | 15,193,413 | 15,824,144 |
+| 256 | metadata-control | 421,870 | 514,580 | 936,450 | 10,599,633 | 11,724,473 |
+| 256 | optimized | 242,320 | 378,620 | 597,230 | 7,990,532 | 8,694,552 |
+| 1,024 | folding-control | 423,640 | 923,231 | 1,334,460 | 138,553,262 | 139,887,722 |
+| 1,024 | metadata-control | 490,440 | 848,651 | 1,327,670 | 58,271,894 | 60,257,144 |
+| 1,024 | optimized | 433,880 | 878,710 | 1,316,340 | 28,655,097 | 29,971,437 |
+| 4,096 | folding-control | 1,001,181 | 3,035,050 | 4,036,231 | 1,776,257,753 | 1,780,896,824 |
+| 4,096 | metadata-control | 1,086,020 | 2,716,541 | 3,802,561 | 475,045,671 | 478,848,232 |
+| 4,096 | optimized | 955,220 | 2,596,911 | 3,552,131 | 112,131,536 | 115,486,846 |
+| 16,384 | folding-control | 2,802,490 | 11,096,083 | 13,898,573 | 28,528,866,981 | 28,542,060,764 |
+| 16,384 | metadata-control | 3,230,141 | 11,022,183 | 14,150,493 | 6,387,470,083 | 6,400,688,476 |
+| 16,384 | optimized | 2,886,831 | 10,863,142 | 14,369,424 | 473,829,941 | 488,328,784 |
+
+#### nested-additions: SWI inferences
+
+| n=q | Mode | Registration | First query | Preparation | Repeated q calls | Total |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| 128 | folding-control | 553 | 40,067 | 40,620 | 82,825 | 123,445 |
+| 128 | metadata-control | 553 | 50,938 | 51,491 | 50,439 | 101,930 |
+| 128 | optimized | 553 | 50,938 | 51,491 | 50,439 | 101,930 |
+| 512 | folding-control | 553 | 181,810 | 182,363 | 724,515 | 906,878 |
+| 512 | metadata-control | 553 | 201,088 | 201,641 | 201,741 | 403,382 |
+| 512 | optimized | 553 | 201,088 | 201,641 | 201,741 | 403,382 |
+| 2,048 | folding-control | 553 | 724,040 | 724,593 | 9,189,749 | 9,914,342 |
+| 2,048 | metadata-control | 553 | 801,686 | 802,239 | 806,949 | 1,609,188 |
+| 2,048 | optimized | 553 | 801,688 | 802,241 | 806,949 | 1,609,190 |
+| 8,192 | folding-control | 553 | 2,892,958 | 2,893,511 | 137,426,303 | 140,319,814 |
+| 8,192 | metadata-control | 553 | 3,204,084 | 3,204,637 | 3,227,783 | 6,432,420 |
+| 8,192 | optimized | 553 | 3,204,086 | 3,204,639 | 3,227,783 | 6,432,422 |
+
+#### nested-additions: Process CPU, nanoseconds
+
+| n=q | Mode | Registration | First query | Preparation | Repeated q calls | Total |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| 128 | folding-control | 307,720 | 1,399,421 | 1,707,141 | 4,495,811 | 6,202,952 |
+| 128 | metadata-control | 275,670 | 1,669,560 | 1,958,270 | 4,169,271 | 6,127,541 |
+| 128 | optimized | 259,950 | 1,752,490 | 2,020,040 | 3,712,561 | 5,732,601 |
+| 512 | folding-control | 559,040 | 7,402,012 | 7,961,052 | 26,918,776 | 34,879,828 |
+| 512 | metadata-control | 644,120 | 6,325,772 | 7,068,732 | 29,154,086 | 36,222,818 |
+| 512 | optimized | 505,340 | 5,829,012 | 6,334,352 | 13,814,903 | 20,149,255 |
+| 2,048 | folding-control | 1,541,590 | 30,515,938 | 32,057,528 | 288,553,096 | 310,044,631 |
+| 2,048 | metadata-control | 1,543,980 | 24,189,236 | 25,762,526 | 317,200,294 | 342,962,820 |
+| 2,048 | optimized | 1,296,061 | 23,235,755 | 24,531,816 | 60,952,914 | 85,484,730 |
+| 8,192 | folding-control | 5,751,561 | 85,432,010 | 90,156,861 | 3,673,935,655 | 3,764,092,516 |
+| 8,192 | metadata-control | 5,599,191 | 115,307,547 | 120,867,408 | 4,221,281,493 | 4,323,577,646 |
+| 8,192 | optimized | 5,103,691 | 97,473,273 | 102,576,964 | 275,942,454 | 383,722,909 |
+
+#### Fixed q=256
+
+| Computation | n | Mode | Repeated inferences | Repeated CPU, ns |
+| --- | ---: | --- | ---: | ---: |
+| fixed-list-maximum | 256 | folding-control | 363,795 | 15,193,413 |
+| fixed-list-maximum | 256 | metadata-control | 100,873 | 10,599,633 |
+| fixed-list-maximum | 256 | optimized | 100,873 | 7,990,532 |
+| fixed-list-maximum | 1,024 | folding-control | 1,150,259 | 33,528,248 |
+| fixed-list-maximum | 1,024 | metadata-control | 100,873 | 12,564,173 |
+| fixed-list-maximum | 1,024 | optimized | 100,873 | 7,710,051 |
+| fixed-list-maximum | 4,096 | folding-control | 4,296,113 | 109,279,615 |
+| fixed-list-maximum | 4,096 | metadata-control | 100,873 | 27,919,627 |
+| fixed-list-maximum | 4,096 | optimized | 100,873 | 7,895,182 |
+| fixed-list-maximum | 16,384 | folding-control | 16,879,529 | 395,995,693 |
+| fixed-list-maximum | 16,384 | metadata-control | 100,873 | 98,136,873 |
+| fixed-list-maximum | 16,384 | optimized | 100,873 | 7,076,832 |
+| nested-additions | 128 | folding-control | 165,643 | 8,626,632 |
+| nested-additions | 128 | metadata-control | 100,873 | 9,297,622 |
+| nested-additions | 128 | optimized | 100,873 | 7,330,852 |
+| nested-additions | 512 | folding-control | 362,259 | 12,880,473 |
+| nested-additions | 512 | metadata-control | 100,873 | 13,978,453 |
+| nested-additions | 512 | optimized | 100,873 | 7,846,152 |
+| nested-additions | 2,048 | folding-control | 1,148,723 | 33,327,878 |
+| nested-additions | 2,048 | metadata-control | 100,873 | 39,879,639 |
+| nested-additions | 2,048 | optimized | 100,873 | 7,951,452 |
+| nested-additions | 8,192 | folding-control | 4,294,577 | 120,938,478 |
+| nested-additions | 8,192 | metadata-control | 100,873 | 175,481,000 |
+| nested-additions | 8,192 | optimized | 100,873 | 9,719,702 |
+
+All three mode metadata files report `source_unchanged=true`; their engine, library and Python source hash dictionaries match. Exact samples and every q=16, q=256 and q=n workload remain in `ai-folding-final-a20256a5-complete-summary.json` and the three raw JSONL files.
+
+Outcome: over the largest fourfold list-size increase, total CPU grows from 1,780,896,824 to 28,542,060,764 ns with folding disabled, from 478,848,232 to 6,400,688,476 ns with metadata reads reverted, and from 115,486,846 to 488,328,784 ns with both optimizations enabled. The source and output bounds explain the class difference: the controls repeat a list scan or retained-body copy for each query; the optimized path scans the fixed list once during preparation and returns a fixed-size value thereafter. The complete workload therefore changes from O(n+q*n) to O(n+q) for this fixed-head, fixed-result fixture, rather than merely shifting cost into its first call. Arbitrary-precision arithmetic and result copying remain dependent on operand and output bit sizes.
+
+Tried: `jscpd --noTips --reporters ai engine/translator/analysis.pl engine/translator/lowering.pl engine/translator/typing.pl engine/translator/runtime.pl tests/prolog/suites/translator/metadata_projection.plt extensions/python/tests/ch18_performance/test_metadata_projection.py` -> exit 0, zero clones, 0.0% duplication. Its log is `ai-tmp/ai-folding-final-a20256a5-projection-jscpd.log`; no extraction was warranted.
+
+## 2026-09-05 reproducible complete-workload driver
+
+Decided: move the existing complete-workload sweep and its helper dependency into `extensions/python/benchmarks/query_planning_folding.py`. The fixtures, modes, measured phases and full-bag checks remain the same. It runs as `PYTHONPATH=extensions/python "$VENV/bin/python" -m benchmarks.query_planning_folding --mode MODE --metadata PATH`; its default three samples produce 69 completed workloads per mode. The fourth mode combines the two independent controls. This removes the scratch `runpy` dependency from the repeatable command.
+
+Decided: share `source_snapshot()` and `finish_metadata()` with the other query-planning benchmark drivers. They fingerprint relative engine, library, Python and `query_planning*.py` source paths, excluding scratch files and metadata outputs. A mismatched before/after fingerprint writes the changed path names into the metadata and then refuses the run. It does not detect a transient source edit restored between those snapshots. Three-way reuse removes a duplicated finalization policy; `jscpd` reports zero clones across the join/demand and folding modules after that extraction.
+
+Verified: `--samples 0`, `--samples -1` and a nonnumeric value exit 2 before engine startup or metadata creation. Values 1 and 101 reach the source-snapshot boundary; there is no arbitrary upper cap. A planted fingerprint mismatch covering changed, added and removed paths writes `source_unchanged=false` before raising `AssertionError(['engine/example.pl', 'lib/new.pl', 'lib/removed.pl'])`; a matching fingerprint preserves the mode and row fields and succeeds. No source files were changed by these probes. Logs and separate zero statuses are `ai-tmp/ai-folding-final-a20256a5-benchmark-module-validation3.log`, `ai-tmp/ai-folding-final-a20256a5-benchmark-metadata-control.log`, `ai-tmp/ai-folding-final-a20256a5-benchmark-module-ruff4.log` and `ai-tmp/ai-folding-final-a20256a5-benchmark-module-jscpd3.log`.
+
+Open: run the final paired measurements through the module after the materialization transaction-publication source is frozen. The earlier checkpoint remains unchanged.
+
+
+## 2026-09-05 final module measurements
+
+Tried: `PYTHONPATH=extensions/python timeout -s KILL 290 "$VENV/bin/python" -m benchmarks.query_planning_folding --mode MODE --metadata ai-tmp/ai-folding-final-a20256a5-module-MODE-metadata.json` for `optimized`, `folding-control` and `metadata-control`, with the default three samples. Every process exited 0 and recorded 69 complete workloads. The preserved `combined-control` mode also exited 0 with `--samples 1`, recording another 23 workloads. All four stderr logs are empty. Each JSONL row states that SWI inferences exclude Python and native-call internals, beside its phase numbers. The external process bound was explicitly required for this verification; no process reached it.
+
+Verified: all four before/after checks report unchanged source, and all 206 engine, library, Python and benchmark-driver source fingerprints match across the processes and the tree at measurement close. The first two processes record HEAD `b9f0e7f3842ec0a5ae9c3a7f8a709cfefc76b5c0`; the later two record `4d0713ac74c49e60dfda40116a663b6e61c02932`. A local commit advanced HEAD while those source bytes remained unchanged. The first final audit incorrectly required equal HEAD names and failed with `AssertionError`; `ai-tmp/ai-folding-final-a20256a5-module-audit2.log` records the corrected source-equality audit, both HEADs, exact phase sums, fixed 22-character calls and all 230 completed workloads, with exit 0. The independent three-mode summary audit checks all 207 sampled workloads and exits 0 in `ai-tmp/ai-folding-final-a20256a5-module-summary.log`.
+
+The tables below replace the earlier checkpoint as the measured result for this implementation. They measure completed public source calls within an existing context; context creation, context teardown, source-string construction and inspection calls are outside the reported phases.
+
+### Complete public workloads at q=n
+
+Each number is the median of three completed workloads on the same source bytes. Registration stores the definition; the first query compiles it and returns one answer; the repeated phase completes q additional public calls and checks every full bag. Preparation is registration plus first query, and total is preparation plus repeated calls. The raw per-sample phases sum exactly. Medians of different columns need not add, because their middle samples can differ.
+
+The folding control disables only `fold_native_scalar_call/5`. The metadata control restores source-reading existence/head consumers while retaining the ownership tables and folding. The optimized mode uses both changes. Every fixed-list fixture contains n one-digit integers and answers 1, so its source length is linear in n and output length stays fixed.
+
+SWI inferences count predicate ports and omit work inside native predicates and Python. The metadata control demonstrates that blind spot directly: similar port counts coexist with quadratic total CPU. `process_time_ns` measures process user plus system CPU, including transport, decoding and the `m.stats()` calls; it excludes interpreter startup, source-string construction and diagnostics.
+
+#### fixed-list-maximum: SWI inferences
+
+| n=q | Mode | Registration | First query | Preparation | Repeated q calls | Total |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| 256 | folding-control | 565 | 5,247 | 5,812 | 363,797 | 369,609 |
+| 256 | metadata-control | 565 | 5,838 | 6,403 | 100,873 | 107,276 |
+| 256 | optimized | 565 | 5,838 | 6,403 | 100,873 | 107,276 |
+| 1,024 | folding-control | 565 | 17,537 | 18,102 | 4,601,021 | 4,619,123 |
+| 1,024 | metadata-control | 565 | 19,664 | 20,229 | 403,477 | 423,706 |
+| 1,024 | optimized | 565 | 19,664 | 20,229 | 403,477 | 423,706 |
+| 4,096 | folding-control | 565 | 66,689 | 67,254 | 68,737,731 | 68,804,985 |
+| 4,096 | metadata-control | 565 | 74,960 | 75,525 | 1,613,893 | 1,689,418 |
+| 4,096 | optimized | 565 | 74,960 | 75,525 | 1,613,893 | 1,689,418 |
+| 16,384 | folding-control | 565 | 263,303 | 263,868 | 1,080,289,489 | 1,080,553,357 |
+| 16,384 | metadata-control | 565 | 296,152 | 296,717 | 6,455,559 | 6,752,276 |
+| 16,384 | optimized | 565 | 296,152 | 296,717 | 6,455,559 | 6,752,276 |
+
+#### fixed-list-maximum: Process CPU, nanoseconds
+
+| n=q | Mode | Registration | First query | Preparation | Repeated q calls | Total |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| 256 | folding-control | 361,040 | 435,910 | 806,400 | 15,162,373 | 15,949,524 |
+| 256 | metadata-control | 344,390 | 460,790 | 805,180 | 12,495,923 | 13,301,103 |
+| 256 | optimized | 404,160 | 524,040 | 917,460 | 9,664,123 | 10,549,063 |
+| 1,024 | folding-control | 536,190 | 975,510 | 1,503,220 | 180,516,932 | 182,020,152 |
+| 1,024 | metadata-control | 646,890 | 1,184,671 | 1,831,561 | 61,915,584 | 63,747,145 |
+| 1,024 | optimized | 535,830 | 1,079,140 | 1,638,490 | 36,997,158 | 38,757,819 |
+| 4,096 | folding-control | 1,576,730 | 4,690,172 | 6,335,251 | 2,013,654,066 | 2,020,111,088 |
+| 4,096 | metadata-control | 1,025,221 | 3,443,190 | 4,440,891 | 569,548,193 | 575,268,254 |
+| 4,096 | optimized | 1,482,960 | 3,527,731 | 5,010,691 | 140,880,963 | 145,891,654 |
+| 16,384 | folding-control | 4,584,301 | 13,893,843 | 18,478,144 | 29,743,802,706 | 29,762,280,850 |
+| 16,384 | metadata-control | 4,972,481 | 14,950,733 | 20,459,605 | 6,677,838,790 | 6,698,298,395 |
+| 16,384 | optimized | 3,322,041 | 11,164,862 | 14,595,863 | 509,013,868 | 523,609,731 |
+
+#### nested-additions: SWI inferences
+
+| n=q | Mode | Registration | First query | Preparation | Repeated q calls | Total |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| 128 | folding-control | 565 | 40,065 | 40,630 | 82,825 | 123,455 |
+| 128 | metadata-control | 565 | 50,938 | 51,503 | 50,439 | 101,942 |
+| 128 | optimized | 565 | 50,938 | 51,503 | 50,439 | 101,942 |
+| 512 | folding-control | 565 | 181,812 | 182,377 | 724,513 | 906,890 |
+| 512 | metadata-control | 565 | 201,088 | 201,653 | 201,741 | 403,394 |
+| 512 | optimized | 565 | 201,088 | 201,653 | 201,741 | 403,394 |
+| 2,048 | folding-control | 565 | 724,040 | 724,605 | 9,189,749 | 9,914,354 |
+| 2,048 | metadata-control | 565 | 801,688 | 802,253 | 806,949 | 1,609,202 |
+| 2,048 | optimized | 565 | 801,686 | 802,251 | 806,949 | 1,609,200 |
+| 8,192 | folding-control | 565 | 2,892,958 | 2,893,523 | 137,426,301 | 140,319,824 |
+| 8,192 | metadata-control | 565 | 3,204,084 | 3,204,651 | 3,227,783 | 6,432,432 |
+| 8,192 | optimized | 565 | 3,204,084 | 3,204,649 | 3,227,783 | 6,432,432 |
+
+#### nested-additions: Process CPU, nanoseconds
+
+| n=q | Mode | Registration | First query | Preparation | Repeated q calls | Total |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: |
+| 128 | folding-control | 409,000 | 1,651,900 | 2,003,010 | 5,922,372 | 7,925,382 |
+| 128 | metadata-control | 353,030 | 1,895,601 | 2,140,551 | 4,479,621 | 6,620,172 |
+| 128 | optimized | 284,300 | 1,899,431 | 2,170,420 | 4,492,391 | 6,723,062 |
+| 512 | folding-control | 610,310 | 7,026,582 | 7,636,892 | 27,480,176 | 35,117,068 |
+| 512 | metadata-control | 551,280 | 6,058,482 | 6,651,552 | 30,775,257 | 39,271,199 |
+| 512 | optimized | 575,780 | 6,965,922 | 7,759,562 | 16,715,684 | 24,599,586 |
+| 2,048 | folding-control | 1,295,521 | 23,522,815 | 24,818,336 | 272,457,813 | 297,276,149 |
+| 2,048 | metadata-control | 1,366,630 | 27,822,227 | 29,188,857 | 312,519,762 | 337,641,098 |
+| 2,048 | optimized | 1,394,670 | 24,124,596 | 25,491,156 | 67,691,936 | 97,432,582 |
+| 8,192 | folding-control | 6,400,612 | 89,416,431 | 94,409,772 | 3,857,940,398 | 3,952,350,170 |
+| 8,192 | metadata-control | 4,798,651 | 104,599,054 | 108,944,315 | 5,213,538,091 | 5,389,902,600 |
+| 8,192 | optimized | 4,841,411 | 107,787,385 | 113,212,146 | 330,517,116 | 440,677,882 |
+
+#### Fixed q=256
+
+| Computation | n | Mode | Repeated inferences | Repeated CPU, ns |
+| --- | ---: | --- | ---: | ---: |
+| fixed-list-maximum | 256 | folding-control | 363,797 | 15,162,373 |
+| fixed-list-maximum | 256 | metadata-control | 100,873 | 12,495,923 |
+| fixed-list-maximum | 256 | optimized | 100,873 | 9,664,123 |
+| fixed-list-maximum | 1,024 | folding-control | 1,150,259 | 35,288,748 |
+| fixed-list-maximum | 1,024 | metadata-control | 100,873 | 15,133,084 |
+| fixed-list-maximum | 1,024 | optimized | 100,873 | 8,606,152 |
+| fixed-list-maximum | 4,096 | folding-control | 4,296,113 | 140,537,843 |
+| fixed-list-maximum | 4,096 | metadata-control | 100,873 | 39,558,070 |
+| fixed-list-maximum | 4,096 | optimized | 100,873 | 9,983,791 |
+| fixed-list-maximum | 16,384 | folding-control | 16,879,529 | 457,679,117 |
+| fixed-list-maximum | 16,384 | metadata-control | 100,873 | 122,865,476 |
+| fixed-list-maximum | 16,384 | optimized | 100,873 | 8,190,682 |
+| nested-additions | 128 | folding-control | 165,643 | 11,946,083 |
+| nested-additions | 128 | metadata-control | 100,873 | 10,178,492 |
+| nested-additions | 128 | optimized | 100,873 | 8,089,662 |
+| nested-additions | 512 | folding-control | 362,261 | 14,021,014 |
+| nested-additions | 512 | metadata-control | 100,873 | 15,298,523 |
+| nested-additions | 512 | optimized | 100,873 | 9,028,682 |
+| nested-additions | 2,048 | folding-control | 1,148,723 | 34,947,918 |
+| nested-additions | 2,048 | metadata-control | 100,873 | 37,190,298 |
+| nested-additions | 2,048 | optimized | 100,873 | 8,036,262 |
+| nested-additions | 8,192 | folding-control | 4,294,577 | 113,630,547 |
+| nested-additions | 8,192 | metadata-control | 100,873 | 141,192,824 |
+| nested-additions | 8,192 | optimized | 100,873 | 9,087,722 |
+
+All three mode metadata files report `source_unchanged=true`; their engine, library and Python source hash dictionaries match. Exact samples and every q=16, q=256 and q=n workload remain in `ai-folding-final-a20256a5-module-summary.json` and the three raw JSONL files.
+
+Outcome: for the fixed-head list fixture, preparation is linear in source length and every answer is the integer 1. At q=n, the largest fourfold size increase raises total process CPU from 2,020,111,088 to 29,762,280,850 ns with folding disabled, from 575,268,254 to 6,698,298,395 ns with source-reading metadata restored, and from 145,891,654 to 523,609,731 ns with both changes enabled. The complete workload changes from O(n+q*n) to O(n+q). This includes first compilation rather than relying only on a warmed plateau. At fixed q=256, optimized repeated CPU stays between 8,190,682 and 9,983,791 ns over n=256 through 16,384, while the two controls rise to 457,679,117 and 122,865,476 ns respectively.
+
+The metadata control and optimized mode have identical q=n total SWI counts for every list size, ending at 6,752,276 ports, despite their different CPU classes. Folding disabled ends at 1,080,553,357 ports. Thus the source-reading control proves why inference counts alone did not establish the earlier total-cost claim. The retained input consumes O(n) source memory; preparation must inspect the input, and q completed calls must return q values. Arbitrary-precision operands and results keep their bit-size costs; the nested-addition fixture is supplementary evidence rather than a claim that all scalar arithmetic has constant-size values.
