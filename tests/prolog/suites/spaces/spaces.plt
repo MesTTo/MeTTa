@@ -58,6 +58,7 @@
 % reads beside its own tests.
 :- discontiguous seam:foreign_space/1.
 :- discontiguous seam:foreign_capability/2.
+:- discontiguous seam:foreign_match/2.
 
 seam:foreign_space('&plunit_cycle_foreign').
 seam:foreign_capability('&plunit_cycle_foreign', match).
@@ -1253,13 +1254,13 @@ test(a_single_pattern_still_answers_the_first_row_without_walking_the_space,
 test(a_conjunction_keeps_each_row_annotation,
      [ setup(setup_snapshot_space), cleanup(cleanup_snapshot_space) ]) :-
     Space = '&plunit_snapshot',
-    Pattern = [',', [snap_link, X, Y], [snap_link, Y, Z]],
+    % Y is the join; the two ends are read by the match and never inspected.
+    Pattern = [',', [snap_link, _, Y], [snap_link, Y, _]],
     findall(K, ( match(Space, Pattern, out, out), metta_annotation(K) ), Ks),
     % Unannotated atoms read the semiring's 1, once per row rather than a
     % stale neighbour's value or nothing at all.
     assertion(Ks \== []),
-    assertion(forall(member(K1, Ks), K1 == 1)),
-    assertion(Z == Z).
+    assertion(forall(member(K1, Ks), K1 == 1)).
 
 :- end_tests(spaces_match_snapshot).
 

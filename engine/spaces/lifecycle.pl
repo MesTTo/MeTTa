@@ -43,6 +43,11 @@
 %   structural_aliases:a_scope_without_an_alias_installs_no_withdrawal_clause,
 %   structural_aliases:alias_readers_cost_only_their_visible_scope_and_retire_transactionally;
 %   commit=e471c116647ffc9d3949501b3f2d3869a9153bc2].
+%   Those clauses cover the space type_alias_scope_space/2 gives the scope:
+%   a local scope's own space, and every space for the shared one, whose
+%   aliases every module reads [tested:
+%   structural_aliases:a_shared_alias_is_hidden_by_a_declaration_added_to_another_space;
+%   commit=60d6ca9089f50521bba869c3b7a87c92fd6a990f].
 
 %The inverse of add_sexp_in/4, written here beside it for the same reason
 %metta_module_space/2 is written beside space_module/2: the mapping is
@@ -1552,7 +1557,14 @@ compiled_predicate_arity(F, Module, Predicate, Arity) :-
 
 set_type_alias_mutation_scope(Scope, enabled) :-
     type_alias_scope_module(Scope, Module),
-    ( Scope = local(_) -> metta_module_space(Module, Space) ; true ),
+    % Which space the scope covers, asked of the predicate that already
+    % decides it for the reader clauses in engine/metta/type_aliases.pl.
+    % `local(M)` covers M's space alone; `shared` covers EVERY space, and
+    % answers with Space unbound, so each clause below installs as a template
+    % whose caller binds it. Deriving that inline instead left the same
+    % variable free with nothing saying so, which SWI's var_branches reads as
+    % a branch that forgot to bind it.
+    type_alias_scope_space(Scope, Space),
     asserta((metta_add_atom(Space, Term, true) :-
                 Term = [':', Name, Type], atom(Name),
                 \+ type_alias_declaration_type(Type),

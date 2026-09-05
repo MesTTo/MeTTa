@@ -35,7 +35,7 @@ fold_native_scalar_call(Module, Fun, Args, Out, Goal) :-
     % with it here and 429,855 with it ahead of them, because most of what
     % passes the argument shape is rejected by the effect or mode test before
     % the question is worth asking
-    % [measured: 427855 against 429855 SWI inferences; command=cd
+    % [measured 2026-09-05: 427855 against 429855 SWI inferences; command=cd
     % extensions/python && PYTHONPATH=. $VENV/bin/python bench.py
     % --counter-only run-source; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
     % [tested: source_observation:nested_controls_preserve_each_source_branch;

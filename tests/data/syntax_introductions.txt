@@ -153,6 +153,7 @@ union-atom                        08-01-10
 reverse                           08-01-11
 first                             08-01-12
 last                              08-01-13
+if-decons-expr                    08-01-16
 get-metatype                      08-02-01
 format-args                       08-03-03
 sort-strings                      08-03-03

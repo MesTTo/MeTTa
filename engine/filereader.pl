@@ -937,10 +937,11 @@ with_source_program_order(Space, ParsedForms, Goal) :-
 %is caught by the lookup's own stamp check rather than here, so the empty case
 %keeps the shape it had before materialization existed. Entering the wrapper
 %anyway cost 5 of the 15 inferences the subsystem added to every completed
-%runnable-only source [measured: 816831 against 786829 SWI inferences over
-%2000 completed calls; command=cd extensions/python && PYTHONPATH=.
-%$VENV/bin/python bench.py --counter-only foreign-match; fixture=the
-%foreign-match benchmark space; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
+%runnable-only source [measured 2026-09-05: 816831 against 786829 SWI
+%inferences over 2000 completed calls; command=cd extensions/python &&
+%PYTHONPATH=. $VENV/bin/python bench.py --counter-only foreign-match;
+%fixture=the foreign-match benchmark space;
+%commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 with_named_program_order(_Space, [], Goal) :- !, call(Goal).
 with_named_program_order(Space, Names, Goal) :-
     materialize:with_source_materialization(

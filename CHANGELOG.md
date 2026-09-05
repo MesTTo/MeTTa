@@ -9,6 +9,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The example corpus reads in its own order again. `08-case-duals.metta` sat in
+  chapter 7, whose subject is `case`, and negated its arms with `not-provable`,
+  which chapter 22 teaches; it is
+  `ch22-a-reasoner-you-can-serve/22-01-logic-programs/06-case-duals.metta` now,
+  three files after the one that introduces constructive negation, and its
+  Python twin moved with it. `ch09-types/18-compiled_overloads.metta` checked
+  its two overloads with `assertEqualToResult`, a chapter 12 form, and now uses
+  the collapse-and-compare its four chapter 9 siblings use for the same
+  question. Both programs make the same claims and store the same content.
+
 - A program that materializes nothing pays nothing for the machinery that
   retires materialized relations, and its inference counts repeat exactly.
   Source materialization installed a process-wide listener on clause erasure
@@ -174,6 +184,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   their `unwind(halt(Status))` control signal as an application error.
 
 ### Added
+
+- `metta_ensure_source_observation/0` is a published `service`, so a library
+  may ask for the source observer by name. The engine does not load
+  `engine/source_observation.pl` at boot, and `observe_source/4` cannot be its
+  own loader, so an extension that may call the published observer needs a
+  published way to make it exist; without one the only route was a library
+  running `load_files/2` over an engine path. `lib_observe`'s `observe-source`
+  is the shipped caller.
 
 - `Defined.free_variables` now has an exact consumer-sheet spelling and a
   checked compiled-definition example with one lexical dependency.
