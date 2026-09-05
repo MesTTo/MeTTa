@@ -20,6 +20,8 @@
 %   commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: metta_error_atom/4 preserves Error data and records diagnostics only
+%   during explicit observation [tested: source_observation; commit=WORKTREE].
 
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 
@@ -95,8 +97,9 @@ metta_error_operand([A|_], A) :-
     nonvar(A), A = [Head|Tail], Head == 'Error', nonvar(Tail), !.
 metta_error_operand([_|As], Error) :- metta_error_operand(As, Error).
 
-metta_error_atom(Operation, Arguments, Reason,
-                 ['Error', [Operation|Arguments], Reason]).
+metta_error_atom(Operation, Arguments, Reason, Error) :-
+    Error = ['Error', [Operation|Arguments], Reason],
+    source_observation:record_error(Error).
 
 %A declared refusal retains both names: the rule that made the decision and
 %the reason its author supplied. The ordinary BadArgType shape remains exact

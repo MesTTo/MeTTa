@@ -3,6 +3,8 @@
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: decons-atom/2 and atom-subst/4 retain their refusal answers while
+%   explicit observation records them [tested: source_observation; commit=WORKTREE].
 
 %%% Arithmetic & Comparison: %%%
 %An arithmetic operand is a number. Everything else is refused here, before
@@ -865,9 +867,11 @@ empty(_) :- fail.
 %case not matching; a two-element error would bind $h to Error and answer a
 %wrong result in silence, where a three-element one still fails to unify and
 %those loops terminate exactly as before [tested: decons_atom_is_total, the_empty_error_does_not_destructure_as_a_pair].
-'decons-atom'([], ['Error', ['decons-atom', []],
-                   "expected: (decons-atom (: <expr> Expression)), \c
-                    found: (decons-atom ())"]).
+'decons-atom'([], Error) :-
+    Error = ['Error', ['decons-atom', []],
+             "expected: (decons-atom (: <expr> Expression)), \c
+              found: (decons-atom ())"],
+    source_observation:record_error(Error).
 'first-from-pair'(Pair, _) :- var(Pair), !, refuse_unbound_input('first-from-pair', 1).
 'first-from-pair'([A, _], A).
 first(Pair, _) :- var(Pair), !, refuse_unbound_input(first, 1).
@@ -934,7 +938,8 @@ alpha_bucket_insert(Key, Term, SeenIn, SeenOut, IsNew) :-
 'atom-subst'(Value, Variable, Template, Out) :-
     (   var(Variable)
     ->  substitute_written_variable(Variable, Value, Template, Out)
-    ;   Out = ['Error', ['atom-subst', Value, Variable, Template], 'NoReturn']
+    ;   Out = ['Error', ['atom-subst', Value, Variable, Template], 'NoReturn'],
+        source_observation:record_error(Out)
     ).
 
 %A term that can never become a list, no matter how it gets instantiated:
