@@ -31,11 +31,32 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-#: Anchored to this file rather than to the working directory, and beside
-#: the repository rather than inside it, which is where the sibling
-#: checkouts live. LEATTA_PATH overrides it, the same name
-#: test_critical_pair_oracle.py reads.
-_SIBLING = Path(__file__).resolve().parents[4] / "LeaTTa"
+
+def _sibling_leatta() -> Path:
+    """The LeaTTa checkout beside this one, found by walking up.
+
+    Anchored to this file rather than to the working directory, and beside
+    the repository rather than inside it, which is where the sibling
+    checkouts live. A fixed number of parents named ONE depth: a git worktree
+    sits three levels further down, under `.claude/worktrees/<name>/`, so the
+    same count reached `<worktree>/.claude/LeaTTa` and the artifact-path gate
+    read the miss as a broken reference in every agent checkout. Walking up for
+    the first ancestor that HAS the sibling answers the same directory from
+    either place. LEATTA_PATH overrides it, the same name
+    test_critical_pair_oracle.py reads.
+    """
+    here = Path(__file__).resolve()
+    for ancestor in here.parents:
+        candidate = ancestor / "LeaTTa"
+        if candidate.is_dir():
+            # Resolved, because the checkout carries a LeaTTa SYMLINK to the
+            # sibling and a reported path that hides that is a path two
+            # tools can disagree about.
+            return candidate.resolve()
+    return here.parents[4] / "LeaTTa"
+
+
+_SIBLING = _sibling_leatta()
 
 CORPUS = Path(os.environ.get("LEATTA_PATH", _SIBLING)) / "tests" / "semantics"
 
