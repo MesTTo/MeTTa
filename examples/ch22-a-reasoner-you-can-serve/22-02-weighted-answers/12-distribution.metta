@@ -1,7 +1,7 @@
 ; Purpose: executable semantics for transparent finite value distributions.
 ; Guarantees: every lib_distribution head has a checked example, including
 ;   invalid mass and the distinction between independent marginals and a joint
-;   law [tested: this file's !(test ...) forms; commit=WORKTREE].
+;   law [tested: this file's !(test ...) forms; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
 ; Fails when: a library operation changes its boundary, ordering, dependence,
 ;   or normalization contract without updating this consumer-facing example.
 

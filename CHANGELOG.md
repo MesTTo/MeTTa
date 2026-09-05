@@ -441,7 +441,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   at their first position. `ws-normalize` now rejects empty, negative,
   nonfinite, and zero-mass inputs with remedy-bearing errors instead of
   returning an empty or silently invalid distribution [tested:
-  test_distribution.py and 12-distribution.metta; commit=WORKTREE].
+  test_distribution.py and 12-distribution.metta; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
 - Integration installation is transactional across framework-managed state.
   A failed installer now restores operations and declaration ownership,
   protocol types and reprs, reflectors, converted types, library paths,

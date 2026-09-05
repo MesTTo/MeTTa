@@ -13,13 +13,13 @@ Tried: reading the PeTTaChainer formulas beside ProbLog, PRISM, Scallop, NumPy,
 SciPy, and Apache Commons Math. The common transferable construction is a
 push-forward over one support and a product measure over independent supports,
 with multiplication across choices and addition when outcomes coincide.
-[source: https://github.com/numpy/numpy/blob/2f7fe64b8b6d7591dd208942f1cc74473d5db4cb/numpy/_core/numeric.py#L793-L801; commit=WORKTREE]
+[source: https://github.com/numpy/numpy/blob/2f7fe64b8b6d7591dd208942f1cc74473d5db4cb/numpy/_core/numeric.py#L793-L801; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6]
 ProbLog and Scallop expose that addition-and-multiplication split directly in
 their probability semirings. PRISM states the semantic side condition: factors
 multiply for independent switch instances and explanations add when mutually
 exclusive.
-[source: https://github.com/ML-KULeuven/problog/blob/168f0399543f32506253fd9f7774dd8aa1222be8/problog/evaluator.py#L184-L209 and https://github.com/scallop-lang/scallop/blob/668bfb6d45ce302fd4ffa7f29916baf3c7ce36ef/core/src/runtime/provenance/probabilistic/add_mult_prob.rs#L48-L62; commit=WORKTREE]
-[source: https://rjida.meijo-u.ac.jp/prism/download/prism23.pdf, PDF page 20, sha256=7998dda53cdcfb713228dff497eaef59e7cc4608a712a42683aa83a9cb6b36e3; commit=WORKTREE]
+[source: https://github.com/ML-KULeuven/problog/blob/168f0399543f32506253fd9f7774dd8aa1222be8/problog/evaluator.py#L184-L209 and https://github.com/scallop-lang/scallop/blob/668bfb6d45ce302fd4ffa7f29916baf3c7ce36ef/core/src/runtime/provenance/probabilistic/add_mult_prob.rs#L48-L62; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6]
+[source: https://rjida.meijo-u.ac.jp/prism/download/prism23.pdf, PDF page 20, sha256=7998dda53cdcfb713228dff497eaef59e7cc4608a712a42683aa83a9cb6b36e3; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6]
 
 Rejected: `NatDist` and `FloatDist`, because the swept repository contains the
 names but no implementations. Rejected: a particle ID and global backing store,
@@ -42,7 +42,7 @@ probability as `ws-prob-gt-independent`, exactly `P(X > Y)` with ties worth
 zero. First-order stochastic dominance remains a relation over every threshold;
 total variation remains a symmetric distance; expectation ordering remains a
 scalar summary. None is an alias for another.
-[source: https://github.com/rTreutlein/PeTTaChainer/blob/b0e24f9b9d7106ccabf51917f1703abf3ab8c570/pettachainer/metta/dist_formulas.metta#L296-L310; commit=WORKTREE]
+[source: https://github.com/rTreutlein/PeTTaChainer/blob/b0e24f9b9d7106ccabf51917f1703abf3ab8c570/pettachainer/metta/dist_formulas.metta#L296-L310; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6]
 
 Decided: `ws-mass-at-least` is inclusive. The name states the boundary and the
 requested law then holds at the minimum support value. Rejected the upstream
@@ -88,7 +88,7 @@ arithmetic errors. Rejected: relying on an error term to propagate through a
 guard every normalized binding and the average fold with `if-error`; all seven
 heads now preserve the original normalization remedy, including invalid inputs
 on either side of a product [tested:
-test_operations_preserve_the_normalization_refusal; commit=WORKTREE].
+test_operations_preserve_the_normalization_refusal; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
 
 Measured: eight Hypothesis properties generated 100 passing distributions or
 distribution tuples each, 800 law cases total, with weights from 1 through 8,
@@ -97,7 +97,7 @@ outcomes admitted, and Bernoulli probabilities from the five dyadic endpoints.
 The module reported 18 passing tests under `HYPOTHESIS_PROFILE=ci`. The
 repository registers only `metta` and `ci`, so the requested but nonexistent
 `petta` profile was not used [tested:
-test_distribution.py under HYPOTHESIS_PROFILE=ci; commit=WORKTREE].
+test_distribution.py under HYPOTHESIS_PROFILE=ci; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
 
 Measured: the numbered example passed all 15 test forms, and the
 engine-versus-Python parity runner reported `1/1 examples agree across both
@@ -105,7 +105,7 @@ configurations`. `jscpd --reporters ai --min-lines 5 --min-tokens 40` over the
 new library, example, and test reported zero clones and 0.0 percent duplication,
 so dry-refactoring had no extraction to make [tested:
 examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/12-distribution.metta;
-commit=WORKTREE].
+commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
 
 Found: the earlier `17-verify-discharges.metta` introduced `pragma!` in chapter
 9 while `syntax_introductions.txt` still named chapter 14. Git history assigns
@@ -129,7 +129,7 @@ red lanes: `engine-bench`, `prolog-static`, `c-bench`, `mork-bench`, `pytest`,
 `benchmarks`, `policy-inventory`, and `parity-perf`. The MORK lane included
 `perf stat failed with exit 2: Events disabled` and a second-session PMU
 ownership error, so that measurement cannot support a performance conclusion
-[tested: GATE_ONLY=1 sh check.sh; commit=WORKTREE].
+[tested: GATE_ONLY=1 sh check.sh; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
 
 Tried: the same focused failure checks in a detached `e8356642` control. Its
 Python suite already had three failures: the unpublished
@@ -143,7 +143,7 @@ Decided: remove this work's one avoidable `D103` suppression so the feature
 leaves the Ruff count at the base's 2232, and do not fold unrelated engine and
 earlier-journal repairs into this distribution change [tested:
 test_the_ruff_configuration_enables_every_family_or_records_why_not;
-commit=WORKTREE].
+commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
 
 Tried: a locked A/B run of `python bench.py --counter-only --keep-going
 alpha-unique annotated-relation eval-arith source-load typed-call add-single`
@@ -154,7 +154,7 @@ same other five cases failed on both, with equal minima for `alpha-unique`
 308332 [measured: five matching failures and one matching pass; command=python
 bench.py --counter-only --keep-going alpha-unique annotated-relation eval-arith
 source-load typed-call add-single; fixture=feature tree and detached e8356642
-control under the shared gate lock; commit=WORKTREE].
+control under the shared gate lock; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
 Decided: the full lane's 16 stale counter pins predate the new library;
 re-pinning them here would hide rather than repair the frozen-base condition.
 
@@ -176,7 +176,7 @@ tests its accumulator with `if-error` before invoking
 invalid distribution is first, interior, or last. The regression test crosses
 all three positions with empty, zero-mass, and negative-mass inputs. The full
 module reports 19 passing tests, including the same 800 generated law cases
-[tested: test_distribution.py under HYPOTHESIS_PROFILE=ci; commit=WORKTREE].
+[tested: test_distribution.py under HYPOTHESIS_PROFILE=ci; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
 
 Open: no distribution-surface obligation remains. The frozen-base gate failures
 remain as recorded above.
@@ -242,7 +242,7 @@ percent duplication [tested: engine/test.sh, test.sh,
 extensions/python/test.sh, extensions/cmetta/test.sh,
 extensions/python/tests/ch08_data/test_distribution.py,
 examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/12-distribution.metta;
-commit=WORKTREE].
+commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
 
 Measured: no benchmark row moves. Against a `petta` control provisioned with
 the identical artifact set, `sh engine/bench.sh --counter-only` reads the same
@@ -263,7 +263,7 @@ movement and not this branch's [measured: identical counter minima on both arms
 and instruction flags that change sides; command=sh engine/bench.sh
 --counter-only and sh extensions/python/bench.sh; fixture=this tree and a
 `petta` control carrying the same eight shared objects, loadavg 50 to 78;
-commit=WORKTREE].
+commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
 
 Found: the pytest lane was not reliable on this box at loadavg 60 until trunk's
 `4f20c052` and `754df32f` landed. Across the earlier bases, seven of fourteen
