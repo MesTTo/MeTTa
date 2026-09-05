@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A second `@m.define` clause publishes the arrow its own signature states. One
+  boolean per name recorded only whether it had declared anything, so every
+  later clause's declaration was suppressed; a ledger of what the name has
+  published here adds the new arrow and skips a repeat.
 - A declared class answers its OWN type name. `ensure_registered` walks the MRO,
   so a subclass adding nothing projected through its base's entry: declaring
   `Dog(Animal)` restated `(: Animal (-> String Animal))`, which the engine
