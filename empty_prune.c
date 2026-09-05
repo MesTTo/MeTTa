@@ -19,7 +19,7 @@
  *   comes back and the crash the pre-filter caused cannot return
  *   [measured 2026-09-05: swipl -g "metta_bench:bench_run('match-skew')" -t
  *   halt engine/bench.pl, 307,962 before and 207,982 after, three identical
- *   samples each way; commit=WORKTREE].
+ *   samples each way; commit=d6ae0469e495f47b8483b7d6f185ecd9d5472046].
  *
  * Assumes:
  *   - the lists arrive from findall/3 at all four call sites
