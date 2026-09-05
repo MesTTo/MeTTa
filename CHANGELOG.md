@@ -123,6 +123,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A trace whose program abolished a wrapped predicate no longer leaves the
+  tracer armed for the rest of the process. Tearing a session down unwraps each
+  recorded target, and `unwrap_predicate/2` FAILS rather than raising when the
+  indicator names no wrapper, which is what a clearing program leaves behind:
+  the child module's copy is abolished and the parent's is imported in its
+  place, so the child's indicator removes the PARENT's wrapper and the parent's
+  own target then finds nothing. The failure stopped the sweep before any state
+  was retracted, and because the teardown runs as a cleanup, whose failure is
+  not reported, the trace answered normally and every later trace on that engine
+  refused with `permission_error(trace, evaluation, nested)`. Reproduced with a
+  space holding two equations, a copy of them in a second space, and a program
+  that clears that space: `session=yes wrapped=4` afterwards.
+
 - Two overlapping engine transactions cannot both commit a different alias for
   one name. Under snapshot isolation each read a state the other's write was
   not in, so both declaration-time checks passed and a space ended up holding
