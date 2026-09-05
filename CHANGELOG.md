@@ -9,6 +9,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The engine layering gate loads the source observer again. It asked for it in
+  a file-level directive, which runs before the gate consults the engine, so
+  the lane raised `Unknown procedure: metta_ensure_source_observation/0`,
+  measured a graph the observer was not in, and failed on six of its own
+  contract lines. The ask now sits at the head of the walk, where both the gate
+  and its test suite reach it.
 - Clearing a space no longer walks its stored atoms one at a time because an
   unrelated library watches a different space. A hook clause whose head names
   the space it watches, as `lib_tabling` names `&metta`, is now idle for every

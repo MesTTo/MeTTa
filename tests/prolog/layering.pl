@@ -48,17 +48,10 @@
 %   Error through a sink the observation buffer carries, so source_observation
 %   and source_positions are leaf consumers and left the declared tangle
 %   [tested: engine_layering, scc_components; commit=WORKTREE].
-% Assumes: engine/metta.pl no longer loads the observer at boot, so this file
-%   asks for it through metta_ensure_source_observation/0 before the walk; the
-%   walk reads the database and would otherwise report every one of that
-%   subsystem's contract rows as stale.
-
-%The engine does not load engine/source_observation.pl at boot, because an
-%engine nobody asks for an observation from must not pay for one. The walk
-%reads the DATABASE, so the contract's rows for that subsystem are only
-%measurable once it is in it, and this is the same door lib_observe's
-%observe-source uses.
-:- metta_ensure_source_observation.
+% Assumes: engine/metta.pl no longer loads the observer at boot, so
+%   measure_layer_edges/0 asks for it through metta_ensure_source_observation/0
+%   before the walk; the walk reads the database and would otherwise report
+%   every one of that subsystem's contract rows as stale.
 
 :- ensure_loaded(surface_walk).
 :- use_module('../../engine/scc', [nodes_arcs_sccs/3]).
@@ -133,8 +126,27 @@ engine_relative_subsystem([Owner, _|_], Base) :-
 
 subsystem_name(Base, Name) :- file_name_extension(Name, pl, Base).
 
+%The engine does not load engine/source_observation.pl at boot, because an
+%engine nobody asks for an observation from must not pay for one. The walk
+%reads the DATABASE, so the contract's rows for that subsystem are only
+%measurable once it is in it, and this is the same door lib_observe's
+%observe-source uses.
+%
+%Asked HERE rather than by a directive at the top of this file, because a
+%directive runs when this file loads and layering_gate/0 below consults the
+%engine only afterwards: the standalone lane therefore raised `Unknown
+%procedure: metta_ensure_source_observation/0`, left the observer unloaded,
+%and reported all six of that subsystem's contract rows stale, exiting 1.
+%tests/prolog/suites/seams/layering.plt hid it, because that file loads the
+%engine before it loads this one. Both callers reach the walk, so the walk is
+%where the ask belongs, beside the library load above it
+%[measured 2026-09-06: `swipl -q --on-error=status -g layering_gate -t
+%'halt(0)' layering.pl` from tests/prolog, exit 1 with six findings before and
+%exit 0 with 874 cross-subsystem calls over 71 contract lines after;
+%commit=WORKTREE].
 measure_layer_edges :-
     ensure_loaded('../../lib/lib_tabling/lib_tabling.pl'),
+    metta_ensure_source_observation,
     retractall(layer_edge(_, _, _, _, _)),
     extension_clauses(['../../engine'], EngineReferences),
     tabling_clause_references(TablingReferences),
