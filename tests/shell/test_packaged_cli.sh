@@ -1,4 +1,20 @@
 #!/bin/sh
+# Purpose: build this repository into a wheel, install it into a venv OUTSIDE
+#   the checkout, and exercise the installed copy: the launcher runs programs
+#   and imports libraries from an unrelated working directory, the runtime tree
+#   setup.py maps into metta/_runtime/ is all there, and metta.llms() prints
+#   the whole cheat sheet.
+# Guarantees:
+#   - every claim is made against the INSTALL. A resource the wheel drops is
+#     invisible in a checkout, where the same door reads the repository root,
+#     so a source-tree test cannot answer this question at all.
+#   - the checkout's own llms.txt is the oracle for what the install printed,
+#     because the wheel under test was built from it moments earlier.
+# Fails when: uv or swipl is absent, which it refuses on rather than skipping.
+# Open Obligations:
+#   To Do: None
+#   Hacks: None
+#   Future Enhancements: None
 set -eu
 
 command -v uv >/dev/null
@@ -26,10 +42,22 @@ printf '!(import! &self (library lib_roman))\n!(map-flat (+ 1) (1 2 3))\n' \
     "$fixture/venv/bin/metta" "$fixture/basic.metta" > "$fixture/basic.log"
     "$fixture/venv/bin/metta" "$fixture/import.metta" > "$fixture/import.log"
     "$fixture/venv/bin/metta" "$fixture/roman.metta" > "$fixture/roman.log"
+    "$fixture/venv/bin/python" -c 'import metta; metta.llms()' > "$fixture/llms.log"
+    "$fixture/venv/bin/python" -m metta llms > "$fixture/llms-verb.log"
 )
 
 grep -Fxq '2' "$fixture/basic.log"
 grep -Fq '(2 3 4)' "$fixture/roman.log"
+
+# The cheat sheet is the one document a reader who pip-installed this has no
+# checkout to find, so metta.llms() has to answer from the INSTALL or the door
+# is a checkout-only convenience. Byte equality against the checkout's own file
+# is the whole question: it says the file shipped, that all of it shipped, and
+# that the first line is still the sheet's title, where a `test -s` would pass
+# on a truncated copy. Same bytes from the subcommand, so the two faces cannot
+# drift apart in a released wheel either.
+cmp "$project_dir/llms.txt" "$fixture/llms.log"
+cmp "$project_dir/llms.txt" "$fixture/llms-verb.log"
 
 # The runtime tree an installed MeTTa has to find, checked in the install
 # rather than in the checkout. extensions/ is here because the engine GLOBS it
@@ -45,7 +73,13 @@ import metta
 import importlib.util
 
 runtime = Path(metta.__file__).parent / "_runtime"
-for required in ("engine", "lib", "extensions/mork/extension.pl", "extensions/python/extension.pl"):
+for required in (
+    "engine",
+    "lib",
+    "extensions/mork/extension.pl",
+    "extensions/python/extension.pl",
+    "llms.txt",
+):
     assert (runtime / required).exists(), f"{required} is missing from the wheel"
 assert list((runtime / "extensions").glob("*/extension.pl")), "extensions/ shipped empty"
 assert importlib.util.find_spec("pymetta") is None, "the distribution name became a module"

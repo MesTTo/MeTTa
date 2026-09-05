@@ -9,6 +9,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `llms.txt`'s source table names every engine unit again. The query-planning
+  work added `engine/translator/folding.pl` and `engine/spaces/generic_join.pl`
+  without naming them, so the table read five translator units against six and
+  seven spaces units against eight. The `llms` lane derives both counts and had
+  been reporting them; they are corrected here because the file now ships in
+  the wheel, where a reader has nothing else to check it against.
+
 - A second `@m.define` clause publishes the arrow its own signature states. One
   boolean per name recorded only whether it had declared anything, so every
   later clause's declaration was suppressed; a ledger of what the name has
@@ -115,6 +122,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   their `unwind(halt(Status))` control signal as an application error.
 
 ### Added
+
+- `metta.llms()` prints `llms.txt`, the sheet that teaches this library, and
+  answers None the way `help()` does. It is the document an agent reads before
+  writing anything against this surface, and until now reading it meant finding
+  the repository: a `pip install` carried the engine, the libraries and the
+  codec corpus but not the one file that explains them. `setup.py` ships it into
+  the runtime tree, so a checkout and an install print the same bytes, and
+  `python -m metta llms` is the same document from a shell. It never pages,
+  unlike `help()`, because the reader is usually a program holding a pipe.
 
 - A compiled `match(...)` call takes a CONJUNCTION. Two or more patterns before
   the template lower to the engine's own `(, p q)`, so

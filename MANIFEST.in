@@ -24,6 +24,7 @@ include SECURITY.md
 # the one path never exercised. test_packaging.py derives its check from
 # RUNTIME_RESOURCES itself so this cannot drift again.
 include extensions/mork/extension.pl
+include llms.txt
 recursive-include tests/codec *
 include extensions/python/extension.pl
 include extensions/python/bridge.pl
