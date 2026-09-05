@@ -321,7 +321,7 @@ metta_space_names(Names) :-
 %[measured 2026-09-05: set_prolog_flag(autoload, false) then engine/metta.pl,
 %metta_c_empty_prune_active and predicate_property(foreign) both true with this
 %line and both false with it removed, the prune answering [a,b] either way;
-%commit=WORKTREE].
+%commit=d6ae0469e495f47b8483b7d6f185ecd9d5472046].
 :- catch(use_module(library(shlib)), _, true).
 :- dynamic metta_c_empty_prune_active/0.
 :- dynamic metta_empty_prune_artifact/1.
@@ -388,7 +388,7 @@ metta_c_empty_prune_stub :-
 %'$skip_list'/3 is C and retires 2.00 whether the list holds 10 elements or
 %1,000 [measured 2026-09-05: 1,005.01 against the bare walk's 1,003.01 at
 %n=1000 and 15.00 against 13.00 at n=10, each shape called between two
-%statistics(inferences, _) reads; commit=WORKTREE]. It sits on the PROLOG
+%statistics(inferences, _) reads; commit=d6ae0469e495f47b8483b7d6f185ecd9d5472046]. It sits on the PROLOG
 %branch alone; the C scan classifies the same three ways from PL_skip_list,
 %which is one pass of the walk it was going to make anyway
 %[tested: empty_prune_c_differential:the_two_prune_doors_agree_shape_for_shape,
@@ -444,7 +444,7 @@ metta_prune_scan_ok_(All) :-
 %table-bridge-match carried +2,000 each
 %[measured 2026-09-05: swipl -g "metta_bench:bench_run('match-skew')" -t halt
 %engine/bench.pl, three identical samples at each of a94f804c, b3753db7 and
-%046b0054; commit=WORKTREE].
+%046b0054; commit=d6ae0469e495f47b8483b7d6f185ecd9d5472046].
 %
 %The answer is not to put unification back. engine/empty_prune.c asks the SAME
 %identity question in C: PL_get_atom compares an atom handle and answers false
@@ -452,7 +452,7 @@ metta_prune_scan_ok_(All) :-
 %foreign call retires one inference where the walk retires n. A 10,000-element
 %all-ground list costs 3 inferences through the C scan against 10,003 through
 %the walk, and match-skew reads 207,982
-%[measured 2026-09-05; commit=WORKTREE;
+%[measured 2026-09-05; commit=d6ae0469e495f47b8483b7d6f185ecd9d5472046;
 %tested: empty_prune_c_differential:the_c_scan_is_constant_where_the_prolog_walk_is_linear].
 %The walks below stay the specification and the fallback, and a differential
 %runs both arms over every shape either can meet

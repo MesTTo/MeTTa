@@ -375,7 +375,7 @@ test(the_c_scan_is_constant_where_the_prolog_walk_is_linear) :-
     %alone made the first reading 7 against the 6 the same call answered five
     %more times, at both lengths
     %[measured 2026-09-05: [7,6,6,6,6,6] at n=1000 then [6,6,6,6,6,6] at
-    %n=10000 in one process; commit=WORKTREE].
+    %n=10000 in one process; commit=d6ae0469e495f47b8483b7d6f185ecd9d5472046].
     prune_cost(Short, _),
     without_c_scan(prune_cost(Short, _)),
     prune_cost(Short, CShort),
