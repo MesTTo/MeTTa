@@ -138,11 +138,11 @@ separate status file beside it under the branch-specific prefix.
 
 ```text
 CHECK_PY=$VENV/bin/python sh extensions/python/test.sh
-3084 passed, 48 skipped, 5 warnings in 99.17s (0:01:39)
+3084 passed, 48 skipped, 5 warnings in 136.77s (0:02:16)
 exit 0
 ```
 
-Log: `ai-compiled-vocabulary-3d96d263-python-verified.log`.
+Log: `ai-compiled-vocabulary-3d96d263-python-final.log`.
 The five warnings are the existing benchmark/packaging deprecation notices.
 
 ```text
@@ -299,3 +299,10 @@ intercepted the new starred-unpack test. The exact pair failed before, returning
 now close on every exit, invoking the existing rule retirement mechanism.
 The complete typed-flat, vocabulary and admission files pass 36 tests in that
 order. No production naming workaround or engine lifetime change was added.
+
+The final ownership pass moved all six dual/tail scenarios to scratch_space,
+so their temporary definition storage also closes on every exit. The complete
+Python rerun still reports 3,084 passed and 48 skipped, exit 0. Production code
+and measured example pins remain those of the functional snapshot above.
+The post-provenance combined gate also passes with all 35 counters unchanged;
+its log is `ai-compiled-vocabulary-3d96d263-post-provenance.log`, exit 0.

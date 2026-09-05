@@ -38,3 +38,17 @@ bound. The nested spelling also completes the 200,000-step stack check;
 its three calls report 57,442,545/3,302/2,426 because that two-call-site form
 uses existing tabling. Those cold and warm counts are not a deterministic
 cost pin. The new log is `ai-tmp/ai-resume-tail-stack.log`, exit 0.
+
+### Explicit regression-space lifetime
+
+The final ownership review found that the six new dual/tail scenarios created
+anonymous spaces directly without closing them. They now borrow the existing
+`scratch_space` fixture, whose context manager closes the storage after each
+scenario. The equations, assertions and fixed stack bound are unchanged.
+This applies the same lifetime boundary established by the ordered translator
+rule regression; it adds no runtime or engine workaround.
+
+Verified: the complete Python gate after this fixture change reports
+3,084 passed, 48 skipped and zero failures, exit 0. The exact tail and separate
+status are in `ai-tmp/ai-compiled-vocabulary-3d96d263-python-final.log` and
+its `.status` companion. Production code and inference pins are unchanged.
