@@ -25,7 +25,7 @@
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: dispatch refusals retain their Error answers; declared_arity_refusal/3
-%   still answers rather than throws [tested: source_observation; commit=WORKTREE].
+%   still answers rather than throws [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
 
 %% translate_cached_expr(+Expression, -Goals, -Value) is det.
 % This cache stores translation templates, not evaluation answers. Any future

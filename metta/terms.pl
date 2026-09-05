@@ -21,7 +21,7 @@
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: metta_error_atom/4 preserves Error data and records diagnostics only
-%   during explicit observation [tested: source_observation; commit=WORKTREE].
+%   during explicit observation [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
 
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 
