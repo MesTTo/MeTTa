@@ -660,7 +660,6 @@ test(an_older_owned_release_retires_a_concurrently_published_image) :-
     concurrent_materialization_clear(clear_first, release).
 
 :- dynamic materialization_gc_tick/0.
-:- dynamic materialization_nonowner/1.
 
 collect_materialization_owners :-
     % An explicit collection can return while another collector owns CGC.
@@ -696,8 +695,11 @@ with_unmanaged_clear(Action, Goal) :-
           spaces:metta_release_space(Space) )).
 
 collected_space_has_no_image(Space) :-
+    once(materialize:materialized_snapshot(Space, _, Token, _, _)),
+    assertion(materialize:materialized_dispatch_ref(Token, _)),
     collect_materialization_owners,
-    assertion(\+ materialize:materialized_snapshot(Space, _, _, _, _)).
+    assertion(\+ materialize:materialized_snapshot(Space, _, _, _, _)),
+    assertion(\+ materialize:materialized_dispatch_ref(Token, _)).
 
 test(an_unmanaged_stale_clear_retires_its_image_at_source_collection) :-
     with_unmanaged_clear(clear, collected_space_has_no_image).
@@ -705,8 +707,11 @@ test(an_unmanaged_stale_release_retires_its_image_at_source_collection) :-
     with_unmanaged_clear(release, collected_space_has_no_image).
 
 collection_rollback_keeps_image_retired(Space) :-
+    once(materialize:materialized_snapshot(Space, _, Token, _, _)),
+    assertion(materialize:materialized_dispatch_ref(Token, _)),
     collect_materialization_owners,
     assertion(\+ materialize:materialized_snapshot(Space, _, _, _, _)),
+    assertion(\+ materialize:materialized_dispatch_ref(Token, _)),
     fail.
 
 collection_under_transaction_keeps_image_retired(Space) :-

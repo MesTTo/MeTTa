@@ -142,3 +142,11 @@ want of evidence. Its cause is reproducible by planting the scheduler it ran
 with. The `current_transaction/1` enumerator defect remains a separate, also
 reproduced failure.
 
+## 2026-09-05: sparse dispatch ownership
+
+Found: the full engine gate fails the existing context-read assertion with `40==0` and the native dispatch ceiling with `38.0015<30`. The unconditional materialization seam reads planning mode and module context for every unrelated call. The former direct dispatch measured about 29 inferences. These are integration regressions, not a reason to change the existing ceilings. The red gate is `ai-tmp/query-a20256a5-final-engine.log`, status 1.
+
+Decided before the repair: follow the ground function heads in `lib_memo:memo_install_dispatch_handler/1`, introduced in `9e7d5dc2cad810940e5386d52636ac6946df279d`. Each image owns one exact seam clause reference per admitted signature. Publication and removal include these references in the image transaction. Unlike the previously rejected shared-handler reference counts, images never share a mutable owner count. An old transaction cannot erase a newer image's handler by function name. The existing outer commit constraint and source-owner cleanup retire exact image tokens. The selected handler still checks the calling module and permits only guarded or direct query expressions, preserving compiled source bodies.
+
+Current and target materialization classes remain unchanged. The repair restores the existing unrelated-call ceiling and prevents the number of other images from entering that path. The new dispatch differential is written before changing publication; it covers 0, 1, 16 and 64 unrelated images, same-name images in distinct spaces, exact removal and rollback. The full owner, concurrency and source-bag differential remains required.
+

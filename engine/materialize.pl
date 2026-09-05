@@ -30,7 +30,6 @@
             materialize_source/1,
             flush_source_materialization/0,
             discard_space/1,
-            materialized_dispatch/4,
             materialized_call/5
           ]).
 :- use_module(library(apply)).
@@ -48,7 +47,9 @@
 :- dynamic materialized_snapshot/5.
 :- dynamic materialized_predicate/4.
 :- dynamic materialized_owner/3.
+:- dynamic materialized_dispatch_ref/2.
 :- multifile seam:dispatch_call/4.
+:- dynamic seam:dispatch_call/4.
 :- multifile seam:effect_operation_name/3.
 :- multifile support_graph:support_invalidation_action/1.
 
@@ -553,7 +554,14 @@ publish_if_current(Space, Module, Stamp, Signatures, Trie, Owner) :-
 publish_materialization(Space, Module, Stamp, Signatures, Trie, Owner) :-
     materialization_changed(Space),
     forall(member(F/Arity, Signatures),
-           assertz(materialized_predicate(Module, F, Arity, Trie))),
+           ( assertz(materialized_predicate(Module, F, Arity, Trie)),
+             length(Args, Arity),
+             assertz(seam:(
+                 dispatch_call(F, Args, Out,
+                               materialize:materialized_call(Space, Module,
+                                                             F, Args, Out)) :-
+                     materialize:materialized_query_context(Module)), Ref),
+             assertz(materialized_dispatch_ref(Trie, Ref)) )),
     assertz(materialized_snapshot(Space, Module, Trie, Stamp, Signatures)),
     assertz(materialized_owner(Owner, Space, Trie)).
 
@@ -565,11 +573,12 @@ result_descriptor([], none).
 result_descriptor([Value-Count], one(Value, Count)).
 result_descriptor([_,_|_], original).
 
-seam:dispatch_call(F, Args, Out, Goal) :-
-    materialize:materialized_dispatch(F, Args, Out, Goal).
-
-materialized_dispatch(F, Args, Out,
-                      materialize:materialized_call(Space, Module, F, Args, Out)) :-
+% Ground function heads keep unrelated calls off this path, as in lib_memo's
+% memo_install_dispatch_handler/1. Each image owns exact clause references;
+% shared function counters would let stale transactions erase another image.
+% [source: lib/lib_memo/lib_memo.pl, memo_install_dispatch_handler/1;
+% commit=8f853f992a4c732eca39de34ff0a3dfe161508dd]
+materialized_query_context(Module) :-
     % A retained source body must remain visible to clause-based proof search.
     % Source runnables use guarded mode and direct host expressions have no
     % mode. Tracked equations use enabled and untracked clauses use disabled,
@@ -579,10 +588,7 @@ materialized_dispatch(F, Args, Out,
     % translate_runnable_expr/3; commit=WORKTREE]
     ( nb_current('$metta_static_contract_shortcuts', Mode) -> Mode == guarded
     ; true ),
-    current_metta_module(Module),
-    length(Args, Arity),
-    materialized_predicate(Module, F, Arity, Token),
-    materialized_snapshot(Space, Module, Token, _, _).
+    current_metta_module(Module).
 
 seam:effect_operation_name(materialize:materialized_call(_, _, F, Args, _),
                            F, Arity) :-
@@ -637,9 +643,18 @@ discard_space_locked(Space) :-
     ; transaction(discard_space_rows(Space)) ).
 
 discard_space_rows(Space) :-
-    forall(retract(materialized_snapshot(Space, Module, Token, _, _)),
-           ( retractall(materialized_predicate(Module, _, _, Token)),
-             retractall(materialized_owner(_, Space, Token)) )).
+    forall(retract(materialized_snapshot(Space, _, Token, _, _)),
+           discard_image_rows(Space, Token)).
+
+% The caller owns both the publication lock and its transaction. Exact refs
+% preserve rollback and another image's handlers even for the same function.
+% [tested: materialization_dispatch, function_free_materialization;
+% commit=WORKTREE]
+discard_image_rows(Space, Token) :-
+    forall(retract(materialized_dispatch_ref(Token, Ref)), erase(Ref)),
+    retractall(materialized_snapshot(Space, _, Token, _, _)),
+    retractall(materialized_predicate(_, _, _, Token)),
+    retractall(materialized_owner(_, Space, Token)).
 
 % Clause GC emits erase before unlinking even when a DBREF_CLAUSE still owns
 % the allocation. Active transaction generations postpone this event. One
@@ -675,8 +690,7 @@ source_owner_erased(_).
 % commit=WORKTREE]
 retire_source_owner(Reference) :-
     transaction(forall(retract(materialized_owner(Reference, Space, Token)),
-                       ( retractall(materialized_snapshot(Space, _, Token, _, _)),
-                         retractall(materialized_predicate(_, _, _, Token)) ))).
+                       discard_image_rows(Space, Token))).
 
 :- prolog_listen(erase, materialize:source_owner_erased,
                  [name(materialized_source_owner)]).

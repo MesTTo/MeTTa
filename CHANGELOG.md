@@ -192,6 +192,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Native cyclic conjunctions intersect indexed variable domains before
   producing answers. Duplicate facts retain their full contribution to every
   answer bag; unsupported patterns continue through the existing matcher.
+- `(pragma! plan-cyclic-joins True)` plans a full native cyclic conjunction as
+  a Generic Join, intersecting indexed variable domains before producing
+  answers. Duplicate facts retain their full contribution to every answer bag;
+  unsupported patterns and every conjunction without the pragma continue
+  through the existing matcher, which is faster wherever the data is not
+  skewed.
 - Retained clauses fold admitted immutable integer computations during
   planning. Redefining a dependency rebuilds its folded callers, and host
   operations remain deferred until demanded.
@@ -201,11 +207,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Tagged queries propagate bound arguments through certified acyclic integer
   programs. They derive the requested proof bags while preserving duplicate
   source occurrences and the existing failure behavior outside that fragment.
-- Source loading materializes eligible finite function-free derivations once.
-  Ground calls reuse counted results, while open calls, multiple distinct
-  outputs, cyclic proof graphs, tracing and bounded reductions keep their
-  original execution. Transactional loads validate their prepared source
-  receipts on the first query after commit.
+- `(pragma! materialize-source-relations True)` makes source loading derive
+  eligible finite function-free relations once, at each source boundary and
+  once per completed load. Ground calls then reuse counted results, while open
+  calls, multiple distinct outputs, cyclic proof graphs, tracing and bounded
+  reductions keep their original execution, and transactional loads validate
+  their prepared source receipts on the first query after commit. Preparation
+  is quadratic in the derived relation, so a load without the pragma prepares
+  nothing.
 
 - The MeTTa file library now creates directories, copies bytes with staged
   replacement, returns queryable metadata snapshots, composes lexical paths,
@@ -558,6 +567,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Node answers and traces now carry partial applications and other Prolog
   compounds as expressions using the Python wire grammar. Improper lists
   cross as `(cons Head Tail)` rather than raising an untaggable-term error.
+- An unrelated native call no longer reads planning mode and module context
+  for every materialized relation in the process. Each relation owns one
+  dispatch clause per admitted signature, and removing one leaves another
+  relation's clause for the same function standing.
 - Fast-cache version 4 preserves resolved reader bindings beside exact stored
   equations, including duplicate native/reader occurrences and later
   recompilation. Deferred reconstruction no longer compiles a resolved sibling

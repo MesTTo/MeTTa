@@ -341,7 +341,6 @@ reaches(duals, metta, 'reads the module context, the function registry and the t
 reaches(duals, spaces, 'asserts the generated clause into the space it duals for').
 reaches(duals, translator, 'duals are generated FROM translated clauses, so it reads the translator\'s metadata and reuses its expression compiler').
 reaches(ext_points, filereader, 'a function-changed handler recompiles the affected source').
-reaches(ext_points, materialize, 'the dispatch seam selects a validated counted relation for admitted ground calls').
 reaches(ext_points, tracer, 'the tracer is the shipped consumer of the function-changed seam').
 reaches(ext_points, translator, 'names the compiled predicate a seam is about, and asks whether a function uses super').
 reaches(filereader, metta, 'a load runs forms, which is the engine core\'s job').
