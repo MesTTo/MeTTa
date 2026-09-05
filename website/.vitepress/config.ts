@@ -4,7 +4,7 @@ Guarantees:
   - the top navigation offers five destinations, one per question a reader
     arrives with: learn it, build with it, connect it to something, look a
     signature up, or work on the engine
-    [tested: npm run docs:build; commit=WORKTREE]
+    [tested: npm run docs:build; commit=34c48b5b6f2e9515a1410a937d5784d6420e1d23]
   - every page in the site is reachable from this navigation, so a written page
     cannot ship findable only by search
     [tested: test_every_site_page_is_reachable_from_the_navigation; commit=a7d2f292004fe06d7671b7931cfc2ce4620b7b35]
