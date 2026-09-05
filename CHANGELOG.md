@@ -29,6 +29,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- A compiled `match(...)` call takes a CONJUNCTION. Two or more patterns before
+  the template lower to the engine's own `(, p q)`, so
+  `match(S.edge(V.x, V.y), S.edge(V.y, V.z), (V.x, V.z))` stores
+  `(match (context-space) (, (edge $x $y) (edge $y $z)) ($x $z))` and joins on
+  the shared middle node. It is the spelling the read door already takes,
+  `m[p1, p2]` and `Space.match(p1, p2)`, and a leading handle, space parameter
+  or `"&kb"` still names the space. Writing the two patterns as a TUPLE builds a
+  two-element pattern term instead, which the space cannot hold, and answered
+  nothing without saying so; a conjunct that is not a whole pattern now refuses
+  and names both readings.
+
 - `csv-snapshot!` reads a CSV file ONCE into an ordinary space of
   `(row Number Field...)` atoms, beside `csv-space`'s live view. The view holds
   no rows and reparses per query; the snapshot pays one parse and then about two
