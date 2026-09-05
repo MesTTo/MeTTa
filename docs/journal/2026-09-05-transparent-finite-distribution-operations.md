@@ -180,3 +180,121 @@ module reports 19 passing tests, including the same 800 generated law cases
 
 Open: no distribution-surface obligation remains. The frozen-base gate failures
 remain as recorded above.
+
+## 2026-09-06
+
+Tried: rebasing this thread's six commits onto `petta`, 259 commits ahead of the
+base they were written against, and five times more as trunk advanced during the
+verification, by four commits, then five, three, twenty-seven and three. The
+final base is `754df32f93346ff9b05c1cf3e6aa4ab6cce93276`. Only two hunks ever
+conflicted after the first pass, both in `llms.txt`, where trunk's corrected
+engine-unit counts and its `declaration 13` seam count sit beside this thread's
+example and library counts; all four numbers survive.
+
+Found: two repairs recorded above had already landed under other work.
+`engine/translator/typing.pl`'s `discharge_audit` unit name is commit
+`4d94a1acdf879f3aa36a3ae168f8a937f001d200`, which named the same defect and gave
+the same reason, and `pragma!`'s `09-00-17` coordinate in
+`tests/data/syntax_introductions.txt` is commit
+`b0deaca6750eea097d7af7d2a71f7c77b0a0071f`, which also moved the row into sorted
+position. Both hunks are dropped. Nothing in the distribution surface depended
+on either.
+
+Found: `examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/` gained
+`10-pln2-ctv.metta` and `11-weighted_subset_posterior.metta` at commit
+`afc4024cef7d4b7bcdd194bb030a112187b676d0`, the PeTTaChainer adaptation whose
+own journal recorded finding 5 as blocked because this thread owned it. Decided:
+the distribution example takes 12, after both, and joins them in
+`extensions/python/tests/repository/test_metta_examples.py`'s `FILES`, so the
+Python suite runs it as an item the way it runs theirs.
+
+Found: `HYPOTHESIS_PROFILE=petta` is registered as a parent-of-`metta` alias in
+`extensions/python/tests/conftest.py`, added by the same `afc4024c`. The entry
+above records it as nonexistent, which was true at that entry's date.
+
+Decided: the two provenance-only commits are dropped and one provenance pass at
+the end of the branch replaces them. A rebase changes every object ID, so a pin
+written against a pre-rebase commit names a tree this lineage does not carry,
+and every measurement behind those pins was re-run here.
+
+Superseded: the `GATE_ONLY=1 sh check.sh` record and the `bench.py
+--counter-only` A/B above describe the pre-rebase snapshot, whose base was
+`e8356642`. Their engine numbers are not true of this tree: `boot` alone reads
+265,430 inferences here against the 531,984 that snapshot compared against.
+Their pins are advanced to the commit carrying the same content, and the
+measurements below replace them.
+
+Measured on the rebased tree, with `libmork_ffi.so`, `morklib.so`, the five
+`engine/*.so`, `extensions/cmetta/libcmetta.so`, the chapter 19 `cstore.so`,
+`cbump.so` and `handle.so` all built, `extensions/node/build` compiled against
+the main checkout's `node_modules`, and `engine/*.qlf` cleared and warmed:
+`sh engine/test.sh` exits 0 over 74 units, 2,157 tests and 1,436 sub-tests with
+no choicepoint and no load-time error; `sh test.sh` exits 0 with 253 of 253
+examples OK and no cross; `sh extensions/python/test.sh` exits 0 with 3,405
+passed and 48 skipped, the eight `test_node_binding.py` items among the passes
+rather than skipped for a missing seat; `sh extensions/cmetta/test.sh` exits 0.
+The distribution module reports 19 passing tests under the default profile and
+19 under `HYPOTHESIS_PROFILE=ci`, still 800 generated law cases. The numbered
+example passes all 15 test forms, `example_parity.py` reports `1/1 examples
+agree across both configurations`, and `jscpd --reporters ai --min-lines 5
+--min-tokens 40` over the library, example and test reports 0 clones and 0.0
+percent duplication [tested: engine/test.sh, test.sh,
+extensions/python/test.sh, extensions/cmetta/test.sh,
+extensions/python/tests/ch08_data/test_distribution.py,
+examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/12-distribution.metta;
+commit=WORKTREE].
+
+Measured: no benchmark row moves. Against a `petta` control provisioned with
+the identical artifact set, `sh engine/bench.sh --counter-only` reads the same
+inference minimum on both arms for all seven cases: `boot` 265,430, `evaluate`
+560,491, `match` 265,002, `match-skew` 208,042, `translate` 310,375, `parse` 152
+and `parse-prolog` 3,113,384. `sh extensions/python/bench.sh` fails the same 18
+of 35 counter cases on both arms; thirteen of the seventeen reported minima are
+equal and four differ by 2 inferences, two in each direction, which is the
+jitter inside each arm's own three samples, and `automatic-tabling` reads
+`{12: 122124, 15: 953646, 18: 7605816, 20: 30413256}` plain on both. The
+instruction half's flags change sides between runs, which is what a loaded box
+does to a 1 percent band: over five bases this tree flagged between one and
+three cases and the control between one and four, and `save-load-metta`,
+`save-load-fast` and `source-load` each flagged on one arm and passed on the
+other at some point. `let-heavy` is 1.1 percent over its pin on both arms,
+8,885,165,711 here against 8,885,158,590 on the control, which is trunk's own
+movement and not this branch's [measured: identical counter minima on both arms
+and instruction flags that change sides; command=sh engine/bench.sh
+--counter-only and sh extensions/python/bench.sh; fixture=this tree and a
+`petta` control carrying the same eight shared objects, loadavg 50 to 78;
+commit=WORKTREE].
+
+Found: the pytest lane was not reliable on this box at loadavg 60 until trunk's
+`4f20c052` and `754df32f` landed. Across the earlier bases, seven of fourteen
+full runs each lost one or two lanes, `test_async_scheduler.py` four times,
+`test_snippet_auditor.py` once, `test_aio.py` once and the two
+`ch18_performance` timing modules once; two of those runs ended around 50
+percent when an xdist worker died under `--max-worker-restart=0`. A full run on
+a `petta` control lost
+`test_a_first_evaluation_costs_the_same_in_every_space`, which this tree never
+failed. Every named failure passed when re-run alone. On the last two bases the
+suite passed on its first attempt.
+
+Found: four lanes are red on `petta` itself and stay exactly as red here, with
+the same findings and the same counts on a provisioned control. `evidence`
+reports the same 7 unbacked tags in `engine/materialize.pl`,
+`engine/filereader.pl`, `engine/spaces/generic_join.pl` and
+`engine/translator/folding.pl`. `cumulative-syntax` reports the same 5 findings
+about `not-provable`, `if-decons-expr` and `assertEqualToResult`.
+`engine-bench` reports 5 of 7 cases off their pins and `benchmarks` 18 of 35,
+all against baselines the query-planning merge did not re-pin. Decided: none of
+them is repaired here. Each belongs to the work that moved it, and folding an
+unrelated re-pin into this change would hide which tree the numbers came from.
+`llms` was a fifth until commit `f24054d0` named the two engine units its
+source table had stopped counting; it reads 0 findings on both arms now, with
+this thread's own examples count at 258 and library count at 38.
+
+Decided: `ws-normalize`'s renamed refusal is reconciled at both places that
+quote the old wording, `lib_measure.metta`'s softmax worked example and
+`examples/.../01-measure.metta`'s explanation of why the peak is subtracted.
+Both are past-tense descriptions of what the pre-shift softmax answered, and
+after the rename their quoted string existed nowhere in the tree.
+
+Open: nothing on the distribution surface. The four lanes above remain `petta`'s
+to re-pin.
