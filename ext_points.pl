@@ -48,7 +48,7 @@
 %     a_missing_definition_is_priced_like_a_present_one]
 %     [measured 2026-09-06: engine/bench.pl bench_run(boot) 543,929 to
 %     240,641, and thirty added kind/2 rows 124,185 to 1,755;
-%     commit=WORKTREE].
+%     commit=8ec7de241ef3cdd2753f24a97c86e9e9c7240b06].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -1557,7 +1557,7 @@ seam_home(Name/Arity, Home) :-
 %inferences per seam and 305,970 of a 543,929-inference boot, 56%, and it is
 %why three added kind/2 rows cost 6,300
 %[measured 2026-09-06: engine/bench.pl bench_run(boot), 543,929 before and
-%240,641 after, per-seam publish/1 meter over both sweeps; commit=WORKTREE].
+%240,641 after, per-seam publish/1 meter over both sweeps; commit=8ec7de241ef3cdd2753f24a97c86e9e9c7240b06].
 %engine/spaces/foreign.pl's visible_predicate_definition/3 is spelled this way
 %for the trap's other half: probing a name an inherited static defines caches
 %the resolution as an import link and poisons the module against the local
