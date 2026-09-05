@@ -43,6 +43,8 @@
 %     To Do: None
 %     Hacks: None
 %     Future Enhancements: None
+% Guarantees: source observation reaches only the reviewed published subsystem
+%   surfaces below [tested: engine_layering; commit=df1367c75148ca6c7262134a8736b237e1150383].
 
 :- ensure_loaded(surface_walk).
 :- use_module('../../engine/scc', [nodes_arcs_sccs/3]).
@@ -332,6 +334,7 @@ reaches(lib_tabling, spaces, 'declared space, storage and module services resolv
 reaches(metta, ext_points, 'installs the atom-write wrappers when a handler exists').
 reaches(metta, filereader, 'import! and the file builtins are the loader\'s surface').
 reaches(metta, parser, 'sread, swrite and sdisplay are the core\'s text builtins').
+reaches(metta, source_observation, 'records diagnostics at Error construction inside explicit observation').
 reaches(metta, spaces, 'the space builtins are the space subsystem\'s surface').
 reaches(metta, support_graph, 'a world admits a program write only after walking who its recompilation reaches').
 reaches(metta, translator, 'a runnable form is compiled before it runs').
@@ -363,10 +366,17 @@ reaches(translator, ext_points, 'a call may be claimed by a dispatch owner').
 reaches(translator, filereader, 'reads whether a head is reducible in the source being loaded').
 reaches(translator, metta, 'the core holds the function, arity and type registries the compiler writes and reads').
 reaches(translator, parser, 'writes a term as MeTTa text for a compile-time diagnostic').
+reaches(translator, source_observation, 'records dispatch refusals without changing their Error answers').
 reaches(translator, spaces, 'compiles into a space\'s execution module and asks that space its capabilities').
 reaches(translator, specializer, 'a higher-order call may specialize').
 reaches(translator, translator_rules, 'the shipped rule set is the compiler\'s own first tier').
 reaches(translator, type_rules, 'a compile-time type check resolves through the typing-rule registry').
+reaches(source_observation, filereader, 'observes source execution, file identities and completed answers').
+reaches(source_observation, metta, 'resolves the execution module for an observed space').
+reaches(source_observation, source_positions, 'maps parsed source to side-table positions').
+reaches(source_observation, spaces, 'validates spaces and identifies stored source equations').
+reaches(source_positions, filereader, 'the text-only entry point obtains the authoritative parsed forms').
+reaches(source_positions, parser, 'uses the reader token boundaries and string states').
 reaches(translator_rules, metta, 'refuses an unbound input in the core\'s error vocabulary').
 reaches(translator_rules, spaces, 'a shipped rule expands into space operations').
 reaches(translator_rules, translator, 'a rule declares itself a special form to the compiler').
@@ -382,7 +392,8 @@ reaches(type_rules, translator, 'a changed typing rule clears the translation ca
 %   and shrinking one is a visible edit here. Untangling them is the work a
 %   layer order would need first, and this is its measure.
 
-tangle([duals, ext_points, filereader, metta, parser, spaces, specializer,
+tangle([duals, ext_points, filereader, metta, parser, source_observation,
+        source_positions, spaces, specializer,
         support_graph, tracer, translator, translator_rules, type_rules]).
 
 %%%% What the lane checks %%%%
