@@ -23,6 +23,9 @@
 %     commit=39092863ae34184a9f955f185ff57c1ff177ec40]
 %   - a library's own error term renders through prolog:error_message//1
 %     [tested 2026-08-16: ext_points_messages]
+%   - a seam whose defining file has not loaded is priced like one that has,
+%     so the boot sweep cannot pay a library-index search per declared row
+%     [tested: a_missing_definition_is_priced_like_a_present_one]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -390,6 +393,37 @@ test(a_declaration_without_a_definition_is_not_exported) :-
     seam:publish(plunit_undefined_seam/3),
     module_property(Engine, exports(Exports)),
     assertion(\+ memberchk(plunit_undefined_seam/3, Exports)).
+
+% And it costs what the answer above it costs. "Not defined yet" is the answer
+% the boot directive gets for most of the table, because a seam is declared in
+% engine/ext_points.pl before the file that defines it loads, and the sweep
+% asks twice per seam, once in `seam` and once in the engine module. Asked
+% with predicate_property(Module:Head, defined) that answer ran SWI's
+% undefined-procedure trap -- define_or_generate/1 falls through to
+% '$define_predicate'/1, which searches the whole autoload library index
+% before raising the existence error the caller's catch/3 swallowed -- so the
+% no cost 2,065 inferences against 31 for the yes, 2,114 per seam over the two
+% sweeps, and 305,970 of a 543,929-inference boot. Thirty added kind/2 rows
+% cost 124,185 inferences there and 1,755 here [measured 2026-09-06:
+% engine/bench.pl bench_run(boot); commit=8ec7de241ef3cdd2753f24a97c86e9e9c7240b06].
+%
+% The bound is a RATIO rather than a count because the honest number moves a
+% few inferences with clause layout: what must hold is that a missing
+% definition is priced like a present one, and the trap is sixty-seven times
+% the present one, so anything that reintroduces it lands far outside.
+test(a_missing_definition_is_priced_like_a_present_one) :-
+    seam_home_cost(swrite/2, Present),
+    seam_home_cost(plunit_no_such_seam_at_all/3, Missing),
+    assertion(\+ seam:seam_home(plunit_no_such_seam_at_all/3, _)),
+    assertion(Missing =< 4 * Present).
+
+seam_home_cost(Seam, Per) :-
+    Rounds = 1000,
+    statistics(inferences, Before),
+    forall(between(1, Rounds, _),
+           ( seam:seam_home(Seam, _) -> true ; true )),
+    statistics(inferences, After),
+    Per is (After - Before - 3 * Rounds) // Rounds.
 
 :- end_tests(metta_published_surface).
 
