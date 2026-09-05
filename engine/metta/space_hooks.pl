@@ -711,8 +711,33 @@ metta_transaction_result(threw(Error), _, _) :- throw(Error).
 %registry gives an enclosing user transaction a real provider savepoint when
 %the provider supports nested begin/rollback; an older provider that cannot
 %nest refuses before its speculative write rather than leaking one.
+%
+%COLLECT, DISCARD, THEN REPLAY, the same three steps metta_transaction/1 takes
+%below and for the same reason: snapshot/1 runs its goal as once/1, so
+%`(speculate (match &kb (n $x) $x))` over three rows answered `1` and dropped
+%two with nothing said [measured 2026-09-05 through the Node binding's
+%speculate scope: 3 answers unscoped against 1 scoped]. Dropping answers is the
+%OPACITY violation the transaction door already refuses to commit, and a
+%discarded scope has less excuse for it than a committing one, because the
+%answers are copied out of the snapshot before the writes go and nothing about
+%them depends on the rolled-back state.
+%
+%The workaround this replaces lived in one caller: the Python shim's LAZY
+%cursor built findall-then-member by hand, so a held speculative cursor kept
+%every answer while the eager door beside it and the Node binding's own scope
+%did not [source: metta_py_execution_cursor_goal/4 in
+%extensions/python/metta/shim.pl, removed with this]. Answering it here means
+%every caller of the seam inherits it
+%[tested: transaction_answers:speculation_answers_every_answer_and_still_discards_its_writes;
+%commit=WORKTREE].
 :- meta_predicate metta_speculate(0).
 metta_speculate(Goal) :-
+    term_variables(Goal, Vars),
+    metta_speculate_prepare(Goal, Vars, Answers, Outcome),
+    metta_speculate_result(Outcome),
+    member(Vars, Answers).
+
+metta_speculate_prepare(Goal, Vars, Answers, Outcome) :-
     seam:observation_begin,
     (   nb_current('$metta_tx_enlisted', OuterEnlisted)
     ->  true
@@ -722,7 +747,7 @@ metta_speculate(Goal) :-
     nb_setval('$metta_tx_enlisted', []),
     catch(( setup_call_cleanup(
                 b_setval('$metta_user_tx', true),
-                snapshot(Goal),
+                snapshot(metta_transaction_answers(Goal, Vars, Answers)),
                 b_setval('$metta_user_tx', OuterFlag))
         ->  Outcome = succeeded
         ;   Outcome = failed
@@ -732,8 +757,7 @@ metta_speculate(Goal) :-
     nb_getval('$metta_tx_enlisted', Enlisted),
     nb_setval('$metta_tx_enlisted', OuterEnlisted),
     metta_finish_foreign(discarded, Enlisted, _),
-    seam:observation_discard,
-    metta_speculate_result(Outcome).
+    seam:observation_discard.
 
 metta_speculate_result(succeeded).
 metta_speculate_result(failed) :- !, fail.

@@ -123,6 +123,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `speculate` answers every answer of its body. `snapshot/1` runs its goal as
+  `once/1`, so a scope over three answers answered one and dropped two with
+  nothing said, the same opacity violation `transaction` was repaired for: the
+  answers are collected inside the snapshot and replayed after it, so every
+  write still belongs to one discarded execution. The Python shim's lazy cursor
+  carried a hand-written findall-then-member for this, which the seam now
+  answers for every caller.
+
 - A trace whose program abolished a wrapped predicate no longer leaves the
   tracer armed for the rest of the process. Tearing a session down unwraps each
   recorded target, and `unwrap_predicate/2` FAILS rather than raising when the

@@ -2939,6 +2939,32 @@ test(a_nested_transaction_yields_every_solution_too) :-
             Answers),
     assertion(Answers == [a,b]).
 
+%The discarded sibling answers the same way and for the same reason: snapshot/1
+%is once-like too, so this used to answer 1 of 3 and say nothing about the
+%other two, while a caller reading the third would have been reading a state no
+%serial execution of the body produces.
+test(speculation_answers_every_answer_and_still_discards_its_writes) :-
+    retractall(tx_probe(_)),
+    findall(X, metta_speculate(( member(X, [1,2,3]),
+                                 assertz(tx_probe(X)) )), Answers),
+    assertion(Answers == [1,2,3]),
+    findall(P, tx_probe(P), Written),
+    assertion(Written == []).
+
+test(a_goal_with_no_solution_fails_the_speculation) :-
+    assertion(\+ metta_speculate(fail)),
+    assertion(\+ metta_speculate(member(_, []))).
+
+test(a_throw_after_several_speculative_writes_undoes_all_of_them) :-
+    retractall(tx_probe(_)),
+    catch(metta_speculate(( member(X, [1,2,3]),
+                            assertz(tx_probe(X)),
+                            throw(spec_boom) )),
+          Thrown, true),
+    assertion(Thrown == spec_boom),
+    findall(P, tx_probe(P), Written),
+    assertion(Written == []).
+
 :- end_tests(transaction_answers).
 
 %The generated probe P1.7 and P1.8 ask for: every position the engine's own
