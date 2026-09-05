@@ -147,6 +147,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Node remote wire carries a number the way `CODEC.md` says, so the two
+  seats can exchange one at all. It sent `["n", "1.5"]` where the Python seat
+  sends `["n", 1.5]`, and each end refused the other's: every Python-to-Node
+  and Node-to-Python exchange carrying a number failed, against a header
+  claiming interoperability. The portable transport now carries the VALUE, a
+  `bigint` for an integer at any width and a `number` for a float, which is the
+  same split Python makes with `int` and `float`; the JSON text carries the
+  literal, so an integer past 2^53 is exact and an integral float still reads
+  back as a float. A payload that is text is refused, naming the tag and what
+  arrived. A non-finite float is refused on the JSON wire in the engine's own
+  sentence, because JSON has no literal for one. The engine's own flat
+  transport is unchanged and still spells a number as decimal text, which is
+  what tells 2 from 2.0 across the WebAssembly boundary.
+
 - The Node seat orders text by code point wherever the order is an answer, so
   the two seats order identically. `Array.prototype.sort` with no comparator
   compares UTF-16 code UNITS, which parts from Python's `sorted` on every

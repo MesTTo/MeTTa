@@ -184,3 +184,97 @@ Red, with the five changed sources at 3c025a0e and `byCodePoint` shimmed to the
 default order: 6 of 6 fail, the algebra one reading `(requires 𝐀 豈)` against
 `(requires 豈 𝐀)` and the lint one `defined with 10 or 2` against `2 or 10`.
 Green here; the seat's suite goes 583 to 589 and the browser suite stays at 9.
+
+## 2026-09-05, the number two seats could not exchange
+
+Found while surveying the float text above, and larger than it: the Node
+remote wire and the Python remote wire could not carry a number to each other
+at all.
+
+    node   toTransport(...)     ["e",[["s","f"],["n","1.5"],["n","42"],["g","hi"]]]
+    python atom.to_wire()       ["e",[["s","f"],["n",1.5],  ["n",42],  ["g","hi"]]]
+    node   fromTransport(["n", 1.5])    WireError: expected text from the engine
+    python atom_from_wire(["n","1.5"])  ValueError: wire number payload must be numeric
+
+`CODEC.md`'s `n` row reads "exact integer or float" and
+`tests/codec/corpus.json` holds `["n", 1.0]`, `["n", 0]` and
+`["n", 9007199254740993]`, so the Node seat was the one out of spec, in both
+directions at once: it SENT text and REFUSED the value. `src/remote.ts`'s
+header claimed "either end interoperates with the Python seat's".
+
+The seat has three number spellings and the defect was one layer using
+another's. The ENGINE transport, flat and arity-prefixed, carries decimal TEXT
+and always will: swipl-wasm's value conversion renders the float 2.0 and the
+integer 2 as one JavaScript number, and `(== 2 2.0)` is `False`. The PORTABLE
+transport is a JSON document and JSON can spell the two apart, so the grammar
+says it carries the value. `toTransport` was handing the engine's spelling to
+the portable one.
+
+Decided: `bigint` for an integer at any width, `number` for a float, which is
+the pair the seat's `Wire` type already used and the same split Python makes
+with `int` and `float`. The kit's comparison form already relied on it
+(`["n","i",digits]` against `["n","f",bits]`), so nothing new had to be
+invented for the distinction; only the transport had to stop erasing it.
+
+Decided: a text payload is a REFUSAL, not a legacy form with a compatibility
+read. The two spellings belong to two transports, and accepting either here
+would accept a document the written-down wire does not have. The message names
+the tag, what arrived, and which transport spells a number as text.
+
+    the n tag carries an exact integer or a float, not a string ("42"); this
+    transport spells a number as the VALUE, and the engine's own flat
+    transport is the one that spells it as decimal text
+
+JSON's own two problems, and the mechanism for each, which is the one CODEC.md
+already points at ("the TypeScript reference server does this from
+`JSON.parse`'s reviver, which can see the source text of each literal"):
+
+- `JSON.parse` has one numeric kind, so `["n", 1]` and `["n", 1.0]` arrive
+  identical and `["n", 9007199254740993]` arrives rounded. The reviver's
+  `context.source` is the literal's text, so an integer literal becomes a
+  `bigint` and a float literal a `number`. Shipped in V8 12.4, which every
+  Node this package's `engines` field admits carries.
+- `JSON.stringify` writes the float 1.0 as `1`. `JSON.rawJSON` places a
+  literal verbatim.
+
+Tried: the writing half as a `JSON.stringify` REPLACER, the symmetric shape.
+It looked right and was wrong, and the way it was wrong is this branch's own
+subject a fourth time. `JSON.stringify` asks each value for `toJSON` BEFORE it
+calls the replacer, and booting this seat's engine installs
+`BigInt.prototype.toJSON`, which answers the decimal string:
+
+    typeof BigInt.prototype.toJSON   undefined before metta(), function after
+    JSON.stringify({a: 1n})          '{"a":"1"}'
+
+So the gateway answered `["n", "1"]` for the integer 1, a string where the
+grammar says a number, and the replacer was never reached. The unit probe
+passed because it never booted an engine. Decided: put the literal in the
+STRUCTURE first, on an explicit worklist like the file's other walks, and let
+`JSON.stringify` see no bigint at all. A bigint anywhere OTHER than an `n`
+payload is refused rather than handed to it.
+
+Evidence, three layers:
+
+- the golden corpus through both seats' codecs, both ways, every row equal: 39
+  round-trip cases and 32 transport cases, no disagreement. The transport leg
+  runs fewer because the JSON wire carries neither a boolean nor a non-finite
+  float.
+- a live exchange each way, a Python `RemoteSpace` against this seat's
+  `serve()` and this seat's `RemoteSpace` against the Python `serve()`,
+  carrying an integer, a float, a float whose value is whole, a negative
+  fraction, and integers past both 2^53 and i64.
+- both seats refusing a non-finite float on the JSON wire, in the engine's own
+  sentence.
+
+Open: the engine's refusal names the culprit with `~w`, so it says
+"JSON cannot carry the non-finite number 1.0Inf" where its own writer prints
+`inf` for the same float. This seat writes what the engine PRINTS, and the
+test pins both spellings so the day the engine's message uses its own writer,
+it says so.
+
+Red, against af0eeb6c with `transportToJson`/`transportFromJson` shimmed to a
+bare `JSON.stringify` and `JSON.parse`: 3 of 4 wire cases fail and 6 of 8
+cross-seat cases fail, the client one reading
+`ValueError: wire number payload must be numeric, got '0'` and the non-finite
+one reading `ACCEPTED`. Green here, with the seat's suite at 590 and the
+cross-seat lane at 8.
