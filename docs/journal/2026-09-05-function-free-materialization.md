@@ -287,3 +287,22 @@ trie population returned to 22 every time, so the atom pass that reclaims the
 blob can already have run when the clause pass drops the last reference to it.
 The helper now collects to a fixed point, bounded at four rounds; a retained root
 survives all of them. Ten consecutive whole-file runs are green.
+
+## 2026-09-05: the same collection round in the Prolog suite, and one crash
+
+Found by running the Prolog suite twenty times rather than once:
+`an_unmanaged_stale_clear_retires_its_image_at_source_collection` failed its
+post-collection assertion in one of the twenty. It is the defect above one level
+down. `collect_materialization_owners/0` already stops and joins the collector,
+which is the half that makes the assertion possible at all, but it then ran a
+single clause and atom pass. It now runs four. Twenty-five consecutive
+whole-suite runs are green against one failure in the twenty before.
+
+Recorded unexplained: one run in that same period died with signal 11 during
+`an_unmanaged_stale_release_retires_its_image_at_source_collection`. The C stack
+is inside `__pthread_clockjoin_ex` under the signal handler, which is the join
+`set_prolog_gc_thread(false)` performs on the clause collector, and the Prolog
+stack printed empty. It has not recurred in 30 isolated runs of the two
+unmanaged cases, 11 whole-suite runs before the collector change or 25 after, at
+loadavg between 29 and 64. No cause established; the next occurrence should not
+be treated as the first.

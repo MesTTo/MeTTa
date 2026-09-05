@@ -679,11 +679,19 @@ collect_materialization_owners :-
     % Stop and join that worker before asserting the post-collection state.
     % SWI V10.1.13 src/pl-proc.c:pl_garbage_collect_clauses and
     % boot/syspred.pl:set_prolog_gc_thread(false).
+    %
+    % One round is not a fixed point either: the atom pass that reclaims an
+    % image blob can already have run when the clause pass drops the last
+    % reference to it, so the image goes on the next round. A single round
+    % left an image standing in one whole-suite run out of twenty; a retained
+    % image survives all four.
     current_prolog_flag(gc_thread, GCThread),
     setup_call_cleanup(
         set_prolog_gc_thread(false),
-        ( assertz(materialization_gc_tick, Tick), erase(Tick),
-          garbage_collect_clauses, garbage_collect, garbage_collect_atoms ),
+        forall(between(1, 4, _),
+               ( assertz(materialization_gc_tick, Tick), erase(Tick),
+                 garbage_collect_clauses, garbage_collect,
+                 garbage_collect_atoms )),
         set_prolog_gc_thread(GCThread)).
 
 :- meta_predicate with_unmanaged_clear(+, 1).
