@@ -55,3 +55,21 @@ Verification: The added expiry regression failed before the ownership check
 and passed afterwards. The complete mutation/schema set passed 42 tests.
 `npm run --prefix website docs:build` rendered the site successfully. Ruff
 passed for the changed remote files; mypy reported no issues in remote.py.
+
+Final verification: Rebased to `8f853f99` and repeated the original row probes
+against that detached baseline. L001 failed 3 cases, L007 failed 3, L008 failed
+16, L010 failed 1 and L012 failed 1 while its applied-form control passed.
+L009's four existing guarantees passed. The same unchanged assertions passed
+on the implementation branch.
+Final verification: `HYPOTHESIS_PROFILE=ci RUSTC_WRAPPER= PYTEST_ADDOPTS=-rs
+CHECK_PY="$VENV/bin/python" sh extensions/python/test.sh` passed 3,080 tests,
+skipped 48 and exited 0. This is the updated 3,031-test baseline plus 49
+regressions. Then `RUSTC_WRAPPER= CHECK_PY="$VENV/bin/python" sh check.sh ruff
+artifact-paths` passed both gates with zero artifact-path findings and exit 0.
+The complete log and row assertions are in `ai-tmp/ai-remote-lifecycle.md`.
+Environment: Rebuilt native artifacts after the worktree relocation, disabled
+only this build's stale shared sccache wrapper, and installed the locked Node
+and website dependencies. Budget and CLI interruption failures seen in earlier
+full runs passed named isolated reruns and the final full run. No expectations
+were weakened. The documentation site rendered successfully; all 70 evidence
+commit references in changed files resolve, and the clone check found none.
