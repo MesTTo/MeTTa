@@ -891,14 +891,29 @@ metta_rule_gate_bodies(gated,
 %Boot loads this file before translator_rules (engine/metta.pl's
 %ensure_loaded order), so the table module does not exist yet when the
 %load-end initialization below runs; an absent table and an empty table
-%both mean fast, which is what the catch encodes. Post-boot the two table
-%writers call this after every mutation, and the load-end run also heals a
-%RELOAD of this file while gated, whatever reconsult did to the doors'
+%both mean fast, and the presence test is what encodes that. Post-boot the two
+%table writers call this after every mutation, and the load-end run also heals
+%a RELOAD of this file while gated, whatever reconsult did to the doors'
 %clauses, because the mode is re-derived from the table rather than trusted.
+%
+%current_predicate/1 rather than calling the name and catching its existence
+%error, which is the same trap the seam sweep took out of ten other sites:
+%SWI answers a call to an undefined name by running its undefined-procedure
+%trap, which searches the whole autoload library index before raising the
+%error this catch swallowed. It never found anything to find --
+%cost_ordered_translator_rule/1 is this engine's own dynamic predicate, and
+%the boot's answer is `fast` in every run -- and it cost the boot 2,744
+%inferences, 1,021 of them only sometimes, which is a benchmark row that moves
+%on its own. current_predicate/1 does not consult the index and reads 0 on an
+%absent name [measured 2026-09-06: 220 boots, the trap 2,744 inferences in 219
+%and 1,723 in one, `current=no mode=fast` in all 220; the same catch priced on
+%a booted engine reads 1,025 against 0 for current_predicate/1;
+%command=sh tests/shell/test_boot_inference_determinism.sh; commit=001c97213388e39b14ba3789a60e59a5e2c79f41].
+%The catch goes with it: a name current_predicate/1 has just answered for
+%cannot raise the existence error the catch was there to swallow.
 metta_rule_gates_refresh :-
-    (   catch(translator_rules:cost_ordered_translator_rule(_),
-              error(existence_error(_, _), _),
-              fail)
+    (   current_predicate(translator_rules:cost_ordered_translator_rule/1),
+        translator_rules:cost_ordered_translator_rule(_)
     ->  Mode = gated
     ;   Mode = fast
     ),

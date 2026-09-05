@@ -150,6 +150,15 @@ check_engine_bench() {
 }
 run GATE engine-bench check_engine_bench
 
+# What the lane above ASSUMES, checked rather than assumed. engine/bench.sh
+# gates on inferences and allows a case four of them, so a boot whose own count
+# moves turns it red with no code behind it -- which is what happened between
+# acfa6e74 and this lane's arrival, the boot case reading 265,752 to 266,058
+# over eight samples because engine/materialize.pl registered a process-global
+# `erase` listener at load time and SWI delivers that event from clause garbage
+# collection on whichever thread trips the collector first.
+run GATE boot-determinism sh -c "cd '$HERE' && sh tests/shell/test_boot_inference_determinism.sh"
+
 # Undefined predicates in the engine. Nothing checked the Prolog side before
 # this; SWI has had the check built in all along.
 #
