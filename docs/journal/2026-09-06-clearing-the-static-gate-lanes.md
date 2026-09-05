@@ -256,3 +256,16 @@ occurrence: same stack, a sibling test that makes the same
 `set_prolog_gc_thread(false)` join, at loadavg 65-71. What is new is a
 reproduction rate, 1 in 6 and 1 in 12 on the two arms, where the earlier record
 had none in 30 isolated runs and 36 whole-suite runs.
+
+Measured again after `001c9721` made boot's inference count deterministic, which
+is what the paragraph above could not have. `engine/ext_points.pl` reverted to
+trunk against this branch's version, .qlf cleared and warmed for every arm,
+three samples each and every sample identical: 262,251 without the row and
+262,396 with it, +145, with the second arm confirmed twice A/B/A. The identity
+twin still reads 3,432 on both arms.
+
+So the row costs boot 145 inferences on the tree that ships, against the -415
+and -223 read while boot's own count still spread by up to 83. Both readings
+were honest about their arms; only this one is repeatable. It re-pins nothing:
+the boot row's pin is 531,984 and the tree measures 262,396, the unpinned
+improvement `8ec7de24` and `001c9721` left there.
