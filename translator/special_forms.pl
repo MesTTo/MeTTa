@@ -15,7 +15,7 @@
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: explicit cast targets and typed bindings resolve aliases inside
 %   the engine; emitted checks preserve already resolved type observations
-%   [tested: structural_aliases; commit=WORKTREE].
+%   [tested: structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
 
 %%% An evaluated operand that produced an Error finishes the call %%%
 %

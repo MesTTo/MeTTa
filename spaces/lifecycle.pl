@@ -30,7 +30,7 @@
 % Guarantees: alias conflicts and cycles visible in the current transaction
 %   fail before publication; alias reader and mutation clauses retire with
 %   their scope [tested:
-%   structural_aliases; commit=WORKTREE].
+%   structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
 
 %The inverse of add_sexp_in/4, written here beside it for the same reason
 %metta_module_space/2 is written beside space_module/2: the mapping is

@@ -200,7 +200,7 @@
 % Guarantees: prepare_parsed_summary_in/5 validates aliases in source order;
 %   record_translated_supports/3 retains raw annotation dependencies in the
 %   existing support graph, including previously missing aliases [tested:
-%   tests/prolog/suites/typecheck/structural_aliases.plt; commit=WORKTREE].
+%   tests/prolog/suites/typecheck/structural_aliases.plt; commit=acad923476d21110870f235192757281a737ee71].
 
 %The loader's surface: what the engine core asks of it, what a write records
 %with it, the host services a binding calls, and the parser doors it publishes

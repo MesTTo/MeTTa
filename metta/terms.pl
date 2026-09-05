@@ -22,7 +22,7 @@
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: argument origins and masks consume expanded types, while
 %   BadArgType retains the written alias and can show TypeExpansion [tested:
-%   structural_aliases; commit=WORKTREE].
+%   structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
 
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 

@@ -24,7 +24,7 @@
 % [tested: tests/prolog/suites/spaces/spaces.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: withdrawing a declaration repairs aliases and compiled callers
 %   through the existing support graph in the same transaction [tested:
-%   structural_aliases; commit=WORKTREE].
+%   structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
 
 %%%% Who owns a space name: the claim door %%%%
 %
