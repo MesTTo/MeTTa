@@ -7,6 +7,26 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Clearing a space no longer walks its stored atoms one at a time because an
+  unrelated library watches a different space. A hook clause whose head names
+  the space it watches, as `lib_tabling` names `&metta`, is now idle for every
+  other space, so importing it stops turning the bulk clear off everywhere.
+  Clearing a space holding a memoized function and 2,000 plain atoms cost
+  131,247 inferences with `lib_tabling` in the process and 4,759 without it;
+  both now cost 4,759.
+- Reloading a file that declares an annotated arrow now succeeds when more than
+  one space holds that file, which is the ordinary shape for a library. The
+  withdrawal removed the declaration's own catalog effect row a second time by
+  value, where it is indistinguishable from the equal row another space owns,
+  so the reload refused with `permission_error(remove,
+  annotated_arrow_effect, ...)` after retracting the source record and before
+  releasing any of the load's references. A withdrawal now removes the atoms
+  its load stored and leaves the clauses it derived to the reference sweep.
+- The example parity reporter preserves SWI process exits without reporting
+  their `unwind(halt(Status))` control signal as an application error.
+
 ### Added
 
 - The writer's variable-identity invariant is pinned under garbage
@@ -68,6 +88,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   Type observers and Python casts accept the expanded type while stored
   source and diagnostics retain the alias spelling.
 
+- Node's `Semiring` vocabulary now includes the catalog's `budget` and
+  `amplitude` values in their declared order.
+
 - Integration installation is transactional across framework-managed state.
   A failed installer now restores operations and declaration ownership,
   protocol types and reprs, reflectors, converted types, library paths,
@@ -80,8 +103,28 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   both file loading and separate declaration/equation loads. Argument checks,
   application types, higher-order arguments and declaration readers use the
   plain runtime arrow. Stored atoms, `get-type f`, documentation and source
-  export retain the written annotation. The catalog still validates the
-  annotation; its determinism and effect product are not enforced.
+  export retain the written annotation. Concrete products now publish owned
+  effect rows consumed by planning, world admission and memoization. A `nondet`
+  product joins its effect with `nondeterministicReadOnly`. Removing or reloading
+  a declaration withdraws only its owned rows. Direct removal of owned rows
+  and catalog clears that would orphan another space's declaration are refused.
+  The removal guard also covers catalogs with capacity counters. Ordinary clear
+  retains provider callback suspension and removes only metadata for declarations
+  no longer stored.
+- `(pragma! verify-cardinality true)` audits annotated ordinary function calls
+  using SWI's failure and choicepoint rule. `det` requires one success without
+  a choicepoint, `semidet` permits failure, and `nondet` has no answer-count
+  restriction. The checker executes the original dispatch once; by default
+  cardinality assertions are trusted. Plain `->` calls gain no runtime check.
+  Unresolved products, nested products and annotations on translated forms
+  are refused at load because their claims have no runtime consumer.
+  Foreign spaces require transactional storage so partial writes cannot
+  separate an annotation from its effect. A conflicting late effect is refused
+  while a dependent cache is enabled. Removing the last cached equation now
+  releases its owner's memoization state, even when another space still defines
+  the name or the host has already untabled its implementation. Memo handlers
+  retain exact clause references and retire with their owners. Native clear
+  keeps bulk data removal when its observers watch only compiled equations.
 
 - Python-authored programs can now be inspected and exported as MeTTa.
   `Space.source()` returns the receiver's directly stored program as the exact

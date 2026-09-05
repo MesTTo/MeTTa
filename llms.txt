@@ -200,8 +200,7 @@ call. Ten carriers ship. The answers below are one program's: two facts tagged
 
 Five are objects, `metta.counting`, `.prob`, `.prov`, `.ranked` and `.tropical`.
 The other five are reachable by name only, `under="budget"`, and
-`metta.vocabularies.Semiring` names eight of the ten, omitting budget and
-amplitude.
+`metta.vocabularies.Semiring` names all ten.
 
 `under=counting` answers the integer ITSELF, so those answers are `int` and
 `.one()` reads the count, where every other carrier yields `TaggedAnswer` with
@@ -470,6 +469,16 @@ Types are optional atoms: `(: Ann Person)`, `(: age (-> Person Number))`.
 expand inside tuples and full arrows in their declaration owner's scope;
 reflection retains the written declaration. An alias of `Atom` preserves
 the same argument mask and result finality as `Atom` itself.
+
+An annotated arrow, `(: age (-[det,readOnlyLookup]-> Person Number))`, also
+publishes the author's effect in the catalog. Plans, world coverage and cache
+admission consume it; `nondet` lifts the class to at least
+`nondeterministicReadOnly`. Missing effects default to `oracleIO`.
+`!(pragma! verify-cardinality true)` checks applicable `det` and `semidet`
+calls without replay: a surviving choicepoint raises, and `det` also raises
+on no answer. The mode defaults off, trusting the cardinality claim. Plain
+arrows emit no cardinality checkpoint. Unsupported product variables, nested
+products, translated forms and nontransactional foreign storage refuse at load.
 A typed mismatch answers an `Error` value whose reason is `BadArgType` or
 `IncorrectNumberOfArguments`, so a MeTTa program can handle it with `if-error`.
 `(add-typing-rule! name family actual expected outcome)` adds a module-scoped
@@ -774,7 +783,8 @@ ordinary atom write uses, so a library that pre-generates a space's storage
 writes the one format the space reads;
 effects and caching: `metta_effect_class_canonical/2`, `metta_effect_rank/2`,
 `metta_effect_join/3`, `metta_effect_compose/2`, `metta_operation_effect/2`,
-`metta_operation_plan_effect/2`, `metta_effect_walk/3`,
+`metta_operation_plan_effect/2`, `metta_annotated_operation_effect/2`,
+`metta_effect_walk/3`,
 `metta_function_cacheable/1`, and `metta_cache_unchecked/1`, with
 `support_record/2`, `support_invalidate/1` and `support_forget/1` for taking
 part in the support graph whose handler seams the engine already declares,
@@ -957,7 +967,8 @@ modules: `add-translator-rule!`, `remove-translator-rule!`,
 `assertAlphaEqualToResultMsg`. `undocumented` reports what `doc` lacks.
 
 `pragma!` accepts `max-time`, `max-inferences`,
-`verify-specializations`, `max-stack-depth`, `type-check`, and
+`verify-specializations`, `verify-discharges`, `verify-cardinality`,
+`max-stack-depth`, `type-check`, and
 `interpreter`. The two bounds and `verify-specializations` change live
 engine mechanisms. `max-stack-depth` is validated exactly as the
 arbiter validates it: a value that is not a non-negative integer

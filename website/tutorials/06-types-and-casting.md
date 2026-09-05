@@ -1,6 +1,6 @@
 <!--
 Purpose: explain MeTTa declarations, annotation-derived arrows,
-effect-classified operations, transparent aliases, and checked casts.
+effect-classified operations, transparent aliases, cardinality auditing, and checked casts.
 Guarantees: operation examples use the canonical Space.op decorator with
 required EffectClass metadata.
 [tested: npm run docs:build and
@@ -90,6 +90,75 @@ a transaction does not substitute for that lock.
 `get-type` reports expanded types, while matching stored `(: ...)` atoms and
 exporting source retain the written alias. A type error retains that spelling
 and adds `TypeExpansion` when substitution changed the declaration.
+
+You can put a cardinality and an effect class in a function arrow:
+
+```metta
+(: w (-[det,writesState]-> Number Number))
+(= (w $x) $x)
+```
+
+The written type stays visible through `get-type`. Its effect publishes
+`(effect w writesState)` in `&metta`, so `space.effect_plan(S.w(1))` reports
+`writesState`. A world covering only `pureStructural` refuses the call, and
+`lib_memo` refuses to cache it, even though this example's body is an identity.
+Removing the declaration removes its owned effect row. Effects join by name
+across the catalog, including declarations in other spaces; one declaration
+cannot weaken another or the effects found in a body.
+Removing an owned effect row directly is refused. Clearing `&metta` is also
+refused while declarations in other spaces still own effect rows there;
+remove those declarations first.
+
+`nondet` joins its class with `nondeterministicReadOnly`. For example,
+`(-[nondet,pureStructural]-> Number Number)` has that joined class. Omitting
+the class, as in `(-[det]-> Number Number)`, uses `oracleIO`.
+
+An effect annotation added after memoization is enabled is refused if an
+existing cache includes that function, including a cache on a caller. Remove
+the cached definition before loading the new annotation. `clear-memoize`
+only clears entries and does not disable memoization.
+Forward memo declarations are checked when their bodies compile, including
+annotated dependencies reached through an unchecked caller.
+
+Cardinality is an author assertion. By default it is trusted and does not
+prune answers. Enable auditing when you want execution to check it:
+
+```metta
+(: two (-[det]-> Number Number))
+(= (two $x) $x)
+(= (two $x) (+ $x 1))
+!(pragma! verify-cardinality true)
+!(two 1) ; raises: annotated call succeeded with a choicepoint
+```
+
+The check follows [SWI's `det/1` rule](https://www.swi-prolog.org/pldoc/man?predicate=det/1):
+`det` must succeed without a choicepoint; `semidet` may fail but must leave no
+choicepoint on success. `nondet` permits any number of answers. A choicepoint
+raises before another equation runs, including when the alternatives would
+produce equal answers or eventually fail. The body is executed once, so
+auditing does not replay its effects. An `Empty` result is not an answer.
+A call with an already constrained output checks only the upper bound,
+because that constraint can legitimately remove the result.
+
+The mode is optional because this operational check is stricter than counting
+completed answers and adds work to annotated calls. It observes each executed
+call; it does not prove unexecuted branches. Use
+`!(pragma! verify-cardinality none)` to disable it, or scope it with
+`with-pragma!`. Plain `->` calls retain their ordinary compiled goals in either
+mode.
+
+A foreign space must declare transactional writes before storing an annotated
+arrow. An undeclared or `best-effort` provider is refused because a partial
+write could separate the type from its catalog effect. Plain arrows retain
+their existing storage behavior.
+
+An annotation must name an ordinary function and use a concrete product.
+Product variables such as `-[$effect]->`, annotations nested in parameter or
+result types, and annotations on translated special forms or translator rules
+are refused at load with the unsupported claim named. Put a contract on an
+ordinary wrapper when a translated form needs one. An annotated function can
+still be passed to an ordinary higher-order parameter such as
+`(-> (-> Number Number) Number Number)`.
 
 At a Python boundary, use `m.cast` when refusal must raise instead:
 

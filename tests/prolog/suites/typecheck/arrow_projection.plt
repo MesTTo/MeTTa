@@ -6,9 +6,10 @@
 %   malformed or infix-looking terms fail closed
 %   [tested: run_tests(metta_arrow_projection);
 %   commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
-% Guarantees: loaded annotated declarations execute, check arguments, type
-%   applications and compile like plain arrows while stored types retain their
-%   spelling [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
+% Guarantees: concrete annotated declarations execute, check arguments and
+%   type applications while stored types retain their spelling. Annotated
+%   callers gain a cardinality checkpoint; callees retain their typed bodies
+%   [tested: run_tests(metta_arrow_projection); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Owns resources: each test releases its space; the export-reader fixture
 %   retracts its pending export row even when an assertion fails.
 
@@ -106,8 +107,7 @@ test(the_long_determinism_spellings_map_to_the_catalog_members) :-
     assertion(msort(Members, [det, nondet, semidet])).
 
 test(annotated_declarations_execute_and_keep_the_written_type,
-     [ forall((member(Head, ['->', '-[det]->', '-[semidet,pureStructural]->',
-                            '-[$e]->']),
+     [ forall((member(Head, ['->', '-[det]->', '-[semidet,pureStructural]->']),
                member(Mode, [together, separate]))),
        setup('new-space'(Space)), cleanup(metta_release_space(Space)) ]) :-
     load_arrow_identity(Space, Head, Mode),
@@ -173,7 +173,7 @@ test(annotated_function_values_satisfy_higher_order_and_shared_types,
     findall(Value, eval_metta_in_module(Module, ['arrow-many', 1], Value), Many),
     assertion(Many == ['arrow-first', 'arrow-second']).
 
-test(replacing_a_plain_arrow_with_its_annotation_preserves_compiled_clauses,
+test(replacing_a_plain_arrow_instruments_only_its_callers,
      [ setup('new-space'(Space)), cleanup(metta_release_space(Space)) ]) :-
     load_arrow_identity(Space, '->', together),
     process_metta_string(
@@ -194,7 +194,11 @@ test(replacing_a_plain_arrow_with_its_annotation_preserves_compiled_clauses,
     findall((Head :- Body),
             (member(Predicate/Arity, Predicates), functor(Head, Predicate, Arity),
              clause(Module:Head, Body)), Annotated),
-    assertion(Annotated =@= Plain).
+    Plain = [PlainCallee|_], Annotated = [AnnotatedCallee|_],
+    assertion(AnnotatedCallee =@= PlainCallee),
+    assertion(Annotated \=@= Plain),
+    findall(Value, eval_metta_in_module(Module, ['arrow-caller', 1], Value), Values),
+    assertion(Values == [1]).
 
 test(rest_reporting_and_documentation_read_annotated_arrows,
      [ setup('new-space'(Space)), cleanup(metta_release_space(Space)) ]) :-

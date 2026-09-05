@@ -10,6 +10,11 @@
 %   call. The `extra-variables-exempt` declaration is the exception: it is
 %   written for engine/narrowing.pl, whose question is a narrowing one because
 %   a rule's body is EVALUATED while the program compiles.
+% Guarantees: translator-rule registration and cache restore refuse an
+%   annotated function whose cardinality checkpoint they would bypass
+%   [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
+% Guarded by: '$metta_arrow_products' serializes rule registration against
+%   annotated-declaration publication.
 % Assumes:
 %   - current_metta_module/1 names the module a registration is written in and
 %     metta_module_space/2 turns that into the space holding its equations, so
@@ -291,6 +296,10 @@ translator_rule_override_snapshot(_, none).
 %stored atoms in the image and compile in the following phase. All names are
 %preflighted before the first row lands.
 restore_translator_rule_snapshot(Rules, NodeSpaces, Installed) :-
+    metta_with_arrow_product_update(
+        restore_translator_rule_snapshot_locked(Rules, NodeSpaces, Installed)).
+
+restore_translator_rule_snapshot_locked(Rules, NodeSpaces, Installed) :-
     forall(member(rule(Name, Declarations, HomeId, Override), Rules),
            preflight_restored_translator_rule(Name, Declarations, HomeId,
                                               Override, NodeSpaces)),
@@ -300,6 +309,7 @@ restore_translator_rule_snapshot(Rules, NodeSpaces, Installed) :-
 preflight_restored_translator_rule(Name, Declarations, HomeId, Override,
                                    NodeSpaces) :-
     must_be(atom, Name),
+    spaces:metta_refuse_annotated_translator_rule(Name),
     must_be(list, Declarations),
     refuse_protected_core_rule(Name),
     memberchk(HomeId-Space, NodeSpaces),
@@ -538,6 +548,11 @@ translator_rule_extra_variables_exempt(Name, Reason) :-
     derive_translator_rule_inverse(HV, Declarations).
 
 register_translator_rule(Name, Declarations) :-
+    metta_with_arrow_product_update(
+        ( spaces:metta_refuse_annotated_translator_rule(Name),
+          register_translator_rule_locked(Name, Declarations) )).
+
+register_translator_rule_locked(Name, Declarations) :-
     current_metta_module(Home),
     (   translator_rule(Name, Existing, ExistingHome)
     ->  translator_rule_life_status(Name, ExistingHome, Status),

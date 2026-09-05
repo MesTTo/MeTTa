@@ -20,3 +20,24 @@ Tried: replacing `copy-file!/3` with an unconditional no-op exposed a vacuous ex
 Verification: jscpd found zero clones in the changed file/CSV surface. The requested ruff, artifact-paths, llms and llms-selftest lanes passed. The nested worktree layout initially broke existing sibling-path assumptions; moving the worktree beside the main checkout restored the expected layout without changing tracked gate code.
 Verification: the broad Python run found stale generated API/library reference pages, which were regenerated through `reference.py --write` and `libdoc.py --write`. After worktree relocation, stale pytest bytecode retained the old `co_filename`, making `inspect.getsource` fail with `OSError: could not get source code`; a named test reproduced alone. Removing only generated `__pycache__` directories repaired source lookup. The C binding also required a rebuild because its build deliberately embeds the checkout path. Neither repair changed runtime source.
 Tried: the public missing-file exception carried its name and remedy but began with SWI's `Unknown error term`. Added native error-message clauses for the three file refusal families so the public diagnostic reads as a named error rather than an unknown Prolog term.
+
+## 2026-09-05, process control in the parity reporter
+
+Tried: the complete gate reported the standard-streams example as an engine
+error, `unwind(halt(0))`, although the engine and Python processes both exited
+zero. The reporter's catch handler printed `ANSWER-ERROR` before SWI rethrew
+the process-control exception.
+
+Decided: rethrow `unwind/1` before rendering application errors. SWI reserves
+that wrapper for process and thread control; its catch recovery runs before
+the runtime rethrows it. The immutable source is SWI-Prolog
+`fc7ef84b949378b729052c3ade79c90ce5416abb`, `man/builtin.plx`, section
+`unwind-exceptions`. Changing the example's exit or suppressing ordinary
+errors would change the observation being compared.
+
+Verified: the two `test_process_exit_is_not_an_answer_error` cases failed
+with the original reporter on `ANSWER-ERROR unwind(halt(0))` and
+`ANSWER-ERROR unwind(halt(7))`. After the repair, both preserve their exact
+exit status and emit no error marker. Running
+`sh extensions/python/test.sh tests/repository/test_example_parity.py`
+passes all 20 cases with the maintained Python interpreter.

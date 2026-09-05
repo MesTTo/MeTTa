@@ -404,3 +404,25 @@ for its own work rather than left in this ledger.
 Revisit findings 3 and 8 when the product has a consumer. Finding 8 additionally
 remains optional `lib_chainer` work by its own decision and is not gated on this
 alone.
+
+## 2026-09-05, after the product acquired consumers: findings 3 and 8 revisited
+
+Tried: reran this journal's two probes independently of the product regression
+suite, against `763b7f2d1b0c6882b171cfa0e6a56374e0e8d167` and the rebased
+product worktree. The base still answers `1` and `2` for `two`, reports
+`pureStructural` for `w`, and returns no `(effect w ...)` row.
+
+Verified: the product worktree reports `writesState` for `w` and exposes
+`(effect w writesState)`. The same `two` declaration raises
+`metta_cardinality_violation(_, two, det, nondet)` under
+`!(with-pragma! ((verify-cardinality true)) (two 1))`. With auditing disabled,
+its declared cardinality is trusted and both answers remain. The verifier
+observes the chosen dispatch once and raises on its surviving choicepoint;
+it does not ask a second equation to execute merely to count its answer.
+
+Decided: **THE MISSING-CONSUMER PRECONDITION IS CLEARED** for findings 3 and 8.
+An explicit cardinality now reaches a runtime checker, and its effect reaches
+the existing catalog consumers. Finding 3's argument-aware classification of
+`callPredicate` remains separate work. Finding 8 remains optional
+`lib_chainer` work under its earlier decision. Neither downstream adaptation
+is claimed to have been implemented by these two probes.

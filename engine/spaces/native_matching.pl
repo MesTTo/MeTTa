@@ -1,4 +1,12 @@
 % Purpose: plan and execute indexed native-space matches and relational conjunction joins
+% Guarantees: annotated arrow effects reach catalog policy and follow their
+%   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
+% Guarded by: catalog clear acquires '$metta_typing_policy' before
+%   '$metta_arrow_products', matching annotated declaration publication
+%   [source: engine/spaces/arrow_products.pl:metta_with_arrow_product_update/1;
+%   commit=bbb512316280110a747e31c26adfc31e8c5104be]. Ordinary clear lets provider callbacks suspend before
+%   reconciling product ownership [tested: extensions/node/test/remote.test.ts
+%   "does not carry clear across the wire, and says why"; commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
@@ -271,7 +279,8 @@ get_atom_read_link(Space, Pattern) :-
 %lib/lib_redis/lib_redis.pl does) was reachable only when Python was in the process:
 %under run.sh the engine had no path to it at all. The shim now calls this.
 clear_foreign_atoms(Space) :-
-    foreign_write(Space, clear, seam:foreign_clear(Space)).
+    foreign_write(Space, clear, seam:foreign_clear(Space)),
+    metta_prune_arrow_products(Space).
 
 %A space has two halves and this used to empty one of them. The storage sweep
 %below drops every stored atom, and the atoms that also COMPILED left their
@@ -367,6 +376,7 @@ metta_capacity_remove_hook_install(Space) :-
 metta_capacity_remove_sexp('&metta', [Rel|Args], Removed) :- !,
     (   native_storage_module_ready('&metta', Module)
     ->  Term =.. ['&metta', Rel|Args],
+        ( Rel == effect -> metta_refuse_owned_effect_removal(Module, Term) ; true ),
         native_retract_one(Module:Term, Removed),
         (   Removed == true
         ->  metta_catalog_note_removed([Rel|Args])
@@ -492,7 +502,25 @@ space_atom_count_uncached(Space, Count) :-
     ;   Count = 0
     ).
 
+%A catalog clear cannot withdraw a declaration stored in another space.
+%Hold the publication lock across this check and the catalog sweep. Ordinary
+%clear calls providers without this lock, then reconciles against retained
+%declarations so a product published after the sweep keeps its owned row.
+clear_native_atoms('&metta') :-
+    !,
+    metta_with_arrow_product_update(
+        ( (   metta_arrow_product(Name, Owner, Type, _, _),
+              Owner \== '&metta'
+          ->  throw(error(permission_error(clear, annotated_arrow_catalog, '&metta'),
+                          context(clear_native_atoms/1,
+                                  remove_declaration(Owner, [':', Name, Type]))))
+          ;   true
+          ),
+          clear_native_atoms_stored('&metta') )).
 clear_native_atoms(Space) :-
+    clear_native_atoms_stored(Space).
+
+clear_native_atoms_stored(Space) :-
     (   native_storage_module_ready(Space, Module)
     ->  space_module(Space, SupportModule),
         findall(Atom, compiled_half_atom(Space, Module, Atom), Compiled),
@@ -505,6 +533,7 @@ clear_native_atoms(Space) :-
         retractall(Module:'$metta_native_scalar'(_))
     ;   SupportModule = none
     ),
+    metta_prune_arrow_products(Space),
     metta_capacity_count_cleared(Space),
     retractall(import_life(Space, _, _)),
     (   SupportModule \== none

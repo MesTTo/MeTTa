@@ -11,8 +11,9 @@
 %     every line after it [tested:
 %     test_a_prelude_derived_form_matches_its_fused_twin_on_the_corpus;
 %     commit=c1eaa36c7a2089801fe9da3cbec3fc02833d66fe].
-%   - a raise prints `ANSWER-ERROR ` and stops, rather than being mistaken for
-%     an empty run.
+%   - an application error prints `ANSWER-ERROR ` and stops; SWI unwind
+%     exceptions retain process control without becoming answer errors
+%     [tested: test_process_exit_is_not_an_answer_error; commit=bbb512316280110a747e31c26adfc31e8c5104be].
 %   - reader variable names carried with collected answers are rendered by the
 %     engine's named writer [tested: LeaTTa conformance runner;
 %     commit=916def0562c211143bb91cd0bd8b2c9dac7ab4fa].
@@ -45,6 +46,12 @@ main :-
 %observation. load_metta_source_groups/3 is the engine's own grouped loader,
 %which `include` also reads, so this file no longer keeps a second copy of it.
 
+%SWI reserves unwind/1 for process and thread control. The reporter must not
+%label a normal halt as an application error before the runtime rethrows it.
+%[source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/man/builtin.plx,
+%section unwind-exceptions; commit=bbb512316280110a747e31c26adfc31e8c5104be].
+report_error(unwind(Cause)) :- !,
+    throw(unwind(Cause)).
 report_error(Error) :-
     message_to_text(Error, Text),
     format("ANSWER-ERROR ~w~n", [Text]).
