@@ -908,7 +908,7 @@ metta_rule_gate_bodies(gated,
 %absent name [measured 2026-09-06: 220 boots, the trap 2,744 inferences in 219
 %and 1,723 in one, `current=no mode=fast` in all 220; the same catch priced on
 %a booted engine reads 1,025 against 0 for current_predicate/1;
-%command=sh tests/shell/test_boot_inference_determinism.sh; commit=WORKTREE].
+%command=sh tests/shell/test_boot_inference_determinism.sh; commit=001c97213388e39b14ba3789a60e59a5e2c79f41].
 %The catch goes with it: a name current_predicate/1 has just answered for
 %cannot raise the existence error the catch was there to swallow.
 metta_rule_gates_refresh :-
