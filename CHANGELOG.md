@@ -26,6 +26,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - `EnginePool.close(wait=True)` joins owned workers after an earlier nonwaiting
   close. `AsyncMeTTa.define` requires the reference function with `prolog=` and
   applies the synchronous decorator on its owning worker.
+- Compiled Python bodies now unpack tuple and list patterns, collect known
+  answer streams with `list`, query engine metatypes with `type`, and preserve
+  every `typing.overload` declaration. Generator `match` statements carry
+  captures into later statements, and an answerless match subject reaches its
+  explicit `Empty` branch.
+- `if-decons-expr` holds its expression operand, binds its head and tail on
+  success, and evaluates the selected continuation. Empty expressions and
+  incompatible existing bindings take the fallback branch.
+- Constructive negation now preserves wildcard and structural bindings in
+  nested case towers and recognizes the complement of an empty answer set.
 
 - The MeTTa file library now creates directories, copies bytes with staged
   replacement, returns queryable metadata snapshots, composes lexical paths,

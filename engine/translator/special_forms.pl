@@ -12,6 +12,7 @@
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % Guarantees: match, unify and let classify a written gap pattern ONCE while the call site compiles and hand the plan to the door in a wrapper, so a gap-free form emits the goal it always emitted [tested: tests/prolog/suites/reader/segments.plt, examples/ch08-data/08-02-sequence-variables/01-segments.metta; commit=a3dff3abc83b9d82f3652093246e1d693d526cdb].
 % Guarantees: a collection closure excludes every variable bound by case, switch, unify and let* from its captured environment, preserving the written variable identities used by each binding form [tested: a_collection_closure_keeps_each_binding_form_local_to_one_element; commit=09e34db01c8e3ebeff375ca18d3424c483172e7d].
+% Guarantees: a singleton superposition adds no return unification and preserves every answer of its member [tested: singleton_superpose:the_only_branch_has_the_same_goal_and_output_as_its_expression, singleton_superpose:the_only_branch_keeps_every_answer_and_duplicate; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67].
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: explicit cast targets and typed bindings resolve aliases inside
 %   the engine; emitted checks preserve already resolved type observations
@@ -379,9 +380,11 @@ translate_special_dl('__metta_type_syntax__', [Raw, Space], AfterHead, Goals, Ou
 
 translate_special_dl(superpose, [Args], AfterHead, Goals, Out) :-
     is_list(Args),
-    build_superpose_branches(Args, Out, Branches),
-    disj_list(Branches, Disj),
-    AfterHead = [Disj|Goals].
+    ( Args = [Only], Only \== 'Empty'
+      -> translate_expr_dl(Only, AfterHead, Goals, Out)
+      ;  build_superpose_branches(Args, Out, Branches),
+         disj_list(Branches, Disj),
+         AfterHead = [Disj|Goals] ).
 %Empty is the branch remover: a finished result that IS the symbol Empty
 %"is not returned among other results when interpreting is finished", no
 %operation exempt [source: LeaTTa MettaHyperonFull/Minimal/
