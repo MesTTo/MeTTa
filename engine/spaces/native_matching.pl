@@ -41,8 +41,9 @@
 %sets across every conjunct that mentions it rather than generating from one
 %and testing in the rest. That needs sorted access per variable, which the
 %whole-conjunction seam foreign_plan/5 exists to delegate for providers.
-%Native cyclic, ground relations now reach generic_join.pl before this
-%fallback; its per-variable domains remove the intermediate product.
+%Full native conjunctions reach generic_join.pl through match_conjunction/3;
+%its per-variable domains remove the intermediate product. Bounded callers
+%retain this streaming path so finding one answer need not read every input.
 %
 %MULTIPLICITY is preserved exactly because the atom combinations are the same
 %ones, merely visited in another order: `(, (edge $x $y) (edge $x $y))` over a
@@ -82,12 +83,7 @@ match_native(Module, Space, [Comma|Conjuncts], OutPattern, Result) :-
     Conjuncts = [_, _|_],
     relational_conjuncts(Conjuncts),
     !,
-    (   native_conjunction_plan(Module, Space, Conjuncts, Plan)
-    ->  native_conjunction_answer(Plan),
-        acyclic_term(OutPattern),
-        Result = OutPattern
-    ;   match_relational_conjuncts(Module, Space, Conjuncts, OutPattern, Result)
-    ).
+    match_relational_conjuncts(Module, Space, Conjuncts, OutPattern, Result).
 
 match_native(Module, Space, [Comma|[Head|Tail]], OutPattern, Result) :- Comma == ',',
                                                                         var(Head), !,

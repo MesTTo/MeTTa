@@ -129,4 +129,26 @@ test(the_empty_two_hub_triangle_avoids_quadratic_growth) :-
     assertion(Medium < 2.8 * Small),
     assertion(Large < 2.8 * Medium).
 
+prefix_join_cost(N, Cost) :-
+    findall([edge,I,J], (between(1, N, I), J is I+1), Chain),
+    append([[edge,a,b],[edge,b,c],[edge,c,a]], Chain, Atoms),
+    with_join_atoms(Atoms,
+        ( Goal = spaces:match_bounded(1, '&plunit_generic_join',
+                                      [',',[edge,X,Y],[edge,Y,Z],[edge,Z,X]],
+                                      [triple,X,Y,Z], Answer),
+          findall(Answer, Goal, _),
+          statistics(inferences, Before),
+          findall(Answer, Goal, Answers),
+          statistics(inferences, After),
+          Cost is After - Before,
+          assertion(Answers == [[triple,a,b,c]]) )).
+
+test(a_bounded_triangle_retains_streaming_first_answer_cost) :-
+    prefix_join_cost(16, _),
+    prefix_join_cost(64, Small),
+    prefix_join_cost(256, Medium),
+    prefix_join_cost(1024, Large),
+    assertion(Medium =< Small + 4),
+    assertion(Large =< Small + 4).
+
 :- end_tests(native_generic_join).
