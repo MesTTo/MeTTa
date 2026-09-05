@@ -18,7 +18,7 @@ Guarantees:
     checked specialization, and the final line gives agreed and inference-
     bounded totals rather than discarding the verifier's coverage
     [tested: tests/checks/check_specialization_differential_selftest.py;
-    commit=WORKTREE]
+    commit=694dff934a11dbc2ee99267b60f39564053baf87]
 Fails when:
   - SWI-Prolog or the engine cannot start; infrastructure failure is loud
     rather than being mistaken for a corpus with no disagreements.

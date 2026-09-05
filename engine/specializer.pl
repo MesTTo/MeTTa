@@ -49,7 +49,7 @@
 %     counts when the mode ends, including at process exit, on output that
 %     survives the standalone launcher's quiet logging policy [tested:
 %     tests/checks/check_specialization_differential_selftest.py;
-%     commit=WORKTREE].
+%     commit=694dff934a11dbc2ee99267b60f39564053baf87].
 % Guarded by: '$metta_typing_policy' is acquired before '$metta_specializer'
 %   and before the publication transaction, so a specialization cannot retain
 %   a static type proof across a concurrent policy change. '$metta_specializer'

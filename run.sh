@@ -14,7 +14,7 @@
 #     examples/ pass; unset, the default GATE_ONLY=1 sh check.sh is
 #     unaffected, all 35 lanes still green].
 #   - `--verbose` preserves SWI informational reports while the default stays
-#     quiet [tested: tests/shell/test_run_verbose.sh; commit=WORKTREE].
+#     quiet [tested: tests/shell/test_run_verbose.sh; commit=694dff934a11dbc2ee99267b60f39564053baf87].
 # Open Obligations:
 #   To Do: None
 #   Hacks: None

@@ -5,7 +5,7 @@
 ;   - verify-specializations reports how many generated calls agreed and how
 ;     many reached its inference bound when the mode turns off [tested:
 ;     tests/checks/check_specialization_differential_selftest.py;
-;     commit=WORKTREE].
+;     commit=694dff934a11dbc2ee99267b60f39564053baf87].
 ;
 ;Time control and interpreter pragmas, all core: no import needed.
 ;

@@ -10,7 +10,7 @@ Guarantees:
   - a clean specialized call reports an agreed count and a one-inference
     budget reports the same attempted check as unverified
     [tested: tests/checks/check_specialization_differential_selftest.py;
-    commit=WORKTREE]
+    commit=694dff934a11dbc2ee99267b60f39564053baf87]
 Fails when:
   - the production detector, specializer verification, or fixture stops
     exercising the same disagreement; this imports the detector rather than
