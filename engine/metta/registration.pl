@@ -54,10 +54,10 @@ register_prolog_arities(N) :-
              \+ (current_op(_, _, N), imported_predicate(N, Arity)) ),
            register_arity(N, Arity)).
 
-%%% Arities a SWI system predicate lent a MeTTa name by accident %%%
+%%% Arities a predicate outside this tree lent a MeTTa name by accident %%%
 %
-%A SWI SYSTEM predicate that shares a MeTTa operation's name but not its shape
-%is a different predicate, and registering its arity made an UNDER-APPLIED call
+%A predicate that shares a MeTTa operation's name but not its shape is a
+%different predicate, and registering its arity made an UNDER-APPLIED call
 %compile straight into it. `!(not)` reached SWI's own not/1, which is negation,
 %and aborted the runnable with `not/1: Arguments are not sufficiently
 %instantiated` instead of answering anything at all; the same held for
@@ -67,15 +67,41 @@ register_prolog_arities(N) :-
 %may take the host down
 %[tested: test_an_underapplied_operation_answers_instead_of_aborting].
 %
-%The operation's OWN declarations decide which arities are its: a chain of N
-%links is the Prolog predicate of arity N, one argument per link with the last
-%being the result. So `(: not (-> Bool Bool))` keeps not/2 and drops not/1, and
-%`(: length (-> Expression Number))` keeps length/2 even though length/2 is a
-%system predicate too. Measured on this tree: exactly nine registrations go,
-%append/1, assert/1, copy_term/3, copy_term/4, exists_file/1, not/1, sleep/1,
-%sort/4 and term_hash/4, none of which any example, test or library calls, and
-%every library or engine-defined predicate is untouched because it is not
-%built_in.
+%The operation's OWN description decides which arities are its, and it has two
+%independent halves that are read together: an implementation facet, whose key
+%is the MeTTa arity and whose Prolog predicate therefore has one more argument;
+%and an arrow declaration, a chain of N links being the Prolog predicate of
+%arity N. Either one claiming an arity keeps it. So `(: not (-> Bool Bool))`
+%and `builtin_implementation(not/1, _)` both keep not/2 while nothing claims
+%not/1, and `(: length (-> Expression Number))` keeps length/2 even though
+%length/2 is a system predicate too.
+%
+%WHAT THIS DOES NOT ASK IS `built_in`, and that was the defect. built_in is a
+%property of the BUILD rather than of the collision: swipl-wasm 8.0.6 defines
+%sleep/1 in library(wasm), its JavaScript interop library, which is an ordinary
+%module predicate and not built_in, so the pass kept arity(sleep, 1) there and
+%the Node seat's every boot then failed the registration coverage check with
+%`unregistered_builtin_spec(sleep/0)`, 44 of its 621 tests with it
+%[measured 2026-09-06: `cd extensions/node && npm test` reads 44 failures
+%before and 0 after; the same engine natively reads sleep/1 as system].
+%A predicate this tree DEFINES is kept whatever a build calls it, which is the
+%half built_in was standing in for, and it is asked the way the reverse
+%coverage scan asks it, through the file the clauses came from.
+%
+%Measured on both builds and the two now agree ROW FOR ROW, which is the
+%property the old spelling did not have: nine registrations go, append/1,
+%assert/1, copy_term/3, copy_term/4, not/1, sleep/1, sort/4, term_hash/4 and
+%throw/1, natively and under swipl-wasm alike. The native set is byte-identical
+%to what the built_in spelling removed, so nothing this tree relies on changes
+%[measured 2026-09-06: the same nine under `swipl -g` and inside the wasm
+%engine the Node seat boots]. None of them is called by any example, test or
+%library, and every library or engine-defined predicate is untouched because a
+%facet claims it, its arrow declaration claims it, or its file is in this tree
+%[tested: builtin_facets:a_foreign_predicate_lending_a_builtin_name_loses_its_arity,
+%builtin_facets:the_pass_removes_a_foreign_arity_and_keeps_the_described_one,
+%builtin_facets:a_tree_defined_arity_is_told_from_a_foreign_one,
+%builtin_facets:the_retraction_set_is_the_same_nine_on_every_build;
+%commit=7eff330776f703cb603d7eea03fc1166d9e08e5e].
 %
 %IT RUNS AFTER THE DECLARATIONS AND THE PRELUDE, not while the names register,
 %and that ordering is the whole reason it is a separate pass:
@@ -156,16 +182,51 @@ retract_unrelated_system_arities :-
             Unrelated),
     forall(member(N-Arity, Unrelated), retractall(arity(N, Arity))).
 
+%A name the engine says NOTHING about is not judged at all, which is what
+%keeps the pass off a host's or a backend's own registrations. Saying something
+%is either half of the description, and both halves are needed here: the core
+%names carry facets as source clauses, while a prelude name like `throw` has
+%only its arrow declaration until finalize_builtin_implementations/0 derives
+%its facet, which happens in the NEXT boot step.
 unrelated_system_predicate(N, Arity) :-
-    functor(Head, N, Arity),
-    metta_engine_module(Engine),
-    predicate_property(Engine:Head, built_in),
-    seam:builtin_type_declaration(N, _),
-    \+ declared_metta_arity(N, Arity).
+    builtin_described_name(N),
+    \+ described_metta_arity(N, Arity),
+    \+ declared_metta_arity(N, Arity),
+    \+ builtin_tree_defined_arity(N, Arity).
+
+builtin_described_name(N) :-
+    (   builtin_implementation(N/_, _)
+    ->  true
+    ;   seam:builtin_type_declaration(N, _)
+    ).
+
+described_metta_arity(N, Arity) :-
+    MettaArity is Arity - 1,
+    MettaArity >= 0,
+    builtin_implementation(N/MettaArity, _).
 
 declared_metta_arity(N, Arity) :-
     seam:builtin_type_declaration(N, [->|Links]),
     length(Links, Arity).
+
+%Currently no arity is kept by the declaration alone, and it is asked anyway:
+%the two halves of the description are independent statements, and an arity a
+%declaration claims with no facet behind it has to reach
+%validate_builtin_registration_coverage/0 as drift rather than disappear here.
+%The same holds for an arity this tree defines and has not described.
+%
+%The file question is the reverse coverage scan's, asked through the same two
+%predicates, so "a predicate of ours" has one meaning in this file. A predicate
+%with no source file at all -- every C-defined SWI builtin -- is not ours.
+builtin_tree_defined_arity(N, Arity) :-
+    metta_engine_module(Engine),
+    current_predicate(Engine:N/Arity),
+    functor(Head, N, Arity),
+    predicate_property(Engine:Head, implementation_module(Owner)),
+    current_predicate(Owner:N/Arity),
+    source_file(Owner:Head, File),
+    builtin_project_implementation_prefixes(Prefixes),
+    builtin_project_implementation_file(Prefixes, File).
 
 %Only for an OPERATOR, and the first attempt got that wrong: excluding every
 %imported predicate dropped length/2, which is library(lists)'s and a
