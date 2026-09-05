@@ -1,6 +1,6 @@
 % Purpose: verify that a MeTTa program can query execution observations.
 % Guarantees: selected trace records retain source execution results and depths
-%   [tested: lib_observe; commit=WORKTREE].
+%   [tested: lib_observe; commit=504f8dddfa890ced97e795a13ab10e239b1de2ce].
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 

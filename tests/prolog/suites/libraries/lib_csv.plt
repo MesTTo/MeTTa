@@ -1,6 +1,6 @@
 % Purpose: verify CSV spaces through the public provider seam and MeTTa match.
 % Owns resources: temporary fixture files are removed by each test's cleanup.
-% [tested: lib_csv; commit=WORKTREE]
+% [tested: lib_csv; commit=504f8dddfa890ced97e795a13ab10e239b1de2ce]
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

@@ -1,5 +1,5 @@
 ; Purpose: create, copy and inspect files using queryable metadata.
-; [tested: sh test.sh examples/ch20-extending-the-engine/20-06-files-and-processes/01-files-and-paths.metta; commit=WORKTREE]
+; [tested: sh test.sh examples/ch20-extending-the-engine/20-06-files-and-processes/01-files-and-paths.metta; commit=504f8dddfa890ced97e795a13ab10e239b1de2ce]
 !(import! &self (library lib_file))
 
 !(test (path-join "reports" "sales.csv") "reports/sales.csv")

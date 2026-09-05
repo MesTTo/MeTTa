@@ -10,7 +10,7 @@
 % Guarantees:
 %   - Exact function filters retain execution depth and charge only selected
 %     events [tested: tracer:filter_precedes_the_bound_and_keeps_depth;
-%     commit=WORKTREE].
+%     commit=504f8dddfa890ced97e795a13ab10e239b1de2ce].
 %   - Functions defined by the traced source and calls from hyperpose workers
 %     produce events [tested 2026-08-14: tracer].
 %   - A symbol whose spelling reads back as something else survives the

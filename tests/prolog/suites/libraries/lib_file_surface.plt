@@ -1,6 +1,6 @@
 % Purpose: verify file operations against SWI and query metadata as atoms.
 % Owns resources: each fixture directory is removed through setup_call_cleanup.
-% [tested: lib_file_surface; commit=WORKTREE]
+% [tested: lib_file_surface; commit=504f8dddfa890ced97e795a13ab10e239b1de2ce]
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 :- use_module(library(prolog_wrap)).

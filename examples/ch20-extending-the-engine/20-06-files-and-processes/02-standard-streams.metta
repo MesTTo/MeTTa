@@ -1,5 +1,5 @@
 ; Purpose: demonstrate standard streams and explicit process termination.
-; [tested: test_standard_streams_and_explicit_exit; commit=WORKTREE]
+; [tested: test_standard_streams_and_explicit_exit; commit=504f8dddfa890ced97e795a13ab10e239b1de2ce]
 !(import! &self (library lib_file))
 
 ; In the shell suite stdin is already at EOF. With a pipe, the text is echoed
