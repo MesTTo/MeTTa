@@ -41,14 +41,14 @@ It called `reading=$(bounded swipl ...)` an unbounded swipl, which is what
 tests/shell/test_boot_inference_determinism.sh was reworded around rather than
 this file being fixed; it spared ``bad=`swipl ...` `` entirely, because a
 backtick is not an operator it knew; it spared an unbounded spawn in every
-`if`, `while`, `for` and `case` position; and it spared
-`RUSTFLAGS="-C target-cpu=native" ... cargo build`, because its prefix pattern
-stopped at the space inside the quotes. That last one was the tree's one
-unbounded spawn when this was written [measured 2026-09-06: over the nine
-planted command positions the pattern answered 6 findings across 8 spawns and
-got seven shapes wrong, five by sparing; the grammar answers 9 across 18 and
-gets all nine right; fixture=tests/checks/check_process_bounds_selftest.py's
-POSITIONS].
+`if`, `while`, `for` and `case` position and inside every `{ ...; }` group;
+and it spared `RUSTFLAGS="-C target-cpu=native" ... cargo build`, because its
+prefix pattern stopped at the space inside the quotes. That last one was the
+tree's one unbounded spawn when this was written [measured 2026-09-06: over
+the eleven planted command positions the pattern answered 7 findings across 10
+spawns and got eight shapes wrong, six by sparing; the grammar answers 11
+across 22 and gets all eleven right;
+fixture=tests/checks/check_process_bounds_selftest.py's POSITIONS].
 
 Assumes:
   - a lane function is `name() {` at column 0 in one of the check scripts, and

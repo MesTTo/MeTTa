@@ -45,14 +45,14 @@ Guarantees:
     line carrying `# unbounded: <reason>` are NOT reported
     [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
   - every shell shape that opens a command position is judged by the command
-    that WRAPS the spawn: a `$( )`, a backtick, a pipeline, an `&&` chain, an
-    `if` and a `while` condition, a `for` body, a `case` arm and an assignment
-    prefix holding a quoted space, each planted bounded and unbounded, are
-    reported in the second form and spared in the first. The old
-    command-position pattern got seven of the nine wrong, five of them by
-    sparing the unbounded half [measured 2026-09-06: the pattern answered 6
-    findings over 8 spawns where the grammar answers 9 over 18, over the
-    POSITIONS fixture below]
+    that WRAPS the spawn: a `$( )`, a backtick, a pipeline, an `&&` chain, a
+    `||` alternative, a `{ ...; }` group, an `if` and a `while` condition, a
+    `for` body, a `case` arm and an assignment prefix holding a quoted space,
+    each planted bounded and unbounded, are reported in the second form and
+    spared in the first. The old command-position pattern got eight of the
+    eleven wrong, six of them by sparing the unbounded half [measured
+    2026-09-06: the pattern answered 7 findings over 10 spawns where the
+    grammar answers 11 over 22, over the POSITIONS fixture below]
     [tested: tests/checks/check_process_bounds_selftest.py; commit=WORKTREE]
   - a spawner NAMED inside a quoted argument, `sed 's|sh run.sh ...|'`, is not
     a command and is not reported
@@ -190,7 +190,7 @@ exec "$PY" -m pytest tests
 #: command's last argument is what the assertions name, so a shape that flips
 #: reads as itself rather than as a line number.
 #:
-#: Nine shapes, because a pass that reads the first word after an assignment
+#: Eleven shapes, because a pass that reads the first word after an assignment
 #: prefix gets three of them backwards at once. `reading=$(bounded swipl ...)`
 #: is BOUNDED and read as an unbounded swipl, which is what
 #: tests/shell/test_boot_inference_determinism.sh was reworded around; ``
@@ -219,6 +219,12 @@ swipl -g halt pipeline-loose.pl | sed -n 1p
 cd "$HERE" && bounded swipl -g halt chain-bound.pl
 cd "$HERE" && swipl -g halt chain-loose.pl
 
+cd "$HERE" || bounded swipl -g halt alternative-bound.pl
+cd "$HERE" || swipl -g halt alternative-loose.pl
+
+command -v swipl >/dev/null 2>&1 || { bounded swipl -g halt block-bound.pl; }
+command -v swipl >/dev/null 2>&1 || { swipl -g halt block-loose.pl; }
+
 if bounded swipl -g halt condition-bound.pl; then echo yes; fi
 if swipl -g halt condition-loose.pl; then echo yes; fi
 
@@ -239,9 +245,13 @@ RUSTFLAGS="-C target-cpu=native" TMPDIR="$HERE" cargo build prefix-loose
 sed 's|sh run.sh "$f" 2>&1|sh run.sh "$f"|' "$HERE/test.sh" > quoted-argument.sh
 """
 
-#: The nine, in the order they are planted above.
-SHAPES = ("substitution", "backtick", "pipeline", "chain", "condition",
-          "loop", "body", "arm", "prefix")
+#: The eleven, in the order they are planted above. `chain` and `alternative`
+#: are the two halves of an and-or list and `block` is the brace group a
+#: `|| { ...; }` opens, which build.sh at the root writes; they are separate
+#: cases because a reader checking a shape against this list should find the
+#: shape rather than have to know which ones share a code path.
+SHAPES = ("substitution", "backtick", "pipeline", "chain", "alternative",
+          "block", "condition", "loop", "body", "arm", "prefix")
 
 
 #: A harness script, read as Python rather than as shell. Six shapes: an engine
