@@ -1483,6 +1483,20 @@ metta_add_atom(Space, Term, true) :-
     nonvar(Type), Type = [Alias|_], Alias == 'Alias',
     !,
     space_module(Space, Module),
+    %VALIDATED TWICE, and the second time is the one that matters under
+    %concurrency. The first call reads the rows this transaction can SEE, which
+    %under SWI's snapshot isolation is the state as of its start; two
+    %overlapping declarations therefore each find no conflict and both commit,
+    %leaving `(: Count (Alias Number))` and `(: Count (Alias String))` standing
+    %together [measured 2026-09-05, reproduced on the clean base without
+    %aliases using two typing rules, so it is the substrate rather than this
+    %feature]. transaction/3 calls the constraint after changing visibility to
+    %"the current global state combined with the changes made by Goal", holding
+    %its mutex through the commit, so the same validation run there sees the
+    %conflict and throws, and SWI discards everything
+    %[source: SWI-Prolog transaction/3; only the OUTER branch refreshes, which
+    %is why a declaration made inside a user transaction is covered by that
+    %transaction's own constraint instead].
     with_typing_policy_stable(
         transaction(
             ( validate_type_alias_declaration(Module, Name, Type),
@@ -1491,7 +1505,9 @@ metta_add_atom(Space, Term, true) :-
               ;  store_atom(Space, Term),
                  enable_type_alias_scope(Module),
                  type_alias_lookup_changed(Module, Name)
-              ) ))).
+              ) ),
+            validate_type_alias_declaration(Module, Name, Type),
+            '$metta_type_alias_commit')).
 
 %Type declarations are a multimap because distinct arrows and distinct data
 %types are meaningful. A variant-identical second row is not: every type walk

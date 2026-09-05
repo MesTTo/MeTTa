@@ -542,9 +542,21 @@ metta_outer_transaction_prepare(Goal, Vars, Answers,
                                 Outcome, outer(Enlisted)) :-
     seam:observation_begin,
     nb_setval('$metta_tx_enlisted', []),
+    nb_setval('$metta_tx_aliases', []),
+    %transaction/3 rather than /1, for the invariant a snapshot cannot see.
+    %SWI calls Goal, locks the mutex, changes visibility to the current global
+    %state combined with Goal's changes, calls the constraint, and only then
+    %commits; a failure or exception there discards everything. That refresh is
+    %what lets metta_validate_pending_type_aliases/0 catch a conflicting alias
+    %another transaction committed while this one ran, which the check at
+    %declaration time cannot see and which left both declarations standing
+    %[measured 2026-09-05; the nested branch does NOT refresh, which is why
+    %only the outer boundary carries this].
     catch(( setup_call_cleanup(
                 b_setval('$metta_user_tx', true),
-                transaction(metta_transaction_answers(Goal, Vars, Answers)),
+                transaction(metta_transaction_answers(Goal, Vars, Answers),
+                            metta_validate_pending_type_aliases,
+                            '$metta_tx_constraint'),
                 b_setval('$metta_user_tx', false))
         ->  Outcome = committed ; Outcome = failed ),
           Error,
