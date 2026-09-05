@@ -224,7 +224,7 @@ Python side does not move. Within one run the counts are exact: three fresh
 - `foldl-atom` `(-> Expression Atom Variable Variable Atom %Undefined%) | (-> Expression Atom Expression %Undefined%)` &mdash; `functools.reduce` with an initial value is the same finite left fold. For a change stream, `m.events().fold(..., under=algebra)` makes the algebra itself the step; `into=State(...)` is the running-gauge form.
 - `for-each-in-atom` `(-> Expression Atom (->))` &mdash; A `for` statement. It is called for its effect, so the row prints and answers the unit. Python's `for` has no value at all, and the concept map says `None` IS the unit, but `metta.ground(None)` renders `<NoneType>` rather than `()` today, so a row that wants the unit writes it [measured 2026-08-22]. Where they differ: this engine answers one unit per element.
 - `atom-subst` `(-> Atom (:Atom Variable) Atom Atom)` &mdash; Applying a substitution to a template, which `Atom.map` does over the whole term. Section 9e wants the bindings object to carry it, `b.apply(template)`; `metta.Bindings` has no such method yet, so the walker is the spelling. The form is shown but not run here: this engine leaves the MeTTa call unreduced.
-- `if-decons-expr` `(-> Expression Variable Variable Atom Atom %Undefined%)` &mdash; Starred unpacking inside an `if`: the empty case is the `else` branch. The form is shown but not run here: this engine leaves the call unreduced.
+- `if-decons-expr` `(-> (:Atom Expression) (:Atom Variable) (:Atom Variable) Atom Atom %Undefined%)` &mdash; Starred unpacking inside an `if`: the empty case is the `else` branch.
 
 ## Set operations
 
