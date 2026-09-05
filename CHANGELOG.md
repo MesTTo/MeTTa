@@ -189,9 +189,6 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   incompatible existing bindings take the fallback branch.
 - Constructive negation now preserves wildcard and structural bindings in
   nested case towers and recognizes the complement of an empty answer set.
-- Native cyclic conjunctions intersect indexed variable domains before
-  producing answers. Duplicate facts retain their full contribution to every
-  answer bag; unsupported patterns continue through the existing matcher.
 - `(pragma! plan-cyclic-joins True)` plans a full native cyclic conjunction as
   a Generic Join, intersecting indexed variable domains before producing
   answers. Duplicate facts retain their full contribution to every answer bag;
