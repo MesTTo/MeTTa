@@ -31,7 +31,7 @@
 % open-tail queries enumerate stored arities [tested:
 % catalog_self_description:catalog_queries_preserve_width_multiplicity_and_references,
 % catalog_self_description:fixed_width_catalog_lookup_ignores_unrelated_arities;
-% commit=WORKTREE].
+% commit=8bd37f3042555ee016a7b917234ce44c75a97c3e].
 
 :- dynamic native_storage_module_cache/2.
 :- dynamic space_parametric/1.
