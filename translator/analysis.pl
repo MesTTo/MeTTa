@@ -28,6 +28,9 @@
 %   aliases, and with_equation_types/4 restores its enclosing translation
 %   context [tested: structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
 
+% Guarantees: refined-call evidence helpers cannot be captured by a space's
+%   user predicates [tested: run_tests(tensor_shapes); commit=4eaefdd8d40e53b2613722287302a14b41704662].
+
 % Function source retained for higher-order specialization. Each equation is
 % one independently indexed fact, so compiling a new equation does not copy
 % every older equation for the same function.
@@ -729,6 +732,8 @@ seam:engine_emitted(function_overapplication/3).
 seam:engine_emitted(declared_arity_refusal/3).
 seam:engine_emitted(metta_bad_argument_error/3).
 seam:engine_emitted(dispatch_mismatch_result/3).
+seam:engine_emitted(dispatch_refinement_mismatch_result/4).
+seam:engine_emitted(metta_record_refinement_failure/3).
 seam:engine_emitted(dispatch_no_match_result/3).
 seam:engine_emitted(dispatch_policy_execute/5).
 seam:engine_emitted(metta_application_result/3).

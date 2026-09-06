@@ -24,6 +24,15 @@
 %   parameter masks and static proofs are chosen [tested:
 %   structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
 
+% Guarantees: Annotated parameter checks run before the body, retain joint
+%   bindings with the result, and report observed refinement failures using
+%   the original written call after all overloads decline
+%   [tested: run_tests(tensor_shapes); commit=4eaefdd8d40e53b2613722287302a14b41704662].
+% Owns resources: each refined call owns a refinement_evidence/2 cell whose
+%   failure snapshots and host references become collectible when that call
+%   finishes or is abandoned. The cell never escapes into global state.
+% Guarded by: no lock is needed because the evidence cell belongs to one call.
+
 :- meta_predicate with_static_parameter_environment(+, +, +, +, 0).
 
 %Type function call generation, returns function call plus typechecks for input and output:
@@ -78,12 +87,19 @@ typed_functioncall_dl(Fun, UniqueTypeChains, T, IsPartial, Bound, Out,
             RuntimeArgs = T,
             AfterHead = [Out = Refusal|Goals]
         ;   applicable_typed_branches(Selection, Fun, T, IsPartial, Bound,
-                                      Out, RuntimeArgs, BeforeCall, Branches),
+                                      Out, RuntimeArgs, BeforeCall, Evidence,
+                                      Branches),
             Branches \== [],
-            first_applicable_branch(Branches,
-                                    dispatch_mismatch_result(Fun, Written, Out),
-                                    Dispatch),
-            AfterHead = [Dispatch|Goals]
+            (   nonvar(Evidence)
+            ->  Evidence = refinement(Cell),
+                AfterHead = [Cell = refinement_evidence([], false),
+                             Dispatch|Goals],
+                Fallback = dispatch_refinement_mismatch_result(
+                               Fun, Written, Cell, Out)
+            ;   AfterHead = [Dispatch|Goals],
+                Fallback = dispatch_mismatch_result(Fun, Written, Out)
+            ),
+            first_applicable_branch(Branches, Fallback, Dispatch)
         )
     ).
 
@@ -291,26 +307,26 @@ type_chain_refusal(Chains, InputArity, Rule, Reason) :-
                         DeclaredInputArity, Rule, Reason),
     !.
 
-applicable_typed_branches([], _, _, _, _, _, _, _, []).
+applicable_typed_branches([], _, _, _, _, _, _, _, _, []).
 applicable_typed_branches([TypeChain|Rest], Fun, T, IsPartial, Bound, Out,
-                          RuntimeArgs, BeforeCall, Branches) :-
+                          RuntimeArgs, BeforeCall, Evidence, Branches) :-
     (   typed_functioncall_branch(Fun, TypeChain, T, [], IsPartial, Bound, Out,
-                                  RuntimeArgs, BeforeCall, BranchGoal)
+                                  RuntimeArgs, BeforeCall, Evidence, BranchGoal)
     ->  Branches = [BranchGoal|More]
     ;   Branches = More
     ),
     applicable_typed_branches(Rest, Fun, T, IsPartial, Bound, Out,
-                              RuntimeArgs, BeforeCall, More).
+                              RuntimeArgs, BeforeCall, Evidence, More).
 
 typed_functioncall_branch(Fun, TypeChain, T, GsH, IsPartial, Bound, Out,
-                          RuntimeArgs, BeforeCall, BranchGoal) :-
+                          RuntimeArgs, BeforeCall, Evidence, BranchGoal) :-
     TypeChain = [->|Xs],
     append(_, [_], Xs), !,
     %The RESULT type is dropped by the same rule as the arguments, in the same
     %pass: a type variable that occurs once in the chain constrains nothing
     %wherever it sits.
     drop_unconstraining_types(TypeChain, Xs, AllTypes),
-    append(ArgTypes, [OutType], AllTypes),
+    typed_parameters(AllTypes, ArgTypes, OutType, Refined),
     metta_argument_type_origins(ArgTypes, ArgOrigins),
     argument_applicability_checks(T, ArgTypes, ArgOrigins, ApplicabilityChecks),
     translate_args_by_type(T, ArgTypes, GsT2, AVsTmp0, ArgChecks, Computed0),
@@ -373,11 +389,75 @@ typed_functioncall_branch(Fun, TypeChain, T, GsH, IsPartial, Bound, Out,
                       Extra),
     typed_call_operands(Fun, Computed0, Guarded),
     build_call_or_partial_dl(Fun, AVsTmp, Out, CallGoals, [], Extra),
-    append([AfterEval, BeforeCall, CallGoals], Checked),
+    (   nonvar(Refined)
+    ->  Evidence = refinement(Cell),
+        (   AfterEval == []
+        ->  goals_list_to_conj(ArgChecks, ArgumentCheck),
+            Probe = (\+ \+ ArgumentCheck)
+        ;   goals_list_to_conj(AfterEval, Probe)
+        ),
+        append(BeforeCall, CallGoals, Continue),
+        goals_list_to_conj(Continue, Proceed),
+        Checked = [( Probe
+                   -> nb_setarg(2, Cell, true), Proceed
+                   ;  metta_record_refinement_failure(Fun, AVsTmp, Cell),
+                      fail
+                   )]
+    ;   append([AfterEval, BeforeCall, CallGoals], Checked)
+    ),
     guard_error_arguments(Guarded, Out, Checked, AfterInnerEval, []),
     append(InnerEval, AfterInnerEval, CallGoalsList),
     GoalsList = [(RuntimeArgs = AVsTmp0)|CallGoalsList],
     goals_list_to_conj(GoalsList, BranchGoal).
+
+% Split the result and detect refined parameters in the same arrow walk.
+% Atomic types cannot contain a refinement. Only compound declarations need
+% the checked-type projection that unwraps a type-position modifier.
+typed_parameters([OutType], [], OutType, _) :- !.
+typed_parameters([Type|Types], [Type|Parameters], OutType, Refined) :-
+    (   compound(Type),
+        declared_type_for_check(Type, Checked),
+        nonvar(Checked),
+        Checked = [Head, _, _|_],
+        Head == 'Annotated'
+    ->  Refined = true
+    ;   true
+    ),
+    typed_parameters(Types, Parameters, OutType, Refined).
+
+% Freeze the diagnostic when the evaluated values are still available. This
+% does not evaluate the source operands again. Identical failed snapshots from
+% alternative arrows are kept once, while their ordinary refusal multiplicity
+% remains in Reasons. The cell survives branch backtracking, not call lifetime.
+metta_record_refinement_failure(Fun, Arguments, Evidence) :-
+    findall(Reason,
+            ( \+ metta_call_accepted(Fun, Arguments),
+              metta_bad_argument_reason(Fun, Arguments, Reason) ), Reasons),
+    arg(1, Evidence, Previous),
+    Snapshot = Arguments-Reasons,
+    (   member(Seen, Previous), Seen =@= Snapshot
+    ->  true
+    ;   nb_setarg(1, Evidence, [Snapshot|Previous])
+    ).
+
+% A later accepting overload makes earlier failures irrelevant. A body or
+% result check that fails after its parameters passed is not an argument
+% refusal. Other mismatch policies retain their existing written-call answer.
+dispatch_refinement_mismatch_result(Fun, Written, Evidence, Out) :-
+    dispatch_policy_value(Fun, 'MismatchEnum', Policy),
+    (   Policy == 'MismatchOriginal'
+    ->  arg(2, Evidence, Accepted),
+        Accepted == false,
+        arg(1, Evidence, Reversed),
+        (   Reversed == []
+        ->  dispatch_mismatch_result(Fun, Written, Out)
+        ;   reverse(Reversed, Snapshots),
+            member(_-Reasons, Snapshots),
+            member(Reason, Reasons),
+            metta_error_atom(Fun, Written, Reason, Out)
+        )
+    ;   dispatch_mismatch(Policy, Fun, Written, Out)
+    ).
 
 %evaluated_argument_values/3's typed twin. A parameter the evaluation mask
 %holds back (Atom, and any user type declared DontEvalType) receives the
