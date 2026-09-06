@@ -31,7 +31,7 @@
 %     life's typing policy [tested:
 %     typing_rule_scope:a_released_space_retires_the_typing_rules_declared_in_it,
 %     typing_rule_scope:the_next_life_of_a_released_module_answers_the_ordinary_refusal;
-%     commit=WORKTREE].
+%     commit=84327245373bba29fba00cf2cea62d8257a9f5cb].
 % Decides:
 %   - rules are tried in registration order, user tier before shipped tier;
 %     the shared overlap reporter names every ordering-sensitive intersection.
@@ -228,9 +228,9 @@ remove_typing_rule_in(Module, Name) :-
 %names, so the next life of a released name inherited the dead life's typing
 %policy and re-decided its argument checks
 %[tested: a_released_space_retires_the_typing_rules_declared_in_it;
-%commit=WORKTREE]. Withdrawn through the public door rather than by retracting
-%the entries, so the invalidation a rule change owes its module stays written
-%once.
+%commit=84327245373bba29fba00cf2cea62d8257a9f5cb].
+%Withdrawn through the public door rather than by retracting the entries, so
+%the invalidation a rule change owes its module stays written once.
 retire_typing_rules_in(Module) :-
     findall(Name, typing_rule_entry(user, Module, Name, _, _, _, _), Names0),
     sort(Names0, Names),

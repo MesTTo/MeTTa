@@ -23,7 +23,7 @@
 %   pooled name checks under the shipped typing policy [tested:
 %   typing_rule_scope:a_released_space_retires_the_typing_rules_declared_in_it,
 %   test_a_recycled_space_name_inherits_no_typing_rule_from_its_past_life;
-%   commit=WORKTREE].
+%   commit=84327245373bba29fba00cf2cea62d8257a9f5cb].
 %   Every execution-module life receives a monotone generation, retained as a
 %   tombstone after release so a registry row from an earlier occupant cannot
 %   address a recycled module name [tested: translator_rule_module_home;
@@ -1313,7 +1313,7 @@ with_metta_space_releasing(Space, Goal) :-
         %dying module exactly as the two retirements beside it do
         %[tested: a_released_space_retires_the_typing_rules_declared_in_it,
         %test_a_recycled_space_name_inherits_no_typing_rule_from_its_past_life;
-        %commit=WORKTREE].
+        %commit=84327245373bba29fba00cf2cea62d8257a9f5cb].
         ( retire_metta_tokens_in(Module),
           translator_rules:retire_translator_rules_in(Module),
           type_rules:retire_typing_rules_in(Module),

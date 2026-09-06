@@ -43,7 +43,7 @@
 %   refusal replaces it for the pair the rule does name [tested:
 %   typing_rule_scope:a_user_rule_that_names_no_refusal_leaves_the_ordinary_one,
 %   typing_rule_scope:a_named_refusal_replaces_the_ordinary_one_for_its_own_pair;
-%   commit=WORKTREE].
+%   commit=84327245373bba29fba00cf2cea62d8257a9f5cb].
 
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 
@@ -185,7 +185,7 @@ metta_bad_argument_error(Operation, Arguments, Error) :-
 %user rule silenced every ordinary argument refusal in it, so a wrong-typed
 %call answered nothing at all, no value and no error
 %[tested: a_user_rule_that_names_no_refusal_leaves_the_ordinary_one;
-%commit=WORKTREE].
+%commit=84327245373bba29fba00cf2cea62d8257a9f5cb].
 metta_bad_argument_refusal(Operation, Arguments, Error) :-
     current_metta_module(Module),
     raw_registered_typing_rule(user, Module, _, _, _, _, _),
