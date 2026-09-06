@@ -28,24 +28,24 @@ Guarantees:
   - a planted engine whose fixed cost exceeds its program run is reported as
     ``negative-net`` by ``measure`` and turns ``verdicts`` red, while the rule
     this file replaced records the same numbers and stays green
-    [tested: this file is its own gate; commit=WORKTREE]
+    [tested: this file is its own gate; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]
   - the recorded net is the program run minus the null run at that row's own
     path length AND directory count, and a control taken at another shape
     gives a different answer, so shape-matching is load-bearing rather than
-    decorative [tested: this file is its own gate; commit=WORKTREE]
+    decorative [tested: this file is its own gate; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]
   - ``--rebaseline`` carries a meta note forward instead of dropping it
-    [tested: this file is its own gate; commit=WORKTREE]
+    [tested: this file is its own gate; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]
   - ``null_program`` builds a control with its example's character count AND
     its directory count, and refuses a shape its root cannot name, naming the
-    edit [tested: this file is its own gate; commit=WORKTREE]
+    edit [tested: this file is its own gate; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]
   - a measurement that outlives ``TIMEOUT`` leaves nothing running, checked on
     the real shape: the timed process is the wrapper and the survivor would be
-    its grandchild [tested: this file is its own gate; commit=WORKTREE]
+    its grandchild [tested: this file is its own gate; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]
   - one cheap run in three is ignored rather than taken and the sample is
     extended; three cheap in seven still answer the cost the other four agree
     on; a cold first touch is discarded rather than counted; and a program
     with no mode at all is reported as having no cost
-    [tested: this file is its own gate; commit=WORKTREE]
+    [tested: this file is its own gate; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]
 Fails when: the production lane stops exposing ``_perf`` as its only process
   call, or stops computing a row's net inside ``measure``.
 Open Obligations:

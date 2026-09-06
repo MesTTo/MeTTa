@@ -27,7 +27,7 @@ subtracting it was wrong in both directions at once:
   program compared ~0.3M against ~5.5M and read 0.05x
   [measured 2026-09-06: upstream boot fixture 252,415,596, upstream empty
   program through the driver 257,010,407, in a clone at the canonical path
-  length with the shipping artifacts; commit=WORKTREE].
+  length with the shipping artifacts; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
 - ours went the other way and NEGATIVE, by 8,661,096 in the same clone
   (1,056,745,595 against 1,048,084,499), because the boot fixture and the
   driver are different processes with different command lines, and a process's
@@ -36,7 +36,7 @@ subtracting it was wrong in both directions at once:
   1,341,149,760, 8.8M or 0.66% apart, non-monotonic in the argument count
   [measured 2026-09-06: ai-tmp/probe/argc.py, three processes per shape, in a
   tree without the C artifacts, so the level differs from the clone's and the
-  effect is the point; commit=WORKTREE]. That is the ASPLOS 2009 measurement
+  effect is the point; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]. That is the ASPLOS 2009 measurement
   bias -- environment and link order shifting layout and moving a measurement
   by percents while nothing about the program changed [source: Mytkowicz,
   Diwan, Hauswirth, Sweeney, "Producing wrong data without doing anything
@@ -61,7 +61,7 @@ path components, which is real work either way. With both matched, a program
 of no content nets between -13,405 and +12,852 on this engine and between
 -7,446 and -705 on upstream's, across nine corpus shapes, which is this
 method's resolution [measured 2026-09-06;
-command=ai-tmp/probe/validate_control.py; commit=WORKTREE].
+command=ai-tmp/probe/validate_control.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
 
 Assumes:
   - the upstream checkout at ../PeTTa-upstream is read-only and pinned, so its
@@ -78,18 +78,18 @@ Guarantees:
   - a row whose program run costs LESS than its own null control is reported
     as `negative-net` and fails the run, rather than being recorded and then
     dropped from the page
-    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
   - the net a row records is the program run minus the null run at that row's
     own path length and directory count, on the same engine, in the same
     harness process
-    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
   - --rebaseline carries every meta note the old baseline held forward; the
     re-pin history is a record, not a cache
-    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
   - a measurement that hits TIMEOUT leaves nothing running: the command owns a
     session and the session is what is killed, because the engine is `perf`'s
     child and outlives every signal aimed at its parents
-    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
 Owns resources: NULL_ROOT holds one empty .metta per distinct corpus path
   length. They are 0-byte files under the ignored scratch root and are left in
   place between runs; nothing else reads them.
@@ -205,7 +205,7 @@ CHILD_ENVIRONMENT = _child_environment()
 #reparented still running. Three corpus rows time out on upstream, and one
 #--rebaseline left two swipl processes at 48% CPU with nothing left to bound
 #them [measured 2026-09-06: pids 4090605 and 4121404, five and three minutes
-#after their rows were recorded as `upstream-timeout`; commit=WORKTREE]. So
+#after their rows were recorded as `upstream-timeout`; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]. So
 #the command gets a session of its own and the SESSION is what the timeout
 #kills, and the wrapper's own ceiling is set just above this one so a harness
 #that dies without reaching this line still has a timer that reaps the group.
@@ -253,7 +253,7 @@ def null_program(length: int, components: int) -> pathlib.Path:
     at a fixed 120 characters, one empty file measured 56,989 instructions at
     one component below the scratch root and 139,684 at seven, and a
     one-equation file rose from 685,835 to 772,826 over the same range
-    [measured 2026-09-06; command=ai-tmp/probe/depth.py; commit=WORKTREE]. A
+    [measured 2026-09-06; command=ai-tmp/probe/depth.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]. A
     control that matched only the length charged that difference to the
     program.
     """
@@ -291,7 +291,7 @@ def null_shape(example: pathlib.Path) -> tuple[int, int]:
 #run carrying one MORE clause because a collection it would have paid for never
 #happened. The same 120 processes with `set_prolog_gc_thread(false)` spread
 #38,479, or 0.0037% [measured 2026-09-06; command=ai-tmp/probe/hunt.py;
-#fixture=examples/ch09-types/13-types_nondet.metta; commit=WORKTREE].
+#fixture=examples/ch09-types/13-types_nondet.metta; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
 #
 #That excursion is bigger than most rows' entire cost, and the minimum picks it
 #every time it appears: the first --rebaseline under the corrected control put
@@ -311,7 +311,7 @@ EXTRA_RUNS = 4
 #: `nondeterministic` on a fresh checkout while reading one inference count six
 #: times in a row on a warmed one [measured 2026-09-06: 03-python_import,
 #: 06-git_import and relative/root.metta, 11,847 / 36,640 / 15,049 inferences
-#: over six processes each; command=ai-tmp/probe/flaky.py; commit=WORKTREE].
+#: over six processes each; command=ai-tmp/probe/flaky.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
 #: One discarded run is the ordinary answer to that, and it is what the
 #: baseline's own fixture line has always assumed by saying the tree was
 #: warmed.
@@ -421,7 +421,7 @@ def measure(engine_root: pathlib.Path, example: pathlib.Path) -> dict:
     #clamped or dropped. Between the floor and zero the row is not a defect and
     #not a measurement either: a program of no content nets between -13,405 and
     #+12,852 across nine corpus shapes [measured 2026-09-06;
-    #command=ai-tmp/probe/validate_control.py; commit=WORKTREE], so a row that
+    #command=ai-tmp/probe/validate_control.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276], so a row that
     #lands there has less work in it than this method can see. Nothing in the
     #corpus does; the smallest row is seventeen times that.
     if net < -INSTRUCTION_ABSOLUTE:
@@ -603,7 +603,7 @@ GUARDED_ARITHMETIC = (
 #runnable forms, which is exactly where a per-form cost shows and where the
 #13.3M bias used to hide it. The decomposition the string quotes
 #[measured 2026-09-06; command=ai-tmp/probe/attribute.py and attribute2.py,
-#both engines through this file's own measure/2; commit=WORKTREE].
+#both engines through this file's own measure/2; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
 PER_FORM = (
     "per-top-level-form load bookkeeping, measured by decomposition: on both"
     " files this tree is cheaper at everything EXCEPT the `!(...)` form."
@@ -681,7 +681,7 @@ WAIVERS = {
         " O(program)."
     ),
     #The seven-process spread the entry below quotes
-    #[measured 2026-09-06; command=ai-tmp/probe/torch.py; commit=WORKTREE].
+    #[measured 2026-09-06; command=ai-tmp/probe/torch.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
     "examples/ch11-python-as-a-notation/07-torch.metta": (
         "SUPERSEDED 2026-09-06 and kept for the record. This row is no longer"
         " measured at all: seven upstream processes of it read 6,916,429,114"
