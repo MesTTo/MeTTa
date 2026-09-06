@@ -1269,9 +1269,18 @@ no transport under it, for mounting on another HTTP framework.
 
 `metta.testing` ships what the suite fuzzes itself with: hypothesis strategies
 (`atoms`, `expressions`, `patterns`, `names`, `numbers`, `texts`, `symbols`,
-`variables`, `grounded`, `ground_atoms`, `numpy_scalars`),
+`variables`, `grounded`, `ground_atoms`, `numpy_scalars`, `programs`),
 `from_pattern(pattern, max_leaves=8)` for ground instances that share every
-repeated named variable and draw anonymous occurrences independently, the compliance suites
+repeated named variable and draw anonymous occurrences independently,
+`programs(census=None, depth=3, facts=(1, 4), queries=(1, 3))` for whole MeTTa
+programs written only out of heads an arbiter is known to REDUCE, which is what
+makes a differential against another engine compare answers instead of error
+paths. Its census is `tests/conformance/petta/HEADS.json`, read from upstream
+PeTTa's own example corpus by
+`tests/conformance/petta_capture.py --census` and decided by running each head
+on that engine; `tests/checks/check_upstream_fuzz.py` is the `parity-fuzz` lane
+that draws from it, runs both engines, and shrinks a disagreement to the
+smallest program that still shows it. Also here: the compliance suites
 (`SpaceComplianceSuite`, `GatewayComplianceSuite`, `check_space_provider`,
 `check_twin`, `check_replay`, `check_minted_handles`), and the deterministic
 benchmark gates (`benchmark_case`, `benchmark_counter_slope`,

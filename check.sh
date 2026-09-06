@@ -18,6 +18,7 @@
 #                                            ciao-grade
 #                                            codec-doc petta parity-perf
 #                                            parity-perf-selftest
+#                                            parity-fuzz parity-fuzz-selftest
 #                                            policy-inventory
 #                                            policy-inventory-selftest
 #                                            refusal-grounds
@@ -408,6 +409,29 @@ run GATE   parity-perf  sh -c "cd '$HERE' && '$PY' tests/checks/check_upstream_p
 # denied counter. It replaces _perf, the lane's one process call, so no engine
 # runs and the whole netting and verdict path is still the production one.
 run GATE   parity-perf-selftest "$PY" "$HERE/tests/checks/check_upstream_parity_selftest.py"
+
+# Generated programs on both engines, which is the question the two lanes above
+# cannot ask: they replay upstream's 156 examples, so they find only what those
+# examples happen to write. This draws programs from a CENSUS of the heads that
+# corpus proves upstream reduces (tests/conformance/petta/HEADS.json, written by
+# `petta_capture.py --census` and pinned to the same commit), runs each on both
+# engines, and shrinks a disagreement to the smallest program that still shows
+# it. A finding is a Markdown file under ai-tmp/parity-fuzz/ carrying the
+# divergence issue template's own fields.
+#
+# REPORT, because the programs are drawn fresh: what it finds moves run to run,
+# and a lane that blocks a push on a newly drawn program blocks it on the draw
+# rather than on the change. A program the arbiter leaves unreduced is a hole in
+# the census and is recorded as one, never reported as a divergence.
+run REPORT parity-fuzz  sh -c "cd '$HERE' && '$PY' tests/checks/check_upstream_fuzz.py"
+
+# and the plant that proves the lane above can fail: six cases against engines
+# substituted at its one process call, among them an engine answering 4 for
+# (+ 1 2) whose finding must shrink to a program every line of which the
+# disagreement needs, an arbiter printing the query back, an arbiter that
+# raises, the six-way classification over strings both engines really printed,
+# and the strategy held to the census's own heads.
+run GATE   parity-fuzz-selftest "$PY" "$HERE/tests/checks/check_upstream_fuzz_selftest.py"
 
 # The two-runtime differential: the conformance corpus's CeTTa-routable
 # fragment replays through the fork's C core (CETTA_PATH overrides the

@@ -1,0 +1,2669 @@
+{
+ "arbiter": {
+  "commit": "ae66fa8e41dcd5539d614706bd4e5cfb34f9608d",
+  "invocation": "swipl --stack_limit=8g -q -s src/main.pl -- <file> silent",
+  "remote": "https://github.com/trueagi-io/PeTTa.git"
+ },
+ "corpus": {
+  "call_sites": 4671,
+  "defined_in_corpus": 199,
+  "distinct_heads": 495,
+  "files": 156,
+  "path": "tests/conformance/petta/examples"
+ },
+ "counts": {
+  "candidates": 70,
+  "error": 4,
+  "reduces": 49,
+  "unreduced": 43,
+  "world": 4
+ },
+ "excluded": {
+  "#+": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "-->": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  ".": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "..": "the corpus defines it, so it is an example's own name",
+  ".:": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  ".__add__": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  ".upper": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "/==\\": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "/=\\": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "/=a\\": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  ":-": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "==>": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "=>": "the corpus defines it, so it is an example's own name",
+  "?": "the corpus defines it, so it is an example's own name",
+  "@": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "B": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "Concept": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "Constant": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "E": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "Empty": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "Error": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "False": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "Father": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "FoundChain": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "Greater": "the corpus defines it, so it is an example's own name",
+  "Implication": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "IntSet": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "Letter": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "Metal": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "MissedAllPieces": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "MissedSecondPiece": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "NARS.Query": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "OK": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "P": "the corpus defines it, so it is an example's own name",
+  "PLN.Query": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "Pair": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "Predicate": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "Product": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "R": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "STV": "the corpus defines it, so it is an example's own name",
+  "Son": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "Sword": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "SyllogisticRuleGuard": "the corpus defines it, so it is an example's own name",
+  "Transaction_rollback_fail_to_inc": "the corpus defines it, so it is an example's own name",
+  "Truth_Deduction": "the corpus defines it, so it is an example's own name",
+  "Truth_ModusPonens": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "TupleConcat": "the corpus defines it, so it is an example's own name",
+  "Type": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "Var": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "Z": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "[]": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "\\=": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "\\=/": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "\\==": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "\\==/": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "\\=a": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "\\=a/": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "___": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "a1": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "a2": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "abs-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "acos-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "add": "the corpus defines it, so it is an example's own name",
+  "add-atom-no-duplicate": "the corpus defines it, so it is an example's own name",
+  "add-reduct": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "add-unique-item-or-empty": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "add-unique-or-fail": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "addK": "the corpus defines it, so it is an example's own name",
+  "adder": "the corpus defines it, so it is an example's own name",
+  "addnormal": "the corpus defines it, so it is an example's own name",
+  "addreduct": "the corpus defines it, so it is an example's own name",
+  "after-call": "the corpus defines it, so it is an example's own name",
+  "after-eval": "the corpus defines it, so it is an example's own name",
+  "after-quote": "the corpus defines it, so it is an example's own name",
+  "after-reduce": "the corpus defines it, so it is an example's own name",
+  "aggregate": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "all:": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "alpha-unique-atom": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "animal": "the corpus defines it, so it is an example's own name",
+  "answer": "the corpus defines it, so it is an example's own name",
+  "answertoeverything": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "apply": "the corpus defines it, so it is an example's own name",
+  "apply-many": "the corpus defines it, so it is an example's own name",
+  "applyL1": "the corpus defines it, so it is an example's own name",
+  "applyL2": "the corpus defines it, so it is an example's own name",
+  "asin-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "assertAlphaEqual": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "assertAlphaEqualToResult": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "assertEqual": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "assertEqualToResult": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "assertaPredicate": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "atan-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "bc": "the corpus defines it, so it is an example's own name",
+  "before-call": "the corpus defines it, so it is an example's own name",
+  "before-call-errors-ofc": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "before-eval": "the corpus defines it, so it is an example's own name",
+  "before-quote": "the corpus defines it, so it is an example's own name",
+  "before-reduce": "the corpus defines it, so it is an example's own name",
+  "being": "the corpus defines it, so it is an example's own name",
+  "bfs_all": "the corpus defines it, so it is an example's own name",
+  "bfs_loop": "the corpus defines it, so it is an example's own name",
+  "bind!": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "blacksmith": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "c": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "call": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "call-after": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "call-before": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "call-fib": "the corpus defines it, so it is an example's own name",
+  "call-within": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "callPredicate": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "car-atom": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "case-nondet": "the corpus defines it, so it is an example's own name",
+  "casetest": "the corpus defines it, so it is an example's own name",
+  "cat": "the corpus defines it, so it is an example's own name",
+  "cat42": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "cdr-atom": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "ceil-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "change-state!": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "check_xor": "the corpus defines it, so it is an example's own name",
+  "child": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "choices": "the corpus defines it, so it is an example's own name",
+  "choose": "the corpus defines it, so it is an example's own name",
+  "clamp": "the corpus defines it, so it is an example's own name",
+  "cnt": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "compile": "the corpus defines it, so it is an example's own name",
+  "compile42": "the corpus defines it, so it is an example's own name",
+  "compileeval42": "the corpus defines it, so it is an example's own name",
+  "compilefib": "the corpus defines it, so it is an example's own name",
+  "conditional-probability-consistency": "the corpus defines it, so it is an example's own name",
+  "config-memoize": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "cons-atom": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "cos-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "countdown": "the corpus defines it, so it is an example's own name",
+  "countitem": "the corpus defines it, so it is an example's own name",
+  "d": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "datawithnondatacomponent": "the corpus defines it, so it is an example's own name",
+  "deep-nest": "the corpus defines it, so it is an example's own name",
+  "demo-peano": "the corpus defines it, so it is an example's own name",
+  "dequeue": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "derive": "the corpus defines it, so it is an example's own name",
+  "div": "the corpus defines it, so it is an example's own name",
+  "double": "the corpus defines it, so it is an example's own name",
+  "e": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "empty-queue": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "energy": "the corpus defines it, so it is an example's own name",
+  "enqueue": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "eq": "the corpus defines it, so it is an example's own name",
+  "eval-after": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "eval-before": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "eval-fib": "the corpus defines it, so it is an example's own name",
+  "eval-within": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "evalCustom": "the corpus defines it, so it is an example's own name",
+  "evalc": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "even": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "evolve": "the corpus defines it, so it is an example's own name",
+  "expand": "the corpus defines it, so it is an example's own name",
+  "expand-once": "the corpus defines it, so it is an example's own name",
+  "expandK": "the corpus defines it, so it is an example's own name",
+  "f": "the corpus defines it, so it is an example's own name",
+  "f1": "the corpus defines it, so it is an example's own name",
+  "f1a": "the corpus defines it, so it is an example's own name",
+  "f1b": "the corpus defines it, so it is an example's own name",
+  "f2": "the corpus defines it, so it is an example's own name",
+  "f2a": "the corpus defines it, so it is an example's own name",
+  "f2b": "the corpus defines it, so it is an example's own name",
+  "f3": "the corpus defines it, so it is an example's own name",
+  "f3a": "the corpus defines it, so it is an example's own name",
+  "f3b": "the corpus defines it, so it is an example's own name",
+  "f4": "the corpus defines it, so it is an example's own name",
+  "facF": "the corpus defines it, so it is an example's own name",
+  "father": "the corpus defines it, so it is an example's own name",
+  "fib": "the corpus defines it, so it is an example's own name",
+  "fib-call": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "fib-eval": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "fib-quote": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "fib-reduce": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "fib-step": "the corpus defines it, so it is an example's own name",
+  "fib-tr": "the corpus defines it, so it is an example's own name",
+  "filter-atom": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "filterfun": "the corpus defines it, so it is an example's own name",
+  "find": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "find-divisor": "the corpus defines it, so it is an example's own name",
+  "first": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "first-from-pair": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "flip": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "floor-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "fold-flat": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "fold-nested": "the corpus defines it, so it is an example's own name",
+  "foldfun": "the corpus defines it, so it is an example's own name",
+  "foldfun2": "the corpus defines it, so it is an example's own name",
+  "foldl": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "foldr-flat": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "for": "the corpus defines it, so it is an example's own name",
+  "for-each-in-atom": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "forall": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "fromNat": "the corpus defines it, so it is an example's own name",
+  "fromNumber": "the corpus defines it, so it is an example's own name",
+  "full": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "fun2": "the corpus defines it, so it is an example's own name",
+  "fun3": "the corpus defines it, so it is an example's own name",
+  "function1": "the corpus defines it, so it is an example's own name",
+  "g": "the corpus defines it, so it is an example's own name",
+  "gen": "the corpus defines it, so it is an example's own name",
+  "get-attribute": "the corpus defines it, so it is an example's own name",
+  "get-metatype": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "get-state": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "get-type": "the corpus defines it, so it is an example's own name",
+  "get-type-space": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "getattr": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "grandfather": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "h": "the corpus defines it, so it is an example's own name",
+  "h_old": "the corpus defines it, so it is an example's own name",
+  "hates": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "head": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "hello": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "hi": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "hide": "the corpus defines it, so it is an example's own name",
+  "higher-order-fun": "the corpus defines it, so it is an example's own name",
+  "hu": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "hyperpose": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "if-equal": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "if-error": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "if-nondet": "the corpus defines it, so it is an example's own name",
+  "import": "the corpus defines it, so it is an example's own name",
+  "import_prolog_function": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "import_prolog_functions_from_file": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "importlib.import_module": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "in": "the corpus defines it, so it is an example's own name",
+  "inc": "the corpus defines it, so it is an example's own name",
+  "index-atom": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "indexing-demo": "the corpus defines it, so it is an example's own name",
+  "init": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "intersection": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "intersection-atom": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "iron": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "is-alpha-member": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "is-expr": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "is-function": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "is-member": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "is-memoized": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "is-var": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "isinf-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "isnan-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "iter-next": "the corpus defines it, so it is an example's own name",
+  "justdata": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "kb": "the corpus defines it, so it is an example's own name",
+  "knows": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "lambda": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "largest-intersection-probability": "the corpus defines it, so it is an example's own name",
+  "last": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "later-in-alphabet": "the corpus defines it, so it is an example's own name",
+  "left": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "len": "the corpus defines it, so it is an example's own name",
+  "likes": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "link": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "living": "the corpus defines it, so it is an example's own name",
+  "log-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "lol": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "make-nat-iter": "the corpus defines it, so it is an example's own name",
+  "make-object": "the corpus defines it, so it is an example's own name",
+  "map-atom": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "map-flat": "the corpus defines it, so it is an example's own name",
+  "map-flat2": "the corpus defines it, so it is an example's own name",
+  "map-flat3": "the corpus defines it, so it is an example's own name",
+  "map-flat4": "the corpus defines it, so it is an example's own name",
+  "map-nested": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "mapfun": "the corpus defines it, so it is an example's own name",
+  "maplist": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "match-single": "the corpus defines it, so it is an example's own name",
+  "match-single-via-cut": "the corpus defines it, so it is an example's own name",
+  "match-single-via-once": "the corpus defines it, so it is an example's own name",
+  "match-type-or": "the corpus defines it, so it is an example's own name",
+  "match-types": "the corpus defines it, so it is an example's own name",
+  "matchtrickery": "the corpus defines it, so it is an example's own name",
+  "mate": "the corpus defines it, so it is an example's own name",
+  "mate-space-demo": "the corpus defines it, so it is an example's own name",
+  "math.pi": "the corpus defines it, so it is an example's own name",
+  "max": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "member": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "merge": "the corpus defines it, so it is an example's own name",
+  "mfail": "the corpus defines it, so it is an example's own name",
+  "mid": "the corpus defines it, so it is an example's own name",
+  "min": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "mirror": "the corpus defines it, so it is an example's own name",
+  "mix": "the corpus defines it, so it is an example's own name",
+  "mother": "the corpus defines it, so it is an example's own name",
+  "move": "the corpus defines it, so it is an example's own name",
+  "mp": "the corpus defines it, so it is an example's own name",
+  "mutexinc": "the corpus defines it, so it is an example's own name",
+  "my": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "myAdd": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "myAddMeTTa": "the corpus defines it, so it is an example's own name",
+  "myAddPred": "the corpus defines it, so it is an example's own name",
+  "mycalc": "the corpus defines it, so it is an example's own name",
+  "myf": "the corpus defines it, so it is an example's own name",
+  "myfun": "the corpus defines it, so it is an example's own name",
+  "myfunc": "the corpus defines it, so it is an example's own name",
+  "myfunc2": "the corpus defines it, so it is an example's own name",
+  "myinterpreter": "the corpus defines it, so it is an example's own name",
+  "mylast": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "mymap": "the corpus defines it, so it is an example's own name",
+  "myplus": "the corpus defines it, so it is an example's own name",
+  "new-space": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "new-state": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "noreduce-eq": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "notjustdata": "the corpus defines it, so it is an example's own name",
+  "odd": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "old": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "only": "the corpus defines it, so it is an example's own name",
+  "overloaded-curry": "the corpus defines it, so it is an example's own name",
+  "p1": "the corpus defines it, so it is an example's own name",
+  "padded-ax1": "the corpus defines it, so it is an example's own name",
+  "parent": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "parse": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "pattern:-": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "plus": "the corpus defines it, so it is an example's own name",
+  "plus1times2": "the corpus defines it, so it is an example's own name",
+  "poly": "the corpus defines it, so it is an example's own name",
+  "pow-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "prime?": "the corpus defines it, so it is an example's own name",
+  "println!": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "process_metta_string": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "prog1": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "progme": "the corpus defines it, so it is an example's own name",
+  "program1": "the corpus defines it, so it is an example's own name",
+  "program2": "the corpus defines it, so it is an example's own name",
+  "program3": "the corpus defines it, so it is an example's own name",
+  "program4": "the corpus defines it, so it is an example's own name",
+  "py-call": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "python_import_file.add": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "python_import_file.greet": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "q-all": "the corpus defines it, so it is an example's own name",
+  "q-both": "the corpus defines it, so it is an example's own name",
+  "q-first": "the corpus defines it, so it is an example's own name",
+  "q-rel": "the corpus defines it, so it is an example's own name",
+  "q-second": "the corpus defines it, so it is an example's own name",
+  "quad-step": "the corpus defines it, so it is an example's own name",
+  "quad-sum": "the corpus defines it, so it is an example's own name",
+  "quote-after": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "quote-before": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "quote-fib": "the corpus defines it, so it is an example's own name",
+  "quote-within": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "r": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "range": "the corpus defines it, so it is an example's own name",
+  "rcons": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "re_replace": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "read_file_to_string": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "read_file_to_string_functionized": "the corpus defines it, so it is an example's own name",
+  "reduce-after": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "reduce-before": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "reduce-fib": "the corpus defines it, so it is an example's own name",
+  "reduce-within": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "remove-all-atoms": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "repra": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "return-on-error": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "reverse": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "rewriteK": "the corpus defines it, so it is an example's own name",
+  "right": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "round-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "runtime42": "the corpus defines it, so it is an example's own name",
+  "s": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "second": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "second-from-pair": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "sentence": "the corpus defines it, so it is an example's own name",
+  "set": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "set-attribute": "the corpus defines it, so it is an example's own name",
+  "setattr": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "shape-kind": "the corpus defines it, so it is an example's own name",
+  "show": "the corpus defines it, so it is an example's own name",
+  "sin-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "size-atom": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "sloppyinc": "the corpus defines it, so it is an example's own name",
+  "small": "the corpus defines it, so it is an example's own name",
+  "smallest-intersection-probability": "the corpus defines it, so it is an example's own name",
+  "smartfun": "the corpus defines it, so it is an example's own name",
+  "sort-atom": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "space": "the corpus defines it, so it is an example's own name",
+  "spacecount": "the corpus defines it, so it is an example's own name",
+  "sq": "the corpus defines it, so it is an example's own name",
+  "sqrt-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "state1": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "strategy": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "subtraction": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "subtraction-atom": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "succeedsPredicate": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "successor": "the corpus defines it, so it is an example's own name",
+  "tabled": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "tail": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "tan-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "test-func": "the corpus defines it, so it is an example's own name",
+  "testf": "the corpus defines it, so it is an example's own name",
+  "testx": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "transaction": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "transitive": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "translatePredicate": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "trickyspec": "the corpus defines it, so it is an example's own name",
+  "true": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "trunc-math": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "twice": "the corpus defines it, so it is an example's own name",
+  "two-vars": "the corpus defines it, so it is an example's own name",
+  "types.SimpleNamespace": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "union": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "union-atom": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "unique": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "unique-limit": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "unquote": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "v": "the corpus defines it, so it is an example's own name",
+  "w": "the corpus defines it, so it is an example's own name",
+  "what": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "with_mutex": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "within": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "wrapper": "the corpus defines it, so it is an example's own name",
+  "wrapper2": "the corpus defines it, so it is an example's own name",
+  "wu": "the corpus defines it, so it is an example's own name",
+  "wu1": "the corpus defines it, so it is an example's own name",
+  "wu2": "the corpus defines it, so it is an example's own name",
+  "wu3": "the corpus defines it, so it is an example's own name",
+  "x": "written in 2 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "xor": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "y": "the corpus defines it, so it is an example's own name",
+  "|-": "the corpus defines it, so it is an example's own name",
+  "\u00d7": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "\u27e8+\u27e9": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "\u27e8->\u27e9": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names",
+  "\u27e8=\u27e9": "written in 1 corpus file(s), below the 3 that separate vocabulary from one example's names"
+ },
+ "heads": {
+  "%": {
+   "arities": {
+    "2": {
+     "answer": "ERROR: [Thread main] <arbiter>/src/main.pl:36: user:main is/2: Arguments are not sufficiently instantiated",
+     "positions": [
+      {
+       "variable": 5
+      },
+      {
+       "number": 3,
+       "variable": 2
+      }
+     ],
+     "probe": "!(% $x $x)",
+     "result": null,
+     "uses": 5,
+     "verdict": "error"
+    }
+   },
+   "files": 5,
+   "uses": 5
+  },
+  "*": {
+   "arities": {
+    "1": {
+     "answer": "(partial * (1))",
+     "positions": [
+      {
+       "number": 5
+      }
+     ],
+     "probe": "!(* 1)",
+     "result": "expression",
+     "uses": 5,
+     "verdict": "reduces"
+    },
+    "2": {
+     "answer": "2",
+     "positions": [
+      {
+       "expression": 3,
+       "number": 7,
+       "variable": 15
+      },
+      {
+       "expression": 6,
+       "number": 3,
+       "variable": 16
+      }
+     ],
+     "probe": "!(* 1 (+ 1 1))",
+     "result": "number",
+     "uses": 25,
+     "verdict": "reduces"
+    }
+   },
+   "files": 19,
+   "uses": 30
+  },
+  "+": {
+   "arities": {
+    "0": {
+     "answer": "(partial + ())",
+     "positions": [],
+     "probe": "!(+)",
+     "result": "expression",
+     "uses": 1,
+     "verdict": "reduces"
+    },
+    "1": {
+     "answer": "(partial + (1))",
+     "positions": [
+      {
+       "number": 22
+      }
+     ],
+     "probe": "!(+ 1)",
+     "result": "expression",
+     "uses": 22,
+     "verdict": "reduces"
+    },
+    "2": {
+     "answer": "2",
+     "positions": [
+      {
+       "expression": 13,
+       "number": 43,
+       "variable": 76
+      },
+      {
+       "expression": 14,
+       "number": 69,
+       "symbol": 1,
+       "variable": 48
+      }
+     ],
+     "probe": "!(+ 1 1)",
+     "result": "number",
+     "uses": 132,
+     "verdict": "reduces"
+    },
+    "3": {
+     "answer": "ERROR: [Thread main] <arbiter>/src/main.pl:36: user:main Domain error: `function_input_arities(+,[2])' expected, found `3'",
+     "positions": [
+      {
+       "number": 2,
+       "variable": 2
+      },
+      {
+       "number": 4
+      },
+      {
+       "number": 2,
+       "variable": 2
+      }
+     ],
+     "probe": "!(+ $x 2 $x)",
+     "result": null,
+     "uses": 4,
+     "verdict": "error"
+    }
+   },
+   "files": 64,
+   "uses": 159
+  },
+  ",": {
+   "arities": {
+    "2": {
+     "answer": "(, 2 2)",
+     "positions": [
+      {
+       "expression": 6
+      },
+      {
+       "expression": 6
+      }
+     ],
+     "probe": "!(, (+ 1 1) (+ 1 1))",
+     "result": null,
+     "uses": 6,
+     "verdict": "unreduced"
+    },
+    "29": {
+     "answer": "(, (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) 2 (rel a b) 2)",
+     "positions": [
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      }
+     ],
+     "probe": "!(, (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (a b) (+ 1 1) (rel a b) (+ 1 1))",
+     "result": null,
+     "uses": 1,
+     "verdict": "unreduced"
+    },
+    "4": {
+     "answer": "(, true true true true)",
+     "positions": [
+      {
+       "symbol": 1
+      },
+      {
+       "symbol": 1
+      },
+      {
+       "symbol": 1
+      },
+      {
+       "symbol": 1
+      }
+     ],
+     "probe": "!(, true true true true)",
+     "result": null,
+     "uses": 1,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 6,
+   "uses": 8
+  },
+  "-": {
+   "arities": {
+    "2": {
+     "answer": "0",
+     "positions": [
+      {
+       "expression": 2,
+       "number": 5,
+       "variable": 35
+      },
+      {
+       "expression": 2,
+       "number": 34,
+       "variable": 6
+      }
+     ],
+     "probe": "!(- 1 1)",
+     "result": "number",
+     "uses": 42,
+     "verdict": "reduces"
+    }
+   },
+   "files": 25,
+   "uses": 42
+  },
+  "->": {
+   "arities": {
+    "2": {
+     "answer": "(-> $_0 2)",
+     "positions": [
+      {
+       "expression": 4,
+       "number": 2,
+       "symbol": 40,
+       "variable": 9
+      },
+      {
+       "expression": 4,
+       "number": 2,
+       "symbol": 42,
+       "variable": 7
+      }
+     ],
+     "probe": "!(-> $x 2)",
+     "result": null,
+     "uses": 55,
+     "verdict": "unreduced"
+    },
+    "3": {
+     "answer": "(-> a (rel a b) 2)",
+     "positions": [
+      {
+       "expression": 10,
+       "symbol": 30,
+       "variable": 3
+      },
+      {
+       "expression": 8,
+       "symbol": 31,
+       "variable": 4
+      },
+      {
+       "expression": 1,
+       "symbol": 37,
+       "variable": 5
+      }
+     ],
+     "probe": "!(-> a (rel a b) (+ 1 1))",
+     "result": null,
+     "uses": 43,
+     "verdict": "unreduced"
+    },
+    "4": {
+     "answer": "(-> a a (rel a b) 2)",
+     "positions": [
+      {
+       "expression": 3,
+       "symbol": 5,
+       "variable": 1
+      },
+      {
+       "expression": 3,
+       "symbol": 6
+      },
+      {
+       "expression": 3,
+       "symbol": 5,
+       "variable": 1
+      },
+      {
+       "expression": 1,
+       "symbol": 5,
+       "variable": 3
+      }
+     ],
+     "probe": "!(-> a a (rel a b) (+ 1 1))",
+     "result": null,
+     "uses": 9,
+     "verdict": "unreduced"
+    },
+    "5": {
+     "answer": "(-> (a b) 2 (rel a b) 2 $_0)",
+     "positions": [
+      {
+       "expression": 3
+      },
+      {
+       "expression": 3
+      },
+      {
+       "expression": 3
+      },
+      {
+       "expression": 3
+      },
+      {
+       "variable": 3
+      }
+     ],
+     "probe": "!(-> (a b) (+ 1 1) (rel a b) (+ 1 1) $x)",
+     "result": null,
+     "uses": 3,
+     "verdict": "unreduced"
+    },
+    "6": {
+     "answer": "(-> (a b) (a b) (a b) (rel a b) 2 2)",
+     "positions": [
+      {
+       "expression": 3
+      },
+      {
+       "expression": 3
+      },
+      {
+       "expression": 3
+      },
+      {
+       "expression": 3
+      },
+      {
+       "expression": 3
+      },
+      {
+       "expression": 1,
+       "variable": 2
+      }
+     ],
+     "probe": "!(-> (a b) (a b) (a b) (rel a b) (+ 1 1) (+ 1 1))",
+     "result": null,
+     "uses": 3,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 22,
+   "uses": 113
+  },
+  "/": {
+   "arities": {
+    "2": {
+     "answer": "1",
+     "positions": [
+      {
+       "expression": 5,
+       "variable": 2
+      },
+      {
+       "expression": 2,
+       "number": 1,
+       "variable": 4
+      }
+     ],
+     "probe": "!(/ (+ 1 1) (+ 1 1))",
+     "result": "number",
+     "uses": 7,
+     "verdict": "reduces"
+    }
+   },
+   "files": 3,
+   "uses": 7
+  },
+  ":": {
+   "arities": {
+    "2": {
+     "answer": "(: (a b) true)",
+     "positions": [
+      {
+       "expression": 21,
+       "symbol": 83,
+       "variable": 106
+      },
+      {
+       "expression": 87,
+       "symbol": 49,
+       "variable": 74
+      }
+     ],
+     "probe": "!(: (a b) true)",
+     "result": null,
+     "uses": 210,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 21,
+   "uses": 210
+  },
+  "<": {
+   "arities": {
+    "2": {
+     "answer": "false",
+     "positions": [
+      {
+       "number": 5,
+       "variable": 22
+      },
+      {
+       "number": 20,
+       "variable": 7
+      }
+     ],
+     "probe": "!(< 1 1)",
+     "result": "symbol",
+     "uses": 27,
+     "verdict": "reduces"
+    }
+   },
+   "files": 15,
+   "uses": 27
+  },
+  "<=": {
+   "arities": {
+    "2": {
+     "answer": "true",
+     "positions": [
+      {
+       "expression": 2,
+       "variable": 4
+      },
+      {
+       "expression": 2,
+       "number": 2,
+       "variable": 2
+      }
+     ],
+     "probe": "!(<= (+ 1 1) (+ 1 1))",
+     "result": "symbol",
+     "uses": 6,
+     "verdict": "reduces"
+    }
+   },
+   "files": 4,
+   "uses": 6
+  },
+  "=": {
+   "arities": {
+    "2": {
+     "answer": "true",
+     "positions": [
+      {
+       "expression": 397,
+       "variable": 6
+      },
+      {
+       "expression": 328,
+       "number": 31,
+       "symbol": 28,
+       "variable": 16
+      }
+     ],
+     "probe": "!(= (a b) (a b))",
+     "result": "symbol",
+     "uses": 403,
+     "verdict": "reduces"
+    }
+   },
+   "files": 116,
+   "uses": 403
+  },
+  "==": {
+   "arities": {
+    "1": {
+     "answer": "(partial == (1))",
+     "positions": [
+      {
+       "number": 1
+      }
+     ],
+     "probe": "!(== 1)",
+     "result": "expression",
+     "uses": 1,
+     "verdict": "reduces"
+    },
+    "2": {
+     "answer": "false",
+     "positions": [
+      {
+       "expression": 7,
+       "number": 6,
+       "variable": 27
+      },
+      {
+       "expression": 8,
+       "number": 24,
+       "symbol": 3,
+       "variable": 5
+      }
+     ],
+     "probe": "!(== $x 1)",
+     "result": "symbol",
+     "uses": 40,
+     "verdict": "reduces"
+    }
+   },
+   "files": 27,
+   "uses": 41
+  },
+  "=alpha": {
+   "arities": {
+    "2": {
+     "answer": "true",
+     "positions": [
+      {
+       "expression": 17
+      },
+      {
+       "expression": 17
+      }
+     ],
+     "probe": "!(=alpha (a b) (a b))",
+     "result": "symbol",
+     "uses": 17,
+     "verdict": "reduces"
+    }
+   },
+   "files": 3,
+   "uses": 17
+  },
+  ">": {
+   "arities": {
+    "2": {
+     "answer": "true",
+     "positions": [
+      {
+       "expression": 3,
+       "number": 1,
+       "variable": 5
+      },
+      {
+       "number": 6,
+       "variable": 3
+      }
+     ],
+     "probe": "!(> (+ 1 1) 1)",
+     "result": "symbol",
+     "uses": 9,
+     "verdict": "reduces"
+    }
+   },
+   "files": 8,
+   "uses": 9
+  },
+  "A": {
+   "arities": {
+    "1": {
+     "answer": "(A 2)",
+     "positions": [
+      {
+       "expression": 2,
+       "symbol": 5
+      }
+     ],
+     "probe": "!(A (+ 1 1))",
+     "result": null,
+     "uses": 7,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 4,
+   "uses": 7
+  },
+  "C": {
+   "arities": {
+    "1": {
+     "answer": "(C $_0)",
+     "positions": [
+      {
+       "variable": 3
+      }
+     ],
+     "probe": "!(C $x)",
+     "result": null,
+     "uses": 3,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 3,
+   "uses": 3
+  },
+  "Inheritance": {
+   "arities": {
+    "2": {
+     "answer": "(Inheritance (rel a b) $_0)",
+     "positions": [
+      {
+       "expression": 7,
+       "symbol": 14,
+       "variable": 7
+      },
+      {
+       "expression": 7,
+       "symbol": 18,
+       "variable": 3
+      }
+     ],
+     "probe": "!(Inheritance (rel a b) $x)",
+     "result": null,
+     "uses": 28,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 4,
+   "uses": 28
+  },
+  "M": {
+   "arities": {
+    "1": {
+     "answer": "(M $_0)",
+     "positions": [
+      {
+       "variable": 6
+      }
+     ],
+     "probe": "!(M $x)",
+     "result": null,
+     "uses": 6,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 3,
+   "uses": 6
+  },
+  "S": {
+   "arities": {
+    "1": {
+     "answer": "(S $_0)",
+     "positions": [
+      {
+       "expression": 37,
+       "symbol": 24,
+       "variable": 12
+      }
+     ],
+     "probe": "!(S $x)",
+     "result": null,
+     "uses": 73,
+     "verdict": "unreduced"
+    },
+    "2": {
+     "answer": "(S true true)",
+     "positions": [
+      {
+       "symbol": 1
+      },
+      {
+       "symbol": 1
+      }
+     ],
+     "probe": "!(S true true)",
+     "result": null,
+     "uses": 1,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 6,
+   "uses": 74
+  },
+  "Sentence": {
+   "arities": {
+    "2": {
+     "answer": "(Sentence 2 2)",
+     "positions": [
+      {
+       "expression": 24
+      },
+      {
+       "expression": 24
+      }
+     ],
+     "probe": "!(Sentence (+ 1 1) (+ 1 1))",
+     "result": null,
+     "uses": 24,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 3,
+   "uses": 24
+  },
+  "True": {
+   "arities": {
+    "1": {
+     "answer": "(true true)",
+     "positions": [
+      {
+       "symbol": 5
+      }
+     ],
+     "probe": "!(True true)",
+     "result": null,
+     "uses": 5,
+     "verdict": "unreduced"
+    },
+    "2": {
+     "answer": "(true true true)",
+     "positions": [
+      {
+       "symbol": 2
+      },
+      {
+       "symbol": 2
+      }
+     ],
+     "probe": "!(True true true)",
+     "result": null,
+     "uses": 2,
+     "verdict": "unreduced"
+    },
+    "3": {
+     "answer": "(true true true true)",
+     "positions": [
+      {
+       "symbol": 2
+      },
+      {
+       "symbol": 2
+      },
+      {
+       "symbol": 2
+      }
+     ],
+     "probe": "!(True true true true)",
+     "result": null,
+     "uses": 2,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 5,
+   "uses": 9
+  },
+  "W": {
+   "arities": {
+    "1": {
+     "answer": "(W $_0)",
+     "positions": [
+      {
+       "variable": 6
+      }
+     ],
+     "probe": "!(W $x)",
+     "result": null,
+     "uses": 6,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 3,
+   "uses": 6
+  },
+  "a": {
+   "arities": {
+    "0": {
+     "answer": "(a)",
+     "positions": [],
+     "probe": "!(a)",
+     "result": null,
+     "uses": 6,
+     "verdict": "unreduced"
+    },
+    "1": {
+     "answer": "(a 2)",
+     "positions": [
+      {
+       "expression": 2,
+       "symbol": 15,
+       "variable": 4
+      }
+     ],
+     "probe": "!(a (+ 1 1))",
+     "result": null,
+     "uses": 21,
+     "verdict": "unreduced"
+    },
+    "2": {
+     "answer": "(a true true)",
+     "positions": [
+      {
+       "symbol": 15
+      },
+      {
+       "symbol": 15
+      }
+     ],
+     "probe": "!(a true true)",
+     "result": null,
+     "uses": 15,
+     "verdict": "unreduced"
+    },
+    "3": {
+     "answer": "(a true true true)",
+     "positions": [
+      {
+       "symbol": 11
+      },
+      {
+       "symbol": 11
+      },
+      {
+       "symbol": 11
+      }
+     ],
+     "probe": "!(a true true true)",
+     "result": null,
+     "uses": 11,
+     "verdict": "unreduced"
+    },
+    "4": {
+     "answer": "(a true true true true)",
+     "positions": [
+      {
+       "symbol": 5
+      },
+      {
+       "symbol": 5
+      },
+      {
+       "symbol": 5
+      },
+      {
+       "symbol": 5
+      }
+     ],
+     "probe": "!(a true true true true)",
+     "result": null,
+     "uses": 5,
+     "verdict": "unreduced"
+    },
+    "5": {
+     "answer": "(a true a true true true)",
+     "positions": [
+      {
+       "symbol": 2
+      },
+      {
+       "symbol": 2
+      },
+      {
+       "symbol": 2
+      },
+      {
+       "symbol": 2
+      },
+      {
+       "symbol": 2
+      }
+     ],
+     "probe": "!(a true a true true true)",
+     "result": null,
+     "uses": 2,
+     "verdict": "unreduced"
+    },
+    "7": {
+     "answer": "(a a a true a true true true)",
+     "positions": [
+      {
+       "symbol": 3
+      },
+      {
+       "symbol": 3
+      },
+      {
+       "symbol": 3
+      },
+      {
+       "symbol": 3
+      },
+      {
+       "symbol": 3
+      },
+      {
+       "symbol": 3
+      },
+      {
+       "symbol": 3
+      }
+     ],
+     "probe": "!(a a a true a true true true)",
+     "result": null,
+     "uses": 3,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 15,
+   "uses": 63
+  },
+  "add-atom": {
+   "arities": {
+    "2": {
+     "answer": "true",
+     "positions": [
+      {
+       "expression": 1,
+       "space": 64,
+       "variable": 3
+      },
+      {
+       "expression": 64,
+       "variable": 4
+      }
+     ],
+     "probe": "!(add-atom &self (a b))",
+     "result": "symbol",
+     "uses": 68,
+     "verdict": "reduces"
+    }
+   },
+   "files": 28,
+   "uses": 68
+  },
+  "add-translator-rule!": {
+   "arities": {
+    "1": {
+     "answer": "rewrites the translator, so it changes how the rest of the program is READ rather than answering",
+     "positions": [
+      {
+       "symbol": 4
+      }
+     ],
+     "probe": null,
+     "result": null,
+     "uses": 4,
+     "verdict": "world"
+    }
+   },
+   "files": 3,
+   "uses": 4
+  },
+  "and": {
+   "arities": {
+    "2": {
+     "answer": "",
+     "positions": [
+      {
+       "expression": 12,
+       "symbol": 1
+      },
+      {
+       "expression": 11,
+       "symbol": 1,
+       "variable": 1
+      }
+     ],
+     "probe": "!(and (a b) (a b))",
+     "result": null,
+     "uses": 13,
+     "verdict": "reduces"
+    }
+   },
+   "files": 6,
+   "uses": 13
+  },
+  "append": {
+   "arities": {
+    "2": {
+     "answer": "(cons a (cons b $_0))",
+     "positions": [
+      {
+       "expression": 7,
+       "variable": 2
+      },
+      {
+       "variable": 9
+      }
+     ],
+     "probe": "!(append (a b) $x)",
+     "result": "expression",
+     "uses": 9,
+     "verdict": "reduces"
+    }
+   },
+   "files": 6,
+   "uses": 9
+  },
+  "b": {
+   "arities": {
+    "1": {
+     "answer": "(b true)",
+     "positions": [
+      {
+       "expression": 2,
+       "symbol": 1
+      }
+     ],
+     "probe": "!(b true)",
+     "result": null,
+     "uses": 3,
+     "verdict": "unreduced"
+    },
+    "2": {
+     "answer": "(b true true)",
+     "positions": [
+      {
+       "symbol": 3
+      },
+      {
+       "symbol": 3
+      }
+     ],
+     "probe": "!(b true true)",
+     "result": null,
+     "uses": 3,
+     "verdict": "unreduced"
+    },
+    "3": {
+     "answer": "(b true true true)",
+     "positions": [
+      {
+       "symbol": 4
+      },
+      {
+       "symbol": 4
+      },
+      {
+       "symbol": 4
+      }
+     ],
+     "probe": "!(b true true true)",
+     "result": null,
+     "uses": 4,
+     "verdict": "unreduced"
+    },
+    "4": {
+     "answer": "(b true true true true)",
+     "positions": [
+      {
+       "symbol": 2
+      },
+      {
+       "symbol": 2
+      },
+      {
+       "symbol": 2
+      },
+      {
+       "symbol": 2
+      }
+     ],
+     "probe": "!(b true true true true)",
+     "result": null,
+     "uses": 2,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 3,
+   "uses": 12
+  },
+  "bar": {
+   "arities": {
+    "1": {
+     "answer": "(bar true)",
+     "positions": [
+      {
+       "number": 4,
+       "symbol": 2,
+       "variable": 14
+      }
+     ],
+     "probe": "!(bar true)",
+     "result": null,
+     "uses": 20,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 5,
+   "uses": 20
+  },
+  "case": {
+   "arities": {
+    "2": {
+     "answer": "ERROR: [Thread main] <arbiter>/src/main.pl:36: user:main Syntax error: failed to process form: parsed(runnable,(case $x (+ 1 1)),[case,_6012,[+,1,1]])",
+     "positions": [
+      {
+       "expression": 14,
+       "variable": 2
+      },
+      {
+       "expression": 16
+      }
+     ],
+     "probe": "!(case $x (+ 1 1))",
+     "result": null,
+     "uses": 16,
+     "verdict": "error"
+    }
+   },
+   "files": 10,
+   "uses": 16
+  },
+  "catch": {
+   "arities": {
+    "1": {
+     "answer": "(a b)",
+     "positions": [
+      {
+       "expression": 5
+      }
+     ],
+     "probe": "!(catch (a b))",
+     "result": "expression",
+     "uses": 5,
+     "verdict": "reduces"
+    }
+   },
+   "files": 3,
+   "uses": 5
+  },
+  "chain": {
+   "arities": {
+    "3": {
+     "answer": "(a b)",
+     "positions": [
+      {
+       "expression": 10
+      },
+      {
+       "variable": 10
+      },
+      {
+       "expression": 7,
+       "variable": 3
+      }
+     ],
+     "probe": "!(chain (a b) $x (a b))",
+     "result": "expression",
+     "uses": 10,
+     "verdict": "reduces"
+    }
+   },
+   "files": 3,
+   "uses": 10
+  },
+  "collapse": {
+   "arities": {
+    "1": {
+     "answer": "((a b))",
+     "positions": [
+      {
+       "expression": 86
+      }
+     ],
+     "probe": "!(collapse (a b))",
+     "result": "expression",
+     "uses": 86,
+     "verdict": "reduces"
+    }
+   },
+   "files": 47,
+   "uses": 86
+  },
+  "cons": {
+   "arities": {
+    "2": {
+     "answer": "($_0 a b)",
+     "positions": [
+      {
+       "expression": 7,
+       "number": 4,
+       "symbol": 3,
+       "variable": 20
+      },
+      {
+       "expression": 12,
+       "variable": 22
+      }
+     ],
+     "probe": "!(cons $x (a b))",
+     "result": "expression",
+     "uses": 34,
+     "verdict": "reduces"
+    }
+   },
+   "files": 16,
+   "uses": 34
+  },
+  "cut": {
+   "arities": {
+    "0": {
+     "answer": "true",
+     "positions": [],
+     "probe": "!(cut)",
+     "result": "symbol",
+     "uses": 4,
+     "verdict": "reduces"
+    }
+   },
+   "files": 4,
+   "uses": 4
+  },
+  "empty": {
+   "arities": {
+    "0": {
+     "answer": "",
+     "positions": [],
+     "probe": "!(empty)",
+     "result": null,
+     "uses": 15,
+     "verdict": "reduces"
+    }
+   },
+   "files": 14,
+   "uses": 15
+  },
+  "eval": {
+   "arities": {
+    "1": {
+     "answer": "(a b)",
+     "positions": [
+      {
+       "expression": 12,
+       "variable": 2
+      }
+     ],
+     "probe": "!(eval (a b))",
+     "result": "expression",
+     "uses": 14,
+     "verdict": "reduces"
+    }
+   },
+   "files": 8,
+   "uses": 14
+  },
+  "foldall": {
+   "arities": {
+    "3": {
+     "answer": "(a (a b) 1)",
+     "positions": [
+      {
+       "expression": 4,
+       "symbol": 6,
+       "variable": 5
+      },
+      {
+       "expression": 15
+      },
+      {
+       "number": 15
+      }
+     ],
+     "probe": "!(foldall a (a b) 1)",
+     "result": "expression",
+     "uses": 15,
+     "verdict": "reduces"
+    }
+   },
+   "files": 4,
+   "uses": 15
+  },
+  "foldl-atom": {
+   "arities": {
+    "3": {
+     "answer": "(a (a (a b) a) b)",
+     "positions": [
+      {
+       "expression": 3,
+       "variable": 2
+      },
+      {
+       "expression": 4,
+       "number": 1
+      },
+      {
+       "symbol": 5
+      }
+     ],
+     "probe": "!(foldl-atom (a b) (a b) a)",
+     "result": "expression",
+     "uses": 5,
+     "verdict": "reduces"
+    },
+    "5": {
+     "answer": "",
+     "positions": [
+      {
+       "expression": 2
+      },
+      {
+       "expression": 1,
+       "number": 1
+      },
+      {
+       "variable": 2
+      },
+      {
+       "variable": 2
+      },
+      {
+       "expression": 2
+      }
+     ],
+     "probe": "!(foldl-atom (a b) (a b) $x $x (a b))",
+     "result": null,
+     "uses": 2,
+     "verdict": "reduces"
+    }
+   },
+   "files": 3,
+   "uses": 7
+  },
+  "foo": {
+   "arities": {
+    "1": {
+     "answer": "(foo true)",
+     "positions": [
+      {
+       "expression": 2,
+       "number": 11,
+       "symbol": 2,
+       "variable": 14
+      }
+     ],
+     "probe": "!(foo true)",
+     "result": null,
+     "uses": 29,
+     "verdict": "unreduced"
+    },
+    "2": {
+     "answer": "(foo $_0 $_0)",
+     "positions": [
+      {
+       "number": 3,
+       "variable": 2
+      },
+      {
+       "number": 3,
+       "variable": 2
+      }
+     ],
+     "probe": "!(foo $x $x)",
+     "result": null,
+     "uses": 5,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 7,
+   "uses": 34
+  },
+  "friend": {
+   "arities": {
+    "2": {
+     "answer": "(friend $_0 $_0)",
+     "positions": [
+      {
+       "symbol": 16,
+       "variable": 12
+      },
+      {
+       "symbol": 17,
+       "variable": 11
+      }
+     ],
+     "probe": "!(friend $x $x)",
+     "result": null,
+     "uses": 28,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 7,
+   "uses": 28
+  },
+  "get-atoms": {
+   "arities": {
+    "1": {
+     "answer": "(rel a b)",
+     "positions": [
+      {
+       "space": 6
+      }
+     ],
+     "probe": "!(get-atoms &self)",
+     "result": "expression",
+     "uses": 6,
+     "verdict": "reduces"
+    }
+   },
+   "files": 4,
+   "uses": 6
+  },
+  "id": {
+   "arities": {
+    "1": {
+     "answer": "1",
+     "positions": [
+      {
+       "number": 2,
+       "variable": 1
+      }
+     ],
+     "probe": "!(id 1)",
+     "result": "number",
+     "uses": 3,
+     "verdict": "reduces"
+    }
+   },
+   "files": 3,
+   "uses": 3
+  },
+  "if": {
+   "arities": {
+    "2": {
+     "answer": "",
+     "positions": [
+      {
+       "expression": 5,
+       "symbol": 1
+      },
+      {
+       "expression": 2,
+       "number": 1,
+       "symbol": 1,
+       "variable": 2
+      }
+     ],
+     "probe": "!(if (a b) (a b))",
+     "result": null,
+     "uses": 6,
+     "verdict": "reduces"
+    },
+    "3": {
+     "answer": "(a b)",
+     "positions": [
+      {
+       "expression": 68,
+       "symbol": 7
+      },
+      {
+       "expression": 39,
+       "number": 7,
+       "symbol": 13,
+       "variable": 16
+      },
+      {
+       "expression": 59,
+       "number": 7,
+       "symbol": 8,
+       "variable": 1
+      }
+     ],
+     "probe": "!(if (a b) (a b) (a b))",
+     "result": "expression",
+     "uses": 75,
+     "verdict": "reduces"
+    }
+   },
+   "files": 53,
+   "uses": 81
+  },
+  "import!": {
+   "arities": {
+    "2": {
+     "answer": "loads a file, so it answers each checkout's own module tree: `!(import! &self 1)` answers nothing upstream and raises here",
+     "positions": [
+      {
+       "space": 37
+      },
+      {
+       "expression": 17,
+       "string": 1,
+       "symbol": 19
+      }
+     ],
+     "probe": null,
+     "result": null,
+     "uses": 37,
+     "verdict": "world"
+    }
+   },
+   "files": 37,
+   "uses": 37
+  },
+  "is": {
+   "arities": {
+    "2": {
+     "answer": "(is $_0 $_0)",
+     "positions": [
+      {
+       "variable": 2
+      },
+      {
+       "number": 1,
+       "variable": 1
+      }
+     ],
+     "probe": "!(is $x $x)",
+     "result": null,
+     "uses": 2,
+     "verdict": "unreduced"
+    },
+    "5": {
+     "answer": "(is true $_0 true true $_0)",
+     "positions": [
+      {
+       "symbol": 1
+      },
+      {
+       "variable": 1
+      },
+      {
+       "symbol": 1
+      },
+      {
+       "symbol": 1
+      },
+      {
+       "variable": 1
+      }
+     ],
+     "probe": "!(is true $x true true $x)",
+     "result": null,
+     "uses": 1,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 3,
+   "uses": 3
+  },
+  "iterate": {
+   "arities": {
+    "4": {
+     "answer": "(iterate 1 (a b) 2 (rel a b))",
+     "positions": [
+      {
+       "number": 3
+      },
+      {
+       "expression": 1,
+       "number": 1,
+       "variable": 1
+      },
+      {
+       "expression": 2,
+       "number": 1
+      },
+      {
+       "expression": 1,
+       "symbol": 2
+      }
+     ],
+     "probe": "!(iterate 1 (a b) 2 (rel a b))",
+     "result": null,
+     "uses": 3,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 3,
+   "uses": 3
+  },
+  "length": {
+   "arities": {
+    "1": {
+     "answer": "2",
+     "positions": [
+      {
+       "expression": 6,
+       "variable": 6
+      }
+     ],
+     "probe": "!(length (a b))",
+     "result": "number",
+     "uses": 12,
+     "verdict": "reduces"
+    }
+   },
+   "files": 8,
+   "uses": 12
+  },
+  "let": {
+   "arities": {
+    "3": {
+     "answer": "(a b)",
+     "positions": [
+      {
+       "expression": 17,
+       "symbol": 2,
+       "variable": 45
+      },
+      {
+       "expression": 59,
+       "number": 1,
+       "variable": 4
+      },
+      {
+       "expression": 42,
+       "number": 1,
+       "variable": 21
+      }
+     ],
+     "probe": "!(let $x (a b) (a b))",
+     "result": "expression",
+     "uses": 64,
+     "verdict": "reduces"
+    }
+   },
+   "files": 34,
+   "uses": 64
+  },
+  "let*": {
+   "arities": {
+    "2": {
+     "answer": "ERROR: [Thread main] <arbiter>/src/main.pl:36: user:main Syntax error: failed to process form: parsed(runnable,(let* (+ 1 1) $x),[let*,[+,1,1],_9140])",
+     "positions": [
+      {
+       "expression": 31
+      },
+      {
+       "expression": 27,
+       "variable": 4
+      }
+     ],
+     "probe": "!(let* (+ 1 1) $x)",
+     "result": null,
+     "uses": 31,
+     "verdict": "error"
+    }
+   },
+   "files": 20,
+   "uses": 31
+  },
+  "library": {
+   "arities": {
+    "1": {
+     "answer": "answers a path inside the engine that ran it",
+     "positions": [
+      {
+       "symbol": 17
+      }
+     ],
+     "probe": "!(library a)",
+     "result": null,
+     "uses": 17,
+     "verdict": "world"
+    }
+   },
+   "files": 17,
+   "uses": 17
+  },
+  "match": {
+   "arities": {
+    "3": {
+     "answer": "",
+     "positions": [
+      {
+       "expression": 1,
+       "space": 48,
+       "variable": 8
+      },
+      {
+       "expression": 47,
+       "variable": 10
+      },
+      {
+       "expression": 32,
+       "symbol": 2,
+       "variable": 23
+      }
+     ],
+     "probe": "!(match &self (a b) (a b))",
+     "result": null,
+     "uses": 57,
+     "verdict": "reduces"
+    }
+   },
+   "files": 26,
+   "uses": 57
+  },
+  "max-atom": {
+   "arities": {
+    "1": {
+     "answer": "()",
+     "positions": [
+      {
+       "expression": 2,
+       "number": 1
+      }
+     ],
+     "probe": "!(max-atom (+ 1 1))",
+     "result": "expression",
+     "uses": 3,
+     "verdict": "reduces"
+    }
+   },
+   "files": 3,
+   "uses": 3
+  },
+  "memoize": {
+   "arities": {
+    "1": {
+     "answer": "(memoize true)",
+     "positions": [
+      {
+       "symbol": 6
+      }
+     ],
+     "probe": "!(memoize true)",
+     "result": null,
+     "uses": 6,
+     "verdict": "unreduced"
+    },
+    "2": {
+     "answer": "(memoize true 2)",
+     "positions": [
+      {
+       "symbol": 3
+      },
+      {
+       "number": 3
+      }
+     ],
+     "probe": "!(memoize true 2)",
+     "result": null,
+     "uses": 3,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 8,
+   "uses": 9
+  },
+  "min-atom": {
+   "arities": {
+    "1": {
+     "answer": "()",
+     "positions": [
+      {
+       "expression": 2,
+       "number": 1
+      }
+     ],
+     "probe": "!(min-atom (+ 1 1))",
+     "result": "expression",
+     "uses": 3,
+     "verdict": "reduces"
+    }
+   },
+   "files": 3,
+   "uses": 3
+  },
+  "msort": {
+   "arities": {
+    "1": {
+     "answer": "(a b)",
+     "positions": [
+      {
+       "expression": 8
+      }
+     ],
+     "probe": "!(msort (a b))",
+     "result": "expression",
+     "uses": 8,
+     "verdict": "reduces"
+    }
+   },
+   "files": 6,
+   "uses": 8
+  },
+  "num": {
+   "arities": {
+    "1": {
+     "answer": "(num true)",
+     "positions": [
+      {
+       "expression": 14,
+       "number": 5,
+       "symbol": 4,
+       "variable": 14
+      }
+     ],
+     "probe": "!(num true)",
+     "result": null,
+     "uses": 37,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 6,
+   "uses": 37
+  },
+  "once": {
+   "arities": {
+    "1": {
+     "answer": "(a b)",
+     "positions": [
+      {
+       "expression": 13,
+       "symbol": 2
+      }
+     ],
+     "probe": "!(once (a b))",
+     "result": "expression",
+     "uses": 15,
+     "verdict": "reduces"
+    }
+   },
+   "files": 11,
+   "uses": 15
+  },
+  "or": {
+   "arities": {
+    "2": {
+     "answer": "",
+     "positions": [
+      {
+       "expression": 2,
+       "variable": 1
+      },
+      {
+       "symbol": 2,
+       "variable": 1
+      }
+     ],
+     "probe": "!(or (a b) a)",
+     "result": null,
+     "uses": 3,
+     "verdict": "reduces"
+    }
+   },
+   "files": 3,
+   "uses": 3
+  },
+  "progn": {
+   "arities": {
+    "2": {
+     "answer": "(a b)",
+     "positions": [
+      {
+       "expression": 7
+      },
+      {
+       "expression": 5,
+       "variable": 2
+      }
+     ],
+     "probe": "!(progn (a b) (a b))",
+     "result": "expression",
+     "uses": 7,
+     "verdict": "reduces"
+    },
+    "3": {
+     "answer": "1",
+     "positions": [
+      {
+       "expression": 1,
+       "number": 1
+      },
+      {
+       "expression": 1,
+       "number": 1
+      },
+      {
+       "number": 1,
+       "variable": 1
+      }
+     ],
+     "probe": "!(progn (a b) (a b) 1)",
+     "result": "number",
+     "uses": 2,
+     "verdict": "reduces"
+    },
+    "4": {
+     "answer": "(a b)",
+     "positions": [
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      },
+      {
+       "expression": 1
+      }
+     ],
+     "probe": "!(progn (a b) (a b) (a b) (a b))",
+     "result": "expression",
+     "uses": 1,
+     "verdict": "reduces"
+    }
+   },
+   "files": 6,
+   "uses": 10
+  },
+  "quote": {
+   "arities": {
+    "1": {
+     "answer": "(a b)",
+     "positions": [
+      {
+       "expression": 30,
+       "string": 1,
+       "variable": 1
+      }
+     ],
+     "probe": "!(quote (a b))",
+     "result": "expression",
+     "uses": 32,
+     "verdict": "reduces"
+    }
+   },
+   "files": 13,
+   "uses": 32
+  },
+  "reduce": {
+   "arities": {
+    "1": {
+     "answer": "(a b)",
+     "positions": [
+      {
+       "expression": 6,
+       "variable": 4
+      }
+     ],
+     "probe": "!(reduce (a b))",
+     "result": "expression",
+     "uses": 10,
+     "verdict": "reduces"
+    }
+   },
+   "files": 6,
+   "uses": 10
+  },
+  "remove-atom": {
+   "arities": {
+    "2": {
+     "answer": "true",
+     "positions": [
+      {
+       "space": 16
+      },
+      {
+       "expression": 16
+      }
+     ],
+     "probe": "!(remove-atom &self (a b))",
+     "result": "symbol",
+     "uses": 16,
+     "verdict": "reduces"
+    }
+   },
+   "files": 9,
+   "uses": 16
+  },
+  "repr": {
+   "arities": {
+    "1": {
+     "answer": "\"(a b)\"",
+     "positions": [
+      {
+       "expression": 18,
+       "number": 1,
+       "string": 4,
+       "symbol": 1
+      }
+     ],
+     "probe": "!(repr (a b))",
+     "result": "string",
+     "uses": 24,
+     "verdict": "reduces"
+    }
+   },
+   "files": 8,
+   "uses": 24
+  },
+  "stv": {
+   "arities": {
+    "2": {
+     "answer": "(stv (a b) 2)",
+     "positions": [
+      {
+       "expression": 2,
+       "number": 75,
+       "variable": 10
+      },
+      {
+       "expression": 2,
+       "number": 75,
+       "variable": 10
+      }
+     ],
+     "probe": "!(stv (a b) (+ 1 1))",
+     "result": null,
+     "uses": 87,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 7,
+   "uses": 87
+  },
+  "superpose": {
+   "arities": {
+    "1": {
+     "answer": "a\nb",
+     "positions": [
+      {
+       "expression": 30,
+       "variable": 7
+      }
+     ],
+     "probe": "!(superpose (a b))",
+     "result": null,
+     "uses": 37,
+     "verdict": "reduces"
+    }
+   },
+   "files": 13,
+   "uses": 37
+  },
+  "test": {
+   "arities": {
+    "2": {
+     "answer": "is (a b), should (a b). \u2705 \ntrue",
+     "positions": [
+      {
+       "expression": 548,
+       "string": 10
+      },
+      {
+       "expression": 230,
+       "number": 160,
+       "string": 37,
+       "symbol": 130,
+       "variable": 1
+      }
+     ],
+     "probe": "!(test (a b) (a b))",
+     "result": null,
+     "uses": 558,
+     "verdict": "reduces"
+    }
+   },
+   "files": 156,
+   "uses": 558
+  },
+  "unify": {
+   "arities": {
+    "4": {
+     "answer": "(unify &self (a b) a 2)",
+     "positions": [
+      {
+       "space": 9,
+       "variable": 1
+      },
+      {
+       "expression": 9,
+       "symbol": 1
+      },
+      {
+       "expression": 6,
+       "number": 1,
+       "symbol": 2,
+       "variable": 1
+      },
+      {
+       "expression": 7,
+       "number": 1,
+       "symbol": 2
+      }
+     ],
+     "probe": "!(unify &self (a b) a (+ 1 1))",
+     "result": null,
+     "uses": 10,
+     "verdict": "unreduced"
+    }
+   },
+   "files": 3,
+   "uses": 10
+  },
+  "unique-atom": {
+   "arities": {
+    "1": {
+     "answer": "(a b)",
+     "positions": [
+      {
+       "expression": 3,
+       "number": 1
+      }
+     ],
+     "probe": "!(unique-atom (a b))",
+     "result": "expression",
+     "uses": 4,
+     "verdict": "reduces"
+    }
+   },
+   "files": 4,
+   "uses": 4
+  },
+  "|->": {
+   "arities": {
+    "2": {
+     "answer": "answers a gensym from an engine-internal counter, `lambda_1` upstream against `lambda_2` here for the same one-line program",
+     "positions": [
+      {
+       "expression": 37
+      },
+      {
+       "expression": 37
+      }
+     ],
+     "probe": null,
+     "result": null,
+     "uses": 37,
+     "verdict": "world"
+    }
+   },
+   "files": 5,
+   "uses": 37
+  }
+ },
+ "policy": {
+  "min_files": 3,
+  "prelude": "(rel a b)",
+  "probe_tuples": 24,
+  "values": {
+   "any": [
+    "1",
+    "a",
+    "true",
+    "(a b)"
+   ],
+   "expression": [
+    "(a b)",
+    "(rel a b)",
+    "(+ 1 1)"
+   ],
+   "number": [
+    "1",
+    "2"
+   ],
+   "space": [
+    "&self"
+   ],
+   "string": [
+    "\"s\""
+   ],
+   "symbol": [
+    "a",
+    "true"
+   ],
+   "variable": [
+    "$x"
+   ]
+  }
+ }
+}

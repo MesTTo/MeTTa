@@ -151,6 +151,42 @@ def from_pattern(pattern, max_leaves: int = 8):
 > Repeated named variables share one draw. Each anonymous ``V._`` occurrence
 > receives its own draw, matching the engine's non-binding anonymous law.
 
+## `programs`
+
+```python
+def programs(*, census=None, depth: int = 3, facts=(1, 4), queries=(1, 3)):
+```
+
+> Generate MeTTa program text over the heads an arbiter is known to reduce.
+>
+> The strategy for differential testing against another engine. Every head it
+> writes comes from a CENSUS: the call heads of a corpus that engine ships,
+> each one run on that engine and recorded with what it did, so a generated
+> program is inside the surface being compared rather than exercising the two
+> implementations' error paths. The shipped census is upstream PeTTa's, taken
+> from `tests/conformance/petta/examples` and written by
+> `tests/conformance/petta_capture.py --census`.
+>
+>     from hypothesis import given
+>     from metta import testing
+>
+>     @given(testing.programs())
+>     def test_both_engines_agree(source):
+>         assert run_here(source) == run_there(source)
+>
+> A program is one to four facts over fresh relation names, up to two
+> equations over `$x`, and one to three `!` queries. Every equation body uses
+> `$x`, which is the known weakness of generating well-typed terms freely:
+> the generator that draws bodies at random writes functions ignoring their
+> argument, and the comparison then says nothing about how the argument was
+> reduced.
+>
+> `depth` bounds how deeply a call nests inside another. `facts` and
+> `queries` are inclusive ranges. `census` takes a census dict for another
+> arbiter; the default reads the one committed in this checkout and refuses
+> with the command that writes it when there is none, which is the case in an
+> installed wheel.
+
 ## `check_space_provider`
 
 ```python
