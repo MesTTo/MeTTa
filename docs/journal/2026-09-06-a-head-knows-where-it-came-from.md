@@ -17,8 +17,9 @@ loaded from a `.metta` file and one defined through `m.run` both answer
 `predicate/1` and no other property, because the translator installs a
 compiled equation with `assertz(Module:Clause, NewRef)`
 (`engine/filereader.pl:1417`) and SWI records no source for an asserted clause
-[measured 2026-09-06, `ai-tmp/obs/probe4.py` on this branch, one crossing per
-head against the live engine].
+[measured 2026-09-06: `clause_property(Ref, P)` over the references
+`nth_clause/3` yields, asked of the live engine for each head; the MeTTa half
+of it is pinned since by test_a_head_defined_from_python_text_has_no_source].
 
 Found: the file half is there anyway, in a different place. The loader
 journals every reference a load asserted, `source_load_assertion(LoadId,
@@ -94,8 +95,10 @@ the auto-fill is an interpreter internal rather than a documented guarantee.
 Rejected: setting them on the private-name guards as well. Those answer
 protocol probes from `copy`, `pickle` and `inspect`, nobody reads their
 tracebacks, and the two fields cost the probe round trip 296 ns against 462 ns
-[measured 2026-09-06, minimum of nine runs of 200,000 on CPython 3.14;
-command=ai-tmp/obs/probe_attr_cost.py on this branch].
+[measured 2026-09-06: minimum of nine timeit rounds of 200,000 on CPython 3.14.4 over
+`try: o.__wrapped__` / `except AttributeError: pass`, against a class whose
+__getattr__ raises `AttributeError(name)` and one whose raises
+`AttributeError(name, name=name, obj=self)`].
 
 Decided, the message bridge's threading: SWI declares
 `user:thread_message_hook/3` thread_local [source: SWI-Prolog 10.1.13
@@ -104,9 +107,11 @@ the thread that consulted it, which is the thread Python drives the engine on.
 That IS the thread-safety argument. The callback only ever runs inside a
 crossing this process asked for, on a thread that has an interpreter state,
 and a message emitted on a Prolog worker thread finds no clause and prints as
-before [measured 2026-09-06: a clause asserted from one janus crossing is
-visible in the next on the same thread and absent on a Python worker thread's
-engine; `ai-tmp/obs/probe_hook.py`]. No deferral queue is needed, because this
+before [measured 2026-09-06: `assertz((user:thread_message_hook(_,probe,_) :- fail))`
+in one janus crossing is counted by `aggregate_all(count,
+clause(user:thread_message_hook(_,_,_), _), N)` in the NEXT crossing on the
+same thread, and is absent from a Python worker thread's own engine]. No
+deferral queue is needed, because this
 is not a finaliser: it runs at a point the caller chose, which is the
 distinction `docs/journal/2026-09-06-finalisers-must-not-call-prolog.md` draws.
 
