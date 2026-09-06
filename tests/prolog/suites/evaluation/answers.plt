@@ -5,6 +5,9 @@
 %   apart from python_surface.plt because shim hooks change which bridge
 %   answers the typing tests there.
 % Guarantees:
+%   - evaluation context preserves demand across carrier overrides, restores
+%     after every exit, and licenses ordered provider bounds consistently
+%     [tested: run_tests(evaluation_context); commit=WORKTREE].
 %   - the Python repeatability bridge fails closed on an ordinary classifier
 %     refusal but never catches a control limit [tested:
 %     python_repeatability_control:the_bridge_preserves_inference_limits;
@@ -197,3 +200,122 @@ test(the_top_error_has_an_engine_message) :-
     \+ sub_string(Message, _, _, _, "Unknown error term").
 
 :- end_tests(answers_annotations).
+
+
+% A host operation reads the active carrier through the public observer.
+:- multifile seam:extension_builtin/2.
+seam:extension_builtin('plunit-carrier-operation', readOnlyLookup).
+'plunit-carrier-operation'(_, _, Algebra) :-
+    metta_current_algebra('&self', [], Algebra).
+:- register_builtin_fun('plunit-carrier-operation').
+
+:- begin_tests(evaluation_context).
+
+test(an_operation_uses_its_carrier_and_restores_the_outer_one) :-
+    metta_with_under(tropical,
+        ( metta_apply_algebra_operation(observed, 'plunit-carrier-operation',
+                                        left, right, Selected),
+          assertion(Selected == observed),
+          metta_current_algebra('&self', [], Outer),
+          assertion(Outer == tropical) )).
+
+test(an_algebra_override_preserves_the_current_demand) :-
+    assertion(seam:kind(metta_with_evaluation_context/2, host_service)),
+    assertion(seam:kind(metta_evaluation_context/1, host_service)),
+    assertion(seam:kind(metta_ordered_match_limit/6, host_service)),
+    metta_with_evaluation_context(evaluation_context(ranked, 2, descending),
+        ( metta_with_under(observed,
+              ( metta_evaluation_context(Inner),
+                assertion(Inner == evaluation_context(observed, 2, descending)),
+                metta_effective_algebra('&self', Selected),
+                assertion(Selected == observed) )),
+          metta_evaluation_context(Outer),
+          assertion(Outer == evaluation_context(ranked, 2, descending)) )),
+    \+ metta_evaluation_context(_).
+
+test(context_cleanup_covers_failure_exception_and_exhaustion) :-
+    Context = evaluation_context(ranked, 2, descending),
+    \+ metta_with_evaluation_context(Context, fail),
+    \+ metta_evaluation_context(_),
+    catch(metta_with_evaluation_context(Context, throw(context_probe)),
+          context_probe, Caught = true),
+    assertion(Caught == true),
+    \+ metta_evaluation_context(_),
+    findall(X, metta_with_evaluation_context(Context, member(X, [a, b])), Xs),
+    assertion(Xs == [a, b]),
+    \+ metta_evaluation_context(_).
+
+test(suspended_engines_keep_distinct_contexts) :-
+    setup_call_cleanup(
+        ( engine_create(C1,
+              metta_with_evaluation_context(evaluation_context(ranked, 2, descending),
+                  ( member(_, [a, b]), metta_evaluation_context(C1) )), E1),
+          engine_create(C2,
+              metta_with_evaluation_context(evaluation_context(tropical, 3, ascending),
+                  ( member(_, [a, b]), metta_evaluation_context(C2) )), E2) ),
+        ( engine_next(E1, First),
+          engine_next(E2, Second),
+          engine_next(E1, Again),
+          assertion(First == evaluation_context(ranked, 2, descending)),
+          assertion(Again == First),
+          assertion(Second == evaluation_context(tropical, 3, ascending)),
+          \+ metta_evaluation_context(_) ),
+        ( engine_destroy(E1), engine_destroy(E2) )),
+    \+ metta_evaluation_context(_).
+
+ordered_fixture :-
+    'add-atom'('&metta', [annotations, '&plunit_topk', ranked], _),
+    'add-atom'('&metta', [emits, '&plunit_topk', 'best-first'], _),
+    'add-atom'('&metta', [handles, '&plunit_topk', [scored, _], 'Exact'], _).
+
+ordered_cleanup :-
+    'remove-atom'('&metta', [annotations, '&plunit_topk', ranked], _),
+    'remove-atom'('&metta', [emits, '&plunit_topk', 'best-first'], _),
+    'remove-atom'('&metta', [handles, '&plunit_topk', [scored, _], 'Exact'], _).
+
+test(ordered_bound_requires_matching_carrier_direction_and_positive_demand,
+     [setup(ordered_fixture), cleanup(ordered_cleanup)]) :-
+    metta_ordered_match_limit('&plunit_topk', [scored, _], ranked,
+                               2, descending, Accepted),
+    assertion(Accepted == 2),
+    forall(member(Algebra-Limit-Direction,
+                  [tropical-2-ascending, ranked-2-ascending,
+                   ranked-0-descending, ranked-2-none]),
+           ( spaces:metta_ordered_match_limit('&plunit_topk', [scored, _],
+                                               Algebra, Limit, Direction, Refused),
+             assertion(Refused == 0) )),
+    'remove-atom'('&metta', [annotations, '&plunit_topk', ranked], _),
+    setup_call_cleanup(
+        'add-atom'('&metta', [annotations, '&plunit_topk', tropical], _),
+        ( spaces:metta_ordered_match_limit('&plunit_topk', [scored, _], tropical,
+                                            2, ascending, Cheapest),
+          assertion(Cheapest == 2),
+          spaces:metta_ordered_match_limit('&plunit_topk', [scored, _], tropical,
+                                            2, descending, WrongDirection),
+          assertion(WrongDirection == 0) ),
+        ( 'remove-atom'('&metta', [annotations, '&plunit_topk', tropical], _),
+          'add-atom'('&metta', [annotations, '&plunit_topk', ranked], _) )).
+
+test(ordered_bound_requires_foreign_exact_best_first_and_repeatable_source,
+     [setup(ordered_fixture), cleanup(ordered_cleanup)]) :-
+    spaces:metta_ordered_match_limit('&self', [scored, _], ranked,
+                                     2, descending, Native),
+    assertion(Native == 0),
+    setup_call_cleanup(
+        'add-atom'('&metta', [source, '&plunit_topk', linear], _),
+        ( spaces:metta_ordered_match_limit('&plunit_topk', [scored, _], ranked,
+                                            2, descending, Linear),
+          assertion(Linear == 0) ),
+        'remove-atom'('&metta', [source, '&plunit_topk', linear], _)),
+    'remove-atom'('&metta', [emits, '&plunit_topk', 'best-first'], _),
+    spaces:metta_ordered_match_limit('&plunit_topk', [scored, _], ranked,
+                                     2, descending, Unordered),
+    assertion(Unordered == 0),
+    'add-atom'('&metta', [emits, '&plunit_topk', 'best-first'], _),
+    'remove-atom'('&metta', [handles, '&plunit_topk', [scored, _], 'Exact'], _),
+    spaces:metta_ordered_match_limit('&plunit_topk', [scored, _], ranked,
+                                     2, descending, Inexact),
+    assertion(Inexact == 0),
+    'add-atom'('&metta', [handles, '&plunit_topk', [scored, _], 'Exact'], _).
+
+:- end_tests(evaluation_context).

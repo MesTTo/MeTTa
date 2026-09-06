@@ -30,7 +30,7 @@ root, and `ai-todo.md` prices for the C seat at about 0.045% per character.
 This worktree sits at 71 characters against the main checkout's 29, so a boot
 pin taken here would describe this worktree and read as a 2% improvement
 wherever the gate actually runs. Every number below was therefore measured in
-a clone at `/home/user/Dev/PyPeTTa1/repin`, which is character-for-character
+a sibling clone at `../repin`, whose absolute path is character-for-character
 as long as the main checkout, provisioned with the same native artifacts and a
 freshly warmed `.qlf` set.
 
