@@ -149,7 +149,7 @@ run GATE pytest env CHECK_PY="$PY" sh "$HERE/extensions/python/test.sh"
 # read as unbacked while the same citation in the tree is backed.
 PYTHON_TEST_SH = """\
 set -eu
-exec "$PY" -m {pytest_anchor} -n auto
+exec "$PY" -m {pytest_anchor}
 """
 
 # The plunit lane is the engine component's, for the same reason and with the
@@ -330,7 +330,7 @@ def seat_relative_path_complaints() -> list[str]:
     complaints = []
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
-        build(root, "pytest tests -q -p no:benchmark")
+        build(root, "pytest -q -p no:benchmark -n 4 --dist loadfile --max-worker-restart=0 tests")
         header = root / "extensions/cmetta/fixture.h"
         header.write_text(
             "/* Purpose: a fixture beside the C suite.\n"
@@ -373,7 +373,7 @@ def line_continuation_complaints() -> list[str]:
     complaints = []
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
-        build(root, "pytest tests -q -p no:benchmark")
+        build(root, "pytest -q -p no:benchmark -n 4 --dist loadfile --max-worker-restart=0 tests")
         (root / "check.sh").write_text(
             CHECK_SH.replace(
                 "run GATE checked sh -c \"cd '$HERE' && '$PY' tests/checked.py\"",
@@ -415,7 +415,7 @@ def seat_root_path_complaints() -> list[str]:
     complaints = []
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
-        build(root, "pytest tests -q -p no:benchmark")
+        build(root, "pytest -q -p no:benchmark -n 4 --dist loadfile --max-worker-restart=0 tests")
         probe = root / "extensions/cmetta/tests/seat_probe.c"
         probe.write_text(
             "/* Purpose: a fixture one directory inside the C seat.\n"
@@ -451,7 +451,7 @@ def commit_pin_complaints() -> list[str]:
     complaints = []
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
-        build(root, "pytest tests -q -p no:benchmark")
+        build(root, "pytest -q -p no:benchmark -n 4 --dist loadfile --max-worker-restart=0 tests")
         for command in (
             ["git", "init", "-q"],
             ["git", "add", "-A"],
@@ -519,7 +519,7 @@ def main() -> int:
     complaints = []
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
-        at = build(root, "pytest tests -q -p no:benchmark")
+        at = build(root, "pytest -q -p no:benchmark -n 4 --dist loadfile --max-worker-restart=0 tests")
         output = run(root)
         for accepted, names, why in CITATIONS:
             marker = f"engine/fixture.pl:{at[names]}:"

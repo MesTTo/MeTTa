@@ -315,11 +315,15 @@ COLLECTORS = (
     # out of the lane and into the seat's own test.sh, so that the gate and a
     # developer run one file; anchoring on the lane's text here would have
     # dropped all 202 test files out of this model the moment it did.
+    # The fragment ends on the root because the defaults moved in front of the
+    # caller's arguments on 2026-09-06 (so a caller's -n 0 wins); the old
+    # `pytest tests -q` spelling stopped matching and this model dropped 2,584
+    # backed claims in one step before the anchor followed.
     Collector(
         runner="extensions/python/test.sh",
         tier="GATE",
         lane="pytest",
-        anchor="pytest tests -q -p no:benchmark",
+        anchor="--max-worker-restart=0 tests",
         root="extensions/python/tests",
         patterns=("test_*.py", "*_test.py"),
         recursive=True,
