@@ -1124,3 +1124,17 @@ seventeen sections above it: the library already has the mechanism for most
 of them, in one seat or one direction, and perfection is the rule that every
 mechanism has every face, generated rather than written, with the roster that
 proves it.
+
+### Ruling, later the same day: the arbiter is PeTTa
+
+The user ruled that the semantics arbiter is upstream PeTTa at the pinned
+commit the parity lane clones, not LeaTTa. Three places above were written
+against LeaTTa and are corrected here rather than edited in place, per the
+journal's own rule: item 3 of section 19 (a derivation checkable against the
+arbiter's semantics) reads against PeTTa's measured answers, the parity
+corpus, and a Lean certificate is a research idea rather than the arbiter's;
+the Open on Unicode normalisation is a question for PeTTa's behaviour at the
+pin; "where the arbiter is silent" in section 5 means where PeTTa has no
+measured answer. LeaTTa citations elsewhere in the tree are the provenance
+of a behaviour, not its authority, and the sentences that still say otherwise
+are swept separately (`ai-todo.md`).
