@@ -71,3 +71,37 @@ self-tests still answer 0 defects over their 28 and 29 planted cases.
 Rejected: resolving those four by hand, which is the whole-tree textual
 substitution the tool exists to replace and which has already reached into
 twelve string literals once.
+
+Tried: re-pinning the identity twin an eighteenth time. Seventeen of the
+eighty-three re-pins in its own chain were written on 2026-09-05 and 2026-09-06
+alone, and every control taken with them left the MeTTa side of the same run
+unchanged.
+Measured: what moves it. Appending ONE inert fact to `engine/specializer.pl`
+takes the reading from 3422 to 3432, and 2, 4, 8, 16 or 32 more take it no
+further; the same fact in `engine/filereader.pl` or
+`engine/translator/analysis.pl` costs the same 10 and in
+`engine/metta/effects.pl`, `engine/spaces/catalog.pl` or `engine/metta/types.pl`
+costs nothing; the MeTTa side reads 2356 in all twelve arms. Over the sixteen
+first-parent trunk points the row read 3397 to 3437 while the MeTTa side moved
+once, at 26f479ba, 2291 to 2357; over the eleven points since then it read 3422
+to 3437, a spread of 15, one and a half of those steps.
+Rejected: an empirical envelope, which is the mechanism this lane already has
+for a counter that varies. It licenses exactly ONE protocol, and this twin is
+priced under the serial protocol by
+`tests/repository/test_twin_coverage.py::test_a_shipped_twin_agrees_with_its_example_end_to_end`
+and under the full-lane protocol by the `twins` lane, so either spelling would
+be a finding in the other. Revisit if the two lanes ever price a twin under one
+protocol.
+Rejected: pinning the MeTTa side instead of the twin's. It is stable across
+every control, but `BUDGET` means the twin's own cost for all 224 twins and
+changing which side one twin prices would make its number mean something
+different from its neighbours'.
+Decided: a per-twin `ALLOWANCE`, declared beside `BUDGET`, read from source the
+way `BUDGET` and `RUNG` already are, applying to a POINT budget only because
+widening measured extrema by a declared number would report a spread nobody
+observed. The identity twin declares 20, which covers the measured 15 with a
+step to spare and is 0.58% of its pin; every other twin states none and stays on
+the tree's four-inference allowance. Two tests hold it:
+`test_a_declared_allowance_widens_one_twins_band_only` plants a twin with the
+declaration and one without and requires the band to move for exactly one of
+them, and `test_a_declared_allowance_is_validated` plants -1, True and 4.5.

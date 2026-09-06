@@ -9,6 +9,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- A Python twin may declare its own `ALLOWANCE` beside its `BUDGET`, for the
+  one case where a twin's inference count is measured to track something that
+  is not the twin's work. `ch05-.../01-identity.py` is that case: its cost
+  carries a compile-time term that follows the ENGINE's clause layout, so
+  appending one inert fact to `engine/specializer.pl` moves it by 10 while the
+  MeTTa side of the same run does not move at all, and it was re-pinned
+  seventeen times in two days on that account. It declares 20, the measured
+  spread of the trunk readings whose MeTTa side is unchanged; every other twin
+  states none and stays on the tree's four-inference allowance, and an
+  allowance never widens an empirical envelope's observed extrema.
+
 - **Breaking.** `under=counting` answers a `TaggedAnswer` rather than a bare
   `int`. The count is `.annotation`; `.value` is `()`, which says no
   proposition row was manufactured, and `.plan`, `.why()` and `.under(other)`
