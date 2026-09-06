@@ -16,6 +16,41 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Node binding decodes a space the engine registered without an ampersand.
+  Any symbol written through is a space name, which
+  `examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/07-add_atom_fun_space.metta`
+  relies on, and the host interns such a name and sends it back under the
+  portable space tag. `bridge.pl`'s decoder still demanded the prefix, and a
+  failing decode refuses the whole wire rather than the leaf, so once a program
+  had named one, every later term mentioning it died on that engine with
+  `metta_node_undecodable([e,2,s,collapse,e,2,s,'get-atoms',p,my_space_name])`.
+  A workspace giving each program its own space on one engine lost four of
+  twenty-four corpus programs to it.
+- A browser prepares each runtime root once. `metta()` used to fetch and
+  re-validate the whole 3.3 MB `runtime.json` and re-fetch both wasm assets on
+  every boot; twelve boots made twelve of each request and now make one, boots
+  that start together share the one preparation, and a refused runtime is not
+  remembered. `forgetRuntime()` drops every prepared root and
+  `forgetRuntime(root)` drops one.
+- A browser compiles the engine module from its URL with
+  `WebAssembly.compileStreaming` and hands the loader the compiled module,
+  where it used to hand over bytes. Chrome's WebAssembly code cache is keyed by
+  the resource URL and is populated by the streaming calls alone, so the bytes
+  path recompiled the module on every page load: measured over Chromium's own
+  `v8.wasm` trace events, a second page load compiled 1062 wasm functions from
+  bytes and 1 after streaming, deserializing the rest from the cache, and a
+  warm page load boots in 785 ms where the bytes path takes 1042. A
+  response the browser will not stream, and a root that is not `http:` or
+  `https:`, still compile the fetched bytes, and a module that will not compile
+  is now refused by name instead of aborting inside the loader.
+- Installing the Node package from a directory carries the engine.
+  `_runtime/` and `browser/` were built by `prepack`, and npm's directory
+  fetcher runs `prepare` and no other script, so `npm install file:` delivered
+  165 of the package's 300 files and a boot that searched the consumer's own
+  project for `engine/`. Both are built by `prepare` now. The `node-dist` gate
+  lane packs the package and unpacks it where no checkout encloses it, rather
+  than reading it through a symlink to the checkout, and a checkout's own
+  `engine/` takes precedence over an `_runtime/` snapshot beside it.
 - A Python stream the engine pulls no longer loses the exception that ended
   it. Janus reads a raising pull as an exhausted one, so a space provider's
   `match` or `atoms`, a grounded value's `match_`, a generator operation and an
