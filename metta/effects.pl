@@ -25,6 +25,13 @@
 %     effects_lattice:world_effect_coverage_composes_catalog_rows_to_the_strongest_rank,
 %     effects_lattice:compensation_declarations_require_an_effectful_operation;
 %     commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
+%   - annotation algebra lookup reads a custom descriptor only from the
+%     declaring context, with shipped global rows as fallbacks [tested:
+%     test_custom_algebras_are_context_owned; commit=2e627a593413191cda3170f2eb716835f7f62543].
+%   - metta_current_algebra/3 exposes the selected declaration without
+%     confusing the implicit Boolean execution default for an explicit choice
+%     [tested: test_current_algebra_follows_each_selection_layer;
+%     commit=2e627a593413191cda3170f2eb716835f7f62543].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: observe-source owns its diagnostic writes as oracleIO; ordinary
@@ -2098,9 +2105,29 @@ metta_effective_algebra(_, Algebra) :-
 metta_effective_algebra(Ctx, Algebra) :-
     metta_annotations(Ctx, Algebra).
 
+%The public observer is narrower than metta_effective_algebra/2: silence means
+%None to its host caller, while execution still defaults silence to bool.
+%A singleton list distinguishes an actual scoped algebra named "none" from no
+%Python scope. The engine-held per-call override wins because it encloses the
+%operation that can ask this question.
+metta_current_algebra(_, _, Algebra) :-
+    nb_current('$metta_under_algebras', [Algebra|_]), !.
+metta_current_algebra(_, [Algebra], Algebra) :- !.
+metta_current_algebra(Ctx, [], Algebra) :-
+    (   metta_contract_fact([annotations, Ctx, _])
+    ;   metta_contract_fact([annotations, Ctx, _, _])
+    ), !,
+    metta_annotations(Ctx, Algebra).
+
 metta_algebra_descriptor(Name, Combine, Extend, Zero, One, Laws,
                          Carrier, Requires) :-
-    (   metta_algebra_descriptor_cache(Name, CachedCombine, CachedExtend,
+    (   current_metta_space(Ctx) -> true ; Ctx = '&self' ),
+    metta_algebra_descriptor(Ctx, Name, Combine, Extend, Zero, One, Laws,
+                             Carrier, Requires).
+
+metta_algebra_descriptor(Ctx, Name, Combine, Extend, Zero, One, Laws,
+                         Carrier, Requires) :-
+    (   metta_algebra_descriptor_cache(Ctx, Name, CachedCombine, CachedExtend,
                                        CachedZero, CachedOne, CachedLaws,
                                        CachedCarrier, CachedRequires)
     ->  Combine = CachedCombine,
@@ -2110,20 +2137,24 @@ metta_algebra_descriptor(Name, Combine, Extend, Zero, One, Laws,
         Laws = CachedLaws,
         Carrier = CachedCarrier,
         Requires = CachedRequires
-    ;   metta_algebra_descriptor_fresh(Name, Combine, Extend, Zero, One,
+    ;   metta_algebra_descriptor_fresh(Ctx, Name, Combine, Extend, Zero, One,
                                        Laws, Carrier, Requires)
     ).
 
-metta_algebra_descriptor_fresh(Name, Combine, Extend, Zero, One, Laws,
+metta_algebra_descriptor_fresh(Ctx, Name, Combine, Extend, Zero, One, Laws,
                                Carrier, Requires) :-
-    metta_contract_fact([algebra, Name, Combine, Extend, Zero, One,
-                         Laws, Carrier, Requires]),
-    assertz(metta_algebra_descriptor_cache(Name, Combine, Extend, Zero, One,
-                                           Laws, Carrier, Requires)).
+    (   metta_contract_fact([algebra, Name, Combine, Extend, Zero, One,
+                             Laws, Carrier, Requires, Ctx])
+    ->  true
+    ;   metta_contract_fact([algebra, Name, Combine, Extend, Zero, One,
+                             Laws, Carrier, Requires, global])
+    ),
+    assertz(metta_algebra_descriptor_cache(Ctx, Name, Combine, Extend, Zero,
+                                           One, Laws, Carrier, Requires)).
 
 metta_algebra_one(Ctx, One) :-
     metta_effective_algebra(Ctx, Algebra),
-    metta_algebra_descriptor(Algebra, _, _, _, One, _, _, _).
+    metta_algebra_descriptor(Ctx, Algebra, _, _, _, One, _, _, _).
 
 metta_algebra_law(Algebra, Law) :-
     metta_algebra_descriptor(Algebra, _, _, _, _, [laws|Laws], _, _),
@@ -2224,7 +2255,7 @@ metta_annotation(Ctx, K) :-
 %tensor operation registered from Python is not a separate engine case.
 metta_k_extend(Ctx, K1, K2, K) :-
     metta_effective_algebra(Ctx, Algebra),
-    metta_algebra_descriptor(Algebra, _, Extend, _, One, _, _, _),
+    metta_algebra_descriptor(Ctx, Algebra, _, Extend, _, One, _, _, _),
     (   K1 == One -> K = K2
     ;   K2 == One -> K = K1
     ;   metta_apply_algebra_operation(Algebra, Extend, K1, K2, K)
