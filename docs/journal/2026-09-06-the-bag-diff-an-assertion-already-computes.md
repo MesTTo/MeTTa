@@ -124,3 +124,53 @@ to be regenerated (`fngen.py --write`), a `syntax_introductions.txt` row for
 `assert` at 12-00-03 (the example is the corpus's first user of the head),
 and two derived counts in `llms.txt`: 300 builtins to 301, measured through
 `m.self.builtins()`, and 258 example programs to 259.
+
+Tried: `GATE_ONLY=1 sh check.sh`, once, on the frozen tree at loadavg 32-58.
+13 of 106 lanes red. Two were this change's and both are fixed:
+
+Tried: `prolog-static` -> `Variable not introduced in all branches: Missing`
+at `'assert-answers'/5`. SWI warns for a variable bound in one arm of an
+if-then-else and read after it, and `tests/prolog/static_checks.pl` fails the
+run on any warning. The prediction that no such warning existed was wrong.
+Decided: each arm calls `report_failed_assertion/4` for itself, so nothing
+crosses the branch. Re-run: no warnings, lane ok.
+
+Tried: `spec-differential` -> `examples/ch12-testing/03-assertion_difference.metta:
+verifier reported an error`. The lane reads ANY `ERROR:` line in an example's
+output as a verifier fault, and that held until this corpus gained its first
+file whose SUBJECT is an engine diagnostic.
+Rejected: a per-file exemption. It would blind the net inside the one file
+most likely to surface a real fault in this area.
+Decided: a two-state walk. An assertion report's headline and the indented
+lines under it are let past; every other `ERROR:` line, there and anywhere
+else, is still a finding. The selftest plants both. Re-run:
+`0 disagreements; 78 checked, 73 agreed, 5 unverified`.
+
+Measured: the price of the richer report on the FAILING path, from the C
+seat's `error-ball` case, which is 2,000 failing assertions each rendered to
+C: inferences 406,009 -> 498,008 (+46 per raise), instructions 1,053,177,858
+-> 1,328,105,169 (+137,464 per raise, +26%), CPU 0.0901s -> 0.19042s. Each
+raise now renders three message lines where it rendered one, twice over (the
+engine's own stderr report inside the region, and the capture window the case
+reads), and computes two `subtraction-atom` calls. `boot` moved +3,011
+inferences there, the engine having one more builtin to register and four
+longer prelude bodies to compile. `engine-bench` REFUSED to compare rather
+than reporting a move, because its baseline is stamped with a digest of its
+workload files and `engine/prelude.metta` is one of them.
+Open: both baselines want a re-pin. Not taken here: each would re-measure
+every row on a loaded box whose other rows already sit outside their bands,
+against a base twelve commits behind trunk, so the pin would freeze this
+tree's contention and trunk's drift. The numbers and the mechanism above are
+what that pass needs.
+
+Measured: nine of the thirteen red lanes are not this change's.
+`benchmarks`, `instructions` and `memory-scale-gate` move rows this change
+cannot reach and move them in BOTH directions -- `annotated-relation`
+315,385 -> 745,524 inferences and `support-drop-spaces` 3,665,257 ->
+6,886,427 against `source-load` -4.1% and `term-operators` -1.3% in
+instructions -- which is a stale baseline rather than a regression.
+`policy-inventory`'s two findings name files this change does not touch.
+`vulture`, `pylint` and `refurb` report pre-existing sites only.
+`mork-bench` failed on `perf stat ... Events disabled`, PMU contention from
+the other work on this box. `pytest` failed 3 of 3,728, all three passing
+when re-run alone, the parallel-worker flake already recorded here.
