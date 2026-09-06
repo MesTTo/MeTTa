@@ -1586,6 +1586,123 @@ derived performance page follow, because the pain is measured; tokens open
 vocabulary; handlers open `scope()` and its generated faces; the rest of the
 combinations of section 21 keep their order.
 
+### 23. Superset candidates, under the compatibility law
+
+Ruling (2026-09-07): this engine goes by upstream PeTTa's semantics and by
+nothing else; no operational-semantics paper and no mechanisation decides a
+semantics question. The engine may be a superset of PeTTa: on every program
+PeTTa accepts, the same answers; an extension lives only in a spelling PeTTa
+does not define or refuses, and it ships with the parity lane proving PeTTa's
+own programs answer unchanged. Everything below is read under that law, and
+each item names its compatibility condition.
+
+Candidates seen in a sibling corpus this week, each restated in this
+engine's terms with the primary source that grounds it:
+
+1. Typed holes in patterns. `(= (f (: $n Number)) ...)` reads the `:` head
+   inside a pattern as a judgment on the bound value, the pattern-level
+   spelling of the refinements of section 4 (`Annotated` on the Python side,
+   a typed hole in a template on the entry side). Compatibility: PeTTa reads
+   `(: $n Number)` in a pattern as an ordinary expression to match; the
+   extension therefore applies only where that structural reading yields no
+   match, or it is spelled with a head PeTTa does not define. Decided:
+   measure PeTTa's reading first; if it matches structurally, the extension
+   takes a distinct head.
+2. Gradual admission. An argument with no declared type is admitted by any
+   declared parameter, and only a declared mismatch refuses, the stance of
+   the Hyperon typing pull request by vsbogd (trueagi-io/hyperon-experimental
+   PR 46) and the founding specification's `?`. Compatibility: whatever PeTTa
+   answers for an untyped argument is the answer; the engine's `casting.cast`
+   and the refinement rule refuse only declared mismatches already.
+3. An unreduced host call is data. `(+ 1 S)` stays `(+ 1 S)` and a program
+   may rewrite inside it (Necr0x0Der in hyperon-experimental issue 320: "the
+   whole idea was to have the possibility to write down any intermixture of
+   symbolic and subsymbolic expressions"), and an Error atom is the outcome
+   of a request (`chain`, `eval`, `collapse`, a host contract's demand),
+   never a rewrite. Compatibility: measured on PeTTa; this engine's
+   `NotReducible` refusal and its "one Error per bad call" ruling are the
+   places the measurement lands.
+4. Branch-local effects as scratch spaces. A transaction is a fresh space,
+   commit is the merge of its rows into the target, abort is dropping the
+   handle, which is the row-merge reading of `reify()` and `commit(world)`
+   (section 5) and, with tokens, the observed-remove merge (section 20).
+   Compatibility: the doors are Python and Node faces; a MeTTa spelling
+   uses `new-space`, `match` and `add-atom`, all PeTTa's.
+5. A stored handle is a value, never an implicit descent: a query over a
+   space does not enter the spaces stored in it; a federated query is an
+   explicit inner match. This is the engine's rule already (the space is an
+   `Atom`; `Handle.__call__` refuses).
+6. Modules are spaces and import is a row merge, idempotent. A second
+   import adds nothing, mutual imports terminate, and a module's private
+   rows stay in its space until merged. With tokens the idempotence is the
+   union of token sets. Compatibility: PeTTa's `import!` behaviour is the
+   answer for what it defines; where two modules define one name, the
+   inherited-declarations ruling of this repository (a definition in `&self`
+   hides an imported one, C++ name hiding) stands where PeTTa is silent, and
+   is re-measured against PeTTa before anything changes.
+7. The reader as rows. Numberhood and stringhood as spelling families
+   declared by rows, so a program can add a family and replacing one
+   re-reads every stored atom. Compatibility: the default rows reproduce
+   PeTTa's reading exactly, and a family is an addition PeTTa cannot spell;
+   this is also where the Unicode-normalisation Open of section 18 belongs,
+   as a family rule rather than a seat decision.
+
+Candidates from the substrate shape (one counted multiset, one transition
+with kept, taken, absent and put patterns), each with its primary source:
+
+8. Match as subscription and emission. A match is a standing subscription
+   that emits when an atom arrives (Gelernter's Linda `rd` and `in`, 1985),
+   and a one-shot match is a subscription that closes at quiescence. This
+   is the engine-side reading of `live(query)` (sections 20 and 22) and
+   supports making the standing query the primitive and the one-shot match
+   its face. Compatibility: the one-shot face answers what PeTTa answers.
+9. Effects as linear tokens. A host call's result is a token consumed
+   exactly once, so backtracking and replay never fire an effect twice; a
+   fired effect is an atom in `&events` and firing the same token again is
+   a no-op. This is the deterministic replay of section 21 and a fix for
+   duplicated side effects under nondeterminism. Compatibility: PeTTa's
+   observable effects on its programs are the measurement; the linearity is
+   a contract of this engine's host seam.
+10. Files as epochs. Loading files in order is the epoch protocol, and a
+    token's generation coincides with the epoch of the load that minted it,
+    so `as-of` by file falls out of section 20 with no new mechanism.
+11. Forward chaining through CHR. SWI-Prolog ships `library(chr)`
+    (Frühwirth, Constraint Handling Rules, 2009): a rule with kept heads,
+    removed heads, a guard and a body is a simpagation rule, the store is the
+    constraint store, and negative guards are absence. A `lib_rules` face
+    compiling `(rule (keep ...) (take ...) (absent ...) (put ...))` to CHR
+    gives production rules with a proven engine in-process, composing with
+    standing queries (kept heads are subscriptions), tokens (a taken head
+    consumes one token) and provenance (CHR with justifications is the same
+    polynomial). Compatibility: a new head PeTTa does not define.
+12. Conjunctive match as a worst-case-optimal join. A conjunction of
+    patterns is a nested-loop join today (the ledger's finding); a
+    leapfrog triejoin over sorted tries (Veldhuizen, ICDT 2014; Ngo, Porat,
+    Ré and Rudra, PODS 2012) is worst-case optimal, and MORK's PathMap
+    tries are the sorted structure it needs, with a maintained factor
+    representation (Xu and Erdweg, doi:10.1145/3776728) as the index the
+    join reads. This is the class change behind the parity gap that section
+    2's columnar join and the MORK Θ(N²) item both circle. Compatibility: a
+    join answers the same bag in any order; the bag ruling is what makes
+    the routing free.
+13. Blueprints. A rule re-emitted from its own quoted row (Meredith and
+    Radestock's reflective replication) is the reading of `save_space` as a
+    first-class quotation: `space.blueprint()` is the program that
+    regenerates the space, `reify()` quotes, and freezing seals the
+    blueprint. Compatibility: `quote` and `eval` are PeTTa's.
+14. The scheduler as a parameter, with commutation laws. Every enabled
+    firing is admissible, so the order is a strategy value, and independent
+    firings commute, which is the law the parallel worlds of section 21
+    need before token union is sound; Montanari and Rossi's read arcs (kept
+    patterns that read without consuming) are what make independence
+    decidable per rule. Compatibility: the sequential schedule answers what
+    PeTTa answers, and every other schedule answers the same bag.
+
+Decided: none of these enters without a PeTTa measurement of the spelling
+it touches, recorded in the parity corpus, and each that changes evaluation
+(1, 3, 8, 9, 12, 14) is fenced behind the compatibility condition above with
+a differential against the sequential path.
+
 ### Ruling, later the same day: the arbiter is PeTTa
 
 The user ruled that the semantics arbiter is upstream PeTTa at the pinned
