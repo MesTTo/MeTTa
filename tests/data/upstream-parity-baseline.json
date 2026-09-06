@@ -1,68 +1,111 @@
 {
  "//": {
   "annotated_arrow_product_repin": "RE-PINNED 2026-09-05 after three source-only before/after samples at the canonical checkout path, warm QLF, against 763b7f2d1b0c6882b171cfa0e6a56374e0e8d167. All four old inference bands also fail on that unmodified base. Only these four within-tree inference pins change; upstream fields, recorded instruction fields, waivers and allowances remain untouched. examples/ch09-types/02-builin_types.metta: base/product inferences 54589/55949; net instruction minima 42624311/43898010; examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/01-c_extension.metta: base/product inferences 87799/87797; net instruction minima 108030420/113627817; examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/02-handle.metta: base/product inferences 93598/93596; net instruction minima 115393277/120765591; examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/04-nilbc.metta: base/product inferences 324825344/324827492; net instruction minima 156378969117/155175829651. [measured: three processes per example; command=ai-tmp/ai-remaining-ab.py; fixture=identical native artifacts, canonical path, warmed source-only base/product; commit=bbb512316280110a747e31c26adfc31e8c5104be]",
-  "our_boot": 1076388987,
+  "null_program_correction": "REBUILT 2026-09-06 by the null-program correction, which is a MEASUREMENT change and not an engine change: every field in this file moved, and no engine, library or Python-seat source did. The subtrahend was the boot fixture tests/fixtures/parity_boot.pl, a second process that reached neither engine's per-run setup and, having a different command line, did not measure the same fixed cost either: 4,594,811 instructions BELOW upstream's real one and 8,661,096 ABOVE ours, a 13,255,907 bias in this tree's favour on every row, against a corpus whose smallest row is 225,455. It is now the EMPTY PROGRAM through the same driver at the same path length and directory count, median of three processes and of seven when the three disagree, after one process that is run and discarded; a program of no content nets between -13,405 and +12,852 here and between -7,446 and -705 on upstream's across nine corpus shapes, which is this method's resolution. The recorded our_inferences move on 135 of the 148 rows measured in both files, 84 of them DOWNWARD, and not one exceeds the old pin's 2% + 200, so this is the stale half of the 0.8.0 re-pin being brought to this tip rather than any drift: that re-pin advanced thirteen inference fields and left the rest at their 2026-08-31 values. Seven rows the old file recorded with a net at or below zero, between -94,022 and -50,470,138, are measured here for the first time. examples/ch11-python-as-a-notation/07-torch.metta leaves the comparable set: seven processes of it spread 7.46% on upstream and 6.80% here with no mode, so its old 2.07% flag was a minimum read off a distribution rather than a cost. examples/ch20-extending-the-engine/20-06-files-and-processes/_fixtures/exit-status.metta leaves it too, by name, because it terminates its own process at its second form here and runs three forms upstream. [measured 2026-09-06: one discarded process then three fresh ones per program per engine, seven where the three disagreed; command=$CHECK_PY tests/checks/check_upstream_parity.py --rebaseline; fixture=/home/user/Dev/PyPeTTa1/pnull, a clone of this branch whose path is the same 29 characters as the repository root, with the five engine C artifacts, the three chapter-19 artifacts, libcmetta.so, both MORK artifacts and the git-import fixture cache present, the QLF purged and warmed, loadavg 34 to 54; commit=WORKTREE]",
+  "our_null": {
+   "at_longest_path": 1048776168,
+   "at_shortest_path": 1048174808,
+   "longest_path": [
+    142,
+    5
+   ],
+   "median": 1048438941,
+   "shapes": 71,
+   "shortest_path": [
+    64,
+    0
+   ]
+  },
   "release_0_8_0_repin": "RE-PINNED 2026-09-06 for the 0.8.0 release. Thirteen within-tree inference tripwires, each attributed by measuring the twelve cheap ones at fifteen first-parent points from a94f804c to this tip through this file's own measure(), three fresh processes per point; the sweep and its per-row table are in docs/journal/2026-09-06-the-release-repin.md. Only these thirteen our_inferences fields change; upstream fields, recorded instruction fields, waivers and allowances remain untouched, which is the same rule the two entries above followed. Where the moves are: 84bb5aa9's boot-determinism fix costs +691 on eight of the twelve and +716 on one, the largest single step in the set, and it is what the fix bought - materialize.pl's erase listener is registered once and lazily now, behind flag/3 and a mutex, because registering it per collected clause charged the collecting thread and made the engine boot nondeterministic. 40aca947's per-module definition pricing costs +4,078 and +4,080 on the two chapter-19 C examples, which build many namesake spaces. 4a40c577's annotated arrow product costs +1,840 on specializecyclic, +1,588 on builin_types, +12 on parametric_types and +85 to +91 on the rest. 26f479ba's query planning costs +85 to +300 across all twelve. 26cf523f's memoisation repairs cost +47 to +86 on the seven memoisation and search examples and 9b944a94's memoisation-as-a-library gives -26 to -45 of it back, the two halves of the same change. 653922f1's autoload-trap removal costs +90 on newtons_method and 970d443b's algebra surface -26 on memo_aggregate. nilbc is the thirteenth and is NOT attributed: one measurement of it is a minute of CPU and three are needed for a reading, so it was measured only at this tip, where it reads 332,597,186 against a frozen 324,827,492 (+2.39%), the same direction and order as the twelve beside it [measured 2026-09-06: three fresh processes per example per point, every point's three inference counts identical; command=$CHECK_PY tests/checks/check_upstream_parity.py; fixture=a clone of the branch whose path is as long as the repository root, with the C reader, writer, JSON codec and chapter-19 artifacts present, the QLF warmed and the git-import fixture cache populated, loadavg 12 to 15; commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136]",
   "status": "meta",
   "translator_rule_home_repin": "RE-PINNED 2026-09-03 while closing module-owned translator rules. Clean 12771f41 already exceeds the frozen inference pins on specializefunctiontypes, recursive_types2, types_dependent, types_nondet, nilbc, plntest and plntestdirect; the changed tree adds only its deterministic delta to those standing drifts. forall is the one newly displaced row because it compiles the prelude translator-rule path. Retired-instruction comparison and answer parity remain governed by their existing fields. [measured: full parity/performance lane on clean 12771f41 and the changed tree; command=$CHECK_PY tests/checks/check_upstream_parity.py; fixture=warm main-checkout engine artifacts; commit=d1318d20b5d89d33079c49d0e94aa29e12685664]",
-  "upstream_boot": 252384222
+  "upstream_null": {
+   "at_longest_path": 257393519,
+   "at_shortest_path": 257090841,
+   "longest_path": [
+    142,
+    5
+   ],
+   "median": 257236862,
+   "shapes": 71,
+   "shortest_path": [
+    64,
+    0
+   ]
+  }
  },
  "examples/ch01-getting-started/01-hello.metta": {
-  "our_inferences": 1812,
-  "our_instructions": 783763,
+  "our_inferences": 1900,
+  "our_instructions": 743778,
+  "our_null": 1048241970,
   "status": "measured",
-  "upstream_instructions": 13521234
+  "upstream_instructions": 8892079,
+  "upstream_null": 257124203
  },
  "examples/ch01-getting-started/02-checking-an-answer.metta": {
   "status": "upstream-error"
  },
  "examples/ch01-getting-started/_fixtures/01-reaches-forward.metta": {
-  "status": "upstream-nondeterministic"
+  "status": "upstream-error"
  },
  "examples/ch02-programming-a-family-tree/01-facts.metta": {
   "status": "upstream-error"
  },
  "examples/ch02-programming-a-family-tree/02-a-query.metta": {
-  "our_inferences": 2737,
-  "our_instructions": 2245725,
+  "our_inferences": 2865,
+  "our_instructions": 1943766,
+  "our_null": 1048287599,
   "status": "measured",
-  "upstream_instructions": 12923825
+  "upstream_instructions": 8256026,
+  "upstream_null": 257166711
  },
  "examples/ch02-programming-a-family-tree/03-a-rule.metta": {
-  "our_inferences": 7065,
-  "our_instructions": 6635534,
+  "our_inferences": 6466,
+  "our_instructions": 5707816,
+  "our_null": 1048287778,
   "status": "measured",
-  "upstream_instructions": 16505879
+  "upstream_instructions": 11834706,
+  "upstream_null": 257162915
  },
  "examples/ch02-programming-a-family-tree/04-the-whole-program.metta": {
-  "our_inferences": 8457,
-  "our_instructions": 7967980,
+  "our_inferences": 7846,
+  "our_instructions": 7074646,
+  "our_null": 1048348444,
   "status": "measured",
-  "upstream_instructions": 18563775
+  "upstream_instructions": 13856104,
+  "upstream_null": 257201139
  },
  "examples/ch03-atoms-and-expressions/01-comments.metta": {
-  "our_inferences": 2056,
-  "our_instructions": 1585893,
+  "our_inferences": 2001,
+  "our_instructions": 1501548,
+  "our_null": 1048274890,
   "status": "measured",
-  "upstream_instructions": 7635939
+  "upstream_instructions": 2981000,
+  "upstream_null": 257151156
  },
  "examples/ch03-atoms-and-expressions/02-string.metta": {
-  "our_inferences": 942,
-  "our_instructions": 296395,
+  "our_inferences": 990,
+  "our_instructions": 269710,
+  "our_null": 1048263863,
   "status": "measured",
-  "upstream_instructions": 5490938
+  "upstream_instructions": 828571,
+  "upstream_null": 257150558
  },
  "examples/ch03-atoms-and-expressions/03-string_comments.metta": {
-  "our_inferences": 3705,
-  "our_instructions": 3339638,
+  "our_inferences": 3750,
+  "our_instructions": 2989723,
+  "our_null": 1048319885,
   "status": "measured",
-  "upstream_instructions": 11861740
+  "upstream_instructions": 7229843,
+  "upstream_null": 257181945
  },
  "examples/ch03-atoms-and-expressions/04-repr.metta": {
-  "our_inferences": 3077,
-  "our_instructions": 1499836,
+  "our_inferences": 3193,
+  "our_instructions": 1515955,
+  "our_null": 1048246265,
   "status": "measured",
-  "upstream_instructions": 19542214
+  "upstream_instructions": 14906795,
+  "upstream_null": 257132219
  },
  "examples/ch03-atoms-and-expressions/05-parse.metta": {
   "status": "upstream-error"
@@ -71,193 +114,256 @@
   "status": "upstream-error"
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/01-spaces.metta": {
-  "our_inferences": 3119,
-  "our_instructions": 2985347,
+  "our_inferences": 3052,
+  "our_instructions": 2606312,
+  "our_null": 1048541713,
   "status": "measured",
-  "upstream_instructions": 9800742
+  "upstream_instructions": 4984831,
+  "upstream_null": 257293188
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/02-spaces2.metta": {
-  "our_inferences": 3323,
-  "our_instructions": 2989351,
+  "our_inferences": 3291,
+  "our_instructions": 2366763,
+  "our_null": 1048549383,
   "status": "measured",
-  "upstream_instructions": 12502127
+  "upstream_instructions": 7701773,
+  "upstream_null": 257294088
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/03-spaces3.metta": {
-  "our_inferences": 3533,
-  "our_instructions": 2637766,
+  "our_inferences": 3650,
+  "our_instructions": 2109445,
+  "our_null": 1048549383,
   "status": "measured",
-  "upstream_instructions": 20574647
+  "upstream_instructions": 15776306,
+  "upstream_null": 257294088
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/04-spaces_find.metta": {
-  "our_inferences": 7489,
-  "our_instructions": 8481324,
+  "our_inferences": 7598,
+  "our_instructions": 8104268,
+  "our_null": 1048581589,
   "status": "measured",
-  "upstream_instructions": 28362743
+  "upstream_instructions": 23553851,
+  "upstream_null": 257300139
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/05-spaces_succeedspredicate.metta": {
-  "our_inferences": 6936,
-  "our_instructions": 7842208,
+  "our_inferences": 7251,
+  "our_instructions": 7513565,
+  "our_null": 1048667446,
   "status": "measured",
-  "upstream_instructions": 25331684
+  "upstream_instructions": 20473400,
+  "upstream_null": 257353223
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/06-spaces_removeallatoms.metta": {
-  "our_inferences": 11098,
-  "our_instructions": 11939702,
+  "our_inferences": 10271,
+  "our_instructions": 10666287,
+  "our_null": 1048639785,
   "status": "measured",
-  "upstream_instructions": 29807527
+  "upstream_instructions": 25660486,
+  "upstream_null": 257341016
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/07-add_atom_fun_space.metta": {
-  "our_inferences": 3376,
-  "our_instructions": 3198127,
+  "our_inferences": 3236,
+  "our_instructions": 2393045,
+  "our_null": 1048616612,
   "status": "measured",
-  "upstream_instructions": 10406689
+  "upstream_instructions": 5580892,
+  "upstream_null": 257327896
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/08-spacefunction.metta": {
-  "our_inferences": 5661,
-  "our_instructions": 5122753,
+  "our_inferences": 4766,
+  "our_instructions": 3335653,
+  "our_null": 1048580838,
   "status": "measured",
-  "upstream_instructions": 13942472
+  "upstream_instructions": 9121562,
+  "upstream_null": 257311533
  },
  "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/09-selfprog.metta": {
-  "our_inferences": 3253,
-  "our_instructions": 2696663,
+  "our_inferences": 3255,
+  "our_instructions": 2422622,
+  "our_null": 1048544607,
   "status": "measured",
-  "upstream_instructions": 9921968
+  "upstream_instructions": 5125615,
+  "upstream_null": 257288770
+ },
+ "examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/10-subtract_atom.metta": {
+  "status": "upstream-error"
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/01-matchsingle.metta": {
-  "our_inferences": 5211,
-  "our_instructions": 5090297,
+  "our_inferences": 5054,
+  "our_instructions": 4462514,
+  "our_null": 1048506459,
   "status": "measured",
-  "upstream_instructions": 14355020
+  "upstream_instructions": 9582747,
+  "upstream_null": 257264574
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/02-matchnested.metta": {
-  "our_inferences": 4235,
-  "our_instructions": 3713898,
+  "our_inferences": 4087,
+  "our_instructions": 3034124,
+  "our_null": 1048506459,
   "status": "measured",
-  "upstream_instructions": 16280743
+  "upstream_instructions": 11511220,
+  "upstream_null": 257264574
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/03-matchnested2.metta": {
-  "our_inferences": 4295,
-  "our_instructions": 3766984,
+  "our_inferences": 4151,
+  "our_instructions": 3092653,
+  "our_null": 1048510695,
   "status": "measured",
-  "upstream_instructions": 16112171
+  "upstream_instructions": 11328854,
+  "upstream_null": 257268902
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/04-match_snapshot.metta": {
   "status": "upstream-error"
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/05-constanthead.metta": {
-  "our_inferences": 2791,
-  "our_instructions": 2372509,
+  "our_inferences": 2740,
+  "our_instructions": 2077874,
+  "our_null": 1048510695,
   "status": "measured",
-  "upstream_instructions": 10457372
+  "upstream_instructions": 5675497,
+  "upstream_null": 257268902
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/06-listhead.metta": {
-  "our_inferences": 4843,
-  "our_instructions": 4497675,
+  "our_inferences": 4804,
+  "our_instructions": 3989057,
+  "our_null": 1048483491,
   "status": "measured",
-  "upstream_instructions": 13158462
+  "upstream_instructions": 8396938,
+  "upstream_null": 257258679
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/07-unify.metta": {
   "status": "upstream-error"
  },
  "examples/ch04-spaces-and-matching/04-02-patterns-and-bindings/08-unify_eval_branches.metta": {
-  "our_inferences": 4378,
-  "our_instructions": 4375759,
+  "our_inferences": 4524,
+  "our_instructions": 3875080,
+  "our_null": 1048544607,
   "status": "measured",
-  "upstream_instructions": 55496395
+  "upstream_instructions": 50708400,
+  "upstream_null": 257288770
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/01-identity.metta": {
-  "our_inferences": 2368,
-  "our_instructions": 2049658,
+  "our_inferences": 2315,
+  "our_instructions": 1716818,
+  "our_null": 1048541377,
   "status": "measured",
-  "upstream_instructions": 9726101
+  "upstream_instructions": 4934576,
+  "upstream_null": 257281280
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/02-twostage.metta": {
-  "our_inferences": 5121,
-  "our_instructions": 5440189,
+  "our_inferences": 4701,
+  "our_instructions": 4505903,
+  "our_null": 1048541377,
   "status": "measured",
-  "upstream_instructions": 9008638
+  "upstream_instructions": 4225208,
+  "upstream_null": 257281280
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/03-program_order.metta": {
   "status": "upstream-error"
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/04-partialdef.metta": {
-  "our_inferences": 5877,
-  "our_instructions": 6193595,
+  "our_inferences": 5582,
+  "our_instructions": 5358079,
+  "our_null": 1048549383,
   "status": "measured",
-  "upstream_instructions": 11940860
+  "upstream_instructions": 7138559,
+  "upstream_null": 257294088
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/05-smartdispatch.metta": {
-  "our_inferences": 9568,
-  "our_instructions": 10260279,
+  "our_inferences": 8698,
+  "our_instructions": 9136193,
+  "our_null": 1048566072,
   "status": "measured",
-  "upstream_instructions": 15177134
+  "upstream_instructions": 10364988,
+  "upstream_null": 257302484
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/06-functionhead.metta": {
-  "our_inferences": 7574,
-  "our_instructions": 8570748,
+  "our_inferences": 7103,
+  "our_instructions": 7580977,
+  "our_null": 1048549174,
   "status": "measured",
-  "upstream_instructions": 16515799
+  "upstream_instructions": 11705745,
+  "upstream_null": 257292942
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/07-functionhead2.metta": {
-  "our_inferences": 11851,
-  "our_instructions": 12981722,
+  "our_inferences": 11336,
+  "our_instructions": 12142051,
+  "our_null": 1048566072,
   "status": "measured",
-  "upstream_instructions": 19050969
+  "upstream_instructions": 14240057,
+  "upstream_null": 257302484
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/08-functionhead3.metta": {
-  "our_inferences": 8914,
-  "our_instructions": 8659683,
+  "our_inferences": 7907,
+  "our_instructions": 7017479,
+  "our_null": 1048566072,
   "status": "measured",
-  "upstream_instructions": 17568881
+  "upstream_instructions": 12761198,
+  "upstream_null": 257302484
  },
  "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/09-multicall.metta": {
-  "our_inferences": 3195,
-  "our_instructions": 3028221,
+  "our_inferences": 3191,
+  "our_instructions": 2440887,
+  "our_null": 1048541713,
   "status": "measured",
-  "upstream_instructions": 10825444
+  "upstream_instructions": 6021284,
+  "upstream_null": 257293188
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/01-dispatch_policies.metta": {
-  "our_inferences": 4861,
-  "our_instructions": 4532981,
+  "our_inferences": 4188,
+  "our_instructions": 3255852,
+  "our_null": 1048579654,
   "status": "measured",
-  "upstream_instructions": 13579912
+  "upstream_instructions": 8765386,
+  "upstream_null": 257301878
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/02-functionremoval.metta": {
-  "our_inferences": 12135,
-  "our_instructions": 11529122,
+  "our_inferences": 10980,
+  "our_instructions": 9799921,
+  "our_null": 1048566072,
   "status": "measured",
-  "upstream_instructions": 16675724
+  "upstream_instructions": 11868268,
+  "upstream_null": 257302484
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/03-functionremovalspec.metta": {
-  "our_inferences": 11700,
-  "our_instructions": 11602698,
+  "our_inferences": 11129,
+  "our_instructions": 10786017,
+  "our_null": 1048584114,
   "status": "measured",
-  "upstream_instructions": 15366017
+  "upstream_instructions": 10547671,
+  "upstream_null": 257312830
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/04-specialize.metta": {
-  "our_inferences": 87598,
-  "our_instructions": 88270238,
+  "our_inferences": 78172,
+  "our_instructions": 75112862,
+  "our_null": 1048541377,
   "status": "measured",
-  "upstream_instructions": 48574121
+  "upstream_instructions": 43783025,
+  "upstream_null": 257281280
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/05-specialize_recursive_wrap.metta": {
-  "our_inferences": 8075,
-  "our_instructions": 8575806,
+  "our_inferences": 7926,
+  "our_instructions": 7822692,
+  "our_null": 1048629747,
   "status": "measured",
-  "upstream_instructions": 14109207
+  "upstream_instructions": 9265350,
+  "upstream_null": 257338534
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/06-specializecyclic.metta": {
   "our_inferences": 19290,
-  "our_instructions": 19708550,
+  "our_instructions": 20969228,
+  "our_null": 1048581589,
   "status": "measured",
-  "upstream_instructions": 18137381
+  "upstream_instructions": 13333760,
+  "upstream_null": 257300139
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/07-specializefunctiontypes.metta": {
-  "our_inferences": 5520,
-  "our_instructions": 5156214,
+  "our_inferences": 5355,
+  "our_instructions": 4856929,
+  "our_null": 1048616612,
   "status": "measured",
-  "upstream_instructions": 13234450
+  "upstream_instructions": 8394812,
+  "upstream_null": 257327896
  },
  "examples/ch05-equations-and-evaluation/05-03-the-number-library/01-math.metta": {
   "status": "upstream-error"
@@ -275,376 +381,498 @@
   "status": "upstream-error"
  },
  "examples/ch06-many-answers/01-superpose_nested.metta": {
-  "our_inferences": 3978,
-  "our_instructions": 4396402,
+  "our_inferences": 3846,
+  "our_instructions": 3871692,
+  "our_null": 1048271354,
   "status": "measured",
-  "upstream_instructions": 11627750
+  "upstream_instructions": 6977678,
+  "upstream_null": 257152067
  },
  "examples/ch06-many-answers/02-casenew.metta": {
-  "our_inferences": 4996,
-  "our_instructions": 5139427,
+  "our_inferences": 4678,
+  "our_instructions": 4567346,
+  "our_null": 1048216980,
   "status": "measured",
-  "upstream_instructions": 9131212
+  "upstream_instructions": 4500639,
+  "upstream_null": 257122197
  },
  "examples/ch06-many-answers/03-collapse.metta": {
-  "our_inferences": 1026,
-  "our_instructions": 276414,
+  "our_inferences": 1074,
+  "our_instructions": 281267,
+  "our_null": 1048241970,
   "status": "measured",
-  "upstream_instructions": 5599379
+  "upstream_instructions": 968417,
+  "upstream_null": 257124203
  },
  "examples/ch06-many-answers/04-supercollapse.metta": {
-  "our_inferences": 6387,
-  "our_instructions": 6873250,
+  "our_inferences": 6070,
+  "our_instructions": 6290880,
+  "our_null": 1048246265,
   "status": "measured",
-  "upstream_instructions": 13019424
+  "upstream_instructions": 8368966,
+  "upstream_null": 257132219
  },
  "examples/ch06-many-answers/05-empty.metta": {
-  "our_inferences": 2286,
-  "our_instructions": 1634047,
+  "our_inferences": 2229,
+  "our_instructions": 1607252,
+  "our_null": 1048214564,
   "status": "measured",
-  "upstream_instructions": 7586138
+  "upstream_instructions": 2966138,
+  "upstream_null": 257112343
  },
  "examples/ch06-many-answers/06-once.metta": {
-  "our_inferences": 3175,
-  "our_instructions": 2579340,
+  "our_inferences": 3134,
+  "our_instructions": 2567024,
+  "our_null": 1048222716,
   "status": "measured",
-  "upstream_instructions": 11873806
+  "upstream_instructions": 7256822,
+  "upstream_null": 257110572
  },
  "examples/ch06-many-answers/07-tests.metta": {
-  "our_inferences": 8713,
-  "our_instructions": 9366513,
+  "our_inferences": 8171,
+  "our_instructions": 8553135,
+  "our_null": 1048214564,
   "status": "measured",
-  "upstream_instructions": 17335910
+  "upstream_instructions": 12709620,
+  "upstream_null": 257112343
  },
  "examples/ch06-many-answers/08-permutations.metta": {
-  "our_inferences": 24245796,
-  "our_instructions": 22251447128,
+  "our_inferences": 24245851,
+  "our_instructions": 22294172970,
+  "our_null": 1048260374,
   "status": "measured",
-  "upstream_instructions": 12566480316
+  "upstream_instructions": 12561837339,
+  "upstream_null": 257125244
  },
  "examples/ch06-many-answers/09-streamops.metta": {
-  "our_inferences": 4719,
-  "our_instructions": 3440224,
+  "our_inferences": 4854,
+  "our_instructions": 3184772,
+  "our_null": 1048222577,
   "status": "measured",
-  "upstream_instructions": 19528625
+  "upstream_instructions": 14893674,
+  "upstream_null": 257126451
  },
  "examples/ch06-many-answers/10-mettaset.metta": {
-  "our_inferences": 2353,
-  "our_instructions": 1334714,
+  "our_inferences": 2415,
+  "our_instructions": 1340726,
+  "our_null": 1048241970,
   "status": "measured",
-  "upstream_instructions": 15202757
+  "upstream_instructions": 10571962,
+  "upstream_null": 257124203
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/01-ifsimple.metta": {
-  "our_inferences": 956,
-  "our_instructions": 383448,
+  "our_inferences": 1004,
+  "our_instructions": 225455,
+  "our_null": 1048405474,
   "status": "measured",
-  "upstream_instructions": 5259534
+  "upstream_instructions": 535151,
+  "upstream_null": 257208019
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/02-if.metta": {
-  "our_inferences": 1290,
-  "our_instructions": 534567,
+  "our_inferences": 1346,
+  "our_instructions": 436571,
+  "our_null": 1048356412,
   "status": "measured",
-  "upstream_instructions": 10334194
+  "upstream_instructions": 5638429,
+  "upstream_null": 257183110
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/03-if2.metta": {
-  "our_inferences": 1650,
-  "our_instructions": 693365,
+  "our_inferences": 1723,
+  "our_instructions": 571957,
+  "our_null": 1048368579,
   "status": "measured",
-  "upstream_instructions": 13080596
+  "upstream_instructions": 8384318,
+  "upstream_null": 257188889
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/04-if3.metta": {
-  "our_inferences": 1406,
-  "our_instructions": 606028,
+  "our_inferences": 1468,
+  "our_instructions": 490780,
+  "our_null": 1048368579,
   "status": "measured",
-  "upstream_instructions": 11824550
+  "upstream_instructions": 7128965,
+  "upstream_null": 257188889
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/05-if4.metta": {
-  "our_inferences": 1464,
-  "our_instructions": 630281,
+  "our_inferences": 1531,
+  "our_instructions": 512255,
+  "our_null": 1048368579,
   "status": "measured",
-  "upstream_instructions": 12209157
+  "upstream_instructions": 7510790,
+  "upstream_null": 257188889
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/06-if_branch_binding.metta": {
   "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/07-and_or.metta": {
-  "our_inferences": 1784,
-  "our_instructions": 813418,
+  "our_inferences": 1848,
+  "our_instructions": 678413,
+  "our_null": 1048391510,
   "status": "measured",
-  "upstream_instructions": 11617454
+  "upstream_instructions": 6908975,
+  "upstream_null": 257205880
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/08-booleansolver.metta": {
-  "our_inferences": 1979,
-  "our_instructions": 1002610,
+  "our_inferences": 2039,
+  "our_instructions": 814044,
+  "our_null": 1048436697,
   "status": "measured",
-  "upstream_instructions": 12281157
+  "upstream_instructions": 7547977,
+  "upstream_null": 257224040
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/09-xor.metta": {
-  "our_inferences": 4123,
-  "our_instructions": 4089508,
+  "our_inferences": 3925,
+  "our_instructions": 3446477,
+  "our_null": 1048368579,
   "status": "measured",
-  "upstream_instructions": 11470549
+  "upstream_instructions": 6763599,
+  "upstream_null": 257188889
  },
  "examples/ch07-control-flow/07-01-if-and-booleans/10-and_then_or_else.metta": {
-  "our_inferences": 11825,
-  "our_instructions": 9509623,
+  "our_inferences": 11551,
+  "our_instructions": 8892308,
+  "our_null": 1048450922,
   "status": "measured",
-  "upstream_instructions": 31714795
+  "upstream_instructions": 26976090,
+  "upstream_null": 257236862
  },
  "examples/ch07-control-flow/07-02-case/01-case.metta": {
-  "our_inferences": 2595,
-  "our_instructions": 2295973,
+  "our_inferences": 2527,
+  "our_instructions": 2165240,
+  "our_null": 1048301372,
   "status": "measured",
-  "upstream_instructions": 10339681
+  "upstream_instructions": 5673005,
+  "upstream_null": 257157958
  },
  "examples/ch07-control-flow/07-02-case/02-case2.metta": {
-  "our_inferences": 2710,
-  "our_instructions": 2367155,
+  "our_inferences": 2648,
+  "our_instructions": 2231960,
+  "our_null": 1048306432,
   "status": "measured",
-  "upstream_instructions": 10785322
+  "upstream_instructions": 6118141,
+  "upstream_null": 257163673
  },
  "examples/ch07-control-flow/07-02-case/03-caseconstrain.metta": {
-  "our_inferences": 1013,
-  "our_instructions": 381788,
+  "our_inferences": 1061,
+  "our_instructions": 275723,
+  "our_null": 1048356412,
   "status": "measured",
-  "upstream_instructions": 5592398
+  "upstream_instructions": 900144,
+  "upstream_null": 257183110
  },
  "examples/ch07-control-flow/07-02-case/04-caseempty.metta": {
-  "our_inferences": 5370,
-  "our_instructions": 5493519,
+  "our_inferences": 5067,
+  "our_instructions": 4863156,
+  "our_null": 1048325436,
   "status": "measured",
-  "upstream_instructions": 10025040
+  "upstream_instructions": 5339382,
+  "upstream_null": 257173473
  },
  "examples/ch07-control-flow/07-02-case/05-casecomputed.metta": {
   "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-02-case/06-ifcasenondet.metta": {
-  "our_inferences": 5394,
-  "our_instructions": 5534703,
+  "our_inferences": 5181,
+  "our_instructions": 4945042,
+  "our_null": 1048352049,
   "status": "measured",
-  "upstream_instructions": 12636828
+  "upstream_instructions": 7940843,
+  "upstream_null": 257181172
  },
  "examples/ch07-control-flow/07-02-case/07-let_superpose_if_case.metta": {
-  "our_inferences": 4726,
-  "our_instructions": 5231448,
+  "our_inferences": 4498,
+  "our_instructions": 4515256,
+  "our_null": 1048420304,
   "status": "measured",
-  "upstream_instructions": 13746884
+  "upstream_instructions": 9027792,
+  "upstream_null": 257214039
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/01-letstar.metta": {
-  "our_inferences": 1200,
-  "our_instructions": 539811,
+  "our_inferences": 1252,
+  "our_instructions": 370267,
+  "our_null": 1048420304,
   "status": "measured",
-  "upstream_instructions": 10306705
+  "upstream_instructions": 5588238,
+  "upstream_null": 257214039
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/02-letlet.metta": {
-  "our_inferences": 2389,
-  "our_instructions": 2205948,
+  "our_inferences": 2313,
+  "our_instructions": 1962666,
+  "our_null": 1048405573,
   "status": "measured",
-  "upstream_instructions": 8560361
+  "upstream_instructions": 3835440,
+  "upstream_null": 257215310
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/03-letext.metta": {
-  "our_inferences": 1523,
-  "our_instructions": 669098,
+  "our_inferences": 1581,
+  "our_instructions": 513862,
+  "our_null": 1048405573,
   "status": "measured",
-  "upstream_instructions": 12189825
+  "upstream_instructions": 7476254,
+  "upstream_null": 257215310
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/04-letstarcomputed.metta": {
   "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/05-metta4_prog.metta": {
-  "our_inferences": 1499,
-  "our_instructions": 916962,
+  "our_inferences": 1568,
+  "our_instructions": 744022,
+  "our_null": 1048427127,
   "status": "measured",
-  "upstream_instructions": 7966084
+  "upstream_instructions": 3212260,
+  "upstream_null": 257237896
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/06-chain.metta": {
-  "our_inferences": 2353,
-  "our_instructions": 1138120,
+  "our_inferences": 2449,
+  "our_instructions": 998206,
+  "our_null": 1048405474,
   "status": "measured",
-  "upstream_instructions": 16863975
+  "upstream_instructions": 12153555,
+  "upstream_null": 257208019
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/07-eval.metta": {
-  "our_inferences": 10581,
-  "our_instructions": 10770511,
+  "our_inferences": 9604,
+  "our_instructions": 9393076,
+  "our_null": 1048388585,
   "status": "measured",
-  "upstream_instructions": 16353600
+  "upstream_instructions": 11628477,
+  "upstream_null": 257215703
  },
  "examples/ch07-control-flow/07-03-let-and-sequencing/08-sealed.metta": {
   "status": "upstream-error"
  },
+ "examples/ch07-control-flow/07-03-let-and-sequencing/09-walrus.metta": {
+  "status": "upstream-error"
+ },
  "examples/ch07-control-flow/07-04-bounded-and-committed-searches/01-forall.metta": {
-  "our_inferences": 23384,
-  "our_instructions": 23141891,
+  "our_inferences": 19450,
+  "our_instructions": 19252097,
+  "our_null": 1048483491,
   "status": "measured",
-  "upstream_instructions": 33028914
+  "upstream_instructions": 28261924,
+  "upstream_null": 257258679
  },
  "examples/ch07-control-flow/07-04-bounded-and-committed-searches/02-metta4_streams.metta": {
-  "our_inferences": 8893,
-  "our_instructions": 8736966,
+  "our_inferences": 8407,
+  "our_instructions": 7694176,
+  "our_null": 1048541377,
   "status": "measured",
-  "upstream_instructions": 17999982
+  "upstream_instructions": 13206012,
+  "upstream_null": 257281280
  },
  "examples/ch07-control-flow/07-04-bounded-and-committed-searches/03-take.metta": {
   "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-04-bounded-and-committed-searches/04-cut.metta": {
-  "our_inferences": 3341,
-  "our_instructions": 3020617,
+  "our_inferences": 3295,
+  "our_instructions": 2777278,
+  "our_null": 1048464713,
   "status": "measured",
-  "upstream_instructions": 12555255
+  "upstream_instructions": 7798836,
+  "upstream_null": 257249557
  },
  "examples/ch07-control-flow/07-04-bounded-and-committed-searches/05-foldall.metta": {
-  "our_inferences": 20761,
-  "our_instructions": 17645601,
+  "our_inferences": 17237,
+  "our_instructions": 14594078,
+  "our_null": 1048492166,
   "status": "measured",
-  "upstream_instructions": 30073853
+  "upstream_instructions": 25311229,
+  "upstream_null": 257259444
  },
  "examples/ch07-control-flow/07-04-bounded-and-committed-searches/06-foldallmatch.metta": {
-  "our_inferences": 4510,
-  "our_instructions": 4051353,
+  "our_inferences": 4272,
+  "our_instructions": 3277162,
+  "our_null": 1048518638,
   "status": "measured",
-  "upstream_instructions": 14369247
+  "upstream_instructions": 9588490,
+  "upstream_null": 257274750
  },
  "examples/ch07-control-flow/07-04-bounded-and-committed-searches/07-foldallspacecount.metta": {
-  "our_inferences": 4283,
-  "our_instructions": 4774808,
+  "our_inferences": 4141,
+  "our_instructions": 4117268,
+  "our_null": 1048544607,
   "status": "measured",
-  "upstream_instructions": 10374542
+  "upstream_instructions": 5576580,
+  "upstream_null": 257288770
  },
  "examples/ch07-control-flow/07-05-recursion/01-factorial.metta": {
-  "our_inferences": 4005,
-  "our_instructions": 3714970,
+  "our_inferences": 3895,
+  "our_instructions": 3215153,
+  "our_null": 1048368579,
   "status": "measured",
-  "upstream_instructions": 10611086
+  "upstream_instructions": 5911303,
+  "upstream_null": 257188889
  },
  "examples/ch07-control-flow/07-05-recursion/02-fib.metta": {
   "status": "upstream-error"
  },
  "examples/ch07-control-flow/07-05-recursion/03-fibsmart.metta": {
-  "our_inferences": 5931,
-  "our_instructions": 5689691,
+  "our_inferences": 5694,
+  "our_instructions": 5084815,
+  "our_null": 1048356412,
   "status": "measured",
-  "upstream_instructions": 11956054
+  "upstream_instructions": 7266707,
+  "upstream_null": 257183110
  },
  "examples/ch07-control-flow/07-05-recursion/04-fibsmartimport.metta": {
-  "our_inferences": 8221,
-  "our_instructions": 7766787,
+  "our_inferences": 7909,
+  "our_instructions": 7055129,
+  "our_null": 1048405474,
   "status": "measured",
-  "upstream_instructions": 16665748
+  "upstream_instructions": 11953453,
+  "upstream_null": 257208019
  },
  "examples/ch07-control-flow/07-05-recursion/05-iter.metta": {
-  "our_inferences": 4521,
-  "our_instructions": 4307302,
+  "our_inferences": 4100,
+  "our_instructions": 3545568,
+  "our_null": 1048325436,
   "status": "measured",
-  "upstream_instructions": 13507495
+  "upstream_instructions": 8823289,
+  "upstream_null": 257173473
  },
  "examples/ch07-control-flow/07-05-recursion/06-peano.metta": {
-  "our_inferences": 1507341,
-  "our_instructions": 36106299161,
+  "our_inferences": 1506830,
+  "our_instructions": 36117270713,
+  "our_null": 1048340158,
   "status": "measured",
-  "upstream_instructions": 35888671587
+  "upstream_instructions": 35883967097,
+  "upstream_null": 257179267
  },
  "examples/ch07-control-flow/07-05-recursion/07-invertpeanoplus.metta": {
-  "our_inferences": 9296,
-  "our_instructions": 7184861,
+  "our_inferences": 8799,
+  "our_instructions": 6282696,
+  "our_null": 1048405573,
   "status": "measured",
-  "upstream_instructions": 26276739
+  "upstream_instructions": 21559649,
+  "upstream_null": 257215310
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/01-nestedcons.metta": {
-  "our_inferences": 2437,
-  "our_instructions": 1984634,
+  "our_inferences": 2378,
+  "our_instructions": 1790326,
+  "our_null": 1048405474,
   "status": "measured",
-  "upstream_instructions": 10069282
+  "upstream_instructions": 5354180,
+  "upstream_null": 257208019
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/02-holfunctions.metta": {
-  "our_inferences": 17205,
-  "our_instructions": 18210085,
+  "our_inferences": 16351,
+  "our_instructions": 17370158,
+  "our_null": 1048420304,
   "status": "measured",
-  "upstream_instructions": 21791553
+  "upstream_instructions": 17067487,
+  "upstream_null": 257214039
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/03-holfunctions_intrinsicop.metta": {
-  "our_inferences": 11426,
-  "our_instructions": 12029454,
+  "our_inferences": 10993,
+  "our_instructions": 11319082,
+  "our_null": 1048492166,
   "status": "measured",
-  "upstream_instructions": 14954472
+  "upstream_instructions": 10184408,
+  "upstream_null": 257259444
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/04-curry.metta": {
-  "our_inferences": 12915,
-  "our_instructions": 11534906,
+  "our_inferences": 12998,
+  "our_instructions": 11725180,
+  "our_null": 1048368579,
   "status": "measured",
-  "upstream_instructions": 25079936
+  "upstream_instructions": 20381362,
+  "upstream_null": 257188889
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/05-lambda.metta": {
-  "our_inferences": 16578,
-  "our_instructions": 15619038,
+  "our_inferences": 15092,
+  "our_instructions": 14689404,
+  "our_null": 1048368136,
   "status": "measured",
-  "upstream_instructions": 24012766
+  "upstream_instructions": 19308868,
+  "upstream_null": 257195852
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/06-invertfunction.metta": {
-  "our_inferences": 5638,
-  "our_instructions": 5997691,
+  "our_inferences": 5432,
+  "our_instructions": 5275640,
+  "our_null": 1048438941,
   "status": "measured",
-  "upstream_instructions": 15294423
+  "upstream_instructions": 10558175,
+  "upstream_null": 257226870
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/07-atomops.metta": {
   "status": "upstream-error"
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/08-alpha_member.metta": {
-  "our_inferences": 15955,
-  "our_instructions": 9284037,
+  "our_inferences": 16321,
+  "our_instructions": 9195291,
+  "our_null": 1048420304,
   "status": "measured",
-  "upstream_instructions": 63887840
+  "upstream_instructions": 59199700,
+  "upstream_null": 257214039
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/09-alpha_unique_atom.metta": {
-  "our_inferences": 12035,
-  "our_instructions": 7021396,
+  "our_inferences": 12294,
+  "our_instructions": 6810975,
+  "our_null": 1048449187,
   "status": "measured",
-  "upstream_instructions": 72693555
+  "upstream_instructions": 67976511,
+  "upstream_null": 257239286
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/10-multiset_operations.metta": {
-  "our_inferences": 5716,
-  "our_instructions": 3374540,
+  "our_inferences": 5865,
+  "our_instructions": 2910776,
+  "our_null": 1048459243,
   "status": "measured",
-  "upstream_instructions": 26123390
+  "upstream_instructions": 21387713,
+  "upstream_null": 257244168
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/11-patrick.metta": {
-  "our_inferences": 16258,
-  "our_instructions": 17385087,
+  "our_inferences": 16054,
+  "our_instructions": 17129047,
+  "our_null": 1048388869,
   "status": "measured",
-  "upstream_instructions": 30166137
+  "upstream_instructions": 25468770,
+  "upstream_null": 257194294
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/12-patrick_iterate_fib.metta": {
-  "our_inferences": 14476,
-  "our_instructions": 15099971,
+  "our_inferences": 14108,
+  "our_instructions": 14682031,
+  "our_null": 1048459243,
   "status": "measured",
-  "upstream_instructions": 28467127
+  "upstream_instructions": 23716846,
+  "upstream_null": 257244168
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/13-patrick_iterate_quad.metta": {
-  "our_inferences": 10526122,
-  "our_instructions": 5244340065,
+  "our_inferences": 10525771,
+  "our_instructions": 5344234048,
+  "our_null": 1048464713,
   "status": "measured",
-  "upstream_instructions": 12207667311
+  "upstream_instructions": 12202919446,
+  "upstream_null": 257249557
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/14-lib_roman_pair_helpers.metta": {
-  "our_inferences": 16870,
-  "our_instructions": 28533455,
+  "our_inferences": 16506,
+  "our_instructions": 28643365,
+  "our_null": 1048483273,
   "status": "measured",
-  "upstream_instructions": 77330043
+  "upstream_instructions": 72572630,
+  "upstream_null": 257247572
  },
  "examples/ch08-data/08-01-atoms-lists-and-folds/15-roman.metta": {
-  "our_inferences": 412335,
-  "our_instructions": 432919678,
+  "our_inferences": 266175,
+  "our_instructions": 244980740,
+  "our_null": 1048368579,
   "status": "measured",
-  "upstream_instructions": 107910255
+  "upstream_instructions": 103207724,
+  "upstream_null": 257188889
+ },
+ "examples/ch08-data/08-01-atoms-lists-and-folds/16-if_decons_expr.metta": {
+  "status": "upstream-error"
  },
  "examples/ch08-data/08-02-sequence-variables/01-segments.metta": {
   "status": "upstream-error"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/01-library.metta": {
-  "our_inferences": 15351,
-  "our_instructions": 26882538,
+  "our_inferences": 15318,
+  "our_instructions": 27143698,
+  "our_null": 1048388869,
   "status": "measured",
-  "upstream_instructions": 75166710
+  "upstream_instructions": 70470225,
+  "upstream_null": 257194294
  },
  "examples/ch08-data/08-03-the-shipped-libraries/02-datastructures_fingertree.metta": {
   "status": "upstream-error"
@@ -662,10 +890,12 @@
   "status": "upstream-error"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta": {
-  "our_inferences": 27986,
-  "our_instructions": 29772310,
+  "our_inferences": 28313,
+  "our_instructions": 32691697,
+  "our_null": 1048391510,
   "status": "measured",
-  "upstream_instructions": 64026673
+  "upstream_instructions": 59323159,
+  "upstream_null": 257205880
  },
  "examples/ch08-data/08-03-the-shipped-libraries/08-doc_lib.metta": {
   "status": "upstream-error"
@@ -674,16 +904,20 @@
   "status": "upstream-error"
  },
  "examples/ch09-types/01-types.metta": {
-  "our_inferences": 11605,
-  "our_instructions": 8322386,
+  "our_inferences": 11863,
+  "our_instructions": 8412518,
+  "our_null": 1048174808,
   "status": "measured",
-  "upstream_instructions": 19667051
+  "upstream_instructions": 15058853,
+  "upstream_null": 257090841
  },
  "examples/ch09-types/02-builin_types.metta": {
   "our_inferences": 57346,
-  "our_instructions": 39920283,
+  "our_instructions": 43564590,
+  "our_null": 1048214564,
   "status": "measured",
-  "upstream_instructions": 54186862
+  "upstream_instructions": 49565008,
+  "upstream_null": 257112343
  },
  "examples/ch09-types/03-functiontypes.metta": {
   "status": "upstream-error"
@@ -692,57 +926,88 @@
   "status": "upstream-error"
  },
  "examples/ch09-types/05-meta_types.metta": {
-  "our_inferences": 1854,
-  "our_instructions": 972839,
+  "our_inferences": 1944,
+  "our_instructions": 967056,
+  "our_null": 1048201311,
   "status": "measured",
-  "upstream_instructions": 19237309
+  "upstream_instructions": 14630533,
+  "upstream_null": 257108117
  },
  "examples/ch09-types/06-dont_eval_type.metta": {
   "status": "upstream-error"
  },
+ "examples/ch09-types/07-metatype_of_a_name.metta": {
+  "status": "upstream-error"
+ },
  "examples/ch09-types/08-parametric_types.metta": {
   "our_inferences": 5757,
-  "our_instructions": 4786419,
+  "our_instructions": 4781666,
+  "our_null": 1048222577,
   "status": "measured",
-  "upstream_instructions": 12188604
+  "upstream_instructions": 7550083,
+  "upstream_null": 257126451
  },
  "examples/ch09-types/09-recursive_types.metta": {
-  "our_inferences": 4138,
-  "our_instructions": 2552260,
+  "our_inferences": 4326,
+  "our_instructions": 2318683,
+  "our_null": 1048241970,
   "status": "measured",
-  "upstream_instructions": 12655445
+  "upstream_instructions": 8021082,
+  "upstream_null": 257124203
  },
  "examples/ch09-types/10-recursive_types2.metta": {
-  "our_inferences": 8697,
-  "our_instructions": 6779648,
+  "our_inferences": 8791,
+  "our_instructions": 6817484,
+  "our_null": 1048222577,
   "status": "measured",
-  "upstream_instructions": 13638792
+  "upstream_instructions": 9006021,
+  "upstream_null": 257126451
  },
  "examples/ch09-types/11-subtyping.metta": {
   "status": "upstream-error"
  },
  "examples/ch09-types/12-types_dependent.metta": {
-  "our_inferences": 13884,
-  "our_instructions": 10841227,
+  "our_inferences": 13962,
+  "our_instructions": 11076762,
+  "our_null": 1048241970,
   "status": "measured",
-  "upstream_instructions": 17006060
+  "upstream_instructions": 12374247,
+  "upstream_null": 257124203
  },
  "examples/ch09-types/13-types_nondet.metta": {
-  "our_inferences": 9562,
-  "our_instructions": 7163880,
+  "our_inferences": 8712,
+  "our_instructions": 6156592,
+  "our_null": 1048214564,
   "status": "measured",
-  "upstream_instructions": 15897377
+  "upstream_instructions": 11283230,
+  "upstream_null": 257112343
  },
  "examples/ch09-types/14-matchtypes.metta": {
-  "our_inferences": 6839,
-  "our_instructions": 5375584,
+  "our_inferences": 6166,
+  "our_instructions": 4379115,
+  "our_null": 1048201311,
   "status": "measured",
-  "upstream_instructions": 15046331
+  "upstream_instructions": 10436709,
+  "upstream_null": 257108117
  },
  "examples/ch09-types/15-engine_surface.metta": {
   "status": "upstream-error"
  },
  "examples/ch09-types/16-typing_rules.metta": {
+  "status": "upstream-error"
+ },
+ "examples/ch09-types/17-verify-discharges.metta": {
+  "status": "upstream-error"
+ },
+ "examples/ch09-types/18-compiled_overloads.metta": {
+  "our_inferences": 5105,
+  "our_instructions": 3590140,
+  "our_null": 1048240710,
+  "status": "measured",
+  "upstream_instructions": 8319988,
+  "upstream_null": 257135100
+ },
+ "examples/ch09-types/19-union-types.metta": {
   "status": "upstream-error"
  },
  "examples/ch10-errors-and-refusals/01-he_error.metta": {
@@ -755,10 +1020,12 @@
   "status": "upstream-error"
  },
  "examples/ch11-python-as-a-notation/03-python_import.metta": {
-  "our_inferences": 11766,
-  "our_instructions": 146706528,
+  "our_inferences": 11847,
+  "our_instructions": 146369694,
+  "our_null": 1048295024,
   "status": "measured",
-  "upstream_instructions": 176859455
+  "upstream_instructions": 172306722,
+  "upstream_null": 257171456
  },
  "examples/ch11-python-as-a-notation/04-py_surface.metta": {
   "status": "upstream-error"
@@ -767,28 +1034,32 @@
   "status": "upstream-error"
  },
  "examples/ch11-python-as-a-notation/06-door_combinations.metta": {
-  "our_inferences": 19520,
-  "our_instructions": 154819828,
+  "our_inferences": 19066,
+  "our_instructions": 154365064,
+  "our_null": 1048316890,
   "status": "measured",
-  "upstream_instructions": 174895934
+  "upstream_instructions": 170498907,
+  "upstream_null": 257176288
  },
  "examples/ch11-python-as-a-notation/07-torch.metta": {
-  "our_inferences": 21131,
-  "our_instructions": 8327251946,
-  "status": "measured",
-  "upstream_instructions": 7982385732
+  "status": "upstream-unstable"
  },
  "examples/ch11-python-as-a-notation/08-torch_lib.metta": {
+  "status": "upstream-error"
+ },
+ "examples/ch11-python-as-a-notation/09-compiled_structural_vocabulary.metta": {
   "status": "upstream-error"
  },
  "examples/ch12-testing/01-he_assert.metta": {
   "status": "upstream-error"
  },
  "examples/ch12-testing/02-he_equalreduct.metta": {
-  "our_inferences": 4208,
-  "our_instructions": 4017793,
+  "our_inferences": 4188,
+  "our_instructions": 3719068,
+  "our_null": 1048222577,
   "status": "measured",
-  "upstream_instructions": 43866321
+  "upstream_instructions": 39232029,
+  "upstream_null": 257126451
  },
  "examples/ch14-seeing-your-program/01-time_and_pragmas.metta": {
   "status": "upstream-error"
@@ -824,10 +1095,12 @@
   "status": "upstream-error"
  },
  "examples/ch18-performance/18-01-larger-workloads/01-scale.metta": {
-  "our_inferences": 21214540,
-  "our_instructions": 23940844981,
+  "our_inferences": 21213635,
+  "our_instructions": 25217146612,
+  "our_null": 1048388869,
   "status": "measured",
-  "upstream_instructions": 15307825708
+  "upstream_instructions": 15303131403,
+  "upstream_null": 257194294
  },
  "examples/ch18-performance/18-01-larger-workloads/02-holbenchmark.metta": {
   "status": "upstream-error"
@@ -836,64 +1109,82 @@
   "status": "upstream-error"
  },
  "examples/ch18-performance/18-01-larger-workloads/04-peanofast.metta": {
-  "our_inferences": 53246,
-  "our_instructions": 5933350392,
+  "our_inferences": 53024,
+  "our_instructions": 5936406671,
+  "our_null": 1048405573,
   "status": "measured",
-  "upstream_instructions": 5912936759
+  "upstream_instructions": 5908206275,
+  "upstream_null": 257215310
  },
  "examples/ch18-performance/18-01-larger-workloads/05-matespacefast.metta": {
   "status": "upstream-error"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/01-memo_multi_answer.metta": {
   "our_inferences": 28047,
-  "our_instructions": 29916788,
+  "our_instructions": 33584943,
+  "our_null": 1048506459,
   "status": "measured",
-  "upstream_instructions": 84751605
+  "upstream_instructions": 79991948,
+  "upstream_null": 257264574
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/02-memo_aggregate.metta": {
   "our_inferences": 28783,
-  "our_instructions": 30257544,
+  "our_instructions": 34032770,
+  "our_null": 1048483491,
   "status": "measured",
-  "upstream_instructions": 84889801
+  "upstream_instructions": 80137323,
+  "upstream_null": 257258679
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/03-memo_per_arity.metta": {
   "our_inferences": 30209,
-  "our_instructions": 31844893,
+  "our_instructions": 34970308,
+  "our_null": 1048483491,
   "status": "measured",
-  "upstream_instructions": 86517227
+  "upstream_instructions": 81753255,
+  "upstream_null": 257258679
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/04-memo_same_name_multi_arity.metta": {
-  "our_inferences": 36784,
-  "our_instructions": 38877439,
+  "our_inferences": 35022,
+  "our_instructions": 39322288,
+  "our_null": 1048549174,
   "status": "measured",
-  "upstream_instructions": 89495099
+  "upstream_instructions": 84700828,
+  "upstream_null": 257292942
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/05-memo_variant_nonground.metta": {
   "our_inferences": 27650,
-  "our_instructions": 29975472,
+  "our_instructions": 33190203,
+  "our_null": 1048541377,
   "status": "measured",
-  "upstream_instructions": 84233506
+  "upstream_instructions": 79464252,
+  "upstream_null": 257281280
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/06-memo_dependency_invalidation.metta": {
   "our_inferences": 27331,
-  "our_instructions": 29703909,
+  "our_instructions": 32830600,
+  "our_null": 1048581589,
   "status": "measured",
-  "upstream_instructions": 83782790
+  "upstream_instructions": 78985255,
+  "upstream_null": 257300139
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/07-memo_spaces.metta": {
   "status": "upstream-error"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/08-memo_stats.metta": {
   "our_inferences": 27830,
-  "our_instructions": 30073908,
+  "our_instructions": 33223093,
+  "our_null": 1048459243,
   "status": "measured",
-  "upstream_instructions": 84178123
+  "upstream_instructions": 79436684,
+  "upstream_null": 257244168
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/09-tabling_fib.metta": {
-  "our_inferences": 78757,
-  "our_instructions": 81567043,
+  "our_inferences": 80102,
+  "our_instructions": 83947901,
+  "our_null": 1048464713,
   "status": "measured",
-  "upstream_instructions": 25238220
+  "upstream_instructions": 20494562,
+  "upstream_null": 257249557
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/10-tabling_equation_change.metta": {
   "status": "upstream-error"
@@ -920,20 +1211,24 @@
   "status": "upstream-error"
  },
  "examples/ch19-spaces-backed-by-anything/19-02-a-space-in-c/01-c_space.metta": {
-  "detail": "the example's last block runs four add-atom branches through hyperpose, on worker threads; its own comment promises a deterministic ANSWER count, and the inference count varies with the interleaving (124,249 to 124,254 over four runs, 0.004%). Excluded by the checker's exact-agreement rule, which is the right treatment for a concurrent workload rather than a defect: the same example measured 76,469 exactly with its concurrent block removed.",
+  "detail": "",
   "status": "nondeterministic"
  },
  "examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/01-c_extension.metta": {
   "our_inferences": 92738,
-  "our_instructions": 87886158,
+  "our_instructions": 120826661,
+  "our_null": 1048497437,
   "status": "measured",
-  "upstream_instructions": 52510511
+  "upstream_instructions": 47747945,
+  "upstream_null": 257263304
  },
  "examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/02-handle.metta": {
   "our_inferences": 98604,
-  "our_instructions": 95329550,
+  "our_instructions": 128015944,
+  "our_null": 1048464713,
   "status": "measured",
-  "upstream_instructions": 59845230
+  "upstream_instructions": 55090151,
+  "upstream_null": 257249557
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/01-translatorrule.metta": {
   "status": "upstream-error"
@@ -951,34 +1246,42 @@
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/06-translatorrule_fib.metta": {
-  "our_inferences": 8114,
-  "our_instructions": 8541035,
+  "our_inferences": 7858,
+  "our_instructions": 7662595,
+  "our_null": 1048518638,
   "status": "measured",
-  "upstream_instructions": 13958668
+  "upstream_instructions": 9171842,
+  "upstream_null": 257274750
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/07-translatorrule_refusal.metta": {
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-01-translator-rules/08-derived_forms.metta": {
-  "our_inferences": 8509,
-  "our_instructions": 8606088,
+  "our_inferences": 8689,
+  "our_instructions": 8302413,
+  "our_null": 1048492166,
   "status": "measured",
-  "upstream_instructions": 24908558
+  "upstream_instructions": 20156346,
+  "upstream_null": 257259444
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/01-callquoteevalreduce.metta": {
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/02-callquoteevalreduce2.metta": {
-  "our_inferences": 32360,
-  "our_instructions": 30630261,
+  "our_inferences": 29205,
+  "our_instructions": 26421055,
+  "our_null": 1048581589,
   "status": "measured",
-  "upstream_instructions": 18139006
+  "upstream_instructions": 13339552,
+  "upstream_null": 257300139
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/03-myinterpreter.metta": {
-  "our_inferences": 6435,
-  "our_instructions": 6608256,
+  "our_inferences": 6114,
+  "our_instructions": 5682756,
+  "our_null": 1048528483,
   "status": "measured",
-  "upstream_instructions": 14873091
+  "upstream_instructions": 10079041,
+  "upstream_null": 257288256
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/04-minimal_metta.metta": {
   "status": "upstream-error"
@@ -987,16 +1290,20 @@
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/06-he_evaluation.metta": {
-  "our_inferences": 5899,
-  "our_instructions": 5927821,
+  "our_inferences": 5781,
+  "our_instructions": 5130645,
+  "our_null": 1048528483,
   "status": "measured",
-  "upstream_instructions": 46175457
+  "upstream_instructions": 41384211,
+  "upstream_null": 257288256
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/07-he_quoting.metta": {
-  "our_inferences": 5621,
-  "our_instructions": 5234784,
+  "our_inferences": 5279,
+  "our_instructions": 4126653,
+  "our_null": 1048510695,
   "status": "measured",
-  "upstream_instructions": 45595228
+  "upstream_instructions": 40816120,
+  "upstream_null": 257268902
  },
  "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/08-he_atomspace.metta": {
   "status": "upstream-error"
@@ -1011,10 +1318,12 @@
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-03-prolog-underneath/01-translatepredicate.metta": {
-  "our_inferences": 1022,
-  "our_instructions": -50470138,
+  "our_inferences": 1064,
+  "our_instructions": 307843,
+  "our_null": 1048528483,
   "status": "measured",
-  "upstream_instructions": 6086421
+  "upstream_instructions": 1291401,
+  "upstream_null": 257288256
  },
  "examples/ch20-extending-the-engine/20-03-prolog-underneath/02-prologimport.metta": {
   "status": "upstream-error"
@@ -1038,10 +1347,12 @@
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/06-git_import.metta": {
-  "our_inferences": 35770,
-  "our_instructions": 59911403,
+  "our_inferences": 36628,
+  "our_instructions": 61853259,
+  "our_null": 1048511136,
   "status": "measured",
-  "upstream_instructions": 96492481
+  "upstream_instructions": 91721065,
+  "upstream_null": 257261391
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/07-git_import2.metta": {
   "status": "upstream-error"
@@ -1049,23 +1360,30 @@
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/08-catalog.metta": {
   "status": "upstream-error"
  },
+ "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/09-carrier_vocabulary.metta": {
+  "status": "upstream-error"
+ },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/import_error_broken.metta": {
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/import_order/defines.metta": {
-  "our_inferences": 1074,
-  "our_instructions": -49916425,
+  "our_inferences": 1124,
+  "our_instructions": 662788,
+  "our_null": 1048746976,
   "status": "measured",
-  "upstream_instructions": 5594472
+  "upstream_instructions": 719096,
+  "upstream_null": 257373485
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/import_order/index.metta": {
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/import_order/uses.metta": {
-  "our_inferences": 1074,
-  "our_instructions": -49924688,
+  "our_inferences": 1124,
+  "our_instructions": 659319,
+  "our_null": 1048714300,
   "status": "measured",
-  "upstream_instructions": 5665275
+  "upstream_instructions": 773289,
+  "upstream_null": 257372247
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/overhaul/cycle_a.metta": {
   "status": "upstream-timeout"
@@ -1074,63 +1392,115 @@
   "status": "upstream-timeout"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/overhaul/duplicate.metta": {
-  "our_inferences": 1072,
-  "our_instructions": -174267,
+  "our_inferences": 1124,
+  "our_instructions": 667081,
+  "our_null": 1048721093,
   "status": "measured",
-  "upstream_instructions": 5590188
+  "upstream_instructions": 698903,
+  "upstream_null": 257371361
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/overhaul/space_payload.metta": {
-  "our_inferences": 1117,
-  "our_instructions": -94022,
+  "our_inferences": 1169,
+  "our_instructions": 681896,
+  "our_null": 1048766616,
   "status": "measured",
-  "upstream_instructions": 5788092
+  "upstream_instructions": 889193,
+  "upstream_null": 257390233
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/relative/root.metta": {
-  "our_inferences": 14865,
-  "our_instructions": 151125044,
+  "our_inferences": 15049,
+  "our_instructions": 152177028,
+  "our_null": 1048680316,
   "status": "measured",
-  "upstream_instructions": 145562645
+  "upstream_instructions": 140871829,
+  "upstream_null": 257354456
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/relative/second.metta": {
-  "our_inferences": 1072,
-  "our_instructions": -181915,
+  "our_inferences": 1124,
+  "our_instructions": 658299,
+  "our_null": 1048714869,
   "status": "measured",
-  "upstream_instructions": 5441621
+  "upstream_instructions": 577906,
+  "upstream_null": 257360760
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/relative/subdir/parent.metta": {
-  "our_inferences": 12121,
-  "our_instructions": 147466523,
+  "our_inferences": 12221,
+  "our_instructions": 148064023,
+  "our_null": 1048772366,
   "status": "measured",
-  "upstream_instructions": 172559765
+  "upstream_instructions": 167699748,
+  "upstream_null": 257398678
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/relative/subdir/sibling.metta": {
-  "our_inferences": 1072,
-  "our_instructions": -127300,
+  "our_inferences": 1124,
+  "our_instructions": 661313,
+  "our_null": 1048776168,
   "status": "measured",
-  "upstream_instructions": 5497422
+  "upstream_instructions": 598024,
+  "upstream_null": 257393519
+ },
+ "examples/ch20-extending-the-engine/20-05-observing-execution/01-filtered-trace.metta": {
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-05-observing-execution/02-source-coverage.metta": {
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-05-observing-execution/03-source-errors.metta": {
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-06-files-and-processes/01-files-and-paths.metta": {
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-06-files-and-processes/02-standard-streams.metta": {
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-06-files-and-processes/03-a-fresh-directory.metta": {
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-06-files-and-processes/04-stream-handles.metta": {
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-06-files-and-processes/_fixtures/exit-status.metta": {
+  "detail": "the fixture's whole purpose is to terminate its own process with status 17 at its second form, which this engine does and upstream, having no exit!, does not: upstream runs three forms and this tree runs two, so there is no common program to price. The driver reads the exit status, so the row would otherwise record `ours-fails` against an engine doing exactly what the fixture asks",
+  "status": "unmeasurable"
+ },
+ "examples/ch20-extending-the-engine/20-08-csv-row-spaces/01-csv-space.metta": {
+  "status": "upstream-error"
+ },
+ "examples/ch20-extending-the-engine/20-08-csv-row-spaces/02-csv-snapshot.metta": {
+  "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/01-logicprog.metta": {
-  "our_inferences": 8337,
-  "our_instructions": 7049978,
+  "our_inferences": 8343,
+  "our_instructions": 7946549,
+  "our_null": 1048483273,
   "status": "measured",
-  "upstream_instructions": 17623993
+  "upstream_instructions": 12860138,
+  "upstream_null": 257247572
  },
  "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/02-logicprogset.metta": {
-  "our_inferences": 4940,
-  "our_instructions": 3429360,
+  "our_inferences": 4916,
+  "our_instructions": 4104362,
+  "our_null": 1048497437,
   "status": "measured",
-  "upstream_instructions": 11223517
+  "upstream_instructions": 6460610,
+  "upstream_null": 257263304
  },
  "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/03-constructive_negation.metta": {
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/04-nilbc.metta": {
   "our_inferences": 332597186,
-  "our_instructions": 146853601069,
+  "our_instructions": 160402285960,
+  "our_null": 1048450922,
   "status": "measured",
-  "upstream_instructions": 11597617619
+  "upstream_instructions": 11592875186,
+  "upstream_null": 257236862
  },
  "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/05-scallop_readme.metta": {
+  "status": "upstream-error"
+ },
+ "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/06-case-duals.metta": {
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/01-measure.metta": {
@@ -1140,16 +1510,20 @@
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/03-plntest.metta": {
-  "our_inferences": 28968,
-  "our_instructions": 28142411,
+  "our_inferences": 27600,
+  "our_instructions": 30061674,
+  "our_null": 1048483273,
   "status": "measured",
-  "upstream_instructions": 34787182
+  "upstream_instructions": 30032944,
+  "upstream_null": 257247572
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/04-plntestdirect.metta": {
-  "our_inferences": 31648,
-  "our_instructions": 29039034,
+  "our_inferences": 30301,
+  "our_instructions": 31007739,
+  "our_null": 1048511136,
   "status": "measured",
-  "upstream_instructions": 35124230
+  "upstream_instructions": 30352969,
+  "upstream_null": 257261391
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/05-pln_direct.metta": {
   "status": "upstream-error"
@@ -1158,43 +1532,64 @@
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/07-pln_tuffy.metta": {
-  "our_inferences": 302240,
-  "our_instructions": 302105077,
+  "our_inferences": 291206,
+  "our_instructions": 294963481,
+  "our_null": 1048492166,
   "status": "measured",
-  "upstream_instructions": 313544007
+  "upstream_instructions": 308780527,
+  "upstream_null": 257259444
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/08-nars_direct.metta": {
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/09-nars_tuffy.metta": {
-  "our_inferences": 4616976,
-  "our_instructions": 3150549248,
+  "our_inferences": 4607851,
+  "our_instructions": 3030312499,
+  "our_null": 1048497437,
   "status": "measured",
-  "upstream_instructions": 5448281223
+  "upstream_instructions": 5443511287,
+  "upstream_null": 257263304
+ },
+ "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/10-pln2-ctv.metta": {
+  "status": "upstream-error"
+ },
+ "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/11-weighted_subset_posterior.metta": {
+  "status": "upstream-error"
+ },
+ "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/12-distribution.metta": {
+  "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-03-search/01-newtons_method.metta": {
   "our_inferences": 39707,
-  "our_instructions": 39908351,
+  "our_instructions": 44358350,
+  "our_null": 1048459243,
   "status": "measured",
-  "upstream_instructions": 87901403
+  "upstream_instructions": 83147453,
+  "upstream_null": 257244168
  },
  "examples/ch22-a-reasoner-you-can-serve/22-03-search/02-tilepuzzle.metta": {
-  "our_inferences": 29962061,
-  "our_instructions": 30018714195,
+  "our_inferences": 29962368,
+  "our_instructions": 30594446676,
+  "our_null": 1048436697,
   "status": "measured",
-  "upstream_instructions": 24172211257
+  "upstream_instructions": 24167484926,
+  "upstream_null": 257224040
  },
  "examples/ch22-a-reasoner-you-can-serve/22-03-search/03-matespace.metta": {
-  "our_inferences": 19519367,
-  "our_instructions": 102866624072,
+  "our_inferences": 19518529,
+  "our_instructions": 103039368322,
+  "our_null": 1048438941,
   "status": "measured",
-  "upstream_instructions": 97942100283
+  "upstream_instructions": 97937366591,
+  "upstream_null": 257226870
  },
  "examples/ch22-a-reasoner-you-can-serve/22-03-search/04-matespace2.metta": {
-  "our_inferences": 29062532,
-  "our_instructions": 161998684618,
+  "our_inferences": 29061695,
+  "our_instructions": 162219931861,
+  "our_null": 1048436697,
   "status": "measured",
-  "upstream_instructions": 146980832648
+  "upstream_instructions": 146976116302,
+  "upstream_null": 257224040
  },
  "examples/ch22-a-reasoner-you-can-serve/22-03-search/05-fibadd.metta": {
   "status": "upstream-error"

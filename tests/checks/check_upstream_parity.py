@@ -4,20 +4,67 @@ Every example the pinned upstream checkout can run, this tree must run in no
 more real work. Two lanes, because the two questions differ:
 
 - Cross-engine, the gate the corpus exists for: instructions:u net of each
-  engine's own boot, minimum of three processes. Inference counts are NOT
-  comparable across engines: upstream inlines arithmetic and comparison to
-  VM instructions where this tree routes them through guarded predicates
+  engine's own NULL-PROGRAM run, median of three processes and of seven when
+  the three disagree. Inference counts
+  are NOT comparable across engines: upstream inlines arithmetic and comparison
+  to VM instructions where this tree routes them through guarded predicates
   for ISO error classes, so the same real work counts up to 1.5x more
   inferences here while instructions stay within percents [measured
   2026-08-17: scale.metta 1.52x by inferences on identical files].
 - Within this tree, the tripwire: inferences against the frozen baseline,
   deterministic to the last count, so a real engine regression trips at
-  2% + 200 with zero noise.
+  2% + 200 with zero noise. Inferences are counted inside one process and are
+  unaffected by everything below, so this half is unchanged.
 
-Boot subtraction is sound on this box: five boots spread 40k instructions
-on 1.05e9 [measured 2026-08-17], far under the 500k absolute allowance.
+The fixed cost is the NULL PROGRAM, not a boot driver. Until 2026-09-06 it was
+a separate fixture that consulted the engine and printed BOOTED, and
+subtracting it was wrong in both directions at once:
+
+- upstream's programs each paid 4,594,811 instructions that its boot fixture
+  never reached, because `load_metta_file/2` is where its DCG parser, its
+  `library(pcre)` and the rest of its first-use autoloads are charged. That
+  constant sat in every upstream number and in none of ours, so a three-line
+  program compared ~0.3M against ~5.5M and read 0.05x
+  [measured 2026-09-06: upstream boot fixture 252,415,596, upstream empty
+  program through the driver 257,010,407, in a clone at the canonical path
+  length with the shipping artifacts; commit=WORKTREE].
+- ours went the other way and NEGATIVE, by 8,661,096 in the same clone
+  (1,056,745,595 against 1,048,084,499), because the boot fixture and the
+  driver are different processes with different command lines, and a process's
+  instruction count moves with its own argv. One fixture, one engine, one
+  identical consult, argv length the only difference: 1,332,326,774 against
+  1,341,149,760, 8.8M or 0.66% apart, non-monotonic in the argument count
+  [measured 2026-09-06: ai-tmp/probe/argc.py, three processes per shape, in a
+  tree without the C artifacts, so the level differs from the clone's and the
+  effect is the point; commit=WORKTREE]. That is the ASPLOS 2009 measurement
+  bias -- environment and link order shifting layout and moving a measurement
+  by percents while nothing about the program changed [source: Mytkowicz,
+  Diwan, Hauswirth, Sweeney, "Producing wrong data without doing anything
+  obviously wrong!", doi:10.1145/1508244.1508275]. Seven rows of the
+  2026-08-31 baseline came out at or below zero and the page dropped them
+  rather than reporting a defect.
+
+Together those two are a 13,255,907-instruction bias in this tree's favour on
+every row of a corpus whose smallest rows are worth a few hundred thousand.
+
+So the fixed cost is measured the way a benchmark harness measures the cost of
+its own launcher: run the EMPTY program through the very same driver, and
+subtract that [source: hyperfine calibrates the shell it launches through by
+timing the shell with no command and subtracting the mean,
+src/benchmark/executor.rs; it clamps a negative result to zero, which is the
+one thing this file does NOT copy, because a negative result here is the
+defect above and hiding it is what went wrong]. The null program is written at
+the SAME PATH LENGTH and the SAME DIRECTORY COUNT as the example it is the
+control for: equal length hands the two processes argv of identical size so
+the layout term cancels, and equal depth makes them walk the same number of
+path components, which is real work either way. With both matched, a program
+of no content nets between -13,405 and +12,852 on this engine and between
+-7,446 and -705 on upstream's, across nine corpus shapes, which is this
+method's resolution [measured 2026-09-06;
+command=ai-tmp/probe/validate_control.py; commit=WORKTREE].
+
 Assumes:
-  - the upstream checkout at ../PeTTa-base is read-only and pinned, so its
+  - the upstream checkout at ../PeTTa-upstream is read-only and pinned, so its
     numbers freeze into the baseline; --rebaseline re-measures everything
     [assumed: the sibling checkout is a reference copy nothing in this
     repository writes to, which this tool relies on and cannot enforce].
@@ -25,9 +72,50 @@ Assumes:
     [source: /proc/sys/kernel/perf_event_paranoid, which reads -1 on the
     machine these numbers were taken on; a stricter value makes
     measure_instructions fail loudly rather than silently skip].
-Decides: the allowances. Cross-engine, 2% + 500k instructions; within-tree,
-  2% + 200 inferences. An example whose three runs disagree on inferences
-  is nondeterministic and excluded with its status printed.
+  - every corpus path is long enough and deep enough that NULL_ROOT can name a
+    control of the same shape; null_program refuses by name when it is not.
+Guarantees:
+  - a row whose program run costs LESS than its own null control is reported
+    as `negative-net` and fails the run, rather than being recorded and then
+    dropped from the page
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
+  - the net a row records is the program run minus the null run at that row's
+    own path length and directory count, on the same engine, in the same
+    harness process
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
+  - --rebaseline carries every meta note the old baseline held forward; the
+    re-pin history is a record, not a cache
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
+  - a measurement that hits TIMEOUT leaves nothing running: the command owns a
+    session and the session is what is killed, because the engine is `perf`'s
+    child and outlives every signal aimed at its parents
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
+Owns resources: NULL_ROOT holds one empty .metta per distinct corpus path
+  length. They are 0-byte files under the ignored scratch root and are left in
+  place between runs; nothing else reads them.
+Decides:
+  - the estimator is the MEDIAN of the runs, not the minimum, and the sample
+    grows from RUNS to RUNS+EXTRA_RUNS when the runs disagree. See the comment
+    above _sample: SWI's collector thread costs 35,083,561 instructions that
+    perf counts and inferences do not, and whether it lands inside the process
+    is a race, so the minimum picks the run that skipped it.
+  - WARMUP_RUNS processes are discarded before the first counted one, because
+    three corpus rows write a cache on their first touch in a tree and read it
+    afterwards. Their cost is the steady-state one.
+  - the allowances. Cross-engine, 2% + 150,000 instructions; within-tree,
+    2% + 200 inferences. The absolute term is eleven times the method's
+    measured resolution, the +-13,405 a program of no content nets across nine
+    corpus shapes; the smallest row in the corpus is seventeen times that. It
+    was 500,000 while the subtrahend was a boot fixture whose error it had to
+    cover.
+  - a net below MINUS the absolute allowance is a `negative-net` defect and
+    fails the lane; between there and zero the row is `below-floor`, which is
+    not a defect and not a measurement, and it is excluded with its status
+    printed rather than given a ratio.
+  - an example whose runs disagree on inferences is nondeterministic, and one
+    whose runs have no majority around their median has no single cost. Both
+    are excluded with their status printed, and both fail the lane rather than
+    passing unchecked.
 Open Obligations:
   To Do: None
   Hacks: None
@@ -37,14 +125,16 @@ Open Obligations:
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import pathlib
+import signal
 import statistics
 import subprocess
 import sys
 
-from bounded_spawn import bounded
+from bounded_spawn import CHILD_GRACE, bounded
 
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parents[1]
@@ -64,19 +154,22 @@ UPSTREAM = REPO.parent / "PeTTa-upstream"
 #: all -- a lane that cannot fail is not a lane. Pointing it back at the
 #: committed file is what makes our_inferences a tripwire again.
 BASELINE = REPO / "tests" / "data" / "upstream-parity-baseline.json"
-#The drivers live under tests/fixtures/, which is where every other input
-#rather than program does. They were named against HERE, tests/checks/, until
+#The driver lives under tests/fixtures/, which is where every other input
+#rather than program does. It was named against HERE, tests/checks/, until
 #2026-08-30: swipl cannot find a source it is given, prints one line and drops
 #to its toplevel, and EXITS 0, so perf reported 123M for both "boots", every
 #example came back `upstream-error`, and the lane passed having measured
 #nothing.
 DRIVER = REPO / "tests" / "fixtures" / "parity_driver.pl"
-BOOT_DRIVER = REPO / "tests" / "fixtures" / "parity_boot.pl"
+#: Where the null-program controls are written, one per distinct corpus path
+#: shape. Deliberately NOT the gate's scratch directory: that name carries a
+#: random six-character suffix, and the whole point of these files is that
+#: their paths have the length and the depth this script chooses.
+NULL_ROOT = REPO / "ai-tmp" / "parity-null"  # artifact-path-created
 TIMEOUT = 120
-RUNS = 3
 
 INSTRUCTION_RATIO = 1.02
-INSTRUCTION_ABSOLUTE = 500_000
+INSTRUCTION_ABSOLUTE = 150_000
 INFERENCE_RATIO = 1.02
 INFERENCE_ABSOLUTE = 200
 
@@ -106,16 +199,41 @@ def _child_environment() -> dict[str, str]:
 CHILD_ENVIRONMENT = _child_environment()
 
 
-def _perf(command: list[str]) -> tuple[int, subprocess.CompletedProcess]:
-    completed = subprocess.run(
-        bounded(["perf", "stat", "-e", "instructions:u", "-x", ",", *command]),
-        capture_output=True,
+#The timed-out engine has to die with the timer, and killing the timed
+#process is not enough to do it: the death signal bounded.sh arms reaches
+#`perf`, and `swipl` is perf's CHILD, so it survives its whole family and is
+#reparented still running. Three corpus rows time out on upstream, and one
+#--rebaseline left two swipl processes at 48% CPU with nothing left to bound
+#them [measured 2026-09-06: pids 4090605 and 4121404, five and three minutes
+#after their rows were recorded as `upstream-timeout`; commit=WORKTREE]. So
+#the command gets a session of its own and the SESSION is what the timeout
+#kills, and the wrapper's own ceiling is set just above this one so a harness
+#that dies without reaching this line still has a timer that reaps the group.
+def _spawn(argv: list[str]) -> subprocess.CompletedProcess:
+    """Run argv under the repository's bound, in a session this call can reap."""
+    with subprocess.Popen(
+        bounded(argv, ceiling=TIMEOUT + CHILD_GRACE),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
-        timeout=TIMEOUT,
         cwd=str(REPO),
         env=CHILD_ENVIRONMENT,
-        check=False,
+        start_new_session=True,
+    ) as process:
+        try:
+            stdout, stderr = process.communicate(timeout=TIMEOUT)
+        except subprocess.TimeoutExpired:
+            with contextlib.suppress(ProcessLookupError):
+                os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+            process.communicate()
+            raise
+    return subprocess.CompletedProcess(
+        process.args, process.returncode, stdout, stderr
     )
+
+
+def _perf(command: list[str]) -> tuple[int, subprocess.CompletedProcess]:
+    completed = _spawn(["perf", "stat", "-e", "instructions:u", "-x", ",", *command])
     instructions = None
     for line in completed.stderr.splitlines():
         if ",instructions:u" in line:
@@ -126,54 +244,199 @@ def _perf(command: list[str]) -> tuple[int, subprocess.CompletedProcess]:
     return instructions, completed
 
 
-#A boot that did not print BOOTED did not boot, whatever perf counted for the
-#process. Requiring the marker is what turns a silent misconfiguration into a
-#failure instead of a number.
-def boot_cost(engine_root: pathlib.Path) -> int:
-    """One engine's boot in instructions, min-of-RUNS, so a run's cost nets it out."""
-    costs = []
-    for _ in range(RUNS):
-        count, completed = _perf(["swipl", str(BOOT_DRIVER), str(engine_root)])
-        if "BOOTED" not in completed.stdout:
-            message = (
-                f"the boot driver did not report BOOTED for {engine_root}: "
-                f"{(completed.stderr or completed.stdout).strip()[-300:]}"
-            )
-            raise RuntimeError(message)
-        costs.append(count)
-    return min(costs)
+def null_program(length: int, components: int) -> pathlib.Path:
+    """An empty .metta file `length` characters long, `components` directories deep.
 
-
-def measure(engine_root: pathlib.Path, example: pathlib.Path, boot: int) -> dict:
-    """One engine, one example: min-of-RUNS net instructions, plus the inference count.
-
-    The inference count must agree across the runs to count at all.
+    Both halves are the control. Equal LENGTH means equal argv bytes, so the
+    two processes start with the same layout and the layout term cancels.
+    Equal COMPONENTS means the engine walks the same number of path elements:
+    at a fixed 120 characters, one empty file measured 56,989 instructions at
+    one component below the scratch root and 139,684 at seven, and a
+    one-equation file rose from 685,835 to 772,826 over the same range
+    [measured 2026-09-06; command=ai-tmp/probe/depth.py; commit=WORKTREE]. A
+    control that matched only the length charged that difference to the
+    program.
     """
-    instructions = []
-    inferences = set()
-    for _ in range(RUNS):
-        try:
-            count, completed = _perf(["swipl", str(DRIVER), str(engine_root), str(example)])
-        except subprocess.TimeoutExpired:
-            return {"status": "timeout"}
-        marker = [
-            line
-            for line in completed.stdout.splitlines()
-            if line.startswith("PARITY-INFERENCES:")
-        ]
-        if completed.returncode != 0 or not marker:
-            return {
-                "status": "error",
-                "detail": (completed.stderr or completed.stdout).strip()[-300:],
-            }
-        instructions.append(count - boot)
-        inferences.add(int(marker[-1].split(":")[1]))
+    room = length - len(str(NULL_ROOT)) - len("/.metta") - components
+    if room < components + 1:
+        message = (
+            f"cannot write a null control {length} characters long and "
+            f"{components} directories deep: {NULL_ROOT} alone is "
+            f"{len(str(NULL_ROOT))} characters and {len(NULL_ROOT.parts)} "
+            "components. Move NULL_ROOT nearer the repository root, for "
+            f"example {REPO / 'ai-tmp' / 'n'}."
+        )
+        raise RuntimeError(message)
+    each = room // (components + 1)
+    parts = ["n" * each] * components
+    stem = "n" * (room - each * components)
+    program = NULL_ROOT.joinpath(*parts, stem + ".metta")
+    if not program.is_file():
+        program.parent.mkdir(parents=True, exist_ok=True)
+        program.write_text("")
+    return program
+
+
+def null_shape(example: pathlib.Path) -> tuple[int, int]:
+    """The length and the directory count a control for this example must match."""
+    return len(str(example)), len(example.parts) - len(NULL_ROOT.parts) - 1
+
+
+#The MEDIAN of the runs, not the minimum, and more runs when they disagree.
+#Min-of-N is right when interference only ever adds work, and here it does not:
+#SWI collects clauses on a `gc` thread, perf counts that thread and
+#`statistics(inferences)` does not, and whether the collection lands inside the
+#process or after it is a race with exit. One example, 120 processes: 119 read
+#1,059.76e9 and one read 1,024.71e9, 35,083,561 apart at 3.42%, with the cheap
+#run carrying one MORE clause because a collection it would have paid for never
+#happened. The same 120 processes with `set_prolog_gc_thread(false)` spread
+#38,479, or 0.0037% [measured 2026-09-06; command=ai-tmp/probe/hunt.py;
+#fixture=examples/ch09-types/13-types_nondet.metta; commit=WORKTREE].
+#
+#That excursion is bigger than most rows' entire cost, and the minimum picks it
+#every time it appears: the first --rebaseline under the corrected control put
+#three rows out by about 35.1M, two of them negative and one reading 35.5x
+#against upstream where the true figure is 1.2x.
+#
+#The collector thread is NOT turned off here, for the reason
+#docs/journal/2026-09-06-boot-inference-determinism.md gives for refusing it in
+#the boot lane: it measures a configuration nothing ships and hides the
+#per-clause cost instead of removing it. The estimator absorbs it instead.
+RUNS = 3
+EXTRA_RUNS = 4
+#: Processes run and thrown away before the first counted one. Three corpus
+#: rows write a cache on their first touch in a tree and read it afterwards --
+#: the git-import fixture cache, a Python `__pycache__`, an import receipt --
+#: so run one disagreed with runs two and three and the row came back
+#: `nondeterministic` on a fresh checkout while reading one inference count six
+#: times in a row on a warmed one [measured 2026-09-06: 03-python_import,
+#: 06-git_import and relative/root.metta, 11,847 / 36,640 / 15,049 inferences
+#: over six processes each; command=ai-tmp/probe/flaky.py; commit=WORKTREE].
+#: One discarded run is the ordinary answer to that, and it is what the
+#: baseline's own fixture line has always assumed by saying the tree was
+#: warmed.
+WARMUP_RUNS = 1
+#: How far two processes running the same program may sit apart and still be
+#: called the same measurement. 0.1% clears the 0.025% that 120 ordinary
+#: processes of one example spanned and is 34 times under the collector
+#: excursion above.
+SPREAD_RATIO = 0.001
+
+
+def _sample(engine_root: pathlib.Path, program: pathlib.Path) -> dict:
+    """One engine, one program: the median process cost and the inference count.
+
+    WARMUP_RUNS processes are run and discarded, then RUNS are counted,
+    extended by EXTRA_RUNS when they disagree by more than SPREAD_RATIO, so
+    the median is taken over an odd sample that a single excursion cannot
+    carry.
+    """
+    counts: list[int] = []
+    inferences: set[int] = set()
+    for batch, counted in ((WARMUP_RUNS, False), (RUNS, True), (EXTRA_RUNS, True)):
+        for _ in range(batch):
+            try:
+                count, completed = _perf(
+                    ["swipl", str(DRIVER), str(engine_root), str(program)]
+                )
+            except subprocess.TimeoutExpired:
+                return {"status": "timeout"}
+            marker = [
+                line
+                for line in completed.stdout.splitlines()
+                if line.startswith("PARITY-INFERENCES:")
+            ]
+            if completed.returncode != 0 or not marker:
+                return {
+                    "status": "error",
+                    "detail": (completed.stderr or completed.stdout).strip()[-300:],
+                }
+            if counted:
+                counts.append(count)
+                inferences.add(int(marker[-1].split(":")[1]))
+        if counts and max(counts) - min(counts) <= min(counts) * SPREAD_RATIO:
+            break
     if len(inferences) != 1:
         return {"status": "nondeterministic"}
+    middle = int(statistics.median(counts))
+    agreeing = [c for c in counts if abs(c - middle) <= middle * SPREAD_RATIO]
+    #A median means something when a majority of the sample is around it. A
+    #program whose processes are split between two costs has no single cost,
+    #and saying so is better than picking one of them.
+    if len(agreeing) * 2 <= len(counts):
+        return {
+            "status": "unstable",
+            "detail": f"{len(agreeing)} of {len(counts)} runs within "
+            f"{SPREAD_RATIO:.1%} of the median {middle}: {sorted(counts)}",
+        }
+    return {"status": "ok", "raw": middle, "runs": len(counts),
+            "inferences": inferences.pop()}
+
+
+#: One measured null cost per (engine, path length, directory count), because
+#: the whole corpus shares 90 such shapes between 272 files and the control
+#: does not change within one.
+_FIXED_COST: dict[tuple[str, int, int], int] = {}
+
+
+def fixed_cost(engine_root: pathlib.Path, length: int, components: int) -> int:
+    """One engine's cost for a program of no content at that path shape.
+
+    This is what a run pays before its own work: loading the engine, whatever
+    the first call to the file-loading path autoloads, and the per-process
+    setup around both.
+    """
+    key = (str(engine_root), length, components)
+    if key in _FIXED_COST:
+        return _FIXED_COST[key]
+    program = null_program(length, components)
+    sample = _sample(engine_root, program)
+    if sample["status"] != "ok":
+        message = (
+            f"the null control {program} came back {sample['status']} on "
+            f"{engine_root}. Every net is taken against it, so this is fatal: "
+            f"{sample.get('detail', '')}"
+        )
+        raise RuntimeError(message)
+    _FIXED_COST[key] = sample["raw"]
+    return _FIXED_COST[key]
+
+
+def measure(engine_root: pathlib.Path, example: pathlib.Path) -> dict:
+    """One engine, one example: net instructions, plus the inference count.
+
+    The net is against this engine's null control at this example's own path
+    length AND directory count. The inference count must agree across the
+    counted runs to count at all.
+    """
+    sample = _sample(engine_root, example)
+    if sample["status"] != "ok":
+        return sample
+    fixed = fixed_cost(engine_root, *null_shape(example))
+    net = sample["raw"] - fixed
+    #A program cannot do less work than no program at all through the same
+    #driver at the same shape. A net BELOW the measurement's own floor means
+    #the control is not measuring this run's fixed cost, which is the defect
+    #this file was rebuilt to stop hiding, so it is reported rather than
+    #clamped or dropped. Between the floor and zero the row is not a defect and
+    #not a measurement either: a program of no content nets between -13,405 and
+    #+12,852 across nine corpus shapes [measured 2026-09-06;
+    #command=ai-tmp/probe/validate_control.py; commit=WORKTREE], so a row that
+    #lands there has less work in it than this method can see. Nothing in the
+    #corpus does; the smallest row is seventeen times that.
+    if net < -INSTRUCTION_ABSOLUTE:
+        status = "negative-net"
+    elif net <= 0:
+        status = "below-floor"
+    else:
+        status = "ok"
     return {
-        "status": "ok",
-        "instructions": min(instructions),
-        "inferences": inferences.pop(),
+        "status": status,
+        "instructions": net,
+        "fixed": fixed,
+        "raw": sample["raw"],
+        "runs": sample["runs"],
+        "inferences": sample["inferences"],
     }
 
 
@@ -182,28 +445,101 @@ def corpus() -> list[pathlib.Path]:
     return sorted((REPO / "examples").rglob("*.metta"))
 
 
+def _carried_meta() -> dict:
+    """The meta notes the committed baseline already holds.
+
+    A re-pin is a record of why a number moved and survives the next
+    measurement; only the fields this run computes are replaced.
+    """
+    if not BASELINE.exists():
+        return {}
+    try:
+        stored = json.loads(BASELINE.read_text()).get("//", {})
+    except (json.JSONDecodeError, OSError):
+        return {}
+    computed = {"status", "upstream_null", "our_null", "upstream_boot", "our_boot"}
+    return {k: v for k, v in stored.items() if k not in computed}
+
+
+def _null_summary(engine_root: pathlib.Path) -> dict:
+    """What this engine's null control cost, across the shapes this run used."""
+    costs = {
+        (length, components): cost
+        for (root, length, components), cost in _FIXED_COST.items()
+        if root == str(engine_root)
+    }
+    if not costs:
+        return {}
+    shortest, longest = min(costs), max(costs)
+    return {
+        "shapes": len(costs),
+        "shortest_path": list(shortest),
+        "longest_path": list(longest),
+        "at_shortest_path": costs[shortest],
+        "at_longest_path": costs[longest],
+        "median": int(statistics.median(costs.values())),
+    }
+
+
+#Programs the corpus holds that this comparison cannot ask a question about,
+#each with the reason. Not a waiver: a waiver is a row that is measured and
+#found wanting, and these are rows where the two engines would not be running
+#the same program at all.
+UNMEASURABLE = {
+    "examples/ch20-extending-the-engine/20-06-files-and-processes/_fixtures/exit-status.metta": (
+        "the fixture's whole purpose is to terminate its own process with"
+        " status 17 at its second form, which this engine does and upstream,"
+        " having no exit!, does not: upstream runs three forms and this tree"
+        " runs two, so there is no common program to price. The driver reads"
+        " the exit status, so the row would otherwise record `ours-fails`"
+        " against an engine doing exactly what the fixture asks"
+    ),
+}
+
+
 def build_baseline() -> dict:
     """Measure both engines over the whole corpus and answer a fresh baseline."""
-    upstream_boot = boot_cost(UPSTREAM)
-    our_boot = boot_cost(REPO)
-    entries = {
-        "//": {
-            "status": "meta",
-            "upstream_boot": upstream_boot,
-            "our_boot": our_boot,
-        }
-    }
+    entries: dict[str, dict] = {"//": {"status": "meta", **_carried_meta()}}
     ratios = []
+    negatives = []
     for example in corpus():
         name = str(example.relative_to(REPO))
-        upstream = measure(UPSTREAM, example, upstream_boot)
+        if name in UNMEASURABLE:
+            entries[name] = {"status": "unmeasurable", "detail": UNMEASURABLE[name]}
+            continue
+        upstream = measure(UPSTREAM, example)
+        if upstream["status"] == "below-floor":
+            entries[name] = {"status": "upstream-below-floor"}
+            print(f"  {name}: upstream's own net is under the measurement floor")
+            continue
+        if upstream["status"] == "negative-net":
+            entries[name] = {
+                "status": "upstream-negative-net",
+                "upstream_instructions": upstream["instructions"],
+                "upstream_null": upstream["fixed"],
+            }
+            negatives.append(f"{name}: upstream {upstream['instructions']}")
+            print(f"  {name}: UPSTREAM NET BELOW ITS OWN NULL CONTROL")
+            continue
         if upstream["status"] != "ok":
             entries[name] = {"status": f"upstream-{upstream['status']}"}
             continue
-        ours = measure(REPO, example, our_boot)
-        if ours["status"] == "nondeterministic":
-            entries[name] = {"status": "nondeterministic"}
-            print(f"  {name}: nondeterministic, excluded")
+        ours = measure(REPO, example)
+        if ours["status"] in ("nondeterministic", "unstable", "below-floor"):
+            entries[name] = {"status": ours["status"], "detail": ours.get("detail", "")}
+            print(f"  {name}: {ours['status']}, excluded ({ours.get('detail', '')})")
+            continue
+        if ours["status"] == "negative-net":
+            entries[name] = {
+                "status": "negative-net",
+                "upstream_instructions": upstream["instructions"],
+                "upstream_null": upstream["fixed"],
+                "our_instructions": ours["instructions"],
+                "our_null": ours["fixed"],
+                "our_inferences": ours["inferences"],
+            }
+            negatives.append(f"{name}: ours {ours['instructions']}")
+            print(f"  {name}: OUR NET BELOW OUR OWN NULL CONTROL")
             continue
         if ours["status"] != "ok":
             entries[name] = {
@@ -215,7 +551,9 @@ def build_baseline() -> dict:
         entries[name] = {
             "status": "measured",
             "upstream_instructions": upstream["instructions"],
+            "upstream_null": upstream["fixed"],
             "our_instructions": ours["instructions"],
+            "our_null": ours["fixed"],
             "our_inferences": ours["inferences"],
         }
         ratio = ours["instructions"] / max(upstream["instructions"], 1)
@@ -224,8 +562,14 @@ def build_baseline() -> dict:
             f"  {name}: instructions {upstream['instructions']} -> "
             f"{ours['instructions']} ({ratio:.2f}x)"
         )
+    entries["//"]["upstream_null"] = _null_summary(UPSTREAM)
+    entries["//"]["our_null"] = _null_summary(REPO)
+    print(f"upstream null program: {entries['//']['upstream_null']}")
+    print(f"our null program:      {entries['//']['our_null']}")
     if ratios:
         print(f"median instruction ratio ours/upstream: {statistics.median(ratios):.3f}")
+    for line in negatives:
+        print(f"  NEGATIVE NET {line}")
     return entries
 
 
@@ -251,6 +595,32 @@ GUARDED_ARITHMETIC = (
     "the documented ISO-error-class arithmetic guards (the fibadd cause),"
     " density-proportional; fib.metta is fibadd's twin workload with"
     " identical numbers"
+)
+
+#The two rows the 2026-09-06 correction newly put over the allowance, and the
+#only cause in this table that was measured by decomposing the programs rather
+#than by profiling the engines. Both are files with FEW definitions and SEVERAL
+#runnable forms, which is exactly where a per-form cost shows and where the
+#13.3M bias used to hide it. The decomposition the string quotes
+#[measured 2026-09-06; command=ai-tmp/probe/attribute.py and attribute2.py,
+#both engines through this file's own measure/2; commit=WORKTREE].
+PER_FORM = (
+    "per-top-level-form load bookkeeping, measured by decomposition: on both"
+    " files this tree is cheaper at everything EXCEPT the `!(...)` form."
+    " twostage's three definitions alone cost 1,652,075 here against"
+    " upstream's 3,361,563; its first test form then adds 1,724,261 here"
+    " against 492,613 there and its second 1,224,549 against 391,478."
+    " holfunctions_intrinsicop's definitions cost 1,301,033 against 6,673,818,"
+    " a bare `!(mymap ...)` over them leaves this tree at 0.932x, and wrapping"
+    " the same call in `test` adds 3,806,718 here against 1,706,816 there."
+    " test/3 is upstream's predicate almost verbatim -- the"
+    " same =@=, two writes and a format, ours throwing where theirs halts --"
+    " so the delta is the work AROUND each runnable form rather than the"
+    " builtin: the effect classification, source tracking and support-graph"
+    " bookkeeping the loader runs per form, the family the pln_direct entry"
+    " prices at 516 inferences per source atom. OPEN, and the lever is that"
+    " per-form path rather than either program: a file with many definitions"
+    " and few forms reads 0.19x to 0.49x on the same decomposition."
 )
 
 DISPATCH_HOP = (
@@ -284,6 +654,8 @@ WAIVERS = {
         " `('get-type'(AV, T) *-> true ; 'get-metatype'(AV, T))`, one"
         " derivation with a metatype fallback -- rather than another guard"
     ),
+    "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/02-twostage.metta": (PER_FORM),
+    "examples/ch08-data/08-01-atoms-lists-and-folds/03-holfunctions_intrinsicop.metta": (PER_FORM),
     "examples/ch07-control-flow/07-05-recursion/02-fib.metta": (GUARDED_ARITHMETIC),
     "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/05-pln_direct.metta": (
         "metta-library import machinery: the lib_pln import alone costs"
@@ -308,14 +680,19 @@ WAIVERS = {
         " so that changing an equation is O(affected) rather than"
         " O(program)."
     ),
+    #The seven-process spread the entry below quotes
+    #[measured 2026-09-06; command=ai-tmp/probe/torch.py; commit=WORKTREE].
     "examples/ch11-python-as-a-notation/07-torch.metta": (
-        "python-seam richness on a workload that is mostly Python: the"
-        " effect classification, receipts and source tracking this tree"
-        " runs around every py crossing put it 2.07% over an engine with"
-        " no such seam, 0.07% past the 2% allowance (8,327,251,946 against"
-        " 7,982,385,732 upstream, 2026-08-31 rebaseline). The per-crossing"
-        " constants are the same family the peano entry prices; the"
-        " crossing-cost track owns removing them."
+        "SUPERSEDED 2026-09-06 and kept for the record. This row is no longer"
+        " measured at all: seven upstream processes of it read 6,916,429,114"
+        " to 7,432,625,840, a 7.46% spread with no mode, and seven of ours"
+        " 7,812,902,156 to 8,344,224,046, 6.80%, so neither engine has a"
+        " single instruction cost for a PyTorch workload and the row comes"
+        " back `upstream-unstable`. The waiver it"
+        " carried -- python-seam richness, 2.07% over, 8,327,251,946 against"
+        " 7,982,385,732 -- was a min-of-three reading off that distribution's"
+        " low tail, so its 2.07% was never a measurement. What it says about"
+        " the per-crossing constants may still be true; nothing here shows it."
     ),
     "examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/01-c_extension.metta": (
         "feature-versus-absent: loading this example consult-time"
@@ -384,18 +761,48 @@ WAIVERS = {
 
 def verdicts(baseline: dict, *, remeasure: bool) -> int:
     """Judge this tree against the baseline, remeasuring it first unless frozen."""
-    our_boot = boot_cost(REPO)
-    cross, drift = [], []
+    cross, drift, negative, unstable = [], [], [], []
     waived = []
     checked = 0
     for name, entry in sorted(baseline.items()):
+        if entry.get("status") == "negative-net":
+            negative.append(
+                f"{name}: recorded net {entry.get('our_instructions')} against "
+                f"a null control of {entry.get('our_null')}"
+            )
+            continue
         if entry.get("status") != "measured":
+            continue
+        #A baseline written by this file cannot hold one, but the one this
+        #replaced could and did: seven rows carried a net between -94,022 and
+        #-50,470,138 under `measured`, and the page dropped them rather than
+        #reporting them. A stored net at or below zero is the same defect as a
+        #fresh one.
+        if entry["our_instructions"] <= 0 or entry["upstream_instructions"] <= 0:
+            negative.append(
+                f"{name}: recorded {entry['our_instructions']} against upstream's "
+                f"{entry['upstream_instructions']}, and a program cannot cost "
+                "nothing"
+            )
             continue
         example = REPO / name
         if not example.exists():
             continue
         if remeasure:
-            ours = measure(REPO, example, our_boot)
+            ours = measure(REPO, example)
+            if ours["status"] == "negative-net":
+                negative.append(
+                    f"{name}: {ours['raw']} instructions against a null control "
+                    f"of {ours['fixed']} at the same path length"
+                )
+                continue
+            #A row that stopped having ONE cost is not a regression, and saying
+            #so mattered: three import rows read `nondeterministic` on a fresh
+            #checkout, under the old "now fails to run" wording, purely because
+            #their first touch writes the cache their later runs read.
+            if ours["status"] in ("unstable", "nondeterministic", "below-floor"):
+                unstable.append(f"{name}: {ours['status']} {ours.get('detail', '')}")
+                continue
             if ours["status"] != "ok":
                 cross.append(f"{name}: now fails to run ({ours['status']})")
                 continue
@@ -434,7 +841,16 @@ def verdicts(baseline: dict, *, remeasure: bool) -> int:
         print(f"  WAIVED (root-caused, see WAIVERS) {line}")
     for line in drift:
         print(f"  TREE DRIFT {line}")
-    return 1 if cross or drift else 0
+    for line in negative:
+        print(f"  NEGATIVE NET, THE CONTROL IS WRONG {line}")
+    #A row here is not a regression, it is a row whose cost is not one number,
+    #so its tripwire could not be read at all. It fails rather than being
+    #skipped, because a check that stopped happening reports success. Run the
+    #row alone before believing it: the excursion behind an `unstable` is a
+    #race with process exit and a loaded box makes it likelier.
+    for line in unstable:
+        print(f"  NO SINGLE COST, THE ROW WAS NOT CHECKED {line}")
+    return 1 if cross or drift or negative or unstable else 0
 
 
 def main() -> int:

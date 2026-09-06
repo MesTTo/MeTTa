@@ -7,6 +7,42 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `PERFORMANCE.md` overstated this engine's advantage over upstream PeTTa, and
+  the page has been rewritten from a corrected measurement. Each row is a
+  program's instruction count net of that engine's fixed cost, and the fixed
+  cost was measured by a second fixture that consulted the engine and stopped.
+  That fixture reached neither engine's per-run setup and, being a different
+  process with a different command line, did not measure the same fixed cost
+  either: 4,594,811 instructions below upstream's real one and 8,661,096 above
+  ours, a 13,255,907 bias in this engine's favour on every row of a corpus
+  whose smallest row is 225,455. Seven rows came out at or below zero and the
+  page dropped them rather than reporting them.
+
+  The fixed cost is now the EMPTY PROGRAM through the same driver at the same
+  path length and directory depth, and the estimator is the median of three
+  processes, or of seven when the three disagree, because SWI collects clauses
+  on a thread `perf` counts and `statistics(inferences)` does not, worth
+  35,083,561 instructions in the one process out of 120 where it lands inside
+  the run, and one process per measurement is run and discarded because three
+  rows write a cache on their first touch in a tree. A program of no content
+  now nets between -13,405 and +12,852.
+
+  The headline moves from a median of 0.379x to 0.512x, the geometric mean
+  from 0.355x to 0.477x, the corpus total from 1.445x to 1.498x dearer, and
+  the largest win from 0.049x to 0.066x. The baseline
+  `tests/data/upstream-parity-baseline.json` is rebuilt; the measurements are
+  in `docs/journal/2026-09-06-the-parity-floor.md`.
+
+- The `parity-perf` lane fails on a row whose net comes out below its own
+  control instead of recording it, and a new selftest beside it,
+  `check_upstream_parity_selftest.py`, plants that and the other ways this
+  measurement can break to prove the lane catches each. A timed-out measurement no
+  longer leaves its engine running: one `--rebaseline` left two `swipl`
+  processes at 48% CPU with nothing bounding them, because the death signal
+  reached `perf` and the engine is `perf`'s child.
+
 ## [0.8.0] - 2026-09-06
 
 ### Added

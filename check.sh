@@ -17,6 +17,7 @@
 #                                            jscpd jscpd-prolog prolog
 #                                            ciao-grade
 #                                            codec-doc petta parity-perf
+#                                            parity-perf-selftest
 #                                            policy-inventory
 #                                            policy-inventory-selftest
 #                                            refusal-grounds
@@ -374,17 +375,31 @@ run GATE   petta        sh -c "cd '$HERE' && '$PY' tests/conformance/petta.py --
 
 # Performance parity with the same upstream, over the same corpus, and the
 # question the conformance lane above does not ask. instructions:u NET OF EACH
-# ENGINE'S OWN BOOT, minimum of three processes: this tree loads 39,977 lines
-# of engine against upstream's 1,229, so it boots in 1.04e9 instructions
-# against 0.45e9, and a boot-inclusive comparison would report that constant
-# on every small file instead of the work
-# [measured 2026-08-30]. Subtracting it is sound here: five boots spread 40k
-# on 1.05e9, far under the 500k absolute allowance.
+# ENGINE'S OWN NULL PROGRAM, median of three processes and of seven when the
+# three disagree: engine/ holds 50,297 lines of Prolog against upstream's
+# 1,229, so an empty program costs 1.048e9 instructions here against 0.257e9
+# there, and a comparison that did not subtract it would report that constant
+# on every small file instead of the work.
+#
+# It was NET OF EACH ENGINE'S OWN BOOT until 2026-09-06, measured by a second
+# fixture that consulted the engine and stopped. That fixture reached neither
+# engine's per-run setup and, being a different command line, did not even
+# measure the same fixed cost: 4,594,811 instructions BELOW upstream's real
+# one and 8,661,096 ABOVE ours, a 13.3M bias in this tree's favour on every
+# row of the corpus [measured 2026-09-06;
+# see docs/journal/2026-09-06-the-parity-floor.md].
 #
 # It pointed at PeTTa-base until 2026-08-30, an older upstream whose layout
 # has no engine/metta.pl, so the guard inside fired and the lane passed
 # without measuring anything.
 run GATE   parity-perf  sh -c "cd '$HERE' && '$PY' tests/checks/check_upstream_parity.py"
+
+# and the four-case plant that proves the lane above can fail: a control
+# measured above its program run, a control taken at the wrong path length, a
+# frozen negative net, and a meta note a rebaseline must carry forward. It
+# replaces _perf, the lane's one process call, so no engine runs and the whole
+# netting and verdict path is still the production one.
+run GATE   parity-perf-selftest "$PY" "$HERE/tests/checks/check_upstream_parity_selftest.py"
 
 # The two-runtime differential: the conformance corpus's CeTTa-routable
 # fragment replays through the fork's C core (CETTA_PATH overrides the
