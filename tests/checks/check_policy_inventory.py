@@ -8,9 +8,9 @@ Assumes:
     root, the same environment used by the Prolog and vocabulary gate lanes
 Guarantees:
   - the runtime publishes exactly the twenty required axes, with one row
-    per axis and the knob/default pair recorded in POLICY_SEAMS; the algebra
-    row also derives and validates each shipped semiring law claim [tested:
-    tests/checks/check_policy_inventory.py; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+    per axis and the knob/default pair recorded in POLICY_SEAMS; the semiring
+    rows also derive and validate each shipped ordering claim [tested:
+    tests/checks/check_policy_inventory.py; commit=WORKTREE]
   - unannotated Python Literal expressions and list/set membership, plus
     single- or multiline Prolog member/2 and memberchk/2 lists, are reported
     with path, line and values; an exemption is accepted only when immediately
@@ -87,10 +87,9 @@ EXCLUDED_PATHS = frozenset(
 
 # Each ordered semiring claims its DIRECTION beside orderedness, because
 # ordered alone does not say which end a top-k slice takes: ranked and prob
-# count down from the best, tropical counts up from the cheapest. The three
-# rows are engine/spaces/catalog.pl's own claim presets, and tropical joined
-# the table when the algebra carriers landed.
-REQUIRED_ALGEBRA_LAWS = {
+# count down from the best, tropical counts up from the cheapest. The rows are
+# engine/spaces/catalog.pl's own claim presets.
+REQUIRED_SEMIRING_CLAIMS = {
     "ranked": frozenset({"ordered", "descending"}),
     "prob": frozenset({"ordered", "descending"}),
     "tropical": frozenset({"ordered", "ascending"}),
@@ -100,7 +99,7 @@ REQUIRED_ALGEBRA_LAWS = {
     # so it had no claim row to be required of.
     "budget": frozenset({"ordered", "ascending"}),
 }
-ALGEBRA_LAW_SEAM = (
+SEMIRING_CLAIM_SEAM = (
     "engine/metta/effects.pl",
     r"^\s*metta_vocabulary_claim\(semiring,\s*Semiring,\s*ordered\)\.",
 )
@@ -199,7 +198,7 @@ QUERY = (
     "        metta_catalog_row([claim,semiring,S|L]), Laws), "
     "metta_catalog_row([vocabulary,semiring|Semirings]), "
     "json_write_dict(current_output, "
-    "                _{policies:Policies,algebra_laws:Laws,semirings:Semirings}, "
+    "                _{policies:Policies,semiring_claims:Laws,semirings:Semirings}, "
     "                [width(0)])"
 )
 
@@ -207,7 +206,7 @@ QUERY = (
 def runtime_inventory(
     root: Path,
 ) -> tuple[list[dict[str, str]], list[dict[str, object]], list[str]]:
-    """Ask the running catalog for policies, semirings and algebra laws."""
+    """Ask the running catalog for policies, semirings and ordering claims."""
     completed = subprocess.run(
         bounded(["swipl", "-q", "-g", QUERY, "-t", "halt"]),
         cwd=root,
@@ -229,13 +228,13 @@ def runtime_inventory(
         msg = f"swipl policy query emitted a non-inventory payload: {payload!r}"
         raise TypeError(msg)
     policies = payload.get("policies")
-    laws = payload.get("algebra_laws")
+    laws = payload.get("semiring_claims")
     semirings = payload.get("semirings")
     if not isinstance(policies, list) or not all(isinstance(row, dict) for row in policies):
         msg = f"swipl policy query emitted invalid policy rows: {policies!r}"
         raise RuntimeError(msg)
     if not isinstance(laws, list) or not all(isinstance(row, dict) for row in laws):
-        msg = f"swipl policy query emitted invalid algebra law rows: {laws!r}"
+        msg = f"swipl policy query emitted invalid semiring claim rows: {laws!r}"
         raise RuntimeError(msg)
     if not isinstance(semirings, list) or not all(isinstance(item, str) for item in semirings):
         msg = f"swipl policy query emitted invalid semiring values: {semirings!r}"
@@ -289,10 +288,10 @@ def validate_policy_rows(root: Path, rows: list[dict[str, str]]) -> list[str]:
     return findings
 
 
-def validate_algebra_laws(
+def validate_semiring_claims(
     root: Path, rows: list[dict[str, object]], semirings: list[str]
 ) -> list[str]:
-    """Validate the semiring law rows derived from the runtime catalog."""
+    """Validate semiring ordering rows derived from the runtime catalog."""
     findings: list[str] = []
     observed: dict[str, list[str]] = {}
     for row in rows:
@@ -303,13 +302,13 @@ def validate_algebra_laws(
             or not isinstance(laws, list)
             or not all(isinstance(law, str) for law in laws)
         ):
-            findings.append(f"&metta: malformed algebra law row {row!r}")
+            findings.append(f"&metta: malformed semiring claim row {row!r}")
             continue
         if semiring not in semirings:
-            findings.append(f"&metta: algebra law row names undeclared semiring {semiring!r}")
+            findings.append(f"&metta: semiring claim row names undeclared semiring {semiring!r}")
         observed.setdefault(semiring, []).extend(laws)
 
-    for semiring, required in REQUIRED_ALGEBRA_LAWS.items():
+    for semiring, required in REQUIRED_SEMIRING_CLAIMS.items():
         laws = observed.get(semiring, [])
         counts = Counter(laws)
         # Sorted: with two required laws per semiring, frozenset iteration
@@ -327,17 +326,17 @@ def validate_algebra_laws(
             for law in sorted(set(laws) - required)
         )
     findings.extend(
-        f"&metta: unexpected algebra law claims for semiring {semiring}"
-        for semiring in sorted(set(observed) - REQUIRED_ALGEBRA_LAWS.keys())
+        f"&metta: unexpected ordering claims for semiring {semiring}"
+        for semiring in sorted(set(observed) - REQUIRED_SEMIRING_CLAIMS.keys())
     )
 
-    path, pattern = ALGEBRA_LAW_SEAM
+    path, pattern = SEMIRING_CLAIM_SEAM
     source = root / path
     if not source.is_file():
-        findings.append(f"{path}: missing implementation seam for algebra law claims")
+        findings.append(f"{path}: missing implementation seam for semiring claims")
     elif re.search(pattern, source.read_text(encoding="utf-8"), re.MULTILINE) is None:
         findings.append(
-            f"{path}: implementation seam for algebra law claims no longer matches {pattern!r}"
+            f"{path}: implementation seam for semiring claims no longer matches {pattern!r}"
         )
     return findings
 
@@ -585,13 +584,13 @@ def scan_closed_lists(root: Path) -> list[str]:
 def main() -> int:
     """Print the derived table and fail on any catalog, seam or list finding."""
     try:
-        rows, algebra_laws, semirings = runtime_inventory(ROOT)
+        rows, semiring_claims, semirings = runtime_inventory(ROOT)
     except (OSError, RuntimeError, subprocess.SubprocessError) as exc:
         print(f"policy inventory: {exc}")
         return 1
 
     findings = validate_policy_rows(ROOT, rows)
-    findings.extend(validate_algebra_laws(ROOT, algebra_laws, semirings))
+    findings.extend(validate_semiring_claims(ROOT, semiring_claims, semirings))
     findings.extend(scan_closed_lists(ROOT))
     by_axis = {str(row["axis"]): row for row in rows if "axis" in row}
     for axis, seam in POLICY_SEAMS.items():
@@ -601,9 +600,9 @@ def main() -> int:
                 f"policy {axis}: knob={row.get('knob')} default={row.get('default')} "
                 f"seam={seam.path}"
             )
-    for row in algebra_laws:
+    for row in semiring_claims:
         for law in row.get("laws", []):
-            print(f"algebra law: semiring={row.get('semiring')} law={law}")
+            print(f"semiring claim: semiring={row.get('semiring')} value={law}")
     for finding in findings:
         print(finding)
     print(f"policy inventory: {len(rows)} runtime row(s), {len(findings)} finding(s)")

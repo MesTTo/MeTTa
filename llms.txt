@@ -395,7 +395,7 @@ shipped choice. There is exactly one row for each of dispatch, order, merge,
 agenda, equality, errors, world, algebra, storage, typing, fidelity,
 source-kind, transaction-mode, atomicity, save-format, volatility, and
 determinism. `tests/checks/check_policy_inventory.py` asks the running catalog for
-those rows and the semiring law claims, joins them to their implementation
+those rows and the semiring ordering claims, joins them to their implementation
 seams, and rejects multiline `member/2` or `memberchk/2` lists, Python
 `Literal[...]`, and Python list/set membership that bypass the catalog. The
 immediately preceding annotation may exempt only mechanism-internal,

@@ -15,9 +15,9 @@ Guarantees:
     and Python list/set membership are planted independently; only catalog
     preset terms and generated vocabulary output are excluded [tested:
     tests/checks/check_policy_inventory_selftest.py; commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3]
-  - algebra validation rejects a missing required law, an undeclared
+  - semiring-claim validation rejects a missing required value, an undeclared
     semiring claim and a missing consumer seam [tested:
-    tests/checks/check_policy_inventory_selftest.py; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+    tests/checks/check_policy_inventory_selftest.py; commit=WORKTREE]
 Fails when:
   - run against a tree it did not create; every assertion is against a fresh
     temporary fixture with exact findings
@@ -34,10 +34,10 @@ import tempfile
 from pathlib import Path
 
 from check_policy_inventory import (
-    ALGEBRA_LAW_SEAM,
     EXEMPTION_REASONS,
+    SEMIRING_CLAIM_SEAM,
     scan_closed_lists,
-    validate_algebra_laws,
+    validate_semiring_claims,
 )
 
 
@@ -201,11 +201,11 @@ def test_evidence_must_name_an_in_range_line_or_existing_symbol() -> None:
     ]
 
 
-def test_algebra_law_claims_are_derived_and_validated() -> None:
-    """Runtime claim rows must name the vocabulary and the shipped laws."""
+def test_semiring_claims_are_derived_and_validated() -> None:
+    """Runtime claim rows must name the vocabulary and shipped ordering."""
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
-        seam_path, seam_pattern = ALGEBRA_LAW_SEAM
+        seam_path, seam_pattern = SEMIRING_CLAIM_SEAM
         _write(
             root,
             seam_path,
@@ -215,36 +215,36 @@ def test_algebra_law_claims_are_derived_and_validated() -> None:
         # ranked and prob count down from the best, tropical and budget up
         # from the cheapest, mirroring the shipped catalog rows.
         good = [
+            {"semiring": "budget", "laws": ["ordered", "ascending"]},
             {"semiring": "ranked", "laws": ["ordered", "descending"]},
             {"semiring": "prob", "laws": ["ordered", "descending"]},
             {"semiring": "tropical", "laws": ["ordered", "ascending"]},
-            {"semiring": "budget", "laws": ["ordered", "ascending"]},
         ]
         declared = ["bool", "ranked", "prob", "tropical", "budget"]
-        assert validate_algebra_laws(root, good, declared) == []
-        findings = validate_algebra_laws(
+        assert validate_semiring_claims(root, good, declared) == []
+        findings = validate_semiring_claims(
             root,
             [
+                {"semiring": "budget", "laws": ["ordered", "ascending"]},
                 {"semiring": "ranked", "laws": []},
                 {"semiring": "prob", "laws": ["ordered", "descending"]},
                 {"semiring": "tropical", "laws": ["ordered", "descending"]},
-                {"semiring": "budget", "laws": ["ordered", "ascending"]},
                 {"semiring": "missing", "laws": ["ordered"]},
             ],
             declared,
         )
         _write(root, seam_path, "different_consumer.\n")
-        missing_seam = validate_algebra_laws(root, good, declared)
+        missing_seam = validate_semiring_claims(root, good, declared)
     assert findings == [
-        "&metta: algebra law row names undeclared semiring 'missing'",
+        "&metta: semiring claim row names undeclared semiring 'missing'",
         "&metta: semiring ranked is missing law descending",
         "&metta: semiring ranked is missing law ordered",
         "&metta: semiring tropical is missing law ascending",
         "&metta: semiring tropical has unexpected law descending",
-        "&metta: unexpected algebra law claims for semiring missing",
+        "&metta: unexpected ordering claims for semiring missing",
     ], findings
     assert missing_seam == [
-        f"{seam_path}: implementation seam for algebra law claims no longer matches "
+        f"{seam_path}: implementation seam for semiring claims no longer matches "
         f"{seam_pattern!r}"
     ]
 
@@ -260,7 +260,7 @@ def main() -> int:
         test_multiline_prolog_member_predicates_are_reported,
         test_python_literal_and_list_set_membership_are_reported,
         test_evidence_must_name_an_in_range_line_or_existing_symbol,
-        test_algebra_law_claims_are_derived_and_validated,
+        test_semiring_claims_are_derived_and_validated,
     )
     failures: list[str] = []
     for test in tests:
