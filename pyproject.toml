@@ -150,6 +150,14 @@ target-version = "py312"
 line-length = 100
 extend-exclude = ["examples/**/_common.py"]
 
+# The library floor is py312, so Ruff must keep rejecting 3.14-only syntax
+# everywhere it could ship. The one file below is a TEST helper holding the
+# t-string literals the template-hole suite needs, imported only when the
+# running interpreter is 3.14; without this entry Ruff refuses to parse it
+# ("Cannot use t-strings on Python 3.12").
+[tool.ruff.per-file-target-version]
+"tests/ch11_python_as_a_notation/template_literals_314.py" = "py314"
+
 [tool.ruff.lint]
 # Refurb owns these newer rules. Ruff must preserve their targeted ``noqa``
 # directives even though this Ruff version does not implement the codes.

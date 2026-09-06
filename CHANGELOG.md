@@ -9,6 +9,24 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Program text with holes reaches every text door. `m.run(t"!(fib {n})")` on
+  Python 3.14, `m.run("!(fib {n})", n=10)` on every supported version, and any
+  object carrying `strings` and `interpolations` tuples (`tstrings-backport`'s
+  `t("...")`) in between; the door's type is `metta.TemplateLike`. `run`,
+  `profile`, `profile_extension`, `eval`, `answers`, `eval_status`, `match` and
+  `parse` all take it, on `Space`, on the `MeTTa` context, at module level and
+  on `AsyncMeTTa`. A hole is a binding by position: it is spliced into the text
+  as a generated symbol and bound through the mechanism `bind()` already uses,
+  so a `str` value stays one String atom and never has to be escaped, and a
+  value cannot reach an occurrence of a symbol the author meant as a symbol.
+  Values enter through `encode`; `{Symbol(name)}`, `{Grounded(obj)}` and
+  `{parse(text)}` are the markers, with `:sym`, `:py` and `:expr` as their short
+  forms and `!r`, `!s` and `!a` applying Python's conversion first. A hole
+  inside a string literal, inside a `;` comment or glued to a symbol is refused
+  with its line and column. The `__metta_hole_` prefix is reserved: program text
+  and `bind()` keys spelling it are refused. The keyword face engages only when
+  values are passed, so existing programs whose symbols contain braces are
+  unchanged.
 - `lib_import` exposes committed imports as `(import Path)` atoms through
   `(imports &space)`. `unimport!` withdraws the imported source's surviving
   atom occurrences and compiled definitions, preserving equal atoms owned by

@@ -217,15 +217,15 @@ anything, comparing modulo variable renaming. Python's `a == b` answers
 ## Running and querying: exact return shapes
 
 ```python
-m.run(src, *, timeout=, inferences=)
+m.run(src, /, *, timeout=, inferences=, **values)
                        -> list[list[Atom]], one inner list per ! directive
-m.eval(target, *more, timeout=, inferences=, under=, theory=, interpreter=)
+m.eval(target, /, *more, timeout=, inferences=, under=, theory=, interpreter=, **values)
                  -> list[Atom | Undefined] | list[list[Atom | Undefined]]
-m.match(*patterns, where=, limit=, timeout=, inferences=, under=, into=) -> Answers
-m.answers(target, *, timeout=, inferences=, under=, theory=, interpreter=) -> Answers
+m.match(*patterns, where=, limit=, timeout=, inferences=, under=, into=, **values) -> Answers
+m.answers(target, /, *, timeout=, inferences=, under=, theory=, interpreter=, **values) -> Answers
 m.sample(query, *, k=10, seed=7) -> list[Atom]
 m.prepare(*patterns, where=) -> Prepared; .solve(given=...) many times, .columns
-m.parse(src) -> Atom
+m.parse(src, /, **values) -> Atom
 m.register_token(pattern, constructor) -> None
 m.unregister_token(pattern) -> None
 m.load(path, *, timeout=, inferences=) -> list[list[Atom]]
@@ -239,6 +239,54 @@ m.digest() -> str, 64-hex content hash of the space, store-independent
 `with m.bind(v=tensor): m.eval("(gated v)")` scopes that binding over every
 call inside the block. A target with no applicable rule is returned as the
 unreduced term; `eval_status()` names that path `not-reducible`.
+
+### Program text with holes
+
+Three faces, one door. `m.run(t"!(fib {n})")` is a Python 3.14 t-string
+literal; `m.run("!(fib {n})", n=10)` is the same on every supported version;
+in between, any object with `strings` and `interpolations` tuples works,
+including `tstrings-backport`'s `t("...")`, because the check is structural and
+never an isinstance against a class the 3.12 floor does not have. The type is
+`metta.TemplateLike`, whose holes are `metta.InterpolationLike`. It is accepted
+at `run`, `profile`, `profile_extension`, `eval`, `answers`, `eval_status`,
+`match` (pattern text) and `parse`, on `Space`, on the `MeTTa` context, at
+module level and on `AsyncMeTTa`.
+
+A hole is a BINDING BY POSITION. Each one is spliced into the text as a
+generated symbol and bound through the mechanism `bind()` already uses, after
+the reader and before anything runs. Nothing is rendered to text, so a `str`
+holding a space or a quote needs no escaping. Values enter through `encode`: an
+int is a Number, a `str` a String atom, an `Atom` itself, a `Space` its handle,
+anything else a grounded object.
+
+The generated spelling is `__metta_hole_<k>`, and the `__metta_hole_` prefix is
+RESERVED: program text spelling it is refused, and so is a `bind()` key in that
+namespace, so a hole and a name the program uses can never be the same symbol.
+
+The markers at a hole are the atom constructors, not a new vocabulary:
+`{Symbol(name)}` for a symbol, `{Grounded(obj)}` for an opaque object,
+`{parse(text)}` for a spliced expression. The specs `{v:sym}`, `{v:py}` and
+`{v:expr}` are sugar for exactly those three. `{v!r}`, `{v!s}` and `{v!a}` apply
+Python's conversion first and enter the result as text. `{x=}` is PEP 750's
+debug form: it folds `x=` into the text, so it enters as the String `"x="`
+followed by the repr, two atoms rather than one. A nested template composes,
+splicing its text and its holes into the outer call.
+
+Refused with the hole's line and column in the text you wrote: a hole inside a
+`"..."` string literal, inside a `;` comment, or glued to a symbol. Refused by
+name: a field with no keyword, a positional `{}` or `{0}`, a keyword no field
+uses, a field spelled like one of the door's own keywords (`timeout`, `under`,
+`where`), an unknown spec, a template at `load` (which takes a path, so use an
+f-string) and at `run_status` (whose engine door carries no bindings).
+
+The keyword face engages ONLY when values are passed, so `m.run("!(id {x})")`
+still reads `{x}` as an ordinary symbol and `{{`/`}}` are `str.format` escapes
+only when a value is there to resolve.
+
+`bind()` stays, and is the right door for a value several calls share: it names
+a value for a whole block rather than one position. The difference is what the
+holes exist for. A binding names a SYMBOL and reaches every occurrence of it,
+including one the author meant as a symbol; a hole reaches only its own place.
 
 Variables shared across query patterns join: `m.match(S.p(V.x,V.y), S.p(V.y,V.z))`.
 `where=` is a term the engine evaluates per match: `where=S[">="](V.n, 60) & S["<="](V.n, 70)`.

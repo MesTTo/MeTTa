@@ -105,7 +105,7 @@ def seg(variable: Any) -> Expression:
 ## `parse`
 
 ```python
-def parse(source: str) -> Atom:
+def parse(source: str | TemplateLike, /, **values: Any) -> Atom:
 ```
 
 > Read one form of MeTTa source into an atom, evaluating nothing.
@@ -113,6 +113,11 @@ def parse(source: str) -> Atom:
 > Use ``metta.forms()`` for a whole source program. ``parse()`` deliberately
 > refuses empty input and multiple top-level forms rather than selecting one
 > silently.
+>
+> The source may carry HOLES, which land in the term this answers rather
+> than crossing to the engine, since nothing runs here:
+> ``parse(t"(person {name} 36)")`` and ``parse("(person {n} 36)", n=name)``
+> both build the term with the value already in it.
 >
 > Backed by the engine's own reader, with one improvement over sread/2: the
 > variable names the DCG collects are kept, so parse("(Parent $x Bob)")

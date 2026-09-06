@@ -117,12 +117,14 @@ async def count(self) -> int:
 async def eval(
     self,
     target: Any,
+    /,
     *more: Any,
     timeout: float | None = None,
     inferences: int | None = None,
     under: Any = _UNSET,
     theory: Any | None = None,
     interpreter: Any | None = None,
+    **values: Any,
 ) -> list[Atom | Undefined] | list[list[Atom | Undefined]]:
 ```
 
@@ -134,6 +136,11 @@ async def eval(
 > without them there was no way to annotate an EVALUATION asynchronously
 > at all -- match(under=) covered patterns and nothing covered calls
 > .
+>
+> A text target may carry HOLES, as the synchronous eval()'s may:
+> `await m.eval(t"(decide {tensor})")`. `target` is positional-only for
+> the same reason it is there, so `{target}` is a field name a caller can
+> use.
 
 ### `AsyncMeTTa.copy`
 
@@ -507,10 +514,12 @@ async def drop(self) -> None:
 ```python
 async def run(
     self,
-    source: str,
+    source: str | TemplateLike,
+    /,
     *,
     timeout: float | None = None,
     inferences: int | None = None,
+    **values: Any,
 ) -> list[list[Atom]]:
 ```
 
@@ -521,8 +530,23 @@ async def run(
 > directive instead of flattened. Equations and facts in the source
 > land in this space.
 >
-> `bind()` names Python values the source refers to by bare symbol,
-> the way DuckDB reads a local dataframe by its variable name:
+> The source may carry HOLES, which are bindings by position:
+>
+>     m.run(t"!(fib {n})")            # a 3.14 t-string literal
+>     m.run("!(fib {n})", n=10)       # the same on every version
+>
+> Each hole is spliced into the text as a generated symbol and bound to
+> its value, so a str stays one String atom and never has to be escaped.
+> Values enter through `encode`: an int is a Number, a str a String, an
+> Atom itself, a Space its handle. The markers at a hole are the atom
+> constructors, `{Symbol(name)}`, `{Grounded(obj)}` and `{parse(text)}`,
+> with the specs `:sym`, `:py` and `:expr` as their short forms; `!r`
+> and `!s` convert in Python first and enter the result as text. A hole
+> inside a string literal, a comment or a symbol is refused with its
+> line and column.
+>
+> `bind()` is the same substitution by NAME, for a value several calls
+> share, the way DuckDB reads a local dataframe by its variable name:
 >
 >     with m.bind({"graph": my_graph}):
 >         m.run("!(py-len graph)")
@@ -533,6 +557,9 @@ async def run(
 > and a block grows down the page where a keyword has to fit beside
 > everything else on the call. Every call that accepts a target reads the
 > same scope, so one block covers run(), eval(), and answers() together.
+> A binding names a symbol and so replaces EVERY occurrence of it,
+> including one the author meant as a symbol; a hole is positional and
+> cannot reach anything but itself.
 >
 > `timeout` (seconds) and `inferences` (engine steps) bound the call
 > with the engine's own guards; passing either raises TimeLimitError
@@ -558,10 +585,12 @@ async def run(
 ```python
 async def profile(
     self,
-    source: str,
+    source: str | TemplateLike,
+    /,
     *,
     timeout: float | None = None,
     inferences: int | None = None,
+    **values: Any,
 ) -> tuple[list[list[Atom]], EngineProfile]:
 ```
 
@@ -583,12 +612,14 @@ async def profile(
 ```python
 async def profile_extension(
     self,
-    source: str,
+    source: str | TemplateLike,
+    /,
     *,
     extension: str | None = None,
     names: _abc.Sequence[str] | None = None,
     timeout: float | None = None,
     inferences: int | None = None,
+    **values: Any,
 ) -> tuple[list[list[Atom]], list[FunctionCost]]:
 ```
 
@@ -714,14 +745,23 @@ async def load(
 > likely to be handed code the caller did not write, since a file can
 > carry `!` directives and an import graph, so it takes the same pair
 > its siblings take.
+>
+> Program text with holes is refused here. A hole is a binding, and a
+> PATH has nowhere to bind one: run() takes holes, and an f-string or a
+> Path builds a computed filename.
 
 ### `AsyncMeTTa.parse`
 
 ```python
-async def parse(self, source: str) -> Atom:
+async def parse(self, source: str | TemplateLike, /, **values: Any) -> Atom:
 ```
 
 > Read one form into an atom without evaluating it.
+>
+> Holes work here as they do at run(), and land in the term this
+> answers rather than crossing to the engine, since nothing runs:
+> `m.parse(t"(person {name} 36)")` is the built term with the value
+> already in it.
 
 ### `AsyncMeTTa.register_token`
 
@@ -1014,6 +1054,7 @@ async def match(
     inferences: int | None = None,
     under: Any = _UNSET,
     into: _builtins.type | None = None,
+    **values: Any,
 ) -> Any:
 ```
 
@@ -1059,6 +1100,11 @@ async def match(
 > expressions instead: `m.match(V.edge, into=Edge)`.
 >
 >     m.match(S.Edge(V.x, V.y), S.Edge(V.y, V.z))
+>
+> A text pattern may carry HOLES, as run()'s source may:
+> `m.match(t"(person {name} $age)")` matches the value itself, so a name
+> holding a space stays one String atom rather than reading as two
+> symbols. Keyword values apply across every pattern of the call.
 
 ### `AsyncMeTTa.solve`
 
@@ -1142,11 +1188,13 @@ async def reducible(self, target: Any) -> bool:
 async def eval_status(
     self,
     target: Any,
+    /,
     *,
     timeout: float | None = None,
     inferences: int | None = None,
     theory: Any | None = None,
     interpreter: Any | None = None,
+    **values: Any,
 ) -> list[tuple[str, Atom | Undefined | None]]:
 ```
 
