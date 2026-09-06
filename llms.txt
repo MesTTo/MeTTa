@@ -254,7 +254,7 @@ call. Ten carriers ship. The answers below are one program's: two facts tagged
 | `bag` | `+` `*` | `0.9` | the default when `under=` is omitted |
 | `bool` | `max` `*` | `0.6` | |
 | `set` | `max` `*` | `0.6` | combine is idempotent, so multiplicity collapses |
-| `counting` | `+` `*` | `3` | an engine aggregate crossing no answer rows |
+| `counting` | `+` `*` | `2` | an engine aggregate crossing no answer rows |
 | `ranked` | `max` `*` | `0.6` | orders highest first |
 | `prob` | `+` `*` | `0.9` | orders highest first |
 | `tropical` | `min` `+` | `1.3` | orders cheapest first |
@@ -608,11 +608,18 @@ Only DECLARED classes and REAL bases become edges, which keeps `object`, a
 NamedTuple's `tuple`, an enum's `Enum` and a virtual `abc` registration out.
 `m.type(atom)` is the other verb and is unrelated: it answers that atom's first
 `get-type`.
-`m.fn(name)` calls an engine function from Python (`m.fn("superpose").all(...)`
-for every answer; `.compiled` for the clauses).
+`m.fn.superpose(...)` calls an engine function from Python and answers every
+answer; `m.fn["car-atom"]` is the exact door for a head outside Python's
+identifier grammar, and `.compiled`, `.equations` and `.type` on the handle read
+its clauses, its stored equations and its declared type. The namespace is not
+callable, so `m.fn("superpose")` is a TypeError. Module-level `metta.fn` is a
+different thing, the symbol namespace a compiled body writes `fn.add` against.
 `m.register_prolog(source=..., path=..., names=...)` registers Prolog
-predicates directly, which is the fast path: 7.16 inferences and 0.13us per
-call against 25.16 and 2.34us for the same operation through `m.op`.
+predicates directly, which is the fast path: 2 inferences a call against 20 for
+the same operation through an encoded `m.op`, measured 2026-09-06 by
+`python -m benchmarks.extension_cost` from `extensions/python`, which subtracts
+its driver so each figure is one call's marginal cost.
+`extensions/python/llms.txt` carries the whole tier table.
 `m.register_foreign_library(path, entry=, names=)` loads a compiled `.so`.
 `m.unregister_prolog(extension)` releases everything one extension registered.
 
@@ -869,8 +876,9 @@ each worker its OWN attached engine, which is what makes the calls genuinely
 concurrent (measured 2026-08-15: 1.94x, 3.90x and 7.26x at 2, 4 and 8 workers).
 Its `map(fn, items)` handles unary work and `starmap(fn, argument_rows)` spreads
 each row into a multi-argument call; both preserve input order.
-`m.parallel(*targets)` and its language-side name `m.hyperpose(*targets)`
-evaluate targets at once. `metta.aio.AsyncMeTTa` runs engine calls on one worker
+`m.parallel(*targets)` evaluates targets at once; `hyperpose` is the same thing
+under its MeTTa name, written `!(hyperpose (t1 t2))` in source and reached from
+Python as `m.fn.hyperpose`. `metta.aio.AsyncMeTTa` runs engine calls on one worker
 thread behind `async`; `metta.parallel.engine_thread()` and `metta.current_space()`
 report the crossing.
 `metta.channel(max=)` creates a mailbox. `send` may block on capacity,
@@ -1057,7 +1065,8 @@ publishes a complete support set, `support_record/2` adds an observation,
 forward subgraph once, and `support_stabilize/3` recomputes only on demand and
 cuts propagation off when the value is unchanged. Nodes carry their execution
 module: `function`, `function_view`, `specialization`, `memo`,
-`compiled_function`, `translated_form`, `type_marker`, and `dispatch_policy`.
+`compiled_function`, `translated_form`, `type_marker`, `dispatch_policy`, and
+`derived`, which is the open kind an extension's own artifact takes.
 The specializer, memo library, compiler, and language-policy registries use
 these same `supports(Support, Derived)` edges.
 
