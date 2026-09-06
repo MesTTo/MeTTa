@@ -230,3 +230,119 @@ Open: whether a freeze pragma at the end of `&self`'s definitions should be
 the default for `run.sh` programs, where the definitions-then-queries shape
 is universal, with `unfreeze` available to the rare program that defines
 during its run.
+
+### More of Python the engine can read
+
+The first pass covered decorators. Python carries many more declarations and
+protocols that map onto a MeTTa meaning, some of them recent enough to be
+unfamiliar. Grouped by what they buy; each row is a candidate face of an
+existing mechanism, never a new one.
+
+#### Program text without strings
+
+| Python | MeTTa meaning | Gain |
+| --- | --- | --- |
+| template strings, `t"..."` (PEP 750, 3.14) | a MeTTa source template whose interpolations stay objects | `t"(= (f {x}) {body})"` hands the seat the literal parts and the interpolated ATOMS separately, so a program template is built from values rather than pasted text: no quoting, no injection, and the interpolation is knowledge already, which is the strings-are-text rule with the escape hatch made safe |
+| `typing.LiteralString` (3.11) | a string that is a literal in the source | where a door accepts a name only as an exact literal (`name=`), the type checker can refuse a computed string before the engine does |
+| f-string nesting and `=` debugging (PEP 701, 3.12) | trace text | `f"{atom=}"` prints the atom with its expression for free in refusals and traces |
+
+#### Types as declarations
+
+| Python | MeTTa meaning | Gain |
+| --- | --- | --- |
+| type parameter syntax `def f[T](x: T) -> T` (PEP 695, 3.12) | an arrow with a type variable, `(-> $t $t)` | polymorphic arrows without `TypeVar` boilerplate; bounds (`[T: Number]`) become the variable's declared bound |
+| `A | B` unions (PEP 604) | `(| A B)`, which landed on 2026-09-05 | already the same shape; the seat reads the union from the annotation |
+| `TypeIs` (PEP 742, 3.13) and `TypeGuard` | a refinement predicate | a Python predicate that narrows a type is a typing rule the checker can use on the MeTTa side, so one refinement is declared once and read by both checkers |
+| `ReadOnly` TypedDict fields (PEP 705, 3.13) | immutable fields of a record type | per-field immutability, which the crossing cache and the carrier rules can read field by field |
+| deferred annotations and `annotationlib` (PEP 649 and 749, 3.14) | forward references in arrows | an arrow may name a type defined later in the file without quoting it as a string, and the seat reads annotations in `FORWARDREF` form to build arrows lazily |
+| `typing.Self`, `typing.Never`, `Unpack`, `Concatenate`, `ParamSpec` | return-self arrows, the empty type, variadic tails, decorator typing | `Never` is the type of a call that always refuses; `Unpack[Ts]` is the variadic arrow tail the seat already spells as `%Rest%` |
+| `zip(strict=True)` (3.10) | an arity check | a refusal, with the two lengths, where a silent truncation was |
+
+#### Exceptions and refusals
+
+| Python | MeTTa meaning | Gain |
+| --- | --- | --- |
+| `ExceptionGroup` and `except*` (PEP 654, 3.11) | an answer bag that holds several Error atoms | a nondeterministic evaluation that refuses on more than one branch raises one group, and `except* BadArgType` handles that class across every branch; this is the honest Python spelling of a bag of refusals, where today one is raised and the rest are lost |
+| `Exception.add_note()` (3.11) | provenance on a refusal | the engine's ground for a refusal (which rule, which arrow) rides on the exception as notes rather than in the message text |
+| `warnings.deprecated` (PEP 702, 3.13) | a deprecation row | covered above; the lint reads it |
+
+#### Immutability and identity in the standard library
+
+| Python | MeTTa meaning | Gain |
+| --- | --- | --- |
+| `types.MappingProxyType` | a read-only view of a space's rows | `space.rows` as a proxy: readable, hashable by content, unwritable, and refuses a write with Python's own error |
+| `sys.intern` and `weakref.WeakValueDictionary` | hash-consing of atoms and frozen terms | interning tables with the atom garbage collector's own lifetime rule, which is the open interning question answered with a standard tool |
+| `copy.replace` and `__replace__` (3.13) | a frozen value with one field changed | the persistent-structure idiom for frozen records: `replace(record, x=1)` shares everything but `x` |
+| `fractions.Fraction`, `decimal.Decimal` | exact carriers | the Node seat already ships exact rational carriers; Python's `Fraction` is the same carrier by value, so a semiring over `Fraction` needs no conversion |
+| `decimal.localcontext()` | `under(algebra)` | the same shape: a context manager that scopes the arithmetic semantics of a block; one more reason the evaluation context is a context variable |
+| `collections.Counter` | a bag with multiplicities | answer bags carry multiplicity and never drop duplicates (the 2026-09 ruling); `Counter` is that bag in Python's own word, with `+`, `-`, `&`, `|` as bag algebra |
+| `collections.ChainMap` | space inheritance | lookup through a chain of parents is exactly `inherits=`; a `ChainMap` view of a space chain reads the way the engine resolves |
+| `graphlib.TopologicalSorter` (3.9) | dependency order | the materialiser's list-based topological scheduler, and the library import order, are this class; use it rather than a hand-written scheduler on the Python side |
+| `heapq`, `bisect` | best-first emission, ranked insertion | the ranked and tropical semirings' emission order in Python's own structures |
+
+#### Laziness, streams and control
+
+| Python | MeTTa meaning | Gain |
+| --- | --- | --- |
+| `yield from` | delegation to a sub-derivation | a provider or a defined function that delegates to another answer stream without draining it |
+| generator `send`, `throw`, `close` | SWI engine `engine_post/3`, an injected refusal, `engine_destroy/1` | one protocol both ways: a Python generator drives a Prolog engine and a Prolog engine drives a Python generator |
+| `itertools.product` | a conjunction | the nested-loop join the ledger names; making the correspondence explicit lets the seat route a `product` over spaces through the engine's join instead of Python's loop |
+| `itertools.groupby`, `accumulate`, `takewhile`, `islice`, `pairwise`, `batched` (3.12) | `group_by`, a fold with intermediates, a bounded search, a take, adjacent pairs, chunking | the answer-stream doors that already exist get their `itertools` spelling, so a Python reader recognises them |
+| `functools.partial` | partial application | a curried atom; `partial(f, 1)` is `(f 1)` waiting for its next argument |
+| `operator.itemgetter`, `attrgetter`, `methodcaller` | projections | `column()` and `group_by()` keys in Python's own word |
+| `asyncio.TaskGroup` (3.11) | structured concurrency | the ledger's open L055 item (a scope that owns child spaces and futures, cancels them together); `TaskGroup` is the Python face and Trio's nursery the design |
+| `contextvars` | dynamic scope | the evaluation context as a `ContextVar`, visible to `asyncio` tasks and threads by Python's own propagation rules |
+| `contextlib.ExitStack` | a scope that owns several spaces | one `with` for many resources, closed in reverse order |
+
+#### Concurrency and interpreters
+
+| Python | MeTTa meaning | Gain |
+| --- | --- | --- |
+| free-threaded build (PEP 703, 3.13t) | threads without the GIL | SWI is multi-threaded already; without the GIL a Prolog thread pool and Python callbacks stop serialising on one lock, which is the one seat-side constant the engine cannot remove by itself |
+| subinterpreters, `concurrent.interpreters` (PEP 734, 3.14) | one engine per interpreter | isolated engines with separate Python state in one process, a middle ground between threads and processes for parallel programs |
+| `multiprocessing.shared_memory`, the buffer protocol and `__buffer__` (PEP 688, 3.12), `memoryview` | zero-copy tensors and rows | an array crosses as a view, not a copy; the shape rows read its dimensions from the buffer |
+| `threading.local` | per-thread engines | already the janus model; naming it keeps the crossing rules legible |
+
+#### The data model as doors
+
+| Python | MeTTa meaning | Gain |
+| --- | --- | --- |
+| `__set_name__` | a descriptor learns the name it was bound to | the library's rule that a function's symbol is its Python name, applied to class attributes without repeating the name |
+| `__init_subclass__` | registration of every subclass | seats, providers and algebra carriers register themselves by being defined; no explicit registry call |
+| `__class_getitem__` | `Space[Fact]`, `Answers[Atom]` | generic doors with their element type, readable by the type checker and by the engine's arrow projection |
+| `__length_hint__` | an answer-count estimate | `len()` on a lazy answer stream is a count today; a hint lets `list()` preallocate and lets a demand be sized before it runs |
+| `__missing__` | a default for an absent key | absence is never `None`: the door computes or refuses, in one place |
+| `__reduce_ex__`, `__getstate__` | persistence of a space | `pickle` a frozen space and get it back, which a persistent-schema rename already half-does |
+| `__format__` | `f"{atom:metta}"` and `f"{atom:python}"` | one atom, two renderings, chosen at the use site |
+| `__index__`, `__int__`, `__float__`, `__round__` | numeric coercions with declared exactness | a `Grounded` number answers `int()` exactly or refuses, never rounds silently |
+| `__bool__` | truthiness | keep the trap on record: `Grounded(False)` is falsy by design, so a door never uses `or` for defaulting |
+
+#### Discovery, persistence and observation
+
+| Python | MeTTa meaning | Gain |
+| --- | --- | --- |
+| `importlib.metadata` entry points | seat and backend discovery | a backend installed from PyPI declares itself through an entry point group, the way pytest plugins do; the engine globs `extensions/*/extension.pl` in a checkout and reads entry points in an installation |
+| `sqlite3`, `dbm.sqlite3` (3.13), `shelve` | a persistent space | a datastore is a space; SQLite is the smallest one that ships with Python, and `dbm.sqlite3` gives a key-value space with no dependency |
+| `sys.monitoring` (PEP 669, 3.12) | cheap tracing | the tracer and coverage seats can hook Python callbacks at near-zero cost instead of `sys.settrace`; pairs with the engine's own inference counters |
+| `tracemalloc`, `resource` | memory scaling and limits | the memory-scale lane measured in Python's own instrument; `resource.setrlimit` as the process-wide face of `m.limits()` |
+| `faulthandler` | crash traces | already what printed this week's finaliser crashes; enabling it under the gate is one line |
+| `logging` handlers | subscriptions | an engine subscription delivered as log records lets every existing logging consumer receive space events |
+
+Decided: nothing in this list is adopted by being listed. Each candidate enters
+the work in the same way as the decorators above: it becomes a face of one
+existing mechanism, it is written down as a catalog row where it declares
+something, and it is measured on the existing instruments where it claims a
+cost. The four that most change what a program can say are the template
+strings (a program built from atoms, not text), `ExceptionGroup` (a bag of
+refusals raised honestly), `TypeIs` (one refinement read by both checkers)
+and the subinterpreter/free-threaded runtimes (parallel engines the seat
+cannot otherwise offer). The four that most change what a program costs are
+the buffer protocol (zero-copy tensors), interning through `sys.intern` and
+weak tables, `__length_hint__` on answer streams, and `sys.monitoring` for
+tracing.
+
+Open: which of the 3.13 and 3.14 features the supported Python floor admits;
+`pyproject.toml` requires 3.12 today, so `TypeIs`, `ReadOnly`, `copy.replace`
+and `warnings.deprecated` need 3.13 and template strings, `annotationlib` and
+subinterpreters need 3.14, each usable only behind a version check or after
+the floor moves.
