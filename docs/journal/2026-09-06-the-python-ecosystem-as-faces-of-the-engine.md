@@ -1125,6 +1125,182 @@ of them, in one seat or one direction, and perfection is the rule that every
 mechanism has every face, generated rather than written, with the roster that
 proves it.
 
+### 20. A second pass, from other fields
+
+Asked for more, the same evening. Each item maps a mechanism another field
+settled onto a mechanism this engine already has, with the source it was
+checked against.
+
+1. One token per fact. Git identifies a change by its commit, Datomic writes
+   every datom as `[entity attribute value tx added?]` so that `as-of`,
+   `since`, `history` and speculative `with` are filters and applications
+   over the transaction id [source: https://docs.datomic.com/transactions/model.html],
+   Automerge and Yjs identify every operation by an actor and a counter so
+   that concurrent replicas merge without coordination, an observed-remove
+   set removes exactly the additions it has seen so a concurrent add wins
+   (Shapiro, Preguiça, Baquero and Zawirski, "Conflict-free replicated data
+   types", SSS 2011), and provenance polynomials are built from one
+   indeterminate per base fact [source: Green, Karvounarakis and Tannen,
+   "Provenance semirings", PODS 2007, https://dl.acm.org/doi/10.1145/1265530.1265535].
+   Those four are one construct: a unique token minted at every `add-atom`,
+   carrying the engine (actor) that added it and the generation at which it
+   did. The engine already mints half of it: `assertz(Module:Term, Ref)` in
+   `engine/spaces/catalog.pl:287-306` returns a clause reference per added
+   atom, SWI's logical update view stamps every clause with the generation
+   it was created and erased in, `transaction_updates/1` lists the
+   references a transaction touched, and the persistency journal records
+   every assert and retract in order. Decided as the design to build on: a
+   space's atoms carry tokens; the journal is the token log; `reify()` is a
+   branch at a generation, `commit(world)` a fast-forward merge, and a merge
+   of two worlds that branched from the same generation is the union of
+   their token sets, which is the observed-remove multiset (every add is a
+   distinct token, a remove names the tokens it observed, a concurrent add
+   survives), so it never conflicts and keeps the bag ruling; `blame(atom)`
+   answers the token's actor and generation; `as-of(t)` filters tokens by
+   generation; `diff` is a token-set difference; and shipping the journal
+   between processes replicates a space the way Automerge ships operations.
+   Prior art for the replication: Automerge's op log, Yjs, Datomic's
+   transactor log, Materialize's CDC. Cost class: a merge is linear in the
+   tokens exchanged, never in the space.
+
+2. The derivation is the free carrier. Green, Karvounarakis and Tannen
+   prove that provenance polynomials `N[X]` are universal: any valuation of
+   the tokens into a commutative semiring extends uniquely to a homomorphism,
+   and query evaluation commutes with it, so bag counts (`N`), boolean truth
+   (`B`), why-provenance, the tropical semiring for costs, the Viterbi
+   semiring for confidences and access-control lattices are all images of the
+   one polynomial [source: the PODS 2007 paper; Green and Tannen, "The
+   semiring framework for database provenance", PODS 2017]. This library
+   has both halves apart: `metta.derivation` builds proof trees, and the
+   algebra rows evaluate tagged answers under a carrier. Decided as the
+   design to build on: a `provenance` carrier whose answers are polynomials
+   over the tokens of item 1 (product across a conjunction, sum across
+   alternatives, multiplicity as the coefficient), so `why()` is the
+   polynomial and every other carrier is `under(algebra)` applied to it by
+   homomorphism; incremental maintenance falls out, because a removed token
+   invalidates exactly the answers whose polynomial mentions it, which is
+   the deletion propagation the paper names, and the monotonic and
+   incremental tabling of section 6 are its engine-side implementation.
+
+3. Effect handlers are the general scope. SWI's `reset/3` and `shift/1`
+   implement delimited continuations, described in Schrijvers, Demoen,
+   Desouter and Wielemaker, "Delimited continuations for Prolog", TPLP
+   13(4-5), 2013, whose worked examples are effect handlers (state, DCG
+   input, iterators, and their composition by propagating unknown operations
+   to the next handler), and SWI's own tabling is built on them (Desouter,
+   van Dooren and Schrijvers, "Tabling as a library with delimited control",
+   TPLP 2015) [source: https://www.swi-prolog.org/pldoc/man?section=delcont,
+   https://www.swi-prolog.org/download/publications/iclp2013.pdf]. The scope
+   family of section 18 (limits, seed, capture, isolation, algebra demand,
+   bound values) and the search strategies of `lib_strategy` are handlers
+   for effects the program performs (consume a resource, draw a random number,
+   write output, mutate a space, choose among alternatives). Decided as the
+   design to build on, engine side: a `(with-handler effect handler body)`
+   special form compiled to `reset/3` with the handler resuming through the
+   continuation, `(with-seed ...)` re-expressed as the first handler, and
+   nondeterminism's strategy (depth-first, breadth-first, best-first, the
+   Stratego combinators) as a handler of the choice effect, which is what
+   makes a strategy a value the program installs rather than a mode the
+   engine has. The manual's caveat is recorded with it: `shift/1` does not
+   capture choice points and a cut in a saved continuation does not commit,
+   so a handler that saves continuations is bounded to the shapes tabling
+   already proves safe.
+
+4. A cost knows its class, declared and measured. Ciao's assertion language
+   states types, modes, determinism and cost bounds on a predicate
+   (`:- pred p(A) : int(A) + (det, cost(ub, steps, O(length(A))))`) and
+   CiaoPP checks or infers them statically; this repository already installs
+   Ciao-grade packs in its gate and already measures counter slopes
+   (`metta.testing.benchmark_counter_slope`, the `scaling` lane). Decided as
+   the design to build on: a `(cost head class)` catalog row (`constant`,
+   `log`, `linear`, `quadratic`, `exponential`, in inferences over the
+   declared size argument) checked by the slope instrument as a lane, so a
+   head's declared class is a claim the gate can fail, shown beside the
+   signature (section 19 item 8) and in the library card (item 6). Static
+   inference of the class is the research half and is not claimed.
+
+5. Fuzz the arbiter. Differential testing of two implementations on random
+   programs is how compilers are kept honest (CSmith for C; QuickCheck-style
+   property tests for interpreters); the parity lane already runs a corpus
+   against upstream PeTTa at the pin, and `metta.testing.expressions` already
+   generates well-formed programs. Decided as the design to build on: a
+   REPORT lane that generates programs from the strategies, runs them on
+   this engine and on upstream PeTTa, compares answer bags, and shrinks a
+   disagreement to a minimal program through Hypothesis, with the arbiter's
+   answer recorded as the expectation; the lane's disagreements are the
+   divergence issues the repository's `divergence.yml` template already asks
+   for.
+
+6. Library cards and a lockfile. A model card states what a model does,
+   its inputs, its limits and its provenance; a library card is the same
+   document for a `lib_*`: heads and arrows, `(@doc ...)` text, effect
+   classes, declared cost classes, examples that run under the gate, the
+   measurements the library cites, and its digest. `tools/libdoc.py`
+   already writes the documentation half from the catalog. A `metta.lock`
+   records the library digests, the engine build and the pins a program
+   loaded, and `import!`'s digest check (which already decides reloads)
+   verifies a load against it, so a program's knowledge is reproducible the
+   way a Python environment is under `uv.lock`.
+
+7. More projections of the one schema. The gateway (`python -m metta serve`)
+   gains an OpenAPI document generated from the served space's heads and
+   arrows; a GraphQL schema is the same projection with types from `:`
+   declarations and queries from patterns; trace events become OpenTelemetry
+   spans, `m.stats()` deltas become metrics, and the `metta.engine` logger's
+   records become logs, through one exporter; the gateway's cursors stream
+   Arrow IPC batches (section 2's capsule serialised) so a remote consumer
+   receives columns. Each is a column of the projection table of section 17
+   item 2, never a new mechanism.
+
+8. Explain and advise. A query's plan should answer `explain()` the way SQL,
+   Polars and DuckDB explain theirs (the query-planning work of this week is
+   the plan to print); and the engine can advise: from `profile_data/1` and
+   the call counts, a REPORT lane proposes `(cache head policy)` rows for the
+   heads that would pay (a memo advisor, the shape of PostgreSQL's index
+   advisors and Soufflé's automatic index selection, Subotić et al., VLDB
+   2018), never applying them, because the developer's word decides.
+
+9. The textbook runs in the reader's browser. The Node seat already boots
+   the engine under swipl-wasm in a browser (the gate installs Chromium and
+   runs the browser binding), and MeTTa-LSP already ships a browser IDE with
+   the same analyzer in a Web Worker. Every example in the textbook
+   repository gets a run button that executes it in the page with no server,
+   which is the executable-document property Jupyter Book would have added,
+   from the seat the split already builds.
+
+10. Reversible debugging over the trace. `m.trace()` records events as data
+    and `m.debug()` holds an evaluation in an engine; recording the trace
+    with the seed, the bound values and the space's generation gives a run
+    that can be stepped backwards and forwards through its recorded events
+    (the shape of `rr` and of Jane Street's magic-trace), and `check_replay`
+    already proves a recorded run is replayable.
+
+11. Refusals as code actions. Every refusal names a remedy in prose; a
+    structured `remedy` field carrying the runnable form (an atom, or a
+    Python call) lets MeTTa-LSP offer it as a quick fix, the way a compiler's
+    fix-it hints become editor actions, and lets `metta lint` apply it.
+
+12. Standing queries as reactive views. `examples/live/standing_queries.py`
+    exists, the subscriptions deliver events, and incremental tabling keeps
+    a table current; a `live(query)` object that re-answers as the space
+    changes, iterable with `async for`, rendering as a table that updates in
+    a notebook, is those three composed, the shape of Materialize and of a
+    spreadsheet cell.
+
+13. Small faces: `metta -` reads a program from standard input and `--json`
+    prints answers one per line for pipelines, making the CLI a Unix filter;
+    `space.digest()` (the canonical `save_space` bytes hashed) names a
+    fixture in an evidence tag exactly, which the obligations framework
+    wants; `space.infer_types()` proposes `:` declarations from the facts a
+    space holds, the way `pandas.api.types.infer_dtype` reads a column, and
+    feeds the stub generator and the library card.
+
+Decided: items 1, 2 and 3 are one design (tokens, the free carrier over
+them, handlers as the scope) and enter the program as its own wave after the
+faces above, since they change the engine's storage and control; items 4 to
+13 are faces of mechanisms that exist and enter by the ranking rule of
+section 16, measured where they claim a cost.
+
 ### Ruling, later the same day: the arbiter is PeTTa
 
 The user ruled that the semantics arbiter is upstream PeTTa at the pinned
