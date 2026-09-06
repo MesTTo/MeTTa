@@ -15,7 +15,7 @@
 %   rather than a BadArgType atom, which is what a relation out of its domain
 %   means and what upstream PeTTa answers
 %   [tested: examples/ch07-control-flow/07-01-if-and-booleans/11-boolean_domain.metta;
-%   commit=WORKTREE].
+%   commit=5540a0d03942741ed9565fbb671f18e37cb6eca5].
 % Guarantees: the algebra-law vocabulary carries the ghostwriter names,
 % identity and distributes-over as aliases and roundtrip and equivalent as
 % seam laws the engine never checks, and the refinement vocabulary row names

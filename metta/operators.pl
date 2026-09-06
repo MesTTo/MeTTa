@@ -13,7 +13,7 @@
 %   [tested: metta_operation_errors:a_non_boolean_operand_leaves_the_operation_with_no_answer,
 %   metta_operation_errors:boolean_operations_remain_relational,
 %   examples/ch07-control-flow/07-01-if-and-booleans/11-boolean_domain.metta;
-%   commit=WORKTREE].
+%   commit=5540a0d03942741ed9565fbb671f18e37cb6eca5].
 % Guarantees: decons-atom/2 and atom-subst/4 retain their refusal answers, and
 %   announce them through metta_record_error/1, which reaches an observer only
 %   while one is running [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
