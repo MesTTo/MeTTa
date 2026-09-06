@@ -19,6 +19,9 @@
 %     filter contradictory ground candidates, and a terminal generator frame
 %     carries the live exception and is recognised only with one
 %     [tested: shim_relation_form; commit=0ee5a2dfee0e37a23b0eb9c765b477d7f90295fe].
+%   - a source form is selected for a head at ONE predicate arity, and the
+%     message hook always fails and leaves its reentrancy flag down, whatever
+%     the delivery did [tested: shim_observation_doors; commit=6375a7c8f3c035b04bc9d41c8f7f22e56b42fb41].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -593,3 +596,73 @@ test(a_frame_shaped_answer_without_a_live_exception_is_not_one) :-
     \+ metta_py_stream_frame(["s", "raise", "ValueError", planted], _).
 
 :- end_tests(shim_relation_form).
+
+%%%%%%%%%% Observation doors %%%%%%%%%%
+%
+% The engine-free halves of the two doors Python reaches end to end: which
+% top-level forms define a head, and how a SWI message kind reaches the Python
+% side. Both are decisions Prolog makes alone, and an end-to-end test that goes
+% through janus exercises only the shapes that happen to arise.
+
+:- begin_tests(shim_observation_doors).
+
+shim_parsed_source(
+    [ parsed(expression, "(: quad (-> Number Number))", [:, quad, [->, 'Number', 'Number']]),
+      parsed(function,   "(= (quad $x) (* 4 $x))",      [=, [quad, _X1], [*, 4, _X1]]),
+      parsed(function,   "(= (pent $x) (* 5 $x))",      [=, [pent, _X2], [*, 5, _X2]]),
+      parsed(function,   "(= (pent 0) 0)",              [=, [pent, 0], 0]),
+      parsed(runnable,   "(pent 1)",                    [pent, 1]),
+      parsed(function,   "(= (pent 1 2) both)",         [=, [pent, 1, 2], both]),
+      parsed(function,   "(= (nil) empty)",             [=, [nil], empty])
+    ]).
+
+%The index is into the reader's own form list, which is the list
+%metta_py_read_forms/2 hands the Python position walk, so the two sides agree
+%on what form number 3 is without either reproducing the other's work.
+test(equation_indices_select_one_heads_forms_at_one_arity) :-
+    shim_parsed_source(Forms),
+    metta_py_equation_indices(Forms, quad, 2, Quad),
+    assertion(Quad == [1]),
+    metta_py_equation_indices(Forms, pent, 2, Pent),
+    assertion(Pent == [2, 3]).
+
+%A predicate arity counts the output slot a MeTTa call does not, so the two
+%pent definitions at different argument counts are different predicates and
+%must not share an index list.
+test(equation_indices_separate_the_arities_of_one_name) :-
+    shim_parsed_source(Forms),
+    metta_py_equation_indices(Forms, pent, 3, Both),
+    assertion(Both == [5]),
+    metta_py_equation_indices(Forms, nil, 1, Nil),
+    assertion(Nil == [6]).
+
+test(equation_indices_ignore_declarations_runnables_and_other_heads) :-
+    shim_parsed_source(Forms),
+    assertion(metta_py_equation_indices(Forms, quad, 1, [])),
+    assertion(metta_py_equation_indices(Forms, absent, 2, [])),
+    \+ metta_py_equation_indices(Forms, quad, 0, _).
+
+%SWI's kinds are names; debug/1 is the one compound kind that ships, and its
+%topic stays SWI's business rather than becoming part of a logging level.
+test(a_message_kind_crosses_as_a_word) :-
+    metta_py_message_level(error, Error),
+    assertion(Error == error),
+    metta_py_message_level(informational, Info),
+    assertion(Info == informational),
+    metta_py_message_level(debug(my_topic), Debug),
+    assertion(Debug == debug).
+
+%A hook that SUCCEEDS is read as "handled" by print_message_guarded/2, which
+%then prints nothing. This one must fail however the delivery went, including
+%when there is no Python to deliver to, which is the case here.
+test(the_message_hook_always_fails) :-
+    \+ user:thread_message_hook(a_term, warning, ['a line'-[]]),
+    \+ user:thread_message_hook(a_term, silent, ['a line'-[]]).
+
+%And it must leave its own reentrancy flag down, or the first message would be
+%the last one delivered.
+test(the_message_hook_clears_its_reentrancy_flag) :-
+    \+ user:thread_message_hook(a_term, warning, ['a line'-[]]),
+    \+ nb_current('$metta_py_message_bridge', true).
+
+:- end_tests(shim_observation_doors).

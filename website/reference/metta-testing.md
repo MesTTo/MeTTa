@@ -24,6 +24,8 @@ Source: `extensions/python/metta/testing.py`.
 >     numeric dispatch survive an engine round trip
 >   - from_pattern generates ground substitutions, preserving repeated named
 >     variables while drawing anonymous occurrences independently
+>   - the module names both compliance suites in __dir__ and carries the asked
+>     name on a refusal, without resolving either import
 
 The entries below reproduce the source signatures and docstrings.
 
