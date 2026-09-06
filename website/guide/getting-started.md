@@ -6,6 +6,65 @@ Guarantees: examples use the current narrow public surface.
 
 # Install and first steps
 
+## Run it here
+
+Nothing is installed yet and this already runs. Press Run: the page fetches the
+engine, about 8 MB of WebAssembly and MeTTa source, into a Web Worker and
+evaluates the program below in it. The first press pays for the engine, a second
+or two; every press after it, and every other fence on this page, is the program
+alone.
+
+::: run examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/01-identity.metta
+```metta
+(= (f $x) (* $x $x))
+
+!(test (f 1) 1)
+```
+:::
+
+An equation rewrites: `(f 1)` becomes `(* 1 1)` becomes `1`, and `test` compares
+that against the `1` written beside it and answers `true`. That is the corpus's
+own idiom, and it is why every example here checks itself.
+
+The program is not a sample of that file. It IS that file, byte for byte:
+`examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/01-identity.metta`
+is what `sh test.sh` runs in the gate, and the site build refuses a `::: run`
+fence whose text has drifted from the file it names. Here is the first program in
+the corpus, which prints a number rather than checking one:
+
+::: run examples/ch01-getting-started/01-hello.metta
+```metta
+;The first program. There is no main, no declaration and no import: a file
+;is a list of forms, and a form prefixed with ! is RUN when the reader
+;reaches it. The engine prints what it answers.
+;
+;    sh run.sh examples/ch01-getting-started/01-hello.metta
+;
+;prints 42.
+!(+ 40 2)
+
+;A form without the ! is DATA. This one is stored, not run, and nothing is
+;printed for it.
+(the-answer 42)
+
+;So the same text means two things depending on one character, and that is
+;the whole of the directive. Chapter 5 comes back to why data and calls look
+;alike; for now, ! means run.
+!(+ 2 (* 2 20))
+```
+:::
+
+What this browser engine does NOT have is a host beside it: no Python, so
+`py-atom` and its family are refused by name rather than answering themselves;
+no threads, so `hyperpose` and `lib_thread` are refused with the engine's own
+census sentence, which says what the absence costs; and no processes, so
+`git-import!` is. It does carry the whole standard library, so
+`!(import! &self (library lib_regex))` works here as it does anywhere. What it
+cannot reach is the example's own directory: only the fence's bytes cross, so a
+file an example imports from beside itself is not there. 225 of the
+repository's 258 runnable examples run here unchanged. Everything else on this
+page is the Python surface, which needs the install below.
+
 The `metta` module is the Python surface for the engine. MeTTa runs on SWI-Prolog, which is a program rather than a Python package, so it is installed first and pip cannot do it for you: `sudo apt install swi-prolog`, `brew install swi-prolog`, or `winget install SWI-Prolog.SWI-Prolog`. Then `pip install 'pymetta[engine]'`, or `pip install '.[engine]'` from a checkout. The runtime is bundled; only the engine underneath it is not. To use a checkout in place, point `METTA_PATH` at the repository tree.
 
 `pymetta` without the `engine` extra installs and imports on a machine that has no SWI-Prolog, and the first engine call names the two commands above. That is what the extra is for: the bridge compiles against whichever SWI-Prolog is present, so requiring it would make a plain install fail inside another package's build.

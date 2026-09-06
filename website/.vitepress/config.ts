@@ -8,6 +8,9 @@ Guarantees:
   - every page in the site is reachable from this navigation, so a written page
     cannot ship findable only by search
     [tested: test_every_site_page_is_reachable_from_the_navigation; commit=a7d2f292004fe06d7671b7931cfc2ce4620b7b35]
+  - a `::: run` fence names an example the corpus runner runs and carries that
+    file's own bytes, or this build refuses by name
+    [tested: test_every_run_fence_runs_the_corpus_file_it_names; commit=WORKTREE]
   - code renders in the theme pair ./highlighting.mjs builds, which is the most
     colourful bundled pair that still reads on the background VitePress paints
     a code block with, and which colours the two Python scopes no theme rules
@@ -23,6 +26,7 @@ import { readFileSync } from "node:fs";
 import { defineConfig } from "vitepress";
 
 import { darkTheme, lightTheme } from "./highlighting.mjs";
+import { runContainer } from "./runnable.mjs";
 
 const mettaLanguage = {
   ...JSON.parse(readFileSync(new URL("./metta.tmLanguage.json", import.meta.url), "utf8")),
@@ -59,6 +63,13 @@ export default defineConfig({
     // reprints the comparison, and with no arguments it measures the objects
     // rendered with rather than the themes they were built from.
     theme: { light: lightTheme, dark: darkTheme },
+    // `::: run <example>` around a `metta` fence, which is the same fence with
+    // a Run button over it. ./runnable.mjs holds the container, the checks it
+    // refuses on, and the one place that knows where the corpus and the
+    // browser kit are.
+    config: (md) => {
+      runContainer(md);
+    },
   },
   themeConfig: {
     nav: [

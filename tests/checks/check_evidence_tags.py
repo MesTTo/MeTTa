@@ -199,6 +199,15 @@ GUARANTEE_SOURCES = (
     "extensions/cmetta/*.c",
     "extensions/cmetta/*.h",
     "extensions/cmetta/*.pl",
+    # The site's runnable-fence machinery: the container that refuses a fence
+    # that has drifted from the example it names, the component that runs one,
+    # the client that holds the page's one engine, and the worker it holds it
+    # in. `website/.vitepress/*.ts` was here and its `.mjs` neighbours were not,
+    # so highlighting.mjs's claims went unread beside config.ts's.
+    "website/.vitepress/*.mjs",
+    "website/.vitepress/theme/*.js",
+    "website/.vitepress/theme/*.vue",
+    "website/public/metta/*.js",
     # The three classes pin_provenance's out-of-scope net caught on 2026-08-31,
     # each carrying a real pin that nothing read and nothing would ever resolve:
     # a seat's build file, the C program a seat's install lane compiles, and the

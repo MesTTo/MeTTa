@@ -158,11 +158,16 @@ jobs:
         working-directory: extensions/node
         run: npx playwright install --with-deps chromium
 
-      - name: Verify the browser binding
-        run: npm run test:browser --prefix extensions/node
-
+      # BEFORE the browser suite, not after it. That suite drives the
+      # documentation site's `MettaRun` component, and it is the site's own
+      # vite, @vitejs/plugin-vue and vue that compile a `.vue` here; without
+      # them the two component cases skip by name, which is a green run that
+      # checked the site's fences not at all.
       - name: Install the documentation site's dependencies
         run: npm ci --prefix website
+
+      - name: Verify the browser binding
+        run: npm run test:browser --prefix extensions/node
 
       - name: Gate
         env:

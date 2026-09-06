@@ -25,6 +25,12 @@ SOURCE_PATHS = [
     *(REPO / "extensions" / "python" / "tests").glob("*.py"),
     REPO / "lib" / "lib_measure" / "lib_measure.metta",
     REPO / "lib" / "lib_soft" / "lib_soft.metta",
+    # The example corpus, which became a source the site quotes when `::: run`
+    # arrived: a fence inside one is that file's text, byte for byte, and the
+    # docs lane refuses the build when it is not. A fence with a GATE behind its
+    # provenance is the strongest entry this list can hold, and it was the one
+    # class of approved source the list had never named.
+    *(REPO / "examples").rglob("*.metta"),
 ]
 FENCE = re.compile(r"^```[^\n]*\n(.*?)^```\s*$", re.MULTILINE | re.DOTALL)
 SHA256 = re.compile(r"[0-9a-f]{64}")
