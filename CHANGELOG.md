@@ -57,6 +57,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The `node-dist` gate lane runs on a fresh checkout. `dist-consumer.mjs`
+  built its throwaway consumer package under `extensions/node/ai-tmp/`, a
+  gitignored directory nothing creates, so the lane passed only in a checkout
+  where somebody had already written a scratch file there and failed with
+  `ENOENT: no such file or directory, mkdtemp` everywhere else, CI included.
+  It creates the directory first, which is what the seat's two other
+  repository-local scratch sites already do.
 - `sh extensions/python/test.sh` lets a caller's own flag override its
   defaults. The four-worker `-n 4` came after the caller's arguments, and
   pytest takes the last value of a repeated option, so `-n 0` was silently
