@@ -8,7 +8,7 @@
 %   expression and refuses every other bound term, which is upstream's
 %   `add_sexp(Space, [Rel|Args])` head unification read as a test
 %   [tested: examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/11-what-a-space-stores.metta;
-%   commit=WORKTREE].
+%   commit=5540a0d03942741ed9565fbb671f18e37cb6eca5].
 % Guarantees: lift_pattern_modifiers/4 answers whether a pattern carries a sequence variable from the walk it already makes, and a case arm with one compiles to the gap matcher [tested: tests/prolog/suites/translator/translator.plt:the_walk_reports_a_written_gap, tests/prolog/suites/reader/segments.plt; commit=a3dff3abc83b9d82f3652093246e1d693d526cdb].
 % Guarantees: result finality is read from the declaration set that governs
 % the function's owning space [tested:

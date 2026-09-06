@@ -19,12 +19,12 @@
 %   without one, while `add-atoms`, `subtract-atom`, `add-reduct` and the
 %   engine's own doors keep the wider space
 %   [tested: examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/11-what-a-space-stores.metta;
-%   commit=WORKTREE].
+%   commit=5540a0d03942741ed9565fbb671f18e37cb6eca5].
 % Guarantees: `chain` compiles to exactly `let`'s goals, so the binder holds a
 %   VALUE and nothing evaluates that value a second time; an equation atom read
 %   out of a space and chained is the atom rather than the equality test's answer
 %   [tested: examples/ch07-control-flow/07-03-let-and-sequencing/10-chain_is_let.metta;
-%   commit=WORKTREE].
+%   commit=5540a0d03942741ed9565fbb671f18e37cb6eca5].
 % Guarantees: explicit cast targets and typed bindings resolve aliases inside
 %   the engine; emitted checks preserve already resolved type observations
 %   [tested: structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
