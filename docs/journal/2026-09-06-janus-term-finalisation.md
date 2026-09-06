@@ -29,8 +29,9 @@ and the two instructions above it are `call __tls_get_addr@plt` followed by
 `truePrologFlag(PLFLAG_GCTHREAD)`, which is
 `LD->prolog_flag.mask.flags[..] & bit` with NO null guard
 [source: SWI-Prolog 10.1.13 src/pl-incl.h:2839 truePrologFlag,
-src/pl-thread.c:7353 signalGCThread; commit=WORKTREE]. `r8 == 0` is `LD ==
-NULL`: the thread had no Prolog engine.
+src/pl-thread.c:7353 signalGCThread;
+commit=81d05b34f938ff97f835ca1c00205220690cb6f0].
+`r8 == 0` is `LD == NULL`: the thread had no Prolog engine.
 
 The path in: `Term.__del__` calls `_swipl.erase(record)`, janus's
 `py_free_record` calls `PL_erase`, the record's atoms are unregistered, and
@@ -39,12 +40,12 @@ The path in: `Term.__del__` calls `_swipl.erase(record)`, janus's
 `GD->atoms.non_garbage + GD->atoms.margin`, and `signalGCThread()` reads the
 flag through `LD` before it reaches the `raiseSignal(ld, sig)` that IS guarded
 [source: SWI-Prolog 10.1.13 src/pl-atom.c:1475 considerAGC, src/pl-wam.c:258
-raiseSignal; commit=WORKTREE].
+raiseSignal; commit=81d05b34f938ff97f835ca1c00205220690cb6f0].
 
 Rejected as the mechanism: `LD->atoms.unregistering = p->atom` a few lines
 earlier in the same function. It is the obvious suspect and it is guarded, by
 `if ( HAS_LD )` [source: SWI-Prolog 10.1.13 src/pl-atom.c:1639;
-commit=WORKTREE].
+commit=81d05b34f938ff97f835ca1c00205220690cb6f0].
 
 Reproduced, exactly. `ai-tmp/ai-janus-term-probes/term_del_bulk.py` builds
 50,000 janus Terms on a worker thread, detaches the engine, and drops them:
@@ -53,11 +54,13 @@ core, `+0x12e563` under `PL_unregister_atom` under `+0x12b055` under
 `+0x12afa2` under `py_free_record`. Dropping the same 50,000 with the engine
 still attached is 5 runs out of 5 clean
 [command=sh ai-tmp/ai-janus-term-probes/bulk_tally.sh 50000 5;
-fixture=janus_swi in .venv-pypetta, swipl 10.1.13; commit=WORKTREE].
+fixture=janus_swi in .venv-pypetta, swipl 10.1.13;
+commit=81d05b34f938ff97f835ca1c00205220690cb6f0].
 
 Where this repository meets it: `metta_py_cursor_open/8` answers
 `prolog(Engine)`, so every cursor handle crosses as a `janus_swi.Term`
-[source: extensions/python/metta/shim.pl:1231; commit=WORKTREE]. In
+[source: extensions/python/metta/shim.pl:1230;
+commit=81d05b34f938ff97f835ca1c00205220690cb6f0]. In
 `_space_execution.py` the `stream()` generator holds that handle in a local,
 closes the cursor in its `finally` through `rt.do/2`, and then lets the frame
 die. `rt.do/2` attaches an engine for the length of the call and detaches it
@@ -90,4 +93,4 @@ Noted in passing: `Term.__del__` writes `self.record = 0`, not `self._record`,
 so its own double-erase guard sets an attribute nothing reads. CPython runs a
 finaliser once per object, so it is latent rather than active
 [source: .venv-pypetta/lib/python3.14/site-packages/janus_swi/janus.py:485-488;
-commit=WORKTREE].
+commit=81d05b34f938ff97f835ca1c00205220690cb6f0].

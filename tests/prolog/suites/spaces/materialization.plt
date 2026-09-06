@@ -855,9 +855,9 @@ test(an_unrelated_record_erasure_does_not_reach_the_retirement_engine) :-
 % detach_engine, called from PL_set_engine at :7056; '$engine_create'/3 at
 % :4083 makes the pair at :4134 and :4148, destroy_interactor at :4164 the
 % pair at :4168 and :4170, and thread_join at :2898 reads .tid at :2927;
-% commit=WORKTREE]. Clause collection is delivered to this file's
-% erase listener, so an engine per collected clause put that window into any
-% thread a program joins, at a point no program chose.
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0]. Clause collection is
+% delivered to this file's erase listener, so an engine per collected clause
+% put that window into any thread a program joins, at a point no program chose.
 % tests/prolog/probes/engine_join_window.pl isolates the same window in plain
 % SWI with no engine of ours involved.
 :- dynamic collectable_clause/1.

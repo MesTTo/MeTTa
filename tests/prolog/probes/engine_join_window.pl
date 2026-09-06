@@ -11,7 +11,8 @@
 %   in __pthread_clockjoin_ex 10 runs out of 10 and `post`, `next` and
 %   `create_idle` join cleanly 10 out of 10, at loadavg 65;
 %   command=sh tests/prolog/probes/engine_join_window.sh 10;
-%   fixture=swipl 10.1.13, this file; commit=WORKTREE].
+%   fixture=swipl 10.1.13, this file;
+%   commit=81d05b34f938ff97f835ca1c00205220690cb6f0].
 % Fails when: run against an SWI-Prolog that guards thread_join/2 with
 %   has_tid, where every mode joins cleanly and the probe shows nothing.
 % Owns resources: three message queues, one worker thread, one detached
@@ -32,19 +33,22 @@
 % restores both [source: SWI-Prolog 10.1.13 src/pl-thread.c:7038
 % detach_engine, called from PL_set_engine at :7056 by its line :7077;
 % '$engine_create'/3 at :4083 makes the pair at :4134 and :4148, and
-% destroy_interactor at :4164 the pair at :4168 and :4170; commit=WORKTREE].
+% destroy_interactor at :4164 the pair at :4168 and :4170;
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0].
 % thread_join/2 reads .tid once, with no has_tid test, and hands it to
 % pthread_timedjoin_np [source: SWI-Prolog 10.1.13 src/pl-thread.c:2898
 % thread_join, its call at :2927, pthread_join_interruptible at :2873;
-% commit=WORKTREE], so a join inside the window calls pthread_timedjoin_np(0,
-% ...) and glibc dereferences a null struct pthread.
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0], so a join inside the
+% window calls pthread_timedjoin_np(0, ...) and glibc dereferences a null
+% struct pthread.
 %
 % engine_next/2 and engine_post/3 do NOT close on that path: they go through
 % activate_interactor/suspend_interactor, which detach the ENGINE's
 % PL_thread_info_t and leave the host's alone [source: SWI-Prolog 10.1.13
 % src/pl-thread.c:4251 activate_interactor, :4266 suspend_interactor;
-% commit=WORKTREE]. That difference is the whole reason a standing engine
-% driven by engine_post/3 is safe where a per-event engine is not.
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0]. That difference is the
+% whole reason a standing engine driven by engine_post/3 is safe where a
+% per-event engine is not.
 %
 %   swipl tests/prolog/probes/engine_join_window.pl destroy
 %   swipl tests/prolog/probes/engine_join_window.pl post
@@ -71,7 +75,8 @@ main([Mode]) :-
     % 0 of 15 for a plain sleep, 0 of 15 for the same alarm with
     % remove_alarm/1, and 0 of 15 for call_with_time_limit/2, which removes
     % its own [measured 2026-09-06; command=sh bounded.sh --ceiling 30 swipl
-    % -g GOAL -t halt; fixture=swipl 10.1.13; commit=WORKTREE].
+    % -g GOAL -t halt; fixture=swipl 10.1.13;
+    % commit=81d05b34f938ff97f835ca1c00205220690cb6f0].
     thread_create(( sleep(2), thread_send_message(release, go) ), _,
                   [detached(true)]),
     thread_join(Worker, Status),
