@@ -444,6 +444,7 @@ python -m metta serve kb.metta --port 8700
 python -m metta lint program.metta       # nonzero exit on findings
 python -m metta doc car-atom
 python -m metta llms                     # print llms.txt, the sheet for an agent
+python -m metta stubs program.metta -o program.pyi   # the program's types, for an editor
 ```
 
 ## A motivating example

@@ -628,6 +628,34 @@ Only DECLARED classes and REAL bases become edges, which keeps `object`, a
 NamedTuple's `tuple`, an enum's `Enum` and a virtual `abc` registration out.
 `m.type(atom)` is the other verb and is unrelated: it answers that atom's first
 `get-type`.
+The class door carries PEP 681's `typing.dataclass_transform`, so a checker
+synthesises the constructor `install_type` builds and `Point(1.0, 2.0)` checks
+and completes. Mypy reads that declaration on the module-level `metta.define`
+and not on `m.define`, because it resolves a decorator expression to a
+definition node and an instance member access has none; pyright, the
+specification's reference implementation, reads both.
+`@typing.override` under `@m.define` is read as a declaration rather than a
+hint: the definition must shadow a head a space this one inherits from
+defines, and the door refuses with both remedies when it shadows nothing. The
+decorator sits BELOW `@m.define`, on the function, because `typing.override`
+writes `__override__` on what it is handed and the installer reads it there.
+Shadowing WITHOUT the decorator is unchanged and silent, which is the
+inherited-declarations ruling: a definition that hides an inherited one is
+deliberate. PEP 698 scopes `override` to methods, so mypy reports
+`"override" used with a non-method` on a module-level definition and a mypy
+user silences that line with `# type: ignore[misc]`; pyright accepts it.
+`metta.stubs(space)` returns that space's declared heads as the text of a
+`.pyi`: one `def` per declared head with the arrow projected to Python
+annotations, one `class` per `(: X Type)` with its constructor arrow as
+`__init__`, each `(@doc ...)` as the docstring the same formatter gives
+`help()`, an `__all__`, and a trailing note naming every head whose MeTTa
+name Python cannot spell with the `m.fn["<name>"]` door that reaches it. The
+projection is the annotation reader's table backwards: `%Undefined%` to `Any`,
+`Number` to `int | float`, `String` to `str`, `Bool` to `bool`, the metatypes
+to the atom classes, a nested `(-> ...)` to `Callable`, `(->)` as the return
+to `None`, a type variable to a PEP 695 type parameter, and any other symbol
+to `Atom`. `python -m metta stubs file.metta [-o out.pyi]` is the same
+generator from a shell.
 `m.fn.superpose(...)` calls an engine function from Python and answers every
 answer; `m.fn["car-atom"]` is the exact door for a head outside Python's
 identifier grammar, and `.compiled`, `.equations` and `.type` on the handle read
@@ -1155,11 +1183,13 @@ performed form is stored as its own atom, so the running app answers
 mid-way keeps its performed prefix's writes, closes any servers it started, and
 names the failing form.
 
-`python -m metta` has eight subcommands: `run` (files, printing each `!` answer
+`python -m metta` has nine subcommands: `run` (files, printing each `!` answer
 group), `repl` (paren-balance aware; on a terminal, TAB completes a head or a
 `&space` against the live engine and history persists in `~/.metta_history`, or
 wherever `METTA_HISTORY` points), `serve`, `boot`, `lint` (nonzero
-exit on findings), `doc` (a name's `(@doc ...)`), `llms` (this file), and
+exit on findings), `doc` (a name's `(@doc ...)`), `llms` (this file),
+`stubs` (`file.metta... [-o out.pyi]`, the loaded program's declarations as a
+Python stub, with the program's own printing kept on stderr), and
 `convert` (`program.py [-o out.metta]`, emitting the module's fresh-space
 declarations as loadable MeTTa source).
 

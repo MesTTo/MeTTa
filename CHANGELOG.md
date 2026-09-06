@@ -9,6 +9,29 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `python -m metta stubs file.metta [-o out.pyi]` and `metta.stubs(space)`
+  write a loaded program's declarations as a Python stub: one `def` per
+  declared head with the arrow's types projected to annotations, one `class`
+  per `(: X Type)` with its constructor arrow as `__init__`, each `(@doc ...)`
+  as the docstring `help()` prints, an `__all__`, and a trailing note naming
+  every head whose MeTTa name Python cannot spell beside the `m.fn["<name>"]`
+  door that reaches it. An editor then completes a MeTTa program's heads and a
+  checker refuses a call that passes the wrong type. The subcommand keeps the
+  loaded program's own printing on stderr, so the artefact on stdout is the
+  stub alone.
+- The class door declares PEP 681's `dataclass_transform`, so a checker
+  synthesises the constructor `m.define(cls)` builds and `Point(1.0, 2.0)`
+  type-checks and completes instead of reading as `type`. Mypy reads the
+  declaration on the module-level `metta.define`; pyright reads it on
+  `m.define` as well.
+- `@typing.override` under `@m.define` is read as a declaration: the
+  definition must shadow a head a space this one inherits from defines, and
+  the door refuses with both remedies when it shadows nothing. Shadowing
+  without the decorator is unchanged and silent, which is the
+  inherited-declarations ruling stated by the developer rather than inferred.
+- Two typing lanes: `stubtest` holds the two generated stubs against the
+  runtime with a classified allowlist, and `verifytypes` reports pyright's
+  type-completeness score for the public surface (59.8% on 2026-09-07).
 - `lib_import` exposes committed imports as `(import Path)` atoms through
   `(imports &space)`. `unimport!` withdraws the imported source's surviving
   atom occurrences and compiled definitions, preserving equal atoms owned by
@@ -16,6 +39,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Two `@m.define` clauses stacked under one name now answer correctly when
+  they spell a parameter differently. Every row of the merged case equation
+  was built from the first clause's parameter names, so the second clause's
+  row bound a pattern variable its body never used and the call answered its
+  own unreduced body with a free variable: `def f(count=0)` beside
+  `def f(total)` answered `(+ $_8 1)` for `(f 5)`.
+- `help()` on a function documented from a Python docstring shows its
+  parameter and return descriptions rather than their types. A
+  `(@param (@type Number) (@desc "the count"))` row was read for its first
+  child, so `Parameters:` listed `(@type Number)` and the prose was
+  unreachable.
 - A Python stream the engine pulls no longer loses the exception that ended
   it. Janus reads a raising pull as an exhausted one, so a space provider's
   `match` or `atoms`, a grounded value's `match_`, a generator operation and an

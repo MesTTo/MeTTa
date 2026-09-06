@@ -211,6 +211,7 @@ python -m metta run program.metta        # run a file, print each ! answer group
 python -m metta repl                     # interactive, multi-line forms
 python -m metta lint program.metta       # diagnostics; nonzero exit on findings
 python -m metta doc car-atom             # a name's (@doc ...) documentation
+python -m metta stubs program.metta -o program.pyi   # its declarations, as Python types
 ```
 
 Each subcommand exits nonzero on failure, so all of them script.

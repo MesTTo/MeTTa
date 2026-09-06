@@ -76,11 +76,14 @@ python -m metta boot app.metta           # assemble a (boot ...) manifest
 python -m metta lint program.metta       # diagnostics; nonzero exit on findings
 python -m metta doc car-atom             # a name's (@doc ...) documentation
 python -m metta llms                     # print llms.txt, the sheet for an agent
+python -m metta stubs program.metta -o program.pyi   # the program's declarations, as Python types
 ```
 
 Each subcommand exits nonzero on failure, so all of them script. The bare `metta` console command keeps the direct-file launcher contract, running a file through `swipl` directly.
 
 `llms.txt` is the one document an LLM agent reads before writing anything against this library, and it ships inside the wheel. `metta.llms()` prints it from Python the way `help()` prints, so neither a person nor an agent needs a checkout to read it.
+
+`stubs` writes what an editor needs: one `def` per head the program declares, with the arrow's types as Python annotations and the `(@doc ...)` as the docstring, so completion and `mypy` reach a MeTTa program the way they reach any module. `metta.stubs(space)` is the same generator from Python, returning the text.
 
 Examples that need DuckDB, NumPy, or PyTorch skip when that optional dependency is absent.
 
