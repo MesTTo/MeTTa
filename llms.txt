@@ -142,16 +142,22 @@ Four kinds, all immutable with `__slots__` and one-subpattern
 `match atom: case Expression([head, *args]): ...`, `case Symbol(name):`,
 `case Grounded(value):` all bind.
 `Expression.head`, `.args`, `.children`. Free functions in `metta.atoms`:
-`alpha_eq`, `unify`, `substitute`, `is_ground`, `map_atoms`, `variables`,
-`order_key`, `pretty(atom, width=78)`, `encode`/`decode`, `atom_from_wire`,
-`register_object_repr` and `register_object_repr_protocol` (and their
-`unregister_` twins) to control how a foreign object prints as an atom.
+`unify`, `substitute`, `order_key`, `arrow`, `typed`, `fresh`, `seg`, and
+`register_object_repr` with its `unregister_` twin to control how a foreign
+object prints as an atom. `metta.wire` owns `encode`, `decode` and
+`atom_from_wire`.
+The atom's OWN methods carry the rest: `a.alpha_eq(b)` for equality modulo
+variable renaming, `a.map(f)` to rewrite every subterm, `a.vars` for the
+variables it contains (so `not a.vars` is the ground test), and `repr(a)` for
+the laid-out reading, the same layout `(pretty-atom $x)` gives on the MeTTa
+side.
 The object-level round trip is `bindings = pattern.unify(fact)` followed by
 `template.subs(bindings)`. Its keys are variable atoms, not their names;
 `Atom.subs` also accepts a query `Row` directly.
-`path("profile", "age", to=V.age)` occupies an opaque handle's pattern
-position, reads only those live attributes after the stored match, and binds
-the reached value. `Key("name")` selects a subscription key instead.
+`metta.paths.path("profile", "age", to=V.age)` occupies an opaque handle's
+pattern position, reads only those live attributes after the stored match, and
+binds the reached value. `metta.paths.Key("name")` selects a subscription key
+instead.
 `metta.spaces.object_view(obj, relation="py-field")` exposes the same object's
 current public fields as `(py-field obj name value)` atoms. Pass another
 relation name to avoid colliding with an application's existing facts. Compose
@@ -558,9 +564,15 @@ type and derives from the first-class longhand `S["="](lhs, rhs)`. Inside a
 compiled generator, `yield from call(...)` delegates only when the callee's
 nondeterminism is known; an ambiguous engine call refuses with the two explicit
 spellings instead of splicing the call's children.
-`@m.type(cls)` declares a class into a space: `(: ...)` atoms, one accessor
+`m.define(cls)` declares a class into a space: `(: ...)` atoms, one accessor
 equation per field for an expression-image class, and its methods registered as
-functions, so the class crosses with its behavior.
+functions, so the class crosses with its behavior. Python's class hierarchy IS
+a subtype relation, so declaring `Animal` and then `Dog(Animal)` stores
+`(:< Dog Animal)` and `get-type` on a `(: Rex Dog)` widens to `[Dog, Animal]`.
+Only DECLARED classes and REAL bases become edges, which keeps `object`, a
+NamedTuple's `tuple`, an enum's `Enum` and a virtual `abc` registration out.
+`m.type(atom)` is the other verb and is unrelated: it answers that atom's first
+`get-type`.
 `m.fn(name)` calls an engine function from Python (`m.fn("superpose").all(...)`
 for every answer; `.compiled` for the clauses).
 `m.register_prolog(source=..., path=..., names=...)` registers Prolog
@@ -782,9 +794,16 @@ for chaining.
 `MettaOperationError(EngineError)` is a builtin refusing a value, with the parts
 as data: `.operation` is what the source wrote (`+`, `min-atom`), `.kind` the
 formal's functor, `.expected` and `.culprit` the type and offending value.
-`DECLINE` / `Decline` is how a provider says "not mine" rather than failing.
-Type checkers get `SpaceName`, `MettaName` and the closed `SaveFormat` set,
-all constructible straight from `metta`.
+`metta.errors.NotReducible` is how a deterministic operation says "no answer"
+rather than failing: raising it makes the call fail rather than error, which is
+a semi-deterministic MeTTa function's way of declining. A generator needs no
+signal, since yielding nothing already is one. A SPACE PROVIDER declines
+differently, through `should_run` and `refusal` under Foreign spaces below.
+`CastError` lives in `metta.casting`, beside the `cast` it names, and the rest
+of the family in `metta.errors`.
+Type checkers get the closed `SaveFormat` set from `metta.vocabularies`.
+Atom kinds are the type: a space name is a `Handle` and a call head is a
+`Symbol`.
 
 ## Concurrency, transactions, bounds
 
