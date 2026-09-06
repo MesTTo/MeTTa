@@ -86,6 +86,8 @@ def drop(self) -> None:
 
 > Clear this space and release an anonymous name for reuse.
 >
+> Dropping retires every space-owned catalog declaration, including
+> algebra rows and their Python mirrors.
 > Dropping unregisters a Python provider and closes only backing state
 > owned by this handle. A foreign provider with a clear/drop lifecycle,
 > such as MORK, releases its provider state.
@@ -2054,17 +2056,19 @@ def algebra(
     one: Any,
     laws: _abc.Iterable[str] = (),
     carrier: _abc.Iterable[Any] = (),
+    type: Any = None,
     requires: _abc.Iterable[str] = (),
     order: SemiringOrder | None = None,
 ) -> Atom:
 ```
 
-> Declare operations and checked laws for an arbitrary atom carrier.
+> Declare operations with carrier membership and optional checked laws.
 >
-> Public laws are certificates, not wishes. When an equational law is
-> named, ``carrier`` must be finite and the operation tables are checked
-> exhaustively before the catalog atom lands. ``contraction`` is the
-> explicit resource-reuse capability and has no equation to sample.
+> ``type`` accepts a Python type, MeTTa type atom, or Boolean predicate
+> and checks every input and result. A type alone grants no laws or
+> fusion. ``carrier`` enumerates the finite domain required for exhaustive
+> law checking; it may accompany ``type`` to constrain that domain.
+> Use ``prov`` and ``.under()`` to reinterpret uncertified tensor traces.
 
 ### `Space.covers`
 

@@ -2,7 +2,12 @@
 % Assumes: engine/metta.pl owns type checking and Janus supplies opaque values.
 % Guarantees: host shape expressions refine typed arguments, share dimension
 %   variables across parameters, and project instantiated return types
-%   [tested: run_tests(tensor_shapes); commit=4eaefdd8d40e53b2613722287302a14b41704662].
+%   [tested: run_tests(tensor_shapes); commit=WORKTREE].
+% Guarantees: one refused host value reports its matching-base refinement,
+%   its first named type, or its first remaining structural type
+%   [tested: a_concrete_shape_refusal_names_expected_and_actual_shapes,
+%   an_unrelated_refinement_keeps_the_concrete_type_refusal,
+%   a_structural_only_host_still_has_one_refusal; commit=WORKTREE].
 % Owns resources: each fixture releases its space and removes its host rows.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
@@ -66,11 +71,33 @@ test(a_concrete_shape_refusal_names_expected_and_actual_shapes,
     assertion(Values == [['Error', ['shape-fixed', Other],
                           ['BadArgType', 1,
                            ['Annotated', 'DLTensor', ['Shape', [2, 3]]],
-                           'DLTensor']],
-                         ['Error', ['shape-fixed', Other],
+                           ['Annotated', 'DLTensor', ['Shape', [4, 1]]]]]]).
+
+test(an_unrelated_refinement_keeps_the_concrete_type_refusal,
+     [ setup(setup_shapes(Space, _, Other, _)),
+       cleanup(cleanup_shapes(Space)) ]) :-
+    retractall(user:tensor_shape_fixture(Other, _)),
+    assertz(user:tensor_shape_fixture(Other,
+        [['Annotated', 'OtherTensor', ['Shape', [4, 1]]], 'HostArray'])),
+    space_module(Space, Module),
+    findall(Value, eval_metta_in_module(Module, ['shape-fixed', Other], Value),
+            Values),
+    assertion(Values == [['Error', ['shape-fixed', Other],
                           ['BadArgType', 1,
                            ['Annotated', 'DLTensor', ['Shape', [2, 3]]],
-                           ['Annotated', 'DLTensor', ['Shape', [4, 1]]]]]]).
+                           'HostArray']]]).
+
+test(a_structural_only_host_still_has_one_refusal,
+     [ setup(setup_shapes(Space, _, Other, _)),
+       cleanup(cleanup_shapes(Space)) ]) :-
+    retractall(user:tensor_shape_fixture(Other, _)),
+    Shape = ['Annotated', 'DLTensor', ['Shape', [4, 1]]],
+    assertz(user:tensor_shape_fixture(Other, [Shape])),
+    space_module(Space, Module),
+    findall(Value, eval_metta_in_module(Module, ['*', Other, Other], Value),
+            Values),
+    assertion(Values == [['Error', ['*', Other, Other],
+                          ['BadArgType', 1, 'Number', Shape]]]).
 
 test(a_symbolic_shape_projects_the_result_and_freshens_each_call,
      [ setup(setup_shapes(Space, Matrix, Other, _)),
@@ -155,10 +182,6 @@ test(a_constructor_result_is_checked_after_its_shape_is_available,
                         ['shape-fixed', ['shape-other-source']], Value), Refusals)),
     assertion(Printed == "shape-source-ran\n"),
     assertion(Refusals == [['Error', ['shape-fixed', ['shape-other-source']],
-                            ['BadArgType', 1,
-                             ['Annotated', 'DLTensor', ['Shape', [2, 3]]],
-                             'DLTensor']],
-                           ['Error', ['shape-fixed', ['shape-other-source']],
                             ['BadArgType', 1,
                              ['Annotated', 'DLTensor', ['Shape', [2, 3]]],
                              ['Annotated', 'DLTensor', ['Shape', [4, 1]]]]]]).
