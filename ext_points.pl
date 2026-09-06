@@ -52,7 +52,7 @@
 %     240,641, and thirty added kind/2 rows 124,185 to 1,755;
 %     commit=8ec7de241ef3cdd2753f24a97c86e9e9c7240b06].
 %   - finite algebra equality is a host-owned decision with an explicit false answer
-%     [tested: test_finite_tensor_semiring_checks_every_law; commit=WORKTREE].
+%     [tested: test_finite_tensor_semiring_checks_every_law; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -783,14 +783,14 @@ kind(grounded_applicable/1, ownership).
 % A grounded provider decides exact value equality for finite algebra carriers.
 % Succeed with true or false to claim the pair; failure leaves native equality.
 % False must not fall through to blob identity or structural matching [tested:
-% test_finite_tensor_semiring_checks_every_law; commit=WORKTREE].
+% test_finite_tensor_semiring_checks_every_law; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 :- multifile grounded_algebra_equal/3.
 kind(grounded_algebra_equal/3, ownership).
 
 % A host carrier predicate receives the value in its own faithful atom reading.
 % The first owner returns true or false; a refusal cannot fall through into a
 % different host representation [tested: test_carrier_preserves_text_and_symbol_types;
-% commit=WORKTREE].
+% commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 :- multifile grounded_algebra_type/3.
 kind(grounded_algebra_type/3, ownership).
 

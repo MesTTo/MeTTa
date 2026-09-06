@@ -4,7 +4,7 @@
 %   [tested: run_tests(grounded_refusals),
 %   run_tests(tensor_shapes),
 %   extensions/python/tests/ch09_types/test_grounded_refusals.py;
-%   commit=WORKTREE].
+%   commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 % Guarantees: Runtime argument checking and shallow declaration reads use
 %   metta_runtime_type/2 for annotated function types
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
@@ -843,7 +843,7 @@ metta_bad_argument([Declared|Rest], [Origin|Origins], [Argument|Arguments], N,
 %A bridge supplies named classes in resolution order; structural protocol
 %witnesses may precede those names
 %[source: extensions/python/metta/_ops.py:type_names,
-%extensions/python/bridge.pl:seam:grounded_class_type/2; commit=WORKTREE].
+%extensions/python/bridge.pl:seam:grounded_class_type/2; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 %All witnesses still participate in acceptance. Only a wholly refused host
 %value needs a diagnostic. A refined requirement reports its corresponding
 %observed refinement; ordinary requirements report the first class name once.

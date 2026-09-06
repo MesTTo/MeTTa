@@ -6,7 +6,7 @@
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: native annotation inputs and outputs obey the declared type
 % or finite carrier, including the unit shortcut [tested:
-% run_tests(algebra_types); commit=WORKTREE].
+% run_tests(algebra_types); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 % Guarantees:
 %   - one dynamic evaluation context carries algebra, limit, and ordering
 %     through nested operations and restores on every exit
@@ -651,7 +651,7 @@ metta_semantic_effect('fuzzy-match-context', readOnlyLookup).
 % Library effects describe observable behavior, independently of the host
 % language used to implement the operation. Metadata snapshots allocate a
 % space; directory listings and filesystem existence checks only read.
-% [tested: lib_file_surface:effect_rows; commit=WORKTREE]
+% [tested: lib_file_surface:effect_rows; commit=074dc0a88b1605c54824de677d586b6f60998bcf]
 metta_semantic_effect('path-join', pureStructural).
 metta_semantic_effect('path-parent', pureStructural).
 metta_semantic_effect('path-name', pureStructural).

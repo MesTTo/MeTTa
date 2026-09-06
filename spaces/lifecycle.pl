@@ -27,7 +27,7 @@
 %   with_metta_space_releasing/2 retires space-owned catalog declarations
 %   after storage cleanup succeeds, so a reused name has no old algebra or
 %   policy and a failed clear retains its declarations [tested:
-%   run_tests(catalog_lifecycle); commit=WORKTREE].
+%   run_tests(catalog_lifecycle); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 %   Every execution-module life receives a monotone generation, retained as a
 %   tombstone after release so a registry row from an earlier occupant cannot
 %   address a recycled module name [tested: translator_rule_module_home;
