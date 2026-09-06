@@ -2,7 +2,7 @@
 % Assumes: engine/metta.pl owns type checking and Janus supplies opaque values.
 % Guarantees: host shape expressions refine typed arguments, share dimension
 %   variables across parameters, and project instantiated return types
-%   [tested: run_tests(tensor_shapes); commit=WORKTREE].
+%   [tested: run_tests(tensor_shapes); commit=4eaefdd8d40e53b2613722287302a14b41704662].
 % Owns resources: each fixture releases its space and removes its host rows.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

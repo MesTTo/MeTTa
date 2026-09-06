@@ -1446,7 +1446,7 @@ kind(grounded_extra_type/2, declaration).
 %in envelope objects the boundary must not rewrite, so names or structural
 %type expressions cross rather than the value. Structural candidates use
 %the same terms as declared arrow types [tested: run_tests(tensor_shapes);
-%commit=WORKTREE]. What a bridge owns is the CLASS
+%commit=4eaefdd8d40e53b2613722287302a14b41704662]. What a bridge owns is the CLASS
 %WALK: when one answers, its names stand in for the walk, and with none the
 %local walk applies. It does not own grounded_extra_type/2 above, which is
 %consulted either way, because a declaration seam is additive and reading

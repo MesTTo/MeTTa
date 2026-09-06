@@ -250,7 +250,7 @@
 %imports them from the engine's module and they have to reach it from here.
 % Guarantees: refinement evidence helpers are exported to the engine before
 %   compiled space modules import them [tested: run_tests(tensor_shapes);
-%   commit=WORKTREE].
+%   commit=4eaefdd8d40e53b2613722287302a14b41704662].
 
 :- module(translator,
           [ translate_clause/2,
