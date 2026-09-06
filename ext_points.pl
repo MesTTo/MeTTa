@@ -1,6 +1,8 @@
 % Purpose: declare each engine extension seam, its direction and its cut
 %   semantics, and publish the predicates extensions and host bindings may call.
 % Guarantees:
+%   - evaluation context and ordered-match demand are published engine
+%     services [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 %   - libraries can distinguish an author's annotated effect from inferred
 %     operation metadata [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 %   - host query carriers enter the engine-owned algebra scope, read its
@@ -965,6 +967,9 @@ kind(metta_deprecation/3, host_service).
 %policy, not host-side orchestration: keeping them published prevents a binding
 %from reproducing the scope stack, declaration fallback, or descriptor lookup.
 kind(metta_with_under/2, host_service).
+kind(metta_with_evaluation_context/2, host_service).
+kind(metta_evaluation_context/1, host_service).
+kind(metta_ordered_match_limit/6, host_service).
 kind(metta_effective_algebra/2, host_service).
 kind(metta_current_algebra/3, host_service).
 kind(metta_algebra_one/2, host_service).
