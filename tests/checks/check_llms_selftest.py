@@ -36,6 +36,9 @@ Guarantees:
   - every required closed-value roster catches omission, invention, wrong
     order where order is semantic, a false count and total absence [tested:
     this file is its own test, run by the gate; commit=2e627a593413191cda3170f2eb716835f7f62543]
+  - a same-count substitution in the algebra-law roster and a changed alias
+    expansion in its table are each caught [tested: this file is its own test,
+    run by the gate; commit=WORKTREE]
 Open Obligations:
   To Do: None
   Hacks: None
@@ -83,9 +86,27 @@ CAPABILITIES = (
     "match", "enumerate", "add", "add-many", "remove", "clear", "subscribe",
     "plan", "rules",
 )
+ALGEBRA_LAWS = (
+    "combine-associative", "combine-commutative", "extend-associative",
+    "extend-commutative", "left-distributive", "right-distributive",
+    "combine-idempotent", "combine-zero-identity", "extend-one-identity",
+    "extend-zero-annihilates", "contraction", "associative", "commutative",
+    "distributive", "idempotent",
+)
+#: One row per alias, flattened the way the checker flattens the table, so a
+#: changed expansion is a changed string rather than a same-length list.
+LAW_ALIASES = (
+    "associative=combine-associative=extend-associative",
+    "commutative=combine-commutative",
+    "distributive=left-distributive=right-distributive",
+    "idempotent=combine-idempotent",
+    "contraction=contraction",
+)
 CLOSED_VALUES = {
     "semiring": SEMIRINGS,
     "algebra-presets": SEMIRINGS,
+    "algebra-law": ALGEBRA_LAWS,
+    "algebra-law-aliases": LAW_ALIASES,
     "effect-class": EFFECTS,
     "provider-capabilities": CAPABILITIES,
 }
@@ -118,8 +139,19 @@ def _listed(values: tuple[str, ...], prefix: str = "") -> str:
 
 
 def _closed_text(*, root: bool) -> str:
+    aliases = (
+        "| algebra-law alias | expands to |\n|---|---|\n"
+        "| `associative` | `combine-associative`, `extend-associative` |\n"
+        "| `commutative` | `combine-commutative` |\n"
+        "| `distributive` | `left-distributive`, `right-distributive` |\n"
+        "| `idempotent` | `combine-idempotent` |\n"
+        "| `contraction` | `contraction` |\n"
+    )
     shared = (
         f"`metta.vocabularies.Semiring` names the closed set: {_listed(SEMIRINGS)}.\n\n"
+        f"`metta.vocabularies.AlgebraLaw` names the accepted set: "
+        f"{_listed(ALGEBRA_LAWS)}.\n\n"
+        f"{aliases}\n"
         f"The ordered `EffectClass` members are: {_listed(EFFECTS)}. "
         "A plan's class is their join.\n\n"
         f"Capabilities are declared, not guessed: {_listed(CAPABILITIES)}, "
@@ -252,6 +284,32 @@ def main() -> int:
             )
         ),
         "an invented Semiring member was NOT reported",
+    )
+    expect(
+        any(
+            "AlgebraLaw" in finding
+            for finding in closed_value_findings(
+                SHEET,
+                root_closed.replace("`idempotent`.", "`identity`.", 1),
+                CLOSED_VALUES,
+            )
+        ),
+        "a same-count algebra-law substitution was NOT reported",
+    )
+    expect(
+        any(
+            "algebra-law alias" in finding
+            for finding in closed_value_findings(
+                SHEET,
+                root_closed.replace(
+                    "| `idempotent` | `combine-idempotent` |",
+                    "| `idempotent` | `combine-associative` |",
+                    1,
+                ),
+                CLOSED_VALUES,
+            )
+        ),
+        "a changed algebra-law alias expansion was NOT reported",
     )
     expect(
         any(
