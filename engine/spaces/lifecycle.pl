@@ -1,3 +1,10 @@
+% Guarantees: metta_remove_atom_reference/1 preserves other owners of equal atoms
+%   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
+% Owns resources: native_removal_reference/1 reads a per-thread control context,
+%   consumed before callbacks and restored by setup_call_cleanup/3.
+% Guarded by: non-backtrackable thread-local storage isolates removal selection
+%   from database snapshots [tested: lib_import_lifecycle,
+%   extensions/python/tests/ch05_equations_and_evaluation/test_reload.py; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: decode stored atoms and manage source, subscription, reaction, table, and clear lifecycles
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
@@ -208,6 +215,51 @@ remove_sexp(Space, Atom, Removed) :-
     ;   Removed = false
     ).
 
+% A source withdrawal selects a stored occurrence before entering the ordinary
+% removal funnel. Consume its selector when storage removes that occurrence,
+% so callbacks cannot accidentally inherit it. SWI's erase/1 is the exact
+% reference operation; term equality cannot identify duplicate ownership.
+% [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
+% This is control state, like with_metta_space_releasing/2 below. A database
+% selector can reappear inside a later transaction after a failed reload even
+% though a query outside that transaction sees no row. Then specialization
+% invalidation mistakes its own removal for the old source's selected atom.
+% [tested: extensions/python/tests/ch05_equations_and_evaluation/test_reload.py;
+% commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
+native_removal_reference(Ref) :-
+    nb_current('$metta_native_removal_reference', Ref).
+
+metta_remove_atom_reference(Ref) :-
+    (   stored_atom_of_ref(Ref, Space, Atom),
+        native_storage_module_ready(Space, Module),
+        native_atom_clause(Space, Atom, Head),
+        once((clause(Module:Head, true, Live), Live == Ref))
+    ->  ( native_removal_reference(Previous) -> Prior = some(Previous) ; Prior = none ),
+        setup_call_cleanup(
+            nb_setval('$metta_native_removal_reference', Ref),
+            (   metta_remove_atom(Space, Atom, Removed), Removed == true
+            ->  true
+            ;   throw(error(permission_error(remove, source_atom, Atom),
+                            context(metta_remove_atom_reference/1,
+                                    'the exact imported occurrence was not removed'))) ),
+            restore_native_removal_reference(Prior))
+    ;   true
+    ).
+
+restore_native_removal_reference(some(Ref)) :-
+    nb_setval('$metta_native_removal_reference', Ref).
+restore_native_removal_reference(none) :-
+    nb_delete('$metta_native_removal_reference').
+
+native_retract_one(Head, Removed) :-
+    native_removal_reference(Ref), !,
+    (   clause(Head, true, Ref)
+    ->  nb_delete('$metta_native_removal_reference'),
+        ( erase(Ref) -> Removed = true ; Removed = false )
+    ;   throw(error(permission_error(remove, source_reference, Head),
+                    context(native_retract_one/2,
+                            'the removal changed the selected imported occurrence')))
+    ).
 native_retract_one(Head, Removed) :-
     ( \+ \+ retract(Head) -> Removed = true ; Removed = false ).
 
@@ -1456,10 +1508,12 @@ prolog:error_message(metta_space_capability_required(Space, Operation,
 %`(get-type 1)` unreduced for the rest of the process. Removing an equation
 %for `match`, `+` or any other builtin name did the same
 %[tested: builtin_survives_equation_removal].
-function_still_defined(F) :- builtin_fun(F), !.
-function_still_defined(F) :- compiled_function_name(F, Predicate),
+function_still_defined(F) :- function_still_defined(F, ordinary).
+function_still_defined(F, _) :- builtin_fun(F), !.
+function_still_defined(F, source(_)) :- deferred_metta_function(F, _, _, _, _, _), !.
+function_still_defined(F, Owner) :- compiled_function_name(F, Predicate),
                              ( fun_in(Module, F) ; metta_engine_module(Module) ),
-                             compiled_predicate_arity(F, Module, Predicate, Arity),
+                             compiled_predicate_arity(F, Module, Predicate, Arity, Owner),
                              functor(Head, Predicate, Arity),
                              predicate_property(Module:Head, number_of_clauses(_)),
                              clause(Module:Head, _, _),
@@ -1468,9 +1522,11 @@ function_still_defined(F) :- compiled_function_name(F, Predicate),
 %Whether this module itself holds a clause for a function. Inherited clauses
 %do not count: clause/3 sees user's clauses through module inheritance, and
 %counting those would keep a module's claim alive on another space's strength.
-module_owns_function(Module, F) :- compiled_function_name(F, Predicate),
+module_owns_function(Module, F) :- module_owns_function(Module, F, ordinary).
+module_owns_function(Module, F, source(_)) :- deferred_metta_function(F, Module, _, _, _, _), !.
+module_owns_function(Module, F, Owner) :- compiled_function_name(F, Predicate),
                                    compiled_predicate_arity(F, Module, Predicate,
-                                                            Arity),
+                                                            Arity, Owner),
                                    functor(Head, Predicate, Arity),
                                    predicate_property(Module:Head,
                                                       number_of_clauses(_)),
@@ -1490,11 +1546,13 @@ module_owns_function(Module, F) :- compiled_function_name(F, Predicate),
 %callers run before unregister_fun_everywhere/1 retracts it. A name the registry
 %does not know still falls back to the enumeration, so this cannot report a
 %predicate absent that the scan would have found.
-compiled_predicate_arity(F, Module, Predicate, Arity) :-
+compiled_predicate_arity(F, Module, Predicate, Arity, Owner) :-
     %The question is about the compiled predicate, and a definition that has
     %arrived without being translated has none yet. current_predicate/1 is not
-    %a call, so the undefined-predicate net does not fire for it.
-    metta_ensure_compiled(F),
+    %a call, so the undefined-predicate net does not fire for it. Source
+    %withdrawal updates deferred budgets itself and must not compile a body
+    %the caller is removing; ordinary removal retains its existing forcing.
+    ( Owner == ordinary -> metta_ensure_compiled(F) ; true ),
     (   arity(F, _)
     ->  arity(F, Arity),
         current_predicate(Module:Predicate/Arity)

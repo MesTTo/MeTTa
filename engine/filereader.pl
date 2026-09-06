@@ -26,17 +26,17 @@
 %     classes are active, and parse_metta_source_prolog/2 stays the
 %     specification it is held to, variant-identical results over the corpus
 %     and adversarial battery [tested: reader_c in tests/prolog/suites/reader/reader_c.plt;
-%     commit=d1093b8bbf5d36b18a3a36fd2536eadc5d04fea3].
+%     commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 %   - parse_metta_source_summary/4 carries the signature multiset and
 %     declaration pairs beside the forms, from the C reader's own walk or
 %     source_summary_of_forms/3's, and every pre-pass and the program-order
 %     context consume the summary instead of re-walking the source [tested:
 %     reader_c:the_parse_summary_agrees_with_the_prolog_walks;
-%     commit=d1093b8bbf5d36b18a3a36fd2536eadc5d04fea3].
+%     commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 %   - a run of consecutive plain data atoms under a silent load with no
 %     bound tokens stores through spaces' run door with the identical
 %     atoms, order, journal rows and withdrawal the per-form door produces
-%     [tested: filereader_data_runs; commit=d1093b8bbf5d36b18a3a36fd2536eadc5d04fea3].
+%     [tested: filereader_data_runs; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 %   - plain and gzip-compressed MeTTa sources are decoded as UTF-8 regardless
 %     of the process locale [tested:
 %     filereader_source_reload:a_source_is_utf8_independent_of_the_locale;
@@ -182,7 +182,7 @@
 %     supports/2, and a function change queues each transitive compiled caller
 %     once for repair [tested:
 %     support_graph:test_a_derived_fact_is_invalidated_forward_from_what_it_supports;
-%     commit=7ade2b90e2631451fd6ffc23d22dd8c2d4a7a7aa].
+%     commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 %   - A module-scoped typing-policy change invalidates its compiled functions
 %     through the same support graph, so the next call sees clauses translated
 %     under the new policy and a removal restores the discharged checks
@@ -217,6 +217,10 @@
 %says filereader: and means it
 %[tested: engine_layering:test_the_engine_layering_contract_holds_and_a_violation_is_named].
 :- encoding(utf8).
+% Guarantees: withdraw_source_load/3 and source_load_assertion/3 publish the
+%   source ownership boundary for exact import undo
+%   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
+
 :- module(filereader,
           [ load_imported_metta_file/3,
             load_metta_source_groups/3,
@@ -229,6 +233,8 @@
             run_with_loading_marker/2,
             record_source_assertion/1,
             record_source_atom_assertion/1,
+            source_load_assertion/3,
+            withdraw_source_load/3,
             source_load_receipt_current/4,
             with_owning_source_load/2,
             current_owning_source_load/1,
@@ -239,7 +245,7 @@
             record_translated_from/3,
             record_translated_from/4,
             translated_equation_binding/3,
-            stored_equation_source/3,
+            stored_equation_source/4,
             forget_translated_from/3,
             forget_space_source_loads/1,
             recompile_function_impl/1,
@@ -801,7 +807,7 @@ process_forms(PerForm, Space, [Form|Forms], [Result|Results]) :-
 %per-atom meaning (definition, declaration) and ends the run too, so both
 %doors' plain-data behaviour, evict-nothing then store then journal, is
 %the same behaviour this run door performs
-%[tested: filereader_data_runs; commit=d1093b8bbf5d36b18a3a36fd2536eadc5d04fea3].
+%[tested: filereader_data_runs; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 data_run(Forms, Space, Run, Rest) :-
     silent(true),
     \+ metta_token(_, _),
@@ -846,7 +852,7 @@ definition_run(Forms, Space, Run, Rest) :-
     %keeps the per-form fence exactly as it stood; bind! is a runnable and
     %ends every run, so neither table can change inside one
     %[tested: filereader_data_runs, spaces_deferred_translation;
-    %commit=d1093b8bbf5d36b18a3a36fd2536eadc5d04fea3].
+    %commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
     (   \+ seam:form_rewriter(_),
         \+ metta_token(_, _)
     ->  plain_definition_prefix(Forms, Run, Rest)
@@ -883,7 +889,7 @@ prepare_metta_source(S, ParsedForms) :-
 %back from the one walk it already makes; the Prolog reader computes them by
 %the walks below, which stay the specification the C summary is held to
 %[tested: reader_c:the_parse_summary_agrees_with_the_prolog_walks;
-%commit=d1093b8bbf5d36b18a3a36fd2536eadc5d04fea3]. Before the summary, preparing a source walked every form
+%commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]. Before the summary, preparing a source walked every form
 %three more times, once per pre-pass, and those walks were 3.6 findall-bag
 %inferences per atom of the fun doorbench and a fifth of the data one.
 prepare_metta_source(S, ParsedForms, Names) :-
@@ -1488,7 +1494,7 @@ record_translated_from(Ref, Term, StoredRef, SourceRef) :-
 % Read the exact stored occurrence that a deferred translation is visiting.
 % A resolved sibling already owns its executable clause even when an older
 % equation of the same function is still waiting to compile.
-stored_equation_source(Space, Original, Resolved) :-
+stored_equation_source(Space, Original, Resolved, StoredRef) :-
     spaces:native_storage_module_ready(Space, Storage),
     native_atom_clause(Space, Original, Head),
     clause(Storage:Head, true, StoredRef),
@@ -1888,16 +1894,16 @@ print_runnable_form(FormStr, Goals) :-
 %The clause trace is the only thing at load time that looks at the translated
 %clause, so it is the only thing that has to force the translation; everything
 %else a definition settles, the name being a function and the previous
-%definition being stale, defer_metta_equation/2 settles as the equation
+%definition being stale, defer_metta_equation/4 settles as the equation
 %arrives.
 %Equality by ==, never head unification: Term and BoundTerm both carry
 %variables, and unifying them can succeed by BINDING across the two where
 %the rewrite in fact changed the term.
-store_metta_equation(Space, Module, Term, BoundTerm, _, _) :-
+store_metta_equation(Space, Module, Term, BoundTerm, StoredRef, _) :-
     silent(true),
     Term == BoundTerm,
     !,
-    defer_metta_equation(Space, Module, Term).
+    defer_metta_equation(Space, Module, Term, StoredRef).
 store_metta_equation(_, Module, _, BoundTerm, StoredRef, FormStr) :-
     compile_metta_equation(Module, BoundTerm, StoredRef, _Clause, Ref),
     print_function_form(FormStr, Ref).

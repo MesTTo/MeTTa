@@ -69,7 +69,7 @@ website.
 | `ch17-concurrency-and-the-loop` | threads, mutexes, Linda, `hyperpose` |
 | `ch18-performance` | larger workloads, memoisation and tabling, algebra carriers |
 | `ch19-spaces-backed-by-anything` | inherited, restricted and parametric spaces; a space and a builtin in C |
-| `ch20-extending-the-engine` | translator rules, MeTTa written in MeTTa, Prolog underneath, modules and the `&metta` catalog |
+| `ch20-extending-the-engine` | translator rules, MeTTa written in MeTTa, Prolog underneath, queryable imports and source undo, modules and the `&metta` catalog |
 | `ch22-a-reasoner-you-can-serve` | logic programs, weighted answers, search |
 
 ## What does not run

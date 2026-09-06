@@ -6,6 +6,8 @@
 % environment from a small allowlist carrying no locale.
 :- encoding(utf8).
 
+% Guarantees: withdraw_source_load/3 preserves equal atoms owned by other loads
+%   or the caller [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
 % Assumes: engine/filereader.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/filereader.pl's implementation module and original load order;
@@ -1069,16 +1071,40 @@ replace_source_load(CanonPath, Space, Replaced, LoadInto, Goal) :-
 %commits; commit=bbb512316280110a747e31c26adfc31e8c5104be]. stored_atom_of_ref/3 reads a bound reference, so
 %it decodes an atom the same transaction has already taken out.
 withdraw_source_load(CanonPath, Space, Count) :-
+    metta_source_load(CanonPath, Space, LoadId, _),
+    metta_engine_module(Engine),
+    findall(F,
+            ( source_load_assertion(LoadId, Kind, Ref),
+              ( Kind == stored, stored_atom_of_ref(Ref, _, [=, [F|_], _])
+              ; Kind == artifact,
+                clause_property(Ref, module(Engine)),
+                clause(Recorded, true, Ref), strip_module(Recorded, _, Row),
+                member(Shape, [fun(F), arity(F,_), fun_in(_,F), fun_scoped(F)]),
+                Row = Shape ) ), Names0),
+    sort(Names0, Names),
     retract(metta_source_load(CanonPath, Space, LoadId, _)),
     findall(Ref, source_load_assertion(LoadId, stored, Ref), Asserted),
     reverse(Asserted, Refs),
     findall(AtomSpace-Atom,
             ( member(Ref, Refs), stored_atom_of_ref(Ref, AtomSpace, Atom) ),
             Atoms),
-    forall(member(AtomSpace-Atom, Atoms),
-           ( metta_remove_atom(AtomSpace, Atom, _) -> true ; true )),
+    forall(member(Ref, Refs), spaces:metta_remove_atom_reference(Ref)),
     rollback_source_load(LoadId),
+    with_owning_source_load(none, restore_surviving_source_functions(Names)),
     length(Atoms, Count).
+
+% The first source that introduced a name owns its registry references, but
+% later sources and caller equations can reuse them. Once that first source
+% leaves, derive their replacements from the executable equations that remain.
+% Pin to no source: an enclosing import does not own these older definitions.
+% [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
+restore_surviving_source_functions(Names) :-
+    forall(( member(F, Names),
+             ( translated_equation_of(F, Ref, [=, [F|Args], _]),
+               clause_property(Ref, module(Module)), length(Args, Inputs)
+             ; spaces:deferred_metta_function(F, Module, _, Inputs, _, _) ) ),
+           ( register_fun_in(Module, F),
+             Arity is Inputs+1, register_arity(F, Arity) )).
 
 %A cleared space keeps no record of what a file put in it, because nothing of
 %it is left to replace and the name is POOLED: a later life reusing the name

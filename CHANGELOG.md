@@ -7,6 +7,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `lib_import` exposes committed imports as `(import Path)` atoms through
+  `(imports &space)`. `unimport!` withdraws the imported source's surviving
+  atom occurrences and compiled definitions, preserving equal atoms owned by
+  callers or other imports. Both operations use the loader's ownership journal.
+
 ### Fixed
 
 - Algebra operations and tagged query guards retain the selected carrier,
@@ -41,6 +48,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   Tagged algebra evaluation preserves that refusal instead of reporting
   `algebra_operation_not_single` or applying arithmetic to the error.
   A shaped requirement retains the actual dimensions in that single refusal.
+
+- Soft structural scoring retains symbol similarity after an equation defines
+  the symbol as a function. Numbers, strings and host values still compare
+  crisply; `get-metatype` keeps its upstream function-registration rule.
+
+- Tagged rules resolve provider-backed premises through the same match and
+  annotation path as direct queries. Provider coefficients participate in
+  derivations and provenance reinterpretation, including repeated premises
+  and duplicate source rows. Linear provider proofs refuse when the provider
+  protocol cannot establish stable source occurrence identity.
 
 ## [0.8.0] - 2026-09-06
 

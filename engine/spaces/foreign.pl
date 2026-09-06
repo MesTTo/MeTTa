@@ -1,3 +1,5 @@
+% Guarantees: resolved_equation_removal/4 honors exact source occurrence selection
+%   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: validate foreign-provider capabilities and route foreign and native space operations
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
@@ -530,6 +532,7 @@ store_program_atoms([Atom|Atoms], Storage, Space, Module, Load, Q0,
             Signatures = Rest
         ;   add_sexp_in(Storage, Space, Atom, Ref),
             journal_data_ref(Load, Ref),
+            ( Class == declared -> queue_deferred_equation_types(Module, F, Ref) ; true ),
             head_pattern_notes_for(Module, Atom),
             length(W, N),
             Arity is N + 1,
@@ -551,9 +554,9 @@ store_program_atoms([Atom|Atoms], Storage, Space, Module, Load, Q0,
 %of every name cost more than the probes it saved (4.6 inferences per
 %equation of assoc machinery against the 6 it replaced, measured on this
 %walk's own profile). A TRANSLATED or UNDECLARED name skips, while a
-%DECLARED name queues its one-row-per-equation FIFO exactly as the
-%deferral's consumption contract requires (materialize_with_queued_types/3
-%retracts one row per materialised equation). A ':' atom stored mid-walk
+%DECLARED name records each equation's type group exactly as the
+%deferral's consumption contract requires (materialize_with_queued_types/4
+%retracts the stored occurrence's row). A ':' atom stored mid-walk
 %resets the memo to none, because a declaration between two equations is
 %precisely the visibility change the per-equation probe existed to observe
 %[tested: spaces_deferred_translation, lib_conformance;
@@ -561,11 +564,7 @@ store_program_atoms([Atom|Atoms], Storage, Space, Module, Load, Q0,
 equation_walk_class(Module, F, Q0, Q, Class) :-
     (   Q0 = q(F0, Class0), F0 == F
     ->  Q = Q0,
-        Class = Class0,
-        (   Class0 == declared
-        ->  queue_deferred_equation_types(Module, F)
-        ;   true
-        )
+        Class = Class0
     ;   ho_specialization(Module, _, F)
     ->  Class = ho,
         Q = q(F, ho)
@@ -573,8 +572,7 @@ equation_walk_class(Module, F, Q0, Q, Class) :-
     ->  Class = plain,
         Q = q(F, plain)
     ;   catch_recover(definition_type_declaration_in(Module, F, _), fail)
-    ->  queue_deferred_equation_types(Module, F),
-        Class = declared,
+    ->  Class = declared,
         Q = q(F, declared)
     ;   Class = plain,
         Q = q(F, plain)
@@ -711,13 +709,13 @@ announce_equation_arrival(Module, F) :-
 %already walks it: compiling a call site to F asks for F, whose bodies compile
 %their own call sites, so the reachable set falls out of the recursion that
 %was going to happen anyway.
-defer_metta_equation(Space, Module, Term) :-
+defer_metta_equation(Space, Module, Term, StoredRef) :-
     Term = [=, [F|W], _],
     note_metta_equation(Module, Term),
     head_pattern_notes_for(Module, Term),
     (   metta_function_translated(Module, F)
     ->  true
-    ;   queue_deferred_equation_types(Module, F)
+    ;   queue_deferred_equation_types(Module, F, StoredRef)
     ),
     length(W, InputArity),
     mark_or_translate_equation(Space, Module, F, InputArity, [Term]),
@@ -936,15 +934,11 @@ translate_deferred_pairs(F, Shapes) :-
             Pairs0),
     list_to_set(Pairs0, Pairs),
     forall(member(Space-Module, Pairs),
-           ( findall(InputArity-budget(Load, Count),
-                     member(deferred(Space, Module, InputArity, Load, Count),
-                            Shapes),
-                     Budgeted),
-             findall(InputArity, member(InputArity-_, Budgeted),
+           ( findall(InputArity,
+                     member(deferred(Space, Module, InputArity, _, _), Shapes),
                      InputArities0),
              sort(InputArities0, InputArities),
-             translate_deferred_equations(Space, Module, F, InputArities,
-                                          Budgeted),
+             translate_deferred_equations(Space, Module, F, InputArities),
              %Only now, with the pair's clauses standing, do its rows go: a
              %signal before this line leaves the pair deferred and resumable.
              retractall(deferred_metta_function(F, Module, Space, _, _, _)),
@@ -974,51 +968,26 @@ translate_deferred_pairs(F, Shapes) :-
 %reference included: an equation naming a NOT-YET-ARRIVED arity of its own
 %name answers its written form under both doors, and the pinned corpus pins
 %that answer.
-translate_deferred_equations(Space, Module, F, InputArities, Budgeted) :-
+translate_deferred_equations(Space, Module, F, InputArities) :-
     with_typing_policy_stable(
-        translate_deferred_equations_stable(
-            Space, Module, F, InputArities, Budgeted)).
+        translate_deferred_equations_stable(Space, Module, F, InputArities)).
 
-translate_deferred_equations_stable(Space, Module, F, InputArities,
-                                    Budgeted) :-
-    findall(Equation,
-            ( stored_equation_source(Space, [=, [F|W], _], Equation),
-              is_list(W),
-              length(W, InputArity),
-              memberchk(InputArity, InputArities) ),
+% The native stored clause reference already identifies its source owner.
+% Counts cannot recover that identity after deletion or an interleaved nested
+% import. Carry the reference into compilation and its exact type lookup.
+% [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
+translate_deferred_equations_stable(Space, Module, F, InputArities) :-
+    findall(owned(Load, StoredRef, Equation),
+            ( stored_equation_source(Space, [=, [F|W], _], Equation, StoredRef),
+              is_list(W), length(W, InputArity),
+              memberchk(InputArity, InputArities),
+              ( filereader:source_load_assertion(Owner, stored, StoredRef)
+              -> Load = Owner ; Load = none ) ),
             Equations),
-    budget_queues(Budgeted, InputArities, Queues),
     (   metta_function_translated(Module, F)
     ->  translated_sources_of(Module, F, Stored),
-        translate_missing_equations(F, Equations, Module, Stored, Queues)
-    ;   translate_owned_equations(Equations, Module, F, Queues)
-    ).
-
-%One FIFO of budget(Load, Count) per arity, in row order, which is load
-%arrival order. The walk pops one unit per stored copy it passes, so each
-%equation is handed back to the load that stored it: the store appends, so a
-%load's copies of one arity are a contiguous run in exactly the order the
-%rows were written. An empty queue answers none, which journals nowhere; the
-%one way to reach it with equations still untranslated is the removal
-%limitation the deferral header records.
-budget_queues(Budgeted, InputArities, Queues) :-
-    findall(InputArity-Queue,
-            ( member(InputArity, InputArities),
-              findall(Budget, member(InputArity-Budget, Budgeted), Queue) ),
-            Pairs),
-    list_to_assoc(Pairs, Queues).
-
-pop_equation_load([=, [_|W], _], Queues0, Load, Queues) :-
-    length(W, InputArity),
-    (   get_assoc(InputArity, Queues0, [budget(Load, Count)|Rest])
-    ->  (   Count =< 1
-        ->  Remaining = Rest
-        ;   Left is Count - 1,
-            Remaining = [budget(Load, Left)|Rest]
-        ),
-        put_assoc(InputArity, Queues0, Remaining, Queues)
-    ;   Load = none,
-        Queues = Queues0
+        translate_missing_equations(F, Equations, Module, Stored)
+    ;   translate_owned_equations(Equations, Module, F)
     ).
 
 %One equation, one transaction, the same unit compile_metta_equation/4 already
@@ -1028,14 +997,13 @@ pop_equation_load([=, [_|W], _], Queues0, Load, Queues) :-
 %the retry both ways: provenance without a clause is excused into "Unknown
 %procedure", a clause without provenance translates again and doubles its
 %answers.
-translate_owned_equations([], _, _, _).
-translate_owned_equations([Equation|Equations], Module, F, Queues0) :-
-    pop_equation_load(Equation, Queues0, Load, Queues),
+translate_owned_equations([], _, _).
+translate_owned_equations([owned(Load, StoredRef, Equation)|Equations], Module, F) :-
     transaction(
         with_owning_source_load(Load,
-            materialize_with_queued_types(Module, F,
-                assert_translated_equation(Module, Equation, _, _)))),
-    translate_owned_equations(Equations, Module, F, Queues).
+            materialize_with_queued_types(Module, F, StoredRef,
+                assert_translated_equation(Module, Equation, StoredRef, _, _)))),
+    translate_owned_equations(Equations, Module, F).
 
 %The second branch exists for one interleaving: a name's first arity defers, a
 %SECOND arity arrives whose compiled predicate an inherited definition already
@@ -1050,29 +1018,29 @@ translate_owned_equations([Equation|Equations], Module, F, Queues0) :-
 %skipped 29 of lib_nars's 51 `|-` rules, each one swallowed by an earlier
 %rule's open-variable row [measured 2026-08-24].
 translated_sources_of(Module, F, Stored) :-
-    findall(Source,
+    findall(owned(Load, Source),
             ( translated_from(Ref, Source),
               Source = [=, [F|_], _],
-              clause_property(Ref, module(Module)) ),
+              clause_property(Ref, module(Module)),
+              ( filereader:source_load_assertion(Owner, artifact, Ref)
+              -> Load = Owner ; Load = none ) ),
             Stored).
 
 %One provenance row excuses ONE stored copy, consumed as it matches, because
 %equations are a multiset: the same equation stored twice answers twice, so a
 %stored copy beyond its translated rows still translates. Variance decides a
 %match, never unification, for the reason above.
-translate_missing_equations(_, [], _, _, _).
-translate_missing_equations(F, [Equation|Equations], Module, Stored0,
-                            Queues0) :-
-    pop_equation_load(Equation, Queues0, Load, Queues),
-    (   select_variant_source(Equation, Stored0, Stored)
+translate_missing_equations(_, [], _, _).
+translate_missing_equations(F, [owned(Load, StoredRef, Equation)|Equations], Module, Stored0) :-
+    (   select_variant_source(owned(Load, Equation), Stored0, Stored)
     ->  true
     ;   Stored = Stored0,
         transaction(
             with_owning_source_load(Load,
-                materialize_with_queued_types(Module, F,
-                    assert_translated_equation(Module, Equation, _, _))))
+                materialize_with_queued_types(Module, F, StoredRef,
+                    assert_translated_equation(Module, Equation, StoredRef, _, _))))
     ),
-    translate_missing_equations(F, Equations, Module, Stored, Queues).
+    translate_missing_equations(F, Equations, Module, Stored).
 
 select_variant_source(Equation, [Source|Rest], Rest) :-
     Source =@= Equation,
@@ -1081,12 +1049,7 @@ select_variant_source(Equation, [Source|Rest], [Source|Kept]) :-
     select_variant_source(Equation, Rest, Kept).
 
 translate_deferred_shape(Space, Module, F, InputArity) :-
-    length(Args, InputArity),
-    findall([=, [F|Args], Body],
-            get_native_atom(Space, [=, [F|Args], Body]),
-            Equations),
-    forall(member(Equation, Equations),
-           assert_translated_equation(Module, Equation, _, _)).
+    translate_deferred_equations(Space, Module, F, [InputArity]).
 
 %A recursive equation spends the same branch-local budget that runnable
 %limits own. The source tree supplies the cost because it is the stable unit:
@@ -1860,7 +1823,8 @@ metta_host_native_fact(Module, Goal, Space, Fact) :-
 
 %% remove_equation(+Space, +Equation, +Function:atom, +Arguments, ?Body, -Removed:boolean) is semidet.
 remove_equation(Space, Term, F, Args, Body, Removed) :-
-    (   translated_equation_binding(Space, _, _)
+    (   ( translated_equation_binding(Space, _, _)
+        ; native_removal_reference(_) )
     ->  transaction(
             ( resolved_equation_removal(Space, Term, Source, Origin),
               remove_equation_source(Space, Term, Source, Origin, Removed) ))
@@ -1876,20 +1840,30 @@ resolved_equation_removal(Space, Term, Source, Origin) :-
     (   \+ seam:foreign_space(Space),
         native_storage_module_ready(Space, Storage),
         native_atom_clause(Space, Pattern, Head),
-        once(clause(Storage:Head, true, StoredRef))
+        once(( clause(Storage:Head, true, StoredRef),
+               ( native_removal_reference(Selected) -> StoredRef == Selected ; true ) ))
     ->  (   translated_equation_binding(Space, StoredRef, Ref),
             translated_from(Ref, Bound)
-        ->  Source = Bound, Origin = bound(Ref)
-        ;   stored_atom_of_ref(StoredRef, Space, Source), Origin = ordinary
+        ->  Source = Bound, CompiledOrigin = bound(Ref)
+        ;   stored_atom_of_ref(StoredRef, Space, Source), CompiledOrigin = ordinary
         )
-    ;   Source = Pattern, Origin = ordinary
+    ;   Source = Pattern, CompiledOrigin = ordinary
+    ),
+    (   native_removal_reference(SelectedRef),
+        filereader:source_load_assertion(Load, stored, SelectedRef)
+    ->  Origin = source(Load, CompiledOrigin)
+    ;   Origin = CompiledOrigin
     ).
 
 remove_equation_source(Space, Term, Probe, Origin, Removed) :-
+    ( Origin = source(Load, CompiledOrigin)
+    -> Owner = source(Load)
+    ; Owner = ordinary, CompiledOrigin = Origin ),
     unstore_atom(Space, Term, Stored),
     space_module(Space, Module),
     Probe = [=, [F|Args], Body],
-    drop_fun_meta(Module, F, Args, Body),
+    retire_source_deferred_equation(Owner, Space, F, Args),
+    drop_fun_meta(Module, F, Args, Body, Owner),
     %ONE compiled clause, the multiset law applied to the compiled half. The
     %retained-equation half above already worked this way and said so, "remove
     %one variant-equivalent retained equation... duplicate equations are
@@ -1904,10 +1878,13 @@ remove_equation_source(Space, Term, Probe, Origin, Removed) :-
     %
     %The probe is a COPY for drop_fun_meta/4's reason: a lookup that binds the
     %caller's Term would narrow every later use of it in this clause.
-    (   (   Origin = bound(Ref)
+    (   (   CompiledOrigin = bound(Ref)
         ->  clause_property(Ref, module(Module))
         ;   translated_from(Ref, Probe), clause_property(Ref, module(Module)),
-            \+ translated_equation_binding(_, _, Ref)
+            \+ translated_equation_binding(_, _, Ref),
+            ( Owner = source(SourceLoad)
+            -> filereader:source_load_assertion(SourceLoad, artifact, Ref)
+            ; true )
         )
     ->  forget_translated_from(Module, Ref, Probe), erase(Ref), Erased = true
     ;   Erased = false
@@ -1961,9 +1938,9 @@ remove_equation_source(Space, Term, Probe, Origin, Removed) :-
     %lib_strategy:removing_a_local_shadow_recompiles_its_callers;
     %commit=7b238053d2907cd514e3fd9a29927d43a53c5a3c]. The process-wide fun/1 row remains until the second
     %phase below, preserving the existing call-to-data removal transition.
-    ( module_owns_function(Module, F) -> true ; unregister_fun_in(Module, F) ),
+    ( module_owns_function(Module, F, Owner) -> true ; unregister_fun_in(Module, F) ),
     announce_function_changed(Module, F),
-    ( \+ function_still_defined(F)
+    ( \+ function_still_defined(F, Owner)
       -> retractall(fun(F)), unregister_fun_everywhere(F),
          %announce_function_removed/1, not the bare event: fun(F) is false only now,
          %so THIS recompile is the one that reads mentions of F as data
@@ -1971,6 +1948,23 @@ remove_equation_source(Space, Term, Probe, Origin, Removed) :-
          announce_function_removed(F)
       ; true ),
     ( Erased == false, Stored \== true -> Removed = false ; Removed = true ).
+
+% Removing a deferred source occurrence reduces the source's own compile
+% budget. No compilation is needed to delete it, and later source equations
+% keep their original owner when they eventually compile.
+% [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
+retire_source_deferred_equation(ordinary, _, _, _).
+retire_source_deferred_equation(source(Load), Space, F, Args) :-
+    length(Args, Inputs),
+    (   retract(deferred_metta_function(F, Module, Space, Inputs, Load, Count))
+    ->  (   Count > 1
+        ->  Left is Count-1,
+            assertz(deferred_metta_function(F, Module, Space, Inputs, Load, Left), Ref),
+            with_owning_source_load(Load, record_source_assertion(Ref))
+        ;   true
+        )
+    ;   true
+    ).
 
 :- dynamic '$metta_shadow_repair_pending'/3.
 

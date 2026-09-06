@@ -24,7 +24,7 @@ beside its definitions.
 | lib_file | 18 | 18 |
 | lib_gitimport | 0 | 0 |
 | lib_he | 0 | 0 |
-| lib_import | 2 | 2 |
+| lib_import | 4 | 4 |
 | lib_json | 0 | 0 |
 | lib_measure | 17 | 0 |
 | lib_memo | 0 | 0 |
@@ -38,7 +38,7 @@ beside its definitions.
 | lib_reflect | 10 | 9 |
 | lib_regex | 6 | 0 |
 | lib_roman | 36 | 0 |
-| lib_soft | 8 | 0 |
+| lib_soft | 9 | 1 |
 | lib_spaces | 5 | 0 |
 | lib_strategy | 24 | 0 |
 | lib_string | 0 | 0 |
@@ -357,7 +357,7 @@ Returns: Bool
 
 ### `import_prolog_functions_from_file`
 
-*lib_import.metta:32*
+*lib_import.metta:45*
 
 Consults a Prolog file and registers the named predicates as MeTTa functions
 
@@ -368,7 +368,7 @@ Returns: unit
 
 ### `import_prolog_functions_from_module`
 
-*lib_import.metta:37*
+*lib_import.metta:50*
 
 Loads a Prolog module and registers the named predicates as MeTTa functions
 
@@ -376,6 +376,27 @@ Loads a Prolog module and registers the named predicates as MeTTa functions
 2. the predicate names to register
 
 Returns: unit
+
+### `imports`
+
+*lib_import.metta:56*
+
+A live read-only space of (import CanonicalPath) atoms for the destination's committed MeTTa source imports; query with (match (imports &space) (import $path) $path)
+
+1. the destination space
+
+Returns: Space
+
+### `unimport!`
+
+*lib_import.metta:60*
+
+Withdraw exactly one MeTTa source's surviving native atoms and compiled definitions; equal atoms from other owners survive. Repeats return true and deleted source paths work. Nested imports remain independently imported. Does not reverse external I/O or unload host modules
+
+1. the destination space
+2. the imported module path, including a path returned by imports
+
+Returns: true
 
 ## lib_observe
 
@@ -483,3 +504,21 @@ The engine's whole surface as a JSON string, for external tools
 Returns: a JSON string
 
 Undocumented: `origin-of`
+
+## lib_soft
+
+### `soft-symbol?`
+
+*lib_soft.metta:33*
+
+```metta
+(: soft-symbol? (-> Atom Bool))
+```
+
+Tests written symbol representation, regardless of function registration
+
+1. the held atom; grounded values and expressions answer False
+
+Returns: True for a symbol, False otherwise
+
+Undocumented: `soft-aggregation`, `soft-best`, `soft-fold`, `soft-match`, `soft-score`, `soft-score-by`, `soft-walk`, `sym-sim`
