@@ -21,7 +21,7 @@
 %     [tested: shim_relation_form; commit=0ee5a2dfee0e37a23b0eb9c765b477d7f90295fe].
 %   - a source form is selected for a head at ONE predicate arity, and the
 %     message hook always fails and leaves its reentrancy flag down, whatever
-%     the delivery did [tested: shim_observation_doors; commit=WORKTREE].
+%     the delivery did [tested: shim_observation_doors; commit=6375a7c8f3c035b04bc9d41c8f7f22e56b42fb41].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
