@@ -98,6 +98,30 @@ test(a_non_list_operand_leaves_the_bags_absent) :-
     var(Missing),
     var(Excess).
 
+%The one-sided door beside it. Same four arguments and the same rule that the
+%verdict is the caller's; what differs is that the excess side is never
+%computed, so it reaches the ball ABSENT rather than empty and no reader is
+%pointed at an answer this relation allows.
+test(a_one_sided_ball_carries_the_missing_bag_alone) :-
+    catch('assert-includes-answers'(false, [qIncludes, a, b], [a, d], [a, c], _),
+          error(metta_assertion_failed(Form, Missing, Excess), _),
+          true),
+    Form == [qIncludes, a, b],
+    Missing == [c],
+    var(Excess).
+
+test(a_true_verdict_asks_no_question_of_the_one_sided_bags) :-
+    'assert-includes-answers'(true, [qIncludes, a, b], [x], [y], Result),
+    Result == true.
+
+test(a_non_list_operand_leaves_the_one_sided_bag_absent_too) :-
+    catch('assert-includes-answers'(false, [qIncludes, a, b], notabag, [a], _),
+          error(metta_assertion_failed(Form, Missing, Excess), _),
+          true),
+    Form == [qIncludes, a, b],
+    var(Missing),
+    var(Excess).
+
 test(an_assertion_message_prints_both_bags) :-
     message_to_string(error(metta_assertion_failed([qEqual, [+, 1, 1], 3],
                                                    [3], [2]), none),
@@ -107,6 +131,30 @@ test(an_assertion_message_prints_both_bags) :-
                          "excess: (2)"]),
            sub_string(Message, _, _, _, Line)),
     \+ sub_string(Message, _, _, _, "differ only in order").
+
+%One bag present and one absent prints ONE line. The absent side is not
+%rendered as an empty bag, which would say the comparison ran and found
+%nothing, and it does not reach the permutation note either: that note reads
+%its two arguments with ==, so an unbound bag is never taken for an empty one.
+test(a_one_sided_message_prints_the_missing_line_alone) :-
+    message_to_string(error(metta_assertion_failed([qIncludes, a, b], [c], _),
+                            none),
+                      Message),
+    forall(member(Line, ["MeTTa assertion failed: (qIncludes a b)",
+                         "missing: (c)"]),
+           sub_string(Message, _, _, _, Line)),
+    \+ sub_string(Message, _, _, _, "excess"),
+    \+ sub_string(Message, _, _, _, "differ only in order").
+
+%The mirror, so the renderer is shown asking each bag for itself rather than
+%having one special case for the one door that uses it.
+test(an_excess_bag_alone_prints_its_own_line) :-
+    message_to_string(error(metta_assertion_failed([qIncludes, a, b], _, [d]),
+                            none),
+                      Message),
+    forall(member(Line, ["excess: (d)"]),
+           sub_string(Message, _, _, _, Line)),
+    \+ sub_string(Message, _, _, _, "missing").
 
 %Two empty bags beside a failure is the permutation diagnosis, and it is the
 %one reading a reader would otherwise have to make alone.

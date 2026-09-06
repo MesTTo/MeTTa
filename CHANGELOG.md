@@ -213,6 +213,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- A failing `assertIncludes` names the call as written and the answers missing
+  from its expectation, where it printed `MeTTa assertion failed: false` and
+  nothing else. Its report is ONE-SIDED and stays so: an answer in excess of
+  the expectation is legal under a containment, so no `excess:` line is
+  printed and `AssertionFailure.excess` is `None`, which a harness tells apart
+  from the empty tuple a comparison that ran and found nothing gives. The
+  absence convention `metta_assertion_failed/3` already carried is now read per
+  bag rather than per pair, so the message prints one labelled line for each
+  bag the verdict depended on. `(assert-includes-answers $Verdict $Form
+  $Actual $Expected)` is the door behind it, `assert-answers`' arguments in the
+  same order with the same meanings, computing its one difference on the
+  failing path only and never deciding a verdict; a user's own one-sided
+  assertion over answer bags reaches the same report through it. The verdicts
+  of every assert form are unmoved.
 - `<`, `<=`, `>` and `>=` between two space handles now refuse, naming
   `metta.spaces.diff` and `metta.spaces.union` as the doors that answer
   containment. They answered the engine's term order silently, while `|`, `&`,

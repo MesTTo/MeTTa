@@ -1655,9 +1655,9 @@ at each source boundary and answers admitted ground calls from it.
 provided patterns, and evaluates the selected branch. Empty expressions and
 incompatible patterns select the fallback.
 
-301 builtins are registered; `m.self.builtins()` lists the live union of the
+302 builtins are registered; `m.self.builtins()` lists the live union of the
 functions callable from `&self` and the translator special forms. That live union in full, measured
-2026-09-06 on a boot with this tree's extensions present, which is where the
+2026-09-07 on a boot with this tree's extensions present, which is where the
 three `mork-add-atoms`, `mork-flush` and `mm2-exec` heads come from:
 
 `!=` `#*` `#+` `#-` `#//` `#<` `#=` `#=<` `#>` `#>=` `#\=` `#div` `#max`
@@ -1666,7 +1666,7 @@ three `mork-add-atoms`, `mork-flush` and `mm2-exec` heads come from:
 `add-atoms` `add-reduct` `add-reducts` `add-translator-rule!`
 `add-typing-rule!` `alpha-unique` `alpha-unique-atom` `and` `and-then`
 `annotation` `append` `argv` `asin-math` `assert` `assert-answers`
-`assertAlphaEqual`
+`assert-includes-answers` `assertAlphaEqual`
 `assertAlphaEqualMsg` `assertAlphaEqualToResult`
 `assertAlphaEqualToResultMsg` `assertEqual` `assertEqualMsg`
 `assertEqualToResult` `assertEqualToResultMsg` `assertIncludes`
@@ -1807,11 +1807,17 @@ A typed call rejects a bad argument by answering empty, not by raising: use `cas
 A failing `assertEqual` or `assertEqualToResult` names the call as WRITTEN and
 prints the two answer bags under it, `missing:` then `excess:`; both empty
 means the answers agree and only their order differs, which `assertEqual`
-fails on because it compares the collapsed tuples by term equality. `assert`
-and `assertIncludes` print no bag line at all, the first because its operand
-is a verdict and the second because its excess answers are legal. A user's own
-assertion over answer bags gets the same report from `assert-answers`, which
-takes the verdict, the call to report, and the two bags.
+fails on because it compares the collapsed tuples by term equality. A failing
+`assertIncludes` prints `missing:` ALONE and no `excess:` line, because an
+answer in excess of its expectation is legal under that relation and naming
+one would blame a bag that is not a reason for the failure; the absent side
+reaches `AssertionFailure.excess` as `None`, which a harness tells from the
+empty tuple an emptied comparison gives. `assert` prints no bag line at all,
+its operand being a verdict. A user's own assertion over answer bags gets the
+same report from `assert-answers` for a two-sided relation and
+`assert-includes-answers` for a one-sided one; each takes the verdict, the
+call to report, the answers produced and the answers expected, computes its
+differences only on the failing path, and never decides the verdict.
 An unreduced call is a non-empty answer, so test truth with `any(a == True)`,
 never "the result was non-empty".
 Python `None` from an operation answers nothing.

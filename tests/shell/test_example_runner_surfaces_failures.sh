@@ -18,9 +18,13 @@
 #   2>&1 in test.sh went from carrying part of one shape to carrying two whole
 #   ones, and that is what the crippled copy below measures.
 # Guarantees:
-#   - a !(test A B) mismatch, an assertEqual mismatch and a syntax error each
-#     reach the "FAILURE in $f:" block naming THEMSELVES, and none of the three
-#     bodies carries another's signature
+#   - a !(test A B) mismatch, an assertEqual mismatch, an assertIncludes
+#     mismatch and a syntax error each reach the "FAILURE in $f:" block naming
+#     THEMSELVES, and none of the four bodies carries another's signature
+#   - the two assertion shapes stay apart from each other too: a two-sided
+#     verdict reports both bags and a one-sided one reports only the bag its
+#     verdict depended on, so a block carrying an "excess" line for
+#     assertIncludes would be naming answers that relation allows
 #   - a passing file's report is the is/should trace, without the engine's
 #     compiled-goal listing that the same $output holds
 #   - the assertion report reaches that block WHOLE. Its two bag lines are
@@ -54,12 +58,15 @@ bounded() { sh "$project_dir/bounded.sh" "$@"; }
 probe=$(mktemp -d)
 trap 'rm -rf "$probe"' EXIT HUP INT TERM
 
-# assertEqual throws through assert/2 ("MeTTa assertion failed"), never through
-# test/3 ("is ..., should ..."), so the two reproduce different classes. The
-# unclosed form is the third: the reader refuses it before anything runs.
+# assertEqual throws through the assert family ("MeTTa assertion failed"),
+# never through test/3 ("is ..., should ..."), so the two reproduce different
+# classes. assertIncludes is the same class with a one-sided report. The
+# unclosed form is the last: the reader refuses it before anything runs.
 printf '!(test 1 1)\n'        > "$probe/passes.metta"
 printf '!(test 1 2)\n'        > "$probe/test_mismatch.metta"
 printf '!(assertEqual 1 2)\n' > "$probe/assert_mismatch.metta"
+printf '!(assertIncludes (superpose (1 2)) (7))\n' \
+                              > "$probe/one_sided_mismatch.metta"
 printf '!(foo\n'              > "$probe/syntax_error.metta"
 
 # test.sh with its ONE stdout-and-stderr capture cut back to stdout: the
@@ -114,7 +121,7 @@ failed() {
         fail "test.sh exited 0 for $1" "$1"
 }
 
-for shape in test_mismatch assert_mismatch syntax_error; do
+for shape in test_mismatch assert_mismatch one_sided_mismatch syntax_error; do
     run_fixture "$project_dir/test.sh" "$shape" "$shape"
     failed "$shape"
 done
@@ -136,6 +143,18 @@ silent_about assert_mismatch "should"
 silent_about assert_mismatch "MeTTa test failed"
 silent_about assert_mismatch "Syntax error"
 
+# A one-sided verdict reports one bag. assertIncludes allows an answer in
+# excess of its expectation, so 1 and 2 are produced, legal, and unnamed; a
+# block carrying an "excess" line here would be pointing the reader at
+# something the relation permits.
+carries      one_sided_mismatch "MeTTa assertion failed"
+carries      one_sided_mismatch "missing: (7)"
+silent_about one_sided_mismatch "excess"
+silent_about one_sided_mismatch "differ only in order"
+silent_about one_sided_mismatch "should"
+silent_about one_sided_mismatch "MeTTa test failed"
+silent_about one_sided_mismatch "Syntax error"
+
 carries      syntax_error    "Syntax error"
 silent_about syntax_error    "should"
 silent_about syntax_error    "MeTTa assertion failed"
@@ -153,11 +172,11 @@ grep -qF -- "is 1, should 1" "$probe/passes.out" ||
     fail "a passing file's report carries the engine's compiled-goal listing" \
          passes
 
-# The planted defect. Two of the three shapes are diagnosed on stderr alone,
-# so a stdout-only capture loses them entirely; the third is on stdout and
+# The planted defect. Three of the four shapes are diagnosed on stderr alone,
+# so a stdout-only capture loses them entirely; the fourth is on stdout and
 # survives, which is what proves the crippled copy still runs examples rather
 # than merely failing to produce output.
-for shape in test_mismatch assert_mismatch syntax_error; do
+for shape in test_mismatch assert_mismatch one_sided_mismatch syntax_error; do
     run_fixture "$crippled" "$shape" "crippled_$shape"
     failed "crippled_$shape"
 done
@@ -176,9 +195,13 @@ rather than crippled and the two checks below prove nothing" \
     fail "an assertEqual mismatch is writing its diagnostic to STDOUT again; \
 engine/metta/runtime.pl's assert/2 must report through print_message/2" \
          crippled_assert_mismatch
+! grep -qF -- "MeTTa assertion failed" \
+       "$probe/crippled_one_sided_mismatch.body" ||
+    fail "the stdout-only copy still reports the one-sided assertion failure, \
+so the 2>&1 in test.sh buys nothing for this shape" crippled_one_sided_mismatch
 ! grep -qF -- "Syntax error" "$probe/crippled_syntax_error.body" ||
     fail "the stdout-only copy still reports the syntax error, so the 2>&1 in \
 test.sh buys nothing for this shape" crippled_syntax_error
 
-echo "ok: test.sh's FAILURE block tells the three failure shapes apart, and \
-the stdout+stderr capture is what carries two of them"
+echo "ok: test.sh's FAILURE block tells the four failure shapes apart, and \
+the stdout+stderr capture is what carries three of them"

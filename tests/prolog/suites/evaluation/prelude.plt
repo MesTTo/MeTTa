@@ -128,19 +128,34 @@ test(assertAlphaEqualToResult_over_variables) :-
 test(assertIncludes_subset_passes) :-
     eval_string("(assertIncludes (superpose (1 2 3)) (2 1))", [true]).
 
-%assertIncludes keeps the plain assert door, and so reports no bags: its
-%EXCESS answers are legal, so the two-sided report the equal forms carry would
-%name a bag that is not a reason for the failure. A one-sided report needs its
-%own door and is not built [source: docs/journal/2026-09-06-the-bag-diff-an-assertion-already-computes.md;
-%commit=71de27a76dd16684941e3e090de0d17299d96493].
-test(assertIncludes_missing_expectation_raises) :-
+%assertIncludes reaches the ONE-SIDED door, so a failure names the call as
+%written and the answers missing from the expectation, and the excess side
+%stays absent: its EXCESS answers are legal, so a two-sided report would name
+%a bag that is not a reason for the failure
+%[source: docs/journal/2026-09-06-the-bag-diff-an-assertion-already-computes.md;
+%commit=WORKTREE].
+test(assertIncludes_failure_carries_the_missing_bag_alone) :-
     catch(( eval_string("(assertIncludes (superpose (1 2)) (7))", _),
             Verdict = passed ),
-          error(metta_assertion_failed(_, Missing, Excess), _),
+          error(metta_assertion_failed(Form, Missing, Excess), _),
           Verdict = failed),
     Verdict == failed,
-    var(Missing),
+    Form == [assertIncludes, [superpose, [1, 2]], [7]],
+    Missing == [7],
     var(Excess).
+
+%The excess answers this relation ALLOWS, on a failing call: 1 and 2 are both
+%produced and neither is expected, and neither is named.
+test(assertIncludes_failure_never_names_a_legal_excess_answer) :-
+    catch(( eval_string("(assertIncludes (superpose (1 2)) (7))", _), true ),
+          error(Ball, _),
+          true),
+    message_to_string(error(Ball, none), Message),
+    forall(member(Line, ["MeTTa assertion failed: (assertIncludes (superpose (1 2)) (7))",
+                         "missing: (7)"]),
+           sub_string(Message, _, _, _, Line)),
+    \+ sub_string(Message, _, _, _, "excess"),
+    \+ sub_string(Message, _, _, _, "differ only in order").
 
 %The two bag-comparing Msg twins spell out their own bodies so their failure
 %report names the call the caller wrote, message included; the alpha twins

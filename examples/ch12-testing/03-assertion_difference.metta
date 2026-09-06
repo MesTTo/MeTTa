@@ -44,6 +44,18 @@
          (unify $reported (Error $ball $context) (repr $ball) no-error))
        "(metta_assertion_failed (assertEqual (superpose (a a b)) (superpose (a b b))) (b) (a))")
 
+; A ONE-SIDED question gets a one-sided answer. assertIncludes asks whether
+; every expected answer appears, so an answer in excess of the expectation is
+; LEGAL: 1 and 2 are both produced here and neither is expected, and the report
+; names neither. Only the missing bag is a reason for the failure, and the
+; excess side is ABSENT rather than empty, which repr writes as a variable:
+;
+;     MeTTa assertion failed: (assertIncludes (superpose (1 2)) (7))
+;       missing: (7)
+!(test (let $reported (catch (assertIncludes (superpose (1 2)) (7)))
+         (unify $reported (Error $ball $context) (repr $ball) no-error))
+       "(metta_assertion_failed (assertIncludes (superpose (1 2)) (7)) (7) $_0)")
+
 ; Two EMPTY bags beside a failure is the diagnosis rather than a puzzle.
 ; assertEqual compares the collapsed tuples by term equality, so a permutation
 ; fails while the answers themselves agree; the message adds a line saying
