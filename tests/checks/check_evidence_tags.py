@@ -239,6 +239,13 @@ CLAIM_SOURCES = (
     # was globbed and the seat root beside it was not, so bridge.pl's whole
     # Guarantees block went unread.
     "extensions/python/*.pl",
+    # And the seat root's PYTHON beside it, for the same reason and by the
+    # same route the `lib/*/*.metta` line above records: pin_provenance
+    # reported metta_py.py as "OUTSIDE the evidence gate's globs, so nothing
+    # reads this file's claims and nothing would ever resolve them" the first
+    # time it carried a placeholder. It is the Python half of the surface
+    # bridge.pl is the Prolog half of, and it makes the same kind of claim.
+    "extensions/python/*.py",
     "tests/prolog/*.py",
     "tests/conformance/*.pl",
     # The MORK seat's Rust, the one shipped language the list had never named.

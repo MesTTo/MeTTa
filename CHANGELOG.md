@@ -9,6 +9,35 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `m.fn[name].origin` answers where each clause of a head was written: one
+  `Origin(file, line)` per compiled clause in clause order, or `None` in that
+  position for a clause with no source. A head loaded from a `.metta` file
+  names that file and the line its equation sits on, a head registered from a
+  Prolog file names what `clause_property/2` recorded, and a head defined from
+  Python text has no source and says so. `S["car-atom"].origin` and
+  `metta.fn.car_atom.origin` ask the same question of the ambient space.
+- The engine's messages are `metta.engine` log records. SWI's `error`,
+  `warning`, `informational` and `debug(Topic)` kinds map to ERROR, WARNING,
+  INFO and DEBUG; `silent` is dropped; each record carries `metta_kind` and,
+  where the message has one, `metta_file` and `metta_line`. SWI still prints
+  its own line, so this adds a reader rather than taking the message, and the
+  package root logger carries the library author's `NullHandler` so a program
+  that configures nothing stays quiet.
+- `m.profile(...)`'s `EngineProfile` answers `.as_stats()`, a `pstats.Stats`
+  over the same run: `sort_stats`, `print_stats` and `dump_stats` work as they
+  do on a `cProfile` run, so `snakeviz` and `tuna` open SWI's profile. Its
+  rows gained `file`, `line`, `seconds_self` and `seconds_total`, and the
+  profile itself gained `.seconds`, converted the way SWI's own report
+  converts ticks.
+- The three doors that run host code raise `sys.audit("metta.host", door,
+  payload)` before the effect, so an `addaudithook` hook can watch or refuse:
+  `("py-atom", source)`, `("load", path)` and `("compile", qualname)`.
+- A refusal from a namespace, a projection or a module carries
+  `AttributeError.name` and `.obj`, so the interpreter's own "Did you mean"
+  appears beside the library's own sentence. The bracket and method doors,
+  which CPython fills nothing for, gained the suggestion they never had, and
+  `Row` and `Event` now name their columns and bindings in `__dir__` so the
+  suggestion is drawn from the names the message lists.
 - `lib_import` exposes committed imports as `(import Path)` atoms through
   `(imports &space)`. `unimport!` withdraws the imported source's surviving
   atom occurrences and compiled definitions, preserving equal atoms owned by

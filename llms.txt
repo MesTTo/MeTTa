@@ -866,10 +866,52 @@ m.eval_status(target) / m.run_status(src)  each answer paired with the path that
 m.stats()      with-block yielding .inferences (deterministic, gate on this),
                .cputime, .walltime, .gc_count, .gc_freed, .gc_time, .table_bytes
 m.profile(src) -> (groups, EngineProfile), per predicate
+        EngineProfile: .samples, .ticks, .seconds, .nodes (Rows over predicate,
+        calls, redos, ticks_self, ticks_siblings, file, line, seconds_self,
+        seconds_total), .top(n), .as_stats()
+prof.as_stats() -> pstats.Stats   the same profile in the currency every Python
+        profile viewer reads: .sort_stats("cumulative").print_stats(), and
+        .dump_stats(path) writes what snakeviz and tuna open. The key is
+        (file, line, predicate), so a row is navigable; a redo has no pstats
+        column, so .nodes stays the door for choice-point cost
 m.profile_extension(src, extension=, names=)  only YOUR functions
+m.fn[name].origin -> tuple      where each clause of a head was written, in
+        clause order: Origin(file, line) per compiled clause, or None in that
+        position for a clause with no source. A `.metta` head answers the file
+        and the line its equation sits on, a Prolog-registered head answers
+        what clause_property/2 recorded, and a head defined from Python text
+        has None. A special form has no clauses and answers (). Reading a
+        `.metta` line reads and parses that file, so this is a diagnostic
+        rather than a lookup. S["car-atom"].origin and metta.fn.car_atom.origin
+        ask the same question of the ambient space
 m.prolog()                    the engine's own interactive toplevel
 metta.engine().info() -> versions of metta, janus, swi_prolog, python, metta_path
 ```
+
+The engine's messages are `metta.engine` log records, so the tool a Python
+program already configures filters and formats them. SWI's kinds map to
+levels: `error` to ERROR, `warning` to WARNING, `informational` to INFO,
+`debug(Topic)` to DEBUG, and `silent` is dropped. Each record carries
+`metta_kind`, and `metta_file` and `metta_line` when the message has a source
+location. The bridge ADDS a reader: SWI still writes its own line to stderr,
+because a message hook that claimed the message would silence the engine. It
+covers the thread the library drives the engine on; a message emitted on a
+Prolog worker thread prints without a record. `metta` carries the library
+author's `NullHandler`, so a program that configures nothing stays quiet.
+
+The three doors that run host code raise `sys.audit("metta.host", door,
+payload)` before the effect, so an `addaudithook` hook can watch or refuse:
+`("py-atom", source)` for the expression form of `py-atom`, `("load", path)`
+for `Space.load`, and `("compile", qualname)` for a Python function compiled
+into equations. The name form of `py-atom` needs none of its own, because
+importing raises `import` already.
+
+A refusal from a namespace, a projection or a module carries
+`AttributeError.name` and `.obj`, so the interpreter's own "Did you mean"
+appears beside the library's sentence. CPython fills both itself for anything
+raised out of `__getattr__`; the bracket and method doors (`fn["car-atmo"]`,
+`answers.column("wha")`) are not attribute access and would otherwise carry
+nothing.
 
 Errors: `MettaError` is the base, then `EngineError`, `MettaSyntaxError`,
 `CastError`, `CompileError`, `SourceNotFound`,
