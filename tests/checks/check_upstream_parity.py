@@ -918,8 +918,18 @@ def upstream_head() -> str | None:
 #push and measured nothing -- and PERFORMANCE.md said the measurement ran in
 #CI. The workflow clones the pin before the gate now, so a missing checkout
 #there is a broken workflow rather than a missing option.
-def upstream_prerequisite() -> int | None:
-    """None when the comparison can run, or the exit status when it cannot."""
+def upstream_prerequisite(
+    remedy: str = "PERFORMANCE.md's 'Reproducing it' has the commands.",
+) -> int | None:
+    """None when the comparison can run, or the exit status when it cannot.
+
+    `remedy` is the sentence the LOCAL skip ends on, because the two lanes that
+    call this send a reader somewhere different: this one to the page carrying
+    the numbers, and check_upstream_fuzz to its own lane. The POLICY -- refuse
+    where CI=true, print a skip elsewhere -- is one piece of code on purpose,
+    since two copies of it are two things that can drift into disagreeing about
+    when a missing checkout is allowed to pass.
+    """
     if upstream_present():
         return None
     absence = f"upstream checkout not found at {UPSTREAM}"
@@ -935,7 +945,7 @@ def upstream_prerequisite() -> int | None:
     print(
         f"note: {absence}; nothing to compare. Check "
         f"{UPSTREAM_REMOTE} out at {UPSTREAM_COMMIT[:7]} there to run it; "
-        "PERFORMANCE.md's 'Reproducing it' has the commands."
+        f"{remedy}"
     )
     return 0
 

@@ -9,6 +9,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `metta.testing.programs(census=None, depth=3, facts=(1, 4), queries=(1, 3))`
+  generates whole MeTTa programs for differential testing against another
+  engine, and the `parity-fuzz` lane runs them on this engine and on upstream
+  PeTTa at the pinned commit. Every head a program writes comes from a census
+  of upstream's own example corpus with each head RUN on that engine and
+  recorded as reducing, left standing, raising, hanging, or reaching outside
+  the program, so a generated program compares answers instead of error paths.
+  The census is `tests/conformance/petta/HEADS.json`, written by
+  `tests/conformance/petta_capture.py --census`: 156 corpus files, 4,671 call
+  sites, 495 distinct heads, 70 candidates and 49 (head, arity) pairs the
+  arbiter reduces. A disagreement is shrunk to the smallest program that still
+  shows it and written to `ai-tmp/parity-fuzz/<date>/` as one Markdown file per
+  finding, carrying the divergence issue template's own fields and the
+  hypothesis reproduction blob. A program the arbiter leaves unreduced is
+  recorded in `surface-misses.jsonl` and never reported as a divergence.
 - Program text with holes reaches every text door. `m.run(t"!(fib {n})")` on
   Python 3.14, `m.run("!(fib {n})", n=10)` on every supported version, and any
   object carrying `strings` and `interpolations` tuples (`tstrings-backport`'s

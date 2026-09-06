@@ -318,6 +318,13 @@ PROVENANCE_SOURCES = (
     # this list's entries take.
     "extensions/python/benchmarks/*.py",
     "tests/conformance/*.pl",
+    # Their PYTHON half, which had been writing pins nothing read since the
+    # corpus lane was built: petta_capture.py and petta.py each carry a
+    # Guarantees block with commit pins in it, and the census mode added a
+    # third file's worth on 2026-09-07. The PIN half only, the staging this
+    # list's entries take, because the claim half is a burn-down the queue in
+    # CLAIM_SOURCES already counts at one unbacked tag.
+    "tests/conformance/*.py",
     "tests/data/*.json",
     # The Prolog beside the suites, named by the out-of-glob net: layering.pl
     # states what the engine's module graph guarantees and pins it, and
