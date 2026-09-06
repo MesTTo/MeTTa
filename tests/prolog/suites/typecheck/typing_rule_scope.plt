@@ -10,12 +10,12 @@
 %     replaces it for the pair the rule does name
 %     [tested: typing_rule_scope:a_user_rule_that_names_no_refusal_leaves_the_ordinary_one,
 %     typing_rule_scope:a_named_refusal_replaces_the_ordinary_one_for_its_own_pair;
-%     commit=WORKTREE].
+%     commit=84327245373bba29fba00cf2cea62d8257a9f5cb].
 %   - releasing a space retires the user typing rules declared in it, so the
 %     next life of that execution module checks under the shipped policy
 %     [tested: typing_rule_scope:a_released_space_retires_the_typing_rules_declared_in_it,
 %     typing_rule_scope:the_next_life_of_a_released_module_answers_the_ordinary_refusal;
-%     commit=WORKTREE].
+%     commit=84327245373bba29fba00cf2cea62d8257a9f5cb].
 % Owns resources: setup/cleanup releases each space; no file is written.
 % Open Obligations:
 %   To Do: None
