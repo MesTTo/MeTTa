@@ -12,7 +12,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Program text with holes reaches every text door. `m.run(t"!(fib {n})")` on
   Python 3.14, `m.run("!(fib {n})", n=10)` on every supported version, and any
   object carrying `strings` and `interpolations` tuples (`tstrings-backport`'s
-  `t("...")`) in between; the door's type is `metta.TemplateLike`. `run`,
+  `t("...")`) in between; the door's type is `metta.atoms.TemplateLike`. `run`,
   `profile`, `profile_extension`, `eval`, `answers`, `eval_status`, `match` and
   `parse` all take it, on `Space`, on the `MeTTa` context, at module level and
   on `AsyncMeTTa`. A hole is a binding by position: it is spliced into the text

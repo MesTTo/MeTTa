@@ -280,3 +280,51 @@ Open: `run_status` has no bindings channel, because
 not reach it either. It refuses a template naming that reason. The face lands
 there when the engine's status door grows the argument; that is an engine
 change, not a library one.
+
+## 2026-09-07, after the merge: where the two protocols are public
+
+The full battery on the merged trunk found three roster failures the
+four-directory verification did not reach. All three are about the SURFACE, not
+the mechanism, and the first two are one decision.
+
+Tried: exporting `TemplateLike` and `InterpolationLike` from the package root,
+because they name the type of the first argument of eight public doors and a
+reader of `m.run`'s signature has to be able to reach the name. It went red
+twice: `test_canonical_context_types_replace_public_newtypes` asserts
+`_api_types.__all__ == []`, and `test_m7_narrow_core_surface` pins the root at
+`FINAL_METTA_EXPORTS = 113` where the root now had 115.
+
+Decided: `metta.atoms` publishes them, `_api_types` defines them and publishes
+nothing, and the root keeps its count. Three reasons, in the order they
+decided it. The narrow-core ruling is a ruling: a name earns a place on the
+root by being a verb a program calls, and a structural type is not that.
+`metta.atoms` is the module the reader door already lives in, so a caller who
+has `parse` in scope has the type of `parse`'s argument in scope with it. And
+a hole's markers ARE the atom constructors, `Symbol`, `Grounded` and `parse`,
+every one of them already on that roster, so the type of the thing they are
+markers inside belongs beside them.
+
+The module tier's annotation follows the convention that table already has:
+`aiogen.py`'s `MODULE_ALIASES` gains `("TemplateLike", "_TemplateLike")` and
+`__init__.py` imports it under `TYPE_CHECKING` as `_TemplateLike`, which is how
+`Callable`, `Literal`, `Defined` and the rest stay out of `metta.<TAB>` while
+still typing the generated signatures. `InterpolationLike` gets no alias
+because no door's signature names it.
+
+Rejected: leaving them at the root and advancing `FINAL_METTA_EXPORTS` to 115.
+The count is not the claim; the ruling behind it is, and this change had no
+argument against the ruling. Revisit only if a door ever takes a protocol as a
+VALUE rather than as an annotation.
+
+The third failure is a pin doing its job. `test_aio_covers_the_whole_synchronous_surface`
+spells out `AsyncMeTTa.run`'s and `.match`'s parameters, and its own comment
+says an exact list goes red on every legitimate widening, so the pin advances:
+`values` joins both lists. Two assertions go with it, because the same pin
+exists to say what a name alone cannot: `source` is POSITIONAL_ONLY and
+`values` is VAR_KEYWORD. The first is load-bearing rather than cosmetic. It is
+what lets a hole be named `{source}`, since a positional-or-keyword parameter
+of that name would take the value before the field could see it, and it is what
+mypy required of the `eval` overloads.
+
+Not touched: three order-dependent lifecycle failures in the same battery,
+which are another worker's.
