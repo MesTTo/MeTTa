@@ -382,7 +382,7 @@ reaches(spaces, specializer, 'a changed function invalidates the specializations
 reaches(spaces, support_graph, 'a cleared space forgets the support edges of its module').
 reaches(spaces, translator, 'storing an equation compiles it').
 reaches(spaces, translator_rules, 'a release retires global translator registrations before clearing their owning module').
-reaches(spaces, type_rules, 'equation compilation holds the typing policy stable while installing translated clauses').
+reaches(spaces, type_rules, 'equation compilation holds the typing policy stable while installing translated clauses, and a release retires the user typing rules declared in the module it is clearing').
 reaches(specializer, filereader, 'records and forgets the assertion of a generated specialization').
 reaches(specializer, metta, 'reads the module and space context and the type declarations it specializes over').
 reaches(specializer, materialize, 'the shared support-invalidation action retires materialized relations as well as specializations').
