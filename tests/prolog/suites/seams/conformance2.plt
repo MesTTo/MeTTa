@@ -1,7 +1,7 @@
 % Purpose: pin conformance increment 2 through compiled and dynamic evaluation.
 % Assumes: run from tests/prolog so ../../engine/metta.pl resolves to this tree.
-% Guarantees: every semantic fix below produces the pinned LeaTTa 9ea9f9d
-%   answer through an equation body and through eval/2.
+% Guarantees: every semantic fix below produces its pinned answer through an
+%   equation body and through eval/2.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

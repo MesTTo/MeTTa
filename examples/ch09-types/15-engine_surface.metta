@@ -41,8 +41,8 @@
 ;; MeTTa's own, with no dump entry to take.
 ;sort-atom sorts a VALUE, so its parameter cannot carry the evaluation mask:
 ;the reference declares no type for it at all and its argument therefore
-;evaluates [measured 2026-08-24: `!(get-type sort-atom)` is `%Undefined%` on
-;LeaTTa 9ea9f9d, and `!(sort-atom (cdr-atom (a c b)))` is `(b c)` there].
+;evaluates, so `!(get-type sort-atom)` reports an evaluated first parameter and
+;`!(sort-atom (cdr-atom (a c b)))` is `(b c)`.
 !(test (get-type sort-atom) (-> %Undefined% Expression))
 !(test (get-type is-var) (-> Atom Bool))
 ;repr renders what its argument EVALUATED to, so its parameter says so.

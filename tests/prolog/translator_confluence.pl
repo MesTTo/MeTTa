@@ -57,9 +57,8 @@
 %     CONDITIONAL systems is undecidable in general, so that verdict is a
 %     PROOF OBLIGATION about the rules as they actually run, discharged
 %     exactly where every rule's body answers. The route that reaches the rest
-%     is LeaTTa's extended conditional critical pairs
-%     [source 2026-08-21: LeaTTa MeTTaILProofs/ConditionalCP.lean, after
-%     Avenhaus-Loria-Saenz 1994 and Lucas JLAMP 2024].
+%     is extended conditional critical pairs
+%     [source: Avenhaus and Loria-Saenz, LPAR 1994, and Lucas, JLAMP 2024].
 %
 %     A rule may also DECLINE with its own words, `(refuse Reason)`. That is
 %     one more way for a condition to fail rather than a change of fragment,
@@ -826,8 +825,7 @@ print_decidable_fragment(SpaceRules, PreludeRules) :-
             UNCONDITIONAL system extracted from the rule heads and a PROOF \c
             OBLIGATION about the conditional system that actually runs: it \c
             transfers exactly where every rule's body answers. The route that \c
-            reaches the rest is the arbiter's extended conditional critical \c
-            pairs, LeaTTa MeTTaILProofs/ConditionalCP.lean, after \c
+            reaches the rest is extended conditional critical pairs, after \c
             Avenhaus-Loria-Saenz (1994) and Lucas (JLAMP 2024).~n"),
     guarded_rules(SpaceRules, PreludeRules, Guarded, Total),
     (   Guarded =:= 0

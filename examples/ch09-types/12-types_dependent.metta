@@ -5,9 +5,9 @@
 ;get-type extension for numbers:
 ;=alpha declares two `Atom` parameters, so `(% $x 2)` would reach it as WRITTEN
 ;and be compared with 0 rather than run. The remainder is NAMED first, which is
-;what makes the extension fire; LeaTTa answers False for the unsequenced
-;form too [measured 2026-08-24: `!(=alpha (% 2 2) 0)` is False on LeaTTa
-;9ea9f9d].
+;what makes the extension fire [assumed 2026-08-24: the unsequenced
+;`!(=alpha (% 2 2) 0)` answered False when this was measured against an earlier
+;reference corpus, not re-measured since].
 (= (get-type $x)
    (catch (let $remainder (% $x 2)
             (if (=alpha $remainder 0)

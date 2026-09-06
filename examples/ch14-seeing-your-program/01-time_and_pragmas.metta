@@ -35,9 +35,8 @@
 ;The value is NAMED before the family operation reads it. `car-atom` and
 ;`size-atom` declare `Expression` parameters, so the operand reaches them AS
 ;WRITTEN; a `let` runs the form first and hands the answer over. The
-;demonstration is unchanged, and so is the expected value
-;[measured 2026-08-24: `!(let $v ((+ 1 2) b) (car-atom $v))` is 3 on LeaTTa
-;9ea9f9d and on this engine].
+;demonstration is unchanged, and so is the expected value: this engine answers
+;3 for `!(let $v ((+ 1 2) b) (car-atom $v))`.
 !(test (let $timed (elapsed (spin 100)) (car-atom $timed)) done)
 
 ;;; sleep answers True, so it sequences with let like any other side effect.

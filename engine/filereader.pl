@@ -1828,12 +1828,12 @@ process_form(_, In, _) :-
 % retryable. It used to carry a compile/populate MODE whose compile half
 % targeted the BASE tier: a file imported into a named space stored its
 % atoms there while its equations compiled into &self's module, so a
-% top-level call reduced through a space it never imported. LeaTTa
-% pins the opposite (LeaTTa tests/semantics/grounded/
-% 29-builtin-module-alias-import.metta, MEASURED: an alias import admits
-% nothing into the caller, both probes staying unreduced data; its model
-% is World.moduleReady testing the RUNNING CONTEXT's own space's import
-% mark). So equations compile into the RECEIVING space's module, exactly
+% top-level call reduced through a space it never imported. The opposite is
+% pinned: an alias import admits nothing into the caller, both probes staying
+% unreduced data, because module readiness is tested against the RUNNING
+% CONTEXT's own space's import mark [assumed: measured against an earlier
+% reference corpus, not re-measured against upstream PeTTa]. So equations
+% compile into the RECEIVING space's module, exactly
 % as the runtime door above does, every receiving space compiles its own
 % copy, and the mode distinction died with the shared-clause optimization
 % it existed for [tested:
@@ -1971,9 +1971,8 @@ read_balanced_form(LC, _, _) -->
 %parenthesised expression is the commonest kind and was for a long time the
 %only kind this splitter read, so `! untouched-symbol`, `! 42` and `! &first`
 %raised `expected '(' or '!('` and took the whole file down with them
-%[source: LeaTTa tests/semantics/eval-core/self-evaluating-atoms.metta,
-%grounded/25-state-rendering.metta, modules/09-bind/main.metta, all three
-%STATUS conforms].
+%[assumed: the three self-evaluating top-level forms were adopted from an
+%earlier reference corpus, not re-measured against upstream PeTTa].
 read_top_atom(LC0, Cs, LC1) --> "(", !, read_balanced_form(LC0, Cs, LC1).
 read_top_atom(LC0, Cs, LC1) --> read_bare_atom(outside, LC0, [], Cs, LC1).
 
@@ -2001,9 +2000,10 @@ top_forms_after_layout(Forms, LC0) -->
     top_atom_form(form, Forms, LC0).
 
 %A marker with nothing after it contributes no form rather than raising:
-%LeaTTa's tokenizer emits the marker and its parser then has no atom to mark
-%[measured 2026-08-19: LeaTTa --observed-file on a file ending in a bare `!`
-%exits 0 and prints nothing].
+%the tokenizer emits the marker and the parser then has no atom to mark
+%[assumed 2026-08-19: a file ending in a bare `!` exiting 0 and printing
+%nothing was measured against an earlier reference runner at that date, not
+%re-measured against upstream PeTTa].
 top_atom_form(_, [], _) --> eos, !.
 top_atom_form(Tag, [Term|Fs], LC0) -->
     read_top_atom(LC0, Cs, LC1),
@@ -2013,9 +2013,10 @@ top_atom_form(Tag, [Term|Fs], LC0) -->
 %`!` marks the atom that follows only when it stands before `(`, layout or
 %end of input. Everywhere else it is an ordinary symbol character, which is
 %what makes `bind!`, `change-state!`, `println!` and `!=` ordinary names, and
-%what makes `!42` and `!$x` symbols rather than runnables [source: LeaTTa
-%MettaHyperonFull/Runtime/Parser.lean:85-88; measured 2026-08-19: each of
-%those two prints nothing there].
+%what makes `!42` and `!$x` symbols rather than runnables
+%[assumed 2026-08-19: each of those two printing nothing was measured against
+%an earlier reference runner at that date, not re-measured against upstream
+%PeTTa].
 exec_marker --> "!", exec_marker_boundary.
 
 exec_marker_boundary, [C] --> [C], !,

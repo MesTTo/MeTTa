@@ -310,9 +310,8 @@ wire it is not a separate shape.
 
 `theta` binds the query's variables by name, and the names are the ones the
 encoder wrote for those variables, so binding by name is binding the
-caller's own variable. This is Hyperon's `execute_bindings` and LeaTTa's
-`ReduceResult.okBind`: an answer atom together with the bindings it is
-returned under. A `value` is the candidate-with-bindings reading and must
+caller's own variable. This is Hyperon's `execute_bindings`: an answer atom
+together with the bindings it is returned under. A `value` is the candidate-with-bindings reading and must
 unify with the pattern under theta; an answer whose value contradicts its
 theta drops, exactly as a non-unifying plain candidate does.
 

@@ -7,6 +7,26 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Removed
+
+- The `cetta` gate lane and the machinery behind it. `tests/conformance/`
+  loses `cetta.py`, `cetta_corpus.py`, `cetta_fences.txt`,
+  `cetta_shared_fragment.txt` and `measured_corpus.py`, and
+  `extensions/python/tests/conformance/` loses the two harness proofs of
+  those lanes. The C seat of this repository is `extensions/cmetta`; the
+  vendored fork is not something the gate tests against. `CETTA_PATH` and
+  `LEATTA_PATH` are gone with them, so no lane or tool reaches an outside
+  checkout through an environment override any more, and
+  `test_workspace_paths.py` scans every tracked file with no exemption.
+- Every reference to the earlier reference semantics that used to be the
+  arbiter. The behaviours it settled are unchanged and their sentences keep
+  their technical content; what each carried as a citation into an outside
+  checkout is now either the published work the claim really rests on, a
+  path inside this repository, or an `assumed` tag saying plainly that the
+  claim was adopted rather than re-measured against upstream PeTTa. Upstream
+  PeTTa at the parity pin is the arbiter, and `tests/conformance/petta.py`
+  with its vendored corpus is the lane that reads it.
+
 ### Added
 
 - `metta.testing.programs(census=None, depth=3, facts=(1, 4), queries=(1, 3))`

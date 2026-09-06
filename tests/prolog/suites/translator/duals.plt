@@ -407,8 +407,8 @@ test(an_unnamed_call_cannot_be_negated,
 %written head, where a dual would see a structure that never matches 10 and
 %answer True. Refusing is the only sound answer. This test asserted the
 %opposite between 2026-08-19 and 2026-08-30, when the engine matched such a
-%head structurally because LeaTTa does
-%[source: PeTTa@ae66fa8 src/translator.pl:9-12].
+%head structurally, following an earlier reference semantics
+%[source: PeTTa@ae66fa8 src/translator.pl:9-12, which is the rule now].
 test(a_functional_pattern_head_has_no_dual,
      [throws(error(type_error(dualisable_function, 'fp-halfof'), _))]) :-
     metta("(= (fp-dbl $n) (#* 2 $n))\n\c

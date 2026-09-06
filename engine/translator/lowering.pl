@@ -713,7 +713,6 @@ function_overapplication(Fun, Arguments, _) :-
 %third was unreportable, because the term it yields is indistinguishable from
 %data. reduce/3 carries which of the two happened and reduce/2 keeps its exact
 %behaviour, so every compiled call site is unchanged
-%[source: the LeaTTa checkout's MettaHyperonFull/Core/Result.lean, EvalStatus]
 %[tested: translator_reduction_status].
 reduce(X, Out) :- reduce(X, Out, _).
 
@@ -826,13 +825,13 @@ reduce([F|Args], Out, Status) :- !,
         % A parameter declared `Expression` or `Atom` hands its operand over AS
         % WRITTEN, so a variable-headed call site can receive the `(|-> ...)`
         % term itself where an evaluated operand used to arrive already
-        % compiled. LeaTTa applies exactly this shape: with
+        % compiled. The reference applies exactly this shape: with
         % `(: apply-two (-> Number Number Expression Number))` and
         % `(= (apply-two $x $y $f) ($f $x $y))`,
         % `!(apply-two 10 20 (|-> ($x $y) (+ $x $y)))` is 30 there and was the
         % unapplied `((|-> ($x $y) (+ $x $y)) 10 20)` here
-        % [measured 2026-08-24 against LeaTTa 9ea9f9d;
-        % source: LeaTTa tests/regression/lambda.metta].
+        % [assumed 2026-08-24: measured against an earlier reference corpus at
+        % that date, not re-measured against upstream PeTTa].
         %
         % Compiling it is one eval, and then this predicate's own partial case
         % applies it, so nothing about applying a lambda is special here. The
@@ -964,8 +963,10 @@ translate_expr_to_conj(Input, Conj, Out) :- translate_expr(Input, Goals, Out),
 %  - the conditional-rewriting metatheory defines an oriented conditional
 %    rewrite rule as one that "fires when its left side matches and each
 %    condition `s ~> t` holds", following Avenhaus-Loria-Saenz 1994 and Lucas
-%    JLAMP 2024, mechanised in LeaTTa [source 2026-08-21: LeaTTa
-%    MeTTaILProofs/ConditionalCP.lean, module header];
+%    JLAMP 2024 [source: Avenhaus and Loria-Saenz, "On Conditional Rewrite
+%    Systems with Extra Variables and Deterministic Logic Programs", LPAR 1994;
+%    Lucas, "Applications and extensions of context-sensitive rewriting",
+%    JLAMP 2024];
 %  - CHR: "If the guard succeeds, the rule applies. Otherwise the next rule is
 %    tried" [source 2026-08-21: sicstus.sics.se CHR, "How CHR Work"];
 %  - Haskell: "If none of the guarded expressions for a given alternative
@@ -1228,8 +1229,7 @@ translate_expr_dl([H|T], Goals0, Goals, Out) :-
 %ordinary arity machinery below again decides calls and partial applications.
 %This follows evalSequentialRun, whose bang branch evaluates against kb while
 %only a non-bang form extends kb for the next step
-%[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean,
-%evalSequentialRun] [tested:
+%[tested:
 %test_a_bang_before_the_definition_answers_unreduced_not_a_host_error].
 runnable_head_awaits_its_definition(Fun) :-
     translating_runnable,
@@ -1277,17 +1277,16 @@ call_site_type_chains(Fun, UniqueTypeChains) :-
     ).
 
 %A DECLARED head with no equations is still checked against its declaration,
-%because the declaration is what LeaTTa reads: `(: aF (-> A R))` with
-%`(: b B)` makes `(aF b)` `(Error (aF b) (BadArgType 1 A B))` there and left
+%because the declaration is what decides: `(: aF (-> A R))` with
+%`(: b B)` makes `(aF b)` `(Error (aF b) (BadArgType 1 A B))` and left
 %it as data here, which is why four type-cast files read the subject's own
-%error where this engine reported none
-%[source: LeaTTa tests/semantics/types-basic/50-type-cast-ill-typed-atom.metta
-%through 53, and 44 through 49 for the multiplicity].
+%error where this engine reported none [assumed: the four type-cast shapes and
+%the multiplicity were adopted from an earlier reference corpus, not
+%re-measured against upstream PeTTa].
 %
 %The goal is emitted ONLY for a head that HAS an arrow, so an ordinary
 %constructor compiles to exactly what it did and pays nothing. The arguments
-%it reports are the ones AS WRITTEN, which is the form LeaTTa names and
-%the one whose types decide.
+%it reports are the ones AS WRITTEN, which is the form whose types decide.
 %
 %ONE INDEXED CLAUSE LOOKUP decides it, the same door get_function_type/2 opens
 %on the typed-call path, and not type_declaration/2, which goes through match/4
@@ -1551,10 +1550,11 @@ masked_position_or_undefined(T, Masked) :-
     ( non_evaluated_parameter_type(T) -> Masked = T ; Masked = '%Undefined%' ).
 
 %THE EVALUATION MASK OF A WRITTEN BUILTIN CALL, which is the half of
-%LeaTTa's typed dispatch the function path above could not read. `argMask`
-%takes the operator's declared signature and answers one boolean per argument
-%[source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean:3767-3784]; this
-%index is that signature, and translate_call_args_dl/6 is that answer applied.
+%the typed dispatch the function path above could not read. An argument mask
+%takes the operator's declared signature and answers one boolean per argument;
+%this index is that signature, and translate_call_args_dl/6 is that answer
+%applied [assumed: the mask rule was adopted from an earlier reference
+%semantics, not re-measured against upstream PeTTa].
 %
 %Only chains that actually mask something are indexed, so the lookup below is
 %one indexed failure for every ordinary builtin and the walk it guards is the
@@ -1626,11 +1626,12 @@ builtin_result_type(Fun, Args, ResultType) :-
 %
 %Where several arrows are declared, one whose arity FITS is preferred over the
 %first. The reference takes the first unconditionally and guards the choice
-%with a build-time agreement test rather than defending it
-%[source: LeaTTa MettaHyperonFullTests/MultiArrowAgreement.lean:23-31, "at
-%which point `argMask` and `returnsAtom` need an order ruling rather than a
-%convention"]; this register carries genuinely different-arity rows for
-%`new-space`, `py-atom` and `Kwargs`, so the fitting arrow is read where there
+%with a build-time agreement test rather than defending it, at which point the
+%argument mask and the return-type reading need an order ruling rather than a
+%convention [assumed: read from an earlier reference semantics, not re-measured
+%against upstream PeTTa]; this register carries genuinely different-arity
+%rows for `new-space`, `py-atom` and `Kwargs`, so the fitting arrow is read
+%where there
 %is one and the reference's own fallback is used where there is not.
 %The caller has already asked the index, so this runs only for a name that
 %masks something.
@@ -1665,14 +1666,14 @@ memberchk_masked([T|Ts]) :-
 %arguments.
 %Upstream type-checks an application before interpreting its operands
 %(`hyperon-experimental@3f76dc4` interpreter.rs:1224-1258 against :1352-1395),
-%and LeaTTa's eight effects files are built to see the difference: each
+%and eight effects files are built to see the difference: each
 %pairs a control with an experiment whose operand emits a marker from inside
-%itself, and no marker appears for a rejected operand
-%[source: LeaTTa tests/semantics/grounded/13-effects-arithmetic.metta through
-%21-effects-strings-metatype.metta, all STATUS conforms]. This engine ran the
+%itself, and no marker appears for a rejected operand [assumed: the eight files
+%came from an earlier reference corpus, not re-measured against upstream
+%PeTTa]. This engine ran the
 %operand first and then reported the REDUCED value, so `(+ 1 (effect-string
 %PLUS-WRONG True))` printed the marker and answered
-%`(Error (+ 1 s) (BadArgType 2 Number String))` where LeaTTa answers the
+%`(Error (+ 1 s) (BadArgType 2 Number String))` where the reference answers the
 %call as written and prints nothing.
 %
 %DECIDED HERE, at compile time, because that is where it is free. The types of

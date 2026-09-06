@@ -462,11 +462,9 @@ note_head_pattern(Module, F, RevPath, Label, Reason) :-
 %does not consult that. AST.matchPat's own words are "a pattern variable
 %matches any subterm (and must match consistently if it recurs); CONSTRUCTORS
 %MATCH STRUCTURALLY; everything else matches only itself", four cases and no
-%case reading whether a label is defined [source 2026-08-19:
-%LeaTTa/MeTTaIL/Semantics/Reduce.lean:30-46, AST.matchPat], and equations are
-%applied by matching the whole left-hand side, `(matchAtoms p.fst a)`
-%[source 2026-08-19: LeaTTa/MettaHyperonFull/Operational/Properties.lean:48-50,
-%firedReducts].
+%case reading whether a label is defined, and equations are applied by matching
+%the whole left-hand side [assumed 2026-08-19: both rules were read from an
+%earlier reference semantics, not re-measured against upstream PeTTa].
 %
 %The question is asked once more AFTER the walk, and only to say so:
 %record_head_pattern_notes/2 reports a position whose label has meaning,
@@ -474,15 +472,16 @@ note_head_pattern(Module, F, RevPath, Label, Reason) :-
 %then only match a term handed over unevaluated. It decides nothing about what
 %compiles.
 %
-%Two of LeaTTa's own corpus files decide it, and this engine failed both.
+%Two files of an earlier reference corpus decide it, and this engine
+%failed both.
 %`(= (outer-hold (inner-sum $x $y)) outer-held)` with `(: outer-hold (-> Atom
 %Symbol))` answers `outer-held` there and RAISED here, because the head became
 %`inner-sum` run backwards over syntax; and `(= (nested-atom (produce-pa3))
 %nested-argument-held)` beside `(= (nested-atom pa3) ...)` answers only
-%`nested-argument-evaluated` there and answered BOTH here [measured 2026-08-19:
-%LeaTTa/tests/semantics/types-meta/19_atom_parameter_outer_call.metta and
-%15_atom_parameter_nested_parametric.metta, through
-%tests/conformance/answer_groups.pl].
+%`nested-argument-evaluated` there and answered BOTH here
+%[assumed 2026-08-19: measured against an earlier reference corpus at that
+%date, through tests/conformance/answer_groups.pl, and not re-measured against
+%upstream PeTTa].
 %
 %The relational reading is not lost, it is written where it runs: a `let` in
 %the body says the same thing and answers the same answers
@@ -565,10 +564,11 @@ constrain_args([F, A, B], Out, Goals, Path, Positions, Rest, Invert) :-
 %The name is Curry's: a functional pattern is a left-hand-side call solved by
 %narrowing rather than matched as a constructor term.
 %
-%This engine dropped it on 2026-08-19 because LeaTTa's matching relation has
-%no case for it, and rewrote five examples to say the same thing with a `let`
-%in the body. That reasoning was sound for LeaTTa and does not survive the
-%move to upstream as the only oracle: functionhead, functionhead2,
+%This engine dropped it on 2026-08-19 because an earlier reference semantics'
+%matching relation had no case for it, and rewrote five examples to say the
+%same thing with a `let` in the body. That reasoning was sound for that
+%reference and does not survive the move to upstream as the only oracle:
+%functionhead, functionhead2,
 %functionhead3, patrick_test and tilepuzzle all need it and all diverged
 %without it [measured 2026-08-30, tests/conformance/petta].
 %
@@ -1245,8 +1245,9 @@ translate_equation_body_result(F, BodyExpr, GoalsBody, ExpOut) :-
 %BodyExpr ; translate_expr(BodyExpr, GoalsBody, ExpOut) )` there and nothing
 %more [source: PeTTa@ae66fa8 src/translator.pl:25-28]. A body that compiled to
 %no goals used to take equation_result_continuation/4, which re-entered
-%evaluation on LeaTTa's `returnsAtom` rule
-%[LeaTTa MettaHyperonFull/Minimal/Interpreter.lean:3786-3799]. It became
+%evaluation on the `returnsAtom` rule this engine had adopted
+%[assumed: read from an earlier reference semantics, not re-measured against
+%upstream PeTTa]. It became
 %observable once a masked parameter could carry something unreduced, and it
 %DIVERGED: `(: wu1 (-> Number Atom %Undefined%))` with
 %`(= (wu1 $a $b) (42 $a $b))` answers `(42 6 (+ 4 2))` upstream and answered

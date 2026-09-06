@@ -7,7 +7,7 @@
 %   - one `ANSWER-GROUP ` line per RUNNABLE form, in source order, holding that
 %     form's answers in the engine's display spelling. A form with no answers
 %     prints an empty group rather than nothing, because "no answers" is an
-%     observation LeaTTa records as `[]` and dropping it would misalign
+%     observation a comparator records as `[]` and dropping it would misalign
 %     every line after it [tested:
 %     test_a_prelude_derived_form_matches_its_fused_twin_on_the_corpus;
 %     commit=c1eaa36c7a2089801fe9da3cbec3fc02833d66fe].
@@ -15,7 +15,8 @@
 %     exceptions retain process control without becoming answer errors
 %     [tested: test_process_exit_is_not_an_answer_error; commit=bbb512316280110a747e31c26adfc31e8c5104be].
 %   - reader variable names carried with collected answers are rendered by the
-%     engine's named writer [tested: LeaTTa conformance runner;
+%     engine's named writer [assumed: this was exercised by a conformance
+%     runner this repository no longer ships; no lane covers it today;
 %     commit=916def0562c211143bb91cd0bd8b2c9dac7ab4fa].
 % Fails when:
 %   - never silently: an unreadable file raises out of read_metta_source/2 and

@@ -140,9 +140,10 @@ inherited_stored_declaration_owns_arity(Module, Fun) :-
 %
 %That is a multiplicity divergence and multiplicity is specified: with
 %`(: df (-> Atom %Undefined%))` and `(: df (-> Number %Undefined%))` declared
-%over one equation, LeaTTa answers `(quote (+ 1 2))` once, reading the
+%over one equation, the reference answers `(quote (+ 1 2))` once, reading the
 %FIRST declaration's mask, where this engine answered `(quote (+ 1 2))` and
-%`(quote 3)` [measured 2026-08-24 against LeaTTa 9ea9f9d]. It is not a corner:
+%`(quote 3)` [assumed 2026-08-24: measured against an earlier reference corpus
+%at that date, not re-measured against upstream PeTTa]. It is not a corner:
 %loading the reference's own prelude beside minimal_metta_lib gives `function`
 %two declarations, and `!(function (return 7))` answered `7, 7`, which is what
 %made every strategy suite answer nothing once the duplicates compounded
@@ -150,8 +151,8 @@ inherited_stored_declaration_owns_arity(Module, Fun) :-
 %
 %The arity filter above already removed the WIDER-declaration case; this
 %removes the same-arity one, and the two together are what
-%`(ctxSigs env w op).head?` does in one step
-%[source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean:3775].
+%the reference's own signature lookup does in one step [assumed: adopted from
+%an earlier reference semantics, not re-measured against upstream PeTTa].
 %
 %Each branch keeps its own soft cut, so a branch that answers keeps EVERY
 %answer it has: a MeTTa function is nondeterministic and this must not become
@@ -163,13 +164,13 @@ first_applicable_branch([Branch|Branches], Fallback, ( Branch *-> true ; Rest ))
 %A declared call that no branch answered says WHY when the declaration is the
 %reason: every rejection it makes, `(Error <call> (BadArgType <position>
 %<expected> <actual>))`, against the arguments AS WRITTEN, which is the form
-%LeaTTa names and the one whose types decide
-%[source: LeaTTa tests/semantics/types-basic/44-badargtype-per-actual.metta
-%through 49-badargtype-widened-actuals.metta].
+%whose types decide [assumed: the per-actual and widened-actual shapes were
+%adopted from an earlier reference corpus, not re-measured against upstream
+%PeTTa].
 %
 %It answers NOTHING when the declaration makes no rejection, so a call whose
 %types check and whose equations do not match keeps this engine's own reading
-%rather than gaining LeaTTa's NotReducible: `(= (f 1) one)` then `!(f 2)`
+%rather than gaining the reference's NotReducible: `(= (f 1) one)` then `!(f 2)`
 %answers `[(f 2)]` there and nothing here, and that divergence is not this
 %change's to make [measured 2026-08-19 against the arbiter]. The soft cut is
 %what keeps the successful path unchanged: it commits to the branches whenever
@@ -367,14 +368,15 @@ typed_functioncall_branch(Fun, TypeChain, T, GsH, IsPartial, Bound, Out,
         OutCheck = [OutGoal]
     ),
     %NO RESULT CONTINUATION IS EMITTED HERE, and the reason is that this engine
-    %compiles where LeaTTa steps. LeaTTa's `eval` applies one equation
+    %compiles where the reference steps. Its `eval` applies one equation
     %and hands the instantiated right-hand side to `returnsAtom`, which sends it
     %back through evaluation; compiling that right-hand side has ALREADY done
     %exactly that one round. Adding a second is a double evaluation, measured:
     %`(: uf2 (-> Atom %Undefined%))` with `(= (uf2 $x) (cons-atom (+ 1 2) (b)))`
-    %answers `((+ 1 2) b)` on LeaTTa, because cons-atom's own `Atom` result
+    %answers `((+ 1 2) b)` there, because cons-atom's own `Atom` result
     %stops there, and a continuation at this call site answered `(3 b)`
-    %[measured 2026-08-24 against LeaTTa 9ea9f9d].
+    %[assumed 2026-08-24: measured against an earlier reference corpus at that
+    %date, not re-measured against upstream PeTTa].
     %
     %The one shape compilation does NOT cover is a body that emits no goals,
     %where nothing was evaluated at all; that is handled once, at the equation,
@@ -383,7 +385,7 @@ typed_functioncall_branch(Fun, TypeChain, T, GsH, IsPartial, Bound, Out,
     %between the argument evaluations and them. An argument that produced an
     %Error fails its own declared check -- an Error is not a Number -- and a
     %failed check takes the whole branch down, which is how
-    %`(needs-number (+ 1 "bad"))` answered nothing where LeaTTa answers
+    %`(needs-number (+ 1 "bad"))` answered nothing where the reference answers
     %the inner error atom.
     place_type_checks(ArgTypes, OutType, ArgChecks, OutCheck, [], AfterEval,
                       Extra),
@@ -686,9 +688,8 @@ translate_args_by_type_dl([A|As], [T|Ts], [Origin|Origins],
 %[source: PeTTa@ae66fa8 src/translator.pl:389-397].
 %
 %This named three members until 2026-08-30, `Atom`, `Variable` and
-%`Expression`, which is LeaTTa's `declaredTypeEvaluates`
-%(MettaHyperonFull/Core/Modifiers.lean:118-124). The extra two are the
-%difference, and it is observable: with `Expression` masked,
+%`Expression`, the three an earlier reference semantics masks. The extra
+%two are the difference, and it is observable: with `Expression` masked,
 %`(map-atom (cdr-atom (a b)) $y (q $y))` answered
 %`((q cdr-atom) (q (a b)))`, mapping over the two PARTS of an unevaluated
 %call, where upstream evaluates the list first and answers `((q b))`
@@ -712,11 +713,12 @@ non_evaluated_parameter_type(Type) :-
 
 %A masked position whose declared type still DECIDES something keeps its check,
 %and the check reads the argument AS WRITTEN, which is the term whose type
-%LeaTTa reports. Dropping it would turn two conforming answers into
+%the reference reports. Dropping it would turn two conforming answers into
 %non-conforming ones: `(: ef (-> Expression %Undefined%))` answers
 %`(Error (ef 5) (BadArgType 1 Expression Number))` and
-%`(Error (ef "s") (BadArgType 1 Expression String))` on LeaTTa
-%[measured 2026-08-24 against LeaTTa 9ea9f9d].
+%`(Error (ef "s") (BadArgType 1 Expression String))`
+%[assumed 2026-08-24: measured against an earlier reference corpus at that
+%date, not re-measured against upstream PeTTa].
 %
 %Atom decides nothing: it is the gradual top metatype, admitted against every
 %actual type, so its check can only ever succeed and is the same foregone

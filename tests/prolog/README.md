@@ -117,8 +117,9 @@ termination method for rewriting. `engine/narrowing.pl` implements it,
 `engine/trs.pl` is the rewriting library underneath (an adaptation of Markus
 Triska's public-domain trs.pl), `tests/prolog/suites/translator/trs.plt` and
 `tests/prolog/suites/translator/narrowing.plt` cover both, and
-`extensions/python/tests/conformance/test_critical_pair_oracle.py` runs the critical-pair enumerator
-against the kernel-checked one in LeaTTa's `MeTTaILProofs/CPExecutable.lean`.
+`extensions/python/tests/conformance/test_critical_pair_oracle.py` runs the
+critical-pair enumerator over a corpus of rewrite systems and checks its report
+against the pairs each system's own overlaps require.
 
 WHAT EACH HALF COVERS: the confluence half covers REWRITING and the termination
 half covers NARROWING. A critical pair is an overlap between two rules of a

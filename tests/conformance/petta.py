@@ -200,9 +200,9 @@ def _canonical_record(record: str) -> str:
     against engine/main.pl]. Canonicalising the line as one namespace therefore
     invents a coreference the writer never expressed, and splitting it loses
     none. CeTTa's own corpus generator draws the line in the same place
-    [source: CETTA_PATH/scripts/petta_corpus_manifest.py, test_diagnostic_parts
-    and alpha_canonicalize_output; CETTA_PATH is the override cetta.py resolves
-    the fork through].
+    [source: CeTTa scripts/petta_corpus_manifest.py, test_diagnostic_parts and
+    alpha_canonicalize_output, at
+    MesTTo/CeTTa@0ca2f4bad47205174608d7af54dd12a4c12b2e0b].
     """
     body = record.rstrip("\r\n")
     ending = record[len(body) :]

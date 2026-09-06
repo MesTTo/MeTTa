@@ -2,8 +2,7 @@
 ;
 ; Two spellings. `...` is an anonymous gap and every occurrence of it is its
 ; own variable; `(:seg $x)` is a named one, and the run it took is the answer
-; that name carries. Both are the law's [LeaTTa
-; MettaHyperonFull/Core/Modifiers.lean, segment?].
+; that name carries. Both are the law's.
 
 !(add-atom &self (Order 7 x y))
 !(add-atom &self (Order 8))
@@ -43,8 +42,7 @@
        (7 (x y)))
 
 ; TWO-SIDED. When both operands carry gaps the answer may stay open, and it
-; prints as the pattern that would match it [LeaTTa
-; MettaHyperonFull/Core/SeqRuntime.lean, SeqAtom.toSurface].
+; prints as the pattern that would match it.
 !(test (unify (f a (:seg $u)) (f a b (:seg $v)) $u none) (b (:seg $v)))
 
 ; THE FENCE. General sequence unification is INFINITARY (Kutsia, Journal of
@@ -56,7 +54,6 @@
        Expression)
 
 ; A marker a variable carries is DATA, never a gap: only what the program
-; WROTE is read as one [LeaTTa MettaHyperonFull/Core/SeqSyntax.lean,
-; parseConcreteAtom].
+; WROTE is read as one.
 !(add-atom &self (Marked ... tail))
 !(test (collapse (match &self (Marked $slot tail) $slot)) (...))

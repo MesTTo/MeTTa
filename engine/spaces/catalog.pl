@@ -91,10 +91,11 @@ native_storage_module_ready(Space, Module) :-
 %writing to `my_space_name` creates it exactly as writing to `&self` does
 %[source: PeTTa@ae66fa8 src/spaces.pl:1-6,52-62].
 %
-%This engine required a leading `&` between 2026-08-20 and 2026-08-30, on
-%LeaTTa's `spaceName` rule that "bare symbols resolve only through the running
-%context's token table; an unbound symbol is not a space"
-%[source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean:1565-1573]. Under
+%This engine required a leading `&` between 2026-08-20 and 2026-08-30, on a
+%rule taken from an earlier reference semantics: bare symbols resolve only
+%through the running context's token table, so an unbound symbol is not a space
+%[assumed: adopted from an earlier reference semantics and since withdrawn, not
+%re-measured against upstream PeTTa]. Under
 %that rule `examples/add_atom_fun_space.metta` could not run, and this engine's
 %own copy of it was respelled to `&my_space_name` to fit.
 %

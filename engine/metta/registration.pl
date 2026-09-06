@@ -391,10 +391,9 @@ metta_arithmetic_saturating_recovery(Operation, Arguments, Expression,
     ).
 
 %An operation fault is an answer when the language gives the fault a reason.
-%LeaTTa pins both integer doors byte-exactly as (Error (<op> 7 0)
-%DivisionByZero), while every other host error retains the raising path
-%[source: LeaTTa tests/regression/division_convention.metta:82-90;
-%tested: test_integer_division_by_zero_answers_what_d1_decides;
+%Both integer doors answer (Error (<op> 7 0) DivisionByZero) byte-exactly,
+%while every other host error retains the raising path
+%[tested: test_integer_division_by_zero_answers_what_d1_decides;
 %commit=ecd792eacbfe1810645434ce406f79be3a9e03d1].
 metta_operation_recovery(Operation, Arguments,
                          error(evaluation_error(zero_divisor), _), Answer) :-
@@ -557,7 +556,7 @@ runtime_type_guarded('<').
 %== and != are TERM equality and answer a Bool for any two operands, which is
 %exactly what their declared type (-> $a $b Bool) states, so the typed
 %dispatch has nothing left to check. They carried a comparable_operands/2
-%guard for LeaTTa's one-variable declaration until 2026-08-30; upstream's
+%guard for an adopted one-variable declaration until 2026-08-30; upstream's
 %declaration uses two independent variables and constrains nothing
 %[source: PeTTa@ae66fa8 lib/lib_builtin_types.metta:17-18]. Classifying them
 %here is what makes

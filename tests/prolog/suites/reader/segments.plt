@@ -1,13 +1,14 @@
 % Purpose: verify sequence-variable (gap) parsing, fragment classification,
 %   the three certified-finite solvers, the refusal fence, and the space door,
-%   against LeaTTa's own statements of the law.
+%   against the three fragments Kutsia proved finite.
 % Guarantees:
 %   - `...` and `(:seg $x)` parse to gaps and every other marker-shaped term
 %     stays data, root included [tested: segments_parsing].
-%   - the classifier answers LeaTTa's own case for each fragment and
+%   - the classifier answers the right case for each fragment and
 %     refuses outside them, naming the rule [tested: segments_fragments].
-%   - each solver answers what LeaTTa's procedure answers, including the
-%     shortest-first split order and the open remainder a two-sided answer
+%   - each solver answers what the calculus for its fragment answers,
+%     including the shortest-first split order and the open remainder a
+%     two-sided answer
 %     keeps [tested: segments_one_sided, segments_last_position,
 %     segments_linear_shallow].
 %   - distinct `...` occurrences never constrain each other, a repeated named
@@ -68,8 +69,7 @@ mentions(Message, Text) :-
 
 :- begin_tests(segments_parsing).
 
-%The two spellings the law recognises, and nothing else [source: LeaTTa
-%MettaHyperonFull/Core/Modifiers.lean, segment?].
+%The two spellings the law recognises, and nothing else.
 test(both_spellings_parse_to_gaps) :-
     parsed('(A ... D)', Anonymous),
     parsed('(A (:seg $x) D)', Named),
@@ -84,8 +84,7 @@ test(a_bound_second_position_is_data) :-
     parsed('(A (:seg foo) D)', Parsed),
     Parsed == ['A', [':seg', foo], 'D'].
 
-%The root of a side is never a gap [source: LeaTTa
-%MettaHyperonFull/Core/SeqSyntax.lean, parseSeqAtom].
+%The root of a side is never a gap.
 test(the_root_is_never_a_gap) :-
     sread('(:seg $r)', Term),
     spaces:metta_seq_parse(Term, Parsed),
@@ -96,7 +95,7 @@ test(the_root_is_never_a_gap) :-
 %is WHEN the question is asked: a pattern whose marker sits behind a variable
 %is gap-free at the moment its call site compiles, so it keeps the ordinary
 %door and the marker the variable later carries is matched as the atom it is
-%[source: LeaTTa MettaHyperonFull/Core/SeqSyntax.lean, parseConcreteAtom].
+%as the ordinary parse rule requires.
 test(a_marker_behind_a_variable_is_not_a_gap) :-
     sread('(A $p D)', Term),
     \+ spaces:metta_seq_present(Term),
@@ -121,9 +120,8 @@ test(a_nested_gap_is_reported) :-
 
 :- begin_tests(segments_fragments).
 
-%The classifier's own dispatch order [source: LeaTTa
-%MettaHyperonFull/Core/SeqFragment.lean, seqFinitary?]: a gap-free side first,
-%then last position, then linear-shallow.
+%The classifier's own dispatch order: a gap-free side first, then last
+%position, then linear-shallow.
 test(a_gap_free_side_is_one_sided) :-
     parsed('(A ... D)', Left),
     sread('(A b c D)', Right),
@@ -156,7 +154,7 @@ test(the_commuting_equation_refuses) :-
     refusal(Left, Right, Message),
     mentions(Message, "outside the proved finitary fragment"),
     mentions(Message, "Theorem 62"),
-    mentions(Message, "SeqFragment.lean").
+    mentions(Message, "metta_seq_classify/3").
 
 %A two-sided pair whose gaps are neither all final nor all shallow.
 test(a_nested_two_sided_gap_refuses) :-
@@ -164,8 +162,7 @@ test(a_nested_two_sided_gap_refuses) :-
     refusal(Left, Right, Message),
     mentions(Message, "outside the proved finitary fragment").
 
-%One name may not play both roles [source: LeaTTa
-%MettaHyperonFull/Core/SeqFragment.lean, noMixedSeqRoles].
+%One name may not play both roles.
 test(a_mixed_role_name_refuses) :-
     parsed('(f (:seg $m) $m)', Left),
     sread('(f a b)', Right),
@@ -182,8 +179,7 @@ test(a_mixed_role_across_sides_refuses) :-
 
 :- begin_tests(segments_one_sided).
 
-%A gap consumes every possible run, SHORTEST FIRST [source: LeaTTa
-%MettaHyperonFull/Core/SeqOneSided.lean, oneSidedSeg]. Two gaps around a
+%A gap consumes every possible run, SHORTEST FIRST. Two gaps around a
 %separator therefore enumerate the splits in increasing prefix length.
 test(splits_enumerate_shortest_first) :-
     parsed('($pre ... SEP ... $post)', Left),
@@ -226,8 +222,7 @@ test(a_clash_refutes_every_split) :-
 :- begin_tests(segments_identity).
 
 %Distinct `...` occurrences are distinct variables, so one taking a run says
-%nothing about the other [source: LeaTTa
-%MettaHyperonFull/Core/SeqSyntax.lean, SeqVar.anonymous].
+%nothing about the other.
 test(distinct_anonymous_gaps_do_not_constrain_each_other) :-
     parsed('(f ... g ...)', Left),
     sread('(f a g b c)', Right),
@@ -238,8 +233,7 @@ test(distinct_anonymous_gaps_do_not_constrain_each_other) :-
             Answers),
     Answers == [[a]-[b, c]].
 
-%A repeated NAMED gap accepts exactly a runtime-equal run [source: LeaTTa
-%MettaHyperonFull/Core/SeqOneSided.lean, oneSidedBindSegment].
+%A repeated NAMED gap accepts exactly a runtime-equal run.
 test(a_repeated_named_gap_takes_the_same_run) :-
     parsed('(f (:seg $x) g (:seg $x))', Left),
     sread('(f a b g a b)', Right),
@@ -267,8 +261,7 @@ test(a_repeated_run_compares_the_engines_way) :-
 
 %Kutsia Section 6.3 is deterministic and unitary: one answer or none. A gap
 %facing a longer side takes the whole remainder, and a remainder that still
-%holds a gap keeps it as the marker that would match it [source: LeaTTa
-%MettaHyperonFull/Core/SeqRuntime.lean, SeqAtom.toSurface].
+%holds a gap keeps it as the marker that would match it.
 test(a_trailing_gap_absorbs_the_remainder) :-
     pair('(pair (f a (:seg $u)) (f a b (:seg $v)))', Left, Right),
     Left = [_, _, '$metta_seg'(Run, _)],
@@ -300,8 +293,8 @@ test(a_shorter_fixed_side_refutes) :-
 %the last child of its own expression, so a NAMED gap may occur twice, and the
 %second occurrence then solves its stored run against what it faces rather than
 %demanding the two were written the same way. That is what applying the
-%substitution to the worklist does in the calculus [source: LeaTTa
-%MettaHyperonFull/Core/SeqLastPos.lean, bindSegment].
+%substitution to the worklist does in the calculus
+%[source: Kutsia Section 6.3].
 test(a_repeated_gap_solves_its_stored_run_against_the_second_face) :-
     pair('(pair (f (g (:seg $x)) (h (:seg $x))) (f (g (:seg $y)) (h b)))',
          Left, Right),
@@ -335,8 +328,7 @@ test(the_trivial_identity_holds) :-
 
 :- begin_tests(segments_linear_shallow).
 
-%The widening calculus, projection first [source: LeaTTa
-%MettaHyperonFull/Core/SeqLinearShallow.lean, solveLinearShallow].
+%The widening calculus, projection first [source: Kutsia Section 6.2].
 test(two_root_gaps_solve_to_their_runs) :-
     pair('(pair (f (:seg $u) b) (f a (:seg $v)))', Left, Right),
     Left = [_, '$metta_seg'(U, _), _],
@@ -391,8 +383,7 @@ test(a_gap_query_reads_every_admissible_arity) :-
     metta_remove_atom('&j5door', ['B', b, 'D'], _).
 
 %A marker STORED as an atom is data, never a gap, which is the frozen-subject
-%reading [source: LeaTTa MettaHyperonFull/Core/SeqRuntime.lean,
-%residualUnderRigid].
+%reading.
 test(a_stored_marker_is_data) :-
     metta_add_atom('&j5stored', ['A', '...', 'D'], _),
     spaces:metta_seq_query_plan(['A', '...', 'D'], Asked),

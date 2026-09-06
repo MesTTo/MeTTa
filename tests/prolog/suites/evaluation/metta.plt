@@ -238,7 +238,8 @@ test(every_runtime_term_has_a_metatype,
 % A NAME is Grounded when this engine HOLDS A FUNCTION for it and a Symbol
 % when it does not, which is upstream PeTTa's whole rule, one clause over one
 % register [source: PeTTa@43705f5d src/metta.pl:202]. It replaced a 115-name
-% table taken from LeaTTa's `groundedTokens` on 2026-09-05, when the user
+% table taken from an earlier reference semantics' grounded-token list on
+% 2026-09-05, when the user
 % ruled that this engine follows upstream PeTTa. Reproduce the rows below on
 % both engines by putting one `!(get-metatype <name>)` per line in a file and
 % running
@@ -442,7 +443,7 @@ test(test_real_valued_math_treats_integer_and_float_operands_alike) :-
     'pow-math'(2, -2147483649, TooSmall),
     TooSmall == ['Error', ['pow-math', 2, -2147483649],
                  "power argument is too big, try using float value"],
-    %exp-math is this engine's doctrine, not part of LeaTTa's floatUn table.
+    %exp-math is this engine's doctrine, outside the adopted promotion table.
     'exp-math'(1, IntegerExp), 'exp-math'(1.0, FloatExp),
     IntegerExp =:= FloatExp.
 
@@ -480,7 +481,8 @@ test(divide_names_its_two_operands) :-
 %answers in upstream's own words, and upstream's noun is not uniform: sqrt-math
 %and abs-math say `number` where every later unary operation says `input
 %number`, and pow-math and log-math name both of theirs
-%[source: LeaTTa tests/semantics/grounded/08-partial-math.metta].
+%[source: hyperon-experimental lib/src/metta/runner/stdlib/math.rs, whose unit
+%tests pin each text].
 math_refusal_case('sqrt-math'(invalid_number, R), R,
                   "sqrt-math expects one argument: number").
 math_refusal_case('abs-math'(invalid_number, R), R,
@@ -1003,7 +1005,8 @@ test(a_scoped_user_function_stays_scoped,
 %What these three reproductions pin is that the operand is not COERCED, and
 %that is unchanged; how the refusal is DELIVERED did change, from a raise to
 %an answer, so the expectations are written out rather than hidden behind a
-%catch [source: LeaTTa tests/semantics/grounded/07-partial-core.metta].
+%catch [assumed: the answer shapes were adopted from an earlier reference
+%corpus, not re-measured against upstream PeTTa].
 test(a_one_element_expression_is_not_a_character_code) :-
     % (+ 1 (g)) answered 104, the character code of g.
     findall(R, '+'(1, [g], R), Plus),
@@ -1688,8 +1691,9 @@ test(a_program_declaration_is_answered_before_the_engines,
 
 %TWO DIFFERENT KINDS ANSWER FALSE, and no type question is asked to get there.
 %These four were REFUSED with `(BadArgType 2 <expected> <actual>)` until
-%2026-08-30, through a comparable_operands/2 guard written for LeaTTa's
-%one-variable `(-> $a $a Bool)`. Upstream declares two independent variables
+%2026-08-30, through a comparable_operands/2 guard written for an earlier
+%reference semantics' one-variable `(-> $a $a Bool)`. Upstream declares two
+%independent variables
 %and its whole definition is term equality
 %[source: PeTTa@ae66fa8 src/metta.pl:40-41 and lib/lib_builtin_types.metta:17;
 %measured 2026-08-30, both engines answer false for all four].
@@ -1843,9 +1847,9 @@ test(a_list_argument_stays_a_list,
 %subtyping relation while checking an argument; it WIDENS the argument's type
 %LIST and runs the ordinary check against the wider list, so the matcher learns
 %nothing about subtyping and `get-type` is where it shows. Every expectation
-%below is LeaTTa's measured answer from pinned hyperon 0.2.10 at 3f76dc4
-%[source: LeaTTa ai-report-subtype-graph.md, measured 2026 against pinned
-%hyperon 0.2.10 at 3f76dc4, which the two lines above name].
+%below is the answer measured from pinned hyperon 0.2.10 at 3f76dc4
+%[source: hyperon-experimental@3f76dc4, get_atom_types_internal and
+%get_tuple_types, which the two lines above name].
 
 subtype_case(Setup, Query, Expected) :-
     forall(member(Form, Setup), process_metta_string(Form, _)),
@@ -1912,8 +1916,7 @@ test(no_edge_leaves_types_alone) :-
 %
 %The mechanism is one equality with a wildcard, not the `:<` graph:
 %`*typ == ATOM_TYPE_ATOM || *typ == get_meta_type(atom)`
-%[source: LeaTTa tests/semantics/types-meta/00_metatypes.metta, quoting
-%hyperon-experimental@3f76dc4 lib/src/metta/types.rs:606-617].
+%[source: hyperon-experimental@3f76dc4 lib/src/metta/types.rs:606-617].
 
 metatype_call(Declaration, Argument, Answer) :-
     process_metta_string(Declaration, _),
@@ -1944,7 +1947,7 @@ test(a_symbol_parameter_takes_a_symbol_and_nothing_else) :-
 %(Siek and Taha's ? relation), so no violation is provable for `foo`.
 %
 %This test used to say "and nothing else" and assert that `foo` was refused.
-%Measured 2026-08-19 on hyperon 0.2.10 and on the LeaTTa mechanised
+%Measured 2026-08-19 on hyperon 0.2.10 and on an earlier reference
 %interpreter, byte-identical across both: `!(meta-expr foo)` answers
 %`(got foo)` and `!(meta-expr 7)` is `(BadArgType 1 Expression Number)`. The
 %source the old comment quoted, `*typ == ATOM_TYPE_ATOM || *typ ==
@@ -1984,7 +1987,7 @@ test(an_atom_parameter_takes_every_kind,
 %which made every value answer Grounded. Both callers ask with it bound.
 %The same gradual rule from the Grounded side. This test used to assert that
 %a Grounded parameter REJECTS a symbol; measured 2026-08-19 on hyperon 0.2.10
-%and on the LeaTTa mechanised interpreter, byte-identical across both,
+%and on an earlier reference interpreter, byte-identical across both,
 %`!(meta-gnd foo)` answers `(gotg foo)`. An undeclared symbol has no declared
 %type to contradict Grounded with. A symbol that IS declared does, and that is
 %the half this pins as still refusing.
@@ -2528,12 +2531,12 @@ test(with_pragma_refuses_an_unknown_key,
 
 :- begin_tests(operation_answers).
 
-%The multiplicity and the order of BadArgType, on LeaTTa's own four
-%programs: one error per rejected ACTUAL type, one per declared ARROW, the two
-%composing arrow-major and actual-minor, and a position whose sibling actual
-%type carried the check forward still reporting its failure before the later
-%position's [source: LeaTTa tests/semantics/types-basic/
-%44-badargtype-per-actual.metta through 49-badargtype-widened-actuals.metta].
+%The multiplicity and the order of BadArgType, on four programs taken from an
+%earlier reference corpus: one error per rejected ACTUAL type, one per declared
+%ARROW, the two composing arrow-major and actual-minor, and a position whose
+%sibling actual type carried the check forward still reporting its failure
+%before the later position's [assumed: not re-measured against upstream
+%PeTTa].
 %Each program names its own symbols, so the five run in one space without a
 %teardown between them and one case cannot inherit another's declarations.
 badargtype_program("(: pa-a pa-A)\n(: pa-a pa-B)\n(: pa-g (-> pa-C Number))",
@@ -2611,13 +2614,12 @@ test(a_shared_type_variable_reports_what_the_first_argument_fixed,
 
 %An argument whose DECLARED type is already wrong is refused where it stands,
 %so the error names the call the program wrote and the argument never runs.
-%LeaTTa's eight effects files are built to see exactly that: each pairs a
+%Eight effects files are built to see exactly that: each pairs a
 %control with an experiment whose operand emits a marker, and the marker is
 %absent for the rejected operand on hyperon 0.2.10, which type-checks a call
 %before interpreting its arguments
-%[source: LeaTTa tests/semantics/grounded/13-effects-arithmetic.metta through
-%21-effects-strings-metatype.metta, all STATUS conforms, quoting
-%hyperon-experimental@3f76dc4 interpreter.rs:1224-1258 against :1352-1395].
+%[source: hyperon-experimental@3f76dc4 interpreter.rs:1224-1258 against
+%:1352-1395].
 test(a_wrongly_typed_operand_is_named_as_written,
      [setup(( process_metta_string("(: ew-string (-> Atom String))", _),
               process_metta_string("(= (ew-string $l) \"s\")", _) ))]) :-
@@ -2666,10 +2668,9 @@ test(an_undecided_operand_still_runs,
 % a file, and `!(import! &self skel)` names it directly. Upstream loads six of
 % them at startup and `skel` is its own skeleton, the one that uses every tier
 % at once: three declarations, one MeTTa equation, and one grounded operation
-% [source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean, skelBuiltin,
-% transcribed from upstream's builtin_mods/skel.metta and skel.rs; corpus
-% tests/semantics/grounded/28-builtin-module-skel.metta, 29 and 32, all three
-% STATUS conforms]. This engine resolved every import against the filesystem,
+% [source: hyperon-experimental builtin_mods/skel.metta and skel.rs, by way of
+% an earlier reference semantics' transcription]. This engine resolved every
+% import against the filesystem,
 % so all three read `existence_error(source_sink, skel)`.
 :- begin_tests(builtin_modules).
 
@@ -2710,10 +2711,10 @@ test(skel_admits_both_tiers_and_is_idempotent,
 %child of the TOP and the same name written inside a module is relative to that
 %module. Accepting it there would be worse than refusing: the import would
 %report success while the operation stayed unreduced
-%[source: LeaTTa tests/semantics/modules/35-builtin-from-module, whose STATUS
-%is diverges because the two engines word the refusal differently, both
-%refusing]. The two files are LeaTTa's own shape: the top imports a
-%module, and the MODULE writes the bare built-in name.
+%[assumed: the two engines word the refusal differently and both refuse;
+%measured against an earlier reference corpus, not re-measured against upstream
+%PeTTa]. The two files keep that corpus's shape: the top imports a module, and
+%the MODULE writes the bare built-in name.
 plunit_builtin_module_tree(Directory) :-
     tmp_file(builtin_from_module, Directory),
     make_directory(Directory),
@@ -2745,8 +2746,8 @@ test(a_module_cannot_reach_a_builtin_by_its_bare_name,
 %A module NAME may be a COLON PATH: `pkg:child` names pkg/child.metta beside
 %the file that imports it, `top:` names the outermost module's directory and
 %`self:` the importing module's own, which is also what a bare path means
-%[source: LeaTTa tests/semantics/modules/22-path-colon, 23-path-top and
-%24-path-self, all STATUS conforms].
+%[assumed: the three path forms were adopted from an earlier reference corpus,
+%not re-measured against upstream PeTTa].
 plunit_module_tree(Top, Package, Child) :-
     tmp_file(modules, Top),
     make_directory(Top),
@@ -2801,10 +2802,9 @@ test(a_written_path_is_not_rewritten) :-
 
 %`include` PASTES a module's source into the space that included it and
 %answers what its LAST directive answered, where import! gives the file its
-%own space and answers unit [source: LeaTTa
-%MettaHyperonFull/Minimal/Interpreter.lean, the include dispatch;
-%tests/semantics/modules/04-include-no-directive.metta and
-%05-include-directive.metta].
+%own space and answers unit [assumed: the include dispatch was adopted from an
+%earlier reference semantics, not re-measured against upstream PeTTa, which has
+%no include].
 plunit_include_tree(Top, Quiet, Loud) :-
     tmp_file(include, Top),
     make_directory(Top),
@@ -2855,8 +2855,9 @@ test(include_refuses_a_base_and_a_name_that_resolves_to_nothing) :-
 %state is dropped and the character after it taken literally, a `}` in the
 %argument state consumes the next argument or produces NOTHING once they run
 %out, and any other character there ends the argument and is taken literally
-%[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean, formatPiece and
-%formatArg; measured 2026-08-19 against the arbiter, each row below].
+%[assumed 2026-08-19: the format-piece and format-argument rules were adopted
+%from an earlier reference semantics and each row below measured against it at
+%that date, not re-measured against upstream PeTTa].
 format_case("Probability of {} is {}%", [head, 50],
             "Probability of head is 50%").
 format_case("{} and {}", [only], "only and ").
@@ -2874,8 +2875,8 @@ test(format_args_follows_the_arbiters_formatter,
 
 %A first argument that is not a format string earns the long text, a second
 %that is not an expression earns the conversion's own, and a DECIDED wrong
-%type earns a BadArgType before either [source: the same file, formatArgsOp's
-%three cases; LeaTTa tests/semantics/grounded/07-partial-core.metta].
+%type earns a BadArgType before either [assumed: the three cases were adopted
+%from an earlier reference semantics, not re-measured against upstream PeTTa].
 test(format_args_words_its_refusal_by_which_argument_is_wrong) :-
     'format-args'(not-a-format, [], First),
     First == ['Error', ['format-args', not-a-format, []],

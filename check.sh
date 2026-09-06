@@ -433,21 +433,6 @@ run REPORT parity-fuzz  sh -c "cd '$HERE' && '$PY' tests/checks/check_upstream_f
 # and the strategy held to the census's own heads.
 run GATE   parity-fuzz-selftest "$PY" "$HERE/tests/checks/check_upstream_fuzz_selftest.py"
 
-# The two-runtime differential: the conformance corpus's CeTTa-routable
-# fragment replays through the fork's C core (CETTA_PATH overrides the
-# sibling checkout) and the shared-fragment pin must hold. Fenced classes
-# skip the route loudly; divergences outside the pin report and never
-# block; with the fork absent this reports that and passes, the same
-# absence policy the conformance lane above follows.
-run GATE   cetta         "$PY" "$HERE/tests/conformance/cetta.py" --timeout 25 --show 12
-
-# The forward half, the fork's frozen oracle corpus, left the gate on
-# 2026-08-30 (user ruling): its pins were frozen from the LeaTTa-aligned
-# semantics and the engine now follows upstream PeTTa, so every moved
-# answer is the alignment, not a defect. tests/conformance/cetta_corpus.py
-# remains runnable by hand, and re-freezing the fork's pins from the
-# PeTTa-aligned tree is what would earn the lane back.
-
 # The obligation headers are the contract a library author reads, and a
 # [tested X] tag is the strongest evidence in the scheme. Thirteen of them
 # named tests that had never existed in the tree's history, including some

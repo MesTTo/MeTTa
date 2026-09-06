@@ -20,12 +20,11 @@ should, unless moving it costs something measurable.
 ## The bar a head has to clear
 
 The reference point is the state-free structural core of minimal MeTTa's
-instruction set, which LeaTTa's own `tests/mettail/metta.mettail` presents as
-fourteen names: `eval`, `evalc`, `context-space`, `chain`, `unify`, `unify%`,
-`cons-atom`, `decons-atom`, `collapse-bind`, `superpose-bind`, `function`,
-`return`, `metta` and `call-native`. Its `MettaDialect` proves those fourteen
-are exactly the primitive instruction enum plus the accepted heads plus
-contextual `return`, and eight of them head no rewrite at all: their
+instruction set, fourteen names: `eval`, `evalc`, `context-space`, `chain`,
+`unify`, `unify%`, `cons-atom`, `decons-atom`, `collapse-bind`,
+`superpose-bind`, `function`, `return`, `metta` and `call-native`. Those
+fourteen are exactly the primitive instruction enum plus the accepted heads
+plus contextual `return`, and eight of them head no rewrite at all: their
 configuration, matching, collection, type and host semantics are named
 follow-up presentations rather than omissions.
 

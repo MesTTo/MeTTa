@@ -45,9 +45,10 @@ confident but WRONG verdict, never a merely-missed one:
      only a path check.sh's own lane text names LITERALLY does).
   3. A cited check.sh LANE existing as GATE was read as FIXED-leaning.
      Wrong for `vulture` (P2.7, "vulture's confidence floor" -- vulture
-     has been a GATE lane since before P2.7 existed) and for `leatta`
-     (P2.13, cited only as "the same differential pattern as the `leatta`
-     lane," an analogy). Fixed by requiring the token's own PROVENANCE to
+     has been a GATE lane since before P2.7 existed) and for a
+     conformance lane P2.13 cites only as an ANALOGY, "the same
+     differential pattern as the <name> lane". Fixed by requiring the
+     token's own PROVENANCE to
      be the item's terse "item" cell, not its longer acceptance/evidence
      prose, since an author citing an unrelated pre-existing lane only for
      comparison does so in the prose, never in the title.
@@ -78,10 +79,10 @@ Reads only. No engine, no janus, no `swipl`, no `pytest` subprocess: like
 check_evidence_tags.py, this runs on a tree that does not boot.
 Assumes:
   - ai-spec-execution.md sits one directory above the repository's MAIN
-    checkout (not necessarily above `this` worktree), and the LeaTTa
-    corpus one directory above THAT, per this workspace's own
-    standing layout [source: the workspace CLAUDE.md, "Ledgers"
-    and "the arbiter corpus", LeaTTa] [assumed 2026-08-18]
+    checkout (not necessarily above `this` worktree), and that a path a
+    ledger row cites may resolve one directory above THAT, per this
+    workspace's own standing layout [source: the workspace CLAUDE.md,
+    "Ledgers"] [assumed 2026-08-18]
   - GFM table cells split on `|`, except one escaped as `\|` or one that
     falls inside a matched run of backticks, which is how three of this
     spec's own rows carry a literal `|` (`shim.pl:92`'s `[F\|Args]`, the
@@ -728,11 +729,10 @@ def _is_test_shaped(path: Path) -> bool:
 # Every literal root a cited path is checked against, outermost fallback
 # last. WORKSPACE.parent is the workspace's own parent, derived the same
 # worktree-safe way WORKSPACE is (never a literal `/home` path in this
-# file): the historical `LeaTTa` corpus sits there, and the ledgers'
-# older acceptance records still cite into it; P2.13's acceptance cites
-# `LeaTTa/MeTTaILProofs/CPExecutable.lean` directly. Checking ROOT and
-# WORKSPACE only reported that file "absent" when it exists one directory
-# further out [measured 2026-08-18].
+# file): the ledgers' older acceptance records cite paths in sibling
+# checkouts one directory further out, P2.13's among them. Checking ROOT
+# and WORKSPACE only reported such a file "absent" when it exists one
+# directory further out [measured 2026-08-18].
 SEARCH_ROOTS = (ROOT, WORKSPACE, WORKSPACE.parent)
 
 
@@ -858,10 +858,10 @@ def resolve_lane(anchor: Anchor, facts: TreeFacts) -> Verdict | None:
         dead variable, a lowered threshold) had landed. Requiring the
         SENTENCE to contain the word "lane" was tried first and did not
         catch this, because "confidence floor" carries no such word.
-      - P2.13 cites "the same differential pattern as the `leatta`
-        conformance lane" as an ANALOGY for a new Lean cross-check, and
-        DOES contain the word "lane" right there, so the word-cue version
-        of this check accepted it -- `leatta` predates Phase 2 entirely, so
+      - P2.13 cites "the same differential pattern as the <name>
+        conformance lane" as an ANALOGY for a new cross-check, and DOES
+        contain the word "lane" right there, so the word-cue version of
+        this check accepted it -- that lane predates Phase 2 entirely, so
         this was the same false signal in a form the word-cue could not
         see either.
     An item's ITEM cell is its terse, title-like description of what the

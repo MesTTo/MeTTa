@@ -5,12 +5,14 @@
 % Guarantees:
 %   - a parameter declared Atom, Variable or Expression receives its argument
 %     as written, and one declared Symbol, Grounded, Number or %Undefined%
-%     does not, which is LeaTTa's own `declaredTypeEvaluates`
-%     [source: LeaTTa MettaHyperonFull/Core/Modifiers.lean:118-124]
+%     does not, which is the mask this engine adopted
+%     [assumed: adopted from an earlier reference semantics, not re-measured
+%     against upstream PeTTa]
 %   - a masked builtin whose declared result is `Atom` answers as produced, and
 %     one whose declared result is `%Undefined%` or `Expression` sends that
 %     answer back through evaluation
-%     [source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean:3786-3799]
+%     [assumed: the `returnsAtom` rule was adopted from an earlier reference
+%     semantics, not re-measured against upstream PeTTa]
 %   - the compiled door and the dynamic door agree on every row, which is what
 %     lets a self-interpreter dispatch a family call through `metta` and get
 %     the answer a written call gets
@@ -55,8 +57,9 @@ both_doors(Text, Answers) :-
     dynamic_answers(Text, DynamicAnswers),
     assertion(DynamicAnswers == Answers).
 
-% Every expected value below was measured on LeaTTa 9ea9f9d on 2026-08-24,
-% through both its `--file` and its `--min` door where both accept the form.
+% Every expected value below was measured on an earlier reference runner on
+% 2026-08-24, through both its `--file` and its `--min` door where both accept
+% the form.
 mask_row("(cons-atom (+ 1 2) (b))", [[3,b]]).
 mask_row("(cons-atom a ((+ 1 2) c))", [[a,3,c]]).
 mask_row("(decons-atom ((+ 1 2) b))", [[3,[b]]]).
@@ -123,9 +126,10 @@ test(a_nested_evaluation_prunes_an_empty_answer) :-
 
 % THE COLLECTION FORMS, both spellings. Each declares its list `Expression`
 % and foldl-atom declares its seed `Atom`, so both cross as written and the
-% fold runs over the parts of an unrun call. Measured on LeaTTa 9ea9f9d on
-% 2026-08-24: the binder and the closure spelling answer identically, and
-% `!(foldl-atom (1) (+ 1 2) $a $b (size-atom $a))` is 3, the size of the held
+% fold runs over the parts of an unrun call. Measured on an earlier reference
+% runner on 2026-08-24: the binder and the closure spelling answer
+% identically, and `!(foldl-atom (1) (+ 1 2) $a $b (size-atom $a))` is 3, the
+% size of the held
 % `(+ 1 2)`, where an evaluated seed would refuse a Number.
 collection_row("(map-atom (cdr-atom (a b)) $y (q $y))", [[[q,b]]]).
 collection_row("(map-atom (cdr-atom (a b)) (|-> ($y) (q $y)))", [[[q,b]]]).

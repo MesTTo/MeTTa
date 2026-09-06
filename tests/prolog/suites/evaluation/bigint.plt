@@ -9,7 +9,7 @@
 %     arithmetic_promotes_and_demotes_by_result_width,
 %     mixed_bigint_number_equality_is_exact]
 % Open Obligations:
-%   To Do: Re-verify these rules when LeaTTa adds its announced BigInt type.
+%   To Do: Re-verify these rules if the arbiter gains a BigInt type.
 %   Hacks: None
 %   Future Enhancements: None
 
