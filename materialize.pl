@@ -23,9 +23,9 @@
 %   pthread_t while they run, and a concurrent thread_join/2 on that thread
 %   then dereferences null [tested:
 %   a_transactional_collection_creates_no_engine_on_the_collecting_thread;
-%   commit=WORKTREE]. Between posts that engine stays suspended holding the
-%   last reference it was handed, one already-collected clause reference, which
-%   the next post unbinds.
+%   commit=81d05b34f938ff97f835ca1c00205220690cb6f0]. Between posts that
+%   engine stays suspended holding the last reference it was handed, one
+%   already-collected clause reference, which the next post unbinds.
 %   One process-wide erase listener carries that channel, registered by
 %   flush_space_materialization/2 before the first publication, outside
 %   '$metta_materialization' because the callback takes it, and held for the
@@ -845,11 +845,12 @@ ensure_source_owner_listener :-
 % [source: SWI-Prolog 10.1.13 src/pl-thread.c:7038 detach_engine, called from
 % PL_set_engine at :7056 by its line :7077; '$engine_create'/3 at :4083 makes
 % the pair at :4134 and :4148, and destroy_interactor at :4164 the pair at
-% :4168 and :4170; commit=WORKTREE]. thread_join/2 reads that field once, with
-% no has_tid test, and hands it to pthread_timedjoin_np [source: SWI-Prolog
-% 10.1.13 src/pl-thread.c:2898 thread_join, its call at :2927,
-% pthread_join_interruptible at :2873; commit=WORKTREE], so a join landing in
-% that window dereferences a null struct pthread and the process dies with
+% :4168 and :4170; commit=81d05b34f938ff97f835ca1c00205220690cb6f0].
+% thread_join/2 reads that field once, with no has_tid test, and hands it to
+% pthread_timedjoin_np [source: SWI-Prolog 10.1.13 src/pl-thread.c:2898
+% thread_join, its call at :2927, pthread_join_interruptible at :2873;
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0], so a join landing in that
+% window dereferences a null struct pthread and the process dies with
 % SIGSEGV inside __pthread_clockjoin_ex. This event is delivered from clause
 % garbage collection, so an engine created per collected clause made EVERY
 % thread that collects inside a transaction intermittently unjoinable, through
@@ -857,14 +858,15 @@ ensure_source_owner_listener :-
 % engine_post/3 instead goes through activate_interactor/suspend_interactor,
 % which detach the ENGINE's info and never the host's [source: SWI-Prolog
 % 10.1.13 src/pl-thread.c:4251 activate_interactor, :4266 suspend_interactor;
-% commit=WORKTREE].
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0].
 % [measured 2026-09-06: a thread parked inside engine_destroy/1 and joined
 % crashes 10 runs out of 10; parked inside engine_post/3 or engine_next/2, and
 % churning engine_create/3 under a join, it joins cleanly 10 out of 10, at
 % loadavg 65; command=sh tests/prolog/probes/engine_join_window.sh 10;
-% fixture=tests/prolog/probes/engine_join_window.pl; commit=WORKTREE]
+% fixture=tests/prolog/probes/engine_join_window.pl;
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0]
 % [tested: a_transactional_collection_creates_no_engine_on_the_collecting_thread;
-% commit=WORKTREE]
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0]
 %
 % Creating it here rather than at load time keeps a process that publishes no
 % image free of it, which is the same reason the listener is registered here.
@@ -886,7 +888,7 @@ register_source_owner_listener :-
 % one failed retirement from ending the loop; the poster re-raises.
 % [tested: source_collection_inside_rollback_keeps_the_orphan_image_retired,
 % a_cleanup_engine_finds_an_owner_hidden_from_the_gc_callers_snapshot;
-% commit=WORKTREE]
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0]
 source_owner_retirement_loop :-
     repeat,
       engine_fetch(Reference),
@@ -913,7 +915,7 @@ source_owner_retirement_loop :-
 % [tested: an_unrelated_record_erasure_does_not_reach_the_retirement_engine,
 % static_library_reconsult_preserves_materialized_answer_bags,
 % a_cleanup_engine_finds_an_owner_hidden_from_the_gc_callers_snapshot;
-% commit=WORKTREE]
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0]
 %
 % The mutex serialises posters: the engine is one shared resource and a second
 % engine_post/3 while a package is pending raises a permission error. The
@@ -948,7 +950,7 @@ retire_owner_through_engine(Reference) :-
 % synchronous GC runs inside a transaction; its erasures must survive that
 % caller's rollback, and reacquiring the poster's mutex would deadlock.
 % [tested: source_collection_inside_rollback_keeps_the_orphan_image_retired;
-% commit=WORKTREE]
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0]
 retire_source_owner(Reference) :-
     transaction(forall(retract(materialized_owner(Reference, Space, Token)),
                        discard_image_rows(Space, Token))).
