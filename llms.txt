@@ -49,7 +49,7 @@ re-runs them.
 | `check.sh` | the gate. `GATE_ONLY=1 sh check.sh` is what CI blocks on | |
 | `extensions/python/metta/*.py` | the library. `extensions/python/metta/_space.py` is the `MeTTa` context and the `Space` handle; a leading `_` means internal | |
 
-Counts re-measured 2026-09-05. The `llms` lane derives every explicit count in
+Counts re-measured 2026-09-06. The `llms` lane derives every explicit count in
 this table, checks the library roster and every backticked path, rejects names
 the live engine does not know, and asks the reverse question too: every
 engine-known call head the example corpus exercises must be named here.
@@ -358,7 +358,11 @@ by a weighted proof, without any one of them overwriting another.
 
 `with m.capture() as output:` collects printed text in `output.text` without
 changing either return shape. `with m.atomic():` makes each whole run one
-transaction; `with m.speculative():` answers and rolls its writes back.
+transaction; `with m.speculative():` runs each source against a snapshot and
+discards its writes, so `m.run("!(add-atom &self (f 1))")` inside one leaves
+nothing behind. Both scope the EVALUATIONS in the block, not the Python write
+door: a bare `m.add(atom)` inside either lands and stays, and
+`m.transaction(callable)` is what puts Python-side writes under one boundary.
 `with metta.speculate():` is the same discarded execution scope for the lazy
 module-tier default context.
 
@@ -452,10 +456,11 @@ every declaration below is stored. The catalog describes its own kinds there:
 `(vocabulary name value...)` rows declare the value sets, and
 `(claim vocab value property...)` rows attach per-value facts. A
 `(policy axis knob default)` row names each engine decision point and its
-shipped choice. There is exactly one row for each of dispatch, order, merge,
-agenda, equality, errors, world, algebra, storage, typing, fidelity,
-source-kind, transaction-mode, atomicity, save-format, volatility, and
-determinism. `tests/checks/check_policy_inventory.py` asks the running catalog for
+shipped choice. There is exactly one row for each of agenda, algebra,
+atomicity, caching, delivery, determinism, dispatch, equality, errors,
+fidelity, merge, order, reaction-order, save-format, source-kind, storage,
+transaction-mode, typing, volatility and world, twenty of
+them. `tests/checks/check_policy_inventory.py` asks the running catalog for
 those rows and the semiring ordering claims, joins them to their implementation
 seams, and rejects multiline `member/2` or `memberchk/2` lists, Python
 `Literal[...]`, and Python list/set membership that bypass the catalog. The
