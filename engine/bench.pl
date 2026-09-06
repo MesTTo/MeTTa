@@ -29,6 +29,9 @@
 %     because a generating boot is a different workload from a loading one:
 %     3,129,543 inferences against 612,598 [measured 2026-08-28].
 % Guarantees:
+%   - a window that never opened exits 125 rather than failing as a case: the
+%     driver reads that as "this run says nothing" instead of as a moved row
+%     [tested: engine/bench.sh; commit=WORKTREE].
 %   - every case CHECKS its own result before its counters are printed, so a
 %     case that stopped doing its work fails instead of reporting a cheaper
 %     number [tested: engine/bench.sh; commit=c41b54d69e951882e5075393f851a33438247372].
@@ -414,19 +417,50 @@ bench_control(Control, Acknowledge, Command) :-
 % harmless: it stays in the stream buffer and is consumed at the head of the
 % next acknowledgement.
 bench_acknowledged(Acknowledge) :-
-    get_byte(Acknowledge, Byte),
+    catch(get_byte(Acknowledge, Byte), Error, bench_no_acknowledgement(Error)),
     (   Byte =:= 0'\n
     ->  true
     ;   Byte =:= -1
-    ->  throw(error(io_error(read, Acknowledge),
-                    context(bench_acknowledged/1,
-                            'perf closed its acknowledgement pipe')))
+    ->  bench_no_acknowledgement(end_of_file)
     ;   bench_acknowledged(Acknowledge)
     ).
+
+% One vocabulary for a window that never opened, shared with
+% extensions/mork/benchmarks/workload.pl: the tag is `perf_control` rather than
+% the stream, so the entry point below can catch exactly this and nothing else.
+% The stream's own timeout raises here too, which is the shape PMU contention
+% takes -- perf never arms, so it never acknowledges, and this process would
+% otherwise wait out the driver's whole deadline with nothing to say.
+bench_no_acknowledgement(Cause) :-
+    throw(error(io_error(read, perf_control),
+                context(bench_acknowledged/1,
+                        'perf did not acknowledge: it may have failed to open \c
+                         its counter, which it does while another session holds \c
+                         the PMU'-Cause))).
 
 %%%% Entry points %%%%
 
 bench_run(Case) :-
+    catch(bench_measured(Case),
+          error(io_error(read, perf_control), Context),
+          bench_unmeasured(Context)).
+
+%A window that never opened measured NOTHING, which is a different answer from
+%a case that ran and moved, and the driver has to tell them apart: read as a
+%regression, PMU contention on a shared box reports a code change that did not
+%happen. 125 is the status this tree already reads as "the wrapper failed
+%rather than the command" -- timeout(1) uses it for a failure in itself,
+%`git bisect run` reads it as "this run says nothing about the commit", and
+%bounded.sh refuses with it when the process that started a command had
+%already exited. metta.benchmarking names the same number PERF_CONTROL_REFUSED
+%and turns it into a named skip [source: coreutils timeout(1) EXIT STATUS;
+%git-bisect(1), "run <cmd>"; extensions/python/metta/benchmarking.py,
+%PERF_CONTROL_REFUSED].
+bench_unmeasured(context(_, Message-Cause)) :-
+    format(user_error, "bench.pl: ~w (~w)~n", [Message, Cause]),
+    halt(125).
+
+bench_measured(Case) :-
     (   bench_case(Case, Unit, Operations)
     ->  true
     ;   throw(error(domain_error(bench_case, Case),

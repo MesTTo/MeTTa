@@ -274,6 +274,22 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A benchmark lane tells a box that would not count apart from a tree that
+  moved. `measure_counters` raises `MeasurementRefusedError` where perf
+  answered `<not counted>` for a requested event, and where a controlled
+  workload exited `PERF_CONTROL_REFUSED` (125, the status `timeout(1)` and
+  `git bisect run` already use for "this run says nothing"); every other
+  nonzero exit stays an ordinary `RuntimeError`, which is the workload's own
+  failure. `measured_main` is the one policy every benchmark's `__main__` goes
+  through: a named skip and exit 0 on a developer's box, an error and exit 1
+  where `CI=true`. The refusal names `/proc/sys/kernel/perf_event_paranoid` and
+  the container knob rather than sending a reader into the harness. The C and
+  Python workloads bound their acknowledgement wait for ten seconds, where they
+  used to block until the driver's deadline. `parity-perf` gains the same
+  reading: a timed-out example and a row whose processes split between two
+  costs are printed as `NOT MEASURED ON THIS BOX` with the load beside them and
+  refuse only in CI, where they used to be reported as cross-engine
+  regressions.
 - The policy inventory reads a list of Prolog variables as what it is. A
   `member(X, [First, Second])` names no values: each element is decided
   wherever its binding came from, so the lane skips it the way it already skips

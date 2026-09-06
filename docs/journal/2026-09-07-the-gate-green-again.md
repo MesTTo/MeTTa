@@ -111,3 +111,91 @@ the rule carries it.
 Decided: `sh check.sh policy-inventory policy-inventory-selftest` -> both 0,
 9 planted cases, 0 failures. With the desk-versus-CI split planted the other
 way round the selftest goes red by name, so the plant can fail.
+
+Tried: reproducing `mork-bench`'s failure rather than accepting the earlier
+attribution -> `sh extensions/mork/bench.sh` at loadavg 78.52, log
+`ai-tmp/hy-morkbench-repro.log`. The one-line summary the earlier deliverables
+carried, `perf stat failed with exit 2: Events disabled`, is the FIRST LINE of
+a multi-line message. The whole of it, over three attempts:
+
+    attempt 1: Events disabled / Events enabled / workload.pl
+      bench_acknowledge/1: I/O error ... timeout_error(read, ...)
+      / 1863222,,instructions:u,1241851,100.00,,
+    attempts 2 and 3: Events disabled / the same workload error
+      / <not counted>,,instructions:u,0,100.00,,
+
+So it is PMU contention, but not the way the phrase suggests. The exit status 2
+is the WORKLOAD's, not perf's: the workload times out after ten seconds waiting
+for perf's acknowledgement of `enable`, throws, and SWI exits 2. In attempt 1
+perf had armed and counted 1,863,222 instructions of a window that was never
+closed; in attempts 2 and 3 it had not armed at all and said `<not counted>`.
+Both are the box refusing, and neither says anything about the tree.
+
+Rejected: reading an incomplete `Events enabled`/`Events disabled` transcript as
+the refusal signal. It cannot tell a stuck handshake from a workload that
+crashed INSIDE the window, and mork's own workload halts 3 and 4 for exactly
+that; a rule that confuses them turns a real regression into a green skip,
+which is the one failure worse than a red lane.
+
+Decided: a reserved exit status, the vocabulary this tree and its tools already
+share. `timeout(1)` uses 125 for a failure in itself rather than in the
+command, `git bisect run` reads 125 as "this run says nothing about the
+commit", and `bounded.sh` already refuses with 125 when the process that
+started a command had exited. `metta.benchmarking.PERF_CONTROL_REFUSED` is that
+number; a controlled workload whose handshake fails exits it, and
+`_parse_counter_sample` turns it, and a `<not counted>` counter row, into
+`MeasurementRefusedError`. Every other nonzero exit stays an ordinary
+`RuntimeError`. One policy decides what a lane does with it, `measured_main`,
+because two copies of that policy are two things that can drift into
+disagreeing about when a box that cannot count may pass; it is the same
+CI-refuses/desk-skips line `upstream_prerequisite` already draws for a missing
+upstream checkout.
+
+Measured after the change, same box at loadavg 58.85: `sh
+extensions/mork/bench.sh` -> exit **0**, `note: the box refused the
+measurement, so nothing here says the tree moved; re-run it where the PMU is
+free.` with `/proc/sys/kernel/perf_event_paranoid reads -1` and perf's own
+transcript under it (`ai-tmp/hy-morkbench-after.log`).
+
+Bounded the handshake where it was not bounded, since a status can only be
+reported by a process that gets to report it: `cases.c` polls its
+acknowledgement descriptor for ten seconds where it used to block in `read(2)`
+until the driver's own deadline, and `pure.py` selects for the same ten. One
+syscall inside the counted region against rows of 1.0e9 to 4.4e9 (c-bench) and
+2.3e8 to 2.6e10 (the instruction pins) is between 5e-6 and 1e-5 of a row, so
+the bound is free at this resolution. `engine/bench.pl` already bounded its
+read at 60 seconds and now says `perf_control` the way mork's workload does, so
+one catch matches both.
+
+Left unbounded, with the reason: `extensions/node/benchmarks/sampler.ts`.
+Node's `readSync` has no timeout and the fd is inherited, so bounding it means
+either an async read, which puts the event loop inside the counted region, or a
+non-blocking reopen and a spin, which at perf's ~50-200us acknowledgement costs
+about 400,000 instructions per window of spin whose count moves with load. Both
+change every node instruction row and would need a re-pin this box cannot
+supply. A node window that never opens therefore still surfaces as the
+harness's 180-second timeout rather than as a named refusal; the `<not counted>`
+half of the rule covers node already, since it needs no workload cooperation.
+
+Tried: `parity-perf`'s own reading of a loaded box -> `_sample` returns
+`{"status": "timeout"}` when an example runs out the 120-second ceiling, and
+`verdicts` printed that as `CROSS-ENGINE REGRESSION ... now fails to run
+(timeout)`. A corpus row measured 300.0s against a 300s ceiling at loadavg
+33.81 during the test-hygiene work and was recorded that way. `unstable` had
+the same shape, and this file's own comment says a loaded box makes the
+excursion behind it likelier.
+
+Decided: both go to a bucket of their own, `NOT MEASURED ON THIS BOX`, printed
+with their count and the loadavg either way so a check that stopped happening
+is never silent, and fatal only where `CI=true`. `nondeterministic` and
+`below-floor` stay fatal on a desk, because neither is load: the first is the
+tree answering differently across processes and the second is a row with less
+work in it than the method can see. `_perf`'s "no instruction count" is a
+`CounterUnavailable` now and reaches the same CI/desk policy instead of ending
+the run with a traceback.
+
+Planted, and each verified to fail with the rule inverted: making an unmeasured
+row fatal on a desk turns `parity-perf-selftest` red by name, and making every
+nonzero exit a refusal turns
+`test_a_refused_window_is_told_apart_from_a_workload_that_failed` red on its
+third case, the workload that exited 3.
