@@ -5,8 +5,8 @@
 %     without a comment-stripping prepass [tested 2026-08-15:
 %     parser_comments, filereader_comments].
 %   - a semicolon comment ends only at LF or end of input; CR, NEL and U+2028
-%     remain comment text, matching LeaTTa's tokenizeAux comment state rather
-%     than Hyperon's wider CR behavior [tested:
+%     remain comment text, which is narrower than Hyperon's CR behavior
+%     [tested:
 %     test_a_comment_terminates_on_the_class_the_arbiter_rules].
 %   - swrite/2 names variables by first occurrence, independent of SWI's
 %     process-local variable identifiers [tested 2026-08-14:
@@ -757,13 +757,13 @@ seq_numbered(Terms) --> seq_mode(Terms, strict).
 seq_mode([X], Mode)    --> !, swrite_mode(X, Mode).
 seq_mode([X|Xs], Mode) --> swrite_mode(X, Mode), " ", seq_mode(Xs, Mode).
 
-%Every float class prints LeaTTa's way: inf, -inf by sign, an unsigned
-%NaN (the forms hyperon's Rust f64 Display prints and LeaTTa's
-%pretty-printer pins), and a finite float in LeaTTa's LAYOUT over SWI's
-%own shortest-round-trip digits. The digits were already LeaTTa's, the
-%layout was not: SWI writes 1.0e+16 and 1.0e-05 where LeaTTa writes
-%1e16 and 0.00001 [source 2026-08-20: LeaTTa RyuLean4/Runtime.lean:371-396,
-%Decimal.formatMeTTa, Rust ryu's pretty layout]. The printed non-finite
+%Every float class prints the way hyperon's Rust f64 Display does: inf, -inf by
+%sign, an unsigned NaN, and a finite float in that same LAYOUT over SWI's own
+%shortest-round-trip digits. The digits already agreed, the layout did not: SWI
+%writes 1.0e+16 and 1.0e-05 where the layout writes 1e16 and 0.00001
+%[assumed 2026-08-20: the layout was adopted from an earlier reference
+%pretty-printer, which reproduces Rust ryu's pretty format; not re-measured
+%against upstream PeTTa]. The printed non-finite
 %spelling reads back as a SYMBOL of that name, upstream's exactly as ours,
 %which is why metta_number_writable/1 below keeps refusing the class at the
 %text seam: the answer PRINTS faithfully, it still does not round-trip.

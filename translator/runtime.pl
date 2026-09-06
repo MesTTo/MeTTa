@@ -379,8 +379,9 @@ translate_case([[K,VExpr]|Rs], Kv, Out, Goal, KGo) :- translate_expr_to_conj(VEx
 %What decides one case arm, and one let binding: the plain unification both
 %have always emitted, or the gap matcher when the pattern the program WROTE
 %carries a sequence variable. The parse and the fragment decision happen HERE,
-%once, while the arm compiles [source: LeaTTa
-%MettaHyperonFull/Core/SeqFragment.lean, seqFinitary?], so the emitted goal
+%once, while the arm compiles
+%[source: engine/spaces/segment_matching.pl, metta_seq_classify/3], so the
+%emitted goal
 %names its certificate and nothing re-classifies per candidate. The subject is
 %the arm's KEY VALUE, which is data by the time it arrives and therefore
 %carries no gap, so the case is one_sided by construction.
@@ -670,9 +671,10 @@ metta_segment_body_result(Module, Fun, spliced(Prefix, Template), Out) :-
 %A splice makes the final expression shape depend on the matched run, so that
 %one body is translated after instantiation.  The same declared-result rule as
 %an ordinary equation still decides whether the constructed expression is
-%data or a computation [source: LeaTTa
-%MettaHyperonFull/Core/SeqRuntime.lean:95-104 and
-%MettaHyperonFull/Minimal/Interpreter.lean:3786-3799; commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
+%data or a computation [assumed: the splice result rule and the `returnsAtom`
+%rule beneath it were adopted from an earlier reference semantics, not
+%re-measured against upstream PeTTa;
+%commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
 metta_segment_spliced_result(Fun, Instantiated, Out) :-
     (   declared_output_type(Fun, 'Atom'),
         \+ function_frame_body(Instantiated)
@@ -1327,12 +1329,13 @@ metta_condition_holds(Closure, Item) :- call(Closure, Item, true).
 %That also matches what the modifier means. The reference states that the
 %guard "does not receive the match state, so bindings accumulated earlier in
 %the same match cannot affect it", which is exactly a ==/2 over the operand as
-%written [source: LeaTTa/MettaHyperonFull/Proofs/Modifiers.lean, the checked
-%matcher's modifier law].
+%written [assumed: the modifier law was read from an earlier reference
+%semantics, not re-measured against upstream PeTTa].
 %
 %THE ARITY GATE IS COPIED, NOT INVENTED. A modifier is recognised only at
-%`Atom.expr [Atom.sym s, x]`, exactly two elements
-%[source: LeaTTa/MettaHyperonFull/Core/Modifiers.lean, registeredMod?].
+%a symbol followed by one operand, exactly two elements [assumed: the arity
+%gate was copied from an earlier reference semantics, not re-measured against
+%upstream PeTTa].
 %Upstream has no modifier registry at all, so its three-element forms are
 %data by construction and the gate keeps this engine agreeing with it:
 %`(add-atom &m (:= a b))` then `(match &m (:= $x $y) ($x $y))` collapses to
@@ -1352,8 +1355,8 @@ metta_condition_holds(Closure, Item) :- call(Closure, Item, true).
 %cost 400,002 inferences against 400,003 for a clause carrying none].
 %
 %Only an ITEM is tested, never the enclosing list, because the root of a side
-%is never a gap [source: LeaTTa MettaHyperonFull/Core/SeqSyntax.lean,
-%parseSeqAtom]. The recogniser is engine/spaces/segment_matching.pl's
+%is never a gap [source: engine/spaces/segment_matching.pl, metta_seq_parse/2].
+%The recogniser is engine/spaces/segment_matching.pl's
 %metta_seq_surface_gap/3 written out: a call there would be one inference per
 %child on the hottest compile-time walk the translator has.
 lift_pattern_modifiers(Pattern, Lifted, Guards, Segments) :-

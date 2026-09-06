@@ -127,13 +127,13 @@ metta_runtime_check_report :-
     findall(K-D, metta_pragma_key(K, D), Known),
     throw(error(domain_error(metta_pragma_key, Key),
                 context('pragma!'/2, Known))).
-%max-stack-depth is the ONE key LeaTTa validates, and a count is the
+%max-stack-depth is the ONE key this engine validates, and a count is the
 %whole of what it validates. The refusal is an ANSWER, not a raise, so the
-%program that wrote it keeps running [measured 2026-08-19 against the
-%arbiter: -1, 1.5 and abc each answer this error, while
-%(pragma! type-check -1) answers (); the plan's closed engine registry
-%deliberately makes a completely invented key a hard host-facing error here;
-%source: LeaTTa tests/semantics/eval-core/max-stack-depth-negative.metta].
+%program that wrote it keeps running: -1, 1.5 and abc each answer this error,
+%while (pragma! type-check -1) answers (); the plan's closed engine registry
+%deliberately makes a completely invented key a hard host-facing error here
+%[assumed 2026-08-19: measured against an earlier reference corpus at that
+%date, not re-measured against upstream PeTTa].
 %`none` is the engine's own "unset" sentinel, which metta_restore_pragma/1
 %passes back on every scope exit, so it is not a value to validate.
 'pragma!'('max-stack-depth', Value, Error) :-
@@ -606,10 +606,10 @@ metta_host_with_stack_limit(StackBytes, Goal) :-
 %A positive max-stack-depth caps the same balance. ABSENCE DOES NOT CAP IT:
 %the budget is opt-in, and a program that never names one reduces until it
 %finishes or the host stack gives out, which is what upstream does. The default
-%used to be the LeaTTa runner's 100000, four per reduction, and that ceiling
-%stopped six upstream examples that upstream itself completes -- `(fib 30)`
-%among them, which answered `(Error 4 StackOverflow)` here at n=22 and answers
-%832040 with the ceiling lifted
+%used to be 100000, four per reduction, taken from an earlier reference runner,
+%and that ceiling stopped six upstream examples that upstream itself completes
+%-- `(fib 30)` among them, which answered `(Error 4 StackOverflow)` here at
+%n=22 and answers 832040 with the ceiling lifted
 %[measured 2026-08-30: fib 22/25/30 under `(pragma! max-stack-depth 100000000)`
 %against the same file without it; source: PeTTa@ae66fa8 src/metta.pl has no
 %budget of any kind and loops forever on `(= (loop $n) (loop (+ $n 1)))`].
@@ -1060,7 +1060,6 @@ metta_metta_result_is_final(Atom) :-
 %The space is REGISTERED here rather than at its first write, because a space
 %that has been created exists: `(chain (new-space) $s (get-type $s))` is
 %`SpaceType` on hyperon 0.2.10 with nothing written to it
-%[source: LeaTTa tests/semantics/spaces/space_identity.metta, STATUS conforms]
 %[tested: space_handle_type:a_fresh_space_is_one_before_anything_is_written_to_it].
 %Naming a space still registers nothing, which is the property that keeps every
 %symbol in a space position from becoming one.
@@ -1303,9 +1302,10 @@ rewrite_parsed_form(Space, FormStr, Term, Rewritten) :-
 %  (: new-state (-> $t (StateMonad $t)))
 %  (: get-state (-> (StateMonad $t) $t))
 %  (: change-state! (-> (StateMonad $t) $t (StateMonad $t)))
-%[source: LeaTTa tests/semantics/grounded/25-state-rendering.metta, STATUS
-%conforms, whose transcript has `!(new-state 5)` answering a cell and
-%`!(change-state! (new-state 5) 6)` answering the cell it wrote]
+%[assumed: the three declarations were adopted from an earlier reference
+%semantics, whose transcript had `!(new-state 5)` answering a cell and
+%`!(change-state! (new-state 5) 6)` answering the cell it wrote; not
+%re-measured against upstream PeTTa]
 %[tested: test_a_state_cell_is_a_value_typed_by_what_it_holds].
 %
 %THE CELL IS A HANDLE ATOM, `&state-#N`, the same shape a space handle takes
@@ -1317,8 +1317,9 @@ rewrite_parsed_form(Space, FormStr, Term, Rewritten) :-
 %writes a cell nothing allocated, and the two spellings are one implementation
 %rather than two.
 %
-%DIVERGENCE, measured and recorded rather than closed: LeaTTa RENDERS a
-%cell as `(State <value>)` and this engine renders it as its handle, `&state-#0`,
+%DIVERGENCE, measured and recorded rather than closed: the reference semantics
+%this rendering was compared against RENDERS a cell as `(State <value>)` while
+%this engine renders it as its handle, `&state-#0`,
 %which is what it already does for a space handle. The rendering is presentation
 %in a printer with a round-trip obligation (swrite/2 is sread/2's inverse), so
 %it is a separate change from the parametric cell this row asked for
@@ -1440,8 +1441,9 @@ prolog:error_message(metta_state_write_fenced(Cell)) -->
 %The runnable path already prunes it, through metta_prune_empty_answers/2, but
 %a nested `eval`, and therefore `evalc` and `metta` over it, handed the symbol
 %back as an ordinary value; a caller collecting those answers then saw one
-%where LeaTTa sees none. Measured 2026-08-24 against LeaTTa 9ea9f9d with
-%`(= (f a) A)` and `(= (f $x) Empty)`:
+%where the reference sees none [assumed 2026-08-24: measured against an
+%earlier reference corpus at that date, not re-measured against upstream
+%PeTTa]. With `(= (f a) A)` and `(= (f $x) Empty)`:
 %`!(collapse-bind (metta (f b) %Undefined% &self))` is `()` there and was
 %`((Empty (bindings)))` here, and `!(collapse-bind (metta (f a) %Undefined%
 %&self))` is `((A (bindings)))` there against `((A (bindings)) (Empty
@@ -1449,9 +1451,8 @@ prolog:error_message(metta_state_write_fenced(Cell)) -->
 %
 %Failing rather than filtering is the whole mechanism: eval is
 %nondeterministic, so a pruned branch simply does not answer, which is what
-%"removes it from the result" means [source: LeaTTa
-%MettaHyperonFull/Minimal/Interpreter.lean:5531-5537, `bareEmptyItem`, "A
-%finished `Empty` frame denotes no bare-machine result"].
+%"removes it from the result" means: a finished `Empty` frame denotes no
+%bare-machine result.
 %
 %The test is ==/2 rather than unification, so an eval whose answer is still an
 %unbound variable is not mistaken for Empty; that is the same identity test
@@ -1508,7 +1509,7 @@ eval(C0, Out) :-
 %MeTTa's eval is a full evaluation of compiled goals rather than the single
 %rewriting step of minimal MeTTa, and evalc keeps that, so the two agree
 %everywhere except which space's equations answer
-%[source: LeaTTa stdlib.md, evalc's SpaceType is the "Space to
+%[source: the stdlib documentation for evalc, whose SpaceType is the "Space to
 %evaluate atom in its context"] [tested: metta_evalc].
 %
 %A space is either an atom beginning with & or a registered ground expression,
@@ -1613,7 +1614,8 @@ filter_atom_([H|T], Operator, Out) :-
 % the chosen template lets the existing result mask evaluate it, including
 % every nondeterministic answer. Failure unwinds both binder assignments.
 % Type refusals inspect declarations without propagating a held Error branch.
-% [source: https://github.com/MesTTo/LeaTTa/blob/9afd0a5144f60e9d9195971bbda8ab60a6a2990b/MettaHyperonFull/Minimal/Stdlib.lean#L3169-L3183; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67]
+% [assumed: the definition was adopted from an earlier reference semantics, not
+% re-measured against upstream PeTTa; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67]
 'if-decons-expr'(Expression, Head, Tail, Then, Else, Out) :-
     (   nonvar(Expression), Expression = [Head|Tail]
     ->  Out = Then

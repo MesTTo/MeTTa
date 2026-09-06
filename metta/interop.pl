@@ -1308,10 +1308,9 @@ resolve_metta_import_path(File, CanonPath) :-
 %own space and answers unit. A module with no directive answers nothing, and
 %facts join the including space in order, each directive evaluating against
 %the state built so far
-%[source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean, the include
-%dispatch, whose Type line is `(-> Atom %Undefined%)`;
-%tests/semantics/modules/04-include-no-directive.metta and
-%05-include-directive.metta, both STATUS conforms].
+%[assumed: the include dispatch and its `(-> Atom %Undefined%)` type line were
+%adopted from an earlier reference semantics, not re-measured against upstream
+%PeTTa, which has no include].
 %
 %`self` and `top` are BASES rather than modules, so including one is refused
 %in upstream's own words, and so is a name that resolves to nothing
@@ -1338,9 +1337,8 @@ metta_include_refusal(Module, Reason) :-
 %A module NAME may be a COLON PATH. `pkg:child` names pkg/child.metta beside
 %the file that imports it, `top:` names the OUTERMOST module's directory and
 %`self:` the importing module's own, which is also what a bare name means
-%[source: LeaTTa tests/semantics/modules/22-path-colon.metta,
-%23-path-top.metta and 24-path-self.metta, all STATUS conforms; the third
-%imports `self:child` from inside a module the first level already reached].
+%[assumed: the three path forms were adopted from an earlier reference
+%semantics, not re-measured against upstream PeTTa].
 %
 %A name carrying a separator ALREADY is a path and is left alone, which is the
 %whole guard: nothing that resolved before resolves somewhere else now
@@ -1519,11 +1517,11 @@ run_import_attempt(Space, CanonPath, Goal) :-
 %
 %import! takes `changed`, so an edited file is picked up where before the
 %import was skipped and the edit silently ignored. An UNCHANGED repeat is
-%still skipped, which is what keeps LeaTTa's measured behaviour: two
+%still skipped, which keeps the adopted behaviour: two
 %imports of the same module with different destination tokens execute its
-%source once [source: LeaTTa tests/semantics/modules/30-resolution-loaded,
-%M30 conforms; its own evidence records that neither stdlib.md nor the module
-%tutorial states a reload policy, so the edited case is ours to decide].
+%source once [assumed: measured against an earlier reference corpus, not
+%re-measured against upstream PeTTa; neither the stdlib documentation nor the
+%module tutorial states a reload policy, so the edited case is ours to decide].
 %
 %A Python source takes `not_loaded`. Re-executing a module body over a live
 %sys.modules entry is a different operation with different hazards, and
@@ -1568,8 +1566,9 @@ import_load_needed(changed, Space, CanonPath) :-
 
 %A COMPUTED SPACE designator is this engine's extension in exactly the way a
 %computed path is, and the mask hands it over unreduced for the same reason:
-%`(: import! (-> Atom Atom (->)))` is LeaTTa's own declaration
-%[measured 2026-08-24: `!(get-type import!)` on LeaTTa 9ea9f9d]. `&self` is a
+%`(: import! (-> Atom Atom (->)))` is the adopted declaration
+%[assumed 2026-08-24: `!(get-type import!)` was measured against an earlier
+%reference corpus at that date]. `&self` is a
 %name and stays one; `(context-space)` is a call and is run here.
 resolve_space_form(Form, Space) :-
     nonvar(Form), Form = [Head|_], atom(Head), fun_here(Head), !,
@@ -1599,14 +1598,13 @@ resolve_module_form(Form, Path) :-
     nonvar(Form), Form = [library, Alias, Name], !,
     library(Alias, Name, Path).
 %A BUILT-IN MODULE is one the engine ships, named directly rather than by
-%path: `!(import! &self skel)` is LeaTTa's own spelling and upstream
-%loads six of them at startup [source: LeaTTa
-%MettaHyperonFull/Minimal/Interpreter.lean, builtinModules]. Resolved BEFORE
+%path: `!(import! &self skel)` is the adopted spelling and upstream
+%loads six of them at startup [assumed: the spelling came from an earlier
+%reference semantics, not re-measured against upstream PeTTa]. Resolved BEFORE
 %the filesystem, because the name is the module's identity rather than a path
 %a program may happen to have a file for, which is also what makes the same
 %import work from inside another module with its own working directory
-%[tested: builtin_modules] [source: LeaTTa tests/semantics/grounded/
-%28-builtin-module-skel.metta and modules/35-builtin-from-module].
+%[tested: builtin_modules].
 resolve_module_form(Form, Path) :-
     atom(Form), metta_builtin_module(Form, Relative),
     metta_top_context, !,
@@ -1631,9 +1629,8 @@ resolve_module_form(Form, Form).
 %`load_builtin_mods` also registers `json`, `fileio`, `catalog` and `das`, and
 %those are libraries this engine does not implement; registering a name so
 %that an import succeeds while every operation behind it silently fails is the
-%graceful degradation this repository refuses, so they stay unresolvable and
-%say so [source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean, the note
-%above builtinModules, which makes the same decision].
+%graceful degradation this repository refuses, so they stay unresolvable
+%and say so.
 metta_builtin_module(skel, 'builtin_mods/skel.metta').
 
 %A built-in module is a child of the TOP, so its bare name means one only when
@@ -1642,10 +1639,8 @@ metta_builtin_module(skel, 'builtin_mods/skel.metta').
 %built-in is, and the import fails. Comparing the written name before anything
 %else gets this wrong in a way that is worse than a plain refusal: the import
 %reports success and a call to the module's operation is still unreduced,
-%because admission is tested against the running context and the import went
-%somewhere else [source: LeaTTa tests/semantics/modules/35-builtin-from-module,
-%whose PURPOSE is exactly that trap; both engines refuse there and differ only
-%in the wording]
+%because admission is tested against the running context and the import
+%went somewhere else
 %[tested: a_module_cannot_reach_a_builtin_by_its_bare_name].
 %
 %working_dir/1 is the load stack, one entry per file being loaded, so the

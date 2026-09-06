@@ -1054,9 +1054,10 @@ translate_deferred_shape(Space, Module, F, InputArity) :-
 %A recursive equation spends the same branch-local budget that runnable
 %limits own. The source tree supplies the cost because it is the stable unit:
 %one fuel unit covers two reduction nodes, rounded up. That calibration is
-%the LeaTTa runner's two exact boundary witnesses: factorial's three-node body
-%costs two and stops at -3 under 20, while fuel-loop's five-node body costs
-%three and stops at -33332 under the default 100000. A quote is data and
+%two exact boundary witnesses: factorial's three-node body costs two and
+%stops at -3 under 20, while fuel-loop's five-node body costs three and stops
+%at -33332 under the default 100000 [assumed: both were measured on an earlier
+%reference runner]. A quote is data and
 %contributes neither a recursive call nor a reduction node. A compiled input
 %that is the translator's internal `quote` sentinel is likewise not a source
 %argument; its higher-order specialization owns the runnable call, so the
@@ -1230,9 +1231,8 @@ prolog:error_message(metta_builtin_redefinition(Name, Arity, Space)) -->
 %remove-atom currently neither raises a error nor returns the empty result" is
 %a COMPLAINT, and upstream carries the same question as an unanswered TODO at
 %`stdlib/space.rs:219`, "Is it necessary to distinguish whether the atom was
-%removed or not?" -- and the error was LeaTTa's answer to it
-%(Hyperon-Hacks-Register row 15, "Implement. Keep the distinction"). PeTTa is
-%the arbiter now, and PeTTa answers `True`
+%removed or not?" -- and the error was the answer an earlier reference
+%semantics gave it. PeTTa is the arbiter now, and PeTTa answers `True`
 %[measured 2026-08-30 against PeTTa@ae66fa8: `!(remove-atom &self (never
 %there))` answers `true` there and answered
 %`(Error (remove-atom &self (never there)) "remove-atom: atom is not in the
@@ -1295,9 +1295,9 @@ use remove-atom to drain every atom, or name a pattern", ['subtract-atom']),
 %where this engine left `(2)`].
 %
 %It removed ONE occurrence until 2026-08-30, as multiset subtraction, on a
-%ground this engine no longer stands on: LeaTTa's Properties.lean required
-%subtraction, PeTTa is the arbiter now, and a different answer to the same
-%call is not a superset. The one-occurrence door is not lost and is not
+%ground this engine no longer stands on: an earlier reference semantics
+%required subtraction, PeTTa is the arbiter now, and a different answer to the
+%same call is not a superset. The one-occurrence door is not lost and is not
 %private -- metta_remove_atom/3 is it, every internal caller uses it, and the
 %Python surface spells the pair apart already, `space -= atom` for the exact
 %atom against `del space[pattern]` for the pattern.
@@ -1330,8 +1330,8 @@ remove_matching_atoms(Space, Term) :-
 %
 %A space is a NAME that is one, and metta_space_name/1 decides which. The doors
 %used to share a metta_space_argument/1 whose whole body was `atom(Space)`, on
-%the reading that this engine CANNOT reproduce LeaTTa's
-%`(add-atom not-a-space (bad add))` diagnostic: the two model spaces
+%the reading that this engine CANNOT reproduce an earlier reference
+%semantics' `(add-atom not-a-space (bad add))` diagnostic: the two model spaces
 %differently, upstream's being a grounded atom wrapping a space object while
 %MeTTa's is a symbol, and a write to a name that does not exist yet creates it,
 %so `not-a-space` and a program's own fresh name looked like the same kind of
@@ -1343,22 +1343,20 @@ remove_matching_atoms(Space, Term) :-
 %made a space called `not-a-space` while `(is-space not-a-space)` answered
 %False in the same program.
 %
-%LeaTTa decides it the same way for the same reason. It dispatches by
-%name as this engine does, and its `spaceName` says "bare symbols resolve only
-%through the running context's token table; an unbound symbol is not a space",
-%with every space-consuming operation resolving through `resolveSpace`
-%[source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean:1565-1573,1621-1627].
-%What it does not have is creation on demand, which is why the second half of
-%metta_space_name/1 is the prefix rather than the registry: a fresh `&kb` is a
+%The rule that reading came from decides it the same way for the same reason,
+%dispatching by name as this engine does: bare symbols resolve only
+%through the running context's token table, so an unbound symbol is not a space
+%[assumed: read from an earlier reference semantics].
+%What that rule does not have is creation on demand, which is why the second
+%half of metta_space_name/1 is the prefix rather than the registry: a fresh `&kb` is a
 %space the moment a program writes to it, and that capability is kept whole.
 %The one example that used a name without the prefix,
 %examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/07-add_atom_fun_space.metta, still returns a space name from a
 %function and still lands its write there, spelled `&my_space_name`.
 %
-%The atom is ANSWERED rather than thrown, because that is what LeaTTa
-%does: `(collapse (add-atom not-a-space (bad add)))` is a one-element collapse
-%holding the error, and a raise would have emptied the collapse instead
-%[source: LeaTTa tests/semantics/spaces/add_atom.metta]
+%The atom is ANSWERED rather than thrown: a refusing
+%`(collapse (add-atom 42 (bad add)))` is a one-element collapse holding the
+%error, where a raise would have emptied the collapse instead
 %[tested: space_argument_refusals].
 %
 %NO DOOR ASKS ON THE PATH THAT SUCCEEDS. A shared test called before the
@@ -1441,9 +1439,7 @@ metta_reader_variable_name([_|Names], Original, Name) :-
 
 %get-atoms is worded differently because upstream words it differently: it
 %takes ONE argument, so pinned `space.rs:143` says "its argument" where the
-%two-operand operations' `:172` and `:199` say "the first argument"
-%[source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean, getAtomsStep at
-%5450-5452 against addAtomStep at 5386-5388].
+%two-operand operations' `:172` and `:199` say "the first argument".
 space_argument_error(Operation, Arguments, Error) :-
     (   Operation == 'get-atoms'
     ->  Position = "its argument"
@@ -1464,16 +1460,18 @@ space_argument_error(Operation, Arguments, Error) :-
 %  add-reduct   "Reduces atom (second argument) and adds it into the space"
 %  add-reducts  "evaluates atoms in it and adds them into given space"
 %
-%[source: LeaTTa stdlib.md:330-361, quoted in its tests/semantics/spaces].
+%[assumed: the three documentation strings were transcribed from an earlier
+%reference semantics' copy of the stdlib documentation].
 %
 %Each answers the UNIT value, like add-atom, and each takes its second argument
 %unreduced: the reducing ones do their own reducing, which is the whole of what
 %distinguishes them from the plain ones.
 %All three DELEGATE the space check to add-atom rather than repeating it, and
-%that is observable: LeaTTa answers `(Error (add-atom not-a-space 7001)
-%...)` for `(add-reduct not-a-space (+ 7000 1))`, naming add-atom and the
-%REDUCED atom, because the refusal happens where the write does. Checking here
-%would name add-reduct and the unreduced call, which is a different answer.
+%that is observable: this engine answers `(Error (add-atom 42 7001) ...)` for
+%`(add-reduct 42 (+ 7000 1))`, naming add-atom and the REDUCED atom, because
+%the refusal happens where the write does [tested: space_argument_refusals].
+%Checking here would name add-reduct and the unreduced call, which is a
+%different answer.
 'add-atoms'(Space, Terms, Result) :-
     metta_space_expression('add-atoms', Terms, List),
     add_expression_to_space(Space, List, Result).
@@ -1518,8 +1516,8 @@ add_expression_to_space(Space, List, Result) :-
 %  (add-reduct &self (+ 1000 1))          adds 1001
 %  (add-reduct &self (= (foo) (+ 3 4)))   makes (foo) answer 7
 %
-%[source: LeaTTa tests/semantics/spaces/add_reduct.metta for the first, the
-%language's Working with spaces for the second]. Reducing the second one whole
+%[assumed: the first came from an earlier reference corpus; the second is the
+%language's Working with spaces]. Reducing the second one whole
 %cannot work HERE, and the reason is local rather than general: `=` is
 %overloaded in this engine, the head of a definition and also the equality
 %operator, so `(= (foo) (+ 3 4))` reduces to `false` rather than staying an
@@ -1539,11 +1537,11 @@ reduced_for_space([=, Head, Body], [=, Head, ReducedBody]) :-
 %came back written and `(add-reduct &s (total (+ 1 2)))` stored the call.
 %eval/2 compiles the expression the way a top-level form is compiled, and that
 %walk reduces a MEMBER of an expression whose head names no function, which is
-%what LeaTTa's own interpret-tuple does: `!(total (+ 1 2))` is `(total 3)`
-%on both engines, and now so is what add-reduct stores
-%[measured 2026-08-24 against LeaTTa 9ea9f9d:
-%`(add-reduct $s (total (+ 1 2)))` then `(get-atoms $s)` answers `((total 3))`
-%there].
+%an interpret-tuple step does: `!(total (+ 1 2))` is `(total 3)`, and now
+%so is what add-reduct stores
+%[assumed 2026-08-24: `(add-reduct $s (total (+ 1 2)))` then `(get-atoms $s)`
+%answering `((total 3))` was measured against an earlier reference corpus at
+%that date].
 %
 %A form that answers nothing keeps its written shape rather than removing the
 %write: `Empty` prunes a branch, and an add whose atom pruned away has nothing

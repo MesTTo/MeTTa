@@ -386,9 +386,8 @@ refuse_untypable_declaration(Name, Types) :-
 %stopped evaluating its argument, so an application now reaches this probe as
 %written: without the fallthrough (get-type (+ 1 2)) typed ELEMENT-WISE and
 %answered ((-> Number Number Number) Number Number) where it used to answer
-%Number, and LeaTTa answers ErrorType for (get-type (Error Foo Boo))
-%from exactly this route [source: LeaTTa
-%tests/semantics/types-meta/30_evaluation_control.metta].
+%Number, and this engine answers ErrorType for (get-type (Error Foo Boo))
+%from exactly this route.
 get_function_type([F|Args], T) :- nonvar(F),
                                   (   normalized_self_type_declaration(F, Chain0)
                                   *-> true
@@ -457,16 +456,18 @@ application_arrow_declared_in(Module, [F|_]) :-
         typing_rule_accepts(Module, witness, '$metta_resolved_type'(Actual), T)
     ).
 
-%LeaTTa rules that the reporting observers see the empty expression's unit
+%The rule here is that the reporting observers see the empty expression's unit
 %type while the classifier derives no type and therefore uses its gradual
 %%Undefined% fallback. Keeping this as a wrapper around the ordinary candidate
 %set preserves that split: argument checks continue to call type_answers/3,
 %and only get-type reads the observer correction
-%[source: LeaTTa@dae62ced23eb0f30a8c2b86583fd09d88fb24ea5 MettaHyperonFull/Minimal/Interpreter.lean:3681-3689,4358-4363,4416-4424; commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3].
-%The pinned executable case is tests/semantics/types-basic/
-%69-unit-type-of-empty-expression.metta in that checkout.
-%The pinned file now agrees and moves the types-basic area from 45/76 to 46/76
-%[measured: 2026-08-21 types-basic 46/76; command=python tests/conformance/leatta.py --engine . --area types-basic --timeout 25 --show 1; fixture=LeaTTa dae62ced23eb0f30a8c2b86583fd09d88fb24ea5; commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3].
+%[assumed: the split was adopted from an earlier reference semantics, not
+%re-measured against upstream PeTTa;
+%commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3].
+%That area's agreement moved from 45/76 to 46/76 with it
+%[assumed 2026-08-21: measured against an earlier reference corpus at that
+%date, through a runner this repository no longer ships;
+%commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3].
 %Identity, not unification: an unbound subject is not the empty expression.
 %The head-pattern version bound every `(get-type $x)` query to unit and broke
 %the observer's relational surface while the ground P3.10 case stayed green.
@@ -523,7 +524,7 @@ has_resolved_type(X, T) :- current_metta_module(Module),
 %application element-wise; and a value with no declaration failed a concrete
 %parameter, so (== 1 a) had no answer through a shared type variable.
 %
-%Measured 2026-08-19 on hyperon 0.2.10 and on the LeaTTa mechanised
+%Measured 2026-08-19 on hyperon 0.2.10 and on an earlier reference
 %interpreter, byte-identical across both: with (: f2 (-> Number Number)) and
 %(: g2 (-> %Undefined% Number)), (f2 a), (f2 (undeclared-call)), (g2 "s") and
 %(g2 1) all answer, while (f2 "s") is a BadArgType. String is KNOWN and it is
@@ -962,8 +963,8 @@ inapplicable_typed_application(Module, X, Candidates) :-
 %subtyping relation while checking an argument: it WIDENS the argument's type
 %LIST, and the ordinary type check then runs unchanged against the wider list.
 %So the matcher learns nothing about subtyping, and `get-type` is the surface
-%where it shows [source: LeaTTa ai-report-subtype-graph.md,
-%against pinned hyperon 0.2.10 at 3f76dc4].
+%where it shows [source: hyperon-experimental@3f76dc4 lib/src/metta/types.rs,
+%get_atom_types_internal].
 %
 %What is NOT widened: a grounded literal's built-in type and an application's
 %return type, because upstream's get_atom_types_internal queries the space only
@@ -974,7 +975,7 @@ inapplicable_typed_application(Module, X, Candidates) :-
 %declarations already widened, then one more widening over the whole list. With
 %(: (a b) D), (:< (A B) C) and (:< D E) that answers ((A B) D E C), where a
 %single pass over the whole list answers ((A B) D C E)
-%[source: LeaTTa ai-report-subtype-graph.md, get_tuple_types].
+%[source: hyperon-experimental@3f76dc4 lib/src/metta/types.rs, get_tuple_types].
 widen_to_super_types(Module, X, Types0, Types) :-
     %THE CHEAP TEST LEADS. Both are pure tests that bind nothing, so the order is
     %free, and it was the wrong way round: widening_applies_to/2 asks
@@ -1310,8 +1311,8 @@ get_type_candidate(X, T) :- seam:builtin_type_declaration(X, T).
 %A space handle's own type, which no declaration carries because no program
 %wrote the handle. `(get-type &self)` and the type of a space a program made
 %are both `SpaceType` on hyperon 0.2.10, including for a `(new-space)` nothing
-%has been written to [source: LeaTTa tests/semantics/spaces/space_identity.metta
-%and context_space.metta, both STATUS conforms]. Last, like the engine's own
+%has been written to [assumed: measured against an earlier reference corpus,
+%not re-measured against upstream PeTTa]. Last, like the engine's own
 %declarations above it, so a program that declares something about a handle is
 %still answered first [tested: space_handle_type].
 get_type_candidate(X, 'SpaceType') :- atom(X), metta_space_operand(X).
@@ -1372,9 +1373,11 @@ get_type_candidate_in(_, X, T) :- metta_state_cell_type(X, T).
 %candidate and inapplicable_typed_application/2 preserves that empty answer;
 %typing `(Cons 1)` element-wise would mistake a partial application for tuple
 %data [tested: test_an_underapplied_arrow_head_types_as_the_arbiter_does; commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3].
-%The two typing areas now agree on 46/76 and 16/20 checkable files
-%[measured: 2026-08-21 types-basic 46/76 and types-meta 16/20; command=python tests/conformance/leatta.py --engine . --area types-basic --timeout 25 --show 1 and python tests/conformance/leatta.py --engine . --area types-meta --timeout 25 --show 1; fixture=LeaTTa dae62ced23eb0f30a8c2b86583fd09d88fb24ea5; commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3].
-%Measured 2026-08-19 on hyperon 0.2.10 and on the LeaTTa mechanised
+%The two typing areas agreed on 46/76 and 16/20 checkable files
+%[assumed 2026-08-21: measured against an earlier reference corpus at that
+%date, through a runner this repository no longer ships;
+%commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3].
+%Measured 2026-08-19 on hyperon 0.2.10 and on an earlier reference
 %interpreter, byte-identical across both: `(typed-sym (typed-sym typed-sym))`
 %is `(Number (Number Number))` and `(typed-sym (typed-sym aa))` is
 %%Undefined%, one undeclared symbol away.
@@ -1706,8 +1709,8 @@ metatype_of(false, 'Grounded') :- !.
 %one register [source: PeTTa@43705f5d src/metta.pl:202, `'get-metatype'(X,
 %'Grounded') :- atom(X), fun(X), !.`; commit=7bc8e2ac2a2adfa252d5251ee123f320c2dd5ce7].
 %
-%It replaced a 115-name table adopted from LeaTTa's `groundedTokens`, which
-%classified a name by what MINIMAL MeTTa calls grounded rather than by what
+%It replaced a 115-name table adopted from an earlier reference semantics,
+%which classified a name by what MINIMAL MeTTa calls grounded rather than what
 %this engine holds. Over the 268 names in the union of both engines' fun/1
 %and that table, the two rules disagreed on 108 and 74 of those were names
 %whose fun/1 membership is IDENTICAL in both engines -- `car-atom`, `let`,
@@ -1778,11 +1781,11 @@ metatype_of(_, 'Grounded').                        % e.g., partial(f,[1]), f(1)
 %metta_minimal_equation_step/3; measured 2026-09-05 by enumerating
 %metta_grounded_token(N), fun_meta_module(_, N, _)].
 %
-%The list stays LeaTTa's, because upstream PeTTa at ae66fa8e, the arbiter, is
+%The list stays as adopted, because upstream PeTTa at ae66fa8e, the arbiter, is
 %silent about what it now answers: minimal MeTTa is a form upstream PeTTa
 %does not have at all, so the PeTTa ruling does not reach it
-%[source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean, groundedTokens, 98
-%names read 2026-08-19 and 115 here since]. The engine's vocabulary lane also
+%[assumed: 98 names were read from an earlier reference semantics on 2026-08-19
+%and 115 stand here since]. The engine's vocabulary lane also
 %reads it, as one of the four registers that make a name one this engine
 %speaks about [source: tests/checks/check_llms_names.py, engine_vocabulary].
 metta_grounded_token('%'). metta_grounded_token('&self').
@@ -1893,12 +1896,12 @@ metta_grounded_token('unique-atom'). metta_grounded_token('xor').
 %
 %`Atom` accepts everything, and the mechanism is NOT the subtype relation `:<`
 %spells even though the tutorial's wording invites that reading. It is one
-%equality with a wildcard, and LeaTTa quotes the line:
+%equality with a wildcard, and the implementation line is:
 %
 %    *typ == ATOM_TYPE_ATOM || *typ == get_meta_type(atom)
 %
-%[source: LeaTTa tests/semantics/types-meta/00_metatypes.metta, quoting
-%hyperon-experimental@3f76dc4 lib/src/metta/types.rs:606-617]. So the check is
+%[source: hyperon-experimental@3f76dc4 lib/src/metta/types.rs:606-617].
+%So the check is
 %"the parameter is Atom, or it equals this value's metatype", which is what the
 %shipped typing-rule rows declare. The tutorial line calling Atom "a supertype
 %for Symbol,

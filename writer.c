@@ -468,21 +468,19 @@ emit_integer(wctx *c, term_t t)
   return emit_via_swi(c, t, CVT_INTEGER);  /* past int64: mpz_get_str */
 }
 
-/* metta_finite_float_codes/2: SWI's spelling relaid in LeaTTa's
- * layout.  The split recovers the digits D and the power of ten E with
- * value = D * 10^E, strips the leading and trailing zeros the layout does
- * not want (dropping a trailing zero divides D by ten, so E rises with it),
- * and then chooses among five branches on KK, the exponent making the value
- * 0.D * 10^KK.  The five branches and their bounds are the ones LeaTTa's
- * RyuLean4/Runtime.lean:371-396 pins and CeTTa reaches the same way
+/* metta_finite_float_codes/2: SWI's spelling relaid in the layout this
+ * engine's floats print in.  The split recovers the digits D and the power
+ * of ten E with value = D * 10^E, strips the leading and trailing zeros the
+ * layout does not want (dropping a trailing zero divides D by ten, so E rises
+ * with it), and then chooses among five branches on KK, the exponent making
+ * the value 0.D * 10^KK.  The five branches and their bounds are the ones the
+ * fork's C core reaches
  * [source: CeTTa src/atom.c, cetta_format_float, at
- * MesTTo/CeTTa@0ca2f4bad47205174608d7af54dd12a4c12b2e0b, reached through
- * CETTA_PATH the way tests/conformance/cetta.py reaches the fork; its
- * closing branch table is this one character for character, and that
- * file selects its own digits by trial and records that the closest
- * candidate is outside the rounding interval for 46 of the 2098 powers of
- * two, which is exactly the reason the digits here come from SWI rather
- * than from a reimplementation]. */
+ * MesTTo/CeTTa@0ca2f4bad47205174608d7af54dd12a4c12b2e0b; its closing branch
+ * table is this one character for character, and that file selects its own
+ * digits by trial and records that the closest candidate is outside the
+ * rounding interval for 46 of the 2098 powers of two, which is exactly the
+ * reason the digits here come from SWI rather than from a reimplementation]. */
 static int
 emit_finite_float(wctx *c, const char *swi, size_t len)
 { char digits[64];

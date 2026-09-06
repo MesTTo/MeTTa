@@ -25,11 +25,11 @@
 %instead of being consumed as an ordinary value: `(== 4 (+ 1 "bad"))` is the
 %inner `(Error (+ 1 "bad") (BadArgType 2 Number String))` rather than `False`,
 %and a typed identity passes the same atom through
-%[source: LeaTTa tests/semantics/control-stdlib/07_error.metta, STATUS
-%conforms, whose probes read "A BadArgType raised while preparing a nested
-%call must emerge unchanged through needs-number" and "A grounded equality
-%must propagate its argument's BadArgType rather than compare it as a value";
-%pinned minimal-metta.md:55-73]
+%[assumed: two rules were adopted from an earlier reference semantics and have
+%not been re-measured against upstream PeTTa -- a BadArgType raised while
+%preparing a nested call emerges unchanged through needs-number, and a grounded
+%equality propagates its argument's BadArgType rather than comparing it as a
+%value]
 %[tested: test_the_error_vocabulary_answers_what_the_arbiter_answers].
 %
 %An operand WRITTEN as an Error atom is data and keeps the other reading, the
@@ -387,8 +387,7 @@ translate_special_dl(superpose, [Args], AfterHead, Goals, Out) :-
          AfterHead = [Disj|Goals] ).
 %Empty is the branch remover: a finished result that IS the symbol Empty
 %"is not returned among other results when interpreting is finished", no
-%operation exempt [source: LeaTTa MettaHyperonFull/Minimal/
-%Interpreter.lean:3090, quoting the pinned minimal-metta.md]. Every
+%operation exempt [source: the pinned minimal-metta.md]. Every
 %runnable and every collapse aggregates here, so this is the door. A
 %literal value decides at compile time and pays nothing; a computed
 %value keeps the findall EXACTLY as it always compiled and prunes the
@@ -727,19 +726,18 @@ translate_special_dl(case, [KeyExpr, PairsExpr], AfterHead, Goals, Out) :-
 %forms differ at exactly that point and nowhere else, which is what upstream's
 %own comment says: "Difference between switch and case is a way how they
 %interpret Empty result"
-%[source: hyperon-experimental@3f76dc4:lib/src/metta/runner/stdlib/stdlib.metta:331-365,
-%quoted in LeaTTa tests/semantics/control-stdlib/03_case_switch.metta].
+%[source: hyperon-experimental@3f76dc4:lib/src/metta/runner/stdlib/stdlib.metta:331-365].
 %
 %So the Empty ROW is ordinary here: it is matched against the key's value in
 %source order like any other, and a key with no answers selects nothing at all
-%rather than selecting it. Measured against LeaTTa, whose transcript this
-%reproduces line for line: `(switch (key) ((first wrong) (second S) ($_ C)))`
+%rather than selecting it. The transcript this reproduces line for line:
+%`(switch (key) ((first wrong) (second S) ($_ C)))`
 %is S, `(switch second (($_ F) (second L)))` is F because rows are tried in
 %order, `(switch absent ((first wrong) (second wrong)))` is nothing,
 %`(switch (empty) ((Empty E) ($_ V)))` is nothing, and
 %`(switch Empty (($_ V) (Empty L)))` is V
-%[source: LeaTTa tests/semantics/control-stdlib/03_case_switch.metta, whose
-%STATUS records switch as conforming]
+%[assumed: measured against an earlier reference corpus, not re-measured
+%against upstream PeTTa]
 %[tested: test_switch_reads_a_key_with_no_answers_as_no_answer].
 %
 %The rows compile through translate_case/5, the same relation the written-out
@@ -767,27 +765,29 @@ translate_special_dl(return, [Value], AfterHead, Goals, Out) :-
     AfterHead = Goals.
 %CHAIN'S NESTED OPERAND IS ONE MINIMAL STEP, NOT AN EVALUATION, and that is the
 %whole difference between it and `let`. Its declared first parameter is `Atom`,
-%so the operand reaches the instruction as written
-%[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean:906,
-%`(: chain (-> Atom Variable Atom %Undefined%))`]; the instruction then steps
+%so the operand reaches the instruction as written, under
+%`(: chain (-> Atom Variable Atom %Undefined%))`; the instruction then steps
 %it if it is one of the twelve reflected forms and leaves it as DATA if it is
-%not [source: the same file's `mi-function-continue` at :1818-1843, which
-%enumerates that closed list]. An operand the instruction leaves as data is
+%not [assumed: the declaration and the closed list of reflected forms were
+%adopted from an earlier reference semantics, not re-measured against upstream
+%PeTTa]. An operand the instruction leaves as data is
 %substituted into the template unevaluated, and the template's own positions
 %then decide whether it ever reduces.
 %
 %That is why the two spellings answer differently for a reducible operand:
 %`!(chain (+ 1 2) $x (quote $x))` is `(quote (+ 1 2))` and
-%`!(let $x (+ 1 2) (quote $x))` is `(quote 3)` [measured 2026-08-24 against
-%LeaTTa 9ea9f9d, both doors agreeing].
+%`!(let $x (+ 1 2) (quote $x))` is `(quote 3)` [assumed 2026-08-24: both doors
+%agreeing was measured against an earlier reference corpus at that date, not
+%re-measured against upstream PeTTa].
 %
 %SUBSTITUTION IS THE WHOLE IMPLEMENTATION, and it is compile-time work rather
 %than a runtime binding, which is what makes the unevaluated operand reach a
 %masked position at all. It also carries the multiplicity the runtime binding
 %could not: a binder used twice duplicates a nondeterministic operand, and the
-%LeaTTa answers all four rows for
+%reference this was compared against answers all four rows for
 %`!(chain (superpose (1 2)) $x ($x $x))` where a bind-once route answers two
-%[measured 2026-08-24].
+%[assumed 2026-08-24: measured against an earlier reference corpus at that
+%date, not re-measured against upstream PeTTa].
 %CHAIN IS LET, which is upstream's own definition: one clause serves both,
 %`(HV == let ; HV == chain), T = [Pat, Val, In] -> ... (Pv = V) ...`
 %[source: PeTTa@ae66fa8 src/translator.pl:207-210]. So the binder takes the
@@ -804,8 +804,8 @@ translate_special_dl(return, [Value], AfterHead, Goals, Out) :-
 %`!(chain (superpose (1 2)) $x ($x $x))` answers `(1 1) (2 2)` upstream and
 %answered `(1 1) (1 2) (2 1) (2 2)` here, because substituting a
 %nondeterministic operand into a binder used twice duplicates it. The four
-%rows are LeaTTa's, recorded as such in the comment this replaces; two is
-%upstream's, and upstream is the oracle for this branch.
+%rows are the earlier reference's, recorded as such in the comment this
+%replaces; two is upstream's, and upstream is the oracle for this branch.
 %
 %THE COST: examples/he_minimalmetta.metta is `(chain (eval ...) ...)` four
 %deep inside a 70,000 iteration loop, and every one of those evals took the
@@ -923,8 +923,8 @@ translate_special_dl('foldall', [Accumulator, Generator, InitialExpr],
 %maps or filters over L rather than over the written operand
 %[source: PeTTa@ae66fa8 src/translator.pl:247-265].
 %
-%They crossed AS WRITTEN here between 2026-08-24 and this change, following
-%LeaTTa's wider evaluation mask, and the difference is visible in one line:
+%They crossed AS WRITTEN here between 2026-08-24 and this change, following a
+%wider evaluation mask, and the difference is visible in one line:
 %`!(map-atom (cdr-atom (a b)) $y (q $y))` answered
 %`((q cdr-atom) (q (a b)))`, mapping over the two parts of an unevaluated
 %call, where upstream evaluates the list to `(b)` first and answers `((q b))`
@@ -1274,9 +1274,9 @@ translate_special_dl('catch', [Expr], AfterHead, Goals, Out) :-
 %
 %A sequence variable changes a pattern's ARITY, so the door that reads a space
 %cannot build a candidate head from the pattern's length, and the fragment its
-%answer set lives in has to be decided before anything enumerates [source:
-%LeaTTa MettaHyperonFull/Core/SeqFragment.lean, seqFinitary?]. Both decisions
-%are made HERE, while the call site compiles, which is the staging
+%answer set lives in has to be decided before anything enumerates
+%[source: engine/spaces/segment_matching.pl, metta_seq_classify/3]. Both
+%decisions are made HERE, while the call site compiles, which is the staging
 %lift_pattern_modifiers/4 already uses and states: "Engine-compiled match/4
 %pays nothing per row because this walk happens once while its call site
 %compiles." The result rides in a WRAPPER the two existing doors dispatch on,
@@ -1438,7 +1438,7 @@ translate_let_dl([[__metta_typed_binding__, Pattern], Value, In],
 %self-containing binding is a legal rational tree, not a refusal. Measured on
 %the upstream engine, `!(let $x (f $x) worked)` answers [worked] and the
 %rational tree itself flows out when the body mentions it; the occurs check
-%this replaces was the LeaTTa arbiter's law and left with the arbiter,
+%this replaces was an earlier reference semantics' law and left with it,
 %taking the demotion pass with it: nothing emits an occurs check to demote
 %any more. Where the binding is emitted still decides WHEN it runs.
 %
@@ -1472,8 +1472,8 @@ translate_let_dl([[__metta_typed_binding__, Pattern], Value, In],
 %parsing-by-unification idiom rather than a single binding. It also cannot use
 %the early spelling, which unifies BEFORE the value's own goals have produced
 %it: a gap needs the value it is splitting. Written patterns only, so a gap
-%that arrived through a binding stays data [source: LeaTTa
-%MettaHyperonFull/Core/SeqSyntax.lean, parseConcreteAtom].
+%that arrived through a binding stays data
+%[source: engine/spaces/segment_matching.pl, metta_seq_parse/2].
 %
 %And a gap pattern is NOT COMPILED as an expression, which the two ordinary
 %routes both do. A variable-headed pattern compiles to a reduce/3 CALL, so
@@ -1750,23 +1750,21 @@ variable_capturing_form('not-provable').
 %THE EMBEDDED-OPERATION VOCABULARY, transcribed from the reference's own list
 %rather than inferred: the twelve reflected minimal forms plus the interpreter
 %operations that touch the threaded world, which are stepped for the same
-%reason they are not groundings there
-%[source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean:331-346,
-%`embeddedOpNames` and `isEmbeddedOp`, whose header says keeping the names as
-%data "lets effect and coverage checks follow the same dispatch boundary as the
-%interpreter"; the transcription is complete, so a name this engine has no
-%operation for simply never matches].
+%reason they are not groundings there [assumed: the name list was transcribed
+%from an earlier reference semantics, where keeping the names as data lets
+%effect and coverage checks follow the same dispatch boundary as the
+%interpreter; the transcription is complete, so a name this engine has no
+%operation for simply never matches; not re-measured against upstream PeTTa].
 %
 %Two decisions read it. A `chain` operand it names is EXECUTED and one it does
 %not is data, which is why `!(chain (+ 1 2) $x (quote $x))` keeps the sum
 %unreduced while `!(chain (cons-atom a (b)) $x (quote $x))` does not. An
 %Atom-returning equation whose body it names still RUNS that body, which is the
-%`!isEmbeddedOp` guard the reference records
-%[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean:800-808, "guarded by
-%`!isEmbeddedOp` so a bare `(chain …)` function body is still run"].
+%`!isEmbeddedOp` guard the reference records: a bare `(chain …)` function body
+%is still run.
 %
-%Every name here and eleven names outside it were each measured on LeaTTa
-%9ea9f9d on 2026-08-24, one probe per head, and the measured split is this
+%Every name here and eleven names outside it were each measured on an earlier
+%reference runner on 2026-08-24, one probe per head, and the split is this
 %list exactly: `car-atom`, `index-atom`, `union-atom`, `format-args`, `==`,
 %`if-equal`, `noeval`, `quote`, `collapse`, `superpose` and arithmetic are all
 %data, and `new-state` is data while `_new-state` is named here.
@@ -1806,8 +1804,7 @@ masked_result_goal(Produced, Out,
 %Native and grounded operations instead use reduce/3's status-carrying seam,
 %so this result continuation can retain the old scalar-fast shape: an Atom
 %result is final, and every other compound result re-enters evaluation.
-%[source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean:7350-7361 and
-%7533-7564; tested: translator_evaluation_errors and conformance2;
+%[tested: translator_evaluation_errors and conformance2;
 %commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
 %An Atom-result masker answers as produced AND may be handing written
 %material onward, so it raises the escape flag on a compound answer; the

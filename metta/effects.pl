@@ -599,7 +599,7 @@ metta_fixed_operation_effect(Name, Effect) :-
 %let a world run host input or mutation. The structural floor reuses the
 %engine's existing reviewed primitive families, except for operations whose
 %answer cardinality is itself observable. The remaining named groups are the
-%interpreter profile proved by LeaTTa's Minimal/EffectSafety.lean, extended by
+%interpreter profile of the EffectSafety law this engine follows, extended by
 %MeTTa's host bridges and operating-system doors.
 %A backend's own builtin is reviewed by the backend, because the engine cannot
 %review a predicate it does not ship without naming it. The classification
@@ -623,7 +623,7 @@ metta_builtin_effect(Name, Effect) :-
 %Interpreter operations can disappear into control goals during translation,
 %and several are not builtin_fun/1 leaves at all. Keep the complete reviewed
 %profile independent of that registry. The five groups are the executable
-%lists in LeaTTa's MettaHyperonFull/Minimal/EffectSafety.lean; the
+%lists of that same EffectSafety profile; the
 %embedded-operation coverage test below the planner rejects drift between this
 %profile and translator:embedded_operation_head/1.
 metta_semantic_effect(chain, pureStructural).
