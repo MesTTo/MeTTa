@@ -7,7 +7,7 @@
 %   - one `ANSWER-GROUP ` line per RUNNABLE form, in source order, holding that
 %     form's answers in the engine's display spelling. A form with no answers
 %     prints an empty group rather than nothing, because "no answers" is an
-%     observation the arbiter records as `[]` and dropping it would misalign
+%     observation LeaTTa records as `[]` and dropping it would misalign
 %     every line after it [tested:
 %     test_a_prelude_derived_form_matches_its_fused_twin_on_the_corpus;
 %     commit=c1eaa36c7a2089801fe9da3cbec3fc02833d66fe].

@@ -57,7 +57,7 @@
 %     CONDITIONAL systems is undecidable in general, so that verdict is a
 %     PROOF OBLIGATION about the rules as they actually run, discharged
 %     exactly where every rule's body answers. The route that reaches the rest
-%     is the arbiter's extended conditional critical pairs
+%     is LeaTTa's extended conditional critical pairs
 %     [source 2026-08-21: LeaTTa MeTTaILProofs/ConditionalCP.lean, after
 %     Avenhaus-Loria-Saenz 1994 and Lucas JLAMP 2024].
 %

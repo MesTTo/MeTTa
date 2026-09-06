@@ -5,7 +5,7 @@
 ;get-type extension for numbers:
 ;=alpha declares two `Atom` parameters, so `(% $x 2)` would reach it as WRITTEN
 ;and be compared with 0 rather than run. The remainder is NAMED first, which is
-;what makes the extension fire; the arbiter answers False for the unsequenced
+;what makes the extension fire; LeaTTa answers False for the unsequenced
 ;form too [measured 2026-08-24: `!(=alpha (% 2 2) 0)` is False on LeaTTa
 ;9ea9f9d].
 (= (get-type $x)

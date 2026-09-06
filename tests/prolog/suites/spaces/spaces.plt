@@ -1192,7 +1192,7 @@ test(deciding_a_function_is_still_defined_does_not_walk_the_predicate_table,
 % is evaluated outside match. If remove-atom and add-atom would be executed
 % right away for each found matching, the condition of circular links would be
 % broken after the first rewrite" [source: the language's Working with spaces].
-% The arbiter pins it with an experiment built to tell an eager snapshot from
+% LeaTTa pins it with an experiment built to tell an eager snapshot from
 % a lazy query that happens to be fully consumed, and only the effect ORDER is
 % a recorded free divergence [source: LeaTTa tests/semantics/matching/
 % nondeterministic_match_snapshot.metta].
@@ -2269,7 +2269,7 @@ test(a_control_signal_is_never_kept,
 
 % A Prolog-hosted matchable: the term claims its own matching logic, so
 % the walker's hook cases run with no Python in the process. The ground
-% cases mirror the arbiter's measured decisions [source: LeaTTa
+% cases mirror LeaTTa's measured decisions [source: LeaTTa
 % tests/semantics/matching/grounded_value_matching.metta].
 seam:matchable_value(plunit_interval(_, _)).
 seam:custom_match(plunit_interval(Lo, Hi), Other) :-
@@ -2497,7 +2497,7 @@ test(an_unbound_operand_fails_without_enumerating) :-
 % add_reducts, get_atoms and match, all six STATUS conforms and all six
 % transcripts of hyperon 0.2.10; the texts are upstream's own `ok_or` strings
 % at space.rs:143, :172 and :199]. The message is a STRING here and prints
-% quoted, where the arbiter's writer prints the same text bare; the corpus
+% quoted, where LeaTTa's writer prints the same text bare; the corpus
 % comparison drops quotes on both sides and says so at
 % tests/conformance/leatta.py, so the two records differ only in that.
 %
@@ -2525,7 +2525,7 @@ refused_space_call("!(collapse (match 42 (q a) a))",
 %and the REDUCED atom, which is where the write would have happened.
 refused_space_call("!(collapse (add-reduct 42 (+ 7000 1)))",
                    "((Error (add-atom 42 7001) \"add-atom expects a space as the first argument\"))").
-%The scoped type lookup is a space door too, and the arbiter refuses it in the
+%The scoped type lookup is a space door too, and LeaTTa refuses it in the
 %same shape [source: LeaTTa tests/semantics/spaces/get_type_space.metta and the
 %four get_doc files, whose last line is this refusal reached through it].
 refused_space_call("!(collapse (get-type-space not-a-space scoped-atom))",

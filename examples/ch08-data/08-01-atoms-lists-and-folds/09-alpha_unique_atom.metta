@@ -1,7 +1,7 @@
 ; tests for alpha-unique-atom
 ;=alpha declares two `Atom` parameters, so both operands reach it AS WRITTEN
 ;and a call in that position would be compared rather than run. The result
-;is NAMED first; the arbiter answers the same way for the unsequenced form
+;is NAMED first; LeaTTa answers the same way for the unsequenced form
 ;[measured 2026-08-24: `!(=alpha (alpha-unique-atom ((link $x human)))
 ;((link $a human)))` is False on LeaTTa 9ea9f9d too].
 

@@ -1330,7 +1330,7 @@ remove_matching_atoms(Space, Term) :-
 %
 %A space is a NAME that is one, and metta_space_name/1 decides which. The doors
 %used to share a metta_space_argument/1 whose whole body was `atom(Space)`, on
-%the reading that this engine CANNOT reproduce the arbiter's
+%the reading that this engine CANNOT reproduce LeaTTa's
 %`(add-atom not-a-space (bad add))` diagnostic: the two model spaces
 %differently, upstream's being a grounded atom wrapping a space object while
 %MeTTa's is a symbol, and a write to a name that does not exist yet creates it,
@@ -1343,7 +1343,7 @@ remove_matching_atoms(Space, Term) :-
 %made a space called `not-a-space` while `(is-space not-a-space)` answered
 %False in the same program.
 %
-%The arbiter decides it the same way for the same reason. LeaTTa dispatches by
+%LeaTTa decides it the same way for the same reason. It dispatches by
 %name as this engine does, and its `spaceName` says "bare symbols resolve only
 %through the running context's token table; an unbound symbol is not a space",
 %with every space-consuming operation resolving through `resolveSpace`
@@ -1355,7 +1355,7 @@ remove_matching_atoms(Space, Term) :-
 %examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/07-add_atom_fun_space.metta, still returns a space name from a
 %function and still lands its write there, spelled `&my_space_name`.
 %
-%The atom is ANSWERED rather than thrown, because that is what the arbiter
+%The atom is ANSWERED rather than thrown, because that is what LeaTTa
 %does: `(collapse (add-atom not-a-space (bad add)))` is a one-element collapse
 %holding the error, and a raise would have emptied the collapse instead
 %[source: LeaTTa tests/semantics/spaces/add_atom.metta]
@@ -1470,7 +1470,7 @@ space_argument_error(Operation, Arguments, Error) :-
 %unreduced: the reducing ones do their own reducing, which is the whole of what
 %distinguishes them from the plain ones.
 %All three DELEGATE the space check to add-atom rather than repeating it, and
-%that is observable: the arbiter answers `(Error (add-atom not-a-space 7001)
+%that is observable: LeaTTa answers `(Error (add-atom not-a-space 7001)
 %...)` for `(add-reduct not-a-space (+ 7000 1))`, naming add-atom and the
 %REDUCED atom, because the refusal happens where the write does. Checking here
 %would name add-reduct and the unreduced call, which is a different answer.
@@ -1539,7 +1539,7 @@ reduced_for_space([=, Head, Body], [=, Head, ReducedBody]) :-
 %came back written and `(add-reduct &s (total (+ 1 2)))` stored the call.
 %eval/2 compiles the expression the way a top-level form is compiled, and that
 %walk reduces a MEMBER of an expression whose head names no function, which is
-%what the arbiter's own interpret-tuple does: `!(total (+ 1 2))` is `(total 3)`
+%what LeaTTa's own interpret-tuple does: `!(total (+ 1 2))` is `(total 3)`
 %on both engines, and now so is what add-reduct stores
 %[measured 2026-08-24 against LeaTTa 9ea9f9d:
 %`(add-reduct $s (total (+ 1 2)))` then `(get-atoms $s)` answers `((total 3))`

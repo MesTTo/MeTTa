@@ -34,7 +34,7 @@
 
 ;if-equal compares by ALPHA-EQUIVALENCE, not ==: Hyperon implements it
 ;with core.rs atoms_are_equivalent, atoms equal up to a consistent
-;variable renaming, and the arbiter mechanises exactly that
+;variable renaming, and LeaTTa mechanises exactly that
 ;[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean, ifEqualOp]. The
 ;library shim compared with ==, which misses (f $x $x) against
 ;(f $y $y); the promotion fixes the contract, the same way add-reduct's
@@ -137,7 +137,7 @@
 ;Subtracting the produced set from the expected one leaves nothing when
 ;all of them did. subtraction-atom's two parameters are Expression and so
 ;hold their arguments as written, which is why the collapse is named first
-;and the variable handed over; the arbiter's own definition sequences it the
+;and the variable handed over; LeaTTa's own definition sequences it the
 ;same way [source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean:2834-2840,
 ;(= (assertIncludes $atom $content) (let $eval_atom (collapse $atom) (let
 ;$diff (subtraction-atom $content $eval_atom) ...)))].
@@ -342,7 +342,7 @@
 ;arrives unreduced, so the prelude register, which IS honoured at call
 ;sites, is where it belongs.
 ;
-;The answer then comes from the declaration, which is what the arbiter
+;The answer then comes from the declaration, which is what LeaTTa
 ;answers: (get-type (literal-return 2)) is Atom for
 ;(: literal-return (-> Number Atom)), whatever its body would reduce to
 ;[source: LeaTTa tests/semantics/types-meta/20_atom_return_literal.metta,
@@ -408,7 +408,7 @@
 ;absence carries behaviour: upstream ships this equation with no
 ;(: type-cast ...) line, so the operands evaluate before the equation
 ;runs, and an ill-typed subject reports its OWN error instead of being
-;swallowed by an Atom mask. The arbiter measured exactly that against
+;swallowed by an Atom mask. LeaTTa measured exactly that against
 ;pinned Hyperon 0.2.10 [source: LeaTTa Stdlib.lean, the type-cast note
 ;and tests/semantics/types-basic/50-53]. The library declared Atom
 ;parameters and compared metatypes with ==; both diverged.

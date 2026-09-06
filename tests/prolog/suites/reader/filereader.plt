@@ -103,8 +103,8 @@ test(comment_parentheses_do_not_close_a_form) :-
     SecondTerm == [quote, done].
 
 %A top-level form is ONE ATOM, and a parenthesised expression is only the
-%commonest kind. The four splitter tests below pin the reader against the
-%arbiter's own tokenizer rule: a leading `!` before `(`, layout or end of
+%commonest kind. The four splitter tests below pin the reader against
+%LeaTTa's own tokenizer rule: a leading `!` before `(`, layout or end of
 %input marks the atom that follows as runnable, and a `!` anywhere else is
 %an ordinary symbol character [source: LeaTTa
 %MettaHyperonFull/Runtime/Parser.lean:85-88].
@@ -120,7 +120,7 @@ test(the_marker_takes_an_atom_of_any_kind) :-
     Forms == [runnable("untouched-symbol"), runnable("42"),
               runnable("\"a b\""), runnable("$free"), runnable("&first")].
 
-%`!42` and `!$x` print nothing under the arbiter because its tokenizer keeps
+%`!42` and `!$x` print nothing under LeaTTa because its tokenizer keeps
 %the `!` inside the symbol; only `(`, layout and end of input make it the
 %marker [measured 2026-08-19: LeaTTa --observed-file on each exits 0 with no
 %output].
@@ -146,7 +146,7 @@ test(missing_form_close_reports_its_syntax_error,
 :- begin_tests(filereader_bare_top_level_atoms).
 
 %Both halves end to end: the marked atom evaluates to itself and the
-%unmarked one is stored, which is what the arbiter does with each
+%unmarked one is stored, which is what LeaTTa does with each
 %[source: LeaTTa tests/semantics/eval-core/self-evaluating-atoms.metta,
 %grounded/25-state-rendering.metta, modules/09-bind/main.metta].
 test(a_marked_bare_atom_evaluates_to_itself) :-

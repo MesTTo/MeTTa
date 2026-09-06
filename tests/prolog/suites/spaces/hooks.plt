@@ -11,7 +11,7 @@
 %   when the claim is made, and a request no rule covers is locally
 %   detectable rather than silently decided. The verdicts are a BEFORE
 %   trigger's; the transform is one rule step, its output granted and not
-%   re-asked, the bounded prefix of the CHR ω_e semantics the arbiter
+%   re-asked, the bounded prefix of the CHR ω_e semantics LeaTTa
 %   mechanizes (LeaTTa MettaHyperonFull/Proofs/ChrOperational.lean).
 % Guarantees:
 %   - compiled fire observes the evaluator's residual unchanged, and the

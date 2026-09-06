@@ -474,7 +474,7 @@ note_head_pattern(Module, F, RevPath, Label, Reason) :-
 %then only match a term handed over unevaluated. It decides nothing about what
 %compiles.
 %
-%Two of the arbiter's own corpus files decide it, and this engine failed both.
+%Two of LeaTTa's own corpus files decide it, and this engine failed both.
 %`(= (outer-hold (inner-sum $x $y)) outer-held)` with `(: outer-hold (-> Atom
 %Symbol))` answers `outer-held` there and RAISED here, because the head became
 %`inner-sum` run backwards over syntax; and `(= (nested-atom (produce-pa3))
@@ -1245,7 +1245,7 @@ translate_equation_body_result(F, BodyExpr, GoalsBody, ExpOut) :-
 %BodyExpr ; translate_expr(BodyExpr, GoalsBody, ExpOut) )` there and nothing
 %more [source: PeTTa@ae66fa8 src/translator.pl:25-28]. A body that compiled to
 %no goals used to take equation_result_continuation/4, which re-entered
-%evaluation on the arbiter's `returnsAtom` rule
+%evaluation on LeaTTa's `returnsAtom` rule
 %[LeaTTa MettaHyperonFull/Minimal/Interpreter.lean:3786-3799]. It became
 %observable once a masked parameter could carry something unreduced, and it
 %DIVERGED: `(: wu1 (-> Number Atom %Undefined%))` with

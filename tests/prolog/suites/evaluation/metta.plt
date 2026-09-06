@@ -1843,7 +1843,7 @@ test(a_list_argument_stays_a_list,
 %subtyping relation while checking an argument; it WIDENS the argument's type
 %LIST and runs the ordinary check against the wider list, so the matcher learns
 %nothing about subtyping and `get-type` is where it shows. Every expectation
-%below is the arbiter's measured answer from pinned hyperon 0.2.10 at 3f76dc4
+%below is LeaTTa's measured answer from pinned hyperon 0.2.10 at 3f76dc4
 %[source: LeaTTa ai-report-subtype-graph.md, measured 2026 against pinned
 %hyperon 0.2.10 at 3f76dc4, which the two lines above name].
 
@@ -2528,7 +2528,7 @@ test(with_pragma_refuses_an_unknown_key,
 
 :- begin_tests(operation_answers).
 
-%The multiplicity and the order of BadArgType, on the arbiter's own four
+%The multiplicity and the order of BadArgType, on LeaTTa's own four
 %programs: one error per rejected ACTUAL type, one per declared ARROW, the two
 %composing arrow-major and actual-minor, and a position whose sibling actual
 %type carried the check forward still reporting its failure before the later
@@ -2611,7 +2611,7 @@ test(a_shared_type_variable_reports_what_the_first_argument_fixed,
 
 %An argument whose DECLARED type is already wrong is refused where it stands,
 %so the error names the call the program wrote and the argument never runs.
-%The arbiter's eight effects files are built to see exactly that: each pairs a
+%LeaTTa's eight effects files are built to see exactly that: each pairs a
 %control with an experiment whose operand emits a marker, and the marker is
 %absent for the rejected operand on hyperon 0.2.10, which type-checks a call
 %before interpreting its arguments
@@ -2712,7 +2712,7 @@ test(skel_admits_both_tiers_and_is_idempotent,
 %report success while the operation stayed unreduced
 %[source: LeaTTa tests/semantics/modules/35-builtin-from-module, whose STATUS
 %is diverges because the two engines word the refusal differently, both
-%refusing]. The two files are the arbiter's own shape: the top imports a
+%refusing]. The two files are LeaTTa's own shape: the top imports a
 %module, and the MODULE writes the bare built-in name.
 plunit_builtin_module_tree(Directory) :-
     tmp_file(builtin_from_module, Directory),

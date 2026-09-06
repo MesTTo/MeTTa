@@ -826,7 +826,7 @@ reduce([F|Args], Out, Status) :- !,
         % A parameter declared `Expression` or `Atom` hands its operand over AS
         % WRITTEN, so a variable-headed call site can receive the `(|-> ...)`
         % term itself where an evaluated operand used to arrive already
-        % compiled. The arbiter applies exactly this shape: with
+        % compiled. LeaTTa applies exactly this shape: with
         % `(: apply-two (-> Number Number Expression Number))` and
         % `(= (apply-two $x $y $f) ($f $x $y))`,
         % `!(apply-two 10 20 (|-> ($x $y) (+ $x $y)))` is 30 there and was the
@@ -1277,7 +1277,7 @@ call_site_type_chains(Fun, UniqueTypeChains) :-
     ).
 
 %A DECLARED head with no equations is still checked against its declaration,
-%because the declaration is what the arbiter reads: `(: aF (-> A R))` with
+%because the declaration is what LeaTTa reads: `(: aF (-> A R))` with
 %`(: b B)` makes `(aF b)` `(Error (aF b) (BadArgType 1 A B))` there and left
 %it as data here, which is why four type-cast files read the subject's own
 %error where this engine reported none
@@ -1286,7 +1286,7 @@ call_site_type_chains(Fun, UniqueTypeChains) :-
 %
 %The goal is emitted ONLY for a head that HAS an arrow, so an ordinary
 %constructor compiles to exactly what it did and pays nothing. The arguments
-%it reports are the ones AS WRITTEN, which is the form the arbiter names and
+%it reports are the ones AS WRITTEN, which is the form LeaTTa names and
 %the one whose types decide.
 %
 %ONE INDEXED CLAUSE LOOKUP decides it, the same door get_function_type/2 opens
@@ -1550,8 +1550,8 @@ mask_positions_only(Chain, Chain).
 masked_position_or_undefined(T, Masked) :-
     ( non_evaluated_parameter_type(T) -> Masked = T ; Masked = '%Undefined%' ).
 
-%THE EVALUATION MASK OF A WRITTEN BUILTIN CALL, which is the half of the
-%arbiter's typed dispatch the function path above could not read. `argMask`
+%THE EVALUATION MASK OF A WRITTEN BUILTIN CALL, which is the half of
+%LeaTTa's typed dispatch the function path above could not read. `argMask`
 %takes the operator's declared signature and answers one boolean per argument
 %[source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean:3767-3784]; this
 %index is that signature, and translate_call_args_dl/6 is that answer applied.
@@ -1665,14 +1665,14 @@ memberchk_masked([T|Ts]) :-
 %arguments.
 %Upstream type-checks an application before interpreting its operands
 %(`hyperon-experimental@3f76dc4` interpreter.rs:1224-1258 against :1352-1395),
-%and the arbiter's eight effects files are built to see the difference: each
+%and LeaTTa's eight effects files are built to see the difference: each
 %pairs a control with an experiment whose operand emits a marker from inside
 %itself, and no marker appears for a rejected operand
 %[source: LeaTTa tests/semantics/grounded/13-effects-arithmetic.metta through
 %21-effects-strings-metatype.metta, all STATUS conforms]. This engine ran the
 %operand first and then reported the REDUCED value, so `(+ 1 (effect-string
 %PLUS-WRONG True))` printed the marker and answered
-%`(Error (+ 1 s) (BadArgType 2 Number String))` where the arbiter answers the
+%`(Error (+ 1 s) (BadArgType 2 Number String))` where LeaTTa answers the
 %call as written and prints nothing.
 %
 %DECIDED HERE, at compile time, because that is where it is free. The types of

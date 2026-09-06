@@ -127,7 +127,7 @@ metta_runtime_check_report :-
     findall(K-D, metta_pragma_key(K, D), Known),
     throw(error(domain_error(metta_pragma_key, Key),
                 context('pragma!'/2, Known))).
-%max-stack-depth is the ONE key the arbiter validates, and a count is the
+%max-stack-depth is the ONE key LeaTTa validates, and a count is the
 %whole of what it validates. The refusal is an ANSWER, not a raise, so the
 %program that wrote it keeps running [measured 2026-08-19 against the
 %arbiter: -1, 1.5 and abc each answer this error, while
@@ -1317,7 +1317,7 @@ rewrite_parsed_form(Space, FormStr, Term, Rewritten) :-
 %writes a cell nothing allocated, and the two spellings are one implementation
 %rather than two.
 %
-%DIVERGENCE, measured and recorded rather than closed: the arbiter RENDERS a
+%DIVERGENCE, measured and recorded rather than closed: LeaTTa RENDERS a
 %cell as `(State <value>)` and this engine renders it as its handle, `&state-#0`,
 %which is what it already does for a space handle. The rendering is presentation
 %in a printer with a round-trip obligation (swrite/2 is sread/2's inverse), so
@@ -1440,7 +1440,7 @@ prolog:error_message(metta_state_write_fenced(Cell)) -->
 %The runnable path already prunes it, through metta_prune_empty_answers/2, but
 %a nested `eval`, and therefore `evalc` and `metta` over it, handed the symbol
 %back as an ordinary value; a caller collecting those answers then saw one
-%where the arbiter sees none. Measured 2026-08-24 against LeaTTa 9ea9f9d with
+%where LeaTTa sees none. Measured 2026-08-24 against LeaTTa 9ea9f9d with
 %`(= (f a) A)` and `(= (f $x) Empty)`:
 %`!(collapse-bind (metta (f b) %Undefined% &self))` is `()` there and was
 %`((Empty (bindings)))` here, and `!(collapse-bind (metta (f a) %Undefined%

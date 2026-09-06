@@ -258,12 +258,12 @@ test_answer_value(Results, Results).
 'test-no-answer'(Results, Out) :-
     test(Results, [], Out).
 
-%The operand crosses UNEVALUATED, because `(: assert (-> Atom (->)))` is the
-%arbiter's own declaration for this name
+%The operand crosses UNEVALUATED, because `(: assert (-> Atom (->)))` is
+%LeaTTa's own declaration for this name
 %[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean:1020]. So the evaluation
 %is this predicate's to make, and what it can report is the form as WRITTEN:
 %`!(assert (== 1 2))` answers `(Error (assert (== 1 2)) ((== 1 2) not True))`
-%on the arbiter and throws here naming that same `(== 1 2)`
+%on LeaTTa and throws here naming that same `(== 1 2)`
 %[measured 2026-08-24 against LeaTTa 9ea9f9d].
 %
 %Before the mask reached written builtin calls the operand arrived already
@@ -328,7 +328,7 @@ assert(Form, true) :-
 %space; the engine's type machinery is module-parameterized already, so
 %selection is one with_metta_module/2 around the ordinary get-type.
 %A name that is not a space is refused here as it is at every other space
-%door, and in the same shape, an ANSWER rather than a throw: the arbiter's
+%door, and in the same shape, an ANSWER rather than a throw: LeaTTa's
 %`(Error (get-type-space not-a-space scoped-atom) get-type-space expects a
 %space as the first argument)` is what the four get-doc files read back through
 %this operation [source: LeaTTa tests/semantics/spaces/get_type_space.metta,

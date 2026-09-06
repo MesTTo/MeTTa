@@ -1,8 +1,10 @@
 """Purpose: replay the conformance corpus's CeTTa-routable fragment through
 the fork's C core and gate that the SHARED fragment stays shared. CeTTa is
-triangulation, never authority: LeaTTa defines, and agreement here is
-regression detection on the fragment both runtimes serve, priced for the
-day forms route to the C core in-process.
+triangulation, never authority: upstream PeTTa at ae66fa8e is the arbiter
+and tests/conformance/petta.py is the lane that reads it. This corpus is
+LeaTTa's, kept for the fragment both runtimes serve, and agreement here is
+regression detection on it, priced for the day forms route to the C core
+in-process.
 
 The checkout resolves through the CETTA_PATH environment override with the
 sibling checkout as the default, the same env-override oracle pattern
@@ -112,7 +114,7 @@ def observe(binary: Path, path: Path, timeout: float) -> tuple[list[str], int, s
 def compare(binary: Path, path: Path, timeout: float) -> measured_corpus.Comparison:
     source = path.read_text(errors="replace")
     expected, skipped = measured_corpus.expected_groups(source)
-    #The corpus's MEASURED blocks carry the arbiter's own variable epochs
+    #The corpus's MEASURED blocks carry LeaTTa's own variable epochs
     #($x#0), so the epoch normalisation applies to BOTH sides: the sealed
     #file is recorded as agreeing, and comparing spellings the two writers
     #never shared would invent a divergence out of notation.

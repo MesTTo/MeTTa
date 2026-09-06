@@ -241,7 +241,7 @@
       "text": "1.0e10",
       "wire": ["n", 10000000000.0],
       "written": "10000000000.0",
-      "note": "The engine prints the arbiter's layout (LeaTTa RyuLean4/Runtime.lean:371-396: positional while the value has at most sixteen digits before the point), and Python's repr shares both the digits and this threshold, so the two shipped printers agree here where they used to split 1.0e+10 against 10000000000.0. Gnd's own renderer implements the same law, so the two printers agree everywhere a float prints. Pinned so a change to either printer is visible."
+      "note": "The engine prints LeaTTa's layout (LeaTTa RyuLean4/Runtime.lean:371-396: positional while the value has at most sixteen digits before the point), and Python's repr shares both the digits and this threshold, so the two shipped printers agree here where they used to split 1.0e+10 against 10000000000.0. Gnd's own renderer implements the same law, so the two printers agree everywhere a float prints. Pinned so a change to either printer is visible."
     },
     {
       "id": "float-small-exponent",
@@ -249,7 +249,7 @@
       "text": "1.0e-300",
       "wire": ["n", 1e-300],
       "written": "1e-300",
-      "note": "The other end of the range, agreeing the same way: the engine's arbiter layout drops the mantissa's redundant .0 exactly where repr does."
+      "note": "The other end of the range, agreeing the same way: the engine's LeaTTa layout drops the mantissa's redundant .0 exactly where repr does."
     },
     {
       "id": "float-infinity",
@@ -258,7 +258,7 @@
       "wire": ["n", {"$float": "inf"}],
       "written": "inf",
       "reads_back": false,
-      "note": "The arbiter's spelling, which is hyperon's f64 Display. It prints and it does not read back: `inf` reads as the SYMBOL inf, MeTTa having no literal for a non-finite number, so this case has no text and the seam refuses the whole class rather than storing something that comes back different."
+      "note": "LeaTTa's spelling, which is hyperon's f64 Display. It prints and it does not read back: `inf` reads as the SYMBOL inf, MeTTa having no literal for a non-finite number, so this case has no text and the seam refuses the whole class rather than storing something that comes back different."
     },
     {
       "id": "float-negative-infinity",

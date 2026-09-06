@@ -4,9 +4,9 @@
 % Guarantees:
 %   - `...` and `(:seg $x)` parse to gaps and every other marker-shaped term
 %     stays data, root included [tested: segments_parsing].
-%   - the classifier answers the arbiter's own case for each fragment and
+%   - the classifier answers LeaTTa's own case for each fragment and
 %     refuses outside them, naming the rule [tested: segments_fragments].
-%   - each solver answers what the arbiter's procedure answers, including the
+%   - each solver answers what LeaTTa's procedure answers, including the
 %     shortest-first split order and the open remainder a two-sided answer
 %     keeps [tested: segments_one_sided, segments_last_position,
 %     segments_linear_shallow].

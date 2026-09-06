@@ -140,7 +140,7 @@ inherited_stored_declaration_owns_arity(Module, Fun) :-
 %
 %That is a multiplicity divergence and multiplicity is specified: with
 %`(: df (-> Atom %Undefined%))` and `(: df (-> Number %Undefined%))` declared
-%over one equation, the arbiter answers `(quote (+ 1 2))` once, reading the
+%over one equation, LeaTTa answers `(quote (+ 1 2))` once, reading the
 %FIRST declaration's mask, where this engine answered `(quote (+ 1 2))` and
 %`(quote 3)` [measured 2026-08-24 against LeaTTa 9ea9f9d]. It is not a corner:
 %loading the reference's own prelude beside minimal_metta_lib gives `function`
@@ -163,13 +163,13 @@ first_applicable_branch([Branch|Branches], Fallback, ( Branch *-> true ; Rest ))
 %A declared call that no branch answered says WHY when the declaration is the
 %reason: every rejection it makes, `(Error <call> (BadArgType <position>
 %<expected> <actual>))`, against the arguments AS WRITTEN, which is the form
-%the arbiter names and the one whose types decide
+%LeaTTa names and the one whose types decide
 %[source: LeaTTa tests/semantics/types-basic/44-badargtype-per-actual.metta
 %through 49-badargtype-widened-actuals.metta].
 %
 %It answers NOTHING when the declaration makes no rejection, so a call whose
 %types check and whose equations do not match keeps this engine's own reading
-%rather than gaining the arbiter's NotReducible: `(= (f 1) one)` then `!(f 2)`
+%rather than gaining LeaTTa's NotReducible: `(= (f 1) one)` then `!(f 2)`
 %answers `[(f 2)]` there and nothing here, and that divergence is not this
 %change's to make [measured 2026-08-19 against the arbiter]. The soft cut is
 %what keeps the successful path unchanged: it commits to the branches whenever
@@ -367,12 +367,12 @@ typed_functioncall_branch(Fun, TypeChain, T, GsH, IsPartial, Bound, Out,
         OutCheck = [OutGoal]
     ),
     %NO RESULT CONTINUATION IS EMITTED HERE, and the reason is that this engine
-    %compiles where the arbiter steps. The arbiter's `eval` applies one equation
+    %compiles where LeaTTa steps. LeaTTa's `eval` applies one equation
     %and hands the instantiated right-hand side to `returnsAtom`, which sends it
     %back through evaluation; compiling that right-hand side has ALREADY done
     %exactly that one round. Adding a second is a double evaluation, measured:
     %`(: uf2 (-> Atom %Undefined%))` with `(= (uf2 $x) (cons-atom (+ 1 2) (b)))`
-    %answers `((+ 1 2) b)` on the arbiter, because cons-atom's own `Atom` result
+    %answers `((+ 1 2) b)` on LeaTTa, because cons-atom's own `Atom` result
     %stops there, and a continuation at this call site answered `(3 b)`
     %[measured 2026-08-24 against LeaTTa 9ea9f9d].
     %
@@ -383,7 +383,7 @@ typed_functioncall_branch(Fun, TypeChain, T, GsH, IsPartial, Bound, Out,
     %between the argument evaluations and them. An argument that produced an
     %Error fails its own declared check -- an Error is not a Number -- and a
     %failed check takes the whole branch down, which is how
-    %`(needs-number (+ 1 "bad"))` answered nothing where the arbiter answers
+    %`(needs-number (+ 1 "bad"))` answered nothing where LeaTTa answers
     %the inner error atom.
     place_type_checks(ArgTypes, OutType, ArgChecks, OutCheck, [], AfterEval,
                       Extra),
@@ -711,11 +711,11 @@ non_evaluated_parameter_type(Type) :-
     catch_recover(type_declaration(Type, 'DontEvalType'), fail).
 
 %A masked position whose declared type still DECIDES something keeps its check,
-%and the check reads the argument AS WRITTEN, which is the term whose type the
-%arbiter reports. Dropping it would turn two conforming answers into
+%and the check reads the argument AS WRITTEN, which is the term whose type
+%LeaTTa reports. Dropping it would turn two conforming answers into
 %non-conforming ones: `(: ef (-> Expression %Undefined%))` answers
 %`(Error (ef 5) (BadArgType 1 Expression Number))` and
-%`(Error (ef "s") (BadArgType 1 Expression String))` on the arbiter
+%`(Error (ef "s") (BadArgType 1 Expression String))` on LeaTTa
 %[measured 2026-08-24 against LeaTTa 9ea9f9d].
 %
 %Atom decides nothing: it is the gradual top metatype, admitted against every
