@@ -158,27 +158,33 @@ relation name to avoid colliding with an application's existing facts. Compose
 it with a stored space through `spaces.union`, or register it directly so
 adding a field atom calls `setattr`.
 
-Arithmetic and logic operators BUILD terms: `S.x + 1` is `(+ x 1)`,
-`&` `|` `~` build `and`/`or`/`not`, unary `-` builds the subtraction image
-`(- 0 $n)`, unary `+` answers the identical atom, `abs()` builds
-`(abs-math $n)`, `@` builds the library-provided name `matmul`, and `//`
-lowers through `floor-math`. Integer shifts refuse and the error names the
-missing MeTTa operation. Arithmetic on two grounded values stays ordinary
-Python. Rich COMPARISONS do not build: `a < b` and friends answer Python
+Arithmetic and logic operators BUILD terms, ALWAYS, whether or not an operand
+is a variable: `S.x + 1` is `(+ x 1)` and `G(2) + G(3)` is `(+ 2 3)`, not `5`.
+Unwrap with `.value` when Python arithmetic is what you meant.
+`&` `|` `~` build `and`/`or`/`not`, `^` builds `xor`, `<<` and `>>` build
+`bit-shift-left` and `bit-shift-right`, `**` builds `pow-math`, unary `-`
+builds the subtraction image `(- 0 $n)`, unary `+` answers the identical atom,
+`abs()` builds `(abs-math $n)`, `math.floor`, `math.ceil`, `math.trunc` and
+`round` build their `-math` heads, `@` builds the library-provided name
+`matmul`, and `//` lowers through `floor-math`.
+Rich COMPARISONS do not build: `a < b` and friends answer Python
 booleans in the engine's own `msort` order (so atoms sort), and `a == b`
-is ordinary Python equality. A comparison TERM is spelled at the bracket
-door, `S[">="](V.n, 60)`, or built by `a.eq(b)` / `a.ne(b)` for
-`(== a b)` / `(not (== a b))`. `Expression.__bool__` raises on comparison
+is ordinary Python equality. Comparing an atom with a plain Python value
+refuses and the message names the three ways out. A comparison TERM is spelled
+at the bracket door, `S[">="](V.n, 60)`, or built by `a.eq(b)`, `a.ne(b)`,
+`a.lt(b)`, `a.le(b)`, `a.gt(b)` and `a.ge(b)`; `a.alpha(b)` builds
+`(=alpha a b)`. `Expression.__bool__` raises on comparison
 and boolean heads, so `if S[">"](V.x, 1):` is refused rather than
 silently truthy.
 
-The MeTTa `==` is `(-> $a $a Bool)`: it compares two things of ONE type and
-refuses two of different KNOWN types by name, so `!(== 1 "S")` raises rather
-than answering `False`. An operand nothing declares contradicts nothing, so
-`!(== 1 a)` still answers `False`, and expressions are left alone, so
-`!(== (collapse ...) ())` is unchanged. `=alpha` is `(-> Atom Atom Bool)` and
-takes anything. Python's `a == b` still answers `False` across kinds, because
-`__eq__` may not raise.
+The MeTTa `==` is `(-> $a $b Bool)`, two independent type variables, and it
+asks no type question at all: it is identity of the two evaluated operands.
+So `!(== 1 "S")`, `!(== True 1)` and `!(== 1 a)` all answer `False` rather
+than refusing, `!(!= 1 "S")` answers `True`, and `!(== (collapse ...) ())`
+compares the collapsed tuple. This engine refused a cross-type pair until
+2026-08-30; nothing does now. `=alpha` carries no arrow declaration and takes
+anything, comparing modulo variable renaming. Python's `a == b` answers
+`False` across kinds for the same reason.
 
 ## Running and querying: exact return shapes
 
@@ -261,9 +267,14 @@ operations are plain Python callables. `amplitude` refuses until
 `contractive` and `staged`.
 `with metta.under(carrier):` supplies the task-local default and an explicit
 keyword wins; nothing reads back the carrier in force.
-`m.match(q, under=ranked)[:3]` orders in Python and then slices, which is the
-three best but does not bound a provider; `(top 3 ...)` is the form that does,
-under the three declarations Contracts names. `m.sample(q, k=10, seed=7)`
+`m.match(q, under=ranked)[:3]` is the three best, and it reaches the provider
+as `limit=3` when the space is foreign, its `(source ...)` discipline is not
+`linear`, it declares `emits("best-first")`, its effective algebra is the
+carrier the query selected, and the query is one pattern with no `where=`.
+Short of all five it pulls the shared cursor and orders here, so the answers
+are the same either way and only the work changes. `(top 3 ...)` is the
+language-side form, under the three declarations Contracts names.
+`m.sample(q, k=10, seed=7)`
 samples with replacement from implicit `(rate n)` tags using a local seeded
 generator.
 
@@ -454,8 +465,10 @@ need.
 The ordered `EffectClass` members are `pureStructural`, `readOnlyLookup`,
 `nondeterministicReadOnly`, `writesState`, and `oracleIO`. A plan's class is
 the strongest member: `EffectClass.compose(effects)` folds that join and an
-empty plan is `pureStructural`. Generators and generator inverses require at
-least `nondeterministicReadOnly`. Every registration publishes its canonical
+empty plan is `pureStructural`. Registering a generator or a generator inverse
+LIFTS the class to at least `nondeterministicReadOnly` rather than refusing, so
+`effect="pureStructural"` on a generator is accepted and reflects
+`nondeterministicReadOnly`. Every registration publishes its canonical
 `(effect name class)` row in `&metta`; missing metadata refuses before engine
 state changes and names all five remedies. The retired input spellings map as
 `immutable -> pureStructural`, `stable -> readOnlyLookup`, and
@@ -489,7 +502,13 @@ nondeterministic, one answer per yield; returning `None` answers nothing, which
 is why an `Optional` return declares the value type. An unannotated callable
 makes no type claim. `(arguments name atoms)` asks for Atom wrappers after
 ordinary evaluation, while an `Atom` annotation receives the written term
-before evaluation. Only `(effect name pureStructural)` licenses caching. These
+before evaluation. Only `(effect name pureStructural)` licenses the AUTOMATIC
+cache, the one nobody asked for. A written declaration is carried out as
+written whatever the class says: `!(memoize f)`, `!(memoize-exact f)`,
+`!(tabled (f $x))` and `(cache f force)` cache a body that prints, writes a
+space or is declared `oracleIO`. Two refusals remain and neither judges a
+body: a name no function answers to, and a predicate SWI already tables, which
+`force` does not open. These
 policy atoms live in `&metta`; `(op name arity raw_det|raw_many)` records raw
 transport.
 
@@ -615,8 +634,13 @@ its type as `(->)`. That is an observer rule; argument checking continues to
 treat `()` as gradual rather than forcing a unit-type constraint.
 A state cell has type `(StateMonad $t)`: `(new-state 0.4)` is
 `(StateMonad Number)` and arithmetic on it is a `BadArgType`, so a cell is
-dereferenced with `get-state` before use. `get-metatype` answers `Grounded` for
-a cell and a number alike, so a guard that tells them apart needs `get-type`.
+dereferenced with `get-state` before use. `get-metatype` classifies a NAME by
+whether this engine holds a function for it, so it answers `Grounded` for
+`car-atom`, for a literal, and for a name the running program has just given
+an equation, and `Symbol` for `nop`, `hyperpose`, `sealed`, a name nothing
+defines, and every space handle and state cell, `&self` included. What a
+handle or a cell IS is read with `get-type`, which answers `SpaceType` and
+`(StateMonad $t)`.
 `metta.State[T](value, space=None)` is the Python handle: `.value` reads and
 writes the same engine cell, `__metta__` carries it across any atom boundary,
 and the write answers `true` rather than the cell. Because a cell is an
@@ -1333,7 +1357,9 @@ through `annotations`, and `emits("best-first")`. Drop one and the bound stays
 here. `emits("best-first")` is therefore a CORRECTNESS promise, not a
 formatting preference: a provider that declares it and yields out of order
 makes `(top k ...)` answer the wrong rows, not a permutation of the right ones.
-A Python `[:k]` slice never pushes: it drains the provider and orders here,
+A Python `[:k]` slice of an ordered-carrier match asks the same promise of the
+same provider, so `emits("best-first")` decides both. A slice that does not
+meet every condition under `under=` above drains the provider and orders here,
 which is correct whatever the provider promises and costs the whole store.
 `py-iter` is lazy and yields one answer at a time; a Python generator is not
 drained. Each enumeration gets its OWN cursor over a shared cache, so reading
