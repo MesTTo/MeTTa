@@ -14,6 +14,11 @@
 % Guarantees: a collection closure excludes every variable bound by case, switch, unify and let* from its captured environment, preserving the written variable identities used by each binding form [tested: a_collection_closure_keeps_each_binding_form_local_to_one_element; commit=09e34db01c8e3ebeff375ca18d3424c483172e7d].
 % Guarantees: a singleton superposition adds no return unification and preserves every answer of its member [tested: singleton_superpose:the_only_branch_has_the_same_goal_and_output_as_its_expression, singleton_superpose:the_only_branch_keeps_every_answer_and_duplicate; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67].
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: `chain` compiles to exactly `let`'s goals, so the binder holds a
+%   VALUE and nothing evaluates that value a second time; an equation atom read
+%   out of a space and chained is the atom rather than the equality test's answer
+%   [tested: examples/ch07-control-flow/07-03-let-and-sequencing/10-chain_is_let.metta;
+%   commit=WORKTREE].
 % Guarantees: explicit cast targets and typed bindings resolve aliases inside
 %   the engine; emitted checks preserve already resolved type observations
 %   [tested: structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
@@ -763,57 +768,50 @@ translate_special_dl(return, [Value], AfterHead, Goals, Out) :-
     !,
     Out = [return, Value],
     AfterHead = Goals.
-%CHAIN'S NESTED OPERAND IS ONE MINIMAL STEP, NOT AN EVALUATION, and that is the
-%whole difference between it and `let`. Its declared first parameter is `Atom`,
-%so the operand reaches the instruction as written, under
-%`(: chain (-> Atom Variable Atom %Undefined%))`; the instruction then steps
-%it if it is one of the twelve reflected forms and leaves it as DATA if it is
-%not [assumed: the declaration and the closed list of reflected forms were
-%adopted from an earlier reference semantics, not re-measured against upstream
-%PeTTa]. An operand the instruction leaves as data is
-%substituted into the template unevaluated, and the template's own positions
-%then decide whether it ever reduces.
-%
-%That is why the two spellings answer differently for a reducible operand:
-%`!(chain (+ 1 2) $x (quote $x))` is `(quote (+ 1 2))` and
-%`!(let $x (+ 1 2) (quote $x))` is `(quote 3)` [assumed 2026-08-24: both doors
-%agreeing was measured against an earlier reference corpus at that date, not
-%re-measured against upstream PeTTa].
-%
-%SUBSTITUTION IS THE WHOLE IMPLEMENTATION, and it is compile-time work rather
-%than a runtime binding, which is what makes the unevaluated operand reach a
-%masked position at all. It also carries the multiplicity the runtime binding
-%could not: a binder used twice duplicates a nondeterministic operand, and the
-%reference this was compared against answers all four rows for
-%`!(chain (superpose (1 2)) $x ($x $x))` where a bind-once route answers two
-%[assumed 2026-08-24: measured against an earlier reference corpus at that
-%date, not re-measured against upstream PeTTa].
 %CHAIN IS LET, which is upstream's own definition: one clause serves both,
 %`(HV == let ; HV == chain), T = [Pat, Val, In] -> ... (Pv = V) ...`
 %[source: PeTTa@ae66fa8 src/translator.pl:207-210]. So the binder takes the
-%value the operand produced, once.
+%value the operand produced, once, and the template is then translated like
+%any other expression. There is nothing left for this clause to add.
 %
 %This engine used to SUBSTITUTE the written operand into the template instead,
-%and fall back to a runtime `metta_chain_step/2` whenever the operand was an
+%and fall back to a runtime stepping predicate whenever the operand was an
 %embedded operation -- eval or evalc -- so that chain could observe eval's raw
 %NotReducible mark. That is minimal MeTTa's stepping protocol, and it cost
 %twice: it diverged, and it put a runtime translation inside every loop
 %written in that style.
 %
-%THE DIVERGENCE, measured 2026-08-30:
+%THE FIRST DIVERGENCE, measured 2026-08-30:
 %`!(chain (superpose (1 2)) $x ($x $x))` answers `(1 1) (2 2)` upstream and
 %answered `(1 1) (1 2) (2 1) (2 2)` here, because substituting a
-%nondeterministic operand into a binder used twice duplicates it. The four
-%rows are the earlier reference's, recorded as such in the comment this
-%replaces; two is upstream's, and upstream is the oracle for this branch.
+%nondeterministic operand into a binder used twice duplicates it. That is what
+%moved this clause onto translate_let_dl/4.
 %
-%THE COST: examples/he_minimalmetta.metta is `(chain (eval ...) ...)` four
-%deep inside a 70,000 iteration loop, and every one of those evals took the
-%runtime door and translated its operand again.
+%THE SECOND DIVERGENCE, measured 2026-09-07, is what removed the result step
+%the move left standing. masked_result_goal/3 re-enters evaluation for any
+%compound result holding a redex, so a chain whose BOUND VALUE is itself an
+%application was evaluated a second time, once as the operand and once as the
+%answer. `!(chain (quote (= a b)) $v $v)` is `(= a b)` upstream and was `false`
+%here, because `=` is this engine's equality as well as its definition head, so
+%re-entering an equation atom TESTS it; and
+%`(= (f0 $x) (* $x (* $x $x)))` read out of `get-atoms` and chained raised the
+%CLP(FD) backwards-multiplication refusal instead of answering the atom. `let`
+%never had the step and never diverged on any row of the family: the pair was
+%measured on eleven programs and `let` agreed with upstream on all of them
+%[measured 2026-09-07 against PeTTa@ae66fa8, `chain`/`let` over quote,
+%cons-atom, car-atom, superpose, eval and get-atoms operands].
+%
+%What the step was there for is covered without it: `!(chain 1 $x (car-atom
+%((+ 1 2) b)))` is 3 and `!(chain (+ 1 2) $x (cons-atom $x (b)))` is `(3 b)` on
+%both engines, because a masked operand is reduced by the CALL's own result
+%continuation (call_result_goal/6) rather than by chain's
+%[measured 2026-09-07 against PeTTa@ae66fa8].
+%
+%THE COST it removed: examples/he_minimalmetta.metta is `(chain (eval ...)
+%...)` four deep inside a 70,000 iteration loop, and every one of those evals
+%took the runtime door and translated its operand again.
 translate_special_dl(chain, Args, AfterHead, Goals, Out) :-
-    translate_let_dl(Args, AfterHead, AfterTemplate, Value),
-    masked_result_goal(Value, Out, Goal),
-    AfterTemplate = [Goal|Goals].
+    translate_let_dl(Args, AfterHead, Goals, Out).
 %let* reads its bindings as syntax and rewrites them into nested lets, so
 %bindings that have not arrived have none to read. That shape used to reach
 %letstar_to_rec_let/3's [] base clause, whose cut then committed to it: the
@@ -1768,12 +1766,6 @@ variable_capturing_form('not-provable').
 %list exactly: `car-atom`, `index-atom`, `union-atom`, `format-args`, `==`,
 %`if-equal`, `noeval`, `quote`, `collapse`, `superpose` and arithmetic are all
 %data, and `new-state` is data while `_new-state` is named here.
-embedded_operation(Term) :-
-    nonvar(Term),
-    Term = [Head|_],
-    atom(Head),
-    embedded_operation_head(Head).
-
 %THE SHAPE THE RESULT CONTINUATION IS EMITTED IN, and the inline test in front
 %of it is what keeps the rule off the arithmetic path. Only a COMPOUND answer
 %can hold a redex, so a scalar is handed straight back by a test the VM decides
