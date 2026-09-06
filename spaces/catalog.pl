@@ -2,6 +2,11 @@
 % and capability catalog Assumes: engine/spaces.pl consults this plain file
 % while its owning module is the load context. Guarantees: every definition
 % retains engine/spaces.pl's implementation module and original load order.
+% Guarantees: a (cost ...) row's witness names exactly one size hole and one
+% head, both checked at the write with the remedy named, and one head carries
+% at most one row [tested: catalog_self_description:a_cost_witness_needs_exactly_one_hole,
+% catalog_self_description:a_second_cost_row_for_one_head_is_refused_with_its_remedy,
+% catalog_self_description:one_hole_used_twice_is_one_hole; commit=WORKTREE].
 % Fails when: loaded directly or from another module; internal state and
 % unqualified meta-goals would acquire the wrong owner. Guarantees: counting
 % and tropical are ordinary catalog algebras, the semiring vocabulary derives
@@ -927,6 +932,38 @@ metta_check_catalog_semantics(cache, [Function, _], Term) :-
             Term, 1, 'one cache row per function; remove the old row first')
     ;   true
     ).
+%A cost row's witness is a CALL with exactly one size hole, because the lane
+%that checks it substitutes a ladder of sizes for that hole and fits the
+%inference counts against the declared class. Zero holes leaves nothing to
+%vary and two leaves the lane no way to say which one the class is in, so
+%both are refused here rather than discovered as a row nothing can measure.
+%Repeated occurrences of ONE hole are a hole: (intersection-atom $n $n) sizes
+%both arguments together, which is one ladder and one class.
+%
+%One row per head, the rule the cache row above keeps for the same reason: a
+%head with two classes has no class, and the remedy is the removal rather
+%than a silent last-writer-wins. A head whose two call shapes really do cost
+%differently declares the witness that matters.
+metta_check_catalog_semantics(cost, [Witness|_], Term) :-
+    !,
+    (   nonvar(Witness), Witness = [Head|_], atom(Head)
+    ->  true
+    ;   metta_declaration_refused(
+            Term, 1, 'a call whose head is a function name, as in (nrev $n)')
+    ),
+    (   term_variables(Witness, [_])
+    ->  true
+    ;   metta_declaration_refused(
+            Term, 1, 'a call naming exactly one size hole $n')
+    ),
+    Witness = [Head|_],
+    (   metta_cost_row(Head, _, _, _)
+    ->  metta_declaration_refused(
+            Term, 1,
+            'one cost row per head; remove-atom the standing row to declare another')
+    ;   true
+    ).
+
 metta_check_catalog_semantics('dispatch-default', [Axis, Value], Term) :-
     !,
     metta_check_dispatch_value(Axis, Value, Term),
@@ -1016,6 +1053,19 @@ metta_check_catalog_semantics(on, [Ctx|_], _) :-
     metta_require_events(Ctx, 'carry a reaction'),
     metta_install_bridges.
 metta_check_catalog_semantics(_, _, _).
+%One head's standing cost row, at either width: the measure field is optional
+%and reads `none` when it was left out, which is the case the engine resolves
+%from the head's arrow. Enumerating over the witness rather than indexing on
+%the head is what the row's shape allows, and there are as many rows as there
+%are declared heads.
+metta_cost_row(Head, Witness, Class, Measure) :-
+    (   metta_catalog_row([cost, Witness, Class, Measure])
+    ;   metta_catalog_row([cost, Witness, Class]),
+        Measure = none
+    ),
+    nonvar(Witness),
+    Witness = [Head|_],
+    atom(Head).
 
 metta_check_algebra_fields(Name, Combine, Extend, Zero, One,
                            Laws, Carrier, Requires, Term) :-
@@ -1620,6 +1670,20 @@ metta_catalog_preset([vocabulary, 'cache-policy', force, refuse,
                       plain, incremental, monotonic, lazy, shared, private,
                       subsumptive, lattice, 'max-answers', 'subgoal-abstract',
                       'answer-abstract']).
+%The asymptotic classes a (cost ...) row may claim, in the order a cost
+%grows. The six are the shapes the checker can tell apart on a size ladder:
+%google/benchmark's own model set minus cubic and plus exponential, which its
+%selection has no term for and a recursion without a memo reaches
+%[source: https://github.com/google/benchmark/blob/eddb0241389718a23a42db6af5f0164b6e0139af/src/complexity.cc#L133-L146].
+%Ciao states the same claim as `:- check comp nrev(A,B) + steps_o(length(A))`
+%and CiaoPP proves it from inferred bounds; here the checker is the cost-rows
+%lane, which measures it
+%[source: https://ciao-lang.org/ciao/build/doc/ciaopp_tutorials.html/tut_advanced.html,
+%"CiaoPP can also infer lower and upper bounds on the sizes of terms and the
+%computational cost of predicates"].
+metta_catalog_preset([vocabulary, 'cost-class',
+                      constant, log, linear, linearithmic,
+                      quadratic, exponential]).
 metta_catalog_preset([vocabulary, 'effect-class',
                       pureStructural, readOnlyLookup,
                       nondeterministicReadOnly, writesState, oracleIO]).
@@ -1723,6 +1787,8 @@ metta_catalog_preset([kind, events, symbol, ['one-of', delivery],
                       [optional, ['one-of', 'event-order']]]).
 metta_catalog_preset([kind, emits, symbol, ['one-of', 'answer-policy']]).
 metta_catalog_preset([kind, cache, symbol, ['some-of', 'cache-policy']]).
+metta_catalog_preset([kind, cost, pattern, ['one-of', 'cost-class'],
+                      [optional, symbol]]).
 metta_catalog_preset([kind, image, symbol, symbol, ['one-of', 'image-mode']]).
 metta_catalog_preset([kind, 'type-image', symbol,
                       ['one-of', 'registry-image']]).

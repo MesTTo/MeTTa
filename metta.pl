@@ -1446,12 +1446,46 @@ load_builtin_type_surface :-
            ( seam:builtin_type_declaration(Name, Type)
              -> true
              ;  assertz(seam:builtin_type_declaration(Name, Type)) )),
+    %The same file's (cost ...) rows, for the same reason its (: ...) rows are
+    %here: a claim about a builtin belongs where the builtin's surface is
+    %declared, and it has to be LOADED to be worth anything. Explain and the
+    %Python docstring answer from &metta, so a row reachable only through an
+    %explicit import! would be a claim nobody sees. These go through the
+    %ordinary catalog door, so the engine's own rows meet the same checker a
+    %program's do.
+    forall(member(parsed(expression, _, [cost, Witness|Fields]), Forms),
+           ensure_shipped_cost_row([cost, Witness|Fields], _)),
     %Derived from the surface just loaded rather than by a separate
     %initialization, because two initialization/1 goals do not reliably order
     %against each other and an empty index is a silent loss: a constructor like
     %Error would quietly evaluate the argument it exists to carry.
     index_builtin_masks.
 load_builtin_type_surface :- index_builtin_masks.
+
+%A shipped cost row lands in '&metta' through add_sexp/3, the door every
+%native catalog write passes, so the kind check that refuses a program's
+%malformed row refuses the engine's. Skipping a head that already has a row
+%keeps the boot idempotent and leaves an earlier row standing, which is the
+%order every other engine declaration keeps: the engine fills a gap and never
+%overwrites.
+%Wrote is what the caller needs to know and not a courtesy: the prelude
+%remembers the rows IT put in so eviction can take them out again, and a row
+%that was already standing when the prelude reached its own copy belongs to
+%whoever wrote it.
+ensure_shipped_cost_row([cost, Witness|Fields], Wrote) :-
+    nonvar(Witness),
+    Witness = [Head|_],
+    atom(Head),
+    !,
+    (   metta_cost_row(Head, _, _, _)
+    ->  Wrote = false
+    ;   add_sexp('&metta', [cost, Witness|Fields], _),
+        Wrote = true
+    ).
+ensure_shipped_cost_row(Row, _) :-
+    throw(error(domain_error(cost_row, Row),
+                context(ensure_shipped_cost_row/2,
+                        'a cost row names a call, as in (cost (nrev $n) quadratic)'))).
 
 %%%%%%%%%% The engine's prelude %%%%%%%%%%
 %
@@ -1484,6 +1518,11 @@ load_builtin_type_surface :- index_builtin_masks.
 :- dynamic prelude_type_declaration/2.
 :- dynamic prelude_owned/1.
 :- dynamic prelude_clause_ref/2.
+%Which (cost ...) rows the prelude put into '&metta', as the rows themselves:
+%eviction withdraws them through metta_remove_atom/3, the door whose hook the
+%catalog's derived caches watch, and that door takes the term rather than a
+%clause reference.
+:- dynamic prelude_cost_row/2.
 %Which names the prelude registered as TRANSLATOR RULES. A derived form ships
 %as an equation plus that registration, and the registration is the prelude's
 %to withdraw: a program that defines the name itself takes the whole form
@@ -1530,6 +1569,8 @@ evict_prelude_definition(FAtom) :-
         forall(retract(prelude_clause_ref(FAtom, Ref)), erase(Ref)),
         retract_prelude_declarations(FAtom),
         retractall(prelude_doc_atom(FAtom, _)),
+        forall(retract(prelude_cost_row(FAtom, Row)),
+               metta_remove_atom('&metta', Row, _)),
         retractall(prelude_equation(FAtom, _)),
         (   retract(prelude_translator_rule(FAtom))
         ->  translator_rules:forget_translator_rule(FAtom)
@@ -1641,6 +1682,26 @@ load_prelude_form(expression, _, Term) :-
     Term = ['@doc', Name | _], atom(Name), !,
     (   prelude_doc_atom(Name, Term) -> true
     ;   assertz(prelude_doc_atom(Name, Term))
+    ).
+%A (cost ...) form is the prelude's THIRD declaration about its own
+%vocabulary, beside the type and the doc atom: what class the call's cost
+%grows in, as a catalog row the cost-rows lane then has to hold it to. It is a
+%declaration and not execution, which is why it belongs on this side of the
+%loader rather than needing the runnable door the note below keeps shut.
+%
+%The row is remembered so eviction can withdraw it: a program that defines one
+%of these names takes the whole form over, and the class was measured on the
+%prelude's equations rather than on the program's.
+load_prelude_form(expression, _, [cost, Witness|Fields]) :-
+    nonvar(Witness), Witness = [Name|_], atom(Name), !,
+    Row = [cost, Witness|Fields],
+    (   prelude_cost_row(Name, _)
+    ->  true
+    ;   ensure_shipped_cost_row(Row, Wrote),
+        (   Wrote == true
+        ->  assertz(prelude_cost_row(Name, Row))
+        ;   true
+        )
     ).
 %A DERIVED form: an equation that expands the call plus the registration
 %that makes the translator consult it. The loader takes only this one
