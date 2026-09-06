@@ -1442,9 +1442,11 @@ kind(refuse_unbound_input/2, service).
 :- multifile grounded_extra_type/2.
 kind(grounded_extra_type/2, declaration).
 
-%A host bridge may compute an object's type names itself: values can sit in
-%envelope objects the boundary must not rewrite, so the names, plain text,
-%are what crosses rather than the value. What a bridge owns is the CLASS
+%A host bridge may compute an object's type candidates itself: values can sit
+%in envelope objects the boundary must not rewrite, so names or structural
+%type expressions cross rather than the value. Structural candidates use
+%the same terms as declared arrow types [tested: run_tests(tensor_shapes);
+%commit=WORKTREE]. What a bridge owns is the CLASS
 %WALK: when one answers, its names stand in for the walk, and with none the
 %local walk applies. It does not own grounded_extra_type/2 above, which is
 %consulted either way, because a declaration seam is additive and reading

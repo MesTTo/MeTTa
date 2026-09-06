@@ -248,6 +248,10 @@
 %compiler writes case_runtime/3, letstar_runtime/3, function_overapplication/3
 %and the two dispatch results into clause bodies, so a space's execution module
 %imports them from the engine's module and they have to reach it from here.
+% Guarantees: refinement evidence helpers are exported to the engine before
+%   compiled space modules import them [tested: run_tests(tensor_shapes);
+%   commit=WORKTREE].
+
 :- module(translator,
           [ translate_clause/2,
             translate_clause/3,
@@ -379,6 +383,8 @@
             function_overapplication/3,
             declared_arity_refusal/3,
             dispatch_mismatch_result/3,
+            dispatch_refinement_mismatch_result/4,
+            metta_record_refinement_failure/3,
             switch_runtime/3,
             dispatch_no_match_result/3,
             dispatch_policy_execute/5
