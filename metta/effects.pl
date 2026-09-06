@@ -7,7 +7,7 @@
 % Guarantees:
 %   - one dynamic evaluation context carries algebra, limit, and ordering
 %     through nested operations and restores on every exit
-%     [tested: run_tests(evaluation_context); commit=WORKTREE].
+%     [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 %   - every definition retains engine/metta.pl's implementation module and
 %     original load order [tested: tests/prolog/suites/evaluation/metta.plt,
 %     tests/prolog/static_checks.pl; commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
