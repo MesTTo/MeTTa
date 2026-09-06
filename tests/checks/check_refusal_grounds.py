@@ -15,7 +15,7 @@ Guarantees:
     parity corpus, so a claim about what upstream PeTTa answers points at the
     file that measures it [tested:
     test_a_planted_arbiter_ground_without_the_corpus_is_reported;
-    commit=WORKTREE]
+    commit=3fc5479961fd591b1884af118528c9a64a1afbb7]
 Decides:
   - input-shape validation errors are not semantic refusals; this gate owns the
     compiler, Python data-model fences, and MeTTa fragment fences classified by

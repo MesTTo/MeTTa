@@ -8,7 +8,7 @@ Guarantees:
   - an arbiter citation that names no captured corpus, and an unknown ground
     kind, are both refused [tested:
     test_a_planted_arbiter_ground_without_the_corpus_is_reported;
-    commit=WORKTREE]
+    commit=3fc5479961fd591b1884af118528c9a64a1afbb7]
 """
 
 from __future__ import annotations
