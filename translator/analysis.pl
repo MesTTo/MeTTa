@@ -1,5 +1,5 @@
 % Guarantees: source withdrawal selects retained metadata by source owner
-%   [tested: lib_import_lifecycle; commit=WORKTREE].
+%   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: retain function metadata, translation caches, symbol analysis, and callable-head discovery
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
@@ -24,7 +24,7 @@
 %   drop_fun_meta/4, drop_fun_meta/5, clear_fun_meta/2, or source withdrawal.
 %   deferred_equation_types/4 keys captured declarations by stored occurrence;
 %   materialize_with_queued_types/4 consumes its row transactionally and source
-%   withdrawal retires unused rows [tested: lib_import_lifecycle; commit=WORKTREE].
+%   withdrawal retires unused rows [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Guarded by: '$metta_fun_metadata' serializes metadata writers; transaction/1
 %   publishes the source and its projections together and rolls back failures
 %   [tested: run_tests(translator_metadata_projection); commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
@@ -125,7 +125,7 @@ record_fun_meta_rows(Module, F, Args, Body, Types) :-
 % The stored occurrence is the identity, not its position in a queue. A
 % removed equation cannot lend its type group to a surviving equation, even
 % when a removal callback forces compilation before source cleanup finishes.
-% [tested: lib_import_lifecycle; commit=WORKTREE]
+% [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
 :- dynamic deferred_equation_types/4.
 
 queue_deferred_equation_types(Module, F, StoredRef) :-
@@ -264,7 +264,7 @@ drop_fun_meta_types(Module, F, Args, Body, Owner) :-
 
 % Source ownership travels with this removal's arguments, so an event callback
 % that removes another equation cannot inherit the source's ownership filter.
-% [tested: lib_import_lifecycle; commit=WORKTREE]
+% [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
 source_removal_owns_metadata(ordinary, _).
 source_removal_owns_metadata(source(Load), Ref) :-
     filereader:source_load_assertion(Load, artifact, Ref).

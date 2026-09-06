@@ -26,17 +26,17 @@
 %     classes are active, and parse_metta_source_prolog/2 stays the
 %     specification it is held to, variant-identical results over the corpus
 %     and adversarial battery [tested: reader_c in tests/prolog/suites/reader/reader_c.plt;
-%     commit=WORKTREE].
+%     commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 %   - parse_metta_source_summary/4 carries the signature multiset and
 %     declaration pairs beside the forms, from the C reader's own walk or
 %     source_summary_of_forms/3's, and every pre-pass and the program-order
 %     context consume the summary instead of re-walking the source [tested:
 %     reader_c:the_parse_summary_agrees_with_the_prolog_walks;
-%     commit=WORKTREE].
+%     commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 %   - a run of consecutive plain data atoms under a silent load with no
 %     bound tokens stores through spaces' run door with the identical
 %     atoms, order, journal rows and withdrawal the per-form door produces
-%     [tested: filereader_data_runs; commit=WORKTREE].
+%     [tested: filereader_data_runs; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 %   - plain and gzip-compressed MeTTa sources are decoded as UTF-8 regardless
 %     of the process locale [tested:
 %     filereader_source_reload:a_source_is_utf8_independent_of_the_locale;
@@ -182,7 +182,7 @@
 %     supports/2, and a function change queues each transitive compiled caller
 %     once for repair [tested:
 %     support_graph:test_a_derived_fact_is_invalidated_forward_from_what_it_supports;
-%     commit=WORKTREE].
+%     commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 %   - A module-scoped typing-policy change invalidates its compiled functions
 %     through the same support graph, so the next call sees clauses translated
 %     under the new policy and a removal restores the discharged checks
@@ -219,7 +219,7 @@
 :- encoding(utf8).
 % Guarantees: withdraw_source_load/3 and source_load_assertion/3 publish the
 %   source ownership boundary for exact import undo
-%   [tested: lib_import_lifecycle; commit=WORKTREE].
+%   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 
 :- module(filereader,
           [ load_imported_metta_file/3,
@@ -807,7 +807,7 @@ process_forms(PerForm, Space, [Form|Forms], [Result|Results]) :-
 %per-atom meaning (definition, declaration) and ends the run too, so both
 %doors' plain-data behaviour, evict-nothing then store then journal, is
 %the same behaviour this run door performs
-%[tested: filereader_data_runs; commit=WORKTREE].
+%[tested: filereader_data_runs; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 data_run(Forms, Space, Run, Rest) :-
     silent(true),
     \+ metta_token(_, _),
@@ -852,7 +852,7 @@ definition_run(Forms, Space, Run, Rest) :-
     %keeps the per-form fence exactly as it stood; bind! is a runnable and
     %ends every run, so neither table can change inside one
     %[tested: filereader_data_runs, spaces_deferred_translation;
-    %commit=WORKTREE].
+    %commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
     (   \+ seam:form_rewriter(_),
         \+ metta_token(_, _)
     ->  plain_definition_prefix(Forms, Run, Rest)
@@ -889,7 +889,7 @@ prepare_metta_source(S, ParsedForms) :-
 %back from the one walk it already makes; the Prolog reader computes them by
 %the walks below, which stay the specification the C summary is held to
 %[tested: reader_c:the_parse_summary_agrees_with_the_prolog_walks;
-%commit=WORKTREE]. Before the summary, preparing a source walked every form
+%commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]. Before the summary, preparing a source walked every form
 %three more times, once per pre-pass, and those walks were 3.6 findall-bag
 %inferences per atom of the fun doorbench and a fifth of the data one.
 prepare_metta_source(S, ParsedForms, Names) :-

@@ -1,10 +1,10 @@
 % Guarantees: metta_remove_atom_reference/1 preserves other owners of equal atoms
-%   [tested: lib_import_lifecycle; commit=WORKTREE].
+%   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Owns resources: native_removal_reference/1 reads a per-thread control context,
 %   consumed before callbacks and restored by setup_call_cleanup/3.
 % Guarded by: non-backtrackable thread-local storage isolates removal selection
 %   from database snapshots [tested: lib_import_lifecycle,
-%   extensions/python/tests/ch05_equations_and_evaluation/test_reload.py; commit=WORKTREE].
+%   extensions/python/tests/ch05_equations_and_evaluation/test_reload.py; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: decode stored atoms and manage source, subscription, reaction, table, and clear lifecycles
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
@@ -219,13 +219,13 @@ remove_sexp(Space, Atom, Removed) :-
 % removal funnel. Consume its selector when storage removes that occurrence,
 % so callbacks cannot accidentally inherit it. SWI's erase/1 is the exact
 % reference operation; term equality cannot identify duplicate ownership.
-% [tested: lib_import_lifecycle; commit=WORKTREE]
+% [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
 % This is control state, like with_metta_space_releasing/2 below. A database
 % selector can reappear inside a later transaction after a failed reload even
 % though a query outside that transaction sees no row. Then specialization
 % invalidation mistakes its own removal for the old source's selected atom.
 % [tested: extensions/python/tests/ch05_equations_and_evaluation/test_reload.py;
-% commit=WORKTREE]
+% commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
 native_removal_reference(Ref) :-
     nb_current('$metta_native_removal_reference', Ref).
 

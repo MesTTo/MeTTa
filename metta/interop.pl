@@ -1,5 +1,5 @@
 % Guarantees: metta_import_record/2 exposes live source ownership and
-%   metta_unimport/2 withdraws it transactionally [tested: lib_import_lifecycle; commit=WORKTREE].
+%   metta_unimport/2 withdraws it transactionally [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Guarded by: metta_unimport/2 shares metta_loader with import_when/4.
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
 % Guarantees: Export readers use metta_runtime_type/2 to recognise annotated

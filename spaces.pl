@@ -185,7 +185,7 @@
 %[tested: spaces_builtin_override, test_a_system_predicate_survives_an_equation_for_its_name].
 % Guarantees: metta_remove_atom_reference/1 retains exact source occurrence
 %   ownership through the ordinary removal funnel
-%   [tested: lib_import_lifecycle; commit=WORKTREE].
+%   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 
 :- module(spaces,
           [

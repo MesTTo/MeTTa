@@ -252,7 +252,7 @@
 %   compiled space modules import them [tested: run_tests(tensor_shapes);
 %   commit=4eaefdd8d40e53b2613722287302a14b41704662].
 % Guarantees: drop_fun_meta/5 selects source-owned metadata without leaking
-%   that owner into callbacks [tested: lib_import_lifecycle; commit=WORKTREE].
+%   that owner into callbacks [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 
 :- module(translator,
           [ translate_clause/2,

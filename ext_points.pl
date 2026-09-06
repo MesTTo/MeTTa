@@ -4,7 +4,7 @@
 %   - evaluation context and ordered-match demand are published engine
 %     services [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 %   - metta_import_record/2 and metta_unimport/2 expose one source lifecycle
-%     to libraries [tested: lib_import_lifecycle; commit=WORKTREE].
+%     to libraries [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 %   - libraries can distinguish an author's annotated effect from inferred
 %     operation metadata [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 %   - host query carriers enter the engine-owned algebra scope, read its
