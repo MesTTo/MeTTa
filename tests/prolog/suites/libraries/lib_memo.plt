@@ -13,6 +13,12 @@
 %     lib_memo_volatility:a_volatile_function_still_memoizes_on_the_declaration,
 %     lib_memo_volatility:a_name_that_is_not_a_function_is_still_refused;
 %     commit=ccad9f6d588270ec2f0810fc56c30e9e59207e7c].
+%   - A declaration REACHES the calls it governs: a registered operation is
+%     cached through a caller compiled before it, and enabling does not rewrite
+%     the space's stored program [tested:
+%     lib_memo_reach:memoizing_an_operation_reaches_a_caller_compiled_before_it,
+%     lib_memo_reach:a_body_that_writes_its_own_space_is_not_duplicated_by_memoize;
+%     commit=295f4c80ace06f6bf8e132ea936777afd79ac3d5].
 %   - Exact-cache invalidation advances a hidden table generation seen by
 %     already-live worker engines [tested:
 %     lib_memo_stats:invalidation_moves_a_live_worker_to_a_fresh_exact_table_generation;
@@ -501,6 +507,134 @@ test(a_name_that_is_not_a_function_is_still_refused,
     'memoize'('plunit-memo-nosuchname', true).
 
 :- end_tests(lib_memo_volatility).
+
+% WHAT THE DECLARATION HAS TO REACH. Both cases below were admitted and then did
+% nothing, and both for one reason: the declaration was recorded in the module
+% that was SPEAKING while every call is keyed by the module that owns the
+% clauses. When the speaking space is also the owner they agree, which is why
+% the ordinary case worked and these did not.
+:- begin_tests(lib_memo_reach).
+
+:- dynamic user:plunit_memo_op_runs/1.
+user:plunit_memo_op_impl(X, Y) :-
+    ( retract(user:plunit_memo_op_runs(N0)) -> true ; N0 = 0 ),
+    N1 is N0 + 1,
+    assertz(user:plunit_memo_op_runs(N1)),
+    Y is X + 0.
+
+%A registered operation is ONE predicate imported into every space's execution
+%module. It has no equations, so nothing of its own is recompiled and its call
+%sites are its CALLERS' bodies; and its calls are keyed by the module that
+%registered it, not by the space that spoke. Both halves were wrong: the
+%declaration landed in the speaking space, where no call ever looked, and the
+%caller kept the direct goal it was compiled with. `memoize-exact` answered
+%true, `is-memoized` answered true, and the operation ran on every call.
+test(memoizing_an_operation_reaches_a_caller_compiled_before_it,
+     [ setup(( retractall(user:plunit_memo_op_runs(_)),
+               import_prolog_function(plunit_memo_op_impl, _) )),
+       cleanup(( catch('clear-memoize'(plunit_memo_op_impl, _), _, true),
+                 catch(disable_memoization(plunit_memo_op_impl), _, true),
+                 retractall(user:plunit_memo_op_runs(_)),
+                 release_function_name(plunit_memo_op_impl),
+                 unregister_fun_everywhere(plunit_memo_op_impl),
+                 retractall(user:fun(plunit_memo_op_impl)),
+                 retractall(user:arity(plunit_memo_op_impl, _)),
+                 catch('remove-atom'('&self',
+                                     [=, ['plunit-memo-op-caller', _],
+                                      [plunit_memo_op_impl, _]], _), _, true) )) ]) :-
+    %The caller is compiled BEFORE the declaration, which is the case the wide
+    %recompile door exists for.
+    process_metta_string(
+        "(= (plunit-memo-op-caller $k) (plunit_memo_op_impl $k))", _),
+    process_metta_string("!(plunit-memo-op-caller 1)", _),
+    'memoize-exact'(plunit_memo_op_impl, true),
+
+    %The declaration lands where the calls look, which is the module that
+    %registered the operation and not the space that spoke.
+    metta_self_module(Self),
+    memo_owner_module(plunit_memo_op_impl, Self, 2, Owner),
+    assertion(memo_enabled(plunit_memo_op_impl, Owner, exact)),
+    assertion(memoization_enabled_for_call(plunit_memo_op_impl, Owner, 1)),
+
+    %The caller compiled before it now dispatches through the cache.
+    functor(Head, 'plunit-memo-op-caller', 2),
+    clause(Self:Head, Body),
+    assertion(( sub_term(Sub, Body), nonvar(Sub), Sub = cache_call(_, _, _, _) )),
+
+    %And the cache SERVES: two calls, one run of the operation.
+    retractall(user:plunit_memo_op_runs(_)),
+    process_metta_string("!(plunit-memo-op-caller 2)", First),
+    process_metta_string("!(plunit-memo-op-caller 2)", Second),
+    assertion(First == [2]),
+    assertion(Second == [2]),
+    assertion(user:plunit_memo_op_runs(1)).
+
+%THE ROUND TRIP THAT DUPLICATED AN EQUATION. Enabling used to remove each
+%stored equation and add it back around the enable, which is not the same term:
+%the source says (add-atom &self ...) and the retained form the compiler kept
+%carries the space's RESOLVED name, so the removal matched nothing and the add
+%left a second copy. The function then had two clauses, wrote twice and answered
+%a doubled bag on its first call.
+%
+%Through metta_host_run_source/4 and a NAMED space, which is what makes the two
+%forms differ. Written into &self the source name and the resolved name are the
+%same word and nothing duplicates, which is why this went unseen from the
+%suite's own space; the stored form below says &self and the retained one says
+%&memo_reach.
+test(a_body_that_writes_its_own_space_is_not_duplicated_by_memoize,
+     [ cleanup(( space_module('&memo_reach', M),
+                 with_metta_module(M,
+                     ( catch('clear-memoize'('memo-reach-writer', _), _, true),
+                       catch(disable_memoization('memo-reach-writer'), _, true) )),
+                 forall(metta_host_stored('&memo_reach', ['memo-reach-wrote', K]),
+                        catch('remove-atom'('&memo_reach',
+                                            ['memo-reach-wrote', K], _), _, true)),
+                 forall(metta_host_stored('&memo_reach',
+                                          [=, ['memo-reach-writer'|Args], Body]),
+                        catch('remove-atom'('&memo_reach',
+                                            [=, ['memo-reach-writer'|Args], Body],
+                                            _), _, true)) )) ]) :-
+    metta_host_run_source(
+        "(= (memo-reach-writer $k) \c
+           (let $i (add-atom &self (memo-reach-wrote $k)) $k))",
+        '&memo_reach', [], _),
+    metta_host_run_source("!(memo-reach-writer 1)", '&memo_reach', [], _),
+    space_module('&memo_reach', Module),
+    functor(Head, 'memo-reach-writer', 2),
+    aggregate_all(count, clause(Module:Head, _), Before),
+    %The premise: the two forms of this equation really do differ, which is
+    %what the removal used to miss.
+    findall(Retained, memo_equation('memo-reach-writer', Module, any, Retained),
+            [[=, _, RetainedBody]]),
+    findall(StoredBody,
+            metta_host_stored('&memo_reach',
+                              [=, ['memo-reach-writer'|_], StoredBody]),
+            [SoleStored]),
+    assertion(\+ RetainedBody =@= SoleStored),
+
+    with_metta_module(Module, 'memoize'('memo-reach-writer', true)),
+    aggregate_all(count, clause(Module:Head, _), After),
+    assertion(After == Before),
+    findall(Body,
+            metta_host_stored('&memo_reach',
+                              [=, ['memo-reach-writer'|_], Body]),
+            Equations),
+    assertion(Equations = [_]),
+
+    %One run of the body on a miss, one write, one answer, and the second call
+    %is a hit that writes nothing. The 1 is the uncached warm-up above.
+    metta_host_run_source("!(memo-reach-writer 7)", '&memo_reach', [], First),
+    metta_host_run_source("!(memo-reach-writer 7)", '&memo_reach', [], Second),
+    assertion(memo_reach_answers(First, [7])),
+    assertion(memo_reach_answers(Second, [7])),
+    findall(K, metta_host_stored('&memo_reach', ['memo-reach-wrote', K]), Wrote),
+    assertion(Wrote == [1, 7]).
+
+%One directive's answers, without the name state the host door carries.
+memo_reach_answers([Group], Answers) :-
+    findall(Term, member('$metta_answer'(Term, _), Group), Answers).
+
+:- end_tests(lib_memo_reach).
 
 %The catalog's two profitability overrides are covered from Python, but every
 %function they are declared on there is recursive
