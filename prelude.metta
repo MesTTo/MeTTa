@@ -11,6 +11,11 @@
 ;     [tested: prelude:assertEqual_failure_carries_both_bags,
 ;     prelude:assertEqualToResult_failure_carries_both_bags,
 ;     prelude:assertEqual_compares_result_sets; commit=71de27a76dd16684941e3e090de0d17299d96493]
+;   - assertIncludes keeps its one-sided verdict and reaches
+;     assert-includes-answers, so a failure names the call as written and the
+;     answers missing from the expectation, with the excess side absent
+;     [tested: prelude:assertIncludes_failure_carries_the_missing_bag_alone,
+;     prelude:assertIncludes_subset_passes; commit=WORKTREE]
 ; Open Obligations:
 ;   To Do: None
 ;   Hacks: None
@@ -172,14 +177,21 @@
 ;[assumed: adopted from an earlier reference semantics, not re-measured against
 ;upstream PeTTa].
 (: assertIncludes (-> Atom Atom %Undefined%))
-;The verdict crosses to assert rather than the comparison, for the reason
-;assertEqualToResult above records: the difference is a set of WRITTEN
-;expectations and == would evaluate it.
+;The verdict crosses to assert-includes-answers rather than the comparison,
+;for the reason assertEqualToResult above records: the difference is a set of
+;WRITTEN expectations and == would evaluate it.
+;
+;The ONE-SIDED door, not assert-answers. This relation is containment, so an
+;answer in excess of the expectation is legal and naming one would give the
+;reader a bag that is not a reason for the failure; the door reports the
+;answers missing from the expectation and leaves the excess side absent
+;[source: engine/metta/runtime.pl, 'assert-includes-answers'/5;
+;commit=WORKTREE].
 (= (assertIncludes $A $B)
    (let $Actual (collapse $A)
      (let $Diff (subtraction-atom $B $Actual)
        (let $Empty (== $Diff ())
-         (assert $Empty)))))
+         (assert-includes-answers $Empty (assertIncludes $A $B) $Actual $B)))))
 
 ;The Msg variants carry a failure message. Each reports the call AS WRITTEN,
 ;which carries the message with it, so the two bag-comparing twins below spell
@@ -497,6 +509,10 @@
 (@doc assert-answers
   (@desc "Asserts a verdict about two answer bags; a false verdict reports the call as written and the two directed bag differences, what was missing and what was in excess")
   (@params ((@param "Verdict, evaluated") (@param "Call to report, as written") (@param "Answers produced") (@param "Answers expected")))
+  (@return "unit"))
+(@doc assert-includes-answers
+  (@desc "assert-answers for a containment: a false verdict reports the call as written and only the answers missing from the expectation, because an answer in excess of it is legal under this relation")
+  (@params ((@param "Verdict, evaluated") (@param "Call to report, as written") (@param "Answers produced") (@param "Answers expected to be included")))
   (@return "unit"))
 (@doc assertEqual
   (@desc "Compares the result sets of two expressions; passes silently or raises a failed assertion naming the expression and the answers missing from and in excess of the expectation")

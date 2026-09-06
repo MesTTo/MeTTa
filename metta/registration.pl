@@ -803,6 +803,7 @@ builtin_implementation(test/2, prolog(engine)).
 builtin_implementation('test-no-answer'/1, prolog(engine)).
 builtin_implementation(assert/1, prolog(engine)).
 builtin_implementation('assert-answers'/4, prolog(engine)).
+builtin_implementation('assert-includes-answers'/4, prolog(engine)).
 builtin_implementation(atom_concat/2, prolog(system)).
 builtin_implementation(atom_chars/1, prolog(system)).
 builtin_implementation(copy_term/1, prolog(system)).
