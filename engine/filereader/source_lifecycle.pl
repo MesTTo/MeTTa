@@ -7,7 +7,7 @@
 :- encoding(utf8).
 
 % Guarantees: withdraw_source_load/3 preserves equal atoms owned by other loads
-%   or the caller [tested: lib_import_lifecycle; commit=WORKTREE].
+%   or the caller [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
 % Assumes: engine/filereader.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/filereader.pl's implementation module and original load order;
@@ -1097,7 +1097,7 @@ withdraw_source_load(CanonPath, Space, Count) :-
 % later sources and caller equations can reuse them. Once that first source
 % leaves, derive their replacements from the executable equations that remain.
 % Pin to no source: an enclosing import does not own these older definitions.
-% [tested: lib_import_lifecycle; commit=WORKTREE]
+% [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
 restore_surviving_source_functions(Names) :-
     forall(( member(F, Names),
              ( translated_equation_of(F, Ref, [=, [F|Args], _]),

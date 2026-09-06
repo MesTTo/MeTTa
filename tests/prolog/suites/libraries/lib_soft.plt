@@ -1,6 +1,6 @@
 % Purpose: test structural symbol scoring independently of function registration.
 % Guarantees: defining a head preserves its similarity and grounded leaves stay
-%   crisp [tested: sh engine/test.sh suites/libraries/lib_soft.plt; commit=WORKTREE].
+%   crisp [tested: sh engine/test.sh suites/libraries/lib_soft.plt; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

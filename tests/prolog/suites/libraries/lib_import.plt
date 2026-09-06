@@ -1,5 +1,5 @@
 % Guarantees: source imports are queryable and undo preserves occurrence ownership
-%   [tested: lib_import_lifecycle; commit=WORKTREE].
+%   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: verify queryable import records, exact source undo, and static-import!.
 %   The fast path for a large data file converts a
 %   .metta file to Prolog facts once, qcompiles them, and consults the .qlf on

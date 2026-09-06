@@ -1,5 +1,5 @@
 % Guarantees: resolved_equation_removal/4 honors exact source occurrence selection
-%   [tested: lib_import_lifecycle; commit=WORKTREE].
+%   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: validate foreign-provider capabilities and route foreign and native space operations
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
@@ -975,7 +975,7 @@ translate_deferred_equations(Space, Module, F, InputArities) :-
 % The native stored clause reference already identifies its source owner.
 % Counts cannot recover that identity after deletion or an interleaved nested
 % import. Carry the reference into compilation and its exact type lookup.
-% [tested: lib_import_lifecycle; commit=WORKTREE]
+% [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
 translate_deferred_equations_stable(Space, Module, F, InputArities) :-
     findall(owned(Load, StoredRef, Equation),
             ( stored_equation_source(Space, [=, [F|W], _], Equation, StoredRef),
@@ -1952,7 +1952,7 @@ remove_equation_source(Space, Term, Probe, Origin, Removed) :-
 % Removing a deferred source occurrence reduces the source's own compile
 % budget. No compilation is needed to delete it, and later source equations
 % keep their original owner when they eventually compile.
-% [tested: lib_import_lifecycle; commit=WORKTREE]
+% [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
 retire_source_deferred_equation(ordinary, _, _, _).
 retire_source_deferred_equation(source(Load), Space, F, Args) :-
     length(Args, Inputs),
