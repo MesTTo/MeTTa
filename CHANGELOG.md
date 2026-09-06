@@ -9,6 +9,30 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The cache policy is a catalog vocabulary, `cache-policy`, and a
+  `(cache name policy)` row in `&metta` is the declaration of HOW a function
+  is tabled: `plain`, `incremental`, `monotonic`, `lazy`, `shared`,
+  `private`, `subsumptive`, `(lattice join)`, `(max-answers n)`,
+  `(subgoal-abstract n)` and `(answer-abstract n)`, one word or a list,
+  compiled by `lib_tabling` to SWI-Prolog's own table option list and
+  answer-subsumption mode. The row installs the table by itself, for every
+  arity the name is defined at, now or when its equations arrive, and its
+  removal takes the table away. A monotonic table takes an `add-atom` at the
+  cost of its consequences where the incremental default re-evaluates: a
+  point read after a write is flat at 863-871 inferences over chains of 50 to
+  400 links against 1,969 to 9,345. A lattice table answers one joined answer
+  per input, which is how shortest paths over a cycle terminate. A policy the
+  engine cannot honour is refused naming the remedy and never lands.
+  `table-stats` and `TabledMap.stats()` answer the policy in force.
+  `force` and `refuse` keep their meaning in the same vocabulary; the
+  generated `CacheMode` enum is `CachePolicy` on both seats.
+- A tripped tabling restraint raises `RestraintError`, under
+  `ResourceLimitError`, with the word, the bound and the call; the engine
+  lists it as a control signal a MeTTa `catch` cannot disarm.
+- The catalog's argspec grammar gains `(some-of vocabulary)`: one member, a
+  member applied to the arguments its `takes` claim declares, or a list of
+  those, with `alone` claims for members that stand by themselves.
+
 - `lib_import` exposes committed imports as `(import Path)` atoms through
   `(imports &space)`. `unimport!` withdraws the imported source's surviving
   atom occurrences and compiled definitions, preserving equal atoms owned by

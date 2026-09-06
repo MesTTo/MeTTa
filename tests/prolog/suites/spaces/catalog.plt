@@ -294,6 +294,31 @@ test(a_removed_kind_row_stops_checking_that_head,
     add_sexp('&metta', [cache, anything, 'not-a-cache-mode'], Ref),
     erase(Ref).
 
+%(some-of Vocab) reads one argument three ways and the claims decide between
+%them: a word, a word applied to the arguments its takes claim declares, or a
+%list of either. The shapes that must NOT pass are the ones a naive list read
+%would let through: a parametrised word standing bare, a standalone word
+%beside another, an applied word given the wrong argument type or count.
+test(a_some_of_argument_reads_one_applied_member_or_a_list) :-
+    assertion(metta_policy_members('cache-policy', monotonic, [monotonic])),
+    assertion(metta_policy_members('cache-policy', [monotonic, lazy], [monotonic, lazy])),
+    assertion(metta_policy_members('cache-policy', [lattice, join], [[lattice, join]])),
+    assertion(metta_policy_members('cache-policy', [monotonic, [lattice, join]],
+                                   [monotonic, [lattice, join]])),
+    assertion(metta_policy_members('cache-policy', ['max-answers', 3], [['max-answers', 3]])),
+    assertion(metta_policy_members('cache-policy', [force], [force])),
+    forall(member(Bad, [lattice, [lattice, join, lazy], [force, monotonic],
+                        ['max-answers', many], [lattice, 3], [], bogus,
+                        [monotonic, bogus]]),
+           assertion(\+ metta_policy_members('cache-policy', Bad, _))),
+    %The door reads the same parse, so the row that carries a rejected shape
+    %never lands.
+    catch(( add_sexp('&metta', [cache, 'cat-some-of', [force, monotonic]], Ref),
+            erase(Ref), fail ),
+          error(metta_declaration_malformed(_, 2, ['some-of', 'cache-policy']), _),
+          true),
+    assertion(\+ metta_catalog_row([cache, 'cat-some-of', _])).
+
 %A third-party kind enters the ONE shape router through catalog rows
 %alone: vocabulary, kind, routed-by-shape, entries. Specificity, adornment
 %and coherence are inherited, not reimplemented.

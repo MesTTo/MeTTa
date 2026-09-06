@@ -162,13 +162,18 @@ class TabledMap:
 ### `TabledMap.stats`
 
 ```python
-def stats(self) -> dict[str, int]:
+def stats(self) -> dict[str, int | Expression]:
 ```
 
 > The engine's own counters for this function's tables: tables,
 > answers, complete-call, invalidated, reevaluated. invalidated
 > above reevaluated is SWI deciding a table was not worth
 > rebuilding yet; both moving is the freshness machinery working.
+> `policy` is the cache policy in force, the expression
+> `(incremental shared)` for a bare `tabled` over a body the engine
+> can watch, or whatever a `(cache name ...)` row in `&metta` compiled
+> to, `(monotonic shared)` or `(plain private (lattice join))`; it is
+> present while the table is declared.
 
 ### `TabledMap.clear`
 
