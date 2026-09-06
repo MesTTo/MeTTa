@@ -92,3 +92,30 @@ record id and the next crossing that carries it reaches `PL_recorded` on freed
 memory: `./src/pl-rec.c:1560: copy_record___LD: Assertion failed: 0`, the
 `default:` arm of the switch over record tags. Twelve-line reproduction:
 release a Term with `__del__()` and pass it to `query_once`.
+
+### Also janus, found later the same day: `py_iter/2` never checks `PyIter_Next`
+
+Both `state->next = PyIter_Next(state->iterator)` calls in janus's `py_iter/2`
+are unchecked, while the `PyObject_GetIter` above them is wrapped in
+`check_error`. `PyIter_Next` returns NULL for exhaustion and for a raise
+alike, so a Python generator that raises is indistinguishable from one that is
+exhausted: the Prolog goal continues over a silently truncated answer set and
+the still-set Python exception surfaces at whatever C function returns a value
+next. In the common case that is `_Py_CheckFunctionResult`'s `SystemError`;
+inside janus's own error path it is fatal, because `py_record` asks Python to
+build a `Term` while the error indicator is set, CPython answers NULL, and
+`Py_SetPrologErrorFromObject` increments that NULL.
+
+Reproduction, engine-free: `findall(X, py_iter(g(), X), L)` over a generator
+that yields 1 then raises answers `L = [1]`, runs the goal's `assertz` marker
+afterwards, and no Prolog `catch/3` sees anything. Through this library the
+plain `Space.match(pattern, inferences=20_000)` door exited 139 on the trunk
+before ff997ad3. The library's side of the repair is the
+`["x","raise",Class,Exception]` terminal frame carried across every `py_iter`
+door and re-raised through `stream_reraise/1`, recorded in
+`2026-09-06-limits-inside-a-provider-callback.md`.
+
+Suggested fix: check `PyIter_Next`'s NULL with `PyErr_Occurred()` at both
+sites and convert through the same path `check_error` uses, so a raising
+iterator raises in Prolog the way a raising deterministic callback already
+does.
