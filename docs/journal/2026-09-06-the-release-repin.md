@@ -240,3 +240,51 @@ Open: `nilbc`'s parity row, the one of the thirteen not measured per commit. One
 reading of it is a minute of CPU and three are needed, so it was measured only
 at this tip: 332,597,186 against a frozen 324,827,492, +2.39%, the same
 direction and order as the twelve beside it.
+
+Tried: re-pinning the C seat's boot row, which read 382,627 against a 382,606
+pin in every tree this pass had touched, and which the sweep's own points at
+82c1ab65 and 5bdf3d60 read at 382,629.
+Rejected: the number is the measurement environment, not the engine. A FRESHLY
+CLONED tree, built and warmed and left alone, reads 382,606 and 382,607 -- the
+committed pin, inside its four-inference allowance. A tree whose files have
+been REWRITTEN IN PLACE reads twenty-one higher: a `cp` of the same bytes over
+236 tracked files does it, and so does a `git checkout -f` per commit through a
+sweep. Every reading is deterministic within its tree, three identical samples
+every time. The pin stands, and the note beside it now says which trees read
+what.
+Rejected as the cause, each by control: the four engine files whose comments
+the provenance pass rewrote (reverted, .qlf cleared and rebuilt per arm, three
+runs per arm, 382,627 in all nine); the C artifacts (libcmetta.so and
+benchmarks/cases byte-identical across rebuilds, md5 350ec656 and a7e45f99);
+the .qlf regeneration inside one tree; and the package cache under repos/.
+Open: why rewriting a tracked file with its own bytes costs this row
+twenty-one inferences.
+Open, and the reason this pass nearly pinned the wrong number: the measurement
+clone is itself a rewritten tree once files are copied into it, so the
+verification that matters is the one on a clone nobody has written over. That
+run is what caught it.
+
+Measured, in the same hunt: the C seat's term-in retired-instruction row is
+MULTIMODAL on the .qlf image. A set built from scratch by `qlf_boot.pl` and a
+set in which a few units were recompiled into an otherwise-fresh one give
+4,398,146,45x and 4,385,666,00x, 0.28% apart against a 0.15% band, each stable
+across repeated runs and across the whole engine suite running in front of it.
+Copying files into an already-warm tree produces the second, because the copy
+gives them a new mtime and the next boot recompiles just those units. Clearing
+the set and letting `qlf_boot.pl` rebuild it returns the first, which the
+committed pin already covers.
+Decided: nothing in the pins. Both of this seat's fragile rows have the same
+remedy and it is the rule this repository already writes down -- clear the
+`.qlf` and boot once, in a tree you have not written over. The band being
+narrower than the distance between the two images is left as a finding for
+whoever measures that row's real spread; widening it here would be widening a
+band to make a row pass.
+
+Corrected: five rows in the table above read "no step above the sweep's own
+threshold" because the Node ladder's records live beside the main sweep's
+rather than in it. The steps are: answers-lazy 26f479ba -3,959,166 and
+82c1ab65 +20,471,629; host-op instructions 82c1ab65 +85,191,515; query-rows
+82c1ab65 +20,060,254. Two independent ladder runs agree on the 82c1ab65 step,
+which is the typing-rule scope fix. define-call's and host-op's INFERENCE rows
+have no step in this window at all, which is the finding recorded above: they
+moved before the sweep's base.
