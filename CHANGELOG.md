@@ -274,6 +274,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The forty-seven `@settings(deadline=None)` decorators the suite carried are
+  gone. The Hypothesis profile sets `deadline=None` once, so each of them was
+  a private copy of a decision the profile already makes; two `settings`
+  imports go with them.
 - A benchmark lane tells a box that would not count apart from a tree that
   moved. `measure_counters` raises `MeasurementRefusedError` where perf
   answered `<not counted>` for a requested event, and where a controlled

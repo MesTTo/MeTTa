@@ -199,3 +199,20 @@ row fatal on a desk turns `parity-perf-selftest` red by name, and making every
 nonzero exit a refusal turns
 `test_a_refused_window_is_told_apart_from_a_workload_that_failed` red on its
 third case, the workload that exited 3.
+
+Decided: the forty-seven `@settings(deadline=None)` decorators go. The
+test-hygiene merge put `deadline=None` in the Hypothesis profile with the
+measurement that forced it (the same example 250.78ms on its first call and
+24.53ms on the retry at loadavg 54), which makes every one of them a private
+copy of a decision the profile already makes. Removed by rule rather than by
+hand: the keyword alone leaves `@settings()`, which is not a decorator any
+more and goes with it; `max_examples` and `derandomize` stay wherever they
+were written; `metta/testing.py` keeps its own `deadline=None`, because the
+tests IT generates run in a caller's process that never loads this profile.
+Two `settings` imports became unused and ruff removed them.
+Measured on the committed tree: `sh extensions/python/test.sh` reads 3937
+passed, 48 skipped, 343.93s at loadavg 56.16 to 72.45, with three failures,
+all of them this session's own and all now fixed: an N818 on the parity lane's
+new refusal class, the harness test pinning the old `<not counted>` sentence,
+and `test_a_monotonic_table_propagates_an_add_at_delta_cost`, which is treated
+below.
