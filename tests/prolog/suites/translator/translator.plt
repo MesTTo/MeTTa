@@ -2801,8 +2801,8 @@ test(a_parametric_type_is_not_specialised,
 %position, the declared type and the literal's own
 %[source: LeaTTa tests/semantics/types-basic/44-badargtype-per-actual.metta].
 %
-%Three of the four are byte-identical to the arbiter [measured 2026-08-19].
-%The fourth is not, and the difference is the ARBITER's: it answers
+%Three of the four are byte-identical to LeaTTa [measured 2026-08-19].
+%The fourth is not, and the difference is LEATTA's: it answers
 %`((* True True))` for `(tlc-sq true)`, accepting a Bool through a Number
 %parameter, while answering `(BadArgType 1 Bool Number)` for the mirror
 %`(tlc-flag 1)` and `(BadArgType 1 Number String)` for `(tlc-sq "s")`, with

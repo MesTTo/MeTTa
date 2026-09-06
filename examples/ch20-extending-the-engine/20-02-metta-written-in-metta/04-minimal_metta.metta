@@ -135,7 +135,7 @@
 !(test (if-partial True yes) yes)
 ;`Empty` is NO RESULT rather than a symbol, so a partial function that
 ;declines answers nothing at all and the empty answer set is what a
-;collapse shows. The arbiter answers the same way
+;collapse shows. LeaTTa answers the same way
 ;[measured 2026-08-24 on LeaTTa 9ea9f9d: `(= (ip $c $t) (unify $c True $t
 ;Empty))` makes `!(ip False yes)` answer nothing and
 ;`!(collapse (ip False yes))` answer `()`].

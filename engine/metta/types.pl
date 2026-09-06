@@ -386,7 +386,7 @@ refuse_untypable_declaration(Name, Types) :-
 %stopped evaluating its argument, so an application now reaches this probe as
 %written: without the fallthrough (get-type (+ 1 2)) typed ELEMENT-WISE and
 %answered ((-> Number Number Number) Number Number) where it used to answer
-%Number, and the arbiter answers ErrorType for (get-type (Error Foo Boo))
+%Number, and LeaTTa answers ErrorType for (get-type (Error Foo Boo))
 %from exactly this route [source: LeaTTa
 %tests/semantics/types-meta/30_evaluation_control.metta].
 get_function_type([F|Args], T) :- nonvar(F),
@@ -1778,9 +1778,9 @@ metatype_of(_, 'Grounded').                        % e.g., partial(f,[1]), f(1)
 %metta_minimal_equation_step/3; measured 2026-09-05 by enumerating
 %metta_grounded_token(N), fun_meta_module(_, N, _)].
 %
-%The list stays LeaTTa's, which is the right arbiter for what it now answers:
-%minimal MeTTa is a form upstream PeTTa does not have at all, so the PeTTa
-%ruling does not reach it
+%The list stays LeaTTa's, because upstream PeTTa at ae66fa8e, the arbiter, is
+%silent about what it now answers: minimal MeTTa is a form upstream PeTTa
+%does not have at all, so the PeTTa ruling does not reach it
 %[source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean, groundedTokens, 98
 %names read 2026-08-19 and 115 here since]. The engine's vocabulary lane also
 %reads it, as one of the four registers that make a name one this engine
@@ -1893,7 +1893,7 @@ metta_grounded_token('unique-atom'). metta_grounded_token('xor').
 %
 %`Atom` accepts everything, and the mechanism is NOT the subtype relation `:<`
 %spells even though the tutorial's wording invites that reading. It is one
-%equality with a wildcard, and the arbiter quotes the line:
+%equality with a wildcard, and LeaTTa quotes the line:
 %
 %    *typ == ATOM_TYPE_ATOM || *typ == get_meta_type(atom)
 %

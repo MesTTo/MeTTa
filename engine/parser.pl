@@ -757,11 +757,11 @@ seq_numbered(Terms) --> seq_mode(Terms, strict).
 seq_mode([X], Mode)    --> !, swrite_mode(X, Mode).
 seq_mode([X|Xs], Mode) --> swrite_mode(X, Mode), " ", seq_mode(Xs, Mode).
 
-%Every float class prints the arbiter's way: inf, -inf by sign, an unsigned
-%NaN (the forms hyperon's Rust f64 Display prints and the arbiter's
-%pretty-printer pins), and a finite float in the arbiter's LAYOUT over SWI's
-%own shortest-round-trip digits. The digits were already the arbiter's, the
-%layout was not: SWI writes 1.0e+16 and 1.0e-05 where the arbiter writes
+%Every float class prints LeaTTa's way: inf, -inf by sign, an unsigned
+%NaN (the forms hyperon's Rust f64 Display prints and LeaTTa's
+%pretty-printer pins), and a finite float in LeaTTa's LAYOUT over SWI's
+%own shortest-round-trip digits. The digits were already LeaTTa's, the
+%layout was not: SWI writes 1.0e+16 and 1.0e-05 where LeaTTa writes
 %1e16 and 0.00001 [source 2026-08-20: LeaTTa RyuLean4/Runtime.lean:371-396,
 %Decimal.formatMeTTa, Rust ryu's pretty layout]. The printed non-finite
 %spelling reads back as a SYMBOL of that name, upstream's exactly as ours,

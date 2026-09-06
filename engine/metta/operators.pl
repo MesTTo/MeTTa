@@ -696,7 +696,7 @@ metta_numeric_list(List) :- is_list(List), List \== [], maplist(number, List).
 %%% Runtime format strings and string ordering: %%%
 %
 %Both are always-loaded corelib operations rather than library ones, because
-%the arbiter's corpus calls them with no import
+%LeaTTa's corpus calls them with no import
 %[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean, the corelib blocks].
 %They used to live in lib/lib_string/lib_string.pl, where a program reached them only
 %through (import! &self (library lib_string)) and where the formatter was a
@@ -808,7 +808,7 @@ empty(_) :- fail.
 
 %%% Lists / Tuples: %%%
 %The tail's declared type is Expression [source: lib/lib_builtin_types/lib_builtin_types.metta,
-%(: cons-atom (-> Atom Expression Atom))], and the arbiter refuses a tail that
+%(: cons-atom (-> Atom Expression Atom))], and LeaTTa refuses a tail that
 %is not one rather than building a term it could not print
 %[source: LeaTTa MettaHyperonFull/Core/Builtins.lean, Builtins.consAtom;
 %tests/regression/instruction_interp.metta pins native cons-atom and its mirror
@@ -958,7 +958,7 @@ non_list(X) :- compound(X), X \= [_|_].
 
 %The positive reading of the same shape, and the engine's answer to "is this an
 %Expression". A MeTTa Expression IS a proper list, by construction rather than
-%by hope: the arbiter's Atom carries `Atom.expr (List Atom)`
+%by hope: LeaTTa's Atom carries `Atom.expr (List Atom)`
 %[source: LeaTTa MettaHyperonFull/Core/Builtins.lean, Builtins.consAtom], so an
 %improper cons is not a term the semantics can express, and 'cons-atom'/3 above
 %refuses to build one. The FIRST CELL therefore settles the question, where

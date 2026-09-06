@@ -77,7 +77,7 @@ parse(Str, R) :- sread(Str, R).
 %MeTTa's error channel is an ANSWER and not an exception. `(Error <call>
 %<reason>)` is a value a program can test with if-error, compare with
 %assertEqual and pass on, and the FORM AFTER IT STILL RUNS; a raise here ended
-%the whole file instead, which is why eleven of the arbiter's grounded
+%the whole file instead, which is why eleven of LeaTTa's grounded
 %transcripts stopped at their first probe. So an operation handed an argument
 %it cannot use answers, and which answer is decided by the argument's own type:
 %
@@ -116,7 +116,7 @@ metta_operation_answer(Operation, Arguments, Answer) :-
 %An operand that already IS an error atom finishes the call with that atom,
 %unchanged, rather than being reported as an ErrorType argument: `(+ 1 (+ 1
 %"bad"))` is `(Error (+ 1 "bad") (BadArgType 2 Number String))` and not a
-%second error naming the first. That is the arbiter's rule for an operand the
+%second error naming the first. That is LeaTTa's rule for an operand the
 %evaluation PRODUCED
 %[source: LeaTTa tests/semantics/control-stdlib/07_error.metta, STATUS
 %conforms: "A BadArgType raised while preparing a nested call must emerge
@@ -243,8 +243,8 @@ metta_type_refusal_reason(Raw, Canonical, Position, Expected, Actual, Details,
         append(Details, [['TypeExpansion', Raw, Canonical]], More)
     ).
 
-%A type-position modifier is REPORTED and CHECKED by its value type: the
-%arbiter answers `(BadArgType 1 Number String)` for a `(:Atom Number)`
+%A type-position modifier is REPORTED and CHECKED by its value type:
+%LeaTTa answers `(BadArgType 1 Number String)` for a `(:Atom Number)`
 %parameter, naming the type that decided rather than the pair that carried it
 %[measured 2026-08-24 against LeaTTa 9ea9f9d]. The projection sits on the
 %refusal path, which this file's own note above metta_operation_answer/3
@@ -434,8 +434,8 @@ metta_argument_type_origin(_, Expected, metatype) :-
     !.
 metta_argument_type_origin(_, _, ordinary).
 
-%THE RUNTIME CHECK AND THE REPORTED TYPE ASK DIFFERENT QUESTIONS, and the
-%arbiter answers them with different relations. Admitting an argument selects
+%THE RUNTIME CHECK AND THE REPORTED TYPE ASK DIFFERENT QUESTIONS, and
+%LeaTTa answers them with different relations. Admitting an argument selects
 %`.runtime`, "the permissive `match_types`", where `Atom` on either side is a
 %match [source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean:4560-4582,
 %`typeCheckArgsOutcomes`]. Reporting an application's type keeps the stricter
@@ -1068,7 +1068,7 @@ metta_derived_types_match_in(Module, RawLeft, RawRight) :-
     typing_rule_accepts_resolved(Module, derived, Left, Right).
 
 %The operations that refuse BY NAME rather than leaving the call. Each text is
-%upstream's own, quoted from the arbiter's transcript rather than invented, and
+%upstream's own, quoted from LeaTTa's transcript rather than invented, and
 %upstream's noun is not uniform: sqrt-math and abs-math say `number` where every
 %later unary operation says `input number`, and log-math names both arguments
 %[source: LeaTTa tests/semantics/grounded/08-partial-math.metta, whose STATUS

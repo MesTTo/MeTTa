@@ -203,7 +203,7 @@ routed_selective_conjunct(Space, Conjuncts, Best, Rest) :-
 %2026-08-11]; everything else is ground equality. A space is named by a
 %symbol here rather than a grounded atom, so the operand test is the
 %registered-space probe, and an unregistered name falls through to
-%equality like any symbol. The leading identity clause is the arbiter's
+%equality like any symbol. The leading identity clause is LeaTTa's
 %diagonal collapsed to one C comparison: two identical operands match
 %with the empty binding set case for case (equal grounds trivially; a
 %shared variable is the same-variable case; identical compounds decide

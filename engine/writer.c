@@ -468,7 +468,7 @@ emit_integer(wctx *c, term_t t)
   return emit_via_swi(c, t, CVT_INTEGER);  /* past int64: mpz_get_str */
 }
 
-/* metta_finite_float_codes/2: SWI's spelling relaid in the arbiter's
+/* metta_finite_float_codes/2: SWI's spelling relaid in LeaTTa's
  * layout.  The split recovers the digits D and the power of ten E with
  * value = D * 10^E, strips the leading and trailing zeros the layout does
  * not want (dropping a trailing zero divides D by ten, so E rises with it),

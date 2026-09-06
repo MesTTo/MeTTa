@@ -79,7 +79,7 @@ check_evidence_tags.py, this runs on a tree that does not boot.
 Assumes:
   - ai-spec-execution.md sits one directory above the repository's MAIN
     checkout (not necessarily above `this` worktree), and the LeaTTa
-    arbiter corpus one directory above THAT, per this workspace's own
+    corpus one directory above THAT, per this workspace's own
     standing layout [source: the workspace CLAUDE.md, "Ledgers"
     and "the arbiter corpus", LeaTTa] [assumed 2026-08-18]
   - GFM table cells split on `|`, except one escaped as `\|` or one that

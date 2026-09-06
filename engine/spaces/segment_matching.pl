@@ -20,7 +20,7 @@
 %doi:10.1016/j.jsc.2006.12.002, Theorem 62]: `(f (:seg $x) a)` against
 %`(f a (:seg $x))` has the family `$x = a^n` for every n, so no complete
 %finite answer set exists. Three restrictions of that theory ARE proved
-%finite, and they are what this engine admits, in the arbiter's own
+%finite, and they are what this engine admits, in LeaTTa's own
 %classification order [source: LeaTTa
 %MettaHyperonFull/Core/SeqFragment.lean, seqFinitary?]:
 %
@@ -59,8 +59,8 @@
 %The solvers never look at surface syntax. A side is PARSED first, which
 %rewrites each live gap child into '$metta_seg'(Var, Kind) and leaves
 %everything else alone, and the solvers then test one functor instead of
-%re-deciding what a marker-shaped list means at every candidate. That is the
-%arbiter's own staging [source: LeaTTa MettaHyperonFull/Core/SeqSyntax.lean,
+%re-deciding what a marker-shaped list means at every candidate. That is
+%LeaTTa's own staging [source: LeaTTa MettaHyperonFull/Core/SeqSyntax.lean,
 %parseSeqAtom], and it settles two questions the raw shape cannot:
 %
 %  - A marker that arrived through a BINDING is data, never a gap. Only what
@@ -288,12 +288,12 @@ metta_seq_named_vars([g(_, _, Gap)|Gaps], Names) :-
     ),
     metta_seq_named_vars(Gaps, Rest).
 
-%The classifier, in the arbiter's own dispatch order [source: LeaTTa
+%The classifier, in LeaTTa's own dispatch order [source: LeaTTa
 %MettaHyperonFull/Core/SeqFragment.lean, seqFinitary?]: the gap-free side
 %first, then last position, which is deterministic and unitary and therefore
 %the more specific result, then linear-shallow. LeaTTa's numeric guard is
 %deliberately NOT reproduced: that guard belongs to the raw syntactic reading,
-%and the arbiter's own dispatcher classifies the free term skeleton instead,
+%and LeaTTa's own dispatcher classifies the free term skeleton instead,
 %where numbers are theory values rather than a finiteness limit [source: LeaTTa
 %MettaHyperonFull/Core/SeqFragment.lean header, "Numeric grounds are not a
 %finiteness or completeness limit"]. This engine compares grounds through
@@ -560,7 +560,7 @@ metta_seq_repeat(Run, Subject, Rest) :-
 %Binding eagerly cannot do that, because Prolog cannot rewrite a term it has
 %already bound, so the two-sided solvers thread an association list and bind
 %the program's variables ONCE at the end, after resolving each run through the
-%others. That is the arbiter's own staging [source: LeaTTa
+%others. That is LeaTTa's own staging [source: LeaTTa
 %MettaHyperonFull/Core/SeqSyntax.lean, SeqSolution.instantiate, and
 %MettaHyperonFull/Core/SeqLastPos.lean, bindSegment].
 metta_seq_lookup(Var, [Key-Run|Rest], Found) :-

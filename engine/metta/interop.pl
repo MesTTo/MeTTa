@@ -1519,7 +1519,7 @@ run_import_attempt(Space, CanonPath, Goal) :-
 %
 %import! takes `changed`, so an edited file is picked up where before the
 %import was skipped and the edit silently ignored. An UNCHANGED repeat is
-%still skipped, which is what keeps the arbiter's measured behaviour: two
+%still skipped, which is what keeps LeaTTa's measured behaviour: two
 %imports of the same module with different destination tokens execute its
 %source once [source: LeaTTa tests/semantics/modules/30-resolution-loaded,
 %M30 conforms; its own evidence records that neither stdlib.md nor the module
@@ -1568,7 +1568,7 @@ import_load_needed(changed, Space, CanonPath) :-
 
 %A COMPUTED SPACE designator is this engine's extension in exactly the way a
 %computed path is, and the mask hands it over unreduced for the same reason:
-%`(: import! (-> Atom Atom (->)))` is the arbiter's own declaration
+%`(: import! (-> Atom Atom (->)))` is LeaTTa's own declaration
 %[measured 2026-08-24: `!(get-type import!)` on LeaTTa 9ea9f9d]. `&self` is a
 %name and stays one; `(context-space)` is a call and is run here.
 resolve_space_form(Form, Space) :-
@@ -1599,7 +1599,7 @@ resolve_module_form(Form, Path) :-
     nonvar(Form), Form = [library, Alias, Name], !,
     library(Alias, Name, Path).
 %A BUILT-IN MODULE is one the engine ships, named directly rather than by
-%path: `!(import! &self skel)` is the arbiter's own spelling and upstream
+%path: `!(import! &self skel)` is LeaTTa's own spelling and upstream
 %loads six of them at startup [source: LeaTTa
 %MettaHyperonFull/Minimal/Interpreter.lean, builtinModules]. Resolved BEFORE
 %the filesystem, because the name is the module's identity rather than a path

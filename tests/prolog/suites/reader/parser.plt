@@ -242,7 +242,7 @@ test(comment_is_a_number_token_boundary) :-
 %CR, NEL and U+2028 [source 2026-08-21: LeaTTa
 %MettaHyperonFull/Runtime/Parser.lean:58, tokenizeAux comment branch at 66-67].
 %The row originally expected a reader change based on Hyperon's CR behavior;
-%the arbiter instead makes this engine's existing LF-only reader the conforming one.
+%LeaTTa instead made this engine's existing LF-only reader the conforming one.
 test(test_a_comment_terminates_on_the_class_the_arbiter_rules) :-
     sread("(a ; comment\n b)", LfTerm),
     LfTerm == [a, b],
@@ -508,7 +508,7 @@ test(every_number_that_does_survive_is_accepted,
     sread(Text, Back),
     Back == [holds, Number].
 
-% A finite float prints the arbiter's layout over SWI's shortest digits
+% A finite float prints LeaTTa's layout over SWI's shortest digits
 % [source 2026-08-20: LeaTTa RyuLean4/Runtime.lean:371-396, Decimal.formatMeTTa].
 % The pins are the law's own table rows, the four measured witnesses that
 % diverged under number_codes/2's layout (1.0e+16, 1.0e-05, 1.5e+300, 1.0e+26),

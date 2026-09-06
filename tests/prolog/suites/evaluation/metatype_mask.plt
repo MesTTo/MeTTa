@@ -5,7 +5,7 @@
 % Guarantees:
 %   - a parameter declared Atom, Variable or Expression receives its argument
 %     as written, and one declared Symbol, Grounded, Number or %Undefined%
-%     does not, which is the arbiter's own `declaredTypeEvaluates`
+%     does not, which is LeaTTa's own `declaredTypeEvaluates`
 %     [source: LeaTTa MettaHyperonFull/Core/Modifiers.lean:118-124]
 %   - a masked builtin whose declared result is `Atom` answers as produced, and
 %     one whose declared result is `%Undefined%` or `Expression` sends that
