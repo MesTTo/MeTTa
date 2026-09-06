@@ -29,7 +29,7 @@
 %     not inherit user predicates [tested: spaces_storage_modules].
 %   - the algebra descriptor cache includes its context owner, so a same-name
 %     declaration in another context cannot reuse its value [tested:
-%     test_custom_algebras_are_context_owned; commit=WORKTREE].
+%     test_custom_algebras_are_context_owned; commit=2e627a593413191cda3170f2eb716835f7f62543].
 %   - subscribe follows the (events ...) declaration rather than what a host
 %     registered, and a standing query or a reaction on a context that
 %     declares none is refused at the catalog door naming the missing

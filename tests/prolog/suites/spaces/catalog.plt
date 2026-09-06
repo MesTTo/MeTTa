@@ -16,7 +16,7 @@
        while shipped rows state their global fallback explicitly [tested:
        algebra_descriptor_caches_follow_catalog_edits,
        a_claimed_ordered_value_orders_and_an_unclaimed_one_does_not;
-       commit=WORKTREE]
+       commit=2e627a593413191cda3170f2eb716835f7f62543]
      - the deprecated kind is queryable with exact name, since, and remedy
        fields [tested: the_shipped_catalog_is_queryable_data;
        commit=d74e2e828cd9272882dcf907cfaf095d2d147ce0]

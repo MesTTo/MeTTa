@@ -9,7 +9,7 @@
 %     [tested: a_host_binding_calls_only_published_surface,
 %     test_the_host_service_scoreboard_matches_the_tree,
 %     test_two_annotated_operation_calls_multiply_all_four_joint_weights;
-%     commit=WORKTREE].
+%     commit=2e627a593413191cda3170f2eb716835f7f62543].
 %   - atom events raised inside an observation frame are retained in write
 %     order, merged into an enclosing frame on nested commit, published only
 %     after the outer commit, and discarded on rollback [tested:

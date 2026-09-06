@@ -85,7 +85,7 @@ Guarantees:
     tests/checks/check_llms_selftest.py; commit=4ef96c94579db405fafed8fdaab20e33901a2298]
   - every required closed-value roster fails closed and is compared in both
     directions with the catalog or Python constant that owns it [tested:
-    tests/checks/check_llms_selftest.py; commit=WORKTREE]
+    tests/checks/check_llms_selftest.py; commit=2e627a593413191cda3170f2eb716835f7f62543]
 Open Obligations:
   To Do: None
   Hacks: None

@@ -35,7 +35,7 @@ Guarantees:
     is [tested: this file is its own test, run by the gate; commit=4ef96c94579db405fafed8fdaab20e33901a2298]
   - every required closed-value roster catches omission, invention, wrong
     order where order is semantic, a false count and total absence [tested:
-    this file is its own test, run by the gate; commit=WORKTREE]
+    this file is its own test, run by the gate; commit=2e627a593413191cda3170f2eb716835f7f62543]
 Open Obligations:
   To Do: None
   Hacks: None

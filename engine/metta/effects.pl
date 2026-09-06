@@ -27,11 +27,11 @@
 %     commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
 %   - annotation algebra lookup reads a custom descriptor only from the
 %     declaring context, with shipped global rows as fallbacks [tested:
-%     test_custom_algebras_are_context_owned; commit=WORKTREE].
+%     test_custom_algebras_are_context_owned; commit=2e627a593413191cda3170f2eb716835f7f62543].
 %   - metta_current_algebra/3 exposes the selected declaration without
 %     confusing the implicit Boolean execution default for an explicit choice
 %     [tested: test_current_algebra_follows_each_selection_layer;
-%     commit=WORKTREE].
+%     commit=2e627a593413191cda3170f2eb716835f7f62543].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: observe-source owns its diagnostic writes as oracleIO; ordinary
