@@ -346,3 +346,55 @@ Open: which of the 3.13 and 3.14 features the supported Python floor admits;
 and `warnings.deprecated` need 3.13 and template strings, `annotationlib` and
 subinterpreters need 3.14, each usable only behind a version check or after
 the floor moves.
+
+### Correction: what the library already does
+
+The survey above was written from the language outward and listed several
+features as candidates that the library already uses, some as the very
+mechanism the row proposes. Read against the source at d018aa01, the status
+of each is:
+
+| Feature | Status in the library | Where |
+| --- | --- | --- |
+| `ExceptionGroup` | in use: subscription failures and rollback errors are raised as one group | `events.py:534,794` |
+| `except*` | recognised by the Python compiler and refused with its reason (it groups across concurrent tasks) | `_define_statements.py:294-298` |
+| `contextvars.ContextVar` | in use: receipt capture is a context variable and every spawn snapshots the context at launch | `_ops.py:83,147`, `parallel.py:42` |
+| `TypeIs`, `TypeGuard`, `LiteralString` | read from annotations already | `_type_annotations.py:271,305`, `derivation.py:178` |
+| `annotationlib` (3.14) | in use behind a version check for deferred annotations | `_type_annotations.py:488-492` |
+| `graphlib.TopologicalSorter` | in use for integration order, with `CycleError` surfaced | `integrate.py:77,440-441` |
+| `ChainMap` semantics | the overlay space reads both layers and writes the front, stated as ChainMap's own rule | `spaces.py:16,441,744` |
+| `Counter` | in use for bag diffs and unmatched answers | `spaces.py:810`, `parallel.py:482` |
+| `Fraction` | in use: SWI rationals cross as exact `Fraction`s in leaves and expressions | `_atom_wire.py:18,52,140` |
+| buffer protocol / `memoryview` | in use: a buffer is carried zero-copy with its memoryview description | `_convert_project.py:154-156` |
+| `importlib.metadata` entry points | in use: space providers are discovered through an entry-point group | `integrate.py:351-357` |
+| `__reduce__` | in use on answers and atoms | `results.py:257,378`, `_atoms_core.py:264` |
+| `__format__`, `__index__`, `__match_args__`, `__replace__` | in use on atoms and generated definitions | `_atoms_core.py:691-710,1015-1021`, `_space_definitions.py:69,981,1010` |
+| `__init_subclass__` | in use: providers and compliance suites register by being defined | `foreign.py:319`, `_compliance.py:193` |
+| `heapq` | in use for mutation expiries in the remote server | `remote.py:1412-1429` |
+| generator `send` | in use: derivations are driven with `send` | `algebra.py:1324`, `_algebra_demand.py:318` |
+| `MappingProxyType` | in use: the provider registry is a read-only view | `foreign.py:419` |
+| `functools.cache`, `singledispatch`, `weakref.finalize`, `add_note`, `ExitStack`, `itemgetter`, `sqlite3` row reading | in use internally | `_parameterized.py:266`, `_atoms_core.py:1628`, `_space_objects.py:691-695`, `manifest.py:316`, `_persistent.py:907`, `structures.py:368`, `aio.py:1831` |
+| `Enum` as vocabulary | in use: the vocabularies are `StrEnum`s generated from catalog rows, including today's `AlgebraLaw` | `vocabularies.py:40-161` |
+| `typing.final`, `typing.override` | in use as type-checker hints on the library's own classes; not read as engine declarations | throughout |
+| `__wrapped__` | followed when reading a decorated function's annotations, so a cached or wrapped `@define` keeps its signature | `_type_annotations.py:522-523`, `define.py:380` |
+
+So the candidates that remain genuinely absent, and that the ordered plan
+above should be read against, are: value and space freezing with interning
+(`sys.intern` and an intern table are not used anywhere); `@typing.final`
+read as a sealed head with SSU compilation (`final` is only a hint today);
+`@functools.cache` on a `@define`d function read as the memo declaration (the
+wrapper is unwrapped for its signature, and the cache itself is ignored);
+`singledispatch` exposed as MeTTa's typed dispatch (it is used only for
+encoding); `total_ordering` as an ordering law; `cached_property` as a
+materialised derived fact; `__length_hint__`, `__class_getitem__`,
+`__missing__`, `__set_name__` and `assert_never` (none present);
+`asyncio.TaskGroup` for the structured-concurrency item; `sys.monitoring` for
+tracing and `faulthandler` under the gate (neither present); template strings
+and subinterpreters (3.14, not present; the `annotationlib` precedent shows
+how a 3.14 feature is admitted behind a version check); `dbm.sqlite3` as a
+dependency-free persistent space.
+
+Decided: the survey's method was wrong for a mature codebase, where the
+first question is what the library already spells, and the correction stands
+beside the survey rather than replacing it, per the journal's own rule that an
+entry is true to its date.
