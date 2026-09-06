@@ -32,7 +32,7 @@
 %   by metta_refined_result/6, which answers the produced value, the
 %   BadReturnValue Error on the written call, or fails as a plain mismatch
 %   [tested: refinements:a_return_refinement_refuses_with_the_constraint_and_the_value,
-%   refinements:a_return_base_mismatch_stays_silent; commit=WORKTREE].
+%   refinements:a_return_base_mismatch_stays_silent; commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 % Owns resources: each refined call owns a refinement_evidence/2 cell whose
 %   failure snapshots and host references become collectible when that call
 %   finishes or is abandoned. The cell never escapes into global state.
