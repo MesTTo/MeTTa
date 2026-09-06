@@ -15,7 +15,7 @@
 % seam laws the engine never checks, and the refinement vocabulary row names
 % the eleven heads engine/metta/refinements.pl decides [tested:
 % algebra_law_vocabulary_and_alias_claims_are_exact,
-% refinements:the_rule_table_and_the_catalog_vocabulary_agree; commit=WORKTREE].
+% refinements:the_rule_table_and_the_catalog_vocabulary_agree; commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 % Guarantees: deprecated is a
 % schema-checked catalog kind whose name, since, and remedy fields remain
 % ordinary queryable data [tested: the_shipped_catalog_is_queryable_data;

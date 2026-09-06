@@ -67,7 +67,7 @@
 %   [tested: refinements:a_refined_parameter_accepts_a_value_the_constraint_admits,
 %   refinements:a_refined_parameter_refuses_with_the_constraint_and_the_value,
 %   refinements:a_base_mismatch_keeps_the_ordinary_bad_arg_type;
-%   commit=WORKTREE].
+%   commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 

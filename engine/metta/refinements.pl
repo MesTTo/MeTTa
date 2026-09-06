@@ -15,36 +15,36 @@
 %     constraint the vocabulary decides against the value, so an undecided one
 %     is never reported as a violation
 %     [tested: refinements:an_unknown_refinement_head_neither_holds_nor_is_violated;
-%     commit=WORKTREE].
+%     commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 %   - Gt, Ge, Lt and Le compare a native number natively and a host numeric
 %     through seam:grounded_numeric_operation/3, the door metta_math_eval/4
 %     already routes host arithmetic through; Interval decides each written
 %     bound the same way and MultipleOf reads the remainder
 %     [tested: refinements:every_numeric_refinement_decides_a_number,
-%     refinements:a_host_numeric_decides_through_the_seam; commit=WORKTREE].
+%     refinements:a_host_numeric_decides_through_the_seam; commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 %   - MinLen, MaxLen and Len read a string's length, an expression's child
 %     count, and a host sequence's length through seam:grounded_structure/2;
 %     a value with no length satisfies no length refinement
 %     [tested: refinements:a_length_refinement_reads_strings_and_expressions;
-%     commit=WORKTREE].
+%     commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 %   - Predicate applies its test to the value as a finished value, through the
 %     translator's dynamic-value door, so a MeTTa head runs its equations and
 %     a grounded host callable runs through seam:grounded_apply/3; the
 %     refinement holds only when the application answers True
 %     [tested: refinements:a_predicate_refinement_applies_a_metta_head,
 %     extensions/python/tests/ch09_types/test_refinements.py::test_a_predicate_refinement_calls_the_grounded_predicate_at_the_seam;
-%     commit=WORKTREE].
+%     commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 %   - Unit holds for every value: a unit is a claim about the DECLARATION, decided
 %     by unification between declared types, and a bare number carries none to
 %     disagree with [tested: refinements:a_unit_refinement_is_a_declaration_not_a_value_test;
-%     commit=WORKTREE].
+%     commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 %   - metta_refined_result/6 answers the produced value when the declared result
 %     type admits it, the Error `(BadReturnValue <constraint> <value>)` on the
 %     written call when the base admits it and a decided constraint fails, and
 %     nothing otherwise, which keeps a plain result-type mismatch the silent
 %     branch failure the arbiter gives it
 %     [tested: refinements:a_return_refinement_refuses_with_the_constraint_and_the_value,
-%     refinements:a_return_base_mismatch_stays_silent; commit=WORKTREE].
+%     refinements:a_return_base_mismatch_stays_silent; commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 % Decides: the refinement vocabulary is the eleven heads below, and the
 %   catalog's `(vocabulary refinement ...)` row in engine/spaces/catalog.pl
 %   names the same eleven; the two are held equal by

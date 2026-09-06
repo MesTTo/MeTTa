@@ -6,7 +6,7 @@
 %   refuses the rest by constraint and value, a base mismatch keeps
 %   BadArgType, a refined result refuses at the crossing, an unknown head is
 %   undecided rather than violated, and the rule table equals the catalog row
-%   [tested: run_tests(refinements); commit=WORKTREE].
+%   [tested: run_tests(refinements); commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 % Owns resources: each fixture releases its space.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
