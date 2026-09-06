@@ -1301,6 +1301,167 @@ faces above, since they change the engine's storage and control; items 4 to
 13 are faces of mechanisms that exist and enter by the ranking rule of
 section 16, measured where they claim a cost.
 
+### 21. The integration: six layers, one substrate
+
+Read together, sections 1 to 20 and the declarations thread are not a list
+of features. They are six layers, each riding the one below it, and most of
+the value is in the combinations. The layers, from the bottom:
+
+| Layer | What it is | Which sections it absorbs |
+| --- | --- | --- |
+| 0 The token | one identity per added fact: actor, generation, clause reference | 20.1; the journal (12), the what-if doors (5), `transaction_updates` (17.13), digests and receipts (19.9, 20.13), freezing (the declarations thread) |
+| 1 The free carrier | provenance polynomials over tokens; every algebra carrier a homomorphism | 20.2; the algebra rows and `under` (17.3), the `sum` memo coefficient (18), `lattice` policies (6), the bag diff (9), `why()` (19.3) |
+| 2 The handler | effects a program performs, handled by installed handlers over `reset/3` and `shift/1` | 20.3; the scope family (5, 18), strategies (11), limits and tripwires (5), capture, seed, tracing and audit (9), providers (17.9), parallelism (13) |
+| 3 The catalog and its projections | declarations as rows; every surface a projection | 17.2, 17.4, 17.8, 17.10, 17.11; stubs, cards, OpenAPI, GraphQL, JSON schema, Arrow schema, `testing.cases` (4, 20.6, 20.7), the inverse `llms.txt` lane (19.1) |
+| 4 The seam contracts | streams with a terminal frame; capabilities as dunders; constructors as entry markers | 17.1, 17.7, 17.12; Arrow both ways (2), DLPack, `py_iter` (this week's repair), foreign objects (3), templates (1) |
+| 5 Measurement | counters, slopes, the null-program floor, receipts, digests, the advisor, routing | 20.4, 20.8, 19.10, 19.20, the parity floor, the benchmark baselines |
+
+Above them sit the seats (Python, Node, C, MeTTa text, notebook, CLI,
+gateway, the language server and agent tools, the browser), which are
+generated faces of layer 3 over layers 4 and 5.
+
+What each layer gives the ones above it:
+
+- Tokens give time (`as-of`, `since`, `history`), branching and merging as
+  token-set operations that never conflict (the observed-remove multiset),
+  blame, replication by shipping the journal, the indeterminates of layer 1,
+  the invalidation keys of incremental and monotonic tabling, the identity of
+  a frozen space (a token set at a generation, so two frozen spaces are equal
+  when their digests are), the content of a receipt, and the anchors of a
+  recorded trace.
+- The free carrier gives one evaluation for every semantics: bag counts,
+  truth, costs (tropical), confidences (Viterbi), access levels, lineage;
+  `why()` as the polynomial and `explain()` as its structure; deletion
+  propagation as the incremental maintenance; the bag diff of an assertion
+  as a polynomial difference; the `lattice` memo as the storage of an image;
+  and provenance specialisation (Green and Tannen 2017): a query asked under
+  a concrete carrier is evaluated in that carrier directly, and the
+  polynomial is materialised only when asked for and bounded by the tabling
+  restraints, which is how the exponential blow-up of derivations is kept
+  out of the common path.
+- The handler gives one mechanism for every scope door and every strategy,
+  parallelism as a handler of the choice effect that fans branches out to
+  the engine pool (SWI engines being the safe form of a captured
+  continuation), speculation as a handler of the write effect that mints
+  tokens into a world instead of committing them, capture as a handler of
+  emit, seed as a handler of random, limits and tripwires as a handler of
+  spend, tracing and monitoring as a handler of everything that records,
+  audit and capability security as the handler of the host effect, foreign
+  providers as the read and write handlers for their spaces, and
+  deterministic replay as re-running under handlers that feed recorded
+  results.
+- The catalog gives self-description (the roster is derived, the inverse
+  lane checks it), the IDE surface, cards, the gateway's schemas, the test
+  generator, and every seat's faces of the scope parameters, generated.
+- The seam contracts give zero-copy data both ways, safe crossings, and
+  foreign objects as expressions without registration.
+- Measurement gives the cost rows their check, the advisor its evidence,
+  routing its decision, and every claim in the documentation its number.
+
+The combinations, each one something neither part gives alone:
+
+1. Tokens and the free carrier and subscriptions: a standing query is a
+   polynomial, and it re-answers exactly when a token it mentions is added
+   or removed. That is `live(query)` (20.12) from first principles, and the
+   reactive notebook cell of 19.17, with Materialize's semantics and no
+   second engine.
+2. Tokens and the write handler and the engine pool: every branch of a
+   nondeterministic evaluation runs in its own world, minting tokens it does
+   not commit, and the worlds merge by token union when the branches join.
+   That is parallel forward chaining: 19.5 extended from reads to writes,
+   with 20.1's merge law making the join conflict-free.
+3. The free carrier and cost rows under the tropical semiring: an answer's
+   cost is its polynomial's image when each token carries its provider's
+   measured crossing cost, so the cheapest derivation is a best-first search
+   (the tropical carrier already orders answers) and the choice of provider
+   for a sub-pattern (Prolog clauses, MORK's trie, a columnar join) is a
+   cost-model decision over the same numbers. That is 19.10's self-routing
+   grounded in 20.2 and 20.4, with the parity floor and the baselines as the
+   cost model's data.
+4. Handlers and monitoring and replay: recording what every handler answered
+   (random draws, host calls, provider reads) is a trace that replays the
+   run exactly, and stepping backwards through it moves both control and,
+   through tokens, the space's generation. That is 20.10 built from 20.3 and
+   20.1, with `check_replay` as the existing proof of the shape.
+5. The catalog, the inverse `llms.txt` lane and cards: the roster is
+   generated from rows, the lane fails on a door without a row, and a library
+   card is the rows of one library rendered. This evening's finding (a reader
+   surprised by shipped capabilities) cannot recur, structurally.
+6. Refinements, Hypothesis and the arbiter: random programs generated from
+   declared arrows and refinements are well-typed by construction, so the
+   fuzzing lane (20.5) finds semantic divergences from upstream PeTTa rather
+   than type errors, which is type-directed generation in the tradition of
+   testing compilers with random well-typed terms (Pałka, Claessen, Russo
+   and Hughes, 2011).
+7. Tokens, the journal and Arrow: the journal is a token log, and a token log
+   is a table, so replication and analytics over a space's history are an
+   Arrow IPC stream of the journal through the gateway (20.7), which is
+   change-data capture with no second format.
+8. The host handler, effect rows and cards: a library's card lists the
+   effects its heads perform (the effect rows exist), and loading a library
+   under a handler that refuses undeclared effects is capability security by
+   declaration (19.19), deal's `has()` at the scale of a library.
+9. Templates and tokens: a program built from atoms carries the identities
+   of the values it embeds, so `why()` on its answers names the Python values
+   that entered, not their text; a hole is a binding (17.1) and a binding is
+   a token.
+10. Cost rows, the slope lane, the advisor and routing form one loop: a
+    declared class is checked by the slope instrument, a measured slope
+    proposes a policy row, a policy row changes the cost, and the routing
+    reads the result. Every step is the same counter.
+11. Projections, Arrow schema, stubs and OpenAPI: one type table with a
+    column per target; a new target is a column, and the four surfaces agree
+    because they cannot differ.
+12. Handlers and strategies and the pool: `par(depth_first)` is a value
+    installing the choice handler that fans out; the Stratego combinators and
+    `race` and `every` compose because they are all handlers of one effect.
+13. Tokens and freezing: the declarations thread's frozen space becomes a
+    value with an identity, the crossing cache keys on its digest, and
+    forking a frozen space shares its tokens (Clojure's persistent maps for
+    facts).
+14. The bag diff and the free carrier: an assertion's missing and excess
+    answers are polynomial differences, so a failing test names the facts
+    (tokens) whose absence or presence caused it: blame for a test failure.
+15. Reversible debugging and `as-of`: stepping backwards in the trace and
+    querying the space as it was are one operation, because both are reads at
+    a generation.
+
+Tensions, and how the layers resolve them:
+
+- Memory per token. A clause reference already exists per added atom and
+  SWI already stamps generations internally; the cost is in exposing them,
+  which the tokens design agent measures on a 100,000-atom space before
+  anything is pinned. Foreign providers that cannot mint tokens (MORK, SQL)
+  declare that as a capability, and `as-of`, `blame` and merge refuse on
+  them with the remedy named, which is the capability rule of 17.12.
+- Polynomial blow-up. Evaluate under the concrete carrier (specialisation),
+  materialise the free polynomial only on `why()`, bound it by
+  `answer_abstract` and `max_answers`; the memo stores images, never the free
+  polynomial, unless the policy says `provenance`.
+- Continuations and cut. Handlers are bounded to the shapes tabling already
+  proves safe; the choice handler that parallelises uses engines, which are
+  resumable continuations with their own choice points; a handler that would
+  need to commit a saved continuation refuses at installation.
+- Remove semantics under merge. `remove-atom` removes one token, the oldest
+  by generation, so it is deterministic and observed; a concurrent add
+  survives a concurrent remove of a different token, and two removes of the
+  same token are one removal (idempotent), which are the observed-remove
+  laws stated over multisets.
+- Two records for budgets and demands (17.3) stay two: the spend handler
+  reads the budget, the choice handler reads the demand.
+
+Build order implied by the dependencies, replacing the flat ranking of
+section 16 for everything below the seats: the faces of waves 1 to 3 (Arrow,
+templates, refinements, IDE, observation, notebooks, import, lanes) do not
+depend on the substrate and land first; then tokens, as a storage change with
+no semantic change, measured; then the provenance carrier as an opt-in
+carrier; then handlers as a special form with the existing doors re-expressed
+and their behaviour proved unchanged by differential tests; then, and only
+then, the combinations: live views, parallel worlds, self-routing, replay,
+CRDT replication, cards with effects, and the fuzzing lane over typed
+generation. Each combination is a face of two mechanisms already measured,
+never a third mechanism.
+
 ### Ruling, later the same day: the arbiter is PeTTa
 
 The user ruled that the semantics arbiter is upstream PeTTa at the pinned
