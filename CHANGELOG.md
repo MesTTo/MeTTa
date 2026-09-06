@@ -274,6 +274,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Ten static gate findings, each at its site. The batching overload of
+  `Space.eval` and `MeTTa.eval` names its second positional term `_second`,
+  since it is positional-only and exists to require two terms rather than to be
+  read; `_space.py`'s superseding transaction body no longer shadows
+  `dataclasses.replace`; `metta.testing` imports `annotated_types` under a
+  module-private alias so it cannot shadow a local index; `_refinements.py`
+  registers its constraint encoders through `_encode_register`, the function
+  `encode.register` forwards to, rather than through a cast a checker cannot
+  follow; `_space_execution.py` writes its two-way None test as the chained
+  identity three of its siblings already use; and the two `__annotations__`
+  properties, the two public parameter names that shadow the functions they
+  select, and the three function-attribute writes a `Callable` annotation
+  cannot carry each state their reason where they sit. `InForce`, the Prolog
+  variable holding a name's installed table policy, is spelled out in
+  `.codespellrc` as a word rather than a typo.
 - The codec builds under mypyc again. `RestraintError` was constructed with a
   `dict[str, object]` unpacked as keywords, which mypyc refuses for parameters
   typed `int | None`; the three restraint fields cross by name.
