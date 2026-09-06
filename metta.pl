@@ -207,10 +207,12 @@
 %     [tested 2026-08-14: metta_builtin_outputs].
 %   - Function registration performed by a source load participates in that
 %     load's rollback [tested 2026-08-14: filereader_source_rollback].
-%   - metta_host_function_generation/1 exposes fun/1's process-global SWI
-%     database generation, which advances on committed catalogue changes and
-%     on no ordinary evaluation or data write
-%     [tested: function_catalogue_generation; commit=4c9a794750103e0a3a2e9d883adde337ffb501f0].
+%   - metta_host_function_generation/1 exposes the sum of the process-global
+%     SWI database generations of fun/1, fun_in/2, fun_scoped/1 and
+%     metta_exec_module_parent/2, which advances on committed catalogue
+%     changes, including a second space defining an already-registered name,
+%     and on no ordinary evaluation or data write
+%     [tested: function_catalogue_generation; commit=WORKTREE].
 %   - Prolog registration refuses every head the translator compiles before
 %     function dispatch, including heads added through translator_rule/1
 %     [tested: test_registering_any_translator_compiled_head_is_refused_by_name].
@@ -1693,10 +1695,15 @@ load_prelude_translator_rule(Name, Declarations, Src) :-
                     context(load_engine_prelude/0, Src)))
     ).
 
-%fun/1 is the exact mutable input metta_py_builtins/1 reads. SWI maintains a
-%dynamic predicate's last_modified_generation for cache validation, including
-%transaction commit and rollback semantics, so no listener or generic
-%write-door flag exists and every mutation route keeps its original cost.
+%fun/1, fun_in/2, fun_scoped/1 and metta_exec_module_parent/2 are the exact
+%mutable inputs the host catalogues read: metta_py_builtins/1 reads the first,
+%and the per-space metta_py_builtins/2 reads all four, because a second space
+%defining an already-registered name asserts fun_in/2 without touching fun/1
+%and a cache stamped by fun/1 alone would go on answering the old set for it.
+%SWI maintains a dynamic predicate's last_modified_generation for cache
+%validation, including transaction commit and rollback semantics, so no
+%listener or generic write-door flag exists and every mutation route keeps
+%its original cost; the sum of four monotone generations is monotone.
 %Keep this read-only host service after the loader predicates it does not call:
 %its clause layout then cannot perturb the save-load-metta hot path [measured 2026-08-23:
 %save-load-metta 9,223,648 inferences; command=METTA_BENCHMARK_COUNTERS=1
@@ -1704,7 +1711,12 @@ load_prelude_translator_rule(Name, Declarations, Src) :-
 %-q extensions/python/benchmarks/test_benchmarks.py::test_save_load_metta;
 %fixture=deterministic benchmark harness; commit=fc08223618651c122c7e3bfa9f269d03ff1c0932].
 metta_host_function_generation(Generation) :-
-    predicate_property(fun(_), last_modified_generation(Generation)).
+    predicate_property(fun(_), last_modified_generation(Functions)),
+    predicate_property(fun_in(_, _), last_modified_generation(Homes)),
+    predicate_property(fun_scoped(_), last_modified_generation(Scopes)),
+    predicate_property(spaces:metta_exec_module_parent(_, _),
+                       last_modified_generation(Parents)),
+    Generation is Functions + Homes + Scopes + Parents.
 
 %One initialization goal for all of them, in this order, because
 %initialization/1 goals do not reliably order against each other (the note
