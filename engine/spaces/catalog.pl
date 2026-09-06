@@ -42,15 +42,15 @@
 % Guarantees: metta_retire_space_catalog/1 removes declarations owned by a
 % released space through metta_remove_atom/3, including context-routed kinds,
 % while global vocabularies and sibling algebra declarations remain intact
-% [tested: run_tests(catalog_lifecycle); commit=WORKTREE].
+% [tested: run_tests(catalog_lifecycle); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 
 % Guarantees: finite tensor closure and law witnesses compare shape and exact
-% values [tested: test_finite_tensor_semiring_checks_every_law; commit=WORKTREE].
+% values [tested: test_finite_tensor_semiring_checks_every_law; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 
 % Guarantees: type carriers validate membership without certifying laws;
 % only finite enumerations permit exhaustive law checks [tested:
 % test_type_carrier_cannot_certify_laws,
-% test_type_carrier_refuses_values_outside_its_type; commit=WORKTREE].
+% test_type_carrier_refuses_values_outside_its_type; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 
 :- dynamic native_storage_module_cache/2.
 :- dynamic space_parametric/1.
@@ -508,7 +508,7 @@ metta_cache_policy_changed(Function) :-
 % row. Algebra laws and their carrier certificate live inside the owned
 % algebra row; vocabulary and claim rows are global definitions. Context
 % routes describe their owner position already, including third-party kinds.
-% [tested: run_tests(catalog_lifecycle); commit=WORKTREE].
+% [tested: run_tests(catalog_lifecycle); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 metta_space_catalog_head(Head) :- metta_routed_head(Head, context).
 metta_space_catalog_head(annotations).
 metta_space_catalog_head(source).

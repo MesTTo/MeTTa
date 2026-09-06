@@ -2,12 +2,12 @@
 % Assumes: engine/metta.pl owns type checking and Janus supplies opaque values.
 % Guarantees: host shape expressions refine typed arguments, share dimension
 %   variables across parameters, and project instantiated return types
-%   [tested: run_tests(tensor_shapes); commit=WORKTREE].
+%   [tested: run_tests(tensor_shapes); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 % Guarantees: one refused host value reports its matching-base refinement,
 %   its first named type, or its first remaining structural type
 %   [tested: a_concrete_shape_refusal_names_expected_and_actual_shapes,
 %   an_unrelated_refinement_keeps_the_concrete_type_refusal,
-%   a_structural_only_host_still_has_one_refusal; commit=WORKTREE].
+%   a_structural_only_host_still_has_one_refusal; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 % Owns resources: each fixture releases its space and removes its host rows.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

@@ -1,7 +1,7 @@
 % Purpose: verify that catalog declarations follow their owning space's life.
 % Guarantees: release removes owned rows, preserves other owners and global
 %   vocabularies, and permits a different declaration in the next life
-%   [tested: run_tests(catalog_lifecycle); commit=WORKTREE].
+%   [tested: run_tests(catalog_lifecycle); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

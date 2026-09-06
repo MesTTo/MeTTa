@@ -1,6 +1,6 @@
 % Purpose: enforce carrier membership through native annotation evaluation.
 % Guarantees: public annotation reads and extension validate inputs and results
-%   [tested: run_tests(algebra_types); commit=WORKTREE].
+%   [tested: run_tests(algebra_types); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 % Owns resources: tests release each declaring space after evaluation.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

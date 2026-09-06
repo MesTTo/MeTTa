@@ -1,7 +1,7 @@
 % Purpose: distinguish one grounded value's class witnesses from separate refusals.
 % Guarantees: a grounded argument reports its concrete class once while all
 %   inherited witnesses remain available to type checking
-%   [tested: run_tests(grounded_refusals); commit=WORKTREE].
+%   [tested: run_tests(grounded_refusals); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 % Owns resources: each test releases its Python reference and local space.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
