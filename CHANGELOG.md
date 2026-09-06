@@ -80,6 +80,43 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   an attribute nothing reads, so a released term handed back to Prolog is
   refused instead of reading freed memory.
 
+- The two cheat sheets describe the engine that ships. `metta.llms()` prints
+  `llms.txt` from an install now, so a stale line in it reaches every reader
+  with nothing to check it against, and a release pass over both files found
+  claims the gate's `llms` lane cannot anchor: rosters and counts stated
+  outside the source table, behaviour a later change reversed, and names the
+  narrow-core rename retired.
+
+  What a reader was told wrongly. `==` refuses a cross-type pair, which it
+  stopped doing on 2026-08-30: `(== 1 "S")` answers `False`. `get-metatype`
+  answers `Grounded` for a state cell, where it now answers `Symbol` for every
+  handle and cell and the rule is whether the engine holds a function for the
+  name. A Python `[:k]` slice never bounds a provider, where it reaches one as
+  a limit under five named conditions. Integer shifts refuse, where `<<` and
+  `>>` build `bit-shift-left` and `bit-shift-right`. Arithmetic on two grounded
+  values stays ordinary Python, where every arithmetic operator on an atom
+  builds a term and `G(2) + G(3)` is `(+ 2 3)`. `pure`, `reads`, `writes` and
+  `io` are effect shorthands, where none is accepted. `m.fn("name").all(...)`,
+  `m.hyperpose(...)`, `@m.type(cls)`, `metta.atoms.alpha_eq`,
+  `metta.atoms.is_ground`, `metta.atoms.map_atoms`, `metta.atoms.pretty`,
+  `SpaceName`, `MettaName` and `DECLINE` resolve to nothing.
+
+  Numbers re-derived: 300 registered builtins against 298 and the roster whole,
+  59 public special forms against 50, 48 lazy root names against 43, the whole
+  58-name service list against 55, eight `python -m metta` subcommands against
+  seven, 38 libraries and 224 twin programs in the seat sheet against 34 and
+  219, 258 example programs in README against 233, the `counting` carrier's
+  answer for the table's own program, and the extension-cost table, whose
+  translator-rule row is 0.00 inferences a call now that planning folds its
+  expansion away and which gained the `@m.define, no annotations` row at 28.00.
+
+  Added where the sheets were silent: the install contract, that a plain
+  `pip install pymetta` omits the `janus-swi` bridge the `engine` extra adds;
+  the context lifecycle and which doors live on the context against the space;
+  `metta.current_algebra()`; `m.trace(filter=)`; annotated arrows
+  `(-[det]-> ...)` with their slot grammar; an atom in annotation position as
+  the type; `metta.arrays.Shape`; and `serve`'s mutation bounds.
+
 - Calling `Answers.index()` with a missing string that is also a column name
   now explains that `index` searches row values and points to `column(name)`;
   successful and ordinary missing-value Sequence behavior is unchanged.
