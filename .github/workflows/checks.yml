@@ -26,8 +26,67 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/mestto/metta-kernel-ci:latest
+      # The parity lane counts retired instructions with perf, and Docker's
+      # default seccomp profile denies perf_event_open outright, so inside a
+      # container `perf stat -e instructions:u` answers `No permission to
+      # enable instructions:u event` even as root. Measured on this image's
+      # own base: swipl:latest plus linux-perf counts nothing under the
+      # default profile and answers `130379,,instructions:u,249770,100.00,,`
+      # with the profile off. This is the narrowest option that lets the
+      # syscall through; it does not grant privileges.
+      options: --security-opt seccomp=unconfined
     steps:
       - uses: actions/checkout@v4
+
+      # The parity lane compares this engine against numbers measured from
+      # upstream PeTTa at this commit, and it REFUSES rather than skipping
+      # when the checkout is absent and CI is set, so this step is what lets
+      # that lane fail here instead of printing a skip on every push. Shallow
+      # and BY COMMIT: the harness reads the checkout's HEAD and a rebaseline
+      # against any other commit is refused, because the recorded upstream
+      # numbers came from this one. github.com serves an arbitrary object ID
+      # to `fetch --depth 1`, which is what makes the pin fetchable without
+      # the history [measured 2026-09-06: the four commands below against
+      # github.com answer ae66fa8e41dcd5539d614706bd4e5cfb34f9608d].
+      - name: Check out the pinned upstream PeTTa beside the repository
+        run: |
+          set -eu
+          upstream="$(dirname "$GITHUB_WORKSPACE")/PeTTa-upstream"
+          pin=ae66fa8e41dcd5539d614706bd4e5cfb34f9608d
+          mkdir -p "$upstream"
+          git -C "$upstream" init -q
+          git -C "$upstream" remote add origin https://github.com/trueagi-io/PeTTa
+          git -C "$upstream" fetch -q --depth 1 origin "$pin"
+          git -C "$upstream" checkout -q FETCH_HEAD
+          test "$(git -C "$upstream" rev-parse HEAD)" = "$pin"
+
+      # Before the gate rather than 13 minutes into it. Without a readable
+      # counter the parity lane cannot measure anything, and the two things
+      # that decide it are the container's seccomp profile, set above, and the
+      # host's perf_event_paranoid, which a container job cannot change.
+      #
+      # The test is a COUNT, not the event name. `grep -q instructions:u`
+      # passes on the refusal, which says `No permission to enable
+      # instructions:u event`, so the first shape of this step reported a
+      # readable counter inside a container that could not count at all. It
+      # now asks what check_upstream_parity._perf asks: a `-x ,` row whose
+      # third field is the event and whose first is a number.
+      - name: Verify the instruction counter is readable
+        run: |
+          set -eu
+          if ! perf stat -e instructions:u -x , true 2>&1 |
+               awk -F, '$3 == "instructions:u" && $1 ~ /^[0-9]+$/ { found = 1 }
+                        END { exit !found }'
+          then
+            echo "error: perf cannot count instructions:u in this container." >&2
+            echo "perf_event_paranoid reads $(cat /proc/sys/kernel/perf_event_paranoid 2>/dev/null || echo unreadable); 2 or less is needed." >&2
+            echo "Two things decide this: the container's seccomp profile," >&2
+            echo "which this job sets to unconfined because Docker's default" >&2
+            echo "denies perf_event_open, and the host's perf_event_paranoid," >&2
+            echo "which a container job cannot change." >&2
+            perf stat -e instructions:u -x , true || true
+            exit 1
+          fi
 
       - uses: actions/setup-python@v5
         with:

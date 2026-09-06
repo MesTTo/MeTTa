@@ -1,7 +1,20 @@
-% Purpose: run one .metta example on one engine checkout and print the
+% Purpose: run one .metta program on one engine checkout and print the
 %   inferences its load and evaluation cost, for check_upstream_parity.py.
-%   The marker line is machine-read; everything the example prints stays on
+%   The marker line is machine-read; everything the program prints stays on
 %   stdout above it, symmetric for both engines.
+%
+%   This is the ONLY driver. An engine's fixed cost is measured by handing
+%   this same file an EMPTY program at the same path length, so the two
+%   processes differ in the bytes of the program and in nothing else. A
+%   second fixture that consulted the engine and stopped, tests/fixtures/
+%   parity_boot.pl, did that job until 2026-09-06 and got it wrong in both
+%   directions: it never reached upstream's first-use autoloads, which cost
+%   4,594,811 instructions there, and being a different command line it read
+%   8,661,096 instructions ABOVE this driver's own empty run on this engine,
+%   which is how seven baseline rows came out negative. Those two numbers and
+%   the measurement behind them are pinned in
+%   tests/checks/check_upstream_parity.py's own header, which is inside the
+%   evidence gate's globs where this file is not.
 % Assumes: the engine root's engine/metta.pl or src/metta.pl defines
 %   load_metta_file/2 and the
 %   file-relative working_dir/1 convention both checkouts share.
