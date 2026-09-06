@@ -1,6 +1,6 @@
 % Purpose: the engine's kernel vocabulary, performance atoms beyond the
 %   conforming stdlib (the user's standing ruling, 2026-08-21): each is a
-%   grounded head LeaTTa does not speak about, Prolog-bodied by
+%   grounded head the conforming stdlib does not speak about, Prolog-bodied by
 %   measurement, with its MeTTa spelling kept alive as a differential
 %   where one exists. The registries stay in engine/metta.pl's tables
 %   (metta_grounded_token/1, the register_builtin_fun list, the effect

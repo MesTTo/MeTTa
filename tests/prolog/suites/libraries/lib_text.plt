@@ -122,8 +122,9 @@ test(format_args_matches_hyperons_own_example) :-
 
 % A short argument list produces NOTHING for the placeholders it cannot fill,
 % and a long one is ignored: both are the dyn_fmt formatter upstream uses
-% [source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean, formatArg's empty-args
-% case; measured 2026-08-19 against the arbiter, which answers "only and "].
+% [assumed 2026-08-19: the empty-argument case was adopted from an earlier
+% reference semantics, which answered "only and " when measured at that date;
+% not re-measured against upstream PeTTa].
 test(format_args_empties_the_placeholders_it_cannot_fill) :-
     'format-args'("{} and {}", [only], S), S == "only and ".
 

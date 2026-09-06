@@ -11,8 +11,8 @@
 %   when the claim is made, and a request no rule covers is locally
 %   detectable rather than silently decided. The verdicts are a BEFORE
 %   trigger's; the transform is one rule step, its output granted and not
-%   re-asked, the bounded prefix of the CHR ω_e semantics LeaTTa
-%   mechanizes (LeaTTa MettaHyperonFull/Proofs/ChrOperational.lean).
+%   re-asked, the bounded prefix of the CHR ω_e semantics the atom
+%   fragment was mechanised under.
 % Guarantees:
 %   - compiled fire observes the evaluator's residual unchanged, and the
 %     verdict consumer classifies that residual as the named stuck state
@@ -729,8 +729,8 @@ test(capacity_redeclaration_recounts_writes_made_while_unbounded,
 
 % The design board's worked instances (P12.5, P12.8, P12.9, P12.10):
 % the mechanism demonstrated as the board names them, no new machinery.
-% The CHR mapping is the project's own mechanized analysis frame
-% (LeaTTa's ChrOperational cluster), and the three forms are the
+% The CHR mapping is the project's own mechanized analysis frame,
+% and the three forms are the
 % completeness checklist for the verdict vocabulary.
 :- begin_tests(hooks_worked_instances).
 

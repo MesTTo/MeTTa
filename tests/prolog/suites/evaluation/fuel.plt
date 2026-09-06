@@ -70,7 +70,8 @@ test(an_exhausted_branch_records_its_culprit_and_fails) :-
 
 %WITHOUT a max-stack-depth the budget is off, and the first step LATCHES that
 %so no later reduction in the runnable re-reads the pragma table. The engine
-%used to default to the LeaTTa runner's 100000 here, which capped every program
+%used to default to an earlier reference runner's 100000 here, which capped
+%every program
 %at 25,000 charged reductions and stopped six upstream examples that upstream
 %completes
 %[source: PeTTa@ae66fa8 src/metta.pl, which has no budget; measured 2026-08-30,

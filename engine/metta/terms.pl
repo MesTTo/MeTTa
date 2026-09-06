@@ -77,7 +77,7 @@ parse(Str, R) :- sread(Str, R).
 %MeTTa's error channel is an ANSWER and not an exception. `(Error <call>
 %<reason>)` is a value a program can test with if-error, compare with
 %assertEqual and pass on, and the FORM AFTER IT STILL RUNS; a raise here ended
-%the whole file instead, which is why eleven of LeaTTa's grounded
+%the whole file instead, which is why eleven of the reference corpus's grounded
 %transcripts stopped at their first probe. So an operation handed an argument
 %it cannot use answers, and which answer is decided by the argument's own type:
 %
@@ -91,9 +91,8 @@ parse(Str, R) :- sread(Str, R).
 %    message where upstream gives it one, and otherwise the call left as
 %    written, which is upstream's NoReduce
 %
-%[source: LeaTTa tests/semantics/grounded/07-partial-core.metta and
-%08-partial-math.metta, both STATUS conforms and both byte-for-byte
-%transcripts; tests/semantics/types-basic/44 through 49 for the multiplicity]
+%[assumed: the three answer shapes and the multiplicity were adopted from an
+%earlier reference semantics, not re-measured against upstream PeTTa]
 %[tested: operation_answers].
 %
 %NOTHING HERE IS ON A HOT PATH. Every caller reaches it only after its own
@@ -116,11 +115,10 @@ metta_operation_answer(Operation, Arguments, Answer) :-
 %An operand that already IS an error atom finishes the call with that atom,
 %unchanged, rather than being reported as an ErrorType argument: `(+ 1 (+ 1
 %"bad"))` is `(Error (+ 1 "bad") (BadArgType 2 Number String))` and not a
-%second error naming the first. That is LeaTTa's rule for an operand the
-%evaluation PRODUCED
-%[source: LeaTTa tests/semantics/control-stdlib/07_error.metta, STATUS
-%conforms: "A BadArgType raised while preparing a nested call must emerge
-%unchanged"]. An operand WRITTEN as an error atom keeps the other reading,
+%second error naming the first. That is the rule for an operand the evaluation
+%PRODUCED: a BadArgType raised while preparing a nested call emerges unchanged
+%[assumed: adopted from an earlier reference semantics, not re-measured against
+%upstream PeTTa]. An operand WRITTEN as an error atom keeps the other reading,
 %`(+ (Error source message) 1)` is `(BadArgType 1 Number ErrorType)`, and
 %never reaches here: its static type is ErrorType, so refused_argument_call/2
 %rejects the call at compile time and dispatch_mismatch_result/3 answers first
@@ -244,9 +242,11 @@ metta_type_refusal_reason(Raw, Canonical, Position, Expected, Actual, Details,
     ).
 
 %A type-position modifier is REPORTED and CHECKED by its value type:
-%LeaTTa answers `(BadArgType 1 Number String)` for a `(:Atom Number)`
+%this engine answers `(BadArgType 1 Number String)` for a `(:Atom Number)`
 %parameter, naming the type that decided rather than the pair that carried it
-%[measured 2026-08-24 against LeaTTa 9ea9f9d]. The projection sits on the
+%[measured 2026-09-07: `(: mf2 (-> (:Atom Number) %Undefined%))` with
+%`(= (mf2 $x) (quote $x))` makes `!(mf2 "s")` answer
+%`(Error (mf2 "s") (BadArgType 1 Number String))`]. The projection sits on the
 %refusal path, which this file's own note above metta_operation_answer/3
 %records as reached only after a caller's fast path has declined.
 metta_named_rule_refusal(Module, [Declared|_], [Origin|_],
@@ -351,9 +351,9 @@ metta_arguments_match_in(Module, [Expected|Rest], [Origin|Origins],
 %Number". Without it those are exclusive: the official "Controlling pattern
 %matching" page records that a specific parameter type and a metatype cannot
 %be supplied together and links trueagi-io/hyperon-experimental#177, and these
-%two spellings are what close that quadrant
-%[source: LeaTTa MettaHyperonFull/Core/Modifiers.lean:92-116, `typeMod?`,
-%`declaredTypeForCheck` and `declaredTypeForEvaluation`].
+%two spellings are what close that quadrant [assumed: the modifier registry,
+%its check type and its evaluation type were adopted from an earlier reference
+%semantics, not re-measured against upstream PeTTa].
 %
 %The registry is CLOSED and the arity is part of the shape: a three-element
 %`(:Atom a b)` is ordinary data, exactly as `registeredMod?` requires.
@@ -434,14 +434,14 @@ metta_argument_type_origin(_, Expected, metatype) :-
     !.
 metta_argument_type_origin(_, _, ordinary).
 
-%THE RUNTIME CHECK AND THE REPORTED TYPE ASK DIFFERENT QUESTIONS, and
-%LeaTTa answers them with different relations. Admitting an argument selects
-%`.runtime`, "the permissive `match_types`", where `Atom` on either side is a
-%match [source: LeaTTa MettaHyperonFull/Minimal/Interpreter.lean:4560-4582,
-%`typeCheckArgsOutcomes`]. Reporting an application's type keeps the stricter
+%THE RUNTIME CHECK AND THE REPORTED TYPE ASK DIFFERENT QUESTIONS, and this
+%engine answers them with different relations. Admitting an argument selects
+%the permissive `match_types`, where `Atom` on either side is a
+%match. Reporting an application's type keeps the stricter
 %`match_reducted_types`, where a literal `Atom` result is an ordinary type.
 %
-%Both are measured, on the same day and against LeaTTa 9ea9f9d. With
+%Both were measured on the same day against an earlier reference corpus
+%[assumed 2026-08-24: not re-measured against upstream PeTTa]. With
 %`(: idv (-> Atom Atom))` declared, `(: vf (-> Variable %Undefined%))` ACCEPTS
 %`!(vf (idv $y))` and answers `(quote (idv $y))`, while
 %`!(get-type (needs-grounded (atom-result value)))` answers NOTHING for the
@@ -1068,11 +1068,11 @@ metta_derived_types_match_in(Module, RawLeft, RawRight) :-
     typing_rule_accepts_resolved(Module, derived, Left, Right).
 
 %The operations that refuse BY NAME rather than leaving the call. Each text is
-%upstream's own, quoted from LeaTTa's transcript rather than invented, and
-%upstream's noun is not uniform: sqrt-math and abs-math say `number` where every
-%later unary operation says `input number`, and log-math names both arguments
-%[source: LeaTTa tests/semantics/grounded/08-partial-math.metta, whose STATUS
-%records that each text is pinned by an upstream unit test in math.rs].
+%upstream's own, quoted from a transcript rather than invented, and upstream's
+%noun is not uniform: sqrt-math and abs-math say `number` where every later
+%unary operation says `input number`, and log-math names both arguments
+%[source: hyperon-experimental lib/src/metta/runner/stdlib/math.rs, whose unit
+%tests pin each text].
 %
 %The ARGUMENTS are in the head because three of these operations word the
 %refusal differently for different arguments, and the caller has them anyway.
@@ -1128,8 +1128,8 @@ metta_operation_refusal(Operation, _, Message) :-
 %format-args words its refusal by WHICH argument is wrong: a first argument
 %that is not a format string earns the long text, and a first that is one with
 %a second that is not an expression earns the conversion's own
-%[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean, formatArgsOp's three
-%cases].
+%[assumed: the three cases were adopted from an earlier reference semantics,
+%not re-measured against upstream PeTTa].
 metta_operation_refusal('format-args', [Format|_], Message) :-
     (   string(Format)
     ->  Message = "Atom is not an ExpressionAtom"

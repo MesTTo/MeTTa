@@ -191,19 +191,19 @@ routed_selective_conjunct(Space, Conjuncts, Best, Rest) :-
 %self-containing binding is a legal rational tree, exactly as the adopted
 %matcher and let behave (upstream's let measures [worked] on
 %`!(let $x (f $x) worked)`). The occurs check that stood in the variable
-%case was the LeaTTa arbiter's law (Matching.lean matchAtomsWith 209-241)
-%and left with the arbiter; the clause order remains that historical case
+%case was an earlier reference semantics' law and left with it; the clause
+%order remains that historical case
 %order: variables bind first, before anything is consulted; expressions match pointwise, consistency kept by
 %the shared bindings; then a grounded operand's own matching logic runs,
 %left before right, which is how a space becomes queryable inside unify
 %(Hyperon: `impl CustomMatch for DynSpace` is query, hyperon-space
 %engine/lib.rs); a host value with declared matching runs its hook the same
-%way; numbers compare promoted, so 1 matches 1.0 [source: LeaTTa
-%tests/semantics/matching/grounded_value_matching.metta, measured
-%2026-08-11]; everything else is ground equality. A space is named by a
+%way; numbers compare promoted, so 1 matches 1.0 [assumed 2026-08-11:
+%measured against an earlier reference corpus at that date, not re-measured
+%against upstream PeTTa]; everything else is ground equality. A space is named by a
 %symbol here rather than a grounded atom, so the operand test is the
 %registered-space probe, and an unregistered name falls through to
-%equality like any symbol. The leading identity clause is LeaTTa's
+%equality like any symbol. The leading identity clause is the matcher's
 %diagonal collapsed to one C comparison: two identical operands match
 %with the empty binding set case for case (equal grounds trivially; a
 %shared variable is the same-variable case; identical compounds decide
@@ -211,7 +211,7 @@ routed_selective_conjunct(Space, Conjuncts, Best, Rest) :-
 %equal-operand traffic that dominates eval-branch tests
 %[measured 2026-08-17: test_unify_eval_branches].
 %A GAP OPERAND arrives wrapped, carrying the fragment its call site decided
-%[source: LeaTTa MettaHyperonFull/Core/SeqFragment.lean, seqFinitary?]. The
+%[source: engine/spaces/segment_matching.pl, metta_seq_classify/3]. The
 %wrapper is what makes the question free: nonvar/1 and =/2 compile inline and
 %are not counted as inferences, and a clause whose head does not unify costs
 %none either, so every ordinary unify, let and case pays exactly what it did
@@ -730,8 +730,8 @@ match_foreign_routed(Space, enumerate, Pattern, _, OutPattern, Result) :-
     acyclic_term(OutPattern),
     Result = OutPattern.
 %A declared keep delivers the provider's own failure as one final (Error
-%...) answer beside the answers that already streamed, LeaTTa's
-%adjudicated reading of evaluation errors turned to the provider
+%...) answer beside the answers that already streamed, the same reading of
+%evaluation errors this engine gives them turned to the provider
 %boundary; empty ends the stream by declaration. Control signals and
 %transport failures pass through both, always: an interrupt is the
 %caller's, and an absent backend is never a data answer.

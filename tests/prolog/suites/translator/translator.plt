@@ -921,12 +921,13 @@ test(variable_heads_are_not_bound_to_a_special_form) :-
 % the one operation upstream's standard library says out loud it could not
 % write: "there is no way to define operation which consumes any number of
 % arguments and returns unit", directly above nop's own doc block
-% [source: hyperon-experimental@3f76dc4 stdlib.metta:608-609, quoted in LeaTTa
-% tests/semantics/types-basic/71-variadic-nop.metta]. Upstream answers it in
-% Rust instead, `grounded_op!(NopOp, "nop")` ignoring its whole argument list
+% [source: hyperon-experimental@3f76dc4 stdlib.metta:608-609]. Upstream
+% answers it in Rust instead, `grounded_op!(NopOp, "nop")` ignoring its whole
+% argument list
 % (core.rs:58,61-63,70-74); a variadic special form is this engine's own way to
 % ignore an argument list. Measured on hyperon 0.2.10 at that pin on 2026-08-16
-% and on LeaTTa the same day, all three calls answer `[()]` on both.
+% and on an earlier reference runner the same day, all three calls answer
+% `[()]` on both.
 test(nop_answers_unit_at_every_arity,
      [forall(member(Source, ["!(nop)", "!(nop 1)", "!(nop 1 2 3)"]))]) :-
     process_metta_string(Source, Answers),
@@ -1458,9 +1459,10 @@ test(written_out_bindings_cost_the_same_per_call_however_many_there_are) :-
 % [source: PeTTa@ae66fa8 src/translator.pl:9-12, constrain_args/3].
 %
 % Between 2026-08-19 and 2026-08-30 neither was a call: the whole head was
-% structural, because LeaTTa's matching relation has one case and no case in
-% it consults whether a label is defined [source 2026-08-19:
-% LeaTTa/MeTTaIL/Semantics/Reduce.lean:30-46, AST.matchPat]. The two masked
+% structural, because an earlier reference semantics' matching relation has one
+% case and no case in it consults whether a label is defined
+% [assumed 2026-08-19: read from that reference, not re-measured against
+% upstream PeTTa]. The two masked
 % tests below are unchanged by the restoration and are what the gate protects;
 % the unmasked one changed and is measured against upstream.
 :- begin_tests(translator_head_is_a_pattern,
@@ -1513,8 +1515,9 @@ test(an_equation_head_and_a_match_of_the_same_shape_agree) :-
 
 %plunit-hp-nested is UNTYPED, so neither argument position is masked and the
 %call-shaped head runs backwards: `(plunit-hp-produce)` yields pa3, which is
-%also what the caller's argument evaluates to, so BOTH equations fire. LeaTTa
-%answers only `evaluated` here, which is what this asserted until 2026-08-30
+%also what the caller's argument evaluates to, so BOTH equations fire. The
+%earlier reference answers only `evaluated` here, which is what this
+%asserted until 2026-08-30
 %[measured 2026-08-30: both engines answer (evaluated held), byte-identical,
 %for `(plunit-hp-nested (plunit-hp-produce))` and for `(plunit-hp-nested pa3)`;
 %fixture=ai-tmp/petta-align/nullary.metta].
@@ -1724,7 +1727,8 @@ test(a_singleton_type_variable_generates_no_check) :-
     %check beside every typed call whose output is not %Undefined%, _ or Atom
     %[source: PeTTa@ae66fa8 src/translator.pl:382-383]. This asserted `[]`
     %until 2026-08-30, while a declared result decided re-evaluation rather
-    %than filtering the value, which is LeaTTa's reading and not upstream's.
+    %than filtering the value, which was an earlier reference's reading and not
+    %upstream's.
     Checked == ['Bool'].
 
 test(a_repeated_type_variable_keeps_its_checks) :-
@@ -1944,8 +1948,8 @@ test(empty_reduce_is_a_value) :-
 %A grounded operation that cannot compute ANSWERS rather than raising, so what
 %these pin is that the two routes answer the SAME thing and that the refusal is
 %an answer rather than a silent failure. `undefined_sym` is undeclared, so its
-%type rules nothing out and the call is left as written
-%[source: LeaTTa tests/semantics/grounded/07-partial-core.metta].
+%type rules nothing out and the call is left as written [assumed: adopted from
+%an earlier reference corpus, not re-measured against upstream PeTTa].
 dynamic_arithmetic_refusal(Answer) :-
     reduce(['+', 1, undefined_sym], Answer).
 
@@ -2138,9 +2142,8 @@ test(each_application_gets_its_own_sealed_variable) :-
 %
 %Every other malformed parameter already left the form as data, `(|-> foo ..)`
 %and `(|-> 5 ..)` among them, so the variable was the one shape that compiled
-%instead of falling through. LeaTTa pins the same surface: its
-%tests/regression/lambda.metta says the parameters are a "parenthesized tuple,
-%following PeTTa's shipped `|->` surface", and every one of this repository's
+%instead of falling through. The parameters are a parenthesized tuple,
+%following PeTTa's shipped `|->` surface, and every one of this repository's
 %own six lambda examples writes the list.
 
 malformed_lambda("((|-> $x (+ $x 1)) 5)").
@@ -2764,7 +2767,7 @@ test(an_intrinsic_type_check_is_specialised,
 %The refusal is checked with a symbol declared to be something ELSE, not with
 %an undeclared one. An undeclared symbol has type %Undefined%, which is
 %consistent with every type under the gradual rule, so both arbiters admit it:
-%measured 2026-08-19 on hyperon 0.2.10 and on the LeaTTa mechanised
+%measured 2026-08-19 on hyperon 0.2.10 and on an earlier reference
 %interpreter, byte-identical across both, `(: bflag (-> Bool Atom))` gives
 %`!(bflag nope)` = `(gotb nope)` while `!(bflag 7)` is
 %`(BadArgType 1 Bool Number)`. This test asserted the `nope` case as a refusal
@@ -2799,10 +2802,12 @@ test(a_parametric_type_is_not_specialised,
 %The drop is one-directional: a literal of the WRONG type keeps its check and
 %is still refused at run time, and the refusal is an ANSWER naming the
 %position, the declared type and the literal's own
-%[source: LeaTTa tests/semantics/types-basic/44-badargtype-per-actual.metta].
+%[assumed: the per-actual shape was adopted from an earlier reference corpus,
+%not re-measured against upstream PeTTa].
 %
-%Three of the four are byte-identical to LeaTTa [measured 2026-08-19].
-%The fourth is not, and the difference is LEATTA's: it answers
+%Three of the four were byte-identical to that reference
+%[assumed 2026-08-19: measured at that date, not re-measured against upstream
+%PeTTa]. The fourth is not, and the difference is the reference's: it answers
 %`((* True True))` for `(tlc-sq true)`, accepting a Bool through a Number
 %parameter, while answering `(BadArgType 1 Bool Number)` for the mirror
 %`(tlc-flag 1)` and `(BadArgType 1 Number String)` for `(tlc-sq "s")`, with

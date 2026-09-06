@@ -21,8 +21,8 @@
 ;upstream's own definition -- `(HV == let ; HV == chain), T = [Pat, Val, In]`
 ;is one clause there [source: PeTTa@ae66fa8 src/translator.pl:207-210]. So the
 ;operand reduces and the binder receives 3.
-;This engine substituted the WRITTEN atom here until 2026-08-30, on LeaTTa
-;9ea9f9d's answer of `(+ 1 2)`. Substitution also duplicated a
+;This engine substituted the WRITTEN atom here until 2026-08-30, on an earlier
+;reference's answer of `(+ 1 2)`. Substitution also duplicated a
 ;nondeterministic operand into a binder used twice:
 ;`(chain (superpose (1 2)) $x ($x $x))` answered four rows where upstream
 ;answers `(1 1) (2 2)`.
@@ -35,8 +35,8 @@
 !(test (return 7) (return 7))
 
 ;A branch that ends without a return is the specification's own error, and it
-;carries the ORIGINAL function frame rather than wherever the walk stopped.
-;LeaTTa 9ea9f9d answers this exact form with the same diagnostic.
+;carries the ORIGINAL function frame rather than wherever the walk stopped,
+;which is the diagnostic this engine answers below.
 !(test (function (foo bar)) (Error (function (foo bar)) NoReturn))
 
 ;--------------------------------------------------------------- unify-mod
@@ -83,7 +83,7 @@
 
 ;--------------------------------------------------------- collapse-bind
 ;Every alternative, each paired with the values its own branch bound. The
-;shape is LeaTTa's: one expression of (<atom> <bindings>) pairs.
+;shape is the adopted one: one expression of (<atom> <bindings>) pairs.
 ;
 ;The left of each (<- ...) is the CALLER'S OWN VARIABLE, one shared across
 ;every row, which is why $v appears twice below rather than once per row.
@@ -135,8 +135,7 @@
 !(test (if-partial True yes) yes)
 ;`Empty` is NO RESULT rather than a symbol, so a partial function that
 ;declines answers nothing at all and the empty answer set is what a
-;collapse shows. LeaTTa answers the same way
-;[measured 2026-08-24 on LeaTTa 9ea9f9d: `(= (ip $c $t) (unify $c True $t
-;Empty))` makes `!(ip False yes)` answer nothing and
-;`!(collapse (ip False yes))` answer `()`].
+;collapse shows: with `(= (ip $c $t) (unify $c True $t Empty))`,
+;`!(ip False yes)` answers nothing and `!(collapse (ip False yes))` answers
+;`()`.
 !(test (collapse (if-partial False yes)) ())

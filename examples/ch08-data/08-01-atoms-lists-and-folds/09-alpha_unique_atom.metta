@@ -1,9 +1,10 @@
 ; tests for alpha-unique-atom
 ;=alpha declares two `Atom` parameters, so both operands reach it AS WRITTEN
 ;and a call in that position would be compared rather than run. The result
-;is NAMED first; LeaTTa answers the same way for the unsequenced form
-;[measured 2026-08-24: `!(=alpha (alpha-unique-atom ((link $x human)))
-;((link $a human)))` is False on LeaTTa 9ea9f9d too].
+;is NAMED first [assumed 2026-08-24: the unsequenced
+;`!(=alpha (alpha-unique-atom ((link $x human))) ((link $a human)))` answered
+;False when this was measured against an earlier reference corpus, not
+;re-measured since].
 
 ; 1 Basic duplicates with different variables
 !(test (let $unique (alpha-unique-atom ((link $x human) (link $y human) (link $z human)))

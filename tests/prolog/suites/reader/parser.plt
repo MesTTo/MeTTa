@@ -237,12 +237,14 @@ test(comment_is_a_number_token_boundary) :-
     sread("(1; ignored ) and (!\n 2)", Term),
     Term == [1, 2].
 
-%LeaTTa's tokenizer leaves comment state only for LF. Direct probes against
-%the LeaTTa executable answer both quoted forms for LF and only the first for
-%CR, NEL and U+2028 [source 2026-08-21: LeaTTa
-%MettaHyperonFull/Runtime/Parser.lean:58, tokenizeAux comment branch at 66-67].
+%This engine's tokenizer leaves comment state only for LF, and so did the
+%reference it was checked against: direct probes there answered both quoted
+%forms for LF and only the first for CR, NEL and U+2028
+%[assumed 2026-08-21: measured against an earlier reference runner at that
+%date, not re-measured against upstream PeTTa].
 %The row originally expected a reader change based on Hyperon's CR behavior;
-%LeaTTa instead made this engine's existing LF-only reader the conforming one.
+%that measurement instead made this engine's existing LF-only reader the
+%conforming one.
 test(test_a_comment_terminates_on_the_class_the_arbiter_rules) :-
     sread("(a ; comment\n b)", LfTerm),
     LfTerm == [a, b],
@@ -508,8 +510,9 @@ test(every_number_that_does_survive_is_accepted,
     sread(Text, Back),
     Back == [holds, Number].
 
-% A finite float prints LeaTTa's layout over SWI's shortest digits
-% [source 2026-08-20: LeaTTa RyuLean4/Runtime.lean:371-396, Decimal.formatMeTTa].
+% A finite float prints hyperon's f64 Display layout over SWI's shortest digits
+% [assumed 2026-08-20: the layout was adopted from an earlier reference
+% pretty-printer, not re-measured against upstream PeTTa].
 % The pins are the law's own table rows, the four measured witnesses that
 % diverged under number_codes/2's layout (1.0e+16, 1.0e-05, 1.5e+300, 1.0e+26),
 % and the boundary at every branch: kk 16 stays positional and 17 goes

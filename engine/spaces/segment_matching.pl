@@ -1,4 +1,4 @@
-% Purpose: parse, classify and solve expression-child gap patterns (sequence variables) inside LeaTTa's three certified-finite fragments
+% Purpose: parse, classify and solve expression-child gap patterns (sequence variables) inside the three fragments Kutsia proved finite
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context; metta_match_atoms/2 decides one atom position.
 % Guarantees: a pattern the program wrote without a gap never reaches any predicate here, so a gap-free ask pays nothing [tested: tests/prolog/suites/reader/segments.plt:segments_costs_nothing; commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
@@ -9,10 +9,9 @@
 %
 %A gap is a sequence variable: an expression CHILD that stands for a finite
 %run of zero or more sibling children rather than for one term. Two surface
-%spellings, both the law's [source: LeaTTa
-%MettaHyperonFull/Core/Modifiers.lean, segment?]: the bare symbol `...` is an
-%ANONYMOUS gap, and `(:seg $x)` with a VARIABLE in the second position is a
-%NAMED gap. Any other shape, `(:seg foo)` included, is ordinary data.
+%spellings: the bare symbol `...` is an ANONYMOUS gap, and `(:seg $x)` with a
+%VARIABLE in the second position is a NAMED gap. Any other shape, `(:seg foo)`
+%included, is ordinary data.
 %
 %Kutsia proved general syntactic sequence unification INFINITARY [source:
 %Temur Kutsia, "Solving Equations with Sequence Variables and Sequence
@@ -20,9 +19,8 @@
 %doi:10.1016/j.jsc.2006.12.002, Theorem 62]: `(f (:seg $x) a)` against
 %`(f a (:seg $x))` has the family `$x = a^n` for every n, so no complete
 %finite answer set exists. Three restrictions of that theory ARE proved
-%finite, and they are what this engine admits, in LeaTTa's own
-%classification order [source: LeaTTa
-%MettaHyperonFull/Core/SeqFragment.lean, seqFinitary?]:
+%finite, and they are what this engine admits, listed in the order
+%metta_seq_classify/3 tries them:
 %
 %  one_sided       one side carries no gap at all. Matching rather than
 %                  unification; every gap consumes a run of the other side's
@@ -38,21 +36,34 @@
 %Outside them the ask REFUSES, naming the rule. That is not caution: the
 %alternative is a search that does not terminate.
 %
+%WHERE THE NON-KUTSIA DECISIONS CAME FROM. Kutsia settles the theory: which
+%fragments are finite, and the calculus each one is solved by. The decisions
+%around that theory were adopted from an earlier reference semantics this
+%repository no longer follows, and none of them has been re-measured against
+%upstream PeTTa: the two surface spellings above; the parse-before-match
+%staging and its rule that only what the program WROTE is a gap; the order the
+%classifier tries the three fragments in; the decision not to reproduce that
+%source's numeric guard; the one-sided binding rules, meaning the expression
+%projection an ordinary occurrence gets and a repeated name accepting a
+%runtime-equal rather than a syntactically equal run; the association-list
+%staging that binds the program's variables once at the end; the store-sized
+%dereference budget; and the surface an unsolved gap renders back to
+%[assumed: adopted from an earlier reference semantics, not re-measured
+%against upstream PeTTa].
+%
 %ONE NAME MAY NOT PLAY BOTH ROLES in the general two-sided `unify` and space
 %query doors. `(f (:seg $x) $x)` is refused there across every fragment
 %[source: ai-python-conventions.md 3.3, "One name may not play both the
 %ordinary and the segment role; that mix refuses too"]. An EQUATION HEAD is
-%the deliberate one-sided exception below: LeaTTa's one-sided matcher gives
-%the ordinary occurrence the expression projection of the finite run, and
-%metta_seq_head_match/2 does the same [source: LeaTTa
-%MettaHyperonFull/Core/SeqOneSided.lean:65-89, oneSidedBindRole;
+%the deliberate one-sided exception below: metta_seq_head_match/2 gives the
+%ordinary occurrence the expression projection of the finite run
+%[assumed: the one-sided binding rule was adopted from an earlier reference
+%semantics, not re-measured against upstream PeTTa;
 %commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
 %
-%DISTINCT `...` OCCURRENCES ARE DISTINCT VARIABLES [source: LeaTTa
-%MettaHyperonFull/Core/SeqSyntax.lean, SeqVar.anonymous, "two `...`
-%occurrences are distinct variables"]. Parsing gives each one its own fresh
-%Prolog variable, which nothing else mentions, so its run is recorded and
-%discarded and no two occurrences can constrain each other.
+%DISTINCT `...` OCCURRENCES ARE DISTINCT VARIABLES. Parsing gives each one its
+%own fresh Prolog variable, which nothing else mentions, so its run is
+%recorded and discarded and no two occurrences can constrain each other.
 
 %%%% Parsing: the gap markers become one distinguished term, once %%%%
 %
@@ -60,22 +71,19 @@
 %rewrites each live gap child into '$metta_seg'(Var, Kind) and leaves
 %everything else alone, and the solvers then test one functor instead of
 %re-deciding what a marker-shaped list means at every candidate. That is
-%LeaTTa's own staging [source: LeaTTa MettaHyperonFull/Core/SeqSyntax.lean,
-%parseSeqAtom], and it settles two questions the raw shape cannot:
+%the staging the provenance note above covers, and it settles two questions
+%the raw shape cannot:
 %
 %  - A marker that arrived through a BINDING is data, never a gap. Only what
 %    the program WROTE is parsed, so `(let $p (:seg $x) (match &s $p $t))`
-%    matches the literal atom [source: LeaTTa
-%    MettaHyperonFull/Core/SeqSyntax.lean, parseConcreteAtom, "no child is
-%    ever a segment, at any depth"].
+%    matches the literal atom: no child of a term that arrived through a
+%    binding is ever a gap, at any depth.
 %  - A repeated `(:seg $x)` still reads as a gap after its first occurrence
 %    bound $x, because the second occurrence is already '$metta_seg'($x, named)
 %    and the parse ran before any binding.
 %
-%The ROOT of a side is never a gap: only expression children can be [source:
-%LeaTTa MettaHyperonFull/Core/SeqSyntax.lean, parseSeqAtom, "the root itself
-%is never a segment"], so `(:seg $r)` asked as a whole pattern is ordinary
-%data.
+%The ROOT of a side is never a gap: only expression children can be, so
+%`(:seg $r)` asked as a whole pattern is ordinary data.
 metta_seq_parse(Side, Parsed) :-
     (   nonvar(Side),
         Side = [_|_]
@@ -140,8 +148,8 @@ metta_seq_present_items(Items) :-
 %projects its ordinary occurrence to the expression containing that run.
 %Prolog already has precisely that projection.  Binding the gap variable to
 %the run `[a,b]` makes a later ordinary occurrence of the same variable match
-%the expression `(a b)` [source: LeaTTa
-%MettaHyperonFull/Core/SeqOneSided.lean:65-89 and :445-461;
+%the expression `(a b)` [assumed: the one-sided projection rule was adopted
+%from an earlier reference semantics, not re-measured against upstream PeTTa;
 %commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
 %
 %The plan is built while the equation is compiled, before any call can bind
@@ -175,9 +183,9 @@ metta_seq_head_matches(Pattern, Subject) :-
 %as one expression; a written `(:seg $x)` child splices the run into its
 %surrounding expression.  Parse before the head match and instantiate after it,
 %so a marker arriving through a binding stays data and repeated written splice
-%occurrences keep sharing their one authoritative run [source: LeaTTa
-%MettaHyperonFull/Core/SeqSyntax.lean:300-314 and :343-367;
-%commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
+%occurrences keep sharing their one authoritative run [assumed: the staging
+%was adopted from an earlier reference semantics, not re-measured against
+%upstream PeTTa; commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
 metta_seq_instantiate(Template, Instantiated) :-
     (   nonvar(Template),
         Template = [_|_]
@@ -288,16 +296,13 @@ metta_seq_named_vars([g(_, _, Gap)|Gaps], Names) :-
     ),
     metta_seq_named_vars(Gaps, Rest).
 
-%The classifier, in LeaTTa's own dispatch order [source: LeaTTa
-%MettaHyperonFull/Core/SeqFragment.lean, seqFinitary?]: the gap-free side
-%first, then last position, which is deterministic and unitary and therefore
-%the more specific result, then linear-shallow. LeaTTa's numeric guard is
-%deliberately NOT reproduced: that guard belongs to the raw syntactic reading,
-%and LeaTTa's own dispatcher classifies the free term skeleton instead,
-%where numbers are theory values rather than a finiteness limit [source: LeaTTa
-%MettaHyperonFull/Core/SeqFragment.lean header, "Numeric grounds are not a
-%finiteness or completeness limit"]. This engine compares grounds through
-%metta_match_atoms/2, which is that same runtime comparison.
+%The classifier's dispatch order: the gap-free side first, then last position,
+%which is deterministic and unitary and therefore the more specific result,
+%then linear-shallow. The numeric guard the source this order came from carries
+%is deliberately NOT reproduced: that guard belongs to the raw syntactic
+%reading, while the classification here is of the free term skeleton, where
+%numbers are theory values rather than a finiteness limit. This engine compares
+%grounds through metta_match_atoms/2, which is that same runtime comparison.
 metta_seq_classify(Left, Right, Case) :-
     metta_seq_gaps(Left, 0, LeftGaps, []),
     metta_seq_gaps(Right, 0, RightGaps, []),
@@ -316,10 +321,9 @@ metta_seq_classify(Left, Right, Case) :-
     ;   metta_seq_refuse(Left, Right, [], no_certificate)
     ).
 
-%A name caught in both roles across the pair [source: LeaTTa
-%MettaHyperonFull/Core/SeqFragment.lean, noMixedSeqRoles]. Compared by
-%variable IDENTITY, because a gap's name and an ordinary mention of that name
-%are one Prolog variable and == is the only test that says so.
+%A name caught in both roles across the pair, compared by variable IDENTITY,
+%because a gap's name and an ordinary mention of that name are one Prolog
+%variable and == is the only test that says so.
 metta_seq_mixed_roles(Left, Right, LeftGaps, RightGaps, Mixed) :-
     append(LeftGaps, RightGaps, Gaps),
     metta_seq_named_vars(Gaps, GapVars),
@@ -387,17 +391,16 @@ prolog:error_message(metta_seq_outside_fragment(Left, Right, Mixed, Reason)) -->
        side with no gap at all; every gap linear and a direct child of the \c
        root (Kutsia Section 6.2); every gap the last child of its own \c
        expression (Kutsia Section 6.3). One name may not be both a gap and an \c
-       ordinary variable. The classifier is LeaTTa \c
-       MettaHyperonFull/Core/SeqFragment.lean, seqFinitary?'-[LeftText,
-                                                              RightText,
-                                                              Reason,
-                                                              MixedText] ].
+       ordinary variable. The classifier is metta_seq_classify/3 in \c
+       engine/spaces/segment_matching.pl'-[LeftText,
+                                           RightText,
+                                           Reason,
+                                           MixedText] ].
 
 %Parsed syntax back to what the program wrote, for a message a reader
-%recognises and for a published run that still holds an unsolved gap [source:
-%LeaTTa MettaHyperonFull/Core/SeqRuntime.lean, SeqAtom.toSurface, "a named
+%recognises and for a published run that still holds an unsolved gap: a named
 %splice renders as its (:seg $x) marker and an anonymous one as the bare gap
-%marker, so an open value prints as the pattern that would match it"].
+%marker, so an open value prints as the pattern that would match it.
 metta_seq_surface(Parsed, Surface) :-
     (   nonvar(Parsed),
         Parsed = '$metta_seg'(Var, Kind)
@@ -440,8 +443,7 @@ metta_seq_plan(Left, Right, '$metta_seq'(Plan, Parsed)) :-
 
 %The query door's plan. Its subject is a stored atom, whose own marker-shaped
 %atoms are data rather than gaps, so every conjunct is one-sided by
-%construction [source: LeaTTa MettaHyperonFull/Core/SeqRuntime.lean,
-%residualUnderRigid]. Each CONJUNCT is classified on its own, because a
+%construction. Each CONJUNCT is classified on its own, because a
 %conjunction is a join and its conjuncts are separate equations.
 metta_seq_query_plan(Pattern, '$metta_seq'(Plan, Parsed)) :-
     metta_seq_parse(Pattern, Parsed),
@@ -477,9 +479,8 @@ metta_seq_unify(refused(Why), _, _) :-
 
 %%%% one_sided: the gap side is a pattern, the other side is closed %%%%
 %
-%The certified matcher [source: LeaTTa MettaHyperonFull/Core/SeqOneSided.lean,
-%oneSidedAtoms, oneSidedItems, oneSidedSeg]: atoms decide pointwise, argument
-%lists split around each gap, and a gap consumes every possible run, SHORTEST
+%The certified matcher: atoms decide pointwise, argument lists split around
+%each gap, and a gap consumes every possible run, SHORTEST
 %FIRST. Prolog's append/3 with an unbound prefix is exactly that enumeration in
 %exactly that order, which is why the substrate supplies the split rather than
 %a hand-written index walk.
@@ -530,8 +531,7 @@ metta_seq_items(Pattern, Subject) :-
 %already carrying a run, from an earlier occurrence or an earlier conjunct,
 %accepts exactly a run that MATCHES it under the engine's own comparison rather
 %than under syntactic equality, so 1 and 1.0 agree there as they do everywhere
-%else [source: LeaTTa MettaHyperonFull/Core/SeqOneSided.lean,
-%oneSidedBindSegment, "A repeated name accepts exactly a runtime-equal run"].
+%else: a repeated name accepts exactly a runtime-equal run.
 metta_seq_consume(Var, After, Subject) :-
     (   var(Var)
     ->  append(Run, Rest, Subject),
@@ -560,9 +560,7 @@ metta_seq_repeat(Run, Subject, Rest) :-
 %Binding eagerly cannot do that, because Prolog cannot rewrite a term it has
 %already bound, so the two-sided solvers thread an association list and bind
 %the program's variables ONCE at the end, after resolving each run through the
-%others. That is LeaTTa's own staging [source: LeaTTa
-%MettaHyperonFull/Core/SeqSyntax.lean, SeqSolution.instantiate, and
-%MettaHyperonFull/Core/SeqLastPos.lean, bindSegment].
+%others. That is the staging the provenance note at the top covers.
 metta_seq_lookup(Var, [Key-Run|Rest], Found) :-
     (   Key == Var
     ->  Found = Run
@@ -570,9 +568,9 @@ metta_seq_lookup(Var, [Key-Run|Rest], Found) :-
     ).
 
 %A gap whose run mentions the gap itself would build a term containing itself.
-%LeaTTa keeps the one exception its calculus keeps: `X = X` is trivial rather
-%than a clash [source: LeaTTa MettaHyperonFull/Core/SeqLastPos.lean, the
-%hedgeEliminate rule's occursSeqVarList branch].
+%The one exception Kutsia's calculus keeps is kept here too: `X = X` is
+%trivial rather than a clash [source: Kutsia Section 6.3, the eliminate rule's
+%occurrence branch].
 metta_seq_store(Var, Run, Store0, Store) :-
     (   Run = [Only],
         nonvar(Only),
@@ -594,9 +592,8 @@ metta_seq_gap_occurs(Var, Run) :-
 %
 %The budget is the store's own size, which bounds any acyclic dereference
 %chain, and exceeding it PROVES a cycle the per-binding occurs check could not
-%see because it spans two entries [source: LeaTTa
-%MettaHyperonFull/Core/SeqSyntax.lean, SeqSolution.derefBudget, "exceeding it
-%proves a dependency cycle"]. A proven cycle has no answer, so the branch
+%see because it spans two entries: exceeding the budget proves a dependency
+%cycle. A proven cycle has no answer, so the branch
 %fails rather than publishing a term that contains itself.
 metta_seq_publish(Store) :-
     length(Store, Budget),
@@ -649,8 +646,8 @@ metta_seq_resolve_atom(Atom, Store, Budget, Out) :-
 %remainder of the other side. That is Prolog's own partial-list unification
 %with the occurs check, spelled out because MeTTa expressions are PROPER lists
 %and the remainder has to be handed over as data rather than aliased as a tail
-%[source: LeaTTa MettaHyperonFull/Core/SeqLastPos.lean, the hedgeEliminate,
-%hedgeDecompose, hedgeTrivial and hedgeDelete rules].
+%[source: Kutsia Section 6.3, the eliminate, decompose, trivial and delete
+%rules of the hedge calculus].
 metta_seq_last_position(Left, Right) :-
     metta_seq_last_atoms(Left, Right, [], Store),
     metta_seq_publish(Store).
@@ -706,8 +703,8 @@ metta_seq_absorb(Var, Items, Store0, Store) :-
 %Every gap is a direct child of the root and every named gap occurs once, so
 %the problem is a LINEAR WORD EQUATION over the two child lists and the finite
 %successor set is small: project a gap to the empty run, or widen it by one
-%item and continue with a fresh remainder in its slot [source: LeaTTa
-%MettaHyperonFull/Core/SeqLinearShallow.lean, solveLinearShallow]. Projection
+%item and continue with a fresh remainder in its slot [source: Kutsia Section
+%6.2, the widening calculus]. Projection
 %comes FIRST, which keeps the shortest-first order the one-sided enumeration
 %already has. Nested expressions carry no gap in this fragment, which is why
 %every position below the root decides through metta_match_atoms/2.
@@ -811,10 +808,8 @@ metta_seq_project(Var, Store0, Store) :-
 %
 %The SUBJECT is stored data and its own marker-shaped atoms are data, never
 %gaps, which is why nothing parses it and why every space match sits in the
-%one_sided fragment by construction [source: LeaTTa
-%MettaHyperonFull/Core/SeqRuntime.lean, residualUnderRigid, "the subject is
-%frozen, so its segment markers are ordinary structure and not gaps to solve
-%for"].
+%one_sided fragment by construction: the subject is frozen, so its gap markers
+%are ordinary structure and not gaps to solve for.
 metta_seq_space(refused(Why), _, _, _, _) :-
     throw(error(Why, none)).
 metta_seq_space(query, Space, Parsed, OutPattern, Result) :-

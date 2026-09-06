@@ -3,7 +3,7 @@
 !(add-atom &self (= (addnormal) (+ 1 3)))
 !(add-reduct &self (= (addreduct) (+ 1 3)))
 
-; quote retains its wrapper in LeaTTa types-meta/30_evaluation_control.metta;
+; quote retains its wrapper;
 ; noeval holds the stored body without adding that wrapper.
 !(test (match &self (= (addnormal) $X) $X) (noeval (+ 1 3)))
 ;4, not (4). add-reduct is an engine builtin now and reduces the definition's

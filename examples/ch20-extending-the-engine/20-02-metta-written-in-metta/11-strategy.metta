@@ -49,7 +49,7 @@
 !(test (choice strategy-step strategy-fail strategy-a) strategy-b)
 !(test (collapse (choice strategy-many strategy-right strategy-a)) (A1 A2))
 
-; try(s) = choice(s,id); gtry is LeaTTa's binary spelling of the same law.
+; try(s) = choice(s,id); gtry is the binary spelling of the same law.
 !(test (try strategy-fail strategy-a) strategy-a)
 !(test (gtry strategy-fail strategy-a) strategy-a)
 

@@ -58,10 +58,10 @@
 %loud-refuse distinction. The refusal carries the handler's OWN
 %sentence, the SpaceProvider.refusal pattern at the hook layer. In
 %CHR's terms the hook fires at most ONE rule step per request, the
-%bounded prefix of the ω_e semantics LeaTTa mechanizes over this
-%very atom fragment; ω_e itself has no refusal and no stuck state, so
-%those belong to this admission door alone
-%[source: LeaTTa MettaHyperonFull/Proofs/ChrOperational.lean].
+%bounded prefix of the ω_e semantics the atom fragment was mechanised under;
+%ω_e itself has no refusal and no stuck state, so those belong to this
+%admission door alone [assumed: the ω_e reading was adopted from an earlier
+%reference semantics, not re-derived here].
 %
 %ONE claimant per (space, slot), checked when the claim is made, is the
 %interaction-net discipline (Hassan, Mackie and Sato, GT-VMT 2008: at

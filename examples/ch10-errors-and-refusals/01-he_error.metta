@@ -33,7 +33,7 @@
        "Error!")
 
 ;At top level the reference's double return leaves one return instruction for
-;an enclosing function frame. LeaTTa 9ea9f9d answers this exact call likewise.
+;an enclosing function frame, which is what this engine answers below.
 !(test (return-on-error (Error 5 BadType) 6)
        (return (Error 5 BadType)))
 

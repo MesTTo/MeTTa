@@ -175,7 +175,7 @@ metta_int_solve('/', A, B, R, Verdict) :-
 %nothing said the question was meaningless. `=alpha` is the comparison that
 %accepts anything, and it is declared (-> Atom Atom Bool) for that reason.
 %
-%Measured 2026-08-19 on hyperon 0.2.10 and on the LeaTTa mechanised
+%Measured 2026-08-19 on hyperon 0.2.10 and on an earlier reference
 %interpreter, byte-identical across both: (== 1 "S"), (== True 1),
 %(== xnum ystr) and (== xnum "s") are BadArgType, while (== 1 a),
 %(== a "a"), (== xnum 1), (== xnum undeclared) and (== 1 (foo)) are False and
@@ -191,8 +191,8 @@ metta_int_solve('/', A, B, R, Verdict) :-
 %[source: PeTTa@ae66fa8 src/metta.pl:40-41]. Two consequences were measured on
 %2026-08-30 and both are upstream's:
 %  - `(== 1 1.0)` is FALSE and `(!= 1 1.0)` is TRUE. This engine compared
-%    numbers by VALUE with =:=/2, on LeaTTa's Ground.equiv promoting the
-%    integer with Float.ofInt.
+%    numbers by VALUE with =:=/2, on an earlier reference semantics' ground
+%    equivalence, which promoted the integer to a float first.
 %  - `(== 1 "s")` and `(== true 1)` answer FALSE. This engine refused them,
 %    through a comparable_operands/2 guard that asked the type declarations
 %    whenever the two operands' intrinsic kinds differed.
@@ -227,8 +227,9 @@ metta_int_solve('/', A, B, R, Verdict) :-
 %EXPRESSIONS ARE EXCLUDED, because the two references disagree about them and
 %nothing here should pick a side that neither of them agrees on. Measured
 %2026-08-19: hyperon answers False for (== () 1), (== "s" ()) and
-%(== (1 2) (1 2 3)) while LeaTTa raises BadArgType for the first two and
-%answers False for the third. Both answer False for (== (1 2 3) ()) and
+%(== (1 2) (1 2 3)) while an earlier reference interpreter raised BadArgType
+%for the first two and answered False for the third. Both answer False for
+%(== (1 2 3) ()) and
 %(== (1 2) (a b)), which is the shape a MeTTa program actually writes, so the
 %collapse-and-compare idiom is untouched either way.
 %TWO TIERS, because asking the type system costs 26 inferences and a program
@@ -244,9 +245,9 @@ metta_int_solve('/', A, B, R, Verdict) :-
 %the expected type and the actual one rather than a bare pair.
 %AN ERROR ATOM IS NOT A COMPARABLE VALUE, it is an evaluation that finished in
 %error, so `(== 4 (+ 1 "bad"))` hands the inner error on instead of answering
-%False about it [source: LeaTTa tests/semantics/control-stdlib/07_error.metta,
-%STATUS conforms: "A grounded equality must propagate its argument's
-%BadArgType rather than compare it as a value"]. Falling through here sends the
+%False about it: a grounded equality propagates its argument's BadArgType
+%rather than comparing it as a value [assumed: adopted from an earlier
+%reference semantics]. Falling through here sends the
 %pair to metta_operation_answer/3, which is where that propagation lives.
 %
 %The test is asked only where a LIST operand is present, because an error atom
@@ -460,10 +461,9 @@ prolog:error_message(metta_unsolved_arithmetic(Op, no_integer_relation)) -->
        or clpq from lib_constraints for the rationals'-[Op, Op] ].
 
 %Real-valued operations explicitly promote integer inputs before applying the
-%host function. That is LeaTTa's toFloat? -> floatUn/floatBin law: sqrt, log
+%host function. That is the promote-then-apply law: sqrt, log
 %and the trig family always run and answer in binary64, including their NaN
-%and infinity edges [source: LeaTTa MettaHyperonFull/Core/Builtins.lean:
-%143-194; tested:
+%and infinity edges [tested:
 %test_real_valued_math_treats_integer_and_float_operands_alike;
 %commit=6e529fc2c08eb69c0df47e3cff7c921320a3300d].
 %
@@ -471,8 +471,8 @@ prolog:error_message(metta_unsolved_arithmetic(Op, no_integer_relation)) -->
 %8.0, because SWI's `**` answers an integer for two integers
 %[source: PeTTa@ae66fa8 src/metta.pl:69, `'pow-math'(A, B, Out) :- Out is A ** B.`;
 %measured 2026-08-30, `2**3` is 8 and `2.0**3` is 8.0]. It coerced both
-%operands with float/1 between commit 6e529fc2 and this change, following
-%LeaTTa's toFloat law, and answered 8.0 where upstream and its examples/math.metta
+%operands with float/1 between commit 6e529fc2 and this change, following that
+%same promotion law, and answered 8.0 where upstream and its examples/math.metta
 %answer 8.
 %
 %An integer exponent must still fit signed i32; check the base's numeric door
@@ -598,10 +598,10 @@ metta_float_unary_eval(Operation, Function, A, Out) :-
 'log-math'(Base, X, Out) :-
     metta_math_saturating_eval(
         'log-math', log(float(X)) / log(float(Base)), [Base, X], Out).
-%exp-math is retained under this engine's existing real-valued doctrine. LeaTTa's
-%floatUn table does not include exp-math, so no LeaTTa attribution is made for
-%this operation; its integer and float spellings already share the host exp/1
-%path and its overflow recovery.
+%exp-math is retained under this engine's existing real-valued doctrine. The
+%adopted promotion table does not include exp-math, so no outside attribution
+%is made for this operation; its integer and float spellings already share the
+%host exp/1 path and its overflow recovery.
 'exp-math'(A, Out) :-
     metta_math_saturating_eval('exp-math', exp(A), [A], Out).
 'trunc-math'(A, Out) :-
@@ -696,8 +696,8 @@ metta_numeric_list(List) :- is_list(List), List \== [], maplist(number, List).
 %%% Runtime format strings and string ordering: %%%
 %
 %Both are always-loaded corelib operations rather than library ones, because
-%LeaTTa's corpus calls them with no import
-%[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean, the corelib blocks].
+%the corpus they were adopted from calls them with no import
+%[assumed: adopted from an earlier reference semantics].
 %They used to live in lib/lib_string/lib_string.pl, where a program reached them only
 %through (import! &self (library lib_string)) and where the formatter was a
 %plain {}-substitution rather than upstream's.
@@ -784,7 +784,7 @@ boolean_operand(Value) :- ( var(Value) -> bool(Value) ; Value == true -> true
 %than raise while the enumeration above still runs: it takes every solution the
 %operands have and reaches the refusal only when they have none. `(and True u)`
 %is left as written and `(and True n)` is `(BadArgType 2 Bool Number)`
-%[source: LeaTTa tests/semantics/grounded/07-partial-core.metta].
+%[assumed: adopted from an earlier reference semantics].
 and(A,B,C) :- ( ( boolean_operand(A), boolean_operand(B) )
                 *-> ( A == true -> C = B ; C = false )
                 ;   metta_operation_answer(and, [A, B], C) ).
@@ -808,11 +808,11 @@ empty(_) :- fail.
 
 %%% Lists / Tuples: %%%
 %The tail's declared type is Expression [source: lib/lib_builtin_types/lib_builtin_types.metta,
-%(: cons-atom (-> Atom Expression Atom))], and LeaTTa refuses a tail that
+%(: cons-atom (-> Atom Expression Atom))], and this engine refuses a tail that
 %is not one rather than building a term it could not print
-%[source: LeaTTa MettaHyperonFull/Core/Builtins.lean, Builtins.consAtom;
-%tests/regression/instruction_interp.metta pins native cons-atom and its mirror
-%rejecting `(cons-atom a 1)` alike]. MeTTa BUILT the improper cons instead, and
+%[source: tests/regression/instruction_interp.metta, which pins native
+%cons-atom and its mirror rejecting `(cons-atom a 1)` alike]. MeTTa BUILT the
+%improper cons instead, and
 %then could not write it: `!(cons-atom a 1)` raised swrite/2's "cannot write 1
 %as MeTTa text because its printed form would read back as a different value".
 %
@@ -866,11 +866,10 @@ empty(_) :- fail.
 %
 %The shape is the reference implementation's, because MeTTa had no considered
 %answer here to keep: failing was the absence of a clause rather than a
-%decision. LeaTTa's conformance evidence pins it to the Rust interpreter,
+%decision. The reference implementation is the Rust interpreter,
 %lib/src/metta/interpreter.rs:1750-1758, which tests the empty case as an
-%execution error, and records the byte-identical output
-%[source: LeaTTa tests/semantics/metaprogramming/EVIDENCE.md,
-%M06 "Empty deconstruction is an error"].
+%execution error [assumed: the byte-identical output was recorded against an
+%earlier reference corpus].
 %
 %Three elements, which the callers need. lib_measure.metta and lib_soft.metta
 %destructure with (let ($h $t) (decons-atom $ps) ...) and rely on the empty
@@ -934,17 +933,18 @@ alpha_bucket_insert(Key, Term, SeenIn, SeenOut, IsNew) :-
 %variable inside the template by the value, with all three operands as written
 %and the result as produced. The declaration is what supplies that:
 %`(-> Atom Variable Atom Atom)` masks each operand and its `Atom` result stops
-%the answer re-entering evaluation
-%[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean:2678-2687, whose whole
-%definition is `(function (chain (eval (noeval $atom)) $var (return $templ)))`].
+%the answer re-entering evaluation; the definition it was taken from is
+%`(function (chain (eval (noeval $atom)) $var (return $templ)))`
+%[assumed: adopted from an earlier reference semantics].
 %
 %A SECOND OPERAND THAT IS NOT A VARIABLE answers NoReturn rather than failing
 %or substituting nothing, and the shape is the reference's own rather than a
 %choice: its body is a `chain` whose binder is that operand, a non-variable
 %binder makes the substitution step fail, and the enclosing `function` frame
-%reports the call it never returned from. Measured 2026-08-24 on LeaTTa
-%9ea9f9d: `!(atom-subst 1 (car-atom ($x)) ($x $x))` answers
-%`(Error (atom-subst 1 (car-atom ($x)) ($x $x)) NoReturn)`.
+%reports the call it never returned from
+%[assumed 2026-08-24: `!(atom-subst 1 (car-atom ($x)) ($x $x))` answering
+%`(Error (atom-subst 1 (car-atom ($x)) ($x $x)) NoReturn)` was measured against
+%an earlier reference corpus at that date].
 'atom-subst'(Value, Variable, Template, Out) :-
     (   var(Variable)
     ->  substitute_written_variable(Variable, Value, Template, Out)
@@ -958,8 +958,7 @@ non_list(X) :- compound(X), X \= [_|_].
 
 %The positive reading of the same shape, and the engine's answer to "is this an
 %Expression". A MeTTa Expression IS a proper list, by construction rather than
-%by hope: LeaTTa's Atom carries `Atom.expr (List Atom)`
-%[source: LeaTTa MettaHyperonFull/Core/Builtins.lean, Builtins.consAtom], so an
+%by hope: the atom type carries an expression as a LIST of atoms, so an
 %improper cons is not a term the semantics can express, and 'cons-atom'/3 above
 %refuses to build one. The FIRST CELL therefore settles the question, where
 %is_list/1 walks the whole list to reach the same answer.

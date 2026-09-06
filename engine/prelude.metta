@@ -34,8 +34,8 @@
 
 ;if-equal compares by ALPHA-EQUIVALENCE, not ==: Hyperon implements it
 ;with core.rs atoms_are_equivalent, atoms equal up to a consistent
-;variable renaming, and LeaTTa mechanises exactly that
-;[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean, ifEqualOp]. The
+;variable renaming, and this engine's if-equal does exactly that
+;[source: hyperon-experimental lib/src/atom/mod.rs, atoms_are_equivalent]. The
 ;library shim compared with ==, which misses (f $x $x) against
 ;(f $y $y); the promotion fixes the contract, the same way add-reduct's
 ;promotion fixed its.
@@ -103,16 +103,17 @@
 ;`assertEqualToResult` is `assertEqual` is `(assert (== $A $B))`, checked once
 ;per answer of the first expression
 ;[source: PeTTa@43705f5d lib/lib_he.metta:12-22 over src/metta.pl:224-227].
-;LeaTTa reaches it by routing these forms around assert entirely, through the
-;quoting `_assert-results-are-equal`
-;[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean:2871-2874 and :759-760].
+;An earlier reference semantics reached it by routing these forms around
+;assert entirely, through a quoting `_assert-results-are-equal`
+;[assumed: read from that reference, not re-measured against upstream PeTTa].
 ;That operation compares MULTISETS: order is ignored, but one occurrence on
 ;one side consumes exactly one occurrence on the other.  The two directed
 ;subtractions below are the same bag-difference test using this engine's
 ;identity-preserving subtraction-atom.  Both must be empty, so `(a a b)` does
 ;not equal `(a b b)` even though their ordinary sets agree
-;[source: LeaTTa@9ea9f9d MettaHyperonFull/Minimal/Stdlib.lean:364-438,
-;`bagDiffBy` and `assertResultsEqOp`; commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
+;[assumed: the bag-difference reading was adopted from an earlier reference
+;semantics, not re-measured against upstream PeTTa;
+;commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
 ;Both verdicts were measured across the two engines on 2026-09-05 against
 ;PeTTa@43705f5d: `(assertEqualToResult (+ 1 1) ((+ 1 1)))` and
 ;`(assertEqualToResult (superpose (a a b)) (a b b))` each fail on both, and
@@ -137,10 +138,12 @@
 ;Subtracting the produced set from the expected one leaves nothing when
 ;all of them did. subtraction-atom's two parameters are Expression and so
 ;hold their arguments as written, which is why the collapse is named first
-;and the variable handed over; LeaTTa's own definition sequences it the
-;same way [source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean:2834-2840,
+;and the variable handed over; the definition this was taken from sequences it
+;the same way, as
 ;(= (assertIncludes $atom $content) (let $eval_atom (collapse $atom) (let
-;$diff (subtraction-atom $content $eval_atom) ...)))].
+;$diff (subtraction-atom $content $eval_atom) ...)))
+;[assumed: adopted from an earlier reference semantics, not re-measured against
+;upstream PeTTa].
 (: assertIncludes (-> Atom Atom %Undefined%))
 ;The verdict crosses to assert rather than the comparison, for the reason
 ;assertEqualToResult above records: the difference is a set of WRITTEN
@@ -291,8 +294,9 @@
 ;that source is loaded, the native `metta` operation supplies the same typed
 ;evaluation boundary; a function frame is required so the Atom result rule
 ;does not return the `(metta ...)` call itself as inert data.
-;[source: LeaTTa@9ea9f9d MettaHyperonFull/Minimal/Stdlib.lean:4311-4336,
-;`interpret`; commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87]
+;[assumed: the `interpret` definition was adopted from an earlier reference
+;semantics, not re-measured against upstream PeTTa;
+;commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87]
 (: interpret (-> Atom Type SpaceType Atom))
 (= (interpret $atom $type $space)
    (function
@@ -342,12 +346,10 @@
 ;arrives unreduced, so the prelude register, which IS honoured at call
 ;sites, is where it belongs.
 ;
-;The answer then comes from the declaration, which is what LeaTTa
-;answers: (get-type (literal-return 2)) is Atom for
-;(: literal-return (-> Number Atom)), whatever its body would reduce to
-;[source: LeaTTa tests/semantics/types-meta/20_atom_return_literal.metta,
-;MEASURED [Atom] from the mechanised interpreter and from hyperon
-;0.2.10 alike].
+;The answer then comes from the declaration: (get-type (literal-return 2)) is
+;Atom for (: literal-return (-> Number Atom)), whatever its body would reduce
+;to [assumed: [Atom] was measured from an earlier reference interpreter and
+;from hyperon 0.2.10 alike, not re-measured against upstream PeTTa].
 ;
 ;get-type's arrow is upstream's. The first parameter of get-type-space said
 ;Symbol here while a space handle answered Symbol, and had to move with the
@@ -408,16 +410,17 @@
 ;absence carries behaviour: upstream ships this equation with no
 ;(: type-cast ...) line, so the operands evaluate before the equation
 ;runs, and an ill-typed subject reports its OWN error instead of being
-;swallowed by an Atom mask. LeaTTa measured exactly that against
-;pinned Hyperon 0.2.10 [source: LeaTTa Stdlib.lean, the type-cast note
-;and tests/semantics/types-basic/50-53]. The library declared Atom
+;swallowed by an Atom mask [assumed: exactly that was measured against pinned
+;Hyperon 0.2.10 in an earlier reference corpus, not re-measured against
+;upstream PeTTa]. The library declared Atom
 ;parameters and compared metatypes with ==; both diverged.
 ;The atom's metatype is NAMED before the comparison. Both of =alpha's declared
 ;parameters are `Atom`, so an operand written as a call reaches the comparison
 ;unreduced and `(=alpha Symbol (get-metatype A))` compares a symbol with a call
 ;instead of with `Symbol`; the reference's own type-cast names the same value
-;first, through a chain [source: LeaTTa MettaHyperonFull/Minimal/
-;Stdlib.lean:4206-4209, `(chain (eval (get-metatype $atom)) $meta ...)`].
+;first, through a chain, as `(chain (eval (get-metatype $atom)) $meta ...)`
+;[assumed: adopted from an earlier reference semantics, not re-measured against
+;upstream PeTTa].
 (= (type-cast $atom $raw-type $space)
    (let $type (__metta_type_syntax__ $raw-type $space)
      (let $meta (get-metatype $atom)

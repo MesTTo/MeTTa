@@ -247,7 +247,8 @@ test(spaces_removal_answers_true_and_drains_every_occurrence,
     add_sexp(Space, lonely),
     % `true` whether or not the space held the atom, which is upstream's own
     % answer and this engine's since 2026-08-30. It answered an error for the
-    % absent case until then, on LeaTTa's ruling; PeTTa is the arbiter now and
+    % absent case until then, on an earlier reference semantics' ruling; PeTTa
+    % is the arbiter now and
     % a different ANSWER to the same call is not a superset
     % [source: PeTTa@ae66fa8 src/spaces.pl:43-44].
     'remove-atom'(Space, [pair, 1, 2], Present),
@@ -267,7 +268,8 @@ test(spaces_removal_answers_true_and_drains_every_occurrence,
     % ONE removal drains every atom that unifies, which is upstream's
     % retractall/1 under a comment reading "Remove all same atoms"
     % [source: PeTTa@ae66fa8 src/spaces.pl:5-7]. It took one occurrence here
-    % until 2026-08-30, as multiset subtraction on LeaTTa's Properties.lean.
+    % until 2026-08-30, as multiset subtraction on an earlier reference
+    % semantics' ruling.
     add_sexp(Space, [twice, x]),
     add_sexp(Space, [twice, x]),
     'remove-atom'(Space, [twice, x], Both),
@@ -1192,10 +1194,10 @@ test(deciding_a_function_is_still_defined_does_not_walk_the_predicate_table,
 % is evaluated outside match. If remove-atom and add-atom would be executed
 % right away for each found matching, the condition of circular links would be
 % broken after the first rewrite" [source: the language's Working with spaces].
-% LeaTTa pins it with an experiment built to tell an eager snapshot from
-% a lazy query that happens to be fully consumed, and only the effect ORDER is
-% a recorded free divergence [source: LeaTTa tests/semantics/matching/
-% nondeterministic_match_snapshot.metta].
+% An experiment built to tell an eager snapshot from a lazy query that happens
+% to be fully consumed pins it, and only the effect ORDER is a recorded free
+% divergence [assumed: measured against an earlier reference corpus, not
+% re-measured against upstream PeTTa].
 setup_snapshot_space :-
     cleanup_snapshot_space,
     forall(member(P, [[snap_link, a, b], [snap_link, b, c],
@@ -1471,7 +1473,7 @@ test(a_cyclic_binding_is_refused_only_when_the_template_carries_it,
     % raw and the ONE cycle test sits on the answer template. (rt $y $y)
     % against a stored (rt (f $x) $x) makes a rational-tree binding; with
     % template `hit` the answer flows, and with the pattern itself as the
-    % template the cyclic answer is refused. The LeaTTa-era occurs
+    % template the cyclic answer is refused. The earlier occurs
     % discipline that refused both is withdrawn by the petta alignment.
     findall(R0, match('&plunit_rational', [rt, Y, Y], hit, R0), [hit]),
     \+ match('&plunit_rational', [rt, Y2, Y2], [rt, Y2, Y2], _),
@@ -1846,9 +1848,10 @@ batch_side(batch, Space, Atom) :- added_in_a_batch(Space, Atom).
 % answer is the held term itself, and it takes BOTH halves of the repair to
 % get there, the call site holding the argument and the definition dropping
 % its result continuation
-% [measured 2026-08-24 against LeaTTa 9ea9f9d: with `(= (q $x) $x)` and
-% `(= (c) (q (+ 1 2)))`, `!(c)` is 3 under `(: q (-> Atom %Undefined%))` and
-% `(+ 1 2)` under `(: q (-> Atom Atom))`].
+% [assumed 2026-08-24: with `(= (q $x) $x)` and `(= (c) (q (+ 1 2)))`, `!(c)`
+% being 3 under `(: q (-> Atom %Undefined%))` and `(+ 1 2)` under
+% `(: q (-> Atom Atom))` was measured against an earlier reference corpus at
+% that date, not re-measured against upstream PeTTa].
 declaration_answer(Side, Answer) :-
     atom_concat('bt-', Side, Prefix),
     atom_concat(Prefix, '-q', Q),
@@ -2269,8 +2272,9 @@ test(a_control_signal_is_never_kept,
 
 % A Prolog-hosted matchable: the term claims its own matching logic, so
 % the walker's hook cases run with no Python in the process. The ground
-% cases mirror LeaTTa's measured decisions [source: LeaTTa
-% tests/semantics/matching/grounded_value_matching.metta].
+% cases mirror the decisions measured for grounded-value matching
+% [assumed: measured against an earlier reference corpus, not re-measured
+% against upstream PeTTa].
 seam:matchable_value(plunit_interval(_, _)).
 seam:custom_match(plunit_interval(Lo, Hi), Other) :-
     number(Other), Lo =< Other, Other =< Hi.
@@ -2493,13 +2497,10 @@ test(an_unbound_operand_fails_without_enumerating) :-
 % A first argument that is not a space is refused BY NAME, with upstream's own
 % text and the call that failed as the subject, and as an ANSWER rather than a
 % throw so a collapse can hold it
-% [source: LeaTTa tests/semantics/spaces/add_atom.metta, add_atoms, add_reduct,
-% add_reducts, get_atoms and match, all six STATUS conforms and all six
-% transcripts of hyperon 0.2.10; the texts are upstream's own `ok_or` strings
-% at space.rs:143, :172 and :199]. The message is a STRING here and prints
-% quoted, where LeaTTa's writer prints the same text bare; the corpus
-% comparison drops quotes on both sides and says so at
-% tests/conformance/leatta.py, so the two records differ only in that.
+% [source: hyperon-experimental lib/src/metta/runner/stdlib/space.rs:143, :172
+% and :199, whose `ok_or` strings these texts are]. The message is a STRING
+% here and prints quoted, where the reference these were transcribed from
+% printed the same text bare.
 %
 % A SYMBOL IS ALWAYS A SPACE, so what is refused is an operand that is not a
 % symbol at all. Upstream's space IS a Prolog predicate name -- `match/4` and
@@ -2510,8 +2511,8 @@ test(an_unbound_operand_fails_without_enumerating) :-
 % Answering instead is this engine's superset over that, on the same ground as
 % every other place upstream aborts where this engine answers.
 %
-% These rows required a leading `&` until 2026-08-30, on LeaTTa's spaceName
-% rule; the positive half is now tested by
+% These rows required a leading `&` until 2026-08-30, on an earlier reference
+% semantics' space-name rule; the positive half is now tested by
 % a_bare_symbol_is_a_space_the_moment_it_is_written_to below.
 :- begin_tests(space_argument_refusals).
 
@@ -2525,9 +2526,9 @@ refused_space_call("!(collapse (match 42 (q a) a))",
 %and the REDUCED atom, which is where the write would have happened.
 refused_space_call("!(collapse (add-reduct 42 (+ 7000 1)))",
                    "((Error (add-atom 42 7001) \"add-atom expects a space as the first argument\"))").
-%The scoped type lookup is a space door too, and LeaTTa refuses it in the
-%same shape [source: LeaTTa tests/semantics/spaces/get_type_space.metta and the
-%four get_doc files, whose last line is this refusal reached through it].
+%The scoped type lookup is a space door too, and it refuses in the same shape
+%[assumed: measured against an earlier reference corpus, not re-measured
+%against upstream PeTTa].
 refused_space_call("!(collapse (get-type-space not-a-space scoped-atom))",
                    "((Error (get-type-space not-a-space scoped-atom) \"get-type-space expects a space as the first argument\"))").
 

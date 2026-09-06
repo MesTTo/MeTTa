@@ -143,9 +143,9 @@ def scan_refusal_grounds(root: Path) -> tuple[list[str], GateCounts]:
         findings.append(f"{SEGMENTS}: MeTTa segment refusal source is missing")
     else:
         segment_text = segment_path.read_text(encoding="utf-8")
-        if "Kutsia" not in segment_text or "SeqFragment.lean" not in segment_text:
+        if "Kutsia" not in segment_text or "metta_seq_classify" not in segment_text:
             findings.append(
-                f"{SEGMENTS}: segment refusal must cite Kutsia and SeqFragment.lean"
+                f"{SEGMENTS}: segment refusal must cite Kutsia and name metta_seq_classify"
             )
         else:
             metta_law_fences = 1

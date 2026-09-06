@@ -24,7 +24,7 @@ workspace -- `<T>/ai-tmp/workspace/repo` is ROOT,
 out -- because
 check_spec_status.py derives WORKSPACE and SEARCH_ROOTS from ROOT's own
 position, and a fixture that collapses that nesting would not exercise the
-code path that matters (P2.13's `LeaTTa/...` citation, resolved one
+code path that matters (P2.13's sibling-checkout citation, resolved one
 directory past WORKSPACE, is the reason that path exists at all). The
 checker and its two sibling dependencies are copied into `repo/tools/`,
 mirroring check_evidence_selftest.py's own reason for copying rather than
@@ -307,7 +307,8 @@ def main() -> int:
             complaints.append("P92.1 (escaped `\\|` inside backticks): row dropped, cell splitter regressed")
 
         # P90.16 must correctly LOCATE the sibling file rather than claim it
-        # is absent: this is the P2.13/LeaTTa false-negative this file guards.
+        # is absent: this is the P2.13 sibling-path false negative this file
+        # guards.
         sibling_case = by_id.get("P90.16")
         if sibling_case is not None:
             joined = " ".join(sibling_case["reasons"])

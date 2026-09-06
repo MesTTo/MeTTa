@@ -104,10 +104,10 @@ test(comment_parentheses_do_not_close_a_form) :-
 
 %A top-level form is ONE ATOM, and a parenthesised expression is only the
 %commonest kind. The four splitter tests below pin the reader against
-%LeaTTa's own tokenizer rule: a leading `!` before `(`, layout or end of
+%the tokenizer rule it adopted: a leading `!` before `(`, layout or end of
 %input marks the atom that follows as runnable, and a `!` anywhere else is
-%an ordinary symbol character [source: LeaTTa
-%MettaHyperonFull/Runtime/Parser.lean:85-88].
+%an ordinary symbol character [assumed: adopted from an earlier reference
+%semantics, not re-measured against upstream PeTTa].
 test(a_bare_symbol_is_a_top_level_form) :-
     string_codes("not-a-form", Codes),
     once(phrase(filereader:top_forms(Forms, 1), Codes)),
@@ -120,10 +120,11 @@ test(the_marker_takes_an_atom_of_any_kind) :-
     Forms == [runnable("untouched-symbol"), runnable("42"),
               runnable("\"a b\""), runnable("$free"), runnable("&first")].
 
-%`!42` and `!$x` print nothing under LeaTTa because its tokenizer keeps
+%`!42` and `!$x` print nothing under that rule because the tokenizer keeps
 %the `!` inside the symbol; only `(`, layout and end of input make it the
-%marker [measured 2026-08-19: LeaTTa --observed-file on each exits 0 with no
-%output].
+%marker [assumed 2026-08-19: each exiting 0 with no output was measured against
+%an earlier reference runner at that date, not re-measured against upstream
+%PeTTa].
 test(a_marker_before_a_non_boundary_stays_an_ordinary_symbol_character) :-
     string_codes("!42\n!$x\n!(f)", Codes),
     once(phrase(filereader:top_forms(Forms, 1), Codes)),
@@ -146,9 +147,8 @@ test(missing_form_close_reports_its_syntax_error,
 :- begin_tests(filereader_bare_top_level_atoms).
 
 %Both halves end to end: the marked atom evaluates to itself and the
-%unmarked one is stored, which is what LeaTTa does with each
-%[source: LeaTTa tests/semantics/eval-core/self-evaluating-atoms.metta,
-%grounded/25-state-rendering.metta, modules/09-bind/main.metta].
+%unmarked one is stored [assumed: the three self-evaluating cases came from an
+%earlier reference corpus, not re-measured against upstream PeTTa].
 test(a_marked_bare_atom_evaluates_to_itself) :-
     setup_call_cleanup(
         assertz(silent(true), Ref),

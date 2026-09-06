@@ -131,7 +131,7 @@ match_relational_conjuncts(Module, Space, Conjuncts, OutPattern, Result) :-
 %The storage call unifies raw, so first-argument indexing dispatches, and
 %rational-tree bindings are legal: the ONE cycle test lives on the answer
 %template at every match_native/5 answer site, upstream PeTTa's own
-%placement. The LeaTTa-era occurs discipline (a rational-tree instantiation
+%placement. The earlier occurs discipline (a rational-tree instantiation
 %is never an answer, whatever the template) is withdrawn by the alignment:
 %a cyclic binding the template does not carry now answers, as upstream
 %measures [source: PeTTa-base@43705f5 src/spaces.pl match/4].

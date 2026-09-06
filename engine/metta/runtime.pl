@@ -259,12 +259,12 @@ test_answer_value(Results, Results).
     test(Results, [], Out).
 
 %The operand crosses UNEVALUATED, because `(: assert (-> Atom (->)))` is
-%LeaTTa's own declaration for this name
-%[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean:1020]. So the evaluation
+%the declaration this engine adopted for this name. So the evaluation
 %is this predicate's to make, and what it can report is the form as WRITTEN:
-%`!(assert (== 1 2))` answers `(Error (assert (== 1 2)) ((== 1 2) not True))`
-%on LeaTTa and throws here naming that same `(== 1 2)`
-%[measured 2026-08-24 against LeaTTa 9ea9f9d].
+%`!(assert (== 1 2))` throws here naming that same `(== 1 2)`, where the
+%reference answered `(Error (assert (== 1 2)) ((== 1 2) not True))`
+%[assumed 2026-08-24: measured against an earlier reference corpus at that
+%date, not re-measured against upstream PeTTa].
 %
 %Before the mask reached written builtin calls the operand arrived already
 %reduced and this called the resulting `True`/`False` as a Prolog goal. Once the
@@ -328,11 +328,10 @@ assert(Form, true) :-
 %space; the engine's type machinery is module-parameterized already, so
 %selection is one with_metta_module/2 around the ordinary get-type.
 %A name that is not a space is refused here as it is at every other space
-%door, and in the same shape, an ANSWER rather than a throw: LeaTTa's
+%door, and in the same shape, an ANSWER rather than a throw:
 %`(Error (get-type-space not-a-space scoped-atom) get-type-space expects a
-%space as the first argument)` is what the four get-doc files read back through
-%this operation [source: LeaTTa tests/semantics/spaces/get_type_space.metta,
-%STATUS conforms] [tested: space_argument_refusals]. Without it, space_module/2
+%space as the first argument)` is what a scoped type lookup reads back through
+%this operation [tested: space_argument_refusals]. Without it, space_module/2
 %made a module for the name and the lookup answered &self's own declarations
 %through it.
 'get-type-space'(Space, _, _) :- var(Space), !,

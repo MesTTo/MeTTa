@@ -1315,8 +1315,8 @@ body_true(Expr, Goal) :-
 %
 %What the generator narrows a variable TO belongs in the answer rather than
 %being quantified away. That is what MeTTa's own collapse-bind says an answer
-%is, one (value, bindings) pair per alternative [source:
-%lib/minimal_metta_lib/minimal_metta_lib.pl, and LeaTTa's ReduceResult.okBind], and it is the
+%is, one (value, bindings) pair per alternative
+%[source: lib/minimal_metta_lib/minimal_metta_lib.pl], and it is the
 %constrained-answer framework this file already works in. So: collect the
 %narrowings, answer once per DISTINCT one with the dual quantified over just
 %that narrowing's values, and once more for the terms the generator narrows to

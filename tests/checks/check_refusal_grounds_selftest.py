@@ -44,7 +44,7 @@ def _fixture(*, grounded_call: bool = True, central: bool = True, law: bool = Tr
         "def refuse():\n"
         f"    raise _grounded_type_error('fixture'{ground_argument})\n",
     )
-    segment_ground = "Kutsia; SeqFragment.lean" if law else "a finite fragment"
+    segment_ground = "Kutsia; metta_seq_classify/3" if law else "a finite fragment"
     _write(root, "engine/spaces/segment_matching.pl", segment_ground + "\n")
     return directory, root
 
@@ -96,7 +96,7 @@ def test_a_planted_segment_fence_without_a_named_law_is_reported() -> None:
         directory.cleanup()
     assert findings == [
         "engine/spaces/segment_matching.pl: segment refusal must cite Kutsia "
-        "and SeqFragment.lean"
+        "and name metta_seq_classify"
     ]
 
 

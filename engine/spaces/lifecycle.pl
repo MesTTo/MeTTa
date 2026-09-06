@@ -128,14 +128,12 @@ remove_sexp(Space, Atom) :- remove_sexp(Space, Atom, _).
 %space is a multiset unless something forbids it, SO removal takes EVERY
 %occurrence". The premise argues for the opposite conclusion, and the tree it
 %described was a multiset on ADD and a set on REMOVE, so three adds of (dup 1)
-%gave count 3 and one removal gave count 0. LeaTTa reads the premise the
-%other way: "remove-atom must behave as multiset subtraction on the
-%reader-visible view of &self", and its own model "removes the first exact
-%occurrence and returns unit"
-%[source: LeaTTa MettaHyperonFullTests/Properties.lean:107,
-%MettaHyperonFull/Minimal/Stdlib.lean:2223, and wiki/Mechanization-Ledger.md
-%row "Represented removal consumes the first exact occurrence", which pins
-%(one two one) minus (one) as (two one) executably].
+%gave count 3 and one removal gave count 0. An earlier reference semantics
+%read the premise the other way: remove-atom behaves as multiset subtraction on
+%the reader-visible view of &self, and its own model removes the first exact
+%occurrence and returns unit, pinning (one two one) minus (one) as (two one)
+%[assumed: adopted from an earlier reference semantics, not re-measured against
+%upstream PeTTa].
 %
 %That reading is the PUBLIC 'subtract-atom'/3 now. `remove-atom` took
 %upstream's draining law on 2026-08-30, because a different answer to the same
