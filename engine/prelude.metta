@@ -5,6 +5,12 @@
 ;   - is-function observes the unit arrow as an arrow while the internal type
 ;     classifier remains free to require a result child.
 ;   [tested: test_the_empty_expressions_type_follows_the_arbiters_ruling; commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3]
+;   - the four bag-comparing assert forms keep the verdicts they had and reach
+;     assert-answers, so a failure carries the answers missing from and in
+;     excess of the expectation while what passes and what fails is unmoved
+;     [tested: prelude:assertEqual_failure_carries_both_bags,
+;     prelude:assertEqualToResult_failure_carries_both_bags,
+;     prelude:assertEqual_compares_result_sets; commit=71de27a76dd16684941e3e090de0d17299d96493]
 ; Open Obligations:
 ;   To Do: None
 ;   Hacks: None
@@ -63,9 +69,21 @@
 ;collapse owns the full evaluation, so its operand is not wrapped in eval.
 ;The return type stays %Undefined% for the reason type-cast's note
 ;records: an Atom RESULT type would leave the body untranslated.
+;
+;The two collapses are NAMED so the failure can report them. The verdict is
+;the same == over the same two tuples it always was, and assert-answers never
+;decides one: what changed is that the answers reach the failure instead of
+;being discarded with the comparison. == is TERM equality, so this form is
+;order-sensitive where its bag difference is not, and two empty bags beside a
+;failure here mean the answers are a permutation of each other; the message
+;says so [source: engine/metta/runtime.pl, assertion_permutation_note//2;
+;commit=71de27a76dd16684941e3e090de0d17299d96493].
 (: assertEqual (-> Atom Atom %Undefined%))
 (= (assertEqual $A $B)
-   (assert (== (collapse $A) (collapse $B))))
+   (let $Actual (collapse $A)
+     (let $Expected (collapse $B)
+       (let $Same (== $Actual $Expected)
+         (assert-answers $Same (assertEqual $A $B) $Actual $Expected)))))
 
 ;The operands are collapsed into ANSWER SETS first, so a nondeterministic
 ;side is compared set-wise rather than pairwise, which is the same reason
@@ -120,13 +138,22 @@
 ;`(assertEqual (+ 1 1) 2)` passes on both.
 ;Only the comparison changes.  The public MeTTa contract remains the existing
 ;True answer on success and metta_assertion_failed exception on failure.
+;
+;The verdict below is unchanged and stays the multiset test these two
+;subtractions have always made. What changed is where their result goes: it
+;used to reach `assert` as one Bool and the two bags were dropped on the floor,
+;which is the diff this form computes and nobody could read. assert-answers
+;takes the same verdict plus the two answer bags and recomputes the same two
+;differences ON THE FAILING PATH to report them, so what a failure says and
+;what the verdict tested are one operation [source: engine/metta/runtime.pl,
+;'assert-answers'/5; commit=71de27a76dd16684941e3e090de0d17299d96493].
 (: assertEqualToResult (-> Atom Atom %Undefined%))
 (= (assertEqualToResult $A $B)
    (let $Actual (collapse $A)
      (let $Missed (subtraction-atom $B $Actual)
        (let $Excessive (subtraction-atom $Actual $B)
          (let $Same (noreduce-eq ($Missed $Excessive) (() ()))
-           (assert $Same))))))
+           (assert-answers $Same (assertEqualToResult $A $B) $Actual $B))))))
 
 (: assertAlphaEqualToResult (-> Atom Atom %Undefined%))
 (= (assertAlphaEqualToResult $A $B)
@@ -154,12 +181,18 @@
        (let $Empty (== $Diff ())
          (assert $Empty)))))
 
-;The Msg variants carry a failure message. assert/2 already reports the
-;failing expression, so each delegates and the message is accepted but
-;unused.
+;The Msg variants carry a failure message. Each reports the call AS WRITTEN,
+;which carries the message with it, so the two bag-comparing twins below spell
+;out their own bodies rather than delegating: a delegated body would report
+;the delegate's name and lose the message the caller wrote. The alpha twins
+;still delegate, because their relation computes no bag difference and their
+;report is the delegate's already.
 (: assertEqualMsg (-> Atom Atom Atom %Undefined%))
 (= (assertEqualMsg $A $B $M)
-   (assert (== (collapse $A) (collapse $B))))
+   (let $Actual (collapse $A)
+     (let $Expected (collapse $B)
+       (let $Same (== $Actual $Expected)
+         (assert-answers $Same (assertEqualMsg $A $B $M) $Actual $Expected)))))
 
 (: assertAlphaEqualMsg (-> Atom Atom Atom %Undefined%))
 (= (assertAlphaEqualMsg $A $B $M)
@@ -170,7 +203,11 @@
 
 (: assertEqualToResultMsg (-> Atom Atom Atom %Undefined%))
 (= (assertEqualToResultMsg $A $B $M)
-   (assertEqualToResult $A $B))
+   (let $Actual (collapse $A)
+     (let $Missed (subtraction-atom $B $Actual)
+       (let $Excessive (subtraction-atom $Actual $B)
+         (let $Same (noreduce-eq ($Missed $Excessive) (() ()))
+           (assert-answers $Same (assertEqualToResultMsg $A $B $M) $Actual $B))))))
 
 (: assertAlphaEqualToResultMsg (-> Atom Atom Atom %Undefined%))
 (= (assertAlphaEqualToResultMsg $A $B $M)
@@ -457,8 +494,12 @@
   (@desc "if-equal under its second historical name")
   (@params ((@param "First atom") (@param "Second atom") (@param "Result on equivalence") (@param "Result otherwise")))
   (@return "Third or fourth argument"))
+(@doc assert-answers
+  (@desc "Asserts a verdict about two answer bags; a false verdict reports the call as written and the two directed bag differences, what was missing and what was in excess")
+  (@params ((@param "Verdict, evaluated") (@param "Call to report, as written") (@param "Answers produced") (@param "Answers expected")))
+  (@return "unit"))
 (@doc assertEqual
-  (@desc "Compares the result sets of two expressions; passes silently or raises a failed assertion naming the expression")
+  (@desc "Compares the result sets of two expressions; passes silently or raises a failed assertion naming the expression and the answers missing from and in excess of the expectation")
   (@params ((@param "First expression, not evaluated on the way in") (@param "Second expression, not evaluated on the way in")))
   (@return "unit"))
 (@doc assertAlphaEqual
@@ -478,7 +519,7 @@
   (@params ((@param "Expression to evaluate") (@param "Expected subset, as written")))
   (@return "unit"))
 (@doc assertEqualMsg
-  (@desc "assertEqual with a message argument, accepted and unused because the assertion already names the failing expression")
+  (@desc "assertEqual with a message argument, which the failure report carries because it reports the call as written")
   (@params ((@param "First expression") (@param "Second expression") (@param "Message")))
   (@return "unit"))
 (@doc assertAlphaEqualMsg
@@ -486,7 +527,7 @@
   (@params ((@param "First expression") (@param "Second expression") (@param "Message")))
   (@return "unit"))
 (@doc assertEqualToResultMsg
-  (@desc "assertEqualToResult with a message argument, accepted and unused")
+  (@desc "assertEqualToResult with a message argument, which the failure report carries because it reports the call as written")
   (@params ((@param "Expression to evaluate") (@param "Expected results") (@param "Message")))
   (@return "unit"))
 (@doc assertAlphaEqualToResultMsg

@@ -20,7 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 258 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 259 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 24 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms | `extensions/python/tools/libdoc.py` |
@@ -1033,7 +1033,13 @@ classify an absent connection, timeout, or closed stream before choosing retry
 or abandonment; ordinary application errors answer false.
 `AssertionFailure` means a `(test ...)` or `(assert ...)` claim was false, not
 that the engine broke; `.operation`, `.actual`, and `.expected` are structured
-fields for a harness.
+fields for a harness. A failing comparison over ANSWERS adds `.missing` and
+`.excess`, the answers expected and never produced and the answers produced
+and never expected, each a tuple of atoms carrying bag multiplicity; the
+message carries the same two lines. Both are `None` where the failing form
+computed no such difference, which is a different answer from `()`: two empty
+bags say the answers agree and differ only in ORDER, which is what
+`assertEqual` fails on while `assertEqualToResult` accepts it.
 `Rows.raise_for_errors()` and `Answers.raise_for_errors()` are the explicit
 bridge from `(Error culprit reason)` values to `MettaResultError`: one raises
 plainly, several as an `ExceptionGroup`, and a clean collection returns itself
@@ -1519,7 +1525,7 @@ at each source boundary and answers admitted ground calls from it.
 provided patterns, and evaluates the selected branch. Empty expressions and
 incompatible patterns select the fallback.
 
-300 builtins are registered; `m.self.builtins()` lists the live union of registered
+301 builtins are registered; `m.self.builtins()` lists the live union of registered
 functions and translator special forms. That live union in full, measured
 2026-09-06 on a boot with this tree's extensions present, which is where the
 three `mork-add-atoms`, `mork-flush` and `mm2-exec` heads come from:
@@ -1529,7 +1535,8 @@ three `mork-add-atoms`, `mork-flush` and `mm2-exec` heads come from:
 `Predicate` `__metta_type_syntax__` `abs-math` `acos-math` `add-atom`
 `add-atoms` `add-reduct` `add-reducts` `add-translator-rule!`
 `add-typing-rule!` `alpha-unique` `alpha-unique-atom` `and` `and-then`
-`annotation` `append` `argv` `asin-math` `assert` `assertAlphaEqual`
+`annotation` `append` `argv` `asin-math` `assert` `assert-answers`
+`assertAlphaEqual`
 `assertAlphaEqualMsg` `assertAlphaEqualToResult`
 `assertAlphaEqualToResultMsg` `assertEqual` `assertEqualMsg`
 `assertEqualToResult` `assertEqualToResultMsg` `assertIncludes`
@@ -1667,6 +1674,14 @@ than replacing the old one, so a second `(= (f x) ...)` gives `f` two answers.
 Equations are alternatives, not sequential clauses; a literal-headed default
 needs a guard or it fires too.
 A typed call rejects a bad argument by answering empty, not by raising: use `cast`.
+A failing `assertEqual` or `assertEqualToResult` names the call as WRITTEN and
+prints the two answer bags under it, `missing:` then `excess:`; both empty
+means the answers agree and only their order differs, which `assertEqual`
+fails on because it compares the collapsed tuples by term equality. `assert`
+and `assertIncludes` print no bag line at all, the first because its operand
+is a verdict and the second because its excess answers are legal. A user's own
+assertion over answer bags gets the same report from `assert-answers`, which
+takes the verdict, the call to report, and the two bags.
 An unreduced call is a non-empty answer, so test truth with `any(a == True)`,
 never "the result was non-empty".
 Python `None` from an operation answers nothing.

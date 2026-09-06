@@ -889,6 +889,7 @@ metta_builtin_effect_override('undeclare-pre-add!', writesState).
 metta_builtin_effect_override(interpret, writesState).
 
 metta_builtin_effect_override(assert, oracleIO).
+metta_builtin_effect_override('assert-answers', oracleIO).
 metta_builtin_effect_override(assertAlphaEqual, oracleIO).
 metta_builtin_effect_override(assertAlphaEqualMsg, oracleIO).
 metta_builtin_effect_override(assertAlphaEqualToResult, oracleIO).

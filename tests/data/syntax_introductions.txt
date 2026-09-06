@@ -186,6 +186,7 @@ assertEqualToResult               12-00-01
 assertEqualToResultMsg            12-00-01
 assertIncludes                    12-00-01
 if-equal                          12-00-02
+assert                            12-00-03
 elapsed                           14-00-01
 evalc                             14-00-01
 inferences                        14-00-01

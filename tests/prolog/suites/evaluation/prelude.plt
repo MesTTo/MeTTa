@@ -50,8 +50,34 @@ test(assertEqual_passes) :-
     eval_string("(assertEqual (+ 1 1) 2)", [true]).
 
 test(assertEqual_failure_raises,
-     [throws(error(metta_assertion_failed(_), _))]) :-
+     [throws(error(metta_assertion_failed(_, _, _), _))]) :-
     eval_string("(assertEqual 1 2)", _).
+
+%The evidence the comparison already had. The form is the call as the program
+%wrote it rather than the verdict it reduced to, and the two bags are the
+%answers expected but not produced and produced but not expected.
+test(assertEqual_failure_carries_both_bags,
+     [throws(error(metta_assertion_failed([assertEqual, [+, 1, 1], 3],
+                                          [3], [2]), _))]) :-
+    eval_string("(assertEqual (+ 1 1) 3)", _).
+
+%Multiplicity survives the report exactly as it survives the comparison: one
+%occurrence on one side consumes one on the other.
+test(assertEqual_failure_keeps_bag_multiplicity,
+     [throws(error(metta_assertion_failed(_, [b], [a]), _))]) :-
+    eval_string("(assertEqual (superpose (a a b)) (superpose (a b b)))", _).
+
+%The verdict is unmoved: == over the collapsed tuples is order-sensitive, so
+%a permutation still fails, and the two empty bags are what says why.
+test(assertEqual_still_fails_on_a_permutation,
+     [throws(error(metta_assertion_failed(_, [], []), _))]) :-
+    eval_string("(assertEqual (superpose (1 2)) (superpose (2 1)))", _).
+
+test(assertEqualMsg_failure_reports_its_message,
+     [throws(error(metta_assertion_failed(
+                       [assertEqualMsg, [+, 1, 2], 4, "sums differ"],
+                       [4], [3]), _))]) :-
+    eval_string("(assertEqualMsg (+ 1 2) 4 \"sums differ\")", _).
 
 test(assertAlphaEqual_renames_apart) :-
     eval_string("(assertAlphaEqual (f $x $x) (f $y $y))", [true]).
@@ -73,9 +99,25 @@ test(expected_set_is_not_evaluated) :-
     %((+ 1 1)) must FAIL the comparison instead.
     catch(( eval_string("(assertEqualToResult (+ 1 1) ((+ 1 1)))", _),
             Verdict = passed ),
-          error(metta_assertion_failed(_), _),
+          error(metta_assertion_failed(_, _, _), _),
           Verdict = failed),
     Verdict == failed.
+
+%The two bags assertEqualToResult has always computed, now reaching the
+%failure instead of being discarded with the comparison.
+test(assertEqualToResult_failure_carries_both_bags,
+     [throws(error(metta_assertion_failed(
+                       [assertEqualToResult, [superpose, [1, 2]], [1, 2, 3]],
+                       [3], []), _))]) :-
+    eval_string("(assertEqualToResult (superpose (1 2)) (1 2 3))", _).
+
+test(assertEqualToResultMsg_failure_reports_its_message,
+     [throws(error(metta_assertion_failed(
+                       [assertEqualToResultMsg, [+, 1, 2], [4],
+                        "not the expected result"],
+                       [4], [3]), _))]) :-
+    eval_string("(assertEqualToResultMsg (+ 1 2) (4) \"not the expected result\")",
+                _).
 
 test(assertAlphaEqualToResult_over_variables) :-
     %noeval hands over (f $a), so the produced set is ((f $a)) and the
@@ -86,13 +128,30 @@ test(assertAlphaEqualToResult_over_variables) :-
 test(assertIncludes_subset_passes) :-
     eval_string("(assertIncludes (superpose (1 2 3)) (2 1))", [true]).
 
-test(assertIncludes_missing_expectation_raises,
-     [throws(error(metta_assertion_failed(_), _))]) :-
-    eval_string("(assertIncludes (superpose (1 2)) (7))", _).
+%assertIncludes keeps the plain assert door, and so reports no bags: its
+%EXCESS answers are legal, so the two-sided report the equal forms carry would
+%name a bag that is not a reason for the failure. A one-sided report needs its
+%own door and is not built [source: docs/journal/2026-09-06-the-bag-diff-an-assertion-already-computes.md;
+%commit=71de27a76dd16684941e3e090de0d17299d96493].
+test(assertIncludes_missing_expectation_raises) :-
+    catch(( eval_string("(assertIncludes (superpose (1 2)) (7))", _),
+            Verdict = passed ),
+          error(metta_assertion_failed(_, Missing, Excess), _),
+          Verdict = failed),
+    Verdict == failed,
+    var(Missing),
+    var(Excess).
 
-test(msg_variants_delegate) :-
+%The two bag-comparing Msg twins spell out their own bodies so their failure
+%report names the call the caller wrote, message included; the alpha twins
+%still delegate. Either way a Msg form answers what its base answers, which is
+%the invariant this holds.
+test(msg_variants_answer_as_their_bases) :-
     eval_string("(assertEqualMsg (+ 1 1) 2 ignored)", [true]),
     eval_string("(assertEqualToResultMsg (superpose (1 2)) (1 2) ignored)",
+                [true]),
+    eval_string("(assertAlphaEqualMsg (f $x $x) (f $y $y) ignored)", [true]),
+    eval_string("(assertAlphaEqualToResultMsg (noeval (f $a)) ((f $b)) ignored)",
                 [true]).
 
 % -- error handling ---------------------------------------------------------

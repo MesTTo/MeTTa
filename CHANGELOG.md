@@ -172,6 +172,39 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   per-cell rule unchanged.
 - The `dataframes` extra floors polars at 1.3, the release that reads the
   Arrow PyCapsule Interface.
+- `assert-answers` asserts a verdict about two answer bags and reports the two
+  directed bag differences when it is false. A user's own assertion over
+  answers reaches the same failure report by handing over its own comparison,
+  the call to name, and the produced and expected bags.
+
+### Changed
+
+- A failing `assertEqual`, `assertEqualToResult` or either one's `Msg` twin now
+  reports the answers that were MISSING and the answers that were in EXCESS
+  beside the call, on every seat:
+
+  ```
+  MeTTa assertion failed: (assertEqual (+ 1 1) 3)
+    missing: (3)
+    excess: (2)
+  ```
+
+  The differences are not new work. `assertEqualToResult` already subtracted
+  each bag from the other to reach its verdict and kept only their emptiness,
+  and `assertEqual` already held the same two collapsed tuples; the report
+  used to receive the `False` those comparisons reduced to and could name
+  neither the call nor the answers. The failure now names the call AS WRITTEN,
+  which also carries a `Msg` variant's message for the first time. Two empty
+  bags carry their own line: the answers agree as a bag, so they differ only
+  in order, which is what `assertEqual`'s term equality fails on.
+
+  Python's `AssertionFailure` gains `.missing` and `.excess`, tuples of atoms
+  with bag multiplicity preserved, both `None` for a failing form that
+  computed no such difference (`assert` itself, `assertIncludes`, and the
+  alpha forms). None and `()` are different answers.
+
+  What an assertion ACCEPTS is unchanged: every verdict is the comparison it
+  always was, computed where it always was.
 
 ### Fixed
 
