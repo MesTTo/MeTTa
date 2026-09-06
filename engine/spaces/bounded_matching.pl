@@ -1,4 +1,6 @@
 % Purpose: propagate output bounds through conjunction matching, ordering, and best-first merge policies
+% Guarantees: ordered cursors and top share one provider-bound license
+% [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
 %   metta_prune_empty/2 is declared locally as an effect-planner primitive,
@@ -898,12 +900,9 @@ metta_top(Count, Goal, Out) :-
     member(Out, Best).
 
 %The single-match form checks the context's declared order and decides the
-%push. The bound reaches the provider only when three declarations hold
-%together: the route is Exact for this shape, the annotations are ordered,
-%and the merge policy is best-first, since the first k of a best-first
-%emission ARE the k best. Drop any one and a pushed bound can return the
-%wrong k, not merely a permutation, so the bound stays here and the
-%ordering happens after collection.
+%push. The shared license requires an Exact route, ordered annotations in
+%the requested carrier and direction, best-first emission, and a non-linear
+%source. Otherwise the bound stays above collection and ordering.
 metta_top_match(Count, Space, Pattern, OutPattern, Result) :-
     metta_take_count(top, Count),
     (   metta_annotations_ordered(Space)
@@ -913,10 +912,11 @@ metta_top_match(Count, Space, Pattern, OutPattern, Result) :-
     ),
     (   nonvar(Space),
         seam:foreign_space(Space)
-    ->  (   metta_top_pushable(Space, Pattern)
-        ->  Options = [limit(Count)]
-        ;   Options = []
-        ),
+    ->  metta_effective_algebra(Space, Algebra),
+        metta_annotations_order(Space, Direction),
+        metta_ordered_match_limit(Space, Pattern, Algebra, Count, Direction,
+                                   ProducerLimit),
+        ( ProducerLimit > 0 -> Options = [limit(ProducerLimit)] ; Options = [] ),
         Producer = match_foreign(Space, Pattern, Options, OutPattern, Result)
     ;   %A native space that declares an ordered semiring still stores
         %plain atoms, so every annotation reads 1 and top k keeps the
@@ -931,6 +931,24 @@ metta_top_match(Count, Space, Pattern, OutPattern, Result) :-
             Pairs),
     metta_top_best(Space, Count, Pairs, Best),
     member(Result, Best).
+
+% A producer prefix is a ranked answer prefix only under the same declared
+% carrier and direction. The caller has already established one unguarded
+% pattern; joins and guards retain their bound above the complete query.
+metta_ordered_match_limit(Space, Pattern, Algebra, Limit, Direction,
+                           ProducerLimit) :-
+    (   Limit > 0,
+        nonvar(Space),
+        seam:foreign_space(Space),
+        metta_annotations(Space, Algebra),
+        metta_vocabulary_claim(semiring, Algebra, ordered),
+        metta_algebra_order(Algebra, DeclaredDirection),
+        Direction == DeclaredDirection,
+        metta_source(Space, Source), Source \== linear,
+        metta_top_pushable(Space, Pattern)
+    ->  ProducerLimit = Limit
+    ;   ProducerLimit = 0
+    ).
 
 metta_top_pushable(Space, Pattern) :-
     %A cap below exact, or a cap refusal, declines the pushdown here and

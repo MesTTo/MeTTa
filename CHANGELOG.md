@@ -7,6 +7,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Algebra operations and tagged query guards retain the selected carrier,
+  answer limit and ordering across evaluator calls. `current_algebra()` inside
+  combine and extend now observes the ask's algebra, including when an
+  annotations row supplies a different default.
+- `match(q, under=ranked, limit=k)` offers the provider the same licensed bound
+  as `[:k]` and `(top k ...)`. Exact matching, matching algebra and ordering,
+  best-first emission and repeatable consumption must all hold; guards and joins
+  retain the complete candidate stream.
+- `TaggedAnswer.under(algebra_object)` uses the supplied algebra directly,
+  including its callback carrier, without declaring it on the answer's space.
+  A local declaration with the same name no longer replaces that object.
+
 ## [0.8.0] - 2026-09-06
 
 ### Added

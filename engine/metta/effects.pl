@@ -5,6 +5,9 @@
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees:
+%   - one dynamic evaluation context carries algebra, limit, and ordering
+%     through nested operations and restores on every exit
+%     [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 %   - every definition retains engine/metta.pl's implementation module and
 %     original load order [tested: tests/prolog/suites/evaluation/metta.plt,
 %     tests/prolog/static_checks.pl; commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
@@ -2084,28 +2087,40 @@ metta_annotations_resolved([First, Second|Rest], Ctx, _) :-
 %every persistent declaration remains unchanged for the next ask [tested:
 %extensions/python/tests/ch06_many_answers/test_under_algebra.py;
 %commit=c7468b2789746bcf95c4bacc0e2d517ec4d972fa].
-:- meta_predicate metta_with_under(+, 0).
+:- meta_predicate metta_with_under(+, 0),
+                  metta_with_evaluation_context(+, 0).
 
 metta_with_under(Algebra, Goal) :-
-    setup_call_cleanup(
-        metta_under_push(Algebra, Previous),
-        Goal,
-        metta_under_pop(Previous)).
+    (   metta_evaluation_context(evaluation_context(_, Limit, Direction))
+    ->  true
+    ;   Limit = 0, Direction = none
+    ),
+    metta_with_evaluation_context(
+        evaluation_context(Algebra, Limit, Direction), Goal).
 
-metta_under_push(Algebra, Previous) :-
-    (   nb_current('$metta_under_algebras', Old)
+metta_with_evaluation_context(Context, Goal) :-
+    setup_call_cleanup(
+        metta_evaluation_context_push(Context, Previous),
+        Goal,
+        metta_evaluation_context_pop(Previous)).
+
+metta_evaluation_context_push(Context, Previous) :-
+    (   nb_current('$metta_evaluation_contexts', Old)
     ->  Previous = some(Old)
     ;   Old = [], Previous = none
     ),
-    nb_setval('$metta_under_algebras', [Algebra|Old]).
+    nb_setval('$metta_evaluation_contexts', [Context|Old]).
 
-metta_under_pop(some(Previous)) :- !,
-    nb_setval('$metta_under_algebras', Previous).
-metta_under_pop(none) :-
-    catch(nb_delete('$metta_under_algebras'), _, true).
+metta_evaluation_context_pop(some(Previous)) :- !,
+    nb_setval('$metta_evaluation_contexts', Previous).
+metta_evaluation_context_pop(none) :-
+    catch(nb_delete('$metta_evaluation_contexts'), _, true).
+
+metta_evaluation_context(Context) :-
+    nb_current('$metta_evaluation_contexts', [Context|_]).
 
 metta_effective_algebra(_, Algebra) :-
-    nb_current('$metta_under_algebras', [Algebra|_]), !.
+    metta_evaluation_context(evaluation_context(Algebra, _, _)), !.
 metta_effective_algebra(Ctx, Algebra) :-
     metta_annotations(Ctx, Algebra).
 
@@ -2115,7 +2130,7 @@ metta_effective_algebra(Ctx, Algebra) :-
 %Python scope. The engine-held per-call override wins because it encloses the
 %operation that can ask this question.
 metta_current_algebra(_, _, Algebra) :-
-    nb_current('$metta_under_algebras', [Algebra|_]), !.
+    metta_evaluation_context(evaluation_context(Algebra, _, _)), !.
 metta_current_algebra(_, [Algebra], Algebra) :- !.
 metta_current_algebra(Ctx, [], Algebra) :-
     (   metta_contract_fact([annotations, Ctx, _])
@@ -2291,7 +2306,7 @@ metta_apply_algebra_operation(_, max, A, B, R) :-
     number(A), number(B), !,
     R is max(A, B).
 metta_apply_algebra_operation(Algebra, Operation, A, B, R) :-
-    (   once(eval([Operation, A, B], R0))
+    (   once(metta_with_under(Algebra, eval([Operation, A, B], R0)))
     ->  R = R0
     ;   throw(error(metta_algebra_operation_failed(Algebra, Operation, A, B),
                     none))
