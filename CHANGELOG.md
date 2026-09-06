@@ -29,6 +29,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `examples/ch12-testing/03-assertion_difference.metta` has a Python twin,
+  `extensions/python/examples/language-feature-examples/ch12-testing/03-assertion_difference.py`,
+  which proves the same ten claims through `AssertionFailure.missing` and
+  `.excess` rather than through `catch`, `unify` and `repr`. Those three are
+  what the MeTTa file needs to read its own failure and Python has the object
+  instead, so the twin shows the fields a harness actually reads, `None` and
+  `()` included. Priced at 8,295 inferences against the example's 15,331.
 - `metta.testing.programs(census=None, depth=3, facts=(1, 4), queries=(1, 3))`
   generates whole MeTTa programs for differential testing against another
   engine, and the `parity-fuzz` lane runs them on this engine and on upstream

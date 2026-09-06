@@ -128,3 +128,40 @@ engine's wording -> it classifies on `/MeTTa assertion failed/` and is
 unaffected, but the string was teaching a spelling the engine no longer
 writes. It carries the new one, and the seat's live one-sided case asserts the
 head as well. `node --test build/test/errors.test.js` -> 14 pass, 0 fail.
+
+### The example's Python twin
+
+Tried: `refused(m.fn.assertEqual, S.add(1, 1), 3)` with a bare call inside it
+-> the helper reported that the claim HELD. A `fn` call answers a lazy view, so
+the assertion never ran; `list` around it is what pulls the answer and raises.
+Every claim in the file would have been vacuous without it, and the twin would
+still have priced and passed.
+
+Tried: `raise AssertionError(f"{claim} held, ...")` when a claim does not fail
+-> the twins lane refused it: `line 42: the string ' held, so there is no
+failure to read' is neither a name nor ground() data`. The scan is right; a
+twin's strings are names or data.
+Decided: the corpus's own shape instead, `refusal = None` ... `assert refusal
+is not None`, which
+`ch19-.../02-restricted_spaces.py` already uses for exactly this. `refused`
+answers None where the claim held and each case asserts on it, which also makes
+"it really did fail" a stated claim rather than an implied one.
+
+Decided: a file-level `RUNG`, as `01-he_assert.py` has. Every head this twin
+names -- `assertEqual`, `assertIncludes`, `assert` -- is in the lane's
+DISSOLVED table, because Python's own `assert` is their image; here the assert
+family's FAILURE REPORT is the subject, so naming the member that raised is
+what the file is about rather than a transliteration.
+
+Measured: 8295 inferences, min of three serial fresh processes, and the same
+number on three separate invocations of that protocol at loadavg 53 and 78 --
+inferences are counted rather than timed, which is what makes it a point pin.
+The example costs 15331 on the same runs, so the twin is 0.54 of its MeTTa
+side. `python extensions/python/tools/twin_coverage.py
+examples/ch12-testing/03-assertion_difference.metta` -> `10 claims, 10 proved,
+store equal, 0 findings`.
+
+Open: the ch12 chapter reads 1/3 twinned now. `01-he_assert.py` and
+`02-he_equalreduct.py` are both pinned to budgets trunk has moved past
+(17906 against 17883, 3155 against 3127), which is the corpus-wide stale-pin
+class the twins lane already reports and not this thread's to re-pin.
