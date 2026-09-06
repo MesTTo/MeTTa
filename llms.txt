@@ -357,12 +357,18 @@ a fact carry a truth value AND range over a distributed quantity AND be reached
 by a weighted proof, without any one of them overwriting another.
 
 `with m.capture() as output:` collects printed text in `output.text` without
-changing either return shape. `with m.atomic():` makes each whole run one
-transaction; `with m.speculative():` runs each source against a snapshot and
+changing either return shape. `with m.atomic():` makes each whole call one
+transaction; `with m.speculative():` runs each call against a snapshot and
 discards its writes, so `m.run("!(add-atom &self (f 1))")` inside one leaves
-nothing behind. Both scope the EVALUATIONS in the block, not the Python write
-door: a bare `m.add(atom)` inside either lands and stays, and
-`m.transaction(callable)` is what puts Python-side writes under one boundary.
+nothing behind. Both scope every CALL in the block, the Python write doors
+included: `m.add`, `m.remove`, `del m[pattern]`, `m.transfer` and `m.clear`
+inside a speculative block leave nothing behind, and inside an atomic one
+each is its own committing transaction. Per CALL is the whole contract: a
+later call does not see what an earlier one wrote in a speculative block, and
+a raise does not undo a call an atomic block already committed.
+`m.transaction(callable)` is the boundary that spans SEVERAL calls, and there
+is no with-block form of it, because SWI's transaction/1 and snapshot/1 take
+a closed goal and an engine refuses to yield out of either.
 `with metta.speculate():` is the same discarded execution scope for the lazy
 module-tier default context.
 

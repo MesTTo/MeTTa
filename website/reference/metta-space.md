@@ -907,7 +907,15 @@ def capture(self) -> CapturedOutput:
 def atomic(self) -> ScopedExecution:
 ```
 
-> Make each run in the block one committing engine transaction.
+> Make each CALL in the block one committing engine transaction.
+>
+> Per call, the write doors included: ``m.add(a, b)`` inside the block
+> is one transaction, so a provider that refuses the second atom takes
+> the first back with it. Across SEVERAL calls the boundary is
+> :meth:`transaction`, because SWI's transaction/1 takes a closed goal
+> and an engine cannot yield out of one, so no with-block can hold one
+> open; a raise later in the block does not undo a call that already
+> committed.
 
 ### `Space.speculative`
 
@@ -915,7 +923,12 @@ def atomic(self) -> ScopedExecution:
 def speculative(self) -> ScopedExecution:
 ```
 
-> Run each source against a snapshot and discard its writes.
+> Run each CALL against a snapshot and discard its writes.
+>
+> Per call, the write doors included: ``m.add(atom)`` inside the block
+> leaves nothing behind, exactly as ``m.run("!(add-atom &self ...)")``
+> in the same block does, and a later call in the block does not see
+> what an earlier one wrote, because each call is its own what-if.
 
 ### `Space.batch`
 
@@ -3178,8 +3191,12 @@ def limits(
 def speculate(self) -> ScopedExecution:
 ```
 
-> Run each source against a snapshot and discard its writes.
+> Run each CALL against a snapshot and discard its writes.
 >
+> Per call, the write doors included: ``m.add(atom)`` inside the block
+> leaves nothing behind, exactly as ``m.run("!(add-atom &self ...)")``
+> in the same block does, and a later call in the block does not see
+> what an earlier one wrote, because each call is its own what-if.
 > Runs against this context's self space.
 
 ### `MeTTa.trace`

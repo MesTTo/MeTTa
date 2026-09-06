@@ -545,7 +545,7 @@ naming everything a space stores.
 
 The engine has transactions, and a program can already use the inline
 `(transaction ...)` form for a scope inside itself. `with m.atomic():` lifts
-that over every whole `run` in the block: every write, facts and equations
+that over every whole CALL in the block: every write, facts and equations
 alike, commits whole or rolls back whole when a directive throws.
 
 ```python
@@ -558,7 +558,7 @@ alike, commits whole or rolls back whole when a directive throws.
     assert Expression(S.kept, S.fact) in m  # and commits whole on success
 ```
 
-`with m.speculative():` is the what-if twin: each run executes against a
+`with m.speculative():` is the what-if twin: each call executes against a
 frozen view, the answers return, and every write is discarded.
 
 ```python
@@ -567,6 +567,24 @@ frozen view, the answers return, and every write is discarded.
     assert groups[-1] == [4]
     assert Expression(S.ghost, S.fact) not in m
 ```
+
+The write doors are calls too, so they obey the same policy:
+
+```python
+    with m.speculative():
+        m.add(S.ghost(2))         # discarded with the block's other writes
+    assert S.ghost(2) not in m
+```
+
+Per CALL is the whole contract, and it is why `m.transaction` exists beside
+these. A later call does not see what an earlier one wrote inside a
+speculative block, each call being its own what-if; and a raise later in an
+atomic block does not undo a call that already committed. For all-or-nothing
+across several calls, use `m.transaction(callable)` below. There is
+deliberately no `with m.transaction():` form: SWI's `transaction/1` and
+`snapshot/1` take a closed goal, and an engine, the one thing that suspends a
+goal across host calls, refuses to yield inside either, so a with-block cannot
+hold one open and pretending otherwise would lie about the isolation.
 
 Both cover engine state. A Python operation's side effects, and subscription
 callbacks that already fired, stay where they happened; that is what rolling

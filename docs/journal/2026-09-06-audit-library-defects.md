@@ -90,3 +90,68 @@ times two receivers. Against `petta`'s copy of the nine modules, 12 of the 15
 context cases fail and all 15 space cases pass; on the branch all 30 pass, with
 `test_embedding_store_takes_a_context_as_well_as_a_space` beside its `install`
 sibling in the arrays suite. Import contracts stay at 3 kept, 0 broken.
+
+## 2026-09-06, the scope that covered the sources and missed the writes
+
+Reported as `with m.speculative(): m.add(atom)` leaving the atom behind, and
+`with m.atomic():` keeping a write when the block raises, with the audit's
+reading that the scopes are source-shaped by design and Python-side writes are
+simply outside them.
+
+Measured first, because the reading decides the fix. The scopes are per-CALL
+policies, and that is already observable: inside `with sp.speculative():` an
+engine-source write is invisible to the very next call in the same block
+(`[[]]`), and `with sp.atomic():` rolls back a multi-statement run that trips
+an inference bound (`[[]]` scoped against `[[yes]]` unscoped) while a raise
+after a committed call keeps its work in either scope. `_controlled_run` in
+`_space_execution.py` is the one place the policy is applied, by design ("No
+caller selects individual wrappers"), and `add`, `remove`, `__delitem__`,
+`transfer` and `clear` were the doors that bypassed it, calling `rt.do_must`
+and `rt.apply_must` directly.
+
+Tried: holding one boundary open across the whole block, which is what the
+report's "route the block's Python writes through the scope's snapshot engine"
+would need. SWI has no begin/commit pair, and the one mechanism that suspends
+a goal across host calls is an engine, so the question is whether an engine can
+yield inside `transaction/1` or `snapshot/1`. It cannot:
+`engine_yield/1` raises `permission_error(execute, vmi, 'I_YIELD')` with
+context "not an engine" inside either, on SWI-Prolog 10.1.13
+(`ai-tmp/probe_held_tx2.pl`, `probe_held_snap.pl`; the same file's control
+without the wrapper yields normally). The shim's own held cursor already works
+around this by materializing every answer inside the boundary and replaying
+after it, which a with-block cannot do because the block's statements are the
+host's, not a goal's answers. So `Space.transaction`'s standing ruling holds:
+there is no `with m.transaction():` and cannot be one.
+
+Decided: not a refusal but the policy. A scope is per CALL, so a write door is
+a call like any other and goes through the same wrapper. Refusing a write
+inside a speculative block would be a wall neither language requires, since
+the snapshot covers a write call exactly as it covers a run call, and refusing
+one inside an atomic block would refuse the Python door while the source door
+beside it in the same block commits.
+
+The engine's own precedent decides where a refusal WOULD belong:
+`metta_with_state_write_fence/1` fences `new-state` inside a speculative scope
+because `nb_setval` state is not rolled back by `snapshot/1`. The Python
+equivalent is `clear`'s definition registries, which the snapshot cannot undo
+either; they are held back until the engine write stands rather than being
+refused, which leaves the whole clear discarded and the mirror describing what
+the space still holds.
+
+Rejected: routing every write through the output-carrying crossing so one
+helper serves both shapes. `janus.apply_once` costs 6.7% more instructions per
+write than `janus.cmd` (44,782 against 41,966 instructions:u per
+`metta_py_add` over 100,000 writes, control-subtracted, min of 3, three rounds
+agreeing within 0.05%), and the idiomatic write must also be the fast one. The
+void doors keep `cmd` outside a scope and answer through a unit-carrying face
+of one greater arity inside one, `metta_py_add/3` beside `metta_py_add/2`.
+
+Evidence: `test_every_public_write_door_honours_the_execution_scopes`, nine
+doors each with its own control, plus
+`test_an_atomic_scope_makes_one_python_write_one_transaction` (a transactional
+provider that refuses the second row: unscoped leaves `(row 1)` with no
+begin/commit ever issued, atomic leaves nothing and records
+`['begin', 'rollback']`) and
+`test_an_async_write_door_inherits_the_scope_across_the_worker`. All ten are
+red against `petta`'s `_space.py`, `_space_execution.py`,
+`_space_definitions.py` and `shim.pl` and green on the branch.
