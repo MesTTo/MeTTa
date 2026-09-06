@@ -36,7 +36,7 @@
 %     the same prefix whatever else the process has registered
 %     [tested: tracer:a_bounded_request_bounds_the_program_and_not_the_arming,
 %     test_arming_the_tracer_is_not_charged_to_the_run_bound;
-%     commit=WORKTREE].
+%     commit=59c3cbf1bc269dfa7194f78da34497f1757a9604].
 % Owns:
 %   - metta_trace_source/4 removes every metta_tracer wrapper and state fact,
 %     including after an event-limit error [tested 2026-08-14:
