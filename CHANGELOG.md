@@ -213,6 +213,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- The Node seat's vocabulary tables, `extensions/node/src/vocabularies.ts`, are
+  written by `extensions/python/tools/vocabgen.py` from the engine's own
+  `(vocabulary ...)` rows beside the Python module it already wrote, with the
+  Node package's casing map, and the `vocab-sync` lane fails on drift in
+  either. The table was hand-maintained, and the `refinement` vocabulary and
+  the four new `algebra-law` members reached Python and not Node until the
+  Node seat's own test caught it on the merged tree.
+- `metta_host_function_callable_from/2` is a host service: the engine's own
+  callable-from-here rule with the module made explicit, which a space's
+  function namespace reads, so the host transport never reaches the registry
+  facts directly.
 - `<`, `<=`, `>` and `>=` between two space handles now refuse, naming
   `metta.spaces.diff` and `metta.spaces.union` as the doors that answer
   containment. They answered the engine's term order silently, while `|`, `&`,
@@ -263,6 +274,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The codec builds under mypyc again. `RestraintError` was constructed with a
+  `dict[str, object]` unpacked as keywords, which mypyc refuses for parameters
+  typed `int | None`; the three restraint fields cross by name.
 - A space's function namespace lists and resolves only what that space can
   call. `dir(m.fn)`, `m.builtins()` and `m.fn.<name>` read the process-wide
   function register, so a head whose equations live in another space's module

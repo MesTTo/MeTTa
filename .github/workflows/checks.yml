@@ -256,7 +256,7 @@ jobs:
           # 2026-09-07]. A bare floor is still the subject of this job; these
           # two are part of running the suite at all, like pytest itself.
           uv pip install --python /tmp/v/bin/python --no-binary janus_swi \
-                         janus_swi docstring-parser pytest hypothesis \
+                         janus_swi docstring-parser annotated-types pytest hypothesis \
                          pytest-randomly pytest-timeout
           # The package itself, WITHOUT its dependencies: this job's subject is
           # the library on a bare floor, and pulling an extra in would make the

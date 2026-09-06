@@ -13,7 +13,7 @@
 ;Nothing has happened yet: one call, one answer, no invalidation.
 !(collapse (reach a $y))
 !(test (table-stats (reach $x $y))
-       ((tables 1) (answers 1) (complete-call 1) (invalidated 0) (reevaluated 0)))
+       ((tables 1) (answers 1) (complete-call 1) (invalidated 0) (reevaluated 0) (policy (incremental shared))))
 
 ;--------------------------------------------- what does NOT invalidate a table
 ;A write under a key this subgoal does not read leaves the table alone. Not
@@ -22,12 +22,12 @@
 ;the next call is what shows it.
 !(add-atom &self (edge b d))
 !(test (table-stats (reach $x $y))
-       ((tables 1) (answers 1) (complete-call 1) (invalidated 0) (reevaluated 0)))
+       ((tables 1) (answers 1) (complete-call 1) (invalidated 0) (reevaluated 0) (policy (incremental shared))))
 
 ;Nor does an atom with a different head in the same space.
 !(add-atom &self (unrelated x y))
 !(test (table-stats (reach $x $y))
-       ((tables 1) (answers 1) (complete-call 1) (invalidated 0) (reevaluated 0)))
+       ((tables 1) (answers 1) (complete-call 1) (invalidated 0) (reevaluated 0) (policy (incremental shared))))
 
 ;This is finer than the manual's own summary, which says invalidation "is done
 ;at the level of tables. Notably asserting a clause invalidates all affected
@@ -40,7 +40,7 @@
 ;------------------------------------------------ what DOES invalidate a table
 !(add-atom &self (edge a c))
 !(test (table-stats (reach $x $y))
-       ((tables 1) (answers 1) (complete-call 1) (invalidated 1) (reevaluated 0)))
+       ((tables 1) (answers 1) (complete-call 1) (invalidated 1) (reevaluated 0) (policy (incremental shared))))
 
 ;Re-evaluation is on demand, so it takes a call. reevaluated LOWER than
 ;invalidated would be SWI deciding a dependency changed without changing this
@@ -48,4 +48,4 @@
 ;shared table has completed one original call and one re-evaluation call.
 !(test (sort-atom (collapse (reach a $y))) (b c))
 !(test (table-stats (reach $x $y))
-       ((tables 1) (answers 2) (complete-call 2) (invalidated 1) (reevaluated 1)))
+       ((tables 1) (answers 2) (complete-call 2) (invalidated 1) (reevaluated 1) (policy (incremental shared))))
