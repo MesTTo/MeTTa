@@ -397,6 +397,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `group_by(column)`. Groups are keyed by the column's atom and retain `Rows`
   values with the original columns.
 
+- The catalog now publishes every accepted algebra-law spelling and alias
+  expansion. Python exposes them as `AlgebraLaw`, and all ten shipped algebra
+  carriers have matching catalog vocabulary members, enums, and root objects.
+
 - A bounded slice of a ranked match reaches the provider as a bound.
   `m.match(q, under=ranked)[:3]` pulled the ordinary cursor and sliced in
   Python, so a store that could have answered three rows answered all of them.

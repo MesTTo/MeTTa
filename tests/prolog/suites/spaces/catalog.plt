@@ -29,6 +29,10 @@
        catalog_self_description:catalog_queries_preserve_width_multiplicity_and_references,
        catalog_self_description:fixed_width_catalog_lookup_ignores_unrelated_arities;
        commit=8bd37f3042555ee016a7b917234ce44c75a97c3e]
+     - algebra-law vocabulary members and aliases derive from engine facts,
+       and every shipped algebra row appears in the semiring vocabulary
+       [tested: algebra_law_vocabulary_and_alias_claims_are_exact,
+       shipped_algebra_rows_are_the_semiring_vocabulary; commit=WORKTREE]
    Open Obligations:
      To Do: None
      Hacks: None
@@ -218,6 +222,66 @@ test(a_claim_on_a_value_outside_its_vocabulary_is_refused,
      [error(metta_declaration_malformed([claim, semiring, sideways, ordered],
                                         2, _))]) :-
     add_sexp('&metta', [claim, semiring, sideways, ordered], _).
+
+test(algebra_law_vocabulary_and_alias_claims_are_exact) :-
+    Equational = ['combine-associative', 'combine-commutative',
+                  'extend-associative', 'extend-commutative',
+                  'left-distributive', 'right-distributive',
+                  'combine-idempotent', 'combine-zero-identity',
+                  'extend-one-identity', 'extend-zero-annihilates'],
+    Accepted = ['combine-associative', 'combine-commutative',
+                'extend-associative', 'extend-commutative',
+                'left-distributive', 'right-distributive',
+                'combine-idempotent', 'combine-zero-identity',
+                'extend-one-identity', 'extend-zero-annihilates', contraction,
+                associative, commutative, distributive, idempotent],
+    once('get-atoms'('&metta', [vocabulary, 'algebra-law'|Accepted])),
+    findall([Alias|Expansion],
+            'get-atoms'('&metta',
+                        [claim, 'algebra-law', Alias, 'expands-to'|Expansion]),
+            Claims),
+    sort(Claims, SortedClaims),
+    SortedClaims ==
+        [[associative, 'combine-associative', 'extend-associative'],
+         [commutative, 'combine-commutative'],
+         [contraction, contraction],
+         [distributive, 'left-distributive', 'right-distributive'],
+         [idempotent, 'combine-idempotent']],
+    forall(( member([_|Expansion], Claims), member(Law, Expansion) ),
+           ( Law == contraction ; memberchk(Law, Equational) )).
+
+test(shipped_algebra_rows_are_the_semiring_vocabulary) :-
+    once('get-atoms'('&metta', [vocabulary, semiring|Semirings])),
+    findall(Name, 'get-atoms'('&metta', [algebra, Name|_]), Algebras),
+    Semirings == Algebras,
+    Semirings == [bool, bag, counting, set, ranked, tropical, prob, prov,
+                  budget, amplitude].
+
+test(algebra_law_aliases_expand_through_catalog_claims,
+     [cleanup(metta_remove_atom('&metta',
+                                [algebra, 'catalog-alias-laws', max, min, 0, 1,
+                                 [laws, associative], [carrier, 0, 1],
+                                 [requires], '&self'], _))]) :-
+    add_sexp('&metta',
+             [algebra, 'catalog-alias-laws', max, min, 0, 1,
+              [laws, associative], [carrier, 0, 1], [requires], '&self'], _),
+    metta_algebra_law('catalog-alias-laws', 'combine-associative'),
+    metta_algebra_law('catalog-alias-laws', 'extend-associative'),
+    metta_algebra_law('catalog-alias-laws', associative).
+
+test(an_unknown_algebra_law_names_the_accepted_vocabulary) :-
+    once(catch(add_sexp('&metta',
+                        [algebra, 'catalog-unknown-law', max, min, 0, 1,
+                         [laws, identity], [carrier], [requires], '&self'], _),
+               Error,
+               true)),
+    Error = error(metta_algebra_law_unknown('catalog-unknown-law', identity), _),
+    once(message_to_string(Error, Message)),
+    sub_string(Message, _, _, _, "accepted laws are"),
+    once('get-atoms'('&metta', [vocabulary, 'algebra-law'|Accepted])),
+    forall(member(Law, Accepted),
+           ( atom_string(Law, Text), sub_string(Message, _, _, _, Text) )),
+    !.
 
 :- dynamic cat_parked_spec/1.
 
