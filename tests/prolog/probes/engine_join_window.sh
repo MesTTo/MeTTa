@@ -12,8 +12,8 @@
 #     than stalling the caller
 #   - the exit status is nonzero if `post`, `next` or `create_idle` ever
 #     crashes, which is the direction that would falsify the fix in
-#     engine/materialize.pl; `destroy` crashing is the expected reading and
-#     does not fail this script
+#     engine/materialize.pl; `destroy` and `create_churn` crashing is the
+#     expected reading and does not fail this script
 #   - the crashing mode writes no core. It dumped a 55MB core per run under
 #     systemd-coredump, and six of those in a row starved the modes that ran
 #     after them: one run of each of `post`, `next` and `create_idle` was
@@ -61,7 +61,7 @@ tally() {
         i=$((i+1))
     done
     echo "$mode: runs=$RUNS joined=$ok segv=$segv hung=$hung other=$other"
-    if [ "$mode" != destroy ] && [ "$segv" -gt 0 ]; then
+    if [ "$mode" != destroy ] && [ "$mode" != create_churn ] && [ "$segv" -gt 0 ]; then
         echo "  $mode crashed, which the window map says it cannot" >&2
         status=1
     fi
@@ -76,4 +76,5 @@ tally post
 tally next
 tally create_idle
 tally destroy
+tally create_churn
 exit $status

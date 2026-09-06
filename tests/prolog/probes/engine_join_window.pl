@@ -54,9 +54,28 @@
 %   swipl tests/prolog/probes/engine_join_window.pl post
 %   swipl tests/prolog/probes/engine_join_window.pl next
 %   swipl tests/prolog/probes/engine_join_window.pl create_idle
+%   swipl tests/prolog/probes/engine_join_window.pl create_churn
 
 :- initialization(main, main).
 
+% Forty rounds of: start a worker that churns engine_create/3 and
+% engine_destroy/1 for fifty milliseconds, wait two milliseconds into it, and
+% join it with plain thread_join/2. This is the shape lib_thread's regressions
+% use, with the safe join taken out, so it says what those regressions would do
+% without it.
+main([create_churn]) :-
+    !,
+    message_queue_create(_, [alias(churning)]),
+    format("forty joins, each two milliseconds into a churning worker~n", []),
+    flush_output,
+    forall(between(1, 40, _),
+           ( get_time(Now),
+             Deadline is Now + 0.05,
+             thread_create(churn_announced(Deadline), Worker, []),
+             thread_get_message(churning, now),
+             sleep(0.002),
+             thread_join(Worker, _) )),
+    format("joined: forty~n", []).
 main([Mode]) :-
     !,
     message_queue_create(_, [alias(parked)]),
@@ -83,7 +102,7 @@ main([Mode]) :-
     format("joined: ~q~n", [Status]).
 main(_) :-
     format(user_error,
-           "usage: engine_join_window.pl destroy|post|next|create_idle~n", []),
+           "usage: engine_join_window.pl destroy|post|next|create_idle|create_churn~n", []),
     halt(2).
 
 park :-
@@ -110,8 +129,17 @@ worker(next) :-
     thread_send_message(ready, now),
     engine_next(E, _).
 % engine_create/3's own window is short and cannot be parked in, because
-% nothing inside it runs Prolog. This mode reports how often a join lands in it
-% by chance, which is how the crash was first met: rarely, and under load.
+% nothing inside it runs Prolog. These two modes report how often a join lands
+% in it by chance, which is how the crash was first met: rarely, and under
+% load. They differ only in WHEN the join happens, and that is the whole
+% difference between a probe that discriminates and one that does not:
+% `create_idle` joins as soon as the worker announces itself and has never
+% crashed here, while `create_churn` joins forty times, two milliseconds into
+% each of forty short churns, and crashes readily. A join taken straight after
+% thread_create/3 reads the pthread_t before the worker has run its first
+% goal, which is also why an early form of
+% lib_thread:a_joined_worker_survives_engine_churn_on_its_thread passed against
+% the defect it exists for.
 worker(create_idle) :-
     numlist(1, 300000, L),
     Goal = ( length(L, _), true ),
@@ -120,6 +148,11 @@ worker(create_idle) :-
     get_time(T0),
     Deadline is T0+3.0,
     churn(Goal, Deadline).
+% Driven by main/1 rather than by the shared park-and-join body, because the
+% repeated join is the point.
+worker(create_churn) :-
+    thread_send_message(ready, now),
+    thread_send_message(parked, now).
 
 post_loop :-
     repeat,
@@ -127,6 +160,10 @@ post_loop :-
       ( Term == park -> park ; true ),
       engine_yield(done),
     fail.
+
+churn_announced(Deadline) :-
+    thread_send_message(churning, now),
+    churn(( X = x, X == x ), Deadline).
 
 churn(Goal, Deadline) :-
     get_time(Now),

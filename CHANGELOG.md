@@ -57,6 +57,29 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Joining a MeTTa worker thread no longer risks killing the process. A worker
+  evaluating an ordinary query can be inside `engine_create/3` at any moment,
+  because a fair or best-first merge opens one SWI engine per space, and on
+  SWI-Prolog 10.1.13 a thread inside that call has no valid `pthread_t` for
+  `thread_join/2` to use. Every join the concurrency library makes now waits
+  for the worker's status to leave `running` first, which is the point after
+  which no further Prolog runs on it; three of those joins already followed a
+  `thread_signal(_, abort)`, so the wait is a millisecond.
+
+- A Python program no longer dies when the garbage collector reclaims an
+  answer view or a Prolog term. Three process deaths came from the same rule
+  being broken: a finaliser that calls into Prolog runs at a point no caller
+  chooses, on any thread, possibly inside another crossing, and the cyclic
+  collector finalises the members of one reference cycle in no defined order.
+  Two were `janus_swi.Term.__del__` erasing a record on a thread with no
+  engine, where SWI's `signalGCThread` dereferences a null `LD`; the third was
+  a dropped view closing its cursor from a collection pass, where SWI aborted
+  reading a record another member's finaliser had already erased. Finalisers
+  now only hand work over, and the next engine crossing does it. A released
+  janus term also goes inert, which janus 1.5.3 intends and misses by clearing
+  an attribute nothing reads, so a released term handed back to Prolog is
+  refused instead of reading freed memory.
+
 - Calling `Answers.index()` with a missing string that is also a column name
   now explains that `index` searches row values and points to `column(name)`;
   successful and ordinary missing-value Sequence behavior is unchanged.
