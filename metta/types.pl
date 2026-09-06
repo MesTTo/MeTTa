@@ -59,7 +59,7 @@
 % Guarantees: metta_grounded_type/2 retains structural type candidates from
 %   seam:grounded_type_names/2, so ordinary arrow unification checks live
 %   tensor dimensions and binds their result dimensions
-%   [tested: run_tests(tensor_shapes); commit=WORKTREE].
+%   [tested: run_tests(tensor_shapes); commit=4eaefdd8d40e53b2613722287302a14b41704662].
 
 %%% Type system: %%%
 
@@ -748,7 +748,7 @@ has_type_under_policy(Module, X, T) :-
 % choose an alternative through the same relation as has_type_derive/3.
 % [tested: tensor_shapes:a_policy_checked_shape_variable_binds_at_the_live_call,
 % tensor_shapes:a_policy_refusal_still_blocks_a_relational_shape_witness;
-% commit=WORKTREE].
+% commit=4eaefdd8d40e53b2613722287302a14b41704662].
 has_type_under_policy(Module, X, T) :-
     \+ ground(T),
     (   nonvar(T), T = [UnionHead|_], UnionHead == '|'

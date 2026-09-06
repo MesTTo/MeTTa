@@ -29,7 +29,7 @@
 %   context [tested: structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
 
 % Guarantees: refined-call evidence helpers cannot be captured by a space's
-%   user predicates [tested: run_tests(tensor_shapes); commit=WORKTREE].
+%   user predicates [tested: run_tests(tensor_shapes); commit=4eaefdd8d40e53b2613722287302a14b41704662].
 
 % Function source retained for higher-order specialization. Each equation is
 % one independently indexed fact, so compiling a new equation does not copy

@@ -27,7 +27,7 @@
 % Guarantees: Annotated parameter checks run before the body, retain joint
 %   bindings with the result, and report observed refinement failures using
 %   the original written call after all overloads decline
-%   [tested: run_tests(tensor_shapes); commit=WORKTREE].
+%   [tested: run_tests(tensor_shapes); commit=4eaefdd8d40e53b2613722287302a14b41704662].
 % Owns resources: each refined call owns a refinement_evidence/2 cell whose
 %   failure snapshots and host references become collectible when that call
 %   finishes or is abandoned. The cell never escapes into global state.

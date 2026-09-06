@@ -48,7 +48,7 @@
 % Guarantees: metta_bad_argument_reason/3 builds the same refusal payload
 %   independently of Error context and observation, allowing an evaluated
 %   refinement mismatch to retain its written call
-%   [tested: run_tests(tensor_shapes); commit=WORKTREE].
+%   [tested: run_tests(tensor_shapes); commit=4eaefdd8d40e53b2613722287302a14b41704662].
 
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 
