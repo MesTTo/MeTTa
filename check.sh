@@ -391,7 +391,12 @@ run GATE   petta        sh -c "cd '$HERE' && '$PY' tests/conformance/petta.py --
 #
 # It pointed at PeTTa-base until 2026-08-30, an older upstream whose layout
 # has no engine/metta.pl, so the guard inside fired and the lane passed
-# without measuring anything.
+# without measuring anything. That guard then returned 0 EVERYWHERE, and
+# .github/workflows/checks.yml never cloned upstream, so the lane ran on every
+# push and measured nothing there while PERFORMANCE.md said it did. The
+# workflow now checks the pinned upstream out and proves the counter is
+# readable before the gate, and the lane refuses where CI=true, the same line
+# check_docs_site draws below.
 run GATE   parity-perf  sh -c "cd '$HERE' && '$PY' tests/checks/check_upstream_parity.py"
 
 # and the four-case plant that proves the lane above can fail: a control

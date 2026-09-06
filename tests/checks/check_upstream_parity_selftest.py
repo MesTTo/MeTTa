@@ -46,6 +46,10 @@ Guarantees:
     on; a cold first touch is discarded rather than counted; and a program
     with no mode at all is reported as having no cost
     [tested: this file is its own gate; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]
+  - an absent upstream checkout refuses where ``CI=true`` and prints a skip
+    naming the pin elsewhere, the sibling checkout is AT that pin, and a
+    kernel or container that denies the counter is named with the two knobs
+    that decide it [tested: this file is its own gate; commit=WORKTREE]
 Fails when: the production lane stops exposing ``_perf`` as its only process
   call, or stops computing a row's net inside ``measure``.
 Open Obligations:
@@ -57,6 +61,7 @@ Open Obligations:
 from __future__ import annotations
 
 import contextlib
+import io
 import json
 import os
 import subprocess
@@ -435,6 +440,74 @@ def main() -> int:
             f"{len(str(control))} characters against the example's "
             f"{len(example.parts)} and {len(str(example))}"
         )
+
+    #The lane must not be able to pass in CI without measuring. Until
+    #2026-09-06 an absent upstream checkout returned 0 everywhere, and the
+    #workflow never provided one, so the lane ran on every push and measured
+    #nothing while the page said the measurement ran there.
+    original_upstream, original_ci = lane.UPSTREAM, os.environ.get("CI")
+    try:
+        lane.UPSTREAM = lane.REPO / "ai-tmp" / "no-upstream-checkout-here"
+        os.environ["CI"] = "true"
+        if lane.upstream_prerequisite() != 1:
+            failures.append(
+                "an absent upstream checkout did not refuse under CI=true, so "
+                "the lane can pass in CI without measuring"
+            )
+        os.environ.pop("CI")
+        if lane.upstream_prerequisite() != 0:
+            failures.append(
+                "an absent upstream checkout refused off CI, where a developer "
+                "who has not cloned it should get a printed skip"
+            )
+        #and the skip has to name the pin, or the reader cannot act on it.
+        buffer = io.StringIO()
+        with contextlib.redirect_stdout(buffer):
+            lane.upstream_prerequisite()
+        if lane.UPSTREAM_COMMIT[:7] not in buffer.getvalue():
+            failures.append("the local skip does not name the pinned commit")
+    finally:
+        lane.UPSTREAM = original_upstream
+        if original_ci is None:
+            os.environ.pop("CI", None)
+        else:
+            os.environ["CI"] = original_ci
+
+    #The pin itself: a present checkout still has to be the one the recorded
+    #upstream numbers came from before anything rebaselines against it.
+    if len(lane.UPSTREAM_COMMIT) != 40 or not all(
+        character in "0123456789abcdef" for character in lane.UPSTREAM_COMMIT
+    ):
+        failures.append(
+            f"UPSTREAM_COMMIT {lane.UPSTREAM_COMMIT!r} is not a full object ID"
+        )
+    if lane.upstream_present() and lane.upstream_head() != lane.UPSTREAM_COMMIT:
+        failures.append(
+            f"the checkout at {lane.UPSTREAM} is at {lane.upstream_head()}, "
+            f"not the pinned {lane.UPSTREAM_COMMIT}"
+        )
+
+    #A kernel or container that will not let this count has to say so. The
+    #plant is what a container under Docker's default seccomp profile actually
+    #prints, which is not a parse failure and must not be reported as one.
+    denied = subprocess.CompletedProcess(
+        args=[], returncode=0, stdout="",
+        stderr="Error:\nNo permission to enable instructions:u event.\n",
+    )
+    original_spawn = lane._spawn
+    lane._spawn = lambda argv: denied
+    try:
+        lane._perf(["true"])
+    except RuntimeError as refusal:
+        for expected in ("perf_event_paranoid", "seccomp=unconfined"):
+            if expected not in str(refusal):
+                failures.append(
+                    f"the perf refusal does not name {expected}: {refusal}"
+                )
+    else:
+        failures.append("perf answering no count at all did not refuse")
+    finally:
+        lane._spawn = original_spawn
 
     #The one thing the control cannot do is name a path shorter than its root,
     #and it has to say so with the edit that fixes it.

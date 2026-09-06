@@ -2,15 +2,18 @@
 
 This engine runs the median example program for about half the retired
 instructions upstream PeTTa needs. That is measured on the same files by the
-same harness, and the harness is in the repository, so this page can be checked
-rather than believed. "Reproducing it" below is the whole procedure.
+same harness, and the measurement runs in CI, so this page can be checked
+rather than believed.
 
-Everything below comes from `tests/data/upstream-parity-baseline.json`. The
-`parity-perf` gate lane compares this tree against it on every push, but only
-where the pinned upstream checkout sits beside the repository: the CI workflow
-does not clone it, so there the lane says so and passes without measuring
-anything. The numbers on this page were taken by hand on a machine that has
-it.
+Everything below comes from `tests/data/upstream-parity-baseline.json`, which
+the `parity-perf` gate lane compares this tree against on every push. What runs
+there is this engine over the corpus, against the upstream numbers frozen in
+that file: the workflow checks the pinned upstream out beside the repository
+and proves the instruction counter is readable before the gate starts, and the
+lane refuses instead of skipping when either is missing. So a CI run either
+re-measures this engine or goes red; it cannot pass without measuring. That
+was not true until 2026-09-06: the workflow never cloned upstream, the lane
+returned 0 when it was absent, and this paragraph claimed the opposite.
 
 ## The numbers on this page were too good until 2026-09-06
 
@@ -171,8 +174,18 @@ own numbers for the small programs range from 535,151 to 14,630,533.
 
 ## Reproducing it
 
+The upstream checkout has to be at the commit the recorded upstream numbers
+were measured from, `ae66fa8`, or `--rebaseline` refuses. These are the same
+four commands the CI workflow runs:
+
 ```sh
-git clone https://github.com/trueagi-io/PeTTa ../PeTTa-upstream
+mkdir -p ../PeTTa-upstream && cd ../PeTTa-upstream
+git init -q && git remote add origin https://github.com/trueagi-io/PeTTa
+git fetch --depth 1 origin ae66fa8e41dcd5539d614706bd4e5cfb34f9608d
+git checkout FETCH_HEAD
+```
+
+```sh
 python tests/checks/check_upstream_parity.py
 ```
 
@@ -180,11 +193,15 @@ The script measures both engines over the corpus and compares against the
 committed baseline. `--rebaseline` rewrites the baseline from a fresh
 measurement, which is how the numbers on this page were produced, and
 `--frozen` compares without remeasuring.
-`tests/checks/check_upstream_parity_selftest.py` plants four kinds of broken
-measurement and requires the lane to catch each.
+`tests/checks/check_upstream_parity_selftest.py` plants the ways this
+measurement can break and requires the lane to catch each.
 
-`perf` must be available and `perf_event_paranoid` low enough to read counters
-without privileges.
+`perf` must be available and `/proc/sys/kernel/perf_event_paranoid` at 2 or
+below. Inside a container that is not enough on its own: Docker's default
+seccomp profile denies `perf_event_open`, so `perf stat -e instructions:u`
+answers `No permission to enable instructions:u event` until the container
+runs with `--security-opt seccomp=unconfined`, which is what the workflow's
+gate job sets.
 
 ## What these numbers do not say
 

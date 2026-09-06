@@ -35,6 +35,23 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `tests/data/upstream-parity-baseline.json` is rebuilt; the measurements are
   in `docs/journal/2026-09-06-the-parity-floor.md`.
 
+- The `parity-perf` lane now measures in CI instead of skipping there. It ran
+  on every push and returned 0 without comparing anything, because the guard
+  for a missing upstream checkout returned 0 everywhere and the workflow never
+  cloned one, while `PERFORMANCE.md` said the measurement ran in CI. The gate
+  job checks `trueagi-io/PeTTa` out at `ae66fa8` beside the repository, proves
+  the instruction counter is readable before the gate starts, and runs with
+  `--security-opt seccomp=unconfined` because Docker's default profile denies
+  `perf_event_open`; the CI image gains `linux-perf`, which Debian trixie does
+  not ship. The lane refuses where `CI=true` and prints a skip naming the pin
+  elsewhere, so a CI run either re-measures this engine or goes red.
+
+  The pinned commit is enforced rather than assumed: `--rebaseline` refuses
+  against a checkout at any other commit, since the recorded upstream numbers
+  came from that one. A kernel or container that will not let the harness
+  count is named with the two settings that decide it instead of being
+  reported as a parse failure.
+
 - The `parity-perf` lane fails on a row whose net comes out below its own
   control instead of recording it, and a new selftest beside it,
   `check_upstream_parity_selftest.py`, plants that and the other ways this

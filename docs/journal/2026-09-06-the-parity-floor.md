@@ -332,10 +332,65 @@ lane needs is never there: the guard at the top of `main/0` prints
 `upstream checkout not found at ...; nothing to compare` and returns 0. The
 lane runs in CI and measures nothing.
 
-Decided: the page says that, in the same paragraph that says where the numbers
-came from. A claim that a number is checked automatically, on a page whose
-whole subject is a number that was not, is the one sentence that had to be
-true.
+Decided, then superseded the same day: the page said that, in the same
+paragraph that says where the numbers came from. Superseded by the section
+below, which makes the sentence true instead of qualifying it.
+
+## 2026-09-06, making the lane able to fail in CI
+
+A lane that cannot fail is not a lane, so the answer was not to describe the
+skip but to remove it. Three prerequisites, and each was measured rather than
+assumed, because two of them are properties of a container this repository has
+never run perf inside.
+
+Tried: `git ls-remote` and then the shallow fetch-by-object-ID recipe against
+github.com -> `git init` + `remote add` + `fetch --depth 1 origin <sha>` +
+`checkout FETCH_HEAD` answers `ae66fa8e41dcd5539d614706bd4e5cfb34f9608d`, so
+the pin is fetchable without the history. github.com serves an arbitrary
+object ID to `want`, which not every host does.
+
+Tried: the CI image. `swipl:latest` is Debian trixie and has NO `perf`; the
+package that provides it there is `linux-perf`. Built the image with it and
+ran `perf stat -e instructions:u -x , true` inside:
+
+    default seccomp profile   Error: No permission to enable instructions:u event.
+    seccomp=unconfined        130379,,instructions:u,249770,100.00,,
+
+So Docker's default profile denies `perf_event_open` and the gate job needs
+`options: --security-opt seccomp=unconfined`. That is the narrowest option
+that lets the syscall through and it grants no privileges.
+
+Tried: both workflow step bodies, verbatim, inside the built image, with the
+option and without ->
+
+    with --security-opt seccomp=unconfined   exit 0, "counter readable"
+    default profile                          exit 1, the diagnostic
+
+Found, by running that second control rather than trusting the first: the
+preflight step's own test was broken. It read
+`perf stat ... | grep -q instructions:u`, and perf's REFUSAL says
+`No permission to enable instructions:u event`, which contains that string, so
+the step reported a readable counter inside a container that could not count
+at all. It now asks what `_perf` asks: a `-x ,` row whose third field is the
+event and whose first is a number.
+
+Decided: `upstream_prerequisite/0` refuses where `CI=true` and prints a skip
+naming the pin elsewhere, which is the line `docs_prerequisite_missing` already
+draws in check.sh. Decided: `UPSTREAM_COMMIT` is a constant, `upstream_head/0`
+reads the checkout's HEAD, and `--rebaseline` refuses against any other commit
+-- that turns this file's own `assumed: the sibling checkout is ... pinned`
+into something enforced. The gate path does not read the sibling at all, so a
+drifted checkout there is a printed note rather than a refusal.
+
+Decided: a perf that cannot count is named with the two knobs that decide it,
+`perf_event_paranoid` and the seccomp profile, instead of the old
+`perf reported no instruction count`, which sent the reader into the harness.
+
+Open: `/proc/sys/kernel/perf_event_paranoid` on GitHub's own runners. It reads
+-1 here and 2 or less is enough, but a container job cannot change the host's
+value, so if theirs is 3 or more the preflight step fails and the remedy is
+the runner's rather than this repository's. That is the one link in this chain
+measured nowhere but on this box.
 
 ## 2026-09-06, the timeout that left the engine running
 

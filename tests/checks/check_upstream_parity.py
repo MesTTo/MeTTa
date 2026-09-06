@@ -64,17 +64,23 @@ method's resolution [measured 2026-09-06;
 command=ai-tmp/probe/validate_control.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
 
 Assumes:
-  - the upstream checkout at ../PeTTa-upstream is read-only and pinned, so its
-    numbers freeze into the baseline; --rebaseline re-measures everything
+  - the upstream checkout at ../PeTTa-upstream is read-only, so its numbers
+    freeze into the baseline; --rebaseline re-measures everything
     [assumed: the sibling checkout is a reference copy nothing in this
-    repository writes to, which this tool relies on and cannot enforce].
-  - perf_event_paranoid permits instructions:u without privileges
-    [source: /proc/sys/kernel/perf_event_paranoid, which reads -1 on the
-    machine these numbers were taken on; a stricter value makes
-    measure_instructions fail loudly rather than silently skip].
+    repository writes to, which this tool relies on and cannot enforce]. That
+    it is at the PINNED COMMIT is no longer assumed: upstream_head/0 reads it
+    and --rebaseline refuses anything else
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
   - every corpus path is long enough and deep enough that NULL_ROOT can name a
     control of the same shape; null_program refuses by name when it is not.
 Guarantees:
+  - the lane cannot pass in CI without measuring: an absent upstream checkout
+    is a refusal where CI=true and a printed skip elsewhere, which is the line
+    check.sh's documentation lane already draws
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
+  - a kernel or container that will not let this count instructions is named
+    with the two knobs that decide it, rather than reported as a parse failure
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
   - a row whose program run costs LESS than its own null control is reported
     as `negative-net` and fails the run, rather than being recorded and then
     dropped from the page
@@ -144,6 +150,14 @@ REPO = HERE.parents[1]
 #the existence guard below fired and this lane passed without measuring
 #anything.
 UPSTREAM = REPO.parent / "PeTTa-upstream"
+#: The upstream this tree is compared against, and the commit every recorded
+#: upstream number was measured from. PERFORMANCE.md names the same pin, the
+#: workflow checks that commit out beside the repository before the gate, and
+#: upstream_head/0 refuses a rebaseline against anything else. It was an
+#: `assumed` in this header's Assumes block until 2026-09-06, when the
+#: workflow gained a step that can satisfy it.
+UPSTREAM_REMOTE = "https://github.com/trueagi-io/PeTTa"
+UPSTREAM_COMMIT = "ae66fa8e41dcd5539d614706bd4e5cfb34f9608d"
 #: The COMMITTED baseline, which lives with the other test data rather than
 #: beside this script. It moved there when tests/ was put into folders by kind
 #: and this constant did not follow, so the file below never existed: the
@@ -232,14 +246,40 @@ def _spawn(argv: list[str]) -> subprocess.CompletedProcess:
     )
 
 
+#: What the kernel will let an unprivileged process count, read for the
+#: refusal below rather than assumed. -1 on the machine these numbers were
+#: taken on; 2 still permits a process to count itself, 3 and above permit
+#: nothing.
+PARANOID = pathlib.Path("/proc/sys/kernel/perf_event_paranoid")
+
+
 def _perf(command: list[str]) -> tuple[int, subprocess.CompletedProcess]:
     completed = _spawn(["perf", "stat", "-e", "instructions:u", "-x", ",", *command])
     instructions = None
     for line in completed.stderr.splitlines():
         if ",instructions:u" in line:
             instructions = int(line.split(",")[0])
+    #Naming the two ways this fails, because they are not the tree's fault and
+    #the old message ("perf reported no instruction count") sent the reader
+    #into the harness. A container is the common one: Docker's default seccomp
+    #profile denies perf_event_open outright, so `perf stat -e instructions:u`
+    #answers `No permission to enable instructions:u event` even as root, and
+    #`--security-opt seccomp=unconfined` is what lets it count [measured
+    #2026-09-06: swipl:latest plus linux-perf, `perf stat -e instructions:u -x
+    #, true` denied under the default profile and answering
+    #`130379,,instructions:u,249770,100.00,,` unconfined; commit=WORKTREE].
     if instructions is None:
-        msg = f"perf reported no instruction count: {completed.stderr[-300:]}"
+        paranoid = "unreadable"
+        with contextlib.suppress(OSError):
+            paranoid = PARANOID.read_text().strip()
+        msg = (
+            "perf did not report an instruction count, so nothing here can be "
+            "measured. Either perf is absent, or this kernel refuses to let "
+            f"this process count itself: {PARANOID} reads {paranoid}, where 2 "
+            "or less is needed, and a container needs "
+            "--security-opt seccomp=unconfined before perf_event_open is "
+            f"permitted at all. perf said: {completed.stderr[-300:]}"
+        )
         raise RuntimeError(msg)
     return instructions, completed
 
@@ -853,6 +893,53 @@ def verdicts(baseline: dict, *, remeasure: bool) -> int:
     return 1 if cross or drift or negative or unstable else 0
 
 
+def upstream_present() -> bool:
+    """Whether the sibling checkout holds an engine this can measure."""
+    return any((UPSTREAM / d / "metta.pl").exists() for d in ("engine", "src"))
+
+
+def upstream_head() -> str | None:
+    """The commit the sibling checkout is on, or None when it cannot say."""
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(UPSTREAM), "rev-parse", "HEAD"],
+            capture_output=True, text=True, timeout=30, check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return completed.stdout.strip() if completed.returncode == 0 else None
+
+
+#GitHub Actions sets CI=true, and check.sh already draws this exact line for a
+#prerequisite the repository can provide: refuse where the lane is
+#load-bearing, print a skip where a developer simply has not cloned it
+#[source: check.sh:639, docs_prerequisite_missing]. Until 2026-09-06 this returned
+#0 either way, and the workflow never cloned upstream, so the lane ran on every
+#push and measured nothing -- and PERFORMANCE.md said the measurement ran in
+#CI. The workflow clones the pin before the gate now, so a missing checkout
+#there is a broken workflow rather than a missing option.
+def upstream_prerequisite() -> int | None:
+    """None when the comparison can run, or the exit status when it cannot."""
+    if upstream_present():
+        return None
+    absence = f"upstream checkout not found at {UPSTREAM}"
+    if os.environ.get("CI") == "true":
+        print(
+            f"error: {absence}; refusing to pass the parity gate without it. "
+            f"The workflow checks {UPSTREAM_REMOTE} out at "
+            f"{UPSTREAM_COMMIT} beside the repository before this lane runs; "
+            "if that step did not, this lane measured nothing.",
+            file=sys.stderr,
+        )
+        return 1
+    print(
+        f"note: {absence}; nothing to compare. Check "
+        f"{UPSTREAM_REMOTE} out at {UPSTREAM_COMMIT[:7]} there to run it; "
+        "PERFORMANCE.md's 'Reproducing it' has the commands."
+    )
+    return 0
+
+
 def main() -> int:
     """Report the parity verdicts, rebuilding the baseline under --rebaseline."""
     parser = argparse.ArgumentParser()
@@ -863,9 +950,25 @@ def main() -> int:
         help="judge the stored numbers without re-measuring this tree",
     )
     arguments = parser.parse_args()
-    if not any((UPSTREAM / d / "metta.pl").exists() for d in ("engine", "src")):
-        print(f"upstream checkout not found at {UPSTREAM}; nothing to compare")
-        return 0
+    refusal = upstream_prerequisite()
+    if refusal is not None:
+        return refusal
+    #Only --rebaseline READS the sibling checkout; the gate path re-measures
+    #this tree and compares against upstream numbers already frozen in the
+    #baseline. So a checkout at the wrong commit is fatal to a rebaseline,
+    #which would attribute fresh numbers to a pin they did not come from, and
+    #is worth saying but not worth failing for anywhere else.
+    head = upstream_head()
+    if head is not None and head != UPSTREAM_COMMIT:
+        drift = (
+            f"{UPSTREAM} is at {head}, not the pinned {UPSTREAM_COMMIT} that "
+            "the recorded upstream numbers were measured from"
+        )
+        if arguments.rebaseline:
+            print(f"error: {drift}; refusing to rebaseline against it.",
+                  file=sys.stderr)
+            return 1
+        print(f"note: {drift}; this run does not read it, so the verdicts hold.")
     if arguments.rebaseline or not BASELINE.exists():
         entries = build_baseline()
         BASELINE.write_text(json.dumps(entries, indent=1, sort_keys=True) + "\n")
