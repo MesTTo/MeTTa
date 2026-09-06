@@ -133,7 +133,7 @@ test(assertIncludes_subset_passes) :-
 %stays absent: its EXCESS answers are legal, so a two-sided report would name
 %a bag that is not a reason for the failure
 %[source: docs/journal/2026-09-06-the-bag-diff-an-assertion-already-computes.md;
-%commit=WORKTREE].
+%commit=48ec57e6df02e05ad3b5da50157dea321969bc48].
 test(assertIncludes_failure_carries_the_missing_bag_alone) :-
     catch(( eval_string("(assertIncludes (superpose (1 2)) (7))", _),
             Verdict = passed ),
