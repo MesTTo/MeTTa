@@ -3,6 +3,8 @@
 %   '&metta' declarations against the self-describing catalog.
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
+% Guarantees: algebra membership is shared by declaration, native annotations
+% and host validation [tested: test_tensor_type_carrier_runs_max_product_and_reinterprets_provenance; commit=WORKTREE].
 % Assumes:
 %   - the removal funnel takes a space NAME rather than a handle, so
 %     metta_remove_atom/3, unstore_atom/3 and remove_equation/6 each take a
@@ -92,7 +94,7 @@
 %     gate rejects a closed list that has neither a catalog row nor a strict
 %     adjacent exemption [tested:
 %     test_a_planted_closed_policy_list_is_reported_by_the_inventory_lane;
-%     commit=42b5d28232e75c32b20a1d5bf1f740fec134938d].
+%     commit=WORKTREE].
 %   - A selective native match is one indexed probe rather than a scan, and
 %     the acyclic guard does not change that because it runs on the answer
 %     [tested 2026-08-18:
@@ -126,7 +128,7 @@
 %     rebuilding compiled dependents, so all mutation doors share one forward
 %     propagation mechanism [tested:
 %     support_graph:test_a_derived_fact_is_invalidated_forward_from_what_it_supports;
-%     commit=7ade2b90e2631451fd6ffc23d22dd8c2d4a7a7aa].
+%     commit=WORKTREE].
 %   - Dispatch override/default edits and DontEvalType marker edits invalidate
 %     their typed support roots after storage changes, including callers that
 %     compiled before the edit [tested:
@@ -271,6 +273,7 @@
             metta_capacity_count_install/1,
             metta_capacity_count_uninstall/1,
             metta_catalog_row/1,
+            metta_require_algebra_value/3,
             metta_publish_builtin_visibility/0,
             metta_dispatch_value/3,
             metta_instrument_recursive_clause/3,

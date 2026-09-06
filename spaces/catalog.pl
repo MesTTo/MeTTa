@@ -39,6 +39,18 @@
 % annotations row, while shipped preset rows remain global fallbacks [tested:
 % extensions/python/tests/ch06_many_answers/test_under_algebra.py::test_custom_algebras_are_context_owned;
 % commit=2e627a593413191cda3170f2eb716835f7f62543].
+% Guarantees: metta_retire_space_catalog/1 removes declarations owned by a
+% released space through metta_remove_atom/3, including context-routed kinds,
+% while global vocabularies and sibling algebra declarations remain intact
+% [tested: run_tests(catalog_lifecycle); commit=WORKTREE].
+
+% Guarantees: finite tensor closure and law witnesses compare shape and exact
+% values [tested: test_finite_tensor_semiring_checks_every_law; commit=WORKTREE].
+
+% Guarantees: type carriers validate membership without certifying laws;
+% only finite enumerations permit exhaustive law checks [tested:
+% test_type_carrier_cannot_certify_laws,
+% test_type_carrier_refuses_values_outside_its_type; commit=WORKTREE].
 
 :- dynamic native_storage_module_cache/2.
 :- dynamic space_parametric/1.
@@ -492,6 +504,57 @@ metta_catalog_note_removed(_).
 metta_cache_policy_changed(Function) :-
     forall(seam:cache_policy_changed(Function), true).
 
+% A space owner is a catalog position, not a symbol mentioned anywhere in a
+% row. Algebra laws and their carrier certificate live inside the owned
+% algebra row; vocabulary and claim rows are global definitions. Context
+% routes describe their owner position already, including third-party kinds.
+% [tested: run_tests(catalog_lifecycle); commit=WORKTREE].
+metta_space_catalog_head(Head) :- metta_routed_head(Head, context).
+metta_space_catalog_head(annotations).
+metta_space_catalog_head(source).
+metta_space_catalog_head(context).
+metta_space_catalog_head(admits).
+metta_space_catalog_head(capacity).
+metta_space_catalog_head(writes).
+metta_space_catalog_head(events).
+metta_space_catalog_head(emits).
+metta_space_catalog_head(image).
+metta_space_catalog_head(on).
+metta_space_catalog_head(agenda).
+metta_space_catalog_head(tabled).
+metta_space_catalog_head(defined).
+metta_space_catalog_head(subscription).
+metta_space_catalog_head(inherits).
+metta_space_catalog_head(restricted).
+metta_space_catalog_head(grants).
+metta_space_catalog_head(parametric).
+metta_space_catalog_head(covers).
+metta_space_catalog_head('pre-add').
+metta_space_catalog_head('post-add').
+
+metta_retire_space_catalog(Space) :-
+    metta_undeclare_hook(pre_add, Space),
+    metta_undeclare_hook(post_add, Space),
+    findall(Head, metta_space_catalog_head(Head), Heads0),
+    sort(Heads0, Heads),
+    findall(Row,
+            ( member(Head, Heads),
+              Row = [Head, Space|_],
+              metta_catalog_row(Row) ),
+            ContextRows),
+    findall([algebra, Name, Combine, Extend, Zero, One,
+             Laws, Carrier, Requires, Space],
+            ( Space \== global,
+              metta_catalog_row([algebra, Name, Combine, Extend, Zero, One,
+                                 Laws, Carrier, Requires, Space]) ),
+            AlgebraRows),
+    append(ContextRows, AlgebraRows, Rows),
+    forall(member(Row, Rows), metta_remove_atom('&metta', Row, _)),
+    retractall(metta_annotations_cache(Space, _)),
+    retractall(metta_algebra_descriptor_cache(Space, _, _, _, _, _, _, _, _)),
+    retractall(metta_ctx_declared(Space)),
+    retractall(metta_events_declared(Space)).
+
 %One catalog row as a list, whatever its arity: '&metta'(kind, handles,
 %symbol, ...) reads back as [kind, handles, symbol, ...]. The walk over the
 %arities is needed only when the query leaves its width open. A fixed-width
@@ -901,6 +964,10 @@ metta_check_algebra_fields(Name, Combine, Extend, Zero, One,
     metta_algebra_list_field(Laws, laws, Term, 6),
     metta_algebra_carrier_field(Carrier, Term),
     metta_algebra_list_field(Requires, requires, Term, 8),
+    metta_require_algebra_value(Name, Carrier, Zero),
+    metta_require_algebra_value(Name, Carrier, One),
+    metta_algebra_carrier_parts(Carrier, _, Values),
+    forall(member(Value, Values), metta_require_algebra_value(Name, Carrier, Value)),
     metta_check_algebra_laws(Name, Combine, Extend, Zero, One,
                              Laws, Carrier, Term).
 
@@ -958,6 +1025,14 @@ metta_algebra_list_field([Head|Values], Head, _, _) :-
 metta_algebra_list_field(_, Head, Term, Position) :-
     metta_declaration_refused(Term, Position, [Head, '... symbols']).
 
+metta_algebra_carrier_field([type, Type, Carrier], Term) :-
+    !,
+    (   ground(Type), (atom(Type) ; is_list(Type) ; seam:host_object(Type))
+    ->  metta_algebra_carrier_field(Carrier, Term),
+        ( Carrier = [carrier|_] -> true
+        ; metta_declaration_refused(Term, 7, [type, 'Type', [carrier, '... finite values']]) )
+    ;   metta_declaration_refused(Term, 7, 'a ground type or grounded membership predicate')
+    ).
 metta_algebra_carrier_field([carrier|Values], Term) :-
     !,
     (   maplist(ground, Values)
@@ -966,6 +1041,44 @@ metta_algebra_carrier_field([carrier|Values], Term) :-
     ).
 metta_algebra_carrier_field(_, Term) :-
     metta_declaration_refused(Term, 7, [carrier, '... atoms']).
+
+% A type is a membership relation; a finite enumeration additionally bounds
+% the domain over which a law can be checked by exhaustion.
+metta_algebra_carrier_parts([carrier|Values], none, Values).
+metta_algebra_carrier_parts([type, Type, [carrier|Values]], some(Type), Values).
+
+metta_require_algebra_value(_, [carrier], _) :- !.
+metta_require_algebra_value(Name, Carrier, Value) :-
+    metta_algebra_carrier_parts(Carrier, Type, Values),
+    (   ground(Value),
+        metta_algebra_type_admits(Type, Value),
+        ( Values == []
+        ; member(Member, Values), metta_algebra_equal(Value, Member) )
+    ->  true
+    ;   throw(error(metta_algebra_value_outside_carrier(Name, Value, Carrier), none))
+    ).
+
+metta_algebra_type_admits(none, _).
+metta_algebra_type_admits(some(Type), Value) :-
+    (   seam:host_object(Type)
+    ->  (   once(seam:grounded_algebra_type(Type, Value, Answer))
+        ->  Answers = [Answer]
+        ;   once(findnsols(2, Answer, eval([Type, Value], Answer), Answers))
+        ),
+        (   Answers == [true] -> true
+        ;   Answers == [false] -> fail
+        ;   throw(error(metta_algebra_type_predicate(Type, Answers), none))
+        )
+    ;   current_metta_module(Module),
+        type_witness_in(Module, Value, Type)
+    ).
+
+prolog:error_message(metta_algebra_value_outside_carrier(Name, Value, Carrier)) -->
+    [ 'algebra_value_outside_carrier: ~w value ~w is outside ~w; provide a value of the declared type or finite carrier, or declare the intended type'-
+      [Name, Value, Carrier] ].
+prolog:error_message(metta_algebra_type_predicate(Type, Answers)) -->
+    [ 'algebra_type_predicate: ~w must answer one bool, not ~w; use a predicate returning exactly True or False'-
+      [Type, Answers] ].
 
 %A public law is a certificate, not a planner hint. User rows therefore name
 %only this vocabulary and supply a finite carrier for every equation; shipped
@@ -1004,7 +1117,13 @@ metta_algebra_law_vocabulary(Laws) :-
     list_to_set(All, Laws).
 
 metta_check_algebra_laws(Name, Combine, Extend, Zero, One,
-                         [laws|Laws], [carrier|Carrier], Term) :-
+                         [laws|Laws], CarrierField, Term) :-
+    metta_algebra_carrier_parts(CarrierField, Type, Carrier),
+    (   Type = some(_), Carrier == [], Laws \== []
+    ->  throw(error(metta_algebra_law_uncheckable(Name, Laws,
+                                                  finite_carrier_required), none))
+    ;   true
+    ),
     (   member(Unknown, Laws),
         \+ metta_algebra_known_law(Unknown)
     ->  throw(error(metta_algebra_law_unknown(Name, Unknown), none))
@@ -1025,110 +1144,127 @@ metta_check_algebra_laws(Name, Combine, Extend, Zero, One,
                     none))
     ;   Carrier == []
     ->  true
-    ;   metta_check_algebra_closure(Name, Combine, Extend, Carrier),
+    ;   metta_check_algebra_closure(Name, Combine, Extend, CarrierField, Carrier),
         forall(member(Law, Equational),
                metta_check_algebra_law(Name, Combine, Extend, Zero, One,
-                                       Carrier, Law))
+                                       CarrierField, Carrier, Law))
     ).
 
-metta_check_algebra_closure(Name, Combine, Extend, Carrier) :-
+metta_check_algebra_closure(Name, Combine, Extend, CarrierField, Carrier) :-
     % policy-inventory-exempt: mechanism-internal; reason=Combine and Extend are the algebra row's own two declared operation names rather than a closed value set; evidence=engine/spaces/catalog.pl:metta_check_algebra_laws/8
     forall(( member(Operation, [Combine, Extend]),
              member(A, Carrier), member(B, Carrier) ),
            ( metta_apply_algebra_operation(Name, Operation, A, B, Result),
-             (   memberchk(Result, Carrier)
+             (   member(Candidate, Carrier),
+                 metta_algebra_equal(Result, Candidate)
              ->  true
              ;   throw(error(metta_algebra_carrier_not_closed(
                                  Name, Operation, A, B, Result), none))
-             ) )).
+             ),
+             metta_require_algebra_value(Name, CarrierField, Result) )).
 
-metta_algebra_apply(Name, Operation, A, B, Result) :-
-    metta_apply_algebra_operation(Name, Operation, A, B, Result).
+metta_algebra_apply(Name, CarrierField, Operation, A, B, Result) :-
+    metta_require_algebra_value(Name, CarrierField, A),
+    metta_require_algebra_value(Name, CarrierField, B),
+    metta_apply_algebra_operation(Name, Operation, A, B, Result),
+    metta_require_algebra_value(Name, CarrierField, Result).
 
-metta_check_algebra_law(Name, Combine, _, _, _, Carrier,
+metta_check_algebra_law(Name, Combine, _, _, _, CarrierField, Carrier,
                         'combine-associative') :- !,
     forall(( member(A, Carrier), member(B, Carrier), member(C, Carrier) ),
-           ( metta_algebra_apply(Name, Combine, A, B, AB),
-             metta_algebra_apply(Name, Combine, AB, C, Left),
-             metta_algebra_apply(Name, Combine, B, C, BC),
-             metta_algebra_apply(Name, Combine, A, BC, Right),
+           ( metta_algebra_apply(Name, CarrierField, Combine, A, B, AB),
+             metta_algebra_apply(Name, CarrierField, Combine, AB, C, Left),
+             metta_algebra_apply(Name, CarrierField, Combine, B, C, BC),
+             metta_algebra_apply(Name, CarrierField, Combine, A, BC, Right),
              metta_require_algebra_equal(Name, 'combine-associative',
                                          [A,B,C], Left, Right) )).
-metta_check_algebra_law(Name, Combine, _, _, _, Carrier,
+metta_check_algebra_law(Name, Combine, _, _, _, CarrierField, Carrier,
                         'combine-commutative') :- !,
     forall(( member(A, Carrier), member(B, Carrier) ),
-           ( metta_algebra_apply(Name, Combine, A, B, Left),
-             metta_algebra_apply(Name, Combine, B, A, Right),
+           ( metta_algebra_apply(Name, CarrierField, Combine, A, B, Left),
+             metta_algebra_apply(Name, CarrierField, Combine, B, A, Right),
              metta_require_algebra_equal(Name, 'combine-commutative',
                                          [A,B], Left, Right) )).
-metta_check_algebra_law(Name, _, Extend, _, _, Carrier,
+metta_check_algebra_law(Name, _, Extend, _, _, CarrierField, Carrier,
                         'extend-associative') :- !,
     forall(( member(A, Carrier), member(B, Carrier), member(C, Carrier) ),
-           ( metta_algebra_apply(Name, Extend, A, B, AB),
-             metta_algebra_apply(Name, Extend, AB, C, Left),
-             metta_algebra_apply(Name, Extend, B, C, BC),
-             metta_algebra_apply(Name, Extend, A, BC, Right),
+           ( metta_algebra_apply(Name, CarrierField, Extend, A, B, AB),
+             metta_algebra_apply(Name, CarrierField, Extend, AB, C, Left),
+             metta_algebra_apply(Name, CarrierField, Extend, B, C, BC),
+             metta_algebra_apply(Name, CarrierField, Extend, A, BC, Right),
              metta_require_algebra_equal(Name, 'extend-associative',
                                          [A,B,C], Left, Right) )).
-metta_check_algebra_law(Name, _, Extend, _, _, Carrier,
+metta_check_algebra_law(Name, _, Extend, _, _, CarrierField, Carrier,
                         'extend-commutative') :- !,
     forall(( member(A, Carrier), member(B, Carrier) ),
-           ( metta_algebra_apply(Name, Extend, A, B, Left),
-             metta_algebra_apply(Name, Extend, B, A, Right),
+           ( metta_algebra_apply(Name, CarrierField, Extend, A, B, Left),
+             metta_algebra_apply(Name, CarrierField, Extend, B, A, Right),
              metta_require_algebra_equal(Name, 'extend-commutative',
                                          [A,B], Left, Right) )).
-metta_check_algebra_law(Name, Combine, Extend, _, _, Carrier,
+metta_check_algebra_law(Name, Combine, Extend, _, _, CarrierField, Carrier,
                         'left-distributive') :- !,
     forall(( member(A, Carrier), member(B, Carrier), member(C, Carrier) ),
-           ( metta_algebra_apply(Name, Combine, B, C, BC),
-             metta_algebra_apply(Name, Extend, A, BC, Left),
-             metta_algebra_apply(Name, Extend, A, B, AB),
-             metta_algebra_apply(Name, Extend, A, C, AC),
-             metta_algebra_apply(Name, Combine, AB, AC, Right),
+           ( metta_algebra_apply(Name, CarrierField, Combine, B, C, BC),
+             metta_algebra_apply(Name, CarrierField, Extend, A, BC, Left),
+             metta_algebra_apply(Name, CarrierField, Extend, A, B, AB),
+             metta_algebra_apply(Name, CarrierField, Extend, A, C, AC),
+             metta_algebra_apply(Name, CarrierField, Combine, AB, AC, Right),
              metta_require_algebra_equal(Name, 'left-distributive',
                                          [A,B,C], Left, Right) )).
-metta_check_algebra_law(Name, Combine, Extend, _, _, Carrier,
+metta_check_algebra_law(Name, Combine, Extend, _, _, CarrierField, Carrier,
                         'right-distributive') :- !,
     forall(( member(A, Carrier), member(B, Carrier), member(C, Carrier) ),
-           ( metta_algebra_apply(Name, Combine, A, B, AB),
-             metta_algebra_apply(Name, Extend, AB, C, Left),
-             metta_algebra_apply(Name, Extend, A, C, AC),
-             metta_algebra_apply(Name, Extend, B, C, BC),
-             metta_algebra_apply(Name, Combine, AC, BC, Right),
+           ( metta_algebra_apply(Name, CarrierField, Combine, A, B, AB),
+             metta_algebra_apply(Name, CarrierField, Extend, AB, C, Left),
+             metta_algebra_apply(Name, CarrierField, Extend, A, C, AC),
+             metta_algebra_apply(Name, CarrierField, Extend, B, C, BC),
+             metta_algebra_apply(Name, CarrierField, Combine, AC, BC, Right),
              metta_require_algebra_equal(Name, 'right-distributive',
                                          [A,B,C], Left, Right) )).
-metta_check_algebra_law(Name, Combine, _, _, _, Carrier,
+metta_check_algebra_law(Name, Combine, _, _, _, CarrierField, Carrier,
                         'combine-idempotent') :- !,
     forall(member(A, Carrier),
-           ( metta_algebra_apply(Name, Combine, A, A, Result),
+           ( metta_algebra_apply(Name, CarrierField, Combine, A, A, Result),
              metta_require_algebra_equal(Name, 'combine-idempotent',
                                          [A], Result, A) )).
-metta_check_algebra_law(Name, Combine, _, Zero, _, Carrier,
+metta_check_algebra_law(Name, Combine, _, Zero, _, CarrierField, Carrier,
                         'combine-zero-identity') :- !,
-    metta_check_algebra_identity(Name, Combine, Zero, Carrier,
+    metta_check_algebra_identity(Name, Combine, Zero, CarrierField, Carrier,
                                  'combine-zero-identity').
-metta_check_algebra_law(Name, _, Extend, _, One, Carrier,
+metta_check_algebra_law(Name, _, Extend, _, One, CarrierField, Carrier,
                         'extend-one-identity') :- !,
-    metta_check_algebra_identity(Name, Extend, One, Carrier,
+    metta_check_algebra_identity(Name, Extend, One, CarrierField, Carrier,
                                  'extend-one-identity').
-metta_check_algebra_law(Name, _, Extend, Zero, _, Carrier,
+metta_check_algebra_law(Name, _, Extend, Zero, _, CarrierField, Carrier,
                         'extend-zero-annihilates') :- !,
     forall(member(A, Carrier),
-           ( metta_algebra_apply(Name, Extend, Zero, A, Left),
+           ( metta_algebra_apply(Name, CarrierField, Extend, Zero, A, Left),
              metta_require_algebra_equal(Name, 'extend-zero-annihilates',
                                          [Zero,A], Left, Zero),
-             metta_algebra_apply(Name, Extend, A, Zero, Right),
+             metta_algebra_apply(Name, CarrierField, Extend, A, Zero, Right),
              metta_require_algebra_equal(Name, 'extend-zero-annihilates',
                                          [A,Zero], Right, Zero) )).
 
-metta_check_algebra_identity(Name, Operation, Identity, Carrier, Law) :-
+metta_check_algebra_identity(Name, Operation, Identity, CarrierField, Carrier, Law) :-
     forall(member(A, Carrier),
-           ( metta_algebra_apply(Name, Operation, Identity, A, Left),
+           ( metta_algebra_apply(Name, CarrierField, Operation, Identity, A, Left),
              metta_require_algebra_equal(Name, Law, [Identity,A], Left, A),
-             metta_algebra_apply(Name, Operation, A, Identity, Right),
+             metta_algebra_apply(Name, CarrierField, Operation, A, Identity, Right),
              metta_require_algebra_equal(Name, Law, [A,Identity], Right, A) )).
 
-metta_require_algebra_equal(_, _, _, Left, Right) :- Left == Right, !.
+% Carrier membership and equations compare values without binding witnesses.
+% A provider's negative result is final, including a tensor compared with itself.
+metta_algebra_equal(Left, Right) :-
+    is_list(Left), is_list(Right), !,
+    same_length(Left, Right),
+    maplist(metta_algebra_equal, Left, Right).
+metta_algebra_equal(Left, Right) :-
+    seam:grounded_algebra_equal(Left, Right, Equal), !,
+    Equal == true.
+metta_algebra_equal(Left, Right) :- Left == Right.
+
+metta_require_algebra_equal(_, _, _, Left, Right) :-
+    metta_algebra_equal(Left, Right), !.
 metta_require_algebra_equal(Name, Law, Inputs, Left, Right) :-
     throw(error(metta_algebra_law_violation(Name, Law, Inputs, Left, Right),
                 none)).

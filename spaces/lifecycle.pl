@@ -24,6 +24,10 @@
 %   typing_rule_scope:a_released_space_retires_the_typing_rules_declared_in_it,
 %   test_a_recycled_space_name_inherits_no_typing_rule_from_its_past_life;
 %   commit=84327245373bba29fba00cf2cea62d8257a9f5cb].
+%   with_metta_space_releasing/2 retires space-owned catalog declarations
+%   after storage cleanup succeeds, so a reused name has no old algebra or
+%   policy and a failed clear retains its declarations [tested:
+%   run_tests(catalog_lifecycle); commit=WORKTREE].
 %   Every execution-module life receives a monotone generation, retained as a
 %   tombstone after release so a registry row from an earlier occupant cannot
 %   address a recycled module name [tested: translator_rule_module_home;
@@ -1317,7 +1321,8 @@ with_metta_space_releasing(Space, Goal) :-
         ( retire_metta_tokens_in(Module),
           translator_rules:retire_translator_rules_in(Module),
           type_rules:retire_typing_rules_in(Module),
-          Goal ),
+          Goal,
+          metta_retire_space_catalog(Space) ),
         restore_metta_space_releasing(Prior)).
 
 restore_metta_space_releasing(present(Module)) :- !,

@@ -51,6 +51,8 @@
 %     [measured 2026-09-06: engine/bench.pl bench_run(boot) 543,929 to
 %     240,641, and thirty added kind/2 rows 124,185 to 1,755;
 %     commit=8ec7de241ef3cdd2753f24a97c86e9e9c7240b06].
+%   - finite algebra equality is a host-owned decision with an explicit false answer
+%     [tested: test_finite_tensor_semiring_checks_every_law; commit=WORKTREE].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -153,6 +155,8 @@
             % The grounded-value protocol.
             grounded_applicable/1,
             grounded_apply/3,
+            grounded_algebra_equal/3,
+            grounded_algebra_type/3,
             grounded_class_type/2,
             grounded_numeric/1,
             grounded_numeric_operation/3,
@@ -776,6 +780,20 @@ kind(grounded_apply/3, ownership).
 :- multifile grounded_applicable/1.
 kind(grounded_applicable/1, ownership).
 
+% A grounded provider decides exact value equality for finite algebra carriers.
+% Succeed with true or false to claim the pair; failure leaves native equality.
+% False must not fall through to blob identity or structural matching [tested:
+% test_finite_tensor_semiring_checks_every_law; commit=WORKTREE].
+:- multifile grounded_algebra_equal/3.
+kind(grounded_algebra_equal/3, ownership).
+
+% A host carrier predicate receives the value in its own faithful atom reading.
+% The first owner returns true or false; a refusal cannot fall through into a
+% different host representation [tested: test_carrier_preserves_text_and_symbol_types;
+% commit=WORKTREE].
+:- multifile grounded_algebra_type/3.
+kind(grounded_algebra_type/3, ownership).
+
 %A grounded host value may participate in the language's numeric operations
 %without becoming a Prolog number. Admission and execution stay one provider
 %protocol: the owner recognizes its numeric objects, then evaluates with that
@@ -973,6 +991,7 @@ kind(metta_ordered_match_limit/6, host_service).
 kind(metta_effective_algebra/2, host_service).
 kind(metta_current_algebra/3, host_service).
 kind(metta_algebra_one/2, host_service).
+kind(metta_require_algebra_value/3, host_service).
 kind(metta_annotation/2, host_service).
 kind(metta_k_extend/4, host_service).
 %The host run and load surface: the grouped runner (with the
