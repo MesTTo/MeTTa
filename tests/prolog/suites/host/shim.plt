@@ -16,8 +16,9 @@
 %     [tested: comparing_against_the_empty_expression_does_not_walk_the_other_operand;
 %     commit=fddb28afcb066271d1f0c78fad8b578b2ab65ccd].
 %   - relation rows bind indexed call arguments in one monotone argument walk,
-%     filter contradictory ground candidates, and terminal generator errors
-%     retain their Python class [tested: shim_relation_form; commit=6917bef7ca902671999eafcae3a7a86db8f69723].
+%     filter contradictory ground candidates, and a terminal generator frame
+%     carries the live exception and is recognised only with one
+%     [tested: shim_relation_form; commit=WORKTREE].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -574,8 +575,21 @@ test(a_wide_candidate_walk_does_not_restart_with_nth0) :-
     metta_py_encode_arguments(Args, _, Table),
     once(metta_py_relation_result(Fields, Args, Table, [])).
 
-test(a_terminal_generator_error_keeps_its_python_class) :-
-    metta_py_stream_error(["x", "raise", "ValueError", planted], Error),
-    assertion(Error == error(python_error('ValueError', planted), none)).
+%The frame carries the LIVE exception, which is what lets the Prolog side
+%hand it back to Python to raise rather than reconstructing an error term.
+%py_is_object/1 is what keeps the frame reserved on the raw doors, whose
+%items are the operation author's own values: four elements of plain wire
+%are not one of these.
+test(a_terminal_generator_frame_carries_the_live_exception) :-
+    py_call(builtins:'ValueError'("planted"), Live),
+    metta_py_stream_frame(["x", "raise", "ValueError", Live], Carried),
+    assertion(Carried == Live),
+    assertion(py_is_object(Carried)).
+
+test(a_frame_shaped_answer_without_a_live_exception_is_not_one) :-
+    \+ metta_py_stream_frame(["x", "raise", "ValueError", planted], _),
+    \+ metta_py_stream_frame(["x", "raise", "ValueError", "planted"], _),
+    \+ metta_py_stream_frame(["x", "end"], _),
+    \+ metta_py_stream_frame(["s", "raise", "ValueError", planted], _).
 
 :- end_tests(shim_relation_form).
