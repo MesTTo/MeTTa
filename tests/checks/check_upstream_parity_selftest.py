@@ -49,7 +49,7 @@ Guarantees:
   - an absent upstream checkout refuses where ``CI=true`` and prints a skip
     naming the pin elsewhere, the sibling checkout is AT that pin, and a
     kernel or container that denies the counter is named with the two knobs
-    that decide it [tested: this file is its own gate; commit=WORKTREE]
+    that decide it [tested: this file is its own gate; commit=fc990fa3042ee05d931d3928694e89021be32855]
 Fails when: the production lane stops exposing ``_perf`` as its only process
   call, or stops computing a row's net inside ``measure``.
 Open Obligations:

@@ -70,17 +70,17 @@ Assumes:
     repository writes to, which this tool relies on and cannot enforce]. That
     it is at the PINNED COMMIT is no longer assumed: upstream_head/0 reads it
     and --rebaseline refuses anything else
-    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=fc990fa3042ee05d931d3928694e89021be32855].
   - every corpus path is long enough and deep enough that NULL_ROOT can name a
     control of the same shape; null_program refuses by name when it is not.
 Guarantees:
   - the lane cannot pass in CI without measuring: an absent upstream checkout
     is a refusal where CI=true and a printed skip elsewhere, which is the line
     check.sh's documentation lane already draws
-    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=fc990fa3042ee05d931d3928694e89021be32855].
   - a kernel or container that will not let this count instructions is named
     with the two knobs that decide it, rather than reported as a parse failure
-    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=fc990fa3042ee05d931d3928694e89021be32855].
   - a row whose program run costs LESS than its own null control is reported
     as `negative-net` and fails the run, rather than being recorded and then
     dropped from the page
@@ -267,7 +267,7 @@ def _perf(command: list[str]) -> tuple[int, subprocess.CompletedProcess]:
     #`--security-opt seccomp=unconfined` is what lets it count [measured
     #2026-09-06: swipl:latest plus linux-perf, `perf stat -e instructions:u -x
     #, true` denied under the default profile and answering
-    #`130379,,instructions:u,249770,100.00,,` unconfined; commit=WORKTREE].
+    #`130379,,instructions:u,249770,100.00,,` unconfined; commit=fc990fa3042ee05d931d3928694e89021be32855].
     if instructions is None:
         paranoid = "unreadable"
         with contextlib.suppress(OSError):
