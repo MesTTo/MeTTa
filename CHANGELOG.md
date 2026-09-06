@@ -176,9 +176,6 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   directed bag differences when it is false. A user's own assertion over
   answers reaches the same failure report by handing over its own comparison,
   the call to name, and the produced and expected bags.
-
-### Changed
-
 - A failing `assertEqual`, `assertEqualToResult` or either one's `Msg` twin now
   reports the answers that were MISSING and the answers that were in EXCESS
   beside the call, on every seat:
@@ -208,6 +205,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A space's function namespace lists and resolves only what that space can
+  call. `dir(m.fn)`, `m.builtins()` and `m.fn.<name>` read the process-wide
+  function register, so a head whose equations live in another space's module
+  was listed, resolved, and produced a call that answered itself unreduced; and
+  once a process had registered more than 750 names the interpreter stopped
+  offering a `Did you mean` for a typo, because CPython declines a candidate
+  pool that large. The catalogue is now the engine's own callable-from-here
+  rule per space (own, inherited and `&self`'s heads plus the builtins and the
+  special forms), `m.is_function(name)` is documented as the translator's
+  registered-anywhere question beside `m.is_function_here(name)`, and the
+  host's function-generation stamp covers a second space defining an
+  already-registered name.
 - The Node binding decodes a space the engine registered without an ampersand.
   Any symbol written through is a space name, which
   `examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/07-add_atom_fun_space.metta`

@@ -848,10 +848,13 @@ writes the same engine cell, `__metta__` carries it across any atom boundary,
 and the write answers `true` rather than the cell. Because a cell is an
 ordinary atom it also serves as a mutable TAG, so an algebra that dereferences
 it reads the current weight on every match.
-`m.arities(name)`, `m.is_function(name)` (visible from here),
-`m.is_function_here(name)` (has clauses HERE), `m.builtins()` (every
-registered function and translator special form, sorted without duplicates);
-each is a `Space` method, so any space handle answers for its own view.
+`m.arities(name)`, `m.is_function(name)` (registered as a function anywhere in
+this engine, the translator's call-or-data question), `m.is_function_here(name)`
+(has clauses HERE), `m.builtins()` (every function callable from this space,
+its own, inherited, `&self`'s shared ones and the engine's builtins, plus every
+translator special form, sorted without duplicates; a head another space
+defines is not listed); each is a `Space` method, so any space handle answers
+for its own view, and `dir(m.fn)` is the same list spelled as attributes.
 
 ## Declarations: how a space behaves, written as atoms
 
@@ -1525,8 +1528,8 @@ at each source boundary and answers admitted ground calls from it.
 provided patterns, and evaluates the selected branch. Empty expressions and
 incompatible patterns select the fallback.
 
-301 builtins are registered; `m.self.builtins()` lists the live union of registered
-functions and translator special forms. That live union in full, measured
+301 builtins are registered; `m.self.builtins()` lists the live union of the
+functions callable from `&self` and the translator special forms. That live union in full, measured
 2026-09-06 on a boot with this tree's extensions present, which is where the
 three `mork-add-atoms`, `mork-flush` and `mm2-exec` heads come from:
 

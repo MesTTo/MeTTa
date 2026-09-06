@@ -32,8 +32,8 @@ Deleted, as machinery: the `cetta` GATE lane and its two comment blocks in
 root; `CETTA_PATH` and `LEATTA_PATH` at every site, including
 `twin_coverage.py`'s `MEASURED_ENVIRONMENT`; and
 `test_workspace_paths.py`'s fixed-oracle exemption, which had been exempting
-three files that carry no absolute path (`git grep -F "/home/"` over the
-tracked tree finds none). 984 lines of machinery, 7 files.
+three files that carry no absolute path (a `git grep -F` for the home
+directory prefix over the tracked tree finds none). 984 lines of machinery, 7 files.
 
 Kept, because something runs them, which is what decided it rather than the
 file's name: `tests/conformance/answer_groups.pl` is run by

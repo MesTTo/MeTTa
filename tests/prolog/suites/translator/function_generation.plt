@@ -1,11 +1,17 @@
 % Purpose: prove the host-visible function-catalogue generation contract.
 % Assumes:
-%   - metta_py_builtins/1 is the catalogue consumer and reads fun/1 plus the
-%     engine's static special-form service.
+%   - metta_py_builtins/1 is the process-wide catalogue consumer and reads
+%     fun/1 plus the engine's static special-form service; the per-space
+%     metta_py_builtins/2 also reads fun_in/2, fun_scoped/1 and the
+%     exec-module parent chain.
 % Guarantees:
 %   - the process-wide generation advances exactly when the fun/1 set can
 %     change through registration, definition, import, and removal routes
 %     [tested: function_catalogue_generation; commit=4c9a794750103e0a3a2e9d883adde337ffb501f0]
+%   - it also advances when an already-registered name gains a second home
+%     module, which moves fun_in/2 and fun_scoped/1 and leaves fun/1 alone
+%     [tested: a_second_home_for_a_registered_name_bumps_the_generation;
+%     commit=WORKTREE]
 %   - a rolled-back fun/1 assertion changes neither the visible set nor its
 %     generation [tested: a_rolled_back_definition_is_generation_neutral;
 %     commit=4c9a794750103e0a3a2e9d883adde337ffb501f0]
@@ -53,6 +59,17 @@ test(a_fresh_registration_bumps_once_and_reregistration_does_not,
     metta_host_function_generation(Repeated),
     assertion(Added > Before),
     assertion(Repeated =:= Added).
+
+test(a_second_home_for_a_registered_name_bumps_the_generation,
+     [ cleanup(forget_generation_function('p14-generation-second-home')) ]) :-
+    register_fun('p14-generation-second-home'),
+    metta_host_function_generation(Before),
+    %A second space defining the name asserts fun_in/2 and fun_scoped/1 and
+    %leaves fun/1 alone, which is exactly the move a fun/1-only stamp missed.
+    register_fun_in('$metta_exec:p14_generation_second_home',
+                    'p14-generation-second-home'),
+    metta_host_function_generation(After),
+    assertion(After > Before).
 
 test(a_definition_bumps_once_for_the_function_set,
      [ cleanup(( metta_remove_atom('&self',
