@@ -251,6 +251,8 @@
 % Guarantees: refinement evidence helpers are exported to the engine before
 %   compiled space modules import them [tested: run_tests(tensor_shapes);
 %   commit=4eaefdd8d40e53b2613722287302a14b41704662].
+% Guarantees: drop_fun_meta/5 selects source-owned metadata without leaking
+%   that owner into callbacks [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 
 :- module(translator,
           [ translate_clause/2,
@@ -266,8 +268,8 @@
             with_runnable_variable_epochs/1,
             clear_translation_cache/0,
             clear_module_translation_state/1,
-            queue_deferred_equation_types/2,
-            materialize_with_queued_types/3,
+            queue_deferred_equation_types/3,
+            materialize_with_queued_types/4,
             with_equation_types/4,
             metta_function_translated/2,
             head_pattern_notes_for/2,
@@ -295,6 +297,7 @@
             fun_meta_module/3,
             clear_fun_meta/2,
             drop_fun_meta/4,
+            drop_fun_meta/5,
             arrived_pairs/1,
             call_site_type_chains/2,
             fitting_type_chains/3,
