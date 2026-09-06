@@ -1681,18 +1681,15 @@ metta_effect_plan_source_special_arguments(_, switch, [Key, Pairs],
 metta_effect_plan_source_special_arguments(_, let, [_, Value, Body],
                                            [metta_evaluated_source_root(Value),
                                             metta_evaluated_source_root(Body)]).
-metta_effect_plan_source_special_arguments(_, chain,
-                                           [Nested, Binder, Template],
-                                           Evaluated) :-
-    (   var(Binder),
-        nonvar(Nested),
-        \+ translator:embedded_operation(Nested)
-    ->  translator:substitute_written_variable(
-            Binder, Nested, Template, Substituted),
-        Evaluated = [metta_evaluated_source_root(Substituted)]
-    ;   Evaluated = [metta_evaluated_source_root(Nested),
-                     metta_evaluated_source_root(Template)]
-    ).
+%chain reads exactly as let does, because it COMPILES exactly as let does
+%[source: engine/translator/special_forms.pl, translate_special_dl(chain, ...)
+%delegating to translate_let_dl/4; PeTTa@ae66fa8 src/translator.pl:207-210].
+%This clause modelled the substituting chain that clause used to be, so a
+%source plan for a chain disagreed with the goals the translator actually
+%emitted for it.
+metta_effect_plan_source_special_arguments(_, chain, [_, Value, Body],
+                                           [metta_evaluated_source_root(Value),
+                                            metta_evaluated_source_root(Body)]).
 metta_effect_plan_source_special_arguments(_, 'let*', [Bindings, Body],
                                            Evaluated) :-
     metta_effect_plan_binding_values(Bindings, Values),

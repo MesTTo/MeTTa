@@ -863,8 +863,8 @@ whose declared result is the metatype `Atom` answers as produced where any
 other declared result re-enters evaluation, so `!(car-atom ((+ 1 2) b))` is
 `3` and a caller that wants a call's value in a masked position names it
 first with `let`. Minimal MeTTa's `eval` is one equality step over retained
-source equations; NotReducible is a control result only `chain`, `function`,
-and `metta-thread` observe raw, an application boundary retains an
+source equations; NotReducible is a control result only `function` and
+`metta-thread` observe raw (`chain` is `let` and sees what `let` sees), an application boundary retains an
 irreducible call as written, and a function frame distinguishes a produced
 marker from an irreducible body. A user type
 declared with `(: Payload DontEvalType)` is also an evaluation mask: a function

@@ -1,0 +1,129 @@
+# Agreeing with the arbiter on drawn programs
+
+Goal: every program the parity fuzzer draws answers here what upstream PeTTa
+answers at the parity pin, or the difference is recorded as an extension in a
+spelling PeTTa does not define or refuses.
+
+Constraint: the compatibility law, ruled 2026-09-07 and written down in
+`2026-09-06-the-python-ecosystem-as-faces-of-the-engine.md` section 23: "on
+every program PeTTa accepts, the same answers; an extension lives only in a
+spelling PeTTa does not define or refuses". A program PeTTa runs to exit 0 is
+one PeTTa accepts, and its answer set — the empty one included — is the answer
+we owe. A program PeTTa raises on, or its parser refuses, is where this engine
+may be wider.
+
+The arbiter is upstream PeTTa at `ae66fa8e41dcd5539d614706bd4e5cfb34f9608d`,
+run as `swipl --stack_limit=8g -q -s src/main.pl -- <file> silent` from
+`/home/user/Dev/PyPeTTa1/PeTTa-upstream`, which is the invocation
+`tests/conformance/petta_capture.py`'s `run/5` builds for both engines.
+
+## 2026-09-07 — the classification rule, settled before any fix
+
+Tried: reading the four fuzz findings against the law -> three of the four
+classes the lane reports map onto the law directly, and the mapping is what
+decides whether a finding is a defect or an extension.
+
+| lane class | what PeTTa did | the law says |
+|---|---|---|
+| `answer-mismatch` | accepted the program, answered | we owe the same answers |
+| `error-on-one`, where PeTTa errored | refused | we may be wider |
+| `arbiter-error` | refused | we may be wider |
+| `unreduced-on-arbiter` | does not define the head | we may be wider |
+
+Decided: an EMPTY answer set is an answer, not a refusal. `!(and a a)` exits 0
+on the arbiter and prints nothing; that is PeTTa answering "no solutions" and
+we owe it. A refusal is an exit 2 or a parser rejection. All four findings are
+`answer-mismatch` or `error-on-one` with the error on THIS side, so all four
+are defects here.
+
+Measured, as the boundary that makes the rule usable rather than a reading:
+`foo` alone on a line is `Syntax error: expected '(' or '!('` on the arbiter
+and stores the symbol `foo` here, so a top-level bare atom is a spelling PeTTa
+refuses and this engine's wider space keeps a legitimate door.
+`!(add-atom (new-space) (a b))` is `Type error: 'atom' expected, found
+['new-space']` on the arbiter, so a first-class space handle is another.
+`!(add-atoms &self (a b))` and `!(subtract-atom &self b)` are left standing by
+the arbiter, so they are heads PeTTa does not define and stay wide.
+
+## 2026-09-07 — divergence 3 and 4 are one: chain evaluated the value it bound
+
+Program (finding 3, shrunk by the lane):
+
+```metta
+(rel0 a a)
+(= (f0 $x) (* $x))
+!(chain (get-atoms &self) $v1 $v1)
+```
+
+Arbiter: `(rel0 a a)` and `(= (f0 $_0) (* $_0))`, exit 0.
+Ours before: `(rel0 a a)` and `false`, exit 0.
+
+Program (finding 4) is the same with `(= (f0 $x) (* $x (* $x $x)))`. Arbiter
+prints both atoms; ours exited 2 with `*: * ran backwards with more than one
+unknown ...`, the CLP(FD) refusal.
+
+Tried: the family, `let` beside `chain` on eleven programs, before touching
+anything -> `let` agrees with the arbiter on every row and `chain` disagrees on
+exactly the rows where the BOUND VALUE is itself an application.
+
+| program | arbiter | ours before |
+|---|---|---|
+| `!(chain 1 $v (+ $v 1))` | 2 | 2 |
+| `!(chain (+ 1 1) $v $v)` | 2 | 2 |
+| `!(chain (superpose (1 2)) $v $v)` | 1, 2 | 1, 2 |
+| `!(chain 1 (foo $v) $v)` | nothing | nothing |
+| `!(chain (= a b) $v $v)` | `false` | `false` |
+| `!(chain (quote (= a b)) $v $v)` | `(= a b)` | `false` |
+| `!(chain (get-atoms &self) $v (foo $v))` | `(foo (= (f0 $_0) (* $_0)))` | `(foo false)` |
+| `!(let $v (get-atoms &self) (foo $v))` | `(foo (= (f0 $_0) (* $_0)))` | same as arbiter |
+| `!(chain (quote (+ 1 2)) $v $v)` | `(+ 1 2)` | `(+ 1 2)` after the fix, `3` before |
+| `!(chain (eval (foo)) $x $x)` | `(foo)` | `(foo)` |
+| `!(chain 1 $x (car-atom ((+ 1 2) b)))` | 3 | 3 |
+
+So the finding is not about `=` and not about `get-atoms`. `!(= (f0 $x) (* $x))`
+answers `false` on BOTH engines and `!(get-atoms &self)`, `!(collapse
+(get-atoms &self))`, `!(match &self (= $a $b) (= $a $b))` and
+`!(superpose ((= (f0 $x) (* $x))))` all agree already. Only `chain` differs,
+and only where what it bound could reduce again.
+
+Cause: upstream compiles `let` and `chain` with ONE clause,
+`(HV == let ; HV == chain), T = [Pat, Val, In] -> ... (Pv = V) ...`
+[source: PeTTa@ae66fa8 `src/translator.pl:207-210`]. This engine's clause was
+`translate_let_dl/4` PLUS `masked_result_goal/3`, which re-enters evaluation
+for any compound result holding a redex. That step is a survival from the
+`chain` this engine had before 975b07ae, which substituted the WRITTEN operand
+into the template and needed a way to reduce an operand that had landed in a
+masked position. Once the operand became a bound VALUE, the step had nothing
+left to do except evaluate the answer a second time — and `=` is this engine's
+equality as well as its definition head, so a second evaluation of an equation
+atom TESTS it.
+
+Fix: `translate_special_dl(chain, Args, ...) :- translate_let_dl(Args, ...)`,
+and the same correction one layer over, in `engine/metta/effects.pl`, whose
+`metta_effect_plan_source_special_arguments/4` still modelled `chain` as the
+substituting form and so planned a source shape the translator no longer
+emitted. The stepping protocol the old clause needed goes with it:
+`metta_chain_step/2` had had no emitter since 975b07ae, and
+`embedded_operation/1`, the wrapper over its vocabulary, had no reader left
+once the effect planner stopped calling it. `embedded_operation_head/1` stays;
+it is the effect-profile roster `tests/prolog/suites/evaluation/effects.plt`
+reads.
+
+Tried: what the removed step was documented to protect -> already covered
+without it, by the CALL's own result continuation.
+`!(chain 1 $x (car-atom ((+ 1 2) b)))` is 3 and
+`!(chain (+ 1 2) $x (cons-atom $x (b)))` is `(3 b)` on both engines after the
+change, and `!(let $x 1 (car-atom ((+ 1 2) b)))` was already 3 without ever
+having the step.
+
+Rejected: keeping the step and special-casing an equation atom. It would fix
+the two shrunk programs and leave every other reducible bound value wrong;
+`!(chain (quote (+ 1 2)) $v $v)` was `3` here and `(+ 1 2)` upstream, and
+nothing in that program mentions `=`.
+
+Evidence: `examples/ch07-control-flow/07-03-let-and-sequencing/10-chain_is_let.metta`
+runs byte-identical on both engines and is red without the fix (`is false,
+should (= a b). ❌`, checked by reverting `engine/` and re-running).
+`sh engine/test.sh` exit 0.
+
+Open: nothing for this divergence.

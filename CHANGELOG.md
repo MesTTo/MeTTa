@@ -263,6 +263,23 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `chain` no longer evaluates the value it bound a second time. It compiles to
+  exactly `let`'s goals, which is upstream's own definition (one clause serves
+  both spellings), and a result step left over from the substituting `chain`
+  this engine used to have was re-entering evaluation for any compound answer
+  holding a redex. So an equation atom read out of a space and chained became
+  the equality test's answer: `(= (f0 $x) (* $x))` with
+  `!(chain (get-atoms &self) $v1 $v1)` answered `false` where the arbiter
+  answers the atom, and `(= (f0 $x) (* $x (* $x $x)))` with the same query
+  raised the CLP(FD) backwards-multiplication refusal where the arbiter answers
+  the atom. `!(chain (quote (= a b)) $v $v)` is the shrunk form and is now
+  `(= a b)` on both engines. `let` never had the step and never diverged. The
+  chain stepping protocol the old clause needed (`metta_chain_step/2` and the
+  `embedded_operation/1` wrapper over its vocabulary) goes with it; nothing had
+  emitted it since `chain` moved onto `let`'s translation, and the effect
+  planner's own source model of `chain`, which still described the substituting
+  form, now reads it as `let` too.
+
 - A space's function namespace lists and resolves only what that space can
   call. `dir(m.fn)`, `m.builtins()` and `m.fn.<name>` read the process-wide
   function register, so a head whose equations live in another space's module

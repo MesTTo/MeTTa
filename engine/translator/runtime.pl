@@ -1008,23 +1008,6 @@ restore_function_evaluation(none) :-
 function_evaluation_active :-
     nb_current('$metta_function_evaluation', true).
 
-%Run the one reflected instruction handed to chain.  eval and evalc expose
-%their raw control result here; translating the whole `(eval X)` term through
-%the ordinary expression door would consume NotReducible at eval's own
-%application boundary before chain could inspect it.  A value that arrived
-%through chain's Atom parameter may reveal its head only at run time, so this
-%recognizer also covers that dynamic door.
-metta_chain_step([eval, Arg], Out) :- !,
-    metta_eval_step(Arg, Out).
-metta_chain_step([evalc, Arg, Space], Out) :- !,
-    metta_evalc_step(Arg, Space, Out).
-metta_chain_step(Nested, Out) :-
-    embedded_operation(Nested),
-    !,
-    current_metta_module(Module),
-    eval_metta_in_module(Module, Nested, Out).
-metta_chain_step(Nested, Nested).
-
 %A bare symbol is reduced only in value positions.  Scalar equality rules are
 %stored in the atomspace rather than compiled as predicates, so the ordinary
 %expression translator cannot see them.  Follow those rules to a fixpoint for
