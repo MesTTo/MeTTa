@@ -16,6 +16,11 @@ Assumes:
     `bench_describe` with its case table and its workload list, so no case
     name, unit, operation count or corpus path is written twice.
 Guarantees:
+  - a box that would not count is told apart from a tree that moved: this
+    lane exits 0 with a named skip on a developer's box and 1 where CI=true,
+    and never reports a refused measurement as a moved row
+    [tested: test_a_benchmark_lane_skips_a_refusal_locally_and_refuses_it_in_ci;
+    commit=WORKTREE]
   - the deciding counter is inferences, taken from three fresh processes that
     perf is NOT watching, so a machine with no perf still gates
     [tested: engine/bench.sh; commit=c41b54d69e951882e5075393f851a33438247372].
@@ -72,7 +77,11 @@ sys.path.insert(0, str(ROOT / "extensions" / "python"))
 # module before metta, which pyproject declares first-party.
 from benchmarks.configuration import counter_configuration  # noqa: E402
 
-from metta.testing import BenchmarkBaseline, measure_instructions  # noqa: E402
+from metta.testing import (  # noqa: E402
+    BenchmarkBaseline,
+    measure_instructions,
+    measured_main,
+)
 
 BASELINE = HERE / "bench-baseline.json"
 BENCH = HERE / "bench.pl"
@@ -340,4 +349,4 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(measured_main(main))
