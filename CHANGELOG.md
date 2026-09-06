@@ -7,6 +7,481 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-09-06
+
+### Added
+
+- Binding answer collections now provide `column(name)` and
+  `group_by(column)`. Groups are keyed by the column's atom and retain `Rows`
+  values with the original columns.
+
+- The catalog now publishes every accepted algebra-law spelling and alias
+  expansion. Python exposes them as `AlgebraLaw`, and all ten shipped algebra
+  carriers have matching catalog vocabulary members, enums, and root objects.
+
+- A bounded slice of a ranked match reaches the provider as a bound.
+  `m.match(q, under=ranked)[:3]` pulled the ordinary cursor and sliced in
+  Python, so a store that could have answered three rows answered all of them.
+  The slice now reopens the query with `limit=3` when, and only when, the
+  space is foreign, its source is not `linear`, it declares
+  `(emits <ctx> best-first)`, its effective algebra is the carrier the query
+  selected, and the query is one pattern with no `where=`. Anything short of
+  that keeps the shared cursor, so the answers are the same either way and
+  only the work changes.
+
+- Tensor shapes flow through type inference. `metta.arrays.Shape(...)` builds
+  the dimension metadata a Python `Annotated[DLTensor, Shape(...)]` carries, a
+  declared `(Annotated DLTensor (Shape ...))` symbol satisfies an ordinary
+  `DLTensor` argument, and `get-type` derives the result shape before any array
+  is built: elementwise operations through the existing `broadcast-shape`
+  relation, rank-two `matmul` by unifying the shared inner dimension. So
+  `(: image (Annotated DLTensor (Shape (4 1))))` with
+  `(: bias (Annotated DLTensor (Shape (3))))` gives
+  `!(get-type (t+ image bias))` the shape `(4 3)`, and an incompatible pair
+  yields no shaped type at all. The elementwise operations keep their existing
+  scalar-capable second argument.
+
+- `metta.current_algebra()` answers the algebra a query here would run under,
+  or None. `current_space()` had no partner: a program could scope a carrier
+  with `with metta.under(...)`, declare one on a space, or pass one to a call,
+  and had no way to read back which of the three was in force, including from
+  inside an operation the engine has already entered. The observer follows the
+  same precedence the query does, per-call carrier over task scope over the
+  current context's annotations row, and answers None when none of the three
+  is present rather than reporting execution's implicit Boolean default as a
+  declaration.
+
+- Every shipped semiring is a root object. `metta.counting`, `.prob`, `.prov`,
+  `.ranked` and `.tropical` were exported and `bool`, `bag`, `set`, `budget`
+  and `amplitude` were reachable only as strings, so `metta.budget` raised
+  AttributeError for a carrier `under="budget"` already answered and no typed
+  annotation could name it. All ten are lazy root exports now, in the order the
+  catalog declares them.
+
+- `metta_ensure_source_observation/0` is a published `service`, so a library
+  may ask for the source observer by name. The engine does not load
+  `engine/source_observation.pl` at boot, and `observe_source/4` cannot be its
+  own loader, so an extension that may call the published observer needs a
+  published way to make it exist; without one the only route was a library
+  running `load_files/2` over an engine path. `lib_observe`'s `observe-source`
+  is the shipped caller.
+
+- `Defined.free_variables` now has an exact consumer-sheet spelling and a
+  checked compiled-definition example with one lexical dependency.
+
+- Remote-backend authors can now find `is_transport_failure(error)` in the
+  error model, with checked positive and negative classifications in the
+  remote-controls example.
+
+- Performance authors can now find the general `measure_counters` and
+  `CounterRuns` surface beside the narrower instruction helper, including the
+  baseline methods that decide deterministic and noisy counters.
+
+- `EmbeddingStore.vector_for(key)` and `keys()` now appear beside the
+  embedding operation door, and the checked matcher example reads a stored
+  vector back by atom key.
+
+- `metta.testing.from_pattern(pattern)` now has a consumer-sheet entry and a
+  checked property-testing example covering both repeated named variables and
+  independent anonymous occurrences.
+
+- The exact module-tier `metta.speculate()` spelling now appears beside
+  `Space.speculative()` and runs in the checked engine-controls example.
+
+- `object_view(obj, relation=...)` now has an exact consumer-sheet spelling,
+  and the checked object-integration example queries a view under a custom
+  relation name.
+
+- `EventStream.folds(space_name)` now has a consumer-sheet door, and the
+  standing-query example checks its live roster before and after cancellation.
+
+- `Rows.raise_for_errors` and `Answers.raise_for_errors` now appear in the
+  consumer error model, and the checked error-handling example proves both its
+  clean chaining and stored-error exception paths.
+
+- Foreign backend authors now have exact consumer-sheet and executable doors
+  for `BoundedMatcher`, `Snapshotter`, and `WorldCommitter`, including an exact
+  bound pushdown and a provider-owned immutable-world commit.
+
+- Integration authors now have consumer-sheet spellings for unloaded and
+  explicit entry-point loading, dependency-ordered discovery, and exact
+  process-wide hook cleanup, plus a checked registration-lifecycle example.
+
+- The concurrency sheet and a checked example now expose
+  `EnginePool.starmap` for multi-argument work and `Channel.try_recv` for a
+  nonblocking mailbox take.
+
+- The consumer sheet and first-steps example now expose the Python-safe root
+  builders `not_` and `in_` beside the existing logic builders.
+
+- `Atom.subs` now appears beside `Atom.unify` in the consumer sheet and the
+  first-steps example proves a unifier can be applied directly to a template.
+
+- Test and conformance harness authors can now find `AssertionFailure` in the
+  error taxonomy and a checked example that reads its operation, actual, and
+  expected fields.
+
+- Class-owned `__metta__` and `__from_metta__` conversion now appears in the
+  consumer sheet and executable object-integration example, including the
+  unregistered `build(atom, Class)` round trip.
+
+- Python class authors can now discover and execute
+  `space.define(Class, accessors=False, methods=False)` to register a type
+  without exposing its host fields or methods as MeTTa callables.
+
+- Saga compensation now has a consumer-sheet entry and checked example showing
+  a committed step's queryable receipt, exceptional-exit recovery, and receipt
+  retirement after successful compensation.
+
+- The checked engine-controls example now executes `Space.limits(stack=...)`,
+  and the consumer sheet identifies it as a scoped SWI combined-stack byte
+  ceiling beside the other call bounds.
+
+- Remote deployers now have a checked example and exact consumer-sheet
+  spellings for `Request` authorization, client capability discovery, TLS and
+  timeout controls, and the server's idle and live-cursor resource bounds.
+
+- Foreign-provider authors now have a consumer-sheet entry and checked example
+  for the distinction between structural `can_run` support, request-specific
+  `should_run` policy, and provider-owned `refusal` messages.
+
+- The consumer sheet and a checked runtime-configuration example now expose
+  the root `metta.config` object, its four environment variables, the atomic
+  `configure` method, and which settings freeze after engine startup.
+
+- `MeTTa.space(..., journal=..., rename=...)`, the module-level `metta.space`
+  factory and `AsyncMeTTa.space` now expose the persistent store's one-open
+  schema migration. Users no longer need to import the private provider class
+  to rename journal heads.
+
+- `sh run.sh --verbose program.metta` exposes informational compiler and
+  source-reload reports at the standalone user's invocation point. The default
+  remains quiet.
+
+- Specialization verification now reports its coverage. Turning
+  `(pragma! verify-specializations true)` off, or exiting a process started
+  with `METTA_VERIFY_SPECIALIZATIONS=1`, writes the checked, agreed, and
+  inference-bounded counts to the requested report channel even when the
+  standalone launcher uses quiet logging. The corpus differential reads and
+  aggregates those counts, and refuses a vacuous run that checked nothing.
+
+- `metta.llms()` prints `llms.txt`, the sheet that teaches this library, and
+  answers None the way `help()` does. It is the document an agent reads before
+  writing anything against this surface, and until now reading it meant finding
+  the repository: a `pip install` carried the engine, the libraries and the
+  codec corpus but not the one file that explains them. `setup.py` ships it into
+  the runtime tree, so a checkout and an install print the same bytes, and
+  `python -m metta llms` is the same document from a shell. It never pages,
+  unlike `help()`, because the reader is usually a program holding a pipe.
+
+- A compiled `match(...)` call takes a CONJUNCTION. Two or more patterns before
+  the template lower to the engine's own `(, p q)`, so
+  `match(S.edge(V.x, V.y), S.edge(V.y, V.z), (V.x, V.z))` stores
+  `(match (context-space) (, (edge $x $y) (edge $y $z)) ($x $z))` and joins on
+  the shared middle node. It is the spelling the read door already takes,
+  `m[p1, p2]` and `Space.match(p1, p2)`, and a leading handle, space parameter
+  or `"&kb"` still names the space. Writing the two patterns as a TUPLE builds a
+  two-element pattern term instead, which the space cannot hold, and answered
+  nothing without saying so; a conjunct that is not a whole pattern now refuses
+  and names both readings.
+
+- Declaring a class into a space writes its subtype edges. Python's class
+  hierarchy IS a subtype relation, so `m.define(Animal)` then `m.define(Dog)`
+  for `class Dog(Animal)` stores `(:< Dog Animal)`, and `get-type` on a
+  `(: Rex Dog)` widens to `[Dog, Animal]`. Only DECLARED classes count as
+  supertypes, which keeps `object`, a NamedTuple's `tuple` and an enum's `Enum`
+  out of the answer, and only REAL bases do, since a virtual `abc` registration
+  never reaches `__mro__`. Multiple inheritance answers one edge per direct
+  base, and a base declared after its subclass fills that edge in then.
+
+- An ATOM in annotation position is the type itself. `typed(S.a, S.Number)` and
+  `arrow(S.Number, S.Bool)` already read an atom or a Python type either way; a
+  signature read only the Python type, so `def speak(a: S.Animal) -> S.Sound`
+  declared `(-> %Undefined% %Undefined%)` and said nothing. It declares
+  `(-> Animal Sound)` now, and the doc's `(@type ...)` field carries the same
+  atom. It is the escape hatch the projection table needs, since the table is
+  finite and many-to-one: a MeTTa type with no Python class had to be given an
+  empty one to be nameable in a signature.
+
+- `csv-snapshot!` reads a CSV file ONCE into an ordinary space of
+  `(row Number Field...)` atoms, beside `csv-space`'s live view. The view holds
+  no rows and reparses per query; the snapshot pays one parse and then about two
+  inferences per answer, which is 27x to 30x cheaper per query and pays for
+  itself on the second one [measured over 1,000 rows: 59,856 inferences per
+  query through the view against 63,960 to build plus 2,015 per query]. The
+  record number comes with the snapshot because a space is unordered: without it
+  a space of rows can neither say which record came first nor skip a header, and
+  a number is an identity only once the rows are fixed. `csv-space`'s
+  `(row Field...)` is unchanged.
+
+- `(stdin)`, `(stdout)` and `(stderr)` answer handles 0, 1 and 2, POSIX's own
+  numbering, in the table `file-open!` already fills. So `file-read-exact!`,
+  `file-write!` and `file-get-size!` reach the three streams a process always
+  has, and standard output has a spelling. They are a second spelling rather
+  than a second mechanism: `stderr!` is a handle write and `stdin-to-string!` is
+  `(file-read-to-string! (stdin))`, and both stay as they are. `file-close!`
+  refuses all three, because closing stdout or stderr takes it from the whole
+  process with no way back.
+
+- `temp-dir!` mints a fresh directory the way `temp-path!` mints a fresh file,
+  so a caller who needs somewhere to put files no longer derives a directory
+  name from a temporary FILE name. A prefix names the directory and may not
+  contain a separator: `tmp_file/2` pastes it into the path unsanitised, so one
+  would place the result outside the temporary directory.
+
+- `(| Number String)` is a union type, usable as an argument type, a result
+  type, a tuple field and an alias right side. A value is admitted when some
+  member admits it, and a value whose own type is a union only when every
+  alternative is, under one assignment of the type variables they share, so
+  `(| Number String)` fits `(| Number String Bool)` and not `(| Number Bool)`.
+  Nested unions flatten, a repeated member is one member, and a one-member
+  union is that member; `(|)` and an improper union raise a type-syntax error.
+  `|` heads a union only where a type is read, so `(|-> ($x) ...)` is still a
+  lambda and `(| a b)` is still data. There is no occurrence typing: testing a
+  union-typed value does not narrow it, and `match-types` with the `type-cast`
+  built on it keep comparing written types by unification with wildcards.
+  `examples/ch09-types/19-union-types.metta` is the executable description.
+
+- The writer's variable-identity invariant is pinned under garbage
+  collection: one variable shared across a 40,000-string filler reparses as
+  one, two as two, and 5,000 shared variables keep their count. Upstream's
+  `swrite` named variables from `term_to_atom/2`, which reflects a stack
+  address, so a collection mid-serialization printed one variable under two
+  names; that mechanism is live on SWI 10.1.13 and the planted pre-fix
+  writer fails the new tests. Our writer never read an address, so no
+  engine change was needed.
+
+- `bounded.sh` is the one bound on every process this repository starts. It
+  holds a deadline in a process of the child's own, so an orphan still ends,
+  and links that child to the process that started it through
+  `prctl(PR_SET_PDEATHSIG)`, so a killed session reaps its children in
+  milliseconds instead of leaving them to the deadline. Every runner calls it,
+  the harness scripts reach it through `tests/checks/bounded_spawn.py`, and
+  `sh bounded.sh swipl ...` is the form to type by hand. `sh engine/test.sh
+  suites/<group>/<suite>.plt` runs one PlUnit suite through it, with the
+  working directory, the janus environment and the load-error scan a bare
+  `swipl` call does not carry.
+
+- The five CI jobs carry `timeout-minutes` rather than GitHub's 360-minute
+  default: 45 for the gate and the version matrix, 20 for the rest, against
+  measured costs of 18 to 19, 10 to 14, and 0 to 2 minutes.
+
+- Remote mutations negotiate scoped, expiring idempotency keys. Lost or
+  indeterminate replies raise `OutcomeUnknown`; its `retry()` replays the
+  retained request without repeating its effects. Legacy peers expose the
+  same uncertainty but refuse recovery without negotiated replay. Late
+  reentrant completions cannot restore pruned replay reservations.
+
+- Remote responses validate their envelope and complete atom list before
+  delivery. Malformed replies raise `ProtocolError`, which remains a transport
+  failure through engine error policies. Invalid initial cursor replies
+  release their token or retain it on the reported cleanup failure.
+
+- `Space.drop()` retains subscriptions and provider ownership when engine
+  teardown fails. A later cleanup failure keeps the anonymous name reserved
+  and can be retried without repeating engine teardown or clearing a journal.
+
+- `EnginePool.close(wait=True)` joins owned workers after an earlier nonwaiting
+  close. `AsyncMeTTa.define` requires the reference function with `prolog=` and
+  applies the synchronous decorator on its owning worker.
+
+- Compiled Python bodies now unpack tuple and list patterns, collect known
+  answer streams with `list`, query engine metatypes with `type`, and preserve
+  every `typing.overload` declaration. Generator `match` statements carry
+  captures into later statements, and an answerless match subject reaches its
+  explicit `Empty` branch.
+
+- `if-decons-expr` holds its expression operand, binds its head and tail on
+  success, and evaluates the selected continuation. Empty expressions and
+  incompatible existing bindings take the fallback branch.
+
+- Constructive negation now preserves wildcard and structural bindings in
+  nested case towers and recognizes the complement of an empty answer set.
+
+- `(pragma! plan-cyclic-joins True)` plans a full native cyclic conjunction as
+  a Generic Join, intersecting indexed variable domains before producing
+  answers. Duplicate facts retain their full contribution to every answer bag;
+  unsupported patterns and every conjunction without the pragma continue
+  through the existing matcher, which is faster wherever the data is not
+  skewed.
+
+- Retained clauses fold admitted immutable integer computations during
+  planning. Redefining a dependency rebuilds its folded callers, and host
+  operations remain deferred until demanded.
+
+- Function metadata keeps source-owned head and presence indexes. Repeated
+  calls no longer copy an unused definition body during dispatch; duplicate
+  equations, source reload and transaction rollback retain their bindings.
+
+- Tagged queries propagate bound arguments through certified acyclic integer
+  programs. They derive the requested proof bags while preserving duplicate
+  source occurrences and the existing failure behavior outside that fragment.
+
+- `(pragma! materialize-source-relations True)` makes source loading derive
+  eligible finite function-free relations once, at each source boundary and
+  once per completed load. Ground calls then reuse counted results, while open
+  calls, multiple distinct outputs, cyclic proof graphs, tracing and bounded
+  reductions keep their original execution, and transactional loads validate
+  their prepared source receipts on the first query after commit. Preparation
+  is quadratic in the derived relation, so a load without the pragma prepares
+  nothing.
+
+- The MeTTa file library now creates directories, copies bytes with staged
+  replacement, returns queryable metadata snapshots, composes lexical paths,
+  reads stdin through EOF, writes stderr, and exits with an explicit status.
+
+- `lib_csv` exposes UTF-8 CSV files as read-only row spaces through the native
+  provider seam. Queries stream cells as strings and report malformed records,
+  missing files and denied permissions by name.
+
+- `trace(filter=...)` selects named functions before recording limits apply.
+  MeTTa programs can query selected trace events through `lib_observe`.
+
+- `observe-source` in `lib_observe` returns source coverage, Error values and
+  attributed MeTTa stack frames as queryable atoms. Positions count Unicode
+  codepoints. Generated calls name their originating construct, and missing
+  source metadata is explicit. Ordinary execution keeps its atom representation
+  and does not collect diagnostic state.
+
+- Transparent structural type aliases use `(: Count (Alias Number))`.
+  Aliases work in parameters, results, positional tuples and complete arrows,
+  including `Atom` evaluation barriers. Each alias resolves names where it was
+  declared. Adding, removing or reloading declarations repairs compiled
+  callers; cycles report their path and conflicting definitions roll back.
+  Type observers and Python casts accept the expanded type while stored
+  source and diagnostics retain the alias spelling.
+
+- Node's `Semiring` vocabulary now includes the catalog's `budget` and
+  `amplitude` values in their declared order.
+
+- `lib_distribution` adds pure unary map, independence-named binary map and
+  convolution, inclusive threshold mass, strict independent win probability,
+  exact joint conditioning, independent average, and additive Bernoulli update
+  over `lib_measure`'s transparent weight-first rows. Equal outcomes collapse
+  at their first position. `ws-normalize` now rejects empty, negative,
+  nonfinite, and zero-mass inputs with remedy-bearing errors instead of
+  returning an empty or silently invalid distribution [tested:
+  test_distribution.py and 12-distribution.metta; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
+
+- Integration installation is transactional across framework-managed state.
+  A failed installer now restores operations and declaration ownership,
+  protocol types and reprs, reflectors, converted types, library paths,
+  dynamic Prolog registrations, atoms, and nested installation receipts.
+  Best-effort home spaces are refused before execution, while consulted Prolog,
+  loaded native code, custom listeners, and other process-global residue are
+  reported on the original exception because they cannot be safely unwound.
+
+- Annotated function types such as `(: f (-[det]-> Number Number))` now
+  govern execution and compilation like `(: f (-> Number Number))`, through
+  both file loading and separate declaration/equation loads. Argument checks,
+  application types, higher-order arguments and declaration readers use the
+  plain runtime arrow. Stored atoms, `get-type f`, documentation and source
+  export retain the written annotation. Concrete products now publish owned
+  effect rows consumed by planning and world admission. A `nondet`
+  product joins its effect with `nondeterministicReadOnly`. Removing or reloading
+  a declaration withdraws only its owned rows. Direct removal of owned rows
+  and catalog clears that would orphan another space's declaration are refused.
+  The removal guard also covers catalogs with capacity counters. Ordinary clear
+  retains provider callback suspension and removes only metadata for declarations
+  no longer stored.
+
+- `(pragma! verify-cardinality true)` audits annotated ordinary function calls
+  using SWI's failure and choicepoint rule. `det` requires one success without
+  a choicepoint, `semidet` permits failure, and `nondet` has no answer-count
+  restriction. The checker executes the original dispatch once; by default
+  cardinality assertions are trusted. Plain `->` calls gain no runtime check.
+  Unresolved products, nested products and annotations on translated forms
+  are refused at load because their claims have no runtime consumer.
+  Foreign spaces require transactional storage so partial writes cannot
+  separate an annotation from its effect. Removing the last cached equation now
+  releases its owner's memoization state, even when another space still defines
+  the name or the host has already untabled its implementation. Memo handlers
+  retain exact clause references and retire with their owners. Native clear
+  keeps bulk data removal when its observers watch only compiled equations.
+
+- Python-authored programs can now be inspected and exported as MeTTa.
+  `Space.source()` returns the receiver's directly stored program as the exact
+  loadable text written by `Space.save(format="metta")`; `Defined` and `Space`
+  show the same source in rich notebooks; and
+  `python -m metta convert program.py [-o out.metta]` imports a Python file
+  into a fresh space and prints or writes that text.
+  `Space.consumption(kind)` now declares linear, repeated, or peek consumption
+  while preserving `(source <space> <kind>)`; it replaces the colliding
+  `Space.source(kind)`.
+
+- Builtin registration now owns an exact implementation facet for every core,
+  prelude, and extension operation. Boot-time checks reject a registered name
+  or arity without a description, a description without its registered name
+  and dispatch arity, a missing implementation hook, and an independently
+  surfaced project predicate without either a description or a local reasoned
+  exemption. `seam:builtin_implementation_exemption/2` is the declaration seam
+  that says a predicate of yours is a compiled helper rather than a language
+  operation; it is written beside the implementation it excuses, carries the
+  reason, and is refused once the predicate it names stops being reported.
+  `EXTENDING.md` documents it.
+
+- `current_source_identity/2` answers the file a record made during a compile
+  belongs to and the digest of that file's text, for anything that files a
+  record alongside a compile and needs a reload to replace its old set. It takes
+  `record_source_assertion/1`'s charge, so a record and the source it reports
+  name one load even when a deferred equation is compiled inside an unrelated
+  import, and it names the absence, `immediate` and `none`, outside every load
+  rather than failing or inventing a revision.
+
+- `(pragma! verify-discharges true)` verifies the type checks the compiler
+  decided not to emit. A literal whose type is settled at compile time, an
+  argument a caller's declaration proved, a `Number` parameter compiled to a VM
+  test and a metatype parameter compiled to the metatype ladder are each a
+  claim that the removed check could not have failed; under the pragma the fast
+  side still decides and the check it replaced runs beside it, raising a
+  disagreement that names the discharge, the type and the value. Turning the
+  mode off reports what it checked, as agreed, disagreed and could-not-be-
+  checked counts, so coverage is a number rather than a claim of completeness.
+  The mode costs nothing when off: the three emitted discharges choose their
+  form while compiling, so an ordinary compile carries no trace of it.
+
+- `lint()` reports `det-equations-overlap` when two equations share a head up
+  to variable renaming under a `-[det]->` claim, so each equation
+  is tried for every call. The claim holds only while at most one body
+  succeeds, which nothing checks, so this is a hint rather than a proof: a
+  guarded second body keeps it for some calls and breaks it for others. Not
+  `duplicate-equation`, whose bodies are
+  equal, nor `subsumed-equation`, whose heads are instances rather than
+  variants; what makes this one wrong is the declaration. Merge them, separate
+  the heads, or declare `-[nondet]->`.
+
+- `lint()` reports `uncovered-constructor` when a `-[det]->` claim is broken by
+  a member no equation covers. The arrow promises exactly one answer and an
+  uncovered constructor gives zero, so the declaration and the equations
+  contradict each other; the message names both remedies, cover it or declare
+  `-[semidet]->`. A plain `->` promises nothing about answer count, so
+  partiality under one is not a finding. `@m.define` on an `Enum` declares its
+  members as ordinary declarations, so a Python enum with an uncovered member
+  is found by the same check. The verdict is a lower bound: a constructor
+  declared later cannot be seen from the space as it stands.
+
+- `lint()` reports `builtin-equation-shadow` when an equation redefines a head
+  the engine ships. The dangerous cases already refused by name; this is the
+  case the engine PERMITS, where the equation compiles into the space's own
+  module and shadows the builtin there, so `!(max-atom (1 5 3))` answers `5`
+  before it and `shadowed` after with nothing said. A warning, because the
+  write is lawful and scoped, and the sibling of
+  `interpreter-equation-shadow` for translator-owned heads.
+
+- The Node package exports `metta-node/atom` and `metta-node/errors`, the atom
+  algebra and the errors it throws, with no engine behind either. A consumer
+  that only builds terms had to come through the main entry, which resolves 166
+  modules and reaches `node:fs`, `node:path` and `node:url`; the two new
+  subpaths resolve three between them and reach none of those, so a browser
+  page that builds atoms pays for none of the engine.
+
+- The aggregation over a soft match's positions is a choice. `min`, the fuzzy
+  t-norm, stays the default and is right for logic, where a term is as close as
+  its worst position; it flattens a ranking, because one unrelated symbol takes
+  an otherwise strong match to zero. `(soft-aggregate mean)` in a space selects
+  the other, which is Bousi~Prolog's own shape for the same decision, and
+  `soft-score-by` takes one explicitly. Adding a third is two clauses.
+
 ### Changed
 
 - A Python twin may declare its own `ALLOWANCE` beside its `BUDGET`, for the
@@ -66,6 +541,116 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   2,735 a space; it now costs
   `[15582, 13538, 13557, 13578, 13583, 13618, 13613, 13662]`, flat within 0.92%.
 
+- A C host's boot loads the compiled engine instead of recompiling it.
+  `mt_open()` consulted `engine/metta.pl` by name, and an explicit `.pl` names
+  the source, so every boot compiled the umbrella and its eleven
+  `engine/metta/*.pl` units again; it now runs the engine's own
+  `metta_qlf_boot:qlf_load_engine/0`, which is the load `engine/main.pl` runs.
+  The seat's `boot` benchmark falls from 1,563,321 inferences to 633,848 and
+  from 1,885,311,169 retired instructions to 1,107,958,359, with the other
+  five cases identical to the inference. On a tree with no artifacts a C host
+  read 3,417,125 inferences and generated none, and its next boot read
+  3,417,141, so an installation that only ever ran a C program paid the whole
+  source compile on every run; the first boot now costs 3,459,587, leaves the
+  fourteen artifacts, and the second reads 633,837. A tree the process may not
+  write still boots from source, writes nothing and says nothing.
+
+- `get-metatype` classifies a NAME by whether this engine holds a function for
+  it, which is upstream PeTTa's whole rule, in place of a 115-name table taken
+  from another arbiter. `car-atom`, `cdr-atom`, `cons-atom`, `decons-atom`,
+  `eval`, `empty`, `let` and `min` answer `Grounded` where they answered
+  `Symbol`; `nop`, `hyperpose`, `sealed` and every space handle and state cell,
+  `&self` included, answer `Symbol` where they answered `Grounded`; and a name
+  the running program defines answers `Grounded` from the moment its equation
+  exists. Over the 268 names both engines register, the two now disagree only
+  where their function inventories do, on none whose registration they share,
+  where 74 such names disagreed before. What a handle IS is unchanged and is
+  read with `get-type`, which still answers `SpaceType` and `(StateMonad $t)`;
+  both wire codecs ask the space registry directly and are unaffected.
+  `lib_soft`'s three aggregation-name parameters move from `Symbol` to
+  `%Undefined%`, because `min` is one of the engine's own operations and a
+  `Symbol` parameter refused the library's own default.
+
+- `lib_strategy` recognises a user strategy by its name being a NAME rather
+  than by its metatype being `Symbol`. Defining a strategy is what gives its
+  name a function, so under the rule above a Symbol-only test stopped
+  recognising every strategy that had been defined; compound plans it does not
+  know, and an unbound strategy, still decline.
+
+- The Python contract ontology declares its eleven NAME positions `Atom` in
+  place of `Symbol`, so `(op ...)`, `(defined ...)`, `(source-span ...)`,
+  `(free-variable ...)`, `(effect ...)`, `(arguments ...)`, `(image ...)`,
+  `(type-image ...)`, `(lint-evidence ...)` and `(lint-intent ...)` answer
+  their declared type again. Registering an operation is what makes its name
+  `Grounded`, so a `Symbol` position refused the very facts the ontology
+  exists to type. Fields naming a closed set keep their own type.
+
+- Nineteen engine and library comments now cite upstream PeTTa at `43705f5d`
+  for the behaviour they explain, in place of LeaTTa. Each carries the
+  differential that established the two engines answer alike: the comment
+  terminator, the closure spelling of `map-atom`, the conjunctive-match
+  snapshot, the Atom-result rule and `returnsAtom`, conditional-rule order,
+  the modifier arity gate, `unify`'s branch evaluation, the `assert*`
+  verdicts, `pragma!`'s absent declaration, and the registered SWI predicates.
+  No behaviour changed; every line in the diff is a comment.
+
+- A metatype argument check tries the shape first. `Symbol`, `Expression`,
+  `Grounded` and `Variable` are decided by the engine's own metatype ladder
+  before the typing-rule registry is walked, so a `Symbol` parameter costs 20
+  inferences per call rather than 56, an `Expression` one 14 rather than 68 and
+  a `Grounded` one 6 rather than 54, against 2 for a `Number` parameter.
+  `lib_soft` declares `Symbol` again where it had retreated to `%Undefined%`,
+  at 150,971 inferences over its 400-candidate scorer where the metatype
+  declaration used to cost 218,975. No decision changes: the shape test admits exactly what the walk
+  admits over every value shape the ladder can classify, and where it fails the
+  walk still runs.
+
+- `Trace.stopped` names the bound that cut a trace, one of `Limit.events`,
+  `Limit.memory`, `Limit.inferences`, `Limit.timeout` and `Limit.stack`, or
+  `None` when the run finished. `truncated` remains as the yes-or-no reading
+  of the same fact. The bounds have different remedies and one flag sent a
+  caller to the wrong one: the same program above stops at 7,972 events on the
+  engine's store-cell budget, where raising `max_events` returns the same
+  7,972 at the same cost. `limit` is a catalog vocabulary, so MeTTa, Python
+  and the Node package read one list.
+
+- `m.debug(term, on=[S.double])` stops a running program at a breakpoint and
+  hands it to Python. Iterating the Debugger runs the program to each
+  breakpoint, the loop body is where it is SUSPENDED, and leaving the body
+  resumes that same execution rather than starting a new one. `d.step()` stops
+  at the very next reduction whether or not it carries a breakpoint and lasts
+  one advance; `d.breakpoints` is a live set, so one added at a stop stops the
+  program next time; `d.answers` is what the program produced once it
+  finished. The division is CPython's own `bdb`, where the stop callback is
+  the suspension and the mode selects how execution goes on; the suspension
+  itself is SWI's `engine_yield/1` from inside the reduction, the one
+  mechanism that returns control from deep in a running goal and leaves it
+  resumable. What is debugged executes for real, writes included, and inherits
+  the caller's scope. `inferences=` bounds the whole session cumulatively, so
+  a resume with no breakpoint ahead of it stops; there is no timeout, because
+  a session is suspended by design and a clock would run while a person reads
+  a stop. A breakpoint reached from inside a Python operation that calls back
+  into MeTTa cannot suspend, and says so with the remedy rather than being
+  skipped.
+
+- `python -m metta repl` completes names and keeps its history. TAB completes
+  the token under the cursor against every name the language knows, functions
+  and translator special forms alike, and against the engine's spaces when the
+  token opens with `&`; a name defined in the session is offered at once.
+  readline's default delimiters break a token on `-`, `!`, `?`, `*` and `&`,
+  every one of which is ordinary inside a MeTTa head, so with them `car-a`
+  completed against `a` and answered nothing: the delimiters are now whitespace,
+  parentheses and the string quote. History is read at startup from
+  `~/.metta_history`, or wherever `METTA_HISTORY` points, and written back on
+  exit without the `exit` that ended the session, which would otherwise be the
+  first thing Up recalled. A read-only home says so on stderr rather than
+  ending the session.
+
+- `m.trace(filter=...)` also takes a bound function handle, `m.fn.double`, and
+  anything else that mentions as one head symbol, because the debugger's `on=`
+  and the trace's `filter=` now read their names through one normaliser rather
+  than two. Every refusal it already made it still makes.
+
 ### Fixed
 
 - The `spec-status-selftest` gate lane is green again. Two self-tests plant the
@@ -74,6 +659,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   of the two fixtures followed and the other did not, so the lane read its
   planted FIXED case as OPEN. Both fixtures read the anchor from the collector
   now, so the tree has one authority for it.
+
 - The provenance pass reaches every file class that carries a commit pin.
   `tests/prolog/*.pl` and `.metta` each held a placeholder `pin_provenance.py`
   could see and could not resolve: the first sat outside every glob the pass
@@ -82,6 +668,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   that refuses an unresolved placeholder had no way to pass. The Prolog glob
   joins the pin half only, which changes no claim obligation, and `.metta` joins
   the `#` line-comment rule as the second member of a two-member table.
+
 - The `node-dist` gate lane runs on a fresh checkout. `dist-consumer.mjs`
   built its throwaway consumer package under `extensions/node/ai-tmp/`, a
   gitignored directory nothing creates, so the lane passed only in a checkout
@@ -89,6 +676,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `ENOENT: no such file or directory, mkdtemp` everywhere else, CI included.
   It creates the directory first, which is what the seat's two other
   repository-local scratch sites already do.
+
 - `sh extensions/python/test.sh` lets a caller's own flag override its
   defaults. The four-worker `-n 4` came after the caller's arguments, and
   pytest takes the last value of a repeated option, so `-n 0` was silently
@@ -452,12 +1040,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   boolean per name recorded only whether it had declared anything, so every
   later clause's declaration was suppressed; a ledger of what the name has
   published here adds the new arrow and skips a repeat.
+
 - A case row that is not a `(pattern body)` pair no longer makes a negation over
   its function answer nothing. The bound-variable walk failed on the row, which
   failed the whole dual build and left `(not-provable (f 1))` with no answer at
   all where the form does not reduce and its dual is therefore true. The walk
   steps over such a row now, so the refusal comes from the place this engine
   puts one: it raises rather than answering from an incomplete dual.
+
 - A declared class answers its OWN type name. `ensure_registered` walks the MRO,
   so a subclass adding nothing projected through its base's entry: declaring
   `Dog(Animal)` restated `(: Animal (-> String Animal))`, which the engine
@@ -529,12 +1119,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   124,185. Nothing about which seam is published from which module changed:
   every module's export list, every seam's home module and the whole kind table
   are identical before and after.
+
 - The engine layering gate loads the source observer again. It asked for it in
   a file-level directive, which runs before the gate consults the engine, so
   the lane raised `Unknown procedure: metta_ensure_source_observation/0`,
   measured a graph the observer was not in, and failed on six of its own
   contract lines. The ask now sits at the head of the walk, where both the gate
   and its test suite reach it.
+
 - Clearing a space no longer walks its stored atoms one at a time because an
   unrelated library watches a different space. A hook clause whose head names
   the space it watches, as `lib_tabling` names `&metta`, is now idle for every
@@ -542,6 +1134,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   Clearing a space holding a memoized function and 2,000 plain atoms cost
   131,247 inferences with `lib_tabling` in the process and 4,759 without it;
   both now cost 4,759.
+
 - Reloading a file that declares an annotated arrow now succeeds when more than
   one space holds that file, which is the ordinary shape for a library. The
   withdrawal removed the declaration's own catalog effect row a second time by
@@ -550,420 +1143,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   annotated_arrow_effect, ...)` after retracting the source record and before
   releasing any of the load's references. A withdrawal now removes the atoms
   its load stored and leaves the clauses it derived to the reference sweep.
+
 - The example parity reporter preserves SWI process exits without reporting
   their `unwind(halt(Status))` control signal as an application error.
-
-### Added
-
-- Binding answer collections now provide `column(name)` and
-  `group_by(column)`. Groups are keyed by the column's atom and retain `Rows`
-  values with the original columns.
-
-- The catalog now publishes every accepted algebra-law spelling and alias
-  expansion. Python exposes them as `AlgebraLaw`, and all ten shipped algebra
-  carriers have matching catalog vocabulary members, enums, and root objects.
-
-- A bounded slice of a ranked match reaches the provider as a bound.
-  `m.match(q, under=ranked)[:3]` pulled the ordinary cursor and sliced in
-  Python, so a store that could have answered three rows answered all of them.
-  The slice now reopens the query with `limit=3` when, and only when, the
-  space is foreign, its source is not `linear`, it declares
-  `(emits <ctx> best-first)`, its effective algebra is the carrier the query
-  selected, and the query is one pattern with no `where=`. Anything short of
-  that keeps the shared cursor, so the answers are the same either way and
-  only the work changes.
-
-- Tensor shapes flow through type inference. `metta.arrays.Shape(...)` builds
-  the dimension metadata a Python `Annotated[DLTensor, Shape(...)]` carries, a
-  declared `(Annotated DLTensor (Shape ...))` symbol satisfies an ordinary
-  `DLTensor` argument, and `get-type` derives the result shape before any array
-  is built: elementwise operations through the existing `broadcast-shape`
-  relation, rank-two `matmul` by unifying the shared inner dimension. So
-  `(: image (Annotated DLTensor (Shape (4 1))))` with
-  `(: bias (Annotated DLTensor (Shape (3))))` gives
-  `!(get-type (t+ image bias))` the shape `(4 3)`, and an incompatible pair
-  yields no shaped type at all. The elementwise operations keep their existing
-  scalar-capable second argument.
-
-- `metta.current_algebra()` answers the algebra a query here would run under,
-  or None. `current_space()` had no partner: a program could scope a carrier
-  with `with metta.under(...)`, declare one on a space, or pass one to a call,
-  and had no way to read back which of the three was in force, including from
-  inside an operation the engine has already entered. The observer follows the
-  same precedence the query does, per-call carrier over task scope over the
-  current context's annotations row, and answers None when none of the three
-  is present rather than reporting execution's implicit Boolean default as a
-  declaration.
-
-- Every shipped semiring is a root object. `metta.counting`, `.prob`, `.prov`,
-  `.ranked` and `.tropical` were exported and `bool`, `bag`, `set`, `budget`
-  and `amplitude` were reachable only as strings, so `metta.budget` raised
-  AttributeError for a carrier `under="budget"` already answered and no typed
-  annotation could name it. All ten are lazy root exports now, in the order the
-  catalog declares them.
-
-- `metta_ensure_source_observation/0` is a published `service`, so a library
-  may ask for the source observer by name. The engine does not load
-  `engine/source_observation.pl` at boot, and `observe_source/4` cannot be its
-  own loader, so an extension that may call the published observer needs a
-  published way to make it exist; without one the only route was a library
-  running `load_files/2` over an engine path. `lib_observe`'s `observe-source`
-  is the shipped caller.
-
-- `Defined.free_variables` now has an exact consumer-sheet spelling and a
-  checked compiled-definition example with one lexical dependency.
-
-- Remote-backend authors can now find `is_transport_failure(error)` in the
-  error model, with checked positive and negative classifications in the
-  remote-controls example.
-
-- Performance authors can now find the general `measure_counters` and
-  `CounterRuns` surface beside the narrower instruction helper, including the
-  baseline methods that decide deterministic and noisy counters.
-
-- `EmbeddingStore.vector_for(key)` and `keys()` now appear beside the
-  embedding operation door, and the checked matcher example reads a stored
-  vector back by atom key.
-
-- `metta.testing.from_pattern(pattern)` now has a consumer-sheet entry and a
-  checked property-testing example covering both repeated named variables and
-  independent anonymous occurrences.
-
-- The exact module-tier `metta.speculate()` spelling now appears beside
-  `Space.speculative()` and runs in the checked engine-controls example.
-
-- `object_view(obj, relation=...)` now has an exact consumer-sheet spelling,
-  and the checked object-integration example queries a view under a custom
-  relation name.
-
-- `EventStream.folds(space_name)` now has a consumer-sheet door, and the
-  standing-query example checks its live roster before and after cancellation.
-
-- `Rows.raise_for_errors` and `Answers.raise_for_errors` now appear in the
-  consumer error model, and the checked error-handling example proves both its
-  clean chaining and stored-error exception paths.
-
-- Foreign backend authors now have exact consumer-sheet and executable doors
-  for `BoundedMatcher`, `Snapshotter`, and `WorldCommitter`, including an exact
-  bound pushdown and a provider-owned immutable-world commit.
-
-- Integration authors now have consumer-sheet spellings for unloaded and
-  explicit entry-point loading, dependency-ordered discovery, and exact
-  process-wide hook cleanup, plus a checked registration-lifecycle example.
-
-- The concurrency sheet and a checked example now expose
-  `EnginePool.starmap` for multi-argument work and `Channel.try_recv` for a
-  nonblocking mailbox take.
-
-- The consumer sheet and first-steps example now expose the Python-safe root
-  builders `not_` and `in_` beside the existing logic builders.
-
-- `Atom.subs` now appears beside `Atom.unify` in the consumer sheet and the
-  first-steps example proves a unifier can be applied directly to a template.
-
-- Test and conformance harness authors can now find `AssertionFailure` in the
-  error taxonomy and a checked example that reads its operation, actual, and
-  expected fields.
-
-- Class-owned `__metta__` and `__from_metta__` conversion now appears in the
-  consumer sheet and executable object-integration example, including the
-  unregistered `build(atom, Class)` round trip.
-
-- Python class authors can now discover and execute
-  `space.define(Class, accessors=False, methods=False)` to register a type
-  without exposing its host fields or methods as MeTTa callables.
-
-- Saga compensation now has a consumer-sheet entry and checked example showing
-  a committed step's queryable receipt, exceptional-exit recovery, and receipt
-  retirement after successful compensation.
-
-- The checked engine-controls example now executes `Space.limits(stack=...)`,
-  and the consumer sheet identifies it as a scoped SWI combined-stack byte
-  ceiling beside the other call bounds.
-
-- Remote deployers now have a checked example and exact consumer-sheet
-  spellings for `Request` authorization, client capability discovery, TLS and
-  timeout controls, and the server's idle and live-cursor resource bounds.
-
-- Foreign-provider authors now have a consumer-sheet entry and checked example
-  for the distinction between structural `can_run` support, request-specific
-  `should_run` policy, and provider-owned `refusal` messages.
-
-- The consumer sheet and a checked runtime-configuration example now expose
-  the root `metta.config` object, its four environment variables, the atomic
-  `configure` method, and which settings freeze after engine startup.
-
-- `MeTTa.space(..., journal=..., rename=...)`, the module-level `metta.space`
-  factory and `AsyncMeTTa.space` now expose the persistent store's one-open
-  schema migration. Users no longer need to import the private provider class
-  to rename journal heads.
-
-- `sh run.sh --verbose program.metta` exposes informational compiler and
-  source-reload reports at the standalone user's invocation point. The default
-  remains quiet.
-
-- Specialization verification now reports its coverage. Turning
-  `(pragma! verify-specializations true)` off, or exiting a process started
-  with `METTA_VERIFY_SPECIALIZATIONS=1`, writes the checked, agreed, and
-  inference-bounded counts to the requested report channel even when the
-  standalone launcher uses quiet logging. The corpus differential reads and
-  aggregates those counts, and refuses a vacuous run that checked nothing.
-
-- `metta.llms()` prints `llms.txt`, the sheet that teaches this library, and
-  answers None the way `help()` does. It is the document an agent reads before
-  writing anything against this surface, and until now reading it meant finding
-  the repository: a `pip install` carried the engine, the libraries and the
-  codec corpus but not the one file that explains them. `setup.py` ships it into
-  the runtime tree, so a checkout and an install print the same bytes, and
-  `python -m metta llms` is the same document from a shell. It never pages,
-  unlike `help()`, because the reader is usually a program holding a pipe.
-
-- A compiled `match(...)` call takes a CONJUNCTION. Two or more patterns before
-  the template lower to the engine's own `(, p q)`, so
-  `match(S.edge(V.x, V.y), S.edge(V.y, V.z), (V.x, V.z))` stores
-  `(match (context-space) (, (edge $x $y) (edge $y $z)) ($x $z))` and joins on
-  the shared middle node. It is the spelling the read door already takes,
-  `m[p1, p2]` and `Space.match(p1, p2)`, and a leading handle, space parameter
-  or `"&kb"` still names the space. Writing the two patterns as a TUPLE builds a
-  two-element pattern term instead, which the space cannot hold, and answered
-  nothing without saying so; a conjunct that is not a whole pattern now refuses
-  and names both readings.
-- Declaring a class into a space writes its subtype edges. Python's class
-  hierarchy IS a subtype relation, so `m.define(Animal)` then `m.define(Dog)`
-  for `class Dog(Animal)` stores `(:< Dog Animal)`, and `get-type` on a
-  `(: Rex Dog)` widens to `[Dog, Animal]`. Only DECLARED classes count as
-  supertypes, which keeps `object`, a NamedTuple's `tuple` and an enum's `Enum`
-  out of the answer, and only REAL bases do, since a virtual `abc` registration
-  never reaches `__mro__`. Multiple inheritance answers one edge per direct
-  base, and a base declared after its subclass fills that edge in then.
-- An ATOM in annotation position is the type itself. `typed(S.a, S.Number)` and
-  `arrow(S.Number, S.Bool)` already read an atom or a Python type either way; a
-  signature read only the Python type, so `def speak(a: S.Animal) -> S.Sound`
-  declared `(-> %Undefined% %Undefined%)` and said nothing. It declares
-  `(-> Animal Sound)` now, and the doc's `(@type ...)` field carries the same
-  atom. It is the escape hatch the projection table needs, since the table is
-  finite and many-to-one: a MeTTa type with no Python class had to be given an
-  empty one to be nameable in a signature.
-- `csv-snapshot!` reads a CSV file ONCE into an ordinary space of
-  `(row Number Field...)` atoms, beside `csv-space`'s live view. The view holds
-  no rows and reparses per query; the snapshot pays one parse and then about two
-  inferences per answer, which is 27x to 30x cheaper per query and pays for
-  itself on the second one [measured over 1,000 rows: 59,856 inferences per
-  query through the view against 63,960 to build plus 2,015 per query]. The
-  record number comes with the snapshot because a space is unordered: without it
-  a space of rows can neither say which record came first nor skip a header, and
-  a number is an identity only once the rows are fixed. `csv-space`'s
-  `(row Field...)` is unchanged.
-
-- `(stdin)`, `(stdout)` and `(stderr)` answer handles 0, 1 and 2, POSIX's own
-  numbering, in the table `file-open!` already fills. So `file-read-exact!`,
-  `file-write!` and `file-get-size!` reach the three streams a process always
-  has, and standard output has a spelling. They are a second spelling rather
-  than a second mechanism: `stderr!` is a handle write and `stdin-to-string!` is
-  `(file-read-to-string! (stdin))`, and both stay as they are. `file-close!`
-  refuses all three, because closing stdout or stderr takes it from the whole
-  process with no way back.
-
-- `temp-dir!` mints a fresh directory the way `temp-path!` mints a fresh file,
-  so a caller who needs somewhere to put files no longer derives a directory
-  name from a temporary FILE name. A prefix names the directory and may not
-  contain a separator: `tmp_file/2` pastes it into the path unsanitised, so one
-  would place the result outside the temporary directory.
-
-### Fixed
 
 - `examples/README.md` stated its corpus size, its derived-program count and its
   written-here count twice each, with different numbers, from a merge that kept
   both sides of all three sentences. They are one line each again, derived from
   the tree.
-
-### Added
-
-- `(| Number String)` is a union type, usable as an argument type, a result
-  type, a tuple field and an alias right side. A value is admitted when some
-  member admits it, and a value whose own type is a union only when every
-  alternative is, under one assignment of the type variables they share, so
-  `(| Number String)` fits `(| Number String Bool)` and not `(| Number Bool)`.
-  Nested unions flatten, a repeated member is one member, and a one-member
-  union is that member; `(|)` and an improper union raise a type-syntax error.
-  `|` heads a union only where a type is read, so `(|-> ($x) ...)` is still a
-  lambda and `(| a b)` is still data. There is no occurrence typing: testing a
-  union-typed value does not narrow it, and `match-types` with the `type-cast`
-  built on it keep comparing written types by unification with wildcards.
-  `examples/ch09-types/19-union-types.metta` is the executable description.
-
-- The writer's variable-identity invariant is pinned under garbage
-  collection: one variable shared across a 40,000-string filler reparses as
-  one, two as two, and 5,000 shared variables keep their count. Upstream's
-  `swrite` named variables from `term_to_atom/2`, which reflects a stack
-  address, so a collection mid-serialization printed one variable under two
-  names; that mechanism is live on SWI 10.1.13 and the planted pre-fix
-  writer fails the new tests. Our writer never read an address, so no
-  engine change was needed.
-
-- `bounded.sh` is the one bound on every process this repository starts. It
-  holds a deadline in a process of the child's own, so an orphan still ends,
-  and links that child to the process that started it through
-  `prctl(PR_SET_PDEATHSIG)`, so a killed session reaps its children in
-  milliseconds instead of leaving them to the deadline. Every runner calls it,
-  the harness scripts reach it through `tests/checks/bounded_spawn.py`, and
-  `sh bounded.sh swipl ...` is the form to type by hand. `sh engine/test.sh
-  suites/<group>/<suite>.plt` runs one PlUnit suite through it, with the
-  working directory, the janus environment and the load-error scan a bare
-  `swipl` call does not carry.
-
-- The five CI jobs carry `timeout-minutes` rather than GitHub's 360-minute
-  default: 45 for the gate and the version matrix, 20 for the rest, against
-  measured costs of 18 to 19, 10 to 14, and 0 to 2 minutes.
-
-- Remote mutations negotiate scoped, expiring idempotency keys. Lost or
-  indeterminate replies raise `OutcomeUnknown`; its `retry()` replays the
-  retained request without repeating its effects. Legacy peers expose the
-  same uncertainty but refuse recovery without negotiated replay. Late
-  reentrant completions cannot restore pruned replay reservations.
-- Remote responses validate their envelope and complete atom list before
-  delivery. Malformed replies raise `ProtocolError`, which remains a transport
-  failure through engine error policies. Invalid initial cursor replies
-  release their token or retain it on the reported cleanup failure.
-
-- `Space.drop()` retains subscriptions and provider ownership when engine
-  teardown fails. A later cleanup failure keeps the anonymous name reserved
-  and can be retried without repeating engine teardown or clearing a journal.
-
-- `EnginePool.close(wait=True)` joins owned workers after an earlier nonwaiting
-  close. `AsyncMeTTa.define` requires the reference function with `prolog=` and
-  applies the synchronous decorator on its owning worker.
-- Compiled Python bodies now unpack tuple and list patterns, collect known
-  answer streams with `list`, query engine metatypes with `type`, and preserve
-  every `typing.overload` declaration. Generator `match` statements carry
-  captures into later statements, and an answerless match subject reaches its
-  explicit `Empty` branch.
-- `if-decons-expr` holds its expression operand, binds its head and tail on
-  success, and evaluates the selected continuation. Empty expressions and
-  incompatible existing bindings take the fallback branch.
-- Constructive negation now preserves wildcard and structural bindings in
-  nested case towers and recognizes the complement of an empty answer set.
-- `(pragma! plan-cyclic-joins True)` plans a full native cyclic conjunction as
-  a Generic Join, intersecting indexed variable domains before producing
-  answers. Duplicate facts retain their full contribution to every answer bag;
-  unsupported patterns and every conjunction without the pragma continue
-  through the existing matcher, which is faster wherever the data is not
-  skewed.
-- Retained clauses fold admitted immutable integer computations during
-  planning. Redefining a dependency rebuilds its folded callers, and host
-  operations remain deferred until demanded.
-- Function metadata keeps source-owned head and presence indexes. Repeated
-  calls no longer copy an unused definition body during dispatch; duplicate
-  equations, source reload and transaction rollback retain their bindings.
-- Tagged queries propagate bound arguments through certified acyclic integer
-  programs. They derive the requested proof bags while preserving duplicate
-  source occurrences and the existing failure behavior outside that fragment.
-- `(pragma! materialize-source-relations True)` makes source loading derive
-  eligible finite function-free relations once, at each source boundary and
-  once per completed load. Ground calls then reuse counted results, while open
-  calls, multiple distinct outputs, cyclic proof graphs, tracing and bounded
-  reductions keep their original execution, and transactional loads validate
-  their prepared source receipts on the first query after commit. Preparation
-  is quadratic in the derived relation, so a load without the pragma prepares
-  nothing.
-
-- The MeTTa file library now creates directories, copies bytes with staged
-  replacement, returns queryable metadata snapshots, composes lexical paths,
-  reads stdin through EOF, writes stderr, and exits with an explicit status.
-- `lib_csv` exposes UTF-8 CSV files as read-only row spaces through the native
-  provider seam. Queries stream cells as strings and report malformed records,
-  missing files and denied permissions by name.
-- `trace(filter=...)` selects named functions before recording limits apply.
-  MeTTa programs can query selected trace events through `lib_observe`.
-- `observe-source` in `lib_observe` returns source coverage, Error values and
-  attributed MeTTa stack frames as queryable atoms. Positions count Unicode
-  codepoints. Generated calls name their originating construct, and missing
-  source metadata is explicit. Ordinary execution keeps its atom representation
-  and does not collect diagnostic state.
-
-- Transparent structural type aliases use `(: Count (Alias Number))`.
-  Aliases work in parameters, results, positional tuples and complete arrows,
-  including `Atom` evaluation barriers. Each alias resolves names where it was
-  declared. Adding, removing or reloading declarations repairs compiled
-  callers; cycles report their path and conflicting definitions roll back.
-  Type observers and Python casts accept the expanded type while stored
-  source and diagnostics retain the alias spelling.
-
-- Node's `Semiring` vocabulary now includes the catalog's `budget` and
-  `amplitude` values in their declared order.
-
-- `lib_distribution` adds pure unary map, independence-named binary map and
-  convolution, inclusive threshold mass, strict independent win probability,
-  exact joint conditioning, independent average, and additive Bernoulli update
-  over `lib_measure`'s transparent weight-first rows. Equal outcomes collapse
-  at their first position. `ws-normalize` now rejects empty, negative,
-  nonfinite, and zero-mass inputs with remedy-bearing errors instead of
-  returning an empty or silently invalid distribution [tested:
-  test_distribution.py and 12-distribution.metta; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
-- Integration installation is transactional across framework-managed state.
-  A failed installer now restores operations and declaration ownership,
-  protocol types and reprs, reflectors, converted types, library paths,
-  dynamic Prolog registrations, atoms, and nested installation receipts.
-  Best-effort home spaces are refused before execution, while consulted Prolog,
-  loaded native code, custom listeners, and other process-global residue are
-  reported on the original exception because they cannot be safely unwound.
-- Annotated function types such as `(: f (-[det]-> Number Number))` now
-  govern execution and compilation like `(: f (-> Number Number))`, through
-  both file loading and separate declaration/equation loads. Argument checks,
-  application types, higher-order arguments and declaration readers use the
-  plain runtime arrow. Stored atoms, `get-type f`, documentation and source
-  export retain the written annotation. Concrete products now publish owned
-  effect rows consumed by planning and world admission. A `nondet`
-  product joins its effect with `nondeterministicReadOnly`. Removing or reloading
-  a declaration withdraws only its owned rows. Direct removal of owned rows
-  and catalog clears that would orphan another space's declaration are refused.
-  The removal guard also covers catalogs with capacity counters. Ordinary clear
-  retains provider callback suspension and removes only metadata for declarations
-  no longer stored.
-- `(pragma! verify-cardinality true)` audits annotated ordinary function calls
-  using SWI's failure and choicepoint rule. `det` requires one success without
-  a choicepoint, `semidet` permits failure, and `nondet` has no answer-count
-  restriction. The checker executes the original dispatch once; by default
-  cardinality assertions are trusted. Plain `->` calls gain no runtime check.
-  Unresolved products, nested products and annotations on translated forms
-  are refused at load because their claims have no runtime consumer.
-  Foreign spaces require transactional storage so partial writes cannot
-  separate an annotation from its effect. Removing the last cached equation now
-  releases its owner's memoization state, even when another space still defines
-  the name or the host has already untabled its implementation. Memo handlers
-  retain exact clause references and retire with their owners. Native clear
-  keeps bulk data removal when its observers watch only compiled equations.
-
-- Python-authored programs can now be inspected and exported as MeTTa.
-  `Space.source()` returns the receiver's directly stored program as the exact
-  loadable text written by `Space.save(format="metta")`; `Defined` and `Space`
-  show the same source in rich notebooks; and
-  `python -m metta convert program.py [-o out.metta]` imports a Python file
-  into a fresh space and prints or writes that text.
-  `Space.consumption(kind)` now declares linear, repeated, or peek consumption
-  while preserving `(source <space> <kind>)`; it replaces the colliding
-  `Space.source(kind)`.
-
-- Builtin registration now owns an exact implementation facet for every core,
-  prelude, and extension operation. Boot-time checks reject a registered name
-  or arity without a description, a description without its registered name
-  and dispatch arity, a missing implementation hook, and an independently
-  surfaced project predicate without either a description or a local reasoned
-  exemption. `seam:builtin_implementation_exemption/2` is the declaration seam
-  that says a predicate of yours is a compiled helper rather than a language
-  operation; it is written beside the implementation it excuses, carries the
-  reason, and is refused once the predicate it names stops being reported.
-  `EXTENDING.md` documents it.
-
-- `current_source_identity/2` answers the file a record made during a compile
-  belongs to and the digest of that file's text, for anything that files a
-  record alongside a compile and needs a reload to replace its old set. It takes
-  `record_source_assertion/1`'s charge, so a record and the source it reports
-  name one load even when a deferred equation is compiled inside an unrelated
-  import, and it names the absence, `immediate` and `none`, outside every load
-  rather than failing or inventing a revision.
-
-### Fixed
 
 - A composed space's capability set is its members' rather than its own
   methods'. `spaces.overlay(readonly_space, store)` used to answer
@@ -975,61 +1162,6 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   each capability is routed to, and a capability refusal names the member that
   lacks it rather than the combinator. Measured over 400 generated trees: 388
   of 2,000 claims were false before, none after.
-
-### Added
-
-- `(pragma! verify-discharges true)` verifies the type checks the compiler
-  decided not to emit. A literal whose type is settled at compile time, an
-  argument a caller's declaration proved, a `Number` parameter compiled to a VM
-  test and a metatype parameter compiled to the metatype ladder are each a
-  claim that the removed check could not have failed; under the pragma the fast
-  side still decides and the check it replaced runs beside it, raising a
-  disagreement that names the discharge, the type and the value. Turning the
-  mode off reports what it checked, as agreed, disagreed and could-not-be-
-  checked counts, so coverage is a number rather than a claim of completeness.
-  The mode costs nothing when off: the three emitted discharges choose their
-  form while compiling, so an ordinary compile carries no trace of it.
-
-### Added
-
-- `lint()` reports `det-equations-overlap` when two equations share a head up
-  to variable renaming under a `-[det]->` claim, so each equation
-  is tried for every call. The claim holds only while at most one body
-  succeeds, which nothing checks, so this is a hint rather than a proof: a
-  guarded second body keeps it for some calls and breaks it for others. Not
-  `duplicate-equation`, whose bodies are
-  equal, nor `subsumed-equation`, whose heads are instances rather than
-  variants; what makes this one wrong is the declaration. Merge them, separate
-  the heads, or declare `-[nondet]->`.
-
-- `lint()` reports `uncovered-constructor` when a `-[det]->` claim is broken by
-  a member no equation covers. The arrow promises exactly one answer and an
-  uncovered constructor gives zero, so the declaration and the equations
-  contradict each other; the message names both remedies, cover it or declare
-  `-[semidet]->`. A plain `->` promises nothing about answer count, so
-  partiality under one is not a finding. `@m.define` on an `Enum` declares its
-  members as ordinary declarations, so a Python enum with an uncovered member
-  is found by the same check. The verdict is a lower bound: a constructor
-  declared later cannot be seen from the space as it stands.
-
-- `lint()` reports `builtin-equation-shadow` when an equation redefines a head
-  the engine ships. The dangerous cases already refused by name; this is the
-  case the engine PERMITS, where the equation compiles into the space's own
-  module and shadows the builtin there, so `!(max-atom (1 5 3))` answers `5`
-  before it and `shadowed` after with nothing said. A warning, because the
-  write is lawful and scoped, and the sibling of
-  `interpreter-equation-shadow` for translator-owned heads.
-
-### Added
-
-- The Node package exports `metta-node/atom` and `metta-node/errors`, the atom
-  algebra and the errors it throws, with no engine behind either. A consumer
-  that only builds terms had to come through the main entry, which resolves 166
-  modules and reaches `node:fs`, `node:path` and `node:url`; the two new
-  subpaths resolve three between them and reach none of those, so a browser
-  page that builds atoms pays for none of the engine.
-
-### Fixed
 
 - The Node binding refuses a command whose argument count is not the one its
   verb takes, instead of answering nothing. A wrong count unified with no
@@ -1236,21 +1368,26 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Node answers and traces now carry partial applications and other Prolog
   compounds as expressions using the Python wire grammar. Improper lists
   cross as `(cons Head Tail)` rather than raising an untaggable-term error.
+
 - Running or loading a source no longer pays for materialization when no
   program asked for it. A source that defines no equation, and any source at
   all while the relation pragma is off and the space holds no relation, take
   the doors they took before the subsystem existed.
+
 - Reconsulting a Prolog library while a materialized relation exists no longer
   crashes the process. The clause-erase callback tests the reference's type
   alone, where asking it for its predicate reached SWI's clause metadata
   during the reconsult that was replacing it.
+
 - A source replacement prepares its materialized relation once rather than
   twice. The loader's dependency repair pass runs before preparation instead
   of invalidating a relation the file body had already derived.
+
 - An unrelated native call no longer reads planning mode and module context
   for every materialized relation in the process. Each relation owns one
   dispatch clause per admitted signature, and removing one leaves another
   relation's clause for the same function standing.
+
 - Fast-cache version 4 preserves resolved reader bindings beside exact stored
   equations, including duplicate native/reader occurrences and later
   recompilation. Deferred reconstruction no longer compiles a resolved sibling
@@ -1358,11 +1495,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   now include `Undefined` through direct, saga, and reified-world routes, and
   `AsyncMeTTa.eval` distinguishes the flat one-target result from grouped batch
   results through overloads.
+
 - `py-iter` now gives each repeated or nested enumeration an independent lazy
   cursor over one shared cache, so two reads of the same one-shot iterator do
   not silently lose answers. `py-iter-once` exposes explicit consumptive
   iteration, and compiled Python `for` statements use it to retain Python's
   one-shot iterator behavior.
+
 - `answers(timeout=)` and `match(timeout=)` bound the evaluation. They did
   nothing at all: a non-terminating recursion ran past sixty seconds under
   `timeout=3` where `eval(timeout=3)` raised at 3.01 seconds on the same
@@ -1371,6 +1510,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   in-engine goal now, beside the inference budget that already worked, and
   raises `TimeLimitError` at the bound. It checks between answers, so a goal
   stuck before its first answer is still `inferences=`'s to bound.
+
 - Tagged algebra evaluation now carries `timeout=` and `inferences=` through
   `answers(under=)`, `match(under=)` and `eval(under=)`. Its wall bound is one
   absolute deadline across fixpoint rounds, and custom operations debit one
@@ -1379,74 +1519,6 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   first answer, so an untabled cyclic tropical query raises `TimeLimitError`
   at six seconds instead of reaching a stack error after about a minute.
 
-### Changed
-
-- A C host's boot loads the compiled engine instead of recompiling it.
-  `mt_open()` consulted `engine/metta.pl` by name, and an explicit `.pl` names
-  the source, so every boot compiled the umbrella and its eleven
-  `engine/metta/*.pl` units again; it now runs the engine's own
-  `metta_qlf_boot:qlf_load_engine/0`, which is the load `engine/main.pl` runs.
-  The seat's `boot` benchmark falls from 1,563,321 inferences to 633,848 and
-  from 1,885,311,169 retired instructions to 1,107,958,359, with the other
-  five cases identical to the inference. On a tree with no artifacts a C host
-  read 3,417,125 inferences and generated none, and its next boot read
-  3,417,141, so an installation that only ever ran a C program paid the whole
-  source compile on every run; the first boot now costs 3,459,587, leaves the
-  fourteen artifacts, and the second reads 633,837. A tree the process may not
-  write still boots from source, writes nothing and says nothing.
-
-- `get-metatype` classifies a NAME by whether this engine holds a function for
-  it, which is upstream PeTTa's whole rule, in place of a 115-name table taken
-  from another arbiter. `car-atom`, `cdr-atom`, `cons-atom`, `decons-atom`,
-  `eval`, `empty`, `let` and `min` answer `Grounded` where they answered
-  `Symbol`; `nop`, `hyperpose`, `sealed` and every space handle and state cell,
-  `&self` included, answer `Symbol` where they answered `Grounded`; and a name
-  the running program defines answers `Grounded` from the moment its equation
-  exists. Over the 268 names both engines register, the two now disagree only
-  where their function inventories do, on none whose registration they share,
-  where 74 such names disagreed before. What a handle IS is unchanged and is
-  read with `get-type`, which still answers `SpaceType` and `(StateMonad $t)`;
-  both wire codecs ask the space registry directly and are unaffected.
-  `lib_soft`'s three aggregation-name parameters move from `Symbol` to
-  `%Undefined%`, because `min` is one of the engine's own operations and a
-  `Symbol` parameter refused the library's own default.
-
-- `lib_strategy` recognises a user strategy by its name being a NAME rather
-  than by its metatype being `Symbol`. Defining a strategy is what gives its
-  name a function, so under the rule above a Symbol-only test stopped
-  recognising every strategy that had been defined; compound plans it does not
-  know, and an unbound strategy, still decline.
-
-- The Python contract ontology declares its eleven NAME positions `Atom` in
-  place of `Symbol`, so `(op ...)`, `(defined ...)`, `(source-span ...)`,
-  `(free-variable ...)`, `(effect ...)`, `(arguments ...)`, `(image ...)`,
-  `(type-image ...)`, `(lint-evidence ...)` and `(lint-intent ...)` answer
-  their declared type again. Registering an operation is what makes its name
-  `Grounded`, so a `Symbol` position refused the very facts the ontology
-  exists to type. Fields naming a closed set keep their own type.
-
-- Nineteen engine and library comments now cite upstream PeTTa at `43705f5d`
-  for the behaviour they explain, in place of LeaTTa. Each carries the
-  differential that established the two engines answer alike: the comment
-  terminator, the closure spelling of `map-atom`, the conjunctive-match
-  snapshot, the Atom-result rule and `returnsAtom`, conditional-rule order,
-  the modifier arity gate, `unify`'s branch evaluation, the `assert*`
-  verdicts, `pragma!`'s absent declaration, and the registered SWI predicates.
-  No behaviour changed; every line in the diff is a comment.
-
-- A metatype argument check tries the shape first. `Symbol`, `Expression`,
-  `Grounded` and `Variable` are decided by the engine's own metatype ladder
-  before the typing-rule registry is walked, so a `Symbol` parameter costs 20
-  inferences per call rather than 56, an `Expression` one 14 rather than 68 and
-  a `Grounded` one 6 rather than 54, against 2 for a `Number` parameter.
-  `lib_soft` declares `Symbol` again where it had retreated to `%Undefined%`,
-  at 150,971 inferences over its 400-candidate scorer where the metatype
-  declaration used to cost 218,975. No decision changes: the shape test admits exactly what the walk
-  admits over every value shape the ladder can classify, and where it fails the
-  walk still runs.
-
-### Fixed
-
 - `ws-softmax` works on scores a network produced. It exponentiated each score
   directly, so a large one overflowed the whole distribution to NaN and a large
   negative one underflowed it to an "ws-normalize requires nonzero total mass"
@@ -1454,6 +1526,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   where the same one-unit gap at `((1.0 a) (2.0 b))` answers 0.2689 and 0.7311.
   The peak is subtracted before exponentiating, which is what every array
   library does and changes no answer in the safe range.
+
 - `soft-score` no longer runs the program it is scoring. Both operands are
   `Atom`, so an equation is compared as written:
   `(soft-score (= (tepid $x) $b) (= (warm $y) (* $y 2)))` answered a refusal
@@ -1471,6 +1544,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   The gate asks which LIBRARY an operand belongs to; the class test stays in
   front of it as a fast path, since two values of one class are always of one
   library.
+
 - `metta.arrays.install(m)` and `metta.integrate.integrate(m, target)` take a
   context as well as a space. Both need the space's storage doors, and `MeTTa`
   refuses a Space door rather than forwarding it, so the natural spelling
@@ -1486,6 +1560,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   but an `InferenceLimitError` where the events give 302 frames to a renderer
   reading them. `timeout`, `inferences` and `stack` now stop the trace the way
   the event bound does.
+
 - A trace's run bound no longer pays for the trace's own answer. It wrapped the
   whole door, and encoding the events costs more than producing them: 686,743
   inferences for that program's traced run and harvest against 4,825,600 to
@@ -1493,65 +1568,6 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   event bound during the run and then died encoding events it had already
   recorded. The bound now applies to the run alone, which is what the door
   always documented.
-
-### Added
-
-- The aggregation over a soft match's positions is a choice. `min`, the fuzzy
-  t-norm, stays the default and is right for logic, where a term is as close as
-  its worst position; it flattens a ranking, because one unrelated symbol takes
-  an otherwise strong match to zero. `(soft-aggregate mean)` in a space selects
-  the other, which is Bousi~Prolog's own shape for the same decision, and
-  `soft-score-by` takes one explicitly. Adding a third is two clauses.
-
-### Changed
-
-- `Trace.stopped` names the bound that cut a trace, one of `Limit.events`,
-  `Limit.memory`, `Limit.inferences`, `Limit.timeout` and `Limit.stack`, or
-  `None` when the run finished. `truncated` remains as the yes-or-no reading
-  of the same fact. The bounds have different remedies and one flag sent a
-  caller to the wrong one: the same program above stops at 7,972 events on the
-  engine's store-cell budget, where raising `max_events` returns the same
-  7,972 at the same cost. `limit` is a catalog vocabulary, so MeTTa, Python
-  and the Node package read one list.
-
-- `m.debug(term, on=[S.double])` stops a running program at a breakpoint and
-  hands it to Python. Iterating the Debugger runs the program to each
-  breakpoint, the loop body is where it is SUSPENDED, and leaving the body
-  resumes that same execution rather than starting a new one. `d.step()` stops
-  at the very next reduction whether or not it carries a breakpoint and lasts
-  one advance; `d.breakpoints` is a live set, so one added at a stop stops the
-  program next time; `d.answers` is what the program produced once it
-  finished. The division is CPython's own `bdb`, where the stop callback is
-  the suspension and the mode selects how execution goes on; the suspension
-  itself is SWI's `engine_yield/1` from inside the reduction, the one
-  mechanism that returns control from deep in a running goal and leaves it
-  resumable. What is debugged executes for real, writes included, and inherits
-  the caller's scope. `inferences=` bounds the whole session cumulatively, so
-  a resume with no breakpoint ahead of it stops; there is no timeout, because
-  a session is suspended by design and a clock would run while a person reads
-  a stop. A breakpoint reached from inside a Python operation that calls back
-  into MeTTa cannot suspend, and says so with the remedy rather than being
-  skipped.
-
-- `python -m metta repl` completes names and keeps its history. TAB completes
-  the token under the cursor against every name the language knows, functions
-  and translator special forms alike, and against the engine's spaces when the
-  token opens with `&`; a name defined in the session is offered at once.
-  readline's default delimiters break a token on `-`, `!`, `?`, `*` and `&`,
-  every one of which is ordinary inside a MeTTa head, so with them `car-a`
-  completed against `a` and answered nothing: the delimiters are now whitespace,
-  parentheses and the string quote. History is read at startup from
-  `~/.metta_history`, or wherever `METTA_HISTORY` points, and written back on
-  exit without the `exit` that ended the session, which would otherwise be the
-  first thing Up recalled. A read-only home says so on stderr rather than
-  ending the session.
-
-- `m.trace(filter=...)` also takes a bound function handle, `m.fn.double`, and
-  anything else that mentions as one head symbol, because the debugger's `on=`
-  and the trace's `filter=` now read their names through one normaliser rather
-  than two. Every refusal it already made it still makes.
-
-### Fixed
 
 - `m.why()` and `lint()` answer from one head verdict instead of two. Asking
   why `(if $c $t $e)` matched nothing used to answer "nothing here is headed by
@@ -9102,6 +9118,11 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
 - Released PeTTa v1.0 with smart dispatch, two-stage compilation, function
   specialization, modular libraries, and MORK, MM2, and FAISS integration.
 
-[Unreleased]: https://github.com/MesTTo/MeTTa-Kernel/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/MesTTo/MeTTa-Kernel/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/MesTTo/MeTTa-Kernel/compare/v0.7.3...v0.8.0
+[0.7.3]: https://github.com/MesTTo/MeTTa-Kernel/compare/v0.7.2...v0.7.3
+[0.7.2]: https://github.com/MesTTo/MeTTa-Kernel/compare/v0.7.1...v0.7.2
+[0.7.1]: https://github.com/MesTTo/MeTTa-Kernel/compare/v0.7.0...v0.7.1
+[0.7.0]: https://github.com/MesTTo/MeTTa-Kernel/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/MesTTo/MeTTa-Kernel/releases/tag/v0.6.0
 [1.0.5]: https://github.com/trueagi-io/PeTTa/releases/tag/v1.0.5
