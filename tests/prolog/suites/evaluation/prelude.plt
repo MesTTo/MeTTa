@@ -157,6 +157,23 @@ test(assertIncludes_failure_never_names_a_legal_excess_answer) :-
     \+ sub_string(Message, _, _, _, "excess"),
     \+ sub_string(Message, _, _, _, "differ only in order").
 
+%The name a failure BLAMES, end to end through the written forms. SWI prints
+%an uncaught error's context culprit before the sentence, and what stood there
+%was the Prolog predicate that raised -- `'assert-answers'/5`, `assert/2`,
+%`test/3` -- an internal name and arity in a sentence about the program's own
+%claim. Each form blames the head the program wrote instead.
+test(a_failure_blames_the_metta_head_the_program_wrote,
+     [forall(member(Source-Head,
+                    ["(assertEqual (+ 1 1) 3)"-assertEqual,
+                     "(assertEqualToResult (superpose (1 2)) (1 2 3))"
+                         -assertEqualToResult,
+                     "(assertEqualMsg (+ 1 2) 4 \"sums differ\")"-assertEqualMsg,
+                     "(assertIncludes (superpose (1 2)) (7))"-assertIncludes,
+                     "(assert (== 1 2))"-assert]))]) :-
+    catch(eval_string(Source, _), error(_, Context), true),
+    Context = context(Culprit, _),
+    Culprit == Head.
+
 %The two bag-comparing Msg twins spell out their own bodies so their failure
 %report names the call the caller wrote, message included; the alpha twins
 %still delegate. Either way a Msg form answers what its base answers, which is

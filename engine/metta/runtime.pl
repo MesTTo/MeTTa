@@ -322,7 +322,7 @@ test(A,B,true) :- (A =@= B -> E = '✅' ; E = '❌'),
                   format("is ~w, should ~w. ~w ~n", [RA, RB, E]),
                   ( A =@= B -> true
                   ; throw(error(metta_test_failed(A, B),
-                                context(test/3, 'MeTTa test values differ'))) ).
+                                context(test, 'MeTTa test values differ'))) ).
 
 %ZERO ANSWERS COMPARE AS `()`, which is upstream's own shape: its test form is
 %`findall(Val, Conj, Results), (Results = [Actual] -> true ; Actual = Results)`,
@@ -399,7 +399,7 @@ assert(Form, true) :-
     metta_boundary_result(Form, Produced, Value),
     (   Value == true
     ->  true
-    ;   report_failed_assertion(assert/2, Form, _, _)
+    ;   report_failed_assertion(assert, Form, _, _)
     ).
 
 %The report every assertion door reaches, so the ball, the sentence and the
@@ -408,6 +408,21 @@ assert(Form, true) :-
 %now happens for all of them. Missing and Excess are passed per bag and each
 %may be left unbound, which is how a door with a one-sided verdict reports the
 %one difference its verdict depended on.
+%
+%Culprit is the MeTTa HEAD the program wrote -- assert, test, assertEqual,
+%assertIncludes -- and never the Prolog predicate that raised. SWI prefixes an
+%uncaught error with its context's first argument
+%[source: SWI-Prolog 10.1.13 boot/messages.pl, swi_location//1 over
+%context(ContextPI, _)], so what a reader saw was
+%`'assert-answers'/5: MeTTa assertion failed: ...`, an engine-internal name and
+%arity in a sentence about the program's own claim, with no head of that name
+%anywhere in the source. Naming the written MeTTa operation in the context is
+%the convention the engine already holds every OTHER user-facing refusal to
+%[source: engine/metta/registration.pl, metta_host_operation_error/5, whose
+%first condition is atom(Operation) over that same position;
+%commit=WORKTREE], and the two message clauses there render from it. Nothing
+%else reads this position: the classifier below matches the context as `_` and
+%takes its own operation word from the FORMAL.
 report_failed_assertion(Culprit, Form, Missing, Excess) :-
     print_message(error, error(metta_assertion_failed(Form, Missing, Excess), _)),
     throw(error(metta_assertion_failed(Form, Missing, Excess),
@@ -445,12 +460,32 @@ report_failed_assertion(Culprit, Form, Missing, Excess) :-
 %absent there and the message degrades to the form alone.
 'assert-answers'(Verdict, _, _, _, true) :- Verdict == true, !.
 'assert-answers'(_, Form, Actual, Expected, true) :-
+    written_assertion_culprit(Form, 'assert-answers', Culprit),
     (   is_list(Actual), is_list(Expected)
     ->  'subtraction-atom'(Expected, Actual, Missing),
         'subtraction-atom'(Actual, Expected, Excess),
-        report_failed_assertion('assert-answers'/5, Form, Missing, Excess)
-    ;   report_failed_assertion('assert-answers'/5, Form, _, _)
+        report_failed_assertion(Culprit, Form, Missing, Excess)
+    ;   report_failed_assertion(Culprit, Form, _, _)
     ).
+
+%The head of the call a door was handed, which is the MeTTa operation the
+%program wrote: these two doors take that call AS WRITTEN, so its head is
+%exactly what a reader has to look for in the source. Only a form with an
+%atom head has one, and a caller may hand over anything, so a form that is not
+%an application falls back to the DOOR's own MeTTa name -- which is then the
+%head the program wrote, since it called the door directly.
+%
+%This reads the reported form for a DIAGNOSTIC and decides nothing.
+%Dispatching a comparison on that head was rejected on 2026-09-06 for making
+%the reported form load-bearing for semantics
+%[source: docs/journal/2026-09-06-the-bag-diff-an-assertion-already-computes.md;
+%commit=WORKTREE]; a culprit changes no verdict, no bag and no ball.
+written_assertion_culprit(Form, _, Head) :-
+    nonvar(Form),
+    Form = [Head|_],
+    atom(Head),
+    !.
+written_assertion_culprit(_, Door, Door).
 
 %The same door for a CONTAINMENT over answers: the expectation is a lower
 %bound rather than the whole answer set, so exactly one of the two directed
@@ -473,10 +508,11 @@ report_failed_assertion(Culprit, Form, Missing, Excess) :-
 %each says in its own name which report it gives.
 'assert-includes-answers'(Verdict, _, _, _, true) :- Verdict == true, !.
 'assert-includes-answers'(_, Form, Actual, Expected, true) :-
+    written_assertion_culprit(Form, 'assert-includes-answers', Culprit),
     (   is_list(Actual), is_list(Expected)
     ->  'subtraction-atom'(Expected, Actual, Missing),
-        report_failed_assertion('assert-includes-answers'/5, Form, Missing, _)
-    ;   report_failed_assertion('assert-includes-answers'/5, Form, _, _)
+        report_failed_assertion(Culprit, Form, Missing, _)
+    ;   report_failed_assertion(Culprit, Form, _, _)
     ).
 
 %%% The running space: %%%

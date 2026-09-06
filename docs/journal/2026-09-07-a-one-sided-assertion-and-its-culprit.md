@@ -68,3 +68,63 @@ neither is expected, and neither is named.
 Open: nothing about `assertIncludes`' verdict moved. `subtraction-atom` on the
 written expectation minus the collapsed answers, compared with `()`, is what it
 always was; only where the difference goes changed.
+
+### The name a failure blames
+
+Tried: read the whole report a false claim writes, rather than the message the
+engine's own `print_message/2` prints ->
+
+    ERROR: MeTTa assertion failed: (assertEqual (+ 1 1) 3)
+    ERROR:   missing: (3)
+    ERROR:   excess: (2)
+    ERROR: engine/main.pl:93: user:main 'assert-answers'/5: MeTTa assertion
+           failed: (assertEqual (+ 1 1) 3) ...
+
+The first block is `report_failed_assertion/4`'s own print, whose context is
+unbound and which therefore blames nobody. The `'assert-answers'/5` in the
+second is SWI printing the ball's context culprit
+[source: SWI-Prolog 10.1.13 boot/messages.pl, swi_location//1 over
+context(ContextPI, _)], and `'assert-answers'/5` is a predicate with no head of
+that name anywhere a reader could search. `assert/2` and `test/3` read the same
+way.
+
+Decided: the culprit is the MeTTa head the program wrote, as an ATOM. Naming
+the written MeTTa operation in that position is the convention the engine
+already holds every other user-facing refusal to
+[source: engine/metta/registration.pl, metta_host_operation_error/5, whose
+first condition is `atom(Operation)` over that same position, and the two
+`prolog:message//1` clauses that render from it]. So `assert`, `test`, and
+for the two answer-bag doors the head of the call they were handed --
+`assertEqual`, `assertEqualToResult`, `assertEqualMsg`, `assertIncludes`.
+Measured after: each of those five forms blames its own head, and no `/5` or
+`/2` appears in any of them.
+
+Decided: reading the reported form's head is legitimate HERE and was rejected
+elsewhere for a reason that does not reach it. `2026-09-06-the-bag-diff-an-
+assertion-already-computes.md` rejected "dispatch on the reported form's head"
+because it would make that form load-bearing for SEMANTICS; a culprit changes
+no verdict, no bag and no ball, and the same doors document that argument as
+the call the program wrote. A form that is not an application has no head, and
+the door's own MeTTa name is then what the program wrote, since it called the
+door directly.
+
+Rejected: deriving the culprit inside `report_failed_assertion/4` from its Form.
+`assert/2`'s Form is the EVALUATED operand -- `(: assert (-> %Undefined% (->)))`
+is upstream's declaration -- so `!(assert (foo bar))` would have blamed `foo`,
+a head the program wrote nowhere near an assertion. The derivation belongs to
+the doors whose form IS a written call.
+
+Tested: `a_failure_blames_the_metta_head_the_program_wrote` walks all five
+forms in `prelude.plt`; four cases in `metta.plt` cover the doors directly, the
+formless fallback and the rendered sentence; the shell failure-surface lane
+asserts the prefix and the absence of the predicate indicator for each of the
+three shapes that have a culprit. Planted proof: with the old culprits restored,
+`sh tests/shell/test_example_runner_surfaces_failures.sh` exits 1 with `the
+FAILURE block for test_mismatch does not name test: MeTTa test failed`.
+
+Tried: the Node seat's fixture for the classifier, which carried
+`assert/2: MeTTa assertion failed: false (MeTTa assertion failed)` as the
+engine's wording -> it classifies on `/MeTTa assertion failed/` and is
+unaffected, but the string was teaching a spelling the engine no longer
+writes. It carries the new one, and the seat's live one-sided case asserts the
+head as well. `node --test build/test/errors.test.js` -> 14 pass, 0 fail.

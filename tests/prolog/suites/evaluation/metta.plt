@@ -110,6 +110,50 @@ test(a_one_sided_ball_carries_the_missing_bag_alone) :-
     Missing == [c],
     var(Excess).
 
+%The name a failure BLAMES is the MeTTa head the program wrote, taken from
+%the call the door was handed, and never the Prolog predicate that raised.
+%SWI prefixes an uncaught error with its context's first argument, so this is
+%the word a reader sees before the sentence.
+test(a_failure_blames_the_head_of_the_call_it_was_given) :-
+    catch('assert-answers'(false, [qEqual, a, b], [a, d], [a, c], _),
+          error(_, Context),
+          true),
+    Context = context(Culprit, _),
+    Culprit == qEqual.
+
+test(a_one_sided_failure_blames_its_own_head_too) :-
+    catch('assert-includes-answers'(false, [qIncludes, a, b], [a], [c], _),
+          error(_, Context),
+          true),
+    Context = context(Culprit, _),
+    Culprit == qIncludes.
+
+%A form that is not an application has no head, and a caller may hand one
+%over. The DOOR's own MeTTa name is then the head the program wrote, because
+%calling the door directly is what it did.
+test(a_formless_report_blames_the_door_the_program_called) :-
+    catch('assert-answers'(false, notacall, [a], [c], _),
+          error(_, Context),
+          true),
+    Context = context(Culprit, _),
+    Culprit == 'assert-answers'.
+
+%The rendered sentence, which is where the internal name used to show:
+%`'assert-answers'/5: MeTTa assertion failed: ...` named a predicate with no
+%head of that name anywhere in the source.
+test(the_rendered_failure_carries_the_metta_head_and_no_predicate_indicator) :-
+    catch('assert-answers'(false, [qEqual, a, b], [a, d], [a, c], _),
+          Error,
+          true),
+    message_to_string(Error, Message),
+    sub_string(Message, 0, _, _, "qEqual: MeTTa assertion failed:"),
+    \+ sub_string(Message, _, _, _, "/5").
+
+test(a_failing_test_blames_test_rather_than_its_predicate) :-
+    catch(with_output_to(string(_), test(1, 2, _)), error(_, Context), true),
+    Context = context(Culprit, _),
+    Culprit == test.
+
 test(a_true_verdict_asks_no_question_of_the_one_sided_bags) :-
     'assert-includes-answers'(true, [qIncludes, a, b], [x], [y], Result),
     Result == true.
@@ -182,7 +226,7 @@ test(an_absent_difference_prints_no_bag_line) :-
 test(the_classifier_hands_out_the_two_bags) :-
     metta_assertion_failure(error(metta_assertion_failed([qEqual, a, b],
                                                          [c], [d]),
-                                  context('assert-answers'/5, m)),
+                                  context(qEqual, m)),
                             Form, Actual, Expected, Missing, Excess),
     Form == assert,
     Actual == [qEqual, a, b],
@@ -192,7 +236,7 @@ test(the_classifier_hands_out_the_two_bags) :-
 
 test(the_classifier_reports_an_absent_difference_as_unbound) :-
     metta_assertion_failure(error(metta_assertion_failed(false, _, _),
-                                  context(assert/2, m)),
+                                  context(assert, m)),
                             assert, false, _, Missing, Excess),
     var(Missing),
     var(Excess).

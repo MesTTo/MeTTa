@@ -25,6 +25,10 @@
 #     verdict reports both bags and a one-sided one reports only the bag its
 #     verdict depended on, so a block carrying an "excess" line for
 #     assertIncludes would be naming answers that relation allows
+#   - each block BLAMES the MeTTa head the program wrote, which is what a
+#     reader can go and find in the source. The Prolog predicate that raised
+#     -- test/3, 'assert-answers'/5, 'assert-includes-answers'/5 -- appears in
+#     no program and in none of these blocks
 #   - a passing file's report is the is/should trace, without the engine's
 #     compiled-goal listing that the same $output holds
 #   - the assertion report reaches that block WHOLE. Its two bag lines are
@@ -133,12 +137,20 @@ carries      test_mismatch   "is 1, should 2"
 carries      test_mismatch   "MeTTa test failed"
 silent_about test_mismatch   "MeTTa assertion failed"
 silent_about test_mismatch   "Syntax error"
+# The name the report BLAMES, which SWI prints from the error's context before
+# the sentence. It is the MeTTa head the program wrote, so a reader can find
+# it in the source; `test/3` is the Prolog predicate that raised and appears in
+# no program.
+carries      test_mismatch   "test: MeTTa test failed"
+silent_about test_mismatch   "test/3"
 
 carries      assert_mismatch "MeTTa assertion failed"
 # The evidence the comparison already had, on the message's continuation
 # lines: 2 was expected and never produced, 1 was produced and never expected.
 carries      assert_mismatch "missing: (2)"
 carries      assert_mismatch "excess: (1)"
+carries      assert_mismatch "assertEqual: MeTTa assertion failed"
+silent_about assert_mismatch "assert-answers"
 silent_about assert_mismatch "should"
 silent_about assert_mismatch "MeTTa test failed"
 silent_about assert_mismatch "Syntax error"
@@ -149,6 +161,8 @@ silent_about assert_mismatch "Syntax error"
 # something the relation permits.
 carries      one_sided_mismatch "MeTTa assertion failed"
 carries      one_sided_mismatch "missing: (7)"
+carries      one_sided_mismatch "assertIncludes: MeTTa assertion failed"
+silent_about one_sided_mismatch "assert-includes-answers"
 silent_about one_sided_mismatch "excess"
 silent_about one_sided_mismatch "differ only in order"
 silent_about one_sided_mismatch "should"

@@ -277,6 +277,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A failed assertion or test blames the MeTTa head the program wrote. SWI
+  prints an uncaught error's context culprit before the sentence, and what
+  stood there was the Prolog predicate that raised, so a false claim read
+  `'assert-answers'/5: MeTTa assertion failed: (assertEqual (+ 1 1) 3)` --
+  a name and arity that appear in no program and cannot be searched for in the
+  source. It now reads `assertEqual: ...`, and `assertIncludes`, `assert` and
+  `test` name themselves the same way, which is the convention every other
+  user-facing refusal in the engine already followed. The two answer-bag doors
+  take the head from the call they were handed, falling back to their own name
+  where a hand-written call passes something that is not an application. The
+  ball, its formals and `AssertionFailure.operation` are untouched: only the
+  word before the colon changed.
 - A space's function namespace lists and resolves only what that space can
   call. `dir(m.fn)`, `m.builtins()` and `m.fn.<name>` read the process-wide
   function register, so a head whose equations live in another space's module
