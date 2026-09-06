@@ -1703,6 +1703,76 @@ it touches, recorded in the parity corpus, and each that changes evaluation
 (1, 3, 8, 9, 12, 14) is fenced behind the compatibility condition above with
 a differential against the sequential path.
 
+### 24. The plan of record
+
+Everything above, synthesised into one program a reader can execute from,
+with the settled designs of the ten faces (probed on this box on 2026-09-07:
+the join plan already exists as an engine term, per-head call counts are
+exact in `profile_data/1`, sixty generated programs run on both engines in
+17 s with the vendored corpus as the census of the arbiter's surface, a
+static page boots the wasm seat in 1.8 s with 8.1 MB fetched once) folded
+in. Correction first: `space.digest()` ships already (`_space.py:1979`, the
+engine's `metta_host_digest/2`, the Node `digest` command); section 22's
+small-faces list overstated that gap, and what remains is the evidence-tag
+spelling `fixture=space:sha256:<digest>` and a test pinning the two doors to
+each other.
+
+Five principles govern every row: upstream PeTTa's measured semantics decide
+and the engine may only extend in spellings PeTTa does not define (section
+23); one mechanism, many faces, never a second mechanism for a face; a
+feature is a space, a query, an equation, a token, a carrier, a template or a
+stream, or a face of one (section 22); a cost claim is measured on the
+existing instruments before it is pinned; and the capability roster is
+derived, so a door cannot ship undescribed (section 19 item 1, the final
+pass).
+
+The program, as a dependency graph. Each row names what it rides on today
+and what it gains later from the substrate, so a door never changes shape
+when the substrate arrives.
+
+| Wave | Package | Rides on today | Gains later from |
+| --- | --- | --- | --- |
+| 1 (running) | the bag diff in assertion failures | `$Missed` and `$Excessive`, already computed | provenance: the missing answers name the facts (21.14) |
+| 1 | the Arrow doors both ways, `TableBridge` stream, handle-order refusal, `_repr_pretty_`, `__length_hint__`, accessors, `sql_function` | `table()` columns, `tables.add`, nanoarrow | tokens: the journal as an Arrow stream (21.7) |
+| 1 | templates as sugar over `bind`, the keyword face on 3.12 | `_BoundValues`, `encode` | tokens: a hole carries the identity of the value it filled (21.9) |
+| 1 | the suite that cannot hide a crash: `faulthandler`, warnings as errors, timeouts, `pytest-randomly`, coverage, the report lanes, the `.metta` collector | pytest configuration, the gate | nothing; it is the floor every later wave stands on |
+| 2 (running) | observation doors: `origin`, did-you-mean through `AttributeError` fields, the `metta.engine` logger, `pstats` export, audit events | `clause_property`, `message_hook`, `profile_data` | events as a space and source positions on atoms (22) |
+| 2 | cache policies `monotonic`, `lattice`, `subsumptive` as catalog rows compiled to SWI's `as` options | `lib_tabling`, `lib_memo`'s `sum` coefficient | the free carrier: `lattice` stores an image of the polynomial (21) |
+| 2 | the refinement vocabulary through `encode.register`, contracts, `testing.cases`, the ghostwriter law names, the `__match_args__` default | the existing `Annotated` rule, Hypothesis `from_type` | typed fuzzing of the arbiter (21.6) |
+| 2 | the IDE surface: `dataclass_transform`, `override` as a declaration, `metta stubs` from a space, `stubtest` and `verifytypes` | `install_type`, `_EngineFunction.__signature__`, the catalog query | cards and OpenAPI reuse the same projection query |
+| sweeps (running) | no LeaTTa in live files, no `cetta` gate; the four Node defects from the downstream report | the rulings of 2026-09-07 | |
+| 3 | V, the fuzz lane: kind-directed programs from the corpus census, both engines, Hypothesis shrinking to a minimal divergence written in the divergence template's fields | `petta_capture.py`, `testing.expressions`, the `ci` profile | type-directed generation from arrows once wave 2's refinements land |
+| 3 | AA, `explain()` rendering the join plan (`generic-join` order and relations, `nested-loop`, `empty-factor`) with `analyze=`, and the memo advisor proposing `(cache head force\|refuse)` rows from exact call counts with fresh-process what-ifs, never applying; repairs `profile_extension(names=)` answering zero | `native_conjunction_plan/4` split into a pure shape, `profile_data/1` | the closed loop with cost rows and routing (21.10) |
+| 3 | AF, `metta run -` with `--json` lines, `space.infer_types()`, the digest tag spelling | `__main__.py`, `metta._json`, one engine walk | |
+| 3 | AD, refusals as code actions: `Remedy` and `Ground` on every deliberate refusal, `lint --fix` and `lint --json` as LSP diagnostics with the remedy in `data` | `_RefusalGround`, `Finding.autofix`, the 33 prose remedy sites | refusal kinds as catalog rows (22) |
+| 3 | U, `(cost witness class [measure])` rows checked by the `scaling` lane's ladder and fit, shown in `explain`, `__doc__` and the card | `benchmarks/scaling.py`, `curves.py`, the vocabulary generator | the tropical carrier and routing (21.3, 21.10) |
+| 3 | AB, every example runs in the reader's browser from the site's static assets, a Web Worker booting once | the browser kit, `tools/browser.test.mjs`, the `docs` lane | moves with `examples/` to the textbook repository at the split |
+| 3b | AE, `live(query)` with three strategies (`pattern` O(1) per event, `heads` exact recompute per touching write, `tabled` on the invalidation counter) and `progress` deltas | `LiveView`, `TabledMap`, the subscriptions' publish-after-commit rule | delta propagation without recompute from tokens and the carrier (21.1) |
+| 3b | AC, recordings: `seq`, `time` and the `fail` port on trace events, save and load, O(1) backward navigation, replay under the recorded seed over the same digest, `debug(at=k)`; repairs the memo dispatch bypassing the tracer | `tracer.pl`, `_trace.py`, `_debug.py`, `with-seed`, `check_replay` | handlers feed recorded host answers back (21.4); `as-of` at event k (21.15) |
+| 3b | Y, library cards (the model-card sections mapped to catalog rows) and `metta.lock` (engine, libraries, sources, pins by digest) with `run --locked` | `libdoc.py`, `metta_source_digest/2`, `import!`'s digest reload | a card that gates loading under an effect handler (21.8); a lock over token sets (21.13) |
+| 3b | Z, projections: OpenAPI from the served space's heads, a GraphQL schema over `graphql-core` when installed, OpenTelemetry spans and histograms from the trace and stats, Arrow IPC batches from the gateway's cursors | `Gateway`, the type projection table, the trace record | change data capture over the token log (21.7) |
+| 3b | J, K, L, M, N, AG, AH, AK, AL, AM from sections 10, 8, 11, 15, 13 and 22: the Pygments lexer and kernel verification, the import hook, the testing exports, the distribution practices, the executor and process pool, cards and the renderer and the inverse `llms.txt` lane over the catalog space, the measurements space with the derived performance page, refusal kinds as rows, `scope()` with generated faces, templates that render | the catalog space, `_config.py`, `parallel.py` | |
+| 4 (the substrate, designs pending from the running design agent) | T tokens as a storage change with no semantic change, measured on 100,000 atoms; then AI source positions on atoms (the other kind of token); then P the provenance carrier, opt-in, with specialisation; then AJ `why_not()`; then X handlers over `reset/3` and `shift/1` with every scope door re-expressed and proved unchanged by differential | `assertz/2`'s clause references, generations, `transaction_updates/1`, the algebra rows, `library(chr)`'s neighbour `reset/3` | |
+| 4b (the combinations) | live views by delta, parallel worlds, self-routing, replay with handlers, CDC, cards with effects, typed fuzzing; AQ the CHR face, AR conjunctive match as a leapfrog triejoin over PathMap tries, AS effects as linear tokens, AT blueprints, AU reader rows, AP typed holes in patterns | two measured mechanisms each, never a third | |
+| final | the derived `llms.txt` roster and the inverse lane; the release; then the split | | |
+
+Defects found on the way, each fixed inside the package that reaches it:
+`profile_extension(names=)` answering zero calls (AA); the automatic memo
+bypassing the tracer (AC); the four Node defects (the running sweep); the
+two unbacked evidence tags and the stale plant comment (merged); the
+`space_a <= space_b` term-order answer (wave 1's Arrow package).
+
+The measurement discipline per wave: inferences and `instructions:u` on
+the existing rows before and after; a class claim states the classes; a
+lane that cannot fail is not a lane, so every new lane ships with its
+planted defect; the parity lane runs after every wave that touches
+evaluation, and the fuzz lane after wave 3 makes it continuous.
+
+Decided: this section replaces the flat ranking of section 16 and the
+provisional order of section 21 as the plan of record; the two design
+deliverables that settled waves 3 and 4 are folded here rather than cited,
+and the substrate rows are rewritten when the second design report lands.
+
 ### Ruling, later the same day: the arbiter is PeTTa
 
 The user ruled that the semantics arbiter is upstream PeTTa at the pinned
