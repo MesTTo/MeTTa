@@ -238,18 +238,26 @@ def unregister_type(cls: type) -> None:
 ## `register_object_type`
 
 ```python
-def register_object_type(predicate: Callable[[Any], bool], name: str) -> None:
+def register_object_type(
+    predicate: Callable[[Any], bool],
+    name: str | Atom | Callable[[Any], Atom],
+) -> None:
 ```
 
 > A protocol as a type: objects satisfying predicate get name as an
-> additional get-type candidate, beyond their own classes.
+> additional get-type candidate, beyond their own classes. A type Atom
+> carries structure; a callable computes a type Atom from the live value
+> every time the engine reads its type.
 >
 >     register_object_type(lambda x: hasattr(x, "__dlpack__"), "DLTensor")
 
 ## `unregister_object_type`
 
 ```python
-def unregister_object_type(predicate: Callable[[Any], bool], name: str) -> None:
+def unregister_object_type(
+    predicate: Callable[[Any], bool],
+    name: str | Atom | Callable[[Any], Atom],
+) -> None:
 ```
 
 > Remove the latest exact protocol type registration.

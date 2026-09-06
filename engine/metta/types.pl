@@ -56,6 +56,11 @@
 %   union_types:a_union_of_tuples_keeps_the_positional_walk;
 %   commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 
+% Guarantees: metta_grounded_type/2 retains structural type candidates from
+%   seam:grounded_type_names/2, so ordinary arrow unification checks live
+%   tensor dimensions and binds their result dimensions
+%   [tested: run_tests(tensor_shapes); commit=4eaefdd8d40e53b2613722287302a14b41704662].
+
 %%% Type system: %%%
 
 :- consult('type_aliases.pl').
@@ -734,6 +739,23 @@ has_type_under_policy(Module, X, T) :-
                 metta_resolved_types_match_in(Module, Other, T)
             )
         )
+    ).
+
+% A parameterized requirement must bind from the value before the policy can
+% adjudicate its instantiated type. Reuse the ordinary relational derivation,
+% retaining its alternatives for later shared parameters, then require the
+% ordinary policy's approval of the resulting equal types. Union requirements
+% choose an alternative through the same relation as has_type_derive/3.
+% [tested: tensor_shapes:a_policy_checked_shape_variable_binds_at_the_live_call,
+% tensor_shapes:a_policy_refusal_still_blocks_a_relational_shape_witness;
+% commit=4eaefdd8d40e53b2613722287302a14b41704662].
+has_type_under_policy(Module, X, T) :-
+    \+ ground(T),
+    (   nonvar(T), T = [UnionHead|_], UnionHead == '|'
+    ->  metta_union_admits(has_type_under_policy(Module), X, T)
+    ;   has_type_derive(Module, X, Actual),
+        metta_runtime_type(T, Actual),
+        typing_rule_accepts_resolved(Module, ordinary, Actual, Actual)
     ).
 
 type_witness_candidate_matches_under_policy(Module, RawActual, RawExpected) :-
@@ -1619,7 +1641,7 @@ scoped_super_type_rounds(Module, Edges, Frontier, Accumulated, Widened) :-
 %MeTTa's own types are nondeterministic. This is what lets a declared
 %(-> Tensor Tensor Tensor) hold for values the host created.
 %A bridge that knows how to read the object answers with every type name at
-%once, protocols included, as plain text the boundary cannot damage; without
+%once, protocols included, as names or structural type expressions; without
 %one, the host's own class walk runs, which the HOST BRIDGE supplies through
 %seam:grounded_class_type/2 because enumerating a value's classes is host
 %code by nature. What a bridge owns is the CLASS WALK and
@@ -1636,7 +1658,7 @@ scoped_super_type_rounds(Module, Edges, Frontier, Accumulated, Widened) :-
 %an ordinary configuration and stays one [tested: metta_object_types].
 metta_grounded_type(X, T) :- ( seam:grounded_type_names(X, Names)
                                -> member(N, Names),
-                                  ( atom(N) -> T = N ; atom_string(T, N) )
+                                  ( string(N) -> atom_string(T, N) ; T = N )
                              ; seam:grounded_class_type(X, T) ).
 %A protocol the object satisfies may name a type too, and so may a (py-atom f
 %Type) declaration, both through seam:grounded_extra_type/2, so a declared (->

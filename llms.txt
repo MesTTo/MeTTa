@@ -966,8 +966,19 @@ registered, 44 of them with numpy as the default, and every one carries a
 expressions, so it computes compatible shapes, runs backwards to infer
 dimensions, and rejects incompatible shapes before a tensor is materialised.
 `Shape(...)` builds the dimension metadata an
-`Annotated[DLTensor, Shape(...)]` annotation carries, so `get-type` derives an
-elementwise or `matmul` result shape before any array exists.
+`Annotated[DLTensor, Shape(...)]` annotation carries. A user operation's arrow
+retains `(Annotated DLTensor (Shape (...)))`: input dimensions unify with the
+argument shape and shared MeTTa variables determine its result shape.
+An incompatible known shape returns the ordinary `BadArgType` refusal naming
+both shapes. Live array types include that same expression beside their class
+and `DLTensor` types. `SHAPE_RULES` declares every registered head's behavior:
+elementwise unary heads preserve shape, binary heads infer broadcast shapes,
+and rank-two `matmul` unifies its inner dimension before materialization.
+Array results from constructors, axis transformations, and reductions report
+their actual shape when the value exists. Scalar observations retain their host
+type. An unbound dimension remains a variable until
+argument typing or the live value binds it; a shape claim does not evaluate
+a symbolic size or prove the host function's implementation.
 
 `metta.tables`: `declare(...)` writes one ctx-scoped bridge declaration into
 `&metta` and `TableBridge` derives every provider operation from it, so a

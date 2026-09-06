@@ -80,6 +80,11 @@ def install(m, default: Any = None) -> list[str]:
 > when compatibility or inference must happen before materialisation.
 >
 > ``Shape`` carries those expressions through Python ``Annotated`` claims.
+> User operation arrows retain the claim: argument dimensions unify and
+> bind shared result dimensions. Live values report the same type expression.
+> ``SHAPE_RULES`` names every installed head's behavior; preserving heads
+> share their entire input shape with the result. Other transformations
+> expose their actual shape when their result value exists.
 > A declared ``(Annotated DLTensor (Shape ...))`` remains a valid DLTensor
 > argument, elementwise binary operations derive their output shape with
 > ``broadcast-shape``, and rank-two matmul unifies the two inner dimensions:
