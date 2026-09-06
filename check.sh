@@ -70,7 +70,7 @@
 #     tests/checks/check_kernel_ledger_selftest.py; commit=d7a55be4e931732a02f2178013aed47bb9cde474].
 #   - generated-artifacts selects ledger, aio-mirror, init-stub and reference in
 #     the order their remedies converge [tested:
-#     tests/checks/check_generated_artifact_group.py; commit=WORKTREE].
+#     tests/checks/check_generated_artifact_group.py; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e].
 #   - every lane inherits a repository-local scratch directory, and a later
 #     run reclaims one left by SIGKILL without touching a concurrent run
 #     [tested: scratch-retention; commit=c96093349e37cc7153f31b3dd9af10246a325301].

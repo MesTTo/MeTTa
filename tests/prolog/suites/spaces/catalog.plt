@@ -32,7 +32,7 @@
      - algebra-law vocabulary members and aliases derive from engine facts,
        and every shipped algebra row appears in the semiring vocabulary
        [tested: algebra_law_vocabulary_and_alias_claims_are_exact,
-       shipped_algebra_rows_are_the_semiring_vocabulary; commit=WORKTREE]
+       shipped_algebra_rows_are_the_semiring_vocabulary; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]
    Open Obligations:
      To Do: None
      Hacks: None

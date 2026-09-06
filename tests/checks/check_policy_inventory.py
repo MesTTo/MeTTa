@@ -10,7 +10,7 @@ Guarantees:
   - the runtime publishes exactly the twenty required axes, with one row
     per axis and the knob/default pair recorded in POLICY_SEAMS; the semiring
     rows also derive and validate each shipped ordering claim [tested:
-    tests/checks/check_policy_inventory.py; commit=WORKTREE]
+    tests/checks/check_policy_inventory.py; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]
   - unannotated Python Literal expressions and list/set membership, plus
     single- or multiline Prolog member/2 and memberchk/2 lists, are reported
     with path, line and values; an exemption is accepted only when immediately

@@ -89,7 +89,7 @@ Guarantees:
     tests/checks/check_llms_selftest.py; commit=2e627a593413191cda3170f2eb716835f7f62543]
   - the algebra-law roster and its alias table are held to the catalog's own
     vocabulary row and expansion claims, the alias table by exact alias=target
-    rows [tested: tests/checks/check_llms_selftest.py; commit=WORKTREE]
+    rows [tested: tests/checks/check_llms_selftest.py; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]
 Open Obligations:
   To Do: None
   Hacks: None

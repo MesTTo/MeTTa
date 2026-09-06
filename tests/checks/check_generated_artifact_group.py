@@ -4,7 +4,7 @@ Guarantees:
   - ``generated-artifacts`` selects exactly ``ledger``, ``aio-mirror``,
     ``init-stub`` and ``reference``, whose adjacent source order keeps each
     producer ahead of its derived surface [tested: generated-artifacts-selftest;
-    commit=WORKTREE].
+    commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e].
   - DEVELOPING.md publishes the aggregate command and the reason for the order
     [tested: generated-artifacts-selftest;
     commit=7d3c883f91d1d4be055fd725463d214f6fbd1438].

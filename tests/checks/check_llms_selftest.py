@@ -38,7 +38,7 @@ Guarantees:
     this file is its own test, run by the gate; commit=2e627a593413191cda3170f2eb716835f7f62543]
   - a same-count substitution in the algebra-law roster and a changed alias
     expansion in its table are each caught [tested: this file is its own test,
-    run by the gate; commit=WORKTREE]
+    run by the gate; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]
 Open Obligations:
   To Do: None
   Hacks: None
