@@ -834,10 +834,14 @@ with an exact faiss backend. `EmbeddingStore.keys()` lists stored atom keys and
 `EmbeddingStore.vector_for(key)` retrieves a key's original vector.
 `EmbeddingStore` registers `(name-knn $q $k)` and
 `(name-embed $key)` as OPERATIONS rather than backing a space, so it is called
-beside a match rather than being one. Its 44 installed names all carry `(-> ...)`
-declarations. `broadcast-shape` is a CLP(FD) relation over shape expressions,
-so it computes compatible shapes, runs backwards to infer dimensions, and
-rejects incompatible shapes before a tensor is materialised.
+beside a match rather than being one. `install` returns the names it
+registered, 44 of them with numpy as the default, and every one carries a
+`(-> ...)` declaration. `broadcast-shape` is a CLP(FD) relation over shape
+expressions, so it computes compatible shapes, runs backwards to infer
+dimensions, and rejects incompatible shapes before a tensor is materialised.
+`Shape(...)` builds the dimension metadata an
+`Annotated[DLTensor, Shape(...)]` annotation carries, so `get-type` derives an
+elementwise or `matmul` result shape before any array exists.
 
 `metta.tables`: `declare(...)` writes one ctx-scoped bridge declaration into
 `&metta` and `TableBridge` derives every provider operation from it, so a
@@ -899,10 +903,10 @@ apart, `active_source_program/1` to detect a definition batch,
 `current_working_dir/1` for what a relative path resolves against,
 `observe/3` with `observation_begin/0`, `observation_commit/0`,
 `observation_discard/0` and `observation_defer/2` for the post-commit event
-stream a scope buffers and then publishes or drops, `observation_defer/2`
-pairing a commit goal with its rollback so a launch happens only after the
-transaction commits, and
-`metta_source/2` to expose source metadata, and `metta_vocabulary_value/2` so a
+stream a scope buffers and then publishes or drops, the last of them pairing a
+commit goal with its rollback so a launch happens only after the transaction
+commits, `metta_ensure_source_observation/0` to bring the source observer into
+a process that did not boot with it, and `metta_vocabulary_value/2` so a
 library validates an option against the same declared vocabulary the engine
 reads;
 compiler: `metta_special_form_head/1`, every head the translator gives special
@@ -910,7 +914,8 @@ meaning, so a linter, a completion list or the Python MeTTa.builtins() call asks
 a question instead of reading the compiler's clause table. That read was what the
 Python shim and lib/lib_reflect/lib_reflect.metta both did, and both answered short and
 silently the moment the translator became a module of its own, and
-`recompile_function_impl/1` rebuilds one function after a dispatch decision;
+`recompile_function_impl/1` rebuilds one function after a dispatch decision,
+with `recompile_function_impl_in/2` naming the module to rebuild it in;
 errors: `throw_metta_type_error/3`, `rethrow_metta_operation_error/2`,
 `refuse_unbound_input/2`;
 context: `current_metta_module/1`, `current_metta_space/1`, `space_module/2`,
@@ -928,7 +933,8 @@ ordinary atom write uses, so a library that pre-generates a space's storage
 writes the one format the space reads;
 effects and caching: `metta_effect_class_canonical/2`, `metta_effect_rank/2`,
 `metta_effect_join/3`, `metta_effect_compose/2`, `metta_operation_effect/2`,
-`metta_operation_plan_effect/2`, `metta_effect_walk/3`,
+`metta_annotated_operation_effect/2` for the class an annotated arrow
+published, `metta_operation_plan_effect/2`, `metta_effect_walk/3`,
 and `metta_function_cacheable/1`, with
 `support_record/2`, `support_invalidate/1` and `support_forget/1` for taking
 part in the support graph whose handler seams the engine already declares,
@@ -986,13 +992,13 @@ performed form is stored as its own atom, so the running app answers
 mid-way keeps its performed prefix's writes, closes any servers it started, and
 names the failing form.
 
-`python -m metta` has seven subcommands: `run` (files, printing each `!` answer
+`python -m metta` has eight subcommands: `run` (files, printing each `!` answer
 group), `repl` (paren-balance aware; on a terminal, TAB completes a head or a
 `&space` against the live engine and history persists in `~/.metta_history`, or
 wherever `METTA_HISTORY` points), `serve`, `boot`, `lint` (nonzero
-exit on findings), `doc` (a name's `(@doc ...)`), and `convert`
-(`program.py [-o out.metta]`, emitting the module's fresh-space declarations
-as loadable MeTTa source).
+exit on findings), `doc` (a name's `(@doc ...)`), `llms` (this file), and
+`convert` (`program.py [-o out.metta]`, emitting the module's fresh-space
+declarations as loadable MeTTa source).
 
 `metta.remote`: `serve(m, spaces=, token=, authorize=, ssl_context=,
 cursor_idle=300, cursor_limit=100)`, `connect(url, timeout=30, token=,
@@ -1063,34 +1069,37 @@ controlled=False, timeout=60) -> CounterRuns`, `measure_instructions`,
 `observe_configuration` before comparing either. `metta.pytest_plugin` gives the `metta` and
 `scratch_space` fixtures; `metta.ipython` gives `%%metta` in a notebook.
 
-These submodules and names, forty-three of them, load on first access rather than during
-`import metta`: `aio`, `algebra`, `arrays`, `boot`, `casting`, `channel`,
-`convert`, `counting`, `derivation`, `events`, `every`, `foreign`, `integrate`, `lint`,
-`manifest`, `par_map`, `parallel`, `paths`, `race`, `remote`, `rules`,
-`prob`, `prov`, `ranked`, `spaces`, `spawn`, `strategies`, `structures`, `subscribe`,
-`tables`, `testing`, `tropical`, `view`,
-`vocabularies`, `wire`, and the
+These submodules and names, forty-eight of them, load on first access rather than during
+`import metta`: `aio`, `algebra`, `amplitude`, `arrays`, `bag`, `bool`, `boot`,
+`budget`, `casting`, `channel`, `convert`, `counting`, `derivation`, `events`,
+`every`, `foreign`, `integrate`, `lint`, `manifest`, `par_map`, `parallel`,
+`paths`, `prob`, `prov`, `race`, `ranked`, `remote`, `rules`, `set`, `spaces`,
+`spawn`, `strategies`, `structures`, `subscribe`, `tables`, `testing`,
+`tropical`, `view`, `vocabularies`, `wire`, and the
 classes `Answer`, `Bindings`, `Defined`, `MeTTa`, `Space`, `SpaceProvider`,
 `State`, `equation`.
 
-Importing metta therefore never pulls in the HTTP and table machinery boot
-composes over. dir(metta) still lists each one, and subscribe is eager, being
-part of the write path.
+Importing metta therefore never pulls in the HTTP, subscription and table
+machinery boot composes over: `import metta` leaves `metta.atoms` and
+`metta.errors` loaded and nothing else. `dir(metta)` still lists every one of
+the forty-eight, so completion and reflection see the whole surface.
 
 ## The MeTTa language surface
 
 Special forms are compiled by the translator rather than defined by equations,
 and most answer false to "is this a function", so "no equations" does not mean
-"nothing can prove it":
+"nothing can prove it". These fifty-nine, plus the internal
+`__metta_type_syntax__` the registry section below names:
 
 ```
-if case let let* collapse superpose quote sealed unify match
-once forall foldall not-provable prog1 progn nop cut super
-chain eval evalc noeval reduce filter-atom foldl-atom map-atom
-add-atom add-atoms add-reduct add-reducts remove-atom get-metatype
-catch timeout inferences elapsed take top transaction with-pragma!
-with_mutex hyperpose call explain annotation test test-no-answer
-translatePredicate |->
+add-atom add-atoms add-reduct add-reducts annotation call case catch
+chain collapse cut elapsed eval evalc explain filter-atom foldall
+foldl-atom forall get-atoms get-metatype hyperpose if inferences let
+let* map-atom match metta-thread new-space noeval nop not-provable once
+prog1 progn quote reduce remove-atom return sealed space-atom-count
+space-contains subtract-atom super superpose switch take test
+test-no-answer timeout top transaction translatePredicate unify
+with-pragma! with-seed with_mutex |->
 ```
 
 Eight more are written in MeTTa, as prelude equations saying what the call
@@ -1117,15 +1126,20 @@ Logic: `xor`, `dif`. Spaces:
 `get-atoms`, `space-atom-count`, `is-space`, `new-state`, `has-declared-type`,
 `space-admission-verdict`. Types: `match-types`, `match-type-or`, `type-cast`.
 Text, IO and files: `repr`, `println!`, `readln!`, `read-form!`, `format-args`,
-`sort-strings`, `parse-command`, `sleep`, `file-exists`, `exists_file`.
+`sort-strings`, `parse-command`, `sleep`, `exists_file`.
 Pre-add hooks: `declare-pre-add!`, `undeclare-pre-add!`. Translator, Prolog and
 modules: `add-translator-rule!`, `remove-translator-rule!`,
-`import_prolog_function`, `import_prolog_functions_from_file`, `Predicate`, `callPredicate`,
+`import_prolog_function`, `Predicate`, `callPredicate`,
 `assertaPredicate`, `git-import!`, `residual-goals`. Minimal MeTTa: `unquote`,
 `noreduce-eq`, `collapse-bind`, `superpose-bind`, `return-on-error`,
 `if-equal`, `repra`. Assertions beyond the four above: `assertEqualMsg`,
 `assertAlphaEqualMsg`, `assertAlphaEqualToResult`, `assertEqualToResultMsg`,
 `assertAlphaEqualToResultMsg`. `undocumented` reports what `doc` lacks.
+
+Two names the corpus also exercises are LIBRARY heads and not in that count:
+`file-exists`, which is `lib_file`'s spelling beside the engine's own
+`exists_file`, and `import_prolog_functions_from_file`, which a library
+registers.
 
 `pragma!` accepts `max-time`, `max-inferences`, `verify-specializations`,
 `verify-discharges`, `verify-cardinality`, `max-stack-depth`, `stack-limit`,
@@ -1157,78 +1171,78 @@ at each source boundary and answers admitted ground calls from it.
 provided patterns, and evaluates the selected branch. Empty expressions and
 incompatible patterns select the fallback.
 
-298 builtins are registered; `m.self.builtins()` lists the live union of registered
+300 builtins are registered; `m.self.builtins()` lists the live union of registered
 functions and translator special forms. That live union in full, measured
-2026-09-04 on a boot with this tree's extensions present, which is where the
+2026-09-06 on a boot with this tree's extensions present, which is where the
 three `mork-add-atoms`, `mork-flush` and `mm2-exec` heads come from:
 
 `!=` `#*` `#+` `#-` `#//` `#<` `#=` `#=<` `#>` `#>=` `#\=` `#div` `#max`
 `#min` `#mod` `%` `*` `+` `-` `/` `<` `<=` `=` `==` `=?` `=alpha` `>` `>=`
-`Predicate` `abs-math` `acos-math` `add-atom` `add-atoms` `add-reduct`
-`add-reducts` `add-translator-rule!` `add-typing-rule!` `alpha-unique`
-`alpha-unique-atom` `and` `and-then` `annotation` `append` `argv` `asin-math`
-`assert` `assertAlphaEqual` `assertAlphaEqualMsg` `assertAlphaEqualToResult`
+`Predicate` `__metta_type_syntax__` `abs-math` `acos-math` `add-atom`
+`add-atoms` `add-reduct` `add-reducts` `add-translator-rule!`
+`add-typing-rule!` `alpha-unique` `alpha-unique-atom` `and` `and-then`
+`annotation` `append` `argv` `asin-math` `assert` `assertAlphaEqual`
+`assertAlphaEqualMsg` `assertAlphaEqualToResult`
 `assertAlphaEqualToResultMsg` `assertEqual` `assertEqualMsg`
 `assertEqualToResult` `assertEqualToResultMsg` `assertIncludes`
-`assertaPredicate` `assertzPredicate` `atan-math` `atom-subst` `atom_chars`
-`atom_concat` `atomically` `bind!` `bit-and` `bit-not` `bit-or`
-`bit-shift-left` `bit-shift-right` `bit-xor` `call` `callPredicate` `car-atom`
-`case` `catch` `cdr-atom` `ceil-math` `chain` `change-state!`
-`check_prolog_function_names` `collapse` `collapse-bind` `cons` `cons-atom`
-`context-space` `copy_term` `cos-math` `current-time` `cut`
-`declare-post-add!` `declare-pre-add!` `decons` `decons-atom` `defined-name`
-`dif` `documented` `documented-space` `elapsed` `empty` `error-payload` `eval`
-`evalc` `except` `exclude-item` `exists_file` `exp` `exp-math` `explain`
-`filter-atom` `first` `first-from-pair` `floor-div` `floor-math` `foldall`
-`foldl` `foldl-atom` `for-each-in-atom` `forall` `format-args` `format-time`
-`function` `get-atoms` `get-doc` `get-doc-atom` `get-doc-function`
-`get-doc-params` `get-doc-single-atom` `get-doc-space` `get-metatype`
-`get-state` `get-type` `get-type-space` `git-import!` `has-declared-type`
-`help!` `hyperpose` `id` `if` `if-equal` `if-equal2` `if-error` `implies`
-`import!` `import_prolog_function` `import_prolog_functions` `include`
-`index-atom` `inferences` `interpret` `intersection` `intersection-atom`
-`is-alpha-member` `is-expr` `is-function` `is-ground` `is-member` `is-space`
-`is-var` `isinf-math` `isnan-math` `lambda_1` `last` `length` `let` `let*`
-`library` `list_to_set` `log-math` `map-atom` `maplist` `match`
-`match-type-or` `match-types` `max` `max-atom` `member` `metta` `metta-thread`
-`min` `min-atom` `mm2-exec` `mork-add-atoms` `mork-flush` `msort` `new-space`
-`new-state` `noeval` `nop` `noreduce-eq` `not` `not-provable` `once` `or`
-`or-else` `parse` `parse-command` `pow-math` `pragma!` `pretty-atom`
-`println!` `prog1` `progn` `py-at` `py-atom` `py-call` `py-container-kind`
-`py-dict` `py-dict-pairs` `py-dot` `py-eq` `py-format` `py-global-read`
-`py-global-write` `py-in` `py-iter` `py-iter-once` `py-len` `py-list` `py-operator`
-`py-range` `py-repr` `py-round` `py-set` `py-set-pairs` `py-slice` `py-str`
-`py-str-join` `py-truthy` `py-tuple` `quote` `random-float` `random-int`
-`read-form!` `readln!` `reduce` `register-token!`
-`register_metta_library_path` `remove-atom` `remove-translator-rule!`
-`remove-typing-rule!` `repr` `repra` `require-extension!` `residual-goals`
-`retractPredicate` `return` `return-on-error` `reverse` `round-math` `sealed`
-`second-from-pair` `sin-math` `size-atom` `sleep` `sort` `sort-atom`
-`sort-strings` `space-admission-verdict` `space-atom-count` `space-contains`
-`sqrt-math` `sread` `subtract-atom` `subtraction` `subtraction-atom` `super`
+`assertaPredicate` `assertzPredicate` `atan-math` `atom-subst`
+`atom_chars` `atom_concat` `atomically` `bind!` `bit-and` `bit-not`
+`bit-or` `bit-shift-left` `bit-shift-right` `bit-xor` `call`
+`callPredicate` `car-atom` `case` `catch` `cdr-atom` `ceil-math` `chain`
+`change-state!` `check_prolog_function_names` `collapse` `collapse-bind`
+`cons` `cons-atom` `context-space` `copy_term` `cos-math` `current-time`
+`cut` `declare-post-add!` `declare-pre-add!` `decons` `decons-atom`
+`defined-name` `dif` `documented` `documented-space` `elapsed` `empty`
+`error-payload` `eval` `evalc` `except` `exclude-item` `exists_file` `exp`
+`exp-math` `explain` `filter-atom` `first` `first-from-pair` `floor-div`
+`floor-math` `foldall` `foldl` `foldl-atom` `for-each-in-atom` `forall`
+`format-args` `format-time` `function` `get-atoms` `get-doc`
+`get-doc-atom` `get-doc-function` `get-doc-params` `get-doc-single-atom`
+`get-doc-space` `get-metatype` `get-state` `get-type` `get-type-space`
+`git-import!` `has-declared-type` `help!` `hyperpose` `id` `if`
+`if-decons-expr` `if-equal` `if-equal2` `if-error` `implies` `import!`
+`import_prolog_function` `import_prolog_functions` `include` `index-atom`
+`inferences` `interpret` `intersection` `intersection-atom`
+`is-alpha-member` `is-expr` `is-function` `is-ground` `is-member`
+`is-space` `is-var` `isinf-math` `isnan-math` `lambda_1` `last` `length`
+`let` `let*` `library` `list_to_set` `log-math` `map-atom` `maplist`
+`match` `match-type-or` `match-types` `max` `max-atom` `member` `metta`
+`metta-thread` `min` `min-atom` `mm2-exec` `mork-add-atoms` `mork-flush`
+`msort` `new-space` `new-state` `noeval` `nop` `noreduce-eq` `not`
+`not-provable` `once` `or` `or-else` `parse` `parse-command` `pow-math`
+`pragma!` `pretty-atom` `println!` `prog1` `progn` `py-at` `py-atom`
+`py-call` `py-container-kind` `py-dict` `py-dict-pairs` `py-dot` `py-eq`
+`py-format` `py-global-read` `py-global-write` `py-in` `py-iter`
+`py-iter-once` `py-len` `py-list` `py-operator` `py-range` `py-repr`
+`py-round` `py-set` `py-set-pairs` `py-slice` `py-str` `py-str-join`
+`py-truthy` `py-tuple` `quote` `random-float` `random-int` `read-form!`
+`readln!` `reduce` `register-token!` `register_metta_library_path`
+`remove-atom` `remove-translator-rule!` `remove-typing-rule!` `repr`
+`repra` `require-extension!` `residual-goals` `retractPredicate` `return`
+`return-on-error` `reverse` `round-math` `sealed` `second-from-pair`
+`sin-math` `size-atom` `sleep` `sort` `sort-atom` `sort-strings`
+`space-admission-verdict` `space-atom-count` `space-contains` `sqrt-math`
+`sread` `subtract-atom` `subtraction` `subtraction-atom` `super`
 `superpose` `superpose-bind` `switch` `take` `tan-math` `term_hash` `test`
 `test-no-answer` `throw` `timeout` `top` `trace!` `transaction`
 `translatePredicate` `trunc-math` `type-cast` `type-cast-holds`
-`undeclare-post-add!` `undeclare-pre-add!` `undocumented` `undocumented-space`
-`unify` `union` `union-atom` `unique` `unique-atom` `unquote`
-`unregister-token!` `with-pragma!` `with-seed` `with_mutex` `xor` `|->`
+`undeclare-post-add!` `undeclare-pre-add!` `undocumented`
+`undocumented-space` `unify` `union` `union-atom` `unique` `unique-atom`
+`unquote` `unregister-token!` `with-pragma!` `with-seed` `with_mutex`
+`xor` `|->`
 
-`m.self.builtins()` is not the whole callable registry: the assert family and the
-CLP(FD) `#` relations below are registered and absent from it. The registry
-also includes the
-py-* bridge (`py-atom`, `py-call`, `py-dot`, `py-iter`, `py-len`, `py-list`,
-`py-dict`, `py-tuple`, `py-str`, `py-repr`, `py-format`, `py-slice`, `py-range`,
-`py-at`, `py-in`, `py-eq`, `py-truthy`, `py-round`, `py-str-join`), the atom
-algebra (`car-atom`, `cdr-atom`, `cons-atom`, `decons-atom`, `index-atom`,
-`size-atom`, `sort-atom`, `union-atom`, `intersection-atom`, `subtraction-atom`,
-`unique-atom`, `max-atom`, `min-atom`), the assert family
-(`assertEqual`, `assertAlphaEqual`, `assertEqualToResult`, `assertIncludes`) that the
-example corpus is written in, `get-type`, `get-doc`, `help!`, `import!`, `pragma!`, `bind!`,
-`register-token!`, `unregister-token!`,
-`new-space`, `get-state` / `change-state!`, `pretty-atom`, `random-int` /
-`random-float`, `format-time`, and the CLP(FD) relations (`#+`, `#-`, `#*`,
-`#//`, `#div`, `#mod`, `#<`, `#=<`, `#>`, `#>=`, `#=`, `#\=`, `#min`, `#max`),
-which RELATE rather than compute, so giving any two of three solves the third.
+That roster is the whole registry: the py-* bridge, the atom algebra, the
+assert family the example corpus is written in, and the CLP(FD) `#` relations
+are all in it. The `#` relations RELATE rather than compute, so giving any two
+of three solves the third.
+
+The catalog also says which of those names are the language's own. A
+`(visibility <name> PUBLIC|INTERNAL)` row in `&metta` classifies every one, and
+seven read `INTERNAL`: `get-doc-atom`, `get-doc-function`, `get-doc-params`,
+`get-doc-single-atom`, `interpret`, `match-type-or`, and
+`__metta_type_syntax__`, which is the prelude casts' door for type syntax as
+data. They are registered and callable, and they are implementation steps
+behind public forms rather than spellings to write.
 
 Hand a builtin an unbound variable where it needs a value and it refuses by
 name: `!(car-atom $u)` is `car-atom: a value expected in argument 1, found an

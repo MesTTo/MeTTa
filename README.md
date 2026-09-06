@@ -649,7 +649,7 @@ like a native space and joins with one.
 
 ## What the examples show
 
-**[`examples/`](examples/) is the book for learning MeTTa itself.** Its 233
+**[`examples/`](examples/) is the book for learning MeTTa itself.** Its 258
 programs are ordered as a reading list, chapter by chapter from the first
 answer to a reasoner you can serve, and the directory names ARE the order.
 Every file runs and checks itself under the gate, and a law is enforced
@@ -658,10 +658,11 @@ introduced, so reading top to bottom never meets something unexplained.
 [`examples/README.md`](examples/README.md) is its table of contents.
 
 **[`extensions/python/examples/language-feature-examples/`](extensions/python/examples/language-feature-examples/)
-is the reference for how to write this library idiomatically.** It is 219
-runnable programs, one per MeTTa example, and the gate runs each against the
-MeTTa it mirrors: they agree on the stored equations AND the answers, so
-neither side can drift into a spelling that merely looks right. Find the
+is the reference for how to write this library idiomatically.** It is 224
+runnable programs, each mirroring one MeTTa example's path, and the `twins`
+lane runs each against the MeTTa it mirrors: they agree on the stored
+equations AND the answers, so neither side can drift into a spelling that
+merely looks right. Find the
 construct in `examples/`, open the file of the same name here, and the Python
 beside it is the way to say it. They go deeper than this page can:
 
