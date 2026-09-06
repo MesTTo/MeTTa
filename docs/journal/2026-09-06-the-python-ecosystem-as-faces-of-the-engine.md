@@ -1462,6 +1462,130 @@ CRDT replication, cards with effects, and the fuzzing lane over typed
 generation. Each combination is a face of two mechanisms already measured,
 never a third mechanism.
 
+### 22. Reduction: the machinery as spaces, and four additions to MeTTa's four
+
+MeTTa has four primitives: the atom, the space, the match and the equation.
+The library's ideology says everything is data and the machinery is
+queryable. Taken literally, the six layers of section 21 reduce further,
+because each layer's store is a space and each layer's operation is a match
+or an equation over it.
+
+1. The catalog is a space. It already is: `&metta` holds the declarations,
+   and the SQL bridge reads its own `(bridge ...)` rows back out of it
+   (`tables.py:460`). A card is the query `(card head)` over `&metta`; a
+   projection (a stub, a reference page, an OpenAPI document, a JSON schema,
+   an Arrow schema, a Hypothesis strategy, an `llms.txt` section) is that
+   query rendered; the inverse `llms.txt` lane is the query for doors without
+   a documentation row; the generators (`vocabgen`, `fngen`, `initstubgen`,
+   `libdoc`, `reference`) become queries with a renderer, and a new surface
+   is a new renderer over the same rows.
+
+2. The history is a space. `&history` holds `(added token atom)` and
+   `(removed token' token)` atoms, and its provider is the persistency
+   journal, which already records every assert and retract in order. Then
+   `as-of`, `since`, `blame`, `diff` and merge are matches over `&history`,
+   replication is the synchronisation of a space (the remote provider, or an
+   Arrow IPC stream of the journal through the gateway), a receipt is an atom
+   naming the tokens a run read, and a digest hashes the canonical form. The
+   op-log and the observed-remove merge of section 20 are operations on a
+   space, not a new store.
+
+3. Events are a space. `&events` holds the atom events, the trace ports,
+   the tripwires, the audit events and the engine's messages, on a stream
+   provider with a bounded buffer; a subscription is a standing match, and a
+   sink (a callback with the `sys.monitoring` shape, a `logging` record, an
+   `asyncio.Queue`) is a face of one subscription. Section 17 item 6 said
+   "one channel"; the channel is a space.
+
+4. Measurements are a space. `&measurements` holds every counter run, slope,
+   parity row and receipt as an atom with its fixture digest and commit;
+   `PERFORMANCE.md` and the parity page are projections of it with the
+   null-program correction as an equation over the rows, so the hand-written
+   wins table that misled this week cannot be written by hand again, and an
+   evidence tag cites the atom. The benchmark baselines are the first rows.
+
+5. Handlers are overlay spaces at the surface. A handler is a space of
+   equations of the form `(= (handle (effect args) $k) body)`; installing it
+   for an extent overlays it on the handler chain, which is the left-biased
+   overlay `spaces.overlay` already implements and the module base chain the
+   engine already resolves through (`engine/spaces/lifecycle.pl:324-352`).
+   Dynamic scope is an overlay. The mechanism underneath stays `reset/3` and
+   `shift/1` with a per-engine handler stack, but the program sees spaces,
+   and a strategy, a limit, a seed, a capture and an isolation are atoms in
+   the `&scope` overlay the handlers read. The Python door for all of them is
+   one: `with m.scope(seed=42, inferences=1000, capture=True, under=ranked)`,
+   and `limits`, `under`, `capture`, `speculative`, `assuming` stay as its
+   named faces, generated from the parameter rows together with their
+   decorator and special-form twins.
+
+6. Derived spaces are materialised queries. `materialize.pl` already
+   materialises function-free definitions; a `live(query)` is a space whose
+   provider is a query, kept current by invalidation over tokens and
+   announced through `&events`; `TabledMap` is its function-shaped face; and
+   a derived space with the persistency provider is a persisted materialised
+   view whose invalidation is journaled.
+
+What the library adds to MeTTa's four is then exactly four things: the
+token (the identity of a fact: where it came from), the carrier (the
+semantics an evaluation is asked under, with provenance as the free one),
+the template (values entering a program, and answers leaving it as text) and
+the stream (the crossing contract). Decided as the design law of this
+thread: a feature of this library is a space, a query, an equation, a token,
+a carrier, a template or a stream, or a face of one of those; anything that
+cannot be spelled that way is not a feature of this library.
+
+Missed opportunities the reduction exposes:
+
+- Source positions on atoms. The reader assigns every atom read from text a
+  token of the other kind, `(file, line, column)`, which is what Racket's
+  syntax objects, Clojure's metadata and Python's AST `lineno` carry; kept
+  in a side table keyed by the atom's identity, so nothing in the atom
+  changes. Then `origin` answers for atoms, not only for heads; a refusal
+  points at the atom that caused it; the language server gets ranges for its
+  diagnostics; blame reaches the source line; a template hole carries the
+  Python call site that filled it. A token is "where an atom came from",
+  whether a file position or an actor and a generation, which makes the two
+  kinds one vocabulary.
+- Absence explained. `why_not(answer)` names the facts whose presence would
+  have produced an answer, from dual-indeterminate polynomials `N[X, X̄]`
+  that track negative facts through negation and negation-as-failure (Grädel
+  and Tannen, "Provenance analysis and semiring semantics for first-order
+  logic", 2024; Wu, Zhao, Haeberlen, Zhou and Loo, "Diagnosing missing events
+  in distributed systems with negative provenance", SIGCOMM 2014). The
+  assertion diff's missing answers gain "would need" hints; an `Empty`
+  answer gains a reason; `tnot` under well-founded semantics is covered.
+- Refusal kinds as rows. The error taxonomy is hand-written in `errors.py`
+  and rendered separately on the Node and C seats; as catalog rows with a
+  remedy template each, "one Error per meaning" becomes a checkable
+  property, the remedy becomes data the language server offers as a fix
+  (20.11), the seats' error text is generated, and the documentation's error
+  pages are a projection.
+- Templates render as well as read. The same `Template` object renders
+  answers to text (`render(t"...", rows)`), with format specs symmetric to
+  the entry specs of section 1 (`{atom:sexp}`, `{rows:table}`, `{v:json}`),
+  so a card, an `llms.txt` section or a reference page is a template over a
+  catalog query, and the generators are data.
+- Actors carry capabilities. A token's actor includes the capability set
+  under which the write happened (the host handler's, the gateway's bearer
+  token's), so the access-control semiring image of a polynomial is the
+  clearance an answer requires, and 19.19 falls out of 20.1 and 20.2 with no
+  new mechanism.
+- Laws over tokens. The space algebra's laws (union associative, overlay
+  left-biased, diff inverting union, merge commutative and idempotent) are
+  the observed-remove multiset's laws once spaces carry tokens, and the
+  exported `SpaceMachine` checks them; 19.13 rides layer 0.
+- Every seat from one pin. The split's repositories share the catalog at
+  the kernel pin, so each site's reference, cards and roster are projections
+  at that pin and cannot drift from the kernel they document.
+
+Build order refined by the reduction: the catalog is a space today, so
+cards, the projection renderer and the inverse `llms.txt` lane can start
+with wave 3 rather than waiting for the substrate; `&measurements` and the
+derived performance page follow, because the pain is measured; tokens open
+`&history`, and with them source positions, since both are the same
+vocabulary; handlers open `scope()` and its generated faces; the rest of the
+combinations of section 21 keep their order.
+
 ### Ruling, later the same day: the arbiter is PeTTa
 
 The user ruled that the semantics arbiter is upstream PeTTa at the pinned
