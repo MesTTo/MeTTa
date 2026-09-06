@@ -56,7 +56,16 @@ engine-known call head the example corpus exercises must be named here.
 
 ## Install and first call
 
-`pip install .` (the runtime is bundled) or point `METTA_PATH` at a clone.
+The distribution is `pymetta` and the module it installs is `metta`.
+`pip install 'pymetta[engine]'` after `apt install swi-prolog` (or
+`brew install swi-prolog`, or `winget install SWI-Prolog.SWI-Prolog`), which
+needs SWI-Prolog 9.3+ and Python 3.12+. The engine tree, the libraries and the
+codec corpus ride in the wheel; the `engine` extra adds `janus-swi`, the
+bridge to the SWI on the machine, and it is the only part a plain
+`pip install pymetta` leaves out. Without it the package still imports and the
+first engine call names the command for your platform. `pip install .` from a
+checkout is the same thing, and `METTA_PATH` points an installed `metta` at a
+clone's engine tree instead of the bundled one.
 
 Run one MeTTa file with `sh run.sh path/to/program.metta`. Add `--verbose`
 before the path when the program's authoring diagnostics matter, including
@@ -70,7 +79,20 @@ from metta.vocabularies import EffectClass
 context = MeTTa()                         # owns one engine context
 m = context.self                          # the home Space, bound as &self
 m.run("(= (f) 1) !(f) !(+ 1 2)")         # [[Grounded(1)], [Grounded(3)]]
+context.close()                           # or `with MeTTa() as m:`
 ```
+
+`m` in every block below is that home SPACE. The two receivers differ and the
+difference is checked: a context carries the evaluation doors and forwards them
+home (`run`, `eval`, `match`, `add`, `define`, `op`, `transaction`, `limits`,
+`stats`, `trace`, `debug`, `space`, `close`) plus the collection protocols,
+while storage and introspection stay on the space and are reached as
+`context.self.atoms()` (`atoms`, `type`, `cast`, `digest`, `source`, `save`,
+`is_function`, `arities`, `builtins`, `space_names`, `lint`, `derivation`,
+`effect_plan`, `subscribe`, `watch`, every declaration verb). Asking the
+context for a space door raises an `AttributeError` naming `m.self`, rather
+than a bare one. Two contexts are two engines' worth of state in one process,
+so a library never has to own the global one.
 
 Module-level `metta.run/match/eval/add/remove/parse/fn/trace` act on one lazily
 created default engine, for scripts that never need a second space.
@@ -272,7 +294,13 @@ operations are plain Python callables. `amplitude` refuses until
 `m.annotations` declares its fragment with the capabilities `finite`,
 `contractive` and `staged`.
 `with metta.under(carrier):` supplies the task-local default and an explicit
-keyword wins; nothing reads back the carrier in force.
+keyword wins. `metta.current_algebra()` reads back which of the three is in
+force, following the same precedence a query does, per-call carrier over task
+scope over the current context's `annotations` row, and answering `None` when
+none of the three is present rather than reporting execution's implicit
+Boolean default as a declaration. It answers from inside an operation the
+engine has already entered, which is what `metta.current_space()` does for the
+other half of the ambient state.
 `m.match(q, under=ranked)[:3]` is the three best, and it reaches the provider
 as `limit=3` when the space is foreign, its `(source ...)` discipline is not
 `linear`, it declares `emits("best-first")`, its effective algebra is the
@@ -503,9 +531,16 @@ Annotations become declarations in the engine's idiom: a `TypeVar` is
 parametric, a `Union` declares one arrow per member, `Callable[[int],int]` ->
 `(-> Number Number)`, `tuple[int,str]` -> elementwise, and
 `Annotated[int,"metres"]` retains `Number` in the arrow while publishing its
-metadata as a matchable `(Annotated Number "metres")` claim. A generator is
+metadata as a matchable `(Annotated Number "metres")` claim. An ATOM in
+annotation position IS the type, which is the escape hatch for a MeTTa type no
+Python class spells: `def speak(a: S.Animal) -> S.Sound` declares
+`(-> Animal Sound)`, and the doc's `(@type ...)` field carries the same atom.
+A generator is
 nondeterministic, one answer per yield; returning `None` answers nothing, which
-is why an `Optional` return declares the value type. An unannotated callable
+is why an `Optional` return declares the value type. An annotation the runtime
+cannot resolve, a `TYPE_CHECKING`-only import for instance, drops only its own
+parameter: the ones that resolve still declare, and a call form that does reach
+the unresolved one is refused naming that parameter. An unannotated callable
 makes no type claim. `(arguments name atoms)` asks for Atom wrappers after
 ordinary evaluation, while an `Atom` annotation receives the written term
 before evaluation. Only `(effect name pureStructural)` licenses the AUTOMATIC
@@ -584,6 +619,23 @@ call against 25.16 and 2.34us for the same operation through `m.op`.
 ## Types and cast
 
 Types are optional atoms: `(: Ann Person)`, `(: age (-> Person Number))`.
+An arrow may carry ANNOTATIONS in its own brackets,
+`(: twice (-[det]-> Number Number))`, and it then governs execution and
+compilation exactly as the plain `->` does: `!(twice "s")` is a `BadArgType`
+either way. The stored atom, `get-type`, the docs and source export all retain
+the written spelling. The brackets hold one slot or two, and the ORDER is
+fixed: a determinism word from `metta.vocabularies.Determinism`, one of `det`,
+`semidet` and `nondet`, then optionally an `EffectClass` member. One slot
+leaves the class at `oracleIO`, the top, and a class ALONE is not an arrow:
+`(: f (-[oracleIO]-> Number Number))` is refused as a declaration that types
+the symbol rather than calls to it. `(-[nondet,readOnlyLookup]-> Number
+Number)` publishes `(effect f nondeterministicReadOnly)`, because a `nondet`
+product joins its class with that one. Both slots must be CONCRETE: a `$name`
+in either is refused at the declaration, because a product variable has no
+runtime consumer, and so are a nested product and an annotation on a
+translated form. A plain `->` is `(-[nondet,oracleIO]->)`, which is why it
+promises nothing. `(pragma! verify-cardinality true)` is what turns a
+determinism claim into a runtime check; without it the claim is trusted.
 `(: Count (Alias Number))` defines a transparent structural alias. Aliases
 expand inside tuples and full arrows in their declaration owner's scope;
 reflection retains the written declaration. An alias of `Atom` preserves
@@ -737,12 +789,17 @@ m.events("at-most-once"|"at-least-once"|"per-write-exactly",
 ## Observability
 
 ```
-m.trace(src, max_events=10_000, *, timeout=, inferences=) -> Trace of TraceEvent
+m.trace(src, max_events=10_000, *, filter=, timeout=, inferences=)
+                                                     -> Trace of TraceEvent
         (depth, kind, term, answer); kinds "call" and "exit", and a reduction
         that fails leaves a call with no exit
-        Trace is a list; .stopped names the bound that cut it, or None
+        Trace is a list; .stopped names the bound that cut it, one of
+        Limit.events, .memory, .inferences, .timeout and .stack, or None when
+        the run finished; .truncated is the yes-or-no reading of the same fact
         max_events bounds the RECORDING, timeout and inferences bound the RUN;
         either way the events recorded so far are answered, never discarded
+        filter= names the functions to record, before those bounds apply, and
+        takes a symbol, a string, a bound handle like m.fn.double, or several
 m.debug(src, *, on=, inferences=) -> Debugger of Stop
         breakpoints, suspension, stepping, resume. Iterating runs the program
         to each breakpoint; the loop body is where it is SUSPENDED and leaving
