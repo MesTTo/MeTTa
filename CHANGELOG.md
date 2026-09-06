@@ -57,6 +57,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `sh extensions/python/test.sh` lets a caller's own flag override its
+  defaults. The four-worker `-n 4` came after the caller's arguments, and
+  pytest takes the last value of a repeated option, so `-n 0` was silently
+  overridden and every "serial" run of the script stayed parallel; the
+  defaults now come first.
 - Joining a MeTTa worker thread no longer risks killing the process. A worker
   evaluating an ordinary query can be inside `engine_create/3` at any moment,
   because a fair or best-first merge opens one SWI engine per space, and on
