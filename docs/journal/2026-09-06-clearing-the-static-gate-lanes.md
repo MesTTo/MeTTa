@@ -269,3 +269,47 @@ and -223 read while boot's own count still spread by up to 83. Both readings
 were honest about their arms; only this one is repeatable. It re-pins nothing:
 the boot row's pin is 531,984 and the tree measures 262,396, the unpinned
 improvement `8ec7de24` and `001c9721` left there.
+
+Tried: the two `evidence` refusals left on trunk `d58b26a9`, both pre-existing.
+`lib/lib_soft/lib_soft.metta:112` is a `measured:` tag carrying no date, the
+same class as the five above, but re-running its command rather than dating it
+in place moved the number it stamps. Six samples of
+`.venv-pypetta/bin/python extensions/python/benchmarks/soft_match_cost.py`,
+four in a fresh worktree at `d58b26a9`, two after the comment edit, and one
+control in the main checkout, all read 87,657 inferences for a position-zero
+mismatch and 183,663 for a match, ratio 2.10. `2026-09-06-soft-provider-import-doors.md`
+recorded 87,657 and 183,661 from the branch tree, by three fresh-process
+controls. The mismatch arm is identical and the match arm is two inferences
+higher on trunk; the worktree and the checkout agree, so it is the tree state
+and not the worktree's provisioning. The tag now reads
+`[measured 2026-09-06: ...; commit=d58b26a9...]` and the table above it reads
+183,663.
+
+Rejected: dating that tag from the commit that wrote its numbers, the way the
+five query-planning tags above were dated. That is the right move for a
+measurement nobody re-ran, and the wrong one here: the re-run disagrees with
+the recorded figure, so a date alone would have stamped a number the tree no
+longer produces.
+
+Decided: `examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/05-import_space_identity.metta`
+cites its own path instead of a command. `sh run.sh <file>` is refused because
+run.sh has no `exit` or `return` of its own to read, and `sh test.sh <file>`,
+the shape two ch20 siblings write, is accepted on test.sh alone:
+`gate_command_problems` returns as soon as `SHELL_COMMAND` matches, so the path
+argument is never read and the claim says nothing about this file. The bare
+path is the shape four 20-01 examples write and the only one the checker takes
+through all three of its questions FOR THIS FILE: it holds `(test ...)` forms,
+so it can fail, and test.sh's corpus collector runs it under a GATE lane. Run
+both ways: `sh test.sh <file>` exits 0 with eleven green forms, and with the
+first expectation flipped to `(absent)` it exits 1, printing
+`is (present), should (absent). ❌` and naming the file.
+
+Found while there: check.sh's comment above `parity-perf-selftest` still called
+it "the four-case plant" and listed four. `check_upstream_parity_selftest.py`
+has thirteen plant functions now, `honest_plant_failures` through
+`null_program_refusal_failures`, and `main` runs them in that order. The
+comment says what it plants now.
+
+Open: what moved the match arm by two inferences between the soft-provider
+branch tip and trunk. Not bisected. The mismatch arm is unchanged, the ratio
+still reads 2.10, and nothing the comment concludes turns on it.

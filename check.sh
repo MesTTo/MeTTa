@@ -399,11 +399,14 @@ run GATE   petta        sh -c "cd '$HERE' && '$PY' tests/conformance/petta.py --
 # check_docs_site draws below.
 run GATE   parity-perf  sh -c "cd '$HERE' && '$PY' tests/checks/check_upstream_parity.py"
 
-# and the four-case plant that proves the lane above can fail: a control
-# measured above its program run, a control taken at the wrong path length, a
-# frozen negative net, and a meta note a rebaseline must carry forward. It
-# replaces _perf, the lane's one process call, so no engine runs and the whole
-# netting and verdict path is still the production one.
+# and the plant that proves the lane above can fail: thirteen cases, one
+# function each, one honest control the lane must stay green on and twelve
+# defects it must catch, among them a control measured above its program run,
+# one taken at the wrong path shape, a frozen negative net, a sampling
+# excursion, an uncounted warm-up, a timed-out measurement that leaves a
+# process behind, a dropped rebaseline note, an unmeasured run under CI and a
+# denied counter. It replaces _perf, the lane's one process call, so no engine
+# runs and the whole netting and verdict path is still the production one.
 run GATE   parity-perf-selftest "$PY" "$HERE/tests/checks/check_upstream_parity_selftest.py"
 
 # The two-runtime differential: the conformance corpus's CeTTa-routable
