@@ -362,7 +362,9 @@ transaction; `with m.speculative():` answers and rolls its writes back.
 `with metta.speculate():` is the same discarded execution scope for the lazy
 module-tier default context.
 
-`Rows` is a list of `Row` with `.columns`. `row.x` and `row["x"]` both work.
+`Rows` is a list of `Row` with `.columns`, and `Answers`, which is what `match`
+and `answers` hand back, is the lazy replayable cursor carrying every door
+below. `row.x` and `row["x"]` both work.
 `rows.one()` (exactly one), `.first()`, `.column(name)` -> that column's atoms,
 `.group_by(name)` -> a dict from each column atom to its `Rows` slice,
 `.table()` -> dict of columns decoded to Python values, `.to_dicts()` -> plain
@@ -1109,12 +1111,17 @@ exit on findings), `doc` (a name's `(@doc ...)`), `llms` (this file), and
 `convert` (`program.py [-o out.metta]`, emitting the module's fresh-space
 declarations as loadable MeTTa source).
 
-`metta.remote`: `serve(m, spaces=, token=, authorize=, ssl_context=,
-cursor_idle=300, cursor_limit=100)`, `connect(url, timeout=30, token=,
-headers=, ssl_context=)`, `RemoteSpace.server_capabilities()`, and `attach`.
+`metta.remote`: `serve(m, host="127.0.0.1", port=0, spaces=, token=,
+authorize=, ssl_context=, cursor_idle=300, cursor_limit=256, mutation_ttl=300,
+mutation_limit=4096)`, `connect(url, timeout=30, token=,
+headers=, ssl_context=)`, `RemoteSpace(transport, space="&self", batch=)` with
+its `server_capabilities()`, and the root `metta.attach` to mount one.
 `authorize(Request(operation, space, headers)) -> bool` can express read-only,
 per-space, and tenant policy. The cursor settings bound how long an abandoned
-answer cursor survives and how many the server owns at once. Credentials
+answer cursor survives and how many the server owns at once; the mutation
+settings do the same for the idempotency keys a retryable write negotiates, so
+a lost reply raises `OutcomeUnknown` and its `retry()` replays the request
+without repeating its effects. Credentials
 require https, tokens compare in constant time, and only http/https schemes
 are accepted.
 
