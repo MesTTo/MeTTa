@@ -872,4 +872,88 @@ test(thread_count_is_a_positive_integer) :-
     thread_count(Count),
     integer(Count), Count >= 1.
 
+% ------------------------------------------------- joining an engine-using worker
+
+%thread_join/2 on its own is unsafe against a thread inside engine_create/3 or
+%engine_destroy/1: PL_set_engine's detach_engine() memsets the CALLING thread's
+%pthread_t to zero for the length of those calls, and thread_join/2 reads that
+%field once, with no has_tid test, and hands it to pthread_timedjoin_np, so the
+%join dereferences a null struct pthread [source: SWI-Prolog 10.1.13
+%src/pl-thread.c:7038 detach_engine, :4083 '$engine_create'/3, :4164
+%destroy_interactor, :2898 thread_join; commit=WORKTREE].
+%tests/prolog/probes/engine_join_window.pl isolates that window in plain SWI:
+%parked inside engine_destroy/1 a joined worker dies 10 runs out of 10.
+%
+%The join announces itself and waits two milliseconds into a worker that churns
+%for tens, for the same reason
+%function_free_materialization:a_joined_thread_survives_clause_collection_inside_its_transaction
+%does: joining straight after thread_create/3 reads the pthread_t before the
+%worker has run its first goal, and passes against the defect.
+engine_churn_worker(Ready, Deadline) :-
+    thread_send_message(Ready, churning),
+    engine_churn_until(Deadline).
+
+engine_churn_until(Deadline) :-
+    get_time(Now),
+    (   Now >= Deadline
+    ->  true
+    ;   engine_create(x, member(_, [a,b,c]), Engine),
+        engine_destroy(Engine),
+        engine_churn_until(Deadline)
+    ).
+
+test(a_joined_worker_survives_engine_churn_on_its_thread) :-
+    setup_call_cleanup(
+        message_queue_create(Ready),
+        forall(between(1, 40, _),
+               ( get_time(Now), Deadline is Now + 0.05,
+                 thread_create(engine_churn_worker(Ready, Deadline),
+                               Worker, []),
+                 thread_get_message(Ready, churning),
+                 sleep(0.002),
+                 lib_thread:metta_thread_join_settled(Worker, Status),
+                 assertion(Status == true) )),
+        message_queue_destroy(Ready)).
+
+%The same join against the engines an ORDINARY query opens. A fair merge builds
+%one engine per space and destroys them all when the merge is done
+%[source: engine/spaces/bounded_matching.pl, metta_match_engine/4 and
+%metta_engine_done/1; commit=WORKTREE], so a worker running merges is inside
+%that window repeatedly without doing anything unusual.
+merged_match_worker(Spaces, Ready, Deadline) :-
+    thread_send_message(Ready, matching),
+    merged_match_until(Spaces, Deadline).
+
+merged_match_until(Spaces, Deadline) :-
+    get_time(Now),
+    (   Now >= Deadline
+    ->  true
+    ;   forall(spaces:metta_merged_match_(fair, Spaces, [edge, _, _], _), true),
+        merged_match_until(Spaces, Deadline)
+    ).
+
+test(a_joined_worker_survives_a_merged_match_on_its_thread) :-
+    Spaces = ['&lt-merge-a', '&lt-merge-b', '&lt-merge-c'],
+    forall(member(Space, Spaces),
+           ( 'add-atom'(Space, [edge, a, b], _),
+             'add-atom'(Space, [edge, b, c], _) )),
+    % The premise, asserted rather than assumed: without it this passes
+    % vacuously the day a fair merge stops opening engines, and the join it
+    % exercises would no longer be the join that matters.
+    statistics(engines_created, Before),
+    forall(spaces:metta_merged_match_(fair, Spaces, [edge, _, _], _), true),
+    statistics(engines_created, After),
+    assertion(After > Before),
+    setup_call_cleanup(
+        message_queue_create(Ready),
+        forall(between(1, 40, _),
+               ( get_time(Now), Deadline is Now + 0.05,
+                 thread_create(merged_match_worker(Spaces, Ready, Deadline),
+                               Worker, []),
+                 thread_get_message(Ready, matching),
+                 sleep(0.002),
+                 lib_thread:metta_thread_join_settled(Worker, Status),
+                 assertion(Status == true) )),
+        message_queue_destroy(Ready)).
+
 :- end_tests(lib_thread).

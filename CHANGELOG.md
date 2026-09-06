@@ -57,6 +57,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Joining a MeTTa worker thread no longer risks killing the process. A worker
+  evaluating an ordinary query can be inside `engine_create/3` at any moment,
+  because a fair or best-first merge opens one SWI engine per space, and on
+  SWI-Prolog 10.1.13 a thread inside that call has no valid `pthread_t` for
+  `thread_join/2` to use. Every join the concurrency library makes now waits
+  for the worker's status to leave `running` first, which is the point after
+  which no further Prolog runs on it; three of those joins already followed a
+  `thread_signal(_, abort)`, so the wait is a millisecond.
+
 - A Python program no longer dies when the garbage collector reclaims an
   answer view or a Prolog term. Three process deaths came from the same rule
   being broken: a finaliser that calls into Prolog runs at a point no caller

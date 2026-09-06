@@ -137,7 +137,8 @@ out of 10 here, both at loadavg 69, and
 Twenty consecutive `sh engine/test.sh suites/spaces/materialization.plt` at
 loadavg 20 to 85 all exit 0.
 
-Open: `engine/spaces/bounded_matching.pl` and `lib/lib_thread/lib_thread.pl`
+CLOSED 2026-09-06 by the join side rather than the engine side, see below.
+Open at the time: `engine/spaces/bounded_matching.pl` and `lib/lib_thread/lib_thread.pl`
 also call `engine_create/3` and `engine_destroy/1`, on threads a program can
 join, and `lib_thread` joins its own workers in `cancel_future_worker_/4` and
 `cancel_repeating_worker_/1`, after a `thread_signal(ThreadId, abort)` that a
@@ -146,3 +147,47 @@ are opened by code the program asked for rather than injected into it by a GC
 callback, so they are a smaller hazard than the one this entry closes, but they
 are the same hazard. `tests/prolog/probes/engine_join_window.pl` is the
 instrument for whoever takes them.
+
+
+## 2026-09-06, later: the other two engine sites, closed at the joiner
+
+Tried: the standing engine, as here. It does not fit either site.
+`metta_match_engine/4` builds one engine per space for a fair or best-first
+merge and destroys them all when the merge ends, several live at once over
+distinct goals, so there is no single engine to stand. `lib_thread`'s scheduler
+engines are per task and outlive their creating call.
+
+Found: neither site JOINS anything. `bounded_matching.pl` opens engines and
+never joins a thread, and the window only becomes a crash when some other
+thread joins the one inside it. Every join this repository ships is in
+`lib/lib_thread/lib_thread.pl` -- `race_stop_/1`, `future_join_/1`,
+`cancel_future_worker_/4`, `cancel_repeating_worker_/1` and the timer-dispatch
+rollback -- and three of those join straight after a
+`thread_signal(_, abort)`. So the repair belongs at the joiner, where it covers
+both sites and any future one.
+
+Decided: `metta_thread_join_settled/2`, which waits for the target's status to
+leave `running` and only then calls `thread_join/2`. A thread whose goal has
+finished runs no further Prolog, so its pthread_t is valid and stays valid;
+`start_thread` calls `set_thread_completion` before the cleanup that ends the
+thread. This is the approach the entry above REJECTED for the erase callback,
+and the reason it fits here and not there is the same in both directions: it
+polls, and there it would have polled for the whole life of a long-running
+collector thread on a path taken once per collected clause, while here it is
+taken once per join, three times out of five straight after an abort. The
+backoff runs from half a millisecond to 32.
+
+Verified: `create_churn`, added to `tests/prolog/probes/engine_join_window.pl`,
+is the same forty-round shape the new regressions use with the safe join taken
+out; it dies 10 runs out of 10 where the probe's older `create_idle` mode,
+which joins as soon as the worker announces itself, has never crashed. Both new
+regressions, run alone at loadavg 48, are 10 SIGSEGVs out of 10 with
+`metta_thread_settled_/2`'s wait planted out and 10 passes out of 10 with it.
+`a_joined_worker_survives_a_merged_match_on_its_thread` asserts that a fair
+merge moved `statistics(engines_created)` before it joins anything, so it
+cannot pass vacuously the day merges stop opening engines.
+
+Open: a MeTTa program that writes its own `thread_join/2` in raw Prolog is
+still exposed, as is any future engine site joined from outside this library.
+The upstream defect is written up for reporting in
+`docs/journal/2026-09-06-swi-defects-to-report-upstream.md`.
