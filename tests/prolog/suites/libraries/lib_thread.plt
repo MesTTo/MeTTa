@@ -880,7 +880,8 @@ test(thread_count_is_a_positive_integer) :-
 %field once, with no has_tid test, and hands it to pthread_timedjoin_np, so the
 %join dereferences a null struct pthread [source: SWI-Prolog 10.1.13
 %src/pl-thread.c:7038 detach_engine, :4083 '$engine_create'/3, :4164
-%destroy_interactor, :2898 thread_join; commit=WORKTREE].
+%destroy_interactor, :2898 thread_join;
+%commit=2421d06e697daffb0797c307a798131616ebdd8e].
 %tests/prolog/probes/engine_join_window.pl isolates that window in plain SWI:
 %parked inside engine_destroy/1 a joined worker dies 10 runs out of 10.
 %
@@ -918,7 +919,8 @@ test(a_joined_worker_survives_engine_churn_on_its_thread) :-
 %The same join against the engines an ORDINARY query opens. A fair merge builds
 %one engine per space and destroys them all when the merge is done
 %[source: engine/spaces/bounded_matching.pl, metta_match_engine/4 and
-%metta_engine_done/1; commit=WORKTREE], so a worker running merges is inside
+%metta_engine_done/1; commit=2421d06e697daffb0797c307a798131616ebdd8e], so a
+%worker running merges is inside
 %that window repeatedly without doing anything unusual.
 merged_match_worker(Spaces, Ready, Deadline) :-
     thread_send_message(Ready, matching),
