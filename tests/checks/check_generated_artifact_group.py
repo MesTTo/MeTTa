@@ -1,10 +1,10 @@
 """Purpose: keep the generated-artifact gate alias in its dependency order.
 
 Guarantees:
-  - ``generated-artifacts`` selects exactly ``ledger``, ``aio-mirror`` and
-    ``reference``, whose adjacent source order keeps the mirror ahead of the
-    page derived from it [tested: generated-artifacts-selftest;
-    commit=7d3c883f91d1d4be055fd725463d214f6fbd1438].
+  - ``generated-artifacts`` selects exactly ``ledger``, ``aio-mirror``,
+    ``init-stub`` and ``reference``, whose adjacent source order keeps each
+    producer ahead of its derived surface [tested: generated-artifacts-selftest;
+    commit=WORKTREE].
   - DEVELOPING.md publishes the aggregate command and the reason for the order
     [tested: generated-artifacts-selftest;
     commit=7d3c883f91d1d4be055fd725463d214f6fbd1438].
@@ -21,7 +21,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-EXPECTED = ("ledger", "aio-mirror", "reference")
+EXPECTED = ("ledger", "aio-mirror", "init-stub", "reference")
 
 
 def findings(root: Path = ROOT) -> list[str]:
@@ -85,7 +85,7 @@ def main() -> int:
         for defect in defects:
             print(defect, file=sys.stderr)
         return 1
-    print("generated-artifacts: alias, three-lane order and guide agree")
+    print("generated-artifacts: alias, four-lane order and guide agree")
     return 0
 
 

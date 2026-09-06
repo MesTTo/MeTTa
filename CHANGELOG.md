@@ -61,6 +61,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   now explains that `index` searches row values and points to `column(name)`;
   successful and ordinary missing-value Sequence behavior is unchanged.
 
+- Type checkers now recognize `metta.algebra` as callable through the package
+  attribute while preserving precise declaration and carrier types.
+
 - Joining a thread that collects clauses inside a transaction no longer kills
   the process. Source materialization retires a collected relation through a
   callback SWI delivers from clause garbage collection, and that callback

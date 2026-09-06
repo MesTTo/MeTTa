@@ -28,6 +28,8 @@
 #                                            memory-scale memory-scale-gate
 #                                            shell examples layering
 #                                            generated-artifacts
+#                                            init-stub mypy-root-impl
+#                                            mypy-algebra-surface
 #                                            scratch-retention
 #                                            process-bounds reaping
 #          CHECK_PY=/path/to/python   pick the interpreter
@@ -66,9 +68,9 @@
 #   - KERNEL.md's counts and both translator-head rosters are runtime-derived,
 #     with independent planted count and omission failures [tested:
 #     tests/checks/check_kernel_ledger_selftest.py; commit=d7a55be4e931732a02f2178013aed47bb9cde474].
-#   - generated-artifacts selects ledger, aio-mirror and reference in the order
-#     their remedies converge [tested: tests/checks/check_generated_artifact_group.py;
-#     commit=7d3c883f91d1d4be055fd725463d214f6fbd1438].
+#   - generated-artifacts selects ledger, aio-mirror, init-stub and reference in
+#     the order their remedies converge [tested:
+#     tests/checks/check_generated_artifact_group.py; commit=WORKTREE].
 #   - every lane inherits a repository-local scratch directory, and a later
 #     run reclaims one left by SIGKILL without touching a concurrent run
 #     [tested: scratch-retention; commit=c96093349e37cc7153f31b3dd9af10246a325301].
@@ -101,9 +103,9 @@ METTA_ROOT="$HERE"
 [ -n "$PY" ] || { echo "check.sh: no python found (set CHECK_PY)" >&2; exit 2; }
 
 PYDIR="$HERE/extensions/python"
-# ledger is independent; aio-mirror must precede reference because aiogen.py
-# rewrites aio.py and reference.py publishes that file's docstrings.
-GENERATED_ARTIFACT_LANES="ledger aio-mirror reference"
+# ledger is independent; aio-mirror must precede init-stub and reference because
+# aiogen.py rewrites __init__.py and aio.py before those consumers read them.
+GENERATED_ARTIFACT_LANES="ledger aio-mirror init-stub reference"
 WANT="$*"
 case " $WANT " in
     *" generated-artifacts "*) WANT="$WANT $GENERATED_ARTIFACT_LANES" ;;
@@ -516,6 +518,13 @@ run GATE ledger     "$PY" "$HERE/extensions/python/tools/ledger.py"
 # they claimed to reproduce, two of them refusing at runtime what the sync door
 # accepts [measured 2026-08-31].
 run GATE aio-mirror "$PY" "$HERE/extensions/python/tools/aiogen.py"
+
+# A module can implement __call__ at runtime, but mypy deliberately models the
+# module structurally and never consults that mutation.  The generated package
+# stub is the place its callable attribute type can live.  It also mirrors the
+# complete root source, and reads every carrier attribute from the catalog's
+# semiring vocabulary, so a source or closed-set change makes this lane stale.
+run GATE init-stub "$PY" "$HERE/extensions/python/tools/initstubgen.py"
 
 # Every website/reference/metta-*.md page says "The entries below reproduce the
 # source signatures and docstrings", and across nineteen pages that promise was
