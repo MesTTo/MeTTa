@@ -662,7 +662,7 @@ fun_here(F) :- fun(F),
 %transport never reaches fun_scoped/1 or fun_here_in/2 directly
 %[tested: test_a_namespace_lists_and_resolves_only_what_its_space_can_call,
 %test_builtins_equals_the_union_of_functions_and_special_forms;
-%commit=WORKTREE].
+%commit=a376df6dff8099d6145ace55132c7e30922ea1de].
 metta_host_function_callable_from(Module, F) :-
     fun(F),
     (   \+ fun_scoped(F)
