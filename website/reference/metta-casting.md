@@ -40,3 +40,5 @@ def cast(space: Any, value: Any, type_: Any, /) -> Any:
 >     m.run("(: Ann Person)")
 >     assert m.cast(S.Ann, "Person") is S.Ann
 >     assert m.cast(3, int) == 3
+>
+> space may be a context or a space.

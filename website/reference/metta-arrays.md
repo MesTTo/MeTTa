@@ -113,6 +113,8 @@ class EmbeddingStore:
 > stored vector or nothing. Public operation names route through equations
 > in this space to unique internal operations, so the same store name in a
 > different space cannot retarget this store.
+>
+> m may be a context or a space, as ``install`` takes either.
 
 ### `EmbeddingStore.add`
 

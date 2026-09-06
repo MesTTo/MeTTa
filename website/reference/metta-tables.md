@@ -43,6 +43,8 @@ def add(space: Any, head: Any, data: Any) -> int:
 ```
 
 > Add a tabular source to a space as ``(head column...)`` facts.
+>
+> space may be a context or a space.
 
 ## `Executes`
 
@@ -94,6 +96,8 @@ def from_context(cls, m: Any, name: str, connection: Executes) -> TableBridge:
 > The provider for every `(bridge <name> <shape> <row>)` atom in
 > &metta, so a schema declared from MeTTa source, or by declare()
 > below, becomes a provider in one line.
+>
+> m may be a context or a space.
 
 ### `TableBridge.atoms`
 
@@ -175,3 +179,5 @@ def declare(m: Any, name: str, declaration: Atom | str) -> Atom:
 
 > Write one ctx-scoped bridge declaration into &metta, where explain
 > and any program can read the schema, and from_context will.
+>
+> m may be a context or a space.

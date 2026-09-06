@@ -156,6 +156,8 @@ class TabledMap:
 > map. A nondeterministic function does not fit a map; a key whose
 > call answers several values raises, and one answering none is a
 > KeyError.
+>
+> space may be a context or a space.
 
 ### `TabledMap.stats`
 
@@ -197,6 +199,8 @@ class LiveView:
 > event. A space is a multiset and so is the view: len counts copies,
 > iteration yields them, count(atom) answers multiplicity. close()
 > cancels the subscription; a closed view keeps its last state.
+>
+> space may be a context or a space.
 
 ### `LiveView.count`
 
@@ -242,6 +246,8 @@ class ClosureView:
 > without tabling that spelling never terminates, which is why the
 > class always tables. Defines `<relation>-closure` (and its `-step`)
 > in the space, named so a MeTTa program can call the same closure.
+>
+> space may be a context or a space.
 
 ### `ClosureView.reachable`
 

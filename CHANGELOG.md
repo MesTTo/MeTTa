@@ -63,6 +63,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   overridden and every "serial" run of the script stayed parallel; the
   defaults now come first.
 
+- Every public door that wants a space now takes a context as well, the way
+  `metta.integrate.integrate` and `metta.arrays.install` already did.
+  `metta.tables.declare`, `metta.tables.TableBridge.from_context`,
+  `metta.tables.add`, `metta.casting.cast`, `metta.lint.lint`,
+  `metta.lint.lint_file`, `metta.structures.TabledMap`,
+  `metta.structures.LiveView`, `metta.structures.ClosureView`,
+  `metta.algebra.declare`, `metta.algebra.evaluate`, `metta.algebra.resolve`,
+  `metta.algebra.sample`, `metta.arrays.EmbeddingStore`,
+  `metta.remote.Gateway` and `metta.remote.serve` resolve the receiver at
+  their own boundary instead of dying somewhere inside on whichever Space
+  door they reached first: `MeTTa has no 'parse'`, `MeTTa has no 'name'`,
+  `'MeTTa' object has no attribute '_space'`. The distinction between the two
+  classes is unchanged, and a context still refuses a Space door.
+
 - Closing a context no longer depends on the garbage collector, and no longer
   destroys a space the context only opened. `MeTTa.space()` recorded every
   handle it returned as though the context owned it, so `catalog =
