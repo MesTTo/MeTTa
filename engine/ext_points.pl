@@ -996,6 +996,10 @@ kind(metta_algebra_one/2, host_service).
 kind(metta_require_algebra_value/3, host_service).
 kind(metta_annotation/2, host_service).
 kind(metta_k_extend/4, host_service).
+%A binding's cast asks which refinement a value violates once the witness has
+%declined it, so its refusal can name `(Gt 0)` and the value rather than the
+%value's types (engine/metta/refinements.pl, metta_refinement_violation/3).
+kind(metta_refinement_violation/3, host_service).
 %The host run and load surface: the grouped runner (with the
 %using-substitution folded in as Bindings), the status runner, the load
 %lifecycle and the manifest read, plus the reducible-head test the status

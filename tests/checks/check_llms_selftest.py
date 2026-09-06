@@ -90,8 +90,9 @@ ALGEBRA_LAWS = (
     "combine-associative", "combine-commutative", "extend-associative",
     "extend-commutative", "left-distributive", "right-distributive",
     "combine-idempotent", "combine-zero-identity", "extend-one-identity",
-    "extend-zero-annihilates", "contraction", "associative", "commutative",
-    "distributive", "idempotent",
+    "extend-zero-annihilates", "contraction", "roundtrip", "equivalent",
+    "associative", "commutative", "distributive", "idempotent", "identity",
+    "distributes-over",
 )
 #: One row per alias, flattened the way the checker flattens the table, so a
 #: changed expansion is a changed string rather than a same-length list.
@@ -101,6 +102,8 @@ LAW_ALIASES = (
     "distributive=left-distributive=right-distributive",
     "idempotent=combine-idempotent",
     "contraction=contraction",
+    "identity=combine-zero-identity=extend-one-identity",
+    "distributes-over=left-distributive=right-distributive",
 )
 CLOSED_VALUES = {
     "semiring": SEMIRINGS,
@@ -146,6 +149,8 @@ def _closed_text(*, root: bool) -> str:
         "| `distributive` | `left-distributive`, `right-distributive` |\n"
         "| `idempotent` | `combine-idempotent` |\n"
         "| `contraction` | `contraction` |\n"
+        "| `identity` | `combine-zero-identity`, `extend-one-identity` |\n"
+        "| `distributes-over` | `left-distributive`, `right-distributive` |\n"
     )
     shared = (
         f"`metta.vocabularies.Semiring` names the closed set: {_listed(SEMIRINGS)}.\n\n"
@@ -290,7 +295,7 @@ def main() -> int:
             "AlgebraLaw" in finding
             for finding in closed_value_findings(
                 SHEET,
-                root_closed.replace("`idempotent`.", "`identity`.", 1),
+                root_closed.replace("`distributes-over`.", "`absorptive`.", 1),
                 CLOSED_VALUES,
             )
         ),

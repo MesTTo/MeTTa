@@ -55,6 +55,19 @@
 %   independently of Error context and observation, allowing an evaluated
 %   refinement mismatch to retain its written call
 %   [tested: run_tests(tensor_shapes); commit=4eaefdd8d40e53b2613722287302a14b41704662].
+% Guarantees: a refined expected type `(Annotated Base C...)` admits a value
+%   whose declared type unifies with it, as before, and also a value whose
+%   reported type admits Base while every constraint holds on the value
+%   (engine/metta/refinements.pl); the refusal for a value whose base is
+%   admitted and whose first decided constraint fails is
+%   `(BadArgValue <position> <constraint> <value>)`, one per bad call, and a
+%   base mismatch keeps the ordinary BadArgType. At compile time the shallow
+%   reading defers every constraint to the value's arrival, so a literal
+%   satisfying the base compiles the ordinary typed call
+%   [tested: refinements:a_refined_parameter_accepts_a_value_the_constraint_admits,
+%   refinements:a_refined_parameter_refuses_with_the_constraint_and_the_value,
+%   refinements:a_base_mismatch_keeps_the_ordinary_bad_arg_type;
+%   commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 
@@ -227,6 +240,12 @@ metta_ordinary_argument_reason(Operation, Arguments, Refusal) :-
     metta_type_refusal_reason(RawChain, Chain, Position, Expected, Actual, [],
                               Refusal).
 
+%A refinement violation names the constraint and the VALUE, because the value's
+%type said nothing wrong: `0` is a Number, and `(Gt 0)` is what it fails. One
+%reason per bad call, the first decided constraint that fails, so the alias
+%expansion detail of the ordinary shape below has nothing to add here.
+metta_type_refusal_reason(_, _, Position, _, violated(Constraint, Value), _,
+                          ['BadArgValue', Position, Constraint, Value]) :- !.
 % Preserve the source parameter spelling and carry the complete expansion for
 % a whole-arrow alias, where no source parameter position exists to project.
 metta_type_refusal_reason(Raw, Canonical, Position, Expected, Actual, Details,
@@ -306,11 +325,28 @@ metta_arguments_match_shallow([Expected|Rest], [Origin|Origins],
         satisfies_metatype(Argument, Expected)
     ->  true
     ;   shallow_argument_types(Argument, Types)
-    ->  member(Actual, Types),
-        metta_argument_type_matches(Actual, Expected, Origin)
+    ->  (   nonvar(Expected), Expected = [Head|_], Head == 'Annotated'
+        ->  metta_shallow_refined_admits(Types, Expected, Origin)
+        ;   member(Actual, Types),
+            metta_argument_type_matches(Actual, Expected, Origin)
+        )
     ;   true
     ),
     metta_arguments_match_shallow(Rest, Origins, Arguments).
+
+%A refinement is DEFERRED at compile time: the base decides here, and the value
+%a constraint needs arrives at run time, where the check below names it. Refusing
+%`(f 0)` at compile time from its literal would be a second copy of every rule
+%in engine/metta/refinements.pl, and accepting it costs nothing the runtime
+%check does not already do for every other argument. The guard above is
+%inlined so a plain declared type compiles with the inferences it had.
+metta_shallow_refined_admits(Types, Expected, Origin) :-
+    metta_refined_type(Expected, Base, _),
+    (   member(Actual, Types),
+        metta_refined_declared_match(Actual, Expected, Origin)
+    ;   member(Actual, Types),
+        metta_argument_type_matches(Actual, Base, Origin)
+    ).
 
 metta_shallow_call_accepted(Operation, Arguments) :-
     metta_shallow_operation_parameters(Operation, Arguments,
@@ -690,8 +726,11 @@ check_argument_type_under_policy_in(Module, Argument, Expected, Origin) :-
     !,
     (   metta_evaluating_type_rule
     ->  metta_argument_types_in(Module, Argument, Types),
-        member(Actual, Types),
-        metta_resolved_types_match_in(Module, Actual, Expected)
+        (   nonvar(Expected), Expected = [Head|_], Head == 'Annotated'
+        ->  metta_reported_type_admits_in(Module, Argument, Types, Expected)
+        ;   member(Actual, Types),
+            metta_resolved_types_match_in(Module, Actual, Expected)
+        )
     ;   has_type_under_policy(Module, Argument, Expected)
     ).
 %A metatype under a USER policy goes straight to the walk. The shape test in
@@ -763,9 +802,30 @@ check_argument_type_in(Module, Argument, Expected, Origin) :-
     Origin \== variable,
     (   metta_evaluating_type_rule
     ->  metta_argument_types_in(Module, Argument, Types),
-        member(Actual, Types),
-        metta_resolved_types_match_in(Module, Actual, Expected)
+        (   nonvar(Expected), Expected = [Head|_], Head == 'Annotated'
+        ->  metta_reported_type_admits_in(Module, Argument, Types, Expected)
+        ;   member(Actual, Types),
+            metta_resolved_types_match_in(Module, Actual, Expected)
+        )
     ;   has_resolved_type_in(Module, Argument, Expected)
+    ).
+
+%A reported type admits a REFINED expected type by evidence on the whole type,
+%or by admitting its base while the value satisfies every constraint. The
+%second disjunct is what lets `5` reach a `(Annotated Number (Gt 0))`
+%parameter: its one reported type is Number, which unifies with no Annotated
+%type, and the constraint is a question about the value, not about the type
+%(engine/metta/refinements.pl). A disjunction rather than an if-then-else, so
+%a chain sharing a type variable keeps the witness the next argument may need.
+%Reached behind the inlined `Head == 'Annotated'` guard at both callers, so a
+%plain type never pays the call.
+metta_reported_type_admits_in(Module, Argument, Types, Expected) :-
+    metta_refined_type(Expected, Base, Constraints),
+    (   member(Actual, Types),
+        metta_refined_declared_match_in(Module, Actual, Expected)
+    ;   member(Actual, Types),
+        metta_resolved_types_match_in(Module, Actual, Base),
+        metta_refinements_hold(Constraints, Argument)
     ).
 
 %The metatype is asked first and decides on its own where it can; only where
@@ -829,16 +889,55 @@ metta_bad_argument([Declared|Rest], [Origin|Origins], [Argument|Arguments], N,
                            Position, Reported, Actual)
     ;   metta_argument_types(Argument, Types),
         (   Position = N, Reported = Expected,
-            metta_rejected_argument_type(Argument, Types, Expected, Origin,
-                                          Actual)
+            metta_argument_rejection(Argument, Types, Expected, Origin, Actual)
         ;   member(Carried, Types),
-            metta_argument_type_matches(Carried, Expected, Origin),
+            metta_argument_type_admits(Argument, Carried, Expected, Origin),
             !,
             Later is N + 1,
             metta_bad_argument(Rest, Origins, Arguments, Later,
                                Position, Reported, Actual)
         )
     ).
+
+%What one position rejects. A refined expected type whose base some reported
+%type admits, while no reported type matches the whole refined type, rejects
+%by the first decided constraint the VALUE fails, as `violated(Constraint,
+%Value)`, and metta_type_refusal_reason/7 spells that BadArgValue; a value
+%every constraint accepts is not rejected here and the carrying alternative
+%above takes it forward. Every other shape keeps the type-by-type rejection
+%below, one BadArgType per rejected reported type.
+metta_argument_rejection(Argument, Types, Expected, Origin, Rejection) :-
+    (   metta_refined_type(Expected, Base, Constraints),
+        \+ ( member(Whole, Types),
+             metta_refined_declared_match(Whole, Expected, Origin) ),
+        member(Actual, Types),
+        metta_argument_type_matches(Actual, Base, Origin),
+        metta_refinement_violated(Constraints, Argument, Constraint)
+    ->  Rejection = violated(Constraint, Argument)
+    ;   metta_rejected_argument_type(Argument, Types, Expected, Origin,
+                                     Rejection)
+    ).
+
+%A reported type carries an argument past a parameter when it matches the
+%expected type, or, for a refined expected type, when it matches the whole
+%type by evidence or matches the base while the value satisfies every
+%constraint: the acceptance relation the refusal walk has to agree with,
+%restated over one reported type. The wildcard exclusion is
+%metta_refined_declared_match_in/3's, for the reason given there.
+metta_argument_type_admits(Argument, Actual, Expected, Origin) :-
+    (   metta_refined_type(Expected, Base, Constraints)
+    ->  (   metta_refined_declared_match(Actual, Expected, Origin)
+        ;   metta_argument_type_matches(Actual, Base, Origin),
+            metta_refinements_hold(Constraints, Argument)
+        )
+    ;   metta_argument_type_matches(Actual, Expected, Origin)
+    ).
+
+metta_refined_declared_match(Actual, Refined, Origin) :-
+    nonvar(Actual),
+    Actual \== '%Undefined%',
+    Actual \== 'Atom',
+    metta_argument_type_matches(Actual, Refined, Origin).
 
 %A bridge supplies named classes in resolution order; structural protocol
 %witnesses may precede those names
@@ -848,13 +947,17 @@ metta_bad_argument([Declared|Rest], [Origin|Origins], [Argument|Arguments], N,
 %value needs a diagnostic. A refined requirement reports its corresponding
 %observed refinement; ordinary requirements report the first class name once.
 %Independent MeTTa declarations retain their existing refusal alternatives.
+%Admission rather than matching decides what is rejected, so a refined
+%expected type rejects exactly the reported types that neither match it by
+%evidence nor carry the value past its constraints; for a plain expected type
+%the two relations are the same one.
 metta_rejected_argument_type(Argument, Types, Expected, Origin, Actual) :-
     (   atomic(Argument), \+ atom(Argument), seam:host_object(Argument)
     ->  \+ ( member(Candidate, Types),
-             metta_argument_type_matches(Candidate, Expected, Origin) ),
+             metta_argument_type_admits(Argument, Candidate, Expected, Origin) ),
         metta_host_refusal_type(Types, Expected, Actual)
     ;   member(Actual, Types),
-        \+ metta_argument_type_matches(Actual, Expected, Origin)
+        \+ metta_argument_type_admits(Argument, Actual, Expected, Origin)
     ).
 
 % The caller has already projected parameter modifiers and normalized aliases.
