@@ -62,6 +62,51 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   pytest takes the last value of a repeated option, so `-n 0` was silently
   overridden and every "serial" run of the script stayed parallel; the
   defaults now come first.
+
+- A speculative or atomic scope covers the Python write doors, which crossed
+  outside every wrapper and simply persisted. `with m.speculative():
+  m.add(atom)` now leaves nothing behind, the way
+  `m.run("!(add-atom &self ...)")` in the same block already did, and the same
+  holds for `remove`, `del m[pattern]`, `transfer` and `clear`, for the async
+  doors through the worker hop, and for an equation added through the Python
+  door. Inside `with m.atomic():` each write is its own committing
+  transaction, so a provider that refuses the second atom of one call takes
+  the first back with it.
+
+  Both scopes are per-CALL policies and the documentation now says so: a later
+  call does not see what an earlier one wrote under speculation, and a raise
+  does not undo a call an atomic block already committed. The boundary that
+  spans SEVERAL calls remains `m.transaction(callable)`, and there is
+  deliberately no with-block form of it, because SWI's `transaction/1` and
+  `snapshot/1` take a closed goal and an engine, the one thing that suspends a
+  goal across host calls, refuses to yield inside either.
+
+- Every public door that wants a space now takes a context as well, the way
+  `metta.integrate.integrate` and `metta.arrays.install` already did.
+  `metta.tables.declare`, `metta.tables.TableBridge.from_context`,
+  `metta.tables.add`, `metta.casting.cast`, `metta.lint.lint`,
+  `metta.lint.lint_file`, `metta.structures.TabledMap`,
+  `metta.structures.LiveView`, `metta.structures.ClosureView`,
+  `metta.algebra.declare`, `metta.algebra.evaluate`, `metta.algebra.resolve`,
+  `metta.algebra.sample`, `metta.arrays.EmbeddingStore`,
+  `metta.remote.Gateway` and `metta.remote.serve` resolve the receiver at
+  their own boundary instead of dying somewhere inside on whichever Space
+  door they reached first: `MeTTa has no 'parse'`, `MeTTa has no 'name'`,
+  `'MeTTa' object has no attribute '_space'`. The distinction between the two
+  classes is unchanged, and a context still refuses a Space door.
+
+- Closing a context no longer depends on the garbage collector, and no longer
+  destroys a space the context only opened. `MeTTa.space()` recorded every
+  handle it returned as though the context owned it, so `catalog =
+  m.space("&metta")` followed by `m.close()` raised `No permission to release
+  metta_base_space` while the same program without the variable succeeded, and
+  `m.space("&kb")` in one context emptied `&kb` for every other context reading
+  it when the first one closed. A context now releases exactly the spaces it
+  MINTED, and holds them strongly, so which spaces a close releases is decided
+  when they are minted rather than by when the collector runs. A named space,
+  `&self` and `&metta` included, is borrowed and survives, the same way a
+  borrowed home already did.
+
 - Joining a MeTTa worker thread no longer risks killing the process. A worker
   evaluating an ordinary query can be inside `engine_create/3` at any moment,
   because a fair or best-first merge opens one SWI engine per space, and on

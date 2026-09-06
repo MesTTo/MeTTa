@@ -32,6 +32,11 @@ Guarantees:
   - ``MeTTa.space()`` is the one method that creates named or anonymous handles
     [tested: test_module_tier_is_sugar_over_one_default_engine;
     commit=f88aa8be03cb64cb59d3307515ded8701f418321]
+  - a context releases the spaces it MINTED and borrows the ones it opened by
+    name, and releases the same spaces whether or not their handles are still
+    referenced [tested:
+    test_a_context_closes_the_same_way_whether_a_base_space_handle_lives,
+    test_a_context_close_leaves_a_named_space_it_only_opened; commit=fad372b730e5c6e2d28274afa2f9e5a1d01b5670]
   - the same factory exposes a persistent journal's one-open schema rename,
     so migration does not require importing its private provider [tested:
     test_the_public_space_factory_exposes_replay_rename; commit=694dff934a11dbc2ee99267b60f39564053baf87]
@@ -271,6 +276,8 @@ from ._space_execution import (
     profile_source,
     run_source,
     run_status,
+    run_void_write,
+    run_write,
     value_one,
 )
 from ._space_objects import (
@@ -1606,9 +1613,9 @@ class Space(Handle):
         if not wires:
             return
         if len(wires) == 1:
-            self._rt.do_must("metta_py_add", self._space, wires[0])
+            run_void_write(self._rt, "metta_py_add", self._space, wires[0])
         else:
-            self._rt.do_must("metta_py_add_many", self._space, wires)
+            run_void_write(self._rt, "metta_py_add_many", self._space, wires)
         _invalidate_builtins_cache(self._rt)
 
     def remove(self, atom: Any, *more: Any) -> bool | int:
@@ -1644,9 +1651,7 @@ class Space(Handle):
         _refuse_in_batch(self._space, "remove")
         if more:
             wires = [_to_atom(each).to_wire() for each in (atom, *more)]
-            found = self._rt.apply_must(
-                "metta_py_remove_many", self._space, wires
-            )
+            found = run_write(self._rt, "metta_py_remove_many", self._space, wires)
             _invalidate_builtins_cache(self._rt)
             return int(found)
         pattern = _to_atom(atom)
@@ -1655,12 +1660,10 @@ class Space(Handle):
             # than reached by handing an unbound term to the one-occurrence
             # one. The engine's `subtract-atom` refuses that term precisely
             # because it would otherwise mean two opposite things in one head.
-            removed = self._rt.apply_must(
-                "metta_py_remove_everything", self._space
-            )
+            removed = run_write(self._rt, "metta_py_remove_everything", self._space)
         else:
-            removed = self._rt.apply_must(
-                "metta_py_remove", self._space, pattern.to_wire()
+            removed = run_write(
+                self._rt, "metta_py_remove", self._space, pattern.to_wire()
             )
         result = _atom_from_wire(removed)
         _invalidate_builtins_cache(self._rt)
@@ -1681,8 +1684,8 @@ class Space(Handle):
         """
         _refuse_in_batch(self._space, "transfer")
         wires = [_to_atom(atom).to_wire() for atom in atoms]
-        moved = self._rt.apply_must(
-            "metta_py_transfer", self._space, to._space, wires
+        moved = run_write(
+            self._rt, "metta_py_transfer", self._space, to._space, wires
         )
         _invalidate_builtins_cache(self._rt)
         return int(moved)
@@ -2227,8 +2230,8 @@ class Space(Handle):
         crossing rather than one per removed atom.
         """  # noqa: D205  -- the API contract is one continuous invariant, not summary-and-body prose
         _refuse_in_batch(self._space, "remove")
-        existed = self._rt.apply_must(
-            "metta_py_drain", self._space, _to_atom(pattern).to_wire()
+        existed = run_write(
+            self._rt, "metta_py_drain", self._space, _to_atom(pattern).to_wire()
         )
         _invalidate_builtins_cache(self._rt)
         if not bool(getattr(_atom_from_wire(existed), "value", True)):
@@ -2852,11 +2855,26 @@ class Space(Handle):
         return capture_output()
 
     def atomic(self) -> ScopedExecution:
-        """Make each run in the block one committing engine transaction."""
+        """Make each CALL in the block one committing engine transaction.
+
+        Per call, the write doors included: ``m.add(a, b)`` inside the block
+        is one transaction, so a provider that refuses the second atom takes
+        the first back with it. Across SEVERAL calls the boundary is
+        :meth:`transaction`, because SWI's transaction/1 takes a closed goal
+        and an engine cannot yield out of one, so no with-block can hold one
+        open; a raise later in the block does not undo a call that already
+        committed.
+        """
         return execution_scope("atomic")
 
     def speculative(self) -> ScopedExecution:
-        """Run each source against a snapshot and discard its writes."""
+        """Run each CALL against a snapshot and discard its writes.
+
+        Per call, the write doors included: ``m.add(atom)`` inside the block
+        leaves nothing behind, exactly as ``m.run("!(add-atom &self ...)")``
+        in the same block does, and a later call in the block does not see
+        what an earlier one wrote, because each call is its own what-if.
+        """
         return execution_scope("speculative")
 
     def batch(self) -> _Batch:
@@ -5352,7 +5370,7 @@ class MeTTa:
         metta_path: str | None = None,
         _runtime: Runtime | None = None,
     ) -> None:
-        self._minted: list = []
+        self._minted: dict[str, Space] = {}
         self._finalizer = None
         if isinstance(space, Space):
             # A borrowed home carries its runtime, and explicit options
@@ -5411,18 +5429,23 @@ class MeTTa:
         outlive it. A space the program declared with (inherits ...) still
         refuses, naming the heir, because that relationship is the
         program's own.
+
+        What a context OPENED by name it borrows and leaves alone, the way
+        it leaves a borrowed home alone: ``m.space("&kb")`` may be a space
+        that already existed, that another context is reading, or that the
+        engine owns, and closing a reader is not how any of those end.
         """
         if self._owns_self:
             if self._finalizer is not None:
                 self._finalizer.detach()
-            # Handles this context minted tear down python-side first, so
+            # The spaces this context MINTED tear down python-side first, so
             # their subscriptions and provider state cannot follow a pooled
             # name into another life; the engine's own cascade then covers
             # the program's handle-less mints.
-            for ref in self._minted:
-                handle = ref()
-                if handle is not None and not handle.dropped:
+            for handle in list(self._minted.values()):
+                if not handle.dropped:
                     handle.drop()
+            self._minted.clear()
             self._self.drop()
 
     @property
@@ -5552,6 +5575,11 @@ class MeTTa:
         ``metta.space(S.locked, restricted=True)`` is that call. Declaring a
         model on a name that already carries the same one is a no-op; a
         different one raises, because a space cannot have two models.
+
+        The context OWNS what it mints and BORROWS what it opens by name:
+        :meth:`close` releases the anonymous mints and leaves ``&kb``,
+        ``&metta`` and every other named space exactly as it found them,
+        whether or not the handle is still referenced.
         """
         if sync != "none" and journal is None:
             msg = "space(sync=...) paces a journal; pass journal= as well"
@@ -5669,7 +5697,18 @@ class MeTTa:
             if minted_fresh:
                 handle.drop()
             raise
-        self._minted.append(weakref.ref(handle))
+        if minted_fresh:
+            # ONLY the mints. A named open is a BORROW: the name may be a
+            # space that already existed, one another context is reading, or
+            # an engine-owned root, and close() releasing it destroyed the
+            # first two and raised `No permission to release
+            # metta_base_space` on the third. Recorded STRONGLY and keyed by
+            # the engine name, so which spaces a close releases is decided
+            # when they are minted rather than by when the collector runs,
+            # and a pooled name a later mint draws replaces its own entry
+            # instead of accumulating one per mint
+            # [tested: test_a_context_closes_the_same_way_whether_a_base_space_handle_lives].
+            self._minted[str(handle._name)] = handle
         return handle
 
     @property
@@ -6409,8 +6448,12 @@ class MeTTa:
         return self._self.limits(timeout=timeout, inferences=inferences, stack=stack)
 
     def speculate(self) -> ScopedExecution:
-        """Run each source against a snapshot and discard its writes.
+        """Run each CALL against a snapshot and discard its writes.
 
+        Per call, the write doors included: ``m.add(atom)`` inside the block
+        leaves nothing behind, exactly as ``m.run("!(add-atom &self ...)")``
+        in the same block does, and a later call in the block does not see
+        what an earlier one wrote, because each call is its own what-if.
         Runs against this context's self space.
         """
         return self._self.speculative()

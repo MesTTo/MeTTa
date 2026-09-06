@@ -40,7 +40,7 @@ No docstring is defined.
 def space_of(m: Any) -> Any:
 ```
 
-> The space an installer writes into, given a context or a space.
+> The space a door works in, given a context or a space.
 >
 > An installer is handed a SPACE, because "equations and facts an installer
 > writes land in the space it was handed" is what makes integrate()
@@ -50,10 +50,11 @@ def space_of(m: Any) -> Any:
 > reached: `metta.arrays.install(m)` raised `MeTTa has no 'is_function'`
 > with every array operation left unregistered.
 >
-> Resolving once, here, is what lets `install(m)` work without erasing the
-> distinction the two classes draw, because the installer still receives a
-> space. A context is exactly the object that has a home space to give; a
-> space has none, and answers for itself.
+> Resolving once, at the door, is what lets `install(m)` work without
+> erasing the distinction the two classes draw, because the installer still
+> receives a space. A context is exactly the object that has a home space to
+> give; a space has none, and answers for itself. This is the public
+> spelling; every door in the library resolves the same way.
 
 ## `integrate`
 

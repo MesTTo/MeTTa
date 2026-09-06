@@ -10,10 +10,10 @@ maintained by hand.
 
 | class | count | what it means |
 |---|---|---|
-| primitive | 24 | speaks to the engine; nothing on this surface expresses it |
+| primitive | 21 | speaks to the engine; nothing on this surface expresses it |
 | derived | 15 | its body reaches another PUBLIC method, so it is macro-expressible by one |
 | shared | 26 | reaches a private helper: an implementation already collapsed, which is a shrink's outcome rather than its target |
-| facade | 41 | delegates to a satellite module; the layering, not a duplication |
+| facade | 44 | delegates to a satellite module; the layering, not a duplication |
 | property | 9 | no body to class |
 
 ## The derived methods, and what each buys

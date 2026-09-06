@@ -907,7 +907,15 @@ def capture(self) -> CapturedOutput:
 def atomic(self) -> ScopedExecution:
 ```
 
-> Make each run in the block one committing engine transaction.
+> Make each CALL in the block one committing engine transaction.
+>
+> Per call, the write doors included: ``m.add(a, b)`` inside the block
+> is one transaction, so a provider that refuses the second atom takes
+> the first back with it. Across SEVERAL calls the boundary is
+> :meth:`transaction`, because SWI's transaction/1 takes a closed goal
+> and an engine cannot yield out of one, so no with-block can hold one
+> open; a raise later in the block does not undo a call that already
+> committed.
 
 ### `Space.speculative`
 
@@ -915,7 +923,12 @@ def atomic(self) -> ScopedExecution:
 def speculative(self) -> ScopedExecution:
 ```
 
-> Run each source against a snapshot and discard its writes.
+> Run each CALL against a snapshot and discard its writes.
+>
+> Per call, the write doors included: ``m.add(atom)`` inside the block
+> leaves nothing behind, exactly as ``m.run("!(add-atom &self ...)")``
+> in the same block does, and a later call in the block does not see
+> what an earlier one wrote, because each call is its own what-if.
 
 ### `Space.batch`
 
@@ -2383,6 +2396,11 @@ def close(self) -> None:
 > outlive it. A space the program declared with (inherits ...) still
 > refuses, naming the heir, because that relationship is the
 > program's own.
+>
+> What a context OPENED by name it borrows and leaves alone, the way
+> it leaves a borrowed home alone: ``m.space("&kb")`` may be a space
+> that already existed, that another context is reading, or that the
+> engine owns, and closing a reader is not how any of those end.
 
 ### `MeTTa.closed`
 
@@ -2455,6 +2473,11 @@ def space(
 > ``metta.space(S.locked, restricted=True)`` is that call. Declaring a
 > model on a name that already carries the same one is a no-op; a
 > different one raises, because a space cannot have two models.
+>
+> The context OWNS what it mints and BORROWS what it opens by name:
+> :meth:`close` releases the anonymous mints and leaves ``&kb``,
+> ``&metta`` and every other named space exactly as it found them,
+> whether or not the handle is still referenced.
 
 ### `MeTTa.fn`
 
@@ -3168,8 +3191,12 @@ def limits(
 def speculate(self) -> ScopedExecution:
 ```
 
-> Run each source against a snapshot and discard its writes.
+> Run each CALL against a snapshot and discard its writes.
 >
+> Per call, the write doors included: ``m.add(atom)`` inside the block
+> leaves nothing behind, exactly as ``m.run("!(add-atom &self ...)")``
+> in the same block does, and a later call in the block does not see
+> what an earlier one wrote, because each call is its own what-if.
 > Runs against this context's self space.
 
 ### `MeTTa.trace`

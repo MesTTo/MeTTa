@@ -296,7 +296,11 @@ def capture(self):
 def atomic(self):
 ```
 
-> Make each awaited run in the block one engine transaction.
+> Make each awaited CALL in the block one engine transaction.
+>
+> The write doors included: the request carries the submitting task's
+> contextvars to the worker, so the thread hop is not a hole in the
+> scope.
 
 ### `AsyncMeTTa.speculative`
 
@@ -304,7 +308,11 @@ def atomic(self):
 def speculative(self):
 ```
 
-> Answer awaited runs while discarding their engine writes.
+> Answer awaited CALLS while discarding their engine writes.
+>
+> The write doors included: `await am.add(atom)` inside the block
+> leaves nothing behind
+> .
 
 ### `AsyncMeTTa.batch`
 

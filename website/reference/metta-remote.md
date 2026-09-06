@@ -300,6 +300,8 @@ class Gateway:
 > attached-engine worker, and a Gateway called directly runs on the
 > calling thread, so a caller that shares one across threads owns that
 > arrangement.
+>
+> m may be a context or a space; the gateway serves the space either way.
 
 ### `Gateway.health`
 
@@ -407,3 +409,5 @@ def serve(
 > engine and need no wire. Gateway is the same protocol with no
 > transport under it, for a test or a framework that wants the
 > operations without a socket.
+>
+> m may be a context or a space, as Gateway takes either.
