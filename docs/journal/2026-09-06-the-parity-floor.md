@@ -321,6 +321,22 @@ the lane, because a check that stopped happening reports success, but the
 wording no longer sends the reader after a performance change that did not
 happen.
 
+## 2026-09-06, the page said the measurement runs in CI, and it does not
+
+Found while checking the page's own claims rather than its numbers. The
+opening sentence read "the measurement runs in CI, so this page can be checked
+rather than believed", and `.github/workflows/checks.yml` runs
+`GATE_ONLY=1 sh check.sh`, which does include `parity-perf`. But nothing in
+`.github/` mentions `trueagi` or `PeTTa-upstream`, so the sibling checkout the
+lane needs is never there: the guard at the top of `main/0` prints
+`upstream checkout not found at ...; nothing to compare` and returns 0. The
+lane runs in CI and measures nothing.
+
+Decided: the page says that, in the same paragraph that says where the numbers
+came from. A claim that a number is checked automatically, on a page whose
+whole subject is a number that was not, is the one sentence that had to be
+true.
+
 ## 2026-09-06, the timeout that left the engine running
 
 Found while re-measuring, not looked for: `--rebaseline` leaves a live `swipl`

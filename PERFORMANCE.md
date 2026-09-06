@@ -2,11 +2,15 @@
 
 This engine runs the median example program for about half the retired
 instructions upstream PeTTa needs. That is measured on the same files by the
-same harness, and the measurement runs in CI, so this page can be checked rather
-than believed.
+same harness, and the harness is in the repository, so this page can be checked
+rather than believed. "Reproducing it" below is the whole procedure.
 
-Everything below comes from `tests/data/upstream-parity-baseline.json`, which
-the `parity-perf` gate lane compares against on every push.
+Everything below comes from `tests/data/upstream-parity-baseline.json`. The
+`parity-perf` gate lane compares this tree against it on every push, but only
+where the pinned upstream checkout sits beside the repository: the CI workflow
+does not clone it, so there the lane says so and passes without measuring
+anything. The numbers on this page were taken by hand on a machine that has
+it.
 
 ## The numbers on this page were too good until 2026-09-06
 
