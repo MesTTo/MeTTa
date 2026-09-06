@@ -561,4 +561,86 @@ test(both_doors_render_a_duplicate_declaration,
     once(sub_string(Text, _, _, _, "is a duplicate in")),
     \+ sub_string(Text, _, _, _, "Unknown message").
 
+
+%%%% (cost <witness> <class> [<measure>]) %%%%
+%
+%The row's witness is a CALL with exactly one size hole, because the lane that
+%checks it substitutes a ladder of sizes for that hole. Zero holes leaves
+%nothing to vary and two leaves no way to say which one the class is in, so
+%both are refused HERE, at the write, rather than discovered later as a row
+%nothing can measure. Repeated occurrences of ONE hole are a hole.
+
+test(a_cost_witness_needs_exactly_one_hole,
+     [forall(member(Witness-Position,
+                    [ [cost_none]-1,
+                      cost_bare-1,
+                      [cost_two, _A, _B]-1 ]))]) :-
+    catch(add_sexp('&metta', [cost, Witness, linear], _),
+          error(metta_declaration_malformed(_, Position, _), _),
+          true),
+    \+ spaces:metta_cost_row(_, Witness, _, _).
+
+test(one_hole_used_twice_is_one_hole) :-
+    setup_call_cleanup(
+        add_sexp('&metta', [cost, [cost_twice, X, X], linear], Ref),
+        ( assertion(spaces:metta_cost_row(cost_twice, _, linear, none)) ),
+        erase(Ref)).
+
+test(a_second_cost_row_for_one_head_is_refused_with_its_remedy) :-
+    setup_call_cleanup(
+        add_sexp('&metta', [cost, [cost_once, _], linear], Ref),
+        ( catch(add_sexp('&metta', [cost, [cost_once, _], quadratic], _),
+                error(metta_declaration_malformed(_, 1, Expected), _),
+                true),
+          assertion(sub_atom(Expected, _, _, _, 'one cost row per head')),
+          assertion(sub_atom(Expected, _, _, _, 'remove-atom')),
+          assertion(\+ spaces:metta_cost_row(cost_once, _, quadratic, _)) ),
+        erase(Ref)).
+
+test(a_cost_class_outside_the_vocabulary_takes_the_shared_one_of_refusal,
+     [error(metta_declaration_malformed([cost, [cost_bogus, _], sublinear], 2,
+                                        ['one-of', 'cost-class']))]) :-
+    add_sexp('&metta', [cost, [cost_bogus, _], sublinear], _).
+
+test(the_optional_measure_field_is_stored_when_written) :-
+    setup_call_cleanup(
+        add_sexp('&metta', [cost, [cost_measured, _], linear, depth], Ref),
+        assertion(spaces:metta_cost_row(cost_measured, _, linear, depth)),
+        erase(Ref)).
+
+%The engine ships ten of these and they enter through the same door: four from
+%engine/prelude.metta's own loader and six read out of
+%lib_builtin_types.metta by the pass that already reads its (: ...) rows. A
+%claim about a builtin has to be LOADED to be worth anything, since explain and
+%every host docstring answer from '&metta'.
+test(the_shipped_cost_rows_are_loaded_and_every_class_is_a_vocabulary_member) :-
+    findall(Head-Class,
+            spaces:metta_cost_row(Head, _, Class, _),
+            Rows),
+    assertion(length(Rows, 10)),
+    forall(member(_-Class, Rows),
+           assertion(metta_vocabulary_value('cost-class', Class))),
+    forall(member(Expected, [+, 'car-atom', 'cdr-atom', 'size-atom',
+                             'union-atom', 'intersection-atom',
+                             union, intersection, subtraction, 'alpha-unique']),
+           assertion(memberchk(Expected-_, Rows))).
+
+%The measure a row does not name comes from the head's arrow at the hole's
+%position, and it is compared with == rather than unified: (: min-atom
+%(-> $a Number)) carries a type VARIABLE there, which unifies with 'Number'
+%and made the whole polymorphic family read as integer-sized.
+test(an_unnamed_measure_comes_from_the_arrow_at_the_holes_position) :-
+    assertion(metta_cost_declaration(+, _, constant, int)),
+    assertion(metta_cost_declaration('car-atom', _, linear, length)),
+    setup_call_cleanup(
+        add_sexp('&metta', [cost, ['min-atom', _], linear], Ref),
+        assertion(metta_cost_declaration('min-atom', _, linear, length)),
+        erase(Ref)).
+
+test(explain_answers_a_declared_cost_and_stays_silent_without_one) :-
+    metta_explain(['car-atom', [1, 2]], Items),
+    assertion(memberchk([cost, linear, length], Items)),
+    metta_explain(['if-equal', a, a, 1], Other),
+    assertion(\+ memberchk([cost|_], Other)).
+
 :- end_tests(catalog_self_description).

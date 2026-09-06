@@ -279,6 +279,7 @@
             metta_capacity_count_install/1,
             metta_capacity_count_uninstall/1,
             metta_catalog_row/1,
+            metta_cost_row/4,
             metta_require_algebra_value/3,
             metta_publish_builtin_visibility/0,
             metta_dispatch_value/3,

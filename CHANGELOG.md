@@ -29,6 +29,36 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `(cost witness class)` and `(cost witness class measure)` catalog rows, and
+  the `cost-rows` gate lane that can fail one. The witness is a call with
+  exactly one size hole `$n`, the class is the new `cost-class` vocabulary
+  (`constant`, `log`, `linear`, `linearithmic`, `quadratic`, `exponential`,
+  generated as `metta.vocabularies.CostClass`), and the measure is optional
+  because the engine derives it from the head's arrow at the hole's position:
+  `Number` gives the value of `$n`, anything else its length. `(explain
+  (<head> ...))` answers `(cost <class> <measure>)` and `help()` on the bound
+  function shows `cost: <class> in $n (<measure>)` with the lane's measurement
+  date. Refused at the write: a witness with zero or two holes, a witness that
+  is not a call, a second row for one head, and a class outside the vocabulary.
+  The shape is Ciao's `:- check comp nrev(A,B) + steps_o(length(A))` with
+  CiaoPP's static proof replaced by a measurement.
+
+  Ten rows ship, each measured before it was written: `(+ $n 1)` constant;
+  `car-atom`, `cdr-atom`, `size-atom`, `union-atom` and `union` linear;
+  `intersection-atom`, `intersection`, `subtraction` and `alpha-unique`
+  linearithmic. `unique` and `unique-atom` deliberately carry none, because
+  `list_to_set/2` sorts in C and the engine's inference counter reads them
+  linear where retired instructions read them linearithmic.
+
+  `sh check.sh cost-rows` runs `benchmarks/costs.py`: one fresh process per
+  row, one fresh space per size, the ladder fitted against the declared class
+  in BOTH directions, with `benchmarks/cost-baseline.json` as its ledger and
+  five permanent planted controls, one per gate direction. About 23 to 31
+  seconds and load-immune. `--paired` adds the advisory retired-instruction
+  curve. `benchmarks/curves.py` gains `exponential_fit`, the semi-log
+  estimator the exponential class needs, since a log-log exponent has no fixed
+  value for a curve no power law describes.
+
 - `metta.testing.programs(census=None, depth=3, facts=(1, 4), queries=(1, 3))`
   generates whole MeTTa programs for differential testing against another
   engine, and the `parity-fuzz` lane runs them on this engine and on upstream
