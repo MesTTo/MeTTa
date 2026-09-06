@@ -319,6 +319,13 @@ PROVENANCE_SOURCES = (
     "extensions/python/benchmarks/*.py",
     "tests/conformance/*.pl",
     "tests/data/*.json",
+    # The Prolog beside the suites, named by the out-of-glob net: layering.pl
+    # states what the engine's module graph guarantees and pins it, and
+    # nothing read that pin or would ever resolve it. The PIN half only,
+    # because the claim half is a burn-down: reading these as SOURCES
+    # reports 8 unbacked tags [measured 2026-09-05, recorded in
+    # CLAIM_SOURCES' own queue above].
+    "tests/prolog/*.pl",
 )
 
 #: Every file whose evidence TAGS are read. Both halves, because a tag is a

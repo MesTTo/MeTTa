@@ -43,14 +43,14 @@ marginal cost of **one call** rather than of the loop around it.
 
 | extension point | inferences/call | vs MeTTa | microseconds/call | vs MeTTa |
 |---|---|---|---|---|
-| C foreign predicate | 1.00 | 0.33x | 0.01 | 0.17x |
-| translator rule (a macro) | 2.00 | 0.67x | 0.03 | 0.39x |
-| Prolog grounded predicate | 2.00 | 0.67x | 0.02 | 0.27x |
-| ordinary MeTTa function | 3.00 | 1.00x | 0.08 | 1.00x |
-| @m.define, annotated | 3.00 | 1.00x | 0.10 | 1.15x |
-| Python operation, transport="raw" | 12.00 | 4.00x | 1.16 | 13.85x |
-| Python operation, encoded | 20.00 | 6.67x | 4.05 | 48.22x |
-| @m.define, no annotations | 28.00 | 9.33x | 5.13 | 61.12x |
+| translator rule (a macro) | 0.00 | 0.00x | 0.02 | 0.23x |
+| C foreign predicate | 1.00 | 0.33x | 0.03 | 0.42x |
+| Prolog grounded predicate | 2.00 | 0.67x | 0.04 | 0.58x |
+| ordinary MeTTa function | 3.00 | 1.00x | 0.07 | 1.00x |
+| @m.define, annotated | 3.00 | 1.00x | 0.08 | 1.15x |
+| Python operation, transport="raw" | 12.00 | 4.00x | 1.15 | 15.69x |
+| Python operation, encoded | 20.00 | 6.67x | 4.27 | 58.15x |
+| @m.define, no annotations | 28.00 | 9.33x | 5.64 | 76.77x |
 
 Six of each operation row's inferences are the scheduler admission probe: every
 operation call asks the effect and lane question that lets an `oracleIO` call
@@ -63,9 +63,12 @@ is exact; the microsecond column is not, because the four native tiers land
 near the timer's resolution. The annotated `@m.define` row has varied between
 about 1.1x and 1.7x on runs minutes apart at the same load, while its inference
 figure was identical every time. Any native-tier ratio inside about 2x is timer
-noise. [measured: table output above; command=python -m
-benchmarks.extension_cost --update; fixture=3000 calls, min-of-3, C reader and
-C extension enabled; commit=c350f51a5e1318187c4446fb2ceba04fba82e262]
+noise. [measured 2026-09-06: table output above, and the two tables below it
+from the same run; command=$CHECK_PY -m benchmarks.extension_cost;
+fixture=3000 calls, min-of-3, C reader, writer, JSON codec and chapter-19
+artifacts present, measured in a clone of the branch whose path is as long as
+the repository root at loadavg 12.7;
+commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136]
 
 ### Three choices, and none of them is the other two
 
@@ -193,10 +196,10 @@ pre-add hook with the `space-admission-verdict` judge.
 
 | write door | inferences/add | vs plain add | microseconds/add | vs plain add |
 |---|---|---|---|---|
-| add-atom, no claims on the space | 30.00 | 1.00x | 1.70 | 1.00x |
-| add-atom through an accept-all pre-add hook | 47.00 | 1.57x | 2.57 | 1.51x |
-| add-atom into a pool with a declared admits type | 57.00 | 1.90x | 2.73 | 1.60x |
-| add-atom into a pool with a declared capacity | 67.00 | 2.23x | 4.78 | 2.81x |
+| add-atom, no claims on the space | 30.00 | 1.00x | 1.64 | 1.00x |
+| add-atom through an accept-all pre-add hook | 47.00 | 1.57x | 2.60 | 1.59x |
+| add-atom into a pool with a declared admits type | 58.00 | 1.93x | 2.87 | 1.75x |
+| add-atom into a pool with a declared capacity | 67.00 | 2.23x | 5.11 | 3.12x |
 
 A space nothing claimed keeps the direct write path, which is what holds the
 plain row where it is. The capacity row used to read 4569.69 at a thousand held
@@ -211,8 +214,8 @@ hook claim never probes for one.
 ### Read both columns, because each one hides something
 
 **Inferences understate Python.** The janus crossing counts as one inference
-and costs real microseconds, so inferences say a raw Python operation is 1.7
-times a MeTTa function while wall clock says **more than ten times**. If you
+and costs real microseconds, so inferences say a raw Python operation is four
+times a MeTTa function while wall clock says **more than fifteen times**. If you
 are deciding whether to move a hot loop out of Python, trust the microseconds.
 
 **Inferences flatter C.** A foreign predicate is one inference no matter how
@@ -266,11 +269,11 @@ predicate's 2.
 One of the raw path's inferences is the catch that turns a Python failure into
 a MeTTa error naming your call. It is the floor rather than a choice, the
 manual putting `catch/3` at "comparable to `call/1`", and against a crossing
-costing 0.87 microseconds where a MeTTa function costs 0.05 it decides nothing.
+costing 1.15 microseconds where a MeTTa function costs 0.07 it decides nothing.
 What raw transport gives up is the symbol-string distinction: symbols reach a
 raw operation as plain strings. `pettorch` uses it throughout for that reason.
 
-The four native tiers are within two inferences of each other, so choose
+The four native tiers are within three inferences of each other, so choose
 between them on what the code is, not on speed: a macro when the shape is known
 at compile time, Prolog when you are writing new logic, C when you are wrapping
 something that already exists in C or Rust, and `@m.define` when the logic is

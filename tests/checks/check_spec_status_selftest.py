@@ -59,6 +59,22 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+
+from evidence_runners import COLLECTORS  # noqa: E402  -- HERE must be on the path first
+
+#: The pytest collector's own anchor, READ from the collector rather than
+#: restated here. Two self-tests plant it into a fixture tree and both used to
+#: write it out: `a025e10f` moved the seat runner's default flags in front of
+#: its arguments, which moved the selection `tests` to the end of the command,
+#: and `7ec761da` followed the collector in one fixture and not the other, so
+#: `spec-status-selftest` read its planted FIXED case as OPEN. A restated
+#: anchor is a second authority for one fact, which is the shape
+#: `test_the_repin_tag_uses_the_gates_own_placeholder` already rules out for
+#: the re-pin tag.
+PYTEST_ANCHOR = next(
+    collector.anchor for collector in COLLECTORS if collector.lane == "pytest"
+)
 
 CHECK_SH = """\
 run GATE known-good sh -c "cd \\"$HERE\\" && sh tests/known_good.sh"
@@ -87,8 +103,8 @@ PYTHON_CHECK_SH = """\
 run GATE pytest env CHECK_PY="$PY" sh "$HERE/extensions/python/test.sh"
 """
 
-PYTHON_TEST_SH = """\
-exec "$PY" -m pytest tests -q -p no:benchmark
+PYTHON_TEST_SH = f"""\
+exec "$PY" -m {PYTEST_ANCHOR}
 """
 
 # The plunit lane is the engine component's, for the same reason. P90.11 is what

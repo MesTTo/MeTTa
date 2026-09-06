@@ -9,6 +9,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- A Python twin may declare its own `ALLOWANCE` beside its `BUDGET`, for the
+  one case where a twin's inference count is measured to track something that
+  is not the twin's work. `ch05-.../01-identity.py` is that case: its cost
+  carries a compile-time term that follows the ENGINE's clause layout, so
+  appending one inert fact to `engine/specializer.pl` moves it by 10 while the
+  MeTTa side of the same run does not move at all, and it was re-pinned
+  seventeen times in two days on that account. It declares 20, the measured
+  spread of the trunk readings whose MeTTa side is unchanged; every other twin
+  states none and stays on the tree's four-inference allowance, and an
+  allowance never widens an empirical envelope's observed extrema.
+
 - **Breaking.** `under=counting` answers a `TaggedAnswer` rather than a bare
   `int`. The count is `.annotation`; `.value` is `()`, which says no
   proposition row was manufactured, and `.plan`, `.why()` and `.under(other)`
@@ -57,6 +68,27 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The `spec-status-selftest` gate lane is green again. Two self-tests plant the
+  pytest collector's anchor into a fixture tree and both wrote it out as their
+  own literal; when the seat runner's flags were reordered the collector and one
+  of the two fixtures followed and the other did not, so the lane read its
+  planted FIXED case as OPEN. Both fixtures read the anchor from the collector
+  now, so the tree has one authority for it.
+- The provenance pass reaches every file class that carries a commit pin.
+  `tests/prolog/*.pl` and `.metta` each held a placeholder `pin_provenance.py`
+  could see and could not resolve: the first sat outside every glob the pass
+  reads, and the second sat in a `;` comment whose rule the pass refused to
+  guess at. `--check` exits nonzero while either is true, so the release check
+  that refuses an unresolved placeholder had no way to pass. The Prolog glob
+  joins the pin half only, which changes no claim obligation, and `.metta` joins
+  the `#` line-comment rule as the second member of a two-member table.
+- The `node-dist` gate lane runs on a fresh checkout. `dist-consumer.mjs`
+  built its throwaway consumer package under `extensions/node/ai-tmp/`, a
+  gitignored directory nothing creates, so the lane passed only in a checkout
+  where somebody had already written a scratch file there and failed with
+  `ENOENT: no such file or directory, mkdtemp` everywhere else, CI included.
+  It creates the directory first, which is what the seat's two other
+  repository-local scratch sites already do.
 - `sh extensions/python/test.sh` lets a caller's own flag override its
   defaults. The four-worker `-n 4` came after the caller's arguments, and
   pytest takes the last value of a repeated option, so `-n 0` was silently

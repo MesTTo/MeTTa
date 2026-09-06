@@ -2,6 +2,7 @@
  "//": {
   "annotated_arrow_product_repin": "RE-PINNED 2026-09-05 after three source-only before/after samples at the canonical checkout path, warm QLF, against 763b7f2d1b0c6882b171cfa0e6a56374e0e8d167. All four old inference bands also fail on that unmodified base. Only these four within-tree inference pins change; upstream fields, recorded instruction fields, waivers and allowances remain untouched. examples/ch09-types/02-builin_types.metta: base/product inferences 54589/55949; net instruction minima 42624311/43898010; examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/01-c_extension.metta: base/product inferences 87799/87797; net instruction minima 108030420/113627817; examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/02-handle.metta: base/product inferences 93598/93596; net instruction minima 115393277/120765591; examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/04-nilbc.metta: base/product inferences 324825344/324827492; net instruction minima 156378969117/155175829651. [measured: three processes per example; command=ai-tmp/ai-remaining-ab.py; fixture=identical native artifacts, canonical path, warmed source-only base/product; commit=bbb512316280110a747e31c26adfc31e8c5104be]",
   "our_boot": 1076388987,
+  "release_0_8_0_repin": "RE-PINNED 2026-09-06 for the 0.8.0 release. Thirteen within-tree inference tripwires, each attributed by measuring the twelve cheap ones at fifteen first-parent points from a94f804c to this tip through this file's own measure(), three fresh processes per point; the sweep and its per-row table are in docs/journal/2026-09-06-the-release-repin.md. Only these thirteen our_inferences fields change; upstream fields, recorded instruction fields, waivers and allowances remain untouched, which is the same rule the two entries above followed. Where the moves are: 84bb5aa9's boot-determinism fix costs +691 on eight of the twelve and +716 on one, the largest single step in the set, and it is what the fix bought - materialize.pl's erase listener is registered once and lazily now, behind flag/3 and a mutex, because registering it per collected clause charged the collecting thread and made the engine boot nondeterministic. 40aca947's per-module definition pricing costs +4,078 and +4,080 on the two chapter-19 C examples, which build many namesake spaces. 4a40c577's annotated arrow product costs +1,840 on specializecyclic, +1,588 on builin_types, +12 on parametric_types and +85 to +91 on the rest. 26f479ba's query planning costs +85 to +300 across all twelve. 26cf523f's memoisation repairs cost +47 to +86 on the seven memoisation and search examples and 9b944a94's memoisation-as-a-library gives -26 to -45 of it back, the two halves of the same change. 653922f1's autoload-trap removal costs +90 on newtons_method and 970d443b's algebra surface -26 on memo_aggregate. nilbc is the thirteenth and is NOT attributed: one measurement of it is a minute of CPU and three are needed for a reading, so it was measured only at this tip, where it reads 332,597,186 against a frozen 324,827,492 (+2.39%), the same direction and order as the twelve beside it [measured 2026-09-06: three fresh processes per example per point, every point's three inference counts identical; command=$CHECK_PY tests/checks/check_upstream_parity.py; fixture=a clone of the branch whose path is as long as the repository root, with the C reader, writer, JSON codec and chapter-19 artifacts present, the QLF warmed and the git-import fixture cache populated, loadavg 12 to 15; commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136]",
   "status": "meta",
   "translator_rule_home_repin": "RE-PINNED 2026-09-03 while closing module-owned translator rules. Clean 12771f41 already exceeds the frozen inference pins on specializefunctiontypes, recursive_types2, types_dependent, types_nondet, nilbc, plntest and plntestdirect; the changed tree adds only its deterministic delta to those standing drifts. forall is the one newly displaced row because it compiles the prelude translator-rule path. Retired-instruction comparison and answer parity remain governed by their existing fields. [measured: full parity/performance lane on clean 12771f41 and the changed tree; command=$CHECK_PY tests/checks/check_upstream_parity.py; fixture=warm main-checkout engine artifacts; commit=d1318d20b5d89d33079c49d0e94aa29e12685664]",
   "upstream_boot": 252384222
@@ -247,7 +248,7 @@
   "upstream_instructions": 14109207
  },
  "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/06-specializecyclic.metta": {
-  "our_inferences": 18562,
+  "our_inferences": 19290,
   "our_instructions": 19708550,
   "status": "measured",
   "upstream_instructions": 18137381
@@ -679,7 +680,7 @@
   "upstream_instructions": 19667051
  },
  "examples/ch09-types/02-builin_types.metta": {
-  "our_inferences": 55949,
+  "our_inferences": 57346,
   "our_instructions": 39920283,
   "status": "measured",
   "upstream_instructions": 54186862
@@ -700,7 +701,7 @@
   "status": "upstream-error"
  },
  "examples/ch09-types/08-parametric_types.metta": {
-  "our_inferences": 5426,
+  "our_inferences": 5757,
   "our_instructions": 4786419,
   "status": "measured",
   "upstream_instructions": 12188604
@@ -844,19 +845,19 @@
   "status": "upstream-error"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/01-memo_multi_answer.metta": {
-  "our_inferences": 26703,
+  "our_inferences": 28047,
   "our_instructions": 29916788,
   "status": "measured",
   "upstream_instructions": 84751605
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/02-memo_aggregate.metta": {
-  "our_inferences": 27266,
+  "our_inferences": 28783,
   "our_instructions": 30257544,
   "status": "measured",
   "upstream_instructions": 84889801
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/03-memo_per_arity.metta": {
-  "our_inferences": 29129,
+  "our_inferences": 30209,
   "our_instructions": 31844893,
   "status": "measured",
   "upstream_instructions": 86517227
@@ -868,13 +869,13 @@
   "upstream_instructions": 89495099
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/05-memo_variant_nonground.metta": {
-  "our_inferences": 26331,
+  "our_inferences": 27650,
   "our_instructions": 29975472,
   "status": "measured",
   "upstream_instructions": 84233506
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/06-memo_dependency_invalidation.metta": {
-  "our_inferences": 26006,
+  "our_inferences": 27331,
   "our_instructions": 29703909,
   "status": "measured",
   "upstream_instructions": 83782790
@@ -883,7 +884,7 @@
   "status": "upstream-error"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/08-memo_stats.metta": {
-  "our_inferences": 26611,
+  "our_inferences": 27830,
   "our_instructions": 30073908,
   "status": "measured",
   "upstream_instructions": 84178123
@@ -923,13 +924,13 @@
   "status": "nondeterministic"
  },
  "examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/01-c_extension.metta": {
-  "our_inferences": 87797,
+  "our_inferences": 92738,
   "our_instructions": 87886158,
   "status": "measured",
   "upstream_instructions": 52510511
  },
  "examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/02-handle.metta": {
-  "our_inferences": 93596,
+  "our_inferences": 98604,
   "our_instructions": 95329550,
   "status": "measured",
   "upstream_instructions": 59845230
@@ -1124,7 +1125,7 @@
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/04-nilbc.metta": {
-  "our_inferences": 324827492,
+  "our_inferences": 332597186,
   "our_instructions": 146853601069,
   "status": "measured",
   "upstream_instructions": 11597617619
@@ -1172,7 +1173,7 @@
   "upstream_instructions": 5448281223
  },
  "examples/ch22-a-reasoner-you-can-serve/22-03-search/01-newtons_method.metta": {
-  "our_inferences": 38560,
+  "our_inferences": 39707,
   "our_instructions": 39908351,
   "status": "measured",
   "upstream_instructions": 87901403

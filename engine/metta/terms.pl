@@ -28,7 +28,7 @@
 %   one failing nb_current/2 read and engine/source_observation.pl is not loaded
 %   [tested: source_observation, tests/prolog/suites/reader/source_observation.plt;
 %   measured 2026-09-05: boot 536,337 with that file loaded at boot against
-%   532,641 without; commit=WORKTREE].
+%   532,641 without; commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136].
 % Guarantees: metta_shipped_types_match/2 decides union membership itself, in
 %   the same direction and with the same shared-variable discipline as the
 %   registry route, and its arm is reached only after the six shipped

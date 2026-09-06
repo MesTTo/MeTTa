@@ -103,6 +103,7 @@ BLANK_LINE = re.compile(r"\n[ \t]*\n")
 PERCENT_COMMENT = (".pl", ".plt")
 HASH_COMMENT = (".sh", ".mk")
 SLASH_COMMENT = (".ts", ".mjs", ".c", ".h")
+SEMICOLON_COMMENT = (".metta",)
 MAKEFILE_NAMES = ("Makefile", "GNUmakefile")
 
 #: The grammars whose language ALSO has `/* ... */`, so a line marker is one of
@@ -110,6 +111,14 @@ MAKEFILE_NAMES = ("Makefile", "GNUmakefile")
 #: is: ISO 13211-1 gives it both forms and the plunit suites use the block one
 #: for their contract headers.
 BLOCK_GRAMMARS = ("//", "%")
+
+#: The grammars whose language has ONLY a line marker, so the marker has to
+#: open a comment before the pin on the pin's own line and there is no block
+#: form to fall back to. MeTTa joined when three shipped examples carried a
+#: pin in a `;` header and this pass refused all three by name: that refusal
+#: asks for an entry here rather than for the hand substitution it exists to
+#: replace.
+LINE_ONLY_GRAMMARS = ("#", ";")
 
 
 def _grammar(path: Path) -> str | None:
@@ -122,6 +131,8 @@ def _grammar(path: Path) -> str | None:
         return "#"
     if path.suffix in SLASH_COMMENT:
         return "//"
+    if path.suffix in SEMICOLON_COMMENT:
+        return ";"
     if path.suffix == ".json":
         return "json"
     return None
@@ -243,10 +254,10 @@ def sites(path: Path, text: str) -> list[tuple[int, int, str | None]]:
         elif grammar == "py":
             if any(low <= at < high for low, high in skip):
                 reason = "a string literal that is not a docstring: this code emits or matches pins"
-        elif grammar == "#":
+        elif grammar in LINE_ONLY_GRAMMARS:
             head = text[text.rfind("\n", 0, at) + 1 : at]
-            if "#" not in head:
-                reason = "no # opens a comment before it on its line"
+            if grammar not in head:
+                reason = f"no {grammar} opens a comment before it on its line"
         elif grammar in BLOCK_GRAMMARS:
             head = text[text.rfind("\n", 0, at) + 1 : at]
             if grammar not in head and not any(low <= at < high for low, high in skip):

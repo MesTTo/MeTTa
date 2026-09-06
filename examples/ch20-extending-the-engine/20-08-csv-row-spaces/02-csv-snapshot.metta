@@ -1,5 +1,5 @@
 ; Purpose: read a CSV file once into a numbered space, beside the live view.
-; [tested: lib_csv:snapshot_rows_carry_their_record_number; commit=WORKTREE]
+; [tested: lib_csv:snapshot_rows_carry_their_record_number; commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136]
 !(import! &self (library lib_csv))
 !(import! &self (library lib_file))
 
