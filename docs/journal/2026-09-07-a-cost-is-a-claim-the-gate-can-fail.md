@@ -272,18 +272,58 @@ way, so the cost is the vocabulary's WIDTH and not the rows.
 Not re-pinned here, on purpose. `annotated-relation` is pinned at 315,385 and
 the pristine control at this branch's base already measures 820,627, so 505,242
 inferences of that row's gap arrived before this branch and are not this
-branch's to absorb; re-pinning would hide them inside this commit. The same
-holds for the identity twin's pre-existing 3422 to 3462. Both numbers are here
-so the next re-pin can subtract this branch's share exactly.
+branch's to absorb; re-pinning would hide them inside this commit. The number
+below is here so the next re-pin can subtract this branch's share exactly.
 
-Found and NOT fixed here, with its measurement, because it is a pre-existing
-cost this branch only makes 7% larger rather than one it causes:
-`metta_vocabulary_claim/3` (engine/metta/effects.pl) reads
-`metta_catalog_row([claim, Vocab, Value|Properties])` with an open tail and no
-cache, and `metta_annotations_order/2` calls it on every `(top k ...)`
-evaluation. At 15 calls and 73 inferences each that is about 1,095 of the
-workload's 1,756 inferences per evaluation, 62% of it, spent re-reading one
-catalog row. A cache with the invalidation `metta_vocab_cache` already has
-would take it to single digits. That is its own change, in the annotations
-path rather than in this one, and it is written down here rather than bundled
-into a branch about declaring costs.
+### The read that made it visible, and the cache that answers it
+
+`metta_vocabulary_claim/3` reads `metta_catalog_row([claim, Vocab, Value|
+Properties])`. The tail is open because a claim row carries any number of
+properties, so the read takes the arity-enumerating branch, and
+`metta_annotations_order/2` asks it once per answer: instrumenting that branch
+counted 150 claim reads over ten `(top 1 ...)` evaluations, fifteen per
+evaluation. Every arity this branch adds is therefore paid fifteen times per
+evaluation, which is where +75 comes from.
+
+Decided: cache it, exactly as `metta_vocab_cache` caches a vocabulary's values
+and beside it, rather than reopening the arity enumeration that
+`2026-09-05-catalog-arity-enumeration.md` settled after rejecting both a
+membership walk and an index build on measurements. Two differences from its
+sibling, both forced by the data: a value may carry SEVERAL claim rows, so an
+entry watches several clause references and any one of them being erased
+refreshes it; and the EMPTY answer is cached too, which is a negative row the
+erased-reference check cannot revalidate, so `metta_catalog_note_added/1`
+retracts the entry when a claim for that value lands.
+
+Measured on `annotated-relation`, 500 evaluations, all three readings on the
+same provisioned configuration
+[measured 2026-09-07; command=python bench.py --counter-only annotated-relation;
+fixture=C reader, writer, JSON and extension artifacts plus MORK present;
+commit=WORKTREE]:
+
+| tree | inferences | against the control |
+| --- | --- | --- |
+| pristine control at 5621c456 | 820,627 | |
+| this branch, no claim cache | 858,127 | +37,500 |
+| this branch with the cache | 825,125 | +4,498 |
+
+The cache returns 33,002 of the 37,500, which is 66 inferences per evaluation
+rather than the 990 a first estimate predicted: an open-tail read that FINDS
+its row stops at that row's arity, so only a miss walks all thirteen, and the
+73-inference figure quoted above is a miss. What is left, +4,498, is the arity
+cost on the open-tail reads elsewhere on that path.
+
+Every other row of the counter suite is within four inferences of the control,
+except `source-load` at +27, which boots the engine inside its measured region
+and pays for ten more catalog rows there. Twenty rows in that lane are red on
+the control too, at identical counts, and none of them is this branch's.
+
+Tested: a claim landing after a read beats the cached answer, a claim removed
+after a read stops answering, a value carrying several rows answers a property
+from any of them, and the shipped `(claim semiring prob ordered)` row that
+every `(top k ...)` evaluation reads still answers
+[tested: catalog_self_description:a_claim_landing_after_a_read_beats_the_cached_answer,
+catalog_self_description:a_claim_removed_after_a_read_stops_answering,
+catalog_self_description:a_value_may_carry_several_claim_rows,
+catalog_self_description:the_shipped_ordered_claims_answer_through_the_cache;
+commit=WORKTREE].

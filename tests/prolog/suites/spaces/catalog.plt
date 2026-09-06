@@ -643,4 +643,56 @@ test(explain_answers_a_declared_cost_and_stays_silent_without_one) :-
     metta_explain(['if-equal', a, a, 1], Other),
     assertion(\+ memberchk([cost|_], Other)).
 
+
+%%%% The claim cache %%%%
+%
+%A claim row's query has an open tail, because the row carries any number of
+%properties, and an open-tail catalog read enumerates every storage arity.
+%metta_annotations_order/2 asks one per answer, so the answer is cached the way
+%a vocabulary's values are. What that cache has to survive is a row landing
+%AFTER a read: the erased-reference revalidation the other caches rely on
+%cannot see an addition, because every reference the entry watches is still
+%live.
+
+test(a_claim_landing_after_a_read_beats_the_cached_answer) :-
+    add_sexp('&metta', [vocabulary, cat_claimvocab, cat_a, cat_b], VocabRef),
+    setup_call_cleanup(
+        true,
+        ( assertion(\+ metta_vocabulary_claim(cat_claimvocab, cat_a, cat_prop)),
+          add_sexp('&metta', [claim, cat_claimvocab, cat_a, cat_prop], ClaimRef),
+          assertion(metta_vocabulary_claim(cat_claimvocab, cat_a, cat_prop)),
+          erase(ClaimRef) ),
+        erase(VocabRef)).
+
+test(a_claim_removed_after_a_read_stops_answering) :-
+    add_sexp('&metta', [vocabulary, cat_claimvocab2, cat_a], VocabRef),
+    add_sexp('&metta', [claim, cat_claimvocab2, cat_a, cat_prop], ClaimRef),
+    setup_call_cleanup(
+        true,
+        ( assertion(metta_vocabulary_claim(cat_claimvocab2, cat_a, cat_prop)),
+          metta_remove_atom('&metta', [claim, cat_claimvocab2, cat_a, cat_prop], _),
+          assertion(\+ metta_vocabulary_claim(cat_claimvocab2, cat_a, cat_prop)) ),
+        ( catch(erase(ClaimRef), _, true), erase(VocabRef) )).
+
+%Several rows per value is legal, so the entry watches several references and
+%the property may be in any of them.
+test(a_value_may_carry_several_claim_rows) :-
+    add_sexp('&metta', [vocabulary, cat_claimvocab3, cat_a], VocabRef),
+    add_sexp('&metta', [claim, cat_claimvocab3, cat_a, cat_first], First),
+    add_sexp('&metta', [claim, cat_claimvocab3, cat_a, cat_second, cat_third], Second),
+    setup_call_cleanup(
+        true,
+        ( forall(member(P, [cat_first, cat_second, cat_third]),
+                 assertion(metta_vocabulary_claim(cat_claimvocab3, cat_a, P))),
+          assertion(\+ metta_vocabulary_claim(cat_claimvocab3, cat_a, cat_absent)) ),
+        ( erase(First), erase(Second), erase(VocabRef) )).
+
+%The shipped claim every (top k ...) evaluation reads, so a cache that answered
+%the wrong thing would change what best-first means rather than only what it
+%costs.
+test(the_shipped_ordered_claims_answer_through_the_cache) :-
+    assertion(metta_vocabulary_claim(semiring, prob, ordered)),
+    assertion(\+ metta_vocabulary_claim(semiring, bool, ordered)),
+    assertion(metta_vocabulary_claim(semiring, prob, ordered)).
+
 :- end_tests(catalog_self_description).

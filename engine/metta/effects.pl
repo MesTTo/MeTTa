@@ -2225,7 +2225,8 @@ metta_annotations_order(Ctx, Direction) :-
 %A declared per-value fact: (claim Vocab Value Property...) rows carry any
 %number of properties, and a consumer asks for one.
 metta_vocabulary_claim(Vocab, Value, Property) :-
-    metta_catalog_row([claim, Vocab, Value|Properties]),
+    metta_value_claims(Vocab, Value, Claims),
+    member(Properties, Claims),
     memberchk(Property, Properties),
     !.
 

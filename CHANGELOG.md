@@ -27,6 +27,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   PeTTa at the parity pin is the arbiter, and `tests/conformance/petta.py`
   with its vendored corpus is the lane that reads it.
 
+### Changed
+
+- A `(claim Vocab Value Property...)` row's properties are cached per value,
+  the way a vocabulary's values already were. The read has an open tail,
+  because a claim row carries any number of properties, so it took the branch
+  that enumerates every `&metta` storage arity, and `metta_annotations_order/2`
+  asks it once per answer: fifteen such reads per `(top k ...)` evaluation.
+  `annotated-relation` falls 33,002 inferences over its 500 evaluations. A
+  value may carry several claim rows, so an entry watches several clause
+  references and refreshes when any is erased; the empty answer is cached too
+  and a landing claim retracts it.
+
 ### Added
 
 - `(cost witness class)` and `(cost witness class measure)` catalog rows, and
