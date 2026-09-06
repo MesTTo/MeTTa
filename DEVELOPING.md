@@ -124,6 +124,90 @@ Ubuntu) and a lane that only ran on the official build would not run at all on
 the machine that most needs it. `npm run test:source` runs the sources
 directly, on a Node that has type stripping and, for `using`, Node 24.
 
+### What the Python suite does to itself
+
+The suite's configuration is `[tool.pytest.ini_options]` in the root
+`pyproject.toml`, reached through the `extensions/python/pyproject.toml`
+symlink. Four settings there decide how a run behaves when something goes
+wrong, and each is measured rather than chosen:
+
+| setting | value | why that number |
+|---|---|---|
+| `testpaths` | `tests` | pytest is the one that can tell a path argument from a flag, so `sh extensions/python/test.sh -n 0 --durations=25` keeps the suite's root instead of collecting the whole seat |
+| `faulthandler_timeout` | 180 | twice the slowest test measured under the gate's own four-worker configuration (89.78s at loadavg 43); it dumps every thread's stack and fails nothing |
+| `timeout` | 900 | above the longest bound a test enforces on its own children (600s), ten times the slowest test, and a quarter of `bounded.sh`'s ceiling |
+| `timeout_method` | `thread` | `signal` cannot interrupt a hang inside a Prolog crossing: measured against `janus_swi.query_once("sleep(30)")` under `--timeout=5`, the signal method reported the timeout after 30.18s, when `sleep/1` returned |
+
+`filterwarnings` starts at `error`, so a warning fails the test that raised it.
+Each exception carries its reason on the line above it, and
+`error::pytest.PytestUnraisableExceptionWarning` is last so nothing can soften
+it: an exception escaping `__del__`, a weakref callback or a thread bootstrap is
+otherwise printed to stderr while the test passes.
+
+`PYTHONFAULTHANDLER=1` is exported by `extensions/python/test.sh` and by
+`tests/shell/test_packaged_cli.sh`. pytest arms faulthandler in
+`pytest_configure` and disarms it in `pytest_unconfigure`, so a fault during
+interpreter shutdown prints nothing unless the environment armed it first.
+
+Tests run in a random order, from `pytest-randomly`. The seed is printed at the
+top of every run and `--randomly-seed=<n>` repeats one:
+
+```sh
+CHECK_PY="$PY" sh extensions/python/test.sh --randomly-seed=1
+```
+
+A test that only passes because of the one before it is a defect in the pair,
+not in the ordering. Give the leaking test its state back through a public door
+-- drop the space it minted, withdraw the equation it wrote into `&self`, or
+name an object no other test pins -- rather than pinning the order.
+
+### The report lanes over the suite itself, and the stub gate
+
+Three of these report and one gates. Each prints a number the other GATE
+lanes cannot see.
+
+```sh
+CHECK_PY="$PY" sh check.sh coverage verifytypes stubtest mutation
+```
+
+- `coverage` runs the suite once under `pytest-cov`, with branch coverage over
+  `metta` and no percentage floor. A floor rewards tests that touch lines; the
+  mutation lane below is the one that asks whether touching them decides
+  anything.
+- `verifytypes` builds the wheel, installs it into an environment of its own and
+  asks pyright how much of the published surface has a type it can read. It is
+  the wheel rather than the checkout because that is what a user receives, and
+  because pyright resolves the package for `--verifytypes` through the search
+  paths of the `python` it finds on `PATH`.
+- `stubtest` is a GATE: it compares the shipped `.pyi` files against the
+  runtime objects they describe and is clean. Its allowlist is
+  `extensions/python/stubtest-allowlist.txt`, which classifies every known
+  difference under the reason it is not a finding (typeshed's model of a live
+  object, the root stub's lazily reached satellites, the deliberate overloads),
+  and an entry that stops matching fails the lane as unused, so the
+  classification cannot go stale quietly. Its mypy settings are
+  `extensions/python/stubtest-mypy.toml`, stubtest's own and not the
+  project's type policy: stubtest turns positional-only special methods off
+  before reading a configuration, which makes three ordinary lines of the
+  package look like errors and stops the comparison before it starts.
+- `mutation` changes one operator, constant or branch at a time and asks whether
+  any test fails. One module per run, because the package is 61,000 lines:
+
+  ```sh
+  METTA_MUTATION_TARGET='metta.results.*' \
+  METTA_MUTATION_TESTS='tests/ch06_many_answers/test_answers.py' \
+      CHECK_PY="$PY" sh check.sh mutation
+  ```
+
+  `METTA_MUTATION_TARGET` is an fnmatch pattern over mutmut's own mutant names
+  and `METTA_MUTATION_TESTS` is the pytest selection that judges them. They are
+  two knobs because mutmut takes its test selection from configuration alone,
+  and a lane cannot rewrite `pyproject.toml`. The lane rebuilds `.mutmut/`, a
+  scratch copy one level under the repository root, each run: mutmut runs the
+  suite inside `.mutmut/mutants/`, which is the depth at which `metta/shim.pl`
+  still reaches `../../../engine` and `tests/conftest.py` still reaches
+  `bounded.sh`.
+
 ## Performance measurements
 
 ### Which counter decides

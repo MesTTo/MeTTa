@@ -34,6 +34,10 @@
 #                                            mypy-algebra-surface
 #                                            scratch-retention
 #                                            process-bounds reaping
+#                                            coverage verifytypes stubtest
+#                                            mutation
+#          METTA_MUTATION_TARGET=metta.atoms.*        which mutants to test
+#          METTA_MUTATION_TESTS='tests/...'           which tests judge them
 #          CHECK_PY=/path/to/python   pick the interpreter
 #          GATE_ONLY=1                skip the REPORT tier
 #          METTA_CHILD_CEILING=3600   seconds any spawn may live (bounded.sh)

@@ -195,8 +195,17 @@ PLANTS = (
     # Outside every glob check_evidence_tags reads. The pass must not REWRITE
     # it, and must report it: an unscanned pin is a claim nothing would ever
     # resolve, which is the defect the out-of-glob net exists to catch.
+    #
+    # website/, not extensions/python/tests/: the gate's globs GREW on
+    # 2026-09-07, when the Python seat's own conftest.py started carrying pins
+    # and `extensions/python/tests/*.py` joined SOURCES to make them readable.
+    # This plant then landed inside the globs it exists to sit outside, the
+    # pass rewrote it as it should, and the selftest read that as four
+    # defects. A fixture that names the CONDITION rather than a path is not
+    # available here -- the globs are the thing under test -- so the path is
+    # one the gate has no reason to read: generated documentation.
     (
-        "extensions/python/tests/plant.py",
+        "website/plant.py",
         [f"#: An unscanned pin [{TAG} {WHEN}: test_collected; {WORD}]."],
         [],
         [],

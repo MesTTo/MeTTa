@@ -263,6 +263,52 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `(@param (@type Number) (@desc "the count"))` row was read for its first
   child, so `Parameters:` listed `(@type Number)` and the prose was
   unreachable.
+- The Python suite runs in a random order, bounds every item, and treats a
+  warning as a failure. `pytest-randomly` shuffles each run and prints the seed
+  it used, `pytest-timeout` ends an item stuck for 900 seconds after
+  `faulthandler` has dumped every thread's stack at 180, and `filterwarnings`
+  starts at `error` with `PytestUnraisableExceptionWarning` named explicitly, so
+  an exception escaping a finaliser fails the test that raised it instead of
+  printing to stderr under a green run. `PYTHONFAULTHANDLER=1` keeps the handler
+  armed through interpreter shutdown, which pytest's own configuration does not
+  reach. Three order dependencies the shuffle exposed are fixed where they leak
+  rather than pinned in place: a library import that taught the whole process a
+  `range` head, an equation left in `&self` that rewrote a space family, a
+  second type declaration on the same `math.pow` object, and a specialization
+  test that left its generated equations in the process home for every later
+  test to copy. Two ceilings that were absolute numbers are now the relations
+  they stand for, because both quantities move with what the process has
+  loaded: a bounded trace's budget follows the traced program rather than the
+  whole door, and a fast image's restore is priced against restoring one form
+  rather than against 100,000 inferences. Two wall-clock windows widen for the
+  same reason, each measured rather than guessed: a provider's carrier budget
+  and a re-entrant provider's, both of which had to fall between reaching a
+  callback and leaving it.
+- `extensions/python/test.sh` takes the suite's root from pytest's `testpaths`
+  instead of spelling it as a trailing argument, so an invocation carrying only
+  flags still runs the suite rather than collecting the whole seat.
+- The `.metta` examples this library contributed are collected from
+  `extensions/python/tests/repository/metta_examples.txt`, one pytest item per
+  example, in place of a list parametrised into a single test. The corpus skip
+  list is honoured, and each example is its own node for `-k`, `--deselect` and
+  a junit report.
+- Four report lanes measure the suite itself rather than the library: `coverage`
+  (branch coverage over `metta`, no percentage floor), `verifytypes` (pyright's
+  type-completeness score over the built wheel), `stubtest` (the shipped stubs
+  against the runtime objects they describe), and `mutation` (mutmut over one
+  module per run, chosen by `METTA_MUTATION_TARGET`).
+
+### Fixed
+
+- `Space.trace`'s `timeout`, `inferences` and stack bounds bound the RUN, as
+  the door has always documented. Arming the tracer wraps every function name
+  the process has registered and unwrapping them again is the same walk, twelve
+  inferences per name, and both were charged to the caller's budget: a trace
+  bounded at 40,000 inferences answered an empty prefix naming a bound the
+  program never reached once enough names existed, so what the door did
+  depended on how much else had been loaded rather than on the program. The
+  bounds now ride inside the door and wrap the traced program alone, the way
+  the answer's encoding left the same budget in 0.7.2.
 - A Python stream the engine pulls no longer loses the exception that ended
   it. Janus reads a raising pull as an exhausted one, so a space provider's
   `match` or `atoms`, a grounded value's `match_`, a generator operation and an

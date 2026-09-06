@@ -119,6 +119,13 @@ test = [
     "numpy",
     "pytest>=8.4.2",
     "pytest-benchmark>=5.2",
+    #: Ordering and the per-item wall bound, which the suite's configuration
+    #: reads: pytest-randomly shuffles every run so a test cannot depend on the
+    #: one before it, and pytest-timeout ends an item that is stuck rather than
+    #: slow. Both are in `test` rather than in `checks` because they change what
+    #: the SUITE does, and CI installs `test` to run it.
+    "pytest-randomly>=5",
+    "pytest-timeout>=2.4",
     "pytest-xdist>=3.8,<4",
 ]
 #: Everything `test` installs, plus the linters. Written as the self-reference
@@ -129,14 +136,25 @@ checks = [
     "pymetta[test]",
     "bandit>=1.9",
     "codespell>=2.4",
+    #: The `coverage` REPORT lane. pytest-cov is what carries coverage across
+    #: the four xdist workers, each of which is a separate process with its own
+    #: engine; `coverage run -m pytest` alone measures the controller and none
+    #: of them.
+    "coverage[toml]>=7.15",
     "deptry>=0.25",
     "import-linter>=2.13",
     "interrogate>=1.7",
     "mypy>=1.18",
+    #: The `mutation` REPORT lane, one module per run.
+    "mutmut>=3.7",
     "perflint>=0.8",
     "pip-audit>=2.9",
     "pylint>=3.3,<4",
-    "pyright>=1.1.400",
+    #: The `verifytypes` REPORT lane: how much of the published surface a type
+    #: checker can see a type for. A different question from mypy's, which asks
+    #: whether the annotations that ARE there hold.
+    "pyright>=1.1.411",
+    "pytest-cov>=7",
     "radon>=6.0",
     "refurb>=2.3",
     "ruff>=0.14",
@@ -160,6 +178,101 @@ version = {attr = "metta._version.__version__"}
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+# The suite's one root, so a run given only FLAGS still collects it.
+# extensions/python/test.sh used to spell `tests` as a trailing argument and
+# drop it whenever the caller passed anything at all, so
+# `sh extensions/python/test.sh -n 0 --durations=25` collected the whole of
+# extensions/python -- benchmarks/conftest.py included -- and died in
+# collection with `PluginValidationError: unknown hook
+# 'pytest_benchmark_update_machine_info'`, because the same command disables the
+# benchmark plugin [measured 2026-09-06]. pytest is the one that can tell a path
+# argument from a flag, so the default belongs here and the runner passes "$@"
+# unchanged. tests/checks/evidence_runners.py READS this value and reports it
+# when it stops naming the pytest collector's own root.
+testpaths = ["tests"]
+
+# Every thread's stack when an item runs long, dumped from faulthandler's own C
+# watchdog thread, so it reaches a main thread sitting inside a Prolog crossing
+# where no Python bytecode runs. It DUMPS and does not fail: a slow test stays
+# green and a stuck one says where it is.
+#
+# 180 seconds is twice the slowest test measured on this box in the gate's own
+# four-worker configuration -- 89.78s,
+# tests/repository/test_host_carve.py::test_the_python_binding_calls_only_the_published_host_surface,
+# at loadavg 43 [measured 2026-09-06, `-n 4 --dist loadfile --durations=25`] --
+# so ordinary load variation on a box that idles at 25-35 cannot reach it.
+faulthandler_timeout = 180
+
+# The bound that ends a stuck item. Three properties decide the number:
+#   - above every bound a test enforces on its own children, the largest being
+#     600s in tests/ch01_getting_started/test_packaging.py::_build_ext, so the
+#     test's own TimeoutExpired -- which prints the child's output -- always
+#     wins the race and this only ever fires on something genuinely stuck;
+#   - ten times the slowest test measured (89.78s at loadavg 43);
+#   - a quarter of bounded.sh's 3600s ceiling, so a stuck item is NAMED, with
+#     every thread's stack, long before the anonymous session kill.
+timeout = 900
+
+# thread, measured rather than assumed. The engine is embedded in this process
+# and the main thread sits inside PL_next_solution for the length of a crossing,
+# where CPython cannot run a Python-level signal handler:
+#   - signal, --timeout=5 against `janus_swi.query_once("sleep(30)")`: the run
+#     took 30.18s and reported `Failed: Timeout (>5.0s)` only when sleep/1
+#     RETURNED, so a crossing that never returns is never bounded at all;
+#   - signal, --timeout=5 against a hang in a Python callback reached from
+#     Prolog: it fires, and the Failed it raises comes back out of the crossing
+#     as a PrologError, so the report names the engine rather than the timeout;
+#   - thread, the same 30-second crossing: 5.41s wall, exit 1, and the dump
+#     names janus.py:245 query_once -> _swipl.call.
+# [measured 2026-09-06; the two probe files are in the journal entry
+# docs/journal/2026-09-06-a-suite-that-cannot-hide-a-crash.md]
+# thread ends the process with os._exit(1) after printing every thread's stack.
+# It therefore never unwinds a live crossing, which is what the signal method
+# does and what leaves the engine's next call answering for the wrong reason.
+# Under --dist loadfile each worker owns one engine, so the kill is contained,
+# and --max-worker-restart=0 turns it into a loud session failure rather than a
+# retried flake.
+timeout_method = "thread"
+
+# A warning is a failure unless this file says otherwise, and each exception
+# carries the reason it is one. Later entries win, which is why the unraisable
+# rule sits last.
+filterwarnings = [
+    "error",
+    # ResourceWarning is raised from __del__ and from weakref finalizers, so it
+    # is delivered whenever the collector happens to run and is attributed to
+    # whichever test is running then -- an order-dependent failure by
+    # construction, in a suite whose whole point here is to have none. Making it
+    # fatal also raises INSIDE the finalizer, which abandons the cleanup that
+    # finalizer was running: measured 2026-09-06, `-W error` over the suite gave
+    # 125 failures and 54 errors, of which 43 were one library diagnostic
+    # ("an open metta Cursor was discarded") and 42 more were the
+    # PytestUnraisableExceptionWarning cascade from raising inside __del__;
+    # demoting this one category left 3. The contract itself is tested at its
+    # own door, where a test that means to see the warning catches it
+    # (tests/ch04_spaces_and_matching/test_variadic_doors.py,
+    # tests/ch20_extending_the_engine/test_deprecation_catalog.py), so nothing
+    # is lost by not also making it fatal everywhere else.
+    "ignore::ResourceWarning",
+    # bandit's extension loader calls pkg_resources with an argument setuptools
+    # has retired. It is reached by importlib.util.find_spec("bandit") in
+    # test_every_module_invocation_in_the_gate_reaches_an_entry_point, which
+    # imports every `python -m` target the gate names, so the warning is
+    # bandit's and the fix is bandit's
+    # [source: bandit/core/extension_loader.py:29 load_formatters].
+    "ignore:The verify_requirements argument is now a no-op:DeprecationWarning",
+    # pytest-benchmark declares an option with argparse.FileType, which Python
+    # 3.14 deprecates. It fires while pytest registers the plugin, before any
+    # test runs, so it is unreachable from this repository
+    # [source: pytest_benchmark/plugin.py:260 pytest_addoption].
+    "ignore:FileType is deprecated:PendingDeprecationWarning",
+    # Last, so no entry above can soften it. An exception that CPython cannot
+    # raise -- one escaping __del__, a weakref callback or a thread bootstrap --
+    # is otherwise printed to stderr and the test still passes. This week's
+    # finaliser crashes were unraisable exceptions before they were
+    # segmentation faults.
+    "error::pytest.PytestUnraisableExceptionWarning",
+]
 
 [tool.ruff]
 target-version = "py312"
@@ -552,3 +665,66 @@ ignore_imports = [
     "metta._space -> metta._saga",
 ]
 unmatched_ignore_imports_alerting = "error"
+
+# The `coverage` REPORT lane. Branch coverage over the library, no percentage
+# gate: the number is a map of what the suite reaches, and a threshold on it
+# rewards writing tests that touch lines rather than tests that decide
+# anything -- which is what the `mutation` lane below measures instead.
+[tool.coverage.run]
+branch = true
+source = ["metta"]
+# Each xdist worker is its own process; pytest-cov writes one data file per
+# worker and combines them, which needs the suffixed form.
+parallel = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+# `if TYPE_CHECKING:` bodies and `@overload` stubs never execute, and a
+# NotImplementedError body is a refusal a subclass answers.
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "@overload",
+    "raise NotImplementedError",
+]
+
+# The `mutation` REPORT lane. It runs from `.mutmut/`, a scratch directory ONE
+# level under the repository root holding a copy of the package and a copy of
+# the suite, and that depth is the whole reason the directory exists:
+#
+#   - mutmut names a mutant from the file's path under the current directory and
+#     matches it at run time against the function's `__module__`, so the two
+#     agree only when the package sits DIRECTLY under the directory mutmut runs
+#     in. From the repository root, `extensions/python/metta` produced keys
+#     `extensions.python.metta.answer.*` against a runtime module `metta.answer`
+#     and every mutant read "no tests": 55 of them, 0 functions traced
+#     [measured 2026-09-07; mutmut/mutation/trampoline.py:60 builds the runtime
+#     name from `orig_func.__module__`].
+#   - mutmut runs the suite inside `mutants/`, which puts the copy back at the
+#     depth the tree assumes: `.mutmut/mutants/metta/shim.pl` reaches the
+#     engine as `../../../engine`, and `.mutmut/mutants/tests/conftest.py`
+#     reaches bounded.sh as `parents[3]`, exactly as `extensions/python/metta`
+#     and `extensions/python/tests` do. So nothing needs copying but the two
+#     directories: the engine, the shipped libraries and the Python seat's
+#     bridge.pl are read from the real tree.
+#
+# WHICH mutants are tested is the lane's argument, an fnmatch pattern over
+# mutmut's own mutant names (`mutmut run 'metta.answer.*'`); WHICH tests judge
+# them is PYTEST_ADDOPTS, because mutmut takes its test selection from
+# configuration alone and a lane cannot rewrite this file.
+[tool.mutmut]
+source_paths = ["metta"]
+also_copy = ["tests"]
+pytest_add_cli_args = [
+    "-p", "no:benchmark",
+    "-p", "no:randomly",
+    "-p", "no:cacheprovider",
+    "-q",
+]
+# mutmut's own budget per mutant: it times the clean suite once and kills a
+# mutant that takes longer than `baseline * multiplier + constant`. Four times
+# is generous enough for a box that idles at loadavg 25-35 while still ending a
+# mutant that turned a bounded loop into an unbounded one, and the fifteen
+# seconds keep a sub-second baseline from making the bound unreachably tight.
+timeout_multiplier = 4.0
+timeout_constant = 15.0
