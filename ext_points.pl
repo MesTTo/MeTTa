@@ -1030,6 +1030,7 @@ kind(metta_host_inference_budget/3, host_service).
 %inside the engine's own goal and can act.
 kind(metta_host_time_budget/3, host_service).
 kind(metta_host_function_generation/1, host_service).
+kind(metta_host_function_callable_from/2, host_service).
 %Setting the engine-wide print-suppression flag. engine/filereader.pl decides
 %it from argv at load time and an embedded host has no argv, so two seats had each
 %written the same retract-then-assert under a private name and the engine's own

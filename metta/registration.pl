@@ -653,6 +653,23 @@ fun_here(F) :- fun(F),
                ( \+ fun_scoped(F) -> true
                ; current_metta_module(Module), fun_here_in(Module, F) ).
 
+%The same rule with the module made explicit, for a host asking about a space
+%it is not executing in: what one space's function namespace lists and
+%resolves. fun_here/1 stays as written above because it runs per head the
+%translator resolves and its two indexed probes are the whole of its cost; a
+%host asks this once per catalogue build and once per attribute miss, so the
+%extra frame is nothing there. Published as a host service so the host
+%transport never reaches fun_scoped/1 or fun_here_in/2 directly
+%[tested: test_a_namespace_lists_and_resolves_only_what_its_space_can_call,
+%test_builtins_equals_the_union_of_functions_and_special_forms;
+%commit=WORKTREE].
+metta_host_function_callable_from(Module, F) :-
+    fun(F),
+    (   \+ fun_scoped(F)
+    ->  true
+    ;   fun_here_in(Module, F)
+    ).
+
 %The builtin fallback is what keeps (+ 1 2) working in &self after some other
 %named space defines (= (+ $a $b) ...). fun_scoped(N) stops fun_here/1's first
 %clause applying process-wide, and without this the name resolved nowhere: one
