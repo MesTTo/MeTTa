@@ -18,7 +18,7 @@
 %     dev-typed gate lane also runs every plunit suite under that build.
 % Guarantees:
 %   - the ordered match limit service is exported for host evaluation
-%     [tested: run_tests(evaluation_context); commit=WORKTREE].
+%     [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 %   - Files below engine/spaces/ are plain source units consulted into this
 %     implementation module in their original order; storage predicates,
 %     provider seams, and lifecycle state retain their existing ownership

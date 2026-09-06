@@ -2,7 +2,7 @@
 %   semantics, and publish the predicates extensions and host bindings may call.
 % Guarantees:
 %   - evaluation context and ordered-match demand are published engine
-%     services [tested: run_tests(evaluation_context); commit=WORKTREE].
+%     services [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 %   - libraries can distinguish an author's annotated effect from inferred
 %     operation metadata [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 %   - host query carriers enter the engine-owned algebra scope, read its

@@ -7,7 +7,7 @@
 % Guarantees:
 %   - evaluation context preserves demand across carrier overrides, restores
 %     after every exit, and licenses ordered provider bounds consistently
-%     [tested: run_tests(evaluation_context); commit=WORKTREE].
+%     [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 %   - the Python repeatability bridge fails closed on an ordinary classifier
 %     refusal but never catches a control limit [tested:
 %     python_repeatability_control:the_bridge_preserves_inference_limits;

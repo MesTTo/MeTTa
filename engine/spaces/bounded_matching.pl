@@ -1,6 +1,6 @@
 % Purpose: propagate output bounds through conjunction matching, ordering, and best-first merge policies
 % Guarantees: ordered cursors and top share one provider-bound license
-% [tested: run_tests(evaluation_context); commit=WORKTREE].
+% [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
 %   metta_prune_empty/2 is declared locally as an effect-planner primitive,
