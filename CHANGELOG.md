@@ -27,10 +27,64 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   and `bind()` keys spelling it are refused. The keyword face engages only when
   values are passed, so existing programs whose symbols contain braces are
   unchanged.
+- Query results are Arrow data. `Rows` and `Answers` answer
+  `__arrow_c_schema__()` and `__arrow_c_stream__(requested_schema=None)`, the
+  Arrow PyCapsule Interface, so `pa.table(rows)`,
+  `pl.scan_arrow_c_stream(rows)`, `pd.DataFrame.from_arrow(rows)` and
+  `duckdb.sql("select * from rows")` read answers with no conversion call and
+  no pyarrow on this side. One typed projection decides the columns for every
+  typed door: a column of one wire kind is int64, float64, bool or utf8 with
+  its decoded values, and a mixed column, a symbol, a variable, a nested
+  expression or an integer wider than int64 is utf8 canonical MeTTa text, with
+  `Grounded(None)` as Arrow null. Record batches double from one up to 64, the
+  engine cursor's own chunk policy. `rows.arrow()` is the same stream wearing
+  nothing but the Arrow protocol, which is what `pl.DataFrame` needs because
+  its constructor tests for a sequence first. The producer needs the new
+  `arrow` extra (`pip install 'pymetta[arrow]'`), which brings `nanoarrow`;
+  every capsule door refuses by naming it when it is absent.
+- `metta.tables.add` reads any object with `__arrow_c_stream__`, one record
+  batch per write, so a DuckDB relation, a pyarrow Table, a Parquet reader or
+  an Ibis expression loads as `(head col1 col2 ...)` facts. A source with its
+  own row door keeps it.
+- `TableBridge` is an Arrow producer, so a SQL-backed space streams its
+  declared columns straight to a frame or a query engine through the
+  provider's own cursor.
+- `metta.tables.accessors()` installs the `metta` accessor on every frame
+  library already imported, so `df.metta.into(space, head)` is `tables.add` in
+  pandas' and polars' own spelling, and answers which libraries carry it.
+- `metta.tables.sql_function(connection, head, name=None)` registers a MeTTa
+  head as a scalar SQL function on a sqlite3 or DuckDB connection. sqlite3
+  takes the arity, DuckDB takes the types from the head's declared arrow; no
+  answer is SQL NULL and several answers refuse.
+- `np.asarray(rows["age"])` answers a typed NumPy array through `__array__` on
+  the projected column, rather than an object array of atoms.
+- An expression pretty-prints through IPython's `_repr_pretty_` with the same
+  grouping `__rich_repr__` gives rich and the same layout `repr()` uses.
+- `Answers.__length_hint__()` answers a size already known and never pulls.
 - `lib_import` exposes committed imports as `(import Path)` atoms through
   `(imports &space)`. `unimport!` withdraws the imported source's surviving
   atom occurrences and compiled definitions, preserving equal atoms owned by
   callers or other imports. Both operations use the loader's ownership journal.
+
+### Changed
+
+- `<`, `<=`, `>` and `>=` between two space handles now refuse, naming
+  `metta.spaces.diff` and `metta.spaces.union` as the doors that answer
+  containment. They answered the engine's term order silently, while `|`, `&`,
+  `-` and `^` on the same pair build `(or a b)`, `(and a b)`, `(- a b)` and
+  `(xor a b)`; one spelling cannot carry both meanings. A handle against any
+  other atom still orders, so a mixed atom list still sorts.
+- `rows["age"]`, `rows.age` and `rows.column("age")` answer a `Column`, a list
+  subclass carrying the column's name and the array face. Everything a list
+  does it still does.
+- `to_df()` and `to_pl()` build from the typed projection rather than decoding
+  each cell on its own, so a column that mixes kinds, holds an integer wider
+  than int64, or holds an opaque Python object becomes canonical MeTTa text
+  instead of an object column or a constructor error, and the frame's types
+  are declared rather than inferred. `table()` and `to_dicts()` keep their
+  per-cell rule unchanged.
+- The `dataframes` extra floors polars at 1.3, the release that reads the
+  Arrow PyCapsule Interface.
 
 ### Fixed
 

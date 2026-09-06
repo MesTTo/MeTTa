@@ -45,6 +45,18 @@ def add(space: Any, head: Any, data: Any) -> int:
 > Add a tabular source to a space as ``(head column...)`` facts.
 >
 > space may be a context or a space.
+>
+> The source may offer rows its own way (``iter_rows()`` for polars,
+> ``itertuples()`` for pandas, a mapping of columns, any iterable of rows)
+> or speak the Arrow PyCapsule Interface, which is how a DuckDB relation, a
+> pyarrow Table, a Parquet reader or an Ibis expression hands over rows
+> without a row-at-a-time Python door. A source with both keeps its own:
+> the two produce identical atoms, and the row door is the faster of them
+> .
+>
+> An Arrow source is written one record batch at a time, so a reader larger
+> than memory loads, and the writes are one transaction each; wrap the call
+> in ``m.transaction(...)`` to make the whole load one.
 
 ## `Executes`
 
@@ -181,3 +193,45 @@ def declare(m: Any, name: str, declaration: Atom | str) -> Atom:
 > and any program can read the schema, and from_context will.
 >
 > m may be a context or a space.
+
+## `accessors`
+
+```python
+def accessors() -> tuple[str, ...]:
+```
+
+> Install `df.metta` for every frame library already imported.
+>
+> Answers the libraries that now carry it, so a program can ask.
+>
+> Registration never imports pandas or polars itself. `import metta.tables`
+> costs 15 ms and `import pandas` costs 531 ms, so a module
+> that registered by importing would charge every tables user for a library
+> the program may never touch. It registers what is in `sys.modules`, every
+> door in this module calls it first, and a program that imports a frame
+> library afterwards and touches nothing else here calls this by name.
+> Idempotent, because both libraries warn when an accessor name is replaced.
+
+## `sql_function`
+
+```python
+def sql_function(connection: Any, head: Any, name: str | None = None) -> str:
+```
+
+> Register a MeTTa head as a scalar SQL function, and answer its SQL name.
+>
+>     m.run("(: dbl (-> Number Number))  (= (dbl $x) (* 2 $x))")
+>     tables.sql_function(connection, m.fn.dbl)
+>     connection.sql("select dbl(age) from people")
+>
+> The head is the callable from a space's `fn` namespace, which already
+> carries its own name, its arity and its arrow, so nothing about the
+> function is restated here; `name=` is the escape for a SQL identifier the
+> head's own name cannot be.
+>
+> Two drivers, told apart by what their `create_function` takes: sqlite3
+> wants the arity and no types, DuckDB wants the types and reads them from
+> the head's declared arrow, refusing by name when there is none. A row that
+> produces no answer is SQL NULL and one that produces several refuses,
+> because a scalar function has one result per row; a SQL NULL argument
+> reaches the head as `Grounded(None)` and MeTTa decides what it means.

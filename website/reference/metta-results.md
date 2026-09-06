@@ -59,6 +59,21 @@ def asdict(self) -> dict[str, Any]:
 
 > Return this row as a column-to-value mapping.
 
+## `Column`
+
+```python
+class Column(list[Any]):
+```
+
+> One projected query column: the answer atoms, and the array face.
+>
+> A list, because that is what a column of answers has always been and
+> every caller that indexes, slices, compares or iterates one keeps
+> working. What it adds is `__array__`: `np.asarray(rows["age"])` answers
+> an int64 array rather than an object array of Grounded atoms, because
+> the array face reads the column's DERIVED kind the way the Arrow doors
+> and `to_pl` do, rather than handing NumPy the atoms to guess at.
+
 ## `Rows`
 
 ```python
@@ -106,7 +121,7 @@ No docstring is defined.
 ### `Rows.column`
 
 ```python
-def column(self, name: str) -> list[Any]:
+def column(self, name: str) -> Column:
 ```
 
 > Project one exact column name.
@@ -218,6 +233,20 @@ def table(self) -> dict[str, list[Any]]:
 > pd.DataFrame(rows.table()). Grounded values unwrap to Python;
 > symbols and structure become their text.
 
+### `Rows.arrow`
+
+```python
+def arrow(self) -> ArrowView:
+```
+
+> These rows wearing nothing but the Arrow protocol.
+>
+> `Rows` is a sequence, and polars' `DataFrame()` constructor tests for
+> a sequence before it looks for the capsule, so `pl.DataFrame(rows)`
+> reads the atoms row by row instead. `pl.DataFrame(rows.arrow())` is
+> the stream. Consumers that ask for the protocol first, pyarrow,
+> DuckDB, pandas 3 and `pl.scan_arrow_c_stream`, take `rows` itself.
+
 ### `Rows.to_df`
 
 ```python
@@ -225,6 +254,12 @@ def to_df(self):
 ```
 
 > The rows as a pandas DataFrame, DuckDB's own conversion naming.
+>
+> Sugar over `__arrow_c_stream__` where pandas reads it, which is
+> `DataFrame.from_arrow` from pandas 3, so the columns are TYPED by the
+> projection rather than inferred from Python objects. Without pandas 3
+> or without the `arrow` extra it builds the same projected columns
+> through the frame constructor, which answers the same values.
 > pandas is the caller's dependency; its absence raises naming the
 > need, and table() stays the constructor-agnostic shape.
 
@@ -235,6 +270,10 @@ def to_pl(self):
 ```
 
 > The rows as a polars DataFrame; the polars twin of to_df().
+>
+> Sugar over `__arrow_c_stream__`, through the view that hides the
+> sequence protocol from polars' constructor; without the `arrow` extra
+> it builds the same projected columns directly.
 
 ### `Rows.pipe`
 
@@ -359,6 +398,14 @@ def to_pl(self):
 ```
 
 > Materialize as a polars DataFrame.
+
+### `Answers.arrow`
+
+```python
+def arrow(self) -> ArrowView:
+```
+
+> These answers wearing nothing but the Arrow protocol.
 
 ### `Answers.pipe`
 

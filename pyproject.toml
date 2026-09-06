@@ -91,15 +91,30 @@ arrays = [
     "faiss-cpu",
     "numpy",
 ]
+#: The Arrow C Data producer. nanoarrow builds the ArrowSchema and
+#: ArrowArrayStream structs from buffers, so `rows.__arrow_c_stream__()` needs
+#: no pyarrow and a consumer needs only the Arrow support it already has.
+arrow = [
+    "nanoarrow>=0.9",
+]
 das = [
     "websocket-client",
 ]
+#: polars from 1.3 reads the Arrow PyCapsule Interface, which is what to_pl()
+#: hands it; pandas gained DataFrame.from_arrow in 3.0 and to_df() falls back
+#: to the projected columns below that.
 dataframes = [
     "pandas",
-    "polars",
+    "polars>=1.3",
 ]
 test = [
     "hypothesis>=6.165",
+    #: The Arrow producer's own dependency, so the suite's projection and
+    #: schema scenarios RUN rather than skipping. The consumers they hand a
+    #: capsule to (pyarrow, polars, pandas, duckdb) stay in `dataframes`,
+    #: where the existing to_pl and DuckDB-compliance lanes get theirs, so
+    #: those scenarios skip here exactly as they already do.
+    "nanoarrow>=0.9",
     "networkx>=3.6,<4",
     "numpy",
     "pytest>=8.4.2",
@@ -306,7 +321,7 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = [
     "array_api_compat", "faiss", "hypothesis", "numpy", "pandas",
-    "polars", "rich.*", "websocket",
+    "nanoarrow", "nanoarrow.*", "polars", "rich.*", "websocket",
 ]
 ignore_missing_imports = true
 follow_imports = "skip"
@@ -399,6 +414,7 @@ DEP003 = ["rich"]
 DEP002 = [
     "janus-swi",
     "array-api-compat",
+    "nanoarrow",
     "faiss-cpu",
     "numpy",
     "pandas",
@@ -465,6 +481,7 @@ source_modules = [
     "metta._object_fields",
     "metta._operator_lowerings",
     "metta._ops",
+    "metta._arrow",
     "metta._optional",
     "metta._parameterized",
     "metta._prelude",

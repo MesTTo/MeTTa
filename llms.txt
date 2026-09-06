@@ -63,7 +63,12 @@ needs SWI-Prolog 9.3+ and Python 3.12+. The engine tree, the libraries and the
 codec corpus ride in the wheel; the `engine` extra adds `janus-swi`, the
 bridge to the SWI on the machine, and it is the only part a plain
 `pip install pymetta` leaves out. Without it the package still imports and the
-first engine call names the command for your platform. `pip install .` from a
+first engine call names the command for your platform. Four more extras each
+name what one door needs: `arrow` brings `nanoarrow`, which builds the Arrow C
+structs the capsule doors hand a consumer (a consumer needs no pyarrow);
+`arrays` brings NumPy and `array-api-compat`; `dataframes` brings pandas and
+polars 1.3+; `das` brings the websocket client. A door whose extra is missing
+raises naming it. `pip install .` from a
 checkout is the same thing, and `METTA_PATH` points an installed `metta` at a
 clone's engine tree instead of the bundled one.
 
@@ -434,7 +439,27 @@ below. `row.x` and `row["x"]` both work.
 mappings, `.to_df()` / `.to_pl()` -> pandas / polars, `.build(column, cls)`
 rebuilds one named column, and `.build(cls)` rebuilds the sole constructor
 column. Both keep `cls` for type checkers.
-`.pipe(fn, *args)` chains, `_repr_html_` renders in notebooks.
+`.pipe(fn, *args)` chains, `_repr_html_` renders in notebooks, and
+`_repr_pretty_` on an atom gives IPython the same tree `__rich_repr__` gives
+rich.
+
+Rows and Answers ARE Arrow data. `__arrow_c_schema__()` and
+`__arrow_c_stream__(requested_schema=None)` are the Arrow PyCapsule Interface,
+so `pa.table(rows)`, `pl.scan_arrow_c_stream(rows)`,
+`pd.DataFrame.from_arrow(rows)` and `duckdb.sql("select * from rows")` all read
+the answers with no conversion call, and `to_df()` and `to_pl()` are sugar over
+the same stream. One typed projection decides the columns for all of them: a
+column of one wire kind is int64, float64, bool or utf8 and carries its decoded
+values, and a column mixing kinds, or holding a symbol, a variable, a nested
+expression or an integer wider than int64, is utf8 canonical MeTTa text.
+`Grounded(None)` is Arrow null. Batches double from one up to 64, the engine
+cursor's own chunk policy. `rows.arrow()` is the same stream wearing nothing
+but the Arrow protocol, for `pl.DataFrame(rows.arrow())`: polars' constructor
+tests for a sequence before it looks for the capsule and Rows is a sequence.
+`np.asarray(rows["age"])` answers a typed array through `__array__` on the
+column rather than an object array of atoms.
+`answers.__length_hint__()` answers a size already known and never pulls;
+`len(answers)` is the door that counts.
 
 `m.assuming(*facts)` is a with-block where those facts exist and then do not.
 `m.batch()` collects `add()` calls and crosses once at exit.
@@ -471,8 +496,16 @@ compile into their own module, so two spaces can define the same function.
 
 `m.add(*atoms)`, `m.remove(atom)`, `m.atoms()`, `len(m)`, `m.clear()`,
 `m.space_names()`, `m.name`, and `metta.tables.add(m, head, source)` reads
-polars / pandas / mappings / iterables into `(head v1 .. vn)` facts and
-answers how many.
+polars / pandas / mappings / iterables / any `__arrow_c_stream__` producer into
+`(head v1 .. vn)` facts and answers how many.
+
+`<`, `<=`, `>` and `>=` between two space handles REFUSE. `|`, `&`, `-` and
+`^` on a space already build the terms `(or a b)`, `(and a b)`, `(- a b)` and
+`(xor a b)`, because a Space is an Atom, so the ordering spellings cannot also
+mean subset, and term order between two live engine objects is a third meaning
+no program wants. Set algebra is `metta.spaces.diff`, `union`, `overlay`,
+`readonly` and `mapped`; `a == b` compares identity; `metta.atoms.order_key`
+sorts a mixed atom list. A handle against any other atom still orders.
 
 The write family is VARIADIC where n-ary is the meaning, each shape one
 engine crossing inside one transaction: `a.transfer(x, y, to=b)` moves one
@@ -1044,7 +1077,23 @@ its observed dimensions.
 
 `metta.tables`: `declare(...)` writes one ctx-scoped bridge declaration into
 `&metta` and `TableBridge` derives every provider operation from it, so a
-DB-API connection (the `Executes` slice) answers MeTTa matches.
+DB-API connection (the `Executes` slice) answers MeTTa matches. The bridge is
+an Arrow producer too, so `pl.DataFrame(bridge)` and
+`duckdb.sql("select * from bridge")` stream the declared columns out of its own
+cursor; two shapes over different relations refuse, because one stream carries
+one schema. The rows are read inside the `__arrow_c_stream__` call and DuckDB
+makes that call on a worker thread, so a thread-affine driver needs a
+connection that permits it, `sqlite3.connect(path, check_same_thread=False)`. `add(space, head, data)` reads an Arrow stream one record batch at
+a time, which is how a DuckDB relation, a pyarrow Table or a Parquet reader
+loads; a source with its own row door keeps it, since the two build the same
+atoms and the row door measured faster. `accessors()` installs the `metta`
+accessor on every frame library already imported and answers which ones carry
+it, so `df.metta.into(m, "row")` is `tables.add` in each library's own
+spelling; it never imports a frame library to do it. `sql_function(connection, head)`
+registers a MeTTa head as a scalar SQL function on a sqlite3 or DuckDB
+connection and answers its SQL name: sqlite3 takes the arity alone, DuckDB
+takes the types and reads them from the head's declared arrow, no answer is
+SQL NULL and several answers refuse.
 `metta.space(backing={"edge": 2}, journal=path, sync="flush")` is journalled
 and crash-recovering. Reopen an old schema once with
 `metta.space(backing={"new": 2}, journal=path, rename={"old": "new"})`; every
