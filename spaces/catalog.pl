@@ -10,6 +10,12 @@
 % commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]. Guarantees: the algebra-law vocabulary and its alias claims
 % derive from the engine's accepted law facts [tested:
 % algebra_law_vocabulary_and_alias_claims_are_exact; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e].
+% Guarantees: the algebra-law vocabulary carries the ghostwriter names,
+% identity and distributes-over as aliases and roundtrip and equivalent as
+% seam laws the engine never checks, and the refinement vocabulary row names
+% the eleven heads engine/metta/refinements.pl decides [tested:
+% algebra_law_vocabulary_and_alias_claims_are_exact,
+% refinements:the_rule_table_and_the_catalog_vocabulary_agree; commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 % Guarantees: deprecated is a
 % schema-checked catalog kind whose name, since, and remedy fields remain
 % ordinary queryable data [tested: the_shipped_catalog_is_queryable_data;
@@ -1102,8 +1108,29 @@ metta_algebra_law_alias(distributive,
                         ['left-distributive', 'right-distributive']).
 metta_algebra_law_alias(idempotent, ['combine-idempotent']).
 metta_algebra_law_alias(contraction, [contraction]).
+%The property-test vocabulary Hypothesis's ghostwriter spells for a binary
+%operation, `identity` and `distributes_over`, as aliases over the same
+%equational laws the checker already decides: a semiring's two identities are
+%its zero under combine and its one under extend, and extend distributing over
+%combine is the two-sided law `distributive` already names. Both spellings stay
+%reachable; the ghostwriter's is what a generated property test is named by.
+metta_algebra_law_alias(identity,
+                        ['combine-zero-identity', 'extend-one-identity']).
+metta_algebra_law_alias('distributes-over',
+                        ['left-distributive', 'right-distributive']).
+
+%The two laws a carrier owes the SEAM rather than its operations, and which
+%only a host can check: `roundtrip`, every carrier value survives projection
+%through the engine and back, and `equivalent`, each operation agrees with its
+%reference twin on the host. Known here so a declaration may name them, and
+%never equational, so the engine's finite-carrier checker leaves them to the
+%host's property tests exactly as it leaves `contraction` to the capability
+%it names.
+metta_algebra_seam_law(roundtrip).
+metta_algebra_seam_law(equivalent).
 
 metta_algebra_known_law(contraction).
+metta_algebra_known_law(Law) :- metta_algebra_seam_law(Law).
 metta_algebra_known_law(Law) :- metta_algebra_equational_law(Law).
 metta_algebra_known_law(Law) :- metta_algebra_law_alias(Law, _).
 
@@ -1113,8 +1140,9 @@ metta_algebra_law_expansion(Law, [Law]).
 
 metta_algebra_law_vocabulary(Laws) :-
     findall(Law, metta_algebra_equational_law(Law), Equational),
+    findall(Law, metta_algebra_seam_law(Law), Seam),
     findall(Alias, metta_algebra_law_alias(Alias, _), Aliases),
-    append(Equational, [contraction|Aliases], All),
+    append([Equational, [contraction], Seam, Aliases], All),
     list_to_set(All, Laws).
 
 metta_check_algebra_laws(Name, Combine, Extend, Zero, One,
@@ -1511,6 +1539,16 @@ metta_catalog_preset([vocabulary, semiring|Semirings]) :-
     findall(Name, metta_catalog_preset([algebra, Name|_]), Semirings).
 metta_catalog_preset([vocabulary, 'algebra-law'|Laws]) :-
     metta_algebra_law_vocabulary(Laws).
+%The heads a refinement may carry inside `(Annotated Base ...)` and still
+%constrain a VALUE: the eleven engine/metta/refinements.pl decides, spelled as
+%annotated_types spells them so a Python `Annotated[int, Gt(0)]` and a MeTTa
+%`(Annotated Number (Gt 0))` are one declaration. The type reader admits an
+%encoded metadata atom as a refinement only when its head is here; anything
+%else, `doc` and `Timezone` included, stays in the annotation claim alone.
+%Held equal to the rule table by refinements:the_rule_table_and_the_catalog_vocabulary_agree.
+metta_catalog_preset([vocabulary, refinement,
+                      'Gt', 'Ge', 'Lt', 'Le', 'Interval', 'MultipleOf',
+                      'MinLen', 'MaxLen', 'Len', 'Predicate', 'Unit']).
 metta_catalog_preset([vocabulary, 'source-kind', linear, repeated, peek]).
 metta_catalog_preset([vocabulary, world, 'closed-world', 'open-world']).
 metta_catalog_preset([vocabulary, atomicity,
