@@ -28,6 +28,11 @@
 %   bindings with the result, and report observed refinement failures using
 %   the original written call after all overloads decline
 %   [tested: run_tests(tensor_shapes); commit=4eaefdd8d40e53b2613722287302a14b41704662].
+% Guarantees: a refined declared result type is checked at the result crossing
+%   by metta_refined_result/6, which answers the produced value, the
+%   BadReturnValue Error on the written call, or fails as a plain mismatch
+%   [tested: refinements:a_return_refinement_refuses_with_the_constraint_and_the_value,
+%   refinements:a_return_base_mismatch_stays_silent; commit=WORKTREE].
 % Owns resources: each refined call owns a refinement_evidence/2 cell whose
 %   failure snapshots and host references become collectible when that call
 %   finishes or is abandoned. The cell never escapes into global state.
@@ -358,13 +363,30 @@ typed_functioncall_branch(Fun, TypeChain, T, GsH, IsPartial, Bound, Out,
     %[measured 2026-08-30: per-call 47.24 typed against 15.24 plain over a
     %null-driver baseline of 12.24, and back to parity through this door;
     %tested: test_extension_cost_rows_are_marginal].
+    %A REFINED result type is checked at the crossing by a goal that can
+    %answer an Error rather than fail: the call binds a fresh Produced and
+    %metta_refined_result/6 (engine/metta/refinements.pl) then binds Out to
+    %the value the declared type admits, to `(Error <call as written>
+    %(BadReturnValue <constraint> <value>))` when the base admits it and a
+    %decided constraint fails, and fails as the ordinary check below does when
+    %the base itself is wrong. The written call is the one
+    %dispatch_mismatch_result/3 names for an argument refusal, computed here
+    %exactly as typed_functioncall_dl/10 computes it above.
     (   metta_unchecked_result_type(OutType)
-    ->  OutCheck = []
+    ->  OutCheck = [],
+        Produced = Out
+    ;   nonvar(OutType), OutType = [OutHead|_], OutHead == 'Annotated',
+        metta_refined_type(OutType, _, _)
+    ->  ( IsPartial -> append(Bound, T, Written) ; Written = T ),
+        metta_argument_type_origins([OutType], [OutOrigin]),
+        OutCheck = [metta_refined_result(Fun, Written, Produced, OutType,
+                                         OutOrigin, Out)]
     ;   metta_argument_type_origins([OutType], [OutOrigin]),
         type_check_goal(Out, OutType,
                         check_argument_type(Out, OutType, OutOrigin),
                         OutGoal),
-        OutCheck = [OutGoal]
+        OutCheck = [OutGoal],
+        Produced = Out
     ),
     %NO RESULT CONTINUATION IS EMITTED HERE, and the reason is that this engine
     %compiles where the arbiter steps. The arbiter's `eval` applies one equation
@@ -388,7 +410,7 @@ typed_functioncall_branch(Fun, TypeChain, T, GsH, IsPartial, Bound, Out,
     place_type_checks(ArgTypes, OutType, ArgChecks, OutCheck, [], AfterEval,
                       Extra),
     typed_call_operands(Fun, Computed0, Guarded),
-    build_call_or_partial_dl(Fun, AVsTmp, Out, CallGoals, [], Extra),
+    build_call_or_partial_dl(Fun, AVsTmp, Produced, CallGoals, [], Extra),
     (   nonvar(Refined)
     ->  Evidence = refinement(Cell),
         (   AfterEval == []

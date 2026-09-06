@@ -751,6 +751,7 @@ seam:engine_emitted(metta_bad_argument_error/3).
 seam:engine_emitted(dispatch_mismatch_result/3).
 seam:engine_emitted(dispatch_refinement_mismatch_result/4).
 seam:engine_emitted(metta_record_refinement_failure/3).
+seam:engine_emitted(metta_refined_result/6).
 seam:engine_emitted(dispatch_no_match_result/3).
 seam:engine_emitted(dispatch_policy_execute/5).
 seam:engine_emitted(metta_application_result/3).

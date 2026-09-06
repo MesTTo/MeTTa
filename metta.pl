@@ -1384,6 +1384,7 @@ prolog:error_message(metta_extension_required(Name, Cause)) -->
 :- consult('metta/operators.pl').
 :- consult('metta/input_guards.pl').
 :- consult('metta/types.pl').
+:- consult('metta/refinements.pl').
 :- consult('metta/effects.pl').
 :- consult('metta/space_hooks.pl').
 :- consult('metta/runtime.pl').
