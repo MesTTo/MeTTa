@@ -52,6 +52,12 @@ license-files = ["LICENSE"]
 #: command and the reinstall that follows it. The engine is a program rather
 #: than a Python package either way; this only decides who gets to say so.
 dependencies = [
+    #: The refinement vocabulary the type reader speaks: `Annotated[int, Gt(0)]`
+    #: declares `(Annotated Number (Gt 0))`. It is the vocabulary pydantic,
+    #: msgspec, beartype and Hypothesis already read, and a reader that speaks a
+    #: vocabulary imports it; the package is pure Python with no dependency of
+    #: its own.
+    "annotated-types>=0.7",
     "docstring-parser>=0.17",
 ]
 classifiers = [
@@ -297,8 +303,8 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = [
-    "array_api_compat", "faiss", "hypothesis", "numpy", "pandas",
-    "polars", "rich.*", "websocket",
+    "annotated_types", "array_api_compat", "faiss", "hypothesis", "numpy",
+    "pandas", "polars", "rich.*", "websocket",
 ]
 ignore_missing_imports = true
 follow_imports = "skip"

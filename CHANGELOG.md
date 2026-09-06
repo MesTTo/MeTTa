@@ -9,6 +9,40 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- One refinement vocabulary. `Annotated[int, Gt(0)]` with the
+  `annotated_types` constraints (`Gt`, `Ge`, `Lt`, `Le`, `Interval`,
+  `MultipleOf`, `MinLen`, `MaxLen`, `Len`, `Predicate`, `Unit`) declares
+  `(Annotated Number (Gt 0))` from a signature, because each constraint class
+  now encodes to the atom of its own name; `doc(...)` and `Timezone(...)` stay
+  in the annotation claim. The engine decides each head on the value, one
+  rule per head in `engine/metta/refinements.pl`, named by the catalog's
+  `(vocabulary refinement ...)` row and the generated
+  `metta.vocabularies.Refinement`. A refined parameter now accepts the values
+  its constraints admit (it refused every value before) and refuses the rest
+  with one `(Error <call> (BadArgValue <position> <constraint> <value>))`; a
+  refined result type is checked at the return crossing and answers
+  `(BadReturnValue <constraint> <value>)` where it answered nothing;
+  `m.cast(value, Annotated[...])` casts against the refined type and names
+  the violated constraint. `annotated-types` is a declared dependency.
+- `metta.testing.cases(head)`, deal.cases's shape over MeTTa's contracts: the
+  arrow and refinements of a `@m.define`d head become Hypothesis strategies
+  through `from_type`, each generated call is run, and an `(Error ...)`
+  answer, a return value outside the declared refinement, or a write or
+  unrepeatable answer under a read-only effect class is reported with the
+  shrunk MeTTa call form. Usable as a pytest test, a decorator, and an
+  iterable of cases. `metta.testing.laws(algebra, space)` generates one
+  property test per declared law row.
+- The `algebra-law` vocabulary carries Hypothesis's ghostwriter names:
+  `identity` and `distributes-over` as aliases over the equational laws, and
+  `roundtrip` and `equivalent` as the seam's own laws (a carrier value
+  survives projection through the engine and back; an operation agrees with
+  its host twin), checked by `testing.laws` and never by the engine's
+  finite-carrier checker. Every existing law name stays reachable.
+- A class that states its positional fields through `__match_args__`, an
+  attrs class or a plain class, crosses by default with the positional
+  constructor as its reverse; hidden state is refused rather than lost.
+- `typing.get_type_hints` resolves a defined head's annotations through the
+  head and through its `.py` twin: both now name what they wrap.
 - `lib_import` exposes committed imports as `(import Path)` atoms through
   `(imports &space)`. `unimport!` withdraws the imported source's surviving
   atom occurrences and compiled definitions, preserving equal atoms owned by
@@ -16,6 +50,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A comparison over a numpy scalar answers the MeTTa boolean. `(< x 6)` with
+  `x` a `numpy.int64` answered `np.True_`, a host object, so
+  `(if (< x 6) yes no)` took the `no` branch and `(== (< x 6) True)` was
+  False; a scalar comparison now crosses as Python's bool while an array
+  comparison keeps its array.
 - A Python stream the engine pulls no longer loses the exception that ended
   it. Janus reads a raising pull as an exhausted one, so a space provider's
   `match` or `atoms`, a grounded value's `match_`, a generator operation and an

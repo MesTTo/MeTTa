@@ -448,6 +448,12 @@ application_arrow_declared_in(Module, [F|_]) :-
 %Internal checks call has_type/2 instead: a fixed expected type stops at its
 %first witness, while an unbound shared type variable still enumerates the
 %distinct choices needed to make later arguments consistent.
+%A BOUND second argument is the witness question, "is X known to be a T", and
+%the cast door (extensions/python/metta/shim.pl, metta_py_cast/4) is its
+%caller. A refined T is witnessed by a reported type the witness relation
+%admits as the whole type, or by one it admits as the BASE while every
+%constraint holds on X; the constraint is a question about the value and the
+%witness relation only ever saw types (engine/metta/refinements.pl).
 'get-type'(X, T) :-
     current_metta_module(Module),
     reported_type_answers(Module, X, Types),
@@ -455,6 +461,11 @@ application_arrow_declared_in(Module, [F|_]) :-
     ->  member(T, Types)
     ;   member(Actual, Types),
         typing_rule_accepts(Module, witness, '$metta_resolved_type'(Actual), T)
+    ;   metta_refined_type(T, Base, Constraints),
+        member(Actual, Types),
+        typing_rule_accepts(Module, witness, '$metta_resolved_type'(Actual),
+                            Base),
+        metta_refinements_hold(Constraints, X)
     ).
 
 %LeaTTa rules that the reporting observers see the empty expression's unit
@@ -570,7 +581,40 @@ has_type_in(_, X, T) :- metta_grounded_numeric_type(X, T), !.
 has_type_in(Module, X, T) :- has_type_derive(Module, X, T).
 
 has_resolved_type_in(_, X, T) :- metta_grounded_numeric_type(X, T), !.
-has_resolved_type_in(Module, X, T) :- has_type_derive(Module, X, T).
+%A refined type is satisfied the way it always was, by a declared type that
+%unifies with it, and also by a value whose type satisfies the BASE while every
+%constraint holds on the value (engine/metta/refinements.pl). The base takes
+%this same relation, so a host numeric against `(Annotated Number (Gt 0))`
+%keeps the grounded fast path above. A disjunction and not an if-then-else:
+%the declared path may bind a shared type variable several ways and the
+%argument group's commit is the only place that choice is closed.
+%The guard is INLINED, as the union guards are: `T = [Head|_]` against an atom
+%fails without a call, so a plain type reaches has_type_derive/3 retiring the
+%same inferences it did before this arm existed.
+has_resolved_type_in(Module, X, T) :-
+    (   nonvar(T), T = [Head|_], Head == 'Annotated',
+        metta_refined_type(T, Base, Constraints)
+    ->  (   type_answers(Module, X, Types),
+            member(Actual, Types),
+            metta_refined_declared_match_in(Module, Actual, T)
+        ;   has_resolved_type_in(Module, X, Base),
+            metta_refinements_hold(Constraints, X)
+        )
+    ;   has_type_derive(Module, X, T)
+    ).
+
+%A reported type that matches the WHOLE refined type by evidence. The two
+%gradual wildcards are excluded on purpose: `%Undefined%` and `Atom` satisfy
+%every expected type in the shipped relation, and letting them satisfy a
+%refined one would discharge a constraint about the value without ever reading
+%the value. A wildcard-typed value instead takes the base-plus-constraints road
+%below, where `(a)` is refused by `(MinLen 2)` on its length rather than
+%admitted for having no type.
+metta_refined_declared_match_in(Module, Actual, Refined) :-
+    nonvar(Actual),
+    Actual \== '%Undefined%',
+    Actual \== 'Atom',
+    metta_resolved_types_match_in(Module, Actual, Refined).
 
 
 has_type_derive(Module, X, T) :-
@@ -708,12 +752,28 @@ type_witness_candidate_matches(Module, RawActual, RawExpected) :-
                             Actual, Expected)
     ).
 
+%The refined alternative under a user policy, the same split
+%has_resolved_type_in/3 makes on the shipped one: the declared path first,
+%then the base under this same policy-strict relation with every constraint
+%holding on the value (engine/metta/refinements.pl).
+has_type_under_policy(Module, X, T) :-
+    (   nonvar(T), T = [Head|_], Head == 'Annotated',
+        metta_refined_type(T, Base, Constraints)
+    ->  (   type_answers(Module, X, Types),
+            member(Actual, Types),
+            metta_refined_declared_match_in(Module, Actual, T)
+        ;   has_type_under_policy(Module, X, Base),
+            metta_refinements_hold(Constraints, X)
+        )
+    ;   has_type_under_policy_declared(Module, X, T)
+    ).
+
 %The policy-strict ground check mirrors has_type_derive/3's candidate order
 %but deliberately omits its tuple and exact shortcuts. This path is reached
 %only while a user ordinary or widening policy is installed, where every
 %candidate must be accepted by that policy before it can discharge a
 %generated contract.
-has_type_under_policy(Module, X, T) :-
+has_type_under_policy_declared(Module, X, T) :-
     ground(T),
     State = collected([]),
     (   (   type_candidate_in(Module, X, Actual),
@@ -749,7 +809,7 @@ has_type_under_policy(Module, X, T) :-
 % [tested: tensor_shapes:a_policy_checked_shape_variable_binds_at_the_live_call,
 % tensor_shapes:a_policy_refusal_still_blocks_a_relational_shape_witness;
 % commit=4eaefdd8d40e53b2613722287302a14b41704662].
-has_type_under_policy(Module, X, T) :-
+has_type_under_policy_declared(Module, X, T) :-
     \+ ground(T),
     (   nonvar(T), T = [UnionHead|_], UnionHead == '|'
     ->  metta_union_admits(has_type_under_policy(Module), X, T)

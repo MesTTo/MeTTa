@@ -37,8 +37,8 @@ re-runs them.
 | `website/reasoning/*.md` | weighted relations, matchers and measure | |
 | `extensions/python/examples/*/*.py` | runnable Python programs, each printing checked claims through `_common.py`: `check(label, got, expected)` raises `CheckFailed` rather than asserting, because `python -O` strips an assert while the print under it still runs, and `done(name)` refuses to print its OK line when nothing was checked, so an example that verified nothing cannot report success; the six under `gallery/` also check adjacent emitted-MeTTa and output comments plus bilingual `@example` atoms | the `examples` and `gallery` gate lanes |
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
-| `engine/**/*.pl` | `engine/metta.pl` engine bootstrap loading the twelve `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, effects, space_hooks, runtime, control, interop, registration), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eight `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products), `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 923 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.metta`. Each unit is a plain source file consulted by its umbrella, so predicate ownership and load order are the umbrella's | |
-| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 91, `service` 60, `ownership` 38, `event` 14, `declaration` 13. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
+| `engine/**/*.pl` | `engine/metta.pl` engine bootstrap loading the thirteen `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, space_hooks, runtime, control, interop, registration), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eight `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products), `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 923 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.metta`. Each unit is a plain source file consulted by its umbrella, so predicate ownership and load order are the umbrella's | |
+| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 92, `service` 60, `ownership` 38, `event` 14, `declaration` 13. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
 | `lib/lib_*/` | 38 MeTTa libraries, implemented in `.metta`, `.pl`, or both, loaded with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
 | `extensions/*/extension.pl` | one control file per seat, read when argv carries `extensions` and never read without it; a seat's `entry(engine, _)` loads only where its declared needs hold and its `entry(host, _)` is recorded for the seat's own runtime to consult, so the engine names neither a host nor a backend | |
@@ -273,7 +273,8 @@ wherever an object does, `under="budget"`.
 `combine-commutative`, `extend-associative`, `extend-commutative`,
 `left-distributive`, `right-distributive`, `combine-idempotent`,
 `combine-zero-identity`, `extend-one-identity`, `extend-zero-annihilates`,
-`contraction`, `associative`, `commutative`, `distributive`, `idempotent`.
+`contraction`, `roundtrip`, `equivalent`, `associative`, `commutative`,
+`distributive`, `idempotent`, `identity`, `distributes-over`.
 
 | algebra-law alias | expands to |
 |---|---|
@@ -282,6 +283,18 @@ wherever an object does, `under="budget"`.
 | `distributive` | `left-distributive`, `right-distributive` |
 | `idempotent` | `combine-idempotent` |
 | `contraction` | `contraction` |
+| `identity` | `combine-zero-identity`, `extend-one-identity` |
+| `distributes-over` | `left-distributive`, `right-distributive` |
+
+The seven names Hypothesis's ghostwriter spells, `associative`, `commutative`,
+`identity`, `distributes_over`, `idempotent`, `roundtrip` and `equivalent`,
+are `AlgebraLaw` members (the enum is the underscore-to-hyphen map), so
+`metta.testing.laws(algebra, space)` generates one property test per law row
+a declaration names. `roundtrip` and `equivalent` are the seam's laws, checked
+by the host and never by the engine's finite-carrier checker: every carrier
+value survives projection through the engine and back, and each operation
+agrees with its host twin (the Python callable it was registered from, or the
+standard callable that mentions a builtin, `*` and `operator.mul`).
 
 `under=counting` answers one `TaggedAnswer` whose `.annotation` is the count
 and whose `.value` is `()`, the empty value saying no proposition row was
@@ -551,7 +564,9 @@ Annotations become declarations in the engine's idiom: a `TypeVar` is
 parametric, a `Union` declares one arrow per member, `Callable[[int],int]` ->
 `(-> Number Number)`, `tuple[int,str]` -> elementwise, and
 `Annotated[int,"metres"]` retains `Number` in the arrow while publishing its
-metadata as a matchable `(Annotated Number "metres")` claim. An ATOM in
+metadata as a matchable `(Annotated Number "metres")` claim, where
+`Annotated[int, Gt(0)]` refines the arrow itself to `(Annotated Number (Gt
+0))` (Types and cast, the refinement vocabulary). An ATOM in
 annotation position IS the type, which is the escape hatch for a MeTTa type no
 Python class spells: `def speak(a: S.Animal) -> S.Sound` declares
 `(-> Animal Sound)`, and the doc's `(@type ...)` field carries the same atom.
@@ -685,6 +700,36 @@ wildcards and do not decompose a union; union membership is the argument and
 result relation.
 A typed mismatch answers an `Error` value whose reason is `BadArgType` or
 `IncorrectNumberOfArguments`, so a MeTTa program can handle it with `if-error`.
+A REFINEMENT is a constraint on the value inside a type: `(Annotated Number
+(Gt 0))` is a Number that is greater than zero, and `Annotated[int, Gt(0)]`
+with the `annotated_types` vocabulary declares exactly that arrow from a
+signature, because each constraint class encodes to the atom of its own name.
+`metta.vocabularies.Refinement` names the heads the engine decides: `Gt`,
+`Ge`, `Lt`, `Le`, `Interval` (as `(Interval (ge 0) (le 1))`, the bounds that
+were written), `MultipleOf`, `MinLen`, `MaxLen`, `Len` (as `(Len 2)` or
+`(Len 2 5)`), `Predicate` and `Unit`; `doc(...)` and `Timezone(...)` travel in
+the annotation claim and never reach the type. A refined parameter accepts a
+value whose declared type unifies with the whole refined type, or whose type
+admits the base while every constraint holds on the value; a value the base
+admits and a constraint refuses answers ONE `(Error <call> (BadArgValue
+<position> <constraint> <value>))`, the first violated constraint of the first
+violating position, and a base mismatch keeps `BadArgType`. A refined RESULT
+type, `-> Annotated[int, Ge(0)]`, is checked at the return crossing and
+answers `(Error <call> (BadReturnValue <constraint> <value>))`; a bare result
+type mismatch stays the silent branch failure it always was. `MinLen`,
+`MaxLen` and `Len` read a string's length, an expression's child count and a
+host sequence's length; `Gt`, `Ge`, `Lt`, `Le`, `Interval` and `MultipleOf`
+decide native numbers and host numerics through the seam; `Predicate` applies
+its function to the value, a defined head through its equations and a Python
+callable through the seam, and holds when the answer is True; `Unit` is a
+declaration, decided by unification between declared types and never against
+a bare number. An `%Undefined%`-typed value is not waved through a refinement
+the way the gradual rule waves it through a plain type: the constraint reads
+the value, so `(a)` fails `(MinLen 2)` on its length. A constraint head
+outside the vocabulary, `(Shape ...)` included, is admitted only by declared
+type unification, exactly as before the vocabulary existed. The rules are one
+clause per head in `engine/metta/refinements.pl`, and the catalog's
+`(vocabulary refinement ...)` row names the same eleven heads.
 `(add-typing-rule! name family actual expected outcome)` adds a module-scoped
 checker rule; `outcome` is `accept`, `(refuse reason)`, or `defer`, and
 `remove-typing-rule!` withdraws it. Families are `ordinary`, `derived`,
@@ -697,7 +742,10 @@ overlaps as conditional proof obligations.
 the value does admit. Its bound type observation uses `witness`: the wildcard
 applies to the target only, so an unknown actual cannot establish a concrete
 target. This is stricter than ordinary typed-call acceptance. Aliases inherit
-that rule and ordinary user refusals. `Atom`, `%Undefined%` and `_` are unchecked. The
+that rule and ordinary user refusals. An `Annotated` target casts against its
+refined type, `m.cast(1, Annotated[int, Gt(0)])` answers `1`, and a value the
+base admits and a constraint refuses raises `CastError` naming that constraint
+and the value. `Atom`, `%Undefined%` and `_` are unchecked. The
 metatypes `Atom`, `Variable` and `Expression` mask evaluation: a parameter
 declared with one receives its argument as written at every door, and a call
 whose declared result is the metatype `Atom` answers as produced where any
@@ -941,7 +989,12 @@ reverse commit order; a failed compensation keeps its receipt for an explicit
 expression, `build(atom)` -> object (returning the atom unchanged when it
 cannot), `register_type`, `unregister_type`, `declarations`, `auto_image`.
 Dataclasses, enums, pydantic models and annotated classes all cross; enums
-project to symbols. A class owner can instead implement `obj.__metta__()` and
+project to symbols. A class that states its positional fields through PEP
+634's `__match_args__`, an attrs class or a plain class, crosses the same way
+with no registration: the fields become children and the positional
+constructor is the reverse; attrs state outside the tuple and a required
+constructor parameter it does not name are refused rather than lost, and
+`__metta__` on the class outranks the default. A class owner can instead implement `obj.__metta__()` and
 `Class.__from_metta__(*fields)` for a two-way conversion without process-wide
 registration; pass the class as `build(atom, Class)`. `@space.define` on a
 class declares it INTO the space
@@ -1223,7 +1276,10 @@ no transport under it, for mounting on another HTTP framework.
 (`atoms`, `expressions`, `patterns`, `names`, `numbers`, `texts`, `symbols`,
 `variables`, `grounded`, `ground_atoms`, `numpy_scalars`),
 `from_pattern(pattern, max_leaves=8)` for ground instances that share every
-repeated named variable and draw anonymous occurrences independently, the compliance suites
+repeated named variable and draw anonymous occurrences independently, the
+contract tests a declaration already writes, `cases(head, examples=100,
+strategies=None, seed=None)` and `laws(algebra, space, laws=None,
+values=None, examples=100, seed=None)`, the compliance suites
 (`SpaceComplianceSuite`, `GatewayComplianceSuite`, `check_space_provider`,
 `check_twin`, `check_replay`, `check_minted_handles`), and the deterministic
 benchmark gates (`benchmark_case`, `benchmark_counter_slope`,
@@ -1231,7 +1287,29 @@ benchmark gates (`benchmark_case`, `benchmark_counter_slope`,
 controlled=False, timeout=60) -> CounterRuns`, `measure_instructions`,
 `BenchmarkBaseline`, `count_atoms`), also exported from `metta.benchmarking`.
 `CounterRuns.events` maps each requested perf event to its samples and
-`.outputs` retains each measured command's stdout. Use
+`.outputs` retains each measured command's stdout.
+`testing.cases(head)` is deal.cases's shape over MeTTa's contracts: every
+parameter of a `@m.define`d head draws through Hypothesis's `from_type`, so
+`Annotated[int, Gt(0)]` draws positive integers, an atom class draws atoms
+(the atom classes are registered with `register_type_strategy` on first use),
+a MeTTa type atom draws the values the space declares to inhabit it, and
+`strategies=` overrides a parameter by name; each generated call runs and is
+held to three contracts: no `(Error ...)` answer, every answer inside the
+return annotation's refinements, and a declared effect class at or below
+`nondeterministicReadOnly` neither writing into the space nor answering
+differently when repeated. The failing example is Hypothesis's shrunk one with
+the MeTTa call form, `(shrink 1) answered (Error (shrink 1) (BadReturnValue
+(Ge 0) -4))`. Three shapes: `test_double = testing.cases(double)` is a pytest
+test, `@testing.cases(double)` decorates a test taking one `Case` whose
+`.call` is the form and whose call runs the checks, and iterating yields the
+generated cases unrun. `testing.laws(algebra, space)` does the same for a
+declared algebra's law rows and answers a `Laws` object that is a pytest
+test, an iterable of `(law, test)` pairs, and a callable; values come from
+the finite carrier, from the declared type (`Number` draws integers, because
+floating-point addition is not associative), or from `values=`, and a preset
+with no carrier row is tested over its two identities. There is no exception
+contract row, so an `(Error ...)` answer for a generated call is always a
+violation: narrow the precondition with a refinement instead. Use
 `BenchmarkBaseline.observe_counter` for deterministic engine counts,
 `observe_measurement` for a declared noisy-counter band, and
 `observe_configuration` before comparing either. `metta.pytest_plugin` gives the `metta` and

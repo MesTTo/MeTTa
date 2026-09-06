@@ -24,6 +24,14 @@ Source: `extensions/python/metta/testing.py`.
 >     numeric dispatch survive an engine round trip
 >   - from_pattern generates ground substitutions, preserving repeated named
 >     variables while drawing anonymous occurrences independently
+>   - cases(head) draws every argument from the head's annotations through
+>     Hypothesis's from_type, refinements included, runs the head over them and
+>     reports an Error answer, a return value outside the declared refinement,
+>     or an observed effect above the declared class, with the MeTTa call form
+>     in the failing example
+>   - laws(algebra, space) generates one property test per declared law row
+>     under the ghostwriter's names, passing for the boolean semiring and
+>     failing with the counterexample for a carrier that breaks a law
 
 The entries below reproduce the source signatures and docstrings.
 
@@ -283,3 +291,146 @@ def check_twin(defined, cases) -> list[str]:
 >
 > Raises AssertionError on the first case where they differ, naming the
 > case and both answers.
+
+## `Case`
+
+```python
+class Case:
+```
+
+> One generated call of a defined head, with its contract checks.
+>
+> ``call`` is the MeTTa form, ``(double 3)``; calling the case runs the head
+> over the arguments and checks every declared contract, answering the
+> encoded answers or raising AssertionError naming the call and what it
+> violated.
+
+### `Case.call`
+
+```python
+def call(self) -> Expression:
+```
+
+> The MeTTa form this case evaluates.
+
+## `Cases`
+
+```python
+class Cases:
+```
+
+> The property test a defined head's declarations write.
+>
+> Built by ``cases``; see it for the three ways this object is used.
+
+### `Cases.strategy`
+
+```python
+def strategy(self) -> dict[str, Any]:
+```
+
+> One Hypothesis strategy per parameter, in the head's own order.
+
+## `cases`
+
+```python
+def cases(
+    head: Defined,
+    *,
+    examples: int = 100,
+    strategies: dict[str, Any] | None = None,
+    seed: int | None = None,
+) -> Cases:
+```
+
+> The property test a defined head's declarations already write.
+>
+> Every parameter's annotation becomes a Hypothesis strategy through
+> ``from_type``, so ``Annotated[int, Gt(0)]`` draws positive integers, an
+> atom class draws atoms, and a MeTTa type atom draws the values the space
+> declares to inhabit it. Each generated call is run, and three contracts
+> are checked: the head answers no ``(Error ...)``, every answer satisfies
+> the return annotation's refinements, and a declared effect class at or
+> below ``nondeterministicReadOnly`` neither writes into the space nor
+> answers differently when the call is repeated. The failing example is
+> Hypothesis's own shrunk one, printed with the MeTTa call form.
+>
+> Three shapes, deal.cases's:
+>
+>     from metta import testing
+>
+>     test_double = testing.cases(double)          # pytest collects it
+>
+>     @testing.cases(double)
+>     def test_double_keeps_its_contract(case):
+>         case()                                   # run it; inspect case.call
+>
+>     for case in testing.cases(double, examples=10):
+>         print(case.call)
+>
+> ``strategies`` overrides the draw for named parameters, which is the door
+> for a MeTTa type nothing inhabits or an Atom refinement only the engine
+> can judge; ``examples`` is Hypothesis's max_examples; ``seed`` derandomises
+> one run.
+
+## `Laws`
+
+```python
+class Laws:
+```
+
+> The property tests a declared algebra's law rows write.
+>
+> Built by ``laws``; see it for the shapes. Iterating answers ``(law,
+> test)`` pairs, one Hypothesis test per canonical law; calling runs them
+> all; ``notes`` records the laws that had nothing to compare.
+
+### `Laws.strategy`
+
+```python
+def strategy(self) -> Any:
+```
+
+> The carrier's values: the declared finite carrier, the declared type, or ``values``.
+
+## `laws`
+
+```python
+def laws(
+    algebra: Any,
+    space: Any = None,
+    *,
+    laws: Iterable[str] | None = None,
+    values: Any = None,
+    examples: int = 100,
+    seed: int | None = None,
+) -> Laws:
+```
+
+> The property tests a declared algebra's law rows write.
+>
+> ``algebra`` is a ``DeclaredAlgebra`` (``metta.algebra.bool``, or what
+> ``require`` answers) or its name in ``space``, which must be given
+> because the operations are evaluated in it. Every law row the
+> declaration names, or every law in ``laws``, becomes one Hypothesis test
+> named by the ghostwriter vocabulary the ``AlgebraLaw`` rows spell:
+> ``associative`` and ``commutative`` over each operation, ``identity`` for
+> the two identities, ``distributes_over`` for extend over combine,
+> ``idempotent`` for combine, ``roundtrip`` for every carrier value
+> surviving projection through the engine and back, and ``equivalent`` for
+> each operation agreeing with its host twin. A failure is the engine's own
+> ``algebra_law_violation`` sentence with the shrunk counterexample.
+>
+>     from metta import algebra, testing
+>
+>     test_bool_laws = testing.laws(algebra.bool, m)   # pytest collects it
+>     for law, test in testing.laws("mine", m, laws=("commutative",)):
+>         test()
+>
+> Values come from the declared finite carrier, from the declared type
+> (``Number`` draws integers, because floating-point addition is not
+> associative), or from ``values``; a preset with no carrier row is tested
+> over its two identities. A symbolic identity such as ``tropical``'s
+> ``infinity`` is outside its operation's domain, which the engine's algebra
+> scope short-circuits and this sweep does not; pass ``values`` and ``laws``
+> that exclude it.
