@@ -263,6 +263,25 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `add-atom` and `remove-atom` take upstream PeTTa's domain. Upstream stores an
+  atom by making it a fact keyed on its HEAD, so an atom without one — a bare
+  symbol, a number, a string, or `()` — cannot become one there and the
+  operation has no answer; here both spellings accepted it, answered `True` and
+  wrote it. `!(add-atom &self ())` is the shrunk program the parity fuzzer
+  found, and the difference was not only the printed `true`: the atom was in
+  the space afterwards here and not there. The same now holds through every
+  route a program can take, including `(eval (add-atom &self b))`, a computed
+  space, and an atom arriving through a variable.
+
+  Nothing is lost, because this engine's space is still wider and the wider
+  doors are the spellings upstream does not define: `add-atoms` writes any
+  atom, `subtract-atom` takes one occurrence back, `Space.add`, `space.remove`
+  and `del space[atom]` are the Python faces, and a bare atom at the top of a
+  source file is the source spelling, which upstream's parser refuses outright.
+  The guard is at the compiled CALL SITE rather than in the predicate, so it
+  keys on the spelling and costs nothing: a written expression compiles to the
+  goal it always compiled to and only a computed atom pays one test.
+
 - `and`, `or`, `not`, `xor` and `implies` have no answer outside the two
   booleans, where they used to leave the call standing for a symbol operand
   and answer a `BadArgType` atom for a number. They are RELATIONS over `True`

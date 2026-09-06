@@ -20,7 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 263 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 266 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 24 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms | `extensions/python/tools/libdoc.py` |
@@ -533,7 +533,16 @@ door stores the other subtracts (`m -= [(S.Edge, a, b), (S.Edge, b, c)]`).
 `-=` takes ONE occurrence per element, Counter's grain, which is what makes
 it `+=`'s inverse; `remove()` is that same grain reporting absence; and
 `del m[pattern]` is the drain, every unifying occurrence in one crossing.
-MeTTa spells the pair `subtract-atom` and `remove-atom`. The `MeTTa` context speaks the same protocols as its own space,
+MeTTa spells the pair `subtract-atom` and `remove-atom`. `add-atom` and
+`remove-atom` are upstream PeTTa's own spellings and take upstream's domain, an
+atom with a HEAD: `!(add-atom &self b)`, `!(add-atom &self ())` and
+`!(remove-atom &self 1)` answer nothing and write nothing here exactly as they
+do there, because upstream stores an atom as a fact keyed on its head and a
+headless atom cannot become one. This engine's space is WIDER, and the wider
+doors are the spellings upstream does not define: `add-atoms` writes any atom,
+`subtract-atom` takes one occurrence back, `Space.add`, `space.remove` and
+`del space[atom]` are the Python faces, and a bare atom at the top of a source
+file is the source spelling, which upstream's parser refuses. The `MeTTa` context speaks the same protocols as its own space,
 so `m += lib.dict`, `len(m)`, `atom in m`, `m[pattern]` and `del m[...]`
 work on the process home directly; `bool(m)` is always True, since a space
 is a handle rather than a value that dwindles.

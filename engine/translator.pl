@@ -355,6 +355,7 @@
             %body, so a space's execution module imports it from here exactly
             %as it imports reduce/3 and the two dispatch results.
             metta_masked_result/2,
+            metta_space_update_atom/1,
             %atom-subst is one written-variable substitution and chain's
             %unstepped operand is another, so the walk is defined once here
             %and the operator in engine/metta/operators.pl imports it.

@@ -13,8 +13,9 @@ we owe. A program PeTTa raises on, or its parser refuses, is where this engine
 may be wider.
 
 The arbiter is upstream PeTTa at `ae66fa8e41dcd5539d614706bd4e5cfb34f9608d`,
-run as `swipl --stack_limit=8g -q -s src/main.pl -- <file> silent` from
-`/home/user/Dev/PyPeTTa1/PeTTa-upstream`, which is the invocation
+run as `swipl --stack_limit=8g -q -s src/main.pl -- <file> silent` from the
+checkout `tests/checks/check_upstream_parity.py` names as `UPSTREAM`, a sibling
+of this repository, which is the invocation
 `tests/conformance/petta_capture.py`'s `run/5` builds for both engines.
 
 ## 2026-09-07 — the classification rule, settled before any fix
@@ -243,3 +244,112 @@ attribution rows, and one contributor's only credit with them. `tests/prolog/sui
 `boolean_type_errors_answer_the_position_they_refuse` and covers all five over
 a number AND an undeclared symbol;
 `boolean_operations_remain_relational` is unchanged and still passes.
+
+## 2026-09-07 — divergence 1: `add-atom` and `remove-atom` outside upstream's domain
+
+Program (shrunk by the lane):
+
+```metta
+(rel0 a a)
+!(add-atom &self ())
+```
+
+Arbiter: nothing, exit 0. Ours before: `true`, exit 0, and the space then held
+`()`.
+
+Tried: the whole family before touching anything, because the shrunk program
+made this look like a printing difference and it is not — the atom is not
+STORED upstream either.
+
+| program | arbiter | ours before |
+|---|---|---|
+| `!(add-atom &self (foo 1))` | `true` | `true` |
+| `!(add-atom &self (new-space))` | `true` | `true` |
+| `!(add-atom &self ())` | nothing | `true` |
+| `!(add-atom &self b)` | nothing | `true` |
+| `!(add-atom &self 1)` | nothing | `true` |
+| `!(add-atom &self "s")` | nothing | `true` |
+| `!(remove-atom &self (nope))` | `true` | `true` |
+| `!(remove-atom &self ())` | nothing | `true` |
+| `!(remove-atom &self b)` | nothing | `true` |
+| `!(remove-atom &self 1)` | nothing | `true` |
+| `!(add-atom &self ())` then `!(get-atoms &self)` | `(rel0 a a)` | `true`, `(rel0 a a)`, `()` |
+| `!(add-atom &self b)` then `!(match &self b found)` | nothing | `true`, `found` |
+| `(= (g $x) (add-atom &self $x))` then `!(g b)` | nothing | `true` |
+| `(= (g $x) (add-atom &self $x))` then `!(g (p q))` | `true` | `true` |
+| `!(eval (add-atom &self b))` | nothing | `true` |
+| `!(let $s &self (add-atom $s b))` | nothing | `true` |
+| `!(add-atom &self $x)` | error, `assertz/2` no permission | error, insufficient instantiation |
+| a `!` whose result is the unit: `!()` | `()` | `()` |
+| `!(let $x () $x)` | `()` | `()` |
+| `!(collapse (add-atom &self b))` | `()` | `(true)` |
+| `!(collapse (add-atom &self (a b)))` | `(true)` | `(true)` |
+
+So the unit is not special: the domain is "has a head", and a `!` over a unit
+RESULT prints `()` on both engines, which rules out the printing reading the
+shrunk program suggests.
+
+Cause: upstream stores an atom by making it a fact keyed on its head,
+`add_sexp(Space, [Rel|Args]) :- Term =.. [Space, Rel | Args], assertz(Term).`,
+and removes through `remove_sexp/2` built the same way
+[source: PeTTa@ae66fa8 `src/spaces.pl:1-7`]. Both `'add-atom'/3` clauses
+(`:10`, `:24`) and both `'remove-atom'/3` clauses (`:26`, `:44`) funnel through
+those two, so the head unification `[Rel|Args]` IS the domain: an atom with no
+head cannot become a fact there and the call has no solution. This engine's
+space is wider by design — `add_sexp_in/4`'s last clause keeps a headless atom
+in `$metta_native_scalar/1`, a shape whose own comment records 15.3x against
+the marked-rule alternative — so both spellings accepted more than upstream's.
+
+Decided: the two spellings PeTTa defines take PeTTa's domain, and the wider
+space keeps the doors PeTTa does not define. Measured, so that the wider part
+is not lost:
+
+- a top-level bare atom in a source file. Upstream's parser refuses one,
+  `Syntax error: expected '(' or '!('`; here it is stored. A spelling PeTTa
+  refuses.
+- `add-atoms`, which upstream leaves standing as
+  `(add-atoms &self (a b))`. It funnels through `metta_add_atoms/2` rather
+  than `'add-atom'/3` and stores any atom, one per member.
+- `subtract-atom`, likewise left standing upstream, takes one occurrence back.
+- the Python `Space.add`, `space.remove` and `del space[atom]`, which call the
+  Prolog predicates directly and not through a compiled MeTTa call site.
+
+Fix: the guard is at the CALL SITE, `translate_space_update_dl/5`, not in
+`'add-atom'/3`. That is where the law's scope is — the law is about MeTTa
+spellings, and every other caller of the predicate is one of the doors above —
+and it costs nothing: the written atom decides at compile time wherever it can,
+so a written expression compiles to the goal it always compiled to, a written
+scalar compiles to `fail`, and only an atom arriving through a variable pays
+one test, `metta_space_update_atom/1`.
+
+Rejected: putting the guard in `'add-atom'/3` and `'remove-atom'/3`, where
+upstream has it. Fifteen Prolog call sites reach those predicates — the Python
+add, remove, drain and transfer doors, `add-reduct`, the conformance harness,
+the MORK space, `lib_file`, `lib_thread` — and every one of them would have had
+to be audited and moved to a wider predicate to keep a capability the law does
+not ask us to drop. The call-site guard needs no audit at all, because the
+spelling is what it keys on.
+
+Rejected: dropping the scalar storage to match upstream's representation.
+Nothing asks for it: the law binds the ANSWERS of programs PeTTa accepts, and
+a headless atom reaches the space through spellings PeTTa refuses or does not
+define.
+
+Tried: the wider doors after the change, to check nothing was taken with it ->
+`!(add-atoms &self (b 1))` still stores both and `!(add-reduct &self b)` still
+stores the symbol, and the arbiter leaves both heads standing, so both are
+extensions in spellings PeTTa does not define
+[measured 2026-09-07 against PeTTa@ae66fa8].
+
+Corpus moved with it: `04-02-patterns-and-bindings/07-unify.metta` used bare
+symbols as side-effect markers, `(chain (add-atom &self then-ran) $_ 3)`, which
+now has nothing to chain. The markers are expressions, `(then-ran)` and
+`(else-ran)`, and the file is 15 ✅ 0 ❌ again. It is the only place in the tree
+that wrote one: a grep for `add-atom`/`remove-atom` with a non-parenthesised
+atom over every `.metta`, `.py`, `.pl`, `.ts` and `.md` finds nothing else
+outside prose.
+
+Evidence:
+`examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/11-what-a-space-stores.metta`
+carries both halves; the half written in PeTTa's own spellings runs green on
+the arbiter (12 ✅) and was red here before the change.

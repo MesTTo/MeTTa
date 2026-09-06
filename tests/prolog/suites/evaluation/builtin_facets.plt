@@ -117,6 +117,7 @@ test(the_current_reverse_inventory_names_every_independent_surface_orphan) :-
                 predicate(spaces:metta_require_current_capability/2),
                 predicate(spaces:metta_require_safe_goal/1),
                 predicate(spaces:metta_require_space_update_capability/2),
+                predicate(translator:metta_space_update_atom/1),
                 predicate(user:'=@='/3)
               ]).
 

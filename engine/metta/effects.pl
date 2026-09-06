@@ -447,6 +447,7 @@ metta_effect_prolog_primitive(b_setval).
 metta_effect_prolog_primitive(metta_require_current_capability).
 metta_effect_prolog_primitive(metta_require_safe_goal).
 metta_effect_prolog_primitive(metta_require_space_update_capability).
+metta_effect_prolog_primitive(metta_space_update_atom).
 metta_effect_prolog_primitive('=@=').    metta_effect_prolog_primitive('\\==').
 metta_effect_prolog_primitive(nth0).     metta_effect_prolog_primitive(nth1).
 metta_effect_prolog_primitive(between).  metta_effect_prolog_primitive(succ).

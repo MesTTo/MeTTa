@@ -14,6 +14,12 @@
 % Guarantees: a collection closure excludes every variable bound by case, switch, unify and let* from its captured environment, preserving the written variable identities used by each binding form [tested: a_collection_closure_keeps_each_binding_form_local_to_one_element; commit=09e34db01c8e3ebeff375ca18d3424c483172e7d].
 % Guarantees: a singleton superposition adds no return unification and preserves every answer of its member [tested: singleton_superpose:the_only_branch_has_the_same_goal_and_output_as_its_expression, singleton_superpose:the_only_branch_keeps_every_answer_and_duplicate; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67].
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: the MeTTa spellings `add-atom` and `remove-atom` take upstream
+%   PeTTa's domain, an atom with a head, and have no answer for a bound atom
+%   without one, while `add-atoms`, `subtract-atom`, `add-reduct` and the
+%   engine's own doors keep the wider space
+%   [tested: examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/11-what-a-space-stores.metta;
+%   commit=WORKTREE].
 % Guarantees: `chain` compiles to exactly `let`'s goals, so the binder holds a
 %   VALUE and nothing evaluates that value a second time; an equation atom read
 %   out of a space and chained is the atom rather than the equality test's answer
@@ -1626,9 +1632,43 @@ translate_space_update_dl(Operation, [SpaceExpr, Atom], AfterHead, Goals,
                           Out) :-
     translate_space_expr_dl(SpaceExpr, AfterHead, BeforeOperation, Space),
     Goal =.. [Operation, Space, Atom, Out],
+    space_update_domain_goal(Operation, Atom, Goal, Guarded),
     translate_restricted_guard_dl(
-        metta_require_space_update_capability(Operation, Space), [Goal|Goals],
-        BeforeOperation).
+        metta_require_space_update_capability(Operation, Space),
+        [Guarded|Goals], BeforeOperation).
+
+%`add-atom` and `remove-atom` are PeTTa's spellings and take PeTTa's domain:
+%an atom with no head cannot be stored there and the operation answers nothing
+%[source: PeTTa@ae66fa8 src/spaces.pl:1-7; see metta_space_update_atom/1 for
+%the whole reading]. `!(add-atom &self ())` and `!(add-atom &self b)` answered
+%`true` here and stored the atom, against no answer and no write upstream;
+%`!(collapse (add-atom &self b))` was `(true)` here against `()` there
+%[measured 2026-09-07 against PeTTa@ae66fa8].
+%
+%The WRITTEN atom decides wherever it can, so this costs nothing at run time:
+%a written expression compiles to the goal it always compiled to, a written
+%scalar compiles to `fail`, and only an atom that arrives through a variable
+%pays one test. `(= (g $x) (add-atom &self $x))` is the case that needs it,
+%and it is measured on both sides: `!(g b)` answers nothing on both engines
+%after this and `!(g (p q))` answers `true` on both.
+%
+%The other three spellings this relation compiles are NOT PeTTa's --
+%`add-atoms`, `add-reduct` and `add-reducts` are left standing by the arbiter
+%and `subtract-atom` with them -- so they keep the wider space, which is where
+%a headless atom still has a MeTTa door [measured 2026-09-07: the arbiter
+%answers `(add-atoms &self (a b))` and `(subtract-atom &self b)` unreduced].
+space_update_domain_goal(Operation, Atom, Goal, Guarded) :-
+    (   \+ petta_defined_space_update(Operation)
+    ->  Guarded = Goal
+    ;   var(Atom)
+    ->  Guarded = (metta_space_update_atom(Atom), Goal)
+    ;   Atom = [_|_]
+    ->  Guarded = Goal
+    ;   Guarded = fail
+    ).
+
+petta_defined_space_update('add-atom').
+petta_defined_space_update('remove-atom').
 
 %A registered expression is an entity identifier in a space position. Every
 %other expression is still evaluated, preserving computed spaces such as
