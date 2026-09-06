@@ -334,10 +334,16 @@ self_tier_arrived(Space) :-
 %                                     declaration
 %
 %An argspec is symbol, integer, pattern, term, (one-of Vocab),
-%(optional Spec) in the tail only, or (rest Spec) in final position matching
-%zero or more. pattern and term both admit any term; the two names keep a
-%kind's row readable, a pattern is matched against queries and a term is
-%carried.
+%(some-of Vocab), (optional Spec) in the tail only, or (rest Spec) in final
+%position matching zero or more. pattern and term both admit any term; the two
+%names keep a kind's row readable, a pattern is matched against queries and a
+%term is carried. (some-of Vocab) admits one member of the vocabulary, a
+%member APPLIED to the arguments its (claim Vocab Member takes Spec...) row
+%declares, or a list of those, so a composable option set such as
+%(cache f (monotonic lazy (max-answers 100))) is one argument; a member
+%claimed (claim Vocab Member alone) stands by itself. metta_policy_members/3
+%below is the one parser, and the consumer that compiles the members reads
+%the same list the checker admitted.
 %
 %The checker runs at the two doors every native '&metta' write passes, the
 %per-atom funnel above and the bulk door below. A head with a declared kind
@@ -788,8 +794,53 @@ metta_check_value(Arg, ['one-of', Vocab], Position, Term) :-
     ->  true
     ;   metta_declaration_refused(Term, Position, ['one-of', Vocab])
     ).
+metta_check_value(Arg, ['some-of', Vocab], Position, Term) :-
+    !,
+    (   metta_policy_members(Vocab, Arg, _)
+    ->  true
+    ;   metta_declaration_refused(Term, Position, ['some-of', Vocab])
+    ).
 metta_check_value(_, Spec, Position, Term) :-
     metta_declaration_refused(Term, Position, Spec).
+
+%The members a (some-of Vocab) argument names, each a bare word or [Word|Args]
+%with the arguments the word's `takes` claim declares. One argument reads
+%three ways and the claims decide between them: a word is one member; an
+%expression whose head is a word claimed to take exactly the arguments that
+%follow it is one APPLIED member, so (lattice join) is not the pair of words
+%lattice and join; anything else is a list, every element read the same way.
+%A word with a `takes` claim never stands bare and a word claimed `alone`
+%never shares a list, so (cache f lattice) and (cache f (force monotonic))
+%are refused at the door rather than read as half a policy.
+metta_policy_members(Vocab, Arg, [Member]) :-
+    metta_policy_member(Vocab, Arg, Member),
+    !.
+metta_policy_members(Vocab, Args, Members) :-
+    is_list(Args),
+    Args \== [],
+    maplist(metta_policy_member(Vocab), Args, Members),
+    \+ ( Members = [_, _|_],
+         member(Member, Members),
+         metta_policy_member_word(Member, Word),
+         metta_catalog_row([claim, Vocab, Word, alone]) ).
+
+metta_policy_member(Vocab, Word, Word) :-
+    atom(Word),
+    metta_vocabulary_value(Vocab, Word),
+    \+ metta_catalog_row([claim, Vocab, Word, takes|_]).
+metta_policy_member(Vocab, [Word|Args], [Word|Args]) :-
+    atom(Word),
+    metta_vocabulary_value(Vocab, Word),
+    metta_catalog_row([claim, Vocab, Word, takes|Specs]),
+    is_list(Args),
+    same_length(Specs, Args),
+    maplist(metta_policy_argument, Specs, Args).
+
+metta_policy_argument(symbol, Arg) :- atom(Arg).
+metta_policy_argument(integer, Arg) :- integer(Arg).
+
+metta_policy_member_word([Word|_], Word) :- !.
+metta_policy_member_word(Word, Word).
 
 %kind and claim rows carry meaning past their shape, and the checker owns
 %their language, so their adds get the deeper walk: a kind's argspecs must
@@ -873,7 +924,7 @@ metta_check_catalog_semantics(cache, [Function, _], Term) :-
     !,
     (   metta_catalog_row([cache, Function, _])
     ->  metta_declaration_refused(
-            Term, 1, 'one cache override per function; remove the old row first')
+            Term, 1, 'one cache row per function; remove the old row first')
     ;   true
     ).
 metta_check_catalog_semantics('dispatch-default', [Axis, Value], Term) :-
@@ -1356,6 +1407,9 @@ metta_check_argspec_form(['one-of', Vocab], Position, Term) :-
     ;   metta_declaration_refused(Term, Position,
                                   'a vocabulary declared before the kind that names it')
     ).
+metta_check_argspec_form(['some-of', Vocab], Position, Term) :-
+    !,
+    metta_check_argspec_form(['one-of', Vocab], Position, Term).
 metta_check_argspec_form([optional, Spec], Position, Term) :-
     !,
     metta_check_argspec_form(Spec, Position, Term).
@@ -1556,7 +1610,16 @@ metta_catalog_preset([vocabulary, atomicity,
 metta_catalog_preset([vocabulary, 'memo-strategy', wtinylfu, lru]).
 metta_catalog_preset([vocabulary, 'memo-aggregate', none, min, max, sum, count]).
 metta_catalog_preset([vocabulary, 'save-format', metta, fast]).
-metta_catalog_preset([vocabulary, 'cache-mode', force, refuse]).
+%The cache policy is one vocabulary because one row, (cache Name Policy),
+%carries it: force and refuse are lib_memo's word about the AUTOMATIC memo,
+%the rest are lib_tabling's compilation targets, SWI's own table/1 option
+%list and answer-subsumption mode spelled as MeTTa words. The four members
+%that take an argument and the two that stand alone are claimed below, which
+%is what lets (some-of cache-policy) read (lattice join) as one member.
+metta_catalog_preset([vocabulary, 'cache-policy', force, refuse,
+                      plain, incremental, monotonic, lazy, shared, private,
+                      subsumptive, lattice, 'max-answers', 'subgoal-abstract',
+                      'answer-abstract']).
 metta_catalog_preset([vocabulary, 'effect-class',
                       pureStructural, readOnlyLookup,
                       nondeterministicReadOnly, writesState, oracleIO]).
@@ -1659,7 +1722,7 @@ metta_catalog_preset([kind, writes, symbol, ['one-of', atomicity]]).
 metta_catalog_preset([kind, events, symbol, ['one-of', delivery],
                       [optional, ['one-of', 'event-order']]]).
 metta_catalog_preset([kind, emits, symbol, ['one-of', 'answer-policy']]).
-metta_catalog_preset([kind, cache, symbol, ['one-of', 'cache-mode']]).
+metta_catalog_preset([kind, cache, symbol, ['some-of', 'cache-policy']]).
 metta_catalog_preset([kind, image, symbol, symbol, ['one-of', 'image-mode']]).
 metta_catalog_preset([kind, 'type-image', symbol,
                       ['one-of', 'registry-image']]).
@@ -1717,6 +1780,14 @@ metta_catalog_preset([claim, semiring, prob, ordered, descending]).
 %reading, and declares order=ascending in its own preset. Its claim row was
 %the one an ordered carrier was missing.
 metta_catalog_preset([claim, semiring, budget, ordered, ascending]).
+%The applied and the standalone members of the cache-policy vocabulary, read
+%by metta_policy_members/3 when a (cache ...) row is written.
+metta_catalog_preset([claim, 'cache-policy', lattice, takes, symbol]).
+metta_catalog_preset([claim, 'cache-policy', 'max-answers', takes, integer]).
+metta_catalog_preset([claim, 'cache-policy', 'subgoal-abstract', takes, integer]).
+metta_catalog_preset([claim, 'cache-policy', 'answer-abstract', takes, integer]).
+metta_catalog_preset([claim, 'cache-policy', force, alone]).
+metta_catalog_preset([claim, 'cache-policy', refuse, alone]).
 %Each alias is published as data so a consumer outside this module expands it
 %by asking &metta rather than by keeping a second copy of the table.
 metta_catalog_preset([claim, 'algebra-law', Alias, 'expands-to'|Expansion]) :-

@@ -309,6 +309,12 @@ control_exception('$aborted').
 %disarm the counter.
 control_exception(error(metta_control_signal(time_limit, _), _)).
 control_exception(error(metta_control_signal(inference_limit, _), _)).
+%A tabling restraint is a bound the program declared for one of its own
+%tables, (cache f (max-answers N)) and its two size siblings, thrown by
+%lib_tabling's tripwire when SWI trips it. It is the same kind of signal as
+%the two above and reaches the host seats through the same classifier, so a
+%MeTTa catch must not be able to disarm it either.
+control_exception(error(metta_control_signal(restraint, _), _)).
 
 %The reserved envelope renders its payload: a reader failure used to cross
 %as a bare syntax_error and take SWI's own message with it, and wrapping
@@ -327,6 +333,9 @@ prolog:error_message(metta_control_signal(inference_limit, Limit)) -->
     [ 'the evaluation passed its ~w inference bound and was stopped'-[Limit] ].
 prolog:error_message(metta_control_signal(time_limit, Seconds)) -->
     [ 'the evaluation passed its ~w second bound and was stopped'-[Seconds] ].
+prolog:error_message(metta_control_signal(restraint, [Word, Bound, Call])) -->
+    [ 'the (~w ~w) restraint declared for the table of ~w tripped and the \c
+       evaluation was stopped'-[Word, Bound, Call] ].
 control_exception(error(resource_error(_), _)).
 
 %A result past binary64 SATURATES to the IEEE value instead of raising,

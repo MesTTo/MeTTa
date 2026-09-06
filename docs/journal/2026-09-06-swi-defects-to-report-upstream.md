@@ -119,3 +119,37 @@ Suggested fix: check `PyIter_Next`'s NULL with `PyErr_Occurred()` at both
 sites and convert through the same path `check_error` uses, so a raising
 iterator raises in Prolog the way a raising deterministic callback already
 does.
+
+## 2026-09-07: answer subsumption under a watch, a shared moded table, and the count restraint
+
+Found while compiling cache policies to `table/1` options
+(`2026-09-06-cache-policies-are-the-engines-own-options.md`), each in a
+fresh `swipl -q` process on 10.1.13, probes under `ai-tmp/cp/`:
+
+- A shared answer-subsumption table (`table p(_,_,lattice(j/3)) as shared`)
+  raises `type_error(trie, <clause>(...))` from `trie_gen/2` on its second
+  call, with any watch or none (`probe13_shared_*`). Private works.
+- An incremental or monotonic answer-subsumption table re-evaluates to a
+  wrong table after a write: `[]` on the first re-evaluation of the shared
+  variant, and for a private one two answers for one input,
+  `[c-3, c-1, a-2, b-1]` where the minimum is `c-1`, and `a-6` for a path
+  that costs 2 (`probe13_private_incremental`, `probe13_private_monotonic`).
+- A subsumptive table that is also incremental or monotonic raises
+  `existence_error(reset, call_info(...))` ("Cannot catch continuation
+  through findall/3", or "No matching reset/3 call" outside findall) on the
+  first call after an invalidating write (`probe7`).
+- `table p/2 as max_answers(N)` never calls `prolog:tripwire/2` and takes
+  the bounded-rationality path whatever `max_answers_for_subgoal_action`
+  says; the process-wide `max_answers_for_subgoal` flag does call it
+  (`probe8`). The manual (7.11) says the tripwire actions apply to both.
+- `dynamic([P], [monotonic(false)])` is accepted and leaves the monotonic
+  property standing; `incremental(false)` clears its property (`probe18`).
+- `table p/2 as (monotonic, lazy)` propagates a dynamic fact into the table
+  at the assert, as the eager form does, and only marks the table invalid
+  until its next call (`probe16`); the manual (7.8.1) says the answer is
+  queued until then.
+
+The library refuses the first three combinations at compile time with the
+measurement in the message, routes the count restraint through
+`call_delays/2`, releases the monotonic property through the attribute door,
+and compiles `lazy` as written.
