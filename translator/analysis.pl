@@ -1,3 +1,5 @@
+% Guarantees: source withdrawal selects retained metadata by source owner
+%   [tested: lib_import_lifecycle; commit=WORKTREE].
 % Purpose: retain function metadata, translation caches, symbol analysis, and callable-head discovery
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
@@ -19,7 +21,10 @@
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % Owns resources: fun_meta_head/3 and fun_meta_projection/4 are compiler
 %   artifacts journalled with their source occurrence and retired by
-%   drop_fun_meta/4, clear_fun_meta/2, or source withdrawal.
+%   drop_fun_meta/4, drop_fun_meta/5, clear_fun_meta/2, or source withdrawal.
+%   deferred_equation_types/4 keys captured declarations by stored occurrence;
+%   materialize_with_queued_types/4 consumes its row transactionally and source
+%   withdrawal retires unused rows [tested: lib_import_lifecycle; commit=WORKTREE].
 % Guarded by: '$metta_fun_metadata' serializes metadata writers; transaction/1
 %   publishes the source and its projections together and rolls back failures
 %   [tested: run_tests(translator_metadata_projection); commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
@@ -112,17 +117,18 @@ record_fun_meta_rows(Module, F, Args, Body, Types) :-
 %compiles at its first call, AFTER every declaration, so the live read handed
 %the first clause the whole set and every later clause inherited it. So the
 %association is CAPTURED where the equation arrives, one row per deferred
-%equation of a DECLARED name, and consumed first-in-first-out as the
-%store-order materialisation translates them. An undeclared name, which is
+%equation of a DECLARED name, and consumed by stored occurrence identity as
+%materialisation translates them. An undeclared name, which is
 %nearly every function of a bulk load, pays one indexed probe and writes
 %nothing.
 %
-%Limitation: removing one of a function's equations while the function is
-%still deferred leaves its queued row behind, so the LATER equations of an
-%interleaved-declaration function shift onto their removed sibling's group.
-:- dynamic deferred_equation_types/3.
+% The stored occurrence is the identity, not its position in a queue. A
+% removed equation cannot lend its type group to a surviving equation, even
+% when a removal callback forces compilation before source cleanup finishes.
+% [tested: lib_import_lifecycle; commit=WORKTREE]
+:- dynamic deferred_equation_types/4.
 
-queue_deferred_equation_types(Module, F) :-
+queue_deferred_equation_types(Module, F, StoredRef) :-
     (   catch_recover(raw_definition_type_declaration_in(Module, F, _), fail)
     ->  findall(Chain,
                 catch_recover(
@@ -136,13 +142,13 @@ queue_deferred_equation_types(Module, F) :-
         ->  Types = Previous
         ;   Types = Current
         ),
-        assertz(deferred_equation_types(F, Module, Types), Ref),
+        assertz(deferred_equation_types(F, Module, StoredRef, Types), Ref),
         record_source_assertion(Ref)
     ;   true
     ).
 
 deferred_seen_chain(Module, F, Chain) :-
-    (   deferred_equation_types(F, Module, Group)
+    (   deferred_equation_types(F, Module, _, Group)
     ;   fun_meta_clause_types(Module, F, _, _, Group)
     ),
     member(Seen, Group),
@@ -150,20 +156,19 @@ deferred_seen_chain(Module, F, Chain) :-
     !.
 
 last_queued_types_group(Module, F, Group) :-
-    (   findall(G, deferred_equation_types(F, Module, G), Groups),
+    (   findall(G, deferred_equation_types(F, Module, _, G), Groups),
         Groups \== []
     ->  last(Groups, Group)
     ;   fun_meta_clause_types(Module, F, _, _, Group)
     ->  true
     ).
 
-%The consuming half: pop the oldest row and hold it where record_fun_meta/3
-%reads, for exactly one translation. Only the materialisation path wraps with
-%this, so an equation translated at ARRIVAL keeps the live read that is
-%correct for it and cannot eat a deferred sibling's row.
-:- meta_predicate materialize_with_queued_types(+, +, 0).
-materialize_with_queued_types(Module, F, Goal) :-
-    (   retract(deferred_equation_types(F, Module, Types))
+% The consuming half reads this stored occurrence's group and holds it where
+% record_fun_meta/3 reads, for exactly one translation. An eager equation
+% retains the live declaration read; no equation consumes a sibling's group.
+:- meta_predicate materialize_with_queued_types(+, +, +, 0).
+materialize_with_queued_types(Module, F, StoredRef, Goal) :-
+    (   retract(deferred_equation_types(F, Module, StoredRef, Types))
     ->  with_equation_types(Module, F, Types, Goal)
     ;   call(Goal)
     ).
@@ -233,24 +238,36 @@ fun_meta_module(Module, F, Owner) :-
 % Remove one variant-equivalent retained equation. Retraction must not bind the
 % caller's variables, and duplicate equations are removed one at a time.
 drop_fun_meta(Module, F, Args, Body) :-
-    with_mutex('$metta_fun_metadata',
-               transaction(drop_fun_meta_rows(Module, F, Args, Body))).
+    drop_fun_meta(Module, F, Args, Body, ordinary).
 
-drop_fun_meta_rows(Module, F, Args, Body) :-
+drop_fun_meta(Module, F, Args, Body, Owner) :-
+    with_mutex('$metta_fun_metadata',
+               transaction(drop_fun_meta_rows(Module, F, Args, Body, Owner))).
+
+drop_fun_meta_rows(Module, F, Args, Body, Owner) :-
     ( once(( clause(fun_meta_clause(Module, F, StoredArgs, StoredBody), true, Ref),
-             (StoredArgs-StoredBody) =@= (Args-Body) ))
+             (StoredArgs-StoredBody) =@= (Args-Body),
+             source_removal_owns_metadata(Owner, Ref) ))
     -> retract(fun_meta_projection(Module, F, Ref, HeadRef)),
        erase(HeadRef),
        erase(Ref)
     ; true ),
-    drop_fun_meta_types(Module, F, Args, Body).
-drop_fun_meta_types(Module, F, Args, Body) :-
+    drop_fun_meta_types(Module, F, Args, Body, Owner).
+drop_fun_meta_types(Module, F, Args, Body, Owner) :-
     ( once(( clause(fun_meta_clause_types(Module, F, StoredArgs, StoredBody, _),
                     true, Ref),
              (StoredArgs-StoredBody) =@= (Args-Body),
+             source_removal_owns_metadata(Owner, Ref),
              erase(Ref) ))
     -> true
     ; true ).
+
+% Source ownership travels with this removal's arguments, so an event callback
+% that removes another equation cannot inherit the source's ownership filter.
+% [tested: lib_import_lifecycle; commit=WORKTREE]
+source_removal_owns_metadata(ordinary, _).
+source_removal_owns_metadata(source(Load), Ref) :-
+    filereader:source_load_assertion(Load, artifact, Ref).
 
 % An unbound Module means every module. That is what a
 % teardown wants and what the engine must never pass.
@@ -1561,7 +1578,7 @@ cache_translated_form(Module, Key, Source, Goals, Out) :-
 clear_module_translation_state(Module) :-
     forall(retract(translated_form_cache(Module, _, Id, _, _, _)),
            retractall(translated_form_mention(_, Id))),
-    retractall(deferred_equation_types(_, Module, _)),
+    retractall(deferred_equation_types(_, Module, _, _)),
     retractall(head_pattern_note(Module, _, _, _, _)).
 
 install_translation_cache_hooks :- translation_cache_hook_ref(_, _), !.

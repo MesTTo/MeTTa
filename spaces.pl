@@ -183,6 +183,10 @@
 %and the local definition wins, which is exactly what the import was before
 %this file had a module of its own
 %[tested: spaces_builtin_override, test_a_system_predicate_survives_an_equation_for_its_name].
+% Guarantees: metta_remove_atom_reference/1 retains exact source occurrence
+%   ownership through the ordinary removal funnel
+%   [tested: lib_import_lifecycle; commit=WORKTREE].
+
 :- module(spaces,
           [
             'add-atom'/3,
@@ -201,7 +205,7 @@
             clear_native_atoms/1,
             compile_metta_equation/4,
             compile_metta_equation/5,
-            defer_metta_equation/3,
+            defer_metta_equation/4,
             metta_add_program_atoms/2,
             metta_add_program_atoms/3,
             store_data_atoms/2,
@@ -252,6 +256,8 @@
             metta_module_space/2,
             metta_release_space/1,
             metta_remove_atom/3,
+            metta_remove_atom_reference/1,
+            deferred_metta_function/6,
             metta_remove_hooks_idle/1,
             metta_require_current_capability/2,
             metta_require_safe_goal/1,

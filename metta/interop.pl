@@ -1,3 +1,6 @@
+% Guarantees: metta_import_record/2 exposes live source ownership and
+%   metta_unimport/2 withdraws it transactionally [tested: lib_import_lifecycle; commit=WORKTREE].
+% Guarded by: metta_unimport/2 shares metta_loader with import_when/4.
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
 % Guarantees: Export readers use metta_runtime_type/2 to recognise annotated
 %   arrows and derive arity while retaining the declared type
@@ -1389,6 +1392,59 @@ import_cache_current(Space, CanonPath) :-
         ; import_receipt_current(Space, CanonPath) )
     ;   true
     ).
+
+% Import records are a live view of the loader's committed ownership rows.
+% A stale digest still names a load that undo can withdraw; a cleared space
+% has no load and therefore no record, even if an old cache marker remains.
+metta_import_record(Space, CanonPath) :-
+    imported_metta_source(Space, CanonPath),
+    import_life(Space, CanonPath, loaded),
+    filereader:metta_source_load(CanonPath, Space, _, _).
+
+metta_unimport(Space0, File0) :-
+    resolve_space_form(Space0, Space),
+    metta_require_space_update_capability('unimport!', Space),
+    resolve_module_form(File0, File),
+    with_mutex(metta_loader,
+        ( resolve_unimport_path(Space, File, CanonPath),
+          (   import_life(Space, CanonPath, loading)
+          ->  throw(error(permission_error(unimport, loading_source, CanonPath),
+                          context('unimport!', 'wait until this source finishes loading')))
+          ;   true
+          ),
+          call_cleanup(
+              materialize:materialization_transaction(
+                  unimport_source(Space, CanonPath)),
+              metta_repair_emptied_shadows) )).
+
+% The recorded path is an identity, so undo must also work after deletion.
+% Existing imports choose the process directory before the current source's
+% directory; prefer a recorded candidate from that same ordered pair.
+resolve_unimport_path(Space, File, CanonPath) :-
+    import_file_string(File, SFile),
+    metta_module_path(SFile, Base, Relative),
+    ensure_metta_ext(Relative, Requested),
+    findall(Path,
+            ( member(Root, ['.', Base]),
+              absolute_file_name(Requested, Path,
+                                 [relative_to(Root), access(none), file_errors(error)]) ),
+            Candidates),
+    (   member(Recorded, Candidates), imported_metta_source(Space, Recorded)
+    ->  CanonPath = Recorded
+    ;   Candidates = [CanonPath|_]
+    ).
+
+unimport_source(Space, CanonPath) :-
+    (   filereader:metta_source_load(CanonPath, Space, _, _)
+    ->  filereader:withdraw_source_load(CanonPath, Space, _),
+        retractall(filereader:compiled_metta_source(CanonPath))
+    ;   imported_metta_source(Space, CanonPath),
+        import_life(Space, CanonPath, loaded)
+    ->  throw(error(permission_error(unimport, unjournalled_source, CanonPath),
+                    context('unimport!', 'this loader has no exact atom ownership journal')))
+    ;   true
+    ),
+    clear_import_state(Space, CanonPath).
 
 capture_import_state(Space, CanonPath, Terms) :-
     findall(imported_metta_source(Space, CanonPath),
