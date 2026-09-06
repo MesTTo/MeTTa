@@ -23,6 +23,10 @@
 #     bodies carries another's signature
 #   - a passing file's report is the is/should trace, without the engine's
 #     compiled-goal listing that the same $output holds
+#   - the assertion report reaches that block WHOLE. Its two bag lines are
+#     continuation lines of one print_message/2 message, so a capture that
+#     kept the headline and dropped the rest would still satisfy the
+#     "MeTTa assertion failed" check above and lose the diagnosis
 #   - the stdout+stderr capture is load-bearing for two of those three shapes,
 #     proven against a copy of test.sh with that one redirection removed rather
 #     than asserted in a comment. The same copy still reports the is/should
@@ -124,6 +128,10 @@ silent_about test_mismatch   "MeTTa assertion failed"
 silent_about test_mismatch   "Syntax error"
 
 carries      assert_mismatch "MeTTa assertion failed"
+# The evidence the comparison already had, on the message's continuation
+# lines: 2 was expected and never produced, 1 was produced and never expected.
+carries      assert_mismatch "missing: (2)"
+carries      assert_mismatch "excess: (1)"
 silent_about assert_mismatch "should"
 silent_about assert_mismatch "MeTTa test failed"
 silent_about assert_mismatch "Syntax error"

@@ -65,14 +65,89 @@ test(failing_test_is_catchable,
      [throws(error(metta_test_failed(1, 2), _))]) :-
     test(1, 2, _).
 
+%A bare assert has a VALUE for an operand, not a comparison, so it computes no
+%bag difference and both bag arguments stay unbound.
 test(failing_assert_is_catchable,
-     [throws(error(metta_assertion_failed(fail), _))]) :-
+     [throws(error(metta_assertion_failed(fail, _, _), _))]) :-
     assert(fail, _).
 
 test(assertion_errors_have_engine_messages) :-
     message_to_string(error(metta_test_failed(1, 2), none), Message),
     sub_string(Message, _, _, _, "MeTTa test failed: 1 does not match 2"),
     \+ sub_string(Message, _, _, _, "Unknown error term").
+
+%The door the bag-comparing assert forms reach. The verdict is the caller's
+%and this predicate never decides one, so a true verdict passes whatever the
+%bags say and a false one reports both differences beside the form.
+test(an_assertion_ball_carries_the_two_bags,
+     [throws(error(metta_assertion_failed([qEqual, a, b], [c], [d]), _))]) :-
+    'assert-answers'(false, [qEqual, a, b], [a, d], [a, c], _).
+
+test(a_true_verdict_asks_no_question_of_the_bags) :-
+    'assert-answers'(true, [qEqual, a, b], [x], [y], Result),
+    Result == true.
+
+%A hand-written call may pass something collapse never produces. The bags stay
+%absent there rather than letting subtraction-atom's refusal replace the
+%assertion failure with a different error.
+test(a_non_list_operand_leaves_the_bags_absent) :-
+    catch('assert-answers'(false, [qEqual, a, b], notabag, [a], _),
+          error(metta_assertion_failed(Form, Missing, Excess), _),
+          true),
+    Form == [qEqual, a, b],
+    var(Missing),
+    var(Excess).
+
+test(an_assertion_message_prints_both_bags) :-
+    message_to_string(error(metta_assertion_failed([qEqual, [+, 1, 1], 3],
+                                                   [3], [2]), none),
+                      Message),
+    forall(member(Line, ["MeTTa assertion failed: (qEqual (+ 1 1) 3)",
+                         "missing: (3)",
+                         "excess: (2)"]),
+           sub_string(Message, _, _, _, Line)),
+    \+ sub_string(Message, _, _, _, "differ only in order").
+
+%Two empty bags beside a failure is the permutation diagnosis, and it is the
+%one reading a reader would otherwise have to make alone.
+test(two_empty_bags_report_the_permutation) :-
+    message_to_string(error(metta_assertion_failed([qEqual, a, b], [], []),
+                            none),
+                      Message),
+    forall(member(Line, ["missing: ()",
+                         "excess: ()",
+                         "differ only in order"]),
+           sub_string(Message, _, _, _, Line)).
+
+%A form that computed no difference says nothing about bags, which is how a
+%reader tells "the bags agree" from "there is no bag comparison here".
+test(an_absent_difference_prints_no_bag_line) :-
+    message_to_string(error(metta_assertion_failed(false, _, _), none),
+                      Message),
+    forall(member(Line, ["MeTTa assertion failed: false"]),
+           sub_string(Message, _, _, _, Line)),
+    \+ sub_string(Message, _, _, _, "missing:"),
+    \+ sub_string(Message, _, _, _, "excess:").
+
+%The classifier is what a harness reads instead of the sentence, and it hands
+%the two bags out with the same unbound-is-absent convention.
+test(the_classifier_hands_out_the_two_bags) :-
+    metta_assertion_failure(error(metta_assertion_failed([qEqual, a, b],
+                                                         [c], [d]),
+                                  context('assert-answers'/5, m)),
+                            Form, Actual, Expected, Missing, Excess),
+    Form == assert,
+    Actual == [qEqual, a, b],
+    Missing == [c],
+    Excess == [d],
+    var(Expected).
+
+test(the_classifier_reports_an_absent_difference_as_unbound) :-
+    metta_assertion_failure(error(metta_assertion_failed(false, _, _),
+                                  context(assert/2, m)),
+                            assert, false, _, Missing, Excess),
+    var(Missing),
+    var(Excess).
 
 :- end_tests(metta_assertions).
 

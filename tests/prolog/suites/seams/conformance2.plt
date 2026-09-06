@@ -31,10 +31,10 @@ both_doors(Text, Expected) :-
 
 both_doors_raise_assertion(Text) :-
     catch(( compiled_answers(Text, _), Compiled = passed ),
-          error(metta_assertion_failed(_), _),
+          error(metta_assertion_failed(_, _, _), _),
           Compiled = failed),
     catch(( dynamic_answers(Text, _), Dynamic = passed ),
-          error(metta_assertion_failed(_), _),
+          error(metta_assertion_failed(_, _, _), _),
           Dynamic = failed),
     assertion(Compiled == failed),
     assertion(Dynamic == failed).

@@ -19,6 +19,11 @@ Guarantees:
     bounded totals rather than discarding the verifier's coverage
     [tested: tests/checks/check_specialization_differential_selftest.py;
     commit=694dff934a11dbc2ee99267b60f39564053baf87]
+  - an example whose SUBJECT is a failing assertion prints the engine's own
+    report, and that report is not read as a verifier fault, while any other
+    ERROR: line in the same output still is
+    [tested: tests/checks/check_specialization_differential_selftest.py;
+    commit=WORKTREE]
 Fails when:
   - SWI-Prolog or the engine cannot start; infrastructure failure is loud
     rather than being mistaken for a corpus with no disagreements.
@@ -44,6 +49,19 @@ sys.path.insert(0, str(TOOLS))
 from example_parity import corpus  # noqa: E402
 
 MARKER = "metta_specialization_disagrees"
+#: The engine's report for a program-level falsehood, and the one ERROR: block
+#: the scan below lets past. A failing assertion is the PROGRAM saying
+#: something false rather than the engine breaking, which is the distinction
+#: the tree already draws by exception type, and
+#: examples/ch12-testing/03-assertion_difference.metta demonstrates one on
+#: purpose: it is the corpus's first file whose SUBJECT is an engine
+#: diagnostic. Every other ERROR: line, in that file and any other, is still a
+#: finding.
+ASSERTION_REPORT = "MeTTa assertion failed"
+#: print_message/2 writes the report's continuation lines through the same
+#: prefix as its headline, so a continuation is told from a fresh error by the
+#: indent that survives the prefix and the optional thread tag.
+ERROR_PREFIX = re.compile(r"^\s*ERROR:\s*(?:\[[^\]]*\]\s?)?")
 COVERAGE = re.compile(
     r"verify-specializations checked (?P<checked>\d+) specialization\(s\): "
     r"(?P<agreed>\d+) agreed, (?P<unverified>\d+) could not be checked inside "
@@ -75,6 +93,31 @@ def _display(path: Path, root: Path) -> str:
         return str(resolved.relative_to(root.resolve()))
     except ValueError:
         return str(resolved)
+
+
+def verifier_errors(output: str) -> list[str]:
+    """Every ERROR: line that is not part of a demonstrated assertion report.
+
+    The scan is a two-state walk rather than a per-file exemption, so a real
+    verifier fault inside the one example that demonstrates a failing
+    assertion still lands: only the report's own headline and the indented
+    lines under it are let past.
+    """
+    errors: list[str] = []
+    reporting = False
+    for line in output.splitlines():
+        said, prefixed = ERROR_PREFIX.subn("", line)
+        if not prefixed:
+            reporting = False
+            continue
+        if ASSERTION_REPORT in said:
+            reporting = True
+            continue
+        if reporting and said.startswith("  "):
+            continue
+        reporting = False
+        errors.append(line)
+    return errors
 
 
 def _diagnostic_lines(text: str, marker: str | None = None) -> str:
@@ -134,7 +177,7 @@ def specialization_result(
     if MARKER in output:
         finding = f"{label}: {_diagnostic_lines(output, MARKER)}"
         return SpecializationResult(finding, coverage)
-    if any(line.lstrip().startswith("ERROR:") for line in output.splitlines()):
+    if verifier_errors(output):
         finding = f"{label}: verifier reported an error\n{_diagnostic_lines(output)}"
         return SpecializationResult(finding, coverage)
     if done.returncode != 0:

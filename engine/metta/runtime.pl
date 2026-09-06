@@ -24,6 +24,14 @@
 %     extensions/python/tests/ch21_another_language_at_the_seam/test_c_binding.py,
 %     tests/shell/test_example_runner_surfaces_failures.sh;
 %     commit=b7eb5734f476f8a8f5b6f16c1e71a67c72a57478]
+%   - metta_assertion_failed/3 carries the failing form and the two directed
+%     bag differences, unbound where the form computed neither, and the
+%     message prints one labelled line per bag; assert-answers/5 is the door
+%     that computes them, on the failing path only, from the same
+%     subtraction-atom/3 an assertEqualToResult verdict is built from
+%     [tested: metta_assertions:an_assertion_ball_carries_the_two_bags,
+%     metta_assertions:an_assertion_message_prints_both_bags,
+%     prelude:assertEqual_failure_carries_both_bags; commit=WORKTREE]
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 
 %%% Diagnostics / Testing: %%%
@@ -34,12 +42,55 @@ prolog:error_message(metta_test_failed(Actual, Expected)) -->
     [ 'MeTTa test failed: ~p does not match ~p'-[Actual, Expected] ].
 %The form is a MeTTa term, so it is rendered as MeTTa text. ~p on the Prolog
 %list prints `[==,[collapse,[eval,[+,1,1]]],[collapse,[eval,3]]]`, which is the
-%engine's storage and not what the program wrote. Nothing rendered a list here
-%until assert/2 began reporting its operand as WRITTEN rather than the True or
-%False it used to receive.
-prolog:error_message(metta_assertion_failed(Goal)) -->
+%engine's storage and not what the program wrote. A bare `assert` reaches here
+%with its operand already reduced, so the form it renders is a verdict; the
+%bag-comparing forms hand assert-answers/5 their call AS WRITTEN and that is
+%the list this renders.
+%
+%Missing and Excess are the two directed bag differences the failing form
+%already computed on its way to a verdict, and carrying them is the whole
+%reason this ball has three arguments: a comparison that keeps only the
+%emptiness of a difference makes every reader recompute by hand what the
+%engine held. Both stay UNBOUND for a form that computed neither, and the
+%block below is then absent -- that is bare `assert`, whose operand is a
+%value; `assertIncludes`, whose excess answers are legal so a two-sided
+%report would blame the wrong bag; and the alpha forms, whose relation is
+%alpha-equivalence rather than bag difference.
+%
+%hyperon-experimental reports the same pair from the same subtraction and
+%spells them `Missed results` and `Excessive results`; the labels here are
+%`missing` and `excess` instead, so the message and the Python fields a
+%harness reads say one word each
+%[source: hyperon-experimental hyperon-common/src/assert.rs:71-79, the diff
+%branch of compare_vec_no_order; commit=WORKTREE].
+prolog:error_message(metta_assertion_failed(Goal, Missing, Excess)) -->
     { sdisplay(Goal, Written) },
-    [ 'MeTTa assertion failed: ~w'-[Written] ].
+    [ 'MeTTa assertion failed: ~w'-[Written] ],
+    assertion_bag_difference(Missing, Excess).
+
+assertion_bag_difference(Missing, Excess) -->
+    { var(Missing), var(Excess) },
+    !,
+    [].
+assertion_bag_difference(Missing, Excess) -->
+    { sdisplay(Missing, WrittenMissing),
+      sdisplay(Excess, WrittenExcess) },
+    [ nl, '  missing: ~w'-[WrittenMissing],
+      nl, '  excess: ~w'-[WrittenExcess] ],
+    assertion_permutation_note(Missing, Excess).
+
+%Two empty bags beside a failure is not a puzzle, it is the diagnosis: the
+%answers agree as multisets with their multiplicities, so a permutation is
+%the only difference left. assertEqual is the one form that reaches it,
+%because its verdict is term equality over the collapsed tuples while the
+%difference above is multiplicity-aware and order-blind
+%[measured 2026-09-06 on this tree: (assertEqual (superpose (1 2)) (superpose
+%(2 1))) fails while (assertEqualToResult (superpose (1 2)) (2 1)) answers
+%true].  Saying so costs one clause and saves the reader the inference.
+assertion_permutation_note([], []) -->
+    !,
+    [ nl, '  the two answer bags agree, so the answers differ only in order' ].
+assertion_permutation_note(_, _) --> [].
 
 %The three formals above are the program saying something FALSE, which is a
 %different event from the engine breaking, and a harness has to be able to
@@ -56,9 +107,15 @@ prolog:error_message(metta_assertion_failed(Goal)) -->
 %Actual and Expected are handed out as WRITTEN MeTTa terms; a caller that
 %has to cross them to another language converts them itself, because the
 %conversion belongs to that boundary and not to the engine.
+%
+%Missing and Excess are the same absence convention one level out: the two
+%directed bag differences where the failing form computed them, unbound
+%where it did not, so a consumer tells "the bags agree" (both `()`) from
+%"there is no bag comparison here" (both absent) without reading prose.
 metta_assertion_failure(error(metta_test_failed(Actual, Expected), _),
-                        test, Actual, Expected).
-metta_assertion_failure(error(metta_assertion_failed(Goal), _), assert, Goal, _).
+                        test, Actual, Expected, _, _).
+metta_assertion_failure(error(metta_assertion_failed(Goal, Missing, Excess), _),
+                        assert, Goal, _, Missing, Excess).
 
 prolog:error_message(metta_not_a_prolog_module(File)) -->
     [ '~w is not a Prolog module, so its exports cannot be imported under \c
@@ -258,20 +315,22 @@ test_answer_value(Results, Results).
 'test-no-answer'(Results, Out) :-
     test(Results, [], Out).
 
-%The operand crosses UNEVALUATED, because `(: assert (-> Atom (->)))` is the
-%arbiter's own declaration for this name
-%[source: LeaTTa MettaHyperonFull/Minimal/Stdlib.lean:1020]. So the evaluation
-%is this predicate's to make, and what it can report is the form as WRITTEN:
-%`!(assert (== 1 2))` answers `(Error (assert (== 1 2)) ((== 1 2) not True))`
-%on the arbiter and throws here naming that same `(== 1 2)`
-%[measured 2026-08-24 against LeaTTa 9ea9f9d].
+%The operand arrives EVALUATED. `(: assert (-> %Undefined% (->)))` is the
+%declaration this engine carries, aligned to upstream PeTTa in 975b07ae, so
+%what reaches here is the verdict and never the comparison:
+%`!(assert (== 1 2))` reports `false`, not `(== 1 2)`
+%[measured 2026-09-06 on this tree; the declaration is
+%lib/lib_builtin_types/lib_builtin_types.metta and it is upstream's].
 %
-%Before the mask reached written builtin calls the operand arrived already
-%reduced and this called the resulting `True`/`False` as a Prolog goal. Once the
-%declaration was honoured that call received a LIST, which SWI reads as a
-%consult list: `!(assertEqual (+ 1 1) 3)` printed
-%`source_sink '==' does not exist` three times and then answered true for a
-%false assertion.
+%A form that wants its CALL in the report therefore has to hand it over, which
+%is what the assert family does through assert-answers/5 below; only that
+%caller still holds what the program wrote.
+%
+%The eval below stays, and the paragraph after this one says what it is for.
+%Calling the operand as a Prolog GOAL is what this used to do instead, and an
+%operand that arrived as a LIST made SWI read it as a consult list:
+%`!(assertEqual (+ 1 1) 3)` printed `source_sink '==' does not exist` three
+%times and then answered true for a false assertion.
 %
 %eval/2 resolves in the calling space's module, which is what the old
 %call(Module:Goal) was for: the form may name a function the space itself
@@ -310,9 +369,55 @@ assert(Form, true) :-
     metta_boundary_result(Form, Produced, Value),
     (   Value == true
     ->  true
-    ;   print_message(error, error(metta_assertion_failed(Form), _)),
-        throw(error(metta_assertion_failed(Form),
-                    context(assert/2, 'MeTTa assertion failed')))
+    ;   report_failed_assertion(assert/2, Form, _, _)
+    ).
+
+%The report both assertion doors reach, so the ball, the sentence and the
+%classifier stay ONE shape however the verdict was reached. Reporting and then
+%throwing is assert/2's decision, recorded above; this predicate is where it
+%now happens for both.
+report_failed_assertion(Culprit, Form, Missing, Excess) :-
+    print_message(error, error(metta_assertion_failed(Form, Missing, Excess), _)),
+    throw(error(metta_assertion_failed(Form, Missing, Excess),
+                context(Culprit, 'MeTTa assertion failed'))).
+
+%assert with the two answer bags carried, so a failed comparison over answers
+%says WHICH answers differ instead of only that they did. The four arguments
+%are the verdict, the call to report as the program wrote it, the answers
+%produced, and the answers expected.
+%
+%The VERDICT stays the caller's and this door never decides it. That is what
+%keeps assertEqual's term equality over the collapsed tuples and
+%assertEqualToResult's multiset equality exactly the comparisons they were:
+%the change carries evidence into the failure and moves no verdict
+%[tested: prelude:assertEqual_failure_carries_both_bags,
+%prelude:assertEqualToResult_failure_carries_both_bags].
+%A user's own assertion over answer bags reaches the same report by handing
+%over its own verdict, which is why this is vocabulary rather than a private
+%helper.
+%
+%The difference is computed HERE and only on the failing path. assertEqual's
+%verdict is one ==, so computing its bags where the arguments are built would
+%charge every passing assertion in the corpus two subtractions for a
+%diagnostic nobody reads; assertEqualToResult's verdict already holds them and
+%recomputing two small subtractions once, on a run that is about to stop, is
+%not worth a second door shape.
+%
+%subtraction-atom is the engine's own multiplicity-preserving difference and
+%the very operation an assertEqualToResult verdict is built from, so what a
+%failure reports and what a verdict tested cannot drift. It wants proper lists
+%on both sides: collapse answers one and a written expected set is one, but a
+%hand-written call may pass anything, and an unbound or partial operand would
+%either make subtraction-atom refuse or bind the caller's variable. Either
+%would replace the assertion failure with a different error, so the bags stay
+%absent there and the message degrades to the form alone.
+'assert-answers'(Verdict, _, _, _, true) :- Verdict == true, !.
+'assert-answers'(_, Form, Actual, Expected, true) :-
+    (   is_list(Actual), is_list(Expected)
+    ->  'subtraction-atom'(Expected, Actual, Missing),
+        'subtraction-atom'(Actual, Expected, Excess),
+        report_failed_assertion('assert-answers'/5, Form, Missing, Excess)
+    ;   report_failed_assertion('assert-answers'/5, Form, _, _)
     ).
 
 %%% The running space: %%%

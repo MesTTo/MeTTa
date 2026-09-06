@@ -11,6 +11,10 @@ Guarantees:
     budget reports the same attempted check as unverified
     [tested: tests/checks/check_specialization_differential_selftest.py;
     commit=694dff934a11dbc2ee99267b60f39564053baf87]
+  - the engine's own report for a failing assertion is let past the ERROR:
+    scan while an unrelated engine error beside it is still reported
+    [tested: tests/checks/check_specialization_differential_selftest.py;
+    commit=WORKTREE]
 Fails when:
   - the production detector, specializer verification, or fixture stops
     exercising the same disagreement; this imports the detector rather than
@@ -28,6 +32,7 @@ from check_specialization_differential import (
     ROOT,
     specialization_finding,
     specialization_result,
+    verifier_errors,
 )
 
 PLANTED = """(: wrap-one (-> %Undefined% %Undefined%))
@@ -45,6 +50,17 @@ COVERED = """(= (coverage-inc $x) (+ $x 1))
 (= (coverage-twice $f $x) ($f ($f $x)))
 !(test (coverage-twice coverage-inc 20) 22)
 """
+
+#: The engine's own three-line report for a failing assertion, byte for byte
+#: as examples/ch12-testing/03-assertion_difference.metta produces it, and one
+#: unrelated engine error beside it. The scan must let the first block past and
+#: report the second, which is the wall and the door of the same check.
+DEMONSTRATED_REPORT = (
+    "ERROR: [Thread main] MeTTa assertion failed: (assertEqual (+ 1 1) 3)\n"
+    "ERROR: [Thread main]   missing: (3)\n"
+    "ERROR: [Thread main]   excess: (2)\n"
+)
+UNRELATED_ERROR = "ERROR: [Thread main] the specialization verifier fell over\n"
 
 FIXED_CALL = "translate_specialized_clause(CompiledInput, Clause, false),"
 PLANTED_CALL = "translate_tracked_clause(CompiledInput, Clause, false),"
@@ -124,6 +140,18 @@ def main() -> int:
                 "the covered control did not report agreed coverage: "
                 f"{covered_result.coverage}"
             )
+        if verifier_errors(DEMONSTRATED_REPORT):
+            problems.append(
+                "a demonstrated assertion report was read as a verifier error: "
+                f"{verifier_errors(DEMONSTRATED_REPORT)}"
+            )
+        if verifier_errors(DEMONSTRATED_REPORT + UNRELATED_ERROR) != [
+            UNRELATED_ERROR.rstrip("\n")
+        ]:
+            problems.append(
+                "an unrelated engine error beside a demonstrated report was "
+                f"not reported: {verifier_errors(DEMONSTRATED_REPORT + UNRELATED_ERROR)}"
+            )
         if bounded_result.finding is not None:
             problems.append(f"the bounded control failed: {bounded_result.finding}")
         elif (
@@ -141,7 +169,8 @@ def main() -> int:
     print(
         "spec-differential selftest: "
         f"{len(problems)} problem(s), 1 planted disagreement, 1 plain control, "
-        "1 agreed control and 1 inference-bounded control"
+        "1 agreed control, 1 inference-bounded control and 2 assertion-report "
+        "scans"
     )
     return 1 if problems else 0
 
