@@ -698,7 +698,7 @@ run REPORT jscpd       sh -c "cd '$HERE' && npx --yes jscpd --reporters ai --for
 # translator asserts its clauses at run time. `prolog-reach` in
 # engine/check.sh is what sees them, through prolog_walk_code/1 against a
 # loaded database.
-run REPORT jscpd-prolog sh -c "cd '$HERE' && npx --yes jscpd --reporters ai --format perl --min-lines 8 --skip-comments --ignore-pattern '%[^\\n]*' --ignore '**/vendor/**' engine lib extensions tests/prolog"
+run REPORT jscpd-prolog sh -c "cd '$HERE' && npx --yes jscpd --reporters ai --format perl --min-lines 8 --skip-comments --ignore-pattern '%[^\\n]*' --ignore '**/vendor/**,**/_runtime/**' engine lib extensions tests/prolog"
 
 # -------------------------------------------------------------------- report
 printf '\n================ summary ================\n'
