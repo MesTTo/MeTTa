@@ -105,3 +105,13 @@ the tree's four-inference allowance. Two tests hold it:
 `test_a_declared_allowance_widens_one_twins_band_only` plants a twin with the
 declaration and one without and requires the band to move for exactly one of
 them, and `test_a_declared_allowance_is_validated` plants -1, True and 4.5.
+
+Tried: the twin corpus's own pricing pass, `--repin --rounds 3` over all 223
+point-budget twins except the identity one. 208 moved. The lane reported 409
+findings before it and 201 after, which is the 208 budget findings and nothing
+else: the remaining 201 are 121 stored-content differences, 37 band ceilings and
+one twin that fails to run, all of them present before this pass and none of
+them a budget.
+Open: `ch11-python-as-a-notation/01-python.py` fails on trunk, at line 74's
+`assert py(S[".get"](prefs, S.size)) == [7]`, in the main checkout as well as
+here, so its budget could not be priced and keeps its pin.
