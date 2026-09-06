@@ -311,6 +311,7 @@
             metta_effect_class_canonical/2,
             metta_determinism_canonical/2,
             metta_vocabulary_value/2,
+            metta_policy_members/3,
             protect_engine_emitted/1,
             protect_metta_exec_modules/0,
             %Shared tables engine/metta.pl reads and writes: the execution

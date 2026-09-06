@@ -1452,6 +1452,11 @@ kind(current_working_dir/1, service).
 %reads the same table the engine reads, so a value the catalog gains is
 %accepted without editing the library.
 kind(metta_vocabulary_value/2, service).
+%The members of a (some-of Vocab) argument, read by the library that compiles
+%them. The write door and the compiler read ONE parse of the row, so a member
+%the door admitted is the member the compiler sees, applied arguments and all
+%[source: engine/spaces/catalog.pl, metta_policy_members/3].
+kind(metta_policy_members/3, service).
 %The import lifecycle's marker. A library that performs an import of its own
 %(lib/lib_gitimport/lib_gitimport.pl's git-import!) has to run under the same marker, or a
 %failed load leaves behind the clauses the engine would have erased.
