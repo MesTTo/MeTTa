@@ -217,3 +217,128 @@ engine and does no further work. Measured here it does not, because the module
 never tiers up far enough; a real application that then runs MeTTa will, and
 that is the case the streamed path serves. The threshold itself is V8's and is
 not something this seat can set.
+
+## 2026-09-07, later: the other seat
+
+Tried: the same probe on the Python seat, which the Node fix left holding the
+opposite ruling -> `metta_py_decode(["p", "my_space_name"], T)` FAILS, and so
+does everything containing it. The damage has a different SHAPE here, and it
+is worse to read: this seat's decode failure does not raise the way
+`metta_node_undecodable/1` does, it just fails, so
+`m.eval(S.collapse(S["get-atoms"](space)))` answers NOTHING and a host reads an
+empty photograph as an empty space. Measured with the demand still in place:
+every registered space photographed its own atoms except `my_space_name`,
+which photographed `[]`.
+
+Tried: reaching the defect from the Python surface at all -> two more doors
+above the wire refused first. `metta.space("my_space_name")` raised
+`a space name starts with &`, and `_space_from_wire` refused the same payload
+on the Python side of the codec. So the seat could not even MINT what the Node
+host mints from its own registry: `space_names()` listed `my_space_name` and
+`space()` refused it, which is one seat disagreeing with the engine about what
+a space is.
+
+Decided: all three, because fixing only the shim leaves the defect
+unobservable from Python and the regression unwritable. The wire clause
+(`extensions/python/metta/shim.pl`), the Python decoder
+(`_atom_wire._space_from_wire`) and the handle door (`Space.__init__`).
+
+Decided: a STRING names the space EXACTLY and the Symbol door keeps supplying
+the prefix. That is not a new rule, it is this surface's own bracket-door rule
+-- `S["add"]` is the symbol `add` while `S.add` is the operator word -- and it
+makes `space(name)` open every name `space_names()` reports while
+`space(S.kb)` stays `&kb`. The Node seat draws the same line from the other
+end: its `spaceIdentityOf` prefixes a string or a Sym and passes a
+`SpaceHandle` through untouched, and a handle is what its registry hands back.
+
+Rejected: widening `metta_py_encode/2` to tag a bare registered name `p`. The
+encoder asks `metta_space_operand/1`, which tests the prefix before probing
+either registry, and that is the SPECIES question the tag encodes; changing it
+would move the language's own notion of what a space atom is, which is a
+different question from what a decoder must accept. A bare registered name
+therefore still crosses OUT as `s`, and only a host minting the tag itself puts
+one in -- which is exactly how the Node seat's `spacenames` command produces
+one. Revisit only if the engine's species test moves.
+
+Rejected: relaxing the `$` refusal with it. A `$` name reads back as a
+VARIABLE, so a term mentioning such a space would stop being the term it
+crossed as; that and the empty name are what `Space` still refuses, and they
+are the two the old message named as real reasons.
+
+Measured, per tag, because the block above that clause records that a per-tag
+change needs a per-tag measurement: 10,000 decodes of one leaf minus a bare
+loop of the same count, three identical runs each side. The probe is recorded
+below rather than left in a scratch directory, so the numbers can be re-taken:
+save it beside the repository root as `wire-cost.pl` and run
+`swipl -g true -t halt wire-cost.pl`.
+
+```prolog
+% Per-tag decode cost, the protocol the block comment above metta_py_decode_/3
+% records: 10,000 decodes of one leaf, minus a bare loop of the same count,
+% divided by the count.
+:- initialization(main, main).
+:- consult('extensions/python/metta/shim.pl').
+
+metta_space_operand('&self').
+metta_space_operand('&metta').
+metta_match_atoms(L, R) :- unify_with_occurs_check(L, R).
+metta_py_tuple_arguments(T, A) :-
+    compound(T), compound_name_arity(T, -, _), compound_name_arguments(T, -, A).
+
+count(10000).
+
+bare(0) :- !.
+bare(N) :- M is N - 1, bare(M).
+
+decodes(0, _) :- !.
+decodes(N, Wire) :- ( metta_py_decode(Wire, _) -> true ; true ), M is N - 1, decodes(M, Wire).
+
+per_leaf(Label, Wire) :-
+    count(N),
+    statistics(inferences, B0), bare(N), statistics(inferences, B1),
+    statistics(inferences, D0), decodes(N, Wire), statistics(inferences, D1),
+    Base is B1 - B0, Total is D1 - D0,
+    Per is (Total - Base) / N,
+    format("~w~t~24| ~4f~n", [Label, Per]).
+
+main :-
+    forall(member(Label-Wire,
+                  ['s atom'-['s', foo], 's string'-['s', "foo"],
+                   'g string'-['g', "foo"], 'g atom'-['g', foo],
+                   'n'-['n', 1],
+                   'b atom'-['b', true], 'b string'-['b', "true"],
+                   'v atom'-['v', x], 'v string'-['v', "x"],
+                   'p & atom'-['p', '&self'], 'p & string'-['p', "&self"],
+                   'p bare atom'-['p', my_space_name],
+                   'p bare string'-['p', "my_space_name"]]),
+           per_leaf(Label, Wire)).
+```
+
+    tag             before          after
+    p  atom          3.00            2.00
+    p  string        4.00            3.00
+    p  bare atom     4.00 (failing)  2.00
+    p  bare string   5.00 (failing)  3.00
+    s g n b v        unchanged to the inference
+
+The `sub_atom/5` is the whole difference, and `p` now costs exactly what `s`
+costs, which is what it should: the two clauses do the same work.
+
+Tested: `tests/prolog/suites/host/shim.plt` gains four `decodes/3` rows, a
+`wrong_class/1` row for a non-text payload, and two named cases; five pytest
+cases in
+`extensions/python/tests/ch04_spaces_and_matching/test_bare_space_names.py`,
+one of them the consumer's walk -- four programs before and after the poisoning
+one, on one engine, photographing what its own programs registered after each.
+`test_space_name_validation` and the `p` half of
+`test_malformed_space_handle_wire_payloads_are_refused` said the old rule and
+say the new one.
+
+Planted, once per layer, because a lane that cannot fail is not a lane. The
+shim clause restored -> 2 of 5 fail. `_space_from_wire`'s demand restored -> the
+r2 handle case fails. `Space.__init__`'s demand restored -> 6 fail.
+
+Open: this seat answers NOTHING for a wire term it cannot decode, where the
+Node seat raises. That is `metta_py_decode/2`'s contract for every tag and not
+this fix's to change, but it is the reason the defect was silent here and loud
+there, and a silent wrong answer at a boundary is the worse of the two.

@@ -284,6 +284,23 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Python seat opens a space the engine registered without an ampersand,
+  which is every symbol a program writes through: `(= (space) my_space_name)`
+  plus one `add-atom` registers `my_space_name` and `space_names()` lists it,
+  and three doors on this seat refused the name their own listing had just
+  issued. `space("my_space_name")` opened nothing, `Space` refused the string
+  outright, and the `p` wire tag demanded the prefix on both sides -- so a term
+  mentioning such a space silently answered NOTHING, a leaf that will not
+  decode failing the decode of everything containing it. A STRING now names the
+  space exactly, which is the bracket door's rule everywhere else here; the
+  Symbol door still supplies the prefix, so `space(S.kb)` is `&kb` and the two
+  doors stay different on purpose. A `$` name is still refused, because it
+  would read back as a variable, and so is the empty name. The ENCODER is
+  unchanged and still asks `metta_space_operand/1`, so a bare registered name
+  crosses out as `s` and the species question the wire's tag encodes does not
+  move. The Node seat made the same fix on its own decoder on 2026-09-07; this
+  is the opposite ruling that merge left behind, withdrawn. Decoding a `p` leaf
+  costs one inference less than it did, the `sub_atom/5` that is gone.
 - A failed assertion or test blames the MeTTa head the program wrote. SWI
   prints an uncaught error's context culprit before the sentence, and what
   stood there was the Prolog predicate that raised, so a false claim read

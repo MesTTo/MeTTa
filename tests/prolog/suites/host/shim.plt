@@ -81,6 +81,13 @@ decodes('b', false, false).
 decodes('b', '@'(true), true).
 decodes('b', "true", true).
 decodes('o', an_opaque_object, an_opaque_object).
+% A p payload is a space NAME, and the ampersand is how the engine spells the
+% spaces it mints rather than a rule of the tag: a program writing through a
+% bare symbol registers that symbol, so both spellings decode.
+decodes('p', '&self', '&self').
+decodes('p', "&self", '&self').
+decodes('p', my_space_name, my_space_name).
+decodes('p', "my_space_name", my_space_name).
 
 malformed(['zz', 1]).            % a tag no clause claims
 malformed([1, 2]).               % a tag that is neither atom nor string
@@ -106,6 +113,7 @@ wrong_class(['v', 1]).
 wrong_class(['b', neither]).
 wrong_class(['b', 1]).
 wrong_class(['b', "maybe"]).
+wrong_class(['p', 1]).
 
 % Every variable name a wire term carries, in the order the encoder wrote
 % them. The proof-tree tests below ask how MANY distinct names one term
@@ -153,6 +161,24 @@ test(a_payload_outside_its_tags_class_fails, [forall(wrong_class(Wire)), fail]) 
 test(a_payload_outside_its_tags_class_fails_when_sharing,
      [forall(wrong_class(Wire)), fail]) :-
     metta_py_decode_shared(Wire, _, _).
+
+% The clause this suite exists to hold still. It demanded the ampersand until
+% 2026-09-07, and a leaf that will not decode fails the decode of every term
+% containing it, so one bare name in the engine's registry made every term
+% mentioning it undecodable on this seat. The engine registers a space under
+% any symbol a program writes through, and metta_space_names/1 hands that name
+% back, so the demand refused a name the registry had just issued.
+test(a_bare_space_name_decodes_like_a_symbol) :-
+    metta_py_decode(['p', my_space_name], Bare),
+    Bare == my_space_name,
+    metta_py_decode(['s', my_space_name], Symbol),
+    Bare == Symbol.
+
+test(a_space_name_decodes_the_same_through_the_sharing_walk) :-
+    metta_py_decode_shared(['e', [['s', "get-atoms"], ['p', my_space_name]]],
+                           Term, Bindings),
+    Term == ['get-atoms', my_space_name],
+    Bindings == [].
 
 test(a_variable_decodes_to_a_variable) :-
     metta_py_decode(['v', "x"], Term),

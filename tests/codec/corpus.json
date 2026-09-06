@@ -33,7 +33,7 @@
     "b": {"class": "term", "payload": "\"true\" or \"false\"", "means": "a grounded boolean; the engine writes true and false, and reads True and False as the same two constants"},
     "v": {"class": "term", "payload": "text", "means": "a variable, the payload an identity within this term"},
     "e": {"class": "term", "payload": "array of terms", "means": "an expression, its children in order; the empty one is unit"},
-    "p": {"class": "term", "payload": "ampersand-prefixed text", "means": "an executable space reference carried by its portable engine name; the tag is a species and an ampersand name that is no space keeps s"},
+    "p": {"class": "term", "payload": "text", "means": "an executable space reference carried by its portable engine name, ampersand-prefixed or not; the tag is a species and a name that is no space keeps s"},
     "o": {"class": "term", "payload": "host reference", "means": "a live host value crossing by reference, in process only"},
     "h": {"class": "term", "payload": "registry id, and its printed text outbound", "means": "a native engine value held by reference"},
     "u": {"class": "frame", "payload": "term and why", "means": "an answer whose truth is undefined under the well-founded semantics"},

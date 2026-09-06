@@ -499,6 +499,14 @@ long form and names all nine seams; forking should never be the answer.
 
 `ctx.space(name)` selects on the `MeTTa` context and `ctx.space()` or
 `metta.space()` creates a fresh one, a context manager whose exit drops it;
+a STRING names the space exactly, so `space("&kb")` is `&kb` and
+`space("my_space_name")` is the bare name a program registers by writing
+through it and `space_names()` lists, while the Symbol door supplies the
+prefix, so `space(S.kb)` is `&kb`. A `$` name is refused (it would read back
+as a variable) and so is the empty name; every other symbol is a space name.
+The wire's `p` tag takes the payload as written for the same reason, while the
+ENCODER still asks `metta_space_operand/1`, so a bare registered name crosses
+out as `s` and only a host minting the tag itself puts one in;
 `m.copy()` clones contents into a fresh anonymous
 space through the bulk door, so equations copy as equations and keep running.
 `m.drop()` clears a space and releases its name: a drop clears the whole life,
