@@ -141,10 +141,12 @@ def bind(self, values: _abc.Mapping[str, Any] | None = None, /, **named: Any) ->
 ```python
 def run(
     self,
-    source: str,
+    source: str | TemplateLike,
+    /,
     *,
     timeout: float | None = None,
     inferences: int | None = None,
+    **values: Any,
 ) -> list[list[Atom]]:
 ```
 
@@ -155,8 +157,23 @@ def run(
 > directive instead of flattened. Equations and facts in the source
 > land in this space.
 >
-> `bind()` names Python values the source refers to by bare symbol,
-> the way DuckDB reads a local dataframe by its variable name:
+> The source may carry HOLES, which are bindings by position:
+>
+>     m.run(t"!(fib {n})")            # a 3.14 t-string literal
+>     m.run("!(fib {n})", n=10)       # the same on every version
+>
+> Each hole is spliced into the text as a generated symbol and bound to
+> its value, so a str stays one String atom and never has to be escaped.
+> Values enter through `encode`: an int is a Number, a str a String, an
+> Atom itself, a Space its handle. The markers at a hole are the atom
+> constructors, `{Symbol(name)}`, `{Grounded(obj)}` and `{parse(text)}`,
+> with the specs `:sym`, `:py` and `:expr` as their short forms; `!r`
+> and `!s` convert in Python first and enter the result as text. A hole
+> inside a string literal, a comment or a symbol is refused with its
+> line and column.
+>
+> `bind()` is the same substitution by NAME, for a value several calls
+> share, the way DuckDB reads a local dataframe by its variable name:
 >
 >     with m.bind({"graph": my_graph}):
 >         m.run("!(py-len graph)")
@@ -167,6 +184,9 @@ def run(
 > and a block grows down the page where a keyword has to fit beside
 > everything else on the call. Every call that accepts a target reads the
 > same scope, so one block covers run(), eval(), and answers() together.
+> A binding names a symbol and so replaces EVERY occurrence of it,
+> including one the author meant as a symbol; a hole is positional and
+> cannot reach anything but itself.
 >
 > `timeout` (seconds) and `inferences` (engine steps) bound the call
 > with the engine's own guards; passing either raises TimeLimitError
@@ -192,10 +212,12 @@ def run(
 ```python
 def profile(
     self,
-    source: str,
+    source: str | TemplateLike,
+    /,
     *,
     timeout: float | None = None,
     inferences: int | None = None,
+    **values: Any,
 ) -> tuple[list[list[Atom]], EngineProfile]:
 ```
 
@@ -217,12 +239,14 @@ def profile(
 ```python
 def profile_extension(
     self,
-    source: str,
+    source: str | TemplateLike,
+    /,
     *,
     extension: str | None = None,
     names: _abc.Sequence[str] | None = None,
     timeout: float | None = None,
     inferences: int | None = None,
+    **values: Any,
 ) -> tuple[list[list[Atom]], list[FunctionCost]]:
 ```
 
@@ -348,14 +372,23 @@ def load(
 > likely to be handed code the caller did not write, since a file can
 > carry `!` directives and an import graph, so it takes the same pair
 > its siblings take.
+>
+> Program text with holes is refused here. A hole is a binding, and a
+> PATH has nowhere to bind one: run() takes holes, and an f-string or a
+> Path builds a computed filename.
 
 ### `Space.parse`
 
 ```python
-def parse(self, source: str) -> Atom:
+def parse(self, source: str | TemplateLike, /, **values: Any) -> Atom:
 ```
 
 > Read one form into an atom without evaluating it.
+>
+> Holes work here as they do at run(), and land in the term this
+> answers rather than crossing to the engine, since nothing runs:
+> `m.parse(t"(person {name} 36)")` is the built term with the value
+> already in it.
 
 ### `Space.register_token`
 
@@ -662,6 +695,7 @@ def match(
     inferences: int | None = None,
     under: Any = _UNSET,
     into: _builtins.type | None = None,
+    **values: Any,
 ) -> Any:
 ```
 
@@ -707,6 +741,11 @@ def match(
 > expressions instead: `m.match(V.edge, into=Edge)`.
 >
 >     m.match(S.Edge(V.x, V.y), S.Edge(V.y, V.z))
+>
+> A text pattern may carry HOLES, as run()'s source may:
+> `m.match(t"(person {name} $age)")` matches the value itself, so a name
+> holding a space stays one String atom rather than reading as two
+> symbols. Keyword values apply across every pattern of the call.
 
 ### `Space.stream`
 
@@ -996,12 +1035,14 @@ def prepare(self, *patterns: Any, where: Any | None = None) -> Prepared:
 def eval(
     self,
     target: Any,
+    /,
     *more: Any,
     timeout: float | None = None,
     inferences: int | None = None,
     under: Any = _UNSET,
     theory: Any | None = None,
     interpreter: Any | None = None,
+    **values: Any,
 ) -> list[Atom | Undefined] | list[list[Atom | Undefined]]:
 ```
 
@@ -1024,6 +1065,11 @@ def eval(
 > rule applies is the ordinary answer itself; `eval_status()` names
 > that path `not-reducible`. run() does not carry the third truth
 > value; evaluate through eval() when it matters.
+>
+> A text target may carry HOLES, exactly as run()'s source may:
+> `m.eval(t"(decide {tensor})")` and `m.eval("(decide {x})", x=tensor)`
+> hand the object itself to the rule, by identity. One call's holes are
+> numbered together, so a batch and a nested template cannot collide.
 >
 > `bind()` binds named host values into the term before it evaluates,
 > exactly as it does for run(): inside `with m.bind({"x": tensor})`,
@@ -1056,12 +1102,14 @@ def eval(
 def answers(
     self,
     target: Any,
+    /,
     *,
     timeout: float | None = None,
     inferences: int | None = None,
     under: Any = _UNSET,
     theory: Any | None = None,
     interpreter: Any | None = None,
+    **values: Any,
 ) -> Answers[Any]:
 ```
 
@@ -1104,6 +1152,11 @@ def answers(
 > target before the interpreter ever sees it; and its RETURN metatype
 > `%Undefined%`, or the interpreter's own answer is not reduced either.
 > `(: e (-> Atom Atom Atom %Undefined%))` is the declaration.
+>
+> A text target may carry HOLES, as run()'s source may:
+> `m.answers(t"(near {point})")`. A theory, an interpreter or a carrier
+> makes this view ask through another door, so the holes are read into
+> the term itself there rather than sent as pairs a hand-off would drop.
 
 ### `Space.parallel`
 
@@ -1195,11 +1248,13 @@ def reducible(self, target: Any) -> bool:
 def eval_status(
     self,
     target: Any,
+    /,
     *,
     timeout: float | None = None,
     inferences: int | None = None,
     theory: Any | None = None,
     interpreter: Any | None = None,
+    **values: Any,
 ) -> list[tuple[str, Atom | Undefined | None]]:
 ```
 
@@ -2528,10 +2583,12 @@ def transaction(self, target: Any, /) -> Any:
 ```python
 def run(
     self,
-    source: str,
+    source: str | TemplateLike,
+    /,
     *,
     timeout: float | None = None,
     inferences: int | None = None,
+    **values: Any,
 ) -> list[list[Atom]]:
 ```
 
@@ -2542,8 +2599,23 @@ def run(
 > directive instead of flattened. Equations and facts in the source
 > land in this space.
 >
-> `bind()` names Python values the source refers to by bare symbol,
-> the way DuckDB reads a local dataframe by its variable name:
+> The source may carry HOLES, which are bindings by position:
+>
+>     m.run(t"!(fib {n})")            # a 3.14 t-string literal
+>     m.run("!(fib {n})", n=10)       # the same on every version
+>
+> Each hole is spliced into the text as a generated symbol and bound to
+> its value, so a str stays one String atom and never has to be escaped.
+> Values enter through `encode`: an int is a Number, a str a String, an
+> Atom itself, a Space its handle. The markers at a hole are the atom
+> constructors, `{Symbol(name)}`, `{Grounded(obj)}` and `{parse(text)}`,
+> with the specs `:sym`, `:py` and `:expr` as their short forms; `!r`
+> and `!s` convert in Python first and enter the result as text. A hole
+> inside a string literal, a comment or a symbol is refused with its
+> line and column.
+>
+> `bind()` is the same substitution by NAME, for a value several calls
+> share, the way DuckDB reads a local dataframe by its variable name:
 >
 >     with m.bind({"graph": my_graph}):
 >         m.run("!(py-len graph)")
@@ -2554,6 +2626,9 @@ def run(
 > and a block grows down the page where a keyword has to fit beside
 > everything else on the call. Every call that accepts a target reads the
 > same scope, so one block covers run(), eval(), and answers() together.
+> A binding names a symbol and so replaces EVERY occurrence of it,
+> including one the author meant as a symbol; a hole is positional and
+> cannot reach anything but itself.
 >
 > `timeout` (seconds) and `inferences` (engine steps) bound the call
 > with the engine's own guards; passing either raises TimeLimitError
@@ -2614,6 +2689,10 @@ def load(
 > likely to be handed code the caller did not write, since a file can
 > carry `!` directives and an import graph, so it takes the same pair
 > its siblings take.
+>
+> Program text with holes is refused here. A hole is a binding, and a
+> PATH has nowhere to bind one: run() takes holes, and an f-string or a
+> Path builds a computed filename.
 > Runs against this context's self space.
 
 ### `MeTTa.match`
@@ -2628,6 +2707,7 @@ def match(
     inferences: int | None = None,
     under: Any = _UNSET,
     into: _builtins.type | None = None,
+    **values: Any,
 ) -> Any:
 ```
 
@@ -2673,6 +2753,11 @@ def match(
 > expressions instead: `m.match(V.edge, into=Edge)`.
 >
 >     m.match(S.Edge(V.x, V.y), S.Edge(V.y, V.z))
+>
+> A text pattern may carry HOLES, as run()'s source may:
+> `m.match(t"(person {name} $age)")` matches the value itself, so a name
+> holding a space stays one String atom rather than reading as two
+> symbols. Keyword values apply across every pattern of the call.
 > Runs against this context's self space.
 
 ### `MeTTa.add`
@@ -2740,12 +2825,14 @@ def remove(self, atom: Any, *more: Any) -> bool | int:
 def eval(
     self,
     target: Any,
+    /,
     *more: Any,
     timeout: float | None = None,
     inferences: int | None = None,
     under: Any = _UNSET,
     theory: Any | None = None,
     interpreter: Any | None = None,
+    **values: Any,
 ) -> list[Atom | Undefined] | list[list[Atom | Undefined]]:
 ```
 
@@ -2768,6 +2855,11 @@ def eval(
 > rule applies is the ordinary answer itself; `eval_status()` names
 > that path `not-reducible`. run() does not carry the third truth
 > value; evaluate through eval() when it matters.
+>
+> A text target may carry HOLES, exactly as run()'s source may:
+> `m.eval(t"(decide {tensor})")` and `m.eval("(decide {x})", x=tensor)`
+> hand the object itself to the rule, by identity. One call's holes are
+> numbered together, so a batch and a nested template cannot collide.
 >
 > `bind()` binds named host values into the term before it evaluates,
 > exactly as it does for run(): inside `with m.bind({"x": tensor})`,
