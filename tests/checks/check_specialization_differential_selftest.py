@@ -14,7 +14,7 @@ Guarantees:
   - the engine's own report for a failing assertion is let past the ERROR:
     scan while an unrelated engine error beside it is still reported
     [tested: tests/checks/check_specialization_differential_selftest.py;
-    commit=WORKTREE]
+    commit=71de27a76dd16684941e3e090de0d17299d96493]
 Fails when:
   - the production detector, specializer verification, or fixture stops
     exercising the same disagreement; this imports the detector rather than

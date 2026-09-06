@@ -23,7 +23,7 @@ Guarantees:
     report, and that report is not read as a verifier fault, while any other
     ERROR: line in the same output still is
     [tested: tests/checks/check_specialization_differential_selftest.py;
-    commit=WORKTREE]
+    commit=71de27a76dd16684941e3e090de0d17299d96493]
 Fails when:
   - SWI-Prolog or the engine cannot start; infrastructure failure is loud
     rather than being mistaken for a corpus with no disagreements.

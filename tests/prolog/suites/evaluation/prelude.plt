@@ -132,7 +132,7 @@ test(assertIncludes_subset_passes) :-
 %EXCESS answers are legal, so the two-sided report the equal forms carry would
 %name a bag that is not a reason for the failure. A one-sided report needs its
 %own door and is not built [source: docs/journal/2026-09-06-the-bag-diff-an-assertion-already-computes.md;
-%commit=WORKTREE].
+%commit=71de27a76dd16684941e3e090de0d17299d96493].
 test(assertIncludes_missing_expectation_raises) :-
     catch(( eval_string("(assertIncludes (superpose (1 2)) (7))", _),
             Verdict = passed ),

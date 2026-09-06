@@ -10,7 +10,7 @@
 ;     excess of the expectation while what passes and what fails is unmoved
 ;     [tested: prelude:assertEqual_failure_carries_both_bags,
 ;     prelude:assertEqualToResult_failure_carries_both_bags,
-;     prelude:assertEqual_compares_result_sets; commit=WORKTREE]
+;     prelude:assertEqual_compares_result_sets; commit=71de27a76dd16684941e3e090de0d17299d96493]
 ; Open Obligations:
 ;   To Do: None
 ;   Hacks: None
@@ -77,7 +77,7 @@
 ;order-sensitive where its bag difference is not, and two empty bags beside a
 ;failure here mean the answers are a permutation of each other; the message
 ;says so [source: engine/metta/runtime.pl, assertion_permutation_note//2;
-;commit=WORKTREE].
+;commit=71de27a76dd16684941e3e090de0d17299d96493].
 (: assertEqual (-> Atom Atom %Undefined%))
 (= (assertEqual $A $B)
    (let $Actual (collapse $A)
@@ -145,7 +145,7 @@
 ;takes the same verdict plus the two answer bags and recomputes the same two
 ;differences ON THE FAILING PATH to report them, so what a failure says and
 ;what the verdict tested are one operation [source: engine/metta/runtime.pl,
-;'assert-answers'/5; commit=WORKTREE].
+;'assert-answers'/5; commit=71de27a76dd16684941e3e090de0d17299d96493].
 (: assertEqualToResult (-> Atom Atom %Undefined%))
 (= (assertEqualToResult $A $B)
    (let $Actual (collapse $A)

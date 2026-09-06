@@ -31,7 +31,7 @@
 %     subtraction-atom/3 an assertEqualToResult verdict is built from
 %     [tested: metta_assertions:an_assertion_ball_carries_the_two_bags,
 %     metta_assertions:an_assertion_message_prints_both_bags,
-%     prelude:assertEqual_failure_carries_both_bags; commit=WORKTREE]
+%     prelude:assertEqual_failure_carries_both_bags; commit=71de27a76dd16684941e3e090de0d17299d96493]
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 
 %%% Diagnostics / Testing: %%%
@@ -62,7 +62,7 @@ prolog:error_message(metta_test_failed(Actual, Expected)) -->
 %`missing` and `excess` instead, so the message and the Python fields a
 %harness reads say one word each
 %[source: hyperon-experimental hyperon-common/src/assert.rs:71-79, the diff
-%branch of compare_vec_no_order; commit=WORKTREE].
+%branch of compare_vec_no_order; commit=71de27a76dd16684941e3e090de0d17299d96493].
 prolog:error_message(metta_assertion_failed(Goal, Missing, Excess)) -->
     { sdisplay(Goal, Written) },
     [ 'MeTTa assertion failed: ~w'-[Written] ],
