@@ -136,6 +136,7 @@ checks = [
     "perflint>=0.8",
     "pip-audit>=2.9",
     "pylint>=3.3,<4",
+    "pyright>=1.1.400",
     "radon>=6.0",
     "refurb>=2.3",
     "ruff>=0.14",
