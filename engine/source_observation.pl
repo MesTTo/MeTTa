@@ -20,7 +20,7 @@
 %   over its 2,000 runs; command=engine/bench.py and extensions/python/bench.py
 %   --counter-only; fixture=worktree at a94f804c with the MORK artifacts
 %   present and the .qlf set cleared and warmed for every arm; three identical
-%   samples per arm; commit=WORKTREE].
+%   samples per arm; commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136].
 
 :- module(source_observation, [record_error/2, observe_source/4]).
 :- use_module(source_positions, [source_positions/3]).

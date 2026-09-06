@@ -67,7 +67,8 @@ noise. [measured 2026-09-06: table output above, and the two tables below it
 from the same run; command=$CHECK_PY -m benchmarks.extension_cost;
 fixture=3000 calls, min-of-3, C reader, writer, JSON codec and chapter-19
 artifacts present, measured in a clone of the branch whose path is as long as
-the repository root at loadavg 12.7; commit=WORKTREE]
+the repository root at loadavg 12.7;
+commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136]
 
 ### Three choices, and none of them is the other two
 

@@ -47,7 +47,7 @@
 %   surfaces below, and nothing reaches IT: the engine announces a constructed
 %   Error through a sink the observation buffer carries, so source_observation
 %   and source_positions are leaf consumers and left the declared tangle
-%   [tested: engine_layering, scc_components; commit=WORKTREE].
+%   [tested: engine_layering, scc_components; commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136].
 % Assumes: engine/metta.pl no longer loads the observer at boot, so
 %   measure_layer_edges/0 asks for it through metta_ensure_source_observation/0
 %   before the walk; the walk reads the database and would otherwise report

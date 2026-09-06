@@ -22,7 +22,7 @@ Guarantees:
     status [tested: tests/shell/test_bounded_reaping.sh]
   - `--owner` is this process's pid, read here rather than by the wrapper, so
     a caller that died before the wrapper's first line is detected rather than
-    guessed at [tested: tests/shell/test_bounded_reaping.sh; commit=WORKTREE]
+    guessed at [tested: tests/shell/test_bounded_reaping.sh; commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136]
 Fails when: bounded.sh is not in the tree. It refuses rather than returning the
   command unwrapped, because a bound that silently became absent is the failure
   this file exists to prevent.

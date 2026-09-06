@@ -1031,7 +1031,7 @@ metta_base_engine_subsystems(EngineSource) :-
 %against 532,641, translate 362,516 against 362,397, evaluate 558,643 against
 %558,636, foreign-match 788,827 against 784,829; command=engine/bench.py and
 %extensions/python/bench.py --counter-only; three identical samples per arm
-%with the .qlf set cleared and warmed for each; commit=WORKTREE].
+%with the .qlf set cleared and warmed for each; commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136].
 %
 %So whoever wants an observation loads it, through here. The pass above is
 %re-run because a module loaded after that directive would otherwise keep

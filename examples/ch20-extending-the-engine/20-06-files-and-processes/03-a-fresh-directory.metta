@@ -1,5 +1,5 @@
 ; Purpose: mint a temporary DIRECTORY, the twin of temp-path!'s temporary file.
-; [tested: lib_file_surface:temp_dir_mints_a_fresh_empty_directory; commit=WORKTREE]
+; [tested: lib_file_surface:temp_dir_mints_a_fresh_empty_directory; commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136]
 !(import! &self (library lib_file))
 
 ; temp-dir! creates the directory exclusively, so two checkouts running the

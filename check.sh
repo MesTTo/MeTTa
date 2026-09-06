@@ -77,7 +77,7 @@
 #   - every process a lane starts carries both a deadline and a link to the
 #     process that started it, and the link is checked against a real orphan
 #     rather than against the text that installs it
-#     [tested: reaping, process-bounds; commit=WORKTREE].
+#     [tested: reaping, process-bounds; commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136].
 # Open Obligations:
 #   To Do: None
 #   Hacks: None

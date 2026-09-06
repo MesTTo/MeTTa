@@ -1,5 +1,5 @@
 ; Purpose: reach standard input, output and error through the handle surface.
-; [tested: lib_file_surface:standard_streams_are_handles_zero_one_and_two; commit=WORKTREE]
+; [tested: lib_file_surface:standard_streams_are_handles_zero_one_and_two; commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136]
 !(import! &self (library lib_file))
 
 ; The three streams a process always has are HANDLES, POSIX's own numbers, in
