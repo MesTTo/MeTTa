@@ -9,6 +9,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- **Breaking.** `under=counting` answers a `TaggedAnswer` rather than a bare
+  `int`. The count is `.annotation`; `.value` is `()`, which says no
+  proposition row was manufactured, and `.plan`, `.why()` and `.under(other)`
+  work as they do for every other carrier. Nine carriers spoke the tagged
+  protocol and counting alone answered a scalar, so a caller writing one
+  generic reader had to special-case it. The aggregate still crosses the seam
+  once and still opens no row cursor, on the match, call, scoped and async
+  routes alike. `m.match(q, under=counting).one()` becomes
+  `m.match(q, under=counting).one().annotation`.
+
 - A written cache declaration is carried out as written. `!(memoize f)`,
   `!(memoize-exact f)` and `!(tabled (f $x))` are honoured whatever `f` does:
   over a body that prints, writes a space, reads a space or calls an operation
@@ -142,6 +152,66 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   function became a two-equation one, wrote twice, and answered a doubled bag
   on its first call. Enabling now recompiles through the engine's own door and
   touches no stored atom.
+
+- The provenance pass resolves a pin written in a Prolog block comment. ISO
+  Prolog has both `%` and `/* ... */`, and the plunit suites write their
+  contract headers in the second one, but `pin_provenance.py` recognised a pin
+  only where a `%` opened the line. `tests/prolog/suites/spaces/catalog.plt`'s
+  pin was therefore reported as "left alone, no % opens a comment before it on
+  its line" and no run would ever have replaced it, so the file would have
+  shipped a claim naming the word WORKTREE as its evidence tree. The `%`
+  grammar now takes the block form the `//` grammar already took.
+
+- `Answer`'s docstring states the contract the engine actually runs. It said
+  `residue` and `k` "complete the wire form; the engine's support for them
+  lands by phase, and until it does a non-default value is a loud error",
+  which had stopped being true: a residue is evaluated under theta and a false
+  one drops its answer, and a `k` is admitted wherever the context declares a
+  non-Boolean annotation algebra. It also records what `get-metatype` observes
+  about an encoded value, the atom class rather than the Python one.
+
+- The `metta.algebra(...)` module constructor declares into the ambient space.
+  It resolved its receiver as the process-default home, so a row built inside
+  `with scratch:` landed in `&self` and, once algebra rows became context-owned,
+  `scratch` reported `algebra_not_declared` for the algebra it had just built.
+  It reads `current_space()` now, the path the other context-sensitive
+  module-tier helpers already take.
+
+- A declared algebra belongs to the space that declared it. The catalog row
+  carried no context, so one declared anywhere was visible everywhere,
+  including from a fresh `MeTTa()`, while the `(annotations <ctx> ...)` row
+  that SELECTS an algebra has always been context-keyed: two rows about the
+  same thing with two different lifetimes. `(algebra ...)` takes a tenth field
+  naming its owner, `global` for the ten shipped presets and the exact
+  annotation context for a declared one, and descriptor lookup, its cache, and
+  the requirement check all read that context first and `global` second. A
+  program that declared on one space and evaluated on a sibling now declares
+  where it evaluates. The Node seat writes and reads the same row, so
+  `Algebra.atom` there becomes `Algebra.rowOwnedBy(owner)`, `declare(space,
+  ...)` names that space, and its catalog reader prefers the asking context's
+  row before the shipped `global` ones.
+
+- A law-bearing `metta.algebra(...)` declaration is certified once, in the
+  space that declares it. Python walked the finite carrier itself and then the
+  engine walked it again in `&self`, so an algebra whose `combine` is a MeTTa
+  equation defined in a scratch space failed with `algebra_carrier_not_closed`:
+  the second walk could not see the definition the first one used. The Python
+  walk is gone and the declaration goes through the catalog door with the
+  declaring space's equation module active, so one checker sees the same
+  definitions later evaluation sees. A violated law still raises
+  `AlgebraLawError`; its text is now the engine's,
+  `algebra_law_violation: <name> law <law> fails at <inputs>`.
+
+- The `llms` lane reads the closed VALUE sets a cheat sheet states. Its blind
+  spot was named in `docs/journal/2026-09-05-a-count-the-lane-could-not-see.md`:
+  the semiring carriers, the module carrier objects, the `EffectClass` members
+  and the `SpaceProvider` capability words are closed sets with no source-table
+  row, so nothing derived them. Each is now compared against the engine catalog
+  or the Python constant that owns it, in both directions and, for
+  `EffectClass`, in order. The root sheet must carry each roster, so deleting
+  one cannot silence its check; another sheet is held to what it states. It
+  caught the root sheet saying five carriers are objects where ten are, and
+  `Semiring` naming eight of ten where it names all ten.
 
 - The example corpus reads in its own order again. `08-case-duals.metta` sat in
   chapter 7, whose subject is `case`, and negated its arms with `not-provable`,
@@ -318,6 +388,45 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   their `unwind(halt(Status))` control signal as an application error.
 
 ### Added
+
+- A bounded slice of a ranked match reaches the provider as a bound.
+  `m.match(q, under=ranked)[:3]` pulled the ordinary cursor and sliced in
+  Python, so a store that could have answered three rows answered all of them.
+  The slice now reopens the query with `limit=3` when, and only when, the
+  space is foreign, its source is not `linear`, it declares
+  `(emits <ctx> best-first)`, its effective algebra is the carrier the query
+  selected, and the query is one pattern with no `where=`. Anything short of
+  that keeps the shared cursor, so the answers are the same either way and
+  only the work changes.
+
+- Tensor shapes flow through type inference. `metta.arrays.Shape(...)` builds
+  the dimension metadata a Python `Annotated[DLTensor, Shape(...)]` carries, a
+  declared `(Annotated DLTensor (Shape ...))` symbol satisfies an ordinary
+  `DLTensor` argument, and `get-type` derives the result shape before any array
+  is built: elementwise operations through the existing `broadcast-shape`
+  relation, rank-two `matmul` by unifying the shared inner dimension. So
+  `(: image (Annotated DLTensor (Shape (4 1))))` with
+  `(: bias (Annotated DLTensor (Shape (3))))` gives
+  `!(get-type (t+ image bias))` the shape `(4 3)`, and an incompatible pair
+  yields no shaped type at all. The elementwise operations keep their existing
+  scalar-capable second argument.
+
+- `metta.current_algebra()` answers the algebra a query here would run under,
+  or None. `current_space()` had no partner: a program could scope a carrier
+  with `with metta.under(...)`, declare one on a space, or pass one to a call,
+  and had no way to read back which of the three was in force, including from
+  inside an operation the engine has already entered. The observer follows the
+  same precedence the query does, per-call carrier over task scope over the
+  current context's annotations row, and answers None when none of the three
+  is present rather than reporting execution's implicit Boolean default as a
+  declaration.
+
+- Every shipped semiring is a root object. `metta.counting`, `.prob`, `.prov`,
+  `.ranked` and `.tropical` were exported and `bool`, `bag`, `set`, `budget`
+  and `amplitude` were reachable only as strings, so `metta.budget` raised
+  AttributeError for a carrier `under="budget"` already answered and no typed
+  annotation could name it. All ten are lazy root exports now, in the order the
+  catalog declares them.
 
 - `metta_ensure_source_observation/0` is a published `service`, so a library
   may ask for the source observer by name. The engine does not load

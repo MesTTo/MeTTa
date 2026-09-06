@@ -15,11 +15,13 @@
 ;; Each of those names also has an (algebra ...) row saying what it
 ;; computes. budget is a cost carrier: it combines with min, extends with
 ;; +, and starts from infinity, so an unreachable path costs infinity and
-;; every real one improves on it.
+;; every real one improves on it. The last field is the row's OWNER: a
+;; shipped preset says global, a declared one names the space that declared
+;; it, and the lookup reads its own context first and global second.
 !(test (match &metta (algebra budget $combine $extend $zero $one
-                              $laws $carrier $requires)
-                     $zero)
-       infinity)
+                              $laws $carrier $requires $owner)
+                     ($zero $owner))
+       (infinity global))
 
 ;; Orderedness is a separate claim, because combining with min does not by
 ;; itself say which end a (top k ...) slice should take. budget reads
@@ -37,5 +39,5 @@
 ;; kind for five days: shipped, usable through `metta.under`, and absent
 ;; from the vocabulary the enum is generated from, so `Semiring.budget`
 ;; raised AttributeError while `(algebra budget ...)` sat right here.
-!(test (match &metta (algebra amplitude $c $e $z $o $l $ca $r) $z)
+!(test (match &metta (algebra amplitude $c $e $z $o $l $ca $r $w) $z)
        (complex 0 0))

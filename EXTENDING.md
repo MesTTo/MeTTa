@@ -2996,7 +2996,7 @@ they disagree on.
 | `(on-error <ctx> <shape> keep\|empty\|abort)` | what a provider failure becomes: an `(Error ...)` answer, declared silence, or the abort floor | `space.on_error` |
 | `(writes <ctx> transactional\|atomic-single\|best-effort)` | whether `(transaction ...)` delegates, refuses, or proceeds by declared acceptance | `space.atomicity` |
 | `(context <ctx> closed-world\|open-world)` | whether negation may consult the context at all | `space.context` |
-| `(algebra <name> <combine> <extend> <zero> <one> (laws ...) (carrier ...) (requires ...))` | the operations and checked laws that govern tagged derivations; a finite carrier makes public law claims declaration-time checkable | `space.algebra` |
+| `(algebra <name> <combine> <extend> <zero> <one> (laws ...) (carrier ...) (requires ...) <owner>)` | the operations and checked laws that govern tagged derivations; a finite carrier makes public law claims declaration-time checkable, and the owner is `global` for a shipped preset or the exact annotation context for a declared one | `space.algebra` |
 | `(annotations <ctx> <algebra> [(capabilities ...)])` | the declared algebra answer annotations live in; `ranked` is what `(top k ...)` consumes, `prov` carries source terms, and required fragment capabilities are checked before the row lands | `space.annotations` |
 | `(emits <ctx> depth\|fair\|best-first)` | the context's own emission order; best-first lets `top` push its bound | `space.emits` |
 | `(merge <pattern> depth\|fair\|best-first)` | how the engine merges one shape's answers ACROSS contexts | `space.merge` |
@@ -3024,7 +3024,7 @@ themselves rows in `&metta`:
 (kind handles symbol pattern (one-of fidelity)     ; a declaration's shape
       (optional (one-of determinism)))
 (claim semiring ranked ordered)                    ; a per-value fact
-(algebra prob + * 0 1 (laws ...) (carrier) (requires))
+(algebra prob + * 0 1 (laws ...) (carrier) (requires) global)
 (routed-by-shape handles)                          ; entries route by shape
 ```
 

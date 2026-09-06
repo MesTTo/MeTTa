@@ -5,7 +5,7 @@ cheat sheet claimed a gate that did not exist and drifted for three days
 behind the claim, so this file plants exactly the drift each half is supposed
 to catch and fails when the checker reports it green.
 
-The checker's six parts are pure functions over (sheet, text), so each
+The checker's nine parts are pure functions over (sheet, text), so each
 fault is planted in TEXT rather than by writing a broken llms.txt into the
 tree: a selftest that edited the shipped sheet would race the lane reading it.
 The engine half takes its vocabulary as an argument for the same reason, and
@@ -33,6 +33,9 @@ Guarantees:
   - a documented return type is checked against the live annotation, with the
     four decorations that are not disagreements planted beside the one that
     is [tested: this file is its own test, run by the gate; commit=4ef96c94579db405fafed8fdaab20e33901a2298]
+  - every required closed-value roster catches omission, invention, wrong
+    order where order is semantic, a false count and total absence [tested:
+    this file is its own test, run by the gate; commit=2e627a593413191cda3170f2eb716835f7f62543]
 Open Obligations:
   To Do: None
   Hacks: None
@@ -51,6 +54,8 @@ if str(HERE) not in sys.path:
 
 from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
     REPO,
+    closed_value_findings,
+    closed_value_source_findings,
     count_findings,
     head_findings,
     library_findings,
@@ -65,6 +70,25 @@ from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
 
 SHEET = REPO / "llms.txt"
 PYTHON_SHEET = REPO / "extensions/python/llms.txt"
+
+SEMIRINGS = (
+    "bool", "bag", "counting", "set", "ranked", "tropical", "prob", "prov",
+    "budget", "amplitude",
+)
+EFFECTS = (
+    "pureStructural", "readOnlyLookup", "nondeterministicReadOnly",
+    "writesState", "oracleIO",
+)
+CAPABILITIES = (
+    "match", "enumerate", "add", "add-many", "remove", "clear", "subscribe",
+    "plan", "rules",
+)
+CLOSED_VALUES = {
+    "semiring": SEMIRINGS,
+    "algebra-presets": SEMIRINGS,
+    "effect-class": EFFECTS,
+    "provider-capabilities": CAPABILITIES,
+}
 
 
 def _shipped() -> list[str]:
@@ -89,11 +113,37 @@ def _surface(body: str) -> str:
     return f"## The MeTTa language surface\n\nblah\n\n```\n{body}\n```\n"
 
 
+def _listed(values: tuple[str, ...], prefix: str = "") -> str:
+    return ", ".join(f"`{prefix}{value}`" for value in values)
+
+
+def _closed_text(*, root: bool) -> str:
+    shared = (
+        f"`metta.vocabularies.Semiring` names the closed set: {_listed(SEMIRINGS)}.\n\n"
+        f"The ordered `EffectClass` members are: {_listed(EFFECTS)}. "
+        "A plan's class is their join.\n\n"
+        f"Capabilities are declared, not guessed: {_listed(CAPABILITIES)}, "
+        "and an unsupported operation refuses.\n"
+    )
+    if not root:
+        return shared
+    rows = "\n".join(f"| `{value}` | x |" for value in SEMIRINGS)
+    return (
+        "| carrier | combine |\n|---|---|\n"
+        f"{rows}\n\n"
+        f"Ten are objects: {_listed(SEMIRINGS, 'metta.')}\n\n"
+        f"{shared}"
+    )
+
+
 def main() -> int:
     """Plant one fault per check and require each to be caught."""
     failures: list[str] = []
+    cases = 0
 
     def expect(condition: bool, message: str) -> None:  # noqa: FBT001  -- the boolean IS the claim being asserted, and every call reads as one sentence
+        nonlocal cases
+        cases += 1
         if not condition:
             failures.append(message)
 
@@ -156,6 +206,117 @@ def main() -> int:
     expect(
         library_findings(REPO / "extensions/python/llms.txt", "a seat sheet") == [],
         "a seat sheet without a roster was reported",
+    )
+
+    # CLOSED SETS: each roster is explicit and exact. Unlike the library
+    # roster, these values come from the engine catalog and one Python
+    # protocol constant rather than from directory names.
+    root_closed = _closed_text(root=True)
+    python_closed = _closed_text(root=False)
+    expect(
+        closed_value_source_findings(CLOSED_VALUES) == [],
+        "matching catalog semiring and algebra preset sets were reported",
+    )
+    split_sources = dict(CLOSED_VALUES)
+    split_sources["algebra-presets"] = SEMIRINGS[:-1]
+    expect(
+        len(closed_value_source_findings(split_sources)) == 1,
+        "a catalog algebra preset omitted from the semiring vocabulary was NOT reported",
+    )
+    expect(
+        closed_value_findings(SHEET, root_closed, CLOSED_VALUES) == [],
+        "exact root closed-value rosters were reported",
+    )
+    expect(
+        closed_value_findings(PYTHON_SHEET, python_closed, CLOSED_VALUES) == [],
+        "exact Python closed-value rosters were reported",
+    )
+    expect(
+        any(
+            "module algebra object" in finding
+            for finding in closed_value_findings(
+                SHEET,
+                root_closed.replace("`metta.amplitude`", "", 1),
+                CLOSED_VALUES,
+            )
+        ),
+        "a module algebra object omission was NOT reported",
+    )
+    expect(
+        any(
+            "Semiring" in finding
+            for finding in closed_value_findings(
+                SHEET,
+                root_closed.replace("`amplitude`.", "`amplitude`, `invented`.", 1),
+                CLOSED_VALUES,
+            )
+        ),
+        "an invented Semiring member was NOT reported",
+    )
+    expect(
+        any(
+            "EffectClass" in finding
+            for finding in closed_value_findings(
+                SHEET,
+                root_closed.replace(
+                    "`pureStructural`, `readOnlyLookup`",
+                    "`readOnlyLookup`, `pureStructural`",
+                    1,
+                ),
+                CLOSED_VALUES,
+            )
+        ),
+        "a reordered EffectClass roster was NOT reported",
+    )
+    expect(
+        any(
+            "SpaceProvider capability" in finding
+            for finding in closed_value_findings(
+                PYTHON_SHEET,
+                python_closed.replace(", `rules`, and an unsupported", ", and an unsupported"),
+                CLOSED_VALUES,
+            )
+        ),
+        "an omitted provider capability was NOT reported",
+    )
+    expect(
+        any(
+            "Semiring" in finding and "roster is missing" in finding
+            for finding in closed_value_findings(
+                SHEET,
+                root_closed.replace(
+                    "`metta.vocabularies.Semiring` names the closed set:",
+                    "The enum contains:",
+                ),
+                CLOSED_VALUES,
+            )
+        ),
+        "a Semiring roster deleted from the ROOT sheet was NOT reported",
+    )
+    expect(
+        closed_value_findings(PYTHON_SHEET, "a seat sheet with no roster", CLOSED_VALUES)
+        == [],
+        "a seat sheet that covers none of these sets was reported",
+    )
+    expect(
+        any(
+            "EffectClass" in finding
+            for finding in closed_value_findings(
+                PYTHON_SHEET,
+                python_closed.replace("`oracleIO`.", "`oracleIO`, `invented`.", 1),
+                CLOSED_VALUES,
+            )
+        ),
+        "an invented member in a seat sheet's own roster was NOT reported",
+    )
+    expect(
+        any(
+            "object roster says 9" in finding
+            for finding in closed_value_findings(
+                SHEET, root_closed.replace("Ten are objects", "Nine are objects"), CLOSED_VALUES
+            )
+        ),
+        "a false module object roster count was NOT reported",
     )
 
     # COUNTS: use the real table as the clean control, then corrupt one claim
@@ -406,7 +567,7 @@ def main() -> int:
 
     for failure in failures:
         print(failure, file=sys.stderr)
-    print(f"llms selftest: 47 planted case(s), {len(failures)} failure(s)")
+    print(f"llms selftest: {cases} planted case(s), {len(failures)} failure(s)")
     return 1 if failures else 0
 
 

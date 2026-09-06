@@ -32,6 +32,10 @@
 % catalog_self_description:catalog_queries_preserve_width_multiplicity_and_references,
 % catalog_self_description:fixed_width_catalog_lookup_ignores_unrelated_arities;
 % commit=8bd37f3042555ee016a7b917234ce44c75a97c3e].
+% Guarantees: a user algebra row is owned by the same context key as its
+% annotations row, while shipped preset rows remain global fallbacks [tested:
+% extensions/python/tests/ch06_many_answers/test_under_algebra.py::test_custom_algebras_are_context_owned;
+% commit=2e627a593413191cda3170f2eb716835f7f62543].
 
 :- dynamic native_storage_module_cache/2.
 :- dynamic space_parametric/1.
@@ -367,9 +371,12 @@ metta_catalog_note_added([vocabulary, Vocab|_]) :-
 metta_catalog_note_added(['routed-by-shape', Head|_]) :-
     !,
     metta_materialize_route(Head).
-metta_catalog_note_added([algebra, Name|_]) :-
+metta_catalog_note_added([algebra, Name, _, _, _, _, _, _, _, Owner]) :-
     !,
-    retractall(metta_algebra_descriptor_cache(Name, _, _, _, _, _, _, _)).
+    (   Owner == global
+    ->  retractall(metta_algebra_descriptor_cache(_, Name, _, _, _, _, _, _, _))
+    ;   retractall(metta_algebra_descriptor_cache(Owner, Name, _, _, _, _, _, _, _))
+    ).
 metta_catalog_note_added([annotations, Ctx|_]) :-
     !,
     retractall(metta_annotations_cache(Ctx, _)).
@@ -434,7 +441,7 @@ metta_catalog_note_removed([Rel|_]) :-
     !,
     retractall(metta_kind_cache(_, _, _)),
     retractall(metta_vocab_cache(_, _, _)),
-    retractall(metta_algebra_descriptor_cache(_, _, _, _, _, _, _, _)),
+    retractall(metta_algebra_descriptor_cache(_, _, _, _, _, _, _, _, _)),
     retractall(metta_annotations_cache(_, _)),
     retractall(metta_dispatch_value_cache(_, _, _, _)),
     metta_materialize_routes,
@@ -459,9 +466,12 @@ metta_catalog_note_removed([vocabulary, Vocab|_]) :-
 metta_catalog_note_removed(['routed-by-shape', Head|_]) :-
     !,
     metta_materialize_route(Head).
-metta_catalog_note_removed([algebra, Name|_]) :-
+metta_catalog_note_removed([algebra, Name, _, _, _, _, _, _, _, Owner]) :-
     !,
-    retractall(metta_algebra_descriptor_cache(Name, _, _, _, _, _, _, _)).
+    (   Owner == global
+    ->  retractall(metta_algebra_descriptor_cache(_, Name, _, _, _, _, _, _, _))
+    ;   retractall(metta_algebra_descriptor_cache(Owner, Name, _, _, _, _, _, _, _))
+    ).
 metta_catalog_note_removed([annotations, Ctx|_]) :-
     !,
     retractall(metta_annotations_cache(Ctx, _)).
@@ -513,8 +523,8 @@ metta_catalog_clause([Rel|Args], Ref) :-
 :- dynamic metta_kind_cache/3.    %Head, Spec | none, ref(Ref) | none
 :- dynamic metta_vocab_cache/3.   %Vocab, Values | none, ref(Ref) | none
 :- dynamic metta_annotations_cache/2. %Ctx, Algebra
-:- dynamic metta_algebra_descriptor_cache/8.
-%Name, Combine, Extend, Zero, One, Laws, Carrier, Requires
+:- dynamic metta_algebra_descriptor_cache/9.
+%Ctx, Name, Combine, Extend, Zero, One, Laws, Carrier, Requires
 :- dynamic metta_dispatch_value_cache/4. %Function, Axis, Value | none, ref(Ref) | none
 
 %A compiled call can ask four dispatch axes on every recursive step. Walking
@@ -765,22 +775,21 @@ metta_check_catalog_semantics(claim, [Vocab, Value|_], Term) :-
     ).
 metta_check_catalog_semantics(algebra,
                               [Name, Combine, Extend, Zero, One,
-                               Laws, Carrier, Requires],
+                               Laws, Carrier, Requires, Owner],
                               Term) :-
     !,
-    (   metta_catalog_row([algebra, Name|_])
+    (   metta_catalog_row([algebra, Name, _, _, _, _, _, _, _, Owner])
     ->  metta_declaration_refused(
-            Term, 1, 'one algebra row per name; remove the old row first')
+            Term, 1,
+            'one algebra row per context and name; remove the old row first')
     ;   true
     ),
-    metta_algebra_list_field(Laws, laws, Term, 6),
-    metta_algebra_carrier_field(Carrier, Term),
-    metta_algebra_list_field(Requires, requires, Term, 8),
-    metta_check_algebra_laws(Name, Combine, Extend, Zero, One,
-                             Laws, Carrier, Term).
+    metta_check_algebra_fields(Name, Combine, Extend, Zero, One,
+                               Laws, Carrier, Requires, Term).
+
 metta_check_catalog_semantics(annotations, [Ctx, Algebra|CapabilityArgs], Term) :-
     !,
-    metta_declared_algebra_requirements(Algebra, Required, Term),
+    metta_declared_algebra_requirements(Ctx, Algebra, Required, Term),
     metta_annotation_capabilities(CapabilityArgs, Capabilities, Term),
     (   member(Requirement, Required),
         \+ memberchk(Requirement, Capabilities)
@@ -884,6 +893,14 @@ metta_check_catalog_semantics(on, [Ctx|_], _) :-
     metta_install_bridges.
 metta_check_catalog_semantics(_, _, _).
 
+metta_check_algebra_fields(Name, Combine, Extend, Zero, One,
+                           Laws, Carrier, Requires, Term) :-
+    metta_algebra_list_field(Laws, laws, Term, 6),
+    metta_algebra_carrier_field(Carrier, Term),
+    metta_algebra_list_field(Requires, requires, Term, 8),
+    metta_check_algebra_laws(Name, Combine, Extend, Zero, One,
+                             Laws, Carrier, Term).
+
 metta_require_saga_effect(Operation, Term) :-
     metta_operation_effect(Operation, Effect),
     !,
@@ -920,11 +937,15 @@ metta_saga_compensation_callable(Name) :-
     metta_ensure_compiled(Name),
     arity(Name, 2).
 
-metta_declared_algebra_requirements(Algebra, Required, _) :-
+metta_declared_algebra_requirements(Ctx, Algebra, Required, _) :-
     metta_catalog_row([algebra, Algebra, _, _, _, _, _, _,
-                       [requires|Required]]),
+                       [requires|Required], Ctx]),
     !.
-metta_declared_algebra_requirements(_, _, Term) :-
+metta_declared_algebra_requirements(_, Algebra, Required, _) :-
+    metta_catalog_row([algebra, Algebra, _, _, _, _, _, _,
+                       [requires|Required], global]),
+    !.
+metta_declared_algebra_requirements(_, _, _, Term) :-
     metta_declaration_refused(Term, 2, 'a declared algebra').
 
 metta_algebra_list_field([Head|Values], Head, _, _) :-
@@ -1424,7 +1445,7 @@ metta_catalog_preset([kind, merge, pattern, ['one-of', 'answer-policy']]).
 metta_catalog_preset([kind, annotations, symbol, symbol,
                       [optional, term]]).
 metta_catalog_preset([kind, algebra, symbol, symbol, symbol, term, term,
-                      term, term, term]).
+                      term, term, term, symbol]).
 metta_catalog_preset([kind, source, symbol, ['one-of', 'source-kind']]).
 metta_catalog_preset([kind, context, symbol, ['one-of', world]]).
 metta_catalog_preset([kind, admits, symbol, term]).
@@ -1497,60 +1518,60 @@ metta_catalog_preset([algebra, bool, max, '*', 0, 1,
                        'right-distributive', 'combine-zero-identity',
                        'extend-one-identity', 'extend-zero-annihilates',
                        contraction],
-                      [carrier], [requires]]).
+                      [carrier], [requires], global]).
 metta_catalog_preset([algebra, bag, '+', '*', 0, 1,
                       [laws, 'combine-associative', 'combine-commutative',
                        'extend-associative', 'left-distributive',
                        'right-distributive', 'combine-zero-identity',
                        'extend-one-identity', 'extend-zero-annihilates',
                        contraction],
-                      [carrier], [requires]]).
+                      [carrier], [requires], global]).
 metta_catalog_preset([algebra, counting, '+', '*', 0, 1,
                       [laws, 'combine-associative', 'combine-commutative',
                        'extend-associative', 'left-distributive',
                        'right-distributive', 'combine-zero-identity',
                        'extend-one-identity', 'extend-zero-annihilates',
                        contraction],
-                      [carrier], [requires]]).
+                      [carrier], [requires], global]).
 metta_catalog_preset([algebra, set, max, '*', 0, 1,
                       [laws, 'combine-associative', 'combine-commutative',
                        'combine-idempotent', 'extend-associative',
                        'left-distributive', 'right-distributive',
                        'combine-zero-identity', 'extend-one-identity',
                        'extend-zero-annihilates', contraction],
-                      [carrier], [requires]]).
+                      [carrier], [requires], global]).
 metta_catalog_preset([algebra, ranked, max, '*', 0, 1,
                       [laws, 'combine-associative', 'combine-commutative',
                        'extend-associative', 'left-distributive',
                        'right-distributive', 'combine-zero-identity',
                        'extend-one-identity', 'extend-zero-annihilates',
                        contraction],
-                      [carrier], [requires]]).
+                      [carrier], [requires], global]).
 metta_catalog_preset([algebra, tropical, min, '+', infinity, 0,
                       [laws, 'combine-associative', 'combine-commutative',
                        'combine-idempotent', 'extend-associative',
                        'left-distributive', 'right-distributive',
                        'combine-zero-identity', 'extend-one-identity'],
-                      [carrier], [requires]]).
+                      [carrier], [requires], global]).
 metta_catalog_preset([algebra, prob, '+', '*', 0, 1,
                       [laws, 'combine-associative', 'combine-commutative',
                        'extend-associative', 'left-distributive',
                        'right-distributive', 'combine-zero-identity',
                        'extend-one-identity', 'extend-zero-annihilates',
                        contraction],
-                      [carrier], [requires]]).
+                      [carrier], [requires], global]).
 metta_catalog_preset([algebra, prov, plus, times, zero, one,
                       [laws, 'combine-associative', 'combine-commutative',
                        'extend-associative', 'left-distributive',
                        'right-distributive', 'combine-zero-identity',
                        'extend-one-identity', 'extend-zero-annihilates',
                        contraction],
-                      [carrier], [requires]]).
+                      [carrier], [requires], global]).
 metta_catalog_preset([algebra, budget, min, '+', infinity, 0,
                       [laws, 'combine-associative', 'combine-commutative',
                        'combine-idempotent', 'extend-associative',
                        'combine-zero-identity', 'extend-one-identity'],
-                      [carrier], [requires]]).
+                      [carrier], [requires], global]).
 metta_catalog_preset([algebra, amplitude, 'amplitude-add',
                       'amplitude-multiply', [complex, 0, 0], [complex, 1, 0],
                       [laws, 'combine-associative', 'combine-commutative',
@@ -1558,7 +1579,7 @@ metta_catalog_preset([algebra, amplitude, 'amplitude-add',
                        'left-distributive', 'right-distributive',
                        'combine-zero-identity', 'extend-one-identity',
                        'extend-zero-annihilates', contraction],
-                      [carrier], [requires, finite, contractive, staged]]).
+                      [carrier], [requires, finite, contractive, staged], global]).
 %The requirements above are the executable amplitude fence [tested:
 %an_amplitude_context_without_the_whole_fragment_is_refused_by_name;
 %commit=7ae3103aee78e947d23c5872e3db23c28ad7fe1c].

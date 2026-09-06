@@ -10,7 +10,7 @@ and say so in two places for three days without a red lane [measured
 
 A cheat sheet is the one document read by something that cannot notice a stale
 claim, so the file that asserts its own gate and has none is worse off than one
-admitting it is hand-kept. Eight checks cover both directions of each promise:
+admitting it is hand-kept. Nine checks cover both directions of each promise:
 
   PATHS       every backticked token that names a file or directory resolves,
               a glob resolving to at least one match. This is the "real file
@@ -42,6 +42,12 @@ admitting it is hand-kept. Eight checks cover both directions of each promise:
               annotation, compared by HEAD name so a sheet may be more precise
               than the signature is. A method the annotation says nothing about
               is skipped rather than guessed at.
+  CLOSED SETS every semiring, algebra-object, effect-class and provider-
+              capability roster equals the implementation that owns it, read
+              from the engine catalog and one Python protocol constant rather
+              than from a list kept here. The root sheet must carry each one,
+              so deleting a roster cannot silence its check; a seat sheet is
+              free not to cover a set and is held to what it does state.
 
 Assumes:
   - swipl is on PATH; without it the HEADS half is skipped aloud rather than
@@ -77,6 +83,9 @@ Guarantees:
     a prose tail, a module qualifier, an omitted parameter, a positional tuple
     and a sheet more precise than the signature are not [tested:
     tests/checks/check_llms_selftest.py; commit=4ef96c94579db405fafed8fdaab20e33901a2298]
+  - every required closed-value roster fails closed and is compared in both
+    directions with the catalog or Python constant that owns it [tested:
+    tests/checks/check_llms_selftest.py; commit=2e627a593413191cda3170f2eb716835f7f62543]
 Open Obligations:
   To Do: None
   Hacks: None
@@ -85,6 +94,7 @@ Open Obligations:
 
 from __future__ import annotations
 
+import ast
 import inspect
 import re
 import subprocess
@@ -170,6 +180,37 @@ _ROSTER = re.compile(
 )
 #: The same count where the sources table states it a second time.
 _TABLE_COUNT = re.compile(r"\|\s*`lib/lib_\*/`\s*\|\s*(?P<count>\d+) MeTTa libraries")
+
+#: Closed-value prose is parsed only at a labelled contract. Pulling every
+#: backticked word from a whole section would admit examples, aliases and
+#: retired spellings into the roster. Each expression stops before the prose
+#: that explains the set, so a closed set stays an exact list.
+_CARRIER_ROSTER = re.compile(
+    r"^\| carrier \|.*?\n\|---.*?\n(?P<body>(?:^\|.*(?:\n|$))+)",
+    re.MULTILINE,
+)
+_OBJECT_ROSTER = re.compile(
+    r"^(?P<count>[A-Za-z]+|\d+) are objects[:,]\s*(?P<body>.*?)"
+    r"(?=^The |^`metta\.vocabularies\.Semiring`|^\s*$)",
+    re.MULTILINE | re.DOTALL,
+)
+_SEMIRING_ROSTER = re.compile(
+    r"^`metta\.vocabularies\.Semiring` names the closed set:\s*"
+    r"(?P<body>.*?)(?=^\s*$)",
+    re.MULTILINE | re.DOTALL,
+)
+#: Both of these end at the roster SENTENCE rather than at a particular
+#: following clause, so two sheets may introduce the same closed set in their
+#: own words. Only backticked values are read out of the body, so prose that
+#: names no value cannot join the roster.
+_EFFECT_ROSTER = re.compile(
+    r"^The ordered `EffectClass` members are:?\s*(?P<body>.*?)(?=\.\s|\.$)",
+    re.MULTILINE | re.DOTALL,
+)
+_CAPABILITY_ROSTER = re.compile(
+    r"^Capabilities are declared, not guessed:\s*(?P<body>.*?)(?=\.\s|\.$)",
+    re.MULTILINE | re.DOTALL,
+)
 
 #: Each count is anchored to the table row that makes the claim. A missing
 #: match is itself a finding, so deleting the number cannot disable its check.
@@ -856,12 +897,215 @@ def library_findings(sheet: Path, text: str) -> list[str]:
     return findings
 
 
+def _python_constant(path: Path, name: str) -> tuple[str, ...]:
+    """Read a literal tuple of strings without importing its module."""
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    for node in tree.body:
+        value: ast.expr | None = None
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == name for target in node.targets
+        ):
+            value = node.value
+        elif (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == name
+        ):
+            value = node.value
+        if value is None:
+            continue
+        literal = ast.literal_eval(value)
+        if not isinstance(literal, tuple) or not all(isinstance(item, str) for item in literal):
+            message = f"{path.relative_to(REPO)}:{name} is not a literal tuple of strings"
+            raise RuntimeError(message)
+        return literal
+    message = f"{path.relative_to(REPO)} does not define {name}"
+    raise RuntimeError(message)
+
+
+def _inline_values(body: str) -> tuple[str, ...]:
+    """The unqualified values in a labelled backtick roster."""
+    return tuple(re.findall(r"`([A-Za-z][A-Za-z0-9-]*)`", body))
+
+
+def _object_values(body: str) -> tuple[str, ...]:
+    """Normalize `metta.name` and the documented `.name` shorthand."""
+    values: list[str] = []
+    for token in re.findall(r"`([^`]+)`", body):
+        if token.startswith("metta."):
+            values.append(token.removeprefix("metta."))
+        elif token.startswith("."):
+            values.append(token.removeprefix("."))
+    return tuple(values)
+
+
+def _roster_difference(
+    sheet: Path,
+    text: str,
+    label: str,
+    match: re.Match[str] | None,
+    *,
+    actual: tuple[str, ...],
+    expected: tuple[str, ...],
+    ordered: bool = False,
+    opening: str = "",
+    required: bool = True,
+) -> list[str]:
+    """Describe one exact roster disagreement in a stable, copyable form.
+
+    A roster that is absent and one that disagrees are different edits, so
+    they read differently: the absent one names the sentence the sheet has to
+    carry, because "found no explicit values" alone sends the reader looking
+    for a list that is not there.
+
+    ``required`` is the fail-closed half. The root sheet promises the whole
+    surface, so a roster deleted from it is a finding and the check cannot be
+    silenced by removing the sentence. A seat sheet documents its own seat and
+    is free not to cover a set; what it DOES state still has to be exact. This
+    is the split ``library_findings`` already makes.
+    """
+    where = str(sheet.relative_to(REPO))
+    if match is not None:
+        where += f":{_line_of(text, match.start())}"
+    if match is None and not required:
+        return []
+    wanted = ", ".join(f"`{value}`" for value in expected)
+    duplicates = len(actual) != len(set(actual))
+    same_values = len(actual) == len(expected) and set(actual) == set(expected)
+    if same_values and not duplicates and (not ordered or actual == expected):
+        return []
+    qualifier = " in that order" if ordered else ""
+    if match is None:
+        return [
+            f"{where}: the {label} roster is missing; this sheet must carry a "
+            f"line beginning {opening!r} that names exactly "
+            f"{wanted}{qualifier}"
+        ]
+    found = ", ".join(f"`{value}`" for value in actual) or "no explicit values"
+    return [
+        f"{where}: the {label} roster must be exactly {wanted}{qualifier}; found {found}"
+    ]
+
+
+def closed_value_source_findings(values: Mapping[str, tuple[str, ...]]) -> list[str]:
+    """The algebra rows and their declared vocabulary are one closed set."""
+    semirings = values["semiring"]
+    presets = values["algebra-presets"]
+    if presets == semirings:
+        return []
+    wanted = ", ".join(f"`{value}`" for value in semirings)
+    found = ", ".join(f"`{value}`" for value in presets) or "no values"
+    return [
+        "llms: the catalog's algebra rows disagree with its semiring vocabulary: "
+        f"expected {wanted}; found {found}"
+    ]
+
+
+def closed_value_findings(
+    sheet: Path,
+    text: str,
+    values: Mapping[str, tuple[str, ...]],
+) -> list[str]:
+    """Every documented closed roster against the source that owns it."""
+    if sheet not in _PYTHON_DOCUMENTS:
+        return []
+    findings: list[str] = []
+    semirings = values["semiring"]
+    if sheet == _ROOT_SHEET:
+        carrier = _CARRIER_ROSTER.search(text)
+        carrier_values = (
+            tuple(re.findall(r"^\|\s*`([^`]+)`", carrier.group("body"), re.MULTILINE))
+            if carrier is not None
+            else ()
+        )
+        findings.extend(
+            _roster_difference(
+                sheet,
+                text,
+                "carrier",
+                carrier,
+                actual=carrier_values,
+                expected=semirings,
+                opening="| carrier |",
+            )
+        )
+
+        objects = _OBJECT_ROSTER.search(text)
+        object_values = _object_values(objects.group("body")) if objects is not None else ()
+        findings.extend(
+            _roster_difference(
+                sheet,
+                text,
+                "module algebra object",
+                objects,
+                actual=object_values,
+                expected=semirings,
+                opening="<count> are objects:",
+            )
+        )
+        if objects is not None and _number(objects.group("count")) != len(semirings):
+            findings.append(
+                f"{sheet.relative_to(REPO)}:{_line_of(text, objects.start())}: the module "
+                f"algebra object roster says {_number(objects.group('count'))}, "
+                f"the catalog has {len(semirings)}"
+            )
+
+    semiring = _SEMIRING_ROSTER.search(text)
+    semiring_values = _inline_values(semiring.group("body")) if semiring is not None else ()
+    findings.extend(
+        _roster_difference(
+            sheet,
+            text,
+            "Semiring",
+            semiring,
+            actual=semiring_values,
+            expected=semirings,
+            opening="`metta.vocabularies.Semiring` names the closed set:",
+            required=sheet == _ROOT_SHEET,
+        )
+    )
+
+    effects = _EFFECT_ROSTER.search(text)
+    effect_values = _inline_values(effects.group("body")) if effects is not None else ()
+    findings.extend(
+        _roster_difference(
+            sheet,
+            text,
+            "EffectClass",
+            effects,
+            actual=effect_values,
+            expected=values["effect-class"],
+            ordered=True,
+            opening="The ordered `EffectClass` members are:",
+            required=sheet == _ROOT_SHEET,
+        )
+    )
+
+    capabilities = _CAPABILITY_ROSTER.search(text)
+    capability_values = (
+        _inline_values(capabilities.group("body")) if capabilities is not None else ()
+    )
+    findings.extend(
+        _roster_difference(
+            sheet,
+            text,
+            "SpaceProvider capability",
+            capabilities,
+            actual=capability_values,
+            expected=values["provider-capabilities"],
+            opening="Capabilities are declared, not guessed:",
+            required=sheet == _ROOT_SHEET,
+        )
+    )
+    return findings
+
+
 class EngineUnavailableError(Exception):
     """swipl is not installed, which is a skip; anything else is a finding."""
 
 
-def _query_vocabulary(disjunction: str) -> set[str]:
-    """Ask one engine process for the distinct names a goal enumerates."""
+def _query_values(disjunction: str) -> tuple[str, ...]:
+    """Ask one engine process for the names a goal enumerates, in source order."""
     goal = (
         "ensure_loaded('engine/qlf_boot.pl'), ensure_loaded('engine/metta.pl'), "
         f"forall(({disjunction}), "
@@ -882,7 +1126,28 @@ def _query_vocabulary(disjunction: str) -> set[str]:
         tail = detail[-1] if detail else "no output"
         msg = f"the engine did not answer its vocabulary: {tail}"
         raise RuntimeError(msg)
-    return {line.strip() for line in finished.stdout.splitlines() if line.strip()}
+    return tuple(line.strip() for line in finished.stdout.splitlines() if line.strip())
+
+
+def _query_vocabulary(disjunction: str) -> set[str]:
+    """Ask one engine process for the distinct names a goal enumerates."""
+    return set(_query_values(disjunction))
+
+
+def closed_value_catalog() -> dict[str, tuple[str, ...]]:
+    """Read each closed Python-facing set from the implementation that owns it."""
+    return {
+        "semiring": _query_values(
+            "metta_catalog_row([vocabulary,semiring|Vs]), member(N, Vs)"
+        ),
+        "algebra-presets": _query_values("metta_catalog_row([algebra,N|_])"),
+        "effect-class": _query_values(
+            "metta_catalog_row([vocabulary,'effect-class'|Vs]), member(N, Vs)"
+        ),
+        "provider-capabilities": _python_constant(
+            REPO / "extensions/python/metta/foreign.py", "CAPABILITIES"
+        ),
+    }
 
 
 def engine_vocabulary() -> set[str]:
@@ -1008,6 +1273,16 @@ def main(argv: list[str] | None = None) -> int:
         known = None
         corpus_known = None
         findings.append(f"llms: {broken}")
+    closed_values: dict[str, tuple[str, ...]] | None
+    try:
+        closed_values = closed_value_catalog()
+    except EngineUnavailableError:
+        closed_values = None
+    except (RuntimeError, SyntaxError, ValueError) as broken:
+        closed_values = None
+        findings.append(f"llms: {broken}")
+    if closed_values is not None:
+        findings.extend(closed_value_source_findings(closed_values))
     used = corpus_head_uses() if known is not None else {}
     for sheet in sheets():
         text = sheet.read_text(encoding="utf-8")
@@ -1018,6 +1293,8 @@ def main(argv: list[str] | None = None) -> int:
         findings.extend(near_miss_findings(sheet, text, known))
         findings.extend(method_findings(sheet, text))
         findings.extend(return_findings(sheet, text))
+        if closed_values is not None:
+            findings.extend(closed_value_findings(sheet, text, closed_values))
         if known is not None:
             assert corpus_known is not None
             findings.extend(head_findings(sheet, text, known))
