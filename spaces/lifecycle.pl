@@ -128,7 +128,7 @@ remove_sexp(Space, Atom) :- remove_sexp(Space, Atom, _).
 %space is a multiset unless something forbids it, SO removal takes EVERY
 %occurrence". The premise argues for the opposite conclusion, and the tree it
 %described was a multiset on ADD and a set on REMOVE, so three adds of (dup 1)
-%gave count 3 and one removal gave count 0. The arbiter reads the premise the
+%gave count 3 and one removal gave count 0. LeaTTa reads the premise the
 %other way: "remove-atom must behave as multiset subtraction on the
 %reader-visible view of &self", and its own model "removes the first exact
 %occurrence and returns unit"

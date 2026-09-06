@@ -1828,7 +1828,7 @@ process_form(_, In, _) :-
 % retryable. It used to carry a compile/populate MODE whose compile half
 % targeted the BASE tier: a file imported into a named space stored its
 % atoms there while its equations compiled into &self's module, so a
-% top-level call reduced through a space it never imported. The arbiter
+% top-level call reduced through a space it never imported. LeaTTa
 % pins the opposite (LeaTTa tests/semantics/grounded/
 % 29-builtin-module-alias-import.metta, MEASURED: an alias import admits
 % nothing into the caller, both probes staying unreduced data; its model
@@ -2000,8 +2000,8 @@ top_forms_after_layout(Forms, LC0) -->
 top_forms_after_layout(Forms, LC0) -->
     top_atom_form(form, Forms, LC0).
 
-%A marker with nothing after it contributes no form rather than raising: the
-%arbiter's tokenizer emits the marker and its parser then has no atom to mark
+%A marker with nothing after it contributes no form rather than raising:
+%LeaTTa's tokenizer emits the marker and its parser then has no atom to mark
 %[measured 2026-08-19: LeaTTa --observed-file on a file ending in a bare `!`
 %exits 0 and prints nothing].
 top_atom_form(_, [], _) --> eos, !.

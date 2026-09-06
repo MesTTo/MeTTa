@@ -732,7 +732,7 @@ translate_special_dl(case, [KeyExpr, PairsExpr], AfterHead, Goals, Out) :-
 %
 %So the Empty ROW is ordinary here: it is matched against the key's value in
 %source order like any other, and a key with no answers selects nothing at all
-%rather than selecting it. Measured against the arbiter, whose transcript this
+%rather than selecting it. Measured against LeaTTa, whose transcript this
 %reproduces line for line: `(switch (key) ((first wrong) (second S) ($_ C)))`
 %is S, `(switch second (($_ F) (second L)))` is F because rows are tried in
 %order, `(switch absent ((first wrong) (second wrong)))` is nothing,
@@ -785,7 +785,7 @@ translate_special_dl(return, [Value], AfterHead, Goals, Out) :-
 %than a runtime binding, which is what makes the unevaluated operand reach a
 %masked position at all. It also carries the multiplicity the runtime binding
 %could not: a binder used twice duplicates a nondeterministic operand, and the
-%arbiter answers all four rows for
+%LeaTTa answers all four rows for
 %`!(chain (superpose (1 2)) $x ($x $x))` where a bind-once route answers two
 %[measured 2026-08-24].
 %CHAIN IS LET, which is upstream's own definition: one clause serves both,
@@ -804,7 +804,7 @@ translate_special_dl(return, [Value], AfterHead, Goals, Out) :-
 %`!(chain (superpose (1 2)) $x ($x $x))` answers `(1 1) (2 2)` upstream and
 %answered `(1 1) (1 2) (2 1) (2 2)` here, because substituting a
 %nondeterministic operand into a binder used twice duplicates it. The four
-%rows are the arbiter's, recorded as such in the comment this replaces; two is
+%rows are LeaTTa's, recorded as such in the comment this replaces; two is
 %upstream's, and upstream is the oracle for this branch.
 %
 %THE COST: examples/he_minimalmetta.metta is `(chain (eval ...) ...)` four
