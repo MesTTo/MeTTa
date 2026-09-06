@@ -247,7 +247,9 @@ literal; `m.run("!(fib {n})", n=10)` is the same on every supported version;
 in between, any object with `strings` and `interpolations` tuples works,
 including `tstrings-backport`'s `t("...")`, because the check is structural and
 never an isinstance against a class the 3.12 floor does not have. The type is
-`metta.TemplateLike`, whose holes are `metta.InterpolationLike`. It is accepted
+`metta.atoms.TemplateLike`, whose holes are `metta.atoms.InterpolationLike`
+(published there, beside the reader door and the atom constructors that are a
+hole's markers, rather than at the narrow package root). It is accepted
 at `run`, `profile`, `profile_extension`, `eval`, `answers`, `eval_status`,
 `match` (pattern text) and `parse`, on `Space`, on the `MeTTa` context, at
 module level and on `AsyncMeTTa`.
