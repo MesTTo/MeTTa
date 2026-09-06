@@ -45,6 +45,11 @@
 %   typing_rule_scope:a_named_refusal_replaces_the_ordinary_one_for_its_own_pair;
 %   commit=84327245373bba29fba00cf2cea62d8257a9f5cb].
 
+% Guarantees: metta_bad_argument_reason/3 builds the same refusal payload
+%   independently of Error context and observation, allowing an evaluated
+%   refinement mismatch to retain its written call
+%   [tested: run_tests(tensor_shapes); commit=WORKTREE].
+
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 
 %%% Representation and parsing conversions: %%%
@@ -155,7 +160,8 @@ metta_record_error(Error) :-
 %the two refusal shapes are tried underneath it, in the order they had.
 metta_bad_argument_error(Operation, Arguments, Error) :-
     \+ metta_call_accepted(Operation, Arguments),
-    metta_bad_argument_refusal(Operation, Arguments, Error).
+    metta_bad_argument_reason(Operation, Arguments, Reason),
+    metta_error_atom(Operation, Arguments, Reason, Error).
 
 %THE CHEAP QUESTION FIRST. This clause exists to find a NAMED refusal, and
 %only a rule the program registered can produce one: engine/type_rules.pl
@@ -186,7 +192,7 @@ metta_bad_argument_error(Operation, Arguments, Error) :-
 %call answered nothing at all, no value and no error
 %[tested: a_user_rule_that_names_no_refusal_leaves_the_ordinary_one;
 %commit=84327245373bba29fba00cf2cea62d8257a9f5cb].
-metta_bad_argument_refusal(Operation, Arguments, Error) :-
+metta_bad_argument_reason(Operation, Arguments, Refusal) :-
     current_metta_module(Module),
     raw_registered_typing_rule(user, Module, _, _, _, _, _),
     !,
@@ -196,25 +202,23 @@ metta_bad_argument_refusal(Operation, Arguments, Error) :-
                                  Position, Expected, Actual, Rule, Reason)
     ->  metta_type_refusal_reason(RawChain, Chain, Position, Expected, Actual,
                                   [['TypingRuleRefusal', Rule, Reason]],
-                                  Refusal),
-        metta_error_atom(Operation, Arguments, Refusal, Error)
-    ;   metta_ordinary_argument_refusal(Operation, Arguments, Error)
+                                  Refusal)
+    ;   metta_ordinary_argument_reason(Operation, Arguments, Refusal)
     ).
 
-metta_bad_argument_refusal(Operation, Arguments, Error) :-
-    metta_ordinary_argument_refusal(Operation, Arguments, Error).
+metta_bad_argument_reason(Operation, Arguments, Refusal) :-
+    metta_ordinary_argument_reason(Operation, Arguments, Refusal).
 
 %One error per declared ARROW and per rejected ACTUAL type, arrows in
 %declaration order and actual types in the order get-type reports them, which
 %is the multiplicity and the order the arbiter pins.
-metta_ordinary_argument_refusal(Operation, Arguments, Error) :-
+metta_ordinary_argument_reason(Operation, Arguments, Refusal) :-
     metta_operation_parameters(Operation, Arguments, ParameterTypes, Origins,
                                RawChain, Chain),
     metta_bad_argument(ParameterTypes, Origins, Arguments, 1,
                        Position, Expected, Actual),
     metta_type_refusal_reason(RawChain, Chain, Position, Expected, Actual, [],
-                              Refusal),
-    metta_error_atom(Operation, Arguments, Refusal, Error).
+                              Refusal).
 
 % Preserve the source parameter spelling and carry the complete expansion for
 % a whole-arrow alias, where no source parameter position exists to project.

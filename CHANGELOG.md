@@ -20,6 +20,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - `TaggedAnswer.under(algebra_object)` uses the supplied algebra directly,
   including its callback carrier, without declaring it on the answer's space.
   A local declaration with the same name no longer replaces that object.
+- Tensor shape claims on user operations now refine their arrows. Known
+  incompatible arguments produce `BadArgType`, and shared dimension variables
+  derive the result shape. Live arrays report the same shaped type expression.
+  The complete array operation roster declares shape behavior and every
+  elementwise unary operation preserves shape through its arrow, including
+  rank-zero NumPy results returned as arrays.
+- Object type integrations can publish structural type atoms or compute a type
+  from a live value. MeTTa atom metadata in Python `Annotated` refines arrow
+  alternatives; ordinary Python metadata remains available in catalog rows.
 
 ## [0.8.0] - 2026-09-06
 
