@@ -263,7 +263,7 @@ PARANOID = pathlib.Path("/proc/sys/kernel/perf_event_paranoid")
 LOADAVG = pathlib.Path("/proc/loadavg")
 
 
-class CounterUnavailable(RuntimeError):
+class CounterUnavailableError(RuntimeError):
     """This box would not count, so nothing measured here says the tree moved.
 
     The seat benchmarks state the same rule in their own harness
@@ -330,7 +330,7 @@ def _perf(command: list[str]) -> tuple[int, subprocess.CompletedProcess]:
             "--security-opt seccomp=unconfined before perf_event_open is "
             f"permitted at all. perf said: {completed.stderr[-300:]}"
         )
-        raise CounterUnavailable(msg)
+        raise CounterUnavailableError(msg)
     return instructions, completed
 
 
@@ -1041,7 +1041,7 @@ def main() -> int:
         return absent
     try:
         return _judge(arguments)
-    except CounterUnavailable as unavailable:
+    except CounterUnavailableError as unavailable:
         return refused(str(unavailable))
 
 
