@@ -22,6 +22,9 @@ The questions are the halves of the 2026-09-06 defect:
   it puts a run.
 - a measurement that times out must leave nothing running.
 
+Each question is one function below, named for what it plants, and ``main``
+runs them in order and prints what they answer.
+
 Assumes: an ``examples/`` corpus with at least two files, used only for their
   names and path shapes.
 Guarantees:
@@ -75,14 +78,28 @@ if str(HERE) not in sys.path:
 
 import check_upstream_parity as lane  # noqa: E402
 
-#: The two costs a plant assigns, keyed by what the driver was handed.
-#: A null control is any program under NULL_ROOT; everything else is an example.
+#: The two costs a plant assigns, keyed by what the driver was handed. A null
+#: control is any program under NULL_ROOT and costs FIXED; everything else is
+#: an example and costs FIXED plus its own WORK, which is what the row records.
+FIXED = 1_000_000_000
+WORK = 250_000
+
+#: The inference count a plant reports unless it names its own.
 PLANTED_INFERENCES = 4321
+
+#: How far one run in three lands below the others, because SWI's collector
+#: thread sometimes finishes inside the process and sometimes after it.
+EXCURSION = 35_083_561
 
 
 @contextlib.contextmanager
 def planted(cost):
-    """Run the production lane with `cost(engine_root, program)` standing in for perf."""
+    """Run the production lane with `cost(engine_root, program)` standing in for perf.
+
+    A plant is handed what the driver was handed, so a cost can differ per
+    engine the way the real fixed cost does. Every plant below answers the
+    same for both engines, and spells that parameter `_engine_root` to say so.
+    """
     original = lane._perf
     lane._FIXED_COST.clear()
 
@@ -111,6 +128,7 @@ def planted(cost):
 
 
 def is_null(program: str) -> bool:
+    """Whether the driver was handed a null control rather than a corpus example."""
     return program.startswith(str(lane.NULL_ROOT))
 
 
@@ -137,48 +155,52 @@ def survivors(marker: str) -> list[int]:
 #    instructions.append(count - boot)
 #[source: tests/checks/check_upstream_parity.py at 749f5864, measure/3]
 def old_rule_net(raw: int, boot: int) -> int:
+    """The net the rule this file replaced would have recorded."""
     return raw - boot
 
 
-def main() -> int:
+def honest_plant_failures(example: Path) -> list[str]:
+    """A control that behaves: the net a row records is the program's own work.
+
+    The program run costs its null control plus that work, and the work is
+    what has to come out the other side whatever the fixed cost was.
+    """
     failures: list[str] = []
-    corpus = lane.corpus()
-    if len(corpus) < 2:
-        print("the examples corpus is too small to plant against", file=sys.stderr)
-        return 1
-    example, other = corpus[0], next(
-        (p for p in corpus if len(str(p)) != len(str(corpus[0]))), corpus[1]
-    )
-    name = str(example.relative_to(lane.REPO))
 
-    #A control that behaves: the program run costs its null control plus its
-    #own work, and the work is what the row records.
-    fixed, work = 1_000_000_000, 250_000
-
-    def honest(engine_root, program):
-        return fixed if is_null(program) else fixed + work
+    def honest(_engine_root, program):
+        return FIXED if is_null(program) else FIXED + WORK
 
     with planted(honest):
         measured = lane.measure(lane.REPO, example)
     if measured["status"] != "ok":
         failures.append(f"an honest plant did not measure: {measured}")
-    elif measured["instructions"] != work:
+    elif measured["instructions"] != WORK:
         failures.append(
             f"the net is {measured['instructions']} where the program's own work "
-            f"is {work}; it is not being taken against the null control"
+            f"is {WORK}; it is not being taken against the null control"
         )
+    return failures
 
-    #The net must come from the control at THIS row's SHAPE. Plant a fixed cost
-    #that rises with both the path length and the directory count, the way the
-    #real one does, and check each row is charged its own shape.
+
+def shape_matching_failures(corpus: list[Path], example: Path) -> list[str]:
+    """The net must come from the control at THIS row's SHAPE.
+
+    Plant a fixed cost that rises with both the path length and the directory
+    count, the way the real one does, and check each row is charged its own
+    shape.
+    """
+    failures: list[str] = []
     per_character = 5_638  # ours, measured 2026-09-06 across a 78-character span
     per_directory = 13_782  # ours, measured 2026-09-06 across six components
 
-    def by_shape(engine_root, program):
-        base = (fixed + per_character * len(program)
+    def by_shape(_engine_root, program):
+        base = (FIXED + per_character * len(program)
                 + per_directory * program.count("/"))
-        return base if is_null(program) else base + work
+        return base if is_null(program) else base + WORK
 
+    other = next(
+        (p for p in corpus if len(str(p)) != len(str(example))), corpus[1]
+    )
     deeper = next(
         (p for p in corpus if len(p.parts) != len(example.parts)), other
     )
@@ -186,11 +208,11 @@ def main() -> int:
         here = lane.measure(lane.REPO, example)
         there = lane.measure(lane.REPO, other)
         below = lane.measure(lane.REPO, deeper)
-    if any(row.get("instructions") != work for row in (here, there, below)):
+    if any(row.get("instructions") != WORK for row in (here, there, below)):
         failures.append(
             "a shape-dependent fixed cost leaked into the net: "
             f"{here.get('instructions')}, {there.get('instructions')} and "
-            f"{below.get('instructions')} against a planted {work} each"
+            f"{below.get('instructions')} against a planted {WORK} each"
         )
     if len(str(example)) != len(str(other)) and here.get("fixed") == there.get("fixed"):
         failures.append(
@@ -202,67 +224,80 @@ def main() -> int:
             "two rows of different directory count shared one control, so the "
             "control is not depth-matched"
         )
+    return failures
 
-    #One run in three lands 35,083,561 low, because SWI's collector thread
-    #sometimes finishes inside the process and sometimes does not. The minimum
-    #takes that run every time it appears; the median has to ignore it.
-    excursion = 35_083_561
+
+def excursion_failures(example: Path) -> list[str]:
+    """One cheap run in three is ignored and the sample extended, three in seven are not.
+
+    One run in three lands EXCURSION low, because SWI's collector thread
+    sometimes finishes inside the process and sometimes does not. The minimum
+    takes that run every time it appears; the median has to ignore it. Three
+    excursions in seven still leave the median where the other four agree, and
+    that is the answer, so it must NOT be reported as a defect: a lane that
+    failed there would fail on a busy box for nothing.
+    """
+    failures: list[str] = []
     seen = {"n": 0}
 
-    def sometimes_cheap(engine_root, program):
+    def sometimes_cheap(_engine_root, program):
         if is_null(program):
-            return fixed
+            return FIXED
         seen["n"] += 1
-        return fixed + work - (excursion if seen["n"] % 3 == 1 else 0)
+        return FIXED + WORK - (EXCURSION if seen["n"] % 3 == 1 else 0)
 
     with planted(sometimes_cheap):
         steady = lane.measure(lane.REPO, example)
-    if steady.get("instructions") != work:
+    if steady.get("instructions") != WORK:
         failures.append(
             f"one cheap run in three moved the recorded cost to "
-            f"{steady.get('instructions')} against the {work} the other two agree on"
+            f"{steady.get('instructions')} against the {WORK} the other two agree on"
         )
     if steady.get("runs") != lane.RUNS + lane.EXTRA_RUNS:  # counted, not spawned
         failures.append(
-            f"runs that disagreed by {excursion} were not extended: "
+            f"runs that disagreed by {EXCURSION} were not extended: "
             f"{steady.get('runs')} runs taken"
         )
 
-    #Three excursions in seven still leave the median where the other four
-    #agree, and that is the answer, so it must NOT be reported as a defect: a
-    #lane that failed there would fail on a busy box for nothing.
     seen["n"] = 0
 
-    def cheap_three_in_seven(engine_root, program):
+    def cheap_three_in_seven(_engine_root, program):
         if is_null(program):
-            return fixed
+            return FIXED
         seen["n"] += 1
-        return fixed + work - (excursion if seen["n"] in (1, 4, 6) else 0)
+        return FIXED + WORK - (EXCURSION if seen["n"] in (1, 4, 6) else 0)
 
     with planted(cheap_three_in_seven):
         minority = lane.measure(lane.REPO, example)
-    if minority.get("status") != "ok" or minority.get("instructions") != work:
+    if minority.get("status") != "ok" or minority.get("instructions") != WORK:
         failures.append(
             f"three cheap runs in seven left the row {minority.get('status')} at "
-            f"{minority.get('instructions')} rather than ok at {work}"
+            f"{minority.get('instructions')} rather than ok at {WORK}"
         )
+    return failures
 
-    #The first touch of three corpus rows writes a cache their later runs read,
-    #so its cost AND its inference count differ. One discarded run is what
-    #stops that reading as a nondeterministic row on a fresh checkout.
-    seen["n"] = 0
 
-    def cold_first_touch(engine_root, program):
+def warmup_failures(example: Path) -> list[str]:
+    """A cold first touch is discarded rather than counted.
+
+    The first touch of three corpus rows writes a cache their later runs read,
+    so its cost AND its inference count differ. One discarded run is what
+    stops that reading as a nondeterministic row on a fresh checkout.
+    """
+    failures: list[str] = []
+    seen = {"n": 0}
+
+    def cold_first_touch(_engine_root, program):
         if is_null(program):
-            return fixed
+            return FIXED
         seen["n"] += 1
         if seen["n"] == 1:
-            return fixed + work + 9_000_000, PLANTED_INFERENCES + 4_000
-        return fixed + work, PLANTED_INFERENCES
+            return FIXED + WORK + 9_000_000, PLANTED_INFERENCES + 4_000
+        return FIXED + WORK, PLANTED_INFERENCES
 
     with planted(cold_first_touch):
         warmed = lane.measure(lane.REPO, example)
-    if warmed["status"] != "ok" or warmed.get("instructions") != work:
+    if warmed["status"] != "ok" or warmed.get("instructions") != WORK:
         failures.append(
             f"a cold first touch left the row {warmed['status']} at "
             f"{warmed.get('instructions')}; the warm-up run is not being discarded"
@@ -271,16 +306,23 @@ def main() -> int:
         failures.append(
             f"the row recorded the cold run's {warmed['inferences']} inferences"
         )
+    return failures
 
-    #A program with no mode at all has no cost, and saying so beats picking a
-    #number: every run lands somewhere different, so nothing supports a median.
-    seen["n"] = 0
 
-    def no_mode(engine_root, program):
+def modeless_failures(example: Path) -> list[str]:
+    """A program with no mode at all is reported as having no cost.
+
+    Saying so beats picking a number: every run lands somewhere different, so
+    nothing supports a median.
+    """
+    failures: list[str] = []
+    seen = {"n": 0}
+
+    def no_mode(_engine_root, program):
         if is_null(program):
-            return fixed
+            return FIXED
         seen["n"] += 1
-        return fixed + work + seen["n"] * excursion
+        return FIXED + WORK + seen["n"] * EXCURSION
 
     with planted(no_mode):
         spread = lane.measure(lane.REPO, example)
@@ -289,13 +331,24 @@ def main() -> int:
             f"a program whose every run costs something different was reported "
             f"as {spread['status']}, not unstable"
         )
+    return failures
 
-    #The defect itself: a fixed cost measured ABOVE what a run of the program
-    #costs. This is what the boot fixture did, by 8,661,096 instructions.
+
+def overstated_control_failures(example: Path, name: str) -> list[str]:
+    """The defect itself: a fixed cost measured ABOVE what a run of the program costs.
+
+    This is what the boot fixture did, by 8,661,096 instructions. It must be
+    reported as `negative-net` and turn the lane red rather than passing
+    quietly. The discrimination is what makes the plant a regression rather
+    than an assertion: the rule this file replaced records exactly the same
+    numbers and stays green, because a negative net is smaller than every
+    allowance there is.
+    """
+    failures: list[str] = []
     overstatement = 8_661_096
 
-    def overstated(engine_root, program):
-        return fixed + overstatement if is_null(program) else fixed + work
+    def overstated(_engine_root, program):
+        return FIXED + overstatement if is_null(program) else FIXED + WORK
 
     with planted(overstated):
         broken = lane.measure(lane.REPO, example)
@@ -307,15 +360,14 @@ def main() -> int:
     elif broken["instructions"] >= 0:
         failures.append("a negative-net row did not record its negative net")
 
-    #and it must turn the lane red rather than passing quietly.
     baseline = {
         "//": {"status": "meta"},
         name: {
             "status": "measured",
             "upstream_instructions": 10_000_000,
-            "upstream_null": fixed,
-            "our_instructions": work,
-            "our_null": fixed,
+            "upstream_null": FIXED,
+            "our_instructions": WORK,
+            "our_null": FIXED,
             "our_inferences": PLANTED_INFERENCES,
         },
     }
@@ -324,11 +376,7 @@ def main() -> int:
     if verdict == 0:
         failures.append("a negative net passed the lane instead of failing it")
 
-    #The discrimination, which is what makes the plant above a regression
-    #rather than an assertion: the rule this file replaced records exactly the
-    #same numbers and stays green, because a negative net is smaller than every
-    #allowance there is.
-    old_net = old_rule_net(fixed + work, fixed + overstatement)
+    old_net = old_rule_net(FIXED + WORK, FIXED + overstatement)
     if old_net >= 0:
         failures.append("the replayed old rule did not reproduce a negative net")
     old_allowed = (
@@ -340,16 +388,23 @@ def main() -> int:
             "the replayed old rule flagged the planted row, so the plant does "
             "not discriminate between the two rules"
         )
+    return failures
 
-    #A recorded negative net is a defect too, so a frozen baseline carrying one
-    #cannot pass, under either the status this file writes for it or the
-    #`measured` the old one wrote.
+
+def frozen_negative_net_failures(name: str) -> list[str]:
+    """A recorded negative net is a defect too, under either status a baseline writes.
+
+    So a frozen baseline carrying one cannot pass, whether it says
+    `negative-net` the way this file writes it or `measured` the way the old
+    one wrote it seven times.
+    """
+    failures: list[str] = []
     frozen = {
         "//": {"status": "meta"},
         name: {
             "status": "negative-net",
             "our_instructions": -50_470_138,
-            "our_null": fixed,
+            "our_null": FIXED,
         },
     }
     if lane.verdicts(frozen, remeasure=False) == 0:
@@ -368,8 +423,12 @@ def main() -> int:
             "a baseline recording a negative net as `measured`, which is what "
             "the old one did seven times, passed the lane"
         )
+    return failures
 
-    #A re-pin note is a record. Rebuilding the meta block must not drop it.
+
+def carried_meta_failures() -> list[str]:
+    """A re-pin note is a record: rebuilding the meta block must not drop it."""
+    failures: list[str] = []
     with tempfile.TemporaryDirectory() as scratch:
         stored = Path(scratch) / "baseline.json"
         note = "RE-PINNED 2026-09-06, and this sentence has to survive a rebaseline"
@@ -385,14 +444,20 @@ def main() -> int:
         failures.append("a rebaseline drops the meta notes the baseline already held")
     if "our_boot" in carried:
         failures.append("a rebaseline carries forward a field it recomputes")
+    return failures
 
-    #A timed-out measurement must not leave the engine running. The topology is
-    #the real one and it is the whole point: the process being timed is the
-    #wrapper, bounded.sh's death signal reaches the wrapper's child, and the
-    #engine is that child's OWN child. `sleep` here stands where swipl stands
-    #under perf, one level below anything a kill or a pdeathsig reaches, so a
-    #kill aimed at the timed process leaves it running exactly as it did on
-    #2026-09-06.
+
+def timeout_failures() -> list[str]:
+    """A timed-out measurement must not leave the engine running.
+
+    The topology is the real one and it is the whole point: the process being
+    timed is the wrapper, bounded.sh's death signal reaches the wrapper's
+    child, and the engine is that child's OWN child. `sleep` here stands where
+    swipl stands under perf, one level below anything a kill or a pdeathsig
+    reaches, so a kill aimed at the timed process leaves it running exactly as
+    it did on 2026-09-06.
+    """
+    failures: list[str] = []
     #The grandchild gets its own stdio on purpose. Holding the harness's pipe
     #makes the post-kill communicate() wait for the orphan to finish, so by the
     #time anything could look, the orphan has exited of its own accord and a
@@ -418,10 +483,16 @@ def main() -> int:
             f"a timed-out measurement left {left} running; the kill reached the "
             "process being timed and not the session under it"
         )
+    return failures
 
-    #The control has to match the example's directory count as well as its
-    #length, or an empty file at seven components reads 139,684 instructions
-    #against a control at one.
+
+def null_program_failures(example: Path) -> list[str]:
+    """The control has to match the example's directory count as well as its length.
+
+    Or an empty file at seven components reads 139,684 instructions against a
+    control at one.
+    """
+    failures: list[str] = []
     deep, shallow = lane.null_program(120, 6), lane.null_program(120, 0)
     if len(str(deep)) != 120 or len(str(shallow)) != 120:
         failures.append(
@@ -440,11 +511,19 @@ def main() -> int:
             f"{len(str(control))} characters against the example's "
             f"{len(example.parts)} and {len(str(example))}"
         )
+    return failures
 
-    #The lane must not be able to pass in CI without measuring. Until
-    #2026-09-06 an absent upstream checkout returned 0 everywhere, and the
-    #workflow never provided one, so the lane ran on every push and measured
-    #nothing while the page said the measurement ran there.
+
+def upstream_prerequisite_failures() -> list[str]:
+    """The lane must not be able to pass in CI without measuring.
+
+    Until 2026-09-06 an absent upstream checkout returned 0 everywhere, and the
+    workflow never provided one, so the lane ran on every push and measured
+    nothing while the page said the measurement ran there. The pin itself
+    belongs here too: a present checkout still has to be the one the recorded
+    upstream numbers came from before anything rebaselines against it.
+    """
+    failures: list[str] = []
     original_upstream, original_ci = lane.UPSTREAM, os.environ.get("CI")
     try:
         lane.UPSTREAM = lane.REPO / "ai-tmp" / "no-upstream-checkout-here"
@@ -473,8 +552,6 @@ def main() -> int:
         else:
             os.environ["CI"] = original_ci
 
-    #The pin itself: a present checkout still has to be the one the recorded
-    #upstream numbers came from before anything rebaselines against it.
     if len(lane.UPSTREAM_COMMIT) != 40 or not all(
         character in "0123456789abcdef" for character in lane.UPSTREAM_COMMIT
     ):
@@ -486,31 +563,44 @@ def main() -> int:
             f"the checkout at {lane.UPSTREAM} is at {lane.upstream_head()}, "
             f"not the pinned {lane.UPSTREAM_COMMIT}"
         )
+    return failures
 
-    #A kernel or container that will not let this count has to say so. The
-    #plant is what a container under Docker's default seccomp profile actually
-    #prints, which is not a parse failure and must not be reported as one.
+
+def denied_counter_failures() -> list[str]:
+    """A kernel or container that will not let this count has to say so.
+
+    The plant is what a container under Docker's default seccomp profile
+    actually prints, which is not a parse failure and must not be reported as
+    one.
+    """
+    failures: list[str] = []
     denied = subprocess.CompletedProcess(
         args=[], returncode=0, stdout="",
         stderr="Error:\nNo permission to enable instructions:u event.\n",
     )
     original_spawn = lane._spawn
-    lane._spawn = lambda argv: denied
+    lane._spawn = lambda _argv: denied
     try:
         lane._perf(["true"])
     except RuntimeError as refusal:
-        for expected in ("perf_event_paranoid", "seccomp=unconfined"):
-            if expected not in str(refusal):
-                failures.append(
-                    f"the perf refusal does not name {expected}: {refusal}"
-                )
+        failures.extend(
+            f"the perf refusal does not name {expected}: {refusal}"
+            for expected in ("perf_event_paranoid", "seccomp=unconfined")
+            if expected not in str(refusal)
+        )
     else:
         failures.append("perf answering no count at all did not refuse")
     finally:
         lane._spawn = original_spawn
+    return failures
 
-    #The one thing the control cannot do is name a path shorter than its root,
-    #and it has to say so with the edit that fixes it.
+
+def null_program_refusal_failures() -> list[str]:
+    """The one thing the control cannot do is name a path shorter than its root.
+
+    And it has to say so with the edit that fixes it.
+    """
+    failures: list[str] = []
     try:
         lane.null_program(len(str(lane.NULL_ROOT)) - 1, 0)
     except RuntimeError as refusal:
@@ -518,6 +608,33 @@ def main() -> int:
             failures.append("the null-control refusal does not name the edit")
     else:
         failures.append("null_program accepted a length its root cannot name")
+    return failures
+
+
+def main() -> int:
+    """Plant every way this measurement can break, and report the ones the lane missed."""
+    corpus = lane.corpus()
+    if len(corpus) < 2:
+        print("the examples corpus is too small to plant against", file=sys.stderr)
+        return 1
+    example = corpus[0]
+    name = str(example.relative_to(lane.REPO))
+
+    failures = [
+        *honest_plant_failures(example),
+        *shape_matching_failures(corpus, example),
+        *excursion_failures(example),
+        *warmup_failures(example),
+        *modeless_failures(example),
+        *overstated_control_failures(example, name),
+        *frozen_negative_net_failures(name),
+        *carried_meta_failures(),
+        *timeout_failures(),
+        *null_program_failures(example),
+        *upstream_prerequisite_failures(),
+        *denied_counter_failures(),
+        *null_program_refusal_failures(),
+    ]
 
     for failure in failures:
         print(failure, file=sys.stderr)

@@ -109,7 +109,7 @@ reporting. Keeping a second, non-comparable fixed cost on the page is an
 invitation to subtract it again.
 
 Tried: the corpus re-measured with the null control, both engines, three
-processes each, in `/home/user/Dev/PyPeTTa1/pnull`, a clone whose path is the
+processes each, in a sibling clone at `../pnull`, whose absolute path is the
 same 29 characters as the main checkout, provisioned with the five engine `.so`
 artifacts, the three chapter-19 artifacts, `libcmetta.so`, both MORK artifacts
 and the git-import fixture cache, `.qlf` purged and then warmed.
@@ -420,3 +420,51 @@ post-kill `communicate()` waits for the orphan to exit and by the time anything
 can look, it has. Giving the grandchild its own stdio separates the two and the
 check finally discriminates: red against `process.kill()`, green against
 `os.killpg`.
+
+## 2026-09-06, the two repository gates this thread's landing left red
+
+The merge onto `petta` turned two of the Python seat's repository tests red,
+both on files this thread wrote.
+
+Tried: `sh extensions/python/test.sh -n 0 -k 'ruff_configuration_enables_every_family
+or no_tracked_file_cites_an_absolute_workspace_path'`. Two failures.
+
+`test_no_tracked_file_cites_an_absolute_workspace_path` named this file's line
+112 and `tests/data/upstream-parity-baseline.json`'s meta note, both citing the
+measurement clone by an absolute path a reader's machine does not have. Both
+now spell it `../pnull`, the form `2026-09-06-the-release-repin.md` already
+uses for its own `../repin`. The load-bearing fact was never the path: it is
+that the clone's path is the same 29 characters as the checkout, so the
+per-character term cancels, and both sentences still say so.
+
+Decided: the ruff findings in `tests/checks/check_upstream_parity_selftest.py`
+are fixed in code, not suppressed, because a suppression could not have worked
+here. `test_the_ruff_configuration_enables_every_family_or_records_why_not`
+counts the burn-down with `--ignore-noqa`, so a `# noqa: ARG001` still counts
+its site: measured 160 ARG sites against that ledger's ceiling of 152, and the
+eight this file carried had to disappear rather than be annotated. Every plant
+now spells the parameter it does not read `_engine_root`, which is
+`metta/__main__.py`'s `_repl(_arguments)` idiom for a signature its caller
+fixes. 152 after, and the file is clean under the configured gate.
+
+Rejected: dropping `engine_root` from the plant protocol so `planted` calls
+`cost(program)`. It is half of what the driver is handed, and a fixed cost that
+differs per engine is this thread's whole subject -- the boot fixture read
+8,661,096 above ours and 4,594,811 below upstream's -- so a plant has to stay
+able to answer differently for the two. Revisit if the protocol stops mirroring
+`_perf`'s command.
+
+Decided: `main` splits into thirteen functions, one per plant, each named for
+what it plants and carrying the comment that used to sit above it as its
+docstring. It was one function at 56 branches against a mccabe ceiling of 35,
+and the ceiling is the right complaint: the plants share nothing but three
+constants, which are now `FIXED`, `WORK` and `EXCURSION` at module scope.
+
+Measured: the split changes nothing the lane says. `sh check.sh
+parity-perf-selftest` before and after produces byte-identical output, `diff`
+reporting no difference, both exiting 0. The burn-down families the file
+touched read ARG 152 (ceiling 152), D 2232 (2233), C90 2 (26) and PERF 0 (0),
+where they read 160, 2235, 3 and 1.
+
+Open: `check.sh`'s comment above the lane still calls it "the four-case plant",
+written when it was four. It is thirteen.
