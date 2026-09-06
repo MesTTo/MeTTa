@@ -17,6 +17,8 @@
 %     the_dev_build_inserts_checks_and_types_a_planted_violation]; the
 %     dev-typed gate lane also runs every plunit suite under that build.
 % Guarantees:
+%   - the ordered match limit service is exported for host evaluation
+%     [tested: run_tests(evaluation_context); commit=WORKTREE].
 %   - Files below engine/spaces/ are plain source units consulted into this
 %     implementation module in their original order; storage predicates,
 %     provider seams, and lifecycle state retain their existing ownership
@@ -326,6 +328,7 @@
             %appears in examples/ once, inside a comment].
             metta_top/3,
             metta_top_match/5,
+            metta_ordered_match_limit/6,
             metta_merged_match/3,
             %The two removal funnels tests/prolog/ciao_grade.pl carries an
             %EXTERNAL Ciao-style assertion for. A predicate with a written
