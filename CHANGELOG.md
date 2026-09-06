@@ -263,6 +263,29 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `reduce` handed a bound scalar has no answer, where it used to raise. The
+  raise was reachable from a MeTTa program rather than only from an engine
+  caller, because `reduce` is a published head: `!(foldall a (reduce a) 0)`
+  compiled the generator to `reduce([reduce, a], D, _)`, dispatched the head
+  with `a`, and exited 2 with `reduce: list expected, found a`, ending the
+  whole file where the arbiter answers `0`. MeTTa's error channel is an answer
+  and not an exception, so a raise at a door a program can knock on broke this
+  engine's own rule. A scalar is not a call, there is no reduction step to
+  take, and the three programs the fuzz lane drew (`(reduce a)`,
+  `(reduce (* 0))` and `(reduce (* 0 1))` as `foldall` generators) now answer
+  `0` on both engines. The EMPTY expression keeps its own answer: `(reduce ())`
+  is `()` here by a pin that records why, and that is the one place this
+  engine's `reduce` stays wider than the arbiter's. Every use of `reduce` in
+  the corpus and the libraries passes an expression.
+- `chain`'s operand is read from its FIRST argument in the effect planner, not
+  its second. `(chain <atom> <binder> <template>)` is the opposite order from
+  `(let <pattern> <value> <body>)`, and reading it as `let`'s put the binder
+  where the operand belongs, so a reified world planned the binder as a dynamic
+  operation and refused `(chain 1 $x (+ $x 2))` at effect rank `oracleIO`.
+- An operand whose evaluation produced an `(Error ...)` atom finishes a
+  boolean operation with that atom again. Narrowing the five to their domain
+  had removed the branch that carried it, so `!(and True (+ 1 "bad"))` answered
+  nothing instead of the inner error.
 - `add-atom` and `remove-atom` take upstream PeTTa's domain. Upstream stores an
   atom by making it a fact keyed on its HEAD, so an atom without one — a bare
   symbol, a number, a string, or `()` — cannot become one there and the
@@ -295,7 +318,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `(dispatch-policy <name> MismatchEnum MismatchFail)` row so the call site's
   declared-type mismatch fails with them instead of answering the position it
   refused. A relation out of its domain has no row; it is not a function given
-  the wrong argument.
+  the wrong argument. An operand whose evaluation produced an `(Error ...)`
+  atom still finishes the call with that atom, which is the engine's own rule
+  and a channel upstream does not have (it exits 2 on the same programs); an
+  operand WRITTEN as an error atom now answers that atom too, where it used to
+  answer `(BadArgType 1 Bool ErrorType)` from the call site's mismatch answer.
 
 - `chain` no longer evaluates the value it bound a second time. It compiles to
   exactly `let`'s goals, which is upstream's own definition (one clause serves

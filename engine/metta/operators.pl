@@ -809,15 +809,36 @@ boolean_operand(Value) :- ( var(Value) -> bool(Value) ; Value == true -> true
 %enumerates, so `!(collapse (and $a $b))` is `(true false false false)` on both
 %engines [measured 2026-09-07] and
 %metta_operation_errors:boolean_operations_remain_relational still holds.
-and(A,B,C) :- boolean_operand(A), boolean_operand(B),
-              ( A == true -> C = B ; C = false ).
-or(A,B,C) :- boolean_operand(A), boolean_operand(B),
-             ( A == true -> C = true ; C = B ).
-not(A,B) :- boolean_operand(A), ( A == true -> B = false ; B = true ).
-xor(A,B,C) :- boolean_operand(A), boolean_operand(B),
-              ( A == B -> C = false ; C = true ).
-implies(A,B,C) :- boolean_operand(A), boolean_operand(B),
-                  ( A == true -> C = B ; C = true ).
+%AN ERROR OPERAND STILL FINISHES THE CALL, which is the one thing the removed
+%branch did that the domain does not cover. `(Error <call> <reason>)` is an
+%ANSWER here, and an operand whose evaluation produced one hands that atom on
+%unchanged instead of being consumed: `!(and True (+ 1 "bad"))` is
+%`(Error (+ 1 "bad") (BadArgType 2 Number String))` and not a second error
+%naming the first [source: engine/metta/terms.pl, metta_error_operand/2 and the
+%note over it; tested: test_the_error_vocabulary_answers_what_the_arbiter_answers].
+%Upstream has no such channel and exits 2 on the same three programs
+%[measured 2026-09-07 against PeTTa@ae66fa8: `!(and True (+ 1 "bad"))`,
+%`!(or False (+ 1 "bad"))` and `!(not (+ 1 "bad"))` are all
+%`is/2: Type error: 'character' expected`], which is class arbiter-error and
+%where this engine's answer is the extension the compatibility law allows.
+%
+%So the soft cut stays and only its else-branch narrows: an error operand is
+%answered, and every OTHER non-boolean has no answer at all.
+and(A,B,C) :- ( ( boolean_operand(A), boolean_operand(B) )
+                *-> ( A == true -> C = B ; C = false )
+                ;   metta_error_operand([A, B], C) ).
+or(A,B,C) :- ( ( boolean_operand(A), boolean_operand(B) )
+               *-> ( A == true -> C = true ; C = B )
+               ;   metta_error_operand([A, B], C) ).
+not(A,B) :- ( boolean_operand(A)
+              *-> ( A == true -> B = false ; B = true )
+              ;   metta_error_operand([A], B) ).
+xor(A,B,C) :- ( ( boolean_operand(A), boolean_operand(B) )
+                *-> ( A == B -> C = false ; C = true )
+                ;   metta_error_operand([A, B], C) ).
+implies(A,B,C) :- ( ( boolean_operand(A), boolean_operand(B) )
+                    *-> ( A == true -> C = B ; C = true )
+                    ;   metta_error_operand([A, B], C) ).
 
 %%% Nondeterminism: %%%
 superpose(L, _) :- var(L), !, refuse_unbound_input(superpose, 1).

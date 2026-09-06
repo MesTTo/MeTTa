@@ -685,10 +685,17 @@ test(boolean_operations_remain_relational) :-
     Rows == [true-true-true, true-false-false,
              false-true-false, false-false-false].
 
-test(non_list_reduce_throws_its_own_type_error,
-     [throws(error(type_error(list, invalid_reduce),
-                   context(reduce, 'invalid MeTTa operation argument')))]) :-
-    reduce(invalid_reduce, _).
+%A SCALAR IS NOT A CALL, so `reduce` has no reduction step to take and no
+%answer to give. It used to raise here, and the raise was reachable from a
+%MeTTa program through a `foldall` generator, which ended the whole file:
+%`!(foldall a (reduce a) 0)` exited 2 with `reduce: list expected, found a`
+%where the arbiter answers `0`, and answers `0` here now
+%[measured 2026-09-07 against PeTTa@ae66fa8].
+test(a_scalar_reduce_has_no_answer) :-
+    findall(Out, reduce(invalid_reduce, Out), Answers),
+    assertion(Answers == []),
+    findall(Out, reduce(42, Out), Numbers),
+    assertion(Numbers == []).
 
 test(variable_reduce_keeps_its_existing_empty_answer) :-
     findall(Input-Out, reduce(Input, Out), Answers),

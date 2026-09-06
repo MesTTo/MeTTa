@@ -234,6 +234,30 @@ lists it as an open measurement (items 2 and 3). Revisit when the engine's
 error channel is decided against upstream as a whole; the measurement above is
 what that decision starts from.
 
+Caught by the full Python seat after this commit and repaired in the one that
+closes the verification pass: removing the `metta_operation_answer/3` branch
+also removed the ERROR-OPERAND law for these five, and `!(and True (+ 1 "bad"))` answered nothing where it must answer
+`(Error (+ 1 "bad") (BadArgType 2 Number String))` — an operand whose
+evaluation produced an Error finishes the call with that atom
+[source: engine/metta/terms.pl, metta_error_operand/2; tested:
+test_the_error_vocabulary_answers_what_the_arbiter_answers]. The arbiter exits
+2 on that program and on the `or` and `not` twins, so it is class arbiter-error
+and the channel is the extension the law allows. The soft cut therefore stays
+and only its else-branch narrows: an error operand is answered, every other
+non-boolean has none.
+
+One consequence, recorded because it is a real change and neither reading is
+the arbiter's: an operand WRITTEN as an error atom no longer takes the
+ErrorType reading for these five. `!(collapse (and (Error a b) True))` was
+`((Error (and (Error a b) true) (BadArgType 1 Bool ErrorType)))`, is now
+`((Error a b))`, and is `()` on the arbiter. The ErrorType reading came from
+the call site's mismatch answer, which is the very thing `MismatchFail`
+replaces, so it is not reachable for these five whatever `and/3` does; the
+choice left is between the operand and nothing, and the operand is what the
+produced case needs and what the engine's own rule says. Revisit with the
+written-versus-produced distinction if the error channel is settled against
+upstream.
+
 Evidence: `examples/ch07-control-flow/07-01-if-and-booleans/11-boolean_domain.metta`
 is a new file, runs byte-identical on both engines, and is red without the fix.
 It is a NEW file rather than lines added to `07-and_or.metta` and `09-xor.metta`
@@ -353,3 +377,189 @@ Evidence:
 `examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/11-what-a-space-stores.metta`
 carries both halves; the half written in PeTTa's own spellings runs green on
 the arbiter (12 ✅) and was red here before the change.
+
+## 2026-09-07 — the fuzz rounds, and one family recorded rather than fixed
+
+The lane already takes `--seed`, so nothing was added to it. Three more seeds
+at 300 programs, `--rounds 8` because seed 1 spent all four of the default
+rounds inside one family:
+
+```sh
+python tests/checks/check_upstream_fuzz.py -n 300 --rounds 8 --seed <s> \
+    --report ai-tmp/fz/parity-fuzz-seed-<s>
+```
+
+### The family fixed: `foldall` over a `(reduce X)` generator
+
+Six of seed 2's seven. Shrunk: `!(foldall a (reduce (* 0)) 0)` after
+`(rel0 a a)`. Arbiter `0`; ours EXIT 2 with `reduce: list expected, found
+(partial * (0))`.
+
+| program | arbiter | ours before | ours after |
+|---|---|---|---|
+| `!(foldall a (reduce a) 0)` | `0` | exit 2 | `0` |
+| `!(foldall a (reduce (* 0)) 0)` | `0` | exit 2 | `0` |
+| `!(foldall a (reduce (* 0 1)) 0)` | `0` | exit 2 | `0` |
+| `!(foldall a (reduce ()) 0)` | `0` | `(a () 0)` | `(a () 0)` |
+| `!(foldall a (reduce (a b)) 0)` | `(a (a b) 0)` | agrees | agrees |
+| `!(foldall a (rel0 $x $y) 0)` | `(a (rel0 $_0 $_1) 0)` | agrees | agrees |
+| `!(reduce (* 0))` | `(partial * (0))` | agrees | agrees |
+
+Cause: `foldall` compiles its generator by head and arguments, so
+`(reduce a)` becomes `reduce([reduce, a], D, _)`; the head `reduce` is a
+PUBLISHED head here, dispatches with `a`, and reaches `reduce/3`'s last clause,
+which raised `type_error(list, a)`. A raise ends the whole file. MeTTa's error
+channel is an ANSWER and not an exception, which is this engine's own rule and
+the reason `metta_operation_answer/3` exists, so the raise broke that rule at a
+door a program can knock on rather than serving it.
+
+Decided: a scalar is not a call, so there is no reduction step and no answer.
+The clause is REMOVED rather than replaced: a bound term that is neither `[]`
+nor `[_|_]` matches no head and the call fails at the index, leaving no choice
+point, which is what the comment above the clause already required of it.
+
+Rejected: answering the scalar back. Tried it first, and it removes the raise
+without matching the arbiter: `!(foldall a (reduce a) 0)` answered `(a a 0)`
+because the generator then had a solution, where upstream's evaluator has none.
+Failing is what upstream does and what makes the three answer `0`.
+
+Open: the fourth row. `(reduce ())` still answers `()` here, because the empty
+expression must evaluate to itself for ARGUMENT evaluation — `!(foo ())` needs
+it — so the `[]` clause above stays and the generator has a solution where
+upstream's has none. The residual is one program shape, `foldall` with a
+non-lambda accumulator over `(reduce ())`, and it is a mismatch rather than a
+raise. Revisit if the MeTTa head `reduce` is ever separated from the engine's
+own evaluator predicate, which is what it would take to answer `()` at one door
+and nothing at the other.
+
+[Superseded the same day by "Seed 4 closed the row the section above left
+open", below: the argument-evaluation reason stated here is WRONG and was
+measured to be — removing the clause leaves `!()`, `!(let $x () $x)`,
+`!(collapse ())` and `!(cons-atom a ())` unchanged, because a written `()` is a
+compile-time constant. The reason the answer stays is the pin, not argument
+evaluation.]
+
+### Seed 4 closed the row the section above left open
+
+Tried: a fresh seed after the three repairs -> one finding, and it is that row
+reached by a shorter road than `foldall`:
+
+```metta
+(rel0 a a)
+(= (f0 $x) (reduce $x))
+!(f0 ())
+```
+
+arbiter nothing, ours `()`.
+
+Tried: giving `reduce` no clause for `[]` either -> it makes `!(f0 ())` and
+`!(foldall a (reduce ()) 0)` answer what the arbiter answers, and nothing else
+wanted the old answer: `!()`, `!(let $x () $x)`, `!(collapse ())` and
+`!(cons-atom a ())` are unchanged and all four agree with the arbiter, because
+a written `()` is a compile-time constant and never asks the reducer what it
+evaluates to.
+
+Rejected, and REVERTED after the engine suite named it: the `()` answer is a
+DESIGN this repository pinned with its reason, and the pin is
+conformance2:reduce_answers_an_irreducible_operand — "The empty operand is this
+engine's own: upstream aborts the run on `(reduce ())`". That reason is true of
+the STANDALONE form, which upstream refuses to parse; reached through a
+function it is not, and the fuzz lane drew exactly that. But the line this
+thread decides on is FIX where the behaviour was an accident and RECORD where
+it is a design, and this one is a design with its reason written down. The
+scalar rule is the other side of the same line: the raise it replaced was
+neither this engine's rule nor the arbiter's, so it had to change, and failing
+is what the arbiter does. `(= (f0 $x) (reduce $x))` with `!(f0 a)` and
+`!(f0 7)` answer nothing on both engines now, and `!(f0 (nofib 5))` is
+`(nofib 5)` on both, which is the pin's own rule for an operand `reduce` cannot
+call.
+
+Open, and recorded rather than fixed: `!(f0 ())` is `()` here and nothing on
+the arbiter, and `!(foldall a (reduce ()) 0)` is `(a () 0)` here and `0` there.
+Revisit if the pin is ever revisited; the measurement is here.
+
+### Two repairs the verification pass surfaced, neither from the lane
+
+Tried: the full Python seat against the three divergence commits -> two
+defects the fuzz lane cannot see, because it draws neither a reified world nor
+an error operand.
+
+Tried: `world.eval("(chain 1 $x (+ $x 2))")` -> refused at effect rank
+`oracleIO`. Cause: `(chain <atom> <binder> <template>)` is the OPPOSITE order
+from `(let <pattern> <value> <body>)`, and the effect planner's chain clause,
+moved onto let's shape when chain moved onto let's translation, read the binder
+where the operand belongs; a reified world then planned the binder as a dynamic
+operation. Decided: read the operand from the first argument.
+[tested: extensions/python/tests/ch15_writing_transactions_and_worlds/test_worlds.py:test_a_typed_structural_chain_is_not_falsely_refused].
+
+Tried: `!(and True (+ 1 "bad"))` -> answered nothing where it must answer the
+inner `(Error (+ 1 "bad") (BadArgType 2 Number String))`. Recorded in full in
+the boolean section above.
+
+### The one new family: arithmetic over a one-character symbol
+
+Seed 1's four findings are one family with four heads. The shrunk shape:
+
+```metta
+(rel0 a a)
+(= (f0 $x) (* $x))
+!(chain (a) $v1 (* (+ $v1 0)))
+```
+
+arbiter `(partial * (97))`, ours `(partial * ((Error (+ (a) 0) "+ expects two
+numbers")))`. `$v1` is bound to the unreduced call `(a)`, and the arithmetic is
+what differs.
+
+Measured across the family on both engines:
+
+| program | arbiter | ours |
+|---|---|---|
+| `!(+ (a) 0)` | `97` | `(Error (+ (a) 0) "+ expects two numbers")` |
+| `!(* (a) 0)` | `0` | the same refusal |
+| `!(< (a) 1)` | `false` | the same refusal |
+| `!(+ "s" 0)` | `115` | `(Error (+ "s" 0) (BadArgType 1 Number String))` |
+| `!(+ a 0)` | exit 2, ``Arithmetic: `a/0' is not a function`` | the refusal, exit 0 |
+| `!(+ (ab) 0)` | exit 2, `` `character' expected, found `ab' `` | the refusal, exit 0 |
+| `!(+ (a b) 0)` | exit 2, `"x" must hold one character` | the refusal, exit 0 |
+| `!(+ ((a)) 0)` | exit 2, `` `character' expected, found `[a]' `` | the refusal, exit 0 |
+
+So upstream accepts EXACTLY one shape outside the numbers: a one-element list
+holding a one-character atom, or a one-character string, read as its character
+code. That is SWI's `is/2` reading a "character", reached because upstream's
+arithmetic is `C is A + B` with nothing in front of it. Every other non-number
+raises there, which is class arbiter-error and where this engine's `(Error ...)`
+answer is already the extension the law allows.
+
+Decided: RECORD, not fix. Two grounds, and both are needed.
+
+- Upstream's accepted shape is discontinuous in the LENGTH OF A SYMBOL:
+  `!(+ (a) 0)` is 97 and `!(+ (ab) 0)` is a type error. Nothing in either
+  language says that; it is SWI's character arithmetic leaking through `is/2`.
+- Refusing a non-number is a liked design here, not an accident: `(: + (-> Number
+  Number Number))`, the `BadArgType` vocabulary, the `"+ expects two numbers"
+  answer, chapter 10 of the corpus and the refinement vocabulary are all built
+  on it. The standing ruling covers exactly this case: "Where a lane built on
+  upstream parity fights a liked design, the design wins and the lane adjusts"
+  [source: the workspace's own working notes, Compatibility].
+
+The line this draws is the same one every other finding in this thread was
+decided on, and it is worth stating because it is what makes the classification
+repeatable: FIX where this engine's behaviour was an accident — `chain`'s
+leftover result step, `and`'s `[assumed: adopted from an earlier reference
+semantics]` fallback, `add-atom`'s domain falling out of its storage — and
+RECORD where it is a design the repository built on purpose and documents. In
+every recorded case the upstream measurement is written down beside it, so the
+decision can be revisited with the numbers already taken.
+
+This is also the measurement section 23's item 3 asked for and did not have.
+That item records the direction "an unreduced host call is data: `(+ 1 S)`
+stays `(+ 1 S)` ... and an Error atom is the outcome of a request, never a
+rewrite", with the compatibility note "measured on PeTTa; this engine's
+NotReducible refusal and its one-Error-per-bad-call ruling are the places the
+measurement lands". The measurement is now taken, and it says the three
+candidate answers for `!(+ (a) 0)` are upstream's `97`, this engine's
+`(Error ...)` atom, and the item's own `(+ (a) 0)` left standing — three
+different answers, none of which the other two imply.
+
+Revisit when that item is decided; this family is the row it decides, and the
+numbers are here.

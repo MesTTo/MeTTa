@@ -1688,7 +1688,13 @@ metta_effect_plan_source_special_arguments(_, let, [_, Value, Body],
 %This clause modelled the substituting chain that clause used to be, so a
 %source plan for a chain disagreed with the goals the translator actually
 %emitted for it.
-metta_effect_plan_source_special_arguments(_, chain, [_, Value, Body],
+%The ORDER is chain's own, not let's: `(chain <atom> <binder> <template>)`
+%against `(let <pattern> <value> <body>)`, so the evaluated operand is the
+%FIRST argument here and the second one there. Reading it as let's put the
+%binder in the operand's place, and a reified world then planned the binder as
+%a dynamic operation and refused `(chain 1 $x (+ $x 2))` at oracleIO
+%[tested: extensions/python/tests/ch15_writing_transactions_and_worlds/test_worlds.py:test_a_typed_structural_chain_is_not_falsely_refused].
+metta_effect_plan_source_special_arguments(_, chain, [Value, _, Body],
                                            [metta_evaluated_source_root(Value),
                                             metta_evaluated_source_root(Body)]).
 metta_effect_plan_source_special_arguments(_, 'let*', [Bindings, Body],
