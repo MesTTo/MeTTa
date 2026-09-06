@@ -2383,6 +2383,11 @@ def close(self) -> None:
 > outlive it. A space the program declared with (inherits ...) still
 > refuses, naming the heir, because that relationship is the
 > program's own.
+>
+> What a context OPENED by name it borrows and leaves alone, the way
+> it leaves a borrowed home alone: ``m.space("&kb")`` may be a space
+> that already existed, that another context is reading, or that the
+> engine owns, and closing a reader is not how any of those end.
 
 ### `MeTTa.closed`
 
@@ -2455,6 +2460,11 @@ def space(
 > ``metta.space(S.locked, restricted=True)`` is that call. Declaring a
 > model on a name that already carries the same one is a no-op; a
 > different one raises, because a space cannot have two models.
+>
+> The context OWNS what it mints and BORROWS what it opens by name:
+> :meth:`close` releases the anonymous mints and leaves ``&kb``,
+> ``&metta`` and every other named space exactly as it found them,
+> whether or not the handle is still referenced.
 
 ### `MeTTa.fn`
 

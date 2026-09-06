@@ -62,6 +62,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   pytest takes the last value of a repeated option, so `-n 0` was silently
   overridden and every "serial" run of the script stayed parallel; the
   defaults now come first.
+
+- Closing a context no longer depends on the garbage collector, and no longer
+  destroys a space the context only opened. `MeTTa.space()` recorded every
+  handle it returned as though the context owned it, so `catalog =
+  m.space("&metta")` followed by `m.close()` raised `No permission to release
+  metta_base_space` while the same program without the variable succeeded, and
+  `m.space("&kb")` in one context emptied `&kb` for every other context reading
+  it when the first one closed. A context now releases exactly the spaces it
+  MINTED, and holds them strongly, so which spaces a close releases is decided
+  when they are minted rather than by when the collector runs. A named space,
+  `&self` and `&metta` included, is borrowed and survives, the same way a
+  borrowed home already did.
+
 - Joining a MeTTa worker thread no longer risks killing the process. A worker
   evaluating an ordinary query can be inside `engine_create/3` at any moment,
   because a fair or best-first merge opens one SWI engine per space, and on
