@@ -30,6 +30,13 @@
 %     and names itself, the recording pair from the recorder and the run
 %     triple by catching their balls
 %     [tested 2026-09-04: tracer:a_run_bound_answers_the_prefix_it_recorded].
+%   - A run bound sent as a `bounded/2` request bounds the PROGRAM: arming the
+%     tracer over every name in arity/2 and unwrapping them again costs twelve
+%     inferences per name and is not charged to it, so the same budget answers
+%     the same prefix whatever else the process has registered
+%     [tested: tracer:a_bounded_request_bounds_the_program_and_not_the_arming,
+%     test_arming_the_tracer_is_not_charged_to_the_run_bound;
+%     commit=59c3cbf1bc269dfa7194f78da34497f1757a9604].
 % Owns:
 %   - metta_trace_source/4 removes every metta_tracer wrapper and state fact,
 %     including after an event-limit error [tested 2026-08-14:
@@ -75,6 +82,17 @@
 %than into the engine module, because this is the only file that wants it and a
 %module of one's own is what makes that distinction possible to state.
 :- use_module(library(pairs), [pairs_values/2]).
+%call_with_time_limit/2 arrives through engine/metta.pl's platform census,
+%which loads library(time) as the `deadlines` capability and records its
+%absence rather than failing to load. Importing it here instead broke the
+%WebAssembly seat at boot -- `source_sink library(time) does not exist`, which
+%extensions/node refuses to absorb, and every ch21 test with it
+%[measured 2026-09-07].
+
+:- meta_predicate
+       metta_trace_stack_bound(+, 0),
+       metta_trace_time_bound(+, 0),
+       metta_trace_inference_bound(+, 0).
 
 :- dynamic metta_trace_event/2.
 :- dynamic metta_trace_limit/1.
@@ -558,11 +576,22 @@ metta_trace_source(Source, Space, Max, Events) :-
     metta_trace_source(Source, Space, Max, Events, _Stopped).
 
 % The existing host door transports its bound unchanged. A two-item request
-% adds a filter without changing that door or bypassing its execution guards.
+% adds a filter without changing that door or bypassing its execution guards,
+% and a `bounded/2` request carries the RUN bounds the same way, for the reason
+% metta_trace_run/3 records. A caller that sends neither is unbounded here and
+% may still wrap the whole door itself, which is what lib_observe, the Node
+% bridge and tracer.plt do.
 metta_trace_source(Source, Space, Request, Events, Stopped) :-
-    ( nonvar(Request), Request = [Max, Filter]
-    -> metta_trace_source(Source, Space, Max, Filter, Events, Stopped)
-    ;  metta_trace_source(Source, Space, Request, all, Events, Stopped) ).
+    (   nonvar(Request), Request = bounded(Inner, Bounds)
+    ->  true
+    ;   Inner = Request, Bounds = run_bounds(-1, -1, -1)
+    ),
+    (   nonvar(Inner), Inner = [Max, Filter]
+    ->  true
+    ;   Max = Inner, Filter = all
+    ),
+    metta_trace_bounded_source(Source, Space, Max, Filter, Bounds,
+                               Events, Stopped).
 
 % all selects every compiled logical name; [] selects none. Names need not
 % exist yet because Source itself can define them. Invalid filters refuse
@@ -588,11 +617,16 @@ metta_trace_install_filter(Names) :-
     forall(member(Name, Names), assertz(metta_trace_selected(Name))).
 
 metta_trace_source(Source, Space, Max, Filter, Events, Stopped) :-
+    metta_trace_bounded_source(Source, Space, Max, Filter,
+                               run_bounds(-1, -1, -1), Events, Stopped).
+
+metta_trace_bounded_source(Source, Space, Max, Filter, Bounds, Events, Stopped) :-
     metta_trace_filter_names(Filter, Names),
     ( integer(Max), Max > 0 -> true
     ; throw(error(domain_error(positive_integer, Max),
                   context(metta_trace_source/5, 'max_events bound')))),
-    catch(metta_trace_session(Source, Space, Max, Names, Events0, Stopped0),
+    catch(metta_trace_session(Source, Space, Max, Names, Bounds,
+                              Events0, Stopped0),
           Ball, true),
     (   var(Ball)
     ->  Events = Events0, Stopped = Stopped0
@@ -603,23 +637,85 @@ metta_trace_source(Source, Space, Max, Filter, Events, Stopped) :-
         %a caller can reason about, and a bound that sometimes raises and
         %sometimes answers, on nothing the caller can see, is worse than
         %either. metta_trace_begin/2 has already torn the session down by
-        %here, so there is nothing left to harvest.
+        %here, so there is nothing left to harvest. A bound sent as
+        %run_bounds/3 cannot reach that branch at all, since it is installed
+        %around the program rather than around the arming; a caller wrapping
+        %the whole door still can.
     ;   metta_trace_stop_ball(Ball, Stopped)
     ->  Events = []
     ;   throw(Ball)
     ).
 
-metta_trace_session(Source, Space, Max, Filter, Events, Stopped) :-
+metta_trace_session(Source, Space, Max, Filter, Bounds, Events, Stopped) :-
     setup_call_cleanup(
         metta_trace_begin(Max, Filter),
         ( b_setval('$metta_trace_depth', 0),
           %Every ball, so a RUN bound stopped by the guard around this
           %call keeps its events too; metta_trace_stop/2 rethrows anything
           %that is not a bound before a single event is harvested.
-          catch(process_metta_string(Source, _Results, Space), Ball, true),
+          catch(metta_trace_run(Bounds, Source, Space), Ball, true),
           with_mutex('$metta_trace_events',
                      ( metta_trace_stop(Ball, Stopped),
                        findall(N-E, metta_trace_event(N, E), Pairs) )),
           keysort(Pairs, Sorted),
           pairs_values(Sorted, Events) ),
         metta_trace_end).
+
+%What the RUN bounds bound, and what they do not. Arming the tracer walks
+%every name in arity/2 and wraps the ones a module still defines, and
+%metta_trace_end_unlocked/0 unwraps them again: measured 2026-09-07 that pair
+%costs twelve inferences per registered name -- 12,016 in a fresh process,
+%35,941 with two thousand more names defined and 47,943 with three thousand --
+%against 3,192 for the program those numbers were taken on. Charged to the
+%caller's budget, as they were while the Python transport wrapped the whole
+%door in metta_py_guarded/4, a bound the caller set for the PROGRAM was spent
+%on the wrap before the first event was recorded: `inferences=40_000` answered
+%an empty prefix naming a bound the program never reached, and what the door
+%did depended on how much else the process had loaded rather than on the
+%program. The door's own contract is that max_events bounds the RECORDING and
+%timeout, inferences and stack bound the RUN, and the ENCODING left this
+%budget for the same reason on 2026-09-04
+%[docs/journal/2026-09-04-bounded-trace-keeps-its-events.md]; the arming and
+%the teardown leave it here.
+metta_trace_run(run_bounds(Seconds, Inferences, StackBytes), Source, Space) :-
+    metta_trace_stack_bound(
+        StackBytes,
+        metta_trace_time_bound(
+            Seconds,
+            metta_trace_inference_bound(
+                Inferences,
+                process_metta_string(Source, _Results, Space)))).
+
+%A negative bound is the no-bound sentinel every other door here uses.
+metta_trace_stack_bound(Bytes, Goal) :-
+    (   Bytes < 0
+    ->  call(Goal)
+    ;   metta_host_with_stack_limit(Bytes, Goal)
+    ).
+
+%A build without the deadlines capability refuses BY NAME, the way
+%(timeout N Expr) and (pragma! max-time N) do, rather than raising an
+%existence error for a predicate the census already knows is absent.
+metta_trace_time_bound(Seconds, Goal) :-
+    (   Seconds < 0
+    ->  call(Goal)
+    ;   metta_require_platform('a trace with a timeout', deadlines),
+        call_with_time_limit(Seconds, Goal)
+    ).
+
+%call_with_inference_limit/3 REPORTS the overrun through its Result rather
+%than letting the ball out, so it is thrown again here: metta_trace_stop/2
+%names a bound from the ball, and this one has to name itself the same way
+%whether it was installed here or by a caller wrapping the whole door. The
+%throw is sound rather than a trick played on the guard, for the reason
+%metta_trace_stop_ball/2 records: SWI disarms the limit before it raises, so
+%the harvest below the catch runs unbounded either way.
+metta_trace_inference_bound(Limit, Goal) :-
+    (   Limit < 0
+    ->  call(Goal)
+    ;   call_with_inference_limit(Goal, Limit, Result),
+        (   Result == inference_limit_exceeded
+        ->  throw(inference_limit_exceeded)
+        ;   true
+        )
+    ).
