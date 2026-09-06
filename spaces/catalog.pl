@@ -35,7 +35,7 @@
 % Guarantees: a user algebra row is owned by the same context key as its
 % annotations row, while shipped preset rows remain global fallbacks [tested:
 % extensions/python/tests/ch06_many_answers/test_under_algebra.py::test_custom_algebras_are_context_owned;
-% commit=WORKTREE].
+% commit=2e627a593413191cda3170f2eb716835f7f62543].
 
 :- dynamic native_storage_module_cache/2.
 :- dynamic space_parametric/1.
