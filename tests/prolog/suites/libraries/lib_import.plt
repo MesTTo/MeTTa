@@ -1,4 +1,7 @@
-% Purpose: static-import!, the fast path for a large data file. It converts a
+% Guarantees: source imports are queryable and undo preserves occurrence ownership
+%   [tested: lib_import_lifecycle; commit=WORKTREE].
+% Purpose: verify queryable import records, exact source undo, and static-import!.
+%   The fast path for a large data file converts a
 %   .metta file to Prolog facts once, qcompiles them, and consults the .qlf on
 %   every run after. Every one of those steps could silently produce or serve
 %   the wrong data, and three of them did.
@@ -146,3 +149,325 @@ check_stale_cache(Dir, Stem) :-
     clear_import_space.
 
 :- end_tests(lib_import_cache).
+
+% Source ownership is occurrence identity, including equal caller-owned rows.
+:- begin_tests(lib_import_lifecycle).
+
+:- meta_predicate with_owned_import(+, 2).
+with_owned_import(Source, Goal) :-
+    with_import_dir(owned, Source, owned_import_in_dir(Goal)).
+
+:- meta_predicate owned_import_in_dir(2, +, +).
+owned_import_in_dir(Goal, Dir, Stem) :-
+    directory_file_path(Dir, Stem, Base),
+    file_name_extension(Base, metta, Path),
+    setup_call_cleanup('new-space'(Space), call(Goal, Space, Path),
+                       spaces:metta_release_space(Space)).
+
+import_paths(Space, Paths) :-
+    imports(Space, View),
+    findall(Path, match(View, [import, Path], Path, Path), Paths).
+
+test(markers_are_queryable_and_reimport_is_idempotent) :-
+    with_owned_import("(payload 1)\n(payload 2)\n", check_import_rows).
+
+check_import_rows(Space, Path) :-
+    import_paths(Space, Empty), assertion(Empty == []),
+    'import!'(Space, Path, true),
+    'import!'(Space, Path, true),
+    import_paths(Space, Paths), assertion(Paths == [Path]),
+    findall(A, 'get-atoms'(Space, A), Atoms),
+    assertion(Atoms == [[payload, 1], [payload, 2]]).
+
+test(undo_preserves_equal_atoms_before_and_after_import) :-
+    with_owned_import("(shared x)\n(shared x)\n", check_exact_undo).
+
+check_exact_undo(Space, Path) :-
+    'add-atom'(Space, [shared, x], _),
+    'import!'(Space, Path, true),
+    'add-atom'(Space, [shared, x], _),
+    'unimport!'(Space, Path, true),
+    findall(A, 'get-atoms'(Space, A), Atoms),
+    assertion(Atoms == [[shared, x], [shared, x]]),
+    import_paths(Space, Paths), assertion(Paths == []),
+    'unimport!'(Space, Path, true),
+    findall(A, 'get-atoms'(Space, A), Again), assertion(Again == Atoms),
+    'import!'(Space, Path, true),
+    findall(A, 'get-atoms'(Space, A), Reloaded), assertion(length(Reloaded, 4)).
+
+test(undo_preserves_equal_equations_and_their_execution) :-
+    with_owned_import("(= (owned-answer $x) $x)\n", check_equation_undo).
+
+check_equation_undo(Space, Path) :-
+    'add-atom'(Space, [=, ['owned-answer', X], X], _),
+    'import!'(Space, Path, true),
+    'add-atom'(Space, [=, ['owned-answer', Y], Y], _),
+    'unimport!'(Space, Path, true),
+    findall(A, 'get-atoms'(Space, A), Atoms), assertion(length(Atoms, 2)),
+    space_module(Space, Module),
+    findall(R, with_metta_module(Module, eval(['owned-answer', 42], R)), Results),
+    assertion(Results == [42, 42]).
+
+test(undo_skips_removed_occurrences_and_preserves_replacements) :-
+    with_owned_import("(payload x)\n", check_removed_occurrence).
+
+check_removed_occurrence(Space, Path) :-
+    'import!'(Space, Path, true),
+    'remove-atom'(Space, [payload, x], _),
+    'add-atom'(Space, [payload, x], _),
+    'unimport!'(Space, Path, true),
+    findall(A, 'get-atoms'(Space, A), Atoms),
+    assertion(Atoms == [[payload, x]]).
+
+test(undo_survives_a_deleted_source) :-
+    with_owned_import("(payload x)\n", check_deleted_source).
+
+check_deleted_source(Space, Path) :-
+    'import!'(Space, Path, true), delete_file(Path),
+    'unimport!'(Space, Path, true), 'unimport!'(Space, Path, true),
+    findall(A, 'get-atoms'(Space, A), Atoms), assertion(Atoms == []).
+
+test(undo_keeps_another_spaces_import) :-
+    with_owned_import("(= (owned-answer) kept)\n", check_other_space).
+
+check_other_space(Space, Path) :-
+    setup_call_cleanup('new-space'(Other),
+        ( 'import!'(Space, Path, true), 'import!'(Other, Path, true),
+          'unimport!'(Space, Path, true),
+          space_module(Other, Module),
+          findall(R, with_metta_module(Module, eval(['owned-answer'], R)), Results),
+          assertion(Results == [kept]),
+          import_paths(Other, Paths), assertion(Paths == [Path]) ),
+        spaces:metta_release_space(Other)).
+
+test(nested_imports_have_independent_ownership) :-
+    with_owned_import("(parent payload)\n!(import! &self child)\n", check_nested).
+
+check_nested(Space, Path) :-
+    file_directory_name(Path, Dir), directory_file_path(Dir, 'child.metta', Child),
+    setup_call_cleanup(open(Child, write, Out), write(Out, "(child payload)\n"), close(Out)),
+    'import!'(Space, Path, true),
+    'unimport!'(Space, Path, true),
+    findall(A, 'get-atoms'(Space, A), Atoms), assertion(Atoms == [[child, payload]]),
+    import_paths(Space, Paths), assertion(Paths == [Child]),
+    'unimport!'(Space, Child, true),
+    findall(A, 'get-atoms'(Space, A), Empty), assertion(Empty == []).
+
+test(failed_import_has_no_row) :-
+    with_owned_import("(payload x)\n!(import! &self definitely-missing-import)\n", check_failed_row).
+
+check_failed_row(Space, Path) :-
+    catch('import!'(Space, Path, true), Error, true), assertion(nonvar(Error)),
+    import_paths(Space, Paths), assertion(Paths == []),
+    findall(A, 'get-atoms'(Space, A), Atoms), assertion(Atoms == []).
+
+test(clear_removes_rows_from_a_retained_view) :-
+    with_owned_import("(payload x)\n", check_clear_rows).
+
+check_clear_rows(Space, Path) :-
+    'import!'(Space, Path, true), imports(Space, View),
+    clear_native_atoms(Space),
+    findall(A, match(View, A, A, A), Rows), assertion(Rows == []).
+
+test(import_view_refuses_writes,
+     [throws(error(permission_error(add, import_records, _), _))]) :-
+    imports('&self', View), 'add-atom'(View, [import, fake], _).
+
+
+test(overlapping_sources_keep_independent_occurrences) :-
+    with_owned_import("(shared x)\n(= (overlap-answer) kept)\n", check_overlap).
+
+check_overlap(Space, Path) :-
+    file_directory_name(Path, Dir), directory_file_path(Dir, 'second.metta', Other),
+    copy_file(Path, Other),
+    'import!'(Space, Path, true), 'import!'(Space, Other, true),
+    'unimport!'(Space, Path, true),
+    findall(A, match(Space, [shared, A], A, A), Rows), assertion(Rows == [x]),
+    space_module(Space, Module),
+    findall(R, with_metta_module(Module, eval(['overlap-answer'], R)), Results),
+    assertion(Results == [kept]),
+    import_paths(Space, Paths), assertion(Paths == [Other]),
+    'unimport!'(Space, Other, true),
+    findall(A, 'get-atoms'(Space, A), Empty), assertion(Empty == []).
+
+test(refused_withdrawal_restores_atoms_and_marker) :-
+    with_owned_import("(first x)\n(blocked x)\n(last x)\n", check_refused_undo).
+
+check_refused_undo(Space, Path) :-
+    'import!'(Space, Path, true),
+    setup_call_cleanup(
+        asserta((spaces:metta_remove_atom(Space, [blocked, x], false) :- !), Ref),
+        catch('unimport!'(Space, Path, true), Error, true),
+        erase(Ref)),
+    assertion(Error = error(permission_error(remove, source_atom, [blocked,x]), _)),
+    findall(A, 'get-atoms'(Space, A), Atoms),
+    assertion(Atoms == [[first,x], [blocked,x], [last,x]]),
+    import_paths(Space, Paths), assertion(Paths == [Path]),
+    'unimport!'(Space, Path, true),
+    findall(A, 'get-atoms'(Space, A), Empty), assertion(Empty == []).
+
+
+test(a_removal_callback_does_not_inherit_source_ownership) :-
+    with_owned_import("(trigger)\n", check_removal_callback).
+
+check_removal_callback(Space, Path) :-
+    'add-atom'(Space, [=, ['callback-answer', X], X], _),
+    'import!'(Space, Path, true),
+    setup_call_cleanup(
+        asserta((spaces:metta_remove_atom(Space, [trigger], Result) :- !,
+                    spaces:metta_remove_atom_raw(Space, [trigger], Result),
+                    spaces:metta_remove_atom(Space,
+                                            [=, ['callback-answer', Y], Y], _)), Ref),
+        'unimport!'(Space, Path, true),
+        erase(Ref)),
+    findall(A, 'get-atoms'(Space, A), Atoms), assertion(Atoms == []),
+    space_module(Space, Module),
+    findall(R, with_metta_module(Module, eval(['callback-answer', 42], R)), Results),
+    assertion(Results == [['callback-answer', 42]]).
+
+
+test(deferred_overlapping_sources_keep_the_surviving_function) :-
+    setup_call_cleanup(asserta(filereader:silent(true), Silent),
+        with_owned_import("(shared x)\n(= (overlap-answer) kept)\n", check_overlap),
+        erase(Silent)).
+
+test(deferred_import_keeps_another_spaces_function) :-
+    setup_call_cleanup(asserta(filereader:silent(true), Silent),
+        with_owned_import("(= (owned-answer) kept)\n", check_other_space),
+        erase(Silent)).
+
+
+test(typed_overlapping_sources_keep_the_surviving_function) :-
+    with_owned_import("(shared x)\n(: overlap-answer (-> Symbol))\n(= (overlap-answer) kept)\n",
+                      check_overlap).
+
+
+test(a_replaced_equation_is_not_withdrawn_with_its_former_source) :-
+    with_owned_import("(= (replacement-answer $x) $x)\n", check_replaced_equation).
+
+check_replaced_equation(Space, Path) :-
+    'import!'(Space, Path, true),
+    'remove-atom'(Space, [=, ['replacement-answer', X], X], _),
+    'add-atom'(Space, [=, ['replacement-answer', Y], Y], _),
+    'unimport!'(Space, Path, true),
+    findall(A, 'get-atoms'(Space, A), Atoms), assertion(length(Atoms, 1)),
+    space_module(Space, Module),
+    findall(R, with_metta_module(Module, eval(['replacement-answer', 42], R)), Results),
+    assertion(Results == [42]).
+
+
+test(undo_does_not_force_deferred_compilation) :-
+    setup_call_cleanup(asserta(filereader:silent(true), Silent),
+        with_owned_import("(= (uncompiled-answer x) x)\n(= (uncompiled-answer y) y)\n",
+                          check_uncompiled_undo),
+        erase(Silent)).
+
+check_uncompiled_undo(Space, Path) :-
+    setup_call_cleanup('new-space'(Other),
+        ( 'import!'(Space, Path, true), 'import!'(Other, Path, true),
+          setup_call_cleanup(
+              wrap_predicate(spaces:metta_ensure_compiled(F), import_no_compile, Wrapped,
+                  ( F == 'uncompiled-answer'
+                  -> throw(error(unexpected_import_compilation(F), none))
+                  ; call(Wrapped) )),
+              'unimport!'(Space, Path, true),
+              unwrap_predicate(spaces:metta_ensure_compiled/1, import_no_compile)),
+          findall(A, 'get-atoms'(Space, A), Atoms), assertion(Atoms == []),
+          findall(A, 'get-atoms'(Other, A), Others), assertion(length(Others, 2)),
+          assertion(spaces:deferred_metta_function('uncompiled-answer', _, Other, _, _, _)) ),
+        spaces:metta_release_space(Other)).
+
+
+test(deferred_nested_equations_keep_their_exact_source_owner) :-
+    setup_call_cleanup(asserta(filereader:silent(true), Silent),
+        with_owned_import("(= (nested-answer) first)\n!(import! &self child)\n(= (nested-answer) second)\n",
+                          check_nested_equations),
+        erase(Silent)).
+
+check_nested_equations(Space, Path) :-
+    file_directory_name(Path, Dir), directory_file_path(Dir, 'child.metta', Child),
+    setup_call_cleanup(open(Child, write, Out),
+                       write(Out, "(= (nested-answer) third)\n"), close(Out)),
+    'import!'(Space, Path, true), space_module(Space, Module),
+    findall(R, with_metta_module(Module, eval(['nested-answer'], R)), Before),
+    assertion(Before == [first, third, second]),
+    'unimport!'(Space, Path, true),
+    findall(R, with_metta_module(Module, eval(['nested-answer'], R)), After),
+    assertion(After == [third]),
+    findall(A, 'get-atoms'(Space, A), Atoms),
+    assertion(Atoms == [[=, ['nested-answer'], third]]).
+
+test(a_callback_can_force_remaining_equations_during_source_withdrawal) :-
+    setup_call_cleanup(asserta(filereader:silent(true), Silent),
+        with_owned_import("(= (callback-deferred) first)\n(= (callback-deferred) second)\n",
+                          check_deferred_callback),
+        erase(Silent)).
+
+check_deferred_callback(Space, Path) :-
+    file_directory_name(Path, Dir), directory_file_path(Dir, 'second.metta', Other),
+    setup_call_cleanup(open(Other, write, Out),
+                       write(Out, "(= (callback-deferred) third)\n"), close(Out)),
+    'import!'(Space, Path, true), 'import!'(Space, Other, true),
+    space_module(Space, Module),
+    setup_call_cleanup(
+        asserta((spaces:metta_remove_atom(Space, [=, ['callback-deferred'], Body], Result) :- !,
+                    spaces:metta_remove_atom_raw(Space,
+                                                [=, ['callback-deferred'], Body], Result),
+                    findall(R, with_metta_module(Module, eval(['callback-deferred'], R)), _)), Ref),
+        'unimport!'(Space, Path, true),
+        erase(Ref)),
+    findall(R, with_metta_module(Module, eval(['callback-deferred'], R)), Results),
+    assertion(Results == [third]),
+    findall(A, 'get-atoms'(Space, A), Atoms),
+    assertion(Atoms == [[=, ['callback-deferred'], third]]).
+
+test(a_callback_keeps_the_surviving_equations_own_type_group) :-
+    setup_call_cleanup(asserta(filereader:silent(true), Silent),
+        with_owned_import("(: callback-typed (-> Number))\n(= (callback-typed) 1)\n(: callback-typed (-> Bool))\n(= (callback-typed) True)\n",
+                          check_deferred_type_callback),
+        erase(Silent)).
+
+check_deferred_type_callback(Space, Path) :-
+    file_directory_name(Path, Dir), directory_file_path(Dir, 'second.metta', Other),
+    setup_call_cleanup(open(Other, write, Out),
+                       write(Out, "(: callback-typed (-> String))\n(= (callback-typed) \"third\")\n"), close(Out)),
+    'import!'(Space, Path, true), 'import!'(Space, Other, true),
+    space_module(Space, Module),
+    setup_call_cleanup(
+        asserta((spaces:metta_remove_atom(Space, [=, ['callback-typed'], 'True'], Result) :- !,
+                    spaces:metta_remove_atom_raw(Space,
+                                                [=, ['callback-typed'], 'True'], Result),
+                    findall(R, with_metta_module(Module, eval(['callback-typed'], R)), _)), Ref),
+        'unimport!'(Space, Path, true),
+        erase(Ref)),
+    findall(R, with_metta_module(Module, eval(['callback-typed'], R)), Results),
+    assertion(Results == ["third"]),
+    findall(Body-Types, translator:fun_meta_clause_types(Module, 'callback-typed', _, Body, Types),
+            Metadata),
+    assertion(Metadata == ["third"-[[->, 'String']]]).
+
+
+test(undo_invalidates_a_specialization_after_a_failed_reload) :-
+    with_owned_import("(= (import-bump $n) (+ $n 1))\n(= (import-twice $f $x) ($f ($f $x)))\n",
+                      check_specialized_undo).
+
+check_specialized_undo(Space, Path) :-
+    read_file_to_string(Path, Source, []),
+    'import!'(Space, Path, true),
+    setup_call_cleanup(open(Path, write, Broken),
+                       write(Broken, "(= (import-bump $n) (+ $n 2))\n!(import! &self definitely-missing-import)\n"),
+                       close(Broken)),
+    catch('import!'(Space, Path, true), Error, true), assertion(nonvar(Error)),
+    setup_call_cleanup(open(Path, write, Restored), write(Restored, Source), close(Restored)),
+    'import!'(Space, Path, true),
+    space_module(Space, Module),
+    findall(R, with_metta_module(Module, eval(['import-twice', 'import-bump', 1], R)), Before),
+    assertion(Before == [3]),
+    assertion(specializer:ho_specialization(Module, 'import-twice', _)),
+    'unimport!'(Space, Path, true),
+    assertion(\+ specializer:ho_specialization(Module, 'import-twice', _)),
+    findall(A, 'get-atoms'(Space, A), Atoms), assertion(Atoms == []),
+    findall(R, with_metta_module(Module, eval(['import-twice', 'import-bump', 1], R)), After),
+    assertion(After == [['import-twice', 'import-bump', 1]]).
+
+:- end_tests(lib_import_lifecycle).

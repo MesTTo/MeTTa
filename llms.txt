@@ -38,7 +38,7 @@ re-runs them.
 | `extensions/python/examples/*/*.py` | runnable Python programs, each printing checked claims through `_common.py`: `check(label, got, expected)` raises `CheckFailed` rather than asserting, because `python -O` strips an assert while the print under it still runs, and `done(name)` refuses to print its OK line when nothing was checked, so an example that verified nothing cannot report success; the six under `gallery/` also check adjacent emitted-MeTTa and output comments plus bilingual `@example` atoms | the `examples` and `gallery` gate lanes |
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
 | `engine/**/*.pl` | `engine/metta.pl` engine bootstrap loading the twelve `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, effects, space_hooks, runtime, control, interop, registration), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eight `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products), `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 923 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.metta`. Each unit is a plain source file consulted by its umbrella, so predicate ownership and load order are the umbrella's | |
-| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 91, `service` 58, `ownership` 38, `event` 14, `declaration` 13. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
+| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 91, `service` 60, `ownership` 38, `event` 14, `declaration` 13. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
 | `lib/lib_*/` | 38 MeTTa libraries, implemented in `.metta`, `.pl`, or both, loaded with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
 | `extensions/*/extension.pl` | one control file per seat, read when argv carries `extensions` and never read without it; a seat's `entry(engine, _)` loads only where its declared needs hold and its `entry(host, _)` is recorded for the seat's own runtime to consult, so the engine names neither a host nor a backend | |
@@ -1025,8 +1025,12 @@ refuses loudly rather than degrading. A provider's `match` may yield
 the query's variables, `value` is the answer atom unified with the pattern, and
 `k` is the provider's own annotation, which orders answers under `under=ranked`
 and becomes the tag under `under=prov`. That is how a store's own score, a
-cosine or a confidence, weights a derivation. `rules` is a promise about what a space
-HOLDS, not about which methods a provider has, so nothing derives it: without
+cosine or a confidence, weights a derivation. Tagged-rule premises use that same
+match door and evaluation context, retain k in their proof traces, and read
+fresh complete source bags on each query. Linear provider derivations refuse with
+`linear_provider_occurrence_identity_missing` because `Answer` supplies no
+stable occurrence identity. `rules` is a promise about what a space HOLDS,
+not about which methods a provider has, so nothing derives it: without
 it a space holds DATA, and an equation written there is refused rather than
 stored where it could never fire. Conjunctive queries route per conjunct, so
 a foreign space joins with a native one; on such a conjunction `rows.why()`
@@ -1445,7 +1449,8 @@ its vocabulary moved; `lib_file` text files, directory creation, byte copies, qu
 `lib_gitimport` git-import!, Prolog-only, a module fetched from a repository;
 `lib_he` Hyperon-Experimental compatibility, nearly all of it core now;
 `lib_import` importing that fails LOUDLY where a missing file once answered
-nothing; `lib_json` JSON, decoding into that dict-as-space; `lib_measure`
+nothing; matchable `(import Path)` rows through `(imports &space)`,
+and `unimport!` for exact source-owned atom withdrawal; `lib_json` JSON, decoding into that dict-as-space; `lib_measure`
 weighted superpositions: normalize, softmax, rank, top-k, sample; `lib_memo` the
 resident automatic and explicit memoisation controls; `lib_mm2` notation over
 &mork, loaded on demand; `lib_nars` NARS truth functions, inference rules and
@@ -1454,7 +1459,8 @@ formulas, consistency and ranking; `lib_pln2` selected Beta and moment formulas
 with explicit evidence scale and support-checked independence; `lib_redis` shared spaces over Redis;
 `lib_reflect` the engine's own surface as data you can match; `lib_regex` PCRE2
 over strings; `lib_roman` a list and fold basis, head, init, fold-flat,
-foldr-flat; `lib_soft` soft structural unification, match quality as a measure;
+foldr-flat; `lib_soft` soft structural unification over written symbols, including
+function names, with grounded values compared crisply; match quality as a measure;
 `lib_spaces` moving atoms between spaces, with find and match-count;
 `lib_strategy` a Stratego-style strategy basis whose plans are ordinary atoms;
 `lib_string` text, imported when you need it; `lib_tabling` expert-only tabling
