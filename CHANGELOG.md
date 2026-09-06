@@ -263,6 +263,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `and`, `or`, `not`, `xor` and `implies` have no answer outside the two
+  booleans, where they used to leave the call standing for a symbol operand
+  and answer a `BadArgType` atom for a number. They are RELATIONS over `True`
+  and `False`, which is what an unbound operand already read (`!(collapse (and
+  $a $b))` is `(True False False False)` and stays so), and upstream writes
+  that domain as a guard and nothing else: `and(A,B,C) :- bool(A), bool(B),
+  ...`. `!(and a a)` is the shrunk program the parity fuzzer found; it was
+  `(and a a)` here and nothing on the arbiter, and `!(collapse (and a a))` was
+  `((and a a))` against `()`. Two places said different things and both now say
+  the relation's: the operation's own guard fails, and the five ship a
+  `(dispatch-policy <name> MismatchEnum MismatchFail)` row so the call site's
+  declared-type mismatch fails with them instead of answering the position it
+  refused. A relation out of its domain has no row; it is not a function given
+  the wrong argument.
+
 - `chain` no longer evaluates the value it bound a second time. It compiles to
   exactly `let`'s goals, which is upstream's own definition (one clause serves
   both spellings), and a result step left over from the substituting `chain`

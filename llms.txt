@@ -589,7 +589,13 @@ Function dispatch has six axes. Match `(dispatch-default $axis $value)` in
 function. The axes are `MismatchEnum`, `NoMatchEnum`, `EvaluationOrderEnum`,
 `FunctionResultEnum`, `ClauseFailedEnum`, and `OutOfClausesEnum`; each axis's
 accepted values are published by its same-named vocabulary row. Remove the
-override atom to restore the default immediately.
+override atom to restore the default immediately. Five names ship an override
+of their own: `and`, `or`, `not`, `xor` and `implies` carry
+`(dispatch-policy <name> MismatchEnum MismatchFail)`, because they are
+RELATIONS over the two booleans and a relation out of its domain has no row
+rather than a badly typed argument. `!(and a a)`, `!(and True 5)` and
+`!(not 5)` answer nothing, which is upstream PeTTa's answer, while
+`!(collapse (and $a $b))` is still `(True False False False)`.
 
 ## Python functions as MeTTa functions
 

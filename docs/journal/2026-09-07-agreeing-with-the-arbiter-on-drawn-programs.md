@@ -127,3 +127,119 @@ should (= a b). ❌`, checked by reverting `engine/` and re-running).
 `sh engine/test.sh` exit 0.
 
 Open: nothing for this divergence.
+
+## 2026-09-07 — divergence 2: `and`, `or` and `not` outside the booleans
+
+Program (shrunk by the lane):
+
+```metta
+(rel0 a a)
+!(and a a)
+```
+
+Arbiter: nothing, exit 0. Ours before: `(and a a)`, exit 0.
+
+Tried: the family on both engines before touching anything -> the disagreement
+is the whole non-boolean domain, and this engine disagreed with itself inside
+it as well, leaving a symbol operand standing and answering a refusal atom for
+a number.
+
+| program | arbiter | ours before |
+|---|---|---|
+| `!(and True True)` | `true` | `true` |
+| `!(and True False)` | `false` | `false` |
+| `!(or False False)` | `false` | `false` |
+| `!(not True)` | `false` | `false` |
+| `!(and (== 1 1) (== 2 2))` | `true` | `true` |
+| `!(and $x True)` | `true`, `false` | `true`, `false` |
+| `!(collapse (and $a $b))` | `(true false false false)` | `(true false false false)` |
+| `!(and a a)` | nothing | `(and a a)` |
+| `!(and True a)` | nothing | `(and true a)` |
+| `!(and False a)` | nothing | `(and false a)` |
+| `!(and (== 1 1) a)` | nothing | `(and true a)` |
+| `!(or a b)`, `!(or True a)`, `!(or False a)` | nothing | the call, standing |
+| `!(not a)` | nothing | `(not a)` |
+| `!(and 1 2)` | nothing | `(Error (and 1 2) (BadArgType 1 Bool Number))` |
+| `!(and True 5)` | nothing | `(Error (and True 5) (BadArgType 2 Bool Number))` |
+| `!(collapse (and a a))` | `()` | `((and a a))` |
+| `!(collapse (or False 5))` | `()` | `((Error ... (BadArgType 2 Bool Number)))` |
+| `!(collapse (not 5))` | `()` | `((Error ... (BadArgType 1 Bool Number)))` |
+| `!(collapse (xor True 5))` | `()` | `((Error ... (BadArgType 2 Bool Number)))` |
+| `!(collapse (implies False 5))` | `()` | `((Error ... (BadArgType 2 Bool Number)))` |
+| `!(if (and a a) yes no)` | nothing | `no` |
+| `!(and (and a a) True)` | nothing | `(and (and a a) true)` |
+
+Cause: upstream writes the domain as a guard and nothing else,
+`and(A,B,C) :- bool(A), bool(B), ( A == true -> C = B ; A == false -> C =
+false ).`, with `bool(true).` and `bool(false).` above it, and the same shape
+for `or`, `not`, `xor` and `implies` [source: PeTTa@ae66fa8
+`src/metta.pl:97-104`]. An operand outside the domain fails the guard and the
+call has no solution. This engine wrapped the same guard in a soft cut whose
+else-branch called `metta_operation_answer/3`, and the comment over it recorded
+the rule as adopted from an earlier reference semantics rather than measured.
+
+Fix: the guard is the whole clause, exactly upstream's shape. `engine/metta/
+operators.pl`, five clauses.
+
+Decided: keep `boolean_operand/1` rather than upstream's `bool/1`, because the
+RELATIONAL reading is upstream's too and lives there: an unbound operand
+enumerates, `!(collapse (and $a $b))` is `(true false false false)` on both
+engines, and the enumeration never lived in the soft cut. The change removes a
+soft cut and a choice point from all five.
+
+Rejected: keeping the `BadArgType` answer for a number and failing only for a
+symbol. It would keep half the divergence and would make the domain depend on
+which kind of non-boolean arrived, which nothing in either engine says.
+
+Tried: the guard alone -> it fixed the symbol operand and NOT the number one.
+`!(collapse (and a a))` became `()` and `!(collapse (and True 5))` was still
+`((Error (and True 5) (BadArgType 2 Bool Number)))`, because a number is a
+DECIDED type and the call site's declared-argument check answers before
+`and/3` runs. So the family has two causes, not one, and the second is a layer
+up.
+
+Measured, to find where the second one ends: the same check answers for a user
+function too. `(: f (-> Bool Bool))` with `(= (f $x) $x)` makes `!(collapse (f
+5))` `((Error (f 5) (BadArgType 1 Bool Number)))` here and `()` on the arbiter,
+so this engine's typed refusal diverges wherever upstream's implementation
+FAILS rather than raises. Where upstream RAISES it does not: `!(+ 1 a)`,
+`!(< 1 a)` and `!(min-atom (a b))` are exit 2 on the arbiter and Error atoms
+here, which is class arbiter-error and the extension the compatibility law
+allows [measured 2026-09-07 against PeTTa@ae66fa8].
+
+Decided: say the relation's answer in BOTH places, and say it as data. The
+mismatch answer is already a per-name policy axis with a three-value
+vocabulary, `MismatchEnum` over `MismatchOriginal`, `MismatchError` and
+`MismatchFail` [source: engine/spaces/catalog.pl, metta_catalog_preset for
+that vocabulary; engine/translator/lowering.pl, dispatch_mismatch/4], and
+`MismatchFail` is exactly upstream's behaviour. So the five ship a
+`(dispatch-policy <name> MismatchEnum MismatchFail)` row. Checked before
+writing it, by adding the row from a PROGRAM rather than the engine:
+`!(add-atom &metta (dispatch-policy and MismatchEnum MismatchFail))` followed
+by `!(collapse (and True 5))` answers `()` on both engines.
+
+Rejected: exempting the five inside the type checker. The axis exists, its
+vocabulary already carries the value, and a row is readable by a program while
+an exemption is not.
+
+Rejected, and recorded as OPEN rather than fixed: aligning the typed refusal
+in general, so every declared-argument mismatch fails the way upstream's does.
+That is not this divergence's cause and it is not a defect to patch: it would
+delete this engine's `BadArgType`/`BadArgValue` answer, which chapters 9 and
+10 of the corpus, the union types, the refinement vocabulary and the Python
+error surface are all built on, and which follows hyperon rather than upstream.
+`2026-09-06-the-python-ecosystem-as-faces-of-the-engine.md` section 23 already
+lists it as an open measurement (items 2 and 3). Revisit when the engine's
+error channel is decided against upstream as a whole; the measurement above is
+what that decision starts from.
+
+Evidence: `examples/ch07-control-flow/07-01-if-and-booleans/11-boolean_domain.metta`
+is a new file, runs byte-identical on both engines, and is red without the fix.
+It is a NEW file rather than lines added to `07-and_or.metta` and `09-xor.metta`
+because those two derive from upstream's corpus and `example_origins.py`
+measures body retention: growing them past the threshold dropped their
+attribution rows, and one contributor's only credit with them. `tests/prolog/suites/evaluation/metta.plt`'s
+`a_non_boolean_operand_leaves_the_operation_with_no_answer` replaces
+`boolean_type_errors_answer_the_position_they_refuse` and covers all five over
+a number AND an undeclared symbol;
+`boolean_operations_remain_relational` is unchanged and still passes.
