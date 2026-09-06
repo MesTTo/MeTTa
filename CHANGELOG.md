@@ -29,6 +29,40 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Every refusal this library makes on purpose carries its repair as data.
+  `metta.errors.Remedy(title, kind, applicability, edit=, replace=, python=)`
+  is one repair: `kind` is LSP's CodeActionKind, `applicability` is rustc's
+  (`machine` is applied without asking, `maybe` is shown, `prose` carries
+  `<placeholders>`), and the act is an atom to write, a stored atom and what
+  it becomes (`None` in the second position removes it), or the host text to
+  write instead. A Remedy naming no act refuses at construction.
+  `metta.errors.Ground(kind, citation)` is the authority behind the refusal,
+  the former private `_RefusalGround` made public and given a third kind,
+  `arbiter`, for a measured answer of upstream PeTTa under
+  `tests/conformance/petta/`. Both are frozen, slotted and pattern-matchable
+  and project to `(remedy ...)` and `(ground ...)` atoms and back.
+  `MettaError.remedy` and `.ground` carry them; a refusal that is a
+  `TypeError`, `AttributeError` or `ValueError` because Python's own word for
+  it is that class carries the same two fields on the instance, through
+  `metta.errors.refusing(error, remedy=, ground=)`. The message text is
+  unchanged everywhere. A deprecation catalog row's remedy TERM decodes to a
+  `Remedy` with the term as its `edit`, carried on the DeprecationWarning
+  instance.
+- `metta.lint` applies what it diagnoses. A `Finding` gains `.remedy` beside
+  `.autofix`: the six rewriting simplifications carry a `machine` replace,
+  `duplicate-equation` a `machine` removal, and
+  `possibly-undefined-reference` a `maybe` rename to its near miss.
+  `metta.lint.apply(space, findings=None)` writes the machine remedies into a
+  space, `metta.lint.fix_file(path, findings=None, m=None)` rewrites the
+  source, and both answer a `Repair` naming what they left and why.
+  `python -m metta lint --fix` runs the file half in place, and
+  `python -m metta lint --json` prints one LSP 3.17 `Diagnostic` per line
+  with zero-based ranges and the remedy under `data`, which is the field LSP
+  preserves from `publishDiagnostics` to `textDocument/codeAction`. A fix
+  rewrites a line only where it still holds exactly the form the finding
+  stands on, keeps the variable names the author wrote rather than the
+  engine's, and refuses a whole file whose sha256 moved since lint read it;
+  `lint_file` carries that digest in every finding's payload.
 - `metta.testing.programs(census=None, depth=3, facts=(1, 4), queries=(1, 3))`
   generates whole MeTTa programs for differential testing against another
   engine, and the `parity-fuzz` lane runs them on this engine and on upstream

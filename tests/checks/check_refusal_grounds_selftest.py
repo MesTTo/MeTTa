@@ -5,6 +5,10 @@ Guarantees:
     segment fence without its named MeTTa law fail independently, while the
     complete fixture passes [tested: tests/checks/check_refusal_grounds_selftest.py;
     commit=acb40f1912f131ae088083d1af29b4b283019bea]
+  - an arbiter citation that names no captured corpus, and an unknown ground
+    kind, are both refused [tested:
+    test_a_planted_arbiter_ground_without_the_corpus_is_reported;
+    commit=WORKTREE]
 """
 
 from __future__ import annotations
@@ -13,7 +17,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from check_refusal_grounds import scan_refusal_grounds
+from check_refusal_grounds import scan_refusal_grounds, valid_ground
 
 
 def _write(root: Path, relative: str, text: str) -> None:
@@ -87,6 +91,21 @@ def test_a_planted_noncentral_compile_error_ground_is_reported() -> None:
     ]
 
 
+def test_a_planted_arbiter_ground_without_the_corpus_is_reported() -> None:
+    """Reject an arbiter citation that describes the pin instead of naming it."""
+
+    class _Ground:
+        def __init__(self, kind: str, citation: str) -> None:
+            self.kind = kind
+            self.citation = citation
+
+    assert valid_ground(
+        _Ground("arbiter", "upstream PeTTa: tests/conformance/petta/HEADS.json")
+    )
+    assert not valid_ground(_Ground("arbiter", "upstream PeTTa answers it this way"))
+    assert not valid_ground(_Ground("oracle", "tests/conformance/petta/HEADS.json"))
+
+
 def test_a_planted_segment_fence_without_a_named_law_is_reported() -> None:
     """Reject the segment fence when its named MeTTa law is absent."""
     directory, root = _fixture(law=False)
@@ -106,6 +125,7 @@ def main() -> int:
         test_a_complete_refusal_fixture_passes,
         test_a_planted_semantic_type_error_without_ground_is_reported,
         test_a_planted_noncentral_compile_error_ground_is_reported,
+        test_a_planted_arbiter_ground_without_the_corpus_is_reported,
         test_a_planted_segment_fence_without_a_named_law_is_reported,
     )
     failures: list[str] = []

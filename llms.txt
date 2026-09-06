@@ -1063,7 +1063,19 @@ m.lint() -> list[lint.Finding]   the silently-wrong class, from stored structure
         CALL to cover a space built entirely from Python, suppresses that one
         kind there; it is kept as a (lint-intent ...) atom, not dropped as a
         comment
+        a Finding carries `.remedy`, the same Remedy the errors carry, beside
+        `.autofix`; `duplicate-equation` removes, the six simplifications
+        rewrite, and `possibly-undefined-reference` renames to its near miss
 metta.lint.lint_file(path, m=None)   the same findings anchored to file:line
+        with the sha256 of the bytes read, which is the document version
+metta.lint.apply(space, findings=None) -> Repair   writes every `machine`
+        remedy into the space, remove-then-add; `.applied`, `.skipped` (each
+        with its reason) and `.remaining`
+metta.lint.fix_file(path, findings=None, m=None) -> Repair   the same repair
+        over the file, rewriting only a line that still holds exactly the
+        form; refuses the whole file when its digest moved
+metta.lint.diagnostics(findings) -> list[dict]   LSP 3.17 Diagnostics,
+        zero-based, the remedy under `data`
 m.effect_plan(target) -> EffectPlan(operations, effect), translates and follows
         nested compiled calls without executing the target
 m.eval_status(target) / m.run_status(src)  each answer paired with the path that
@@ -1125,7 +1137,26 @@ Errors: `MettaError` is the base, then `EngineError`, `MettaSyntaxError`,
 `CastError`, `CompileError`, `SourceNotFound`,
 `MettaResultError`, `AssertionFailure`, `TransportFailure`, and `ResourceLimitError` with
 `TimeLimitError`, `InferenceLimitError` and `RestraintError` under it, plus
-`Interrupted`. `RestraintError` is a bound the program declared for one of its
+`Interrupted`. Every refusal this library makes on purpose carries
+`.remedy` and `.ground` beside its message, and the message never changes
+for their presence. `metta.errors.Remedy(title, kind, applicability, edit=,
+replace=, python=)` is the repair as data: `kind` is LSP's CodeActionKind
+(`quickfix`, `refactor`, `source`), `applicability` is rustc's
+(`machine` is definitely right and is applied without asking, `maybe` is
+valid but may not be what was meant, `prose` carries `<placeholders>` for a
+human), and the repair itself is `edit` (an atom to write), `replace` (a
+stored atom and what it becomes, `None` in the second position for a
+removal) or `python` (the host text to write instead). A Remedy naming none
+of the three refuses at construction. `metta.errors.Ground(kind, citation)`
+is the authority: `python-reference` a Language Reference section,
+`metta-law` a named law, `arbiter` a measured answer of upstream PeTTa under
+`tests/conformance/petta/`. Both are frozen, slotted, pattern-matchable, and
+project to `(remedy ...)` and `(ground ...)` atoms through `as_atom()` and
+back through `from_atom()`. A refusal Python's own word covers is still a
+`TypeError`, `AttributeError` or `ValueError`, and carries the two fields on
+the instance, so `getattr(error, "remedy", None)` is the one reader.
+A deprecation's catalog remedy term decodes the same way: the
+DeprecationWarning instance carries `.remedy` with the term as its `edit`. `RestraintError` is a bound the program declared for one of its
 own tables, `(cache f (max-answers N))` or a size restraint, tripping; it
 carries `restraint`, `bound` and `call`.
 Remote-backend authors use `metta.errors.is_transport_failure(error)` to
@@ -1439,7 +1470,9 @@ names the failing form.
 group), `repl` (paren-balance aware; on a terminal, TAB completes a head or a
 `&space` against the live engine and history persists in `~/.metta_history`, or
 wherever `METTA_HISTORY` points), `serve`, `boot`, `lint` (nonzero
-exit on findings), `doc` (a name's `(@doc ...)`), `llms` (this file),
+exit on findings; `--json` prints one LSP Diagnostic per line and `--fix`
+applies every `machine` remedy in place and lists the rest with their
+reasons, exiting nonzero on what remains), `doc` (a name's `(@doc ...)`), `llms` (this file),
 `stubs` (`file.metta... [-o out.pyi]`, the loaded program's declarations as a
 Python stub, with the program's own printing kept on stderr), and
 `convert` (`program.py [-o out.metta]`, emitting the module's fresh-space
