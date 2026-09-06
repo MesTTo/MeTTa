@@ -165,3 +165,53 @@ Open: the ch12 chapter reads 1/3 twinned now. `01-he_assert.py` and
 `02-he_equalreduct.py` are both pinned to budgets trunk has moved past
 (17906 against 17883, 3155 against 3127), which is the corpus-wide stale-pin
 class the twins lane already reports and not this thread's to re-pin.
+
+### A knife-edge the prelude moved
+
+Tried: the Node seat's whole suite on the finished branch -> `# fail 2`. One is
+`every vocabulary here matches the engine's own`, which fails identically on a
+pristine control at this branch's base and which trunk has already fixed
+(a376df6d, the refinement vocabulary the hand-maintained Node table lacked).
+The other, `refuses a deeper one by name, with the ceiling and the remedy` in
+`depth.test.ts`, PASSED on that control and failed here, three runs each,
+deterministic.
+
+Tried: bisect it over the four commits with the Node suite -> the one-sided
+assertion door, and inside it `engine/prelude.metta` alone: reverting that one
+file on top of the commit makes the test pass again, and reverting each of the
+other four engine files does not.
+
+Tried: reproduce it outside the test -> in a fresh process 50,000 levels
+refuses on both trees; in THIS FILE'S sequence, a 10,000-level parse first and
+then 50,000, the base refuses and this branch accepts. So the outcome at one
+depth depends on how the stacks grew getting there as well as on the depth.
+
+Measured: the boundary itself, by bisection after the same 10,000-level warm-up
+-> `accepts 45038, refuses 45800` on BOTH trees, identically. The engine's
+capacity did not move. What moved is where 50,000 lands relative to the growth
+sequence a slightly different boot footprint produces, and 50,000 is one
+warm-up away from a boundary at ~45,000.
+
+Measured: the same sequence at a spread of depths, one process each, both trees.
+
+    depth     base        this branch
+    50,000    refuses     ACCEPTS
+    60,000    refuses     refuses
+    80,000    refuses     refuses
+    100,000   refuses     refuses
+    200,000   refuses     refuses
+    400,000   refuses     refuses
+
+Decided: raise the refusal case to 200,000, four times the boundary, and say in
+the file's header what the boundary is and why the margin has to be large. The
+test's claim -- a term deeper than the stack allows is refused by NAME, with
+the ceiling and the remedy -- is untouched and still proven; what changes is
+that the number proving it is no longer inside the band a prelude edit moves.
+It is also the faster case: 6.0 s to refuse at 200,000 against 17.7 s spent
+building the term it then accepted at 50,000. Verified on the base tree as well
+as this one, so the new number is not tuned to this branch.
+
+Rejected: leaving it red and attributing it to the base. It is not the base's:
+the control passes it. Rejected also: treating it as a defect in the prelude
+change. Nothing about the engine's depth capacity moved; the two trees refuse
+and accept at exactly the same boundary.
