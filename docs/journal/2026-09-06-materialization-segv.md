@@ -122,6 +122,21 @@ out of 10 here, both at loadavg 104; twenty consecutive
 `sh engine/test.sh suites/spaces/materialization.plt` at loadavg 63 to 134 all
 exit 0 with no signal in any of them.
 
+Re-verified after two more trunk moves, on base `26cf523f`, which is the tree
+this branch finally sits on. `GATE_ONLY=1 sh check.sh` fails
+`engine-bench c-bench mork-bench pytest benchmarks instructions extcost` here
+and fails EXACTLY those seven on `26cf523f` itself in the same worktree, so
+this branch adds no gate failure; all seven are measurement lanes and a
+`pytest` twin case that are red on trunk in a worktree without the build
+artifacts. `sh engine/test.sh` exits 0 over its 74 units.
+`a_joined_thread_survives_clause_collection_inside_its_transaction` is 10
+SIGSEGVs out of 10 with `engine/materialize.pl` at `26cf523f` and 10 passes
+out of 10 here, both at loadavg 69, and
+`sh tests/prolog/probes/engine_join_window.sh 10` reads
+`destroy: segv=10` against `post`, `next` and `create_idle` at `joined=10`.
+Twenty consecutive `sh engine/test.sh suites/spaces/materialization.plt` at
+loadavg 20 to 85 all exit 0.
+
 Open: `engine/spaces/bounded_matching.pl` and `lib/lib_thread/lib_thread.pl`
 also call `engine_create/3` and `engine_destroy/1`, on threads a program can
 join, and `lib_thread` joins its own workers in `cancel_future_worker_/4` and
