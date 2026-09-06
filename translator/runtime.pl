@@ -4,6 +4,11 @@
 %   [tested: run_tests(translator_metadata_projection); commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
+% Guarantees: metta_space_update_atom/1 admits an unbound atom and a non-empty
+%   expression and refuses every other bound term, which is upstream's
+%   `add_sexp(Space, [Rel|Args])` head unification read as a test
+%   [tested: examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/11-what-a-space-stores.metta;
+%   commit=WORKTREE].
 % Guarantees: lift_pattern_modifiers/4 answers whether a pattern carries a sequence variable from the walk it already makes, and a case arm with one compiles to the gap matcher [tested: tests/prolog/suites/translator/translator.plt:the_walk_reports_a_written_gap, tests/prolog/suites/reader/segments.plt; commit=a3dff3abc83b9d82f3652093246e1d693d526cdb].
 % Guarantees: result finality is read from the declaration set that governs
 % the function's owning space [tested:
@@ -1007,6 +1012,40 @@ restore_function_evaluation(none) :-
 
 function_evaluation_active :-
     nb_current('$metta_function_evaluation', true).
+
+%WHAT `add-atom` AND `remove-atom` CAN BE GIVEN, asked of an atom the call
+%site could not settle while it compiled. Upstream stores an atom as
+%`assertz(Space(Rel, Args...))` through `add_sexp(Space, [Rel|Args])`, and
+%removes through `remove_sexp/2` built the same way, so the head unification
+%IS the domain: an atom with no head -- a symbol, a number, a string, `()` --
+%cannot become a fact there and the operation has no solution
+%[source: PeTTa@ae66fa8 src/spaces.pl:1-7, and its two `add-atom` clauses at
+%:10,:24 and two `remove-atom` clauses at :26,:44, every one of them funnelling
+%through those two helpers].
+%
+%This engine's space is WIDER: add_sexp_in/4's last clause keeps a headless
+%atom in `$metta_native_scalar/1`, which is measured and load-bearing. The two
+%spellings PeTTa defines take PeTTa's domain; the wider space keeps the doors
+%PeTTa does not define -- `add-atoms`, `subtract-atom`, a top-level atom in a
+%file (upstream's parser refuses one: `Syntax error: expected '(' or '!('`),
+%and the Python `Space.add`, `remove` and `del`, none of which compile through
+%the call site that carries this guard
+%[measured 2026-09-07 against PeTTa@ae66fa8].
+%
+%An UNBOUND atom is left to the operation's own refusal, which both engines
+%raise on, so this only ever refuses a bound one.
+metta_space_update_atom(Atom) :- ( nonvar(Atom) -> Atom = [_|_] ; true ).
+
+%A compiled guard is not a language operation, so it carries no builtin
+%implementation row; the census reads metta_effect_prolog_primitive/1 as one of
+%its surface sources and would otherwise ask for one. The same shape as
+%spaces:metta_prune_empty/2, which is exempted beside itself for the same
+%reason [source: engine/spaces/bounded_matching.pl:489-493].
+:- multifile seam:builtin_implementation_exemption/2.
+:- dynamic seam:builtin_implementation_exemption/2.
+seam:builtin_implementation_exemption(
+    translator:metta_space_update_atom/1,
+    compiled_space_update_guard_is_not_a_language_operation).
 
 %A bare symbol is reduced only in value positions.  Scalar equality rules are
 %stored in the atomspace rather than compiled as predicates, so the ordinary

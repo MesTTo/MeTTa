@@ -767,6 +767,7 @@ seam:engine_emitted(metta_dynamic_call/3).
 seam:engine_emitted(metta_ensure_compiled/1).
 seam:engine_emitted(metta_dynamic_head_masks/1).
 seam:engine_emitted(metta_dynamic_value_call/4).
+seam:engine_emitted(metta_space_update_atom/1).
 seam:engine_emitted(collapse_runtime/2).
 seam:engine_emitted(metta_segment_dispatch/4).
 seam:engine_emitted(metta_segment_rule_result/6).
