@@ -16,8 +16,16 @@
 %   postcommit query validates them or discards the image.
 %   One stored-equation owner reference ties an image to clause collection,
 %   including unmanaged clear transactions whose old view missed the image.
-%   A transactional erase callback retires it in a temporary synchronous
-%   engine, destroyed on every outcome.
+%   A transactional erase callback retires it through one standing engine,
+%   aliased '$metta_source_owner_retirement', created beside the listener and
+%   held for the life of the process. A per-callback engine cannot be used:
+%   engine_create/3 and engine_destroy/1 zero the calling thread's own
+%   pthread_t while they run, and a concurrent thread_join/2 on that thread
+%   then dereferences null [tested:
+%   a_transactional_collection_creates_no_engine_on_the_collecting_thread;
+%   commit=81d05b34f938ff97f835ca1c00205220690cb6f0]. Between posts that
+%   engine stays suspended holding the last reference it was handed, one
+%   already-collected clause reference, which the next post unbinds.
 %   One process-wide erase listener carries that channel, registered by
 %   flush_space_materialization/2 before the first publication, outside
 %   '$metta_materialization' because the callback takes it, and held for the
@@ -829,14 +837,67 @@ ensure_source_owner_listener :-
                    register_source_owner_listener)
     ).
 
+% The retirement engine is created HERE, beside the listener and under the same
+% flag, and never destroyed. It cannot be created from the callback, and this
+% is the reason: engine_create/3 and engine_destroy/1 both wrap their work in
+% PL_set_engine(Other, &Caller), whose detach_engine() memsets the CALLING
+% thread's own PL_thread_info_t.tid to zero and restores it on the way out
+% [source: SWI-Prolog 10.1.13 src/pl-thread.c:7038 detach_engine, called from
+% PL_set_engine at :7056 by its line :7077; '$engine_create'/3 at :4083 makes
+% the pair at :4134 and :4148, and destroy_interactor at :4164 the pair at
+% :4168 and :4170; commit=81d05b34f938ff97f835ca1c00205220690cb6f0].
+% thread_join/2 reads that field once, with no has_tid test, and hands it to
+% pthread_timedjoin_np [source: SWI-Prolog 10.1.13 src/pl-thread.c:2898
+% thread_join, its call at :2927, pthread_join_interruptible at :2873;
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0], so a join landing in that
+% window dereferences a null struct pthread and the process dies with
+% SIGSEGV inside __pthread_clockjoin_ex. This event is delivered from clause
+% garbage collection, so an engine created per collected clause made EVERY
+% thread that collects inside a transaction intermittently unjoinable, through
+% no act of the program running on it. Driving one standing engine with
+% engine_post/3 instead goes through activate_interactor/suspend_interactor,
+% which detach the ENGINE's info and never the host's [source: SWI-Prolog
+% 10.1.13 src/pl-thread.c:4251 activate_interactor, :4266 suspend_interactor;
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0].
+% [measured 2026-09-06: a thread parked inside engine_destroy/1 and joined
+% crashes 10 runs out of 10; parked inside engine_post/3 or engine_next/2, and
+% churning engine_create/3 under a join, it joins cleanly 10 out of 10, at
+% loadavg 65; command=sh tests/prolog/probes/engine_join_window.sh 10;
+% fixture=tests/prolog/probes/engine_join_window.pl;
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0]
+% [tested: a_transactional_collection_creates_no_engine_on_the_collecting_thread;
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0]
+%
+% Creating it here rather than at load time keeps a process that publishes no
+% image free of it, which is the same reason the listener is registered here.
 register_source_owner_listener :-
     flag(materialized_source_owner_listener, Installed, Installed),
     (   Installed == 1
     ->  true
-    ;   prolog_listen(erase, materialize:source_owner_erased,
+    ;   engine_create(_, materialize:source_owner_retirement_loop, _,
+                      [alias('$metta_source_owner_retirement')]),
+        prolog_listen(erase, materialize:source_owner_erased,
                       [name(materialized_source_owner)]),
         flag(materialized_source_owner_listener, _, 1)
     ).
+
+% The standing engine. Its Prolog thread holds no transaction of its own, so
+% every reference it is handed is looked up in a view no caller's transaction
+% can hide a row from, and its transaction/1 commits against the global
+% generation rather than into a caller that may still roll back. catch/3 keeps
+% one failed retirement from ending the loop; the poster re-raises.
+% [tested: source_collection_inside_rollback_keeps_the_orphan_image_retired,
+% a_cleanup_engine_finds_an_owner_hidden_from_the_gc_callers_snapshot;
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0]
+source_owner_retirement_loop :-
+    repeat,
+      engine_fetch(Reference),
+      (   catch(retire_source_owner(Reference), Error, true)
+      ->  ( var(Error) -> Outcome = retired ; Outcome = raised(Error) )
+      ;   Outcome = declined
+      ),
+      engine_yield(Outcome),
+    fail.
 
 % Clause GC emits erase before unlinking even when a DBREF_CLAUSE still owns
 % the allocation. Active transaction generations postpone this event. One
@@ -850,31 +911,46 @@ register_source_owner_listener :-
 % and SWI 10.1.13 segfaults in $get_clause_attribute/3 when clause_property/2
 % asks a clause being replaced by that reconsult for its predicate. Identity
 % is the only remaining test, and a transaction can predate the owner row, so
-% an apparently unrelated clause still needs the fresh cleanup engine.
-% [tested: an_unrelated_record_erasure_creates_no_cleanup_engine,
+% an apparently unrelated clause still needs the standing engine's view.
+% [tested: an_unrelated_record_erasure_does_not_reach_the_retirement_engine,
 % static_library_reconsult_preserves_materialized_answer_bags,
 % a_cleanup_engine_finds_an_owner_hidden_from_the_gc_callers_snapshot;
-% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0]
+%
+% The mutex serialises posters: the engine is one shared resource and a second
+% engine_post/3 while a package is pending raises a permission error. The
+% engine's own goal must not take it, because the engine is a distinct Prolog
+% thread on the caller's OS thread and mutex_lock/1 recurses per thread, not
+% per OS thread; retire_source_owner/1 takes nothing.
 source_owner_erased(Reference) :-
     (   \+ blob(Reference, clause)
     ->  true
     ;   current_transaction(_)
     ->  with_mutex('$metta_materialization',
-            setup_call_cleanup(
-                engine_create(true, materialize:retire_source_owner(Reference),
-                              Engine),
-                engine_next(Engine, true),
-                engine_destroy(Engine)))
+                   retire_owner_through_engine(Reference))
     ;   materialized_owner(Reference, _, _)
     ->  with_mutex('$metta_materialization', retire_source_owner(Reference))
     ;   true
     ).
 
-% The caller engine owns the mutex. A child engine supplies the fresh view
-% when synchronous GC runs inside a transaction; its erasures must survive
-% that caller's rollback, and reacquiring the parent's mutex would deadlock.
+% engine_post/3 posts and resumes in one step, so the outcome the loop yields
+% is this reference's own. A raised error is re-raised here, where the caller
+% that tripped the collector sees it, which is where engine_next/2 used to
+% deliver it.
+retire_owner_through_engine(Reference) :-
+    engine_post('$metta_source_owner_retirement', Reference, Outcome),
+    (   Outcome == retired
+    ->  true
+    ;   Outcome = raised(Error)
+    ->  throw(Error)
+    ;   fail
+    ).
+
+% The poster owns the mutex. The standing engine supplies the fresh view when
+% synchronous GC runs inside a transaction; its erasures must survive that
+% caller's rollback, and reacquiring the poster's mutex would deadlock.
 % [tested: source_collection_inside_rollback_keeps_the_orphan_image_retired;
-% commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0]
 retire_source_owner(Reference) :-
     transaction(forall(retract(materialized_owner(Reference, Space, Token)),
                        discard_image_rows(Space, Token))).

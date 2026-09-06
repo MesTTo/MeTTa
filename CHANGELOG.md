@@ -47,6 +47,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Joining a thread that collects clauses inside a transaction no longer kills
+  the process. Source materialization retires a collected relation through a
+  callback SWI delivers from clause garbage collection, and that callback
+  created and destroyed a Prolog engine once per collected clause. On
+  SWI-Prolog 10.1.13, `engine_create/3` and `engine_destroy/1` set the CALLING
+  thread's own `pthread_t` to zero for the length of their work, and
+  `thread_join/2` reads that field with no test and hands it to
+  `pthread_timedjoin_np`, so a join that landed in the window dereferenced null
+  and the process died with SIGSEGV. Because the event arrives from garbage
+  collection, the window was injected into whatever thread tripped the
+  collector, at a point no program chose. The callback now drives one standing
+  engine with `engine_post/3`, which SWI runs without touching the host
+  thread's identity. A collection that used to cost 331 engines for 5,000
+  clauses costs none.
+
 - The `parity` gate's verdict no longer depends on how loaded the box is. It
   reported `engine 0 verdicts` (or `library 0 verdicts`) for a different
   example on each run, five times over sixteen whole-corpus runs at loadavg

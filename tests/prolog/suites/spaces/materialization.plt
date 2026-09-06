@@ -695,11 +695,22 @@ collect_materialization_owners :-
         set_prolog_gc_thread(GCThread)).
 
 :- meta_predicate with_unmanaged_clear(+, 1).
+% The `gc` thread is stopped for the whole window, so collect_materialization_
+% owners/0 is the only collector in it. The stale clear erases the image's
+% owner clause and clause collection is what retires the image, so whichever
+% collector reaches it first wins; left to the background one, the goal's own
+% precondition -- that the image survived the stale clear -- was already false
+% when it looked, and the test FAILED rather than asserting. Measured at
+% loadavg 107, run alone, 40 times each: 4 failures with engine/materialize.pl
+% at db307494 and 3 with the standing-engine retirement, so the race is the
+% collector's and not either version's, and 0 with the thread stopped.
 with_unmanaged_clear(Action, Goal) :-
     source_with_reach("(edge a b) (edge a b) (edge b c)\n", Source),
     Space = '&plunit_materialized_unmanaged_clear',
+    current_prolog_flag(gc_thread, GCThread),
     setup_call_cleanup(
-        ( process_metta_string(Source, _, Space),
+        ( set_prolog_gc_thread(false),
+          process_metta_string(Source, _, Space),
           materialize:discard_space(Space),
           message_queue_create(Ready), message_queue_create(Proceed) ),
         ( thread_create(
@@ -713,7 +724,8 @@ with_unmanaged_clear(Action, Goal) :-
           thread_join(Writer, Status), assertion(Status == true),
           call(Goal, Space) ),
         ( message_queue_destroy(Ready), message_queue_destroy(Proceed),
-          spaces:metta_release_space(Space) )).
+          spaces:metta_release_space(Space),
+          set_prolog_gc_thread(GCThread) )).
 
 collected_space_has_no_image(Space) :-
     once(materialize:materialized_snapshot(Space, _, Token, _, _)),
@@ -818,17 +830,85 @@ test(static_library_reconsult_preserves_materialized_answer_bags) :-
 % registers the listener with the first image rather than at load time, so a
 % run of this test alone would otherwise ask a channel nobody is listening to
 % and pass without touching source_owner_erased/1.
-test(an_unrelated_record_erasure_creates_no_cleanup_engine) :-
+test(an_unrelated_record_erasure_does_not_reach_the_retirement_engine) :-
     source_with_reach("(edge a b) (edge b c)\n", Source),
     with_program(Source,
         ( assertion(materialize:materialized_owner(
                         _, '&plunit_materialized', _)),
           collect_materialization_owners,
           recordz(materialization_nonowner, recorded, Record),
-          statistics(engines_created, Before),
+          % The standing engine is a Prolog thread, so its own inference
+          % counter is the meter: a reference that reached it moves the count.
+          % engines_created cannot be the meter any more, because the engine is
+          % created once per process and no erase creates another.
+          thread_statistics('$metta_source_owner_retirement', inferences, Before),
           \+ transaction(( erase(Record), fail )),
+          thread_statistics('$metta_source_owner_retirement', inferences, After),
+          assertion(After == Before) )).
+
+% engine_create/3 and engine_destroy/1 wrap their work in PL_set_engine, whose
+% detach_engine() memsets the CALLING thread's own pthread_t to zero and
+% restores it on the way out. thread_join/2 reads that field once, with no
+% has_tid test, and hands it to pthread_timedjoin_np, so a join landing in that
+% window dereferences a null struct pthread and the process dies inside
+% __pthread_clockjoin_ex [source: SWI-Prolog 10.1.13 src/pl-thread.c:7038
+% detach_engine, called from PL_set_engine at :7056; '$engine_create'/3 at
+% :4083 makes the pair at :4134 and :4148, destroy_interactor at :4164 the
+% pair at :4168 and :4170, and thread_join at :2898 reads .tid at :2927;
+% commit=81d05b34f938ff97f835ca1c00205220690cb6f0]. Clause collection is
+% delivered to this file's erase listener, so an engine per collected clause
+% put that window into any thread a program joins, at a point no program chose.
+% tests/prolog/probes/engine_join_window.pl isolates the same window in plain
+% SWI with no engine of ours involved.
+:- dynamic collectable_clause/1.
+
+% Erased BEFORE the transaction opens and after the global generation moves
+% on, because clause collection skips a clause an active transaction can still
+% see; that is the same ordering a_cleanup_engine_finds_an_owner_hidden_from_
+% the_gc_callers_snapshot spells out for its own owner.
+erased_clauses_to_collect(Count) :-
+    forall(between(1, Count, N),
+           ( assertz(collectable_clause(N), Ref), erase(Ref) )),
+    assertz(materialization_gc_tick, Tick), erase(Tick).
+
+collect_inside_transaction :-
+    transaction(garbage_collect_clauses).
+
+collect_inside_transaction(Ready) :-
+    thread_send_message(Ready, collecting),
+    collect_inside_transaction.
+
+test(a_transactional_collection_creates_no_engine_on_the_collecting_thread) :-
+    source_with_reach("(edge a b) (edge b c)\n", Source),
+    with_program(Source,
+        ( collect_materialization_owners,
+          erased_clauses_to_collect(2000),
+          statistics(engines_created, Before),
+          collect_inside_transaction,
           statistics(engines_created, After),
           assertion(After == Before) )).
+
+% The join has to land WHILE the collector is collecting. Joining straight
+% after thread_create/3 reads the pthread_t before the new thread has run its
+% first goal, which is why an earlier form of this test passed on the parent
+% commit: the collector announces itself, and the sleep puts the read a
+% couple of milliseconds into a collection that runs for tens.
+test(a_joined_thread_survives_clause_collection_inside_its_transaction) :-
+    source_with_reach("(edge a b) (edge b c)\n", Source),
+    current_prolog_flag(gc_thread, GCThread),
+    with_program(Source,
+        setup_call_cleanup(
+            ( set_prolog_gc_thread(false), message_queue_create(Ready) ),
+            forall(between(1, 40, _),
+                   ( erased_clauses_to_collect(4000),
+                     thread_create(collect_inside_transaction(Ready),
+                                   Collector, []),
+                     thread_get_message(Ready, collecting),
+                     sleep(0.002),
+                     thread_join(Collector, Status),
+                     assertion(Status == true) )),
+            ( message_queue_destroy(Ready),
+              set_prolog_gc_thread(GCThread) ))).
 
 % The pragma is the whole gate: without it a source boundary derives nothing
 % and every admitted call keeps its compiled clauses.
