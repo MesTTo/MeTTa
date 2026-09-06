@@ -7,18 +7,18 @@ Assumes:
   - the corpus runner lists an example when it is a `.metta` file under
     `examples/` outside a `_fixtures/` directory and
     tests/data/example_skips.txt does not name it
-    [source: test.sh, the find and the SKIPS read; commit=WORKTREE]
+    [source: test.sh, the find and the SKIPS read; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
 Guarantees:
   - a `::: run` fence names an example the corpus runner runs and carries that
     file's own bytes, or the site build refuses by name, so the page cannot
     run a program the gate does not
-    [tested: test_every_run_fence_runs_the_corpus_file_it_names; commit=WORKTREE]
+    [tested: test_every_run_fence_runs_the_corpus_file_it_names; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
   - the fence's text reaches the component unchanged: it travels
     percent-encoded, which is what survives an HTML attribute and the Vue
     template compiler without a quoting rule of its own, and is the transport
     mermaid's own VitePress integration uses for the same reason
     [source: https://github.com/mermaid-js/mermaid/blob/1fad9e6eefd1e9ab6fe6aa708c8e2fa4df7cb3ce/packages/mermaid/src/docs/.vitepress/mermaid-markdown-all.ts,
-    `graph="${encodeURIComponent(token.content)}"`; commit=WORKTREE]
+    `graph="${encodeURIComponent(token.content)}"`; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
 Decides: ROOTS below is the whole of what changes when `examples/` and this
   site move into the textbook repository. Nothing else in the site knows where
   the corpus or the browser kit is.

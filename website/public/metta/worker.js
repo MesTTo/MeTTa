@@ -20,18 +20,18 @@
  *     command=npm run test:browser --prefix extensions/node, the diagnostic
  *     line of "answers the site's fences through one worker";
  *     fixture=extensions/node/browser and _runtime served from a local server;
- *     commit=WORKTREE]
+ *     commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  *   - a program naming a door this build has no implementation for is REFUSED
  *     before it runs, rather than answering itself unreduced, which is what
  *     `(py-atom "1 + 1")` does in an engine with no Python seat behind it
  *     [tested: npm run test:browser --prefix extensions/node,
  *     "refuses a fence the browser has no seat or no budget for";
- *     commit=WORKTREE]
+ *     commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  *   - a run costs at most the fence's own inference budget, and the engine
  *     stops itself with its own `InferenceLimitError` text when it passes it
  *     [tested: npm run test:browser --prefix extensions/node,
  *     "refuses a fence the browser has no seat or no budget for";
- *     commit=WORKTREE]
+ *     commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  *   - an engine that has aborted is dropped rather than reused: a WebAssembly
  *     abort leaves the module dead, and every later run in a census that
  *     shared one inherited the corpse and reported a transport failure
@@ -39,17 +39,17 @@
  *     `Unknown procedure: system:metta_node_do/2`;
  *     command=extensions/node/tools/measure-browser-corpus.mjs run with ONE
  *     shared engine rather than the engine per example it uses;
- *     fixture=examples/ over the browser build; commit=WORKTREE]
+ *     fixture=examples/ over the browser build; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  *     [assumed: the drop itself has no test. The example that aborted a shared
  *     engine, examples/ch08-data/08-03-the-shipped-libraries/09-conformance.metta,
  *     raises `ERR_METTA_ENGINE` and leaves the engine usable in the
  *     space-per-run this worker gives it, and nothing else aborts a
- *     WebAssembly engine on demand; commit=WORKTREE]
+ *     WebAssembly engine on demand; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  *   - each run gets a space of its own, released after it, so one fence cannot
  *     change what another answers and running one fence twice answers the same
  *     thing twice rather than doubling its equations
  *     [tested: npm run test:browser --prefix extensions/node,
- *     "answers the site's fences through one worker"; commit=WORKTREE]
+ *     "answers the site's fences through one worker"; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  * Owns resources: the engine, until a message drops it or the page discards
  *   this worker.
  * Decides: a WORKER rather than the page, because `run` is synchronous once the

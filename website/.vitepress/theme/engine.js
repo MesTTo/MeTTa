@@ -7,25 +7,25 @@
  *   - one worker for the whole page however many fences it holds, so the second
  *     fence a reader runs pays nothing for the engine
  *     [tested: npm run test:browser --prefix extensions/node,
- *     "answers the site's fences through one worker"; commit=WORKTREE]
+ *     "answers the site's fences through one worker"; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  *   - a fence that paid for the engine says `booting` and then `running`: the
  *     worker sends one progress message when the engine is up and before the
  *     program starts, because a boot and a run are one message and a page
  *     cannot see the moment between them otherwise
  *     [tested: npm run test:browser --prefix extensions/node,
  *     "clears a fence reset while its run was still going", which waits for
- *     that state; commit=WORKTREE]
+ *     that state; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  *   - runs are served in the order they were asked for, because the engine is
  *     synchronous inside the worker and answering out of order would only mean
  *     a later fence had overtaken an earlier one
  *     [tested: npm run test:browser --prefix extensions/node,
  *     "answers the site's fences through one worker", whose last two messages
- *     are asked for at once; commit=WORKTREE]
+ *     are asked for at once; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  *   - a worker that dies takes every waiting run with it, named, rather than
  *     leaving a fence saying `running` forever
  *     [tested: npm run test:browser --prefix extensions/node,
  *     "names a worker it cannot start rather than waiting on it";
- *     commit=WORKTREE]
+ *     commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  * Owns resources: the Worker, until `reset()` or the page unloads.
  * Decides: the worker's URL is read from Vite's own `BASE_URL`, the same value
  *   VitePress publishes the site under, so the one place the base is written is

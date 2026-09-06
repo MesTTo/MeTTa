@@ -10,7 +10,7 @@ Guarantees:
     [tested: test_every_site_page_is_reachable_from_the_navigation; commit=a7d2f292004fe06d7671b7931cfc2ce4620b7b35]
   - a `::: run` fence names an example the corpus runner runs and carries that
     file's own bytes, or this build refuses by name
-    [tested: test_every_run_fence_runs_the_corpus_file_it_names; commit=WORKTREE]
+    [tested: test_every_run_fence_runs_the_corpus_file_it_names; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
   - code renders in the theme pair ./highlighting.mjs builds, which is the most
     colourful bundled pair that still reads on the background VitePress paints
     a code block with, and which colours the two Python scopes no theme rules

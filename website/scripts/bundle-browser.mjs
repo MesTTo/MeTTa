@@ -16,14 +16,14 @@
  * instead and never asks for one of them
  * [source: extensions/node/src/platform-browser.ts:prepareBase, which fetches
  * runtime.json, wasm/swipl-web.wasm and wasm/swipl-web.data and nothing else;
- * commit=WORKTREE]. Copying the trees as well would put 5 MB no reader ever
+ * commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]. Copying the trees as well would put 5 MB no reader ever
  * downloads into the site, and then again into its built output
  * [measured 2026-09-07: 7.8 MB copied where the seat's two directories hold
  * 11.4 MB, which this script's own last line prints the first half of;
  * command=npm run bundle:browser --prefix website;
- * fixture=the browser build `npm run build:browser` makes; commit=WORKTREE].
+ * fixture=the browser build `npm run build:browser` makes; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d].
  *
- * [tested: test_the_site_build_refuses_without_the_browser_kit; commit=WORKTREE]
+ * [tested: test_the_site_build_refuses_without_the_browser_kit; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  */
 
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from "node:fs";

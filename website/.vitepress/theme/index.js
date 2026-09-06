@@ -3,7 +3,7 @@
  *   component the `::: run` container renders.
  * Guarantees: `MettaRun` is registered globally, which is what the container's
  *   emitted `<MettaRun ...>` needs to resolve in every page
- *   [tested: npm run docs:build; commit=WORKTREE].
+ *   [tested: npm run docs:build; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d].
  */
 import DefaultTheme from "vitepress/theme";
 

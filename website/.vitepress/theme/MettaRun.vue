@@ -3,15 +3,15 @@
  * Purpose: a Run button over a `metta` fence, and the answer groups under it.
  * Assumes: the `::: run` container gave it the fence's own bytes, percent
  *   encoded, and an example path the corpus runner runs
- *   [source: website/.vitepress/runnable.mjs:runContainer; commit=WORKTREE].
+ *   [source: website/.vitepress/runnable.mjs:runContainer; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d].
  * Guarantees:
  *   - what runs is the fence's text, character for character, which is the
  *     text of the example file the gate runs
- *     [tested: test_every_run_fence_runs_the_corpus_file_it_names; commit=WORKTREE]
+ *     [tested: test_every_run_fence_runs_the_corpus_file_it_names; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  *   - the engine is the page's, booted once by the first fence a reader runs
  *     [tested: npm run test:browser --prefix extensions/node,
  *     "runs a fence in a mounted component and prints its answer";
- *     commit=WORKTREE]
+ *     commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  *   - a refusal is shown with the code it was raised under -- the seat's for a
  *     door this build has not got, the engine's for a capability, a source or
  *     an inference bound -- and the reset control is offered beside it, because
@@ -19,11 +19,11 @@
  *     settles
  *     [tested: npm run test:browser --prefix extensions/node,
  *     "names a worker it cannot start rather than waiting on it";
- *     commit=WORKTREE]
+ *     commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  *   - a reset while a run is going clears the fence rather than showing the
  *     refusal the reset itself produced
  *     [tested: npm run test:browser --prefix extensions/node,
- *     "clears a fence reset while its run was still going"; commit=WORKTREE]
+ *     "clears a fence reset while its run was still going"; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]
  * Decides: the answer groups are printed as text rather than re-highlighted.
  *   They are the engine's own rendering of an atom, and running them through
  *   the MeTTa grammar would colour an answer as though it were source.
