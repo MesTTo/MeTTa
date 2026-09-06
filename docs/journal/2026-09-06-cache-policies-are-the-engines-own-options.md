@@ -154,3 +154,292 @@ generic `EngineError` until that classifier learns the word.
 Open: a `provenance` carrier will table a polynomial in the answer position;
 `metta_tabling_moded_head/4` and the `moded` class of the policy table are
 the two seams it extends, one row each.
+
+## 2026-09-07, the probe programs behind the numbers above
+
+Each ran as `swipl -q <file>` in a fresh process on SWI-Prolog 10.1.13, from
+the repository root; the Python measurement ran as
+`PYTHONPATH=extensions/python python measure_monotonic.py` with the
+`.venv-pypetta` interpreter. They are recorded here so the numbers can be
+re-taken from a tracked file after the scratch directory is gone.
+
+### probe17.pl: propagation against re-evaluation per storage and table declaration
+
+Generated once per pair of `$dyn` in `monotonic`, `(monotonic, incremental)`,
+`incremental` and `$tbl` in `(monotonic, shared)`, `(monotonic, lazy, shared)`,
+`(incremental, shared)`, skipping the three pairs SWI refuses:
+
+```prolog
+:- use_module(library(tableutil)).
+:- dynamic link/2 as incremental.
+:- table reach/2 as (incremental, shared).
+reach(X, Y) :- link(X, Y).
+reach(X, Z) :- reach(X, Y), link(Y, Z).
+status(Head) :- ( current_table(user:T, Tr), T = Head, '${tbl}_table_status'(Tr, S) -> format("status=~w", [S]) ; format("status=?", []) ).
+main :-
+    N = 200,
+    forall(between(1, N, I), (J is I + 1, assertz(link(I, J)))),
+    statistics(inferences, A0), findall(Y, reach(1, Y), L0), statistics(inferences, A1), D0 is A1 - A0, length(L0, Len0),
+    format("dyn incremental table (incremental, shared): first call ~w answers in ~w inferences ", [Len0, D0]), status(reach(1,_)), nl,
+    M is N + 1, M2 is N + 2,
+    statistics(inferences, B0), assertz(link(M, M2)), statistics(inferences, B1), DB is B1 - B0,
+    ( catch(table_statistics(user:reach(1,_), answers, NA), _, fail) -> true ; NA = none ),
+    format("  assert cost ~w inferences, answers before call ~w ", [DB, NA]), status(reach(1,_)), nl,
+    statistics(inferences, C0), findall(Y, reach(1, Y), L1), statistics(inferences, C1), D1 is C1 - C0, length(L1, Len1),
+    format("  next call ~w answers in ~w inferences ", [Len1, D1]), status(reach(1,_)), nl,
+    M3 is N + 3,
+    statistics(inferences, E0), assertz(link(M2, M3)), statistics(inferences, E1), DE is E1 - E0,
+    statistics(inferences, F0), findall(Y, reach(1, Y), L2), statistics(inferences, F1), D2 is F1 - F0, length(L2, Len2),
+    format("  second assert ~w, next call ~w answers in ~w inferences~n", [DE, Len2, D2]),
+    statistics(inferences, G0), findall(Y, reach(1, Y), L3), statistics(inferences, G1), D3 is G1 - G0, length(L3, Len3),
+    format("  repeat call ~w answers in ~w inferences~n", [Len3, D3]),
+    retract(link(1, 2)),
+    statistics(inferences, H0), findall(Y, reach(1, Y), L4), statistics(inferences, H1), D4 is H1 - H0, length(L4, Len4),
+    format("  after retract link(1,2): ~w answers in ~w inferences~n", [Len4, D4]).
+:- initialization(main, main).
+```
+
+### probe13: the moded-table matrix
+
+Generated once per `$thread` in `shared`, `private` and `$watch` in `plain`,
+`incremental`, `monotonic`:
+
+```prolog
+:- use_module(library(tableutil)).
+shortest(A, B, C) :- ( A =< B -> C = A ; C = B ).
+:- ( 'plain' == plain -> dynamic(pedge/3) ; 'plain' == incremental -> dynamic(pedge/3 as incremental) ; dynamic(pedge/3 as (monotonic, incremental)) ).
+:- ( 'plain' == plain -> table(ppath(_,_,lattice(shortest/3)) as (${thread})) ; 'plain' == incremental -> table(ppath(_,_,lattice(shortest/3)) as (incremental, private)) ; table(ppath(_,_,lattice(shortest/3)) as (monotonic, private)) ).
+ppath(X, Y, C) :- pedge(X, Y, C).
+ppath(X, Z, C) :- ppath(X, Y, C0), pedge(Y, Z, C1), C is C0 + C1.
+stats(V) :- forall(member(S, [tables, answers, complete_call, invalidated, reevaluated]),
+                   ( (catch(table_statistics(V, S, N), _, fail) -> true ; N = none), format("~w=~w ", [S, N]))), nl.
+vstats(Head) :- ( user:'$table_mode'(Head, V, _) -> stats(V) ; stats(Head) ).
+props(Head) :- forall(predicate_property(Head, tabled(F)), (write(F), write(' '))), nl.
+go(Label) :- catch((findall(Y-C, ppath(a, Y, C), L), format("~w: ~w  ", [Label, L]), vstats(ppath(a,_,_))), E, (format("~w: ERR ~q~n", [Label, E]))).
+main :-
+    write('${thread}/${watch} props: '), props(ppath(_,_,_)),
+    assertz(pedge(a, b, 1)), assertz(pedge(b, c, 1)), assertz(pedge(c, a, 1)), assertz(pedge(a, c, 5)),
+    go(first), go(second),
+    assertz(pedge(a, c, 1)),
+    write('after add, before call: '), vstats(ppath(a,_,_)),
+    go('after add'), go('after add again'),
+    ( user:'$table_mode'(ppath(_,_,_), PV, _) -> abolish_table_subgoals(user:PV) ; true ),
+    go('after clear'),
+    retract(pedge(a, c, 1)),
+    go('after retract').
+:- initialization(main, main).
+```
+
+### probe7.pl: subsumptive under a watch
+
+```prolog
+% Probe 7: subsumptive variants.
+:- use_module(library(tableutil)).
+:- dynamic sedge/2 as incremental.
+:- table sreach/2 as (subsumptive, incremental, shared).
+sreach(X, Y) :- sedge(X, Y).
+sreach(X, Z) :- sreach(X, Y), sedge(Y, Z).
+:- dynamic pedge/2.
+:- table preach/2 as (subsumptive, shared).
+preach(X, Y) :- pedge(X, Y).
+preach(X, Z) :- preach(X, Y), pedge(Y, Z).
+stats(V) :- forall(member(S, [tables, answers, complete_call, invalidated, reevaluated]),
+                   ( (catch(table_statistics(V, S, N), _, fail) -> true ; N = none), format("~w=~w ", [S, N]))), nl.
+try(Goal) :- catch((Goal -> format("OK: ~q~n", [Goal]) ; format("FAILED: ~q~n", [Goal])), E, (format("ERROR ~q: ", [Goal]), print_message(error, E))).
+props(Head) :- forall(predicate_property(Head, tabled(F)), (write(F), write(' '))), nl.
+main :-
+    write('props: '), props(sreach(_,_)),
+    assertz(sedge(a, b)), assertz(sedge(b, c)),
+    findall(X-Y, sreach(X, Y), S0), format("all: ~w~n", [S0]), stats(sreach(_,_)),
+    findall(Y, sreach(a, Y), S1), format("a: ~w~n", [S1]), stats(sreach(_,_)),
+    assertz(sedge(c, d)),
+    format("after assert: "), stats(sreach(_,_)),
+    catch((forall(sreach(a, Y), format("  a->~w~n", [Y]))), E1, (format("forall ERR: ~q~n", [E1]))),
+    stats(sreach(_,_)),
+    catch((findall(Y, sreach(a, Y), S2), format("a after: ~w~n", [S2])), E2, (format("findall ERR: ~q~n", [E2]))),
+    catch((findall(X-Y, sreach(X, Y), S3), format("all after: ~w~n", [S3])), E3, (format("findall-all ERR: ~q~n", [E3]))),
+    catch((findall(Y, sreach(a, Y), S4), format("a after all: ~w~n", [S4])), E4, (format("findall ERR2: ~q~n", [E4]))),
+    stats(sreach(_,_)),
+    % plain subsumptive
+    assertz(pedge(a, b)), assertz(pedge(b, c)),
+    findall(X-Y, preach(X, Y), P0), format("plain all: ~w~n", [P0]), stats(preach(_,_)),
+    findall(Y, preach(a, Y), P1), format("plain a: ~w~n", [P1]), stats(preach(_,_)),
+    % subsumptive + monotonic
+    try(dynamic(user:medge/2 as (monotonic, incremental))),
+    try(table(user:mreach/2 as (subsumptive, monotonic, shared))),
+    ( current_predicate(mreach/2) -> (write('mreach props: '), props(mreach(_,_))) ; true ),
+    assertz((mreach(X, Y) :- medge(X, Y))), assertz((mreach(X, Z) :- mreach(X, Y), medge(Y, Z))),
+    assertz(medge(a, b)),
+    catch((findall(X-Y, mreach(X, Y), MR0), format("mreach all: ~w~n", [MR0])), EM0, (format("mreach ERR: ~q~n", [EM0]))),
+    assertz(medge(b, c)),
+    catch((findall(Y, mreach(a, Y), MR1), format("mreach a after assert: ~w~n", [MR1])), EM1, (format("mreach ERR2: ~q~n", [EM1]))),
+    stats(mreach(_,_)).
+:- initialization(main, main).
+```
+
+### probe8.pl: option conflicts and the tripwire routes
+
+```prolog
+% Probe 8: option conflicts, max_answers tripwire routes, module-qualified lattice, untable moded.
+:- use_module(library(tableutil)).
+:- multifile prolog:tripwire/2.
+:- dynamic seen/2.
+prolog:tripwire(Wire, Context) :-
+    assertz(seen(Wire, Context)),
+    format("TRIPWIRE ~q context ~q~n", [Wire, Context]),
+    throw(error(my_signal(Wire), _)).
+try(Goal) :- catch((Goal -> format("OK: ~q~n", [Goal]) ; format("FAILED: ~q~n", [Goal])), E, (format("ERROR ~q: ", [Goal]), print_message(error, E))).
+props(Head) :- forall(predicate_property(Head, tabled(F)), (write(F), write(' '))), nl.
+attr(Head, A) :- ( catch('$get_predicate_attribute'(Head, A, V), _, fail) -> format("~w=~w ", [A, V]) ; format("~w=? ", [A]) ).
+:- table p/2 as (max_answers(3), shared).
+p(M, N) :- between(1, M, N).
+:- table p2/2 as shared.
+p2(M, N) :- between(1, M, N).
+shortest(A, B, C) :- ( A =< B -> C = A ; C = B ).
+main :-
+    try(table(user:ps/1 as (private, shared))), write('ps props: '), props(ps(_)),
+    try(table(user:lz/1 as lazy)), write('lazy-alone props: '), props(lz(_)), attr(lz(_), lazy), attr(lz(_), monotonic), nl,
+    try(table(user:lz2/1 as (monotonic, lazy))), write('mono-lazy props: '), props(lz2(_)), attr(lz2(_), lazy), attr(lz2(_), monotonic), nl,
+    try(table(user:ma/2 as (max_answers(2), shared))), write('max_answers props: '), props(ma(_,_)), attr(ma(_,_), max_answers), attr(ma(_,_), subgoal_abstract), attr(ma(_,_), answer_abstract), nl,
+    try(table(user:sa/2 as (subgoal_abstract(2), answer_abstract(3), shared))), attr(sa(_,_), max_answers), attr(sa(_,_), subgoal_abstract), attr(sa(_,_), answer_abstract), nl,
+    try(table(user:pv/1 as private)), write('private props: '), props(pv(_)),
+    try(table(user:mq(_,lattice(user:shortest/3)) as shared)), write('mq props: '), props(mq(_,_)),
+    try(table(user:bogus/1 as bogus)),
+    try(table(user:ma2/2 as max_answers(foo))),
+    % max_answers per-predicate: which path
+    set_prolog_flag(max_answers_for_subgoal_action, error),
+    catch((findall(N, p(10, N), L), format("p answers (flag error): ~w~n", [L])), E, (format("caught: ~q~n", [E]))),
+    set_prolog_flag(max_answers_for_subgoal_action, bounded_rationality),
+    abolish_all_tables,
+    catch((findall(N, p(10, N), L2), format("p answers (flag bounded_rationality): ~w~n", [L2])), E2, (format("caught: ~q~n", [E2]))),
+    % global flag
+    set_prolog_flag(max_answers_for_subgoal_action, error),
+    set_prolog_flag(max_answers_for_subgoal, 3),
+    abolish_all_tables,
+    catch((findall(N, p2(10, N), L3), format("p2 answers (global flag 3): ~w~n", [L3])), E3, (format("caught: ~q~n", [E3]))),
+    forall(seen(W, C), format("seen ~q ~q~n", [W, C])),
+    forall(current_prolog_flag(F, V), ( (sub_atom(F, _, _, _, restraint) ; sub_atom(F, _, _, _, max_answers) ; sub_atom(F, _, _, _, max_table) ; sub_atom(F, _, _, _, table_)) -> format("flag ~w=~w~n", [F, V]) ; true )).
+:- initialization(main, main).
+```
+
+### probe16.pl: the lazy table dumped after an assert
+
+```prolog
+:- use_module(library(tableutil)).
+:- use_module(library(tables)).
+:- dynamic link/2 as (monotonic, incremental).
+:- table lz/2 as (monotonic, lazy, shared).
+lz(X, Y) :- link(X, Y).
+lz(X, Z) :- lz(X, Y), link(Y, Z).
+:- table eg/2 as (monotonic, shared).
+eg(X, Y) :- link(X, Y).
+eg(X, Z) :- eg(X, Y), link(Y, Z).
+dump(Label) :-
+    format("~w~n", [Label]),
+    forall(current_table(user:T, Tr),
+           ( '$tbl_table_status'(Tr, S),
+             findall(R, get_returns(Tr, R), Rs),
+             ( catch(table_statistics(user:T, answers, N), _, fail) -> true ; N = none ),
+             format("  ~q status=~w returns=~q table_statistics(answers)=~w~n", [T, S, Rs, N]) )).
+main :-
+    assertz(link(a, b)),
+    findall(Y, lz(a, Y), _), findall(Y, eg(a, Y), _),
+    dump('after first calls'),
+    assertz(link(b, c)),
+    dump('after assert link(b,c), before any call'),
+    statistics(inferences, I0), findall(Y, lz(a, Y), L1), statistics(inferences, I1), D is I1 - I0,
+    format("lz call ~w in ~w inferences~n", [L1, D]),
+    dump('after lz call'),
+    statistics(inferences, J0), findall(Y, eg(a, Y), E1), statistics(inferences, J1), D2 is J1 - J0,
+    format("eg call ~w in ~w inferences~n", [E1, D2]),
+    dump('after eg call').
+:- initialization(main, main).
+```
+
+### probe18.pl: turning a storage watch back off
+
+```prolog
+:- use_module(library(tableutil)).
+try(Goal) :- catch((Goal -> format("OK: ~q~n", [Goal]) ; format("FAILED: ~q~n", [Goal])), E, (format("ERROR ~q: ", [Goal]), print_message(error, E))).
+dprops(Head) :- forall(( predicate_property(Head, P), memberchk(P, [dynamic, incremental, monotonic]) ), (write(P), write(' '))), nl.
+main :-
+    try(dynamic(user:link/2 as (monotonic))), write('after as monotonic: '), dprops(link(_,_)),
+    try(dynamic(user:link/2 as incremental)), write('after as incremental: '), dprops(link(_,_)),
+    try(dynamic([user:link/2], [incremental(false)])), write('after incremental(false): '), dprops(link(_,_)),
+    try(dynamic([user:link/2], [monotonic(false)])), write('after monotonic(false): '), dprops(link(_,_)),
+    try(dynamic([user:link/2], [monotonic(true)])), write('after monotonic(true): '), dprops(link(_,_)),
+    try(('$set_predicate_attribute'(user:link(_,_), monotonic, false), '$set_table_wrappers'(user:link(_,_)))), write('after attribute reset: '), dprops(link(_,_)),
+    % does a monotonic table over a now-non-monotonic dyn still work / error?
+    assertz(link(a, b)),
+    try(dynamic(user:link/2 as monotonic)), write('re-enabled: '), dprops(link(_,_)),
+    try(table(user:reach/2 as (monotonic, shared))),
+    assertz((reach(X, Y) :- link(X, Y))), assertz((reach(X, Z) :- reach(X, Y), link(Y, Z))),
+    findall(Y, reach(a, Y), L0), format("reach ~w~n", [L0]),
+    assertz(link(b, c)), ( table_statistics(user:reach(a,_), answers, N) -> format("answers before call ~w~n", [N]) ; true ),
+    findall(Y, reach(a, Y), L1), format("reach ~w~n", [L1]),
+    % a monotonic table over a storage predicate that is incremental ONLY: what happens on evaluation?
+    try(dynamic(user:ilink/2 as incremental)),
+    try(table(user:ireach/2 as (monotonic, shared))),
+    assertz((ireach(X, Y) :- ilink(X, Y))), assertz((ireach(X, Z) :- ireach(X, Y), ilink(Y, Z))),
+    assertz(ilink(a, b)),
+    catch((findall(Y, ireach(a, Y), I0), format("ireach over incremental-only storage: ~w~n", [I0])), E, (format("ireach ERR: ~q~n", [E]))),
+    assertz(ilink(b, c)),
+    catch((findall(Y, ireach(a, Y), I1), format("ireach after add: ~w~n", [I1])), E2, (format("ireach ERR2: ~q~n", [E2]))),
+    % a monotonic table over a plain dynamic predicate (neither): error?
+    dynamic(user:plink/2),
+    try(table(user:preach/2 as (monotonic, shared))),
+    assertz((preach(X, Y) :- plink(X, Y))), assertz((preach(X, Z) :- preach(X, Y), plink(Y, Z))),
+    assertz(plink(a, b)),
+    catch((findall(Y, preach(a, Y), P0), format("preach over plain dynamic: ~w~n", [P0])), E3, (format("preach ERR: ~q~n", [E3]))),
+    assertz(plink(b, c)),
+    catch((findall(Y, preach(a, Y), P1), format("preach after add: ~w~n", [P1])), E4, (format("preach ERR2: ~q~n", [E4]))).
+:- initialization(main, main).
+```
+
+### measure_monotonic.py: the class change through the Python surface
+
+```python
+"""M1: a monotonic table under a sequence of add-atom calls against the incremental table."""
+import sys
+from metta import MeTTa
+
+def reach(m, head, space):
+    m.run(f"(= ({head} $x $y) (match {space} (link $x $y) $y))")
+    m.run(f"(= ({head} $x $z) (let $y ({head} $x $y) (match {space} (link $y $z) $z)))")
+
+def measure(n, writes=5):
+    m = MeTTa().space(f"&m1-{n}")
+    m.run("!(import! &self (library lib_tabling))")
+    m.run("!(bind! &mono-links (new-space))")
+    m.run("!(bind! &incr-links (new-space))")
+    for space in ("&mono-links", "&incr-links"):
+        for i in range(n):
+            m.run(f"!(add-atom {space} (link n{i} n{i + 1}))")
+    reach(m, f"m1-mono-{n}", "&mono-links")
+    reach(m, f"m1-incr-{n}", "&incr-links")
+    m.run(f"!(add-atom &metta (cache m1-mono-{n} monotonic))")
+    m.run(f"!(tabled (m1-incr-{n} $x $y))")
+    with m.stats() as first_mono:
+        assert len(m.run(f"!(collapse (m1-mono-{n} n0 $y))")[0][0].children) == n
+    with m.stats() as first_incr:
+        assert len(m.run(f"!(collapse (m1-incr-{n} n0 $y))")[0][0].children) == n
+    rows = []
+    for k in range(writes):
+        tail = n + k
+        with m.stats() as wm:
+            m.run(f"!(add-atom &mono-links (link n{tail} n{tail + 1}))")
+        with m.stats() as rm:
+            m.run(f"!(once (m1-mono-{n} n0 $y))")
+        with m.stats() as wi:
+            m.run(f"!(add-atom &incr-links (link n{tail} n{tail + 1}))")
+        with m.stats() as ri:
+            m.run(f"!(once (m1-incr-{n} n0 $y))")
+        rows.append((wm.inferences, rm.inferences, wm.cputime + rm.cputime, wi.inferences, ri.inferences, wi.cputime + ri.cputime))
+    return first_mono.inferences, first_incr.inferences, rows
+
+for n in (50, 100, 200, 400):
+    fm, fi, rows = measure(n)
+    print(f"N={n}: first evaluation mono={fm} incr={fi}")
+    for k, (wm, rm, cm, wi, ri, ci) in enumerate(rows):
+        print(f"  write {k + 1}: monotonic write={wm} read={rm} cpu={cm:.5f}s | incremental write={wi} read={ri} cpu={ci:.5f}s")
+```
