@@ -18,7 +18,7 @@
 %     the space's stored program [tested:
 %     lib_memo_reach:memoizing_an_operation_reaches_a_caller_compiled_before_it,
 %     lib_memo_reach:a_body_that_writes_its_own_space_is_not_duplicated_by_memoize;
-%     commit=WORKTREE].
+%     commit=295f4c80ace06f6bf8e132ea936777afd79ac3d5].
 %   - Exact-cache invalidation advances a hidden table generation seen by
 %     already-live worker engines [tested:
 %     lib_memo_stats:invalidation_moves_a_live_worker_to_a_fresh_exact_table_generation;
