@@ -155,6 +155,13 @@ GUARANTEE_SOURCES = (
     # The Python suites carry 536 tags of their own, the largest block
     # the lane could not see.
     "extensions/python/tests/*/*.py",
+    # And the seat's own conftest, which sits ABOVE them and makes claims
+    # of the same kind: it collects the .metta example manifest and
+    # registers the shipped fixture plugin. Its pins read as "OUTSIDE the
+    # evidence gate's globs, so nothing reads this file's claims" until
+    # this line existed [measured 2026-09-07 by
+    # tests/checks/pin_provenance.py --check].
+    "extensions/python/tests/*.py",
     # The plunit suites make the same claims their subjects do, in their
     # own headers, and 271 of them across 50 files went unread.
     "tests/prolog/suites/*/*.plt",
@@ -303,6 +310,13 @@ PROVENANCE_SOURCES = (
     "extensions/python/examples/*/*/*/*.py",
     "extensions/python/examples/*/*/*/*/*.py",
     "extensions/python/tests/*/*.py",
+    # And the seat's own conftest, which sits ABOVE them and makes claims
+    # of the same kind: it collects the .metta example manifest and
+    # registers the shipped fixture plugin. Its pins read as "OUTSIDE the
+    # evidence gate's globs, so nothing reads this file's claims" until
+    # this line existed [measured 2026-09-07 by
+    # tests/checks/pin_provenance.py --check].
+    "extensions/python/tests/*.py",
     "extensions/*/benchmarks/*.json",
     "engine/*.json",
     "*.sh",

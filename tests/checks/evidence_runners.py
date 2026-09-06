@@ -29,8 +29,10 @@ Assumes:
   - `:- initialization(main, main)` exits 1 when main fails, so a Prolog script
     named by a runner reports its failure [measured 2026-08-18: swipl 10 exits
     1 on `main :- fail.` and 0 on `main :- true.`]
-  - extensions/python/pyproject.toml leaves pytest's discovery at its documented defaults,
-    which PYTEST_DISCOVERY_KEYS re-checks on every run
+  - extensions/python/pyproject.toml leaves pytest's FILE selection at its
+    documented defaults, which PYTEST_DISCOVERY_KEYS re-checks on every run, and
+    names its collection root in testpaths, which _testpaths_problems compares
+    against the collectors declared for that directory's runners
     [source: https://docs.pytest.org/en/stable/explanation/goodpractices.html]
 Guarantees:
   - a file no runner reaches is absent from executed(), and a file only a
@@ -227,9 +229,17 @@ SHELL_VARIABLES = (
     ("$PYDIR", "extensions/python"),
 )
 
-# pytest's discovery is documented rather than configured here, so the model
-# below is only right while extensions/python/pyproject.toml stays silent about it.
-PYTEST_DISCOVERY_KEYS = ("python_files", "python_classes", "python_functions", "testpaths")
+# pytest selects test FILES by its documented defaults, so the model below is
+# only right while extensions/python/pyproject.toml stays silent about these three.
+PYTEST_DISCOVERY_KEYS = ("python_files", "python_classes", "python_functions")
+
+# testpaths is different: it is CONFIGURED, and reading it is what keeps the
+# model true rather than what breaks it. extensions/python/test.sh names no path
+# of its own, so what the pytest lane collects when the gate runs it is exactly
+# what testpaths selects, and the collector's `root` below has to be the same
+# directory. Forbidding the key was the old rule; comparing it is the rule that
+# survives the runner learning to take flag-only arguments.
+PYTEST_TESTPATHS = re.compile(r"^testpaths\s*=\s*\[([^\]]*)\]", re.MULTILINE)
 
 # A Prolog file a runner names pulls in whatever it loads, and those clauses
 # are as much a part of the run as its own: static_checks.pl reaches its
@@ -319,11 +329,16 @@ COLLECTORS = (
     # caller's arguments on 2026-09-06 (so a caller's -n 0 wins); the old
     # `pytest tests -q` spelling stopped matching and this model dropped 2,584
     # backed claims in one step before the anchor followed.
+    # The root left the anchor on 2026-09-07, when `tests` moved out of the
+    # runner and into pyproject.toml's testpaths so that a flag-only invocation
+    # keeps it. The anchor is now the worker protocol alone, and the root it
+    # names is checked against that setting by _testpaths_problems rather than
+    # by being repeated in two files.
     Collector(
         runner="extensions/python/test.sh",
         tier="GATE",
         lane="pytest",
-        anchor="--max-worker-restart=0 tests",
+        anchor="--max-worker-restart=0",
         root="extensions/python/tests",
         patterns=("test_*.py", "*_test.py"),
         recursive=True,
@@ -532,10 +547,44 @@ def executed() -> tuple[dict[Path, Execution], list[str]]:
         )
         return runs, problems
     section = configuration.read_text().partition("[tool.pytest.ini_options]")[2]
+    section = section.partition("\n[")[0]
     problems.extend(
         f"extensions/python/pyproject.toml sets pytest's {key}, so the collectors above "
         f"model a discovery this project no longer uses"
         for key in PYTEST_DISCOVERY_KEYS
-        if re.search(rf"^{key}\s*=", section.partition("\n[")[0], re.MULTILINE)
+        if re.search(rf"^{key}\s*=", section, re.MULTILINE)
     )
+    problems.extend(_testpaths_problems(section, configuration.parent))
     return runs, problems
+
+
+def _testpaths_problems(section: str, rootdir: Path) -> list[str]:
+    """Whether the configured default root is the one the collectors model.
+
+    pytest resolves testpaths against the directory holding the configuration,
+    which is the directory extensions/python/test.sh enters, so the entries and
+    the collectors declared for a runner in that directory name the same places
+    or one of the two is describing a run that does not happen.
+    """
+    declared = PYTEST_TESTPATHS.search(section)
+    modelled = {
+        (ROOT / collector.root).resolve()
+        for collector in COLLECTORS
+        if (ROOT / collector.runner).parent == rootdir
+    }
+    if declared is None:
+        return []
+    named = {
+        (rootdir / entry.strip().strip("\"'")).resolve()
+        for entry in declared.group(1).split(",")
+        if entry.strip()
+    }
+    if named == modelled:
+        return []
+    return [
+        f"extensions/python/pyproject.toml sets pytest's testpaths to "
+        f"{sorted(str(path) for path in named)}, and the collectors for runners "
+        f"under {rootdir.relative_to(ROOT)} model "
+        f"{sorted(str(path) for path in modelled)}, so one of the two describes "
+        f"a run that does not happen"
+    ]

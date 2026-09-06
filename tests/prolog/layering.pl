@@ -395,6 +395,7 @@ reaches(support_graph, filereader, 'the loader owns the assertion records the gr
 reaches(support_graph, scc, 'the support graph classifies recursive call components').
 reaches(support_graph, specializer, 'invalidating a support node runs the specializer\'s invalidation action').
 reaches(tracer, filereader, 'a traced form is processed through the loader\'s string door').
+reaches(tracer, metta, 'the RUN bounds a caller sends with a trace are installed around the traced program, which is the core\'s stack-limit service and its platform census for the deadline capability').
 reaches(tracer, translator, 'names the compiled predicate a trace wraps').
 reaches(translator, duals, 'a negation compiles through the dual it needs').
 reaches(translator, ext_points, 'a call may be claimed by a dispatch owner').

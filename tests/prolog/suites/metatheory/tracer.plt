@@ -204,6 +204,41 @@ test(a_run_bound_answers_the_prefix_it_recorded,
     Cut < Full,
     append(Prefix, _, Whole).
 
+%A bound sent INSIDE the request bounds the program, not the door. Arming the
+%tracer walks every name in arity/2 and the teardown unwraps them again, and
+%while a caller's guard around the whole door paid for both, the same budget
+%answered fewer and fewer events as the process registered more names --
+%twelve inferences per name, and none at all under a whole test suite in one
+%process [measured 2026-09-07]. Here the budget is a fraction of what the
+%PROGRAM costs and the door's own cost is measured, warm, and left out of it.
+test(a_bounded_request_bounds_the_program_and_not_the_arming,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    process_metta_string(
+        "(= (plunit_trace_bounded $n) \c
+             (if (> $n 0) (plunit_trace_bounded (- $n 1)) done))", _),
+    tracer:metta_trace_source("!(plunit_trace_bounded 0)", '&self', 100000,
+                              _, false),
+    statistics(inferences, DoorBefore),
+    tracer:metta_trace_source("!(plunit_trace_bounded 0)", '&self', 100000,
+                              _, false),
+    statistics(inferences, DoorAfter),
+    Door is DoorAfter - DoorBefore,
+    statistics(inferences, WholeBefore),
+    tracer:metta_trace_source("!(plunit_trace_bounded 300)", '&self', 100000,
+                              Whole, false),
+    statistics(inferences, WholeAfter),
+    Budget is (WholeAfter - WholeBefore - Door) // 2,
+    length(Whole, Full),
+    Full > 20,
+    tracer:metta_trace_source(
+        "!(plunit_trace_bounded 300)", '&self',
+        bounded(100000, run_bounds(-1, Budget, -1)), Prefix, Stopped),
+    Stopped == inferences,
+    length(Prefix, Cut),
+    Cut > 0,
+    Cut < Full,
+    append(Prefix, _, Whole).
+
 test(filter_precedes_the_bound_and_keeps_depth,
      [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
     Source = "(= (plunit_trace_new $x) (plunit_trace_walk $x)) \c

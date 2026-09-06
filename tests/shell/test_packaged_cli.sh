@@ -17,6 +17,14 @@
 #   Future Enhancements: None
 set -eu
 
+# faulthandler armed for every interpreter below, including the one embedded in
+# the packaged CLI's engine. These are the runs that boot SWI outside pytest, so
+# nothing else arms it for them, and a fatal signal or a fault during
+# interpreter shutdown would otherwise print nothing at all before the exit
+# status [source: https://docs.python.org/3/library/faulthandler.html].
+PYTHONFAULTHANDLER=1
+export PYTHONFAULTHANDLER
+
 command -v uv >/dev/null
 command -v swipl >/dev/null
 
