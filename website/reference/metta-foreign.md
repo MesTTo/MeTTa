@@ -505,12 +505,13 @@ def foreign_match(space: str, pattern_wire: list, limit: int | None = None, mode
 
 > The shim's py_iter enumerates this: candidate atoms, encoded.
 >
-> Everything that can fail happens before the generator exists. A
-> generator body does not run until the first pull, and an exception
-> raised there escapes through py_iter as
-> `SystemError: apply_once returned a result with an exception set`,
-> which names nothing the caller did. Raising it from an ordinary call
-> instead lets janus carry it as the error it is.
+> Everything that CAN fail eagerly does, before the generator exists: a
+> refusal raised here escapes through janus's own py_eval, which reports
+> it as the error it is. What a provider's own generator raises later
+> cannot take that route, because py_iter reads a raising pull as an
+> exhausted stream, so the pulls are wrapped in the crossing guard and a
+> failure crosses as data. `metta.errors.stream_failure` has the
+> measurements.
 
 ## `foreign_atoms`
 
@@ -538,7 +539,8 @@ def match_object(obj: Any, other_wire: list):
 >
 > The value is local, so nothing crosses per candidate: match_ runs
 > here and only the answers are encoded. Errors abort by design; see
-> CustomMatch.
+> CustomMatch. A bare value has no space and no provider to name, so the
+> crossing carries its exception unchanged.
 
 ## `foreign_transaction`
 

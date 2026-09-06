@@ -16,6 +16,25 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A Python stream the engine pulls no longer loses the exception that ended
+  it. Janus reads a raising pull as an exhausted one, so a space provider's
+  `match` or `atoms`, a grounded value's `match_`, a generator operation and an
+  operation inverse could each answer a silently short set and deliver the
+  failure at an unrelated later call, as
+  `SystemError: <built-in function apply_once> returned a result with an
+  exception set`, as a mis-attributed Prolog error, or as a process crash. Each
+  now reaches the caller as the exception it is: a provider's own error names
+  the space and the provider and keeps the original as its cause, one written
+  as a `MettaError` keeps its own sentence, an inverse names its MeTTa call,
+  and `KeyboardInterrupt` and `SystemExit` cross unchanged. The engine is clean
+  for the next call in every case.
+- A resource bound spent inside a Python callback that re-enters the engine
+  now raises `InferenceLimitError` or `TimeLimitError` rather than
+  `EngineError: Unknown message: inference_limit_exceeded`. SWI's own
+  `inference_limit_exceeded` and `time_limit_exceeded` balls are classified as
+  the control signals they are; a bound that expires in its own goal still
+  names its limit, and one arriving from a nested query says which resource
+  ran out without inventing a number.
 - Algebra operations and tagged query guards retain the selected carrier,
   answer limit and ordering across evaluator calls. `current_algebra()` inside
   combine and extend now observes the ask's algebra, including when an

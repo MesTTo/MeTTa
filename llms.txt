@@ -1040,6 +1040,13 @@ when `MatchClassifier.pushdown(pattern)` says `"exact"`; ignoring the limit is
 always sound. `Snapshotter.snapshot() -> tuple[Atom, ...]` makes a provider
 reifiable, and `WorldCommitter.commit_world(base, removed, added)` is the
 provider-owned atomic boundary for landing that world's checked multiset diff.
+A provider's `match` or `atoms` may re-enter the engine and may raise at any
+point, mid-stream included: its own `MettaError` reaches the caller with its
+own sentence, anything else arrives as an `EngineError` naming the space and
+the provider class and carrying the original as `__cause__`, a resource bound
+spent inside the callback arrives as `InferenceLimitError` or `TimeLimitError`,
+and `KeyboardInterrupt` crosses unchanged. Answers already streamed before the
+failure are never delivered as a complete set.
 
 From Prolog, `engine/ext_points.pl` declares every seam WITH ITS KIND: an EVENT runs
 for effect and every handler runs; an OWNERSHIP seam is claimed by the first
