@@ -7,9 +7,9 @@
 % and tropical are ordinary catalog algebras, the semiring vocabulary derives
 % from every shipped algebra preset, and each ordered preset declares its best
 % direction [tested: shipped_algebra_rows_are_the_semiring_vocabulary;
-% commit=WORKTREE]. Guarantees: the algebra-law vocabulary and its alias claims
+% commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]. Guarantees: the algebra-law vocabulary and its alias claims
 % derive from the engine's accepted law facts [tested:
-% algebra_law_vocabulary_and_alias_claims_are_exact; commit=WORKTREE].
+% algebra_law_vocabulary_and_alias_claims_are_exact; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e].
 % Guarantees: deprecated is a
 % schema-checked catalog kind whose name, since, and remedy fields remain
 % ordinary queryable data [tested: the_shipped_catalog_is_queryable_data;

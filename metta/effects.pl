@@ -35,7 +35,7 @@
 %   - algebra-law alias claims expand descriptor laws for canonical engine
 %     checks, and an unknown-law refusal names the catalog's accepted set
 %     [tested: algebra_law_aliases_expand_through_catalog_claims,
-%     an_unknown_algebra_law_names_the_accepted_vocabulary; commit=WORKTREE].
+%     an_unknown_algebra_law_names_the_accepted_vocabulary; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: observe-source owns its diagnostic writes as oracleIO; ordinary
