@@ -32,17 +32,17 @@ Assumes:
 Guarantees:
   - a program the arbiter leaves unreduced, raises on, or does not finish is
     recorded and skipped, never reported as a divergence
-    [tested: sh check.sh parity-fuzz-selftest; commit=WORKTREE]
+    [tested: sh check.sh parity-fuzz-selftest; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
   - a real disagreement is shrunk before it is written down, so the report
     carries the smallest program of the strategy's own language that still
-    shows it [tested: sh check.sh parity-fuzz-selftest; commit=WORKTREE]
+    shows it [tested: sh check.sh parity-fuzz-selftest; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
   - one run finds more than one KIND of disagreement: a divergence's signature
     is suppressed and the search re-entered, and the memo makes the programs
     already run free, so the whole run still costs N programs per engine
-    [tested: sh check.sh parity-fuzz-selftest; commit=WORKTREE]
+    [tested: sh check.sh parity-fuzz-selftest; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
   - every engine run is a fresh bounded process in a session of its own, so a
     program that hangs cannot poison the next one and cannot outlive this
-    script [tested: sh check.sh process-bounds; commit=WORKTREE]
+    script [tested: sh check.sh process-bounds; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
 Fails when:
   - the upstream checkout is absent: a refusal where CI=true and a printed skip
     elsewhere, the rule the parity lane draws and this one calls.
@@ -58,7 +58,7 @@ Decides:
     177 of their 200 programs, with the per-class counts moving by up to three
     [measured 2026-09-07; command=tests/checks/check_upstream_fuzz.py -n 200
     --seed 0 --report <fresh>, twice; fixture=tests/conformance/petta/HEADS.json;
-    commit=WORKTREE]. Which programs fill the budget after the findings are
+    commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]. Which programs fill the budget after the findings are
     located is not fully determined by the seed, and that is not root-caused.
   - 20 seconds is a program's ceiling on either engine, and a program that
     reaches it is recorded as a timeout rather than shrunk. Shrinking over a
@@ -103,7 +103,7 @@ CENSUS = REPO / "tests" / "conformance" / "petta" / "HEADS.json"
 #: A program's ceiling on ONE engine. Upstream answers a generated program in
 #: 0.08 s and this engine in 0.20 s [measured 2026-09-07, min of three on a box
 #: at load 52; command=/usr/bin/time -f %e sh bounded.sh swipl ... silent;
-#: fixture=a ten-query program; commit=WORKTREE], so twenty seconds is two
+#: fixture=a ten-query program; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce], so twenty seconds is two
 #: orders of magnitude of headroom and reaching it means a program does not
 #: terminate rather than that the box is slow.
 CEILING = 20
@@ -222,7 +222,7 @@ def shape(printed: str) -> str:
     so the first real run reported those three as three separate findings
     [measured 2026-09-07: 4 reports over 164 programs at seed 0, of which 3
     were that one finding; command=tests/checks/check_upstream_fuzz.py -n 200
-    --seed 0; fixture=tests/conformance/petta/HEADS.json; commit=WORKTREE].
+    --seed 0; fixture=tests/conformance/petta/HEADS.json; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
     """
     read = petta_capture.forms(printed)
     if (len(read) == 1 and isinstance(read[0], list) and read[0]
@@ -241,7 +241,7 @@ def signature(verdict: Verdict) -> str:
     `true` and against `(partial + ())` [measured 2026-09-07: 4 reports over
     172 programs by line and 2 by edit at the same seed;
     command=tests/checks/check_upstream_fuzz.py -n 200 --seed 0;
-    fixture=tests/conformance/petta/HEADS.json; commit=WORKTREE].
+    fixture=tests/conformance/petta/HEADS.json; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
 
     The arbiter is the `a` side, so an extra answer HERE is an insertion and a
     missing one is a deletion, which is the direction a reader of the report
@@ -430,7 +430,7 @@ def survey(strategy, *, number: int, seed: int, timeout: int, work: Path,
         # so `hypothesis.reporting.with_reporter` captures nothing and the
         # notes are where to read
         # [tested: sh check.sh parity-fuzz-selftest, which requires the written
-        # report to carry a blob; commit=WORKTREE].
+        # report to carry a blob; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
         printed = BLOB.search("\n".join(getattr(found, "__notes__", [])))
         found.blob = printed.group(0) if printed else ""
         return found

@@ -29,21 +29,21 @@ Guarantees:
   - an engine that answers one expression wrongly yields exactly one
     answer-mismatch, and the program reported for it carries no facts, one
     query, and no line that can be dropped with the disagreement surviving
-    [tested: this file is its own gate; commit=WORKTREE]
+    [tested: this file is its own gate; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
   - an arbiter that prints the query term is classified as a surface miss and
     an arbiter that raises is classified as an arbiter error, and neither is
-    reported as a divergence [tested: this file is its own gate; commit=WORKTREE]
+    reported as a divergence [tested: this file is its own gate; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
   - the classifier answers each of the six on strings the two engines really
     printed, including a pair that differs only in printed variable identity
-    [tested: this file is its own gate; commit=WORKTREE]
+    [tested: this file is its own gate; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
   - two divergences differing only in their numbers share one signature, which
     is what stops the rounds re-reporting one finding
-    [tested: this file is its own gate; commit=WORKTREE]
+    [tested: this file is its own gate; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
   - the strategy writes only census heads and its own generated names, and
     every equation body uses `$x`
-    [tested: this file is its own gate; commit=WORKTREE]
+    [tested: this file is its own gate; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
   - a report carries the divergence template's fields and the reproduction blob
-    [tested: this file is its own gate; commit=WORKTREE]
+    [tested: this file is its own gate; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
 Fails when: the lane stops exposing ``engine_run`` as its only process call, or
   stops deciding a program's class in ``classify``.
 Open Obligations:
@@ -310,7 +310,7 @@ def a_raising_arbiter_is_skipped() -> list[str]:
 #: Strings both engines really printed, and what each pair has to be classified
 #: as [measured 2026-09-07, one query per file over `(rel a b)`;
 #: command=swipl --stack_limit=8g -q -s <main.pl> -- <file> silent;
-#: commit=WORKTREE].
+#: commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
 CAPTURED = (
     ("agreement", "!(f0 2)\n", (0, "3\n", False), (0, "3\n", False), lane.AGREE),
     ("a variable printed from another slot", "!(f0 2)\n",
@@ -365,7 +365,7 @@ def one_finding_has_one_signature() -> list[str]:
     #: left standing by this engine over `(a a)`, `(a b)` and `(b a)` and each
     #: got a report of its own [measured 2026-09-07; command=
     #: tests/checks/check_upstream_fuzz.py -n 200 --seed 0;
-    #: fixture=tests/conformance/petta/HEADS.json; commit=WORKTREE].
+    #: fixture=tests/conformance/petta/HEADS.json; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
     symbols = (lane.signature(verdict(lane.ANSWER_MISMATCH, "(and a a)\n", "")),
                lane.signature(verdict(lane.ANSWER_MISMATCH, "(and b a)\n", "")))
     #: The same extra answer with different queries after it, which a
@@ -374,7 +374,7 @@ def one_finding_has_one_signature() -> list[str]:
     #: it, so line 1 differed against nothing, against `true` and against
     #: `(partial + ())` [measured 2026-09-07; command=
     #: tests/checks/check_upstream_fuzz.py -n 200 --seed 0;
-    #: fixture=tests/conformance/petta/HEADS.json; commit=WORKTREE].
+    #: fixture=tests/conformance/petta/HEADS.json; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
     shifted = (lane.signature(verdict(lane.ANSWER_MISMATCH, "(and a a)\ntrue\n", "true\n")),
                lane.signature(verdict(lane.ANSWER_MISMATCH,
                                       "(and a a)\n(partial + ())\n", "(partial + ())\n")))

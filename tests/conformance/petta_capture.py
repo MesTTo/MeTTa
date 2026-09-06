@@ -39,7 +39,7 @@ Guarantees:
   - a census head is drawable only where the ARBITER reduced it, decided by
     running it rather than by a list, and a head whose two runs disagree is
     recorded as nondeterministic instead
-    [tested: sh check.sh parity-fuzz-selftest; commit=WORKTREE]
+    [tested: sh check.sh parity-fuzz-selftest; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]
 Fails when:
   - asked to capture from a dirty or unresolvable checkout, or from one whose
     corpus holds an untracked file.
@@ -259,7 +259,7 @@ CENSUS_WORK = ROOT / "ai-tmp" / "petta-census"  # artifact-path-created
 #: more and 81 in three or more. Two admits a helper a pair of examples share;
 #: three is where per-file names stop appearing
 #: [measured 2026-09-07; command=tests/conformance/petta_capture.py --census;
-#: fixture=tests/conformance/petta/examples, 156 files; commit=WORKTREE].
+#: fixture=tests/conformance/petta/examples, 156 files; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
 CENSUS_MIN_FILES = 3
 
 #: The written values each argument kind is probed with. The probe walks the
@@ -274,14 +274,14 @@ CENSUS_MIN_FILES = 3
 #: was among the values [measured 2026-09-07: of 100 (head, arity) pairs, 47
 #: reduce with the inert values alone and 49 with this list, `/`/2 and `<=`/2
 #: being the two; command=tests/conformance/petta_capture.py --census;
-#: fixture=tests/conformance/petta/examples; commit=WORKTREE].
+#: fixture=tests/conformance/petta/examples; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
 #:
 #: `true` rather than `True` reads the way the corpus mostly writes it. It is
 #: not load-bearing: the boolean spelling is canonicalised by the engine, and
 #: same_call below sees through that, so the census is the same either way
 #: [measured 2026-09-07: 49 pairs reduce with each spelling;
 #: command=tests/conformance/petta_capture.py --census;
-#: fixture=tests/conformance/petta/examples; commit=WORKTREE].
+#: fixture=tests/conformance/petta/examples; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
 CENSUS_VALUES: dict[str, tuple[str, ...]] = {
     "number": ("1", "2"),
     "symbol": ("a", "true"),
@@ -298,7 +298,7 @@ CENSUS_VALUES: dict[str, tuple[str, ...]] = {
 #: MEASUREMENT, not a worry [measured 2026-09-07, one query per file over
 #: `(rel a b)`, arbiter then this engine;
 #: command=swipl --stack_limit=8g -q -s <main.pl> -- <file> silent;
-#: commit=WORKTREE]. Only what derivation cannot reach is here: `library`
+#: commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]. Only what derivation cannot reach is here: `library`
 #: answers a path inside the engine that ran it and the derived net below sees
 #: that in the answer, so it is not in this table and the net is what rules it
 #: out; these three say nothing a reader of one answer could tell.
@@ -317,7 +317,7 @@ CENSUS_WORLD: dict[str, str] = {
 #: heads sat, `/`/2 and `<=`/2 [measured 2026-09-07: of 100 (head, arity)
 #: pairs, 47 reduce at a cap of 12, 49 at 24 and 49 at 40;
 #: command=tests/conformance/petta_capture.py --census;
-#: fixture=tests/conformance/petta/examples; commit=WORKTREE]. At the measured
+#: fixture=tests/conformance/petta/examples; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce]. At the measured
 #: 0.08 s per arbiter run this is under two seconds for one head.
 CENSUS_TUPLES = 24
 
@@ -330,7 +330,7 @@ CENSUS_PRELUDE = "(rel a b)\n"
 #: bytes would be one box's census: it would differ between two checkouts of
 #: the same commit and could not be committed
 #: [tested: sh extensions/python/test.sh tests/repository/test_workspace_paths.py;
-#: commit=WORKTREE].
+#: commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
 CENSUS_ROOT = "<arbiter>"
 
 #: SWI's own error prefix, which is how an engine says it raised rather than
@@ -355,7 +355,7 @@ def engine_error(rc: int | None, out: str) -> bool:
     2026-09-07: `!(/ 1 0)` gives upstream
     `ERROR: [Thread main] ... Arithmetic: evaluation error: 'zero_divisor'` at
     exit 2, and this engine `(Error (/ 1 0) DivisionByZero)` at exit 0;
-    commit=WORKTREE].
+    commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
     """
     return rc != 0 or bool(ENGINE_ERROR.search(out)) or "(Error " in out
 
@@ -433,7 +433,7 @@ def corpus_census(corpus: Path) -> dict:
     number, so counting it would put `1` in the census with seven arities,
     which is what a first pass did [measured 2026-09-07;
     command=tests/conformance/petta_capture.py --census;
-    fixture=tests/conformance/petta/examples; commit=WORKTREE].
+    fixture=tests/conformance/petta/examples; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
     """
     uses: dict[str, int] = {}
     where: dict[str, set[str]] = {}
@@ -489,7 +489,7 @@ def corpus_census(corpus: Path) -> dict:
                 # of 100 (head, arity) pairs, 48 reduce with the kinds sorted
                 # by name and 49 by descending use;
                 # command=tests/conformance/petta_capture.py --census;
-                # fixture=tests/conformance/petta/examples; commit=WORKTREE].
+                # fixture=tests/conformance/petta/examples; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
                 "positions": [positions[(head, arity, index)] for index in range(arity)],
             }
         heads[head] = {"uses": uses[head], "files": len(where[head]), "arities": arities}
@@ -528,7 +528,7 @@ def probe_arguments(positions: list[dict[str, int]]) -> list[tuple[str, ...]]:
     # verdict at any cap, so the order stays the corpus's own [measured
     # 2026-09-07: 49 (head, arity) pairs reduce either way, and the same four
     # raise; command=tests/conformance/petta_capture.py --census;
-    # fixture=tests/conformance/petta/examples; commit=WORKTREE].
+    # fixture=tests/conformance/petta/examples; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
     return list(itertools.islice(itertools.product(*values), CENSUS_TUPLES))
 
 
@@ -552,7 +552,7 @@ def same_call(answer: list | str, query: list | str) -> bool:
     pairs the text test calls 79 reducing and this one 49, the 30 being data
     constructors the corpus writes and the arbiter leaves alone;
     command=tests/conformance/petta_capture.py --census;
-    fixture=tests/conformance/petta/examples; commit=WORKTREE].
+    fixture=tests/conformance/petta/examples; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
     """
     if not (isinstance(answer, list) and isinstance(query, list)):
         return False
@@ -572,7 +572,7 @@ def probe_verdict(query: str, rc: int | None, out: str,
     c a no)` answers `(unify $_0 c a no)` at the pin, and `!(nosuchhead 1 2)`
     answers `(nosuchhead 1 2)` [measured 2026-09-07;
     command=swipl --stack_limit=8g -q -s src/main.pl -- p.metta silent;
-    fixture=a one-query program over `(rel a b)`; commit=WORKTREE].
+    fixture=a one-query program over `(rel a b)`; commit=5e53dfba208acc69c1eb8a5f2e8aa90c9864a5ce].
     """
     if timed:
         return "timeout", None
