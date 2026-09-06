@@ -18,7 +18,7 @@
 %   - relation rows bind indexed call arguments in one monotone argument walk,
 %     filter contradictory ground candidates, and a terminal generator frame
 %     carries the live exception and is recognised only with one
-%     [tested: shim_relation_form; commit=WORKTREE].
+%     [tested: shim_relation_form; commit=0ee5a2dfee0e37a23b0eb9c765b477d7f90295fe].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
