@@ -1773,6 +1773,238 @@ provisional order of section 21 as the plan of record; the two design
 deliverables that settled waves 3 and 4 are folded here rather than cited,
 and the substrate rows are rewritten when the second design report lands.
 
+### 25. The substrate, settled by probes
+
+The token, carrier and handler design of sections 20 to 22 was probed on
+this box on 2026-09-07 (SWI-Prolog 10.1.13, load 35 to 72 on 32 cores,
+every comparison in inferences and bytes) and settled. The six probe files
+are tracked at `tests/prolog/probes/tokens/` (`probe_a_clause_ref_identity.pl`
+to `probe_e2_moded_update_delivery.pl`), each run as
+`swipl -q -g main -t halt <file>` from the repository root. This section
+supersedes the wave-4 rows of section 24 and corrects one law of section
+21.
+
+The token. A token is a dot `(Actor, Gen)`: the engine instance's UUID,
+minted at boot and overridable so a replica keeps its identity, and that
+actor's strictly increasing per-process counter, consumed by every
+operation (add, remove, commit record); a bare integer for the local actor,
+`t(Actor, Gen)` for a replicated one, ordered by `(Gen, Actor)` with the
+Lamport rule on receipt (Kleppmann and Beresford, "A Conflict-Free
+Replicated JSON Datatype", 2016, IV-B-1; Almeida, Shoker and Baquero,
+"Delta State Replicated Data Types", 2016, section 7.3; Datomic's `t`). It
+is the LAST argument of the storage clause (`'&self'(Rel, Args..., Tok)`,
+`'$metta_native_scalar'(Atom, Tok)`, the parametric shape), minted at the
+one write funnel `add_sexp_in/4` (`engine/spaces/catalog.pl:273-305`) with
+`flag('$metta_generation', Gen, Gen + 1)`. Measured on 100,000 atoms (probe
+c): the storage argument costs +16 bytes per atom (14,400,128 to
+16,000,128) and +5 inferences per add, and nothing on reads (a 1,000-answer
+bound read stays 1,012 inferences, a scan 100,012, `blame` of one atom 5
+through the JIT index on the token column); a side table keyed by clause
+reference costs +128 bytes per atom, triples every token-reading read
+(3,011 and 300,011) and pins erased clauses, because a reference keeps an
+erased clause present after `garbage_collect_clauses` (probe a). Decided:
+the storage argument. First-argument indexing is untouched because the
+relation stays first; the C units read no storage predicate (Appendix A of
+the design lists the fourteen Prolog read sites that gain an argument).
+Equations are atoms and get tokens through the same funnel; the compiled
+clause carries none and one row links it to its equation's token
+`[assumed: a one-row addition at store_metta_equation/6; not built]`.
+`[assumed: flag/3 is atomic under concurrent minting; not probed under
+contention; the C fetch-add is the next step if the add-atom rows flag the
++5.]`
+
+Foreign providers that cannot mint (MORK declares no begin, commit or
+rollback and no row identity; the SQL bridge and host spaces likewise)
+answer the capability `tokens` when they can hand back a stable row
+identity, wrapped as `t(ProviderActor, RowId)`; otherwise `blame`, `as_of`,
+`since`, `history`, `merge` and `diff` refuse with the capability error and
+its remedy, as `enumerate` and `plan` refuse today; the provenance carrier
+keeps its per-evaluation local labels over such spaces.
+
+The laws, each an existing behaviour restated over tokens or a new door:
+L1 add mints a fresh token. L2 `subtract-atom` erases the pair whose token
+is the least of those observed for the atom (today's `retract/1` on the
+oldest clause; explicit by token order once foreign tokens arrive). L3
+`remove-atom` erases every observed pair: the arbiter's draining
+`remove-atom` (`foreign.pl:1286-1300` cites upstream `src/spaces.pl:5-7`),
+unchanged. Correction to section 21: it said `remove-atom` removes one
+token; the arbiter's `remove-atom` drains, and the one-token law is
+`subtract-atom`'s. Both are observed-remove, naming exactly the tokens they
+observed. L4 `as-of`, `since` and `history` read tombstones and the journal
+and exist only for a space declaring `(history Space keep)`, a catalog row;
+a space without it refuses by name (Datomic keeps history by default and
+opts out per attribute; this engine opts in per space because the
+tombstone's cost is the atom's own). L5 `blame` answers the token and its
+commit record (actor, instant, origin). L6 `diff` is a token-set
+difference, `O(|segment|)` when the two states are connected by a journaled
+segment; inside an open transaction or snapshot `transaction_updates/1` is
+exactly that list (probe a). L7 merge of two branches from one base is the
+union of their tokens minus the base tokens either removed: the
+observed-remove set of Shapiro, Preguiça, Baquero and Zawirski
+(INRIA RR-7506, 2011, Specification 15 and section 3.3.5) read as a
+multiset, so concurrent adds commute, concurrent removes commute, an add
+survives a concurrent remove, two subtracts of one token are one removal,
+and the merged multiplicity is base minus distinct removed tokens plus both
+branches' adds; merge is total, so the reified world's "space changed after
+this world was reified" refusal is retired. L8 an operation already applied
+by `(Actor, Gen)` is a no-op. L9 a token minted inside a snapshot or a
+rolled-back transaction never becomes visible and its reference decodes to
+nothing (probe a).
+
+What tokens change in the doors: `reify()` is `(G0, added, removed)` with
+the base copied into the plan space WITH its tokens; `commit(world)` is L7
+in one transaction and the Python multiset diff goes; `speculative()`
+discards its tokens with the snapshot; a transaction's commit record closes
+the generation range it consumed and a rollback journals nothing; Node's
+world keeps its removal journal as the `removed` set in the engine;
+`digest()` stays content-only and a frozen space's identity is `(digest,
+actor, generation)`.
+
+The op-log is `library(persistency)`'s own action format on the journal
+the persistent space already keeps under its `flock(2)` claim: one
+`assert(actor(UUID))` per journal, then `assert(op(Gen, add, Space, Atom))`,
+`assert(op(Gen, remove, Space, Token))` and
+`assert(op(Gen, commit, [range(G1, G2), instant(T), origin(O)]))`. Replay
+walks the records in file order through the write funnel's token-taking
+entry, deduping by `(Actor, Gen)` against a per-space applied vector, and
+a remove that names an undelivered token is kept as a tombstone and
+cancelled when the add arrives, so add and remove commute without causal
+delivery. Replication: a peer asks for operations above its vector for that
+actor and receives the contiguous segment (a delta-interval, Almeida et al.
+Definition 4), over the gateway, the Arrow IPC projection of the same rows,
+or the file; a partition heals by both sides applying L7. Out-of-order
+delivery is deferred with its citation (interval version vectors, Almeida
+et al. section 8.3).
+
+The carrier. A polynomial in `N[X]` is the term
+`(poly (K τ1 τ2 ...) ...)`: sorted monomials, positive coefficients, tokens
+repeated for powers, `(poly)` for zero, the normal form of the free
+commutative semiring (Green, Karvounarakis and Tannen, PODS 2007,
+Definition 4.1), so equality is term equality and the polynomial crosses
+every seat. Conjunction multiplies, alternatives add, a derivation reached
+twice by the same tokens is one monomial with coefficient two, and a rule
+step multiplies in its equation's token. Specialisation: a query asked
+`under(K)` is evaluated in `K` directly with the `(fact tag proposition)`
+rows as the valuation, and the free polynomial is built only when `why()`
+asks, from the derivation enumerator one proof tree per monomial, bounded
+by its depth and the restraints; Propositions 3.5 and 4.2 and Theorem 4.3
+(evaluation commutes with the homomorphism) are what make the two paths
+agree, and property P9 below checks it. Deletion propagation is the
+valuation `τ ↦ 0`: an answer survives exactly when its polynomial stays
+non-zero (Green, Karvounarakis, Ives and Tannen, "Provenance in ORCHESTRA",
+2010, p. 6); the removed-atom hook carries the token and a provenance-imaged
+memo entry records `'$metta_prov_dep'(Token, Variant)` so a removal
+invalidates exactly the variants that mention it. `metta.derivation` gains
+the token on every fact leaf and `polynomial()`, so the proof tree is
+generated from the carrier.
+
+Which images may be tabled, settled by probes e and e2: a `lattice(PI)`
+table carries a polynomial term exactly on acyclic programs, including the
+self-recursive variant (SWI's `sum` is itself `lattice('$tabling':sum/3)`,
+`boot/tabling.pl:1508`; PITA stores BDD explanations the same way, Riguzzi
+and Swift, TPLP 2011). But SWI feeds an UPDATED aggregate to a consumer in
+the same SCC by joining the whole new aggregate on top of the consumer's
+earlier contribution: `sum` answered 30 where the value is 20, and
+`lattice(psum)` answered `2xz + yz` where `xz + yz` is right (probe e2);
+and on a cyclic graph neither `N[X]` nor `B[X]` converges within 2,000,000
+inferences while `Why(X)` (monomials as token sets) converges
+(`[[ab,ba,bc]-1,[ab,bc]-1]`), which is Theorem 6.5's infinite case. Decided,
+for the policy compiler of section 6: `(cache f provenance)` compiles to
+`lattice(psum)` only when `f`'s call graph is acyclic and no consumer shares
+an SCC with a source it reads (the support graph's SCC analysis is the
+oracle); a recursive SCC compiles to the `Why(X)` image or refuses naming
+the measurement; `min` and `max` are idempotent and always allowed; the
+free polynomial is stored only under the `provenance` policy and bounded by
+`answer_abstract` and `max_answers`. Costs at 1,000 answers (probe e): a
+plain table 9,057 inferences and 50,840 bytes; `sum` 14,057 and 203,176;
+`lattice(psum)` 19,057 and 1,355,512; a chain of 1,000 unit edges under
+`lattice(psum)` 541,522 inferences and 72,628,520 bytes, quadratic in the
+depth, which is the blow-up the restraints bound. `[assumed: lib_memo's
+sum coefficient (lib_memo.pl:900-953) does not reach the e2 double count
+through its replay clause for a recursive nondeterministic memoised
+function; a differential decides, and a hit is a pre-existing defect.]`
+`[assumed: the manual says shared tables should not be combined with
+transactions, lib_tabling emits `as (incremental, shared)` and tables are
+reached inside transactions and speculation; not probed; a pre-existing
+hazard to probe before the provenance memo inherits it.]`
+
+The handlers. `(with-handler family handler body)` compiles as
+`with-seed`'s body does; the handler is a MeTTa function of the operation
+and `$k` answering `($k V)`, `(abort V)` or `(propagate)`, nondeterministic
+like any function. Two kinds, read from the family's catalog row
+`(handler-family Name Kind Default)`: a VALUE handler is called directly at
+the perform site (the tail-resumptive case, Xie and Leijen, ICFP 2021,
+section 2.5; Leijen 2018, section 5.1: "dynamically scoped method calls"),
+which is what dynamic binding is; a CONTROL handler uses `reset/3` and
+`shift/1`. The perform site is one predicate `metta_perform/3` that looks
+up the family in a thread-local stack and otherwise runs today's default
+byte for byte. Value handlers are the default kind because `shift/1` cannot
+cross `findall/3` (probe d2: `existence_error(reset, ...)`, "Cannot catch
+continuation through findall/3"), so an effect inside a `collapse`-compiled
+scope would never reach an outer control handler while a value handler is
+found by the stack lookup wherever it runs. The bounded shapes for control
+handlers (probe d): S1, one-shot immediate resumption in the reset loop, is
+sound under nondeterminism (a failing resumption backtracks into the body
+before the shift and `reset/3` returns once per alternative; d1, d1b, d5,
+d6); S2, saved continuations, must be copied (`copy_term`, 0.43 µs) and run
+in a fresh engine or under a fresh reset in a failure-driven loop (d9, d10,
+Desouter, van Dooren and Schrijvers 2015 sections 4.2 and 4.3), and the
+manual's caveats hold (a cut in a saved continuation does not commit, d4;
+`\+` and if-then-else keep their meaning only when resumed at once, d7c,
+d7d), so a control effect is performed only at the sites the translator
+marks safe (`superpose` alternatives, clause alternatives, `match` answers)
+and degrades to the default inside `if`, `case`, `unify`, `once`,
+`not-provable`, `forall`, `test` and `collapse`; S3, `catch/3` and
+`setup_call_cleanup/3` are transparent and a resource envelope unwinds
+through every reset, so limits always win over handlers. Cost: `reset`,
+`shift` and `call` are 2 inferences and about 0.4 µs per cycle (d8);
+`[assumed: the no-handler fast path costs 1 to 3 inferences per perform
+site; measured against the parity floor at implementation.]`
+
+The families: `random` (value; `with-seed` becomes its first handler,
+`m.seed(42)` its Python face), `emit` (value; `capture()`), `algebra` (value;
+`under(...)`), `write` (control; `speculative()` mints tokens into a world
+and never commits, `atomic()` is `transaction/1`, `assuming()` a world with
+its facts pre-added, `reify()` the never-committing write handler), `read`
+(control; the providers already are this handler), `choose` (control at
+safe sites only; the default depth-first, `fair` and `best-first` are the
+existing merge policies generalised from "across spaces" to every choice
+site, `par` is the engine pool), `host` (value; capability security, audit,
+replay), `spend` (value; the fuel latch and tripwires; `limits`, `inferences`
+and `timeout` keep `call_with_inference_limit/3`, which counts in C at no
+per-step cost, and gain the row and the face). `lib_strategy`'s combinators
+stay a MeTTa library; `choice`, `one` and `some` perform the choose effect
+at their alternatives, so a strategy value installs the search order
+(Plotkin and Pretnar's nondeterminism effect; Visser's Stratego). `bind`
+stays a reader-time substitution. On the Python seat one `ContextVar` of
+installed handlers replaces the scoped execution, capture and demand
+carriers; every door is generated from its row as a context manager and a
+decorator; per call the crossing wraps the goal as
+`metta_with_handlers(List, Goal)`, because a `with` block cannot hold an
+engine reset open across calls, the recorded reason transactions are closed
+goals.
+
+Migration, each step with no behaviour change and a gate: step 0 tokens as
+storage (parity byte-identical; add at most +6 inferences; match +0;
+memory-scale at most +16 bytes per atom; the engine-bench rows re-pinned);
+step 1 the op-log, `blame`, `history`, `as_of` on `(history ...)` spaces,
+`diff` by tokens, world commit as merge (journal round trip; the merge laws
+as properties; `commit(world)` measured `O(|Δ|)` on a 100,000-atom origin);
+step 2 the carrier (Theorem 4.3 as a property over random acyclic tagged
+programs for every shipped carrier; probe e's costs re-measured with the
+restraints); step 3 handlers (every door's differential equal; the fast
+path inside the parity floor's noise; the scaling slopes unchanged); step 4
+the combinations. Properties P1 to P14: merge commutes; add wins; remove
+idempotent; the multiplicity bound; replay idempotent; `as_of` equals the
+prefix; `diff` then apply is the identity; Lamport monotonicity; Theorem
+4.3 per carrier; the counting image equals the bag; deletion propagation
+equals `τ ↦ 0`; door equivalences (`with-seed` against `random`, `capture`
+against `emit`, `speculative` against `write`, `under` against `algebra`,
+`depth` against no handler); `fair` and `best-first` equal the merge
+policies; `par` equals `hyperpose` as bags. Four plunit suites
+(`tokens.plt`, `journal.plt`, `provenance.plt`, `handlers.plt`) and a
+`lib_memo` differential for `sum` on a recursive nondeterministic function.
+
 ### Ruling, later the same day: the arbiter is PeTTa
 
 The user ruled that the semantics arbiter is upstream PeTTa at the pinned
