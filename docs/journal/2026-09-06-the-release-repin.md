@@ -42,3 +42,32 @@ against the same-length clone: engine `parse` instructions 112,721,690 against
 instruction window is opened around the measured region through perf's control
 descriptors, so a non-boot case never carries the boot whose cost the path
 length moves.
+
+Tried: `RELEASE=1 python tests/checks/check_evidence_tags.py` on the tree as it
+stood. 2,572 unbacked tags over 5,558 claims, with the first line of the report
+saying why: the pytest collector's anchor no longer matched
+`extensions/python/test.sh`, because a025e10f had moved that runner's default
+flags in front of `"$@"`. 7ec761da landed the same repair on trunk while this
+pass was measuring.
+Measured: that repair moved the collector and ONE of the two self-tests that
+plant the anchor into a fixture tree. `tests/checks/check_spec_status_selftest.py`
+still planted the old spelling, so `spec-status-selftest` is RED on 5bdf3d60
+with "P90.9 (a specific pytest test name that exists and is GATE): expected
+FIXED, got OPEN". Confirmed against that commit's own copies of all three files
+rather than against this branch's.
+Decided: both fixtures read the anchor from `COLLECTORS` now. A restated anchor
+is a second authority for one fact, and it has now cost 2,572 false findings in
+one lane and a red gate in another.
+Tried: `python tests/checks/pin_provenance.py --check`. It reports one file
+OUTSIDE the globs and exits nonzero on that alone, so no provenance pass could
+make it green: `tests/prolog/layering.pl` carries a pin nothing reads. Three
+shipped `.metta` examples carry one the pass refuses to guess at.
+Decided: `tests/prolog/*.pl` joins `PROVENANCE_SOURCES`, the pin half only,
+because reading those files as `SOURCES` reports the eight unbacked tags
+`CLAIM_SOURCES`' own queue already prices; and `.metta` joins the line-comment
+rule as the second member of a two-member table. After both, the pass reports 21
+pins awaiting, one occurrence left alone and no file outside the globs, and both
+self-tests still answer 0 defects over their 28 and 29 planted cases.
+Rejected: resolving those four by hand, which is the whole-tree textual
+substitution the tool exists to replace and which has already reached into
+twelve string literals once.

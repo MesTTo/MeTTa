@@ -54,6 +54,20 @@ HERE = Path(__file__).resolve().parent
 
 sys.path.insert(0, str(HERE))
 from check_evidence_tags import PLACEHOLDER  # noqa: E402  -- HERE must be on the path first
+from evidence_runners import COLLECTORS  # noqa: E402  -- HERE must be on the path first
+
+#: The pytest collector's own anchor, READ from the collector rather than
+#: restated here. Two self-tests plant it into a fixture tree and both used to
+#: write it out: `a025e10f` moved the seat runner's default flags in front of
+#: its arguments, which moved the selection `tests` to the end of the command,
+#: and `7ec761da` followed the collector in one fixture and not the other, so
+#: `spec-status-selftest` read its planted FIXED case as OPEN. A restated
+#: anchor is a second authority for one fact, which is the shape
+#: `test_the_repin_tag_uses_the_gates_own_placeholder` already rules out for
+#: the re-pin tag.
+PYTEST_ANCHOR = next(
+    collector.anchor for collector in COLLECTORS if collector.lane == "pytest"
+)
 
 TAG = "tested"
 WHEN = "2026-08-18"
@@ -330,7 +344,7 @@ def seat_relative_path_complaints() -> list[str]:
     complaints = []
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
-        build(root, "pytest -q -p no:benchmark -n 4 --dist loadfile --max-worker-restart=0 tests")
+        build(root, PYTEST_ANCHOR)
         header = root / "extensions/cmetta/fixture.h"
         header.write_text(
             "/* Purpose: a fixture beside the C suite.\n"
@@ -373,7 +387,7 @@ def line_continuation_complaints() -> list[str]:
     complaints = []
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
-        build(root, "pytest -q -p no:benchmark -n 4 --dist loadfile --max-worker-restart=0 tests")
+        build(root, PYTEST_ANCHOR)
         (root / "check.sh").write_text(
             CHECK_SH.replace(
                 "run GATE checked sh -c \"cd '$HERE' && '$PY' tests/checked.py\"",
@@ -415,7 +429,7 @@ def seat_root_path_complaints() -> list[str]:
     complaints = []
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
-        build(root, "pytest -q -p no:benchmark -n 4 --dist loadfile --max-worker-restart=0 tests")
+        build(root, PYTEST_ANCHOR)
         probe = root / "extensions/cmetta/tests/seat_probe.c"
         probe.write_text(
             "/* Purpose: a fixture one directory inside the C seat.\n"
@@ -451,7 +465,7 @@ def commit_pin_complaints() -> list[str]:
     complaints = []
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
-        build(root, "pytest -q -p no:benchmark -n 4 --dist loadfile --max-worker-restart=0 tests")
+        build(root, PYTEST_ANCHOR)
         for command in (
             ["git", "init", "-q"],
             ["git", "add", "-A"],
@@ -519,7 +533,7 @@ def main() -> int:
     complaints = []
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
-        at = build(root, "pytest -q -p no:benchmark -n 4 --dist loadfile --max-worker-restart=0 tests")
+        at = build(root, PYTEST_ANCHOR)
         output = run(root)
         for accepted, names, why in CITATIONS:
             marker = f"engine/fixture.pl:{at[names]}:"

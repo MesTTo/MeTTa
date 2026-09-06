@@ -57,6 +57,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The `spec-status-selftest` gate lane is green again. Two self-tests plant the
+  pytest collector's anchor into a fixture tree and both wrote it out as their
+  own literal; when the seat runner's flags were reordered the collector and one
+  of the two fixtures followed and the other did not, so the lane read its
+  planted FIXED case as OPEN. Both fixtures read the anchor from the collector
+  now, so the tree has one authority for it.
+- The provenance pass reaches every file class that carries a commit pin.
+  `tests/prolog/*.pl` and `.metta` each held a placeholder `pin_provenance.py`
+  could see and could not resolve: the first sat outside every glob the pass
+  reads, and the second sat in a `;` comment whose rule the pass refused to
+  guess at. `--check` exits nonzero while either is true, so the release check
+  that refuses an unresolved placeholder had no way to pass. The Prolog glob
+  joins the pin half only, which changes no claim obligation, and `.metta` joins
+  the `#` line-comment rule as the second member of a two-member table.
 - The `node-dist` gate lane runs on a fresh checkout. `dist-consumer.mjs`
   built its throwaway consumer package under `extensions/node/ai-tmp/`, a
   gitignored directory nothing creates, so the lane passed only in a checkout
