@@ -4,10 +4,13 @@
 % retains engine/spaces.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and
 % unqualified meta-goals would acquire the wrong owner. Guarantees: counting
-% and tropical are ordinary catalog algebras, and each ordered preset declares
-% its best direction [tested:
-% extensions/python/tests/ch06_many_answers/test_under_algebra.py;
-% commit=c7468b2789746bcf95c4bacc0e2d517ec4d972fa]. Guarantees: deprecated is a
+% and tropical are ordinary catalog algebras, the semiring vocabulary derives
+% from every shipped algebra preset, and each ordered preset declares its best
+% direction [tested: shipped_algebra_rows_are_the_semiring_vocabulary;
+% commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]. Guarantees: the algebra-law vocabulary and its alias claims
+% derive from the engine's accepted law facts [tested:
+% algebra_law_vocabulary_and_alias_claims_are_exact; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e].
+% Guarantees: deprecated is a
 % schema-checked catalog kind whose name, since, and remedy fields remain
 % ordinary queryable data [tested: the_shipped_catalog_is_queryable_data;
 % commit=d74e2e828cd9272882dcf907cfaf095d2d147ce0]. Guarantees: every shipped
@@ -978,8 +981,27 @@ metta_algebra_equational_law('combine-zero-identity').
 metta_algebra_equational_law('extend-one-identity').
 metta_algebra_equational_law('extend-zero-annihilates').
 
+metta_algebra_law_alias(associative,
+                        ['combine-associative', 'extend-associative']).
+metta_algebra_law_alias(commutative, ['combine-commutative']).
+metta_algebra_law_alias(distributive,
+                        ['left-distributive', 'right-distributive']).
+metta_algebra_law_alias(idempotent, ['combine-idempotent']).
+metta_algebra_law_alias(contraction, [contraction]).
+
 metta_algebra_known_law(contraction).
 metta_algebra_known_law(Law) :- metta_algebra_equational_law(Law).
+metta_algebra_known_law(Law) :- metta_algebra_law_alias(Law, _).
+
+metta_algebra_law_expansion(Law, Expansion) :-
+    metta_algebra_law_alias(Law, Expansion), !.
+metta_algebra_law_expansion(Law, [Law]).
+
+metta_algebra_law_vocabulary(Laws) :-
+    findall(Law, metta_algebra_equational_law(Law), Equational),
+    findall(Alias, metta_algebra_law_alias(Alias, _), Aliases),
+    append(Equational, [contraction|Aliases], All),
+    list_to_set(All, Laws).
 
 metta_check_algebra_laws(Name, Combine, Extend, Zero, One,
                          [laws|Laws], [carrier|Carrier], Term) :-
@@ -988,8 +1010,12 @@ metta_check_algebra_laws(Name, Combine, Extend, Zero, One,
     ->  throw(error(metta_algebra_law_unknown(Name, Unknown), none))
     ;   true
     ),
-    findall(Law, ( member(Law, Laws),
-                   metta_algebra_equational_law(Law) ), Equational),
+    findall(Equation,
+            ( member(Law, Laws),
+              metta_algebra_law_expansion(Law, Expansion),
+              member(Equation, Expansion),
+              metta_algebra_equational_law(Equation) ), Equational0),
+    list_to_set(Equational0, Equational),
     (   Equational == []
     ->  true
     ;   Carrier == [],
@@ -1336,14 +1362,18 @@ metta_catalog_preset([vocabulary, 'image-mode', opaque, transparent, auto]).
 metta_catalog_preset([vocabulary, 'registry-image',
                       expression, symbol, handle, operations]).
 metta_catalog_preset([vocabulary, 'answer-policy', depth, fair, 'best-first']).
-%Every algebra this catalog DEFINES below is nameable here. The row carried
-%eight while the [algebra, ...] rows defined ten, so `budget` and `amplitude`
-%were shipped presets the vocabulary would not admit and the generated
-%Semiring enum therefore could not spell. The runtime already named all ten:
-%an undeclared carrier is refused with "shipped presets are bool, bag,
-%counting, set, ranked, tropical, prob, prov, budget, amplitude".
-metta_catalog_preset([vocabulary, semiring, bool, bag, counting, set, ranked,
-                      tropical, prob, prov, budget, amplitude]).
+%Every algebra this catalog DEFINES below is nameable here, because the row
+%IS the list of those definitions. Written out by hand it carried eight while
+%the [algebra, ...] rows defined ten, so `budget` and `amplitude` were shipped
+%presets the vocabulary would not admit and the generated Semiring enum could
+%not spell, while the runtime's own refusal already named all ten. Deriving
+%the row makes that disagreement unrepresentable rather than merely corrected.
+%The two goals below read [algebra, ...] and the alias facts, neither of which
+%unifies with a [vocabulary, ...] head, so these clauses do not recurse.
+metta_catalog_preset([vocabulary, semiring|Semirings]) :-
+    findall(Name, metta_catalog_preset([algebra, Name|_]), Semirings).
+metta_catalog_preset([vocabulary, 'algebra-law'|Laws]) :-
+    metta_algebra_law_vocabulary(Laws).
 metta_catalog_preset([vocabulary, 'source-kind', linear, repeated, peek]).
 metta_catalog_preset([vocabulary, world, 'closed-world', 'open-world']).
 metta_catalog_preset([vocabulary, atomicity,
@@ -1512,6 +1542,10 @@ metta_catalog_preset([claim, semiring, prob, ordered, descending]).
 %reading, and declares order=ascending in its own preset. Its claim row was
 %the one an ordered carrier was missing.
 metta_catalog_preset([claim, semiring, budget, ordered, ascending]).
+%Each alias is published as data so a consumer outside this module expands it
+%by asking &metta rather than by keeping a second copy of the table.
+metta_catalog_preset([claim, 'algebra-law', Alias, 'expands-to'|Expansion]) :-
+    metta_algebra_law_alias(Alias, Expansion).
 metta_catalog_preset([algebra, bool, max, '*', 0, 1,
                       [laws, 'combine-associative', 'combine-commutative',
                        'extend-associative', 'left-distributive',

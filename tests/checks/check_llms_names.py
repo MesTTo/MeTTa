@@ -42,8 +42,9 @@ admitting it is hand-kept. Nine checks cover both directions of each promise:
               annotation, compared by HEAD name so a sheet may be more precise
               than the signature is. A method the annotation says nothing about
               is skipped rather than guessed at.
-  CLOSED SETS every semiring, algebra-object, effect-class and provider-
-              capability roster equals the implementation that owns it, read
+  CLOSED SETS every semiring, algebra-law, algebra-object, effect-class and
+              provider-capability roster equals the implementation that owns
+              it, and each alias expansion equals its catalog claim, read
               from the engine catalog and one Python protocol constant rather
               than from a list kept here. The root sheet must carry each one,
               so deleting a roster cannot silence its check; a seat sheet is
@@ -86,6 +87,9 @@ Guarantees:
   - every required closed-value roster fails closed and is compared in both
     directions with the catalog or Python constant that owns it [tested:
     tests/checks/check_llms_selftest.py; commit=2e627a593413191cda3170f2eb716835f7f62543]
+  - the algebra-law roster and its alias table are held to the catalog's own
+    vocabulary row and expansion claims, the alias table by exact alias=target
+    rows [tested: tests/checks/check_llms_selftest.py; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]
 Open Obligations:
   To Do: None
   Hacks: None
@@ -198,6 +202,19 @@ _SEMIRING_ROSTER = re.compile(
     r"^`metta\.vocabularies\.Semiring` names the closed set:\s*"
     r"(?P<body>.*?)(?=^\s*$)",
     re.MULTILINE | re.DOTALL,
+)
+_ALGEBRA_LAW_ROSTER = re.compile(
+    r"^`metta\.vocabularies\.AlgebraLaw` names the accepted set:\s*"
+    r"(?P<body>.*?)(?=^\s*$)",
+    re.MULTILINE | re.DOTALL,
+)
+#: The alias table is a two-column roster, so each row is flattened to one
+#: `alias=target` string and the whole table compared as a set of those. A row
+#: naming one value is a row that lost its expansion, and reads as a difference.
+_LAW_ALIAS_ROSTER = re.compile(
+    r"^\| algebra-law alias \| expands to \|\n\|---.*?\n"
+    r"(?P<body>(?:^\|.*(?:\n|$))+)",
+    re.MULTILINE,
 )
 #: Both of these end at the roster SENTENCE rather than at a particular
 #: following clause, so two sheets may introduce the same closed set in their
@@ -987,6 +1004,16 @@ def _roster_difference(
     ]
 
 
+def _alias_values(body: str) -> tuple[str, ...]:
+    """Flatten the labelled alias table into stable alias=target rows."""
+    rows: list[str] = []
+    for line in body.splitlines():
+        values = re.findall(r"`([A-Za-z][A-Za-z0-9-]*)`", line)
+        if len(values) >= 2:
+            rows.append("=".join(values))
+    return tuple(rows)
+
+
 def closed_value_source_findings(values: Mapping[str, tuple[str, ...]]) -> list[str]:
     """The algebra rows and their declared vocabulary are one closed set."""
     semirings = values["semiring"]
@@ -1061,6 +1088,36 @@ def closed_value_findings(
             actual=semiring_values,
             expected=semirings,
             opening="`metta.vocabularies.Semiring` names the closed set:",
+            required=sheet == _ROOT_SHEET,
+        )
+    )
+
+    laws = _ALGEBRA_LAW_ROSTER.search(text)
+    law_values = _inline_values(laws.group("body")) if laws is not None else ()
+    findings.extend(
+        _roster_difference(
+            sheet,
+            text,
+            "AlgebraLaw",
+            laws,
+            actual=law_values,
+            expected=values["algebra-law"],
+            opening="`metta.vocabularies.AlgebraLaw` names the accepted set:",
+            required=sheet == _ROOT_SHEET,
+        )
+    )
+
+    aliases = _LAW_ALIAS_ROSTER.search(text)
+    alias_values = _alias_values(aliases.group("body")) if aliases is not None else ()
+    findings.extend(
+        _roster_difference(
+            sheet,
+            text,
+            "algebra-law alias",
+            aliases,
+            actual=alias_values,
+            expected=values["algebra-law-aliases"],
+            opening="| algebra-law alias | expands to |",
             required=sheet == _ROOT_SHEET,
         )
     )
@@ -1141,6 +1198,13 @@ def closed_value_catalog() -> dict[str, tuple[str, ...]]:
             "metta_catalog_row([vocabulary,semiring|Vs]), member(N, Vs)"
         ),
         "algebra-presets": _query_values("metta_catalog_row([algebra,N|_])"),
+        "algebra-law": _query_values(
+            "metta_catalog_row([vocabulary,'algebra-law'|Vs]), member(N, Vs)"
+        ),
+        "algebra-law-aliases": _query_values(
+            "metta_catalog_row([claim,'algebra-law',A,'expands-to'|Xs]), "
+            "atomic_list_concat([A|Xs], '=', N)"
+        ),
         "effect-class": _query_values(
             "metta_catalog_row([vocabulary,'effect-class'|Vs]), member(N, Vs)"
         ),

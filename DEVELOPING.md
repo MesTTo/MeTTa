@@ -47,16 +47,18 @@ Pass check names to run a subset, for example:
 CHECK_PY="$PY" sh check.sh ruff mypy ty
 ```
 
-Run the three Python generated-artifact checks as one target:
+Run the four Python generated-artifact checks as one target:
 
 ```sh
 CHECK_PY="$PY" sh check.sh generated-artifacts
 ```
 
-The target runs `ledger`, `aio-mirror`, then `reference`. The ledger is
-independent, while `aio-mirror` must precede `reference`: `aiogen.py --write`
-rewrites `aio.py`, and `reference.py --write` then publishes that file's
-docstrings. Keeping the checks in remedy order makes one repair pass converge.
+The target runs `ledger`, `aio-mirror`, `init-stub`, then `reference`. The
+ledger is independent. `aio-mirror` must precede `reference` because
+`aiogen.py --write` rewrites `aio.py` before `reference.py --write` publishes
+that file's docstrings. It also precedes `init-stub`, whose package stub mirrors
+the generated module functions in `metta/__init__.py`. Keeping the checks in
+remedy order makes one repair pass converge.
 
 Every root gate run places its temporary files under
 `ai-tmp/check-runs/run.*`. An advisory lock distinguishes an active concurrent

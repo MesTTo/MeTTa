@@ -235,6 +235,20 @@ wherever an object does, `under="budget"`.
 `metta.vocabularies.Semiring` names the closed set: `bool`, `bag`, `counting`,
 `set`, `ranked`, `tropical`, `prob`, `prov`, `budget`, `amplitude`.
 
+`metta.vocabularies.AlgebraLaw` names the accepted set: `combine-associative`,
+`combine-commutative`, `extend-associative`, `extend-commutative`,
+`left-distributive`, `right-distributive`, `combine-idempotent`,
+`combine-zero-identity`, `extend-one-identity`, `extend-zero-annihilates`,
+`contraction`, `associative`, `commutative`, `distributive`, `idempotent`.
+
+| algebra-law alias | expands to |
+|---|---|
+| `associative` | `combine-associative`, `extend-associative` |
+| `commutative` | `combine-commutative` |
+| `distributive` | `left-distributive`, `right-distributive` |
+| `idempotent` | `combine-idempotent` |
+| `contraction` | `contraction` |
+
 `under=counting` answers one `TaggedAnswer` whose `.annotation` is the count
 and whose `.value` is `()`, the empty value saying no proposition row was
 manufactured; every carrier yields `TaggedAnswer` with `.annotation`, `.plan`,
@@ -305,6 +319,7 @@ module-tier default context.
 
 `Rows` is a list of `Row` with `.columns`. `row.x` and `row["x"]` both work.
 `rows.one()` (exactly one), `.first()`, `.column(name)` -> that column's atoms,
+`.group_by(name)` -> a dict from each column atom to its `Rows` slice,
 `.table()` -> dict of columns decoded to Python values, `.to_dicts()` -> plain
 mappings, `.to_df()` / `.to_pl()` -> pandas / polars, `.build(column, cls)`
 rebuilds one named column, and `.build(cls)` rebuilds the sole constructor
@@ -394,7 +409,7 @@ shipped choice. There is exactly one row for each of dispatch, order, merge,
 agenda, equality, errors, world, algebra, storage, typing, fidelity,
 source-kind, transaction-mode, atomicity, save-format, volatility, and
 determinism. `tests/checks/check_policy_inventory.py` asks the running catalog for
-those rows and the semiring law claims, joins them to their implementation
+those rows and the semiring ordering claims, joins them to their implementation
 seams, and rejects multiline `member/2` or `memberchk/2` lists, Python
 `Literal[...]`, and Python list/set membership that bypass the catalog. The
 immediately preceding annotation may exempt only mechanism-internal,

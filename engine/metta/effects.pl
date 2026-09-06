@@ -32,6 +32,10 @@
 %     confusing the implicit Boolean execution default for an explicit choice
 %     [tested: test_current_algebra_follows_each_selection_layer;
 %     commit=2e627a593413191cda3170f2eb716835f7f62543].
+%   - algebra-law alias claims expand descriptor laws for canonical engine
+%     checks, and an unknown-law refusal names the catalog's accepted set
+%     [tested: algebra_law_aliases_expand_through_catalog_claims,
+%     an_unknown_algebra_law_names_the_accepted_vocabulary; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: observe-source owns its diagnostic writes as oracleIO; ordinary
@@ -2158,7 +2162,20 @@ metta_algebra_one(Ctx, One) :-
 
 metta_algebra_law(Algebra, Law) :-
     metta_algebra_descriptor(Algebra, _, _, _, _, [laws|Laws], _, _),
-    memberchk(Law, Laws).
+    metta_algebra_law_expansion(Law, Required),
+    forall(member(Canonical, Required),
+           metta_algebra_declares_law(Laws, Canonical)).
+
+metta_algebra_declares_law(Laws, Canonical) :-
+    member(Declared, Laws),
+    metta_algebra_law_expansion(Declared, Expansion),
+    memberchk(Canonical, Expansion),
+    !.
+
+metta_algebra_law_expansion(Law, Expansion) :-
+    metta_catalog_row([claim, 'algebra-law', Law, 'expands-to'|Expansion]),
+    !.
+metta_algebra_law_expansion(Law, [Law]).
 
 %Whether the declared semiring carries an order is a CLAIM in the catalog,
 %(claim semiring ranked ordered) and its prob sibling shipped as presets,
@@ -2291,7 +2308,16 @@ prolog:error_message(metta_algebra_operation_failed(Algebra, Operation, A, B)) -
     [ 'declared algebra ~w operation ~w answered nothing for (~w, ~w)'-
       [Algebra, Operation, A, B] ].
 prolog:error_message(metta_algebra_law_unknown(Algebra, Law)) -->
-    [ 'algebra_law_unknown: ~w names unsupported law ~w'-[Algebra, Law] ].
+    [ 'algebra_law_unknown: ~w names unsupported law ~w'-[Algebra, Law] ],
+    metta_algebra_accepted_laws.
+
+%The remedy is read from the catalog, so a program that removed the vocabulary
+%row still gets the refusal itself rather than an unrendered error term. The
+%open-ended row leaves a choicepoint over the storage arities; take the first.
+metta_algebra_accepted_laws -->
+    { metta_catalog_row([vocabulary, 'algebra-law'|Accepted]), ! },
+    [ '; accepted laws are ~w'-[Accepted] ].
+metta_algebra_accepted_laws --> [].
 prolog:error_message(metta_algebra_law_uncheckable(Algebra, Laws, Reason)) -->
     [ 'algebra_law_uncheckable: ~w names ~w but provides no ~w'-
       [Algebra, Laws, Reason] ].
