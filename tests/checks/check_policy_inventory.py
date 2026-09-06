@@ -18,6 +18,11 @@ Guarantees:
     existing local source line or symbol
     [tested: test_a_planted_closed_policy_list_is_reported_by_the_inventory_lane;
     commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3]
+  - a Prolog list whose every element is a variable is not a policy list: it
+    names no values, so it is skipped the way a partial list already is, while
+    one literal element anywhere in it is still reported
+    [tested: test_a_list_of_prolog_variables_carries_no_policy;
+    commit=WORKTREE]
 Fails when:
   - the engine cannot boot, emits non-JSON policy rows, publishes a duplicate,
     missing or extra axis, or an implementation seam no longer exists
@@ -73,6 +78,10 @@ CATALOG_PRESET = re.compile(
     r"^\s*metta_catalog_preset\s*\(\s*\[.*?\]\s*\)\s*\.",
     re.DOTALL | re.MULTILINE,
 )
+#: Prolog's own variable grammar: `_`, or a leading underscore or capital.
+#: A list whose every element matches this names no values at all, only the
+#: bindings its caller supplies, so there is nothing closed in it to own.
+PROLOG_VARIABLE = re.compile(r"^[_A-Z][A-Za-z0-9_]*$")
 
 SOURCE_ROOTS = (
     Path("engine"),
@@ -363,6 +372,15 @@ def _prolog_candidates(relative: Path, text: str) -> list[ClosedListCandidate]:
     for match in PROLOG_CLOSED_LIST.finditer(text):
         values = match.group("values")
         if "|" in values:
+            continue
+        # `member(From, [CallModule, Self])` iterates over two module names
+        # already computed above it. Every element is a variable, so the list
+        # carries no vocabulary a catalog could own and no reader could read a
+        # policy off it; the values live wherever the bindings came from, which
+        # is a place this scan cannot see and does not claim to. A list with
+        # one literal in it is still a finding, which is what keeps a real
+        # closed set from hiding behind a variable beside it.
+        if all(PROLOG_VARIABLE.match(part.strip()) for part in values.split(",")):
             continue
         if any(start <= match.start() < end for start, end in authority_spans):
             continue

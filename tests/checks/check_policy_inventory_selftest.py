@@ -15,6 +15,9 @@ Guarantees:
     and Python list/set membership are planted independently; only catalog
     preset terms and generated vocabulary output are excluded [tested:
     tests/checks/check_policy_inventory_selftest.py; commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3]
+  - a Prolog list whose every element is a variable is skipped, and one
+    literal element anywhere in it brings the finding back
+    [tested: test_a_list_of_prolog_variables_carries_no_policy; commit=WORKTREE]
   - semiring-claim validation rejects a missing required value, an undeclared
     semiring claim and a missing consumer seam [tested:
     tests/checks/check_policy_inventory_selftest.py; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]
@@ -124,6 +127,30 @@ def test_catalog_authority_and_generated_output_are_not_findings() -> None:
         findings = scan_closed_lists(root)
     assert findings == [
         "engine/spaces.pl:2: closed policy list [one, two] has no adjacent exemption"
+    ]
+
+
+def test_a_list_of_prolog_variables_carries_no_policy() -> None:
+    """Two module names iterated over are not a vocabulary a catalog could own.
+
+    `member(From, [CallModule, Self])` names no values at all: what each
+    element IS is decided wherever its binding came from, which is a place this
+    scan cannot see and does not claim to. One literal element anywhere in the
+    list brings the finding straight back, which is what keeps a real closed
+    set from hiding behind a variable beside it.
+    """
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        _write(
+            root,
+            "lib/variables.pl",
+            "scoped(X, First, Second) :- member(X, [First, Second]).\n"
+            "mixed(X, First) :- member(X, [First, blue]).\n"
+            "anonymous(X, _Named) :- memberchk(X, [_Named, _]).\n",
+        )
+        findings = scan_closed_lists(root)
+    assert findings == [
+        "lib/variables.pl:2: closed policy list [First, blue] has no adjacent exemption"
     ]
 
 

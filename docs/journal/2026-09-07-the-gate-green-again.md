@@ -73,3 +73,41 @@ Rejected: a `[tool.vulture] ignore_names` entry for `second` and a
 `per-file-ignores` line for the two E0102 sites, because both hide the finding
 from every other file as well; the underscore and the two pragmas are local to
 the sites that earned them.
+
+Tried: reading `policy-inventory`'s six findings for what each list actually
+carries -> three different answers, so three different remedies.
+
+- `lib_tabling.pl`'s three `memberchk(Watch, [incremental, monotonic])` are a
+  closed set the file ALREADY declares one line above them:
+  `metta_tabling_policy_word/3` names `plain`, `incremental` and `monotonic` as
+  the three watch words. The list is the two that are not `plain`, so it is
+  derived now: `metta_tabling_watched/1` reads the word table and excludes
+  `plain`, and a fourth watch word cannot be added without deciding what it
+  means here. The 18 tabling plunit tests pass unchanged.
+- `source_lifecycle.pl:1082`'s four artifact row shapes and `interop.pl:1426`'s
+  two import roots are this loader's and this resolver's own record and search
+  order, which is what `mechanism-internal` is for. Each takes an adjacent
+  exemption naming its own predicate. The exemption grammar wants the comment
+  on a LINE OF ITS OWN: written as `( % policy-inventory-exempt: ...` inside a
+  findall the lane reports `malformed exemption`, because its regex anchors the
+  marker at the start of the line.
+- `lib_tabling.pl:1081`'s `member(From, [CallModule, Self])` is neither. Every
+  element is a Prolog VARIABLE, so the list names no values at all: what each
+  element is gets decided wherever its binding came from, which is a place the
+  scan cannot see and does not claim to. That is a lane defect rather than a
+  site to annotate, and it is the same structural skip the lane already applies
+  to a partial list, so `_prolog_candidates` skips a list whose every element
+  matches Prolog's variable grammar. One literal element anywhere in the list
+  brings the finding straight back, which is the plant
+  `test_a_list_of_prolog_variables_carries_no_policy` asserts.
+
+Found by the change: `engine/spaces/catalog.pl:1234` carried an exemption for
+`member(Operation, [Combine, Extend])` whose stated reason was exactly what the
+new rule decides structurally ("the algebra row's own two declared operation
+names rather than a closed value set"). The lane's orphan check reported it as
+soon as the list stopped being a candidate, so the annotation is removed and
+the rule carries it.
+
+Decided: `sh check.sh policy-inventory policy-inventory-selftest` -> both 0,
+9 planted cases, 0 failures. With the desk-versus-CI split planted the other
+way round the selftest goes red by name, so the plant can fail.

@@ -274,6 +274,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The policy inventory reads a list of Prolog variables as what it is. A
+  `member(X, [First, Second])` names no values: each element is decided
+  wherever its binding came from, so the lane skips it the way it already skips
+  a partial list, and one literal element anywhere in the list still reports.
+  The tabling library's three `[incremental, monotonic]` lists derive from
+  `metta_tabling_policy_word/3` instead, so the watch words have one home; the
+  loader's four artifact row shapes and the import resolver's two roots carry
+  adjacent exemptions naming their own predicates; and the algebra closure
+  check's exemption is gone, because the rule now decides what its prose said.
 - Ten static gate findings, each at its site. The batching overload of
   `Space.eval` and `MeTTa.eval` names its second positional term `_second`,
   since it is positional-only and exists to require two terms rather than to be
