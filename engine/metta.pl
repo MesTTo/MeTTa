@@ -212,7 +212,7 @@
 %     metta_exec_module_parent/2, which advances on committed catalogue
 %     changes, including a second space defining an already-registered name,
 %     and on no ordinary evaluation or data write
-%     [tested: function_catalogue_generation; commit=WORKTREE].
+%     [tested: function_catalogue_generation; commit=1f32a7c85d5c3bcbd8797218694ae5550c362e9a].
 %   - Prolog registration refuses every head the translator compiles before
 %     function dispatch, including heads added through translator_rule/1
 %     [tested: test_registering_any_translator_compiled_head_is_refused_by_name].

@@ -11,7 +11,7 @@
 %   - it also advances when an already-registered name gains a second home
 %     module, which moves fun_in/2 and fun_scoped/1 and leaves fun/1 alone
 %     [tested: a_second_home_for_a_registered_name_bumps_the_generation;
-%     commit=WORKTREE]
+%     commit=1f32a7c85d5c3bcbd8797218694ae5550c362e9a]
 %   - a rolled-back fun/1 assertion changes neither the visible set nor its
 %     generation [tested: a_rolled_back_definition_is_generation_neutral;
 %     commit=4c9a794750103e0a3a2e9d883adde337ffb501f0]
