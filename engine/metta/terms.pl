@@ -1,4 +1,10 @@
 % Purpose: provide representation, parsing, grounded-operation errors, and numeric term recovery
+% Guarantees: a refused host object reports one corresponding refinement or
+%   its concrete type; accepted class and protocol witnesses are not blamed
+%   [tested: run_tests(grounded_refusals),
+%   run_tests(tensor_shapes),
+%   extensions/python/tests/ch09_types/test_grounded_refusals.py;
+%   commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 % Guarantees: Runtime argument checking and shallow declaration reads use
 %   metta_runtime_type/2 for annotated function types
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
@@ -76,7 +82,10 @@ parse(Str, R) :- sread(Str, R).
 %it cannot use answers, and which answer is decided by the argument's own type:
 %
 %  - a type the parameter RULES OUT is `(BadArgType <position> <expected>
-%    <actual>)`, one answer per rejected actual type, positions left to right
+%    <actual>)`, one answer per rejected declared actual type, positions left
+%    to right; a host object's class and protocol witnesses describe one value
+%    and its refusal names the corresponding refinement when available,
+%    otherwise the first class name supplied by its bridge
 %  - an argument whose type does not DECIDE, %Undefined% or a symbol declared
 %    the right type but carrying no value, is the operation's own refusal: its
 %    message where upstream gives it one, and otherwise the call left as
@@ -209,9 +218,9 @@ metta_bad_argument_reason(Operation, Arguments, Refusal) :-
 metta_bad_argument_reason(Operation, Arguments, Refusal) :-
     metta_ordinary_argument_reason(Operation, Arguments, Refusal).
 
-%One error per declared ARROW and per rejected ACTUAL type, arrows in
-%declaration order and actual types in the order get-type reports them, which
-%is the multiplicity and the order the arbiter pins.
+%One error per declared ARROW and per rejected declared ACTUAL type, arrows
+%in declaration order. A host object's ordered class/protocol witnesses are
+%consolidated by metta_rejected_argument_type/5 on the refusal path alone.
 metta_ordinary_argument_reason(Operation, Arguments, Refusal) :-
     metta_operation_parameters(Operation, Arguments, ParameterTypes, Origins,
                                RawChain, Chain),
@@ -790,7 +799,7 @@ metta_argument_type_matches(Actual, Expected, metatype) :-
 metta_argument_type_matches(Actual, Expected, ordinary) :-
     metta_resolved_types_match(Actual, Expected).
 
-%Every rejected actual type at a position, and then the positions after it,
+%Every rejected declared actual type at a position, then later positions,
 %which is what the arbiter reports when one actual type of an argument matched
 %and carried the check forward while another did not
 %[source: types-basic/48-badargtype-argument-order.metta]. The cut commits to
@@ -820,8 +829,8 @@ metta_bad_argument([Declared|Rest], [Origin|Origins], [Argument|Arguments], N,
                            Position, Reported, Actual)
     ;   metta_argument_types(Argument, Types),
         (   Position = N, Reported = Expected,
-            member(Actual, Types),
-            \+ metta_argument_type_matches(Actual, Expected, Origin)
+            metta_rejected_argument_type(Argument, Types, Expected, Origin,
+                                          Actual)
         ;   member(Carried, Types),
             metta_argument_type_matches(Carried, Expected, Origin),
             !,
@@ -829,6 +838,37 @@ metta_bad_argument([Declared|Rest], [Origin|Origins], [Argument|Arguments], N,
             metta_bad_argument(Rest, Origins, Arguments, Later,
                                Position, Reported, Actual)
         )
+    ).
+
+%A bridge supplies named classes in resolution order; structural protocol
+%witnesses may precede those names
+%[source: extensions/python/metta/_ops.py:type_names,
+%extensions/python/bridge.pl:seam:grounded_class_type/2; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
+%All witnesses still participate in acceptance. Only a wholly refused host
+%value needs a diagnostic. A refined requirement reports its corresponding
+%observed refinement; ordinary requirements report the first class name once.
+%Independent MeTTa declarations retain their existing refusal alternatives.
+metta_rejected_argument_type(Argument, Types, Expected, Origin, Actual) :-
+    (   atomic(Argument), \+ atom(Argument), seam:host_object(Argument)
+    ->  \+ ( member(Candidate, Types),
+             metta_argument_type_matches(Candidate, Expected, Origin) ),
+        metta_host_refusal_type(Types, Expected, Actual)
+    ;   member(Actual, Types),
+        \+ metta_argument_type_matches(Actual, Expected, Origin)
+    ).
+
+% The caller has already projected parameter modifiers and normalized aliases.
+% Match the refinement's base without binding either type: dimensions describe
+% the failed constraint, rather than another candidate to accept or instantiate.
+metta_host_refusal_type(Types, Expected, Actual) :-
+    (   nonvar(Expected), Expected = [Head, Base, _|_], Head == 'Annotated',
+        member(Refined, Types),
+        nonvar(Refined), Refined = [ActualHead, ActualBase, _|_],
+        ActualHead == 'Annotated', Base =@= ActualBase
+    ->  Actual = Refined
+    ;   member(Named, Types), atom(Named)
+    ->  Actual = Named
+    ;   Types = [Actual|_]
     ).
 
 %The types an ARGUMENT CHECK may read, which is not everything get-type

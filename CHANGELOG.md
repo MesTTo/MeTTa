@@ -29,6 +29,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Object type integrations can publish structural type atoms or compute a type
   from a live value. MeTTa atom metadata in Python `Annotated` refines arrow
   alternatives; ordinary Python metadata remains available in catalog rows.
+- Releasing a space now retires all its catalog declarations and installed
+  hooks. Named and pooled spaces start their next lifetime without an algebra,
+  annotation policy, or other stale declaration.
+- Both algebra constructors accept `type=` for a Python type, MeTTa type atom,
+  or Boolean predicate. Inputs, results, identities and annotations must belong
+  to the carrier. A type grants no law certificate; `carrier=` remains the
+  finite domain checked exhaustively for laws. Tensor equality compares shape
+  and values, allowing fresh array results in finite tensor certificates.
+- One rejected array argument produces one `Error` with its concrete type.
+  Tagged algebra evaluation preserves that refusal instead of reporting
+  `algebra_operation_not_single` or applying arithmetic to the error.
+  A shaped requirement retains the actual dimensions in that single refusal.
 
 ## [0.8.0] - 2026-09-06
 

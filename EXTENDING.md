@@ -2847,6 +2847,9 @@ honest. Today's list: `catch_recover/2`, `match_foreign/5`, `metta_add_atoms/2`,
 `metta_string_declarations/2`, `metta_substitute_self/3`,
 `metta_trace_source/4`, `metta_annotations/2`, `metta_contract_fact/1`,
 `metta_error_answer/3`, `metta_handles_coherent/1`, `metta_on_error_mode/3`,
+`metta_require_algebra_value/3`,
+`metta_with_evaluation_context/2`, `metta_evaluation_context/1`,
+`metta_ordered_match_limit/6`,
 `metta_source_reset/1`, `metta_transaction/1`, `metta_transport_failure/1`,
 `sread_with_names/3`, `translate_expr/3`, `unregister_metta_extension/1` and
 `with_metta_module/2`. Shrinking this list is the shim-thinning work's
@@ -3008,6 +3011,32 @@ they disagree on.
 | `(inherits <child> <parent>)` | the child's execution base and child-first read chain; writes remain local | `(new-space <child> (inherits <parent>))`, `new_space(inherits=...)` |
 | `(restricted <space>)`, `(grants <space> <capability>)` | a curated execution base; file, process, and network vocabulary is creation-granted | `(new-space <space> (restricted (grants ...)))`, `new_space(restricted=True, grants=...)` |
 | `(parametric <expression>)` | the exact ground expression registered as a native space identifier | `(new-space (<family> <parameter> ...))` |
+
+The algebra row's carrier field also accepts `(type <T> (carrier ...))`.
+`T` is a MeTTa type atom or type expression, or a grounded membership predicate
+that must answer exactly one Boolean. Python's `type=` supplies this field;
+a Python type uses `isinstance`, while `str` and atom classes select their
+native MeTTa types. The plain
+`(carrier ...)` field remains valid. A type is checked against every input and
+result. A nonempty finite carrier additionally restricts membership and is the
+only domain over which user equational laws receive exhaustive certification.
+A type alone supplies no certificate or fusion permission and refuses every
+law claim, including contraction. Uncheckable laws
+name the remedy: provide a finite carrier, or use `prov` and `.under()` for
+reinterpretation.
+
+`metta_require_algebra_value/3` is the host service for this membership check.
+`seam:grounded_algebra_type/3` lets the owning host apply a carrier predicate
+without losing atom kinds. The Python shim uses its ordinary wire codec, so
+symbols and expressions remain atoms and grounded values unwrap to Python.
+A handler returns one `true` or `false`; unclaimed hosts retain their ordinary
+grounded application route.
+`seam:grounded_algebra_equal/3` lets a value's owner decide exact equality for
+finite membership and law witnesses. A handler answers `true` or `false`;
+a negative answer is final. Python arrays compare shape and all elements,
+without changing ordinary atom equality. Dropping a space retires its algebra
+row, embedded law certificate and other space-owned catalog rows, so a pooled
+name's next life inherits none of them.
 
 Ask the seam itself what it will do: `!(explain (match &s <pattern> $x))` answers
 the route as atoms, which entry matched, at what fidelity, whether a bound would

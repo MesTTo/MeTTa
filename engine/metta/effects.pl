@@ -4,6 +4,9 @@
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
+% Guarantees: native annotation inputs and outputs obey the declared type
+% or finite carrier, including the unit shortcut [tested:
+% run_tests(algebra_types); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 % Guarantees:
 %   - one dynamic evaluation context carries algebra, limit, and ordering
 %     through nested operations and restores on every exit
@@ -648,7 +651,7 @@ metta_semantic_effect('fuzzy-match-context', readOnlyLookup).
 % Library effects describe observable behavior, independently of the host
 % language used to implement the operation. Metadata snapshots allocate a
 % space; directory listings and filesystem existence checks only read.
-% [tested: lib_file_surface:effect_rows; commit=504f8dddfa890ced97e795a13ab10e239b1de2ce]
+% [tested: lib_file_surface:effect_rows; commit=074dc0a88b1605c54824de677d586b6f60998bcf]
 metta_semantic_effect('path-join', pureStructural).
 metta_semantic_effect('path-parent', pureStructural).
 metta_semantic_effect('path-name', pureStructural).
@@ -2269,17 +2272,20 @@ prolog:error_message(metta_source_discipline(Ctx, linear)) -->
 %backtrackably. Outside an answer it reads the current context's DECLARED one,
 %not a numeric engine constant.
 metta_annotation(K) :-
-    (   catch(b_getval('$metta_answer_k', K0), _, fail)
-    ->  K = K0
-    ;   current_metta_space(Ctx),
-        metta_algebra_one(Ctx, K)
-    ).
+    current_metta_space(Ctx),
+    metta_annotation(Ctx, K).
 
 metta_annotation(Ctx, K) :-
     (   catch(b_getval('$metta_answer_k', K0), _, fail)
     ->  K = K0
     ;   metta_algebra_one(Ctx, K)
-    ).
+    ),
+    metta_check_annotation_value(Ctx, K).
+
+metta_check_annotation_value(Ctx, K) :-
+    metta_effective_algebra(Ctx, Algebra),
+    metta_algebra_descriptor(Ctx, Algebra, _, _, _, _, _, Carrier, _),
+    metta_require_algebra_value(Algebra, Carrier, K).
 
 %Extend two annotations along a conjunction by the operation in the catalog.
 %Numeric +/*/min/max use their already-typed engine primitives directly; an
@@ -2287,11 +2293,16 @@ metta_annotation(Ctx, K) :-
 %tensor operation registered from Python is not a separate engine case.
 metta_k_extend(Ctx, K1, K2, K) :-
     metta_effective_algebra(Ctx, Algebra),
-    metta_algebra_descriptor(Ctx, Algebra, _, Extend, _, One, _, _, _),
-    (   K1 == One -> K = K2
-    ;   K2 == One -> K = K1
+    metta_algebra_descriptor(Ctx, Algebra, _, Extend, _, One, [laws|Laws], Carrier, _),
+    metta_require_algebra_value(Algebra, Carrier, K1),
+    metta_require_algebra_value(Algebra, Carrier, K2),
+    (   K1 == One, metta_algebra_declares_law(Laws, 'extend-one-identity')
+    ->  K = K2
+    ;   K2 == One, metta_algebra_declares_law(Laws, 'extend-one-identity')
+    ->  K = K1
     ;   metta_apply_algebra_operation(Algebra, Extend, K1, K2, K)
-    ).
+    ),
+    metta_require_algebra_value(Algebra, Carrier, K).
 
 metta_apply_algebra_operation(_, '*', A, B, R) :-
     number(A), number(B), !,
@@ -2335,7 +2346,8 @@ metta_algebra_accepted_laws -->
 metta_algebra_accepted_laws --> [].
 prolog:error_message(metta_algebra_law_uncheckable(Algebra, Laws, Reason)) -->
     [ 'algebra_law_uncheckable: ~w names ~w but provides no ~w'-
-      [Algebra, Laws, Reason] ].
+      [Algebra, Laws, Reason] ],
+    [ '; declare an explicit finite carrier with carrier= for an exhaustive certificate, or use prov plus .under() for reinterpretation' ].
 prolog:error_message(metta_algebra_carrier_not_closed(Algebra, Operation,
                                                        A, B, Result)) -->
     [ 'algebra_carrier_not_closed: ~w operation ~w maps (~w, ~w) to ~w'-
