@@ -38,7 +38,7 @@
 %     [tested: metta_assertions:a_one_sided_ball_carries_the_missing_bag_alone,
 %     metta_assertions:a_one_sided_message_prints_the_missing_line_alone,
 %     prelude:assertIncludes_failure_carries_the_missing_bag_alone;
-%     commit=WORKTREE]
+%     commit=48ec57e6df02e05ad3b5da50157dea321969bc48]
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 
 %%% Diagnostics / Testing: %%%
@@ -420,7 +420,7 @@ assert(Form, true) :-
 %the convention the engine already holds every OTHER user-facing refusal to
 %[source: engine/metta/registration.pl, metta_host_operation_error/5, whose
 %first condition is atom(Operation) over that same position;
-%commit=WORKTREE], and the two message clauses there render from it. Nothing
+%commit=e9851ae5542263936f11590e059d1e1576d2ce7b], and the two message clauses there render from it. Nothing
 %else reads this position: the classifier below matches the context as `_` and
 %takes its own operation word from the FORMAL.
 report_failed_assertion(Culprit, Form, Missing, Excess) :-
@@ -479,7 +479,7 @@ report_failed_assertion(Culprit, Form, Missing, Excess) :-
 %Dispatching a comparison on that head was rejected on 2026-09-06 for making
 %the reported form load-bearing for semantics
 %[source: docs/journal/2026-09-06-the-bag-diff-an-assertion-already-computes.md;
-%commit=WORKTREE]; a culprit changes no verdict, no bag and no ball.
+%commit=e9851ae5542263936f11590e059d1e1576d2ce7b]; a culprit changes no verdict, no bag and no ball.
 written_assertion_culprit(Form, _, Head) :-
     nonvar(Form),
     Form = [Head|_],
@@ -499,7 +499,7 @@ written_assertion_culprit(_, Door, Door).
 %report at all until this door existed
 %[source: docs/journal/2026-09-06-the-bag-diff-an-assertion-already-computes.md,
 %"assertIncludes is OUT ... revisit when a one-sided assertion door is
-%wanted"; commit=WORKTREE].
+%wanted"; commit=48ec57e6df02e05ad3b5da50157dea321969bc48].
 %
 %TWO doors rather than one door taking the relation as an argument. A mode
 %argument is a closed value set no lane can check, which the same thread

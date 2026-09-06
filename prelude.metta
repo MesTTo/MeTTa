@@ -15,7 +15,7 @@
 ;     assert-includes-answers, so a failure names the call as written and the
 ;     answers missing from the expectation, with the excess side absent
 ;     [tested: prelude:assertIncludes_failure_carries_the_missing_bag_alone,
-;     prelude:assertIncludes_subset_passes; commit=WORKTREE]
+;     prelude:assertIncludes_subset_passes; commit=48ec57e6df02e05ad3b5da50157dea321969bc48]
 ; Open Obligations:
 ;   To Do: None
 ;   Hacks: None
@@ -186,7 +186,7 @@
 ;reader a bag that is not a reason for the failure; the door reports the
 ;answers missing from the expectation and leaves the excess side absent
 ;[source: engine/metta/runtime.pl, 'assert-includes-answers'/5;
-;commit=WORKTREE].
+;commit=48ec57e6df02e05ad3b5da50157dea321969bc48].
 (= (assertIncludes $A $B)
    (let $Actual (collapse $A)
      (let $Diff (subtraction-atom $B $Actual)
