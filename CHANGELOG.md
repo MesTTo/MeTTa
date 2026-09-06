@@ -57,6 +57,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Calling `Answers.index()` with a missing string that is also a column name
+  now explains that `index` searches row values and points to `column(name)`;
+  successful and ordinary missing-value Sequence behavior is unchanged.
+
 - Joining a thread that collects clauses inside a transaction no longer kills
   the process. Source materialization retires a collected relation through a
   callback SWI delivers from clause garbage collection, and that callback
@@ -388,6 +392,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   their `unwind(halt(Status))` control signal as an application error.
 
 ### Added
+
+- Binding answer collections now provide `column(name)` and
+  `group_by(column)`. Groups are keyed by the column's atom and retain `Rows`
+  values with the original columns.
 
 - A bounded slice of a ranked match reaches the provider as a bound.
   `m.match(q, under=ranked)[:3]` pulled the ordinary cursor and sliced in

@@ -305,6 +305,7 @@ module-tier default context.
 
 `Rows` is a list of `Row` with `.columns`. `row.x` and `row["x"]` both work.
 `rows.one()` (exactly one), `.first()`, `.column(name)` -> that column's atoms,
+`.group_by(name)` -> a dict from each column atom to its `Rows` slice,
 `.table()` -> dict of columns decoded to Python values, `.to_dicts()` -> plain
 mappings, `.to_df()` / `.to_pl()` -> pandas / polars, `.build(column, cls)`
 rebuilds one named column, and `.build(cls)` rebuilds the sole constructor

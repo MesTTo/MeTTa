@@ -103,6 +103,22 @@ def copy(self) -> Rows:
 
 No docstring is defined.
 
+### `Rows.column`
+
+```python
+def column(self, name: str) -> list[Any]:
+```
+
+> Project one exact column name.
+
+### `Rows.group_by`
+
+```python
+def group_by(self, column: str) -> dict[Atom, Rows]:
+```
+
+> Group rows by the atom in one exact column.
+
 ### `Rows.first`
 
 ```python
@@ -263,6 +279,30 @@ def columns(self) -> tuple[str, ...]:
 ```
 
 > Caller-variable names available for projection.
+
+### `Answers.index`
+
+```python
+def index(self, value: T, start: int = 0, stop: int | None = None) -> int:
+```
+
+> Return a row position, with a remedy for column-name collisions.
+
+### `Answers.column`
+
+```python
+def column(self, name: str) -> Answers[Any]:
+```
+
+> Project one exact caller-variable column.
+
+### `Answers.group_by`
+
+```python
+def group_by(self, column: str) -> dict[Atom, Rows]:
+```
+
+> Materialize binding rows grouped by one atom-valued column.
 
 ### `Answers.rows`
 
