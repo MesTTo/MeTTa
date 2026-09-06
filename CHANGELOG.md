@@ -139,6 +139,23 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   thread's identity. A collection that used to cost 331 engines for 5,000
   clauses costs none.
 
+- A user typing rule no longer silences the argument refusals it says nothing
+  about, and no longer outlives the space that declared it. Two defects met in
+  one wrong answer: a wrong-typed call answered NOTHING, no value and no error,
+  in a program that had never declared a typing rule at all.
+
+  `add-typing-rule!` writes its entry into the execution module of the space
+  that ran it, and the refusal path committed on the mere existence of such an
+  entry, so a module holding one rule about `Count` lost the ordinary
+  `(BadArgType 1 Number String)` for every other pair. The refusal now asks for
+  a named refusal and falls back to the ordinary one, which is what it did
+  before the probe that made the question cheap was added. Releasing a space
+  now retires that module's user typing rules beside the tokens and translator
+  registrations it already retired, so a program that takes a released space
+  name is checked under the shipped policy rather than under a dead program's.
+  Anonymous space names are pooled, which is what turned a leaked rule into a
+  wrong answer for an unrelated later program.
+
 - The `parity` gate's verdict no longer depends on how loaded the box is. It
   reported `engine 0 verdicts` (or `library 0 verdicts`) for a different
   example on each run, five times over sixteen whole-corpus runs at loadavg
