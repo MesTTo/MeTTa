@@ -38,6 +38,12 @@
 %   commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
 % Guarantees: metta_error_atom/4 preserves Error data and records diagnostics only
 %   during explicit observation [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
+% Guarantees: a module holding a user typing rule still answers the ordinary
+%   BadArgType for every pair that rule says nothing about, while a named
+%   refusal replaces it for the pair the rule does name [tested:
+%   typing_rule_scope:a_user_rule_that_names_no_refusal_leaves_the_ordinary_one,
+%   typing_rule_scope:a_named_refusal_replaces_the_ordinary_one_for_its_own_pair;
+%   commit=84327245373bba29fba00cf2cea62d8257a9f5cb].
 
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 
@@ -169,23 +175,39 @@ metta_bad_argument_error(Operation, Arguments, Error) :-
 %[measured 2026-08-30: 308,570,186 inferences before and after]. A refused
 %call pays it, and a refused call is exactly where an error message is being
 %built, so the work removed is work no answer depended on.
+%
+%THE PROBE SELECTS THE QUESTION, IT DOES NOT ANSWER IT. The cut commits to
+%asking about a named refusal, and the ordinary shape is the ELSE of that
+%question rather than a clause the cut has removed. A user rule decides only
+%the pairs it names: a module holding one rule about `Count` still owes the
+%ordinary `(BadArgType 1 Number String)` for every pair the rule says nothing
+%about. Written as two clauses with the cut between them, the module's FIRST
+%user rule silenced every ordinary argument refusal in it, so a wrong-typed
+%call answered nothing at all, no value and no error
+%[tested: a_user_rule_that_names_no_refusal_leaves_the_ordinary_one;
+%commit=84327245373bba29fba00cf2cea62d8257a9f5cb].
 metta_bad_argument_refusal(Operation, Arguments, Error) :-
     current_metta_module(Module),
     raw_registered_typing_rule(user, Module, _, _, _, _, _),
     !,
-    metta_operation_parameters(Operation, Arguments, ParameterTypes, Origins,
-                               RawChain, Chain),
-    metta_named_rule_refusal(Module, ParameterTypes, Origins, Arguments, 1,
-                             Position, Expected, Actual, Rule, Reason),
-    !,
-    metta_type_refusal_reason(RawChain, Chain, Position, Expected, Actual,
-                              [['TypingRuleRefusal', Rule, Reason]], Refusal),
-    metta_error_atom(Operation, Arguments, Refusal, Error).
+    (   metta_operation_parameters(Operation, Arguments, ParameterTypes,
+                                   Origins, RawChain, Chain),
+        metta_named_rule_refusal(Module, ParameterTypes, Origins, Arguments, 1,
+                                 Position, Expected, Actual, Rule, Reason)
+    ->  metta_type_refusal_reason(RawChain, Chain, Position, Expected, Actual,
+                                  [['TypingRuleRefusal', Rule, Reason]],
+                                  Refusal),
+        metta_error_atom(Operation, Arguments, Refusal, Error)
+    ;   metta_ordinary_argument_refusal(Operation, Arguments, Error)
+    ).
+
+metta_bad_argument_refusal(Operation, Arguments, Error) :-
+    metta_ordinary_argument_refusal(Operation, Arguments, Error).
 
 %One error per declared ARROW and per rejected ACTUAL type, arrows in
 %declaration order and actual types in the order get-type reports them, which
 %is the multiplicity and the order the arbiter pins.
-metta_bad_argument_refusal(Operation, Arguments, Error) :-
+metta_ordinary_argument_refusal(Operation, Arguments, Error) :-
     metta_operation_parameters(Operation, Arguments, ParameterTypes, Origins,
                                RawChain, Chain),
     metta_bad_argument(ParameterTypes, Origins, Arguments, 1,
