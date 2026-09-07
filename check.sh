@@ -17,7 +17,8 @@
 #                                            jscpd jscpd-prolog prolog
 #                                            ciao-grade
 #                                            codec-doc petta parity-perf
-#                                            pygments-sync tokenisation
+#                                            face-sync pygments-sync
+#                                            tokenisation
 #                                            tokenisation-selftest kernel
 #                                            parity-perf-selftest
 #                                            parity-fuzz parity-fuzz-selftest
@@ -628,6 +629,14 @@ run GATE codec-doc  "$PY" "$HERE/extensions/python/tools/codecdoc.py"
 # what the catalog says. Before it, the annotations surface advertised six
 # semirings while the engine acted on two, and nothing said which was right.
 run GATE vocab-sync "$PY" "$HERE/extensions/python/tools/vocabgen.py"
+
+# A MeTTa library that wraps a Python module is GENERATED from that module's
+# own signatures, and this asks whether what is checked in is what the module
+# publishes now. Each face names its module in its own header, so this lane
+# names none: a torch upgrade that moves a signature is a finding with the
+# lines that moved, and a box without the library is told which face went
+# unchecked rather than shown a green lane that checked nothing.
+run GATE face-sync "$PY" "$HERE/extensions/python/tools/facegen.py"
 
 # One grammar colours the site, the editor and every Pygments consumer.
 # metta/_pygments.py is generated from website/.vitepress/metta.tmLanguage.json,

@@ -1645,7 +1645,10 @@ cross but its fields or public methods must not become MeTTa callables. The
 keyword-only decorator form is not supported.
 
 `metta.integrate`: `module_ops(m, module, names=, effect=, prefix=, rename=,
-transport="raw")` registers a whole module's callables, `facts(m, atoms)` bulk-writes,
+transport="raw")` registers a whole module's callables,
+`face(module, names=, purpose=, prefix=, rename=, effects=, signatures=) -> str`
+writes those same names out as MeTTa SOURCE instead of registering them,
+`facts(m, atoms)` bulk-writes,
 `wrap_callable(m, name, target, effect=)`,
 `wrap_object(m, name, obj, methods, effects=)`, `reflect(m, name, obj)`,
 `install_reflection_ops(m)`, `integrate(m, target)`, `Integration`,
@@ -2579,7 +2582,9 @@ function names, with grounded values compared crisply; match quality as a measur
 `lib_strategy` a Stratego-style strategy basis whose plans are ordinary atoms;
 `lib_string` text, imported when you need it; `lib_tabling` expert-only tabling
 control; `lib_thread` parallel data operations, M:N futures and timers;
-`lib_torch` PyTorch from plain MeTTa through py-call; `lib_vector` dot, norm,
+`lib_torch` PyTorch from plain MeTTa through py-call, GENERATED from torch's
+own signatures by `extensions/python/tools/facegen.py` and gated by the
+`face-sync` lane; `lib_vector` dot, norm,
 cosine and random-normal-vector; `lib_zar` Prolog interop, consult and
 use_module wrappers. Scored answers and fuzzy or regex matching
 are `lib_measure` and `lib_regex` riding the general seam, not Python modules:

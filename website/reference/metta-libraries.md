@@ -44,7 +44,7 @@ beside its definitions.
 | lib_string | 19 | 0 |
 | lib_tabling | 11 | 0 |
 | lib_thread | 55 | 0 |
-| lib_torch | 20 | 0 |
+| lib_torch | 20 | 19 |
 | lib_vector | 5 | 0 |
 | lib_zar | 4 | 0 |
 
@@ -526,3 +526,286 @@ Tests written symbol representation, regardless of function registration
 Returns: True for a symbol, False otherwise
 
 Undocumented: `soft-aggregation`, `soft-best`, `soft-fold`, `soft-match`, `soft-score`, `soft-score-by`, `soft-walk`, `sym-sim`
+
+## lib_torch
+
+### `torch-tensor`
+
+*lib_torch.metta:31*
+
+```metta
+(: torch-tensor (-[det,writesState]-> %Undefined% %Undefined%))
+```
+
+Constructs a tensor with no autograd history (also known as a "leaf tensor", see :doc:`/notes/autograd`) by copying :attr:`data`.
+
+1. Initial data for the tensor. Can be a list, tuple, NumPy ``ndarray``, scalar, and other types.
+
+Returns: %Undefined%
+
+### `torch-zeros`
+
+*lib_torch.metta:39*
+
+```metta
+(: torch-zeros (-[det,writesState]-> %Undefined% %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+Returns a tensor filled with the scalar value `0`, with the shape defined by the variable argument :attr:`size`.
+
+1. %Undefined%
+2. %Undefined%
+3. %Undefined%
+4. %Undefined%
+
+Returns: %Undefined%
+
+### `torch-ones`
+
+*lib_torch.metta:51*
+
+```metta
+(: torch-ones (-[det,writesState]-> %Undefined% %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+Returns a tensor filled with the scalar value `1`, with the shape defined by the variable argument :attr:`size`.
+
+1. %Undefined%
+2. %Undefined%
+3. %Undefined%
+4. %Undefined%
+
+Returns: %Undefined%
+
+### `torch-randn`
+
+*lib_torch.metta:63*
+
+```metta
+(: torch-randn (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+Returns a tensor filled with random numbers from a normal distribution with mean `0` and variance `1` (also called the standard normal distribution).
+
+1. %Undefined%
+2. %Undefined%
+3. %Undefined%
+4. %Undefined%
+
+Returns: %Undefined%
+
+### `torch-arange`
+
+*lib_torch.metta:73*
+
+```metta
+(: torch-arange (-[det,writesState]-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+Returns a 1-D tensor of size :math:`\left\lceil \frac{\text{end} - \text{start}}{\text{step}} \right\rceil` with values from the interval ``[start, end)`` taken with common difference :attr:`step` beginning from `start`.
+
+1. the starting value for the set of points. Default: ``0``.
+2. the ending value for the set of points
+3. the gap between each pair of adjacent points. Default: ``1``.
+
+Returns: %Undefined%
+
+### `torch-matmul`
+
+*lib_torch.metta:79*
+
+```metta
+(: torch-matmul (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
+```
+
+Matrix product of two tensors.
+
+1. the first tensor to be multiplied
+2. the second tensor to be multiplied
+
+Returns: %Undefined%
+
+### `torch-add`
+
+*lib_torch.metta:83*
+
+```metta
+(: torch-add (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
+```
+
+Adds :attr:`other`, scaled by :attr:`alpha`, to :attr:`input`.
+
+1. the input tensor.
+2. the tensor or number to add to :attr:`input`.
+
+Returns: %Undefined%
+
+### `torch-sub`
+
+*lib_torch.metta:87*
+
+```metta
+(: torch-sub (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
+```
+
+Subtracts :attr:`other`, scaled by :attr:`alpha`, from :attr:`input`.
+
+1. the input tensor.
+2. the tensor or number to subtract from :attr:`input`.
+
+Returns: %Undefined%
+
+### `torch-mul`
+
+*lib_torch.metta:91*
+
+```metta
+(: torch-mul (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
+```
+
+Multiplies :attr:`input` by :attr:`other`.
+
+1. the input tensor.
+2. the tensor or number to multiply input by.
+
+Returns: %Undefined%
+
+### `torch-div`
+
+*lib_torch.metta:95*
+
+```metta
+(: torch-div (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
+```
+
+Divides each element of the input ``input`` by the corresponding element of :attr:`other`.
+
+1. the dividend
+2. the divisor
+
+Returns: %Undefined%
+
+### `torch-sum`
+
+*lib_torch.metta:99*
+
+```metta
+(: torch-sum (-[det,writesState]-> %Undefined% %Undefined%))
+```
+
+Returns the sum of all elements in the :attr:`input` tensor.
+
+1. the input tensor.
+
+Returns: %Undefined%
+
+### `torch-mean`
+
+*lib_torch.metta:103*
+
+```metta
+(: torch-mean (-[det,writesState]-> %Undefined% %Undefined%))
+```
+
+.. note:: If the `input` tensor is empty, ``torch.mean()`` returns ``nan``. This behavior is consistent with NumPy and follows the definition that the mean over an empty set is undefined.
+
+1. the input tensor.
+
+Returns: %Undefined%
+
+### `torch-sigmoid`
+
+*lib_torch.metta:110*
+
+```metta
+(: torch-sigmoid (-[det,writesState]-> %Undefined% %Undefined%))
+```
+
+Alias for :func:`torch.special.expit`.
+
+1. %Undefined%
+
+Returns: %Undefined%
+
+### `torch-item`
+
+*lib_torch.metta:114*
+
+```metta
+(: torch-item (-[det,readOnlyLookup]-> %Undefined% %Undefined%))
+```
+
+Returns the value of this tensor as a standard Python number. This only works for tensors with one element. For other cases, see :meth:`~Tensor.tolist`.
+
+1. %Undefined%
+
+### `torch-tolist`
+
+*lib_torch.metta:118*
+
+```metta
+(: torch-tolist (-[det,readOnlyLookup]-> %Undefined% %Undefined%))
+```
+
+Returns the tensor as a (nested) list. For scalars, a standard Python number is returned, just like with :meth:`~Tensor.item`. Tensors are automatically moved to the CPU first if necessary.
+
+1. %Undefined%
+
+### `torch-shape`
+
+*lib_torch.metta:122*
+
+```metta
+(: torch-shape (-[det,readOnlyLookup]-> %Undefined% %Undefined%))
+```
+
+Returns the size of the :attr:`self` tensor. Alias for :attr:`size`.
+
+1. %Undefined%
+
+Returns: %Undefined%
+
+### `torch-requires-grad`
+
+*lib_torch.metta:127*
+
+```metta
+(: torch-requires-grad (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
+```
+
+Change if autograd should record operations on this tensor: sets this tensor's :attr:`requires_grad` attribute in-place. Returns this tensor.
+
+1. %Undefined%
+2. If autograd should record operations on this tensor. Default: ``True``.
+
+Returns: %Undefined%
+
+### `torch-backward`
+
+*lib_torch.metta:136*
+
+```metta
+(: torch-backward (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+Computes the gradient of current tensor wrt graph leaves.
+
+1. %Undefined%
+2. The gradient of the function being differentiated w.r.t. ``self``. This argument can be omitted if ``self`` is a scalar. Defaults to ``None``.
+3. If ``False``, the graph used to compute the grads will be freed; If ``True``, it will be retained. The default is ``None``, in which case the value is inferred from ``create_graph`` (i.e., the graph is retained only when higher-order derivative tracking is requested). Note that in nearly all cases setting this option to True is not needed and often can be worked around in a much more efficient way.
+4. If ``True``, graph of the derivative will be constructed, allowing to compute higher order derivative products. Defaults to ``False``.
+5. Inputs w.r.t. which the gradient will be accumulated into ``.grad``. All other tensors will be ignored. If not provided, the gradient is accumulated into all the leaf Tensors that were used to compute the :attr:`tensors`. A dict of tensors (e.g. ``dict(model.named_parameters())``) is also accepted. Defaults to ``None``.
+
+### `torch-grad`
+
+*lib_torch.metta:144*
+
+```metta
+(: torch-grad (-[det,oracleIO]-> %Undefined% %Undefined%))
+```
+
+This attribute is ``None`` by default and becomes a Tensor the first time a call to :func:`backward` computes gradients for ``self``. The attribute will then contain the gradients computed and future calls to :func:`backward` will accumulate (add) gradients into it.
+
+1. %Undefined%
+
+Undocumented: `torch-relu`

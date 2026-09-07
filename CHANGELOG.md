@@ -9,6 +9,48 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- A MeTTa library that wraps a Python module is GENERATED from that module's
+  own signatures. `metta.integrate.face(module, names=, purpose=)` writes the
+  library `module_ops` would have registered: one arrow per reachable
+  positional call form, the `(@doc ...)` atom the docstring already carries,
+  and the `py-call` equation that applies the name. The selection is Python's
+  own two import shapes, the whole module or a list, `rename=` is the import's
+  `as`, and a name may reach a class inside the module, since the resolver is
+  `py-atom`'s dotted one. The head is the module's prefix and the name's own
+  spelling with underscores read as hyphens, so `requires_grad_` reaches
+  `torch-requires-grad`, and the call forms are the arities a registration
+  serves, from the same rule.
+
+- `lib_torch` is that library rather than a hand-written one. Its 20 heads and
+  the two examples that exercise them answer exactly as before; its 21
+  equations became 39, because a defaulted or variadic parameter that reached
+  only one call form now reaches every one it can, and each head gained the
+  arrow, the effect class and the documentation torch itself publishes. Its
+  header carries what torch cannot say for itself: four signature lines, since
+  `torch.relu` has no docstring at all and `torch.arange`'s says
+  `arange(start=0, end, step=1)`, which Python's grammar refuses; and three
+  effect reviews, since a signature shows random construction as an ordinary
+  constructor and a docstring's `-> number` names no type.
+
+- `extensions/python/tools/facegen.py` and the `face-sync` gate lane keep every
+  generated face and the module it was read from one authority. Each face names
+  its own module in its header, so the tool names none: it regenerates from the
+  header and requires the same bytes. A signature that moves is a finding with
+  the lines that moved, never a silent rewrite; a version bump alone is a note,
+  because the header pins the version the face was READ from; and a module this
+  box has not got is reported as unchecked rather than passing a lane that
+  checked nothing.
+
+- `EXTENDING.md` gains "A face for your module": the two import shapes, the
+  three header escapes and what each refuses, the effect rule, the sync lane,
+  and how a package outside this repository generates and gates its own faces
+  with no line here naming it.
+
+- The MeTTa library reference renders a typed `(@param (@type T) (@desc D))` as
+  its description rather than as the type atom, which is the shape every
+  Python-side doc atom is built in; a parameter the source describes now reads
+  as prose, and a parameter it says nothing about reads as its type.
+
 - Sequence variables reach the executable corpus. `examples/ch08-data/08-02-sequence-variables/`
   grows from one file to five: a gap in an EQUATION HEAD, which makes that
   function variable-arity and splices its run back into the body when the body
