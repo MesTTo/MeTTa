@@ -40,19 +40,31 @@
 ;;; nothing in the language reaches them.
 ;;;
 ;;; last-position shapes: a trailing gap facing a longer side, and a repeated
-;;; name in trailing position on both sides.
+;;; name in trailing position on both sides. Given two parsed sides the
+;;; calculus answers `()` for the first, the empty run, and `(b)` for the
+;;; second
+;;; [tested: tests/prolog/suites/reader/segments.plt:a_trailing_gap_takes_the_empty_run,
+;;; tests/prolog/suites/reader/segments.plt:a_repeated_gap_solves_its_stored_run_against_the_second_face;
+;;; commit=a403e56b4f33828834823338eb1fc316e3fea2a4].
 !(test (unify (f a b) (f a b (:seg $v)) $v none) none)
 !(test (unify (f (g (:seg $x)) (h (:seg $x))) (f (g (:seg $y)) (h b)) $x none)
        none)
 ;;; linear-shallow shapes: two root gaps that would absorb each other's fixed
-;;; children.
+;;; children. Given two parsed sides the calculus answers `((a) (b))` for the
+;;; first and `(((g b)) ((g a)))` for the second
+;;; [tested: tests/prolog/suites/reader/segments.plt:two_root_gaps_solve_to_their_runs,
+;;; tests/prolog/suites/reader/segments.plt:gaps_absorb_each_others_settled_children;
+;;; commit=a403e56b4f33828834823338eb1fc316e3fea2a4].
 !(test (unify (f (:seg $u) b) (f a (:seg $v)) ($u $v) no) no)
 !(test (unify (f (:seg $u) (g a)) (f (g b) (:seg $v)) ($u $v) no) no)
 
 ;;; And the same cause turns the calculus's own trivial identity into a
-;;; refusal: `(f (:seg $u))` against itself has no mixed role at all, but the
-;;; unparsed right side puts `$u` in the classifier's ORDINARY list, so the
-;;; mixed-role rule fires. 05-the-fence.metta is the rule this misreads.
+;;; refusal. `(f (:seg $u))` against itself has no mixed role at all, and given
+;;; two parsed sides the calculus answers `yes`, keeping `X = X` as trivial
+;;; [tested: tests/prolog/suites/reader/segments.plt:the_trivial_identity_holds;
+;;; commit=a403e56b4f33828834823338eb1fc316e3fea2a4]. The unparsed right side
+;;; puts `$u` in the classifier's ORDINARY list instead, so the mixed-role rule
+;;; fires. 05-the-fence.metta is the rule this misreads.
 !(test (let $refusal (catch (unify (f (:seg $u)) (f (:seg $u)) yes no))
             (index-atom (index-atom $refusal 1) 4))
        mixed_roles)
