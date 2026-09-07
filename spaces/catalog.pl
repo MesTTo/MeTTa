@@ -74,7 +74,7 @@
 % catalog_lifecycle:withdrawing_the_ownership_row_stops_the_retirement,
 % catalog_self_description:an_ownership_row_without_its_kind_is_refused,
 % catalog_self_description:an_ownership_row_over_a_kind_without_a_space_position_is_refused;
-% commit=WORKTREE].
+% commit=76dbea9f4bc10804a5ca19493972dfb7975bc4b0].
 
 % Guarantees: finite tensor closure and law witnesses compare shape and exact
 % values [tested: test_finite_tensor_semiring_checks_every_law; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
@@ -572,15 +572,15 @@ metta_space_catalog_head(Head) :- metta_routed_head(Head, context).
 %CASCADE reach an extension's own objects, walking stored edges instead of a
 %list compiled into the server
 %[source: https://www.postgresql.org/docs/18/catalog-pg-depend.html, the
-%DEPENDENCY_EXTENSION row; commit=WORKTREE], and it is the ownership rule the
+%DEPENDENCY_EXTENSION row; commit=76dbea9f4bc10804a5ca19493972dfb7975bc4b0], and it is the ownership rule the
 %2026-09-06 retirement thread already mapped this walk onto
 %[source: docs/journal/2026-09-06-algebra-rows-die-with-their-space.md,
-%"Research mapping"; commit=WORKTREE].
+%"Research mapping"; commit=76dbea9f4bc10804a5ca19493972dfb7975bc4b0].
 %The retirement walk below reads position 1 as the owning space, which is
 %where every shipped context-owned head already carries it, so the marker
 %names the head alone
 %[tested: catalog_lifecycle:release_retires_a_third_party_owned_by_space_kind;
-%commit=WORKTREE].
+%commit=76dbea9f4bc10804a5ca19493972dfb7975bc4b0].
 metta_space_catalog_head(Head) :- metta_catalog_row(['owned-by-space', Head]).
 metta_space_catalog_head(annotations).
 metta_space_catalog_head(source).
