@@ -987,6 +987,13 @@ kind(metta_deprecation/3, host_service).
 %from the head's arrow -- is the engine's. Publishing it is what stops a binding
 %deriving the measure a second time and drifting from what (explain ...) says.
 kind(metta_cost_declaration/4, host_service).
+%Which heads one MeTTa source REGISTERS, read from the source and never run.
+%The registration spellings are the engine's own (`import_prolog_function` and
+%its four importer siblings), so a host that read them itself would carry a
+%table of engine forms that goes stale the day a sixth is added -- which is
+%exactly what the generated library reference did by not reading them at all,
+%counting lib_memo at zero names while nine were callable.
+kind(metta_string_registrations/2, host_service).
 %A host query supplies one dynamic carrier around an engine-owned goal, then
 %reads the same effective carrier and its multiplicative identity when it
 %decodes or initializes answer annotations. These are doors into the algebra

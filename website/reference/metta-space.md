@@ -2612,6 +2612,51 @@ def info(self) -> dict[str, str | None]:
 
 > Return backend versions and the consulted MeTTa runtime tree.
 
+### `MeTTa.lock`
+
+```python
+def lock(self) -> Lock:
+```
+
+> Pin the knowledge this context has loaded, as a `Lock`.
+>
+>     m.load("kb/facts.metta")
+>     m.lock().write("metta.lock")
+>     python -m metta lock kb/facts.metta -o metta.lock
+>
+> One `[[library]]` row per shipped library imported, one `[]`
+> row per other file loaded with the space it landed in, one `[[pin]]`
+> row per repository revision acquired, and an `[engine]` table naming
+> this build and a digest over its own sources: what a second machine
+> needs to load exactly this program. `metta.Lock.read` reads one back
+> and :meth:`check` says what a tree no longer matches.
+>
+> The scope is the PROCESS, not this context. The engine's loads,
+> registrations and git pins are process-wide, and a program that loads
+> knowledge into `&kb` from one place and reads it from another is one
+> program; a lock naming only one context's own loads would omit the
+> rest of what has to be reproduced. Two contexts in one process
+> therefore take the same lock.
+>
+> A lock taken while a source is still loading is refused, because it
+> would record a program that is only half there.
+
+### `MeTTa.check`
+
+```python
+def check(self, lock: Lock) -> list[Drift]:
+```
+
+> Every entry of a lock this tree no longer matches, as `Drift` rows.
+>
+>     for drift in m.check(metta.Lock.read("metta.lock")):
+>         print(drift)
+>
+> An empty list is agreement. Nothing is loaded to answer it: each entry
+> names something on disk, so the answer is what a fresh process would
+> find rather than what this one happens to hold. `metta run --locked`
+> is the same check with a refusal instead of a list.
+
 ### `MeTTa.space`
 
 ```python

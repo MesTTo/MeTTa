@@ -793,3 +793,90 @@ test(a_host_loader_called_from_metta_loads_into_the_process_tier,
     metta_release_space(Space).
 
 :- end_tests(prolog_interface_namespacing).
+
+:- begin_tests(prolog_interface_registrations).
+
+% Which heads a source REGISTERS is the engine's question because the
+% registration spellings are the engine's own. A reader that could not ask it
+% reported the library as empty: the generated reference counted lib_memo at
+% zero names while nine of its heads were callable, because all nine arrive
+% through runnable `!(import_prolog_function ...)` forms.
+test(one_form_names_the_head_it_registers) :-
+    metta_registration_names([import_prolog_function, 'plunit-reg-one'],
+                             Names),
+    assertion(Names == ['plunit-reg-one']).
+
+test(the_plural_form_names_its_whole_list) :-
+    metta_registration_names([import_prolog_functions,
+                              ['plunit-reg-a', 'plunit-reg-b']], Names),
+    assertion(Names == ['plunit-reg-a', 'plunit-reg-b']).
+
+% All four importer spellings, from the translator's own published roster
+% rather than from a list kept here, so a fifth is covered where it is added.
+test(every_importer_spelling_names_its_list) :-
+    forall(translator:prolog_function_importer(Importer),
+           ( metta_registration_names([Importer, "some.pl", ['plunit-reg-c']],
+                                      Names),
+             assertion(Names == ['plunit-reg-c']) )).
+
+% A computed name list claims nothing rather than publishing a variable or an
+% unevaluated call as a head name.
+test(a_computed_name_list_claims_nothing) :-
+    metta_registration_names([import_prolog_functions,
+                              ['car-atom', ['plunit-reg-d']]], Computed),
+    assertion(Computed == []),
+    metta_registration_names([import_prolog_function, _Unbound], Unbound),
+    assertion(Unbound == []),
+    metta_registration_names(['println!', "not a registration"], None),
+    assertion(None == []).
+
+% The source-level answer carries the INDEX of the form that claims each name,
+% which is what lets a host pair it with the line its own position walk knows
+% without a second parse.
+test(a_source_answers_its_registrations_with_form_indices) :-
+    metta_string_registrations(
+        "(: plunit-reg-kept (-> Number))\n\c
+         !(import_prolog_function plunit-reg-e)\n\c
+         !(import_prolog_functions (plunit-reg-f plunit-reg-g))\n",
+        Rows),
+    assertion(Rows == [['plunit-reg-e', 1],
+                       ['plunit-reg-f', 2],
+                       ['plunit-reg-g', 2]]).
+
+test(a_source_registering_nothing_answers_nothing) :-
+    metta_string_registrations("(= (plunit-reg-h) 1)\n", Rows),
+    assertion(Rows == []).
+
+% Reading is not running: the name below has no predicate behind it, so
+% performing the form would raise, and asking leaves it unregistered.
+test(reading_a_registration_does_not_perform_it) :-
+    metta_string_registrations(
+        "!(import_prolog_function plunit-reg-absent)\n", Rows),
+    assertion(Rows == [['plunit-reg-absent', 0]]),
+    assertion(\+ fun('plunit-reg-absent')).
+
+% The version an extension declares travels with its name, so a reader asking
+% what a library states does not have to consult the file to learn it.
+test(a_declared_version_is_part_of_what_a_source_declares,
+     [ setup(setup_versioned_source), cleanup(cleanup_versioned_source) ]) :-
+    nb_getval('$plunit_versioned_path', Path),
+    metta_source_declarations(Path, Declarations),
+    assertion(memberchk(extension(plunit_versioned), Declarations)),
+    assertion(memberchk(version('3.2.1'), Declarations)),
+    assertion(memberchk(requires(concurrency), Declarations)).
+
+setup_versioned_source :-
+    tmp_file_stream(text, Path, Stream),
+    format(Stream,
+           ":- metta_extension(plunit_versioned, [version('3.2.1')]).~n", []),
+    format(Stream, ":- metta_requires(concurrency).~n", []),
+    close(Stream),
+    nb_setval('$plunit_versioned_path', Path).
+
+cleanup_versioned_source :-
+    ( nb_current('$plunit_versioned_path', Path)
+    -> delete_file(Path)
+    ;  true ),
+    nb_delete('$plunit_versioned_path').
+
+:- end_tests(prolog_interface_registrations).

@@ -23,7 +23,7 @@ re-runs them.
 | `examples/**/*.metta` | 266 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 24 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
-| `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms | `extensions/python/tools/libdoc.py` |
+| `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
 | `tests/prolog/suites/*/*.plt` | plunit suites over the engine itself, grouped by the engine unit each one tests | the `plunit` gate lane |
 | `extensions/python/tests/*/test_*.py` | blackbox, hypothesis-fuzzed, in the same 20 chapters `examples/` uses, plus `conformance/` for the arbiters and `repository/` for the tests whose subject is this repository | the `pytest` gate lane |
 | `extensions/python/examples/language-feature-examples/**/*.py` | one Python file per shipped MeTTa example, written with no MeTTa source text, answering alpha-equal to its original or explicitly declining a structured-residue form, and pinned to an inference budget. Read these for how a MeTTa program is spelled in Python | the `twins` REPORT lane |
@@ -38,8 +38,8 @@ re-runs them.
 | `extensions/python/examples/*/*.py` | runnable Python programs, each printing checked claims through `_common.py`: `check(label, got, expected)` raises `CheckFailed` rather than asserting, because `python -O` strips an assert while the print under it still runs, and `done(name)` refuses to print its OK line when nothing was checked, so an example that verified nothing cannot report success; the six under `gallery/` also check adjacent emitted-MeTTa and output comments plus bilingual `@example` atoms | the `examples` and `gallery` gate lanes |
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
 | `engine/**/*.pl` | `engine/metta.pl` engine bootstrap loading the thirteen `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, space_hooks, runtime, control, interop, registration), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eight `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products), `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.metta`. Each unit is a plain source file consulted by its umbrella, so predicate ownership and load order are the umbrella's | |
-| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 94, `service` 61, `ownership` 38, `event` 14, `declaration` 13. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
-| `lib/lib_*/` | 38 MeTTa libraries, implemented in `.metta`, `.pl`, or both, loaded with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
+| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 95, `service` 61, `ownership` 38, `event` 14, `declaration` 13. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
+| `lib/lib_*/` | 38 MeTTa libraries, implemented in `.metta`, `.pl`, or both, loaded with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x`, and `metta.library.card("lib_x")` answers what one says about itself | `extensions/python/tests/ch08_data/test_library_door.py`, `test_library_card.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
 | `extensions/*/extension.pl` | one control file per seat, read when argv carries `extensions` and never read without it; a seat's `entry(engine, _)` loads only where its declared needs hold and its `entry(host, _)` is recorded for the seat's own runtime to consult, so the engine names neither a host nor a backend | |
 | `extensions/node/src/*.ts` | MeTTa as a TypeScript library, the engine embedded in a Node process over swipl-wasm and the seam's second consumer: interned atoms, spaces as collections, lazy thenable answers, a lowered-source `define`, a traced generator `define`, host `op`s the engine calls back into, and `using` scopes. `extensions/node/bridge.pl` is its Prolog half and calls published surface only | the `node-binding` gate lane, and `extensions/python/tests/ch21_another_language_at_the_seam/test_node_binding.py` answers the same corpus in both hosts |
@@ -1603,7 +1603,7 @@ performed form is stored as its own atom, so the running app answers
 mid-way keeps its performed prefix's writes, closes any servers it started, and
 names the failing form.
 
-`python -m metta` has nine subcommands: `run` (files, printing each `!` answer
+`python -m metta` has eleven subcommands: `run` (files, printing each `!` answer
 group), `repl` (paren-balance aware; on a terminal, TAB completes a head or a
 `&space` against the live engine and history persists in `~/.metta_history`, or
 wherever `METTA_HISTORY` points), `serve`, `boot`, `lint` (nonzero
@@ -1611,9 +1611,54 @@ exit on findings; `--json` prints one LSP Diagnostic per line and `--fix`
 applies every `machine` remedy in place and lists the rest with their
 reasons, exiting nonzero on what remains), `doc` (a name's `(@doc ...)`), `llms` (this file),
 `stubs` (`file.metta... [-o out.pyi]`, the loaded program's declarations as a
-Python stub, with the program's own printing kept on stderr), and
+Python stub, with the program's own printing kept on stderr),
 `convert` (`program.py [-o out.metta]`, emitting the module's fresh-space
-declarations as loadable MeTTa source).
+declarations as loadable MeTTa source), `card` (`lib_x`, one shipped library's
+own account of itself) and `lock` (`[file.metta...] [-o metta.lock]`, pinning
+what those programs load).
+
+`metta.library`: `card(name) -> Card` is what a shipped library says about
+itself, and `rows(name)` is the query under it, which
+`extensions/python/tools/libdoc.py` renders as the reference page so a card and
+that page cannot disagree. A `Card` carries `name`, `files`, `digest` (each
+file's sha256, sorted, listed under its path and hashed as one document),
+`since` (the version the library declares, else the engine's), `doc` (its own
+opening prose), `heads` (one `HeadCard(name, arrow, doc, effect, cost, origin,
+registered)` per head it declares, defines, documents or REGISTERS through a
+runnable `!(import_prolog_function ...)` form), `effects`, `costs`, `examples`
+(the corpus programs that import it), `deprecations` and `needs` (the platform
+capabilities its `:- metta_requires(...)` declarations name). Reading a library
+neither loads nor runs it, so one whose backend this build has not got still
+describes itself; the effect and cost on a head are what THIS engine currently
+answers, so a card taken after `m += lib.memo` can say more than one taken
+before it. `roster()` is the library-to-files map and `digest(name)` the digest
+alone. Cost: the library's source bytes, plus one crossing for every head's
+live claims, plus one pass over the example corpus the first time any card is
+asked for. `metta.library.card("lib_not_here")` refuses with the roster.
+
+`m.lock() -> Lock` pins what this PROCESS loaded, not what this context
+loaded: the engine's load table, registrations and git pins are process-wide,
+so two contexts in one process take the same lock, which is the unit that has
+to be reproduced. The doors are `Lock.write(path)`,
+`metta.Lock.read(path)`, `m.check(lock) -> list[Drift]`, and
+`metta run --locked metta.lock file.metta`, which checks BEFORE the program
+runs and refuses with `LockDrift` naming every entry that differs. The file is
+TOML in uv's and PEP 751's shape: `lock-version`, `created-by`, an `[engine]`
+table (`metta`, `swi-prolog`, and `sources`, one digest over `engine/**/*.pl`
+and `engine/prelude.metta`, computed once per process), one `[[library]]` row
+per shipped library imported, one `[[source]]` row per other file loaded with
+the space it landed in, and one `[[pin]]` row per repository revision
+`git-import!` or `(git-dependency ...)` acquired. Digests are the engine's own
+`metta_source_digest`, the identity `import!` already compares to decide a
+reload, so a lock check and a reload cannot disagree about whether a file
+changed. A source path is written relative to the lock's own directory when it
+sits under it, so a checked-in lock travels with its program. Refusals: a lock
+taken while a load is in flight (it would record a half-loaded program), a
+`lock-version` this build does not know (refused by number, never read in
+part), and a file that is not TOML. `Drift(kind, name, expected, actual)` with
+`actual` None for an entry that is not here at all. What a lock does NOT pin: a
+program built from text rather than files has no source to digest and gets no
+row, and a bare `!(git-import! url)` with no revision is not a pin.
 
 `metta.remote`: `serve(m, host="127.0.0.1", port=0, spaces=, token=,
 authorize=, ssl_context=, cursor_idle=300, cursor_limit=256, mutation_ttl=300,

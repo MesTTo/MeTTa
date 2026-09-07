@@ -10,40 +10,40 @@ beside its definitions.
 | library | names | documented |
 |---|---|---|
 | lib_builtin_types | 193 | 0 |
-| lib_combinatorics | 6 | 0 |
-| lib_conformance | 1 | 0 |
+| lib_combinatorics | 8 | 0 |
+| lib_conformance | 2 | 0 |
 | lib_constraints | 5 | 0 |
-| lib_crypto | 2 | 0 |
+| lib_crypto | 4 | 0 |
 | lib_csv | 2 | 2 |
 | lib_datastructures | 26 | 9 |
-| lib_datetime | 2 | 0 |
+| lib_datetime | 5 | 0 |
 | lib_derived | 1 | 1 |
 | lib_dict | 7 | 0 |
 | lib_distribution | 7 | 0 |
 | lib_doc | 0 | 0 |
-| lib_file | 18 | 18 |
+| lib_file | 32 | 18 |
 | lib_gitimport | 0 | 0 |
 | lib_he | 0 | 0 |
-| lib_import | 4 | 4 |
-| lib_json | 0 | 0 |
+| lib_import | 8 | 4 |
+| lib_json | 5 | 0 |
 | lib_measure | 17 | 0 |
-| lib_memo | 0 | 0 |
+| lib_memo | 9 | 0 |
 | lib_mm2 | 5 | 0 |
 | lib_nars | 38 | 0 |
 | lib_observe | 2 | 2 |
 | lib_patrick | 4 | 0 |
 | lib_pln | 49 | 0 |
-| lib_pln2 | 0 | 0 |
-| lib_redis | 0 | 0 |
-| lib_reflect | 10 | 9 |
-| lib_regex | 6 | 0 |
+| lib_pln2 | 9 | 0 |
+| lib_redis | 2 | 0 |
+| lib_reflect | 19 | 9 |
+| lib_regex | 12 | 0 |
 | lib_roman | 36 | 0 |
 | lib_soft | 9 | 1 |
 | lib_spaces | 5 | 0 |
 | lib_strategy | 24 | 0 |
-| lib_string | 0 | 0 |
-| lib_tabling | 6 | 0 |
-| lib_thread | 37 | 0 |
+| lib_string | 19 | 0 |
+| lib_tabling | 11 | 0 |
+| lib_thread | 55 | 0 |
 | lib_torch | 20 | 0 |
 | lib_vector | 5 | 0 |
 | lib_zar | 4 | 0 |
@@ -353,6 +353,8 @@ True when a directory exists at the path, False otherwise
 
 Returns: Bool
 
+Undocumented: `append-file!`, `delete-file!`, `file-close!`, `file-get-size!`, `file-lines!`, `file-open!`, `file-read-exact!`, `file-read-to-string!`, `file-seek!`, `file-space!`, `file-write!`, `list-dir!`, `read-file!`, `write-file!`
+
 ## lib_import
 
 ### `import_prolog_functions_from_file`
@@ -397,6 +399,8 @@ Withdraw exactly one MeTTa source's surviving native atoms and compiled definiti
 2. the imported module path, including a path returned by imports
 
 Returns: true
+
+Undocumented: `consult_global`, `static-import!`, `use-module!`, `use_module_global`
 
 ## lib_observe
 
@@ -503,7 +507,7 @@ The engine's whole surface as a JSON string, for external tools
 
 Returns: a JSON string
 
-Undocumented: `origin-of`
+Undocumented: `engine-arity`, `engine-builtin`, `engine-extension-point`, `engine-function`, `engine-knows`, `engine-origin`, `engine-special-form`, `engine-surface-counts`, `engine-user-function`, `origin-of`
 
 ## lib_soft
 

@@ -448,12 +448,22 @@ python -m metta doc car-atom
 python -m metta doc --infer program.metta   # the declarations its atoms justify
 python -m metta llms                     # print llms.txt, the sheet for an agent
 python -m metta stubs program.metta -o program.pyi   # the program's types, for an editor
+python -m metta card lib_memo            # one library's heads, effects, costs, digest
+python -m metta lock program.metta -o metta.lock     # pin what it loads, by digest
+python -m metta run --locked metta.lock program.metta   # refuse unless the tree matches
 ```
 
 `run` is a filter: `--json` writes JSON Lines, `{"query": ..., "answers": [...]}`
 per `!` group on stdout and `{"error": ..., "line": ...}` per failure on stderr,
 with the program's own printing moved to stderr so the stream stays parseable.
 `--json=wire` puts the tagged atom forms in `answers` instead of their text.
+
+`card` prints what a shipped library says about itself: every head it declares,
+defines or registers, each with its `(@doc ...)` prose, the effect class and
+cost class this engine resolves for it, and one digest over the library's
+sources. `lock` writes a `metta.lock` naming the engine build, the libraries a
+program imported and every file it loaded, each by sha256; `run --locked`
+refuses before running when any of them no longer matches, naming what differs.
 
 ## A motivating example
 

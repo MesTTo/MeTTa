@@ -400,5 +400,15 @@ space itself: two spaces agree on it exactly when `save()` would write the same
 content, in any insertion order and in any process. `tests/fixtures/space_digest_vector.json`
 is the vector that pins the digest to its own canonicalization.
 
+A `fixture=` field may also name a whole PROGRAM rather than one space, and a
+`metta.lock` is what names it: `fixture=lock:sha256:<digest of the lock file>`,
+with the lock committed beside the measurement. It pins the engine build, every
+shipped library the program imported and every file it loaded, each by the
+engine's own `metta_source_digest`, so a reader re-running the measurement
+learns from `metta run --locked <lock> <program>` whether the tree still holds
+what the number was measured on, instead of discovering a drifted library
+through a number that no longer reproduces. Write one with `python -m metta
+lock <program.metta> -o <name>.lock`.
+
 `RELEASE=1 python tests/checks/check_evidence_tags.py` is the cut-time check
 that no placeholder survived.
