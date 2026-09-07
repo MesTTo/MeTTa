@@ -33,7 +33,7 @@ Source: `extensions/python/metta/parallel.py`.
 >   - one SWI message queue per Channel, released by close(), context exit, or a
 >     finalizer that retains only the runtime and engine handle.
 > "; fixture=this checkout
->     under load 44; commit=WORKTREE].
+>     under load 44; commit=0179a14353a925115d545fc3ea0dc67eab4e4ecb].
 >   - a fan-out door answers an ITERATOR over results that already exist, not
 >     a list: the whole input is submitted and taken before the door returns,
 >     which is what these pools have always done, while the type is
