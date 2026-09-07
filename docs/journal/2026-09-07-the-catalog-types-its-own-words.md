@@ -175,7 +175,7 @@ Measured: the type atoms cost 50,187 inferences at boot, 3,570,692 against
 `_contract.install()` stops writing about sixty of them per engine
 [measured 2026-09-07; command=`swipl ai-tmp/probe/ai-derive-boot.pl` three
 runs each, identical to the inference; fixture=a worktree with `engine/*.qlf`
-removed; loadavg 32.70; commit=WORKTREE].
+removed; loadavg 32.70; commit=7f9c810e5f4a2023ad98de34e848667dd72bc4a7].
 
 Tried: the `vocab-sync` lane checking only the two generated files -> it would
 have said nothing about the atoms, which are half of what a row implies. The

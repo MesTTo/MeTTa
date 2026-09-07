@@ -95,7 +95,7 @@
 % engine is loaded and thereafter as each row lands
 % [tested: catalog_vocabulary_words:every_vocabulary_row_is_typed,
 % catalog_vocabulary_words:the_declared_type_name_beats_the_map,
-% catalog_vocabulary_words:a_declared_order_is_a_chain; commit=WORKTREE].
+% catalog_vocabulary_words:a_declared_order_is_a_chain; commit=7f9c810e5f4a2023ad98de34e848667dd72bc4a7].
 % Guarantees: a (vocabulary-open ...) row is what admits a
 % (vocabulary-member ...) write, a closed vocabulary refuses one naming the row
 % and the property, and an admitted member answers from every consulting site
@@ -106,11 +106,11 @@
 % catalog_vocabulary_words:a_withdrawn_member_leaves_with_its_type_atom,
 % catalog_vocabulary_words:a_declared_algebra_joins_the_semiring_vocabulary,
 % catalog_vocabulary_words:an_algebra_row_leaving_takes_its_membership;
-% commit=WORKTREE].
+% commit=7f9c810e5f4a2023ad98de34e848667dd72bc4a7].
 % Guarantees: the wire grammar is thirteen (wire-tag Tag Class Payload Means)
 % rows, and the shim's own encoder and decoder speak exactly the term tags they
 % declare [tested: catalog_vocabulary_words:the_shim_speaks_the_declared_wire_tags;
-% commit=WORKTREE].
+% commit=7f9c810e5f4a2023ad98de34e848667dd72bc4a7].
 % Guarantees: type carriers validate membership without certifying laws;
 % only finite enumerations permit exhaustive law checks [tested:
 % test_type_carrier_cannot_certify_laws,
@@ -917,7 +917,7 @@ metta_vocabulary_open(Vocab, Reason) :-
 %(min 1 2), (max 1 2), (+ 1 2), (timeout 1 (+ 1 2)) and (get-type min)
 %answering exactly what they answered before
 %[tested: catalog_vocabulary_words:a_member_type_atom_does_not_shadow_a_callable;
-%commit=WORKTREE].
+%commit=7f9c810e5f4a2023ad98de34e848667dd72bc4a7].
 metta_publish_vocabulary_types(Vocab) :-
     metta_vocabulary_type(Vocab, Type),
     metta_ensure_atom([':', Type, 'Type']),
@@ -1009,7 +1009,7 @@ metta_forget_atom(Atom) :-
 %the vocabulary", so its ordering could never be stated and
 %metta_annotations_order/2 could never see it
 %[tested: catalog_vocabulary_words:a_declared_algebra_joins_the_semiring_vocabulary;
-%commit=WORKTREE].
+%commit=7f9c810e5f4a2023ad98de34e848667dd72bc4a7].
 metta_register_semiring(Name) :-
     (   metta_vocabulary_value(semiring, Name)
     ->  true

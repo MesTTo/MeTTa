@@ -6,7 +6,7 @@
 % declaration doors rather than per operation, so a typo is refused naming the
 % declared words instead of gating nothing
 % [tested: catalog_vocabulary_words:an_unknown_capability_word_is_refused;
-% commit=WORKTREE].
+% commit=7f9c810e5f4a2023ad98de34e848667dd72bc4a7].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarantees: compile_metta_equation/5 retains a resolved reader equation's

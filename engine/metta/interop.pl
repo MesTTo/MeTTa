@@ -7,7 +7,7 @@
 %   (vocabulary provider-capability ...) row, which is the door a Prolog
 %   library's own declarations pass through
 %   [tested: catalog_vocabulary_words:an_unknown_capability_word_is_refused;
-%   commit=WORKTREE].
+%   commit=7f9c810e5f4a2023ad98de34e848667dd72bc4a7].
 % Guarantees: Export readers use metta_runtime_type/2 to recognise annotated
 %   arrows and derive arity while retaining the declared type
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
