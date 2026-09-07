@@ -46,6 +46,20 @@ in each:
   .metta      a (test ...), (test-no-answer ...) or (assert* ...) form, which
               test/3 throws metta_test_failed for [source: engine/metta.pl:2283].
   .sh         an exit path that can be nonzero.
+  .ts .mjs    a `test`, `it` or `describe` node --test registers, or, for a
+  .js         PROGRAM rather than a suite, an exit status it sets itself.
+  .c          a `static void test_<name>(...)` main() calls. A C suite has no
+              collector: main() IS the runner, so a case it does not call is
+              dead the way an uncollected pytest function is.
+
+The last two name themselves in PROSE as well as in identifiers -- a node case
+IS its sentence, and a C case carries a CASE("...") that the CHECK macro prints
+beside a failure -- so a claim points at one by QUOTING it, and the quotes are
+the delimiters. Everything IDENTIFIER rejected used to be answered with "this
+token names nothing and nothing is wrong with that", which is right for the
+prose a claim is written in and wrong for a name that is a sentence: a correct
+citation of a case and a citation of one that had been renamed were accepted
+for the same reason, that neither was read.
 
 Does anything run it? evidence_runners.py answers that from the runners
 themselves. A file only check.sh's REPORT tier reaches is named as such, since
@@ -82,6 +96,18 @@ Guarantees:
     separate scopes, so a class can clear the first without clearing the
     second; SOURCES is the first and GUARANTEE_SOURCES the second
     [tested 2026-09-05: tests/checks/check_evidence_selftest.py]
+  - a name written as a SENTENCE resolves when it is quoted, against every
+    suite in the tree rather than one directory's, and a quoted name the tree
+    does not declare is reported rather than dropped in silence
+    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
+  - a C suite's two names for one case both resolve, the `test_` function and
+    the `CASE(...)` prose inside it, and a CASE in a function main() never
+    calls is as unbacked as the function
+    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
+  - a tag offering a path under the repository's scratch directory is
+    reported, and the directory is read from the runner that allocates it, so
+    a runner that stops declaring it is reported too
+    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs
@@ -167,6 +193,13 @@ GUARANTEE_SOURCES = (
     "tests/prolog/suites/*/*.plt",
     # Diagnostic probes carry measured claims even when no gate runs them.
     "tests/prolog/probes/*.pl",
+    # And the Python half of the same class, which the seat grew on 2026-09-07.
+    # A probe is where a measurement's reproduction is TRACKED rather than left
+    # in a checkout, which is what the scratch rule below asks authors to do, so
+    # the one directory holding those reproductions cannot be the one directory
+    # whose own claims nothing reads. Four pins had to be written by hand
+    # because pin_provenance refuses a placeholder outside these globs.
+    "extensions/python/benchmarks/probes/*.py",
     # The example corpus is the semantics documentation and runs under the
     # gate, so an example that cites a test is making the same kind of
     # claim as the engine unit it demonstrates. Two levels, because the
@@ -395,17 +428,57 @@ PYTHON_TREES = (
 # evidence comes to miss the evidence that is missing. The tag must also be
 # FOLLOWED by a separator and a body, or the same pattern matches an ordinary
 # Prolog variable spelled [Source] and the checker reports the file it reads.
+# `assumed` is here for its COMMIT PIN and for nothing else. Its content stays
+# unchecked, which is the whole reason the tag exists, but a pin it carries
+# names a tree exactly as any other pin does and a dangling one is the same
+# defect. 16 of this tree's 132 assumed tags carry one and none was read
+# [measured 2026-09-07], and the scratch rule below sends more of them here:
+# `assumed` naming what is missing is what a claim writes when its fixture is
+# gone, and that should not cost its pin the scrutiny every other pin gets.
 CLAIM = re.compile(
-    r"\[(tested|measured|source)[:\s]([^\]]*)\]", re.IGNORECASE | re.DOTALL
+    r"\[(tested|measured|source|assumed)[:\s]([^\]]*)\]", re.IGNORECASE | re.DOTALL
 )
-# A `node --test` case names itself in prose: `it("...")` and `describe("...")`
-# each register one, which is what an evidence claim in a TypeScript source
-# points at.
-NODE_TEST = re.compile(r"""^\s*(?:it|describe)\(\s*["'`]([^"'`]+)["'`]""", re.MULTILINE)
+# What a string literal's escapes spell. A GENERATOR holds its output's header
+# in a literal -- extensions/python/tools/vocabgen.py holds the Node vocabulary
+# table's whole contract block in one -- so a claim written there is read
+# through that literal's escaping: `\'` for an apostrophe inside a
+# single-quoted literal, and `\n` for the line break the OUTPUT has. Left raw,
+# one claim answered two ways, `the engine\'s own` from the generator and `the
+# engine's own` from the file it writes, and only the second could resolve. The
+# generator is where a wrong name has to be fixed, because the next --write
+# puts it back, so this is what lets the gate read it there.
+ESCAPE = re.compile(r"\\([nrt'\"\\])")
+UNESCAPED = {"n": "\n", "r": "\r", "t": "\t"}
+# A `node --test` case names itself in prose: `test("...")`, `it("...")` and
+# `describe("...")` each register one, which is what an evidence claim in a
+# TypeScript source points at [source:
+# https://nodejs.org/docs/latest-v22.x/api/test.html]. `test` is the module's
+# own primary export and was missing here, so the 23 cases in
+# extensions/node/tools/browser.test.mjs and the 15 in the TypeScript space
+# example's suite -- every case in this tree written with it -- read as naming
+# nothing.
+#
+# The closing quote is the one that OPENED, by backreference, and not whichever
+# of the three comes first. A title is prose and prose has apostrophes: 21 of
+# this seat's cases are named `"... the engine's own"` and every one of them was
+# registered truncated at the apostrophe, so a citation spelling the case's real
+# name matched nothing while a citation stopping mid-word would have passed.
+NODE_TEST = re.compile(
+    r"""^\s*(?:it|test|describe)\(\s*(?P<quote>["'`])(?P<name>.*?)(?<!\\)(?P=quote)""",
+    re.MULTILINE,
+)
 # A C suite names its cases in identifiers, not in prose: `static void
 # test_<name>(...)` defined at the top level. Being defined is not being run,
 # which is why the caller set below matters as much as this pattern.
 C_TEST = re.compile(r"^static\s+\w[\w *]*?\btest_(\w+)\s*\(", re.MULTILINE)
+# And it names them a SECOND time, in prose. `CASE("...")` sets the harness's
+# `current_case`, which the CHECK macro prints beside a failing check, so the
+# sentence is what names the failure to a reader and what a citation points at:
+# extensions/cmetta/cmetta.c cites one for the object-identity guarantee.
+# 96 of them are written in test_cmetta.c against 45 case functions, so the
+# prose name is the finer of the two and the only one a reader is shown
+# [source: extensions/cmetta/tests/test_cmetta.c, the CASE and CHECK macros].
+C_CASE = re.compile(r'^\s*(?:\{\s*)?CASE\(\s*"([^"]+)"', re.MULTILINE)
 # main()'s body, which is the C suite's runner: a case reaches the binary only
 # by being called from there.
 C_MAIN = re.compile(r"^int\s+main\s*\([^)]*\)\s*\{(.*?)^\}", re.MULTILINE | re.DOTALL)
@@ -451,6 +524,26 @@ NAME_SHAPED = re.compile(r"[_:./0-9-]")
 #they ran to three words; naming the form says why they are citations.
 REFERENCE = re.compile(r"https?://|\w+\.\w+:\d+|\w+/[\w./-]+|\b[\w-]+\([1-8]\)")
 SUFFIXES = (".py", ".pl", ".plt", ".metta", ".sh", ".c")
+#: What node's own runner selects a suite by, and therefore what makes a file
+#: one here [source: https://nodejs.org/docs/latest-v22.x/api/test.html].
+NODE_SUITE = (".test.ts", ".test.mts", ".test.mjs", ".test.js", ".test.cjs")
+#: Directories a build, an install or a scratch run writes into, which the
+#: walk below does not enter. A suite under one is a COPY:
+#: extensions/node/build/test/wire.test.js is tsc's output for
+#: test/wire.test.ts and declares the same 30 names, so harvesting both would
+#: hand a reader the generated copy to open. The census records the copy
+#: because the lane runs it, and maps it back to the source through the seat's
+#: own tsconfig; this is the other half of that.
+#:
+#: It is also what keeps the walk at milliseconds. These hold almost everything
+#: on disk and almost nothing the repository wrote: the main checkout walks
+#: 287,369 files entered and 2,268 skipping them, 1.14s against 0.01s, and this
+#: checker promises to finish in well under a second [measured 2026-09-07].
+#: The scratch root joins them at walk time, read from the runner that
+#: allocates it rather than named twice.
+NODE_GENERATED = frozenset({
+    "node_modules", "build", "dist", "browser", "_runtime", "target", "__pycache__",
+})
 
 # `translator.plt:malformed_seam_is_refused` and
 # `test_per_space.py::test_eval_uses_the_spaces_own_equations` name a file and
@@ -716,20 +809,47 @@ def _prolog_targets(reports: dict[Path, str]) -> dict[str, list[Target]]:
     return targets
 
 
+def _node_suites() -> list[Path]:
+    """Every JavaScript-family suite in the tree, generated copies aside.
+
+    Rooted at extensions/node/test alone until 2026-09-07, which left three
+    kinds of suite invisible: the Node seat's own browser suite one directory
+    over in tools/, and the TypeScript space example's suite beside the server
+    it drives, in both its source and its checked-in bundle. 45 citations named
+    a case in one of them and every one of them read as naming nothing.
+
+    Discovered by the naming convention node's own runner selects on rather
+    than listed, which is the rule _prolog_suites and _c_targets already
+    follow: a seat or an EXAMPLE that grows a suite is covered without an edit
+    here.
+    """
+    scratch, _ = scratch_root()
+    skipped = NODE_GENERATED | ({scratch} if scratch else frozenset())
+    found = []
+    for base, directories, files in os.walk(ROOT):
+        directories[:] = sorted(
+            name for name in directories
+            if name not in skipped and not name.startswith(".")
+        )
+        found += [Path(base) / name for name in files if name.endswith(NODE_SUITE)]
+    return sorted(found)
+
+
 def _node_targets(runs: dict[Path, Execution]) -> dict[str, list[Target]]:
-    """Every name a `node --test` suite declares: its describes and its its.
+    """Every name a `node --test` suite declares: its describes, tests and its.
 
     A TypeScript suite names its cases in prose rather than in identifiers, so
-    the name a claim points at is the STRING, and both `describe` and `it`
-    register one. The file itself is a target too, which is what lets a claim
-    name a whole suite the way one may name a Python test module.
+    the name a claim points at is the STRING, and `describe`, `test` and `it`
+    each register one. The file itself is a target too, which is what lets a
+    claim name a whole suite the way one may name a Python test module.
     """
     targets: dict[str, list[Target]] = {}
-    for path in sorted((ROOT / "extensions" / "node" / "test").glob("*.test.ts")):
+    for path in _node_suites():
         resolved = path.resolve()
         fails = "node --test reports a failure" if resolved in runs else None
         note = "" if fails else "no lane runs it"
-        for name in NODE_TEST.findall(_text(path)):
+        for found in NODE_TEST.finditer(_text(path)):
+            name = found.group("name")
             targets.setdefault(name, []).append(Target("node", path, resolved, fails, note))
         targets.setdefault(path.name, []).append(Target("node", path, resolved, fails, note))
     return targets
@@ -762,6 +882,34 @@ def _c_runner(makefile: str, source: Path) -> str:
     return "test.sh"
 
 
+def _c_cases(text: str) -> Iterator[tuple[str, str]]:
+    """Every CASE(...) in a C suite, with the test_ function it is written in.
+
+    A C suite names its cases twice, and only the second name reaches a reader.
+    `static void test_objects_cross(void)` is the unit main() dispatches;
+    `CASE("the same C object is one engine identity across store, match and
+    delete")` inside it is what the CHECK macro prints when a check fails. So a
+    citation may name either, and the pairing is what decides the finer one's
+    verdict: a CASE inside a function main() never calls is as dead as the
+    function, and inherits its note rather than reading as backed on its own.
+    """
+    current = None
+    for line in text.splitlines():
+        if defined := C_TEST.match(line):
+            current = defined.group(1)
+        elif (named := C_CASE.match(line)) and current is not None:
+            yield current, named.group(1)
+
+
+def _c_verdict(
+    function: str, called: set[str], run: Execution | None, reports: str
+) -> tuple[str | None, str]:
+    """What backs a case written in this function, or why nothing does."""
+    if function not in called:
+        return None, "main() does not call it, so the binary never runs it"
+    return (reports, "") if run else (None, "no lane runs its suite")
+
+
 def _c_targets(runs: dict[Path, Execution]) -> dict[str, list[Target]]:
     """Every case a seat's C suite declares, and whether main() runs it.
 
@@ -789,12 +937,12 @@ def _c_targets(runs: dict[Path, Execution]) -> dict[str, list[Target]]:
             else "a failed lane makes check.sh exit nonzero"
         )
         for name in C_TEST.findall(text):
-            why = reports if run else None
-            note = "" if run else "no lane runs its suite"
-            if name not in called:
-                why, note = None, "main() does not call it, so the binary never runs it"
             targets.setdefault(f"test_{name}", []).append(
-                Target("c", path, runner, why, note)
+                Target("c", path, runner, *_c_verdict(name, called, run, reports))
+            )
+        for function, case in _c_cases(text):
+            targets.setdefault(case, []).append(
+                Target("c", path, runner, *_c_verdict(function, called, run, reports))
             )
         targets.setdefault(path.name, []).append(
             Target("c", path, runner, reports if run else None, "" if run else "no lane runs its suite")
@@ -964,8 +1112,29 @@ def _seat_roots(where: Path) -> Iterator[Path]:
             yield parent
 
 
-def resolve(token: str, known: Evidence, where: Path | None = None) -> list[Target] | str:
-    """The targets a claim's token names, or why it names none."""
+def resolve(
+    token: str, known: Evidence, where: Path | None = None, *, quoted: bool = False
+) -> list[Target] | str:
+    """The targets a claim's token names, or why it names none.
+
+    `quoted` is the author declaring that the token IS a name. It has to be
+    asked FIRST, because a name written as a sentence -- which is how a
+    `node --test` case and a C `CASE` name themselves -- carries spaces and
+    fails IDENTIFIER, and everything IDENTIFIER rejects was answered with the
+    empty list, meaning "this token names nothing and nothing is wrong with
+    that". So a correct citation of a case and a citation of one that had been
+    renamed were accepted for the same reason: neither was read. Six written on
+    2026-09-07 named renamed cases and passed
+    [source: docs/journal/2026-09-07-the-textbook-runs-in-the-browser.md].
+
+    The two silent returns below keep that meaning for an UNQUOTED token, where
+    it is right: a claim's prose sits in the same brackets as its names, and
+    reading every English word in it as a citation would report far more
+    correct headers than wrong ones. Quoting is what separates the two, and it
+    is the author's own mark rather than a guess made here.
+    """
+    if quoted and (found := known.targets.get(token)):
+        return found
     qualified = QUALIFIED.match(token)
     if qualified is not None:
         spelling, name = qualified.groups()
@@ -986,7 +1155,7 @@ def resolve(token: str, known: Evidence, where: Path | None = None) -> list[Targ
             return f"names the path {token}, which is not in the tree"
         return [file_target(path, known.reports)]
     if not IDENTIFIER.match(token):
-        return []
+        return _unread(token, quoted=quoted)
     # A `unit:test` whose UNIT the tree knows is answered by that pair alone.
     # Falling back to the bare name let a citation name the right test under
     # the wrong unit and pass, which sends a reader to a unit the test is not
@@ -1005,8 +1174,15 @@ def resolve(token: str, known: Evidence, where: Path | None = None) -> list[Targ
     if found:
         return found
     if not NAME_SHAPED.search(token):
-        return []
+        return _unread(token, quoted=quoted)
     return f"names {token}, which is not a test in the tree"
+
+
+def _unread(token: str, *, quoted: bool) -> list[Target] | str:
+    """Nothing, unless the author quoted it, in which case it names nothing."""
+    if not quoted:
+        return []
+    return f"names {token!r}, which is not a test in the tree"
 
 
 #: The obligation-header scheme documents a tested tag as carrying either a
@@ -1163,10 +1339,18 @@ def tested_problems(body: str, known: Evidence, where: Path | None = None) -> li
     # "makes === structural" one name instead of three words that are none.
     quoted = [" ".join(found.split()) for found in QUOTED_NAME.findall(stripped)]
     for token in [*quoted, *re.split(r"[\s,;]+", QUOTED_NAME.sub(" ", stripped))]:
-        token = token.strip(" :.'`()") if token in quoted else token.strip(" :.'\"`()")
+        # A quoted token is EXACT: the author's own quotes say where the name
+        # begins and ends, and the sentence's punctuation is outside them. The
+        # strip below is for a bare word the prose put a comma or a bracket
+        # against, and applying it to a quoted name took the parentheses off
+        # `"re-raises an unhandled step failure from settled()"`, which is the
+        # case's real name, and reported the citation as naming nothing.
+        was_quoted = token in quoted
+        if not was_quoted:
+            token = token.strip(" :.'\"`()")
         if not token or token.lower() in PROSE:
             continue
-        found = resolve(token, known, where)
+        found = resolve(token, known, where, quoted=was_quoted)
         if isinstance(found, str):
             problems.append(found)
             continue
@@ -1198,6 +1382,52 @@ def source_problems(body: str) -> list[str]:
     if DATE.search(body) or REFERENCE.search(body) or len(body.split()) >= 3:
         return []
     return ["carries neither a date, a reference, nor a named document"]
+
+
+#: Where the gate allocates this repository's own scratch, and therefore what
+#: a tag may not offer as its evidence. Read from the runner that declares it
+#: rather than spelled here, so one fact has one authority, and reported rather
+#: than guessed at when the assignment moves -- the rule evidence_runners'
+#: collectors already follow, because a scratch root this cannot find is a
+#: refusal that has silently stopped refusing.
+SCRATCH_ANCHOR = "tests/checks/gate_scratch.sh"
+SCRATCH_BASE = re.compile(r'METTA_GATE_SCRATCH_BASE="\$root/([\w.-]+)/')
+
+
+def scratch_root() -> tuple[str | None, list[str]]:
+    """The directory this repository's own scratch goes under, or why not."""
+    where = ROOT / SCRATCH_ANCHOR
+    found = SCRATCH_BASE.search(_text(where)) if where.is_file() else None
+    if found is None:
+        return None, [
+            f"{SCRATCH_ANCHOR}: no METTA_GATE_SCRATCH_BASE assignment, so the "
+            f"scratch directory a claim may not name cannot be read"
+        ]
+    return found.group(1), []
+
+
+def scratch_problems(body: str, under: re.Pattern[str], root: str) -> list[str]:
+    """Paths a tag offers as evidence that go with the checkout that wrote them.
+
+    An untracked fixture makes a claim unfalsifiable: it was true for whoever
+    ran it and there is nothing a reader can do about it either way. This tree
+    carried 73 such tags, 65 measured and 8 source, and not one of the 64
+    distinct paths in them still existed anywhere on the machine that wrote
+    them [measured 2026-09-07].
+
+    The rule is what a tag OFFERS, not where the word appears. Prose may name
+    the convention -- .gitignore does, gate_scratch.sh's own Guarantees line
+    does, DEVELOPING.md's `ai-tmp/check-runs` does -- because none of that is
+    a tag. And an `assumed` tag may name one, because that is precisely where a
+    claim records the fixture it lost; only the three tags that assert evidence
+    are refused. So the exemption is a rule rather than a list of files.
+    """
+    return [
+        f"names {token}, which is under {root}/, this repository's scratch: it "
+        f"goes with the checkout that wrote it, so no reader can re-run the "
+        f"claim. Track the fixture, or say `assumed` and name what is missing"
+        for token in dict.fromkeys(under.findall(body))
+    ]
 
 
 COMMIT = re.compile(r"\bcommit=([0-9a-zA-Z]+)")
@@ -1276,8 +1506,16 @@ def claim_sites() -> list[tuple[Path, int, str, str]]:
             text = _text(path)
             for match in CLAIM.finditer(text):
                 line = text.count("\n", 0, match.start()) + 1
-                body = COMMENT_PREFIX.sub(" ", match.group(2))
-                sites.append((path, line, match.group(1).lower(), body))
+                # Escapes first, so a literal `\n` becomes the line break it
+                # spells and the comment marker behind it is one COMMENT_PREFIX
+                # can then strip. The other order leaves ` * ` in the middle of
+                # a generator's claim.
+                spelled = ESCAPE.sub(
+                    lambda found: UNESCAPED.get(found.group(1), found.group(1)),
+                    match.group(2),
+                )
+                sites.append((path, line, match.group(1).lower(),
+                              COMMENT_PREFIX.sub(" ", spelled)))
     return sites
 
 
@@ -1330,8 +1568,17 @@ def main() -> int:
     sites = claim_sites()
     pins, placeholders = commit_problems(sites + provenance_sites())
     findings += pins
+    root, trouble = scratch_root()
+    findings += trouble
+    under = re.compile(rf"(?<![\w/-]){re.escape(root or 'ai-tmp')}/[\w./$-]*")
     checked = 0
     for path, line, tag, body in sites:
+        if tag == "assumed":
+            # Unchecked on purpose: it is the honest tag for a claim nobody has
+            # verified, and demanding evidence for it would push authors back to
+            # stating unverified claims in the same voice as measured facts. Its
+            # commit pin was read above, where the word does not matter.
+            continue
         checked += 1
         if tag == "tested":
             problems = tested_problems(body, known, path)
@@ -1339,6 +1586,8 @@ def main() -> int:
             problems = measured_problems(body, known, path)
         else:
             problems = source_problems(body)
+        if root is not None:
+            problems += scratch_problems(body, under, root)
         for problem in problems:
             findings.append(f"{path.relative_to(ROOT)}:{line}: {tag}: {problem}")
     for finding in findings:

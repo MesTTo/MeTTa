@@ -11,9 +11,11 @@ above it. So the guarantees in check_evidence_tags.py's own header are tested
 here, against planted violations, and not by the gate run that finds nothing.
 
 The tree is written from scratch each time under a temporary directory: a
-check.sh with both tiers, the engine and Python components' own check.sh files
-that the root one sources, a test.sh with the example corpus, one plunit suite,
-one gate script, one example, one collected pytest module, and the orphans and
+check.sh with both tiers, the engine, Python, C and Node components' own
+check.sh files that the root one sources, a test.sh with the example corpus,
+one plunit suite, one gate script, one example, one collected pytest module, a
+C suite naming its cases twice, two node --test suites in different
+directories, the runner that declares where scratch goes, and the orphans and
 mutes that are supposed to be rejected. The checker is copied into
 <tree>/tools/checks rather than <tree>/tests, because its own SOURCES reads
 tests/*.py and a copy sitting there would have its docstring read as claims
@@ -32,6 +34,9 @@ Guarantees:
     reported when it does not, which is the second half of the scheme's
     "test name or exact gate command" and the form llms.txt's checker uses
     [tested 2026-08-22: tests/checks/check_evidence_selftest.py]
+  - every plant here fails when the rule it pins is taken away, because
+    METTA_EVIDENCE_MUTATION patches the COPIED checker and nothing else
+    [tested 2026-09-07: evidence-mutations; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
 Fails when:
   - run against a tree it did not write. It asserts exact line numbers in a
     fixture it generates, and nothing else.
@@ -43,8 +48,8 @@ Open Obligations:
 
 from __future__ import annotations
 
+import json
 import os
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -69,7 +74,26 @@ PYTEST_ANCHOR = next(
     collector.anchor for collector in COLLECTORS if collector.lane == "pytest"
 )
 
+#: A mutation to apply to the COPIED checker, as a JSON file naming the module,
+#: the text to replace and what to replace it with. It is how
+#: check_evidence_mutations.py asks whether a plant here is load-bearing, and
+#: it edits the copy under <tree>/tools/checks and nothing else: a harness that
+#: patched the repository's own file would leave it patched on any exit that is
+#: not the one it planned for.
+MUTATION = json.loads(Path(os.environ["METTA_EVIDENCE_MUTATION"]).read_text()) if (
+    os.environ.get("METTA_EVIDENCE_MUTATION")
+) else None
+
 TAG = "tested"
+#: The other tag word a plant needs, and a variable for the same reason TAG is
+#: one. Written out, an opening bracket followed by the word is a claim about
+#: THIS repository as far as the gate is concerned, and it read the scratch
+#: plant below as one -- as it read this very sentence, until the word left it.
+MEASURED = "measured"
+#: And the scratch directory, spelled once here and written into the fixture's
+#: own gate_scratch.sh, so the plant and the runner the checker reads it from
+#: cannot disagree about what the rule is refusing.
+SCRATCH = "ai-tmp"
 WHEN = "2026-08-18"
 
 # (accepted, what the citation names, why it is written this way)
@@ -97,6 +121,29 @@ CITATIONS = (
     (False, "test_a_c_case_main_forgot",
      "a C case defined beside it that main() never calls, which is the C "
      "suite's version of an uncollected pytest function"),
+    (True, '"a C case named in prose"',
+     "the SECOND name that C suite gives the same case: CASE(...) is what the "
+     "CHECK macro prints beside a failure, so it is the name a reader is shown"),
+    (False, '"a C case in a function main forgot"',
+     "a CASE(...) inside a function main() never calls, which is as dead as "
+     "the function and must not read as backed on its own"),
+    (True, '"a quoted case the suite declares"',
+     "a node --test case named in PROSE, which carries spaces and so fails "
+     "IDENTIFIER; every name written this way was dropped in silence, so a "
+     "correct citation and a renamed one were accepted for the same reason"),
+    (False, '"a quoted case that was renamed"',
+     "the same shape naming a case no suite declares, which is what the "
+     "silent drop could not tell from the line above"),
+    (True, '"a case in a suite outside the old glob"',
+     "a case in tools/, which the harvester reached nothing of when it globbed "
+     "one directory, run through the workflow's `npm run ... --prefix`"),
+    (True, '"a case whose suite is compiled before it runs"',
+     "a case in the source the seat's npm script COMPILES and then runs; the "
+     "output does not exist in this fixture, exactly as on a fresh clone, so "
+     "the pattern has to be read back through the seat's own tsconfig"),
+    (True, '"a quoted case whose name ends in settled()"',
+     "a case whose own name ends in parentheses, which the punctuation strip "
+     "for a BARE word took off and turned into a citation of nothing"),
     (False, "skipped", "an example holding a test form that the skip list drops"),
     (False, "no_such_thing_at_all", "a name the tree does not define"),
     (True, "GATE_ONLY=1 sh check.sh plunit",
@@ -186,6 +233,21 @@ CMETTA_TEST_SH = """\
 exec make --quiet -C "$HERE" test
 """
 
+# The Node seat's lane delegates the same way, and the indirection it delegates
+# INTO is the package manifest: the lane names a script, the script names what
+# node runs. Modelling that as "an npm lane runs <package>/test/*.test.ts" was
+# right for one seat and blind for every suite outside that one directory, so
+# the fixture makes the seat's `test` compile into build/ and run THAT, which
+# is what the real one does and what a fresh checkout does not have on disk.
+NODE_CHECK_SH = """\
+run GATE node-binding sh "$HERE/extensions/node/test.sh"
+"""
+
+NODE_TEST_SH = """\
+set -eu
+cd "$HERE/extensions/node" && npm run --silent test
+"""
+
 ENGINE_CHECK_SH = """\
 check_plunit() {
     sh "$HERE/engine/test.sh"
@@ -221,7 +283,12 @@ done < "$filelist"
 
 FILES = {
     "extensions/python/pyproject.toml": '[tool.pytest.ini_options]\npythonpath = ["."]\n',
-    ".github/workflows/checks.yml": "run: sh check.sh\n",
+    # The workflow runs one script check.sh does not, the shape the real one
+    # takes for the browser suite: `npm run <script> --prefix <package>`, with
+    # npm's own flag AFTER the name it selects.
+    ".github/workflows/checks.yml": (
+        "run: sh check.sh\nrun: npm run test:tools --prefix extensions/node\n"
+    ),
     ".github/workflows/ci.yml": "run: sh test.sh\n",
     "extensions/python/tests/test_collected.py": "def test_collected():\n    assert True\n",
     "extensions/python/tests/helpers.py": "def test_uncollected():\n    assert True\n",
@@ -254,11 +321,55 @@ FILES = {
         ":- initialization(main, main).\n\nmain :-\n    format('findings~n').\n"
     ),
     "extensions/cmetta/Makefile": "test:\n\t./tests/c_suite\n",
+    # Both of the C suite's naming levels, because a citation may use either:
+    # the FUNCTION main() dispatches, and the CASE(...) inside it that the
+    # CHECK macro prints when a check fails. The two `{ CASE(` shapes are the
+    # two the real suite writes, on the brace's own line and beneath it.
     "extensions/cmetta/tests/c_suite.c": (
         "#include <stdio.h>\n\n"
-        "static void test_a_c_case_main_runs(void)\n{ printf(\"ran\\n\");\n}\n\n"
-        "static void test_a_c_case_main_forgot(void)\n{ printf(\"never\\n\");\n}\n\n"
+        "static const char *current_case;\n"
+        "#define CASE(name) current_case = (name)\n\n"
+        "static void test_a_c_case_main_runs(void)\n"
+        "{ CASE(\"a C case named in prose\");\n  printf(\"ran\\n\");\n}\n\n"
+        "static void test_a_c_case_main_forgot(void)\n{\n"
+        "  CASE(\"a C case in a function main forgot\");\n  printf(\"never\\n\");\n}\n\n"
         "int main(void)\n{ test_a_c_case_main_runs();\n  return 0;\n}\n"
+    ),
+    # The Node seat, whose suites are the ones named in PROSE. Three shapes at
+    # once, because the tree has all three and each was blind on its own: the
+    # `test/` suite the seat's own npm script COMPILES and then runs, so the
+    # pattern names an output that a fresh checkout does not have; the suite in
+    # `tools/` that only the workflow runs, one directory outside the glob the
+    # harvester used to be rooted at; and the `--prefix` that workflow reaches
+    # the package through, which is written AFTER the script name.
+    "extensions/node/package.json": (
+        '{\n  "scripts": {\n'
+        '    "build": "tsc -p tsconfig.build.json",\n'
+        '    "test": "npm run build --silent && node --test \\"build/test/*.test.js\\"",\n'
+        '    "test:tools": "node --test tools/probe.test.mjs"\n'
+        "  }\n}\n"
+    ),
+    "extensions/node/tsconfig.build.json": (
+        '{\n  "compilerOptions": { "outDir": "build", "rootDir": "." }\n}\n'
+    ),
+    "extensions/node/test/suite.test.ts": (
+        'import { describe, it } from "node:test";\n\n'
+        'describe("the seat", () => {\n'
+        '  it("a quoted case the suite declares", () => {});\n'
+        '  it("a case whose suite is compiled before it runs", () => {});\n'
+        '  it("a quoted case whose name ends in settled()", () => {});\n'
+        "});\n"
+    ),
+    "extensions/node/tools/probe.test.mjs": (
+        'import { test } from "node:test";\n\n'
+        'test("a case in a suite outside the old glob", () => {});\n'
+    ),
+    # Where the gate allocates its own scratch, which is where the checker
+    # READS the directory a tag may not offer as evidence.
+    "tests/checks/gate_scratch.sh": (
+        "metta_gate_scratch_open() {\n"
+        f'    METTA_GATE_SCRATCH_BASE="$root/{SCRATCH}/check-runs"\n'
+        "}\n"
     ),
     "examples/kept.metta": "!(test (+ 1 2) 3)\n",
     "examples/quiet.metta": "!(+ 1 2)\n",
@@ -288,6 +399,8 @@ def build(root: Path, pytest_anchor: str) -> dict[str, int]:
         ("engine/test.sh", ENGINE_TEST_SH),
         ("extensions/cmetta/check.sh", CMETTA_CHECK_SH),
         ("extensions/cmetta/test.sh", CMETTA_TEST_SH),
+        ("extensions/node/check.sh", NODE_CHECK_SH),
+        ("extensions/node/test.sh", NODE_TEST_SH),
     ):
         component = root / name
         component.parent.mkdir(parents=True, exist_ok=True)
@@ -302,7 +415,10 @@ def build(root: Path, pytest_anchor: str) -> dict[str, int]:
     tools = root / "tools" / "checks"
     tools.mkdir(parents=True, exist_ok=True)
     for module in ("check_evidence_tags.py", "evidence_runners.py"):
-        shutil.copy(HERE / module, tools / module)
+        text = (HERE / module).read_text(encoding="utf-8")
+        if MUTATION is not None and MUTATION["module"] == module:
+            text = text.replace(MUTATION["old"], MUTATION["new"])
+        (tools / module).write_text(text, encoding="utf-8")
 
     lines = ["% Purpose: fixtures for check_evidence_selftest.py.", "% Guarantees:"]
     at = {}
@@ -453,6 +569,107 @@ def seat_root_path_complaints() -> list[str]:
     return complaints
 
 
+def tracked_probe_complaints() -> list[str]:
+    """A tracked probe's own claims are read, and a stale citation is reported.
+
+    A probe is where a measurement's reproduction is KEPT when the fixture is
+    worth having, which is exactly what the scratch rule asks an author to do
+    instead of naming a path that goes with the checkout. So the one directory
+    holding those reproductions cannot be the one directory whose own claims
+    nothing reads: four pins in it had to be written by hand, because
+    pin_provenance refuses a placeholder outside the gate's globs, and a
+    citation there going stale would have been nobody's finding.
+    """
+    complaints = []
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        build(root, PYTEST_ANCHOR)
+        probe = root / "extensions/python/benchmarks/probes/probe.py"
+        probe.parent.mkdir(parents=True, exist_ok=True)
+        probe.write_text(
+            '"""Purpose: a fixture probe among the seat\'s tracked ones.\n'
+            "Guarantees:\n"
+            f"  - the collected test backs this [{TAG} {WHEN}: test_collected].\n"
+            f"  - this one names nothing [{TAG} {WHEN}: no_such_probe_test].\n"
+            "Open Obligations:\n"
+            "  To Do: None\n"
+            "  Hacks: None\n"
+            "  Future Enhancements: None\n"
+            '"""\n'
+        )
+        output = run(root)
+        mine = [
+            line for line in output
+            if line.startswith("extensions/python/benchmarks/probes/probe.py:")
+        ]
+        if [line for line in mine if "test_collected" in line]:
+            complaints.append("rejected a probe's citation of a test the pytest lane collects")
+        if not [line for line in mine if "no_such_probe_test" in line]:
+            complaints.append(
+                "accepted a probe's citation of a name the tree does not define, so "
+                "nothing reads a tracked probe's claims"
+            )
+    return complaints
+
+
+def scratch_path_complaints() -> list[str]:
+    """A tag may not offer a path under the repository's own scratch directory.
+
+    That path goes with the checkout that wrote it, so the claim above it is
+    one only its author could ever check. This tree carried 73 such tags and
+    not one of the 64 distinct paths in them still existed anywhere on the
+    machine that wrote them [measured 2026-09-07].
+
+    Three things, and the third is what makes the rule a rule rather than a
+    list: a tracked path is fine, a scratch one is reported, and the scratch
+    DIRECTORY is read from the runner that allocates it, so a run that cannot
+    find that assignment says so instead of quietly accepting everything.
+    """
+    complaints = []
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        build(root, PYTEST_ANCHOR)
+        fixture = root / "engine/fixture.pl"
+        lines = fixture.read_text().splitlines()
+        head = lines.index("% Open Obligations:")
+        planted = [
+            f"%   - a tracked fixture [{MEASURED} {WHEN}: "
+            f"fixture=tests/data/example_skips.txt].",
+            f"%   - one under the scratch root [{MEASURED} {WHEN}: "
+            f"fixture={SCRATCH}/probe.pl].",
+        ]
+        at_tracked, at_scratch = head + 1, head + 2
+        fixture.write_text("\n".join(lines[:head] + planted + lines[head:]) + "\n")
+
+        output = run(root)
+        if any(line.startswith(f"engine/fixture.pl:{at_tracked}:") for line in output):
+            complaints.append("rejected a fixture path the repository tracks")
+        reported = [
+            line for line in output
+            if line.startswith(f"engine/fixture.pl:{at_scratch}:")
+        ]
+        if not reported:
+            complaints.append(
+                "accepted a fixture under the scratch root, which goes with the "
+                "checkout that wrote it"
+            )
+        elif len(reported) > 1:
+            complaints.append(f"reported the scratch fixture {len(reported)} times, expected once")
+
+        # And the rule's own authority. The scratch directory is the gate's,
+        # not this file's, so a runner that stops declaring it must surface as
+        # a finding rather than as a refusal that has silently stopped
+        # refusing -- the same contract a collector's anchor carries.
+        (root / "tests/checks/gate_scratch.sh").write_text("metta_gate_scratch_open() { :; }\n")
+        moved = run(root)
+        if not any("METTA_GATE_SCRATCH_BASE" in line for line in moved):
+            complaints.append(
+                "a gate_scratch.sh that no longer declares its scratch root went "
+                "unreported, so the refusal stopped refusing in silence"
+            )
+    return complaints
+
+
 def commit_pin_complaints() -> list[str]:
     """A commit= must name a real commit, and WORKTREE must not survive a release.
 
@@ -563,6 +780,8 @@ def main() -> int:
     complaints += seat_relative_path_complaints()
     complaints += seat_root_path_complaints()
     complaints += line_continuation_complaints()
+    complaints += tracked_probe_complaints()
+    complaints += scratch_path_complaints()
     complaints += commit_pin_complaints()
 
     for complaint in complaints:
@@ -571,7 +790,9 @@ def main() -> int:
         f"{len(complaints)} defect(s) in the evidence gate, over "
         f"{len(CITATIONS)} planted citations, one moved anchor, three commit "
         f"pins, a path cited from beside its own file, a path cited from its "
-        f"seat root, and a lane written across a line continuation"
+        f"seat root, a lane written across a line continuation, a fixture "
+        f"under the scratch root beside one the tree tracks, and a tracked "
+        f"probe citing a test that is not there"
     )
     return 1 if complaints else 0
 

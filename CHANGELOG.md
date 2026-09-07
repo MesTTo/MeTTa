@@ -498,6 +498,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   atom occurrences and compiled definitions, preserving equal atoms owned by
   callers or other imports. Both operations use the loader's ownership journal.
 
+- `evidence-mutations`, a gate lane that asks whether the evidence gate's own
+  self-test is still pinning anything. A green self-test answers "does the gate
+  see this today", not "is this plant attached to the rule it was written for",
+  and a rule can be widened until a plant passes for an unrelated reason. So
+  each rule is taken away in turn and the self-test has to go red: nine
+  mutations, one per rule, plus an unmutated control, because without it a
+  self-test broken to fail always would report every mutation as caught. It is
+  mutation testing with a hand-written mutant set, the targeted form of what
+  the `mutation` REPORT lane does to the Python package with a generated one,
+  and it writes nothing outside a temporary directory.
+
+
 ### Changed
 
 - **`metta.arrays.ARRAY_OPS` is gone.** What a space installed is a property of
@@ -704,6 +716,65 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   could not name the bound, which it cannot when a budget expires inside a
   nested query; it used to be 0. `tests/data/error-kinds.json` is the kind
   list, and each seat's suite reads it against its own map.
+- The evidence gate reads a test name written as a SENTENCE. A `node --test`
+  case is `test("...")`, `it("...")` or `describe("...")` and a C case carries
+  a `CASE("...")` that the CHECK macro prints beside a failure; both are prose,
+  both failed the gate's identifier rule, and everything that rule rejected was
+  answered with silence. So a correct citation of a case and a citation of one
+  that had been renamed were accepted for the same reason: nothing read either.
+  A quoted name now resolves against the harvested names before the identifier
+  check, exactly as written, and one the tree does not declare is a finding.
+  Six citations written on 2026-09-07 named renamed cases and passed.
+
+  The names come from every suite in the tree rather than one directory. The
+  harvester globbed `extensions/node/test/*.test.ts` alone, so `tools/
+  browser.test.mjs` and the TypeScript space example's own suite were invisible
+  and 45 citations across four seats named cases nothing could see. It reads
+  every `*.test.ts`, `*.test.mjs` and `*.test.js` outside a build directory
+  now, plus each `CASE(...)` paired with the `test_` function it sits in, and
+  three harvester defects surfaced with them: `test(` was missing from the
+  registration shapes, a title's closing quote was whichever of the three came
+  first so every name containing an apostrophe was registered truncated, and
+  the punctuation strip meant for a bare word took the parentheses off a name
+  ending in `settled()`.
+
+- The runner census reads what an npm script runs instead of modelling it.
+  `npm run test|typecheck|kit` was taken to mean every `<package>/test/
+  *.test.ts`, which was right for one seat and wrong everywhere else: it
+  claimed 35 files for `typecheck`, which compiles and runs nothing, and saw
+  none of the three suites outside that directory. It expands the manifest's
+  own `scripts` map, follows `npm run` inside a script, honours `--prefix` on
+  either side of the name, and maps a `node --test` selection naming tsc output
+  back through the seat's tsconfig, so the Node seat's suites resolve on a
+  checkout nobody has built.
+
+- The TypeScript space example's own suite runs under the gate, in the new
+  `ts-space` lane. It ships 15 cases stating what its two-sided unifier does,
+  what the HTTP boundary refuses and when a cursor is released, and nothing ran
+  any of them; four of the example's own files cite one.
+
+- No evidence tag offers a path under `ai-tmp/`, and the lane refuses a new
+  one. That directory is this repository's scratch and goes with the checkout
+  that made it: 73 tags named a fixture there and not one of the 64 distinct
+  paths still existed anywhere, so each claim was one only its author could
+  ever check. Each now cites the reproduction the sentence it stamps already
+  carried, and the four naming Rw-Prolog carry the upstream commit instead of a
+  clone that lived in scratch. `assumed` stays exempt, because that is where a
+  claim records a fixture it lost.
+
+- The evidence gate reads the seat's tracked probes. A probe is where a
+  measurement's reproduction is kept when the fixture is worth having, which is
+  what the rule above asks an author to do instead of naming a scratch path, and
+  `extensions/python/benchmarks/probes/` was the one directory whose own claims
+  nothing read: `pin_provenance.py` refused to resolve a placeholder there and
+  four pins were written by hand, and a citation in one going stale would have
+  been nobody's finding.
+
+- `transportToJson` has the test its claim named. The wire codec places each
+  numeric literal rather than filtering through a `JSON.stringify` replacer,
+  because booting the engine installs `BigInt.prototype.toJSON` and a replacer
+  never sees the bigint at all; the case pinning that did not exist.
+
 - `tables.sql_function` on a DuckDB connection reads the head's DECLARED arrow
   for its SQL types and refuses by name without one. Since `inspect.signature`
   shows an undeclared head the arrow its stored atoms justify, the refusal had

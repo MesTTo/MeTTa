@@ -480,6 +480,21 @@ run GATE evidence   "$PY" "$HERE/tests/checks/check_evidence_tags.py"
 # placeholder; disabling either commit rule was caught [measured 2026-08-26].
 run GATE evidence-selftest "$PY" "$HERE/tests/checks/check_evidence_selftest.py"
 
+# And whether those plants are still attached to anything. A green self-test
+# answers "does the gate see this today", not "is this plant pinning the rule
+# it was written for": a rule can be widened until a plant passes for a reason
+# unrelated to why it exists, and the self-test reads the same either way. That
+# is the mistake the gate itself exists to catch, one level up.
+#
+# So each rule is taken away in turn and the self-test has to go red. Nine
+# mutations, one per rule the gate gained on 2026-09-07, plus an unmutated
+# control, because without it a self-test broken to fail always would report
+# every mutation as caught. It is mutation testing with a hand-written mutant
+# set, the targeted form of what the `mutation` REPORT lane does to the Python
+# package with a generated one, and it writes nothing outside a temporary
+# directory: the self-test patches the COPY it makes of the checker.
+run GATE evidence-mutations "$PY" "$HERE/tests/checks/check_evidence_mutations.py"
+
 # The other half of the provenance rule. A commit cannot contain its own object
 # ID, so the scheme writes the work as commit A and resolves every placeholder
 # to A's ID in a provenance-only commit B. That resolution was a hand sweep

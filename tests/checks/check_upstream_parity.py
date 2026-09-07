@@ -34,7 +34,7 @@ subtracting it was wrong in both directions at once:
   instruction count moves with its own argv. One fixture, one engine, one
   identical consult, argv length the only difference: 1,332,326,774 against
   1,341,149,760, 8.8M or 0.66% apart, non-monotonic in the argument count
-  [measured 2026-09-06: ai-tmp/probe/argc.py, three processes per shape, in a
+  [measured 2026-09-06: three processes per shape, in a
   tree without the C artifacts, so the level differs from the clone's and the
   effect is the point; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]. That is the ASPLOS 2009 measurement
   bias -- environment and link order shifting layout and moving a measurement
@@ -60,8 +60,8 @@ the layout term cancels, and equal depth makes them walk the same number of
 path components, which is real work either way. With both matched, a program
 of no content nets between -13,405 and +12,852 on this engine and between
 -7,446 and -705 on upstream's, across nine corpus shapes, which is this
-method's resolution [measured 2026-09-06;
-command=ai-tmp/probe/validate_control.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
+method's resolution [measured 2026-09-06 over the null programs below;
+commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
 
 Assumes:
   - the upstream checkout at ../PeTTa-upstream is read-only, so its numbers
@@ -293,7 +293,7 @@ def null_program(length: int, components: int) -> pathlib.Path:
     at a fixed 120 characters, one empty file measured 56,989 instructions at
     one component below the scratch root and 139,684 at seven, and a
     one-equation file rose from 685,835 to 772,826 over the same range
-    [measured 2026-09-06; command=ai-tmp/probe/depth.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]. A
+    [measured 2026-09-06; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]. A
     control that matched only the length charged that difference to the
     program.
     """
@@ -330,7 +330,7 @@ def null_shape(example: pathlib.Path) -> tuple[int, int]:
 #1,059.76e9 and one read 1,024.71e9, 35,083,561 apart at 3.42%, with the cheap
 #run carrying one MORE clause because a collection it would have paid for never
 #happened. The same 120 processes with `set_prolog_gc_thread(false)` spread
-#38,479, or 0.0037% [measured 2026-09-06; command=ai-tmp/probe/hunt.py;
+#38,479, or 0.0037% [measured 2026-09-06;
 #fixture=examples/ch09-types/13-types_nondet.metta; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
 #
 #That excursion is bigger than most rows' entire cost, and the minimum picks it
@@ -351,7 +351,7 @@ EXTRA_RUNS = 4
 #: `nondeterministic` on a fresh checkout while reading one inference count six
 #: times in a row on a warmed one [measured 2026-09-06: 03-python_import,
 #: 06-git_import and relative/root.metta, 11,847 / 36,640 / 15,049 inferences
-#: over six processes each; command=ai-tmp/probe/flaky.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
+#: over six processes each; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
 #: One discarded run is the ordinary answer to that, and it is what the
 #: baseline's own fixture line has always assumed by saying the tree was
 #: warmed.
@@ -460,8 +460,8 @@ def measure(engine_root: pathlib.Path, example: pathlib.Path) -> dict:
     #this file was rebuilt to stop hiding, so it is reported rather than
     #clamped or dropped. Between the floor and zero the row is not a defect and
     #not a measurement either: a program of no content nets between -13,405 and
-    #+12,852 across nine corpus shapes [measured 2026-09-06;
-    #command=ai-tmp/probe/validate_control.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276], so a row that
+    #+12,852 across nine corpus shapes [measured 2026-09-06 over the null
+    #programs above; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276], so a row that
     #lands there has less work in it than this method can see. Nothing in the
     #corpus does; the smallest row is seventeen times that.
     if net < -INSTRUCTION_ABSOLUTE:
@@ -642,8 +642,8 @@ GUARDED_ARITHMETIC = (
 #than by profiling the engines. Both are files with FEW definitions and SEVERAL
 #runnable forms, which is exactly where a per-form cost shows and where the
 #13.3M bias used to hide it. The decomposition the string quotes
-#[measured 2026-09-06; command=ai-tmp/probe/attribute.py and attribute2.py,
-#both engines through this file's own measure/2; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
+#[measured 2026-09-06 on both engines through this file's own measure/2;
+#commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
 PER_FORM = (
     "per-top-level-form load bookkeeping, measured by decomposition: on both"
     " files this tree is cheaper at everything EXCEPT the `!(...)` form."
@@ -721,7 +721,8 @@ WAIVERS = {
         " O(program)."
     ),
     #The seven-process spread the entry below quotes
-    #[measured 2026-09-06; command=ai-tmp/probe/torch.py; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
+    #[measured 2026-09-06 over seven processes per engine;
+    #commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
     "examples/ch11-python-as-a-notation/07-torch.metta": (
         "SUPERSEDED 2026-09-06 and kept for the record. This row is no longer"
         " measured at all: seven upstream processes of it read 6,916,429,114"

@@ -143,9 +143,9 @@
 %
 %Rw-Prolog guards exactly this. Its call_rw_/3 special-cases `!`, true, false,
 %fail, `->`, `;`, `,` and catch ahead of dispatch so that they "cannot be
-%overridden by rewrite rules" [source: Chris Barrick, Rw-Prolog,
-%src/rewrite.pl, call_rw_/3 and the comment above call_rw/2, read 2026-08-21
-%from the checkout in ai-tmp/rw-prolog]. Refusing at the DECLARATION instead
+%overridden by rewrite rules" [source: github.com/cbarrick/Rw-Prolog
+%src/rewrite.pl, call_rw_/3 and the comment above call_rw/2, at
+%634ad2577ca778e3436d8a596e0d35e0cf0785d2]. Refusing at the DECLARATION instead
 %of at every call is that guard moved to where the author can act on it.
 %
 %WHICH names, from the two sets this repository has already written down.
@@ -770,7 +770,7 @@ install_inverse_equation(Source, Space, Equation) :-
     %arrives, so registering afterwards left the derived inverse as an
     %unguarded clause of the produced head: `(eval (twin 1 1))` answered
     %`(unpack (wrap (box 1)))` where the same call written in source answered
-    %itself [measured 2026-08-30; fixture=ai-tmp/petta-align/tr9.py].
+    %itself [measured 2026-08-30].
     %An inverse rooted at the rule's own head is a second equation for a name
     %that is already registered, not a second registration.
     (   InvHead == Source
@@ -853,7 +853,7 @@ cost_ordered_direction(inverse(_)).
 %inverse a bidirectional declaration derives rewrote UP there --
 %`(collapse (eval (twin 1 1)))` answered `(unpack (wrap (box 1)))` while the
 %same call written in source answered `(twin 1 1)`
-%[measured 2026-08-30; fixture=ai-tmp/petta-align/tr7.py]. The orientation is
+%[measured 2026-08-30]. The orientation is
 %a property of the rewrite RELATION, so a door that applies it has to ask.
 %
 %ONE door does, engine/translator/runtime.pl's metta_boundary_result/3, which

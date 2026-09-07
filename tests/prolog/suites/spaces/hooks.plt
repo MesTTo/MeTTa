@@ -472,7 +472,7 @@ test(an_equation_added_after_the_claim_decides_the_next_fire) :-
 %[measured 2026-08-30 with `(= (cf-marker) evaluated)` and
 %`(= (h $a) (saw $a))`: `!(h (cf-marker))` is `(saw evaluated)` undeclared and
 %`(saw (cf-marker))` under both `(-> Atom %Undefined%)` and `(-> Atom Atom)`,
-%byte-identical on both engines; fixture=ai-tmp/petta-align/hk.metta]. The
+%byte-identical on both engines]. The
 %hook is not that call: it never evaluates the offer, which is the whole
 %point of a BEFORE trigger.
 test(the_offered_atom_reaches_the_handler_as_itself) :-

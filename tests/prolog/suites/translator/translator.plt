@@ -1519,8 +1519,8 @@ test(an_equation_head_and_a_match_of_the_same_shape_agree) :-
 %earlier reference answers only `evaluated` here, which is what this
 %asserted until 2026-08-30
 %[measured 2026-08-30: both engines answer (evaluated held), byte-identical,
-%for `(plunit-hp-nested (plunit-hp-produce))` and for `(plunit-hp-nested pa3)`;
-%fixture=ai-tmp/petta-align/nullary.metta].
+%for `(plunit-hp-nested (plunit-hp-produce))` and for
+%`(plunit-hp-nested pa3)`].
 test(a_nullary_call_in_a_head_runs_backwards_when_unmasked) :-
     process_metta_string("!(plunit-hp-nested (plunit-hp-produce))", Answers),
     assertion(Answers == [evaluated, held]),
@@ -3010,7 +3010,7 @@ test(only_the_compiled_arity_stays_registered,
 %with the head `(= (unquote (quote $A)) ...)` in engine/prelude.metta, and it
 %is why `(unquote (quote (+ 1 2)))` is 3 while a quoted head on an ordinary
 %(evaluating) parameter never matches, in this engine and upstream alike
-%[measured 2026-08-29, ai-tmp/petta-align/qscope.metta].
+%[measured 2026-08-29].
 %
 %The pattern walk must still DESCEND into a quoted head. Measured before it
 %did: `(cons 1 2)` inside a pattern's quote became the improper list `[1|2]`,
@@ -3065,7 +3065,8 @@ test(a_two_argument_quote_is_not_the_scope_form) :-
 %variables. Prolog's call/1 unifies, which runs both ways, so the rule's guard
 %could reach into the call and instantiate it; Rw-Prolog's redex/3 answers that
 %by re-checking subsumes_term/2 after the condition
-%[source 2026-08-21: ai-tmp/rw-prolog/src/rewrite.pl, redex/3].
+%[source: github.com/cbarrick/Rw-Prolog src/rewrite.pl, redex/3, at
+%634ad2577ca778e3436d8a596e0d35e0cf0785d2].
 
 %The guard already in the tree: the shipped set operations name two
 %superpositions and `(union $x $x)` is not that shape, so the first equation

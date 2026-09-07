@@ -30,7 +30,7 @@
 %whose query is one unconstrained conjunct: 13,502,606 at 100 edges rising by
 %exactly 4.0x per doubling to 3,620,340,557 at 1,600, while the AGM bound for a
 %triangle over N edges is N^1.5, about 64,000 there
-%[measured 2026-08-23, ai-tmp/synth/join/].
+%[measured 2026-08-23].
 %
 %Enumerating the conjunct with the FEWEST matches first removes it. Binding
 %`$x,$y` from the first conjunct gives N choices and `$z` from the second gives
@@ -324,7 +324,7 @@ clear_foreign_atoms(Space) :-
 %clauses standing in the space's execution module, so a space holding nothing
 %still answered its own functions: define (= (past-life) inherited), clear,
 %and `!(past-life)` in that space still answered `inherited` over an empty
-%space [measured 2026-08-19, ai-tmp/spaces-p1/probe_p116h.pl]. Space names
+%space [measured 2026-08-19]. Space names
 %are POOLED, so that is a previous life answering through a recycled name.
 %
 %It was masked rather than absent: extensions/python/metta/shim.pl's clear removes

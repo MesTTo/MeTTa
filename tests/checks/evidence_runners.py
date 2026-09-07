@@ -49,6 +49,11 @@ Guarantees:
     fail if it stops resolving [tested 2026-08-28:
     tests/checks/check_evidence_selftest.py,
     tests/checks/check_spec_status_selftest.py]
+  - a lane running an npm script executes what that package's manifest says it
+    does, `npm run` inside it expanded and `--prefix` honoured on either side
+    of the name, and a selection naming tsc OUTPUT resolves to the sources
+    that produce it even on a checkout nobody has built
+    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
 Fails when:
   - a Prolog file is handed to swipl by a Python script rather than by a
     runner or by another Prolog file's consult. tests/conformance/answer_groups.pl
@@ -64,9 +69,11 @@ Open Obligations:
 from __future__ import annotations
 
 import fnmatch
+import json
 import re
+from collections.abc import Iterator
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -152,15 +159,47 @@ ONE_LINE_FUNCTION = re.compile(r"^([a-z_][a-z0-9_]*)\(\)\s*\{([^\n]*)\}[ \t]*$",
 LINE_CONTINUATION = re.compile(r"\\\n[ \t]*")
 
 # A path written into a runner. Anchored on a suffix this repository executes,
-# so `$SUMMARY` and `*.plt` are not mistaken for files.
-PATHISH = re.compile(r"[$\w./{}-]*[\w}-]\.(?:py|pl|plt|sh|metta|ts|mjs|c)\b")
-# A lane that runs a package's own npm script runs that package's tests, and
-# the script NAME is the whole indirection: `npm run test` inside
-# extensions/node runs every extensions/node/test/*.test.ts, and nothing in the
-# lane's text is a path. Reading the indirection is what lets an evidence
-# claim written in a TypeScript source name a test in one of them; without it
-# those claims are unbacked because the checker cannot see the suite at all.
-NPM_SCRIPT = re.compile(r"\bnpm\s+(?:run\s+(?:--silent\s+)?)?(?:test|typecheck|kit)\b")
+# so `$SUMMARY` and `*.plt` are not mistaken for files. `.js` joined on
+# 2026-09-07 with the ts-space lane, which runs a checked-in bundle by name:
+# without it that lane read as running nothing and the 15 cases in the file
+# stopped backing the four claims that cite one.
+PATHISH = re.compile(r"[$\w./{}-]*[\w}-]\.(?:py|pl|plt|sh|metta|ts|mjs|js|c)\b")
+# A lane that runs a package's own npm script runs whatever that script runs,
+# and the script NAME is the whole indirection: nothing in the lane's text is a
+# path. Reading the indirection is what lets an evidence claim written in a
+# TypeScript source name a case in one of those suites; without it the claim is
+# unbacked because this cannot see the suite at all.
+#
+# What the script runs was MODELLED here until 2026-09-07 -- `npm run test`,
+# `typecheck` or `kit` was taken to mean every `<package>/test/*.test.ts` -- and
+# the model was right for one seat and blind everywhere else. It recorded 35
+# files the Node seat's suite lane runs and none of the three suites outside
+# that one directory: tools/browser.test.mjs, which the checks.yml workflow runs
+# as `npm run test:browser --prefix extensions/node`, and the TypeScript space
+# example's own suite beside its server. It also recorded those 35 for
+# `typecheck`, which compiles and runs nothing. The manifest's `scripts` map is
+# the seat's own declaration of what each name runs, exactly as check.sh's `run`
+# lines are the gate's and a Makefile's targets are the C seat's, so it is read
+# rather than guessed at -- the rule make_requests below already follows.
+#
+# `npm <name>` with no `run` is npm's documented alias for `npm run <name>`, and
+# only for the four lifecycle names; `ci`, `pack`, `install` and `publish` are
+# npm's own work and name no script
+# [source: https://docs.npmjs.com/cli/v11/commands/npm-test].
+NPM_CALL = re.compile(r"\bnpm\s+([^\n&|;()]*)")
+NPM_ALIASES = ("test", "start", "stop", "restart")
+# npm's own way of naming the package a call runs in, which is how the workflow
+# runs a seat's script from the repository root.
+NPM_PREFIX = ("--prefix", "-C")
+# node's test runner and the selection it is given: every pattern after `--test`
+# up to the next shell operator. `node --test "build/test/*.test.js"` and
+# `node --test tools/browser.test.mjs` are both this shape
+# [source: https://nodejs.org/docs/latest-v22.x/api/test.html].
+NODE_TEST_RUN = re.compile(r"\bnode\b[^\n&|;]*?\s--test\s+([^\n&|;]*)")
+# What tsc rewrites a TypeScript extension to. `.mts` and `.cts` keep their
+# module kind in the output, which is why this is not one entry
+# [source: https://www.typescriptlang.org/docs/handbook/modules/reference.html].
+TS_OUTPUT = {".ts": ".js", ".tsx": ".js", ".mts": ".mjs", ".cts": ".cjs"}
 # The C seat's equivalent. Its test.sh runs `make -C <seat> test`, and the
 # Makefile's test target builds tests/*.c and runs the binary, so the source
 # a claim names is reached through a Makefile this model does not read. The
@@ -174,6 +213,172 @@ MAKE_CALL = re.compile(r"\bmake\b([^\n]*)")
 MAKE_WORD = re.compile(r"""(?<![-\w/$."'])([a-z][\w-]*)(?![\w/-])""")
 # A Makefile target opens in column 1 and is followed by `:`, which `:=` is not.
 MAKE_RULE = re.compile(r"^([A-Za-z][\w.-]*)\s*:(?!=)")
+
+
+def npm_calls(text: str) -> Iterator[tuple[str | None, str]]:
+    """Every script a runner's text asks npm to run, with the --prefix it names.
+
+    npm consumes its own flags wherever they sit, on either side of the script
+    name: check.sh writes `npm run --prefix "$site" docs:build` and the
+    checks.yml workflow writes `npm run test:browser --prefix extensions/node`.
+    So the first bare word is the script and the whole call is scanned for the
+    prefix; stopping at the script instead read the workflow's call as running
+    in whatever package the lane's path happened to reach first, which is the
+    Node seat only by luck and would be the wrong package for any other.
+    """
+    for call in NPM_CALL.findall(text):
+        words = [word.strip("\"'") for word in call.split()]
+        explicit = bool(words) and words[0] == "run"
+        prefix, script, index = None, None, 1 if explicit else 0
+        while index < len(words):
+            if words[index] in NPM_PREFIX and index + 1 < len(words):
+                prefix = words[index + 1]
+                index += 2
+                continue
+            if script is None and not words[index].startswith("-"):
+                script = words[index]
+            index += 1
+        if script is not None and (explicit or script in NPM_ALIASES):
+            yield prefix, script
+
+
+def npm_scripts(package: Path) -> dict[str, str]:
+    """One package's `scripts` map, or {} when it has none this can read."""
+    try:
+        manifest = json.loads((package / "package.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    scripts = manifest.get("scripts", {})
+    return scripts if isinstance(scripts, dict) else {}
+
+
+def npm_expansion(package: Path, script: str) -> str:
+    """One script's command text, with every `npm run` inside it spent.
+
+    The Node seat's `test` is `npm run build --silent && node --test
+    "build/test/*.test.js"`, so what it runs is only visible once the inner
+    call is expanded; `build` contributes the tsc invocation that decides where
+    the sources it names come from.
+    """
+    scripts = npm_scripts(package)
+    reached, seen, pending = "", set(), [script]
+    while pending:
+        name = pending.pop()
+        if name in seen or name not in scripts:
+            continue
+        seen.add(name)
+        reached += "\n" + scripts[name]
+        pending += [inner for prefix, inner in npm_calls(scripts[name]) if prefix is None]
+    return reached
+
+
+def tsc_projects(package: Path) -> list[tuple[Path, Path]]:
+    """(outDir, rootDir) for every emitting project file this package declares.
+
+    Read from the project files rather than assumed, so a seat that moves its
+    output directory keeps its suites visible. `extends` is followed because
+    tsconfig.build.json's own settings are a layer over two more, and a seat
+    that put outDir in the base would otherwise read as emitting nothing.
+    """
+    projects = []
+    for project in sorted(package.glob("tsconfig*.json")):
+        options = _tsconfig(project, frozenset())
+        if options.get("noEmit") or "outDir" not in options:
+            continue
+        projects.append((
+            (package / options["outDir"]).resolve(),
+            (package / options.get("rootDir", ".")).resolve(),
+        ))
+    return projects
+
+
+def _tsconfig(project: Path, seen: frozenset[Path]) -> dict:
+    """One project file's compilerOptions, with its `extends` chain merged."""
+    try:
+        settings = json.loads(project.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    options = settings.get("compilerOptions", {})
+    options = dict(options) if isinstance(options, dict) else {}
+    base = settings.get("extends")
+    if isinstance(base, str) and project not in seen:
+        inherited = (project.parent / base).resolve()
+        if inherited.is_file():
+            options = {**_tsconfig(inherited, seen | {project}), **options}
+    return options
+
+
+def tsc_sources(package: Path, pattern: str) -> list[str]:
+    """The source patterns tsc compiles into one a command names.
+
+    The Node seat's gate lane BUILDS and then runs the output,
+    `npm run build --silent && node --test "build/test/*.test.js"`, and a claim
+    names the case in the source it was compiled from, so the output has to be
+    read back to its source or all 35 of those suites belong to a file no
+    runner executes and every case in them stops backing a claim.
+
+    The PATTERN is translated rather than the files it matches, because on a
+    checkout nobody has built yet the output does not exist: resolving what is
+    on disk would report the whole seat as unrun on a fresh clone, and the
+    build is part of the same command, so the files are there when node opens
+    them. Same hop prolog_loads makes for a consult and make_owner for a
+    recipe -- what a runner names is not always what an author cites.
+    """
+    patterns = []
+    for out, root in tsc_projects(package):
+        try:
+            emitted_under = out.relative_to(package)
+            source_under = root.relative_to(package)
+        except ValueError:
+            continue
+        try:
+            inside = PurePosixPath(pattern).relative_to(emitted_under)
+        except ValueError:
+            continue
+        patterns += [
+            str(source_under / f"{str(inside)[: -len(emitted)]}{suffix}")
+            for suffix, emitted in TS_OUTPUT.items()
+            if pattern.endswith(emitted)
+        ]
+    return patterns
+
+
+def node_test_files(package: Path, command: str) -> list[Path]:
+    """Every file a `node --test` in this command selects, sources included."""
+    found: list[Path] = []
+    for selection in NODE_TEST_RUN.findall(command):
+        for token in selection.split():
+            token = token.strip("\"'")
+            if token.startswith("-"):
+                continue
+            for pattern in (token, *tsc_sources(package, token)):
+                found += [
+                    path.resolve()
+                    for path in sorted(package.glob(pattern))
+                    if path.is_file()
+                ]
+    return found
+
+
+def npm_package(prefix: str | None, directories: tuple[Path, ...]) -> Path | None:
+    """The package directory an npm call runs in, or None when it cannot be read.
+
+    A `--prefix` still holding a shell variable this cannot spend names a
+    package that cannot be identified, and guessing at the lane's directories
+    instead would attribute one package's scripts to another: check.sh's
+    `npm run --prefix "$site" docs:build` is the site's, and the nearest
+    package.json on the lane's path is the Node seat's.
+    """
+    if prefix is not None:
+        spent = _literal(prefix)
+        if spent is None:
+            return None
+        candidate = (ROOT / spent).resolve()
+        return candidate if (candidate / "package.json").is_file() else None
+    return next(
+        (directory for directory in directories if (directory / "package.json").is_file()),
+        None,
+    )
 
 
 def make_owner(makefile: str, name: str) -> str | None:
@@ -476,21 +681,19 @@ def executed() -> tuple[dict[Path, Execution], list[str]]:
                 for directory in directories:
                     if (candidate := directory / spent).is_file():
                         record(candidate.resolve(), tier, lane)
-            if NPM_SCRIPT.search(lane_text):
-                for directory in directories:
-                    if not (directory / "package.json").is_file():
-                        continue
-                    # EVERY suite, which is what the npm script runs. The break
-                    # ends the DIRECTORY search at the package the lane entered.
-                    # Under the suite loop, where an insertion left it on
-                    # 2026-08-27 by landing above an existing break, it recorded
-                    # the first file alphabetically and every other one read as
-                    # run by nothing [measured 2026-08-28: the model held
-                    # extensions/node/test/atom.test.ts alone out of the ten
-                    # then in the tree, and holds all eleven now].
-                    for suite in sorted((directory / "test").glob("*.test.ts")):
-                        record(suite.resolve(), tier, lane)
-                    break
+            for prefix, script in npm_calls(lane_text):
+                package = npm_package(prefix, directories)
+                if package is None:
+                    continue
+                if script not in npm_scripts(package):
+                    problems.append(
+                        f"{lane}: `npm run {script}` names no script in "
+                        f"{package.relative_to(ROOT)}/package.json, so what it "
+                        f"runs cannot be modelled"
+                    )
+                    continue
+                for suite in node_test_files(package, npm_expansion(package, script)):
+                    record(suite, tier, lane)
             for directory in directories:
                 recipe = directory / "Makefile"
                 if not recipe.is_file():

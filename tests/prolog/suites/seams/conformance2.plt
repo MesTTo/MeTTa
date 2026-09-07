@@ -80,8 +80,7 @@ test(a_variable_result_is_checked_like_any_other) :-
     %which is what separates the result check from the argument's evaluation.
     %It answers the argument AS WRITTEN: the Atom parameter held it, the body
     %is the identity, and a result does not re-enter evaluation
-    %[measured 2026-08-30: both engines answer `((+ 1 2))`;
-    %fixture=ai-tmp/petta-align/anyres.metta].
+    %[measured 2026-08-30: both engines answer `((+ 1 2))`].
     add_form("(: c2-pl-any-result (-> Atom %Undefined%))"),
     add_form("(= (c2-pl-any-result $x) $x)"),
     both_doors("(c2-pl-any-result ((+ 1 2)))", [[['+', 1, 2]]]).
@@ -109,7 +108,7 @@ test(a_declared_wrong_arity_is_an_error) :-
 test(a_variable_head_applies_the_resolved_heads_mask) :-
     %cons-atom's operands EVALUATE, so the resolved head applies the same mask
     %an ordinary call does and 20 + 22 is 42 before the cons sees it
-    %[measured 2026-08-30, ai-tmp/tail.metta: upstream answers `(42 tail)`].
+    %[measured 2026-08-30: upstream answers `(42 tail)`].
     both_doors("(let $head cons-atom ($head (+ 20 22) (tail)))",
                [[42, tail]]).
 
@@ -156,8 +155,8 @@ test(the_reference_interpret_entry_runs_typed_evaluation) :-
 %a variable. Both rows below are byte-identical to upstream, which has no
 %NotReducible of any kind
 %[measured 2026-08-30: `!(c2-pl-nr q)` is `NotReducible` and the chain row is
-%`(c2-pl-held NotReducible)` on both engines;
-%fixture=ai-tmp/petta-align/nr.metta]. They read `(c2-pl-nr q)` and the same
+%`(c2-pl-held NotReducible)` on both engines]. They read `(c2-pl-nr q)` and
+%the same
 %chain row while the marker and the symbol shared a name.
 test(a_program_symbol_named_not_reducible_is_data) :-
     add_form("(: c2-pl-nr (-> Atom Atom))"),
@@ -183,7 +182,7 @@ test(a_function_returned_marker_uses_the_same_protocol) :-
     %`(function (return NotReducible))` -- because it has no function/return at
     %all and leaves the form as data; reducing it is this engine's superset,
     %and what the frame carries out is the program's own symbol either way
-    %[measured 2026-08-30, fixture=ai-tmp/petta-align/nr2.metta].
+    %[measured 2026-08-30].
     both_doors("(c2-pl-frame-nr q)", ['NotReducible']),
     both_doors("(c2-pl-frame-body-call)", ['NotReducible']),
     dynamic_answers("(function (c2-pl-frame-body-nr))", DirectMarker),
@@ -206,8 +205,8 @@ test(a_tail_call_hands_out_the_symbol_its_base_case_answered) :-
 %so `(eval ())` is `()` rather than the retained frame or the marker. Both
 %rows are byte-identical to upstream, whose eval is
 %`translate_expr(C, Goals, Out)` and translates `()` to itself
-%[measured 2026-08-30: `()` then `(())` on both engines;
-%fixture=ai-tmp/petta-align/ev2.metta]. They read `(eval ())` and `((eval ()))`
+%[measured 2026-08-30: `()` then `(())` on both engines]. They read
+%`(eval ())` and `((eval ()))`
 %while eval handed its own written call back on an irreducible operand.
 test(empty_expression_is_not_the_not_reducible_marker) :-
     both_doors("(eval ())", [[]]),

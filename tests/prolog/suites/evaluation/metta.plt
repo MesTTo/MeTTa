@@ -585,7 +585,7 @@ test(test_real_valued_math_treats_integer_and_float_operands_alike) :-
     %pow-math is NOT one of the float-promoting family: it keeps its operands'
     %own numeric kinds, so two integers answer an integer. Every value below
     %was measured on BOTH engines on 2026-08-30 and agrees
-    %[source: PeTTa@ae66fa8 src/metta.pl:69; ai-tmp/pw.metta].
+    %[source: PeTTa@ae66fa8 src/metta.pl:69].
     'pow-math'(2, 3, Power), Power == 8,
     'pow-math'(1, -2147483648, LowerBound), LowerBound == 1,
     'pow-math'(1, 2147483647, UpperBound), UpperBound == 1,
@@ -1288,8 +1288,7 @@ test(an_unbound_term_is_not_an_expression, [fail]) :-
 %A tail that is not an expression leaves the call INERT, which is what upstream
 %does: its `'cons-atom'(H, T, [H|T])` is a bare predicate with no declaration
 %to refuse against, and `!(cons-atom a 1)` comes back as the written call on
-%both engines [source: PeTTa@ae66fa8 src/metta.pl:111; measured 2026-08-30,
-%ai-tmp/tail.metta].
+%both engines [source: PeTTa@ae66fa8 src/metta.pl:111; measured 2026-08-30].
 %
 %The tail was declared `Expression` here until 2026-08-30 and a Number tail
 %earned a BadArgType refusal. The refusal existed because an earlier engine
@@ -1946,8 +1945,8 @@ test(comparing_against_the_empty_list_does_not_walk_the_other_operand) :-
 %The PREDICATE compares anything, error atoms included, which is upstream's
 %own two-clause definition: `!(== (Error x y) 0)` is `false` there, and the
 %hand-on this engine carried answered the error atom instead -- a different
-%answer to the same call [measured 2026-08-30;
-%fixture=ai-tmp/eqprobe2.metta]. Containment for a COMPUTED error operand is
+%answer to the same call [measured 2026-08-30]. Containment for a COMPUTED
+%error operand is
 %the translator's argument ladder's job and still holds through the full
 %pipeline [tested: test_an_error_operand_is_handed_on].
 test(an_error_operand_compares_as_the_term_it_is) :-

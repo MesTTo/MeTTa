@@ -312,7 +312,7 @@ mbr_bind_returns([V-Out|Bindings]) :-
 %goal unifies with (A , B), binds itself to a fresh conjunction whose left
 %is again unbound, and the walk manufactures conjunctions until the stack
 %goes -- 1.0Gb measured from a probe using a raw variable as a branch arm
-%[measured 2026-08-30; recorded in ai-tmp/codex-mbr-suite/ai-findings.md].
+%[measured 2026-08-30].
 %It serves only the generic all-outputs mode; the candidate probe calls with
 %its pattern PRE-BOUND and guards itself with nonvar/1 above, because this
 %clause would otherwise bind the arm to the pattern.
@@ -773,7 +773,7 @@ metta_application_result(_, _, Produced, Produced).
 %the produced head that a plain call reaches with no gate in between, and
 %`(eval (twin 1 1))` answered `(unpack (wrap (box 1)))` -- rewriting UP --
 %where the same call written in source answered itself
-%[measured 2026-08-30; fixture=ai-tmp/petta-align/tr9.py].
+%[measured 2026-08-30].
 %
 %THE ASKER FOR EVERY PATH THAT ENDS HERE: eval, evalc, the flat Python door
 %and its fast path all cross this boundary. reduce/3 is the one door that
@@ -818,8 +818,8 @@ metta_application_result(_, _, Produced, Produced).
 %[measured 2026-08-31: 2/2/4/2 inferences and 11.216G/12.396G/15.416G/11.216G
 % instructions:u per 10M calls for a static fast body, a 1-clause dynamic
 % fast body, the inline empty-table gate and a compile_predicates body;
-% command=swipl ai-tmp/door_cost_probe.pl and perf stat -e instructions:u
-% swipl ai-tmp/door_instr_probe.pl <shape>; commit=57f21ba9edf94bcf28cde11f938bce2c241a3709].
+% counted with perf stat -e instructions:u, one process per shape;
+% commit=57f21ba9edf94bcf28cde11f938bce2c241a3709].
 %So this door, metta_reduce_result/5 and metta_eval_step_orients/2 hold
 %ONE clause each at a time,
 %swapped between the fast bodies, which only answer the irreducible marker,
@@ -841,8 +841,8 @@ metta_application_result(_, _, Produced, Produced).
 %door, but re-swapping then needs abolish/1, whose moment of emptiness a
 %concurrent crossing could observe, so the doors stay dynamic while the
 %transition rail is retract-and-assert inside a transaction
-%[measured 2026-08-30; command=perf stat -e instructions:u swipl
-% ai-tmp/door_static_probe.pl <mode>; commit=57f21ba9edf94bcf28cde11f938bce2c241a3709].
+%[measured 2026-08-30; counted with perf stat -e instructions:u, one process
+% per mode; commit=57f21ba9edf94bcf28cde11f938bce2c241a3709].
 :- dynamic metta_boundary_result/3.
 :- dynamic metta_reduce_result/5.
 :- dynamic metta_eval_step_orients/2.
@@ -855,7 +855,7 @@ metta_application_result(_, _, Produced, Produced).
 %bidirectional declaration derives rewrote UP through eval while the same
 %call written in source did not: `(collapse (eval (twin 1 1)))` answered
 %`(unpack (wrap (box 1)))` against the source form's `(twin 1 1)`
-%[measured 2026-08-30; fixture=ai-tmp/petta-align/tr8.py]. It runs once per
+%[measured 2026-08-30]. It runs once per
 %equation-step ANSWER, which made its inline probe the largest of the three
 %rule-free costs, so its fast body is a fact.
 metta_rule_gate_bodies(fast,
@@ -1100,8 +1100,8 @@ metta_evaluate_argument(Value, Out) :-
 %and `(= (passthru $b) (subtraction-atom $b (2)))`,
 %`(passthru ((+ 1 1)))` answered `()` here and `((+ 1 1))` upstream, because
 %the deferred evaluation turned the held `((+ 1 1))` into `(2)` before the
-%subtraction saw it [measured 2026-08-30, ai-tmp/pass.metta under both
-%engines]. It also costs a goal per such argument, which the passthrough does
+%subtraction saw it [measured 2026-08-30 under both engines]. It also costs a
+%goal per such argument, which the passthrough does
 %not.
 translate_eager_argument_dl(X, Goals0, Goals, V) :-
     (   var(X)
