@@ -47,16 +47,16 @@ Guarantees:
   - a library named anywhere in a seat's core is reported with its path, its
     line and what to do instead, with no allowlist that could admit it
     [tested: tests/checks/check_hardcoded_integrations_selftest.py;
-    commit=WORKTREE]
+    commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
   - an ALLOWED entry whose site no longer names its library is reported, so
     the table shrinks with the code [tested:
-    tests/checks/check_hardcoded_integrations_selftest.py; commit=WORKTREE]
+    tests/checks/check_hardcoded_integrations_selftest.py; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
   - a name in a comment, a docstring or a string that is not a module name is
     NOT a finding [tested:
-    tests/checks/check_hardcoded_integrations_selftest.py; commit=WORKTREE]
+    tests/checks/check_hardcoded_integrations_selftest.py; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
   - a planted `import pandas` in the core is refused, which is the ruling this
     pass exists for [tested:
-    tests/checks/check_hardcoded_integrations_selftest.py; commit=WORKTREE]
+    tests/checks/check_hardcoded_integrations_selftest.py; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
 Fails when: a seat's sources are absent, which it reports rather than passing
   on an empty file list.
 Open Obligations:

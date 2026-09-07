@@ -22,25 +22,25 @@ A package added under `ext/` therefore needs no line here.
 Assumes: a checkout of this repository with `pyproject.toml` at its root.
 Guarantees:
   - a core module importing a member is reported [tested:
-    tests/checks/check_layering_selftest.py; commit=WORKTREE]
+    tests/checks/check_layering_selftest.py; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
   - a member importing a core underscore name is reported [tested:
-    tests/checks/check_layering_selftest.py; commit=WORKTREE]
+    tests/checks/check_layering_selftest.py; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
   - a member naming a library its own manifest does not declare is reported,
     so a package cannot quietly gain a second integration [tested:
-    tests/checks/check_layering_selftest.py; commit=WORKTREE]
+    tests/checks/check_layering_selftest.py; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
   - a member missing from `[tool.uv.sources]`, and a source naming no member,
     are each reported, so the resolver's view and the directory agree [tested:
-    tests/checks/check_layering_selftest.py; commit=WORKTREE]
+    tests/checks/check_layering_selftest.py; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
   - a member whose version, pymetta pin, entry point, README or tests are
     missing is reported [tested: tests/checks/check_layering_selftest.py;
-    commit=WORKTREE]
+    commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
   - an extra a seam point names, and an extra naming a package that is not a
     member, are each reported [tested:
-    tests/checks/check_layering_selftest.py; commit=WORKTREE]
+    tests/checks/check_layering_selftest.py; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
   - an ADVERTISED member whose module body reaches the core facade is
     reported, because discovery loads every advertised package on the first
     dispatch and the cost would be every program's [tested:
-    tests/checks/check_layering_selftest.py; commit=WORKTREE]
+    tests/checks/check_layering_selftest.py; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
 Fails when: the workspace glob matches nothing, which it reports rather than
   passing on an empty roster.
 Open Obligations:

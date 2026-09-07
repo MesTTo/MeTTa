@@ -11,9 +11,9 @@ seam point naming an extra nobody declares.
 
 Assumes: a writable ai-tmp/ in this repository.
 Guarantees:
-  - a clean fixture workspace is clean [tested: this file; commit=WORKTREE]
+  - a clean fixture workspace is clean [tested: this file; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
   - each of the seven planted crossings is reported, and the report names what
-    to do instead [tested: this file; commit=WORKTREE]
+    to do instead [tested: this file; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
 Open Obligations:
   To Do: None

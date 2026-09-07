@@ -30,7 +30,7 @@ Guarantees:
     commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
   - a plain `import pandas` planted in the CORE is reported, and the finding
     says to move it to a package rather than to add an allowlist line, which
-    is the 2026-09-08 ruling [tested: this file; commit=WORKTREE]
+    is the 2026-09-08 ruling [tested: this file; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
   - a TypeScript import of a package, and a C include of a foreign header, are
     each reported [tested: this file; commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
