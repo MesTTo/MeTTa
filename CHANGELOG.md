@@ -278,6 +278,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   gone. The Hypothesis profile sets `deadline=None` once, so each of them was
   a private copy of a decision the profile already makes; two `settings`
   imports go with them.
+- `lib_tabling` declares where `call_delays/2` comes from. It is
+  `library(wfs)`'s, not `library(tabling)`'s, and the library-index autoloader
+  had been finding it: with autoload off the restraint dispatch raised
+  `Unknown procedure: call_delays/2` and the corpus stopped on
+  `16-cache_policy_restraints.metta`. Anyone running the engine with
+  `autoload` false met the same wall. The declaration is an `autoload/2` and
+  not a `use_module/2`: wfs is needed only where a restrained table is read,
+  and loading it eagerly costs the parity corpus's tabling row 2,006
+  inferences against 823 for the declaration.
 - A benchmark lane tells a box that would not count apart from a tree that
   moved. `measure_counters` raises `MeasurementRefusedError` where perf
   answered `<not counted>` for a requested event, and where a controlled

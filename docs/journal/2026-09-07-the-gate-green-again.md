@@ -291,3 +291,244 @@ Landing the invariant means deciding where the engine enforces it, which is a
 ruling about module resolution rather than a patch, and four sites have been
 measured as the wrong ones. The reproduction is forty seconds, so whoever takes
 it does not start from the suite.
+
+## 2026-09-07, the benchmark pins and what a pin from here is worth
+
+Tried: attributing the moved rows from the branch notes, the way the brief's
+list reads. Rejected for the reason the 2026-09-06 release re-pin already
+recorded: each note was measured on the branch that made the change rather than
+on the trunk that shipped it, so the endpoints do not meet. `annotated-relation`
+alone reads 315,385 in the pin, 745,524 in the assertion branch's note and
+820,625 here.
+
+Decided: sweep, the way that pass did. `ai-tmp/hy-sweep.py` in a scratch
+worktree walks the first-parent chain from `5aca9b64`, the release re-pin
+merge, to the tip, and at every point rebuilds the engine's C artifacts from
+THAT commit's sources, clears and rebuilds the `.qlf` set, and re-measures the
+Python counter suite, the engine suite and the C seat. Only inference counts
+are recorded: retired instructions and CPU move with the checkout path, the
+`.qlf` image and the machine's load, none of which a sweep that rewrites the
+tree at every point holds still.
+
+Measured, the first time this sweep was run, and the reason it was run again:
+`engine parse` read 5,212,702 inferences against a pin of 152, and `json-wire`
+169,470,783 against 158,011. Those are exactly the numbers `worktree.sh`'s own
+header records for a tree WITHOUT the engine's C artifacts ("json-wire reads
+178013 inferences with engine/json_codec.so and 169336779 without"; "file-load
+8704891 to 722264 with zero code change"). The first pass had provisioned the
+MORK backend and the node modules and not the engine C, so it measured the
+Prolog fallback at every point. `sh engine/build.sh` per point fixed it, and
+the second pass reproduces every pin at the commit it was taken on.
+
+Measured, the jitter floor: a step of two inferences is the tree's own and not
+a change. The same row reads two apart between a worktree checked out once and
+one rewritten by `git checkout -f` at every point, and several rows show a
++2/-2 pair across commits that cannot touch them. Steps of |2| or less are not
+attributed.
+
+Measured, what a pin taken HERE is worth, because the 2026-09-06 pass nearly
+pinned the wrong number for exactly this reason: the C seat's `boot` inference
+row reads **388,178** in this branch worktree, whose files this work has
+edited, and **388,151** in a worktree of the same commit that was checked out
+once and never written over. Twenty-seven inferences, the same
+rewritten-tree effect that pass measured at twenty-one on the same row. Every
+OTHER c-bench inference row is identical across the two trees, `error-ball`
+included. So a boot row is not pinnable from here and a non-boot inference row
+is.
+
+Re-pinned: `c-bench error-ball`, 406,009 to 498,008 (+91,999, +22.66%),
+attributed to `acd04732`, the assertion-bag-diff merge, by the sweep: 406,008
+at every point up to and including `bcedacec`, 498,008 at `acd04732` and at
+every point after it, three identical samples each. The mechanism is the one
+that branch's own deliverable named: a failing assertion renders three message
+lines where it rendered one, twice, and computes two `subtraction-atom` calls,
+and this case is 2,000 failing assertions through the C seat. Its INSTRUCTION
+and CPU pins are restored to their committed values: the updater writes every
+number it measured, and those two were measured here at loadavg 91 in a
+worktree 26 characters longer than the main checkout.
+
+Not re-pinned, with the numbers for whoever can: `c-bench boot` (+27 from this
+tree alone), and every instruction and CPU row in every seat. The box has not
+been below loadavg 40 for the whole session and has spent most of it between 50
+and 90.
+
+Measured, `memory-scale-gate`'s one regression, on its own ladder
+(`ai-tmp/hy-ladder2.sh`, the same rebuild-per-point discipline):
+`support-drop-spaces` inferences at the four sizes read
+`[3987, 38540, 384062, 3839298]` at `5aca9b64` and hold to `14e70c7a`; the step
+is `699c8b4a`, the algebra-lifecycle merge, which retires every space-owned
+catalog declaration with its space, and this case drops spaces:
+`[7037, 69363, 688777, 6886423]`, +79% at the largest size. Two further steps
+are in this wave: `80af155d` to 7,158,434 and `5621c456` to 7,398,448 at the
+largest size.
+
+Measured, `automatic-tabling`, whose pins live in
+`extensions/python/benchmarks/test_benchmarks.py` rather than in a baseline
+document and carry no configuration stamp. The pins are unchanged across the
+whole chain, so a PASS at a commit means the observed numbers still equal them
+and a FAIL prints what they became. Ladder
+(`ai-tmp/hy-tabling.sh` in the ladder worktree, every component built at every
+point):
+
+| commit | n=12 plain | n=12 automatic |
+|---|---:|---:|
+| `5aca9b64`, `699c8b4a` | 122,123 | 14,372 |
+| `468350eb` .. `acd04732` | 122,086 | 14,335 |
+| `ab02d526` .. `97c96e91` | 122,089 | 14,343 |
+
+So two steps, both attributed: **-37 at `468350eb`**, the soft/provider/import
+doors merge, and **+3 at `ab02d526`**, the test-hygiene merge. `468350eb` is the
+immediate first-parent successor of `699c8b4a`, so the first step is a single
+commit rather than a span.
+
+Recorded, because it cost a ladder: `sh extensions/python/test.sh` carries
+`-p no:benchmark`, which makes `benchmarks/conftest.py`'s
+`pytest_benchmark_update_machine_info` an unknown hook and turns the run into a
+pluggy `INTERNALERROR` rather than a measurement. The first tabling ladder read
+"passes at every point" from that error. `bench.py`'s own invocation --
+`pytest <case> -q --rootdir=. -c pyproject.toml --benchmark-disable` -- is what
+runs it.
+
+## 2026-09-07, the four order-dependent tests
+
+Three separate configurations, and they do not agree, which is the finding.
+
+| run | configuration | result |
+|---|---|---|
+| this tree | `-n 4`, random seed 2964372231 | 3 failed: two this session's own, plus `test_a_monotonic_table_propagates_an_add_at_delta_cost` (487 against 489 inferences) |
+| this tree | `-n 4`, `--randomly-seed=2964372231` again | **3940 passed, 0 failed** |
+| the control at `97c96e91` | `-n 4`, the same seed | 1 failed: `test_no_binding_carries_its_own_verbosity_setter`, which no run of this tree failed |
+
+Three runs at the SAME seed, three different outcomes, on two trees. Under
+`--dist loadfile` the seed fixes the order WITHIN a file and not which files
+share a worker process, and that assignment is decided by which worker frees up
+first. So `repeat it with --randomly-seed=<n>` is a partial promise here: it
+reproduces the order, not the process. None of the brief's four failed in
+either run of this tree.
+
+The serial configuration is where a threshold reproduces, and it does:
+`sh extensions/python/test.sh -n 0 -p no:randomly` reads **1 failed, 3939
+passed, 48 skipped in 1512.94s**, and the one is
+`test_the_subscription_queue_is_bounded_and_load_takes_a_budget`, at
+`with pytest.raises(TimeLimitError): metta.load(forever, timeout=0.3)` --
+`DID NOT RAISE`.
+
+Measured, the door itself: in a FRESH process the same call raises
+`TimeLimitError` twelve times out of twelve, each at 0.301s to 0.307s, with the
+inference-bounded load beside it raising `InferenceLimitError` in 0.002s to
+0.011s (`ai-tmp/hy-bounds-probe.py`). So the door works and the process is what
+breaks it.
+
+Prefix-length search over the collection order, one process per point, the
+target file appended to the first N files:
+
+| files | tests | verdict |
+|---|---:|---|
+| 0 | 3 | passes |
+| 91 | 1,361 | passes |
+| 181 | 2,668 | the bounds test passes; `test_limits_leave_finished_work_standing` in ch14 fails instead |
+| 275 | 3,939 | the bounds test fails |
+
+Two thresholds, not one, and the ch14 one is not in the set the coordinator
+ring-fenced. Both are the same shape: a bound stated in WALL CLOCK against a
+process whose fixed cost per call has grown, which is the instrument this
+repository's own measurement rule rejects everywhere else.
+
+Measured, the same question for the engine seat, because `engine-bench` cannot
+be re-stamped without re-pinning its rows. `engine/bench.py --counter-only
+--update-baseline` reads, in a worktree of `97c96e91` checked out once and
+never written over against this branch worktree whose files this work has
+edited:
+
+| row | pristine | this worktree |
+|---|---:|---:|
+| boot | 267,924 | **268,417** |
+| evaluate | 560,420 | 560,420 |
+| match | 265,002 | 265,002 |
+| match-skew | 208,042 | 208,042 |
+| parse | 152 | 152 |
+| parse-prolog | 3,118,634 | 3,118,634 |
+| translate | 308,706 | 308,706 |
+
+Four hundred and ninety-three on the boot row and nothing anywhere else. It is
+not this branch's code: with `lib/lib_tabling/lib_tabling.pl` reverted to
+`97c96e91` in this same worktree the row reads 268,417 to the digit, and with
+this branch's version it reads 268,417, so `metta_tabling_watched/1` costs the
+boot nothing. It is the rewritten-tree effect again, twenty-three times the
+twenty-seven the C seat's boot row shows, and it is the second time in two days
+that a boot row has nearly been pinned to the measurement rather than to the
+tree.
+
+Decided: a boot row's inference pin is taken from the PRISTINE worktree, and
+every other row from either, since they agree to the digit.
+
+## 2026-09-07, the lane the brief did not name
+
+Tried: reading the pristine control's sixteen red lanes rather than the
+brief's list. Two are not in it. `node-dist` fails on
+`Cannot find package 'esbuild'` from `extensions/node/tools/build-browser.mjs`,
+which is a worktree that never ran `npm install` for that seat rather than
+anything in the tree. `no-autoload` is a real defect.
+
+Measured: `NO_AUTOLOAD=1 sh test.sh` stops on
+`examples/ch18-performance/18-02-memoisation-and-tabling/16-cache_policy_restraints.metta`
+with `Unknown procedure: call_delays/2`. `lib/lib_tabling/lib_tabling.pl`
+reads a restrained table's delay condition through `call_delays/2` and
+declares no import for it; SWI's autoloader had been resolving it, which is
+the exact hazard that lane exists to catch ("a module boundary can be broken
+with every lane still green").
+
+Decided: `:- autoload(library(wfs), [call_delays/2])` beside the file's
+`library(tableutil)` import. It is `library(wfs)`'s and not
+`library(tabling)`'s -- measured, `predicate_property(call_delays(_,_),
+implementation_module(M))` answers `wfs`, and `library(tabling)` neither
+exports it nor is still current ("`:- table/1` is built-in, library(tabling)
+is deprecated"). The lane reads `no-autoload ok` over 258 examples either way.
+
+Rejected: `use_module/2`, which was tried first. This file is loaded by every
+boot and wfs is needed only where a restrained table is read, so an eager load
+charges every program that never restrains anything: the parity corpus's
+tabling row reads 138,172 inferences on trunk, **140,178** with `use_module`
+and **138,995** with the declaration. An explicit `autoload/2` is honoured with
+the `autoload` flag false, which is the point of naming the file rather than
+leaving it to the library index.
+
+## 2026-09-07, parity-perf's third reason
+
+The brief names `parity-perf` as varying with load, and the lane change above
+answers that. The pristine control shows a third reason the brief does not
+name: **thirteen rows of TREE DRIFT**, the lane's own within-tree tripwire,
+which compares this engine's inference count for a corpus example against a
+frozen one. Inferences are deterministic, so this is a stale pin rather than
+noise.
+
+Twelve of the thirteen drift by the same amount and sign, between +2,051 and
++2,957, which is the signature of one fixed per-program cost. The thirteenth,
+`18-02-memoisation-and-tabling/09-tabling_fib.metta`, drifts +58,070.
+
+Laddered, two rows, through the same driver the lane uses
+(`tests/fixtures/parity_driver.pl`) with every component rebuilt at each point
+(`ai-tmp/hy-parity-ladder.sh`):
+
+| commit | 07-datetime | 09-tabling_fib |
+|---|---:|---:|
+| `5aca9b64` | 28,313 | 80,102 |
+| `699c8b4a` | 28,313 | 80,077 |
+| **`468350eb`** | **31,173** | **83,056** |
+| `d4742c23` .. `ab02d526` | 31,173 | 83,056 |
+| `80af155d` | 31,173 | 83,082 |
+| **`5621c456`** | 31,173 | **138,172** |
+| `97c96e91` | 31,173 | 138,172 |
+
+`468350eb` is the immediate first-parent successor of `699c8b4a`, so the
++2,860 is that one commit -- the soft, provider and import doors merge, the
+same commit the `automatic-tabling` pins move at. `tabling_fib` takes that step
+and then a second at `5621c456`, the cache-policies merge, which is the merge
+that rewrote tabling.
+
+Measured, that a parity inference number may be pinned from this worktree:
+`07-datetime.metta` reads 31,173 through the driver here and 31,173 in the
+pristine control's own lane run. Identical, which is the same answer the
+2026-09-06 pass got for every inference count across path lengths; only the
+instruction halves of this baseline are path-sensitive and none of them is
+touched.
