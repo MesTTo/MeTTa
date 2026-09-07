@@ -696,6 +696,9 @@ forbidden_modules = [
     # and MeTTa.check, so an ordinary core import does not load tomllib or the
     # library satellite it reads the roster from.
     "metta._lock",
+    # live is the materialised-view surface metta.structures reaches only when
+    # a LiveView is made, so importing the stores does not build it.
+    "metta.live",
     "metta.aio",
     "metta.algebra",
     "metta.arrays",

@@ -376,6 +376,61 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   gap is. The lane also runs the launcher contract the design record thought
   the kernel rode on, which is real and is this fork's: `METTA_PATH=<upstream>
   metta program.metta` runs upstream's `src/main.pl`.
+- `m.live(*query, on="both", strategy=None)`, a query materialised and kept
+  current by the space's own committed writes. `live.rows` is what
+  `m.match(...)` would answer without asking, `len(live)`, `atom in live` and
+  `live.count(atom_or_row)` are local reads, `live.atoms()` is the answer as
+  atoms when the query is one atom, and `live.close()` ends the maintenance
+  while the view keeps its last answer. The query is one pattern, a
+  conjunction spelled the way `match` spells one, or a call to a TABLED head.
+  `metta.live` is the module and `Live` the class; `metta.structures.LiveView`
+  is now that `Live` with the `pattern` strategy read through its atoms, one
+  mechanism rather than two, and `metta.structures` reaches the module only
+  when a `LiveView` is made, so a program that wants the stores does not pay to
+  build a view [measured 2026-09-07: defining them in `metta.structures` cost
+  the structures-dispatch pin 597,039,924 instructions against 593,464,324].
+
+  Three maintenance strategies, one meaning, named by the new `live-strategy`
+  catalog vocabulary (`metta.vocabularies.LiveStrategy`) and chosen from the
+  query's shape unless `strategy=` says otherwise; `live.strategy` reports the
+  one in force. `pattern` maintains one pattern's multiset from the write
+  events themselves; `heads` subscribes to every head the query mentions and
+  re-answers the whole query once per COMMIT that touched one; `tabled` serves
+  a call by reading its own table's invalidation counter and re-reading only
+  when it moved. Measured over relations of 10, 100 and 1,000 rows, engine
+  inferences per touching write: `pattern` 88, 90, 90 against a
+  recompute-per-event consumer's 149, 425, 3,153, which is the same 90 a
+  subscription that does nothing costs; `heads` 4,035 against that consumer's
+  31,564 for a transaction of ten writes, because the diff is already
+  committed when its first event arrives; `tabled` 563 flat at every size for
+  a write that leaves its table valid. Reproduce with
+  `extensions/python/benchmarks/probes/live_view_cost.py --costs`.
+
+  `live.changes(timeout=None)` reads the same view as a stream of
+  `metta.live.Delta(kind, diff, row, atom, generation)`, frozen and
+  slotted so a consumer reads it with `match`. A `progress` delta follows every
+  committed segment and means every change up to its generation has been
+  delivered, which is Materialize's SUBSCRIBE progress row. The stream is a
+  context manager, iterates with `for` or with `async for` under `aio`, buffers
+  only while it is open, and refuses at `metta.subscribe.SUBSCRIPTION_QUEUE_MAX`
+  rather than dropping the oldest.
+
+  Refusals: a provider that declares no event delivery, because a view is only
+  as current as the changes it hears; a query whose OWN head is an operation
+  that writes, because a view matches its query and never calls it (a head the
+  space also defines with an effectful body is not that case and its view
+  stands); a `tabled` strategy over a head with no table, or one whose cache
+  policy does not invalidate, naming the policy.
+
+- `EventStream.generation()`, the stream's clock, and
+  `EventStream.segments(callback)`, which runs `callback(generation)` after
+  every committed segment: one commit's whole ordered diff, so an unscoped
+  write is a segment of one and a transaction is a segment of everything it
+  wrote, while a rollback, a speculation and a world evaluation have none.
+  Underneath is a new `seam:segment_committed/1` event extension point
+  carrying the sorted space names the segment touched, announced only while a
+  handler exists and crossed to a host only for a segment touching a space it
+  watches.
 
 - `(cost witness class)` and `(cost witness class measure)` catalog rows, and
   the `cost-rows` gate lane that can fail one. The witness is a call with
@@ -911,6 +966,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - `metta_source_declarations/2` answers the version an extension declares
   beside its name, so a reader asking what a library states no longer has to
   consult the file to learn it.
+- `metta.structures.LiveView` is now the one-pattern atom face of `metta.live.Live`
+  rather than its own maintenance loop. Its surface is unchanged, and its
+  removal fast path is stricter: it decrements locally when the removal's
+  pattern is ground and the view holds no answer carrying a variable, where it
+  used to scan its held atoms for one that unifies.
 
 - A `(claim Vocab Value Property...)` row's properties are cached per value,
   the way a vocabulary's values already were. The read has an open tail,

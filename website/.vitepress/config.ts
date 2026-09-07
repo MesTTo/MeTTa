@@ -221,6 +221,7 @@ export default defineConfig({
               { text: "metta.parallel", link: "/reference/metta-parallel" },
               { text: "metta.events", link: "/reference/metta-events" },
               { text: "metta.subscribe", link: "/reference/metta-subscribe" },
+              { text: "metta.live", link: "/reference/metta-live" },
               { text: "metta.foreign", link: "/reference/metta-foreign" },
               { text: "metta.integrate", link: "/reference/metta-integrate" },
               { text: "metta.importing", link: "/reference/metta-importing" },

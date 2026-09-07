@@ -2,12 +2,18 @@
 
 Source: `extensions/python/metta/structures.py`.
 
-> Data structures with MeTTa's semantics at Python speed, built on
-> the boundary-free atom kernel (unify, alpha_eq, variables, order_key) and
-> never touching the engine: importable and usable without janus. PatternMap
-> answers "which entries apply to this atom", MatchIndex answers "which of
-> many registered patterns match it" sublinearly, and AlphaSet holds atoms
-> modulo variable renaming.
+> Data structures with MeTTa's semantics at Python speed. The first
+> three are built on the boundary-free atom kernel (unify, alpha_eq, variables,
+> order_key) and never touch the engine, so they import and work without janus:
+> PatternMap answers "which entries apply to this atom", MatchIndex answers
+> "which of many registered patterns match it" sublinearly, and AlphaSet holds
+> atoms modulo variable renaming. The rest take a live handle and cross
+> deliberately, because the win IS the engine: LiveView materialises one pattern
+> and keeps it current from the space's own writes, TabledMap is a computed cache
+> the engine invalidates, and ClosureView a reachability relation tabled from
+> birth. The general view -- several patterns, a tabled call, a stream of deltas
+> -- is metta.live, which this module reaches only when a LiveView is made, so a
+> program that wants the stores does not build it.
 
 The entries below reproduce the source signatures and docstrings.
 
@@ -204,6 +210,11 @@ class LiveView:
 > event. A space is a multiset and so is the view: len counts copies,
 > iteration yields them, count(atom) answers multiplicity. close()
 > cancels the subscription; a closed view keeps its last state.
+>
+> This is `Live` with the `pattern` strategy, read through its ATOMS: one
+> mechanism, and this face is the one the engine's own atom-hook comment
+> names as the worked instance. `m.live(pattern)` is the rung below it and
+> answers rows, several patterns, a tabled call, and a stream of deltas.
 >
 > space may be a context or a space.
 
