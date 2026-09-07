@@ -439,7 +439,7 @@ measured to be — removing the clause leaves `!()`, `!(let $x () $x)`,
 compile-time constant. The reason the answer stays is the pin, not argument
 evaluation.]
 
-### Seed 4 closed the row the section above left open
+### Seed 4 drew the row the section above left open, by a shorter road
 
 Tried: a fresh seed after the three repairs -> one finding, and it is that row
 reached by a shorter road than `foldall`:
@@ -478,6 +478,53 @@ Open, and recorded rather than fixed: `!(f0 ())` is `()` here and nothing on
 the arbiter, and `!(foldall a (reduce ()) 0)` is `(a () 0)` here and `0` there.
 Revisit if the pin is ever revisited; the measurement is here.
 
+### Seed 5: one finding, and it belongs to the recorded class
+
+Program: `(= (f0 $x) (match $x $x a))` with `!(f0 ())`. Arbiter nothing; ours
+`(Error (match () () a) "match expects a space as the first argument")`.
+
+Measured across the family on both engines:
+
+| program | arbiter | ours |
+|---|---|---|
+| `!(match &self (rel0 $x $y) found)` | `found` | `found` |
+| `!(add-atom b (x 1))` then `!(match b (x $v) $v)` | `true`, `1` | `true`, `1` |
+| `!(match b (x $v) $v)` before any write | nothing | the refusal |
+| `!(get-atoms b)` before any write | nothing | the refusal |
+| `!(match () (x $v) $v)`, `!(get-atoms ())` | nothing | the refusal |
+| `!(add-atom () (x 1))` | `true` | the refusal |
+| `!(match 7 ...)`, `!(match "s" ...)`, `!(match (a b) ...)`, `!(match $s ...)` | exit 2 | the refusal |
+
+Two different things sit in that table and only one is a candidate.
+
+`()` AS A SPACE NAME is upstream's SWI representation leaking, the same shape
+as the arithmetic family above: upstream's spaces ARE Prolog predicates, and
+`[]` happens to be a legal functor there, so `Term =.. [[]|Args]` builds one.
+This engine's stated design is "a space is a symbol here, so anything that is
+not one is refused"
+[source: extensions/python/tests/ch04_spaces_and_matching/test_space_operation_errors.py,
+the note over test_a_non_symbol_first_argument_is_refused_by_the_read_path],
+and `()` is not a symbol. RECORDED, on the same two grounds as the arithmetic
+family. The non-symbol rows below it are class arbiter-error and need nothing.
+
+AN UNDECLARED SYMBOL is different, and it is a finding about this engine rather
+than about the arbiter: the WRITE path creates the space and the READ path
+refuses it. `!(add-atom b (x 1))` answers `true` here and upstream alike and
+`b` then holds the atom; `!(match b ...)` before that write is a refusal here
+and nothing there. Two coherent designs exist and the engine sits between them:
+either a space is DECLARED, and writing to an undeclared name should refuse
+too; or any symbol names a space that is empty until written, which is
+upstream's model and what this engine's write path already does.
+
+Tried: the second, as a two-line change at match/4 and get_native_atom's
+argument test -> it makes the symbol rows agree and leaves every non-symbol row
+refusing, which is where upstream raises. REVERTED, because the refusal it
+removes is pinned three times over a symbol
+[tested: test_match_snapshot.py:test_a_bounded_match_on_an_unbound_space_answers_the_error,
+with `notaspace` as the space], so the choice is an architectural one about
+whether this engine's spaces are declared, not a defect to patch. Recorded with
+both directions and the measurement; it belongs to whoever owns that model.
+
 ### Two repairs the verification pass surfaced, neither from the lane
 
 Tried: the full Python seat against the three divergence commits -> two
@@ -495,6 +542,36 @@ operation. Decided: read the operand from the first argument.
 Tried: `!(and True (+ 1 "bad"))` -> answered nothing where it must answer the
 inner `(Error (+ 1 "bad") (BadArgType 2 Number String))`. Recorded in full in
 the boolean section above.
+
+The seeds run, and what each returned:
+
+| seed | programs | agree | unreduced | arbiter-error | timeout | error-on-one | answer-mismatch | reports |
+|---|---|---|---|---|---|---|---|---|
+| 0 (the lane's own first run, before this branch) | 200 | 130 | 0 | 47 | 0 | 7 | 16 | 4 |
+| 1 | 300 | 210 | 0 | 50 | 3 | 35 | 2 | 6 |
+| 2 | 300 | 202 | 0 | 55 | 2 | 17 | 24 | 7 |
+| 3 | 299 | 243 | 0 | 56 | 0 | 0 | 0 | 0 |
+| 4, after the seed 1-3 fixes | stopped at 183 | — | 0 | — | 0 | — | — | 1 |
+| 5, fresh, after the seed 4 work | 300 | 222 | 0 | 64 | 0 | 13 | 1 | 1 |
+
+Five seeds beyond seed 0, and it took all five. Seed 3 returned a literally
+clean round and does not settle anything, because it ran BEFORE the seed 1 and
+2 fixes landed. Stated exactly: NO seed after the fixes returned zero findings.
+What converged is the DEFECTS — every finding from seed 4 on is recorded rather
+than fixed, and each is either an instance of a class recorded here or, at seed
+5, an architectural question about this engine's own space model. Nothing drawn
+after the fixes was a defect to patch.
+
+Every `arbiter-error` is extension-permitted by construction: the lane asks the
+arbiter's own health first, so those are programs upstream RAISED on. No
+`unreduced-on-arbiter` in any seed, so `surface-misses.jsonl` is empty in all
+five report directories and nothing was drawn outside the census's surface.
+
+One report at seed 1 was not a divergence: `!(catch ())` came back with
+`open_shared_object/3: morklib.so: file too short` in our output, which is
+`check.sh`'s component pass rebuilding the MORK library in the same tree while
+the lane was running. The program agrees on both engines when re-run. Do not
+run `check.sh` against a worktree while the lane is running in it.
 
 ### The one new family: arithmetic over a one-character symbol
 
