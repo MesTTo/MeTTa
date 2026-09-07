@@ -28,6 +28,7 @@ re-runs them.
 | `extensions/python/tests/*/test_*.py` | blackbox, hypothesis-fuzzed, in the same 20 chapters `examples/` uses, plus `conformance/` for the arbiters and `repository/` for the tests whose subject is this repository | the `pytest` gate lane |
 | `extensions/python/examples/language-feature-examples/**/*.py` | one Python file per shipped MeTTa example, written with no MeTTa source text, answering alpha-equal to its original or explicitly declining a structured-residue form, and pinned to an inference budget. Read these for how a MeTTa program is spelled in Python | the `twins` REPORT lane |
 | `CODEC.md` | the wire codec: the tagged form every atom crosses as, what a new binding implements | `extensions/python/tools/codecdoc.py`, whose tables come from `tests/codec/corpus.json` |
+| `extensions/python/metta/_pygments.py` | the MeTTa Pygments lexer, GENERATED from `website/.vitepress/metta.tmLanguage.json`, the one TextMate grammar the site and the editor colour from. Registered under the `pygments.lexers` entry point with the alias `metta`, every filename ending in `.metta`, and the MIME type `text/x-metta`, so Sphinx, mkdocs, rich, IPython, nbconvert and a Jupyter kernel colour MeTTa once `pymetta` is installed and nothing has to be imported to arrange it. It carries no semantic colouring: the grammar's twelve groups are lexical, and meaning (a definition against a call, a known type) is what the language server's semantic tokens add | `extensions/python/tools/pygmentsgen.py`, the `pygments-sync` gate lane, and the `tokenisation` gate lane, which runs the grammar's OWN tokeniser through `website/scripts/tokenise.mjs` and requires the two to agree about every character of every `.metta` file in the tree |
 | `extensions/python/metta/vocabularies.py` | the catalog's value vocabularies as StrEnum classes, one per `(vocabulary ...)` row; each member IS its wire word and encodes as its symbol, and bare words stay the runtime escape hatch | `extensions/python/tools/vocabgen.py`, the `vocab-sync` gate lane |
 | `README.md` | the tour, and the argument for the design | |
 | `CHANGELOG.md` | every user-facing change, with the reasoning | |
@@ -2025,7 +2026,19 @@ violation: narrow the precondition with a refinement instead. Use
 `BenchmarkBaseline.observe_counter` for deterministic engine counts,
 `observe_measurement` for a declared noisy-counter band, and
 `observe_configuration` before comparing either. `metta.pytest_plugin` gives the `metta` and
-`scratch_space` fixtures; `metta.ipython` gives `%%metta` in a notebook.
+`scratch_space` fixtures; `metta.ipython` gives `%metta <source>` and
+`%%metta [space]` in a notebook, one registration in IPython's `line_cell`
+form. The line means a different thing in each, because it is the argument
+line in both: for `%metta` it IS the program, for `%%metta` it names a space
+and the cell is the program. A one-line evaluation therefore has no room to
+name a space, and `metta.ipython.use(m)` is the rung below it, pointing both
+at one runtime for the session. `%metta` with nothing after it refuses.
+The full-notebook experience is `trueagi-io/jupyter-petta-kernel`, which
+runs MeTTa cells with no prefix at all; it asks its host for a `petta`
+module under `$PETTA_PATH/python`, which this fork does not ship, so it
+runs against upstream PeTTa and this package's contribution to it is the
+lexer its `language_info` MIME type resolves to. The `kernel` REPORT lane
+installs it at a pinned commit and starts it.
 
 These submodules and names, forty-eight of them, load on first access rather than during
 `import metta`: `aio`, `algebra`, `amplitude`, `arrays`, `bag`, `bool`, `boot`,

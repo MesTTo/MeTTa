@@ -17,6 +17,8 @@
 #                                            jscpd jscpd-prolog prolog
 #                                            ciao-grade
 #                                            codec-doc petta parity-perf
+#                                            pygments-sync tokenisation
+#                                            tokenisation-selftest kernel
 #                                            parity-perf-selftest
 #                                            parity-fuzz parity-fuzz-selftest
 #                                            policy-inventory
@@ -613,6 +615,17 @@ run GATE codec-doc  "$PY" "$HERE/extensions/python/tools/codecdoc.py"
 # semirings while the engine acted on two, and nothing said which was right.
 run GATE vocab-sync "$PY" "$HERE/extensions/python/tools/vocabgen.py"
 
+# One grammar colours the site, the editor and every Pygments consumer.
+# metta/_pygments.py is generated from website/.vitepress/metta.tmLanguage.json,
+# so this asks whether what is checked in is what the grammar says, and
+# `tokenisation` below asks the harder question: whether the two agree about
+# every character of the corpus, with the grammar's own tokeniser answering for
+# it. Before them a Pygments lexer was a second, hand-kept copy of the token
+# model, which is the drift the one grammar exists to prevent.
+run GATE pygments-sync "$PY" "$HERE/extensions/python/tools/pygmentsgen.py"
+run GATE tokenisation "$PY" "$HERE/tests/checks/check_tokenisation_parity.py"
+run GATE tokenisation-selftest "$PY" "$HERE/tests/checks/check_tokenisation_selftest.py"
+
 # --------------------------------------------------------------- REPORT tier
 # Known backlog. Each entry names its section in the ledger and becomes a
 # GATE once that section is cleared.
@@ -622,6 +635,15 @@ run GATE vocab-sync "$PY" "$HERE/extensions/python/tools/vocabgen.py"
 # remaining entries and calls anything outside it UNTRACKED, so the baseline
 # cannot grow silently. Promote this lane when the remaining count reaches zero.
 run REPORT snippets    "$PY" "$HERE/website/scripts/audit_snippets.py"
+# trueagi-io/jupyter-petta-kernel, installed at a pinned commit and STARTED:
+# against upstream PeTTa at the parity pin, which is its own configuration, and
+# against this engine through the two calls it makes of its host. REPORT
+# because it fetches from github.com and a gate that reaches the network fails
+# for reasons that are not the tree; the kernel job in .github/workflows adds
+# CI=true, where every missing prerequisite refuses instead of skipping. It
+# also runs the launcher contract the journal thought the kernel rode on, which
+# needs no network and is checked whatever the rest of this lane can reach.
+run REPORT kernel      "$PY" "$HERE/tests/checks/check_jupyter_kernel.py"
 # Python that lives OUTSIDE the Python seat. Every lint lane in
 # extensions/python/check.sh runs with that directory as its root, so the
 # benchmark drivers the other components grew -- engine/bench.py,

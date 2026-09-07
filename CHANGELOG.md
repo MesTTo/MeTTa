@@ -282,6 +282,53 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   PROCESS rather than one context, because the engine's loads, registrations
   and pins are process-wide and a program that loads into one space and reads
   from another is still one program to reproduce.
+- A Pygments lexer for MeTTa, `metta._pygments.MettaLexer`, registered under
+  the `pygments.lexers` entry point. Installing the package is the whole of
+  the installation: Pygments reads the entry point out of the distribution's
+  metadata, so Sphinx, mkdocs, rich, IPython, nbconvert and any Jupyter front
+  end colour MeTTa from that moment, by the alias `metta`, by a filename
+  ending in `.metta`, or by the MIME type `text/x-metta`, which is what a
+  Jupyter kernel's `language_info` names.
+
+  It is GENERATED from `website/.vitepress/metta.tmLanguage.json`, the one
+  TextMate grammar this site, the editor and the six sibling repositories
+  colour from, by `extensions/python/tools/pygmentsgen.py` on the same
+  contract `vocabgen.py` keeps. The generator translates Oniguruma to Python's
+  `re` and REFUSES what it cannot translate rather than approximating it: an
+  Oniguruma-only escape, a POSIX bracket class, an Oniguruma-spelled named
+  group, and the four anchors whose meaning changes when the whole file is one
+  string instead of one line. `\s` it translates rather than copies, because
+  the two engines disagree about exactly four codepoints.
+
+  Three lanes hold it. `pygments-sync` fails when the checked-in module is not
+  what the grammar produces. `tokenisation` runs the grammar's OWN tokeniser
+  through `website/scripts/tokenise.mjs` -- shiki, which is what the site
+  highlights with, over the real Oniguruma in WebAssembly -- and requires the
+  two to agree about every character of every `.metta` file the repository
+  tracks and of `tests/data/tokenisation_probes.txt`, which holds the shapes
+  chosen for being able to diverge. `tokenisation-selftest` plants four
+  defects, two on each side, and requires each to be reported.
+
+- `%metta`, a line magic beside `%%metta`, for a one-line evaluation. One
+  registration in IPython's `line_cell` form, the way `%time` and `%%time` are
+  one magic, so the two faces cannot drift apart. The line is the program for
+  `%metta` and names a space for `%%metta`; `metta.ipython.use(m)` is the rung
+  below both, and `%metta` with nothing after it refuses and names the two
+  spellings that do something.
+
+- A `kernel` REPORT lane and a CI job that install
+  `trueagi-io/jupyter-petta-kernel` at a pinned commit and START it, which
+  nothing had done. Measured: the kernel does not use the `metta` console
+  script. It puts `$PETTA_PATH/python` on `sys.path`, imports `petta.PeTTa`,
+  and calls `load_metta_file` per cell, so it needs a tree in upstream's
+  layout. Against upstream PeTTa at the parity pin a MeTTa cell answers
+  correctly; against this fork it refuses with `No module named 'petta'`,
+  since upstream compatibility was withdrawn; and through fifteen lines of
+  adapter in the lane -- `load_metta_file` is `Space.load` -- the same cell
+  answers correctly on this engine, which is the measurement of how wide the
+  gap is. The lane also runs the launcher contract the design record thought
+  the kernel rode on, which is real and is this fork's: `METTA_PATH=<upstream>
+  metta program.metta` runs upstream's `src/main.pl`.
 
 - `(cost witness class)` and `(cost witness class measure)` catalog rows, and
   the `cost-rows` gate lane that can fail one. The witness is a call with

@@ -82,6 +82,22 @@ Issues = "https://github.com/MesTTo/MeTTa-Kernel/issues"
 [project.entry-points.pytest11]
 metta = "metta.pytest_plugin"
 
+#: The one door that needs no import from a user at all: Pygments loads
+#: this by itself and reads the class's own aliases, filenames and
+#: mimetypes, so Sphinx, mkdocs, rich, IPython, nbconvert and a Jupyter
+#: kernel whose language_info says `text/x-metta` all colour MeTTa the
+#: moment pymetta is installed. The name on the left is ignored by
+#: Pygments and is the distribution's own; Pygments loads the entry point and
+#: reads the CLASS's aliases, which mako's own declaration says out loud
+#: [source: https://github.com/sqlalchemy/mako/blob/rel_1_3_10/pyproject.toml].
+#: The tag carries no commit because nothing resolves one here: this file is
+#: outside check_evidence_tags.SOURCES, which is why `pin_provenance.py`
+#: reports it, and check.sh and the workflow cite the same way for the same
+#: reason. The module is GENERATED from
+#: website/.vitepress/metta.tmLanguage.json by tools/pygmentsgen.py.
+[project.entry-points."pygments.lexers"]
+metta = "metta._pygments:MettaLexer"
+
 [project.scripts]
 metta = "metta.cli:main"
 
@@ -457,11 +473,17 @@ module = ["pytest"]
 ignore_missing_imports = true
 
 
+# Beside rich for the same reason: `pygments.*` is what loads metta/_pygments.py
+# through the entry point and `IPython.*` is what calls
+# metta/ipython.py's load_ipython_extension, so each one's presence is the
+# precondition of the call rather than a dependency of this package. Neither
+# ships stubs (types-Pygments exists and IPython has none), and skipping the
+# follow keeps a stub package out of the checks extra for two import lines.
 [[tool.mypy.overrides]]
 module = [
     "annotated_types", "array_api_compat", "faiss", "hypothesis",
     "hypothesis.*", "numpy", "nanoarrow", "nanoarrow.*", "pandas", "polars",
-    "rich.*", "websocket",
+    "rich.*", "websocket", "IPython.*", "pygments", "pygments.*",
 ]
 ignore_missing_imports = true
 follow_imports = "skip"
@@ -558,7 +580,14 @@ optional_dependencies_dev_groups = ["test", "checks"]
 # runs first, so importing metta or metta.testing loads neither the module nor
 # the package it needs.
 DEP004 = ["pytest", "hypothesis"]
-DEP003 = ["rich"]
+# pygments is imported only by metta/_pygments.py, which nothing in this
+# package imports: Pygments itself loads it through the entry point above,
+# so its presence is the precondition of the load, exactly as rich's is
+# the precondition of the __rich__ call. IPython is the same shape from the
+# other side: metta/ipython.py imports IPython's own UsageError inside
+# load_ipython_extension, which only a running IPython calls, so the shell
+# that reaches that line is what put IPython there.
+DEP003 = ["rich", "pygments", "IPython"]
 DEP002 = [
     "janus-swi",
     "array-api-compat",
