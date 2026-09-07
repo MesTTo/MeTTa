@@ -128,3 +128,40 @@ Open: a row rewritten at runtime reaches the seats at once, which the Python
 lane proves by planting one. Nothing revokes a row that a program removes and
 never puts back: a kind with no row answers no refusal and every seat falls
 back to the class it already chose, which is what it had before this existed.
+
+## 2026-09-07, later: what the rows cost
+
+The `benchmarks` lane is red on the base: 22 of 35 benchmarks fail, 20 of them
+on an inference regression against a stale baseline, `annotated-relation`
+reading 825,125 against a pinned 315,385. So "did this branch regress a
+benchmark" could not be read off the lane's verdict and had to be read off the
+numbers.
+
+Measured, `bench.py --counter-only --keep-going` on this branch and on a
+pristine worktree detached at the same base `d624792f`, provisioned
+identically, each run twice, min-of-3 per benchmark inside the harness:
+nineteen of the twenty are within ±2 inferences, which is this harness's own
+cross-process noise, and one moved.
+
+    source-load   control 235,270   branch 235,308   +38   +0.0162%
+
+Deterministic on both sides: two runs of each gave the identical min-of-3.
+
+Bisected by disabling presets and re-measuring:
+
+- with the thirteen `(refusal ...)` preset rows disabled, the branch still
+  reads 235,308, so the rows in `&metta` are not what costs;
+- with the four `(vocabulary ...)` rows disabled as well, it reads 235,303.
+
+So about 5 of the 38 are the seventeen catalog rows and about 33 are the
+larger engine source this branch consults. Rejected the hypothesis that a
+query for another head now walks the `refusal` rows: the catalog stores a row
+as `'&metta'(Head, ...)` per arity and the HEAD is the indexed first argument
+[source: engine/spaces/catalog.pl, metta_catalog_clause/2], and the arity set
+is identical on both trees, `[2,3,4,5,6,7,8,10,11,12,13,15,21]`, so the rows
+add no bucket for an open-tail query to walk either.
+
++0.0162% on one benchmark is inside the push gate's own reading, which calls a
+bench regressed when it passes its noise floor plus 0.10pp. Recorded rather
+than optimised: the cost is the source, not the data, and nothing in the
+measurement points at a scan worth removing.
