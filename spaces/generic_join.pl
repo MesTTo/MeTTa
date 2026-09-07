@@ -64,9 +64,10 @@ cyclic_join_planning_enabled :-
 % [measured 2026-09-07: over 2,048 stored edges the whole triangle query costs
 % 237,473 SWI inferences, the shape and its relations together 95,556, the data
 % half 6,442 and the query half 248, which is flat across a sixteenfold change
-% in stored rows; command=PYTHONPATH=extensions/python $VENV/bin/python
-% ai-tmp/aa_probe13.py; fixture=a two-out-degree ring of 1,024 nodes at
-% loadavg 62; commit=3287d4dd4928f09ce7c111d05a1c516808e226d5]
+% in stored rows; command=PYTHONPATH=extensions/python python
+% extensions/python/benchmarks/probes/explain_plan_cost.py; fixture=a
+% two-out-degree ring of 1,024 nodes at loadavg 62;
+% commit=3287d4dd4928f09ce7c111d05a1c516808e226d5]
 %
 %The query half. Nothing here builds a trie or reads a relation whole: the
 %empty-factor probe stops after one candidate per conjunct and unwinds its
@@ -79,9 +80,9 @@ cyclic_join_planning_enabled :-
 %conjunctive match with planning off must not pay a frame to learn so
 %[measured 2026-09-07: one frame is +1 SWI inference per conjunctive match,
 %which is five over the benchmark harness's four-inference allowance on
-%direct-join's five repeats; command=PYTHONPATH=extensions/python
-%$VENV/bin/python ai-tmp/aa_probe16.py; fixture=a 64-edge chain, minimum of
-%five; commit=3287d4dd4928f09ce7c111d05a1c516808e226d5].
+%direct-join's five repeats; command=PYTHONPATH=extensions/python python
+%extensions/python/benchmarks/probes/conjunction_frame_cost.py; fixture=a
+%64-edge chain, minimum of five; commit=3287d4dd4928f09ce7c111d05a1c516808e226d5].
 native_conjunction_shape(Module, Space, Pattern, Shape) :-
     nonvar(Pattern),
     Pattern = [Comma|Conjuncts],
