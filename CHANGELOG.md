@@ -399,18 +399,29 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   with the instruction band it has always had.
 
   The refusal now records what a refused reading measures. Normalised by its
-  own work -- CPU seconds per billion retired instructions against the pin
-  divided by the instructions that pin was taken on -- every per-operation row
-  reads 1.3 to 1.9 times its pinned rate across two gate runs while its
-  instruction count stays inside its band, so the same instructions are simply
-  taking longer, and `boot`, the one row that is a whole process rather than a
-  window around compute, is unaffected at 0.99x and 1.18x. That is also what
-  makes `error-ball` legible: its raw ratio is the worst in the lane, and per
-  unit of work it is the middle of the pack. No CPU pin is re-taken, and the
-  note names the one worth taking first on a quiet box: `error-ball`'s 0.0901s
-  was measured on work that has since grown 26.2%, so the same rate costs about
-  0.1137s against a ceiling of 0.12614s and that row has about 11% of its band
-  left where the other five have all of theirs.
+  own work -- CPU seconds per retired instruction against that row's pin
+  divided by the instructions THAT pin was taken on, which is a different
+  commit for each row -- the six read 1.2x to 2.0x their pinned rate across
+  three gate runs while every instruction count stays inside its band, so the
+  same instructions are simply taking longer and the slowdown is the box rather
+  than any one row. The table also shows what the ceiling does not: at 0.95
+  runnable processes per core, inside the one-per-core rule, every row still
+  reads 1.2x to 1.6x, where the pins' own era was 0.28 to 0.94 per core.
+
+  `error-ball`'s CPU pin is carried across its measured work growth, 0.0901s to
+  0.11474s, and its band widened 40% to 50%. This is the row that turned the
+  lane red the first time the box was quiet enough for a CPU row to be compared
+  at all: 0.0901s was set when the row retired 1,043,687,765 instructions and
+  it now retires 1,329,080,554, so the seconds pin described work the row no
+  longer does and its band had about 11% of itself left. The new number is
+  carried rather than taken on purpose -- a min-of-fifteen at 0.81 runnable
+  processes per core reads 0.13467s and the gate's min-of-three at 0.95 reads
+  0.15012s, and neither is what the row costs -- and the 50% band is this row's
+  own excursion, fifteen rounds spreading 71.7% at that load. `boot`'s pin is
+  left alone with its problem written down instead: its work fell 39.3% since
+  the pin was taken and the pin did not follow, so with a 95% band the row
+  tolerates a 2.49x regression, and it is not carried because its window is a
+  whole process rather than a compute loop.
 - The built-package check skips on the dependency it needs rather than on the
   directory that holds it. `node-dist` guarded on `extensions/node/node_modules`
   existing, which an install that omitted the dev dependencies satisfies, and

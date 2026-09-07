@@ -1367,3 +1367,88 @@ a change to `metta_c_new_cursor/2` and `metta_c_close/1` rather than to the
 benchmark. Not attempted here: it is engine surface, this row's band already
 covers the noise, and the measurement above is what a proposal would have to be
 argued against.
+
+## 2026-09-07, the box went quiet and the C seat's CPU rows were compared for the first time
+
+Supersedes the boot paragraph of "what the refused CPU rows are actually
+measuring" earlier today. That entry divided every row's CPU pin by the
+instruction count at this branch's BASE, and reported boot at 1.18x and 0.99x
+as "the row the effect does not reach". The denominator was wrong: a row's CPU
+pin has to be divided by the instructions IT was taken on, and those commits
+differ per row. Redone properly:
+
+| row | cpu pin set | instructions then | now | work | 1.39/core | 1.27/core | 0.95/core |
+|---|---|---|---|---|---|---|---|
+| `boot` | 2026-09-04 | 1,794,301,683 | 1,088,457,378 | **0.607x** | 1.98x | 1.65x | 1.61x |
+| `cursor-step` | 2026-08-31 | 3,421,401,712 | 3,463,661,097 | 1.012x | 1.57x | 1.60x | 1.46x |
+| `term-in` | 2026-09-04 | 4,442,427,782 | 4,396,526,934 | 0.990x | 1.63x | 1.60x | 1.37x |
+| `term-out` | 2026-09-01 | 3,586,423,419 | 3,586,423,419 | 1.000x | 1.90x | 1.80x | 1.26x |
+| `space-pair` | 2026-09-03 | 2,825,219,127 | 2,918,794,363 | 1.033x | 1.34x | 1.60x | 1.22x |
+| `error-ball` | 2026-08-31 | 1,043,687,765 | 1,329,080,554 | **1.273x** | 1.60x | 1.29x | 1.31x |
+
+boot is the most affected row once its own work is used, not the least, because
+its CPU pin predates the 0.8.0 re-pin that took the row from consulting the
+source to loading the `.qlf` image.
+
+Then the box went quiet. The third full gate run of the day started at loadavg
+25.45, `c-bench` ran at **0.95 runnable processes per core**, and for the first
+time this branch the lane decided a CPU row instead of refusing it. Five rows
+passed and `error-ball` failed: min-of-three 0.15012 against a ceiling of
+0.12614. That is the failure this branch's own "still open" list predicted an
+hour earlier, in the row it named.
+
+Decided: carry `error-ball`'s CPU pin across its measured work growth,
+0.0901 to **0.11474**, which is the same seconds per retired instruction over
+1,329,080,554 / 1,043,687,765. Carried and not taken, on purpose. A fresh
+number would pin this box: a min-of-FIFTEEN at 0.81 runnable processes per
+core, the quietest window the machine offered all day, reads 0.13467, which is
+1.17x the carried rate, and the gate's own min-of-three at 0.95 per core reads
+0.15012, 1.31x. Neither is what the row costs.
+
+Rejected: taking 0.13467 as the pin. It is a real measurement, and it is a
+measurement of this afternoon rather than of the code; pinning it would make
+the row's ceiling 0.18854 and would bake seventeen per cent of contention into
+a number the file elsewhere insists is a quiet-box figure. Revisit if a box
+ever measures this row at or below the carried rate, which is what would show
+the carry was too generous.
+
+Rejected: widening the band alone and leaving 0.0901 standing. The pin would
+still describe work the row stopped doing in August, and a band widened to
+cover a work change is a band that no longer measures noise.
+
+The carry is corroborated rather than assumed. In the table above `error-ball`
+sits inside its neighbours' range in all three runs, so its seconds per
+instruction did not move; only its instruction count did.
+
+The band goes 40% to 50% on this row's own excursion. Fifteen rounds at 0.81
+per core spread 0.13467 to 0.23122, +71.7%, and the gate compares a min-of-
+THREE drawn from that distribution. The worst comparable min-of-three seen is
+0.15012, 1.31x the carried pin; 50% puts the ceiling at 0.17211, 1.15x that,
+where 40% leaves 1.07x and would make the lane flaky rather than wrong.
+
+Open, and now written where the next reader meets it: `boot`'s CPU pin. Its
+work fell 39.3% and the pin did not follow, so with its 95% band the row
+tolerates a **2.49x** regression -- a min-of-fifteen at 0.81 per core reads
+0.09743 against a ceiling of 0.24219. It is NOT carried the way error-ball's
+was, because the carrying argument needs seconds to track retired instructions
+and this row is the whole process including the dynamic loader, where the work
+that left was source consulting replaced by image loading. Scaling by the
+instruction ratio would predict 0.07534 and nothing here says that prediction
+is sound. What it wants is one min-of-fifteen on a genuinely quiet box, and
+0.09743 is the best reading to argue from.
+
+And one thing the whole table says that the lane does not yet: **one runnable
+process per core is not a guarantee of comparability.** At 0.95 per core, inside
+the ceiling, every row still reads 1.2x to 1.6x the rate its pin was taken at,
+and the pins' own era was 0.28 to 0.94 per core. The bands are what absorb that,
+which is why five rows pass there and only the row whose margin had been eaten
+by work growth did not. Tightening the ceiling would not have saved this row --
+at 0.81 per core it still reads 0.13467 against the old 0.12614 -- so the
+ceiling is left where it is and the fact is recorded beside it.
+
+Confirmed straight after, by the lane rather than by the probe: at 0.78
+runnable processes per core `c-bench` read a min-of-three of **0.12291** for
+`error-ball`, 1.07x the carried pin and the closest any configuration has come
+to it, with all six cases inside their bands and the lane green. A pin taken
+from this afternoon's 0.13467 would have sat 10% above that reading; the
+carried one sits 7% below it.
