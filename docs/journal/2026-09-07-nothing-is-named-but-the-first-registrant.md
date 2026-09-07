@@ -332,3 +332,52 @@ Open: nothing in this thread. The Node seat has no `frame` or `array` point
 because it has neither notion, which is a decision rather than a gap and is
 pinned by a test; the C seat has no frame or array notion either, and C has no
 universal for one to be built on.
+
+## 2026-09-07: two layers the design had wrong, both found by a gate
+
+Tried: declaring every Python point in `metta.seam`, the way `ext_points.pl`
+declares every engine seam in one file -> broke three import-linter contracts
+at once, and the diagnosis is the whole reason those contracts exist.
+`metta.errors.is_transport_failure` reads the transport-error rows on every
+refusal, so `metta.seam` is BELOW the base layer; a seam that imported
+`metta.integrate` for the `type`, `repr` and `reflector` readers, `metta.ops`
+for the registry-undo frame, or `metta._space` for the catalog dragged
+`metta.errors` and `metta.results` up the stack behind it.
+
+Decided, three fixes each running with the layering rather than against it:
+
+- The six points whose readers and adders are `metta.integrate`'s are declared
+  THERE. `metta.seam` names that module in `_DECLARING` and imports it only
+  when `seam.at` is asked for a name the table does not already hold, so the
+  dispatch path never pays the 41 ms `metta.integrate` costs to import
+  [measured 2026-09-06, `python -X importtime`, recorded in `_api_types`'s own
+  header] and `seam.points()` still answers all thirteen.
+- The registry-undo enlistment inverts into a listener. `metta.ops` owns the
+  transaction frame, so it subscribes with `seam.on_registration`, which is
+  the direction `metta._contract` already takes with
+  `_convert_registry.subscribe_registrations`.
+- `publish()` reaches `&metta` through a `catalog` SERVICE that
+  `metta._space` publishes, because a space is that module's and a service is
+  the seam's own word for what the seat provides and a caller calls.
+
+`metta.seam` joined the core roster in the contract, so the constraint is
+written down: a satellite imported from the seam is now a broken contract
+rather than a slow import nobody notices.
+
+Tried: exporting the Node seam from the package index -> the browser build
+refused, `Could not resolve "node:fs"`, three errors out of esbuild. The Node
+seam reads a `package.json` to answer what packages advertise, which is
+`metta-node/integrate`'s own reason for being in that build's `nodeOnly` set
+since it was written. `./seam` joined it, lost its `browser` condition and its
+re-export, and is reached as `import * as seam from "metta-node/seam"`.
+`registerType` and `registerRepr` stay reachable in a browser through
+`metta-node/convert` and `metta-node/atom`; what a page loses is a table about
+packages it does not have.
+
+Measured, and NOT this package's: `engine-bench` and `benchmarks` are red on
+the base. A control worktree cut at `31d54e19` and built with `sh build.sh`
+reads boot 250270 against a pinned 248968, parse 126,111,592 instructions
+against 111,718,052, and the same 23 benchmark cases failing in the same
+order, `annotated-relation` at 830,767 inferences against a pinned 315,385
+where this branch reads 830,765. `engine/bench-baseline.json` was last
+re-pinned at `dd161fbcf` and merges landed on `petta` after it without one.
