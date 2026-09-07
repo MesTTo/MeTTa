@@ -15,6 +15,22 @@
 %   [tested: platform_capabilities_reduced:a_library_that_declares_an_absent_capability_never_loads,
 %   platform_capabilities:a_source_declaration_is_read_without_running_the_source;
 %   commit=87d998c24278fc7f020ccb0e408ebcd9332b63eb].
+% Guarantees: metta_registration_names/2 answers the head names one
+%   registration FORM claims; metta_string_registrations/2 answers a whole
+%   source's, each with the index of the form that claims it. Both READ and
+%   never run, so a documentation reader sees a head published only through a
+%   runnable `!(import_prolog_function ...)` form and asking cannot register
+%   one [tested: prolog_interface_registrations:one_form_names_the_head_it_registers,
+%   prolog_interface_registrations:every_importer_spelling_names_its_list,
+%   prolog_interface_registrations:a_computed_name_list_claims_nothing,
+%   prolog_interface_registrations:a_source_answers_its_registrations_with_form_indices,
+%   prolog_interface_registrations:reading_a_registration_does_not_perform_it;
+%   commit=WORKTREE].
+% Guarantees: the version an extension declares is part of what
+%   metta_source_declarations/2 answers, so a reader asking what a library
+%   states does not consult the file to learn it
+%   [tested: prolog_interface_registrations:a_declared_version_is_part_of_what_a_source_declares;
+%   commit=WORKTREE].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
@@ -919,6 +935,43 @@ prolog_function_name_list(Names, Context) :-
                     context(Context, 'the names to register')))
     ).
 
+%The head names one registration FORM claims, read from the form itself and
+%never run. A library that publishes its surface through
+%`!(import_prolog_function memoize)` says which heads it has in exactly this
+%way, and a reader that cannot see those forms reports the library as empty:
+%the generated library reference counted lib_memo at zero names while nine
+%were registered and callable [measured 2026-09-07].
+%
+%One clause per spelling, HERE, beside the spellings themselves, so a sixth
+%registration form is covered where it is added rather than in each host that
+%reads them. The four importer spellings come from the translator's own
+%published roster, which exists already because compilation has to keep their
+%name list literal [source: engine/translator/special_forms.pl,
+%prolog_function_importer/1].
+%
+%A form whose names are not literal atoms claims NOTHING here rather than
+%guessing: `(import_prolog_functions (car $rest))` computes its list, and a
+%reader that guessed would publish a variable as a head name.
+metta_registration_names([import_prolog_function, Name], Named) :-
+    !,
+    ( atom(Name) -> Named = [Name] ; Named = [] ).
+metta_registration_names([import_prolog_functions, Names], Named) :-
+    !,
+    literal_registration_names(Names, Named).
+metta_registration_names([Importer, _File, Names], Named) :-
+    atom(Importer),
+    translator:prolog_function_importer(Importer),
+    !,
+    literal_registration_names(Names, Named).
+metta_registration_names(_, []).
+
+literal_registration_names(Names, Named) :-
+    (   is_list(Names),
+        forall(member(N, Names), atom(N))
+    ->  Named = Names
+    ;   Named = []
+    ).
+
 %A name the engine re-exports from an OPTIONAL platform library is absent for
 %a reason, and "no Prolog predicate of that name is loaded" is true without
 %being useful: it reads as a typo when the answer is that this build has no
@@ -1089,8 +1142,17 @@ read_one_declaration(In, Declarations) :-
     Term \== end_of_file,
     declaration_of(Term, Declarations).
 
-declaration_of((:- metta_extension(Name, _)), [extension(Name)]) :-
-    atom(Name), !.
+%The extension's own version travels with its name, because the version is
+%something the source DECLARES and this predicate answers everything a source
+%declares. A reader asking what version a library states had to consult the
+%file to learn it, which is what this scan exists to avoid.
+declaration_of((:- metta_extension(Name, Options)), Declared) :-
+    atom(Name), !,
+    (   is_list(Options),
+        memberchk(version(Version), Options)
+    ->  Declared = [extension(Name), version(Version)]
+    ;   Declared = [extension(Name)]
+    ).
 declaration_of((:- metta_requires(Capability)), [requires(Capability)]) :-
     atom(Capability), !.
 declaration_of((:- metta_export(Text)), Names) :-
@@ -1099,6 +1161,30 @@ declaration_of((:- metta_export(Text)), Names) :-
     catch(parse_metta_source(Text, Forms), _, fail),
     findall(export(Name), claimed_export_name(Forms, Name), Names).
 declaration_of(_, []).
+
+%Every head name one MeTTa source's registration forms claim, each with the
+%INDEX of the form that claims it, in the parsed-form list this engine's
+%reader answers. The index rather than a line for the reason metta_py_origin/3
+%answers one: the caller that wants a position already walks the source for
+%it, and the walk is linear in the source where a second parse is not
+%[source: extensions/python/metta/_source_forms.py, positioned_forms/1].
+%
+%READ and never run, the promise the whole static-scan family above makes:
+%a library whose Prolog half this build cannot load still says which heads it
+%publishes, and asking cannot register one.
+%
+%The reader's own failure travels rather than being swallowed, unlike the
+%export text above: that one is a fragment inside a Prolog directive whose
+%consult reports it properly a moment later, while this IS the source, and a
+%caller handing text the reader refuses has a defect to hear about.
+metta_string_registrations(Source, Rows) :-
+    parse_metta_source(Source, Forms),
+    findall([Name, Index],
+            ( nth0(Index, Forms, Parsed),
+              parsed_form_parts(Parsed, _, _, Term),
+              metta_registration_names(Term, Names),
+              member(Name, Names) ),
+            Rows).
 
 %The two forms that CLAIM a name. volatility and determinism state a property
 %of a name claimed elsewhere, so they are not a claim to refuse.
