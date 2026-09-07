@@ -1250,7 +1250,7 @@ metta_substitute_self('&self', Term, Term) :- !.
 %batch's arriving equations. The walk is Prolog and costs the term's size in
 %inferences where the probe costs two whatever the size [measured
 %2026-09-08: the unprobed walk on those doors moved 79 twin budgets by 12 to
-%5731 inferences; command=sh check.sh twins; commit=WORKTREE]. A string, not
+%5731 inferences; command=sh check.sh twins; commit=856434d7c1d381b3f3d7cbbd008f46c0d41b61aa]. A string, not
 %an atom, so a hot door leaves nothing in the atom table.
 metta_substitute_self(Space, Term, Out) :-
     term_string(Term, Text),

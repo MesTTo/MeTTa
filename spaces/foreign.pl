@@ -776,7 +776,7 @@ defer_metta_equation(Space, Module, Term, StoredRef) :-
 %extending a function the space had already run [tested:
 %test_fast_images_preserve_each_equations_binding,
 %test_removal_retires_the_same_stored_equation_after_recompilation;
-%commit=WORKTREE]. The root is the identity case and pays no walk.
+%commit=856434d7c1d381b3f3d7cbbd008f46c0d41b61aa]. The root is the identity case and pays no walk.
 mark_or_translate_equation(Space, Module, F, InputArity, Arriving) :-
     (   metta_function_translated(Module, F)
     ->  forall(member(Equation, Arriving),
@@ -1898,7 +1898,7 @@ metta_host_native_fact(Module, Goal, Space, Fact) :-
 %named space, so remove-atom took the stored atom and left the clause
 %answering with its fun_meta row standing beside it [tested:
 %test_removing_an_equation_that_names_its_own_space_retires_its_clause;
-%commit=WORKTREE]. The STORED atom is still matched as written, which is what
+%commit=856434d7c1d381b3f3d7cbbd008f46c0d41b61aa]. The STORED atom is still matched as written, which is what
 %unstore_atom/3 receives.
 remove_equation(Space, Term, F, Args, Body, Removed) :-
     (   ( translated_equation_binding(Space, _, _)
