@@ -7,10 +7,10 @@
 %     checked where the answer is produced [tested:
 %     time_budget:a_pragma_bound_the_alarm_missed_still_refuses,
 %     time_budget:the_language_timeout_form_refuses_a_bound_it_exceeded;
-%     commit=WORKTREE].
+%     commit=f6e05ca933f4b79d2e5c148b45780a361d87f586].
 %   - a bound that was NOT exceeded still answers, so the rule refuses a
 %     deadline rather than refusing work [tested:
-%     time_budget:a_bound_that_was_not_exceeded_answers; commit=WORKTREE].
+%     time_budget:a_bound_that_was_not_exceeded_answers; commit=f6e05ca933f4b79d2e5c148b45780a361d87f586].
 % Fails when: read as coverage of the ALARM. call_with_time_limit/2 is what
 %   stops the work; this file covers what decides the outcome once the work
 %   has stopped or finished.

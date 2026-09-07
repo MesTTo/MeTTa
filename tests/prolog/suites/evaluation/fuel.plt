@@ -20,7 +20,7 @@
 %     runnable after it still replays its own exhausted branch [tested:
 %     fuel:an_interrupted_scope_does_not_stay_open,
 %     fuel:a_runnable_after_an_abandoned_scope_still_replays_its_overflow;
-%     commit=WORKTREE].
+%     commit=f6e05ca933f4b79d2e5c148b45780a361d87f586].
 % Fails when: read as coverage of max-stack-depth's user-facing law. That is
 %   test_a_stack_depth_pragma_bounds_evaluation_instead_of_overflowing and the
 %   arbiter's own boundary witnesses; this file covers the mechanism under it.
