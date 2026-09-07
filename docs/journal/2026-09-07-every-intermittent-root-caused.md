@@ -297,3 +297,84 @@ because a report that silently omits a reading reads as "the engine was fine".
 `tests/repository/test_failure_state_report.py` plants a red and checks the
 section appears with every field; with the hook renamed out of the way that
 lane goes red, which is what makes it a lane.
+
+## 2026-09-07, later the same day
+
+### The scope marker cost a benchmark, and then it did not
+
+Tried: the shape the entry above decided, a separate `$metta_fuel_scope`
+global beside the balance and the error list. It is correct and it is not free:
+the open then writes three globals where it wrote two and the close writes
+three, one goal per runnable form more than before. `engine/bench.py
+--counter-only` reads match 267,402 and match-skew 208,102 against an unchanged
+worktree of the same commit at 266,202 and 208,062.
+
+Tried: keeping the error list defined for the thread's life instead of creating
+and deleting it around every runnable, which takes the close back to two
+writes. match 266,802, still +600.
+
+Decided: ONE global carries the scope and its overflows, and the VALUE says
+which. `closed` is no scope; a LIST is a scope holding the branches that ran
+out of fuel so far. The open writes `[]`, which both marks the scope and
+empties the record, and the close writes `closed`: the same two writes the pair
+made when the record was created and deleted. match reads 266,202 and
+match-skew 208,062, both exactly the unchanged worktree's figures, and the
+openness is still trailed because the open write is a `b_setval/2`. `[]` is
+atomic, so the one backtrackable value never leaves a global-stack term for a
+later `nb_getval/2` to read after backtracking reclaimed it.
+
+Decided: the BALANCE is trailed at the open too, and that is not tidiness. A
+balance left at `unstarted` outside any scope makes the next charge read the
+pragma table and spend, and a branch that then ran out would record its culprit
+into a scope value that is the atom `closed`, leaving `[Culprit|closed]` where
+a list belongs -- the same leak one level down.
+`fuel:an_interrupted_scope_leaves_the_balance_off` sweeps 6,000 budgets and
+goes red with the non-backtrackable write.
+
+Measured, in passing: the read this fix replaces was costing more than the
+writes it adds. `nb_current/2` is declared nondeterministic and costs a foreign
+frame supporting redo; `b_getval/2` on a global the thread always defines is
+deterministic. evaluate 560,523 to 558,881 (-1,642, -0.293%) and translate
+310,959 to 309,317 (-1,642, -0.528%), three identical samples each. Those two
+rows are re-pinned, alone, with the mechanism in a new
+`scope_marker_repin_comment` key in `engine/bench-baseline.json`. boot, match,
+match-skew, parse and parse-prolog keep their pins: the unchanged worktree
+measures boot 249,723, match 266,202 and match-skew 208,062 against pins of
+248,968, 265,002 and 208,042, so those rows carry a regression that predates
+this work and re-pinning them here would bury it. This branch's own boot cost
+is +15 over that worktree, all of it consult-time.
+
+### What the first verification run caught
+
+Tried: ten consecutive runs of the whole suite under the gate's own
+configuration. The first came back `2 failed, 4396 passed, 48 skipped in
+157.46s`, and one of the two was this branch's own:
+`test_the_ruff_configuration_enables_every_family_or_records_why_not` counts
+P0.13 line-level suppressions and reads the ARG burn-down at 152, which the
+five `# noqa: ARG` lines the new files carried had made 157.
+
+Decided: say the unused arguments rather than suppress them. `del call` in the
+report hook, which is the spelling `_engine.py` already uses for a parameter a
+protocol requires and a body does not read; `del name` in the probe's
+`getoption`; and `@pytest.mark.usefixtures("metta")` for two tests that took a
+fixture only to boot the engine the report reads. Raising the budget to fit the
+code is the mask that check exists to refuse.
+
+The other red is not this branch's.
+`test_a_shipped_twin_agrees_with_its_example_end_to_end[ch05-.../01-identity.metta]`
+reads 3,483 inferences against a pinned 3,528 on the CONTROL worktree of the
+same commit and 3,480 here, so the pin was already violated before this work.
+The twin REPORT lane says the same at scale: 219 budget findings on the control
+against 218 here, 213 above and 6 below there against 203 and 15 here, because
+the cheaper per-runnable read moves every twin down by 2 to 32 inferences and
+flips ten of them across a pin they were already the wrong side of.
+
+### Measured, on the committed tree
+
+Ten consecutive runs of the whole Python suite under the gate's own
+configuration, `sh extensions/python/test.sh -p randomly --randomly-seed=<n>`,
+cycling seeds 3222813221, 11 and 12: every run `1 failed, 4397 passed, 48
+skipped`, between 150.05 s and 180.20 s, at loadavg 33 to 40 with other agents
+on the box. None of the seven named tests is red in any of them, and the ten
+runs carry ONE distinct failure between them, the twin pin that is red on the
+control at the same base.
