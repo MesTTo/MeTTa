@@ -189,6 +189,16 @@ format-args                       08-03-03
 sort-strings                      08-03-03
 get-doc                           08-03-08
 undocumented                      08-03-08
+defined-name                      08-03-10
+documented                        08-03-10
+documented-space                  08-03-10
+get-doc-atom                      08-03-10
+get-doc-function                  08-03-10
+get-doc-params                    08-03-10
+get-doc-single-atom               08-03-10
+get-doc-space                     08-03-10
+help!                             08-03-10
+undocumented-space                08-03-10
 get-type                          09-00-01
 match-type-or                     09-00-14
 match-types                       09-00-14
