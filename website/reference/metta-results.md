@@ -186,6 +186,27 @@ def why(self) -> str:
 > query will do before it runs; the guide's observability page maps
 > the family.
 
+### `Rows.explain`
+
+```python
+def explain(self, *, analyze: bool = False, allow_writes: bool = False) -> Explanation:
+```
+
+> What the engine did with the query that produced these rows.
+>
+> The same answer `Space.explain` gives, over the match form this result
+> came from: the seam entry, pushdown, source, writes, error mode and the
+> PLAN, `generic-join` with its variable order and columns or
+> `nested-loop` with the conjunct the matcher leads with. Nothing is
+> pulled and nothing is re-matched.
+>
+> `analyze=True` RE-RUNS the query inside `stats()` and adds
+> `(inferences N)`, `(answers N)` and `(cputime S)`; it refuses a query
+> whose operations write unless `allow_writes=True`.
+>
+> The longhand is `m.explain(form)` on the match form itself, and under
+> that `m.run("!(explain <form>)")`.
+
 ### `Rows.build`
 
 ```python
@@ -430,6 +451,19 @@ def why(self) -> str:
 ```
 
 > Explain an empty query after materializing it.
+
+### `Answers.explain`
+
+```python
+def explain(self, *, analyze: bool = False, allow_writes: bool = False) -> Explanation:
+```
+
+> What the engine did with the query behind this view, pulling nothing.
+>
+> `why()` materializes because an empty answer set is what it explains;
+> this one reads the query the view holds, so a lazy stream stays exactly
+> where it was and an infinite one is explainable at all. Otherwise it is
+> `Rows.explain` and answers the same `Explanation`.
 
 ### `Answers.one`
 

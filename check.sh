@@ -28,6 +28,7 @@
 #                                            pytest gallery benchmarks instructions
 #                                            scaling
 #                                            memory-scale memory-scale-gate
+#                                            memo-advisor memo-advisor-selftest
 #                                            shell examples layering
 #                                            generated-artifacts
 #                                            init-stub mypy-root-impl

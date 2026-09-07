@@ -29,6 +29,46 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `m.explain(query, *, analyze=False, allow_writes=False)` and
+  `rows.explain()`, SQL's EXPLAIN over this engine's decisions for one query.
+  They answer an `Explanation`, a `Mapping` from each item's head to the whole
+  item atom, with `.plan`, `.route`, `.atoms` and `.analyzed`; the atoms are
+  the ones the MeTTa form `!(explain <query>)` answers, so an explanation is
+  data a space stores and matches back. The match explanation gains two items:
+  `(materialized True|False)`, and a PLAN naming the join the matcher RUNS.
+  `(plan generic-join (order $x $y $z) (relations (edge 1 2) (edge 2 3)
+  (edge 1 3)))` when the Generic Join answers the conjunction, `(plan
+  nested-loop (order <conjunct> ...))` naming the conjunct the retained loop
+  leads with, and `(plan empty-factor <conjunct>)` when one conjunct has no
+  candidate. It follows the route rather than the query's shape: a triangle
+  over a space that also holds one stored row with a variable in it reads
+  `nested-loop`, because that row declines the trie plan at its ground
+  admission. The conjunctive admission gate splits into a pure shape and the
+  trie build to make that decidable without building anything, and both the
+  plan item and the executed query read the same two predicates rather than
+  two readings of one rule.
+  `analyze=True` adds `(inferences N)`, `(answers N)` and `(cputime S)`,
+  measured by running the query inside `stats()`, and REFUSES a query whose
+  named operations write unless `allow_writes=True`.
+- `sh check.sh memo-advisor` proposes `(cache <head> force|refuse)` rows from a
+  workload's own call counts and prices each one by re-running the whole
+  workload in a fresh process with the row declared, reporting the inference
+  count before and after, the hit ratio and a verdict. It never writes a row.
+  `--workload` takes `bench`, `examples` or a path, `--candidates N` bounds how
+  many proposals are measured, and `--json` reports the lot. A workload that
+  ran no compiled head is refused by name. Over `examples/ch07-control-flow` it
+  proposes `(cache expand-once force)` and measures it at 1,507,858 inferences
+  before and 52,232 after, a 100% hit ratio. The `memo-advisor-selftest` GATE
+  carries the discrimination: a pure head called 1,000 times over three
+  distinct arguments must be proposed with a positive measured delta, a head
+  declared `oracleIO` and called 300 times must never be proposed, and a
+  workload calling nothing must be refused.
+- `EngineProfile.nodes` rows carry `name`, `arity` and `recursive_calls`
+  beside the printed `predicate`, so a caller reads a head's own name without
+  taking the spelling apart and can tell a head's entries from its own
+  recursion, which SWI keeps on a `<recursive>` caller rather than in the
+  node's call count.
+
 - `metta.testing.programs(census=None, depth=3, facts=(1, 4), queries=(1, 3))`
   generates whole MeTTa programs for differential testing against another
   engine, and the `parity-fuzz` lane runs them on this engine and on upstream
@@ -263,6 +303,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `m.profile_extension(source, names=[...])` reported 0 calls, 0 redos and 0
+  ticks for every compiled MeTTa head, in the same process where `m.profile()`
+  reported the real counts. The host read a head's name back out of the way
+  Prolog prints a predicate, and every compiled head is written
+  `'$metta_exec:&space':'name'/arity`: a quoted module atom carrying a colon,
+  which the pattern that strips an unquoted module prefix read as part of the
+  name. The engine sends the name and the arity as their own columns now, so
+  nothing re-parses them.
 - A space's function namespace lists and resolves only what that space can
   call. `dir(m.fn)`, `m.builtins()` and `m.fn.<name>` read the process-wide
   function register, so a head whose equations live in another space's module
