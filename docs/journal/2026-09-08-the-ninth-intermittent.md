@@ -97,6 +97,18 @@ subtraction in Prolog cost the caller 10 inferences a block against 7 for the
 crossing alone, and the twins' budgets are pinned to four. At 7 the twin lane
 passes unchanged; at 10 one twin moved 9 and went red.
 
+Tried: leaving the doors that report what an evaluation SPENT on the raw
+counter, on the grounds that they feed quotas rather than measurements. The
+verification found that wrong within one seed:
+test_nominal_subtyping_does_not_scan_unrelated_declarations compares two
+hundred-evaluation runs of one query through metta_py_eval_accounted and
+allows four inferences between them, and one tick's charge is eight. The poll
+had always leaked there; the hook's own cost merely grew past the tolerance.
+Decided: the same subtraction, spelled once in Prolog for the three doors that
+report from there (evaluation, algebra-value checking, tagged sources), which
+also makes that test deterministic rather than merely within tolerance
+[tested: test_the_accounted_door_leaves_the_poll_out_too].
+
 Open: a thread's own ticks are subtracted from measurements taken on that
 thread only, so a worker that ticks while its parent measures is not accounted
 for. SWI adds an exited thread's inferences to the thread that JOINS it

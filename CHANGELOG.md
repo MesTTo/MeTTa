@@ -1612,7 +1612,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   takes it out exactly, ticks landing between the door's two reads included.
   The new `.heartbeats` counter says how many times the poll ran inside the
   block. A thread the block JOINS is still counted, because SWI adds an exited
-  thread's inferences to the thread that waited for it.
+  thread's inferences to the thread that waited for it. The engine-side doors
+  that report what one evaluation SPENT -- the accounting an algebra
+  operation's quota is charged against -- take the poll out on the same rule.
 
 - `await-atom`, `peek-atom` and `take-atom` re-read the space when no wake-up
   arrives, so a lost hint costs latency instead of an answer. The engine
