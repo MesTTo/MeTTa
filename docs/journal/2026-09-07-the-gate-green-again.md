@@ -216,3 +216,78 @@ all of them this session's own and all now fixed: an N818 on the parity lane's
 new refusal class, the harness test pinning the old `<not counted>` sentence,
 and `test_a_monotonic_table_propagates_an_add_at_delta_cost`, which is treated
 below.
+
+## 2026-09-07, the receipt suite's hold and what it waits on
+
+Tried: reproducing the defect the test-hygiene branch ring-fenced, outside
+pytest. `ai-tmp/hy-receipt-probe.py` in the branch worktree runs the two
+`self`-scoped cases of
+`test_public_import_rebuilds_when_a_receipt_dependency_disappears` in one
+process and releases what the pre-hold shape released: the target only, with
+the context left alive, so the anonymous pool holds exactly the target's name
+and the next `MeTTa()`'s HOME draws it. Deterministic, forty seconds, red every
+run. The release ORDER is the whole reproduction: dropping the target AND
+closing the context, in either order, passes, because the home's name goes back
+on top of the stack and the next home takes its own name again.
+
+Measured, in that state, on a space that holds `(job direct-after)`:
+
+| door | answer |
+|---|---|
+| `(match target (job $s) (job $s))` from the context, from the target, and from a fresh context | `[(job direct-after)]` |
+| `Space.match(pattern)` | `[Row(s=direct-after)]` |
+| `(peek-atom target (job $s) 2)` | `[(job direct-after)]` |
+| `(space_await target (job $s) 2)` | `[(job direct-after)]` |
+| `(space_take target (job $s) 2)` | `[(job direct-after)]` |
+| `(take-atom target (job $s) 2)` | `[]` |
+
+So it is not the wait, not the store check, not the deadline and not the
+capability: it is `take-atom` alone, the one head those cases remove and
+re-import. The compiled clause is there and is right -- called directly in the
+owner's module it answers `[job, direct-after]` -- and the census the test's own
+`thread_state` runs reads the same numbers for `take-atom` and `peek-atom`
+(`StoredTake` 2, `StoredPeek` 2, one binary and one timed clause each,
+`fun_in` true for both).
+
+Found: the resolution. The target's execution module reads
+
+    take-atom/4 in $metta_exec:&pyspace_3:
+      imported_from = $metta_exec:&pyspace_1   clauses = 0
+      chain         = [$metta_exec:&pyspace_2]
+
+`$metta_exec:&pyspace_1` is the FIRST case's home, whose space is gone;
+`$metta_exec:&pyspace_2` is the second case's home and holds the clause. SWI
+materialises a weak import at the first call, and `abolish/1` in the source
+retargets neither its own compiled calls (which
+`metta_restore_inherited_predicate/3` already repairs) nor anyone else's link
+to it. While both spaces live, the next definition repairs the link; once the
+source's SPACE is dropped there is no next time, and the link outlives every
+party to it. `peek-atom` is untouched by the removal, so its link still names a
+module that still has the clause.
+
+The invariant that fails: an execution module may resolve a head to another
+execution module only THROUGH ITS OWN IMPORT CHAIN.
+
+Rejected, each by measurement, each reverted:
+
+- running `metta_capture_default_imports/1` unconditionally at rebinding
+  instead of only when the base changes -> still red;
+- a retired-sibling release at rebinding, after `set_module/1` -> the pass
+  fires on every module and finds nothing stale, because the link is
+  materialised at the first CALL, which is after every rebinding in the
+  sequence;
+- a retarget hung on `metta_add_function_transaction/6` -> never reached: a
+  library import stores its equations through the source loader and compiles
+  them lazily, so that door never sees the head;
+- a retarget hung on the deferred compile in `translate_when_still_deferred/1`
+  -> never reached either: after the re-import the head is already DEFINED, as
+  the stale import, so nothing is deferred;
+- releasing every importer inside `metta_abolish_local_predicate/3` -> still
+  red, because the target's link names a third module rather than the one
+  being abolished.
+
+Decided: the hold stays and now names the cause rather than the absence of one.
+Landing the invariant means deciding where the engine enforces it, which is a
+ruling about module resolution rather than a patch, and four sites have been
+measured as the wrong ones. The reproduction is forty seconds, so whoever takes
+it does not start from the suite.
