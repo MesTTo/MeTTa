@@ -715,7 +715,7 @@ translate_args_by_type_dl([A|As], [T|Ts], [Origin|Origins],
 %`(map-atom (cdr-atom (a b)) $y (q $y))` answered
 %`((q cdr-atom) (q (a b)))`, mapping over the two PARTS of an unevaluated
 %call, where upstream evaluates the list first and answers `((q b))`
-%[measured 2026-08-30, ai-tmp/coll.metta under both engines]. Symbol and
+%[measured 2026-08-30 under both engines]. Symbol and
 %Grounded were never members on either reading.
 %
 %type_position_modifier/3 and DontEvalType stay. They are this engine's own

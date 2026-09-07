@@ -478,8 +478,8 @@ metta_add_program_atoms(Space, Atoms, Names) :-
 %its owner-pin unwrapped. What stays per atom is the mechanical core the
 %corebench harness priced at 1.09us against the 2.55us the dispatching walk
 %cost around it: build the clause term, assertz it with its reference, and
-%journal the reference [measured 2026-08-24: ai-tmp/wip/corebench.pl,
-%100,000 atoms, min of three]. Everything with per-atom SEMANTICS keeps the
+%journal the reference [measured 2026-08-24: 100,000 atoms, min of three].
+%Everything with per-atom SEMANTICS keeps the
 %per-atom door: a ':' declaration (duplicate warning, DontEvalType,
 %user-wins eviction, the recompile announce), an '=' head (the guard above,
 %defensively re-tested here), and the whole batch when the space is
@@ -2035,8 +2035,7 @@ unstore_atom(Space, Term, Removed) :- remove_sexp(Space, Term, Removed).
 %goal STARTED AFTER the previous row's template ran, and a fresh goal sees the
 %new generation. Measured on the doc's own example: upstream reverses all
 %three loop edges, and this reversed one, the first template's remove-atom
-%breaking the cycle for every later conjunct [measured 2026-08-19,
-%ai-tmp/spaces-p1/p116/linkloop.metta].
+%breaking the cycle for every later conjunct [measured 2026-08-19].
 %
 %What is collected is the BINDINGS, term_variables over the pattern and the
 %output template together, because that is where a row lives: the translator

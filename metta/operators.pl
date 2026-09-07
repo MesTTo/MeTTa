@@ -216,7 +216,7 @@ metta_int_solve('/', A, B, R, Verdict) :-
 %`(Error x y)` here, a different answer to the same call, which is the one
 %thing the superset rule does not allow
 %[measured 2026-08-30 against PeTTa@ae66fa8 through both engines' main
-%entries; fixture=ai-tmp/eqprobe2.metta].
+%entries].
 %
 %The computed case loses nothing: the translator's argument ladder tests a
 %computed operand BEFORE the comparison runs, so `(== 4 (+ 1 "bad"))` still

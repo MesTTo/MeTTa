@@ -1014,7 +1014,8 @@ translate_expr_to_conj(Input, Conj, Out) :- translate_expr(Input, Goals, Out),
 %    [source 2026-08-21: Haskell 2010 Language Report, section 3.17];
 %  - Rw-Prolog writes a rule as `Pattern := Template :- Conditions`, so a
 %    condition that fails backtracks into the next rule
-%    [source 2026-08-21: ai-tmp/rw-prolog/src/rewrite.pl, redex/3].
+%    [source: github.com/cbarrick/Rw-Prolog src/rewrite.pl, redex/3, at
+%    634ad2577ca778e3436d8a596e0d35e0cf0785d2].
 %
 %The consequence for the confluence machinery is that the unconditional
 %critical-pair verdict is a PROOF OBLIGATION about this rule set rather than a
@@ -1054,7 +1055,8 @@ translate_expr_to_conj(Input, Conj, Out) :- translate_expr(Input, Goals, Out),
 %    exactly this reason: it matches a COPY of the redex against the rule, runs
 %    the condition, checks again that the matched copy is still a
 %    generalization of the redex, and only then commits by unifying the two
-%    [source 2026-08-21: ai-tmp/rw-prolog/src/rewrite.pl, redex/3].
+%    [source: github.com/cbarrick/Rw-Prolog src/rewrite.pl, redex/3, at
+%    634ad2577ca778e3436d8a596e0d35e0cf0785d2].
 %  - CHR states it as a rule of the language: "the guard of a rule may not
 %    contain any goal that binds a variable in the head of the rule", and the
 %    runtime enforces it, "any guard fails when it binds a variable that
