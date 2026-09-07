@@ -23,7 +23,7 @@
 %   seats and a filled act keeps the row's own applicability while a hole left
 %   over lowers it to prose
 %   [tested: tests/prolog/suites/spaces/catalog_refusal_rows.plt,
-%   extensions/python/tests/repository/test_refusal_rows.py; commit=WORKTREE].
+%   extensions/python/tests/repository/test_refusal_rows.py; commit=f33b7ab0200e6dc74c88fb4c7f827bf545a447ed].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 

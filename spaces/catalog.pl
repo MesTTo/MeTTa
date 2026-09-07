@@ -85,7 +85,7 @@
 % and `ground-kind`, `remedy-kind` and `applicability` are the three closed
 % sets metta.errors validates against
 % [tested: run_tests(catalog_refusal_rows),
-% extensions/python/tests/repository/test_refusal_rows.py; commit=WORKTREE].
+% extensions/python/tests/repository/test_refusal_rows.py; commit=f33b7ab0200e6dc74c88fb4c7f827bf545a447ed].
 
 % Guarantees: type carriers validate membership without certifying laws;
 % only finite enumerations permit exhaustive law checks [tested:
