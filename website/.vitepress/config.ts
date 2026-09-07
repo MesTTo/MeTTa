@@ -223,6 +223,7 @@ export default defineConfig({
               { text: "metta.subscribe", link: "/reference/metta-subscribe" },
               { text: "metta.foreign", link: "/reference/metta-foreign" },
               { text: "metta.integrate", link: "/reference/metta-integrate" },
+              { text: "metta.seam", link: "/reference/metta-seam" },
               { text: "metta.importing", link: "/reference/metta-importing" },
               { text: "metta.manifest", link: "/reference/metta-manifest" },
             ],

@@ -163,6 +163,62 @@ store, because a registration happens at import time when there may be no engine
 at all; the catalog rows are published when an engine asks, the way the array
 roster is written when an install happens.
 
+## 2026-09-07: the Python seat
+
+Decided: `metta.seam` holds the declarations and `metta._registrants` holds the
+shipped rows, one file, loaded LAZILY by the point that names it in `shipped=`.
+The two-file split is what makes the gate exact: `_registrants.py` is the one
+Python-seat site where a library may be named, and the checker's ALLOWED table
+says so per library with the door it registers through.
+
+Tried: the shipped rows registering from the module that owns their domain
+(pandas in `tables.py`, faiss in `arrays.py`) -> rejected. `index`'s
+`backend="auto"` takes the first available row in registration order, and with
+the rows split across two modules the order is import order: `arrays.py` is
+imported before a dispatch loads `_registrants`, so the always-available
+fallback registered FIRST and faiss could never win. One file, one reading
+order.
+
+Tried: `Point` declaring `reader=`/`adder=` and NOT keeping a row of its own,
+so a point whose store already exists (the reflector list, the repr list) is
+purely a view -> rejected by the solars proof. `integrate.register_reflector`
+stores `(predicate, callable)` and no name, so a row registered as `solars`
+read back as `lower`, the callable's own name. The seam now keeps the row
+whatever else happens to it and the adder performs the side effect, with the
+reader supplying only rows registered through the older door directly, matched
+out by identity of the fields the store does keep.
+
+Rejected: generating `to_solars()` onto `Rows` from a registrant's `sugar`
+field. It needs `Rows.__getattr__`, which types every attribute of Rows as
+`Any` and turns off the mypy gate for the whole class. `rows.to(<module>)` is
+the door every registrant gets, takes the module rather than its name (the
+library's own rule about strings), and `to_df` / `to_pl` are the two shipped
+rows' declared `sugar`, checked both ways by
+`test_a_shipped_sugar_is_a_declared_row_and_not_a_privilege` so a third
+library cannot arrive as a third method.
+
+Decided: the seat's kind rows go into `&metta` with plain `symbol` argspecs
+rather than `(one-of seam-kind)`. A vocabulary row is generated from
+`engine/spaces/catalog.pl` by `tools/vocabgen.py` and would put a seat's
+closed set into the ENGINE's presets, which is the wrong direction for a
+package about not reaching into what you extend. The closed set is checked
+where the registration happens, at `seam.point`, which is also where the
+refusal can name the four kinds.
+
+Measured: the shipped suites are the differential and they pass unchanged.
+`sh extensions/python/test.sh` over ch04, ch08, ch11, ch13 and ch20: 1467
+passed. One test changed its assertion rather than its subject:
+`test_sql_function_refuses_a_connection_without_the_door` asserted
+"has no create_function", and an unclaimed connection is now refused naming
+the `sql` point, its registrants and the registration it lacks, where before
+anything that was not sqlite3 took DuckDB's branch.
+
+Tried: asserting "advertised() loaded nothing" inside the same program that
+then uses the doors -> it cannot be. Importing `metta.tables` runs
+`accessors()`, which IS a dispatch, which is what loads the group. The free
+half is its own program in the shell test, which is the same reason Pygments
+documents `get_all_lexers(plugins=False)` apart from the lookups.
+
 ## 2026-09-07: what each seat gained
 
 Recorded as the work landed; the numbers are in the commits' own tests.

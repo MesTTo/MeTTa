@@ -268,6 +268,25 @@ def arrow(self) -> ArrowView:
 > the stream. Consumers that ask for the protocol first, pyarrow,
 > DuckDB, pandas 3 and `pl.scan_arrow_c_stream`, take `rows` itself.
 
+### `Rows.to`
+
+```python
+def to(self, library: Any):
+```
+
+> These rows as a frame of `library`: the general frame door.
+>
+>     rows.to(polars)          # the module itself, never its name
+>     rows.to("polars")        # the escape, for a library not imported here
+>
+> Sugar over `__arrow_c_stream__` where the library reads it, which is
+> typed BY the projection rather than inferred from Python objects, and
+> over the projected columns where it does not; either way the values
+> are the same. The library is the caller's dependency, and its absence
+> raises naming the need. Which libraries are reachable is the `frame`
+> point's rows: a library registers once and every rows object answers
+> it, with no method added here.
+
 ### `Rows.to_df`
 
 ```python
@@ -276,13 +295,9 @@ def to_df(self):
 
 > The rows as a pandas DataFrame, DuckDB's own conversion naming.
 >
-> Sugar over `__arrow_c_stream__` where pandas reads it, which is
-> `DataFrame.from_arrow` from pandas 3, so the columns are TYPED by the
-> projection rather than inferred from Python objects. Without pandas 3
-> or without the `arrow` extra it builds the same projected columns
-> through the frame constructor, which answers the same values.
-> pandas is the caller's dependency; its absence raises naming the
-> need, and table() stays the constructor-agnostic shape.
+> The declared sugar of the `frame` point's pandas row: this is
+> `rows.to(pandas)` under the name that row asked for, and a registered
+> library reaches the same door through `to` without a method here.
 
 ### `Rows.to_pl`
 
@@ -292,9 +307,8 @@ def to_pl(self):
 
 > The rows as a polars DataFrame; the polars twin of to_df().
 >
-> Sugar over `__arrow_c_stream__`, through the view that hides the
-> sequence protocol from polars' constructor; without the `arrow` extra
-> it builds the same projected columns directly.
+> The declared sugar of the `frame` point's polars row, and the same
+> door as `rows.to(polars)`.
 
 ### `Rows.pipe`
 
@@ -423,6 +437,14 @@ def table(self) -> dict[str, list[Any]]:
 ```
 
 > Materialize as a column mapping.
+
+### `Answers.to`
+
+```python
+def to(self, library: Any):
+```
+
+> Materialize, then build a frame of `library`: Rows.to.
 
 ### `Answers.to_df`
 

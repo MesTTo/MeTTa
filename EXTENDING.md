@@ -3200,6 +3200,116 @@ is `new_space`, and a Python method that stores `(on ...)` atoms is named after
 name by that rule, it is the wrong name; the guide's Concepts page holds the full
 table.
 
+## Two levels: the engine, and a seat
+
+Everything above extends the ENGINE. There is a second level, and it is the one
+most libraries actually want: extending a SEAT. A seat is this repository's word
+for a host binding with its own build and scripts, `extensions/python`,
+`extensions/node` and `extensions/cmetta`; a satellite is a package that extends
+one from outside this repository. `pettorch` is a satellite of the Python seat,
+and so is a frame library that wants `rows.to(...)` to answer its own frames.
+
+The two levels have the same shape on purpose. `engine/ext_points.pl` declares
+every engine seam with a KIND and lets Prolog's database hold the clauses; each
+seat declares every point of its own with the same four kinds and lets each
+point's rows live wherever they already live. So the words below are the words
+above, and a reader who knows one knows the other.
+
+| kind | rows written by | dispatch | what follows |
+|---|---|---|---|
+| `declaration` | a registrant | read as data | every row stays visible |
+| `ownership` | a registrant | the FIRST row that claims answers | a row declines by answering nothing |
+| `event` | a registrant | every row runs | a row may not claim |
+| `service` | the SEAT | a registrant CALLS it | the seat implements it |
+
+A seat declares four where the engine declares five: the engine splits `service`
+into `service` and `host_service` by an audience (host bindings against
+extensions) that a seat does not have.
+
+The law each seat holds itself to is that **no third-party library is named in a
+seat except as the first registrant of a door a stranger can use**. pandas is a
+row against the Python seat's `frame` point, DuckDB a row against its `sql`
+point, faiss a row against its `index` point. Nothing about any of them sits in
+a branch, which is what makes a second library of each kind possible without an
+edit here. The `no-hardcoded-integration` gate lane is what keeps it true: it
+derives every library name each seat reaches for from the sources themselves and
+reports one named outside its registration.
+
+### The Python seat
+
+`metta.seam` is the table.
+
+```python
+from metta import seam
+
+seam.points()                 # every declared point, with its kind and fields
+seam.rows()                   # every registration, from any of them
+seam.at("frame").table()      # one point's rows, as data
+```
+
+A library registers a row per capability it wants, and advertises ONE callable
+under the `metta.extensions` entry-point group so a `pip install` is the whole
+of the wiring:
+
+```python
+# in solars/__init__.py
+from metta import seam
+
+def register():
+    seam.frame.register("solars", module="solars", accessor=..., build=...)
+    seam.sql.register("solars", claims=..., define=...)
+    seam.index.register("solars", available=..., build=..., search=...)
+```
+
+```toml
+# in solars' pyproject.toml
+[project.entry-points."metta.extensions"]
+solars = "solars:register"
+```
+
+Nothing else. `rows.to(solars)` then answers a solars frame,
+`tables.sql_function(solars_connection, m.fn.dbl)` registers into a solars
+connection, and `EmbeddingStore(m, backend="solars")` searches through solars.
+`tests/shell/test_a_stranger_extends_the_python_seat.sh` builds exactly that
+package during the gate and drives all nine doors through it.
+
+Discovery is lazy and costs nothing until it is used: `seam.advertised()` reads
+the group's names without importing any of it, and the group is loaded on the
+first dispatch that has no answer without it. That is what Pygments does for a
+plugin lexer, and for the same reason: listing has to stay cheap
+([Pygments plugins](https://pygments.org/docs/plugins)).
+
+The shipped points are `frame` (a dataframe library), `sql` (a SQL engine),
+`array` (an Array API library), `index` (a nearest-neighbour backend), `arrow`
+(who builds the Arrow C structs), `transport-error` (which exceptions mean an
+absent backend), `image` (how a class of host types projects by default), and
+the four whose rows already lived somewhere: `type`, `repr`, `reflector`, and
+`provider`, `library` and `integration` read straight from the three
+entry-point groups. `seam.services()` is the other direction, what a registrant
+may CALL: `projection`, `arrow-view`, `space-of`, `module`, `sql-arity`,
+`sql-types` and `image-of`, so a registrant never imports a private module.
+
+Declaring a point of your own is the same call the seat makes:
+
+```python
+freshness = seam.point(
+    "freshness", "ownership", fields=("claims",), doc="how stale a row may be"
+)
+```
+
+which is `seam:kind/2` being multifile one level out. `seam.publish(m)` writes
+the whole table into `&metta` under declared kind rows, so
+
+```metta
+!(match &metta (extension python frame $who $fields) $who)
+```
+
+answers the frame libraries this process can reach.
+
+Every refusal names the door. A dispatch nobody claims says which point it was,
+which registrants there are, and the registration the caller lacks; registering
+against a point nobody declared lists every point that is declared.
+
 ## Choosing
 
 | you want to | use |
@@ -3217,6 +3327,7 @@ table.
 | keep derived state coherent | `seam:function_changed/1` |
 | change what counts as a match | a matcher, by convention |
 | ship a whole seat, with its own build and scripts | `extensions/README.md` |
+| extend a SEAT from your own package, without forking it | that seat's seam: `metta.seam` |
 | reach the engine from a language it has never been used from | the wire codec, [CODEC.md](CODEC.md) |
 
 Three of those are **declared seams** in `engine/ext_points.pl`, and a change to

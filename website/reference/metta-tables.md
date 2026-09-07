@@ -200,17 +200,23 @@ def declare(m: Any, name: str, declaration: Atom | str) -> Atom:
 def accessors() -> tuple[str, ...]:
 ```
 
-> Install `df.metta` for every frame library already imported.
+> Install `df.metta` for every registered frame library already imported.
 >
 > Answers the libraries that now carry it, so a program can ask.
 >
-> Registration never imports pandas or polars itself. `import metta.tables`
-> costs 15 ms and `import pandas` costs 531 ms, so a module
+> Registration never imports a frame library. `import metta.tables` costs
+> 15 ms and `import pandas` costs 531 ms, so a module
 > that registered by importing would charge every tables user for a library
-> the program may never touch. It registers what is in `sys.modules`, every
-> door in this module calls it first, and a program that imports a frame
-> library afterwards and touches nothing else here calls this by name.
-> Idempotent, because both libraries warn when an accessor name is replaced.
+> the program may never touch. It installs for whichever registered module
+> is in `sys.modules`, every door in this module calls it first, and a
+> program that imports a frame library afterwards and touches nothing else
+> here calls this by name. Idempotent, because a library warns when an
+> accessor name is replaced.
+>
+> Which libraries these are is the `frame` point's rows, not a list here:
+> each row says which module it is and how that library spells an accessor,
+> so a third one installs `df.metta` by registering
+> (`metta.seam.frame.register(...)`, or the `metta.extensions` entry point).
 
 ## `sql_function`
 
@@ -229,10 +235,12 @@ def sql_function(connection: Any, head: Any, name: str | None = None) -> str:
 > function is restated here; `name=` is the escape for a SQL identifier the
 > head's own name cannot be.
 >
-> Two drivers, told apart by what their `create_function` takes: sqlite3
-> wants the arity and no types, DuckDB wants the types and reads them from
-> the head's DECLARED arrow, refusing by name when there is none (an
-> arrow `inspect.signature` merely infers is a proposal, not a promise). A row that
-> produces no answer is SQL NULL and one that produces several refuses,
-> because a scalar function has one result per row; a SQL NULL argument
-> reaches the head as `Grounded(None)` and MeTTa decides what it means.
+> WHICH engines are known is the `sql` point's rows, and the first row that
+> claims the connection declares the function its own way: sqlite3 wants the
+> arity and no types, DuckDB wants the types and reads them from the head's
+> DECLARED arrow, refusing by name when there is none (an arrow
+> `inspect.signature` merely infers is a proposal, not a promise). A third
+> engine registers rather than being added here. A row that produces no
+> answer is SQL NULL and one that produces several refuses, because a scalar
+> function has one result per row; a SQL NULL argument reaches the head as
+> `Grounded(None)` and MeTTa decides what it means.

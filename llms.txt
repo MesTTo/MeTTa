@@ -22,7 +22,7 @@ re-runs them.
 |---|---|---|
 | `examples/**/*.metta` | 266 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
-| `website/reference/metta-*.md` | 27 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
+| `website/reference/metta-*.md` | 28 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
 | `website/reference/refusals.md` | the engine's own `(refusal ...)` rows: the class each seat raises, the ground and the remedy | `extensions/python/tools/refusalsdoc.py` |
 | `tests/prolog/suites/*/*.plt` | plunit suites over the engine itself, grouped by the engine unit each one tests | the `plunit` gate lane |
@@ -544,7 +544,8 @@ below. `row.x` and `row["x"]` both work.
 `rows.one()` (exactly one), `.first()`, `.column(name)` -> that column's atoms,
 `.group_by(name)` -> a dict from each column atom to its `Rows` slice,
 `.table()` -> dict of columns decoded to Python values, `.to_dicts()` -> plain
-mappings, `.to_df()` / `.to_pl()` -> pandas / polars, `.build(column, cls)`
+mappings, `.to(library)` -> a frame of any REGISTERED frame library, with
+`.to_df()` and `.to_pl()` its pandas and polars sugar, `.build(column, cls)`
 rebuilds one named column, and `.build(cls)` rebuilds the sole constructor
 column. Both keep `cls` for type checkers.
 `.pipe(fn, *args)` chains, `_repr_html_` renders in notebooks, and
@@ -555,8 +556,11 @@ Rows and Answers ARE Arrow data. `__arrow_c_schema__()` and
 `__arrow_c_stream__(requested_schema=None)` are the Arrow PyCapsule Interface,
 so `pa.table(rows)`, `pl.scan_arrow_c_stream(rows)`,
 `pd.DataFrame.from_arrow(rows)` and `duckdb.sql("select * from rows")` all read
-the answers with no conversion call, and `to_df()` and `to_pl()` are sugar over
-the same stream. One typed projection decides the columns for all of them: a
+the answers with no conversion call, and `to(library)` is sugar over the same
+stream: which libraries it reaches is the `frame` point's rows in
+`metta.seam`, so a third frame library gets `rows.to(solars)` by registering
+and `to_df` / `to_pl` are the two shipped rows' declared method names rather
+than a privilege. One typed projection decides the columns for all of them: a
 column of one wire kind is int64, float64, bool or utf8 and carries its decoded
 values, and a column mixing kinds, or holding a symbol, a variable, a nested
 expression or an integer wider than int64, is utf8 canonical MeTTa text.
@@ -581,7 +585,11 @@ code becomes equations (`@m.define`, translator rules). **Extend it**: the
 engine calls your code (Python operations, Prolog predicates, C foreign
 predicates, reader tokens). **Back it**: the atoms live elsewhere, because a
 space is an interface, so SQLite, DuckDB, NetworkX, a live object, another
-process or MORK can BE a space and still join with a native one. A
+process or MORK can BE a space and still join with a native one. Each SEAT has
+the same shape one level out: `metta.seam` for Python, `metta-node/seam` for
+Node and `mt_point`/`mt_register` for C are one declared table of extension
+points per seat, so a library extends a seat the way an extension extends the
+engine. A
 table-backed space is one declaration,
 `(bridge (edge $a $b) (row edges (a $a) (b $b)))`, from which every provider
 operation derives in both directions: a match becomes a WHERE, a repeated
@@ -1598,12 +1606,53 @@ dependency order. Installation is idempotent for a live space, and dropping a
 space releases its installation record. Pair `register_object_type`,
 `register_repr`, and `register_reflector` with their exact `unregister_` twins
 when an integration or test stops owning those process-wide hooks.
-Entry-point groups: `metta.integrations`, `metta.spaces`, `metta.libraries`.
+Entry-point groups: `metta.integrations`, `metta.spaces`, `metta.libraries`,
+and `metta.extensions` for the seam below.
+
+`metta.seam` is this seat's ONE extension seam, the seat-level twin of
+`engine/ext_points.pl`: every point a library can plug into is declared with a
+KIND and its fields, a registrant is a ROW against a declared point, and both
+read back as data. Four kinds, the engine's own less the `host_service` split
+it has no audience for: `declaration` (rows read as data, all of them),
+`ownership` (the FIRST row whose `claims(...)` answers non-None wins, pluggy's
+`firstresult`), `event` (every row's `on(...)` runs), `service` (the SEAT
+writes it and a registrant CALLS it). The shipped points are `frame` (a
+dataframe library: `module`, `accessor`, `build`, optional `sugar`), `sql` (a
+SQL engine: `claims`, `define`, optional `undeclared`), `array` (an Array API
+library: `module`, `default`, optional `missing`, `scalars`), `index` (a
+nearest-neighbour backend: `available`, `build`, `search`), `arrow` (who
+builds the Arrow C structs: `claims`, `schema`, `stream`, `batches`),
+`transport-error` (`module`, `classes`), `image` (a default projection for a
+class of host types: `claims`), and the four whose rows live where they always
+lived, `type`, `repr`, `reflector`, plus `provider`, `library` and
+`integration` read from the three entry-point groups. Services published for a
+registrant to call: `projection`, `arrow-view`, `space-of`, `module`,
+`sql-arity`, `sql-types`, `image-of`.
+`seam.at(name)` reads a point (`seam.frame` and friends are the sugar),
+`point(name, kind, fields=, doc=)` declares one, `<point>.register(name,
+**fields)` adds a row and refuses an undeclared point, a missing field or an
+extra one by name, `<point>.table()` / `.claim(...)` / `.each(...)` dispatch by
+kind and refuse the other kinds' spelling, `rows()` and `points()` are the
+whole seam as data, `withdraw(name)` is remove-then-redeclare, and
+`publish(m)` writes it into `&metta` under `(kind extension-point ...)` and
+`(kind extension ...)` so `!(match &metta (extension python frame $who $f)
+$who)` answers the frame libraries. Discovery is lazy and free: `advertised()`
+answers the `metta.extensions` names without importing anything, and the group
+is loaded on the first dispatch that has no answer without it, which is how
+Pygments finds a plugin lexer. Cost: a registration imports nothing (a row
+holds the module NAME), and the shipped rows arrive by the same lazy path a
+stranger's do. Refusals: an undeclared point names every declared one; a row
+against a `service` point is refused because the seat writes those; and a
+dispatch nobody claims names the door, the registrants there are, and the
+registration the caller lacks.
 
 `metta.arrays`: one operation vocabulary over any DLPack library.
 `install(m, default=xp)` makes numpy, torch or JAX first-class with the same
 words; `namespace_of`, `is_array`, `data_of`, and `EmbeddingStore`
-with an exact faiss backend. What a space installed is a property OF that
+and `EmbeddingStore(m, backend="auto"|<a registered name>)`, whose backends
+are the `index` point's rows: an exact faiss index and this seat's own Array
+API path ship, `auto` takes the first that can run here, and a vector library
+installs itself into every store by registering. What a space installed is a property OF that
 space, one row `(array-backend <space> <library> (ops ...))` in `&metta`:
 `ops(m)` answers that space's roster and `backend(m)` its library, so two
 spaces on two libraries answer their own whichever order they were installed
@@ -1660,13 +1709,16 @@ connection that permits it, `sqlite3.connect(path, check_same_thread=False)`. `a
 a time, which is how a DuckDB relation, a pyarrow Table or a Parquet reader
 loads; a source with its own row door keeps it, since the two build the same
 atoms and the row door measured faster. `accessors()` installs the `metta`
-accessor on every frame library already imported and answers which ones carry
-it, so `df.metta.into(m, "row")` is `tables.add` in each library's own
-spelling; it never imports a frame library to do it. `sql_function(connection, head)`
-registers a MeTTa head as a scalar SQL function on a sqlite3 or DuckDB
-connection and answers its SQL name: sqlite3 takes the arity alone, DuckDB
-takes the types and reads them from the head's declared arrow, no answer is
-SQL NULL and several answers refuse.
+accessor on every REGISTERED frame library already imported and answers which
+ones carry it, so `df.metta.into(m, "row")` is `tables.add` in each library's
+own spelling; it never imports a frame library to do it, and which libraries
+those are is the `frame` point's rows. `sql_function(connection, head)`
+registers a MeTTa head as a scalar SQL function and answers its SQL name: the
+first row of the `sql` point that CLAIMS the connection declares the function
+its own way, sqlite3 taking the arity alone and DuckDB the types from the
+head's declared arrow. No answer is SQL NULL and several answers refuse. A
+connection no row claims is refused naming the door and every engine
+registered, never pushed down whichever branch is last.
 `metta.space(backing={"edge": 2}, journal=path, sync="flush")` is journalled
 and crash-recovering. Reopen an old schema once with
 `metta.space(backing={"new": 2}, journal=path, rename={"old": "new"})`; every
@@ -1972,7 +2024,9 @@ no transport under it, for mounting on another HTTP framework.
 
 `metta.testing` ships what the suite fuzzes itself with: hypothesis strategies
 (`atoms`, `expressions`, `patterns`, `names`, `numbers`, `texts`, `symbols`,
-`variables`, `grounded`, `ground_atoms`, `numpy_scalars`, `programs`),
+`variables`, `grounded`, `ground_atoms`, `numpy_scalars`, `programs`;
+`library_scalars(module)` is the general spelling and `numpy_scalars` the
+shipped name for the `array` point's numpy row),
 `from_pattern(pattern, max_leaves=8)` for ground instances that share every
 repeated named variable and draw anonymous occurrences independently,
 `programs(census=None, depth=3, facts=(1, 4), queries=(1, 3))` for whole MeTTa
