@@ -681,6 +681,78 @@ def unmeasured_row_failures(name: str) -> list[str]:
     return failures
 
 
+def straddled_allowance_failures(name: str) -> list[str]:
+    """A row whose own runs land on both sides of the allowance has no verdict.
+
+    The cross-engine allowance is a LINE, and a row whose spread crosses it
+    would be called a regression or not by whichever half of that spread this
+    run's median happened to fall in, with the next run saying the other thing.
+    That is the box picking, not the tree answering, so it goes to the bucket
+    that names it. A row whose BEST run is still over the line is a different
+    thing and still fails, which is the plant that keeps this from becoming a
+    blanket amnesty for anything near the boundary.
+    """
+    failures: list[str] = []
+    frozen = {
+        "//": {"status": "meta"},
+        name: {
+            "status": "measured",
+            "upstream_instructions": 1_000_000,
+            "our_instructions": 1_000_000,
+            "our_inferences": PLANTED_INFERENCES,
+        },
+    }
+    #1,000,000 * 1.02 + 150,000 = 1,170,000.
+    allowed = 1_170_000
+    original_measure = lane.measure
+    original_ci = os.environ.get("CI")
+
+    def judged(lowest: int, median: int) -> tuple[int, str]:
+        lane.measure = lambda _root, _example: {
+            "status": "ok",
+            "instructions": median,
+            "lowest": lowest,
+            "highest": median + (median - lowest),
+            "runs": 5,
+            "inferences": PLANTED_INFERENCES,
+        }
+        printed = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(printed):
+                answer = lane.verdicts(frozen, remeasure=True)
+        finally:
+            lane.measure = original_measure
+        return answer, printed.getvalue()
+
+    try:
+        os.environ.pop("CI", None)
+        answer, printed = judged(allowed - 1, allowed + 1)
+        if answer != 0:
+            failures.append(
+                "a row whose runs straddle the allowance failed the lane on a "
+                "desk, where the verdict is the spread rather than the tree"
+            )
+        if "straddle the allowance" not in printed:
+            failures.append("a straddled row was not named as unmeasured")
+        answer, printed = judged(allowed + 1, allowed + 2)
+        if answer == 0:
+            failures.append(
+                "a row whose BEST run is over the allowance passed; that is the "
+                "tree answering and it has to fail"
+            )
+        if "straddle the allowance" in printed:
+            failures.append(
+                "a row entirely over the allowance was called a straddle"
+            )
+    finally:
+        lane.measure = original_measure
+        if original_ci is None:
+            os.environ.pop("CI", None)
+        else:
+            os.environ["CI"] = original_ci
+    return failures
+
+
 def counter_refusal_policy_failures() -> list[str]:
     """One line for a box that cannot count: a desk skips it, a runner refuses it."""
     failures: list[str] = []
@@ -738,6 +810,7 @@ def main() -> int:
         *denied_counter_failures(),
         *null_program_refusal_failures(),
         *unmeasured_row_failures(name),
+        *straddled_allowance_failures(name),
         *counter_refusal_policy_failures(),
     ]
 
