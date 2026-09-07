@@ -37,7 +37,7 @@
 %     assertion failure rather than as a classifier that could not run
 %     [tested: metta_assertions:an_assertion_over_terms_with_variables_still_classifies,
 %     metta_assertions:a_failing_test_classifies_its_two_values_unchanged;
-%     commit=WORKTREE]
+%     commit=ef5b91d7950594a49e177d972a954841a6b8d6e0]
 %   - absence is per bag, so assert-includes-answers/5 reports the answers
 %     missing from a containment and leaves the excess side ABSENT, where a
 %     two-sided report would name legal answers as a reason for the failure
