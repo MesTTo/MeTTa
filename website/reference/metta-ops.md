@@ -112,10 +112,38 @@ def unregister(runtime, name: str) -> None:
 > registration added, so nothing keeps describing a function that no
 > longer exists.
 
+## `withdraw`
+
+```python
+def withdraw(runtime, name: str, space: str) -> bool:
+```
+
+> Stop ONE space declaring an operation, leaving it registered elsewhere.
+>
+> `unregister` is the whole-process form: the callable goes and every space
+> that declared it is released. This is the per-space half, for a library
+> uninstalling from one space an operation ANOTHER space still uses. The
+> space's own declaration rows go, the implementation stays for the spaces
+> that kept it, and the answer says whether this space held anything.
+>
+> An implementation is process-global and declarations are space-local, so
+> a space that stops using an operation but cannot unregister it kept
+> DESCRIBING it: the rows stayed, `builtins()` still listed the name there,
+> and the call still answered. Withdrawing the last space leaves the operation
+> registered and declared nowhere, which is the caller's decision to make:
+> `unregister` is the door when nothing should keep it.
+>
+> Raises KeyError for a name that is not registered, as `unregister` does.
+
 ## `registered`
 
 ```python
 def registered() -> dict[str, Operation]:
 ```
 
-> The live registry, name to operation.
+> The live registry, name to operation, for the whole PROCESS.
+>
+> A name registers once however many spaces use it, so this is not the
+> question "what does this space have": `space.builtins()` answers that,
+> and a library that installs a set of operations answers its own
+> (`arrays.ops(space)` for the array roster).

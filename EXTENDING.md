@@ -3058,6 +3058,7 @@ themselves rows in `&metta`:
 (claim semiring ranked ordered)                    ; a per-value fact
 (algebra prob + * 0 1 (laws ...) (carrier) (requires) global)
 (routed-by-shape handles)                          ; entries route by shape
+(owned-by-space array-backend)                     ; rows die with their space
 ```
 
 One generic checker validates every `&metta` write against the standing kind
@@ -3076,6 +3077,24 @@ shipped ones use: entries are patterns, queries route by the most specific
 matching entry with `(in $x)` adornments and loud coherence conflicts, all
 inherited, none reimplemented. Read the routed view back with the published
 service `metta_shape_route/5`.
+
+`(owned-by-space <head>)` gives your kind the SAME lifetime the shipped
+space-owned ones have: its rows name their owning space in the first position,
+and dropping that space retires them along with its `(annotations ...)` and
+`(handles ...)`, so a pooled space name's next life inherits none of them.
+Declare it when your rows are a per-space FACT with nothing to dispatch, which
+is where the routing marker does not fit: a route forces the shape
+`(<head> <ctx> <pattern> <payload>...)`. Because the retirement walk reads
+position 1 as the space, the marker refuses a head whose kind row does not
+start at `symbol`, naming the remedy. `metta.arrays` is the worked instance:
+`install` declares `(kind array-backend symbol symbol term)` and
+`(owned-by-space array-backend)` once, writes one
+`(array-backend <space> <library> (ops ...))` row per installed space, and
+reads it back for `arrays.ops(space)` and `arrays.backend(space)`. Recording
+the ownership edge as data rather than as a list inside the engine is what
+PostgreSQL's `pg_depend` does for an extension's own objects, which is how
+`DROP ... CASCADE` reaches them
+([pg_depend](https://www.postgresql.org/docs/18/catalog-pg-depend.html)).
 
 To make the engine ACT on your kind, ship exploitation rules riding the published
 seams. The routing seam is `seam:route_cap/4`: consulted where the declared

@@ -430,6 +430,62 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- **`metta.arrays.ARRAY_OPS` is gone.** What a space installed is a property of
+  that space now, one `(array-backend <space> <library> (ops ...))` row in
+  `&metta` that `arrays.ops(space)` and `arrays.backend(space)` read back and a
+  MeTTa program can match for itself. The removed name was a module-level list
+  that every `install()` anywhere in the process rewrote, so its meaning
+  depended on call order: installing JAX in one space made a NumPy space
+  answer `%Undefined%` for the type of `tensor--jax.numpy`, a name it had
+  never registered, and the suite met it as a shuffle-dependent failure at
+  `--randomly-seed=4`. Two spaces on two libraries now answer their own
+  rosters in either order.
+
+  `arrays.uninstall(space)` is the new inverse: it retires the row, the
+  constructor aliases and their bare-name arrows, the `get-type` shape
+  equations and the shaped-DLTensor typing rule, then unregisters every
+  operation of the roster that no OTHER space's row still names, the operation
+  registry being process-wide by name, and answers what actually left it. The
+  DLTensor type and printing hooks and the `broadcast-shape` relation
+  deliberately survive it, being keyed on the DLPack predicate rather than on
+  a space; `integrate.unregister_object_type` and `integrate.unregister_repr`
+  are their own doors. Installing again replaces the row, the aliases and the
+  operations the outgoing roster alone named. A space with no install refuses
+  by name, and a space carrying two rows refuses naming both libraries with
+  `install` as the remedy. `ops.registered()` keeps its meaning and says so:
+  the process-wide registry view, a different question from what one space
+  installed.
+
+- `metta.ops.withdraw(runtime, name, space)` is the per-space half of
+  `unregister`. An implementation is process-global while declarations are
+  space-local, so a library uninstalling from ONE space an operation another
+  space still uses could not unregister it and had no way to stop declaring
+  it: the rows stayed, `builtins()` still listed the name there, and the call
+  still answered from a space that no longer routed to it. It releases that
+  space's rows, leaves the operation registered for the spaces that kept it,
+  and answers whether the space held any. `metta.arrays.uninstall` is its
+  first caller.
+
+- **Fixed:** a dropped space left the binding claiming its operation
+  declarations were still in its name, and anonymous names are pooled, so the
+  NEXT life of the name registered the same operations and got no declaration
+  rows at all, leaving them callable and typed nowhere. Measured: a space that
+  installed `metta.arrays` and was dropped left 160 refcount entries, and the
+  next space to take its name registered with 37 atoms where a fresh name gets
+  197. The refcounts and the holdings are dropped with the space now, beside
+  the integration records and algebra rows that already were.
+
+- `(owned-by-space <head>)` is a new catalog marker row: it says a kind's rows
+  name their owning space in the first position, which puts the head in the
+  walk that retires a space's declarations when the space is dropped. Shape
+  routing was the only self-service path into that walk and it forces the
+  shape `(<head> <ctx> <pattern> <payload>...)` on a kind whose rows are a
+  per-space fact with nothing to dispatch, so a library storing one needed a
+  clause inside the engine. Refused at the write unless the head already has a
+  kind row starting at `symbol`, because the walk reads position 1 as the
+  space. `metta.arrays` is the first user, and recording the ownership edge as
+  data is what PostgreSQL's `pg_depend` does for an extension's own objects.
+
 - A `(claim Vocab Value Property...)` row's properties are cached per value,
   the way a vocabulary's values already were. The read has an open tail,
   because a claim row carries any number of properties, so it took the branch

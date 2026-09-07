@@ -146,6 +146,35 @@ test(release_retires_custom_context_routes_but_preserves_global_routes,
     assertion(\+ metta_catalog_row(['life-route', '&catalog-route'|_])),
     assertion(metta_catalog_row([merge, ['&catalog-route'], fair])).
 
+%The declarative twin of the route test above: a kind with nothing to
+%dispatch joins the retirement walk through (owned-by-space Head) alone, and
+%a row of that head owned by another symbol is untouched.
+test(release_retires_a_third_party_owned_by_space_kind,
+     [cleanup((clean_life('&catalog-owned'),
+               remove_sexp('&metta', ['owned-by-space', 'life-owned']),
+               remove_sexp('&metta', [kind, 'life-owned', symbol, symbol]),
+               remove_sexp('&metta', ['life-owned', '&catalog-kept', payload])))]) :-
+    add_sexp('&metta', [kind, 'life-owned', symbol, symbol]),
+    add_sexp('&metta', ['owned-by-space', 'life-owned']),
+    add_sexp('&metta', ['life-owned', '&catalog-owned', payload]),
+    add_sexp('&metta', ['life-owned', '&catalog-kept', payload]),
+    metta_release_space('&catalog-owned'),
+    assertion(\+ metta_catalog_row(['life-owned', '&catalog-owned'|_])),
+    assertion(metta_catalog_row(['life-owned', '&catalog-kept', payload])),
+    assertion(metta_catalog_row([kind, 'life-owned', symbol, symbol])),
+    assertion(metta_catalog_row(['owned-by-space', 'life-owned'])).
+
+test(withdrawing_the_ownership_row_stops_the_retirement,
+     [cleanup((clean_life('&catalog-unowned'),
+               remove_sexp('&metta', [kind, 'life-unowned', symbol, symbol]),
+               remove_sexp('&metta', ['life-unowned', '&catalog-unowned', payload])))]) :-
+    add_sexp('&metta', [kind, 'life-unowned', symbol, symbol]),
+    add_sexp('&metta', ['owned-by-space', 'life-unowned']),
+    add_sexp('&metta', ['life-unowned', '&catalog-unowned', payload]),
+    remove_sexp('&metta', ['owned-by-space', 'life-unowned']),
+    metta_release_space('&catalog-unowned'),
+    assertion(metta_catalog_row(['life-unowned', '&catalog-unowned', payload])).
+
 test(release_retires_the_live_hook_claim_as_well_as_its_reflection,
      [cleanup((clean_life('&catalog-hooks'), clean_life('&catalog-judge')))]) :-
     metta_add_atom('&catalog-judge', [=, ['life-judge', _], [accept]], _),

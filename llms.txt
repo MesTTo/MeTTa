@@ -625,7 +625,13 @@ or symbol. Only catalog preset terms in `engine/spaces.pl` and the generated
 generic checker validates every `&metta` write against them, a violation is a hard
 error naming the atom, the position and the argspec, and a head with no kind
 row passes untouched, so third-party declaration kinds are ordinary data
-until their author declares a kind row for them.
+until their author declares a kind row for them. Two marker rows put a
+third-party kind on the engine's own paths: `(routed-by-shape head)` gives it
+the shape router the shipped kinds use, keyed by context or by global, and
+`(owned-by-space head)` says its rows name their owning space in the first
+position, which puts the head in the walk that retires a space's declarations
+when the space is dropped. `owned-by-space` refuses a head whose kind row does
+not start at `symbol`, because that walk reads position 1 as the space.
 
 Function dispatch has six axes. Match `(dispatch-default $axis $value)` in
 `&metta` to read their shipped defaults, and add
@@ -653,7 +659,15 @@ code and an existing `(effect name class)` declaration atom retained as a
 compatibility input. The remaining options are `name=`,
 `transport="encoded"|"raw"`, `declarations=` (ordinary Atom claims),
 `arities=`, and `inverse=` (the callable that runs it backwards).
-`m.unregister_op(name)` removes every arity and declaration. A coroutine
+`m.unregister_op(name)` removes every arity and declaration, for the whole
+process. Its per-space half is `ops.withdraw(runtime, name, space)`: an
+implementation is process-global while declarations are space-local, so a
+library uninstalling from ONE space an operation another space still uses
+releases that space's rows and leaves the operation registered, answering
+whether the space held any. It raises `KeyError` for an unregistered name, as
+`unregister` does, and withdrawing the last space leaves the operation
+registered and declared nowhere, `unregister` being the door for that. A
+coroutine
 operation answers a FutureSpace immediately rather than suspending the call:
 the future IS a space, so awaiting it is matching it, and `(async-op <name>
 <future-space> launch|landing)` makes both ends observable. Landing is
@@ -1402,8 +1416,27 @@ Entry-point groups: `metta.integrations`, `metta.spaces`, `metta.libraries`.
 
 `metta.arrays`: one operation vocabulary over any DLPack library.
 `install(m, default=xp)` makes numpy, torch or JAX first-class with the same
-words; `namespace_of`, `is_array`, `data_of`, `ARRAY_OPS`, and `EmbeddingStore`
-with an exact faiss backend. `EmbeddingStore.keys()` lists stored atom keys and
+words; `namespace_of`, `is_array`, `data_of`, and `EmbeddingStore`
+with an exact faiss backend. What a space installed is a property OF that
+space, one row `(array-backend <space> <library> (ops ...))` in `&metta`:
+`ops(m)` answers that space's roster and `backend(m)` its library, so two
+spaces on two libraries answer their own whichever order they were installed
+in. `uninstall(m)` is install's inverse, retiring the row, the constructor
+aliases, the shape equations and the typing rule, and unregistering every
+operation of the roster that no OTHER space's row still names, since the
+operation registry is process-wide by name; it answers what actually left it.
+Two registrations deliberately survive an uninstall, both keyed on the DLPack
+predicate rather than on a space: the DLTensor type and printing hooks, whose
+doors are `integrate.unregister_object_type` and `integrate.unregister_repr`,
+and the `broadcast-shape` relation, which `register_prolog` cannot withdraw.
+Dropping the space retires the row, the catalog retiring a space's
+declarations with it, but the process-wide operations stay until `uninstall`
+hands them back. `ops.registered()` remains the PROCESS-wide registry view,
+which is a different question from what one space installed. Installing again
+replaces the row, the aliases and the operations the outgoing roster alone
+named. A space with no install refuses by name, and two rows for one space
+refuse naming both libraries with install as the remedy.
+`EmbeddingStore.keys()` lists stored atom keys and
 `EmbeddingStore.vector_for(key)` retrieves a key's original vector.
 `EmbeddingStore` registers `(name-knn $q $k)` and
 `(name-embed $key)` as OPERATIONS rather than backing a space, so it is called
