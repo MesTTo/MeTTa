@@ -128,3 +128,102 @@ Open: SWI's `did not clear exception` diagnostic is written by its own C error
 stream and reaches neither pytest's fd capture nor the library's `capture()`,
 so the regression that pins its absence runs the case in a child process and
 reads that child's stderr.
+
+## 2026-09-07
+
+Tried: the open item above, `py-iter` and `py-iter-once` in
+`extensions/python/bridge.pl`, measured on `petta` at 70ac99da before touching
+anything. THREE symptoms, not the one recorded:
+
+    !(once (py-iter G))      G raises 1st  -> EngineError: the engine could not
+                                              accept this call's inputs:
+                                              <built-in function apply_once>
+                                              returned a result with an
+                                              exception set
+    !(collapse (py-iter G))  G raises 3rd  -> EngineError: Python 'ValueError':
+                                              ... Python stack: metta_py.py:166
+    !(catch (collapse ...))                -> the same, uncaught
+
+The first is the LAZY pull and is the worst of the three: the whole nested
+query returns with the error indicator still set, `_Py_CheckFunctionResult`
+turns that into a `SystemError`, and the class, the message and the place are
+all gone. The second keeps the exception but never enters `metta_py_guard/2`,
+so it wears janus's own rendering with a live Python stack and names no MeTTa
+call. The recorded "attributed to the py-atom call" was the shape of the first
+report; what actually happens is that no MeTTa call is named at all.
+
+Decided: the same repair as the operation and provider doors, with a different
+frame. `metta_py.py` ends a failed enumeration with `(_STREAM_FAILURE, error)`
+and `bridge.pl` raises it back through `py_call(metta_py:stream_reraise(E), _)`
+INSIDE the goal `metta_py_guard/2` already wraps, so the attribution is the
+guard's and nothing is reconstructed.
+
+Rejected: reusing `metta.errors.stream_failure`'s four-element list
+`["x","raise",Class,Exception]`. This seat crosses under `py_object(true)`,
+and a janus probe settles it: `['x','raise',...]` arrives as
+`<py>(0x..,list)`, an opaque blob Prolog cannot take apart without a second
+crossing PER ITEM, while the exact tuple `(tag, exc)` arrives as
+`<py>(0x..,object)-<py>(0x..,'ValueError')` with both elements in hand. The
+pair is also the stronger reservation: the tag is a private module singleton
+compared by blob identity, where the string tags are spellable by an
+iterator's own data. Revisit if this seat ever stops asking for
+`py_object(true)`.
+
+Rejected: recovering the failure OUT OF BAND after the enumeration ends, the
+`bufio.Scanner.Err()` and `ferror(3)` shape, which needs no reservation at all.
+`py_iter/2` backtracks with one-item lookahead, so a source that raises on its
+SECOND item raises during the lookahead for the first and `py_iter` then
+SUCCEEDS deterministically; an end-of-stream check never runs and the crossing
+stays poisoned. In-band is the only place the lookahead pull can be seen.
+
+Decided: a replayable source REMEMBERS its failure, as the last entry of the
+cache `_ReplayableIterator` already keeps, so `_done` and the cache carry it
+and `replay` needs no new branch. The source is spent once it has raised, so
+the alternative is not a retry: it is a second enumeration reading a truncated
+prefix as a complete answer, which is the defect this whole mechanism exists to
+close. That is RxJava's rule for a shared sequence, `Single.cache()` "caches
+its success or error event and replays it to all the downstream subscribers",
+and not `itertools.tee`'s, whose `_tee.__next__` calls `next(self.iterator)`
+with no handler so the failure reaches whichever tee pulled it and the others
+read the prefix [source:
+https://javadoc.io/doc/io.reactivex/rxjava/latest/rx/Single.html;
+CPython 3.14 itertools documentation, the tee() equivalent]. Python's own
+community reads the ambiguity the same way: `groupby` treats a raising source
+as unexhausted and `islice` as exhausted, and the answer given is that the
+grave risk is "the exception being silently overlooked"
+[source: https://discuss.python.org/t/is-an-iterable-that-raises-an-exception-exhausted/68720].
+
+Tried: naming the three new predicates `metta_py_stream_*` the way this file
+names its helpers -> `Warning: Redefined static procedure
+metta_py_stream_raise/1, Previously defined at bridge.pl:670`. Neither
+`bridge.pl` nor `metta/shim.pl` declares a module, so both load into `user` and
+the shim's own `metta_py_stream_raise/1`, which hands ITS frame back through
+`metta_ops`, silently won in every hosted process. Renamed to `py_iter_tag/1`,
+`py_iter_item/2` and `py_iter_raise/1`, for the door rather than the file.
+
+Tried: pricing the per-item guard, since every pulled item is asked -> over
+20,000 items the pull costs 40,004 inferences unguarded and 60,004 guarded,
++1.00 an item exactly, 0.169 against 0.213 microseconds an item at loadavg
+46.20; `metta_py._guarded` adds 5.6 nanoseconds an item to a 9.1 nanosecond
+bare loop, 3.29% of one guarded pull. `extensions/python/benchmarks/py_iter_guard.py`,
+`--items 20000 --rounds 3`. The +1 is clause selection doing the work:
+`py_iter_item(Tag-Exception, Tag)` is a head whose REPEATED VARIABLE is the
+reservation test, and first-argument indexing on `-/2` sends every item that is
+not a pair straight to the second clause. The shim's equivalent costs +2
+because its frame needs a separate predicate to destructure.
+
+Planted, both directions: the six new tests against the unchanged
+`metta_py.py` and `bridge.pl`, five red; and the reservation weakened from the
+tag's identity to the pair's SHAPE, one red, an iterator of ordinary two-element
+tuples read as a terminal failure.
+
+Open: `esbuild` is declared in `extensions/node/package.json` and absent from
+this workspace's one `node_modules`, so `npm run build:browser` cannot finish
+and `extensions/node/llms.txt:238`'s `browser/` names nothing any tree here
+holds. The `llms` lane reports it in a worktree and does NOT report it in the
+main checkout, because `check_llms_names._resolves` falls back to
+`REPO.rglob(tail)` and that glob descends into `ai-tmp/`: the main checkout's
+green is supplied by `ai-tmp/wt-design-faces/extensions/node/browser`, another
+agent's worktree. The lane should exclude `ai-tmp/` the way it already excludes
+`.git`, and then the claim needs either the dependency or a rewrite. Left to
+the seat that owns that sheet.

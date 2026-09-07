@@ -2016,8 +2016,15 @@ drained. Each enumeration gets its OWN cursor over a shared cache, so reading
 the same iterator twice, or nesting two reads of it, answers the cartesian
 product rather than exhausting it once. `py-iter-once` is the other rule, kept
 by name: Python's own consumptive iteration, which is what a compiled `for`
-statement wants. `py-atom` takes a metatype argument, `Grounded` for the live
-reference and `Expression` for a snapshot.
+statement wants. An iterator that RAISES mid-enumeration is reported at the
+pull that raised, naming that `py-iter` call and the iterator's own repr, the
+way a deterministic Python call's failure is; answers already yielded before it
+are never delivered as a complete set. A `py-iter` source remembers its
+failure, so a second enumeration of it reports the same failure at the same
+index rather than reading the prefix as complete; a `py-iter-once` source is
+spent either way. The guard is one inference an item and no extra crossing.
+`py-atom` takes a metatype argument, `Grounded` for the live reference and
+`Expression` for a snapshot.
 Strings carry hyperon's five escapes (quote, backslash, `\n`, `\t`, `\r`).
 Symbols containing whitespace, parentheses or quotes are refused at save and
 digest rather than written unreadably.
