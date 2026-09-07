@@ -45,7 +45,7 @@ MODULES = (
     ModuleSpec("metta.casting", "extensions/python/metta/casting.py"),
     ModuleSpec("metta.foreign", "extensions/python/metta/foreign.py"),
     ModuleSpec("metta.integrate", "extensions/python/metta/integrate.py"),
-    ModuleSpec("metta.arrays", "extensions/python/metta/arrays.py"),
+    ModuleSpec("metta_arrays", "extensions/python/ext/metta-arrays/metta_arrays.py"),
     ModuleSpec("metta.results", "extensions/python/metta/results.py"),
 )
 
@@ -125,7 +125,7 @@ def render_module(spec: ModuleSpec) -> str:
             [
                 "## Re-exported class",
                 "",
-                "`EmbeddingStore` is documented under [`metta.arrays`](./metta-arrays#embeddingstore).",
+                "`EmbeddingStore` is documented under [`metta_arrays`](./metta-arrays#embeddingstore).",
                 "",
             ]
         )

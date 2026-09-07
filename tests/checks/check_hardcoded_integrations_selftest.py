@@ -11,6 +11,10 @@ ordinary dict are all things a text search would report; each is planted here
 so that the decision to read the SYNTAX TREE cannot be quietly reversed into a
 grep, which would be turned off within a day.
 
+Since 2026-09-08 one positive is load-bearing too: a plain `import pandas` in
+the core, which was legal in exactly one file before the ruling and is legal
+nowhere now.
+
 Assumes: a writable ai-tmp/ in this repository.
 Guarantees:
   - an import of a library nowhere in ALLOWED is reported with its file, its
@@ -24,6 +28,9 @@ Guarantees:
     are NOT reported [tested: this file; commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
   - an ALLOWED entry nothing names any more is reported [tested: this file;
     commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
+  - a plain `import pandas` planted in the CORE is reported, and the finding
+    says to move it to a package rather than to add an allowlist line, which
+    is the 2026-09-08 ruling [tested: this file; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
   - a TypeScript import of a package, and a C include of a foreign header, are
     each reported [tested: this file; commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
@@ -82,6 +89,18 @@ def frames(cache):
     return cache.get("numpy") or seam.frame.table()
 '''
 
+#: The ruling of 2026-09-08, planted. pymetta ships zero integrations, so an
+#: import of a frame library in the CORE is a finding with no table entry that
+#: could admit it; before that ruling this same line was legal in one file.
+RETURNED = '''"""The coupling the ruling removed, coming back."""
+
+import pandas
+
+
+def frame(rows):
+    return pandas.DataFrame(rows)
+'''
+
 TYPESCRIPT = """
 // solarsdb is named in this comment and must not be a finding
 import { readFile } from "node:fs";
@@ -111,6 +130,7 @@ def _plant(scratch: Path) -> None:
     (python / "coupled.py").write_text(COUPLED, encoding="utf-8")
     (python / "probed.py").write_text(PROBED, encoding="utf-8")
     (python / "innocent.py").write_text(INNOCENT, encoding="utf-8")
+    (python / "returned.py").write_text(RETURNED, encoding="utf-8")
     (node / "seat.ts").write_text(TYPESCRIPT, encoding="utf-8")
     (cmetta / "cmetta.c").write_text(C_SOURCE, encoding="utf-8")
     (cmetta / "cmetta.h").write_text("#include <stdint.h>\n", encoding="utf-8")
@@ -145,8 +165,22 @@ def main() -> int:
         assert ("solarsdb", "seat.ts") in reported, reported
         assert ("solarsdb.h", "cmetta.c") in reported, reported
         assert not [name for _library, name in reported if name == "innocent.py"], reported
-        assert not [finding for finding in found if finding.library == "pandas"], found
+        assert not [
+            finding
+            for finding in found
+            if finding.library == "pandas" and finding.path.endswith("innocent.py")
+        ], found
         assert not [finding for finding in found if finding.library == "numpy"], found
+
+        # The ruling itself: an integration in the core is refused, and the
+        # refusal says to move it to a package rather than to add a line here.
+        returned = next(
+            finding
+            for finding in found
+            if finding.library == "pandas" and finding.path.endswith("returned.py")
+        )
+        assert "own distribution" in returned.reason, returned
+        assert "extensions/python/ext/" in returned.reason, returned
 
         # The finding names the door to use, which is what makes it actionable.
         coupling = next(finding for finding in found if finding.library == "solarsdb")
@@ -169,7 +203,8 @@ def main() -> int:
         assert misplaced, elsewhere
         assert "seam.sql" in misplaced[0].reason, misplaced[0]
 
-        # Registered at its real site: no longer a finding.
+        # An entry at the library's real site clears it, which is what a
+        # DEPENDENCY line does; nothing here says an integration may have one.
         settled = _findings_over(
             scratch,
             {
@@ -178,6 +213,9 @@ def main() -> int:
                 ),
                 ("python", "faiss"): pass_under_test.Site(
                     ("extensions/python/metta/probed.py",), "seam.index"
+                ),
+                ("python", "pandas"): pass_under_test.Site(
+                    ("extensions/python/metta/returned.py",), "the planted return"
                 ),
                 ("node", "solarsdb"): pass_under_test.Site(
                     ("extensions/node/src/seat.ts",), "the node seam"
@@ -198,6 +236,9 @@ def main() -> int:
                 ),
                 ("python", "faiss"): pass_under_test.Site(
                     ("extensions/python/metta/probed.py",), "seam.index"
+                ),
+                ("python", "pandas"): pass_under_test.Site(
+                    ("extensions/python/metta/returned.py",), "the planted return"
                 ),
                 ("node", "solarsdb"): pass_under_test.Site(
                     ("extensions/node/src/seat.ts",), "the node seam"

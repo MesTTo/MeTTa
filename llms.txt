@@ -1390,7 +1390,7 @@ m.record(src, *, seed=None, max_events=, timeout=, inferences=) -> Recording
         replay() and debug() then refuse; the events stay readable either way
         replay refuses a space whose digest() differs from the recording's, and
         a LOADED recording has no live space, so it wants one as the argument
-metta.telemetry.spans(trace, *, tracer, space=None, start_time=None, parent=None)
+metta_otel.spans(trace, *, tracer, space=None, start_time=None, parent=None)
         one BACK-DATED OpenTelemetry span per recorded reduction, nested by the
         events' own depth and carrying the times the engine recorded rather than
         the times the spans were built. `trace` is a Trace or a Recording, which
@@ -1399,7 +1399,7 @@ metta.telemetry.spans(trace, *, tracer, space=None, start_time=None, parent=None
         `depth`, `seq` and `space`, each under the `metta.` namespace; its exit
         ends it with `answer`; a `fail` ends it ERROR with `exit=fail`; and a
         reduction a bound cut ends where the trace does with `exit=absent`
-metta.telemetry.observe(m, *, tracer=None, meter=None, name="metta",
+metta_otel.observe(m, *, tracer=None, meter=None, name="metta",
         max_events=None, filter=None) -> Trace
         a with-block. With a tracer it holds the engine's ONE trace session for
         the block, so every compiled reduction in it becomes a span under one
@@ -1415,7 +1415,8 @@ metta.telemetry.observe(m, *, tracer=None, meter=None, name="metta",
         stream; they carry the true times, which is what back-dating is for
         A trace or debug session inside an observed block refuses, and observing
         inside one of those refuses naming the same rule: one session holds the
-        wrappers. Needs pymetta[otel], the API package alone
+        wrappers. Needs pymetta[otel], which installs metta-otel, whose one
+        dependency is the OpenTelemetry API package
         The `metta.*` loggers need no code here: attaching
         opentelemetry.sdk._logs.LoggingHandler to logging.getLogger("metta")
         puts every engine, transport and provider message in the same pipeline
@@ -1753,8 +1754,26 @@ a class of host types: `claims`), plus `type`, `repr`, `reflector`,
 `provider`, `library` and `integration`, whose rows live where they always
 lived. The seven above are declared by `metta.seam` itself and are module attributes of it; `type`, `repr`, `reflector`, `provider`, `library` and `integration` are declared by `metta.integrate`, where their readers and adders live, and are reached with `seam.at(<name>)`, which loads that module only when the name is not already declared so a dispatch on the base layer never pays for it. Services published for a
 registrant to call: `projection`, `arrow-view`, `space-of`, `module`,
-`sql-arity`, `sql-types`, `image-of`, and `catalog`, which `metta._space`
-publishes because a space is that module's.
+`optional-module` (its declining twin, for an ownership row's `claims()`),
+`field-types`, `sql-arity`, `sql-types`, `image-of`, `match` (the directional
+primitive, where public `unify` is symmetric), `alpha-eq`, `batch-bounds`,
+`arrow-schema`, `arrow-stream`, `arrow-batches`, `observe` (hold the engine's
+ONE trace session over a block and answer the Trace, which is what
+`metta_otel` calls), and `catalog`, which `metta._space` publishes because a
+space is that module's. A service is the SEAT's one row and no package can add
+another, so reading one never triggers discovery: `seam.at("module").call()`
+is the first line of most packages and would otherwise have loaded every other
+one [measured 2026-09-08: 124 ms and 196 modules for `import metta_pandas`
+before, 5 ms and 33 after].
+
+A row may declare itself a FALLBACK, `register(..., fallback=True)`, which is
+the trylast rank: it is consulted after every row that is not one, whatever
+order the two loaded in, and registration order decides only between rows of
+the same rank. This is what lets rows live in separate distributions, since
+`importlib.metadata` promises no order over a group's entry points. The four
+structural images this package ships are fallbacks so a model framework's row
+is asked first, and the Array API index backend is one so a library's own
+backend wins `backend="auto"`.
 `seam.at(name)` reads a point (`seam.frame` and friends are the sugar),
 `point(name, kind, fields=, doc=)` declares one, `<point>.register(name,
 **fields)` adds a row and refuses an undeclared point, a missing field or an
@@ -1773,7 +1792,50 @@ against a `service` point is refused because the seat writes those; and a
 dispatch nobody claims names the door, the registrants there are, and the
 registration the caller lacks.
 
-`metta.arrays`: one operation vocabulary over any DLPack library.
+**pymetta names no third-party library.** Not in a branch, not in a row, not
+in an allowlist: every library the Python seat can be extended by is its own
+distribution under `extensions/python/ext/`, one directory per library, found
+through the `metta.extensions` entry point exactly as a stranger's package is.
+There is no built-in tier. This is the shape Apache Airflow's providers have
+(the core knows no cloud; `apache-airflow[amazon]` is the extra that installs
+`apache-airflow-providers-amazon`), and an extra here is the same convenience:
+
+| extra | packages | what it fills |
+|---|---|---|
+| `engine` | janus-swi, which is the bridge rather than a package | the SWI-Prolog runtime |
+| `dataframes` | `metta-pandas`, `metta-polars` | the `frame` point: `rows.to_df()`, `rows.to_pl()`, and the library's own `.metta` accessor |
+| `sql` | `metta-duckdb`, `metta-sqlite` | the `sql` point: a MeTTa head as a scalar SQL function |
+| `arrays` | `metta-arrays`, `metta-numpy`, `metta-faiss` | the array layer, its default library, its vector index |
+| `arrow` | `metta-nanoarrow`, `metta-pyarrow` | the `arrow` capsules and the `ipc` stream |
+| `graphql` | `metta-graphql` | the `graphql` point: executing a query, where the SDL needs nothing |
+| `models` | `metta-pydantic` | the `image` point: a validated model as a constructor expression |
+| `das` | `metta-websocket` | the `transport-error` point |
+| `otel` | `metta-otel` | a reduction trace as OpenTelemetry spans |
+
+`metta-arrays`, `metta-otel` and `metta-benchmarking` are LIBRARIES you import
+by name (`import metta_arrays`) and advertise no entry point, because a
+program reaches them directly and discovery would only make every other
+program pay to load them; the other eleven are rows and advertise.
+
+Every generic door works with NONE of them installed and refuses by name,
+saying which point it was, which registrants there are, and the command that
+fills it: `no frame registration handles to_df(); registered: nothing. ... The
+packages this repository ships for it install with pip install
+'pymetta[dataframes]'`. `tests/shell/test_the_core_names_no_library.sh` runs
+the core with zero packages and then with one, and
+`tests/checks/check_layering.py` holds the two rules that keep the boundary
+real: the core imports no member, and no member reaches the core's private
+names.
+
+Cost, measured 2026-09-08 with `perf stat -e instructions:u`, min of five, on
+a box at loadavg 26: `import metta` is 179.84M instructions with all fourteen
+packages installed and 179.85M with none (the difference is one sys.path entry,
+2.09M, which an empty directory costs identically), so what a program that
+never dispatches pays does not change. The first dispatch of a point a
+registrant writes loads the group: 278.0M with nothing installed, 393.0M with
+the eleven advertising packages, one module each.
+
+`metta_arrays`: one operation vocabulary over any DLPack library.
 `install(m, default=xp)` makes numpy, torch or JAX first-class with the same
 words; `namespace_of`, `is_array`, `data_of`, and `EmbeddingStore`
 and `EmbeddingStore(m, backend="auto"|<a registered name>)`, whose backends
@@ -2271,7 +2333,9 @@ seed=None)`, the compliance suites
 benchmark gates (`benchmark_case`, `benchmark_counter_slope`,
 `measure_counters(command, events=("instructions:u",), rounds=3,
 controlled=False, timeout=60) -> CounterRuns`, `measure_instructions`,
-`BenchmarkBaseline`, `count_atoms`), also exported from `metta.benchmarking`.
+`BenchmarkBaseline`, `count_atoms`), which live in the `metta_benchmarking` distribution
+(`pip install metta-benchmarking`, which `pymetta[test]` includes; a checkout reaches
+it through `extensions/python/_workspace.py`'s `on_path()`).
 `CounterRuns.events` maps each requested perf event to its samples and
 `.outputs` retains each measured command's stdout. A box that will not count
 is told apart from a tree that moved: `measure_counters` raises

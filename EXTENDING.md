@@ -3333,14 +3333,30 @@ A seat declares four where the engine declares five: the engine splits `service`
 into `service` and `host_service` by an audience (host bindings against
 extensions) that a seat does not have.
 
-The law each seat holds itself to is that **no third-party library is named in a
-seat except as the first registrant of a door a stranger can use**. pandas is a
+The law each seat holds itself to is that **no third-party library is named in
+a seat at all**. Not in a branch, not in a row, not in an allowlist. pandas is a
 row against the Python seat's `frame` point, DuckDB a row against its `sql`
-point, faiss a row against its `index` point. Nothing about any of them sits in
-a branch, which is what makes a second library of each kind possible without an
-edit here. The `no-hardcoded-integration` gate lane is what keeps it true: it
-derives every library name each seat reaches for from the sources themselves and
-reports one named outside its registration.
+point, faiss a row against its `index` point, and every one of those rows lives
+in a DISTRIBUTION of its own that the seat discovers exactly as it discovers a
+stranger's: `metta-pandas`, `metta-duckdb`, `metta-faiss`. There is no built-in
+tier. A second library of any kind needs no edit here because the first one
+needed none either.
+
+That is stricter than it was until 2026-09-08, when the rows lived in one
+registrant module the seat shipped, and the strictness is the point: a file
+where a library MAY be named is a file where the next one is named too. The
+`no-hardcoded-integration` gate lane derives every library name each seat
+reaches for from the sources themselves and reports any of them, with no
+category that could admit one; the `seat-layering` lane holds the other half, that
+the core imports no package and no package reaches the core's private names.
+
+Prior art, so nothing here is invented. Apache Airflow's core knows no cloud:
+`apache-airflow-providers-amazon` is a distribution in the same monorepo, found
+through an entry point, and `apache-airflow[amazon]` is the extra that installs
+it ([provider packages](https://airflow.apache.org/docs/apache-airflow-providers/)).
+SQLAlchemy's dialects, Pygments' lexers and pytest's plugins are the same shape.
+`pymetta[dataframes]` is that extra, and it installs `metta-pandas` and
+`metta-polars` rather than pandas and polars.
 
 ### The Python seat
 
@@ -3354,9 +3370,10 @@ seam.rows()                   # every registration, from any of them
 seam.at("frame").table()      # one point's rows, as data
 ```
 
-A library registers a row per capability it wants, and advertises ONE callable
+A library registers a row per capability it wants, and advertises ONE target
 under the `metta.extensions` entry-point group so a `pip install` is the whole
-of the wiring:
+of the wiring. The target may be a callable, as below, or the module itself,
+whose body registers on the way in; the seat calls one and imports the other:
 
 ```python
 # in solars/__init__.py
@@ -3380,6 +3397,57 @@ connection, and `EmbeddingStore(m, backend="solars")` searches through solars.
 `tests/shell/test_a_stranger_extends_the_python_seat.sh` builds exactly that
 package during the gate and drives all nine doors through it.
 
+#### Your library is a package, and so is ours
+
+Every library this repository ships support for is one of those packages, in
+`extensions/python/ext/`, one directory per library:
+
+    extensions/python/ext/metta-pandas/
+      pyproject.toml        name, version, `dependencies = ["pymetta", "pandas"]`,
+                            and the one `metta.extensions` entry point
+      metta_pandas.py       the row, and the two callables it holds
+      tests/                what proves the row
+      README.md             the four lines a reader needs
+
+`metta-pandas` is the worked example, and it is thirty lines: a `_MISSING`
+sentence, an accessor installer, a builder, and
+
+```python
+seam.frame.register(
+    "pandas", module="pandas", accessor=_install_accessor, build=_build, sugar="to_df"
+)
+```
+
+Read it beside your own. The rules it follows are the rules that make discovery
+cheap, and the `seat-layering` lane holds each of them:
+
+- **One package names one library.** Its dependencies are `pymetta` and that
+  library, and the lane refuses a module that names a library the package's own
+  manifest does not declare. `metta-faiss` declares NumPy too, because faiss'
+  own `add` and `search` take contiguous float32 NumPy arrays; that is faiss'
+  interface, not a second integration.
+- **The module body imports the seam and nothing heavy.** A row holds the
+  module NAME of its library and imports it inside the callable that uses it,
+  so `import metta_pandas` costs 5 ms where importing pandas costs 531. This is
+  load-bearing rather than tidy: the first dispatch of any point loads EVERY
+  advertised package, so what one costs, every program pays. The lane imports
+  every advertised member and refuses one that reaches `metta._space`.
+- **The core is reached through public names and the seam's services.** A
+  registrant that needs the seat's own machinery calls a service --
+  `seam.at("projection").call()`, `seam.at("module").call()` -- and never
+  imports a private module. That is the rule Airflow had to invent a Task SDK
+  for and the rule a pytest plugin breaks every release by ignoring.
+- **A library you IMPORT need not advertise at all.** `metta-arrays` is the
+  array layer, `metta-otel` the OpenTelemetry bridge, `metta-benchmarking` the
+  measurement plumbing: a program reaches each by name, so advertising them
+  would only make every other program pay to load them. They are workspace
+  members and distributions like the rest; they simply have no row a dispatch
+  could need first.
+
+The repository is a uv workspace, so `uv sync --all-packages` installs the core
+and every member from the checkout, and an extra resolves its members from the
+workspace rather than from an index.
+
 Discovery is lazy and costs nothing until it is used: `seam.advertised()` reads
 the group's names without importing any of it, and the group is loaded on the
 first dispatch that has no answer without it. That is what Pygments does for a
@@ -3398,8 +3466,32 @@ the six whose rows already lived somewhere: `type`, `repr`, `reflector`,
 declared, so `metta.errors` reading its transport-error rows on every refusal
 never pays for it. `seam.services()` is the other direction, what a registrant
 may CALL: `projection`, `arrow-view`, `space-of`, `module`, `sql-arity`,
-`sql-types`, `image-of` and `catalog`, so a registrant never imports a private
-module.
+`sql-types`, `image-of`, `catalog`, `field-types`, `optional-module`, `match`,
+`alpha-eq`, `batch-bounds`, `arrow-schema`, `arrow-stream`, `arrow-batches` and
+`observe`, so a registrant never imports a private module. A service is the
+seat's own row and no package can add one, so reading a service never triggers
+discovery: `seam.at("module").call()` is the first line of most packages and
+would otherwise have loaded every other one.
+
+A row may declare itself a FALLBACK, `register(..., fallback=True)`, which is
+pluggy's `trylast`: it is consulted after every row that is not one, whatever
+order the two loaded in. The seat's four structural images are fallbacks so a
+model framework's row is asked first, and the Array API index backend is one so
+a library's own backend wins `backend="auto"`. Registration order decides
+between rows of the same rank and nothing else, which matters because
+`importlib.metadata` promises no order over the entry points of a group.
+
+A point may name the EXTRA that installs the packages this repository ships for
+it, and its refusal then ends in a command:
+
+    no frame registration handles to_df(); registered: nothing. A library
+    registers with metta.seam.at('frame').register(name, module=...,
+    accessor=..., build=...), or advertises the same call under the
+    metta.extensions entry-point group. The packages this repository ships for
+    it install with `pip install 'pymetta[dataframes]'`
+
+The extra is this distribution's own name and never a library's, which is the
+same split `apache-airflow[amazon]` keeps.
 
 Declaring a point of your own is the same call the seat makes:
 

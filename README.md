@@ -31,6 +31,24 @@ bridge. Without it the first engine call names the command for your platform.
 
 Requires SWI-Prolog 9.3+ and Python 3.12+.
 
+`pymetta` itself depends on no data or compute library, and names none. Every
+library it can work with is its own small distribution that registers one row
+against a declared extension point, discovered through an entry point exactly
+as a package written by somebody else is, so an extra is a convenience name for
+a set of them:
+
+```bash
+pip install 'pymetta[dataframes]'    # metta-pandas, metta-polars: rows.to_df(), rows.to_pl()
+pip install 'pymetta[arrays]'        # metta-arrays, metta-numpy, metta-faiss
+pip install 'pymetta[arrow]'         # metta-nanoarrow, metta-pyarrow: the capsules and the IPC stream
+pip install 'pymetta[sql]'           # metta-duckdb, metta-sqlite: a MeTTa head as a SQL function
+pip install metta-pandas             # or name the package, which is the same thing
+```
+
+Every door works with none of them installed and refuses by name, saying which
+point it was and which command fills it; `EXTENDING.md` shows how to write your
+own, and it is the same thirty lines `metta-pandas` is.
+
 ## The representation
 
 Everything is an atom, in four kinds. MeTTa writes them:
@@ -481,7 +499,7 @@ runs:
 ```python
 import torch
 from metta import TRUE, G, S, V, counting, prov, space
-from metta.arrays import EmbeddingStore
+from metta_arrays import EmbeddingStore
 
 m = space()
 

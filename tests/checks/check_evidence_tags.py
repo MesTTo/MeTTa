@@ -174,6 +174,19 @@ GUARANTEE_SOURCES = (
     "lib/*/*.metta",
     "extensions/python/metta/*.py",
     "extensions/python/metta/*.pl",
+    # The Python seat's extension DISTRIBUTIONS: one module and one suite per
+    # member under `extensions/python/ext/`. Each is hand-written code that
+    # makes the same kind of claim the core's modules make, and each is where a
+    # library's row now lives, so leaving them out would make the ruling of
+    # 2026-09-08 the one change whose evidence nothing reads [measured
+    # 2026-09-08 by tests/checks/pin_provenance.py: 24 placeholders in fourteen
+    # files sat outside these globs before the two lines below].
+    "extensions/python/ext/metta-*/*.py",
+    "extensions/python/ext/metta-*/tests/*.py",
+    # And the two files above them: the hook that puts a member on the path for
+    # the suite, and the one implementation both it and the benchmark drivers
+    # call.
+    "extensions/python/ext/*.py",
     "extensions/python/examples/*.py",
     "extensions/mork/mork_ffi/*.pl",
     "extensions/python/tools/*.py",
@@ -418,6 +431,15 @@ PYTHON_TREES = (
     *sorted(
         str(path.relative_to(ROOT))
         for path in ROOT.glob("extensions/*/tests")
+        if path.is_dir()
+    ),
+    # The Python seat's extension DISTRIBUTIONS, each with its own module and
+    # its own tests beside it: a claim in metta_arrays.py names a test in
+    # ext/metta-arrays/tests/, and the same glob reads both because a member
+    # is one directory [discovered 2026-09-08 with the packages themselves].
+    *sorted(
+        str(path.relative_to(ROOT))
+        for path in ROOT.glob("extensions/python/ext/metta-*")
         if path.is_dir()
     ),
 )

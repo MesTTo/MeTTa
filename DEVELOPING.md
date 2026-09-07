@@ -413,7 +413,11 @@ record what is not, and say in the document which is which.
 
 Sibling packages should import `BenchmarkBaseline`, `benchmark_case`,
 `count_atoms`, `measure_instructions`, and `measure_counters` from
-`metta.testing`. Do not copy the harness into another repository.
+`metta_benchmarking`, the extension distribution under
+`extensions/python/ext/metta-benchmarking/` (a checkout reaches it through
+`extensions/python/_workspace.py`'s `on_path()`, which the `benchmarks`
+package's init and the drivers call). Do not copy the harness into another
+repository.
 
 ### Profiling one workload
 

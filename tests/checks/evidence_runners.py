@@ -548,6 +548,20 @@ COLLECTORS = (
         patterns=("test_*.py", "*_test.py"),
         recursive=True,
     ),
+    # The seat's OTHER root, added 2026-09-08 with the extension packages: each
+    # member under `extensions/python/ext/` keeps its own tests beside its own
+    # module, and pytest's testpaths names both roots. One runner, two roots,
+    # so the collector is doubled rather than the runner; _testpaths_problems
+    # holds the two lists equal.
+    Collector(
+        runner="extensions/python/test.sh",
+        tier="GATE",
+        lane="pytest",
+        anchor="--max-worker-restart=0",
+        root="extensions/python/ext",
+        patterns=("test_*.py", "*_test.py"),
+        recursive=True,
+    ),
     # The plunit lane is the engine component's, and lives in that component's
     # own check.sh. Same field and the same cost as the pytest collector above:
     # left naming the root, the anchor reads as gone and the suites drop out

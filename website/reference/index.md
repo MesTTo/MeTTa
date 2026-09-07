@@ -39,7 +39,7 @@ These modules expose reduction events, structural findings, similarity scores, a
 |---|---|
 | [`metta.trace`](./metta-trace) | the reduction trace as events |
 | [`metta.recording`](./metta-recording) | a run kept as data, navigable and replayable |
-| [`metta.telemetry`](./metta-telemetry) | the trace and the counters as OpenTelemetry spans and metrics |
+| [`metta_otel`](./metta-otel) | the trace and the counters as OpenTelemetry spans and metrics |
 | [`metta.derivation`](./metta-derivation) | proof trees and their steps |
 | [`metta.lint`](./metta-lint) | space diagnostics for the silently-wrong class |
 
@@ -51,7 +51,7 @@ These modules operate on array protocols and generate test data for public atoms
 |---|---|
 | [`metta.structures`](./metta-structures) | pattern-keyed maps, indexes, and engine-backed views |
 | [`metta.tables`](./metta-tables) | SQL tables bridged in as declared shapes |
-| [`metta.arrays`](./metta-arrays) | array operations and embedding stores |
+| [`metta_arrays`](./metta-arrays) | array operations and embedding stores |
 | [`metta.testing`](./metta-testing) | the hypothesis strategies the suite fuzzes itself with |
 
 ## Distribution

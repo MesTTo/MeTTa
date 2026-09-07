@@ -1,6 +1,6 @@
-# `metta.arrays`
+# `metta_arrays`
 
-Source: `extensions/python/metta/arrays.py`.
+Source: `extensions/python/ext/metta-arrays/metta_arrays.py`.
 
 > Arrays as atoms for every library speaking the standard
 > protocols, not one. Recognition is DLPack (__dlpack__), semantics are the
@@ -9,9 +9,14 @@ Source: `extensions/python/metta/arrays.py`.
 > mixed-library call converts through from_dlpack. Arrays cross the boundary
 > by reference with identity, DLTensor joins each array's own classes as a
 > type, and printing shows shape, dtype and device whatever the library.
-> Built entirely on the public integration interface; pettorch instantiates it
-> with torch as the constructor default and proves nothing here is
-> torch-shaped.
+>
+> This is a DISTRIBUTION of its own, `metta-arrays`, and it names no array
+> library: which one is the default comes from a row against the seat's `array`
+> point, so `metta-numpy` is one package among the ones a user may install and
+> `install(m, default=<module>)` already takes any module the standard covers.
+> It reaches pymetta through public names and the seam's published services and
+> through nothing private, which is what makes it the same kind of thing as a
+> stranger's package.
 
 The entries below reproduce the source signatures and docstrings.
 

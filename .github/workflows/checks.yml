@@ -97,7 +97,11 @@ jobs:
           enable-cache: true
 
       - name: Install the package and the check tools
-        run: uv sync --locked --extra checks
+        # --all-packages, because this repository is a uv WORKSPACE: the core
+        # and one distribution per extension package. Without it uv installs
+        # the root project alone and every member's own suite fails to import
+        # the module it tests.
+        run: uv sync --locked --all-packages --extra checks
 
       - name: Install the reviewed Ciao-grade packs
         run: |
@@ -210,7 +214,11 @@ jobs:
           enable-cache: true
 
       - name: Install the package and the check tools
-        run: uv sync --locked --extra checks
+        # --all-packages, because this repository is a uv WORKSPACE: the core
+        # and one distribution per extension package. Without it uv installs
+        # the root project alone and every member's own suite fails to import
+        # the module it tests.
+        run: uv sync --locked --all-packages --extra checks
 
       - name: Report
         env:
@@ -489,6 +497,44 @@ jobs:
           print('the installed distribution registers the MeTTa lexer with Pygments')
           "
 
+      - name: Build every extension package and find each through its entry point
+        # The ruling of 2026-09-08 read from the installer's side. Every
+        # library the Python seat can be extended by is its own distribution,
+        # and a distribution that does not BUILD, or that builds without its
+        # `metta.extensions` entry point, is a package no dispatch can ever
+        # discover -- a failure a checkout cannot show, because a checkout
+        # reaches a member by path and writes no metadata at all.
+        #
+        # Derived from the directory, so a package added under ext/ is built
+        # here with no edit: the members are what the workspace glob matches.
+        run: |
+          set -eu
+          for member in extensions/python/ext/metta-*; do
+              python -m build --wheel --outdir dist/ext "$member"
+          done
+          /tmp/wheeltest/bin/pip install --no-deps dist/ext/*.whl
+          cd /tmp
+          /tmp/wheeltest/bin/python -c "
+          import os
+          from importlib import metadata
+          from pathlib import Path
+
+          from metta import seam
+
+          checkout = Path(os.environ['GITHUB_WORKSPACE'])
+          expected = {path.name for path in checkout.glob('extensions/python/ext/metta-*')}
+          advertised = seam.advertised()
+          assert set(advertised) == expected, (sorted(advertised), sorted(expected))
+          # And each one LOADS through the entry point it advertised, which is
+          # the door the seat opens on the first dispatch that needs it.
+          for name in sorted(advertised):
+              metadata.distribution(name)
+              advertised[name].load()
+          rows = {row.name for row in seam.rows() if row.source == 'package'}
+          assert {'pandas', 'numpy', 'pyarrow'} <= rows, sorted(rows)
+          print(len(advertised), 'extension packages built, installed and discovered')
+          "
+
   # The upstream Jupyter kernel, started rather than read. Its own job because
   # it fetches trueagi-io/jupyter-petta-kernel from github.com, which the gate
   # refuses to do, and because it needs three things the gate has no use for:
@@ -535,7 +581,7 @@ jobs:
         # runs one. janus-swi comes from the `engine` extra, and the kernel
         # boots the engine through it in-process.
         run: |
-          uv sync --locked --extra checks --extra engine
+          uv sync --locked --all-packages --extra checks --extra engine
           uv pip install ipykernel nbclient nbformat
 
       - name: Start the upstream kernel against upstream and against this engine

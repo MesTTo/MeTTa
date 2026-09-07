@@ -38,6 +38,13 @@ Source: `extensions/python/metta/seam.py`.
 > `metta.integrate`'s are declared there and named in `_DECLARING` here, and
 > `seam.at` loads that module only when a name is not already declared.
 >
+> No row here is a library's. Every library the Python seat can be extended by
+> lives in its own distribution under `extensions/python/ext/`, advertising one
+> entry point in the `metta.extensions` group, found the way a stranger's package
+> is found; this package ships the four structural images and nothing else. That
+> is the ruling of 2026-09-07, and `tests/checks/check_hardcoded_integrations.py`
+> is what keeps it true.
+>
 > Owns:
 >   - _POINTS and _ROWS hold the process-wide seam; a registration made inside an
 >     integration's transaction frame is undone with it, through the same
@@ -79,7 +86,15 @@ class Point:
 ### `Point.register`
 
 ```python
-def register(self, name: str, /, source: str = 'package', **fields: Any) -> Row:
+def register(
+    self,
+    name: str,
+    /,
+    source: str = 'package',
+    *,
+    fallback: bool = False,
+    **fields: Any,
+) -> Row:
 ```
 
 > Add one row to this point, answering it.
@@ -87,6 +102,14 @@ def register(self, name: str, /, source: str = 'package', **fields: Any) -> Row:
 > Registering an existing name REPLACES that row in its original
 > position, which is the registry's ordinary replacement and keeps
 > ownership order stable across a reload.
+>
+> `fallback` says this row answers only where no other row does, which is
+> pluggy's `trylast`. Registration order decides between rows of the same
+> rank and nothing else, so a general row (the Array API index backend, a
+> structural image) cannot shadow a specific one merely by having been
+> imported first. Load order across DISTRIBUTIONS is not a thing a
+> package can arrange: `importlib.metadata` promises no order over the
+> entry points of a group.
 
 ### `Point.unregister`
 
@@ -162,7 +185,9 @@ def refusal(self, subject: str) -> str:
 > The sentence a caller gets when no row of this point answers.
 >
 > Names the door rather than the missing library, because the caller's
-> next move is a registration and the library is only an example of one.
+> next move is a registration and the library is only an example of one,
+> and ends in the install command for the packages this repository ships
+> against the point when the declaration named an extra.
 
 ## `point`
 
@@ -175,6 +200,7 @@ def point(
     doc: str,
     optional: tuple[str, ...] = (),
     shipped: str | None = None,
+    extra: str | None = None,
     reader: Callable[[], Iterable[Row]] | None = None,
     adder: Callable[[Row], Callable[[], None] | None] | None = None,
 ) -> Point:
@@ -189,6 +215,13 @@ def point(
 > `shipped` names the module holding this seat's own first registrants; it is
 > imported at the first dispatch, so a point nobody uses costs nothing and
 > the shipped rows arrive by the same lazy path a stranger's do.
+>
+> `extra` names THIS distribution's own extra whose requirements fill the
+> point, so a refusal can end in a command rather than in a shape. It is an
+> extra and never a library, which is the same split Airflow's providers keep:
+> the core declares `apache-airflow[amazon]` and knows no cloud
+> . `tests/checks/check_layering.py` refuses an extra this
+> distribution does not declare.
 >
 > `reader` and `adder` are for a point whose rows already live somewhere: the
 > reader answers them, and the adder performs a registration and answers the
@@ -296,7 +329,7 @@ def publish(m: Any) -> int:
 >     !(match &metta (extension python frame $who $fields) $who)
 >
 > Two kind rows make the engine's own declaration checker refuse a malformed
-> row at the write, the way metta.arrays declares (kind array-backend ...)
+> row at the write, the way the array layer declares (kind array-backend ...)
 > for its roster. The rows carry the seat, the point and the registrant, not
 > the callables: a callable is not knowledge, and what a program asks the
 > catalog is who registered against what.
@@ -352,6 +385,22 @@ def module(name: str, guidance: str) -> Any:
 
 > The named module, or ImportError carrying `guidance`.
 
+## `field_types`
+
+```python
+def field_types(cls: type, names: tuple[str, ...]) -> tuple:
+```
+
+> One class's declared annotations, in `names` order.
+
+## `optional_module`
+
+```python
+def optional_module(name: str) -> Any:
+```
+
+> The named module, or None when it is not installed.
+
 ## `sql_arity`
 
 ```python
@@ -367,6 +416,54 @@ def sql_types(head: Any, name: str, signature: Any, undeclared: Any) -> tuple[li
 ```
 
 > (parameter types, return type) in SQL's vocabulary.
+
+## `batch_bounds`
+
+```python
+def batch_bounds(length: int) -> Any:
+```
+
+> (start, stop) windows over `length` rows, doubling.
+
+## `match`
+
+```python
+def match(pattern: Any, atom: Any) -> Any:
+```
+
+> The pattern's bindings, or None when it does not match.
+
+## `alpha_eq`
+
+```python
+def alpha_eq(left: Any, right: Any) -> bool:
+```
+
+> MeTTa's =alpha over two atoms.
+
+## `arrow_schema`
+
+```python
+def arrow_schema(projected: Any) -> Any:
+```
+
+> One projection's Arrow schema capsule.
+
+## `arrow_stream`
+
+```python
+def arrow_stream(projected: Any, requested_schema: Any = None) -> Any:
+```
+
+> One projection's Arrow stream capsule.
+
+## `arrow_batches`
+
+```python
+def arrow_batches(source: Any) -> Any:
+```
+
+> (column names, an iterator of batches) for one Arrow stream.
 
 ## `image_of`
 

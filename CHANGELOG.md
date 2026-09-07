@@ -102,6 +102,66 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   its description rather than as the type atom, which is the shape every
   Python-side doc atom is built in; a parameter the source describes now reads
   as prose, and a parameter it says nothing about reads as its type.
+- Fourteen extension distributions, one per library, under
+  `extensions/python/ext/`. `metta-pandas`, `metta-polars`, `metta-duckdb`,
+  `metta-sqlite`, `metta-numpy`, `metta-faiss`, `metta-nanoarrow`,
+  `metta-pyarrow`, `metta-websocket`, `metta-pydantic` and `metta-graphql`
+  each register ONE row against a declared extension point and are found
+  through the `metta.extensions` entry point exactly as a package written by
+  somebody else is; `metta-arrays` (the array layer), `metta-otel` (a
+  reduction trace as OpenTelemetry spans) and `metta-benchmarking` (the
+  measurement plumbing) are libraries a program imports by name. Each has its
+  own `pyproject.toml`, its own tests and a README, and the repository is a uv
+  workspace so `uv sync --all-packages` installs them all from the checkout.
+  The user-facing command does not change: `pip install 'pymetta[dataframes]'`
+  now installs `metta-pandas` and `metta-polars` rather than pandas and
+  polars, which is the shape `apache-airflow[amazon]` has for the same reason.
+
+- A row may declare itself a FALLBACK, `register(..., fallback=True)`: it is
+  consulted after every row that is not one, whatever order the two loaded in,
+  and registration order decides only between rows of the same rank. This is
+  what lets rows live in separate distributions, since `importlib.metadata`
+  promises no order over a group's entry points. The four structural images
+  this package ships are fallbacks so a model framework's row is asked first,
+  and the Array API index backend is one so a library's own backend wins
+  `backend="auto"`.
+
+- A point may name the EXTRA that installs the packages this repository ships
+  for it, and its refusal then ends in a command rather than in a shape: `no
+  frame registration handles to_df(); registered: nothing. ... The packages
+  this repository ships for it install with pip install 'pymetta[dataframes]'`.
+
+- Nine seam services, bringing the seat's published total to seventeen, so a
+  registrant never imports a private module:
+  `optional-module` (the declining twin of `module`, for an ownership row's
+  `claims()`), `field-types`, `match` (the directional primitive, where public
+  `unify` is symmetric), `alpha-eq`, `batch-bounds`, `arrow-schema`,
+  `arrow-stream`, `arrow-batches` and `observe`, which holds the engine's one
+  trace session over a block and answers the Trace. `seam.ARROW_KINDS` and
+  `seam.ARROW_FORMAT` publish the five column kinds an Arrow registrant maps,
+  beside `SQL_TYPE` and for the same reason.
+
+- A `graphql` ownership point, beside `arrow` and `ipc`: who EXECUTES a
+  GraphQL document. The SDL a served space publishes is built as text and
+  needs nobody, so `GET /graphql` answers with nothing installed;
+  `POST /graphql` reaches `metta-graphql`.
+
+- `seat-layering` and `seat-layering-selftest` GATE lanes (the engine's own
+  Prolog `layering` lane keeps its name)
+  (`tests/checks/check_layering.py`), which hold the workspace's two rules:
+  the core imports no member, and no member reaches the core's private names.
+  Both are derived from the `[tool.uv.workspace] members` glob, so a package
+  added under `ext/` is gated with no edit. The lane also refuses a member
+  that names a library its own manifest does not declare, a member the
+  resolver's sources do not list, and an ADVERTISED member whose module body
+  reaches `metta._space`: discovery loads every advertised package on the
+  first dispatch, so what one costs, every program pays.
+
+- A `no-packages` GATE lane (`tests/shell/test_the_core_names_no_library.sh`),
+  the stranger proof from the other side: the core with ZERO extension
+  packages installed, where every generic door refuses by name and everything
+  that needs no registrant keeps working, and then with one package installed
+  through its real entry point.
 
 - Sequence variables reach the executable corpus. `examples/ch08-data/08-02-sequence-variables/`
   grows from one file to five: a gap in an EQUATION HEAD, which makes that
@@ -1161,6 +1221,35 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   recorded rather than by comparing two lists. `metta._compliance.CAPABILITIES`
   is gone: it was a second copy of `metta.foreign.CAPABILITIES`, and once both
   derived from the catalog row, comparing them proved nothing.
+- **pymetta names no third-party library.** Not in a branch, not in a row, not
+  in an allowlist. `metta/_registrants.py`, the one file where a library could
+  be named, is gone, and the `no-hardcoded-integration` lane's integration
+  category with it: the table now holds DEPENDENCIES only, each the seat's own
+  tooling or the engine it embeds, and its selftest plants an `import pandas`
+  in the core and proves the refusal names the package to write rather than
+  the line to add. Every generic door keeps working with no package installed
+  and with any subset.
+
+- `metta.arrays` is `metta_arrays`, `metta.telemetry` is `metta_otel` and
+  `metta.benchmarking` is `metta_benchmarking`, each its own distribution with
+  no alias left behind. `metta.testing` no longer re-exports the ten benchmark
+  names.
+
+- Reading a seam SERVICE no longer triggers discovery. A service's one row is
+  the seat's and no package can add another, so loading the group to read one
+  bought nothing and cost everything: `seam.at("module").call()` is the first
+  line of most packages and would have loaded every other one. Measured
+  2026-09-08: `import metta_pandas` was 124 ms and 196 modules, and is 5 ms and
+  33.
+
+- The `observe` service is declared in `metta._trace`, where the session lives,
+  rather than in `metta.seam`: the seam sits under `metta.errors` and may not
+  reach the execution machinery, even through a function-local import.
+
+- `pytest`'s `testpaths` is `["tests", "ext"]`, so a member's tests run in the
+  seat's one suite; the `ruff`, `mypy`, `vulture` and evidence lanes read the
+  members too, and the wheel job builds and installs every one of them and
+  finds each through its own entry point.
 
 - Every per-library coupling in the Python seat is a registration through a
   public door, with the shipped library as its first registrant and nothing
@@ -1467,6 +1556,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   always was, computed where it always was.
 
 ### Removed
+
+- `metta/_registrants.py`, the seat's shipped registrant module. Every row it
+  held is now a package of its own; the four structural images (an Enum, a
+  dataclass, a NamedTuple, a class that states `__match_args__`) moved to
+  `metta/_images.py`, name no library, and are FALLBACKS so a model
+  framework's row is asked first.
+
+- `metta.testing.numpy_scalars`. `library_scalars(<name>)` is the general
+  spelling and reads the `array` point's own row, where the shipped name
+  wrote a library's name into the core.
+
+- The `arrays`, `arrow`, `dataframes`, `das`, `graphql` and `otel` extras no
+  longer name a third-party library; they name this repository's packages.
 
 - `engine/prelude.metta`. Its vocabulary is `engine/prelude.pl` and its text is
   `tests/data/prelude-spec.metta`; `load_engine_prelude/0` and the form loader

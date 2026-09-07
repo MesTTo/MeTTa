@@ -279,10 +279,19 @@ import sys
 
 from metta import seam
 
-assert "solars" in seam.advertised(), seam.advertised()
+advertised = seam.advertised()
+assert "solars" in advertised, advertised
 assert "solars" not in sys.modules, "advertised() must not import the package"
-assert "pandas" not in sys.modules, "nor may listing load a shipped registrant"
-print("discovery       : solars advertised, nothing imported for it")
+# This repository's own row packages advertise under the same group and are
+# found the same way, which is the ruling of 2026-09-08 read from the outside:
+# there is no built-in tier for a dispatch to prefer. (metta-arrays is beside
+# them here as a LIBRARY: it advertises nothing, because a program reaches its
+# embedding store by importing it and discovery would only make every other
+# program pay to load it.)
+assert "metta-numpy" in advertised, advertised
+assert "metta-arrays" not in advertised, advertised
+assert "metta_numpy" not in sys.modules, "nor may listing load one of ours"
+print("discovery       :", len(advertised), "packages advertised, none imported")
 FREE
 
 cat > "$scratch/prove.py" <<'PROVE'
@@ -290,7 +299,7 @@ cat > "$scratch/prove.py" <<'PROVE'
 
 import metta
 from metta import seam, tables
-from metta.arrays import EmbeddingStore
+from metta_arrays import EmbeddingStore
 from metta.convert import project
 from metta.errors import is_transport_failure
 from metta.integrate import LIBRARIES_GROUP, load_entry_point
@@ -387,6 +396,17 @@ PROVE
 
 uv pip install --quiet --target "$scratch/site" --no-deps "$scratch/solars"
 test -d "$scratch/site/solars-0.1.0.dist-info"
+
+# Two of this repository's OWN packages, installed the same way and into the
+# same directory, because the point of the ruling is that they are the same
+# kind of thing as solars: `metta-arrays` holds the embedding store this proof
+# uses and `metta-numpy` is the row that makes NumPy its default library.
+# --python, because a member declares requires-python and uv would otherwise
+# resolve against whatever interpreter it found.
+uv pip install --quiet --python "$CHECK_PY" --target "$scratch/site" --no-deps \
+    "$project_dir/extensions/python/ext/metta-arrays" \
+    "$project_dir/extensions/python/ext/metta-numpy"
+test -d "$scratch/site/metta_arrays-0.8.0.dist-info"
 
 run_with_solars() {
     PYTHONPATH="$scratch/site:$project_dir/extensions/python" \

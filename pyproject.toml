@@ -9,7 +9,7 @@
 # Decides: NetworkX and NumPy are test-only infrastructure because the
 # blocking gallery executes them, while the core distribution remains
 # dependency-free of them.
-# [tested: test_optional_integrations_have_installable_extras,
+# [tested: test_every_extra_installs_packages_and_never_a_library,
 # test_minimal_version_matrix_installs_blocking_gallery_dependency;
 # commit=8bfe05c3850776543ece25a85038242f10b1d841]
 
@@ -108,10 +108,24 @@ metta = "metta.cli:main"
 engine = [
     "janus-swi>=1.5.2",
 ]
+#: EVERY extra below installs PACKAGES, never libraries. pymetta ships zero
+#: integrations (the ruling of 2026-09-07): each library the Python seat can be
+#: extended by is its own distribution under `extensions/python/ext/`,
+#: advertising one `metta.extensions` entry point and found the way a
+#: stranger's package is found. An extra is the convenience name for a set of
+#: them, which is the shape `apache-airflow[amazon]` has for the same reason:
+#: the core knows no cloud, and the extra is how a user says which providers
+#: they want [source: https://airflow.apache.org/docs/apache-airflow-providers/].
+#: So `pip install 'pymetta[dataframes]'` is the command it always was, and
+#: nothing in this file names pandas.
+#: The generic array layer, its default library and its vector index. The layer
+#: itself names no array library: which one is the default is a row against the
+#: `array` point, and `install(m, default=<module>)` takes any module the
+#: standard covers with no package at all.
 arrays = [
-    "array-api-compat",
-    "faiss-cpu",
-    "numpy",
+    "metta-arrays",
+    "metta-faiss",
+    "metta-numpy",
 ]
 #: The Arrow doors' two producers, which answer two different questions.
 #: nanoarrow builds the ArrowSchema and ArrowArrayStream structs from buffers,
@@ -121,59 +135,66 @@ arrays = [
 #: envelope nanoarrow does not write; it is that format's own reference
 #: implementation.
 arrow = [
-    "nanoarrow>=0.9",
-    "pyarrow>=15",
+    "metta-nanoarrow",
+    "metta-pyarrow",
 ]
 das = [
-    "websocket-client",
+    "metta-websocket",
 ]
-#: The OpenTelemetry API, which `metta.telemetry` speaks. Only the API package
-#: is here: the SDK, the exporters and the collector are the deployment's, which
-#: is the split the API package exists for, and a library that pulled in an SDK
-#: would be choosing a deployment's pipeline for it.
+#: A reduction trace as OpenTelemetry spans. Only the API is a dependency of
+#: that package: the SDK, the exporters and the collector are the deployment's,
+#: which is the split the API package exists for, and a library that pulled in
+#: an SDK would be choosing a deployment's pipeline for it.
 otel = [
-    "opentelemetry-api>=1.30",
+    "metta-otel",
 ]
 #: Executing a GraphQL query against a served space. The SDL is built as text,
 #: so `GET /graphql` publishes the schema without this; only `POST /graphql`
-#: needs a GraphQL implementation, and graphql-core is the reference port of
-#: GraphQL.js with no dependency of its own.
+#: needs an implementation of the language.
 graphql = [
-    "graphql-core>=3.2",
+    "metta-graphql",
 ]
-#: polars from 1.3 reads the Arrow PyCapsule Interface, which is what to_pl()
-#: hands it; pandas gained DataFrame.from_arrow in 3.0 and to_df() falls back
-#: to the projected columns below that.
+#: The two frame libraries this repository ships a package for. A third needs
+#: no entry here and no edit anywhere: it registers against the `frame` point
+#: from its own distribution.
 dataframes = [
-    "pandas",
-    "polars>=1.3",
+    "metta-pandas",
+    "metta-polars",
+]
+#: The SQL engines a MeTTa head can be registered into as a scalar function.
+#: sqlite3 is the standard library and its package still exists, because "in
+#: the standard library" is not a reason for the core to know a SQL engine.
+sql = [
+    "metta-duckdb",
+    "metta-sqlite",
+]
+#: A validated model as a constructor expression. The four STRUCTURAL images
+#: (an Enum, a dataclass, a NamedTuple, a class that states __match_args__) are
+#: the core's own and need nothing installed; a model framework's reading is a
+#: package.
+models = [
+    "metta-pydantic",
 ]
 test = [
+    #: Every extension package this repository ships, so the suite's own
+    #: scenarios RUN rather than skipping. They arrive as PACKAGES, which is
+    #: the whole point: the suite exercises the doors through exactly the
+    #: distributions a user installs, and no library is named here.
+    "pymetta[arrays,arrow,das,dataframes,graphql,models,otel,sql]",
+    #: The benchmark plumbing, which is a package of its own because nothing in
+    #: the core needs it: it measures a workload from outside.
+    "metta-benchmarking",
+    #: What a member's own suite needs beyond the member: metta-otel asserts on
+    #: what an EXPORTER received, which is the SDK rather than the API.
+    "metta-otel[test]",
     "hypothesis>=6.165",
-    #: The Arrow producer's own dependency, so the suite's projection and
-    #: schema scenarios RUN rather than skipping. The consumers they hand a
-    #: capsule to (pyarrow, polars, pandas, duckdb) stay in `dataframes`,
-    #: where the existing to_pl and DuckDB-compliance lanes get theirs, so
-    #: those scenarios skip here exactly as they already do.
-    "nanoarrow>=0.9",
+    #: A graph fixture for the blocking gallery, and the OpenAPI
+    #: specification's own validator so the document scenario holds
+    #: `Gateway.openapi()` to the specification rather than to this
+    #: repository's reading of it. Both are the SUITE's tooling, the same class
+    #: as pytest: neither is imported by anything shipped.
     "networkx>=3.6,<4",
-    "numpy",
-    #: The OpenAPI specification's own validator, so the document scenario holds
-    #: `Gateway.openapi()` to the specification rather than to this repository's
-    #: reading of it. In `test` beside nanoarrow and for the same reason: it
-    #: decides whether a scenario runs or skips.
     "openapi-spec-validator>=0.9",
-    #: The GraphQL executor, so the schema scenarios RUN rather than skipping.
-    #: Same reason nanoarrow and openapi-spec-validator are here.
-    "graphql-core>=3.2",
-    #: The telemetry scenarios need the SDK as well as the API, because what
-    #: they assert about a span is what an EXPORTER received; the library
-    #: itself imports the API alone.
-    "opentelemetry-api>=1.30",
-    "opentelemetry-sdk>=1.30",
-    #: The Arrow IPC codec, so the gateway's Arrow scenarios RUN. nanoarrow is
-    #: already here for the capsule ones and does not write the stream format.
-    "pyarrow>=15",
     "pytest>=8.4.2",
     "pytest-benchmark>=5.2",
     #: Ordering and the per-item wall bound, which the suite's configuration
@@ -231,6 +252,36 @@ checks = [
     "xenon>=0.9",
 ]
 
+#: This repository is a uv WORKSPACE: pymetta at the root, and one member per
+#: extension package under `extensions/python/ext/`. `uv sync --all-packages`
+#: installs every member from the checkout, and an extra above resolves its
+#: members here rather than from an index, which is what lets
+#: `pip install 'pymetta[dataframes]'` mean the same thing before and after a
+#: release [source: https://docs.astral.sh/uv/concepts/projects/workspaces/].
+#: The membership is a GLOB, so a new package is a directory and no edit here.
+[tool.uv.workspace]
+members = ["extensions/python/ext/metta-*"]
+
+#: Every member resolves from the workspace. Written per name because uv takes
+#: no glob here; `tests/checks/check_layering.py` refuses a member the
+#: workspace does not list and a listing with no member, so the two cannot
+#: drift apart.
+[tool.uv.sources]
+metta-arrays = { workspace = true }
+metta-benchmarking = { workspace = true }
+metta-duckdb = { workspace = true }
+metta-faiss = { workspace = true }
+metta-graphql = { workspace = true }
+metta-nanoarrow = { workspace = true }
+metta-numpy = { workspace = true }
+metta-otel = { workspace = true }
+metta-pandas = { workspace = true }
+metta-polars = { workspace = true }
+metta-pyarrow = { workspace = true }
+metta-pydantic = { workspace = true }
+metta-sqlite = { workspace = true }
+metta-websocket = { workspace = true }
+
 [tool.setuptools]
 packages = ["metta"]
 package-dir = {"" = "extensions/python"}
@@ -255,7 +306,12 @@ pythonpath = ["."]
 # argument from a flag, so the default belongs here and the runner passes "$@"
 # unchanged. tests/checks/evidence_runners.py READS this value and reports it
 # when it stops naming the pytest collector's own root.
-testpaths = ["tests"]
+#: Two roots: the core's suite, and every extension package's own tests. A
+#: member's tests live with the member, which is what makes "delete ext/ and
+#: the core is green" a thing the layout says rather than a thing a reader has
+#: to check. `ext` is the directory, so a package added under it is collected
+#: with no edit here.
+testpaths = ["tests", "ext"]
 
 # pytest-memray's two markers, registered HERE as well as by the plugin, so
 # the plant can carry one where the plugin is absent and be reported as skipped
@@ -416,6 +472,10 @@ max-complexity = 35
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S", "BLE", "PLW", "SIM", "RUF059", "PLC0415"]
+# An extension package's own suite is a suite, and reads the same way as the
+# core's: a deferred import inside a scenario is how a test reaches an optional
+# library after `importorskip` has decided the scenario runs at all.
+"ext/*/tests/**" = ["S", "BLE", "PLW", "SIM", "RUF059", "PLC0415"]
 # A language-feature example mirrors ITS MeTTa example's program, so the
 # simplifications ruff offers there are requests to stop mirroring it:
 # 05-if4.metta really does read `(if (== 42 42) True False)`, and its Python
@@ -428,7 +488,11 @@ max-complexity = 35
 "metta/__init__.py" = ["PLW0603", "PTH"]
 
 [tool.ruff.lint.isort]
+# This repository's own distributions, so a member sorts with `metta` rather
+# than among the third-party libraries it is there to integrate. Written as a
+# prefix, since the roster is a workspace glob and a list here would drift.
 known-first-party = ["metta"]
+known-local-folder = ["_workspace"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -493,7 +557,19 @@ disable = [
 
 [tool.mypy]
 python_version = "3.12"
-files = ["metta"]
+# The core AND every extension package: a member is shipped code, and the
+# overrides below are what let it name its own library without a stub package
+# in the checks extra. Spelled as the directory, so a package added under
+# `ext/` is checked with no edit here.
+files = ["metta", "ext"]
+# A member's own suite, for the same reason the core's is not checked: this
+# gate is about the surface a program imports, and a test's local bindings are
+# not that. And setuptools' own scratch, which the two shell proofs leave
+# behind whenever they BUILD a member: a copy of the module under `build/lib/`
+# is a second module of the same name and mypy stops on the collision before
+# it checks anything [measured 2026-09-08, `Duplicate module named
+# "metta_arrays"`]. Written as a regex over the path, which is mypy's spelling.
+exclude = "ext/[^/]+/(tests|build)/"
 explicit_package_bases = true
 mypy_path = "."
 warn_unused_configs = true
@@ -515,10 +591,14 @@ ignore_missing_imports = true
 # ships stubs (types-Pygments exists and IPython has none), and skipping the
 # follow keeps a stub package out of the checks extra for two import lines.
 [[tool.mypy.overrides]]
+# Short, because an extension package reaches its library through the seam's
+# `module` and `optional-module` services rather than by importing it: the row
+# holds the module NAME, so `import metta_pandas` costs nothing and mypy sees
+# no pandas to be missing. What is left is the handful of libraries something
+# here really does import by statement.
 module = [
-    "annotated_types", "array_api_compat", "faiss", "hypothesis",
-    "hypothesis.*", "numpy", "nanoarrow", "nanoarrow.*", "pandas", "polars",
-    "rich.*", "websocket", "IPython.*", "pygments", "pygments.*",
+    "annotated_types", "hypothesis.*", "nanoarrow.*",
+    "rich.*", "IPython.*", "pygments.*",
 ]
 ignore_missing_imports = true
 follow_imports = "skip"
@@ -544,11 +624,19 @@ ignore-semiprivate = true
 # test_every_delimiter_check_derives_from_one_grammar_rule and the GATE vulture
 # lane; commit=3ae4e6b08bc82d8b9cbdf934afc92ada7cf7a19e].
 min_confidence = 60
-paths = ["metta", "bench.py", "vulture_whitelist.py"]
+# `ext` is here because a member is a CALLER: `Projection.retyped` is reached
+# only by the Arrow producer package, and without the members in the scan the
+# core's own doors read as dead the moment their one caller became a
+# distribution. Reading both is what makes the answer true.
+paths = ["metta", "ext", "bench.py", "vulture_whitelist.py"]
 # The generated vocabulary module is data: every member is read by VALUE
 # (membership, iteration, the wire), so name-reachability is the wrong
 # question for it and each catalog row would need a fresh whitelist line.
-exclude = ["metta/vocabularies.py"]
+# A member's own suite and the hook file above it, for the reason the core's
+# tests are simply not in `paths`: a pytest hook is called by NAME from
+# outside, and every fixture and every declarative class attribute in a test
+# reads as dead to a reachability scan.
+exclude = ["metta/vocabularies.py", "*/ext/conftest.py", "*/tests/*"]
 ignore_names = ["exc_type", "exc_val", "exc_tb", "tb", "exc"]
 
 # Six of refurb's rules are wrong for this codebase rather than unfixed, and
@@ -595,7 +683,13 @@ known_first_party = [
     "alpha", "aio_divergences", "aiogen", "ledger", "ledger_entries", "reference",
     "vocabgen",
 ]
-extend_exclude = ["examples", "build", "bench.py", "benchmarks"]
+# `ext` is excluded because deptry reads ONE manifest and every member has its
+# own: it would judge `metta-nanoarrow`'s import of nanoarrow against pymetta's
+# dependencies, which do not and must not contain it. What it would have said
+# there, `check_layering.py` says exactly: a member may name the libraries its
+# OWN pyproject declares and no other, derived from that manifest and the
+# syntax tree, which is a per-member deptry with no second manifest to read.
+extend_exclude = ["examples", "build", "bench.py", "benchmarks", "ext"]
 optional_dependencies_dev_groups = ["test", "checks"]
 
 # Every one of these is imported, and none of them by a statement a static
@@ -623,18 +717,29 @@ DEP004 = ["pytest", "hypothesis"]
 # load_ipython_extension, which only a running IPython calls, so the shell
 # that reaches that line is what put IPython there.
 DEP003 = ["rich", "pygments", "IPython"]
+# Every extra is a set of PACKAGES now, and a package is not imported by the
+# core -- that is the whole ruling -- so deptry sees each as declared and
+# unused. It is right about the import and wrong about the conclusion: an
+# extra exists so a user can name a set of distributions in one word, which is
+# the shape apache-airflow[amazon] has. janus-swi keeps its own line for the
+# older reason: it is imported through importlib so that importing metta does
+# not start an engine.
 DEP002 = [
     "janus-swi",
-    "graphql-core",
-    "opentelemetry-api",
-    "array-api-compat",
-    "nanoarrow",
-    "pyarrow",
-    "faiss-cpu",
-    "numpy",
-    "pandas",
-    "polars",
-    "websocket-client",
+    "metta-arrays",
+    "metta-benchmarking",
+    "metta-duckdb",
+    "metta-faiss",
+    "metta-graphql",
+    "metta-nanoarrow",
+    "metta-numpy",
+    "metta-otel",
+    "metta-pandas",
+    "metta-polars",
+    "metta-pyarrow",
+    "metta-pydantic",
+    "metta-sqlite",
+    "metta-websocket",
 ]
 
 [tool.importlinter]
@@ -671,6 +776,15 @@ ignore_imports = [
 ]
 unmatched_ignore_imports_alerting = "error"
 
+# The seat's LAYERS, in one contract. The core is the modules listed as
+# sources; a satellite is a module the core survives without and reaches, when
+# it reaches it at all, through a deferred call; and a workspace MEMBER --
+# `metta_arrays`, `metta_pandas` and the twelve others under
+# `extensions/python/ext/` -- is not reachable from here at all. That last
+# half is not written below because import-linter builds its graph from
+# `root_package` and cannot see a module outside it; `check_layering.py` holds
+# it instead, derived from the `[tool.uv.workspace] members` glob, so a package
+# added under `ext/` is gated with no edit here.
 [[tool.importlinter.contracts]]
 name = "core does not import satellites"
 type = "forbidden"
@@ -736,6 +850,15 @@ forbidden_modules = [
     # _saga is the deferred recovery implementation reached only by
     # Space.saga, so ordinary core imports do not load its event machinery.
     "metta._saga",
+    # _gateway_compliance and _algebra_demand are a SATELLITE's private half
+    # rather than the core's: the first is imported only by metta.testing and
+    # imports metta.remote, the second only by metta.algebra and imports it.
+    # Naming them here is the ruling the survival split asked for -- each of
+    # the five core-to-satellite edges is cut or the module is ruled a
+    # satellite -- and it makes the edge that looked like a crossing read as
+    # what it is, a satellite reaching its own public face.
+    "metta._gateway_compliance",
+    "metta._algebra_demand",
     "metta._persistent",
     # _lock is the deferred lockfile implementation reached only by MeTTa.lock
     # and MeTTa.check, so an ordinary core import does not load tomllib or the
@@ -746,7 +869,6 @@ forbidden_modules = [
     "metta.live",
     "metta.aio",
     "metta.algebra",
-    "metta.arrays",
     "metta.casting",
     "metta.convert",
     "metta.derivation",
@@ -761,7 +883,6 @@ forbidden_modules = [
     "metta.paths",
     "metta.remote",
     "metta.spaces",
-    "metta.telemetry",
     "metta.structures",
     "metta.subscribe",
     "metta.tables",

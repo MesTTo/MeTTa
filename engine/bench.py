@@ -7,9 +7,10 @@ a fresh `swipl` running engine/bench.pl and nothing else; this file starts
 those processes, reads the line each prints, and calls BenchmarkBaseline.
 Assumes:
   - extensions/python is importable from ROOT, which is where
-    metta.benchmarking lives. DEVELOPING.md's rule is that a sibling imports
-    BenchmarkBaseline, benchmark_case, count_atoms and measure_instructions
-    from metta.testing rather than copying the harness, and that is the whole
+    metta_benchmarking is put on the path by the benchmarks package's own
+    init. DEVELOPING.md's rule is that a sibling imports BenchmarkBaseline,
+    benchmark_case, count_atoms and measure_instructions from
+    metta_benchmarking rather than copying the harness, and that is the whole
     reason this file exists instead of a second comparison protocol
     [source: DEVELOPING.md:149-151].
   - engine/bench.pl prints one `metta-bench ...` line per run and answers
@@ -80,11 +81,11 @@ ROOT = HERE.parent
 sys.path.insert(0, str(ROOT / "extensions" / "python"))
 
 # E402 on both: the sys.path line above is what makes either importable, so
-# these cannot precede it. isort's own grouping puts the sibling component's
-# module before metta, which pyproject declares first-party.
+# these cannot precede it. The benchmarks package's init puts the workspace's
+# extension distributions on the path, which is what makes the second import
+# resolve; isort groups the two together, neither being first-party.
 from benchmarks.configuration import counter_configuration  # noqa: E402
-
-from metta.testing import (  # noqa: E402
+from metta_benchmarking import (  # noqa: E402
     BenchmarkBaseline,
     measure_instructions,
     measured_main,
@@ -130,7 +131,7 @@ TIMEOUT = 120.0
 #: Known limitation: this makes the INFERENCE samples caller-independent in
 #: the one way that was measured to matter, not in every way. The instruction
 #: samples are already independent by construction and more strictly -- they
-#: go through metta.benchmarking's measure_counters, which BUILDS a four-name
+#: go through metta_benchmarking's measure_counters, which BUILDS a four-name
 #: environment with LC_ALL=C and PYTHONHASHSEED=0. Handing that same built
 #: environment to the inference samples would close the class rather than the
 #: case, and it is not done here because it moves boot to 263,515, evaluate to
