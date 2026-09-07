@@ -32,7 +32,8 @@
     64,
     0
    ]
-  }
+  },
+  "wave3_merge_repin": "RE-PINNED 2026-09-07, the within-tree inference tripwire only; no instruction number and no upstream number is touched. Thirteen rows had drifted, twelve of them by between +1,823 and +2,957, which is one fixed per-program cost rather than thirteen causes. Two were laddered through this file's own driver over the first-parent chain with every component rebuilt at each point (ai-tmp/hy-parity-ladder.sh in the branch's ladder worktree): 07-datetime and 09-tabling_fib both read 28,313 and 80,102 at 5aca9b64 and at 699c8b4a, and 31,173 and 83,056 at 468350eb, the immediate first-parent successor and the soft/provider/import doors merge, so that step is one commit. 09-tabling_fib takes a second step at 5621c456, the cache-policies merge, to 138,172, and a third of +823 from this branch's own autoload declaration for call_delays/2, which the no-autoload lane required; 2,954 + 26 + 55,090 + 823 is its whole +58,893. Every value here was read twice through the driver and agreed to the digit, and 07-datetime reads 31,173 in a pristine worktree of 97c96e91 as well, which is the control that says an inference pin may be taken from a worktree at all. 06-git_import is pinned at its WARM reading, 38,451, stable over five runs; the 38,679 the lane reported once is the first-touch cache write this file's own note on the three import rows already records. Moved: 07-datetime.metta 28313 to 31173 (+2860); 01-memo_multi_answer.metta 28047 to 30947 (+2900); 02-memo_aggregate.metta 28783 to 31740 (+2957); 03-memo_per_arity.metta 30209 to 33105 (+2896); 04-memo_same_name_multi_arity.metta 35022 to 37957 (+2935); 05-memo_variant_nonground.metta 27650 to 30544 (+2894); 06-memo_dependency_invalidation.metta 27331 to 30223 (+2892); 08-memo_stats.metta 27830 to 30726 (+2896); 09-tabling_fib.metta 80102 to 138995 (+58893); 01-c_extension.metta 92738 to 95664 (+2926); 02-handle.metta 98604 to 101536 (+2932); 06-git_import.metta 36628 to 38451 (+1823); 01-newtons_method.metta 39707 to 42621 (+2914)."
  },
  "examples/ch01-getting-started/01-hello.metta": {
   "our_inferences": 1900,
@@ -890,7 +891,7 @@
   "status": "upstream-error"
  },
  "examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta": {
-  "our_inferences": 28313,
+  "our_inferences": 31173,
   "our_instructions": 32691697,
   "our_null": 1048391510,
   "status": "measured",
@@ -1120,7 +1121,7 @@
   "status": "upstream-error"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/01-memo_multi_answer.metta": {
-  "our_inferences": 28047,
+  "our_inferences": 30947,
   "our_instructions": 33584943,
   "our_null": 1048506459,
   "status": "measured",
@@ -1128,7 +1129,7 @@
   "upstream_null": 257264574
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/02-memo_aggregate.metta": {
-  "our_inferences": 28783,
+  "our_inferences": 31740,
   "our_instructions": 34032770,
   "our_null": 1048483491,
   "status": "measured",
@@ -1136,7 +1137,7 @@
   "upstream_null": 257258679
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/03-memo_per_arity.metta": {
-  "our_inferences": 30209,
+  "our_inferences": 33105,
   "our_instructions": 34970308,
   "our_null": 1048483491,
   "status": "measured",
@@ -1144,7 +1145,7 @@
   "upstream_null": 257258679
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/04-memo_same_name_multi_arity.metta": {
-  "our_inferences": 35022,
+  "our_inferences": 37957,
   "our_instructions": 39322288,
   "our_null": 1048549174,
   "status": "measured",
@@ -1152,7 +1153,7 @@
   "upstream_null": 257292942
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/05-memo_variant_nonground.metta": {
-  "our_inferences": 27650,
+  "our_inferences": 30544,
   "our_instructions": 33190203,
   "our_null": 1048541377,
   "status": "measured",
@@ -1160,7 +1161,7 @@
   "upstream_null": 257281280
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/06-memo_dependency_invalidation.metta": {
-  "our_inferences": 27331,
+  "our_inferences": 30223,
   "our_instructions": 32830600,
   "our_null": 1048581589,
   "status": "measured",
@@ -1171,7 +1172,7 @@
   "status": "upstream-error"
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/08-memo_stats.metta": {
-  "our_inferences": 27830,
+  "our_inferences": 30726,
   "our_instructions": 33223093,
   "our_null": 1048459243,
   "status": "measured",
@@ -1179,7 +1180,7 @@
   "upstream_null": 257244168
  },
  "examples/ch18-performance/18-02-memoisation-and-tabling/09-tabling_fib.metta": {
-  "our_inferences": 80102,
+  "our_inferences": 138995,
   "our_instructions": 83947901,
   "our_null": 1048464713,
   "status": "measured",
@@ -1215,7 +1216,7 @@
   "status": "nondeterministic"
  },
  "examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/01-c_extension.metta": {
-  "our_inferences": 92738,
+  "our_inferences": 95664,
   "our_instructions": 120826661,
   "our_null": 1048497437,
   "status": "measured",
@@ -1223,7 +1224,7 @@
   "upstream_null": 257263304
  },
  "examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/02-handle.metta": {
-  "our_inferences": 98604,
+  "our_inferences": 101536,
   "our_instructions": 128015944,
   "our_null": 1048464713,
   "status": "measured",
@@ -1347,7 +1348,7 @@
   "status": "upstream-error"
  },
  "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/06-git_import.metta": {
-  "our_inferences": 36628,
+  "our_inferences": 38451,
   "our_instructions": 61853259,
   "our_null": 1048511136,
   "status": "measured",
@@ -1560,7 +1561,7 @@
   "status": "upstream-error"
  },
  "examples/ch22-a-reasoner-you-can-serve/22-03-search/01-newtons_method.metta": {
-  "our_inferences": 39707,
+  "our_inferences": 42621,
   "our_instructions": 44358350,
   "our_null": 1048459243,
   "status": "measured",

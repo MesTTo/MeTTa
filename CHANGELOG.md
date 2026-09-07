@@ -278,6 +278,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   gone. The Hypothesis profile sets `deadline=None` once, so each of them was
   a private copy of a decision the profile already makes; two `settings`
   imports go with them.
+- Forty benchmark pins the September merge wave moved are re-pinned, each on
+  the commit that moved it. The `benchmarks` lane's twenty-one counter rows,
+  `automatic-tabling`'s four size pairs, `memory-scale`'s
+  `support-drop-spaces`, the C seat's `error-ball` and the upstream-parity
+  lane's thirteen within-tree inference rows. The attribution is a first-parent
+  sweep of the forty-three commits since the release re-pin, with the engine's
+  C artifacts rebuilt from each commit's own sources: a tree without them
+  measures the Prolog fallback and reads `json-wire` at 169,470,783 against its
+  pin of 158,011. Only inference counts are re-pinned; no instruction or CPU
+  number moves, and the C seat's `boot` row keeps its pin because a worktree
+  whose files have been edited reads it 27 inferences high.
 - `lib_tabling` declares where `call_delays/2` comes from. It is
   `library(wfs)`'s, not `library(tabling)`'s, and the library-index autoloader
   had been finding it: with autoload off the restraint dispatch raised

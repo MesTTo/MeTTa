@@ -427,7 +427,13 @@ target file appended to the first N files:
 | 0 | 3 | passes |
 | 91 | 1,361 | passes |
 | 181 | 2,668 | the bounds test passes; `test_limits_leave_finished_work_standing` in ch14 fails instead |
+| 230 | 3,386 | passes, and so does the ch14 one this time |
+| 252 | 3,557 | passes |
 | 275 | 3,939 | the bounds test fails |
+
+So the bounds threshold is between 3,557 and 3,939 tests in one process, and
+the ch14 one is not a threshold at all: it failed at 181 files and passed at
+230 with an IDENTICAL prefix in front of it, so that one is load.
 
 Two thresholds, not one, and the ch14 one is not in the set the coordinator
 ring-fenced. Both are the same shape: a bound stated in WALL CLOCK against a
@@ -532,3 +538,35 @@ pristine control's own lane run. Identical, which is the same answer the
 2026-09-06 pass got for every inference count across path lengths; only the
 instruction halves of this baseline are path-sensitive and none of them is
 touched.
+
+Re-pinned, the `benchmarks` lane's twenty-one counter rows, each with the
+steps the sweep attributes it to (a step of two or less is the jitter floor
+and is not attributed):
+
+| row | old | new | delta | steps |
+|---|---:|---:|---:|---|
+| `alpha-unique` | 3,752,461 | 3,752,466 | +5 | 2e72490f +6 (Merge tensor shape claims); 80af155d +3 (Merge feat/refinement-vocabulary) |
+| `annotated-relation` | 315,385 | 820,625 | +505,240 | 14e70c7a +3000 (Merge algebra carrier propagation); 2e72490f +70 (Merge tensor shape claims); 699c8b4a +427067 (Merge algebra lifecycle and carriers); ab02d526 +30 (Merge chore/test-hygiene-lanes); 80af155d +37569 (Merge feat/refinement-vocabulary); 5621c456 +37504 (Merge feat/cache-policies) |
+| `direct-join` | 121,099 | 121,139 | +40 | 14e70c7a +5 (Merge algebra carrier propagation); 699c8b4a +35 (Merge algebra lifecycle and carriers) |
+| `eval-arith` | 278,862 | 279,027 | +165 | 2e72490f +66 (Merge tensor shape claims); 699c8b4a +4 (Merge algebra lifecycle and carriers); ab02d526 +32 (Merge chore/test-hygiene-lanes); 80af155d +67 (Merge feat/refinement-vocabulary) |
+| `file-load` | 726,212 | 726,433 | +221 | 2e72490f +68 (Merge tensor shape claims); 80af155d +153 (Merge feat/refinement-vocabulary) |
+| `foreign-match` | 784,882 | 793,051 | +8,169 | 2e72490f +68 (Merge tensor shape claims); ff997ad3 +8000 (Merge fix/provider-callback-limits); ab02d526 +32 (Merge chore/test-hygiene-lanes); 80af155d +67 (Merge feat/refinement-vocabulary) |
+| `handle-round-trip` | 1,516,912 | 1,517,079 | +167 | 2e72490f +68 (Merge tensor shape claims); ab02d526 +30 (Merge chore/test-hygiene-lanes); 80af155d +69 (Merge feat/refinement-vocabulary) |
+| `op-encoded` | 318,864 | 319,031 | +167 | 2e72490f +66 (Merge tensor shape claims); 406175b9 -68 (Merge chore/no-cetta-gate-no-leatta); 175f41a1 +68 (Merge feat/observation-doors); ab02d526 +30 (Merge chore/test-hygiene-lanes); 80af155d +69 (Merge feat/refinement-vocabulary) |
+| `op-raw` | 298,862 | 299,029 | +167 | 2e72490f +70 (Merge tensor shape claims); ab02d526 +32 (Merge chore/test-hygiene-lanes); 80af155d +69 (Merge feat/refinement-vocabulary) |
+| `prepared-join` | 280,610 | 280,652 | +42 | 14e70c7a +7 (Merge algebra carrier propagation); 699c8b4a +35 (Merge algebra lifecycle and carriers) |
+| `py-method-call` | 2,270,769 | 2,270,777 | +8 | 2e72490f +5 (Merge tensor shape claims); 80af155d +3 (Merge feat/refinement-vocabulary); a376df6d +4 (Reconcile the merged tree after the test-hygiene, refinement) |
+| `query-where` | 58,837 | 59,004 | +167 | 2e72490f +68 (Merge tensor shape claims); ab02d526 +30 (Merge chore/test-hygiene-lanes); 80af155d +69 (Merge feat/refinement-vocabulary) |
+| `register-op` | 105,823 | 106,821 | +998 | 468350eb +1000 (Merge the soft, provider and import doors) |
+| `run-source` | 427,868 | 428,035 | +167 | 2e72490f +68 (Merge tensor shape claims); ab02d526 +30 (Merge chore/test-hygiene-lanes); 80af155d +69 (Merge feat/refinement-vocabulary) |
+| `save-load-fast` | 2,949,538 | 2,949,753 | +215 | 2e72490f +68 (Merge tensor shape claims); 468350eb -75 (Merge the soft, provider and import doors); ab02d526 +30 (Merge chore/test-hygiene-lanes); 80af155d +192 (Merge feat/refinement-vocabulary) |
+| `save-load-metta` | 927,860 | 928,073 | +213 | 2e72490f +68 (Merge tensor shape claims); 468350eb -73 (Merge the soft, provider and import doors); ab02d526 +30 (Merge chore/test-hygiene-lanes); 80af155d +190 (Merge feat/refinement-vocabulary) |
+| `sort-atom` | 1,301,549 | 1,301,560 | +11 | 2e72490f +6 (Merge tensor shape claims); 406175b9 -8 (Merge chore/no-cetta-gate-no-leatta); 175f41a1 +8 (Merge feat/observation-doors); 80af155d +3 (Merge feat/refinement-vocabulary) |
+| `source-load` | 234,916 | 235,121 | +205 | 14e70c7a +11 (Merge algebra carrier propagation); 2e72490f +15 (Merge tensor shape claims); 699c8b4a +21 (Merge algebra lifecycle and carriers); 468350eb +4 (Merge the soft, provider and import doors); ff997ad3 +9 (Merge fix/provider-callback-limits); 175f41a1 +44 (Merge feat/observation-doors); bcedacec +6 (Merge feat/ide-surface); acd04732 +14 (Merge feat/assertion-bag-diff); 1f32a7c8 +6 (Make a space's function namespace list and resolve only what); 80af155d +70 (Merge feat/refinement-vocabulary); 5621c456 +5 (Merge feat/cache-policies) |
+| `space-name` | 4,200,418 | 4,200,427 | +9 | 2e72490f +7 (Merge tensor shape claims); 699c8b4a -3 (Merge algebra lifecycle and carriers); 468350eb +3 (Merge the soft, provider and import doors) |
+| `table-bridge-match` | 784,884 | 793,051 | +8,167 | 2e72490f +66 (Merge tensor shape claims); ff997ad3 +8002 (Merge fix/provider-callback-limits); ab02d526 +30 (Merge chore/test-hygiene-lanes); 80af155d +71 (Merge feat/refinement-vocabulary) |
+| `typed-call` | 12,505,836 | 12,505,762 | -74 | 468350eb -74 (Merge the soft, provider and import doors) |
+
+`--counter-only` was used for every one, so no instruction pin and no wall
+figure moved; the two join rows' `inference_slope` deltas moved with their
+counters, which is the same measurement.
