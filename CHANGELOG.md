@@ -9,6 +9,59 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Every catalog vocabulary carries a MeTTa TYPE NAME and the engine writes the
+  type atoms itself: one `(: <TypeName> Type)` beside each `(vocabulary ...)`
+  row and one `(: <member> <TypeName>)` per member, so `!(get-type
+  pureStructural)` answers `EffectClass` and a program can match a closed set
+  by its type. The name is the mechanical CamelCase of the kebab row name, and
+  an exception is a row: `(vocabulary-type on-error-mode OnError)` is the only
+  one that ships, and it is what both seats' generated enums are named after
+  as well.
+
+- Three sibling rows carry what a vocabulary needs beyond its members, never a
+  column, because programs match `(vocabulary ...)` by arity.
+  `(vocabulary-order <vocab> <m1> <m2> ...)` is a chain the engine writes as
+  `(:< m1 m2)` edges, shipped once as
+  `(vocabulary-order fidelity Exact Partial Sound)` with `Refuse` deliberately
+  outside it. `(vocabulary-open <vocab> "<why>")` says a library may extend
+  the set and carries the reason it opens. `(vocabulary-member <vocab>
+  <word>)` is the one door: admitted on an open row, where the word joins the
+  vocabulary everywhere the engine reads it and gains its own type atom, and
+  refused on a closed row naming the row and the property.
+
+- `semiring` is an open vocabulary and an `(algebra ...)` row registers its own
+  carrier through the door. Before this the vocabulary was a boot-time snapshot
+  of the shipped presets, so a program's own algebra was refused
+  `(claim semiring <name> ordered ascending)` with "argument 2 expects a value
+  of the vocabulary" and could never state its ordering.
+
+- Provider capabilities are a catalog vocabulary, `(vocabulary
+  provider-capability match enumerate add add-many remove clear subscribe plan
+  rules)`, open, which `metta.foreign.CAPABILITIES` reads rather than restates.
+  `extensions/node/bridge.pl` registers `bounded`, `pushdown` and
+  `transactional` through the member door, because those three gate seam
+  clauses that seat implements and the engine names nowhere. A capability word
+  neither shipped nor registered is refused when a provider registers, instead
+  of gating nothing and reading like a provider that lacks it.
+
+- The wire grammar is catalog rows, `(wire-tag <tag> <class> <payload>
+  <means>)`, thirteen of them over the new `wire-class` and `wire-payload`
+  vocabularies: nine `term` tags, three `frame` tags and `r`, whose class is
+  `reply` because it is `metta_py_cast`'s answer shape rather than part of the
+  atom grammar. `metta.vocabularies.WIRE_TAGS` is generated from the rows,
+  `metta._schemas`' OpenAPI `Atom` schema builds one arm per term tag from
+  them, `metta._projection.WIRE_TAGS` is the term tags in the catalog's order,
+  and `CODEC.md` with `tests/codec/corpus.json` is held to them.
+
+- `(arguments <name> atoms|values)` has a catalog kind row over a new
+  `argument-delivery` vocabulary, so a misspelt delivery word is refused at the
+  write instead of landing silently and reading as `values`.
+
+- The space compliance suite has a `subscribe` case: it subscribes to a
+  pattern, writes a matching atom through the space and reads the event back,
+  skipped when the provider declares no event promise. It is the third
+  capability the suite had no case for at all, after `add-many` and `rules`.
+
 - Sequence variables reach the executable corpus. `examples/ch08-data/08-02-sequence-variables/`
   grows from one file to five: a gap in an EQUATION HEAD, which makes that
   function variable-arity and splices its run back into the body when the body
@@ -1036,6 +1089,33 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 
 ### Changed
+
+- `metta._contract.ONTOLOGY` no longer restates the engine's closed value
+  sets. Eleven of its twelve member sets named an engine vocabulary under a
+  CamelCase this seat had chosen, one (`Semiring`) listed six members where
+  the engine derived ten, and one (`ArgumentDelivery`) named a set the engine
+  did not have; all twelve are engine rows now, typed by the engine. The seat
+  keeps its own declaration kinds, and the arrows that name a closed set name
+  the engine's type for it: `Effect` reads `EffectClass`, `ImageSetting` reads
+  `ImageMode`, `TypeImage` reads `RegistryImage`.
+
+- `extensions/python/tools/vocabgen.py` reads the type name from the catalog
+  instead of a `RENAMES` dict, so the MeTTa type name, the Python enum and the
+  Node table are one word. The Node seat's `OnErrorMode` table is now
+  `OnError`. The `vocab-sync` lane also checks the engine's own type atoms
+  against its vocabulary rows, and a vocabulary the engine declares open
+  renders as an enum that accepts a registered word, through `_missing_` in
+  Python and `| (string & {})` in TypeScript.
+
+- `CODEC.md`'s tag table names the payload CLASS (`number`, `terms`, `handle`)
+  rather than a prose spelling of it, because the class is what the catalog
+  row carries and what each seat projects; the concrete forms stay in the
+  grammar line above the table.
+
+- The compliance suite's capability coverage is checked by reading what a run
+  recorded rather than by comparing two lists. `metta._compliance.CAPABILITIES`
+  is gone: it was a second copy of `metta.foreign.CAPABILITIES`, and once both
+  derived from the catalog row, comparing them proved nothing.
 
 - Every per-library coupling in the Python seat is a registration through a
   public door, with the shipped library as its first registrant and nothing

@@ -47,11 +47,11 @@ admitting it is hand-kept. Nine checks cover both directions of each promise:
               is skipped rather than guessed at.
   CLOSED SETS every semiring, algebra-law, algebra-object, effect-class and
               provider-capability roster equals the implementation that owns
-              it, and each alias expansion equals its catalog claim, read
-              from the engine catalog and one Python protocol constant rather
-              than from a list kept here. The root sheet must carry each one,
-              so deleting a roster cannot silence its check; a seat sheet is
-              free not to cover a set and is held to what it does state.
+              it, and each alias expansion equals its catalog claim, all five
+              read from the engine catalog rather than from a list kept here.
+              The root sheet must carry each one, so deleting a roster cannot
+              silence its check; a seat sheet is free not to cover a set and
+              is held to what it does state.
 
 Assumes:
   - swipl is on PATH; without it the HEADS half is skipped aloud rather than
@@ -101,7 +101,6 @@ Open Obligations:
 
 from __future__ import annotations
 
-import ast
 import inspect
 import os
 import re
@@ -962,32 +961,6 @@ def library_findings(sheet: Path, text: str) -> list[str]:
     return findings
 
 
-def _python_constant(path: Path, name: str) -> tuple[str, ...]:
-    """Read a literal tuple of strings without importing its module."""
-    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-    for node in tree.body:
-        value: ast.expr | None = None
-        if isinstance(node, ast.Assign) and any(
-            isinstance(target, ast.Name) and target.id == name for target in node.targets
-        ):
-            value = node.value
-        elif (
-            isinstance(node, ast.AnnAssign)
-            and isinstance(node.target, ast.Name)
-            and node.target.id == name
-        ):
-            value = node.value
-        if value is None:
-            continue
-        literal = ast.literal_eval(value)
-        if not isinstance(literal, tuple) or not all(isinstance(item, str) for item in literal):
-            message = f"{path.relative_to(REPO)}:{name} is not a literal tuple of strings"
-            raise RuntimeError(message)
-        return literal
-    message = f"{path.relative_to(REPO)} does not define {name}"
-    raise RuntimeError(message)
-
-
 def _inline_values(body: str) -> tuple[str, ...]:
     """The unqualified values in a labelled backtick roster."""
     return tuple(re.findall(r"`([A-Za-z][A-Za-z0-9-]*)`", body))
@@ -1256,8 +1229,12 @@ def closed_value_catalog() -> dict[str, tuple[str, ...]]:
         "effect-class": _query_values(
             "metta_catalog_row([vocabulary,'effect-class'|Vs]), member(N, Vs)"
         ),
-        "provider-capabilities": _python_constant(
-            REPO / "extensions/python/metta/foreign.py", "CAPABILITIES"
+        # The engine's own row, like the four above it. This used to AST-parse
+        # `foreign.py:CAPABILITIES` as a literal tuple; that tuple now reads
+        # the catalog vocabulary, so parsing the source would only report the
+        # expression that reads the row.
+        "provider-capabilities": _query_values(
+            "metta_catalog_row([vocabulary,'provider-capability'|Vs]), member(N, Vs)"
         ),
     }
 

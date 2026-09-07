@@ -87,6 +87,30 @@
 % [tested: run_tests(catalog_refusal_rows),
 % extensions/python/tests/repository/test_refusal_rows.py; commit=f33b7ab0200e6dc74c88fb4c7f827bf545a447ed].
 
+% Guarantees: every (vocabulary ...) row carries its MeTTa TYPE NAME by one
+% rule, the mechanical CamelCase of the kebab name with declared exceptions as
+% (vocabulary-type ...) rows, and the ENGINE writes the type atoms: one
+% (: <TypeName> Type) per row, one (: <member> <TypeName>) per member and the
+% (:< ...) edges of a declared (vocabulary-order ...) chain, published once the
+% engine is loaded and thereafter as each row lands
+% [tested: catalog_vocabulary_words:every_vocabulary_row_is_typed,
+% catalog_vocabulary_words:the_declared_type_name_beats_the_map,
+% catalog_vocabulary_words:a_declared_order_is_a_chain; commit=7f9c810e5f4a2023ad98de34e848667dd72bc4a7].
+% Guarantees: a (vocabulary-open ...) row is what admits a
+% (vocabulary-member ...) write, a closed vocabulary refuses one naming the row
+% and the property, and an admitted member answers from every consulting site
+% and leaves with its row; an (algebra ...) row registers its own carrier
+% through that door, which is what lets a declared algebra claim its ordering
+% [tested: catalog_vocabulary_words:a_closed_vocabulary_refuses_a_member,
+% catalog_vocabulary_words:an_open_vocabulary_admits_a_member,
+% catalog_vocabulary_words:a_withdrawn_member_leaves_with_its_type_atom,
+% catalog_vocabulary_words:a_declared_algebra_joins_the_semiring_vocabulary,
+% catalog_vocabulary_words:an_algebra_row_leaving_takes_its_membership;
+% commit=7f9c810e5f4a2023ad98de34e848667dd72bc4a7].
+% Guarantees: the wire grammar is thirteen (wire-tag Tag Class Payload Means)
+% rows, and the shim's own encoder and decoder speak exactly the term tags they
+% declare [tested: catalog_vocabulary_words:the_shim_speaks_the_declared_wire_tags;
+% commit=7f9c810e5f4a2023ad98de34e848667dd72bc4a7].
 % Guarantees: type carriers validate membership without certifying laws;
 % only finite enumerations permit exhaustive law checks [tested:
 % test_type_carrier_cannot_certify_laws,
@@ -303,6 +327,11 @@ metta_note_ctx_declared(_).
 %what it says: a context some declaration names.
 metta_catalog_head(kind).
 metta_catalog_head(vocabulary).
+metta_catalog_head('vocabulary-type').
+metta_catalog_head('vocabulary-order').
+metta_catalog_head('vocabulary-open').
+metta_catalog_head('vocabulary-member').
+metta_catalog_head('wire-tag').
 metta_catalog_head(claim).
 metta_catalog_head(policy).
 metta_catalog_head('routed-by-shape').
@@ -429,7 +458,25 @@ metta_catalog_note_added([kind, Head|_]) :-
     metta_materialize_route(Head).
 metta_catalog_note_added([vocabulary, Vocab|_]) :-
     !,
-    retractall(metta_vocab_cache(Vocab, _, _)).
+    retractall(metta_vocab_cache(Vocab, _, _)),
+    metta_publish_vocabulary_types(Vocab).
+%A vocabulary's words are typed the moment its row lands, so the three rows
+%that change what the type IS or which words carry it republish. The declared
+%type name arrives AFTER the vocabulary row at boot (a kind row has to be in
+%place to check it), so this is also how the shipped exception takes effect.
+metta_catalog_note_added(['vocabulary-type', Vocab, _]) :-
+    !,
+    metta_camel_name(Vocab, Mechanical),
+    metta_vocabulary_values(Vocab, Values),
+    metta_retract_types_under(Mechanical, Values),
+    metta_publish_vocabulary_types(Vocab).
+metta_catalog_note_added(['vocabulary-order', Vocab|_]) :-
+    !,
+    metta_publish_vocabulary_order(Vocab).
+metta_catalog_note_added(['vocabulary-member', Vocab, Member]) :-
+    !,
+    retractall(metta_vocab_cache(Vocab, _, _)),
+    metta_publish_member_type(Vocab, Member).
 %A landed claim beats the entry for its value, whether that entry is a list of
 %earlier rows or the empty one a value with no claims cached. The erased-ref
 %revalidation above covers removal and cannot cover this: an entry built before
@@ -445,7 +492,8 @@ metta_catalog_note_added([algebra, Name, _, _, _, _, _, _, _, Owner]) :-
     (   Owner == global
     ->  retractall(metta_algebra_descriptor_cache(_, Name, _, _, _, _, _, _, _))
     ;   retractall(metta_algebra_descriptor_cache(Owner, Name, _, _, _, _, _, _, _))
-    ).
+    ),
+    metta_register_semiring(Name).
 metta_catalog_note_added([annotations, Ctx|_]) :-
     !,
     retractall(metta_annotations_cache(Ctx, _)).
@@ -530,9 +578,31 @@ metta_catalog_note_removed([kind, Head|_]) :-
     !,
     retractall(metta_kind_cache(Head, _, _)),
     metta_materialize_route(Head).
-metta_catalog_note_removed([vocabulary, Vocab|_]) :-
+%The row is already gone when this runs, so the members it published are read
+%from the entry the removal invalidates rather than from the store.
+metta_catalog_note_removed([vocabulary, Vocab|Declared]) :-
     !,
-    retractall(metta_vocab_cache(Vocab, _, _)).
+    (   metta_registered_members(Vocab, Registered, _)
+    ->  true
+    ;   Registered = []
+    ),
+    append(Declared, Registered, Values),
+    retractall(metta_vocab_cache(Vocab, _, _)),
+    metta_retract_vocabulary_types(Vocab, Values).
+metta_catalog_note_removed(['vocabulary-type', Vocab, Type]) :-
+    !,
+    (   metta_vocabulary_values(Vocab, Values)
+    ->  metta_retract_types_under(Type, Values),
+        metta_publish_vocabulary_types(Vocab)
+    ;   true
+    ).
+metta_catalog_note_removed(['vocabulary-order', _|Chain]) :-
+    !,
+    metta_retract_order_edges(Chain).
+metta_catalog_note_removed(['vocabulary-member', Vocab, Member]) :-
+    !,
+    retractall(metta_vocab_cache(Vocab, _, _)),
+    metta_retract_member_type(Vocab, Member).
 %Removal is covered by the erased-ref revalidation, and this is here anyway for
 %the case that revalidation cannot see: a removal by PATTERN, whose Vocab or
 %Value is a variable, retracts every entry it could have matched.
@@ -547,7 +617,8 @@ metta_catalog_note_removed([algebra, Name, _, _, _, _, _, _, _, Owner]) :-
     (   Owner == global
     ->  retractall(metta_algebra_descriptor_cache(_, Name, _, _, _, _, _, _, _))
     ;   retractall(metta_algebra_descriptor_cache(Owner, Name, _, _, _, _, _, _, _))
-    ).
+    ),
+    metta_unregister_semiring(Name).
 metta_catalog_note_removed([annotations, Ctx|_]) :-
     !,
     retractall(metta_annotations_cache(Ctx, _)).
@@ -743,10 +814,21 @@ metta_kind_spec_fresh(Head, Spec) :-
         fail
     ).
 
+%A vocabulary's members: the row's own, then every (vocabulary-member ...) row
+%a program or library registered against an open vocabulary, in the order they
+%landed. The stored (vocabulary ...) ATOM never grows, which is what keeps a
+%program matching it by arity working ((vocabulary delivery $a $b $c) in
+%examples/ch16-events-and-standing-queries/01-event_catalog.metta is one of
+%five such matches); what grows is the answer every consulting site reads,
+%which is (one-of ...), (some-of ...), the claim check and metta_vocabulary_value/2.
+%
+%Cached like a claim rather than like a single row: the entry carries the base
+%row's reference AND every member row's, and any one of them being erased
+%refreshes the whole entry, so a withdrawn member self-heals on the next read.
 metta_vocabulary_values(Vocab, Values) :-
     (   metta_vocab_cache(Vocab, Values0, Validity)
-    ->  (   Validity = ref(Ref)
-        ->  (   metta_catalog_ref_erased(Ref)
+    ->  (   Validity = refs(Refs)
+        ->  (   ( member(Ref, Refs), metta_catalog_ref_erased(Ref) )
             ->  retractall(metta_vocab_cache(Vocab, _, _)),
                 metta_vocabulary_values_fresh(Vocab, Values)
             ;   Values = Values0
@@ -757,17 +839,205 @@ metta_vocabulary_values(Vocab, Values) :-
     ).
 
 metta_vocabulary_values_fresh(Vocab, Values) :-
-    (   metta_catalog_clause([vocabulary, Vocab|Fresh], Ref)
-    ->  assertz(metta_vocab_cache(Vocab, Fresh, ref(Ref))),
-        Values = Fresh
+    (   metta_catalog_clause([vocabulary, Vocab|Declared], BaseRef)
+    ->  metta_registered_members(Vocab, Registered, MemberRefs),
+        append(Declared, Registered, Values),
+        assertz(metta_vocab_cache(Vocab, Values, refs([BaseRef|MemberRefs])))
     ;   assertz(metta_vocab_cache(Vocab, none, none)),
         fail
     ).
+
+%The registered half, asked as a FIXED-WIDTH query so it selects the '&metta'/3
+%storage predicate directly and indexes on the head rather than enumerating
+%every stored arity, which is what the open-tail branch above the vocabulary
+%row has to do.
+metta_registered_members(Vocab, Members, Refs) :-
+    findall(Member-Ref,
+            metta_catalog_clause(['vocabulary-member', Vocab, Member], Ref),
+            Pairs),
+    pairs_keys_values(Pairs, Members, Refs).
 
 %One value's membership, the question every consulting site asks.
 metta_vocabulary_value(Vocab, Value) :-
     metta_vocabulary_values(Vocab, Values),
     memberchk(Value, Values).
+
+%A vocabulary's MeTTa type name: the declared exception where there is one,
+%and otherwise the mechanical CamelCase of the kebab name, which is the map
+%extensions/python/tools/vocabgen.py applies to reach the Python and Node
+%spellings. One rule and one declared exception list, so the type atom the
+%engine writes below, the Python enum and the Node table cannot disagree.
+%Protocol Buffers spells the same arrangement as json_name: derived by rule,
+%overridden by declaration [source: https://protobuf.dev/programming-guides/proto3,
+%"JSON Mapping", the json_name field option].
+metta_vocabulary_type(Vocab, Type) :-
+    (   metta_catalog_row(['vocabulary-type', Vocab, Declared])
+    ->  Type = Declared
+    ;   metta_camel_name(Vocab, Type)
+    ).
+
+%`effect-class` is `EffectClass`; a name already in CamelCase keeps its
+%spelling, which is what makes `MismatchEnum` come back as itself.
+metta_camel_name(Name, Camel) :-
+    atomic_list_concat(Parts, -, Name),
+    maplist(metta_capitalise, Parts, Capitalised),
+    atomic_list_concat(Capitalised, Camel).
+
+metta_capitalise(Part, Capitalised) :-
+    atom_chars(Part, Chars),
+    (   Chars = [First|Rest]
+    ->  upcase_atom(First, Upper),
+        atom_chars(UpperAtom, [Upper]),
+        atomic_list_concat([UpperAtom|Rest], Capitalised)
+    ;   Capitalised = Part
+    ).
+
+%Whether a library may add a member, and why. Absent means closed, which is
+%the safe answer and the one the catalog header already gives every value set:
+%a member no consumer acts on would pass the checker only to sit inert.
+%Protocol Buffers' features.enum_type carries the same per-type property, and
+%Rust's #[non_exhaustive] and Swift's non-frozen enums are the same decision
+%stated on the type [source: https://protobuf.dev/programming-guides/enum,
+%"Definitions"].
+metta_vocabulary_open(Vocab, Reason) :-
+    metta_catalog_row(['vocabulary-open', Vocab, Reason]).
+
+%%%%%%%%%% The type atoms a vocabulary row implies %%%%%%%%%%
+%
+%`&metta` is the ENGINE's space, so the engine types the engine's own words:
+%one (: <TypeName> Type) beside each (vocabulary ...) row and one
+%(: <member> <TypeName>) beside each of its members. A host seat writing them
+%put a seat's chosen CamelCase on the engine's vocabulary and gave the same
+%set three spellings, one of which went stale (extensions/python/metta/_contract.py
+%listed six semirings while the engine derived ten).
+%
+%A member type atom is inert against evaluation, which is tested rather than
+%assumed: six of these members are engine callables or special forms, and
+%(: min MemoAggregate) beside `min`'s own (-> Number Number Number) leaves
+%(min 1 2), (max 1 2), (+ 1 2), (timeout 1 (+ 1 2)) and (get-type min)
+%answering exactly what they answered before
+%[tested: catalog_vocabulary_words:a_member_type_atom_does_not_shadow_a_callable;
+%commit=7f9c810e5f4a2023ad98de34e848667dd72bc4a7].
+metta_publish_vocabulary_types(Vocab) :-
+    metta_vocabulary_type(Vocab, Type),
+    metta_ensure_atom([':', Type, 'Type']),
+    metta_vocabulary_values(Vocab, Values),
+    forall(member(Value, Values), metta_ensure_atom([':', Value, Type])),
+    metta_publish_vocabulary_order(Vocab).
+
+%A row-declared chain, written as the subtype edges the engine's own widening
+%reads: (vocabulary-order fidelity Exact Partial Sound) is (:< Exact Partial)
+%and (:< Partial Sound), so a stronger claim stands wherever a weaker one is
+%required. A member left OUT of the row is deliberately outside the chain,
+%which is how `Refuse` stays a Fidelity that is not a weaker Sound.
+metta_publish_vocabulary_order(Vocab) :-
+    (   metta_catalog_row(['vocabulary-order', Vocab|Chain])
+    ->  metta_publish_order_edges(Chain)
+    ;   true
+    ).
+
+metta_publish_order_edges([Narrow, Wide|Rest]) :-
+    !,
+    metta_ensure_atom([':<', Narrow, Wide]),
+    metta_publish_order_edges([Wide|Rest]).
+metta_publish_order_edges(_).
+
+%One registered member's type atom, written when its row lands rather than at
+%boot, so a member added at runtime answers get-type like a shipped one.
+metta_publish_member_type(Vocab, Member) :-
+    metta_vocabulary_type(Vocab, Type),
+    metta_ensure_atom([':', Member, Type]).
+
+metta_retract_member_type(Vocab, Member) :-
+    metta_vocabulary_type(Vocab, Type),
+    metta_forget_atom([':', Member, Type]).
+
+%Everything a vocabulary row published, withdrawn with it. Removing by the
+%EXACT atom is what keeps a member shared between two vocabularies typed by
+%the other: dropping the op-kind row leaves (: det Determinism) standing.
+metta_retract_vocabulary_types(Vocab, Values) :-
+    metta_vocabulary_type(Vocab, Type),
+    (   metta_catalog_row(['vocabulary-order', Vocab|Chain])
+    ->  metta_retract_order_edges(Chain)
+    ;   true
+    ),
+    metta_retract_types_under(Type, Values).
+
+metta_retract_types_under(Type, Values) :-
+    forall(member(Value, Values), metta_forget_atom([':', Value, Type])),
+    metta_forget_atom([':', Type, 'Type']).
+
+metta_retract_order_edges([Narrow, Wide|Rest]) :-
+    !,
+    metta_forget_atom([':<', Narrow, Wide]),
+    metta_retract_order_edges([Wide|Rest]).
+metta_retract_order_edges(_).
+
+%Idempotent because a vocabulary shares members with a sibling and because a
+%re-consulted engine meets its own atoms: (: det OpKind) and (: det Determinism)
+%are two atoms, while publishing `det` twice under one name would be a
+%duplicate declaration the engine warns about and keeps anyway.
+%
+%Silent until the engine is loaded, for the same reason
+%metta_publish_builtin_visibility runs late: a (: ...) write reaches
+%self_tier_arrived/1, whose metta_exec_module_known/2 lives in
+%engine/spaces/lifecycle.pl and does not exist yet while THIS file's own
+%preset directive is running. Everything written before the flag is typed in
+%one pass by metta_publish_every_vocabulary_type/0; everything after it, as
+%it lands.
+metta_ensure_atom(Atom) :-
+    (   \+ metta_vocabulary_types_published
+    ->  true
+    ;   metta_catalog_row(Atom)
+    ->  true
+    ;   add_sexp('&metta', Atom, _)
+    ).
+
+metta_forget_atom(Atom) :-
+    (   metta_vocabulary_types_published
+    ->  metta_remove_atom('&metta', Atom, _)
+    ;   true
+    ).
+
+:- dynamic metta_vocabulary_types_published/0.
+
+%An (algebra ...) row IS the door a program has into the semiring vocabulary,
+%so the engine walks through it on the author's behalf rather than asking for
+%a second row. Before this, the vocabulary was derived from the shipped
+%presets once and frozen: a declared algebra was refused
+%(claim semiring <name> ordered ascending) with "argument 2 expects a value of
+%the vocabulary", so its ordering could never be stated and
+%metta_annotations_order/2 could never see it
+%[tested: catalog_vocabulary_words:a_declared_algebra_joins_the_semiring_vocabulary;
+%commit=7f9c810e5f4a2023ad98de34e848667dd72bc4a7].
+metta_register_semiring(Name) :-
+    (   metta_vocabulary_value(semiring, Name)
+    ->  true
+    ;   add_sexp('&metta', ['vocabulary-member', semiring, Name], _)
+    ).
+
+%The membership leaves with the LAST row that named the algebra: two contexts
+%may declare the same name, and the vocabulary is global.
+metta_unregister_semiring(Name) :-
+    (   metta_catalog_row([algebra, Name|_])
+    ->  true
+    ;   metta_remove_atom('&metta', ['vocabulary-member', semiring, Name], _)
+    ).
+
+%Every vocabulary row typed in one pass, run from engine/metta.pl's
+%initialization beside metta_publish_builtin_visibility so the whole engine
+%is loaded first. The flag goes up BEFORE the walk, which is what makes the
+%walk itself write anything, and it stays up so a vocabulary a program
+%declares later is typed as its row lands.
+metta_publish_every_vocabulary_type :-
+    (   metta_vocabulary_types_published
+    ->  true
+    ;   assertz(metta_vocabulary_types_published)
+    ),
+    findall(Vocab, metta_catalog_row([vocabulary, Vocab|_]), Vocabs0),
+    sort(Vocabs0, Vocabs),
+    forall(member(Vocab, Vocabs), metta_publish_vocabulary_types(Vocab)).
+
 
 %Every (claim Vocab Value Property...) row's properties for one value, cached.
 %
@@ -1004,7 +1274,84 @@ metta_check_catalog_semantics(vocabulary, [Name|_], Term) :-
     (   metta_vocabulary_values(Name, _)
     ->  metta_declaration_refused(Term, 1,
                                   'one vocabulary row per name; remove the old row first')
-    ;   true
+    ;   metta_vocabulary_type(Name, Type),
+        metta_type_name_free(Name, Type, 1, Term)
+    ).
+%The type name is what a program writes in an arrow and what each seat's enum
+%is called, so two vocabularies resolving to one name would give two closed
+%sets one type. Refused at the write, where the remedy is one row, rather than
+%discovered as a (: value X) atom whose X means two things.
+metta_check_catalog_semantics('vocabulary-type', [Name, Type], Term) :-
+    !,
+    (   \+ metta_vocabulary_values(Name, _)
+    ->  metta_declaration_refused(Term, 1, 'a declared vocabulary')
+    ;   metta_catalog_row(['vocabulary-type', Name, _])
+    ->  metta_declaration_refused(Term, 1,
+            'one vocabulary-type row per vocabulary; remove the old row first')
+    ;   metta_type_name_free(Name, Type, 2, Term)
+    ).
+%The chain the engine writes as (:< ...) edges. Every word in it is a member
+%of the vocabulary it orders, and a chain of one names no edge at all, so both
+%are refused here rather than published as nothing.
+metta_check_catalog_semantics('vocabulary-order', [Name|Chain], Term) :-
+    !,
+    (   \+ metta_vocabulary_values(Name, _)
+    ->  metta_declaration_refused(Term, 1, 'a declared vocabulary')
+    ;   metta_catalog_row(['vocabulary-order', Name|_])
+    ->  metta_declaration_refused(Term, 1,
+            'one vocabulary-order row per vocabulary; remove the old row first')
+    ;   Chain = [_, _|_]
+    ->  metta_check_order_members(Name, Chain, 2, Term)
+    ;   metta_declaration_refused(Term, 2,
+            'at least two members, narrowest first: a chain of one has no edge')
+    ).
+%The reason is load-bearing: this row is what admits a member into an engine
+%vocabulary, and an author reading a refused (vocabulary-member ...) is told
+%to write one, so it has to say why the set opens rather than merely that it
+%does.
+metta_check_catalog_semantics('vocabulary-open', [Name, Reason], Term) :-
+    !,
+    (   \+ metta_vocabulary_values(Name, _)
+    ->  metta_declaration_refused(Term, 1, 'a declared vocabulary')
+    ;   metta_catalog_row(['vocabulary-open', Name, _])
+    ->  metta_declaration_refused(Term, 1,
+            'one vocabulary-open row per vocabulary; remove the old row first')
+    ;   ( string(Reason), Reason \== "" )
+    ->  true
+    ;   metta_declaration_refused(Term, 2,
+            'a nonempty string saying why the set is open')
+    ).
+%The one door a program or library has into an engine vocabulary. Open rows
+%admit; closed rows refuse with the row and the property named, because the
+%author's next move is either to open the vocabulary deliberately or to
+%declare one of their own, and neither is guessable from "not a member".
+metta_check_catalog_semantics('vocabulary-member', [Name, Member], Term) :-
+    !,
+    (   \+ metta_vocabulary_values(Name, _)
+    ->  metta_declaration_refused(Term, 1, 'a declared vocabulary')
+    ;   metta_vocabulary_value(Name, Member)
+    ->  metta_declaration_refused(Term, 2,
+                                  'a word the vocabulary does not already carry')
+    ;   metta_vocabulary_open(Name, _)
+    ->  true
+    ;   format(atom(Remedy),
+               'an open vocabulary: ~w is closed, so add \c
+                (vocabulary-open ~w "<why it opens>") to &metta first, or \c
+                declare a vocabulary of your own',
+               [Name, Name]),
+        metta_declaration_refused(Term, 1, Remedy)
+    ).
+%One row per tag, because a tag is one claim about one payload and a second
+%row would let the shim's encoder and its decoder read different grammars.
+metta_check_catalog_semantics('wire-tag', [Tag, _, _, Means], Term) :-
+    !,
+    (   metta_catalog_row(['wire-tag', Tag, _, _, _])
+    ->  metta_declaration_refused(Term, 1,
+                                  'one wire-tag row per tag; remove the old row first')
+    ;   ( string(Means), Means \== "" )
+    ->  true
+    ;   metta_declaration_refused(Term, 4,
+            'a nonempty string saying what the tag carries')
     ).
 metta_check_catalog_semantics(policy, [Axis|_], Term) :-
     !,
@@ -1594,6 +1941,36 @@ metta_check_argspec_form(_, Position, Term) :-
 metta_declaration_refused(Term, Position, Expected) :-
     throw(error(metta_declaration_malformed(Term, Position, Expected), none)).
 
+%A type name answers for exactly one vocabulary. Two closed sets sharing one
+%name would put (: keep X) and (: depth X) under the same X, so get-type on a
+%word would answer a type whose membership means two different things. The
+%walk is over the vocabulary rows rather than over the published type atoms
+%because a program may have declared a type of its own for its own reasons,
+%and that is not this row's business.
+metta_type_name_free(Name, Type, Position, Term) :-
+    (   metta_catalog_row([vocabulary, Other|_]),
+        Other \== Name,
+        metta_vocabulary_type(Other, Type)
+    ->  format(atom(Remedy),
+               'a type name no other vocabulary answers to: ~w already names \c
+                the ~w vocabulary, so both closed sets would type under one \c
+                name',
+               [Type, Other]),
+        metta_declaration_refused(Term, Position, Remedy)
+    ;   true
+    ).
+
+%Every word in a chain is a member of the vocabulary it orders, refused at the
+%position it sits in so the message names the word rather than the row.
+metta_check_order_members(_, [], _, _).
+metta_check_order_members(Name, [Member|Rest], Position, Term) :-
+    (   metta_vocabulary_value(Name, Member)
+    ->  true
+    ;   metta_declaration_refused(Term, Position, ['one-of', Name])
+    ),
+    Next is Position + 1,
+    metta_check_order_members(Name, Rest, Next, Term).
+
 %%%% Materialized shape-route dispatch %%%%
 %
 %(routed-by-shape Head [Key]) in the catalog makes (Head ...) declarations
@@ -1877,6 +2254,45 @@ metta_catalog_preset([vocabulary, 'agenda-policy',
 metta_catalog_preset([vocabulary, volatility, volatile, stable, immutable]).
 metta_catalog_preset([vocabulary, 'route-key', context, global]).
 metta_catalog_preset([vocabulary, 'space-capability', file, process, network]).
+%What a space PROVIDER can be asked to do, in the engine's own words. The
+%nine are the operations engine/spaces/foreign.pl gates: match, enumerate,
+%add, add-many, remove and clear are the seam hooks a provider implements,
+%plan is the pushdown offer, and subscribe and rules are the two PROMISES no
+%method list can derive - one about what the context delivers, one about
+%whether the space's atoms include equations.
+%
+%Open, because seam:foreign_capability/2 and engine/ext_points.pl's kind/2
+%are both multifile: a seat or a library declares a hook of its own and the
+%word that gates it. extensions/node/bridge.pl does exactly that today with
+%bounded, pushdown and transactional, which it registers through the
+%(vocabulary-member ...) door at load.
+metta_catalog_preset([vocabulary, 'provider-capability',
+                      match, enumerate, add, 'add-many', remove, clear,
+                      subscribe, plan, rules]).
+%How a callable receives its arguments: `atoms` hands the syntax through
+%untouched, `values` decodes it to the host's own data first, and the absence
+%of an (arguments ...) row means values. It is a catalog vocabulary rather
+%than a seat's tuple because the DECLARATION lives in '&metta' and all three
+%seats read the same word out of it.
+metta_catalog_preset([vocabulary, 'argument-delivery', atoms, values]).
+%The wire's own grammar, as rows, because all three seats speak the same tags
+%and the grammar had three partial copies between them: the shim's clauses,
+%metta._schemas' eight JSON payload shapes and metta._projection's nine
+%decoder tags. A tag is a CLAIM about its payload rather than a label on it,
+%so a row states which class of thing the payload is and one lane holds every
+%copy to it.
+%
+%The three classes: a `term` tag is part of an atom and nests; a `frame` tag
+%wraps a whole answer and never appears inside one; a `reply` tag is one
+%door's answer shape and is neither.
+metta_catalog_preset([vocabulary, 'wire-class', term, frame, reply]).
+%What a tag's payload IS. Each seat spells these its own way - JSON Schema in
+%metta._schemas, a Prolog type test in the shim's decoder - and the word is
+%what the seats agree on, exactly as the type table in
+%extensions/python/metta/_projection.py carries one column per target.
+metta_catalog_preset([vocabulary, 'wire-payload',
+                      text, number, boolean, term, terms, host, handle,
+                      truth, bindings, control]).
 %Which bound stopped a piece of engine work that answers what it managed
 %before the stop. The five words are the names a caller SETS them under, so
 %the value is also the remedy: max_events for events, m.limits(inferences=),
@@ -1942,6 +2358,21 @@ metta_catalog_preset([kind, 'routed-by-shape', symbol,
                       [optional, ['one-of', 'route-key']]]).
 metta_catalog_preset([kind, 'owned-by-space', symbol]).
 metta_catalog_preset([kind, vocabulary, symbol, [rest, symbol]]).
+%The four rows a vocabulary carries BESIDE its members, sibling rows rather
+%than columns because the (vocabulary ...) atom is matched by ARITY by
+%programs (five example files match one, from (vocabulary delivery $a $b $c)
+%up to the ten-member semiring row), so a column would break every one of
+%them and every reader that takes the tail as the member list.
+metta_catalog_preset([kind, 'vocabulary-type', symbol, symbol]).
+metta_catalog_preset([kind, 'vocabulary-order', symbol, [rest, symbol]]).
+metta_catalog_preset([kind, 'vocabulary-open', symbol, term]).
+metta_catalog_preset([kind, 'vocabulary-member', symbol, symbol]).
+%One wire tag: the class of thing it is, the class of its payload, and the
+%sentence CODEC.md and the OpenAPI schema both show. The prose is on the row
+%for the same reason a (refusal ...) row carries its ground and its remedy:
+%three seats and two documents were each keeping their own copy of it.
+metta_catalog_preset([kind, 'wire-tag', symbol, ['one-of', 'wire-class'],
+                      ['one-of', 'wire-payload'], term]).
 metta_catalog_preset([kind, claim, symbol, symbol, [rest, symbol]]).
 metta_catalog_preset([kind, policy, symbol, symbol, term]).
 metta_catalog_preset([kind, handles, symbol, pattern, ['one-of', fidelity],
@@ -1972,6 +2403,11 @@ metta_catalog_preset([kind, covers, term, ['one-of', 'effect-class']]).
 metta_catalog_preset([kind, compensates, symbol, symbol]).
 metta_catalog_preset([kind, inverse, symbol]).
 metta_catalog_preset([kind, op, symbol, integer, ['one-of', 'op-kind']]).
+%How a callable's arguments reach it. The declaration was written by the
+%Python seat and typed there by hand, with no kind row, so a misspelt
+%(arguments f atomz) landed silently and read as `values` at every call site.
+metta_catalog_preset([kind, arguments, symbol,
+                      ['one-of', 'argument-delivery']]).
 metta_catalog_preset([kind, deprecated, symbol, term, term]).
 metta_catalog_preset([kind, visibility, symbol, ['one-of', visibility]]).
 metta_catalog_preset([kind, on, symbol, pattern, term, [optional, integer]]).
@@ -1993,6 +2429,78 @@ metta_catalog_preset([kind, refusal, ['one-of', 'refusal-kind'], symbol,
 metta_catalog_preset(['routed-by-shape', handles]).
 metta_catalog_preset(['routed-by-shape', 'on-error']).
 metta_catalog_preset(['routed-by-shape', merge, global]).
+%A vocabulary's MeTTa type name is the mechanical CamelCase of its kebab
+%name, and the exceptions are rows. One ships. `on-error-mode` is the row's
+%<head>-<argname> name, while the TYPE a program writes and the enum each
+%seat generates is OnError, which is the spelling the design record ruled
+%(ai-python-first-revamp-discussion.md, the de-stringify ruling:
+%"mode=OnError.keep ... list(OnError) enumeration"). Declaring it here is
+%what deleted the RENAMES dict from extensions/python/tools/vocabgen.py, so
+%the type name and both seats' enums now come from one place.
+metta_catalog_preset(['vocabulary-type', 'on-error-mode', 'OnError']).
+%The one chain the engine ships, written as the subtype edges (:< Exact
+%Partial) and (:< Partial Sound). A stronger fidelity claim stands wherever a
+%weaker one is required, which is what makes an Exact handler serve a Sound
+%route. `Refuse` is a Fidelity and deliberately NOT in the chain: it is not a
+%weaker claim, it is the absence of a stream.
+metta_catalog_preset(['vocabulary-order', fidelity, 'Exact', 'Partial', 'Sound']).
+%The two open vocabularies, each with the reason it opens. Everything not
+%named here is closed, which is this catalog's standing rule: a value no
+%consumer acts on would pass the checker only to sit silently inert.
+metta_catalog_preset(['vocabulary-open', semiring,
+                      "an (algebra ...) row is the door a program already \c
+                       has, and the engine registers its name here when the \c
+                       row lands, so a declared carrier can claim its own \c
+                       ordering"]).
+metta_catalog_preset(['vocabulary-open', 'provider-capability',
+                      "seam:foreign_capability/2 and engine/ext_points.pl's \c
+                       kind/2 are multifile, so a seat or library declares a \c
+                       hook of its own and the word gating it; \c
+                       extensions/node/bridge.pl registers bounded, pushdown \c
+                       and transactional this way"]).
+%The wire grammar, one row per tag. Nine term tags nest inside an atom, three
+%frame tags wrap a whole answer, and `r` is metta_py_cast/4's reply, which
+%CODEC.md's kit does not carry because it is one door's answer shape rather
+%than part of the atom grammar - the class column is what says so, and the
+%lane over the kit reads it rather than carrying an exception.
+metta_catalog_preset(['wire-tag', s, term, text,
+                      "a symbol: a name that denotes itself"]).
+metta_catalog_preset(['wire-tag', g, term, text,
+                      "a grounded value carried as text; a string crosses \c
+                       this way"]).
+metta_catalog_preset(['wire-tag', n, term, number,
+                      "a grounded Number or BigInt; signed-i64 width fixes \c
+                       an integer's language type"]).
+metta_catalog_preset(['wire-tag', b, term, boolean,
+                      "a grounded boolean; the engine writes true and false, \c
+                       and reads True and False as the same two constants"]).
+metta_catalog_preset(['wire-tag', v, term, text,
+                      "a variable, the payload an identity within this term"]).
+metta_catalog_preset(['wire-tag', e, term, terms,
+                      "an expression, its children in order; the empty one \c
+                       is unit"]).
+metta_catalog_preset(['wire-tag', p, term, text,
+                      "an executable space reference carried by its portable \c
+                       engine name, ampersand-prefixed or not; the tag is a \c
+                       species and a name that is no space keeps s"]).
+metta_catalog_preset(['wire-tag', o, term, host,
+                      "a live host value crossing by reference, in process \c
+                       only"]).
+metta_catalog_preset(['wire-tag', h, term, handle,
+                      "a native engine value held by reference"]).
+metta_catalog_preset(['wire-tag', u, frame, truth,
+                      "an answer whose truth is undefined under the \c
+                       well-founded semantics"]).
+metta_catalog_preset(['wire-tag', a, frame, bindings,
+                      "an answer together with the bindings it is returned \c
+                       under"]).
+metta_catalog_preset(['wire-tag', x, frame, control,
+                      "stream control: exhaustion, no answer at all, or a \c
+                       failure kept as a value"]).
+metta_catalog_preset(['wire-tag', r, reply, term,
+                      "the refinement constraint a cast violated, answered \c
+                       when the base type admits the value and the \c
+                       refinement does not"]).
 %One row per engine decision axis. The inventory lane joins these live rows
 %to the implementation seam named for each knob; keeping the defaults here
 %means a program can read the same table the gate checks.
