@@ -22,7 +22,7 @@ re-runs them.
 |---|---|---|
 | `examples/**/*.metta` | 271 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
-| `website/reference/metta-*.md` | 28 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
+| `website/reference/metta-*.md` | 29 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
 | `website/reference/refusals.md` | the engine's own `(refusal ...)` rows: the class each seat raises, the ground and the remedy | `extensions/python/tools/refusalsdoc.py` |
 | `tests/prolog/suites/*/*.plt` | plunit suites over the engine itself, grouped by the engine unit each one tests | the `plunit` gate lane |
@@ -1312,6 +1312,35 @@ m.record(src, *, seed=None, max_events=, timeout=, inferences=) -> Recording
         replay() and debug() then refuse; the events stay readable either way
         replay refuses a space whose digest() differs from the recording's, and
         a LOADED recording has no live space, so it wants one as the argument
+metta.telemetry.spans(trace, *, tracer, space=None, start_time=None, parent=None)
+        one BACK-DATED OpenTelemetry span per recorded reduction, nested by the
+        events' own depth and carrying the times the engine recorded rather than
+        the times the spans were built. `trace` is a Trace or a Recording, which
+        knows its own space. A call opens a span named by the HEAD (a span name
+        is low-cardinality) with the attributes `term` (the canonical text),
+        `depth`, `seq` and `space`, each under the `metta.` namespace; its exit
+        ends it with `answer`; a `fail` ends it ERROR with `exit=fail`; and a
+        reduction a bound cut ends where the trace does with `exit=absent`
+metta.telemetry.observe(m, *, tracer=None, meter=None, name="metta",
+        max_events=None, filter=None) -> Trace
+        a with-block. With a tracer it holds the engine's ONE trace session for
+        the block, so every compiled reduction in it becomes a span under one
+        span named `name`; with a meter the block's `m.stats()` deltas become the
+        four histograms `inferences` (1), `cputime` (s), `gc.freed` (By) and
+        `table_bytes` (By), under that same `metta.` namespace and attributed
+        with the space and `name`.
+        Neither given refuses; either alone works, and a meter alone arms nothing
+        The yielded Trace fills in as the block ENDS, `.stopped` naming the
+        recording bound if one cut it. That bound stops the RECORDING and never
+        the observed work, which is the caller's; a trace's bound stops its run
+        Spans are emitted at the block's end because the engine's tracer does not
+        stream; they carry the true times, which is what back-dating is for
+        A trace or debug session inside an observed block refuses, and observing
+        inside one of those refuses naming the same rule: one session holds the
+        wrappers. Needs pymetta[otel], the API package alone
+        The `metta.*` loggers need no code here: attaching
+        opentelemetry.sdk._logs.LoggingHandler to logging.getLogger("metta")
+        puts every engine, transport and provider message in the same pipeline
 m.derivation(target, depth=None, *, timeout=, inferences=) -> list[Derivation]
         proof trees in MeTTa terms: .rules, .facts, .complete, .truncations
 m.why(pattern) -> str            one empty match explained in words
@@ -2021,6 +2050,61 @@ builds the transport when it needs a token, headers or a timeout. `metta.remote.
 no transport under it, for mounting on another HTTP framework.
 `website/live/remote-protocol.md` is the contract every binding inherits and
 `metta.testing.GatewayComplianceSuite` certifies it.
+
+A served engine also DESCRIBES itself. `Gateway.openapi(secured=False) -> dict`
+is an OpenAPI 3.1.1 document for the spaces that gateway serves, answered at
+`GET /openapi.json`: one path per door with the door's own name as its
+`operationId`, `components.schemas.Atom` as the wire's tagged grammar written as
+JSON Schema 2020-12, and `x-metta-heads` naming what each space DECLARES with
+each argument's and the result's schema. `serve(token=)` puts the bearer scheme
+in it; a Gateway is transport-free and never learns the token. A space that
+declares nothing publishes an empty head list, which is the reason to declare.
+`Gateway.served() -> dict` is the space map the document is built from, and a
+Gateway is a context manager because it owns one engine per open cursor.
+
+Cost: the declarations are read through the engine's own first-argument index,
+not by walking the store, so the document is derived per request and does not
+grow with the space (230 inferences over 20,000 atoms against 340,525 for the
+walk). Nothing is cached, so nothing goes stale.
+
+`Gateway.graphql_schema() -> str` is the same catalog as GraphQL SDL, answered
+at `GET /graphql` as `text/plain`. `scalar Atom` carries any atom as canonical
+MeTTa text and `scalar Number` a MeTTa number, which no built-in GraphQL scalar
+holds exactly (`Int` is 32-bit, `Float` a double). `Query.match(pattern:
+String!, limit: Int, space: String)` reaches every atom whatever a space
+declares; each DECLARED head gains `<head>(x1: Atom, ..., space: String):
+[<Head>Row!]!` whose row fields are `x1..xn` at their declared types, because a
+`(@param ...)` row carries a type and a description and never a name. Mutations
+are `add(atom: String!)` and `remove(atom: String!)`, both taking MeTTa source.
+A head outside GraphQL's `[_A-Za-z][_0-9A-Za-z]*`, one colliding with another
+space's, and one that would shadow `match` are listed in the OpenAPI document's
+`x-metta-unnameable` with the `match(pattern:)` door that still reaches them.
+
+`Gateway.graphql(request) -> dict` executes one request, GraphQL over HTTP's own
+`query`, `variables` and `operationName` shape, and answers `data` and `errors`;
+`POST /graphql` is the same. It needs `pymetta[graphql]` (graphql-core) and
+refuses by name without it, while the SDL is built as text here and is published
+either way. `Query.match` resolves through the same door `POST /match` uses, so
+the two answer one set.
+
+`POST /ask` and `/next` with `Accept: application/vnd.apache.arrow.stream`
+answer an Arrow IPC stream instead of tagged JSON atoms;
+`RemoteSpace.stream(pattern, batch=, limit=, arrow=True)` is the client half,
+`RemoteCursor.to_arrow()` drains it into one pyarrow Table and
+`__arrow_c_stream__` hands the batches to anything reading the PyCapsule
+protocol. A `Gateway` called directly asks with `format="arrow"` in the payload,
+which is what the Accept header sets. Columns are the pattern's variables at the
+types the space DECLARES, plus `atom`, the canonical text of each instantiated
+answer; an undeclared column is `utf8` text with `metta.kind=mixed` in the field
+metadata. The schema is fixed when the cursor OPENS, because an IPC stream has
+one schema for all its batches, and each chunk crosses as a complete stream with
+the cursor token in `x-metta-cursor`. Needs `pymetta[arrow]` (pyarrow) on both
+sides and refuses by name without it; an Arrow cursor answers batches and not
+atoms, and each mode's door refuses the other's by name.
+
+Cost: 360M retired instructions for a 2,000-row drained cursor against JSON's
+685M at one chunk, 383M against 622M at ten. The crossings are the same
+(`ceil(rows / batch)`); what Arrow removes is the per-atom encode and decode.
 
 `metta.testing` ships what the suite fuzzes itself with: hypothesis strategies
 (`atoms`, `expressions`, `patterns`, `names`, `numbers`, `texts`, `symbols`,

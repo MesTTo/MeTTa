@@ -55,6 +55,110 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta`
   so the repair shows as a corpus change.
 
+- A cursor's answers as Arrow record batches. `POST /ask` and `/next` with
+  `Accept: application/vnd.apache.arrow.stream` answer an Arrow IPC stream
+  instead of tagged JSON atoms, `RemoteSpace.stream(..., arrow=True)` is the
+  client half, and `RemoteCursor.to_arrow()` drains it into one table while
+  `__arrow_c_stream__` hands the same batches to anything that speaks the Arrow
+  PyCapsule protocol. A direct `Gateway` caller asks for the same bytes with
+  `format="arrow"` in the payload, which is what the Accept header sets.
+
+  The schema is fixed when the cursor OPENS, from what the served space declares
+  about the pattern's positions, and every chunk is written at it: an IPC stream
+  has one schema for all its batches, so a kind read off the first chunk's cells
+  could be contradicted by the second. A position nothing declares is `utf8`
+  canonical MeTTa text with `metta.kind=mixed` in the field metadata. Beside the
+  variables is an `atom` column carrying each instantiated answer's canonical
+  text, which is the lossless carrier that makes the typed columns safe.
+
+  Each chunk crosses as a COMPLETE IPC stream, since a response body is what
+  `pyarrow.ipc.open_stream` is handed, and its cursor token rides in
+  `x-metta-cursor` because a stream has nowhere to carry one. Measured on a
+  2,000-row drained cursor: 360M retired instructions against JSON's 685M at one
+  chunk, and 383M against 622M at ten. Both make the same number of crossings;
+  what Arrow removes is the per-atom encode and decode.
+
+  `pyarrow` joins the `arrow` extra beside nanoarrow, which builds the C structs
+  a PyCapsule carries and does not write the streaming format.
+
+  Fixed on the way: `Gateway("ask", ...)` raised `TypeError: 'TaggedAnswer'
+  object is not iterable` for every pattern whenever an ambient
+  `metta.under(<algebra>)` scope reached the calling thread. `HTTPEndpoint`
+  answers a named `Response` carrying the reply's headers, which is where an
+  Arrow answer's media type and cursor token live.
+
+- The reduction trace as OpenTelemetry spans, and the engine's counters as
+  metrics. `metta.telemetry.spans(trace, tracer=)` emits one BACK-DATED span per
+  recorded reduction, nested by the events' own depth and carrying the times the
+  engine recorded: a call opens a span named by the head with `metta.term`,
+  `metta.depth`, `metta.seq` and `metta.space`, its exit ends it with
+  `metta.answer`, a `fail` ends it ERROR with `metta.exit=fail`, and a reduction
+  a bound cut ends where the trace does with `metta.exit=absent`.
+
+  `metta.telemetry.observe(m, tracer=, meter=)` is the block form. With a tracer
+  it holds the engine's one trace session for the block, so every compiled
+  reduction from every call inside it becomes a span under one span; with a
+  meter the block's `m.stats()` deltas become the four histograms
+  `metta.inferences`, `metta.cputime`, `metta.gc.freed` and `metta.table_bytes`.
+  The recording bound stops the RECORDING and never the observed work, which is
+  the caller's and must not fail because a telemetry budget ran out; the engine
+  gained a session mode for that, and a trace's bound still stops its own run.
+
+  Only `opentelemetry-api` is imported, from the new `[otel]` extra: the SDK,
+  the exporters and the collector stay the deployment's. The `metta.*` loggers
+  need no code at all, since attaching the SDK's `LoggingHandler` to
+  `logging.getLogger("metta")` puts every engine message in the same pipeline.
+
+- A served space publishes a GraphQL schema. `Gateway.graphql_schema() -> str`
+  is the same declarations projected into SDL, answered at `GET /graphql`, and
+  `Gateway.graphql(request) -> dict` executes a query, `POST /graphql`, through
+  graphql-core from the new `[graphql]` extra. `Query.match(pattern: String!,
+  limit: Int, space: String)` reaches every atom whatever a space declares and
+  resolves through the same door `POST /match` uses, so the two answer one set;
+  each DECLARED head gains a field of its own answering typed rows, `add` and
+  `remove` are the mutations.
+
+  `scalar Atom` carries any atom as canonical MeTTa text and `scalar Number`
+  carries a MeTTa number, which no built-in GraphQL scalar holds exactly: `Int`
+  is 32-bit signed and `Float` is an IEEE-754 double. Row fields are `x1..xn`
+  with their declared types, the names the generated stub and
+  `inspect.signature` already use, and a `(@param ...)` row's description
+  becomes the field's, since that row carries a type and a description and never
+  a name.
+
+  The SDL is built as text, so a server publishes its schema whether or not
+  graphql-core is installed; only executing needs the package, and the refusal
+  names it. A head GraphQL cannot name -- one outside
+  `[_A-Za-z][_0-9A-Za-z]*`, one colliding with a field already taken, or one
+  that would shadow `match` -- is listed in the OpenAPI document's
+  `x-metta-unnameable` with the `match(pattern:)` door that still reaches it,
+  rather than dropped.
+
+- A served space publishes an OpenAPI document. `Gateway.openapi(secured=False)
+  -> dict` builds an OpenAPI 3.1.1 document for the spaces a gateway serves and
+  the bundled server answers it at `GET /openapi.json`, so a consumer's own
+  tooling generates a client without anyone writing the wire down twice. One
+  path per door with the door's name as its `operationId`,
+  `components.schemas.Atom` as the wire's tagged grammar written as JSON Schema
+  2020-12, and `x-metta-heads` listing what each served space DECLARES, with
+  every argument's and the result's schema. `serve(token=...)` puts the bearer
+  scheme in the document; a `Gateway` is transport-free and never learns the
+  token itself.
+
+  The schemas come from one type table, `metta._projection`, with a row per
+  MeTTa type and a column per target: the Python annotation a stub renders, the
+  JSON Schema an OpenAPI document carries, the GraphQL type an SDL field
+  declares and the Arrow kind a column is produced at. `metta stubs` now reads
+  its Python column from that table instead of keeping a second copy.
+
+  Deriving the document does not grow with the served space. The declarations
+  are read through the engine's own first-argument index rather than by walking
+  the store: 230 inferences over a 20,000-atom space against 340,525 for the
+  walk, flat from 200 atoms up, which is why the document is derived per
+  request and no cache can go stale behind it.
+
+  `Gateway` is a context manager, like `Server` and every other handle here
+  that owns an engine resource.
 
 - A template renders as well as reads. `metta.render(source, /, **values) ->
   str` takes the same three faces the reading doors take -- a 3.14 `t"..."`

@@ -82,6 +82,27 @@ class RemoteCursor:
 > that may go unwanted for a saved round trip, the same choice a
 > database driver's fetch size makes.
 
+### `RemoteCursor.to_arrow`
+
+```python
+def to_arrow(self) -> Any:
+```
+
+> The whole remaining stream as one pyarrow Table.
+>
+>     with space.stream(pattern, arrow=True) as answers:
+>         table = answers.to_arrow()
+>
+> Every chunk crosses as its own complete IPC stream at ONE schema, fixed
+> by the server when the cursor opened, so the batches concatenate. The
+> columns are the pattern's variables at the types the served space
+> declares for them, plus `atom`, the canonical text of each instantiated
+> answer, which stays exact where a typed column cannot hold a cell.
+>
+> The longhand is the ask/next/stop lifecycle with
+> `Accept: application/vnd.apache.arrow.stream` and reading each body with
+> `pyarrow.ipc.open_stream`; this is that loop, drained.
+
 ### `RemoteCursor.close`
 
 ```python
@@ -171,6 +192,7 @@ def stream(
     *,
     batch: int = _DEFAULT_BATCH,
     limit: int | None = None,
+    arrow: bool = False,
 ) -> RemoteCursor:
 ```
 
@@ -191,6 +213,14 @@ def stream(
 > the count is the under-approximation the protocol forbids. The
 > first ask crosses when the cursor is built, as the in-process
 > cursor opens its engine when it is built.
+>
+> `arrow=True` asks for Arrow record batches instead of tagged atoms: the
+> server fixes ONE schema for the whole stream when the cursor opens, from
+> what it declares about the pattern's positions, and each chunk crosses
+> as a complete IPC stream at that schema. Such a cursor answers
+> `to_arrow()` and the PyCapsule protocol rather than atoms, because
+> converting a batch back to atoms would go through canonical text and
+> lose what the tagged wire carries exactly.
 
 ### `RemoteSpace.server_capabilities`
 
@@ -312,6 +342,79 @@ def health(self) -> dict:
 > The transport-side spelling of GET /health, so a Gateway is a
 > drop-in Transport and RemoteSpace.server_capabilities() can ask
 > one the same question it asks a connected server.
+
+### `Gateway.served`
+
+```python
+def served(self) -> dict[str, MeTTa]:
+```
+
+> Every space this gateway serves, by the name a request calls it.
+>
+> A gateway built with no `spaces` list serves one, the space it was made
+> from; a list names them, and each is opened on the same runtime, which
+> is what `_space` does for a request.
+
+### `Gateway.openapi`
+
+```python
+def openapi(self, *, secured: bool = False) -> dict:
+```
+
+> This gateway as an OpenAPI 3.1.1 document, `GET /openapi.json`.
+>
+>     print(metta._json.dumps(gateway.openapi()))
+>
+> One path per door, `components.schemas.Atom` as the wire's own tagged
+> grammar, and `x-metta-heads` listing what each served space DECLARES,
+> with every argument's and result's JSON Schema from the one type table.
+> A space that declares nothing publishes an empty list of heads.
+>
+> `secured` puts the bearer scheme in the document, and `serve()` sets it
+> from its own token: a gateway is transport-free and knows nothing about
+> credentials, so the half that holds them is the half that says so.
+>
+> Cost: one indexed read of each served space's `(: ...)` rows and one
+> `get-doc` per declared head, which is O(declarations) rather than
+> O(atoms) and is why this is derived per request instead of cached.
+
+### `Gateway.graphql_schema`
+
+```python
+def graphql_schema(self) -> str:
+```
+
+> This gateway's served spaces as GraphQL SDL, `GET /graphql`.
+>
+>     print(gateway.graphql_schema())
+>
+> `scalar Atom` carries any atom as the canonical MeTTa text `parse` reads
+> back and `scalar Number` carries a MeTTa number, which no built-in
+> GraphQL scalar can. `Query.match` reaches every atom whatever a space
+> declares; each DECLARED head gains a field of its own answering typed
+> rows, whose fields are `x1..xn` because a `(@param ...)` row carries a
+> type and a description and never a name.
+>
+> The text is built here, so a server publishes its schema whether or not
+> graphql-core is installed; only `graphql()` needs the package. A head
+> GraphQL cannot name is in the OpenAPI document's `x-metta-unnameable`
+> with the door that still reaches it.
+
+### `Gateway.graphql`
+
+```python
+def graphql(self, request: dict) -> dict:
+```
+
+> Execute one GraphQL request, `POST /graphql`.
+>
+>     gateway.graphql({"query": "{ users { x1 x2 } }"})
+>
+> The request is GraphQL over HTTP's own shape -- `query`, `variables`
+> and `operationName` -- and the answer is its `data` and `errors`.
+> Resolution goes through the same doors the wire operations use, so a
+> `match` query answers what `Gateway("match")` answers for the same
+> pattern. Refuses with the install guidance when graphql-core is absent.
 
 ### `Gateway.cursor_space`
 

@@ -197,6 +197,7 @@ export default defineConfig({
             items: [
               { text: "metta.trace", link: "/reference/metta-trace" },
               { text: "metta.recording", link: "/reference/metta-recording" },
+              { text: "metta.telemetry", link: "/reference/metta-telemetry" },
               { text: "metta.derivation", link: "/reference/metta-derivation" },
               { text: "metta.lint", link: "/reference/metta-lint" },
             ],

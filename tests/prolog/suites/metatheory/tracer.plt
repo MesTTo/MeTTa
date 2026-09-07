@@ -563,4 +563,79 @@ test(a_count_breakpoint_stops_at_that_event,
     engine_destroy(Engine),
     tracer:metta_debug_end.
 
+%%%%%%%%%% A held OBSERVE session %%%%%%%%%%
+
+%The session a host holds across its OWN calls, which is what instrumentation
+%over a block of work needs: one arming, several evaluations, one harvest.
+test(a_held_session_records_across_separate_evaluations,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    process_metta_string("(= (plunit_trace_inner $x) (+ $x 1))", _),
+    tracer:metta_trace_begin(1000, all, observe),
+    tracer:metta_trace_start_clock,
+    process_metta_string("!(plunit_trace_inner 1)", _),
+    process_metta_string("!(plunit_trace_inner 2)", _),
+    tracer:metta_trace_harvest(Stopped, Events),
+    tracer:metta_trace_end,
+    Stopped == false,
+    findall(Kind-Term,
+            member(event(_, _, _, Kind, Term, _, _), Events),
+            Ports),
+    Ports == [call-[plunit_trace_inner, 1], exit-[plunit_trace_inner, 1],
+              call-[plunit_trace_inner, 2], exit-[plunit_trace_inner, 2]].
+
+%The whole difference between the two modes. A trace's recording bound stops
+%the program with the recording, which is what bounds a traced run's time; an
+%observed block's work is the host's, so the bound stops the RECORDING and the
+%work finishes.
+test(an_observed_blocks_bound_stops_the_recording_and_not_the_work,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    process_metta_string("(= (plunit_trace_inner $x) (+ $x 1))", _),
+    process_metta_string(
+        "(= (plunit_trace_outer $x) (plunit_trace_inner (plunit_trace_inner $x)))",
+        _),
+    tracer:metta_trace_begin(2, all, observe),
+    tracer:metta_trace_start_clock,
+    process_metta_string("!(plunit_trace_outer 1)", Answers),
+    tracer:metta_trace_harvest(Stopped, Events),
+    tracer:metta_trace_end,
+    flatten(Answers, Flat),
+    memberchk(3, Flat),
+    Stopped == events,
+    length(Events, 2).
+
+%And the same bound in the other mode still aborts, which is the property the
+%mode exists to keep apart from the one above.
+test(a_traced_runs_bound_still_stops_the_run,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    process_metta_string("(= (plunit_trace_inner $x) (+ $x 1))", _),
+    process_metta_string(
+        "(= (plunit_trace_outer $x) (plunit_trace_inner (plunit_trace_inner $x)))",
+        _),
+    tracer:metta_trace_source("!(plunit_trace_outer 1)", '&self', 2, Events,
+                              Stopped),
+    Stopped == events,
+    length(Events, 2).
+
+%A held session takes the wrappers, so a trace inside one refuses by the same
+%rule a second debug session meets.
+test(a_held_session_refuses_a_trace_inside_it,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    process_metta_string("(= (plunit_trace_inner $x) (+ $x 1))", _),
+    tracer:metta_trace_begin(1000, all, observe),
+    catch(tracer:metta_trace_source("!(plunit_trace_inner 1)", '&self', _),
+          Error, true),
+    tracer:metta_trace_end,
+    Error = error(permission_error(trace, evaluation, nested), _).
+
+%The door validates its own bound and filter before anything is wrapped, so a
+%host that holds a session across its own calls cannot arm one it then has to
+%tear down.
+test(a_held_session_refuses_a_malformed_bound,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    catch(tracer:metta_trace_begin(0, all, observe), Error, true),
+    Error = error(domain_error(positive_integer, 0), _),
+    catch(tracer:metta_trace_begin(1000, "not a list", observe), Filter, true),
+    Filter = error(domain_error(trace_function_filter, _), _),
+    \+ tracer:metta_trace_session.
+
 :- end_tests(tracer).

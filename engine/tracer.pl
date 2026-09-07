@@ -25,6 +25,14 @@
 %   - Exact function filters retain execution depth and charge only selected
 %     events [tested: tracer:filter_precedes_the_bound_and_keeps_depth;
 %     commit=504f8dddfa890ced97e795a13ab10e239b1de2ce].
+%   - A session held over work a HOST drives, metta_trace_begin/3 in `observe`
+%     mode, records across separate evaluations and stops RECORDING at the
+%     bound instead of stopping the work, where a trace's own bound still stops
+%     its run; the door validates its bound and filter before it wraps anything
+%     [tested: tracer:a_held_session_records_across_separate_evaluations,
+%     tracer:an_observed_blocks_bound_stops_the_recording_and_not_the_work,
+%     tracer:a_traced_runs_bound_still_stops_the_run,
+%     tracer:a_held_session_refuses_a_malformed_bound; commit=0fb68d75871c57f2421c335e9faef3561f8dfdd5].
 %   - A DEBUG session suspends the program at a breakpoint through
 %     engine_yield/1 and resumes the same execution on the command the host
 %     posts back, and only one session, trace or debug, holds the wrappers
@@ -101,6 +109,10 @@
             metta_trace_target/1,
             metta_trace_interposed_target/1,
             metta_trace_wrap_once/1,
+            metta_trace_begin/3,
+            metta_trace_start_clock/0,
+            metta_trace_end/0,
+            metta_trace_harvest/2,
             metta_debug_begin/2,
             metta_debug_run/3,
             metta_debug_end/0
@@ -135,6 +147,13 @@
 :- dynamic metta_trace_filter/1.
 :- dynamic metta_trace_selected/1.
 :- dynamic metta_trace_origin/1.
+%Whether a recording bound ABORTS the work being recorded. A trace session runs
+%one program and the bound bounds it: the throw is what stops a traced program
+%that would otherwise run to the end for events nobody keeps. An OBSERVE session
+%is instrumentation over work a host is driving through its own calls, where the
+%same throw would surface as that call's failure and turn a telemetry budget
+%into a program error, so it stops RECORDING and leaves the work alone.
+:- dynamic metta_trace_aborts_at_bound/0.
 
 %Every name the translator compiled from equations, in &self's module and in
 %each other space module that registered it: exactly the predicates owning at
@@ -368,7 +387,15 @@ metta_trace_record(Depth, Kind, Term, Answer) :-
                  ( metta_trace_recording_bound(N1, Max, Cells1, Budget,
                                                Why)
                    -> metta_trace_note_stop(Why),
-                      throw('$metta_trace_bound_reached')
+                      %Dropping the limit is what makes the quiet stop cost
+                      %nothing per event afterwards: metta_trace_observe/4 reads
+                      %metta_trace_limit/1 to tell a recording session from a
+                      %debug one, so without it the wrapper's third arm answers
+                      %true and nothing is copied or charged again.
+                      (   metta_trace_aborts_at_bound
+                      ->  throw('$metta_trace_bound_reached')
+                      ;   retractall(metta_trace_limit(_))
+                      )
                  ; retractall(metta_trace_next_seq(_)),
                    assertz(metta_trace_next_seq(N1)),
                    retractall(metta_trace_cells(_)),
@@ -644,14 +671,35 @@ metta_debug_end_unlocked :-
 %%%%%%%%%%% Trace sessions %%%%%%%%%%
 
 metta_trace_begin(Max, Filter) :-
-    with_mutex('$metta_trace_state', metta_trace_begin_unlocked(Max, Filter)).
+    metta_trace_begin(Max, Filter, abort).
 
-metta_trace_begin_unlocked(Max, Filter) :-
+%Mode is `abort` for a trace, which runs one program and stops it at the
+%recording bound, or `observe` for instrumentation held over work a host drives
+%through its own calls, which stops recording there instead. Both arm the same
+%wrappers and only one session, of either kind, may hold them.
+%
+%It validates its own bound and filter, so a host that holds a session across
+%its own calls refuses a malformed one before anything is wrapped, the same
+%order metta_trace_bounded_source/7 keeps for a traced source. That path has
+%already converted its filter and metta_trace_filter_names/2 is idempotent on
+%the converted form, so the second call costs one sort of a short list.
+metta_trace_begin(Max, Filter, Mode) :-
+    metta_trace_filter_names(Filter, Names),
+    (   integer(Max), Max > 0
+    ->  true
+    ;   throw(error(domain_error(positive_integer, Max),
+                    context(metta_trace_begin/3, 'max_events bound')))
+    ),
+    with_mutex('$metta_trace_state',
+               metta_trace_begin_unlocked(Max, Names, Mode)).
+
+metta_trace_begin_unlocked(Max, Filter, Mode) :-
     ( metta_trace_session
       -> throw(error(permission_error(trace, evaluation, nested),
                      context(metta_trace_source/3,
                              'a trace is already running')))
-    ; retractall(metta_trace_filter(_)),
+    ; ( Mode == abort -> assertz(metta_trace_aborts_at_bound) ; true ),
+      retractall(metta_trace_filter(_)),
       retractall(metta_trace_selected(_)),
       retractall(metta_trace_event(_, _)),
       retractall(metta_trace_limit(_)),
@@ -694,6 +742,7 @@ metta_trace_end_unlocked :-
     retractall(metta_trace_stopped(_)),
     retractall(metta_trace_cells(_)),
     retractall(metta_trace_origin(_)),
+    retractall(metta_trace_aborts_at_bound),
     retractall(metta_trace_event(_, _)).
 
 %Run Source in Space with the trace armed; Events come back oldest
@@ -828,6 +877,17 @@ metta_trace_bounded_source(Source, Space, Max, Filter, Bounds, Events, Stopped) 
     ->  Events = []
     ;   throw(Ball)
     ).
+
+%What a session recorded, oldest first, and the bound that stopped it or false.
+%metta_trace_session/7 below reads the same two facts through
+%metta_trace_stop/2, which also has a BALL to classify; a held session ends on
+%the host's word rather than on a ball, so it asks for the recorded stop alone.
+metta_trace_harvest(Stopped, Events) :-
+    with_mutex('$metta_trace_events',
+               ( ( metta_trace_stopped(Why) -> Stopped = Why ; Stopped = false ),
+                 findall(N-E, metta_trace_event(N, E), Pairs) )),
+    keysort(Pairs, Sorted),
+    pairs_values(Sorted, Events).
 
 metta_trace_session(Source, Space, Max, Filter, Bounds, Events, Stopped) :-
     setup_call_cleanup(
