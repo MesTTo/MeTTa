@@ -1177,9 +1177,41 @@ load into `user` at boot either way, so it is load structure and not new work,
 and the tabling row the declaration was measured for is unchanged.
 
 **`pytest`: a tracked file cited an absolute workspace path.** The C seat's
-`checkout_path_length_note` said "Twenty-nine is /home/user/Dev/PyPeTTa1/PeTTa",
-and `test_no_tracked_file_cites_an_absolute_workspace_path` is right to refuse
-it: the note now says "the repository root's own length". The same test caught
+`checkout_path_length_note` justified its twenty-nine by spelling this
+workspace's own absolute path out, and
+`test_no_tracked_file_cites_an_absolute_workspace_path` is right to refuse it:
+the note now says "the repository root's own length". The same test caught
 the same mistake in this file earlier in the day, in a citation of the
 throwaway checkout, and the lesson is the same both times: a number's
 JUSTIFICATION can leak a path just as a command can.
+
+## 2026-09-07, the full gate on the branch tip, and the leak that was a quotation
+
+`GATE_ONLY=1 sh check.sh` on `3255c206`, loadavg 51.33 at the start and 61.82
+at the end: **107 of 108 lanes green, one red**, and the red was this file.
+The passage above explaining that the C seat's `checkout_path_length_note` had
+been respelled QUOTED the literal it was reporting as removed, so the scanner
+matched the quotation:
+
+    FAILED tests/repository/test_workspace_paths.py::test_no_tracked_file_cites_an_absolute_workspace_path
+    a tracked file cites an absolute workspace path; respell it repo-relative,
+    or derive it from the citing file's own position:
+      docs/journal/2026-09-07-the-gate-green-again.md:1180
+
+That is the third instance of the same shape on this branch, after a journal
+citation of a throwaway checkout and the C baseline's own note, and the scan is
+right all three times: a tracked file that spells an absolute workspace path is
+a defect whether the spelling is a command, a justification, or a quotation of
+the defect being fixed. The passage now describes the leak instead of
+reproducing it.
+
+Rejected: exempting `docs/journal/` from the scan. The test says in its own
+header that there is no exemption and every tracked file is scanned, and a
+journal documenting this lane is precisely the file such an exemption would let
+through -- the published repository would then carry the path in the one place
+that explains why it must not. Revisit only if a lane needs to assert on a
+literal absolute path, which none does.
+
+Verified: the same scan run by hand over the whole tracked set,
+`git ls-files -z | xargs -0 grep -InE '<workspace-root-needle>|<windows-needle>'`,
+reports 0 offenders, and the test itself passes on its own.
