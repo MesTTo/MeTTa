@@ -729,6 +729,49 @@ position, which puts the head in the walk that retires a space's declarations
 when the space is dropped. `owned-by-space` refuses a head whose kind row does
 not start at `symbol`, because that walk reads position 1 as the space.
 
+Every vocabulary has a MeTTa TYPE NAME, and the engine writes the type atoms
+itself: one `(: <TypeName> Type)` beside each `(vocabulary ...)` row and one
+`(: <member> <TypeName>)` per member, so `!(get-type pureStructural)` answers
+`EffectClass` and a program can match the closed sets by type. The name is the
+mechanical CamelCase of the kebab row name (`effect-class` is `EffectClass`,
+`answer-policy` is `AnswerPolicy`), and an exception is a row:
+`(vocabulary-type on-error-mode OnError)` is the only one that ships, and it is
+what both seats' generated enums are named after as well. Two more sibling rows
+carry what a vocabulary needs beyond its members, never a column, because
+programs match `(vocabulary ...)` by arity: `(vocabulary-order <vocab> <m1>
+<m2> ...)` is a chain the engine writes as `(:< m1 m2)` edges, shipped once as
+`(vocabulary-order fidelity Exact Partial Sound)` so a stronger fidelity claim
+stands where a weaker one is required, with `Refuse` deliberately outside it;
+and `(vocabulary-open <vocab> "<why>")` says a library may extend the set.
+
+A vocabulary with no `vocabulary-open` row is CLOSED, which is every one of
+them except `semiring` and `provider-capability`. The one door is
+`(add-atom &metta (vocabulary-member <vocab> <word>))`: on an open row the word
+joins the vocabulary's values everywhere the engine reads them (`(one-of ...)`,
+`(some-of ...)`, a `(claim ...)` about it, `metta_vocabulary_value/2`) and gains
+its `(: <word> <TypeName>)` atom, and withdrawing the row takes both back. On a
+closed row it is refused naming the row and the property, with
+`(vocabulary-open <vocab> "<why it opens>")` as the remedy. `semiring` is open
+because an `(algebra ...)` row is the door a program already has, and the
+engine registers the carrier's name through this one when that row lands, which
+is what lets a declared algebra carry `(claim semiring <name> ordered
+ascending)`; before that the vocabulary was a boot-time snapshot of the shipped
+presets and the claim was refused. `provider-capability` is open because
+`seam:foreign_capability/2` and `kind/2` are multifile, so a seat declaring a
+seam hook of its own declares the word gating it: `extensions/node/bridge.pl`
+registers `bounded`, `pushdown` and `transactional` that way, and a capability
+word outside the row is refused at the registration door rather than gating
+nothing.
+
+The wire's own grammar is rows too, `(wire-tag <tag> <class> <payload>
+<means>)`, thirteen of them: nine `term` tags that nest inside an atom, three
+`frame` tags that wrap a whole answer, and `r`, whose class is `reply` because
+it is `metta_py_cast`'s answer shape rather than part of the atom grammar.
+`metta.vocabularies.WIRE_TAGS` is generated from them, `metta._schemas`'
+OpenAPI `Atom` schema builds one arm per term tag from them, and
+`CODEC.md`'s table and `tests/codec/corpus.json` are held to them, so the four
+copies of the grammar that used to disagree now cannot.
+
 Function dispatch has six axes. Match `(dispatch-default $axis $value)` in
 `&metta` to read their shipped defaults, and add
 `(dispatch-policy f NoMatchEnum NoMatchFail)` to override one axis for one
@@ -1796,7 +1839,12 @@ For example, an add policy reads `request["atom"]`; it runs before the write,
 including before any bulk write.
 Capabilities are declared, not guessed: `match`, `enumerate`, `add`, `add-many`,
 `remove`, `clear`, `subscribe`, `plan`, `rules`, and an unsupported operation
-refuses loudly rather than degrading. A provider's `match` may yield
+refuses loudly rather than degrading. They are the engine's own
+`(vocabulary provider-capability ...)` row, which `metta.foreign.CAPABILITIES`
+reads rather than restates, and the row is OPEN: a seat or library that
+declares a seam hook of its own registers the word gating it with
+`(add-atom &metta (vocabulary-member provider-capability <word>))`, and a word
+neither shipped nor registered is refused when the provider registers. A provider's `match` may yield
 `Answer(theta, *, value=, residue=, k=)` instead of a plain atom: `theta` binds
 the query's variables, `value` is the answer atom unified with the pattern, and
 `k` is the provider's own annotation, which orders answers under `under=ranked`

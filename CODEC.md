@@ -60,21 +60,30 @@ decoder refuses it rather than coercing it into something.
 Two shapes break the two-element rule and both are named below: an outbound
 `h` carries three elements, and the frames carry three, four or five.
 
+The `class` and `payload` columns are the engine's own words for a tag, read
+from its `(wire-tag <tag> <class> <payload> <means>)` row in
+`engine/spaces/catalog.pl`: `class` is one of `term`, `frame` and `reply`, and
+`payload` names a class of payload rather than its concrete spelling, which the
+grammar above gives. There is one more row than there are rows here: `r`, whose
+class is `reply`, is the answer shape of one door (`metta_py_cast`) rather than
+part of the atom grammar, so a codec written against this page does not
+implement it.
+
 <!-- generated: tags -->
 | tag | class | payload | what it is |
 |---|---|---|---|
 | `s` | term | text | a symbol: a name that denotes itself |
 | `g` | term | text | a grounded value carried as text; a string crosses this way |
-| `n` | term | exact integer or float | a grounded Number or BigInt; signed-i64 width fixes an integer's language type |
-| `b` | term | "true" or "false" | a grounded boolean; the engine writes true and false, and reads True and False as the same two constants |
+| `n` | term | number | a grounded Number or BigInt; signed-i64 width fixes an integer's language type |
+| `b` | term | boolean | a grounded boolean; the engine writes true and false, and reads True and False as the same two constants |
 | `v` | term | text | a variable, the payload an identity within this term |
-| `e` | term | array of terms | an expression, its children in order; the empty one is unit |
+| `e` | term | terms | an expression, its children in order; the empty one is unit |
 | `p` | term | text | an executable space reference carried by its portable engine name, ampersand-prefixed or not; the tag is a species and a name that is no space keeps s |
-| `o` | term | host reference | a live host value crossing by reference, in process only |
-| `h` | term | registry id, and its printed text outbound | a native engine value held by reference |
-| `u` | frame | term and why | an answer whose truth is undefined under the well-founded semantics |
-| `a` | frame | theta, residue, k, and optionally a value | an answer together with the bindings it is returned under |
-| `x` | frame | end, declined, or error with a term | stream control: exhaustion, no answer at all, or a failure kept as a value |
+| `o` | term | host | a live host value crossing by reference, in process only |
+| `h` | term | handle | a native engine value held by reference |
+| `u` | frame | truth | an answer whose truth is undefined under the well-founded semantics |
+| `a` | frame | bindings | an answer together with the bindings it is returned under |
+| `x` | frame | control | stream control: exhaustion, no answer at all, or a failure kept as a value |
 <!-- end generated -->
 
 Nine of those are term tags and three are frames. The seven `s g n b v e o`

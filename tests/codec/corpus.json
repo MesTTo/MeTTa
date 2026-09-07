@@ -29,16 +29,16 @@
   "tags": {
     "s": {"class": "term", "payload": "text", "means": "a symbol: a name that denotes itself"},
     "g": {"class": "term", "payload": "text", "means": "a grounded value carried as text; a string crosses this way"},
-    "n": {"class": "term", "payload": "exact integer or float", "means": "a grounded Number or BigInt; signed-i64 width fixes an integer's language type"},
-    "b": {"class": "term", "payload": "\"true\" or \"false\"", "means": "a grounded boolean; the engine writes true and false, and reads True and False as the same two constants"},
+    "n": {"class": "term", "payload": "number", "means": "a grounded Number or BigInt; signed-i64 width fixes an integer's language type"},
+    "b": {"class": "term", "payload": "boolean", "means": "a grounded boolean; the engine writes true and false, and reads True and False as the same two constants"},
     "v": {"class": "term", "payload": "text", "means": "a variable, the payload an identity within this term"},
-    "e": {"class": "term", "payload": "array of terms", "means": "an expression, its children in order; the empty one is unit"},
+    "e": {"class": "term", "payload": "terms", "means": "an expression, its children in order; the empty one is unit"},
     "p": {"class": "term", "payload": "text", "means": "an executable space reference carried by its portable engine name, ampersand-prefixed or not; the tag is a species and a name that is no space keeps s"},
-    "o": {"class": "term", "payload": "host reference", "means": "a live host value crossing by reference, in process only"},
-    "h": {"class": "term", "payload": "registry id, and its printed text outbound", "means": "a native engine value held by reference"},
-    "u": {"class": "frame", "payload": "term and why", "means": "an answer whose truth is undefined under the well-founded semantics"},
-    "a": {"class": "frame", "payload": "theta, residue, k, and optionally a value", "means": "an answer together with the bindings it is returned under"},
-    "x": {"class": "frame", "payload": "end, declined, or error with a term", "means": "stream control: exhaustion, no answer at all, or a failure kept as a value"}
+    "o": {"class": "term", "payload": "host", "means": "a live host value crossing by reference, in process only"},
+    "h": {"class": "term", "payload": "handle", "means": "a native engine value held by reference"},
+    "u": {"class": "frame", "payload": "truth", "means": "an answer whose truth is undefined under the well-founded semantics"},
+    "a": {"class": "frame", "payload": "bindings", "means": "an answer together with the bindings it is returned under"},
+    "x": {"class": "frame", "payload": "control", "means": "stream control: exhaustion, no answer at all, or a failure kept as a value"}
   },
 
   "profiles": {
