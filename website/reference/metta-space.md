@@ -1280,7 +1280,7 @@ def pool(self, workers: int | None = None) -> Any:
 >
 >     m.run("(= (sq $x) (* $x $x))")
 >     with m.pool(workers=4) as p:
->         p.map(lambda n: m.eval(S.sq(n))[0], range(64))
+>         list(p.map(lambda n: m.eval(S.sq(n))[0], range(64)))
 >
 > Use it as a context manager so every engine is released. `workers`
 > defaults to os.cpu_count(). This handle stays usable from the workers:

@@ -62,6 +62,7 @@ These modules connect spaces, processes, event loops, subscriptions, and externa
 | [`metta.spaces`](./metta-spaces) | union, readonly, mapped, and overlay combinators |
 | [`metta.manifest`](./metta-manifest) | app assembly from a (boot ...) manifest |
 | [`metta.aio`](./metta-aio) | the engine on an event loop, one dedicated worker thread |
+| [`metta.parallel`](./metta-parallel) | thread and process pools as executors, spawn, race, channels |
 | [`metta.events`](./metta-events) | the public event stream and the fold over it |
 | [`metta.subscribe`](./metta-subscribe) | standing queries, the fold that delivers |
 | [`metta.foreign`](./metta-foreign) | Python-backed spaces |

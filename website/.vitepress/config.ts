@@ -216,6 +216,7 @@ export default defineConfig({
               { text: "metta.remote", link: "/reference/metta-remote" },
               { text: "metta.spaces", link: "/reference/metta-spaces" },
               { text: "metta.aio", link: "/reference/metta-aio" },
+              { text: "metta.parallel", link: "/reference/metta-parallel" },
               { text: "metta.events", link: "/reference/metta-events" },
               { text: "metta.subscribe", link: "/reference/metta-subscribe" },
               { text: "metta.foreign", link: "/reference/metta-foreign" },
