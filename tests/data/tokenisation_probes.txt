@@ -1,0 +1,88 @@
+; The adversarial half of the `tokenisation` lane's input. The corpus is what
+; MeTTa people actually write; these are the shapes where the site's TextMate
+; grammar and the generated Pygments lexer could disagree without anyone
+; noticing, each one a place the two engines' rules are not obviously the same:
+; the whitespace and digit classes, where Oniguruma follows Unicode and
+; Python's `str.isspace()` counts four separators Unicode does not; a span
+; that outlives its line; an escape that matches nothing; a lookaround at a
+; line's edge; and the sigils next to the brackets that bound them.
+;
+; One probe per `>>>>` line. tests/checks/check_tokenisation_parity.py writes
+; each into a file of its own, tokenises it both ways, and compares every
+; character; it also runs one of them again with CRLF endings. Nothing here is
+; a runnable program, and nothing runs it.
+
+>>>> the Unicode spaces Oniguruma counts and an ASCII-only class would not
+(f 1)
+(f 1)
+(f 1)
+(f Bool)
+(f -)
+
+>>>> the four separators Python calls whitespace and Unicode does not
+(f 1)
+(f 1)
+(f 1)
+(f 1)
+(f1)
+(fBool)
+
+>>>> a string that outlives its line
+(= (banner) "first
+second
+third")
+
+>>>> a string nothing closes
+(= (open) "never closed
+
+>>>> an escape the grammar does not define, and one it does
+"a\qb"
+"a\nb"
+"aéb"
+"ends on a backslash \"
+
+>>>> a character literal, closed, open, and ending on a backslash
+'a'
+'\n'
+'\
+'never closed
+
+>>>> the operators next to each other and inside words
+(= a b)
+(== a b)
+(!= a b)
+(~= a b)
+a=b
+import!
+foo!bar
+(: f (-> Number Number))
+(->)
+!(f)
+
+>>>> numbers, and things that only look like numbers
+1 -1 +1 1.5 -1.5 .5 1. 1e9 1E-9
+1a a1 1.2.3 - + . -- ++
+(1)(2)[3]{4}
+1,2
+
+>>>> sigils at the edges of brackets and lines
+$x $x-y $x? $x.y $ $1
+&self &kb &self.x &
+@doc @doc! @param-1 @ @1
+%Undefined% %Irreducible% % %x% %Undefined
+($x)[&self]{@doc}
+(%Undefined%)
+
+>>>> capitalised atoms against brackets, and lowercase ones
+Bool True [Bool] (True) Bool. Bool? A ABC aBC
+Type1 Type-2 T
+
+>>>> unicode outside the ASCII range
+; a comment with ✅ and é in it
+(= (mark) "✅ passed, é")
+(check ✅)
+
+>>>> whitespace only, tabs, and a line that is nothing
+	(tabbed 1)
+
+(after-blank 2)

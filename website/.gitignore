@@ -1,4 +1,9 @@
-node_modules/
+# No trailing slash, which is what extensions/node/.gitignore already
+# writes: a pattern ending in one matches a DIRECTORY only, so a worktree
+# provisioned by linking this at an installed checkout -- which is how the
+# `docs` and `tokenisation` lanes get their dependencies without a second
+# `npm ci` -- left the link showing as an untracked file.
+node_modules
 __pycache__/
 .vitepress/cache/
 .vitepress/dist/

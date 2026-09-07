@@ -463,3 +463,80 @@ jobs:
           assert printed.getvalue() == checkout.read_text(encoding='utf-8'), 'llms.txt did not ship whole'
           print('wheel boots, evaluates outside the checkout, and carries the backend seam')
           "
+
+      - name: Find the Pygments lexer through the installed entry point
+        # The one door nobody imports: Pygments reads `pygments.lexers` from
+        # installed distribution metadata, so a wheel is the only place the
+        # declaration can be wrong in a way a checkout cannot show. Pygments is
+        # installed here rather than depended on, because it is the precondition
+        # of the load rather than something this package needs -- a reader gets
+        # it with Sphinx, mkdocs, rich or IPython.
+        run: |
+          /tmp/wheeltest/bin/pip install pygments
+          cd /tmp
+          /tmp/wheeltest/bin/python -c "
+          from pygments.lexers import (
+              get_lexer_by_name, get_lexer_for_filename, get_lexer_for_mimetype,
+          )
+          from metta._pygments import MettaLexer
+          for found in (get_lexer_by_name('metta'),
+                        get_lexer_for_filename('x.metta'),
+                        # what a Jupyter kernel's language_info names
+                        get_lexer_for_mimetype('text/x-metta')):
+              assert type(found) is MettaLexer, found
+          coloured = [t for _, t, _ in MettaLexer().get_tokens_unprocessed('!(+ 1 2)')]
+          assert len(set(coloured)) > 1, coloured
+          print('the installed distribution registers the MeTTa lexer with Pygments')
+          "
+
+  # The upstream Jupyter kernel, started rather than read. Its own job because
+  # it fetches trueagi-io/jupyter-petta-kernel from github.com, which the gate
+  # refuses to do, and because it needs three things the gate has no use for:
+  # the janus bridge, an ipykernel, and the upstream checkout to run the
+  # kernel's own configuration against.
+  #
+  # The script is invoked DIRECTLY rather than through `sh check.sh kernel`.
+  # That lane is REPORT, and a REPORT failure is printed and forgiven, so
+  # running it through the driver here would report a dead kernel as a green
+  # job. CI=true is what turns every skip in it into a refusal.
+  kernel:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/mestto/metta-kernel-ci:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out the pinned upstream PeTTa beside the repository
+        # The kernel's OWN configuration is a PeTTa tree in upstream's layout,
+        # which is what `PETTA_PATH` names; the same pin the parity lanes use.
+        run: |
+          set -eu
+          upstream="$(dirname "$GITHUB_WORKSPACE")/PeTTa-upstream"
+          pin=ae66fa8e41dcd5539d614706bd4e5cfb34f9608d
+          mkdir -p "$upstream"
+          git -C "$upstream" init -q
+          git -C "$upstream" remote add origin https://github.com/trueagi-io/PeTTa
+          git -C "$upstream" fetch -q --depth 1 origin "$pin"
+          git -C "$upstream" checkout -q FETCH_HEAD
+          test "$(git -C "$upstream" rev-parse HEAD)" = "$pin"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install the package, the engine bridge and a Jupyter client
+        # ipykernel, nbclient and nbformat are not extras of this package: the
+        # kernel is somebody else's and this job is the only thing here that
+        # runs one. janus-swi comes from the `engine` extra, and the kernel
+        # boots the engine through it in-process.
+        run: |
+          uv sync --locked --extra checks --extra engine
+          uv pip install ipykernel nbclient nbformat
+
+      - name: Start the upstream kernel against upstream and against this engine
+        run: ${{ github.workspace }}/.venv/bin/python tests/checks/check_jupyter_kernel.py
