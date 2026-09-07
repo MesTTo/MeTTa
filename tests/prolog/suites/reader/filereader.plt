@@ -137,8 +137,12 @@ test(a_trailing_marker_contributes_no_form) :-
     once(phrase(filereader:top_forms(Forms, 1), Codes)),
     Forms == [runnable("(f)")].
 
+%The line rides in the error's CONTEXT slot as well as its message, so a
+%caller that has to POINT at the line reads a number rather than parsing the
+%sentence. engine/reader.c builds the identical term, which
+%reader_c:the_error_shapes_match_the_prolog_reader compares whole.
 test(missing_form_close_reports_its_syntax_error,
-     [throws(error(syntax_error(_), none))]) :-
+     [throws(error(syntax_error(_), metta_source_line(1)))]) :-
     string_codes("(not-closed", Codes),
     phrase(filereader:top_forms(_, 1), Codes).
 

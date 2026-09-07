@@ -23,12 +23,14 @@
  *     newest-first order, over the whole example corpus and the adversarial
  *     battery [tested: reader_c in tests/prolog/suites/reader/reader_c.plt;
  *     commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
- *   - both predicates raise the Prolog reader's own error shapes:
- *     error(syntax_error(MsgAtom), none) with the identical message text for
- *     a missing ')' and for a form that does not parse, and FAIL (not raise)
- *     where the Prolog splitter fails, a stray top-level ')'
+ *   - both predicates raise the Prolog reader's own error shapes, CONTEXT
+ *     slot included: error(syntax_error(MsgAtom), metta_source_line(Line))
+ *     for a missing ')', which is where a caller reads the line rather than
+ *     parsing it out of the message, and error(syntax_error(MsgAtom), none)
+ *     for a form that does not parse, which names no line; and FAIL (not
+ *     raise) where the Prolog splitter fails, a stray top-level ')'
  *     [tested: reader_c:the_error_shapes_match_the_prolog_reader;
- *     commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
+ *     commit=8d67307403c1e41ccf058bd3c8d4c079dd7cf7d5].
  *   - float literals saturate to inf/-inf past binary64 exactly as the
  *     engine's metta_saturating_parse/2 retry does, because strtod is the
  *     same correctly-rounded conversion number_codes/2 uses underneath
@@ -55,6 +57,7 @@ static atom_t ATOM_expression, ATOM_function, ATOM_runnable, ATOM_none;
 static atom_t ATOM_true, ATOM_false, ATOM_eq, ATOM_colon;
 static functor_t FUNCTOR_parsed3, FUNCTOR_parsed4;
 static functor_t FUNCTOR_error2, FUNCTOR_syntax_error1, FUNCTOR_minus2;
+static functor_t FUNCTOR_metta_source_line1;
 static locale_t c_locale;
 
 /* ------------------------------------------------------------------ */
@@ -276,7 +279,11 @@ str_put(ctx *c, const unsigned char *bytes, size_t n)
 }
 
 /* ------------------------------------------------------------------ */
-/* The two error shapes, error(syntax_error(MsgAtom), none).           */
+/* The two error shapes. A missing ')' knows its line and puts it in the
+   exception's own CONTEXT slot, metta_source_line(Line), which is what
+   engine/filereader.pl's read_balanced_form//3 throws and what
+   metta_control_signal_line/2 reads back out of the reserved control
+   envelope; a form that does not parse names no line and keeps `none`.     */
 
 static int
 raise_syntax_error_atom(atom_t msg)
@@ -309,7 +316,24 @@ raise_missing_paren(long line, const unsigned char *rest, size_t restlen)
   memcpy(buf + hlen, rest, restlen);
   msg = PL_new_atom_mbchars(REP_UTF8, total, buf);
   free(buf);
-  return raise_syntax_error_atom(msg);
+
+  /* Built here rather than through raise_syntax_error_atom() because the two
+     argument references PL_cons_functor/3 consumes have to be created in
+     order, and the context is the second of them.                          */
+  { term_t ex    = PL_new_term_ref();
+    term_t m     = PL_new_term_ref();
+    term_t where = PL_new_term_ref();
+    term_t n     = PL_new_term_ref();
+
+    PL_put_atom(m, msg);
+    PL_unregister_atom(msg);
+    if ( !PL_put_int64(n, (int64_t)line) ||
+         !PL_cons_functor(where, FUNCTOR_metta_source_line1, n) ||
+         !PL_cons_functor(m, FUNCTOR_syntax_error1, m) ||
+         !PL_cons_functor(ex, FUNCTOR_error2, m, where) )
+      return FALSE;
+    return PL_raise_exception(ex);
+  }
 }
 
 /* format('Parse error in form: ~w', [Source]) */
@@ -914,6 +938,8 @@ install_reader(void)
   FUNCTOR_parsed4 = PL_new_functor(PL_new_atom("parsed"), 4);
   FUNCTOR_error2 = PL_new_functor(PL_new_atom("error"), 2);
   FUNCTOR_syntax_error1 = PL_new_functor(PL_new_atom("syntax_error"), 1);
+  FUNCTOR_metta_source_line1 =
+    PL_new_functor(PL_new_atom("metta_source_line"), 1);
   FUNCTOR_minus2 = PL_new_functor(PL_new_atom("-"), 2);
   c_locale = newlocale(LC_ALL_MASK, "C", (locale_t)0);
 

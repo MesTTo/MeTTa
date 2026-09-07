@@ -2,14 +2,18 @@
 # Purpose: build this repository into a wheel, install it into a venv OUTSIDE
 #   the checkout, and exercise the installed copy: the launcher runs programs
 #   and imports libraries from an unrelated working directory, the runtime tree
-#   setup.py maps into metta/_runtime/ is all there, and metta.llms() prints
-#   the whole cheat sheet.
+#   setup.py maps into metta/_runtime/ is all there, metta.llms() prints the
+#   whole cheat sheet, and the CLI carries its filter surface.
 # Guarantees:
 #   - every claim is made against the INSTALL. A resource the wheel drops is
 #     invisible in a checkout, where the same door reads the repository root,
 #     so a source-tree test cannot answer this question at all.
 #   - the checkout's own llms.txt is the oracle for what the install printed,
 #     because the wheel under test was built from it moments earlier.
+#   - the installed CLI carries the filter surface: `run` names --json and the
+#     standard-input operand, `doc` names --infer. Their BEHAVIOUR needs the
+#     engine extra, which this dependency-free install does not have, and is
+#     checked in the checkout instead.
 # Fails when: uv or swipl is absent, which it refuses on rather than skipping.
 # Open Obligations:
 #   To Do: None
@@ -52,10 +56,27 @@ printf '!(import! &self (library lib_roman))\n!(map-flat (+ 1) (1 2 3))\n' \
     "$fixture/venv/bin/metta" "$fixture/roman.metta" > "$fixture/roman.log"
     "$fixture/venv/bin/python" -c 'import metta; metta.llms()' > "$fixture/llms.log"
     "$fixture/venv/bin/python" -m metta llms > "$fixture/llms-verb.log"
+    # The filter faces as far as an install WITHOUT the engine extra reaches:
+    # the operand and the flag are argparse, and argparse runs before anything
+    # imports janus. Running a program through them needs janus_swi, which
+    # --no-deps deliberately leaves out (and which this box cannot install
+    # anyway, its wheel linking libswipl.so.9 against a SWI 10), so the
+    # BEHAVIOUR is checked in the checkout by
+    # extensions/python/tests/ch01_getting_started/test_main_module.py and what
+    # is checked here is that the wheel ships the surface at all.
+    "$fixture/venv/bin/python" -m metta run --help > "$fixture/run-help.log"
+    "$fixture/venv/bin/python" -m metta doc --help > "$fixture/doc-help.log"
 )
 
 grep -Fxq '2' "$fixture/basic.log"
 grep -Fq '(2 3 4)' "$fixture/roman.log"
+
+# Short fragments, because argparse wraps its help to the terminal width and a
+# whole sentence would be a width test rather than a surface one.
+grep -Fq -- '--json' "$fixture/run-help.log"
+grep -Fq -- '--json=wire' "$fixture/run-help.log"
+grep -Fq 'no operand' "$fixture/run-help.log"
+grep -Fq -- '--infer' "$fixture/doc-help.log"
 
 # The cheat sheet is the one document a reader who pip-installed this has no
 # checkout to find, so metta.llms() has to answer from the INSTALL or the door

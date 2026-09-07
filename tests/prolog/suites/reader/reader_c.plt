@@ -2,8 +2,10 @@
 %   Prolog reader it ports, which stays the specification: every shipped
 %   .metta file and an adversarial battery must parse to variant-identical
 %   results through both full-source readers and both single-form readers,
-%   errors and failures included, and generated number spellings must convert
-%   to identical values bit for bit.
+%   errors and failures included -- the thrown term WHOLE, so an unbalanced
+%   form's line has to reach the context slot the same way through either --
+%   and generated number spellings must convert to identical values bit for
+%   bit.
 %
 %   The whole suite is conditioned on parser:metta_c_reader_active: a box
 %   without the built artifact runs the Prolog reader everywhere and this
@@ -204,9 +206,17 @@ test(generated_stress_shapes_agree_through_both_doors) :-
                   ( stress_source(S), agree_full(S), agree_sread(S) ),
                   N).
 
+%The message AND the context slot, and both compared against what the Prolog
+%reader itself throws rather than against a literal beside it: the two
+%readers are one contract, so an unbalanced form has to name its line the
+%same way through either. A missing ')' knows its line and puts it in the
+%context, where a form that does not parse names none.
 test(the_error_shapes_match_the_prolog_reader) :-
     catch(parser:metta_c_parse_source("x\n (a b", _), E1, true),
-    E1 = error(syntax_error(M1), none),
+    catch(filereader:parse_metta_source_prolog("x\n (a b", _), P1, true),
+    E1 =@= P1,
+    E1 = error(syntax_error(M1), metta_source_line(Line)),
+    Line == 2,
     M1 == 'missing \')\', starting at line 2:\na b',
     catch(parser:metta_c_sread("(a))", _, _), E2, true),
     E2 = error(syntax_error(M2), none),
