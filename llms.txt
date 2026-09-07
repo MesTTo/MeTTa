@@ -1031,6 +1031,40 @@ a watched `subsumptive`, a bound that is not a non-negative integer, a join
 that is not a visible function of two inputs. `untabled` under a standing row
 refuses too; the row is the declaration, remove it.
 
+`(cost witness class)` and `(cost witness class measure)` have no Python verb
+either, by the same ruling: `m.run("!(add-atom &metta (cost (nrev $n) quadratic))")`.
+The witness is a CALL with exactly one size hole `$n`, and the class is the
+`cost-class` vocabulary (`metta.vocabularies.CostClass`): `constant`, `log`,
+`linear`, `linearithmic`, `quadratic`, `exponential`. The row is Ciao's
+`:- check comp nrev(A,B) + steps_o(length(A))` with the same size measures,
+except that CiaoPP proves it from inferred bounds while here the `cost-rows`
+gate MEASURES a ladder of sizes and fits it. A repeated hole is one hole:
+`(cost (intersection-atom $n $n) linearithmic)` sizes both operands together.
+
+The measure is optional and the engine derives it from the head's arrow at the
+hole's position: `Number` gives `int`, the VALUE of `$n`, and everything else
+gives `length`, an expression of `$n` children. Name it in the fourth field
+when the arrow does not decide it. `(explain (<head> ...))` answers
+`(cost <class> <measure>)` for a head with a row, and `help()` on the bound
+function shows `cost: <class> in $n (<measure>)` with the ledger's measurement
+date, or `declared` where no ledger is on disk.
+
+Refusals, all at the write: a witness with zero or two holes, a witness that is
+not a call, a second row for one head (`remove-atom` the standing row first),
+and a class outside the vocabulary. The lane refuses more, by name rather than
+by fitting nothing: a head it cannot call, a measure it builds no ladder for,
+and `constant` or `log` over a `length` measure, since a call that receives an
+expression of n children cannot cost less than reading it.
+
+Ten rows ship. `(+ $n 1)` is constant; `car-atom`, `cdr-atom`, `size-atom`,
+`union-atom` and `union` are linear; `intersection-atom`, `intersection`,
+`subtraction` and `alpha-unique` are linearithmic, each building an association
+tree of one operand and looking the other up in it where `union-atom` is an
+append. `unique` and `unique-atom` deliberately carry NO row: `list_to_set/2`
+sorts in C, so the engine's inference counter reads them linear while retired
+instructions read them linearithmic, and a row would state the cheaper of the
+two.
+
 ## Observability
 
 ```
@@ -1852,6 +1886,23 @@ workload gave 1,000,601 every time, 0.0000% spread, while wall clock swung
 where the engine does nothing, use `perf stat -e instructions:u`. Instruction
 counts move with code LAYOUT, so perturb with inert clauses before believing a
 regression. Check `/proc/loadavg` before trusting any timing.
+
+A declared cost class is a claim the gate can fail. `sh check.sh cost-rows`
+runs `benchmarks/costs.py` over every `(cost ...)` row the engine holds: one
+fresh process per row, one fresh space per size, inferences per size fitted
+against the declared class in BOTH directions, so a row that overstates its cost
+fails as one that understates it does. Its ledger is
+`benchmarks/cost-baseline.json`, which is where the docstring's measurement date
+comes from. Five planted controls ride along permanently, one per gate
+direction, and the lane fails if any of them stops landing where it is planted:
+a quadratic body declared linear must fail the class gate, the same body
+declared quadratic must pass it, a linear body declared quadratic must fail it
+the other way, a naive Fibonacci with the memo refused must pass the exponential
+test, and a body whose answer counts are pinned from another row must fail the
+work gate while passing the class one. About 23 to 31 seconds, and load-immune,
+because the counter is inferences. `--paired` adds the retired-instruction
+curve for the heads whose work crosses into C; it is advisory, never a gate, and
+it is why `unique-atom` has no row.
 
 ## Downstream packages built on this surface
 

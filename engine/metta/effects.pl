@@ -4,6 +4,14 @@
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
+% Guarantees: a head's declared cost class reaches explain and every host
+% docstring through ONE resolution, so a row that names no measure takes it
+% from the head's arrow at the hole's position and no reader derives it a
+% second time; a type variable there is compared and not unified, so a
+% polymorphic parameter does not read as integer-sized
+% [tested: catalog_self_description:an_unnamed_measure_comes_from_the_arrow_at_the_holes_position,
+% catalog_self_description:explain_answers_a_declared_cost_and_stays_silent_without_one;
+% commit=6b4dceb61ccc78e308e6678af58f8daf43c31523].
 % Guarantees: native annotation inputs and outputs obey the declared type
 % or finite carrier, including the unit shortcut [tested:
 % run_tests(algebra_types); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
@@ -2217,7 +2225,8 @@ metta_annotations_order(Ctx, Direction) :-
 %A declared per-value fact: (claim Vocab Value Property...) rows carry any
 %number of properties, and a consumer asks for one.
 metta_vocabulary_claim(Vocab, Value, Property) :-
-    metta_catalog_row([claim, Vocab, Value|Properties]),
+    metta_value_claims(Vocab, Value, Claims),
+    member(Properties, Claims),
     memberchk(Property, Properties),
     !.
 
@@ -2436,8 +2445,71 @@ metta_explain_op_item(Op, Args, ['on-error', Mode]) :-
     ).
 metta_explain_op_item(Op, _, [cache, Choice, Reason]) :-
     seam:automatic_cache_explanation(Op, Choice, Reason).
+metta_explain_op_item(Op, _, [cost, Class, Measure]) :-
+    metta_cost_declaration(Op, _, Class, Measure).
 metta_explain_op_item(Op, _, [deprecated, Since, Remedy]) :-
     metta_deprecation(Op, Since, Remedy).
+
+%(cost (nrev $n) quadratic) is one head's claim about how its cost GROWS with
+%the size of one argument, checked by the cost-rows benchmark lane rather than
+%proved: Ciao's assertion language states the same thing as
+%`:- check comp nrev(A,B) + steps_o(length(A))` and CiaoPP discharges it from
+%statically inferred bounds, where this engine measures a size ladder and fits
+%it [source: https://ciao-lang.org/ciao/build/doc/ciaopp_tutorials.html/tut_advanced.html].
+%
+%A row that named no measure answers the one the head's arrow decides, so
+%explain, the Python docstring and the lane read ONE derivation instead of
+%three: the row says what class, the arrow says what the size of $n means, and
+%neither reader has to know the other's rule.
+metta_cost_declaration(Op, Witness, Class, Measure) :-
+    metta_cost_row(Op, Witness, Class, Declared),
+    (   Declared == none
+    ->  metta_cost_measure(Witness, Measure)
+    ;   Measure = Declared
+    ).
+
+%Ciao's size measures are list-length, term-size, term-depth and
+%integer-value; the two this engine derives are its `int` and `length`
+%[source: the same tutorial, "Various measures are used for the ''size'' of an
+%input, such as list-length, term-size, term-depth, integer-value"]. A hole at
+%a Number parameter is sized by its VALUE, because a number is one atom
+%however large it counts to; every other position, and a hole nested below the
+%call's own arguments where there is no parameter to read, is sized by the
+%LENGTH of the expression that fills it. A head whose arrow decides the wrong
+%one says so in the row's optional fourth field, which is why that field
+%exists.
+%The type is compared with ==, not unified. A declaration may carry a type
+%VARIABLE at the hole's position, `(: min-atom (-> $a Number))` being the
+%shipped case, and that variable unifies with 'Number' and would read the whole
+%polymorphic family as integer-sized: the ladder then hands min-atom the number
+%2048 where it wants an expression of 2048 children, and the row measures a
+%type error at a flat 409 inferences instead of the scan
+%[measured 2026-09-07: min-atom and max-atom read exponent -0.005 under
+%unification and 0.978 under ==; commit=6b4dceb61ccc78e308e6678af58f8daf43c31523].
+metta_cost_measure(Witness, Measure) :-
+    (   metta_cost_hole_position(Witness, Position),
+        metta_cost_parameter_type(Witness, Position, Type),
+        Type == 'Number'
+    ->  Measure = int
+    ;   Measure = length
+    ).
+
+metta_cost_hole_position([_|Arguments], Position) :-
+    nth1(Position, Arguments, Argument),
+    var(Argument),
+    !.
+
+%shallow_declared_type/2 rather than the relational type witness: this reads
+%&self's own declarations and the engine's builtin surface, which is where
+%every prelude head, every builtin and every imported library declaration
+%lands, and it answers deterministically. A head declared only inside a named
+%space is not on it, and derives `length`; naming the measure in the row is
+%that head's remedy.
+metta_cost_parameter_type([Head|_], Position, Type) :-
+    catch(once(shallow_declared_type(Head, Raw)), _, fail),
+    metta_arrow_type_chain(Raw, Chain),
+    append(Inputs, [_Result], Chain),
+    nth1(Position, Inputs, Type).
 
 %One declaration over one callable name. Keeping the values as terms is the
 %point: a version can be a symbol or grounded text, and the remedy can be a

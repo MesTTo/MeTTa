@@ -95,6 +95,18 @@ access-pattern check, done at plan time.
   whose membership is a type judgement and whose size is bounded. A
   thread pool is a space whose atoms are spaces, queryable like
   anything else.
+- `(cost (nrev $n) quadratic)` declares how a call's cost GROWS with the
+  size of one argument. This one is not about a backend, and it is the
+  only declaration here that a gate can prove wrong: `sh check.sh
+  cost-rows` substitutes a ladder of sizes for `$n`, counts inferences
+  at each, fits the curve, and fails the row when the measurement
+  disagrees with the class in either direction. A row that overstates
+  its cost fails as one that understates it does. The classes are
+  `constant`, `log`, `linear`, `linearithmic`, `quadratic` and
+  `exponential`; an optional fourth field names the size measure when
+  the head's arrow does not decide it. This is Ciao's `:- check comp
+  nrev(A,B) + steps_o(length(A))` with CiaoPP's static proof replaced by
+  a measurement.
 
 Ask the engine what it will do before running anything:
 
@@ -126,6 +138,24 @@ engine against any context. This is the grounded-operation calling
 convention of Hyperon's `execute_bindings`, and the residue is the
 answer-constraint store of constraint logic programming: `(> $y 3)`
 travelling with an answer is the same object a CLP system returns.
+
+## A declared cost is a claim, not a comment
+
+Every other declaration above tells the engine what to DO. A cost row
+tells it nothing: it is a statement about the head that the engine files
+away and a benchmark lane later tries to refute. That is the difference
+worth knowing before writing one. `(handles ...)` is wrong only in the
+sense that a program then behaves in a way you did not want; `(cost ...)`
+is wrong in the sense that a gate goes red and names the exponent it
+measured.
+
+So write the row you have measured, not the one you meant. The lane will
+tell you: run `python -m benchmarks.costs <head>` from
+`extensions/python` and it prints the ladder, the counts and the fitted
+exponent beside the class you declared. A head whose two counters
+disagree, its Prolog-side inferences saying one class and its retired
+instructions another, is better left undeclared than declared as the
+cheaper one; `python -m benchmarks.costs --paired` is what shows that.
 
 ## The floor
 

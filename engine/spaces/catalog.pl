@@ -2,6 +2,18 @@
 % and capability catalog Assumes: engine/spaces.pl consults this plain file
 % while its owning module is the load context. Guarantees: every definition
 % retains engine/spaces.pl's implementation module and original load order.
+% Guarantees: a value's (claim ...) rows are cached per value and the cache
+% answers what the storage does: a row landing after a read beats the entry,
+% a row removed after a read stops answering through the erased-reference
+% check, and a value carrying several rows answers a property from any of them
+% [tested: catalog_self_description:a_claim_landing_after_a_read_beats_the_cached_answer,
+% catalog_self_description:a_claim_removed_after_a_read_stops_answering,
+% catalog_self_description:a_value_may_carry_several_claim_rows; commit=6b4dceb61ccc78e308e6678af58f8daf43c31523].
+% Guarantees: a (cost ...) row's witness names exactly one size hole and one
+% head, both checked at the write with the remedy named, and one head carries
+% at most one row [tested: catalog_self_description:a_cost_witness_needs_exactly_one_hole,
+% catalog_self_description:a_second_cost_row_for_one_head_is_refused_with_its_remedy,
+% catalog_self_description:one_hole_used_twice_is_one_hole; commit=6b4dceb61ccc78e308e6678af58f8daf43c31523].
 % Fails when: loaded directly or from another module; internal state and
 % unqualified meta-goals would acquire the wrong owner. Guarantees: counting
 % and tropical are ordinary catalog algebras, the semiring vocabulary derives
@@ -396,6 +408,13 @@ metta_catalog_note_added([kind, Head|_]) :-
 metta_catalog_note_added([vocabulary, Vocab|_]) :-
     !,
     retractall(metta_vocab_cache(Vocab, _, _)).
+%A landed claim beats the entry for its value, whether that entry is a list of
+%earlier rows or the empty one a value with no claims cached. The erased-ref
+%revalidation above covers removal and cannot cover this: an entry built before
+%the row landed watches references that are all still live.
+metta_catalog_note_added([claim, Vocab, Value|_]) :-
+    !,
+    retractall(metta_claim_cache(Vocab, Value, _, _)).
 metta_catalog_note_added(['routed-by-shape', Head|_]) :-
     !,
     metta_materialize_route(Head).
@@ -469,6 +488,7 @@ metta_catalog_note_removed([Rel|_]) :-
     !,
     retractall(metta_kind_cache(_, _, _)),
     retractall(metta_vocab_cache(_, _, _)),
+    retractall(metta_claim_cache(_, _, _, _)),
     retractall(metta_algebra_descriptor_cache(_, _, _, _, _, _, _, _, _)),
     retractall(metta_annotations_cache(_, _)),
     retractall(metta_dispatch_value_cache(_, _, _, _)),
@@ -491,6 +511,12 @@ metta_catalog_note_removed([kind, Head|_]) :-
 metta_catalog_note_removed([vocabulary, Vocab|_]) :-
     !,
     retractall(metta_vocab_cache(Vocab, _, _)).
+%Removal is covered by the erased-ref revalidation, and this is here anyway for
+%the case that revalidation cannot see: a removal by PATTERN, whose Vocab or
+%Value is a variable, retracts every entry it could have matched.
+metta_catalog_note_removed([claim, Vocab, Value|_]) :-
+    !,
+    retractall(metta_claim_cache(Vocab, Value, _, _)).
 metta_catalog_note_removed(['routed-by-shape', Head|_]) :-
     !,
     metta_materialize_route(Head).
@@ -605,6 +631,7 @@ metta_catalog_clause([Rel|Args], Ref) :-
 :- dynamic metta_algebra_descriptor_cache/9.
 %Ctx, Name, Combine, Extend, Zero, One, Laws, Carrier, Requires
 :- dynamic metta_dispatch_value_cache/4. %Function, Axis, Value | none, ref(Ref) | none
+:- dynamic metta_claim_cache/4.   %Vocab, Value, Properties lists, Refs
 
 %A compiled call can ask four dispatch axes on every recursive step. Walking
 %the variadic catalog storage for each question makes the loop proportional
@@ -693,6 +720,42 @@ metta_vocabulary_values_fresh(Vocab, Values) :-
 metta_vocabulary_value(Vocab, Value) :-
     metta_vocabulary_values(Vocab, Values),
     memberchk(Value, Values).
+
+%Every (claim Vocab Value Property...) row's properties for one value, cached.
+%
+%A claim row carries ANY number of properties, so the query that reads one has
+%an open tail, and an open-tail catalog read is the branch that enumerates every
+%'&metta' storage arity rather than selecting a predicate by width. That is the
+%design 2026-09-05 settled after rejecting both a membership walk and an index
+%build on measurements, and it is fine for a question nobody asks in a loop.
+%This one IS asked in a loop: metta_annotations_order/2 consults it once per
+%answer, so a `(top k ...)` evaluation made fifteen open-tail reads at 73
+%inferences each, 1,095 of that workload's 1,756 inferences per evaluation
+%[measured 2026-09-07: instrumenting the open-tail branch over ten evaluations
+%counted 150 reads, all of them claim rows; commit=6b4dceb61ccc78e308e6678af58f8daf43c31523].
+%
+%Cached exactly as a vocabulary's values are: the answer carries the clause
+%references it was built from and revalidates with erased/1, so a REMOVED row
+%self-heals on the next read with no hook. Unlike a vocabulary there may be
+%several rows per value, so the entry carries several references and any one of
+%them being erased refreshes the whole entry. The empty answer is cached too,
+%which makes a value that claims nothing one indexed probe instead of the walk,
+%and that negative row is what metta_catalog_note_added/1 has to retract when a
+%claim lands.
+metta_value_claims(Vocab, Value, Claims) :-
+    (   metta_claim_cache(Vocab, Value, Cached, Refs),
+        \+ ( member(Ref, Refs), metta_catalog_ref_erased(Ref) )
+    ->  Claims = Cached
+    ;   retractall(metta_claim_cache(Vocab, Value, _, _)),
+        metta_value_claims_fresh(Vocab, Value, Claims)
+    ).
+
+metta_value_claims_fresh(Vocab, Value, Claims) :-
+    findall(Properties-Ref,
+            metta_catalog_clause([claim, Vocab, Value|Properties], Ref),
+            Pairs),
+    pairs_keys_values(Pairs, Claims, Refs),
+    assertz(metta_claim_cache(Vocab, Value, Claims, Refs)).
 
 %The compatibility projection lives beside the vocabulary it projects into.
 %pure=true and the old immutable spelling mean pureStructural; stable means
@@ -927,6 +990,38 @@ metta_check_catalog_semantics(cache, [Function, _], Term) :-
             Term, 1, 'one cache row per function; remove the old row first')
     ;   true
     ).
+%A cost row's witness is a CALL with exactly one size hole, because the lane
+%that checks it substitutes a ladder of sizes for that hole and fits the
+%inference counts against the declared class. Zero holes leaves nothing to
+%vary and two leaves the lane no way to say which one the class is in, so
+%both are refused here rather than discovered as a row nothing can measure.
+%Repeated occurrences of ONE hole are a hole: (intersection-atom $n $n) sizes
+%both arguments together, which is one ladder and one class.
+%
+%One row per head, the rule the cache row above keeps for the same reason: a
+%head with two classes has no class, and the remedy is the removal rather
+%than a silent last-writer-wins. A head whose two call shapes really do cost
+%differently declares the witness that matters.
+metta_check_catalog_semantics(cost, [Witness|_], Term) :-
+    !,
+    (   nonvar(Witness), Witness = [Head|_], atom(Head)
+    ->  true
+    ;   metta_declaration_refused(
+            Term, 1, 'a call whose head is a function name, as in (nrev $n)')
+    ),
+    (   term_variables(Witness, [_])
+    ->  true
+    ;   metta_declaration_refused(
+            Term, 1, 'a call naming exactly one size hole $n')
+    ),
+    Witness = [Head|_],
+    (   metta_cost_row(Head, _, _, _)
+    ->  metta_declaration_refused(
+            Term, 1,
+            'one cost row per head; remove-atom the standing row to declare another')
+    ;   true
+    ).
+
 metta_check_catalog_semantics('dispatch-default', [Axis, Value], Term) :-
     !,
     metta_check_dispatch_value(Axis, Value, Term),
@@ -1016,6 +1111,19 @@ metta_check_catalog_semantics(on, [Ctx|_], _) :-
     metta_require_events(Ctx, 'carry a reaction'),
     metta_install_bridges.
 metta_check_catalog_semantics(_, _, _).
+%One head's standing cost row, at either width: the measure field is optional
+%and reads `none` when it was left out, which is the case the engine resolves
+%from the head's arrow. Enumerating over the witness rather than indexing on
+%the head is what the row's shape allows, and there are as many rows as there
+%are declared heads.
+metta_cost_row(Head, Witness, Class, Measure) :-
+    (   metta_catalog_row([cost, Witness, Class, Measure])
+    ;   metta_catalog_row([cost, Witness, Class]),
+        Measure = none
+    ),
+    nonvar(Witness),
+    Witness = [Head|_],
+    atom(Head).
 
 metta_check_algebra_fields(Name, Combine, Extend, Zero, One,
                            Laws, Carrier, Requires, Term) :-
@@ -1620,6 +1728,20 @@ metta_catalog_preset([vocabulary, 'cache-policy', force, refuse,
                       plain, incremental, monotonic, lazy, shared, private,
                       subsumptive, lattice, 'max-answers', 'subgoal-abstract',
                       'answer-abstract']).
+%The asymptotic classes a (cost ...) row may claim, in the order a cost
+%grows. The six are the shapes the checker can tell apart on a size ladder:
+%google/benchmark's own model set minus cubic and plus exponential, which its
+%selection has no term for and a recursion without a memo reaches
+%[source: https://github.com/google/benchmark/blob/eddb0241389718a23a42db6af5f0164b6e0139af/src/complexity.cc#L133-L146].
+%Ciao states the same claim as `:- check comp nrev(A,B) + steps_o(length(A))`
+%and CiaoPP proves it from inferred bounds; here the checker is the cost-rows
+%lane, which measures it
+%[source: https://ciao-lang.org/ciao/build/doc/ciaopp_tutorials.html/tut_advanced.html,
+%"CiaoPP can also infer lower and upper bounds on the sizes of terms and the
+%computational cost of predicates"].
+metta_catalog_preset([vocabulary, 'cost-class',
+                      constant, log, linear, linearithmic,
+                      quadratic, exponential]).
 metta_catalog_preset([vocabulary, 'effect-class',
                       pureStructural, readOnlyLookup,
                       nondeterministicReadOnly, writesState, oracleIO]).
@@ -1723,6 +1845,8 @@ metta_catalog_preset([kind, events, symbol, ['one-of', delivery],
                       [optional, ['one-of', 'event-order']]]).
 metta_catalog_preset([kind, emits, symbol, ['one-of', 'answer-policy']]).
 metta_catalog_preset([kind, cache, symbol, ['some-of', 'cache-policy']]).
+metta_catalog_preset([kind, cost, pattern, ['one-of', 'cost-class'],
+                      [optional, symbol]]).
 metta_catalog_preset([kind, image, symbol, symbol, ['one-of', 'image-mode']]).
 metta_catalog_preset([kind, 'type-image', symbol,
                       ['one-of', 'registry-image']]).
