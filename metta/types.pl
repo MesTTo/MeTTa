@@ -264,18 +264,54 @@ raw_governing_type_declaration_in(Module, X, T, Owner) :-
 %inherited &self row [tested:
 %lib_strategy:an_inherited_arrow_does_not_veto_a_local_definition;
 %commit=7b238053d2907cd514e3fd9a29927d43a53c5a3c].
-definition_type_declaration_in(_Module, X, T) :-
+definition_type_declaration_in(Module, X, T) :-
+    prelude_declaration_governs_in(Module, X),
     prelude_type_declaration(X, Raw),
     metta_runtime_type(Raw, T).
 definition_type_declaration_in(Module, X, T) :-
     metta_module_space(Module, Space),
     match_stored(Space, [':', X, Raw], Raw, _),
     metta_runtime_type(Raw, T).
-raw_definition_type_declaration_in(_Module, X, T) :-
+raw_definition_type_declaration_in(Module, X, T) :-
+    prelude_declaration_governs_in(Module, X),
     prelude_type_declaration(X, T).
 raw_definition_type_declaration_in(Module, X, T) :-
     metta_module_space(Module, Space),
     match_stored(Space, [':', X, T], T, _).
+
+%engine/prelude.metta promises a prelude name is "shadowable per named space
+%exactly as builtins are", and the engine's own test for a builtin a module has
+%taken over is fun_in/2: runtime_guarded_builtin_call/1 requires
+%\+ fun_in(Module, Fun) before it will use the builtin's own guard
+%[source: engine/translator/special_forms.pl:273-278; commit=WORKTREE]. The
+%prelude's DECLARATION tier did not ask it. A named space defining if-equal at
+%two inputs therefore kept the prelude's four-input arrow, no chain presented
+%the written arity, and typed_functioncall_dl/10 compiled
+%declared_arity_refusal/3: the same source text answered SHADOWED in &self and
+%(Error (if-equal 1 1) IncorrectNumberOfArguments) under any host that mints a
+%named space, which is the Python seat's every engine
+%[measured 2026-09-07: `(= (if-equal $a $b) SHADOWED)` then `!(if-equal 1 1)`,
+%SHADOWED through sh run.sh and the Error through MeTTa().run, and the same file
+%answering SHADOWED in a named space once &self had evicted the prelude row
+%first; fixture=ai-tmp/dl-repro/dl_f03_gettype2.pl; commit=WORKTREE].
+%
+%&self needs no such test and is deliberately excluded: a definition there
+%EVICTS the prelude's row outright through evict_prelude_definition/1, because
+%the prelude is &self's own tier. A named module cannot evict a row its
+%siblings still read, so it shadows instead, and the two doors then agree
+%[tested: prelude:a_named_space_shadows_a_prelude_name_at_another_arity;
+%commit=WORKTREE].
+%
+%The question is about the NAME IN THIS MODULE rather than about a call site,
+%so it is asked here, where both definition readers pass, and not at
+%governing_type_chains_in/4 alone: equation_walk_class/5 would otherwise go on
+%classifying the equation as `declared` on the strength of a declaration that
+%no longer governs it.
+prelude_declaration_governs_in(Module, X) :-
+    (   metta_self_module(Module)
+    ->  true
+    ;   \+ fun_in(Module, X)
+    ).
 
 %Filter an already nonempty visible set. Keeping the emptiness test at the
 %caller means the extra ownership lookup is paid only by typed heads.
@@ -291,7 +327,19 @@ governing_type_chains_in(Module, X, InScope, Unique) :-
         (   Local \== []
         ->  Selected = Local
         ;   fun_in(Module, X)
-        ->  findall(Prelude, prelude_type_declaration(X, Prelude), Selected)
+        ->  %A name this module DEFINES is not typed by anything it merely
+            %inherits. The branch was written to stop an inherited &self row
+            %vetoing a local definition, and read the prelude's rows back in
+            %where the line above had just excluded them; since
+            %prelude_declaration_governs_in/2 the prelude tier is inherited
+            %too, so what a module-owned name with no stored declaration of
+            %its own governs by is nothing, and the call compiles untyped --
+            %which is exactly what the same equation gets in &self, where
+            %evict_prelude_definition/1 takes the prelude's row away
+            %[tested: prelude:a_named_space_shadows_a_prelude_name_at_another_arity,
+            % lib_strategy:an_inherited_arrow_does_not_veto_a_local_definition;
+            % commit=WORKTREE].
+            Selected = []
         ;   Selected = InScope
         ),
         list_to_set(Selected, Unique)
