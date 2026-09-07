@@ -390,10 +390,10 @@ register_metta_library_path(Alias, Directory0, true) :-
 %trunk, 140,178 with `use_module` and 138,995 with this
 %[measured 2026-09-07; command=swipl tests/fixtures/parity_driver.pl <root>
 %examples/ch18-performance/18-02-memoisation-and-tabling/09-tabling_fib.metta;
-%commit=WORKTREE]. An explicit declaration is honoured with the `autoload` flag
+%commit=c2fe16d7daecca88683c097dbd9f09a09db803b8]. An explicit declaration is honoured with the `autoload` flag
 %false, which is the whole point of naming the file rather than leaving it to
 %the library index [tested: the GATE no-autoload lane, 258 examples;
-%commit=WORKTREE].
+%commit=c2fe16d7daecca88683c097dbd9f09a09db803b8].
 :- autoload(library(wfs), [call_delays/2]).
 :- use_module(library(random)).
 :- use_module(library(error)).
