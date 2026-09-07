@@ -3465,6 +3465,27 @@ test(a_bulk_local_shadow_retains_no_inherited_order_types,
             RetainedTypes),
     assertion(RetainedTypes == [[], []]).
 
+% The deferred door's fallback is the space the occurrence is stored in. An
+% equation that reaches its deferred compile with no binding row, which is
+% every atom the bulk door stores and every unrowed atom a fast image
+% restores, compiled against the raw stored atom, so `&self` in its body named
+% the engine root while the reader's copy of the same atom named the receiving
+% space. The root holds no such edge, so the old reading answers `[[]]` here.
+test(an_unbound_deferred_equation_reads_the_space_it_is_stored_in,
+     [ cleanup(clear_native_atoms('&plunit_deferred_self')) ]) :-
+    Space = '&plunit_deferred_self',
+    metta_add_atom(Space, ['plunit-deferred-edge', local], _),
+    metta_add_program_atoms(
+        Space,
+        [ [=, ['plunit-deferred-self'],
+           [collapse, [match, '&self', ['plunit-deferred-edge', X], X]]] ]),
+    space_module(Space, Module),
+    findall(Answer,
+            with_metta_module(Module,
+                              reduce(['plunit-deferred-self'], Answer, _)),
+            Answers),
+    assertion(Answers == [[local]]).
+
 door_order(Door, Batch, Order) :-
     'new-space'(Space),
     setup_call_cleanup(

@@ -767,10 +767,24 @@ defer_metta_equation(Space, Module, Term, StoredRef) :-
 %No announcement in either branch: the CALLER announces the arrival once,
 %whichever branch stored it, so an equation joining a translated function and
 %an equation deferred behind a marker cost observers the same one event.
+%An arriving equation of a function this module already translated compiles
+%AT ARRIVAL, and as the space compiled every equation before it: &self
+%resolved to the space, the reading the deferred door gives an occurrence in
+%filereader:stored_equation_source/4 and the one-equation door gives one in
+%add_function_atom/6. The raw batch term compiled here read the ENGINE ROOT
+%for the second load of a fast image into one space, and for any batch
+%extending a function the space had already run [tested:
+%test_fast_images_preserve_each_equations_binding,
+%test_removal_retires_the_same_stored_equation_after_recompilation;
+%commit=WORKTREE]. The root is the identity case and pays no walk.
 mark_or_translate_equation(Space, Module, F, InputArity, Arriving) :-
     (   metta_function_translated(Module, F)
     ->  forall(member(Equation, Arriving),
-               assert_translated_equation(Module, Equation, _, _))
+               ( (   Space == '&self'
+                 ->  Resolved = Equation
+                 ;   metta_substitute_self(Space, Equation, Resolved)
+                 ),
+                 assert_translated_equation(Module, Resolved, _, _) ))
     ;   defer_metta_function(Space, Module, F, InputArity)
     ).
 
@@ -1175,8 +1189,11 @@ add_function_atom(Storage, Space, Module, Term, FAtom, W) :-
     %
     %The STORED atom keeps the &self the author wrote and the compiled CLAUSE
     %resolves it against this space, which is the split a source load already
-    %makes: filereader/source_lifecycle.pl stores Original and compiles
-    %Resolved through the same metta_substitute_self/3. Without it the two
+    %makes: filereader:process_form/3 stores the parsed term and compiles the
+    %one rewrite_parsed_form/4 answers, which resolves &self through the same
+    %metta_substitute_self/3; the deferred door's fallback in
+    %filereader:stored_equation_source/4 gives an occurrence with no binding
+    %row the same reading. Without it the two
     %doors disagreed about one word. Byte-identical equations behaved
     %differently by whichever door wrote them: `(= (q) (collapse (match &self
     %(r $x) $x)))` loaded from source read the space it was loaded into, and
@@ -1872,19 +1889,33 @@ metta_host_native_fact(Module, Goal, Space, Fact) :-
     Goal =.. [_|Fact].
 
 %% remove_equation(+Space, +Equation, +Function:atom, +Arguments, ?Body, -Removed:boolean) is semidet.
+%The PROBE that finds the compiled clause is the equation as the space
+%compiled it, &self resolved to the space, because that is the term every
+%compile path leaves in translated_from/2 and fun_meta: the reader through
+%rewrite_parsed_form/4, add_function_atom/6 above, and the deferred door
+%through filereader:stored_equation_source/4. Probing with the WRITTEN atom
+%found no clause for a natively added `(= (f $x) (match &self ...))` in a
+%named space, so remove-atom took the stored atom and left the clause
+%answering with its fun_meta row standing beside it [tested:
+%test_removing_an_equation_that_names_its_own_space_retires_its_clause;
+%commit=WORKTREE]. The STORED atom is still matched as written, which is what
+%unstore_atom/3 receives.
 remove_equation(Space, Term, F, Args, Body, Removed) :-
     (   ( translated_equation_binding(Space, _, _)
         ; native_removal_reference(_) )
     ->  transaction(
             ( resolved_equation_removal(Space, Term, Source, Origin),
               remove_equation_source(Space, Term, Source, Origin, Removed) ))
-    ;   copy_term([=, [F|Args], Body], Source),
+    ;   metta_substitute_self(Space, [=, [F|Args], Body], Resolved),
+        copy_term(Resolved, Source),
         remove_equation_source(Space, Term, Source, ordinary, Removed)
     ).
 
 % Resolve the occurrence before retracting it, under the same transaction
 % snapshot. The binding names its exact executable clause, so a native copy
 % with the same written equation cannot retire a reader copy's source owner.
+% An occurrence without a binding is probed as the space compiled it, the
+% same resolution the deferred door applies.
 resolved_equation_removal(Space, Term, Source, Origin) :-
     copy_term(Term, Pattern),
     (   \+ seam:foreign_space(Space),
@@ -1895,9 +1926,11 @@ resolved_equation_removal(Space, Term, Source, Origin) :-
     ->  (   translated_equation_binding(Space, StoredRef, Ref),
             translated_from(Ref, Bound)
         ->  Source = Bound, CompiledOrigin = bound(Ref)
-        ;   stored_atom_of_ref(StoredRef, Space, Source), CompiledOrigin = ordinary
+        ;   stored_atom_of_ref(StoredRef, Space, Stored),
+            metta_substitute_self(Space, Stored, Source),
+            CompiledOrigin = ordinary
         )
-    ;   Source = Pattern, CompiledOrigin = ordinary
+    ;   metta_substitute_self(Space, Pattern, Source), CompiledOrigin = ordinary
     ),
     (   native_removal_reference(SelectedRef),
         filereader:source_load_assertion(Load, stored, SelectedRef)

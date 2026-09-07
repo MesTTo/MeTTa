@@ -69,7 +69,10 @@
 % Each space(Id, Parent, Atoms, Bindings) preserves its original atom list.
 % binding(Index, ResolvedEquation) names one one-based atom occurrence; indexes
 % are strictly increasing. Resolved terms use the same world-node relocation
-% as atoms, tokens and rules. Earlier schemas lack this source provenance and
+% as atoms, tokens and rules. A row is written only where arrival-time
+% rewriting did more than resolve &self (a bound token, a form rewriter);
+% &self is resolved against the restoring space when the occurrence compiles,
+% which is what relocates it. Earlier schemas lack this source provenance and
 % are refused by the exact header comparison before payload decoding.
 metta_host_fast_header(Header) :-
     current_prolog_flag(version_data, swi(Major, Minor, Patch, _)),

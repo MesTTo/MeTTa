@@ -1090,6 +1090,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- A twin's empirical BUDGET envelope may have zero spread. Every observation
+  agreeing under a protocol is the claim the envelope records, keyed to that
+  protocol and re-observed rather than re-pinned; the lane used to refuse
+  `minimum == maximum` and now refuses only an inverted pair.
 - `metta._contract.ONTOLOGY` no longer restates the engine's closed value
   sets. Eleven of its twelve member sets named an engine vocabulary under a
   CamelCase this seat had chosen, one (`Semiring`) listed six members where
@@ -1452,6 +1456,24 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- An equation that says `&self` reads the space it is stored in through EVERY
+  door, not only the two the entry below made agree. The deferred door
+  (`filereader:stored_equation_source/4`) compiled an occurrence with no
+  binding row from the raw stored atom, so a fast image of natively added
+  `(= (f $x) (match &self ...))` equations restored to a space that answered
+  nothing for the match arm; a batch extending a function the space had
+  already run (`spaces:mark_or_translate_equation/5`) compiled its arriving
+  equations raw, so a second load of one image into one space read the engine
+  root; and `remove-atom` probed for the clause with the written atom, so
+  removing such an equation from a named space took the atom and left the
+  function answering. All three now resolve `&self` against the space, with
+  the root as the identity case. A binding row in a fast image records only
+  what arrival-time rewriting did beyond resolving `&self` (a bound token, a
+  form rewriter), so an image carries fewer rows and means the same, and
+  whether an occurrence has a row no longer depends on which door wrote it.
+  `metta_substitute_self/3` probes the term for the text `&self` before
+  walking it, so a term that never says it pays two inferences however large
+  it is, where the one-equation door walked every natively added equation.
 - An equation stored through `add-atom` resolves `&self` the way one loaded
   from source already did. The one-equation door in
   `engine/spaces/foreign.pl` stored the atom and compiled THE SAME TERM, where
