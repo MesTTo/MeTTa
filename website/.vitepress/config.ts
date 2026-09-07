@@ -170,6 +170,7 @@ export default defineConfig({
         items: [
           { text: "Module index", link: "/reference/" },
           { text: "The shrink ledger", link: "/reference/shrink-ledger" },
+          { text: "Refusals", link: "/reference/refusals" },
           {
             text: "Core",
             collapsed: true,

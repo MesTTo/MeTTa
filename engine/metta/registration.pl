@@ -17,6 +17,13 @@
 %   ball with the fields that kind carries, so every seat classifies the same
 %   set instead of reading the rendered message
 %   [tested: tests/prolog/suites/host/error_kinds.plt; commit=52e95b50cc5acdc0e41f97b444ab244ad1301433].
+%   metta_host_refusal/6 answers that kind's catalog row beside it, the class
+%   name a seat raises, the ground the refusal stands on and the remedy with
+%   its <field> holes filled from the ball, so one renderer serves all three
+%   seats and a filled act keeps the row's own applicability while a hole left
+%   over lowers it to prose
+%   [tested: tests/prolog/suites/spaces/catalog_refusal_rows.plt,
+%   extensions/python/tests/repository/test_refusal_rows.py; commit=f33b7ab0200e6dc74c88fb4c7f827bf545a447ed].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
@@ -503,6 +510,159 @@ metta_host_bound_fields([_-Value|Rest], Fields) :-
     metta_host_bound_fields(Rest, Fields).
 metta_host_bound_fields([Pair|Rest], [Pair|Fields]) :-
     metta_host_bound_fields(Rest, Fields).
+
+%!  metta_host_refusal_row(?Kind, ?Class, ?Ground, ?Remedy) is nondet.
+%
+%   The catalog's declaration for one refusal kind: the class name a seat
+%   raises for it, the authority it stands on, and its remedy TEMPLATE, whose
+%   title carries a <field> hole for each field the kind declares above.
+%   engine/spaces/catalog.pl holds the rows; this is the door the seats read
+%   them through, so a seat asks the engine rather than reaching into '&metta'
+%   with a shape of its own.
+%
+%   The kinds here and the kinds in metta_host_error_kind_row/3 are the same
+%   set, held equal both ways by
+%   catalog_refusal_rows:the_refusal_rows_are_the_engines_own_kinds; the rows
+%   cannot be DERIVED from that table because catalog.pl is consulted into the
+%   spaces module and may not reach an engine predicate, which is the same
+%   reason the refinement vocabulary is checked rather than derived
+%   [source: docs/journal/2026-09-06-one-refinement-vocabulary.md].
+metta_host_refusal_row(Kind, Class, Ground, Remedy) :-
+    metta_catalog_row([refusal, Kind, Class, Ground, Remedy]).
+
+%!  metta_host_refusal(+Ball, -Kind, -Fields, -Class, -Ground, -Remedy) is semidet.
+%
+%   One raised ball read whole: which kind it is, the fields that kind carries
+%   in it, and the kind's declared class, ground and remedy with the fields
+%   filled in. This is the reading every seat makes at a crossing, so the
+%   remedy a caller sees is rendered ONCE, here, rather than once per seat.
+%
+%   Semidet rather than det: it fails for a kind with no catalog row, which
+%   catalog_refusal_rows:the_refusal_rows_are_the_engines_own_kinds forbids and
+%   which a program that removed the row can nonetheless produce, and it fails
+%   the same way for a row whose remedy is not a (remedy ...) row, which the
+%   `refusal` kind spec admits because its last two positions are `term`. A
+%   seat that gets no answer keeps the classification it already had, which is
+%   what it had before this table existed. once/1 because a program may hold a
+%   second row for one kind and a refusal has one reading.
+metta_host_refusal(Ball, Kind, Fields, Class, Ground, Remedy) :-
+    metta_host_error_kind(Ball, Kind, Fields),
+    once(metta_host_refusal_row(Kind, Class, Ground, Template)),
+    metta_host_refusal_remedy(Template, Fields, Remedy).
+
+%!  metta_host_refusal_remedy(+Template, +Fields, -Remedy) is det.
+%
+%   The template with its holes filled from THIS refusal's fields, and its
+%   applicability downgraded to `prose` while any hole is left.
+%
+%   A hole the fields cannot fill is the reader's own choice -- the new bound
+%   in (pragma! max-time <seconds>), which the engine has no opinion about --
+%   and a suggestion carrying one is exactly rustc's HasPlaceholders, the
+%   level `prose` already spells [source: rustc_lint_defs::Applicability,
+%   https://doc.rust-lang.org/nightly/nightly-rustc/rustc_lint_defs/enum.Applicability.html].
+%   So the row declares the applicability its FILLED remedy has and this
+%   lowers it, rather than every row declaring `prose` defensively and a
+%   filled capability edit being unofferable.
+metta_host_refusal_remedy([remedy, Title0, Kind, Applicability0|Acts0], Fields,
+                          [remedy, Title, Kind, Applicability|Acts]) :-
+    metta_host_refusal_fill_text(Fields, Title0, Title),
+    metta_host_refusal_fill_term(Acts0, Fields, Acts),
+    (   ( metta_host_refusal_text_hole(Title)
+        ;   metta_host_refusal_term_hole(Acts)
+        )
+    ->  Applicability = prose
+    ;   Applicability = Applicability0
+    ).
+
+metta_host_refusal_fill_text([], Text, Text).
+metta_host_refusal_fill_text([Name-Value|Fields], Text0, Text) :-
+    atomic_list_concat(['<', Name, '>'], Hole),
+    metta_host_error_field_text(Value, Replacement),
+    metta_host_refusal_substitute(Text0, Hole, Replacement, Text1),
+    metta_host_refusal_fill_text(Fields, Text1, Text).
+
+%Every occurrence, left to right. sub_string/5 with the pattern bound answers
+%the leftmost match first, and the tail is rewritten recursively so a hole
+%repeated in one title is filled everywhere rather than once.
+metta_host_refusal_substitute(Text, Hole, Replacement, Filled) :-
+    (   sub_string(Text, Before, _, After, Hole)
+    ->  sub_string(Text, 0, Before, _, Head),
+        sub_string(Text, _, After, 0, Rest),
+        metta_host_refusal_substitute(Rest, Hole, Replacement, Tail),
+        atomics_to_string([Head, Replacement, Tail], Filled)
+    ;   atom_string(Text, Filled)
+    ).
+
+%An act is ordinary MeTTa data, so a hole in it is the SYMBOL <name> and
+%filling it puts the field's own value in that position rather than its text:
+%(grants <space> <capability>) becomes (grants &restricted process), an atom a
+%program can write back.
+metta_host_refusal_fill_term(Term, _, Term) :- var(Term), !.
+metta_host_refusal_fill_term(List, Fields, Filled) :-
+    is_list(List),
+    !,
+    metta_host_refusal_fill_terms(List, Fields, Filled).
+metta_host_refusal_fill_term(Atom, Fields, Filled) :-
+    atom(Atom),
+    metta_host_refusal_hole_name(Atom, Name),
+    memberchk(Name-Value, Fields),
+    !,
+    Filled = Value.
+metta_host_refusal_fill_term(Term, _, Term).
+
+%A written recursion rather than maplist/3 with a lambda: yall COPIES a
+%lambda's free variables per call, so Fields inside one would be a fresh
+%copy and every hole would fill with an unbound variable
+%[source: SWI-Prolog library(yall), the / operator's own reason for existing].
+metta_host_refusal_fill_terms([], _, []).
+metta_host_refusal_fill_terms([Item|Rest], Fields, [Filled|Others]) :-
+    metta_host_refusal_fill_term(Item, Fields, Filled),
+    metta_host_refusal_fill_terms(Rest, Fields, Others).
+
+metta_host_refusal_hole_name(Atom, Name) :-
+    atom_concat('<', Rest, Atom),
+    atom_concat(Name, '>', Rest).
+
+%A `<` with a `>` after it is a hole this renderer could not fill. The titles
+%carry no other angle bracket, and a field VALUE that carried a pair of them
+%would be a refusal already naming its own remedy shape.
+metta_host_refusal_text_hole(Text) :-
+    split_string(Text, "<", "", [_|Tails]),
+    member(Tail, Tails),
+    sub_string(Tail, _, _, _, ">"),
+    !.
+
+metta_host_refusal_term_hole(Term) :-
+    atom(Term),
+    !,
+    metta_host_refusal_hole_name(Term, _).
+metta_host_refusal_term_hole(List) :-
+    is_list(List),
+    member(Item, List),
+    metta_host_refusal_term_hole(Item),
+    !.
+
+%!  metta_host_error_field_text(+Value, -Text) is det.
+%
+%   One refusal field as the text a person reads. The engine's own writer
+%   spells a compound, which is what makes a restraint's `call` read back as
+%   the call the program wrote, and a number keeps ~w's plain spelling.
+%
+%   extensions/node/bridge.pl keeps metta_node_number_text/2 for the WIRE
+%   instead of calling this: that path spells a number with ~q on purpose, so
+%   inf, nan and 1r3 cross as themselves for the JavaScript side to refuse
+%   [source: extensions/node/bridge.pl, metta_node_number_text/2]. This one is
+%   prose, where a reader wants 0.05 rather than a spelling to parse.
+metta_host_error_field_text(Value, Text) :- string(Value), !, Text = Value.
+metta_host_error_field_text(Value, Text) :- atom(Value), !, atom_string(Value, Text).
+metta_host_error_field_text(Value, Text) :-
+    number(Value),
+    !,
+    format(string(Text), '~w', [Value]).
+metta_host_error_field_text(Value, Text) :-
+    catch(sdisplay(Value, Text), _, fail),
+    !.
+metta_host_error_field_text(Value, Text) :- term_string(Value, Text).
 
 %A result past binary64 SATURATES to the IEEE value instead of raising,
 %which is upstream's arithmetic (plain Rust f64: "1e400".parse and 1e308*10

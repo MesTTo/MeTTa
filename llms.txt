@@ -24,6 +24,7 @@ re-runs them.
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 27 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
+| `website/reference/refusals.md` | the engine's own `(refusal ...)` rows: the class each seat raises, the ground and the remedy | `extensions/python/tools/refusalsdoc.py` |
 | `tests/prolog/suites/*/*.plt` | plunit suites over the engine itself, grouped by the engine unit each one tests | the `plunit` gate lane |
 | `extensions/python/tests/*/test_*.py` | blackbox, hypothesis-fuzzed, in the same 20 chapters `examples/` uses, plus `conformance/` for the arbiters and `repository/` for the tests whose subject is this repository | the `pytest` gate lane |
 | `extensions/python/examples/language-feature-examples/**/*.py` | one Python file per shipped MeTTa example, written with no MeTTa source text, answering alpha-equal to its original or explicitly declining a structured-residue form, and pinned to an inference budget. Read these for how a MeTTa program is spelled in Python | the `twins` REPORT lane |
@@ -39,7 +40,7 @@ re-runs them.
 | `extensions/python/examples/*/*.py` | runnable Python programs, each printing checked claims through `_common.py`: `check(label, got, expected)` raises `CheckFailed` rather than asserting, because `python -O` strips an assert while the print under it still runs, and `done(name)` refuses to print its OK line when nothing was checked, so an example that verified nothing cannot report success; the six under `gallery/` also check adjacent emitted-MeTTa and output comments plus bilingual `@example` atoms | the `examples` and `gallery` gate lanes |
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
 | `engine/**/*.pl` | `engine/metta.pl` engine bootstrap loading the fourteen `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, space_hooks, runtime, control, interop, registration, prelude), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eight `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products), `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.pl` the vocabulary tier (Prolog bodies of the 32 prelude heads). Each unit is a plain source file consulted by its umbrella, so predicate ownership and load order are the umbrella's | |
-| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 101, `service` 61, `ownership` 38, `event` 15, `declaration` 15. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
+| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 103, `service` 61, `ownership` 38, `event` 15, `declaration` 15. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
 | `lib/lib_*/` | 38 MeTTa libraries, implemented in `.metta`, `.pl`, or both, loaded with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
 | `extensions/*/extension.pl` | one control file per seat, read when argv carries `extensions` and never read without it; a seat's `entry(engine, _)` loads only where its declared needs hold and its `entry(host, _)` is recorded for the seat's own runtime to consult, so the engine names neither a host nor a backend | |
@@ -1411,8 +1412,9 @@ human), and the repair itself is `edit` (an atom to write), `replace` (a
 stored atom and what it becomes, `None` in the second position for a
 removal) or `python` (the host text to write instead). A Remedy naming none
 of the three refuses at construction. `metta.errors.Ground(kind, citation)`
-is the authority: `python-reference` a Language Reference section,
-`metta-law` a named law, `arbiter` a measured answer of upstream PeTTa under
+is the authority: `host-reference` the host language's own specification,
+which here is a Python Language Reference section, `metta-law` a named law,
+`arbiter` a measured answer of upstream PeTTa under
 `tests/conformance/petta/`. Both are frozen, slotted, pattern-matchable, and
 project to `(remedy ...)` and `(ground ...)` atoms through `as_atom()` and
 back through `from_atom()`. A refusal Python's own word covers is still a
@@ -1458,6 +1460,32 @@ classify `stack` or `source` from the ball, so a stack overflow arrives as
 `EngineError` and `SourceNotFound` comes from this library's own file check
 before the crossing rather than from the engine. The Node seat maps all
 thirteen.
+Each kind is also a ROW in the `&metta` catalog, `(refusal <kind> <class>
+(ground <authority> "<citation>") (remedy "<title>" <kind> <applicability>
+<act>...))`, and the rows are what a seat READS rather than what it keeps a
+copy of: the class name is the seat-independent one, the ground is the
+authority the refusal stands on (`metta-law` for a law this engine states,
+`arbiter` for a measured answer of upstream PeTTa), and the remedy's title
+carries a `<field>` hole for each field the kind declares. Ask for them like
+any other data, `!(match &metta (refusal $k $class $g $r) ($k $class))`, or
+read `website/reference/refusals.md`, which is those rows rendered. The engine
+fills the holes from the refusal that was actually raised, so a tripped bound
+carries `raise the bound past 0.05 seconds, or narrow the query`; a hole left
+over is the reader's own choice, which is what keeps that remedy `prose`, and
+a remedy whose every hole was filled keeps its row's applicability, which is
+how `capability` arrives `maybe` carrying `(edit (grants &restricted
+process))`. Nine of the thirteen carry a title and no act, because their
+repair is a decision. Every engine refusal reaching this seat therefore has
+`.ground` and `.remedy` without any raise site here naming them; the Node seat
+carries the same two on `MettaError`, and the C seat as `mt_ground()` and
+`mt_remedy()` beside `mt_errmsg()`. A seat spells a class its own way where
+its own language already owns the word, and `tests/data/error-kinds.json`
+records what it spells and why: `value` and `type` are `ValueError` and
+`TypeError` here against the rows' `WireError` and `CastError`. The three
+closed sets `Ground` and `Remedy` validate against are catalog vocabularies
+too, `ground-kind`, `remedy-kind` and `applicability`, which is where
+`metta.vocabularies.GroundKind`, `RemedyKind`, `Applicability` and
+`RefusalKind` come from.
 `metta.errors.NotReducible` is how a deterministic operation says "no answer"
 rather than failing: raising it makes the call fail rather than error, which is
 a semi-deterministic MeTTa function's way of declining. A generator needs no
@@ -1838,8 +1866,8 @@ to be reproduced. The doors are `Lock.write(path)`,
 `metta run --locked metta.lock file.metta`, which checks BEFORE the program
 runs and refuses with `LockDrift` naming every entry that differs. The file is
 TOML in uv's and PEP 751's shape: `lock-version`, `created-by`, an `[engine]`
-table (`metta`, `swi-prolog`, and `sources`, one digest over `engine/**/*.pl`
-and `engine/prelude.metta`, computed once per process), one `[[library]]` row
+table (`metta`, `swi-prolog`, and `sources`, one digest over `engine/**/*.pl`,
+computed once per process), one `[[library]]` row
 per shipped library imported, one `[[source]]` row per other file loaded with
 the space it landed in, and one `[[pin]]` row per repository revision
 `git-import!` or `(git-dependency ...)` acquired. Digests are the engine's own
