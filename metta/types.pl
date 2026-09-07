@@ -283,7 +283,7 @@ raw_definition_type_declaration_in(Module, X, T) :-
 %exactly as builtins are", and the engine's own test for a builtin a module has
 %taken over is fun_in/2: runtime_guarded_builtin_call/1 requires
 %\+ fun_in(Module, Fun) before it will use the builtin's own guard
-%[source: engine/translator/special_forms.pl:273-278; commit=WORKTREE]. The
+%[source: engine/translator/special_forms.pl:273-278; commit=e52b9b2eeb4b303b57c93e6e6844664a25ce0da3]. The
 %prelude's DECLARATION tier did not ask it. A named space defining if-equal at
 %two inputs therefore kept the prelude's four-input arrow, no chain presented
 %the written arity, and typed_functioncall_dl/10 compiled
@@ -293,14 +293,14 @@ raw_definition_type_declaration_in(Module, X, T) :-
 %[measured 2026-09-07: `(= (if-equal $a $b) SHADOWED)` then `!(if-equal 1 1)`,
 %SHADOWED through sh run.sh and the Error through MeTTa().run, and the same file
 %answering SHADOWED in a named space once &self had evicted the prelude row
-%first; fixture=ai-tmp/dl-repro/dl_f03_gettype2.pl; commit=WORKTREE].
+%first; fixture=ai-tmp/dl-repro/dl_f03_gettype2.pl; commit=e52b9b2eeb4b303b57c93e6e6844664a25ce0da3].
 %
 %&self needs no such test and is deliberately excluded: a definition there
 %EVICTS the prelude's row outright through evict_prelude_definition/1, because
 %the prelude is &self's own tier. A named module cannot evict a row its
 %siblings still read, so it shadows instead, and the two doors then agree
 %[tested: prelude:a_named_space_shadows_a_prelude_name_at_another_arity;
-%commit=WORKTREE].
+%commit=e52b9b2eeb4b303b57c93e6e6844664a25ce0da3].
 %
 %The question is about the NAME IN THIS MODULE rather than about a call site,
 %so it is asked here, where both definition readers pass, and not at
@@ -338,7 +338,7 @@ governing_type_chains_in(Module, X, InScope, Unique) :-
             %evict_prelude_definition/1 takes the prelude's row away
             %[tested: prelude:a_named_space_shadows_a_prelude_name_at_another_arity,
             % lib_strategy:an_inherited_arrow_does_not_veto_a_local_definition;
-            % commit=WORKTREE].
+            % commit=e52b9b2eeb4b303b57c93e6e6844664a25ce0da3].
             Selected = []
         ;   Selected = InScope
         ),
