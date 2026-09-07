@@ -493,7 +493,7 @@ bench_run(Case) :-
 %rather than the command" -- timeout(1) uses it for a failure in itself,
 %`git bisect run` reads it as "this run says nothing about the commit", and
 %bounded.sh refuses with it when the process that started a command had
-%already exited. metta.benchmarking names the same number PERF_CONTROL_REFUSED
+%already exited. metta_benchmarking names the same number PERF_CONTROL_REFUSED
 %and turns it into a named skip [source: coreutils timeout(1) EXIT STATUS;
 %git-bisect(1), "run <cmd>"; extensions/python/metta/benchmarking.py,
 %PERF_CONTROL_REFUSED].
