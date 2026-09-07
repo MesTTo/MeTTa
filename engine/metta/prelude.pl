@@ -10,7 +10,7 @@
 %   a boot READS them instead of deriving them
 %   [measured 2026-09-07: boot 272,323 -> 248,271 inferences, -8.83%;
 %   command=swipl -q -g "metta_bench:bench_run(boot)" -t halt engine/bench.pl;
-%   fixture=warm .qlf, three identical samples per arm; commit=WORKTREE].
+%   fixture=warm .qlf, three identical samples per arm; commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 % Assumes: engine/metta.pl consults this plain file while its owning module is
 %   the load context, after engine/metta/registration.pl, whose
 %   builtin_implementation/2 the facets below extend and whose
@@ -19,23 +19,23 @@
 %   - prelude_shipped_equation/2 is the same 36 equations tests/data/prelude-spec.metta
 %     holds, so the register a tool enumerates the shipped tier through and the
 %     text a reader reads cannot drift
-%     [tested: prelude_spec:the_shipped_register_is_the_spec_fixture; commit=WORKTREE].
+%     [tested: prelude_spec:the_shipped_register_is_the_spec_fixture; commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 %   - a user definition of a prelude name still wins ENTIRELY and ONE-WAY: the
 %     declaration, the document, the cost row and the translator registration
 %     go, and the Prolog body stops answering because the definition compiles
 %     into the space's own module and shadows the tier
 %     [tested: prelude:a_user_equation_evicts_the_prelude_definition,
-%     prelude_docs:eviction_takes_the_prelude_docs_with_the_name; commit=WORKTREE].
+%     prelude_docs:eviction_takes_the_prelude_docs_with_the_name; commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 %   - install_engine_prelude/0 is idempotent and restores exactly what eviction
 %     removed, which is what lets a suite evict a name and put it back
 %     [tested: prelude_derived_forms:a_user_definition_withdraws_the_registration_with_the_clauses;
-%     commit=WORKTREE].
+%     commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 % Fails when: a prelude_rule_registration/2 row names a head no
 %   prelude_head/2 row defines. That is an inconsistency between two tables in
 %   this file and it raises rather than registering a rule that would expand
 %   through somebody else's predicate
 %   [tested: prelude_derived_forms:a_registration_for_a_name_the_prelude_does_not_define_is_refused;
-%   commit=WORKTREE].
+%   commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 % Decides: the declarations land in TWO stores, prelude_type_declaration/2 for
 %   the compiler's masking tier and seam:builtin_type_declaration/2 for the
 %   engine's reported type surface, and the ledger prelude_wrote_builtin_type/2
@@ -454,7 +454,7 @@ install_prelude_rule(Name, Declarations) :-
 %all it was ever really about; erasing clauses was the price of compiling the
 %vocabulary into '&self' [source: engine/spaces/lifecycle.pl,
 %metta_prepare_function_predicate/3, which abolishes the materialised import so
-%the local definition is the one that answers; commit=WORKTREE].
+%the local definition is the one that answers; commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 %
 %Additive answers would be the non-exclusive-equations reading, but the prelude
 %is engine vocabulary, not part of the program, and the house rule everywhere
