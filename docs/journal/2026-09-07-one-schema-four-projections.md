@@ -245,3 +245,59 @@ reached the calling thread, because `_candidates` zipped the cursor's columns
 against a row the algebra had wrapped [measured 2026-09-07,
 `ai-tmp/probe-projections-arrow.py`]. `_candidates` now unwraps the tagged
 answer, which is also where Z4's `annotation` column comes from.
+
+### What the suite said about the four, and what it said about itself
+
+Verified: `sh check.sh ruff mypy stubtest deptry llms llms-selftest evidence
+provenance-pin-selftest aio-mirror init-stub reference` and `uv lock --check`
+are all 0 on the finished tree, and the four packages' own scenarios pass: 15
+for the type table, 10 for the OpenAPI document, 15 for the GraphQL schema, 15
+for telemetry, 15 for the Arrow stream, and 30 in `tracer.plt` including five
+new ones for the held session.
+
+Four pins moved and were re-derived rather than argued with: the `arrow` extra
+holds two producers now, the root has one more satellite, the ruff `A`
+burn-down gains the block door's `filter` keyword, and the stubtest allowlist's
+satellite roster gains `telemetry`.
+
+Tried: reading the full `GATE_ONLY=1 sh check.sh` as a verdict. It reports
+twenty red lanes, and a pristine control worktree cut from the same base commit
+reports the same twenty minus one. Every benchmark and static-analysis lane in
+that list -- `engine-bench`, `c-bench`, `mork-bench`, `node-bench`,
+`benchmarks`, `instructions`, `memory-scale-gate`, `parity-perf`, `extcost`,
+`vulture`, `ty`, `pylint`, `refurb`, `bandit`, `policy-inventory`,
+`kernel-ledger`, `kernel-ledger-selftest`, `codespell` -- fails identically on
+the control, down to the same four `parity-perf` cross-engine regressions and
+the same six `vulture` findings. The one that was ours, `stubtest`, wanted
+`telemetry` in the allowlist's satellite roster and is green.
+
+Tried: the `pytest` lane, five times, which is where the box's own noise
+lives. Each run failed one to three of a ROTATING set, and the control failed
+its own three under the same conditions. Two were reproduced on the control at
+31d54e19 and are pre-existing: `pytest tests/ch12_testing
+tests/ch14_seeing_your_program tests/ch10_errors_and_refusals/test_error_vocabulary.py
+-p no:randomly` fails both
+`test_a_stack_depth_pragma_bounds_evaluation_instead_of_overflowing` and
+`test_the_error_vocabulary_answers_what_the_arbiter_answers`, which are the same
+`max-stack-depth` assertion twice, sensitive to what ran before them.
+
+Fixed: one that was ours. `test_analyze_numbers_equal_the_stats_of_the_same_query`
+compares `explain(analyze=True)` to `stats()` on one query, and it read 660
+against 658 whenever the whole telemetry file preceded it in one process.
+Dropping any single one of the fifteen scenarios made it pass, which is a
+threshold in accumulated state rather than a leak: a child space falls back to
+`&self` for equations, so a per-scenario definition of the same two functions
+left fifteen copies of them there. Neither a neutral fifteen-trace file nor
+fifteen held observe sessions reproduced it, and compiling the two functions
+once removes it.
+Open: the assertion itself. Its sibling in the same directory fails the same way
+on the untouched base, so an exact inference count compared across files stays
+sensitive to what ran before it, and that is not this thread's to settle.
+
+Provisioning, for the next worktree: `extensions/node/browser`,
+`extensions/node/_runtime` and `website/node_modules` are needed beyond the
+three the wave's constraints name. Without the first two the `llms` lane
+reports five unresolvable paths in the Node sheet; without the third,
+`test_the_site_build_refuses_without_the_browser_kit` fails on the assertion
+about the bundler's message, because the script exits 1 on
+`Cannot find package 'markdown-it-container'` instead of on the missing kit.
