@@ -20,23 +20,20 @@
 %     [tested: segments_space_door].
 %   - a gap-free pattern reaches no predicate of the gap unit at all, which is
 %     what makes the feature free [tested: segments_costs_nothing].
-% Fails when: read as the surface's reach. segments_last_position and
-%   segments_linear_shallow call metta_seq_unify/3 with two PARSED sides, and
-%   no MeTTa or Python program can produce that pair: metta_seq_plan/3 parses
-%   the left side only, so every written ask classifies one_sided(left) and a
-%   gap on the right of `unify` is ordinary data
-%   [measured 2026-09-07: `!(unify (f a b) (f a b (:seg $v)) $v none)` answers
-%   `none` where last_position answers the empty run, and
-%   `!(unify (f (:seg $u)) (f (:seg $u)) yes no)` refuses for mixed_roles where
-%   the trivial identity holds; pinned in
-%   examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta].
+%   - a WRITTEN `unify` reaches every fragment and every refusal, because that
+%     door parses both operands: the four two-sided shapes answer what their
+%     calculus answers, the trivial identity answers what the arbiter answers,
+%     and no_certificate is reachable [tested: segments_written_pairs].
+% Fails when: the two layers are read as one. segments_last_position and
+%   segments_linear_shallow call metta_seq_unify/3 with two PARSED sides, which
+%   pins each SOLVER: its multiplicity, its shortest-first order, its occurs
+%   check and the sharing an open remainder keeps, none of which a surface
+%   answer shows. segments_written_pairs runs written MeTTa source through
+%   filereader:process_metta_string/2, which pins the DOOR: which fragment a
+%   written pair reaches and what it answers. A change to metta_seq_pair_plan/4
+%   moves the second and not the first.
 % Open Obligations:
-%   To Do: metta_unify_decision/3 hands metta_seq_plan/3 an unparsed right
-%     operand, so the last_position and linear_shallow solvers this suite
-%     proves are unreachable from either surface and the mixed-role rule fires
-%     on pairs that have no mixed role. Parsing both sides there is the fix;
-%     docs/journal/2026-09-07-sequence-variables-in-the-corpus.md carries the
-%     measurement and the shapes that change.
+%   To Do: None
 %   Hacks: None
 %   Future Enhancements: None
 
@@ -81,6 +78,26 @@ message_text(Error, Message) :-
 mentions(Message, Text) :-
     string(Message),
     once(sub_string(Message, _, _, _, Text)).
+
+%Written MeTTa source, run the way the corpus runs it: the file reader's own
+%string door translates each directive and evaluates it, so a test written this
+%way asks exactly what `sh run.sh` asks and reaches the doors a program reaches
+%[source: engine/filereader.pl, process_metta_string/2]. The engine prints its
+%compilation unless started with the quiet flag, which a test run is not.
+written_all(Source, Results) :-
+    with_output_to(string(_), filereader:process_metta_string(Source, Results)).
+
+%One directive's answers.
+written(Source, Answers) :-
+    written_all(Source, [Answers]).
+
+%The refusal a written ask carries, or admitted(Answers) when it carries none.
+%A refusal is thrown at the ASK rather than while the source loads, so it
+%arrives here as the error the door would have given a program.
+written_reason(Source, Reason) :-
+    catch(( written(Source, Answers), Reason = admitted(Answers) ),
+          error(metta_seq_outside_fragment(_, _, _, Why), _),
+          Reason = Why).
 
 :- begin_tests(segments_parsing).
 
@@ -379,6 +396,138 @@ test(gaps_absorb_each_others_settled_children) :-
     Answers == [[[g, b]]-[[g, a]]].
 
 :- end_tests(segments_linear_shallow).
+
+:- begin_tests(segments_written_pairs).
+
+%THE DOOR RATHER THAN THE SOLVER. `unify` is the one form whose two operands
+%are both syntax, so it is the only written ask that can carry a gap on both
+%sides. Until 2026-09-07 metta_unify_decision/3 parsed the left operand alone,
+%the classifier read the right side's markers as ordinary structure and
+%answered one_sided(left) for every pair, and each shape below answered as a
+%one-sided match that failed. metta_seq_pair_plan/4 parses both, so each test
+%here names the fragment its shape belongs to and asserts what that fragment's
+%calculus answers, through the same door a MeTTa program uses.
+
+%last_position, and the pre-parsed twin is a_trailing_gap_takes_the_empty_run:
+%the right side is longer by exactly its gap, so the gap takes the empty run.
+test(a_trailing_gap_on_the_right_takes_the_empty_run) :-
+    written("!(collapse (unify (f a b) (f a b (:seg $v)) $v none))", Answers),
+    Answers == [[]].
+
+%last_position again, and the fragment's own point: a repeated NAME is admitted
+%here, and its second occurrence solves the run its first took against what it
+%faces rather than demanding the two were written alike. The pre-parsed twin is
+%a_repeated_gap_solves_its_stored_run_against_the_second_face.
+test(a_repeated_trailing_name_solves_across_the_pair) :-
+    written("!(collapse (unify (f (g (:seg $x)) (h (:seg $x))) \c
+                                (f (g (:seg $y)) (h b)) $x none))",
+            Answers),
+    Answers == [[b]].
+
+%linear_shallow: two root gaps, each taking the other side's fixed child. The
+%pre-parsed twin is two_root_gaps_solve_to_their_runs.
+test(two_root_gaps_solve_to_their_runs_through_the_door) :-
+    written("!(collapse (unify (f (:seg $u) b) (f a (:seg $v)) ($u $v) no))",
+            Answers),
+    Answers == [[[a], [b]]].
+
+%linear_shallow with a settled EXPRESSION on each side, which the widening
+%calculus absorbs whole. The pre-parsed twin is
+%gaps_absorb_each_others_settled_children.
+test(root_gaps_absorb_each_others_settled_children_through_the_door) :-
+    written("!(collapse (unify (f (:seg $u) (g a)) \c
+                                (f (g b) (:seg $v)) ($u $v) no))",
+            Answers),
+    Answers == [[[[g, b]], [[g, a]]]].
+
+%The trivial identity, which Kutsia Section 6.3 keeps as trivial rather than as
+%a clash. It refused for mixed_roles until this door parsed both sides, because
+%the unparsed right side put `$u` in the classifier's ORDINARY list; `$u` plays
+%one role on both sides and the pair is admitted. This is the one row where the
+%repair moves this engine INTO agreement with the arbiter, which has no reading
+%of a gap at all and so unifies two identical expressions
+%[measured 2026-09-07: `sh run.sh` on `!(collapse (unify (f (:seg $u))
+%(f (:seg $u)) yes no))` after `!(import! &self ../lib/lib_he)` in the upstream
+%PeTTa checkout at ae66fa8e41dcd5539d614706bd4e5cfb34f9608d answers `(yes)`;
+%this engine answered a mixed_roles refusal before the repair and `(yes)` after
+%it].
+test(the_trivial_identity_answers_yes_as_the_arbiter_does) :-
+    written("!(collapse (unify (f (:seg $u)) (f (:seg $u)) yes no))", Answers),
+    Answers == [yes].
+
+%A gap written on the RIGHT ALONE is a gap too: the classifier is symmetric, so
+%it answers one_sided(right) and the solver matches the gap side against the
+%closed one.
+test(a_gap_on_the_right_alone_matches_the_other_way) :-
+    written("!(collapse (unify (f a b) (f a (:seg $v)) $v none))", Answers),
+    Answers == [[b]].
+
+%no_certificate, the classifier's third outcome, which no written ask could
+%reach while every pair classified one_sided(left). Kutsia's own infinitary
+%witness reaches it: `X u = u X` has the family X = u^n for every n, its gaps
+%are on both sides, and they are neither all final nor linear.
+test(the_commuting_equation_reaches_no_certificate) :-
+    written_reason("!(collapse (unify (f (:seg $x) a) (f a (:seg $x)) yes no))",
+                   Reason),
+    Reason == no_certificate.
+
+%And a gap below the root on both sides, outside the shallow fragment for the
+%other reason: depth rather than linearity.
+test(a_nested_two_sided_gap_reaches_no_certificate) :-
+    written_reason("!(collapse (unify (f (g (:seg $u) b)) \c
+                                       (f (g a (:seg $v))) yes no))",
+                   Reason),
+    Reason == no_certificate.
+
+%The mixed-role rule still fires where the roles really are mixed, so the
+%identity row's repair narrowed the rule rather than removing it.
+test(a_name_in_both_roles_still_refuses) :-
+    written_reason("!(collapse (unify (f (:seg $m) $m) \c
+                                       (f a (:seg $n)) yes no))",
+                   Reason),
+    Reason == mixed_roles.
+
+%An OPEN operand takes the pattern's SURFACE, with each unsolved gap rendered
+%back to the marker that would match it. Binding the parsed side instead would
+%publish this engine's own '$metta_seg'/2 term into a program's answer.
+test(an_open_operand_takes_the_patterns_surface) :-
+    written("!(collapse (unify $q (f a (:seg $v)) $q no))", Answers),
+    Answers = [Answer],
+    Answer = [f, a, [':seg', _]].
+
+%A SPACE operand makes the ask a gap QUERY, so the two doors answer the same
+%rows for the same written pattern.
+test(a_space_operand_answers_the_gap_query) :-
+    metta_add_atom('&j5pair', [friend, 'Bob', 'Alice'], _),
+    metta_add_atom('&j5pair', [friend, 'Carol', 'Alice'], _),
+    written_all("!(collapse (match &j5pair (friend (:seg $who)) $who))\n\c
+                 !(collapse (unify &j5pair (friend (:seg $who)) $who none))",
+                [Matched, Unified]),
+    Matched == [['Bob', 'Alice'], ['Carol', 'Alice']],
+    Unified == Matched,
+    metta_remove_atom('&j5pair', [friend, 'Bob', 'Alice'], _),
+    metta_remove_atom('&j5pair', [friend, 'Carol', 'Alice'], _).
+
+%THE FREE HALF. An operand with no written gap opens no walk at all, so a
+%gap-free `unify` emits the plain matcher it always emitted and pays what it
+%always paid.
+test(a_gap_free_pair_emits_the_plain_matcher) :-
+    sread('(unify (f a b) (f a b) yes no)', [_, Left, Right, _, _]),
+    translator:metta_unify_decision(Left, Right, Goal),
+    Goal == metta_match_atoms([f, a, b], [f, a, b]).
+
+%And the repair itself, read off the emitted goal: the left operand rides
+%wrapped in the fragment the two sides decided, and the right operand is handed
+%over PARSED rather than as written.
+test(a_written_pair_hands_the_solver_both_parsed_sides) :-
+    sread('(unify (f a b) (f a b (:seg $v)) $v none)', [_, Left, Right, _, _]),
+    translator:metta_unify_decision(Left, Right, Goal),
+    Goal = metta_match_atoms('$metta_seq'(Case, ParsedLeft), ParsedRight),
+    Case == one_sided(right),
+    ParsedLeft == [f, a, b],
+    ParsedRight = [f, a, b, '$metta_seg'(_, named)].
+
+:- end_tests(segments_written_pairs).
 
 :- begin_tests(segments_space_door).
 

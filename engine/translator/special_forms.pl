@@ -11,6 +11,7 @@
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % Guarantees: match, unify and let classify a written gap pattern ONCE while the call site compiles and hand the plan to the door in a wrapper, so a gap-free form emits the goal it always emitted [tested: tests/prolog/suites/reader/segments.plt, examples/ch08-data/08-02-sequence-variables/01-segments.metta; commit=a3dff3abc83b9d82f3652093246e1d693d526cdb].
+% Guarantees: unify classifies over BOTH its operands parsed, because it is the one form whose two operands are syntax, so a written gap on either side reaches the fragment its shape belongs to [tested: tests/prolog/suites/reader/segments.plt:segments_written_pairs, examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta; commit=WORKTREE].
 % Guarantees: a collection closure excludes every variable bound by case, switch, unify and let* from its captured environment, preserving the written variable identities used by each binding form [tested: a_collection_closure_keeps_each_binding_form_local_to_one_element; commit=09e34db01c8e3ebeff375ca18d3424c483172e7d].
 % Guarantees: a singleton superposition adds no return unification and preserves every answer of its member [tested: singleton_superpose:the_only_branch_has_the_same_goal_and_output_as_its_expression, singleton_superpose:the_only_branch_keeps_every_answer_and_duplicate; commit=9958c72363d2fbc640d2ae39ee6f0670ecfbff67].
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
@@ -1295,28 +1296,37 @@ metta_seq_query_pattern(true, Pattern, Asked) :-
 %faces a VALUE on one side, which is data and therefore gap-free, so it is
 %one_sided by construction.
 %
-%Known issue: this door does not reach the two-sided fragments either.
-%metta_seq_plan/3 parses its LEFT argument alone, so the classifier reads B's
-%markers as ordinary structure holding ordinary variables, answers
-%one_sided(left) for every pair, and hands the solver an unparsed B. Two
-%consequences: a shape the last_position or linear_shallow calculus would solve
-%is matched one-sidedly and fails, and a name written as a gap on BOTH sides is
-%caught by the mixed-role rule although it plays one role
-%[measured 2026-09-07: `!(unify (f a b) (f a b (:seg $v)) $v none)` answers
-%`none`, `!(unify (f (:seg $u) b) (f a (:seg $v)) ($u $v) no)` answers `no`, and
-%`!(unify (f (:seg $u)) (f (:seg $u)) yes no)` refuses for mixed_roles where
-%upstream PeTTa at the parity pin answers `yes`]. Parsing B here and passing the
-%parsed side to metta_match_atoms/2 is the fix; the shapes it changes are pinned
-%in examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta
-%and the measurement is in
-%docs/journal/2026-09-07-sequence-variables-in-the-corpus.md.
-metta_unify_decision(A, B, metta_match_atoms(Asked, B)) :-
+%So this door PARSES BOTH OPERANDS and classifies over the two parsed sides,
+%which is what reaches the last_position and linear_shallow fragments: the
+%solver the classifier picks is handed the parsed right side as the atom it
+%faces. Until 2026-09-07 it parsed A alone and handed the solver B as written,
+%so the classifier read B's markers as ordinary structure holding ordinary
+%variables and answered one_sided(left) for every pair. Two consequences, both
+%measured on petta at 5a85f5602 and both repaired here: a shape the
+%last_position or linear_shallow calculus solves was matched one-sidedly and
+%failed (`!(unify (f a b) (f a b (:seg $v)) $v none)` answered `none` where the
+%empty run is the answer), and a name written as a gap on BOTH sides was caught
+%by the mixed-role rule although it plays one role there
+%(`!(unify (f (:seg $u)) (f (:seg $u)) yes no)` refused for mixed_roles where
+%upstream PeTTa at the parity pin answers `yes`, which is what it answers now).
+%The five shapes and their answers are pinned in
+%examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta,
+%the surface differential is
+%tests/prolog/suites/reader/segments.plt:segments_written_pairs, and
+%docs/journal/2026-09-07-unify-reaches-the-two-sided-fragments.md carries the
+%design and the measurements.
+%
+%The guard stays the free half: only an operand that IS a nonvar list and
+%carries a written gap opens the walk, so `(unify (f a b) (f a b) yes no)` emits
+%the goal it always emitted and pays exactly what it always paid
+%[tested: segments_written_pairs:a_gap_free_pair_emits_the_plain_matcher].
+metta_unify_decision(A, B, metta_match_atoms(Asked, Faced)) :-
     (   metta_seq_written(A)
     ->  true
     ;   metta_seq_written(B)
     ),
     !,
-    metta_seq_plan(A, B, Asked).
+    metta_seq_pair_plan(A, B, Asked, Faced).
 metta_unify_decision(A, B, Decision) :-
     lift_pattern_modifiers(A, LiftedA, GuardsA, false),
     lift_pattern_modifiers(B, LiftedB, GuardsB, false),

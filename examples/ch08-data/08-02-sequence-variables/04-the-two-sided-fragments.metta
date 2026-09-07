@@ -1,5 +1,4 @@
-; The other two proved-finite fragments, and how far a MeTTa program reaches
-; into them.
+; The other two proved-finite fragments, and the one door that reaches them.
 ;
 ; General sequence unification is INFINITARY (Kutsia, Journal of Symbolic
 ; Computation 42(3), 2007, Theorem 62), so an engine that decides gaps has to
@@ -14,57 +13,86 @@
 ;                   expression carries one, and each named gap occurs once
 ;                   across the pair (Kutsia Section 6.2).
 ;
-; The last two need BOTH sides to carry gaps, and only one form in the
-; language hands the matcher two operands that are both syntax: `unify`, whose
-; arguments are typed Atom and cross unevaluated. What `unify` actually does
-; with a gap on its right is measured below.
+; The last two are the TWO-SIDED fragments: a gap on ONE side is a pattern to
+; match, and it takes two of them to have anything to solve. So they need a
+; door that hands the matcher two pieces of SYNTAX, and `unify` is that door
+; and the only one. Its four arguments are typed Atom and cross unevaluated,
+; while `match` faces stored atoms and `let`, `case` and an equation head face
+; a value, and a value's marker-shaped children are data rather than gaps.
+; Every ask in 01, 02 and 03 is therefore one-sided by construction; the asks
+; here are not.
+;
+; Which shape reaches which solver is the classifier's own order, tried once
+; while the ask compiles: a side with no gap at all first; then last position,
+; which is deterministic and therefore the more specific answer; then linear
+; shallow. Outside all three the ask refuses, naming the certificate it has
+; none of, and 05-the-fence.metta reads that refusal apart.
 
-;;; A MARKER ON THE RIGHT OF unify IS DATA. The left operand is the pattern;
-;;; the right operand is read the way stored atoms are read, so `(:seg $v)`
-;;; there is an ordinary two-child expression and a gap on the left consumes
-;;; it as one child.
-!(test (unify (f ...) (f (:seg $v)) taken none) taken)
+;;; ONE SIDE WITH NO GAP is still the one-sided fragment, whichever side it is.
+;;; A gap written on the right alone consumes the left's children the same way
+;;; a gap on the left consumes the right's.
+!(test (unify (f a b) (f a (:seg $v)) $v none) (b))
+
+;;; LAST POSITION. Every gap is the last child of its own expression, so
+;;; nothing is ever split: the two child lists are walked pointwise and a
+;;; trailing gap takes the whole remainder of the other side. Here the right
+;;; side is longer by exactly its gap, so the run is EMPTY.
+!(test (unify (f a b) (f a b (:seg $v)) $v none) ())
+
+;;; A remainder that still holds the OTHER side's gap keeps it, as the marker
+;;; that would match it: an open run is an answer, not a refusal.
+!(test (unify (f a (:seg $u)) (f a b (:seg $v)) $u none) (b (:seg $v)))
 !(test (unify (f (:seg $u)) (f (:seg $v)) $u none) ((:seg $v)))
 
-;;; So a gap written on the right ALONE is matched literally, and an ordinary
-;;; child does not match it.
-!(test (unify (f a b) (f a (:seg $v)) $v none) none)
+;;; An anonymous gap is a name like any other here, and it absorbs the other
+;;; side's gap as one child of its run.
+!(test (unify (f ...) (f (:seg $v)) taken none) taken)
 
-;;; Limitation, measured 2026-09-07: those two answers are the whole story.
-;;; `metta_seq_plan/3` parses the LEFT operand only, so the classifier sees no
-;;; gap on the right and answers `one_sided(left)` for every ask a program can
-;;; write. The four shapes below are the ones the last-position and
-;;; linear-shallow calculi are for, and each answers here as a one-sided match
-;;; that fails. The solvers themselves decide them, and
-;;; tests/prolog/suites/reader/segments.plt calls them directly to prove it;
-;;; nothing in the language reaches them.
-;;;
-;;; last-position shapes: a trailing gap facing a longer side, and a repeated
-;;; name in trailing position on both sides. Given two parsed sides the
-;;; calculus answers `()` for the first, the empty run, and `(b)` for the
-;;; second
-;;; [tested: tests/prolog/suites/reader/segments.plt:a_trailing_gap_takes_the_empty_run,
-;;; tests/prolog/suites/reader/segments.plt:a_repeated_gap_solves_its_stored_run_against_the_second_face;
-;;; commit=a403e56b4f33828834823338eb1fc316e3fea2a4].
-!(test (unify (f a b) (f a b (:seg $v)) $v none) none)
+;;; Linearity is NOT required in this fragment: Kutsia Section 6.3 asks only
+;;; that every gap be last in its own expression. So a NAME may occur twice,
+;;; and its second occurrence solves the run its first took against what that
+;;; occurrence faces rather than demanding the two were written alike.
 !(test (unify (f (g (:seg $x)) (h (:seg $x))) (f (g (:seg $y)) (h b)) $x none)
-       none)
-;;; linear-shallow shapes: two root gaps that would absorb each other's fixed
-;;; children. Given two parsed sides the calculus answers `((a) (b))` for the
-;;; first and `(((g b)) ((g a)))` for the second
-;;; [tested: tests/prolog/suites/reader/segments.plt:two_root_gaps_solve_to_their_runs,
-;;; tests/prolog/suites/reader/segments.plt:gaps_absorb_each_others_settled_children;
-;;; commit=a403e56b4f33828834823338eb1fc316e3fea2a4].
-!(test (unify (f (:seg $u) b) (f a (:seg $v)) ($u $v) no) no)
-!(test (unify (f (:seg $u) (g a)) (f (g b) (:seg $v)) ($u $v) no) no)
+       (b))
 
-;;; And the same cause turns the calculus's own trivial identity into a
-;;; refusal. `(f (:seg $u))` against itself has no mixed role at all, and given
-;;; two parsed sides the calculus answers `yes`, keeping `X = X` as trivial
-;;; [tested: tests/prolog/suites/reader/segments.plt:the_trivial_identity_holds;
-;;; commit=a403e56b4f33828834823338eb1fc316e3fea2a4]. The unparsed right side
-;;; puts `$u` in the classifier's ORDINARY list instead, so the mixed-role rule
-;;; fires. 05-the-fence.metta is the rule this misreads.
-!(test (let $refusal (catch (unify (f (:seg $u)) (f (:seg $u)) yes no))
-            (index-atom (index-atom $refusal 1) 4))
-       mixed_roles)
+;;; And the calculus keeps `X = X` as trivial rather than as a clash, so a name
+;;; written as a gap on BOTH sides plays one role and the pair holds. Upstream
+;;; PeTTa, which has no reading of a gap at all, unifies the two identical
+;;; expressions and answers the same.
+!(test (unify (f (:seg $u)) (f (:seg $u)) yes no) yes)
+
+;;; The fragment is unitary: one answer or none, never a stream of them.
+!(test (collapse (unify (f a b) (f a b (:seg $v)) $v none)) (()))
+
+;;; LINEAR SHALLOW. Every gap is a direct child of the root and each named gap
+;;; occurs once across the pair, so the two child lists are a linear word
+;;; equation: project a gap to the empty run, or widen it by one item and carry
+;;; a fresh remainder in its slot (Kutsia Section 6.2). Projection is tried
+;;; first, which keeps the shortest-first order 03 already has.
+!(test (unify (f (:seg $u) b) (f a (:seg $v)) ($u $v) no) ((a) (b)))
+
+;;; What a gap absorbs is whole CHILDREN, expressions included, so two gaps
+;;; can trade the settled children written between them.
+!(test (unify (f (:seg $u) (g a)) (f (g b) (:seg $v)) ($u $v) no)
+       (((g b)) ((g a))))
+
+;;; Each of those answers once too, because each gap here is pinned by the
+;;; other side's settled children.
+!(test (collapse (unify (f (:seg $u) b) (f a (:seg $v)) ($u $v) no))
+       (((a) (b))))
+
+;;; A SPACE operand makes the ask a query, which is one-sided again: the stored
+;;; side is data. Both doors then answer the same rows for the same pattern.
+!(add-atom &self (friend Bob Alice))
+!(add-atom &self (friend Carol Alice))
+!(test (collapse (unify &self (friend (:seg $who)) $who none))
+       ((Bob Alice) (Carol Alice)))
+!(test (collapse (match &self (friend (:seg $who)) $who))
+       ((Bob Alice) (Carol Alice)))
+
+;;; OUTSIDE ALL THREE the ask refuses. Kutsia's own witness is a pair of root
+;;; gaps sharing one name across a settled child, which is neither all-final
+;;; nor linear, so it has no certificate: 05-the-fence.metta reads the refusal.
+!(test (if-error (catch (unify (f (:seg $x) a) (f a (:seg $x)) yes no))
+                 refused answered)
+       refused)

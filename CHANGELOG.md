@@ -44,16 +44,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `docs/journal/2026-09-07-sequence-variables-in-the-corpus.md` carries the
   eighteen-row differential.
 
-- Known issue, measured and pinned rather than fixed: no MeTTa or Python
-  program reaches the `last_position` or `linear_shallow` solvers.
-  `metta_seq_plan/3` parses its left argument alone and
-  `metta_unify_decision/3` hands it the right operand as written, so every
-  written ask classifies `one_sided(left)`, a gap on the right of `unify` is
-  ordinary data, and the mixed-role rule fires on pairs that have no mixed
-  role: `(unify (f (:seg $u)) (f (:seg $u)) yes no)` refuses here where
-  upstream answers `yes`. The affected shapes are pinned in
+- Known issue when that corpus landed, measured and pinned rather than fixed:
+  no MeTTa or Python program reached the `last_position` or `linear_shallow`
+  solvers. `metta_seq_plan/3` parses its left argument alone and
+  `metta_unify_decision/3` handed it the right operand as written, so every
+  written ask classified `one_sided(left)`, a gap on the right of `unify` was
+  ordinary data, and the mixed-role rule fired on pairs that have no mixed
+  role: `(unify (f (:seg $u)) (f (:seg $u)) yes no)` refused here where
+  upstream answers `yes`. The affected shapes were pinned in
   `examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta`
-  so the repair shows as a corpus change.
+  so the repair would show as a corpus change, and it did: the Fixed entry
+  below carries it, and that file now pins what each fragment answers.
 
 
 - A template renders as well as reads. `metta.render(source, /, **values) ->
@@ -1086,6 +1087,37 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   with its vendored corpus is the lane that reads it.
 
 ### Fixed
+
+- `unify` reaches the two-sided fragments. It is the one form whose operands
+  are both syntax, so it is the only door a gap on BOTH sides can go through,
+  and it parsed the LEFT operand alone: the classifier read the right side's
+  markers as ordinary structure, answered `one_sided(left)` for every pair a
+  program could write, and the `last_position` and `linear_shallow` solvers
+  were unreachable from any surface. It now parses both operands and classifies
+  over the two parsed sides (`metta_seq_pair_plan/4`), so
+  `(unify (f a b) (f a b (:seg $v)) $v none)` answers the empty run where it
+  answered `none`, `(unify (f (:seg $u) b) (f a (:seg $v)) ($u $v) no)` answers
+  `((a) (b))` where it answered `no`, and the trivial identity
+  `(unify (f (:seg $u)) (f (:seg $u)) yes no)` answers `yes` where it refused
+  for `mixed_roles` although `$u` plays one role on both sides -- `yes` is what
+  upstream PeTTa at the parity pin answers for the same program, so that row
+  moves this engine INTO agreement with the arbiter. The classifier's second
+  refusal, `no_certificate`, is reachable from a written program for the first
+  time, Kutsia's own infinitary witness
+  `(unify (f (:seg $x) a) (f a (:seg $x)) yes no)` being one; that pair refused
+  as `mixed_roles` before and now names the certificate it has none of. A
+  gap-free `unify` is unchanged to the inference, 316 either way, because the
+  guard that opens the walk still asks only whether an operand IS a written
+  gap. Two shapes the repair would otherwise have broken are repaired with it:
+  a parsed side handed to an OPEN operand now renders back to its surface
+  rather than publishing the engine's internal marker term, which also fixes
+  the same leak through `let` and `case`; and a SPACE operand makes the ask a
+  gap query, so `unify` and `match` answer the same rows for the same written
+  pattern where `unify` answered nothing.
+  `examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta`
+  and `05-the-fence.metta` pin every answer, and
+  `docs/journal/2026-09-07-unify-reaches-the-two-sided-fragments.md` carries the
+  design, the arbiter rows and the cost.
 
 - The Node binding raises the condition the ENGINE names, not one read out of
   the rendered sentence. The engine publishes one kind word per refusal a host
