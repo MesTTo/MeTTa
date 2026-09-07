@@ -3310,6 +3310,71 @@ Every refusal names the door. A dispatch nobody claims says which point it was,
 which registrants there are, and the registration the caller lacks; registering
 against a point nobody declared lists every point that is declared.
 
+### The Node seat
+
+`metta-node/seam` is the same table with the same four kinds. Its points are
+`type`, `repr` and `reflector`, which keep the storage `registerType`,
+`registerRepr` and `registerReflector` always used, and `provider`, `library`
+and `integration`, read unloaded from what packages advertise.
+
+```ts
+import { seam } from "metta-node";
+
+export function register() {
+  seam.type.register("Star", { constructor: Star, toAtom: ..., fromAtom: ... });
+  seam.repr.register("Star", { constructor: Star, text: (s) => `(star "${s.id}")` });
+}
+```
+
+```json
+{ "metta": { "extensions": { "solars": "./index.js#register" } } }
+```
+
+A package registers from its own module body and advertises the same call under
+an `extensions` group in its `package.json`, beside the three groups the seat
+already reads. Loading is EXPLICIT here, `await seam.discover()`, rather than
+on first dispatch: ESM `import()` is asynchronous and a synchronous dispatch
+cannot await one. A package imported for its own sake needs neither call.
+
+That seat declares no `frame` point and no `array` point, deliberately. It has
+no frame notion, and its array notion is the platform's own `TypedArray`
+family, which every numeric library in that runtime already produces, so
+neither point has a class of libraries to admit. The Python seat has both
+because Python has neither of those universals.
+
+### The C seat
+
+A library includes `cmetta.h`, links against `libcmetta`, and is loaded by
+path:
+
+```c
+bool mt_extension_init(metta *runtime)
+{ mt_provider store = { .user = my_store, .add = store_add,
+                        .atom_at = store_atom_at, .clear = store_clear };
+  return mt_provider_open(runtime, "&stars", store) &&
+         mt_repr(runtime, "star", star_text, NULL) &&
+         mt_library(runtime, "solars", "/usr/share/solars/metta");
+}
+```
+
+```c
+mt_extension(m, "/usr/lib/solars.so");
+```
+
+`mt_extension_init` is the one symbol it must export, which is sqlite3's
+loadable-extension shape entry point and all
+([loadext](https://www.sqlite.org/loadext.html)). Its five doors are `mt_def`
+(a C function MeTTa calls by name), `mt_object` (a live C value by reference),
+`mt_repr` (how one type prints), `mt_provider_open` (a space whose atoms the
+library holds) and `mt_library` (sources it ships); each is a row against a
+declared point, and `mt_point_declare`, `mt_register`, `mt_point_at`,
+`mt_seam_at` and `mt_claim` are the same seam in C's own spelling.
+
+A C provider speaks canonical MeTTa TEXT, which is what that seat already
+speaks over its bridge, and enumerates by index: `atom_at(user, i)` answers the
+atom at a position and NULL past the end. A callback left NULL is a capability
+the provider declines, refused by name rather than read as an empty answer.
+
 ## Choosing
 
 | you want to | use |

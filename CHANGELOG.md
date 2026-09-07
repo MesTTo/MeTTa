@@ -57,6 +57,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   are new, each publishing one of those registries as data so the seam reads
   it rather than its private map.
 
+- The C seat has the seam and three capabilities it did not have. A library
+  outside this repository can now back a space with its own store
+  (`mt_provider_open`, which rides the engine's foreign-space seam and speaks
+  canonical MeTTa text, enumerating by index), say how its own object type
+  prints (`mt_repr`), and register a directory of MeTTa or Prolog sources
+  (`mt_library`) -- and be LOADED at all, by `mt_extension(m, path)`, which
+  calls the `mt_extension_init` the library exports, sqlite3's
+  loadable-extension shape entry point and all. `mt_point_declare`,
+  `mt_register`, `mt_unregister`, `mt_point_count`, `mt_point_at`,
+  `mt_point_of`, `mt_seam_count`, `mt_seam_at` and `mt_claim` are the seam in
+  C's own spelling, with the same four kinds; the seat declares `op`, `repr`,
+  `provider` and `library` at boot and `mt_def` writes an `op` row.
+
 - A template renders as well as reads. `metta.render(source, /, **values) ->
   str` takes the same three faces the reading doors take -- a 3.14 `t"..."`
   literal, any object with `strings` and `interpolations`, or a string with

@@ -251,6 +251,39 @@ Two conventions caught the first draft and both were real: every exported name
 carries its own doc comment, and `.sort()` takes `byCodePoint` rather than
 JavaScript's default lexicographic-by-UTF-16 comparator.
 
+## 2026-09-07: the C seat
+
+The audit found no name to move and four things missing, so this seat's work
+was capability rather than decoupling: a space provider, a rendering for an
+object type, a directory of sources, and any way to be loaded at all.
+
+Decided: a C provider speaks canonical MeTTa TEXT and enumerates by INDEX.
+Text because that is what this seat already speaks over its bridge, and the
+engine's own reason for having a `service` kind is a provider that speaks text
+over a wire. Index because the alternatives are worse in C: a returned array
+needs an ownership rule for the array AND the strings, and a cursor needs three
+callbacks where `atom_at(user, i)` needs one and is the same shape `mt_arg`
+already has in this header. A store of n atoms costs n+1 calls and never a
+length query a C store may not be able to answer.
+
+Tried: naming the seam's registration type `mt_row` -> rejected by the
+compiler, and rightly. `mt_row` is already an ANSWER row in `cmetta.h`
+(`mt_row_next`, `mt_bound`), and one header has one meaning per name. The
+registration is `mt_seam_row` and its readers are `mt_seam_count` and
+`mt_seam_at`, which also stops `mt_row_at` reading as an answer accessor.
+
+Tried: `pl_cmetta_repr` reading its object through `blob_box()` -> broke
+`test_a_refusal_carries_the_engines_remedy_and_ground`'s neighbour, "an engine
+alias left by explicit release is refused without a dereference". `blob_box`
+RAISES an existence error for a released object, and `grounded_text` is an
+ownership seam where declining is failing, so the release's own refusal came
+back as this predicate's. It reads the blob quietly now and fails.
+
+Measured: `sh extensions/cmetta/test.sh`, 486 checks, 0 failures, with the new
+`tests/test_seam.c` among them. The extension proof compiles a library against
+`cmetta.h` alone and drives five doors through it, including a point the
+library declared for itself.
+
 ## 2026-09-07: what each seat gained
 
 Recorded as the work landed; the numbers are in the commits' own tests.
