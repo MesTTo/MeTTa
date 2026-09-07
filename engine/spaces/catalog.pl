@@ -8,12 +8,12 @@
 % check, and a value carrying several rows answers a property from any of them
 % [tested: catalog_self_description:a_claim_landing_after_a_read_beats_the_cached_answer,
 % catalog_self_description:a_claim_removed_after_a_read_stops_answering,
-% catalog_self_description:a_value_may_carry_several_claim_rows; commit=WORKTREE].
+% catalog_self_description:a_value_may_carry_several_claim_rows; commit=6b4dceb61ccc78e308e6678af58f8daf43c31523].
 % Guarantees: a (cost ...) row's witness names exactly one size hole and one
 % head, both checked at the write with the remedy named, and one head carries
 % at most one row [tested: catalog_self_description:a_cost_witness_needs_exactly_one_hole,
 % catalog_self_description:a_second_cost_row_for_one_head_is_refused_with_its_remedy,
-% catalog_self_description:one_hole_used_twice_is_one_hole; commit=WORKTREE].
+% catalog_self_description:one_hole_used_twice_is_one_hole; commit=6b4dceb61ccc78e308e6678af58f8daf43c31523].
 % Fails when: loaded directly or from another module; internal state and
 % unqualified meta-goals would acquire the wrong owner. Guarantees: counting
 % and tropical are ordinary catalog algebras, the semiring vocabulary derives
@@ -732,7 +732,7 @@ metta_vocabulary_value(Vocab, Value) :-
 %answer, so a `(top k ...)` evaluation made fifteen open-tail reads at 73
 %inferences each, 1,095 of that workload's 1,756 inferences per evaluation
 %[measured 2026-09-07: instrumenting the open-tail branch over ten evaluations
-%counted 150 reads, all of them claim rows; commit=WORKTREE].
+%counted 150 reads, all of them claim rows; commit=6b4dceb61ccc78e308e6678af58f8daf43c31523].
 %
 %Cached exactly as a vocabulary's values are: the answer carries the clause
 %references it was built from and revalidates with erased/1, so a REMOVED row

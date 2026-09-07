@@ -248,7 +248,7 @@ Python counter suite: every other row in `benchmarks` measures IDENTICALLY to a
 pristine control at the branch base, to the inference
 [measured 2026-09-07; command=sh check.sh benchmarks on this tree and on a
 detached worktree at 5621c456; fixture=matching C and MORK artifacts on both;
-commit=WORKTREE].
+commit=6b4dceb61ccc78e308e6678af58f8daf43c31523].
 
 The identity twin moves the OTHER way and is not attributed to a mechanism.
 Measured under the same provisioned configuration by lowering its own `BUDGET`
@@ -299,7 +299,7 @@ Measured on `annotated-relation`, 500 evaluations, all three readings on the
 same provisioned configuration
 [measured 2026-09-07; command=python bench.py --counter-only annotated-relation;
 fixture=C reader, writer, JSON and extension artifacts plus MORK present;
-commit=WORKTREE]:
+commit=6b4dceb61ccc78e308e6678af58f8daf43c31523]:
 
 | tree | inferences | against the control |
 | --- | --- | --- |
@@ -326,4 +326,4 @@ every `(top k ...)` evaluation reads still answers
 catalog_self_description:a_claim_removed_after_a_read_stops_answering,
 catalog_self_description:a_value_may_carry_several_claim_rows,
 catalog_self_description:the_shipped_ordered_claims_answer_through_the_cache;
-commit=WORKTREE].
+commit=6b4dceb61ccc78e308e6678af58f8daf43c31523].
