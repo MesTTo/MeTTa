@@ -172,7 +172,7 @@ type_declaration(X, T) :- current_metta_module(Module),
 %The prelude tier comes LAST in each clause, so a declaration a program
 %writes for the same name wins over the engine's prelude, the order the
 %type surface already keeps for get-type. The my-if tutorial mechanism is
-%what this tier carries: an Atom parameter declared in engine/prelude.metta
+%what this tier carries: an Atom parameter declared in engine/metta/prelude.pl
 %masks that argument at every call site, which is how the prelude's
 %assertEqualToResult receives its expected set unevaluated.
 %In the user clause the prelude branch comes FIRST, and the order is
@@ -1882,12 +1882,15 @@ metatype_of(_, 'Grounded').                        % e.g., partial(f,[1]), f(1)
 %PeTTa, whose rule is fun/1 and nothing else; metatype_of/2 above carries that
 %rule now and the differential behind it. What still reads this table is
 %minimal `eval`, which must RUN a grounded operation rather than take one
-%equality step over equations that happen to share its name: the prelude
-%writes `(eval (if-equal ...))` eight times and `if-equal` and `trace!` are
-%the only two names that are both in this table and carry equations, so they
-%are the two the guard decides [source: engine/translator/runtime.pl,
-%metta_minimal_equation_step/3; measured 2026-09-05 by enumerating
-%metta_grounded_token(N), fun_meta_module(_, N, _)].
+%equality step over equations that happen to share its name. It decided
+%`if-equal` and `trace!` while the prelude was MeTTa and wrote
+%`(eval (if-equal ...))` eight times; the prelude is Prolog since 2026-09-07
+%and NO name is both in this table and carrying equations in a fresh engine
+%[measured 2026-09-07 by enumerating metta_grounded_token(N),
+%fun_meta_module(Self, N, _) with Self the &self module: the empty list]. The
+%guard is not dead: it decides for a name a PROGRAM defines, which is what a
+%space's own `(= (if-equal ...) ...)` is [source: engine/translator/runtime.pl,
+%metta_minimal_equation_step/3].
 %
 %The list stays as adopted, because upstream PeTTa at ae66fa8e, the arbiter, is
 %silent about what it now answers: minimal MeTTa is a form upstream PeTTa

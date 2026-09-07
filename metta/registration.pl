@@ -111,7 +111,7 @@ register_prolog_arities(N) :-
 %IT RUNS AFTER THE DECLARATIONS AND THE PRELUDE, not while the names register,
 %and that ordering is the whole reason it is a separate pass:
 %register_builtin_fun/1 runs at DIRECTIVE time while load_builtin_type_surface/0
-%and load_engine_prelude/0 run at INITIALIZATION time, so a filter inside the
+%and install_engine_prelude/0 run at INITIALIZATION time, so a filter inside the
 %registration sees an empty declaration table and drops the arities it exists to
 %keep -- measured, it took length/2, sort/2 and msort/2 with it and turned
 %`(length (1 2 3))` into a partial application. It is one pass over the registry
@@ -1191,23 +1191,20 @@ register_builtin_implementation(Key, Implementation) :-
 
 %%%% Exact implementation facets and bidirectional coverage %%%%
 
-%Prelude equations and extensions already own their names in their source
-%declarations. Materialise only their dependent implementation facets after
-%the final arity cleanup, then validate the complete boot image. Refresh first
-%so a repeated snapshot observes a replaced prelude or extension rather than
-%retaining its earlier hooks.
+%An extension already owns its names in its source declarations. Materialise
+%only its dependent implementation facets after the final arity cleanup, then
+%validate the complete boot image. Refresh first so a repeated snapshot
+%observes a replaced extension rather than retaining its earlier hooks.
+%
+%The prelude used to be derived here too, as prelude(equation) rows read off
+%prelude_owned/1 and prelude_equation/2. Its vocabulary is Prolog now and its
+%facets are ordinary prolog(prelude) rows engine/metta/prelude.pl registers
+%with the names, beside the prolog(kernel) rows engine/kernel.pl's four heads
+%carry [source: engine/metta/prelude.pl, prelude_builtin_facet/2].
 finalize_builtin_implementations :-
-    retractall(builtin_implementation(_, prelude(_))),
     retractall(builtin_implementation(_, extension(_))),
-    forall(prelude_builtin_implementation(Key, Implementation),
-           register_builtin_implementation(Key, Implementation)),
     forall(extension_builtin_implementation(Key, Implementation),
            register_builtin_implementation(Key, Implementation)).
-
-prelude_builtin_implementation(Name/Arity, prelude(equation)) :-
-    prelude_owned(Name),
-    prelude_equation(Name, ['=', [Name|Arguments], _]),
-    length(Arguments, Arity).
 
 extension_builtin_implementation(Name/Arity, extension(ModuleRef)) :-
     seam:extension_builtin(Name, _),
@@ -1259,7 +1256,6 @@ valid_builtin_implementation(Name/Arity, Implementation) :-
 
 valid_builtin_implementation_descriptor(prolog(ModuleRef)) :-
     atom(ModuleRef).
-valid_builtin_implementation_descriptor(prelude(equation)).
 valid_builtin_implementation_descriptor(extension(ModuleRef)) :-
     atom(ModuleRef).
 valid_builtin_implementation_descriptor(compiler(ModuleRef, Hook, Arity)) :-
@@ -1297,10 +1293,6 @@ builtin_implementation_hook_exists(Name/Arity, Implementation) :-
     functor(Head, Name, PrologArity),
     predicate_property(Module:Head, implementation_module(Actual)),
     Actual == Module.
-builtin_implementation_hook_exists(Name/Arity, prelude(equation)) :- !,
-    prelude_owned(Name),
-    prelude_equation(Name, ['=', [Name|Arguments], _]),
-    length(Arguments, Arity), !.
 builtin_implementation_hook_exists(
         Name/_, compiler(ModuleRef, Hook, HookArity)) :-
     builtin_reference_module(ModuleRef, Module),
