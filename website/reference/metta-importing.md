@@ -21,8 +21,8 @@ class Module(types.ModuleType):
 > The module a `.metta` file becomes.
 >
 > Its attributes are the heads the file declares, each the `_EngineFunction`
-> the loading space's own `fn` namespace answers, so `lib_list.length` and
-> `m.fn.length` are one object and calling one is calling the other. A name
+> the loading space's own `fn` namespace answers for that head, so
+> `lib_list.length(...)` and `m.fn.length(...)` build the same term. A name
 > the file does not declare falls through to that namespace too, under
 > Python's underscore-to-hyphen map: `rules.car_atom` reaches `car-atom`
 > whether or not this file wrote it, because the module reads a live space

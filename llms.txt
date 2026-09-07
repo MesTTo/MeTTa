@@ -1616,8 +1616,8 @@ Python stub, with the program's own printing kept on stderr), and
 declarations as loadable MeTTa source).
 
 `metta.importing.install(space=None, *, path=None)` makes a `.metta` file a
-Python module: it appends a `sys.meta_path` finder, so `import lib_list` finds
-`lib_list.metta`, its `.metta.gz` form, or a directory named for it holding
+Python module: it appends a `sys.meta_path` finder, so `import lib_dict` finds
+`lib_dict.metta`, its `.metta.gz` form, or a directory named for it holding
 that same file, and loads it into `space` with the engine's own `import!`. `path` names directories
 searched before `sys.path`, one bare directory allowed; `space` defaults to the
 ambient one and is resolved AT INSTALL, so one finder names one space for its
