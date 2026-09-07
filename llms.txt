@@ -592,6 +592,21 @@ column rather than an object array of atoms.
 `m.limits(timeout=, inferences=, stack=)` sets scoped defaults for every call
 inside; `stack` is SWI's combined-stack ceiling in bytes.
 
+A bound that was EXCEEDED is a refusal and never an answer. `timeout=` raises
+`TimeLimitError` and `inferences=` raises `InferenceLimitError`, and both are
+decided where the answer is produced as well as armed as an interrupt, so a
+call whose alarm arrived late still refuses rather than handing back a result
+for work that ran past its bound: `call_with_time_limit(0.05,
+sig_atomic(sleep(0.3)))` succeeds in SWI with no signal at all, and a
+0.3-second load once answered after 66.170 seconds on a starved box. The cost
+of the rule is two `get_time/1` reads per bounded call, and none at all when no
+bound is set. A host resource abort inside a bound is raised too, as
+`EngineError` naming SWI's stack ceiling. The program's OWN
+`(pragma! max-stack-depth N)` is the exception and is unchanged: running out of
+that fuel is `(Error <culprit> StackOverflow)` beside the answers that
+finished, because it is reduction fuel the program asked for rather than a
+caller's deadline.
+
 ## The three seams anything plugs into
 
 It is a KERNEL because the point is what plugs into it. **Lower it**: host
@@ -1784,7 +1799,15 @@ refuse naming both libraries with install as the remedy.
 `EmbeddingStore.vector_for(key)` retrieves a key's original vector.
 `EmbeddingStore` registers `(name-knn $q $k)` and
 `(name-embed $key)` as OPERATIONS rather than backing a space, so it is called
-beside a match rather than being one. `install` returns the names it
+beside a match rather than being one. Those two public names route through
+equations in the store's own space to internal operations named per store, and
+the routing is one catalog row,
+`(embedding-store <space> <name> (routes <knn> <embed>))` in `&metta`, carrying
+`(owned-by-space embedding-store)` so a dropped space takes it along exactly as
+it takes the install roster. A second store of the same name in the same space
+replaces the row and retires the old routes; anonymous space names are pooled,
+so a record that outlived its space would be read by whichever space was handed
+the name next. `install` returns the names it
 registered, 44 of them with numpy as the default, and every one carries a
 `(-> ...)` declaration. `broadcast-shape` is a CLP(FD) relation over shape
 expressions, so it computes compatible shapes, runs backwards to infer

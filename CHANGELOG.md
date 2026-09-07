@@ -1545,6 +1545,57 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   and `05-the-fence.metta` pin every answer, and
   `docs/journal/2026-09-07-unify-reaches-the-two-sided-fragments.md` carries the
   design, the arbiter rows and the cost.
+- A runnable's evaluation-fuel scope closes itself when its runnable is
+  abandoned. `setup_call_cleanup/3` is `sig_atomic(Setup), '$call_cleanup'`, so
+  an asynchronous limit delivered in the one call port between those two goals
+  leaves the setup's writes standing with no cleanup registered; the scope's
+  marker was a non-backtrackable write, so one interrupted bounded call left
+  the scope open for the life of the process and every later runnable took the
+  reentrant branch, which never replays a branch that ran out of fuel.
+  `!(p122-fact 5)` under `(pragma! max-stack-depth 20)` answered `120` alone
+  where it answers `[120, (Error -3 StackOverflow)]`, and a `with-pragma!`
+  overflow in a freshly built space answered nothing at all. The marker is
+  trailed now, so unwinding restores it with no cleanup involved. Measured: one
+  budget in 20,000 leaks with the old marker and none with this one, and
+  `tests/ch14_seeing_your_program` whole answers 376 passed where it answered
+  `1 failed, 374 passed`.
+
+- A caller's `timeout=` bound that was exceeded REFUSES; it no longer answers.
+  An alarm that arrives after its goal has finished refuses nothing, and
+  `call_with_time_limit(0.05, sig_atomic(sleep(0.3)))` succeeds in 0.300
+  seconds with no ball at all, which is how a 0.3-second load came back with
+  `[[(Error (spin) StackOverflow)]]` after 66.170 seconds on a starved box. The
+  deadline is checked where the answer is produced as well as armed as an
+  alarm, at all three eager doors: `(pragma! max-time N)`, `(timeout N Expr)`
+  and the Python seat's `timeout=`. Lazy cursors already held this rule. The
+  program's own `(pragma! max-stack-depth N)` is unchanged and still answers
+  `(Error <culprit> StackOverflow)` beside the answers that finished.
+
+- The engine resolves `prolog_wrap`'s own deferred import of `member/2` at
+  boot. It was reached only when a predicate that HAS a wrapper is asked about,
+  which in this engine first happens inside SWI's `assertz` under
+  `sig_atomic(with_mutex(...))` while a deferred function compiles, and there
+  SWI declines the resolution and raises
+  `existence_error(procedure, prolog_wrap:member/2)` for the rest of the
+  process: 29 tests in one file under one ordering seed, and 125 calls on one
+  xdist worker on 2026-09-06. Why SWI declines it is not established; the
+  engine no longer depends on it. Boot costs 12 inferences more.
+
+- A `metta.arrays` embedding store's record dies with its space. It was a
+  module-global dict keyed by `(space name, store name)`, nothing removed an
+  entry when its space was dropped, and anonymous space names are pooled, so
+  the next space handed a recycled name read a closed store's internal
+  operations. It is one `(embedding-store <space> <name> (routes ...))` row in
+  `&metta` now, carrying `(owned-by-space embedding-store)` so the engine's own
+  retirement walk takes it with the space, exactly as the install roster does.
+
+- A missing function in a space's `fn` namespace names the nearest defined head
+  itself. CPython's traceback renderer declines a candidate pool of 750 or more
+  and offers nothing, and a space's namespace lists what that space can CALL,
+  which reaches 1,034 names in a long-lived process, so the "Did you mean"
+  clause disappeared for exactly the programs where a typo is hardest to spot.
+  The refusal composes its own suggestion with `difflib` now, and still sets
+  the two fields the interpreter renders from.
 
 - The Node binding raises the condition the ENGINE names, not one read out of
   the rendered sentence. The engine publishes one kind word per refusal a host
