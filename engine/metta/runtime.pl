@@ -906,14 +906,17 @@ metta_timeout(Seconds, Goal, Value) :-
 %The whole answer set is computed under the bound, timeout's own rule, so
 %a partial set is never mistaken for the whole one; expiry throws the
 %reserved resource envelope the Python tier already classifies.
+%The limiter stops the work and the cumulative read decides, timeout's own
+%rule one line up and for a sharper reason here: SWI disarms the limit before
+%raising its bare `inference_limit_exceeded` atom inside the goal, so a
+%recovery catch anywhere under Expr eats the ball and the limiter then
+%reports success for a subexpression that never stopped
+%[source: docs/journal/2026-09-04-bounded-trace-keeps-its-events.md;
+%tested: inference_budget:a_swallowed_ball_still_refuses_at_the_language_form].
 metta_inferences(Limit, Goal, Value) :-
     must_be(positive_integer, Limit),
-    call_with_inference_limit(findall(Value, Goal, Values), Limit, Result),
-    (   Result == inference_limit_exceeded
-    ->  throw(error(metta_control_signal(inference_limit, Limit),
-                    context(metta, inference_limit)))
-    ;   true
-    ),
+    metta_host_inference_budget(findall(Value, Goal, Values), Limit, Bounded),
+    call(Bounded),
     member(Value, Values).
 
 %Time one answer and report what it cost, as (Value Seconds). Each answer is

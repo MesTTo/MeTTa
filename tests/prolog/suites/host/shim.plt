@@ -794,3 +794,61 @@ test(both_equation_head_spellings_are_read) :-
     \+ metta_py_infer_head([1, x], _, _).
 
 :- end_tests(shim_type_inference).
+
+%%%% The interrupt poll's own cost, and what the counter door hands over %%%%
+%
+%The recording, in the engine-free suite, because it is what the correction
+%on the other side is computed from: how many ticks, what they have spent,
+%the counter reading the last one happened at, and what the ticks before it
+%had spent. The ARITHMETIC that uses those four is the seat's, and its own
+%tests are test_a_reading_leaves_out_a_tick_that_fired_after_it and
+%test_a_measurement_is_the_same_with_the_poll_dense, the second of which arms
+%the poll for real and crosses into Python for real.
+:- begin_tests(heartbeat_accounting).
+
+%Each tick advances the count, adds the charge, records the counter reading
+%it happened at, and keeps what the ticks before it had spent.
+test(a_tick_records_what_it_spent_and_where_it_happened) :-
+    retract(user:metta_py_heartbeat_charge(Measured)),
+    assertz(user:metta_py_heartbeat_charge(5)),
+    nb_setval('$metta_heartbeat_ticks', ticks(0, 0, 0, 0)),
+    metta_py_heartbeat_tick,
+    metta_py_heartbeat_term(One, SpentOne, FirstAt, BeforeOne),
+    metta_py_heartbeat_tick,
+    metta_py_heartbeat_term(Two, SpentTwo, SecondAt, BeforeTwo),
+    retractall(user:metta_py_heartbeat_charge(_)),
+    assertz(user:metta_py_heartbeat_charge(Measured)),
+    assertion(One == 1),
+    assertion(Two == 2),
+    assertion(SpentOne == 5),
+    assertion(SpentTwo == 10),
+    assertion(BeforeOne == 0),
+    assertion(BeforeTwo == 5),
+    assertion(SecondAt > FirstAt).
+
+%A thread that reached the poll without this file's thread_initialization/1
+%reads zeros rather than raising inside a counter read.
+test(an_uninitialised_thread_reads_zeros) :-
+    nb_delete('$metta_heartbeat_ticks'),
+    metta_py_heartbeat_term(Ticks, Spent, At, Before),
+    assertion([Ticks, Spent, At, Before] == [0, 0, 0, 0]),
+    metta_py_heartbeat_tick,
+    metta_py_heartbeat_term(One, _, _, _),
+    assertion(One == 1),
+    nb_setval('$metta_heartbeat_ticks', ticks(0, 0, 0, 0)).
+
+%The counter door hands the four fields across beside the counters, so the
+%seat corrects a reading with the poll's own state at that reading.
+test(the_counter_door_carries_the_polls_term) :-
+    nb_setval('$metta_heartbeat_ticks', ticks(7, 42, 11, 36)),
+    metta_py_stats(Counters),
+    length(Counters, Width),
+    nth1(7, Counters, Ticks),
+    nth1(8, Counters, Spent),
+    nth1(9, Counters, At),
+    nth1(10, Counters, Before),
+    assertion(Width == 10),
+    assertion([Ticks, Spent, At, Before] == [7, 42, 11, 36]),
+    nb_setval('$metta_heartbeat_ticks', ticks(0, 0, 0, 0)).
+
+:- end_tests(heartbeat_accounting).

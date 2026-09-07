@@ -1599,6 +1599,46 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `MeTTa.stats()` reports the measured block's own work: the engine's interrupt
+  poll, which crosses into Python every `config.heartbeat_interval` inferences
+  so a Ctrl-C can land while the engine runs, no longer counts against the
+  caller. Its call ports were ordinary inferences in whatever thread SWI
+  interrupted, so 51 of 4,000 measurements of one 659-inference evaluation read
+  667 at the shipped interval and 2,568 of 4,000 did at an interval of 1,000;
+  two measurements of the same work therefore differed, which is what
+  `test_analyze_numbers_equal_the_stats_of_the_same_query` read as an
+  intermittent on two batteries. The seat now arms its own hook, which records
+  what it spent and the counter reading it spent it at, and the counter door
+  takes it out exactly, ticks landing between the door's two reads included.
+  The new `.heartbeats` counter says how many times the poll ran inside the
+  block. A thread the block JOINS is still counted, because SWI adds an exited
+  thread's inferences to the thread that waited for it.
+
+- `await-atom`, `peek-atom` and `take-atom` re-read the space when no wake-up
+  arrives, so a lost hint costs latency instead of an answer. The engine
+  carries the write door's event publisher only while some handler exists, so
+  a writer already inside that door when a waiter registers writes silently,
+  and a write that then lands after the waiter's own first read was one nobody
+  ever mentioned: measured over the corpus example's own spawn-and-wait, 7 of
+  90,000 rounds sat out a full ten-second deadline with the atom present in
+  the space the moment they gave up, and none did with a second waiter parked
+  to hold the publisher in place. A wait now looks again after 50ms, backing
+  off to a second, in the blocking form and in the scheduled one alike; an
+  unbounded wait that lost its hint used to park for the life of the process.
+
+- A caller's `inferences=` bound is a refusal even when the goal swallowed the
+  ball SWI raises inside it. SWI disarms the limit before raising the bare atom
+  `inference_limit_exceeded` INSIDE the goal, so any recovery catch under the
+  goal ate both the ball and the bound and `call_with_inference_limit/3` then
+  reported success for work that never stopped: `metta.load(..., inferences=N)`
+  over an endless `(= (spin) (spin))` returned normally on a battery instead of
+  raising `InferenceLimitError`. Every door that enforces a caller's inference
+  bound now uses the engine's own budget builder, which pairs that limiter with
+  a counter read taken where the answer is produced: `m.run(inferences=)` and
+  its nine siblings, `(pragma! max-inferences N)` and `with-pragma!`, the
+  `(inferences N Expr)` language form, and the C seat's bounded call. The wall
+  bound already held this rule; the two now hold it at every door.
+
 - An equation that says `&self` reads the space it is stored in through EVERY
   door, not only the two the entry below made agree. The deferred door
   (`filereader:stored_equation_source/4`) compiled an occurrence with no
