@@ -4,7 +4,9 @@
 ;the same operator compose over an operation of any arity.
 !(import! &self (library lib_patrick))
 
+(: inc (-> Number Number))
 (= (inc $x) (+ $x 1))
+(: double (-> Number Number))
 (= (double $x) (* $x 2))
 
 ;A one-function list is just application, and it is the case the definition

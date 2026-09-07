@@ -10,6 +10,7 @@
 
 ;"Within one of each other" is a perfectly good sameness for a set operation,
 ;and nothing about the operators cares that it is not an equality.
+(: close-enough (-> Number Number Bool))
 (= (close-enough $a $b) (< (abs-math (- $a $b)) 2))
 
 ;`/?\` keeps the elements of the left that the comparison relates to
