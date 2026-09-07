@@ -38,6 +38,7 @@ These modules expose reduction events, structural findings, similarity scores, a
 | Module | Surface |
 |---|---|
 | [`metta.trace`](./metta-trace) | the reduction trace as events |
+| [`metta.recording`](./metta-recording) | a run kept as data, navigable and replayable |
 | [`metta.derivation`](./metta-derivation) | proof trees and their steps |
 | [`metta.lint`](./metta-lint) | space diagnostics for the silently-wrong class |
 

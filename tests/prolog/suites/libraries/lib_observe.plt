@@ -1,13 +1,16 @@
 % Purpose: verify that a MeTTa program can query execution observations.
 % Guarantees: selected trace records retain source execution results and depths
 %   [tested: lib_observe; commit=504f8dddfa890ced97e795a13ab10e239b1de2ce].
+% Guarantees: a trace-event atom carries the whole event, its sequence number
+%   and time first, in the tracer's own field order
+%   [tested: lib_observe:filtered_events_are_queryable; commit=WORKTREE].
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 
 :- begin_tests(lib_observe).
 
 test(filtered_events_are_queryable) :-
-    process_metta_string("!(import! &self (library lib_observe))\n(= (observe-inc $x) (+ $x 1))\n(= (observe-outer $x) (observe-inc $x))\n!(bind! &observe-report (trace-source &self \"!(observe-outer 4)\" (observe-inc) 10))\n!(match &observe-report (trace-event $d exit (observe-inc 4) $answer) ($d $answer))", Results),
+    process_metta_string("!(import! &self (library lib_observe))\n(= (observe-inc $x) (+ $x 1))\n(= (observe-outer $x) (observe-inc $x))\n!(bind! &observe-report (trace-source &self \"!(observe-outer 4)\" (observe-inc) 10))\n!(match &observe-report (trace-event $seq $time $d exit (observe-inc 4) $answer) ($d $answer))", Results),
     last(Results, [1, 5]),
     process_metta_string("!(space-atom-count &observe-report)", [3]).
 

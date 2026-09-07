@@ -2694,6 +2694,57 @@ author wrote, and not one a declaration could have matched. Answer here and the
 message names what the program wrote and what `seam:pure_operation/1` will
 match.
 
+**Say how to READ a call of your dispatcher, so an observer still sees the
+function.**
+
+```prolog
+:- multifile seam:interposed_dispatch/4.
+
+%   seam:interposed_dispatch(Module:Head, Fun, InArgs, Out)
+seam:interposed_dispatch(user:my_dispatch(Fun, InArgs, Out), Fun, InArgs, Out).
+```
+
+The head is a TEMPLATE, so one clause answers both questions an observer has:
+enumerated with everything unbound it names the predicate to wrap, and unified
+with a live head it reads that call. The tracer wraps what this declares and
+records a reduction ONCE, by whichever layer the call entered first, so a
+lookup your dispatcher answers without calling the function is still a call
+and its answer. Without it, `lib_memo`'s cached `!(fib 8)` traced as ZERO
+events over 23,050 inferences: the tracer wrapped `fib/2` and the cache never
+called it.
+
+Name the module the predicate is DEFINED in. A wrapper installed on a module
+that merely imports it is a local shadow nobody calls, which is why SWI's own
+port tracer requalifies before it wraps
+(`library(prolog_trace)`, `resolve_predicate/2`).
+
+**Say that a seed makes your draw repeat.**
+
+```prolog
+:- multifile seam:seeded_operation/1.
+seam:seeded_operation('my-draw').
+```
+
+An operation whose only unrepeatable input is the random generator is still
+`oracleIO`: a cache may not hide a draw and a reified world may not admit one.
+What this adds is that a scope which PINS the generator makes it repeat, which
+is what a recorded run needs to know before it promises a replay. An
+allow-list, so a missing entry costs a recording that says it cannot be
+replayed when it could, and a wrong one costs a replay that silently differs
+from what it claims to reproduce.
+
+**Say how to forget what you derived, when someone needs a first run again.**
+
+```prolog
+:- multifile seam:forget_derived/0.
+seam:forget_derived :- my_cache_clear.
+```
+
+An event, so every library's handler runs. A caller replaying a recorded run
+asks for it: the recording pins the space's atoms with a digest and the draws
+with a seed, and this is the third piece of the state the run started from.
+Drop the ANSWERS and keep the decisions, so the next call caches again.
+
 **Say that a goal you make the engine emit must not be taken over.** A goal your
 dispatcher makes the engine compile into a function body is written in the
 space's own module, so an equation in that space for the same name at the same
@@ -3143,7 +3194,7 @@ table.
 | add a domain-specific literal | a reader token class |
 | put atoms somewhere else | a space provider |
 | react when a space changes | an atom hook |
-| cache calls your own way | `seam:dispatch_call/4` |
+| cache calls your own way | `seam:dispatch_call/4`, with `seam:interposed_dispatch/4` so a trace still sees the call and `seam:forget_derived/0` so a replay can start cold |
 | keep derived state coherent | `seam:function_changed/1` |
 | change what counts as a match | a matcher, by convention |
 | ship a whole seat, with its own build and scripts | `extensions/README.md` |

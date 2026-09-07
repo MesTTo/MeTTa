@@ -415,7 +415,7 @@ Run source in a space and return a space of trace-event atoms. The filter is all
 3. all or a tuple of function names
 4. positive event limit
 
-Returns: a space of (trace-event depth kind term answer) and (trace-stopped reason) atoms
+Returns: a space of (trace-event seq time depth kind term answer) and (trace-stopped reason) atoms
 
 ### `observe-source`
 
