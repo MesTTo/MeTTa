@@ -339,7 +339,14 @@ zero or more of them, so one pattern reads every length a head has:
 `...` is the anonymous spelling and every occurrence of it is its own
 variable, so two gaps in one pattern are free of each other. `(:seg $x)` is the
 named one, and `$x` answers the run it took as the expression those children
-make. A repeated `(:seg $x)` has to take the same run twice.
+make, which is an ordinary value: `size-atom`, `car-atom` and `index-atom`
+read it like any other expression. A repeated `(:seg $x)` has to take the same
+run twice, compared the way every other atom position is compared, so `1` and
+`1.0` agree there.
+
+Only what you WRITE is a gap. `(:seg foo)` is ordinary data because the second
+position is not a variable, a marker that arrives through a binding stays the
+atom it is, and the root of a pattern is never a gap.
 
 Matching is nondeterministic, so a gap pattern with two gaps around a
 separator ENUMERATES the splits, one answer per split, which is list
@@ -349,27 +356,104 @@ processing with no recursion written:
 !(let ($pre ... SEP ... $post) (a b SEP c SEP d) ($pre $post))  ; (a d), (a d)
 ```
 
+### A gap in an equation head
+
+A head is the pattern side of a match, so it takes a gap too, and the gap
+decides the arity: a head that carries one is a function of variable arity.
+
+```metta
+(= (allof (:seg $xs)) (kept $xs))
+!(allof)                       ; (kept ())
+!(allof a b c)                 ; (kept (a b c))
+```
+
+In the body, an ordinary `$xs` keeps the run as ONE expression and a written
+`(:seg $xs)` SPLICES it into the expression around it:
+
+```metta
+(= (project (head (:seg $xs) tail)) (rebuilt before $xs after))
+(= (splice  (head (:seg $xs) tail)) (rebuilt before (:seg $xs) after))
+!(project (head a b tail))     ; (rebuilt before (a b) after)
+!(splice  (head a b tail))     ; (rebuilt before a b after)
+```
+
+Two gaps in one head make the CALL nondeterministic, so a function can parse
+its argument and answer once per split. A gap-headed equation and an ordinary
+one are additive, like any two equations that overlap.
+
+In Python the same three doors are `space[(S.A, ..., S.D)]`, `seg(V.rest)`, and
+`case (S.Order, id, *rest):` inside `@m.define`. A star PARAMETER is refused,
+because `*args` has no MeTTa image, so a variadic head is written as data:
+`m += equation(S.allof(seg(V.xs))).to(S.kept(V.xs))`.
+
 ### The fence, and why it is there
 
 General sequence unification is INFINITARY. `(f (:seg $x) a)` against
 `(f a (:seg $x))` is solved by `$x = a`, `$x = (a a)`, and so on without end,
 so no complete finite answer set exists (Kutsia, *Journal of Symbolic
 Computation* 42(3), 2007, Theorem 62). Three restrictions of that theory are
-proved finite, and they are exactly what the engine decides:
+proved finite, and `metta_seq_classify/3` in
+`engine/spaces/segment_matching.pl` decides between them:
 
-- one side carries no gap at all, which is every `match` against a space and
-  every `let` or `case` against a value;
-- every gap is the last child of its own expression;
-- every gap is a direct child of the outermost expression, and each named gap
-  occurs once across the pair.
+- `one_sided`: one side carries no gap at all;
+- `last_position`: every gap is the last child of its own expression, on both
+  sides (Kutsia Section 6.3), which is deterministic and unitary;
+- `linear_shallow`: every gap is a direct child of the outermost expression,
+  and each named gap occurs once across the pair (Kutsia Section 6.2).
 
 Ask outside them and the engine REFUSES, naming the theorem and the three
 shapes, rather than searching forever. One name may not be both a gap and an
-ordinary variable either; `(f (:seg $x) $x)` refuses.
+ordinary variable either; `(f (:seg $x) $x)` refuses. An equation head is the
+exception, because it is one-sided by construction: the run is finite and known
+before the ordinary occurrence is compared, so `(= (echoes ((:seg $xs) tag $xs))
+yes)` is admitted.
 
-A pattern without a gap pays nothing for any of this. The question is answered
-by the same walk that lifts a pattern's modifiers, and the matcher reaches the
-gap machinery only through a marker an ordinary pattern never carries.
+Caught, a refusal is data rather than a stopped program:
+
+```metta
+!(let $refusal (catch (match &self (Order (:seg $m) $m) hit))
+      (index-atom (index-atom $refusal 1) 4))   ; mixed_roles
+```
+
+It is also CARRIED rather than raised while a file loads, so a `case` arm
+nothing reaches cannot stop a program from running.
+
+**What a written ask actually reaches**, measured 2026-09-07: `one_sided`, and
+only that. `metta_seq_plan/3` parses the left side alone, so a gap written on
+the right of `unify` -- the one form whose two operands are both syntax -- is
+read as ordinary data. `(unify (f a b) (f a b (:seg $v)) $v none)` therefore
+answers `none` rather than the empty run, and
+`(unify (f (:seg $u)) (f (:seg $u)) yes no)` refuses for `mixed_roles` although
+that pair has no mixed role at all. The other two solvers are exercised from
+Prolog in `tests/prolog/suites/reader/segments.plt`, and
+`examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta`
+pins what the language answers today.
+
+### What a gap costs
+
+A pattern without a gap pays nothing. The question is answered by the same walk
+that lifts a pattern's modifiers, and the matcher reaches the gap machinery
+only through a marker an ordinary pattern never carries.
+
+A gap pattern cannot use the store's arity-keyed read, since the gap rather
+than the pattern decides the arity. Candidates are enumerated per admissible
+arity instead, with the pattern's own leading child written into the candidate
+head first, so the store's first-argument index still selects the relation.
+Over a space holding three `edge` atoms and 2,000 `node` atoms, measured
+2026-09-07 by lowering each bound until the ask stopped fitting:
+
+| ask | inferences |
+|---|---|
+| `(match &self (edge a $y) $y)` | 57 |
+| `(match &self (edge ... $y) $y)` | 144 |
+| `(match &self (node ... $y) $y)` | 46,070 |
+
+The first two do not move when the node relation grows tenfold; the third is
+about one inference per row it answers. Matching m gaps against n children
+enumerates the integer compositions of n into m parts, so the cost is
+exponential in the NUMBER of gaps and polynomial in the subject. One gap is
+linear, and one gap is the shape nearly every gap pattern has.
+
 
 ## Arithmetic that runs backwards
 

@@ -19,9 +19,17 @@
 %     [tested: segment_equations:a_segment_name_projects_in_an_ordinary_head_position;
 %     commit=37e23dcdaafd0bcf218b31a8a6455bcd59d645cc]
 %   - the compiled and variable-headed dynamic doors answer alike
-%   [assumed: the one-sided binding rule and the parse-then-instantiate staging
-%   were adopted from an earlier reference semantics, not re-measured against
-%   upstream PeTTa; commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87]
+%     [tested: segment_equations:the_compiled_and_variable_headed_doors_answer_alike;
+%     commit=37e23dcdaafd0bcf218b31a8a6455bcd59d645cc]
+%   The one-sided binding rule and the parse-then-instantiate staging were
+%   adopted from an earlier reference semantics. Upstream PeTTa at the parity
+%   pin has no reading to compare them against: a gap in an equation head is a
+%   literal child there, so `(= (allof (:seg $xs)) ...)` compiles to a
+%   one-argument function and `!(allof a b)` raises
+%   `Domain error: function_input_arities(allof,[1])`
+%   [measured 2026-09-07 against upstream PeTTa at
+%   ae66fa8e41dcd5539d614706bd4e5cfb34f9608d;
+%   docs/journal/2026-09-07-sequence-variables-in-the-corpus.md carries the run]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

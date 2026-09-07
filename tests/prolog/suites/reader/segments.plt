@@ -20,8 +20,23 @@
 %     [tested: segments_space_door].
 %   - a gap-free pattern reaches no predicate of the gap unit at all, which is
 %     what makes the feature free [tested: segments_costs_nothing].
+% Fails when: read as the surface's reach. segments_last_position and
+%   segments_linear_shallow call metta_seq_unify/3 with two PARSED sides, and
+%   no MeTTa or Python program can produce that pair: metta_seq_plan/3 parses
+%   the left side only, so every written ask classifies one_sided(left) and a
+%   gap on the right of `unify` is ordinary data
+%   [measured 2026-09-07: `!(unify (f a b) (f a b (:seg $v)) $v none)` answers
+%   `none` where last_position answers the empty run, and
+%   `!(unify (f (:seg $u)) (f (:seg $u)) yes no)` refuses for mixed_roles where
+%   the trivial identity holds; pinned in
+%   examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta].
 % Open Obligations:
-%   To Do: None
+%   To Do: metta_unify_decision/3 hands metta_seq_plan/3 an unparsed right
+%     operand, so the last_position and linear_shallow solvers this suite
+%     proves are unreachable from either surface and the mixed-role rule fires
+%     on pairs that have no mixed role. Parsing both sides there is the fix;
+%     docs/journal/2026-09-07-sequence-variables-in-the-corpus.md carries the
+%     measurement and the shapes that change.
 %   Hacks: None
 %   Future Enhancements: None
 

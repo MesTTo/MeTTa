@@ -85,6 +85,11 @@ def tail(order):
             return S.Other
 ```
 
+A star PARAMETER is a different thing and is refused: `*args` has no MeTTa
+image at a parameter position, so a head of variable arity is written as data,
+`m += equation(S.allof(seg(V.xs))).to(S.kept(V.xs))`. The guide's
+[gap section](run-query.md#match-a-run-of-children) has the rest.
+
 `yield from call(...)` delegates directly only when the compiler knows the
 callee is nondeterministic, including self-recursive generators. A call whose
 result might instead be iterable data is refused at compile time. Write

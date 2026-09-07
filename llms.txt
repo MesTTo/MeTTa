@@ -20,7 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 266 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 271 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 27 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
@@ -201,7 +201,9 @@ Four kinds, all immutable with `__slots__` and one-subpattern
 `unify`, `substitute`, `order_key`, `arrow`, `typed`, `fresh`, `seg`, and
 `register_object_repr` with its `unregister_` twin to control how a foreign
 object prints as an atom. `metta.wire` owns `encode`, `decode` and
-`atom_from_wire`.
+`atom_from_wire`. `seg(V.rest)` is the named sequence variable and `...` the
+anonymous one; the language-surface section below carries the gap rules, the
+fence and the cost.
 The atom's OWN methods carry the rest: `a.alpha_eq(b)` for equality modulo
 variable renaming, `a.map(f)` to rewrite every subterm, `a.vars` for the
 variables it contains (so `not a.vars` is the ground test), and `repr(a)` for
@@ -2109,6 +2111,79 @@ Each of those is an ordinary equation plus one registration, and KERNEL.md is
 the ledger of which head is which, what it answers to in the minimal
 instruction set the arbiter presents, and for a derived form still fused into
 the compiler, the measurement that keeps it there.
+
+### Sequence variables: a pattern child that stands for a run
+
+A gap is an expression CHILD standing for a finite run of zero or more sibling
+children, and only what the program WROTE is one. Two spellings: the bare
+symbol `...` is anonymous and every occurrence of it is its own variable, and
+`(:seg $x)` with a variable in second position is named and answers the run it
+took. `(:seg foo)` is ordinary data, a marker that arrived through a binding is
+ordinary data, and the ROOT of a pattern is never a gap. Wolfram's `___` and
+`x___` are the same two notions.
+
+Five doors read one: a space `match`, one conjunct of a `(, ...)` join, a `let`
+pattern, a `case` arm, and an equation HEAD, which makes that function
+variable-arity. `(= (allof (:seg $xs)) (kept $xs))` answers for every arity,
+and in the body an ordinary `$xs` keeps the run as ONE expression while a
+written `(:seg $xs)` SPLICES it into the expression around it. Two gaps in one
+head make the CALL nondeterministic: matching enumerates the splits and the
+call answers once per split, shortest prefix first.
+
+A run projects as the Expression its children make, so `size-atom`, `car-atom`
+and `index-atom` read it in MeTTa and a Python answer row carries an
+`Expression` slice. In Python `...` is the same glyph (`space[(S.A, ..., S.D)]`),
+`seg(V.rest)` builds the named form, and `case (S.Order, id, *rest):` inside
+`@m.define` lowers a star pattern to one. A star PARAMETER is refused, because
+`*args` has no MeTTa image, so a variadic head is written as data:
+`m += equation(S.allof(seg(V.xs))).to(S.kept(V.xs))`.
+
+THE FENCE. General sequence unification is INFINITARY (Kutsia, Journal of
+Symbolic Computation 42(3), 2007, Theorem 62), so an ask outside the three
+restrictions proved finite REFUSES rather than searching. `metta_seq_classify/3`
+in `engine/spaces/segment_matching.pl` names them: `one_sided`, one side
+carrying no gap at all; `last_position`, every gap the last child of its own
+expression on both sides, deterministic and unitary (Kutsia Section 6.3);
+`linear_shallow`, every gap a direct child of the root and each named gap
+occurring once across the pair (Kutsia Section 6.2). One name may not be both a
+gap and an ordinary variable, except in an equation head, which is one-sided by
+construction and binds the run before the ordinary occurrence is compared.
+
+Measured 2026-09-07: every ask a MeTTa or Python program can write is
+`one_sided`. `metta_seq_plan/3` parses the LEFT side only, so a gap written on
+the right of `unify`, the one form whose two operands are both syntax, is
+ordinary data, and the other two solvers are reachable only from Prolog. Two
+consequences a consumer meets: `(unify (f a b) (f a b (:seg $v)) $v none)`
+answers `none` rather than the empty run, and
+`(unify (f (:seg $u)) (f (:seg $u)) yes no)` refuses for `mixed_roles` where
+upstream PeTTa at the parity pin answers `yes`.
+`examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta`
+pins every one of those answers.
+
+Caught, a refusal is data: `(Error (metta_seq_outside_fragment left right mixed
+reason) none)`, read apart with `index-atom`, where `reason` is `mixed_roles`
+or `no_certificate`. It is CARRIED with the compiled pattern and thrown at the
+ask, so an arm nothing reaches cannot stop a file from loading. Python sees an
+`EngineError` whose message carries the theorem, the rule and the classifier;
+the payload is not on the exception.
+
+COST. A pattern with no gap pays nothing: the question is answered by the walk
+that already lifts a pattern's modifiers, and both matching doors dispatch a
+gap pattern through a wrapper an ordinary pattern never carries. A gap pattern
+cannot use the store's arity-keyed read, since the gap rather than the pattern
+decides the arity, so candidates are enumerated per admissible arity with the
+pattern's leading child written into the candidate head first, which keeps the
+store's first-argument index. Measured 2026-09-07 over a space holding three
+`edge` atoms and 2,000 `node` atoms: `(match &self (edge a $y) $y)` costs 57
+inferences and `(match &self (edge ... $y) $y)` costs 144, both FLAT in the
+size of the node relation, while `(match &self (node ... $y) $y)` costs 46,070,
+about one per row it answers. Matching m gaps against n children enumerates the
+integer compositions of n into m parts, so the cost is exponential in the
+NUMBER of gaps and polynomial in the subject; one gap is linear, which is the
+shape every gap pattern in the corpus has.
+`examples/ch18-performance/18-01-larger-workloads/06-a-gap-query-and-its-index.metta`
+runs the measurement.
+
 
 The exact-integer operators are engine heads rather than library equations:
 `bit-and`, `bit-or`, `bit-xor`, `bit-not`, `bit-shift-left`,

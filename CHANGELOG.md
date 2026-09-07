@@ -9,6 +9,53 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Sequence variables reach the executable corpus. `examples/ch08-data/08-02-sequence-variables/`
+  grows from one file to five: a gap in an EQUATION HEAD, which makes that
+  function variable-arity and splices its run back into the body when the body
+  writes `(:seg $xs)`; the one-sided fragment every written ask lands in, with
+  the shortest-first splits, the empty run, the runtime-equal repeated name and
+  a gap joining a `(, ...)` conjunct; the two-sided fragments and how far a
+  program reaches into them; and the fence read apart as data, since a caught
+  refusal is `(Error (metta_seq_outside_fragment left right mixed reason) none)`
+  and `index-atom` reads the rule it broke.
+  `examples/ch18-performance/18-01-larger-workloads/06-a-gap-query-and-its-index.metta`
+  measures what a gap costs: over three `edge` atoms beside 2,000 `node` atoms,
+  `(match &self (edge a $y) $y)` costs 57 inferences and
+  `(match &self (edge ... $y) $y)` costs 144, both flat in the size of the node
+  relation, while `(match &self (node ... $y) $y)` costs 46,070, about one per
+  row it answers. Each of the six carries a Python twin.
+
+- `llms.txt` and the query guide describe sequence variables for a consumer:
+  both spellings and what makes a marker data rather than a gap, the five doors
+  that read one including the equation head, the Python spellings and the star
+  parameter that is refused, where a run projects, the three proved-finite
+  fragments with what each admits, the refusal read apart as an error atom, and
+  the cost with its measurement.
+
+- The provenance the gap unit carried as an assumption is measured against the
+  arbiter. Upstream PeTTa at the parity pin has NO reading of sequence
+  variables: `...` is an ordinary symbol there and `(:seg $x)` an ordinary
+  two-child expression, on the pattern side, on the stored side and in an
+  equation head, so a gap ask answers nothing rather than refusing and a
+  gap-headed equation becomes a fixed-arity function whose wider call raises
+  `Domain error: function_input_arities`. Every decision around Kutsia's theory
+  is therefore an extension over undefined ground, with three measured places
+  where it changes an upstream answer instead of filling a silence.
+  `docs/journal/2026-09-07-sequence-variables-in-the-corpus.md` carries the
+  eighteen-row differential.
+
+- Known issue, measured and pinned rather than fixed: no MeTTa or Python
+  program reaches the `last_position` or `linear_shallow` solvers.
+  `metta_seq_plan/3` parses its left argument alone and
+  `metta_unify_decision/3` hands it the right operand as written, so every
+  written ask classifies `one_sided(left)`, a gap on the right of `unify` is
+  ordinary data, and the mixed-role rule fires on pairs that have no mixed
+  role: `(unify (f (:seg $u)) (f (:seg $u)) yes no)` refuses here where
+  upstream answers `yes`. The affected shapes are pinned in
+  `examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta`
+  so the repair shows as a corpus change.
+
+
 - A template renders as well as reads. `metta.render(source, /, **values) ->
   str` takes the same three faces the reading doors take -- a 3.14 `t"..."`
   literal, any object with `strings` and `interpolations`, or a string with
