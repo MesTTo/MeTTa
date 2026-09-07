@@ -32,7 +32,7 @@
 %     [tested: tracer:a_held_session_records_across_separate_evaluations,
 %     tracer:an_observed_blocks_bound_stops_the_recording_and_not_the_work,
 %     tracer:a_traced_runs_bound_still_stops_the_run,
-%     tracer:a_held_session_refuses_a_malformed_bound; commit=WORKTREE].
+%     tracer:a_held_session_refuses_a_malformed_bound; commit=0fb68d75871c57f2421c335e9faef3561f8dfdd5].
 %   - A DEBUG session suspends the program at a breakpoint through
 %     engine_yield/1 and resumes the same execution on the command the host
 %     posts back, and only one session, trace or debug, holds the wrappers
