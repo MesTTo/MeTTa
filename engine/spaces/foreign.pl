@@ -1150,7 +1150,7 @@ add_function_atom(Storage, Space, Module, Term, FAtom, W) :-
     %and lowered `match(pattern, template)` to a `(context-space)` CALL
     %instead [measured 2026-09-07: the two spellings side by side in one
     %&pyspace space answered ((1)) and (()); command=python extensions/python/
-    %benchmarks/probes/running_space.py, its `doors` rows; commit=WORKTREE].
+    %benchmarks/probes/running_space.py, its `doors` rows; commit=9010a79b01c9b2a66b96a3952fa378fb3e939dc3].
     %Identity when the space IS '&self',
     %which is the first clause of the substitution.
     metta_substitute_self(Space, Term, Resolved),

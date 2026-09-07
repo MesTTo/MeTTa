@@ -23,16 +23,16 @@ Assumes:
 Guarantees:
   - a twin whose assertion is false is a finding naming the failed run, and the
     same twin unflipped is silent [tested: this file is its own gate;
-    commit=WORKTREE]
+    commit=9010a79b01c9b2a66b96a3952fa378fb3e939dc3]
   - a budget moved by the allowance passes and one moved past it fails, in both
     directions, so the two-sided band is the thing deciding
-    [tested: this file is its own gate; commit=WORKTREE]
+    [tested: this file is its own gate; commit=9010a79b01c9b2a66b96a3952fa378fb3e939dc3]
   - a declared DIVERGENCE passes only for the difference it names: a stale one
     over two agreeing spaces, and a wrong one over two differing spaces, are
-    both findings [tested: this file is its own gate; commit=WORKTREE]
+    both findings [tested: this file is its own gate; commit=9010a79b01c9b2a66b96a3952fa378fb3e939dc3]
   - an undeclared band overrun is a finding, the declared one passes, and a
     declaration the twin no longer needs is itself a finding
-    [tested: this file is its own gate; commit=WORKTREE]
+    [tested: this file is its own gate; commit=9010a79b01c9b2a66b96a3952fa378fb3e939dc3]
 Fails when: the lane stops exposing `run_example` and `run_twin` as its only
   process calls, or moves a verdict out of `check`.
 Owns resources: one TemporaryDirectory per plant, removed on every path.
