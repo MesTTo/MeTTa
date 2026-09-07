@@ -159,6 +159,45 @@ def module_ops(
 > Underscores read as hyphens, a prefix namespaces the lot, and rename
 > overrides per function. Callables only; anything else named raises.
 
+## `face`
+
+```python
+def face(
+    module: Any,
+    names: Iterable[str] | None = None,
+    *,
+    purpose: str,
+    prefix: str | None = None,
+    rename: Mapping[str, str] | None = None,
+    effects: Iterable[tuple[str, str, str]] = (),
+    signatures: Iterable[str] = (),
+) -> str:
+```
+
+> Selected callables of any module as MeTTa SOURCE, in one call.
+>
+>     source = metta.integrate.face(
+>         math, ["sqrt", "gcd"], purpose="Arithmetic from the C library"
+>     )
+>     Path("lib/lib_math/lib_math.metta").write_text(source, encoding="utf-8")
+>
+> module_ops is this act at run time: the same names, the same reachable
+> arities, the same map from a Python annotation to a MeTTa type. This
+> writes them out instead, as one arrow, one `(@doc ...)` atom and one
+> `py-call` equation per call form, so a MeTTa program imports the library
+> with no Python running first.
+>
+> names is the selection and None takes the module whole; rename is the
+> `as` of the import it renders. A name whose signature neither the runtime
+> nor the docstring answers is refused: `signatures` declares it, one
+> Python signature line per call form. `effects` reviews a derived effect
+> class where the signature cannot show it, one (name, class, reason)
+> triple, random construction being the standing example.
+>
+> The answer carries the header those arguments make, and
+> `extensions/python/tools/facegen.py` reads that header back to regenerate
+> the file, so a face stays checkable against the module it was read from.
+
 ## `wrap_callable`
 
 ```python
