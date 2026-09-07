@@ -1291,7 +1291,10 @@ is the authority: `python-reference` a Language Reference section,
 project to `(remedy ...)` and `(ground ...)` atoms through `as_atom()` and
 back through `from_atom()`. A refusal Python's own word covers is still a
 `TypeError`, `AttributeError` or `ValueError`, and carries the two fields on
-the instance, so `getattr(error, "remedy", None)` is the one reader.
+the instance, so `getattr(error, "remedy", None)` is the one reader. Whichever
+class it wears, the message is the sentence the engine composed and never the
+reserved envelope around it, so a repeated JSON key reads `JSON object repeats
+the key a` rather than naming a term.
 A deprecation's catalog remedy term decodes the same way: the
 DeprecationWarning instance carries `.remedy` with the term as its `edit`. `RestraintError` is a bound the program declared for one of its
 own tables, `(cache f (max-answers N))` or a size restraint, tripping; it

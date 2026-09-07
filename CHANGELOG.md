@@ -844,6 +844,29 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   longer leaves its engine running: one `--rebaseline` left two `swipl`
   processes at 48% CPU with nothing bounding them, because the death signal
   reached `perf` and the engine is `perf`'s child.
+- The sentences the JSON codec composes for its refusals are pinned, on both
+  reader paths and for text and bytes alike. `metta._json.loads` on a document
+  that repeats a key reads `JSON object repeats the key a`, `dumps` on a
+  non-finite number names the number, and `dumps` on a live host object says
+  what JSON cannot carry -- which is what `shim.pl`'s
+  `metta_py_json_rethrow/1` has always written, and not what a caller read:
+  until the `MettaSyntaxError.line` work repaired the wrapping, every one of
+  them arrived as `metta: Unknown error term:
+  metta_control_signal(value,"JSON object repeats the key a") (value)`, with
+  the right class around the wrong words. Nothing failed, because every test
+  here asked only for `ValueError`. The tests now read the sentence, and the
+  both-paths one runs a child process per reader, since
+  `engine/json_codec.pl` chooses between the C reader and `library(json)` at
+  load time.
+- One kind set for the reserved control envelope, derived rather than kept in
+  step by hand. `extensions/python/tests/repository/test_error_kinds.py` reads
+  every `metta_control_signal` kind this tree throws out of the tree, holds it
+  equal to `_EXCEPTION_TYPES` with both differences named, and asks the live
+  shim to classify each one. A kind the shim admits and Python does not reaches
+  a caller as a bare `EngineError`, which is what `restraint` did until the
+  cache-policies branch noticed by hand; a kind Python names and nothing throws
+  is an entry that can never fire. Both directions fail the gate now, and the
+  Node seat derives its own map from the same function.
 
 ## [0.8.0] - 2026-09-06
 
