@@ -270,6 +270,8 @@ noreduce-eq                       20-02-07
 unquote                           20-02-07
 get-type-space                    20-02-08
 is-function                       20-02-09
+interpret                         20-02-12
+metta-thread                      20-02-12
 Predicate                         20-03-02
 assertaPredicate                  20-03-02
 callPredicate                     20-03-02
