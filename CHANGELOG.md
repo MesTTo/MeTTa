@@ -232,6 +232,38 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   are the seam in C's own spelling, with the same four kinds; the seat
   declares `op`, `repr`, `provider` and `library` at boot and `mt_def` writes
   an `op` row.
+- Every atom has an example. 46 new programs take the example corpus from 266
+  to 312 files and close the gap between what the engine can call and what the
+  corpus exercises: of the 721 heads a new `corpus-coverage` gate lane knows,
+  245 engine callables and 641 distinct heads the 38 shipped libraries carry,
+  287 were called by no example before this and 4 are now, each of those four
+  a Type or a nullary constructor that appears in the corpus in declaration or
+  argument position instead.
+
+  The lane reads the engine's own `fun/1` plus `translator:metta_translated_head/1`
+  and `metta.library.rows(name).carried`, so neither source is a list kept
+  beside the corpus that could drift from the engine on the first
+  registration. It requires CALL position, `(name `, `(name)` or `(name` at a
+  line end, with full-line comments stripped and `_fixtures/` skipped, so a
+  name spelled in prose proves nothing about it. Its exception list is
+  `tests/data/corpus_coverage_allowlist.txt`, and it is exact in both
+  directions: an allowlisted head an example now calls, an allowlisted head the
+  corpus never writes at all, and a row for a head nothing carries are three
+  separate findings, each of which a selftest plants and reads back.
+
+  Three of the new examples need a capability the tree does not always carry
+  and each asks for it the way the corpus already asks: MORK's five MM2
+  operators behind a `file-exists` check on the backend's own artefact, a space
+  shared over Redis behind an attach under `catch`, and the rest of lib_torch's
+  surface behind one call read with `if-error`. They RUN where the capability
+  exists rather than being named in `tests/data/example_skips.txt`, which stays
+  at five entries.
+
+  Two sections are new: `examples/ch19-spaces-backed-by-anything/19-04-a-space-on-mork/`
+  and `examples/ch20-extending-the-engine/20-07-tokens-and-the-reader/`. Each
+  new example carries a Python twin under
+  `extensions/python/examples/language-feature-examples/`, written with no
+  MeTTa source text and priced by its own first measurement.
 
 - A template renders as well as reads. `metta.render(source, /, **values) ->
   str` takes the same three faces the reading doors take -- a 3.14 `t"..."`

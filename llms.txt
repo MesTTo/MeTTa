@@ -20,7 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 271 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 317 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 30 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
@@ -52,10 +52,22 @@ re-runs them.
 | `check.sh` | the gate. `GATE_ONLY=1 sh check.sh` is what CI blocks on | |
 | `extensions/python/metta/*.py` | the library. `extensions/python/metta/_space.py` is the `MeTTa` context and the `Space` handle; a leading `_` means internal | |
 
-Counts re-measured 2026-09-06. The `llms` lane derives every explicit count in
+Counts re-measured 2026-09-07. The `llms` lane derives every explicit count in
 this table, checks the library roster and every backticked path, rejects names
 the live engine does not know, and asks the reverse question too: every
 engine-known call head the example corpus exercises must be named here.
+
+The corpus answers the other half of that question. `corpus-coverage` reads the
+engine's own callable set and `metta.library`'s carried rows and requires each
+name to appear in CALL position in some example: `(name `, `(name)` or `(name`
+at a line end, with full-line comments and `_fixtures/` removed first, so a
+name spelled in prose proves nothing. It costs one engine boot for each of its
+two sources and about eleven seconds. Its exception list is
+`tests/data/corpus_coverage_allowlist.txt`, four rows today, each a name whose
+TYPE makes a call meaningless -- the three Types `DontEvalType`, `FTree` and
+`TP`, and the nullary constructor `FTEmpty` -- and it refuses in three
+directions: an allowlisted head an example calls, an allowlisted head the
+corpus never writes at all, and a row for a head nothing carries.
 
 ## Install and first call
 
@@ -2567,13 +2579,18 @@ nothing; matchable `(import Path)` rows through `(imports &space)`,
 and `unimport!` for exact source-owned atom withdrawal; `lib_json` JSON, decoding into that dict-as-space; `lib_measure`
 weighted superpositions: normalize, softmax, rank, top-k, sample; `lib_memo` the
 resident automatic and explicit memoisation controls; `lib_mm2` notation over
-&mork, loaded on demand; `lib_nars` NARS truth functions, inference rules and
+&mork, loaded on demand: `＋` and `－` add and remove one atom, `＋*`
+bulk-adds a whole expression in one crossing, and `~>` runs one MM2 transform; `lib_nars` NARS truth functions, inference rules and
 bounded derivation; `lib_observe` filtered traces, source coverage and attributed error frames as queryable atoms; `lib_patrick` compose, for, iterate; `lib_pln` PLN truth
-formulas, consistency and ranking; `lib_pln2` selected Beta and moment formulas
+formulas, consistency and ranking, over `/safe`, the division that answers
+nothing rather than raising when the denominator is zero; `lib_pln2` selected Beta and moment formulas
 with explicit evidence scale and support-checked independence; `lib_redis` shared spaces over Redis;
 `lib_reflect` the engine's own surface as data you can match; `lib_regex` PCRE2
 over strings; `lib_roman` a list and fold basis, head, init, fold-flat,
-foldr-flat; `lib_soft` soft structural unification over written symbols, including
+foldr-flat; the three general set operations `/?\`, `\?` and `\?/`, which take
+the comparison as an argument and are what the nine fixed spellings are sugar
+over; `fst`, `snd` and the pair-shaped `cns`; and `traceid` and `tracem`, which
+print and answer their subject unchanged; `lib_soft` soft structural unification over written symbols, including
 function names, with grounded values compared crisply; match quality as a measure;
 `lib_spaces` moving atoms between spaces, with find and match-count;
 `lib_strategy` a Stratego-style strategy basis whose plans are ordinary atoms;

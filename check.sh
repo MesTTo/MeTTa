@@ -32,6 +32,8 @@
 #                                            memory-scale memory-scale-gate
 #                                            memo-advisor memo-advisor-selftest
 #                                            shell examples layering
+#                                            corpus-coverage
+#                                            corpus-coverage-selftest
 #                                            generated-artifacts
 #                                            init-stub mypy-root-impl
 #                                            mypy-algebra-surface
