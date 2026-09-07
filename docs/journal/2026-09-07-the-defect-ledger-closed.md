@@ -69,3 +69,56 @@ what a module-owned name with no stored declaration of its own governs by.
 All four rows of the ledger's table now agree between the two doors, and
 `&self` still answers `(if-equal 1 1 yes no)` -> `yes`, which is the control.
 
+Tried: the `no-autoload` GATE, which finding 39 repaired and which nothing had
+re-run on trunk. Red, on
+`examples/ch18-performance/18-02-memoisation-and-tabling/16-cache_policy_restraints.metta`,
+with `Unknown procedure: call_delays/2`. `lib_tabling` reads a restrained
+table's delay condition through `call_delays/2`, which is `library(wfs)`'s and
+which the library-index autoloader had been finding. The branch carrying
+`95016842` reached the same conclusion independently and measures the two
+spellings; whichever copy merges second is redundant.
+
+Tried: the general form, because the engine's own `prolog` lane already asks
+this question with the autoloader off and its comment says why -- "with
+autoload on, such a name resolves at the first call and the check says
+nothing" -- and it consults `engine/main.pl`, which `import!` means never
+reaches `lib/`. Consulting every `lib/*/*.pl` under the same flag and running
+`list_undefined` answers in 2.1 seconds and reported FOUR names: the two that
+are deferred by design, `source_observation:observe_source/4` (lib_observe
+loads the observer on demand) and `py_call/2` (janus's, guarded by
+`current_predicate/1` at every site), and two live defects.
+
+The second live one is the argument for the lane. `lib_crypto`'s
+`crypto_random_hex/2` calls `hex_bytes/2`, which is `library(crypto)`'s and
+which its `metta_platform_load/2` import list did not name. No example calls
+it, so the corpus lane could never have found it. Measured:
+`NO_AUTOLOAD=1 sh run.sh` over `!(println! (crypto-random-hex 4))` exits 2
+with `Unknown procedure: hex_bytes/2` on a platform that HAS crypto, and 0
+answering `"0e2530a2"` with the name on the list.
+
+Tried: `sh check.sh prolog` on a pristine `761fd85b`. Already red, third
+instance of the same class: `engine/spaces/catalog.pl:763` calls
+`pairs_keys_values/3` and the `spaces` module imports no `library(pairs)`.
+`engine/source_observation.pl:30-37` carries a comment recording the same name
+failing the same way in September. Declared, and the lane is green.
+
+Decided: `lib-autoload` is a GATE beside `prolog` rather than a REPORT. Its
+backlog is empty after the two repairs, and a lane at zero findings has to
+prove it can still see, so the driver plants a call to the first library export
+this tree does not import and refuses if the walk misses it. Control, both
+directions: with both declarations removed it exits 1 naming
+`user:call_delays/2 lib/lib_tabling/lib_tabling.pl:1180` and
+`user:hex_bytes/2 lib/lib_crypto/lib_crypto.pl:64`; restored, it exits 0.
+
+Open: finding 24's half B, an inherited caller not seeing the child's shadow,
+still reproduces on trunk (`(pick)=[mine]`, `(top)=[base]`, and the same
+program in one space answering `[base, mine]` for both). The engine names the
+mechanism and its own deferred repair at `engine/translator/runtime.pl:562-573`
+-- SWI hands a `module_transparent` predicate Logtalk's `This` where a space
+context is `Self` -- and calls the fix P11.7, which appears in no ledger. That
+is a calling-convention change across every compiled clause, not this thread's.
+
+Open: finding 15's derivation effects are deliberate and now documented, with
+`speculative` as the fence; finding 9's WASM stack-limit message is unchanged
+and its ~33 MB ceiling is still unattributed; finding 37 leaves 2,542 boot
+inferences unattributed to a mechanism.
