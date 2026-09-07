@@ -3322,7 +3322,7 @@ against a point nobody declared lists every point that is declared.
 and `integration`, read unloaded from what packages advertise.
 
 ```ts
-import { seam } from "metta-node";
+import * as seam from "metta-node/seam";
 
 export function register() {
   seam.type.register("Star", { constructor: Star, toAtom: ..., fromAtom: ... });

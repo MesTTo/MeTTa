@@ -82,7 +82,7 @@ cat > "$scratch/app/node_modules/solars/index.js" <<'SOLARS'
 // Nothing here is imported by the seat. The package.json `metta.extensions`
 // group names `register`, and an app either calls it through
 // `seam.discover()` or imports this module, whose body could register itself.
-import { seam } from "metta-node";
+import * as seam from "metta-node/seam";
 
 export class Star {
   constructor(designation) {
@@ -136,7 +136,8 @@ cat > "$scratch/app/prove.mjs" <<'PROVE'
 // Every door solars reaches, named, from a program that imports only the seat.
 import assert from "node:assert/strict";
 
-import { G, S, project, seam } from "metta-node";
+import { G, S, project } from "metta-node";
+import * as seam from "metta-node/seam";
 
 // Discovery is free: the name is advertised and nothing is loaded for it.
 assert.deepEqual(seam.advertised(), ["solars"]);
