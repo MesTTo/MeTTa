@@ -1183,6 +1183,19 @@ kind(metta_space_claim/2, host_service).
 %read from the error term the engine's own throwers shape, absence left
 %unbound for the host to map to its None (2026-08-20).
 kind(metta_host_operation_error/5, host_service).
+%The rest of the refusal contract, one table and the readings that answer
+%from it: which KIND a ball is and the fields that kind carries
+%(metta_host_error_kind/3), the kinds themselves as rows a seat can enumerate
+%(metta_host_error_kind_row/3), the reserved control envelope's kind and
+%payload, the line a reader failure named, and the capability a restricted
+%space lacks. Every seat classified by its own copy before 2026-09-07 and the
+%copies disagreed, so the table moved here and the seats read it
+%[source: docs/journal/2026-09-07-two-seats-one-error-taxonomy.md].
+kind(metta_host_error_kind/3, host_service).
+kind(metta_host_error_kind_row/3, host_service).
+kind(metta_host_control_signal_info/3, host_service).
+kind(metta_host_control_signal_line/2, host_service).
+kind(metta_host_space_capability_error/4, host_service).
 kind(match_foreign/5, host_service).
 kind(metta_add_atoms/2, host_service).
 kind(metta_source_declarations/2, host_service).

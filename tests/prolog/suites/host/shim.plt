@@ -26,9 +26,10 @@
 %     narrowest kind per position, a variable contributing none, an equation
 %     body's result, and a declared head skipped
 %     [tested: shim_type_inference; commit=8d67307403c1e41ccf058bd3c8d4c079dd7cf7d5].
-%   - a reader failure's line is read out of the control envelope's own
-%     context slot, and an envelope without one fails rather than guessing
-%     [tested: shim_type_inference:a_syntax_envelope_carries_its_line; commit=8d67307403c1e41ccf058bd3c8d4c079dd7cf7d5].
+%   - the reader failure's line and the reserved kinds are the ENGINE's to
+%     read, so they are tested where they live rather than here, where this
+%     suite loads the shim alone
+%     [tested: error_kinds:a_syntax_envelope_carries_its_line; commit=52e95b50cc5acdc0e41f97b444ab244ad1301433].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -791,17 +792,5 @@ test(both_equation_head_spellings_are_read) :-
     assertion(metta_py_infer_head([f, x], f, [x])),
     assertion(metta_py_infer_head(f, f, [])),
     \+ metta_py_infer_head([1, x], _, _).
-
-%The reader's line rides in the envelope's context slot; an envelope that
-%names no line fails here rather than answering a guess.
-test(a_syntax_envelope_carries_its_line) :-
-    metta_control_signal_line(
-        error(metta_control_signal(syntax, 'missing'),
-              context(metta, metta_source_line(7))), Line),
-    assertion(Line == 7),
-    \+ metta_control_signal_line(
-        error(metta_control_signal(syntax, 'missing'), context(metta, syntax)), _),
-    \+ metta_control_signal_line(
-        error(metta_control_signal(time_limit, 1), context(metta, time_limit)), _).
 
 :- end_tests(shim_type_inference).

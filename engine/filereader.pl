@@ -20,7 +20,7 @@
 %     reserved control envelope, so a caller points at the line instead of
 %     parsing "starting at line ~w" out of the message
 %     [tested: reader_c:the_error_shapes_match_the_prolog_reader,
-%     shim_type_inference:a_syntax_envelope_carries_its_line; commit=8d67307403c1e41ccf058bd3c8d4c079dd7cf7d5].
+%     error_kinds:a_syntax_envelope_carries_its_line; commit=52e95b50cc5acdc0e41f97b444ab244ad1301433].
 %   - top_forms//2 ignores comment text and keeps parentheses inside escaped
 %     string quotes inside their form [tested 2026-08-15:
 %     filereader_form_splitter].
