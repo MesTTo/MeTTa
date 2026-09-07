@@ -31,7 +31,7 @@
 % Guarantees:
 %   - a window that never opened exits 125 rather than failing as a case: the
 %     driver reads that as "this run says nothing" instead of as a moved row
-%     [tested: engine/bench.sh; commit=WORKTREE].
+%     [tested: engine/bench.sh; commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6].
 %   - every case CHECKS its own result before its counters are printed, so a
 %     case that stopped doing its work fails instead of reporting a cheaper
 %     number [tested: engine/bench.sh; commit=c41b54d69e951882e5075393f851a33438247372].
@@ -308,7 +308,7 @@ bench_check(boot, booted) :-
 % Both calls sit in bench_check/2, which runs AFTER the measured region closes
 % and outside it, so neither reader's cost joins the count it guards
 % [measured 2026-09-07: parse-prolog reads 3,341,234 inferences with the check
-% pinned to a number and 3,341,234 with it derived; commit=WORKTREE].
+% pinned to a number and 3,341,234 with it derived; commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6].
 %
 % Known limitation: two readers that broke the SAME way would agree and pass.
 % The number would not have caught that either, and reader_c.plt's differential

@@ -20,7 +20,7 @@ Guarantees:
     lane exits 0 with a named skip on a developer's box and 1 where CI=true,
     and never reports a refused measurement as a moved row
     [tested: test_a_benchmark_lane_skips_a_refusal_locally_and_refuses_it_in_ci;
-    commit=WORKTREE]
+    commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6]
   - the deciding counter is inferences, taken from three fresh processes that
     perf is NOT watching, so a machine with no perf still gates
     [tested: engine/bench.sh; commit=c41b54d69e951882e5075393f851a33438247372].
@@ -29,7 +29,7 @@ Guarantees:
     every lane. SWI reads TMP for its temporary directory and the boot case is
     sensitive to the one atom that creates, so the samples run without them
     [tested: tests/shell/test_boot_inference_determinism.sh, its third arm;
-    commit=WORKTREE].
+    commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6].
   - retired instructions are measured over the same region and not over the
     process, through perf's control descriptors, so a case's instruction pin
     excludes the engine boot that every case would otherwise carry
@@ -118,7 +118,7 @@ TIMEOUT = 120.0
 #: (atom_concat(hyprobe_,I,A), atom_length(A,_))), user:ensure_loaded(
 #: 'engine/qlf_boot'), statistics(inferences,I0), user:ensure_loaded(
 #: 'engine/metta'), statistics(inferences,I1), X is I1-I0, writeln(X)" -t halt`;
-#: commit=WORKTREE]. No other variable this gate sets or a shell carries moves
+#: commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6]. No other variable this gate sets or a shell carries moves
 #: the row: LANG, LC_ALL, PYTHONHASHSEED, CI, HOME, SHELL, METTA_TIMEOUT and an
 #: invented name all read 268,417.
 #:

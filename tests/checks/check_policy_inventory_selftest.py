@@ -17,7 +17,7 @@ Guarantees:
     tests/checks/check_policy_inventory_selftest.py; commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3]
   - a Prolog list whose every element is a variable is skipped, and one
     literal element anywhere in it brings the finding back
-    [tested: test_a_list_of_prolog_variables_carries_no_policy; commit=WORKTREE]
+    [tested: test_a_list_of_prolog_variables_carries_no_policy; commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6]
   - semiring-claim validation rejects a missing required value, an undeclared
     semiring claim and a missing consumer seam [tested:
     tests/checks/check_policy_inventory_selftest.py; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]

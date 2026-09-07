@@ -85,13 +85,13 @@ Guarantees:
     example and a row whose processes split between two costs are printed with
     their count and the load beside them, and are fatal only where CI=true,
     while a row whose inference counts disagree still fails on a desk
-    [tested: tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE].
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6].
   - a row whose own runs land on BOTH sides of the cross-engine allowance is
     reported as unmeasured with its ends rather than as a regression, because
     the verdict would otherwise be whichever half of its spread this run's
     median fell in; a row whose BEST run is still over the line fails
-    [tested: tests/checks/check_upstream_parity_selftest.py,
-    straddled_allowance_failures; commit=WORKTREE].
+    [tested: tests/checks/check_upstream_parity_selftest.py;
+    commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6].
   - a row whose program run costs LESS than its own null control is reported
     as `negative-net` and fails the run, rather than being recorded and then
     dropped from the page

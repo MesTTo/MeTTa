@@ -22,7 +22,7 @@ Guarantees:
     names no values, so it is skipped the way a partial list already is, while
     one literal element anywhere in it is still reported
     [tested: test_a_list_of_prolog_variables_carries_no_policy;
-    commit=WORKTREE]
+    commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6]
 Fails when:
   - the engine cannot boot, emits non-JSON policy rows, publishes a duplicate,
     missing or extra axis, or an implementation seam no longer exists
