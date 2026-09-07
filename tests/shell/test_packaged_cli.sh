@@ -66,6 +66,12 @@ printf '!(import! &self (library lib_roman))\n!(map-flat (+ 1) (1 2 3))\n' \
     # is checked here is that the wheel ships the surface at all.
     "$fixture/venv/bin/python" -m metta run --help > "$fixture/run-help.log"
     "$fixture/venv/bin/python" -m metta doc --help > "$fixture/doc-help.log"
+    # The provenance faces, at the same depth and for the same reason: `card`
+    # reads a library's own sources through the engine's reader and `lock`
+    # runs the programs it pins, so both need janus to DO anything, and what
+    # this install can answer is that the wheel ships them at all.
+    "$fixture/venv/bin/python" -m metta card --help > "$fixture/card-help.log"
+    "$fixture/venv/bin/python" -m metta lock --help > "$fixture/lock-help.log"
 )
 
 grep -Fxq '2' "$fixture/basic.log"
@@ -77,6 +83,9 @@ grep -Fq -- '--json' "$fixture/run-help.log"
 grep -Fq -- '--json=wire' "$fixture/run-help.log"
 grep -Fq 'no operand' "$fixture/run-help.log"
 grep -Fq -- '--infer' "$fixture/doc-help.log"
+grep -Fq 'lib_x' "$fixture/card-help.log"
+grep -Fq -- '--locked' "$fixture/run-help.log"
+grep -Fq 'metta.lock' "$fixture/lock-help.log"
 
 # The cheat sheet is the one document a reader who pip-installed this has no
 # checkout to find, so metta.llms() has to answer from the INSTALL or the door

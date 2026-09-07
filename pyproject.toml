@@ -663,6 +663,10 @@ forbidden_modules = [
     # Space.saga, so ordinary core imports do not load its event machinery.
     "metta._saga",
     "metta._persistent",
+    # _lock is the deferred lockfile implementation reached only by MeTTa.lock
+    # and MeTTa.check, so an ordinary core import does not load tomllib or the
+    # library satellite it reads the roster from.
+    "metta._lock",
     "metta.aio",
     "metta.algebra",
     "metta.arrays",
@@ -673,6 +677,7 @@ forbidden_modules = [
     "metta.foreign",
     "metta.importing",
     "metta.integrate",
+    "metta.library",
     "metta.lint",
     "metta.manifest",
     "metta.parallel",
@@ -699,6 +704,10 @@ ignore_imports = [
     "metta._space -> metta._world",
     # Space.saga defers the recovery runner until that method is called.
     "metta._space -> metta._saga",
+    # MeTTa.lock and MeTTa.check defer the lockfile implementation until one of
+    # those two methods is called, so taking a lock is the only thing that
+    # reads a lock file.
+    "metta._space -> metta._lock",
 ]
 unmatched_ignore_imports_alerting = "error"
 

@@ -231,4 +231,30 @@ do
     fi
 done
 
+# The pin a runtime import records. A lockfile answers what revisions this
+# process is running from ONE table, so the imperative route has to write there
+# too: without it a lock named the pins a manifest declared and silently omitted
+# the ones a program imported by hand, which is the half a reader would never
+# think to check. The unpinned form records nothing, because a revision it never
+# chose is not a pin.
+pin_base="$fixture/pins"
+pinned=$(cd "$fixture" && bounded swipl -q -g \
+    "consult('$project_dir/engine/main.pl'),\
+     'git-import!'('$remote','','$pin_base','$first',_),\
+     forall(git_pinned_dependency(U, R), format('~w ~w~n', [U, R])),halt" 2>/dev/null | tail -1)
+case "$pinned" in
+    *" $first") ;;
+    *) echo "a runtime pinned git-import! recorded '$pinned', not the revision it checked out" >&2
+       exit 1 ;;
+esac
+unpinned=$(cd "$fixture" && bounded swipl -q -g \
+    "consult('$project_dir/engine/main.pl'),\
+     'git-import!'('$remote','','$fixture/unpinned',_),\
+     ( git_pinned_dependency(_, _) -> print(recorded) ; print(none) ),nl,halt" \
+    2>/dev/null | tail -1)
+if [ "$unpinned" != "none" ]; then
+    echo "an unpinned git-import! recorded a pin: $unpinned" >&2
+    exit 1
+fi
+
 echo "commit-pinned git-import tests passed"

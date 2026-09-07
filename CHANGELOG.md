@@ -237,6 +237,51 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   seam: every library drops the answers it derived earlier, which is what a
   replay needs in order to start where the recording did. `lib_memo` and
   `lib_tabling` answer the second; `lib_memo` answers both.
+- `metta.library.card(name)` and `python -m metta card lib_x`: what one shipped
+  library says about itself. A `Card` carries the library's files and one
+  digest over them, the version it declares, its own opening prose, one
+  `HeadCard` per head it declares, defines, documents or REGISTERS, the effect
+  class and cost class this engine resolves for each, the corpus examples that
+  import it, its deprecation rows, and the platform capabilities its
+  `:- metta_requires(...)` declarations name. It renders as text, as a `rich`
+  table and as notebook HTML, and a name outside the roster refuses with the
+  roster. Reading a library neither loads nor runs it, so one whose backend
+  this build has not got still describes itself; the effect and cost are what
+  the engine currently answers, so a card taken after `m += lib.memo` can say
+  more than one taken before it. The sections are Mitchell et al.'s model card
+  mapped one to one onto a library's facts.
+
+- `metta.library.rows(name)` is the query the card renders, and
+  `extensions/python/tools/libdoc.py` now renders the same rows as
+  `website/reference/metta-libraries.md`, so a card and that page cannot
+  disagree. `metta_registration_names/2` and the published
+  `metta_string_registrations/2` answer which heads a source REGISTERS, from
+  beside the six registration spellings in the engine rather than from a table
+  a host keeps: the page counted `lib_memo` at zero names while nine of its
+  heads were callable, and now counts nine. Fourteen more libraries gain their
+  registered heads, `lib_thread` from 37 to 55 and `lib_file` from 18 to 32,
+  each named in that library's `Undocumented:` line. Every rendered entry, its
+  line and its text are unchanged.
+
+- `m.lock()`, `Lock.write(path)`, `metta.Lock.read(path)`, `m.check(lock)`,
+  `python -m metta lock [files] -o metta.lock` and
+  `python -m metta run --locked metta.lock file.metta`. The lock is TOML in
+  uv's and PEP 751's shape: a `lock-version`, a `created-by`, an `[engine]`
+  table naming this build, SWI's version and one digest over `engine/**/*.pl`
+  and `engine/prelude.metta`, one `[[library]]` row per shipped library
+  imported, one `[[source]]` row per other file loaded with the space it landed
+  in, and one `[[pin]]` row per repository revision a git import acquired. The
+  digests are the engine's own `metta_source_digest`, the identity `import!`
+  already compares to decide a reload. `m.check` answers one
+  `Drift(kind, name, expected, actual)` per entry that no longer matches;
+  `--locked` refuses with `LockDrift` before the program runs, naming every
+  difference and both repairs. A source path is written relative to the lock's
+  own directory when it sits under it, so a checked-in lock travels with its
+  program. Refused: a lock taken while a load is in flight, a `lock-version`
+  this build does not know, and a file that is not TOML. The scope is the
+  PROCESS rather than one context, because the engine's loads, registrations
+  and pins are process-wide and a program that loads into one space and reads
+  from another is still one program to reproduce.
 
 - `(cost witness class)` and `(cost witness class measure)` catalog rows, and
   the `cost-rows` gate lane that can fail one. The witness is a call with
@@ -732,6 +777,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `extensions/python/metta/shim.pl` keeps the names its own goal text asks for
   and delegates to them, so the Python wire is unchanged and the kind list
   exists once instead of once per seat.
+- A runtime `!(git-import! url build base rev)` records the revision it pinned
+  in the same table the declarative `(git-dependency ...)` form keeps, so a
+  reader asking what this process is running gets both routes from one place
+  and a lock cannot name the declared pins while silently omitting the
+  imported ones. The declarative form's own conflict check is unchanged and
+  now sees a runtime pin as the standing specification.
+
+- `metta_source_declarations/2` answers the version an extension declares
+  beside its name, so a reader asking what a library states no longer has to
+  consult the file to learn it.
+
 - A `(claim Vocab Value Property...)` row's properties are cached per value,
   the way a vocabulary's values already were. The read has an open tail,
   because a claim row carries any number of properties, so it took the branch
