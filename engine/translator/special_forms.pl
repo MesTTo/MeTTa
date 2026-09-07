@@ -1291,9 +1291,25 @@ metta_seq_query_pattern(true, Pattern, Asked) :-
     metta_seq_query_plan(Pattern, Asked).
 
 %unify is the ONE door whose two operands are both syntax: they are typed Atom
-%and cross unevaluated, so both sides can carry a written gap and the pair can
-%land in either two-sided fragment. Every other door faces a VALUE on one side,
-%which is data and therefore gap-free, so it is one_sided by construction.
+%and cross unevaluated, so both sides can carry a written gap. Every other door
+%faces a VALUE on one side, which is data and therefore gap-free, so it is
+%one_sided by construction.
+%
+%Known issue: this door does not reach the two-sided fragments either.
+%metta_seq_plan/3 parses its LEFT argument alone, so the classifier reads B's
+%markers as ordinary structure holding ordinary variables, answers
+%one_sided(left) for every pair, and hands the solver an unparsed B. Two
+%consequences: a shape the last_position or linear_shallow calculus would solve
+%is matched one-sidedly and fails, and a name written as a gap on BOTH sides is
+%caught by the mixed-role rule although it plays one role
+%[measured 2026-09-07: `!(unify (f a b) (f a b (:seg $v)) $v none)` answers
+%`none`, `!(unify (f (:seg $u) b) (f a (:seg $v)) ($u $v) no)` answers `no`, and
+%`!(unify (f (:seg $u)) (f (:seg $u)) yes no)` refuses for mixed_roles where
+%upstream PeTTa at the parity pin answers `yes`]. Parsing B here and passing the
+%parsed side to metta_match_atoms/2 is the fix; the shapes it changes are pinned
+%in examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta
+%and the measurement is in
+%docs/journal/2026-09-07-sequence-variables-in-the-corpus.md.
 metta_unify_decision(A, B, metta_match_atoms(Asked, B)) :-
     (   metta_seq_written(A)
     ->  true

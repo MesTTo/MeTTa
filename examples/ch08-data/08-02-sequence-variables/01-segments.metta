@@ -41,15 +41,16 @@
               ($_ nope)))
        (7 (x y)))
 
-; TWO-SIDED. When both operands carry gaps the answer may stay open, and it
-; prints as the pattern that would match it.
+; A marker written on the OTHER operand of unify is DATA, so a gap consumes
+; one as a single child and the run it took prints with that marker still in
+; it. 04-the-two-sided-fragments.metta measures how far that reading goes.
 !(test (unify (f a (:seg $u)) (f a b (:seg $v)) $u none) (b (:seg $v)))
 
 ; THE FENCE. General sequence unification is INFINITARY (Kutsia, Journal of
 ; Symbolic Computation 42(3), 2007, Theorem 62): `X u = u X` has the family
 ; X = u^n for every n. Three restrictions are proved finite and are the ones
 ; this engine decides; outside them an ask REFUSES rather than searching, and
-; the refusal names the rule.
+; the refusal names the rule. 05-the-fence.metta reads that refusal apart.
 !(test (get-metatype (catch (unify (f (:seg $x) a) (f a (:seg $x)) yes no)))
        Expression)
 
