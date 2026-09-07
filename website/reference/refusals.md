@@ -55,7 +55,7 @@ Raised as `MettaSyntaxError`, off the reserved control envelope.
 
 **Remedy.** close or correct the form that starts at line `<line>`
 
-A quickfix, prose.
+An LSP `quickfix` at rustc's `prose`, with no act: the repair is a decision.
 
 ### `time_limit`
 
@@ -65,7 +65,7 @@ Raised as `TimeLimitError`, off the reserved control envelope.
 
 **Remedy.** raise the bound past `<limit>` seconds, or narrow the query
 
-A quickfix, prose, writing `(edit (pragma! max-time <seconds>))`.
+An LSP `quickfix` at rustc's `prose`, whose act is `(edit (pragma! max-time <seconds>))`.
 
 ### `inference_limit`
 
@@ -75,7 +75,7 @@ Raised as `InferenceLimitError`, off the reserved control envelope.
 
 **Remedy.** raise the bound past `<limit>` inferences, or narrow the query
 
-A quickfix, prose, writing `(edit (pragma! max-inferences <inferences>))`.
+An LSP `quickfix` at rustc's `prose`, whose act is `(edit (pragma! max-inferences <inferences>))`.
 
 ### `restraint`
 
@@ -85,7 +85,7 @@ Raised as `RestraintError`, off the reserved control envelope.
 
 **Remedy.** raise the `<restraint>` bound past `<bound>` in the row that declares it, or ask `<call>` for fewer answers
 
-A quickfix, prose.
+An LSP `quickfix` at rustc's `prose`, with no act: the repair is a decision.
 
 ### `interrupted`
 
@@ -95,9 +95,9 @@ Raised as `Interrupted`, off the reserved control envelope.
 
 **Remedy.** start the run again if the stop was not meant
 
-A source, prose.
+An LSP `source` at rustc's `prose`, with no act: the repair is a decision.
 
-On TypeScript this is `InterruptedError`: every condition in this package ends in Error, which is the platform's own convention for an Error subclass, and JavaScript has no builtin of that name to collide with
+On TypeScript this is `InterruptedError`: every condition in this package ends in Error, which is the platform's own convention for an Error subclass, and JavaScript has no builtin of that name to collide with.
 
 ### `value`
 
@@ -107,9 +107,9 @@ Raised as `WireError`, off the reserved control envelope.
 
 **Remedy.** give the crossing a value JSON can carry, or carry the whole thing as a grounded atom
 
-A quickfix, prose.
+An LSP `quickfix` at rustc's `prose`, with no act: the repair is a decision.
 
-On Python this is `ValueError`: Python's own word for a value it cannot use; the refusal is about the caller's data rather than about MeTTa, so the language's class is the one a caller writes in except
+On Python this is `ValueError`: Python's own word for a value it cannot use; the refusal is about the caller's data rather than about MeTTa, so the language's class is the one a caller writes in except.
 
 ### `type`
 
@@ -119,9 +119,9 @@ Raised as `CastError`, off the reserved control envelope.
 
 **Remedy.** carry this term whole as a grounded atom instead of as data
 
-A quickfix, prose.
+An LSP `quickfix` at rustc's `prose`, with no act: the repair is a decision.
 
-On Python this is `TypeError`: Python's own word for a term of the wrong type; metta.casting.CastError already names a different meaning on this seat, a cast() refusal, so the row's name is taken here
+On Python this is `TypeError`: Python's own word for a term of the wrong type; metta.casting.CastError already names a different meaning on this seat, a cast() refusal, so the row's name is taken here.
 
 ### `assertion`
 
@@ -131,9 +131,9 @@ Raised as `AssertionFailure`, off a ball whose own shape names the refusal.
 
 **Remedy.** correct the claim `<operation>` makes, or the equations it reads
 
-A quickfix, prose.
+An LSP `quickfix` at rustc's `prose`, with no act: the repair is a decision.
 
-On TypeScript this is `AssertionError`: node:assert's own word for the same meaning, and this host has no builtin assert statement whose class it would shadow
+On TypeScript this is `AssertionError`: node:assert's own word for the same meaning, and this host has no builtin assert statement whose class it would shadow.
 
 ### `capability`
 
@@ -143,9 +143,9 @@ Raised as `SpaceCapabilityError`, off a ball whose own shape names the refusal.
 
 **Remedy.** grant `<capability>` to `<space>`, which `<operation>` needs
 
-A quickfix, maybe, writing `(edit (grants <space> <capability>))`.
+An LSP `quickfix` at rustc's `maybe`, whose act is `(edit (grants <space> <capability>))`.
 
-On TypeScript this is `CapabilityError`: the package namespace already says space, so the Space prefix would be said twice
+On TypeScript this is `CapabilityError`: the package namespace already says space, so the Space prefix would be said twice.
 
 ### `operation`
 
@@ -155,9 +155,9 @@ Raised as `MettaOperationError`, off a ball whose own shape names the refusal.
 
 **Remedy.** give `<operation>` a `<expected>` where it got `<culprit>`
 
-A quickfix, prose.
+An LSP `quickfix` at rustc's `prose`, with no act: the repair is a decision.
 
-On TypeScript this is `OperationError`: the package namespace already says metta, so the Metta prefix would be said twice
+On TypeScript this is `OperationError`: the package namespace already says metta, so the Metta prefix would be said twice.
 
 ### `stack`
 
@@ -167,9 +167,9 @@ Raised as `StackLimitError`, off a ball whose own shape names the refusal.
 
 **Remedy.** raise the ceiling past `<limit>` bytes, or make the recursion shallower
 
-A quickfix, prose, writing `(edit (pragma! stack-limit <bytes>))`.
+An LSP `quickfix` at rustc's `prose`, whose act is `(edit (pragma! stack-limit <bytes>))`.
 
-On Python this is no class of its own: the Python seat has no stack condition: a stack ball reaches _raise unclassified and arrives as EngineError. Closing this is a Python-seat change (a new public class), tracked in docs/journal/2026-09-07-two-seats-one-error-taxonomy.md.
+Python does not classify this kind from the ball. the Python seat has no stack condition: a stack ball reaches _raise unclassified and arrives as EngineError. Closing this is a Python-seat change (a new public class), tracked in docs/journal/2026-09-07-two-seats-one-error-taxonomy.md.
 
 ### `source`
 
@@ -179,11 +179,11 @@ Raised as `SourceNotFound`, off a ball whose own shape names the refusal.
 
 **Remedy.** create `<source>`, or correct the path that names it
 
-A quickfix, prose.
+An LSP `quickfix` at rustc's `prose`, with no act: the repair is a decision.
 
-On Python this is no class of its own: SourceNotFound is raised by the Python seat's own file check in _space.py, before the crossing; an existence ball that reaches _raise arrives as EngineError. Same journal entry.
+Python does not classify this kind from the ball. SourceNotFound is raised by the Python seat's own file check in _space.py, before the crossing; an existence ball that reaches _raise arrives as EngineError. Same journal entry.
 
-On TypeScript this is `SourceNotFoundError`: every condition in this package ends in Error; the row keeps the shorter name because the Python seat's own N818 exemption records that spelling as deliberate
+On TypeScript this is `SourceNotFoundError`: every condition in this package ends in Error; the row keeps the shorter name because the Python seat's own N818 exemption records that spelling as deliberate.
 
 ### `engine`
 
@@ -193,4 +193,4 @@ Raised as `EngineError`, off a ball this engine did not shape.
 
 **Remedy.** report the ball with the message it carries; this engine did not shape it
 
-A source, prose.
+An LSP `source` at rustc's `prose`, with no act: the repair is a decision.
