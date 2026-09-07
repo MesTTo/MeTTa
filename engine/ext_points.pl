@@ -25,7 +25,7 @@
 %     touched; an unscoped write is a segment of one and a discarded frame
 %     announces nothing [tested:
 %     test_a_transaction_delivers_one_progress_after_its_deltas,
-%     test_a_discarded_segment_announces_no_boundary; commit=WORKTREE].
+%     test_a_discarded_segment_announces_no_boundary; commit=0de0dc08d2fc77bee9dd132c41f1de23cda1e6c2].
 %   - deferred commit callbacks run after earlier committed events even when a
 %     subscriber fails, while rollback runs every paired discard callback even
 %     when an earlier discard raises [tested:

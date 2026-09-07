@@ -6,7 +6,7 @@ Guarantees: the executable example creates its handle through space().
 Guarantees: the live-view fences are exact excerpts of
 extensions/python/examples/live/standing_queries.py, which the example lane
 runs and which verifies itself [tested: test_example_runs_and_verifies_itself;
-commit=WORKTREE]
+commit=0de0dc08d2fc77bee9dd132c41f1de23cda1e6c2]
 -->
 
 # Standing queries
