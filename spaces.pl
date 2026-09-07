@@ -261,6 +261,7 @@
             metta_host_space_capability_error/4,
             metta_host_stored/2,
             metta_module_space/2,
+            metta_forget_derived/0,
             metta_release_space/1,
             metta_remove_atom/3,
             metta_remove_atom_reference/1,

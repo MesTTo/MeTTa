@@ -980,6 +980,25 @@ metta_builtin_effect_override('read-form!', oracleIO).
 metta_builtin_effect_override('readln!', oracleIO).
 metta_builtin_effect_override(sleep, oracleIO).
 
+%%%% Which of those a seed makes repeat %%%%
+%
+%The engine's own answer to seam:seeded_operation/1: the two oracleIO builtins
+%above whose only unrepeatable input is the random generator. Every other name
+%in that block reads something a seed cannot pin -- the clock, a file, the
+%argument vector, standing input -- so a run that reaches one of them cannot be
+%replayed from a seed alone, and a run that reaches only these can:
+%`(with-seed 42 (random-int 1 6))` draws the same number twice
+%[tested: test_a_seed_scope_repeats_its_draws_and_leaves_the_outside_alone].
+%
+%Separate from the effect class rather than a class of its own, because the
+%EFFECT is unchanged: a cache still may not hide a draw, and a reified world
+%still may not admit one. What this adds is whether a RECORDING of the run can
+%be replayed, which is a different consumer's question about the same
+%operation.
+:- multifile seam:seeded_operation/1.
+seam:seeded_operation('random-float').
+seam:seeded_operation('random-int').
+
 metta_builtin_structural(Name) :- pure_arithmetic(Name), !.
 metta_builtin_structural(Name) :- pure_comparison(Name), !.
 metta_builtin_structural(Name) :- pure_structure(Name), !.
