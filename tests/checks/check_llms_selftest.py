@@ -48,7 +48,9 @@ Open Obligations:
 from __future__ import annotations
 
 import re
+import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -197,6 +199,32 @@ def main() -> int:
         path_findings(SHEET, "`add-atom/3` and `metta.run/match/eval`") == [],
         "a predicate indicator or door list was read as a path",
     )
+    # The shorthand resolves a bare tail against THIS checkout only: a file
+    # that exists solely under ai-tmp/ (scratch, where agent worktrees live) or
+    # under a directory carrying its own .git (another checkout) must not
+    # supply the green, since a worktree under ai-tmp/ once did.
+    (REPO / "ai-tmp").mkdir(exist_ok=True)
+    scratch = Path(tempfile.mkdtemp(prefix="llms-selftest-", dir=REPO / "ai-tmp"))
+    nested = Path(tempfile.mkdtemp(prefix="llms-selftest-nested-", dir=HERE))
+    try:
+        (scratch / "only_under_scratch.plt").write_text("", encoding="utf-8")
+        (nested / ".git").write_text("gitdir: elsewhere\n", encoding="utf-8")
+        (nested / "only_under_another_checkout.plt").write_text("", encoding="utf-8")
+        expect(
+            len(path_findings(SHEET, "`only_under_scratch.plt`")) == 1,
+            "a file that exists only under ai-tmp/ resolved a bare-name claim",
+        )
+        expect(
+            len(path_findings(SHEET, "`only_under_another_checkout.plt`")) == 1,
+            "a file that exists only under another checkout resolved a bare-name claim",
+        )
+        expect(
+            path_findings(SHEET, "`ext_points.plt`") == [],
+            "a bare name this checkout holds stopped resolving",
+        )
+    finally:
+        shutil.rmtree(scratch)
+        shutil.rmtree(nested)
 
     # LIBRARIES: the roster and both statements of its count.
     shipped = _shipped()

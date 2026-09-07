@@ -13,8 +13,11 @@ claim, so the file that asserts its own gate and has none is worse off than one
 admitting it is hand-kept. Nine checks cover both directions of each promise:
 
   PATHS       every backticked token that names a file or directory resolves,
-              a glob resolving to at least one match. This is the "real file
-              tree" half.
+              a glob resolving to at least one match, against THIS checkout's
+              own files: scratch under ai-tmp/, a dependency's files under
+              node_modules/, and any directory carrying its own .git (another
+              checkout) never answer a claim. This is the "real file tree"
+              half.
   LIBRARIES   the roster sentence's names and its count equal `lib/lib_*/`.
               The count is stated twice, in the sources table and in the
               roster, and both are read.
@@ -100,10 +103,11 @@ from __future__ import annotations
 
 import ast
 import inspect
+import os
 import re
 import subprocess
 import sys
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from pathlib import Path
 
 from bounded_spawn import bounded
@@ -156,11 +160,56 @@ def _is_path_claim(token: str) -> bool:
     return token.endswith("/") or Path(token).suffix in _SUFFIXES
 
 
+#: Directories that are not this tree, so the shorthand walk never enters
+#: them: scratch (`ai-tmp/`, where agent worktrees also live), a dependency's
+#: own files (`node_modules/`) and bytecode caches. A directory carrying its
+#: own `.git` entry is another checkout and is pruned by that mark rather than
+#: by name. Pruning at the directory is pytest's `norecursedirs` shape and
+#: ripgrep's ignore walker's: a pruned directory is never read, so nothing
+#: under it can supply a match. Before this, `REPO.rglob` answered the Node
+#: sheet's `browser/` claim from an agent worktree under ai-tmp/ while this
+#: checkout held no browser build at all
+#: [source: https://docs.pytest.org/en/stable/reference/reference.html#confval-norecursedirs].
+_PRUNED = frozenset({"ai-tmp", "node_modules", "__pycache__"})
+
+
+def _another_checkout(directory: Path) -> bool:
+    """Whether `directory` is a nested worktree or clone rather than this tree."""
+    return directory != REPO and (directory / ".git").exists()
+
+
+def _in_this_tree(path: Path) -> bool:
+    """Whether an explicit glob hit lies in this checkout's own tree."""
+    parts = path.relative_to(REPO).parts
+    if any(part in _PRUNED for part in parts[:-1]):
+        return False
+    return not any(_another_checkout(REPO.joinpath(*parts[:depth])) for depth in range(1, len(parts)))
+
+
+def _tree_paths_named(name: str) -> Iterator[Path]:
+    """Every file or directory in THIS checkout whose last component is `name`.
+
+    A pruning walk rather than `rglob`: `_PRUNED` names, dot-directories
+    (an explicit claim may still name `.github/...`, since the direct check
+    in `_resolves` reads it) and other checkouts are not entered.
+    """
+    for root, directories, files in os.walk(REPO):
+        here = Path(root)
+        directories[:] = sorted(
+            d
+            for d in directories
+            if d not in _PRUNED and not d.startswith(".") and not _another_checkout(here / d)
+        )
+        for entry in (*directories, *files):
+            if entry == name:
+                yield here / entry
+
+
 def _resolves(sheet: Path, token: str) -> bool:
-    """Whether a path claim names something the tree actually holds."""
+    """Whether a path claim names something this checkout actually holds."""
     bases = (sheet.parent, REPO)
     if "*" in token:
-        return any(list(base.glob(token)) for base in bases)
+        return any(_in_this_tree(hit) for base in bases for hit in base.glob(token))
     if any((base / token.lstrip("/")).exists() for base in bases):
         return True
     # A prose shorthand names a real path by its tail: `repository/` for
@@ -169,11 +218,10 @@ def _resolves(sheet: Path, token: str) -> bool:
     if "/" not in tail:
         # A bare name may be a file the sheet names without its directory,
         # `ext_points.plt` for the suite of that name, as well as a directory.
-        return any(".git" not in candidate.parts for candidate in REPO.rglob(tail))
+        return any(True for _ in _tree_paths_named(tail))
     return any(
         str(candidate.relative_to(REPO)).endswith(tail)
-        for candidate in REPO.rglob(Path(tail).name)
-        if ".git" not in candidate.parts
+        for candidate in _tree_paths_named(Path(tail).name)
     )
 
 
