@@ -77,6 +77,24 @@ run GATE shell-oracle  sh -c "cd '$HERE' && sh tests/shell/test_example_runner.s
 run GATE encoding     sh -c "cd '$HERE' && sh tests/shell/test_engine_text_encoding.sh"
 run GATE examples     check_examples
 
+# The other direction of the llms lane, and the larger of the two. That one
+# requires every head the corpus CALLS to be named in llms.txt; nothing
+# required every head the engine and the libraries carry to be called by an
+# example, and 60 engine callables and 263 library heads were not [measured
+# 2026-09-07 at 31d54e19, before the examples this lane protects were
+# written]. A head nothing calls is a head no change to it can break.
+#
+# It reads the engine's own callable set and metta.library's carried rows
+# rather than a list kept beside the corpus, so a registration cannot drift
+# past it, and its allowlist is exact in three directions: a listed head an
+# example calls, a listed head the corpus never writes at all, and a row for
+# a head nothing carries are each findings. The selftest plants all four
+# shapes plus the two negatives, a head called only in a comment and a head
+# called only under _fixtures/, which is what the comment-stripping rule is
+# for: two heads passed the original audit on a comment alone.
+run GATE corpus-coverage "$PY" "$HERE/tests/checks/check_corpus_coverage.py"
+run GATE corpus-coverage-selftest "$PY" "$HERE/tests/checks/check_corpus_coverage_selftest.py"
+
 # The specializer's whole claim, asserted over the whole corpus rather than
 # trusted: under METTA_VERIFY_SPECIALIZATIONS every specialization is run
 # against the generic call the first time it fires and the complete answer

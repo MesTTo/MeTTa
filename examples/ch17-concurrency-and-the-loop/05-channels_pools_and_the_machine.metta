@@ -67,6 +67,18 @@
        ((size 1) (running 0) (backlog 0) (free 1)))
 !(test (pool-destroy reporting-pool) True)
 
+;`every` is `after`'s repeating twin: a timer that fires again until it is
+;cancelled, where `after` fires once. Both are futures, so the same `cancel`
+;stops either and there is no separate clearInterval.
+!(test (let $t (every 0.05 (inc 41))
+         (let $_ (sleep 0.2)
+           (let $__ (cancel $t) stopped)))
+       stopped)
+!(test (let $t (every 30 (inc 41))
+         (let $settled (settled? $t)
+           (let $_ (cancel $t) $settled)))
+       False)
+
 ;`cpu-count` and `thread-count` report the machine and the process. They are
 ;the numbers a pool size is chosen from, so they are here rather than in a
 ;system library.

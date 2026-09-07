@@ -1,0 +1,24 @@
+# Heads the example corpus cannot CALL, and why not. One row per head: the
+# name, a tab, and the reason.
+#
+# tests/checks/check_corpus_coverage.py requires every engine callable and
+# every carried library head to appear in call position in some example. This
+# file is the exception list, and it is exact in three directions so it cannot
+# become the place uncovered heads go to be forgotten:
+#
+#   - a head listed here that an example CALLS is a finding; write the call and
+#     delete the row
+#   - a head listed here that appears nowhere in the corpus at all is a
+#     finding; the reasons below all say "in declaration or argument position
+#     instead", and that has to stay true
+#   - a row for a head neither the engine nor a library carries is a finding
+#
+# Every row today is one shape: a name whose type makes a call meaningless. A
+# Type is written after a `:` and never applied, and a nullary constructor is a
+# VALUE, so `(FTEmpty)` would be a one-element expression rather than the atom
+# the library means. Each is exercised where its meaning lives, and the file
+# that does so is named.
+DontEvalType	a Type, written in a declaration and never applied; examples/ch09-types/06-dont_eval_type.metta declares (: OpaquePayload DontEvalType)
+FTree	a Type, the sort lib_datastructures' three constructors answer to; examples/ch08-data/08-03-the-shipped-libraries/15-fingertree_internals.metta reads it back through get-type
+FTEmpty	a nullary constructor of FTree, so it is a VALUE written bare and (FTEmpty) would be a one-element expression; examples/ch08-data/08-03-the-shipped-libraries/15-fingertree_internals.metta passes and pattern-matches it
+TP	a Type, lib_strategy's type-preserving scheme, written in the second argument of the typed application operator; examples/ch20-extending-the-engine/20-02-metta-written-in-metta/11-strategy.metta applies it there

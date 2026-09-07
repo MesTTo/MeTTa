@@ -41,5 +41,18 @@
 !(import! &self (library lib_he))
 !(test (if-error (catch (parse-command "(f a))")) Error NoError) Error)
 
+;(sread $text) is the reader `parse-command` is written over, and it is the
+;one that answers a term or raises. The two agree on everything that parses.
+!(test (repr (sread "(f a)")) "(f a)")
+!(test (repr (sread "hello")) "hello")
+!(test (repr (sread "42")) "42")
+!(test (repr (sread "(f \"a)b\")")) "(f \"a)b\")")
+
+;Which is the whole reason `parse-command` exists: `sread` cannot tell a
+;half-typed form from a wrong one, because both of them raise.
+!(test (if-error (catch (sread "(f a")) Error NoError) Error)
+!(test (if-error (catch (sread "(f a))")) Error NoError) Error)
+!(test (parse-command "(f a") incomplete)
+
 ;(read-form!) is the buffering half, reading until the brackets balance. It
 ;needs a console, so examples/ch14-seeing-your-program/02-repl.metta is where it is shown.
