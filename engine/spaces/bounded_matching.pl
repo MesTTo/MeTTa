@@ -23,7 +23,7 @@
 % native_conjunction_route/5 and neither re-derives the other's guards
 % [tested:
 % native_generic_join:the_plan_says_generic_join_exactly_when_the_planned_join_runs;
-% commit=WORKTREE].
+% commit=3287d4dd4928f09ce7c111d05a1c516808e226d5].
 % [tested: tests/prolog/suites/spaces/spaces.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
 %%%% the bound the caller wrote, reaching the matcher %%%%
@@ -141,7 +141,7 @@ match_conjunction(_, Space, Pattern, OutPattern) :-
 %conjunction keeps the streaming join for its first-answer cost, PostgreSQL's
 %startup-versus-total-cost distinction
 %[source: docs/journal/2026-09-05-query-planning.md, "the plan is a declared
-%choice"; commit=WORKTREE]. What is added is the data half, asked rather than
+%choice"; commit=3287d4dd4928f09ce7c111d05a1c516808e226d5]. What is added is the data half, asked rather than
 %assumed. A foreign space answers through its provider and a child space reads
 %through its parent chain, so neither has a Generic Join to report.
 match_conjunction_route(Space, Pattern, Shape) :-

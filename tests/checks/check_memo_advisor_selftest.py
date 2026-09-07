@@ -7,19 +7,19 @@ Assumes:
 Guarantees:
   - a run that DOES propose a row leaves every byte of its workload untouched,
     so "never applies" is checked on the case where applying would have been
-    tempting [tested: test_the_advisor_writes_no_row; commit=WORKTREE]
+    tempting [tested: test_the_advisor_writes_no_row; commit=3287d4dd4928f09ce7c111d05a1c516808e226d5]
   - a pure head called a thousand times over three distinct arguments is
     proposed as `(cache weigh force)` with a POSITIVE measured inference delta,
     so the advisor's what-if is a measurement and not a guess
     [tested: test_a_reused_pure_head_is_proposed_with_a_measured_gain;
-    commit=WORKTREE]
+    commit=3287d4dd4928f09ce7c111d05a1c516808e226d5]
   - a head declared `oracleIO` is never proposed, though it is called three
     hundred times and the memo declined it as not recursive, which is the same
     shape the proposed head has minus its purity
-    [tested: test_an_oracle_head_is_never_proposed; commit=WORKTREE]
+    [tested: test_an_oracle_head_is_never_proposed; commit=3287d4dd4928f09ce7c111d05a1c516808e226d5]
   - a workload that ran no compiled head at all is refused by NAME rather than
     reported as having nothing to say
-    [tested: test_a_workload_with_no_calls_is_refused; commit=WORKTREE]
+    [tested: test_a_workload_with_no_calls_is_refused; commit=3287d4dd4928f09ce7c111d05a1c516808e226d5]
 Fails when: the advisor stops proposing a row that a measurement says wins,
   starts proposing one whose effect row says it reaches outside the engine, or
   applies one. All three are the discrimination this lane exists to hold, so a
