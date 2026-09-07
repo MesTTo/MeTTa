@@ -231,7 +231,8 @@ def sql_function(connection: Any, head: Any, name: str | None = None) -> str:
 >
 > Two drivers, told apart by what their `create_function` takes: sqlite3
 > wants the arity and no types, DuckDB wants the types and reads them from
-> the head's declared arrow, refusing by name when there is none. A row that
+> the head's DECLARED arrow, refusing by name when there is none (an
+> arrow `inspect.signature` merely infers is a proposal, not a promise). A row that
 > produces no answer is SQL NULL and one that produces several refuses,
 > because a scalar function has one result per row; a SQL NULL argument
 > reaches the head as `Grounded(None)` and MeTTa decides what it means.
