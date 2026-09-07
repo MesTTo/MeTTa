@@ -9,6 +9,58 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `metta.testing.SpaceMachine`, the multiset laws of a space as a Hypothesis
+  state machine that anybody can point at their own store. It is the library's
+  own stateful machine made general rather than a second copy of it:
+  `SpaceMachine.for_(factory)` answers the machine bound to a factory returning
+  a fresh space, as a CLASS, so the same object is both
+  `run_state_machine_as_test(SpaceMachine.for_(factory))` and the pytest shape
+  `TestMine = SpaceMachine.for_(factory).TestCase`, and
+  `SpaceMachine(factory)` is the constructor under both. Each generated step
+  adds, adds a second copy, removes one copy, clears, queries, or writes inside
+  a speculative scope or a transaction that commits or rolls back, and after
+  every step the space is compared against a `Counter`.
+
+  It requires `add` and `enumerate` and refuses without them, naming
+  `check_space_provider` and `SpaceComplianceSuite`. Every other rule is
+  skipped where the space cannot support it, and `SpaceMachine.skips(space)`
+  answers which rules those are and why before any run, each reason the
+  engine's own refusal from `foreign.require_capability`. The transaction and
+  speculation rules run for a native space and for a foreign one declaring
+  `(writes <space> transactional)`, and skip for `best-effort`,
+  `atomic-single` or silence, because a write a rollback does not undo is not
+  a bag law to check.
+  `extensions/python/tests/ch04_spaces_and_matching/test_space_stateful.py`
+  now subclasses the export and adds only the native save-and-load round trip.
+
+- `metta.testing.assert_answers(actual, expected, *, msg=None)` and
+  `assert_includes(actual, expected, *, msg=None)`, the Python faces of the
+  engine's own `assert-answers` and `assert-includes-answers`. Each side is
+  `Rows`, `Answers`, or any sequence of atoms or of values `encode` accepts; a
+  `Rows` compares row by row, each row the expression of its values, and one
+  answer handed over as itself is refused, a `str` included, rather than
+  compared character by character. Neither computes a difference of its own:
+  both bags cross to the engine, so the relation is `subtraction-atom`'s, the
+  failure is an `AssertionFailure` carrying the same `.missing` and `.excess`,
+  and everything below the first line of the message is character-for-character
+  what `assertEqualToResult` prints for the same bags. One engine crossing per
+  call, 289 inferences over two four-answer bags.
+
+- A `memray` REPORT lane. The seam's five handle families -- space handles,
+  worlds, standing subscriptions, engine handles and cursors -- run under
+  `pytest --memray` and their allocation growth is printed. The threshold is on
+  the plant, `tests/checks/memray_plant.py`, whose two halves open two hundred
+  cursors each and differ only in whether they close them; the lane fails
+  unless the kept half exceeds its bound and the clean half stays under it. The
+  bound is measured: two hundred cursors opened and closed retain 924.6 KiB at
+  their largest single location, the same figure in each of three runs, and two
+  hundred kept retain 19,968.0 KiB. `pytest-memray` joins the `checks` extra,
+  and the lane stands down with a note where the package is absent.
+
+  `test_two_hundred_opened_and_closed_cursors_leave_no_engine_behind` is the
+  same claim at the engine table, in the GATE suite, where the count is exact
+  and needs no allocator.
+
 - `(cost witness class)` and `(cost witness class measure)` catalog rows, and
   the `cost-rows` gate lane that can fail one. The witness is a call with
   exactly one size hole `$n`, the class is the new `cost-class` vocabulary
@@ -498,6 +550,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   with its vendored corpus is the lane that reads it.
 
 ### Fixed
+
+- A failing MeTTa assertion whose answers carried a VARIABLE reported
+  `EngineError: ... the assertion classifier failed: Arguments are not
+  sufficiently instantiated` instead of the `AssertionFailure` the false claim
+  deserved -- the one distinction that type exists to draw, inverted, for every
+  such assertion. `metta_assertion_failure/6` handed its `Actual` and
+  `Expected` out as raw engine terms on the reading that converting them
+  belongs to the host boundary, and that reading is not reachable from a host:
+  a term carrying a free variable never arrives to be converted, because the
+  crossing itself refuses it. Both parts now cross through
+  `metta_host_operation_part/2`, the same conversion the operation classifier
+  beside it already applied, so `(assertEqualToResult (superpose ((f $x)))
+  ((f $y)))` reports its two bags like any other failing comparison.
 
 - `RestraintError` receives each of its three fields as the type it declares
   for it. The restraint signal's detail crossed as `dict[str, object]` and was

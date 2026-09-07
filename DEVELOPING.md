@@ -163,11 +163,11 @@ name an object no other test pins -- rather than pinning the order.
 
 ### The report lanes over the suite itself, and the stub gate
 
-Three of these report and one gates. Each prints a number the other GATE
+Four of these report and one gates. Each prints a number the other GATE
 lanes cannot see.
 
 ```sh
-CHECK_PY="$PY" sh check.sh coverage verifytypes stubtest mutation
+CHECK_PY="$PY" sh check.sh coverage verifytypes stubtest mutation memray
 ```
 
 - `coverage` runs the suite once under `pytest-cov`, with branch coverage over
@@ -207,6 +207,23 @@ CHECK_PY="$PY" sh check.sh coverage verifytypes stubtest mutation
   suite inside `.mutmut/mutants/`, which is the depth at which `metta/shim.pl`
   still reaches `../../../engine` and `tests/conftest.py` still reaches
   `bounded.sh`.
+- `memray` runs the seam's five handle families -- space handles, worlds,
+  standing subscriptions, engine handles and cursors -- under `pytest --memray`
+  and prints each test's allocation growth. It gates nothing there, because a
+  threshold over a whole suite would be a number nobody measured; the threshold
+  is on the plant instead, `tests/checks/memray_plant.py`, whose two halves open
+  two hundred cursors each and differ only in whether they close them: 924.6 KiB
+  retained at the largest single location when they are closed against
+  19,968.0 KiB when they are kept, with the 8 MB bound between. The lane fails
+  unless the kept half exceeds that bound and the clean half stays under it. It needs `pytest-memray`, which builds for Linux and macOS, and stands
+  down with a note where the package is absent rather than failing for a reason
+  that is not the tree. The whole lane takes about three minutes.
+
+  The two `limit_leaks` marks in the tree are both in that plant, and that is
+  measured rather than tidy: the marker is NOT inert without `--memray`
+  (pytest-memray 1.10.0 enforces it on a plain run whenever it is installed), so
+  a mark on a collected test would put the GATE suite under allocation tracking
+  and make it depend on a `checks`-extra package.
 
 ## Performance measurements
 

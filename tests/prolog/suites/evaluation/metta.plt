@@ -110,6 +110,33 @@ test(a_one_sided_ball_carries_the_missing_bag_alone) :-
     Missing == [c],
     var(Excess).
 
+%The classifier converts the two parts a host cannot otherwise receive. A free
+%variable inside the reported form is the case that says so: it crosses as the
+%MeTTa text swrite/2 writes, where the raw term made the crossing itself
+%refuse and turned a false claim into a report that the engine had broken.
+test(an_assertion_over_terms_with_variables_still_classifies) :-
+    catch('assert-answers'(false, [qEqual, [f, _X]], [[f, _Y]], [[f, _Z]], _),
+          Ball,
+          true),
+    metta_assertion_failure(Ball, Form, Actual, Expected, Missing, Excess),
+    Form == assert,
+    Actual = [qEqual, [f, Written]],
+    string(Written),
+    var(Expected),
+    Missing = [[f, _]],
+    Excess = [[f, _]].
+
+%The other formal's two parts take the same conversion, and an atomic one is
+%unchanged by it, which is what keeps `is 2, should 3` reading as two numbers.
+test(a_failing_test_classifies_its_two_values_unchanged) :-
+    catch(throw(error(metta_test_failed(2, 3), _)), Ball, true),
+    metta_assertion_failure(Ball, Form, Actual, Expected, Missing, Excess),
+    Form == test,
+    Actual == 2,
+    Expected == 3,
+    var(Missing),
+    var(Excess).
+
 %The name a failure BLAMES is the MeTTa head the program wrote, taken from
 %the call the door was handed, and never the Prolog predicate that raised.
 %SWI prefixes an uncaught error with its context's first argument, so this is

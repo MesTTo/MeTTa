@@ -161,6 +161,15 @@ checks = [
     #: whether the annotations that ARE there hold.
     "pyright>=1.1.411",
     "pytest-cov>=7",
+    #: The `memray` REPORT lane: what a test still holds when it ends. It is in
+    #: `checks` and not in `test` because its marker is NOT inert without
+    #: `--memray` -- 1.10.0 enforces one on a plain run whenever the plugin is
+    #: installed [measured 2026-09-07] -- so the two `limit_leaks` marks in the
+    #: tree live in tests/checks/memray_plant.py, which the suite never
+    #: collects, and the GATE suite never runs under allocation tracking.
+    #: memray builds for Linux and macOS, and the lane stands down with a note
+    #: where it is absent rather than failing for a reason that is not the tree.
+    "pytest-memray>=1.8",
     "radon>=6.0",
     "refurb>=2.3",
     "ruff>=0.14",
@@ -196,6 +205,16 @@ pythonpath = ["."]
 # unchanged. tests/checks/evidence_runners.py READS this value and reports it
 # when it stops naming the pytest collector's own root.
 testpaths = ["tests"]
+
+# pytest-memray's two markers, registered HERE as well as by the plugin, so
+# the plant can carry one where the plugin is absent and be reported as skipped
+# rather than as an error. An unregistered mark raises
+# PytestUnknownMarkWarning, and `filterwarnings = error` below turns that into
+# a failure. pytest merges these with the plugin's own registration.
+markers = [
+    "limit_leaks(location_limit): fail under --memray when one call stack leaves more than this allocated",
+    "limit_memory(limit): fail under --memray when the test's high watermark exceeds this",
+]
 
 # Every thread's stack when an item runs long, dumped from faulthandler's own C
 # watchdog thread, so it reaches a main thread sitting inside a Prolog crossing
@@ -440,8 +459,9 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = [
-    "annotated_types", "array_api_compat", "faiss", "hypothesis", "numpy",
-    "nanoarrow", "nanoarrow.*", "pandas", "polars", "rich.*", "websocket",
+    "annotated_types", "array_api_compat", "faiss", "hypothesis",
+    "hypothesis.*", "numpy", "nanoarrow", "nanoarrow.*", "pandas", "polars",
+    "rich.*", "websocket",
 ]
 ignore_missing_imports = true
 follow_imports = "skip"
@@ -500,13 +520,17 @@ ignore = ["FURB123", "FURB149", "FURB138", "FURB107", "FURB140", "FURB184"]
 [tool.bandit]
 exclude_dirs = ["tests", "build"]
 
-# _compliance.py and _gateway_compliance.py are pytest suites that happen to
-# ship: their asserts ARE the contract a space provider or gateway is held to,
-# and B101 exists because asserts vanish under -O, which is not how a test
-# suite is run. ruff's S101 is already ignored project-wide for the same
-# reason, so this only makes the two tools agree.
+# _compliance.py, _gateway_compliance.py and _space_machine.py are test
+# machinery that happens to ship: their asserts ARE the contract a space
+# provider or gateway is held to, and B101 exists because asserts vanish under
+# -O, which is not how a test suite is run. ruff's S101 is already ignored
+# project-wide for the same reason, so this only makes the two tools agree.
 [tool.bandit.assert_used]
-skips = ["*/_compliance.py", "*/_gateway_compliance.py"]
+skips = [
+    "*/_compliance.py",
+    "*/_gateway_compliance.py",
+    "*/_space_machine.py",
+]
 
 [tool.deptry]
 known_first_party = [
@@ -528,8 +552,12 @@ optional_dependencies_dev_groups = ["test", "checks"]
 # pytest is imported only by the pytest11 plugin module, which pytest
 # itself loads; it is not a runtime dependency of the library. rich is
 # imported only inside the __rich__ protocol method, which only rich
-# itself calls, so its presence is the precondition of the call.
-DEP004 = ["pytest"]
+# itself calls, so its presence is the precondition of the call. hypothesis is
+# imported by _space_machine.py, which is reached only through
+# `metta.testing.SpaceMachine` behind PEP 562 and whose require_module guard
+# runs first, so importing metta or metta.testing loads neither the module nor
+# the package it needs.
+DEP004 = ["pytest", "hypothesis"]
 DEP003 = ["rich"]
 DEP002 = [
     "janus-swi",
