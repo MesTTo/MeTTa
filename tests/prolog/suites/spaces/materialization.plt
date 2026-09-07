@@ -145,19 +145,28 @@ test(nonground_or_constructed_data_retains_the_original_path) :-
           same_bag("!(lookup (node a) c)"),
           same_bag("!(lookup $x $y)") )).
 
-test(a_native_literal_self_does_not_acquire_reader_binding) :-
+% A native `&self` handed to the one-equation door now resolves to the space
+% the equation is added to, the split a source load already makes (the stored
+% atom keeps the author's `&self`, the compiled clause reads this space): the
+% twins burn-down measured the two doors disagreeing about one word, where the
+% same equation loaded from source answered ((1)) and handed to add-atom
+% answered nothing. So the native call answers, the materializer reads the
+% space through that resolved clause and takes its snapshot exactly as it does
+% for a source-loaded equation, and the materialized door answers the same bag
+% as the compiled clause.
+test(a_native_literal_self_reads_its_own_space_through_the_materializer) :-
     Space = '&plunit_materialized_native_self',
     setup_call_cleanup(
         ( spaces:metta_add_atom(Space, [native_edge,a,b], _),
           spaces:metta_add_atom(Space,
               [=,[native_lookup,X,Y],[match,'&self',[native_edge,X,Y],true]], _),
           materialize:with_source_materialization(Space, [native_lookup], true) ),
-        ( assertion(\+ materialize:materialized_snapshot(Space, _, _, _, _)),
+        ( assertion(materialize:materialized_snapshot(Space, _, _, _, _)),
           spaces:space_module(Space, Module),
           findall(Out, call(Module:native_lookup(a,b,Out)), Expected),
           findall(Out, materialize:materialized_call(
                           Space, Module, native_lookup, [a,b], Out), Actual),
-          assertion(Expected == []), assertion(Actual == Expected) ),
+          assertion(Expected == [true]), assertion(Actual == Expected) ),
         spaces:metta_host_clear_space(Space)).
 
 test(a_raw_variable_relation_head_retains_native_unification) :-
