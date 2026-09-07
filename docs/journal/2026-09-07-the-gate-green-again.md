@@ -1269,3 +1269,101 @@ memory rather than scheduling, which `measurement_conditions` already measured
 from the other direction in 2026-08-28 (cycles:u spread 38.7% to 43.6% under
 the same load, which ruled out frequency scaling). The mechanism is not
 isolated here and is not claimed.
+
+## 2026-09-07, why `space-pair` is the noisy row, and why its neighbours are not
+
+The band was widened to 2.0% earlier today with the measurement beside it and
+the cause left open, on a guess: "collection timing inside the measured window,
+since the row is the only one that builds and drops a pair of spaces". The
+guess is wrong on its own terms -- `case_space_pair` opens ONE space in setup
+and never drops it -- and twelve samples of each of four rows, taken on one box
+within minutes of each other through the shipped harness, say something sharper.
+
+Retired instructions, twelve rounds each, sorted as deltas from that row's own
+minimum:
+
+| row | min | spread | deltas from min |
+|---|---|---|---|
+| `term-in` | 4,392,566,214 | 0.0410% | 0, 45, 45, 260, 445, **480084**, 480186, 480421, 1320595, 1441520, 1620022, 1800020 |
+| `cursor-step` | 3,466,860,887 | 0.0924% | 0, 498, 864, 1419, 1436, 2187, 2198, 2442, 2958, 4064, 5292, **3201759** |
+| `error-ball` | 1,329,269,401 | 0.1290% | 0 to 1,714,818 in eleven uneven steps |
+| `space-pair` | 2,917,910,656 | **1.7981%** | 0, 752338, 8926073, 15999470, 20054804, 24742008, 29191014, 33551945, 36709554, 42684173, 46879227, 52467119 |
+
+Three of the four are QUANTISED. `term-in` puts five of twelve samples within
+445 instructions of each other out of 4.39 billion, then three more within 337
+of each other at +480,100, so the row reproduces to about one part in ten
+million and a discrete event costing roughly 480,000 instructions fires zero,
+one or more times. `cursor-step` puts eleven of twelve within 5,292 and one at
++3,201,759: the same shape with a rarer, larger event. Nothing about a box
+under load produces that; a contended box smears, it does not put five samples
+inside 445.
+
+`space-pair` has no modes at all. Twelve samples, twelve different values,
+spread continuously across 52 million. Its inference count is 1,140,032 in all
+twelve, so the Prolog work is identical and every instruction of the difference
+is below the inference counter.
+
+Decided: the mechanism class is engine-internal reorganisation whose cost grows
+with the store, not a coin-flip collection. The row's own `comment` field
+already names what is different about it -- "the space grows to 20,000 atoms
+inside the region" -- and it is the only one of the four that grows anything
+inside its measured window. Its neighbours work at a fixed size, so their
+reorganisations cost a fixed amount and show up as clean modes; a row whose
+store grows pays a larger reorganisation each time one fires, so the total is a
+sum of increasing terms and lands anywhere on a continuum. That is why a BAND
+rather than a re-pin is the right shape of fix here, which is what was already
+done, and it is why the band cannot be narrowed by taking more samples.
+
+Tried, and this is where the guess dies: an analogue driven from Prolog through
+the SAME doors the C case drives, `metta_add_atoms/2` for the write and
+`metta_c_open_match/4` + `metta_c_next/3` + `metta_c_close/1` for the read, with
+`statistics(stack_shifts, S)` and `statistics(garbage_collection, G)` read
+around the region. Four arms, ten rounds each, one process per round under
+`setarch -R` with a built environment, 20,000 operations:
+
+| arm | an engine per iteration | the space grows | spread |
+|---|---|---|---|
+| `cursor-grow` | yes | yes | **0.861%** (36,942,221) |
+| `cursor-fixed` | yes | no | **0.262%** (11,236,751) |
+| `grow` | no | yes | 0.048% (1,254,265) |
+| `fixed` | no | no | 0.023% (599,537) |
+
+`global_shifts=0`, `trail_shifts=0` and `collections=0` in every round of every
+arm, and each arm's inference count is identical across its ten. So it is
+neither a stack shift nor a garbage collection: those counters read exactly zero
+while the instruction count moved by tens of millions.
+
+Decided: the mechanism is the SWI ENGINE that `metta_c_open_match/4` creates and
+`metta_c_close/1` destroys, once per iteration, twenty thousand times. Holding
+growth off and turning the churn on multiplies the spread 18.7x
+(`fixed` 599,537 to `cursor-fixed` 11,236,751); holding the churn off and
+turning growth on multiplies it 2.1x (`fixed` to `grow`); both together give
+36,942,221. Each engine allocates and releases its own stacks, and what varies
+between two otherwise identical runs is the allocator's work for those twenty
+thousand allocations, which is why nothing the engine counts moves.
+
+The magnitude agrees with the shipped row. This probe measures whole processes,
+and its boot is 1,979,665,965 instructions with three samples inside 0.0017%,
+so `cursor-grow`'s REGION is about 2,311,721,102 and its 36,942,221 spread is
+**1.598%** of it, against the C row's 1.798%. Same signature, same order,
+through two different drivers.
+
+`space-pair` is the only C case that opens a cursor inside its loop:
+`cursor-step` opens one in setup and steps it 2.2 million times, and `term-in`,
+`term-out` and `error-ball` open none. That is the difference between the row
+that has no modes and the three that reproduce to a few thousand instructions.
+
+The easy explanations were excluded before any of this, by the harness's own
+construction: `measure_counters` BUILDS a four-name child environment with
+`LC_ALL=C` and `PYTHONHASHSEED=0`, each round is its own process, and
+`_run_perf` runs every one under `setarch -R`. Address layout, environment
+size, hash seed and argv are all pinned, so none of them is what differs
+between two runs that read 52 million instructions apart.
+
+Open, and now a design question rather than a mystery: whether a cursor should
+cost an engine. Pooling or reusing engines across cursors would take the noise
+out of this row and off every C host that opens one cursor per query, and it is
+a change to `metta_c_new_cursor/2` and `metta_c_close/1` rather than to the
+benchmark. Not attempted here: it is engine surface, this row's band already
+covers the noise, and the measurement above is what a proposal would have to be
+argued against.

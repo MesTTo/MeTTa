@@ -372,7 +372,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   all of it at the assertion-bag-diff merge that also moved its inferences
   +92,000. `space-pair` did NOT move: its min-of-three varies 1.69% across the
   eleven points with no trend and its band said 0.6%, so the band is widened to
-  2.0% beside that measurement and the count is left where it was. And three
+  2.0% beside that measurement and the count is left where it was. Twelve
+  rounds of four rows say why a band is the right shape of fix there and more
+  samples are not: `term-in` puts five of twelve samples within 445 retired
+  instructions of each other out of 4.39 billion and three more within 337 at
+  +480,100, and `cursor-step` puts eleven of twelve within 5,292, so those rows
+  are quantised by a discrete event of fixed cost, while `space-pair` has no
+  modes at all and spreads continuously across 52 million with its inference
+  count identical in all twelve. The cause is measured rather than guessed, and
+  it is not the collection the note first suspected: an analogue driven through
+  the same doors runs four arms of 20,000 operations and reads
+  `statistics(stack_shifts, S)` and `statistics(garbage_collection, G)` at zero
+  in every round of every arm, while an SWI engine created and destroyed per
+  iteration multiplies the spread 18.7x on its own and 36.9x with the space
+  also growing. `space-pair` is the only case here that opens a cursor inside
+  its loop, and every cursor is an engine. And three
   counters this box cannot read now say so instead of reporting a regression:
   the CPU rows are compared only at or below one runnable process per core,
   which is where every runnable process still has a core and is what the
