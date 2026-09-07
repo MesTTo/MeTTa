@@ -981,6 +981,12 @@ kind(metta_seq_query_plan/2, host_service).
 %catalog costs one crossing per process rather than one goal-string read
 %per name.
 kind(metta_deprecation/3, host_service).
+%The callable doors' cost read, the same shape as the deprecation row above it:
+%the shim answers a bound function's docstring line from the row the head
+%declares, and the RESOLUTION of that row -- which measure an unnamed one takes
+%from the head's arrow -- is the engine's. Publishing it is what stops a binding
+%deriving the measure a second time and drifting from what (explain ...) says.
+kind(metta_cost_declaration/4, host_service).
 %A host query supplies one dynamic carrier around an engine-owned goal, then
 %reads the same effective carrier and its multiplicative identity when it
 %decodes or initializes answer annotations. These are doors into the algebra

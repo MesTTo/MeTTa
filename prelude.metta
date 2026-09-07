@@ -660,6 +660,21 @@
 ;The stream operations. Each was a rewrite rule in the compiler that produced
 ;exactly the MeTTa term below, so moving them changes nothing but where they
 ;live [measured 2026-08-19: byte-identical compiled goals].
+;
+;Four of them carry a (cost ...) row, a claim about how the call's cost grows
+;with the number of answers the stream carries, which the cost-rows lane
+;measures and fails. union is linear, being an append, while intersection,
+;subtraction and alpha-unique each build an association tree of one operand and
+;look the other up in it, so each costs a log factor more; that difference is
+;what the rows are for, since nothing else said so.
+;
+;unique carries NO row, on purpose. It reduces to unique-atom, which is SWI's
+;list_to_set/2 and sorts in C, so the engine's inference counter reads it
+;linear while retired instructions read it linearithmic, and a row would state
+;the cheaper of the two. lib_builtin_types.metta records the same exclusion
+;beside unique-atom itself
+;[measured 2026-09-07: extensions/python/benchmarks/cost-baseline.json for the
+;first counter and `python -m benchmarks.costs --paired` for the second].
 (: trace! (-> Atom Atom %Undefined%))
 (= (trace! $message $value) (noeval (progn (println! $message) $value)))
 !(add-translator-rule! trace!)
@@ -679,6 +694,7 @@
                (superpose $kept)))))
 !(add-translator-rule! alpha-unique
    ((extra-variables-exempt "the let binders the expansion introduces name the collapsed answer sets before the masked family operation reads them, so none takes a value from the term being rewritten")))
+(cost (alpha-unique (superpose $n)) linearithmic)
 
 ;The set operations name the shape they rewrite, `(superpose ...)` on both
 ;sides, exactly as the compiler's rewrite rules did. The second equation is
@@ -694,6 +710,7 @@
 (= (union $a $b) (noeval (noeval (union $a $b))))
 !(add-translator-rule! union
    ((extra-variables-exempt "the let binders the expansion introduces name the collapsed answer sets before the masked family operation reads them, so none takes a value from the term being rewritten")))
+(cost (union (superpose $n) (superpose $n)) linear)
 
 (: intersection (-> Atom Atom %Undefined%))
 (= (intersection (superpose $a) (superpose $b))
@@ -704,6 +721,7 @@
 (= (intersection $a $b) (noeval (noeval (intersection $a $b))))
 !(add-translator-rule! intersection
    ((extra-variables-exempt "the let binders the expansion introduces name the collapsed answer sets before the masked family operation reads them, so none takes a value from the term being rewritten")))
+(cost (intersection (superpose $n) (superpose $n)) linearithmic)
 
 (: subtraction (-> Atom Atom %Undefined%))
 (= (subtraction (superpose $a) (superpose $b))
@@ -714,6 +732,7 @@
 (= (subtraction $a $b) (noeval (noeval (subtraction $a $b))))
 !(add-translator-rule! subtraction
    ((extra-variables-exempt "the let binders the expansion introduces name the collapsed answer sets before the masked family operation reads them, so none takes a value from the term being rewritten")))
+(cost (subtraction (superpose $n) (superpose $n)) linearithmic)
 
 ; has-declared-type asks whether (: <atom> <type>) is declared, about the
 ; atom AS ITSELF: the first parameter carries the Atom mask so the question
