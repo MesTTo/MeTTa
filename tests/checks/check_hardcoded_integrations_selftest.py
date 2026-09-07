@@ -14,18 +14,18 @@ grep, which would be turned off within a day.
 Assumes: a writable ai-tmp/ in this repository.
 Guarantees:
   - an import of a library nowhere in ALLOWED is reported with its file, its
-    line and the door it should have used [tested: this file; commit=WORKTREE]
+    line and the door it should have used [tested: this file; commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
   - the same library imported in a file that is not its declared site is
     reported, so moving a coupling out of the registrant module is caught
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
   - `optional_module("faiss")`, which carries no import statement at all, is
-    reported [tested: this file; commit=WORKTREE]
+    reported [tested: this file; commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
   - a docstring, a comment, an ordinary `.get("pandas")` and a relative import
-    are NOT reported [tested: this file; commit=WORKTREE]
+    are NOT reported [tested: this file; commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
   - an ALLOWED entry nothing names any more is reported [tested: this file;
-    commit=WORKTREE]
+    commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
   - a TypeScript import of a package, and a C include of a foreign header, are
-    each reported [tested: this file; commit=WORKTREE]
+    each reported [tested: this file; commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
 Open Obligations:
   To Do: None

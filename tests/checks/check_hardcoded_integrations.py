@@ -33,13 +33,13 @@ Assumes: a checkout of this repository, and Python 3.10+ for
 Guarantees:
   - a library named outside its declared registration site is reported with
     its path, its line and the door it should have used [tested:
-    tests/checks/check_hardcoded_integrations_selftest.py; commit=WORKTREE]
+    tests/checks/check_hardcoded_integrations_selftest.py; commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
   - an ALLOWED entry whose site no longer names its library is reported, so
     the table shrinks with the code [tested:
-    tests/checks/check_hardcoded_integrations_selftest.py; commit=WORKTREE]
+    tests/checks/check_hardcoded_integrations_selftest.py; commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
   - a name in a comment, a docstring or a string that is not a module name is
     NOT a finding [tested:
-    tests/checks/check_hardcoded_integrations_selftest.py; commit=WORKTREE]
+    tests/checks/check_hardcoded_integrations_selftest.py; commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
 Fails when: a seat's sources are absent, which it reports rather than passing
   on an empty file list.
 Open Obligations:
