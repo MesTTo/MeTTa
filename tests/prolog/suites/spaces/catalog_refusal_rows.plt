@@ -26,6 +26,10 @@
 %     an_unfilled_act_is_prose]
 %   - a kind whose row was removed answers no refusal while still classifying
 %     [tested: a_kind_without_a_row_answers_no_refusal]
+%   - a row for a kind the engine does not declare cannot be written at all,
+%     because the row's first position is (one-of refusal-kind) and that
+%     vocabulary is derived from the declarations
+%     [tested: a_row_for_an_undeclared_kind_is_refused_at_the_door]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -153,6 +157,23 @@ test(an_unfilled_act_is_prose) :-
     assertion(Applicability == prose),
     assertion(Edit == ['pragma!', 'max-time', '<seconds>']),
     assertion(sub_string(Title, _, _, _, "0.05")).
+
+%The `refusal` kind's first position is (one-of refusal-kind) and that
+%vocabulary is derived from the declarations, so a row for a kind the engine
+%does not declare cannot be written at all: the catalog's own door refuses it
+%and names the argspec it missed. A program that means to add one widens the
+%vocabulary first, which is the remove-then-redeclare loosening this catalog
+%documents.
+test(a_row_for_an_undeclared_kind_is_refused_at_the_door) :-
+    catch(add_sexp('&metta',
+                   [refusal, 'no-such-kind', 'ProbeError',
+                    [ground, 'metta-law', "HostLaws: a planted row"],
+                    [remedy, "do something", quickfix, prose]],
+                   _),
+          error(Formal, _), true),
+    assertion(Formal = metta_declaration_malformed(_, 1,
+                                                   ['one-of', 'refusal-kind'])),
+    assertion(\+ metta_catalog_row([refusal, 'no-such-kind'|_])).
 
 test(a_kind_without_a_row_answers_no_refusal,
      [ setup(metta_host_refusal_row(engine, Class, Ground, Remedy)),
