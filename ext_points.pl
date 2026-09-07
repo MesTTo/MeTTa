@@ -97,6 +97,7 @@
             atom_added/2,
             atom_removed/2,
             cache_policy_changed/1,
+            forget_derived/0,
             function_call_graph_changed/2,
             function_changed/1,
             function_clauses_changed/1,
@@ -127,7 +128,9 @@
             foreign_capability/2,
             grounded_extra_type/2,
             automatic_cache_explanation/3,
+            interposed_dispatch/4,
             pure_operation/1,
+            seeded_operation/1,
             route_cap/4,
 
             % Ownership: the first handler that succeeds claims the request.
@@ -330,6 +333,27 @@ kind(dispatch_call/4, ownership).
 %invalidation handler, 4001 on source-load's thousand equations].
 :- multifile function_changed/1.
 kind(function_changed/1, event).
+%DROP every answer a library derived earlier and would serve again.
+%
+%   forget_derived
+%
+%A library that answers a call from something it computed before -- a memo, a
+%table, a materialised view -- holds state no digest can see, and until this
+%seam a caller had no way to ask for it back. Replaying a recorded run is that
+%caller: a recording pins the atoms with a digest and the draws with a seed,
+%and this is the third thing the re-run has to start from. Without it a replay
+%of a memoised head is a different execution with the same answers -- measured
+%2026-09-07, `!(fib 6)` recording 22 events and replaying 2 in the engine that
+%recorded it, every call after the first answered from the cache.
+%
+%An EVENT, so every handler runs: the derived answers of one program can be
+%held by several libraries and dropping one library's is not dropping the
+%state. It is total rather than per space or per function, which is the same
+%argument the tracer's teardown makes: a reset that is sometimes partial is a
+%silent divergence, and the caller asking for it wants the engine as cold as
+%it can be made.
+:- multifile forget_derived/0.
+kind(forget_derived/0, event).
 %The compiled half of the change story, run once per compiled equation AFTER
 %its clause and provenance are in place. function_changed above is the
 %DEFINITION event: it fires when an equation arrives whether or not the engine
@@ -823,6 +847,25 @@ kind(grounded_numeric_operation/3, ownership).
 :- multifile pure_operation/1.
 kind(pure_operation/1, declaration).
 
+%An operation whose only unrepeatable input is the random generator.
+%
+%   seeded_operation(Name)
+%
+%A companion to the effect class rather than one of its own. `random-int` is
+%oracleIO and stays oracleIO: a cache may not hide a draw and a reified world
+%may not admit one. What this says is that a scope which PINS the generator
+%makes it repeat, which is what a recorded run needs to know before it promises
+%a replay -- `(with-seed 42 (random-int 1 6))` answers 44 twice where
+%`(current-time)` never answers the same thing twice.
+%
+%An ALLOW-list, for pure_operation/1's reason: a name missing here costs a
+%recording that says it cannot be replayed when it could, and a name wrongly
+%present costs a replay that silently differs from what it claims to reproduce.
+%Declared by whoever knows, so a library shipping its own draw declares it
+%beside the operation.
+:- multifile seeded_operation/1.
+kind(seeded_operation/1, declaration).
+
 %The MeTTa name behind a bridge's dispatch goal.
 %
 %   effect_operation_name(Goal, Name, Arity)
@@ -841,6 +884,34 @@ kind(pure_operation/1, declaration).
 %[tested: test_a_pure_python_operation_can_be_declared_and_cached].
 :- multifile effect_operation_name/3.
 kind(effect_operation_name/3, ownership).
+
+%A predicate a library puts BETWEEN a compiled call site and the function it
+%stands for, and how to read one of its calls.
+%
+%   interposed_dispatch(Module:Head, Fun, InArgs, Out)
+%
+%The other half of dispatch_call/4 above. That seam lets a library bind a call
+%site to a goal of its own; this one says what that goal MEANS, so an observer
+%watching function calls still sees them. lib_memo binds `(fib 8)` to
+%`cache_call(fib, ..., [8], Out)`, and the tracer wrapped `fib/2`, which the
+%cache answers without calling: a memoised head's trace was EMPTY, 0 events
+%against 23,050 inferences, while the same head with `(cache fib refuse)`
+%recorded 134 [measured 2026-09-07].
+%
+%The head is a TEMPLATE with the function's name, its input arguments and its
+%output in the positions the dispatcher put them, so one clause answers both
+%questions an observer has: enumerate it with everything unbound to learn which
+%predicates to wrap, and unify it with a live head to read that call. The
+%tracer needs no second call at run time because wrap_predicate/4 binds the
+%template's own variables at the wrapper's head
+%[source: /usr/lib/swi-prolog/library/prolog_trace.pl, wrapper/4, which builds
+%its port calls over the same shared head].
+%
+%A declaration rather than an ownership seam: every library that interposes is
+%read, not just the first, because two of them interpose on different
+%functions and an observer wants both.
+:- multifile interposed_dispatch/4.
+kind(interposed_dispatch/4, declaration).
 
 %The STRUCTURE a grounded value also has, when it has one.
 %
@@ -1199,12 +1270,16 @@ kind(metta_space_operand/1, host_service).
 kind(metta_string_declarations/2, host_service).
 kind(metta_substitute_self/3, host_service).
 kind(metta_trace_source/5, host_service).
+%Fire forget_derived above. A host asks for it before replaying a recorded
+%run; the engine owns the firing because an event seam's clauses are the
+%extensions' and the telling is the engine's.
+kind(metta_forget_derived/0, host_service).
 %The debugger's session pair. A transport creates and steps the engine that
 %holds a suspended program, the way it does for a lazy cursor, but the
 %WRAPPERS a breakpoint needs are the tracer's and only one session may own
 %them at a time, so beginning and ending a session is the engine's to decide
 %and refuse. metta_debug_run/3 is the goal that goes inside the engine.
-kind(metta_debug_begin/1, host_service).
+kind(metta_debug_begin/2, host_service).
 kind(metta_debug_run/3, host_service).
 kind(metta_debug_end/0, host_service).
 kind(metta_annotations/2, host_service).

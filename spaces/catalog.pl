@@ -549,6 +549,13 @@ metta_catalog_note_removed(_).
 metta_cache_policy_changed(Function) :-
     forall(seam:cache_policy_changed(Function), true).
 
+%Ask every library to drop what it derived earlier. Beside the policy event
+%because it is the same neighbourhood -- a cache row says whether answers may
+%be kept, this says forget the ones that were -- and because both are the
+%engine telling rather than an extension reaching.
+metta_forget_derived :-
+    forall(seam:forget_derived, true).
+
 % A space owner is a catalog position, not a symbol mentioned anywhere in a
 % row. Algebra laws and their carrier certificate live inside the owned
 % algebra row; vocabulary and claim rows are global definitions. Context
