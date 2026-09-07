@@ -12,6 +12,11 @@
 %   whose owning module lost its final body clause
 %   [tested: prelude_derived_forms, translator_rule_module_home;
 %   commit=d1318d20b5d89d33079c49d0e94aa29e12685664].
+%   metta_host_error_kind_row/3 declares one refusal kind per condition a host
+%   can act on differently, and metta_host_error_kind/3 reads one off a raised
+%   ball with the fields that kind carries, so every seat classifies the same
+%   set instead of reading the rendered message
+%   [tested: tests/prolog/suites/host/error_kinds.plt; commit=WORKTREE].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
@@ -337,6 +342,167 @@ prolog:error_message(metta_control_signal(restraint, [Word, Bound, Call])) -->
     [ 'the (~w ~w) restraint declared for the table of ~w tripped and the \c
        evaluation was stopped'-[Word, Bound, Call] ].
 control_exception(error(resource_error(_), _)).
+
+%%%% The refusal taxonomy every seat classifies by %%%%
+%
+%One KIND word per refusal a host can act on differently, DECLARED as a row
+%and read off the ball below, so every seat maps the same set instead of each
+%reading the rendered message for the words it happens to know. The Node seat
+%read prose until 2026-09-07 and recognised seven of these kinds that way,
+%with no field at all; the Python seat asks the classifiers below and knows
+%ten; a restraint that tripped arrived at one seat with its three fields and
+%at the other as a sentence.
+%tests/data/error-kinds.json carries this same list with each seat's own class
+%beside it, and each seat's suite reads that file against its own map
+%[tested: tests/prolog/suites/host/error_kinds.plt;
+%extensions/python/tests/repository/test_error_kinds.py;
+%extensions/node/test/errors.test.ts "covers every kind the engine publishes";
+%commit=WORKTREE].
+%
+%A FIELD is a part of the refusal a caller ACTS on: the bound that was
+%exceeded, the table a restraint was declared for, the capability a space
+%lacks. The sentence is never a field, because every seat already has the
+%rendered message and a field that repeats it is a second spelling of one
+%thing; so a kind whose whole payload is its sentence declares no fields.
+%
+%Two origins. A `signal` is the reserved control envelope,
+%error(metta_control_signal(Kind, Detail), context(metta, _)), which passes
+%through every recovery catch; a `term` is an ordinary ball whose shape names
+%the refusal. `engine` is the honest default, a ball this engine did not
+%shape, which each seat raises as its own generic class.
+%
+%This is the errno/SQLSTATE shape: one table in the layer that raises, one
+%hand-written map per binding, and a test per binding that its map covers the
+%table [source: PostgreSQL src/backend/utils/errcodes.txt, which generates the
+%C, PL/pgSQL and documentation spellings from one row list]. The rows become
+%catalog atoms when package AK lands and this table is what they are built
+%from.
+metta_host_error_kind_row(syntax,          signal,  [line]).
+metta_host_error_kind_row(time_limit,      signal,  [limit]).
+metta_host_error_kind_row(inference_limit, signal,  [limit]).
+metta_host_error_kind_row(restraint,       signal,  [restraint, bound, call]).
+metta_host_error_kind_row(interrupted,     signal,  []).
+metta_host_error_kind_row(value,           signal,  []).
+metta_host_error_kind_row(type,            signal,  []).
+metta_host_error_kind_row(assertion,       term,    [operation]).
+metta_host_error_kind_row(capability,      term,    [space, operation, capability]).
+metta_host_error_kind_row(operation,       term,    [operation, kind, expected, culprit]).
+metta_host_error_kind_row(stack,           term,    [limit]).
+metta_host_error_kind_row(source,          term,    [source]).
+metta_host_error_kind_row(engine,          default, []).
+
+%!  metta_host_error_kind(+Ball, -Kind, -Fields) is det.
+%
+%   Which kind a ball is, and the fields that kind carries IN THIS ball, as
+%   Name-Value pairs. A field the ball does not carry is absent rather than
+%   guessed: a bound that expired inside a nested query knows which resource
+%   ran out and not the number, and an operation refusal that is not a type
+%   error has neither an expected type nor a culprit.
+%
+%   The clause order is the order the Python seat's four queries run in, and
+%   the two seats have to share it: a failed assertion carries a MeTTa
+%   operation too, and the assertion is the more specific reading of the same
+%   ball [source: extensions/python/metta/_engine.py, Runtime._raise, which
+%   calls _raise_assertion_failure ahead of _raise_operation_error for this
+%   reason].
+metta_host_error_kind(Ball, Kind, Fields) :-
+    metta_host_control_signal_info(Ball, Kind, Detail),
+    !,
+    metta_host_signal_fields(Kind, Detail, Ball, Fields).
+metta_host_error_kind(Ball, assertion, [operation-Form]) :-
+    metta_assertion_failure(Ball, Form, _, _, _, _),
+    !.
+metta_host_error_kind(Ball, capability,
+                      [space-Space, operation-Operation, capability-Capability]) :-
+    metta_host_space_capability_error(Ball, Space, Operation, Capability),
+    !.
+metta_host_error_kind(Ball, operation, Fields) :-
+    metta_host_operation_error(Ball, Operation, Formal, Expected, Culprit),
+    !,
+    metta_host_bound_fields([operation-Operation, kind-Formal,
+                             expected-Expected, culprit-Culprit], Fields).
+metta_host_error_kind(error(resource_error(stack), Context), stack, [limit-Bytes]) :-
+    !,
+    metta_host_stack_ceiling(Context, Bytes).
+metta_host_error_kind(error(existence_error(source_sink, Source), _), source,
+                      [source-Source]) :-
+    !.
+metta_host_error_kind(_, engine, []).
+
+%The envelope's own kind and payload. Detail is left UNBOUND where the ball
+%carries none, the absence marker metta_host_operation_error/5 already uses,
+%and each seat maps it to its own None.
+%
+%SWI's OWN resource balls are the other two clauses, which the engine already
+%names control exceptions and which reach a seat unenveloped whenever the goal
+%that spent the budget was a NESTED query: a host callback that re-enters the
+%engine is exactly that shape, and the enclosing call_with_inference_limit/3
+%never sees the ball to wrap it. The bound is not recoverable there and is
+%answered as absent rather than guessed: the number lives in the frame that
+%installed it, which has already unwound by the time a classifier runs.
+metta_host_control_signal_info(
+        error(metta_control_signal(Kind, Detail), context(metta, _)), Kind, Detail) :-
+    metta_host_error_kind_row(Kind, signal, _).
+metta_host_control_signal_info(inference_limit_exceeded, inference_limit, _).
+metta_host_control_signal_info(time_limit_exceeded, time_limit, _).
+
+%WHERE a reader failure stopped, for the one signal that has a place as well
+%as a sentence. engine/filereader.pl's metta_host_rethrow_syntax/1 puts the
+%line in the envelope's context slot and this reads it back, so a seat
+%pointing at the line never parses "starting at line ~w" out of the message.
+%It FAILS where no line was named, which is every other syntax refusal in this
+%tree (a single form read through a host reader, a numeric literal past
+%binary64), and the field is then absent rather than a guessed line.
+metta_host_control_signal_line(
+        error(metta_control_signal(syntax, _), context(metta, metta_source_line(Line))),
+        Line) :-
+    integer(Line).
+
+metta_host_signal_fields(syntax, _, Ball, Fields) :-
+    !,
+    (   metta_host_control_signal_line(Ball, Line)
+    ->  Fields = [line-Line]
+    ;   Fields = []
+    ).
+metta_host_signal_fields(restraint, Detail, _,
+                         [restraint-Word, bound-Bound, call-Call]) :-
+    Detail = [Word, Bound, Call],
+    !.
+metta_host_signal_fields(Kind, Detail, _, [limit-Detail]) :-
+    % policy-inventory-exempt: mechanism-internal; reason=the two kinds whose payload IS a bound, read off the rows declared above rather than a policy vocabulary; evidence=engine/metta/registration.pl:metta_host_error_kind_row/3
+    memberchk(Kind, [time_limit, inference_limit]),
+    nonvar(Detail),
+    !.
+metta_host_signal_fields(_, _, _, []).
+
+%The ceiling that was IN FORCE when the stack ran out. SWI records it in the
+%ball's own context dict, in Kb [source: /usr/lib/swi-prolog/boot/messages.pl,
+%human_stack_size(Context.stack_limit, _) on the resource_error(stack)
+%message], and the flag answers the ceiling in force NOW, which a scope that
+%raised the limit and unwound has already put back. So the dict is read first
+%and the flag is the fallback for a resource ball that carries no dict
+%[measured 2026-09-07: set_prolog_flag(stack_limit, 40000000) then
+%length(_, 100000000) raises
+%error(resource_error(stack), stack_overflow{stack_limit:39062, ...}),
+%39062 Kb = 39,999,488 bytes against the flag's 40,000,000, SWI's own Kb
+%truncation; the rendered message says "38.1Mb", coarser than either].
+metta_host_stack_ceiling(Context, Bytes) :-
+    is_dict(Context),
+    get_dict(stack_limit, Context, Kb),
+    !,
+    Bytes is Kb * 1024.
+metta_host_stack_ceiling(_, Bytes) :-
+    current_prolog_flag(stack_limit, Bytes).
+
+%Only the pairs whose value the ball actually carried; an unbound part is the
+%engine's absence marker and drops out rather than crossing as a variable.
+metta_host_bound_fields([], []).
+metta_host_bound_fields([_-Value|Rest], Fields) :-
+    var(Value),
+    !,
+    metta_host_bound_fields(Rest, Fields).
+metta_host_bound_fields([Pair|Rest], [Pair|Fields]) :-
+    metta_host_bound_fields(Rest, Fields).
 
 %A result past binary64 SATURATES to the IEEE value instead of raising,
 %which is upstream's arithmetic (plain Rust f64: "1e400".parse and 1e308*10

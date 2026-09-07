@@ -393,6 +393,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Every condition in `metta-node/errors` takes its own parts in one options
+  bag, `new X(message, { ...parts })`, where the resource family took a
+  positional limit: one shape for every condition now that most of them carry
+  fields. `engineError` is no longer exported from the package root, because
+  its input is what the bridge read off the raised ball rather than anything a
+  caller has.
+- The refusal classification the host seats share moved into the engine.
+  `metta_host_error_kind_row/3`, `metta_host_error_kind/3`,
+  `metta_host_control_signal_info/3`, `metta_host_control_signal_line/2` and
+  `metta_host_space_capability_error/4` are published host services;
+  `extensions/python/metta/shim.pl` keeps the names its own goal text asks for
+  and delegates to them, so the Python wire is unchanged and the kind list
+  exists once instead of once per seat.
 - A `(claim Vocab Value Property...)` row's properties are cached per value,
   the way a vocabulary's values already were. The read has an open tail,
   because a claim row carries any number of properties, so it took the branch
@@ -479,6 +492,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Removed
 
+- `metta_control_signal_kind/2` from the Python shim, which nothing had called
+  since it was written and which held a second reading of the kind list the
+  engine now owns.
 - The `cetta` gate lane and the machinery behind it. `tests/conformance/`
   loses `cetta.py`, `cetta_corpus.py`, `cetta_fences.txt`,
   `cetta_shared_fragment.txt` and `measured_corpus.py`, and
@@ -499,6 +515,25 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Node binding raises the condition the ENGINE names, not one read out of
+  the rendered sentence. The engine publishes one kind word per refusal a host
+  can act on differently (`engine/metta/registration.pl`,
+  `metta_host_error_kind_row/3` and `metta_host_error_kind/3`), the bridge
+  sends it with the fields that kind carries, and `metta-node/errors` maps all
+  thirteen. Five kinds the Python seat already classified used to arrive there
+  as a generic `EngineError` -- a tripped tabling restraint, an interrupt, a
+  builtin's own refusal and both codec kinds -- and no refusal that did have a
+  class carried a single field. `RestraintError` (`restraint`, `limit`,
+  `call`), `InterruptedError` and `OperationError` (`operation`, `kind`,
+  `expected`, `culprit`) are new; `MettaSyntaxError` gains `line`,
+  `CapabilityError` gains `space`, `operation` and `capability`,
+  `AssertionError` gains `operation`, `SourceNotFoundError` gains `source`,
+  and `StackLimitError.limit` is the ceiling the ball recorded rather than a
+  number parsed back out of SWI's rounded prose, which for a 40,000,000-byte
+  limit read 39,950,745.6. A resource `limit` is `undefined` where the engine
+  could not name the bound, which it cannot when a budget expires inside a
+  nested query; it used to be 0. `tests/data/error-kinds.json` is the kind
+  list, and each seat's suite reads it against its own map.
 - `tables.sql_function` on a DuckDB connection reads the head's DECLARED arrow
   for its SQL types and refuses by name without one. Since `inspect.signature`
   shows an undeclared head the arrow its stored atoms justify, the refusal had
