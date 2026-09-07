@@ -9,6 +9,28 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The reduction trace as OpenTelemetry spans, and the engine's counters as
+  metrics. `metta.telemetry.spans(trace, tracer=)` emits one BACK-DATED span per
+  recorded reduction, nested by the events' own depth and carrying the times the
+  engine recorded: a call opens a span named by the head with `metta.term`,
+  `metta.depth`, `metta.seq` and `metta.space`, its exit ends it with
+  `metta.answer`, a `fail` ends it ERROR with `metta.exit=fail`, and a reduction
+  a bound cut ends where the trace does with `metta.exit=absent`.
+
+  `metta.telemetry.observe(m, tracer=, meter=)` is the block form. With a tracer
+  it holds the engine's one trace session for the block, so every compiled
+  reduction from every call inside it becomes a span under one span; with a
+  meter the block's `m.stats()` deltas become the four histograms
+  `metta.inferences`, `metta.cputime`, `metta.gc.freed` and `metta.table_bytes`.
+  The recording bound stops the RECORDING and never the observed work, which is
+  the caller's and must not fail because a telemetry budget ran out; the engine
+  gained a session mode for that, and a trace's bound still stops its own run.
+
+  Only `opentelemetry-api` is imported, from the new `[otel]` extra: the SDK,
+  the exporters and the collector stay the deployment's. The `metta.*` loggers
+  need no code at all, since attaching the SDK's `LoggingHandler` to
+  `logging.getLogger("metta")` puts every engine message in the same pipeline.
+
 - A served space publishes a GraphQL schema. `Gateway.graphql_schema() -> str`
   is the same declarations projected into SDL, answered at `GET /graphql`, and
   `Gateway.graphql(request) -> dict` executes a query, `POST /graphql`, through

@@ -122,6 +122,13 @@ arrow = [
 das = [
     "websocket-client",
 ]
+#: The OpenTelemetry API, which `metta.telemetry` speaks. Only the API package
+#: is here: the SDK, the exporters and the collector are the deployment's, which
+#: is the split the API package exists for, and a library that pulled in an SDK
+#: would be choosing a deployment's pipeline for it.
+otel = [
+    "opentelemetry-api>=1.30",
+]
 #: Executing a GraphQL query against a served space. The SDL is built as text,
 #: so `GET /graphql` publishes the schema without this; only `POST /graphql`
 #: needs a GraphQL implementation, and graphql-core is the reference port of
@@ -154,6 +161,11 @@ test = [
     #: The GraphQL executor, so the schema scenarios RUN rather than skipping.
     #: Same reason nanoarrow and openapi-spec-validator are here.
     "graphql-core>=3.2",
+    #: The telemetry scenarios need the SDK as well as the API, because what
+    #: they assert about a span is what an EXPORTER received; the library
+    #: itself imports the API alone.
+    "opentelemetry-api>=1.30",
+    "opentelemetry-sdk>=1.30",
     "pytest>=8.4.2",
     "pytest-benchmark>=5.2",
     #: Ordering and the per-item wall bound, which the suite's configuration
@@ -606,6 +618,7 @@ DEP003 = ["rich", "pygments", "IPython"]
 DEP002 = [
     "janus-swi",
     "graphql-core",
+    "opentelemetry-api",
     "array-api-compat",
     "nanoarrow",
     "faiss-cpu",
@@ -731,6 +744,7 @@ forbidden_modules = [
     "metta.paths",
     "metta.remote",
     "metta.spaces",
+    "metta.telemetry",
     "metta.structures",
     "metta.subscribe",
     "metta.tables",

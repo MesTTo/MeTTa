@@ -22,7 +22,7 @@ re-runs them.
 |---|---|---|
 | `examples/**/*.metta` | 266 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
-| `website/reference/metta-*.md` | 27 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
+| `website/reference/metta-*.md` | 28 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
 | `website/reference/refusals.md` | the engine's own `(refusal ...)` rows: the class each seat raises, the ground and the remedy | `extensions/python/tools/refusalsdoc.py` |
 | `tests/prolog/suites/*/*.plt` | plunit suites over the engine itself, grouped by the engine unit each one tests | the `plunit` gate lane |
@@ -1290,6 +1290,35 @@ m.record(src, *, seed=None, max_events=, timeout=, inferences=) -> Recording
         replay() and debug() then refuse; the events stay readable either way
         replay refuses a space whose digest() differs from the recording's, and
         a LOADED recording has no live space, so it wants one as the argument
+metta.telemetry.spans(trace, *, tracer, space=None, start_time=None, parent=None)
+        one BACK-DATED OpenTelemetry span per recorded reduction, nested by the
+        events' own depth and carrying the times the engine recorded rather than
+        the times the spans were built. `trace` is a Trace or a Recording, which
+        knows its own space. A call opens a span named by the HEAD (a span name
+        is low-cardinality) with the attributes `term` (the canonical text),
+        `depth`, `seq` and `space`, each under the `metta.` namespace; its exit
+        ends it with `answer`; a `fail` ends it ERROR with `exit=fail`; and a
+        reduction a bound cut ends where the trace does with `exit=absent`
+metta.telemetry.observe(m, *, tracer=None, meter=None, name="metta",
+        max_events=None, filter=None) -> Trace
+        a with-block. With a tracer it holds the engine's ONE trace session for
+        the block, so every compiled reduction in it becomes a span under one
+        span named `name`; with a meter the block's `m.stats()` deltas become the
+        four histograms `inferences` (1), `cputime` (s), `gc.freed` (By) and
+        `table_bytes` (By), under that same `metta.` namespace and attributed
+        with the space and `name`.
+        Neither given refuses; either alone works, and a meter alone arms nothing
+        The yielded Trace fills in as the block ENDS, `.stopped` naming the
+        recording bound if one cut it. That bound stops the RECORDING and never
+        the observed work, which is the caller's; a trace's bound stops its run
+        Spans are emitted at the block's end because the engine's tracer does not
+        stream; they carry the true times, which is what back-dating is for
+        A trace or debug session inside an observed block refuses, and observing
+        inside one of those refuses naming the same rule: one session holds the
+        wrappers. Needs pymetta[otel], the API package alone
+        The `metta.*` loggers need no code here: attaching
+        opentelemetry.sdk._logs.LoggingHandler to logging.getLogger("metta")
+        puts every engine, transport and provider message in the same pipeline
 m.derivation(target, depth=None, *, timeout=, inferences=) -> list[Derivation]
         proof trees in MeTTa terms: .rules, .facts, .complete, .truncations
 m.why(pattern) -> str            one empty match explained in words
