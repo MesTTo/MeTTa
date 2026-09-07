@@ -19,6 +19,6 @@
 # the library means. Each is exercised where its meaning lives, and the file
 # that does so is named.
 DontEvalType	a Type, written in a declaration and never applied; examples/ch09-types/06-dont_eval_type.metta declares (: OpaquePayload DontEvalType)
-FTree	a Type, the sort lib_datastructures' three constructors answer to; examples/ch08-data/08-03-the-shipped-libraries/15-fingertree_internals.metta reads it back through get-type
+FTree	a Type, the sort lib_datastructures' three constructors answer to; examples/ch09-types/21-a_librarys_declared_types.metta reads all four declarations back through get-type
 FTEmpty	a nullary constructor of FTree, so it is a VALUE written bare and (FTEmpty) would be a one-element expression; examples/ch08-data/08-03-the-shipped-libraries/15-fingertree_internals.metta passes and pattern-matches it
 TP	a Type, lib_strategy's type-preserving scheme, written in the second argument of the typed application operator; examples/ch20-extending-the-engine/20-02-metta-written-in-metta/11-strategy.metta applies it there

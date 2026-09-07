@@ -13,19 +13,14 @@
 !(import! &self (library lib_datastructures))
 
 ;The constructors are ordinary data, so a tree can be written out by hand and
-;read back with the same operations that build one.
+;read back with the same operations that build one. `FTEmpty` is the one of
+;the three that takes nothing, so it is written bare where the other two are
+;applied, and it is never a call: chapter 9's `21-a_librarys_declared_types`
+;reads all four declarations back.
 !(test (ft-to-list (FTSingle 1)) (1))
 !(test (ft-to-list (FTDeep (1 2) FTEmpty (3 4))) (1 2 3 4))
 !(test (ft-is-empty FTEmpty) True)
 !(test (ft-is-empty (FTSingle 1)) False)
-
-;`FTree` is the type all three answer to, and `FTEmpty` is the only one of
-;the three that takes nothing, so it is written bare where the other two are
-;applied. Neither is ever a call, which is why the corpus-coverage lane
-;carries both by name.
-!(test (get-type FTEmpty) FTree)
-!(test (get-type FTSingle) (-> Atom FTree))
-!(test (get-type FTDeep) (-> Expression FTree Expression FTree))
 
 ;`ft-node-digit` turns a middle-level node back into a digit. It is the step
 ;that lets a node drop one level when the level above it drains.

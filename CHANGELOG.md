@@ -9,8 +9,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
-- Every atom has an example. 45 new programs take the example corpus from 266
-  to 311 files and close the gap between what the engine can call and what the
+- Every atom has an example. 46 new programs take the example corpus from 266
+  to 312 files and close the gap between what the engine can call and what the
   corpus exercises: of the 721 heads a new `corpus-coverage` gate lane knows,
   245 engine callables and 641 distinct heads the 38 shipped libraries carry,
   287 were called by no example before this and 4 are now, each of those four
