@@ -26,15 +26,15 @@ SIGKILL away from committing a mutated gate.
 Assumes:
   - check_evidence_selftest.build() applies METTA_EVIDENCE_MUTATION to the
     module it names while copying [source: tests/checks/check_evidence_selftest.py,
-    MUTATION and build; commit=WORKTREE]
+    MUTATION and build; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
 Guarantees:
   - a mutation the self-test does not notice is reported by name, and the
     unmutated control has to pass, so a self-test broken to fail always cannot
     make every mutation look caught
-    [tested 2026-09-07: evidence-mutations; commit=WORKTREE]
+    [tested 2026-09-07: evidence-mutations; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
   - a mutation whose text is no longer in the module it names is reported
     rather than skipped, so a rule that moved cannot leave its plant untested
-    in silence [tested 2026-09-07: evidence-mutations; commit=WORKTREE]
+    in silence [tested 2026-09-07: evidence-mutations; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
 Fails when:
   - asked which plant catches which mutation. Several plants answer one
     mutation and one plant answers several; what is checked is that every

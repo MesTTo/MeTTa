@@ -99,15 +99,15 @@ Guarantees:
   - a name written as a SENTENCE resolves when it is quoted, against every
     suite in the tree rather than one directory's, and a quoted name the tree
     does not declare is reported rather than dropped in silence
-    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
+    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
   - a C suite's two names for one case both resolve, the `test_` function and
     the `CASE(...)` prose inside it, and a CASE in a function main() never
     calls is as unbacked as the function
-    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
+    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
   - a tag offering a path under the repository's scratch directory is
     reported, and the directory is read from the runner that allocates it, so
     a runner that stops declaring it is reported too
-    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
+    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs

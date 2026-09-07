@@ -53,7 +53,7 @@ Guarantees:
     does, `npm run` inside it expanded and `--prefix` honoured on either side
     of the name, and a selection naming tsc OUTPUT resolves to the sources
     that produce it even on a checkout nobody has built
-    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
+    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
 Fails when:
   - a Prolog file is handed to swipl by a Python script rather than by a
     runner or by another Prolog file's consult. tests/conformance/answer_groups.pl

@@ -36,7 +36,7 @@ Guarantees:
     [tested 2026-08-22: tests/checks/check_evidence_selftest.py]
   - every plant here fails when the rule it pins is taken away, because
     METTA_EVIDENCE_MUTATION patches the COPIED checker and nothing else
-    [tested 2026-09-07: evidence-mutations; commit=WORKTREE]
+    [tested 2026-09-07: evidence-mutations; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
 Fails when:
   - run against a tree it did not write. It asserts exact line numbers in a
     fixture it generates, and nothing else.
