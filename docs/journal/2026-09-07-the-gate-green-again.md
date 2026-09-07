@@ -468,6 +468,14 @@ tree.
 Decided: a boot row's inference pin is taken from the PRISTINE worktree, and
 every other row from either, since they agree to the digit.
 
+Superseded in two rows by the last two entries in this file. The boot row's
+493 is not the rewritten tree, it is this branch's own `engine/bench.pl`; the
+A/B that would have caught it was run against the wrong file. And the table's
+`parse` and `parse-prolog` rows are not measurements at all -- both cases were
+raising `Domain error: bench_result expected` on both sides, and the two
+figures printed there are the standing pins echoed back. The rest of the table
+holds.
+
 ## 2026-09-07, the lane the brief did not name
 
 Tried: reading the pristine control's sixteen red lanes rather than the
@@ -570,3 +578,214 @@ and is not attributed):
 `--counter-only` was used for every one, so no instruction pin and no wall
 figure moved; the two join rows' `inference_slope` deltas moved with their
 counters, which is the same measurement.
+
+## 2026-09-07, the engine boot row was this branch's own edit
+
+Corrects "the benchmark pins and what a pin from here is worth" above, which
+recorded the engine boot row's +493 as the rewritten-tree effect. It is not.
+
+The A/B that entry ran reverted `lib/lib_tabling/lib_tabling.pl` and read the
+row unchanged, and it concluded from that that no file of this branch's was
+responsible. It had reverted the wrong file. `engine/bench.pl` is also this
+branch's, and reverting THAT one, in the same worktree, at the same load, moves
+the row:
+
+| `engine/bench.pl` | boot, cold (image built) | boot, warm |
+|---|---:|---:|
+| this branch's | 3,460,692 | **268,417** |
+| `97c96e91`'s | 3,460,784 | **267,924** |
+
+`command=swipl -q -g "metta_bench:bench_run(boot)" -t halt engine/bench.pl`,
+twice per side with the second reading taken, loadavg 27.32, nothing else in
+the tree touched between the two sides.
+
+The mechanism was written down in this very file eleven days ago and I did not
+read it: `engine/bench.pl`'s own header records that "appending one inert fact
+moves boot from 612,598 inferences to 612,740 [...] ten facts move boot to
+612,896, and removing them moves both back [...] an edit to this file re-pins
+boot and evaluate" [measured 2026-08-28]. This branch adds three predicates to
+it, `bench_measured/1`, `bench_unmeasured/1` and `bench_no_acknowledgement/1`,
+for the refused-window status. So the +493 is the process's predicate set, the
+documented non-monotonic cost of the boot the engine performs inside a process
+that already holds the benchmark file, and it belongs to this branch.
+
+`evaluate`, the other row the header names as sensitive, did not move: 560,420
+on both sides. Non-monotonic is what the header says it is.
+
+Decided: the boot row is pinned to 268,417, the number THIS tree produces,
+and the pin comment attributes it to this branch's own `engine/bench.pl` edit
+rather than to the environment. The pristine-worktree rule from the superseded
+entry is kept for a different reason than the one it was written for: a boot
+row must be read where the tree that will run the lane is, and the pristine
+worktree is only the right place to read it when the benchmark file itself is
+unchanged. When the benchmark file is part of the change, its own tree is.
+
+Open: the C seat's boot row is still the environment. That one was A/B'd
+against the file that could have moved it -- `extensions/cmetta/benchmarks/cases.c`
+reverted to trunk in this worktree reads 388,180, and this branch's reads
+388,180 -- so the +27~29 there has no candidate in the tree and stays
+attributed to the rewritten worktree.
+
+## 2026-09-07, the two parse cases had been broken since the assertion merge
+
+Found while re-stamping `engine-bench`: `bench_check(parse, Forms) :-
+length(Forms, 118)` and the same for `parse-prolog`. Both cases parse
+`engine/prelude.metta`, and `acd04732`, the assertion-bag-diff merge, added a
+top-level form to it. The prelude has 119 forms now, so both cases had been
+raising `bench_result expected, found parse-prolog` at every commit from that
+merge to the tip.
+
+Nobody saw it because the lane refuses earlier than it runs: `engine/bench.py`
+checks its workload digest before it dispatches a case, the digest covers
+`engine/prelude.metta`, and the prelude had moved, so the lane's message was
+about the digest and the run never reached the check that was actually wrong.
+One stale pin was hiding behind another. That is the same shape as
+`policy-inventory`'s: a lane that refuses at its first gate reports the first
+gate forever, and everything behind it is unmeasured rather than green.
+
+Tried: relaxing the count at each point of the first-parent chain and reading
+`parse-prolog` there. The result check runs UNTIMED, outside the measured
+region, so relaxing it cannot move the number it is guarding:
+
+| commit | inferences |
+|---|---:|
+| `5aca9b64` | 3,113,384 |
+| `699c8b4a` | 3,113,384 |
+| `468350eb` | 3,113,384 |
+| `1efa3c73` | 3,112,384 |
+| `406175b9` | 3,118,634 |
+| `acd04732` | **3,341,234** |
+| `ab02d526` .. `97c96e91` | 3,341,234 |
+
+So -1,000 at `1efa3c73`, +6,250 at `406175b9`, +222,600 at `acd04732`, and the
++222,600 is the prelude form: one more form parsed 25 times through the shipped
+door. `parse` itself is 152 inferences and did not move, because it parses
+through the fast path where the form count is not the work.
+
+Decided: the count is RE-COUNTED, to 119, not widened to a range and not
+dropped. It is a fact about the shipped prelude, and a case that stops checking
+its own result is the failure mode the check exists for. `parse-prolog`'s
+inference pin goes to 3,341,234 with that attribution.
+
+Both cases' INSTRUCTION pins had been hidden behind the same refusal, and both
+are out by nine per cent: `parse` reads 121,893,770 against 111,718,052 and
+`parse-prolog` 1,956,872,188 against 1,798,035,063. One control settles both.
+`engine/prelude.metta` is 40,788 bytes here and 37,745 at `5aca9b64`, where
+these pins were last taken; swapping ONLY that file in one checkout, with the
+`.qlf` set cleared and rebuilt per arm and three samples per case per arm:
+
+| arm | `parse` | `parse-prolog` |
+|---|---:|---:|
+| this tree's prelude | 121,902,769 | 1,956,878,696 |
+| `5aca9b64`'s prelude | 112,737,731 | 1,801,314,761 |
+| move | -8.13% | -7.95% |
+
+against a 3,043-byte, +8.06% growth in the file. So the whole of it is the text
+these cases read. The negative half of the control is that with the old prelude
+both rows sit INSIDE their one per cent bands around the standing pins, +0.91%
+and +0.18%, so nothing else moved them either.
+
+Taken in a throwaway checkout beside the repository, whose path is exactly as
+long as the repository root's, because this file's
+`measurement.checkout_location` prices a boot instruction pin taken in a
+worktree at 2.51% wrong and the 2026-09-06 release re-pin used the same device.
+That caveat turns out not to reach these two rows, and the control says so
+rather than the reasoning: the branch worktree, 23 characters longer, reads
+121,901,515 and 1,956,837,066, which are 0.006% and 0.002% away. A controlled
+window excludes the boot, and the boot is where a path is resolved per load.
+
+It DOES reach `boot`, which is why that row's instruction pin is untouched: it
+reads 815,203,930 here and 808,824,304 in the equal-length checkout, 0.79%
+apart, against a standing pin of 808,556,809 that the equal-length checkout
+confirms to +0.03% over eighteen samples. Pinning boot's instructions from this
+worktree would have written the path in.
+
+Open: one boot instruction sample in about forty-five read 788,967,044, -3.2%
+from a mode that is otherwise flat to 0.011%, and min-of-three turned that one
+sample into `improvement left unpinned`. Nine consecutive lane runs since have
+not reproduced it. Not acted on: a band is widened on the measurement that
+justifies it, the way `match`'s 3.0% is, and one observation is not that.
+Revisit if it recurs; the likely shape is the stack-growth count
+`metta.benchmarking`'s `measure_counters` already names as an instruction-level
+second mode.
+
+## 2026-09-07, the gate's own scratch directory was moving the boot row
+
+Found while re-running `engine-bench` after the re-pin: `sh engine/bench.sh`
+reads the boot row at 268,417 and `sh check.sh engine-bench` reads it at
+268,390, on the same tree, in the same worktree, seconds apart. Twenty-seven
+is nearly seven times the harness's four-inference allowance, so the row could
+not be green both ways whichever number was pinned. The lane had been reporting
+`improvement left unpinned` and I had been about to pin the difference.
+
+Tried, in order, and each one wrong: the invocation (`bounded`, `env`,
+`CHECK_PY` and the full seven-case run all read 268,417), `METTA_TIMEOUT`,
+which `check.sh` exports (268,417), and the driver itself (a bare
+`swipl -g bench_run(boot)` and `engine/bench.py` agree). What check.sh does
+that a bare run does not is allocate a repository-local scratch directory and
+export `TMPDIR`, `TMP` and `TEMP` at it. Splitting the three: `TMPDIR` alone
+and `TEMP` alone read 268,417, and **`TMP` alone reads 268,390**. SWI takes its
+`tmp_dir` flag from `TMP`, and `TMP=/tmp` -- the value SWI would have chosen
+anyway -- reads 268,417 again, so it is not the variable being set, it is the
+value being new.
+
+Measured what the difference actually is, because "an environment variable
+moves an inference count" is not an explanation:
+
+- `strace -e trace=file` over both arms is byte-identical once pointers are
+  normalised. Nothing on disk is treated differently.
+- `profile_data/1` over the measured region reports identical call, redo and
+  exit counts for all 1,071 nodes.
+- the set of loaded source files is identical, and so is `file_search_path/2`.
+- a plain `consult('engine/metta.pl')` is identical in both arms. The
+  difference needs the `.qlf` path AND `engine/qlf_boot.pl` already loaded:
+  without qlf_boot, the same `.qlf` load reads 268,284 in both arms.
+- it is not qlf_boot's directives. `set_prolog_flag(encoding, utf8)`,
+  `set_stream(user_output, encoding(utf8))` and `purge_stale_qlf` were each run
+  alone in front of the load and none reproduces it; a copy of qlf_boot.pl with
+  the scan directive removed still does.
+
+So it is qlf_boot's PREDICATE SET, and then the positive control that names the
+mechanism: with qlf_boot loaded, creating **one** atom before the load reads
+267,933 where none reads 267,961, and two, three, five and eight read 267,961
+again. `TMP` set to a value SWI has not already interned creates exactly one
+atom, the `tmp_dir` flag's, before the process starts. The boot's cost holds a
+handful of inferences that depend on the atom table's exact state, and it is
+non-monotonic in it -- which is the same thing `engine/bench.pl`'s own header
+has said since 2026-08-28 about the process's PREDICATE set, where one inert
+fact moves boot by about 142 and ten by less than ten times that.
+
+The row is otherwise robust: `LANG`, `LC_ALL`, `PYTHONHASHSEED`, `CI`, `HOME`,
+`SHELL`, `METTA_TIMEOUT` and an invented variable all read 268,417.
+
+Decided: `engine/bench.py` drops `TMP`, `TMPDIR` and `TEMP` from every sample's
+environment, so a gated run and a bare run measure one configuration. All three
+rather than the one that bites, so a future SWI preferring `TMPDIR` cannot
+reintroduce it quietly. Nothing is lost: a whole `--counter-only` run with the
+three pointed at an empty directory leaves it empty, so no case writes a
+temporary file and the scratch policy has nothing to keep here.
+
+Rejected: handing the inference samples the environment `measure_counters`
+already BUILDS for the instruction samples -- four names plus `LC_ALL=C` and
+`PYTHONHASHSEED=0`. It is the more general fix and it closes the class instead
+of the case, and this file's own instruction pins have been taken that way all
+along. It loses on evidence: it moves boot to 263,515, evaluate to 560,367 and
+translate to 308,653, numbers no sweep point measured, so every attribution
+those three rows carry would stop being a measurement. Revisit when those rows
+are next swept, and take the sweep in the built environment.
+
+The gap the fix leaves, named rather than papered over: this file's two
+counters now describe two configurations that differ by the locale, since the
+instruction samples run under `LC_ALL=C` and the inference samples under
+whatever the caller has.
+
+`tests/shell/test_boot_inference_determinism.sh` gains a third arm for it,
+because that lane exists for exactly this ("a boot whose count moves on its own
+turns the engine-bench lane red with no code behind it"). It reads the row
+through `engine/bench.sh` twice, once with the three names unset and once with
+them set at a scratch directory, and fails if they disagree. The first version
+of that arm PASSED with the fix reverted: the lane runs under check.sh, which
+has already exported all three, so "leave them alone" is not the bare
+configuration, it is the gate's. Both arms are set explicitly now, and with
+`env=_environment()` removed from `engine/bench.py` the lane fails naming both
+readings.

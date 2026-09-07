@@ -285,8 +285,15 @@ bench_work(evaluate, Space, Result) :-
 bench_check(boot, booted) :-
     metta_host_set_silent(true),
     process_metta_string("!(+ 1 2)", [3], '&self').
-bench_check(parse, Forms) :- length(Forms, 118).
-bench_check('parse-prolog', Forms) :- length(Forms, 118).
+% 118 until acd04732, the assertion-bag-diff merge, which added one top-level
+% form to engine/prelude.metta. Both cases parse that file, so the count is a
+% fact about the shipped prelude rather than a pin: it is re-counted, not
+% widened. The lane had been REFUSING at its workload digest before it reached
+% either case, so the stale count was invisible for as long as the refusal was
+% [measured 2026-09-07: parse_metta_source over engine/prelude.metta answers
+% 119 forms; commit=WORKTREE].
+bench_check(parse, Forms) :- length(Forms, 119).
+bench_check('parse-prolog', Forms) :- length(Forms, 119).
 % Forcing drove the 49 names read from the source. The deferred register is
 % the engine's own account of what is left, and it has to be empty.
 bench_check(translate, forced) :-

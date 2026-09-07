@@ -13,6 +13,10 @@
 #   - eight consecutive engine/bench.pl boot samples read one number. That is
 #     the end-to-end half, and it catches a source of drift the first probe
 #     does not model.
+#   - the driver reads the same number whether or not the caller exports a
+#     temporary directory. check.sh exports TMP, TMPDIR and TEMP into every
+#     lane, SWI reads TMP for its own, and one atom in the table is enough to
+#     move this row by 27.
 # Assumes:
 #   - swipl on PATH and the .qlf artifact set warm. The first boot after a
 #     purge COMPILES, which is a different workload from loading, so this
@@ -145,4 +149,48 @@ if [ "$distinct" -ne 1 ]; then
     exit 1
 fi
 
-printf 'boot inference determinism checks passed (%s)\n' "$(printf '%s\n' $readings | sort -u)"
+# The third half of the property: the same count from a bare run and from
+# under check.sh. SWI reads TMP for its temporary directory, and the boot case
+# is sensitive to the one atom that a TMP other than /tmp creates before the
+# process starts -- it reads 268,390 there against 268,417 without, seven times
+# the harness's four-inference allowance. check.sh allocates a scratch
+# directory and exports TMP, TMPDIR and TEMP into every lane, so a row pinned
+# from a bare run was red under the gate and a row pinned under the gate was
+# red from a bare run, with nothing in the engine deciding which. engine/bench.py
+# drops the three names from every sample's environment; this is what says so.
+#
+# Read through engine/bench.sh rather than swipl, because the fix is the
+# DRIVER's and a direct sample would pass with it reverted. The reading is
+# parsed out of either shape the driver prints, the comparison line or the
+# out-of-band failure, so this arm does not depend on the pin being current.
+scratch="$ROOT/ai-tmp/boot-determinism-tmp.$$"
+mkdir -p "$scratch"
+boot_sample() {
+    bounded sh "$ROOT/engine/bench.sh" --counter-only boot 2>&1 |
+        sed -n 's/.*samples=\[\([0-9][0-9]*\).*/\1/p;s/.*every sample of \[\([0-9][0-9]*\).*/\1/p' |
+        head -1
+}
+# Both arms are set explicitly, in subshells. This lane runs UNDER check.sh,
+# which has already exported the three names, so an arm that merely leaves
+# them alone is not the bare configuration -- it is the gate's, and comparing
+# the gate's against the gate's passed with the fix reverted when this was
+# first written.
+bare_reading=$( unset TMPDIR TMP TEMP; boot_sample ) || true
+gated_reading=$( TMPDIR="$scratch"; TMP="$scratch"; TEMP="$scratch"
+                 export TMPDIR TMP TEMP; boot_sample ) || true
+rm -rf "$scratch"
+if [ -z "$bare_reading" ] || [ -z "$gated_reading" ]; then
+    printf 'the boot case produced no reading with TMP set (%s) or unset (%s)\n' \
+        "$gated_reading" "$bare_reading" >&2
+    exit 1
+fi
+if [ "$bare_reading" != "$gated_reading" ]; then
+    printf 'the engine boot read %s with the temporary directory the gate sets '\
+'and %s without it, so engine/bench.py is letting the caller pick the '\
+'configuration it measures in. It removes TMP, TMPDIR and TEMP from every '\
+'sample for exactly this reason.\n' "$gated_reading" "$bare_reading" >&2
+    exit 1
+fi
+
+printf 'boot inference determinism checks passed (%s, and %s with the temporary directory the gate sets)\n' \
+    "$(printf '%s\n' $readings | sort -u)" "$gated_reading"

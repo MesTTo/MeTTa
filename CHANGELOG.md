@@ -289,6 +289,40 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   pin of 158,011. Only inference counts are re-pinned; no instruction or CPU
   number moves, and the C seat's `boot` row keeps its pin because a worktree
   whose files have been edited reads it 27 inferences high.
+- The engine's two parse benchmarks check the prelude's real form count. Both
+  read `engine/prelude.metta` and both asserted it holds 118 top-level forms;
+  the assertion-bag-diff merge added the 119th, so both had been raising
+  `Domain error: bench_result expected` at every commit since. It was invisible
+  because `engine-bench` refuses at its workload digest before it dispatches a
+  case, and the digest covers the same file, so one stale pin was reported and
+  the other was never reached. The count is re-counted rather than widened, the
+  digest is re-stamped, and the two rows the merges moved are re-pinned:
+  `parse-prolog` 3,118,634 to 3,341,234 (+222,600, the added form parsed 25
+  times through the Prolog grammar, laddered to `acd04732`) and `boot` 266,058
+  to 268,417, of which 493 is this branch's own edit to `engine/bench.pl` --
+  that file's predicate set is part of what the boot it measures costs, which
+  its header has recorded since 2026-08-28. `parse` itself stays at 152: the
+  shipped door reads through `engine/reader.so` and does not price a form.
+  Both cases' instruction pins had been hidden behind the same refusal and are
+  re-pinned with them, `parse` 111,718,052 to 121,893,770 and `parse-prolog`
+  1,798,035,063 to 1,956,872,188. One control covers both: swapping only
+  `engine/prelude.metta` for the version this pin was last taken against, in
+  one checkout, moves them -8.13% and -7.95% against a +8.06% growth in the
+  file, and with the old prelude both sit inside their one per cent bands.
+- The engine benchmark measures in one temporary-directory configuration
+  whatever the caller's is. SWI reads `TMP` for its own, and the boot case's
+  inference count depends on the atom table's exact state, so a `TMP` naming
+  anything SWI has not already interned creates one atom and moves the row by
+  27, seven times the harness's four-inference allowance. `check.sh` allocates
+  a repository-local scratch directory and exports `TMP`, `TMPDIR` and `TEMP`
+  into every lane, so the same tree read 268,417 from `sh engine/bench.sh` and
+  268,390 from `sh check.sh engine-bench` and the row could not be green both
+  ways. `engine/bench.py` drops the three names from every sample, and
+  `tests/shell/test_boot_inference_determinism.sh` reads the row both ways and
+  fails if they disagree. The sensitivity itself is measured rather than
+  guessed: with `engine/qlf_boot.pl` loaded, creating one atom before the load
+  moves the same number by 28 and creating two, three, five or eight moves it
+  back.
 - `lib_tabling` declares where `call_delays/2` comes from. It is
   `library(wfs)`'s, not `library(tabling)`'s, and the library-index autoloader
   had been finding it: with autoload off the restraint dispatch raised
