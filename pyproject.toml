@@ -643,6 +643,7 @@ forbidden_modules = [
     "metta.derivation",
     "metta.events",
     "metta.foreign",
+    "metta.importing",
     "metta.integrate",
     "metta.lint",
     "metta.manifest",
