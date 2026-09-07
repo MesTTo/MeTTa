@@ -2304,13 +2304,18 @@ nothing; matchable `(import Path)` rows through `(imports &space)`,
 and `unimport!` for exact source-owned atom withdrawal; `lib_json` JSON, decoding into that dict-as-space; `lib_measure`
 weighted superpositions: normalize, softmax, rank, top-k, sample; `lib_memo` the
 resident automatic and explicit memoisation controls; `lib_mm2` notation over
-&mork, loaded on demand; `lib_nars` NARS truth functions, inference rules and
+&mork, loaded on demand: `＋` and `－` add and remove one atom, `＋*`
+bulk-adds a whole expression in one crossing, and `~>` runs one MM2 transform; `lib_nars` NARS truth functions, inference rules and
 bounded derivation; `lib_observe` filtered traces, source coverage and attributed error frames as queryable atoms; `lib_patrick` compose, for, iterate; `lib_pln` PLN truth
-formulas, consistency and ranking; `lib_pln2` selected Beta and moment formulas
+formulas, consistency and ranking, over `/safe`, the division that answers
+nothing rather than raising when the denominator is zero; `lib_pln2` selected Beta and moment formulas
 with explicit evidence scale and support-checked independence; `lib_redis` shared spaces over Redis;
 `lib_reflect` the engine's own surface as data you can match; `lib_regex` PCRE2
 over strings; `lib_roman` a list and fold basis, head, init, fold-flat,
-foldr-flat; `lib_soft` soft structural unification over written symbols, including
+foldr-flat; the three general set operations `/?\`, `\?` and `\?/`, which take
+the comparison as an argument and are what the nine fixed spellings are sugar
+over; `fst`, `snd` and the pair-shaped `cns`; and `traceid` and `tracem`, which
+print and answer their subject unchanged; `lib_soft` soft structural unification over written symbols, including
 function names, with grounded values compared crisply; match quality as a measure;
 `lib_spaces` moving atoms between spaces, with find and match-count;
 `lib_strategy` a Stratego-style strategy basis whose plans are ordinary atoms;
