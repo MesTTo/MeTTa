@@ -198,7 +198,7 @@ export default defineConfig({
             items: [
               { text: "metta.trace", link: "/reference/metta-trace" },
               { text: "metta.recording", link: "/reference/metta-recording" },
-              { text: "metta.telemetry", link: "/reference/metta-telemetry" },
+              { text: "metta_otel", link: "/reference/metta-otel" },
               { text: "metta.derivation", link: "/reference/metta-derivation" },
               { text: "metta.lint", link: "/reference/metta-lint" },
             ],
@@ -209,7 +209,7 @@ export default defineConfig({
             items: [
               { text: "metta.structures", link: "/reference/metta-structures" },
               { text: "metta.tables", link: "/reference/metta-tables" },
-              { text: "metta.arrays", link: "/reference/metta-arrays" },
+              { text: "metta_arrays", link: "/reference/metta-arrays" },
               { text: "metta.testing", link: "/reference/metta-testing" },
             ],
           },

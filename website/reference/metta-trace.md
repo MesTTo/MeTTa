@@ -99,3 +99,27 @@ def trace(
 > force afterwards, so a traced run's draws come back the same. It is the
 > fourth run control, not a bound, and `record` is the door that always
 > sets it; the MeTTa spelling of the same scope is `(with-seed S expr)`.
+
+## `observed`
+
+```python
+def observed(space: Any, max_events: int | None = None, selected: Any = None, *, arm: bool = True):
+```
+
+> Hold the engine's trace session over a block, yielding what it records.
+>
+> The generic half of observability, published as the seam's `observe`
+> service: a registrant that turns reductions into spans, log lines or
+> events takes the trace from here and never speaks to the engine itself.
+> The yielded `Trace` fills in as the block ENDS, because the engine's
+> tracer records into its own store and is read at the end, so reading it
+> inside the block answers nothing.
+>
+> `max_events` and `selected` are the trace door's own two recording
+> controls, `None` taking DEFAULT_MAX_EVENTS and every function. `arm=False`
+> yields an empty trace and touches the engine not at all, which is the
+> meter-only case: a caller that wants a block's counters and not its
+> reductions must not pay for the wrappers.
+>
+> The longhand for one program rather than a block is `space.record(source)`,
+> which records and answers in one step.

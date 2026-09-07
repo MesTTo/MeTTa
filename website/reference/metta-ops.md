@@ -146,4 +146,4 @@ def registered() -> dict[str, Operation]:
 > A name registers once however many spaces use it, so this is not the
 > question "what does this space have": `space.builtins()` answers that,
 > and a library that installs a set of operations answers its own
-> (`arrays.ops(space)` for the array roster).
+> (`metta_arrays.ops(space)` for the array roster).

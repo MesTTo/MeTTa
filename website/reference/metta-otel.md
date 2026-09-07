@@ -1,6 +1,6 @@
-# `metta.telemetry`
+# `metta_otel`
 
-Source: `extensions/python/metta/telemetry.py`.
+Source: `extensions/python/ext/metta-otel/metta_otel.py`.
 
 > The engine's own trace and counters as OpenTelemetry spans and metrics.
 >
@@ -12,9 +12,18 @@ Source: `extensions/python/metta/telemetry.py`.
 >
 >     from opentelemetry import trace, metrics
 >
->     with metta.telemetry.observe(m, tracer=trace.get_tracer("app"),
->                                  meter=metrics.get_meter("app")):
+>     import metta_otel
+>
+>     with metta_otel.observe(m, tracer=trace.get_tracer("app"),
+>                             meter=metrics.get_meter("app")):
 >         m.run("!(solve puzzle)")
+>
+> This is a DISTRIBUTION of its own, `metta-otel`, because every line of it is
+> the OpenTelemetry API and pymetta names no library. Install it beside pymetta,
+> or take `pymetta[otel]`, which is what that extra now installs. Holding the
+> engine's trace session is NOT OpenTelemetry's, so that half stayed behind as
+> the seam's `observe` service and this package calls it; a registrant that emits
+> log lines or events instead of spans calls the same service.
 >
 > Only `opentelemetry-api` is imported. The SDK, the exporters and the collector
 > are the deployment's, which is the split the API package exists for.
@@ -68,7 +77,7 @@ def observe(
     name: str = 'metta',
     max_events: int | None = None,
     filter: Any = None,
-) -> Iterator[Trace]:
+) -> Iterator[Any]:
 ```
 
 > Observe a block of engine work: its reductions as spans, its counters as metrics.

@@ -31,7 +31,9 @@
 #                                            scaling
 #                                            memory-scale memory-scale-gate
 #                                            memo-advisor memo-advisor-selftest
-#                                            shell examples layering
+#                                            shell examples
+#                                            layering layering-selftest
+#                                            no-packages
 #                                            corpus-coverage
 #                                            corpus-coverage-selftest
 #                                            generated-artifacts
@@ -548,6 +550,15 @@ run GATE artifact-paths-selftest "$PY" "$HERE/tests/checks/check_artifact_paths_
 run GATE no-hardcoded-integration "$PY" "$HERE/tests/checks/check_hardcoded_integrations.py"
 run GATE no-hardcoded-integration-selftest "$PY" "$HERE/tests/checks/check_hardcoded_integrations_selftest.py"
 
+# The other half of the same ruling, and the half a name scan cannot see. The
+# pass above says no library is NAMED in a seat's core; this one says the
+# workspace's two layers hold: the core imports no extension distribution, and
+# no distribution reaches the core's private names. Both are derived from the
+# `[tool.uv.workspace] members` glob, so a package added under
+# `extensions/python/ext/` is gated with no edit to either.
+run GATE layering "$PY" "$HERE/tests/checks/check_layering.py"
+run GATE layering-selftest "$PY" "$HERE/tests/checks/check_layering_selftest.py"
+
 # A bound kept by the caller stops being kept when the caller is killed. Two
 # swipl children spawned under this gate ran from 2026-09-01 to 2026-09-03,
 # spinning at 100% for 122 CPU-hours between them, because
@@ -769,7 +780,7 @@ run GATE   docs        check_docs_site
 # look wrong, and its entries are bare names because codespell prunes a walked
 # directory by NAME, so a ./-prefixed skip stops matching the moment a runner
 # passes explicit paths.
-run GATE   codespell   sh -c "cd '$HERE' && '$PY' -m codespell_lib extensions/python/metta extensions/python/bench.py extensions/python/examples extensions/python/notebooks extensions/python/tests extensions/python/tools engine lib extensions/mork extensions/node extensions/cmetta examples tests website .github *.md"
+run GATE   codespell   sh -c "cd '$HERE' && '$PY' -m codespell_lib extensions/python/metta extensions/python/ext extensions/python/bench.py extensions/python/examples extensions/python/notebooks extensions/python/tests extensions/python/tools engine lib extensions/mork extensions/node extensions/cmetta examples tests website .github *.md"
 # The remaining clones are small facade, protocol, and test-fixture mirrors;
 # extracting them would couple layers or hide the local contract.
 run REPORT jscpd       sh -c "cd '$HERE' && npx --yes jscpd --reporters ai --format python --min-lines 8 --ignore '**/__pycache__/**' extensions/python/metta extensions/python/tests"
