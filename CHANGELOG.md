@@ -159,6 +159,78 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
   `Gateway` is a context manager, like `Server` and every other handle here
   that owns an engine resource.
+- The Python seam gains a fourteenth point, `ipc`, beside `arrow`: who writes
+  and reads the Arrow IPC streaming format (`claims`, `schema`, `stream`,
+  `read`, `concat`), with pyarrow as the shipped row. The gateway's Arrow
+  answers and the remote cursor's `to_arrow()` reach the encoder through it,
+  so a second encoder is a row from its own package and no edit here; the
+  `no-hardcoded-integration` lane found the direct import the projections
+  work had made, and the point is the repair. graphql-core and the
+  OpenTelemetry API are declared as this seat's own dependencies in that
+  lane's table, each with the reason.
+
+- One extension seam per seat, `metta.seam` for Python, the seat-level twin of
+  `engine/ext_points.pl`. Every point a library can plug into is DECLARED with
+  a kind and its fields, a registrant is a ROW against a declared point, and
+  both read back as data: `seam.points()`, `seam.rows()`, and
+  `seam.publish(m)` writing the table into `&metta` so
+  `!(match &metta (extension python frame $who $f) $who)` answers which frame
+  libraries this process can reach.
+
+  Four kinds, the engine's own less the `host_service` split a seat has no
+  audience for. A `declaration` point's rows are all read; an `ownership`
+  point's are consulted in registration order and the first whose `claims(...)`
+  answers non-None wins, which is pluggy's `firstresult`; an `event` point runs
+  every row; a `service` is the other direction, what the seat publishes for a
+  registrant to CALL, so a registrant never imports a private module.
+
+  Points shipped: `frame`, `sql`, `array`, `index`, `arrow`, `transport-error`,
+  `image`, and `type`, `repr`, `reflector`, `provider`, `library` and
+  `integration` for the doors that already existed, whose rows stay where they
+  always lived. Services published: `projection`, `arrow-view`, `space-of`,
+  `module`, `sql-arity`, `sql-types`, `image-of`.
+
+  A package registers from its own code and advertises one callable under the
+  new `metta.extensions` entry-point group, so `pip install` is the whole of
+  the wiring. Discovery is lazy and free: `seam.advertised()` reads the names
+  without importing any of it and the group is loaded on the first dispatch
+  that has no answer without it, which is how Pygments finds a plugin lexer.
+
+- `rows.to(library)` and `answers.to(library)` build a frame of any registered
+  frame library, taking the module itself rather than its name.
+
+- The Node seat has the same seam, `metta-node/seam`, with the same four kinds
+  and the same refusals. Its points are `type`, `repr` and `reflector`, which
+  keep the storage `registerType`, `registerRepr` and `registerReflector`
+  always used, and `provider`, `library` and `integration`, read unloaded from
+  what packages advertise. `seam.point(...)` declares one of your own and the
+  seat dispatches it like any other; `seam.services()` publishes `term` and
+  `name`. A package advertises registrations under a fourth `package.json`
+  group, `extensions`; `seam.advertised()` costs nothing and
+  `await seam.discover()` loads them, explicit rather than on first dispatch
+  because ESM `import()` is asynchronous.
+
+  It declares no `frame` point and no `array` point, deliberately: it has no
+  frame notion, and its array notion is the platform's own `TypedArray`
+  family, which every numeric library in that runtime already produces.
+  `convert.registrations()`, `atom.reprs()` and `integrate.reflectorRows()`
+  are new, each publishing one of those registries as data so the seam reads
+  it rather than its private map.
+
+- The C seat has the seam and three capabilities it did not have. A library
+  outside this repository can now back a space with its own store
+  (`mt_provider_open`, which rides the engine's foreign-space seam, speaks
+  canonical MeTTa text, enumerates by index, and takes the name at the
+  engine's claim door so one another provider owns is refused by name), say
+  how its own object type prints (`mt_repr`), and register a directory of
+  MeTTa or Prolog sources (`mt_library`) -- and be LOADED at all, by
+  `mt_extension(m, path)`, which calls the `mt_extension_init` the library
+  exports, sqlite3's loadable-extension shape entry point and all.
+  `mt_point_declare`, `mt_register`, `mt_unregister`, `mt_point_count`,
+  `mt_point_at`, `mt_point_of`, `mt_seam_count`, `mt_seam_at` and `mt_claim`
+  are the seam in C's own spelling, with the same four kinds; the seat
+  declares `op`, `repr`, `provider` and `library` at boot and `mt_def` writes
+  an `op` row.
 
 - A template renders as well as reads. `metta.render(source, /, **values) ->
   str` takes the same three faces the reading doors take -- a 3.14 `t"..."`
@@ -931,6 +1003,30 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 
 ### Changed
+
+- Every per-library coupling in the Python seat is a registration through a
+  public door, with the shipped library as its first registrant and nothing
+  else about it in the code paths. pandas and polars are rows against `frame`,
+  so `df.metta` installs for any registered library and `to_df` / `to_pl` are
+  those two rows' declared method names over the general `rows.to(...)` door.
+  sqlite3 and DuckDB are rows against `sql`, so `tables.sql_function` asks
+  which registered engine CLAIMS the connection instead of treating anything
+  that is not sqlite3 as DuckDB. numpy is a row against `array`, which is what
+  `arrays.install(m)` with no default and `np.asarray(column)` now read. faiss
+  and the Array API path are rows against `index`, so
+  `EmbeddingStore(backend=...)` takes any registered name and `auto` takes the
+  first that can run here. nanoarrow is a row against `arrow`, so the Arrow
+  capsule doors have a builder rather than a dependency. websocket-client is a
+  row against `transport-error`. pydantic, dataclasses, enums, NamedTuples and
+  `__match_args__` classes are rows against `image`, so a model framework this
+  seat has never heard of gets a default projection by registering.
+
+  A connection, a frame library or an index backend nothing claims is now
+  refused naming the door, the registrants there are and the registration it
+  lacks, where an unrecognised connection previously took DuckDB's branch.
+
+- `metta.testing.numpy_scalars` is the shipped name for the `array` point's
+  numpy row; `library_scalars(module)` is the general spelling.
 
 - **The engine's prelude is Prolog.** The standard vocabulary every space
   reaches with no `import!` -- the assert family, `if-equal`, `if-error`,

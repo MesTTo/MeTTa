@@ -64,6 +64,12 @@
 %     is written
 %     [tested: tests/test_cmetta.c,
 %     test_a_taken_name_is_refused_rather_than_clobbered; commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8]
+%   - a C provider takes its space NAME at the engine's claim door and gives it
+%     back when it closes, so a name another provider owns is refused here
+%     rather than served by two stores, and the ownership row the engine reads
+%     exists exactly while a provider is open
+%     [tested: extensions/cmetta/tests/test_seam.c,
+%     test_a_c_provider_takes_a_space_name_and_gives_it_back; commit=9ee28a945da58dfdef86119ea082609bd5975aed]
 % Owns: one SWI engine per open cursor, released by metta_c_close/1, which the
 %   C half calls from cmetta_answers_free().
 % Decides: verbosity is set explicitly at boot rather than inherited from argv,
@@ -466,3 +472,141 @@ metta_c_text(In, Out) :- atom_string(In, Out).
 
 metta_c_atom(In, Out) :- atom(In), !, Out = In.
 metta_c_atom(In, Out) :- atom_string(Out, In).
+
+%%%%%%%%%% Extending this seat %%%%%%%%%%
+%
+% The Prolog half of the three doors a library outside this repository
+% registers through. Each one dispatches into C, and the C half holds the
+% ROWS: this file knows only that a space has a C provider, never which
+% library opened it, so nothing here names one.
+
+% Which spaces a C provider backs. The ownership guard every clause below
+% leads with, and a pure lookup, so anything may ask it without performing an
+% operation, which is what the foreign-space protocol requires.
+:- dynamic metta_c_provider/1.
+
+% The engine's ownership seam is answered by a ROW asserted when a provider
+% opens, not by a resident clause reading the registry above. The engine asks
+% seam:foreign_space/1 once per space operation, so a resident clause is tried
+% on every operation in every process that loads this seat, whether or not a C
+% provider was ever opened. Measured on benchmarks/cases.c's space-pair case,
+% 20,000 add-and-match pairs: 1,140,032 inferences with the row asserted at the
+% door against 1,160,032 with a resident clause, one inference per pair
+% [measured 2026-09-07: 1140032 inferences against 1160032 over 20,000
+% pairs; command=CHECK_PY=$VENV/bin/python sh extensions/cmetta/bench.sh
+% space-pair; fixture=extensions/cmetta/benchmarks/cases.c, case
+% space-pair; commit=9ee28a945da58dfdef86119ea082609bd5975aed].
+% engine/spaces/foreign.pl states the same rule for the claim door beside its
+% own measurement: the ownership question is answered off the operation path or
+% not at all. The declaration is guarded because a seat that has already made
+% the predicate static leaves nothing to convert, which is the configuration
+% extensions/node/bridge.pl names in its own refusal.
+:- catch(dynamic(seam:foreign_space/1), _, true).
+
+% Taking a name. The engine's claim door goes first, so a space another
+% provider already owns is refused BY NAME here instead of resolving by clause
+% order later, which is what cmetta.h promises mt_provider_open() does. Then
+% this seat's two rows: its own registry, which every hook below guards on, and
+% the engine's ownership row. A space this seat already backs is refused rather
+% than re-pointed at a second store, because the atoms live in the FIRST
+% provider's memory and nothing would move them.
+metta_c_open_provider(Space) :-
+    (   metta_c_provider(Space)
+    ->  throw(error(permission_error(open, metta_space, Space),
+                    context(metta_c_open_provider/1,
+                            'a space already backed by a C provider')))
+    ;   metta_c_require_space_name(Space),
+        metta_claim_space(Space, cmetta),
+        assertz(metta_c_provider(Space)),
+        assertz(seam:foreign_space(Space))
+    ).
+
+% Giving it back, in the reverse order and quietly, because a teardown path may
+% run twice. retract/1 rather than retractall/1: the row this seat wrote is a
+% FACT, and retractall/1 unifies HEADS alone, so it would take another seat's
+% bridging clause for the same name with it.
+metta_c_close_provider(Space) :-
+    retractall(metta_c_provider(Space)),
+    ( retract(seam:foreign_space(Space)) -> true ; true ),
+    metta_disclaim_space(Space, cmetta).
+
+% The ampersand rule, at the door. tests/prolog/static_checks.pl reads
+% seam:foreign_space/1 clause HEADS in the source to enforce it and this seat
+% writes none, so the refusal lives where the Python and Node seats put theirs.
+% metta_space_name/1 is the engine's own test, so a parametric name is admitted
+% on the same terms as everywhere else rather than on this seat's guess.
+metta_c_require_space_name(Space) :-
+    (   metta_space_name(Space)
+    ->  true
+    ;   throw(error(cmetta_bad_space_name(Space),
+                    context(metta_c_open_provider/1,
+                            'a space name begins with an ampersand')))
+    ).
+
+:- multifile prolog:error_message//1.
+prolog:error_message(cmetta_bad_space_name(Name)) -->
+    [ 'a space a C library backs must be named with a leading ampersand, and \c
+       ~w is not'-[Name] ].
+
+% Everything, declared rather than inferred, so the engine refuses an
+% operation this provider does not answer instead of reading the failure as
+% "there is nothing there". A C provider that leaves a callback NULL answers
+% false for it, which is a refusal the engine reports rather than a silence.
+:- multifile seam:foreign_capability/2.
+seam:foreign_capability(Space, Capability) :-
+    metta_c_provider(Space),
+    % policy-inventory-exempt: mechanism-internal; reason=a C provider implements the five fixed foreign-provider protocol hooks rather than choosing an engine policy; evidence=extensions/cmetta/bridge.pl:foreign_capability/2
+    member(Capability, [add, remove, match, enumerate, clear]).
+
+seam:foreign_add(Space, Atom) :-
+    metta_c_provider(Space), !,
+    swrite(Atom, Text),
+    '$cmetta_provider'(Space, add, Text, _).
+
+seam:foreign_remove(Space, Atom, Removed) :-
+    metta_c_provider(Space), !,
+    swrite(Atom, Text),
+    (   '$cmetta_provider'(Space, remove, Text, _)
+    ->  Removed = true
+    ;   Removed = false
+    ).
+
+seam:foreign_atoms(Space, Atom) :-
+    metta_c_provider(Space), !,
+    metta_c_provider_atom(Space, Atom).
+
+% The engine hands one non-conjunctive pattern at a time; candidates enumerate
+% here and unify in place. The options are ignored, which is always correct
+% because the engine applies its own bound afterwards, and a C store with no
+% index has nothing to narrow with anyway.
+seam:foreign_match(Space, Pattern, _Options) :-
+    metta_c_provider(Space), !,
+    metta_c_provider_atom(Space, Candidate),
+    Pattern = Candidate.
+
+seam:foreign_clear(Space) :-
+    metta_c_provider(Space), !,
+    '$cmetta_provider'(Space, clear, 0, _).
+
+% Walking a C store by index, which is the shape mt_provider.atom_at takes:
+% answer the atom at a position and nothing past the end. The generator stops
+% at the first index the provider declines, so a store of n atoms costs n+1
+% calls and never a length query the C side may not be able to answer.
+metta_c_provider_atom(Space, Atom) :-
+    between(0, inf, Index),
+    (   '$cmetta_provider'(Space, atom_at, Index, Text)
+    ->  sread(Text, Atom)
+    ;   !, fail
+    ).
+
+% How a C object renders. An ownership seam: the C half fails when no row
+% names that object's type, and the display renderer falls back to the term's
+% own text exactly as it does with no provider at all.
+:- multifile seam:grounded_text/2.
+seam:grounded_text(Obj, Text) :-
+    blob(Obj, cmetta_object),
+    '$cmetta_repr'(Obj, Text).
+
+% A directory of MeTTa or Prolog sources a library ships, under an alias.
+metta_c_library_path(Alias, Directory, Ok) :-
+    register_metta_library_path(Alias, Directory, Ok).

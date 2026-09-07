@@ -235,8 +235,8 @@ def ranked(self, query: Any, k: int):
 ```
 
 > (key atom, cosine) pairs best first: the raw retrieval every
-> surface (knn, the matcher) formats its own way. With faiss present
-> (or asked for), an exact IndexFlatIP over the normalized matrix
-> answers, byte-agreeing with the array path by a differential test.
-> NumPy-like namespaces use argpartition for the candidate set;
-> namespaces exposing only the Array API use argsort.
+> surface (knn, the matcher) formats its own way. The backend is the
+> first available row of the `index` point, whose shipped rows are an
+> exact inner-product faiss index and this seat's own Array API path,
+> the two byte-agreeing by a differential test; what a row is built into
+> is cached until the matrix changes.

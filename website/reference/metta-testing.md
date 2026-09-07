@@ -97,8 +97,25 @@ def numpy_scalars():
 > These retain identity while MeTTa accepts them as Number operands and
 > dispatches through Python operators.
 >
+> The values come from the `array` point's numpy row, which is what makes
+> this the shipped name for a generator every registered array library also
+> supplies: ``library_scalars(<module>)`` is the general spelling.
+>
 > NumPy is optional. Install ``pymetta[arrays,test]`` before requesting this
 > strategy.
+
+## `library_scalars`
+
+```python
+def library_scalars(library: Any):
+```
+
+> Generate one registered array library's own scalar values.
+>
+> ``library`` is the module or its name. A library registered against the
+> `array` point with a ``scalars`` field answers this; one without it is
+> refused naming the field, because a strategy nobody declared cannot be
+> invented from the module.
 
 ## `texts`
 

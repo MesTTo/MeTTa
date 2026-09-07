@@ -12,6 +12,7 @@ alone, so read whichever one answers your question.
 - [Write MeTTa in Python](./define.md) compiles Python function bodies into equations with `@m.define`.
 - [Spaces](./spaces.md) selects, creates, pools, and drops named spaces.
 - [The contract](./contract.md) explains how backends attach by declaration: fidelity, sources, errors, writes, annotations, and `explain`.
+- [Extending a seat](./extending-a-seat.md) is the other level: how a library outside this repository plugs into the Python, Node or C seat through its one declared seam.
 - [Threads, tasks, and pickling](./threads.md) states, per type, what locks, what is atomic, and what crosses a boundary.
 - [Observability](./observability.md) answers nine questions about a running program.
 - [Jupyter notebooks](./notebook.md) walks the executed notebook tour.
