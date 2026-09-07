@@ -268,6 +268,21 @@ that names the OTHER DOOR, which is not a repair an editor could apply. It is
 `Remedy` pass over this file's prose refusals belongs to the refusals-as-code
 -actions package, not here.
 
+### The battery on the committed tree
+
+`sh extensions/python/test.sh` over the whole seat: 4132 passed, 48 skipped, 2
+failed in 400.66 s, shuffled seed 1262444922, with the box at loadavg 98
+(four `codex-as-mcp` processes at 98% and a benchmark run beside them).
+
+The first failure is the ruff burn-down above, red at the base with the same
+number. The second is `test_the_snippet_auditor_runs_from_the_gate`, which
+spawns `sh check.sh snippets` under a 30-second bound inside the test itself:
+alone it passes in 28.42 s, which is that bound minus a second and a half, so
+four pytest workers and the rest of the box push it over. Nothing on this
+branch touches `check.sh` or the auditor. Read as load, per the wave's own
+rule that a timing lane's red is load until a control says otherwise; the
+control here is the isolated run.
+
 ### Open
 
 - `Answers.render` and `{rows:table}` over a LAZY view read every answer, so
