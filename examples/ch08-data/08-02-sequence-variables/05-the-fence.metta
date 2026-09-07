@@ -66,10 +66,32 @@
 (= (echoes ((:seg $xs) tag $xs)) yes)
 !(test (echoes (a b tag (a b))) yes)
 
-;;; Limitation, measured 2026-09-07: the classifier has a second refusal,
-;;; `no_certificate`, for a pair whose gaps are neither all final nor all
-;;; shallow, and no MeTTa program can reach it. It needs gaps on BOTH sides,
-;;; and 04 measures why a written ask never has them. The shape below is the
-;;; one the plunit suite refuses when it hands the classifier two parsed
-;;; sides; written here it is an ordinary one-sided match that finds nothing.
-!(test (collapse (unify (f (g (:seg $u) b)) (f (g a (:seg $v))) yes no)) (no))
+;;; THE SECOND REFUSAL. `no_certificate` is what the classifier answers for a
+;;; pair with gaps on BOTH sides that fits no fragment: it names the
+;;; certificate it could not produce rather than a rule the program broke.
+;;; `unify` is the door that reaches it, being the one form whose two operands
+;;; are both syntax; 04-the-two-sided-fragments.metta is what a two-sided pair
+;;; that DOES have a certificate answers.
+!(test (if-error (catch (unify (f (g (:seg $u) b)) (f (g a (:seg $v))) yes no))
+                 refused answered)
+       refused)
+!(test (let $refusal (catch (unify (f (g (:seg $u) b))
+                                   (f (g a (:seg $v))) yes no))
+            (index-atom (index-atom $refusal 1) 4))
+       no_certificate)
+
+;;; That pair fails both two-sided fragments at once: its gaps sit one level
+;;; below the root, which the shallow fragment forbids, and neither is the last
+;;; child of its own expression, which the last-position fragment requires.
+;;; Kutsia's own infinitary witness fails for the other reason: its gaps ARE at
+;;; the root, but one name carries both, so the pair is not linear.
+!(test (let $refusal (catch (unify (f (:seg $x) a) (f a (:seg $x)) yes no))
+            (index-atom (index-atom $refusal 1) 4))
+       no_certificate)
+
+;;; The two refusals carry the same payload and differ in what they name. No
+;;; name is caught in both roles here, so the mixed list is EMPTY where the
+;;; mixed-role refusal above named `($m)`.
+!(test (let $refusal (catch (unify (f (:seg $x) a) (f a (:seg $x)) yes no))
+            (index-atom (index-atom $refusal 1) 3))
+       ())

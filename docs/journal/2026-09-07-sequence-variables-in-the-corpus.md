@@ -149,3 +149,18 @@ list -- a star PARAMETER that lowers to a segment head, a `solve` that answers a
 wholly ground pair, a `case` arm binding one name in two roles (which Python's
 grammar rules out outright), the refusal's structured payload on
 `EngineError.atom`, and the `&self` encoding above.
+
+## 2026-09-07 (later the same day)
+
+Superseded, one decision only: "Decided: do not fix it in this package" above.
+The door was repaired the same day in its own thread,
+`docs/journal/2026-09-07-unify-reaches-the-two-sided-fragments.md`, which
+carries the design, the eight-row arbiter measurement of the shapes that moved,
+and the cost. Two facts recorded above are no longer current and are corrected
+there rather than edited here: `metta_unify_decision/3` now parses BOTH
+operands, so the four `none`/`no` rows answer their calculus and the trivial
+identity answers `yes` as the arbiter does; and the one-line fix this entry
+proposed was measured to regress two shapes on its own, an open operand and a
+space operand, so the repair also gave `metta_seq_atoms/2` the subject case
+analysis it was missing. Everything else above, including the thirteen-program
+arbiter table and the cost example's numbers, still holds.

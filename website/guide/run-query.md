@@ -418,16 +418,28 @@ Caught, a refusal is data rather than a stopped program:
 It is also CARRIED rather than raised while a file loads, so a `case` arm
 nothing reaches cannot stop a program from running.
 
-**What a written ask actually reaches**, measured 2026-09-07: `one_sided`, and
-only that. `metta_seq_plan/3` parses the left side alone, so a gap written on
-the right of `unify` -- the one form whose two operands are both syntax -- is
-read as ordinary data. `(unify (f a b) (f a b (:seg $v)) $v none)` therefore
-answers `none` rather than the empty run, and
-`(unify (f (:seg $u)) (f (:seg $u)) yes no)` refuses for `mixed_roles` although
-that pair has no mixed role at all. The other two solvers are exercised from
-Prolog in `tests/prolog/suites/reader/segments.plt`, and
+**Which door reaches which fragment.** The last two need a gap on BOTH sides,
+so they need a door that hands the matcher two pieces of syntax, and `unify` is
+the only one: its four arguments are typed `Atom` and cross unevaluated, so it
+parses both operands and a gap written on either side is a gap. Every other
+door faces a value or stored data on one side -- `match` reads a space, `let`,
+`case` and an equation head take an evaluated subject -- so those stay
+one-sided by construction, and a marker written on the value side is data.
+
+```metta
+!(unify (f a b) (f a b (:seg $v)) $v none)                ; ()
+!(unify (f (:seg $u) b) (f a (:seg $v)) ($u $v) no)       ; ((a) (b))
+!(unify (f (:seg $u)) (f (:seg $u)) yes no)               ; yes
+```
+
+The last is the trivial identity `X = X`, which Kutsia Section 6.3 keeps as
+trivial; it is also what upstream PeTTa answers for the same program, which has
+no reading of a gap at all and unifies two identical expressions. A pair with
+gaps on both sides that fits no fragment refuses with `no_certificate`, and
+Kutsia's own infinitary witness is one:
+`(unify (f (:seg $x) a) (f a (:seg $x)) yes no)`.
 `examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta`
-pins what the language answers today.
+pins every answer above and `05-the-fence.metta` reads both refusals apart.
 
 ### What a gap costs
 

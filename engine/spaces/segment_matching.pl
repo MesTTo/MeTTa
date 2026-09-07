@@ -1,6 +1,8 @@
 % Purpose: parse, classify and solve expression-child gap patterns (sequence variables) inside the three fragments Kutsia proved finite
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context; metta_match_atoms/2 decides one atom position.
 % Guarantees: a pattern the program wrote without a gap never reaches any predicate here, so a gap-free ask pays nothing [tested: tests/prolog/suites/reader/segments.plt:segments_costs_nothing; commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
+% Guarantees: a written `unify` reaches all three fragments and both refusals, because metta_seq_pair_plan/4 parses BOTH operands and classifies over the two parsed sides [tested: tests/prolog/suites/reader/segments.plt:segments_written_pairs; commit=f4ae837efd23791200846ba72556c2ce96a7d05a].
+% Guarantees: no answer, no provider and no space query receives this file's own '$metta_seg'/2 term: an OPEN subject takes metta_seq_instantiate/2's surface and a SPACE subject takes the gap query [tested: tests/prolog/suites/reader/segments.plt:an_open_operand_takes_the_patterns_surface, tests/prolog/suites/reader/segments.plt:a_space_operand_answers_the_gap_query; commit=f4ae837efd23791200846ba72556c2ce96a7d05a].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % Decides: an ask outside the three proved-finite fragments REFUSES by throwing rather than searching an infinitary space.
 % [tested: tests/prolog/suites/reader/segments.plt; commit=a3dff3abc83b9d82f3652093246e1d693d526cdb]
@@ -55,14 +57,19 @@
 %stored side and in an equation head. A gap ask ANSWERS NOTHING rather than
 %refusing, and a head written with a gap becomes a fixed-arity function whose
 %wider call raises `Domain error: function_input_arities`. So every decision
-%listed above is an extension over a region upstream leaves undefined, and
-%three of them CHANGE an upstream answer rather than filling a silence: the
-%commuting equation answers `no` upstream and refuses here, `(f (:seg $u))`
-%against itself answers `yes` upstream and refuses here, and a mixed-role
-%pattern answers nothing upstream and refuses here
+%listed above is an extension over a region upstream leaves undefined, and TWO
+%CLASSES of ask CHANGE an upstream answer rather than filling a silence: a pair
+%outside every fragment, of which the commuting equation is Kutsia's own
+%witness, answers `no` upstream and refuses here; and a mixed-role pattern
+%answers nothing upstream through `match` and `no` through `unify`, and refuses
+%here. A third used to be on that list and is not: `(f (:seg $u))` against
+%itself answers `yes` upstream, refused here for mixed_roles while the `unify`
+%door parsed one operand, and answers `yes` here now that it parses both
 %[measured 2026-09-07 against upstream PeTTa at
-%ae66fa8e41dcd5539d614706bd4e5cfb34f9608d; the thirteen programs, both engines'
-%answers and the commands are in docs/journal/2026-09-07-sequence-variables-in-the-corpus.md].
+%ae66fa8e41dcd5539d614706bd4e5cfb34f9608d; the thirteen programs of the first
+%measurement are in docs/journal/2026-09-07-sequence-variables-in-the-corpus.md
+%and the door's own rows in
+%docs/journal/2026-09-07-unify-reaches-the-two-sided-fragments.md].
 %
 %ONE NAME MAY NOT PLAY BOTH ROLES in the general two-sided `unify` and space
 %query doors. `(f (:seg $x) $x)` is refused there across every fragment
@@ -460,9 +467,42 @@ metta_seq_surface_items(Items, Surface) :-
 %carried in the plan rather than thrown at that moment, so an arm nothing
 %reaches cannot stop a file from loading and the ask that does reach it refuses
 %with the message the door would have given.
+%
+%The RIGHT argument is the side the solver will face, and the caller owes it in
+%that form. A case arm and a let binding pass their subject, which is a value
+%and therefore carries no gap; the two-sided door below parses its own right
+%operand first and passes the parsed side. Handing this predicate a written
+%right operand UNPARSED is the defect metta_seq_pair_plan/4 exists to prevent,
+%because the classifier would read that side's markers as ordinary structure.
 metta_seq_plan(Left, Right, '$metta_seq'(Plan, Parsed)) :-
     metta_seq_parse(Left, Parsed),
     metta_seq_outcome(metta_seq_classify(Parsed, Right, Case), Case, Plan).
+
+%The plan for the ONE door whose two operands are BOTH written syntax. `unify`
+%crosses its operands unevaluated, so a gap written on either side is a gap,
+%and the classifier has to see two PARSED sides or it reads the right side's
+%markers as ordinary structure. That is what it did until 2026-09-07: it
+%answered one_sided(left) for every pair a program could write, the
+%last_position and linear_shallow solvers were unreachable from any surface,
+%and a name written as a gap on BOTH sides was caught by the mixed-role rule
+%although it plays one role there [measured 2026-09-07 on petta at 5a85f5602:
+%`!(unify (f a b) (f a b (:seg $v)) $v none)` answered `none` where
+%last_position answers the empty run, and `!(unify (f (:seg $u)) (f (:seg $u))
+%yes no)` refused for mixed_roles where upstream PeTTa at the parity pin
+%answers `yes`; docs/journal/2026-09-07-unify-reaches-the-two-sided-fragments.md
+%carries the five-row differential].
+%
+%The parsed right side is handed BACK to the caller rather than folded into the
+%wrapper. The wrapper exists to make the LEFT operand self-describing at a door
+%that also takes unwrapped patterns, and metta_match_atoms/2 dispatches on it
+%with a guard that compiles inline; the right side is already an argument
+%position every solver reads, so it needs no self-description. Widening
+%'$metta_seq'/2 to carry both sides would change every producer and both
+%dispatchers and leave metta_match_atoms/2's second argument dead for a gap
+%call, which is one more place for the two sides to disagree.
+metta_seq_pair_plan(Left, Right, Asked, ParsedRight) :-
+    metta_seq_parse(Right, ParsedRight),
+    metta_seq_plan(Left, ParsedRight, Asked).
 
 %The query door's plan. Its subject is a stored atom, whose own marker-shaped
 %atoms are data rather than gaps, so every conjunct is one-sided by
@@ -526,10 +566,44 @@ metta_seq_atoms(Pattern, Subject) :-
         Pattern = '$metta_seg'(_, _)
     ->  fail
     ;   nonvar(Pattern),
-        Pattern = [_|_],
-        nonvar(Subject),
-        Subject = [_|_]
-    ->  metta_seq_items(Pattern, Subject)
+        Pattern = [_|_]
+    ->  (   nonvar(Subject),
+            Subject = [_|_]
+        ->  metta_seq_items(Pattern, Subject)
+        ;   metta_seq_faces(Pattern, Subject)
+        )
+    ;   metta_match_atoms(Pattern, Subject)
+    ).
+
+%What a parsed EXPRESSION faces when the subject is not one. Two of the three
+%answers cannot go through metta_match_atoms/2, because that door would publish
+%this module's own '$metta_seg'/2 term into a program's answer or into a
+%provider's matcher.
+%
+%An OPEN subject takes the pattern's SURFACE: every solved run spliced into the
+%expression around it and every unsolved gap rendered back to the marker that
+%would match it, which is metta_seq_instantiate/2, the same projection the RHS
+%of an equation takes and the same one metta_seq_publish/1 makes for the
+%two-sided solvers. Binding the parsed term instead leaked internal syntax into
+%an answer: `!(collapse (let (f (g (:seg $x)) b) $z ($z here)))` answered
+%`(f (g ($metta_seg $_0 named)) b)` before this
+%[measured 2026-09-07 on petta at 5a85f5602].
+%
+%A SPACE subject is a gap QUERY, which is the space door, entered here with the
+%plan the enclosing classification already decided rather than through
+%metta_seq_query_plan/2, which would parse an already-parsed side and
+%re-classify it once per position. Without this the same written pattern
+%answered rows through `match` and nothing through `unify`.
+%
+%Anything else is an ordinary atom comparison, which for an expression against
+%a non-expression is a refutation, and the leaf cases above never reach here.
+metta_seq_faces(Pattern, Subject) :-
+    (   var(Subject)
+    ->  metta_seq_instantiate(Pattern, Surface),
+        Subject = Surface
+    ;   metta_space_operand(Subject),
+        metta_seq_parsed(Pattern)
+    ->  metta_seq_space(query, Subject, Pattern, [], _)
     ;   metta_match_atoms(Pattern, Subject)
     ).
 

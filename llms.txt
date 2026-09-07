@@ -2340,16 +2340,25 @@ occurring once across the pair (Kutsia Section 6.2). One name may not be both a
 gap and an ordinary variable, except in an equation head, which is one-sided by
 construction and binds the run before the ordinary occurrence is compared.
 
-Measured 2026-09-07: every ask a MeTTa or Python program can write is
-`one_sided`. `metta_seq_plan/3` parses the LEFT side only, so a gap written on
-the right of `unify`, the one form whose two operands are both syntax, is
-ordinary data, and the other two solvers are reachable only from Prolog. Two
-consequences a consumer meets: `(unify (f a b) (f a b (:seg $v)) $v none)`
-answers `none` rather than the empty run, and
-`(unify (f (:seg $u)) (f (:seg $u)) yes no)` refuses for `mixed_roles` where
-upstream PeTTa at the parity pin answers `yes`.
+WHICH DOOR REACHES WHICH FRAGMENT. `unify` is the one form whose two operands
+are both syntax, so it is the only door a TWO-SIDED ask can go through, and it
+parses both of them: a gap written on either side is a gap there. Every other
+door faces a value or stored data on one side -- `match` reads a space, `let`,
+`case` and an equation head take an evaluated subject, and Python's `solve` is
+a `let` -- so those are `one_sided` by construction and a marker written on the
+value side is data. So `(unify (f a b) (f a b (:seg $v)) $v none)` answers the
+empty run `()`, `(unify (f (:seg $u) b) (f a (:seg $v)) ($u $v) no)` answers
+`((a) (b))`, and `(unify (f (:seg $u)) (f (:seg $u)) yes no)` answers `yes`,
+which is what upstream PeTTa at the parity pin answers for the same program.
+A pair with gaps on both sides that fits no fragment refuses with
+`no_certificate`, and Kutsia's own infinitary witness is one:
+`(unify (f (:seg $x) a) (f a (:seg $x)) yes no)`. A space operand makes the ask
+a gap query, so `unify` and `match` answer the same rows for the same pattern.
 `examples/ch08-data/08-02-sequence-variables/04-the-two-sided-fragments.metta`
-pins every one of those answers.
+pins every one of those answers, and `05-the-fence.metta` reads both refusals
+apart. Measured 2026-09-07 through `m.stats()`, one warmed ask each: the five
+two-sided shapes cost 390, 690, 582, 710 and 395 inferences, against 316 for a
+gap-free `unify` of the same shape, which is unchanged to the inference.
 
 Caught, a refusal is data: `(Error (metta_seq_outside_fragment left right mixed
 reason) none)`, read apart with `index-atom`, where `reason` is `mixed_roles`

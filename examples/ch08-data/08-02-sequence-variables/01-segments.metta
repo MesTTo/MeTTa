@@ -41,9 +41,10 @@
               ($_ nope)))
        (7 (x y)))
 
-; A marker written on the OTHER operand of unify is DATA, so a gap consumes
-; one as a single child and the run it took prints with that marker still in
-; it. 04-the-two-sided-fragments.metta measures how far that reading goes.
+; `unify` is the one form whose two operands are both SYNTAX, so a marker
+; written on either of them is a gap. Here both sides carry one, and the run
+; the left gap took still holds the right one, printed as the marker that would
+; match it. 04-the-two-sided-fragments.metta is what that door decides.
 !(test (unify (f a (:seg $u)) (f a b (:seg $v)) $u none) (b (:seg $v)))
 
 ; THE FENCE. General sequence unification is INFINITARY (Kutsia, Journal of
