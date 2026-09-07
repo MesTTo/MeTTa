@@ -435,6 +435,13 @@ So the bounds threshold is between 3,557 and 3,939 tests in one process, and
 the ch14 one is not a threshold at all: it failed at 181 files and passed at
 230 with an IDENTICAL prefix in front of it, so that one is load.
 
+Superseded by "the fourth order-dependent test is load, and it says so twice"
+at the end of this file. There is no threshold: the 275-file point appends the
+file after ALL 275 files, a position no real run puts it in, and the 181-file
+point IS its natural position and passed. Two later runs of that same natural
+position disagree with each other by LOAD alone. The readings above stand; the
+word `threshold` does not.
+
 Two thresholds, not one, and the ch14 one is not in the set the coordinator
 ring-fenced. Both are the same shape: a bound stated in WALL CLOCK against a
 process whose fixed cost per call has grown, which is the instrument this
