@@ -153,6 +153,34 @@ reports what the load answered, which tells a future reader whether the spin
 ran to some other stop (error atoms) or never ran at all (an unevaluated
 `(spin)`).
 
+### What the counter benchmarks say
+
+The seat's benchmark rows are `stats().inferences`, min of three, allowed four,
+so this branch moves every one of them. Measured as an A/B against the pristine
+control on this box, because the committed baseline is already stale here --
+the control alone disagrees with 30 of its 35 rows in an environment whose
+counter configuration matches it exactly.
+
+Ten rows IMPROVE, and every improvement is the poll's own spending leaving the
+measurement: alpha-unique -148, let-heavy -638, loop-1m -438, typed-call -498,
+space-name -170, handle-round-trip -60, py-method-call -86, space-digest -34,
+direct-join's slope -24, prepared-join's slope -54. Each is within a few
+inferences of (work / 50,000) x 2, which is the tick rate times janus's own
+two-inference hook.
+
+Two rows move up, and both are attributed:
+- `query-limit-guarded` +702 over 100 bounded calls, +7 a call. That is the
+  cumulative counter read that makes an inference bound refuse a swallowed
+  ball, and the engine's own builder already documented the shape's cost. An
+  unbounded call pays nothing: its arm is untouched.
+- `source-load` +14, and it is not work this branch does. The seat pays a
+  scan per source unit that grows with the number of predicates the shim
+  defines, and nine dummy predicates appended to the CONTROL's shim move the
+  same measurement from 36,609 to 36,636, further than this branch's own +24
+  [measured 2026-09-08 with a 100-form source unit, raw counter, poll off].
+
+`automatic-tabling` fails on the control as well and is untouched here.
+
 ### The corpus's missed ten-second window
 
 Tried: the latency of the corpus statement's own spawn-and-wait, measured
