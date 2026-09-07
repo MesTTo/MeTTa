@@ -25,10 +25,10 @@
 %   - the inference rule is decided here rather than by a live engine: the
 %     narrowest kind per position, a variable contributing none, an equation
 %     body's result, and a declared head skipped
-%     [tested: shim_type_inference; commit=WORKTREE].
+%     [tested: shim_type_inference; commit=8d67307403c1e41ccf058bd3c8d4c079dd7cf7d5].
 %   - a reader failure's line is read out of the control envelope's own
 %     context slot, and an envelope without one fails rather than guessing
-%     [tested: shim_type_inference:a_syntax_envelope_carries_its_line; commit=WORKTREE].
+%     [tested: shim_type_inference:a_syntax_envelope_carries_its_line; commit=8d67307403c1e41ccf058bd3c8d4c079dd7cf7d5].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
