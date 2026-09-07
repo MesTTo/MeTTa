@@ -789,3 +789,50 @@ has already exported all three, so "leave them alone" is not the bare
 configuration, it is the gate's. Both arms are set explicitly now, and with
 `env=_environment()` removed from `engine/bench.py` the lane fails naming both
 readings.
+
+## 2026-09-07, the form count is derived, not re-counted
+
+Supersedes the decision in "the two parse cases had been broken since the
+assertion merge" above. That entry re-counted `bench_check`'s form pin from 118
+to 119 and argued that the number is a fact about the shipped prelude. It is,
+and that is the problem: the fact changes whenever an unrelated file does, and
+nothing updates it.
+
+The condition for revisiting arrived immediately. `petta` has moved 34 commits
+since this branch was cut, and one of them edits `engine/prelude.metta` again:
+the branch tip's prelude parses to **124** forms. So 119 is stale before this
+branch merges, and merging it would restore precisely the trap it was written
+to clear -- a hand-maintained count, behind a digest refusal that hides it when
+it is wrong.
+
+Decided: each parse case is checked against the OTHER READER instead. The tree
+ships two readers over this text and its own suite already holds them to each
+other (`tests/prolog/suites/reader/reader_c.plt`, `agree_full/1`), so the C
+door's result is counted by the Prolog grammar and the Prolog grammar's by the
+C door, in `bench_check/2`, after the measured region closes.
+
+Controlled both ways, with trunk's prelude dropped into this worktree:
+
+| prelude | check | `parse` | `parse-prolog` |
+|---|---|---|---|
+| this branch's, 119 forms | derived | 152 | 3,341,234 |
+| `petta`'s, 124 forms | derived | 152 | 3,514,259 |
+| `petta`'s, 124 forms | the 119 constant | `Domain error: bench_result expected` | the same |
+
+and a truncated parse still fails: `bench_check(parse, [])` is rejected.
+
+`translate`'s `length(Names, 49)` is deliberately NOT changed. Its number is
+derived from the parse of the very file it then measures, so there is no second
+opinion to check it against; the parse cases have one and that is the whole
+reason only they change.
+
+Cost, measured: the added predicate moves the boot row 268,417 to 268,411, this
+file's own documented predicate-set sensitivity for the third time on this
+branch. Everything else reads identically -- evaluate 560,420, match 265,002,
+match-skew 208,042, parse 152, parse-prolog 3,341,234, translate 308,706 -- and
+the instruction rows move 0.002% to 0.005%, inside their bands.
+
+Open, and it belongs to whoever merges this: the 124-form prelude also moves
+`parse-prolog` to 3,514,259 and re-stamps the workload digest, so the merged
+tree needs `sh engine/bench.sh --update-baseline` and the attribution written
+beside it. The digest refusal is what will say so, which is the design working.

@@ -289,20 +289,27 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   pin of 158,011. Only inference counts are re-pinned; no instruction or CPU
   number moves, and the C seat's `boot` row keeps its pin because a worktree
   whose files have been edited reads it 27 inferences high.
-- The engine's two parse benchmarks check the prelude's real form count. Both
-  read `engine/prelude.metta` and both asserted it holds 118 top-level forms;
-  the assertion-bag-diff merge added the 119th, so both had been raising
+- The engine's two parse benchmarks are checked against each other's reader
+  instead of against a hand-written form count. Both read
+  `engine/prelude.metta` and both asserted it holds 118 top-level forms; the
+  assertion-bag-diff merge added the 119th, so both had been raising
   `Domain error: bench_result expected` at every commit since. It was invisible
   because `engine-bench` refuses at its workload digest before it dispatches a
   case, and the digest covers the same file, so one stale pin was reported and
-  the other was never reached. The count is re-counted rather than widened, the
-  digest is re-stamped, and the two rows the merges moved are re-pinned:
-  `parse-prolog` 3,118,634 to 3,341,234 (+222,600, the added form parsed 25
-  times through the Prolog grammar, laddered to `acd04732`) and `boot` 266,058
-  to 268,417, of which 493 is this branch's own edit to `engine/bench.pl` --
-  that file's predicate set is part of what the boot it measures costs, which
-  its header has recorded since 2026-08-28. `parse` itself stays at 152: the
-  shipped door reads through `engine/reader.so` and does not price a form.
+  the other was never reached. Re-counting to 119 would have restored the same
+  trap, since the prelude has moved again on the branch this work is not based
+  on and now parses to 124. So the C door's result is counted by the Prolog
+  grammar and the Prolog grammar's by the C door, after the measured region
+  closes: the count follows the shipped prelude by itself, a reader that stops
+  mid-file still fails, and only these two cases change because only they have
+  a second reader to be checked against. The digest is re-stamped and the two
+  rows the merges moved are re-pinned: `parse-prolog` 3,118,634 to 3,341,234
+  (+222,600, the added form parsed 25 times through the Prolog grammar,
+  laddered to `acd04732`) and `boot` 266,058 to 268,411, of which 487 is this
+  branch's own edits to `engine/bench.pl` -- that file's predicate set is part
+  of what the boot it measures costs, which its header has recorded since
+  2026-08-28. `parse` itself stays at 152: the shipped door reads through
+  `engine/reader.so` and does not price a form.
   Both cases' instruction pins had been hidden behind the same refusal and are
   re-pinned with them, `parse` 111,718,052 to 121,893,770 and `parse-prolog`
   1,798,035,063 to 1,956,872,188. One control covers both: swapping only
@@ -315,9 +322,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   anything SWI has not already interned creates one atom and moves the row by
   27, seven times the harness's four-inference allowance. `check.sh` allocates
   a repository-local scratch directory and exports `TMP`, `TMPDIR` and `TEMP`
-  into every lane, so the same tree read 268,417 from `sh engine/bench.sh` and
-  268,390 from `sh check.sh engine-bench` and the row could not be green both
-  ways. `engine/bench.py` drops the three names from every sample, and
+  into every lane, so one tree read 268,417 from `sh engine/bench.sh` and
+  268,390 from `sh check.sh engine-bench` on the same afternoon, and the row
+  could not be green both ways whichever number was pinned. `engine/bench.py` drops the three names from every sample, and
   `tests/shell/test_boot_inference_determinism.sh` reads the row both ways and
   fails if they disagree. The sensitivity itself is measured rather than
   guessed: with `engine/qlf_boot.pl` loaded, creating one atom before the load
