@@ -536,6 +536,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A prelude name shadowed in a named space at a DIFFERENT arity answers the
+  definition, so the same file means the same thing through the CLI and through
+  every host that mints a space. `(= (if-equal $a $b) SHADOWED)` then
+  `!(if-equal 1 1)` answered `SHADOWED` in `&self`, where a definition evicts
+  the prelude's declaration, and `(Error (if-equal 1 1)
+  IncorrectNumberOfArguments)` anywhere else, where the four-input declaration
+  survived and no chain presented the written arity. A named space cannot evict
+  a row its siblings still read, so it shadows: the prelude's declaration no
+  longer governs a name the module defines itself, which is the test the engine
+  already applies to a builtin the module has taken over. The prelude's own row
+  is untouched, so `&self` keeps answering `(if-equal 1 1 yes no)`.
 - `tables.sql_function` on a DuckDB connection reads the head's DECLARED arrow
   for its SQL types and refuses by name without one. Since `inspect.signature`
   shows an undeclared head the arrow its stored atoms justify, the refusal had
