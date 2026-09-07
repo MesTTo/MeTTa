@@ -363,6 +363,13 @@ test(a_named_space_shadows_a_prelude_name_at_another_arity,
         DifferentArity,
         '&plunit-prelude-arity-shadow'),
     assertion(DifferentArity == ['SHADOWED']),
+    %get-type agrees with the call: the prelude's arrow no longer governs the
+    %name in the module that defines it, so the space answers for its own
+    %undeclared two-input if-equal exactly what &self answers once its row is
+    %evicted.
+    process_metta_string("!(get-type if-equal)", NamedType,
+                         '&plunit-prelude-arity-shadow'),
+    assertion(NamedType == ['%Undefined%']),
     process_metta_string(
         "(= (throw $a) SHADOWED)\n!(throw x)",
         SameArity,
