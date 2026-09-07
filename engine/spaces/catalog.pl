@@ -129,7 +129,7 @@ native_storage_module_ready(Space, Module) :-
 %[source: PeTTa@ae66fa8 src/metta.pl:208]. So
 %`(add-atom not_a_space (bad add))` answers true and
 %`(is-space not_a_space)` answers false in the same program, on BOTH engines
-%[measured 2026-08-30; fixture=ai-tmp/petta-align/space1.metta].
+%[measured 2026-08-30].
 metta_space_name(S) :- metta_space_prefixed_name(S), !.
 metta_space_name(S) :- metta_space_operand(S).
 

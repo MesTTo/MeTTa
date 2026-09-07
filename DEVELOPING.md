@@ -400,5 +400,50 @@ space itself: two spaces agree on it exactly when `save()` would write the same
 content, in any insertion order and in any process. `tests/fixtures/space_digest_vector.json`
 is the vector that pins the digest to its own canonicalization.
 
+### Naming a test that names itself in prose
+
+Most of this tree's tests are identifiers, and a `tested` tag names one
+directly. Three kinds are not. A `node --test` case is `test("...")`,
+`it("...")` or `describe("...")`, a C case is `CASE("...")` inside its
+`test_` function, and both are sentences. Quote the name and the gate reads
+it whole:
+
+```
+[tested: "answers the site's fences through one worker"]
+```
+
+The quotes are the delimiters, so the name is taken exactly as written,
+parentheses and apostrophes included: `"re-raises an unhandled step failure
+from settled()"` is that case's name and not a near miss of it. A quoted name
+the tree does not declare is a finding, which is the whole point — an
+unquoted sentence used to be read as prose and dropped in silence, so a
+correct citation and one naming a case that had been renamed were accepted for
+the same reason: nothing read either.
+
+The names come from every suite in the tree, not one directory: every
+`*.test.ts`, `*.test.mjs` and `*.test.js` outside a build directory, and every
+`CASE(...)` in a seat's C suite. Which command runs each of them is read from
+the manifest that declares it — a `package.json` script, expanded through
+`npm run` and through the tsconfig that says where its build output comes
+from — so a suite is backed when a lane actually reaches it and not before.
+
+### A tag may not name scratch
+
+`ai-tmp/` is where this repository's own scratch goes, and it is deleted with
+the checkout that made it. A `tested`, `measured` or `source` tag naming a path
+under it is refused: the fixture is gone for every reader but the author, which
+makes the claim above it one nobody can check. Seventy-three tags named one,
+and not one of the 64 distinct paths still existed [measured 2026-09-07].
+
+Cite the reproduction instead — the forms run, the answers on both engines, the
+counter and the workload — which is what the sentence a tag stamps usually
+already carries. Where the fixture is worth keeping, track it under
+`tests/prolog/probes/` or `extensions/python/benchmarks/probes/` and name that
+path. Where it is genuinely unverifiable, say `assumed` and name what is
+missing; `assumed` is exempt from this rule, because that is where a claim
+records the fixture it lost. The rule is about what a tag OFFERS as evidence,
+so prose elsewhere may name the convention freely, and the directory itself is
+read from `tests/checks/gate_scratch.sh`, which is where the gate declares it.
+
 `RELEASE=1 python tests/checks/check_evidence_tags.py` is the cut-time check
 that no placeholder survived.

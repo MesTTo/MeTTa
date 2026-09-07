@@ -79,8 +79,8 @@ mask_row("(cdr-atom (a (+ 1 2)))", [[3]]).
 % that: it is an evaluation BARRIER, so `(quote $x)` answers the held
 % `(+ 1 2)` with no wrapper, and chain's re-entering result then evaluates it.
 % This row read [[quote, ['+', 1, 2]]] while quote was a value
-% [measured 2026-08-29, upstream answers 3 for both spellings, byte-identical:
-% ai-tmp/chain.metta under PeTTa@ae66fa8 and under this engine].
+% [measured 2026-08-29: upstream answers 3 for both spellings,
+% byte-identical, under PeTTa@ae66fa8 and under this engine].
 mask_row("(chain (+ 1 2) $x (quote $x))", [3]).
 mask_row("(chain (+ 1 2) $x $x)", [3]).
 mask_row("(chain (+ 1 2) $x (cons-atom $x (b)))", [[3,b]]).
@@ -197,8 +197,8 @@ test(a_collection_closure_keeps_each_binding_form_local_to_one_element,
 % call stays inert through the second clause.
 %
 % This is upstream's own signature and its own three answers, byte-identical
-% [source: PeTTa@ae66fa8 lib/lib_he.metta:64-67; measured 2026-08-29 with
-% ai-tmp/petta-align/uq.metta run under both engines, same three lines].
+% [source: PeTTa@ae66fa8 lib/lib_he.metta:64-67; measured 2026-08-29 under
+% both engines, same three lines].
 %
 % The operand was `%Undefined%` here until the quote barrier landed, and these
 % rows read [3] and [[unquote, [b]]]: an evaluating operand let the quote

@@ -841,7 +841,7 @@ type_witness_candidate_matches_under_policy(Module, RawActual, RawExpected) :-
 %against checking the LAST: 102 and 859 inferences at three members, 312 and
 %29,496,420 at thirteen, the first flat at 21 per member and the second growing
 %3.0x per member. Same expression, same question, 94,540x apart
-%[measured 2026-08-22, ai-tmp/synth/probe6.pl].
+%[measured 2026-08-22].
 %
 %That is the rule Pfenning's notes call chk/syn, checking by synthesising and
 %comparing, and the standard objection to it is that it is not MODE CORRECT: it
@@ -876,7 +876,7 @@ type_witness_candidate_matches_under_policy(Module, RawActual, RawExpected) :-
 %tuple: after it, arrow-against-list costs 18 rather than 24. Running
 %tuple_positions_hold/3 before it instead costs 66, so the probe is cheaper
 %than the per-position derivation it would skip
-%[measured 2026-08-23, ai-tmp/synth/probe10.pl].
+%[measured 2026-08-23].
 %A union is a list too, so `(| (Number Bool) (String Bool))` would be read here
 %as a three-position tuple whose first position wants the type `|`. The head
 %test separates the two readings before any of the work below, and an unbound
@@ -914,7 +914,7 @@ tuple_positions_hold(Module, [Member|Members], [Type|Types]) :-
 %expression of k members carrying three types each, checked against the LAST
 %combination: 614 inferences at k=2 rising 9x per added inner member to
 %43,097,295 at k=8, where deciding it per position is linear
-%[measured 2026-08-23, ai-tmp/synth/probe11.pl].
+%[measured 2026-08-23].
 %The fallback enumerates that member's own types and stops at the first match,
 %which is Theta(c) for that member rather than Theta(c^k) for the expression.
 %A union AT A POSITION descends here too, and it has to: the fallback below

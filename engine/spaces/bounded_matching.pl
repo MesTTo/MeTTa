@@ -846,8 +846,8 @@ match_foreign(Space, Pattern, Options, OutPattern, Result) :-
 %Prolog provider is already cut by the caller's own limit/2 after the Nth
 %answer, and a Python one is pulled one ahead by janus's py_iter whatever the
 %engine asks for, so limit(3) produced 3 and 4 candidates respectively with
-%and without the classification wired to it [measured 2026-08-16,
-%ai-tmp/x7pl.pl]. Unification is not skippable either: it is not a filter here
+%and without the classification wired to it [measured 2026-08-16].
+%Unification is not skippable either: it is not a filter here
 %but the step that binds the pattern's variables. An exact claim can therefore
 %make a provider cheaper and can never make an answer wrong.
 licensed_options(Space, Pattern, Options, Licensed) :-

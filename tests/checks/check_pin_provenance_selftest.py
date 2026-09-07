@@ -37,7 +37,6 @@ Open Obligations:
 
 from __future__ import annotations
 
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -181,7 +180,11 @@ PLANTS = (
             "% Purpose: a fixture whose prose wraps.",
             f"%   While working, write `{WORD}`, which names no tree yet.",
             f"%   A real pin reads [{TAG} {WHEN}: a_plunit_test; {WORD}].",
-            "%   The span below opens here: `[tested: <name>;",
+            # `{TAG}` rather than the word, so this line is a fixture and not a
+            # claim about THIS repository. Written out, the bracket opened a tag
+            # the evidence gate read across the next two lines and into the
+            # Python quoting around them, and it reported a citation of `, f`.
+            f"%   The span below opens here: `[{TAG}: <name>;",
             f"%   {WORD}]` and closes on this line, one span over two lines.",
             # A run of one closes only on a run of ONE, so the run of three is
             # skipped and this mention sits inside one span. A ``(`+)...\1``
@@ -218,7 +221,20 @@ def build(root: Path) -> str:
     tools = root / "tools/checks"
     tools.mkdir(parents=True)
     for module in ("check_evidence_tags.py", "evidence_runners.py", "pin_provenance.py"):
-        shutil.copy(HERE / module, tools / module)
+        # The pass under test, with its OWN placeholders spent. These three
+        # carry evidence tags like every other hand-written file, so while
+        # their thread is in progress they hold the in-progress spelling, and a
+        # verbatim copy carries it into a tree where nothing reads their glob:
+        # the out-of-glob net then reports the checker rather than the fixture
+        # and --check exits 1 on a tree whose every planted pin is resolved.
+        # This is the same separation that puts the copies under tools/checks
+        # rather than tests/, one level further in.
+        (tools / module).write_text(
+            (HERE / module).read_text(encoding="utf-8").replace(
+                WORD, "commit=(pinned in the tree this copy was taken from)"
+            ),
+            encoding="utf-8",
+        )
     (root / "check.sh").write_text("# a gate script the runner model expects\n")
     # engine/*.sh is one of the pass's globs, so the shell plant below is only
     # reached when the fixture writes it before the loop that writes the rest.
