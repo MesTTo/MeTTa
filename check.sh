@@ -82,7 +82,7 @@
 #     kind on one side of the shared list only is a finding rather than a
 #     missing section [tested:
 #     extensions/python/tests/repository/test_refusal_rows.py::test_the_refusals_page_is_generated,
-#     ::test_the_page_check_sees_a_kind_on_one_side_only; commit=WORKTREE].
+#     ::test_the_page_check_sees_a_kind_on_one_side_only; commit=f33b7ab0200e6dc74c88fb4c7f827bf545a447ed].
 #   - every lane inherits a repository-local scratch directory, and a later
 #     run reclaims one left by SIGKILL without touching a concurrent run
 #     [tested: scratch-retention; commit=c96093349e37cc7153f31b3dd9af10246a325301].
