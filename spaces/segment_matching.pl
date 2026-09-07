@@ -39,27 +39,43 @@
 %WHERE THE NON-KUTSIA DECISIONS CAME FROM. Kutsia settles the theory: which
 %fragments are finite, and the calculus each one is solved by. The decisions
 %around that theory were adopted from an earlier reference semantics this
-%repository no longer follows, and none of them has been re-measured against
-%upstream PeTTa: the two surface spellings above; the parse-before-match
-%staging and its rule that only what the program WROTE is a gap; the order the
-%classifier tries the three fragments in; the decision not to reproduce that
-%source's numeric guard; the one-sided binding rules, meaning the expression
-%projection an ordinary occurrence gets and a repeated name accepting a
-%runtime-equal rather than a syntactically equal run; the association-list
-%staging that binds the program's variables once at the end; the store-sized
-%dereference budget; and the surface an unsolved gap renders back to
-%[assumed: adopted from an earlier reference semantics, not re-measured
-%against upstream PeTTa].
+%repository no longer follows: the two surface spellings above; the
+%parse-before-match staging and its rule that only what the program WROTE is a
+%gap; the order the classifier tries the three fragments in; the decision not
+%to reproduce that source's numeric guard; the one-sided binding rules, meaning
+%the expression projection an ordinary occurrence gets and a repeated name
+%accepting a runtime-equal rather than a syntactically equal run; the
+%association-list staging that binds the program's variables once at the end;
+%the store-sized dereference budget; and the surface an unsolved gap renders
+%back to.
+%
+%THE ARBITER HAS NO READING OF ANY OF IT. Upstream PeTTa at the parity pin does
+%not define sequence variables at all: `...` is an ordinary symbol there and
+%`(:seg $x)` an ordinary two-child expression, on the pattern side, on the
+%stored side and in an equation head. A gap ask ANSWERS NOTHING rather than
+%refusing, and a head written with a gap becomes a fixed-arity function whose
+%wider call raises `Domain error: function_input_arities`. So every decision
+%listed above is an extension over a region upstream leaves undefined, and
+%three of them CHANGE an upstream answer rather than filling a silence: the
+%commuting equation answers `no` upstream and refuses here, `(f (:seg $u))`
+%against itself answers `yes` upstream and refuses here, and a mixed-role
+%pattern answers nothing upstream and refuses here
+%[measured 2026-09-07 against upstream PeTTa at
+%ae66fa8e41dcd5539d614706bd4e5cfb34f9608d; the thirteen programs, both engines'
+%answers and the commands are in docs/journal/2026-09-07-sequence-variables-in-the-corpus.md].
 %
 %ONE NAME MAY NOT PLAY BOTH ROLES in the general two-sided `unify` and space
 %query doors. `(f (:seg $x) $x)` is refused there across every fragment
 %[source: ai-python-conventions.md 3.3, "One name may not play both the
 %ordinary and the segment role; that mix refuses too"]. An EQUATION HEAD is
 %the deliberate one-sided exception below: metta_seq_head_match/2 gives the
-%ordinary occurrence the expression projection of the finite run
-%[assumed: the one-sided binding rule was adopted from an earlier reference
-%semantics, not re-measured against upstream PeTTa;
-%commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
+%ordinary occurrence the expression projection of the finite run. Upstream has
+%no reading to compare it against: a gap in an equation head is a literal child
+%there, so `(= (allof (:seg $xs)) ...)` compiles to a one-argument function and
+%`!(allof a b)` raises `Domain error: function_input_arities(allof,[1])`
+%[measured 2026-09-07 against upstream PeTTa at
+%ae66fa8e41dcd5539d614706bd4e5cfb34f9608d;
+%docs/journal/2026-09-07-sequence-variables-in-the-corpus.md carries the run].
 %
 %DISTINCT `...` OCCURRENCES ARE DISTINCT VARIABLES. Parsing gives each one its
 %own fresh Prolog variable, which nothing else mentions, so its run is
@@ -148,8 +164,13 @@ metta_seq_present_items(Items) :-
 %projects its ordinary occurrence to the expression containing that run.
 %Prolog already has precisely that projection.  Binding the gap variable to
 %the run `[a,b]` makes a later ordinary occurrence of the same variable match
-%the expression `(a b)` [assumed: the one-sided projection rule was adopted
-%from an earlier reference semantics, not re-measured against upstream PeTTa;
+%the expression `(a b)`. The projection rule was adopted from an earlier
+%reference semantics; upstream PeTTa has no gap to project, so the rule extends
+%a region it leaves undefined rather than departing from an answer it gives
+%[measured 2026-09-07 against upstream PeTTa at
+%ae66fa8e41dcd5539d614706bd4e5cfb34f9608d;
+%docs/journal/2026-09-07-sequence-variables-in-the-corpus.md carries the run]
+%[tested: tests/prolog/suites/reader/segment_equations.plt:a_segment_name_projects_in_an_ordinary_head_position;
 %commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
 %
 %The plan is built while the equation is compiled, before any call can bind
@@ -183,9 +204,11 @@ metta_seq_head_matches(Pattern, Subject) :-
 %as one expression; a written `(:seg $x)` child splices the run into its
 %surrounding expression.  Parse before the head match and instantiate after it,
 %so a marker arriving through a binding stays data and repeated written splice
-%occurrences keep sharing their one authoritative run [assumed: the staging
-%was adopted from an earlier reference semantics, not re-measured against
-%upstream PeTTa; commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
+%occurrences keep sharing their one authoritative run. The staging is this
+%engine's own: upstream reads neither marker as a gap, so it has no RHS splice
+%to compare with [measured 2026-09-07 against upstream PeTTa at
+%ae66fa8e41dcd5539d614706bd4e5cfb34f9608d;
+%docs/journal/2026-09-07-sequence-variables-in-the-corpus.md].
 metta_seq_instantiate(Template, Instantiated) :-
     (   nonvar(Template),
         Template = [_|_]
