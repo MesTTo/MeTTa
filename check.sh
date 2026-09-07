@@ -209,6 +209,30 @@ check_prolog() {
 }
 run GATE prolog check_prolog
 
+# The same question one tier out: what a shipped LIBRARY calls that only the
+# library-index autoloader would find. The lane above consults engine/main.pl,
+# and import! loads lib/ on demand, so no clause under lib/ is ever in that
+# walk. The corpus lane below does reach them, but only where an example
+# happens to call the line -- which is the difference this lane exists for:
+# lib_tabling's call_delays/2 stopped no-autoload on
+# 16-cache_policy_restraints.metta, and lib_crypto's hex_bytes/2 is called by
+# no example at all and was found here
+# [measured 2026-09-07: both reported in one 2.1s run; commit=WORKTREE].
+#
+# The driver proves its own eyesight before reporting clean, by planting a call
+# to a library export this tree does not import and requiring the walk to see
+# it, so "no findings" is a tested claim rather than an assumption. Its
+# allowed/2 table carries the two names that are deferred by design, each with
+# the reason. Both halves are the lane's own: reverting either declaration
+# makes it exit 1 naming the file and line, and a plant the walk cannot see
+# makes it exit 1 saying so [tested: sh check.sh lib-autoload; commit=WORKTREE].
+check_library_autoload() {
+    cd "$HERE/tests/prolog" || return 1
+    bounded swipl -q --on-error=status \
+        -g library_autoload_gate -t halt library_autoload.pl
+}
+run GATE lib-autoload check_library_autoload
+
 # Packaged Ciao assertions stay an external development grade. The engine is
 # loaded unchanged, tests/prolog/ciao_grade.pl contributes pred assertions for
 # the removal and translation funnels, and rtchecks collects violations as
