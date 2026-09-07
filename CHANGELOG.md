@@ -932,6 +932,43 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- **A compiled body stores `&self` where it stored a `(context-space)` call.**
+  `match(pattern, template)` inside an `@m.define` body means the space the
+  program is running in, and the engine's own name for that in a stored
+  equation is `&self`; the call answers the same space and costs 1142
+  inferences the first time it is reached and 11 on every call after
+  (`&self` 414, 2000 and 3995 at one, five and ten calls against
+  `(context-space)`'s 1566, 3197 and 5242). Naming the head explicitly with
+  `fn.context_space()` still stores the call, because there the author asked
+  for it.
+
+- **The Python twins lane is a GATE.** Every example's twin now decides the
+  battery: its `assert`s must cover the example's claims, its definitions must
+  land as matchable atoms, its inference count must sit inside a two-sided
+  band, and its stored content must agree with the example's or differ exactly
+  as the twin declares. Three declarations join `BUDGET` at the foot of a
+  twin, each with the measurement that settled it: `DIVERGENCE`, a sha256 over
+  the two spaces' stored-atom surpluses, because a Python annotation IS a
+  `(: ...)` row and a docstring IS an `(@doc ...)` row and the two spaces are
+  not obliged to be equal, only to differ exactly as declared; `OVERRUN`, what
+  a twin's own program costs beyond its example's 10% band; and the existing
+  `ALLOWANCE`. `sh check.sh twins-selftest` plants one failure of each and
+  requires the lane to catch it. The lane's stored-content diagnostic now
+  names the whole atom multiset each side holds beyond the other, bounded at
+  50,000 atoms because enumerating the 1,572,864 that
+  `examples/ch18-performance/18-01-larger-workloads/05-matespacefast.metta`
+  leaves behind exhausts the library's 8 GB stack limit.
+
+- The twins band's authoring allowance is re-measured. It read 1456 inferences
+  once plus 765 for each compiled definition, measured on 2026-08-22; the same
+  fixture reads 1370 plus 1307 today, so the band had been charging every twin
+  that authors a definition for a constant 71% stale per definition.
+  `extensions/python/benchmarks/probes/twin_authoring.py` derives both, and
+  measures the three doors that install an equation beside them: the compiled
+  door's marginal definition is 87 inferences from the source door's end to
+  end, so what grew is the one-time warmup and not the door.
+
+
 - **The engine's prelude is Prolog.** The standard vocabulary every space
   reaches with no `import!` -- the assert family, `if-equal`, `if-error`,
   `throw`, `return-on-error`, `unquote`, `atomically`, `interpret`,
@@ -1190,6 +1227,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   with its vendored corpus is the lane that reads it.
 
 ### Fixed
+
+- An equation stored through `add-atom` resolves `&self` the way one loaded
+  from source already did. The one-equation door in
+  `engine/spaces/foreign.pl` stored the atom and compiled THE SAME TERM, where
+  a source load stores the original and compiles the resolved one, so two
+  byte-identical stored equations behaved differently by whichever door wrote
+  them: `(= (q) (collapse (match &self (r $x) $x)))` read the space it was
+  loaded into from source and answered `((1))`, and the same atom handed to
+  `add-atom` read the engine root and answered `(())`. The stored atom still
+  keeps the `&self` its author wrote; only the compiled clause resolves it.
+  `extensions/python/benchmarks/probes/running_space.py` holds the two doors
+  side by side, and the same probe holds `&self` and `(context-space)`
+  answering the same atoms in the self space, in a named space and in two
+  instances of a parametric family.
+
 
 - A Python dict, list or tuple the engine handed back crosses back in as ONE
   object. Since 2026-09-02 (bbf02dd3, "Release py-atom declarations with their

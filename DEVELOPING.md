@@ -89,6 +89,48 @@ CHECK_PY="$PY" sh check.sh ciao-grade
 non-blocking only while their recorded backlog is being removed. A clean
 REPORT check belongs in the GATE tier.
 
+### The twins lane, and how a pin moves
+
+`sh check.sh twins` runs every Python twin under
+`extensions/python/examples/language-feature-examples/` against the example it
+mirrors: the twin's `assert`s have to cover the example's claims, its
+definitions have to land as atoms the space answers a `(= $head $body)` match
+with, its stored content has to agree with the example's or differ exactly as
+it declares, and its inference count has to sit inside a two-sided band.
+
+Four declarations at the FOOT of a twin decide those bands, each under the `#:`
+run that documents it, and none of them may be moved without the measurement
+that moves it:
+
+| declaration | what it claims | how it moves |
+|---|---|---|
+| `BUDGET` | the twin's exact inference count, inside ±4 | `--repin --reason "<mechanism>"` |
+| `ALLOWANCE` | a wider point band, where the count tracks something that is not the twin's work | by hand, with the measurement above it |
+| `DIVERGENCE` | the sha256 of the two spaces' stored-atom surpluses: the difference the twin MEANS to have | `--repin --divergence-reason "<mechanism>"` |
+| `OVERRUN` | what the twin's own program costs beyond the 10% band over its example | by hand, with `benchmarks/probes/twin_floor.py` beside it |
+
+The discipline is the same for all four: **a number moves only with the
+mechanism that moved it, written beside it.** A budget that moved for a reason
+nobody can name is not a re-pin, it is a lane learning to agree with whatever
+the tree does. Re-price the whole corpus in one pass on the tree that ships,
+because a pin taken on a branch's own base prices a tree nobody merges:
+
+```sh
+"$PY" extensions/python/tools/twin_coverage.py --repin \
+    --reason "the mechanism that moved the count" \
+    --divergence-reason "why the two spaces differ"
+```
+
+Attribute the move before writing it. `git log --first-parent` over the range
+since the last pricing pass, one representative twin per chapter measured at
+each step with `engine/*.qlf` cleared, answers which merge moved what: the
+corpus moves TOGETHER at most steps, which is SWI's clause-indexing shape
+shifting as the boot image grows, and the steps where one chapter moves alone
+are the mechanisms worth naming.
+
+`sh check.sh twins-selftest` plants one failure of each of the four and
+requires the lane to catch it, so the gate is one somebody has watched fail.
+
 Run the Python suite directly with the repository root and configuration made
 explicit:
 

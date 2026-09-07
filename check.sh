@@ -27,6 +27,7 @@
 #                                            refusal-grounds-selftest snippets
 #                                            cumulative-syntax
 #                                            cumulative-syntax-selftest
+#                                            parity twins twins-selftest
 #                                            pytest gallery benchmarks instructions
 #                                            scaling
 #                                            memory-scale memory-scale-gate
