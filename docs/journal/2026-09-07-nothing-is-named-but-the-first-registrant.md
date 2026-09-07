@@ -219,6 +219,38 @@ then uses the doors -> it cannot be. Importing `metta.tables` runs
 half is its own program in the shell test, which is the same reason Pygments
 documents `get_all_lexers(plugins=False)` apart from the lookups.
 
+## 2026-09-07: the Node seat
+
+Decided: no `frame` point and no `array` point. The audit found no coupling to
+remove, and the brief's "where the seat has frames or arrays" is the condition
+that decides it: this seat has no frame notion at all, and its array notion is
+the platform's own `TypedArray` family, which every numeric library in the
+runtime already produces, so neither point has a class of libraries to admit.
+Declaring them would be inventing a door for a room that is not there.
+`test/seam.test.ts` pins the absence, so a later reader meets the decision
+rather than the omission.
+
+Decided: loading is EXPLICIT here, where the Python seat loads an advertised
+registration on the first dispatch that needs it. ESM `import()` is
+asynchronous and `Point.claim` is synchronous, so a dispatch cannot await one;
+`await seam.discover()` is the app's call and a package's own module body is
+the primary door, which is what `npm` packages do anyway. The difference is in
+the module header, the README and llms.txt rather than left for a reader to
+find.
+
+Tried: `reader=`/`adder=` deduping a foreign store's row against the seam's own
+by requiring every field of the read-back row to match -> wrong, and the Node
+solars proof is what caught it. A store records what IT keeps, which is rarely
+what the registration supplied: `convert`'s registry hands back `image` where
+the registration gave `toAtom`, so `type` answered the same registration twice.
+The rule is now same NAME, or the same values under every field the two spell
+in common. The Python seat had the same latent defect and took the same fix.
+
+Measured: `sh extensions/node/test.sh` after the change, 638 tests, 638 pass.
+Two conventions caught the first draft and both were real: every exported name
+carries its own doc comment, and `.sort()` takes `byCodePoint` rather than
+JavaScript's default lexicographic-by-UTF-16 comparator.
+
 ## 2026-09-07: what each seat gained
 
 Recorded as the work landed; the numbers are in the commits' own tests.

@@ -39,6 +39,24 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - `rows.to(library)` and `answers.to(library)` build a frame of any registered
   frame library, taking the module itself rather than its name.
 
+- The Node seat has the same seam, `metta-node/seam`, with the same four kinds
+  and the same refusals. Its points are `type`, `repr` and `reflector`, which
+  keep the storage `registerType`, `registerRepr` and `registerReflector`
+  always used, and `provider`, `library` and `integration`, read unloaded from
+  what packages advertise. `seam.point(...)` declares one of your own and the
+  seat dispatches it like any other; `seam.services()` publishes `term` and
+  `name`. A package advertises registrations under a fourth `package.json`
+  group, `extensions`; `seam.advertised()` costs nothing and
+  `await seam.discover()` loads them, explicit rather than on first dispatch
+  because ESM `import()` is asynchronous.
+
+  It declares no `frame` point and no `array` point, deliberately: it has no
+  frame notion, and its array notion is the platform's own `TypedArray`
+  family, which every numeric library in that runtime already produces.
+  `convert.registrations()`, `atom.reprs()` and `integrate.reflectorRows()`
+  are new, each publishing one of those registries as data so the seam reads
+  it rather than its private map.
+
 - A template renders as well as reads. `metta.render(source, /, **values) ->
   str` takes the same three faces the reading doors take -- a 3.14 `t"..."`
   literal, any object with `strings` and `interpolations`, or a string with
