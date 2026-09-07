@@ -10,6 +10,16 @@
 #   each moves to GATE as its backlog clears. A REPORT tier is not a
 #   softened gate: nothing here is silenced, everything is printed.
 #
+#   THREE WORDS, not two. A lane exiting 125 MEASURED NOTHING and reads
+#   `skipped` rather than `ok`: 125 is what metta.benchmarking names
+#   PERF_CONTROL_REFUSED, what bounded.sh refuses with when the process that
+#   started a command had already exited, and what timeout(1) and
+#   `git bisect run` both read as a failure in the wrapper rather than in the
+#   command. A skip does not decide the run and does not change the exit
+#   status, because a lane that could not measure neither proves nor disproves
+#   the tree; the names are printed above the verdict so nobody has to read the
+#   whole log to learn a lane had nothing to say.
+#
 #   Usage: sh check.sh [name ...]     names: ruff mypy ty pylint perflint
 #                                            xenon refurb vulture slotscheck
 #                                            bandit deptry audit interrogate
@@ -127,6 +137,7 @@ case " $WANT " in
     *" generated-artifacts "*) WANT="$WANT $GENERATED_ARTIFACT_LANES" ;;
 esac
 FAILED=''
+SKIPPED=''
 SUMMARY=$(mktemp "${TMPDIR:-/tmp}/metta-check.XXXXXX")
 MEMORY_SCALE_DATA=$(mktemp "${TMPDIR:-/tmp}/metta-memory-scale.XXXXXX")
 MEMORY_SCALE_STATUS=$(mktemp "${TMPDIR:-/tmp}/metta-memory-scale-status.XXXXXX")
@@ -212,6 +223,24 @@ run() {
     esac
     if [ "$lane_status" -eq 0 ]; then
         status=ok
+    elif [ "$lane_status" -eq 125 ]; then
+        # 125 is this tree's one word for "this run says nothing about the
+        # tree", and the summary needs it as much as the lane's own output
+        # does. bounded.sh refuses with it when the process that started a
+        # command had already exited, metta.benchmarking names the same number
+        # PERF_CONTROL_REFUSED for a measured window that never opened, and
+        # timeout(1) and `git bisect run` both read it as a failure in the
+        # wrapper rather than in the command.
+        #
+        # Without this word a lane that measured NOTHING reads `ok`, which is
+        # the shape the comment above calls the defect this repository has been
+        # bitten by three times: mork-bench reported `ok` on four of five full
+        # runs of this gate while another session held the PMU and it compared
+        # not one row. A skip is not a failure and does not stop the run, so
+        # the exit status is unchanged; what changes is that the summary says
+        # which lanes had nothing to say.
+        status=skipped
+        SKIPPED="$SKIPPED $name"
     else
         # A REPORT that exits nonzero has FINDINGS, which is its working state
         # and not a break. Calling both of them FAIL made a burn-down queue
@@ -799,6 +828,13 @@ run REPORT jscpd-prolog sh -c "cd '$HERE' && npx --yes jscpd --reporters ai --fo
 printf '\n================ summary ================\n'
 awk -F'\t' '{ printf "%-6s %-12s %s\n", $1, $2, $3 }' "$SUMMARY"
 
+# Named before the verdict, and on every run, because the point of the word is
+# that a reader scanning the last two lines learns a lane had nothing to say.
+# A skip does not decide the run either way: the tree is neither proved nor
+# disproved by a lane that could not measure.
+if [ -n "$SKIPPED" ]; then
+    printf '\nMEASURED NOTHING, so nothing here says the tree moved:%s\n' "$SKIPPED"
+fi
 if [ -n "$FAILED" ]; then
     printf '\nGATE FAILED:%s\n' "$FAILED"
     exit 1

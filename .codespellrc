@@ -42,7 +42,11 @@ skip = *.lock,*.pyc,*.svg,package-lock.json,.git,node_modules,__pycache__,build,
 # astroid: the library pylint reads Python with, named in algebra.py where a
 #   comment records what it made of a `yield` inside a `for` header. Not a
 #   misspelling of asteroid; it is the package's name.
-ignore-words-list = intensional,dout,sourcee,notin,ba,nd,som,te,fo,anc,checkking,zar,reduct,reducts,arithmetics,buildt,ans,assync,derails,astroid
+# InForce: the Prolog variable lib_tabling.pl carries a name's currently
+#   installed table policy in, "the options in force" written as one word the
+#   way a Prolog variable has to be. Fourteen sites in one file, and the
+#   dictionary reads it as `enforce`.
+ignore-words-list = intensional,dout,sourcee,notin,ba,nd,som,te,fo,anc,checkking,zar,reduct,reducts,arithmetics,buildt,ans,assync,derails,astroid,inforce
 # Whole LINES that are known and stay unreported, matched verbatim. This is for
 # vendored third-party source -- tests/prolog/vendor, and tests/conformance/petta,
 # which is upstream PeTTa at ae66fa8e and is the CONFORMANCE ORACLE, so editing

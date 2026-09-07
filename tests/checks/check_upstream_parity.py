@@ -81,6 +81,17 @@ Guarantees:
   - a kernel or container that will not let this count instructions is named
     with the two knobs that decide it, rather than reported as a parse failure
     [tested: tests/checks/check_upstream_parity_selftest.py; commit=fc990fa3042ee05d931d3928694e89021be32855].
+  - a row this BOX could not measure is not a row the TREE broke: a timed-out
+    example and a row whose processes split between two costs are printed with
+    their count and the load beside them, and are fatal only where CI=true,
+    while a row whose inference counts disagree still fails on a desk
+    [tested: tests/checks/check_upstream_parity_selftest.py; commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6].
+  - a row whose own runs land on BOTH sides of the cross-engine allowance is
+    reported as unmeasured with its ends rather than as a regression, because
+    the verdict would otherwise be whichever half of its spread this run's
+    median fell in; a row whose BEST run is still over the line fails
+    [tested: tests/checks/check_upstream_parity_selftest.py;
+    commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6].
   - a row whose program run costs LESS than its own null control is reported
     as `negative-net` and fails the run, rather than being recorded and then
     dropped from the page
@@ -252,6 +263,51 @@ def _spawn(argv: list[str]) -> subprocess.CompletedProcess:
 #: nothing.
 PARANOID = pathlib.Path("/proc/sys/kernel/perf_event_paranoid")
 
+#: What else the box was doing, printed beside every verdict. A number with no
+#: load beside it cannot be judged later, and two of this tree's lanes have
+#: already read a loaded box as a regression.
+LOADAVG = pathlib.Path("/proc/loadavg")
+
+
+class CounterUnavailableError(RuntimeError):
+    """This box would not count, so nothing measured here says the tree moved.
+
+    The seat benchmarks state the same rule in their own harness
+    [source: extensions/python/metta/benchmarking.py, MeasurementRefusedError];
+    this lane runs from the repository root, where that package is not on the
+    path, so it carries the rule rather than importing it.
+    """
+
+
+def _loadavg() -> str:
+    """The one-, five- and fifteen-minute averages, or why they could not be read."""
+    try:
+        return " ".join(LOADAVG.read_text(encoding="utf-8").split()[:3])
+    except OSError:
+        return "unreadable"
+
+
+def refused(detail: str) -> int:
+    """Print a box refusal and answer the status the lane should exit with.
+
+    One policy, the same one upstream_prerequisite draws for a missing
+    checkout: refuse where CI=true, because a runner that cannot measure is a
+    broken runner and a lane that passes without measuring is worse than a red
+    one; print a named skip elsewhere, because a developer's box is shared.
+    """
+    if os.environ.get("CI") == "true":
+        print(
+            f"error: {detail}; refusing to pass the parity gate without "
+            f"measuring. loadavg {_loadavg()}",
+            file=sys.stderr,
+        )
+        return 1
+    print(
+        f"note: {detail}; nothing was measured, so nothing here says the tree "
+        f"moved. loadavg {_loadavg()}"
+    )
+    return 0
+
 
 def _perf(command: list[str]) -> tuple[int, subprocess.CompletedProcess]:
     completed = _spawn(["perf", "stat", "-e", "instructions:u", "-x", ",", *command])
@@ -280,7 +336,7 @@ def _perf(command: list[str]) -> tuple[int, subprocess.CompletedProcess]:
             "--security-opt seccomp=unconfined before perf_event_open is "
             f"permitted at all. perf said: {completed.stderr[-300:]}"
         )
-        raise RuntimeError(msg)
+        raise CounterUnavailableError(msg)
     return instructions, completed
 
 
@@ -410,6 +466,10 @@ def _sample(engine_root: pathlib.Path, program: pathlib.Path) -> dict:
             f"{SPREAD_RATIO:.1%} of the median {middle}: {sorted(counts)}",
         }
     return {"status": "ok", "raw": middle, "runs": len(counts),
+            #The whole sample, not only its middle. A cross-engine allowance is
+            #a LINE, and a row whose runs land on both sides of it has no
+            #verdict to give; the judge needs the ends to see that.
+            "counts": sorted(counts),
             "inferences": inferences.pop()}
 
 
@@ -470,12 +530,17 @@ def measure(engine_root: pathlib.Path, example: pathlib.Path) -> dict:
         status = "below-floor"
     else:
         status = "ok"
+    counts = sample.get("counts", [sample["raw"]])
     return {
         "status": status,
         "instructions": net,
         "fixed": fixed,
         "raw": sample["raw"],
         "runs": sample["runs"],
+        #The same subtraction applied to the ends of the sample, so a caller
+        #can ask whether the allowance falls INSIDE this row's own spread.
+        "lowest": min(counts) - fixed,
+        "highest": max(counts) - fixed,
         "inferences": sample["inferences"],
     }
 
@@ -697,6 +762,33 @@ WAIVERS = {
     "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/02-twostage.metta": (PER_FORM),
     "examples/ch08-data/08-01-atoms-lists-and-folds/03-holfunctions_intrinsicop.metta": (PER_FORM),
     "examples/ch07-control-flow/07-05-recursion/02-fib.metta": (GUARDED_ARITHMETIC),
+    "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/04-plntestdirect.metta": (
+        "ROOT-CAUSED AND OPEN, and it is NOT more work: this tree runs 30,047"
+        " inferences on this file against upstream's 40,278, a quarter FEWER,"
+        " and still costs 31,292,574 retired instructions against 30,337,471,"
+        " +3.15%. So each step costs more rather than there being more steps,"
+        " which is the class the two shared strings above name, and the file's"
+        " shape says where to look: fourteen definitions and ONE runnable form,"
+        " with 30,047 inferences netting 31M instructions, so the row is"
+        " dominated by what happens around loading a 47-line file rather than"
+        " by evaluating it."
+        " It is not the September merge wave's and not this branch's: a"
+        " first-parent ladder over the eight points where this file's own"
+        " measurement method exists reads 31,034,356 to 31,141,141 with no"
+        " trend, and the frozen our_instructions, 31,007,739, sits inside that"
+        " spread."
+        " What tipped it over is the LINE, not the tree. The allowance is"
+        " 31,110,028 and the row's own spread crosses it, so at the pinned"
+        " checkout length the verdict is whichever half a run lands in; from a"
+        " checkout 23 characters longer the whole spread is above it, because"
+        " the null control cancels 99.6% of the path (raw +38,887,046, control"
+        " +38,716,562) and the 170,484 it leaves is 0.55% of a 31M net."
+        " Closing this means the per-form loading path, which is the same"
+        " open work the two shared reasons above carry"
+        " [measured 2026-09-07: four runs in the branch worktree and sixteen"
+        " over eleven ladder points; command=this file's own measure/2 against"
+        " both engines]"
+    ),
     "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/05-pln_direct.metta": (
         "metta-library import machinery: the lib_pln import alone costs"
         " 310.7M here against upstream's 275.7M (measured 2026-08-17), and"
@@ -803,7 +895,7 @@ WAIVERS = {
 def verdicts(baseline: dict, *, remeasure: bool) -> int:
     """Judge this tree against the baseline, remeasuring it first unless frozen."""
     cross, drift, negative, unstable = [], [], [], []
-    waived = []
+    waived, unmeasured = [], []
     checked = 0
     for name, entry in sorted(baseline.items()):
         if entry.get("status") == "negative-net":
@@ -841,7 +933,19 @@ def verdicts(baseline: dict, *, remeasure: bool) -> int:
             #so mattered: three import rows read `nondeterministic` on a fresh
             #checkout, under the old "now fails to run" wording, purely because
             #their first touch writes the cache their later runs read.
-            if ours["status"] in ("unstable", "nondeterministic", "below-floor"):
+            #A timeout and a split cost are the BOX's answers, not the
+            #tree's: this file's own note above says a loaded box makes the
+            #excursion behind `unstable` likelier, and a corpus row that ran
+            #300.0s against a 300s ceiling at loadavg 33.81 was recorded as a
+            #cross-engine regression it was not. Both go to the bucket that
+            #names them and refuses only where CI=true, so contention on a
+            #shared desk cannot report a code change that did not happen.
+            if ours["status"] in ("timeout", "unstable"):
+                unmeasured.append(
+                    f"{name}: {ours['status']} {ours.get('detail', '')}".rstrip()
+                )
+                continue
+            if ours["status"] in ("nondeterministic", "below-floor"):
                 unstable.append(f"{name}: {ours['status']} {ours.get('detail', '')}")
                 continue
             if ours["status"] != "ok":
@@ -862,7 +966,26 @@ def verdicts(baseline: dict, *, remeasure: bool) -> int:
                 f"upstream's {entry['upstream_instructions']} "
                 f"(allowed {allowed:.0f})"
             )
-            if name in WAIVERS:
+            #A row whose own runs land on BOTH sides of the allowance has not
+            #failed, it has not been decided: the verdict would be whichever
+            #half of its spread this run's median happened to fall in, and the
+            #next run would say the other thing. Measured on
+            #ch22/22-02/04-plntestdirect, which reads 31,034,356 to 31,141,141
+            #across sixteen runs at the pinned checkout length against an
+            #allowance of 31,110,028, and whose frozen our_instructions,
+            #31,007,739, sits inside that same spread [measured 2026-09-07:
+            #a first-parent ladder over the eight points where this file's
+            #current method exists, two runs each, plus four in the branch
+            #worktree]. So it goes to the bucket that names it rather than to
+            #the one that blames the tree, and the ends are printed so the next
+            #reader sees the straddle rather than re-deriving it.
+            if remeasure and ours.get("lowest", allowed + 1) <= allowed:
+                unmeasured.append(
+                    f"{name}: its own runs straddle the allowance, "
+                    f"{ours['lowest']} to {ours['highest']} against "
+                    f"{allowed:.0f} over {ours.get('runs', 0)} runs"
+                )
+            elif name in WAIVERS:
                 waived.append(line)
             else:
                 cross.append(line)
@@ -875,7 +998,7 @@ def verdicts(baseline: dict, *, remeasure: bool) -> int:
                     f"{name}: {ours['inferences']} inferences against the "
                     f"frozen {entry['our_inferences']}"
                 )
-    print(f"upstream parity: {checked} examples checked")
+    print(f"upstream parity: {checked} examples checked, loadavg {_loadavg()}")
     for line in cross:
         print(f"  CROSS-ENGINE REGRESSION {line}")
     for line in waived:
@@ -891,7 +1014,21 @@ def verdicts(baseline: dict, *, remeasure: bool) -> int:
     #race with process exit and a loaded box makes it likelier.
     for line in unstable:
         print(f"  NO SINGLE COST, THE ROW WAS NOT CHECKED {line}")
-    return 1 if cross or drift or negative or unstable else 0
+    #A row this box could not measure is printed with its count either way, so
+    #"the check stopped happening" is never silent; what the CI line decides is
+    #whether it is also fatal. On a runner it is: a row nobody measured is a
+    #tripwire nobody read.
+    for line in unmeasured:
+        print(f"  NOT MEASURED ON THIS BOX {line}")
+    if unmeasured:
+        print(
+            f"  {len(unmeasured)} row(s) the box would not measure at loadavg "
+            f"{_loadavg()}"
+        )
+    fatal = bool(cross or drift or negative or unstable)
+    if unmeasured and os.environ.get("CI") == "true":
+        fatal = True
+    return 1 if fatal else 0
 
 
 def upstream_present() -> bool:
@@ -961,9 +1098,17 @@ def main() -> int:
         help="judge the stored numbers without re-measuring this tree",
     )
     arguments = parser.parse_args()
-    refusal = upstream_prerequisite()
-    if refusal is not None:
-        return refusal
+    absent = upstream_prerequisite()
+    if absent is not None:
+        return absent
+    try:
+        return _judge(arguments)
+    except CounterUnavailableError as unavailable:
+        return refused(str(unavailable))
+
+
+def _judge(arguments: argparse.Namespace) -> int:
+    """Every verdict this lane reaches once the prerequisites hold."""
     #Only --rebaseline READS the sibling checkout; the gate path re-measures
     #this tree and compares against upstream numbers already frozen in the
     #baseline. So a checkout at the wrong commit is fatal to a rebaseline,

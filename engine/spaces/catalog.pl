@@ -1404,7 +1404,6 @@ metta_check_algebra_laws(Name, Combine, Extend, Zero, One,
     ).
 
 metta_check_algebra_closure(Name, Combine, Extend, CarrierField, Carrier) :-
-    % policy-inventory-exempt: mechanism-internal; reason=Combine and Extend are the algebra row's own two declared operation names rather than a closed value set; evidence=engine/spaces/catalog.pl:metta_check_algebra_laws/8
     forall(( member(Operation, [Combine, Extend]),
              member(A, Carrier), member(B, Carrier) ),
            ( metta_apply_algebra_operation(Name, Operation, A, B, Result),

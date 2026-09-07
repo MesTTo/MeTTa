@@ -1079,6 +1079,7 @@ withdraw_source_load(CanonPath, Space, Count) :-
               ; Kind == artifact,
                 clause_property(Ref, module(Engine)),
                 clause(Recorded, true, Ref), strip_module(Recorded, _, Row),
+                % policy-inventory-exempt: mechanism-internal; reason=the four artifact row shapes are this loader's own record of which clauses name a function, matched so a withdrawal takes back exactly what its load asserted; evidence=engine/filereader/source_lifecycle.pl:withdraw_source_load/3
                 member(Shape, [fun(F), arity(F,_), fun_in(_,F), fun_scoped(F)]),
                 Row = Shape ) ), Names0),
     sort(Names0, Names),

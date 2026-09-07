@@ -1514,6 +1514,263 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   contract and a detail that does not carry it fills the field with absence.
 
 
+- The forty-seven `@settings(deadline=None)` decorators the suite carried are
+  gone. The Hypothesis profile sets `deadline=None` once, so each of them was
+  a private copy of a decision the profile already makes; two `settings`
+  imports go with them.
+- Forty benchmark pins the September merge wave moved are re-pinned, each on
+  the commit that moved it. The `benchmarks` lane's twenty-one counter rows,
+  `automatic-tabling`'s four size pairs, `memory-scale`'s
+  `support-drop-spaces`, the C seat's `error-ball` and the upstream-parity
+  lane's thirteen within-tree inference rows. The attribution is a first-parent
+  sweep of the forty-three commits since the release re-pin, with the engine's
+  C artifacts rebuilt from each commit's own sources: a tree without them
+  measures the Prolog fallback and reads `json-wire` at 169,470,783 against its
+  pin of 158,011. Only inference counts are re-pinned; no instruction or CPU
+  number moves, and the C seat's `boot` row keeps its pin because a worktree
+  whose files have been edited reads it 27 inferences high.
+- The engine's two parse benchmarks are checked against each other's reader
+  instead of against a hand-written form count. Both read
+  `engine/prelude.metta` and both asserted it holds 118 top-level forms; the
+  assertion-bag-diff merge added the 119th, so both had been raising
+  `Domain error: bench_result expected` at every commit since. It was invisible
+  because `engine-bench` refuses at its workload digest before it dispatches a
+  case, and the digest covers the same file, so one stale pin was reported and
+  the other was never reached. Re-counting to 119 would have restored the same
+  trap, since the prelude has moved again on the branch this work is not based
+  on and now parses to 124. So the C door's result is counted by the Prolog
+  grammar and the Prolog grammar's by the C door, after the measured region
+  closes: the count follows the shipped prelude by itself, a reader that stops
+  mid-file still fails, and only these two cases change because only they have
+  a second reader to be checked against. The digest is re-stamped and the two
+  rows the merges moved are re-pinned: `parse-prolog` 3,118,634 to 3,341,234
+  (+222,600, the added form parsed 25 times through the Prolog grammar,
+  laddered to `acd04732`) and `boot` 266,058 to 268,411, of which 487 is this
+  branch's own edits to `engine/bench.pl` -- that file's predicate set is part
+  of what the boot it measures costs, which its header has recorded since
+  2026-08-28. `parse` itself stays at 152: the shipped door reads through
+  `engine/reader.so` and does not price a form.
+  Both cases' instruction pins had been hidden behind the same refusal and are
+  re-pinned with them, `parse` 111,718,052 to 121,893,770 and `parse-prolog`
+  1,798,035,063 to 1,956,872,188. One control covers both: swapping only
+  `engine/prelude.metta` for the version this pin was last taken against, in
+  one checkout, moves them -8.13% and -7.95% against a +8.06% growth in the
+  file, and with the old prelude both sit inside their one per cent bands.
+- The engine benchmark measures in one temporary-directory configuration
+  whatever the caller's is. SWI reads `TMP` for its own, and the boot case's
+  inference count depends on the atom table's exact state, so a `TMP` naming
+  anything SWI has not already interned creates one atom and moves the row by
+  27, seven times the harness's four-inference allowance. `check.sh` allocates
+  a repository-local scratch directory and exports `TMP`, `TMPDIR` and `TEMP`
+  into every lane, so one tree read 268,417 from `sh engine/bench.sh` and
+  268,390 from `sh check.sh engine-bench` on the same afternoon, and the row
+  could not be green both ways whichever number was pinned. `engine/bench.py` drops the three names from every sample, and
+  `tests/shell/test_boot_inference_determinism.sh` reads the row both ways and
+  fails if they disagree. The sensitivity itself is measured rather than
+  guessed: with `engine/qlf_boot.pl` loaded, creating one atom before the load
+  moves the same number by 28 and creating two, three, five or eight moves it
+  back.
+- The instruction lane warms the artifact set before it samples, and the seven
+  rows the September merge wave moved are re-pinned on the commits that moved
+  them. Both sibling harnesses have booted once unmeasured since they were
+  written, because a boot that GENERATES the `.qlf` set is a different workload
+  from one that loads it; this one did not, and the cost is measured: with the
+  set cleared, `let-heavy` reads 8,786,238,839 on its first sample and
+  9,111,554,612 and 9,111,517,463 on the next two, and min-of-three takes the
+  first, which is exactly its committed pin. So the row had been pinned to a
+  compile and compared ever after against loads, 3.7% apart. Re-pinned with a
+  first-parent ladder over the eleven merge points, cleared and warmed at each:
+  `let-heavy` +3.70% at the assertion merge, `py-method-call` +3.17% and
+  `space-name` +5.00% at the no-cetta-gate merge, `save-load-fast` +1.57% and
+  `save-load-metta` +2.10% at the doors merge, `source-load` -4.03% at the
+  assertion merge, and `term-operators` -1.19% because its pin was already 1.2%
+  above every point of the chain, `5aca9b64` included.
+- The cross-engine parity lane says when a row's own runs land on both sides of
+  the allowance. The verdict would otherwise be whichever half this run's
+  median fell in, with the next run saying the other thing; such a row is now
+  reported with its ends among the rows the box could not measure, while a row
+  whose best run is still over the line fails as before. One corpus row is
+  waived with its measurement: `04-plntestdirect.metta` runs 30,047 inferences
+  against upstream's 40,278, a quarter fewer, and still costs 3.15% more
+  instructions, so it is not more work but a costlier step, and a ladder over
+  every point where the lane's current method exists shows it flat.
+- The load-with-a-wall-bound test proves that door in a process of its own. In
+  a shared process the 0.3-second alarm races SWI's stack cap, and when the cap
+  wins the engine's overflow recovery returns the abort as an answer instead of
+  the bound raising: at the same position in the same serial ordering the
+  assertion passed at 60 to 80 runnable processes and failed at 90 to 100,
+  where the load ran 66.170 seconds and came back
+  `[[(Error (spin) StackOverflow)]]`. A fresh process raises it twelve times
+  out of twelve at 0.301 to 0.307 seconds and down to a one-millisecond bound.
+  The inference bound beside it stays in-process, where it is deterministic.
+- The C seat's benchmark lane tells four things apart that it used to report
+  as one. Three rows moved and are re-pinned, each on the commit that moved it
+  by a first-parent ladder over the eleven merge points since the release
+  re-pin: `boot` 382,606 to 388,152 inferences and 1,070,778,354 to
+  1,088,457,378 instructions, `cursor-step` +1.24% instructions with two thirds
+  of it at one merge, and `error-ball` 1,053,177,858 to 1,329,080,554 (+26.2%),
+  all of it at the assertion-bag-diff merge that also moved its inferences
+  +92,000. `space-pair` did NOT move: its min-of-three varies 1.69% across the
+  eleven points with no trend and its band said 0.6%, so the band is widened to
+  2.0% beside that measurement and the count is left where it was. Twelve
+  rounds of four rows say why a band is the right shape of fix there and more
+  samples are not: `term-in` puts five of twelve samples within 445 retired
+  instructions of each other out of 4.39 billion and three more within 337 at
+  +480,100, and `cursor-step` puts eleven of twelve within 5,292, so those rows
+  are quantised by a discrete event of fixed cost, while `space-pair` has no
+  modes at all and spreads continuously across 52 million with its inference
+  count identical in all twelve. The cause is measured rather than guessed, and
+  it is not the collection the note first suspected: an analogue driven through
+  the same doors runs four arms of 20,000 operations and reads
+  `statistics(stack_shifts, S)` and `statistics(garbage_collection, G)` at zero
+  in every round of every arm, while an SWI engine created and destroyed per
+  iteration multiplies the spread 18.7x on its own and 36.9x with the space
+  also growing. `space-pair` is the only case here that opens a cursor inside
+  its loop, and every cursor is an engine. And three
+  counters this box cannot read now say so instead of reporting a regression:
+  the CPU rows are compared only at or below one runnable process per core,
+  which is where every runnable process still has a core and is what the
+  baseline's own measurement conditions record its pins as taken under, and the
+  boot instruction row is refused from a checkout whose path length differs
+  from the one it was pinned at, which the baseline prices at 0.045% per
+  character. The boot inference row declares a 32-inference allowance, because
+  it moves about twenty-five with nothing but whether the tree has been written
+  over; the harness gained a per-row `inference_allowance` for it, symmetric
+  with the instruction band it has always had.
+
+  The refusal now records what a refused reading measures. Normalised by its
+  own work -- CPU seconds per retired instruction against that row's pin
+  divided by the instructions THAT pin was taken on, which is a different
+  commit for each row -- the six read 1.2x to 2.0x their pinned rate across
+  three gate runs while every instruction count stays inside its band, so the
+  same instructions are simply taking longer and the slowdown is the box rather
+  than any one row. The table also shows what the ceiling does not: at 0.95
+  runnable processes per core, inside the one-per-core rule, every row still
+  reads 1.2x to 1.6x, where the pins' own era was 0.28 to 0.94 per core.
+
+  `error-ball`'s CPU pin is carried across its measured work growth, 0.0901s to
+  0.11474s, and its band widened 40% to 50%. This is the row that turned the
+  lane red the first time the box was quiet enough for a CPU row to be compared
+  at all: 0.0901s was set when the row retired 1,043,687,765 instructions and
+  it now retires 1,329,080,554, so the seconds pin described work the row no
+  longer does and its band had about 11% of itself left. The new number is
+  carried rather than taken on purpose -- a min-of-fifteen at 0.81 runnable
+  processes per core reads 0.13467s and the gate's min-of-three at 0.95 reads
+  0.15012s, and neither is what the row costs -- and the 50% band is this row's
+  own excursion, fifteen rounds spreading 71.7% at that load. `boot`'s pin is
+  left alone with its problem written down instead: its work fell 39.3% since
+  the pin was taken and the pin did not follow, so with a 95% band the row
+  tolerates a 2.49x regression, and it is not carried because its window is a
+  whole process rather than a compute loop.
+- The gate has a third word for a lane. `check.sh` had `ok` and `FAIL`, so a
+  benchmark lane that REFUSED to measure and exited 0 read exactly like one
+  that compared every row and passed: `mork-bench` printed `ok` on four of five
+  full gate runs while another session held the PMU and it compared nothing.
+  The vocabulary was already chosen and only half wired, 125 being what
+  `metta.benchmarking` names `PERF_CONTROL_REFUSED`, what `bounded.sh` refuses
+  with when the process that started a command had already exited, and what
+  `timeout(1)` and `git bisect run` both read as a failure in the wrapper
+  rather than in the command. `measured_main` now returns it instead of 0 for a
+  local refusal, the summary says `skipped`, and the run ends with
+  `MEASURED NOTHING, so nothing here says the tree moved:` and the lane names
+  above its verdict. A skip does not decide the run and does not change the
+  exit status, because a lane that could not measure neither proves nor
+  disproves the tree.
+- Four MORK instruction rows the September merge wave moved are re-pinned, and
+  they are the first rows that seat has COMPARED since the wave landed. The
+  lane needs perf's control pipes, another session held the PMU on run after
+  run, and a refusal exits 0, so `mork-bench` had been passing without
+  measuring anything: `mork-mork-match-first-500` 14,578,170 to 14,301,563
+  (-1.90%), `mork-native-add-500` 6,363,871 to 6,298,841 (-1.02%),
+  `mork-native-add-2000` 25,424,013 to 25,167,493 (-1.01%) and
+  `mork-native-match-first-2000` 1,180,271 to 1,170,609, the last because a
+  rare -0.29% excursion below an otherwise two-instruction-flat row was enough
+  to push it under its floor. A first-parent sweep of the twenty-two merge
+  points since these pins were taken, validated at the pin commit where the
+  rig reads the committed number exactly, gives `mork-mork-match-first-500`
+  one mover (`468350eb`, -303,808 instructions in a single step) and the two
+  `native-add` rows none: they swing 1.99% peak to peak across the wave and end
+  it 0.75% under their pins. Their bands are NOT widened for that, because each
+  point's own triple spreads 0.016% to 0.043%, so the swing is the tree rather
+  than the measurement. Every other row is left where it stands.
+
+  A quarter of a per cent of the move is this branch editing the file the
+  measured process runs. `extensions/mork/benchmarks/workload.pl` gained a
+  catch, a clause and comments when the lane learned to refuse, and restoring
+  that one file at the branch tip returns all three moved rows to the base's
+  reading, while restoring only the catch returns one of them. The seat has the
+  load-structure property the engine baseline records for `engine/bench.pl`:
+  its pins hold only while the workload file is byte-identical, comments
+  included, which is why five rows now sitting 0.15% to 0.19% inside their
+  floor are named in the baseline rather than left to be discovered.
+- The built-package check skips on the dependency it needs rather than on the
+  directory that holds it. `node-dist` guarded on `extensions/node/node_modules`
+  existing, which an install that omitted the dev dependencies satisfies, and
+  then died inside `npm pack` with `Cannot find package 'esbuild'` -- a lane
+  that means to skip for a missing install reporting a build failure instead.
+  It now tests for `esbuild`, the package `tools/build-browser.mjs` imports,
+  and names `npm ci` in the note.
+- The engine's `wfs` autoload declaration lives beside its own
+  `autoload(library(uuid))` rather than in `lib_tabling`. Both files load into
+  `user`, whose autoload table is ONE predicate, so a second file adding to it
+  printed `Redefined static procedure '$autoload'/3` on every load. The `petta`
+  conformance lane compares this engine's output against upstream's line for
+  line and blocked on `tabling_fib.metta` with nothing but that warning between
+  them; it now reads 154/156 agreeing and 0 blocking. A `multifile` declaration
+  would have kept the directive where it is used, but this tree's seam scan
+  reads any multifile under `engine/` or `lib/` as a seam needing a
+  `seam:kind/2` fact, and SWI's autoload table is not one of this tree's seams.
+  The move costs the engine's boot row 49 inferences and the C seat's 72, both
+  re-pinned with that attribution.
+- `lib_tabling` declares where `call_delays/2` comes from. It is
+  `library(wfs)`'s, not `library(tabling)`'s, and the library-index autoloader
+  had been finding it: with autoload off the restraint dispatch raised
+  `Unknown procedure: call_delays/2` and the corpus stopped on
+  `16-cache_policy_restraints.metta`. Anyone running the engine with
+  `autoload` false met the same wall. The declaration is an `autoload/2` and
+  not a `use_module/2`: wfs is needed only where a restrained table is read,
+  and loading it eagerly costs the parity corpus's tabling row 2,006
+  inferences against 823 for the declaration.
+- A benchmark lane tells a box that would not count apart from a tree that
+  moved. `measure_counters` raises `MeasurementRefusedError` where perf
+  answered `<not counted>` for a requested event, and where a controlled
+  workload exited `PERF_CONTROL_REFUSED` (125, the status `timeout(1)` and
+  `git bisect run` already use for "this run says nothing"); every other
+  nonzero exit stays an ordinary `RuntimeError`, which is the workload's own
+  failure. `measured_main` is the one policy every benchmark's `__main__` goes
+  through: a named skip and exit 0 on a developer's box, an error and exit 1
+  where `CI=true`. The refusal names `/proc/sys/kernel/perf_event_paranoid` and
+  the container knob rather than sending a reader into the harness. The C and
+  Python workloads bound their acknowledgement wait for ten seconds, where they
+  used to block until the driver's deadline. `parity-perf` gains the same
+  reading: a timed-out example and a row whose processes split between two
+  costs are printed as `NOT MEASURED ON THIS BOX` with the load beside them and
+  refuse only in CI, where they used to be reported as cross-engine
+  regressions.
+- The policy inventory reads a list of Prolog variables as what it is. A
+  `member(X, [First, Second])` names no values: each element is decided
+  wherever its binding came from, so the lane skips it the way it already skips
+  a partial list, and one literal element anywhere in the list still reports.
+  The tabling library's three `[incremental, monotonic]` lists derive from
+  `metta_tabling_policy_word/3` instead, so the watch words have one home; the
+  loader's four artifact row shapes and the import resolver's two roots carry
+  adjacent exemptions naming their own predicates; and the algebra closure
+  check's exemption is gone, because the rule now decides what its prose said.
+- Ten static gate findings, each at its site. The batching overload of
+  `Space.eval` and `MeTTa.eval` names its second positional term `_second`,
+  since it is positional-only and exists to require two terms rather than to be
+  read; `_space.py`'s superseding transaction body no longer shadows
+  `dataclasses.replace`; `metta.testing` imports `annotated_types` under a
+  module-private alias so it cannot shadow a local index; `_refinements.py`
+  registers its constraint encoders through `_encode_register`, the function
+  `encode.register` forwards to, rather than through a cast a checker cannot
+  follow; `_space_execution.py` writes its two-way None test as the chained
+  identity three of its siblings already use; and the two `__annotations__`
+  properties, the two public parameter names that shadow the functions they
+  select, and the three function-attribute writes a `Callable` annotation
+  cannot carry each state their reason where they sit. `InForce`, the Prolog
+  variable holding a name's installed table policy, is spelled out in
+  `.codespellrc` as a word rather than a typo.
 - The codec builds under mypyc again. `RestraintError` was constructed with a
   `dict[str, object]` unpacked as keywords, which mypyc refuses for parameters
   typed `int | None`; the three restraint fields cross by name.

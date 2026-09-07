@@ -16,9 +16,20 @@ Assumes:
     `bench_describe` with its case table and its workload list, so no case
     name, unit, operation count or corpus path is written twice.
 Guarantees:
+  - a box that would not count is told apart from a tree that moved: this
+    lane exits 0 with a named skip on a developer's box and 1 where CI=true,
+    and never reports a refused measurement as a moved row
+    [tested: test_a_benchmark_lane_skips_a_refusal_locally_and_refuses_it_in_ci;
+    commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6]
   - the deciding counter is inferences, taken from three fresh processes that
     perf is NOT watching, so a machine with no perf still gates
     [tested: engine/bench.sh; commit=c41b54d69e951882e5075393f851a33438247372].
+  - a sample reads the same count from a bare run and from under check.sh,
+    which allocates a scratch directory and exports TMP, TMPDIR and TEMP into
+    every lane. SWI reads TMP for its temporary directory and the boot case is
+    sensitive to the one atom that creates, so the samples run without them
+    [tested: tests/shell/test_boot_inference_determinism.sh, its third arm;
+    commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6].
   - retired instructions are measured over the same region and not over the
     process, through perf's control descriptors, so a case's instruction pin
     excludes the engine boot that every case would otherwise carry
@@ -56,6 +67,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import os
 import shutil
 import subprocess
 import sys
@@ -72,7 +84,11 @@ sys.path.insert(0, str(ROOT / "extensions" / "python"))
 # module before metta, which pyproject declares first-party.
 from benchmarks.configuration import counter_configuration  # noqa: E402
 
-from metta.testing import BenchmarkBaseline, measure_instructions  # noqa: E402
+from metta.testing import (  # noqa: E402
+    BenchmarkBaseline,
+    measure_instructions,
+    measured_main,
+)
 
 BASELINE = HERE / "bench-baseline.json"
 BENCH = HERE / "bench.pl"
@@ -82,6 +98,55 @@ SAMPLES = 3
 #: Every case is well under a second warm. The limit exists so a hung engine
 #: fails the case instead of the run.
 TIMEOUT = 120.0
+#: The caller's temporary directory, removed from every sample's environment.
+#:
+#: SWI reads TMP for its own, and the boot case's inference count is sensitive
+#: to the atom table's exact state: TMP set to anything but `/tmp` creates one
+#: atom, the tmp_dir flag's value, before the process starts, and the row reads
+#: 268,390 instead of 268,417. Twenty-seven is seven times the harness's
+#: four-inference allowance, and `check.sh` allocates a scratch directory and
+#: exports all three names into every lane, so without this the SAME TREE is
+#: green from `sh engine/bench.sh` and red under `sh check.sh engine-bench`,
+#: whichever way the row is pinned.
+#:
+#: The sensitivity is the engine's, not this file's, and it is the same
+#: non-monotonic shape engine/bench.pl's header records for the process's
+#: predicate set. Measured with a positive control rather than inferred: with
+#: engine/qlf_boot.pl loaded, creating ONE atom before the load reads 267,933
+#: against 267,961 for none, while two, three, five and eight read 267,961
+#: again [measured 2026-09-07; command=`swipl -q -g "forall(between(1,N,I),
+#: (atom_concat(hyprobe_,I,A), atom_length(A,_))), user:ensure_loaded(
+#: 'engine/qlf_boot'), statistics(inferences,I0), user:ensure_loaded(
+#: 'engine/metta'), statistics(inferences,I1), X is I1-I0, writeln(X)" -t halt`;
+#: commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6]. No other variable this gate sets or a shell carries moves
+#: the row: LANG, LC_ALL, PYTHONHASHSEED, CI, HOME, SHELL, METTA_TIMEOUT and an
+#: invented name all read 268,417.
+#:
+#: All three names go, not only the one that bites, so a future SWI that
+#: prefers TMPDIR does not reintroduce this silently. Nothing is lost by
+#: dropping them: a whole `--counter-only` run with them pointed at an empty
+#: directory leaves it empty, because no case writes a temporary file.
+#:
+#: Known limitation: this makes the INFERENCE samples caller-independent in
+#: the one way that was measured to matter, not in every way. The instruction
+#: samples are already independent by construction and more strictly -- they
+#: go through metta.benchmarking's measure_counters, which BUILDS a four-name
+#: environment with LC_ALL=C and PYTHONHASHSEED=0. Handing that same built
+#: environment to the inference samples would close the class rather than the
+#: case, and it is not done here because it moves boot to 263,515, evaluate to
+#: 560,367 and translate to 308,653, numbers no sweep point has measured, so
+#: every attribution those rows carry would become an inference. The two
+#: counters therefore describe two configurations that differ by the locale.
+TEMPORARY_DIRECTORY_VARIABLES = ("TMP", "TMPDIR", "TEMP")
+
+
+def _environment() -> dict[str, str]:
+    """The caller's environment without its temporary directory."""
+    return {
+        name: value
+        for name, value in os.environ.items()
+        if name not in TEMPORARY_DIRECTORY_VARIABLES
+    }
 
 
 def _command(goal: str) -> list[str]:
@@ -125,6 +190,7 @@ def _run(goal: str) -> str:
             text=True,
             timeout=TIMEOUT,
             check=False,
+            env=_environment(),
         )
     except subprocess.TimeoutExpired as expired:
         msg = f"{goal} exceeded its {TIMEOUT:g} second limit"
@@ -340,4 +406,4 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(measured_main(main))

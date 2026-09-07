@@ -2199,7 +2199,18 @@ benchmark gates (`benchmark_case`, `benchmark_counter_slope`,
 controlled=False, timeout=60) -> CounterRuns`, `measure_instructions`,
 `BenchmarkBaseline`, `count_atoms`), also exported from `metta.benchmarking`.
 `CounterRuns.events` maps each requested perf event to its samples and
-`.outputs` retains each measured command's stdout.
+`.outputs` retains each measured command's stdout. A box that will not count
+is told apart from a tree that moved: `measure_counters` raises
+`MeasurementRefusedError` where perf answered `<not counted>` for a requested
+event or where a controlled workload exited `PERF_CONTROL_REFUSED` (125,
+timeout(1)'s and `git bisect run`'s status for "this run says nothing"),
+and raises an ordinary `RuntimeError` for every other nonzero exit, which is
+the workload's own failure. `measured_main(main)` is what a benchmark's
+`__main__` guard calls: it turns that refusal into a named skip and exit 0 on
+a developer's box, where a PMU another session holds is not a code change, and
+into an error and exit 1 where `CI=true`, because a runner that cannot count
+is a broken runner. The refusal names `/proc/sys/kernel/perf_event_paranoid`
+and the container knob rather than sending a reader into the harness.
 `metta.testing.SpaceMachine` is the multiset laws of a space as a hypothesis
 state machine, pointed at your own store: `SpaceMachine.for_(factory)` answers
 the machine bound to a factory that returns a FRESH space it may write into,
