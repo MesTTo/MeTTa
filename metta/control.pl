@@ -1243,8 +1243,21 @@ substitute_bound_tokens_(Term, Term).
 %parsed-form rewrite, so stored data expressions keep their literal
 %atoms exactly as they do for every other token.
 metta_substitute_self('&self', Term, Term) :- !.
+%A term that never says &self pays one C write and one C substring probe
+%and no walk: the shortcut rewrite_parsed_form/4 takes on the source text
+%it holds, taken here on the term for the doors that hold no text, the
+%one-equation door, the deferred door's fallback, the removal probe and a
+%batch's arriving equations. The walk is Prolog and costs the term's size in
+%inferences where the probe costs two whatever the size [measured
+%2026-09-08: the unprobed walk on those doors moved 79 twin budgets by 12 to
+%5731 inferences; command=sh check.sh twins; commit=WORKTREE]. A string, not
+%an atom, so a hot door leaves nothing in the atom table.
 metta_substitute_self(Space, Term, Out) :-
-    substitute_self_walk_(Term, Space, Out).
+    term_string(Term, Text),
+    (   sub_string(Text, _, _, _, "&self")
+    ->  substitute_self_walk_(Term, Space, Out)
+    ;   Out = Term
+    ).
 
 substitute_self_walk_(Term, Space, Out) :- atom(Term), !,
                                            ( Term == '&self'
@@ -1273,15 +1286,15 @@ rewrite_parsed_form(Space, FormStr, Term, Rewritten) :-
     ->  Term1 = Term
     ;   string(FormStr)
     ->  (   sub_string(FormStr, _, _, _, "&self")
-        ->  metta_substitute_self(Space, Term, Term1)
+        ->  substitute_self_walk_(Term, Space, Term1)
         ;   Term1 = Term
         )
     ;   atom(FormStr)
     ->  (   sub_atom(FormStr, _, _, _, '&self')
-        ->  metta_substitute_self(Space, Term, Term1)
+        ->  substitute_self_walk_(Term, Space, Term1)
         ;   Term1 = Term
         )
-    ;   %No source text to probe: walk, correctness over the shortcut.
+    ;   %No source text to probe: metta_substitute_self/3 probes the term.
         metta_substitute_self(Space, Term, Term1)
     ),
     (   seam:form_rewriter(Rewriter)

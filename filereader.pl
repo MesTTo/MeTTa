@@ -1489,11 +1489,25 @@ recompile_definitions_mentioning(F) :-
 record_translated_from(Ref, Term, SourceRef) :-
     record_translated_from(Ref, Term, none, SourceRef).
 
+% A binding row records what arrival-time rewriting did to the occurrence
+% BEYOND resolving &self: a bound token, a form rewriter. &self itself needs
+% no row, because every compile path resolves it against the storing space
+% (the law in stored_equation_source/4 and in spaces:add_function_atom/6), so
+% a row that only said so was derivable state, and it was written by the
+% doors that carried a stored reference and not by the one-equation door,
+% which made "has a row" a fact about the door rather than the occurrence.
+% The guard is the batch door's own: with no token bound and no rewriter
+% registered, the rewrite IS the law and nothing is compared.
 record_translated_from(Ref, Term, StoredRef, SourceRef) :-
     assertz(translated_from(Ref, Term), SourceRef),
     (   StoredRef \== none,
+        ( seam:form_rewriter(_) ; metta_token(_, _) ),
         stored_atom_of_ref(StoredRef, Space, Original),
-        \+ Original =@= Term
+        (   Space == '&self'
+        ->  Law = Original
+        ;   metta_substitute_self(Space, Original, Law)
+        ),
+        \+ Law =@= Term
     ->  assertz(translated_equation_binding(Space, StoredRef, Ref), BindingRef),
         ( source_recompile_owners(Owners)
         -> record_recompiled_source_assertion(Owners, BindingRef)
@@ -1508,6 +1522,19 @@ record_translated_from(Ref, Term, StoredRef, SourceRef) :-
 % Read the exact stored occurrence that a deferred translation is visiting.
 % A resolved sibling already owns its executable clause even when an older
 % equation of the same function is still waiting to compile.
+%
+% An occurrence WITHOUT a binding row compiles against the space it is stored
+% in: &self in the clause names that space, the reading every other compile
+% path gives it (the reader's per-form door through rewrite_parsed_form/4, the
+% one-equation door through spaces:add_function_atom/6). Answering the raw
+% stored atom here compiled a natively added or fast-restored equation against
+% the ENGINE ROOT while the same atom through the reader read its own space: a
+% fast image holding two native `(= (f $x) (match &self ...))` occurrences
+% restored to a space that answered nothing for the match arm [tested:
+% test_fast_images_preserve_generated_overloaded_ingress,
+% an_unbound_deferred_equation_reads_the_space_it_is_stored_in;
+% commit=WORKTREE]. The root is the identity case and pays no walk; the
+% comparison is inline so a root batch costs what it cost.
 stored_equation_source(Space, Original, Resolved, StoredRef) :-
     spaces:native_storage_module_ready(Space, Storage),
     native_atom_clause(Space, Original, Head),
@@ -1515,7 +1542,9 @@ stored_equation_source(Space, Original, Resolved, StoredRef) :-
     (   translated_equation_binding(Space, StoredRef, Ref),
         translated_from(Ref, Bound)
     ->  Resolved = Bound
-    ;   Resolved = Original
+    ;   Space == '&self'
+    ->  Resolved = Original
+    ;   metta_substitute_self(Space, Original, Resolved)
     ).
 
 % One source-form node per executable clause keeps multiple equations for one
