@@ -1874,6 +1874,40 @@ controlled=False, timeout=60) -> CounterRuns`, `measure_instructions`,
 `BenchmarkBaseline`, `count_atoms`), also exported from `metta.benchmarking`.
 `CounterRuns.events` maps each requested perf event to its samples and
 `.outputs` retains each measured command's stdout.
+`metta.testing.SpaceMachine` is the multiset laws of a space as a hypothesis
+state machine, pointed at your own store: `SpaceMachine.for_(factory)` answers
+the machine bound to a factory that returns a FRESH space it may write into,
+clear and drop, as a class, so the same object is both
+`run_state_machine_as_test(SpaceMachine.for_(factory))` and the pytest shape
+`TestMine = SpaceMachine.for_(factory).TestCase`; `SpaceMachine(factory)` is the
+constructor underneath both. Each generated step adds, adds a second copy,
+removes one copy, clears, queries, or writes inside a speculative scope or a
+transaction that commits or rolls back, and after every step the space is
+compared against a `Counter`. It requires `add` and `enumerate` and REFUSES
+without them, naming `check_space_provider` and `SpaceComplianceSuite`; every
+other rule is skipped where the space cannot support it, and
+`SpaceMachine.skips(space)` answers which rules those are and why before any run,
+each reason the engine's own refusal. The transaction and speculation rules run
+for a native space and for a foreign one declaring `(writes <space>
+transactional)`, and skip for `best-effort`, `atomic-single` or silence, because
+a write a rollback does not undo is not a bag law. Subclass it to add a law of
+your own; the library's own suite adds the native save-and-load round trip that
+way.
+`metta.testing.assert_answers(actual, expected, *, msg=None)` compares two
+answer bags with multiplicity and blind to order, and
+`assert_includes(actual, expected, *, msg=None)` asks the one-sided containment.
+Each side is `Rows`, `Answers`, or any sequence of atoms or of values `encode`
+accepts; a `Rows` compares row by row, each row the expression of its values, so
+project one column with `rows.x` to compare values, and one answer handed over
+as itself is REFUSED, a `str` included, rather than compared character by
+character. Neither is a second implementation: both hand the two bags to the
+engine's own `assert-answers` and `assert-includes-answers`, so the relation is
+`subtraction-atom`'s, the failure is an `AssertionFailure` carrying the same
+`.missing` and `.excess`, and everything below the first line of the message is
+character-for-character what `assertEqualToResult` prints for the same bags. It
+costs one engine crossing per call, 289 inferences over two four-answer bags,
+and the failure is printed on stderr as well as raised, exactly as a MeTTa
+assertion is. pytest's assertion rewriting is not involved.
 `testing.cases(head)` is deal.cases's shape over MeTTa's contracts: every
 parameter of a `@m.define`d head draws through Hypothesis's `from_type`, so
 `Annotated[int, Gt(0)]` draws positive integers, an atom class draws atoms

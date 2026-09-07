@@ -34,6 +34,16 @@ Source: `extensions/python/metta/testing.py`.
 >   - laws(algebra, space) generates one property test per declared law row
 >     under the ghostwriter's names, passing for the boolean semiring and
 >     failing with the counterexample for a carrier that breaks a law
+>
+>   - assert_answers and assert_includes hand both bags to the engine's own two
+>     assertion doors rather than computing a difference here, so the relation is
+>     subtraction-atom's, the failure carries the same .missing and .excess, and
+>     the report below the first line of the message is the engine's own text
+>
+>   - one answer handed over as itself is refused with the sequence spelling
+>     shown, a str included
+>   - SpaceMachine resolves behind PEP 562 like the two suites, so importing this
+>     module for the strategies needs neither pytest nor hypothesis
 
 The entries below reproduce the source signatures and docstrings.
 
@@ -329,6 +339,55 @@ def check_twin(defined, cases) -> list[str]:
 >
 > Raises AssertionError on the first case where they differ, naming the
 > case and both answers.
+
+## `assert_answers`
+
+```python
+def assert_answers(actual, expected, *, msg=None) -> None:
+```
+
+> Assert that two answer bags are equal, ignoring order.
+>
+> The Python face of MeTTa's `(assert-answers ...)`, which is the door
+> `assertEqualToResult` reaches: multiplicity counts and order does not, so
+> `(a a b)` is not `(a b b)` and `(1 2)` is `(2 1)`.
+>
+>     from metta import testing
+>
+>     def test_the_edges_are_what_the_program_stored():
+>         testing.assert_answers(space.match(pattern).x, [S.b, S.c])
+>
+> Each side is `Rows`, `Answers`, or any sequence of atoms or of values
+> `encode` accepts; a `Rows` compares row by row, each row the expression of
+> its values, so project one column with `rows.x` to compare values.
+>
+> A false claim raises `AssertionFailure` carrying `.missing` and `.excess`,
+> the two directed bag differences as tuples of atoms, and a message whose
+> report reads exactly as the engine's own does for the same two bags. It is
+> printed on stderr as well as raised, which is what every MeTTa assertion
+> does and for the same reason: a ball any `except` can swallow says nothing
+> when it is swallowed.
+>
+> pytest's assertion rewriting is not involved. This raises, so it reports
+> the same way inside a `unittest` case, a plain script or a notebook.
+
+## `assert_includes`
+
+```python
+def assert_includes(actual, expected, *, msg=None) -> None:
+```
+
+> Assert that every expected answer was produced, and allow more.
+>
+> The Python face of MeTTa's `(assert-includes-answers ...)`, which is the
+> door `assertIncludes` reaches. The relation is containment, so an answer in
+> excess of the expectation is LEGAL and the failure names only what was
+> wanted and never came: `.missing` carries that bag and `.excess` is None,
+> absence rather than an empty tuple, because a two-sided report of a
+> one-sided verdict points the reader at something that is not broken.
+>
+> `assert_answers` is the two-sided relation. Everything else about the two
+> is the same, arguments included.
 
 ## `Case`
 
