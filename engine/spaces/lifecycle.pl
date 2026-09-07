@@ -320,15 +320,27 @@ metta_exec_module_name(Space, Module) :-
 
 %The chain, and why each link is where it is.
 %
-%  system  ->  the ENGINE's module  ->  '$metta_exec:&self'  ->  every other
-%                                                                space
+%  system  ->  the ENGINE's module  ->  prelude  ->  '$metta_exec:&self'
+%                                                ->  every other space
 %
-%&self's module inherits the engine's, so every builtin, every library
-%predicate and every function imported from Prolog still resolves from a
-%compiled MeTTa clause. Every other space inherits &self's, which is the
-%sharing rule the engine already states for functions and types ("&self is the
-%shared space", fun_here_in/2) and which named spaces used to get by accident:
-%&self WAS `user`, and SWI gives an implicitly created module the base `user`.
+%&self's module inherits the PRELUDE's, which inherits the engine's, so every
+%builtin, every library predicate and every function imported from Prolog still
+%resolves from a compiled MeTTa clause. Every other space inherits &self's,
+%which is the sharing rule the engine already states for functions and types
+%("&self is the shared space", fun_here_in/2) and which named spaces used to get
+%by accident: &self WAS `user`, and SWI gives an implicitly created module the
+%base `user`.
+%
+%THE PRELUDE IS A TIER RATHER THAN AN IMPORT, and two things decide that. The
+%first is names: MeTTa's `union` and `intersection` are library(lists)' union/3
+%and intersection/3 spelled the same way, and the engine module imports those,
+%so a prelude head defined there or imported there would collide with a
+%predicate every list-using engine and library file expects. Below the engine
+%module both names resolve the way each caller means them, and no import list
+%anywhere has to be edited. The second is shadowing: a program that defines a
+%prelude name compiles the definition into its OWN module, which shadows this
+%tier exactly as it shadows any builtin, so a prelude head needs no clause
+%eviction at all [source: engine/metta/prelude.pl, evict_prelude_definition/1].
 %
 %The base is SET rather than left to the name. SWI gives an implicitly created
 %module whose name starts with `$` the base `system` and every other name the
@@ -337,10 +349,10 @@ metta_exec_module_name(Space, Module) :-
 %alone makes '$metta_exec:&self' unable to see the engine at all
 %[measured 2026-08-19: '$metta_exec:&self':'add-atom'/3 raised
 %existence_error on boot until the base was set explicitly]
-%[tested: spaces_execution_modules:the_chain_is_engine_then_self_then_space].
+%[tested: spaces_execution_modules:the_chain_is_engine_then_prelude_then_self_then_space].
 metta_exec_module_base(Space, Base) :-
     (   Space == '&self'
-    ->  metta_engine_module(Base)
+    ->  Base = prelude
     ;   space_restricted(Space, Grants)
     ->  ensure_restricted_profile(Grants, Base)
     ;   space_parent(Space, Parent)

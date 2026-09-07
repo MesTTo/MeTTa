@@ -628,7 +628,7 @@ test(the_optional_measure_field_is_stored_when_written) :-
         erase(Ref)).
 
 %The engine ships ten of these and they enter through the same door: four from
-%engine/prelude.metta's own loader and six read out of
+%the engine prelude's own installer and six read out of
 %lib_builtin_types.metta by the pass that already reads its (: ...) rows. A
 %claim about a builtin has to be LOADED to be worth anything, since explain and
 %every host docstring answer from '&metta'.

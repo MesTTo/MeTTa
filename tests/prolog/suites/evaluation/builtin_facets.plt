@@ -56,13 +56,23 @@ test(the_core_declaration_keeps_the_name_registry_authoritative) :-
             Unregistered),
     assertion(Unregistered == []).
 
-test(prelude_facets_are_derived_from_prelude_ownership) :-
-    forall(( prelude_owned(Name),
-             prelude_equation(Name, ['=', [Name|Arguments], _]),
-             length(Arguments, Arity) ),
-           assertion(builtin_implementation(Name/Arity, prelude(_)))),
-    assertion(builtin_implementation(union/2, prelude(equation))),
-    assertion(builtin_implementation(intersection/2, prelude(equation))).
+%The prelude's vocabulary is Prolog, so its facets are ordinary prolog/1 rows
+%naming the tier module its bodies live in, and every head the registry
+%declares carries one.
+test(prelude_facets_name_the_tier_that_implements_them) :-
+    forall(prelude_head(Name, Arity),
+           assertion(builtin_implementation(Name/Arity, prolog(prelude)))),
+    assertion(builtin_implementation(union/2, prolog(prelude))),
+    assertion(builtin_implementation(intersection/2, prolog(prelude))),
+    %And the facet is true of the live image: the predicate exists in that
+    %module and is that module's own rather than something it inherited.
+    forall(( prelude_head(Name, Arity), PrologArity is Arity + 1 ),
+           assertion(builtin_implementation_hook_exists(Name/Arity,
+                                                        prolog(prelude)))),
+    forall(( prelude_head(Name, Arity), PrologArity is Arity + 1,
+             functor(Head, Name, PrologArity) ),
+           assertion(predicate_property(prelude:Head,
+                                        implementation_module(prelude)))).
 
 test(extension_facets_are_derived_from_extension_ownership) :-
     forall(( seam:extension_builtin(Name, _),

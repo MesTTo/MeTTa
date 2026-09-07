@@ -378,6 +378,37 @@ CPU-hours over 2026-09-01 to 09-03 with only a parent-side timeout on them, and
 a hand-started `swipl ... materialization.plt` ran 7,540 seconds at 97.8% CPU
 on 2026-09-05 with nothing on it at all.
 
+## Adding a form to the engine's prelude
+
+The prelude is the vocabulary every space reaches with no `import!`. It is
+Prolog: `engine/prelude.pl` holds the bodies in a module the execution chain
+resolves through between the engine's module and `&self`'s, and
+`engine/metta/prelude.pl` holds everything the engine knows ABOUT them. A new
+form is four things, and all four go in one commit.
+
+1. **A Prolog clause** in `engine/prelude.pl`, and its head on the module's
+   export list. The predicate takes the MeTTa arity plus one: the last
+   argument is the result.
+2. **Rows in `engine/metta/prelude.pl`**: `prelude_head/2` with the MeTTa
+   arity, `prelude_builtin_facet/2` naming `prolog(prelude)`, a
+   `prelude_declaration/2` row if the form has a type (an `Atom` parameter is
+   what makes an argument arrive as syntax), a `prelude_document/2` row so
+   `(help! <name>)` answers, a `prelude_cost_claim/1` row if the form makes a
+   cost claim the `cost-rows` lane can measure, a `prelude_rule_registration/2`
+   row if the form is a compile-time rewrite, and a `prelude_shipped_equation/2`
+   row carrying the equation the body implements.
+3. **The equation in `tests/data/prelude-spec.metta`**, which is the readable
+   definition and the oracle. The `prelude_shipped_equation/2` row is its
+   parsed form and the suite refuses them if they disagree.
+4. **Cases in `tests/prolog/suites/evaluation/prelude_spec.plt`**, through
+   `prelude_spec_case/2` for an ordinary form or `prelude_spec_expansion_case/2`
+   for a rewrite. The suite runs both sides and compares the answer bag, the
+   printed output and the raised ball; it also fails when a shipped head has no
+   case at all.
+
+Run `sh engine/test.sh suites/evaluation/prelude_spec.plt` and
+`sh engine/test.sh suites/evaluation/prelude.plt` while you work.
+
 ## Change requirements
 
 Every behavior change carries a regression test in the matching tier and

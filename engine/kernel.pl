@@ -5,7 +5,8 @@
 %   where one exists. The registries stay in engine/metta.pl's tables
 %   (metta_grounded_token/1, the register_builtin_fun list, the effect
 %   walk's rows), the way every consulted engine file's builtins already
-%   work; the Atom masks live in engine/prelude.metta's declarations.
+%   work; the Atom masks are prelude_declaration/2 rows in
+%   engine/metta/prelude.pl.
 % Assumes: consulted by engine/metta.pl alongside the other engine files;
 %   space_atom_count/2, metta_capacity_count/2 and
 %   metta_capacity_count_install/1 come from engine/spaces.pl,
@@ -75,8 +76,9 @@
 %for a plain add; a replayed duplicate drops at 46.00; the match
 %spelling is its differential, pinned in
 %test_set_semantics_is_a_declared_rule_not_a_property_of_the_space].
-%The Atom mask on the second parameter lives in engine/prelude.metta so the
-%asked-about atom is never reduced by the asking [tested: spaces_contains].
+%The Atom mask on the second parameter is a prelude_declaration/2 row in
+%engine/metta/prelude.pl, so the asked-about atom is never reduced by the
+%asking [tested: spaces_contains].
 'space-contains'(Space, _, _) :- var(Space), !,
                                  refuse_unbound_input('space-contains', 1).
 'space-contains'(_, Atom, _) :- var(Atom), !,
@@ -103,8 +105,8 @@
 %words, (refuse (does-not-carry <type>)) or
 %(refuse (pool-at-capacity <limit>)), so the refusal arrives as
 %metta_add_refused like any handler's. The Atom mask on the atom
-%parameter lives in engine/prelude.metta: the pool judges the offered atom
-%as itself [tested: the_sugar_judges_the_offered_atom_as_itself].
+%parameter is a prelude_declaration/2 row in engine/metta/prelude.pl: the
+%pool judges the offered atom as itself [tested: the_sugar_judges_the_offered_atom_as_itself].
 %The two fixed contract heads read &metta's boot-created storage directly,
 %so an absent row still fails while the general =../catch wrapper is off
 %this per-add path.

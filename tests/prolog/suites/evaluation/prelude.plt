@@ -312,7 +312,7 @@ test(a_user_equation_evicts_the_prelude_definition,
                 %Reloading restores ONLY the evicted name: names still
                 %owned skip whole, which is what makes the load safe to
                 %repeat and this test order-independent.
-                load_engine_prelude ))]) :-
+                install_engine_prelude ))]) :-
     %The user's word replaces the engine's: defining a prelude-owned name
     %in &self evicts the prelude's clauses and declarations for it, so
     %the program's own definition answers ALONE, exactly as it did before
@@ -322,7 +322,16 @@ test(a_user_equation_evicts_the_prelude_definition,
     eval_string("(if-equal 1 1 yes no)", Results),
     Results == [[shadowed, yes, no]],
     \+ prelude_owned('if-equal'),
-    \+ prelude_clause_ref('if-equal', _).
+    %The prelude has no clause in this module to erase any more: its bodies
+    %live in the prelude tier and the user's equation compiles into &self's own
+    %module, which shadows the tier. What eviction takes is the REGISTERS, and
+    %what makes the answer exclusive is that the definition is LOCAL here
+    %[source: engine/spaces/lifecycle.pl, metta_exec_module_base/2].
+    metta_self_module(Self),
+    assertion(\+ predicate_property(Self:'if-equal'(_, _, _, _, _),
+                                   imported_from(_))),
+    assertion(predicate_property(Self:'if-equal'(_, _, _, _, _),
+                                 number_of_clauses(1))).
 
 test(importing_the_tombstoned_library_is_a_noop) :-
     eval_string("(import! &self (library lib_he))", _),
@@ -560,7 +569,7 @@ test(eviction_takes_the_prelude_docs_with_the_name,
       cleanup(( metta_remove_atom('&self',
                                   [=, ['type-cast', A2, B2, C2],
                                    [shadow, A2, B2, C2]], _),
-                load_engine_prelude ))]) :-
+                install_engine_prelude ))]) :-
     \+ prelude_doc_atom('type-cast', _),
     doc_eval("(collapse (get-doc type-cast))", [[]]).
 
@@ -570,8 +579,8 @@ test(the_doc_example_still_speaks_for_the_library,
 
 :- end_tests(prelude_docs).
 
-% The derived forms: each ships as an equation in engine/prelude.metta plus the
-% one runnable the loader accepts, `!(add-translator-rule! NAME)`. That is the
+% The derived forms: each ships as a Prolog body in engine/prelude.pl that
+% answers its expansion, plus a prelude_rule_registration/2 row. That is the
 % whole of what moving a form out of the compiler needs, and the registration
 % is the prelude's to withdraw, because a program that defines the name has
 % taken the form over and its equations are not a compile-time expander.
@@ -602,14 +611,16 @@ test(a_derived_form_answers_with_no_import) :-
     derived_answers("(or-else False fallback)", [fallback]),
     derived_answers("(collapse (unique (superpose (1 2 1))))", [[1, 2]]).
 
-%The loader takes exactly one runnable shape, and only for a name the prelude
-%itself defines, so a registration can never point at somebody else's
-%equations.
+%A rule registers only for a name the prelude itself owns, so a registration
+%can never point at somebody else's predicate. The two tables in
+%engine/metta/prelude.pl are what this holds to each other: a
+%prelude_rule_registration/2 row whose name has no prelude_head/2 row raises
+%here rather than registering a rule that would expand through whatever
+%predicate happened to answer.
 test(a_registration_for_a_name_the_prelude_does_not_define_is_refused,
      [throws(error(existence_error(prelude_definition, 'no-such-prelude-name'),
                    _))]) :-
-    load_prelude_form(runnable, "(add-translator-rule! no-such-prelude-name)",
-                      ['add-translator-rule!', 'no-such-prelude-name']).
+    install_prelude_rule('no-such-prelude-name', []).
 
 %A program that defines the name takes the whole form over: the prelude's
 %equations go, and so does the registration, or the translator would call the
@@ -618,7 +629,7 @@ test(a_user_definition_withdraws_the_registration_with_the_clauses,
      [ setup(( retractall(silent(_)), assertz(silent(true)) )),
        cleanup(( 'remove-atom'('&self', [=, ['or-else'|_], _], _),
                  retractall(silent(_)), assertz(silent(false)),
-                 load_engine_prelude )) ]) :-
+                 install_engine_prelude )) ]) :-
     assertion(translator_rule('or-else')),
     process_metta_string("(= (or-else $a $b) taken-over)", _),
     assertion(\+ translator_rule('or-else')),
@@ -634,7 +645,7 @@ test(a_named_space_definition_withdraws_a_prelude_translator_registration,
        cleanup(( catch(metta_release_space('&plunit-prelude-rule-shadow'),
                        _, true),
                  retractall(silent(_)), assertz(silent(false)),
-                 load_engine_prelude )) ]) :-
+                 install_engine_prelude )) ]) :-
     assertion(translator_rule(union)),
     process_metta_string(
         "(= (union $a $b) (car-atom $a))\n!(union (+ 1 2) x)",

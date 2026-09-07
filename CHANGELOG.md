@@ -634,6 +634,28 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- **The engine's prelude is Prolog.** The standard vocabulary every space
+  reaches with no `import!` -- the assert family, `if-equal`, `if-error`,
+  `throw`, `return-on-error`, `unquote`, `atomically`, `interpret`,
+  `is-function`, `match-types`, `type-cast` and the eight derived forms -- used
+  to be 783 lines of MeTTa that every boot parsed and translated. The bodies
+  are `engine/prelude.pl`, a module the execution chain resolves through
+  between the engine's module and `&self`'s; the declarations, documents, cost
+  rows, translator registrations and shipped equations are tables in
+  `engine/metta/prelude.pl` that the compiled artifact carries; and the MeTTa
+  equations are `tests/data/prelude-spec.metta`, the readable definition and
+  the oracle a differential suite runs the Prolog against, head by head, over
+  the suites' cases and adversarial ones.
+
+  Nothing about the vocabulary changed: same names, same declarations, same
+  documents, same answers, and a program that defines one of these names still
+  takes it over entirely and one-way. A boot costs 248,271 inferences against
+  272,323, -8.83%, and the five forms that reached their answer through a
+  minimal-MeTTa function frame cost between 8.9 and 56 times less per call:
+  `match-type-or` 4,854 inferences to 86, `match-types` 5,401 to 156,
+  `type-cast-holds` 4,972 to 203, `return-on-error` 2,968 to 69, `if-error`
+  3,800 to 127 and `throw` 2,122 to 62.
+
 - **`metta.arrays.ARRAY_OPS` is gone.** What a space installed is a property of
   that space now, one `(array-backend <space> <library> (ops ...))` row in
   `&metta` that `arrays.ops(space)` and `arrays.backend(space)` read back and a
@@ -796,6 +818,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Removed
 
+- `engine/prelude.metta`. Its vocabulary is `engine/prelude.pl` and its text is
+  `tests/data/prelude-spec.metta`; `load_engine_prelude/0` and the form loader
+  behind it go with it, and `install_engine_prelude/0` writes the registers
+  from the tables the artifact carries. The `prelude(equation)` implementation
+  facet goes too: a prelude head is an ordinary `prolog(prelude)` builtin now,
+  the shape `engine/kernel.pl`'s four heads already had.
 - `metta_control_signal_kind/2` from the Python shim, which nothing had called
   since it was written and which held a second reading of the kind list the
   engine now owns.

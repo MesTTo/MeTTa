@@ -2,8 +2,8 @@
 
 The translator gives 68 heads a meaning of their own. 60 of them are clauses
 of `translate_special_dl/5` in `engine/translator/special_forms.pl`, 65 clauses
-over those 60 heads, and the remaining 8 are equations in
-`engine/prelude.metta` registered with `add-translator-rule!`. Ask the engine
+over those 60 heads, and the remaining 8 are Prolog bodies in
+`engine/prelude.pl` registered with `add-translator-rule!`. Ask the engine
 rather than this paragraph: `metta_special_form_head/1` is
 `clause(translate_special_dl(Name,_,_,_,_), _)` and answers the first number,
 and the four counts here were each wrong before 2026-09-03 because nothing
@@ -115,10 +115,12 @@ measured.
 
 ## The prelude's derived forms, 8 heads
 
-Each is an equation in `engine/prelude.metta` plus `!(add-translator-rule! NAME)`.
-The `Atom` parameters make the arguments arrive as syntax and the `%Undefined%`
-result type makes the `(noeval ...)` body translate, since an `Atom` result
-would leave the body untranslated and hand noeval itself back.
+Each is a Prolog body in `engine/prelude.pl` that answers its expansion, plus a
+`prelude_rule_registration/2` row in `engine/metta/prelude.pl`. The `Atom`
+parameters make the arguments arrive as syntax and the `%Undefined%` result
+type is what re-enters the expansion at a call site the rewrite did not reach.
+The equation each body answers for is in `tests/data/prelude-spec.metta`, and
+the differential suite runs the two against each other.
 
 | head | expands to | measured |
 |---|---|---|

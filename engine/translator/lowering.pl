@@ -1781,15 +1781,15 @@ functioncall_dl(Fun, Chains, Args, IsPartial, Bound, Out, Goals0, Goals) :-
     (   (   EquationCall == true
         ->  TypedPreCall = [( nonvar(Out) -> TypedOut = Out ; true )],
             typed_functioncall_dl(Fun, Chains, Args, IsPartial, Bound,
-                                  TypedOut, RuntimeArgs, TypedPreCall, Goals0,
-                                  TypedTail),
+                                  TypedOut, runtime_args(RuntimeArgs),
+                                  TypedPreCall, Goals0, TypedTail),
             TypedOut = Produced,
             application_protocol_goal(WrittenCall,
                                       [WrittenHead|RuntimeArgs], Produced,
                                       Out, ApplicationGoal),
             TypedTail = [ApplicationGoal|Goals]
         ;   typed_functioncall_dl(Fun, Chains, Args, IsPartial, Bound, Out,
-                                  _RuntimeArgs, [], Goals0, TypedTail),
+                                  no_runtime_args, [], Goals0, TypedTail),
             TypedTail = Goals
         )
     ->  true

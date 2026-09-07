@@ -354,6 +354,9 @@ reaches(filereader, translator_rules, 'a fast-cache image is a whole program and
 reaches(filereader, type_rules, 'source compilation and rollback hold the typing policy stable while rebuilding affected clauses').
 reaches(kernel, metta, 'the kernel builtins are typed and refuse through the core\'s own vocabulary').
 reaches(kernel, spaces, 'the kernel builtins ask spaces about their atoms').
+reaches(prelude, metta, 'the prelude vocabulary is written in the core\'s own operations: it compares with =alpha, asserts through assert-answers, evaluates through metta_eval_step and asks get-metatype what it was handed').
+reaches(prelude, spaces, 'match-types unifies two types through the matcher, and type-cast prunes the empty answers out of a collapse').
+reaches(prelude, translator, 'a masked operand is collapsed and a masked result re-entered through the translator\'s own runtime doors, which is what the equations these bodies replace compiled to').
 reaches(lib_tabling, ext_points, 'declared ownership and event seams route tabled calls and retire their registrations').
 reaches(lib_tabling, metta, 'declared context, effect-walk and cache-policy services decide the executable owner and admissible table').
 reaches(lib_tabling, parser, 'the published writer renders a rejected reflection row in the language\'s syntax').

@@ -191,7 +191,7 @@ test(a_collection_closure_keeps_each_binding_form_local_to_one_element,
     assertion(Answers == Expected).
 
 % unquote HOLDS its operand: `(: unquote (-> Atom %Undefined%))` in
-% engine/prelude.metta, so the argument arrives unreduced and the written
+% engine/metta/prelude.pl, so the argument arrives unreduced and the written
 % `(quote X)` reaches the head `(= (unquote (quote $A)) ...)`. A quote that
 % would have to be COMPUTED first therefore never reaches that head, and the
 % call stays inert through the second clause.

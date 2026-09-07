@@ -407,7 +407,7 @@ test(acyclic_binding_keeps_let_semantics,
 
 :- end_tests(translator_let).
 
-% The derived forms: each one is an equation in engine/prelude.metta plus the
+% The derived forms: each one is a Prolog body in engine/prelude.pl plus the
 % registration that makes the translator consult it, where it used to be a
 % clause of the compiler. The property that matters is that the call and the
 % expansion written out by hand compile to the SAME goals, which is what
@@ -3007,7 +3007,7 @@ test(only_the_compiled_arity_stays_registered,
 %The two meet in USE exactly when the parameter is declared `Atom`, so the
 %argument arrives unreduced and the written `(quote X)` reaches the pattern.
 %That is how the shipped `unquote` works: `(: unquote (-> Atom %Undefined%))`
-%with the head `(= (unquote (quote $A)) ...)` in engine/prelude.metta, and it
+%with the head `(= (unquote (quote $A)) ...)` in the prelude's spec, and it
 %is why `(unquote (quote (+ 1 2)))` is 3 while a quoted head on an ordinary
 %(evaluating) parameter never matches, in this engine and upstream alike
 %[measured 2026-08-29].
