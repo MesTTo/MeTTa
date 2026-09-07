@@ -381,3 +381,50 @@ against 111,718,052, and the same 23 benchmark cases failing in the same
 order, `annotated-relation` at 830,767 inferences against a pinned 315,385
 where this branch reads 830,765. `engine/bench-baseline.json` was last
 re-pinned at `dd161fbcf` and merges landed on `petta` after it without one.
+
+Measured, and THIS package's: the C seat's ownership row cost one inference on
+every space operation. Against the same control worktree, `c-bench`'s
+`space-pair` case, which runs 20,000 add-and-match pairs, read 1,160,032
+inferences on this branch against 1,140,032 on the base, deterministic across
+all three samples on both trees, and exactly one per pair. The cause was a
+resident clause: `seam:foreign_space(Space) :- metta_c_provider(Space).` sits in
+the database of every process that loads this seat, and the engine asks that
+ownership seam once per space operation, so the clause is tried on every
+operation whether or not a C provider was ever opened.
+
+Rejected: re-pinning the baseline and recording the mechanism, which is what
+the harness offers for a deliberate cost. `engine/spaces/foreign.pl` already
+records the rule this breaks, beside its own 2026-08-20 measurement of four
+benchmarks moving when one shared test was put in front of every space door:
+the ownership question is answered off the operation path or not at all.
+
+Decided: the row is asserted when a provider opens and retracted when it
+closes, which is the shape `extensions/node/bridge.pl` already uses and
+measured for itself. `space-pair` came back to 1,140,032, byte-identical to the
+base. Three things came with it, because the door had been doing less than the
+header promised:
+
+- `metta_claim_space(Space, cmetta)` and `metta_disclaim_space/2`, the engine's
+  claim door, which every other provider in the tree already calls and which
+  `cmetta.h` already promised `mt_provider_open()` went through. Before this a
+  C provider could take a name MORK, redis or the Python seat owned, and the
+  collision would have surfaced later as a wrong answer.
+- `metta_space_name/1` at the door. `tests/prolog/static_checks.pl` enforces the
+  ampersand rule by reading `seam:foreign_space/1` clause HEADS in the source,
+  and this seat now writes none, so the refusal moves to where the Python and
+  Node seats keep theirs.
+- `retract/1` rather than `retractall/1` when the row goes. `retractall/1`
+  unifies HEADS alone, so on a predicate other seats bridge into it would take
+  their clause for the same name with it.
+
+`test_seam.c` gained the two refusals and a reopen after close, which is what
+proves the claim was given back rather than leaked.
+
+The one cost that stays is at boot, and it was measured rather than assumed:
+cutting the seam block out of `extensions/cmetta/bridge.pl` and running the
+`boot` case again reads 371,837 inferences against 379,212 with it, so the
+seat's Prolog seam costs 7,375 inferences once per process to consult. Boot
+stays 3,394 inferences under its pinned 382,606. Deferring the five capability
+hooks into a file the door loads on first open would take about half of that
+back and was rejected: it buys 0.4% of a boot that is already inside its pin,
+and costs a file and a load-time branch on the path that opens a provider.

@@ -3379,6 +3379,12 @@ speaks over its bridge, and enumerates by index: `atom_at(user, i)` answers the
 atom at a position and NULL past the end. A callback left NULL is a capability
 the provider declines, refused by name rather than read as an empty answer.
 
+Opening one takes the space NAME at the engine's own claim door, so a name
+another provider already holds is refused here by name rather than resolved by
+clause order later, and closing gives the claim back. The ownership row itself
+is written when a provider opens and removed when it closes, which is why a
+seat that has never opened one pays nothing for the seam on a space operation.
+
 ## Choosing
 
 | you want to | use |
