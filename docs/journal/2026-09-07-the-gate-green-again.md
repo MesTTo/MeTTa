@@ -870,3 +870,118 @@ worktree is a SYMLINK to the repository root's, so the install landed in the
 shared checkout. It was missing esbuild and playwright there too, which is why
 the lane was red on the pristine control as well, and the install is additive
 and matches `package.json`.
+
+## 2026-09-07, the C seat: three rows moved, three counters could not be read
+
+`c-bench` was the pristine control's third red and the earlier deliverables
+filed the whole of it as "an instruction lane a loaded box cannot settle".
+Measured, it is four different things and only one of them is the box.
+
+A first-parent ladder over the eleven merge points from `5aca9b64` to this
+branch's tip, in a throwaway checkout beside the repository at the pinned path
+length, with every component rebuilt and the `.qlf` set cleared at each point.
+Two things had to be provisioned into it before it measured anything at all:
+`engine/build.sh`, `examples/ch19-*/build.sh` and `extensions/cmetta/build.sh`
+for the artifact stamp, and the MORK `libmork_ffi.so` and `morklib.so` for the
+SEAT stamp -- without them the run refuses, naming `['node','python']` against
+the pinned `['mork','node','python']`, which is the stamp doing its job and the
+isolated-workspace hazard doing its. The ladder reproduces this file's
+committed `5aca9b64` pins at `5aca9b64`, which is what licenses reading the
+rest of it.
+
+**Three rows moved and are re-pinned.**
+
+`boot`, inferences 382,606 to 388,152 and instructions 1,070,778,354 to
+1,088,457,378 (+1.65%), stepping at `699c8b4a` +1,661/+3,883,523, `468350eb`
++76/+2,372,145, `acd04732` +1,279/+3,348,888, `80af155d` +1,380/+5,562,567 and
+`5621c456` +1,024/+1,787,907. This branch adds nothing to it.
+
+`cursor-step`, instructions only, +1.24%, two thirds of it one step: `97c96e91`
++28,799,210. Its inference count is 2,200,005 at every one of the eleven
+points, so the seat does the same work and this is the image around it.
+
+`error-ball`, instructions 1,053,177,858 to 1,329,080,554 (+26.2%), ALL of it
+at `acd04732` (+279,788,643) -- the same commit that moved its inferences
++92,000. Two counters agreeing that the case does more work is a different
+finding from either alone, and it is why the inference pin this branch already
+moved was not enough.
+
+**One row did not move and its band was too tight.** `space-pair`'s min-of-three
+reads between 2,902,420,067 and 2,951,536,980 across the eleven points with no
+trend in it, the tip lands BELOW the pin, the within-triple spread is 0.30% to
+1.87%, and four independent runs at the tip gave minima spanning 0.60%. Its
+band said 0.6%. So the lane was reporting the row's own noise as a regression
+whenever a run landed high. The band is widened to 2.0% beside that
+measurement, which is the remedy this file already applied to `cursor-step` and
+`term-in` on 2026-08-29 for the same reason. `term-in` and `term-out` were
+laddered in the same runs and are flat to 0.01-0.5%, so it is the row and not
+the box. OPEN: why this one row's retired-instruction count varies by tens of
+millions between identical runs is not established, and narrowing the band
+needs it. The candidate is collection timing inside the measured window, since
+it is the only row that builds and drops a pair of spaces.
+
+**Three counters this box cannot read, and the lane says so now.**
+
+The CPU rows. This file's own `measurement_conditions` has said since
+2026-08-28 that its CPU pins are loaded-box figures taken at loadavg 9 to 30 on
+a 32-core box and that all six want re-confirming on a quiet one, and it
+measured what happens above that: a task-clock triple spread 38% to 64% at
+loadavg 30 while `instructions:u` over the same runs spread 0.00002% to 0.129%.
+The lane compared them anyway, so at 2.5 to 3.3 runnable processes per core it
+reported `term-out` 0.32451 against 0.30996 and `space-pair` 0.82377 against
+0.773618 as regressions while both rows' INSTRUCTION counts sat inside their
+bands -- the same instructions taking more time, which is contention by
+construction. `extensions/cmetta/benchmarks/bench.py` now compares CPU only at
+or below ONE runnable process per core and otherwise prints
+`NOT MEASURED IN THIS CONFIGURATION` with the figure. One per core is where
+every runnable process still has a core; it is normalised by core count because
+a raw loadavg of 30 is a third of this desk and fifteen times a 2-core runner.
+
+The boot instruction row. `release_0_8_0_repin_comment` records that it scales
+with the length of the engine path at about 0.045% per character, "so the pin
+is true of a checkout at the repository root and of nothing else". This
+worktree's path is 23 characters longer and the row reads 1,101,089,173 against
+1,088,457,378, +1.16% against a 0.1% band, of which 1.04% is predicted before
+anything is measured. The baseline now records `checkout_path_length` and the
+lane refuses that one row from a different one. Only that row: every other row's
+window excludes the boot, and each moved 0.02% to 0.60% between the two paths,
+inside its own band.
+
+The boot inference row gets the third answer, because it is neither the load
+nor the path. It reads about twenty-five higher in a tree whose tracked files
+have been WRITTEN OVER, deterministically, with no source difference behind it;
+`release_0_8_0_boot_environment_note` established that on 2026-09-06 and this
+branch measured it again on a different number (388,152 fresh, 388,176 after a
+ladder had checked out eleven commits in the same tree, 388,179 in the branch
+worktree). Four inferences is an allowance sized for a counter that does not do
+that, so the row declares 32 beside the measurement. The harness gained a
+per-row `inference_allowance` for it, symmetric with the instruction side,
+which has taken a per-row band since it was written; a row that declares
+nothing keeps the four, a declaration survives a re-pin, and a move past the
+declaration still fails.
+
+Decided: `sh check.sh c-bench` exits 0, six cases within band, with four rows
+printed as not measured and the reason on its own line naming both the load and
+the path.
+
+Rejected: pinning any of the four from here. The file's own rule is that a pin
+taken in a worktree describes that worktree, and the whole point of the
+equal-length checkout is that it does not have to.
+
+## 2026-09-07, the control's one red was a build artifact the scan read as a seat
+
+`test_no_binding_carries_its_own_verbosity_setter` was the pristine control's
+only pytest failure and no run of this tree reproduced it, which is why the
+earlier entry left it unexplained. Installing the node seat reproduced it
+immediately: `npm install` runs `prepare`, `prepare` stages the whole engine
+tree under `extensions/node/_runtime/`, and the test's scan of
+`extensions/**` then finds `extensions/node/_runtime/engine/filereader.pl`
+asserting `silent(...)` and reports it as a third binding growing its own
+verbosity setter.
+
+The scan already excludes `node_modules` and the C seat's `build/`, with a
+comment saying why: "a build artifact is the engine's own copy, not a binding
+source growing a setter". `_runtime` is the node seat's word for the same
+directory and was missing from the list. So the control's red was a checkout
+that had built that seat once, and any developer who builds it meets the same
+wall. One line, the same reason, and the seat's own name for it.
