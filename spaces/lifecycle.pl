@@ -1471,6 +1471,18 @@ prolog:error_message(metta_space_capability_required(Space, Operation,
        capability; grant it explicitly when the space is created'-[
        Space, Operation, Capability] ].
 
+%The same refusal READ, beside the two that raise and render it, so a seat
+%names the space, the operation and the missing capability without parsing
+%the sentence above. It is the `capability` row of the engine's refusal table
+%(engine/metta/registration.pl, metta_host_error_kind_row/3); the Python seat
+%reached it through a copy of this clause in its own shim until 2026-09-07
+%and the Node seat matched the word "capabilit" in the rendered message
+%[tested: error_kinds:every_declared_kind_classifies_from_its_own_ball;
+%commit=WORKTREE].
+metta_host_space_capability_error(
+        error(metta_space_capability_required(Space, Operation, Capability), _),
+        Space, Operation, Capability).
+
 %&self's execution module exists from load, the way its storage module does,
 %so nothing has to create it on a first write and metta_self_module/1
 %(engine/metta.pl) names a module that is already based.
