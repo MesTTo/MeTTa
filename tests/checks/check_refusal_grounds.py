@@ -1,4 +1,7 @@
-"""Purpose: gate semantic refusals on a Python-reference or named MeTTa-law ground.
+"""Purpose: gate semantic refusals on one of the three admitted authorities.
+
+The kinds are a Python Language Reference section, a named MeTTa law, and a
+measured answer of upstream PeTTa under the captured parity corpus.
 
 Assumes:
   - compiler refusals use ``CompileError`` and non-compiler Python semantic
@@ -8,6 +11,11 @@ Guarantees:
     ``CompileError`` constructor, every explicit semantic TypeError supplies a
     structured ground, and the segment fence names its MeTTa-law sources
     [tested: tests/checks/check_refusal_grounds_selftest.py; commit=acb40f1912f131ae088083d1af29b4b283019bea]
+  - an "arbiter" ground is admitted only when its citation names the captured
+    parity corpus, so a claim about what upstream PeTTa answers points at the
+    file that measures it [tested:
+    test_a_planted_arbiter_ground_without_the_corpus_is_reported;
+    commit=3fc5479961fd591b1884af118528c9a64a1afbb7]
 Decides:
   - input-shape validation errors are not semantic refusals; this gate owns the
     compiler, Python data-model fences, and MeTTa fragment fences classified by
@@ -30,6 +38,10 @@ ERRORS = PYTHON_PACKAGE / "errors.py"
 SEGMENTS = Path("engine/spaces/segment_matching.pl")
 PYTHON_CITATION = re.compile(r"Python Language Reference section\s+\d")
 METTA_LAWS = ("EffectSafety", "SeqFragment", "UnifierMostGeneral", "HostLaws")
+#: An arbiter ground is upstream PeTTa's own measured answer, so its citation
+#: has to name the captured corpus rather than describe it: the parity pin is
+#: what makes the claim checkable and re-measurable.
+ARBITER_CORPUS = "tests/conformance/petta"
 
 
 @dataclass(frozen=True)
@@ -51,6 +63,8 @@ def valid_ground(ground: Any) -> bool:
         return PYTHON_CITATION.search(citation) is not None
     if kind == "metta-law":
         return any(law in citation for law in METTA_LAWS)
+    if kind == "arbiter":
+        return ARBITER_CORPUS in citation
     return False
 
 
@@ -162,14 +176,18 @@ def runtime_ground_findings(root: Path) -> list[str]:
     if package_parent not in sys.path:
         sys.path.insert(0, package_parent)
     from metta.errors import (
+        _EFFECT_SAFETY_GROUND,
         _PYTHON_COMPARISON_GROUND,
         _PYTHON_RICH_COMPARISON_GROUND,
         _compile_ground,
     )
+    from metta.results import _ERROR_IS_A_VALUE
 
     grounds = (
         _PYTHON_COMPARISON_GROUND,
         _PYTHON_RICH_COMPARISON_GROUND,
+        _EFFECT_SAFETY_GROUND,
+        _ERROR_IS_A_VALUE,
         _compile_ground("free identifier"),
         _compile_ground("floor division"),
         _compile_ground(None),

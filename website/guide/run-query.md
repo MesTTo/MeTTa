@@ -677,10 +677,10 @@ own registries and answers findings:
     assert findings[0].subject == "ghost-fn"
 ```
 
-A healthy space answers an empty list. A finding carries nine fields:
+A healthy space answers an empty list. A finding carries ten fields:
 `kind`, `subject`, `detail` and the `atom` it stands on, plus `severity`, a
 `suggestion` when there is a near-miss to offer, a `docs_link` to this
-section, a structured `payload`, and an `autofix`.
+section, a structured `payload`, an `autofix`, and a `remedy`.
 
 ### What a finding says
 
@@ -705,6 +705,51 @@ for finding in m.lint():
         m.add(finding.autofix)
 ```
 
+### The repair, as data
+
+`remedy` is the same repair with its classification attached, and it covers
+the kinds `autofix` has no shape for. It is the `metta.errors.Remedy` every
+deliberate refusal carries, so one reader serves an exception and a finding:
+
+| field | what it says |
+|---|---|
+| `title` | the one line an editor puts in its menu |
+| `kind` | LSP's CodeActionKind: `quickfix`, `refactor`, `source` |
+| `applicability` | rustc's: `machine` is applied without asking, `maybe` is shown, `prose` has `<placeholders>` |
+| `edit` | an atom to write |
+| `replace` | a stored atom and what it becomes, `None` in the second position for a removal |
+| `python` | the host text to write instead |
+
+Which kinds carry one:
+
+| kind | remedy | applicability |
+|---|---|---|
+| the six rewriting simplifications | `replace` the equation with the simplified one | `machine` |
+| `duplicate-equation` | `replace` with `None`, which removes the extra copy | `machine` |
+| `possibly-undefined-reference` | `replace` the head with its near miss | `maybe` |
+| everything else | none: the repair is a decision, not an edit | |
+
+Applying them is one call, on a space or on a file:
+
+```python
+repair = metta.lint.apply(m)             # remove-then-add, machine only
+for skipped in repair.skipped:
+    print(skipped.finding, skipped.reason)
+```
+
+```sh
+python -m metta lint --fix program.metta   # the same, rewriting the source
+python -m metta lint --json program.metta  # one LSP Diagnostic per line
+```
+
+`--fix` rewrites a line only where it still holds exactly the form the
+finding stands on, keeps the variable names the author wrote, and refuses a
+whole file whose bytes moved since lint read them. Everything it did not
+apply is printed with the reason, and the exit code is nonzero while any
+finding remains. `--json` is what an editor reads: LSP 3.17 Diagnostics with
+zero-based ranges and the remedy under `data`, which is the field LSP
+preserves from `publishDiagnostics` to `textDocument/codeAction`.
+
 ### The catalogue
 
 **Declarations and definitions.** `declared-but-undefined` (an arrow nothing defines, so every call stays unreduced). `arrow-arity-mismatch` (the arrow's input count against the equations'). `declaration-types-the-symbol` (a declaration that is not an arrow, so it types the name and not a call to it). `inconsistent-arity` (one name defined at two arities with no arrow saying so). `duplicate-equation` (the same equation stored twice, up to variable renaming, answering every call twice). `subsumed-equation` (an equation that is a strict instance of another stored one, so every answer it gives the general equation gives too and calls on the overlap answer twice; the check is pairwise against single equations, Plotkin's reduction step, and redundancy through combinations of equations is not searched). `first-letter-role-convention` (a lowercase data head or capitalized function head). `interpreter-equation-shadow` (a lawful writable equation over a translator-owned head such as `eval`). `builtin-equation-shadow` (the same for a head the ENGINE ships rather than the translator: the equation compiles into this space's own module and shadows the builtin there, so `!(max-atom (1 5 3))` answers `5` before it and `shadowed` after, while the engine's own version and every other space's are untouched. The dangerous cases refuse instead, by name). `det-equations-overlap` (a `-[det]->` claim that two equations sharing a head up to variable renaming MAY break: both are tried for every call, and the claim holds only while at most one body succeeds, which nothing checks. A guarded second body keeps it for some calls and breaks it for others, so this is a hint rather than a proof. Not `duplicate-equation`, whose bodies are equal, nor `subsumed-equation`, whose heads are instances rather than variants; what makes this one wrong is the declaration. Merge them, separate the heads, or declare `-[nondet]->`). `uncovered-constructor` (a `-[det]->` claim that an uncovered member breaks. The arrow promises exactly one answer, and a constructor no equation covers answers zero: with `(: Red Colour) (: Green Colour) (: Blue Colour)` and equations for `Red` and `Green`, `(paint Blue)` answers nothing. Cover it, or declare `-[semidet]->` and mean it. A plain `->` promises nothing about answer count, so partiality under one is not a finding. Not general exhaustiveness, which needs totality and is undecidable, but the decidable corner where the members were declared one by one; the verdict is a lower bound, since a constructor declared later cannot be seen).
@@ -713,7 +758,7 @@ for finding in m.lint():
 
 **Bodies.** `unbound-variable` (a body variable the head never bound, exempting equations with their own binding forms). `duplicate-binder` (`let*` binding one name twice, where the second unifies rather than shadows, so write `==` if an equality constraint is meant). `operation-crossing-in-loop` (a registered Python operation called per item in a compiled loop). `host-island-in-loop` (an explicit `py(...)` crossing retained in a `for`, `while`, or comprehension body and therefore paid once per iteration). `effectful-operation-at-construction` (a non-`pureStructural` ground operation fired while a rules bundle is built). `operation-staged-in-law` (an operation term stored in a law and crossed per application). `sync-engine-call-in-async` (a synchronous `run`, `match`, `eval`, `answers`, or defined-function call made directly by an `async def`; use `AsyncMeTTa`). The effect findings read the operation's published five-rank lattice value rather than guessing from its implementation.
 
-**Simplifications, each with an `autofix` where a rewrite exists.** `constant-if-true` and `constant-if-false` (the condition is literal, so only one branch can answer). `if-same-branches` (both branches the same expression, so the condition decides nothing). `if-true-false` (`(if c True False)` answers exactly what `c` answers). `superposed-single` (a superpose of one thing is that thing). `superposed-empty` (a superpose of nothing answers nothing, and every containing expression dies there; no autofix, because the fix is a decision).
+**Simplifications, each with an `autofix` and a `machine` remedy where a rewrite exists.** `constant-if-true` and `constant-if-false` (the condition is literal, so only one branch can answer). `if-same-branches` (both branches the same expression, so the condition decides nothing). `if-true-false` (`(if c True False)` answers exactly what `c` answers). `superposed-single` (a superpose of one thing is that thing). `superposed-empty` (a superpose of nothing answers nothing, and every containing expression dies there; no autofix, because the fix is a decision).
 
 **Order.** `tabled-answer-order-read` (a `car-atom` or `index-atom` picking out of a collapse of a tabled function). `unordered-answers-zip` (zipping `Answers` views as though their positions correspond). `unordered-answers-reversed` (reversing an `Answers` view as though its engine answer order has meaning). Both Python operations remain lawful and return their normal result; sorting by an explicit key or joining in the engine states the intended relation.
 
