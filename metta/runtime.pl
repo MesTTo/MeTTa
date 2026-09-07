@@ -32,6 +32,13 @@
 %     [tested: metta_assertions:an_assertion_ball_carries_the_two_bags,
 %     metta_assertions:an_assertion_message_prints_both_bags,
 %     prelude:assertEqual_failure_carries_both_bags; commit=71de27a76dd16684941e3e090de0d17299d96493]
+%   - absence is per bag, so assert-includes-answers/5 reports the answers
+%     missing from a containment and leaves the excess side ABSENT, where a
+%     two-sided report would name legal answers as a reason for the failure
+%     [tested: metta_assertions:a_one_sided_ball_carries_the_missing_bag_alone,
+%     metta_assertions:a_one_sided_message_prints_the_missing_line_alone,
+%     prelude:assertIncludes_failure_carries_the_missing_bag_alone;
+%     commit=48ec57e6df02e05ad3b5da50157dea321969bc48]
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 
 %%% Diagnostics / Testing: %%%
@@ -51,11 +58,18 @@ prolog:error_message(metta_test_failed(Actual, Expected)) -->
 %already computed on its way to a verdict, and carrying them is the whole
 %reason this ball has three arguments: a comparison that keeps only the
 %emptiness of a difference makes every reader recompute by hand what the
-%engine held. Both stay UNBOUND for a form that computed neither, and the
-%block below is then absent -- that is bare `assert`, whose operand is a
-%value; `assertIncludes`, whose excess answers are legal so a two-sided
-%report would blame the wrong bag; and the alpha forms, whose relation is
-%alpha-equivalence rather than bag difference.
+%engine held. Absence is PER BAG, not per pair: each stays UNBOUND where the
+%failing form's own verdict did not depend on it, and the line below is then
+%absent for that bag alone. Both are absent for bare `assert`, whose operand
+%is a value, and for the alpha forms, whose relation is alpha-equivalence
+%rather than bag difference; Excess alone is absent for `assertIncludes`,
+%whose excess answers are LEGAL, so naming them would blame a bag that is not
+%a reason for the failure. A one-sided verdict gets a one-sided report, which
+%is the split a standard library already draws between the same two relations
+%[measured 2026-09-07 on CPython 3.11.15: assertCountEqual([1,2],[2,3])
+%reports `First has 1, Second has 0: 1` AND `First has 0, Second has 1: 3`,
+%while assertIn(3, [1,2]) reports `3 not found in [1, 2]` and says nothing
+%about the members of the list that were not asked for].
 %
 %hyperon-experimental reports the same pair from the same subtraction and
 %spells them `Missed results` and `Excessive results`; the labels here are
@@ -68,16 +82,23 @@ prolog:error_message(metta_assertion_failed(Goal, Missing, Excess)) -->
     [ 'MeTTa assertion failed: ~w'-[Written] ],
     assertion_bag_difference(Missing, Excess).
 
+%One line per bag the verdict depended on, in the order a reader asks the two
+%questions: what did I want that never came, then what came that I never
+%wanted. Each bag is asked for itself rather than as a pair, so a one-sided
+%verdict prints one line and a two-sided one prints two; the pair test this
+%replaced could only print both or neither.
 assertion_bag_difference(Missing, Excess) -->
-    { var(Missing), var(Excess) },
+    assertion_bag_line(missing, Missing),
+    assertion_bag_line(excess, Excess),
+    assertion_permutation_note(Missing, Excess).
+
+assertion_bag_line(_, Bag) -->
+    { var(Bag) },
     !,
     [].
-assertion_bag_difference(Missing, Excess) -->
-    { sdisplay(Missing, WrittenMissing),
-      sdisplay(Excess, WrittenExcess) },
-    [ nl, '  missing: ~w'-[WrittenMissing],
-      nl, '  excess: ~w'-[WrittenExcess] ],
-    assertion_permutation_note(Missing, Excess).
+assertion_bag_line(Label, Bag) -->
+    { sdisplay(Bag, Written) },
+    [ nl, '  ~w: ~w'-[Label, Written] ].
 
 %Two empty bags beside a failure is not a puzzle, it is the diagnosis: the
 %answers agree as multisets with their multiplicities, so a permutation is
@@ -87,7 +108,16 @@ assertion_bag_difference(Missing, Excess) -->
 %[measured 2026-09-06 on this tree: (assertEqual (superpose (1 2)) (superpose
 %(2 1))) fails while (assertEqualToResult (superpose (1 2)) (2 1)) answers
 %true].  Saying so costs one clause and saves the reader the inference.
-assertion_permutation_note([], []) -->
+%
+%The two bags are compared with ==, not matched as [] in the head. A head
+%match BINDS an absent bag to the empty list and then reports that the answers
+%agree, which is the opposite of what absence means: it happened to be
+%unreachable only while the pair test above cut every absent case out before
+%this clause, and stopped being so the moment each bag was asked for itself
+%[tested: metta_assertions:a_non_list_operand_leaves_the_bags_absent, which is
+%what caught it].
+assertion_permutation_note(Missing, Excess) -->
+    { Missing == [], Excess == [] },
     !,
     [ nl, '  the two answer bags agree, so the answers differ only in order' ].
 assertion_permutation_note(_, _) --> [].
@@ -292,7 +322,7 @@ test(A,B,true) :- (A =@= B -> E = '✅' ; E = '❌'),
                   format("is ~w, should ~w. ~w ~n", [RA, RB, E]),
                   ( A =@= B -> true
                   ; throw(error(metta_test_failed(A, B),
-                                context(test/3, 'MeTTa test values differ'))) ).
+                                context(test, 'MeTTa test values differ'))) ).
 
 %ZERO ANSWERS COMPARE AS `()`, which is upstream's own shape: its test form is
 %`findall(Val, Conj, Results), (Results = [Actual] -> true ; Actual = Results)`,
@@ -369,13 +399,30 @@ assert(Form, true) :-
     metta_boundary_result(Form, Produced, Value),
     (   Value == true
     ->  true
-    ;   report_failed_assertion(assert/2, Form, _, _)
+    ;   report_failed_assertion(assert, Form, _, _)
     ).
 
-%The report both assertion doors reach, so the ball, the sentence and the
+%The report every assertion door reaches, so the ball, the sentence and the
 %classifier stay ONE shape however the verdict was reached. Reporting and then
 %throwing is assert/2's decision, recorded above; this predicate is where it
-%now happens for both.
+%now happens for all of them. Missing and Excess are passed per bag and each
+%may be left unbound, which is how a door with a one-sided verdict reports the
+%one difference its verdict depended on.
+%
+%Culprit is the MeTTa HEAD the program wrote -- assert, test, assertEqual,
+%assertIncludes -- and never the Prolog predicate that raised. SWI prefixes an
+%uncaught error with its context's first argument
+%[source: SWI-Prolog 10.1.13 boot/messages.pl, swi_location//1 over
+%context(ContextPI, _)], so what a reader saw was
+%`'assert-answers'/5: MeTTa assertion failed: ...`, an engine-internal name and
+%arity in a sentence about the program's own claim, with no head of that name
+%anywhere in the source. Naming the written MeTTa operation in the context is
+%the convention the engine already holds every OTHER user-facing refusal to
+%[source: engine/metta/registration.pl, metta_host_operation_error/5, whose
+%first condition is atom(Operation) over that same position;
+%commit=e9851ae5542263936f11590e059d1e1576d2ce7b], and the two message clauses there render from it. Nothing
+%else reads this position: the classifier below matches the context as `_` and
+%takes its own operation word from the FORMAL.
 report_failed_assertion(Culprit, Form, Missing, Excess) :-
     print_message(error, error(metta_assertion_failed(Form, Missing, Excess), _)),
     throw(error(metta_assertion_failed(Form, Missing, Excess),
@@ -413,11 +460,59 @@ report_failed_assertion(Culprit, Form, Missing, Excess) :-
 %absent there and the message degrades to the form alone.
 'assert-answers'(Verdict, _, _, _, true) :- Verdict == true, !.
 'assert-answers'(_, Form, Actual, Expected, true) :-
+    written_assertion_culprit(Form, 'assert-answers', Culprit),
     (   is_list(Actual), is_list(Expected)
     ->  'subtraction-atom'(Expected, Actual, Missing),
         'subtraction-atom'(Actual, Expected, Excess),
-        report_failed_assertion('assert-answers'/5, Form, Missing, Excess)
-    ;   report_failed_assertion('assert-answers'/5, Form, _, _)
+        report_failed_assertion(Culprit, Form, Missing, Excess)
+    ;   report_failed_assertion(Culprit, Form, _, _)
+    ).
+
+%The head of the call a door was handed, which is the MeTTa operation the
+%program wrote: these two doors take that call AS WRITTEN, so its head is
+%exactly what a reader has to look for in the source. Only a form with an
+%atom head has one, and a caller may hand over anything, so a form that is not
+%an application falls back to the DOOR's own MeTTa name -- which is then the
+%head the program wrote, since it called the door directly.
+%
+%This reads the reported form for a DIAGNOSTIC and decides nothing.
+%Dispatching a comparison on that head was rejected on 2026-09-06 for making
+%the reported form load-bearing for semantics
+%[source: docs/journal/2026-09-06-the-bag-diff-an-assertion-already-computes.md;
+%commit=e9851ae5542263936f11590e059d1e1576d2ce7b]; a culprit changes no verdict, no bag and no ball.
+written_assertion_culprit(Form, _, Head) :-
+    nonvar(Form),
+    Form = [Head|_],
+    atom(Head),
+    !.
+written_assertion_culprit(_, Door, Door).
+
+%The same door for a CONTAINMENT over answers: the expectation is a lower
+%bound rather than the whole answer set, so exactly one of the two directed
+%differences is a reason for the failure. Its arguments are assert-answers'
+%four, in the same order and with the same meanings, and the verdict is still
+%the caller's; what differs is that only Expected minus Actual is computed and
+%the excess side stays ABSENT rather than being reported as empty. An excess
+%answer is legal under this relation, so a line naming one would invite the
+%reader to fix something that is not broken -- the failure mode a two-sided
+%report of a one-sided verdict has, and the reason assertIncludes had no
+%report at all until this door existed
+%[source: docs/journal/2026-09-06-the-bag-diff-an-assertion-already-computes.md,
+%"assertIncludes is OUT ... revisit when a one-sided assertion door is
+%wanted"; commit=48ec57e6df02e05ad3b5da50157dea321969bc48].
+%
+%TWO doors rather than one door taking the relation as an argument. A mode
+%argument is a closed value set no lane can check, which the same thread
+%rejected it for, and dispatching on the reported form's head would make that
+%form load-bearing for semantics; two named doors are checkable vocabulary and
+%each says in its own name which report it gives.
+'assert-includes-answers'(Verdict, _, _, _, true) :- Verdict == true, !.
+'assert-includes-answers'(_, Form, Actual, Expected, true) :-
+    written_assertion_culprit(Form, 'assert-includes-answers', Culprit),
+    (   is_list(Actual), is_list(Expected)
+    ->  'subtraction-atom'(Expected, Actual, Missing),
+        report_failed_assertion(Culprit, Form, Missing, _)
+    ;   report_failed_assertion(Culprit, Form, _, _)
     ).
 
 %%% The running space: %%%
