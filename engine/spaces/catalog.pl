@@ -2144,17 +2144,18 @@ metta_catalog_preset([refusal, Kind, Class, Ground, Remedy]) :-
 %here tells a new seat what to call it.
 %
 %<ground> and <remedy> are the two rows metta.errors publishes, projected
-%exactly as Ground.as_atom/0 and Remedy.as_atom/0 write them, so a seat reads
-%one back with Ground.from_atom/1 and Remedy.from_atom/1 rather than parsing a
+%exactly as Ground.as_atom() and Remedy.as_atom() write them, so a seat reads
+%one back with Ground.from_atom() and Remedy.from_atom() rather than parsing a
 %shape of its own. A remedy TITLE carries <field> holes named for the fields
 %that kind declares, which the renderer fills from the raised ball; an ACT's
 %remaining hole is the reader's own choice and is what keeps the applicability
-%at `prose`, which is rustc's HasPlaceholders [source:
-%rustc_lint_defs::Applicability,
-%https://doc.rust-lang.org/nightly/nightly-rustc/rustc_lint_defs/enum.Applicability.html]. The nine refusals whose repair is a decision
-%carry a title and no act, which is PostgreSQL's errhint and clang's note:
-%advice with no mechanical edit [source: PostgreSQL documentation, 55.3.2
-%Error Message Style Guide, errhint()].
+%at `prose`, which is rustc's HasPlaceholders
+%[source: rustc_lint_defs::Applicability,
+%https://doc.rust-lang.org/nightly/nightly-rustc/rustc_lint_defs/enum.Applicability.html].
+%The nine refusals whose repair is a decision carry a title and no act, which
+%is PostgreSQL's errhint and clang's note: advice with no mechanical edit
+%[source: PostgreSQL documentation, 55.3.2 Error Message Style Guide,
+%errhint()].
 %
 %The whole shape is the errno/SQLSTATE one the kind table already follows:
 %one table where the raising happens, one map per binding, and a test per

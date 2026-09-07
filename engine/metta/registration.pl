@@ -539,10 +539,12 @@ metta_host_refusal_row(Kind, Class, Ground, Remedy) :-
 %
 %   Semidet rather than det: it fails for a kind with no catalog row, which
 %   catalog_refusal_rows:the_refusal_rows_are_the_engines_own_kinds forbids and
-%   which a program that removed the row can nonetheless produce. A seat that
-%   gets no answer keeps the classification it already had, which is what it
-%   had before this table existed. once/1 because a program may hold a second
-%   row for one kind and a refusal has one reading.
+%   which a program that removed the row can nonetheless produce, and it fails
+%   the same way for a row whose remedy is not a (remedy ...) row, which the
+%   `refusal` kind spec admits because its last two positions are `term`. A
+%   seat that gets no answer keeps the classification it already had, which is
+%   what it had before this table existed. once/1 because a program may hold a
+%   second row for one kind and a refusal has one reading.
 metta_host_refusal(Ball, Kind, Fields, Class, Ground, Remedy) :-
     metta_host_error_kind(Ball, Kind, Fields),
     once(metta_host_refusal_row(Kind, Class, Ground, Template)),
