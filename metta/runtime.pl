@@ -255,7 +255,7 @@ prolog:error_message(permission_error(register, metta_function, Name)) -->
 %Theta(L^2) in the form's total length. One form of 1,600 lines spent
 %132,673,790,292 instructions where the SAME text on one line spent
 %1,484,324,191, and the cost quadrupled per doubling
-%[measured 2026-08-23, ai-tmp/synth/readform/].
+%[measured 2026-08-23].
 %
 %command_balance/5 already carries its (Depth, State) from one call to the next,
 %so the same question can be asked of one LINE with that state carried, which is
@@ -821,7 +821,7 @@ undocumented(Name) :- current_metta_space(Space),
 %Do not be tempted to replace this with a raw alarm/4 around the goal to get
 %lazy answers. It crashes: alarm/4 with throw/1 around a deeply recursive goal
 %took SIGSEGV where call_with_time_limit/2 on the identical goal unwound
-%cleanly [measured 2026-08-15, ai-tmp/pool/alarm.pl]. The cost of doing this
+%cleanly [measured 2026-08-15]. The cost of doing this
 %safely is that answers are collected before the first is yielded, which for a
 %deadline-bounded call is what you want anyway.
 %

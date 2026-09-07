@@ -612,8 +612,7 @@ metta_notified_transaction_result(failed, Outcome, _, _) :-
 %    then staged its uncommitted rows as though they had been durable, so a
 %    rolled-back write became permanent [measured 2026-08-30: two providers,
 %    the second refusing, left `(kept one)` in the first and a later
-%    successful transaction made it durable; command=ai-tmp/saga-worker/
-%    probe_abandoned.py] [tested:
+%    successful transaction made it durable] [tested:
 %    a_refused_commit_rolls_back_the_participants_it_never_reached].
 %  - the durable outcome is RECORDED per participant. Two-phase commit stays
 %    out of scope, so a partial commit remains possible; what changes is that

@@ -109,8 +109,8 @@ undeclared_call_operands(Fun, _, []) :-
         %operand rather than handing it on, so the ladder is what carries a
         %computed operand's error past them now
         %[measured 2026-08-30: `!(== 4 (+ 1 "bad"))` answered false with the
-        %exemption in place and the contained error with the ladder emitted;
-        %fixture=ai-tmp/fwdprobe.metta]. The arithmetic and ordering family
+        %exemption in place and the contained error with the ladder
+        %emitted]. The arithmetic and ordering family
         %keep it: their numeric doors still route a refused operand through
         %metta_operation_answer/3, `!(< 4 (+ 1 "bad"))` measured handing the
         %inner error on the same day.
@@ -932,7 +932,7 @@ translate_special_dl('foldall', [Accumulator, Generator, InitialExpr],
 %`!(map-atom (cdr-atom (a b)) $y (q $y))` answered
 %`((q cdr-atom) (q (a b)))`, mapping over the two parts of an unevaluated
 %call, where upstream evaluates the list to `(b)` first and answers `((q b))`
-%[measured 2026-08-30, ai-tmp/coll.metta under both engines].
+%[measured 2026-08-30 under both engines].
 %
 %Naming a computed list first still works and is still the clearer spelling,
 %`(let $xs (collapse ...) (map-atom $xs ...))`; it is no longer the only one
@@ -1482,8 +1482,8 @@ translate_let_dl([[__metta_typed_binding__, Pattern], Value, In],
 %And a gap pattern is NOT COMPILED as an expression, which the two ordinary
 %routes both do. A variable-headed pattern compiles to a reduce/3 CALL, so
 %`($pre ... SEP ... $post)` reached the binding as a runtime value with no
-%structure left to split, and the let answered nothing at all [measured
-%2026-08-24, ai-tmp/J5-let.metta]. A pattern is matched, not evaluated, and a
+%structure left to split, and the let answered nothing at all
+%[measured 2026-08-24]. A pattern is matched, not evaluated, and a
 %gap makes that difference visible: there is nothing to evaluate in `...`.
 translate_let_dl([Pattern, Value, In], AfterHead, Goals, Out) :-
     ( metta_seq_written(Pattern)

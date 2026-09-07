@@ -170,7 +170,7 @@ remove_sexp(Space, Atom) :- remove_sexp(Space, Atom, _).
 %cheaper of the two isolations. Measured 2026-08-19 over 20,000 removals, min
 %of three: 1.0001 inferences per removal against the probe-and-retractall
 %shape's 2.0001, and against 2.0001 for the copy_term spelling
-%[measured 2026-08-19, ai-tmp/spaces-p1/rmcost.pl].
+%[measured 2026-08-19].
 %
 %Answering truthfully at all is worth it because the engine already disagreed
 %with ITSELF. Removing an EQUATION answers false when nothing matched, forty
@@ -459,7 +459,7 @@ metta_restore_inherited_predicate(_, Name, _) :-
 %times over the plunit suites, and 1,053 of the 5,347 it costs to add and
 %remove one equation for a function nothing above the space defines
 %[measured 2026-09-06: 200 such cycles through 'remove-atom'/3, 1,069,438
-%inferences before and 858,838 after; fixture=ai-tmp/autoload-traps/removal2.pl;
+%inferences before and 858,838 after;
 %commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
 %
 %Two arms, in this ORDER, which the benchmarks decided. current_predicate/1
@@ -488,7 +488,7 @@ metta_restore_inherited_predicate(_, Name, _) :-
 %repaired call resolves to nothing. imported_from/1 loads it, which is the
 %side effect this clause needs
 %[measured 2026-09-06: 12 shadow-repair probes, one fresh module each, the
-%sumlist/2 row alone diverging; fixture=ai-tmp/autoload-traps/spaces_diff.pl;
+%sumlist/2 row alone diverging;
 %commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19].
 metta_restore_inherited_predicate(Module, Name, Arity) :-
     retractall('$metta_repaired_shadow_import'(Module, Name, Arity, _)),

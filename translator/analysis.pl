@@ -1260,8 +1260,7 @@ translate_equation_body_result(F, BodyExpr, GoalsBody, ExpOut) :-
 %an inconsistency: chain SUBSTITUTES written syntax into its template here
 %where upstream binds a value, so its result genuinely holds a redex that
 %upstream never built. `(chain (+ 1 2) $x (quote $x))` is 3 on both engines
-%with the walk and `(+ 1 2)` here without it [measured 2026-08-30;
-%fixture=ai-tmp/petta-align/chain2.metta].
+%with the walk and `(+ 1 2)` here without it [measured 2026-08-30].
 
 %THE APPLICATION PROTOCOL, PAID ONLY WHERE IT IS READ. Every compiled call to
 %a MeTTa equation ends in metta_application_result/4, whose first clause tests
@@ -1275,7 +1274,7 @@ translate_equation_body_result(F, BodyExpr, GoalsBody, ExpOut) :-
 %unification. Measured in isolation over a million calls: 3,000,003
 %inferences and 0.074s CPU against 2,000,003 and 0.033s, a third of the
 %inferences and 2.24x the CPU
-%[measured 2026-08-30; fixture=ai-tmp/petta-align/micro.pl].
+%[measured 2026-08-30].
 %
 %The relation is unchanged in every mode, which is what makes this a rewrite
 %rather than a fast path: an unbound Produced fails this `==` exactly as it
@@ -1451,7 +1450,7 @@ normalize_translation_key(Term, Normalized) :-
 %skeleton computes the same answer, never a different one
 %[measured 2026-08-30: `(- 350000 5)` translated ground answers 349995; the
 %skeleton `(- A B)` translated once and then bound answers 349995 and, bound
-%again, 349990; fixture=ai-tmp/petta-align/skel.pl].
+%again, 349990].
 %
 %NUMBERS AND STRINGS ONLY, and never in head position. A symbol decides what
 %the translation IS -- whether the head names a function, a special form or
