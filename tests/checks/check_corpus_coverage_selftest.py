@@ -17,15 +17,15 @@ Assumes: a writable ai-tmp/ in this repository. No engine, because every
 Guarantees:
   - an uncovered engine callable and an uncovered carried library head are
     each reported, naming the library where there is one
-    [tested: tests/checks/check_corpus_coverage_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_corpus_coverage_selftest.py; commit=98397cdd04679cbf40b2d515076dadc09c1b0a32]
   - an allowlisted head an example calls, an allowlisted head the corpus never
     mentions, and an allowlist row for a head nothing carries are each
-    reported [tested: tests/checks/check_corpus_coverage_selftest.py; commit=WORKTREE]
+    reported [tested: tests/checks/check_corpus_coverage_selftest.py; commit=98397cdd04679cbf40b2d515076dadc09c1b0a32]
   - a head called in any of the three positions is NOT reported, and a head
     that appears only inside a comment or only under `_fixtures/` IS
-    [tested: tests/checks/check_corpus_coverage_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_corpus_coverage_selftest.py; commit=98397cdd04679cbf40b2d515076dadc09c1b0a32]
   - the shipped allowlist parses into the rows it states, each with a reason
-    [tested: tests/checks/check_corpus_coverage_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_corpus_coverage_selftest.py; commit=98397cdd04679cbf40b2d515076dadc09c1b0a32]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
 Open Obligations:
   To Do: None

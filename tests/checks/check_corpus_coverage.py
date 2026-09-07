@@ -10,7 +10,7 @@ can break, which is the state `examples/` exists to make impossible.
 [measured 2026-09-07: this file's own `source_text`, `is_called`,
 `engine_corpus_vocabulary` and `carried_heads` over the corpus at 31d54e19,
 extracted with `git archive 31d54e19 examples | tar -x -C <dir>`;
-commit=WORKTREE]
+commit=98397cdd04679cbf40b2d515076dadc09c1b0a32]
 
 The two sources are the ones the audit read, and neither is a list kept here:
 the engine's own `fun/1` plus `translator:metta_translated_head/1`, and
@@ -42,14 +42,14 @@ Assumes:
 Guarantees:
   - an engine callable or carried library head that no example calls is
     reported with the library that carries it
-    [tested: tests/checks/check_corpus_coverage_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_corpus_coverage_selftest.py; commit=98397cdd04679cbf40b2d515076dadc09c1b0a32]
   - an allowlisted head an example calls, an allowlisted head the corpus never
     mentions, and an allowlist row for a head nothing carries are each
     reported independently
-    [tested: tests/checks/check_corpus_coverage_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_corpus_coverage_selftest.py; commit=98397cdd04679cbf40b2d515076dadc09c1b0a32]
   - the four uncovered names it passes today are the three Types and the one
     nullary constructor, each of which appears in the corpus in declaration or
-    argument position [tested: corpus-coverage; commit=WORKTREE]
+    argument position [tested: corpus-coverage; commit=98397cdd04679cbf40b2d515076dadc09c1b0a32]
 Fails when: run on a tree whose engine does not boot. That is reported as a
   finding rather than as a skip, because a lane that cannot read its source
   and says nothing is the fail-open shape a gate exists to refuse.
