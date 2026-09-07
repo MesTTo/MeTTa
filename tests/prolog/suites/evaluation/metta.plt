@@ -98,6 +98,74 @@ test(a_non_list_operand_leaves_the_bags_absent) :-
     var(Missing),
     var(Excess).
 
+%The one-sided door beside it. Same four arguments and the same rule that the
+%verdict is the caller's; what differs is that the excess side is never
+%computed, so it reaches the ball ABSENT rather than empty and no reader is
+%pointed at an answer this relation allows.
+test(a_one_sided_ball_carries_the_missing_bag_alone) :-
+    catch('assert-includes-answers'(false, [qIncludes, a, b], [a, d], [a, c], _),
+          error(metta_assertion_failed(Form, Missing, Excess), _),
+          true),
+    Form == [qIncludes, a, b],
+    Missing == [c],
+    var(Excess).
+
+%The name a failure BLAMES is the MeTTa head the program wrote, taken from
+%the call the door was handed, and never the Prolog predicate that raised.
+%SWI prefixes an uncaught error with its context's first argument, so this is
+%the word a reader sees before the sentence.
+test(a_failure_blames_the_head_of_the_call_it_was_given) :-
+    catch('assert-answers'(false, [qEqual, a, b], [a, d], [a, c], _),
+          error(_, Context),
+          true),
+    Context = context(Culprit, _),
+    Culprit == qEqual.
+
+test(a_one_sided_failure_blames_its_own_head_too) :-
+    catch('assert-includes-answers'(false, [qIncludes, a, b], [a], [c], _),
+          error(_, Context),
+          true),
+    Context = context(Culprit, _),
+    Culprit == qIncludes.
+
+%A form that is not an application has no head, and a caller may hand one
+%over. The DOOR's own MeTTa name is then the head the program wrote, because
+%calling the door directly is what it did.
+test(a_formless_report_blames_the_door_the_program_called) :-
+    catch('assert-answers'(false, notacall, [a], [c], _),
+          error(_, Context),
+          true),
+    Context = context(Culprit, _),
+    Culprit == 'assert-answers'.
+
+%The rendered sentence, which is where the internal name used to show:
+%`'assert-answers'/5: MeTTa assertion failed: ...` named a predicate with no
+%head of that name anywhere in the source.
+test(the_rendered_failure_carries_the_metta_head_and_no_predicate_indicator) :-
+    catch('assert-answers'(false, [qEqual, a, b], [a, d], [a, c], _),
+          Error,
+          true),
+    message_to_string(Error, Message),
+    sub_string(Message, 0, _, _, "qEqual: MeTTa assertion failed:"),
+    \+ sub_string(Message, _, _, _, "/5").
+
+test(a_failing_test_blames_test_rather_than_its_predicate) :-
+    catch(with_output_to(string(_), test(1, 2, _)), error(_, Context), true),
+    Context = context(Culprit, _),
+    Culprit == test.
+
+test(a_true_verdict_asks_no_question_of_the_one_sided_bags) :-
+    'assert-includes-answers'(true, [qIncludes, a, b], [x], [y], Result),
+    Result == true.
+
+test(a_non_list_operand_leaves_the_one_sided_bag_absent_too) :-
+    catch('assert-includes-answers'(false, [qIncludes, a, b], notabag, [a], _),
+          error(metta_assertion_failed(Form, Missing, Excess), _),
+          true),
+    Form == [qIncludes, a, b],
+    var(Missing),
+    var(Excess).
+
 test(an_assertion_message_prints_both_bags) :-
     message_to_string(error(metta_assertion_failed([qEqual, [+, 1, 1], 3],
                                                    [3], [2]), none),
@@ -107,6 +175,30 @@ test(an_assertion_message_prints_both_bags) :-
                          "excess: (2)"]),
            sub_string(Message, _, _, _, Line)),
     \+ sub_string(Message, _, _, _, "differ only in order").
+
+%One bag present and one absent prints ONE line. The absent side is not
+%rendered as an empty bag, which would say the comparison ran and found
+%nothing, and it does not reach the permutation note either: that note reads
+%its two arguments with ==, so an unbound bag is never taken for an empty one.
+test(a_one_sided_message_prints_the_missing_line_alone) :-
+    message_to_string(error(metta_assertion_failed([qIncludes, a, b], [c], _),
+                            none),
+                      Message),
+    forall(member(Line, ["MeTTa assertion failed: (qIncludes a b)",
+                         "missing: (c)"]),
+           sub_string(Message, _, _, _, Line)),
+    \+ sub_string(Message, _, _, _, "excess"),
+    \+ sub_string(Message, _, _, _, "differ only in order").
+
+%The mirror, so the renderer is shown asking each bag for itself rather than
+%having one special case for the one door that uses it.
+test(an_excess_bag_alone_prints_its_own_line) :-
+    message_to_string(error(metta_assertion_failed([qIncludes, a, b], _, [d]),
+                            none),
+                      Message),
+    forall(member(Line, ["excess: (d)"]),
+           sub_string(Message, _, _, _, Line)),
+    \+ sub_string(Message, _, _, _, "missing").
 
 %Two empty bags beside a failure is the permutation diagnosis, and it is the
 %one reading a reader would otherwise have to make alone.
@@ -134,7 +226,7 @@ test(an_absent_difference_prints_no_bag_line) :-
 test(the_classifier_hands_out_the_two_bags) :-
     metta_assertion_failure(error(metta_assertion_failed([qEqual, a, b],
                                                          [c], [d]),
-                                  context('assert-answers'/5, m)),
+                                  context(qEqual, m)),
                             Form, Actual, Expected, Missing, Excess),
     Form == assert,
     Actual == [qEqual, a, b],
@@ -144,7 +236,7 @@ test(the_classifier_hands_out_the_two_bags) :-
 
 test(the_classifier_reports_an_absent_difference_as_unbound) :-
     metta_assertion_failure(error(metta_assertion_failed(false, _, _),
-                                  context(assert/2, m)),
+                                  context(assert, m)),
                             assert, false, _, Missing, Excess),
     var(Missing),
     var(Excess).

@@ -69,7 +69,7 @@ Two shapes break the two-element rule and both are named below: an outbound
 | `b` | term | "true" or "false" | a grounded boolean; the engine writes true and false, and reads True and False as the same two constants |
 | `v` | term | text | a variable, the payload an identity within this term |
 | `e` | term | array of terms | an expression, its children in order; the empty one is unit |
-| `p` | term | ampersand-prefixed text | an executable space reference carried by its portable engine name; the tag is a species and an ampersand name that is no space keeps s |
+| `p` | term | text | an executable space reference carried by its portable engine name, ampersand-prefixed or not; the tag is a species and a name that is no space keeps s |
 | `o` | term | host reference | a live host value crossing by reference, in process only |
 | `h` | term | registry id, and its printed text outbound | a native engine value held by reference |
 | `u` | frame | term and why | an answer whose truth is undefined under the well-founded semantics |
@@ -93,8 +93,10 @@ the empty string, which is `["g", ""]`.
 
 `["p", "&kb"]` carries an executable space reference by its engine name. The
 name is portable; decoding resolves it to the receiving runtime's `Space`
-handle. A malformed payload is refused rather than becoming a symbol or
-silently naming another kind of term.
+handle. The ampersand is a spelling and not a rule, so `["p", "my_space_name"]`
+is a space reference too, and decoding takes the payload as written. A payload
+that is not text is refused rather than becoming a symbol or silently naming
+another kind of term.
 
 ## The question `p` asks, and what it costs
 
@@ -116,10 +118,26 @@ registry one: `get-type` reports `SpaceType` for exactly the atoms
 `metta_space_operand/1` accepts, and that is the answer a binding without
 Prolog access should ask for.
 
-The payload is text beginning with `&`, which is how the engine mints a space
-name and what its doors require of one a program writes. A **parametric**
-space is named by a ground expression rather than an atom, and it crosses as
-that expression, `e`, because a `p` payload is text.
+The payload is text, and a DECODER takes it as written. `&` is how the engine
+mints a space name, not a rule about what one may be: a program writing
+through a bare symbol registers that symbol
+(`(= (space) my_space_name)` and one `add-atom`), `metta_space_names/1` hands
+that name back, and a host that opens it and sends it back writes it under
+this tag. Both seats demanded the prefix here until 2026-09-07 and both were
+wrong the same way, because a leaf that will not decode fails the decode of
+every term containing it: one bare name in the registry cost the Node seat
+every later program on that engine and the Python seat every term that
+mentioned the space. What a payload may not be is something that is not a
+name; that is still refused. A **parametric** space is named by a ground
+expression rather than an atom, and it crosses as that expression, `e`,
+because a `p` payload is text.
+
+The ENCODER is the asymmetric half, and deliberately: it asks
+`metta_space_operand/1`, which tests the prefix before it probes either
+registry, so a bare registered name crosses OUT as `s` and only a host minting
+the tag itself puts one in. That is the species question above, unchanged. A
+decoder that mirrored the encoder's test would refuse what the engine's own
+registry issued.
 
 **The ampersand alone decides nothing**, and this is the part a new binding
 gets wrong. `&not-a-space` reads as an ordinary atom; nothing has created a

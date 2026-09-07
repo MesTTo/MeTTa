@@ -243,6 +243,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   recursion, which SWI keeps on a `<recursive>` caller rather than in the
   node's call count.
 
+- `examples/ch12-testing/03-assertion_difference.metta` has a Python twin,
+  `extensions/python/examples/language-feature-examples/ch12-testing/03-assertion_difference.py`,
+  which proves the same ten claims through `AssertionFailure.missing` and
+  `.excess` rather than through `catch`, `unify` and `repr`. Those three are
+  what the MeTTa file needs to read its own failure and Python has the object
+  instead, so the twin shows the fields a harness actually reads, `None` and
+  `()` included. Priced at 8,295 inferences against the example's 15,331.
 - `metta.testing.programs(census=None, depth=3, facts=(1, 4), queries=(1, 3))`
   generates whole MeTTa programs for differential testing against another
   engine, and the `parity-fuzz` lane runs them on this engine and on upstream
@@ -438,6 +445,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   callable-from-here rule with the module made explicit, which a space's
   function namespace reads, so the host transport never reaches the registry
   facts directly.
+- A failing `assertIncludes` names the call as written and the answers missing
+  from its expectation, where it printed `MeTTa assertion failed: false` and
+  nothing else. Its report is ONE-SIDED and stays so: an answer in excess of
+  the expectation is legal under a containment, so no `excess:` line is
+  printed and `AssertionFailure.excess` is `None`, which a harness tells apart
+  from the empty tuple a comparison that ran and found nothing gives. The
+  absence convention `metta_assertion_failed/3` already carried is now read per
+  bag rather than per pair, so the message prints one labelled line for each
+  bag the verdict depended on. `(assert-includes-answers $Verdict $Form
+  $Actual $Expected)` is the door behind it, `assert-answers`' arguments in the
+  same order with the same meanings, computing its one difference on the
+  failing path only and never deciding a verdict; a user's own one-sided
+  assertion over answer bags reaches the same report through it. The verdicts
+  of every assert form are unmoved.
 - `<`, `<=`, `>` and `>=` between two space handles now refuse, naming
   `metta.spaces.diff` and `metta.spaces.union` as the doors that answer
   containment. They answered the engine's term order silently, while `|`, `&`,
@@ -499,6 +520,35 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   which the pattern that strips an unquoted module prefix read as part of the
   name. The engine sends the name and the arity as their own columns now, so
   nothing re-parses them.
+- The Python seat opens a space the engine registered without an ampersand,
+  which is every symbol a program writes through: `(= (space) my_space_name)`
+  plus one `add-atom` registers `my_space_name` and `space_names()` lists it,
+  and three doors on this seat refused the name their own listing had just
+  issued. `space("my_space_name")` opened nothing, `Space` refused the string
+  outright, and the `p` wire tag demanded the prefix on both sides -- so a term
+  mentioning such a space silently answered NOTHING, a leaf that will not
+  decode failing the decode of everything containing it. A STRING now names the
+  space exactly, which is the bracket door's rule everywhere else here; the
+  Symbol door still supplies the prefix, so `space(S.kb)` is `&kb` and the two
+  doors stay different on purpose. A `$` name is still refused, because it
+  would read back as a variable, and so is the empty name. The ENCODER is
+  unchanged and still asks `metta_space_operand/1`, so a bare registered name
+  crosses out as `s` and the species question the wire's tag encodes does not
+  move. The Node seat made the same fix on its own decoder on 2026-09-07; this
+  is the opposite ruling that merge left behind, withdrawn. Decoding a `p` leaf
+  costs one inference less than it did, the `sub_atom/5` that is gone.
+- A failed assertion or test blames the MeTTa head the program wrote. SWI
+  prints an uncaught error's context culprit before the sentence, and what
+  stood there was the Prolog predicate that raised, so a false claim read
+  `'assert-answers'/5: MeTTa assertion failed: (assertEqual (+ 1 1) 3)` --
+  a name and arity that appear in no program and cannot be searched for in the
+  source. It now reads `assertEqual: ...`, and `assertIncludes`, `assert` and
+  `test` name themselves the same way, which is the convention every other
+  user-facing refusal in the engine already followed. The two answer-bag doors
+  take the head from the call they were handed, falling back to their own name
+  where a hand-written call passes something that is not an application. The
+  ball, its formals and `AssertionFailure.operation` are untouched: only the
+  word before the colon changed.
 - A space's function namespace lists and resolves only what that space can
   call. `dir(m.fn)`, `m.builtins()` and `m.fn.<name>` read the process-wide
   function register, so a head whose equations live in another space's module
