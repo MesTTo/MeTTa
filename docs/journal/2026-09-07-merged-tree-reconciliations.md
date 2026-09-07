@@ -70,3 +70,59 @@ on install order (found by the Arrow follow-up branch, fixed in its tests,
 left for the module); the `test_ops` math.fmod and the other ring-fenced
 order effects the test-hygiene branch listed still move run to run under
 the shuffle.
+
+## 2026-09-07, after the wave-3 merges
+
+Battery merged43 on 70ac99da (cost rows, browser textbook, remedies, CLI
+filter, explain and advisor, assertion follow-ups, arbiter divergences):
+plunit, corpus, cmetta, petta, parity, parity-fuzz-selftest, evidence 0;
+Python 7 red, Node 2 red.
+
+Tried: `vocabgen.py` in check mode -> the Node table lacked `cost-class`; the
+cost-rows branch regenerated the Python module with the generator as it was
+before it also wrote the Node table. Decided: regenerate; the vocab-sync lane
+now holds both files on every run.
+
+Tried: `tables.sql_function` on DuckDB with an undeclared head -> registered
+instead of refusing, because the CLI-filter merge made `inspect.signature`
+answer the arrow the stored atoms justify. Decided: DuckDB reads `head.type`
+(the declaration) and refuses without an arrow; a proposal is not a promise.
+Rejected: making `__signature__` hide the inferred arrow, because a reader and
+`stubs` want it, marked inferred.
+
+Tried: `lint --json` -> argparse refused "ignored explicit argument 'text'":
+the CLI-filter merge rewrote every bare `--json` to `--json=text`, and the
+remedies merge gave `lint` a plain flag. Decided: the rewrite applies only
+after the `run` subcommand.
+
+Tried: the Node binding test's `!(remove-atom &s missing)` pin of `true` ->
+the arbiter-divergences merge gave `remove-atom` upstream's domain, and
+upstream answers nothing for a bare symbol (measured at the pin for `()`, a
+symbol and a number). Decided: the pin moves to the empty group, with the
+measurement beside it.
+
+Tried: `test_the_wheel_carries_no_agent_scratch_references` -> `_space.py` and
+its mirror cited `ai-tmp/aa_probe13.py`, and `generic_join.pl` and
+`memo_advisor.py` cited two more scratch probes. Decided: the three probes are
+tracked under `extensions/python/benchmarks/probes/` with contract headers and
+their goals named after the shipped predicates (the plan builder is
+`native_conjunction_relations/4`; the shape predicate takes the whole pattern
+with its comma head), and the citations read them. Re-run on this tree:
+explain 7,348 against the query's 237,474 inferences at 2,048 rows, shape
+247, admission 6,441, plan 95,554; chain 3,252 and single 2,440. About 140
+older scratch citations remain in tracked files and go to the evidence-gate
+package (EV) as one audit rather than piecemeal.
+
+Tried: `test_the_site_build_refuses_without_the_browser_kit` ->
+`markdown-it-container` missing from the main checkout's
+`website/node_modules`; `npm ci` in `website/` installed the 129 packages the
+lockfile names. Nothing tracked changed.
+
+Open: `test_builtin_discovery_is_cached` measured 3,070 inferences for the
+first `fn.car_atom` access in the battery's ch11 worker against a bound of
+400. Seven merge commits measure 315 in a fresh process; 800 heads in a
+sibling space, a library import, a shadowing definition, a deprecation row
+and their drops leave it at 280 to 315; the ch11 directory alone under the
+battery's seed passes. The state that inflates it lives in another file the
+worker ran; the full suite under the same seed is running to find it.
+

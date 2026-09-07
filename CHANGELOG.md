@@ -499,6 +499,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tables.sql_function` on a DuckDB connection reads the head's DECLARED arrow
+  for its SQL types and refuses by name without one. Since `inspect.signature`
+  shows an undeclared head the arrow its stored atoms justify, the refusal had
+  stopped firing and a proposal became SQL types.
+- `python -m metta lint --json` works beside `run --json`: the bare `--json`
+  rewrite that keeps `run`'s next operand an operand applies to `run` alone,
+  and no longer hands `lint` an explicit argument its flag refuses.
 - `RestraintError` receives each of its three fields as the type it declares
   for it. The restraint signal's detail crossed as `dict[str, object]` and was
   splatted into keywords typed `str | None` and `int | None`, which left the
