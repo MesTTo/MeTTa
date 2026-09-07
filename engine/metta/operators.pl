@@ -661,7 +661,7 @@ metta_float_unary_eval(Operation, Function, A, Out) :-
 %min_list/2 has no clause for the empty list, so `(min-atom ())` answers
 %NOTHING there and the file carries on. This engine used to refuse it with
 %"Empty expression"; the same input has to give the same answer, so the
-%refusal goes, on the rule engine/prelude.metta:262-266 already states
+%refusal goes, on the rule engine/prelude.pl's throw/2 already states
 %[source: PeTTa@ae66fa8 src/metta.pl:86-89; measured 2026-08-30, upstream
 %prints no line for `!(min-atom ())` and continues].
 'min-atom'([], _) :- !, fail.

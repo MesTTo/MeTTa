@@ -77,10 +77,10 @@ relational_input_position(or, 1).       relational_input_position(or, 2).
 relational_input_position(not, 1).
 relational_input_position(xor, 1).      relational_input_position(xor, 2).
 relational_input_position(implies, 1).  relational_input_position(implies, 2).
-%cons builds a PATTERN, and an open tail is what makes it one: the engine's
-%own prelude writes (cons Error $_) to test whether a value is an error
-%[source: engine/prelude.metta, if-error]. cons-atom is the same operation under
-%its MeTTa name.
+%cons builds a PATTERN, and an open tail is what makes it one: upstream's own
+%if-error writes (cons Error $_) to test whether a value is an error
+%[source: tests/conformance/petta/lib/lib_he.metta:47, the vendored corpus the
+%petta lane runs]. cons-atom is the same operation under its MeTTa name.
 relational_input_position(cons, 2).
 relational_input_position('cons-atom', 2).
 %union-atom IS append/3, and a shipped library takes a list apart with it:

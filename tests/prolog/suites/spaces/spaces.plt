@@ -623,13 +623,24 @@ test(every_space_compiles_into_a_module_of_its_own) :-
 % import_module/2 rather than believed: SWI decides an implicitly created
 % module's base from the first character of its name, which would have given a
 % `$`-prefixed one `system` and no way to reach the engine at all.
-test(the_chain_is_engine_then_self_then_space) :-
+%The prelude tier sits between the engine and &self, so MeTTa's union and
+%intersection resolve to the vocabulary's rather than to library(lists)', which
+%the engine module imports under those names
+%[source: engine/spaces/lifecycle.pl, metta_exec_module_base/2].
+test(the_chain_is_engine_then_prelude_then_self_then_space) :-
     metta_engine_module(Engine),
     space_module('&self', Self),
     space_module('&plunit_exec_chain', Space),
-    assertion(import_module(Self, Engine)),
+    assertion(import_module(Self, prelude)),
+    assertion(import_module(prelude, Engine)),
     assertion(import_module(Space, Self)),
-    assertion(\+ import_module(Self, Self)).
+    assertion(\+ import_module(Self, Self)),
+    %And the tier is what a space's union/3 resolves to, where the engine's own
+    %stays the list operation.
+    assertion(predicate_property(Self:union(_, _, _),
+                                 implementation_module(prelude))),
+    assertion(predicate_property(Engine:union(_, _, _),
+                                 implementation_module(lists))).
 
 % metta_self_module/1 writes the name and space_module/2 computes it. They are
 % two places, deliberately: the first is inlined at compile time so the hot

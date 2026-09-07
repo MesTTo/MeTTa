@@ -797,7 +797,7 @@ prolog:error_message(metta_platform_required(Form, Capability, Requires,
 %pulls library(gensym) in, so today it resolves by autoload on the first
 %such compile. With autoload=false that call raises
 %existence_error(procedure,gensym/2) from inside the engine's own prelude
-%(engine/prelude.metta's type-cast-holds is the one equation there that uses
+%(the prelude's type-cast-holds is the one form of that vocabulary that uses
 %foldl-atom with an inline body), and SWI's OWN initialization-error
 %reporting then masks that primary error: building a source-location
 %diagnostic for it calls into library(prolog_clause)'s
@@ -991,6 +991,16 @@ metta_import_shared_registries(Subsystem) :-
                   duals, kernel, '../lib/lib_memo/lib_memo',
                   '../lib/minimal_metta_lib/minimal_metta_lib']).
 
+%The prelude tier is LOADED WITHOUT IMPORTING, which is the whole difference
+%between it and the list above. Its heads include union/3 and intersection/3,
+%which this module already imports from library(lists), so importing the tier's
+%would be refused; and importing them is not what makes them reachable anyway.
+%A space's execution module resolves through this module's base chain with the
+%tier spliced in below it, so every space sees MeTTa's union and this module
+%goes on seeing the list one [source: engine/spaces/lifecycle.pl,
+%metta_exec_module_base/2].
+:- use_module(prelude, []).
+
 %A subsystem that declares a module gets THIS module as its base, so the calls
 %it makes the other way -- into the engine core, into another subsystem's
 %exports, into a MeTTa builtin -- resolve without an import cycle. SWI gives a
@@ -1003,7 +1013,7 @@ metta_import_shared_registries(Subsystem) :-
 %execution module, and for the same reason: a chain of bases is how a name
 %written once is visible everywhere below it
 %[tested: engine_layering:test_the_engine_layering_contract_holds_and_a_violation_is_named,
-%spaces_execution_modules:the_chain_is_engine_then_self_then_space].
+%spaces_execution_modules:the_chain_is_engine_then_prelude_then_self_then_space].
 
 
 %A predicate rather than the bare directive it used to be, because a
@@ -1489,273 +1499,17 @@ ensure_shipped_cost_row(Row, _) :-
 
 %%%%%%%%%% The engine's prelude %%%%%%%%%%
 %
-%engine/prelude.metta holds standard vocabulary promoted from the libraries:
-%forms every program may use with no import!, compiled here at startup by
-%the same translator that compiles a program's own equations. The clauses
-%land in the base tier and each head registers as a builtin, so the names
-%are visible from every space and shadowable per named space exactly as
-%builtins are; the ATOMS are stored in no space at all, so a program
-%enumerating &self sees only its own writes, the same design decision
-%load_builtin_type_surface records above for the type surface.
+%The standard vocabulary, reachable with no import!. Its Prolog bodies are
+%engine/prelude.pl, a module the execution chain resolves through between this
+%one and '&self', and its registers, its declarations, its documents, its cost
+%rows and its eviction door are engine/metta/prelude.pl, consulted below.
 %
-%Declarations go to prelude_type_declaration/2, a third register beside
-%type_declaration/2 (what the program declared) and
-%seam:builtin_type_declaration/2 (the engine's Prolog surface). It is consulted
-%on the FUNCTION path, which seam:builtin_type_declaration deliberately is not:
-%that register describes arguments a caller writes for predicates
-%underneath (the maplist lesson, documented at call_site_type_chains/2),
-%while a prelude declaration is an ordinary MeTTa declaration for an
-%ordinary compiled equation, so honouring it at call sites is exactly
-%right, and it is what makes an Atom parameter like assertEqualToResult's
-%arrive unevaluated. A program's own declaration is read first, so a user
-%redeclaration wins, the same order the type surface keeps.
-%
-%Two passes, because the file may use a name before defining it
-%(type-cast calls type-cast-holds, defined below it): every equation head
-%registers first, then every form compiles, so a forward reference
-%compiles as the call it is. The filereader solves the same problem with
-%a repair pass; the prelude is small enough to pre-register instead.
-:- dynamic prelude_type_declaration/2.
-:- dynamic prelude_owned/1.
-:- dynamic prelude_clause_ref/2.
-%Which (cost ...) rows the prelude put into '&metta', as the rows themselves:
-%eviction withdraws them through metta_remove_atom/3, the door whose hook the
-%catalog's derived caches watch, and that door takes the term rather than a
-%clause reference.
-:- dynamic prelude_cost_row/2.
-%Which names the prelude registered as TRANSLATOR RULES. A derived form ships
-%as an equation plus that registration, and the registration is the prelude's
-%to withdraw: a program that defines the name itself takes the whole form
-%over, and a rule pointing at the program's equations would call them as a
-%compile-time expander, which is not what an ordinary definition means.
-:- dynamic prelude_translator_rule/1.
-%The prelude's equations as TERMS, one row per (= ...) form, so a tool
-%can enumerate the shipped tier without re-parsing prelude source: the
-%loader compiles equations into &self's module rather than storing atoms
-%(get-atoms on a user space must not show engine vocabulary), and this
-%register is the enumerable door that compilation would otherwise close.
-%The confluence reporter is the first consumer.
-:- dynamic prelude_equation/2.
-%Which seam:builtin_type_declaration/2 rows the prelude PUT THERE, as opposed to
-%found there. The two registers overlap once a name needs its Atom mask
-%honoured at call sites AND belongs to the engine's reported type surface:
-%get-type is declared by lib_builtin_types.metta and again by engine/prelude.metta,
-%for the two different readers. Without this ledger the prelude's eviction
-%would retract a row the FILE owns, since the two rows are identical and
-%retractall/1 cannot tell them apart.
-:- dynamic prelude_wrote_builtin_type/2.
-
-%A user definition WINS over the prelude, entirely. When &self compiles
-%an equation for a name the prelude owns, the prelude's clauses and
-%declarations for that name are evicted first, so the program's own
-%definition answers alone, exactly as it did before the name was
-%promoted (examples/ch09-types/14-matchtypes.metta defines its own match-types
-%and must keep meaning ITS match-types). Additive answers would be the
-%non-exclusive-equations reading, but the prelude is engine vocabulary,
-%not part of the program, and the house rule everywhere else on this
-%boundary is that the user's word replaces the engine's: get-type reads
-%a program's declaration ahead of the surface, prelude_type_declaration
-%is consulted last. Eviction is one-way; removing the user's equation
-%later does not resurrect the prelude's, the same as redefining any
-%function. An ordinary named-space function shadows through its module, but a
-%translator registration is global, so register_fun_in/2 invokes this door for
-%a prelude rule name from every module.
-evict_prelude_definition(FAtom) :-
-    (   retract(prelude_owned(FAtom))
-    ->  %Read before the declarations go, for the reason the write door reads
-        %it before it stores: it is the state the compiled clauses were built
-        %under.
-        result_finality(FAtom, Before),
-        forall(retract(prelude_clause_ref(FAtom, Ref)), erase(Ref)),
-        retract_prelude_declarations(FAtom),
-        retractall(prelude_doc_atom(FAtom, _)),
-        forall(retract(prelude_cost_row(FAtom, Row)),
-               metta_remove_atom('&metta', Row, _)),
-        retractall(prelude_equation(FAtom, _)),
-        (   retract(prelude_translator_rule(FAtom))
-        ->  translator_rules:forget_translator_rule(FAtom)
-        ;   true
-        ),
-        %The prelude is the base tier's, so its eviction is &self's change.
-        %An eviction takes the prelude's DECLARATION away with its equations,
-        %so it reaches the same two directions a declaration write does.
-        metta_self_module(Self),
-        announce_declaration_changed(Self, FAtom, Before)
-    ;   true
-    ).
-
-%The ledger rows say exactly which seam:builtin_type_declaration entries are
-%the prelude's, so eviction purges both stores and nothing else. A row the
-%prelude found already written by lib_builtin_types.metta stays, because it
-%was never the prelude's to remove.
-retract_prelude_declarations(Name) :-
-    forall(retract(prelude_type_declaration(Name, Type)),
-           (   retract(prelude_wrote_builtin_type(Name, Type))
-           ->  retractall(seam:builtin_type_declaration(Name, Type))
-           ;   true
-           )).
-
-%The declaration half of the same rule, for the loader's door: a ':'
-%atom a file writes into the base tier replaces the prelude's
-%declaration for that name, so the compile-time findall over
-%type chains sees ONE authority, the user's.
-evict_prelude_declaration(Space, [':', Name, _]) :-
-    atom(Name),
-    Space == '&self',
-    !,
-    retract_prelude_declarations(Name).
-evict_prelude_declaration(_, _).
-
-%The prelude compiles SILENTLY whatever the session's verbosity: these
-%are engine internals loading at boot, and a --verbose user asking to see
-%their program's compiled clauses is not asking for the engine's own.
-%asserta so the silence wins over an already-asserted silent(false), and
-%the cleanup erases exactly the clause added here.
-load_engine_prelude :-
-    setup_call_cleanup(asserta(silent(true), Ref),
-                       load_engine_prelude_forms,
-                       erase(Ref)).
-
-load_engine_prelude_forms :-
-    metta_engine_src_dir(Dir),
-    directory_file_path(Dir, 'prelude.metta', Path),
-    (   exists_file(Path)
-    ->  true
-    ;   throw(error(existence_error(source_sink, Path),
-                    context(load_engine_prelude/0,
-                            'engine/prelude.metta is part of the engine')))
-    ),
-    read_file_to_string(Path, Text, [encoding(utf8)]),
-    parse_metta_source(Text, Forms),
-    %Re-loading restores only what eviction removed: a name still owned
-    %keeps every clause it has, and its forms are skipped WHOLE (a name
-    %may carry several equations, so the skip is per name, decided
-    %before anything loads). First load: nothing is owned, nothing
-    %skips.
-    findall(Owned, prelude_owned(Owned), OwnedBefore),
-    %Arity registers in pass one WITH the name: a registered name with no
-    %recorded arity compiles a later call site as a partial application
-    %(the backends note beside seam:extension_builtin/2 records the same
-    %trap), and type-cast calls type-cast-check before pass two reaches
-    %its equation.
-    forall(( member(parsed(function, _, [=, [FAtom|W], _]), Forms),
-             atom(FAtom) ),
-           ( register_builtin_fun(FAtom),
-             length(W, N),
-             Arity is N + 1,
-             register_arity(FAtom, Arity) )),
-    forall(( member(Form, Forms),
-             parsed_form_parts(Form, Kind, Src, Term) ),
-           (   Term = [=, [Skip|_], _],
-               memberchk(Skip, OwnedBefore)
-           ->  true
-           ;   load_prelude_form(Kind, Src, Term)
-           )).
-
-%A declaration lands in TWO stores: prelude_type_declaration/2 is the
-%masking tier the compiler reads and the eviction ledger, and
-%seam:builtin_type_declaration/2 is where get-type already looks, so the
-%get-type path gains no new clause to try (measured: an extra candidate
-%clause cost ~6 inferences per compiled run() call, 2026-08-18). The
-%ledger is what lets eviction purge BOTH stores exactly.
-load_prelude_form(expression, _, [':', Name, Type]) :-
-    atom(Name), !,
-    (   prelude_type_declaration(Name, Type) -> true
-    ;   assertz(prelude_type_declaration(Name, Type)),
-        %lib_builtin_types.metta loads FIRST and may already carry the same
-        %declaration, which is the case for a builtin the prelude declares
-        %only so the CALL SITE honours its Atom mask: get-type is in both
-        %files for two different readers. A second identical fact would give
-        %the engine's type surface a duplicate row, so the prelude writes one
-        %only when it is the one putting it there, and records that it did.
-        (   seam:builtin_type_declaration(Name, Type) -> true
-        ;   assertz(seam:builtin_type_declaration(Name, Type)),
-            assertz(prelude_wrote_builtin_type(Name, Type))
-        )
-    ).
-%A (@doc ...) form in the prelude lands in the engine's doc register,
-%where get-doc's first tier reads it; the prelude documents its own
-%vocabulary the way lib_doc documented its own, because a vocabulary
-%that reports undocumented names and has none of its own would be
-%telling other people to do what it does not.
-load_prelude_form(expression, _, Term) :-
-    Term = ['@doc', Name | _], atom(Name), !,
-    (   prelude_doc_atom(Name, Term) -> true
-    ;   assertz(prelude_doc_atom(Name, Term))
-    ).
-%A (cost ...) form is the prelude's THIRD declaration about its own
-%vocabulary, beside the type and the doc atom: what class the call's cost
-%grows in, as a catalog row the cost-rows lane then has to hold it to. It is a
-%declaration and not execution, which is why it belongs on this side of the
-%loader rather than needing the runnable door the note below keeps shut.
-%
-%The row is remembered so eviction can withdraw it: a program that defines one
-%of these names takes the whole form over, and the class was measured on the
-%prelude's equations rather than on the program's.
-load_prelude_form(expression, _, [cost, Witness|Fields]) :-
-    nonvar(Witness), Witness = [Name|_], atom(Name), !,
-    Row = [cost, Witness|Fields],
-    (   prelude_cost_row(Name, _)
-    ->  true
-    ;   ensure_shipped_cost_row(Row, Wrote),
-        (   Wrote == true
-        ->  assertz(prelude_cost_row(Name, Row))
-        ;   true
-        )
-    ).
-%A DERIVED form: an equation that expands the call plus the registration
-%that makes the translator consult it. The loader takes only this one
-%runnable shape, so the prelude cannot smuggle arbitrary execution into
-%boot, and the name has to be one the prelude itself defines, so a
-%registration can never point at somebody else's equations.
-load_prelude_form(runnable, Src, ['add-translator-rule!', Name]) :-
-    atom(Name), !,
-    load_prelude_translator_rule(Name, [], Src).
-%The DECLARED registration is the same shape carrying the rule's own
-%properties, which are declarations about the rule rather than execution: a
-%prelude rule whose expansion introduces `let` binders says so with
-%`extra-variables-exempt`, exactly as lib_spaces.metta's succeedsPredicate
-%does, and the metatheory lane then reports the exemption with its reason
-%instead of recording the rule as not established.
-load_prelude_form(runnable, Src, ['add-translator-rule!', Name, Declarations]) :-
-    atom(Name), is_list(Declarations), !,
-    load_prelude_translator_rule(Name, Declarations, Src).
-
-load_prelude_form(function, _, Term) :-
-    Term = [=, [FAtom|W], _], atom(FAtom), !,
-    length(W, N),
-    Arity is N + 1,
-    register_arity(FAtom, Arity),
-    %The prelude is the base tier's own vocabulary, so it compiles into &self's
-    %module: every other space inherits it from there, and a program that
-    %redefines one of its names evicts it exactly as before.
-    metta_self_module(Self),
-    once(with_metta_module(Self, translate_clause(Term, Clause))),
-    assert_function_clause(Self, Clause, Ref),
-    assertz(prelude_clause_ref(FAtom, Ref)),
-    assertz(prelude_equation(FAtom, Term)),
-    (   prelude_owned(FAtom) -> true
-    ;   assertz(prelude_owned(FAtom))
-    ).
-%Anything else is refused rather than skipped: a prelude form that is
-%neither a declaration nor an equation is a mistake in the engine's own
-%source, and silently ignoring it would ship a vocabulary hole.
-load_prelude_form(Kind, Src, _) :-
-    throw(error(domain_error(prelude_form, Kind),
-                context(load_engine_prelude/0, Src))).
-
-load_prelude_translator_rule(Name, Declarations, Src) :-
-    (   prelude_owned(Name)
-    ->  (   Declarations == []
-        ->  'add-translator-rule!'(Name, _)
-        ;   'add-translator-rule!'(Name, Declarations, _)
-        ),
-        (   prelude_translator_rule(Name) -> true
-        ;   assertz(prelude_translator_rule(Name))
-        )
-    ;   throw(error(existence_error(prelude_definition, Name),
-                    context(load_engine_prelude/0, Src)))
-    ).
+%Boot used to PARSE and TRANSLATE 783 lines of MeTTa here, once per process,
+%for clauses no .qlf ever held. install_engine_prelude/0 writes the registers
+%from tables the artifact carries instead [measured 2026-09-07: boot 272,323 to
+%248,271 inferences, -8.83%; command=swipl -q -g "metta_bench:bench_run(boot)"
+%-t halt engine/bench.pl; fixture=warm .qlf, three identical samples per arm].
+:- consult('metta/prelude.pl').
 
 %fun/1, fun_in/2, fun_scoped/1 and metta_exec_module_parent/2 are the exact
 %mutable inputs the host catalogues read: metta_py_builtins/1 reads the first,
@@ -1789,7 +1543,7 @@ metta_host_function_generation(Generation) :-
 %export the declaration promises can only be made once every engine file has
 %been [tested: metta_published_surface:every_declared_seam_that_exists_is_exported].
 :- initialization((seam:publish_declared, protect_metta_exec_modules,
-                   load_builtin_type_surface, load_engine_prelude,
+                   load_builtin_type_surface, install_engine_prelude,
                    spaces:metta_publish_builtin_visibility,
                    retract_unrelated_system_arities,
                    snapshot_builtin_function_sources)).

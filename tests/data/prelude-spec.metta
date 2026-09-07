@@ -1,21 +1,25 @@
-; Purpose: define the standard vocabulary the engine loads with no import.
+; Purpose: the executable spec for the engine's prelude vocabulary, and the
+; oracle the differential suite runs the Prolog bodies against.
+;
+; Every form below was engine/prelude.metta until 2026-09-07, parsed and
+; translated at every boot. The vocabulary is Prolog now: the bodies are
+; engine/prelude.pl and the registers are engine/metta/prelude.pl. This file
+; is what those bodies MEAN, in the language they are about, and
+; tests/prolog/suites/evaluation/prelude_spec.plt is what holds them to it:
+; it loads the declarations and equations here into a scratch space and
+; proves bag-equality with the engine's own answers, per head, over the
+; suites' cases and over adversarial ones.
 ; Guarantees:
-;   - the doc family receives the upstream Atom masks and formal signatures
-;     [tested: test_the_doc_family_answers_what_upstream_answers].
-;   - is-function observes the unit arrow as an arrow while the internal type
-;     classifier remains free to require a result child.
-;   [tested: test_the_empty_expressions_type_follows_the_arbiters_ruling; commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3]
-;   - the four bag-comparing assert forms keep the verdicts they had and reach
-;     assert-answers, so a failure carries the answers missing from and in
-;     excess of the expectation while what passes and what fails is unmoved
-;     [tested: prelude:assertEqual_failure_carries_both_bags,
-;     prelude:assertEqualToResult_failure_carries_both_bags,
-;     prelude:assertEqual_compares_result_sets; commit=71de27a76dd16684941e3e090de0d17299d96493]
-;   - assertIncludes keeps its one-sided verdict and reaches
-;     assert-includes-answers, so a failure names the call as written and the
-;     answers missing from the expectation, with the excess side absent
-;     [tested: prelude:assertIncludes_failure_carries_the_missing_bag_alone,
-;     prelude:assertIncludes_subset_passes; commit=48ec57e6df02e05ad3b5da50157dea321969bc48]
+;   - the engine's prelude_shipped_equation/2 register is exactly the 36
+;     equations below, parsed
+;     [tested: prelude_spec:the_shipped_register_is_the_spec_fixture].
+;   - every head answers here what it answers in the engine
+;     [tested: prelude_spec:every_head_agrees_with_its_spec_equation].
+; Assumes: the suite loads the declarations and the equations and SKIPS the
+;   `!(add-translator-rule! ...)` runnables. A translator registration is
+;   global, so running one from a scratch space would point the engine's own
+;   compile-time rewriting at this fixture's equations; the registrations stay
+;   written here because they are part of what each derived form IS.
 ; Open Obligations:
 ;   To Do: None
 ;   Hacks: None
