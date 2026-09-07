@@ -395,7 +395,7 @@ equation_arity(F, Arity, [=, [F|Args], _]) :- length(Args, Arity).
 % binds the same clause either door wrote and materializes it the same way.
 % The compiled clause's recorded source carries that resolution; the stored
 % atom alone does not prove local relational semantics.
-% [tested: a_native_literal_self_reads_its_own_space_through_the_materializer; commit=WORKTREE]
+% [tested: a_native_literal_self_reads_its_own_space_through_the_materializer; commit=08f6f4df19a283bb84ba5f679c83944b42685b2e]
 compiled_equation_rule(Space, Names, Equation, Rule) :-
     equation_rule(Space, Names, Equation, Rule),
     Equation = [=, _, Body], compiled_local_matches(Body, Space).
