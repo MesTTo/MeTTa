@@ -3,6 +3,7 @@
 ;numbers that describe the machine the program is running on.
 !(import! &self (library lib_thread))
 
+(: inc (-> Number Number))
 (= (inc $x) (+ $x 1))
 
 ;`try-recv` is `recv` without the wait. An empty channel answers NOTHING

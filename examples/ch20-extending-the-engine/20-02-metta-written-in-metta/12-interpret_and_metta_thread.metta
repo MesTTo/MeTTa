@@ -8,6 +8,7 @@
 ;[source: MettaHyperonFull/Minimal/Interpreter.lean, `mettaThreadStep`
 ;delegating to `mettaEval`]
 
+(: twice (-> Number Number))
 (= (twice $x) (* 2 $x))
 
 ;On an ordinary call all three agree, because one step is all it takes.

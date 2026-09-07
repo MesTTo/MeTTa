@@ -3,6 +3,7 @@
 ;variant that stores an exact bag rather than a bounded cache.
 !(import! &self (library lib_memo))
 
+(: sq (-> Number Number))
 (= (sq $x) (* $x $x))
 
 ;`memoize-exact` is `memoize` with the policies that change what a function

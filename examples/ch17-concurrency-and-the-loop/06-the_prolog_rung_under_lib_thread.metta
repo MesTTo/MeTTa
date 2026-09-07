@@ -4,7 +4,9 @@
 ;the same operation, and two of them have no MeTTa-named wrapper at all.
 !(import! &self (library lib_thread))
 
+(: inc (-> Number Number))
 (= (inc $x) (+ $x 1))
+(: big? (-> Number Bool))
 (= (big? $x) (> $x 2))
 
 ;The five parallel maps over a list. `par_map` preserves the input's order
