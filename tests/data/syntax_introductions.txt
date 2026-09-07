@@ -40,6 +40,7 @@ if-error                          03-00-06
 import!                           03-00-06
 library                           03-00-06
 parse-command                     03-00-06
+sread                             03-00-06
 let*                              04-01-01
 msort                             04-01-02
 superpose                         04-01-02

@@ -68,7 +68,7 @@ website.
 | `ch16-events-and-standing-queries` | the event layer's declared delivery and reaction rows |
 | `ch17-concurrency-and-the-loop` | threads, mutexes, Linda, `hyperpose` |
 | `ch18-performance` | larger workloads, memoisation and tabling, algebra carriers |
-| `ch19-spaces-backed-by-anything` | inherited, restricted and parametric spaces; a space and a builtin in C |
+| `ch19-spaces-backed-by-anything` | inherited, restricted and parametric spaces; a space and a builtin in C; a space on MORK's Rust trie |
 | `ch20-extending-the-engine` | translator rules, MeTTa written in MeTTa, Prolog underneath, queryable imports and source undo, modules and the `&metta` catalog |
 | `ch22-a-reasoner-you-can-serve` | logic programs, weighted answers, search |
 
@@ -100,7 +100,7 @@ https://github.com/patham9/PeTTa, MIT licensed, at commit
 into the reading order above, and some were edited. Thirteen people wrote them
 there, most of them Patrick Hammer; the rest are credited file by file, because
 naming only the most prolific contributor would miscredit the others. The other
-137 examples were written for this repository.
+186 examples were written for this repository.
 
 `ORIGINS.tsv` names every derived file beside the upstream file it came from,
 how much of the original body survives with comments ignored, and who wrote it
