@@ -285,15 +285,40 @@ bench_work(evaluate, Space, Result) :-
 bench_check(boot, booted) :-
     metta_host_set_silent(true),
     process_metta_string("!(+ 1 2)", [3], '&self').
-% 118 until acd04732, the assertion-bag-diff merge, which added one top-level
-% form to engine/prelude.metta. Both cases parse that file, so the count is a
-% fact about the shipped prelude rather than a pin: it is re-counted, not
-% widened. The lane had been REFUSING at its workload digest before it reached
-% either case, so the stale count was invisible for as long as the refusal was
-% [measured 2026-09-07: parse_metta_source over engine/prelude.metta answers
-% 119 forms; commit=WORKTREE].
-bench_check(parse, Forms) :- length(Forms, 119).
-bench_check('parse-prolog', Forms) :- length(Forms, 119).
+% Each parse case is checked against the OTHER reader, not against a number.
+%
+% It was a number, 118, and it had been wrong since acd04732 added the 119th
+% top-level form to engine/prelude.metta: both cases raised
+% `bench_result expected` at every commit after it, and nobody saw it because
+% the baseline's workload digest covers the same file and refuses BEFORE a case
+% runs. Re-counting to 119 would have restored exactly that trap -- trunk has
+% since moved the prelude to 124 [measured 2026-09-07 against the branch tip
+% this work is not based on]. A count that has to be edited by hand whenever an
+% unrelated file changes, behind a refusal that hides it when it is not, is not
+% a check; it is a second pin with no updater.
+%
+% There is an independent answer to hand here that translate has no equivalent
+% of, which is why only these two cases change: the tree ships TWO readers over
+% this text and the suite already holds them to each other
+% [source: tests/prolog/suites/reader/reader_c.plt, agree_full/1]. So the C
+% door's result is counted by the Prolog grammar and the Prolog grammar's by
+% the C door. A reader that stops mid-file still fails, which is what the check
+% is for, and the count now follows the shipped prelude by itself.
+%
+% Both calls sit in bench_check/2, which runs AFTER the measured region closes
+% and outside it, so neither reader's cost joins the count it guards
+% [measured 2026-09-07: parse-prolog reads 3,341,234 inferences with the check
+% pinned to a number and 3,341,234 with it derived; commit=WORKTREE].
+%
+% Known limitation: two readers that broke the SAME way would agree and pass.
+% The number would not have caught that either, and reader_c.plt's differential
+% is where that pair is held.
+bench_check(parse, Forms) :-
+    bench_prelude_forms(parse_metta_source_prolog, Expected),
+    length(Forms, Expected).
+bench_check('parse-prolog', Forms) :-
+    bench_prelude_forms(parse_metta_source, Expected),
+    length(Forms, Expected).
 % Forcing drove the 49 names read from the source. The deferred register is
 % the engine's own account of what is left, and it has to be empty.
 bench_check(translate, forced) :-
@@ -303,6 +328,11 @@ bench_check(match, rows(First, Both, Relation)) :-
     length(First, 1), length(Both, 1), length(Relation, 1).
 bench_check('match-skew', Rows) :- length(Rows, 5000).
 bench_check(evaluate, [50000]).
+
+bench_prelude_forms(Reader, Count) :-
+    bench_text('engine/prelude.metta', Text),
+    call(Reader, Text, Forms),
+    length(Forms, Count).
 
 % Each round parses into a FRESH variable. Threading one output through the
 % loop instead makes every round after the first unify against the previous
