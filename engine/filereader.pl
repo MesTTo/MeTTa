@@ -1533,7 +1533,7 @@ record_translated_from(Ref, Term, StoredRef, SourceRef) :-
 % restored to a space that answered nothing for the match arm [tested:
 % test_fast_images_preserve_generated_overloaded_ingress,
 % an_unbound_deferred_equation_reads_the_space_it_is_stored_in;
-% commit=WORKTREE]. The root is the identity case and pays no walk; the
+% commit=856434d7c1d381b3f3d7cbbd008f46c0d41b61aa]. The root is the identity case and pays no walk; the
 % comparison is inline so a root batch costs what it cost.
 stored_equation_source(Space, Original, Resolved, StoredRef) :-
     spaces:native_storage_module_ready(Space, Storage),
