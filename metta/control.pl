@@ -685,10 +685,12 @@ metta_run_with_fuel(Value, Answer, Goal) :-
         Answer = Value
     ).
 
-%ONE GLOBAL CARRIES BOTH QUESTIONS, and it always exists so that the reader is
-%the deterministic b_getval/2 rather than the nondeterministic nb_current/2.
+%THE BALANCE, and it always exists so that the reader is the deterministic
+%b_getval/2 rather than the nondeterministic nb_current/2.
 %`off` says no scope is open, `unstarted` says one is open and the first step
-%has not read the pragma yet, and a number is what the scope has left. Lazy
+%has not read the pragma yet, and a number is what the scope has left. It
+%answered "is a scope open" as well until the budget became opt-in; the scope
+%global below answers that now, for the reason recorded there. Lazy
 %rather than eager because with-pragma! sets max-stack-depth INSIDE the runnable
 %the scope already opened around.
 %
@@ -786,6 +788,11 @@ metta_close_fuel_scope :-
 metta_fuel_answer(Value, Answer, Goal) :-
     call(Goal),
     Answer = Value.
+%is_list/1 is the type discriminator that lets one global hold two shapes: the
+%replay reads a LIST and `closed` is an atom, so without it a read outside a
+%scope would reach reverse/2 and raise type_error(list, closed) where this
+%clause owes a failure. It is on the replay path, which runs once per branch
+%that ran out of fuel.
 metta_fuel_answer(_, ['Error', Culprit, 'StackOverflow'], _) :-
     nb_getval('$metta_fuel_scope', Reverse),
     is_list(Reverse),
