@@ -1755,6 +1755,24 @@ metta_catalog_preset([vocabulary, visibility, 'PUBLIC', 'INTERNAL']).
 metta_catalog_preset([vocabulary, 'op-kind', det, many, async,
                       raw_det, raw_many]).
 metta_catalog_preset([vocabulary, 'subscription-edge', add, remove, both]).
+%How a materialised view of a query is kept current. One meaning, three
+%maintenance algorithms, and the word names which is in force. `pattern`
+%maintains a multiset from the write events themselves, O(1) per event, and
+%serves one pattern; `heads` watches the heads the query mentions and re-answers
+%the query once per commit that touched one, which is exact for any read-only
+%query and costs nothing on a write the query cannot see; `tabled` serves a call
+%to a tabled head by watching the invalidation counter of its own table, so a
+%commit that leaves the table valid costs the counter and nothing else. This is
+%the choice a differential-dataflow engine makes internally and names nowhere;
+%naming it is what lets a program ask for one, and read back which it got.
+metta_catalog_preset([vocabulary, 'live-strategy', pattern, heads, tabled]).
+%What one change to a materialised view says. `add` and `remove` carry a signed
+%multiplicity for one answer; `progress` carries neither answer nor atom and its
+%whole content is the generation it names, which is Materialize's SUBSCRIBE
+%progress row, where "everything in the row except for mz_timestamp is not a
+%valid update and its content should be ignored"
+%[source: https://materialize.com/docs/sql/subscribe/].
+metta_catalog_preset([vocabulary, 'delta-kind', add, remove, progress]).
 %What a context promises about the change events it emits. The three
 %delivery words are messaging's own, at-most-once, at-least-once and the
 %exactly-once rung, spelled per-write-exactly here because the unit is one
