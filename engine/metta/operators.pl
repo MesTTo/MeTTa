@@ -7,6 +7,13 @@
 %   commit=90aa1e67c6d1cda45e27dbaa565f2c537f70ad40].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+% Guarantees: and/3, or/3, not/2, xor/3 and implies/3 are relations over the two
+%   booleans and have NO answer outside that domain, while an unbound operand
+%   still enumerates the truth table
+%   [tested: metta_operation_errors:a_non_boolean_operand_leaves_the_operation_with_no_answer,
+%   metta_operation_errors:boolean_operations_remain_relational,
+%   examples/ch07-control-flow/07-01-if-and-booleans/11-boolean_domain.metta;
+%   commit=5540a0d03942741ed9565fbb671f18e37cb6eca5].
 % Guarantees: decons-atom/2 and atom-subst/4 retain their refusal answers, and
 %   announce them through metta_record_error/1, which reaches an observer only
 %   while one is running [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
@@ -780,26 +787,58 @@ bool(false).
 boolean_operand(Value) :- ( var(Value) -> bool(Value) ; Value == true -> true
                           ; Value == false ).
 
-%The soft cut is what lets an operand that is not a boolean be ANSWERED rather
-%than raise while the enumeration above still runs: it takes every solution the
-%operands have and reaches the refusal only when they have none. `(and True u)`
-%is left as written and `(and True n)` is `(BadArgType 2 Bool Number)`
-%[assumed: adopted from an earlier reference semantics].
+%THE OPERAND GUARD IS THE WHOLE DOMAIN, and outside it these five have no
+%answer at all, which is upstream's own shape: `and(A,B,C) :- bool(A), bool(B),
+%( A == true -> C = B ; A == false -> C = false ).`, and the same for or, not,
+%xor and implies [source: PeTTa@ae66fa8 src/metta.pl:97-104]. A non-boolean
+%operand fails the guard, the call has no solution, and a `!` over it prints
+%nothing.
+%
+%This engine wrapped the same guard in a soft cut whose else-branch called
+%metta_operation_answer/3, so a symbol operand left the call standing and a
+%number answered a typed refusal. Both diverged, and the comment this replaces
+%recorded the rule as adopted rather than measured:
+%`!(and a a)` was `(and a a)` here and nothing upstream, `!(and True 5)` was
+%`(Error (and True 5) (BadArgType 2 Bool Number))` here and nothing upstream,
+%and `!(collapse (and a a))` was `((and a a))` against upstream's `()`
+%[measured 2026-09-07 against PeTTa@ae66fa8, all five operations over a symbol
+%operand and a number operand].
+%
+%The RELATIONAL reading survives untouched because it lives in
+%boolean_operand/1 and never lived in the soft cut: an unbound operand still
+%enumerates, so `!(collapse (and $a $b))` is `(true false false false)` on both
+%engines [measured 2026-09-07] and
+%metta_operation_errors:boolean_operations_remain_relational still holds.
+%AN ERROR OPERAND STILL FINISHES THE CALL, which is the one thing the removed
+%branch did that the domain does not cover. `(Error <call> <reason>)` is an
+%ANSWER here, and an operand whose evaluation produced one hands that atom on
+%unchanged instead of being consumed: `!(and True (+ 1 "bad"))` is
+%`(Error (+ 1 "bad") (BadArgType 2 Number String))` and not a second error
+%naming the first [source: engine/metta/terms.pl, metta_error_operand/2 and the
+%note over it; tested: test_the_error_vocabulary_answers_what_the_arbiter_answers].
+%Upstream has no such channel and exits 2 on the same three programs
+%[measured 2026-09-07 against PeTTa@ae66fa8: `!(and True (+ 1 "bad"))`,
+%`!(or False (+ 1 "bad"))` and `!(not (+ 1 "bad"))` are all
+%`is/2: Type error: 'character' expected`], which is class arbiter-error and
+%where this engine's answer is the extension the compatibility law allows.
+%
+%So the soft cut stays and only its else-branch narrows: an error operand is
+%answered, and every OTHER non-boolean has no answer at all.
 and(A,B,C) :- ( ( boolean_operand(A), boolean_operand(B) )
                 *-> ( A == true -> C = B ; C = false )
-                ;   metta_operation_answer(and, [A, B], C) ).
+                ;   metta_error_operand([A, B], C) ).
 or(A,B,C) :- ( ( boolean_operand(A), boolean_operand(B) )
                *-> ( A == true -> C = true ; C = B )
-               ;   metta_operation_answer(or, [A, B], C) ).
+               ;   metta_error_operand([A, B], C) ).
 not(A,B) :- ( boolean_operand(A)
               *-> ( A == true -> B = false ; B = true )
-              ;   metta_operation_answer(not, [A], B) ).
+              ;   metta_error_operand([A], B) ).
 xor(A,B,C) :- ( ( boolean_operand(A), boolean_operand(B) )
                 *-> ( A == B -> C = false ; C = true )
-                ;   metta_operation_answer(xor, [A, B], C) ).
+                ;   metta_error_operand([A, B], C) ).
 implies(A,B,C) :- ( ( boolean_operand(A), boolean_operand(B) )
                     *-> ( A == true -> C = B ; C = true )
-                    ;   metta_operation_answer(implies, [A, B], C) ).
+                    ;   metta_error_operand([A, B], C) ).
 
 %%% Nondeterminism: %%%
 superpose(L, _) :- var(L), !, refuse_unbound_input(superpose, 1).

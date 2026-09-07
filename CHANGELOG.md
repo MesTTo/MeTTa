@@ -549,6 +549,84 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   where a hand-written call passes something that is not an application. The
   ball, its formals and `AssertionFailure.operation` are untouched: only the
   word before the colon changed.
+- `reduce` handed a bound scalar has no answer, where it used to raise. The
+  raise was reachable from a MeTTa program rather than only from an engine
+  caller, because `reduce` is a published head: `!(foldall a (reduce a) 0)`
+  compiled the generator to `reduce([reduce, a], D, _)`, dispatched the head
+  with `a`, and exited 2 with `reduce: list expected, found a`, ending the
+  whole file where the arbiter answers `0`. MeTTa's error channel is an answer
+  and not an exception, so a raise at a door a program can knock on broke this
+  engine's own rule. A scalar is not a call, there is no reduction step to
+  take, and the three programs the fuzz lane drew (`(reduce a)`,
+  `(reduce (* 0))` and `(reduce (* 0 1))` as `foldall` generators) now answer
+  `0` on both engines. The EMPTY expression keeps its own answer: `(reduce ())`
+  is `()` here by a pin that records why, and that is the one place this
+  engine's `reduce` stays wider than the arbiter's. Every use of `reduce` in
+  the corpus and the libraries passes an expression.
+- `chain`'s operand is read from its FIRST argument in the effect planner, not
+  its second. `(chain <atom> <binder> <template>)` is the opposite order from
+  `(let <pattern> <value> <body>)`, and reading it as `let`'s put the binder
+  where the operand belongs, so a reified world planned the binder as a dynamic
+  operation and refused `(chain 1 $x (+ $x 2))` at effect rank `oracleIO`.
+- An operand whose evaluation produced an `(Error ...)` atom finishes a
+  boolean operation with that atom again. Narrowing the five to their domain
+  had removed the branch that carried it, so `!(and True (+ 1 "bad"))` answered
+  nothing instead of the inner error.
+- `add-atom` and `remove-atom` take upstream PeTTa's domain. Upstream stores an
+  atom by making it a fact keyed on its HEAD, so an atom without one — a bare
+  symbol, a number, a string, or `()` — cannot become one there and the
+  operation has no answer; here both spellings accepted it, answered `True` and
+  wrote it. `!(add-atom &self ())` is the shrunk program the parity fuzzer
+  found, and the difference was not only the printed `true`: the atom was in
+  the space afterwards here and not there. The same now holds through every
+  route a program can take, including `(eval (add-atom &self b))`, a computed
+  space, and an atom arriving through a variable.
+
+  Nothing is lost, because this engine's space is still wider and the wider
+  doors are the spellings upstream does not define: `add-atoms` writes any
+  atom, `subtract-atom` takes one occurrence back, `Space.add`, `space.remove`
+  and `del space[atom]` are the Python faces, and a bare atom at the top of a
+  source file is the source spelling, which upstream's parser refuses outright.
+  The guard is at the compiled CALL SITE rather than in the predicate, so it
+  keys on the spelling and costs nothing: a written expression compiles to the
+  goal it always compiled to and only a computed atom pays one test.
+
+- `and`, `or`, `not`, `xor` and `implies` have no answer outside the two
+  booleans, where they used to leave the call standing for a symbol operand
+  and answer a `BadArgType` atom for a number. They are RELATIONS over `True`
+  and `False`, which is what an unbound operand already read (`!(collapse (and
+  $a $b))` is `(True False False False)` and stays so), and upstream writes
+  that domain as a guard and nothing else: `and(A,B,C) :- bool(A), bool(B),
+  ...`. `!(and a a)` is the shrunk program the parity fuzzer found; it was
+  `(and a a)` here and nothing on the arbiter, and `!(collapse (and a a))` was
+  `((and a a))` against `()`. Two places said different things and both now say
+  the relation's: the operation's own guard fails, and the five ship a
+  `(dispatch-policy <name> MismatchEnum MismatchFail)` row so the call site's
+  declared-type mismatch fails with them instead of answering the position it
+  refused. A relation out of its domain has no row; it is not a function given
+  the wrong argument. An operand whose evaluation produced an `(Error ...)`
+  atom still finishes the call with that atom, which is the engine's own rule
+  and a channel upstream does not have (it exits 2 on the same programs); an
+  operand WRITTEN as an error atom now answers that atom too, where it used to
+  answer `(BadArgType 1 Bool ErrorType)` from the call site's mismatch answer.
+
+- `chain` no longer evaluates the value it bound a second time. It compiles to
+  exactly `let`'s goals, which is upstream's own definition (one clause serves
+  both spellings), and a result step left over from the substituting `chain`
+  this engine used to have was re-entering evaluation for any compound answer
+  holding a redex. So an equation atom read out of a space and chained became
+  the equality test's answer: `(= (f0 $x) (* $x))` with
+  `!(chain (get-atoms &self) $v1 $v1)` answered `false` where the arbiter
+  answers the atom, and `(= (f0 $x) (* $x (* $x $x)))` with the same query
+  raised the CLP(FD) backwards-multiplication refusal where the arbiter answers
+  the atom. `!(chain (quote (= a b)) $v $v)` is the shrunk form and is now
+  `(= a b)` on both engines. `let` never had the step and never diverged. The
+  chain stepping protocol the old clause needed (`metta_chain_step/2` and the
+  `embedded_operation/1` wrapper over its vocabulary) goes with it; nothing had
+  emitted it since `chain` moved onto `let`'s translation, and the effect
+  planner's own source model of `chain`, which still described the substituting
+  form, now reads it as `let` too.
+
 - A space's function namespace lists and resolves only what that space can
   call. `dir(m.fn)`, `m.builtins()` and `m.fn.<name>` read the process-wide
   function register, so a head whose equations live in another space's module

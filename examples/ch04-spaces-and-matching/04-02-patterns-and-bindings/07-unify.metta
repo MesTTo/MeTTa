@@ -21,13 +21,17 @@
 !(test (unify $x (f $x) cyclic sound) cyclic)
 
 ;Only the selected branch evaluates: each probe leaves a marker, and
-;exactly one marker lands per query.
-(= (then-probe) (chain (add-atom &self then-ran) $_ 3))
-(= (else-probe) (chain (add-atom &self else-ran) $_ 4))
+;exactly one marker lands per query. The marker is an EXPRESSION rather than a
+;bare symbol because `add-atom` stores an atom by its head, which is upstream's
+;own domain and this engine's: `!(add-atom &self then-ran)` has no answer and
+;writes nothing, so a bare-symbol marker would leave the probe with nothing to
+;chain. `add-atoms` is the door that takes one.
+(= (then-probe) (chain (add-atom &self (then-ran)) $_ 3))
+(= (else-probe) (chain (add-atom &self (else-ran)) $_ 4))
 !(test (unify A A (then-probe) (else-probe)) 3)
-!(test (collapse (match &self else-ran hit)) ())
+!(test (collapse (match &self (else-ran) hit)) ())
 !(test (unify A B (then-probe) (else-probe)) 4)
-!(test (collapse (match &self then-ran hit)) (hit))
+!(test (collapse (match &self (then-ran) hit)) (hit))
 
 ;A space is a grounded atom whose custom matching is query, so a space
 ;operand routes through match: one then-answer per stored match, the

@@ -728,9 +728,21 @@ reduce(X, Out) :- reduce(X, Out, _).
 %defeats last call optimisation in the caller: a 200,000 element map-atom
 %through the dynamic dispatch path retained 86,400,000 bytes of local stack,
 %432 bytes per element, for a choice point that could never yield an answer.
-%Measured 2026-08-15. The last clause is now reachable only for a term that is
-%neither [] nor [_|_], which is exactly what non_list/1 tested, so the test is
-%gone with the choice point.
+%Measured 2026-08-15. That clause is gone entirely now, for the reason written
+%below the last one here, and with it the choice point and the non_list/1 test
+%that used to guard it: a bound term that is neither `[]` nor `[_|_]` matches
+%no head at all.
+%THE EMPTY EXPRESSION KEEPS ITS ANSWER, and it is the one place where this
+%engine's `reduce` is deliberately wider than the arbiter's. The pin and its
+%reason are conformance2:reduce_answers_an_irreducible_operand, "The empty
+%operand is this engine's own: upstream aborts the run on `(reduce ())`", which
+%is true of the STANDALONE form. Reached through a function it is not:
+%`(= (f0 $x) (reduce $x))` with `!(f0 ())` answers nothing on the arbiter and
+%`()` here, and `!(foldall a (reduce ()) 0)` is `0` there and `(a () 0)` here
+%[measured 2026-09-07 against PeTTa@ae66fa8, the first drawn by the fuzz lane
+%at seed 4]. Both are recorded rather than fixed, because the answer is a
+%design this repository pinned with its reason, and the scalar rule below is
+%not: the raise it replaced was neither this engine's rule nor the arbiter's.
 reduce([], Out, Status) :- !, Out = [], Status = 'not-reducible'.
 %The parentheses around the whole if-then-else are load-bearing. Without them
 %the cut is read as the first goal of the CONDITION, because , binds tighter
@@ -846,8 +858,36 @@ reduce([F|Args], Out, Status) :- !,
         acyclic_term(Out),
         Status = 'not-reducible'
     ).
-reduce(Culprit, _, _) :-
-    throw_metta_type_error(reduce, list, Culprit).
+%A SCALAR IS NOT A CALL, so there is no reduction step to take and no answer
+%to give: `reduce` reduces an APPLICATION, and the `[]` clause above is the one
+%expression with nothing in it. There is no clause here at all, which is the
+%whole of it -- a bound term that is neither `[]` nor `[_|_]` matches no head
+%and the call fails at the index, with no choice point left behind.
+%
+%A clause used to sit here and RAISE, and the raise was reachable from a MeTTa
+%PROGRAM rather than only from an engine caller: `reduce` is a published head
+%here, so `!(foldall a (reduce a) 0)` compiled to `reduce([reduce, a], D, _)`,
+%dispatched the head with `a`, and exited 2 with `reduce: list expected, found
+%a` -- the whole file ended, where the arbiter answers. MeTTa's error channel
+%is an ANSWER and not an exception, which is this engine's own rule and the
+%reason `metta_operation_answer/3` exists [source: engine/metta/terms.pl, the
+%note over it], so a raise here broke that rule at a door a program can knock
+%on [measured 2026-09-07 against PeTTa@ae66fa8: `!(foldall a (reduce a) 0)`,
+%`!(foldall a (reduce (* 0)) 0)` and `!(foldall a (reduce (* 0 1)) 0)` were all
+%exit 2 here and `0` there].
+%
+%Failing rather than answering the scalar back is what the arbiter's own
+%evaluator does, and it is what makes those three answer `0` here too: the
+%generator of a `foldall` has no solution, so the fold returns its initial
+%value. Every use of `reduce` in this repository's corpus and libraries passes
+%an expression, so the scalar door is a corner rather than a path
+%[source: examples/ch20-extending-the-engine/20-02-metta-written-in-metta/01-callquoteevalreduce.metta,
+%lib/lib_patrick/lib_patrick.metta:7, which builds its operand with `cons`].
+%
+%An UNBOUND argument never reaches the absent clause either: the `[_|_]` clause
+%above unifies with it and its cut commits, which is what leaves
+%`reduce(X, Out)`'s answer set as `[]-[]` alone
+%[tested: metta_operation_errors:variable_reduce_keeps_its_existing_empty_answer].
 
 %ONE COMPILED PREDICATE PER WRITTEN LAMBDA, however many times it is applied.
 %Compiling on every application asserted a fresh lambda_N/2 each time: 200

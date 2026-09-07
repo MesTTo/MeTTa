@@ -314,7 +314,6 @@
             present_type_chain/3,
             declared_type_for_evaluation/2,
             intrinsically_final_builtin_result/1,
-            embedded_operation/1,
             metta_runtime_argument_mask/3,
             metta_runtime_returns_atom/1,
             constrain_args/3,
@@ -346,7 +345,6 @@
             metta_dynamic_call/3,
             metta_dynamic_head_masks/1,
             metta_dynamic_value_call/4,
-            metta_chain_step/2,
             metta_minimal_equation_step/3,
             collapse_runtime/2,
             metta_function_eval/2,
@@ -357,6 +355,7 @@
             %body, so a space's execution module imports it from here exactly
             %as it imports reduce/3 and the two dispatch results.
             metta_masked_result/2,
+            metta_space_update_atom/1,
             %atom-subst is one written-variable substitution and chain's
             %unstepped operand is another, so the walk is defined once here
             %and the operator in engine/metta/operators.pl imports it.

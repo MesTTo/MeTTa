@@ -748,30 +748,46 @@ test(host_errors_name_the_written_operation,
                   context(Operation, 'while evaluating MeTTa operation')),
     nonvar(Formal).
 
-%A Number where a Bool was declared is decided, so it is a BadArgType ANSWER
-%naming the position, not a raise [source: the same file, `(and True n)` is
-%`(BadArgType 2 Bool Number)`].
-boolean_error_case(and, and(true, 5, R), R, 2).
-boolean_error_case(or, or(false, 5, R), R, 2).
-boolean_error_case(not, not(5, R), R, 1).
-boolean_error_case(xor, xor(true, 5, R), R, 2).
-boolean_error_case(implies, implies(false, 5, R), R, 2).
+%THE FIVE BOOLEAN OPERATIONS ARE RELATIONS OVER THE TWO BOOLEANS and have no
+%answer outside that domain, which is upstream's own guard: `and(A,B,C) :-
+%bool(A), bool(B), ...` and the same for or, not, xor and implies
+%[source: PeTTa@ae66fa8 src/metta.pl:97-104]. A number and an undeclared
+%symbol are both outside it, and both are the empty answer rather than a
+%refusal atom: `!(and True 5)`, `!(and a a)`, `!(or False 5)`, `!(not 5)`,
+%`!(xor True 5)` and `!(implies False 5)` each print nothing on the arbiter
+%and `!(collapse (and a a))` is `()` there
+%[measured 2026-09-07 against PeTTa@ae66fa8].
+boolean_domain_case(and, and(true, 5, R), R).
+boolean_domain_case(and, and(true, u, R), R).
+boolean_domain_case(and, and(u, true, R), R).
+boolean_domain_case(or, or(false, 5, R), R).
+boolean_domain_case(or, or(false, u, R), R).
+boolean_domain_case(not, not(5, R), R).
+boolean_domain_case(not, not(u, R), R).
+boolean_domain_case(xor, xor(true, 5, R), R).
+boolean_domain_case(implies, implies(false, 5, R), R).
 
-test(boolean_type_errors_answer_the_position_they_refuse,
-     [forall(boolean_error_case(_Operation, Goal, Result, Position))]) :-
+test(a_non_boolean_operand_leaves_the_operation_with_no_answer,
+     [forall(boolean_domain_case(_Operation, Goal, Result))]) :-
     findall(Result, call(Goal), Answers),
-    Answers = [['Error', _, Reason]],
-    Reason == ['BadArgType', Position, 'Bool', 'Number'].
+    Answers == [].
 
 test(boolean_operations_remain_relational) :-
     findall(A-B-C, and(A, B, C), Rows),
     Rows == [true-true-true, true-false-false,
              false-true-false, false-false-false].
 
-test(non_list_reduce_throws_its_own_type_error,
-     [throws(error(type_error(list, invalid_reduce),
-                   context(reduce, 'invalid MeTTa operation argument')))]) :-
-    reduce(invalid_reduce, _).
+%A SCALAR IS NOT A CALL, so `reduce` has no reduction step to take and no
+%answer to give. It used to raise here, and the raise was reachable from a
+%MeTTa program through a `foldall` generator, which ended the whole file:
+%`!(foldall a (reduce a) 0)` exited 2 with `reduce: list expected, found a`
+%where the arbiter answers `0`, and answers `0` here now
+%[measured 2026-09-07 against PeTTa@ae66fa8].
+test(a_scalar_reduce_has_no_answer) :-
+    findall(Out, reduce(invalid_reduce, Out), Answers),
+    assertion(Answers == []),
+    findall(Out, reduce(42, Out), Numbers),
+    assertion(Numbers == []).
 
 test(variable_reduce_keeps_its_existing_empty_answer) :-
     findall(Input-Out, reduce(Input, Out), Answers),
