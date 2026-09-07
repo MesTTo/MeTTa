@@ -199,8 +199,16 @@ type_declaration(X, T) :- current_metta_module(Module),
 type_declaration_in(Module, X, T) :- metta_self_module(Module), !,
                                      (   prelude_type_declaration(X, T)
                                      ;   match_stored('&self', [':', X, T], T, _) ).
+%The prelude branch asks prelude_declaration_governs_in/2 here as the two
+%definition readers below do, so get-type stops reporting the prelude's arrow
+%for a name the named space has taken over: before this the call answered
+%the space's own equation while get-type still answered the prelude's
+%(-> Atom Atom Atom Atom %Undefined%), where &self, which evicts the row,
+%answered %Undefined% [tested:
+%prelude:a_named_space_shadows_a_prelude_name_at_another_arity; commit=WORKTREE].
 type_declaration_in(Module, X, T) :- metta_module_space(Module, Space),
-                                     (   prelude_type_declaration(X, T)
+                                     (   prelude_declaration_governs_in(Module, X),
+                                         prelude_type_declaration(X, T)
                                      ;   match_stored(Space, [':', X, T], T, _)
                                      ;   match_stored('&self', [':', X, T], T, _) ).
 raw_type_declaration_in(Module, X, T, Owner) :-
@@ -210,7 +218,8 @@ raw_type_declaration_in(Module, X, T, Owner) :-
     ; match_stored('&self', [':', X, T], T, _) ).
 raw_type_declaration_in(Module, X, T, Owner) :-
     metta_module_space(Module, Space),
-    ( prelude_type_declaration(X, T), metta_self_module(Owner)
+    ( prelude_declaration_governs_in(Module, X),
+      prelude_type_declaration(X, T), metta_self_module(Owner)
     ; match_stored(Space, [':', X, T], T, _), Owner = Module
     ; match_stored('&self', [':', X, T], T, _), metta_self_module(Owner) ).
 
@@ -293,7 +302,7 @@ raw_definition_type_declaration_in(Module, X, T) :-
 %[measured 2026-09-07: `(= (if-equal $a $b) SHADOWED)` then `!(if-equal 1 1)`,
 %SHADOWED through sh run.sh and the Error through MeTTa().run, and the same file
 %answering SHADOWED in a named space once &self had evicted the prelude row
-%first; fixture=ai-tmp/dl-repro/dl_f03_gettype2.pl; commit=e52b9b2eeb4b303b57c93e6e6844664a25ce0da3].
+%first; command=swipl -q tests/prolog/probes/prelude/named_space_declaration_shadow.pl [named_first]; fixture=that probe, run in both orders on the merged tree e67e2db9 and answering ['SHADOWED'] in the named space and [yes] in &self each time; commit=e52b9b2eeb4b303b57c93e6e6844664a25ce0da3].
 %
 %&self needs no such test and is deliberately excluded: a definition there
 %EVICTS the prelude's row outright through evict_prelude_definition/1, because
@@ -311,6 +320,21 @@ prelude_declaration_governs_in(Module, X) :-
     (   metta_self_module(Module)
     ->  true
     ;   \+ fun_in(Module, X)
+    ).
+
+%The builtin type surface carries the prelude's declarations too, since that
+%is where get-type reads them (engine/metta/prelude.pl writes each declaration
+%into both stores), so get-type asks the same question of a surface row the
+%PRELUDE wrote: in a named module that defines the name, that row stops
+%governing and the module's own undeclared head reads %Undefined%, which is
+%what &self answers once eviction takes the row. A row the engine's Prolog
+%surface owns for a builtin keeps answering, because nothing evicts it in
+%&self either and the two doors must agree [tested:
+%prelude:a_named_space_shadows_a_prelude_name_at_another_arity; commit=WORKTREE].
+builtin_surface_governs_in(Module, X) :-
+    (   prelude_declaration(X, _)
+    ->  prelude_declaration_governs_in(Module, X)
+    ;   true
     ).
 
 %Filter an already nonempty visible set. Keeping the emptiness test at the
@@ -1463,7 +1487,8 @@ get_type_candidate_in(Module, X, T) :- X = [_|_],
                                        ).
 
 get_type_candidate_in(Module, X, T) :- type_declaration_in(Module, X, T).
-get_type_candidate_in(_, X, T) :- seam:builtin_type_declaration(X, T).
+get_type_candidate_in(Module, X, T) :- builtin_surface_governs_in(Module, X),
+                                       seam:builtin_type_declaration(X, T).
 get_type_candidate_in(_, X, 'SpaceType') :- atom(X), metta_space_operand(X).
 get_type_candidate_in(_, X, T) :- metta_state_cell_type(X, T).
 
@@ -1650,7 +1675,8 @@ scoped_type_candidate(Space, Module, X, T) :-
     tuple_types_scoped(Space, Module, X, T).
 scoped_type_candidate(Space, Module, X, T) :-
     scoped_type_declaration(Space, Module, X, T).
-scoped_type_candidate(_, _, X, T) :- seam:builtin_type_declaration(X, T).
+scoped_type_candidate(_, Module, X, T) :- builtin_surface_governs_in(Module, X),
+                                          seam:builtin_type_declaration(X, T).
 scoped_type_candidate(_, _, X, 'SpaceType') :- atom(X), metta_space_operand(X).
 scoped_type_candidate(_, _, X, T) :- metta_state_cell_type(X, T).
 
