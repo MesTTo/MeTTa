@@ -325,6 +325,12 @@
             metta_effect_class_canonical/2,
             metta_determinism_canonical/2,
             metta_vocabulary_value/2,
+            metta_vocabulary_values/2,
+            metta_vocabulary_type/2,
+            metta_vocabulary_open/2,
+            %The declaration doors each seat has, checked against the row that
+            %owns the capability words.
+            metta_require_foreign_capability/2,
             metta_policy_members/3,
             protect_engine_emitted/1,
             protect_metta_exec_modules/0,

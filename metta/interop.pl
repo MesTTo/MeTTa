@@ -2,6 +2,12 @@
 %   metta_unimport/2 withdraws it transactionally [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Guarded by: metta_unimport/2 shares metta_loader with import_when/4.
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
+% Guarantees: readying an extension's space checks every word its
+%   seam:foreign_capability/2 clauses declare against the catalog's
+%   (vocabulary provider-capability ...) row, which is the door a Prolog
+%   library's own declarations pass through
+%   [tested: catalog_vocabulary_words:an_unknown_capability_word_is_refused;
+%   commit=7f9c810e5f4a2023ad98de34e848667dd72bc4a7].
 % Guarantees: Export readers use metta_runtime_type/2 to recognise annotated
 %   arrows and derive arity while retaining the declared type
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
@@ -503,6 +509,12 @@ ready_extension_space(Name, Options, Space) :-
                             'declaring nothing provides nothing: give the \c
                              space its seam:foreign_capability/2 rows')))
     ),
+    %Every word the space declares against the row that owns the set, which
+    %is the door a provider contributing seam:foreign_capability/2 clauses in
+    %Prolog arrives through; the Python and Node registration doors check
+    %their own sets where they build them.
+    forall(seam:foreign_capability(Space, Declared),
+           metta_require_foreign_capability(Space, Declared)),
     forall(( extension_capability_hook(Capability, Hook),
              seam:foreign_capability(Space, Capability) ),
            ready_capability_hook(Name, Space, Capability, Hook)),
