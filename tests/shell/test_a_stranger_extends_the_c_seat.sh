@@ -35,11 +35,15 @@ if ! command -v swipl >/dev/null 2>&1; then
 fi
 
 CC=${CC:-cc}
+# One spelling of the bound, implemented in bounded.sh, which every runner in
+# this tree reaches: a ceiling AND the link to the process that started it, so
+# a killed caller does not leave a build burning a core.
+bounded() { sh "$project_dir/bounded.sh" "$@"; }
 scratch=$(mktemp -d)
 trap 'rm -rf "$scratch"' EXIT HUP INT TERM
 
 # The library a consumer links against, built by the seat's own Makefile.
-make --quiet -C "$seat" libcmetta.so
+bounded make --quiet -C "$seat" libcmetta.so
 
 mkdir -p "$scratch/solars/metta"
 

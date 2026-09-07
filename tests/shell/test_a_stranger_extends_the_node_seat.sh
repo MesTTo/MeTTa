@@ -36,13 +36,17 @@ proof will not run without swipl-wasm" >&2
     exit 0
 fi
 
+# One spelling of the bound, implemented in bounded.sh, which every runner in
+# this tree reaches: a ceiling AND the link to the process that started it, so
+# a killed caller does not leave a build burning a core.
+bounded() { sh "$project_dir/bounded.sh" "$@"; }
 scratch=$(mktemp -d)
 trap 'rm -rf "$scratch"' EXIT HUP INT TERM
 
 # What a consumer installs. The seat's own `prepare` builds this, and the
 # proof needs the built form because `exports` in its package.json maps every
 # subpath into it.
-(cd "$seat" && npm run --silent build:dist)
+(cd "$seat" && bounded npm run --silent build:dist)
 
 mkdir -p "$scratch/app/node_modules/solars"
 ln -s "$seat" "$scratch/app/node_modules/metta-node"
@@ -185,7 +189,7 @@ void S;
 console.log("solars extended the Node seat through 6 doors with no edit to PeTTa");
 PROVE
 
-(cd "$scratch/app" && node prove.mjs) > "$scratch/proof.log" 2>&1 || {
+(cd "$scratch/app" && bounded node prove.mjs) > "$scratch/proof.log" 2>&1 || {
     cat "$scratch/proof.log"
     exit 1
 }
