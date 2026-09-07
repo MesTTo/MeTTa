@@ -60,6 +60,15 @@
 %findall COPIES its template and every branch has to keep sharing the caller's
 %Out and argument variables. Collecting them with findall compiled cleanly and
 %answered an unbound variable for every typed call.
+%RuntimeArgs is a REQUEST rather than an output variable: runtime_args(Args)
+%from a caller that reports the call as dispatched, no_runtime_args from one
+%that does not. The difference is a goal in the emitted body. A caller that
+%discards the record used to get `Args = <the values>` emitted anyway, binding
+%a variable nothing reads; SWI's compiler removes such a goal from the clause
+%it STORES, so the emitted body and the stored one stopped being the same term
+%and every source attribution in that clause was refused
+%[tested: source_observation:exception_keeps_source_frames_and_restores_debugger;
+%commit=WORKTREE].
 typed_functioncall_dl(Fun, UniqueTypeChains, T, IsPartial, Bound, Out,
                       RuntimeArgs, BeforeCall, AfterHead, Goals) :-
     UniqueTypeChains \== [],
@@ -76,20 +85,20 @@ typed_functioncall_dl(Fun, UniqueTypeChains, T, IsPartial, Bound, Out,
     (   declared_arity_misses_existing_equation(Fun, UniqueTypeChains,
                                                  InputArity)
     ->  ( IsPartial -> append(Bound, T, Written) ; Written = T ),
-        RuntimeArgs = T,
+        record_runtime_args(RuntimeArgs, T),
         AfterHead = [declared_arity_refusal(Fun, Written, Out)|Goals]
     ;   incomplete_application_kind(Fun, Arity, ApplicationKind),
         ApplicationKind == overapplied,
         \+ metta_segment_equation(Fun)
     ->  ( IsPartial -> append(Bound, T, Written) ; Written = T ),
-        RuntimeArgs = T,
+        record_runtime_args(RuntimeArgs, T),
         AfterHead = [function_overapplication(Fun, Written, Out)|Goals]
     ;   fitting_type_chains(UniqueTypeChains, InputArity, Selection),
         ( IsPartial -> append(Bound, T, Written) ; Written = T ),
         (   Selection = refused(Rule, Reason)
         ->  Refusal = ['Error', [Fun|Written],
                        ['TypingRuleRefusal', Rule, Reason]],
-            RuntimeArgs = T,
+            record_runtime_args(RuntimeArgs, T),
             AfterHead = [Out = Refusal|Goals]
         ;   applicable_typed_branches(Selection, Fun, T, IsPartial, Bound,
                                       Out, RuntimeArgs, BeforeCall, Evidence,
@@ -431,8 +440,26 @@ typed_functioncall_branch(Fun, TypeChain, T, GsH, IsPartial, Bound, Out,
     ),
     guard_error_arguments(Guarded, Out, Checked, AfterInnerEval, []),
     append(InnerEval, AfterInnerEval, CallGoalsList),
-    GoalsList = [(RuntimeArgs = AVsTmp0)|CallGoalsList],
+    %The values THIS branch saw, recorded for the caller that reports the call
+    %as dispatched. Each branch records its own, so backtracking out of one
+    %leaves the next free to record what it saw. Written inline because ==/2
+    %and =/2 compile to VM instructions where a helper predicate is a call,
+    %and this runs once per branch of every typed call site the engine
+    %compiles [measured 2026-09-07: the same split through a helper predicate
+    %cost the boot 580 inferences and through an ==/2 test 475; unification in
+    %the condition costs it 0].
+    (   RuntimeArgs = runtime_args(Recorded)
+    ->  GoalsList = [(Recorded = AVsTmp0)|CallGoalsList]
+    ;   GoalsList = CallGoalsList
+    ),
     goals_list_to_conj(GoalsList, BranchGoal).
+
+%The same request answered where the branch is decided while the call
+%compiles rather than emitted as a goal: a declared-arity refusal, an
+%overapplication and a refused selection each name the written call directly.
+%A call rather than an inline test, because these three are the rare paths.
+record_runtime_args(no_runtime_args, _) :- !.
+record_runtime_args(runtime_args(Args), Args).
 
 % Split the result and detect refined parameters in the same arrow walk.
 % Atomic types cannot contain a refinement. Only compound declarations need
