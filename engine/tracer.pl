@@ -9,19 +9,19 @@
 %   - A reduction's outcome is one of three ports: an `exit` per answer, one
 %     `fail` when it produced none, or nothing at all when a bound cut the run
 %     [tested: tracer:a_reduction_that_answers_nothing_records_a_fail_port,
-%     tracer:an_answered_reduction_records_no_fail_port; commit=WORKTREE].
+%     tracer:an_answered_reduction_records_no_fail_port; commit=e54c3654b9e0d3d040560d12c105a54303f63af7].
 %   - Every event carries its own sequence number and the wall nanoseconds
 %     since the run began, both monotone within one session
-%     [tested: tracer:events_carry_a_monotone_sequence_and_time; commit=WORKTREE].
+%     [tested: tracer:events_carry_a_monotone_sequence_and_time; commit=e54c3654b9e0d3d040560d12c105a54303f63af7].
 %   - A library that interposes a predicate between a call site and the
 %     function it stands for declares it through seam:interposed_dispatch/4,
 %     and the reduction is then recorded ONCE, by whichever layer the call
 %     entered first [tested: tracer:a_memoised_head_records_its_calls_once;
-%     commit=WORKTREE].
+%     commit=e54c3654b9e0d3d040560d12c105a54303f63af7].
 %   - A run under a seed pins the generator and restores the state in force
 %     when it finishes, so a recorded run's draws replay
 %     [tested: tracer:a_seeded_run_repeats_its_draws_and_leaves_the_outside_alone;
-%     commit=WORKTREE].
+%     commit=e54c3654b9e0d3d040560d12c105a54303f63af7].
 %   - Exact function filters retain execution depth and charge only selected
 %     events [tested: tracer:filter_precedes_the_bound_and_keeps_depth;
 %     commit=504f8dddfa890ced97e795a13ab10e239b1de2ce].
