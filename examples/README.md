@@ -77,7 +77,7 @@ website.
 `test.sh` discovers examples recursively. It excludes `_fixtures` and the five
 interactive, network-backed, or optional-dependency examples named in
 `tests/data/example_skips.txt`, each with its reason.
-The merged corpus contains 299 examples that run in the shell suite.
+The merged corpus contains 306 examples that run in the shell suite.
 That count is `len(example_parity.corpus())`, the corpus's one definition in
 `extensions/python/tools/example_parity.py`; the `pytest` gate lane fails the
 moment this sentence and the tree disagree.
@@ -94,7 +94,7 @@ add no `examples/**/*.metta` files, so the count above is unchanged.
 
 ## Origins
 
-143 of the 322 programs here derive from the MeTTa examples of the project at
+143 of the 329 programs here derive from the MeTTa examples of the project at
 https://github.com/patham9/PeTTa, MIT licensed, at commit
 `43705f5d9ff8958ffe7f0aa6777fb8477f2401f2` (2026-07-24). They were reorganised
 into the reading order above, and some were edited. Thirteen people wrote them

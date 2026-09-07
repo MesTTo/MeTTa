@@ -19,6 +19,14 @@
 !(test (ft-is-empty FTEmpty) True)
 !(test (ft-is-empty (FTSingle 1)) False)
 
+;`FTree` is the type all three answer to, and `FTEmpty` is the only one of
+;the three that takes nothing, so it is written bare where the other two are
+;applied. Neither is ever a call, which is why the corpus-coverage lane
+;carries both by name.
+!(test (get-type FTEmpty) FTree)
+!(test (get-type FTSingle) (-> Atom FTree))
+!(test (get-type FTDeep) (-> Expression FTree Expression FTree))
+
 ;`ft-node-digit` turns a middle-level node back into a digit. It is the step
 ;that lets a node drop one level when the level above it drains.
 !(test (ft-node-digit (FTNode2 a b)) (a b))

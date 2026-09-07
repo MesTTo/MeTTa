@@ -199,7 +199,7 @@ get-doc-single-atom               08-03-10
 get-doc-space                     08-03-10
 help!                             08-03-10
 undocumented-space                08-03-10
-get-type                          09-00-01
+get-type                          08-03-15
 match-type-or                     09-00-14
 match-types                       09-00-14
 new-state                         09-00-15
