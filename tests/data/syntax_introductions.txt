@@ -49,6 +49,9 @@ is-space                          04-01-07
 remove-atom                       04-01-08
 subtract-atom                     04-01-10
 add-atoms                         04-01-11
+add-reduct                        04-01-12
+add-reducts                       04-01-12
+space-contains                    04-01-12
 cut                               04-02-01
 once                              04-02-01
 empty                             04-02-02
@@ -193,8 +196,12 @@ new-state                         09-00-15
 add-typing-rule!                  09-00-16
 remove-typing-rule!               09-00-16
 pragma!                           09-00-17
+type-cast                         09-00-20
+type-cast-holds                   09-00-20
 return                            10-00-01
 return-on-error                   10-00-01
+throw                             10-00-02
+trace!                            10-00-02
 py-atom                           11-00-01
 py-call                           11-00-01
 py-dot                            11-00-01
@@ -214,6 +221,8 @@ assertEqualToResultMsg            12-00-01
 assertIncludes                    12-00-01
 if-equal                          12-00-02
 assert                            12-00-03
+assert-answers                    12-00-04
+assert-includes-answers           12-00-04
 elapsed                           14-00-01
 evalc                             14-00-01
 inferences                        14-00-01
@@ -221,6 +230,9 @@ metta                             14-00-01
 sleep                             14-00-01
 timeout                           14-00-01
 read-form!                        14-00-02
+argv                              14-00-03
+current-time                      14-00-03
+format-time                       14-00-03
 hyperpose                         15-00-01
 transaction                       15-00-01
 with_mutex                        15-00-01
@@ -229,6 +241,8 @@ declare-pre-add!                  15-00-03
 undeclare-pre-add!                15-00-03
 has-declared-type                 15-00-04
 space-admission-verdict           15-00-04
+declare-post-add!                 15-00-05
+undeclare-post-add!               15-00-05
 atomically                        17-00-04
 call                              17-00-04
 test-no-answer                    17-00-04
@@ -244,10 +258,8 @@ superpose-bind                    20-02-04
 for-each-in-atom                  20-02-06
 noreduce-eq                       20-02-07
 unquote                           20-02-07
-add-reduct                        20-02-08
 get-type-space                    20-02-08
 is-function                       20-02-09
-type-cast                         20-02-09
 Predicate                         20-03-02
 assertaPredicate                  20-03-02
 callPredicate                     20-03-02
