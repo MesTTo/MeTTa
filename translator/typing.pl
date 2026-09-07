@@ -68,7 +68,7 @@
 %it STORES, so the emitted body and the stored one stopped being the same term
 %and every source attribution in that clause was refused
 %[tested: source_observation:exception_keeps_source_frames_and_restores_debugger;
-%commit=WORKTREE].
+%commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 typed_functioncall_dl(Fun, UniqueTypeChains, T, IsPartial, Bound, Out,
                       RuntimeArgs, BeforeCall, AfterHead, Goals) :-
     UniqueTypeChains \== [],

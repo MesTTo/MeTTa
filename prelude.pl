@@ -10,7 +10,7 @@
 %   "metta_bench:bench_run(boot)" -t halt engine/bench.pl and 200 rounds per
 %   case through eval/2 with the engine's own counter; fixture=warm .qlf,
 %   engine C artifacts present, three identical samples per arm;
-%   commit=WORKTREE].
+%   commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 % Assumes:
 %   - engine/metta.pl loads this file with `use_module(prelude, [])`, importing
 %     NOTHING, and metta_base_engine_subsystems/1 then bases this module on the
@@ -25,20 +25,20 @@
 %     arrive unevaluated, so a body that reads its argument as syntax
 %     (assertEqualToResult's second, unquote's, if-equal's branches) depends on
 %     engine/metta/prelude.pl's prelude_declaration/2 rows being installed
-%     [tested: prelude:expected_set_is_not_evaluated; commit=WORKTREE].
+%     [tested: prelude:expected_set_is_not_evaluated; commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 % Guarantees:
 %   - every head answers what its spec equation answers, over the whole
 %     differential corpus, including nondeterministic arguments, empty answer
 %     sets, alpha-equivalent atoms and errors inside arguments
 %     [tested: tests/prolog/suites/evaluation/prelude_spec.plt,
-%     prelude_spec:every_head_agrees_with_its_spec_equation; commit=WORKTREE].
+%     prelude_spec:every_head_agrees_with_its_spec_equation; commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 %   - the eight derived forms answer the EXPANSION their spec equation writes,
 %     so a registered translator rule rewrites the call site exactly as it did
 %     when the expansion came from a compiled equation: apply_translator_rule_dl/7
 %     obtains an expansion by CALLING the name, never by reading equations
 %     [source: engine/translator/lowering.pl, apply_translator_rule_dl/7's
 %     `HookCall =.. [HV|RuleArgs], call(RuleModule:HookCall)`;
-%     tested: prelude_derived_forms; commit=WORKTREE].
+%     tested: prelude_derived_forms; commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 % Fails when: a caller wants these names to be a program's own. They are
 %   engine vocabulary and a space shadows any of them by defining it, which
 %   is what this module being a TIER below the engine and above '&self' is
@@ -49,7 +49,7 @@
 %   is how both keep their name: the engine module still resolves union/3 to
 %   lists', every space resolves it to this file's, and no import list anywhere
 %   has to be edited [tested: spaces_execution_modules:the_chain_is_engine_then_prelude_then_self_then_space;
-%   commit=WORKTREE].
+%   commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -132,12 +132,12 @@
 %%Undefined% result never has a term left to re-enter evaluation: the
 %masked-result branch the translator emitted for these bodies was dead on
 %every path and is not written out [source: engine/metta/runtime.pl,
-%'assert-answers'/5's first two clauses; commit=WORKTREE].
+%'assert-answers'/5's first two clauses; commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 %
 %The call each reports is the one the PROGRAM wrote, which is why the two
 %bag-comparing Msg twins spell their bodies out instead of delegating: a
 %delegated body would report the delegate's name and lose the message
-%[tested: prelude:assertEqualMsg_failure_reports_its_message; commit=WORKTREE].
+%[tested: prelude:assertEqualMsg_failure_reports_its_message; commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 
 assertEqual(A, B, Out) :-
     collapse_runtime(A, Actual),
@@ -212,7 +212,7 @@ assertAlphaEqualToResultMsg(A, B, _Message, Out) :-
 %and asking it directly costs 127 [measured 2026-09-07: 3800.01 against
 %127.01 per call on `(if-error (Error a b) yes no)`, and 1578.01 against 81.01
 %on `(if-error 42 yes no)`; command=200 rounds through eval/2 with the engine's
-%own counter; fixture=warm .qlf; commit=WORKTREE].
+%own counter; fixture=warm .qlf; commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 %
 %The metatype is asked FIRST and the decons only under its answer, which is
 %the frame's own order and is what keeps the list pattern off a variable: an
@@ -329,7 +329,7 @@ interpret(Atom, Type, Space, Out) :-
 %steps, 5,401.01 inferences a call against 156.01 here, and it is the fold
 %type-cast runs once per declared type [measured 2026-09-07:
 %`(match-types (List $x) (List Number) t e)`, 200 rounds through eval/2 with
-%the engine's own counter; commit=WORKTREE].
+%the engine's own counter; commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 'match-types'(Type1, Type2, Then, Else, Out) :-
     (   (   Type1 == '%Undefined%'
         ;   Type2 == '%Undefined%'
