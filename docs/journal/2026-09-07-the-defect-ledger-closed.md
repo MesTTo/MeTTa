@@ -122,3 +122,15 @@ Open: finding 15's derivation effects are deliberate and now documented, with
 `speculative` as the fence; finding 9's WASM stack-limit message is unchanged
 and its ~33 MB ceiling is still unattributed; finding 37 leaves 2,542 boot
 inferences unattributed to a mechanism.
+
+Corrected count, appended after the sweep finished rather than edited into the
+opening paragraph above, which was written before every row had a verdict.
+Three outcomes were rounded into two there. Counted row by row: **40 closed**
+(the reproduction answers correctly and the regression is red at the tree it
+was measured against and green now); **2 closed as a decision** rather than a
+code change, findings 15 and 23; **1 repaired here**, finding 3; and **3 open**
+-- finding 9 (the WASM stack-limit message, unchanged, its ceiling still
+unattributed), finding 24 half B, and finding 37's 2,542-inference residue,
+which cannot be re-measured against its pin today because `engine-bench`
+refuses on a `prelude.metta` configuration drift that predates this branch.
+40 + 2 + 1 + 3 = 46.
