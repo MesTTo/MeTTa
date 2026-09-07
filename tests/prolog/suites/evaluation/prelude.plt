@@ -329,6 +329,40 @@ test(importing_the_tombstoned_library_is_a_noop) :-
     eval_string("(if-equal 1 1 yes no)", Results),
     memberchk(yes, Results).
 
+%engine/prelude.metta promises a prelude name is shadowable per named space
+%exactly as builtins are. A named space cannot EVICT the prelude's row the way
+%&self does, because its siblings still read it, so it shadows: the prelude
+%declaration stops governing the name in the module that defines it, and the
+%module's own equation answers at its own arity.
+%
+%Both arities are the test, and the different-arity row is the one that used to
+%fail. `throw` is written at the prelude's own arity and always worked;
+%`if-equal` takes four inputs there and two here, and the surviving prelude
+%arrow made typed_functioncall_dl/10 compile declared_arity_refusal/3, so the
+%same file answered SHADOWED through the CLI and
+%(Error (if-equal 1 1) IncorrectNumberOfArguments) through every host that
+%mints a named space.
+%
+%The last two goals are the control a wrong fix fails: a named space's shadow
+%must not reach &self, where the prelude's own four-input if-equal still
+%answers, and must not survive the space that declared it.
+test(a_named_space_shadows_a_prelude_name_at_another_arity,
+     [cleanup(catch(metta_release_space('&plunit-prelude-arity-shadow'),
+                    _, true))]) :-
+    process_metta_string(
+        "(= (if-equal $a $b) SHADOWED)\n!(if-equal 1 1)",
+        DifferentArity,
+        '&plunit-prelude-arity-shadow'),
+    assertion(DifferentArity == ['SHADOWED']),
+    process_metta_string(
+        "(= (throw $a) SHADOWED)\n!(throw x)",
+        SameArity,
+        '&plunit-prelude-arity-shadow'),
+    assertion(SameArity == ['SHADOWED']),
+    eval_string("(if-equal 1 1 yes no)", SelfAnswer),
+    assertion(SelfAnswer == [yes]),
+    assertion(prelude_type_declaration('if-equal', _)).
+
 :- end_tests(prelude).
 
 :- begin_tests(prelude_docs).

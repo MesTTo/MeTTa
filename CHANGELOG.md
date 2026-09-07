@@ -897,6 +897,29 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   because booting the engine installs `BigInt.prototype.toJSON` and a replacer
   never sees the bigint at all; the case pinning that did not exist.
 
+- A prelude name shadowed in a named space at a DIFFERENT arity answers the
+  definition, so the same file means the same thing through the CLI and through
+  every host that mints a space. `(= (if-equal $a $b) SHADOWED)` then
+  `!(if-equal 1 1)` answered `SHADOWED` in `&self`, where a definition evicts
+  the prelude's declaration, and `(Error (if-equal 1 1)
+  IncorrectNumberOfArguments)` anywhere else, where the four-input declaration
+  survived and no chain presented the written arity. A named space cannot evict
+  a row its siblings still read, so it shadows: the prelude's declaration no
+  longer governs a name the module defines itself, which is the test the engine
+  already applies to a builtin the module has taken over. The prelude's own row
+  is untouched, so `&self` keeps answering `(if-equal 1 1 yes no)`.
+- `(crypto-random-hex N)` and `(cache Name (max-answers N))` work with SWI's
+  autoloader off. `lib_crypto` reached `hex_bytes/2` and `lib_tabling`
+  `call_delays/2` with no declaration for either, so both resolved only through
+  the library index: with `autoload` false the first raised `Unknown procedure:
+  hex_bytes/2` on a platform that has crypto, and the second stopped the
+  no-autoload corpus lane. `engine/spaces/catalog.pl` reached
+  `pairs_keys_values/3` the same way, which the `prolog` gate reported.
+- A new `lib-autoload` gate reads every shipped library's clauses with the
+  autoloader off and names anything only the library index would find, so this
+  class no longer waits for an example to call the line. It proves it can still
+  see by planting a call to a library export the tree does not import, and
+  allows exactly two names, each with the reason it is deferred by design.
 - `tables.sql_function` on a DuckDB connection reads the head's DECLARED arrow
   for its SQL types and refuses by name without one. Since `inspect.signature`
   shows an undeclared head the arrow its stored atoms justify, the refusal had
