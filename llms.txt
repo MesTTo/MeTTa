@@ -1291,7 +1291,10 @@ is the authority: `python-reference` a Language Reference section,
 project to `(remedy ...)` and `(ground ...)` atoms through `as_atom()` and
 back through `from_atom()`. A refusal Python's own word covers is still a
 `TypeError`, `AttributeError` or `ValueError`, and carries the two fields on
-the instance, so `getattr(error, "remedy", None)` is the one reader.
+the instance, so `getattr(error, "remedy", None)` is the one reader. Whichever
+class it wears, the message is the sentence the engine composed and never the
+reserved envelope around it, so a repeated JSON key reads `JSON object repeats
+the key a` rather than naming a term.
 A deprecation's catalog remedy term decodes the same way: the
 DeprecationWarning instance carries `.remedy` with the term as its `edit`. `RestraintError` is a bound the program declared for one of its
 own tables, `(cache f (max-answers N))` or a size restraint, tripping; it
@@ -2045,8 +2048,15 @@ drained. Each enumeration gets its OWN cursor over a shared cache, so reading
 the same iterator twice, or nesting two reads of it, answers the cartesian
 product rather than exhausting it once. `py-iter-once` is the other rule, kept
 by name: Python's own consumptive iteration, which is what a compiled `for`
-statement wants. `py-atom` takes a metatype argument, `Grounded` for the live
-reference and `Expression` for a snapshot.
+statement wants. An iterator that RAISES mid-enumeration is reported at the
+pull that raised, naming that `py-iter` call and the iterator's own repr, the
+way a deterministic Python call's failure is; answers already yielded before it
+are never delivered as a complete set. A `py-iter` source remembers its
+failure, so a second enumeration of it reports the same failure at the same
+index rather than reading the prefix as complete; a `py-iter-once` source is
+spent either way. The guard is one inference an item and no extra crossing.
+`py-atom` takes a metatype argument, `Grounded` for the live reference and
+`Expression` for a snapshot.
 Strings carry hyperon's five escapes (quote, backslash, `\n`, `\t`, `\r`).
 Symbols containing whitespace, parentheses or quotes are refused at save and
 digest rather than written unreadably.

@@ -888,6 +888,71 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   longer leaves its engine running: one `--rebaseline` left two `swipl`
   processes at 48% CPU with nothing bounding them, because the death signal
   reached `perf` and the engine is `perf`'s child.
+- The sentences the JSON codec composes for its refusals are pinned, on both
+  reader paths and for text and bytes alike. `metta._json.loads` on a document
+  that repeats a key reads `JSON object repeats the key a`, `dumps` on a
+  non-finite number names the number, and `dumps` on a live host object says
+  what JSON cannot carry -- which is what `shim.pl`'s
+  `metta_py_json_rethrow/1` has always written, and not what a caller read:
+  until the `MettaSyntaxError.line` work repaired the wrapping, every one of
+  them arrived as `metta: Unknown error term:
+  metta_control_signal(value,"JSON object repeats the key a") (value)`, with
+  the right class around the wrong words. Nothing failed, because every test
+  here asked only for `ValueError`. The tests now read the sentence, and the
+  both-paths one runs a child process per reader, since
+  `engine/json_codec.pl` chooses between the C reader and `library(json)` at
+  load time.
+- One kind set for the reserved control envelope, derived rather than kept in
+  step by hand. `extensions/python/tests/repository/test_error_kinds.py` reads
+  every `metta_control_signal` kind this tree throws out of the tree, holds it
+  equal to `_EXCEPTION_TYPES` with both differences named, and asks the live
+  shim to classify each one. A kind the shim admits and Python does not reaches
+  a caller as a bare `EngineError`, which is what `restraint` did until the
+  cache-policies branch noticed by hand; a kind Python names and nothing throws
+  is an entry that can never fire. Both directions fail the gate now, and the
+  Node seat derives its own map from the same function.
+- A Python iterator that RAISES under `py-iter` or `py-iter-once` is reported
+  at the pull that raised, wearing that call and the iterator's own repr,
+  exactly as a deterministic Python call's failure is. janus's `py_iter/2`
+  never consults the Python error indicator after `PyIter_Next`, so a raising
+  pull is indistinguishable there from an exhausted one, and the still-set
+  exception surfaced at whatever crossing ran next. That was three symptoms:
+  `!(once (py-iter G))` over a generator raising on its FIRST item answered
+  `EngineError: the engine could not accept this call's inputs: <built-in
+  function apply_once> returned a result with an exception set`, CPython's own
+  wording, keeping neither the class nor the message nor the place; `collapse`
+  over one raising later answered janus's bare rendering with a Python stack
+  and named no MeTTa call; and neither reached `metta_py_guard/2` at all, which
+  is the guard that decides what a MeTTa `(catch ...)` is shown. The streaming
+  doors and the deterministic doors now report the same exception the same way
+  by construction, `(catch ...)` included.
+
+  `metta_py.py` ends a failed enumeration with a reserved
+  `(stream_tag(), exception)` pair instead, and `bridge.pl` hands the live
+  exception back to Python to raise inside the guarded goal, so janus's own
+  `check_error` converts it exactly as it converts a deterministic callback's
+  exception and the attribution comes from the guard that was already there.
+  A PAIR, where the operation and provider doors use the four-element list
+  `["x","raise",Class,Exception]`: this seat crosses under `py_object(true)`,
+  under which a Python list arrives as an opaque blob and an exact tuple
+  arrives as `-/2` with both elements in hand. The reservation is the tag
+  OBJECT, a private module singleton compared by identity, so an iterator's own
+  two-element data is data.
+
+  A replayable source REMEMBERS its failure, as the last entry of the cache it
+  already keeps, so every later cursor reports the same failure at the same
+  index. The source is spent once it has raised, so the alternative is not
+  retrying: it is a second enumeration reading a truncated prefix as a complete
+  answer. This is RxJava's rule for a shared sequence (`Single.cache()` caches
+  the success or error event and replays it to every subscriber) rather than
+  `itertools.tee`'s, whose `_tee.__next__` has no handler at all.
+  `py-iter-once` stays consumptive and remembers nothing, which is Python's own
+  rule for a spent generator.
+
+  The guard costs one inference an item and no crossing: over 20,000 items the
+  pull is 40,004 inferences unguarded and 60,004 guarded, and the Python
+  wrapper adds 5.6 nanoseconds an item, 3.29% of one guarded pull.
+  `extensions/python/benchmarks/py_iter_guard.py` is the measurement.
 
 ## [0.8.0] - 2026-09-06
 
