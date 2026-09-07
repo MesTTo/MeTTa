@@ -205,7 +205,7 @@ type_declaration_in(Module, X, T) :- metta_self_module(Module), !,
 %the space's own equation while get-type still answered the prelude's
 %(-> Atom Atom Atom Atom %Undefined%), where &self, which evicts the row,
 %answered %Undefined% [tested:
-%prelude:a_named_space_shadows_a_prelude_name_at_another_arity; commit=WORKTREE].
+%prelude:a_named_space_shadows_a_prelude_name_at_another_arity; commit=bc0d495562674e064276e91f04c61286d0b93585].
 type_declaration_in(Module, X, T) :- metta_module_space(Module, Space),
                                      (   prelude_declaration_governs_in(Module, X),
                                          prelude_type_declaration(X, T)
@@ -330,7 +330,7 @@ prelude_declaration_governs_in(Module, X) :-
 %what &self answers once eviction takes the row. A row the engine's Prolog
 %surface owns for a builtin keeps answering, because nothing evicts it in
 %&self either and the two doors must agree [tested:
-%prelude:a_named_space_shadows_a_prelude_name_at_another_arity; commit=WORKTREE].
+%prelude:a_named_space_shadows_a_prelude_name_at_another_arity; commit=bc0d495562674e064276e91f04c61286d0b93585].
 builtin_surface_governs_in(Module, X) :-
     (   prelude_declaration(X, _)
     ->  prelude_declaration_governs_in(Module, X)
