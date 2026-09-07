@@ -1970,6 +1970,22 @@ no transport under it, for mounting on another HTTP framework.
 `website/live/remote-protocol.md` is the contract every binding inherits and
 `metta.testing.GatewayComplianceSuite` certifies it.
 
+A served engine also DESCRIBES itself. `Gateway.openapi(secured=False) -> dict`
+is an OpenAPI 3.1.1 document for the spaces that gateway serves, answered at
+`GET /openapi.json`: one path per door with the door's own name as its
+`operationId`, `components.schemas.Atom` as the wire's tagged grammar written as
+JSON Schema 2020-12, and `x-metta-heads` naming what each space DECLARES with
+each argument's and the result's schema. `serve(token=)` puts the bearer scheme
+in it; a Gateway is transport-free and never learns the token. A space that
+declares nothing publishes an empty head list, which is the reason to declare.
+`Gateway.served() -> dict` is the space map the document is built from, and a
+Gateway is a context manager because it owns one engine per open cursor.
+
+Cost: the declarations are read through the engine's own first-argument index,
+not by walking the store, so the document is derived per request and does not
+grow with the space (230 inferences over 20,000 atoms against 340,525 for the
+walk). Nothing is cached, so nothing goes stale.
+
 `metta.testing` ships what the suite fuzzes itself with: hypothesis strategies
 (`atoms`, `expressions`, `patterns`, `names`, `numbers`, `texts`, `symbols`,
 `variables`, `grounded`, `ground_atoms`, `numpy_scalars`, `programs`),

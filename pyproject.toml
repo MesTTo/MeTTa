@@ -139,6 +139,11 @@ test = [
     "nanoarrow>=0.9",
     "networkx>=3.6,<4",
     "numpy",
+    #: The OpenAPI specification's own validator, so the document scenario holds
+    #: `Gateway.openapi()` to the specification rather than to this repository's
+    #: reading of it. In `test` beside nanoarrow and for the same reason: it
+    #: decides whether a scenario runs or skips.
+    "openapi-spec-validator>=0.9",
     "pytest>=8.4.2",
     "pytest-benchmark>=5.2",
     #: Ordering and the per-item wall bound, which the suite's configuration
@@ -660,6 +665,8 @@ source_modules = [
     "metta._ops",
     "metta._arrow",
     "metta._optional",
+    "metta._projection",
+    "metta._schemas",
     "metta._parameterized",
     "metta._prelude",
     "metta._source_forms",

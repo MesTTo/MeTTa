@@ -70,6 +70,36 @@ unknown operation is a 400 naming it; a non-POST method other than
 a missing or wrong credential is refused with a 401 before the body is
 read, and the comparison must be constant-time.
 
+## The documents a server publishes
+
+`GET /openapi.json` answers an OpenAPI 3.1.1 document for the spaces this
+server serves, so a consumer generates its client from the server rather
+than from this page. It carries one path per operation, with the gateway
+door's own name as each `operationId`; `components.schemas.Atom`, which is
+the tagged grammar of "Atoms on the wire" below written as JSON Schema
+2020-12, recursive through its `e` arm; and `x-metta-heads`, one entry per
+served space listing the
+heads that space DECLARES with each argument's and the result's schema.
+
+```json
+{"x-metta-heads": {"&self": [
+  {"name": "users", "arrow": "(-> Number String Bool)",
+   "arguments": [{"type": "number"}, {"type": "string"}],
+   "result": {"type": "boolean"},
+   "description": "users: who is registered"}]}}
+```
+
+The argument schemas come from one type table, the same one that decides a
+generated Python stub's annotations and an Arrow column's type: `Number` is a
+JSON number, `String` a string, `Bool` a boolean, and every other MeTTa type
+is an `Atom`, because its values cross whole. A space that declares nothing
+publishes an empty list; declaring is what puts a head in the document.
+
+A server configured with a token carries `securitySchemes.bearer` and a
+top-level `security`; without one it carries neither. The document is derived
+per request from an indexed read of the `(: ...)` rows, which does not grow
+with the space, so there is no cache between it and the truth.
+
 ## Mutation recovery
 
 Revision 3 supports an optional idempotency extension. A gateway advertising

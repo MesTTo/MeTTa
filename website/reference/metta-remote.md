@@ -313,6 +313,41 @@ def health(self) -> dict:
 > drop-in Transport and RemoteSpace.server_capabilities() can ask
 > one the same question it asks a connected server.
 
+### `Gateway.served`
+
+```python
+def served(self) -> dict[str, MeTTa]:
+```
+
+> Every space this gateway serves, by the name a request calls it.
+>
+> A gateway built with no `spaces` list serves one, the space it was made
+> from; a list names them, and each is opened on the same runtime, which
+> is what `_space` does for a request.
+
+### `Gateway.openapi`
+
+```python
+def openapi(self, *, secured: bool = False) -> dict:
+```
+
+> This gateway as an OpenAPI 3.1.1 document, `GET /openapi.json`.
+>
+>     print(metta._json.dumps(gateway.openapi()))
+>
+> One path per door, `components.schemas.Atom` as the wire's own tagged
+> grammar, and `x-metta-heads` listing what each served space DECLARES,
+> with every argument's and result's JSON Schema from the one type table.
+> A space that declares nothing publishes an empty list of heads.
+>
+> `secured` puts the bearer scheme in the document, and `serve()` sets it
+> from its own token: a gateway is transport-free and knows nothing about
+> credentials, so the half that holds them is the half that says so.
+>
+> Cost: one indexed read of each served space's `(: ...)` rows and one
+> `get-doc` per declared head, which is O(declarations) rather than
+> O(atoms) and is why this is derived per request instead of cached.
+
 ### `Gateway.cursor_space`
 
 ```python

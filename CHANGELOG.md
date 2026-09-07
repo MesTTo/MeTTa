@@ -9,6 +9,32 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- A served space publishes an OpenAPI document. `Gateway.openapi(secured=False)
+  -> dict` builds an OpenAPI 3.1.1 document for the spaces a gateway serves and
+  the bundled server answers it at `GET /openapi.json`, so a consumer's own
+  tooling generates a client without anyone writing the wire down twice. One
+  path per door with the door's name as its `operationId`,
+  `components.schemas.Atom` as the wire's tagged grammar written as JSON Schema
+  2020-12, and `x-metta-heads` listing what each served space DECLARES, with
+  every argument's and the result's schema. `serve(token=...)` puts the bearer
+  scheme in the document; a `Gateway` is transport-free and never learns the
+  token itself.
+
+  The schemas come from one type table, `metta._projection`, with a row per
+  MeTTa type and a column per target: the Python annotation a stub renders, the
+  JSON Schema an OpenAPI document carries, the GraphQL type an SDL field
+  declares and the Arrow kind a column is produced at. `metta stubs` now reads
+  its Python column from that table instead of keeping a second copy.
+
+  Deriving the document does not grow with the served space. The declarations
+  are read through the engine's own first-argument index rather than by walking
+  the store: 230 inferences over a 20,000-atom space against 340,525 for the
+  walk, flat from 200 atoms up, which is why the document is derived per
+  request and no cache can go stale behind it.
+
+  `Gateway` is a context manager, like `Server` and every other handle here
+  that owns an engine resource.
+
 - A template renders as well as reads. `metta.render(source, /, **values) ->
   str` takes the same three faces the reading doors take -- a 3.14 `t"..."`
   literal, any object with `strings` and `interpolations`, or a string with
