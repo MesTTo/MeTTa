@@ -123,3 +123,46 @@ Node side rather than crossing as fields. They are answer atoms, not names or
 numbers, so carrying them would mean running the atom codec on a path that is
 already raising; the message already names them and the seat's own test reads
 them there. Revisit if a caller needs them as atoms rather than as text.
+
+## 2026-09-07, later: the other seat's package landed while this branch waited
+
+The Python-seat residues package merged into `petta` as `91332fc5` a few
+minutes after this branch was committed, carrying its own
+`extensions/python/tests/repository/test_error_kinds.py` at the same path this
+branch creates. Its `thrown_kinds(repo_root)` derives the reserved envelope's
+kind set by scraping git's tracked `engine`, `lib` and `extensions` sources for
+a literal kind inside `metta_control_signal(` or `metta_py_raise(`, and holds
+that set equal to `_EXCEPTION_TYPES`.
+
+Measured: the two designs agree, and together they close the loop. On this
+branch's tree all FOUR readings of the signal kind set are the same seven words
+`{inference_limit, interrupted, restraint, syntax, time_limit, type, value}`:
+the tree's throw sites under that scrape, the engine's own
+`metta_host_error_kind_row(K, signal, _)` rows, this branch's
+`tests/data/error-kinds.json` signal rows, and `_EXCEPTION_TYPES`. So a scrape
+of the throw sites and a declaration in the engine are not two lists competing
+to be the source; the scrape is the check that the DECLARATION still matches
+what the tree throws, which neither half gives alone: a kind thrown and not
+declared is a refusal no seat classifies, and a kind declared and never thrown
+is a dead row.
+
+Measured: the landed lane's two live goals hold against this branch's shim,
+where `metta_control_signal_info/3` no longer holds a kind list of its own and
+delegates to the engine. All seven kinds classify, and SWI's two unenveloped
+resource balls still answer `inference_limit` and `time_limit`
+[measured 2026-09-07 by running the landed file's own two goals through
+`metta._engine.runtime().once(...)` on this tree, one per kind and one per
+ball, and by comparing the four sets in one process: the scrape over
+`git ls-files -- engine lib extensions` filtered to `.pl`, `.py` and `.c`
+outside `tests`, `findall(K, metta_host_error_kind_row(K, signal, _), Ks)`
+through `swipl -g "consult('engine/metta.pl')"`, the `origin: "signal"` rows of
+`tests/data/error-kinds.json`, and `metta._engine._EXCEPTION_TYPES`].
+
+Open, for whoever merges: the two files at that one path are an add/add
+conflict whose resolution is their UNION, not a choice. Nothing in either is
+redundant once the four readings are chained, and one sentence of the landed
+file's docstring is then stale: it tells the Node seat to generate its map from
+`thrown_kinds(repo_root)`, where the merged tree has that seat read
+`tests/data/error-kinds.json`, which carries what a scrape cannot -- each
+seat's class, its code, its attribute names, and a ball per kind that both
+seats throw through a live engine.
