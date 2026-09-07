@@ -11,7 +11,7 @@
 % polymorphic parameter does not read as integer-sized
 % [tested: catalog_self_description:an_unnamed_measure_comes_from_the_arrow_at_the_holes_position,
 % catalog_self_description:explain_answers_a_declared_cost_and_stays_silent_without_one;
-% commit=WORKTREE].
+% commit=6b4dceb61ccc78e308e6678af58f8daf43c31523].
 % Guarantees: native annotation inputs and outputs obey the declared type
 % or finite carrier, including the unit shortcut [tested:
 % run_tests(algebra_types); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
@@ -2485,7 +2485,7 @@ metta_cost_declaration(Op, Witness, Class, Measure) :-
 %2048 where it wants an expression of 2048 children, and the row measures a
 %type error at a flat 409 inferences instead of the scan
 %[measured 2026-09-07: min-atom and max-atom read exponent -0.005 under
-%unification and 0.978 under ==; commit=WORKTREE].
+%unification and 0.978 under ==; commit=6b4dceb61ccc78e308e6678af58f8daf43c31523].
 metta_cost_measure(Witness, Measure) :-
     (   metta_cost_hole_position(Witness, Position),
         metta_cost_parameter_type(Witness, Position, Type),
