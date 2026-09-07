@@ -110,6 +110,7 @@ export default defineConfig({
           { text: "Write MeTTa in Python", link: "/guide/define" },
           { text: "Spaces", link: "/guide/spaces" },
           { text: "The contract: how backends attach", link: "/guide/contract" },
+          { text: "Extending a seat", link: "/guide/extending-a-seat" },
           { text: "Data structures", link: "/guide/structures" },
           { text: "Threads, tasks, and pickling", link: "/guide/threads" },
           { text: "Observability", link: "/guide/observability" },

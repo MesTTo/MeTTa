@@ -284,6 +284,10 @@ def publish(m: Any) -> int:
 > for its roster. The rows carry the seat, the point and the registrant, not
 > the callables: a callable is not knowledge, and what a program asks the
 > catalog is who registered against what.
+>
+> Publishing is a dispatch of every point, so it LOADS what the seat ships
+> and what packages advertise. Asking for the whole surface as data is
+> exactly the request that cannot be answered without them.
 
 ## `projection`
 

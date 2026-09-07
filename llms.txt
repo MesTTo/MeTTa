@@ -33,7 +33,7 @@ re-runs them.
 | `extensions/python/metta/vocabularies.py` | the catalog's value vocabularies as StrEnum classes, one per `(vocabulary ...)` row; each member IS its wire word and encodes as its symbol, and bare words stay the runtime escape hatch | `extensions/python/tools/vocabgen.py`, the `vocab-sync` gate lane |
 | `README.md` | the tour, and the argument for the design | |
 | `CHANGELOG.md` | every user-facing change, with the reasoning | |
-| `website/guide/*.md` | 15 pages of prose: concepts, run-query, spaces, atoms-terms, python-functions, define, structures, threads, observability, notebook, contract, getting-started, where-code-runs, pettorch | |
+| `website/guide/*.md` | 16 pages of prose: concepts, run-query, spaces, atoms-terms, python-functions, define, structures, threads, observability, notebook, contract, extending-a-seat, getting-started, where-code-runs, pettorch | |
 | `website/tutorials/*.md` | 9 numbered lessons, atoms through graph-view | |
 | `website/integrations/*.md` | dataframes, pydantic, duckdb, SQLite blobs, arrays and embeddings, http routes | |
 | `website/reasoning/*.md` | weighted relations, matchers and measure | |
