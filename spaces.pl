@@ -380,6 +380,11 @@
 
 :- use_module(library(sandbox), [safe_goal/1]).
 :- use_module(library(assoc), [list_to_assoc/2, get_assoc/3, put_assoc/4]).
+%spaces/catalog.pl's claim-row cache splits the findall pairs of a value's
+%claims with it. The gate loads the engine with the autoloader off, so a
+%library predicate a unit calls is imported here, where the umbrella owns
+%every unit's imports, or list_undefined reports it as spaces:pairs_keys_values/3.
+:- use_module(library(pairs), [pairs_keys_values/3]).
 
 % Storage modules are separate from execution modules. They inherit nothing,
 % so a user predicate cannot appear as a space atom, and unknown arities fail
