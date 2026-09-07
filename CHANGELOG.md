@@ -383,6 +383,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   it moves about twenty-five with nothing but whether the tree has been written
   over; the harness gained a per-row `inference_allowance` for it, symmetric
   with the instruction band it has always had.
+
+  The refusal now records what a refused reading measures. Normalised by its
+  own work -- CPU seconds per billion retired instructions against the pin
+  divided by the instructions that pin was taken on -- every per-operation row
+  reads 1.3 to 1.9 times its pinned rate across two gate runs while its
+  instruction count stays inside its band, so the same instructions are simply
+  taking longer, and `boot`, the one row that is a whole process rather than a
+  window around compute, is unaffected at 0.99x and 1.18x. That is also what
+  makes `error-ball` legible: its raw ratio is the worst in the lane, and per
+  unit of work it is the middle of the pack. No CPU pin is re-taken, and the
+  note names the one worth taking first on a quiet box: `error-ball`'s 0.0901s
+  was measured on work that has since grown 26.2%, so the same rate costs about
+  0.1137s against a ceiling of 0.12614s and that row has about 11% of its band
+  left where the other five have all of theirs.
 - The built-package check skips on the dependency it needs rather than on the
   directory that holds it. `node-dist` guarded on `extensions/node/node_modules`
   existing, which an install that omitted the dev dependencies satisfies, and

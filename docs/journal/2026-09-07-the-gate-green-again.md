@@ -1215,3 +1215,57 @@ literal absolute path, which none does.
 Verified: the same scan run by hand over the whole tracked set,
 `git ls-files -z | xargs -0 grep -InE '<workspace-root-needle>|<windows-needle>'`,
 reports 0 offenders, and the test itself passes on its own.
+
+## 2026-09-07, what the refused CPU rows are actually measuring
+
+The C seat's CPU refusal has been declining rows all day without anyone saying
+what the declined readings mean. Two full gate runs on the same tree, each row
+a minimum of three, give enough to answer it without a quiet box.
+
+Normalise each row by its own work -- measured CPU seconds per billion retired
+instructions, against the CPU pin divided by the instruction count that pin was
+taken on -- and the rows stop looking individually guilty:
+
+| row | pin s/Ginstr | run at 1.39/core | run at 1.27/core |
+|---|---|---|---|
+| `boot` | 0.11599 | 1.18x | 0.99x |
+| `cursor-step` | 0.06200 | 1.57x | 1.60x |
+| `term-in` | 0.04768 | 1.61x | 1.59x |
+| `term-out` | 0.04939 | 1.90x | 1.80x |
+| `space-pair` | 0.18279 | 1.39x | 1.65x |
+| `error-ball` | 0.08555 | 1.61x | 1.30x |
+
+Every per-operation row is slowed by roughly the same factor while its
+instruction count sits inside its band, so the same instructions are taking
+1.3 to 1.9 times as long. That is the box, and it is not row-specific: a real
+regression in one row would show as one row moving while its neighbours held.
+`term-in`, `term-out` and `space-pair` are the clean control in that table
+because this branch did not touch their instruction pins, so their
+normalisation uses the committed pair as it stands.
+
+The normalisation is what makes `error-ball` legible. Its raw CPU ratio reads
+2.03x and 1.65x, the worst two numbers in the lane, and its work grew 26.2% on
+this branch (1,053,177,858 to 1,329,080,554 retired instructions, re-pinned
+here). Divide by the work and it reads 1.61x and 1.30x, which is the middle of
+the pack. The row did not get slower per unit of work; it got bigger.
+
+Decided: no CPU pin is re-taken. Every one of them still describes its row's
+rate, and a pin taken at 1.27 runnable processes per core would be a worse
+measurement than the one it replaced, which
+`measurement_conditions` already records as a loaded-box figure wanting a quiet
+box.
+
+Open, and sharper than it was: **`error-ball`'s CPU pin has 11% of its band
+left.** The pin is 0.0901s for work that has since grown 26.2%, so the same
+rate now costs about 0.1137s against a +40% ceiling of 0.12614s. It passes, and
+it will keep passing, but the row's margin against a real regression is now a
+tenth of what its band says. A quiet-box pass should re-take that one number
+first; the other five have their full bands.
+
+`boot` is the row the effect does not reach, at 0.99x and 1.18x. It is the
+whole process, loader included, where the other five are windows around
+cache-resident compute. That is consistent with contention being cache and
+memory rather than scheduling, which `measurement_conditions` already measured
+from the other direction in 2026-08-28 (cycles:u spread 38.7% to 43.6% under
+the same load, which ruled out frequency scaling). The mechanism is not
+isolated here and is not claimed.
