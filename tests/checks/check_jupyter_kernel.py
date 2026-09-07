@@ -51,10 +51,10 @@ Assumes:
     CI the workflow provides them and this refuses instead
 Guarantees:
   - the kernel is installed at a pinned commit and started, rather than read
-    [tested: tests/checks/check_jupyter_kernel.py; commit=WORKTREE]
+    [tested: tests/checks/check_jupyter_kernel.py; commit=7ba114f280ec3b132658cacb562064d0bac23f41]
   - the fork's launcher runs an upstream `src/main.pl` tree, which is the
     contract cli.py keeps for this [tested: tests/checks/check_jupyter_kernel.py;
-    commit=WORKTREE]
+    commit=7ba114f280ec3b132658cacb562064d0bac23f41]
 Fails when: asked to judge a machine with no network. It says so and passes,
   because a developer offline has not broken anything; the workflow's kernel
   job sets CI and it refuses there.

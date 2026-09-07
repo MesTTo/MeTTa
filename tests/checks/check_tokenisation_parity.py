@@ -33,10 +33,10 @@ Assumes:
 Guarantees:
   - a grammar change the generated lexer does not carry is reported with the
     file, the offset, the line and column, and both verdicts [tested:
-    tests/checks/check_tokenisation_selftest.py; commit=WORKTREE]
+    tests/checks/check_tokenisation_selftest.py; commit=7ba114f280ec3b132658cacb562064d0bac23f41]
   - a scope the grammar emits that SCOPE_TOKENS does not name fails the run,
     so a new group cannot reach a reader as plain text [tested:
-    tests/checks/check_tokenisation_selftest.py; commit=WORKTREE]
+    tests/checks/check_tokenisation_selftest.py; commit=7ba114f280ec3b132658cacb562064d0bac23f41]
 Fails when: asked to judge a tree whose website dependencies are not
   installed. It says so and passes, because a developer who has not run one
   npm command has not broken anything; under CI it refuses instead.

@@ -24,15 +24,15 @@ Assumes: a writable ai-tmp/ in this repository; the two plants that need the
   the lane's own policy when they are missing.
 Guarantees:
   - a grammar change the lexer does not carry is reported [tested:
-    tests/checks/check_tokenisation_selftest.py; commit=WORKTREE]
+    tests/checks/check_tokenisation_selftest.py; commit=7ba114f280ec3b132658cacb562064d0bac23f41]
   - a lexer change the grammar does not carry is reported [tested:
-    tests/checks/check_tokenisation_selftest.py; commit=WORKTREE]
+    tests/checks/check_tokenisation_selftest.py; commit=7ba114f280ec3b132658cacb562064d0bac23f41]
   - a group with no token, and a pattern Python's re cannot compile, are each
     refused by name rather than dropped [tested:
-    tests/checks/check_tokenisation_selftest.py; commit=WORKTREE]
+    tests/checks/check_tokenisation_selftest.py; commit=7ba114f280ec3b132658cacb562064d0bac23f41]
   - the generated module is compared against the generator's output, so an
     edit to either side is drift [tested:
-    tests/checks/check_tokenisation_selftest.py; commit=WORKTREE]
+    tests/checks/check_tokenisation_selftest.py; commit=7ba114f280ec3b132658cacb562064d0bac23f41]
 Fails when: run against a tree it did not write. It asserts on fixtures it
   builds and on the repository's own grammar, and changes neither.
 Open Obligations:
