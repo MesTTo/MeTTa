@@ -2,11 +2,15 @@
 
 `llms` already holds the other direction: every head the corpus calls has to
 be named in llms.txt. Nothing held this one, and the gap was the larger of the
-two. Measured 2026-09-07 at 31d54e19, before the examples this lane now
-protects were written: of the engine's 245 callable names 60 were called by no
-example, and of the 659 heads the shipped libraries carry 263 were, across 28
-libraries. A head nothing calls is a head no change to it can break, which is
-the state `examples/` exists to make impossible.
+two. Of the 721 heads this lane knows, 245 engine callables and 641 distinct
+heads the 38 shipped libraries carry across 659 rows, 287 were called by no
+example: 61 of the engine's own, and 226 that only a library carries, spread
+over 28 of the 38 libraries. A head nothing calls is a head no change to it
+can break, which is the state `examples/` exists to make impossible.
+[measured 2026-09-07: this file's own `source_text`, `is_called`,
+`engine_corpus_vocabulary` and `carried_heads` over the corpus at 31d54e19,
+extracted with `git archive 31d54e19 examples | tar -x -C <dir>`;
+commit=WORKTREE]
 
 The two sources are the ones the audit read, and neither is a list kept here:
 the engine's own `fun/1` plus `translator:metta_translated_head/1`, and
