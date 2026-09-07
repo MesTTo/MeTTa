@@ -307,6 +307,26 @@ def pipe(self, fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
 >
 >     m.match(pattern).pipe(clean).pipe(score, weight=2)
 
+### `Rows.render`
+
+```python
+def render(self, source: Any, /, **values: Any) -> str:
+```
+
+> These rows through a template, as text: `metta.render` with `rows` bound.
+>
+>     rows.render("| {rows:table}")
+>     rows.render(t"{len(rows)} answers")   # 3.14
+>
+> The longhand is `metta.render(source, rows=rows)`. The receiver is
+> bound under the name `rows` on both result faces, so one template
+> renders an eager result and a lazy one alike; a template carries its
+> own values, so the binding is what the STRING face resolves `{rows}`
+> against. That binding is always there, so this door always reads its
+> text as fields, where `metta.render("{x}")` with no values leaves the
+> braces alone. Every row is written, where `__rich__` stops at
+> `config.display_rows`: a document is not a terminal.
+
 ## `rows_into`
 
 ```python
@@ -464,6 +484,19 @@ def explain(self, *, analyze: bool = False, allow_writes: bool = False) -> Expla
 > this one reads the query the view holds, so a lazy stream stays exactly
 > where it was and an infinite one is explainable at all. Otherwise it is
 > `Rows.explain` and answers the same `Explanation`.
+
+### `Answers.render`
+
+```python
+def render(self, source: Any, /, **values: Any) -> str:
+```
+
+> These answers through a template, as text: `Rows.render`'s lazy twin.
+>
+> The receiver is bound under the same name, `rows`, so a template
+> written for one face renders the other unchanged. Rendering reads the
+> answers, so an unbounded view is bounded first, the way `to_dicts`
+> and `table` are.
 
 ### `Answers.one`
 

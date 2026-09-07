@@ -113,8 +113,9 @@ MeTTa-defined record when one field changes. Those forms work on 3.12.
 
 Python 3.13 adds `copy.replace(edge, b="new")` as the general functional
 update spelling. Python 3.14 adds t-string syntax, which creates a structured
-`Template`; it is optional integration sugar and is not accepted directly by
-`Space.run`. Neither feature changes the 3.12 floor. See
+`Template`; `Space.run` and `metta.render` both accept one, and both accept
+the keyword face `"...{n}...", n=10` that says the same thing on 3.12. Neither
+feature changes the 3.12 floor. See
 [term building](./atoms-terms.md#build-terms-not-source-text) and
 [record replacement](./python-functions.md#declaring-a-data-class) for the
 runnable forms.

@@ -306,6 +306,70 @@ debug form: it folds `x=` into the text, so it enters as the String `"x="`
 followed by the repr, two atoms rather than one. A nested template composes,
 splicing its text and its holes into the outer call.
 
+### The same template, rendered: `metta.render`
+
+`metta.render(source, /, **values) -> str` takes those same three faces and
+answers TEXT instead of running anything, so a card, a reference page or a
+documentation section is a template over a query rather than a program that
+prints. `rows.render(source, /, **values)` and `answers.render(...)` are the
+method faces: both bind the receiver under the name `rows`, so one report
+renders the eager result and the lazy view alike, and a `rows=` keyword beside
+either is refused rather than silently winning. A method face always has that
+one value, so it always reads its text as fields, where `metta.render("{x}")`
+with no values leaves the braces alone the way `m.run("!(id {x})")` does.
+
+One spec table, both directions, and a spec of the wrong direction refuses
+naming the door that owns it (`{v:sym}` at a rendered hole names `m.run`,
+`{v:table}` at a reading hole names `metta.render`):
+
+| spec | reading a hole | rendering a hole |
+|---|---|---|
+| none | `encode(value)` | the value's text: a String's characters, any other atom's MeTTa text, a `str` itself, anything else through `encode` first |
+| `sym` | `Symbol(text)` | refused, naming `m.run` |
+| `expr` | `parse(text)` | refused, naming `m.run` |
+| `py` | `Grounded(value)` | refused, naming `m.run` |
+| `sexp` | refused, naming `metta.render` | canonical MeTTa text, what `repr` answers and `parse` reads back |
+| `quoted` | refused, naming `metta.render` | a MeTTa string literal of that text |
+| `json` | refused, naming `metta.render` | one line of JSON through `metta._json`, a result as its records |
+| `table` | refused, naming `metta.render` | the columns as a Markdown table, every row, `\|` and `\` escaped and a newline `<br>` |
+| `lines` | refused, naming `metta.render` | one value per line, a nested template rendered |
+
+A bare rendered hole is exactly what the ENGINE puts at a `format-args` `{}`
+(`engine/metta/operators.pl`, `metta_console_text/2`), and `{v:sexp}` is what
+`repr` answers, both compared against the engine by the suite rather than
+pinned to a literal. The one measured difference is the boolean: this library
+writes the source spelling `True` where the engine writes the atom `true`, and
+both read back as the same atom.
+
+Any other spec is Python's own, applied to the value, because a rendered hole
+is text: `{n:.2f}` and `{name:<20}` mean here what they mean in an f-string,
+and `f"{atom:sexp}"`, `format(rows, "table")` reach the same table with no
+import, since `Atom`, `Rows` and `Answers` answer the specs through
+`__format__`. `format(x, "")` stays `str(x)`, Python's law, which for a String
+atom is the quoted literal where a bare hole is the characters.
+
+Rendering costs one `encode` per hole and no engine call, except `{v:json}`,
+which is one engine round trip through the codec. `{rows:table}` and
+`{rows:lines}` read every row, where the display protocols stop at
+`config.display_rows`: a document is not a terminal, so bound an unbounded
+view before rendering it.
+
+A template holds ONE level. `{for row in rows}` is not spellable: it is a
+SyntaxError on the 3.14 face, PEP 750's grammar having no statement form, and
+a literal's values are evaluated when the literal is, so no per-item binding
+could arrive later. Iterate in Python and compose the pieces, which is what a
+nested template and `{parts:lines}` are for:
+
+```python
+entries = [metta.render("- {p} -> {c}", p=row.parent, c=row.child) for row in rows]
+page = metta.render("# {title}\n\n{entries:lines}\n\n{rows:table}",
+                    title="Parents", entries=entries, rows=rows)
+```
+
+`extensions/python/tools/libdoc.py` is that shape at full size: its `catalog()`
+answers three `Rows` and no text, and the page is the templates above it with
+`{coverage:table}` in the middle.
+
 Refused with the hole's line and column in the text you wrote: a hole inside a
 `"..."` string literal, inside a `;` comment, or glued to a symbol. Refused by
 name: a field with no keyword, a positional `{}` or `{0}`, a keyword no field

@@ -56,10 +56,25 @@ function that takes an atom. Do not assemble MeTTa source when the API accepts a
 
 When only a text form exists, build each atom first and render the
 finished term: `source = f"!{term}"` produces `!(Order 7 5)`, which
-`m.run(source)` can read. Python t-string syntax is available only on 3.14 and
-newer. It creates a `string.templatelib.Template`; `Space.run` accepts a
-`str`, not a `Template`. Treat a t-string as optional sugar for an integration
-that explicitly renders templates, not as the 3.12 term-construction path.
+`m.run(source)` can read.
+
+Program text with holes is the other text spelling, and it does not go through
+a rendered string at all. `Space.run` accepts a `str` or a `Template`:
+`m.run("!(fib {n})", n=10)` works on every supported version, and
+`m.run(t"!(fib {n})")` is the same call as a 3.14 t-string, which Python
+compiles to a `string.templatelib.Template`. A hole is a BINDING by position,
+spliced in as a generated symbol and bound the way `bind()` binds, so a `str`
+holding a space or a quote never has to be escaped.
+
+`metta.render(source, **values)` takes the same three faces the other way and
+answers text: `{v:sexp}` writes an atom as MeTTa source, `{rows:table}` writes
+a query result as a Markdown table, and a bare `{v}` writes what the engine's
+own `format-args` puts at a `{}`. That is how a page or a report is written
+over a query rather than printed.
+
+None of this replaces term building. A hole is for a value inside a program
+you are writing as text; when the API takes an atom, `S.Order(7, 5)` is the
+form to pass, on the 3.12 floor and above.
 
 See [where code runs](./where-code-runs.md) for the boundary between building
 an atom and evaluating it.
