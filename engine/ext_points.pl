@@ -20,6 +20,12 @@
 %     test_events_publish_only_after_transaction_commit,
 %     test_rollback_and_outer_rollback_discard_every_buffered_event,
 %     test_speculative_execution_discards_its_event_segment; commit=39092863ae34184a9f955f185ff57c1ff177ec40].
+%   - a committed segment announces its boundary once, after every one of its
+%     atom events has been dispatched, carrying the sorted space names it
+%     touched; an unscoped write is a segment of one and a discarded frame
+%     announces nothing [tested:
+%     test_a_transaction_delivers_one_progress_after_its_deltas,
+%     test_a_discarded_segment_announces_no_boundary; commit=WORKTREE].
 %   - deferred commit callbacks run after earlier committed events even when a
 %     subscriber fails, while rollback runs every paired discard callback even
 %     when an earlier discard raises [tested:
@@ -96,6 +102,7 @@
             % Events: the engine tells, every handler runs.
             atom_added/2,
             atom_removed/2,
+            segment_committed/1,
             cache_policy_changed/1,
             function_call_graph_changed/2,
             function_changed/1,
@@ -391,6 +398,32 @@ kind(atom_added/2, event).
 kind(atom_removed/2, event).
 :- dynamic atom_added/2.
 :- dynamic atom_removed/2.
+
+%The END of one committed segment, with the sorted list of space names its
+%events touched. The two hooks above say WHAT changed, one call per atom; this
+%one says THAT IS ALL, once per commit, after every one of those calls has
+%returned. An unscoped write is a segment of one; a transaction is a segment of
+%its whole ordered diff; a rolled-back or speculative one has no segment at all,
+%because it has no committed events.
+%
+%A consumer that maintains a derived answer needs the boundary and not only the
+%events. The diff of a transaction is already applied and committed when its
+%FIRST event is delivered, so a handler that recomputes per event recomputes N
+%times over one unchanging state and keeps the first answer; recomputing at the
+%boundary is the same answer for one recomputation. This is Materialize's
+%SUBSCRIBE progress row, which carries a timestamp and no data and whose whole
+%content is "there are no more updates for either timestamp 2 or 3"
+%[source: https://materialize.com/docs/sql/subscribe/, the PROGRESS option].
+%extensions/python/metta/structures.py's Live is the worked instance: its
+%`heads` and `tabled` strategies mark themselves stale per event and re-answer
+%here, and its `progress` delta is this hook crossing
+%[tested: test_a_transaction_delivers_one_progress_after_its_deltas].
+%
+%The list is computed only when a handler exists, so a tree with none pays one
+%clause lookup per commit.
+:- multifile segment_committed/1.
+kind(segment_committed/1, event).
+:- dynamic segment_committed/1.
 
 %Foreign spaces: a host runtime may declare a space whose atoms live outside
 %the Prolog database, in a database, a dataframe, a service. match/4,
@@ -1770,9 +1803,44 @@ observation_commit :-
     ->  append(Current, Parent, Merged),
         nb_setval('$metta_observation_frames', [Merged|Parents])
     ;   nb_setval('$metta_observation_frames', []),
-        reverse(Current, Events),
-        observation_dispatch_committed(Events)
+        (   Current == []
+        ->  true
+        ;   reverse(Current, Events),
+            observation_dispatch_segment(Events)
+        )
     ).
+
+%One committed segment: every event in write order, then the boundary. The
+%boundary is announced on the failing path too, because the writes committed
+%whatever a subscriber did with them and a consumer that never hears the
+%boundary waits forever for an answer that already arrived.
+%
+%The clause lookup comes first and decides the whole shape, so a tree that
+%watches atoms but not boundaries reaches the dispatch it always reached and
+%sets up no catch frame for a handler that does not exist. A commit that
+%buffered no event does not get here at all: observation_commit tests the
+%frame above, which is every commit in a tree with no atom hook installed.
+observation_dispatch_segment(Events) :-
+    (   clause(segment_committed(_), _)
+    ->  catch(observation_dispatch_committed(Events),
+              Error,
+              ( observation_segment_committed(Events), throw(Error) )),
+        observation_segment_committed(Events)
+    ;   observation_dispatch_committed(Events)
+    ).
+
+%`( C -> A ; true )` rather than a cut, which is what an event seam's own rule
+%asks of its callers.
+observation_segment_committed(Events) :-
+    (   Events \== []
+    ->  observation_segment_spaces(Events, Spaces),
+        forall(segment_committed(Spaces), true)
+    ;   true
+    ).
+
+observation_segment_spaces(Events, Spaces) :-
+    findall(Space, member(event(_, Space, _), Events), Touched),
+    sort(Touched, Spaces).
 
 %A subscriber failure remains the caller's error, but the state has already
 %committed. Run any later deferred commit callbacks before rethrowing so an
@@ -1837,7 +1905,20 @@ observe(Action, Space, Term) :-
     (   observation_frames([Current|Parents])
     ->  copy_term(event(Action, Space, Term), Event),
         nb_setval('$metta_observation_frames', [[Event|Current]|Parents])
-    ;   observation_dispatch(event(Action, Space, Term))
+    %An unscoped write is a segment of one, and it stays the DIRECT dispatch
+    %it always was while nothing is listening for boundaries. The guard is
+    %inline rather than a predicate of its own, and it is the whole of what
+    %this seam adds to the write path of a tree that watches atoms and not
+    %boundaries: without it every such write would pay a cons cell, a catch
+    %frame and a two-step recursion for a handler that is not there.
+    ;   Event = event(Action, Space, Term),
+        (   clause(segment_committed(_), _)
+        ->  catch(observation_dispatch(Event),
+                  Error,
+                  ( observation_segment_committed([Event]), throw(Error) )),
+            observation_segment_committed([Event])
+        ;   observation_dispatch(Event)
+        )
     ).
 
 observation_frames(Frames) :-

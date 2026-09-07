@@ -22,7 +22,7 @@ re-runs them.
 |---|---|---|
 | `examples/**/*.metta` | 266 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
-| `website/reference/metta-*.md` | 24 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
+| `website/reference/metta-*.md` | 25 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms | `extensions/python/tools/libdoc.py` |
 | `tests/prolog/suites/*/*.plt` | plunit suites over the engine itself, grouped by the engine unit each one tests | the `plunit` gate lane |
 | `extensions/python/tests/*/test_*.py` | blackbox, hypothesis-fuzzed, in the same 20 chapters `examples/` uses, plus `conformance/` for the arbiters and `repository/` for the tests whose subject is this repository | the `pytest` gate lane |
@@ -38,7 +38,7 @@ re-runs them.
 | `extensions/python/examples/*/*.py` | runnable Python programs, each printing checked claims through `_common.py`: `check(label, got, expected)` raises `CheckFailed` rather than asserting, because `python -O` strips an assert while the print under it still runs, and `done(name)` refuses to print its OK line when nothing was checked, so an example that verified nothing cannot report success; the six under `gallery/` also check adjacent emitted-MeTTa and output comments plus bilingual `@example` atoms | the `examples` and `gallery` gate lanes |
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
 | `engine/**/*.pl` | `engine/metta.pl` engine bootstrap loading the thirteen `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, space_hooks, runtime, control, interop, registration), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eight `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products), `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.metta`. Each unit is a plain source file consulted by its umbrella, so predicate ownership and load order are the umbrella's | |
-| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 94, `service` 61, `ownership` 38, `event` 14, `declaration` 13. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
+| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 94, `service` 61, `ownership` 38, `event` 15, `declaration` 13. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
 | `lib/lib_*/` | 38 MeTTa libraries, implemented in `.metta`, `.pl`, or both, loaded with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
 | `extensions/*/extension.pl` | one control file per seat, read when argv carries `extensions` and never read without it; a seat's `entry(engine, _)` loads only where its declared needs hold and its `entry(host, _)` is recorded for the seat's own runtime to consult, so the engine names neither a host nor a backend | |
@@ -594,10 +594,30 @@ narrow one. Each composes STORAGE and is a provider, not an evaluation
 context: equations reachable through one are data, and read back by `atoms()`
 without firing, unless that provider declares `rules`.
 
+`m.live(*query, on="both", strategy=None)` materialises a query and keeps it
+current from this space's own committed writes: `live.rows` is what
+`m.match(...)` would answer without asking, `len(live)`, `atom in live` and
+`live.count(atom_or_row)` are local reads, and `live.atoms()` is the answer as
+atoms for a one-atom query. The query is one pattern, a conjunction spelled the
+way `match` spells one, or a call to a TABLED head. `strategy=` is the
+`live-strategy` vocabulary (`metta.vocabularies.LiveStrategy`) and defaults to
+the query's shape: `pattern` maintains one pattern's multiset from the write
+events at O(1) per event, `heads` watches the heads the query mentions and
+re-answers it once per COMMIT that touched one, `tabled` serves a call by
+watching its own table's invalidation counter. `live.strategy` reports which is
+in force. Refusals: a provider that declares no event delivery; a query whose
+own head is an operation that writes, because a view MATCHES its query and
+never calls it; a `tabled` strategy over a head with no table, or one whose
+cache policy does not invalidate, naming the policy. `live.close()` ends the
+maintenance and the view keeps its last answer; it is a context manager, and
+`aclose()`/`async with` are its `aio` face.
+
 `metta.structures` holds the stores worth having: `AlphaSet` (atoms modulo
 variable renaming), `PatternMap` (a MutableMapping keyed by atoms),
-`MatchIndex` (many patterns, one atom, which match), `LiveView` (a materialised
-view kept current by the space's own writes), `ClosureView` (reachability over a
+`MatchIndex` (many patterns, one atom, which match), `LiveView` (one pattern
+materialised and kept current from the space's own writes, which is
+`metta.live`'s `Live` with the `pattern` strategy read through its atoms),
+`ClosureView` (reachability over a
 stored relation, tabled from birth, which is what makes a closure over CYCLIC
 or symmetric data terminate at all: the same reachability written as recursive
 equations does not terminate over a cycle, so reach for this rather than
@@ -1515,7 +1535,9 @@ apart, `active_source_program/1` to detect a definition batch,
 `observation_discard/0` and `observation_defer/2` for the post-commit event
 stream a scope buffers and then publishes or drops, the last of them pairing a
 commit goal with its rollback so a launch happens only after the transaction
-commits, `metta_ensure_source_observation/0` to bring the source observer into
+commits, with `seam:segment_committed/1` announcing the END of each committed
+segment and the spaces it touched, which is where a handler that maintains a
+derived answer recomputes once instead of once per atom, `metta_ensure_source_observation/0` to bring the source observer into
 a process that did not boot with it, and `metta_vocabulary_value/2` so a
 library validates an option against the same declared vocabulary the engine
 reads;
@@ -1648,6 +1670,34 @@ merge is its step, ordinary events contribute one, and `(fact tag value)`
 events contribute `tag`.
 `EventStream.folds(space_name)` lists that space's live folds in registration
 order, so an observability owner can inspect what is still subscribed.
+`EventStream.generation()` is the stream's clock, one tick per delivered
+change while a segment watch is live and standing still while none is, because
+there is then no consumer to be current to. `EventStream.segments(callback)`
+runs `callback(generation)` after
+every committed SEGMENT: one commit's whole ordered diff, so an unscoped write
+is a segment of one and a transaction is a segment of everything it wrote,
+while a rollback, a speculation and a world evaluation have none. The space
+already held the whole diff when the segment's first event was delivered, so a
+consumer that recomputes recomputes there, once, rather than once per atom. The
+engine announces boundaries only while a watch is live, and only for a segment
+touching a subscribed space.
+
+`m.live(query).changes(timeout=None)` reads a live view as a stream of
+`metta.live.Delta(kind, diff, row, atom, generation)`, frozen and slotted
+so a consumer reads it with `match`: `kind` is the `delta-kind` vocabulary
+(`metta.vocabularies.DeltaKind`), `add`, `remove` or `progress`,
+`diff` is the signed change in that row's multiplicity, `row` is the answer
+keyed by column name, `atom` is the query instantiated under it when the query
+is one atom, and a `progress` delta carries neither and means every change
+committed up to its generation has been delivered. Deltas buffer only while a
+`changes()` stream is open, bounded by `metta.subscribe.SUBSCRIPTION_QUEUE_MAX`
+and REFUSING rather than dropping the oldest; the stream is a context manager
+and iterates with `for` or, under `aio`, with `async for`. Measured 2026-09-07
+over relations of 10, 100 and 1,000 rows, inferences per touching write: the
+`pattern` strategy 88, 90, 90 against a recompute-per-event consumer's 149,
+425, 3,153; `heads` 167, 445, 3,173 for a single write but 4,035 against 31,564
+for a transaction of ten, because it re-answers once per commit; `tabled` 563
+flat for a write that leaves its table valid at every size.
 
 `metta.subscribe`: `m.subscribe(pattern, callback, on="add", queue_max=10000)`
 is the delivering fold, run INSIDE the write that matched it; without a

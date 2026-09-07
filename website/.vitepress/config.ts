@@ -218,6 +218,7 @@ export default defineConfig({
               { text: "metta.aio", link: "/reference/metta-aio" },
               { text: "metta.events", link: "/reference/metta-events" },
               { text: "metta.subscribe", link: "/reference/metta-subscribe" },
+              { text: "metta.live", link: "/reference/metta-live" },
               { text: "metta.foreign", link: "/reference/metta-foreign" },
               { text: "metta.integrate", link: "/reference/metta-integrate" },
               { text: "metta.manifest", link: "/reference/metta-manifest" },

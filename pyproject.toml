@@ -635,6 +635,9 @@ forbidden_modules = [
     # Space.saga, so ordinary core imports do not load its event machinery.
     "metta._saga",
     "metta._persistent",
+    # live is the materialised-view surface metta.structures reaches only when
+    # a LiveView is made, so importing the stores does not build it.
+    "metta.live",
     "metta.aio",
     "metta.algebra",
     "metta.arrays",

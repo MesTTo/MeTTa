@@ -84,6 +84,35 @@ def wait(self, timeout: float | None = None) -> Any:
 > when the fold cancels or, with a timeout, when the deadline passes.
 > Something that arrived before the call is not waited for.
 
+## `SegmentWatch`
+
+```python
+class SegmentWatch:
+```
+
+> One consumer of committed-segment boundaries; ``cancel()`` ends it.
+
+### `SegmentWatch.cancel`
+
+```python
+def cancel(self) -> None:
+```
+
+> Stop hearing boundaries.
+>
+> The engine stops announcing them when this was the last watch.
+
+## `segment_committed`
+
+```python
+def segment_committed() -> bool:
+```
+
+> The engine's commit boundary, arriving from seam:segment_committed/1.
+>
+> Public because the stream is: a host binding for another language taps in
+> here exactly as the Python shim does.
+
 ## `EventStream`
 
 ```python
@@ -157,6 +186,43 @@ def folds(self, space: str) -> tuple[Fold, ...]:
 
 > Every live fold on one space, in registration order.
 
+### `EventStream.generation`
+
+```python
+def generation(self) -> int:
+```
+
+> How many changes this stream has delivered, monotone.
+>
+> The stream's clock. A consumer that has seen generation `g` has seen
+> every change committed up to `g`; `segments` is how it learns that a
+> commit reached one.
+
+### `EventStream.segments`
+
+```python
+def segments(self, callback: Callable[[int], None]) -> SegmentWatch:
+```
+
+> Run `callback(generation)` after every committed segment.
+>
+> A segment is one commit's whole ordered diff: an unscoped write is a
+> segment of one and a transaction is a segment of everything it wrote,
+> while a rollback, a speculation and a world evaluation have none. Every
+> fold step for the segment's events has already run when the callback
+> does, and the space already held the whole diff when the FIRST of them
+> ran, so a consumer that recomputes recomputes here, once, instead of
+> once per atom over a state that is not moving.
+>
+>     done = []
+>     watch = m.events().segments(done.append)
+>     m.transaction(lambda: m.add(S.a, S.b))   # done == [2]
+>
+> `metta.live.Live` is the worked instance and the rung above this
+> one: its `progress` deltas are this callback. The engine announces
+> boundaries only while something listens, so a stream nobody watches
+> this way costs one clause lookup per commit.
+
 ### `EventStream.publish`
 
 ```python
@@ -169,6 +235,11 @@ def publish(self, action: str, space: str, atom: Any) -> None:
 > whose store also changes elsewhere and that has a channel saying so,
 > Redis pub/sub or PostgreSQL LISTEN/NOTIFY, announces those changes
 > here, which is what its `(events ...)` declaration promised.
+>
+> One announcement is one committed segment, because the provider's
+> store already holds the change: a consumer maintaining a derived
+> answer is told the boundary here exactly as the engine's own commit
+> tells it.
 
 ## `stream`
 

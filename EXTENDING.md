@@ -2242,6 +2242,26 @@ blocks on a space without polling.
 seam:atom_added(Space, Term) :- my_index_update(Space, Term).
 ```
 
+`seam:segment_committed/1` is the third of the trio, and it says THAT IS ALL:
+one call per committed segment, after every one of that segment's atom hooks has
+returned, carrying the sorted list of space names the segment touched. An
+unscoped write is a segment of one, a transaction is a segment of its whole
+ordered diff, and a rolled-back or speculative one has no segment at all.
+
+```prolog
+:- multifile seam:segment_committed/1.
+seam:segment_committed(Spaces) :- my_views_recompute(Spaces).
+```
+
+A handler that maintains a DERIVED answer wants this one rather than the two
+above. The whole diff is already applied and committed when a segment's FIRST
+atom hook runs, so recomputing per atom recomputes N times over a state that is
+not moving; recomputing here is the same answer for one recomputation.
+`metta.live.Live` is the worked instance, and Materialize's SUBSCRIBE
+publishes the same shape as a progress row carrying a timestamp and no data.
+The space list is built only when this seam has a clause, so a tree with no
+handler pays one clause lookup per commit.
+
 The write wrapper is installed lazily, and a clause arriving from a FILE reaches
 the channel that installs it just as an `assertz` does. That is worth saying
 because `prolog_listen/2`'s documented action list does not mention loading, so
