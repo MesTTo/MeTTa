@@ -330,6 +330,26 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   guessed: with `engine/qlf_boot.pl` loaded, creating one atom before the load
   moves the same number by 28 and creating two, three, five or eight moves it
   back.
+- The C seat's benchmark lane tells four things apart that it used to report
+  as one. Three rows moved and are re-pinned, each on the commit that moved it
+  by a first-parent ladder over the eleven merge points since the release
+  re-pin: `boot` 382,606 to 388,152 inferences and 1,070,778,354 to
+  1,088,457,378 instructions, `cursor-step` +1.24% instructions with two thirds
+  of it at one merge, and `error-ball` 1,053,177,858 to 1,329,080,554 (+26.2%),
+  all of it at the assertion-bag-diff merge that also moved its inferences
+  +92,000. `space-pair` did NOT move: its min-of-three varies 1.69% across the
+  eleven points with no trend and its band said 0.6%, so the band is widened to
+  2.0% beside that measurement and the count is left where it was. And three
+  counters this box cannot read now say so instead of reporting a regression:
+  the CPU rows are compared only at or below one runnable process per core,
+  which is where every runnable process still has a core and is what the
+  baseline's own measurement conditions record its pins as taken under, and the
+  boot instruction row is refused from a checkout whose path length differs
+  from the one it was pinned at, which the baseline prices at 0.045% per
+  character. The boot inference row declares a 32-inference allowance, because
+  it moves about twenty-five with nothing but whether the tree has been written
+  over; the harness gained a per-row `inference_allowance` for it, symmetric
+  with the instruction band it has always had.
 - The built-package check skips on the dependency it needs rather than on the
   directory that holds it. `node-dist` guarded on `extensions/node/node_modules`
   existing, which an install that omitted the dev dependencies satisfies, and
