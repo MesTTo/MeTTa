@@ -30,7 +30,7 @@
  *     for a form that does not parse, which names no line; and FAIL (not
  *     raise) where the Prolog splitter fails, a stray top-level ')'
  *     [tested: reader_c:the_error_shapes_match_the_prolog_reader;
- *     commit=WORKTREE].
+ *     commit=8d67307403c1e41ccf058bd3c8d4c079dd7cf7d5].
  *   - float literals saturate to inf/-inf past binary64 exactly as the
  *     engine's metta_saturating_parse/2 retry does, because strtod is the
  *     same correctly-rounded conversion number_codes/2 uses underneath
