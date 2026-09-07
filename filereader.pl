@@ -15,6 +15,12 @@
 %     [tested: tests/prolog/suites/reader/filereader.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d].
 %   - A parsed form that cannot translate is not reported as a syntax error
 %     [tested 2026-08-14: filereader_translation_errors].
+%   - An unbalanced form's line rides in the thrown error's CONTEXT slot,
+%     metta_source_line(Line), through both readers and out through the
+%     reserved control envelope, so a caller points at the line instead of
+%     parsing "starting at line ~w" out of the message
+%     [tested: reader_c:the_error_shapes_match_the_prolog_reader,
+%     shim_type_inference:a_syntax_envelope_carries_its_line; commit=WORKTREE].
 %   - top_forms//2 ignores comment text and keeps parentheses inside escaped
 %     string quotes inside their form [tested 2026-08-15:
 %     filereader_form_splitter].
@@ -574,30 +580,38 @@ metta_answer_term(Term, Term).
 %again. Answers cross as raw terms; the codec stays each host's own.
 %
 %A reader failure crosses as the engine's reserved control envelope,
-%error(metta_control_signal(syntax, M), context(metta, syntax)), the same
+%error(metta_control_signal(syntax, M), context(metta, Where)), the same
 %shape the limit guards throw, so a binding classifies the thrown term
 %rather than hunting rendered text.
 %The tagged parse that also hands back the summary, for the host door's
 %no-bindings path.
 metta_host_tagged_parse_summary(Source, Parsed, Sigs, Decls) :-
     catch(parse_metta_source_summary(Source, Parsed, Sigs, Decls), Caught,
-          (   (   Caught = error(syntax_error(M), _)
-              ;   Caught = syntax_error(M)
-              )
-          ->  throw(error(metta_control_signal(syntax, M),
-                          context(metta, syntax)))
-          ;   throw(Caught)
-          )).
+          metta_host_rethrow_syntax(Caught)).
 
 metta_host_tagged_parse(Source, Parsed) :-
     catch(parse_metta_source(Source, Parsed), Caught,
-          (   (   Caught = error(syntax_error(M), _)
-              ;   Caught = syntax_error(M)
-              )
-          ->  throw(error(metta_control_signal(syntax, M),
-                          context(metta, syntax)))
-          ;   throw(Caught)
-          )).
+          metta_host_rethrow_syntax(Caught)).
+
+%One reader failure, re-thrown as the reserved envelope, carrying the line the
+%reader stopped at in the envelope's own context slot when the failure names
+%one. The message already says the line and a caller that has to POINT at it
+%had to parse the sentence to get it; CPython splits the same error the same
+%way, the sentence on the exception and the position in SyntaxError.lineno
+%[source: https://docs.python.org/3.14/library/exceptions.html#SyntaxError].
+%A failure with no line keeps `syntax`, the slot every other
+%metta_control_signal(syntax, _) in this tree already fills, and every reader
+%of the envelope matches context(metta, _) so neither shape is new to it.
+metta_host_rethrow_syntax(error(syntax_error(M), Context)) :- !,
+    (   Context = metta_source_line(Line), integer(Line)
+    ->  Where = metta_source_line(Line)
+    ;   Where = syntax
+    ),
+    throw(error(metta_control_signal(syntax, M), context(metta, Where))).
+metta_host_rethrow_syntax(syntax_error(M)) :- !,
+    throw(error(metta_control_signal(syntax, M), context(metta, syntax))).
+metta_host_rethrow_syntax(Caught) :-
+    throw(Caught).
 
 %The CLI asserts working_dir/1 from the file it loads and import! reads it
 %unconditionally, so a string run needs one too; the process's own
@@ -1964,8 +1978,11 @@ read_balanced_form(LC, Cs, LC2) -->
     grab_until_balanced(1, [0'(], Cs, LC, LC2, outside), !.
 read_balanced_form(LC, _, _) -->
     string_without("\n", Rest),
+    %The line rides in the error's CONTEXT slot as well as its message, so a
+    %caller that has to point at the line reads a number rather than parsing
+    %the sentence; metta_host_rethrow_syntax/1 above carries it across.
     { format(atom(Msg), "missing ')', starting at line ~w:~n~s", [LC, Rest]),
-      throw(error(syntax_error(Msg), none)) }.
+      throw(error(syntax_error(Msg), metta_source_line(LC))) }.
 
 %One top-level ATOM, which is what a MeTTa source is a sequence of. A
 %parenthesised expression is the commonest kind and was for a long time the
