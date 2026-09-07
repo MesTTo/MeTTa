@@ -122,6 +122,13 @@ arrow = [
 das = [
     "websocket-client",
 ]
+#: Executing a GraphQL query against a served space. The SDL is built as text,
+#: so `GET /graphql` publishes the schema without this; only `POST /graphql`
+#: needs a GraphQL implementation, and graphql-core is the reference port of
+#: GraphQL.js with no dependency of its own.
+graphql = [
+    "graphql-core>=3.2",
+]
 #: polars from 1.3 reads the Arrow PyCapsule Interface, which is what to_pl()
 #: hands it; pandas gained DataFrame.from_arrow in 3.0 and to_df() falls back
 #: to the projected columns below that.
@@ -144,6 +151,9 @@ test = [
     #: reading of it. In `test` beside nanoarrow and for the same reason: it
     #: decides whether a scenario runs or skips.
     "openapi-spec-validator>=0.9",
+    #: The GraphQL executor, so the schema scenarios RUN rather than skipping.
+    #: Same reason nanoarrow and openapi-spec-validator are here.
+    "graphql-core>=3.2",
     "pytest>=8.4.2",
     "pytest-benchmark>=5.2",
     #: Ordering and the per-item wall bound, which the suite's configuration
@@ -595,6 +605,7 @@ DEP004 = ["pytest", "hypothesis"]
 DEP003 = ["rich", "pygments", "IPython"]
 DEP002 = [
     "janus-swi",
+    "graphql-core",
     "array-api-compat",
     "nanoarrow",
     "faiss-cpu",

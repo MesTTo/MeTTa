@@ -348,6 +348,44 @@ def openapi(self, *, secured: bool = False) -> dict:
 > `get-doc` per declared head, which is O(declarations) rather than
 > O(atoms) and is why this is derived per request instead of cached.
 
+### `Gateway.graphql_schema`
+
+```python
+def graphql_schema(self) -> str:
+```
+
+> This gateway's served spaces as GraphQL SDL, `GET /graphql`.
+>
+>     print(gateway.graphql_schema())
+>
+> `scalar Atom` carries any atom as the canonical MeTTa text `parse` reads
+> back and `scalar Number` carries a MeTTa number, which no built-in
+> GraphQL scalar can. `Query.match` reaches every atom whatever a space
+> declares; each DECLARED head gains a field of its own answering typed
+> rows, whose fields are `x1..xn` because a `(@param ...)` row carries a
+> type and a description and never a name.
+>
+> The text is built here, so a server publishes its schema whether or not
+> graphql-core is installed; only `graphql()` needs the package. A head
+> GraphQL cannot name is in the OpenAPI document's `x-metta-unnameable`
+> with the door that still reaches it.
+
+### `Gateway.graphql`
+
+```python
+def graphql(self, request: dict) -> dict:
+```
+
+> Execute one GraphQL request, `POST /graphql`.
+>
+>     gateway.graphql({"query": "{ users { x1 x2 } }"})
+>
+> The request is GraphQL over HTTP's own shape -- `query`, `variables`
+> and `operationName` -- and the answer is its `data` and `errors`.
+> Resolution goes through the same doors the wire operations use, so a
+> `match` query answers what `Gateway("match")` answers for the same
+> pattern. Refuses with the install guidance when graphql-core is absent.
+
 ### `Gateway.cursor_space`
 
 ```python

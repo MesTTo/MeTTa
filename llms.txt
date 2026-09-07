@@ -1986,6 +1986,26 @@ not by walking the store, so the document is derived per request and does not
 grow with the space (230 inferences over 20,000 atoms against 340,525 for the
 walk). Nothing is cached, so nothing goes stale.
 
+`Gateway.graphql_schema() -> str` is the same catalog as GraphQL SDL, answered
+at `GET /graphql` as `text/plain`. `scalar Atom` carries any atom as canonical
+MeTTa text and `scalar Number` a MeTTa number, which no built-in GraphQL scalar
+holds exactly (`Int` is 32-bit, `Float` a double). `Query.match(pattern:
+String!, limit: Int, space: String)` reaches every atom whatever a space
+declares; each DECLARED head gains `<head>(x1: Atom, ..., space: String):
+[<Head>Row!]!` whose row fields are `x1..xn` at their declared types, because a
+`(@param ...)` row carries a type and a description and never a name. Mutations
+are `add(atom: String!)` and `remove(atom: String!)`, both taking MeTTa source.
+A head outside GraphQL's `[_A-Za-z][_0-9A-Za-z]*`, one colliding with another
+space's, and one that would shadow `match` are listed in the OpenAPI document's
+`x-metta-unnameable` with the `match(pattern:)` door that still reaches them.
+
+`Gateway.graphql(request) -> dict` executes one request, GraphQL over HTTP's own
+`query`, `variables` and `operationName` shape, and answers `data` and `errors`;
+`POST /graphql` is the same. It needs `pymetta[graphql]` (graphql-core) and
+refuses by name without it, while the SDL is built as text here and is published
+either way. `Query.match` resolves through the same door `POST /match` uses, so
+the two answer one set.
+
 `metta.testing` ships what the suite fuzzes itself with: hypothesis strategies
 (`atoms`, `expressions`, `patterns`, `names`, `numbers`, `texts`, `symbols`,
 `variables`, `grounded`, `ground_atoms`, `numpy_scalars`, `programs`),

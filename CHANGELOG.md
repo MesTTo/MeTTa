@@ -9,6 +9,31 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- A served space publishes a GraphQL schema. `Gateway.graphql_schema() -> str`
+  is the same declarations projected into SDL, answered at `GET /graphql`, and
+  `Gateway.graphql(request) -> dict` executes a query, `POST /graphql`, through
+  graphql-core from the new `[graphql]` extra. `Query.match(pattern: String!,
+  limit: Int, space: String)` reaches every atom whatever a space declares and
+  resolves through the same door `POST /match` uses, so the two answer one set;
+  each DECLARED head gains a field of its own answering typed rows, `add` and
+  `remove` are the mutations.
+
+  `scalar Atom` carries any atom as canonical MeTTa text and `scalar Number`
+  carries a MeTTa number, which no built-in GraphQL scalar holds exactly: `Int`
+  is 32-bit signed and `Float` is an IEEE-754 double. Row fields are `x1..xn`
+  with their declared types, the names the generated stub and
+  `inspect.signature` already use, and a `(@param ...)` row's description
+  becomes the field's, since that row carries a type and a description and never
+  a name.
+
+  The SDL is built as text, so a server publishes its schema whether or not
+  graphql-core is installed; only executing needs the package, and the refusal
+  names it. A head GraphQL cannot name -- one outside
+  `[_A-Za-z][_0-9A-Za-z]*`, one colliding with a field already taken, or one
+  that would shadow `match` -- is listed in the OpenAPI document's
+  `x-metta-unnameable` with the `match(pattern:)` door that still reaches it,
+  rather than dropped.
+
 - A served space publishes an OpenAPI document. `Gateway.openapi(secured=False)
   -> dict` builds an OpenAPI 3.1.1 document for the spaces a gateway serves and
   the bundled server answers it at `GET /openapi.json`, so a consumer's own

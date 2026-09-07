@@ -100,6 +100,33 @@ top-level `security`; without one it carries neither. The document is derived
 per request from an indexed read of the `(: ...)` rows, which does not grow
 with the space, so there is no cache between it and the truth.
 
+`GET /graphql` answers the same catalog as GraphQL SDL, `text/plain`, and
+`POST /graphql` executes a query against it.
+
+```graphql
+type UsersRow { x1: Number, x2: String }
+
+type Query {
+  match(pattern: String!, limit: Int, space: String): [Atom!]!
+  users(x1: Atom, x2: Atom, space: String): [UsersRow!]!
+}
+```
+
+`scalar Atom` carries any atom as canonical MeTTa text; `scalar Number` carries
+a MeTTa number, because GraphQL's `Int` is 32-bit signed and its `Float` is a
+double while a MeTTa number is exact at any width. Row fields are `x1..xn`: a
+`(@param ...)` row carries a type and a description and never a name, so the
+description becomes the field's, and the names are the ones the generated Python
+stub and `inspect.signature` already use. A head whose name is outside
+GraphQL's `[_A-Za-z][_0-9A-Za-z]*`, or that collides with a field already taken,
+is listed in the OpenAPI document's `x-metta-unnameable` with the `match`
+pattern that still reaches it.
+
+The SDL is text and is published whether or not the server can execute a query;
+executing needs a GraphQL implementation, which the Python server takes from
+`pymetta[graphql]` and refuses by name without.
+
+
 ## Mutation recovery
 
 Revision 3 supports an optional idempotency extension. A gateway advertising
