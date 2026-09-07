@@ -985,3 +985,138 @@ source growing a setter". `_runtime` is the node seat's word for the same
 directory and was missing from the list. So the control's red was a checkout
 that had built that seat once, and any developer who builds it meets the same
 wall. One line, the same reason, and the seat's own name for it.
+
+## 2026-09-07, the instructions lane had never warmed its artifact set
+
+`instructions` was red with seven rows outside their bands, and the first thing
+to find was that the lane could not have been measuring one thing.
+
+`engine/bench.py` and `extensions/cmetta/benchmarks/bench.py` both boot once,
+unmeasured, before they sample, and both say why: "the boot that GENERATES the
+.qlf set is a different workload from the boot that loads it". This lane did
+not. Measured, with the set cleared: `let-heavy` reads **8,786,238,839** on its
+first sample and 9,111,554,612 and 9,111,517,463 on the next two, and
+min-of-three takes the first. Its committed pin was 8,786,354,108. So the row
+was pinned to a boot that compiled the artifact set and compared ever after
+against boots that load it, 3.7% apart, with nothing in the tree deciding which
+one a run got.
+
+One unmeasured run of the first selected case is the whole fix; the `.qlf` set
+is shared, so whichever case boots first warms it for the rest.
+
+Then a first-parent ladder over the eleven merge points, with the set cleared
+AND warmed at each one, which is the only way the numbers mean anything:
+
+| row | pin | tip | the step |
+|---|---:|---:|---|
+| `let-heavy` | 8,786,354,108 | 9,111,461,311 | `acd04732` +293,525,025 (+3.33%) |
+| `py-method-call` | 2,151,469,708 | 2,219,582,988 | `406175b9` +61,369,155 (+2.85%) |
+| `save-load-fast` | 4,139,361,508 | 4,204,187,284 | `468350eb` +40,465,198, `699c8b4a` +13,908,154 |
+| `save-load-metta` | 3,067,534,316 | 3,131,835,694 | `468350eb` +52,578,087 (+1.71%) |
+| `source-load` | 231,431,033 | 222,103,035 | `acd04732` -9,697,330 (-4.19%) |
+| `space-name` | 3,977,174,070 | 4,176,031,552 | `406175b9` +181,424,124 (+4.55%) |
+| `term-operators` | 1,028,951,994 | 1,016,683,080 | none |
+
+Four of the seven have ONE step above their own noise, and three of those steps
+are two merges: `406175b9` moves `py-method-call` and `space-name`, `acd04732`
+moves `let-heavy` up and `source-load` down. Five of the seven pins are the
+reading at `5aca9b64` to within 0.1%, which is what says the ladder measures
+what the pins were taken on.
+
+`term-operators` is the exception and worth naming: it reads 1,015,113,523 to
+1,017,233,553 at every one of the eleven points, `5aca9b64` included, against a
+pin of 1,028,951,994. It did not move; the pin was already 1.2% above the tree
+before the wave began, and the improvement side of the band is what finally
+said so.
+
+Decided: `sh check.sh instructions` exits 0, sixteen cases within band.
+
+## 2026-09-07, the parity lane's last red was a line, not a tree
+
+`parity-perf` reported one `CROSS-ENGINE REGRESSION`:
+`ch22/22-02-weighted-answers/04-plntestdirect.metta` at 31,344,053 instructions
+against upstream's 30,352,969, allowed 31,110,028.
+
+Measured on both engines through the lane's own `measure/2`: this tree runs
+**30,047 inferences against upstream's 40,278**, a quarter FEWER, and still
+costs 31,292,574 retired instructions against 30,337,471, +3.15%. So it is not
+more work; each step costs more, which is the class the file's own `PER_FORM`
+and `DISPATCH_HOP` strings already name. The file's shape says where to look:
+fourteen definitions and ONE runnable form, 30,047 inferences netting 31M
+instructions, so the row is dominated by what happens around loading a 47-line
+file rather than by evaluating it.
+
+It is not the merge wave's and not this branch's. A first-parent ladder over
+the eight points where this file's current measurement method exists -- the
+method changed at `43d53eea`, which is why the three points before it answer
+`TypeError` rather than a number, and that refusal is the ladder working --
+reads 31,034,356 to 31,141,141 with no trend, and the frozen
+`our_instructions`, 31,007,739, sits inside that spread.
+
+What tips it over is the LINE. The allowance is 31,110,028 and the row's own
+spread crosses it, so at the pinned checkout length the verdict is whichever
+half a run lands in. From this worktree, 23 characters longer, the whole spread
+is above it: the null control cancels 99.6% of the path (raw +38,887,046,
+control +38,716,562) and the 170,484 it leaves is 0.55% of a 31M net.
+
+Two things follow. The lane learns that a row whose own runs straddle the
+allowance has not failed, it has not been decided, and reports it with its ends
+in the bucket that already exists for a row the box could not measure; a row
+whose BEST run is still over the line fails, which is the plant that keeps this
+from becoming an amnesty for anything near the boundary. And the row takes a
+waiver in the file's own form, with the measurement and the open part named:
+closing it means the per-form loading path, which is the same open work its two
+neighbours carry.
+
+Decided: `sh check.sh parity-perf` exits 0, 149 examples checked, 17 waived.
+
+## 2026-09-07, the fourth order-dependent test is load, and it says so twice
+
+The brief asked for the prefix-length search on four tests that had moved run
+to run, and for a fix where one leaks or the measurement where it is load. The
+answer for the one that reproduces is LOAD, and the measurement is a pair of
+runs at the SAME position.
+
+`test_the_subscription_queue_is_bounded_and_load_takes_a_budget` is file 182 of
+275 in the collection order, so the prefix of the first 182 files reproduces
+its natural position exactly. Serially, `-x`, that prefix:
+
+| loadavg | result |
+|---|---|
+| 90 to 100 | FAILED: the load ran **66.170 seconds** against a 0.3-second bound and came back `[[(Error (spin) StackOverflow)]]` |
+| 60 to 80 | 2,673 passed |
+
+Same tree, same ordering, same position, two answers, and the load is the only
+thing that differed. That also re-reads the earlier prefix table: its 275-file
+point appended the file after ALL 275 files, a position no real run puts it in,
+and its 181-file point IS the natural position and passed. So there was never a
+threshold in the ordering; there were two runs at different loads.
+
+The mechanism is the one the test's own 2026-08-24 note describes and the
+number is new: the wall alarm races SWI's stack cap, and when the cap wins the
+engine's overflow recovery returns the abort as an ANSWER rather than the bound
+raising. Flattening the loop and moving 0.05s to 0.3s bought headroom and did
+not close it, because after 2,670 tests the loop grows enough that the cap can
+win and no fixed number of seconds fixes a race.
+
+Decided: the wall-clock half of that assertion moves into a process the test
+owns. A fresh process raises `TimeLimitError` twelve times out of twelve at
+0.301s to 0.307s and down to a one-millisecond bound, so the door is proven
+deterministically instead of flakily, and the inference bound beside it stays
+in-process, where it belongs -- this repository's own rule is that inferences
+decide and wall clock advises, and the assertion that moved was the one
+deciding on wall clock in a shared process on a shared box.
+
+Rejected: raising the budget again. 0.05 to 0.3 is the same move already made
+once and it is the wrong shape: the failure is a race, not a margin.
+
+Open, and named in the test rather than left in a log: a bound that loses its
+race comes back as an ANSWER rather than a refusal. Whether the engine should
+re-raise a resource abort inside a caller's bound is a surface question and not
+this test's to decide, because `(pragma! max-stack-depth N)` is a bound whose
+overflow the corpus deliberately prints as an answer -- the caller's `timeout=`
+and the program's own pragma are both "bounds" and only one of them wants a
+refusal.
+
+The other three the brief named did not reproduce in any configuration run
+here, including the gate's own.

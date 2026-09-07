@@ -330,6 +330,39 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   guessed: with `engine/qlf_boot.pl` loaded, creating one atom before the load
   moves the same number by 28 and creating two, three, five or eight moves it
   back.
+- The instruction lane warms the artifact set before it samples, and the seven
+  rows the September merge wave moved are re-pinned on the commits that moved
+  them. Both sibling harnesses have booted once unmeasured since they were
+  written, because a boot that GENERATES the `.qlf` set is a different workload
+  from one that loads it; this one did not, and the cost is measured: with the
+  set cleared, `let-heavy` reads 8,786,238,839 on its first sample and
+  9,111,554,612 and 9,111,517,463 on the next two, and min-of-three takes the
+  first, which is exactly its committed pin. So the row had been pinned to a
+  compile and compared ever after against loads, 3.7% apart. Re-pinned with a
+  first-parent ladder over the eleven merge points, cleared and warmed at each:
+  `let-heavy` +3.70% at the assertion merge, `py-method-call` +3.17% and
+  `space-name` +5.00% at the no-cetta-gate merge, `save-load-fast` +1.57% and
+  `save-load-metta` +2.10% at the doors merge, `source-load` -4.03% at the
+  assertion merge, and `term-operators` -1.19% because its pin was already 1.2%
+  above every point of the chain, `5aca9b64` included.
+- The cross-engine parity lane says when a row's own runs land on both sides of
+  the allowance. The verdict would otherwise be whichever half this run's
+  median fell in, with the next run saying the other thing; such a row is now
+  reported with its ends among the rows the box could not measure, while a row
+  whose best run is still over the line fails as before. One corpus row is
+  waived with its measurement: `04-plntestdirect.metta` runs 30,047 inferences
+  against upstream's 40,278, a quarter fewer, and still costs 3.15% more
+  instructions, so it is not more work but a costlier step, and a ladder over
+  every point where the lane's current method exists shows it flat.
+- The load-with-a-wall-bound test proves that door in a process of its own. In
+  a shared process the 0.3-second alarm races SWI's stack cap, and when the cap
+  wins the engine's overflow recovery returns the abort as an answer instead of
+  the bound raising: at the same position in the same serial ordering the
+  assertion passed at 60 to 80 runnable processes and failed at 90 to 100,
+  where the load ran 66.170 seconds and came back
+  `[[(Error (spin) StackOverflow)]]`. A fresh process raises it twelve times
+  out of twelve at 0.301 to 0.307 seconds and down to a one-millisecond bound.
+  The inference bound beside it stays in-process, where it is deterministic.
 - The C seat's benchmark lane tells four things apart that it used to report
   as one. Three rows moved and are re-pinned, each on the commit that moved it
   by a first-parent ladder over the eleven merge points since the release
