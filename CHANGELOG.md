@@ -330,6 +330,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   guessed: with `engine/qlf_boot.pl` loaded, creating one atom before the load
   moves the same number by 28 and creating two, three, five or eight moves it
   back.
+- The built-package check skips on the dependency it needs rather than on the
+  directory that holds it. `node-dist` guarded on `extensions/node/node_modules`
+  existing, which an install that omitted the dev dependencies satisfies, and
+  then died inside `npm pack` with `Cannot find package 'esbuild'` -- a lane
+  that means to skip for a missing install reporting a build failure instead.
+  It now tests for `esbuild`, the package `tools/build-browser.mjs` imports,
+  and names `npm ci` in the note.
 - `lib_tabling` declares where `call_delays/2` comes from. It is
   `library(wfs)`'s, not `library(tabling)`'s, and the library-index autoloader
   had been finding it: with autoload off the restraint dispatch raised

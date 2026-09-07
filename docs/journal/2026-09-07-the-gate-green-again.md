@@ -836,3 +836,37 @@ Open, and it belongs to whoever merges this: the 124-form prelude also moves
 `parse-prolog` to 3,514,259 and re-stamps the workload digest, so the merged
 tree needs `sh engine/bench.sh --update-baseline` and the attribution written
 beside it. The digest refusal is what will say so, which is the design working.
+
+## 2026-09-07, node-dist was reporting a build failure for a missing install
+
+The pristine control's sixteenth red. `node-dist` died inside `npm pack` with
+`Cannot find package 'esbuild'` from `extensions/node/tools/build-browser.mjs`,
+and the earlier deliverables filed it as a worktree provisioning gap.
+
+Half right. The lane already draws the skip every other seat's lane draws --
+`[ -d extensions/node/node_modules ]`, with a note saying `npm ci` fetches
+swipl-wasm and a gate does not reach the network. But the DIRECTORY is not the
+question. `extensions/node/node_modules` holds five entries here, swipl-wasm
+and acorn among them and esbuild absent, which is what an install that omitted
+the dev dependencies leaves. The `-d` test passes on that and the build then
+dies on the name the test should have looked for.
+
+Two things follow, and both are done.
+
+The guard now tests `node_modules/esbuild`, the package
+`tools/build-browser.mjs` imports, which `prepare` runs and which `npm pack`
+runs `prepare` for. A box without it gets the note and exit 0 instead of a
+build failure that reads as a broken tree.
+
+And the seat is installed, because a skip proves nothing about the tree:
+`npm install` in `extensions/node` added 10 packages, and the lane then RAN and
+passed -- "the packed package carries its engine, boots outside any checkout,
+evaluates, reads deep, and resolves the engine-free subpaths without loading
+swipl-wasm". So the red was the install and not the tree, and that is now
+measured rather than inferred.
+
+Worth knowing for anyone repeating it: `extensions/node/node_modules` in a
+worktree is a SYMLINK to the repository root's, so the install landed in the
+shared checkout. It was missing esbuild and playwright there too, which is why
+the lane was red on the pristine control as well, and the install is additive
+and matches `package.json`.
