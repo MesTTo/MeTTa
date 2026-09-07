@@ -18,6 +18,12 @@
 % Guarantees: an ordered carrier's declared ascending or descending direction
 % is applied before a top prefix is selected [tested:
 % test_ranked_and_tropical_slices_are_stable_best_prefixes; commit=c7468b2789746bcf95c4bacc0e2d517ec4d972fa].
+% Guarantees: match_conjunction_route/3 succeeds exactly when
+% native_conjunction_answer/1 answers the pattern, because both read
+% native_conjunction_route/5 and neither re-derives the other's guards
+% [tested:
+% native_generic_join:the_plan_says_generic_join_exactly_when_the_planned_join_runs;
+% commit=3287d4dd4928f09ce7c111d05a1c516808e226d5].
 % [tested: tests/prolog/suites/spaces/spaces.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
 %%%% the bound the caller wrote, reaching the matcher %%%%
@@ -113,15 +119,38 @@ match_conjunction(Extent, Space, Pattern, OutPattern) :-
     ->  match_routed(Space, Pattern, OutPattern, _)
     ;   Extent == full,
         cyclic_join_planning_enabled,
-        nonvar(Pattern), Pattern = [Comma|Conjuncts], Comma == ',',
-        is_list(Conjuncts),
-        native_conjunction_plan(Module, Space, Conjuncts, Plan)
+        native_conjunction_shape(Module, Space, Pattern, Shape),
+        native_conjunction_relations(Shape, Module, Space, Plan)
     ->  native_conjunction_answer(Plan),
         acyclic_term(OutPattern)
     ;   match_native(Module, Space, Pattern, OutPattern, _)
     ).
+
 match_conjunction(_, Space, Pattern, OutPattern) :-
     match_routed(Space, Pattern, OutPattern, _).
+
+%What match_conjunction/4 would do with this pattern, without answering it.
+%Shape is bound when the Generic Join answers the conjunction, and this FAILS
+%whenever the retained nested loop answers it, which is the whole content of
+%the self-honesty law.
+%
+%The clause above and this one read the SAME two predicates,
+%cyclic_join_planning_enabled/0 and native_conjunction_shape/4, so the only
+%thing spelled twice is a call, never a rule. What is missing here is the
+%extent: (explain (match ...)) explains the full-extent form, where a bounded
+%conjunction keeps the streaming join for its first-answer cost, PostgreSQL's
+%startup-versus-total-cost distinction
+%[source: docs/journal/2026-09-05-query-planning.md, "the plan is a declared
+%choice"; commit=3287d4dd4928f09ce7c111d05a1c516808e226d5]. What is added is the data half, asked rather than
+%assumed. A foreign space answers through its provider and a child space reads
+%through its parent chain, so neither has a Generic Join to report.
+match_conjunction_route(Space, Pattern, Shape) :-
+    \+ seam:foreign_space(Space),
+    native_storage_module_cache(Space, Module),
+    \+ space_parent(Space, _),
+    cyclic_join_planning_enabled,
+    native_conjunction_shape(Module, Space, Pattern, Shape),
+    native_conjunction_rows_admit(Shape, Module, Space).
 
 match_inherited_space(Space, OwnModule, Pattern, OutPattern, Result) :-
     space_read_chain(Space, Each),

@@ -1164,6 +1164,34 @@ metta.lint.diagnostics(findings) -> list[dict]   LSP 3.17 Diagnostics,
         zero-based, the remedy under `data`
 m.effect_plan(target) -> EffectPlan(operations, effect), translates and follows
         nested compiled calls without executing the target
+m.explain(query, *, analyze=False, allow_writes=False) -> Explanation
+        SQL's EXPLAIN over this engine's decisions for one query, as the atoms
+        the MeTTa form `!(explain <query>)` answers. A match form answers
+        handles, pushes, source, context, annotations, emits, events, writes,
+        on-error, merge, materialized and PLAN; an operation call answers
+        effect, inverse, annotations, on-error and the memo's cache decision.
+        Explanation is a Mapping from each item's head to the whole item atom,
+        with .plan, .route (the handles item), .atoms (every item in order,
+        which is what a space stores) and .analyzed
+        The plan item names the join the matcher RUNS, not the one the query
+        shape allows: `(plan generic-join (order $x $y $z) (relations (edge 1 2)
+        (edge 2 3) (edge 1 3)))` when the Generic Join answers it, `(plan
+        nested-loop (order <conjunct> ...))` naming the conjunct the retained
+        loop leads with, `(plan empty-factor <conjunct>)` when one conjunct has
+        no candidate. Deciding costs the query's shape plus one scan of each
+        conjunct's relation, because a conjunction whose stored rows are not all
+        ground declines the plan; nothing is sorted and no trie is built, so
+        explaining a triangle over 2,048 stored edges cost 6,204 inferences
+        against the query's own 237,222
+        analyze=True adds (inferences N), (answers N) and (cputime S), measured
+        by running the query inside stats(). It REFUSES a query whose named
+        operations write, because an analysis that mutates is not an analysis;
+        allow_writes=True measures it anyway. A match TEMPLATE is evaluated, so
+        `(match &s (edge $x $y) (add-atom &s (seen $x)))` is a writing query
+rows.explain(*, analyze=False, allow_writes=False) -> Explanation
+        the same, over the match form a query result came from. The lazy view
+        pulls nothing to answer it. A `where=` guard is not part of it: a guard
+        filters answers after the match and does not change which join runs
 m.eval_status(target) / m.run_status(src)  each answer paired with the path that
         produced it: "value" (equation, builtin or special form applied),
         "not-reducible" (no rule applied, the answer is the term itself),
@@ -1988,6 +2016,18 @@ work gate while passing the class one. About 23 to 31 seconds, and load-immune,
 because the counter is inferences. `--paired` adds the retired-instruction
 curve for the heads whose work crosses into C; it is advisory, never a gate, and
 it is why `unique-atom` has no row.
+`sh check.sh memo-advisor` reads a workload's own call counts and proposes
+`(cache <head> force|refuse)` rows, pricing each one by re-running the whole
+workload in a fresh process with the row declared and reporting the inference
+count before and after. It NEVER writes a row: a proposal is a line in the
+report and in `--json`, and declaring it is the program's own
+`!(add-atom &metta (cache <head> <policy>))`. `--workload` takes `bench` (the
+memoisation chapter, the default), `examples` (the whole corpus) or a path;
+`--candidates N` bounds how many proposals are measured, most-called first. A
+workload that ran no compiled head at all is refused by name rather than
+reported as having nothing to say. The hit ratio is a property of the PAIR of
+runs, not of either: under the automatic memo a head's profile counts its
+MISSES, because a hit never reaches the predicate.
 
 ## Downstream packages built on this surface
 

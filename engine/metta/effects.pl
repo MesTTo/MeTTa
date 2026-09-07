@@ -2425,6 +2425,40 @@ metta_explain_match_item(_, Pattern, [merge, Policy]) :-
     ->  Policy = Declared
     ;   Policy = depth
     ).
+metta_explain_match_item(Space, Pattern, [plan|Plan]) :-
+    metta_explain_plan(Space, Pattern, Plan).
+metta_explain_match_item(Space, _, [materialized, Answer]) :-
+    (   catch(materialize:space_materialized(Space), _, fail)
+    ->  Answer = 'True'
+    ;   Answer = 'False'
+    ).
+
+%Which join the conjunctive matcher runs for this pattern, read from the
+%matcher's own decision rather than from a second reading of its rule.
+%spaces:match_conjunction_route/3 succeeds exactly when
+%spaces:native_conjunction_answer/1 runs, so generic-join here is not a claim
+%about the query's shape but about the route: it asks the whole admission gate,
+%the ground candidate rows included, which costs one scan of each conjunct's
+%relation and none of the sort, the tries or the traversal. Everything else is
+%the retained nested loop, whose leading conjunct is named by
+%spaces:native_match_order/3.
+metta_explain_plan(Space, Pattern, Plan) :-
+    (   catch(spaces:match_conjunction_route(Space, Pattern, Shape), _, fail)
+    ->  metta_explain_plan_shape(Shape, Plan)
+    ;   catch(spaces:native_match_order(Space, Pattern, Order), _, fail)
+    ->  Plan = ['nested-loop', [order|Order]]
+    ;   Plan = ['nested-loop', [order, Pattern]]
+    ).
+
+%Column indices rather than variables in the relations item, because that is
+%what the plan holds: rel([1,2], Trie) says this conjunct supplies the first
+%and second variable of the order, and the order is the item beside it.
+metta_explain_plan_shape('generic-join'(Vars, Patterns, Columns, _),
+                         ['generic-join', [order|Vars], [relations|Relations]]) :-
+    maplist(metta_explain_plan_relation, Patterns, Columns, Relations).
+metta_explain_plan_shape('empty-factor'(Pattern), ['empty-factor', Pattern]).
+
+metta_explain_plan_relation([Rel|_], Columns, [Rel|Columns]).
 
 metta_explain_op_item(Op, _, [op, Op, Arity, Kind]) :-
     metta_contract_fact([op, Op, Arity, Kind]).
