@@ -25,12 +25,12 @@
 %   prolog_interface_registrations:a_computed_name_list_claims_nothing,
 %   prolog_interface_registrations:a_source_answers_its_registrations_with_form_indices,
 %   prolog_interface_registrations:reading_a_registration_does_not_perform_it;
-%   commit=WORKTREE].
+%   commit=ff4257005f562786e3ef7a5a37ce94b7d80e782d].
 % Guarantees: the version an extension declares is part of what
 %   metta_source_declarations/2 answers, so a reader asking what a library
 %   states does not consult the file to learn it
 %   [tested: prolog_interface_registrations:a_declared_version_is_part_of_what_a_source_declares;
-%   commit=WORKTREE].
+%   commit=ff4257005f562786e3ef7a5a37ce94b7d80e782d].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
