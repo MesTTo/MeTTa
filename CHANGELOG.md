@@ -27,7 +27,57 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   PeTTa at the parity pin is the arbiter, and `tests/conformance/petta.py`
   with its vendored corpus is the lane that reads it.
 
+### Fixed
+
+- `RestraintError` receives each of its three fields as the type it declares
+  for it. The restraint signal's detail crossed as `dict[str, object]` and was
+  splatted into keywords typed `str | None` and `int | None`, which left the
+  `mypy` lane red; each field is now checked against the exception's own
+  contract and a detail that does not carry it fills the field with absence.
+
 ### Added
+
+- `python -m metta run` is a Unix filter. The operand `-` reads the program
+  from standard input and so does no operand at all, POSIX Utility Syntax
+  Guideline 13; `-` with nothing else to run and a terminal on standard input
+  is a usage error naming `-` rather than a process that blocks. `--json`
+  frames the answers as JSON Lines through the engine's own codec: one
+  `{"query": "<the ! form's own text>", "answers": ["<atom text>", ...]}` a
+  line on stdout, one `{"error": "...", "line": <the input line, or null>}` a
+  line on stderr, and the program's own `println!` moved to stderr at the file
+  descriptor so the stream stays parseable. `--json=wire` puts the tagged atom
+  forms in `answers`, which `metta.atoms._atom_from_wire` reads back; a live
+  host object there is refused with the codec's own sentence. The flag frames
+  and does not rerun: execution, answers and exit status are the ones the same
+  command gives without it, and its extra cost is one read of the source
+  without evaluating it, to pair each `!` form with its group. A bare `--json`
+  no longer eats the operand after it, which is getopt_long's
+  `optional_argument` reading of a long option.
+- `MettaSyntaxError.line`, the 1-based line the reader stopped at, beside the
+  message that already named it in prose. The engine carries it in the control
+  envelope's own context slot, the split CPython makes between `SyntaxError`'s
+  message and its `lineno`. A refusal with no line answers None. A `value` or
+  `type` control signal now also reaches Python as the sentence its thrower
+  composed, where both used to arrive wrapped in `Unknown error term`.
+- `Space.infer_types(*, declare=False)` proposes a `(: head (-> T1 .. Tn R))`
+  for every head a space mentions and never declares, and adds nothing;
+  `declare=True` adds exactly those atoms and `get-type` then answers them.
+  One engine walk names the narrowest kind covering the children observed at
+  each argument position, which is `pandas.api.types.infer_dtype`'s question
+  asked of a position instead of a column, `skipna` included: a variable
+  constrains nothing, a position with nothing left to go on is `%Undefined%`,
+  and several kinds are `Atom`. An equation head's result is its body's own
+  type or the declared result of the head the body calls. Cost is
+  O(atoms x arity). `inspect.signature()`, `metta.stubs()` and
+  `python -m metta doc --infer` show the same arrow for an undeclared head,
+  each marked `(inferred from stored atoms, not declared)`.
+- `tests/fixtures/space_digest_vector.json`, one test vector pinning
+  `Space.digest()` to the canonicalization it names rather than only to
+  itself: a program, the lines the engine writes for its atoms, and their
+  sha256. The Python suite rebuilds both from the stored atoms and the Node
+  seat answers the same hex for the same program, so the two seats cannot
+  drift apart quietly. `DEVELOPING.md` records the evidence spelling for a
+  fixture that is a space, `fixture=space:sha256:<digest>`.
 
 - `metta.testing.programs(census=None, depth=3, facts=(1, 4), queries=(1, 3))`
   generates whole MeTTa programs for differential testing against another

@@ -439,13 +439,21 @@ and `metta.integrate.discover(m)` finds it.
 
 ```bash
 python -m metta run program.metta        # run files, print each ! answer group
+echo '!(+ 1 2)' | python -m metta run -  # `-`, or no operand, reads stdin
+python -m metta run --json prog.metta    # one JSON object per ! group, a line each
 python -m metta repl                     # interactive loop
 python -m metta serve kb.metta --port 8700
 python -m metta lint program.metta       # nonzero exit on findings
 python -m metta doc car-atom
+python -m metta doc --infer program.metta   # the declarations its atoms justify
 python -m metta llms                     # print llms.txt, the sheet for an agent
 python -m metta stubs program.metta -o program.pyi   # the program's types, for an editor
 ```
+
+`run` is a filter: `--json` writes JSON Lines, `{"query": ..., "answers": [...]}`
+per `!` group on stdout and `{"error": ..., "line": ...}` per failure on stderr,
+with the program's own printing moved to stderr so the stream stays parseable.
+`--json=wire` puts the tagged atom forms in `answers` instead of their text.
 
 ## A motivating example
 

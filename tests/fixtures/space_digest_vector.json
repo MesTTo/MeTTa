@@ -1,0 +1,15 @@
+{
+  "about": "One test vector for Space.digest(): the program, the canonical lines engine/filereader/source_lifecycle.pl's metta_host_digest_line/2 writes for its atoms in multiset-sorted order, and the sha256 of those lines joined by newlines as UTF-8. Every seat that answers digest() runs this program and must answer this hex. Regenerate deliberately: a change here is a change to what two spaces holding the same atoms agree on.",
+  "program": "(user 1 ada)\n(user 2 bob)\n(w-empty ())\n(numbers -3.5 42 0)\n(text \"say \\\"hi\\\"\" \"back\\\\slash\")\n(flags True False)\n(= (double $x) (* $x 2))\n(nested (inner a) (inner b))\n",
+  "lines": [
+    "['w-empty',[]]",
+    "[=,[double,A],[*,A,2]]",
+    "[flags,true,false]",
+    "[nested,[inner,a],[inner,b]]",
+    "[numbers,-3.5,42,0]",
+    "[text,\"say \\\"hi\\\"\",\"back\\\\slash\"]",
+    "[user,1,ada]",
+    "[user,2,bob]"
+  ],
+  "digest": "7a9633ce1dea732d4fb955c09d8df97d10a2cc75039cf1a462d46651c77c3ef9"
+}

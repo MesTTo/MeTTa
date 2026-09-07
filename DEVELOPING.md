@@ -392,5 +392,13 @@ literals, which made the twin re-pin tool start writing a stale object ID into
 every twin it priced and silently disabled the release check that refuses
 unresolved pins.
 
+A `fixture=` field names the data a measurement ran on, and a fixture that is
+a SPACE is named by its content: `fixture=space:sha256:<digest>`, the hex
+`Space.digest()` answers for it. A path names a file that may be edited and a
+prose description names nothing a reader can rebuild, where the digest is the
+space itself: two spaces agree on it exactly when `save()` would write the same
+content, in any insertion order and in any process. `tests/fixtures/space_digest_vector.json`
+is the vector that pins the digest to its own canonicalization.
+
 `RELEASE=1 python tests/checks/check_evidence_tags.py` is the cut-time check
 that no placeholder survived.

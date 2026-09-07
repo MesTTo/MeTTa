@@ -37,7 +37,7 @@ re-runs them.
 | `website/reasoning/*.md` | weighted relations, matchers and measure | |
 | `extensions/python/examples/*/*.py` | runnable Python programs, each printing checked claims through `_common.py`: `check(label, got, expected)` raises `CheckFailed` rather than asserting, because `python -O` strips an assert while the print under it still runs, and `done(name)` refuses to print its OK line when nothing was checked, so an example that verified nothing cannot report success; the six under `gallery/` also check adjacent emitted-MeTTa and output comments plus bilingual `@example` atoms | the `examples` and `gallery` gate lanes |
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
-| `engine/**/*.pl` | `engine/metta.pl` engine bootstrap loading the thirteen `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, space_hooks, runtime, control, interop, registration), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eight `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products), `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 923 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.metta`. Each unit is a plain source file consulted by its umbrella, so predicate ownership and load order are the umbrella's | |
+| `engine/**/*.pl` | `engine/metta.pl` engine bootstrap loading the thirteen `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, space_hooks, runtime, control, interop, registration), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eight `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products), `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.metta`. Each unit is a plain source file consulted by its umbrella, so predicate ownership and load order are the umbrella's | |
 | `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 92, `service` 61, `ownership` 38, `event` 14, `declaration` 13. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
 | `lib/lib_*/` | 38 MeTTa libraries, implemented in `.metta`, `.pl`, or both, loaded with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
@@ -109,6 +109,32 @@ metta.llms() -> None    # print THIS file to stdout, the way help() prints
 `python -m metta llms` prints the same document from a shell. `llms.txt` ships
 inside the wheel beside the engine tree, so an install answers it without a
 checkout, and it never pages: the door writes and returns whatever stdout is.
+
+`python -m metta run` is a Unix filter. The operand `-` reads the program from
+standard input, and so does no operand at all; `-` with nothing else to run and
+a terminal on standard input is a usage error naming `-`, rather than a
+process that blocks. `--json` frames the answers as JSON Lines instead of
+printing them, one object a line, `{"query": "<the ! form's own text, without
+its !>", "answers": ["<atom text>", ...]}`; `--json=wire` puts the tagged wire
+forms in `answers` instead, which `metta.atoms._atom_from_wire` reads back, so
+a number stays a number where text has only a spelling. An error is one object
+a line on stderr, `{"error": "<the sentence>", "line": <the input line, or
+null>}`: the reader names its line and nothing else in the engine carries a
+source position, so a failure inside a `!` form answers null there. The exit
+status is the one the same run without the flag gives, and the program's own
+`println!` moves to stderr for the duration so the JSON stream stays
+parseable. `--json` frames, it does not rerun: each operand runs exactly once,
+through `load` for a file (which is a consult, so a relative `import!` resolves
+against that file) and through `run` for standard input. Its extra cost is one
+read of the source WITHOUT evaluating it, to pair each `!` form's text with its
+group; a file that read cannot open is reported by it rather than by the run,
+so the sentence for a missing file is Python's rather than the engine's.
+
+```sh
+echo '!(+ 1 2)' | python -m metta run -            # 3
+python -m metta run --json prog.metta | jq -c .    # one object a line
+python -m metta run --json=wire - < prog.metta     # tagged atoms in answers
+```
 
 `metta.config` is the process-wide `Config` object. Inspect all four settings
 with `config.as_dict()` and set them atomically with
@@ -849,6 +875,31 @@ User rules run
 before the shipped declarations. A named refusal appears in the resulting
 `BadArgType`; the confluence report lists its user/user and user/shipped
 overlaps as conditional proof obligations.
+`m.infer_types()` proposes a `(: head (-> T1 .. Tn R))` for every head the
+space mentions and never declares, and adds nothing; `m.infer_types(declare=
+True)` adds exactly those atoms, after which `get-type` answers them and there
+is nothing left to propose. It reads `pandas.api.types.infer_dtype`'s question
+of an argument position instead of a column: the NARROWEST kind covering every
+child observed there. All numbers `Number`, all strings `String`, all booleans
+`Bool`, all symbols `Symbol`, all expressions sharing one head that head's
+declared result when it has one and `Expression` otherwise, several kinds
+`Atom`. A variable stands for anything and so constrains nothing, `infer_dtype`
+'s own `skipna`, and a position with nothing left to go on is `%Undefined%`.
+An equation head's RESULT is what its body answers: a literal's own type, or
+the declared result of the head the body calls, so `(= (double $x) (* $x 2))`
+proposes `(-> %Undefined% Number)`; anything else, a bare symbol included, is
+`%Undefined%`, since a symbol's own type is. A head mentioned at two arities is
+two proposals. Read the `Atom` case before accepting one: `Atom` in an argument
+position is a metatype and masks evaluation there, so accepting a mixed
+position's proposal turns `(f (+ 1 2))` from `3` into the term `(+ 1 2)`. That
+is why proposing and adding are two calls. Cost is O(atoms x arity), one pass
+plus one type lookup per distinct head. A foreign space that declines
+`enumerate` refuses, and `declare=True` on a space that refuses writes refuses
+through the write path. `inspect.signature()` and `metta.stubs()` show the same
+arrow for an undeclared head, marked `(inferred from stored atoms, not
+declared)` in the docstring, without adding it; `python -m metta doc --infer
+prog.metta` prints the proposals for a program.
+
 `m.cast(value, type)` returns the value or raises `CastError` naming the types
 the value does admit. Its bound type observation uses `witness`: the wildcard
 applies to the target only, so an unknown actual cannot establish a concrete

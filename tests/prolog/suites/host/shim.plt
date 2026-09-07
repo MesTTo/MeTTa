@@ -22,6 +22,13 @@
 %   - a source form is selected for a head at ONE predicate arity, and the
 %     message hook always fails and leaves its reentrancy flag down, whatever
 %     the delivery did [tested: shim_observation_doors; commit=6375a7c8f3c035b04bc9d41c8f7f22e56b42fb41].
+%   - the inference rule is decided here rather than by a live engine: the
+%     narrowest kind per position, a variable contributing none, an equation
+%     body's result, and a declared head skipped
+%     [tested: shim_type_inference; commit=WORKTREE].
+%   - a reader failure's line is read out of the control envelope's own
+%     context slot, and an envelope without one fails rather than guessing
+%     [tested: shim_type_inference:a_syntax_envelope_carries_its_line; commit=WORKTREE].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -666,3 +673,109 @@ test(the_message_hook_clears_its_reentrancy_flag) :-
     \+ nb_current('$metta_py_message_bridge', true).
 
 :- end_tests(shim_observation_doors).
+
+
+%The engine's two answers metta_py_infer_types/2 asks for, supplied here for
+%the reason metta_match_atoms/2 above is: the RULE is what this suite tests,
+%and the rule is decidable from a fixed set of atoms and a fixed set of
+%declarations. extensions/python/tests/ch09_types/test_inference.py runs the
+%same rule against a live engine.
+'get-atoms'(inference_space, Atom) :- inference_atom(Atom).
+
+'get-type-space'(inference_space, Name, Type) :-
+    (   inference_declared(Name, Declared)
+    ->  Type = Declared
+    ;   Type = '%Undefined%'
+    ).
+
+%One declared head, so the skip rule and the "a call to a declared head
+%answers its result" rule both have something to find; `*` stands for the
+%engine's own arithmetic, which is declared the same way.
+inference_declared(said, [->, 'Number', 'Number']).
+inference_declared(*, [->, 'Number', 'Number', 'Number']).
+inference_declared(circle, [->, 'Number', 'Shape']).
+
+inference_atom([user, 1, ada]).
+inference_atom([user, 2, bob]).
+inference_atom([mixed, 1]).
+inference_atom([mixed, "a"]).
+inference_atom([drawn, [circle, 2]]).
+inference_atom([plain, [whatever, a]]).
+inference_atom([=, [double, _], [*, _, 2]]).
+inference_atom([=, [greet, _], "hi"]).
+inference_atom([=, [zero], 7]).
+inference_atom([=, [named, _], sym]).
+inference_atom([said, 1]).
+inference_atom([:, known, 'Number']).
+inference_atom(['@doc', noted, [desc, "noted"]]).
+
+%One row read back the way the Python side reads it: the wire carries a type
+%as ["s", Text], so the names below are atoms rather than the codec's strings.
+inference_row(Name, Arity, Kinds, Result) :-
+    metta_py_infer_types(inference_space, Rows),
+    member([Text, Arity, KindWires, [_, ResultText]], Rows),
+    atom_string(Name, Text),
+    maplist([[_, K], A]>>atom_string(A, K), KindWires, Kinds),
+    atom_string(Result, ResultText).
+
+:- begin_tests(shim_type_inference).
+
+%The narrowest kind covering a position, one row at a time, which is the
+%whole rule table read back out of one walk.
+test(each_position_takes_the_narrowest_kind_covering_its_children) :-
+    assertion(inference_row(user, 2, ['Number', 'Symbol'], '%Undefined%')),
+    assertion(inference_row(mixed, 1, ['Atom'], '%Undefined%')),
+    assertion(inference_row(drawn, 1, ['Shape'], '%Undefined%')),
+    assertion(inference_row(plain, 1, ['Expression'], '%Undefined%')).
+
+%A variable stands for anything, so it constrains nothing and the position it
+%sits in is the gradual unknown rather than a kind called Variable.
+test(a_variable_position_is_the_gradual_unknown) :-
+    assertion(inference_row(double, 1, ['%Undefined%'], 'Number')),
+    assertion(inference_row(greet, 1, ['%Undefined%'], 'String')).
+
+%An equation body decides the result: a literal by its own type, a call by
+%the head's declared result, and anything else by saying nothing.
+test(an_equation_body_decides_the_result) :-
+    assertion(inference_row(zero, 0, [], 'Number')),
+    assertion(inference_row(named, 1, ['%Undefined%'], '%Undefined%')).
+
+%A declaration is the program's own answer, and a catalogue row is the space
+%describing itself rather than data about a head.
+test(a_declared_head_and_a_catalogue_row_are_skipped) :-
+    metta_py_infer_types(inference_space, Rows),
+    findall(N, member([N, _, _, _], Rows), Names),
+    assertion(\+ memberchk("said", Names)),
+    assertion(\+ memberchk(":", Names)),
+    assertion(\+ memberchk("@doc", Names)),
+    assertion(\+ memberchk("known", Names)),
+    assertion(\+ memberchk("noted", Names)).
+
+%Rows come back in the order the space first mentions each head, which is what
+%makes a proposal list readable beside the program it describes.
+test(rows_follow_first_mention) :-
+    metta_py_infer_types(inference_space, Rows),
+    findall(N, member([N, _, _, _], Rows), Names),
+    assertion(Names == ["user", "mixed", "drawn", "plain", "double", "greet",
+                        "zero", "named"]).
+
+%Both equation head spellings name the same head: `(= (f $x) ...)` at arity
+%one and `(= f 1)` at arity zero.
+test(both_equation_head_spellings_are_read) :-
+    assertion(metta_py_infer_head([f, x], f, [x])),
+    assertion(metta_py_infer_head(f, f, [])),
+    \+ metta_py_infer_head([1, x], _, _).
+
+%The reader's line rides in the envelope's context slot; an envelope that
+%names no line fails here rather than answering a guess.
+test(a_syntax_envelope_carries_its_line) :-
+    metta_control_signal_line(
+        error(metta_control_signal(syntax, 'missing'),
+              context(metta, metta_source_line(7))), Line),
+    assertion(Line == 7),
+    \+ metta_control_signal_line(
+        error(metta_control_signal(syntax, 'missing'), context(metta, syntax)), _),
+    \+ metta_control_signal_line(
+        error(metta_control_signal(time_limit, 1), context(metta, time_limit)), _).
+
+:- end_tests(shim_type_inference).
