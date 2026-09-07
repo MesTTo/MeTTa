@@ -260,6 +260,10 @@ translatePredicate                17-00-04
 exists_file                       19-01-02
 context-space                     19-01-03
 super                             19-01-04
+mm2-exec                          19-04-01
+mork-add-atoms                    19-04-01
+mork-flush                        19-04-01
+require-extension!                19-04-01
 add-translator-rule!              20-01-01
 remove-translator-rule!           20-01-02
 collapse-bind                     20-02-04
