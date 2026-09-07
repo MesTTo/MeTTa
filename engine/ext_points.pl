@@ -1196,6 +1196,14 @@ kind(metta_host_error_kind_row/3, host_service).
 kind(metta_host_control_signal_info/3, host_service).
 kind(metta_host_control_signal_line/2, host_service).
 kind(metta_host_space_capability_error/4, host_service).
+%The refusal DECLARATIONS beside the kinds: engine/spaces/catalog.pl holds one
+%(refusal ...) row per kind with the class name a seat raises, the ground the
+%refusal stands on and its remedy template, and metta_host_refusal/6 answers
+%all three for a raised ball with the template's <field> holes already filled
+%from it. Every seat renders the same remedy because only one renderer exists
+%[source: docs/journal/2026-09-07-every-refusal-is-a-row.md].
+kind(metta_host_refusal/6, host_service).
+kind(metta_host_refusal_row/4, host_service).
 kind(match_foreign/5, host_service).
 kind(metta_add_atoms/2, host_service).
 kind(metta_source_declarations/2, host_service).

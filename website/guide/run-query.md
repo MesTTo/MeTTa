@@ -729,6 +729,17 @@ Which kinds carry one:
 | `possibly-undefined-reference` | `replace` the head with its near miss | `maybe` |
 | everything else | none: the repair is a decision, not an edit | |
 
+An engine refusal carries one too, and it comes from the catalog rather than
+from a raise site: each of the thirteen refusal kinds has a `(refusal ...)`
+row in `&metta` naming its class, its ground and its remedy, and the engine
+fills the remedy's `<field>` holes from the refusal actually raised. A remedy
+whose repair is a decision is its title alone, at `prose`. The whole table is
+[Refusals](/reference/refusals), and a program can ask for it:
+
+```metta
+!(match &metta (refusal $kind $class $ground $remedy) $remedy)
+```
+
 Applying them is one call, on a space or on a file:
 
 ```python

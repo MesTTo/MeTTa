@@ -1,7 +1,10 @@
 """Purpose: gate semantic refusals on one of the three admitted authorities.
 
-The kinds are a Python Language Reference section, a named MeTTa law, and a
-measured answer of upstream PeTTa under the captured parity corpus.
+The kinds are the host language's own reference, which on this seat is a
+Python Language Reference section, a named MeTTa law, and a measured answer of
+upstream PeTTa under the captured parity corpus. They are the catalog's own
+`ground-kind` vocabulary, held equal to metta.errors' tuple by
+extensions/python/tests/repository/test_refusal_rows.py.
 
 Assumes:
   - compiler refusals use ``CompileError`` and non-compiler Python semantic
@@ -36,6 +39,10 @@ ROOT = Path(__file__).resolve().parents[2]
 PYTHON_PACKAGE = Path("extensions/python/metta")
 ERRORS = PYTHON_PACKAGE / "errors.py"
 SEGMENTS = Path("engine/spaces/segment_matching.pl")
+#: A `host-reference` ground stands on the HOST language's own specification,
+#: which the engine spells without naming a host because it names none. This
+#: gate walks the PYTHON package, so the host here is Python and a section
+#: number is what makes the claim checkable.
 PYTHON_CITATION = re.compile(r"Python Language Reference section\s+\d")
 METTA_LAWS = ("EffectSafety", "SeqFragment", "UnifierMostGeneral", "HostLaws")
 #: An arbiter ground is upstream PeTTa's own measured answer, so its citation
@@ -59,7 +66,7 @@ def valid_ground(ground: Any) -> bool:
     citation = getattr(ground, "citation", None)
     if not isinstance(citation, str):
         return False
-    if kind == "python-reference":
+    if kind == "host-reference":
         return PYTHON_CITATION.search(citation) is not None
     if kind == "metta-law":
         return any(law in citation for law in METTA_LAWS)

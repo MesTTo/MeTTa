@@ -4,7 +4,8 @@
   "authority": "engine/metta/registration.pl declares the rows (metta_host_error_kind_row/3) and classifies a ball into one (metta_host_error_kind/3). This file adds what the engine cannot know: each seat's own class, code and attribute names. Where the two seats spell one kind differently they say so here rather than hiding it.",
   "read by": "extensions/python/tests/repository/test_error_kinds.py and extensions/node/test/errors.test.ts. Each asserts its own seat's map covers exactly these kinds, and both drive the same ball through a live engine.",
   "adding a kind": "declare the row in engine/metta/registration.pl, add the case to metta_host_error_kind/3, add the entry here with a ball that raises it, then map it in extensions/node/src/errors.ts (KINDS) and extensions/python/metta/_engine.py (_EXCEPTION_TYPES, for a signal). Both suites fail until every step is done, which is what this file is for.",
-  "fields": "origin is the ball's shape: signal for the reserved control envelope, term for a ball whose functor names the refusal, default for the ball nothing shaped. ball is Prolog text raising exactly that kind. expects is what the fields carry in THAT ball, as the text the Node wire delivers. python.error null means the Python seat does not classify this kind from the ball, which is a recorded gap and not an oversight."
+  "fields": "origin is the ball's shape: signal for the reserved control envelope, term for a ball whose functor names the refusal, default for the ball nothing shaped. ball is Prolog text raising exactly that kind. expects is what the fields carry in THAT ball, as the text the Node wire delivers. python.error null means the Python seat does not classify this kind from the ball, which is a recorded gap and not an oversight.",
+  "class and why": "the seat-independent class name is NOT here: it is the second field of the kind's (refusal ...) row in engine/spaces/catalog.pl, so there is one authority for it. A seat whose own class differs from the row's carries why, one sentence saying what its host already owns that name for or what its own convention requires; the suites hold every seat to the row's name unless a why says otherwise, so a difference is a decision rather than a drift."
  },
  "kinds": {
   "syntax": {
@@ -45,14 +46,16 @@
    "ball": "error(metta_control_signal(interrupted, stopped), context(metta, interrupted))",
    "expects": {},
    "python": {"error": "Interrupted", "attributes": {}},
-   "node": {"error": "InterruptedError", "code": "ERR_METTA_INTERRUPTED", "attributes": {}}
+   "node": {"error": "InterruptedError", "code": "ERR_METTA_INTERRUPTED", "attributes": {},
+            "why": "every condition in this package ends in Error, which is the platform's own convention for an Error subclass, and JavaScript has no builtin of that name to collide with"}
   },
   "value": {
    "origin": "signal",
    "fields": [],
    "ball": "error(metta_control_signal(value, \"JSON cannot carry the non-finite number inf\"), context(metta, value))",
    "expects": {},
-   "python": {"error": "ValueError", "attributes": {}},
+   "python": {"error": "ValueError", "attributes": {},
+              "why": "Python's own word for a value it cannot use; the refusal is about the caller's data rather than about MeTTa, so the language's class is the one a caller writes in except"},
    "node": {"error": "WireError", "code": "ERR_METTA_WIRE", "attributes": {}}
   },
   "type": {
@@ -60,7 +63,8 @@
    "fields": [],
    "ball": "error(metta_control_signal(type, \"JSON cannot carry <lambda>, which is not JSON data\"), context(metta, type))",
    "expects": {},
-   "python": {"error": "TypeError", "attributes": {}},
+   "python": {"error": "TypeError", "attributes": {},
+              "why": "Python's own word for a term of the wrong type; metta.casting.CastError already names a different meaning on this seat, a cast() refusal, so the row's name is taken here"},
    "node": {"error": "CastError", "code": "ERR_METTA_CAST", "attributes": {}}
   },
   "assertion": {
@@ -69,7 +73,8 @@
    "ball": "error(metta_assertion_failed('(assertEqual (+ 1 1) 3)', [3], [2]), context(assertEqual, 'MeTTa assertion failed'))",
    "expects": {"operation": "assert"},
    "python": {"error": "AssertionFailure", "attributes": {"operation": "operation"}},
-   "node": {"error": "AssertionError", "code": "ERR_METTA_ASSERTION", "attributes": {"operation": "operation"}}
+   "node": {"error": "AssertionError", "code": "ERR_METTA_ASSERTION", "attributes": {"operation": "operation"},
+            "why": "node:assert's own word for the same meaning, and this host has no builtin assert statement whose class it would shadow"}
   },
   "capability": {
    "origin": "term",
@@ -77,7 +82,8 @@
    "ball": "error(metta_space_capability_required('&restricted', 'add-atom', process), none)",
    "expects": {"space": "&restricted", "operation": "add-atom", "capability": "process"},
    "python": {"error": "SpaceCapabilityError", "attributes": {"space": "space", "operation": "operation", "capability": "capability"}},
-   "node": {"error": "CapabilityError", "code": "ERR_METTA_CAPABILITY", "attributes": {"space": "space", "operation": "operation", "capability": "capability"}}
+   "node": {"error": "CapabilityError", "code": "ERR_METTA_CAPABILITY", "attributes": {"space": "space", "operation": "operation", "capability": "capability"},
+            "why": "the package namespace already says space, so the Space prefix would be said twice"}
   },
   "operation": {
    "origin": "term",
@@ -85,7 +91,8 @@
    "ball": "error(type_error('Number', \"a\"), context('+', 'invalid MeTTa operation argument'))",
    "expects": {"operation": "+", "kind": "type_error", "expected": "Number", "culprit": "a"},
    "python": {"error": "MettaOperationError", "attributes": {"operation": "operation", "kind": "kind", "expected": "expected", "culprit": "culprit"}},
-   "node": {"error": "OperationError", "code": "ERR_METTA_OPERATION", "attributes": {"operation": "operation", "kind": "kind", "expected": "expected", "culprit": "culprit"}}
+   "node": {"error": "OperationError", "code": "ERR_METTA_OPERATION", "attributes": {"operation": "operation", "kind": "kind", "expected": "expected", "culprit": "culprit"},
+            "why": "the package namespace already says metta, so the Metta prefix would be said twice"}
   },
   "stack": {
    "origin": "term",
@@ -101,7 +108,8 @@
    "ball": "error(existence_error(source_sink, '/no/such.metta'), context(system:open/3, 'No such file or directory'))",
    "expects": {"source": "/no/such.metta"},
    "python": {"error": null, "attributes": {}, "note": "SourceNotFound is raised by the Python seat's own file check in _space.py, before the crossing; an existence ball that reaches _raise arrives as EngineError. Same journal entry."},
-   "node": {"error": "SourceNotFoundError", "code": "ERR_METTA_SOURCE", "attributes": {"source": "source"}}
+   "node": {"error": "SourceNotFoundError", "code": "ERR_METTA_SOURCE", "attributes": {"source": "source"},
+            "why": "every condition in this package ends in Error; the row keeps the shorter name because the Python seat's own N818 exemption records that spelling as deliberate"}
   },
   "engine": {
    "origin": "default",

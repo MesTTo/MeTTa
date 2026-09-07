@@ -78,6 +78,14 @@
 
 % Guarantees: finite tensor closure and law witnesses compare shape and exact
 % values [tested: test_finite_tensor_semiring_checks_every_law; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
+% Guarantees: one (refusal ...) row per kind the engine's own table declares,
+% each naming one class, standing on an admitted authority with a citation
+% that names its place, and carrying a remedy whose title holes are fields
+% that kind declares; the `refusal-kind` vocabulary is derived from the rows
+% and `ground-kind`, `remedy-kind` and `applicability` are the three closed
+% sets metta.errors validates against
+% [tested: run_tests(catalog_refusal_rows),
+% extensions/python/tests/repository/test_refusal_rows.py; commit=WORKTREE].
 
 % Guarantees: type carriers validate membership without certifying laws;
 % only finite enumerations permit exhaustive law checks [tested:
@@ -1868,6 +1876,40 @@ metta_catalog_preset([vocabulary, 'ClauseFailedEnum',
                       'ClauseFailNonDet', 'ClauseFailDet']).
 metta_catalog_preset([vocabulary, 'OutOfClausesEnum',
                       'FailureOriginal', 'FailureEmpty', 'FailureError']).
+%The three closed sets a (refusal ...) row's ground and remedy name. They are
+%here rather than in a seat's source because the ROWS below use them and the
+%rows are catalog data: a ground kind or an applicability no consumer acts on
+%would otherwise sit in a seat's tuple where nothing compares it to what the
+%engine writes.
+%
+%`ground-kind` is the authority a refusal stands on: the HOST language's own
+%reference, a named law this engine states, or a measured answer of upstream
+%PeTTa under tests/conformance/petta/, which is what settles a question
+%neither language's documentation answers. The first is spelled without
+%naming a host, because a host is what this engine does not name; each seat's
+%citation names its own reference.
+%
+%`remedy-kind` is LSP 3.17's CodeActionKind restricted to the three this
+%engine issues, and `applicability` is rustc's Applicability with its four
+%levels collapsed to three: machine is MachineApplicable, maybe is
+%MaybeIncorrect, prose is HasPlaceholders. rustc's Unspecified is not
+%admitted, because a remedy nobody classified is a defect
+%[source: rustc_lint_defs::Applicability; LSP 3.17 CodeActionKind].
+%Held equal to metta.errors' own three tuples by
+%extensions/python/tests/repository/test_refusal_rows.py.
+metta_catalog_preset([vocabulary, 'ground-kind',
+                      'host-reference', 'metta-law', arbiter]).
+metta_catalog_preset([vocabulary, 'remedy-kind', quickfix, refactor, source]).
+metta_catalog_preset([vocabulary, applicability, machine, maybe, prose]).
+%The refusal kinds a host seat classifies, derived from the declarations at
+%the foot of this file so a kind reaches the vocabulary by having a row rather
+%than by being remembered here, the way the semiring vocabulary is derived
+%from the algebra presets above. The members are the ENGINE's own kind words,
+%the ones the raised ball and every seat's wire already carry, so a generated
+%member's VALUE is the word a classifier compares; `op-kind`'s raw_det carries
+%an underscore for the same reason.
+metta_catalog_preset([vocabulary, 'refusal-kind'|Kinds]) :-
+    findall(Kind, metta_refusal_declaration(Kind, _, _, _), Kinds).
 metta_catalog_preset([kind, kind, symbol, [rest, term]]).
 metta_catalog_preset([kind, 'routed-by-shape', symbol,
                       [optional, ['one-of', 'route-key']]]).
@@ -1919,6 +1961,8 @@ metta_catalog_preset([kind, grants, term,
 metta_catalog_preset([kind, parametric, term]).
 metta_catalog_preset([kind, 'dispatch-default', symbol, term]).
 metta_catalog_preset([kind, 'dispatch-policy', symbol, symbol, term]).
+metta_catalog_preset([kind, refusal, ['one-of', 'refusal-kind'], symbol,
+                      term, term]).
 metta_catalog_preset(['routed-by-shape', handles]).
 metta_catalog_preset(['routed-by-shape', 'on-error']).
 metta_catalog_preset(['routed-by-shape', merge, global]).
@@ -2066,6 +2110,163 @@ metta_catalog_preset(['dispatch-default', 'EvaluationOrderEnum', 'OrderClause'])
 metta_catalog_preset(['dispatch-default', 'FunctionResultEnum', 'Nondeterministic']).
 metta_catalog_preset(['dispatch-default', 'ClauseFailedEnum', 'ClauseFailNonDet']).
 metta_catalog_preset(['dispatch-default', 'OutOfClausesEnum', 'FailureOriginal']).
+
+%One (refusal ...) row per declaration below, which is where the shape and
+%the reasoning live; this clause is here so every metta_catalog_preset/1
+%clause stays together in the file.
+metta_catalog_preset([refusal, Kind, Class, Ground, Remedy]) :-
+    metta_refusal_declaration(Kind, Class, Ground, Remedy).
+
+%%%%%%%%%% Refusal kinds, as rows %%%%%%%%%%
+%
+%One row per refusal a host seat classifies, each carrying what the engine's
+%own kind table cannot: the class name a seat raises, the authority the
+%refusal stands on, and the repair, as the template a seat renders with the
+%fields that refusal carried.
+%
+%    (refusal <kind> <class> (ground <authority> "<citation>")
+%             (remedy "<title>" <kind> <applicability> <act>...))
+%
+%<kind> is the ENGINE's own kind word, the one metta_host_error_kind_row/3
+%declares in engine/metta/registration.pl and every seat's wire already
+%carries; the two are held equal both ways by
+%catalog_refusal_rows:the_refusal_rows_are_the_engines_own_kinds, the same
+%shape refinements:the_rule_table_and_the_catalog_vocabulary_agree uses and
+%for the same reason: this file is consulted into the spaces module and may
+%not reach an engine predicate, so a row here is checked against the engine's
+%table rather than derived from it.
+%
+%<class> is the SEAT-INDEPENDENT class name: what a seat calls the condition
+%unless its own language already owns that word for a different meaning, in
+%which case tests/data/error-kinds.json records the departure and its reason
+%beside the seat's own spelling. That file is where the two seats' spellings
+%live; this row is where the name they depart FROM lives, so a kind added
+%here tells a new seat what to call it.
+%
+%<ground> and <remedy> are the two rows metta.errors publishes, projected
+%exactly as Ground.as_atom/0 and Remedy.as_atom/0 write them, so a seat reads
+%one back with Ground.from_atom/1 and Remedy.from_atom/1 rather than parsing a
+%shape of its own. A remedy TITLE carries <field> holes named for the fields
+%that kind declares, which the renderer fills from the raised ball; an ACT's
+%remaining hole is the reader's own choice and is what keeps the applicability
+%at `prose`, which is rustc's HasPlaceholders [source:
+%rustc_lint_defs::Applicability,
+%https://doc.rust-lang.org/nightly/nightly-rustc/rustc_lint_defs/enum.Applicability.html]. The nine refusals whose repair is a decision
+%carry a title and no act, which is PostgreSQL's errhint and clang's note:
+%advice with no mechanical edit [source: PostgreSQL documentation, 55.3.2
+%Error Message Style Guide, errhint()].
+%
+%The whole shape is the errno/SQLSTATE one the kind table already follows:
+%one table where the raising happens, one map per binding, and a test per
+%binding that its map covers the table.
+metta_refusal_declaration(
+    syntax, 'MettaSyntaxError',
+    [ground, 'metta-law',
+     "HostLaws: engine/filereader.pl metta_host_rethrow_syntax/1 -- text the \c
+      reader cannot read stops the load, at the line it stopped on"],
+    [remedy, "close or correct the form that starts at line <line>",
+     quickfix, prose]).
+metta_refusal_declaration(
+    time_limit, 'TimeLimitError',
+    [ground, 'metta-law',
+     "HostLaws: engine/metta/control.pl metta_pragma_key/2 max-time -- a \c
+      wall-clock bound stops the evaluation where it stands, and the writes \c
+      it already made stand with it"],
+    [remedy, "raise the bound past <limit> seconds, or narrow the query",
+     quickfix, prose, [edit, ['pragma!', 'max-time', '<seconds>']]]).
+metta_refusal_declaration(
+    inference_limit, 'InferenceLimitError',
+    [ground, 'metta-law',
+     "HostLaws: engine/metta/control.pl metta_pragma_key/2 max-inferences -- \c
+      an inference bound stops the evaluation where it stands, and the writes \c
+      it already made stand with it"],
+    [remedy, "raise the bound past <limit> inferences, or narrow the query",
+     quickfix, prose,
+     [edit, ['pragma!', 'max-inferences', '<inferences>']]]).
+metta_refusal_declaration(
+    restraint, 'RestraintError',
+    [ground, 'metta-law',
+     "HostLaws: engine/spaces/catalog.pl (cache F (max-answers N)) -- a bound \c
+      a program declared for one of its own tables stops the call that passed \c
+      it, naming the bound rather than answering fewer rows in silence"],
+    [remedy, "raise the <restraint> bound past <bound> in the row that \c
+     declares it, or ask <call> for fewer answers",
+     quickfix, prose]).
+metta_refusal_declaration(
+    interrupted, 'Interrupted',
+    [ground, 'metta-law',
+     "HostLaws: engine/metta/registration.pl metta_host_error_kind_row/3 \c
+      interrupted -- a run stopped from outside reports the stop, so a caller \c
+      tells it from a fault"],
+    [remedy, "start the run again if the stop was not meant",
+     source, prose]).
+metta_refusal_declaration(
+    value, 'WireError',
+    [ground, 'metta-law',
+     "HostLaws: engine/json_codec.pl -- the crossing carries only values JSON \c
+      can carry and refuses the rest by name, rather than coercing them"],
+    [remedy, "give the crossing a value JSON can carry, or carry the whole \c
+     thing as a grounded atom",
+     quickfix, prose]).
+metta_refusal_declaration(
+    type, 'CastError',
+    [ground, 'metta-law',
+     "HostLaws: engine/json_codec.pl -- a term that is not JSON data at all \c
+      is refused as a type rather than as a value, so a caller tells a bad \c
+      number from a bad shape"],
+    [remedy, "carry this term whole as a grounded atom instead of as data",
+     quickfix, prose]).
+metta_refusal_declaration(
+    assertion, 'AssertionFailure',
+    [ground, 'metta-law',
+     "HostLaws: engine/metta/runtime.pl report_failed_assertion/4 -- a false \c
+      claim is printed and thrown under the MeTTa head the program wrote, so \c
+      a harness separates it from a broken engine"],
+    [remedy, "correct the claim <operation> makes, or the equations it reads",
+     quickfix, prose]).
+metta_refusal_declaration(
+    capability, 'SpaceCapabilityError',
+    [ground, 'metta-law',
+     "HostLaws: engine/spaces/lifecycle.pl metta_space_capability_required/3 \c
+      -- a restricted space answers only for the capabilities its (grants \c
+      ...) rows name"],
+    [remedy, "grant <capability> to <space>, which <operation> needs",
+     quickfix, maybe, [edit, [grants, '<space>', '<capability>']]]).
+metta_refusal_declaration(
+    operation, 'MettaOperationError',
+    [ground, arbiter,
+     "upstream PeTTa at the parity pin: \c
+      tests/conformance/petta/expected/he_error.metta.out answers Error to \c
+      (catch (+ 40 a)), so a builtin refusing a value is a VALUE inside \c
+      MeTTa and becomes a host exception only at the crossing"],
+    [remedy, "give <operation> a <expected> where it got <culprit>",
+     quickfix, prose]).
+metta_refusal_declaration(
+    stack, 'StackLimitError',
+    [ground, 'metta-law',
+     "HostLaws: engine/metta/control.pl metta_pragma_key/2 stack-limit -- the \c
+      ceiling in force when the stack ran out is the one the refusal names, \c
+      not the one in force now"],
+    [remedy, "raise the ceiling past <limit> bytes, or make the recursion \c
+     shallower",
+     quickfix, prose, [edit, ['pragma!', 'stack-limit', '<bytes>']]]).
+metta_refusal_declaration(
+    source, 'SourceNotFound',
+    [ground, 'metta-law',
+     "HostLaws: engine/filereader.pl -- a source a program names is read only \c
+      once it exists, and the refusal carries the path rather than the \c
+      sentence about it"],
+    [remedy, "create <source>, or correct the path that names it",
+     quickfix, prose]).
+metta_refusal_declaration(
+    engine, 'EngineError',
+    [ground, 'metta-law',
+     "HostLaws: engine/metta/registration.pl metta_host_error_kind/3 -- a ball \c
+      this engine did not shape is reported as itself rather than classified \c
+      by guess"],
+    [remedy, "report the ball with the message it carries; this engine did \c
+     not shape it",
+     source, prose]).
 
 %Visibility controls generated documentation and static members, not whether a
 %name can be mentioned. These are implementation steps behind public forms, or

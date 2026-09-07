@@ -78,6 +78,11 @@
 #   - generated-artifacts selects ledger, aio-mirror, init-stub and reference in
 #     the order their remedies converge [tested:
 #     tests/checks/check_generated_artifact_group.py; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e].
+#   - the refusals page is the engine's own (refusal ...) rows rendered, and a
+#     kind on one side of the shared list only is a finding rather than a
+#     missing section [tested:
+#     extensions/python/tests/repository/test_refusal_rows.py::test_the_refusals_page_is_generated,
+#     ::test_the_page_check_sees_a_kind_on_one_side_only; commit=WORKTREE].
 #   - every lane inherits a repository-local scratch directory, and a later
 #     run reclaims one left by SIGKILL without touching a concurrent run
 #     [tested: scratch-retention; commit=c96093349e37cc7153f31b3dd9af10246a325301].
@@ -597,6 +602,14 @@ run GATE codec-doc  "$PY" "$HERE/extensions/python/tools/codecdoc.py"
 # what the catalog says. Before it, the annotations surface advertised six
 # semirings while the engine acted on two, and nothing said which was right.
 run GATE vocab-sync "$PY" "$HERE/extensions/python/tools/vocabgen.py"
+
+# The refusal taxonomy and its documentation are one authority too: the
+# (refusal ...) rows in &metta carry the class each seat raises, the ground the
+# refusal stands on and the repair, and website/reference/refusals.md is those
+# rows rendered. Before them the taxonomy was thirteen classes in errors.ts,
+# thirteen in errors.py and a page nowhere, so nothing could say what a caller
+# should DO about a refusal without a seat writing its own prose.
+run GATE refusals   "$PY" "$HERE/extensions/python/tools/refusalsdoc.py"
 
 # --------------------------------------------------------------- REPORT tier
 # Known backlog. Each entry names its section in the ledger and becomes a
