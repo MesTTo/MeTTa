@@ -32,6 +32,12 @@
 %     [tested: metta_assertions:an_assertion_ball_carries_the_two_bags,
 %     metta_assertions:an_assertion_message_prints_both_bags,
 %     prelude:assertEqual_failure_carries_both_bags; commit=71de27a76dd16684941e3e090de0d17299d96493]
+%   - metta_assertion_failure/6 converts the two parts a host cannot otherwise
+%     receive, so a false claim over answers carrying a VARIABLE arrives as an
+%     assertion failure rather than as a classifier that could not run
+%     [tested: metta_assertions:an_assertion_over_terms_with_variables_still_classifies,
+%     metta_assertions:a_failing_test_classifies_its_two_values_unchanged;
+%     commit=WORKTREE]
 %   - absence is per bag, so assert-includes-answers/5 reports the answers
 %     missing from a containment and leaves the excess side ABSENT, where a
 %     two-sided report would name legal answers as a reason for the failure
@@ -134,18 +140,39 @@ assertion_permutation_note(_, _) --> [].
 %it is read, rather than in a file the engine never loads [tested:
 %extensions/python/tests/ch12_testing/test_assertion_failures.py].
 %
-%Actual and Expected are handed out as WRITTEN MeTTa terms; a caller that
-%has to cross them to another language converts them itself, because the
-%conversion belongs to that boundary and not to the engine.
+%Actual and Expected cross through metta_host_operation_part/2, the same
+%conversion the operation classifier beside this one applies: an atomic and a
+%list of them as themselves, any other compound as the MeTTa text swrite/2
+%writes, so a caller reads (a $x) rather than a Prolog term.
+%
+%They used to be handed out as the raw terms, on the reading that converting
+%belongs to the host boundary rather than to the engine. That reading is not
+%REACHABLE from a host: a term carrying a free variable never arrives to be
+%converted, because the crossing itself refuses it. Every failing assertion
+%whose answers held a variable therefore reported
+%`the assertion classifier failed: Arguments are not sufficiently
+%instantiated` and arrived as an EngineError, which says the interpreter broke
+%where the truth was that the program's claim was false -- the one distinction
+%AssertionFailure exists to draw [measured 2026-09-07 on this tree:
+%!(assertEqualToResult (superpose ((f $x))) ((f $y))) raised EngineError; the
+%operation classifier had no such hole because metta_host_operation_error/5
+%already converts, which is what this now matches]
+%[tested: metta_assertions:an_assertion_over_terms_with_variables_still_classifies,
+%extensions/python/tests/ch12_testing/test_assert_answers.py].
 %
 %Missing and Excess are the same absence convention one level out: the two
 %directed bag differences where the failing form computed them, unbound
 %where it did not, so a consumer tells "the bags agree" (both `()`) from
-%"there is no bag comparison here" (both absent) without reading prose.
-metta_assertion_failure(error(metta_test_failed(Actual, Expected), _),
-                        test, Actual, Expected, _, _).
-metta_assertion_failure(error(metta_assertion_failed(Goal, Missing, Excess), _),
-                        assert, Goal, _, Missing, Excess).
+%"there is no bag comparison here" (both absent) without reading prose. They
+%need no conversion here, because each element is an ANSWER and every host
+%already has an answer codec; only these two parts had none.
+metta_assertion_failure(error(metta_test_failed(Actual0, Expected0), _),
+                        test, Actual, Expected, _, _) :-
+    metta_host_operation_part(Actual0, Actual),
+    metta_host_operation_part(Expected0, Expected).
+metta_assertion_failure(error(metta_assertion_failed(Goal0, Missing, Excess), _),
+                        assert, Goal, _, Missing, Excess) :-
+    metta_host_operation_part(Goal0, Goal).
 
 prolog:error_message(metta_not_a_prolog_module(File)) -->
     [ '~w is not a Prolog module, so its exports cannot be imported under \c
