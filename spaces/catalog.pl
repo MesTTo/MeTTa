@@ -1058,7 +1058,10 @@ metta_check_catalog_semantics(cache, [Function, _], Term) :-
 %differently declares the witness that matters.
 metta_check_catalog_semantics(cost, [Witness|_], Term) :-
     !,
-    (   nonvar(Witness), Witness = [Head|_], atom(Head)
+    %The condition names its own variable: Head below is introduced after the
+    %if-then-else, and a variable bound inside the condition and read after it
+    %is what SWI's "not introduced in all branches" warning names.
+    (   nonvar(Witness), Witness = [Head0|_], atom(Head0)
     ->  true
     ;   metta_declaration_refused(
             Term, 1, 'a call whose head is a function name, as in (nrev $n)')
