@@ -126,6 +126,37 @@ The SDL is text and is published whether or not the server can execute a query;
 executing needs a GraphQL implementation, which the Python server takes from
 `pymetta[graphql]` and refuses by name without.
 
+## Answers as Arrow record batches
+
+`POST /ask` and `POST /next` carrying
+`Accept: application/vnd.apache.arrow.stream` answer an Arrow IPC stream
+instead of the JSON body above. The request is unchanged; a server that does
+not speak Arrow ignores the header and answers JSON, which every client must
+still read.
+
+Each response is a COMPLETE IPC stream: a schema message, one record batch for
+that chunk, and the end-of-stream marker `0xFFFFFFFF 0x00000000`. A fragment of
+one stream is not readable on its own, and a response body is what a reader is
+handed, so the chunks are one stream each at one schema rather than pieces of a
+single stream. The cursor token travels in the `x-metta-cursor` response
+header, and its absence ends the stream exactly as a null `cursor` does in the
+JSON reply.
+
+The columns are the pattern's variables, in the order the pattern first
+mentions each, at the type the served space DECLARES for that position, then
+`atom`, the canonical MeTTa text of the instantiated answer. `Number` is
+`float64`, `String` is `utf8`, `Bool` is `bool`, and every other position is
+`utf8` canonical text with `metta.kind=mixed` in the field's metadata; every
+field also carries `metta.type`, the MeTTa type name it projects from. A cell a
+typed column cannot hold is null in that column and exact in `atom`, which is
+what makes the typed columns safe to read.
+
+The schema is decided when the cursor OPENS and never changes, so a client may
+read it once. That is why it comes from the space's declarations rather than
+from the first chunk's cells: the next chunk's cells do not exist yet, and an
+IPC stream cannot revise a schema a consumer has already read.
+
+
 
 ## Mutation recovery
 

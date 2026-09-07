@@ -113,11 +113,16 @@ arrays = [
     "faiss-cpu",
     "numpy",
 ]
-#: The Arrow C Data producer. nanoarrow builds the ArrowSchema and
-#: ArrowArrayStream structs from buffers, so `rows.__arrow_c_stream__()` needs
-#: no pyarrow and a consumer needs only the Arrow support it already has.
+#: The Arrow doors' two producers, which answer two different questions.
+#: nanoarrow builds the ArrowSchema and ArrowArrayStream structs from buffers,
+#: so `rows.__arrow_c_stream__()` needs no pyarrow and a consumer needs only
+#: the Arrow support it already has. pyarrow writes and reads the IPC STREAMING
+#: FORMAT, which is what crosses the gateway as BYTES and is a FlatBuffers
+#: envelope nanoarrow does not write; it is that format's own reference
+#: implementation.
 arrow = [
     "nanoarrow>=0.9",
+    "pyarrow>=15",
 ]
 das = [
     "websocket-client",
@@ -166,6 +171,9 @@ test = [
     #: itself imports the API alone.
     "opentelemetry-api>=1.30",
     "opentelemetry-sdk>=1.30",
+    #: The Arrow IPC codec, so the gateway's Arrow scenarios RUN. nanoarrow is
+    #: already here for the capsule ones and does not write the stream format.
+    "pyarrow>=15",
     "pytest>=8.4.2",
     "pytest-benchmark>=5.2",
     #: Ordering and the per-item wall bound, which the suite's configuration
@@ -621,6 +629,7 @@ DEP002 = [
     "opentelemetry-api",
     "array-api-compat",
     "nanoarrow",
+    "pyarrow",
     "faiss-cpu",
     "numpy",
     "pandas",

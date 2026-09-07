@@ -82,6 +82,27 @@ class RemoteCursor:
 > that may go unwanted for a saved round trip, the same choice a
 > database driver's fetch size makes.
 
+### `RemoteCursor.to_arrow`
+
+```python
+def to_arrow(self) -> Any:
+```
+
+> The whole remaining stream as one pyarrow Table.
+>
+>     with space.stream(pattern, arrow=True) as answers:
+>         table = answers.to_arrow()
+>
+> Every chunk crosses as its own complete IPC stream at ONE schema, fixed
+> by the server when the cursor opened, so the batches concatenate. The
+> columns are the pattern's variables at the types the served space
+> declares for them, plus `atom`, the canonical text of each instantiated
+> answer, which stays exact where a typed column cannot hold a cell.
+>
+> The longhand is the ask/next/stop lifecycle with
+> `Accept: application/vnd.apache.arrow.stream` and reading each body with
+> `pyarrow.ipc.open_stream`; this is that loop, drained.
+
 ### `RemoteCursor.close`
 
 ```python
@@ -171,6 +192,7 @@ def stream(
     *,
     batch: int = _DEFAULT_BATCH,
     limit: int | None = None,
+    arrow: bool = False,
 ) -> RemoteCursor:
 ```
 
@@ -191,6 +213,14 @@ def stream(
 > the count is the under-approximation the protocol forbids. The
 > first ask crosses when the cursor is built, as the in-process
 > cursor opens its engine when it is built.
+>
+> `arrow=True` asks for Arrow record batches instead of tagged atoms: the
+> server fixes ONE schema for the whole stream when the cursor opens, from
+> what it declares about the pattern's positions, and each chunk crosses
+> as a complete IPC stream at that schema. Such a cursor answers
+> `to_arrow()` and the PyCapsule protocol rather than atoms, because
+> converting a batch back to atoms would go through canonical text and
+> lose what the tagged wire carries exactly.
 
 ### `RemoteSpace.server_capabilities`
 

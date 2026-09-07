@@ -210,7 +210,34 @@ there and exact in `atom`.
 
 Rejected: deriving the schema by sampling the first chunk, the way DuckDB's
 CSV sniffer and Spark's `inferSchema` do. Their input is a whole file they
-may re-read; this one is a stream whose later rows do not exist yet.
+may re-read; this one is a stream whose later rows do not exist yet. The same
+repository already answers the same question the same way from the other side:
+`TableBridge` refuses an undeclared head outright, "DuckDB needs the types of
+{name} and cannot infer them; declare the head's arrow"
+[source: extensions/python/metta/tables.py, `_undeclared_arrow_message`]. Here
+the fallback is text rather than a refusal, because canonical MeTTa text can
+carry every atom and a wire that refused would be narrower than the JSON one
+beside it.
+
+Measured: what one drained cursor costs in each representation.
+`perf stat -e instructions:u` over `ai-tmp/probe-arrow-cost.py <mode> 2000
+<batch> <repeats>`, differencing repeats=11 against repeats=1 so the process
+start, the pyarrow import and the served space's setup are outside the number,
+minimum of three runs, loadavg 26-39:
+
+| batch | JSON per drain | Arrow per drain | ratio |
+| --- | --- | --- | --- |
+| 200 (10 chunks) | 622M instructions | 383M | 1.62x |
+| 2,000 (1 chunk) | 685M | 360M | 1.90x |
+
+Decided: the cost claim for this item is a CONSTANT FACTOR of 1.6 to 1.9x on a
+drained cursor, and typed columns; it is not a complexity-class change, and the
+design's "class change" wording is wrong for Z4. Both representations are
+O(rows) and both make the same `ceil(rows / batch)` crossings, because a batch
+is a batch either way; what Arrow removes is the per-atom tagged encode on one
+side and decode on the other. The first attempt to measure it, `perf stat` over
+the WHOLE process against an idle run, reported Arrow 4x more expensive, which
+was the pyarrow import (about 1G instructions) and not the drain.
 
 Fixed on the way: `Gateway("ask", ...)` raised `TypeError: 'TaggedAnswer'
 object is not iterable` whenever an ambient `metta.under(<algebra>)` scope

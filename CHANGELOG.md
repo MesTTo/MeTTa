@@ -9,6 +9,38 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- A cursor's answers as Arrow record batches. `POST /ask` and `/next` with
+  `Accept: application/vnd.apache.arrow.stream` answer an Arrow IPC stream
+  instead of tagged JSON atoms, `RemoteSpace.stream(..., arrow=True)` is the
+  client half, and `RemoteCursor.to_arrow()` drains it into one table while
+  `__arrow_c_stream__` hands the same batches to anything that speaks the Arrow
+  PyCapsule protocol. A direct `Gateway` caller asks for the same bytes with
+  `format="arrow"` in the payload, which is what the Accept header sets.
+
+  The schema is fixed when the cursor OPENS, from what the served space declares
+  about the pattern's positions, and every chunk is written at it: an IPC stream
+  has one schema for all its batches, so a kind read off the first chunk's cells
+  could be contradicted by the second. A position nothing declares is `utf8`
+  canonical MeTTa text with `metta.kind=mixed` in the field metadata. Beside the
+  variables is an `atom` column carrying each instantiated answer's canonical
+  text, which is the lossless carrier that makes the typed columns safe.
+
+  Each chunk crosses as a COMPLETE IPC stream, since a response body is what
+  `pyarrow.ipc.open_stream` is handed, and its cursor token rides in
+  `x-metta-cursor` because a stream has nowhere to carry one. Measured on a
+  2,000-row drained cursor: 360M retired instructions against JSON's 685M at one
+  chunk, and 383M against 622M at ten. Both make the same number of crossings;
+  what Arrow removes is the per-atom encode and decode.
+
+  `pyarrow` joins the `arrow` extra beside nanoarrow, which builds the C structs
+  a PyCapsule carries and does not write the streaming format.
+
+  Fixed on the way: `Gateway("ask", ...)` raised `TypeError: 'TaggedAnswer'
+  object is not iterable` for every pattern whenever an ambient
+  `metta.under(<algebra>)` scope reached the calling thread. `HTTPEndpoint`
+  answers a named `Response` carrying the reply's headers, which is where an
+  Arrow answer's media type and cursor token live.
+
 - The reduction trace as OpenTelemetry spans, and the engine's counters as
   metrics. `metta.telemetry.spans(trace, tracer=)` emits one BACK-DATED span per
   recorded reduction, nested by the events' own depth and carrying the times the
