@@ -15,7 +15,7 @@
 %   rather than a second reading of its rule, so (explain (match ...)) cannot
 %   name an order the matcher does not take [tested:
 %   native_generic_join:the_nested_loop_order_names_the_conjunct_the_matcher_leads_with;
-%   commit=WORKTREE].
+%   commit=3287d4dd4928f09ce7c111d05a1c516808e226d5].
 % [tested: tests/prolog/suites/spaces/spaces.plt, native_generic_join; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 
 :- consult('generic_join.pl').

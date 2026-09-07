@@ -13,7 +13,7 @@
 % (explain (match ...)) names a planned mode exactly when
 % native_conjunction_answer/1 runs [tested:
 % native_generic_join:the_plan_says_generic_join_exactly_when_the_planned_join_runs;
-% commit=WORKTREE].
+% commit=3287d4dd4928f09ce7c111d05a1c516808e226d5].
 % Decides: nonempty GYO-cyclic queries use variable-at-a-time intersection;
 % other nonempty shapes retain match_relational_conjuncts/5
 % [tested: native_generic_join; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
@@ -66,7 +66,7 @@ cyclic_join_planning_enabled :-
 % half 6,442 and the query half 248, which is flat across a sixteenfold change
 % in stored rows; command=PYTHONPATH=extensions/python $VENV/bin/python
 % ai-tmp/aa_probe13.py; fixture=a two-out-degree ring of 1,024 nodes at
-% loadavg 62; commit=WORKTREE]
+% loadavg 62; commit=3287d4dd4928f09ce7c111d05a1c516808e226d5]
 %
 %The query half. Nothing here builds a trie or reads a relation whole: the
 %empty-factor probe stops after one candidate per conjunct and unwinds its
@@ -81,7 +81,7 @@ cyclic_join_planning_enabled :-
 %which is five over the benchmark harness's four-inference allowance on
 %direct-join's five repeats; command=PYTHONPATH=extensions/python
 %$VENV/bin/python ai-tmp/aa_probe16.py; fixture=a 64-edge chain, minimum of
-%five; commit=WORKTREE].
+%five; commit=3287d4dd4928f09ce7c111d05a1c516808e226d5].
 native_conjunction_shape(Module, Space, Pattern, Shape) :-
     nonvar(Pattern),
     Pattern = [Comma|Conjuncts],
