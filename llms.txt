@@ -1348,8 +1348,40 @@ Atom kinds are the type: a space name is a `Handle` and a call head is a
 Engine calls belong to the thread that made the engine. `m.pool(workers)` gives
 each worker its OWN attached engine, which is what makes the calls genuinely
 concurrent (measured 2026-08-15: 1.94x, 3.90x and 7.26x at 2, 4 and 8 workers).
-Its `map(fn, items)` handles unary work and `starmap(fn, argument_rows)` spreads
-each row into a multi-argument call; both preserve input order.
+
+Both pools ARE `concurrent.futures.Executor`, so `submit`, `map`, `shutdown`,
+`with`, `as_completed` and `wait` are Python's own words on them. `map(fn,
+*iterables)` handles unary and zipped work and `starmap(fn, argument_rows)`
+spreads each row into a multi-argument call; both preserve input order and
+both take Executor's `timeout=`, `chunksize=` and `buffersize=`. Every
+fan-out door SUBMITS the whole input and then answers an ITERATOR over
+results that already exist, so wrap it in `list()` to compare, and a map
+written for its side effects still runs; `imap_unordered(fn, items)` yields
+in completion order instead. One failure raises plainly, several raise as
+one `ExceptionGroup` in input order, and `timeout=` raises `Timeout` after
+cancelling what has not started. `close(wait=)` is the pools' own name for
+`shutdown(wait=)`, which adds `cancel_futures=`.
+
+`metta.parallel.process_pool(workers, boot=)` is the other boundary: worker
+PROCESSES that each boot an engine of their own and share nothing. A worker
+costs a whole boot where a thread costs an attachment (measured 2026-09-07:
+2,248M instructions:u, 0.37s wall with the `.qlf` set present), so reach for
+`m.pool` unless isolation is the point. An engine cannot cross a process
+boundary, so a worker is sent WORK rather than a callable over a handle:
+`metta.parallel.program(source)` runs program text on the worker's engine
+and `metta.parallel.call(head, *arguments)` applies a head the pool's `boot=`
+defined. Both are ordinary functions in this process too, so `map(program,
+texts)` is the pool's own oracle for `pool.map(program, texts)`. Atoms cross
+by value; a `Space`, a `MeTTa` or any other live handle refuses, at submit
+when a call reaches one and inside the work unit when an answer is one,
+because a handle pickles by NAME and would silently open the worker's own
+space of that name. The pool uses `forkserver` on Linux and `spawn`
+elsewhere and REFUSES `fork` at construction, because SWI-Prolog does not
+survive one. The trap to know: `forkserver` runs your `__main__` once in its
+server and forks workers from it, so an engine booted at IMPORT time is
+inherited and every work unit refuses naming that; keep the boot under `if
+__name__ == "__main__":` or pass
+`mp_context=multiprocessing.get_context("spawn")`.
 `m.parallel(*targets)` evaluates targets at once; `hyperpose` is the same thing
 under its MeTTa name, written `!(hyperpose (t1 t2))` in source and reached from
 Python as `m.fn.hyperpose`. `metta.aio.AsyncMeTTa` runs engine calls on one worker

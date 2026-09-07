@@ -45,6 +45,42 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   and `repl` install one for the program's own directory, the way `python
   script.py` puts the script's directory at the front of `sys.path`, and
   uninstall it when the run ends.
+- `metta.parallel.EnginePool` IS a `concurrent.futures.Executor`, so `submit`,
+  `map`, `starmap`, `imap_unordered`, `shutdown(wait=, cancel_futures=)` and
+  `with` are Python's own words on it and `as_completed(futures)` and
+  `wait(futures)` read its Futures without knowing what an engine is.
+  `close(wait=)` is the pool's own name for `shutdown(wait=)`, unchanged;
+  `shutdown` adds `cancel_futures=`, which cancels queued work and leaves what
+  a worker started. `map` and `starmap` take Executor's `timeout=`,
+  `chunksize=` and `buffersize=`; `chunksize` is honoured rather than ignored,
+  since a chunk is one submitted task, one worker and one failure unit.
+
+- `metta.parallel.ProcessPool` and `metta.parallel.process_pool(workers,
+  boot=)`: worker PROCESSES that each boot an engine of their own and share
+  nothing, for when isolation is the point. `boot=` is MeTTa program text every
+  worker runs once, so a head is compiled per worker rather than per task, and
+  `pool.boot_seconds` reports what each worker's boot actually cost (measured
+  2026-09-07: 2,248M instructions:u and 0.37s wall with the `.qlf` set
+  present). An engine cannot cross a process boundary, so a worker is sent
+  work: `metta.parallel.program(source)` runs program text on the worker's
+  engine and `metta.parallel.call(head, *arguments)` applies a head the boot
+  defined. Both are ordinary functions in the calling process too, which makes
+  `map(program, texts)` the pool's own oracle. Atoms cross by value.
+
+  Four refusals, each with its remedy. A call reaching a `Space`, `MeTTa`,
+  `Runtime` or `EnginePool` refuses at `submit`, because a handle PICKLES by
+  name and a worker receiving one would silently open its own space of that
+  name. An answer that is a handle refuses inside the work unit. The `fork`
+  start method refuses at construction. A worker whose engine did not boot says
+  why on its first work unit instead of breaking the pool with an unexplained
+  `BrokenProcessPool`.
+
+- A forked child of a process that booted an engine refuses at its first
+  crossing, naming the fork and the remedy, instead of answering out of half a
+  runtime; SWI-Prolog does not survive a fork, and the corruption is not
+  immediate enough to be caught by a crash. The same `os.register_at_fork`
+  handler resets the engine locks the fork left held, so the child reaches that
+  refusal rather than hanging on one.
 
 - `(cost witness class)` and `(cost witness class measure)` catalog rows, and
   the `cost-rows` gate lane that can fail one. The witness is a call with
@@ -485,6 +521,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   kind row starting at `symbol`, because the walk reads position 1 as the
   space. `metta.arrays` is the first user, and recording the ownership edge as
   data is what PostgreSQL's `pg_depend` does for an extension's own objects.
+- The pools' fan-out doors answer an ITERATOR over results that already exist
+  rather than a `list`: `list(p.map(f, xs))` is now how you compare one to a
+  list. Execution is unchanged and still eager, so a `map` written for its side
+  effects still runs and a failure still raises at the call; the type is
+  `Executor.map`'s own, which is what makes the class an Executor rather than
+  something resembling one. The lazy alternative was measured and rejected: it
+  turns a side-effecting map into a silent no-op.
 
 - A `(claim Vocab Value Property...)` row's properties are cached per value,
   the way a vocabulary's values already were. The read has an open tail,
