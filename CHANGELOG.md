@@ -1191,6 +1191,33 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A Python dict, list or tuple the engine handed back crosses back in as ONE
+  object. Since 2026-09-02 (bbf02dd3, "Release py-atom declarations with their
+  grounded values") a `Grounded` decoded from the wire re-sent its raw payload
+  on the next crossing, and janus rewrites a bare container into a Prolog term
+  on the way in, so `(py-call (.get prefs size))` over the dict a `py-atom`
+  had just answered found no object and answered nothing. Only an ENVELOPE, a
+  payload speaking `__metta_wire_value__` because it carries a declaration on
+  a value that cannot be weakly referenced, is kept and re-sent as itself; a
+  bare payload crosses boxed again exactly as a fresh `Grounded` of the same
+  value does. `test_a_returned_python_container_crosses_back_as_one_object`
+  pins the round trip, the identity (a write through one door shows through
+  the other) and the envelope case.
+
+- Three Python twins whose claims had stopped holding are repaired to their
+  examples' claims and re-pinned: `07-unify.py` wrote its probe markers as
+  bare symbols, which `add-atom` stopped storing when it took upstream PeTTa's
+  own domain (an atom with a head), and now writes `(then-ran)` as the
+  example does; `12-tabling_statistics.py` predated the `(policy ...)` row
+  `table-stats` answers; `01-python.py` was the dict round trip above. The
+  twins lane in `extensions/python/check.sh` is a REPORT lane, which is how
+  three failing claims went unreported for days; it stays REPORT while its
+  424 remaining findings (213 budgets moved by the merge wave, 113 stored
+  content digests that disagree between the example and its twin, 39 twins
+  past the 10% band over their example's cost) are burned down, and it is
+  promoted to GATE when green. `docs/journal/2026-09-07-the-twins-lane-gates.md`
+  carries the bisections.
+
 - The Node binding raises the condition the ENGINE names, not one read out of
   the rendered sentence. The engine publishes one kind word per refusal a host
   can act on differently (`engine/metta/registration.pl`,
