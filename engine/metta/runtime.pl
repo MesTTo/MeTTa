@@ -888,10 +888,15 @@ undocumented(Name) :- current_metta_space(Space),
 %is existence_error(procedure, call_with_time_limit/2) raised from here, which
 %names a Prolog predicate a MeTTa author never wrote
 %[tested: platform_capabilities_reduced:a_bounded_form_refuses_by_name_when_deadlines_are_absent].
+%The alarm stops the work and the deadline check decides the outcome, the one
+%wall-clock rule every door here holds: a form that finished only because its
+%alarm arrived late still ran past the bound it was given, so it refuses
+%rather than answering [source: engine/metta/control.pl, run_under_pragmas/1].
 metta_timeout(Seconds, Goal, Value) :-
     metta_require_platform('(timeout N Expr)', deadlines),
     must_be(number, Seconds),
-    call_with_time_limit(Seconds, findall(Value, Goal, Values)),
+    metta_host_time_budget(findall(Value, Goal, Values), Seconds, Bounded),
+    call_with_time_limit(Seconds, Bounded),
     member(Value, Values).
 
 %timeout's deterministic twin, the kwarg vocabulary at the language tier:

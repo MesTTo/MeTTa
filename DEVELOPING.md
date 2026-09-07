@@ -161,6 +161,58 @@ not in the ordering. Give the leaking test its state back through a public door
 -- drop the space it minted, withdraw the equation it wrote into `&self`, or
 name an object no other test pins -- rather than pinning the order.
 
+#### Reading the state report a red carries
+
+Every failing item prints one more section, `engine state at failure`, from a
+hook in `extensions/python/tests/conftest.py`. It exists so that a red which
+passes when its test is re-run alone cannot be recorded as "intermittent"
+without the state that decided it. Nothing is computed on the green path.
+
+```text
+--------------------------- engine state at failure ----------------------------
+worker: gw2
+seed: 3222813221
+order: item 47 of 376, after tests/ch14_seeing_your_program/test_features.py::test_capture_composes_with_limits
+load: 43.21 39.87 31.02 26/10008 3234676
+spaces: m=&pyspace_35, metta=&self
+pragmas: ['max-stack-depth'-20]
+fuel scope: scope([],remaining(unstarted))
+prolog flags: autoload(true)-stack_limit(8000000000)
+function generation: 44957
+```
+
+Read it in this order.
+
+- `pragmas` is the engine-wide interpreter settings in force. `pragma!` writes
+  ONE setting that outlives the MeTTa object that wrote it, so a value here
+  that the failing test did not write was left by an earlier test on this
+  worker. The autouse `_pragmas_are_not_left_set` fixture fails the test that
+  LEAVES one, so the two together name the leaker and the victim.
+- `fuel scope` is the evaluation-fuel scope a runnable opens. `closed` is no
+  scope, so `scope(closed, remaining(off))` is the state between runnables; a
+  LIST is an open scope, holding the branches that ran out of fuel so far. A
+  list at a failure means a runnable's scope was abandoned, and an abandoned
+  scope drops the `(Error <culprit> StackOverflow)` answer a bounded
+  evaluation owes.
+- `prolog flags` reads `autoload` and `stack_limit`. `autoload(false)` makes
+  every unresolved library name a hard error; a `stack_limit` other than the
+  process default means a caller's stack bound outlived its call.
+- `worker`, `order` and `seed` reproduce the run:
+  `sh extensions/python/test.sh --randomly-seed=<seed>` repeats the whole
+  ordering, and `order` names the item that ran immediately before, which is
+  where a prefix search starts.
+- `load` is `/proc/loadavg` at the failure. No timing red can be attributed
+  without it; this box carries other work and a wall-clock number under 100ms
+  is bimodal above loadavg 30.
+- `spaces` names the space handles the item was given through a fixture, which
+  is the difference between "the engine was in this state" and "this test put
+  it there".
+
+A reading the engine refuses is printed as a refusal rather than dropped, so
+the report never reads as "the engine was fine" by omission.
+`tests/repository/test_failure_state_report.py` plants a red and checks the
+section carries every field.
+
 ### The report lanes over the suite itself, and the stub gate
 
 Four of these report and one gates. Each prints a number the other GATE

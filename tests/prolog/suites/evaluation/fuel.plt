@@ -13,9 +13,14 @@
 %     fuel:a_step_charges_inside_a_scope_and_is_inert_outside_one;
 %     commit=657ae9672c07b628f8a20c7fe39aa43e58b0014f].
 %   - nb_delete/1 and an `off` sentinel both survive backtracking past a
-%     trailed b_setval/2 write, which is what lets the balance be its own scope
-%     marker [tested: fuel:a_deleted_global_is_not_resurrected_by_backtracking;
+%     trailed b_setval/2 write [tested:
+%     fuel:a_deleted_global_is_not_resurrected_by_backtracking;
 %     commit=657ae9672c07b628f8a20c7fe39aa43e58b0014f].
+%   - a scope abandoned by an asynchronous limit closes itself, and the
+%     runnable after it still replays its own exhausted branch [tested:
+%     fuel:an_interrupted_scope_does_not_stay_open,
+%     fuel:a_runnable_after_an_abandoned_scope_still_replays_its_overflow;
+%     commit=WORKTREE].
 % Fails when: read as coverage of max-stack-depth's user-facing law. That is
 %   test_a_stack_depth_pragma_bounds_evaluation_instead_of_overflowing and the
 %   arbiter's own boundary witnesses; this file covers the mechanism under it.
@@ -63,7 +68,7 @@ test(an_exhausted_branch_records_its_culprit_and_fails) :-
     ->  Charged = true
     ;   Charged = false
     ),
-    nb_getval('$metta_fuel_errors', Recorded),
+    nb_getval('$metta_fuel_scope', Recorded),
     metta_close_fuel_scope,
     assertion(Charged == false),
     assertion(Recorded == [the_culprit]).
@@ -88,7 +93,7 @@ test(a_nested_run_inside_an_unbounded_scope_keeps_the_outer_error_list) :-
             charge(probe, 1),
             b_getval('$metta_fuel_remaining', Latched),
             once(metta_run_with_fuel(inner, _, true)),
-            (   catch(nb_getval('$metta_fuel_errors', E), Raised,
+            (   catch(nb_getval('$metta_fuel_scope', E), Raised,
                       (E = raised(Raised), true))
             ->  true
             ;   E = failed
@@ -151,6 +156,50 @@ test(a_nested_run_reuses_the_scope_the_outer_one_opened) :-
     assertion(Seen == unstarted),
     assertion(Afterwards == off).
 
+%AN ABANDONED SCOPE CLOSES ITSELF. setup_call_cleanup/3 is
+%`sig_atomic(Setup), '$call_cleanup'` [source: SWI-Prolog 10.1.13
+%boot/init.pl, setup_call_cleanup/3], so an asynchronous limit delivered in
+%the call port between those two goals leaves Setup's writes standing with no
+%cleanup registered. A non-backtrackable scope marker then stayed open for the
+%life of the process and every later runnable took the reentrant branch, which
+%answers ordinary solutions and never replays a branch that ran out of fuel.
+%The marker is trailed instead, so unwinding puts it back with no cleanup
+%involved, and this sweep is what says so: every inference budget from 1 to
+%6000 over a runnable that spends 300 steps, and the marker read afterwards.
+%Against the nb_setval/2 marker this replaces it finds budgets that leak.
+test(an_interrupted_scope_does_not_stay_open) :-
+    findall(Limit-Marker,
+            ( between(1, 6000, Limit),
+              plt_bounded_fuel_run(Limit, Marker),
+              Marker \== closed ),
+            Leaks),
+    assertion(Leaks == []).
+
+%And the consequence the leak produced, in one goal: a runnable that follows
+%an abandoned scope still replays its own exhausted branch as
+%(Error <culprit> StackOverflow). Under a leaked-open marker the replay clause
+%is unreachable and the same runnable answers nothing.
+%The balance unwinds with the scope. A balance left at `unstarted` outside any
+%scope makes the next charge read the pragma and spend, and a branch that ran
+%out would then record its culprit into the atom `closed`.
+test(an_interrupted_scope_leaves_the_balance_off) :-
+    findall(Limit-Balance,
+            ( between(1, 6000, Limit),
+              plt_bounded_fuel_balance(Limit, Balance),
+              Balance \== off ),
+            Leaks),
+    assertion(Leaks == []).
+
+test(a_runnable_after_an_abandoned_scope_still_replays_its_overflow) :-
+    setup_call_cleanup(
+        'pragma!'('max-stack-depth', 20, _),
+        ( plt_abandon_a_scope,
+          findall(A,
+                  metta_run_with_fuel(ordinary, A, plt_charge_until_exhausted),
+                  Answers) ),
+        'pragma!'('max-stack-depth', none, _)),
+    assertion(Answers == [['Error', plt_culprit, 'StackOverflow']]).
+
 % ------------------------------------------------- the SWI behaviour underneath
 
 % The balance doubles as the scope marker, so a value restored by backtracking
@@ -190,3 +239,42 @@ plt_fuel_scope(Close) :-
                        ( member(N, [1, 2, 3]),
                          b_setval('$metta_plt_probe', N) ),
                        Close).
+
+plt_spin(0) :- !.
+plt_spin(N) :- M is N - 1, plt_spin(M).
+
+%One bounded runnable, and the scope marker it leaves behind. once/1 because a
+%scope stays open while its runnable can still answer, which is the contract
+%tested above; the cut is what ends the runnable.
+plt_bounded_fuel_run(Limit, Marker) :-
+    nb_setval('$metta_fuel_scope', closed),
+    catch(call_with_inference_limit(
+              once(metta_run_with_fuel(value, _, plt_spin(300))),
+              Limit, _),
+          _, true),
+    b_getval('$metta_fuel_scope', Marker).
+
+plt_bounded_fuel_balance(Limit, Balance) :-
+    nb_setval('$metta_fuel_scope', closed),
+    nb_setval('$metta_fuel_remaining', off),
+    catch(call_with_inference_limit(
+              once(metta_run_with_fuel(value, _, plt_spin(300))),
+              Limit, _),
+          _, true),
+    b_getval('$metta_fuel_remaining', Balance).
+
+%A scope whose cleanup never runs, which is what the interruption produces.
+%The marker is written the way metta_open_fuel_scope/0 writes it and the
+%enclosing goal then succeeds, so nothing unwinds it here either.
+plt_abandon_a_scope :-
+    catch(call_with_inference_limit(
+              once(metta_run_with_fuel(value, _, plt_spin(300))),
+              1, _),
+          _, true).
+
+%A branch that spends the whole budget and fails, which is the shape a
+%recursive equation's compiled charge produces.
+plt_charge_until_exhausted :-
+    metta_fuel_step_goal(plt_culprit, 30, Charge),
+    call(Charge),
+    fail.
