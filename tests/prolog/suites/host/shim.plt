@@ -29,7 +29,7 @@
 %   - the reader failure's line and the reserved kinds are the ENGINE's to
 %     read, so they are tested where they live rather than here, where this
 %     suite loads the shim alone
-%     [tested: error_kinds:a_syntax_envelope_carries_its_line; commit=WORKTREE].
+%     [tested: error_kinds:a_syntax_envelope_carries_its_line; commit=52e95b50cc5acdc0e41f97b444ab244ad1301433].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

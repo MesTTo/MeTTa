@@ -16,7 +16,7 @@
 %   can act on differently, and metta_host_error_kind/3 reads one off a raised
 %   ball with the fields that kind carries, so every seat classifies the same
 %   set instead of reading the rendered message
-%   [tested: tests/prolog/suites/host/error_kinds.plt; commit=WORKTREE].
+%   [tested: tests/prolog/suites/host/error_kinds.plt; commit=52e95b50cc5acdc0e41f97b444ab244ad1301433].
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
@@ -357,7 +357,7 @@ control_exception(error(resource_error(_), _)).
 %[tested: tests/prolog/suites/host/error_kinds.plt;
 %extensions/python/tests/repository/test_error_kinds.py;
 %extensions/node/test/errors.test.ts "covers every kind the engine publishes";
-%commit=WORKTREE].
+%commit=52e95b50cc5acdc0e41f97b444ab244ad1301433].
 %
 %A FIELD is a part of the refusal a caller ACTS on: the bound that was
 %exceeded, the table a restraint was declared for, the capability a space

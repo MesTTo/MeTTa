@@ -1478,7 +1478,7 @@ prolog:error_message(metta_space_capability_required(Space, Operation,
 %reached it through a copy of this clause in its own shim until 2026-09-07
 %and the Node seat matched the word "capabilit" in the rendered message
 %[tested: error_kinds:every_declared_kind_classifies_from_its_own_ball;
-%commit=WORKTREE].
+%commit=52e95b50cc5acdc0e41f97b444ab244ad1301433].
 metta_host_space_capability_error(
         error(metta_space_capability_required(Space, Operation, Capability), _),
         Space, Operation, Capability).
