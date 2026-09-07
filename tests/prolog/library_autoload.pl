@@ -7,7 +7,7 @@
 %       file has finished loading, so a flag set there is set too late for the
 %       engine's own load-time directives
 %       [source: tests/fixtures/no_autoload_boot.pl, which records the same
-%       measurement for the corpus lane; commit=WORKTREE].
+%       measurement for the corpus lane; commit=e52b9b2eeb4b303b57c93e6e6844664a25ce0da3].
 % Guarantees:
 %     - exits nonzero naming every undefined name a shipped library's clauses
 %       reach, with the file and line of the clause that reaches it, and the
@@ -16,7 +16,7 @@
 %       autoloadable name, so a clean result is a claim this file has just
 %       tested rather than an assumption
 %       [tested: prove_eyesight/0, which plants a call to the first library
-%       export this tree does not import; commit=WORKTREE]
+%       export this tree does not import; commit=e52b9b2eeb4b303b57c93e6e6844664a25ce0da3]
 %     - allows exactly the names in allowed/2, each with the reason it is
 %       deferred rather than missing, and nothing else
 % Fails when:
@@ -45,7 +45,7 @@
 % example calls at all and which nothing would have found
 % [measured 2026-09-07: both reported in one run of this file, 4.0s wall at
 % loadavg 68; command=swipl -q --on-error=status -g library_autoload_gate -t
-% halt tests/prolog/library_autoload.pl; commit=WORKTREE].
+% halt tests/prolog/library_autoload.pl; commit=e52b9b2eeb4b303b57c93e6e6844664a25ce0da3].
 
 :- set_prolog_flag(autoload, false).
 :- use_module(library(check), [list_undefined/0]).
