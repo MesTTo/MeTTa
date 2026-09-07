@@ -778,6 +778,40 @@ prolog:error_message(metta_platform_required(Form, Capability, Requires,
 :- metta_platform_load(deadlines).
 %wrap_predicate/4, for making the pragma bound free when no bound is set.
 :- use_module(library(prolog_wrap)).
+%AND its own deferred import, resolved here rather than wherever the engine
+%first happens to need it. prolog_wrap declares `:- autoload(library(lists),
+%[member/2])` and current_predicate_wrapper/4 is the only body that calls
+%member/2, reached only once a predicate actually HAS a wrapper
+%[source: SWI-Prolog 10.1.13 library/prolog_wrap.pl, its autoload directive
+%and current_predicate_wrapper/4]. So the resolution lands wherever the first such
+%query lands, and in this engine that is inside SWI's own assertz, re-entered
+%from `sig_atomic(with_mutex(metta_deferred_translation, ...))` while a
+%deferred function compiles. There it raises
+%`existence_error(procedure, prolog_wrap:member/2)`, and every later
+%derivation in the process raises the same thing: 29 tests in one file
+%[measured 2026-09-07: `-p randomly --randomly-seed=3222813221
+%tests/ch14_seeing_your_program` answers 29 failed, 347 passed, and touching
+%prolog_wrap:member/2 once from the top level beforehand answers 376 passed].
+%The reason SWI declines that one resolution is NOT established -- the flag is
+%`true`, the module is loaded, the declaration is intact, and the same call
+%inside sig_atomic/1, with_mutex/2, transaction/1 and snapshot/1 resolves
+%normally in a plain SWI of the same version. What IS established is that the
+%engine does not have to depend on it: the same reasoning as the library(option)
+%and library(gensym) blocks below, and the same policy the rest of this section
+%holds, which is that nothing the engine needs resolves lazily.
+%Only member/2, not pairs_keys/2: that one is reached from
+%predicate_property/2's `wrapped(List)` property, which nothing here asks for,
+%and resolving it would load library(pairs) at every boot for nothing.
+%import/1 rather than a wrap-and-unwrap round trip that exercises the real
+%path: the round trip resolves the same import and costs 27,606 boot
+%inferences doing it, where this costs 12
+%[measured 2026-09-07: engine/bench.py --counter-only boot, three identical
+%samples per tree; 249,726 with this line removed, 277,329 with the round trip
+%in its place and 249,738 with this one, against 249,723 on an unchanged
+%worktree of the same commit].
+%library(lists) is already loaded above, so this is a module-table import and
+%not a file load.
+:- ignore(catch(prolog_wrap:import(lists:member/2), _, true)).
 %library(thread) does not declare its own dependency on option/2, and nothing
 %else loaded here pulls library(option) in, so jobs/2 resolved it by autoload
 %on the first concurrent_and/3 call [verified 2026-08-15: swi_option is absent

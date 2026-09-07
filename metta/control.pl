@@ -359,10 +359,23 @@ disable_metta_pragma_bounds :-
 %metta_py_limited throws, so a pragma bound and a per-call kwarg bound
 %classify identically one level up: TimeLimitError and
 %InferenceLimitError rather than a generic engine error.
+%A BOUND THAT IS EXCEEDED REFUSES; IT NEVER ANSWERS. The alarm alone cannot
+%promise that, because a signal that arrives late arrives after the goal has
+%finished and the caller then reads an answer for work that ran past the bound
+%it asked for: a 0.3-second load answered `[[(Error (spin) StackOverflow)]]`
+%after 66.170 seconds at loadavg 90 to 100
+%[source: docs/journal/2026-09-07-every-intermittent-root-caused.md]. So the
+%deadline is checked where the answer is produced as well, exactly as
+%metta_host_inference_budget/3 pairs SWI's per-solution limiter with a
+%cumulative counter read for the same reason, and the two bounds now hold the
+%same rule at every door
+%[tested: time_budget:a_pragma_bound_the_alarm_missed_still_refuses,
+%test_a_wall_clock_bound_that_is_exceeded_refuses].
 run_under_pragmas(Goal) :-
     (   metta_pragma('max-time', Seconds), number(Seconds), Seconds > 0
     ->  metta_require_platform('(pragma! max-time N)', deadlines),
-        Timed = catch(call_with_time_limit(Seconds, Goal),
+        metta_host_time_budget(Goal, Seconds, Deadlined),
+        Timed = catch(call_with_time_limit(Seconds, Deadlined),
                       time_limit_exceeded,
                       throw(error(metta_control_signal(time_limit, Seconds),
                                   context(metta, time_limit))))
@@ -620,29 +633,56 @@ metta_host_with_stack_limit(StackBytes, Goal) :-
 % fuel:an_absent_pragma_does_not_bound_evaluation].
 :- meta_predicate metta_run_with_fuel(?, ?, 0).
 
-%SCOPE-OPENNESS IS THE ERROR LIST'S EXISTENCE, not the balance's value. The
-%balance answered both questions until the evaluation budget became opt-in,
-%and then it could not: an absent max-stack-depth resolves to `off` at the
-%first charge and LATCHES it, so mid-scope the balance reads exactly like no
-%scope at all. A nested run then opened a second scope whose close deleted
+%SCOPE-OPENNESS IS A BACKTRACKABLE MARKER, so an abandoned scope closes
+%itself. The balance answered this question until the evaluation budget became
+%opt-in, and then it could not: an absent max-stack-depth resolves to `off` at
+%the first charge and LATCHES it, so mid-scope the balance reads exactly like
+%no scope at all. A nested run then opened a second scope whose close deleted
 %`$metta_fuel_errors`, and the outer replay clause read a deleted global
 %[measured 2026-08-30: charge once under no pragma, run a nested
 %metta_run_with_fuel/3, and nb_getval/2 raises
 %existence_error(variable,'$metta_fuel_errors');
 %tested: fuel:a_nested_run_inside_an_unbounded_scope_keeps_the_outer_error_list].
-%`$metta_fuel_errors` is created by metta_open_fuel_scope/0 and deleted by
-%metta_close_fuel_scope/0, so it IS the scope's lifetime. nb_current/2 is
-%nondeterministic and costs a foreign frame, which the per-reduction charge
-%could not afford; this runs once per runnable form, where the whole
-%two-versus-one-goal difference measured eight inferences over a file load.
+%
+%THE ERROR LIST'S EXISTENCE ANSWERED IT NEXT, AND THAT LEAKED. A cleanup is
+%not a guarantee: setup_call_cleanup/3 is `sig_atomic(Setup), '$call_cleanup'`
+%[source: SWI-Prolog 10.1.13 boot/init.pl, setup_call_cleanup/3], so an
+%asynchronous limit delivered in the one call port BETWEEN those two goals
+%leaves Setup's writes standing with no cleanup registered to undo them. The
+%scope then stayed open for the life of the process and every later runnable
+%took the reentrant branch, which answers ordinary solutions and never replays
+%a branch that ran out of fuel: `!(p122-fact 5)` under `(pragma! max-stack-depth
+%20)` answered `120` alone where it answers `[120, (Error -3 StackOverflow)]`,
+%and the same leak turned `!(with-pragma! ((max-stack-depth 20)) (vocab-spin 5))`
+%into no answer at all
+%[measured 2026-09-07: one budget in 20,000 leaks with an nb_setval marker and
+%none with a b_setval one, sweeping call_with_inference_limit/3 over
+%setup_call_cleanup(Marker, spin(300), Restore);
+%tested: fuel:an_interrupted_scope_does_not_stay_open,
+%test_a_stack_depth_pragma_bounds_evaluation_instead_of_overflowing].
+%
+%A trailed write needs no cleanup to be undone: unwinding an exception unwinds
+%the trail, so `$metta_fuel_scope` returns to `closed` on every abandonment
+%path there is, and metta_close_fuel_scope/0 is the fast ordinary exit rather
+%than the thing correctness rests on. This is the same rule the pragma scope
+%above states for its restores and the reason it arms before it writes.
+%The records written INSIDE the scope stay non-backtrackable, because a branch
+%records its culprit and then FAILS, and the open writes the empty list, so a
+%record left behind by an abandoned scope is never read.
+%
+%b_getval/2 rather than the nb_current/2 this replaces: nb_current/2 is
+%declared nondeterministic and costs a foreign frame that supports redo
+%[source: SWI-Prolog 10.1 Reference Manual section 4.33, nb_current/2], and
+%the marker always exists, so the deterministic read is both correct and
+%cheaper. This runs once per runnable form.
 metta_run_with_fuel(Value, Answer, Goal) :-
-    (   nb_current('$metta_fuel_errors', _)
-    ->  call(Goal),
-        Answer = Value
-    ;   setup_call_cleanup(
+    (   b_getval('$metta_fuel_scope', closed)
+    ->  setup_call_cleanup(
             metta_open_fuel_scope,
             metta_fuel_answer(Value, Answer, Goal),
             metta_close_fuel_scope)
+    ;   call(Goal),
+        Answer = Value
     ).
 
 %ONE GLOBAL CARRIES BOTH QUESTIONS, and it always exists so that the reader is
@@ -696,6 +736,26 @@ metta_run_with_fuel(Value, Answer, Goal) :-
 %[source: SWI-Prolog 10.1 Reference Manual, thread_initialization/1].
 :- thread_initialization(nb_setval('$metta_fuel_remaining', off)).
 
+%ONE GLOBAL CARRIES THE SCOPE AND ITS RECORDED OVERFLOWS, and it is the value
+%rather than the variable's existence that says which. `closed` is no scope; a
+%LIST is a scope, holding the branches that ran out of fuel so far. That is
+%what lets the scope cost exactly what it cost before this fix: the open
+%writes the empty list, which both marks the scope and empties the record, and
+%the close writes `closed`, which is the same two writes the pair made when
+%the record was created and deleted around every runnable
+%[measured 2026-09-07: the match benchmark reads 266,202 with this shape and
+%with the shape it replaces, 266,802 with a separate marker whose close does
+%not delete, and 267,402 with a separate marker and the delete kept].
+%
+%The OPEN write is trailed and the close write is not, which is the whole
+%correctness of it: unwinding past the open restores `closed` with no cleanup
+%involved, and a record written inside the scope survives the failure-driven
+%backtracking a branch that ran out of fuel does on its way out. `[]` is
+%atomic, so the one backtrackable value never puts a global-stack term where a
+%later nb_getval/2 could read it after backtracking has reclaimed it
+%[source: SWI-Prolog 10.1 Reference Manual section 4.33, b_setval/2].
+:- thread_initialization(nb_setval('$metta_fuel_scope', closed)).
+
 %False until an Atom-result masking operation answers a compound: only such
 %an answer can carry an unevaluated subterm PAST its own boundary (noeval
 %hands `(+ 20 22)` onward as written), and the flag is what lets every
@@ -704,19 +764,31 @@ metta_run_with_fuel(Value, Answer, Goal) :-
 %out and each nondeterministic branch carries only its own contamination.
 :- thread_initialization(nb_setval('$metta_masked_escape', false)).
 
+%BOTH writes are trailed, so the whole scope is stack-scoped state: an
+%abandoned runnable leaves the scope `closed` and the balance `off`, with no
+%cleanup involved. The balance has to unwind as well as the scope, and not
+%only for tidiness: a balance left at `unstarted` outside any scope makes the
+%next charge read the pragma table and spend, and a branch that then ran out
+%would record its culprit into a scope value that is the atom `closed`,
+%leaving `[Culprit|closed]` where a list belongs. That is the same leak one
+%level down. setup_call_cleanup/3 runs Setup inside sig_atomic/1, so the two
+%writes here happen together or not at all
+%[source: SWI-Prolog 10.1.13 boot/init.pl, setup_call_cleanup/3;
+%tested: fuel:an_interrupted_scope_leaves_the_balance_off].
 metta_open_fuel_scope :-
-    nb_setval('$metta_fuel_remaining', unstarted),
-    nb_setval('$metta_fuel_errors', []).
+    b_setval('$metta_fuel_scope', []),
+    b_setval('$metta_fuel_remaining', unstarted).
 
 metta_close_fuel_scope :-
-    nb_delete('$metta_fuel_errors'),
+    nb_setval('$metta_fuel_scope', closed),
     nb_setval('$metta_fuel_remaining', off).
 
 metta_fuel_answer(Value, Answer, Goal) :-
     call(Goal),
     Answer = Value.
 metta_fuel_answer(_, ['Error', Culprit, 'StackOverflow'], _) :-
-    nb_getval('$metta_fuel_errors', Reverse),
+    nb_getval('$metta_fuel_scope', Reverse),
+    is_list(Reverse),
     reverse(Reverse, Errors),
     member(Culprit, Errors).
 
@@ -830,8 +902,8 @@ metta_host_stack_charge(Body, (Read, Branch), Premises) :-
 %Off the step's own path, because a branch that ran out of fuel is recorded
 %once and then fails, while the step above runs on every reduction.
 metta_fuel_exhausted(Culprit) :-
-    nb_getval('$metta_fuel_errors', Errors),
-    nb_setval('$metta_fuel_errors', [Culprit|Errors]),
+    nb_getval('$metta_fuel_scope', Errors),
+    nb_setval('$metta_fuel_scope', [Culprit|Errors]),
     fail.
 
 %%% A seeded scope, the declared alternative to a global generator %%%
