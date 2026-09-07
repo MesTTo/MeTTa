@@ -1127,3 +1127,59 @@ refusal.
 
 The other three the brief named did not reproduce in any configuration run
 here, including the gate's own.
+
+## 2026-09-07, the gate's own run found two more, and one of them was this branch's
+
+`GATE_ONLY=1 sh check.sh` on the pinned tree came back with 106 of 108 lanes
+green and two red. Both are this branch's own, and neither had shown up in any
+lane run on its own.
+
+**`petta`, the conformance lane: one blocking entry, and the difference was a
+WARNING.** `tabling_fib.metta` conforms and exits 0 on both engines, and the
+lane compares their output line for line: upstream printed `<no line>` where
+ours printed
+
+    Warning: lib/lib_tabling/lib_tabling.pl:193:
+    Warning:    Redefined static procedure '$autoload'/3
+    Warning:    Previously defined at engine/metta.pl:382
+
+`lib_tabling.pl` has no module declaration, so it loads into `user`, where
+`engine/metta.pl`'s own `:- autoload(library(uuid))` already defined SWI's
+`'$autoload'/3` table. A second FILE adding clauses to it is what SWI warns
+about, once per load, and the earlier `no-autoload` and `engine-bench` runs
+never showed it because neither compares stderr against another engine.
+
+Tried, and each measured rather than argued:
+
+- `:- multifile('$autoload'/3).` beside the directive. It works -- 0 warnings,
+  and with `autoload` false `call_delays/2` still answers -- but this tree's
+  seam scan reads ANY multifile under `engine/` or `lib/` as a seam and asks
+  for a `seam:kind/2` fact naming it event, ownership or declaration. SWI's own
+  autoload table is not one of this tree's seams, so `prolog-static` refuses it
+  in either file, and declaring it one to pass a checker would be a lie in a
+  place this repository reads as a contract.
+- `use_module(library(wfs), [call_delays/2])`. No warning, but it is the
+  eager load the 2026-09-07 entry above already rejected on measurement: it
+  costs the parity corpus's tabling row 2,006 inferences against 823.
+
+Decided: the directive moves to `engine/metta.pl`, beside the engine's own
+`autoload(library(uuid))`, so ONE file owns `user`'s autoload table. The
+comment travels with it and names lib_tabling as the consumer; lib_tabling
+keeps a comment at the site saying where the declaration is and why it cannot
+be here. `petta` reads 154/156 agreeing and 0 blocking, up from 153/156 with 1.
+
+The move costs two boot rows, and this is the third time on this branch that a
+directive's FILE has priced a boot: the engine's boot goes 268,411 to 268,460
+(+49) and the C seat's 388,152 to 388,224 (+72), both re-pinned with that
+attribution, three identical samples each, the C one taken in a throwaway
+checkout at the pinned path length created fresh for the reading. Both files
+load into `user` at boot either way, so it is load structure and not new work,
+and the tabling row the declaration was measured for is unchanged.
+
+**`pytest`: a tracked file cited an absolute workspace path.** The C seat's
+`checkout_path_length_note` said "Twenty-nine is /home/user/Dev/PyPeTTa1/PeTTa",
+and `test_no_tracked_file_cites_an_absolute_workspace_path` is right to refuse
+it: the note now says "the repository root's own length". The same test caught
+the same mistake in this file earlier in the day, in a citation of the
+throwaway checkout, and the lesson is the same both times: a number's
+JUSTIFICATION can leak a path just as a command can.

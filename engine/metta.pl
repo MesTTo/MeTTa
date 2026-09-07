@@ -380,6 +380,21 @@ register_metta_library_path(Alias, Directory0, true) :-
    directory_file_path(Parent, 'lib', LibPath),
    asserta(standard_library_path(LibPath)).
 :- autoload(library(uuid)).
+%wfs is lib/lib_tabling/lib_tabling.pl's, not this file's: it reads a
+%restrained table's delay condition through call_delays/2. The declaration
+%lives here because `user`'s autoload table is ONE predicate and the directive
+%above defined it first, so a second file adding to it warns on every load, and
+%the `petta` conformance lane compares our stderr against upstream's. It is an
+%autoload and not a use_module because wfs is needed only where a restrained
+%table is read: the parity corpus's tabling row reads 138,172 inferences on
+%trunk, 140,178 with `use_module` and 138,995 with this
+%[measured 2026-09-07; command=swipl tests/fixtures/parity_driver.pl <root>
+%examples/ch18-performance/18-02-memoisation-and-tabling/09-tabling_fib.metta;
+%commit=WORKTREE]. An explicit declaration is honoured with the `autoload` flag
+%false, which is the whole point of naming the file rather than leaving it to
+%the library index [tested: the GATE no-autoload lane, 258 examples;
+%commit=WORKTREE].
+:- autoload(library(wfs), [call_delays/2]).
 :- use_module(library(random)).
 :- use_module(library(error)).
 :- use_module(library(listing)).

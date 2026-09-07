@@ -390,6 +390,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   that means to skip for a missing install reporting a build failure instead.
   It now tests for `esbuild`, the package `tools/build-browser.mjs` imports,
   and names `npm ci` in the note.
+- The engine's `wfs` autoload declaration lives beside its own
+  `autoload(library(uuid))` rather than in `lib_tabling`. Both files load into
+  `user`, whose autoload table is ONE predicate, so a second file adding to it
+  printed `Redefined static procedure '$autoload'/3` on every load. The `petta`
+  conformance lane compares this engine's output against upstream's line for
+  line and blocked on `tabling_fib.metta` with nothing but that warning between
+  them; it now reads 154/156 agreeing and 0 blocking. A `multifile` declaration
+  would have kept the directive where it is used, but this tree's seam scan
+  reads any multifile under `engine/` or `lib/` as a seam needing a
+  `seam:kind/2` fact, and SWI's autoload table is not one of this tree's seams.
+  The move costs the engine's boot row 49 inferences and the C seat's 72, both
+  re-pinned with that attribution.
 - `lib_tabling` declares where `call_delays/2` comes from. It is
   `library(wfs)`'s, not `library(tabling)`'s, and the library-index autoloader
   had been finding it: with autoload off the restraint dispatch raised
