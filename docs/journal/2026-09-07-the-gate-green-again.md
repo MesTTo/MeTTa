@@ -1452,3 +1452,134 @@ runnable processes per core `c-bench` read a min-of-three of **0.12291** for
 to it, with all six cases inside their bands and the lane green. A pin taken
 from this afternoon's 0.13467 would have sat 10% above that reading; the
 carried one sits 7% below it.
+
+## 2026-09-07, the MORK seat compares for the first time, and four rows were out
+
+The quiet box kept giving. `mork-bench` had passed every run on this branch,
+and in three of the four full gate runs it passed by REFUSING: the lane needs
+perf's control pipes and another session held the PMU, so it printed "the box
+refused the measurement, so nothing here says the tree moved" and exited 0
+without comparing a single row. The fourth run reached size 8000 before
+refusing, which is still no comparison. On the fifth the whole ladder measured,
+and four instruction rows were outside their bands -- all four LOW, which is
+the "improvement left unpinned" side the two-sided band exists for.
+
+Nine rounds at sizes 500 and 2000 on a quiet box say which rows and by how
+much, against a 1% band:
+
+| row | pin | min of 9 | delta |
+|---|---|---|---|
+| `mork-mork-match-first-500` | 14,578,170 | 14,301,618 | **-1.897%** |
+| `mork-native-add-500` | 6,363,871 | 6,298,841 | **-1.022%** |
+| `mork-native-add-2000` | 25,424,013 | 25,167,507 | **-1.009%** |
+| `mork-native-match-first-2000` | 1,180,271 | 1,170,609 | -0.819%, and it still failed |
+
+The fourth is a different shape from the other three: nine samples inside TWO
+instructions of each other, and the gate run that failed it drew one sample at
+1,167,164, a -0.29% excursion below an otherwise perfectly flat row. It is
+re-pinned with the others because a pin that a rare discrete excursion can push
+under its floor is a pin that turns the lane red at random.
+
+Tried: a first-parent sweep of the twenty-two merge points from `a8d78701`,
+where these pins were taken, to `97c96e91`, this branch's base. Three samples
+per point in a worktree carrying this checkout's gitignored artifacts, with the
+`.qlf` set deleted and regenerated per checkout. The rig is validated at the pin
+commit itself, which reads `mork-mork-match-first-500` 14,578,169 / 14,578,171 /
+14,578,170 against a pin of 14,578,170, and `mork-window-floor` at its pinned
+28,268 exactly.
+
+Result: `mork-mork-match-first-500` has ONE mover. `468350eb`, the soft,
+provider and import doors merge, takes it 14,640,598 to 14,336,790 in one step,
+-303,808 instructions and -2.07%; everything after it oscillates inside 0.3%.
+The two `native-add` rows have NO single mover: across the wave they swing
+between 6,279,479 and 6,404,441 at size 500 -- 1.99% peak to peak, the high
+point at `acd04732` and given straight back at `ab02d526` -- and between
+25,102,284 and 25,233,400 at 2000, ending the wave 0.75% under their pins.
+
+Rejected: widening the `native-add` bands to cover that 1.99% swing, the way
+`space-pair`'s band was widened in the C seat earlier today. The two cases look
+alike and are not. `space-pair` varies WITHIN one tree, four runs at one tip
+spanning 0.60% with no trend, which is measurement noise a band should absorb.
+These rows are flat within a tree -- each sweep point's own triple spreads
+0.016% to 0.043% -- and move BETWEEN trees, which is signal, and a band widened
+to cover signal masks exactly what it is for. Revisit if a row is ever shown to
+vary that much at one commit.
+
+Decided: re-pin the four rows and nothing else. Every other row stays, five of
+them sitting between -0.81% and -0.85% inside their 1% band, because a pin that
+has not left its band is a better measurement than a re-pin.
+
+## 2026-09-07, and 0.26% of that was this branch editing the file being measured
+
+The sweep left a gap: the base reads `native-add-500` at 6,316,084 and the tip
+reads 6,298,841, so 0.26% of the move is this branch's. Bisecting this branch's
+own commits puts the whole step between `f9f93ac8` and `d2050675`, which is a
+surprise, because `d2050675` is the commit that gave the benchmark lanes a
+refusal status and touches no engine predicate the workload calls.
+
+It touches `extensions/mork/benchmarks/workload.pl`, which is the file the
+MEASURED PROCESS runs.
+
+Positive control, at this branch's tip with nothing else changed:
+
+| what is restored | native-add-500 | native-add-2000 | match-first-500 |
+|---|---|---|---|
+| nothing (the tip) | 6,298,841 | 25,167,507 | 14,301,618 |
+| the whole pre-`d2050675` `workload.pl` | 6,315,626 | 25,232,849 | 14,297,632 |
+| only the `catch/3` around `bench_run/3` | 6,299,571 | 25,168,681 | 14,297,698 |
+| the branch base, for comparison | 6,316,084 | 25,233,400 | 14,297,652 |
+
+Restoring that one file returns all three rows to the base's reading. Restoring
+only the catch returns `match-first-500` and leaves the two `native-add` rows
+where they are, so the catch is `match-first`'s share and the added
+`bench_unmeasured/1` clause and its comments are `native-add`'s.
+
+Decided: this is the load-structure class the engine baseline already records
+for `engine/bench.pl`, whose "predicate set is part of what the boot it
+measures costs", and the C seat records for a tree that has been written over.
+The MORK seat has it too and nothing said so. Editing `workload.pl` re-lays the
+measured image and moves every row in the seat by about a quarter of a per
+cent, COMMENTS INCLUDED, so the pins are valid only while that file is
+byte-identical. That is why the five rows sitting 0.15% to 0.19% from their
+floor are worth writing down: the next comment added to `workload.pl` is what
+turns them red.
+
+Open: whether the seat should measure in a process whose source it does not
+edit. The window already excludes the boot; it cannot exclude the image the
+workload file makes. The alternative is a per-row allowance for an image
+re-lay, the shape the C seat's `inference_allowance` takes, and it is a design
+question rather than a defect because the current pins are correct for the
+current file.
+
+## 2026-09-07, the word the summary was missing
+
+Finding the four MORK rows took five full gate runs, and the reason it took
+five is that the gate could not say what had happened. `check.sh`'s `run/2` had
+two words for a lane, `ok` and `FAIL`, and a lane that refused to measure exits
+0 by the design this branch gave it, so it read exactly like one that compared
+every row and passed. Four of five runs printed `GATE mork-bench ok` for a lane
+that compared nothing.
+
+That is the shape `check.sh`'s own comment calls "the defect this repository has
+already been bitten by three times" -- written about a different guard, eight
+lines above the code that had it.
+
+Decided: the vocabulary was already chosen and only half wired.
+`metta.benchmarking` names 125 `PERF_CONTROL_REFUSED`, `bounded.sh` refuses
+with 125 when the process that started a command had already exited, and
+`timeout(1)` and `git bisect run` both read 125 as a failure in the wrapper
+rather than in the command. So `measured_main` returns that instead of 0 for a
+local refusal, `run/2` gains a 125 arm that prints `skipped`, and the run ends
+with `MEASURED NOTHING, so nothing here says the tree moved: <lanes>` above the
+verdict. A skip does not decide the run: the exit status is unchanged, because
+a lane that could not measure neither proves nor disproves the tree.
+
+Verified on the lane that produced the finding: `GATE_ONLY=1 sh check.sh
+mork-bench` on a contended PMU prints `GATE mork-bench skipped`, the
+MEASURED NOTHING line, `all gate checks passed`, and exits 0.
+
+Rejected: wiring the same word to the prerequisite skips, `docs` without
+vitepress and `node-dist` without esbuild. It is the same shape and it deserves
+the same word, but each of those lanes decides its own skip condition in its
+own script, where the measurement refusal is centralised in `measured_main` and
+is one change. Revisit as a lane-by-lane pass rather than as part of this one.

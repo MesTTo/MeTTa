@@ -422,6 +422,47 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   the pin was taken and the pin did not follow, so with a 95% band the row
   tolerates a 2.49x regression, and it is not carried because its window is a
   whole process rather than a compute loop.
+- The gate has a third word for a lane. `check.sh` had `ok` and `FAIL`, so a
+  benchmark lane that REFUSED to measure and exited 0 read exactly like one
+  that compared every row and passed: `mork-bench` printed `ok` on four of five
+  full gate runs while another session held the PMU and it compared nothing.
+  The vocabulary was already chosen and only half wired, 125 being what
+  `metta.benchmarking` names `PERF_CONTROL_REFUSED`, what `bounded.sh` refuses
+  with when the process that started a command had already exited, and what
+  `timeout(1)` and `git bisect run` both read as a failure in the wrapper
+  rather than in the command. `measured_main` now returns it instead of 0 for a
+  local refusal, the summary says `skipped`, and the run ends with
+  `MEASURED NOTHING, so nothing here says the tree moved:` and the lane names
+  above its verdict. A skip does not decide the run and does not change the
+  exit status, because a lane that could not measure neither proves nor
+  disproves the tree.
+- Four MORK instruction rows the September merge wave moved are re-pinned, and
+  they are the first rows that seat has COMPARED since the wave landed. The
+  lane needs perf's control pipes, another session held the PMU on run after
+  run, and a refusal exits 0, so `mork-bench` had been passing without
+  measuring anything: `mork-mork-match-first-500` 14,578,170 to 14,301,563
+  (-1.90%), `mork-native-add-500` 6,363,871 to 6,298,841 (-1.02%),
+  `mork-native-add-2000` 25,424,013 to 25,167,493 (-1.01%) and
+  `mork-native-match-first-2000` 1,180,271 to 1,170,609, the last because a
+  rare -0.29% excursion below an otherwise two-instruction-flat row was enough
+  to push it under its floor. A first-parent sweep of the twenty-two merge
+  points since these pins were taken, validated at the pin commit where the
+  rig reads the committed number exactly, gives `mork-mork-match-first-500`
+  one mover (`468350eb`, -303,808 instructions in a single step) and the two
+  `native-add` rows none: they swing 1.99% peak to peak across the wave and end
+  it 0.75% under their pins. Their bands are NOT widened for that, because each
+  point's own triple spreads 0.016% to 0.043%, so the swing is the tree rather
+  than the measurement. Every other row is left where it stands.
+
+  A quarter of a per cent of the move is this branch editing the file the
+  measured process runs. `extensions/mork/benchmarks/workload.pl` gained a
+  catch, a clause and comments when the lane learned to refuse, and restoring
+  that one file at the branch tip returns all three moved rows to the base's
+  reading, while restoring only the catch returns one of them. The seat has the
+  load-structure property the engine baseline records for `engine/bench.pl`:
+  its pins hold only while the workload file is byte-identical, comments
+  included, which is why five rows now sitting 0.15% to 0.19% inside their
+  floor are named in the baseline rather than left to be discovered.
 - The built-package check skips on the dependency it needs rather than on the
   directory that holds it. `node-dist` guarded on `extensions/node/node_modules`
   existing, which an install that omitted the dev dependencies satisfies, and
