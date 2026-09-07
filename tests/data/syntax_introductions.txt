@@ -276,7 +276,15 @@ Predicate                         20-03-02
 assertaPredicate                  20-03-02
 callPredicate                     20-03-02
 import_prolog_function            20-03-02
+assertzPredicate                  20-03-04
+check_prolog_function_names       20-03-04
+import_prolog_functions           20-03-04
+register_metta_library_path       20-03-04
+retractPredicate                  20-03-04
 git-import!                       20-04-06
+include                           20-04-10
+register-token!                   20-07-01
+unregister-token!                 20-07-01
 member                            22-01-02
 dif                               22-01-03
 not                               22-01-03
