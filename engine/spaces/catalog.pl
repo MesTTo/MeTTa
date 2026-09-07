@@ -67,6 +67,14 @@
 % released space through metta_remove_atom/3, including context-routed kinds,
 % while global vocabularies and sibling algebra declarations remain intact
 % [tested: run_tests(catalog_lifecycle); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
+% Guarantees: a third-party kind joins that retirement with one
+% (owned-by-space Head) row and leaves it when the row is withdrawn; the row
+% is refused unless Head has a kind row starting at the owning space
+% [tested: catalog_lifecycle:release_retires_a_third_party_owned_by_space_kind,
+% catalog_lifecycle:withdrawing_the_ownership_row_stops_the_retirement,
+% catalog_self_description:an_ownership_row_without_its_kind_is_refused,
+% catalog_self_description:an_ownership_row_over_a_kind_without_a_space_position_is_refused;
+% commit=WORKTREE].
 
 % Guarantees: finite tensor closure and law witnesses compare shape and exact
 % values [tested: test_finite_tensor_semiring_checks_every_law; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
@@ -555,6 +563,25 @@ metta_cache_policy_changed(Function) :-
 % routes describe their owner position already, including third-party kinds.
 % [tested: run_tests(catalog_lifecycle); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 metta_space_catalog_head(Head) :- metta_routed_head(Head, context).
+%A kind that is space-owned but has nothing to dispatch says so with one row.
+%Shape routing was the only self-service path into this list, and it forces
+%the shape (Head Ctx Pattern Payload...) on a kind whose rows are a per-space
+%FACT with nothing to match, so the alternative was a clause here per
+%third-party head and an engine edit for every library that stores one.
+%Recording the ownership edge as data is how PostgreSQL's pg_depend lets DROP
+%CASCADE reach an extension's own objects, walking stored edges instead of a
+%list compiled into the server
+%[source: https://www.postgresql.org/docs/18/catalog-pg-depend.html, the
+%DEPENDENCY_EXTENSION row; commit=WORKTREE], and it is the ownership rule the
+%2026-09-06 retirement thread already mapped this walk onto
+%[source: docs/journal/2026-09-06-algebra-rows-die-with-their-space.md,
+%"Research mapping"; commit=WORKTREE].
+%The retirement walk below reads position 1 as the owning space, which is
+%where every shipped context-owned head already carries it, so the marker
+%names the head alone
+%[tested: catalog_lifecycle:release_retires_a_third_party_owned_by_space_kind;
+%commit=WORKTREE].
+metta_space_catalog_head(Head) :- metta_catalog_row(['owned-by-space', Head]).
 metta_space_catalog_head(annotations).
 metta_space_catalog_head(source).
 metta_space_catalog_head(context).
@@ -942,6 +969,20 @@ metta_check_catalog_semantics('routed-by-shape', [Head|KeyArgs], Term) :-
     ->  metta_check_route_fit(Key, Spec, Term)
     ;   metta_declaration_refused(Term, 1,
                                   'a kind row for the routed head, declared first')
+    ).
+%The marked head must already have a kind row starting at symbol, because the
+%retirement walk treats position 1 as the owning space and a kind whose first
+%argument is something else (a vocabulary name, a pattern) would have rows
+%deleted by whichever space happened to be spelled the same. Refused at the
+%write, where the remedy is one line, rather than discovered as rows that
+%vanish on an unrelated drop.
+metta_check_catalog_semantics('owned-by-space', [Head|_], Term) :-
+    !,
+    (   metta_kind_spec(Head, [symbol|_])
+    ->  true
+    ;   metta_declaration_refused(Term, 1,
+            'a head whose kind row starts at the owning space: \c
+             (kind <head> symbol ...), declared first')
     ).
 metta_check_catalog_semantics(vocabulary, [Name|_], Term) :-
     !,
@@ -1830,6 +1871,7 @@ metta_catalog_preset([vocabulary, 'OutOfClausesEnum',
 metta_catalog_preset([kind, kind, symbol, [rest, term]]).
 metta_catalog_preset([kind, 'routed-by-shape', symbol,
                       [optional, ['one-of', 'route-key']]]).
+metta_catalog_preset([kind, 'owned-by-space', symbol]).
 metta_catalog_preset([kind, vocabulary, symbol, [rest, symbol]]).
 metta_catalog_preset([kind, claim, symbol, symbol, [rest, symbol]]).
 metta_catalog_preset([kind, policy, symbol, symbol, term]).

@@ -51,6 +51,42 @@ def data_of(a: Any) -> Any:
 
 > Nested expression of numbers to nested lists; grounded values unwrap.
 
+## `ops`
+
+```python
+def ops(m) -> list[str]:
+```
+
+> The array operation names installed in this space, in install order.
+>
+> `install` returns the same list; this reads it back from the space long
+> afterwards, so two spaces on two libraries answer their own rosters
+> whatever order they were installed in:
+>
+>     numpy_space, jax_space = m.space(), m.space()
+>     arrays.install(jax_space, default=jax.numpy)
+>     arrays.install(numpy_space, default=numpy)
+>     arrays.ops(numpy_space)      # ... 'zeros--numpy' ...
+>     arrays.backend(jax_space)    # 'jax.numpy'
+>
+> m may be a context or a space. The longhand is the row itself, which is
+> ordinary matchable data: `!(match &metta (array-backend &s $lib $ops) $ops)`.
+> A space with no install refuses, naming install as the remedy.
+
+## `backend`
+
+```python
+def backend(m) -> str:
+```
+
+> The array library this space's constructors build in.
+>
+> The fully qualified module name install() recorded, `numpy` or
+> `jax.numpy`, which is the same name its constructor registrations carry
+> after the `--` in `zeros--numpy`. `ops` answers the roster beside it, and
+> the row behind both is `(array-backend <space> <library> (ops ...))` in
+> `&metta`.
+
 ## `install`
 
 ```python
@@ -97,6 +133,53 @@ def install(m, default: Any = None) -> list[str]:
 > space either way, which is the object whose storage and introspection
 > doors this needs; `install(m)` on a context used to raise
 > `MeTTa has no 'is_function'` and leave every operation unregistered.
+>
+> What this space installed becomes one catalog row,
+> ``(array-backend <space> <library> (ops ...))`` in ``&metta``, which
+> ``ops(m)`` and ``backend(m)`` read back and a MeTTa program can match for
+> itself. Installing again REPLACES that row, the space's constructor
+> aliases, and every operation of the outgoing roster that no other space's
+> row still names; ``uninstall(m)`` retires the whole installation, and
+> dropping the space retires the row with it. Two spaces may therefore hold
+> two libraries at once, in either install order, each answering its own.
+
+## `uninstall`
+
+```python
+def uninstall(m) -> list[str]:
+```
+
+> Retire this space's array installation; answers what it unregistered.
+>
+> The inverse of `install`. The space's roster row goes, with its
+> constructor aliases and the bare-name arrows those carried, the `get-type`
+> shape equations and the shaped-DLTensor typing rule; then every operation
+> the roster named is unregistered UNLESS another space's row still names
+> it, because the operation registry is process-wide by name and two spaces
+> on numpy share `zeros--numpy` and the whole backend-agnostic set. The
+> answer is therefore what actually left the registry, in roster order.
+>
+>     arrays.install(space, default=numpy)
+>     arrays.uninstall(space)
+>     arrays.ops(space)            # refuses: nothing is installed here
+>
+> An operation another space claims stays registered, and this space stops
+> DECLARING it: `ops.withdraw` releases the rows that would otherwise keep
+> the space describing a function it no longer routes to.
+>
+> Dropping the space retires the row without this call, the catalog
+> retiring a space's declarations with it, but the process-wide operations
+> are the registry's and only this door hands them back.
+>
+> Two registrations deliberately survive, both keyed on the DLPack
+> predicate rather than on a space, so one registration serves every space
+> and withdrawing it here would change another space's answers: the
+> DLTensor type and array printing hooks, whose own doors are
+> `integrate.unregister_object_type` and `integrate.unregister_repr`, and
+> the `broadcast-shape` CLP(FD) relation, which `register_prolog` has no
+> withdrawal for.
+>
+> m may be a context or a space, as `install` takes either.
 
 ## `EmbeddingStore`
 

@@ -390,6 +390,25 @@ test(a_routing_row_over_an_unroutable_kind_is_refused,
                                         1, _))]) :-
     add_sexp('&metta', ['routed-by-shape', 'flat-kind'], _).
 
+%A kind whose rows are a per-space FACT joins the space retirement walk with
+%one marker row instead of a clause in the engine. The marker is checked the
+%way the routing one is: the head must already have a kind row, and the row
+%must start at the owning space, because the retirement walk reads position 1
+%as the space and would otherwise delete rows keyed by something else that
+%happens to be spelled like a space name.
+test(an_ownership_row_without_its_kind_is_refused,
+     [error(metta_declaration_malformed(['owned-by-space', 'never-kinded'],
+                                        1, _))]) :-
+    add_sexp('&metta', ['owned-by-space', 'never-kinded'], _).
+
+test(an_ownership_row_over_a_kind_without_a_space_position_is_refused,
+     [setup(add_sexp('&metta', [kind, 'patterned-kind', pattern, term], _)),
+      cleanup(metta_remove_atom('&metta',
+                                [kind, 'patterned-kind', pattern, term], _)),
+      error(metta_declaration_malformed(['owned-by-space', 'patterned-kind'],
+                                        1, _))]) :-
+    add_sexp('&metta', ['owned-by-space', 'patterned-kind'], _).
+
 %The advisors' fold at the route classification: a loaded seam:route_cap/4
 %clause may demote the declared Exact to inexact or refuse it loudly, and a
 %cap outside the vocabulary is the advisor's own bug, refused as one.
