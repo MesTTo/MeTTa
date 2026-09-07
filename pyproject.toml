@@ -680,6 +680,11 @@ source_modules = [
     "metta.ops",
     "metta.results",
     "metta._rules",
+    # seam is the extension table every seat door reads, so it sits under the
+    # base layer with atoms and errors: a satellite imported from here would
+    # drag metta.errors up the stack with it, which is why the six points
+    # whose readers are metta.integrate's are declared THERE and named here.
+    "metta.seam",
     # vocabularies is generated data over atoms alone; core doors annotate
     # and validate with its enum classes, so it is core, not a satellite.
     "metta.vocabularies",

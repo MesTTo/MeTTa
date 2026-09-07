@@ -32,6 +32,12 @@ Source: `extensions/python/metta/seam.py`.
 > here may name `reader=` and `adder=`, so a registry that already exists keeps
 > its storage and its hot path and is still one row table from out here.
 >
+> A point may also be DECLARED where its implementation lives. This module sits
+> under the base layer, `metta.errors` reading its transport-error rows on every
+> refusal, so it may not import a satellite; the six points whose readers are
+> `metta.integrate`'s are declared there and named in `_DECLARING` here, and
+> `seam.at` loads that module only when a name is not already declared.
+>
 > Owns:
 >   - _POINTS and _ROWS hold the process-wide seam; a registration made inside an
 >     integration's transaction frame is undone with it, through the same
@@ -220,6 +226,11 @@ def at(name: str) -> Point:
 >
 > The general spelling. A shipped point is also an attribute of this module,
 > `seam.frame`, which is the sugar over this.
+>
+> A name this table does not hold loads the declaring modules once before
+> refusing, so a point declared where its implementation lives is found
+> without the caller having imported that module, and a point already here
+> costs the dictionary lookup and nothing else.
 
 ## `points`
 
@@ -228,6 +239,8 @@ def points() -> dict[str, Point]:
 ```
 
 > Every declared point, keyed by name: the seam as data.
+>
+> Everything means everything, so this loads the declaring modules.
 
 ## `rows`
 
@@ -288,6 +301,21 @@ def publish(m: Any) -> int:
 > Publishing is a dispatch of every point, so it LOADS what the seat ships
 > and what packages advertise. Asking for the whole surface as data is
 > exactly the request that cannot be answered without them.
+
+## `on_registration`
+
+```python
+def on_registration(callback: Callable[[str, str, Callable[[], None]], None]) -> None:
+```
+
+> Hear every registration, with the inverse that withdraws it.
+>
+> The direction is deliberate. A registration made inside an integration's
+> installer has to be undone when that installer fails, and the frame that
+> records inverses lives in metta.ops, which the base layer may not reach;
+> a seam that imported it would drag metta.errors up the stack with it. So
+> the OWNER of the frame subscribes, the way metta._contract subscribes to
+> the conversion registry's own listener list.
 
 ## `projection`
 

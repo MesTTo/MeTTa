@@ -259,7 +259,10 @@ def register():
         "solars", module="solars", classes=transport_classes
     )
     seam.image.register("solars", claims=image)
-    seam.reflector.register("solars", claims=reflects, lower=lower)
+    # `reflector` is declared by metta.integrate, where its reader and adder
+    # live; seam.at() finds it whether or not this package imported that
+    # module, which is what the seam's declaring-module list is for.
+    seam.at("reflector").register("solars", claims=reflects, lower=lower)
 SOLARS
 
 cat > "$scratch/free.py" <<'FREE'
@@ -353,8 +356,9 @@ assert m.run("!(solar-flare 21)") == [[42]], m.run("!(solar-flare 21)")
 print("library         : (library solars solars.metta) -> 42, point 'library'")
 
 # 9. the reflector point: solars decides how its own objects become facts.
-assert "solars" in {row.name for row in seam.reflector.rows()}
-claimed = seam.reflector.claim(solars.Model(3, 4))
+reflector = seam.at("reflector")
+assert "solars" in {row.name for row in reflector.rows()}
+claimed = reflector.claim(solars.Model(3, 4))
 assert claimed is not None and claimed.name == "solars", claimed
 assert claimed.row.lower(solars.Model(3, 4), "model", m.self) == 2
 assert len(m.self.match(m.self.parse("(model $field $value)"))) == 2

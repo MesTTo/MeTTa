@@ -1622,12 +1622,13 @@ SQL engine: `claims`, `define`, optional `undeclared`), `array` (an Array API
 library: `module`, `default`, optional `missing`, `scalars`), `index` (a
 nearest-neighbour backend: `available`, `build`, `search`), `arrow` (who
 builds the Arrow C structs: `claims`, `schema`, `stream`, `batches`),
-`transport-error` (`module`, `classes`), `image` (a default projection for a
-class of host types: `claims`), and the four whose rows live where they always
-lived, `type`, `repr`, `reflector`, plus `provider`, `library` and
-`integration` read from the three entry-point groups. Services published for a
+`transport-error` (`module`, `classes`) and `image` (a default projection for
+a class of host types: `claims`), plus `type`, `repr`, `reflector`,
+`provider`, `library` and `integration`, whose rows live where they always
+lived. The seven above are declared by `metta.seam` itself and are module attributes of it; `type`, `repr`, `reflector`, `provider`, `library` and `integration` are declared by `metta.integrate`, where their readers and adders live, and are reached with `seam.at(<name>)`, which loads that module only when the name is not already declared so a dispatch on the base layer never pays for it. Services published for a
 registrant to call: `projection`, `arrow-view`, `space-of`, `module`,
-`sql-arity`, `sql-types`, `image-of`.
+`sql-arity`, `sql-types`, `image-of`, and `catalog`, which `metta._space`
+publishes because a space is that module's.
 `seam.at(name)` reads a point (`seam.frame` and friends are the sugar),
 `point(name, kind, fields=, doc=)` declares one, `<point>.register(name,
 **fields)` adds a row and refuses an undeclared point, a missing field or an

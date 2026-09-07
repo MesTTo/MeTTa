@@ -3283,11 +3283,15 @@ The shipped points are `frame` (a dataframe library), `sql` (a SQL engine),
 `array` (an Array API library), `index` (a nearest-neighbour backend), `arrow`
 (who builds the Arrow C structs), `transport-error` (which exceptions mean an
 absent backend), `image` (how a class of host types projects by default), and
-the four whose rows already lived somewhere: `type`, `repr`, `reflector`, and
-`provider`, `library` and `integration` read straight from the three
-entry-point groups. `seam.services()` is the other direction, what a registrant
+the six whose rows already lived somewhere: `type`, `repr`, `reflector`,
+`provider`, `library` and `integration`. Those six are declared by
+`metta.integrate`, where their readers and adders live, and reached with
+`seam.at(<name>)`; the seam loads that module only when a name is not already
+declared, so `metta.errors` reading its transport-error rows on every refusal
+never pays for it. `seam.services()` is the other direction, what a registrant
 may CALL: `projection`, `arrow-view`, `space-of`, `module`, `sql-arity`,
-`sql-types` and `image-of`, so a registrant never imports a private module.
+`sql-types`, `image-of` and `catalog`, so a registrant never imports a private
+module.
 
 Declaring a point of your own is the same call the seat makes:
 

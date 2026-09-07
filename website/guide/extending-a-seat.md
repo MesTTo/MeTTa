@@ -77,8 +77,10 @@ lexer.
 (who builds the Arrow C structs), `transport-error` (which exceptions mean an
 absent backend), `image` (how a class of host types projects by default), and
 `type`, `repr`, `reflector`, `provider`, `library` and `integration` for the
-doors that already existed, whose rows stay where they always lived. The
-shipped libraries are its first registrants and nothing else about them is in
+doors that already existed, whose rows stay where they always lived. Those six
+are declared by `metta.integrate`, where their readers and adders are, and
+reached with `seam.at(<name>)`, which loads that module only when a name is not
+already declared. The shipped libraries are its first registrants and nothing else about them is in
 the code paths: pandas and polars are rows against `frame`, DuckDB against
 `sql`, numpy against `array`, faiss against `index`.
 
