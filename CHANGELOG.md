@@ -166,6 +166,77 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `test_two_hundred_opened_and_closed_cursors_leave_no_engine_behind` is the
   same claim at the engine table, in the GATE suite, where the count is exact
   and needs no allocator.
+- `m.record(src, *, seed=None, max_events=, timeout=, inferences=)` answers a
+  `Recording`: one run kept as data, with the header that makes it re-runnable
+  rather than only readable. `Recording(program, space, digest, seed, bound,
+  engine, events, replayable, reason)`; `rec.events` is the ordinary `Trace`.
+  The shape is rr's -- record the nondeterministic inputs once, replay
+  deterministically, reverse-execute from the nearest checkpoint -- with the
+  log AS the recording and the frame index as the checkpoint, so a step
+  backwards over recorded data is a list lookup and a live inspection at event
+  k costs one replay of k events.
+
+  Navigation is `rec.at(k) -> Frame` (a negative k counts from the end, one
+  outside the range raises `IndexError`), `rec.seek(k)`, `rec.back()`,
+  `rec.forward()`, `rec.position`, `rec.stack(k)` and `rec.find(head)`.
+  `Frame(index, seq, time, depth, kind, term, answer, stack)`, where `stack`
+  is the chain of open calls at that event, outermost first and ending with
+  its own term, built from an index over the depths that costs O(events) once
+  and the event's own depth to read.
+
+  `rec.save(path)` and `Recording.load(path)` are wire JSON, named
+  `<something>.metta-rec.json` by convention and gzipped when the name ends
+  `.gz`: measured 55 bytes an event and 9 gzipped over a 2,438-event
+  recording, where a 930-event one reads 55 and 9 the same way and a 46-event
+  one reads 62 and 18 because the header is a larger share of it. The terms
+  cross as the engine's wire and not as their text,
+  because read back from text a symbol whose spelling reads as something else
+  comes back as something else. A file another engine version wrote loads and
+  warns with `RecordingVersionWarning`; one that is not a recording, or holds
+  a layout this reader does not know, refuses by name.
+
+  `rec.replay(space=None) -> Trace` re-runs under the recorded seed and
+  compares event by event, answering the replayed trace or raising with the
+  FIRST event that differed. `rec.debug(space=None, *, at=k) -> Debugger`
+  replays k events and hands back a session already stopped there, `d.stop`
+  being that event, and verifies it landed on it. Both refuse a space whose
+  `digest()` differs from the recording's, and both refuse a recording marked
+  not replayable.
+
+  A recorded run ALWAYS has a seed, minted when you name none, because a
+  replay that cannot reproduce the draws is not a replay; the generator is
+  restored afterwards, the scope `(with-seed S expr)` spells in MeTTa.
+  `replayable` is False, with the reason naming what it reached, when the
+  program reaches an `oracleIO` operation no seed pins. A random draw is not
+  one of those: the engine declares which `oracleIO` operations a seed makes
+  repeat through the new `seam:seeded_operation/1`, and ships `random-int` and
+  `random-float`.
+
+- Every trace event carries `seq` and `time`, and a reduction that answers
+  nothing records a `fail` port. `seq` numbers the recorded events from 0,
+  which is what a `Recording` indexes by and what `m.debug(src, at=k)` seeks;
+  `time` is the WALL nanoseconds since the run began and stays outside event
+  equality, so two traces of one program still compare equal. A reduction now
+  reaches exactly one of three outcomes -- `exit` once per answer, `fail` when
+  it answered none, or neither when a bound cut the run -- where a failure
+  used to be a call with no exit, which a consumer had to infer from the next
+  event's depth and could not infer at all for the last call of a run. The
+  same six fields reach all three seats: Python's `TraceEvent` and `Stop`, the
+  Node seat's `TraceEvent`, and lib_observe's `(trace-event seq time depth
+  kind term answer)` atom.
+
+- `m.debug(src, at=k)` is a COUNT breakpoint, the third kind beside the named
+  ones and stepping: it stops at the event with that sequence number, which is
+  how replaying a recorded run to one of its events becomes a live session.
+  `d.stop` is where a session is suspended now, which a session opened already
+  stopped has nowhere else to say.
+
+- `seam:interposed_dispatch/4`, a declaration seam: a library that puts a
+  predicate between a compiled call site and the function it stands for says
+  so, and how to read one of its calls. `seam:forget_derived/0`, an event
+  seam: every library drops the answers it derived earlier, which is what a
+  replay needs in order to start where the recording did. `lib_memo` and
+  `lib_tabling` answer the second; `lib_memo` answers both.
 
 - `(cost witness class)` and `(cost witness class measure)` catalog rows, and
   the `cost-rows` gate lane that can fail one. The witness is a call with
@@ -845,6 +916,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `metta_host_operation_part/2`, the same conversion the operation classifier
   beside it already applied, so `(assertEqualToResult (superpose ((f $x)))
   ((f $y)))` reports its two bags like any other failing comparison.
+- A memoised head records the calls its cache answers. `m.trace` wrapped the
+  compiled FUNCTION, and the memo binds a call site to a lookup of its own, so
+  a cached call never reached the wrapper: `!(fib 8)` under the automatic memo
+  recorded 0 events over 23,050 inferences, and a recording of a memoised
+  program was empty. The memo declares its dispatcher through the new
+  `seam:interposed_dispatch/4` and the tracer wraps that too, recording each
+  reduction ONCE, by whichever layer the call entered first, so a cache hit is
+  a call with its answer and no children and a miss is the whole reduction
+  underneath. The same `!(fib 8)` now records 30 events cold and 2 warm.
 
 - `RestraintError` receives each of its three fields as the type it declares
   for it. The restraint signal's detail crossed as `dict[str, object]` and was

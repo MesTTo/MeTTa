@@ -2,12 +2,26 @@
 %   with every compiled MeTTa function wrapped by SWI's own
 %   wrap_predicate, recording a call event with the input term and an
 %   exit event with the answer per reduction, depth-nested through the
-%   call tree, then unwraps whole, so tracing costs nothing when off. A
-%   reduction that fails leaves its call without an exit, which is what
-%   failing looks like. Events answer as event/5 terms carrying the term
-%   itself, depth, kind, term, answer, and the names of the term's
-%   variables.
+%   call tree, then unwraps whole, so tracing costs nothing when off.
+%   Events answer as event/7 terms carrying a sequence number, the time,
+%   depth, kind, term, answer, and the names of the term's variables.
 % Guarantees:
+%   - A reduction's outcome is one of three ports: an `exit` per answer, one
+%     `fail` when it produced none, or nothing at all when a bound cut the run
+%     [tested: tracer:a_reduction_that_answers_nothing_records_a_fail_port,
+%     tracer:an_answered_reduction_records_no_fail_port; commit=e54c3654b9e0d3d040560d12c105a54303f63af7].
+%   - Every event carries its own sequence number and the wall nanoseconds
+%     since the run began, both monotone within one session
+%     [tested: tracer:events_carry_a_monotone_sequence_and_time; commit=e54c3654b9e0d3d040560d12c105a54303f63af7].
+%   - A library that interposes a predicate between a call site and the
+%     function it stands for declares it through seam:interposed_dispatch/4,
+%     and the reduction is then recorded ONCE, by whichever layer the call
+%     entered first [tested: tracer:a_memoised_head_records_its_calls_once;
+%     commit=e54c3654b9e0d3d040560d12c105a54303f63af7].
+%   - A run under a seed pins the generator and restores the state in force
+%     when it finishes, so a recorded run's draws replay
+%     [tested: tracer:a_seeded_run_repeats_its_draws_and_leaves_the_outside_alone;
+%     commit=e54c3654b9e0d3d040560d12c105a54303f63af7].
 %   - Exact function filters retain execution depth and charge only selected
 %     events [tested: tracer:filter_precedes_the_bound_and_keeps_depth;
 %     commit=504f8dddfa890ced97e795a13ab10e239b1de2ce].
@@ -57,14 +71,27 @@
 %     [tested 2026-08-14: tracer:event_limit_truncates_and_removes_every_wrapper].
 %   - '$metta_trace_events' assigns event sequence numbers and enforces the
 %     event bound across hyperpose worker threads [tested 2026-08-14: tracer].
+% Decides:
+%   - `time` is WALL nanoseconds since the run began, not CPU. SWI's cputime is
+%     thread-local, so a hyperpose worker's events would carry times near zero
+%     beside the main thread's, and this tracer records worker events by design
+%     [tested: tracer:hyperpose_workers_share_the_trace_event_store]. The
+%     process-wide clock is the other one monotone across threads, and it costs
+%     2.7 to 3.6 times a get_time/1 read, more per event than an event
+%     [measured 2026-09-07: swipl -q tests/prolog/probes/tracer/clock_cost.pl,
+%     200,000 reads each; 1,713ns against 477 at loadavg 60 and 2,247 against
+%     822 at loadavg 88, this box being shared].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
 %   Future Enhancements: None
 
-%Three predicates: what a trace records for a host, and the two questions
-%engine/ext_points.pl asks before it wraps a compiled function. The event
-%buffer, the sequence counter and the wrapper bodies are this subsystem's own
+%Three predicates: what a trace records for a host, and the three questions
+%engine/ext_points.pl asks before it wraps a compiled function -- which
+%compiled functions to wrap, which interposed dispatchers to wrap beside them,
+%and the wrap itself, all three reached from seam:function_clauses_changed/1,
+%whose clause is this file's and whose module is the seam's. The event buffer,
+%the sequence counter and the wrapper bodies are this subsystem's own
 %[tested: engine_layering:test_the_engine_layering_contract_holds_and_a_violation_is_named].
 :- module(tracer,
           [ metta_trace_source/4,
@@ -72,8 +99,9 @@
             metta_trace_source/6,
             metta_trace_default_events/1,
             metta_trace_target/1,
+            metta_trace_interposed_target/1,
             metta_trace_wrap_once/1,
-            metta_debug_begin/1,
+            metta_debug_begin/2,
             metta_debug_run/3,
             metta_debug_end/0
           ]).
@@ -92,7 +120,10 @@
 :- meta_predicate
        metta_trace_stack_bound(+, 0),
        metta_trace_time_bound(+, 0),
-       metta_trace_inference_bound(+, 0).
+       metta_trace_inference_bound(+, 0),
+       metta_trace_seeded(+, 0),
+       metta_trace_ports(+, +, ?, 0),
+       metta_trace_interposition(+, 0).
 
 :- dynamic metta_trace_event/2.
 :- dynamic metta_trace_limit/1.
@@ -103,6 +134,7 @@
 :- dynamic metta_trace_wrapped/1.
 :- dynamic metta_trace_filter/1.
 :- dynamic metta_trace_selected/1.
+:- dynamic metta_trace_origin/1.
 
 %Every name the translator compiled from equations, in &self's module and in
 %each other space module that registered it: exactly the predicates owning at
@@ -135,12 +167,35 @@ metta_trace_target(Module:F/A) :-
            clause_property(Ref, module(Module)),
            translated_from(Ref, _) )).
 
+%A predicate a LIBRARY put in front of a function, declared through
+%seam:interposed_dispatch/4 and enumerated here with everything unbound. The
+%engine knows no library by name, so the set is whatever the loaded ones
+%declare; with none loaded this finds nothing and costs one failed call per
+%session.
+metta_trace_interposed_target(interposed(Module:Head, Fun, InArgs, Out)) :-
+    seam:interposed_dispatch(Module:Head, Fun, InArgs, Out),
+    functor(Head, Name, Arity),
+    current_predicate(Module:Name/Arity).
+
+%The decomposition happens HERE, once per session per target, rather than in
+%the wrapper: wrap_predicate/4 builds a clause whose head is this term, so the
+%call's own arguments arrive already bound to InArgs and Out, the way any
+%clause head binds them. The wrapper it replaced re-derived them with =.. ,
+%length/2 and append/3 on every traced call
+%[source: /usr/lib/swi-prolog/library/prolog_trace.pl, wrapper/4, which shares
+%one head between the wrapped goal and its port calls for the same reason].
 metta_trace_wrap(Module:F/A) :-
     functor(Head, F, A),
     compiled_function_name(LogicalF, F),
     In is A - 1,
+    length(InArgs, In),
+    Head =.. [_|Args],
+    append(InArgs, [Out], Args),
     wrap_predicate(Module:Head, metta_tracer, Closure,
-                   metta_trace_call(LogicalF, In, Head, Closure)).
+                   metta_trace_call(LogicalF, InArgs, Out, Closure)).
+metta_trace_wrap(interposed(Module:Head, Fun, InArgs, Out)) :-
+    wrap_predicate(Module:Head, metta_tracer, Closure,
+                   metta_trace_interposed_call(Fun, InArgs, Out, Closure)).
 
 %Tolerant of BOTH outcomes, and the FAILURE is the one that bites.
 %unwrap_predicate/2 is semidet and fails when the indicator names no
@@ -159,6 +214,9 @@ metta_trace_wrap(Module:F/A) :-
 %commit=f5eb8775b78519c080da4ea7c6dff81f7be21ef9].
 metta_trace_unwrap(Module:F/A) :-
     ignore(catch(unwrap_predicate(Module:F/A, metta_tracer), _, true)).
+metta_trace_unwrap(interposed(Module:Head, _, _, _)) :-
+    functor(Head, Name, Arity),
+    metta_trace_unwrap(Module:Name/Arity).
 
 metta_trace_wrap_once(Target) :-
     ( metta_trace_wrapped(Target) -> true
@@ -178,23 +236,80 @@ seam:function_clauses_changed(F) :-
                  -> compiled_function_name(F, Predicate),
                     findall(Target,
                             ( metta_trace_target(Target),
-                              Target = _Module:Predicate/_Arity ),
+                              Target = _Module:Predicate/_Arity
+                            ; metta_trace_interposed_target(Target) ),
                             Targets0),
                     sort(Targets0, Targets),
                     maplist(metta_trace_wrap_once, Targets)
                  ; true )).
 
-metta_trace_call(F, In, Head, Closure) :-
-    Head =.. [_|Args],
-    length(InArgs, In),
-    append(InArgs, [Out], Args),
+%The interposed sweep rides on the same event and is not narrowed to this
+%function, because a library's dispatcher does not carry the function's name in
+%its predicate: `(memoize-exact f)` DURING a trace generates a replay predicate
+%of its own, and only a full sweep of what the seam declares finds it. It costs
+%one solution per declared interposition against a hook that already walks
+%every registered arity looking for this function's own targets, and
+%metta_trace_wrap_once/1 makes the repeat free.
+
+%The compiled function's own wrapper. It records the reduction unless a
+%library's dispatcher recorded it a moment ago and is now running the function
+%to answer it: that is ONE reduction seen at two layers, and recording both
+%showed `(fib 8)` reducing inside itself. The mark is cleared before the body
+%runs, so a call the body makes under the same name is an ordinary reduction
+%again.
+metta_trace_call(F, InArgs, Out, Closure) :-
+    (   nb_current('$metta_trace_interposed', F)
+    ->  b_setval('$metta_trace_interposed', []),
+        call(Closure)
+    ;   metta_trace_ports(F, InArgs, Out, Closure)
+    ).
+
+%The library dispatcher's wrapper. The reduction is recorded HERE, because
+%this is where the call arrives and the layer below may never run: a cache hit
+%answers from its table without entering the function, which is why a memoised
+%head's trace was empty [measured 2026-09-07: `!(fib 8)` with the automatic
+%memo recorded 0 events over 23,050 inferences, and 18 on a cold cache, one
+%pair per miss and nothing for the 9 hits].
+metta_trace_interposed_call(F, InArgs, Out, Closure) :-
+    metta_trace_ports(F, InArgs, Out, metta_trace_interposition(F, Closure)).
+
+%The mark that stops the layer below recording the same reduction, set for the
+%dispatcher's own body and cleared again on the way out, so a cache HIT -- which
+%never reaches the function and never consumes the mark -- does not leave it
+%standing for the next direct call. Backtracking restores it, which is what a
+%dispatcher re-entered for a second answer wants.
+metta_trace_interposition(F, Closure) :-
+    b_setval('$metta_trace_interposed', F),
+    call(Closure),
+    b_setval('$metta_trace_interposed', []).
+
+%The three ports of one reduction. `*->` is the operator the trichotomy needs:
+%the else branch runs only when the goal produced NO answer, so a reduction
+%that answered is not also reported as failing, and the soft cut leaves no
+%choicepoint behind a deterministic success [measured 2026-09-07: swipl -q
+%tests/prolog/probes/tracer/fail_port_shape.pl, deterministic(true) after a
+%det goal, the same answer SWI's own port wrapper reaches with call_cleanup/2
+%and a local cut (source: /usr/lib/swi-prolog/library/prolog_trace.pl,
+%wrapper/4)]. SWI's
+%wrapper fires `fail` on EXHAUSTION, after however many exits, which is the
+%Byrd box; this records the OUTCOME of a reduction, so the port that says
+%"this one answered nothing" is worth an event and a second port saying "and
+%now there are no more" is not, on a stream every consumer pairs by depth.
+%
+%An exception does not reach the else branch at all, so a bound that cut the
+%run leaves the call unmatched rather than claiming it failed.
+metta_trace_ports(F, InArgs, Out, Closure) :-
     ( nb_current('$metta_trace_depth', D) -> true ; D = 0 ),
-    metta_trace_observe(D, call, [F|InArgs], ''),
+    Term = [F|InArgs],
+    metta_trace_observe(D, call, Term, ''),
     D1 is D + 1,
     b_setval('$metta_trace_depth', D1),
-    call(Closure),
-    b_setval('$metta_trace_depth', D),
-    metta_trace_observe(D, exit, [F|InArgs], Out).
+    (   call(Closure)
+    *-> b_setval('$metta_trace_depth', D),
+        metta_trace_observe(D, exit, Term, Out)
+    ;   metta_trace_observe(D, fail, Term, ''),
+        fail
+    ).
 
 %What the wrapper does with one event, which is the session's business and
 %not the wrapper's. A debug session SUSPENDS on it and a trace session
@@ -236,10 +351,15 @@ metta_trace_record(Depth, Kind, Term, Answer) :-
     copy_term(Term-Answer, TermCopy-AnswerCopy),
     term_variables(TermCopy-AnswerCopy, Variables),
     metta_trace_variable_names(Variables, 0, Names),
-    Event = event(Depth, Kind, TermCopy, AnswerCopy, Names),
-    term_size(Event, EventCells),
+    metta_trace_time(Time),
     with_mutex('$metta_trace_events',
                ( metta_trace_next_seq(N),
+                 %Built inside the lock because the sequence number is part of
+                 %it and the cell budget must charge what is stored. It costs
+                 %one term_size walk over a term the assertz below walks again.
+                 Event = event(N, Time, Depth, Kind, TermCopy, AnswerCopy,
+                               Names),
+                 term_size(Event, EventCells),
                  metta_trace_limit(Max),
                  metta_trace_cells(Cells),
                  Cells1 is Cells + EventCells,
@@ -324,6 +444,26 @@ metta_trace_stop(Ball, Stopped) :-
 %for, or caught by, anything that handles error/2. It never escapes
 %metta_trace_source/5.
 
+%The clock an event carries: whole nanoseconds since the session's run began,
+%so a recording's first event is near zero and two recordings of the same
+%program are comparable whatever else the machine was doing. An absolute epoch
+%stamp would spend nineteen digits a row saying when the process started.
+%
+%Outside a session there is no origin and the answer is 0, which is the only
+%time this is reached: metta_trace_observe/4 has already decided a session is
+%recording, and both sessions set an origin before the program runs.
+metta_trace_time(Time) :-
+    (   metta_trace_origin(Origin)
+    ->  get_time(Now),
+        Time is round((Now - Origin) * 1 000 000 000)
+    ;   Time = 0
+    ).
+
+metta_trace_start_clock :-
+    get_time(Now),
+    retractall(metta_trace_origin(_)),
+    assertz(metta_trace_origin(Now)).
+
 %_0, _1 and so on, by first occurrence, which is the naming swrite applied
 %when an event crossed as text. The pairs travel with the term, so a
 %receiver that encodes variables by name reads the same spelling; the
@@ -361,16 +501,38 @@ metta_trace_variable_names([Variable|Rest], Index, [Name-Variable|Names]) :-
 % The armed set arrives WHOLE on every resume rather than as edits. The host
 % owns it, so there is no second copy here to drift, and arming a function
 % mid-session is the same operation as resuming.
+% A COUNT joins the names as a third kind of breakpoint, because the question
+% "stop where the recording's event 200 is" has no name to arm: replaying a
+% recorded run to one of its events is how a recording becomes a live session,
+% and the event is identified by its position. It is the same numbering a trace
+% records, because both sessions count through metta_trace_observe/4 over the
+% same wrappers, and a recording is made with no filter, so nothing is skipped
+% on one side and counted on the other.
 :- dynamic metta_debug_armed/1.
 :- dynamic metta_debug_mode/1.
+:- dynamic metta_debug_count/1.
 
 metta_debug_event(Depth, Kind, Term, Answer) :-
-    (   metta_debug_stops(Term)
-    ->  metta_debug_suspend(Depth, Kind, Term, Answer)
+    metta_debug_next_seq(Seq),
+    (   metta_debug_stops(Seq, Term)
+        %Read only when it is about to be reported. A session spends the
+        %host's thinking time between stops, so a clock read per candidate
+        %event would price every reduction for a number nobody sees.
+    ->  metta_trace_time(Time),
+        metta_debug_suspend(Seq, Time, Depth, Kind, Term, Answer)
     ;   true
     ).
 
-metta_debug_stops([F|_]) :-
+metta_debug_next_seq(Seq) :-
+    with_mutex('$metta_trace_events',
+               ( metta_trace_next_seq(Seq),
+                 Next is Seq + 1,
+                 retractall(metta_trace_next_seq(_)),
+                 assertz(metta_trace_next_seq(Next)) )).
+
+metta_debug_stops(Seq, _) :-
+    metta_debug_count(Seq).
+metta_debug_stops(_, [F|_]) :-
     (   metta_debug_mode(step)
     ->  true
     ;   metta_debug_armed(F)
@@ -379,11 +541,12 @@ metta_debug_stops([F|_]) :-
 %The names travel with the term for the same reason a trace event's do: a
 %receiver that encodes variables by name reads the same spelling the writer
 %would have produced.
-metta_debug_suspend(Depth, Kind, Term, Answer) :-
+metta_debug_suspend(Seq, Time, Depth, Kind, Term, Answer) :-
     copy_term(Term-Answer, TermCopy-AnswerCopy),
     term_variables(TermCopy-AnswerCopy, Variables),
     metta_trace_variable_names(Variables, 0, Names),
-    metta_debug_yield(stop(Depth, Kind, TermCopy, AnswerCopy, Names)),
+    metta_debug_yield(stop(Seq, Time, Depth, Kind, TermCopy, AnswerCopy,
+                           Names)),
     engine_fetch(Command),
     metta_debug_command(Command).
 
@@ -427,10 +590,13 @@ metta_debug_arm([Name0|Rest]) :-
 metta_debug_run(Source, Space, Groups) :-
     b_setval('$metta_debug_active', true),
     b_setval('$metta_trace_depth', 0),
+    metta_trace_start_clock,
     once(metta_host_run_source(Source, Space, [], Groups)).
 
-metta_debug_begin(Armed) :-
-    with_mutex('$metta_trace_state', metta_debug_begin_unlocked(Armed)).
+%Count is the event to stop at, or a negative number for no count breakpoint,
+%which is the no-bound sentinel every other door here uses.
+metta_debug_begin(Armed, Count) :-
+    with_mutex('$metta_trace_state', metta_debug_begin_unlocked(Armed, Count)).
 
 %One session at a time, trace or debug, because they take the same wrappers.
 %
@@ -440,19 +606,23 @@ metta_debug_begin(Armed) :-
 %already, by the truncation flag and again by the filter pair, and each time a
 %copy here would have gone stale silently. No metta_trace_limit/1 is asserted,
 %which is what metta_trace_observe/4 reads to tell the two sessions apart.
-metta_debug_begin_unlocked(Armed) :-
+metta_debug_begin_unlocked(Armed, Count) :-
     (   metta_trace_session
     ->  throw(error(permission_error(debug, evaluation, nested),
-                    context(metta_debug_begin/1,
+                    context(metta_debug_begin/2,
                             'a trace or debug session is already running')))
     ;   metta_trace_end_unlocked,
         retractall(metta_debug_mode(_)),
         assertz(metta_debug_mode(run)),
         retractall(metta_debug_armed(_)),
         metta_debug_arm(Armed),
+        %The counter the stops are numbered by. metta_trace_end_unlocked/0 has
+        %just retracted it and asserts none of its own, because a trace
+        %session's begin is the only other place that sets it.
+        assertz(metta_trace_next_seq(0)),
+        ( Count < 0 -> true ; assertz(metta_debug_count(Count)) ),
         assertz(metta_trace_session),
-        catch(( findall(Target, metta_trace_target(Target), Targets0),
-                sort(Targets0, Targets),
+        catch(( metta_trace_all_targets(Targets),
                 maplist(metta_trace_wrap_once, Targets) ),
               Error,
               ( metta_debug_end_unlocked, throw(Error) ))
@@ -468,6 +638,7 @@ metta_debug_end :-
 metta_debug_end_unlocked :-
     metta_trace_end_unlocked,
     retractall(metta_debug_armed(_)),
+    retractall(metta_debug_count(_)),
     retractall(metta_debug_mode(_)).
 
 %%%%%%%%%%% Trace sessions %%%%%%%%%%
@@ -493,11 +664,20 @@ metta_trace_begin_unlocked(Max, Filter) :-
       assertz(metta_trace_next_seq(0)),
       assertz(metta_trace_session),
       catch(( metta_trace_install_filter(Filter),
-              findall(Target, metta_trace_target(Target), Targets0),
-              sort(Targets0, Targets),
+              metta_trace_all_targets(Targets),
               maplist(metta_trace_wrap_once, Targets) ),
             Error,
             ( metta_trace_end_unlocked, throw(Error) )) ).
+
+%Every compiled MeTTa function, and every predicate a loaded library declared
+%it interposes in front of one. Sorted together so the wrap order is stable
+%and a duplicate declaration wraps once.
+metta_trace_all_targets(Targets) :-
+    findall(Target,
+            ( metta_trace_target(Target)
+            ; metta_trace_interposed_target(Target) ),
+            Targets0),
+    sort(Targets0, Targets).
 
 metta_trace_end :-
     with_mutex('$metta_trace_state', metta_trace_end_unlocked).
@@ -513,6 +693,7 @@ metta_trace_end_unlocked :-
     retractall(metta_trace_next_seq(_)),
     retractall(metta_trace_stopped(_)),
     retractall(metta_trace_cells(_)),
+    retractall(metta_trace_origin(_)),
     retractall(metta_trace_event(_, _)).
 
 %Run Source in Space with the trace armed; Events come back oldest
@@ -523,8 +704,10 @@ metta_trace_end_unlocked :-
 %full memory of the bound for no answer. The five-argument form reports the
 %bound, false when the run finished; the four- and three-argument forms drop
 %that and carry the default bound. Each event is
-%event(Depth, Kind, Term, Answer, VariableNames), Answer being '' on a
-%call, and VariableNames pairing $_0, $_1 with the term's variables.
+%event(Seq, Time, Depth, Kind, Term, Answer, VariableNames), Answer being ''
+%on a call and on a fail, Seq numbering the recorded events from 0, Time being
+%the wall nanoseconds since the run began, and VariableNames pairing $_0, $_1
+%with the term's variables.
 %
 %DEFAULT_TRACE_EVENTS is 10000 rather than the 1000000 it was through
 %2026-09-03. An unqualified trace has to be survivable on an ordinary
@@ -584,7 +767,7 @@ metta_trace_source(Source, Space, Max, Events) :-
 metta_trace_source(Source, Space, Request, Events, Stopped) :-
     (   nonvar(Request), Request = bounded(Inner, Bounds)
     ->  true
-    ;   Inner = Request, Bounds = run_bounds(-1, -1, -1)
+    ;   Inner = Request, Bounds = run_bounds(-1, -1, -1, -1)
     ),
     (   nonvar(Inner), Inner = [Max, Filter]
     ->  true
@@ -618,7 +801,7 @@ metta_trace_install_filter(Names) :-
 
 metta_trace_source(Source, Space, Max, Filter, Events, Stopped) :-
     metta_trace_bounded_source(Source, Space, Max, Filter,
-                               run_bounds(-1, -1, -1), Events, Stopped).
+                               run_bounds(-1, -1, -1, -1), Events, Stopped).
 
 metta_trace_bounded_source(Source, Space, Max, Filter, Bounds, Events, Stopped) :-
     metta_trace_filter_names(Filter, Names),
@@ -638,7 +821,7 @@ metta_trace_bounded_source(Source, Space, Max, Filter, Bounds, Events, Stopped) 
         %sometimes answers, on nothing the caller can see, is worse than
         %either. metta_trace_begin/2 has already torn the session down by
         %here, so there is nothing left to harvest. A bound sent as
-        %run_bounds/3 cannot reach that branch at all, since it is installed
+        %run_bounds/4 cannot reach that branch at all, since it is installed
         %around the program rather than around the arming; a caller wrapping
         %the whole door still can.
     ;   metta_trace_stop_ball(Ball, Stopped)
@@ -650,6 +833,9 @@ metta_trace_session(Source, Space, Max, Filter, Bounds, Events, Stopped) :-
     setup_call_cleanup(
         metta_trace_begin(Max, Filter),
         ( b_setval('$metta_trace_depth', 0),
+          %After the arming, so an event's time measures the PROGRAM, the same
+          %division the run bounds already make.
+          metta_trace_start_clock,
           %Every ball, so a RUN bound stopped by the guard around this
           %call keeps its events too; metta_trace_stop/2 rethrows anything
           %that is not a bound before a single event is harvested.
@@ -677,14 +863,35 @@ metta_trace_session(Source, Space, Max, Filter, Bounds, Events, Stopped) :-
 %budget for the same reason on 2026-09-04
 %[docs/journal/2026-09-04-bounded-trace-keeps-its-events.md]; the arming and
 %the teardown leave it here.
-metta_trace_run(run_bounds(Seconds, Inferences, StackBytes), Source, Space) :-
+metta_trace_run(run_bounds(Seconds, Inferences, StackBytes, Seed),
+                Source, Space) :-
     metta_trace_stack_bound(
         StackBytes,
         metta_trace_time_bound(
             Seconds,
             metta_trace_inference_bound(
                 Inferences,
-                process_metta_string(Source, _Results, Space)))).
+                metta_trace_seeded(
+                    Seed,
+                    process_metta_string(Source, _Results, Space))))).
+
+%A run under a pinned generator, which is what makes a recorded run's draws
+%replay: rr records the nondeterministic inputs once and replays deterministically
+%[source: O'Callahan et al., "Engineering Record and Replay for Deployability",
+%USENIX ATC 2017, arXiv:1705.05937], and the only such input this engine has
+%without a host call is the random state. The save-and-restore pair is
+%metta_with_seed/4's, and for its reason: a seed is a SCOPE, so the generator
+%is left exactly where the caller had it
+%[source: engine/metta/control.pl, metta_with_seed/4]. Innermost of the four,
+%so the seeding is inside every bound rather than beside them.
+metta_trace_seeded(Seed, Goal) :-
+    (   Seed < 0
+    ->  call(Goal)
+    ;   random_property(state(Saved)),
+        setup_call_cleanup(set_random(seed(Seed)),
+                           call(Goal),
+                           set_random(state(Saved)))
+    ).
 
 %A negative bound is the no-bound sentinel every other door here uses.
 metta_trace_stack_bound(Bytes, Goal) :-

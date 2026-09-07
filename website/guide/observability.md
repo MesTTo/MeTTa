@@ -1,7 +1,7 @@
 # Observability
 
-Ten tools, each answering a different question about a running program. Find
-your question in the left column.
+Eleven tools, each answering a different question about a running program.
+Find your question in the left column.
 
 | Your question | What answers it |
 |---|---|
@@ -10,6 +10,7 @@ your question in the left column.
 | What will this query do, before I run it? | `prepare(...).explain()` and `cursor.explain()`, the [plan reflected](./run-query#explain-a-query) |
 | Which join will the engine run, and what did it cost? | `m.explain(query)` and `rows.explain()`, the engine's own EXPLAIN; `analyze=True` measures it |
 | What did this evaluation do, step by step? | [`metta.trace`](../reference/metta-trace), the reduction trace as events |
+| Can I keep a run and step back through it? | [`metta.recording`](../reference/metta-recording): `m.record(...)` saves, replays and re-enters one |
 | What did this call cost? | `m.stats()`, engine counter deltas over a `with` block |
 | Where did the time go? | `m.profile()`, the engine's own profiler over a block |
 | What is tabling holding? | `(table-stats)`: tables, answers, hits, invalidations |
@@ -87,6 +88,61 @@ and the verdict `WRITE IT`; beside it, refusing the memo the engine chose for
 
 It never writes a row. Declaring one is your program's own
 `!(add-atom &metta (cache expand-once force))`.
+
+## A run you can step backwards through
+
+`m.trace(term)` answers the events of one run. `m.record(term)` answers those
+events *plus the state that produced them*, which is what makes them
+re-runnable rather than only readable:
+
+```python
+rec = m.record(S.fib(12))
+rec.at(-1)                  # the last event, with its whole call stack
+rec.back()                  # a step backwards, which costs a list lookup
+rec.find(S.fib)[3].index    # where the fourth call on fib is
+rec.save("fib.metta-rec.json")
+```
+
+Every event carries `seq`, its position in the recording, and `time`, the wall
+nanoseconds since the run began. A reduction reaches exactly one of three
+outcomes: `exit` once per answer, `fail` when it answered nothing, or neither
+when a bound cut the run. A frame's `stack` is the chain of open calls at that
+moment, outermost first, so a recorded event reads like a traceback.
+
+The header is the header of a *reproducible* run. `digest` is the space's
+content, `seed` is the generator the run was pinned to (minted for you when
+you name none, because a replay that cannot reproduce the draws is not a
+replay), and `replayable` says whether the program stayed inside what those
+two capture:
+
+```python
+rec.replay(other)           # the same run again, event for event
+with rec.debug(at=17) as d: # live, already stopped where event 17 is
+    print(d.stop)
+    for stop in d:          # and stepping carries on from there
+        ...
+```
+
+`replay` compares event by event and names the FIRST one that differed, since
+"something diverged" sends you through the whole log to find out what. Before
+it runs, it asks every library to forget what it derived earlier: a memo
+answers the second run of a program in fewer reductions than the first, so
+without that the same answers would arrive over a shorter event stream.
+
+A recording is refused a replay for two reasons, both stated at the time. The
+space's `digest()` differs, so the program would reduce against different
+atoms. Or the program reaches an `oracleIO` operation no seed pins -- a
+`py-atom` call, the clock, standing input -- in which case `replayable` is
+False and `reason` names it. A random draw is *not* one of those: the seed
+captured it, and the engine declares which `oracleIO` operations that is true
+of, so `(random-int 1 6)` under a recording replays exactly.
+
+The file is wire JSON, `.metta-rec.json`, gzipped when the name ends `.gz`,
+and costs about 62 bytes an event or 18 gzipped. It carries the terms as the
+engine's own wire rather than as their text, because read back from text a
+symbol whose spelling reads as something else comes back as something else.
+`Recording.load(path)` reads it; one written by another engine version loads
+and warns.
 
 ## The engine describes itself
 

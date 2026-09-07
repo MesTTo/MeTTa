@@ -642,7 +642,14 @@ def trace(
 ### `Space.debug`
 
 ```python
-def debug(self, source: Atom | str, *, on: Any = None, inferences: int | None = None) -> Debugger:
+def debug(
+    self,
+    source: Atom | str,
+    *,
+    on: Any = None,
+    inferences: int | None = None,
+    at: int | None = None,
+) -> Debugger:
 ```
 
 > Run a TERM, or source, under breakpoints, stepped from Python.
@@ -664,6 +671,11 @@ def debug(self, source: Atom | str, *, on: Any = None, inferences: int | None = 
 > lasts one advance. `breakpoints` is a live set, so one added while
 > the program is suspended stops it.
 >
+> at= is the third kind of breakpoint, a COUNT: it stops at the event
+> with that sequence number, numbering reductions from 0 the way a
+> Recording numbers them, so `at=200` is "put me where event 200 is".
+> `Recording.debug(at=k)` is the convenience over this one.
+>
 > inferences bound the WHOLE session cumulatively, so a resume that
 > would never reach another breakpoint stops. There is no timeout:
 > the session is suspended by design and a clock would run while a
@@ -671,6 +683,47 @@ def debug(self, source: Atom | str, *, on: Any = None, inferences: int | None = 
 > included, and inherits the caller's scope. Close it, or leave its
 > with-block: the session holds a wrapper on every compiled function
 > until it does.
+
+### `Space.record`
+
+```python
+def record(
+    self,
+    source: Atom | str,
+    *,
+    seed: int | None = None,
+    max_events: int | None = None,
+    timeout: float | None = None,
+    inferences: int | None = None,
+) -> Recording:
+```
+
+> Run a TERM, or source, and keep the whole run as data.
+>
+> The data walks backwards, saves to a file, and re-runs.
+> `m.trace` is the rung below: it answers the events alone. A Recording
+> is those events plus the state that produced them, which is what makes
+> them re-runnable rather than only readable:
+>
+>     rec = m.record(S.fib(12))
+>     rec.save("fib.metta-rec.json")
+>     rec.at(-1)               # the last event, with its call stack
+>     rec.back()               # a step backwards costs a lookup
+>     rec.replay(other)        # the same run, in another engine
+>     with rec.debug(at=17) as d:   # live, stopped where event 17 is
+>         print(d.stop)
+>
+> A recorded run always has a seed, minted when you do not name one,
+> because a replay that cannot reproduce the draws is not a replay; the
+> generator is restored afterwards. `(with-seed S expr)` is the MeTTa
+> spelling of the same scope.
+>
+> max_events bounds the RECORDING and timeout and inferences bound the
+> RUN, exactly as on trace(); a cut recording says so through
+> `rec.events.stopped` and replays to the same length. A program whose
+> effect plan reaches oracleIO is recorded with `replayable` false and
+> the reason naming what it reached, and replay() then refuses rather
+> than re-reading the host.
 
 ### `Space.lint`
 
@@ -3456,7 +3509,14 @@ def trace(
 ### `MeTTa.debug`
 
 ```python
-def debug(self, source: Atom | str, *, on: Any = None, inferences: int | None = None) -> Debugger:
+def debug(
+    self,
+    source: Atom | str,
+    *,
+    on: Any = None,
+    inferences: int | None = None,
+    at: int | None = None,
+) -> Debugger:
 ```
 
 > Run a TERM, or source, under breakpoints, stepped from Python.
@@ -3478,6 +3538,11 @@ def debug(self, source: Atom | str, *, on: Any = None, inferences: int | None = 
 > lasts one advance. `breakpoints` is a live set, so one added while
 > the program is suspended stops it.
 >
+> at= is the third kind of breakpoint, a COUNT: it stops at the event
+> with that sequence number, numbering reductions from 0 the way a
+> Recording numbers them, so `at=200` is "put me where event 200 is".
+> `Recording.debug(at=k)` is the convenience over this one.
+>
 > inferences bound the WHOLE session cumulatively, so a resume that
 > would never reach another breakpoint stops. There is no timeout:
 > the session is suspended by design and a clock would run while a
@@ -3485,6 +3550,48 @@ def debug(self, source: Atom | str, *, on: Any = None, inferences: int | None = 
 > included, and inherits the caller's scope. Close it, or leave its
 > with-block: the session holds a wrapper on every compiled function
 > until it does.
+> Runs against this context's self space.
+
+### `MeTTa.record`
+
+```python
+def record(
+    self,
+    source: Atom | str,
+    *,
+    seed: int | None = None,
+    max_events: int | None = None,
+    timeout: float | None = None,
+    inferences: int | None = None,
+) -> Recording:
+```
+
+> Run a TERM, or source, and keep the whole run as data.
+>
+> The data walks backwards, saves to a file, and re-runs.
+> `m.trace` is the rung below: it answers the events alone. A Recording
+> is those events plus the state that produced them, which is what makes
+> them re-runnable rather than only readable:
+>
+>     rec = m.record(S.fib(12))
+>     rec.save("fib.metta-rec.json")
+>     rec.at(-1)               # the last event, with its call stack
+>     rec.back()               # a step backwards costs a lookup
+>     rec.replay(other)        # the same run, in another engine
+>     with rec.debug(at=17) as d:   # live, stopped where event 17 is
+>         print(d.stop)
+>
+> A recorded run always has a seed, minted when you do not name one,
+> because a replay that cannot reproduce the draws is not a replay; the
+> generator is restored afterwards. `(with-seed S expr)` is the MeTTa
+> spelling of the same scope.
+>
+> max_events bounds the RECORDING and timeout and inferences bound the
+> RUN, exactly as on trace(); a cut recording says so through
+> `rec.events.stopped` and replays to the same length. A program whose
+> effect plan reaches oracleIO is recorded with `replayable` false and
+> the reason naming what it reached, and replay() then refuses rather
+> than re-reading the host.
 > Runs against this context's self space.
 
 ### `MeTTa.register_prolog`

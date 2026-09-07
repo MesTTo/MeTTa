@@ -47,12 +47,21 @@ cleanup_trace_test :-
     retractall(user:silent(_)),
     assertz(user:silent(false)).
 
+%The fields a test pins by hand. The other two are checked by their own tests:
+%a sequence number is the event's position in this very list, and a time is a
+%clock reading no expectation can spell.
+trace_shape(event(_, _, Depth, Kind, Term, Answer, Names),
+            event(Depth, Kind, Term, Answer, Names)).
+
+trace_shapes(Events, Shapes) :- maplist(trace_shape, Events, Shapes).
+
 test(function_defined_in_source_is_traced,
      [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
     Source = "(= (plunit_trace_new $x) (+ $x 1))\n\
 !(plunit_trace_new 1)",
     tracer:metta_trace_source(Source, '&self', Events),
-    Events == [event(0, call, [plunit_trace_new, 1], '', []),
+    trace_shapes(Events, Shapes),
+    Shapes == [event(0, call, [plunit_trace_new, 1], '', []),
                event(0, exit, [plunit_trace_new, 1], 2, [])].
 
 test(function_defined_in_named_trace_stays_in_that_space,
@@ -66,7 +75,8 @@ test(function_defined_in_named_trace_stays_in_that_space,
     clause(Module:Head, _, Ref),
     clause_property(Ref, module(Module)),
     \+ clause(user:Head, _, _),
-    Events == [event(0, call, [plunit_trace_named, 1], '', []),
+    trace_shapes(Events, Shapes),
+    Shapes == [event(0, call, [plunit_trace_named, 1], '', []),
                event(0, exit, [plunit_trace_named, 1], 2, [])].
 
 test(hyperpose_workers_share_the_trace_event_store,
@@ -75,7 +85,8 @@ test(hyperpose_workers_share_the_trace_event_store,
     tracer:metta_trace_source(
         "!(hyperpose ((plunit_trace_hyperpose 1) (plunit_trace_hyperpose 2)))",
         '&self', Events),
-    msort(Events, Sorted),
+    trace_shapes(Events, Shapes),
+    msort(Shapes, Sorted),
     msort([event(0, call, [plunit_trace_hyperpose, 1], '', []),
            event(0, call, [plunit_trace_hyperpose, 2], '', []),
            event(0, exit, [plunit_trace_hyperpose, 1], 2, []),
@@ -103,7 +114,8 @@ test(type_extensions_keep_the_public_name,
     Source = "(= (get-type plunit_trace_type) plunit_traced_type)\n\
 !(get-type plunit_trace_type)",
     tracer:metta_trace_source(Source, '&self', Events),
-    Events == [event(0, call, ['get-type', plunit_trace_type], '', []),
+    trace_shapes(Events, Shapes),
+    Shapes == [event(0, call, ['get-type', plunit_trace_type], '', []),
                event(0, exit, ['get-type', plunit_trace_type],
                      plunit_traced_type, [])].
 
@@ -123,7 +135,8 @@ test(a_symbol_that_looks_like_a_variable_stays_a_symbol,
     tracer:metta_trace_source(
         "!(match &self (plunit_trace_holds $v) (plunit_trace_new $v))",
         '&self', Events),
-    Events == [event(0, call, [plunit_trace_new, '$notvar'], '', []),
+    trace_shapes(Events, Shapes),
+    Shapes == [event(0, call, [plunit_trace_new, '$notvar'], '', []),
                event(0, exit, [plunit_trace_new, '$notvar'],
                      '$notvar', [])].
 
@@ -138,7 +151,8 @@ test(a_symbol_holding_a_comment_character_stays_whole,
     tracer:metta_trace_source(
         "!(match &self (plunit_trace_holds $v) (plunit_trace_new $v))",
         '&self', Events),
-    Events == [event(0, call, [plunit_trace_new, 'semi;colon'], '', []),
+    trace_shapes(Events, Shapes),
+    Shapes == [event(0, call, [plunit_trace_new, 'semi;colon'], '', []),
                event(0, exit, [plunit_trace_new, 'semi;colon'],
                      'semi;colon', [])].
 
@@ -154,12 +168,14 @@ test(event_limit_truncates_and_removes_every_wrapper,
     tracer:metta_trace_source("!(plunit_trace_hyperpose 1)", '&self', 1,
                               Bounded, Stopped),
     Stopped == events,
-    Bounded == [event(0, call, [plunit_trace_hyperpose, 1], '', [])],
+    trace_shapes(Bounded, BoundedShapes),
+    BoundedShapes == [event(0, call, [plunit_trace_hyperpose, 1], '', [])],
     \+ tracer:metta_trace_session,
     \+ current_predicate_wrapper(user:plunit_trace_hyperpose(_, _),
                                   metta_tracer, _, _),
     tracer:metta_trace_source("!(plunit_trace_hyperpose 2)", '&self', Events),
-    Events == [event(0, call, [plunit_trace_hyperpose, 2], '', []),
+    trace_shapes(Events, Shapes),
+    Shapes == [event(0, call, [plunit_trace_hyperpose, 2], '', []),
                event(0, exit, [plunit_trace_hyperpose, 2], 3, [])].
 
 %A trace that fits its bound says so, which is the other half: `Stopped`
@@ -170,7 +186,8 @@ test(a_trace_inside_its_bound_is_not_truncated,
     tracer:metta_trace_source("!(plunit_trace_hyperpose 3)", '&self', 1000,
                               Events, Stopped),
     Stopped == false,
-    Events == [event(0, call, [plunit_trace_hyperpose, 3], '', []),
+    trace_shapes(Events, Shapes),
+    Shapes == [event(0, call, [plunit_trace_hyperpose, 3], '', []),
                event(0, exit, [plunit_trace_hyperpose, 3], 4, [])].
 
 %A RUN bound stops the recording too, and answers the prefix rather than
@@ -202,7 +219,11 @@ test(a_run_bound_answers_the_prefix_it_recorded,
     length(Prefix, Cut),
     Cut > 0,
     Cut < Full,
-    append(Prefix, _, Whole).
+    %By SHAPE, because the two runs happened at different times and an event
+    %carries when it happened.
+    trace_shapes(Prefix, PrefixShapes),
+    trace_shapes(Whole, WholeShapes),
+    append(PrefixShapes, _, WholeShapes).
 
 %A bound sent INSIDE the request bounds the program, not the door. Arming the
 %tracer walks every name in arity/2 and the teardown unwraps them again, and
@@ -232,12 +253,16 @@ test(a_bounded_request_bounds_the_program_and_not_the_arming,
     Full > 20,
     tracer:metta_trace_source(
         "!(plunit_trace_bounded 300)", '&self',
-        bounded(100000, run_bounds(-1, Budget, -1)), Prefix, Stopped),
+        bounded(100000, run_bounds(-1, Budget, -1, -1)), Prefix, Stopped),
     Stopped == inferences,
     length(Prefix, Cut),
     Cut > 0,
     Cut < Full,
-    append(Prefix, _, Whole).
+    %By SHAPE, because the two runs happened at different times and an event
+    %carries when it happened.
+    trace_shapes(Prefix, PrefixShapes),
+    trace_shapes(Whole, WholeShapes),
+    append(PrefixShapes, _, WholeShapes).
 
 test(filter_precedes_the_bound_and_keeps_depth,
      [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
@@ -245,20 +270,23 @@ test(filter_precedes_the_bound_and_keeps_depth,
               (= (plunit_trace_walk $x) (+ $x 1)) !(plunit_trace_new 2)",
     tracer:metta_trace_source(Source, '&self', 2, [plunit_trace_walk],
                               Events, false),
-    Events == [event(1, call, [plunit_trace_walk, 2], '', []),
+    trace_shapes(Events, Shapes),
+    Shapes == [event(1, call, [plunit_trace_walk, 2], '', []),
                event(1, exit, [plunit_trace_walk, 2], 3, [])],
     tracer:metta_trace_source("!(plunit_trace_new 2)", '&self', 100, Whole, false),
-    include(selected_walk_event, Whole, Expected),
-    Events == Expected.
+    include(selected_walk_event, Whole, Selected),
+    trace_shapes(Selected, Expected),
+    Shapes == Expected.
 
-selected_walk_event(event(_, _, [plunit_trace_walk|_], _, _)).
+selected_walk_event(event(_, _, _, _, [plunit_trace_walk|_], _, _)).
 
 test(empty_filter_runs_source_and_does_not_leak,
      [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
     Source = "(= (plunit_trace_new $x) (+ $x 1)) !(plunit_trace_new 2)",
     tracer:metta_trace_source(Source, '&self', 1, [], [], false),
     tracer:metta_trace_source("!(plunit_trace_new 4)", '&self', Events),
-    Events == [event(0, call, [plunit_trace_new, 4], '', []),
+    trace_shapes(Events, Shapes),
+    Shapes == [event(0, call, [plunit_trace_new, 4], '', []),
                event(0, exit, [plunit_trace_new, 4], 5, [])].
 
 test(filter_request_crosses_the_existing_host_door,
@@ -266,7 +294,8 @@ test(filter_request_crosses_the_existing_host_door,
     Source = "(= (plunit_trace_new $x) (+ $x 1)) !(plunit_trace_new 2)",
     tracer:metta_trace_source(Source, '&self', [2, ["plunit_trace_new"]],
                               Events, false),
-    Events == [event(0, call, [plunit_trace_new, 2], '', []),
+    trace_shapes(Events, Shapes),
+    Shapes == [event(0, call, [plunit_trace_new, 2], '', []),
                event(0, exit, [plunit_trace_new, 2], 3, [])].
 
 test(invalid_filter_refuses_with_remedy,
@@ -321,8 +350,9 @@ test(a_trace_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarmed,
     assertion(\+ tracer:metta_trace_session),
     assertion(\+ tracer:metta_trace_wrapped(_)),
     tracer:metta_trace_source("!(plunit_trace_leak 1)", '&self', 1000, Again),
-    assertion(Again == [event(0, call, [plunit_trace_leak, 1], '', []),
-                        event(0, exit, [plunit_trace_leak, 1], 42, [])]).
+    trace_shapes(Again, AgainShapes),
+    assertion(AgainShapes == [event(0, call, [plunit_trace_leak, 1], '', []),
+                              event(0, exit, [plunit_trace_leak, 1], 42, [])]).
 
 %The debug twin of the leak above, because a breakpoint session takes the same
 %wrappers and would leave them the same way. metta_debug_end_unlocked/0 calls
@@ -333,7 +363,7 @@ test(a_trace_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarmed,
 test(a_debug_session_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarmed,
      [setup(setup_trace_leak(Box)), cleanup(cleanup_trace_leak(Box))]) :-
     format(atom(Source), "!(plunit_trace_clear ~w)", [Box]),
-    tracer:metta_debug_begin([]),
+    tracer:metta_debug_begin([], -1),
     engine_create(done(Groups),
                   tracer:metta_debug_run(Source, '&self', Groups),
                   Engine),
@@ -346,8 +376,9 @@ test(a_debug_session_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarm
     assertion(\+ tracer:metta_debug_mode(_)),
     %The engine still arms, which is what the leak took away.
     tracer:metta_trace_source("!(plunit_trace_leak 1)", '&self', 1000, Again),
-    assertion(Again == [event(0, call, [plunit_trace_leak, 1], '', []),
-                        event(0, exit, [plunit_trace_leak, 1], 42, [])]).
+    trace_shapes(Again, AgainShapes),
+    assertion(AgainShapes == [event(0, call, [plunit_trace_leak, 1], '', []),
+                              event(0, exit, [plunit_trace_leak, 1], 42, [])]).
 
 %The debug session's own contract, on the transport's side of the seam: the
 %engine holds a suspended program, a yield answers the host and a post
@@ -355,7 +386,10 @@ test(a_debug_session_that_abolishes_a_wrapped_predicate_leaves_the_tracer_disarm
 %The transport that creates the engine is the shim's, so this drives the
 %three published services directly.
 debug_engine(Source, Armed, Engine) :-
-    tracer:metta_debug_begin(Armed),
+    debug_engine(Source, Armed, -1, Engine).
+
+debug_engine(Source, Armed, Count, Engine) :-
+    tracer:metta_debug_begin(Armed, Count),
     engine_create(done(Groups), tracer:metta_debug_run(Source, '&self', Groups),
                   Engine).
 
@@ -367,14 +401,14 @@ test(a_breakpoint_suspends_the_program_and_a_post_resumes_it,
         _),
     debug_engine("!(plunit_trace_outer 1)", [plunit_trace_inner], Engine),
     engine_next_reified(Engine, First),
-    First = the(stop(1, call, [plunit_trace_inner, 1], '', [])),
+    First = the(stop(_, _, 1, call, [plunit_trace_inner, 1], '', [])),
     engine_post(Engine, resume(run, [plunit_trace_inner])),
     engine_next_reified(Engine, Second),
-    Second = the(stop(1, exit, [plunit_trace_inner, 1], 2, [])),
+    Second = the(stop(_, _, 1, exit, [plunit_trace_inner, 1], 2, [])),
     %Stepping stops at the very next reduction, which no breakpoint names.
     engine_post(Engine, resume(step, [])),
     engine_next_reified(Engine, Third),
-    Third = the(stop(1, call, [plunit_trace_inner, 2], '', [])),
+    Third = the(stop(_, _, 1, call, [plunit_trace_inner, 2], '', [])),
     %And with nothing armed and no step, the program runs to its answer.
     engine_post(Engine, resume(run, [])),
     engine_next_reified(Engine, Fourth),
@@ -389,12 +423,144 @@ test(a_breakpoint_suspends_the_program_and_a_post_resumes_it,
 test(a_session_refuses_a_second_one,
      [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
     process_metta_string("(= (plunit_trace_inner $x) (+ $x 1))", _),
-    tracer:metta_debug_begin([plunit_trace_inner]),
-    catch(tracer:metta_debug_begin([]), Error, true),
+    tracer:metta_debug_begin([plunit_trace_inner], -1),
+    catch(tracer:metta_debug_begin([], -1), Error, true),
     Error = error(permission_error(debug, evaluation, nested), _),
     catch(tracer:metta_trace_source("!(plunit_trace_inner 1)", '&self', _),
           TraceError, true),
     TraceError = error(permission_error(trace, evaluation, nested), _),
+    tracer:metta_debug_end.
+
+%%%%%%%%%% The three ports, the two new fields, and the seed %%%%%%%%%%
+
+%A reduction that answers nothing reaches the fail port. It used to leave a
+%call with no exit, which a consumer had to infer from the NEXT event's depth
+%and could not infer at all for the last call of a run.
+test(a_reduction_that_answers_nothing_records_a_fail_port,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    Source = "(= (plunit_trace_new 1) yes)\n!(plunit_trace_new 2)",
+    tracer:metta_trace_source(Source, '&self', Events),
+    trace_shapes(Events, Shapes),
+    Shapes == [event(0, call, [plunit_trace_new, 2], '', []),
+               event(0, fail, [plunit_trace_new, 2], '', [])].
+
+%And a reduction that answered is NOT also reported as failing when its
+%answers run out, which is where SWI's own port wrapper differs: it fires
+%`fail` on exhaustion, after however many exits, because it reports the Byrd
+%box rather than the outcome.
+test(an_answered_reduction_records_no_fail_port,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    Source = "(= (plunit_trace_new $x) a)\n(= (plunit_trace_new $x) b)\n\
+!(plunit_trace_new 1)",
+    tracer:metta_trace_source(Source, '&self', Events),
+    trace_shapes(Events, Shapes),
+    Shapes == [event(0, call, [plunit_trace_new, 1], '', []),
+               event(0, exit, [plunit_trace_new, 1], a, []),
+               event(0, exit, [plunit_trace_new, 1], b, [])].
+
+%Every event numbers itself and dates itself, and both run forward.
+test(events_carry_a_monotone_sequence_and_time,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    Source = "(= (plunit_trace_new $x) (plunit_trace_walk $x))\n\
+(= (plunit_trace_walk $x) (+ $x 1))\n!(plunit_trace_new 2)",
+    tracer:metta_trace_source(Source, '&self', Events),
+    findall(Seq, member(event(Seq, _, _, _, _, _, _), Events), Seqs),
+    length(Events, Count),
+    Last is Count - 1,
+    numlist(0, Last, Seqs),
+    findall(Time, member(event(_, Time, _, _, _, _, _), Events), Times),
+    forall(member(Time, Times), integer(Time)),
+    msort(Times, Times).
+
+%A seeded run draws the same numbers twice and leaves the generator where it
+%found it, which is what makes a recorded run replayable.
+test(a_seeded_run_repeats_its_draws_and_leaves_the_outside_alone,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    process_metta_string(
+        "(= (plunit_trace_new $x) (random-int 1 1000000))", _),
+    random_property(state(Before)),
+    tracer:metta_trace_source(
+        "!(plunit_trace_new 1)", '&self',
+        bounded(100, run_bounds(-1, -1, -1, 7)), First, false),
+    tracer:metta_trace_source(
+        "!(plunit_trace_new 1)", '&self',
+        bounded(100, run_bounds(-1, -1, -1, 7)), Second, false),
+    trace_shapes(First, FirstShapes),
+    trace_shapes(Second, SecondShapes),
+    FirstShapes == SecondShapes,
+    memberchk(event(0, exit, _, Drawn, []), FirstShapes),
+    integer(Drawn),
+    random_property(state(After)),
+    Before == After.
+
+%%%%%%%%%% A library's dispatcher, made visible %%%%%%%%%%
+
+%The memo binds a call site to a lookup of its own, so the wrapper on the
+%FUNCTION never runs for a call the cache answers: `!(fib 8)` under the
+%automatic memo recorded 0 events over 23,050 inferences [measured 2026-09-07].
+%The dispatcher declares itself through seam:interposed_dispatch/4 and the
+%reduction is recorded once, by whichever layer the call entered first, so a
+%hit is a call with its answer and no children and a miss is the whole
+%reduction underneath.
+test(a_memoised_head_records_its_calls_once,
+     [setup(setup_trace_memo), cleanup(cleanup_trace_memo)]) :-
+    Source = "!(plunit_trace_memo 4)",
+    tracer:metta_trace_source(Source, '&self', 1000, Cold),
+    trace_shapes(Cold, ColdShapes),
+    %Every distinct argument reduces once and every repeat is answered from
+    %the cache, so each call has exactly one exit and no call is recorded
+    %twice at the same depth for the same term.
+    findall(Term,
+            member(event(_, call, Term, _, _), ColdShapes), Calls),
+    findall(Term,
+            member(event(_, exit, Term, _, _), ColdShapes), Exits),
+    length(Calls, Same),
+    length(Exits, Same),
+    Same > 4,
+    memberchk([plunit_trace_memo, 4], Calls),
+    memberchk([plunit_trace_memo, 0], Calls),
+    %A second trace over a WARM cache records the one call it makes.
+    tracer:metta_trace_source(Source, '&self', 1000, Warm),
+    trace_shapes(Warm, WarmShapes),
+    WarmShapes == [event(0, call, [plunit_trace_memo, 4], '', []),
+                   event(0, exit, [plunit_trace_memo, 4], 3, [])],
+    %And forgetting what the libraries derived puts the run back where the
+    %first one started, which is what a replay of a recording needs.
+    metta_forget_derived,
+    tracer:metta_trace_source(Source, '&self', 1000, Again),
+    trace_shapes(Again, AgainShapes),
+    AgainShapes == ColdShapes.
+
+setup_trace_memo :-
+    setup_trace_test,
+    cleanup_trace_function(plunit_trace_memo),
+    process_metta_string(
+        "(= (plunit_trace_memo $n) (if (< $n 2) $n \c
+(+ (plunit_trace_memo (- $n 1)) (plunit_trace_memo (- $n 2)))))", _).
+
+cleanup_trace_memo :-
+    catch(metta_forget_derived, _, true),
+    cleanup_trace_function(plunit_trace_memo),
+    cleanup_trace_test.
+
+%%%%%%%%%% The count breakpoint %%%%%%%%%%
+
+%A COUNT is the third kind of breakpoint, and the one a recording needs: it
+%stops at the event with that sequence number, which is how replaying a
+%recorded run to one of its events becomes a live session.
+test(a_count_breakpoint_stops_at_that_event,
+     [setup(setup_trace_test), cleanup(cleanup_trace_test)]) :-
+    process_metta_string("(= (plunit_trace_inner $x) (+ $x 1))", _),
+    process_metta_string(
+        "(= (plunit_trace_outer $x) (plunit_trace_inner (plunit_trace_inner $x)))",
+        _),
+    Source = "!(plunit_trace_outer 1)",
+    tracer:metta_trace_source(Source, '&self', 1000, Events),
+    nth0(2, Events, event(Seq, _, Depth, Kind, Term, _, _)),
+    debug_engine(Source, [], Seq, Engine),
+    engine_next_reified(Engine, Stopped),
+    Stopped = the(stop(Seq, _, Depth, Kind, Term, _, _)),
+    engine_destroy(Engine),
     tracer:metta_debug_end.
 
 :- end_tests(tracer).

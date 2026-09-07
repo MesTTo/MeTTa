@@ -5,8 +5,8 @@ Source: `extensions/python/metta/_trace.py`.
 > The reduction trace as Python objects. m.trace(term) runs
 > that term with every compiled MeTTa function wrapped engine-side, and
 > answers TraceEvent records: a call carries the term entering reduction
-> at its nesting depth, the matching exit carries the answer, and a call
-> with no exit is a reduction that failed. Tracing wraps and unwraps per
+> at its nesting depth, the matching exit carries the answer, and a fail
+> carries a reduction that answered nothing. Tracing wraps and unwraps per
 > run, so it costs nothing when off; what is traced executes for real,
 > writes included, exactly like a run.
 
@@ -18,9 +18,17 @@ The entries below reproduce the source signatures and docstrings.
 class TraceEvent:
 ```
 
-> One step: depth is the nesting level, kind is call or exit, term
-> is what reduced, answer carries the exit's result and stays None on
-> a call.
+> One step of a reduction.
+>
+> ``seq`` numbers the events of one trace from 0 and ``time`` is the wall
+> nanoseconds since the run began, so an event says both where it is in the
+> order and how far into the run it happened. ``depth`` is the nesting level,
+> ``term`` is what reduced, and ``answer`` carries the exit's result.
+>
+> ``kind`` is the port, and a reduction reaches exactly one of three
+> outcomes: ``exit`` once per answer, ``fail`` when it answered nothing, or
+> neither when a bound cut the run before it finished. ``answer`` is None on
+> every port but ``exit``.
 
 ## `Trace`
 
@@ -61,6 +69,7 @@ def trace(
     filter: Symbol | str | Iterable[Symbol | str] | None = None,
     timeout: float | None = None,
     inferences: int | None = None,
+    seed: int | None = None,
 ) -> Trace:
 ```
 
@@ -85,3 +94,8 @@ def trace(
 > 2026-09-04 on 06-peano.metta's own head, a 2,000,000-inference limit took
 > a 10,000-event trace to an InferenceLimitError and nothing else, and the
 > renderer reading it drew 4 frames where the events give 302.
+>
+> seed pins the run's random generator and restores whatever state was in
+> force afterwards, so a traced run's draws come back the same. It is the
+> fourth run control, not a bound, and `record` is the door that always
+> sets it; the MeTTa spelling of the same scope is `(with-seed S expr)`.
