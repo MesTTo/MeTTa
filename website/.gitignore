@@ -2,3 +2,9 @@ node_modules/
 __pycache__/
 .vitepress/cache/
 .vitepress/dist/
+
+# The browser kit `scripts/bundle-browser.mjs` copies here from
+# extensions/node, which `npm run build:browser` makes there. It is 7.8 MB of
+# build output and belongs in the site's output, not in its history.
+public/metta/browser/
+public/metta/_runtime/

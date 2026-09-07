@@ -677,6 +677,27 @@ check_docs_site() {
             "run 'npm ci --prefix website'; vitepress is not installed"
         return
     fi
+    # The site SERVES the Node seat's browser build: a `::: run` fence boots it
+    # in a Web Worker, and website/scripts/bundle-browser.mjs refuses the site
+    # build when it is not there. That refusal is the right answer to a site
+    # published without an engine and the wrong answer to a developer who has
+    # not run one command, so the kit is BUILT here whenever this tree can build
+    # it -- 3.2 seconds of esbuild and a copy -- rather than only when it is
+    # absent. Same shape as check_node_dist, which builds dist/ inside the
+    # `npm pack` its consumer program runs, and for the same reason: the
+    # artefact is gitignored, so there is no committed state to compare a stale
+    # one against and rebuilding is the only thing that ends one.
+    if [ -d "$HERE/extensions/node/node_modules" ]; then
+        bounded npm run build:browser --prefix "$HERE/extensions/node" || return 1
+    elif [ ! -f "$HERE/extensions/node/_runtime/runtime.json" ]; then
+        docs_prerequisite_missing \
+            "run 'npm ci --prefix extensions/node'; the site serves the browser \
+kit that seat's build makes and a gate does not reach the network"
+        return
+    else
+        printf 'note: extensions/node/node_modules is absent, so the browser kit the \
+site serves is whatever a previous build left; it cannot be refreshed here\n' >&2
+    fi
     bounded npm run --prefix "$site" docs:build
 }
 run GATE   docs        check_docs_site

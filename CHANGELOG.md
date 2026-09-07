@@ -71,6 +71,53 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   estimator the exponential class needs, since a log-log exponent has no fixed
   value for a curve no power law describes.
 
+- The documentation site RUNS its examples, in the reader's browser, with no
+  server beyond the static host it already needs. A `::: run <example>`
+  container around a ```` ```metta ```` fence in any site page renders that
+  fence with a Run button; the first press boots one engine in a Web Worker
+  from the site's own static assets and every press after it evaluates the
+  fence's exact text in a space of its own, printing each `!` answer group
+  under it. A fence says whether it is booting or running -- the worker sends
+  one progress message when the engine is up, because a boot and a run are one
+  message and the page cannot see the moment between them otherwise -- and a
+  Reset control drops the worker for the next press.
+  `website/guide/getting-started.md` opens with two of them.
+  Measured on the built site over HTTP, served under its own base to headless
+  Chromium on a box at loadavg 77: a 7.8 MB first load and a 4,675 ms boot,
+  then 93 ms for the identity example and 28 ms for the next fence on the same
+  page, which pays nothing for the engine. On a quiet box the same boot is
+  about 1.5 s. 225 of the 258 runnable corpus examples run in it, which
+  `node tools/measure-browser-corpus.mjs` in `extensions/node` reprints.
+
+  The page runs the bytes the gate runs, and that is checked twice: the site
+  build refuses a `::: run` fence that does not name an example
+  `sh test.sh` runs or whose text has drifted from that file, and
+  `test_every_run_fence_runs_the_corpus_file_it_names` asks the same from
+  Python on a machine with no node.
+
+  What the page cannot run, it refuses by name rather than answering something
+  wrong. A platform library this WebAssembly build has not got is the engine's
+  own capability census (`hyperpose`, `timeout`, `git-import!`, `lib_thread`).
+  A file beside the example is a source refusal, because only the fence's own
+  bytes cross. A run past the fence's inference budget, 1,000,000 by default,
+  is the engine stopping itself. And a door the standard library declares while
+  nothing in this build implements it is the new lint rule below, raised in the
+  worker as the seat's `UnsupportedError`.
+- The website snippet audit admits `examples/**/*.metta` as an approved source.
+  A `::: run` fence is a corpus file's own text with a gate behind that claim,
+  which is the strongest provenance the audit's list can hold, and the corpus
+  was the one class of source it had never named. The backlog is unchanged at
+  27 of 72 and the untracked count is unchanged at 167.
+- `metta-node`'s linter gains a sixth rule, `unimplemented-head`: a call whose
+  head the engine declares with an arrow ending in `%Undefined%` and cannot
+  reduce in this build. It is the one rule that asks the ENGINE rather than
+  reading the source, because whether a build implements a declared name is not
+  in the text. Without it `!(py-atom "1 + 1")` in an engine with no Python seat
+  behind it ANSWERS `(py-atom "1 + 1")`, which reads as an answer. Over the
+  whole example corpus the rule names exactly eight heads, the seven `py-`
+  doors and `Kwargs`, and no constructor: `Error`, declared `(-> Atom Atom ErrorType)`
+  and equally unreducible, is a term that stands for itself, and the arrow's
+  result is what tells the two apart.
 - `metta.testing.programs(census=None, depth=3, facts=(1, 4), queries=(1, 3))`
   generates whole MeTTa programs for differential testing against another
   engine, and the `parity-fuzz` lane runs them on this engine and on upstream

@@ -100,9 +100,14 @@ BLANK_LINE = re.compile(r"\n[ \t]*\n")
 #: Which comment rule each file class uses. Keyed on the whole PATH rather than
 #: on the suffix alone, because a Makefile carries the same contract header its
 #: neighbours do and has no suffix at all to key on.
+#:
+#: `.js` and `.vue` joined when the site grew a worker and a component: the
+#: worker is served as-is and cannot be TypeScript, and a single-file component
+#: writes its header inside its `<script>` block, where the `//` rule's own
+#: `/* ... */` form is what a file whose top level is markup can carry.
 PERCENT_COMMENT = (".pl", ".plt")
 HASH_COMMENT = (".sh", ".mk")
-SLASH_COMMENT = (".ts", ".mjs", ".c", ".h")
+SLASH_COMMENT = (".ts", ".mjs", ".js", ".c", ".h", ".vue")
 SEMICOLON_COMMENT = (".metta",)
 MAKEFILE_NAMES = ("Makefile", "GNUmakefile")
 
