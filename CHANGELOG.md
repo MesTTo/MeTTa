@@ -9,6 +9,40 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- A template renders as well as reads. `metta.render(source, /, **values) ->
+  str` takes the same three faces the reading doors take -- a 3.14 `t"..."`
+  literal, any object with `strings` and `interpolations`, or a string with
+  `{fields}` and keyword values -- and answers text instead of running
+  anything. `rows.render(...)` and `answers.render(...)` are the method faces,
+  each binding the receiver under the name `rows` so one report renders the
+  eager result and the lazy view alike; `f"{atom:sexp}"` and
+  `format(rows, "table")` reach the same specs through `__format__`.
+
+  One spec table serves both directions and a spec of the wrong one refuses
+  naming the door that owns it. Reading keeps `sym`, `expr` and `py`.
+  Rendering adds `sexp` (canonical MeTTa text, what `repr` answers and `parse`
+  reads back), `quoted` (a MeTTa string literal), `json` (one line through the
+  engine's codec, a result as its records), `table` (the columns as a Markdown
+  table, every row, `|` and `\` escaped and a newline `<br>`) and `lines` (one
+  value per line, a nested template rendered). A bare hole is what the engine
+  itself puts at a `format-args` `{}`: a String's characters, any other atom's
+  MeTTa text. Any other spec is Python's own, applied to the value, because a
+  rendered hole is text, so `{n:.2f}` and `{name:<20}` mean what they mean in
+  an f-string.
+
+  A template holds one level. `{for row in rows}` is a SyntaxError on the 3.14
+  face, PEP 750's grammar having no statement form, and a literal's values are
+  evaluated when the literal is, so no per-item binding could arrive later
+  either; iteration is a Python comprehension and the pieces compose through a
+  nested template and `{parts:lines}`. `{rows:table}` and `{rows:lines}` read
+  every row, where the display protocols stop at `config.display_rows`.
+
+  `extensions/python/tools/libdoc.py` is rewritten as that shape: `catalog()`
+  answers three `Rows` and no text, the page is templates with
+  `{coverage:table}` in the middle, and the generated
+  `website/reference/metta-libraries.md` is byte-identical to the one the
+  hand-assembled generator wrote.
+
 - A `.metta` file is a Python module. `metta.importing.install(space=None, *,
   path=None)` appends a `sys.meta_path` finder, and after it `import lib_list`
   finds `lib_list.metta` on the search path, loads it into `space` with the
