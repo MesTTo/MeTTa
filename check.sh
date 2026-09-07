@@ -537,6 +537,15 @@ run GATE conflict-markers-selftest "$PY" "$HERE/tests/checks/check_conflict_mark
 run GATE artifact-paths "$PY" "$HERE/tests/checks/check_artifact_paths.py"
 run GATE artifact-paths-selftest "$PY" "$HERE/tests/checks/check_artifact_paths_selftest.py"
 
+# A seat that asks "is this pandas?" in a branch cannot be extended by a second
+# frame library without an edit here, which is a fork; EXTENDING.md promises
+# the opposite and promised it only for the engine until the seats had a seam
+# of their own. This asks whether any library name has crept back out of its
+# registration, in all three seats, deriving the names from what the sources
+# actually reach for rather than from a list that would go stale.
+run GATE no-hardcoded-integration "$PY" "$HERE/tests/checks/check_hardcoded_integrations.py"
+run GATE no-hardcoded-integration-selftest "$PY" "$HERE/tests/checks/check_hardcoded_integrations_selftest.py"
+
 # A bound kept by the caller stops being kept when the caller is killed. Two
 # swipl children spawned under this gate ran from 2026-09-01 to 2026-09-03,
 # spinning at 100% for 122 CPU-hours between them, because

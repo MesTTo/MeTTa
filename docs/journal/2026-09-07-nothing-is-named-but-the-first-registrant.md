@@ -284,6 +284,51 @@ Measured: `sh extensions/cmetta/test.sh`, 486 checks, 0 failures, with the new
 `cmetta.h` alone and drives five doors through it, including a point the
 library declared for itself.
 
+## 2026-09-07: the gate
+
+Decided: the names the lane looks for are DERIVED, not listed. A list of
+library names in a checker is the same defect the checker exists to catch, and
+it goes stale the day someone adds a library it never heard of. For Python the
+scan reads the SYNTAX TREE: any import of a module that is neither the standard
+library nor this package, plus any string literal reaching `optional_module`,
+`require_module`, `importlib.import_module`, `sys.modules.get` or
+`importlib.util.find_spec`, which is how a coupling with no import statement
+(`optional_module("faiss")`) is seen at all. For TypeScript it is any import
+specifier that is neither relative nor `node:`; for C, any `#include` that is
+neither the C standard library nor the seat's own.
+
+Reading the tree rather than the text is what makes prose free. A docstring
+naming polars because polars was measured is not a node, so it is invisible by
+construction rather than by an exception list; the TypeScript and C scans strip
+comments for the same reason. The selftest plants a docstring, a comment and an
+ordinary `cache.get("pandas")` as NEGATIVES so that decision cannot be quietly
+reversed into a grep, which would be turned off within a day.
+
+Tried: `PROBES` matching any call whose function name is `get` -> 400 findings
+on the first run, every `dict.get("...")` in the seat among them. A probe is
+matched with its RECEIVER now: `sys.modules.get`, not `.get`.
+
+Tried: one allowed SITE per library -> wrong for a DEPENDENCY. pytest is in
+three compliance kits and rich in two renderers, and a wrapper module whose
+only job is to satisfy the checker would be worse than the checker. A site is a
+tuple of paths with one stated reason, and the ALLOWED table's two halves are
+labelled: integrations, which share the registrant module, and dependencies,
+which are this seat's own implementation of a service it provides.
+
+A registration names its library as `module="websocket"`, a keyword no probe
+sees, so the scan reads a `module=` keyword on a `.register(...)` call too.
+Without it the registrant file looked as though it named nothing and the lane
+reported its own ALLOWED entry as stale.
+
 ## 2026-09-07: what each seat gained
 
-Recorded as the work landed; the numbers are in the commits' own tests.
+| seat | before | after |
+|---|---|---|
+| Python | fifteen couplings across six library classes, each a branch | one seam, thirteen declared points, every library a row in `metta._registrants`; a stranger reaches nine doors |
+| Node | six unrelated registration functions, no group for a registration that is not an integration | one seam, six declared points, a fourth `package.json` group; a stranger reaches six doors, one of them a point it declared itself |
+| C | five API doors, no way to be loaded, no provider, no repr, no library | one seam, four declared points and three new capabilities behind a loader; a stranger reaches five doors |
+
+Open: nothing in this thread. The Node seat has no `frame` or `array` point
+because it has neither notion, which is a decision rather than a gap and is
+pinned by a test; the C seat has no frame or array notion either, and C has no
+universal for one to be built on.
