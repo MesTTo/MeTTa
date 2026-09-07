@@ -7,38 +7,6 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
-### Removed
-
-- The `cetta` gate lane and the machinery behind it. `tests/conformance/`
-  loses `cetta.py`, `cetta_corpus.py`, `cetta_fences.txt`,
-  `cetta_shared_fragment.txt` and `measured_corpus.py`, and
-  `extensions/python/tests/conformance/` loses the two harness proofs of
-  those lanes. The C seat of this repository is `extensions/cmetta`; the
-  vendored fork is not something the gate tests against. `CETTA_PATH` and
-  `LEATTA_PATH` are gone with them, so no lane or tool reaches an outside
-  checkout through an environment override any more, and
-  `test_workspace_paths.py` scans every tracked file with no exemption.
-- Every reference to the earlier reference semantics that used to be the
-  arbiter. The behaviours it settled are unchanged and their sentences keep
-  their technical content; what each carried as a citation into an outside
-  checkout is now either the published work the claim really rests on, a
-  path inside this repository, or an `assumed` tag saying plainly that the
-  claim was adopted rather than re-measured against upstream PeTTa. Upstream
-  PeTTa at the parity pin is the arbiter, and `tests/conformance/petta.py`
-  with its vendored corpus is the lane that reads it.
-
-### Changed
-
-- A `(claim Vocab Value Property...)` row's properties are cached per value,
-  the way a vocabulary's values already were. The read has an open tail,
-  because a claim row carries any number of properties, so it took the branch
-  that enumerates every `&metta` storage arity, and `metta_annotations_order/2`
-  asks it once per answer: fifteen such reads per `(top k ...)` evaluation.
-  `annotated-relation` falls 33,002 inferences over its 500 evaluations. A
-  value may carry several claim rows, so an entry watches several clause
-  references and refreshes when any is erased; the empty answer is cached too
-  and a landing claim retracts it.
-
 ### Added
 
 - `(cost witness class)` and `(cost witness class measure)` catalog rows, and
@@ -152,15 +120,6 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   stands on, keeps the variable names the author wrote rather than the
   engine's, and refuses a whole file whose sha256 moved since lint read it;
   `lint_file` carries that digest in every finding's payload.
-### Fixed
-
-- `RestraintError` receives each of its three fields as the type it declares
-  for it. The restraint signal's detail crossed as `dict[str, object]` and was
-  splatted into keywords typed `str | None` and `int | None`, which left the
-  `mypy` lane red; each field is now checked against the exception's own
-  contract and a detail that does not carry it fills the field with absence.
-
-### Added
 
 - `python -m metta run` is a Unix filter. The operand `-` reads the program
   from standard input and so does no operand at all, POSIX Utility Syntax
@@ -434,6 +393,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- A `(claim Vocab Value Property...)` row's properties are cached per value,
+  the way a vocabulary's values already were. The read has an open tail,
+  because a claim row carries any number of properties, so it took the branch
+  that enumerates every `&metta` storage arity, and `metta_annotations_order/2`
+  asks it once per answer: fifteen such reads per `(top k ...)` evaluation.
+  `annotated-relation` falls 33,002 inferences over its 500 evaluations. A
+  value may carry several claim rows, so an entry watches several clause
+  references and refreshes when any is erased; the empty answer is cached too
+  and a landing claim retracts it.
+
+
 - The Node seat's vocabulary tables, `extensions/node/src/vocabularies.ts`, are
   written by `extensions/python/tools/vocabgen.py` from the engine's own
   `(vocabulary ...)` rows beside the Python module it already wrote, with the
@@ -507,7 +477,34 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   What an assertion ACCEPTS is unchanged: every verdict is the comparison it
   always was, computed where it always was.
 
+### Removed
+
+- The `cetta` gate lane and the machinery behind it. `tests/conformance/`
+  loses `cetta.py`, `cetta_corpus.py`, `cetta_fences.txt`,
+  `cetta_shared_fragment.txt` and `measured_corpus.py`, and
+  `extensions/python/tests/conformance/` loses the two harness proofs of
+  those lanes. The C seat of this repository is `extensions/cmetta`; the
+  vendored fork is not something the gate tests against. `CETTA_PATH` and
+  `LEATTA_PATH` are gone with them, so no lane or tool reaches an outside
+  checkout through an environment override any more, and
+  `test_workspace_paths.py` scans every tracked file with no exemption.
+- Every reference to the earlier reference semantics that used to be the
+  arbiter. The behaviours it settled are unchanged and their sentences keep
+  their technical content; what each carried as a citation into an outside
+  checkout is now either the published work the claim really rests on, a
+  path inside this repository, or an `assumed` tag saying plainly that the
+  claim was adopted rather than re-measured against upstream PeTTa. Upstream
+  PeTTa at the parity pin is the arbiter, and `tests/conformance/petta.py`
+  with its vendored corpus is the lane that reads it.
+
 ### Fixed
+
+- `RestraintError` receives each of its three fields as the type it declares
+  for it. The restraint signal's detail crossed as `dict[str, object]` and was
+  splatted into keywords typed `str | None` and `int | None`, which left the
+  `mypy` lane red; each field is now checked against the exception's own
+  contract and a detail that does not carry it fills the field with absence.
+
 
 - The codec builds under mypyc again. `RestraintError` was constructed with a
   `dict[str, object]` unpacked as keywords, which mypyc refuses for parameters
@@ -720,7 +717,6 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   against the runtime objects they describe), and `mutation` (mutmut over one
   module per run, chosen by `METTA_MUTATION_TARGET`).
 
-### Fixed
 
 - `Space.trace`'s `timeout`, `inferences` and stack bounds bound the RUN, as
   the door has always documented. Arming the tracer wraps every function name
