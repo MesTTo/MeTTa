@@ -306,7 +306,11 @@
             %written. Both then hand match/4 and metta_match_atoms/2 the
             %wrapped pattern those two dispatch on, so a gap adds no goal name
             %the engine has to protect and no cost to a gap-free call.
+            %metta_seq_pair_plan/4 is the same staging for `unify`, the one
+            %door whose two operands are both syntax: it parses BOTH sides and
+            %hands the caller the parsed right side to face the solver with.
             metta_seq_body_plan/2,
+            metta_seq_pair_plan/4,
             metta_seq_plan/3,
             metta_seq_head_match/2,
             metta_seq_head_matches/2,
