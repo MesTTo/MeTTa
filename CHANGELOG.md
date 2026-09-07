@@ -957,7 +957,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   names the whole atom multiset each side holds beyond the other, bounded at
   50,000 atoms because enumerating the 1,572,864 that
   `examples/ch18-performance/18-01-larger-workloads/05-matespacefast.metta`
-  leaves behind exhausts the library's 8 GB stack limit.
+  leaves behind exhausts the library's 8 GB stack limit. Four twins carry an
+  empirical envelope instead of a point pin, pooled over 37 full-lane
+  observations, because their counters are what a schedule leaves: five OS
+  threads under one mutex, a tuple space, a sampler, and a race whose loser
+  spends however many of its 300,000 spin inferences it reached. The other
+  227 read one number in every round.
 
 - The twins band's authoring allowance is re-measured. It read 1456 inferences
   once plus 765 for each compiled definition, measured on 2026-08-22; the same
