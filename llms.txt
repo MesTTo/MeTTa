@@ -22,7 +22,7 @@ re-runs them.
 |---|---|---|
 | `examples/**/*.metta` | 266 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
-| `website/reference/metta-*.md` | 24 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
+| `website/reference/metta-*.md` | 25 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms | `extensions/python/tools/libdoc.py` |
 | `tests/prolog/suites/*/*.plt` | plunit suites over the engine itself, grouped by the engine unit each one tests | the `plunit` gate lane |
 | `extensions/python/tests/*/test_*.py` | blackbox, hypothesis-fuzzed, in the same 20 chapters `examples/` uses, plus `conformance/` for the arbiters and `repository/` for the tests whose subject is this repository | the `pytest` gate lane |
@@ -1614,6 +1614,38 @@ reasons, exiting nonzero on what remains), `doc` (a name's `(@doc ...)`), `llms`
 Python stub, with the program's own printing kept on stderr), and
 `convert` (`program.py [-o out.metta]`, emitting the module's fresh-space
 declarations as loadable MeTTa source).
+
+`metta.importing.install(space=None, *, path=None)` makes a `.metta` file a
+Python module: it appends a `sys.meta_path` finder, so `import lib_list` finds
+`lib_list.metta`, its `.metta.gz` form, or a directory named for it holding
+that same file, and loads it into `space` with the engine's own `import!`. `path` names directories
+searched before `sys.path`, one bare directory allowed; `space` defaults to the
+ambient one and is resolved AT INSTALL, so one finder names one space for its
+whole life. The module carries the heads the FILE declares as attributes, each
+the `_EngineFunction` that space's `fn` answers under the underscore-to-hyphen
+map, plus `__all__`, `__doc__` (the file's own `(@doc <module name> ...)` or
+its first comment block), `__file__`, `__spec__.origin` and `__metta_space__`;
+a name the file does not declare falls through to the space's own namespace,
+and a head Python cannot spell keeps its exact name under `getattr`. A head the
+file DECLARES and never defines is not an attribute, because the space cannot
+call it. `importlib.reload(module)` is `import!`'s digest reload under Python's
+word: the same module object, the edited file's new bodies, a head the edit
+removed gone from `__all__` and from the space. The longhand is
+`m += lib(S["path/to/file.metta"])`, which performs the same import and answers
+no module. Costs and refusals: importing a file RUNS its `!` directives, the
+way `import!` does; the finder is appended and never prepended, so a name with
+both a `.py` and a `.metta` on one path is Python's and says so; a load that
+fails raises `ImportError` chaining the engine's error and leaves no module;
+`importlib.reload` on a module the hook did not load is Python's own refusal,
+since there is no `reload` verb here. `import metta` does NOT install it, a
+process-wide hook being the program's decision; `python -m metta run` and
+`repl` install one for the program's directory and uninstall it when the run
+ends. `install()` answers the `Finder`, which is a context manager, has
+`uninstall()` (taking its `sys.modules` entries with it) and `modules`, and
+`metta.importing.installed()` reads `sys.meta_path` for the ones in place. On
+the producer side, a pip-installed package advertises a directory under the
+`metta.libraries` entry-point group and its declared NAME becomes importable,
+consulted only after the search path misses and only for that exact name.
 
 `metta.remote`: `serve(m, host="127.0.0.1", port=0, spaces=, token=,
 authorize=, ssl_context=, cursor_idle=300, cursor_limit=256, mutation_ttl=300,

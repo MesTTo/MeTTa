@@ -66,6 +66,7 @@ These modules connect spaces, processes, event loops, subscriptions, and externa
 | [`metta.subscribe`](./metta-subscribe) | standing queries, the fold that delivers |
 | [`metta.foreign`](./metta-foreign) | Python-backed spaces |
 | [`metta.integrate`](./metta-integrate) | library integration tools |
+| [`metta.importing`](./metta-importing) | `.metta` files as Python modules, through a `sys.meta_path` finder |
 
 ## The MeTTa libraries
 

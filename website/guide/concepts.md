@@ -85,6 +85,31 @@ import forms map onto MeTTa operations one for one:
 PEP 562 `__getattr__` is a namespace whose lookups are computed on
 demand, which MeTTa calls a foreign space.
 
+The mapping runs the other way too. `metta.importing.install(m)` puts a
+`sys.meta_path` finder in place, and after it a `.metta` file on the search
+path IS a module:
+
+```python
+from metta import MeTTa, importing
+
+with MeTTa() as m, importing.install(m, path="rules"):
+    import lib_list                      # loads rules/lib_list.metta into m
+    print(lib_list.__all__)              # the heads the file declares
+    m.eval(lib_list.list_tail(...))      # the same function m.fn answers
+    importlib.reload(lib_list)           # the file again, edits and all
+```
+
+The longhand is `m += lib(S["rules/lib_list.metta"])`, which performs the same
+`import!` and answers no module. What the module adds is everything tooling
+already knows how to do with one: `__all__`, `__doc__` from the file's own
+`(@doc ...)` or its first comment block, `__file__` and `__spec__.origin`
+pointing at the source so a checker finds the `.pyi` that `metta stubs` writes
+beside it, and `importlib.reload` as the name for the digest reload. The
+finder is appended to `sys.meta_path`, never prepended, so a name with both a
+`.py` and a `.metta` on one path is Python's; importing `metta` does not
+install it, because changing how every `import` in a process resolves is the
+program's decision.
+
 ## The answer-cardinality axis
 
 Evaluation answers a multiset of results, and the caller picks one of

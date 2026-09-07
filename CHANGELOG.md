@@ -9,6 +9,43 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- A `.metta` file is a Python module. `metta.importing.install(space=None, *,
+  path=None)` appends a `sys.meta_path` finder, and after it `import lib_list`
+  finds `lib_list.metta` on the search path, loads it into `space` with the
+  engine's own `import!`, and answers a module whose attributes are the heads
+  that FILE declares, each the `_EngineFunction` the space's `fn` namespace
+  answers under the underscore-to-hyphen map. The module carries `__all__`,
+  `__doc__` (the file's own `(@doc <module name> ...)` or its first comment
+  block), `__file__`, `__spec__.origin` so a checker finds the `.pyi` that
+  `metta stubs` writes beside the source, and `__metta_space__`. A name the
+  file does not declare falls through to the space's own namespace, and a head
+  Python cannot spell keeps its exact name under `getattr`.
+
+  `importlib.reload(module)` is `import!`'s digest reload under Python's word:
+  the same module object, the edited file's new bodies, and a head the edit
+  removed gone from `__all__`, from the module and from the space. The
+  longhand stays `m += lib(S["path/to/file.metta"])`, which performs the same
+  import and answers no module.
+
+  `path` names directories searched before `sys.path`, one bare directory
+  allowed; then `sys.path` read live; then the directory a pip-installed
+  package advertises for that exact name under the `metta.libraries`
+  entry-point group, which is the producer side of a group this library had
+  only consumed. A file, its `.metta.gz` form and the engine's own
+  library layout, a directory named for the library holding it, are all found.
+
+  Four refusals, each deliberate: the finder is appended and never prepended,
+  so a name with both a `.py` and a `.metta` on one path is Python's; a file
+  whose load fails raises `ImportError` chaining the engine's error and leaves
+  no module in `sys.modules`; a head the file declares and never defines is
+  not an attribute, because the space cannot call it; and `importlib.reload`
+  on a module the hook did not load is Python's own refusal, there being no
+  `reload` verb here. Importing `metta` does not install the hook, a
+  process-wide import decision belonging to the program; `python -m metta run`
+  and `repl` install one for the program's own directory, the way `python
+  script.py` puts the script's directory at the front of `sys.path`, and
+  uninstall it when the run ends.
+
 - `(cost witness class)` and `(cost witness class measure)` catalog rows, and
   the `cost-rows` gate lane that can fail one. The witness is a call with
   exactly one size hole `$n`, the class is the new `cost-class` vocabulary
