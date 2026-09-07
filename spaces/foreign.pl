@@ -1,6 +1,12 @@
 % Guarantees: resolved_equation_removal/4 honors exact source occurrence selection
 %   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: validate foreign-provider capabilities and route foreign and native space operations
+% Guarantees: every capability word a provider declares is a member of the
+% catalog's (vocabulary provider-capability ...) row, checked at the three
+% declaration doors rather than per operation, so a typo is refused naming the
+% declared words instead of gating nothing
+% [tested: catalog_vocabulary_words:an_unknown_capability_word_is_refused;
+% commit=WORKTREE].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarantees: compile_metta_equation/5 retains a resolved reader equation's
@@ -230,6 +236,35 @@ foreign_provides(Space, Capability) :-
     ->  metta_event_capability(Space, _, _)
     ;   true
     ).
+
+%One capability word a provider declares, checked against the catalog row that
+%owns the set. The check is at the DECLARATION doors rather than inside
+%foreign_provides/2, which runs per foreign operation: a word is fixed once
+%per registration and re-asking on every match would tax the path for an
+%answer that cannot change between calls.
+%
+%The row is open, so a seat or library that declares a seam hook of its own
+%registers the word beside it; what this refuses is the typo, which used to
+%register happily and then quietly provide nothing, because a capability
+%nothing gates reads exactly like a capability the provider does not have.
+metta_require_foreign_capability(Space, Capability) :-
+    (   metta_vocabulary_value('provider-capability', Capability)
+    ->  true
+    ;   throw(error(metta_foreign_capability_unknown(Space, Capability),
+                    context(metta_require_foreign_capability/2,
+                            'the capability is not a provider-capability \c
+                             member')))
+    ).
+
+:- multifile prolog:error_message//1.
+prolog:error_message(metta_foreign_capability_unknown(Space, Capability)) -->
+    { metta_vocabulary_values('provider-capability', Values),
+      atomic_list_concat(Values, ', ', Known) },
+    [ '~w declares the capability ~w, which no (vocabulary \c
+       provider-capability ...) row carries. The declared words are ~w; \c
+       register a new one with (add-atom &metta (vocabulary-member \c
+       provider-capability ~w)) beside the seam hook that gates \c
+       it'-[Space, Capability, Known, Capability] ].
 
 %A capability the space does not provide. The provider gets to say why, if it
 %has words for it: seam:foreign_refuse/2 raises, and "does not implement add"
