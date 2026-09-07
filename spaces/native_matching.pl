@@ -10,6 +10,12 @@
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/spaces.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
+% Guarantees: native_match_order/3 answers the conjunct
+%   match_relational_conjuncts/5 leads with, through cheapest_conjunct/6 itself
+%   rather than a second reading of its rule, so (explain (match ...)) cannot
+%   name an order the matcher does not take [tested:
+%   native_generic_join:the_nested_loop_order_names_the_conjunct_the_matcher_leads_with;
+%   commit=3287d4dd4928f09ce7c111d05a1c516808e226d5].
 % [tested: tests/prolog/suites/spaces/spaces.plt, native_generic_join; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 
 :- consult('generic_join.pl').
@@ -118,7 +124,7 @@ match_native(Module, Space, [Rel|PatArgs], OutPattern, Result) :- native_express
 %its own, so asking again at every level walked the remaining conjuncts once
 %per conjunct.
 match_relational_conjuncts(Module, Space, Conjuncts, OutPattern, Result) :-
-    cheapest_conjunct(Module, Space, Conjuncts, Goal, Rest),
+    cheapest_conjunct(Module, Space, Conjuncts, _, Goal, Rest),
     call(Goal),
     (   Rest = [_, _|_]
     ->  match_relational_conjuncts(Module, Space, Rest, OutPattern, Result)
@@ -157,23 +163,50 @@ relational_conjuncts([Conjunct|Conjuncts]) :-
 %Distinguishing two matches from three is not worth a probe that every step of
 %every join pays, so the question asked is the cheap one, and the leading
 %conjunct's goal is built once and kept for the fallback that uses it.
-cheapest_conjunct(Module, Space, [First|More], Goal, Rest) :-
+%Chosen is the conjunct the Goal belongs to, which the join itself never needs
+%and (explain (match ...)) does: an extra head argument costs the join no
+%inference, where a wrapper predicate around this would cost one per level.
+cheapest_conjunct(Module, Space, [First|More], Chosen, Goal, Rest) :-
     conjunct_goal(Module, Space, First, FirstGoal),
     (   goal_matches_at_most_one(FirstGoal)
-    ->  Goal = FirstGoal,
+    ->  Chosen = First,
+        Goal = FirstGoal,
         Rest = More
-    ;   selective_conjunct(Module, Space, More, Found, Others)
-    ->  Goal = Found,
+    ;   selective_conjunct(Module, Space, More, Best, Found, Others)
+    ->  Chosen = Best,
+        Goal = Found,
         Rest = [First|Others]
-    ;   Goal = FirstGoal,
+    ;   Chosen = First,
+        Goal = FirstGoal,
         Rest = More
     ).
 
-selective_conjunct(Module, Space, Conjuncts, Goal, Rest) :-
+selective_conjunct(Module, Space, Conjuncts, Best, Goal, Rest) :-
     select(Best, Conjuncts, Rest),
     conjunct_goal(Module, Space, Best, Goal),
     goal_matches_at_most_one(Goal),
     !.
+
+%The order the retained nested loop takes at its FIRST level, which is the only
+%level a reader can be told about without running the join: this same question
+%is re-asked at every level under the bindings the levels above it made, so the
+%order below is exact about the conjunct that leads and says nothing about the
+%rest beyond the order they are offered in.
+%A pattern the reordering does not accept keeps source order, which is what
+%match_native/5's remaining conjunction clauses do, and a single pattern is its
+%own order.
+native_match_order(Space, [Comma|Conjuncts], Order) :-
+    Comma == ',',
+    !,
+    (   Conjuncts = [_, _|_],
+        relational_conjuncts(Conjuncts),
+        native_storage_module_cache(Space, Module),
+        \+ space_parent(Space, _)
+    ->  cheapest_conjunct(Module, Space, Conjuncts, Chosen, _, Rest),
+        Order = [Chosen|Rest]
+    ;   Order = Conjuncts
+    ).
+native_match_order(_, Pattern, [Pattern]).
 
 %The callable form of one conjunct, built ONCE and used by both the probe and
 %the enumeration that follows it. native_expression/4 rebuilds it with =../2 on
