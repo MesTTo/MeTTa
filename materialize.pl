@@ -47,7 +47,8 @@
             materialize_source/1,
             flush_source_materialization/0,
             discard_space/1,
-            materialized_call/5
+            materialized_call/5,
+            space_materialized/1
           ]).
 :- use_module(library(apply)).
 :- use_module(library(assoc)).
@@ -152,6 +153,14 @@ materialize_source(Space) :-
 source_materialization_dormant(Space) :-
     \+ source_relation_materialization_enabled,
     \+ materialized_snapshot(Space, _, _, _, _).
+
+%Whether this space's source relations are materialised RIGHT NOW, which is
+%what (explain (match ...)) reports beside the plan. The pragma is a request
+%and a snapshot is the fact, so a program that asked for materialization and
+%whose source held nothing to derive reads False and is telling the truth.
+space_materialized(Space) :-
+    materialized_snapshot(Space, _, _, _, _),
+    !.
 
 with_source_materialization(Space, _Names, Goal) :-
     source_materialization_dormant(Space),

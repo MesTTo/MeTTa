@@ -217,6 +217,12 @@
             'get-atoms'/2,
             get_native_atom/2,
             match/4,
+            %The conjunctive matcher's own route decision and its own leading
+            %conjunct, read by (explain (match ...)) so the plan item and the
+            %executed query are one decision rather than two that agree by
+            %inspection.
+            match_conjunction_route/3,
+            native_match_order/3,
             match_foreign/4,
             match_foreign/5,
             match_stored/4,
