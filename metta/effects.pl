@@ -455,6 +455,7 @@ metta_effect_prolog_primitive(b_setval).
 metta_effect_prolog_primitive(metta_require_current_capability).
 metta_effect_prolog_primitive(metta_require_safe_goal).
 metta_effect_prolog_primitive(metta_require_space_update_capability).
+metta_effect_prolog_primitive(metta_space_update_atom).
 metta_effect_prolog_primitive('=@=').    metta_effect_prolog_primitive('\\==').
 metta_effect_prolog_primitive(nth0).     metta_effect_prolog_primitive(nth1).
 metta_effect_prolog_primitive(between).  metta_effect_prolog_primitive(succ).
@@ -1690,18 +1691,21 @@ metta_effect_plan_source_special_arguments(_, switch, [Key, Pairs],
 metta_effect_plan_source_special_arguments(_, let, [_, Value, Body],
                                            [metta_evaluated_source_root(Value),
                                             metta_evaluated_source_root(Body)]).
-metta_effect_plan_source_special_arguments(_, chain,
-                                           [Nested, Binder, Template],
-                                           Evaluated) :-
-    (   var(Binder),
-        nonvar(Nested),
-        \+ translator:embedded_operation(Nested)
-    ->  translator:substitute_written_variable(
-            Binder, Nested, Template, Substituted),
-        Evaluated = [metta_evaluated_source_root(Substituted)]
-    ;   Evaluated = [metta_evaluated_source_root(Nested),
-                     metta_evaluated_source_root(Template)]
-    ).
+%chain reads exactly as let does, because it COMPILES exactly as let does
+%[source: engine/translator/special_forms.pl, translate_special_dl(chain, ...)
+%delegating to translate_let_dl/4; PeTTa@ae66fa8 src/translator.pl:207-210].
+%This clause modelled the substituting chain that clause used to be, so a
+%source plan for a chain disagreed with the goals the translator actually
+%emitted for it.
+%The ORDER is chain's own, not let's: `(chain <atom> <binder> <template>)`
+%against `(let <pattern> <value> <body>)`, so the evaluated operand is the
+%FIRST argument here and the second one there. Reading it as let's put the
+%binder in the operand's place, and a reified world then planned the binder as
+%a dynamic operation and refused `(chain 1 $x (+ $x 2))` at oracleIO
+%[tested: extensions/python/tests/ch15_writing_transactions_and_worlds/test_worlds.py:test_a_typed_structural_chain_is_not_falsely_refused].
+metta_effect_plan_source_special_arguments(_, chain, [Value, _, Body],
+                                           [metta_evaluated_source_root(Value),
+                                            metta_evaluated_source_root(Body)]).
 metta_effect_plan_source_special_arguments(_, 'let*', [Bindings, Body],
                                            Evaluated) :-
     metta_effect_plan_binding_values(Bindings, Values),

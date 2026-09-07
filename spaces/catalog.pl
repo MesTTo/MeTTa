@@ -22,6 +22,12 @@
 % commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]. Guarantees: the algebra-law vocabulary and its alias claims
 % derive from the engine's accepted law facts [tested:
 % algebra_law_vocabulary_and_alias_claims_are_exact; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e].
+% Guarantees: the five boolean operations ship a `dispatch-policy` row selecting
+%   MismatchFail, so a declared-type mismatch on one of them has no answer
+%   rather than a BadArgType atom, which is what a relation out of its domain
+%   means and what upstream PeTTa answers
+%   [tested: examples/ch07-control-flow/07-01-if-and-booleans/11-boolean_domain.metta;
+%   commit=5540a0d03942741ed9565fbb671f18e37cb6eca5].
 % Guarantees: the algebra-law vocabulary carries the ghostwriter names,
 % identity and distributes-over as aliases and roundtrip and equivalent as
 % seam laws the engine never checks, and the refinement vocabulary row names
@@ -1988,6 +1994,31 @@ metta_catalog_preset([algebra, amplitude, 'amplitude-add',
 %an_amplitude_context_without_the_whole_fragment_is_refused_by_name;
 %commit=7ae3103aee78e947d23c5872e3db23c28ad7fe1c].
 metta_catalog_preset(['dispatch-default', 'MismatchEnum', 'MismatchOriginal']).
+
+%A RELATION OUT OF ITS DOMAIN HAS NO ROW, which is a different answer from a
+%function refusing a badly typed argument, and these five are relations: an
+%unbound operand ENUMERATES the booleans, which is why their positions are
+%already relational_input_position/2 rather than guarded ones
+%[source: engine/metta/input_guards.pl:75-79]. Their declared
+%`(-> Bool Bool Bool)` reads as a function everywhere else, so the call site's
+%default mismatch answer, a `BadArgType` naming the position, contradicted the
+%operation's own guard, which simply fails. Upstream says failure in both
+%places -- `and(A,B,C) :- bool(A), bool(B), ...` and no argument check at all
+%[source: PeTTa@ae66fa8 src/metta.pl:97-104] -- and it is measurable:
+%`!(collapse (and True 5))` is `()` there and was
+%`((Error (and True 5) (BadArgType 2 Bool Number)))` here, `!(collapse (not 5))`
+%and the other three the same [measured 2026-09-07 against PeTTa@ae66fa8].
+%
+%Written as POLICY rather than as an exemption in the type checker, because
+%the axis already exists and its vocabulary already carries this value: one
+%row per name says what that name answers when its declared types do not
+%match, and a program can read the same table.
+metta_catalog_preset(['dispatch-policy', and, 'MismatchEnum', 'MismatchFail']).
+metta_catalog_preset(['dispatch-policy', or, 'MismatchEnum', 'MismatchFail']).
+metta_catalog_preset(['dispatch-policy', not, 'MismatchEnum', 'MismatchFail']).
+metta_catalog_preset(['dispatch-policy', xor, 'MismatchEnum', 'MismatchFail']).
+metta_catalog_preset(['dispatch-policy', implies, 'MismatchEnum',
+                      'MismatchFail']).
 metta_catalog_preset(['dispatch-default', 'NoMatchEnum', 'NoMatchFail']).
 metta_catalog_preset(['dispatch-default', 'EvaluationOrderEnum', 'OrderClause']).
 metta_catalog_preset(['dispatch-default', 'FunctionResultEnum', 'Nondeterministic']).
