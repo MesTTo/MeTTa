@@ -390,10 +390,12 @@ compiled_spec(Space, Module, Names, F, Arity, Rules) :-
 
 equation_arity(F, Arity, [=, [F|Args], _]) :- length(Args, Arity).
 
-% Native add-atom retains literal &self, while the reader binds it to the
-% receiving space. The compiled clause's recorded source carries that choice;
-% the stored atom alone does not prove local relational semantics.
-% [tested: a_native_literal_self_does_not_acquire_reader_binding; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
+% Native add-atom stores the author's literal &self and compiles the clause
+% against the receiving space, the split a source load makes, so the reader
+% binds the same clause either door wrote and materializes it the same way.
+% The compiled clause's recorded source carries that resolution; the stored
+% atom alone does not prove local relational semantics.
+% [tested: a_native_literal_self_reads_its_own_space_through_the_materializer; commit=WORKTREE]
 compiled_equation_rule(Space, Names, Equation, Rule) :-
     equation_rule(Space, Names, Equation, Rule),
     Equation = [=, _, Body], compiled_local_matches(Body, Space).

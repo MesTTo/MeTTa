@@ -1172,7 +1172,24 @@ add_function_atom(Storage, Space, Module, Term, FAtom, W) :-
     %the door one equation comes through at a time, so there is no batch to
     %amortise a deferral over, and a caller that adds an equation and then
     %reads the space's module finds the clause where it has always been.
-    compile_metta_equation(Module, Term, Clause, _Ref),
+    %
+    %The STORED atom keeps the &self the author wrote and the compiled CLAUSE
+    %resolves it against this space, which is the split a source load already
+    %makes: filereader/source_lifecycle.pl stores Original and compiles
+    %Resolved through the same metta_substitute_self/3. Without it the two
+    %doors disagreed about one word. Byte-identical equations behaved
+    %differently by whichever door wrote them: `(= (q) (collapse (match &self
+    %(r $x) $x)))` loaded from source read the space it was loaded into, and
+    %the same atom handed to add-atom read the ENGINE ROOT and answered
+    %nothing, so a Python-compiled body could not name its own space at all
+    %and lowered `match(pattern, template)` to a `(context-space)` CALL
+    %instead [measured 2026-09-07: the two spellings side by side in one
+    %&pyspace space answered ((1)) and (()); command=python extensions/python/
+    %benchmarks/probes/running_space.py, its `doors` rows; commit=9010a79b01c9b2a66b96a3952fa378fb3e939dc3].
+    %Identity when the space IS '&self',
+    %which is the first clause of the substitution.
+    metta_substitute_self(Space, Term, Resolved),
+    compile_metta_equation(Module, Resolved, Clause, _Ref),
     maybe_print_compiled_clause("added function", Term, Clause).
 
 %What is left to refuse, now that every space compiles into a module of its
