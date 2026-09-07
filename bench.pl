@@ -29,6 +29,9 @@
 %     because a generating boot is a different workload from a loading one:
 %     3,129,543 inferences against 612,598 [measured 2026-08-28].
 % Guarantees:
+%   - a window that never opened exits 125 rather than failing as a case: the
+%     driver reads that as "this run says nothing" instead of as a moved row
+%     [tested: engine/bench.sh; commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6].
 %   - every case CHECKS its own result before its counters are printed, so a
 %     case that stopped doing its work fails instead of reporting a cheaper
 %     number [tested: engine/bench.sh; commit=c41b54d69e951882e5075393f851a33438247372].
@@ -286,14 +289,40 @@ bench_work(evaluate, Space, Result) :-
 bench_check(boot, booted) :-
     metta_host_set_silent(true),
     process_metta_string("!(+ 1 2)", [3], '&self').
-% The spec fixture's own form count, re-derived here rather than carried: the
-% check reads 118 on trunk against the 124 the file has parsed to since the
-% prelude gained comment lines, so both cases failed their usability check
-% before this and the two rows could not be measured at all
-% [measured 2026-09-07: parse_metta_source/2 over the same text answers 124
-% forms with the C reader and 124 with the Prolog one].
-bench_check(parse, Forms) :- length(Forms, 124).
-bench_check('parse-prolog', Forms) :- length(Forms, 124).
+% Each parse case is checked against the OTHER reader, not against a number.
+%
+% It was a number, 118, and it had been wrong since acd04732 added the 119th
+% top-level form to engine/prelude.metta: both cases raised
+% `bench_result expected` at every commit after it, and nobody saw it because
+% the baseline's workload digest covers the same file and refuses BEFORE a case
+% runs. Re-counting to 119 would have restored exactly that trap -- trunk has
+% since moved the prelude to 124 [measured 2026-09-07 against the branch tip
+% this work is not based on]. A count that has to be edited by hand whenever an
+% unrelated file changes, behind a refusal that hides it when it is not, is not
+% a check; it is a second pin with no updater.
+%
+% There is an independent answer to hand here that translate has no equivalent
+% of, which is why only these two cases change: the tree ships TWO readers over
+% this text and the suite already holds them to each other
+% [source: tests/prolog/suites/reader/reader_c.plt, agree_full/1]. So the C
+% door's result is counted by the Prolog grammar and the Prolog grammar's by
+% the C door. A reader that stops mid-file still fails, which is what the check
+% is for, and the count now follows the shipped prelude by itself.
+%
+% Both calls sit in bench_check/2, which runs AFTER the measured region closes
+% and outside it, so neither reader's cost joins the count it guards
+% [measured 2026-09-07: parse-prolog reads 3,341,234 inferences with the check
+% pinned to a number and 3,341,234 with it derived; commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6].
+%
+% Known limitation: two readers that broke the SAME way would agree and pass.
+% The number would not have caught that either, and reader_c.plt's differential
+% is where that pair is held.
+bench_check(parse, Forms) :-
+    bench_prelude_forms(parse_metta_source_prolog, Expected),
+    length(Forms, Expected).
+bench_check('parse-prolog', Forms) :-
+    bench_prelude_forms(parse_metta_source, Expected),
+    length(Forms, Expected).
 % Forcing drove the 49 names read from the source. The deferred register is
 % the engine's own account of what is left, and it has to be empty.
 bench_check(translate, forced) :-
@@ -303,6 +332,11 @@ bench_check(match, rows(First, Both, Relation)) :-
     length(First, 1), length(Both, 1), length(Relation, 1).
 bench_check('match-skew', Rows) :- length(Rows, 5000).
 bench_check(evaluate, [50000]).
+
+bench_prelude_forms(Reader, Count) :-
+    bench_text('tests/data/prelude-spec.metta', Text),
+    call(Reader, Text, Forms),
+    length(Forms, Count).
 
 % Each round parses into a FRESH variable. Threading one output through the
 % loop instead makes every round after the first unify against the previous
@@ -424,19 +458,50 @@ bench_control(Control, Acknowledge, Command) :-
 % harmless: it stays in the stream buffer and is consumed at the head of the
 % next acknowledgement.
 bench_acknowledged(Acknowledge) :-
-    get_byte(Acknowledge, Byte),
+    catch(get_byte(Acknowledge, Byte), Error, bench_no_acknowledgement(Error)),
     (   Byte =:= 0'\n
     ->  true
     ;   Byte =:= -1
-    ->  throw(error(io_error(read, Acknowledge),
-                    context(bench_acknowledged/1,
-                            'perf closed its acknowledgement pipe')))
+    ->  bench_no_acknowledgement(end_of_file)
     ;   bench_acknowledged(Acknowledge)
     ).
+
+% One vocabulary for a window that never opened, shared with
+% extensions/mork/benchmarks/workload.pl: the tag is `perf_control` rather than
+% the stream, so the entry point below can catch exactly this and nothing else.
+% The stream's own timeout raises here too, which is the shape PMU contention
+% takes -- perf never arms, so it never acknowledges, and this process would
+% otherwise wait out the driver's whole deadline with nothing to say.
+bench_no_acknowledgement(Cause) :-
+    throw(error(io_error(read, perf_control),
+                context(bench_acknowledged/1,
+                        'perf did not acknowledge: it may have failed to open \c
+                         its counter, which it does while another session holds \c
+                         the PMU'-Cause))).
 
 %%%% Entry points %%%%
 
 bench_run(Case) :-
+    catch(bench_measured(Case),
+          error(io_error(read, perf_control), Context),
+          bench_unmeasured(Context)).
+
+%A window that never opened measured NOTHING, which is a different answer from
+%a case that ran and moved, and the driver has to tell them apart: read as a
+%regression, PMU contention on a shared box reports a code change that did not
+%happen. 125 is the status this tree already reads as "the wrapper failed
+%rather than the command" -- timeout(1) uses it for a failure in itself,
+%`git bisect run` reads it as "this run says nothing about the commit", and
+%bounded.sh refuses with it when the process that started a command had
+%already exited. metta.benchmarking names the same number PERF_CONTROL_REFUSED
+%and turns it into a named skip [source: coreutils timeout(1) EXIT STATUS;
+%git-bisect(1), "run <cmd>"; extensions/python/metta/benchmarking.py,
+%PERF_CONTROL_REFUSED].
+bench_unmeasured(context(_, Message-Cause)) :-
+    format(user_error, "bench.pl: ~w (~w)~n", [Message, Cause]),
+    halt(125).
+
+bench_measured(Case) :-
     (   bench_case(Case, Unit, Operations)
     ->  true
     ;   throw(error(domain_error(bench_case, Case),

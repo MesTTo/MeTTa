@@ -1509,6 +1509,7 @@ resolve_unimport_path(Space, File, CanonPath) :-
     metta_module_path(SFile, Base, Relative),
     ensure_metta_ext(Relative, Requested),
     findall(Path,
+            % policy-inventory-exempt: mechanism-internal; reason=the two roots are the import resolver's own search order, the process directory before the current source's, not a value a program chooses between; evidence=engine/metta/interop.pl:resolve_unimport_path/3
             ( member(Root, ['.', Base]),
               absolute_file_name(Requested, Path,
                                  [relative_to(Root), access(none), file_errors(error)]) ),
