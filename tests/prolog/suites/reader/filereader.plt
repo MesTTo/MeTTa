@@ -1319,9 +1319,13 @@ test(registering_a_batch_of_names_answers_what_asking_one_by_one_does) :-
     probe_names(200, Names),
     filereader:existing_predicate_arities(Names, Batched0),
     sort(Batched0, Batched),
+    %Ask both strategies from filereader. Qualifying the current_predicate/1
+    %goal includes inherited predicates in this lookup; qualifying only its
+    %Name/Arity argument enumerates a different set. Both arms must read the
+    %same module chain [tested: filereader_signature_registration:registering_a_batch_of_names_answers_what_asking_one_by_one_does; commit=WORKTREE].
     findall(Name-Arity,
             ( member(Name, Names),
-              current_predicate(Name/Arity),
+              filereader:current_predicate(Name/Arity),
               filereader:callable_as_written(Name, Arity) ),
             OneByOne0),
     sort(OneByOne0, OneByOne),

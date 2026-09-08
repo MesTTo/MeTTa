@@ -367,20 +367,32 @@ test(every_declared_seam_that_exists_is_exported) :-
 % hooks use, which sees a clause arriving by consult as it sees one arriving by
 % assert.
 test(a_seam_declared_in_a_later_file_is_exported) :-
-    metta_engine_module(Engine),
-    module_property(Engine, exports(Before)),
-    assertion(\+ memberchk(plunit_late_declared_service/1, Before)),
-    % The fixture defines its service in the host module, so the engine's is
-    % where the export has to land; a handler seam of its own would land in
-    % `seam` and the same listener would put it there.
+    % The fixture is a MODULE, which is what a shipped library is, so the
+    % export lands in ITS module: seam_home/2 asks implementation_module/1 and
+    % publish/1 exports from the answer. It used to land in the engine's,
+    % because the engine and every library shared `user` and the fixture's
+    % service was therefore implemented there.
     % user: because consult from inside a plunit unit resolves against that
-    % unit's module, and a library's seam belongs where the engine's is, which
-    % is the same trap the file-level load at the top of this file avoids.
+    % unit's module, which is the same trap the file-level load at the top of
+    % this file avoids.
+    ( current_module(plunit_seam_late)
+    -> module_property(plunit_seam_late, exports(Before))
+    ;  Before = [] ),
+    assertion(\+ memberchk(plunit_late_declared_service/1, Before)),
     user:ensure_loaded(seam_late_declaration),
-    module_property(Engine, exports(After)),
+    module_property(plunit_seam_late, exports(After)),
     assertion(memberchk(plunit_late_declared_service/1, After)),
     % and the walks agree, since they ask the same list
     assertion(surface_published(plunit_late_declared_service/1)).
+
+% A source-owned service must disappear from discovery with its source.
+% [tested: metta_published_surface:unloading_a_late_seam_removes_its_home;
+% commit=WORKTREE]
+test(unloading_a_late_seam_removes_its_home) :-
+    user:ensure_loaded(seam_late_declaration),
+    assertion(seam:seam_home(plunit_late_declared_service/1, plunit_seam_late)),
+    unload_file(seam_late_declaration),
+    assertion(\+ seam:seam_home(plunit_late_declared_service/1, _)).
 
 % Exporting an undefined name would hand a caller an existence error under the
 % word "published", so a declaration whose predicate does not exist yet is
@@ -503,7 +515,14 @@ test(a_service_is_reached_under_the_subsystem_that_defines_it) :-
 % The surface walks live in tests/prolog/surface_walk.pl, which the two static
 % lanes load; asking their question here without loading the walk keeps this
 % suite standalone.
+%
+% The engine's module is not the answer any more, and asking it was only ever
+% right because everything shared it: a handler seam is exported by `seam`, a
+% service by whichever subsystem defines it, and a seam a shipped library
+% declares about a predicate of its own by that library's module. seam_home/2
+% is the one question, which is exactly what surface_walk.pl's
+% published_surface/1 asks.
 surface_published(Seam) :-
-    metta_engine_module(Engine),
-    module_property(Engine, exports(Exports)),
+    seam:seam_home(Seam, Home),
+    module_property(Home, exports(Exports)),
     memberchk(Seam, Exports).

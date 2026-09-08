@@ -208,11 +208,11 @@ purge_stale_qlf :-
 %
 %The path is qlf_boot_directory/1, asserted by purge_stale_qlf/0 above from
 %this file's own load context, so a host passes no file name and an
-%apostrophe in a directory name cannot reach a goal as text. user: is the
-%module engine/metta.pl loads into and ensure_loaded/1 takes its context
-%module from the caller, so an unqualified call from this module would load
-%the engine into metta_qlf_boot. The qcompile flag is scoped to this one load
-%and restored, so a program the host runs afterwards does not inherit it.
+%apostrophe in a directory name cannot reach a goal as text. user: imports the
+%metta_engine exports into the host tier; the engine's module declaration owns
+%its definitions [source: engine/metta.pl:module/2; commit=WORKTREE].
+%The qcompile flag is scoped to this one load and restored, so a program the
+%host runs afterwards does not inherit it.
 %
 %A tree the process may not write stays correct and silent: SWI compiles from
 %source, writes nothing, and the boot pays what a source boot always paid,

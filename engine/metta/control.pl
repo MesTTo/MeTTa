@@ -1,4 +1,7 @@
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
+% Guarantees: returned cursor budgets retain their private helper owner when
+%   a host executes them in another module
+%   [tested: engine_modules:returned_budgets_keep_their_private_helpers; commit=WORKTREE].
 % Guarantees: verify-cardinality checks annotated calls while plain calls
 %   retain their generated goal [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
@@ -501,7 +504,7 @@ metta_host_inference_budget(Goal, Inferences, Bounded) :-
     ->  Bounded = Goal
     ;   Bounded = ( statistics(inferences, Base),
                     call_with_inference_limit(Goal, Inferences, Outcome),
-                    metta_inference_budget_spent(Outcome, Base, Inferences) )
+                    metta_engine:metta_inference_budget_spent(Outcome, Base, Inferences) )
     ).
 
 %Takes no goal, so no module travels with it and it may be called from
@@ -578,7 +581,7 @@ metta_host_time_budget(Goal, Seconds, Bounded) :-
     ;   Bounded = ( get_time(Start),
                     Deadline is Start + Seconds,
                     call(Goal),
-                    metta_time_budget_spent(Deadline, Seconds) )
+                    metta_engine:metta_time_budget_spent(Deadline, Seconds) )
     ).
 
 %THE COMMON OUTCOME IS THE `then` BRANCH, the rule

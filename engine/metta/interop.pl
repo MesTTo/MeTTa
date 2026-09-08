@@ -2,6 +2,13 @@
 %   metta_unimport/2 withdraws it transactionally [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Guarded by: metta_unimport/2 shares metta_loader with import_when/4.
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
+% Guarantees: declared determinism is applied to the predicate's implementation
+%   module, including plain host files reached through the core's base chain
+%   [tested: test_a_declared_det_function_that_leaks_a_choice_point_raises,
+%   test_the_declaration_is_reported_beside_the_redos; commit=WORKTREE].
+% Guarantees: assertzPredicate/2, assertaPredicate/2 and retractPredicate/2
+%   modify host clauses in user, as consult_global/1 does
+%   [tested: engine_modules:asserted_host_clauses_keep_the_host_module; commit=WORKTREE].
 % Guarantees: readying an extension's space checks every word its
 %   seam:foreign_capability/2 clauses declare against the catalog's
 %   (vocabulary provider-capability ...) row, which is the door a Prolog
@@ -520,20 +527,16 @@ ready_extension_space(Name, Options, Space) :-
            ready_capability_hook(Name, Space, Capability, Hook)),
     (   memberchk(check(true), Options)
     ->  ensure_conformance_kit,
-        user:metta_check_space_provider(Space, _)
+        lib_conformance:metta_check_space_provider(Space, _)
     ;   true
     ).
 
-%The kit defines this in user when ensure_conformance_kit consults it,
-%one line above the only call; declared dynamic THERE so the static
-%engine load carries no undefined reference (SWI's own advice for a
-%predicate that arrives at runtime), and both the declaration and the
-%call name user explicitly because a bare local dynamic would SHADOW
-%the module-chain fallthrough and the readying's deferred goal failed
-%silently that way [measured 2026-08-25: the check(true) probe warned
-%"Initialization goal failed" with a local declaration and passes with
-%this one].
-:- dynamic user:metta_check_space_provider/2.
+% The optional kit owns its entry point. Declaring that module's predicate
+% keeps list_undefined clean before the kit loads, without creating an empty
+% engine predicate that shadows the library's export. The clause-count guard
+% in ensure_conformance_kit/0 still distinguishes a declaration from a loaded kit.
+% [tested: lib_conformance; commit=WORKTREE]
+:- dynamic lib_conformance:metta_check_space_provider/2.
 
 extension_capability_hook(match, seam:foreign_match/3).
 extension_capability_hook(enumerate, seam:foreign_atoms/2).
@@ -610,7 +613,7 @@ ensure_conformance_kit :-
     %predicate EXIST with zero clauses so the static engine load is
     %clean, and an existence guard here would then never consult the
     %kit - the checker present as a receipt with no payload.
-    (   predicate_property(user:metta_check_space_provider(_, _),
+    (   predicate_property(lib_conformance:metta_check_space_provider(_, _),
                            number_of_clauses(N)),
         N > 0
     ->  true
@@ -748,7 +751,9 @@ declare_function_determinism(Name, Mode) :-
 apply_declared_determinism(Name, Type) :-
     (   metta_function_determinism(Name, det)
     ->  declared_predicate_arity(Type, Arity),
-        det(Name/Arity)
+        functor(Head, Name, Arity),
+        predicate_property(Head, implementation_module(Module)),
+        det(Module:Name/Arity)
     ;   true
     ).
 
@@ -1350,9 +1355,9 @@ metta_predicate_goal([F|Args], Term) :- Term =.. [F|Args].
 %consult_global/1 puts a consulted file, and import_prolog_function/2 looks
 %for it there.
 callPredicate(G, true) :- current_metta_module(Module), call(Module:G).
-assertzPredicate(G, true) :- assertz(G).
-assertaPredicate(G, true) :- asserta(G).
-retractPredicate(G, true) :- retract(G), !.
+assertzPredicate(G, true) :- user:assertz(G).
+assertaPredicate(G, true) :- user:asserta(G).
+retractPredicate(G, true) :- user:retract(G), !.
 retractPredicate(_, false).
 
 %%% Library / Import: %%%

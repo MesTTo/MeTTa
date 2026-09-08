@@ -142,7 +142,7 @@ check_stale_cache(Dir, Stem) :-
     Older is SourceTime - 10,
     set_time_file(PlFile, [], [modified(Older)]),
     set_time_file(QlfFile, [], [modified(Older)]),
-    assertion(\+ static_import_cache_fresh(MettaFile, QlfFile)),
+    assertion(\+ lib_import:static_import_cache_fresh(MettaFile, QlfFile)),
     'static-import!'(Space, Stem, true),
     findall(A, 'get-atoms'(Space, A), Atoms),
     assertion(length(Atoms, 2)),
@@ -471,3 +471,17 @@ check_specialized_undo(Space, Path) :-
     assertion(After == [['import-twice', 'import-bump', 1]]).
 
 :- end_tests(lib_import_lifecycle).
+
+% The library-import door preserves the process-wide host tier.
+% [tested: lib_import:use_module_imports_into_the_shared_host_tier; commit=WORKTREE]
+:- begin_tests(lib_import).
+
+test(use_module_imports_into_the_shared_host_tier) :-
+    assertion(\+ current_predicate(user:write_to_codes/2)),
+    'use-module!'(codesio, true),
+    assertion(predicate_property(user:write_to_codes(_, _), imported_from(codesio))),
+    space_module('&self', Self),
+    call(Self:write_to_codes, kept, Codes),
+    assertion(Codes == [107, 101, 112, 116]).
+
+:- end_tests(lib_import).

@@ -63,10 +63,10 @@ test(conformance_catches_a_capability_with_no_hook,
 % the planted second goal would make the old catch-all fail after running more
 % than the protocol permits.
 test(a_qualified_hook_body_runs_only_its_leading_guard) :-
-    conformance_guard_admits(user:(true, fail)).
+    lib_conformance:conformance_guard_admits(user:(true, fail)).
 
 test(a_qualified_hook_body_with_a_failing_guard_is_refused, [fail]) :-
-    conformance_guard_admits(user:(fail, true)).
+    lib_conformance:conformance_guard_admits(user:(fail, true)).
 
 test(conformance_refuses_a_space_that_is_not_foreign,
      [throws(error(metta_conformance_not_foreign('&plunit_conf_absent'), _))]) :-

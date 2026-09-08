@@ -49,6 +49,10 @@
 
 :- set_prolog_flag(autoload, false).
 :- use_module(library(check), [list_undefined/0]).
+% The checker runs in user, which imports only the engine's public interface.
+% [tested: sh check.sh lib-autoload; commit=WORKTREE]
+:- use_module(library(lists), [member/2, memberchk/2]).
+:- use_module(library(apply), [exclude/3]).
 :- ensure_loaded('../../engine/main.pl').
 
 library_glob('../../lib/*/*.pl').

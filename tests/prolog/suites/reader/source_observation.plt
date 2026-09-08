@@ -270,7 +270,16 @@ test(attributing_a_goal_that_is_not_a_host_predicate_costs_what_one_that_is_cost
     assertion(\+ current_predicate(Engine:'plunit-not-a-host-goal'/3)),
     attribution_cost(Engine:maplist(a, b, c), Present),
     attribution_cost(Engine:'plunit-not-a-host-goal'(a, b, c), Missing),
-    assertion(Missing =< 4 * Present).
+    %Five, not four. A miss walks the module chain and the chain gained one
+    %link when the engine core became a module of its own: the host tier
+    %`user` now sits between it and `system`, which is what keeps a MeTTa
+    %program's own consulted Prolog reachable from every space. The present
+    %case is unmoved at 10 and the missing one reads 41 against 38
+    %[measured: 2026-09-08 present=10 and missing=41, cut=10/38; command=swipl -q tests/prolog/probes/module_attribution.pl; fixture=provisioned module tree and cut 9006528e0; commit=WORKTREE]. The bound is here to
+    %catch the 1,030-inference library-index search that
+    %predicate_property(defined) used to trigger, which is two orders of
+    %magnitude away either way.
+    assertion(Missing =< 5 * Present).
 
 attribution_cost(Goal, Per) :-
     Rounds = 1000,

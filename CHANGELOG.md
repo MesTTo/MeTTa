@@ -1191,6 +1191,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- The engine core now owns `metta_engine`, and all 22 shipped Prolog library
+  halves own distinct `lib_*` modules with explicit exports. Private helpers
+  and autoload declarations no longer overwrite another library's. Existing
+  MeTTa import paths and registered names remain available through the engine
+  facade; local equations still shadow them and withdrawal restores an
+  already compiled caller. Host registrations remain in `user`. Tests pin the
+  module chain, helper collisions, autoload ownership, service publication and
+  callback owners. The timer barrier wraps its actual library dispatcher, and
+  the evaluation unit imports CLP(FD) locally so both constraint tests collect.
+
 - A twin's empirical BUDGET envelope may have zero spread. Every observation
   agreeing under a protocol is the claim the envelope records, keyed to that
   protocol and re-observed rather than re-pinned; the lane used to refuse

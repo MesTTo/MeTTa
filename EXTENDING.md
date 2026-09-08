@@ -622,28 +622,41 @@ a silent wrong answer:
 
 ### Which module your predicate lands in
 
-Your predicate must be in the HOST module, `user`, which is where
-`consult_global/1` puts it. A Prolog library loaded from inside a named space
-defines itself in that space's module, where the registration cannot see it,
-and every call to it used to compile to a partial application. That is an error
-too.
+Give a Prolog library its own module and export the predicates its `.metta`
+file registers. The shipped Prolog libraries use this shape:
 
-`user` is the host, and it is not where MeTTa code lives. Every space, `&self`
-included, compiles its equations into a module of its own, which
-`space_module/2` names, and those modules inherit the engine's and through it
-`user`. So a predicate you consult into `user` is reachable from every space,
-and an equation a program writes cannot replace it: the equation lands in the
-space's own module and shadows it there. Two consequences:
+```prolog
+:- module(lib_double, ['my-double'/2]).
+:- set_module(base(metta_engine)).
+
+'my-double'(X, Y) :- double_value(X, Y).
+double_value(X, Y) :- Y is X * 2.
+```
+
+The loader imports the exports into `user`; `double_value/2` stays in
+`lib_double`. Another library may use that helper name independently. Declare
+each SWI dependency with `use_module/2` or `autoload/2` in the file that uses
+it. Autoload declarations belong to the declaring module too. A plain Prolog
+file still loads into the host module, `user`, through `consult_global/1`.
+
+Every space, `&self` included, compiles its equations into a module of its own,
+which `space_module/2` names. Resolution follows the space's parents, `&self`,
+`prelude`, `metta_engine`, `user`, then `system`. Library exports and a plain
+host predicate are therefore reachable from every space. An equation lands in
+its space's module and shadows the inherited predicate there; removing that
+equation restores the inherited implementation, including in an already
+compiled caller. Two consequences:
 
 - Ask `space_module/2` for a module; never write one. `with_metta_module/2`
   takes that module and REFUSES a space name, because the two are different
   atoms and passing the wrong one would silently run your goal against a module
   nothing compiles into.
 - If you call a MeTTa function from Prolog, qualify it with that module. An
-  unqualified call resolves where YOUR clause was compiled, which for a
-  consulted extension is `user`, and `user` is the parent: it cannot see a
-  space's clauses. If you hand a goal to one of the engine's own predicates
-  instead, the engine's `meta_predicate` declarations carry the module for you.
+  unqualified call resolves where your clause was compiled, which cannot see a
+  child's clauses. A `meta_predicate` declaration carries the caller's module
+  for its goal arguments. A private callback stored as data, returned inside a
+  goal or installed in another module must name its owner explicitly, for
+  example `lib_double:double_value(X, Y)`.
 
 A registration also records WHERE its clauses live, which is what keeps it
 working after a space defines an equation of the same name. Without that, one

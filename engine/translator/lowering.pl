@@ -778,7 +778,7 @@ reduce([F|Args], Out, Status) :- !,
         %counter [measured 2026-08-17].
         (   ( Module == Self -> arity(F, Arity)
                               ; current_predicate(Module:F/Arity) ),
-            \+ (Arity =< 2, current_op(_, _, F))
+            \+ (Arity =< 2, metta_engine_operator(F))
         ->  resolve_dispatch(F, Args, Produced, Goal),
             % A host or builtin function in &self has no retained equation and
             % therefore no dispatch policy to interpret. Avoiding the inherited

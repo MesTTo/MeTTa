@@ -220,7 +220,7 @@ rule_equation(_, Head, Rule) :-
     prelude_rule_equation(Head, Rule).
 
 prelude_rule_equation(Head, L ==> R) :-
-    user:prelude_equation(Head, ['=', Lhs, Rhs]),
+    metta_engine:prelude_equation(Head, ['=', Lhs, Rhs]),
     nonvar(Lhs),
     Lhs = [Head|_],
     expr_term(Lhs, L),
@@ -906,8 +906,8 @@ translator_confluence_selftest :-
 planted_collection_seen :-
     setup_call_cleanup(
         ( assertz(user:translator_rule('$cfl_fixture', [], user)),
-          assertz(user:prelude_equation('$cfl_fixture', ['=', ['$cfl_fixture', _], one])),
-          assertz(user:prelude_equation('$cfl_fixture', ['=', ['$cfl_fixture', _], two])) ),
+          assertz(metta_engine:prelude_equation('$cfl_fixture', ['=', ['$cfl_fixture', _], one])),
+          assertz(metta_engine:prelude_equation('$cfl_fixture', ['=', ['$cfl_fixture', _], two])) ),
         ( compile_time_rules('&self', _, Names, _, PreludeRules),
           memberchk('$cfl_fixture', Names),
           include(fixture_rule, PreludeRules, Two),
@@ -916,7 +916,7 @@ planted_collection_seen :-
           confluence_check(Two, Fuel, Verdicts),
           include(verdict_is(counterexample), Verdicts, [_|_]) ),
         ( retractall(user:translator_rule('$cfl_fixture', _, _)),
-          retractall(user:prelude_equation('$cfl_fixture', _)) )),
+          retractall(metta_engine:prelude_equation('$cfl_fixture', _)) )),
     !.
 planted_collection_seen :-
     format("planted collection: the prelude register's rules were not \c
@@ -933,20 +933,20 @@ fixture_rule(L ==> _) :- functor(L, '$cfl_fixture', _).
 planted_masked_payloads_stay_out_of_closure :-
     setup_call_cleanup(
         ( assertz(user:translator_rule('$cfl_masks', [], user)),
-          assertz(user:prelude_equation(
+          assertz(metta_engine:prelude_equation(
                       '$cfl_masks',
                       ['=', ['$cfl_masks', _],
                        ['$cfl_bundle',
                         [noeval, ['$cfl_noeval_payload', _]],
                         [quote, ['$cfl_quote_payload', _]],
                         ['Error', ['$cfl_error_payload', _], "planted"]]])),
-          assertz(user:prelude_equation(
+          assertz(metta_engine:prelude_equation(
                       '$cfl_noeval_payload',
                       ['=', ['$cfl_noeval_payload', _], noeval_reached])),
-          assertz(user:prelude_equation(
+          assertz(metta_engine:prelude_equation(
                       '$cfl_quote_payload',
                       ['=', ['$cfl_quote_payload', _], quote_reached])),
-          assertz(user:prelude_equation(
+          assertz(metta_engine:prelude_equation(
                       '$cfl_error_payload',
                       ['=', ['$cfl_error_payload', _], error_reached])) ),
         ( compile_time_rules('&self', _, Names, _, _),
@@ -955,10 +955,10 @@ planted_masked_payloads_stay_out_of_closure :-
           \+ memberchk('$cfl_quote_payload', Names),
           \+ memberchk('$cfl_error_payload', Names) ),
         ( retractall(user:translator_rule('$cfl_masks', _, _)),
-          retractall(user:prelude_equation('$cfl_masks', _)),
-          retractall(user:prelude_equation('$cfl_noeval_payload', _)),
-          retractall(user:prelude_equation('$cfl_quote_payload', _)),
-          retractall(user:prelude_equation('$cfl_error_payload', _)) )),
+          retractall(metta_engine:prelude_equation('$cfl_masks', _)),
+          retractall(metta_engine:prelude_equation('$cfl_noeval_payload', _)),
+          retractall(metta_engine:prelude_equation('$cfl_quote_payload', _)),
+          retractall(metta_engine:prelude_equation('$cfl_error_payload', _)) )),
     !.
 planted_masked_payloads_stay_out_of_closure :-
     format("planted data masks: quote, noeval or Error payload entered the \c
@@ -972,14 +972,14 @@ planted_masked_payloads_stay_out_of_closure :-
 planted_refusing_rule_seen :-
     setup_call_cleanup(
         ( assertz(user:translator_rule('$cfl_guard', [], user)),
-          assertz(user:prelude_equation('$cfl_guard',
+          assertz(metta_engine:prelude_equation('$cfl_guard',
                                         ['=', ['$cfl_guard', _],
                                          [refuse, "planted"]])) ),
         ( compile_time_rules('&self', _, _, _, PreludeRules),
           guarded_rules([], PreludeRules, Guarded, _),
           Guarded >= 1 ),
         ( retractall(user:translator_rule('$cfl_guard', _, _)),
-          retractall(user:prelude_equation('$cfl_guard', _)) )),
+          retractall(metta_engine:prelude_equation('$cfl_guard', _)) )),
     !.
 planted_refusing_rule_seen :-
     format("planted refusing rule: a rule that can refuse was not counted, so \c

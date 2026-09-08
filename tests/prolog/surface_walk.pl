@@ -41,10 +41,9 @@
 %       because prolog_walk_code/1 reports through a side effect rather than
 %       by answering
 % Decides:
-%     - published means DECLARED, not merely reachable. A predicate that is
-%       exported, callable and widely used is still an internal here until an
-%       seam:kind/2 fact says otherwise, because the point is to make the
-%       surface a decision somebody wrote down.
+%     - published_surface/1 reads the defining module's export list for a
+%       declared seam, or accepts a registered MeTTa builtin head.
+%       [source: tests/prolog/surface_walk.pl:published_surface/1; commit=WORKTREE]
 % Open Obligations:
 %     To Do: None
 %     Hacks: None
@@ -288,7 +287,8 @@ scan_sees_every_planted_reach(Total, Missed) :-
 
 % The planted callee has to be an engine predicate that is NOT published, or
 % the probe proves nothing; a caller checks that before trusting the result.
-planted_internal(register_prolog_arities/1).
+% [tested: sh check.sh prolog-static; commit=WORKTREE]
+planted_internal(imported_predicate/2).
 
 % The helper's OWN clause is walked beside the probe, because that is how SWI
 % comes to know it is a meta-predicate: library(prolog_codewalk) infers a spec
@@ -316,9 +316,9 @@ door_is_seen(Body) :-
 % after it learned meta_predicate specs: nothing declares planted_helper/2 a
 % meta-predicate, and inferring that is the reason the walk is SWI's rather
 % than this file's.
-planted_reach(control_structure, (true, register_prolog_arities(_))).
-planted_reach(declared_meta,     ignore(maplist(register_prolog_arities, []))).
-planted_reach(caret_goal,        \+ bagof(_, _^register_prolog_arities(_), _)).
-planted_reach(inferred_meta,     planted_helper(register_prolog_arities, [])).
+planted_reach(control_structure, (true, metta_engine:imported_predicate(_, _))).
+planted_reach(declared_meta,     ignore(maplist(metta_engine:imported_predicate(_), []))).
+planted_reach(caret_goal,        \+ bagof(_, _^(metta_engine:imported_predicate(_, _)), _)).
+planted_reach(inferred_meta,     planted_helper(metta_engine:imported_predicate(_), [])).
 
 planted_helper(Goal, List) :- maplist(Goal, List).

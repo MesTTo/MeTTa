@@ -477,13 +477,38 @@ unexported_reaches(Unexported) :-
             ( layer_edge(CallerFile, _, _, Module, CalleePI),
               subsystem_name(CallerFile, Caller),
               subsystem_module(Module),
-              \+ module_exports(Module, CalleePI) ),
+              \+ module_exports(Module, CalleePI),
+              \+ unexportable(Module, CalleePI, _) ),
             Unexported0),
     sort(Unexported0, Unexported).
 
-%A module the engine declares, which is what carries an export contract. The
-%engine's own module is not one: it has no file of its own, and its cross-file
-%calls are what the allow-list above is for.
+%!  unexportable(?Module, ?PredicateIndicator, ?Why) is nondet.
+%
+%   A name a subsystem CANNOT export, so the contract above cannot be about
+%   its export list. Both are MeTTa operations whose name and arity SWI
+%   already uses for one of its own built-ins: the engine defines its own
+%   under `:- redefine_system_predicate/1`, and the moment the engine module
+%   DECLARES the name an export, importing it into `user` -- where SWI's is
+%   already imported from `system` -- raises
+%   `No permission to import metta_engine:assert/2 into user (already imported
+%   from system)` and the boot ends there
+%   [tested: engine_modules:every_core_builtin_head_is_exported; commit=WORKTREE].
+%
+%   The reach is legitimate and needs no export: an engine subsystem resolves
+%   it through its base, which is the engine's module, the same way it
+%   resolves every other core predicate.
+unexportable(metta_engine, assert/2,
+             'SWI\'s assert/2 is a built-in and MeTTa\'s `assert` is a \c
+              different operation of the same name and arity; \c
+              engine/metta/runtime.pl declares the redefinition').
+unexportable(metta_engine, exists_file/1,
+             'SWI\'s exists_file/1 is a built-in and MeTTa\'s reverse-mode \c
+              spelling answers a partial application for an unbound argument; \c
+              engine/metta/runtime.pl declares the redefinition').
+
+% Every module with a source under engine/, including the core, has an export
+% contract. The two system-name exceptions above apply only to the core.
+% [tested: sh check.sh layering; commit=WORKTREE]
 subsystem_module(Module) :-
     module_property(Module, file(File)),
     engine_directory(Directory),
@@ -535,7 +560,7 @@ layering_walk_sees_every_planted_reach(Total, Missed) :-
     findall(Door, ( planted_reach(Door, Body), \+ layering_door_is_seen(Body) ),
             Missed).
 
-% The planted callee is register_prolog_arities/1, an engine/metta.pl
+% The planted callee is imported_predicate/2, an engine/metta.pl
 % predicate, and the planted caller's clause is asserted into a module that is
 % not metta.pl's, so a seen door is a cross-subsystem edge this lane's own
 % recorder produced.
