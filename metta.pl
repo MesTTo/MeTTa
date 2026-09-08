@@ -1594,6 +1594,8 @@ metta_import_shared_registries(Subsystem) :-
 % silent/1 remains filereader's single shared flag through this re-export.
 % [source: engine/filereader.pl:metta_host_set_silent/1; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 metta_engine_reexport(filereader, metta_host_fast_header/1).
+metta_engine_reexport(filereader, metta_static_import_image/2).
+metta_engine_reexport(filereader, metta_restore_static_import/3).
 metta_engine_reexport(filereader, active_source_program/1).
 metta_engine_reexport(filereader, recompile_function_impl/1).
 metta_engine_reexport(filereader, recompile_function_impl_in/2).
@@ -1746,6 +1748,17 @@ metta_engine_reexport(kernel, 'space-contains'/3).
 metta_engine_reexport(parser, swrite_pretty/2).
 metta_engine_reexport(spaces, 'get-atoms'/2).
 metta_engine_reexport(spaces, add_sexp/3).
+metta_engine_reexport(spaces, add_sexp/4).
+metta_engine_reexport(spaces, metta_add_atom/4).
+metta_engine_reexport(spaces, metta_add_program_atoms/4).
+metta_engine_reexport(spaces, metta_actor/1).
+metta_engine_reexport(spaces, metta_token_order/3).
+metta_engine_reexport(spaces, metta_token_parts/3).
+metta_engine_reexport(spaces, metta_token_portable/2).
+metta_engine_reexport(spaces, metta_token_receive/2).
+metta_engine_reexport(spaces, metta_generation_receive/1).
+metta_engine_reexport(spaces, metta_storage_term/4).
+metta_engine_reexport(spaces, metta_host_blame/3).
 metta_engine_reexport(spaces, foreign_provides/2).
 metta_engine_reexport(spaces, foreign_pushdown_class/3).
 metta_engine_reexport(spaces, metta_capacity_count/2).
@@ -1756,7 +1769,7 @@ metta_engine_reexport(spaces, metta_match_atoms/2).
 metta_engine_reexport(spaces, metta_policy_members/3).
 metta_engine_reexport(spaces, metta_space_claim/2).
 metta_engine_reexport(spaces, metta_space_operand/1).
-metta_engine_reexport(spaces, native_atom_clause/3).
+metta_engine_reexport(spaces, native_atom_clause/4).
 metta_engine_reexport(spaces, native_storage_module_cache/2).
 metta_engine_reexport(spaces, native_storage_module_ready/2).
 metta_engine_reexport(spaces, space_atom_count/2).
@@ -1790,7 +1803,7 @@ metta_engine_reexport(kernel, 'space-atom-count'/2).
 metta_engine_reexport(spaces, match_foreign/4).
 metta_engine_reexport(spaces, native_storage_functor/2).
 metta_engine_reexport(spaces, protect_metta_exec_modules/0).
-metta_engine_reexport(spaces, stored_atom_of_ref/3).
+metta_engine_reexport(spaces, stored_atom_of_ref/4).
 metta_engine_reexport(translator_rules, restore_translator_rule_snapshot/3).
 metta_engine_reexport(translator_rules, translator_rule_home/2).
 metta_engine_reexport(translator_rules, translator_rule_override/2).

@@ -49,12 +49,12 @@
 %   - the reaction agenda is a declared policy with declaration order as its
 %     stated default, and two conflicting reactions fire in the order each
 %     declared policy names [tested: spaces_reaction_agenda; commit=c05f93baf8c6ecd483487efb72d7f8eb92c97809].
-%   - stored_atom_of_ref/3 is add_sexp_in/4's inverse over both stored shapes,
+%   - stored_atom_of_ref/4 is add_sexp_in/5's inverse over all three stored shapes,
 %     and answers for a stored atom's clause reference alone: not for a
 %     compiled clause's, not for a registration's, not for an erased one
-%     [tested 2026-08-19:
+%     [tested 2026-09-08:
 %     spaces_storage_modules:a_stored_atoms_reference_decodes_to_its_atom,
-%     spaces_storage_modules:an_erased_reference_decodes_to_nothing].
+%     spaces_storage_modules:an_erased_reference_decodes_to_nothing; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 %   - An equation for a name this space's module already DERIVED as a
 %     specialization is not stored again, so enumerating a space and re-adding
 %     its atoms answers a space that holds and answers what the first one did
@@ -200,6 +200,20 @@
             'add-reducts'/3,
             add_sexp/2,
             add_sexp/3,
+            add_sexp/4,
+            metta_actor/1,
+            metta_token_order/3,
+            metta_token_parts/3,
+            metta_token_portable/2,
+            metta_token_receive/2,
+            metta_generation_receive/1,
+            metta_storage_term/4,
+            metta_native_pair/4,
+            metta_space_pair/4,
+            metta_require_token_read/2,
+            metta_host_blame/3,
+            metta_with_occurrence_load/1,
+            metta_receive_occurrences/3,
             announce_function_changed/2,
             announce_declaration_changed/3,
             set_type_alias_mutation_scope/2,
@@ -213,6 +227,7 @@
             defer_metta_equation/4,
             metta_add_program_atoms/2,
             metta_add_program_atoms/3,
+            metta_add_program_atoms/4,
             store_data_atoms/2,
             metta_ensure_compiled/1,
             ensure_native_storage_module/2,
@@ -232,6 +247,7 @@
             match_foreign/5,
             match_stored/4,
             metta_add_atom/3,
+            metta_add_atom/4,
             metta_arrow_product_in/4,
             metta_with_arrow_product_update/1,
             metta_refuse_annotated_translator_rule/1,
@@ -277,7 +293,7 @@
             metta_require_space_update_capability/2,
             metta_restricted_exec_module/2,
             metta_space_names/1,
-            native_atom_clause/3,
+            native_atom_clause/4,
             native_storage_functor/2,
             native_storage_module/2,
             native_storage_module_cache/2,
@@ -391,7 +407,7 @@
             space_parametric/1,
             space_parent/2,
             space_restricted/2,
-            stored_atom_of_ref/3
+            stored_atom_of_ref/4
           ]).
 
 % Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
@@ -442,6 +458,8 @@ native_storage_functor(Space, '$metta_parametric_atom') :-
 space_canonical_atom(Space, Encoded) :-
     with_output_to(atom(Encoded), write_canonical(Space)).
 
+:- consult('spaces/tokens.pl').
+:- consult('spaces/receipts.pl').
 :- consult('spaces/catalog.pl').
 :- consult('spaces/lifecycle.pl').
 :- consult('spaces/arrow_products.pl').

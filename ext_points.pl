@@ -175,6 +175,7 @@
             foreign_add/2,
             foreign_add_many/2,
             foreign_atoms/2,
+            foreign_token/3,
             foreign_begin/1,
             foreign_clear/1,
             foreign_commit/1,
@@ -612,6 +613,10 @@ kind(foreign_add_many/2, ownership).
 kind(foreign_remove/3, ownership).
 :- multifile foreign_atoms/2.
 kind(foreign_atoms/2, ownership).
+% One stable occurrence identity and its candidate atom. A provider may return
+% extra candidates; the seat unifies each against the offered pattern.
+:- multifile foreign_token/3.
+kind(foreign_token/3, ownership).
 %Clear was the sixth of these all along and was declared nowhere: it lived in
 %extensions/python/metta/shim.pl, so a Prolog provider that implemented clear, as
 %lib/lib_redis/lib_redis.pl does, was reachable only when Python was in the process.
@@ -1628,7 +1633,15 @@ kind(eval_metta_in_module/3, service).
 kind(native_storage_module/2, service).
 kind(native_storage_functor/2, service).
 kind(ensure_native_storage_module/2, service).
-kind(native_atom_clause/3, service).
+kind(native_atom_clause/4, service).
+kind(metta_storage_term/4, service).
+kind(metta_actor/1, host_service).
+kind(metta_token_order/3, service).
+kind(metta_token_parts/3, service).
+kind(metta_token_portable/2, service).
+kind(metta_token_receive/2, service).
+kind(metta_generation_receive/1, service).
+kind(metta_host_blame/3, host_service).
 %The match a foreign provider answers, published for the library that CHECKS
 %providers: lib/lib_conformance/lib_conformance.pl runs a provider's own atoms back through it
 %to prove the over-approximation contract holds. match_foreign/5 is the host
@@ -1957,11 +1970,11 @@ atom_hook_clause(removed, Ref) :- clause(atom_removed(_, _), _, Ref).
 %with a run-time variable made three live wrapper bodies unreachable from any
 %root in tests/prolog/reachability.pl [measured 2026-08-19].
 enable_atom_hook(added) :-
-    write_door_module(metta_add_atom/3, Engine),
-    current_predicate_wrapper(Engine:metta_add_atom(_, _, _), metta_atom_added_hooks, _, _), !.
+    write_door_module(metta_add_atom/4, Engine),
+    current_predicate_wrapper(Engine:metta_add_atom(_, _, _, _), metta_atom_added_hooks, _, _), !.
 enable_atom_hook(added) :-
-    write_door_module(metta_add_atom/3, Engine),
-    (   wrap_predicate(Engine:metta_add_atom(Space, Term, _Result), metta_atom_added_hooks, Wrapped,
+    write_door_module(metta_add_atom/4, Engine),
+    (   wrap_predicate(Engine:metta_add_atom(Space, Term, _Token, _Result), metta_atom_added_hooks, Wrapped,
                        run_atom_added_hooks(Wrapped, Space, Term))
     ->  true
     ;   throw(error(metta_atom_hook_install_failed(added),
@@ -2165,8 +2178,8 @@ observation_rollback(defer(_, Discard)) :-
     call(Discard).
 
 disable_atom_hook(added) :-
-    write_door_module(metta_add_atom/3, Engine),
-    ( unwrap_predicate(Engine:metta_add_atom/3, metta_atom_added_hooks) -> true ; true ).
+    write_door_module(metta_add_atom/4, Engine),
+    ( unwrap_predicate(Engine:metta_add_atom/4, metta_atom_added_hooks) -> true ; true ).
 disable_atom_hook(removed) :-
     write_door_module(metta_remove_atom/3, Engine),
     ( unwrap_predicate(Engine:metta_remove_atom/3, metta_atom_removed_hooks) -> true ; true ).

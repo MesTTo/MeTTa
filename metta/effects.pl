@@ -2077,7 +2077,7 @@ seam:pure_operation(Name) :-
 %written has no storage module yet, and that absence reads as "not declared".
 metta_contract_fact(Args) :-
     native_storage_module('&metta', Module),
-    Goal =.. ['&metta'|Args],
+    metta_storage_term('&metta', Args, _, Goal),
     catch(call(Module:Goal), error(existence_error(procedure, _), _), fail).
 
 %(annotations Ctx Algebra [Capabilities]) declares the value algebra a
@@ -2271,7 +2271,7 @@ metta_source_guard(Space) :-
     !.
 metta_source_guard(Space) :-
     (   metta_contract_storage(Module),
-        Module:'&metta'(source, Space, linear)
+        Module:'&metta'(source, Space, linear, _)
     ->  metta_space_flag_key('$metta_consumed:', Space, Key),
         (   current_prolog_flag(Key, consumed)
         ->  throw(error(metta_source_discipline(Space, linear), none))

@@ -1019,7 +1019,7 @@ direct_type_declaration_in(Module, X, T) :-
     metta_module_space(Module, Space),
     (   native_storage_module_ready(Space, Storage),
         native_storage_functor(Space, Functor),
-        Head =.. [Functor, ':', X, Raw],
+        Head =.. [Functor, ':', X, Raw, _],
         call(Storage:Head),
         normalize_type_in(Module, Raw, T)
     ;   normalized_self_type_declaration(X, T)
@@ -1176,9 +1176,9 @@ any_super_type_edge(Module) :-
 native_edge_probe(Space) :-
     native_storage_module_cache(Space, StorageModule),
     (   Space == '&self'
-    ->  \+ \+ clause(StorageModule:'&self'(':<', _, _), _)
+    ->  \+ \+ clause(StorageModule:'&self'(':<', _, _, _), _)
     ;   native_storage_functor(Space, Functor),
-        Head =.. [Functor, ':<', _, _],
+        Head =.. [Functor, ':<', _, _, _],
         \+ \+ clause(StorageModule:Head, _)
     ).
 

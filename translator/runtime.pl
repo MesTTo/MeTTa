@@ -1023,8 +1023,8 @@ function_evaluation_active :-
 %:10,:24 and two `remove-atom` clauses at :26,:44, every one of them funnelling
 %through those two helpers].
 %
-%This engine's space is WIDER: add_sexp_in/4's last clause keeps a headless
-%atom in `$metta_native_scalar/1`, which is measured and load-bearing. The two
+%This engine's space is WIDER: add_sexp_in/5's last clause keeps a headless
+%atom in `$metta_native_scalar/2`, which is measured and load-bearing. The two
 %spellings PeTTa defines take PeTTa's domain; the wider space keeps the doors
 %PeTTa does not define -- `add-atoms`, `subtract-atom`, a top-level atom in a
 %file (upstream's parser refuses one: `Syntax error: expected '(' or '!('`),

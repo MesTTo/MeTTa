@@ -546,6 +546,14 @@ metta_host_refusal_row(Kind, Class, Ground, Remedy) :-
 %   what it had before this table existed. once/1 because a program may hold a
 %   second row for one kind and a refusal has one reading.
 metta_host_refusal(Ball, Kind, Fields, Class, Ground, Remedy) :-
+    Ball = error(metta_foreign_tokens_required(_, _), _),
+    !,
+    metta_host_error_kind(Ball, Kind, Fields),
+    once(metta_host_refusal_row(Kind, Class, Ground, _)),
+    Remedy = [remedy,
+              "copy the atoms into a native overlay, or implement stable provider identities",
+              quickfix, prose].
+metta_host_refusal(Ball, Kind, Fields, Class, Ground, Remedy) :-
     metta_host_error_kind(Ball, Kind, Fields),
     once(metta_host_refusal_row(Kind, Class, Ground, Template)),
     metta_host_refusal_remedy(Template, Fields, Remedy).

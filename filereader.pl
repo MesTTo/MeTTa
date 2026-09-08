@@ -1,5 +1,9 @@
 % Purpose: read MeTTa source, split it into complete top-level forms, and
 % dispatch each parsed form to the evaluator.
+% Owns resources: '$metta_equation_token'/4 rows link live compiled clauses to
+%   their stored occurrence; forget_translated_equation_binding/1 retires them
+%   [tested: spaces_tokens:equation_tokens_survive_recompilation_and_exact_subtraction;
+%   commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 % Guarantees:
 %   - resolved reader equations retain their stored clause reference through
 %     deferred reconstruction, recompilation and fast-cache relocation
@@ -251,6 +255,7 @@
             record_translated_from/3,
             record_translated_from/4,
             translated_equation_binding/3,
+            '$metta_equation_token'/4,
             stored_equation_source/4,
             forget_translated_from/3,
             forget_space_source_loads/1,
@@ -305,6 +310,8 @@
             metta_host_save_fast/3,
             metta_host_load_fast/2,
             metta_host_fast_header/1,
+            metta_static_import_image/2,
+            metta_restore_static_import/3,
             metta_host_digest/2,
             metta_host_set_silent/1,
             metta_host_substitute/3
@@ -352,6 +359,7 @@
 %undefined and crashed).
 :- dynamic translated_from/2.
 :- dynamic translated_equation_binding/3.
+:- dynamic '$metta_equation_token'/4.
 
 :- multifile prolog:error_message//1.
 
@@ -402,7 +410,7 @@ metta_host_set_silent(Silent) :-
 :- dynamic source_load_support_assertions/2.
 :- dynamic source_load_resource/2.
 :- dynamic source_load_repair/2.
-:- thread_local source_recompile_owners/1.
+:- thread_local source_recompile_context/2.
 %What a file put where, so that loading it again can REPLACE that rather than
 %add to it. SWI states the rule this implements: "clauses are owned by the file
 %in which they are defined. This information is used to replace the old
@@ -1382,8 +1390,13 @@ recompile_function_in_module_stable(Module, G) :-
                       source_load_assertion(LoadId, artifact, Ref),
                       Owners0),
               sort(Owners0, Owners),
-              ( translated_equation_binding(_, Origin, Ref)
-              -> StoredRef = Origin ; StoredRef = none ) ),
+              (   '$metta_equation_token'(Module, G, Ref, Token),
+                  metta_module_space(Module, Space),
+                  spaces:native_storage_module_ready(Space, Storage),
+                  native_atom_clause(Space, [=, [G|_], _], Token, Head),
+                  clause(Storage:Head, true, Origin)
+              ->  StoredRef = Origin
+              ;   StoredRef = none ) ),
             Recorded0),
     attach_recompile_types(Recorded0, TypeGroups, Recorded),
     clear_fun_meta(Module, G),
@@ -1480,9 +1493,20 @@ translate_recompiled_clause(Module, G, Term, types(Types), Clause) :-
 %commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
 :- meta_predicate with_source_recompile_owners(+, 0).
 with_source_recompile_owners(Owners, Goal) :-
-    setup_call_cleanup(asserta(source_recompile_owners(Owners), ContextRef),
+    recompile_load_context(Context),
+    setup_call_cleanup(asserta(source_recompile_context(Context, Owners), ContextRef),
                        call(Goal),
                        erase(ContextRef)).
+
+% Forcing a deferred dependency pushes its own source pin. It must not inherit
+% the recompile owner of the caller that happened to force it.
+% [tested: test_source_replacement_retains_recompiled_binding_ownership; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4]
+source_recompile_owners(Owners) :-
+    source_recompile_context(Context, Owners), !,
+    recompile_load_context(Context).
+
+recompile_load_context(Context) :-
+    ( active_source_load(Load) -> Context = load(Load) ; Context = none ).
 
 % Compatibility name for the former name-index walk. Every compiled form now
 % records its supports at record_translated_from/3, so one indexed forward
@@ -1506,8 +1530,17 @@ record_translated_from(Ref, Term, SourceRef) :-
 record_translated_from(Ref, Term, StoredRef, SourceRef) :-
     assertz(translated_from(Ref, Term), SourceRef),
     (   StoredRef \== none,
+        stored_atom_of_ref(StoredRef, _, [=, [Name|_], _], Token),
+        clause_property(Ref, module(TokenModule))
+    ->  assertz('$metta_equation_token'(TokenModule, Name, Ref, Token), TokenRef),
+        ( source_recompile_owners(TokenOwners)
+        -> record_recompiled_source_assertion(TokenOwners, TokenRef)
+        ; record_source_assertion(TokenRef) )
+    ;   true
+    ),
+    (   StoredRef \== none,
         ( seam:form_rewriter(_) ; metta_token(_, _) ),
-        stored_atom_of_ref(StoredRef, Space, Original),
+        stored_atom_of_ref(StoredRef, Space, Original, _),
         (   Space == '&self'
         ->  Law = Original
         ;   metta_substitute_self(Space, Original, Law)
@@ -1541,9 +1574,12 @@ record_translated_from(Ref, Term, StoredRef, SourceRef) :-
 % commit=856434d7c1d381b3f3d7cbbd008f46c0d41b61aa]. The root is the identity case and pays no walk; the
 % comparison is inline so a root batch costs what it cost.
 stored_equation_source(Space, Original, Resolved, StoredRef) :-
-    spaces:native_storage_module_ready(Space, Storage),
-    native_atom_clause(Space, Original, Head),
-    clause(Storage:Head, true, StoredRef),
+    (   nonvar(StoredRef)
+    ->  stored_atom_of_ref(StoredRef, Space, Original, _)
+    ;   spaces:native_storage_module_ready(Space, Storage),
+        native_atom_clause(Space, Original, _, Head),
+        clause(Storage:Head, true, StoredRef)
+    ),
     (   translated_equation_binding(Space, StoredRef, Ref),
         translated_from(Ref, Bound)
     ->  Resolved = Bound
@@ -1636,6 +1672,9 @@ forget_translated_from(_, Ref, _) :-
     retractall(translated_from(Ref, _)).
 
 forget_translated_equation_binding(Ref) :-
+    forall(clause('$metta_equation_token'(_, _, Ref, _), true, TokenRef),
+           ( retractall(source_load_assertion(_, artifact, TokenRef)),
+             erase(TokenRef) )),
     forall(clause(translated_equation_binding(_, _, Ref), true, BindingRef),
            ( retractall(source_load_assertion(_, artifact, BindingRef)),
              erase(BindingRef) )).

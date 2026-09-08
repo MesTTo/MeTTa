@@ -65,12 +65,12 @@ metta_require_arrow_product(Name, Type, Product) :-
 metta_with_arrow_product_update(Goal) :-
     with_typing_policy_stable(with_mutex('$metta_arrow_products', Goal)).
 
-metta_add_annotated_declaration(Space, Name, Type, Product) :-
+metta_add_annotated_declaration(Space, Name, Type, Product, Token) :-
     metta_with_arrow_product_update(
         once(metta_transaction(
-            store_annotated_declaration(Space, Name, Type, Product)))).
+            store_annotated_declaration(Space, Name, Type, Product, Token)))).
 
-store_annotated_declaration(_, Name, Type, _) :-
+store_annotated_declaration(_, Name, Type, _, _) :-
     (   metta_translated_head(Name)
     ;   translator:prolog_function_importer(Name)
     ),
@@ -79,7 +79,7 @@ store_annotated_declaration(_, Name, Type, _) :-
                 context(metta_add_atom/3,
                         'translated forms have no ordinary cardinality checkpoint; \c
                          annotate an ordinary wrapper function instead'))).
-store_annotated_declaration(Space, Name, Type, _) :-
+store_annotated_declaration(Space, Name, Type, _, _) :-
     seam:foreign_space(Space),
     \+ metta_writes(Space, transactional),
     !,
@@ -87,7 +87,7 @@ store_annotated_declaration(Space, Name, Type, _) :-
                 context(metta_add_atom/3,
                         'annotated arrows require transactional storage to keep \c
                          the written type and its catalog effect together'))).
-store_annotated_declaration(Space, Name, Type, Product) :-
+store_annotated_declaration(Space, Name, Type, Product, Token) :-
     result_finality(Name, Before),
     ( Space == '&self', fun(Name) -> retract_prelude_declarations(Name) ; true ),
     Product = effect(_, Class),
@@ -100,7 +100,7 @@ store_annotated_declaration(Space, Name, Type, Product) :-
     assertz(metta_arrow_dispatch(EffectRef, DispatchRef), DispatchOwnerRef),
     record_source_assertion(DispatchOwnerRef),
     forall(seam:cache_policy_changed(Name), true),
-    store_atom(Space, [':', Name, Type]),
+    store_atom(Space, [':', Name, Type], Token),
     (   fun(Name)
     ->  space_module(Space, Module),
         announce_declaration_changed(Module, Name, Before)
