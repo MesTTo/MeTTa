@@ -1149,12 +1149,14 @@ metta_publish_every_vocabulary_type :-
     !,
     source_file(metta_publish_every_vocabulary_type, Catalog),
     file_directory_name(Catalog, Directory),
-    directory_file_path(Directory, vocabulary_seed, Seed),
+    directory_file_path(Directory, 'vocabulary_seed.pl', Seed),
     % The payload is compiled beside its source the first time and loaded
-    % from the artifact after, the way qlf_boot.pl treats the engine: the
-    % recipe's evaluation and the source's expansion cost 23,843 inferences
-    % per boot when consulted, against 14,841 for ordinary publication.
-    load_files(Seed, [qcompile(auto), if(not_loaded)]),
+    % from the artifact after, through the engine's one door for a
+    % runtime-loaded unit (metta_load_source/2), which asks the boot whether
+    % it governs the file: the recipe's evaluation and the source's
+    % expansion cost 23,843 inferences per boot when consulted, against
+    % 14,841 for ordinary publication and 621 from the artifact.
+    metta_load_source(Seed, [if(not_loaded)]),
     catalog_vocabulary_seed:publish_seed,
     assertz(metta_vocabulary_types_published),
     % policy-inventory-exempt: mechanism-internal; reason=the two declaration heads whose atoms the vocabulary types are, the type of a member and the subtype edge of an order; evidence=engine/spaces/catalog.pl:metta_publish_vocabulary_types/1

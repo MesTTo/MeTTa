@@ -207,6 +207,7 @@
             atom_hook_ref_idle/2,
             host_transport_failure/1,
             host_error_reason/2,
+            compiled_source/1,
             host_import/1,
             host_object/1,
             host_reader_token_construct/3,
@@ -1759,6 +1760,15 @@ kind(grounded_class_type/2, ownership).
 %MeTTa import.
 :- multifile host_import/1.
 kind(host_import/1, ownership).
+
+%The boot claims a Prolog source as one it governs: engine/qlf_boot.pl
+%answers for the sources whose artifacts it stamps and purges as one set,
+%and the engine's runtime loaders (metta_load_source/2 in
+%engine/metta/interop.pl) load a claimed source through its compiled
+%artifact and every other one from source. A process that never loaded the
+%boot has no clause here and claims nothing.
+:- multifile compiled_source/1.
+kind(compiled_source/1, ownership).
 
 %Whether a value is a live host object at all, the question in front of
 %every grounded-type lookup: the engine's own cheap class tests run first,

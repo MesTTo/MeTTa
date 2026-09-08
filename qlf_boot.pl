@@ -3,8 +3,11 @@
 %   every engine and lib .qlf when any source is newer than any of them or
 %   when the .qlf set was written by a different SWI version, and hand every
 %   host one qlf_load_engine/0 that consults the umbrella under
-%   qcompile(auto). Exports nothing and lives in its own module for
-%   user-surface hygiene; note that ANY boot-content change, however
+%   qcompile(auto), and claim, through seam:compiled_source/1, every Prolog
+%   source of that set for the engine's runtime loaders, so a library's
+%   Prolog half compiles beside itself on its first import and loads from
+%   the artifact in every process after. Exports nothing and lives in its
+%   own module for user-surface hygiene; note that ANY boot-content change, however
 %   inert, can move a twin's pinned inference count by a few tens
 %   through SWI's clause-indexing shape (the benchmark ledger records
 %   inert facts moving counts non-monotonically the same way), which is
@@ -41,7 +44,25 @@
 %     whatever the ambient locale says, and a .qlf set compiled under a
 %     different encoding is purged rather than served
 %     [tested: tests/shell/test_engine_text_encoding.sh; commit=bdb032a457597ef3b4a1e0d872f66f76bad362e4].
+%   - a runtime-loaded source inside the governed set (engine/*.pl,
+%     engine/*/*.pl, lib/*.pl, lib/*/*.pl) is claimed for compilation beside
+%     itself, and one outside it, or any source while the encoding flag is
+%     not the stamped utf8, is not claimed
+%     [tested: the_boot_governs_the_sources_its_patterns_name,
+%     an_unstamped_encoding_claims_nothing; commit=WORKTREE].
+%   - a claimed source whose artifact is absent or stale is compiled by a
+%     child swipl before the claiming process loads it, so that process reads
+%     the artifact and never the compile; a process marked as such a child
+%     compiles in place
+%     [tested: a_claimed_source_is_compiled_by_a_child_and_this_process_reads_the_artifact,
+%     a_stale_artifact_is_recompiled, a_child_marked_process_compiles_in_place;
+%     commit=WORKTREE].
 % Decides:
+%   - artifacts are written only inside the set this file stamps and purges:
+%     a program's own Prolog file, or a library under a registered or
+%     git-fetched directory, loads from source, because an artifact beside
+%     it would outlive the SWI version and the encoding that wrote it with
+%     no boot to notice.
 %   - freshness is transitive and coarse, the whole set against the
 %     newest source: a false purge costs one ~0.25s generating boot; a
 %     false keep would run stale engine code under a green-looking gate.
@@ -91,24 +112,163 @@ qlf_glob_files(Here, Pattern, Files) :-
 qlf_member(F, [F|_]).
 qlf_member(F, [_|T]) :- qlf_member(F, T).
 
+%The set this file governs, as one table: the Prolog sources whose artifacts
+%it stamps and purges, and the other inputs (the corpus the engine reads at
+%boot, the C beside its .pl) whose edit stales the set. The artifact globs
+%derive from the Prolog rows, and seam:compiled_source/1 below reads the same
+%rows, so what is purged, what stales, and what the engine may compile at
+%runtime cannot disagree.
+qlf_pattern(prolog, 'engine/*.pl').
+qlf_pattern(prolog, 'engine/*/*.pl').
+qlf_pattern(prolog, 'lib/*.pl').
+qlf_pattern(prolog, 'lib/*/*.pl').
+qlf_pattern(input, 'engine/*.metta').
+qlf_pattern(input, 'engine/*.c').
+
+qlf_artifact_pattern(Artifact) :-
+    qlf_pattern(prolog, Source),
+    atom_concat(Stem, '.pl', Source),
+    atom_concat(Stem, '.qlf', Artifact).
+
 qlf_files(Here, Files) :-
-    findall(F, ( qlf_member(Pattern,
-                            ['engine/*.qlf', 'engine/*/*.qlf',
-                             'lib/*.qlf', 'lib/*/*.qlf']),
+    findall(F, ( qlf_artifact_pattern(Pattern),
                  qlf_glob_files(Here, Pattern, Fs),
                  qlf_member(F, Fs) ),
             Files).
 
 qlf_source_newest(Here, Newest) :-
-    findall(T, ( qlf_member(Pattern,
-                            ['engine/*.pl', 'engine/*/*.pl',
-                             'engine/*.metta', 'engine/*.c',
-                             'lib/*.pl', 'lib/*/*.pl']),
+    findall(T, ( qlf_pattern(_, Pattern),
                  qlf_glob_files(Here, Pattern, Fs),
                  qlf_member(F, Fs),
                  catch(time_file(F, T), _, fail) ),
             Times),
     qlf_time_max(Times, 0, Newest).
+
+%What the engine's runtime loaders ask before compiling a source beside
+%itself (engine/metta/interop.pl, metta_load_source/2): is it inside the set
+%above, under the encoding the stamp records. The path is canonicalised
+%first, because the engine names its library root as <engine>/../lib and a
+%pattern cannot see through the dots; then it is matched segment by segment,
+%the way expand_file_name/2 reads the same pattern: a star matches inside one
+%directory level and never across a slash, so a source two levels under lib/
+%is claimed by no row here and purged by no glob above, consistently. The
+%answer is a claim (an ownership seam, engine/ext_points.pl): a process that
+%never loaded this file has no clause and claims nothing, so it loads every
+%runtime source from source and writes no artifact the stamp would not know.
+qlf_governed_source(File) :-
+    qlf_boot_directory(Here),
+    atom_concat(Here, '/..', Parent),
+    absolute_file_name(Parent, Root),
+    atom_concat(Root, '/', RootSlash),
+    absolute_file_name(File, Canon),
+    atom_concat(RootSlash, Relative, Canon),
+    qlf_pattern(prolog, Pattern),
+    qlf_path_matches(Pattern, Relative),
+    !.
+
+qlf_path_matches(Pattern, Path) :-
+    atomic_list_concat(PatternParts, '/', Pattern),
+    atomic_list_concat(PathParts, '/', Path),
+    qlf_segments_match(PatternParts, PathParts).
+
+qlf_segments_match([], []).
+qlf_segments_match([P|Ps], [S|Ss]) :-
+    wildcard_match(P, S),
+    qlf_segments_match(Ps, Ss).
+
+:- multifile seam:compiled_source/1.
+seam:compiled_source(File) :-
+    current_prolog_flag(encoding, utf8),
+    qlf_governed_source(File),
+    qlf_compile_aside(File).
+
+%A claimed source whose artifact is absent or older than it is compiled by a
+%CHILD swipl before this process loads it, so the compile's inferences land
+%in no measurement of this process: every importer of a library reads the
+%same count, the first one included. Without this the first importer after
+%a purge paid the compile, and a lane that prices processes read that one
+%process apart from the rest: the twins lane's combinatorics example read
+%97,944 inferences in the run that wrote lib_combinatorics.qlf and 75,810
+%in every other [measured 2026-09-09: two consecutive
+%extensions/python/tools/twin_coverage.py runs on one tree]. The child boots
+%the engine through this file, because a library half compiles under the
+%engine's goal expansion and the artifact a bare swipl would write is not
+%the one the engine loads, then qcompiles the one file its command line
+%names; the metta_qlf_child flag it raises first keeps its own boot from
+%asking a grandchild for the vocabulary seed. A tree the child may not
+%write, a host with no swipl to start, or a child that fails, leave the load
+%to SWI's own rule, which compiles in this process as before; the claim
+%holds either way, because the file is governed either way.
+qlf_compile_aside(File) :-
+    (   qlf_artifact_stale(File, Artifact),
+        access_file(Artifact, write),
+        \+ current_prolog_flag(metta_qlf_child, true),
+        qlf_swipl(Swipl)
+    ->  qlf_boot_directory(Here),
+        atom_concat(Here, '/qlf_boot.pl', Boot),
+        qlf_shell_word(Swipl, QuotedSwipl),
+        qlf_shell_word(Boot, QuotedBoot),
+        qlf_shell_word(File, QuotedFile),
+        atomic_list_concat([QuotedSwipl, ' -q -s ', QuotedBoot,
+                            ' -g metta_qlf_boot:qlf_compile_argument -t halt -- ',
+                            QuotedFile, ' >/dev/null 2>&1'],
+                           Command),
+        catch(shell(Command, _), _, true)
+    ;   true
+    ).
+
+%system: on exists_file/1, because the engine exports a MeTTa builtin of that
+%name and arity into user, which this module's chain reaches once the engine
+%has loaded, and the boot depends on nothing of the engine's.
+qlf_artifact_stale(File, Artifact) :-
+    atom_concat(Stem, '.pl', File),
+    atom_concat(Stem, '.qlf', Artifact),
+    (   system:exists_file(Artifact)
+    ->  time_file(File, Source),
+        time_file(Artifact, Written),
+        Source > Written
+    ;   true
+    ).
+
+%The executable flag names the real swipl in a standalone process and in an
+%embedding (janus reports /usr/lib/swi-prolog/bin/x86_64-linux/swipl for a
+%Python process); a C host may report itself, and SWI's own install layout,
+%<home>/bin/<arch>/swipl, is the next answer. The bare name is the last, and
+%the shell's failure to find it reads as a failed child.
+qlf_swipl(Swipl) :-
+    current_prolog_flag(executable, Swipl),
+    file_base_name(Swipl, Base),
+    qlf_member(Base, [swipl, 'swipl.exe']),
+    !.
+qlf_swipl(Swipl) :-
+    current_prolog_flag(home, Home),
+    current_prolog_flag(arch, Arch),
+    atomic_list_concat([Home, '/bin/', Arch, '/swipl'], Swipl),
+    system:exists_file(Swipl),
+    !.
+qlf_swipl(swipl).
+
+%POSIX single quoting, the one form that carries any path unchanged: the
+%text goes between apostrophes and an apostrophe inside it becomes '\''.
+qlf_shell_word(Text, Word) :-
+    atomic_list_concat(Parts, '\'', Text),
+    atomic_list_concat(Parts, '\'\\\'\'', Joined),
+    atomic_list_concat(['\'', Joined, '\''], Word).
+
+%The child's whole job: raise the flag that says so, boot the engine the way
+%every host does, and compile the one file its command line names beside
+%itself. Its output is discarded by the parent and its status is the
+%parent's only reading, and a failure to compile is the next load's to
+%report, loudly, in the process that asked.
+qlf_compile_argument :-
+    create_prolog_flag(metta_qlf_child, true, []),
+    current_prolog_flag(argv, Argv),
+    qlf_last(Argv, File),
+    qlf_load_engine,
+    qcompile(File).
+
+qlf_last([File], File) :- !.
+qlf_last([_|Rest], File) :- qlf_last(Rest, File).
 
 qlf_time_max([], Acc, Acc).
 qlf_time_max([T|Ts], Acc, Max) :-

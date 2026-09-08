@@ -1027,14 +1027,65 @@ refuse_absent_prolog_function_scan(N) :-
 %call to it compiles to a partial application instead. In &self the load module
 %already is user, so this states that behaviour rather than adding a rule.
 consult_global(File) :- refuse_unloadable_source_file(File),
-                        loading_loudly(user:consult(File)),
+                        loading_loudly(metta_load_source(user:File, [expand(true)])),
                         register_pending_exports.
 use_module_global(File) :- refuse_unloadable_source_file(File),
-                           loading_loudly(user:use_module(File)),
+                           loading_loudly(metta_load_source(user:File,
+                                                            [if(not_loaded), must_be_module(true)])),
                            register_pending_exports.
 ensure_loaded_global(File) :- refuse_unloadable_source_file(File),
-                              loading_loudly(user:ensure_loaded(File)),
+                              loading_loudly(metta_load_source(user:File, [if(not_loaded)])),
                               register_pending_exports.
+
+%%%% Where a runtime-loaded Prolog source pays its compile %%%%
+%
+%A library's Prolog half is consulted on its first import in EVERY process,
+%and the consult pays SWI's compile-time expansion of the whole file each
+%time: lib/lib_thread/lib_thread.pl costs 278,309 inferences to consult,
+%where the same unit read from the Quick Load Format artifact beside it
+%costs 5,925, with the process that writes the artifact paying 281,792 once
+%[measured 2026-09-09: one boot through engine/qlf_boot.pl per arm,
+%statistics(inferences) around the load; commit=WORKTREE]. The engine's own
+%units already load that way under engine/qlf_boot.pl, and this door is how
+%a unit loaded later reaches the same regime; the three loaders above, the
+%catalog's vocabulary seed and metta_ensure_source_observation/0 all load
+%through it.
+%
+%SWI decides by the SPEC. boot/init.pl's '$qlf_file'/5 compiles from source
+%whenever the spec names its extension, whatever qcompile option travels
+%with it, and applies the artifact rule (load when fresh and compatible,
+%recompile when stale and the directory is writable, source otherwise) only
+%to a bare stem. So a claimed source is loaded by its stem; the observation
+%of 2026-09-05 that "qcompile(auto) reaches the files a loaded file loads and
+%not the file the goal names" was this rule seen from a spec that carried
+%its .pl.
+%
+%Which sources may leave an artifact is the boot's decision, asked through
+%seam:compiled_source/1: engine/qlf_boot.pl claims the sources whose
+%artifacts it stamps (SWI version and encoding) and purges as one set, and
+%nothing else, so a program's own Prolog file loads from source and gains no
+%.qlf that could outlive the SWI or the locale that wrote it. A process that
+%never loaded the boot claims nothing and loads everything from source. The
+%claim also makes the artifact fresh: a stale or absent one is written by a
+%child swipl the boot starts, so the process that asked reads the artifact
+%and never pays the compile, the first importer included, which is what
+%keeps every process's count of one import the same.
+%
+%The load's target module is the caller's, as load_files/2's own is, which
+%is what lets consult_global/1 above keep the process tier as its target
+%[tested: a_claimed_source_is_compiled_by_a_child_and_this_process_reads_the_artifact,
+%an_unclaimed_source_loads_from_source_and_leaves_no_artifact,
+%a_stale_artifact_is_recompiled,
+%consult_global_loads_a_library_half_through_the_door; commit=WORKTREE].
+:- meta_predicate metta_load_source(:, +).
+metta_load_source(Module:Spec, Options) :-
+    (   absolute_file_name(Spec, File,
+                           [file_type(prolog), access(read), file_errors(fail)]),
+        seam:compiled_source(File),
+        file_name_extension(Stem, pl, File)
+    ->  load_files(Module:Stem, [qcompile(auto)|Options])
+    ;   load_files(Module:Spec, Options)
+    ).
 
 %%%% Where a file a MeTTa program loads puts its predicates %%%%
 %
