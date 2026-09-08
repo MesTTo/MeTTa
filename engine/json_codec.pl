@@ -40,6 +40,11 @@
             json_codec_c_active/0
           ]).
 
+% Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
+% Set the base before the clauses and their engine-dependent directives.
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L239; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+:- set_module(base(metta_engine)).
+
 %library(json) ships in SWI's ext/json pack, not its core, so an install
 %without that pack has no json_read/3 at all. A hard use_module there fails the
 %whole directive, which took this file's load with it, then main.pl's, and the

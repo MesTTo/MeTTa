@@ -207,6 +207,9 @@ GUARANTEE_SOURCES = (
     # The plunit suites make the same claims their subjects do, in their
     # own headers, and 271 of them across 50 files went unread.
     "tests/prolog/suites/*/*.plt",
+    # The module-boundary fixtures carry their own test-backed contracts
+    # [source: tests/prolog/suites/seams/engine_modules.plt; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
+    "tests/prolog/module_fixtures/*.pl",
     # Diagnostic probes carry measured claims even when no gate runs them.
     "tests/prolog/probes/*.pl",
     # And the Python half of the same class, which the seat grew on 2026-09-07.
@@ -359,6 +362,10 @@ CLAIM_SOURCES = (
 # blocks remain a burn-down against GUARANTEE_SOURCES, which is a different
 # obligation and is why the two lists are no longer one list.
 PROVENANCE_SOURCES = (
+    # Provider suites qualify private engine probes and pin that boundary.
+    "extensions/*/tests/*.plt",
+    # Native corpus providers carry their own SWI import contracts.
+    "examples/*/*/*.pl",
     # The twins and the suites, named by the out-of-glob net on 2026-08-31: a
     # twin's BUDGET carries a whole provenance history in comments and a
     # suite's Guarantees block carries its own claims, so both were writing

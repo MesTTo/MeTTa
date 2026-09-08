@@ -44,10 +44,15 @@ memo_setting(memo_answer_limit).
 memo_setting(memo_aggregate_mode).
 memo_setting(memo_float_precision).
 
+%lib_memo: and not user:. The five settings are lib/lib_memo/lib_memo.pl's own
+%dynamic predicates, which live in that library's module now; asserting them in
+%`user` would build a second set of facts the library never reads, and the
+%eviction tests would drive the shipped defaults instead of these
+%[tested: memo_eviction_output; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 memo_setting_save :-
     forall(memo_setting(Name),
            ( Fact =.. [Name, Value],
-             user:Fact,
+             lib_memo:Fact,
              atom_concat('$memo_plt_', Name, Key),
              nb_setval(Key, Value) )).
 
@@ -56,32 +61,32 @@ memo_setting_restore :-
            ( atom_concat('$memo_plt_', Name, Key),
              nb_getval(Key, Value),
              Wild =.. [Name, _],
-             retractall(user:Wild),
+             retractall(lib_memo:Wild),
              Fact =.. [Name, Value],
-             assertz(user:Fact) )).
+             assertz(lib_memo:Fact) )).
 
 memo_setting_override(Name, Value) :-
     Wild =.. [Name, _],
-    retractall(user:Wild),
+    retractall(lib_memo:Wild),
     Fact =.. [Name, Value],
-    assertz(user:Fact).
+    assertz(lib_memo:Fact).
 
 :- begin_tests(memo_eviction_output,
                [ setup((memo_setting_save,
                         memo_setting_override(memo_size_limit, 100),
                         memo_setting_override(metta_memo_total_bytes, 100),
-                        assertz(user:metta_memo_head(test_fun, user, 1, 0)),
-                        assertz(user:metta_memo_tail(test_fun, user, 1, 1)),
-                        assertz(user:metta_memo_count(test_fun, user, 1, 1)),
-                        assertz(user:metta_memo_q(test_fun, user, 1, 1, [key])),
-                        assertz(user:metta_memo_entry(test_fun, user, 1, 0,
+                        assertz(lib_memo:metta_memo_head(test_fun, user, 1, 0)),
+                        assertz(lib_memo:metta_memo_tail(test_fun, user, 1, 1)),
+                        assertz(lib_memo:metta_memo_count(test_fun, user, 1, 1)),
+                        assertz(lib_memo:metta_memo_q(test_fun, user, 1, 1, [key])),
+                        assertz(lib_memo:metta_memo_entry(test_fun, user, 1, 0,
                                                       [key], [value])))),
                  cleanup((memo_setting_restore,
-                          retractall(user:metta_memo_head(test_fun, user, 1, _)),
-                          retractall(user:metta_memo_tail(test_fun, user, 1, _)),
-                          retractall(user:metta_memo_count(test_fun, user, 1, _)),
-                          retractall(user:metta_memo_q(test_fun, user, 1, _, _)),
-                          retractall(user:metta_memo_entry(test_fun, user, 1, _, _, _))))
+                          retractall(lib_memo:metta_memo_head(test_fun, user, 1, _)),
+                          retractall(lib_memo:metta_memo_tail(test_fun, user, 1, _)),
+                          retractall(lib_memo:metta_memo_count(test_fun, user, 1, _)),
+                          retractall(lib_memo:metta_memo_q(test_fun, user, 1, _, _)),
+                          retractall(lib_memo:metta_memo_entry(test_fun, user, 1, _, _, _))))
                ]).
 
 capture_user_error(Goal, Text) :-
@@ -100,9 +105,9 @@ capture_user_error(Goal, Text) :-
     free_memory_file(Memory).
 
 test(routine_eviction_is_silent) :-
-    capture_user_error(user:evict_global_space(1), Output),
+    capture_user_error(lib_memo:evict_global_space(1), Output),
     Output == "",
-    \+ user:metta_memo_entry(test_fun, user, 1, _, [key], _).
+    \+ lib_memo:metta_memo_entry(test_fun, user, 1, _, [key], _).
 
 :- end_tests(memo_eviction_output).
 
@@ -129,8 +134,8 @@ memo_iso_forget :-
            ( sread(Text, Term), 'remove-atom'(Space, Term, _) )).
 
 memo_iso_reset :-
-    user:disable_memoization(isocalc),
-    user:cache_clear.
+    lib_memo:disable_memoization(isocalc),
+    lib_memo:cache_clear.
 
 %Every answer the space gives for (isocalc 2), read through the module its
 %equations were compiled into.
@@ -182,7 +187,7 @@ test(an_inheriting_space_shares_the_one_cache,
                sread(SetupText, SetupTerm),
                'add-atom'('&self', SetupTerm, _) )),
        cleanup(( memo_iso_reset,
-                 user:disable_memoization(isoshared),
+                 lib_memo:disable_memoization(isoshared),
                  memo_iso_shared(CleanupText),
                  sread(CleanupText, CleanupTerm),
                  'remove-atom'('&self', CleanupTerm, _) )) ]) :-
@@ -213,15 +218,15 @@ test(a_declaration_lands_in_the_module_that_is_speaking,
     metta_self_module(Self),
     Iso \== Self,
     %&self speaking about its own function: &self.
-    with_metta_module(Self, memo_scope_module(isocalc, HomeSaysHome)),
+    with_metta_module(Self, lib_memo:memo_scope_module(isocalc, HomeSaysHome)),
     %A space speaking about a function IT defines: itself.
-    with_metta_module(Iso, memo_scope_module(isocalc, IsoSaysIso)),
+    with_metta_module(Iso, lib_memo:memo_scope_module(isocalc, IsoSaysIso)),
     %A space speaking about a function only &self defines: &self, which is
     %the case the fallback exists for and the one an inheriting space needs.
-    with_metta_module(Iso, memo_scope_module(isoshared, IsoSaysHome)),
+    with_metta_module(Iso, lib_memo:memo_scope_module(isoshared, IsoSaysHome)),
     %A space speaking about a name neither module defines yet: itself. This
     %is the forward declaration, and this branch is the one that moved.
-    with_metta_module(Iso, memo_scope_module(isoforward, IsoSaysForward)),
+    with_metta_module(Iso, lib_memo:memo_scope_module(isoforward, IsoSaysForward)),
     HomeSaysHome == Self,
     IsoSaysIso == Iso,
     IsoSaysHome == Self,
@@ -286,8 +291,8 @@ reset_table_cost(Module, TableName, Arity, Per) :-
                              "(= (plunit-exact-bag $x) a)\n(= (plunit-exact-bag $x) a)\n(= (plunit-exact-bag $x) b)",
                              _, '&plunit_exact_bag') )),
                  cleanup(( memo_setting_restore,
-                           user:disable_memoization('plunit-exact-bag'),
-                           user:cache_clear,
+                           lib_memo:disable_memoization('plunit-exact-bag'),
+                           lib_memo:cache_clear,
                            user:clear_native_atoms('&plunit_exact_bag'),
                            user:metta_release_space('&plunit_exact_bag') )) ]).
 
@@ -412,19 +417,19 @@ test(a_leaf_change_invalidates_transitive_callers_only) :-
             with_metta_module(Module,
                               reduce(['plunit-memo-support-other', 1], R)),
             [11]),
-    assertion(metta_memo_entry('plunit-memo-support-derived', Module,
+    assertion(lib_memo:metta_memo_entry('plunit-memo-support-derived', Module,
                                _, _, _, _)),
-    assertion(metta_memo_entry('plunit-memo-support-other', Module,
+    assertion(lib_memo:metta_memo_entry('plunit-memo-support-other', Module,
                                _, _, _, _)),
     sread("(= (plunit-memo-support-base $x) (+ $x 1))", Base),
     metta_remove_atom('&self', Base, true),
-    assertion(\+ metta_memo_entry('plunit-memo-support-base', Module,
+    assertion(\+ lib_memo:metta_memo_entry('plunit-memo-support-base', Module,
                                   _, _, _, _)),
-    assertion(\+ metta_memo_entry('plunit-memo-support-middle', Module,
+    assertion(\+ lib_memo:metta_memo_entry('plunit-memo-support-middle', Module,
                                   _, _, _, _)),
-    assertion(\+ metta_memo_entry('plunit-memo-support-derived', Module,
+    assertion(\+ lib_memo:metta_memo_entry('plunit-memo-support-derived', Module,
                                   _, _, _, _)),
-    assertion(metta_memo_entry('plunit-memo-support-other', Module,
+    assertion(lib_memo:metta_memo_entry('plunit-memo-support-other', Module,
                                _, _, _, _)).
 
 :- end_tests(memo_support_graph).
@@ -446,7 +451,7 @@ user:plunit_memo_pure(X, X).
 
 test(a_volatile_function_still_memoizes_on_the_declaration,
      [ setup(( import_prolog_function(plunit_memo_volatile, _),
-               declare_function_volatility(plunit_memo_volatile, volatile) )),
+               metta_engine:declare_function_volatility(plunit_memo_volatile, volatile) )),
        cleanup(( retractall(user:metta_function_volatility(plunit_memo_volatile, _)),
                  catch('clear-memoize'(plunit_memo_volatile, _), _, true),
                  release_function_name(plunit_memo_volatile),
@@ -489,7 +494,7 @@ test(a_declaration_memoizes_a_space_reading_body,
 
 test(an_immutable_function_memoizes,
      [ setup(( import_prolog_function(plunit_memo_pure, _),
-               declare_function_volatility(plunit_memo_pure, immutable) )),
+               metta_engine:declare_function_volatility(plunit_memo_pure, immutable) )),
        cleanup(( retractall(user:metta_function_volatility(plunit_memo_pure, _)),
                  catch('clear-memoize'(plunit_memo_pure, _), _, true),
                  release_function_name(plunit_memo_pure),
@@ -553,8 +558,8 @@ test(memoizing_an_operation_reaches_a_caller_compiled_before_it,
     %registered the operation and not the space that spoke.
     metta_self_module(Self),
     memo_owner_module(plunit_memo_op_impl, Self, 2, Owner),
-    assertion(memo_enabled(plunit_memo_op_impl, Owner, exact)),
-    assertion(memoization_enabled_for_call(plunit_memo_op_impl, Owner, 1)),
+    assertion(lib_memo:memo_enabled(plunit_memo_op_impl, Owner, exact)),
+    assertion(lib_memo:memoization_enabled_for_call(plunit_memo_op_impl, Owner, 1)),
 
     %The caller compiled before it now dispatches through the cache.
     functor(Head, 'plunit-memo-op-caller', 2),
@@ -794,14 +799,14 @@ test(a_hit_only_thread_records_its_own_frequency) :-
     %record_hit/4 used to require a sketch that only record_miss/4 ever built:
     %it fell to its `; true` arm and recorded nothing, for ever. Measured then:
     %main 1 miss and 20 hits reported 21, the worker 20 hits reported 0.
-    record_miss(sketchfn, user, 1, [a]),
-    forall(between(1, 20, _), record_hit(sketchfn, user, 1, [a])),
-    get_freq(sketchfn, user, 1, [a], MainFreq),
+    lib_memo:record_miss(sketchfn, user, 1, [a]),
+    forall(between(1, 20, _), lib_memo:record_hit(sketchfn, user, 1, [a])),
+    lib_memo:get_freq(sketchfn, user, 1, [a], MainFreq),
     assertion(MainFreq >= 20),
     message_queue_create(Answer),
     thread_create(
-        ( forall(between(1, 20, _), record_hit(sketchfn, user, 1, [a])),
-          ( catch(get_freq(sketchfn, user, 1, [a], WorkerFreq), _, fail)
+        ( forall(between(1, 20, _), lib_memo:record_hit(sketchfn, user, 1, [a])),
+          ( catch(lib_memo:get_freq(sketchfn, user, 1, [a], WorkerFreq), _, fail)
           -> true
           ;  WorkerFreq = failed ),
           thread_send_message(Answer, WorkerFreq) ),

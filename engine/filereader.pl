@@ -310,6 +310,11 @@
             metta_host_substitute/3
           ]).
 
+% Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
+% Set the base before the clauses and their engine-dependent directives.
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L239; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+:- set_module(base(metta_engine)).
+
 :- use_module(library(readutil)). % read_file_to_string/3
 %eos//0, for the source-layout grammar below. It used to arrive by accident:
 %engine/parser.pl imported dcg/basics into the one namespace everything shared,
@@ -1249,7 +1254,7 @@ existing_predicate_arities(Names, NameArities) :-
 %called, so the predicate SWI holds under that name is not the shape a MeTTa
 %call would take.
 callable_as_written(Name, Arity) :-
-    \+ ( current_op(_, _, Name), Arity =< 2 ).
+    \+ ( metta_engine_operator(Name), Arity =< 2 ).
 
 %An expression that already executed compiled F as plain data; that execution cannot
 %be repaired retroactively, so flag it when F now arrives through a parsed definition:

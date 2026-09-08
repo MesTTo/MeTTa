@@ -218,10 +218,10 @@ test(a_builtin_the_engine_still_backs_is_a_no_op) :-
 
 test(a_builtin_whose_clauses_moved_is_refused,
      [ setup(( assertz(user:builtin_fun(plunit_pi_moved)),
-               assertz(user:builtin_function_source(plunit_pi_moved,
+               assertz(metta_engine:builtin_function_source(plunit_pi_moved,
                                                     'plunit/never_loaded.pl')) )),
        cleanup(( retractall(user:builtin_fun(plunit_pi_moved)),
-                 retractall(user:builtin_function_source(plunit_pi_moved, _)),
+                 retractall(metta_engine:builtin_function_source(plunit_pi_moved, _)),
                  forget_pi_name(plunit_pi_moved) )),
        throws(error(permission_error(register, metta_builtin,
                                      plunit_pi_moved), _)) ]) :-
@@ -759,8 +759,7 @@ test(a_host_loader_called_from_metta_loads_into_the_process_tier,
      [ setup(( tmp_file_stream(text, Path, Stream),
                format(Stream, "plunit_process_tier_marker(loaded).~n", []),
                close(Stream) )),
-       cleanup(( metta_engine_module(Engine),
-                 catch(abolish(Engine:plunit_process_tier_marker/1), _, true),
+       cleanup(( catch(abolish(user:plunit_process_tier_marker/1), _, true),
                  forget_pi_name(consult),
                  release_function_name(consult),
                  delete_file(Path) )) ]) :-
@@ -774,10 +773,17 @@ test(a_host_loader_called_from_metta_loads_into_the_process_tier,
     format(string(Source), "!(let* (($f \"~w\") ($f (consult))) $f)", [Path]),
     with_metta_module(SpaceModule, process_metta_string(Source, Answers)),
     assertion(Answers \== []),
-    metta_engine_module(Engine),
-    assertion(current_predicate(Engine:plunit_process_tier_marker/1)),
-    assertion(\+ predicate_property(Engine:plunit_process_tier_marker(_),
+    %`user` BY NAME, because that is what the process tier is: consult_global/1
+    %names it, the engine's module sits above it in every space's chain, and a
+    %host's own Prolog and a MeTTa program's consulted Prolog are the same kind
+    %of thing. The engine's module is not the answer -- it INHERITS the name
+    %from here, which is how every space reaches it.
+    assertion(current_predicate(user:plunit_process_tier_marker/1)),
+    assertion(\+ predicate_property(user:plunit_process_tier_marker(_),
                                     imported_from(_))),
+    metta_engine_module(Engine),
+    assertion(predicate_property(Engine:plunit_process_tier_marker(_),
+                                 imported_from(user))),
     % and NOT a definition of the space that asked for it, which is the whole
     % failure: the space module may only INHERIT the name.
     assertion(\+ ( current_predicate(SpaceModule:plunit_process_tier_marker/1),

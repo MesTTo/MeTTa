@@ -13,10 +13,10 @@
 %   commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
 % Assumes:
 %   - engine/metta.pl loads this file with `use_module(prelude, [])`, importing
-%     NOTHING, and metta_base_engine_subsystems/1 then bases this module on the
-%     engine's, so every helper below (collapse_runtime/2, 'assert-answers'/5,
-%     metta_match_atoms/2, ...) resolves upward while union/3 and
+%     nothing. Its base is metta_engine before compilation, so collapse_runtime/2,
+%     'assert-answers'/5 and metta_match_atoms/2 resolve there while union/3 and
 %     intersection/3 stay library(lists)' in the engine module.
+%     [source: engine/prelude.pl:set_module/1; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 %   - engine/metta/prelude.pl registers these names, their arities, their
 %     declarations, their documents, their cost rows and the eight translator
 %     rules. Nothing here registers anything: this file is the vocabulary's
@@ -93,6 +93,11 @@
             intersection/3,
             subtraction/3
           ]).
+
+% Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
+% Set the base before the clauses and their engine-dependent directives.
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L239; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+:- set_module(base(metta_engine)).
 
 %%%% Equality and reduction %%%%
 

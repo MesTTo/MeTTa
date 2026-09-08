@@ -27,11 +27,31 @@
 'plunit-foreign-lender'(_).
 'plunit-foreign-lender'(Input, Input).
 
+%A planted fact goes where the validator READS it, which is asked of the
+%module system rather than written once per site. A bare assertz/1 from this
+%file puts it in `user`, and `user` holds an IMPORT of the engine's tables
+%rather than the tables themselves: SWI answers an assert on an imported name
+%by creating a LOCAL predicate that shadows the import, so the plant would be
+%invisible to the very validator it is planted for. It worked while the engine
+%loaded into `user` and the two were the same predicate
+%[tested: builtin_facets; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 with_assertions([], Goal) :- call(Goal).
 with_assertions([Fact|Facts], Goal) :-
-    setup_call_cleanup(assertz(Fact, Reference),
+    fact_home(Fact, Home),
+    setup_call_cleanup(assertz(Home:Fact, Reference),
                        with_assertions(Facts, Goal),
                        erase(Reference)).
+
+fact_home(Fact, Home) :-
+    functor(Fact, Name, Arity),
+    functor(Head, Name, Arity),
+    metta_engine_module(Engine),
+    (   predicate_property(seam:Head, implementation_module(seam))
+    ->  Home = seam
+    ;   predicate_property(Engine:Head, implementation_module(Found))
+    ->  Home = Found
+    ;   Home = Engine
+    ).
 
 :- begin_tests(builtin_facets).
 
@@ -122,13 +142,15 @@ test(the_translators_embedded_operations_add_no_surface_name) :-
 
 test(the_current_reverse_inventory_names_every_independent_surface_orphan) :-
     builtin_implementation_coverage_inventory(Inventory),
+    %The inventory is sorted, so the engine's own row sorts by its module name
+    %and `metta_engine` comes before `spaces`, where `user` came after.
     assertion(Inventory ==
-              [ predicate(spaces:metta_prune_empty/2),
+              [ predicate(metta_engine:'=@='/3),
+                predicate(spaces:metta_prune_empty/2),
                 predicate(spaces:metta_require_current_capability/2),
                 predicate(spaces:metta_require_safe_goal/1),
                 predicate(spaces:metta_require_space_update_capability/2),
-                predicate(translator:metta_space_update_atom/1),
-                predicate(user:'=@='/3)
+                predicate(translator:metta_space_update_atom/1)
               ]).
 
 test(the_legacy_variant_predicate_is_exempt_in_place) :-
@@ -209,7 +231,7 @@ test(a_described_implementation_without_a_registered_name_is_rejected,
         validate_builtin_implementation_coverage).
 
 test(an_unexempted_surface_predicate_is_rejected,
-     [ throws(error(unregistered_builtin_implementation(user:'=@='/3),
+     [ throws(error(unregistered_builtin_implementation(metta_engine:'=@='/3),
                     builtin_registry)) ]) :-
     Reason = legacy_alpha_equivalence_spelling_is_not_language_visible,
     setup_call_cleanup(

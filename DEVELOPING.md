@@ -476,6 +476,38 @@ CPU-hours over 2026-09-01 to 09-03 with only a parent-side timeout on them, and
 a hand-started `swipl ... materialization.plt` ran 7,540 seconds at 97.8% CPU
 on 2026-09-05 with nothing on it at all.
 
+## Engine and library module ownership
+
+`engine/metta.pl` declares `metta_engine`. Its fourteen included files under
+`engine/metta/` compile into that module. The other engine facades retain their
+own modules; `engine/main.pl` declares `metta_main`, and `engine/kernel.pl`
+retains `kernel`. Every shipped Prolog library declares a distinct `lib_*`
+module. Its `.metta` file keeps the same import path and registrations.
+
+Put each module's `set_module(base(metta_engine))` before its clauses so the
+engine's goal expansions apply while those clauses compile. List its SWI
+dependencies locally. Two plain files sharing a module can replace both a
+helper and its autoload table; separate modules own separate predicates.
+`tests/prolog/suites/seams/engine_modules.plt` tests both the module case and
+the colliding plain-file controls.
+
+Export the registered Prolog heads from each library and the shared operations
+from each engine facade. `metta_engine_reexport/2` in `engine/metta.pl` lists
+the subsystem exports that the host tier also needs. A declared `service` or
+`host_service` must reach that tier, including calls written as Python query
+strings. `prolog-static`, `lib-autoload`, `no-autoload` and `layering` check
+calls, dependency declarations and the permitted inward surface. Private
+probes in tests name the owning module directly.
+
+Execution modules resolve through `&self`, `prelude`, `metta_engine`, `user`
+and `system`. The host's own registrations remain in `user`; engine and
+library definitions do not. The three exceptions are SWI's named hooks
+`user:exception/3`, `user:thread_message_hook/3` and
+`user:prolog_trace_interception/4`. A module's private callback must retain its
+module when stored as data or installed elsewhere. `thread_wait/2` also needs
+the module owning the dynamic predicates it watches. The timer barrier test
+checks the wrapper's owner before any worker waits on it.
+
 ## Adding a form to the engine's prelude
 
 The prelude is the vocabulary every space reaches with no `import!`. It is

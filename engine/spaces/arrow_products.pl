@@ -21,8 +21,20 @@
 :- dynamic metta_cardinality_verified/0.
 :- meta_predicate metta_with_arrow_product_update(0).
 :- meta_predicate metta_verify_annotated_call(+, +, +, ?, 0).
-:- multifile user:control_exception/1.
-user:control_exception(error(metta_cardinality_violation(_, _, _, _), _)).
+%control_exception/1 is the ONE seam whose home is the engine core rather than
+%`seam`, because the translator emits it into compiled bodies and
+%protect_engine_emitted/1 imports it into every space's module FROM the engine
+%module [source: engine/ext_points.pl:kind/2; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
+%A clause of it is therefore written metta_engine: wherever it is added, and
+%this file is one of the four places that add one. Left unqualified it would
+%have created spaces:control_exception/1, a second predicate the engine's
+%recovery sites never read; written user: -- which is what it said while the
+%engine core WAS `user` -- it creates user:control_exception/1 and SWI reports
+%`Local definition of user:control_exception/1 overrides weak import from
+%metta_engine`, after which the host tier's own clauses shadow the engine's
+%whole list [tested: extensions/python/tests/ch07_control_flow/test_control_signals.py; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
+:- multifile metta_engine:control_exception/1.
+metta_engine:control_exception(error(metta_cardinality_violation(_, _, _, _), _)).
 :- multifile seam:engine_emitted/1.
 seam:engine_emitted(metta_verify_annotated_call/5).
 

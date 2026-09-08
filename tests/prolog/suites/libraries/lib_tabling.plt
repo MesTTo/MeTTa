@@ -79,7 +79,7 @@ test(an_inheriting_space_tables_the_visible_owner,
     metta_self_module(Self),
     with_metta_module(Child,
                       metta_tabled_decl(['plt-tab-plain', _], true)),
-    assertion(metta_tabling_registration('plt-tab-plain', Self, 2)),
+    assertion(lib_tabling:metta_tabling_registration('plt-tab-plain', Self, 2)),
     with_metta_module(
         Child,
         once(seam:dispatch_call('plt-tab-plain', [1], Out, Goal))),
@@ -125,7 +125,7 @@ test(a_parametric_space_read_resolves_to_its_private_predicate,
     Space = [cache, '&plt-tab-param', 4],
     metta_declare_parametric_space(Space),
     native_storage_module(Space, Storage),
-    metta_tabling_read(match, Space, [fact, _, _], Reads),
+    lib_tabling:metta_tabling_read(match, Space, [fact, _, _], Reads),
     assertion(Reads == [Storage:'$metta_parametric_atom'/3]).
 
 test(tabling_refuses_unresolvable_reads) :-
@@ -147,10 +147,10 @@ test(tabling_holds_a_declaration_until_its_function_arrives,
                  remove_sexp('&self', [=, ['plt-tab-late', 'X'], 1]) )) ]) :-
     metta_tabled_decl(['plt-tab-late', _], true),
     assertion(lib_tabling:metta_tabling_held(['plt-tab-late', _])),
-    assertion(\+ metta_tabling_registration('plt-tab-late', _, _)),
+    assertion(\+ lib_tabling:metta_tabling_registration('plt-tab-late', _, _)),
     process_metta_string("(= (plt-tab-late $x) 1)", _),
     process_metta_string("!(plt-tab-late 1)", _),
-    assertion(metta_tabling_registration('plt-tab-late', _, _)),
+    assertion(lib_tabling:metta_tabling_registration('plt-tab-late', _, _)),
     assertion(\+ lib_tabling:metta_tabling_held(['plt-tab-late', _])).
 
 % Deciding WHICH tables could have read a given equation needs a call graph
@@ -252,7 +252,7 @@ test(duals_survive_tabling,
                  assertz(user:plt_tab_later_handler_ran(yes))),
             HandlerRef),
     metta_tabled_decl(['plt-tab-plain', _], true),
-    assertion(metta_tabling_declared),
+    assertion(lib_tabling:metta_tabling_declared),
     forall(seam:function_changed('plt-tab-plain'), true),
     user:plt_tab_later_handler_ran(Ran),
     assertion(Ran == yes).

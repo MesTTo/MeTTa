@@ -58,13 +58,10 @@
 %   Hacks: None
 %   Future Enhancements: None
 
-%A module that exports NOTHING. engine/metta.pl declares no module of its own,
-%so the engine loads into whatever module its loader runs in, and a plain file
-%here would put every bench_ name into `user` beside it -- the same `user` a
-%MeTTa program's definitions reach, where a collision REPLACES the colliding
-%predicate rather than refusing. Keeping the cases out of it costs the two
-%`user:` qualifications in bench_boot_prepare/0 and bench_boot_load/0, which
-%are what still load the engine where it belongs.
+% The benchmark module exports nothing. Loading the engine through user
+% publishes the metta_engine facade in the host tier while benchmark helpers
+% remain private [source: engine/metta.pl:metta_publish_host_tier/0;
+% commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 %
 %It does NOT make the boot case independent of this file, and that was
 %measured rather than assumed: appending one inert fact moves boot from
@@ -160,10 +157,9 @@ bench_boot :-
 % every time. Named with the extension, this case read 1,416,424 inferences
 % with the artifact present or absent, because it was never loading it; named
 % without, it loads what every `sh run.sh` loads [measured 2026-08-28].
-% Both loads are qualified with user:, which is the module engine/main.pl
-% loads the engine into. ensure_loaded/1 takes its context module from the
-% caller, so an unqualified call from this module would load a plain
-% engine/metta.pl into metta_bench and measure a configuration nothing ships.
+% user:ensure_loaded/1 imports the module's exports into the host tier.
+% The source module owns its definitions regardless of the loading caller
+% [source: engine/metta.pl:module/2; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 bench_boot_prepare :-
     bench_path('engine/qlf_boot', QlfBoot),
     user:ensure_loaded(QlfBoot).

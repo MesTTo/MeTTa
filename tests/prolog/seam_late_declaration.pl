@@ -13,11 +13,21 @@
 %   Hacks: None
 %   Future Enhancements: None
 
-:- multifile seam:kind/2.
+%A MODULE, because a shipped library is one: the publication machinery exports
+%a declared seam out of whichever module IMPLEMENTS it (seam_home/2 in
+%engine/ext_points.pl asks implementation_module/1), and a file consulted into
+%`user` implements it there, where an export list is not what makes a name
+%reachable -- every space already resolves through `user` at the bottom of its
+%chain. So the stand-in has to be shaped like the thing it stands in for.
+:- module(plunit_seam_late, []).
+
+%The engine core, the same base every shipped library declares.
+:- set_module(base(metta_engine)).
 
 % The definition comes first deliberately: a declaration for a predicate that
 % does not exist yet is skipped rather than exported, so a file that declares
 % before it defines relies on the engine's boot sweep instead, which a library
 % loaded at run time has already missed.
 plunit_late_declared_service(reached).
+:- multifile seam:kind/2.
 seam:kind(plunit_late_declared_service/1, service).

@@ -49,7 +49,7 @@ test(zero_mass_refuses_with_reachability_remedy) :-
 test(repeated_unit_losses_have_target_bounded_rows) :-
     numlist(1, 24, Ids),
     maplist(unit_candidate, Ids, Candidates),
-    weighted_subset_prefix_rows(Candidates, 12, Rows),
+    lib_combinatorics:weighted_subset_prefix_rows(Candidates, 12, Rows),
     maplist(length, Rows, Lengths),
     max_list(Lengths, Maximum),
     last(Rows, Final),

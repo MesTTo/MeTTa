@@ -67,9 +67,16 @@ test(failing_test_is_catchable,
 
 %A bare assert has a VALUE for an operand, not a comparison, so it computes no
 %bag difference and both bag arguments stay unbound.
+%metta_engine: named, because assert/2 is SWI's own too and this test is about
+%MeTTa's. The engine's clause used to be the one an unqualified call here found,
+%because the engine loaded into `user` and a local definition wins over the
+%system predicate; with the engine in a module of its own, `user` sees SWI's
+%assert/2 again and the engine's is exported nowhere -- deliberately, since a
+%Prolog author writing assert(Clause, Ref) means SWI's
+%[tested: metta_assertions:failing_assert_is_catchable; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 test(failing_assert_is_catchable,
      [throws(error(metta_assertion_failed(fail, _, _), _))]) :-
-    assert(fail, _).
+    metta_engine:assert(fail, _).
 
 test(assertion_errors_have_engine_messages) :-
     message_to_string(error(metta_test_failed(1, 2), none), Message),
@@ -1372,6 +1379,13 @@ test(translated_success_leaves_the_query_variable_unbound) :-
 
 :- begin_tests(metta_answer_prune).
 
+% These tests construct residual CLP(FD) variables. Import their operators in
+% this unit, which no longer inherits an incidental import into user.
+% [tested: metta_answer_prune; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+:- use_module(library(clpfd)).
+:- use_module('../../../../engine/spaces',
+              [metta_prune_empty/2, metta_prune_empty_answers/2]).
+
 %The Empty prune asks its question by IDENTITY, so an answer that still carries
 %a constraint survives it. It used to open with memberchk/2, whose UNIFICATION
 %runs clpfd's attribute_unify_hook, and that hook raises type_error(integer,
@@ -2038,7 +2052,7 @@ test(a_list_argument_stays_a_list,
               process_metta_string(
                   "!(import! &self (library lib_constraints))", _) )),
       cleanup(( retractall(silent(_)), assertz(silent(false)) ))]) :-
-    metta_constraint_term([card, [1], [A, B]], Term),
+    lib_constraints:metta_constraint_term([card, [1], [A, B]], Term),
     Term = card(Counts, Vars),
     Counts == [1],
     Vars = [A1, B1],

@@ -53,10 +53,12 @@
 
 % Load the engine through metta.pl, not main.pl: main.pl's
 % `:- initialization(main, main).` fires on consult and prints its demo
-% into the test output. clpfd arrives with it, through engine/duals.pl, which
-% is where `#>` and the attribute_unify_hook this file exercises come from.
+% into the test output. The suite imports its own CLP(FD) operators and hooks
+% [tested: empty_prune_c_differential:a_residual_constraint_answers_through_both_arms;
+% commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
+:- use_module(library(clpfd)).
 
 %PlUnit omits a unit whose condition fails but does not print that condition's
 %output in the log format. Report the same gate once while loading the suite,
