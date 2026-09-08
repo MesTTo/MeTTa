@@ -56,12 +56,12 @@
 %     compiles in place
 %     [tested: a_claimed_source_is_compiled_by_a_child_and_this_process_reads_the_artifact,
 %     a_stale_artifact_is_recompiled, a_child_marked_process_compiles_in_place;
-%     commit=WORKTREE].
+%     commit=5f8a823d23fbed5c7395912a89ba32760e2df4b1].
 %   - the engine's own set is written by the same hermetic child (-f none,
 %     --no-packs) when a boot finds it absent, so no process's flags,
 %     initialisation file or packs shape an artifact the tree shares
 %     [tested: the_engine_set_is_written_by_a_hermetic_child,
-%     a_child_marked_process_writes_the_engine_set_in_place; commit=WORKTREE].
+%     a_child_marked_process_writes_the_engine_set_in_place; commit=5f8a823d23fbed5c7395912a89ba32760e2df4b1].
 % Decides:
 %   - artifacts are written only inside the set this file stamps and purges:
 %     a program's own Prolog file, or a library under a registered or
