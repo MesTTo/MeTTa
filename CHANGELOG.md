@@ -7,6 +7,28 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- The door catalog follows the door registry: a package discovered or a row
+  withdrawn after the first boot in a process is published to the live engine
+  at once, through the seam's registration listeners, which now hear
+  withdrawals with the inverse that restores the row. Two suite failures that
+  depended on which test had booted first are gone with the mechanism.
+
+- A checkout advertises its extension distributions the way an install does:
+  `_workspace.on_path()` adds an `importlib.metadata` finder that reads each
+  member's `pyproject.toml`, so `entry_points(group="metta.extensions")`, the
+  seam's discovery and every example find `m.live` and its siblings without
+  importing the package by name, and a stale `*.egg-info` a wheel build leaves
+  inside a member can no longer shadow the manifest.
+
+- The Node seat's `npm run build` removes `build/` first, so the compiled
+  tests are exactly the sources' and a test file compiled from another
+  checkout cannot run as this one's.
+
+- The face generator's tests take the generator's own spelling of a face's
+  path, so they hold wherever the temporary directory lives.
+
 ### Added
 
 - Transactional subtraction examples and generated multiplicity checks for

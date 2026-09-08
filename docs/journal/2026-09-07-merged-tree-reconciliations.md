@@ -126,3 +126,55 @@ and their drops leave it at 280 to 315; the ch11 directory alone under the
 battery's seed passes. The state that inflates it lives in another file the
 worker ran; the full suite under the same seed is running to find it.
 
+
+## 2026-09-09
+
+The DOORS merge (6471faa37) carried a pre-commit chain with four reds, each
+root-caused on the merged tree before the fix.
+
+Tried: `test_boot_publishes_complete_typed_door_rows` and
+`test_door_catalog_publication_is_atomic_and_idempotent` -> both pass alone
+and with the battery's seed on their own file. Reproduced in one process:
+boot, then `import metta_live, metta_tables`, then a second boot -> `table()`
+212 rows, the catalog 207 door atoms, and an explicit `publish` answers 988
+(the whole snapshot replaced). Publication happened at the first boot only and
+a registration after it reached the table and not the catalog; the explicit
+`seam.publish` refresh the DOORS entry decided was a caller's duty. Decided:
+the catalog is a function of the registry. `metta._contract` subscribes one
+listener to `seam.on_registration` that publishes on every change to the
+`door` point while an engine is booted, and `seam._unregister` now enlists
+the inverse that restores the row, so withdrawals notify the same listeners
+(ops' undo frames keep the first inverse per key, which is the pre-frame
+state, so a register-then-withdraw frame still unwinds to absent). The
+explicit refresh in the idempotency test is gone; the test asserts presence
+after registration and absence after withdrawal with no call between.
+
+Tried: `examples/live/standing_queries.py` -> `AttributeError: no door
+namespace 'live' is registered` in the example's subprocess, and passes with
+`import metta_live` first. A checkout writes no dist-info, so
+`importlib.metadata.entry_points` found nothing and only an explicit import
+registered the package. Rejected: the import in the example, which makes a
+checkout differ from an install at every example. Decided:
+`_workspace.on_path()` installs a `DistributionFinder` that answers
+`importlib.metadata` from each member's `pyproject.toml` (METADATA and
+entry_points.txt rendered from `[project]`), first on `sys.meta_path` as the
+members are first on `sys.path`, with PEP 503 name normalisation. Found on
+the way: `ext/metta-{arrays,numpy,pandas}` held `build/` and `*.egg-info`
+from a wheel build, gitignored, and the path finder reported that stale
+metadata (no entry points) ahead of the manifest; deleted, and the finder's
+position makes the manifest win regardless. `_common` calls `on_path()`, so
+the examples' runner no longer lists the members on PYTHONPATH.
+
+Tried: six Node failures in `occurrence-tokens.test.js` -> the file has no
+source in this checkout; the tokens-as-storage worktree links `build/` to the
+main checkout's and its `tsc` wrote its compiled tests there. Decided: `npm
+run build` removes `build/` first (`prebuild`), so the build is a function of
+the sources; worktrees are provisioned without a `build` link from here on.
+
+Tried: `test_a_version_bump_alone_is_a_note_rather_than_drift` and
+`test_a_face_whose_module_is_absent_is_reported_and_skipped` -> red only with
+TMPDIR inside the repository: the tests restated the generator's path rule
+against the real repository root while the generator's root was the temporary
+directory. Decided: the tests ask `facegen._named` for the spelling.
+
+Twins: 182 findings on the merged tree, the pins pass after this commit.
