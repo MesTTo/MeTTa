@@ -2,7 +2,7 @@
 %   semantics, and publish the predicates extensions and host bindings may call.
 % Guarantees: allocation, release and held-goal context hooks let lib_thread
 %   own scope lifetimes across host engines [tested: lib_thread_scope;
-%   commit=WORKTREE].
+%   commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
 % Guarantees:
 %   - evaluation context and ordered-match demand are published engine
 %     services [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
