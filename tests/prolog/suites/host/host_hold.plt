@@ -1,7 +1,7 @@
 % Purpose: verify transaction-owned host cursors and the seats that hold them.
 % Guarantees: engine laziness, held-row ownership, commit and rollback lifetime,
 %   occurrence order, capture and idempotent close are executable
-%   contracts [tested: host_hold; commit=WORKTREE].
+%   contracts [tested: host_hold; commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084].
 % Owns resources: each test closes its handles and joins every thread it starts.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

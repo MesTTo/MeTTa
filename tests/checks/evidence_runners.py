@@ -36,7 +36,7 @@ Assumes:
     [source: https://docs.pytest.org/en/stable/explanation/goodpractices.html]
 Guarantees:
   - tsc output patterns keep their declared paths when outDir is a symlink
-    [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_evidence_selftest.py; commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084]
   - a file no runner reaches is absent from executed(), and a file only a
     REPORT lane reaches carries tier REPORT
     [tested 2026-08-18: tests/checks/check_evidence_selftest.py]
@@ -286,7 +286,7 @@ def tsc_projects(package: Path) -> list[tuple[Path, Path]]:
     would lose the package-relative pattern that the npm command names.
     abspath normalizes paths without realpath's filesystem lookup
     [source: https://github.com/python/cpython/blob/v3.14.4/Lib/posixpath.py;
-    commit=WORKTREE].
+    commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084].
     """
     projects = []
     for project in sorted(package.glob("tsconfig*.json")):

@@ -1190,7 +1190,7 @@ kind(metta_host_time_budget/3, host_service).
 % Cursor ownership is engine knowledge: a transaction's caller must perform
 % its work, while an outside cursor remains a suspended engine. Hosts retain
 % an opaque handle and use these services for every operation on it.
-% [tested: host_hold; commit=WORKTREE]
+% [tested: host_hold; commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084]
 kind(metta_host_hold/3, host_service).
 kind(metta_host_hold_next/2, host_service).
 kind(metta_host_hold_chunk/3, host_service).

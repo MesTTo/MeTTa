@@ -27,7 +27,7 @@ concerned, and the fixtures are deliberately unbacked.
 Guarantees:
   - a shared build symlink preserves the selected TypeScript sources and
     still refuses a source the command does not select
-    [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_evidence_selftest.py; commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084]
   - a planted citation of each rejected kind produces exactly one finding on
     its own line, and none of the accepted kinds produces any
     [tested 2026-08-18: tests/checks/check_evidence_selftest.py]
