@@ -3,7 +3,7 @@
 % Guarantees: every printed result is checked, and a mismatch throws [measured:
 %   2026-09-08, 12 checked results;
 %   command=swipl -q -g main -t halt tests/prolog/probes/probe_chr_exec_modules.pl;
-%   fixture=two native execution modules on SWI-Prolog 10.1.13; commit=WORKTREE].
+%   fixture=two native execution modules on SWI-Prolog 10.1.13; commit=8806bbf1f5fb8ff233e2ed4868190757d4fb7041].
 % Owns resources: closes source streams, joins its worker, clears both constraint
 %   stores, unloads both compiled programs and releases both spaces on exit.
 % Decides: this is a module integration probe; it does not implement run-rules.

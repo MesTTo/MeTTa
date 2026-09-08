@@ -1,7 +1,7 @@
 ; Purpose: demonstrate single-occurrence subtraction inside transactions.
 ; Guarantees: a native miss returns False and failure restores a consumed copy
 ;   [tested: sh test.sh examples/ch15-writing-transactions-and-worlds/06-single_occurrence_subtraction.metta;
-;   commit=WORKTREE].
+;   commit=8806bbf1f5fb8ff233e2ed4868190757d4fb7041].
 
 ;Subtraction observes the transaction's current store. A miss returns False
 ;without waiting for another writer, so the transaction can continue.
