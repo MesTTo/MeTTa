@@ -485,3 +485,14 @@ support-drop-spaces +24%, stored-atoms-native bytes +12.5%), extcost
 cross-engine rows), and the corpus-coverage lane's three lib_thread heads
 without an example (`scope`, `capture`, `scope_body`); vulture, ty, pylint,
 refurb, bandit and deptry carry findings from the merged Python.
+Found: the battery after the hermetic child read one red,
+`test_array_namespace_preserves_installation_and_withdrawal`, refusing to
+register `matmul` because "the engine already has a function by that name";
+alone it passes, and a closed context's equations do leave the process-wide
+registry (`&pyspace_1` defines `zzz-probe`, closes, and the next context
+answers False). The polluter is `test_operator_documentation.py`, which
+wrote `metta = MeTTa().space()` and defined `(= (matmul $left $right) ...)`
+in a context nothing closes, so the equation lives until the collector
+finds the instance, and whichever arrays test shares the worker meanwhile
+refuses. Decided: the test scopes its context with `with`, the idiom every
+other test uses; the arrays refusal was right about the engine it found.
