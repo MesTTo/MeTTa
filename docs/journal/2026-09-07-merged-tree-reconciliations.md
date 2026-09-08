@@ -368,3 +368,80 @@ a traceback on stderr as a crash whatever the exit code.
 Refined the same day: a tree that carries the door table but not its
 generator is a seat with a piece missing, not a tree without doors, so the
 gate refuses it by name rather than reading nothing.
+
+### The cross-engine performance merge, on the tokens trunk
+
+Tried: `sh engine/test.sh` on the merged tree -> the branch's two new
+catalog suites red: `catalog_vocabulary_bootstrap` read no compiled rows
+(`[] == [[:, ClauseFailedEnum, Type], ...]`) and `catalog_membership`'s
+transaction and cost cases failed. The branch compiled its vocabulary seed as
+`'&metta'/3` storage clauses and read them fixed-width, while the tokens
+merge made every storage clause carry a trailing token, so the seed's
+clauses were invisible to every reader and the fixtures asserted the old
+shape. Decided, following the tokens ruling that rejected compiling storage
+clauses directly: the seed compiles its recipe into one inert payload fact,
+`seed_payload/1`, and `publish_seed/0` stores each row through
+`spaces:add_sexp_in/5`, which mints the token; the catalog's seed branch
+reads back through `metta_catalog_row/1` and warms the subject index through
+`metta_storage_term/4`; the suites install their fixture rows through the
+same funnel. Found on the way: naming the seed module in a clause body
+creates the module when the catalog loads, so the branch's guard
+`\+ current_module(catalog_vocabulary_seed)` could never hold and every
+boot took the ordinary path; the guard asks for the payload predicate now.
+Then, with a planted trace: consulting the seed source cost 23,843
+inferences per boot (its recipe re-evaluated by term expansion), against
+14,841 for ordinary publication, so the seed loads through
+`load_files/2` with `qcompile(auto)` and its artifact beside it costs 621;
+the seed stage reads 7,477 against 14,822 ordinary.
+Tried: the whole boot on this tree against the trunk before the merge ->
+417,401 against 397,466, which contradicted the stage sums, until the
+umbrella-load profile showed `mork_owns_space/1` called 640 times on one
+tree and never on the other: the trunk worktree lacked the two MORK shared
+objects, so its boot skipped the backend. With both objects copied in, the
+boot reads 417,373 against 422,035, a saving of 4,662 on the merged tree.
+The twin agreement failure on `01-identity` (3,636 against a pin of 3,560)
+is the stale pin the re-pin below replaces; the automatic-tabling pins are
+measured on this tree (plain 122,198 / 953,686 / 7,605,590 / 30,412,118,
+automatic 14,614 / 15,744 / 16,878 / 17,634, the tokens' and this
+branch's costs added over the cut); the branch's three new closed lists
+carry their exemptions; and the decoder suite's rollback case names its
+frame before negating it, which the singleton warning had shown to be
+asserting nothing.
+Measured, the re-pin on this tree (`twin_coverage.py --repin`, min-of-3
+fresh processes, load 9 to 10): 232 twins re-pinned, the 4 envelope twins
+untouched, 0 stored-content divergences. Read against the branch's
+cut-time prices, which the union of the two chains leaves as the previous
+number, 229 twins rose and 3 fell, the write-heavy ones by the tokens
+merge's per-occurrence cost that the branch never carried
+(`05-matespacefast` +9,437,302, `01-scale` +6,000,395, `02-tilepuzzle`
++1,090,990). Read against the trunk's own pins at da0e5755d, which is this
+merge's movement: 120 twins fell, 111 rose, 1 held; `04-nilbc` fell
+6,892,030 (309,862,722 to 302,970,692, 2.2%) from the halved base-module
+type lookups, and every other movement lies between +7,920 and -2,910,
+boot content and clause layout. Net -6,875,179.
+Tried: the twins lane plain on this tree against the same lane on a
+pristine control at da0e5755d (both MORK objects, the engine's C units
+built there) -> 29 comparison bands here against 26 there, the same four
+empirical envelopes on both (`01-mutex_and_transaction`, `01-thread_lib`,
+`02-thread_linda`, `01-measure`, the sweep's), and the control's five
+stale point pins this tree's re-pin replaces. Joined per example, the
+three new bands are `04-letstarcomputed` (twin +155, example -25),
+`07-eval` (+215, -1) and `09-alpha_unique_atom` (+622, 0), and the largest
+twin-only movement is `08-alpha_member` +976: the singleton decoder builds
+its index at the second distinct name, which prices a decode with two or
+more names in inferences while the example decodes nothing, and the
+branch measured the same change at 2,853,800,984 instructions against
+3,701,142,714 for `alpha-unique`, so the inference band sees the cost
+the instruction counter sees as the saving.
+Decided: the 29 OVERRUNs rise by their exact excess (the ceiling kept as a
+float, the excess rounded up), each paragraph carrying the twin's and the
+example's movement against the control, where the twin stood there, and
+`twin_floor`'s numbers; 8 of the 29 have a floor above the band
+(`08-unify_eval_branches`, `06-specializecyclic`, `08-alpha_member`,
+`09-alpha_unique_atom`, `10-multiset_operations`, `15-roman`,
+`16-if_decons_expr`, `01-newtons_method`), which is library debt the
+paragraph states and the tracker carries, not a twin's own program. The
+resolver dropped no OVERRUN and no BUDGET: every twin's OVERRUN equals
+the trunk's, checked over all 277.
+Open: the four envelopes, re-observed by the sweep on the tree that ships;
+the library's lib_thread import cost that the two thread twins pay.

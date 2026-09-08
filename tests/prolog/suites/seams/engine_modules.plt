@@ -30,7 +30,8 @@
 %     [tested: every_core_builtin_head_is_exported; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 %   - no shipped module holds a predicate of its own under a name the engine
 %     owns, except the module-local names recorded in shadow_by_design/2
-%     [tested: no_shipped_module_shadows_a_name_the_engine_owns; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+%     [tested: no_shipped_module_shadows_a_name_the_engine_owns,
+%     the_shadow_census_sees_a_planted_library_definition; commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c]
 %   - the operator guards read the ENGINE's namespace, so a name a library lent
 %     the engine at one or two arguments is still told from a MeTTa call
 %     [tested: an_operator_lent_name_is_seen_in_the_engines_own_namespace; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
@@ -429,6 +430,10 @@ shadow_by_design('$autoload'/3,
 % [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/tabling.pl#L1220; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 shadow_by_design('$tabled'/2, 'SWI records table declarations per module').
 shadow_by_design('$table_mode'/3, 'SWI records table modes per module').
+% SWI applies each source module's hook before its inherited expansion hooks.
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L129; commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c]
+shadow_by_design(term_expansion/2,
+                 'SWI expands source declarations through module-local hooks').
 shadow_by_design(union/3,
                  'MeTTa\'s union is not library(lists)\'s, and the prelude \c
                   tier holding its own is what lets both spellings live \c

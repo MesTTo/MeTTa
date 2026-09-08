@@ -681,214 +681,212 @@ def build_baseline() -> dict:
 #Root-caused divergences, each waived with its cause on record; a waiver
 #without a cause is a defect in this table. Anything not listed here
 #still blocks.
-MEMO_IMPORT = (
-    "library-load machinery on the lib_memo import, the newtons_method"
-    " cause exactly: the manifest pre-scan reads the whole 966-line .pl"
-    " before running it, ~46M against these examples' ~110M upstream nets"
-    " (measured 2026-08-17)"
-)
-
-METTA_IMPORT = (
-    "metta-library import machinery, the pln_direct cause: the per-form"
-    " source tracking and change hooks of the loader; lib_he alone"
-    " measures 65.2M here against upstream's 39.2M (2026-08-17), and each"
-    " of these examples is imports-dominated with evaluation at or better"
-    " than parity underneath"
-)
-
-GUARDED_ARITHMETIC = (
-    "the documented ISO-error-class arithmetic guards (the fibadd cause),"
-    " density-proportional; fib.metta is fibadd's twin workload with"
-    " identical numbers"
-)
-
-#The two rows the 2026-09-06 correction newly put over the allowance, and the
-#only cause in this table that was measured by decomposing the programs rather
-#than by profiling the engines. Both are files with FEW definitions and SEVERAL
-#runnable forms, which is exactly where a per-form cost shows and where the
-#13.3M bias used to hide it. The decomposition the string quotes
-#[measured 2026-09-06 on both engines through this file's own measure/2;
-#commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
-PER_FORM = (
-    "per-top-level-form load bookkeeping, measured by decomposition: on both"
-    " files this tree is cheaper at everything EXCEPT the `!(...)` form."
-    " twostage's three definitions alone cost 1,652,075 here against"
-    " upstream's 3,361,563; its first test form then adds 1,724,261 here"
-    " against 492,613 there and its second 1,224,549 against 391,478."
-    " holfunctions_intrinsicop's definitions cost 1,301,033 against 6,673,818,"
-    " a bare `!(mymap ...)` over them leaves this tree at 0.932x, and wrapping"
-    " the same call in `test` adds 3,806,718 here against 1,706,816 there."
-    " test/3 is upstream's predicate almost verbatim -- the"
-    " same =@=, two writes and a format, ours throwing where theirs halts --"
-    " so the delta is the work AROUND each runnable form rather than the"
-    " builtin: the effect classification, source tracking and support-graph"
-    " bookkeeping the loader runs per form, the family the pln_direct entry"
-    " prices at 516 inferences per source atom. OPEN, and the lever is that"
-    " per-form path rather than either program: a file with many definitions"
-    " and few forms reads 0.19x to 0.49x on the same decomposition."
-)
-
-DISPATCH_HOP = (
-    "storage-module candidate dispatch: one native_expression/4 hop per" " enumerated candidate that upstream's direct user-module clauses do" " not pay; the differential profiles match call for call otherwise" " (permutations measured 2026-08-17: identical 1.885M candidate and" " 2.248M cycle-check counts on both engines, ours acyclic_term" " against their cyclic_term, the delta the dispatch hop)"
-)
-
+# Each entry records the retained mechanism, an isolated control and the next
+# unresolved lever. The complete before/after/upstream table and transcripts
+# are indexed by docs/journal/2026-09-08-what-the-waivers-were-paying-for.md.
+# Controls that disable observers or refusals price them; they are not shipped.
+# [source: docs/journal/2026-09-08-what-the-waivers-were-paying-for.md:515;
+# commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
 WAIVERS = {
     "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/04-nilbc.metta": (
-        "ROOT-CAUSED AND OPEN, not explained away. Argument type checking is"
-        " 99.4% of this example (306,132,002 inferences against 1,866,723 with"
-        " check_argument_type/3 stubbed, measured 2026-08-30), and it became so"
-        " in one commit: ecb213fc on 2026-08-21 routed the typing decisions"
-        " through the typing-rule registry where they had been inline"
-        " comparisons, taking this file from 44,327,926 inferences to"
-        " 236,070,644. Reverting that commit's engine/metta.pl hunks alone, at"
-        " that commit, restores 44,328,446, so the attribution is a"
-        " measurement rather than a reading of the diff."
-        " The drift tripwire that would have failed the day it landed could"
-        " not: BASELINE pointed at tests/checks/ while the committed baseline"
-        " had moved to tests/data/, so every run rebuilt a baseline from the"
-        " tree it was measuring and compared it against itself. That path is"
-        " fixed, which is how this was found."
-        " Three narrower fixes are IN and measured, and together they are"
-        " small: the shipped-answer fast path for metta_types_match_in/3"
-        " (0.8%), a bare type variable taking the candidate path as upstream's"
-        " get-type does (0.2%), and guards that stop two registry walks that"
-        " nothing can answer. A whole-cache ceiling on has_type_in/3 measures"
-        " 16.4%, so the remaining cost is spread across the typing path rather"
-        " than sitting in one predicate, and closing it is a redesign of the"
-        " type-witness path against upstream's shape --"
-        " `('get-type'(AV, T) *-> true ; 'get-metatype'(AV, T))`, one"
-        " derivation with a metatype fallback -- rather than another guard"
+        "OPEN: repeated tuple type-witness derivation and dynamic rule-state"
+        " reads. Compiling shipped pattern decisions removes interpretation:"
+        " 164167590122 to 152410418994 instructions, 332595825 to 318243258"
+        " inferences; upstream 11588339197/17937607. A paired empty-rule"
+        " control removes 24849388 inferences and 10549316535 instructions."
+        " Skipping the remaining tuple retry is rejected: a later throwing"
+        " get_type_rule callback changes from an exception to success. Next:"
+        " share witnesses while preserving ordered callback and error traces."
     ),
-    "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/02-twostage.metta": (PER_FORM),
-    "examples/ch08-data/08-01-atoms-lists-and-folds/03-holfunctions_intrinsicop.metta": (PER_FORM),
-    "examples/ch07-control-flow/07-05-recursion/02-fib.metta": (GUARDED_ARITHMETIC),
+    "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/02-twostage.metta": (
+        "OPEN: runnable-form translation and source-ownership recording."
+        " Removing only record_source_assertion/1's journal writes costs"
+        " 30 fewer inferences and 91658 fewer instructions on this file;"
+        " this is below the cross-engine absolute floor and does not explain"
+        " the whole excess. Next: compile the runnable-form envelope once"
+        " while preserving source withdrawal and ordered effects."
+    ),
+    "examples/ch08-data/08-01-atoms-lists-and-folds/03-holfunctions_intrinsicop.metta": (
+        "OPEN: runnable test-form translation and source-ownership recording."
+        " The journal-write control removes 66 inferences and 315759"
+        " instructions with identical answers. The remaining per-form"
+        " translation and effect classification must be separated before a"
+        " cost is assigned to either. Next: specialize the form envelope"
+        " against its declared effects and source owner."
+    ),
+    "examples/ch07-control-flow/07-05-recursion/02-fib.metta": (
+        "RULING: pinned upstream fails the explicit with-pragma! wrapper."
+        " Removing only that wrapper gives the same 832040 answer on both"
+        " engines, 26852009 instructions/23434 inferences here against"
+        " 7359284574/17510131 upstream. The compiled recursive cache_call"
+        " visits 31 Fibonacci states. This is automatic memoization, not"
+        " an arithmetic-guard regression; the original row has no ratio."
+    ),
     "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/04-plntestdirect.metta": (
-        "ROOT-CAUSED AND OPEN, and it is NOT more work: this tree runs 30,047"
-        " inferences on this file against upstream's 40,278, a quarter FEWER,"
-        " and still costs 31,292,574 retired instructions against 30,337,471,"
-        " +3.15%. So each step costs more rather than there being more steps,"
-        " which is the class the two shared strings above name, and the file's"
-        " shape says where to look: fourteen definitions and ONE runnable form,"
-        " with 30,047 inferences netting 31M instructions, so the row is"
-        " dominated by what happens around loading a 47-line file rather than"
-        " by evaluating it."
-        " It is not the September merge wave's and not this branch's: a"
-        " first-parent ladder over the eight points where this file's own"
-        " measurement method exists reads 31,034,356 to 31,141,141 with no"
-        " trend, and the frozen our_instructions, 31,007,739, sits inside that"
-        " spread."
-        " What tipped it over is the LINE, not the tree. The allowance is"
-        " 31,110,028 and the row's own spread crosses it, so at the pinned"
-        " checkout length the verdict is whichever half a run lands in; from a"
-        " checkout 23 characters longer the whole spread is above it, because"
-        " the null control cancels 99.6% of the path (raw +38,887,046, control"
-        " +38,716,562) and the 170,484 it leaves is 0.55% of a 31M net."
-        " Closing this means the per-form loading path, which is the same"
-        " open work the two shared reasons above carry"
-        " [measured 2026-09-07: four runs in the branch worktree and sixteen"
-        " over eleven ladder points; command=this file's own measure/2 against"
-        " both engines]"
+        "OPEN: equation installation and support/source ownership. The"
+        " journal-write control removes 99 inferences and 582157 instructions"
+        " with the same answer transcript. The full row still retires more"
+        " instructions despite fewer inferences than upstream. Next: price"
+        " declaration compilation separately from support-edge installation;"
+        " no source-only scan is inferred from the whole-file ratio."
     ),
     "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/05-pln_direct.metta": (
-        "metta-library import machinery: the lib_pln import alone costs"
-        " 310.7M here against upstream's 275.7M (measured 2026-08-17), and"
-        " that +35M covers the example's whole +28M flag, so evaluation is"
-        " at parity and the delta is the loader's per-form source tracking"
-        " and change hooks, the documented 516-inferences-per-source-atom"
-        " path"
+        "RULING: upstream fails this file's noeval answer assertion; its"
+        " cost is not a comparable successful program. Our file costs"
+        " 89510921 instructions/90012 inferences. A paired source-journal"
+        " control removes 403 inferences and 1279054 instructions with the"
+        " same successful answers. OPEN: separate premise translation and"
+        " support invalidation after choosing a common upstream answer fixture."
     ),
-    "examples/ch06-many-answers/08-permutations.metta": (DISPATCH_HOP),
-    "examples/ch22-a-reasoner-you-can-serve/22-03-search/02-tilepuzzle.metta": (DISPATCH_HOP),
+    "examples/ch06-many-answers/08-permutations.metta": (
+        "OPEN: native candidate enumeration and relational-conjunct choice."
+        " Removing only the output-template acyclic_term checks saves"
+        " 362880 inferences and 706919398 instructions. Those checks are"
+        " required for upstream's cyclic-template refusal and are retained."
+        " Next: compile stable candidate dispatch and conjunct selection"
+        " while preserving duplicate witnesses and bounded streaming."
+    ),
+    "examples/ch22-a-reasoner-you-can-serve/22-03-search/02-tilepuzzle.metta": (
+        "OPEN: native candidate enumeration plus 483842 public repra keys"
+        " in add-unique-or-fail. Omitting only output-template cycle checks"
+        " removes 302402 inferences and 70274860 instructions. Omitting"
+        " source-journal writes does not reduce instructions, so it is not"
+        " the measured instruction bottleneck here. Next: compile native"
+        " dispatch and price serialization without changing stored Symbol"
+        " keys, duplicate answers or cyclic-template refusals."
+    ),
     "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/04-specialize.metta": (
-        "translator per-clause richness on a 250-clause specializer demo:"
-        " this tree records per-equation support-graph nodes with sequence"
-        " ids, arity registration, effect classification and"
-        " deferred-translation bookkeeping that upstream's compiler does not"
-        " perform, and the demo is nothing but clause churn (88,270,238"
-        " against 48,574,121 upstream, 1.82x, 2026-08-31 rebaseline). The"
-        " levers that exist are exhausted: the fuel charge, the boolean"
-        " scaffolding and the rule-gate probes are compiled away, and the"
-        " residue is the invalidation machinery a redefinable engine keeps"
-        " so that changing an equation is O(affected) rather than"
-        " O(program)."
+        "OPEN: effect classification and source-owned generated clauses."
+        " Removing source-journal writes saves 330 inferences/1868481"
+        " instructions; returning an empty declared-effect set saves 1472"
+        " inferences/834948 instructions. Neither capability is removed."
+        " Next: retain one effect/support summary per installed clause and"
+        " invalidate only the changed dependencies during specialization."
     ),
-    #The seven-process spread the entry below quotes
-    #[measured 2026-09-06 over seven processes per engine;
-    #commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276].
     "examples/ch11-python-as-a-notation/07-torch.metta": (
-        "SUPERSEDED 2026-09-06 and kept for the record. This row is no longer"
-        " measured at all: seven upstream processes of it read 6,916,429,114"
-        " to 7,432,625,840, a 7.46% spread with no mode, and seven of ours"
-        " 7,812,902,156 to 8,344,224,046, 6.80%, so neither engine has a"
-        " single instruction cost for a PyTorch workload and the row comes"
-        " back `upstream-unstable`. The waiver it"
-        " carried -- python-seam richness, 2.07% over, 8,327,251,946 against"
-        " 7,982,385,732 -- was a min-of-three reading off that distribution's"
-        " low tail, so its 2.07% was never a measurement. What it says about"
-        " the per-crossing constants may still be true; nothing here shows it."
+        "UNMEASURED: both engines have no majority instruction mode across"
+        " seven processes after warmup. No crossing price or instruction"
+        " ratio follows from that distribution. Next: isolate a warmed"
+        " tensor operation with an empty-call control before attributing"
+        " Python or PyTorch initialization and allocator work."
     ),
     "examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/01-c_extension.metta": (
-        "feature-versus-absent: loading this example consult-time"
-        " goal-expands the tree's OWN extension source (the arithmetic"
-        " guard and effect classification over the C seat's bridge), work"
-        " upstream does not do because it has no extension seam at all"
-        " (87,886,158 against 52,510,511 upstream, 2026-08-31 rebaseline);"
-        " the evaluation underneath is at parity."
+        "RULING: upstream takes the missing-file SKIP branch because the"
+        " file-exists preflight is unavailable, although its C seam works."
+        " A common program that calls and checks c-bump costs 31256118"
+        " instructions here versus 47490682 upstream. Direct loops price"
+        " the call at 414 instructions and one inference on both engines."
+        " The original 158272382/48573209 comparison prices different work,"
+        " including our lib_file preflight; it is not a crossing regression."
     ),
     "examples/ch19-spaces-backed-by-anything/19-03-a-builtin-in-c/02-handle.metta": (
-        "feature-versus-absent, the c_extension entry's sibling: the same"
-        " consult-time goal expansion over the C seat's bridge plus the"
-        " handle door's registration bookkeeping, none of which upstream"
-        " performs because it has no extension seam (95,329,550 against"
-        " 59,845,230 upstream, 2026-08-31 rebaseline); the evaluation"
-        " underneath is at parity."
+        "RULING: upstream skips the original file preflight. The shared"
+        " three-call handle program passes both engines at 39459407 versus"
+        " 52045508 instructions; direct calls cost 583 instructions and one"
+        " inference each on both. Upstream then fails the original Grounded"
+        " metatype check when forced to execute it. The 167201091/55931310"
+        " original costs do not compare the same capability."
     ),
     "examples/ch20-extending-the-engine/20-02-metta-written-in-metta/02-callquoteevalreduce2.metta": (
-        "meta-door richness, diffuse: quote/eval/reduce crossing costs"
-        " spread over every meta operation (30,630,261 against 18,139,006"
-        " upstream, 2026-08-31 rebaseline); the boundary and step doors"
-        " are swapped away when idle, and what remains is the metatype"
-        " bookkeeping the self-interpreter chapter exercises on every"
-        " form."
+        "OPEN: translation of the quote/eval/reduce interpreter and its"
+        " source-owned clauses. The journal-write control saves 84"
+        " inferences and 392481 instructions with unchanged answers. That"
+        " does not price the remaining meta-evaluation result checks. Next:"
+        " split compiled interpreter installation from repeated calls and"
+        " compare their result-orientation checks independently."
     ),
     "examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/imports/relative/root.metta": (
-        "import machinery, feature-versus-absent: the receipt digests,"
-        " source tracking and invalidation hooks that make a re-import"
-        " O(changed) are charged on first load (151,125,044 against"
-        " 145,562,645 upstream, +5.5%, 2026-08-31 rebaseline); upstream"
-        " re-consults blindly and pays nothing for the capability."
+        "OPEN: import receipt/content hashing and source-owned declarations."
+        " The source-journal control removes eight inferences but only"
+        " 42797 instructions, below the measurement floor. It does not"
+        " explain the whole 11820790-instruction gap. Next: isolate receipt"
+        " digest and support invalidation separately, preserving the"
+        " unchanged-import and failed-load behavior."
     ),
-    "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/06-specializecyclic.metta": (DISPATCH_HOP),
-    "examples/ch10-errors-and-refusals/01-he_error.metta": (METTA_IMPORT),
-    "examples/ch08-data/08-01-atoms-lists-and-folds/15-roman.metta": (METTA_IMPORT),
+    "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/06-specializecyclic.metta": (
+        "OPEN: installing specialized recursive clauses and their source"
+        " ownership. Omitting journal writes saves 92 inferences/431737"
+        " instructions; omitting declared-effect reads changes no inferences"
+        " and only 42464 instructions, below the measurement floor. Next:"
+        " price the generated-clause support graph independently of its"
+        " recursive evaluation, retaining dependency invalidation."
+    ),
+    "examples/ch10-errors-and-refusals/01-he_error.metta": (
+        "RULING: upstream aborts with Arithmetic: a/0 is not a function;"
+        " this engine returns Error data and executes the remaining forms,"
+        " at 6595565 instructions/8122 inferences for the complete file."
+        " Removing journal writes changes only two inferences and 2554"
+        " instructions, below the floor. No successful cross-engine ratio"
+        " exists; the retained capability is error reification and recovery."
+    ),
+    "examples/ch08-data/08-01-atoms-lists-and-folds/15-roman.metta": (
+        "OPEN: repeated effect classification during operator-clause"
+        " installation and support invalidation. The empty-effect control"
+        " removes 15584 inferences/9663023 instructions; removing only"
+        " source-journal writes removes 776/3761186. The controls preserve"
+        " this answer transcript but disable observers, so are not shipped."
+        " Next: reuse clause effect summaries with dependency-scoped invalidation."
+    ),
     "examples/ch18-performance/18-02-memoisation-and-tabling/09-tabling_fib.metta": (
-        "library content growth, the builin_types cause: our lib_tabling"
-        " is a 66-line metta surface plus a 290-line Prolog invalidation"
-        " lane against upstream's 11-line stub; the import alone measures"
-        " 72.7M against upstream's 11.7M (2026-08-17), covering the whole"
-        " flag"
+        "OPEN: first installation of the table policy and invalidation"
+        " declarations. Import alone costs 126156652 instructions here"
+        " versus 15289509 upstream, out of full-file 144806322/20708161."
+        " The effect-read control saves 1632 inferences/1590833 instructions."
+        " Direct compiled-versus-raw table calls price retained result"
+        " checks at two inferences and about 1240 instructions per call."
+        " Next: compile invariant declaration work while preserving policy"
+        " registration, table ownership and targeted invalidation."
     ),
     "examples/ch22-a-reasoner-you-can-serve/22-03-search/05-fibadd.metta": (
-        "the documented ISO-error-class arithmetic guards (the +2.1%"
-        " scale.metta trade), density-proportional: a source-defined fib"
-        " twin shows the same +6.8% net on both engines, ~70 instructions"
-        " per guarded op with four per call (measured 2026-08-17); the"
-        " specializer is the future lever"
+        "RULING: pinned upstream fails the explicit with-pragma! wrapper."
+        " Without only that wrapper both engines answer 832040; ours costs"
+        " 26244027 instructions/23211 inferences versus 7368816467/17510470."
+        " Automatic recursive memoization explains the improvement. The"
+        " original file has no comparable successful upstream cost."
     ),
-    "examples/ch22-a-reasoner-you-can-serve/22-03-search/04-matespace2.metta": (DISPATCH_HOP),
-    "examples/ch18-performance/18-01-larger-workloads/03-superpose_primes.metta": (DISPATCH_HOP),
-    "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/08-nars_direct.metta": (DISPATCH_HOP),
+    "examples/ch22-a-reasoner-you-can-serve/22-03-search/04-matespace2.metta": (
+        "OPEN: private-storage candidate dispatch and output-template cycle"
+        " checks. Omitting the checks saves 2823702 inferences and"
+        " 6001414772 instructions; omitting journal writes does not save"
+        " instructions. Cyclic-template refusal remains required. Next:"
+        " compile storage calls from known relation shapes while retaining"
+        " duplicate witnesses, answer checks and streaming backtracking."
+    ),
+    "examples/ch18-performance/18-01-larger-workloads/03-superpose_primes.metta": (
+        "RULING: upstream fails the explicit with-pragma! wrapper. Without"
+        " that wrapper both engines answer four true values, at 193063512"
+        " instructions/418718 inferences here versus 144509714/336481."
+        " The original budget adds 122052 inferences in the paired program"
+        " control. OPEN: the common program's guarded arithmetic and"
+        " compiled call envelope still exceed upstream; separate them with"
+        " valid and invalid operand controls before changing either."
+    ),
+    "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/08-nars_direct.metta": (
+        "RULING: upstream fails the noeval answer assertion; the original"
+        " file has no comparable successful upstream cost. Ours costs"
+        " 88713675 instructions/74438 inferences. Omitting source-journal"
+        " writes saves 348 inferences/1057842 instructions with unchanged"
+        " successful answers. OPEN: isolate premise translation and"
+        " support invalidation on a common upstream answer fixture."
+    ),
     "examples/ch18-performance/18-01-larger-workloads/01-scale.metta": (
-        "the add path's reload-erasure machinery, standing since before"
-        " this session (flagged identically in the first baseline sweep):"
-        " one million load-time add-atom calls each pay assertz/2 with a"
-        " recorded reference so a later source error can erase the whole"
-        " partial load, where upstream's bare assertz/1 records nothing;"
-        " profiles otherwise matched call for call (measured 2026-08-17)."
-        " The assertz/2-vs-assertz/1 4.4x per-call tick ratio deserves its"
-        " own look, recorded in the survey ledger"
+        "RULING for source ownership, OPEN for the remaining write path:"
+        " one million additions retain source references so failure or reload"
+        " can withdraw their contribution. Omitting those journal assertions"
+        " saves 1000051 inferences and 2467983272 instructions while this"
+        " successful file's answers stay unchanged. Removing them would"
+        " break rollback and reload. Next: batch ownership records with the"
+        " native write operation, preserving per-clause erasure references."
     ),
-    "examples/ch22-a-reasoner-you-can-serve/22-03-search/03-matespace.metta": (DISPATCH_HOP),
+    "examples/ch22-a-reasoner-you-can-serve/22-03-search/03-matespace.metta": (
+        "RULING for the cycle refusal, OPEN for native dispatch: omitting"
+        " only output-template checks saves 2050426 inferences and"
+        " 6206977297 instructions, enough to cross the allowance in that"
+        " control. A cyclic template must still fail as upstream requires."
+        " Journal-write removal does not reduce instructions. Next: prove"
+        " cycle safety at compiled call sites or remove candidate-call"
+        " construction while retaining rational-tree bindings and answer bags."
+    ),
 }
 
 
