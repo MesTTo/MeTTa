@@ -210,7 +210,7 @@ purge_stale_qlf :-
 %this file's own load context, so a host passes no file name and an
 %apostrophe in a directory name cannot reach a goal as text. user: imports the
 %metta_engine exports into the host tier; the engine's module declaration owns
-%its definitions [source: engine/metta.pl:module/2; commit=WORKTREE].
+%its definitions [source: engine/metta.pl:module/2; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 %The qcompile flag is scoped to this one load and restored, so a program the
 %host runs afterwards does not inherit it.
 %

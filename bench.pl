@@ -61,7 +61,7 @@
 % The benchmark module exports nothing. Loading the engine through user
 % publishes the metta_engine facade in the host tier while benchmark helpers
 % remain private [source: engine/metta.pl:metta_publish_host_tier/0;
-% commit=WORKTREE].
+% commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 %
 %It does NOT make the boot case independent of this file, and that was
 %measured rather than assumed: appending one inert fact moves boot from
@@ -141,7 +141,7 @@ bench_boot :-
 % without, it loads what every `sh run.sh` loads [measured 2026-08-28].
 % user:ensure_loaded/1 imports the module's exports into the host tier.
 % The source module owns its definitions regardless of the loading caller
-% [source: engine/metta.pl:module/2; commit=WORKTREE].
+% [source: engine/metta.pl:module/2; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 bench_boot_prepare :-
     bench_path('engine/qlf_boot', QlfBoot),
     user:ensure_loaded(QlfBoot).
