@@ -1636,6 +1636,7 @@ talks to. `das.py`, `remote.py` and `persistent.py` are three real instances.
 :- multifile seam:foreign_add/2.       % add an atom
 :- multifile seam:foreign_remove/3.    % remove one
 :- multifile seam:foreign_atoms/2.     % enumerate
+:- multifile seam:foreign_token/3.     % Space, Atom, t(Actor, Generation)
 :- multifile seam:foreign_match/3.     % answer a pattern
 :- multifile seam:foreign_clear/1.     % empty the space
 :- multifile seam:foreign_erring/5.    % a declared error mode's stream
@@ -1766,6 +1767,21 @@ both. Four of the five used to fail silently: a write vanished, a removal
 reported nothing removed, and a match answered the empty set while the space
 demonstrably held matching atoms. A write that merely FAILS is an error too,
 because a write either happened or it did not.
+
+### Preserve occurrence identity
+
+Declare `tokens` when each stored occurrence has a stable identity. Implement
+`seam:foreign_token(Space, Atom, t(Actor, Generation))` once per occurrence;
+`Actor` is a nonempty symbol and `Generation` a nonnegative integer. Equal
+atoms stored twice need distinct tokens. Candidates may over-approximate the
+pattern; the engine performs unification and orders tokens by generation,
+then actor.
+
+Python providers implement `tokens(pattern)` yielding `(token, atom)` pairs.
+Node providers use the same pair order and may return an async iterable.
+`space.blame(atom)` and fast-image saving require this capability. Missing
+identities raise a capability error naming a native overlay or stable provider
+identities as the remedy. Content-only `digest()` does not identify occurrences.
 
 ### Say why you are saying no
 

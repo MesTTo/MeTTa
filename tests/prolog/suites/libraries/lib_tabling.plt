@@ -126,7 +126,7 @@ test(a_parametric_space_read_resolves_to_its_private_predicate,
     metta_declare_parametric_space(Space),
     native_storage_module(Space, Storage),
     lib_tabling:metta_tabling_read(match, Space, [fact, _, _], Reads),
-    assertion(Reads == [Storage:'$metta_parametric_atom'/3]).
+    assertion(Reads == [Storage:'$metta_parametric_atom'/4]).
 
 test(tabling_refuses_unresolvable_reads) :-
     % A computed space: nothing here can say which storage predicate the

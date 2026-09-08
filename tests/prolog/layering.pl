@@ -7,6 +7,8 @@
 %       DATABASE rather than the sources
 %     - the working directory is tests/prolog
 % Guarantees:
+%     - identity is a leaf reached by boot validation, storage and image receipt
+%       [tested: engine_layering; commit=WORKTREE].
 %     - every call from one engine subsystem into another, and every call from
 %       lib_tabling into an engine subsystem, is named in the contract below,
 %       or the lane exits nonzero naming caller, callee and the missing line
@@ -343,6 +345,7 @@ reaches(duals, translator, 'duals are generated FROM translated clauses, so it r
 reaches(ext_points, filereader, 'a function-changed handler recompiles the affected source').
 reaches(ext_points, tracer, 'the tracer is the shipped consumer of the function-changed seam').
 reaches(ext_points, translator, 'names the compiled predicate a seam is about, and asks whether a function uses super').
+reaches(filereader, identity, 'captures portable image identity and advances the receipt clock').
 reaches(filereader, metta, 'a load runs forms, which is the engine core\'s job').
 reaches(filereader, materialize, 'source prefixes and completed loads prepare counted relations inside their rollback boundary').
 reaches(filereader, ext_points, 'a completed source batch announces its compile-time analysis boundary').
@@ -377,6 +380,8 @@ reaches(metta, translator, 'a runnable form is compiled before it runs').
 reaches(metta, translator_rules, 'add-translator-rule! is the rule registry\'s door').
 reaches(metta, type_rules, 'every type question resolves through the typing-rule registry').
 reaches(parser, metta, 'refuses an unbound input in the core\'s error vocabulary').
+reaches(qlf_boot, identity, 'validates actor and generation before engine initialization').
+reaches(spaces, identity, 'normalizes and orders occurrence tokens through the process identity owner').
 reaches(spaces, ext_points, 'announces function changes and asks whether an atom hook is installed').
 reaches(spaces, filereader, 'a write records or forgets what its source assertion supports').
 reaches(spaces, metta, 'a space write reaches the core\'s registries, contract atoms and error vocabulary').

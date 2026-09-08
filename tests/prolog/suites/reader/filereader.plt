@@ -566,6 +566,30 @@ test(a_dependent_recompile_keeps_its_original_source_owner) :-
           forget_reload_source(PathB, Callee),
           cleanup_test_function(Other) )).
 
+test(recompiled_metadata_keeps_the_equations_source_owner,
+     [setup('new-space'(Space)), cleanup(metta_release_space(Space))]) :-
+    setup_call_cleanup(
+        tmp_file_stream(text, File, Out),
+        format(Out, "(= (plunit_owned_metadata $x) $x)~n", []),
+        close(Out)),
+    setup_call_cleanup(
+        filereader:load_metta_file(File, _, Space),
+        ( space_module(Space, Module),
+          spaces:metta_ensure_compiled(plunit_owned_metadata),
+          filereader:metta_source_load(_, Space, Load, _),
+          filereader:recompile_function_in_module(Module, plunit_owned_metadata),
+          findall(Ref,
+                  ( member(Head,
+                           [fun_meta_clause(Module, plunit_owned_metadata, _, _),
+                            fun_meta_head(Module, plunit_owned_metadata, _),
+                            fun_meta_projection(Module, plunit_owned_metadata, _, _),
+                            fun_meta_clause_types(Module, plunit_owned_metadata, _, _, _)]),
+                    clause(translator:Head, true, Ref) ), Refs),
+          assertion(length(Refs, 4)),
+          forall(member(Ref, Refs),
+                 assertion(filereader:source_load_assertion(Load, artifact, Ref))) ),
+        delete_file(File)).
+
 :- end_tests(filereader_source_reload).
 
 :- begin_tests(filereader_global_function_scope).
@@ -580,7 +604,7 @@ test(file_function_remains_a_global_fallback_after_a_named_homonym) :-
     close(Stream),
     NamedTerm = [=, [Function, X], [+, X, 100]],
     setup_call_cleanup(
-        assertz(user:silent(true), SilentRef),
+        assertz(filereader:silent(true), SilentRef),
         setup_call_cleanup(
             true,
             ( filereader:load_metta_file(Path, _),
@@ -698,7 +722,7 @@ test(a_receipt_tracks_the_liveness_of_its_exact_stored_outputs) :-
           user:import_receipt_current(Space, Path),
           filereader:metta_source_load(Path, Space, LoadId, Digest),
           once(( filereader:source_load_assertion(LoadId, stored, StoredRef),
-                 user:stored_atom_of_ref(StoredRef, Space, Stored),
+                 user:stored_atom_of_ref(StoredRef, Space, Stored, _),
                  Stored =@= Equation )),
           catch(
               transaction(
@@ -995,7 +1019,7 @@ compiled_call_goals(Declaration, Goals) :-
     format(atom(Source), "~w~n(= (~w $x) (+ $x 1))~n",
            [Declaration, Function]),
     setup_call_cleanup(
-        assertz(user:silent(true), SilentRef),
+        assertz(filereader:silent(true), SilentRef),
         setup_call_cleanup(
             filereader:process_metta_string(Source, _),
             user:translate_runnable_expr([Function, "s"], Goals, _),
@@ -1046,7 +1070,7 @@ test(one_arrow_among_several_declarations_is_enough) :-
 test(a_declaration_for_a_name_with_no_equations_is_data) :-
     Name = 'plunit-untypable-belief',
     setup_call_cleanup(
-        assertz(user:silent(true), SilentRef),
+        assertz(filereader:silent(true), SilentRef),
         setup_call_cleanup(
             true,
             ( filereader:process_metta_string("(: plunit-untypable-belief \c
@@ -1272,7 +1296,7 @@ late_definition_load_cost(Order, M, Callers, Cost) :-
     write_bulk_equations(M, Bulk),
     write_callers(Order, Callers, Small),
     setup_call_cleanup(
-        assertz(user:silent(true), SilentRef),
+        assertz(filereader:silent(true), SilentRef),
         setup_call_cleanup(
             filereader:load_metta_file(Bulk, _, Space),
             ( statistics(inferences, Before),

@@ -139,7 +139,7 @@ On TypeScript this is `AssertionError`: node:assert's own word for the same mean
 
 Raised as `SpaceCapabilityError`, off a ball whose own shape names the refusal.
 
-**Ground.** metta-law: HostLaws: engine/spaces/lifecycle.pl metta_space_capability_required/3 -- a restricted space answers only for the capabilities its (grants ...) rows name
+**Ground.** metta-law: HostLaws: engine/spaces/lifecycle.pl metta_host_space_capability_error/4 -- a space door requires its declared engine or provider capability
 
 **Remedy.** grant `<capability>` to `<space>`, which `<operation>` needs
 

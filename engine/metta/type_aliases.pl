@@ -29,7 +29,7 @@
 
 % Keep the native miss first. Untyped data heads need no alias lookup.
 normalized_self_type_declaration(X, Type) :-
-    '$metta_atoms:&self':'&self'(':', X, Raw),
+    '$metta_atoms:&self':'&self'(':', X, Raw, _),
     metta_self_module(Self),
     normalize_type_in(Self, Raw, Type).
 

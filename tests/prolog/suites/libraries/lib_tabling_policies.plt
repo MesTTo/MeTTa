@@ -2,6 +2,8 @@
 %   the (cache Name Policy) row's own lifecycle: install on write, hold until
 %   the clauses arrive, withdraw on removal, release the storage watch last.
 % Guarantees:
+%   - storage watches include the trailing occurrence argument
+%     [tested: lib_tabling_policies; commit=WORKTREE].
 %   - monotonic: an add-atom puts its consequence in the table before the next
 %     call, the table is never invalidated, and that call costs a read where
 %     the incremental twin re-evaluates
@@ -111,7 +113,7 @@ inferences(Goal, Cost) :-
 
 storage_head('&plt_pol_shared', Storage:Head) :-
     native_storage_module('&plt_pol_shared', Storage),
-    Head = '&plt_pol_shared'(_, _, _).
+    Head = '&plt_pol_shared'(_, _, _, _).
 
 :- begin_tests(lib_tabling_policies, [setup(setup_policy_suite)]).
 
@@ -125,8 +127,8 @@ test(a_monotonic_table_takes_a_new_fact_without_re_evaluation,
     assertion(policy_in_force(['plt-mono-reach', _, _], [monotonic, shared])),
     assertion(policy_in_force(['plt-incr-reach', _, _], [incremental, shared])),
     native_storage_module('&plt_pol_mono', Storage),
-    assertion(predicate_property(Storage:'&plt_pol_mono'(_, _, _), monotonic)),
-    assertion(\+ predicate_property(Storage:'&plt_pol_mono'(_, _, _), incremental)),
+    assertion(predicate_property(Storage:'&plt_pol_mono'(_, _, _, _), monotonic)),
+    assertion(\+ predicate_property(Storage:'&plt_pol_mono'(_, _, _, _), incremental)),
     metta_self_module(Self),
     findall(Y, Self:'plt-mono-reach'(a, _, Y), First),
     assertion(First == [b]),
@@ -325,14 +327,14 @@ test(the_policy_in_force_is_reported_and_released,
     assertion(policy_in_force(['plt-mono-reach', _, _], [monotonic, shared, lazy])),
     assertion(once('get-atoms'('&metta', [tabled, _, 'plt-mono-reach', 2]))),
     native_storage_module('&plt_pol_mono', Storage),
-    assertion(predicate_property(Storage:'&plt_pol_mono'(_, _, _), monotonic)),
+    assertion(predicate_property(Storage:'&plt_pol_mono'(_, _, _, _), monotonic)),
     withdraw('plt-mono-reach'),
     metta_table_statistics(['plt-mono-reach', _, _], Stats),
     assertion(\+ memberchk([policy, _], Stats)),
     assertion(\+ 'get-atoms'('&metta', [tabled, _, 'plt-mono-reach', 2])),
     metta_self_module(Self),
     assertion(\+ predicate_property(Self:'plt-mono-reach'(_, _, _), tabled)),
-    assertion(\+ predicate_property(Storage:'&plt_pol_mono'(_, _, _), monotonic)).
+    assertion(\+ predicate_property(Storage:'&plt_pol_mono'(_, _, _, _), monotonic)).
 
 test(a_tabled_call_under_a_row_keeps_the_table_when_the_row_leaves,
      [ cleanup(( withdraw('plt-called'),

@@ -52,6 +52,8 @@ is_engine_flag('--silent').
 is_engine_flag('-s').
 is_engine_flag(extensions).
 is_engine_flag('--verbose').
+is_engine_flag(Argument) :- atom_concat('--actor=', _, Argument).
+is_engine_flag(Argument) :- atom_concat('--generation=', _, Argument).
 
 strip_engine_flags([], []).
 strip_engine_flags([Arg|Rest], Filtered) :-

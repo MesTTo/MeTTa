@@ -1433,7 +1433,7 @@ arrow_declared_data_head(HV, DeclarationTier) :-
 :- dynamic self_tier_clause/3.
 
 self_tier_clause(_, HV, Chain) :-
-    '$metta_atoms:&self':'&self'(':', HV, Raw),
+    '$metta_atoms:&self':'&self'(':', HV, Raw, _),
     metta_runtime_type(Raw, Chain).
 
 %The lifecycle's two doors: a born execution module notes its tier, a
@@ -1446,11 +1446,11 @@ self_tier_note(Module, Space) :-
         Space \== '&self',
         \+ self_tier_ref(Module, _),
         native_storage_module_cache(Space, AtomsModule)
-    ->  Row =.. [Space, ':', HV, Raw],
+    ->  Row =.. [Space, ':', HV, Raw, _],
         asserta((self_tier_clause(Module, HV, Chain) :-
                     (   AtomsModule:Row
                     ->  true
-                    ;   '$metta_atoms:&self':'&self'(':', HV, Raw)
+                    ;   '$metta_atoms:&self':'&self'(':', HV, Raw, _)
                     ),
                     metta_runtime_type(Raw, Chain)), Ref),
         assertz(self_tier_ref(Module, Ref))

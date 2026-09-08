@@ -9,6 +9,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Every native atom occurrence now carries an actor and generation token.
+  Python `Space.blame` and Node `Space.blame` / `Space.blamed` return those
+  identities in token order. Providers can expose stable identities through
+  `tokens`; providers without it receive a capability refusal and remedy.
+  Fast image version 5 and versioned static caches preserve non-colliding
+  tokens and mint identities for colliding copies while retaining answer
+  multiplicity. Boot actor and generation overrides support identity recovery;
+  content digests retain their existing meaning.
+
 - Native and MORK skewed triangle benchmark rows at 100, 400, 1600 and
   3200 atoms, with complete answer-bag checks, retired-instruction pins and
   fitted growth exponents. The MORK benchmark selftest rejects altered counts,
@@ -1769,6 +1778,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   with its vendored corpus is the lane that reads it.
 
 ### Fixed
+- Fast-image checksum validation takes the same inference count for every
+  valid checksum while retaining the lowercase hexadecimal format.
+
+- Shared table calls inside transactions and snapshots now refuse before
+  entering the answer trie, including through previously compiled callers.
+  SWI 10.1.13 can expose uncommitted shared-table answers to another thread.
+  An explicit private table uses SWI's transaction and rollback machinery.
+
 - The 0.8.0 regression where an integration installer's MeTTa library import
   was invisible inside the installer and survived its rollback. The function
   door used a cursor in an SWI engine outside the creating thread's

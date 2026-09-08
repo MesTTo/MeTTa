@@ -116,10 +116,10 @@
 %so an absent row still fails while the general =../catch wrapper is off
 %this per-add path.
 'space-admission-verdict'(Pool, Atom, Verdict) :-
-    (   '$metta_atoms:&metta':'&metta'(admits, Pool, Type),
+    (   '$metta_atoms:&metta':'&metta'(admits, Pool, Type, _),
         \+ has_declared_type(Atom, Type)
     ->  Verdict = [refuse, ['does-not-carry', Type]]
-    ;   '$metta_atoms:&metta':'&metta'(capacity, Pool, Limit),
+    ;   '$metta_atoms:&metta':'&metta'(capacity, Pool, Limit, _),
         %A foreign pool's atoms live with its provider, so its count is
         %the enumeration space-atom-count refuses to hide. A native capacity
         %claim owns an incremental dynamic count; the first decision after a

@@ -1135,6 +1135,17 @@ async def effect_plan(self, target: Any) -> _ops_module.EffectPlan:
 > It does not execute the target. A later registration change is visible
 > on the next call. This is the analysis reified-world admission uses.
 
+### `AsyncMeTTa.blame`
+
+```python
+async def blame(self, atom: Any) -> list[Atom]:
+```
+
+> Return each matching occurrence's ``(t actor generation)`` identity.
+>
+> Results are ordered by generation then actor. Equal atoms have separate
+> tokens. A provider must implement the ``tokens`` capability.
+
 ### `AsyncMeTTa.digest`
 
 ```python
