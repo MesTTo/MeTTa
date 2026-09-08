@@ -57,7 +57,7 @@ run_import() {
     build=$2
     import_base=$3
     sha=$4
-    bounded swipl -q -g "consult('$project_dir/engine/main.pl'),'git-import!'('$url','$build','$import_base','$sha',_),halt"
+    bounded swipl -q -g "consult('$project_dir/engine/main.pl'),lib_gitimport:'git-import!'('$url','$build','$import_base','$sha',_),halt"
 }
 
 # Fresh non-tip checkout and build.
@@ -69,7 +69,7 @@ test "$(cat "$target/.build-count")" = 1
 
 # An exact-SHA checkout without a matching build stamp must still be built.
 missing_stamp_base="$fixture/missing-stamp"
-bounded swipl -q -g "consult('$project_dir/engine/main.pl'),'git-import!'('$remote','','$missing_stamp_base',_),halt"
+bounded swipl -q -g "consult('$project_dir/engine/main.pl'),lib_gitimport:'git-import!'('$remote','','$missing_stamp_base',_),halt"
 test ! -e "$missing_stamp_base/fixture/.build-count"
 run_import "$remote" build.sh "$missing_stamp_base" "$second"
 test "$(cat "$missing_stamp_base/fixture/.build-count")" = 1
@@ -127,7 +127,7 @@ for bad_url in '--upload-pack=false' -x; do
         "'$bad_url','','$option_base/b','$first',R"
     do
         if (cd "$fixture" && bounded swipl -q -g \
-            "consult('$project_dir/engine/main.pl'),'git-import!'($bad_call),halt" \
+            "consult('$project_dir/engine/main.pl'),lib_gitimport:'git-import!'($bad_call),halt" \
             >"$fixture/optionlike.log" 2>&1); then
             echo "option-like URL unexpectedly succeeded: $bad_call" >&2
             exit 1
@@ -205,7 +205,7 @@ test "$(git -C "$fixture/concurrent/fixture" rev-parse HEAD)" = "$first"
 
 # URL-only behavior clones a local deterministic remote without lib_import.
 mkdir -p "$fixture/legacy"
-(cd "$fixture/legacy" && bounded swipl -q -g "consult('$project_dir/engine/main.pl'),'git-import!'('$remote',_),halt")
+(cd "$fixture/legacy" && bounded swipl -q -g "consult('$project_dir/engine/main.pl'),lib_gitimport:'git-import!'('$remote',_),halt")
 test -d "$fixture/legacy/repos/fixture/.git"
 
 # Every arity answers the SAME `true`, which is what every effectful builtin in
@@ -224,7 +224,7 @@ for arity_call in \
     "'$remote','','$unit_base/b','$first',R"
 do
     answer=$(cd "$fixture" && bounded swipl -q -g \
-        "consult('$project_dir/engine/main.pl'),'git-import!'($arity_call),print(R),nl,halt" 2>/dev/null | tail -1)
+        "consult('$project_dir/engine/main.pl'),lib_gitimport:'git-import!'($arity_call),print(R),nl,halt" 2>/dev/null | tail -1)
     if [ "$answer" != "true" ]; then
         echo "git-import! answered '$answer' rather than true for: $arity_call" >&2
         exit 1
@@ -240,8 +240,8 @@ done
 pin_base="$fixture/pins"
 pinned=$(cd "$fixture" && bounded swipl -q -g \
     "consult('$project_dir/engine/main.pl'),\
-     'git-import!'('$remote','','$pin_base','$first',_),\
-     forall(git_pinned_dependency(U, R), format('~w ~w~n', [U, R])),halt" 2>/dev/null | tail -1)
+     lib_gitimport:'git-import!'('$remote','','$pin_base','$first',_),\
+     forall(lib_gitimport:git_pinned_dependency(U, R), format('~w ~w~n', [U, R])),halt" 2>/dev/null | tail -1)
 case "$pinned" in
     *" $first") ;;
     *) echo "a runtime pinned git-import! recorded '$pinned', not the revision it checked out" >&2
@@ -249,8 +249,8 @@ case "$pinned" in
 esac
 unpinned=$(cd "$fixture" && bounded swipl -q -g \
     "consult('$project_dir/engine/main.pl'),\
-     'git-import!'('$remote','','$fixture/unpinned',_),\
-     ( git_pinned_dependency(_, _) -> print(recorded) ; print(none) ),nl,halt" \
+     lib_gitimport:'git-import!'('$remote','','$fixture/unpinned',_),\
+     ( lib_gitimport:git_pinned_dependency(_, _) -> print(recorded) ; print(none) ),nl,halt" \
     2>/dev/null | tail -1)
 if [ "$unpinned" != "none" ]; then
     echo "an unpinned git-import! recorded a pin: $unpinned" >&2

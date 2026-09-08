@@ -69,6 +69,12 @@ allowed(user:py_call/2,
         'janus\'s, and every lib_thread call site is guarded by \c
          current_predicate(py_call/2) or current_predicate/1 on a Python-seat \c
          predicate; a tokenless engine has no Python seat').
+allowed(user:py_call/1,
+        'janus\'s, the call that discards its return: converting the return of \c
+         a host cleanup or cancellation callable raised on a leaf Atom \c
+         (docs/journal/2026-09-08-a-scope-owns-its-children.md), so lib_thread \c
+         calls those through py_call/1, and only for a host(...) record a \c
+         Python seat wrote; a tokenless engine has no Python seat').
 
 % Candidates for the eyesight plant: library exports the engine and its
 % libraries do not import, so a call to one is undefined exactly when the

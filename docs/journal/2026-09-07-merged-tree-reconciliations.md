@@ -452,3 +452,36 @@ file and its reconciliation alike), `ord_memberchk/2` in receipts.pl and
 `pairs_values/2` in tokens.pl (both present on the trunk at da0e5755d, from
 the tokens merge). Each unit imports what it calls now; the check answers
 nothing beyond its one known name.
+
+### The full gate on the trunk that carries every merge
+
+Tried: `GATE_ONLY=1 sh check.sh` on 73311b727 -> 115 lanes ok, 24 red.
+Five were defects the merges left and are repaired here: the git shell
+tests called `'git-import!'/5`, `acquire_git_dependency/4`,
+`git_pinned_dependency/2` and `git_library_path/2` unqualified from `-g`
+goals, names that live in `lib_gitimport` since the module boundary landed
+(the tests qualify them, as the 2026-09-08 entry rules for shell probes);
+the specialization differential's planted bootstrap ran `initialization(main,
+main)` in `user`, where `main/0` is library(main)'s and calls a `main/1` the
+engine never had, so it names `metta_main:main`; the static check read
+`Variable not introduced in all branches: Error` at control.pl's
+`metta_host_hold/3`, two catches sharing one name across an if-then-else
+and its continuation; the same check found the vocabulary seed's recipe
+reading a `vocabulary-member` preset that no preset table holds (a live row
+kind, never shipped), a branch that could not match; and the autoload lane
+named `user:py_call/1` at lib_thread's scope cleanup, which stays `py_call/1`
+because the 2026-09-08 scope entry records a leaf Atom raising in the
+conversion `py_call/2` would do, so the lane's allowance table names it with
+that reason. The rest are measurement rows the merges moved, the sweep's:
+engine-bench (boot -4,958 unpinned, match +1,200), c-bench (boot +44,737
+inferences and +11% instructions, space-pair +120,005), mork-bench
+(native-add-500 7,533 to 10,699), node-bench, the Python counter row
+add-batch +7, instructions (alpha-unique -8.4% and let-heavy -4.4%
+unpinned, save-load-fast +52%, save-load-metta +12%, source-load +13%,
+py-method-call +5.7%), scaling (write-door 1.222x, the token per write),
+memory-scale (load-fast 351,480 to 891,612, support-drop-one +87%,
+support-drop-spaces +24%, stored-atoms-native bytes +12.5%), extcost
+(add-atom-no-claims 37,133 to 43,132, six per add), parity-perf (five
+cross-engine rows), and the corpus-coverage lane's three lib_thread heads
+without an example (`scope`, `capture`, `scope_body`); vulture, ty, pylint,
+refurb, bandit and deptry carry findings from the merged Python.

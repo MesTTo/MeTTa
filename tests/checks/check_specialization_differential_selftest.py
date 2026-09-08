@@ -88,7 +88,7 @@ def _planted_entrypoint(directory: Path) -> Path:
         ":- unload_file(" + _quoted(ROOT / "engine" / "specializer.pl") + ").\n"
         ":- load_files(" + _quoted(planted_specializer) + ", [if(true)]).\n"
         ":- ensure_loaded(" + _quoted(ROOT / "engine" / "main.pl") + ").\n"
-        ":- initialization(main, main).\n",
+        ":- initialization(metta_main:main, main).\n",
         encoding="utf-8",
     )
     return bootstrap

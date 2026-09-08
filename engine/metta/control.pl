@@ -640,8 +640,8 @@ metta_host_hold(Template, Goal, Handle) :-
               ( metta_host_hold_close(Handle), throw(Error) ))
     ;   engine_create(Template, Captured, Handle)
     ),
-    catch(forall(seam:host_engine_created(Handle), true), Error,
-          ( metta_host_hold_close(Handle), throw(Error) )).
+    catch(forall(seam:host_engine_created(Handle), true), Announcing,
+          ( metta_host_hold_close(Handle), throw(Announcing) )).
 
 % Capture on the caller, install inside the engine. Wrapping engine_next/2
 % would install context on the carrier instead [tested: lib_thread_scope;
