@@ -1,7 +1,7 @@
 % Purpose: verify lib_thread's lifetime tree through native entry points.
 % Guarantees: normal exit joins children, failure stops siblings, return
 % transfers spaces and escaped names refuse [tested: lib_thread_scope;
-% commit=WORKTREE].
+% commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
 % Owns resources: each case closes its scope, drops returned spaces and
 % destroys its queues, including exceptional exits.
 

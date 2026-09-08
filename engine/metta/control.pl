@@ -2,7 +2,7 @@
 % Guarantees: metta_host_hold/3 installs seam:engine_context/1 inside its
 %   held goal and announces its lifetime through seam:host_engine_created/1
 %   and seam:host_engine_released/1 [tested: lib_thread_scope,
-%   test_scope_closes_held_debuggers_and_retires_their_wrappers; commit=WORKTREE].
+%   test_scope_closes_held_debuggers_and_retires_their_wrappers; commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
 % Guarantees: host cursors opened in a transaction evaluate on its thread;
 %   their rows commit or roll back with it, and stepping on another thread refuses
 %   [tested: host_hold; commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084].
@@ -645,7 +645,7 @@ metta_host_hold(Template, Goal, Handle) :-
 
 % Capture on the caller, install inside the engine. Wrapping engine_next/2
 % would install context on the carrier instead [tested: lib_thread_scope;
-% commit=WORKTREE].
+% commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
 metta_host_context_goal([], Goal, Goal).
 metta_host_context_goal([Context|Contexts], Goal, call(Context, Rest)) :-
     metta_host_context_goal(Contexts, Goal, Rest).

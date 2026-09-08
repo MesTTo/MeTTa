@@ -9,7 +9,7 @@
 % Guarantees: release requests child cancellation before taking the execution
 %   module mutex, then publishes retirement after native teardown. Access
 %   checks also precede cache misses and allocation [tested: lib_thread_scope,
-%   test_a_rolled_back_allocation_cannot_recycle_a_revoked_name; commit=WORKTREE].
+%   test_a_rolled_back_allocation_cannot_recycle_a_revoked_name; commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.

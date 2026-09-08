@@ -1,7 +1,7 @@
 % Purpose: test cancellation acknowledgement at running-engine safe points.
 % Guarantees: a cancelled loop publishes no answer and releases its guard;
 %   an outstanding await does not prevent cancellation [tested:
-%   run_tests(lib_thread_cancellation); commit=WORKTREE].
+%   run_tests(lib_thread_cancellation); commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
 % Owns resources: each test joins its workers and drops its future and queues.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

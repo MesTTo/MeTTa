@@ -126,7 +126,7 @@
 
 % Guarantees: native allocation publishes space_created/1 exactly once under
 %   the storage mutex, including a reused empty module [tested:
-%   lib_thread_scope; commit=WORKTREE].
+%   lib_thread_scope; commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
 :- dynamic native_storage_module_cache/2.
 :- dynamic space_parametric/1.
 %The two host idle-hook seams these read are declared with every other seam,

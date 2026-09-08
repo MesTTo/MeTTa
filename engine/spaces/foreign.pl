@@ -4,7 +4,7 @@
 % Guarantees: a new concrete provider claim emits seam:space_created/1;
 %   namespace claims and reopening an existing space do not mint a lifetime
 %   [tested: test_named_foreign_creation_is_owned_and_an_existing_provider_is_borrowed;
-%   commit=WORKTREE].
+%   commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
 % Guarantees: every capability word a provider declares is a member of the
 % catalog's (vocabulary provider-capability ...) row, checked at the three
 % declaration doors rather than per operation, so a typo is refused naming the
@@ -149,7 +149,7 @@ metta_claim_space(Extent, Owner) :-
 
 % Namespace claims allocate no individual space. A concrete claim announces
 % creation only when it did not replace an existing native or foreign space.
-% [tested: lib_thread_scope; commit=WORKTREE]
+% [tested: lib_thread_scope; commit=c6e1198c490a824b96f6fc6e1c0622a542917024]
 metta_claim_space_created(Extent, Owner) :-
     ( Extent = prefix(_) -> New = false
     ; metta_space_operand(Extent) -> New = false
