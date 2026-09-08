@@ -411,6 +411,23 @@ answer GROUPS are compared separately and exactly, and every verdict either
 configuration prints has that shape. `10-torch-library-surface.metta` agrees
 across both configurations afterwards.
 
+### A generated file cannot carry the provenance placeholder
+
+Verifying on the COMMITTED tree, after the provenance pass, turned the
+`refusal-sync` lane red: `metta/_refusals.py` no longer equalled what
+`refusalgen.py` writes. The generator's header template carried
+`commit=WORKTREE`, the pass rewrote it in the generated FILE, and the two
+stopped agreeing -- on the pin, not on any drift.
+
+`vocabgen.py` already had the answer and this one had not copied it: a
+generator's template names a REAL commit, so the pass has nothing to rewrite
+in what it produces, and the id advances when a change to the generator makes
+its claims say something new. Fixed the same way, with the reason written
+above the template so the next generator here does not learn it again.
+
+Worth stating as a rule: the placeholder belongs in a file a human edits. A
+file a tool writes carries the id the tool was pinned at.
+
 ### The incident, recorded
 
 `ruff check --fix --select I001,RUF100` was run over `metta tests ext` to fix
