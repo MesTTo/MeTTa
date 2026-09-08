@@ -1,7 +1,7 @@
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
 % Guarantees: host cursors opened in a transaction evaluate on its thread;
 %   their rows commit or roll back with it, and stepping on another thread refuses
-%   [tested: host_hold; commit=WORKTREE].
+%   [tested: host_hold; commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084].
 % Owns resources: metta_host_hold/3 owns an engine or thread-local dynamic rows
 %   until metta_host_hold_close/1; rollback discards newly held rows and thread
 %   exit releases abandoned rows. Foreign close requests run on the owner.
@@ -614,7 +614,7 @@ metta_time_bound_exceeded(Limit) :-
 % handle. This is PostgreSQL's held-portal lifetime: commit retains the rows,
 % rollback discards them, and explicit close releases them.
 % [source: https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-transaction.c#L535-L557;
-% commit=WORKTREE]
+% commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084]
 :- meta_predicate metta_host_hold(?, 0, -).
 :- thread_local metta_host_held_row/4.
 :- thread_local metta_host_held_position/3.
@@ -692,7 +692,7 @@ metta_host_hold_close(Engine) :-
 % cleanup on its owner, including a suspended engine; dead owners have already
 % released their thread-local clauses. SWI queues these goals in the target LD.
 % [source: https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-thread.c#L3629-L3690;
-% commit=WORKTREE]
+% commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084]
 metta_host_hold_discard(Id, Thread) :-
     sig_atomic(( retractall(metta_host_held_position(Id, Thread, _)),
                  retractall(metta_host_held_row(Id, Thread, _, _)) )).
