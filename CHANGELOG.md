@@ -9,6 +9,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Transactional subtraction examples and generated multiplicity checks for
+  the existing `subtract-atom` and Python `remove()` doors. Native misses
+  return `False` without waiting for another writer, and rollback restores
+  consumed occurrences. The spaces guide documents the existing operation;
+  no additional removal head is needed.
+
 - Native and MORK skewed triangle benchmark rows at 100, 400, 1600 and
   3200 atoms, with complete answer-bag checks, retired-instruction pins and
   fitted growth exponents. The MORK benchmark selftest rejects altered counts,
@@ -1769,6 +1775,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   with its vendored corpus is the lane that reads it.
 
 ### Fixed
+- The MORK guide's pin-journal link resolves to the repository source when
+  the README is included in the website, allowing the documentation build.
+
 - The 0.8.0 regression where an integration installer's MeTTa library import
   was invisible inside the installer and survived its rollback. The function
   door used a cursor in an SWI engine outside the creating thread's

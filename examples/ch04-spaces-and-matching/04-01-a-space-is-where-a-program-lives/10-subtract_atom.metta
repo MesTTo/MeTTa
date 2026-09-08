@@ -1,3 +1,9 @@
+; Purpose: demonstrate single-occurrence subtraction and draining.
+; Guarantees: native subtraction consumes one copy and returns False on a miss
+;   [tested:
+;   sh test.sh examples/ch04-spaces-and-matching/04-01-a-space-is-where-a-program-lives/10-subtract_atom.metta;
+;   commit=WORKTREE].
+;
 ;A space is a MULTISET, so removal has two honest readings and the engine
 ;ships both. `remove-atom` DRAINS: every atom that unifies leaves, which is
 ;what upstream answers and what `del space[pattern]` spells from Python.
@@ -21,8 +27,9 @@
 !(test (subtract-atom &self (dup 1)) True)
 !(test (collapse (match &self (dup $n) $n)) (1))
 
-;When nothing is left to take, the answer is False rather than an error. This
-;is the distinction `remove-atom` gives up by answering True either way.
+;When nothing is left to take, the answer is False without waiting for another
+;writer. This is the distinction `remove-atom` gives up by answering True
+;either way.
 !(test (subtract-atom &self (dup 1)) True)
 !(test (subtract-atom &self (dup 1)) False)
 

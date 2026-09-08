@@ -1,0 +1,11 @@
+; Purpose: measure subtraction and undefined remover spellings on both engines.
+(dup 1)
+(dup 1)
+!(collapse (match &self (dup $x) $x))
+!(subtract-atom &self (dup 1))
+!(collapse (match &self (dup $x) $x))
+!(remove-one &self (dup 1))
+!(collapse (match &self (dup $x) $x))
+!(remove-atom &self (dup 1))
+!(collapse (match &self (dup $x) $x))
+!(subtract-atom &self (dup 1))
