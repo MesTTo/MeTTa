@@ -365,3 +365,6 @@ citation as accepted, unable to tell that exit from a report with findings.
 Decided: the gate reads door contracts through the generator where the tree
 carries one and says in its summary when it does not, and the selftest treats
 a traceback on stderr as a crash whatever the exit code.
+Refined the same day: a tree that carries the door table but not its
+generator is a seat with a piece missing, not a tree without doors, so the
+gate refuses it by name rather than reading nothing.

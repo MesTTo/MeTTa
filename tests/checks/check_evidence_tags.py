@@ -1621,6 +1621,14 @@ def main() -> int:
 
         findings += contract_findings(root=ROOT)
         doors = "door contracts read through doorgen"
+    elif (ROOT / "extensions/python/metta/doors.py").is_file():
+        # The table without its generator is a seat with a piece missing, not
+        # a tree without doors: refuse rather than read nothing.
+        findings.append(
+            "extensions/python/metta/doors.py: a door table with no "
+            "extensions/python/tools/doorgen.py to read its contracts"
+        )
+        doors = "door table present, its generator absent"
     else:
         doors = "no door table in this tree, so no door contracts read"
     findings += untagged_guarantees()
