@@ -133,7 +133,7 @@
 % seed payload through the storage funnel, each row with a minted token, only
 % for an unchanged initial catalog without type schemas, watchers, existing
 % type atoms or an &metta execution module. Other states use the ordinary
-% declaration door [tested: catalog_vocabulary_bootstrap; commit=WORKTREE].
+% declaration door [tested: catalog_vocabulary_bootstrap; commit=b4341ae382c48ef225f4a52e566af6a9a71757c4].
 
 % Guarantees: native allocation publishes space_created/1 exactly once under
 %   the storage mutex, including a reused empty module [tested:
