@@ -479,3 +479,9 @@ restates a policy makes the row that carries it the place to say what it stands
 on, which is what the alias does; naming the lists in a `Decides:` line only,
 because the lane's exemption already names the mechanism and its evidence at
 the list.
+Decided: the two partitions are stated member by member in
+`tests/repository/test_door_rows.py`
+(`test_answer_forms_and_owner_families_are_the_declared_partitions`), since
+the mappings' totality assertions prove every member has a class and nothing
+about which one; a swapped pair fails there rather than in the evaluation
+door that dispatches on the form.
