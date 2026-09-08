@@ -8,7 +8,7 @@
 %     - the working directory is tests/prolog
 % Guarantees:
 %     - identity is a leaf reached by boot validation, storage and image receipt
-%       [tested: engine_layering; commit=WORKTREE].
+%       [tested: engine_layering; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 %     - every call from one engine subsystem into another, and every call from
 %       lib_tabling into an engine subsystem, is named in the contract below,
 %       or the lane exits nonzero naming caller, callee and the missing line

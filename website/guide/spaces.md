@@ -5,7 +5,7 @@ Guarantees:
   - version 5 fast images preserve occurrence identity and resolved reader
     bindings and refuse earlier cache schemas
     [tested: test_image_collision_rule,
-    test_fast_images_preserve_each_equations_binding; commit=WORKTREE]
+    test_fast_images_preserve_each_equations_binding; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4]
   - examples use the public metta.space() and metta.attach() functions
   - journal replay renames are documented as one-time migrations, and content
     digests state that renamed heads change their hashes

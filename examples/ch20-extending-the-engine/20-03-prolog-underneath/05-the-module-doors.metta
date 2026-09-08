@@ -1,6 +1,6 @@
 ; Purpose: exercise Prolog module doors and token-preserving static import.
 ; Guarantees: static data is matchable and both versioned cache files are removed
-;   [tested: sh test.sh; commit=WORKTREE].
+;   [tested: sh test.sh; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 ;
 ;Six doors that load Prolog, and what separates them. Two live in lib_import,
 ;three in lib_zar, and one is the fast path for DATA rather than for code.

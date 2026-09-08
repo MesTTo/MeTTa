@@ -3,7 +3,7 @@
 %   the clauses arrive, withdraw on removal, release the storage watch last.
 % Guarantees:
 %   - storage watches include the trailing occurrence argument
-%     [tested: lib_tabling_policies; commit=WORKTREE].
+%     [tested: lib_tabling_policies; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 %   - monotonic: an add-atom puts its consequence in the table before the next
 %     call, the table is never invalidated, and that call costs a read where
 %     the incremental twin re-evaluates

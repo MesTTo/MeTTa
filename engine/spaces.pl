@@ -54,7 +54,7 @@
 %     compiled clause's, not for a registration's, not for an erased one
 %     [tested 2026-09-08:
 %     spaces_storage_modules:a_stored_atoms_reference_decodes_to_its_atom,
-%     spaces_storage_modules:an_erased_reference_decodes_to_nothing; commit=WORKTREE].
+%     spaces_storage_modules:an_erased_reference_decodes_to_nothing; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 %   - An equation for a name this space's module already DERIVED as a
 %     specialization is not stored again, so enumerating a space and re-adding
 %     its atoms answers a space that holds and answers what the first one did

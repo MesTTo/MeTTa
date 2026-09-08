@@ -1,9 +1,9 @@
 % Purpose: validate immutable process identity before native catalog writes.
 % Guarantees: receipts advance the atomic generation counter before publication
-%   [tested: spaces_tokens; commit=WORKTREE].
+%   [tested: spaces_tokens; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 % Owns resources: actor and generation flags last until process exit.
 % Guarded by: flag/3 serializes counter changes
-%   [tested: spaces_tokens:concurrent_minting_is_unique; commit=WORKTREE].
+%   [tested: spaces_tokens:concurrent_minting_is_unique; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 % Decides: boot options override environment values; UUID and zero are defaults.
 :- module(metta_identity, [metta_actor/1, metta_boot_identity/0, metta_token_actor/1, metta_token_generation/1, metta_token_parts/3, metta_token_order/3, metta_token_portable/2, metta_token_receive/2, metta_generation_receive/1]).
 :- use_module(library(uuid), [uuid/2]).

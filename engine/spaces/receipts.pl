@@ -2,10 +2,10 @@
 % Assumes: native erasures use metta_erase_storage_ref/1 or metta_retract_storage/1.
 % Guarantees: overlapping image receipts retain distinct tokens, while a load
 %   into an empty destination preserves its tokens [tested: spaces_token_images;
-%   commit=WORKTREE].
+%   commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 % Owns resources: one standing engine; reservations and erased references last
 %   only until their enclosing load or transaction finishes. Nested rollback
-%   releases its reservations [tested: spaces_token_images; commit=WORKTREE].
+%   releases its reservations [tested: spaces_token_images; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 % Guarded by: '$metta_occurrence_receipts' serializes requests to the engine.
 
 :- dynamic metta_receipt_pending/4, metta_receipt_marker/2,

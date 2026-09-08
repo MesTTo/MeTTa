@@ -1,6 +1,6 @@
 /* Purpose: append or decode the occurrence argument of a native storage head.
  * Guarantees: metta_storage_term/4 preserves argument order and variable sharing
- *   [tested: spaces_tokens:storage_constructor_matches_specification; commit=WORKTREE].
+ *   [tested: spaces_tokens:storage_constructor_matches_specification; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
  * Owns resources: SWI reclaims term references with the foreign call frame.
  * Guarded by: no mutable state is retained between calls.
  */

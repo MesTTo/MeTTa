@@ -1,7 +1,7 @@
 % Purpose: hold shared table isolation at the tabled predicate entry.
 % Guarantees: direct compiled callers refuse unsafe transactions and private
 %   tables preserve commit, rollback and snapshot visibility
-%   [tested: lib_tabling_transactions; commit=WORKTREE].
+%   [tested: lib_tabling_transactions; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 % Owns resources: each test releases its space; thread_join/2 reclaims each
 %   reader before the fixture is released.
 
