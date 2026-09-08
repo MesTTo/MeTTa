@@ -36,15 +36,15 @@ Assumes:
 Guarantees:
   - a closed set with no answer is reported with its path, line and name, and
     a malformed or unknown answer is reported as itself [tested:
-    tests/checks/check_closed_sets_selftest.py; commit=WORKTREE]
+    tests/checks/check_closed_sets_selftest.py; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
   - a `generated` answer names a generator that exists and a lane check.sh
     runs; a `seam` answer names a point the seam declares; a `decides` answer
     names a policy and either a catalog row head or `none`
-    [tested: tests/checks/check_closed_sets_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_closed_sets_selftest.py; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
   - a public `str` parameter whose default is a member of a generated
     vocabulary is reported: the parameter's type is the vocabulary's enum,
     which still accepts the plain word [tested:
-    tests/checks/check_closed_sets_selftest.py; commit=WORKTREE]
+    tests/checks/check_closed_sets_selftest.py; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
 Fails when:
   - read as a count. The number of closed sets is not a score; a policy this
     seat decides is a closed set and should stay one, and its line is what

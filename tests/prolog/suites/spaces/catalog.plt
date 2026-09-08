@@ -37,7 +37,7 @@
        stays silent for every other head, stops when unwatched, reaches every
        watched head for a removal whose head is unbound, and leaves the row it
        announced as it found it [tested: run_tests(catalog_watch);
-       commit=WORKTREE]
+       commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
    Open Obligations:
      To Do: None
      Hacks: None

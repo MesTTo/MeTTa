@@ -9,16 +9,16 @@ plants the parameter rule's own case, and its escape.
 Guarantees:
   - a closed set with no answer, and each of the five malformed answers, are
     reported independently while the well-formed fixture passes [tested:
-    tests/checks/check_closed_sets_selftest.py; commit=WORKTREE]
+    tests/checks/check_closed_sets_selftest.py; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
   - a FOURTH answer kind is refused as malformed rather than admitted, which
     is the whole point of the three [tested:
-    test_a_fourth_answer_is_refused; commit=WORKTREE]
+    test_a_fourth_answer_is_refused; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
   - a public str parameter defaulting to a vocabulary member is reported, and
     an adjacent enum-parameter line with its reason clears it [tested:
     test_a_string_parameter_with_a_vocabulary_default_is_reported,
-    test_a_stated_reason_clears_the_parameter; commit=WORKTREE]
+    test_a_stated_reason_clears_the_parameter; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
   - the shipped tree passes the same gate, so a red above is the fixture
-    [tested: test_the_shipped_tree_passes_its_own_gate; commit=WORKTREE]
+    [tested: test_the_shipped_tree_passes_its_own_gate; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
 Open Obligations:
   To Do: None
   Hacks: None

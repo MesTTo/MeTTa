@@ -12,7 +12,7 @@ Guarantees:
   - a class the refusal rows name for a SPECIFIC kind, raised without going
     through its row, is reported, while the catch-all class raised directly is
     accepted [tested: test_a_taxonomy_class_raised_outside_its_row_is_reported,
-    test_the_catch_all_class_may_be_raised_directly; commit=WORKTREE]
+    test_the_catch_all_class_may_be_raised_directly; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
 """
 
 from __future__ import annotations

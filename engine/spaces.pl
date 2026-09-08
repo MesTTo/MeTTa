@@ -23,7 +23,7 @@
 %     consumer that mirrors a catalog row reaches the point that keeps its
 %     mirror in step [tested: run_tests(catalog_watch),
 %     metta_published_surface:every_declared_seam_that_exists_is_exported;
-%     commit=WORKTREE]
+%     commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
 %   - the ordered match limit service is exported for host evaluation
 %     [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 %   - Files below engine/spaces/ are plain source units consulted into this

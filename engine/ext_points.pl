@@ -64,14 +64,14 @@
 %   - a consumer that MIRRORS a catalog row hears every write to its head,
 %     including a removal whose head was left unbound, and hears nothing for a
 %     head it did not ask about [tested: run_tests(catalog_watch);
-%     commit=WORKTREE]
+%     commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
 %   - watching one head costs 1 inference on a '&metta' write and nothing on a
 %     write to any other space [measured 2026-09-08: 36.02 to 37.02 inferences
 %     per '&metta' write, 27.02 either way per '&self' write and 375.07 either
 %     way per equation;
 %     command=python extensions/python/benchmarks/probes/bound_row_cost.py --write;
 %     fixture=300 writes per arm against a control checkout at
-%     9006528e04dfcc6bf3c7f43cd77a7816ad0223d7; commit=WORKTREE]
+%     9006528e04dfcc6bf3c7f43cd77a7816ad0223d7; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

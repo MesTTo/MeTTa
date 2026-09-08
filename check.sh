@@ -75,11 +75,11 @@
 #   - the seat's refusal table is a projection of the engine's own rows, with a
 #     seven-case planted selftest over the classes, their fields and the
 #     generated file [tested: extensions/python/tools/refusalgen.py,
-#     tests/checks/check_refusal_sync_selftest.py; commit=WORKTREE].
+#     tests/checks/check_refusal_sync_selftest.py; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58].
 #   - every closed set in the Python seat states one of three answers adjacent
 #     to it, with a nine-case planted selftest that includes a FOURTH answer
 #     [tested: tests/checks/check_closed_sets.py,
-#     tests/checks/check_closed_sets_selftest.py; commit=WORKTREE].
+#     tests/checks/check_closed_sets_selftest.py; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58].
 #   - memory and scaling curves run once in REPORT-then-GATE order; GATE_ONLY
 #     still takes a fresh measurement and promotes only deterministic pins
 #     [tested: env CHECK_PY=../../.venv-pypetta/bin/python

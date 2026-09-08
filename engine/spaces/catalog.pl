@@ -18,10 +18,10 @@
 % head and unwatch_catalog_rows/1 turns it off, watching twice leaves one
 % registration, a head nobody watched announces nothing, and a removal whose
 % head is unbound reaches every watched head [tested: run_tests(catalog_watch);
-% commit=WORKTREE]. Guarantees: the announcement leaves the row it announced as
+% commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]. Guarantees: the announcement leaves the row it announced as
 % it found it, so an open head reaches the funnel's own dispatch unbound
 % [tested: catalog_watch:the_announcement_undoes_the_binding_it_made;
-% commit=WORKTREE].
+% commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58].
 % Fails when: loaded directly or from another module; internal state and
 % unqualified meta-goals would acquire the wrong owner. Guarantees: counting
 % and tropical are ordinary catalog algebras, the semiring vocabulary derives

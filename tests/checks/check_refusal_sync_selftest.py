@@ -9,12 +9,12 @@ Guarantees:
   - a row naming a class this seat does not have, a class that is not an
     exception, and a class that will not take a field its kind declares are
     each reported [tested: tests/checks/check_refusal_sync_selftest.py;
-    commit=WORKTREE]
+    commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
   - a kind in the engine's rows with no entry in the shared list, and a seat
     spelling that differs from the row with no reason, each stop the run
-    [tested: tests/checks/check_refusal_sync_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_refusal_sync_selftest.py; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
   - the shipped tree passes the same lane, so the fixtures are what fail
-    [tested: tests/checks/check_refusal_sync_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_refusal_sync_selftest.py; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
 Open Obligations:
   To Do: None
   Hacks: None
