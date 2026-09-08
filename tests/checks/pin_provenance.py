@@ -90,6 +90,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 from check_evidence_tags import (  # noqa: E402  -- HERE must be on the path first
+    CLAIM,
     PLACEHOLDER,
     PROVENANCE_SOURCES,
     ROOT,
@@ -143,6 +144,10 @@ def _grammar(path: Path) -> str | None:
         return ";"
     if path.suffix == ".json":
         return "json"
+    # A guide pins inside its evidence tags and discusses the placeholder in
+    # prose around them; the tag brackets are the comment rule.
+    if path.suffix == ".md":
+        return "md"
     return None
 
 
@@ -251,6 +256,8 @@ def sites(path: Path, text: str) -> list[tuple[int, int, str | None]]:
         skip = _docstring_spans(text)
     elif grammar in BLOCK_GRAMMARS:
         skip = [match.span() for match in BLOCK_COMMENT.finditer(text)]
+    elif grammar == "md":
+        skip = [match.span() for match in CLAIM.finditer(text)]
     else:
         skip = []
     for match in TOKEN.finditer(text):
@@ -270,6 +277,9 @@ def sites(path: Path, text: str) -> list[tuple[int, int, str | None]]:
             head = text[text.rfind("\n", 0, at) + 1 : at]
             if grammar not in head and not any(low <= at < high for low, high in skip):
                 reason = f"neither {grammar} nor a /* */ block opens a comment around it"
+        elif grammar == "md":
+            if not any(low <= at < high for low, high in skip):
+                reason = "outside an evidence tag, so prose about the placeholder rather than a pin"
         elif grammar is None:
             reason = f"{path.suffix or path.name} has no comment rule here; add one rather than guessing"
         found.append((at, line, reason))

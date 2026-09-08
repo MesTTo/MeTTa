@@ -443,7 +443,11 @@ def run(root: Path) -> list[str]:
         text=True,
         check=False,
     )
-    if finished.returncode not in (0, 1):
+    # An uncaught exception also exits 1, which is the exit a clean report
+    # with findings uses, so the traceback is what tells them apart: on
+    # 2026-09-09 an import the fixture tree could not satisfy printed no
+    # report, and every planted bad citation read as accepted.
+    if finished.returncode not in (0, 1) or "Traceback (most recent call last)" in finished.stderr:
         msg = f"the checker crashed on the fixture tree:\n{finished.stderr}"
         raise SystemExit(msg)
     return finished.stdout.splitlines()

@@ -349,3 +349,19 @@ sites; and the two sites over the ceiling were the discovery test file this
 journal's own DOORS entry added (a header in the one-invariant form and one
 test without a docstring), now a summary-line header and a docstring, so the
 count reads 2,277 again.
+
+Tried: `tests/checks/pin_provenance.py --check` after the merge -> exit 1:
+EXTENDING.md carried three placeholders outside the evidence gate's globs,
+and the gate had no rule for Markdown. Decided: the root guides join the pin
+half of the gate (`EXTENDING.md`, `KERNEL.md`), and a Markdown placeholder is
+a pin inside an evidence tag's brackets and prose outside them, with a
+planted guide in the pin selftest. Found on the way: the evidence selftest
+read 29 defects on this tree, on the trunk, on the pre-scope control, and 28
+on the DOORS branch tip f70fa37df, while the cut f0d33dcad reads 0. The DOORS
+branch made the gate's `main` import `doorgen` from the tree it checks; the
+selftest's fixture trees carry no such file, the import crashed the gate,
+exit 1 with an empty report, and the selftest counted every planted bad
+citation as accepted, unable to tell that exit from a report with findings.
+Decided: the gate reads door contracts through the generator where the tree
+carries one and says in its summary when it does not, and the selftest treats
+a traceback on stderr as a crash whatever the exit code.

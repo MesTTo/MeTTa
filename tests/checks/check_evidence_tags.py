@@ -422,6 +422,15 @@ PROVENANCE_SOURCES = (
     # reports 8 unbacked tags [measured 2026-09-05, recorded in
     # CLAIM_SOURCES' own queue above].
     "tests/prolog/*.pl",
+    # The guides at the root cite sources and tests with commit pins written
+    # into prose; the out-of-glob net named EXTENDING.md on 2026-09-09 with
+    # three placeholders a merge reconciliation had written, and KERNEL.md
+    # carries two pins of the same kind. The PIN half only, because a guide
+    # spells its sources as prose ("engine/ext_points.pl, seam:pattern_modifier/3
+    # and engine/translator.pl, lift_pattern_modifiers/3") the claim checker
+    # does not parse.
+    "EXTENDING.md",
+    "KERNEL.md",
 )
 
 #: Every file whose evidence TAGS are read. Both halves, because a tag is a
@@ -1598,11 +1607,22 @@ def untagged_guarantees() -> list[str]:
 
 def main() -> int:
     """Report every tag with nothing behind it, and say how many were read."""
-    sys.path.insert(0, str(ROOT / "extensions/python/tools"))
-    from doorgen import contract_findings
-
     known, findings = gather()
-    findings += contract_findings(root=ROOT)
+    # The door table's contracts are evidence of the same kind, read through
+    # its generator where the tree carries one. A tree without it (the
+    # selftest's fixture trees, a checkout of the engine alone) has no door
+    # rows to check, and says so in the summary rather than failing to
+    # import: the gate crashing here printed no report at all, and a selftest
+    # read every planted bad citation as accepted.
+    tools = ROOT / "extensions/python/tools"
+    if (tools / "doorgen.py").is_file():
+        sys.path.insert(0, str(tools))
+        from doorgen import contract_findings
+
+        findings += contract_findings(root=ROOT)
+        doors = "door contracts read through doorgen"
+    else:
+        doors = "no door table in this tree, so no door contracts read"
     findings += untagged_guarantees()
     sites = claim_sites()
     pins, placeholders = commit_problems(sites + provenance_sites())
@@ -1635,7 +1655,7 @@ def main() -> int:
         f"{len(findings)} unbacked evidence tag(s) in {checked} claims, against "
         f"{len(known.targets)} known test names in {len(known.runs)} files a runner "
         f"executes; {placeholders} commit={PLACEHOLDER} placeholder(s) awaiting a "
-        f"provenance pin"
+        f"provenance pin; {doors}"
     )
     return 1 if findings else 0
 

@@ -2564,13 +2564,13 @@ engine runs, so a library that owns a scope wraps the engines the scope holds
 without any host re-implementing a context stack; every declared context
 composes, and `lib_thread` declares `scope_call(Id)` for the scope it owns
 [source: lib/lib_thread/lib_thread.pl, seam:engine_context/1 and
-engine/ext_points.pl; commit=WORKTREE]. `seam:space_dependency/2` declares a
+engine/ext_points.pl; commit=50e34286f66c938d89d5d367c6370ad44164c97f]. `seam:space_dependency/2` declares a
 space that must stay live while a dependent space is kept out of a scope: the
 engine declares a space's parent and the home of its equations, and a scope
 that transfers a kept space to its parent transfers those with it rather than
 releasing them under a space that still reads them
 [source: engine/spaces/lifecycle.pl, seam:space_dependency/2 and
-lib/lib_thread/lib_thread.pl, scope keep; commit=WORKTREE].
+lib/lib_thread/lib_thread.pl, scope keep; commit=50e34286f66c938d89d5d367c6370ad44164c97f].
 
 The events around them are the lifetime seams. `seam:space_created/1` fires
 when a space is minted, `seam:space_releasing/1` before a space is released
@@ -2580,7 +2580,7 @@ has revoked; `seam:host_engine_created/1` and `seam:host_engine_released/1`
 bracket a host engine's life the same way. All six are event seams: every
 handler runs, so no cut [source: engine/ext_points.pl, the lifetime events,
 and lib/lib_thread/lib_thread.pl, seam:space_created/1 and
-seam:space_released/1; commit=WORKTREE].
+seam:space_released/1; commit=50e34286f66c938d89d5d367c6370ad44164c97f].
 
 ### Making your errors read like a builtin's
 

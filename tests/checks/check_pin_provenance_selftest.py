@@ -72,6 +72,18 @@ PLANTS = (
         [1],
         [],
     ),
+    # A guide at the root: its pins sit inside evidence tags in prose, and the
+    # same prose discusses the placeholder, backticked or bare, beside them.
+    (
+        "EXTENDING.md",
+        [
+            f"A guide pin [{TAG} {WHEN}: a case; {WORD}].",
+            f"The word discussed rather than pinned: `{WORD}`.",
+            f"A bare mention of {WORD} outside any tag is prose too.",
+        ],
+        [1],
+        [2, 3],
+    ),
     (
         "engine/plant.pl",
         [
