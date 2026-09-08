@@ -57,7 +57,7 @@ def register(
     fn: Callable[P, R],
     *,
     name: str | None = None,
-    transport: Literal['encoded', 'raw'] = 'encoded',
+    transport: Transport = 'encoded',
     effect: EffectClass | str | None = None,
     declarations: Iterable[Atom] = (),
     space: str = _DEFAULT_SPACE,

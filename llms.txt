@@ -887,10 +887,10 @@ The engine's own counters over a with-block, as deltas.
 
 ```python
 @overload
-op(fn: Callable[_P, _R], /, *, name: str | None=..., transport: Literal['encoded', 'raw']=..., effect: EffectClass | str, declarations: Iterable[Atom]=..., arities: list[int] | None=..., inverse: Callable | None=...) -> Callable[_P, _R]
+op(fn: Callable[_P, _R], /, *, name: str | None=..., transport: Transport=..., effect: EffectClass | str, declarations: Iterable[Atom]=..., arities: list[int] | None=..., inverse: Callable | None=...) -> Callable[_P, _R]
 @overload
-op(*, name: str | None=..., transport: Literal['encoded', 'raw']=..., effect: EffectClass | str, declarations: Iterable[Atom]=..., arities: list[int] | None=..., inverse: Callable | None=...) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]
-op(fn: Callable | None=None, *, name: str | None=None, transport: Literal['encoded', 'raw']='encoded', effect: EffectClass | str | None=None, declarations: Iterable[Atom]=(), arities: list[int] | None=None, inverse: Callable | None=None) -> Any
+op(*, name: str | None=..., transport: Transport=..., effect: EffectClass | str, declarations: Iterable[Atom]=..., arities: list[int] | None=..., inverse: Callable | None=...) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]
+op(fn: Callable | None=None, *, name: str | None=None, transport: Transport='encoded', effect: EffectClass | str | None=None, declarations: Iterable[Atom]=(), arities: list[int] | None=None, inverse: Callable | None=None) -> Any
 ```
 
 Register a Python callable as a MeTTa function, decorator-style.

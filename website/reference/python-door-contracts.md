@@ -2946,10 +2946,10 @@ Evidence: `extensions/python/tests/ch14_seeing_your_program/test_explain_plan.py
 
 ```python
 @overload
-op(fn: Callable[_P, _R], /, *, name: str | None=..., transport: Literal['encoded', 'raw']=..., effect: EffectClass | str, declarations: Iterable[Atom]=..., arities: list[int] | None=..., inverse: Callable | None=...) -> Callable[_P, _R]
+op(fn: Callable[_P, _R], /, *, name: str | None=..., transport: Transport=..., effect: EffectClass | str, declarations: Iterable[Atom]=..., arities: list[int] | None=..., inverse: Callable | None=...) -> Callable[_P, _R]
 @overload
-op(*, name: str | None=..., transport: Literal['encoded', 'raw']=..., effect: EffectClass | str, declarations: Iterable[Atom]=..., arities: list[int] | None=..., inverse: Callable | None=...) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]
-op(fn: Callable | None=None, *, name: str | None=None, transport: Literal['encoded', 'raw']='encoded', effect: EffectClass | str | None=None, declarations: Iterable[Atom]=(), arities: list[int] | None=None, inverse: Callable | None=None) -> Any
+op(*, name: str | None=..., transport: Transport=..., effect: EffectClass | str, declarations: Iterable[Atom]=..., arities: list[int] | None=..., inverse: Callable | None=...) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]
+op(fn: Callable | None=None, *, name: str | None=None, transport: Transport='encoded', effect: EffectClass | str | None=None, declarations: Iterable[Atom]=(), arities: list[int] | None=None, inverse: Callable | None=None) -> Any
 ```
 
 Kind: `provider`. Answer: `value`. Effect: `writesState`. Determinism: `det`.
@@ -2968,7 +2968,7 @@ Assumes receiver state `live`.
 |---|---|---|---|---|
 | `fn` | `(host-union ((host-type metta._space Callable) NoneType))` | `None` | `values` | `positional_or_keyword` |
 | `name` | `(host-union (String NoneType))` | `None` | `values` | `keyword_only` |
-| `transport` | `(host-literal ("encoded" "raw"))` | `'encoded'` | `values` | `keyword_only` |
+| `transport` | `(host-type metta._space Transport)` | `'encoded'` | `values` | `keyword_only` |
 | `effect` | `(host-union ((host-union ((host-type metta._space EffectClass) String)) NoneType))` | `None` | `values` | `keyword_only` |
 | `declarations` | `(host-apply (host-type metta._space Iterable) (Atom))` | `()` | `values` | `keyword_only` |
 | `arities` | `(host-union ((host-apply (host-type metta._space list) (Number)) NoneType))` | `None` | `values` | `keyword_only` |

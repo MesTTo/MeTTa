@@ -55,6 +55,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `EvaluationAnswer.form` and `Owner.family` classify the evaluation
+  answer choices (materialised, view, aggregate, stream) and the door owners
+  (core, result, remote, namespace) once, beside their enums, and the door
+  bodies dispatch on them; `metta.ops.Transport` is the one spelling of the
+  op door's `encoded`/`raw` transport, which its rows, overloads and decoder
+  all name.
+
 - Transactional subtraction examples and generated multiplicity checks for
   the existing `subtract-atom` and Python `remove()` doors. Native misses
   return `False` without waiting for another writer, and rollback restores

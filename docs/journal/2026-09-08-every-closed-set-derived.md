@@ -450,3 +450,32 @@ made every difference attributable.
 The lesson, for the next time: `ruff --select` on this tree is destructive,
 because the configuration's own select list is what makes every `noqa` in the
 tree used. Run the configured `ruff check --fix` and no narrower.
+
+## 2026-09-09
+
+Tried: `policy-inventory` on the trunk after the door-table, structured-concurrency
+and tokens merges -> 14 closed lists with no adjacent exemption, every one
+written by a branch cut before the gate reached its file: two partitions of
+`EvaluationAnswer` in `_evaluation_door.py` (the eager choices, the aggregate
+choices), two partitions of `Owner` in `doors.py` (the core owners a namespace
+may not shadow, the result owners a package may add sugar to), the `transport`
+Literal spelled six times in the generated projections of the op door's three
+rows, typing's two union spellings in `_projection.py`, janus's two truth
+spellings twice in lib_thread and a channel's capability list. Decided, by the
+rule this thread set: a partition of an enum is a fact of the enum, so
+`EvaluationAnswer.form` (`AnswerForm`: materialised, view, aggregate, stream)
+and `Owner.family` (`Family`: core, result, remote, namespace) each state it
+once in a mapping beside the enum, asserted total over its members, and the
+door body and the table's rules dispatch on the form and the family; the
+transport words are one alias, `ops.Transport`, that the op door's rows, its
+overloads, the registration door and the decoder all name, with the exemption
+on the alias's line (aiogen and the root's typing block alias it like the other
+signature names, so the module tier and the stub render `_Transport`); the
+three lists that are a mechanism's own spellings keep their list and carry the
+exemption on the line before it, the janus pair through one `janus_true_/2`.
+`policy-inventory` 14 -> 0; `door-sync` 224 contracts agree after regeneration.
+Rejected: skipping generated regions in the lane, because a projection that
+restates a policy makes the row that carries it the place to say what it stands
+on, which is what the alias does; naming the lists in a `Decides:` line only,
+because the lane's exemption already names the mechanism and its evidence at
+the list.
