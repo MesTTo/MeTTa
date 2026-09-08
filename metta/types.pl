@@ -1,4 +1,8 @@
 % Purpose: resolve scoped declarations, type compatibility, metatypes, and typed-call introspection
+% Guarantees: builtin_surface_governs_in/2 omits the prelude lookup for a
+%   known name in the base module and retains named-space shadowing
+%   [tested: prelude:a_named_space_shadows_a_prelude_name_at_another_arity;
+%   commit=WORKTREE].
 % Guarantees: Callable declaration readers and type witnesses use metta_runtime_type/2;
 %   get-type and stored atoms retain the written annotation
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
@@ -332,7 +336,9 @@ prelude_declaration_governs_in(Module, X) :-
 %&self either and the two doors must agree [tested:
 %prelude:a_named_space_shadows_a_prelude_name_at_another_arity; commit=bc0d495562674e064276e91f04c61286d0b93585].
 builtin_surface_governs_in(Module, X) :-
-    (   prelude_declaration(X, _)
+    (   nonvar(Module), nonvar(X), metta_self_module(Module)
+    ->  true
+    ;   prelude_declaration(X, _)
     ->  prelude_declaration_governs_in(Module, X)
     ;   true
     ).
