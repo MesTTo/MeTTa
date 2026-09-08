@@ -124,6 +124,9 @@
 % test_type_carrier_cannot_certify_laws,
 % test_type_carrier_refuses_values_outside_its_type; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 
+% Guarantees: native allocation publishes space_created/1 exactly once under
+%   the storage mutex, including a reused empty module [tested:
+%   lib_thread_scope; commit=WORKTREE].
 :- dynamic native_storage_module_cache/2.
 :- dynamic space_parametric/1.
 %The two host idle-hook seams these read are declared with every other seam,
@@ -210,16 +213,18 @@ ensure_native_storage_module(Space, Module) :-
 %[measured 2026-08-20: direct-join +10, prepared-join +10, register-op +200,
 %py-method-call +30,002].
 ensure_native_storage_module(Space, Module) :-
+    forall(seam:space_access(Space), true),
     metta_space_writable_name(Space),
     native_storage_module(Space, Module),
     with_mutex('$metta_native_storage',
-               ensure_native_storage_module_locked(Space, Module)).
+               sig_atomic(ensure_native_storage_module_locked(Space, Module))).
 
 ensure_native_storage_module_locked(Space, Module) :-
     native_storage_module_cache(Space, Module), !.
 ensure_native_storage_module_locked(Space, Module) :-
     native_storage_ready(Module), !,
-    assertz(native_storage_module_cache(Space, Module)).
+    assertz(native_storage_module_cache(Space, Module)),
+    forall(seam:space_created(Space), true).
 ensure_native_storage_module_locked(Space, Module) :-
     ( native_storage_module_occupied(Module)
       -> throw(error(permission_error(create, native_space_storage, Module),
@@ -227,7 +232,8 @@ ensure_native_storage_module_locked(Space, Module) :-
                              'the reserved storage module name is already in use')))
     ; set_prolog_flag(Module:unknown, fail),
       dynamic(Module:'$metta_native_storage'/0),
-      assertz(native_storage_module_cache(Space, Module)) ).
+      assertz(native_storage_module_cache(Space, Module)),
+      forall(seam:space_created(Space), true) ).
 
 %A foreign claim over an EXISTING name falsifies the premise the match
 %door's cache-first clause states (a foreign-claimed name never has a native
