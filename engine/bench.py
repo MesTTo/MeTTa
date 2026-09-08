@@ -74,7 +74,7 @@ import subprocess
 import sys
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -89,6 +89,7 @@ from metta_benchmarking import (  # noqa: E402
     BenchmarkBaseline,
     measure_instructions,
     measured_main,
+    refusal_is_fatal,
 )
 
 BASELINE = HERE / "bench-baseline.json"
@@ -203,6 +204,19 @@ def _run(goal: str) -> str:
     return finished.stdout
 
 
+class Case(NamedTuple):
+    """One case as bench.pl declares it.
+
+    `whole_process` is bench.pl's `bench_whole_process/1`: the measured region
+    contains the engine load, so the row's instruction count scales with the
+    length of this checkout's path and is true of one location only.
+    """
+
+    unit: str
+    operations: int
+    whole_process: bool
+
+
 def _fields(line: str, prefix: str) -> dict[str, str] | None:
     """key=value fields from one of bench.pl's tagged lines."""
     head, _, rest = line.partition(" ")
@@ -211,15 +225,26 @@ def _fields(line: str, prefix: str) -> dict[str, str] | None:
     return dict(field.split("=", 1) for field in rest.split() if "=" in field)
 
 
-def describe() -> tuple[dict[str, tuple[str, int]], tuple[str, ...]]:
+def describe() -> tuple[dict[str, Case], tuple[str, ...]]:
     """The case table and the workload list, read from bench.pl itself."""
     output = _run("metta_bench:bench_describe")
-    cases: dict[str, tuple[str, int]] = {}
+    cases: dict[str, Case] = {}
     sources: list[str] = []
     for line in output.splitlines():
         case = _fields(line, "metta-bench-case")
         if case is not None:
-            cases[case["name"]] = (case["unit"], int(case["operations"]))
+            if "whole_process" not in case:
+                msg = (
+                    f"{case['name']}: bench_describe reported no whole_process "
+                    "field; bench.pl owns that declaration and this reader "
+                    "will not guess it"
+                )
+                raise CaseFailureError(msg)
+            cases[case["name"]] = Case(
+                case["unit"],
+                int(case["operations"]),
+                case["whole_process"] == "true",
+            )
             continue
         source = _fields(line, "metta-bench-source")
         if source is not None:
@@ -294,31 +319,59 @@ def _movement(previous: Mapping[str, Any] | None, key: str, observed: int) -> st
     return f"{key} {before} -> {observed} ({delta:+d}, {percent:+.3f}%)"
 
 
+class RowRefusedError(Exception):
+    """One row this checkout cannot read, with the others still deciding.
+
+    Not MeasurementRefusedError, which `measured_main` turns into a skip of the
+    WHOLE lane: a boot row the path length disqualifies leaves six other rows
+    that decide perfectly well here, and skipping them would hide a regression
+    behind a location.
+    """
+
+
 def observe(
     baseline: BenchmarkBaseline,
     name: str,
-    unit: str,
-    operations: int,
+    case: Case,
     *,
     instructions: bool,
+    path_decides: bool,
 ) -> str:
-    """Measure one case and either compare it or re-pin it."""
+    """Measure one case and either compare it or re-pin it.
+
+    `path_decides` is false when this checkout's path is not the length the
+    pins were taken at. A whole-process row is then measured and REPORTED
+    rather than compared, because the offset it reads is the location and not
+    the engine; every other row's window excludes the load and still decides.
+    """
     previous = dict(baseline.cases[name]) if name in baseline.cases else None
     samples, cpu, wall = counter_samples(name)
     moved = [_movement(previous, "inferences", min(samples))]
     reported = [f"inference samples={samples}"]
-    baseline.observe_counter(name, unit=unit, operations=operations, samples=samples)
-    baseline.observe_wall(name, wall / operations)
+    baseline.observe_counter(
+        name, unit=case.unit, operations=case.operations, samples=samples
+    )
+    baseline.observe_wall(name, wall / case.operations)
+    refusal: str | None = None
     if instructions:
         retired = instruction_samples(name)
         moved.append(_movement(previous, "instructions", min(retired)))
         spread = 100.0 * (max(retired) - min(retired)) / min(retired)
         reported.append(f"instruction samples={list(retired)} spread={spread:.3f}%")
-        baseline.observe_instructions(name, retired)
-    return (
+        try:
+            baseline.observe_instructions(name, retired)
+        except AssertionError as band:
+            if not (case.whole_process and not path_decides):
+                raise
+            refusal = str(band)
+    line = (
         f"{name}: {'; '.join(moved)}; {'; '.join(reported)}; "
         f"cpu={cpu:.6f}s wall={wall:.6f}s (advisory)"
     )
+    if refusal is not None:
+        message = f"{line} NOT MEASURED IN THIS CONFIGURATION\n  {refusal}"
+        raise RowRefusedError(message)
+    return line
 
 
 # The loop keeps measurement, reporting and the keep-going contract together;
@@ -374,11 +427,44 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"engine/bench.sh: cannot measure this tree: {unusable}", file=sys.stderr)
         return 2
 
+    # The boot row's instruction count is true of a checkout LENGTH rather than
+    # of a tree: its window is the engine load, which resolves a path for every
+    # file it reads, and this file's baseline prices the difference at 2.51%
+    # between a 72-character worktree and the 30-character repository root with
+    # the inference count identical in both. A run from another length measures
+    # that row and REPORTS it instead of calling the offset a regression, which
+    # is what extensions/cmetta/benchmarks/bench.py does with the same fact.
+    # An UPDATE is the deliberate re-pin and must not silently write a pin the
+    # gate will read as wrong, so it refuses the row there too.
+    pinned_length = baseline.pinned_checkout_path_length()
+    path_decides = pinned_length is None or pinned_length == len(str(ROOT))
+
     failures: list[str] = []
+    refused: list[str] = []
     for name in selected:
-        unit, operations = cases[name]
+        case = cases[name]
+        if arguments.update_baseline and case.whole_process and not path_decides:
+            refused.append(
+                f"{name}: not re-pinned; this checkout's path is "
+                f"{len(str(ROOT))} characters against the {pinned_length} the "
+                "instruction pin was taken at. `sh engine/bench.sh "
+                f"{name}` reports what it reads here without writing it"
+            )
+            print(f"{name}: NOT RE-PINNED IN THIS CONFIGURATION")
+            continue
         try:
-            print(observe(baseline, name, unit, operations, instructions=instructions))
+            print(
+                observe(
+                    baseline,
+                    name,
+                    case,
+                    instructions=instructions,
+                    path_decides=path_decides,
+                )
+            )
+        except RowRefusedError as refusal:
+            refused.append(f"{name}: {refusal}")
+            print(str(refusal))
         # AssertionError is how the harness reports a band; the rest are how the
         # INSTRUMENT reports that it could not take a reading. Both have to land
         # here rather than unwind: a failure in one case that ends the run hides
@@ -397,7 +483,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"{name}: FAILED")
     baseline.finish()
     if arguments.update_baseline:
-        print(f"re-pinned {len(selected)} case(s) in {BASELINE}")
+        print(f"re-pinned {len(selected) - len(refused)} case(s) in {BASELINE}")
+    # Printed either way, so "the check stopped happening" is never silent;
+    # what refusal_is_fatal decides is whether it is also red. On a runner it
+    # is, because a row nobody measured is a tripwire nobody read, and CI runs
+    # at the repository root where the length agrees anyway.
+    for message in refused:
+        print(f"NOT MEASURED IN THIS CONFIGURATION {message}", file=sys.stderr)
+    if refused and refusal_is_fatal():
+        failures = failures + refused
     if failures:
         for message in failures:
             print(message, file=sys.stderr)

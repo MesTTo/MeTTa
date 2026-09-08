@@ -155,13 +155,13 @@ check_engine_bench() {
     # resolves $HERE/ and not a local name. engine/bench.sh picks the
     # interpreter and runs engine/bench.py, which starts one engine/bench.pl
     # process per sample and hands the counters to the shared harness in
-    # extensions/python/metta/benchmarking.py; without the literals the lane
-    # covers none of them and every evidence claim written in one reads as
-    # unbacked.
+    # extensions/python/ext/metta-benchmarking/metta_benchmarking.py; without
+    # the literals the lane covers none of them and every evidence claim
+    # written in one reads as unbacked.
     #
-    # engine/bench.sh exits 0 with a note naming the missing step when swipl, a
-    # Python, or metta.testing is absent, and nonzero when a present toolchain
-    # measures a case outside its band. A missing engine/bench-baseline.json is
+    # engine/bench.sh exits 0 with a note naming the missing step when swipl,
+    # a Python, or metta_benchmarking is absent, and nonzero when a present
+    # toolchain measures a case outside its band. A missing engine/bench-baseline.json is
     # NOT a missing toolchain: it is a committed file, so it fails here rather
     # than skipping.
     bounded env CHECK_PY="$PY" sh "$HERE/engine/bench.sh"

@@ -196,10 +196,16 @@ pre-add hook with the `space-admission-verdict` judge.
 
 | write door | inferences/add | vs plain add | microseconds/add | vs plain add |
 |---|---|---|---|---|
-| add-atom, no claims on the space | 30.00 | 1.00x | 1.64 | 1.00x |
-| add-atom through an accept-all pre-add hook | 47.00 | 1.57x | 2.60 | 1.59x |
-| add-atom into a pool with a declared admits type | 58.00 | 1.93x | 2.87 | 1.75x |
-| add-atom into a pool with a declared capacity | 67.00 | 2.23x | 5.11 | 3.12x |
+| add-atom, no claims on the space | 30.00 | 1.00x | 1.72 | 1.00x |
+| add-atom through an accept-all pre-add hook | 47.00 | 1.57x | 2.62 | 1.53x |
+| add-atom into a pool with a declared admits type | 59.00 | 1.97x | 3.27 | 1.90x |
+| add-atom into a pool with a declared capacity | 67.00 | 2.23x | 5.03 | 2.92x |
+
+The admits row read 58.00 until 2026-09-08 and the difference is the atom
+offered, not the door: `add-atom` takes upstream PeTTa's domain, an atom with a
+head, so the bare symbol this row used to write is no longer addable at all and
+the row now offers `(hk-probe a)`. One inference per add is what the extra
+structure costs.
 
 A space nothing claimed keeps the direct write path, which is what holds the
 plain row where it is. The capacity row used to read 4569.69 at a thousand held

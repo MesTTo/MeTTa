@@ -1191,6 +1191,46 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Fifty pinned numbers -- forty-two across thirty-four rows in six committed
+  baselines, and the eight automatic-tabling pins the suite carries in its own
+  source -- are placed on the first-parent commit that moved them and re-pinned
+  with the mechanism beside the number, by a ladder over the
+  first-parent chain from `97c96e91d` to the tip, twenty-six points for every
+  suite and twenty-eight for the counter rows, rebuilding every seat's
+  artifacts at each point and clearing the `.qlf` set before measuring. Four
+  causes account for them. `e67e2db94`, the prelude's
+  move into Prolog, costs "the one extra module link every first resolution in
+  a fresh space module walks" -- its own words for two engine rows -- which
+  fifteen Python-seat rows and both engine parse instruction rows pay too.
+  `bc0d49556` adds a `prelude_declaration_governs_in/2` guard in front of every
+  builtin type-candidate lookup, exactly three inferences per evaluation, which
+  is `eval-arith` +5,998 over 2,000 and `space-name` +90,009 over 30,000.
+  `1a3579fa4` writes 251 type atoms into `&metta` at initialization, which the
+  engine's and the C seat's boot rows carry, and checks a provider's capability
+  words when its space is readied, which is `register-op` +402 over 100
+  registrations. `3fc65f02c` checks a wall-clock deadline where the answer is
+  produced, which is `query-limit-guarded` +800 over 100 guarded queries and is
+  controlled: reverting `extensions/python/metta/shim.pl` alone puts the row
+  back on its pin while `query-limit-plain`, the same workload without a bound,
+  never moves. The pins these replace were measured on the
+  chore/trunk-gate-hygiene branch and are true of its base, `97c96e91d`, where
+  every one of them reads back exactly; trunk took fifty-eight first-parent
+  commits while that branch measured, so the merge carried numbers true of no
+  commit after it.
+
+- The engine's benchmark lane refuses a row whose measured region contains the
+  engine load when this checkout's path is not the length its pin was taken at,
+  instead of reporting the offset as a regression. `engine/bench.pl` declares
+  `bench_whole_process(boot)` and `bench_describe` reports it,
+  `engine/bench-baseline.json` records `measurement.checkout_path_length`, and
+  `engine/bench.py` also declines to RE-PIN such a row from another length, so
+  an update cannot quietly write a pin the gate will read as wrong. Measured at
+  three lengths on one commit: the boot row reads 829,908,721 retired
+  instructions at 29 characters, 832,642,704 at 45 and 837,082,473 at 60, while
+  its inference count is 273,658 at all three. The C seat has held the same
+  fact under the same name since `db9ff8e1`; every other case's window opens
+  inside an already-booted process and moves under 0.4% across the same span.
+
 - A twin's empirical BUDGET envelope may have zero spread. Every observation
   agreeing under a protocol is the claim the envelope records, keyed to that
   protocol and re-observed rather than re-pinned; the lane used to refuse
@@ -1598,6 +1638,32 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   with its vendored corpus is the lane that reads it.
 
 ### Fixed
+
+- Three benchmark GATE lanes had measured nothing since the extension-package
+  merge. `c-bench`, `mork-bench` and `node-bench` each died on
+  `ImportError: cannot import name 'BenchmarkBaseline' from 'metta.testing'`:
+  the harness moved into the `metta_benchmarking` distribution and the three
+  SEAT drivers were not among the consumers that merge repointed. Each reaches
+  it through `_workspace.on_path()` now, the way `engine/bench.py` and
+  `extensions/python/bench.py` already did; every reference in a live file to
+  the module path that merge deleted, six of them inside `[source:]` evidence
+  claims, points at the file that exists; and a suite test imports every
+  benchmark driver the repository tracks so the next one cannot rot silently.
+
+- A benchmark lane's toolchain guard asks for the module its driver imports.
+  `engine/bench.sh` and `extensions/node/bench.sh` asked whether
+  `metta.testing` imported, which it still does, so a guard written to turn a
+  missing prerequisite into a named skip let the run through to an
+  `ImportError` instead.
+
+- The `extcost` lane's admission-pool row offered a bare symbol to `add-atom`,
+  which took upstream PeTTa's domain -- an atom with a head -- at `12121e3c`.
+  The write then answered nothing, stored nothing and raised nothing, the
+  driver's recursion stopped at its first call, and the whole lane died with
+  it. The row offers `(hk-probe a)` against `(: (hk-probe a) HKAdmitted)`, the
+  shape `examples/ch15-writing-transactions-and-worlds/04-admission_pools.metta`
+  itself uses; EXTENDING.md's write-door table reads 59.00 rather than 58.00
+  inferences an add, which is what the extra structure costs.
 
 - An equation that says `&self` reads the space it is stored in through EVERY
   door, not only the two the entry below made agree. The deferred door
