@@ -359,17 +359,22 @@ disable_metta_pragma_bounds :-
 %metta_py_limited throws, so a pragma bound and a per-call kwarg bound
 %classify identically one level up: TimeLimitError and
 %InferenceLimitError rather than a generic engine error.
-%A BOUND THAT IS EXCEEDED REFUSES; IT NEVER ANSWERS. The alarm alone cannot
-%promise that, because a signal that arrives late arrives after the goal has
-%finished and the caller then reads an answer for work that ran past the bound
-%it asked for: a 0.3-second load answered `[[(Error (spin) StackOverflow)]]`
-%after 66.170 seconds at loadavg 90 to 100
-%[source: docs/journal/2026-09-07-every-intermittent-root-caused.md]. So the
-%deadline is checked where the answer is produced as well, exactly as
-%metta_host_inference_budget/3 pairs SWI's per-solution limiter with a
-%cumulative counter read for the same reason, and the two bounds now hold the
-%same rule at every door
+%A BOUND THAT IS EXCEEDED REFUSES; IT NEVER ANSWERS. Neither signal can
+%promise that on its own. An alarm that arrives late arrives after the goal
+%has finished, and the caller then reads an answer for work that ran past the
+%bound it asked for: a 0.3-second load answered `[[(Error (spin)
+%StackOverflow)]]` after 66.170 seconds at loadavg 90 to 100
+%[source: docs/journal/2026-09-07-every-intermittent-root-caused.md]. An
+%inference limit is lost a second way: SWI disarms it and then raises the
+%bare atom `inference_limit_exceeded` INSIDE the goal, so a recovery catch on
+%the way out eats the ball and the bound with it, and the limiter reports `!`
+%for a goal that never stopped
+%[source: docs/journal/2026-09-04-bounded-trace-keeps-its-events.md, which
+%measured 200,000 further inferences after such a catch].
+%So both bounds are checked where the answer is produced as well as armed as
+%a signal, through the same two builders the lazy cursors use
 %[tested: time_budget:a_pragma_bound_the_alarm_missed_still_refuses,
+%inference_budget:a_swallowed_ball_still_refuses_at_the_pragma_door,
 %test_a_wall_clock_bound_that_is_exceeded_refuses].
 run_under_pragmas(Goal) :-
     (   metta_pragma('max-time', Seconds), number(Seconds), Seconds > 0
@@ -392,11 +397,8 @@ run_under_pragmas(Goal) :-
     ).
 
 metta_call_with_inference_bound(Goal, Limit) :-
-    call_with_inference_limit(Goal, Limit, Result),
-    (   Result == inference_limit_exceeded
-    ->  metta_inference_bound_exceeded(Limit)
-    ;   true
-    ).
+    metta_host_inference_budget(Goal, Limit, Bounded),
+    call(Bounded).
 
 %%% A cumulative inference budget for a goal an engine will resume %%%
 %
