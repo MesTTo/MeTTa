@@ -172,3 +172,39 @@ The repaired seat builds, the seven Rust tests pass, and the MORK seat suite pas
 The published MORK differential builds both default-product and leapfrog executables and reports 99 matching programs, zero failures and five documented skips out of 104. The skips are the unavailable min sink, two explicitly slow exponential fixtures, the declared comment-before-closing-bracket parser bug, and an empty file. Those are the upstream corpus's declared exclusions, not omitted PeTTa MORK tests.
 
 Open: committed-tree gate results and the final provenance pin.
+
+### Final fixture correction
+
+The six native selective rows in the first table and the statement that every original row retains its first re-pin are superseded by the table below. The initial original-row measurements and their old-pair controls loaded the path-graph helper definitions. The eight corrected sweep rows loaded the final skewed-triangle definitions.
+
+Tried: the first committed-tree `sh extensions/mork/check.sh` exited 1. The seat, Rust, lint and benchmark selftest lanes passed, but six native selective rows exceeded their unchanged 1% bands. Each repeated query window grew by about 14,400 instructions. The other thirty-three rows passed, including all eight sweep rows.
+
+Tried: SHA-256 comparison found identical bytes in all five engine shared objects between the new-pair checkout and the old-pair control. In the old-pair checkout, `bench.windowed("window-floor", 500, 3)` followed by `bench.windowed("native-match-first", 500, 3)`, with the final skewed-triangle workload and short WORKTREE header, returned floor [28774, 28774, 28774] and raw [1216941, 1216941, 1216941], or 1,188,167 net instructions. Load was 11.86, 12.65, 11.89.
+
+Tried: change only the new helper definitions in that old-pair workload back to the path-graph fixture, then run the same two calls. The floor stayed [28774, 28774, 28774]; raw counts became [1202665, 1202557, 1202509], whose net minimum is 1,173,735. Load was 10.03, 11.05, 11.38. The skewed fixture was then restored exactly. The 14,432-instruction difference isolates the added fixture definitions; the native query itself, dependency pair and compiled engine bytes stayed fixed. The exact native layout mechanism is not isolated.
+
+Decided: retain the first re-pin for the other twenty-five original rows and the final skew pins for all eight new rows. Correct these six native pins from the three valid samples already obtained by the failing committed-tree check. A single final-fixture old-pair control measures all six, with all three seats loaded, at one-minute loads 9.27 to 9.09. Five controls differ from the new pair by 16 instructions; native first-at-500 differs by 2,176 because its three valid controls are [1188167, 1186007, 1188167]. The minimum is retained. No band is widened and no historical envelope is collected.
+
+| row | first re-pin | final pin | final old-pair control | original-to-final |
+|---|---:|---:|---:|---:|
+| mork-native-match-first-2000 | 1,169,640 | 1,188,193 | 1,188,177 | +1.502% |
+| mork-native-match-first-500 | 1,173,793 | 1,188,183 | 1,186,007 | +0.671% |
+| mork-native-match-first-8000 | 1,175,703 | 1,190,093 | 1,190,077 | +0.670% |
+| mork-native-match-last-2000 | 1,184,603 | 1,198,993 | 1,198,977 | +0.665% |
+| mork-native-match-last-500 | 1,184,593 | 1,198,983 | 1,198,967 | +0.665% |
+| mork-native-match-last-8000 | 1,186,503 | 1,200,893 | 1,200,877 | +0.664% |
+
+| row | new load before / after | old control load before / after |
+|---|---|---|
+| mork-native-match-first-2000 | 11.90, 11.51, 11.43 / 11.90, 11.51, 11.43 | 9.27, 10.71, 11.15 / 9.09, 10.65, 11.12 |
+| mork-native-match-first-500 | 11.75, 11.47, 11.42 / 11.75, 11.47, 11.42 | 9.27, 10.71, 11.15 / 9.27, 10.71, 11.15 |
+| mork-native-match-first-8000 | 10.44, 11.20, 11.33 / 10.44, 11.20, 11.33 | 9.09, 10.65, 11.12 / 9.09, 10.65, 11.12 |
+| mork-native-match-last-2000 | 11.90, 11.51, 11.43 / 11.90, 11.51, 11.43 | 9.09, 10.65, 11.12 / 9.09, 10.65, 11.12 |
+| mork-native-match-last-500 | 11.75, 11.47, 11.42 / 11.75, 11.47, 11.42 | 9.27, 10.71, 11.15 / 9.27, 10.71, 11.15 |
+| mork-native-match-last-8000 | 10.44, 11.20, 11.33 / 10.44, 11.20, 11.33 | 9.09, 10.65, 11.12 / 9.09, 10.65, 11.12 |
+
+There are now eleven original rows outside their original bands. All eleven have same-workload old-pair controls: ten from the initial paired measurement and native first-at-2000 from the final-fixture control. The complete final numbers and their load strings are recorded beside the baseline rows.
+
+Tried: `sh check.sh petta parity examples plunit evidence provenance-pin-selftest llms llms-selftest build` exited 1 with only `llms` failing. The other eight requested lanes passed. The five findings were absent generated Node paths: `browser/`, `_runtime/`, `_runtime/`, `runtime.json` and `wasm/` at `extensions/node/llms.txt:308-310`. The package's existing `npm run prepare --silent` built those artifacts locally and exited 0; no Node source changed. The Python whole-suite MORK selection also exited 0: 30 passed, 4700 deselected, zero skips.
+
+The functional and provenance commits remain intact. This correction adds a baseline-and-journal commit followed by a provenance-only commit. The passed behavior lanes remain evidence for the unchanged source. Open: rerun the failed `mork-bench` and `llms` lanes on the corrected committed tree; record their exits and the final provenance validation in the handoff.
