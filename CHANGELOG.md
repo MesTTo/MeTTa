@@ -36,6 +36,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   return `False` without waiting for another writer, and rollback restores
   consumed occurrences. The spaces guide documents the existing operation;
   no additional removal head is needed.
+- `lib_thread` lifetime scopes through `(scope body)`, `metta.scope()` and
+  `m.scope()`. Exit joins children, failure cancels siblings, and cleanup
+  releases owned spaces, channels, pools, async workers, subscriptions and
+  held cursors or debuggers. Returned spaces
+  transfer to the enclosing scope; Python uses `scope.keep(value)`. Released
+  aliases refuse access. `metta.move_on_after(seconds)` adds a scope deadline.
+- Channels are bounded FIFO spaces, sharing their buffer with ordinary space
+  operations. `(capture expr)` returns the held expression and its evaluation
+  space through `evalc`.
 
 - Native and MORK skewed triangle benchmark rows at 100, 400, 1600 and
   3200 atoms, with complete answer-bag checks, retired-instruction pins and
@@ -1817,6 +1826,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 ### Fixed
 - The MORK guide's pin-journal link resolves to the repository source when
   the README is included in the website, allowing the documentation build.
+- Cancelling a running `lib_thread` future now signals its engine and waits
+  for an acknowledged stop. True means the body stopped; False means it had
+  already finished. Prolog loops stop at predicate safe points; foreign calls
+  must return before cancellation can be delivered.
+- The MORK README's journal citation now names its immutable repository
+  source, so including the README in the website no longer breaks the build.
 
 - The 0.8.0 regression where an integration installer's MeTTa library import
   was invisible inside the installer and survived its rollback. The function

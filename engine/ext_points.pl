@@ -1,5 +1,8 @@
 % Purpose: declare each engine extension seam, its direction and its cut
 %   semantics, and publish the predicates extensions and host bindings may call.
+% Guarantees: allocation, release and held-goal context hooks let lib_thread
+%   own scope lifetimes across host engines [tested: lib_thread_scope;
+%   commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
 % Guarantees:
 %   - evaluation context and ordered-match demand are published engine
 %     services [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
@@ -113,6 +116,13 @@
             % Events: the engine tells, every handler runs.
             atom_added/2,
             atom_removed/2,
+            space_created/1,
+            space_releasing/1,
+            space_released/1,
+            space_access/1,
+            space_dependency/2,
+            host_engine_created/1,
+            host_engine_released/1,
             catalog_row_changed/2,
             segment_committed/1,
             cache_policy_changed/1,
@@ -143,6 +153,7 @@
             extension_builtin/2,
             builtin_type_declaration/2,
             context_events/3,
+            engine_context/1,
             engine_emitted/1,
             foreign_capability/2,
             grounded_extra_type/2,
@@ -437,6 +448,27 @@ kind(automatic_cache_explanation/3, declaration).
 kind(atom_added/2, event).
 :- multifile atom_removed/2.
 kind(atom_removed/2, event).
+% Lifetime events are independent of atom writes and transaction observation.
+% Creation fires once at allocation; release first joins dependants, then
+% retires ownership after the space's own teardown succeeds.
+:- multifile space_created/1, space_releasing/1, space_released/1, space_access/1.
+kind(space_created/1, event).
+kind(space_releasing/1, event).
+kind(space_released/1, event).
+kind(space_access/1, event).
+
+% A closure captured on the caller and applied around a held engine's goal.
+% Every declared context composes; no host duplicates the context stack.
+:- multifile engine_context/1.
+kind(engine_context/1, declaration).
+
+:- multifile host_engine_created/1, host_engine_released/1.
+kind(host_engine_created/1, event).
+kind(host_engine_released/1, event).
+
+% Spaces that must remain live while a dependent space is returned from a scope.
+:- multifile space_dependency/2.
+kind(space_dependency/2, declaration).
 :- dynamic atom_added/2.
 :- dynamic atom_removed/2.
 

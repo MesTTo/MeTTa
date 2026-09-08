@@ -1,4 +1,8 @@
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
+% Guarantees: metta_host_hold/3 installs seam:engine_context/1 inside its
+%   held goal and announces its lifetime through seam:host_engine_created/1
+%   and seam:host_engine_released/1 [tested: lib_thread_scope,
+%   test_scope_closes_held_debuggers_and_retires_their_wrappers; commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
 % Guarantees: host cursors opened in a transaction evaluate on its thread;
 %   their rows commit or roll back with it, and stepping on another thread refuses
 %   [tested: host_hold; commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084].
@@ -623,8 +627,10 @@ metta_time_bound_exceeded(Limit) :-
 :- thread_local metta_host_held_position/3.
 
 metta_host_hold(Template, Goal, Handle) :-
+    findall(Context, seam:engine_context(Context), Contexts),
+    metta_host_context_goal(Contexts, Goal, Captured),
     (   current_transaction(_)
-    ->  findall(Template, Goal, Rows),
+    ->  findall(Template, Captured, Rows),
         thread_self(Thread),
         flag('$metta_host_hold_id', Id, Id + 1),
         Handle = held(Id, Thread),
@@ -632,8 +638,17 @@ metta_host_hold(Template, Goal, Handle) :-
                 assertz(metta_host_held_position(Id, Thread, 0)) ),
               Error,
               ( metta_host_hold_close(Handle), throw(Error) ))
-    ;   engine_create(Template, Goal, Handle)
-    ).
+    ;   engine_create(Template, Captured, Handle)
+    ),
+    catch(forall(seam:host_engine_created(Handle), true), Error,
+          ( metta_host_hold_close(Handle), throw(Error) )).
+
+% Capture on the caller, install inside the engine. Wrapping engine_next/2
+% would install context on the carrier instead [tested: lib_thread_scope;
+% commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
+metta_host_context_goal([], Goal, Goal).
+metta_host_context_goal([Context|Contexts], Goal, call(Context, Rest)) :-
+    metta_host_context_goal(Contexts, Goal, Rest).
 
 % Separate ordinal keys avoid copying the remaining list on every pull.
 metta_host_hold_rows([], _, _, _).
@@ -687,9 +702,11 @@ metta_host_hold_close(held(Id, Thread)) :- !,
     ->  metta_host_hold_discard(Id, Thread)
     ;   catch(thread_signal(Thread, metta_host_hold_discard(Id, Thread)),
               error(existence_error(thread, _), _), true)
-    ).
+    ),
+    forall(seam:host_engine_released(held(Id, Thread)), true).
 metta_host_hold_close(Engine) :-
-    catch(engine_destroy(Engine), error(existence_error(_, _), _), true).
+    catch(engine_destroy(Engine), error(existence_error(_, _), _), true),
+    forall(seam:host_engine_released(Engine), true).
 
 % A refused pull can close a host iterator on the wrong thread. Queue that
 % cleanup on its owner, including a suspended engine; dead owners have already

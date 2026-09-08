@@ -1,16 +1,103 @@
 <!--
 Purpose: document thread ownership, async execution, lifecycle rules, and serialization boundaries.
 Guarantees: public names in the boundary table match the narrow surface.
-[tested: npm run docs:build; commit=0179a14353a925115d545fc3ea0dc67eab4e4ecb]
+[tested: npm run docs:build; commit=c6e1198c490a824b96f6fc6e1c0622a542917024]
 -->
 
 # Threads, tasks, and what pickles
+
+## A scope owns its children
+
+```python
+with metta.scope() as scope:
+    scratch = metta.space()
+    mailbox = metta.channel(max=8)
+    pool = metta.parallel.pool(3)
+    futures = [pool.submit(lambda n: n * n, n) for n in range(3)]
+    returned = scope.keep(metta.space())
+
+assert [future.result() for future in futures] == [0, 1, 4]
+assert scratch.dropped
+returned.drop()
+```
+
+`metta.scope()` and `m.scope()` use lib_thread's ownership rows. Leaving the
+block waits for children, stops repeating timers, closes engines opened by
+streaming cursors and debuggers, then releases resources. A prepared query has no engine
+until its first pull. A body or child exception cancels siblings before the
+join. Cleanup attempts every resource; if a cleanup fails, `scope.close()`
+retries it. The thread that entered the scope owns `close()` and `keep()`.
+
+Spaces and pools that already existed remain borrowed. A submitted future
+belongs to the submitting scope even when its pool is borrowed. A newly
+created channel is a `Space`: `send` and `add` fill the same bounded FIFO;
+`recv`, `try_recv` and `remove` consume it. Leaving the scope drops its channel.
+Subscription handles created in the block are cancelled on exit, including
+subscriptions on borrowed spaces.
+
+An `AsyncMeTTa` created in the block owns its worker until scope exit. Requests
+and async subscriptions submitted through a borrowed worker belong to the
+scope; the worker remains available afterwards. Subscription cleanup also
+wakes consumers waiting on its async queue.
+
+`scope.keep(value)` transfers the spaces in that value after successful
+cleanup. An inner scope transfers to its parent; the outermost transfers to
+the caller. Inheritance and equation-home dependencies travel with a returned
+space, and a returned future retains spaces in its completed answers. Failure
+transfers nothing. A released scoped name is never recycled: every alias
+refuses subsequent use, including a newly opened handle of that name.
+
+```metta
+!(import! &self (library lib_thread))
+!(scope (collapse (await (spawn (superpose (1 1 2)))))) ; (1 1 2)
+!(scope (new-space)) ; the returned space survives and belongs to the caller
+!(capture (+ 1 2)) ; (evalc (+ 1 2) &self)
+```
+
+`capture` holds its argument and records its evaluation space. Evaluating the
+returned `evalc` value, including through `spawn`, uses that space. Python's
+existing output-capture manager retains its separate meaning.
+
+`future.cancel()` and MeTTa's `(cancel future)` wait for the cancellation
+receipt. True means the running body stopped; False means it already finished.
+An unknown future refuses instead of claiming completion. Scope cancellation
+attempts every child before reporting signal refusals; the scope retains its
+resources when close refuses, so `scope.close()` can retry.
+The signal targets the SWI engine, which checks at Prolog predicate safe
+points. Foreign code must return before that engine can acknowledge the stop.
+In a 300 ms Python `time.sleep` callback signalled after 20 ms, the measured
+receipt took another 280.086–280.152 ms. The same probe in a Prolog loop took
+0.071–0.087 ms. These observations are not scheduling guarantees.
+
+```python
+with metta.move_on_after(0.05) as scope:
+    m.eval("(long-running-prolog-computation)")
+```
+
+The deadline uses the same scope and timer service. A scope suppresses its own
+cancellation, including an explicit `scope.cancel()`. Engine call entry and return are checkpoints; arbitrary
+Python work and foreign calls cannot be preempted. Scope exit still waits for
+running executor callables. A scope cannot open inside a transaction, and
+asynchronous submission from a transaction inside a scope refuses before
+publication. The scope still cleans allocations whose database writes roll back.
+
+These contracts are exercised by `test_scopes.py`, `lib_thread_scope` and
+`lib_thread_cancellation`. The `with-handler choose par ...` reading is deferred
+until effect handlers provide resumable alternatives. Node's WASM engine has
+no lib_thread scheduler lanes, so it has no corresponding scope door.
+
+## Engine and host boundaries
 
 Python's own documentation states, per type, what is atomic, what locks, and what a caller must serialize. This page is that statement for MeTTa. Every claim on it is pinned by a named test in the suite, so the guarantees are enforced rather than intended.
 
 ## One process, one home engine
 
-A process holds one embedded Prolog runtime. The thread that first uses it holds the home engine, and every other bare thread's calls serialize on one lock around that engine, so calling any `Space` method from any thread is safe and correct, just not parallel (`test_bare_threads_share_the_home_engine_serialized`). The lock choice is per OS thread and decided once, when a thread attaches an engine, not per call.
+A process holds one embedded Prolog runtime. The thread that first uses it
+holds the home engine and serializes its calls. Janus supplies a private
+temporary engine for calls from a bare foreign thread; an attached worker
+keeps its private engine across calls. A blocked call on either kind of
+foreign thread therefore leaves unrelated engine calls runnable
+(`test_a_bare_thread_blocking_in_the_engine_does_not_freeze_other_calls`).
 
 ## State cells and compound updates
 
@@ -30,7 +117,7 @@ or token must cover both the read and the write.
 
 Real parallelism is a second engine, and there are four ways to get one:
 
-- `metta.parallel.engine_thread()` attaches an engine to the current thread for a block, releasing exactly what it attached (`test_engine_thread_owns_only_its_attachment`). Inside the block this thread's calls stop sharing the home lock; measured 1.94x, 3.90x and 7.26x at 2, 4 and 8 threads.
+- `metta.parallel.engine_thread()` attaches an engine to the current thread for a block, releasing exactly what it attached (`test_engine_thread_owns_only_its_attachment`). Calls reuse that engine across the block.
 - `m.pool(workers=n)` owns n threads that each hold their own engine (`test_each_worker_holds_a_distinct_engine`), proves genuine overlap with a barrier rather than a clock (`test_pool_runs_work_concurrently`), answers `map` in input order however workers finish, and reports every failure, one plainly and several as one `ExceptionGroup` in input order (`test_map_raises_every_failure_in_input_order`).
 - `metta.parallel.process_pool(workers=n, boot=...)` owns n PROCESSES that each boot an engine of their own and share nothing. It is the section below.
 - `m.parallel(...)` fans out INSIDE the engine through `concurrent_and/2`, one SWI thread per branch. Answers arrive in completion order, and there is deliberately no `inferences=` bound on it, because the counter counts the calling thread while the work runs in workers; an unenforceable bound is worse than an absent one.

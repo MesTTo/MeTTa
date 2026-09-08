@@ -178,3 +178,41 @@ against the real repository root while the generator's root was the temporary
 directory. Decided: the tests ask `facegen._named` for the spelling.
 
 Twins: 182 findings on the merged tree, the pins pass after this commit.
+
+### The structured-concurrency merge, on the door table
+
+Tried: `git merge-tree --write-tree petta feat/structured-concurrency` on the
+door-table trunk -> six conflicts: the changelog and the MORK README (both
+sides added), `_space.py` (the branch's `drop` body and its new `scope`
+method against the table's `_door_` bodies and generated regions), `aio.py`
+(the request class and its submit site, changed by both the transaction
+cursor and the scope package), the async divergence ledger (the table derives
+it from rows now; the branch added `scope` to the old dictionary), and the
+generated Space reference page. Decided: the branch's `scope` methods are the
+`_door_scope` bodies of two new rows, `space:scope` (sync and context tiers,
+`async_excluded` carrying the reason the ledger used to spell) and
+`context:scope`; the branch's `drop` documentation becomes the `space:drop`
+row's; the request class is the union of both sides' fields with the
+branch's `cancel()` as the one abandonment path and the scope token finished
+when submission fails; the divergence ledger is the table's; every projection
+is regenerated; the changelog and README are united. The branch's `_scope.py`
+is core and its destination in the layout plan is `_spaces/lifetime.py`.
+
+Tried: the twins lane on the merged tree -> 306 findings over 277, every
+twin up by ten to two hundred inferences, and two async tests red with the
+interrupt landing in the wrong place. Root cause: the branch's `Space._space`
+accessor asked the engine for the current scope on every access, one crossing
+per door call. Decided: the engine is asked only while the engine is calling
+in. `metta._callbacks`, the one boundary the engine crosses into Python, opens
+one frame per callback and answers `entered()`; `_scope.current()` consults
+the engine inside such a frame and the host's ContextVar otherwise, so a door
+access costs no engine call (500 name reads: the stats block's own 7
+inferences, exactly as an empty block). The facade's callbacks are the
+owners' exact objects behind that frame, which `__wrapped__` names.
+Measured on a pristine control of trunk 9a08e8cc2 against the merged tree in
+one fresh process each: a space mint 366 -> 398, ten adds 257 -> 277, ten
+matches 7 -> 7, a hundred name reads 7 -> 7, a drop 8504 -> 8548, ten runs
+3376 -> 3396 [command=ai-tmp/integrator-849a9e/probe-sc-cost.py on each
+tree]. What remains is the branch's allocation and lifetime bookkeeping, 32
+per mint, 2 per write, 44 per drop, none per read, and the twins are
+re-pinned with that mechanism in the commit that follows.

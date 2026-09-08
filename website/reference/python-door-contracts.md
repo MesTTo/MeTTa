@@ -115,7 +115,7 @@ Guarantees result type `NoneType` with the answer shape, effect, and determinism
 
 Implementation failures propagate, including failures from callees and providers.
 
-> Clear this space and release an anonymous name for reuse.
+> Clear this space and release its owned resources.
 >
 > Dropping retires every space-owned catalog declaration, including
 > algebra rows and their Python mirrors.
@@ -126,6 +126,8 @@ Implementation failures propagate, including failures from callees and providers
 > enters the anonymous pool. The engine-owned &self and &metta roots
 > refuse before any Python-side state changes; drop the caller's own
 > context or a named space instead.
+> Anonymous names outside a lifetime scope return to the pool. Scoped
+> names remain revoked, including after ownership transfers to a caller.
 > Subscriptions on the space cancel with it: a pooled name reused later
 > must not deliver to the old life's watchers. The handle itself dies
 > here, and dropping twice is a no-op, as closing twice is.
@@ -1939,6 +1941,36 @@ Implementation failures propagate, including failures from callees and providers
 > decorator twin.
 
 Evidence: `extensions/python/tests/ch11_python_as_a_notation/test_ladder.py::test_batch_composes_with_transaction`, `extensions/python/tests/ch11_python_as_a_notation/test_r5_unbuilt_doors.py::test_transaction_term_uses_empty_answer_rollback_law`, `extensions/python/tests/ch15_writing_transactions_and_worlds/test_saga.py::test_saga_refuses_transaction_speculation_and_batch_boundaries`.
+
+## space:scope
+
+```python
+scope() -> Scope
+```
+
+Kind: `scope`. Answer: `value`. Effect: `oracleIO`. Determinism: `det`.
+
+Tiers: `sync`, `context`.
+
+Implementation: `metta._space:Space._door_scope`, receiving `method`.
+
+Assumes receiver state `live`.
+
+| argument | MeTTa type | default | delivery | parameter kind |
+|---|---|---|---|---|
+
+Guarantees result type `(host-type metta._space Scope)` with the answer shape, effect, and determinism above.
+
+Implementation failures propagate, including failures from callees and providers.
+
+> Join children and release resources created in this block.
+>
+> ``with m.scope() as scope:`` owns newly minted spaces, channels,
+> futures, pools and subscriptions. ``scope.keep(value)`` transfers
+> spaces on successful exit. Child failure cancels siblings. Foreign
+> calls must return before an engine checkpoint can stop them.
+
+Evidence: `extensions/python/tests/ch17_concurrency_and_the_loop/test_scopes.py::test_scope_releases_mints_and_refuses_every_alias`, `extensions/python/tests/ch17_concurrency_and_the_loop/test_scopes.py::test_scope_joins_three_children_before_releasing_their_spaces`, `extensions/python/tests/ch17_concurrency_and_the_loop/test_scopes.py::test_scope_owner_confines_keep_and_close`.
 
 ## space:saga
 
@@ -5723,7 +5755,9 @@ Implementation failures propagate, including failures from callees and providers
 > The context OWNS what it mints and BORROWS what it opens by name:
 > :meth:`close` releases the anonymous mints and leaves ``&kb``,
 > ``&metta`` and every other named space exactly as it found them,
-> whether or not the handle is still referenced.
+> whether or not the handle is still referenced. Inside a lifetime
+> scope, that scope owns newly created spaces and their cleanup;
+> ``scope.keep(value)`` transfers returned spaces on successful exit.
 
 Evidence: `extensions/python/tests/ch04_spaces_and_matching/test_space.py::test_a_context_owns_and_releases_its_minted_home`, `extensions/python/tests/repository/test_door_rows.py::test_remote_storage_doors_use_the_declared_operation_protocol`.
 
@@ -5857,6 +5891,31 @@ Implementation failures propagate, including failures from callees and providers
 > Run one callable or term in an engine transaction.
 
 Evidence: `extensions/python/tests/ch11_python_as_a_notation/test_ladder.py::test_batch_composes_with_transaction`, `extensions/python/tests/ch11_python_as_a_notation/test_r5_unbuilt_doors.py::test_transaction_term_uses_empty_answer_rollback_law`, `extensions/python/tests/ch15_writing_transactions_and_worlds/test_saga.py::test_saga_refuses_transaction_speculation_and_batch_boundaries`.
+
+## context:scope
+
+```python
+scope() -> Scope
+```
+
+Kind: `scope`. Answer: `value`. Effect: `oracleIO`. Determinism: `det`.
+
+Tiers: `sync`.
+
+Implementation: `metta._space:MeTTa._door_scope`, receiving `method`.
+
+Assumes receiver state `live`.
+
+| argument | MeTTa type | default | delivery | parameter kind |
+|---|---|---|---|---|
+
+Guarantees result type `(host-type metta._space Scope)` with the answer shape, effect, and determinism above.
+
+Implementation failures propagate, including failures from callees and providers.
+
+> Own this block's children through the home space's library scope.
+
+Evidence: `extensions/python/tests/ch17_concurrency_and_the_loop/test_scopes.py::test_scope_owner_confines_keep_and_close`.
 
 ## context:register-prolog
 
