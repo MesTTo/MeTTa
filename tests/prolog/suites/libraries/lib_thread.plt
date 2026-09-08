@@ -587,6 +587,12 @@ test(using_an_unknown_channel_is_an_existence_error) :-
     catch(channel_recv(999999, _), error(existence_error(metta_channel, _), _),
           true).
 
+test(closing_a_closed_channel_is_an_existence_error,
+     error(existence_error(metta_channel, Channel))) :-
+    channel_new(Channel),
+    channel_close(Channel, true),
+    channel_close(Channel, _).
+
 test(empty_channel_receives_suspend_engines_instead_of_all_carriers,
      [ setup(metta_test_ensure_thread_surface),
        cleanup(( metta_test_cancel_all(Futures),

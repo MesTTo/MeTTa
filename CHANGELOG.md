@@ -9,6 +9,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `channel-close` on a closed or unknown channel raises
+  `existence_error(metta_channel, ...)` again, as `recv`, `send` and
+  `try-recv` do, rather than answering `True`. A scope releasing a channel
+  that is already gone stays silent, as before. The channel example under
+  `ch17` and its Python twin exercise both.
+
 - The door catalog follows the door registry: a package discovered or a row
   withdrawn after the first boot in a process is published to the live engine
   at once, through the seam's registration listeners, which now hear

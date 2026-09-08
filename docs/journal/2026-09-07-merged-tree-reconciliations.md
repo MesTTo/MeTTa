@@ -216,3 +216,37 @@ matches 7 -> 7, a hundred name reads 7 -> 7, a drop 8504 -> 8548, ten runs
 tree]. What remains is the branch's allocation and lifetime bookkeeping, 32
 per mint, 2 per write, 44 per drop, none per read, and the twins are
 re-pinned with that mechanism in the commit that follows.
+
+### After the structured-concurrency merge
+
+Tried: the twin re-pin on the merged tree -> 259 of 277 up, none down, no
+stored-content divergence, one twin unmeasured. The unmeasured one,
+`ch17/05-channels_pools_and_the_machine`, fails its claim on both sides:
+`sh test.sh examples/ch17-concurrency-and-the-loop/05-channels_pools_and_the_machine.metta`
+-> `is no-error, should metta_channel`. The branch rewrote `channel_close/2`
+as `( metta_channel(Id, _) -> metta_release_space(Id) ; true )`, so a second
+close answers True where the example, and the library before the merge,
+refuse with `existence_error(metta_channel, Id)`; `recv`, `send` and
+`try-recv` still refuse through `known_channel_/2`. The tolerant path the
+scope needs already exists as `seam:space_released/1`, and Python's
+`Channel.close()` is idempotent through `dropped` without calling the door;
+only the finaliser calls it, inside `except MettaError`. Decided: the door
+calls `known_channel_/2` before `metta_release_space/1`; a plt test pins the
+second close. The lib_thread suite passes 74, the example passes, the twin
+prices at 378,597 and is re-pinned; the other five lib_thread twins did not
+move, because the old body already called `metta_channel/2` once.
+
+Tried: attributing the largest re-pin, `ch17/06-the_prolog_rung_under_lib_thread`
+276,286 -> 405,148 -> per form on the pre-merge trunk 9a08e8cc2 and the merged
+tree in one fresh process each [command=ai-tmp/integrator-849a9e/probe-forms.py]:
+`!(import! &self (library lib_thread))` 207,493 -> 323,671 and closing a channel
+652 -> 5,408 (a channel is a space now, and a close is a full release); the
+other 37 forms moved by 34 to 785 each. The import cost is the branch's own:
+the structured-concurrency tip 5a45b0d89 reads 323,049 for the same import,
+and `use_module('lib/lib_thread/lib_thread')` alone reads 277,072 against
+167,710, over 2,759 lines against 2,102. That is compile-time expansion
+counted as inferences on every process that imports the library, since
+`lib/` holds no `.qlf` for a Prolog half. Open: compile library Prolog halves
+to QLF on first import the way `engine/qlf_boot.pl` does for engine units,
+which would remove the counted expansion from every import; measure per
+library first. The twin keeps its variance band of 1,500.
