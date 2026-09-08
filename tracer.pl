@@ -118,10 +118,18 @@
             metta_debug_end/0
           ]).
 
+% Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
+% Set the base before the clauses and their engine-dependent directives.
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L239; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+:- set_module(base(metta_engine)).
+
 %metta_trace_source/4 reads the values off a pairs list. Imported here rather
 %than into the engine module, because this is the only file that wants it and a
 %module of one's own is what makes that distinction possible to state.
 :- use_module(library(pairs), [pairs_values/2]).
+% Event accounting uses the term walker directly, including with autoload off.
+% [tested: sh check.sh prolog; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+:- use_module(library(terms), [term_size/2]).
 %call_with_time_limit/2 arrives through engine/metta.pl's platform census,
 %which loads library(time) as the `deadlines` capability and records its
 %absence rather than failing to load. Importing it here instead broke the

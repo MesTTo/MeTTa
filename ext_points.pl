@@ -201,6 +201,11 @@
             host_remove_hooks_idle/2
           ]).
 
+% Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
+% Set the base before the clauses and their engine-dependent directives.
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L239; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+:- set_module(base(metta_engine)).
+
 %%%% What kind of seam each extension point is %%%%
 %
 %Every seam below is declared multifile and then given a KIND on the line
@@ -1196,6 +1201,8 @@ kind(metta_host_hold_next/2, host_service).
 kind(metta_host_hold_chunk/3, host_service).
 kind(metta_host_hold_post/3, host_service).
 kind(metta_host_hold_close/1, host_service).
+% The host library roster reads the platform capabilities absent in this build.
+kind(metta_platform_absent/1, host_service).
 kind(metta_host_function_generation/1, host_service).
 kind(metta_host_function_callable_from/2, host_service).
 %Setting the engine-wide print-suppression flag. engine/filereader.pl decides
@@ -1651,6 +1658,8 @@ kind(current_working_dir/1, service).
 %reads the same table the engine reads, so a value the catalog gains is
 %accepted without editing the library.
 kind(metta_vocabulary_value/2, service).
+% Enumerate the same live vocabulary for a host capability declaration.
+kind(metta_vocabulary_values/2, service).
 %The members of a (some-of Vocab) argument, read by the library that compiles
 %them. The write door and the compiler read ONE parse of the row, so a member
 %the door admitted is the member the compiler sees, applied arguments and all
@@ -1789,8 +1798,24 @@ seam_home(Name/Arity, Home) :-
     (   defined_in(seam, Head)
     ->  Home = seam
     ;   metta_engine_module(Engine),
-        implemented_in(Engine, Head, Home)
+        (   implemented_in(Engine, Head, Home)
+        ->  true
+        ;   clause(kind(Name/Arity, _), _, Reference),
+            clause_property(Reference, file(File)),
+            source_file_property(File, module(Home)),
+            Home \== seam,
+            Home \== Engine,
+            defined_in(Home, Head)
+        )
     ).
+
+% A late library's private service is outside the engine's import chain until
+% publication. Its kind/2 clause identifies the source file, and SWI records
+% the module that file declares. Reading that record avoids a second ownership
+% registry that survives unload_file/1. clause_property(module/1) alone answers
+% `seam` for these multifile facts, so it cannot identify the declaring library.
+% [tested: metta_published_surface:a_seam_declared_in_a_later_file_is_exported,
+% metta_published_surface:unloading_a_late_seam_removes_its_home; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 
 %The definedness half is load-bearing and not a belt-and-braces check. Asking
 %implementation_module/1 about a name nothing has defined answers with the

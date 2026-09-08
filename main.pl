@@ -31,6 +31,14 @@
 %files in the same order, and used to spell the second one itself. That
 %header carries the staleness story, the read-only fallback, the flag
 %scoping and what the recovery does and does not cover.
+% The entry point owns its clauses. Only the demonstration's Prolog function
+% must reach the host tier so import_prolog_function/2 can register it.
+% [tested: test_the_bare_demo_runs_the_interop_example_and_backend_selftests;
+% commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+:- module(metta_main, [prologfunc/2]).
+:- set_module(base(metta_engine)).
+:- use_module(library(apply), [maplist/2, maplist/3]).
+:- use_module(library(listing), [listing/1]).
 :- ensure_loaded(qlf_boot).
 :- metta_qlf_boot:qlf_load_engine.
 

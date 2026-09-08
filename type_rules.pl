@@ -84,6 +84,11 @@
             retire_typing_rules_in/1
           ]).
 
+% Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
+% Set the base before the clauses and their engine-dependent directives.
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L239; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+:- set_module(base(metta_engine)).
+
 :- dynamic typing_rule_entry/7.
 :- meta_predicate typing_rule_transaction(0).
 :- meta_predicate with_typing_policy_stable(0).
