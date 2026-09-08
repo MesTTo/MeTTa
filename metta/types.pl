@@ -2,7 +2,7 @@
 % Guarantees: builtin_surface_governs_in/2 omits the prelude lookup for a
 %   known name in the base module and retains named-space shadowing
 %   [tested: prelude:a_named_space_shadows_a_prelude_name_at_another_arity;
-%   commit=WORKTREE].
+%   commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
 % Guarantees: Callable declaration readers and type witnesses use metta_runtime_type/2;
 %   get-type and stored atoms retain the written annotation
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
