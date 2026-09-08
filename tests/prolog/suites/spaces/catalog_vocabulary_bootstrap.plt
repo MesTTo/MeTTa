@@ -5,7 +5,7 @@
    Guarantees: the compiled seed preserves the ordered ordinary type atoms;
    changed metadata, schemas and watchers retain their observable behavior
    [tested: sh engine/test.sh suites/spaces/catalog_vocabulary_bootstrap.plt;
-   commit=WORKTREE].
+   commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
 */
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

@@ -2,7 +2,7 @@
 % seeded Python wire decoders.
 % Guarantees: indexed roots agree with the seeded decoder on generated wires
 % and refuse contradictory occurrences of one name
-% [tested: shared_decode_index; commit=WORKTREE].
+% [tested: shared_decode_index; commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
 
 :- consult('../../../../extensions/python/metta/shim.pl').
 

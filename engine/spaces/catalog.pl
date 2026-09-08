@@ -128,12 +128,12 @@
 % and transaction rollback cannot retain the membership. The list build indexes
 % every positive member once, so first reads of all members take linear work.
 % Relational calls retain metta_vocabulary_values/2 and memberchk/2 order [tested:
-% sh engine/test.sh suites/spaces/catalog_membership.plt; commit=WORKTREE].
+% sh engine/test.sh suites/spaces/catalog_membership.plt; commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
 % Guarantees: metta_publish_every_vocabulary_type/0 loads compiled physical
 % facts only for an unchanged initial catalog without type schemas, watchers,
 % existing type atoms or an &metta execution module. Other states use the
 % ordinary declaration door [tested: catalog_vocabulary_bootstrap;
-% commit=WORKTREE].
+% commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
 
 :- dynamic native_storage_module_cache/2.
 :- dynamic space_parametric/1.
@@ -869,7 +869,7 @@ metta_kind_spec(Head, Spec) :-
 %visibility in the caller's transaction, as source_lifecycle.pl documents for
 %withdraw_source_load/3. A bound clause/3 reference alone ignores visibility.
 %[tested: catalog_membership:transaction_erasure_of_a_committed_reference_is_visible;
-%commit=WORKTREE].
+%commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
 metta_catalog_ref_erased(Ref) :-
     (   current_transaction(_)
     ->  \+ catch(( clause(Head, true, Ref),
@@ -1144,7 +1144,7 @@ metta_publish_every_vocabulary_type :-
     % Prepare that lookup mode after bulk loading too: SWI creates the native
     % index on demand, otherwise the first program pays for all catalog rows
     % [tested: catalog_vocabulary_bootstrap:initial_publication_prepares_type_subject_lookup;
-    % commit=WORKTREE]. Choose a subject from the published data.
+    % commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c]. Choose a subject from the published data.
     (   '$metta_atoms:&metta':'&metta'(':', IndexedSubject, _)
     ->  once('$metta_atoms:&metta':'&metta'(':', IndexedSubject, _))
     ;   true

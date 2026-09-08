@@ -2,7 +2,7 @@
    interpreter, including directed matching, variable sharing and cuts.
    Guarantees: the comparison includes accepted and refused outcome queries
    and constrained rule names [tested: sh engine/test.sh
-   suites/typecheck/compiled_typing_rules.plt; commit=WORKTREE].
+   suites/typecheck/compiled_typing_rules.plt; commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
 */
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

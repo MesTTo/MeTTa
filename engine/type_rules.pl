@@ -3,7 +3,7 @@
 % Guarantees: the shipped decision clauses are compiled from typing_rule_entry/7
 %   and preserve its directed matching, variable sharing and first decision
 %   [tested: sh engine/test.sh suites/typecheck/compiled_typing_rules.plt;
-%   commit=WORKTREE].
+%   commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
 % Assumes:
 %   - current_metta_module/1 identifies the execution module whose user rules
 %     are in scope.
@@ -104,7 +104,7 @@
 %order. This is the declaration-to-clauses transformation used by SWI's record
 %library, confined to this module and this declaration shape.
 %[source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/record.pl#L541;
-%commit=WORKTREE].
+%commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
 term_expansion(typing_rule_entry(shipped, '*', Name, Family, Left, Right, Decision),
                [typing_rule_entry(shipped, '*', Name, Family, Left, Right, Decision),
                 (shipped_typing_rule(Family, Actual, Expected, Outcome, Name) :-

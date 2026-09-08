@@ -686,7 +686,7 @@ def build_baseline() -> dict:
 # are indexed by docs/journal/2026-09-08-what-the-waivers-were-paying-for.md.
 # Controls that disable observers or refusals price them; they are not shipped.
 # [source: docs/journal/2026-09-08-what-the-waivers-were-paying-for.md:515;
-# commit=WORKTREE].
+# commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
 WAIVERS = {
     "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/04-nilbc.metta": (
         "OPEN: repeated tuple type-witness derivation and dynamic rule-state"

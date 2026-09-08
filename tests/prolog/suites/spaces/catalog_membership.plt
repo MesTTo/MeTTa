@@ -5,7 +5,7 @@
    assertion-failure hook on return or exception.
    Guarantees: the membership and list readers agree on every tested word
    [tested: sh engine/test.sh suites/spaces/catalog_membership.plt;
-   commit=WORKTREE].
+   commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
 */
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
