@@ -15,6 +15,7 @@
 :- use_module('../identity').
 :- if(current_predicate(open_shared_object/3)).
 :- use_module(library(shlib), [load_foreign_library/1]).
+:- use_module(library(pairs), [pairs_values/2]).
 :- endif.
 
 % Enumerate each stored occurrence once while retaining its identity. A fixed

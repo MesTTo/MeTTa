@@ -9,6 +9,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The engine's tokens, receipts and vocabulary-seed units import the list,
+  ordered-set and pair predicates they call (`member/2`, `list_to_set/2`,
+  `ord_memberchk/2`, `pairs_values/2`), so a boot with autoload off no longer
+  raises an existence error on a fast-image load, a receipt apply or the
+  initial vocabulary publication; the engine's undefined-predicate check
+  (`check_prolog` in `engine/check.sh`) names them no more.
+
 - A thread worker behind a spawned or timer future settles that future
   exactly once whatever a cancellation signal interrupted. The settlement
   now runs in a cleanup handler with thread signals blocked, so a signal

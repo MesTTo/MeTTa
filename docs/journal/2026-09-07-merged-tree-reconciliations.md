@@ -445,3 +445,10 @@ resolver dropped no OVERRUN and no BUDGET: every twin's OVERRUN equals
 the trunk's, checked over all 277.
 Open: the four envelopes, re-observed by the sweep on the tree that ships;
 the library's lib_thread import cost that the two thread twins pay.
+Found after the merge: the engine's undefined-predicate check with autoload
+off (`check_prolog`, engine/check.sh) named four predicates no unit
+imported: `list_to_set/2` and `member/2` in the vocabulary seed (the branch's
+file and its reconciliation alike), `ord_memberchk/2` in receipts.pl and
+`pairs_values/2` in tokens.pl (both present on the trunk at da0e5755d, from
+the tokens merge). Each unit imports what it calls now; the check answers
+nothing beyond its one known name.

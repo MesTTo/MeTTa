@@ -21,6 +21,7 @@
    the per-row admission the guard proves unnecessary.
 */
 :- module(catalog_vocabulary_seed, [publish_seed/0]).
+:- use_module(library(lists), [member/2, list_to_set/2]).
 
 seed_rows(Rows) :-
     findall(Vocab, spaces:metta_catalog_preset([vocabulary, Vocab|_]), Names0),
