@@ -5,11 +5,12 @@
    before this file was loaded. Load through
    spaces:metta_publish_every_vocabulary_type/0.
    Guarantees: seed_rows/1 depends on metta_catalog_preset/1 and the shipped
-   name mapping, never on live catalog rows; seed_payload/1 is those rows
+   name mapping, never on live catalog rows (a `vocabulary-member` row is a
+   live addition and has no preset, so the recipe reads none); seed_payload/1 is those rows
    compiled, and publish_seed/0 stores them in the recipe's order through
    spaces:add_sexp_in/5, so every row carries a token this process minted and
    remains a removable dynamic clause; the published rows equal ordinary
-   publication in order [tested: catalog_vocabulary_bootstrap; commit=b4341ae382c48ef225f4a52e566af6a9a71757c4].
+   publication in order [tested: catalog_vocabulary_bootstrap; commit=WORKTREE].
    Owns resources: dynamic &metta clauses, removed by the ordinary catalog
    mutation doors or released with the Prolog process.
    Fails when: loaded directly; it bypasses admission and row-change observers.
@@ -34,9 +35,8 @@ seed_row(Vocab, Row) :-
     -> Type = Written
     ;  spaces:metta_camel_name(Vocab, Type) ),
     (   Row = [':', Type, 'Type']
-    ;   ( spaces:metta_catalog_preset([vocabulary, Vocab|Members]),
-          member(Member, Members)
-        ; spaces:metta_catalog_preset(['vocabulary-member', Vocab, Member]) ),
+    ;   spaces:metta_catalog_preset([vocabulary, Vocab|Members]),
+        member(Member, Members),
         Row = [':', Member, Type]
     ;   spaces:metta_catalog_preset(['vocabulary-order', Vocab|Chain]),
         seed_order_edge(Chain, Row)
