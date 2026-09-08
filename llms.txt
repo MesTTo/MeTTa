@@ -20,7 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 317 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 318 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 30 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
@@ -700,6 +700,16 @@ file is the source spelling, which upstream's parser refuses. The `MeTTa` contex
 so `m += lib.dict`, `len(m)`, `atom in m`, `m[pattern]` and `del m[...]`
 work on the process home directly; `bool(m)` is always True, since a space
 is a handle rather than a value that dwindles.
+
+On a native space, `subtract-atom` is the non-blocking single-occurrence
+remover: it returns `False` for a current miss without waiting for a later
+writer, including inside `transaction`. A rollback restores the occurrence.
+A structured pattern may contain variables; a bare variable is refused with
+the remedy to name a pattern or use `remove-atom` to drain. Python's
+`space.remove(atom)` and `space -= atom` expose this grain for a named atom
+or structured pattern. Subtraction uses the existing storage lookup and
+removal paths; it does not install a subscription. A foreign provider's
+removal runs synchronously and determines its own waiting behavior.
 
 `metta.spaces` composes spaces without copying: `union(*spaces)` reads a set as
 one, `overlay(front, back)` reads both and writes to the front, `readonly(s)`

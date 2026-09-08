@@ -136,6 +136,23 @@ about absence, and each follows its own Python spelling:
 
 MeTTa spells the pair `subtract-atom` and `remove-atom`.
 
+On a native space, `subtract-atom` and `remove()` return `False` for a
+missing occurrence without waiting for a later writer. They can run inside
+`transaction`; a rollback restores any occurrence they consumed. For example,
+after storing `(job ready)` twice, `(transaction (subtract-atom &self
+(job ready)))` answers `True` and leaves one copy. A subsequent
+`(transaction (subtract-atom &self (job missing)))` answers `False` and
+leaves that copy alone. The executable
+[transactional subtraction example](https://github.com/MesTTo/MeTTa-Kernel/blob/petta/examples/ch15-writing-transactions-and-worlds/06-single_occurrence_subtraction.metta)
+also checks rollback.
+
+Subtraction uses the existing storage lookup and removal paths and installs
+no subscription. A structured pattern may contain variables, but MeTTa's
+bare-variable argument is refused because it names no single occurrence.
+Name a pattern, or use `remove-atom` to drain. A foreign provider's removal
+is a synchronous callback, so its own implementation determines whether it
+waits.
+
 The in-place operators split by what their operand means, and `+=` and `-=`
 read that operand the SAME way, so the fact stream one stores, the other
 subtracts. One built atom is one atom, and a tuple of scalars lifts into one
