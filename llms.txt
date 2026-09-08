@@ -2349,6 +2349,16 @@ a developer's box, where a PMU another session holds is not a code change, and
 into an error and exit 1 where `CI=true`, because a runner that cannot count
 is a broken runner. The refusal names `/proc/sys/kernel/perf_event_paranoid`
 and the container knob rather than sending a reader into the harness.
+One ROW can be refused while its neighbours decide, which is a different thing
+from a lane that measured nothing. A case whose measured region contains the
+engine load reads the LENGTH of the checkout's path, about 0.045% per
+character, so its instruction pin is true of one location: `engine/bench.pl`
+declares `bench_whole_process(boot)`, `engine/bench-baseline.json` records
+`measurement.checkout_path_length`, and `engine/bench.py` reports such a row
+instead of comparing it, and declines to re-pin it, from a checkout of another
+length. `extensions/cmetta/benchmarks/bench.py` holds the same fact for its own
+boot row. Every other row's window opens inside an already-booted process and
+decides from anywhere.
 `metta.testing.SpaceMachine` is the multiset laws of a space as a hypothesis
 state machine, pointed at your own store: `SpaceMachine.for_(factory)` answers
 the machine bound to a factory that returns a FRESH space it may write into,

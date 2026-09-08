@@ -9,10 +9,11 @@
 #   host's cost added to it and a reader or translator regression arrived
 #   diluted by whatever the harness spent around it.
 # Assumes:
-#   - swipl, and a Python that can import metta.testing from
-#     extensions/python. The comparison protocol, the two-sided band, the
-#     configuration stamp and the atomic re-pin are that shared harness's and
-#     are deliberately not reimplemented here [source: DEVELOPING.md:149-151].
+#   - swipl, and a Python that can import metta_benchmarking, the distribution
+#     under extensions/python/ext/. The comparison protocol, the two-sided
+#     band, the configuration stamp and the atomic re-pin are that shared
+#     harness's and are deliberately not reimplemented here
+#     [source: DEVELOPING.md:149-151].
 #   - engine/reader.so, engine/writer.so and engine/json_codec.so are built,
 #     and so are the chapter 19 C example artifacts, because the baseline's
 #     stamp is benchmarks/configuration.py's four keys and one of them reads
@@ -27,7 +28,7 @@
 #   - a regression beyond a case's allowance exits nonzero naming the case,
 #     and so does an improvement left unpinned, because a stale-high pin masks
 #     regressions up to its own margin
-#     [source: extensions/python/metta/benchmarking.py, _compare_counter].
+#     [source: extensions/python/ext/metta-benchmarking/metta_benchmarking.py, _compare_counter].
 #   - a missing toolchain exits 0 with a note naming the step, the same split
 #     engine/build.sh draws; a PRESENT toolchain that measures a regression
 #     exits nonzero.
@@ -71,13 +72,19 @@ suite will not run" >&2
     exit 0
 fi
 
-# metta.testing is the comparison protocol. A tree whose Python dependencies
-# are not installed says which step is missing rather than failing for a reason
-# that is not the engine.
+# metta_benchmarking is the comparison protocol, and it is what bench.py
+# imports: a guard naming any other module proves nothing about this run, which
+# is how three sibling lanes came to die on an ImportError past a green guard.
+# A tree whose Python dependencies are not installed says which step is missing
+# rather than failing for a reason that is not the engine.
 if ! METTA_BENCH_HARNESS="$ROOT/extensions/python" bounded "$PY" -c \
-        'import os, sys; sys.path.insert(0, os.environ["METTA_BENCH_HARNESS"]); import metta.testing' \
+        'import os, sys
+sys.path.insert(0, os.environ["METTA_BENCH_HARNESS"])
+import _workspace
+_workspace.on_path()
+import metta_benchmarking' \
         >/dev/null 2>&1; then
-    echo "engine/bench.sh: cannot import metta.testing; run 'uv sync' in \
+    echo "engine/bench.sh: cannot import metta_benchmarking; run 'uv sync' in \
 extensions/python. The engine benchmark suite will not run" >&2
     exit 0
 fi

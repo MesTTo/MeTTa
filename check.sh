@@ -11,7 +11,7 @@
 #   softened gate: nothing here is silenced, everything is printed.
 #
 #   THREE WORDS, not two. A lane exiting 125 MEASURED NOTHING and reads
-#   `skipped` rather than `ok`: 125 is what metta.benchmarking names
+#   `skipped` rather than `ok`: 125 is what metta_benchmarking names
 #   PERF_CONTROL_REFUSED, what bounded.sh refuses with when the process that
 #   started a command had already exited, and what timeout(1) and
 #   `git bisect run` both read as a failure in the wrapper rather than in the
@@ -231,7 +231,7 @@ run() {
         # 125 is this tree's one word for "this run says nothing about the
         # tree", and the summary needs it as much as the lane's own output
         # does. bounded.sh refuses with it when the process that started a
-        # command had already exited, metta.benchmarking names the same number
+        # command had already exited, metta_benchmarking names the same number
         # PERF_CONTROL_REFUSED for a measured window that never opened, and
         # timeout(1) and `git bisect run` both read it as a failure in the
         # wrapper rather than in the command.

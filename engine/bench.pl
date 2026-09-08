@@ -107,6 +107,24 @@ bench_case(match,          query,    600).
 bench_case('match-skew',   query,     20).
 bench_case(evaluate,       reduction, 50000).
 
+% bench_whole_process(Name). Whether a case's measured region CONTAINS the
+% engine load, and so scales with the length of THIS CHECKOUT'S path: the load
+% resolves a path for every file it reads and a longer prefix multiplies across
+% all of them, so the same tree at a longer path retires more instructions with
+% nothing about the engine changed. engine/bench-baseline.json's
+% measurement.checkout_location measures it at 2.51% between a 72-character
+% worktree and the 30-character repository root, with the inference count
+% identical in both. engine/bench.py reads this field and REFUSES such a row's
+% instruction comparison from a checkout of another length rather than
+% reporting the offset as a regression; extensions/cmetta/benchmarks/bench.py
+% carries the same fact under the same name for the same row.
+%
+% boot alone. Every other case's window opens inside an already-booted process,
+% which is why parse and parse-prolog read 0.006% and 0.002% apart between the
+% repository root and a worktree 23 characters longer
+% [source: engine/bench-baseline.json benchmarks.parse.wave3_merge_repin_comment].
+bench_whole_process(boot).
+
 % The corpus text the cases read. engine/bench.py digests exactly this list
 % into the baseline's configuration stamp.
 bench_source('tests/data/prelude-spec.metta').
@@ -495,7 +513,7 @@ bench_run(Case) :-
 %bounded.sh refuses with it when the process that started a command had
 %already exited. metta_benchmarking names the same number PERF_CONTROL_REFUSED
 %and turns it into a named skip [source: coreutils timeout(1) EXIT STATUS;
-%git-bisect(1), "run <cmd>"; extensions/python/metta/benchmarking.py,
+%git-bisect(1), "run <cmd>"; extensions/python/ext/metta-benchmarking/metta_benchmarking.py,
 %PERF_CONTROL_REFUSED].
 bench_unmeasured(context(_, Message-Cause)) :-
     format(user_error, "bench.pl: ~w (~w)~n", [Message, Cause]),
@@ -523,7 +541,12 @@ bench_measured(Case) :-
 % second copy of the case table or the workload list.
 bench_describe :-
     forall(bench_case(Name, Unit, Operations),
-           format("metta-bench-case name=~w unit=~w operations=~w~n",
-                  [Name, Unit, Operations])),
+           ( (   bench_whole_process(Name)
+             ->  Whole = true
+             ;   Whole = false
+             ),
+             format("metta-bench-case name=~w unit=~w operations=~w \c
+whole_process=~w~n",
+                    [Name, Unit, Operations, Whole]) )),
     forall(bench_source(Relative),
            format("metta-bench-source path=~w~n", [Relative])).

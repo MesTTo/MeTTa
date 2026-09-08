@@ -273,7 +273,7 @@ class CounterUnavailableError(RuntimeError):
     """This box would not count, so nothing measured here says the tree moved.
 
     The seat benchmarks state the same rule in their own harness
-    [source: extensions/python/metta/benchmarking.py, MeasurementRefusedError];
+    [source: extensions/python/ext/metta-benchmarking/metta_benchmarking.py, MeasurementRefusedError];
     this lane runs from the repository root, where that package is not on the
     path, so it carries the rule rather than importing it.
     """
