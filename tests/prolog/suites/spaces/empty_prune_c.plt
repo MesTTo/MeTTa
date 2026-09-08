@@ -55,7 +55,7 @@
 % `:- initialization(main, main).` fires on consult and prints its demo
 % into the test output. The suite imports its own CLP(FD) operators and hooks
 % [tested: empty_prune_c_differential:a_residual_constraint_answers_through_both_arms;
-% commit=WORKTREE].
+% commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 :- use_module(library(clpfd)).

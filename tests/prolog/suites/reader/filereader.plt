@@ -1322,7 +1322,7 @@ test(registering_a_batch_of_names_answers_what_asking_one_by_one_does) :-
     %Ask both strategies from filereader. Qualifying the current_predicate/1
     %goal includes inherited predicates in this lookup; qualifying only its
     %Name/Arity argument enumerates a different set. Both arms must read the
-    %same module chain [tested: filereader_signature_registration:registering_a_batch_of_names_answers_what_asking_one_by_one_does; commit=WORKTREE].
+    %same module chain [tested: filereader_signature_registration:registering_a_batch_of_names_answers_what_asking_one_by_one_does; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
     findall(Name-Arity,
             ( member(Name, Names),
               filereader:current_predicate(Name/Arity),

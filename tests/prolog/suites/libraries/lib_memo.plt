@@ -48,7 +48,7 @@ memo_setting(memo_float_precision).
 %dynamic predicates, which live in that library's module now; asserting them in
 %`user` would build a second set of facts the library never reads, and the
 %eviction tests would drive the shipped defaults instead of these
-%[tested: memo_eviction_output; commit=WORKTREE].
+%[tested: memo_eviction_output; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 memo_setting_save :-
     forall(memo_setting(Name),
            ( Fact =.. [Name, Value],

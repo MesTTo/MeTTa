@@ -473,7 +473,7 @@ check_specialized_undo(Space, Path) :-
 :- end_tests(lib_import_lifecycle).
 
 % The library-import door preserves the process-wide host tier.
-% [tested: lib_import:use_module_imports_into_the_shared_host_tier; commit=WORKTREE]
+% [tested: lib_import:use_module_imports_into_the_shared_host_tier; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 :- begin_tests(lib_import).
 
 test(use_module_imports_into_the_shared_host_tier) :-

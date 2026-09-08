@@ -2,7 +2,7 @@
 % Guarantees:
 %   - its plunit_module_plain_helper/1 replaces plain_alpha.pl's when both are
 %     consulted into one module
-%     [tested: engine_modules:a_plain_pair_still_replaces_one_helpers_clauses; commit=WORKTREE]
+%     [tested: engine_modules:a_plain_pair_still_replaces_one_helpers_clauses; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

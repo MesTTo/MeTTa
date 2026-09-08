@@ -73,7 +73,7 @@ test(failing_test_is_catchable,
 %system predicate; with the engine in a module of its own, `user` sees SWI's
 %assert/2 again and the engine's is exported nowhere -- deliberately, since a
 %Prolog author writing assert(Clause, Ref) means SWI's
-%[tested: metta_assertions:failing_assert_is_catchable; commit=WORKTREE].
+%[tested: metta_assertions:failing_assert_is_catchable; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 test(failing_assert_is_catchable,
      [throws(error(metta_assertion_failed(fail, _, _), _))]) :-
     metta_engine:assert(fail, _).
@@ -1381,7 +1381,7 @@ test(translated_success_leaves_the_query_variable_unbound) :-
 
 % These tests construct residual CLP(FD) variables. Import their operators in
 % this unit, which no longer inherits an incidental import into user.
-% [tested: metta_answer_prune; commit=WORKTREE]
+% [tested: metta_answer_prune; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 :- use_module(library(clpfd)).
 :- use_module('../../../../engine/spaces',
               [metta_prune_empty/2, metta_prune_empty_answers/2]).

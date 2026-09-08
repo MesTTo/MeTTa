@@ -205,7 +205,7 @@ GUARANTEE_SOURCES = (
     # own headers, and 271 of them across 50 files went unread.
     "tests/prolog/suites/*/*.plt",
     # The module-boundary fixtures carry their own test-backed contracts
-    # [source: tests/prolog/suites/seams/engine_modules.plt; commit=WORKTREE].
+    # [source: tests/prolog/suites/seams/engine_modules.plt; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
     "tests/prolog/module_fixtures/*.pl",
     # Diagnostic probes carry measured claims even when no gate runs them.
     "tests/prolog/probes/*.pl",

@@ -1,7 +1,7 @@
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
 % Guarantees: returned cursor budgets retain their private helper owner when
 %   a host executes them in another module
-%   [tested: engine_modules:returned_budgets_keep_their_private_helpers; commit=WORKTREE].
+%   [tested: engine_modules:returned_budgets_keep_their_private_helpers; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 % Guarantees: verify-cardinality checks annotated calls while plain calls
 %   retain their generated goal [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.

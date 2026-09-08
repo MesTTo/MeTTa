@@ -7,35 +7,35 @@
 % Guarantees:
 %   - assertzPredicate/2, assertaPredicate/2 and retractPredicate/2 keep host
 %     clauses in user, where consult_global/1 loads plain host files
-%     [tested: asserted_host_clauses_keep_the_host_module; commit=WORKTREE]
+%     [tested: asserted_host_clauses_keep_the_host_module; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 %   - two libraries may define a helper of ONE name without replacing each
 %     other, and neither helper is visible outside its own module
-%     [tested: two_libraries_may_define_one_helper_name; commit=WORKTREE]
+%     [tested: two_libraries_may_define_one_helper_name; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 %   - that is not vacuous: the same two files WITHOUT module declarations,
 %     consulted into one module, leave exactly one helper -- the second file's
-%     [tested: a_plain_pair_still_replaces_one_helpers_clauses; commit=WORKTREE]
+%     [tested: a_plain_pair_still_replaces_one_helpers_clauses; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 %   - engine/metta.pl's autoload(library(uuid)) and
 %     lib/lib_tabling/lib_tabling.pl's autoload(library(wfs), [call_delays/2])
 %     are two tables in two modules and neither replaces the other, and a third
 %     library declaring one of its own disturbs neither
 %     [tested: the_engines_autoload_table_survives_a_librarys,
-%     a_librarys_autoload_table_is_its_own; commit=WORKTREE]
+%     a_librarys_autoload_table_is_its_own; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 %   - that is not vacuous either: two plain files consulted into one module
 %     leave one table, the second file's
-%     [tested: a_plain_pair_still_replaces_one_autoload_table; commit=WORKTREE]
+%     [tested: a_plain_pair_still_replaces_one_autoload_table; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 %   - `user` holds no predicate any file under engine/ or lib/ DEFINES
-%     [tested: user_holds_nothing_the_engine_defines; commit=WORKTREE]
+%     [tested: user_holds_nothing_the_engine_defines; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 %   - the engine core exports every MeTTa builtin head it implements, bar the
 %     two SWI already has in `user`
-%     [tested: every_core_builtin_head_is_exported; commit=WORKTREE]
+%     [tested: every_core_builtin_head_is_exported; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 %   - no shipped module holds a predicate of its own under a name the engine
 %     owns, except the module-local names recorded in shadow_by_design/2
-%     [tested: no_shipped_module_shadows_a_name_the_engine_owns; commit=WORKTREE]
+%     [tested: no_shipped_module_shadows_a_name_the_engine_owns; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 %   - the operator guards read the ENGINE's namespace, so a name a library lent
 %     the engine at one or two arguments is still told from a MeTTa call
-%     [tested: an_operator_lent_name_is_seen_in_the_engines_own_namespace; commit=WORKTREE]
+%     [tested: an_operator_lent_name_is_seen_in_the_engines_own_namespace; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 %   - the execution chain is the one the design settled
-%     [tested: the_chain_is_self_then_prelude_then_engine_then_user; commit=WORKTREE]
+%     [tested: the_chain_is_self_then_prelude_then_engine_then_user; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -308,7 +308,7 @@ test(user_holds_nothing_the_engine_defines) :-
 %
 %   Exempt SWI's hooks in user. The census checks their multifile declarations
 %   and rejects every other engine or library definition in that module.
-%   [tested: engine_modules:user_holds_nothing_the_engine_defines; commit=WORKTREE]
+%   [tested: engine_modules:user_holds_nothing_the_engine_defines; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 swi_hook_in_user(exception/3,
                  'SWI calls user:exception(undefined_predicate, ...) before it \c
                   reports an unknown procedure, which is how a foreign space \c
@@ -426,7 +426,7 @@ shadow_by_design('$autoload'/3,
                   lib/lib_tabling/lib_tabling.pl declares library(wfs), and \c
                   neither replaces the other any more').
 % SWI's table/1 expansion emits these predicates into each declaring module.
-% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/tabling.pl#L1220; commit=WORKTREE]
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/tabling.pl#L1220; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 shadow_by_design('$tabled'/2, 'SWI records table declarations per module').
 shadow_by_design('$table_mode'/3, 'SWI records table modes per module').
 shadow_by_design(union/3,

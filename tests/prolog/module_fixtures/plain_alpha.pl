@@ -6,7 +6,7 @@
 % Guarantees:
 %   - consulted into one module beside plain_beta.pl, exactly one
 %     plunit_module_plain_helper/1 survives, and it is the second file's
-%     [tested: engine_modules:a_plain_pair_still_replaces_one_helpers_clauses; commit=WORKTREE]
+%     [tested: engine_modules:a_plain_pair_still_replaces_one_helpers_clauses; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

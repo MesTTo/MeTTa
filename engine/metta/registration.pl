@@ -1184,7 +1184,7 @@ builtin_implementation('import!'/2, prolog(engine)).
 %prolog(engine) while every library loaded into the same module the engine did,
 %and the hook check -- implementation_module/1 against the named module -- is
 %what caught the difference the moment the library declared one of its own
-%[tested: builtin_facets:the_live_registry_is_complete_in_both_directions; commit=WORKTREE].
+%[tested: builtin_facets:the_live_registry_is_complete_in_both_directions; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 builtin_implementation('git-import!'/3, prolog(lib_gitimport)).
 builtin_implementation('git-import!'/4, prolog(lib_gitimport)).
 builtin_implementation('git-import!'/2, prolog(lib_gitimport)).

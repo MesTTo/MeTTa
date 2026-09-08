@@ -137,7 +137,7 @@ metta_test_deadline_cleanup(Task, Engine, Done) :-
 
 % An undefined wrapper target is accepted by SWI. Check the real dispatcher
 % directly so a misplaced barrier fails without waiting for its message.
-% [tested: lib_thread:timer_barrier_wraps_the_workers_dispatcher; commit=WORKTREE]
+% [tested: lib_thread:timer_barrier_wraps_the_workers_dispatcher; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 test(timer_barrier_wraps_the_workers_dispatcher,
      [ cleanup(metta_test_remove_timer_barrier(unused_release)) ]) :-
     metta_test_install_timer_barrier(unused_reached, unused_release),

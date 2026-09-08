@@ -5,10 +5,10 @@
 % Guarantees: declared determinism is applied to the predicate's implementation
 %   module, including plain host files reached through the core's base chain
 %   [tested: test_a_declared_det_function_that_leaks_a_choice_point_raises,
-%   test_the_declaration_is_reported_beside_the_redos; commit=WORKTREE].
+%   test_the_declaration_is_reported_beside_the_redos; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 % Guarantees: assertzPredicate/2, assertaPredicate/2 and retractPredicate/2
 %   modify host clauses in user, as consult_global/1 does
-%   [tested: engine_modules:asserted_host_clauses_keep_the_host_module; commit=WORKTREE].
+%   [tested: engine_modules:asserted_host_clauses_keep_the_host_module; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 % Guarantees: readying an extension's space checks every word its
 %   seam:foreign_capability/2 clauses declare against the catalog's
 %   (vocabulary provider-capability ...) row, which is the door a Prolog
@@ -535,7 +535,7 @@ ready_extension_space(Name, Options, Space) :-
 % keeps list_undefined clean before the kit loads, without creating an empty
 % engine predicate that shadows the library's export. The clause-count guard
 % in ensure_conformance_kit/0 still distinguishes a declaration from a loaded kit.
-% [tested: lib_conformance; commit=WORKTREE]
+% [tested: lib_conformance; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 :- dynamic lib_conformance:metta_check_space_provider/2.
 
 extension_capability_hook(match, seam:foreign_match/3).

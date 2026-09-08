@@ -27,7 +27,7 @@
 
 :- use_module(library(shlib)).
 % Resolve the artifact beside this provider with global autoload disabled
-% [tested: sh check.sh no-autoload; commit=WORKTREE].
+% [tested: sh check.sh no-autoload; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 :- use_module(library(filesex), [directory_file_path/3]).
 :- prolog_load_context(directory, Dir),
    directory_file_path(Dir, 'cstore.so', Artefact),

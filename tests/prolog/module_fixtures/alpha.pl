@@ -3,7 +3,7 @@
 %   helper of the SAME name with a different answer.
 % Guarantees:
 %   - plunit_module_answer/1 answers alpha, through a helper this module does
-%     not export [tested: engine_modules:two_libraries_may_define_one_helper_name; commit=WORKTREE]
+%     not export [tested: engine_modules:two_libraries_may_define_one_helper_name; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

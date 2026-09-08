@@ -492,7 +492,7 @@ unexported_reaches(Unexported) :-
 %   already imported from `system` -- raises
 %   `No permission to import metta_engine:assert/2 into user (already imported
 %   from system)` and the boot ends there
-%   [tested: engine_modules:every_core_builtin_head_is_exported; commit=WORKTREE].
+%   [tested: engine_modules:every_core_builtin_head_is_exported; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 %
 %   The reach is legitimate and needs no export: an engine subsystem resolves
 %   it through its base, which is the engine's module, the same way it
@@ -508,7 +508,7 @@ unexportable(metta_engine, exists_file/1,
 
 % Every module with a source under engine/, including the core, has an export
 % contract. The two system-name exceptions above apply only to the core.
-% [tested: sh check.sh layering; commit=WORKTREE]
+% [tested: sh check.sh layering; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 subsystem_module(Module) :-
     module_property(Module, file(File)),
     engine_directory(Directory),

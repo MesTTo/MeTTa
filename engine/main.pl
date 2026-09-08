@@ -34,7 +34,7 @@
 % The entry point owns its clauses. Only the demonstration's Prolog function
 % must reach the host tier so import_prolog_function/2 can register it.
 % [tested: test_the_bare_demo_runs_the_interop_example_and_backend_selftests;
-% commit=WORKTREE]
+% commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 :- module(metta_main, [prologfunc/2]).
 :- set_module(base(metta_engine)).
 :- use_module(library(apply), [maplist/2, maplist/3]).

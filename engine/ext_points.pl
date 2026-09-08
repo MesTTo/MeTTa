@@ -191,7 +191,7 @@
 
 % Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
 % Set the base before the clauses and their engine-dependent directives.
-% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L239; commit=WORKTREE]
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L239; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 :- set_module(base(metta_engine)).
 
 %%%% What kind of seam each extension point is %%%%
@@ -1759,7 +1759,7 @@ seam_home(Name/Arity, Home) :-
 % registry that survives unload_file/1. clause_property(module/1) alone answers
 % `seam` for these multifile facts, so it cannot identify the declaring library.
 % [tested: metta_published_surface:a_seam_declared_in_a_later_file_is_exported,
-% metta_published_surface:unloading_a_late_seam_removes_its_home; commit=WORKTREE]
+% metta_published_surface:unloading_a_late_seam_removes_its_home; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 
 %The definedness half is load-bearing and not a belt-and-braces check. Asking
 %implementation_module/1 about a name nothing has defined answers with the

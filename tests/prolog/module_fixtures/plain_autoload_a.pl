@@ -4,7 +4,7 @@
 %   is the defect the module boundary removes.
 % Guarantees:
 %   - after plain_autoload_b.pl is consulted into the same module, this file's
-%     row is gone [tested: engine_modules:a_plain_pair_still_replaces_one_autoload_table; commit=WORKTREE]
+%     row is gone [tested: engine_modules:a_plain_pair_still_replaces_one_autoload_table; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

@@ -34,7 +34,7 @@
 %by creating a LOCAL predicate that shadows the import, so the plant would be
 %invisible to the very validator it is planted for. It worked while the engine
 %loaded into `user` and the two were the same predicate
-%[tested: builtin_facets; commit=WORKTREE].
+%[tested: builtin_facets; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 with_assertions([], Goal) :- call(Goal).
 with_assertions([Fact|Facts], Goal) :-
     fact_home(Fact, Home),

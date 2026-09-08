@@ -4,7 +4,7 @@
 % Guarantees:
 %   - after this file is consulted into the module plain_autoload_a.pl was
 %     consulted into, only this file's row is left
-%     [tested: engine_modules:a_plain_pair_still_replaces_one_autoload_table; commit=WORKTREE]
+%     [tested: engine_modules:a_plain_pair_still_replaces_one_autoload_table; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

@@ -43,7 +43,7 @@
 % Decides:
 %     - published_surface/1 reads the defining module's export list for a
 %       declared seam, or accepts a registered MeTTa builtin head.
-%       [source: tests/prolog/surface_walk.pl:published_surface/1; commit=WORKTREE]
+%       [source: tests/prolog/surface_walk.pl:published_surface/1; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 % Open Obligations:
 %     To Do: None
 %     Hacks: None
@@ -287,7 +287,7 @@ scan_sees_every_planted_reach(Total, Missed) :-
 
 % The planted callee has to be an engine predicate that is NOT published, or
 % the probe proves nothing; a caller checks that before trusting the result.
-% [tested: sh check.sh prolog-static; commit=WORKTREE]
+% [tested: sh check.sh prolog-static; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 planted_internal(imported_predicate/2).
 
 % The helper's OWN clause is walked beside the probe, because that is how SWI

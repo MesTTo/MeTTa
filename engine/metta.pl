@@ -6,7 +6,7 @@
 %   - The fourteen engine/metta/ units compile into metta_engine in source
 %     order. Engine and library definitions stay out of user except SWI's
 %     exception/3, thread_message_hook/3 and prolog_trace_interception/4 hooks.
-%     [tested: engine_modules; commit=WORKTREE].
+%     [tested: engine_modules; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 %   - A built-in call covered by the effects cluster whose declared operand
 %     types already conflict is refused before operand evaluation; shallow
 %     compile-time checks inspect literals and declared return types without
@@ -262,7 +262,7 @@
 %     commit=87d998c24278fc7f020ccb0e408ebcd9332b63eb].
 % Open Obligations:
 %   To Do: None. check.sh runs the no-autoload lane through test.sh
-%     [source: check.sh no-autoload lane; commit=WORKTREE].
+%     [source: check.sh no-autoload lane; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 %   Hacks: None
 %   Future Enhancements: None
 
@@ -271,16 +271,16 @@
 % Keeping user below the core preserves consulted host predicates while local
 % equations shadow the inherited implementation only in their execution module.
 % [tested: engine_modules:the_chain_is_self_then_prelude_then_engine_then_user,
-% engine_modules:removing_a_local_shadow_restores_a_library_export; commit=WORKTREE]
+% engine_modules:removing_a_local_shadow_restores_a_library_export; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 %
 % Modules own their helper names and autoload tables. The boundary suite also
 % loads plain-file controls that demonstrate both collisions without modules.
-% [tested: engine_modules; commit=WORKTREE]
+% [tested: engine_modules; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 %
 % Exports cover cross-subsystem calls, generated goals, registered builtin heads
 % and the host's query strings. Subsystems set their base before compilation so
 % goal_expansion/2 is visible while their clauses are read.
-% [tested: sh check.sh layering prolog-static; commit=WORKTREE]
+% [tested: sh check.sh layering prolog-static; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 
 :- module(metta_engine,
             % The LANGUAGE: builtin heads the host tier, the prelude tier and the
@@ -309,7 +309,7 @@
             (#>)/3,
             (#\=)/3,
             % Publish division so a host lookup cannot select yall's lambda.
-            % [tested: relational_arithmetic; commit=WORKTREE]
+            % [tested: relational_arithmetic; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
             (/)/3,
             (==)/3,
             call_goals_in/2,
@@ -327,7 +327,7 @@
             repr/2,
             %
             % Export the module queries for callers outside the expansion chain.
-            % [source: engine/metta.pl:goal_expansion/2; commit=WORKTREE]
+            % [source: engine/metta.pl:goal_expansion/2; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
             current_metta_module/1,
             metta_self_module/1,
             metta_exec_module_prefix/1,
@@ -537,7 +537,7 @@
             substitute_bound_tokens/2,
             %
             % These heads also occur in generated or host-supplied goals.
-            % [tested: sh engine/test.sh; commit=WORKTREE]
+            % [tested: sh engine/test.sh; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
             '!='/3,
             'Predicate'/2,
             'abs-math'/2,
@@ -709,7 +709,7 @@
             % assert/2 and exists_file/1 keep explicit core qualification because
             % user already imports SWI's predicates under those indicators.
             % [tested: engine_modules:every_core_builtin_head_is_exported;
-            % commit=WORKTREE]
+            % commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
             (#+)/3,
             (#=<)/3,
             (#>=)/3,
@@ -1466,7 +1466,7 @@ metta_exec_module_prefix('$metta_exec:').
 %   spelling reads user and misses operators imported only into metta_engine.
 %   Registration, reduction and callable_as_written/2 share this guard.
 %   [tested: engine_modules:an_operator_lent_name_is_seen_in_the_engines_own_namespace;
-%   commit=WORKTREE]
+%   commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 metta_engine_operator(Name) :- current_op(_, _, metta_engine:Name).
 
 %And read for FREE. A one-clause fact still costs an inference per call, and
@@ -1488,7 +1488,7 @@ goal_expansion(metta_exec_module_prefix(Prefix), Prefix = '$metta_exec:').
 % Fold the operator guard at its call sites to avoid a predicate call per
 % registered-predicate reduction. Keep metta_engine_operator/1 for other callers.
 % [tested: prolog_interface:a_registered_predicate_costs_no_more_than_a_metta_function;
-% commit=WORKTREE]
+% commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 goal_expansion(metta_engine_operator(Name), current_op(_, _, metta_engine:Name)).
 
 %The seam module loads FIRST and with an EMPTY import list. First because
@@ -1581,12 +1581,12 @@ metta_import_shared_registries(Subsystem) :-
 % clauses, query strings and generated goals, keeping implementation ownership
 % in each subsystem. Declared services are checked even without static callers.
 % [tested: engine_modules:every_declared_service_is_exported_to_the_host,
-% engine_modules:the_service_census_sees_a_declared_private_predicate; commit=WORKTREE]
+% engine_modules:the_service_census_sees_a_declared_private_predicate; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 
 %engine/filereader.pl: reading and running a MeTTa source: the loader's own doors,
 %which every seat's `run this text` crossing lands on.
 % silent/1 remains filereader's single shared flag through this re-export.
-% [source: engine/filereader.pl:metta_host_set_silent/1; commit=WORKTREE]
+% [source: engine/filereader.pl:metta_host_set_silent/1; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 metta_engine_reexport(filereader, metta_host_fast_header/1).
 metta_engine_reexport(filereader, active_source_program/1).
 metta_engine_reexport(filereader, recompile_function_impl/1).
@@ -1730,7 +1730,7 @@ metta_engine_reexport(type_rules, registered_typing_rule/7).
 %The rows the walk could not see, for the same reason as the core's own
 %computed-goal block above: a suite that assembles the goal. Found by
 %running the battery against the measured list and reading the existence
-%errors [tested: sh engine/test.sh; commit=WORKTREE].
+%errors [tested: sh engine/test.sh; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 metta_engine_reexport(duals, metta_dual_goal/2).
 metta_engine_reexport(filereader, load_imported_metta_file/3).
 metta_engine_reexport(kernel, 'has-declared-type'/3).
@@ -1817,7 +1817,7 @@ metta_engine_reexport(spaces, clear_foreign_atoms/1).
 % Shipped subsystems declare metta_engine as their base before compilation.
 % This census also bases subsystems a harness loaded before the engine.
 % Their unqualified calls resolve through the core's published exports.
-% [source: engine/metta.pl:metta_base_engine_subsystems/1; commit=WORKTREE]
+% [source: engine/metta.pl:metta_base_engine_subsystems/1; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 
 
 %A predicate rather than the bare directive it used to be, because a
@@ -1974,7 +1974,7 @@ metta_load_extension(Control) :-
                ( directory_file_path(Directory, Relative, Entry),
                  % Seat definitions belong to the host tier, whose imports
                  % reach this facade without replacing its implementations.
-                 % [source: engine/metta.pl:metta_publish_host_tier/0; commit=WORKTREE]
+                 % [source: engine/metta.pl:metta_publish_host_tier/0; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
                  user:ensure_loaded(Entry) )),
         (   metta_extension_loaded(Name) -> true
         ;   assertz(metta_extension_loaded(Name))
@@ -2043,7 +2043,7 @@ metta_load_extensions(Pattern) :-
 %   SWI's end-of-load import. MORK's metta_claim_space/2 directive needs this.
 %   Later definitions arrive through the ordinary end-of-load import.
 %   [source: extensions/mork/mork_ffi/morkspaces.pl:metta_claim_space/2;
-%   commit=WORKTREE]
+%   commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 metta_publish_host_tier :-
     module_property(metta_engine, exports(Exports)),
     forall(( member(PredicateIndicator, Exports),

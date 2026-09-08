@@ -387,7 +387,7 @@ test(a_seam_declared_in_a_later_file_is_exported) :-
 
 % A source-owned service must disappear from discovery with its source.
 % [tested: metta_published_surface:unloading_a_late_seam_removes_its_home;
-% commit=WORKTREE]
+% commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 test(unloading_a_late_seam_removes_its_home) :-
     user:ensure_loaded(seam_late_declaration),
     assertion(seam:seam_home(plunit_late_declared_service/1, plunit_seam_late)),

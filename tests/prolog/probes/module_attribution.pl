@@ -1,6 +1,6 @@
 % Purpose: measure source attribution for a defined and an absent host goal.
 % Assumes: the engine's native artifacts are provisioned in this checkout
-% [source: engine/source_observation.pl:goal_attribution/3; commit=WORKTREE].
+% [source: engine/source_observation.pl:goal_attribution/3; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 :- ensure_loaded('../../../engine/qlf_boot').
 :- metta_qlf_boot:qlf_load_engine.
 :- initialization(module_attribution_main, main).
