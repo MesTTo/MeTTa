@@ -651,7 +651,12 @@ and run by the gate.
 
 `sh build.sh` builds the MORK backend, which gives MORK-backed atom spaces over
 [trueagi-io/MORK](https://github.com/trueagi-io/MORK) and
-[Adam-Vandervorst/PathMap](https://github.com/Adam-Vandervorst/PathMap). FAISS
+[Adam-Vandervorst/PathMap](https://github.com/Adam-Vandervorst/PathMap).
+The published revisions are pinned in `build.sh`: MORK
+`ed57c6716d8c510296fb5fbb8be6fbfe2df241d7` and PathMap
+`0010dbbd52d13fad67e9a7dabfdadb1cfea71fe1`. The bridge uses the default
+product join; its [benchmark](extensions/mork/README.md#measuring-it) compares
+native and MORK conjunctions at four sizes with instruction counters. FAISS
 atom-vector spaces come from a MeTTa library the engine fetches on request:
 
 ```metta

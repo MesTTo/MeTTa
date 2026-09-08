@@ -8,6 +8,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+
+- Native and MORK skewed triangle benchmark rows at 100, 400, 1600 and
+  3200 atoms, with complete answer-bag checks, retired-instruction pins and
+  fitted growth exponents. The MORK benchmark selftest rejects altered counts,
+  missing sizes and wrong results, and direct `extensions/mork/check.sh`
+  invocation runs the seat's lanes through the root gate.
+
+- A `mork-rust` gate runs the adapter's release tests with its committed
+  dependency lock. Provenance pinning now covers Rust header comments and the
+  MORK Python benchmark selftest, with planted controls for both file classes.
+
 - `metta.errors.refuse(kind, message, **fields)` builds a refusal from the
   engine's own `(refusal ...)` row: the class, the ground and the remedy come
   from the row, and the fields fill both the remedy's `<field>` holes and the
@@ -1243,6 +1254,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 
 ### Changed
+- Advance the published MORK pin from
+  `dd224fd7ced92ca9cfdacd399398dabb609e8faa` to
+  `ed57c6716d8c510296fb5fbb8be6fbfe2df241d7` and PathMap from
+  `4c84a8b40c7b6a7ecb54e009a70f0c5abbc1b60f` to
+  `0010dbbd52d13fad67e9a7dabfdadb1cfea71fe1`. The bridge adopts MORK's
+  `ItemSink` output and specialized pattern accounting, retains the product
+  join, commits its Cargo lockfile, and re-pins all thirty-one existing MORK
+  benchmark rows with old-pin controls for changes outside their bands.
+
 - `metta.wire` and `metta.casting` are gone into `metta.convert`, which is one
   door with `encode`, `decode`, `from_wire`, `atom_from_wire`, `cast` and the
   projection half together. No alias: the two names are removed.

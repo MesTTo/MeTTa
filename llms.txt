@@ -2134,7 +2134,15 @@ folder, told apart by the `entry/2` roles they declare rather than by where
 they sit: `entry(engine, File)` is a file the engine consults, `entry(host,
 File)` one the seat's own runtime consults, and a seat may declare both. A
 MORK-backed store is one such seat, supplying `&mork` and `&mork:name`; it is
-present only when its shared library was built.
+present only when both shared libraries were built. The pins in `build.sh` are
+MORK ed57c6716d8c510296fb5fbb8be6fbfe2df241d7 and PathMap
+0010dbbd52d13fad67e9a7dabfdadb1cfea71fe1. Whole representable conjunctions use
+the product join; the optional upstream leapfrog feature is not enabled.
+`extensions/mork/benchmarks/baseline.json` pins native and MORK skewed triangle joins
+at 100, 400, 1600 and 3200 atoms. Retired instructions measure the Rust work
+that Prolog inference counts cannot see. The text boundary refuses expressions
+with more than 63 children and symbols that cannot round-trip through text;
+plans wider than 62 conjuncts or 62 variables decline to the engine's split.
 
 ## Apps, from source
 

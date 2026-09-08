@@ -31,7 +31,7 @@ than per byte:
   Makefile      carries the same contract header its neighbours do and has no
                 suffix at all to key on.
   .ts .mjs      the same rule with `//`, plus `/* ... */` blocks. The C seat
-  .c .h         writes its whole contract in one leading `/* ... */`, so the
+  .c .h .rs     writes its whole contract in one leading `/* ... */`, so the
                 block half is not a fallback there but the usual case.
   .json         commentless, so the measurement prose is the only place a pin
                 can be, and every placeholder in one is a pin. This is the rule
@@ -64,6 +64,9 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py]
   - a commit that does not resolve is refused before any file is opened
     [tested: tests/checks/check_pin_provenance_selftest.py]
+  - Rust line and block header pins resolve through the same comment rule
+    as C, while bare string literals stay unchanged
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
 Fails when: a pin sits somewhere the file's grammar cannot distinguish from
   code. It is reported, not rewritten, and finishing it is a human's call.
 Owns resources: none; it rewrites files in place and holds nothing open.
@@ -107,7 +110,7 @@ BLANK_LINE = re.compile(r"\n[ \t]*\n")
 #: `/* ... */` form is what a file whose top level is markup can carry.
 PERCENT_COMMENT = (".pl", ".plt")
 HASH_COMMENT = (".sh", ".mk")
-SLASH_COMMENT = (".ts", ".mjs", ".js", ".c", ".h", ".vue")
+SLASH_COMMENT = (".ts", ".mjs", ".js", ".c", ".h", ".rs", ".vue")
 SEMICOLON_COMMENT = (".metta",)
 MAKEFILE_NAMES = ("Makefile", "GNUmakefile")
 

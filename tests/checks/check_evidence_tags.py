@@ -108,6 +108,8 @@ Guarantees:
     reported, and the directory is read from the runner that allocates it, so
     a runner that stops declaring it is reported too
     [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
+  - MORK's Python benchmark selftest carries checked evidence and provenance
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs
@@ -189,6 +191,7 @@ GUARANTEE_SOURCES = (
     "extensions/python/ext/*.py",
     "extensions/python/examples/*.py",
     "extensions/mork/mork_ffi/*.pl",
+    "extensions/mork/tests/*.py",
     "extensions/python/tools/*.py",
     "tests/checks/*.py",
     # The Python suites carry 536 tags of their own, the largest block
