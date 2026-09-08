@@ -16,8 +16,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `metta_load_source/2`, which asks the new ownership seam
   `seam:compiled_source/1`; `engine/qlf_boot.pl` claims exactly the sources
   whose artifacts it stamps and purges, and writes a stale or absent artifact
-  through a child swipl before the claiming process loads it, so every
-  process reads the artifact and none pays the compile. Importing
+  through a hermetic child swipl (`-f none --no-packs`) before the claiming
+  process loads it, so every process reads the artifact and none pays the
+  compile; the engine's own artifact set goes through the same child when a
+  boot finds it absent, so no process's flags, initialisation file or packs
+  shape an artifact the tree shares. Importing
   `lib_thread` costs 5,925 inferences where it cost 278,309 in every process;
   the source observer's first call 20,818 where it cost 94,661. A program's
   own Prolog file, and a library under a registered or git-fetched directory,

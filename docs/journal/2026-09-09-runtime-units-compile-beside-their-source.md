@@ -144,3 +144,31 @@ the open intermittent above): `01-mutex_and_transaction` 17,032..17,040,
 until the plain lanes read 26,022 and 26,057 while twenty observation rounds
 read 26,066: its cost follows the git repository it imports from, so it is an
 envelope too, 26,022..26,066.
+Found, on the full gate after the change landed: two point pins read +8 on
+the tree the gate left and their pinned value after a purge and a plain
+warm boot, so the artifact set a process writes depends on the process. A
+set written under `swipl -O` fails every example and twin outright; sets
+written under autoload off, by the static, reachability, confluence,
+ciao-grade and typed-development lanes, by an extensions-token boot and by
+a kernel boot all read the pin; the lane that wrote the +8 set was not
+found, and the class is what matters: the first process to boot after a
+purge compiled the engine in place, under whatever flags, initialisation
+file and packs it ran with, and every process after ran that engine.
+Decided: the engine's own set is written by the same child as a library
+half, and the child is hermetic: `-f none` reads no user initialisation
+file, `--no-packs` attaches none of the packs this box carries (assertions,
+ciao, edcg, egraph among them), and a child-marked process compiles in
+place because it IS the child. A boot that finds the umbrella's artifact
+absent asks the child first and loads what it wrote; a read-only tree, no
+swipl to start, or a failed child leave the boot to compile in place as
+before. The boot's two `exists_file/1` calls are qualified `system:`,
+because the engine exports a MeTTa builtin of that name and arity into
+user, which the layering walk reported as the boot reaching the engine.
+Measured: the boot file's added predicates move the first definition's
+warm-up by +10 on 142 twins (three by +20, two by -10), the load-structure
+movement again, so the corpus re-pins once more with the mechanism named
+and the authoring constant reads 1,482; a purge-and-warm-boot control read
+every pin exactly before the predicates were added.
+Rejected: recording the compile-shaping flags in the stamp, because the
+list rots and a stamp cannot see an initialisation file or a pack; a
+canonical writer needs no list.

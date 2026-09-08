@@ -11,7 +11,7 @@
    the boot can start exists, which is the shipped configuration.
    Guarantees: the governance follows the boot's pattern table and the claim
    the stamped encoding [tested: the_boot_governs_the_sources_its_patterns_name,
-   an_unstamped_encoding_claims_nothing; commit=f26de01fbf3e0e3c64bb691c66a59fa959fee7f3]; the door's arms are
+   an_unstamped_encoding_claims_nothing; commit=WORKTREE]; the door's arms are
    observed through SWI's own load_file(done(...)) message, which says loaded
    for a process that reads the artifact, *qcompiled* for one that writes it
    and compiled for a source load
@@ -19,7 +19,11 @@
    a_child_marked_process_compiles_in_place,
    an_unclaimed_source_loads_from_source_and_leaves_no_artifact,
    a_stale_artifact_is_recompiled,
-   consult_global_loads_a_library_half_through_the_door; commit=f26de01fbf3e0e3c64bb691c66a59fa959fee7f3].
+   consult_global_loads_a_library_half_through_the_door; commit=WORKTREE]; the
+   engine's own set goes through the same child when its umbrella artifact is
+   absent, and never in a child-marked process
+   [tested: the_engine_set_is_written_by_a_hermetic_child,
+   a_child_marked_process_writes_the_engine_set_in_place; commit=WORKTREE].
 */
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -160,6 +164,39 @@ test(a_stale_artifact_is_recompiled, [setup(cs_forget), cleanup(cs_forget)]) :-
     assertion(cs_loaded_how(File, loaded)),
     time_file(Artifact, Rewritten),
     assertion(Rewritten >= SourceTime).
+
+cs_umbrella_artifact(Artifact) :-
+    metta_qlf_boot:qlf_boot_directory(Here),
+    atom_concat(Here, '/metta.qlf', Artifact).
+
+% The engine this process runs is already in memory, so its umbrella artifact
+% can go and come back without touching a loaded clause.
+cs_restore_engine_set :-
+    ( current_prolog_flag(metta_qlf_child, true)
+    -> set_prolog_flag(metta_qlf_child, false)
+    ;  true ),
+    metta_qlf_boot:qlf_boot_directory(Here),
+    metta_qlf_boot:qlf_regenerate_aside(Here),
+    retractall(cs_load_seen(_, _)).
+
+test(the_engine_set_is_written_by_a_hermetic_child, [cleanup(cs_restore_engine_set)]) :-
+    cs_umbrella_artifact(Artifact),
+    metta_qlf_boot:qlf_boot_directory(Here),
+    delete_file(Artifact),
+    retractall(cs_load_seen(_, _)),
+    metta_qlf_boot:qlf_regenerate_aside(Here),
+    assertion(exists_file(Artifact)),
+    % this process loaded nothing: the child did the compiling
+    assertion(\+ cs_load_seen(_, _)).
+
+test(a_child_marked_process_writes_the_engine_set_in_place,
+     [cleanup(cs_restore_engine_set)]) :-
+    cs_umbrella_artifact(Artifact),
+    metta_qlf_boot:qlf_boot_directory(Here),
+    delete_file(Artifact),
+    create_prolog_flag(metta_qlf_child, true, []),
+    metta_qlf_boot:qlf_regenerate_aside(Here),
+    assertion(\+ exists_file(Artifact)).
 
 test(consult_global_loads_a_library_half_through_the_door,
      [setup(cs_forget), cleanup(cs_forget)]) :-

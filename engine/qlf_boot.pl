@@ -56,7 +56,12 @@
 %     compiles in place
 %     [tested: a_claimed_source_is_compiled_by_a_child_and_this_process_reads_the_artifact,
 %     a_stale_artifact_is_recompiled, a_child_marked_process_compiles_in_place;
-%     commit=f26de01fbf3e0e3c64bb691c66a59fa959fee7f3].
+%     commit=WORKTREE].
+%   - the engine's own set is written by the same hermetic child (-f none,
+%     --no-packs) when a boot finds it absent, so no process's flags,
+%     initialisation file or packs shape an artifact the tree shares
+%     [tested: the_engine_set_is_written_by_a_hermetic_child,
+%     a_child_marked_process_writes_the_engine_set_in_place; commit=WORKTREE].
 % Decides:
 %   - artifacts are written only inside the set this file stamps and purges:
 %     a program's own Prolog file, or a library under a registered or
@@ -202,20 +207,37 @@ seam:compiled_source(File) :-
 qlf_compile_aside(File) :-
     (   qlf_artifact_stale(File, Artifact),
         access_file(Artifact, write),
-        \+ current_prolog_flag(metta_qlf_child, true),
-        qlf_swipl(Swipl)
+        \+ current_prolog_flag(metta_qlf_child, true)
+    ->  qlf_child('metta_qlf_boot:qlf_compile_argument', [File])
+    ;   true
+    ).
+
+%The child is HERMETIC: -f none reads no user initialisation file and
+%--no-packs attaches no add-on, so nothing a developer's own SWI setup loads
+%can shape a clause of an artifact every process on the tree will run (a
+%pack or an initialisation file can install term or goal expansion). Its
+%status is the caller's only reading; a child that cannot be started reads
+%as a failed one, and the caller's load then compiles in place.
+qlf_child(Goal, Arguments) :-
+    (   qlf_swipl(Swipl)
     ->  qlf_boot_directory(Here),
         atom_concat(Here, '/qlf_boot.pl', Boot),
         qlf_shell_word(Swipl, QuotedSwipl),
         qlf_shell_word(Boot, QuotedBoot),
-        qlf_shell_word(File, QuotedFile),
-        atomic_list_concat([QuotedSwipl, ' -q -s ', QuotedBoot,
-                            ' -g metta_qlf_boot:qlf_compile_argument -t halt -- ',
-                            QuotedFile, ' >/dev/null 2>&1'],
+        qlf_shell_words(Arguments, QuotedArguments),
+        atomic_list_concat([QuotedSwipl, ' -q -f none --no-packs -s ', QuotedBoot,
+                            ' -g ', Goal, ' -t halt --', QuotedArguments,
+                            ' >/dev/null 2>&1'],
                            Command),
         catch(shell(Command, _), _, true)
     ;   true
     ).
+
+qlf_shell_words([], '').
+qlf_shell_words([Argument|Arguments], Words) :-
+    qlf_shell_word(Argument, Word),
+    qlf_shell_words(Arguments, Rest),
+    atomic_list_concat([' ', Word, Rest], Words).
 
 %system: on exists_file/1, because the engine exports a MeTTa builtin of that
 %name and arity into user, which this module's chain reaches once the engine
@@ -266,6 +288,28 @@ qlf_compile_argument :-
     qlf_last(Argv, File),
     qlf_load_engine,
     qcompile(File).
+
+%The engine's own set is written by a child for the same reason a library
+%half is: the first process to boot after a purge compiled it in place, under
+%whatever flags, initialisation file and packs that process ran with, and
+%every process after ran that process's engine. A boot that finds the
+%umbrella's artifact absent asks a hermetic child to boot first, which
+%compiles the set in place because it IS the child, then loads what the child
+%wrote. A read-only tree, no swipl to start, or a failed child leave this
+%process to compile in place, as before, and a child-marked process never
+%asks.
+qlf_regenerate_aside(Here) :-
+    atom_concat(Here, '/metta.qlf', UmbrellaArtifact),
+    (   \+ system:exists_file(UmbrellaArtifact),
+        access_file(UmbrellaArtifact, write),
+        \+ current_prolog_flag(metta_qlf_child, true)
+    ->  qlf_child('metta_qlf_boot:qlf_child_boot', [])
+    ;   true
+    ).
+
+qlf_child_boot :-
+    create_prolog_flag(metta_qlf_child, true, []),
+    qlf_load_engine.
 
 qlf_last([File], File) :- !.
 qlf_last([_|Rest], File) :- qlf_last(Rest, File).
@@ -400,6 +444,7 @@ qlf_load_engine :-
     use_module(Identity, []),
     metta_identity:metta_boot_identity,
     atom_concat(Here, '/metta', Umbrella),
+    qlf_regenerate_aside(Here),
     current_prolog_flag(qcompile, Previous),
     setup_call_cleanup(
         set_prolog_flag(qcompile, auto),
