@@ -10,7 +10,7 @@
    compiled, and publish_seed/0 stores them in the recipe's order through
    spaces:add_sexp_in/5, so every row carries a token this process minted and
    remains a removable dynamic clause; the published rows equal ordinary
-   publication in order [tested: catalog_vocabulary_bootstrap; commit=WORKTREE].
+   publication in order [tested: catalog_vocabulary_bootstrap; commit=facdac121bd5b1250c226a6d11aa0252a868954e].
    Owns resources: dynamic &metta clauses, removed by the ordinary catalog
    mutation doors or released with the Prolog process.
    Fails when: loaded directly; it bypasses admission and row-change observers.
