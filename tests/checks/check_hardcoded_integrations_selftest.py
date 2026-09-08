@@ -19,7 +19,7 @@ Assumes: a writable ai-tmp/ in this repository.
 Guarantees:
   - only an exact row-generated annotation projection may name optional
     providers; runtime imports and added imports still fail [tested:
-    this file; commit=WORKTREE]
+    this file; commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543]
   - an import of a library nowhere in ALLOWED is reported with its file, its
     line and the door it should have used [tested: this file; commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
   - the same library imported in a file that is not its declared site is

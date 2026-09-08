@@ -10,7 +10,7 @@ Reads files and the engine-free door grammar. Structured row assumptions,
 guarantees, local refusals and evidence are checked through doorgen's contract
 reader [tested: test_contract_checks_detect_signature_and_evidence_drift,
 test_contract_checks_refuse_missing_coverage_and_unbacked_refusals;
-commit=WORKTREE].
+commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543].
 
 What each tag has to carry, and why only this much:
 

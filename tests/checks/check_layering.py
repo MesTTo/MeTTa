@@ -22,11 +22,11 @@ A package added under `ext/` therefore needs no line here.
 Assumes: a checkout of this repository with `pyproject.toml` at its root.
 Guarantees:
   - a core module importing a member is reported [tested:
-    tests/checks/check_layering_selftest.py; commit=WORKTREE]
+    tests/checks/check_layering_selftest.py; commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543]
   - generated provider annotations are checked against door rows, while
     imports in other TYPE_CHECKING blocks remain subject to both layer rules
     [tested: tests/checks/check_hardcoded_integrations_selftest.py,
-    tests/checks/check_layering_selftest.py; commit=WORKTREE]
+    tests/checks/check_layering_selftest.py; commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543]
   - a member importing a core underscore name is reported [tested:
     tests/checks/check_layering_selftest.py; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
   - a member naming a library its own manifest does not declare is reported,

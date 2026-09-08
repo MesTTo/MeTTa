@@ -7,7 +7,7 @@ Guarantees:
     [tested: npm run docs:build; commit=34c48b5b6f2e9515a1410a937d5784d6420e1d23]
   - every page in the site is reachable from this navigation, so a written page
     cannot ship findable only by search
-    [tested: test_every_site_page_is_reachable_from_the_navigation; commit=WORKTREE]
+    [tested: test_every_site_page_is_reachable_from_the_navigation; commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543]
   - a `::: run` fence names an example the corpus runner runs and carries that
     file's own bytes, or this build refuses by name
     [tested: test_every_run_fence_runs_the_corpus_file_it_names; commit=a8b50dae12518adb626bf2594258eeaaf4a7f76d]

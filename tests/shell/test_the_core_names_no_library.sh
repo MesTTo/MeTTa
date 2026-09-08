@@ -24,7 +24,7 @@
 #   - with metta-pandas alone: to_df() builds a frame through the ENTRY POINT
 #     with nothing imported by hand. Unregistered namespace members and short
 #     sugars are absent; rows.to(library) retains the named missing-provider
-#     refusal [tested: sh check.sh no-packages; commit=WORKTREE].
+#     refusal [tested: sh check.sh no-packages; commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543].
 # Fails when: uv is absent, which it refuses on rather than skipping.
 # Open Obligations:
 #   To Do: None

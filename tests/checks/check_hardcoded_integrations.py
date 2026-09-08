@@ -15,7 +15,7 @@ The generated accessor annotation module is a projection of package door rows.
 Its TYPE_CHECKING imports do not execute. Only that exact generated file is
 recognized; a hand-written import, including one under TYPE_CHECKING, still
 needs the package boundary [tested:
-tests/checks/check_hardcoded_integrations_selftest.py; commit=WORKTREE].
+tests/checks/check_hardcoded_integrations_selftest.py; commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543].
 
 So ALLOWED holds DEPENDENCIES only, and a dependency is not an integration:
 each is this seat's own implementation of a service the seat itself provides,

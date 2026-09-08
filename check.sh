@@ -70,7 +70,7 @@
 #     tests and executes every declared refusal witness [tested:
 #     test_contract_checks_refuse_missing_coverage_and_unbacked_refusals,
 #     test_contract_checks_refuse_a_handwritten_public_parameter_point;
-#     commit=WORKTREE].
+#     commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543].
 #   - the runtime-derived policy inventory and its nine-case discrimination
 #     selftest are GATE lanes [tested:
 #     test_a_planted_closed_policy_list_is_reported_by_the_inventory_lane;

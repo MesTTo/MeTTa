@@ -18,7 +18,7 @@
 #     a real distribution with real entry points.
 #   - a package-owned door reaches both Space and MeTTa as solars.frame, and
 #     a retained method refuses after withdrawal. Its typed contract is
-#     queryable at boot [tested: sh check.sh stranger-python; commit=WORKTREE].
+#     queryable at boot [tested: sh check.sh stranger-python; commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543].
 # Fails when: uv is absent, which it refuses on rather than skipping.
 # Open Obligations:
 #   To Do: None
