@@ -16,11 +16,11 @@
 %   version-5 images preserve occurrence tokens, original atoms and each compiled equation's
 %   resolved source across relocation and later recompilation [tested:
 %   test_fast_images_preserve_each_equations_binding, test_image_collision_rule;
-%   commit=WORKTREE];
+%   commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4];
 %   checksum validation accepts exactly 64 lowercase hexadecimal characters and
 %   its inference cost is independent of their values [tested:
 %   spaces_token_images:hash_header_keeps_the_lowercase_hexadecimal_language,
-%   spaces_token_images:hash_header_cost_is_content_independent; commit=WORKTREE];
+%   spaces_token_images:hash_header_cost_is_content_independent; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4];
 %   fast-image nodes materialize only after their source and registry restore
 %   completes [tested: test_reloading_a_materialized_program_preserves_its_bag;
 %   commit=3c64e2e24787362a5a5081513bc24b880711a1d7];
@@ -1230,7 +1230,7 @@ record_recompiled_source_assertion(Owners, Ref) :-
 %column either way.
 % Recompiled metadata belongs to the executable clause's original owners.
 % The same precedence already governs grouped support-graph assertions below.
-% [tested: filereader_source_reload:recompiled_metadata_keeps_the_equations_source_owner; commit=WORKTREE]
+% [tested: filereader_source_reload:recompiled_metadata_keeps_the_equations_source_owner; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4]
 record_source_assertion(Ref) :-
     source_recompile_owners(Owners), !,
     record_recompiled_source_assertion(Owners, Ref).

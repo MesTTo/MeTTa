@@ -367,7 +367,7 @@ add_sexp_in(Module, [Family|Parameters], Atom, Token, Ref) :-
 % scalar; a variable expression head is not a ':' declaration. Static import
 % previously bypassed this funnel and therefore already preserved both cases.
 % These guards compile to VM instructions and add no Prolog inferences
-% [tested: spaces_tokens:all_storage_shapes_decode; commit=WORKTREE].
+% [tested: spaces_tokens:all_storage_shapes_decode; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 add_sexp_in(Module, Space, Atom, Token, Ref) :-
     nonvar(Atom), Atom = [Rel|Args], !,
     ( Rel == ':' -> self_tier_arrived(Space) ; true ),

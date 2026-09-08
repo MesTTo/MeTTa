@@ -3,7 +3,7 @@
 % Owns resources: '$metta_equation_token'/4 rows link live compiled clauses to
 %   their stored occurrence; forget_translated_equation_binding/1 retires them
 %   [tested: spaces_tokens:equation_tokens_survive_recompilation_and_exact_subtraction;
-%   commit=WORKTREE].
+%   commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 % Guarantees:
 %   - resolved reader equations retain their stored clause reference through
 %     deferred reconstruction, recompilation and fast-cache relocation
@@ -1500,7 +1500,7 @@ with_source_recompile_owners(Owners, Goal) :-
 
 % Forcing a deferred dependency pushes its own source pin. It must not inherit
 % the recompile owner of the caller that happened to force it.
-% [tested: test_source_replacement_retains_recompiled_binding_ownership; commit=WORKTREE]
+% [tested: test_source_replacement_retains_recompiled_binding_ownership; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4]
 source_recompile_owners(Owners) :-
     source_recompile_context(Context, Owners), !,
     recompile_load_context(Context).

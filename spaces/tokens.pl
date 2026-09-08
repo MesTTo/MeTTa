@@ -2,13 +2,13 @@
 % Assumes: spaces.pl consults this unit before catalog initialization.
 % Guarantees: received generations advance the same flag used by fresh writes;
 %   rollback may leave gaps but cannot reuse an allocated generation
-%   [tested: spaces_tokens; commit=WORKTREE].
+%   [tested: spaces_tokens; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 %   A forced source reload preserves the native constructor registration
-%   [tested: test_reloading_storage_preserves_occurrences; commit=WORKTREE].
+%   [tested: test_reloading_storage_preserves_occurrences; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 % Assumes: metta_identity owns the actor and generation flags for the runtime.
 % Owns resources: the native constructor registration lasts until SWI cleanup.
 % Guarded by: flag/3 atomically reads and replaces the generation counter
-%   [tested: spaces_tokens:concurrent_minting_is_unique; commit=WORKTREE].
+%   [tested: spaces_tokens:concurrent_minting_is_unique; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 % Decides: actor defaults to a UUID; generation defaults to zero. SWI's flag/3
 %   representation limit raises before an exhausted counter can publish a write.
 
