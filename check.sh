@@ -38,6 +38,7 @@
 #                                            refusal-grounds-selftest snippets
 #                                            refusal-sync
 #                                            refusal-sync-selftest
+#                                            door-sync door-coverage door-refusals
 #                                            closed-sets
 #                                            closed-sets-selftest
 #                                            cumulative-syntax
@@ -65,6 +66,11 @@
 #          GATE_ONLY=1                skip the REPORT tier
 #          METTA_CHILD_CEILING=3600   seconds any spawn may live (bounded.sh)
 # Guarantees:
+#   - door-sync checks every row projection, runs its planted discrimination
+#     tests and executes every declared refusal witness [tested:
+#     test_contract_checks_refuse_missing_coverage_and_unbacked_refusals,
+#     test_contract_checks_refuse_a_handwritten_public_parameter_point;
+#     commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543].
 #   - the runtime-derived policy inventory and its nine-case discrimination
 #     selftest are GATE lanes [tested:
 #     test_a_planted_closed_policy_list_is_reported_by_the_inventory_lane;
@@ -625,22 +631,22 @@ run GATE process-bounds-selftest "$PY" "$HERE/tests/checks/check_process_bounds_
 # until 2026-09-05, and it leaves all three orphans running.
 run GATE reaping sh -c "cd '$HERE' && sh tests/shell/test_bounded_reaping.sh"
 
-# KERNEL.md is the engine's ledger of which translator head is primitive and
-# which is derived, and it requires every derived form still fused into the
-# compiler to say why. The library had 110 public doors and no such ledger, so
-# a door that became expressible by another could sit there indefinitely: ten
-# declaration doors did, each rewriting a helper's body longhand and each
-# losing the loop and the transaction that helper has, which left a stale
-# `(emits &s fair)` row surviving a redeclaration [measured 2026-08-31]. The
-# classification is derived from the code, so this asks only whether every
-# derived door says what it buys.
+# The door table owns every projection. Its refusal witnesses plant the
+# invalid inputs and engine replies the contracts declare. The standalone
+# coverage and refusal lanes select those parts for focused work.
+door_sync() {
+    bounded "$PY" "$HERE/extensions/python/tools/doorgen.py" || return $?
+    bounded sh "$PYDIR/test.sh" tests/repository/test_door_rows.py tests/repository/test_async_mirror.py || return $?
+    bounded "$PY" "$HERE/extensions/python/tools/doorgen.py" --refusals
+}
+run GATE door-sync door_sync
+run GATE door-coverage "$PY" "$HERE/extensions/python/tools/doorgen.py" --coverage
+run GATE door-refusals "$PY" "$HERE/extensions/python/tools/doorgen.py" --refusals
+
+# The shrink ledger reads kind and sugar_of from the same rows.
 run GATE ledger     "$PY" "$HERE/extensions/python/tools/ledger.py"
 
-# AsyncMeTTa's 66 mechanical doors are generated from Space by aiogen.py, so
-# the two surfaces cannot drift. Hand-written they had: 15 carried a different
-# signature, 16 weakened a return type and 64 of 66 paraphrased the docstring
-# they claimed to reproduce, two of them refusing at runtime what the sync door
-# accepts [measured 2026-08-31].
+# aiogen is the row generator's backend for the async, module and context tiers.
 run GATE aio-mirror "$PY" "$HERE/extensions/python/tools/aiogen.py"
 
 # A module can implement __call__ at runtime, but mypy deliberately models the

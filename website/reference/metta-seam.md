@@ -203,6 +203,7 @@ def point(
     extra: str | None = None,
     reader: Callable[[], Iterable[Row]] | None = None,
     adder: Callable[[Row], Callable[[], None] | None] | None = None,
+    validator: Callable[[Row, tuple[Row, ...]], None] | None = None,
 ) -> Point:
 ```
 
@@ -226,6 +227,10 @@ def point(
 > `reader` and `adder` are for a point whose rows already live somewhere: the
 > reader answers them, and the adder performs a registration and answers the
 > inverse to undo it. A point with neither keeps its rows here.
+>
+> `validator` checks a proposed declaration against the other registrants
+> under the registry lock. It belongs to a point whose rows live here;
+> foreign stores must validate inside their own atomic registration.
 
 ## `service`
 

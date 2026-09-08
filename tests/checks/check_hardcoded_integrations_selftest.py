@@ -17,6 +17,9 @@ nowhere now.
 
 Assumes: a writable ai-tmp/ in this repository.
 Guarantees:
+  - only an exact row-generated annotation projection may name optional
+    providers; runtime imports and added imports still fail [tested:
+    this file; commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543]
   - an import of a library nowhere in ALLOWED is reported with its file, its
     line and the door it should have used [tested: this file; commit=50fc21b0179082d6aca1ac5fe2223d47baa2d828]
   - the same library imported in a file that is not its declared site is
@@ -46,6 +49,7 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -150,8 +154,29 @@ def _findings_over(scratch: Path, allowed):
         pass_under_test.ALLOWED.update(real_allowed)
 
 
+def _check_door_annotations() -> None:
+    """Only the exact generated provider annotations may name a member."""
+    path = ROOT / 'extensions/python/metta/_door_namespaces.py'
+    original = path.read_text(encoding='utf-8')
+    assert pass_under_test._door_annotations(path)
+    assert pass_under_test._python_names(path) == []
+    real_read = Path.read_text
+    for changed in (
+        original.replace('if TYPE_CHECKING:', 'if True:', 1),
+        original + '\nimport solarsdb\n',
+        original + '\nif TYPE_CHECKING:\n    import solarsdb\n',
+    ):
+        def read(candidate, *args, content=changed, **kwargs):
+            return content if candidate == path else real_read(candidate, *args, **kwargs)
+
+        with patch.object(Path, 'read_text', read):
+            assert not pass_under_test._door_annotations(path)
+            assert pass_under_test._python_names(path)
+
+
 def main() -> int:
     """Plant every shape, assert what is reported and what is not."""
+    _check_door_annotations()
     scratch = Path(tempfile.mkdtemp(dir=ROOT / "ai-tmp", prefix="hardcoded-selftest-"))
     try:
         _plant(scratch)

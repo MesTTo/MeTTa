@@ -124,23 +124,26 @@ async def eval(
     under: Any = _UNSET,
     theory: Any | None = None,
     interpreter: Any | None = None,
+    answer: EvaluationAnswer | str = 'all',
+    delivery: ArgumentDelivery | str = 'atoms',
+    limit: int | None = None,
+    image: ImageMode | str | None = None,
+    on_error: OnError | str = 'keep',
+    determinism: Determinism | str = 'nondet',
     **values: Any,
-) -> list[Atom | Undefined] | list[list[Atom | Undefined]]:
+) -> Any:
 ```
 
-> Evaluate a term and return every answer.
+> Evaluate on the worker with the synchronous door's option product.
 >
-> `under`, `theory` and `interpreter` are the synchronous eval()'s, and
-> they matter more here: answers() is excluded from this surface because
-> a replayable cross-thread iterator is not what an await gives you, so
-> without them there was no way to annotate an EVALUATION asynchronously
-> at all -- match(under=) covered patterns and nothing covered calls
-> .
+> Eager and scalar choices return their values after one awaited request.
+> The answers choice returns a replayable asynchronous view; stream
+> returns a single-pass asynchronous view. Pull and close stay on this
+> worker, and the parent owns any unfinished selection. Use async with
+> on a returned view when stopping iteration early.
 >
-> A text target may carry HOLES, as the synchronous eval()'s may:
-> `await m.eval(t"(decide {tensor})")`. `target` is positional-only for
-> the same reason it is there, so `{target}` is a field name a caller can
-> use.
+> Holes, bindings, algebra, theory, interpreter, delivery, images, bounds,
+> error-answer policy and cardinality keep their synchronous meanings.
 
 ### `AsyncMeTTa.copy`
 
@@ -1722,46 +1725,6 @@ async def unregister_prolog(self, extension: str) -> tuple[str, ...]:
 > Answers the names it released. Raises when no extension of that name
 > is loaded, rather than reporting success for a no-op.
 
-### `AsyncMeTTa.live`
-
-```python
-async def live(
-    self,
-    *query: Any,
-    on: SubscriptionEdge = SubscriptionEdge.both,
-    strategy: str | None = None,
-) -> Any:
-```
-
-> A materialised view of a query, current with this space's writes.
->
->     alerts = m.live(S.alert(V.level))
->     len(alerts)                      # no engine call
->     S.alert(S.red) in alerts         # no engine call
->     alerts.rows                      # what m.match(...) would answer
->
-> The query is one pattern, a conjunction of patterns spelled the way
-> `match` spells one, or a call to a TABLED head, and the answer is a
-> multiset exactly as `match`'s is. `for delta in view.changes(timeout=)`
-> reads the same view as a stream of `metta.live.Delta`, where a
-> `progress` delta after each committed segment says which generation
-> the view is current to, and `async for` reads the same stream under
-> `aio`.
->
-> `strategy=` names the maintenance and defaults to the query's shape:
-> `pattern` maintains one pattern's multiset from the write events, O(1)
-> per event; `heads` watches the heads the query mentions and re-answers
-> it once per commit that touched one; `tabled` serves a call by
-> watching its own table's invalidation counter. `view.strategy` reports
-> which is in force.
->
-> `on=` is the subscription edge underneath, "both" by default because a
-> view that ignored removals would drift.
->
-> The longhand is `metta.live.Live(m, *query)`, and the rung below
-> that is `subscribe` plus `match`: a view is the subscription that
-> maintains what the match would have answered.
-
 ### `AsyncMeTTa.derivation`
 
 ```python
@@ -2260,6 +2223,23 @@ async def events(
 > order is ordered or unordered, defaulting to unordered because an
 > omitted promise is the weaker one. A Python provider says the same
 > thing by overriding delivers(), which registration writes here.
+
+### `AsyncMeTTa.live`
+
+```python
+async def live(
+    self,
+    *query: Any,
+    on: SubscriptionEdge = SubscriptionEdge.both,
+    strategy: str | None = None,
+) -> Any:
+```
+
+> Maintain a query's multiset through this space's committed writes.
+>
+> The returned Live owns its subscriptions. close() releases them, and
+> changes() reads its progress and deltas. strategy selects pattern, heads,
+> or tabled maintenance; omitting it selects from the query's shape.
 
 ### `AsyncMeTTa.aclose`
 

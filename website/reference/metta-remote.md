@@ -163,7 +163,7 @@ def delivers(self) -> tuple[str, str] | None:
 def refusal(self, capability: str, /, **_request: Any) -> str | None:
 ```
 
-No docstring is defined.
+> Read RemoteSpace.refusal.
 
 ### `RemoteSpace.match`
 
@@ -241,7 +241,7 @@ def server_capabilities(self) -> dict[str, Any]:
 def atoms(self) -> Iterator[Atom]:
 ```
 
-No docstring is defined.
+> Read RemoteSpace.atoms.
 
 ### `RemoteSpace.add`
 
@@ -272,7 +272,7 @@ def add_many(self, atoms: list[Atom]) -> None:
 def remove(self, atom: Atom) -> bool:
 ```
 
-No docstring is defined.
+> Read RemoteSpace.remove.
 
 ## `connect`
 

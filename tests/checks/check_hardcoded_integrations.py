@@ -11,6 +11,12 @@ the Python seat can be extended by is its own distribution under
 group exactly as a stranger's package is, and there is no site in the core
 where a library may be named at all.
 
+The generated accessor annotation module is a projection of package door rows.
+Its TYPE_CHECKING imports do not execute. Only that exact generated file is
+recognized; a hand-written import, including one under TYPE_CHECKING, still
+needs the package boundary [tested:
+tests/checks/check_hardcoded_integrations_selftest.py; commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543].
+
 So ALLOWED holds DEPENDENCIES only, and a dependency is not an integration:
 each is this seat's own implementation of a service the seat itself provides,
 its class has one member by construction, and there is no second library to be
@@ -223,13 +229,14 @@ def _python_names(path: Path) -> list[tuple[str, int]]:
     node, so prose is invisible here by construction rather than by an
     exception list.
     """
+    annotations = _door_annotations(path)
     found: list[tuple[str, int]] = []
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
                 name = _third_party(alias.name)
-                if name is not None:
+                if name is not None and (name, node.lineno) not in annotations:
                     found.append((name, node.lineno))
         elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
             name = _third_party(node.module)
@@ -248,6 +255,16 @@ def _python_names(path: Path) -> list[tuple[str, int]]:
                 if name is not None:
                     found.append((name, node.lineno))
     return found
+
+
+def _door_annotations(path: Path) -> set[tuple[str, int]]:
+    """Read the door generator's exact provider annotation projection."""
+    if path != ROOT / 'extensions/python/metta/_door_namespaces.py':
+        return set()
+    sys.path.insert(0, str(ROOT / 'extensions/python/tools'))
+    from doorgen import declared_annotation_imports
+
+    return declared_annotation_imports(path)
 
 
 def _registers(func: ast.expr) -> bool:

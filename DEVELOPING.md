@@ -53,12 +53,36 @@ Run the four Python generated-artifact checks as one target:
 CHECK_PY="$PY" sh check.sh generated-artifacts
 ```
 
-The target runs `ledger`, `aio-mirror`, `init-stub`, then `reference`. The
-ledger is independent. `aio-mirror` must precede `reference` because
-`aiogen.py --write` rewrites `aio.py` before `reference.py --write` publishes
-that file's docstrings. It also precedes `init-stub`, whose package stub mirrors
-the generated module functions in `metta/__init__.py`. Keeping the checks in
-remedy order makes one repair pass converge.
+The target retains the individual `ledger`, `aio-mirror`, `init-stub` and
+`reference` checks. The complete door pipeline has one command:
+
+```sh
+"$PY" extensions/python/tools/doorgen.py --write
+CHECK_PY="$PY" sh check.sh door-sync
+```
+
+`metta/doors.py` owns the core declarations. Workspace packages own their
+literal `DOORS` tuples. Add or change a row and its behavioral tests before
+regenerating. Each row names complete signatures, types, effects, result
+shape, tiers, implementation, documentation and evidence. Optional binding,
+provider and sugar records describe the boundary or fixed parameter point.
+
+The generator writes Space, Rows and Answers declarations, the async,
+module and context mirrors, remote client declarations and operation schemas,
+the stub, reference pages, shrink ledger, and the consumer sheet's door
+sections. A hand implementation stays outside the marked regions; its
+signature and documentation must match its row. Inherited members are checked
+against their defining class. Edit those bodies for behavior and the row for
+the public contract; public membership comes from the rows.
+
+`door-sync` checks all projections, contract fields, coverage and refusal
+witnesses, then runs its planted-defect and mirror tests. `doorgen.py
+--coverage` checks that every row cites existing tests. `doorgen.py --refusals`
+runs the exact pytest nodes named by `Refusal` records and checks that each
+asserts the declared exception class. The evidence linter reads the same
+Assumes, Guarantees and Fails-when fields. A second sugar fixing the same
+point on the same receiver, an undeclared public method or a missing test is
+a finding.
 
 Every root gate run places its temporary files under
 `ai-tmp/check-runs/run.*`. An advisory lock distinguishes an active concurrent

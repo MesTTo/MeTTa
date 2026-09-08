@@ -1,6 +1,6 @@
 #!/bin/sh
 # Purpose: build a library this repository has never heard of, install it, and
-#   watch it extend the Python seat through nine doors with ZERO edits here.
+#   watch it extend the Python seat through ten doors with no core edits.
 #   The library is called `solars`, it is written by this script into a scratch
 #   directory, and nothing about it exists in the checkout: no fixture package,
 #   no test double, no name in any source file. If the seat can be extended
@@ -16,6 +16,9 @@
 #   - the checkout is read, never written: the package installs into a scratch
 #     --target directory that goes on PYTHONPATH, so `importlib.metadata` finds
 #     a real distribution with real entry points.
+#   - a package-owned door reaches both Space and MeTTa as solars.frame, and
+#     a retained method refuses after withdrawal. Its typed contract is
+#     queryable at boot [tested: sh check.sh stranger-python; commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543].
 # Fails when: uv is absent, which it refuses on rather than skipping.
 # Open Obligations:
 #   To Do: None
@@ -33,7 +36,7 @@ project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 scratch=$(mktemp -d)
 trap 'rm -rf "$scratch"' EXIT HUP INT TERM
 
-mkdir -p "$scratch/solars/solars/metta"
+mkdir -p "$scratch/solars/solars/metta" "$scratch/solars/tests"
 
 cat > "$scratch/solars/pyproject.toml" <<'TOML'
 [build-system]
@@ -76,6 +79,10 @@ answer without it.
 import pathlib
 
 from metta import seam
+from metta.doors import (
+    AnswersAs, Body, Determinism, Door as DoorContract, EffectClass, Kind,
+    Owner, Provider, Receiver, Signature, Tier,
+)
 from metta.foreign import SpaceProvider
 
 
@@ -246,6 +253,26 @@ def sources():
     return pathlib.Path(__file__).parent / "metta"
 
 
+def frame(space, rows):
+    """Build a solars frame through the declared rows.to conversion."""
+    del space
+    return rows.to("solars")
+
+
+DOORS = (
+    DoorContract(
+        owner=Owner.namespace, name="frame", kind=Kind.provider,
+        signatures=(Signature("space, rows"),), answers=AnswersAs.value,
+        effect=EffectClass.oracleIO, determinism=Determinism.det,
+        tiers=(Tier.sync, Tier.context),
+        body=Body("solars", "frame", Receiver.space),
+        provider=Provider("solars", "solars"),
+        docs="Build a solars frame through the declared rows.to conversion.",
+        evidence=("tests/test_solars.py::test_frame",),
+    ),
+)
+
+
 def register():
     """Every row solars adds, against points the seat declared."""
     seam.frame.register(
@@ -263,7 +290,23 @@ def register():
     # live; seam.at() finds it whether or not this package imported that
     # module, which is what the seam's declaring-module list is for.
     seam.at("reflector").register("solars", claims=reflects, lower=lower)
+    seam.door.register("solars", doors=DOORS)
 SOLARS
+
+cat > "$scratch/solars/tests/test_solars.py" <<'DOOR_TEST'
+"""Purpose: witness the frame door declared by the installed solars package."""
+
+from metta import G, MeTTa, S
+from metta.results import Rows
+
+
+def test_frame():
+    """The namespace converts binding rows through the advertised provider."""
+    with MeTTa() as context:
+        rows = Rows(("who", "n"), [(S.Ada, G(1)), (S.Bob, G(2))])
+        assert context.solars.frame(rows).column("n") == [1, 2]
+        assert context.self.solars.frame(rows).column("who") == ["Ada", "Bob"]
+DOOR_TEST
 
 cat > "$scratch/free.py" <<'FREE'
 """Discovery costs nothing: the name is advertised, the package is not loaded.
@@ -284,13 +327,12 @@ assert "solars" in advertised, advertised
 assert "solars" not in sys.modules, "advertised() must not import the package"
 # This repository's own row packages advertise under the same group and are
 # found the same way, which is the ruling of 2026-09-08 read from the outside:
-# there is no built-in tier for a dispatch to prefer. (metta-arrays is beside
-# them here as a LIBRARY: it advertises nothing, because a program reaches its
-# embedding store by importing it and discovery would only make every other
-# program pay to load it.)
+# there is no built-in tier for a dispatch to prefer. metta-arrays advertises
+# its lightweight door metadata, keeping the implementation unloaded here.
 assert "metta-numpy" in advertised, advertised
-assert "metta-arrays" not in advertised, advertised
+assert "metta-arrays" in advertised, advertised
 assert "metta_numpy" not in sys.modules, "nor may listing load one of ours"
+assert "metta_arrays" not in sys.modules, "listing must leave implementations unloaded"
 print("discovery       :", len(advertised), "packages advertised, none imported")
 FREE
 
@@ -373,9 +415,18 @@ assert claimed.row.lower(solars.Model(3, 4), "model", m.self) == 2
 assert len(m.self.match(m.self.parse("(model $field $value)"))) == 2
 print("reflector       : the reflector point lowers a solars.Model to facts")
 
+# 10. a package-owned accessor, reached through both generated receivers.
+assert m.solars.frame(rows).column("n") == [1, 2]
+assert m.self.solars.frame(rows).column("who") == ["Ada", "Bob"]
+held_frame = m.solars.frame
+door_pattern = "(door frame provider namespace $args $answers $effect $det $sugar $binding (door-provider door solars solars) $body $refuses $tiers $docs $evidence $assumes $guarantees $fails)"
+assert m.run(f"!(match &metta {door_pattern} True)") == [[True]]
+print("door            : m.solars.frame(rows), package contract present at boot")
+
 # The seam says who registered what, as data, and the catalog says it in MeTTa.
 mine = sorted(row.point for row in seam.rows() if row.name == "solars")
 assert mine == [
+    "door",
     "frame",
     "image",
     "index",
@@ -391,7 +442,20 @@ published = sorted({str(atom) for group in answers for atom in group})
 assert published == mine, (published, mine)
 print("catalog         :", " ".join(published), "as (extension python ...) rows")
 
-print("solars extended the Python seat through 9 doors with no edit to PeTTa")
+seam.door.unregister("solars")
+try:
+    held_frame(rows)
+except AttributeError as error:
+    assert "withdrawn" in str(error), error
+else:
+    raise AssertionError("a retained accessor invoked a withdrawn door")
+seam.publish(m)
+assert m.run(f"!(match &metta {door_pattern} True)") == [[]]
+seam.door.register("solars", doors=solars.DOORS)
+assert held_frame(rows).column("n") == [1, 2]
+backed.drop()
+m.close()
+print("solars extended the Python seat through 10 doors with no edit to PeTTa")
 PROVE
 
 uv pip install --quiet --target "$scratch/site" --no-deps "$scratch/solars"
@@ -419,9 +483,16 @@ run_with_solars() {
 : > "$scratch/proof.log"
 run_with_solars "$scratch/free.py"
 run_with_solars "$scratch/prove.py"
+PYTHONPATH="$scratch/site:$project_dir/extensions/python" \
+    "$CHECK_PY" -m pytest --noconftest -c /dev/null --import-mode=importlib -q \
+    -o "cache_dir=$scratch/pytest-cache" -W error \
+    "$scratch/solars/tests/test_solars.py::test_frame" >> "$scratch/proof.log" 2>&1 || {
+    cat "$scratch/proof.log"
+    exit 1
+}
 cat "$scratch/proof.log"
 
-grep -Fq "solars extended the Python seat through 9 doors with no edit to PeTTa" \
+grep -Fq "solars extended the Python seat through 10 doors with no edit to PeTTa" \
     "$scratch/proof.log"
 
 echo "a stranger extends the Python seat: passed"

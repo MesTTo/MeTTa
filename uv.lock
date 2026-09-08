@@ -23,6 +23,7 @@ members = [
     "metta-duckdb",
     "metta-faiss",
     "metta-graphql",
+    "metta-live",
     "metta-nanoarrow",
     "metta-numpy",
     "metta-otel",
@@ -30,7 +31,9 @@ members = [
     "metta-polars",
     "metta-pyarrow",
     "metta-pydantic",
+    "metta-remote",
     "metta-sqlite",
+    "metta-tables",
     "metta-websocket",
     "pymetta",
 ]
@@ -1288,6 +1291,17 @@ requires-dist = [
 ]
 
 [[package]]
+name = "metta-live"
+version = "0.8.0"
+source = { editable = "extensions/python/ext/metta-live" }
+dependencies = [
+    { name = "pymetta" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pymetta", specifier = "==0.8.0" }]
+
+[[package]]
 name = "metta-nanoarrow"
 version = "0.8.0"
 source = { editable = "extensions/python/ext/metta-nanoarrow" }
@@ -1407,9 +1421,31 @@ requires-dist = [
 ]
 
 [[package]]
+name = "metta-remote"
+version = "0.8.0"
+source = { editable = "extensions/python/ext/metta-remote" }
+dependencies = [
+    { name = "pymetta" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pymetta", specifier = "==0.8.0" }]
+
+[[package]]
 name = "metta-sqlite"
 version = "0.8.0"
 source = { editable = "extensions/python/ext/metta-sqlite" }
+dependencies = [
+    { name = "pymetta" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pymetta", specifier = "==0.8.0" }]
+
+[[package]]
+name = "metta-tables"
+version = "0.8.0"
+source = { editable = "extensions/python/ext/metta-tables" }
 dependencies = [
     { name = "pymetta" },
 ]
@@ -2184,6 +2220,7 @@ checks = [
     { name = "metta-duckdb" },
     { name = "metta-faiss" },
     { name = "metta-graphql" },
+    { name = "metta-live" },
     { name = "metta-nanoarrow" },
     { name = "metta-numpy" },
     { name = "metta-otel", extra = ["test"] },
@@ -2191,7 +2228,9 @@ checks = [
     { name = "metta-polars" },
     { name = "metta-pyarrow" },
     { name = "metta-pydantic" },
+    { name = "metta-remote" },
     { name = "metta-sqlite" },
+    { name = "metta-tables" },
     { name = "metta-websocket" },
     { name = "mutmut" },
     { name = "mypy" },
@@ -2223,6 +2262,7 @@ das = [
 dataframes = [
     { name = "metta-pandas" },
     { name = "metta-polars" },
+    { name = "metta-tables" },
 ]
 engine = [
     { name = "janus-swi" },
@@ -2230,15 +2270,22 @@ engine = [
 graphql = [
     { name = "metta-graphql" },
 ]
+live = [
+    { name = "metta-live" },
+]
 models = [
     { name = "metta-pydantic" },
 ]
 otel = [
     { name = "metta-otel" },
 ]
+remote = [
+    { name = "metta-remote" },
+]
 sql = [
     { name = "metta-duckdb" },
     { name = "metta-sqlite" },
+    { name = "metta-tables" },
 ]
 test = [
     { name = "hypothesis" },
@@ -2247,6 +2294,7 @@ test = [
     { name = "metta-duckdb" },
     { name = "metta-faiss" },
     { name = "metta-graphql" },
+    { name = "metta-live" },
     { name = "metta-nanoarrow" },
     { name = "metta-numpy" },
     { name = "metta-otel", extra = ["test"] },
@@ -2254,7 +2302,9 @@ test = [
     { name = "metta-polars" },
     { name = "metta-pyarrow" },
     { name = "metta-pydantic" },
+    { name = "metta-remote" },
     { name = "metta-sqlite" },
+    { name = "metta-tables" },
     { name = "metta-websocket" },
     { name = "networkx" },
     { name = "openapi-spec-validator" },
@@ -2282,6 +2332,7 @@ requires-dist = [
     { name = "metta-duckdb", marker = "extra == 'sql'", editable = "extensions/python/ext/metta-duckdb" },
     { name = "metta-faiss", marker = "extra == 'arrays'", editable = "extensions/python/ext/metta-faiss" },
     { name = "metta-graphql", marker = "extra == 'graphql'", editable = "extensions/python/ext/metta-graphql" },
+    { name = "metta-live", marker = "extra == 'live'", editable = "extensions/python/ext/metta-live" },
     { name = "metta-nanoarrow", marker = "extra == 'arrow'", editable = "extensions/python/ext/metta-nanoarrow" },
     { name = "metta-numpy", marker = "extra == 'arrays'", editable = "extensions/python/ext/metta-numpy" },
     { name = "metta-otel", marker = "extra == 'otel'", editable = "extensions/python/ext/metta-otel" },
@@ -2290,7 +2341,10 @@ requires-dist = [
     { name = "metta-polars", marker = "extra == 'dataframes'", editable = "extensions/python/ext/metta-polars" },
     { name = "metta-pyarrow", marker = "extra == 'arrow'", editable = "extensions/python/ext/metta-pyarrow" },
     { name = "metta-pydantic", marker = "extra == 'models'", editable = "extensions/python/ext/metta-pydantic" },
+    { name = "metta-remote", marker = "extra == 'remote'", editable = "extensions/python/ext/metta-remote" },
     { name = "metta-sqlite", marker = "extra == 'sql'", editable = "extensions/python/ext/metta-sqlite" },
+    { name = "metta-tables", marker = "extra == 'dataframes'", editable = "extensions/python/ext/metta-tables" },
+    { name = "metta-tables", marker = "extra == 'sql'", editable = "extensions/python/ext/metta-tables" },
     { name = "metta-websocket", marker = "extra == 'das'", editable = "extensions/python/ext/metta-websocket" },
     { name = "mutmut", marker = "extra == 'checks'", specifier = ">=3.7" },
     { name = "mypy", marker = "extra == 'checks'", specifier = ">=1.18" },
@@ -2299,7 +2353,7 @@ requires-dist = [
     { name = "perflint", marker = "extra == 'checks'", specifier = ">=0.8" },
     { name = "pip-audit", marker = "extra == 'checks'", specifier = ">=2.9" },
     { name = "pylint", marker = "extra == 'checks'", specifier = ">=3.3,<4" },
-    { name = "pymetta", extras = ["arrays", "arrow", "das", "dataframes", "graphql", "models", "otel", "sql"], marker = "extra == 'test'" },
+    { name = "pymetta", extras = ["arrays", "arrow", "das", "dataframes", "graphql", "live", "models", "otel", "remote", "sql"], marker = "extra == 'test'" },
     { name = "pymetta", extras = ["test"], marker = "extra == 'checks'" },
     { name = "pyright", marker = "extra == 'checks'", specifier = ">=1.1.411" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.4.2" },
@@ -2318,7 +2372,7 @@ requires-dist = [
     { name = "vulture", marker = "extra == 'checks'", specifier = ">=2.16" },
     { name = "xenon", marker = "extra == 'checks'", specifier = ">=0.9" },
 ]
-provides-extras = ["engine", "arrays", "arrow", "das", "otel", "graphql", "dataframes", "sql", "models", "test", "checks"]
+provides-extras = ["engine", "arrays", "arrow", "das", "otel", "graphql", "dataframes", "sql", "models", "live", "remote", "test", "checks"]
 
 [[package]]
 name = "pyparsing"
