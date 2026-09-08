@@ -1,0 +1,146 @@
+# Runtime-loaded Prolog units compile beside their source
+Goal: a Prolog source the engine loads at runtime (a library's half on import, the vocabulary seed, the source observer) pays its expansion once per tree, the way the engine's own units do under engine/qlf_boot.pl.
+Constraint: one artifact policy; an artifact appears only where the boot stamps and purges it; a tree the process may not write, or a process that never loaded the boot, loads from source and writes nothing.
+
+## 2026-09-09
+Measured: `!(import! &self (library lib_thread))` consults
+lib/lib_thread/lib_thread.pl through consult_global/1 at 278,309 inferences
+in every process (SWI's compile-time expansion of the whole file:
+current_prolog_flag, apply_macros, yall, clpfd hooks); the same unit loaded
+through `load_files/2` by its stem with `qcompile(auto)` costs 281,792 in the
+process that writes lib/lib_thread/lib_thread.qlf (39,819 bytes) and 5,925
+in every process after; source_file/1 registers the .pl either way and
+unload_file/1 removes the module's clauses either way [swipl 10.1.13, one
+boot through engine/qlf_boot.pl per arm, statistics(inferences) around the
+load, ai-tmp probe].
+Found: SWI decides the artifact path in boot/init.pl's '$qlf_file'/5 by the
+SPEC. A spec that names its extension ("user explicitly specified") compiles
+from source whatever qcompile option travels with it; only a bare stem
+reaches the artifact rule: load when fresh and compatible, recompile when
+stale and the directory is writable, source otherwise. That is the condition
+under the 2026-09-05 source-observability entry's rejection ("qcompile(auto)
+reaches the files a loaded file loads and not the file the goal names"): the
+door named `.../source_observation.pl`, so the option never applied to it;
+the vocabulary seed of the cross-engine merge passed a stem and compiled
+beside itself on its first boot.
+Rejected: qcompile/1 plus a second load per call site, lib_import's
+static-import! shape, because each site would restate the freshness rule SWI
+already holds and the boot already governs.
+Rejected: compiling every writable source a program consults, because an
+artifact outside engine/ and lib/ is outside the boot's stamp (SWI version,
+encoding) and purge, so a user's directory would keep a .qlf that an SWI
+upgrade or a locale could poison with no boot to notice; SWI recompiles an
+incompatible version itself and knows nothing of the encoding. Revisit if a
+registered library directory is ever given a stamp of its own.
+Decided: one door, metta_load_source/2 in engine/metta/interop.pl: resolve
+the spec; if the boot claims it through seam:compiled_source/1, load it by
+its stem under qcompile(auto); otherwise load it as written. The claim is an
+ownership seam engine/qlf_boot.pl answers from the one pattern table its
+purge reads (engine/*.pl, engine/*/*.pl, lib/*.pl, lib/*/*.pl, matched
+segment by segment as expand_file_name/2 reads them) and only under the
+encoding its stamp records, so a boot that never loaded qlf_boot.pl claims
+nothing. consult_global/1, use_module_global/1, ensure_loaded_global/1, the
+catalog's seed load and metta_ensure_source_observation/0 go through it; the
+seed's inline qcompile(auto), which also wrote under an unstamped boot, and
+the observer's source load are the two descriptions the door removes.
+Open: the twins that import a library with a Prolog half re-pin on this
+tree; the four empirical envelopes (thread_lib, thread_linda,
+mutex_and_transaction, measure) re-observe once the import cost they carry
+has dropped.
+Measured, the corpus on this tree (`twin_coverage.py --repin`, artifacts
+warmed first): 184 twins re-pinned, 46 down and 138 up, net -2,461,799;
+the importers of a half fall by the consult they no longer pay
+(`06-the_prolog_rung_under_lib_thread` -286,616, `05-channels_pools_and_the_machine`
+-286,432, the five lib_tabling twins -111,021 to -111,161, `01-c_space`
+-109,966, the lib_file and lib_text twins -76,797 to -77,821), and the rest
+rise by 70 to 281.
+Tried: attributing the rise. A control at fd70717e3 (the import fix, no
+door) reads every pin exactly; on this tree `01-ifsimple` reads 3,920
+against 3,850 with the seed's inline load restored, with the seam
+declaration removed, with interop.pl reverted and with metta.pl reverted,
+and 3,850 with engine/qlf_boot.pl reverted; inside that file the pattern
+table alone reads 3,850, the governance predicates alone 3,880, both
+3,920. `benchmarks/probes/twin_authoring.py` places it: the define door's
+first store reads 2,857 here against 2,787 on the control, +70 in the
+once-per-file warmup, and the per-definition cost 1,368 on both, +59 over
+the lane's 1,309 from the merges since 08f6f4df. So the rise is the
+load-structure movement engine/qlf_boot.pl's header records for any
+boot-content change, landing in the first definition's warmup, and the
+2026-09-06 entry's ruling stands: the internal reason is not established
+and the class is what the pins name. `profiler/2` around the define
+answered 2^64 for every call count, the underflow the 2026-09-05
+catalog-arity entry already met.
+Decided: the lane's authoring constants are re-derived on this tree
+(warmup 1,472, per definition 1,368), which clears the twelve bands that
+were over by 69 to 70 with one definition each, rather than raising twelve
+overruns for the lane's own stale constant. The one overrun the lane reports
+as no longer needed is dropped with its paragraph (`03-if2`), and eight rise
+by their exact excess with the control deltas and `twin_floor`'s floors in
+each paragraph: the combinatorics, memoisation, tabling and newtons twins
+import a half, so the consult left both sides in equal measure and the tenth
+of it that padded the ceiling left with them, showing the twin's own excess
+whole; only `01-newtons_method` has a floor above the band (38,674 against
+37,466), library debt the paragraph states. `01-thread_lib` keeps its
+overrun of 460,000, re-derived from the envelope below once observed. A
+first pass had read `11-combinatorics_lib` and `01-thread_lib` as overruns
+to drop: both readings came from the run whose example paid the compile,
+before the child-compile ruling above.
+Open: the four empirical envelopes (`01-thread_lib` 283,406 and
+`02-thread_linda` 134,961 now BELOW their envelopes, `01-mutex_and_transaction`
+and `01-measure` above theirs as before) re-observe with `--observe
+--rounds 10` on this tree.
+Found: the process that writes an artifact pays the compile in its own
+counters, so the first importer after a purge reads apart from every other:
+two consecutive twins-lane runs on one tree read the combinatorics example
+at 97,944 and 75,810, the first the run that wrote lib_combinatorics.qlf.
+A lane that prices processes cannot carry that.
+Rejected: regenerating every library half in the boot after a purge, because
+a half loads into the process that compiles it and the boot's process must
+stay the engine a source boot exposes; a warm-up in each measuring lane,
+because it is one description per lane of one need.
+Decided: the claim makes the artifact fresh. A stale or absent artifact is
+written by a child swipl (`current_prolog_flag(executable)` names the real
+binary under janus too, `<home>/bin/<arch>/swipl` is SWI's own layout
+next, the bare name last) that boots the engine through qlf_boot.pl, since a
+half compiles under the engine's goal expansion, raises the
+`metta_qlf_child` flag so its own boot compiles the vocabulary seed in place
+rather than asking a grandchild, and qcompiles the one file its command line
+names; the parent then loads the artifact, so the first importer reads what
+every later one reads. Paths reach the shell as POSIX single-quoted words. A
+tree the child may not write, no swipl to start, or a failed child leave the
+load to SWI's rule, which compiles in the asking process as before.
+Measured: lib_datetime's half through the door reads `loaded` on its first
+load with the child's artifact present (0.08 s of wall clock for the
+child's boot and compile), and `*qcompiled*` only in a process marked as
+the child.
+Measured, ten complete full-lane rounds on this tree (`--observe --rounds
+10`, load 12 to 15 with the layout worktree's own gates running beside
+them): 269 of 277 twins read one count in every round. The four envelopes
+are rewritten from their extrema, each replacing the earlier tree's rather
+than pooling two: `01-mutex_and_transaction` 17,034..17,040 (was
+16,096..16,107), `01-thread_lib` 282,919..308,043 (was 589,444..618,249, its
+overrun re-derived from the new top to 153,950 against a ceiling of 154,093),
+`02-thread_linda` 134,860..134,989 (was 462,787..462,825), `01-measure`
+130,412..130,478 (was 126,937..127,036). Two point pins moved with the
+scheduler for the first time observed and become envelopes:
+`05-channels_pools_and_the_machine` 96,310..96,403 over nine rounds and
+`06-the_prolog_rung_under_lib_thread` 121,863..123,315 over ten, both twins
+that drive lib_thread's pools and channels; `03-hyperpose_primes` and
+`04-thin_forms` read spreads of 2 and 4, inside the point allowance.
+Open: `05-channels_pools_and_the_machine` failed its claim in one round of
+ten with an AssertionError under the lane's load, the second intermittent
+of that twin (the 2026-09-07 entry records the first, on a closed channel);
+its pool-state and thread-count assertions are the candidates, and the
+reproduction under load is the next thread's.
+Measured: a second ten-round observation read the same eight twins moving
+and none failing; the seven envelopes are pooled over every full-lane sample
+on this tree, two observation runs and four plain lane runs, 24 observations
+each (23 for `05-channels_pools_and_the_machine`, whose one failed round is
+the open intermittent above): `01-mutex_and_transaction` 17,032..17,040,
+`01-thread_lib` 282,220..313,661 (its overrun 159,568 against a ceiling of
+154,093), `02-thread_linda` 134,847..134,989, `05-channels_pools_and_the_machine`
+96,306..96,786, `06-the_prolog_rung_under_lib_thread` 121,278..123,532,
+`01-measure` 130,379..130,488, and `06-git_import`, a point pin of 26,066
+until the plain lanes read 26,022 and 26,057 while twenty observation rounds
+read 26,066: its cost follows the git repository it imports from, so it is an
+envelope too, 26,022..26,066.

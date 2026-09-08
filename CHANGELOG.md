@@ -7,6 +7,22 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- A Prolog source the engine loads at run time compiles beside itself on
+  first use in a boot that governs artifacts and loads from the `.qlf` in
+  every process after: a library's Prolog half on `import!`, the catalog's
+  vocabulary seed and the source observer all load through one door,
+  `metta_load_source/2`, which asks the new ownership seam
+  `seam:compiled_source/1`; `engine/qlf_boot.pl` claims exactly the sources
+  whose artifacts it stamps and purges, and writes a stale or absent artifact
+  through a child swipl before the claiming process loads it, so every
+  process reads the artifact and none pays the compile. Importing
+  `lib_thread` costs 5,925 inferences where it cost 278,309 in every process;
+  the source observer's first call 20,818 where it cost 94,661. A program's
+  own Prolog file, and a library under a registered or git-fetched directory,
+  load from source as before and gain no artifact.
+
 ### Fixed
 
 - The engine's tokens, receipts and vocabulary-seed units import the list,

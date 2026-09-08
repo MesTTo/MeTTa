@@ -462,6 +462,7 @@
             check_prolog_function_names/3,
             consult_global/1,
             consult_string_global/2,
+            metta_load_source/2,
             current_working_dir/1,
             import_file_string/2,
             import_prolog_function/2,
@@ -1875,29 +1876,27 @@ metta_base_engine_subsystems(EngineSource) :-
 %SWI's default base of `user`, and this one resolves metta_engine_module/1 and
 %current_metta_module/1 through the engine.
 %
-%What the asker pays: 94,661 inferences on the first call and 1 on every call
-%after it, against 67,349 for the first small observation itself and 59,624
-%for the next, so a process that observes at all pays this roughly once per
-%one and a half observations and never again [measured 2026-09-05;
-%command=statistics(inferences) either side of this predicate and of two
-%source_observation:observe_source/4 calls on `(= (o $x) (+ $x 2)) !(o 3)`,
-%in one swipl that consulted engine/qlf_boot.pl and engine/metta.pl]. It is
-%the compile from source: the boot's own load read a warm .qlf for 3,696.
-%There is no .qlf here and the option that looks like it would make one does
-%not, because SWI's qcompile(auto), whether set as a flag or passed to
-%load_files/2, reaches the files a LOADED FILE loads and not the file the goal
-%names: with it on, engine/source_positions.qlf appeared and
-%engine/source_observation.qlf did not, and the door measured 94,666 with it
-%against 94,661 without [measured 2026-09-05]. Writing one would take an explicit
-%qcompile/1 and a second load, which is a second artifact policy beside
-%engine/qlf_boot.pl's for a cost paid once by a caller that is already running
-%a whole program under the debugger.
+%What the asker pays: 20,818 inferences on the first call in a process whose
+%boot governs artifacts and 1 on every call after it, against 67,349 for the
+%first small observation itself and 59,624 for the next; the one process that
+%writes engine/source_observation.qlf pays 105,493, where consulting the
+%source cost 94,661 in every process before the unit loaded through
+%metta_load_source/2 [measured 2026-09-09; command=statistics(inferences)
+%either side of this predicate, one swipl per arm that consulted
+%engine/qlf_boot.pl and engine/metta.pl; the observation costs measured
+%2026-09-05 the same way on two source_observation:observe_source/4 calls on
+%`(= (o $x) (+ $x 2)) !(o 3)`; commit=WORKTREE]. Until 2026-09-09 this door
+%consulted the source by its .pl path, and the reading that qcompile(auto)
+%"reaches the files a loaded file loads and not the file the goal names" was
+%SWI's rule seen from that spec: a spec that names its extension compiles from
+%source whatever option travels with it, and only a bare stem reaches the
+%artifact rule, which is what metta_load_source/2 hands it.
 metta_ensure_source_observation :-
     (   current_predicate(source_observation:observe_source/4)
     ->  true
     ;   metta_engine_src_dir(EngineSource),
         atomic_list_concat([EngineSource, '/source_observation.pl'], File),
-        load_files(File, [if(not_loaded), imports([])]),
+        metta_load_source(File, [if(not_loaded), imports([])]),
         metta_base_engine_subsystems(EngineSource)
     ).
 

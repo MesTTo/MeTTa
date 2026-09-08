@@ -373,6 +373,7 @@ reaches(metta, ext_points, 'installs the atom-write wrappers when a handler exis
 reaches(metta, materialize, 'effect classification retains operation identity and user transactions own image publication').
 reaches(metta, filereader, 'import! and the file builtins are the loader\'s surface').
 reaches(metta, parser, 'sread, swrite and sdisplay are the core\'s text builtins').
+reaches(metta, qlf_boot, 'the runtime loader asks the boot, through seam:compiled_source/1, whether it governs a source before compiling it beside itself').
 reaches(metta, spaces, 'the space builtins are the space subsystem\'s surface').
 reaches(metta, specializer, 'the verify-specializations pragma write opens a fresh coverage tally and closing it reports one').
 reaches(metta, support_graph, 'a world admits a program write only after walking who its recompilation reaches').

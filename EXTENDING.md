@@ -3066,6 +3066,25 @@ needs it, the way the Python bridge registers its import-as alias rewrite when
 the first alias lands, so a program that never uses the feature pays one failed
 lookup per form and nothing more.
 
+**`seam:compiled_source/1`** is the boot's claim over a Prolog source. Every
+Prolog unit the engine loads at run time (a library's Prolog half on its first
+import through `consult_global/1`, the catalog's vocabulary seed, the source
+observer) goes through one door, `metta_load_source/2`, which asks this seam
+before loading: a claimed source is loaded by its stem under `qcompile(auto)`,
+so it compiles beside itself once and loads from the `.qlf` in every process
+after, and an unclaimed one loads from source and leaves nothing behind.
+`engine/qlf_boot.pl` supplies the one clause, claiming exactly the sources
+whose artifacts it stamps and purges as a set (`engine/*.pl`, `engine/*/*.pl`,
+`lib/*.pl`, `lib/*/*.pl`) and only under the encoding its stamp records, which
+is why a program's own file, or a library under a registered or git-fetched
+directory, gains no artifact: nothing would notice one that outlived the SWI
+version or the locale that wrote it. A process that never loaded the boot has
+no clause here and loads every runtime source from source. The claim also makes
+the artifact fresh: a stale or absent one is written by a child swipl the boot
+starts before the claiming process loads, so that process reads the artifact
+and never pays the compile, the first importer included; a process marked as
+such a child (the `metta_qlf_child` flag) compiles in place.
+
 A clause of either that THROWS is your bug and is not caught. Reading a throw as
 "no bridge answered" once ran the class walk instead, and one broken protocol
 predicate silently destroyed typing for every host object in the process, with
