@@ -170,7 +170,7 @@ A property over your own translator or operation is then one decorator:
 ```python
 @given(_atoms())
 def test_python_wire_round_trip(atom):
-    assert metta.wire.from_wire(atom.to_wire()) == atom
+    assert metta.convert.from_wire(atom.to_wire()) == atom
 ```
 
 `atoms(ground=True)` drops variables for space-content generators, `expressions()` roots every example at the shape spaces store, and hypothesis is only imported when a strategy is built, so the module costs nothing at import. The complete surface is in [`metta.testing`](../reference/metta-testing).

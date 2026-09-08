@@ -143,7 +143,7 @@ def fold(
     *,
     space: str,
     pattern: Any,
-    on: str = 'add',
+    on: SubscriptionEdge = SubscriptionEdge.add,
     state: Any = STATELESS,
     into: Any = None,
     under: Any = _UNSET,

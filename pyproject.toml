@@ -761,7 +761,7 @@ forbidden_modules = [
 name = "leaf modules do not import the facade"
 type = "forbidden"
 source_modules = [
-    "metta.subscribe", "metta.events", "metta.foreign", "metta.casting",
+    "metta.subscribe", "metta.events", "metta.foreign", "metta._convert_cast",
     "metta._debug", "metta._recording", "metta._trace", "metta.lint",
     "metta.derivation", "metta.results", "metta.vocabularies",
 ]
@@ -869,7 +869,6 @@ forbidden_modules = [
     "metta.live",
     "metta.aio",
     "metta.algebra",
-    "metta.casting",
     "metta.convert",
     "metta.derivation",
     "metta.events",

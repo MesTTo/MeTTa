@@ -91,7 +91,7 @@ class Derivation:
 def from_atom(tree: Atom) -> Derivation:
 ```
 
-> Parse the (derivation (answer Call Out) Steps...) atom.
+> Parse the (derivation (answer Call Answer) Step...) atom.
 
 ### `Derivation.facts`
 

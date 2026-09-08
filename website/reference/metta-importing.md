@@ -142,7 +142,7 @@ def uninstall(self) -> None:
 ## `install`
 
 ```python
-def install(space: Any = None, *, path: Any = None) -> Finder:
+def install(space: SpaceLike | None = None, *, path: Any = None) -> Finder:
 ```
 
 > Make `.metta` files importable, and answer the finder that does it.

@@ -29,6 +29,7 @@ Decides:
 from __future__ import annotations
 
 import ast
+import builtins
 import re
 import sys
 from dataclasses import dataclass
@@ -38,6 +39,9 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 PYTHON_PACKAGE = Path("extensions/python/metta")
 ERRORS = PYTHON_PACKAGE / "errors.py"
+#: The module that DEFINES the classes and the door; its own raises are about
+#: a malformed Remedy rather than refusals that carry one.
+_DEFINING_MODULE = "errors.py"
 SEGMENTS = Path("engine/spaces/segment_matching.pl")
 #: A `host-reference` ground stands on the HOST language's own specification,
 #: which the engine spells without naming a host because it names none. This
@@ -51,6 +55,49 @@ METTA_LAWS = ("EffectSafety", "SeqFragment", "UnifierMostGeneral", "HostLaws")
 ARBITER_CORPUS = "tests/conformance/petta"
 
 
+#: Where the seat's own refusal table lives. Every class it names is a MeTTa
+#: refusal the engine declares a kind for, and a site that raises one has a
+#: row to raise it through.
+REFUSALS = PYTHON_PACKAGE / "_refusals.py"
+
+#: The one door that builds a refusal from its row, and the two spellings a
+#: site may still use directly: `refusing(...)` attaches the parts by hand,
+#: which the classes with no kind still need, and re-raising an error the
+#: crossing already dressed is not a raise site at all.
+REFUSAL_DOOR = "refuse"
+
+#: WHY an inline `raise` is still allowed, stated once so nobody has to guess:
+#:
+#: - A Python-level TypeError, ValueError or AttributeError for an argument of
+#:   the wrong SHAPE is not a MeTTa refusal. It is the host language refusing
+#:   its own call, `except TypeError` is what a caller writes for it, and the
+#:   engine's taxonomy has no kind for it because no other seat would spell it
+#:   the same way. Those sites carry a Remedy where the repair is mechanical,
+#:   which extensions/python/tests/repository/test_refusal_remedies.py gates.
+#: - A class the taxonomy does NOT name is the seat's own meaning, and it has
+#:   no row to raise through until the engine declares a kind for it.
+#: - errors.py itself DEFINES the classes and the door, so its own raises are
+#:   about a malformed Remedy rather than refusals that carry one.
+#: - The CATCH-ALL kind, the one whose origin is `default`, is by definition
+#:   the class with no specific meaning: the taxonomy gives it to a ball
+#:   nothing shaped, and the seat gives it to an engine answer this side
+#:   cannot use. Raising it directly IS what it is for, and its row's remedy
+#:   ("report the ball with the message it carries") is true of a ball rather
+#:   than of a seat-side reading, so attaching it would put a false repair on
+#:   a true refusal.
+#:
+#: What is NOT allowed is raising a class the taxonomy names for a SPECIFIC
+#: kind without going through its row: the class, the ground and the remedy
+#: would then be three decisions at the site instead of one row, which is the
+#: drift the table exists to prevent.
+INLINE_RAISE_REASONS = (
+    "a Python-level refusal of an argument's shape is not a MeTTa refusal",
+    "a class the taxonomy does not name has no row to raise through",
+    "errors.py defines the classes and the door",
+    "the catch-all class is what a refusal with no specific kind IS",
+)
+
+
 @dataclass(frozen=True)
 class GateCounts:
     """The refusal populations proved by one gate pass."""
@@ -58,6 +105,7 @@ class GateCounts:
     compile_sites: int
     python_semantic_sites: int
     metta_law_fences: int
+    row_raises: int = 0
 
 
 def valid_ground(ground: Any) -> bool:
@@ -114,11 +162,53 @@ def _compile_error_is_central(text: str, filename: str) -> bool:
     return False
 
 
+def taxonomy_classes(root: Path) -> frozenset[str]:
+    """Every class the engine's refusal rows name on this seat.
+
+    Read out of the generated table's source rather than by importing it, so
+    the scan stays a source walk and needs no engine. A tree with no table
+    yields nothing and the row-raise rule simply finds no sites, which is what
+    the missing-file finding below is for.
+
+    The catch-all kind's class is left OUT, for the reason INLINE_RAISE_REASONS
+    states: it is the class a refusal with no specific kind already is.
+    """
+    path = root / REFUSALS
+    if not path.is_file():
+        return frozenset()
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(REFUSALS))
+    named: set[str] = set()
+    catch_all: set[str] = set()
+    for call in (node for node in ast.walk(tree) if isinstance(node, ast.Call)):
+        if _call_name(call) != "Refusal":
+            continue
+        row = {
+            keyword.arg: keyword.value.value
+            for keyword in call.keywords
+            if isinstance(keyword.value, ast.Constant)
+        }
+        spelled = row.get("cls")
+        if spelled is None:
+            continue
+        named.add(str(spelled))
+        if row.get("origin") == "default":
+            catch_all.add(str(spelled))
+    named -= catch_all
+    # A builtin the seat borrows for a kind is Python's own word for the
+    # condition, and `except ValueError` has to stay the caller's spelling, so
+    # a site raising one is not a row-raise finding.
+    return frozenset(name for name in named if not hasattr(builtins, name))
+
+
 def scan_refusal_grounds(root: Path) -> tuple[list[str], GateCounts]:
     """Scan every owned refusal site and its central ground mechanism."""
     findings: list[str] = []
     compile_sites = 0
     python_semantic_sites = 0
+    row_raises = 0
+    named = taxonomy_classes(root)
+    if not (root / REFUSALS).is_file():
+        findings.append(f"{REFUSALS}: the seat's refusal table is missing")
     package = root / PYTHON_PACKAGE
     if not package.is_dir():
         findings.append(f"{PYTHON_PACKAGE}: Python package is missing")
@@ -133,6 +223,21 @@ def scan_refusal_grounds(root: Path) -> tuple[list[str], GateCounts]:
                     f"{relative}:{exc.lineno or 1}: cannot scan Python: {exc.msg}"
                 )
                 continue
+            defining = relative.name == _DEFINING_MODULE
+            for raise_of in (node for node in ast.walk(tree) if isinstance(node, ast.Raise)):
+                if defining or not isinstance(raise_of.exc, ast.Call):
+                    continue
+                raised = _call_name(raise_of.exc)
+                if raised not in named:
+                    continue
+                row_raises += 1
+                findings.append(
+                    f"{relative}:{raise_of.lineno}: {raised} is a class the "
+                    f"engine's refusal rows name, so it is raised through its "
+                    f"row: `raise {REFUSAL_DOOR}(<kind>, message, **fields)`. "
+                    f"An inline raise is for the three cases the lane states: "
+                    f"{'; '.join(INLINE_RAISE_REASONS)}"
+                )
             for call in (node for node in ast.walk(tree) if isinstance(node, ast.Call)):
                 name = _call_name(call)
                 if name == "CompileError":
@@ -174,6 +279,7 @@ def scan_refusal_grounds(root: Path) -> tuple[list[str], GateCounts]:
         compile_sites,
         python_semantic_sites,
         metta_law_fences,
+        row_raises,
     )
 
 
@@ -217,6 +323,7 @@ def main() -> int:
         f"{counts.compile_sites} CompileError site(s), "
         f"{counts.python_semantic_sites} Python semantic site(s), "
         f"{counts.metta_law_fences} MeTTa-law fence(s), "
+        f"{counts.row_raises} taxonomy class(es) raised outside their row, "
         f"{len(findings)} finding(s)"
     )
     return 1 if findings else 0

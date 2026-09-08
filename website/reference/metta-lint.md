@@ -38,7 +38,7 @@ def remaining(self) -> int:
 ## `lint`
 
 ```python
-def lint(space) -> list[Finding]:
+def lint(space: SpaceLike) -> list[Finding]:
 ```
 
 > Diagnose a space and return an empty list when no check fires.
@@ -50,7 +50,7 @@ def lint(space) -> list[Finding]:
 ## `lint_file`
 
 ```python
-def lint_file(path: str | os.PathLike[str], *, m=None) -> list[Finding]:
+def lint_file(path: str | os.PathLike[str], *, m: SpaceLike | None = None) -> list[Finding]:
 ```
 
 > Diagnose one source file, each finding anchored to its line.

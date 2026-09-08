@@ -180,6 +180,6 @@ The successful cast returns the same symbol. The failed cast names the type
 the space knows. Declarations are space-relative, so another space can carry
 a different type environment.
 
-See [`metta.casting`](../reference/metta-casting) for structural targets,
+See [`metta.convert`](../reference/metta-convert) for structural targets,
 protocol types, and Python type spellings. Next, inspect execution and
 support in [07. Seeing your program](./07-seeing-your-program).

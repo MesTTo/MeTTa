@@ -266,7 +266,7 @@ Python side does not move. Within one run the counts are exact: three fresh
 | `!(quote (+ 1 2))` | `S['+'](1, 2)` | `(+ 1 2)` | dissolves |
 | `!(noeval (+ 1 2))` | `S['+'](1, 2)` | `(+ 1 2)` | dissolves |
 | `!(unquote (quote (+ 1 2)))` | `m.eval(S['+'](1, 2))` | `3` | method |
-| `!(gtry id a)` | `space += metta.lib.strategy ⏎ space.eval(S.gtry(metta.strategies.id, S.a))` | `a` | method |
+| `!(gtry id a)` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.eval(S.gtry(metta.fn.id, S.a))` | `a` | method |
 | `!(case% 2 ((1 one) (2 two)))` | &mdash; | &mdash; | absent |
 | `!(let% $x 1 (+ $x 1))` | &mdash; | &mdash; | absent |
 | `!(let*% (($x 1)) $x)` | &mdash; | &mdash; | absent |
@@ -343,13 +343,13 @@ Python side does not move. Within one run the counts are exact: three fresh
 | `(: pbf (-> Number Number)) ⏎ (= (pbf $x) $x) ⏎ !(get-type pbf)` | `t = S['->'](S.Number, S.Number) ⏎ t` | `(-> Number Number)` | dissolves |
 | `(= (pbf $x) (+ $x 1)) ⏎ !(pbf 1)` | `space += metta.equation(S.pbf(V.x)).to(V.x + 1) ⏎ space.eval(S.pbf(1))[0]` | `2` | method |
 | `!(get-type &self)` | &mdash; | &mdash; | absent |
-| `!(get-type TP)` | `space += metta.lib.strategy ⏎ space.eval(S['get-type'](metta.strategies.TP))` | `Type` | method |
-| `!(get-type TU)` | `space += metta.lib.strategy ⏎ space.eval(S['get-type'](metta.strategies.TU))` | `(-> Type Type)` | method |
+| `!(get-type TP)` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.eval(S['get-type'](strategy.TP))` | `Type` | method |
+| `!(get-type TU)` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.eval(S['get-type'](strategy.TU))` | `(-> Type Type)` | method |
 | `!(get-type (Pair 1 2))` | &mdash; | &mdash; | absent |
 | `!(get-type PairType)` | &mdash; | &mdash; | absent |
 | `!(skel-swap-pair (Pair 1 2))` | &mdash; | &mdash; | absent |
 | `!(skel-swap-pair-native (Pair 1 2))` | &mdash; | &mdash; | absent |
-| `!(get-type ◁)` | `space += metta.lib.strategy ⏎ space.eval(S['get-type'](S['◁']))` | `(-> Atom Type Atom Atom)` | method |
+| `!(get-type ◁)` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.eval(S['get-type'](S['◁']))` | `(-> Atom Type Atom Atom)` | method |
 
 - `get-type` `(-> Atom %Undefined%)` &mdash; Declared types are space-relative, so `space.type(atom)` asks the space. Class declarations use the consolidated `@space.define` decorator.
 - `get-type-space` `(-> SpaceType Atom Atom)` &mdash; The same question asked of a named space through that handle's `space.type(atom)` method.
@@ -358,8 +358,8 @@ Python side does not move. Within one run the counts are exact: three fresh
 - `->` `(-> (%Rest% Type) Type)` &mdash; Annotations. A parameter and return annotation on a decorated function emits the arrow, and `Callable[[int], int]` maps through the same one table; `S['->']` stays for a hand-built arrow.
 - `=` `(-> $t $t %Undefined%)` &mdash; The definitional decorator. `@m.define` compiles a function into equations, `metta.equation(lhs).to(rhs)` builds one by hand, and both land as ordinary `(= ...)` atoms a program can match.
 - `SpaceType` `Type` &mdash; The type of a space. This engine does not declare the name, so there is nothing for a Python type table to map to yet. The form is shown but not run here: this engine answers SpaceType for a space but does not declare the symbol itself.
-- `TP` `Type` &mdash; Lämmel's type-preserving strategy scheme, exported as the reified `metta.strategies.TP` symbol.
-- `TU` `(-> Type Type)` &mdash; Lämmel's type-unifying scheme constructor, exported as the reified `metta.strategies.TU` symbol.
+- `TP` `Type` &mdash; Lämmel's type-preserving strategy scheme, exported as the reified `strategy.TP` symbol.
+- `TU` `(-> Type Type)` &mdash; Lämmel's type-unifying scheme constructor, exported as the reified `strategy.TU` symbol.
 - `Pair` `(-> $ta $tb (PairType $ta $tb))` &mdash; A constructor from the `skel` demonstration module. This engine has no such module; a class decorated with `@space.define` declares its constructor in that space. The form is shown but not run here: this engine does not declare the name.
 - `PairType` `(-> $ta $tb Type)` &mdash; The parameterised type of `Pair`, from the same module. The form is shown but not run here: this engine does not declare the name.
 - `skel-swap-pair` `(-> (PairType $ta $tb) (PairType $tb $ta))` &mdash; The `skel` module's worked equation, the demonstration that a built-in module can ship both a MeTTa and a native implementation. The form is shown but not run here: this engine does not declare the name.
@@ -498,13 +498,13 @@ Python side does not move. Within one run the counts are exact: three fresh
 
 | MeTTa | Python | answers | bucket |
 |---|---|---|---|
-| `(= (pb-try-step strategy-a) strategy-b) ⏎ (= (pb-try-step $x) Empty) ⏎ !(strategy-apply (try pb-try-step) strategy-a)` | `space += metta.lib.strategy ⏎ space.run('(= (pb-try-step strategy-a) strategy-b) (= (pb-try-step $x) Empty)') ⏎ space.eval(S['strategy-apply'](metta.strategies.try_(S['pb-try-step']), S['strategy-a']))` | `strategy-b` | method |
-| `(= (pb-repeat-step strategy-a) strategy-b) ⏎ (= (pb-repeat-step strategy-b) strategy-c) ⏎ (= (pb-repeat-step $x) Empty) ⏎ !(strategy-apply (repeat pb-repeat-step) strategy-a)` | `space += metta.lib.strategy ⏎ space.run('(= (pb-repeat-step strategy-a) strategy-b) (= (pb-repeat-step strategy-b) strategy-c) (= (pb-repeat-step $x) Empty)') ⏎ space.eval(S['strategy-apply'](metta.strategies.repeat(S['pb-repeat-step']), S['strategy-a']))` | `strategy-c` | method |
-| `(= (pb-topdown-step strategy-a) strategy-b) ⏎ (= (pb-topdown-step $x) Empty) ⏎ !(strategy-apply (topdown (try pb-topdown-step)) (strategy-node strategy-a))` | `space += metta.lib.strategy ⏎ space.run('(= (pb-topdown-step strategy-a) strategy-b) (= (pb-topdown-step $x) Empty)') ⏎ plan = metta.strategies.topdown(metta.strategies.try_(S['pb-topdown-step'])) ⏎ space.eval(S['strategy-apply'](plan, S['strategy-node'](S['strategy-a'])))` | `(strategy-node strategy-b)` | method |
-| `(= (pb-bottomup-step strategy-a) strategy-b) ⏎ (= (pb-bottomup-step (strategy-node strategy-b)) strategy-bottomup-root) ⏎ (= (pb-bottomup-step $x) Empty) ⏎ !(strategy-apply (bottomup (try pb-bottomup-step)) (strategy-node strategy-a))` | `space += metta.lib.strategy ⏎ space.run('(= (pb-bottomup-step strategy-a) strategy-b) (= (pb-bottomup-step (strategy-node strategy-b)) strategy-bottomup-root) (= (pb-bottomup-step $x) Empty)') ⏎ plan = metta.strategies.bottomup(metta.strategies.try_(S['pb-bottomup-step'])) ⏎ space.eval(S['strategy-apply'](plan, S['strategy-node'](S['strategy-a'])))` | `strategy-bottomup-root` | method |
-| `(= (pb-innermost-step strategy-a) strategy-b) ⏎ (= (pb-innermost-step strategy-b) strategy-c) ⏎ (= (pb-innermost-step (strategy-node strategy-c)) strategy-innermost-root) ⏎ (= (pb-innermost-step $x) Empty) ⏎ !(strategy-apply (innermost pb-innermost-step) (strategy-node strategy-a))` | `space += metta.lib.strategy ⏎ space.run('(= (pb-innermost-step strategy-a) strategy-b) (= (pb-innermost-step strategy-b) strategy-c) (= (pb-innermost-step (strategy-node strategy-c)) strategy-innermost-root) (= (pb-innermost-step $x) Empty)') ⏎ plan = metta.strategies.innermost(S['pb-innermost-step']) ⏎ space.eval(S['strategy-apply'](plan, S['strategy-node'](S['strategy-a'])))` | `strategy-innermost-root` | method |
-| `!(stratego-all id (f a b))` | `space += metta.lib.strategy ⏎ plan = metta.strategies.stratego_all(metta.strategies.id) ⏎ space.eval(S['strategy-apply'](plan, S.f(S.a, S.b)))` | `(f a b)` | method |
-| `!(stratego-one id (f a b))` | `space += metta.lib.strategy ⏎ plan = metta.strategies.stratego_one(metta.strategies.id) ⏎ space.eval(S['strategy-apply'](plan, S.f(S.a, S.b)))` | `(f a b), (f a b), (f a b)` | method |
+| `(= (pb-try-step strategy-a) strategy-b) ⏎ (= (pb-try-step $x) Empty) ⏎ !(strategy-apply (try pb-try-step) strategy-a)` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-try-step strategy-a) strategy-b) (= (pb-try-step $x) Empty)') ⏎ space.eval(S['strategy-apply'](strategy.try_(S['pb-try-step']), S['strategy-a']))` | `strategy-b` | method |
+| `(= (pb-repeat-step strategy-a) strategy-b) ⏎ (= (pb-repeat-step strategy-b) strategy-c) ⏎ (= (pb-repeat-step $x) Empty) ⏎ !(strategy-apply (repeat pb-repeat-step) strategy-a)` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-repeat-step strategy-a) strategy-b) (= (pb-repeat-step strategy-b) strategy-c) (= (pb-repeat-step $x) Empty)') ⏎ space.eval(S['strategy-apply'](strategy.repeat(S['pb-repeat-step']), S['strategy-a']))` | `strategy-c` | method |
+| `(= (pb-topdown-step strategy-a) strategy-b) ⏎ (= (pb-topdown-step $x) Empty) ⏎ !(strategy-apply (topdown (try pb-topdown-step)) (strategy-node strategy-a))` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-topdown-step strategy-a) strategy-b) (= (pb-topdown-step $x) Empty)') ⏎ plan = strategy.topdown(strategy.try_(S['pb-topdown-step'])) ⏎ space.eval(S['strategy-apply'](plan, S['strategy-node'](S['strategy-a'])))` | `(strategy-node strategy-b)` | method |
+| `(= (pb-bottomup-step strategy-a) strategy-b) ⏎ (= (pb-bottomup-step (strategy-node strategy-b)) strategy-bottomup-root) ⏎ (= (pb-bottomup-step $x) Empty) ⏎ !(strategy-apply (bottomup (try pb-bottomup-step)) (strategy-node strategy-a))` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-bottomup-step strategy-a) strategy-b) (= (pb-bottomup-step (strategy-node strategy-b)) strategy-bottomup-root) (= (pb-bottomup-step $x) Empty)') ⏎ plan = strategy.bottomup(strategy.try_(S['pb-bottomup-step'])) ⏎ space.eval(S['strategy-apply'](plan, S['strategy-node'](S['strategy-a'])))` | `strategy-bottomup-root` | method |
+| `(= (pb-innermost-step strategy-a) strategy-b) ⏎ (= (pb-innermost-step strategy-b) strategy-c) ⏎ (= (pb-innermost-step (strategy-node strategy-c)) strategy-innermost-root) ⏎ (= (pb-innermost-step $x) Empty) ⏎ !(strategy-apply (innermost pb-innermost-step) (strategy-node strategy-a))` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ space.run('(= (pb-innermost-step strategy-a) strategy-b) (= (pb-innermost-step strategy-b) strategy-c) (= (pb-innermost-step (strategy-node strategy-c)) strategy-innermost-root) (= (pb-innermost-step $x) Empty)') ⏎ plan = strategy.innermost(S['pb-innermost-step']) ⏎ space.eval(S['strategy-apply'](plan, S['strategy-node'](S['strategy-a'])))` | `strategy-innermost-root` | method |
+| `!(stratego-all id (f a b))` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ plan = strategy.stratego_all(metta.fn.id) ⏎ space.eval(S['strategy-apply'](plan, S.f(S.a, S.b)))` | `(f a b)` | method |
+| `!(stratego-one id (f a b))` | `space += metta.lib.strategy ⏎ strategy = metta.library.face('lib_strategy') ⏎ plan = strategy.stratego_one(metta.fn.id) ⏎ space.eval(S['strategy-apply'](plan, S.f(S.a, S.b)))` | `(f a b), (f a b), (f a b)` | method |
 | `!(stratego-some id (f a b))` | &mdash; | &mdash; | absent |
 | `!(eval-via-match (+ 1 2))` | &mdash; | &mdash; | absent |
 | `!(eval-via-unify (+ 1 2))` | &mdash; | &mdash; | absent |
@@ -514,26 +514,39 @@ MeTTa's complete shipped basis is reified below. Every plan cell is ordinary
 queryable atom data, and every row is exercised by
 `examples/ch20-extending-the-engine/20-02-metta-written-in-metta/11-strategy.metta` through the normal library runner.
 
+Each row is projected from the library's own source: the name and the form
+from its `(: ...)` declaration, one argument per position of the declared
+arrow, and the Python spelling from the face's own attribute map. `face` is
+`metta.library.face("lib_strategy")`, the library's own heads as Python
+names; `fn` is `metta.fn`, the engine's.
+
 | public name | reified plan or MeTTa form | Python atom | law |
 |---|---|---|---|
-| `id` | `id` | `strategies.id` | `id(t) = t` |
-| `fail` | `fail` | `strategies.fail` | answers no result |
-| `seq` | `(seq s1 s2)` | `strategies.seq(s1, s2)` | `s2(s1(t))` |
-| `choice` | `(choice left right)` | `strategies.choice(left, right)` | complete left result bag, or `right(t)` only when that bag is empty |
-| `try` | `(try s)` | `strategies.try_(s)` | `choice(s, id)` |
-| `repeat` | `(repeat s)` | `strategies.repeat(s)` | `try(seq(s, repeat(s)))` |
-| `all` | `(all s)` | `strategies.all(s)` | apply `s` to every immediate child |
-| `one` | `(one s)` | `strategies.one(s)` | enumerate each successful one-child rewrite |
-| `topdown` | `(topdown s)` | `strategies.topdown(s)` | `seq(s, all(topdown(s)))` |
-| `bottomup` | `(bottomup s)` | `strategies.bottomup(s)` | `seq(all(bottomup(s)), s)` |
-| `innermost` | `(innermost s)` | `strategies.innermost(s)` | `bottomup(try(seq(s, innermost(s))))` |
-| `stratego-all` | `(stratego-all s)` | `strategies.stratego_all(s)` | public alias of `all(s)` |
-| `stratego-one` | `(stratego-one s)` | `strategies.stratego_one(s)` | public alias of `one(s)` |
-| `gtry` | direct call only | `S.gtry` | `gtry(s, t) = try(s)(t)` |
-| `strategy-apply` | `(strategy-apply s t)` | `S['strategy-apply'](s, t)` | translator-lowers to the atom `(strategy-eval s t)` |
-| `TP` | `TP` | `strategies.TP` | type-preserving strategy scheme |
-| `TU` | `(TU result-type)` | `strategies.TU(result_type)` | type-unifying strategy scheme |
-| `◁` | `(◁ s TP t)` or `(◁ s (TU r) t)` | `S['◁'](s, scheme, t)` | apply only when the declared strategy arrow fits the scheme |
+| `id` | `id` | `fn.id` | `id(t) = t` |
+| `strategy-eval` | `(strategy-eval $a $b)` | `face.strategy_eval` | the evaluator every plan is applied through |
+| `strategy-all` | `(strategy-all $a $b)` | `face.strategy_all` | the evaluator's own all-children step |
+| `strategy-all-tail` | `(strategy-all-tail $a $b)` | `face.strategy_all_tail` | the evaluator's own child-list recursion |
+| `strategy-one` | `(strategy-one $a $b)` | `face.strategy_one` | the evaluator's own one-child step |
+| `strategy-apply` | `(strategy-apply $a $b)` | `face.strategy_apply` | translator-lowers to the atom `(strategy-eval s t)` |
+| `fail` | `(fail $a)` | `face.fail` | answers no result |
+| `seq` | `(seq $a $b $c)` | `face.seq` | `s2(s1(t))` |
+| `choice` | `(choice $a $b $c)` | `face.choice` | complete left result bag, or `right(t)` only when that bag is empty |
+| `try` | `(try $a $b)` | `face.try_` | `choice(s, id)` |
+| `gtry` | `(gtry $a $b)` | `face.gtry` | `gtry(s, t) = try(s)(t)`, the direct call form |
+| `repeat` | `(repeat $a $b)` | `face.repeat` | `try(seq(s, repeat(s)))` |
+| `all` | `(all $a $b)` | `face.all` | apply `s` to every immediate child |
+| `one` | `(one $a $b)` | `face.one` | enumerate each successful one-child rewrite |
+| `topdown` | `(topdown $a $b)` | `face.topdown` | `seq(s, all(topdown(s)))` |
+| `bottomup` | `(bottomup $a $b)` | `face.bottomup` | `seq(all(bottomup(s)), s)` |
+| `innermost` | `(innermost $a $b)` | `face.innermost` | `bottomup(try(seq(s, innermost(s))))` |
+| `stratego-all` | `(stratego-all $a $b)` | `face.stratego_all` | public alias of `all(s)` |
+| `stratego-one` | `(stratego-one $a $b)` | `face.stratego_one` | public alias of `one(s)` |
+| `TP` | `TP` | `face.TP` | type-preserving strategy scheme |
+| `TU` | `(TU $a)` | `face.TU` | type-unifying strategy scheme |
+| `◁` | `(◁ $a $b $c)` | `face['◁']` | apply only when the declared strategy arrow fits the scheme |
+| `strategy-typed-tp` | `(strategy-typed-tp $a $b)` | `face.strategy_typed_tp` | the evaluator's `TP` scheme check |
+| `strategy-typed-tu` | `(strategy-typed-tu $a $b $c)` | `face.strategy_typed_tu` | the evaluator's `TU` scheme check |
+| `strategy-typed-apply` | `(strategy-typed-apply $a $b $c)` | `face.strategy_typed_apply` | the evaluator's scheme-checked application |
 
 - `try` `TP | (-> Atom Atom)` &mdash; Stratego's `try(s) = s <+ id`. This engine reifies `s` in the plan and the mechanised interpreter specialises the same law to one equality rewrite. Unary form: `(= strategy-a strategy-b) ⏎ !(try strategy-a)`.
 - `repeat` `TP | (-> Atom Atom)` &mdash; Stratego's `repeat(s) = try(s ; repeat(s))`, root steps to a normal form. Unary form: `(= strategy-a strategy-b) ⏎ (= strategy-b strategy-c) ⏎ !(repeat strategy-a)`.

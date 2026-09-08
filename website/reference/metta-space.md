@@ -65,6 +65,20 @@ def name(self) -> _SpaceId:
 
 > The live engine name represented by this handle.
 
+### `Space.self`
+
+```python
+def self(self) -> Space:
+```
+
+> The space this receiver's doors work in, which for a space is itself.
+>
+> MeTTa's own `&self` is the space a form is evaluated in, and a form
+> stored in a space is evaluated in THAT space, so a space's `&self` is
+> the space. `MeTTa.self` answers the same question for a context, whose
+> answer is its home space, which is what makes `m.self` one attribute
+> read at every door that takes either.
+
 ### `Space.space_names`
 
 ```python
@@ -1007,7 +1021,7 @@ def watch(
     self,
     pattern: Any,
     *,
-    on: str = 'add',
+    on: SubscriptionEdge = SubscriptionEdge.add,
     where: Any | None = None,
     deadline: float | None = None,
     queue_max: int | None = None,
@@ -1921,7 +1935,7 @@ def subscribe(
     pattern: Any,
     callback: Callable | None = None,
     *,
-    on: str = 'add',
+    on: SubscriptionEdge = SubscriptionEdge.add,
     where: Any | None = None,
     queue_max: int | None = None,
 ):
@@ -1958,7 +1972,12 @@ def subscribe(
 ### `Space.live`
 
 ```python
-def live(self, *query: Any, on: str = 'both', strategy: str | None = None) -> Any:
+def live(
+    self,
+    *query: Any,
+    on: SubscriptionEdge = SubscriptionEdge.both,
+    strategy: str | None = None,
+) -> Any:
 ```
 
 > A materialised view of a query, current with this space's writes.
@@ -2760,7 +2779,7 @@ def space(
     grants: _abc.Iterable[str] = (),
     journal: str | os.PathLike[str] | None = None,
     schema: _abc.Mapping[str, Any] | None = None,
-    sync: str = 'none',
+    sync: JournalSync = JournalSync.none,
     rename: _abc.Mapping[str, str] | None = None,
     _created_at: tuple[str, int] | None = None,
 ) -> Space:

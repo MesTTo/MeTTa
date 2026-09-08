@@ -2403,6 +2403,50 @@ seam:atom_hook_ref_idle(Space, Ref) :- my_bridge_clause(Ref),
 Answer only for references you installed. A clause that claims someone else's
 reference idle turns their handler off.
 
+### Mirroring a catalog row you read on a hot path
+
+`seam:catalog_row_changed/2` is the narrow one. It fires for `&metta` writes
+alone, for the heads you asked about and no others, and it exists for a
+consumer that keeps its own copy of a declaration and needs to know when the
+copy went stale.
+
+```prolog
+:- multifile seam:catalog_row_changed/2.
+%Event is added or removed; Row is the row as a list.
+seam:catalog_row_changed(_Event, [my-bound, Name|_]) :- my_cache_forget(Name).
+
+%Nothing fires until you ask, and asking names one head.
+:- initialization(spaces:watch_catalog_rows('my-bound')).
+```
+
+Use it instead of `seam:atom_added/2` when what you are watching is a
+DECLARATION rather than data. One `atom_added/2` clause wraps the write door
+for every space in the process, which costs 16 inferences on each `&self`
+write and 33 on each `&metta` one; this point is read off the catalog's own
+note funnel, which only `&metta` writes reach, and a head nobody watches costs
+one indexed lookup that fails. Watching one head measured 36.02 to 37.02
+inferences per `&metta` write and left `&self` writes at 27.02 either way.
+
+The shape is PostgreSQL's. Its settings are catalog rows you can query through
+`pg_settings`, the value a backend actually reads is a C variable, and an
+assign hook updates that variable when the row changes rather than making
+every reader consult the catalog. `metta._config` is the worked instance: the
+seat's `(limit <name> <value>)` bounds are rows a MeTTa program can read and
+rewrite with `add-atom`, and a cursor still reads its chunk cap for free when
+it opens, where consulting the catalog per read cost 21 inferences and 3.2 of
+the 35 microseconds a one-answer `match` takes.
+
+Two things to know. The event INVALIDATES better than it updates: a removal
+leaves whatever row was written under it standing, and only the catalog knows
+what that is, so forget the entry and read it again when someone asks. And a
+removal by pattern can leave positions unbound, in which case every watched
+head hears it, because announcing for nothing costs a re-read while not
+announcing leaves a mirror wrong.
+
+`spaces:unwatch_catalog_rows/1` turns it off again. Watching twice is watching
+once, and unwatching a head nobody watched succeeds, so two consumers of one
+head cannot leave a registration behind for the first teardown to miss.
+
 ### The one way to get a handler wrong
 
 Write your guard as `( Condition -> Action ; true )`, not `Condition, !`:
@@ -3458,7 +3502,9 @@ The shipped points are `frame` (a dataframe library), `sql` (a SQL engine),
 `array` (an Array API library), `index` (a nearest-neighbour backend), `arrow`
 (who builds the Arrow C structs), `ipc` (who writes and reads the Arrow IPC
 stream), `transport-error` (which exceptions mean an
-absent backend), `image` (how a class of host types projects by default), and
+absent backend), `image` (how a class of host types projects by default),
+`graphql` (who executes a document), `typing` (a type-equation template, below)
+and `law` (an algebra law a declared carrier can be held to), and
 the six whose rows already lived somewhere: `type`, `repr`, `reflector`,
 `provider`, `library` and `integration`. Those six are declared by
 `metta.integrate`, where their readers and adders live, and reached with
@@ -3472,6 +3518,58 @@ may CALL: `projection`, `arrow-view`, `space-of`, `module`, `sql-arity`,
 seat's own row and no package can add one, so reading a service never triggers
 discovery: `seam.at("module").call()` is the first line of most packages and
 would otherwise have loaded every other one.
+
+#### The typing point: what SHAPE a head's result has
+
+A shape rule is an algebra over an indexed carrier, and it is not about arrays.
+`preserve` keeps the operand's shape, `broadcast` is NumPy's rule for two of
+them, `reduce-all` answers a scalar, `concatenate-axis` sums one axis. A
+dataframe is rows by columns, an image is height by width by channels, a series
+is a length, and every one of those wants the same rules. So a rule KIND is a
+row on the `typing` point, and a HEAD declares which kind it follows as an
+ordinary `(typing <space> <head> <kind> <arg>...)` row in the catalog.
+
+A rule's equations are TEMPLATE atoms rather than Python that assembles
+expressions: `$head` is the hole the point fills with the head the rule is
+declared for, and `$arg1`, `$arg2`, ... the holes it fills with the row's own
+arguments. So one template serves every head that follows the rule, and the
+rule is DATA a program can read, store and rewrite.
+
+```python
+from metta import Expression, S, V, seam, typing
+
+# A frame library's own rule: selecting n columns gives a frame of n columns.
+COLUMN_SELECT = S["="](
+    S["get-type"](Expression([V.head, V.frame])),
+    S.Frame(S.Columns(V.arg1)),
+)
+
+seam.typing.register(
+    "column-select",
+    doc="the frame's shape with the selected column count",
+    equations=(COLUMN_SELECT,),
+)
+
+undo = typing.declare(space, "pick2", "column-select", 2)
+space.eval(S["get-type"](S.pick2(S.frame)))   # (Frame (Columns 2))
+undo()                                        # the row and its equations go
+```
+
+`typing.declare(space, head, kind, *arguments)` writes the row, adds the
+instantiated equations and answers the inverse; `typing.withdraw(space, head)`
+is the same inverse from the row alone, which is what an uninstall takes.
+`typing.rules(space)` is every row that space carries. A kind nobody registered
+refuses with the kinds that are registered, and a row whose arguments do not
+fill the template's holes refuses naming both counts. A kind whose result the
+runtime OBSERVES rather than derives carries `equations=()`; its row still says
+which rule the head follows, which is what nineteen of the array layer's
+twenty-one do.
+
+`metta_arrays` is the first registrant: it registers its twenty-one kinds from
+its own package and declares a row per head, where it used to hold a Python
+dict of head to word and three functions assembling the equations. The row dies
+with its space, which `(owned-by-space typing)` in the catalog arranges, so
+dropping a space takes its rules with it.
 
 A row may declare itself a FALLBACK, `register(..., fallback=True)`, which is
 pluggy's `trylast`: it is consulted after every row that is not one, whatever

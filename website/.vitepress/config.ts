@@ -189,7 +189,6 @@ export default defineConfig({
             items: [
               { text: "metta.ops", link: "/reference/metta-ops" },
               { text: "metta.convert", link: "/reference/metta-convert" },
-              { text: "metta.casting", link: "/reference/metta-casting" },
             ],
           },
           {
@@ -227,6 +226,7 @@ export default defineConfig({
               { text: "metta.foreign", link: "/reference/metta-foreign" },
               { text: "metta.integrate", link: "/reference/metta-integrate" },
               { text: "metta.seam", link: "/reference/metta-seam" },
+              { text: "metta.typing", link: "/reference/metta-typing" },
               { text: "metta.importing", link: "/reference/metta-importing" },
               { text: "metta.manifest", link: "/reference/metta-manifest" },
             ],

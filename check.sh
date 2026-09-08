@@ -36,6 +36,10 @@
 #                                            policy-inventory-selftest
 #                                            refusal-grounds
 #                                            refusal-grounds-selftest snippets
+#                                            refusal-sync
+#                                            refusal-sync-selftest
+#                                            closed-sets
+#                                            closed-sets-selftest
 #                                            cumulative-syntax
 #                                            cumulative-syntax-selftest
 #                                            parity twins twins-selftest
@@ -68,6 +72,14 @@
 #   - semantic refusals and the four-case planted discrimination selftest are
 #     GATE lanes [tested: tests/checks/check_refusal_grounds.py,
 #     tests/checks/check_refusal_grounds_selftest.py; commit=acb40f1912f131ae088083d1af29b4b283019bea].
+#   - the seat's refusal table is a projection of the engine's own rows, with a
+#     seven-case planted selftest over the classes, their fields and the
+#     generated file [tested: extensions/python/tools/refusalgen.py,
+#     tests/checks/check_refusal_sync_selftest.py; commit=WORKTREE].
+#   - every closed set in the Python seat states one of three answers adjacent
+#     to it, with a nine-case planted selftest that includes a FOURTH answer
+#     [tested: tests/checks/check_closed_sets.py,
+#     tests/checks/check_closed_sets_selftest.py; commit=WORKTREE].
 #   - memory and scaling curves run once in REPORT-then-GATE order; GATE_ONLY
 #     still takes a fresh measurement and promotes only deterministic pins
 #     [tested: env CHECK_PY=../../.venv-pypetta/bin/python
@@ -698,6 +710,25 @@ run GATE tokenisation-selftest "$PY" "$HERE/tests/checks/check_tokenisation_self
 # thirteen in errors.py and a page nowhere, so nothing could say what a caller
 # should DO about a refusal without a seat writing its own prose.
 run GATE refusals   "$PY" "$HERE/extensions/python/tools/refusalsdoc.py"
+
+# The same rows, projected the other way: metta/_refusals.py is the seat's own
+# table, generated from those rows joined with each seat's spelling in
+# tests/data/error-kinds.json, and it is what metta.errors.refuse and the
+# crossing read the class, the ground and the remedy from. Before it the seat
+# kept its own map of seven kinds against the engine's thirteen, so a stack
+# overflow and a missing source arrived as a bare EngineError with nothing to
+# read off them.
+run GATE refusal-sync "$PY" "$HERE/extensions/python/tools/refusalgen.py"
+run GATE refusal-sync-selftest "$PY" "$HERE/tests/checks/check_refusal_sync_selftest.py"
+
+# The census the two lanes above are instances of: every closed set in the
+# Python seat says which of three answers it stands on -- generated with its
+# sync lane, seam rows with their point, or a `Decides:` naming the policy and
+# the row it reads -- adjacent to the set. Before it, seventy-seven tables sat
+# in the seat with nothing saying which were the engine's rows restated;
+# eleven were, and one of those listed six members where the engine derived ten.
+run GATE closed-sets "$PY" "$HERE/tests/checks/check_closed_sets.py"
+run GATE closed-sets-selftest "$PY" "$HERE/tests/checks/check_closed_sets_selftest.py"
 
 # --------------------------------------------------------------- REPORT tier
 # Known backlog. Each entry names its section in the ledger and becomes a

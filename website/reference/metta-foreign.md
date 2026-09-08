@@ -500,7 +500,12 @@ def foreign_pushdown(space: str, pattern_wire: list) -> str:
 ## `foreign_match`
 
 ```python
-def foreign_match(space: str, pattern_wire: list, limit: int | None = None, mode: str = 'abort'):
+def foreign_match(
+    space: str,
+    pattern_wire: list,
+    limit: int | None = None,
+    mode: OnError = OnError.abort,
+):
 ```
 
 > The shim's py_iter enumerates this: candidate atoms, encoded.
