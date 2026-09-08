@@ -22,7 +22,11 @@ A package added under `ext/` therefore needs no line here.
 Assumes: a checkout of this repository with `pyproject.toml` at its root.
 Guarantees:
   - a core module importing a member is reported [tested:
-    tests/checks/check_layering_selftest.py; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
+    tests/checks/check_layering_selftest.py; commit=WORKTREE]
+  - generated provider annotations are checked against door rows, while
+    imports in other TYPE_CHECKING blocks remain subject to both layer rules
+    [tested: tests/checks/check_hardcoded_integrations_selftest.py,
+    tests/checks/check_layering_selftest.py; commit=WORKTREE]
   - a member importing a core underscore name is reported [tested:
     tests/checks/check_layering_selftest.py; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
   - a member naming a library its own manifest does not declare is reported,
@@ -99,6 +103,7 @@ class Member(NamedTuple):
     version: str
     requires: frozenset[str]
     entry_points: dict[str, str]
+    modules: tuple[str, ...] = ()
 
 
 def _manifest(path: Path) -> dict:
@@ -143,6 +148,7 @@ def members(root: Path = ROOT) -> list[Member]:
                     for requirement in group
                 ),
                 dict(project.get("entry-points", {}).get(GROUP, {})),
+                tuple(modules),
             )
         )
     return found
@@ -152,9 +158,11 @@ def _imports(path: Path) -> list[tuple[str, int]]:
     """Every module this file imports, dotted, with its line."""
     found: list[tuple[str, int]] = []
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    annotations = libraries._door_annotations(path)
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
-            found.extend((alias.name, node.lineno) for alias in node.names)
+            found.extend((alias.name, node.lineno) for alias in node.names
+                         if (alias.name.partition('.')[0], node.lineno) not in annotations)
         elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
             found.append((node.module, node.lineno))
     return found
@@ -170,7 +178,7 @@ def _sources(directory: Path) -> list[Path]:
 
 def _core_imports_no_member(roster: list[Member]) -> list[Finding]:
     """Rule one: nothing in the core reaches an extension distribution."""
-    shipped = {member.module: member.distribution for member in roster}
+    shipped = {module: member.distribution for member in roster for module in member.modules or (member.module,)}
     findings = []
     for path in _sources(CORE):
         for imported, line in _imports(path):
@@ -242,7 +250,7 @@ def _members_declare_what_they_name(roster: list[Member]) -> list[Finding]:
             if "tests" in path.relative_to(member.directory).parts:
                 continue
             for library, line in libraries._python_names(path):
-                if library in allowed or library == member.module:
+                if library in allowed or library in (member.modules or (member.module,)):
                     continue
                 findings.append(
                     Finding(
@@ -311,8 +319,11 @@ def _each_member_is_whole(roster: list[Member], root: Path) -> list[Finding]:
             findings.append(
                 Finding(where, f"ships {member.module!r} where its directory says {expected!r}")
             )
-        if not (member.directory / f"{expected}.py").exists():
-            findings.append(Finding(where, f"declares {expected!r} and no such module is here"))
+        findings.extend(
+            Finding(where, f"declares {module!r} and no such module is here")
+            for module in member.modules or (member.module,)
+            if not (member.directory / f"{module}.py").is_file()
+        )
         findings.extend(
             Finding(where, f"has no {required}")
             for required in ("README.md", "tests")
@@ -332,12 +343,14 @@ def _each_member_is_whole(roster: list[Member], root: Path) -> list[Finding]:
                 )
             )
         advertised = member.entry_points
-        if advertised and advertised.get(member.distribution) != member.module:
+        shipped = member.modules or (member.module,)
+        target = advertised.get(member.distribution, "").partition(":")[0]
+        if advertised and (set(advertised) != {member.distribution} or target not in shipped):
             findings.append(
                 Finding(
                     where,
                     f"advertises {advertised} under {GROUP}; a member either "
-                    f"advertises {{{member.distribution!r}: {member.module!r}}}, so "
+                    f"advertises its own name and a module in {shipped!r}, so "
                     f"a dispatch can discover it, or advertises nothing at all "
                     f"because it is a library a caller imports by name",
                 )
@@ -421,7 +434,7 @@ def _discovery_stays_cheap(roster: list[Member], root: Path) -> list[Finding]:
         "import sys\n"
         "import metta\n"
         "before = set(sys.modules)\n"
-        f"for name in {[member.module for member in advertised]!r}:\n"
+        f"for name in {[target.partition(':')[0] for member in advertised for target in member.entry_points.values()]!r}:\n"
         "    __import__(name)\n"
         "arrived = sorted(set(sys.modules) - before)\n"
         "print(len(arrived))\n"

@@ -92,7 +92,7 @@ class Rows(UserList[Row]):
 def insert(self, i: int, item: Iterable[Any]) -> None:
 ```
 
-No docstring is defined.
+> Read Rows.insert.
 
 ### `Rows.append`
 
@@ -100,7 +100,7 @@ No docstring is defined.
 def append(self, item: Iterable[Any]) -> None:
 ```
 
-No docstring is defined.
+> Read Rows.append.
 
 ### `Rows.extend`
 
@@ -108,7 +108,7 @@ No docstring is defined.
 def extend(self, other: Iterable[Iterable[Any]]) -> None:
 ```
 
-No docstring is defined.
+> Read Rows.extend.
 
 ### `Rows.copy`
 
@@ -116,7 +116,7 @@ No docstring is defined.
 def copy(self) -> Rows:
 ```
 
-No docstring is defined.
+> Read Rows.copy.
 
 ### `Rows.column`
 
@@ -287,29 +287,6 @@ def to(self, library: Any):
 > point's rows: a library registers once and every rows object answers
 > it, with no method added here.
 
-### `Rows.to_df`
-
-```python
-def to_df(self):
-```
-
-> The rows as a pandas DataFrame, DuckDB's own conversion naming.
->
-> The declared sugar of the `frame` point's pandas row: this is
-> `rows.to(pandas)` under the name that row asked for, and a registered
-> library reaches the same door through `to` without a method here.
-
-### `Rows.to_pl`
-
-```python
-def to_pl(self):
-```
-
-> The rows as a polars DataFrame; the polars twin of to_df().
->
-> The declared sugar of the `frame` point's polars row, and the same
-> door as `rows.to(polars)`.
-
 ### `Rows.pipe`
 
 ```python
@@ -340,6 +317,22 @@ def render(self, source: Any, /, **values: Any) -> str:
 > text as fields, where `metta.render("{x}")` with no values leaves the
 > braces alone. Every row is written, where `__rich__` stops at
 > `config.display_rows`: a document is not a terminal.
+
+### `Rows.to_df`
+
+```python
+def to_df(self) -> Any:
+```
+
+> These rows as a pandas DataFrame; the declared point rows.to('pandas').
+
+### `Rows.to_pl`
+
+```python
+def to_pl(self) -> Any:
+```
+
+> These rows as a polars DataFrame; the declared point rows.to('polars').
 
 ## `rows_into`
 
@@ -446,22 +439,6 @@ def to(self, library: Any):
 
 > Materialize, then build a frame of `library`: Rows.to.
 
-### `Answers.to_df`
-
-```python
-def to_df(self):
-```
-
-> Materialize as a pandas DataFrame.
-
-### `Answers.to_pl`
-
-```python
-def to_pl(self):
-```
-
-> Materialize as a polars DataFrame.
-
 ### `Answers.arrow`
 
 ```python
@@ -564,3 +541,19 @@ def close(self) -> None:
 > Closing twice is a no-op, as it is for `drop()`. Answers already pulled
 > stay readable, because they are cached values rather than engine state;
 > only what has NOT been pulled is given up.
+
+### `Answers.to_df`
+
+```python
+def to_df(self) -> Any:
+```
+
+> These rows as a pandas DataFrame; the declared point rows.to('pandas').
+
+### `Answers.to_pl`
+
+```python
+def to_pl(self) -> Any:
+```
+
+> These rows as a polars DataFrame; the declared point rows.to('polars').

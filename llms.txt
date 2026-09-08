@@ -264,25 +264,1915 @@ compares the collapsed tuple. This engine refused a cross-type pair until
 anything, comparing modulo variable renaming. Python's `a == b` answers
 `False` across kinds for the same reason.
 
-## Running and querying: exact return shapes
+<!-- begin generated door contracts -->
+## Python door contracts
+
+`metta.doors` is the engine-free source of host door contracts. `door-sync` checks Space, the async mirror, module and context methods, remote client and operation schemas, stubs, reference, and shrink ledger against it. The same typed rows enter `&metta` at boot; `seam.publish(context)` refreshes them after registration changes.
+
+Package doors are accessor namespaces resolved from `seam.door` rows on first access. Current workspace namespaces: `m.arrays`, `m.live`, `m.remote`, `m.tables`.
+
+A convenience declares its base and fixed arguments. A second declaration of the same parameter point on one receiver is refused. Ownership and rollback operations keep their implementation contracts.
+
+| convenience | longhand |
+|---|---|
+| `space:answers` | `space:eval(..., answer='answers')` |
+| `space:one` | `space:eval(..., answer='one', delivery='values', on_error='abort')` |
+| `space:first` | `space:eval(..., answer='first', delivery='values', on_error='abort')` |
+| `space:pure` | `space:op(..., effect='pureStructural')` |
+| `space:reads` | `space:op(..., effect='readOnlyLookup')` |
+| `space:writes` | `space:op(..., effect='writesState')` |
+| `space:io` | `space:op(..., effect='oracleIO')` |
+| `tables:to-df` | `rows:to(..., library='pandas')` |
+| `rows:to-df` | `rows:to(..., library='pandas')` |
+| `answers:to-df` | `answers:to(..., library='pandas')` |
+| `tables:to-pl` | `rows:to(..., library='polars')` |
+| `rows:to-pl` | `rows:to(..., library='polars')` |
+| `answers:to-pl` | `answers:to(..., library='polars')` |
+
+The declarations below omit the implicit receiver. Hyphens in a MeTTa-facing door name become underscores in Python. A namespace entry `tables:add` is called as `m.tables.add(...)`; a context entry belongs to `MeTTa`. The detailed contracts, input types, delivery, refusal witnesses and tests are in `website/reference/python-door-contracts.md`.
+
+### space declarations
+
+`space:name`: `introspection`, returns `value`, effect `pureStructural`, determinism `det`; tiers `sync`.
 
 ```python
-m.run(src, /, *, timeout=, inferences=, **values)
-                       -> list[list[Atom]], one inner list per ! directive
-m.eval(target, /, *more, timeout=, inferences=, under=, theory=, interpreter=, **values)
-                 -> list[Atom | Undefined] | list[list[Atom | Undefined]]
-m.match(*patterns, where=, limit=, timeout=, inferences=, under=, into=, **values) -> Answers
-m.answers(target, /, *, timeout=, inferences=, under=, theory=, interpreter=, **values) -> Answers
-m.sample(query, *, k=10, seed=7) -> list[Atom]
-m.prepare(*patterns, where=) -> Prepared; .solve(given=...) many times, .columns
-m.parse(src, /, **values) -> Atom
-m.register_token(pattern, constructor) -> None
-m.unregister_token(pattern) -> None
-m.load(path, *, timeout=, inferences=) -> list[list[Atom]]
-m.save(path, format="metta"|"fast") -> int   (atomic, fsynced)
-m.source() -> str   direct atoms as loadable MeTTa; exactly m.save(format="metta")
-m.digest() -> str, 64-hex content hash of the space, store-independent
+name -> _SpaceId
 ```
+
+The live engine name represented by this handle.
+
+`space:self`: `introspection`, returns `space`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+self -> Space
+```
+
+The space this receiver's doors work in, which for a space is itself.
+
+`space:space-names`: `introspection`, returns `list`, effect `readOnlyLookup`, determinism `det`; tiers `sync`, `async`.
+
+```python
+space_names() -> list[str]
+```
+
+Every space name this engine registers, sorted: '&self' and
+
+`space:drop`: `lifecycle`, returns `None`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+drop() -> None
+```
+
+Clear this space and release an anonymous name for reuse.
+
+`space:dropped`: `lifecycle`, returns `bool`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+dropped -> bool
+```
+
+Whether :meth:`drop` has released this handle's space.
+
+`space:to-wire`: `introspection`, returns `list`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+to_wire() -> list
+```
+
+Encode the live engine reference as a portable space operand.
+
+`space:metatype`: `introspection`, returns `str`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+metatype -> str
+```
+
+Read Space.metatype.
+
+`space:bind`: `scope`, returns `context`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+bind(values: _abc.Mapping[str, Any] | None=None, /, **named: Any) -> _BoundValues
+```
+
+Scope named host values for :meth:`run` without a call flag.
+
+`space:run`: `evaluation`, returns `list`, effect `oracleIO`, determinism `nondet`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+run(source: str | TemplateLike, /, *, timeout: float | None=None, inferences: int | None=None, **values: Any) -> list[list[Atom]]
+```
+
+Run MeTTa source: one list of answers per ! directive.
+
+`space:explain`: `introspection`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+explain(query: Any, /, *, analyze: bool=False, allow_writes: bool=False, **values: Any) -> Explanation
+```
+
+What the engine will do with this query, reflected rather than run.
+
+`space:profile`: `introspection`, returns `tuple`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+profile(source: str | TemplateLike, /, *, timeout: float | None=None, inferences: int | None=None, **values: Any) -> tuple[list[list[Atom]], EngineProfile]
+```
+
+Run source under the engine's statistical profiler, answering
+
+`space:profile-extension`: `introspection`, returns `tuple`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+profile_extension(source: str | TemplateLike, /, *, extension: str | None=None, names: _abc.Sequence[str] | None=None, timeout: float | None=None, inferences: int | None=None, **values: Any) -> tuple[list[list[Atom]], list[FunctionCost]]
+```
+
+Run source under the profiler, reporting only YOUR functions.
+
+`space:save`: `introspection`, returns `int`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+save(path: str | os.PathLike[str], *, format: SaveFormat=SaveFormat.metta, timeout: float | None=None, inferences: int | None=None) -> int
+```
+
+Write every stored atom of this space, equations included, as
+
+- `format`: `metta`, `fast`.
+
+`space:source`: `introspection`, returns `str`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+source() -> str
+```
+
+Return this space's directly stored atoms as loadable MeTTa text.
+
+`space:load`: `introspection`, returns `list`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+load(path: str | os.PathLike[str], *, timeout: float | None=None, inferences: int | None=None) -> list[list[Atom]]
+```
+
+Add a text program or trusted fast cache to this space.
+
+`space:parse`: `introspection`, returns `Atom`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+parse(source: str | TemplateLike, /, **values: Any) -> Atom
+```
+
+Read one form into an atom without evaluating it.
+
+`space:register-token`: `provider`, returns `None`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+register_token(pattern: str | _re.Pattern[str], constructor: Callable[[str], Any]) -> None
+```
+
+Register a full-token regex and its Atom constructor.
+
+`space:unregister-token`: `provider`, returns `None`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+unregister_token(pattern: str | _re.Pattern[str]) -> None
+```
+
+Remove a reader-token class; an absent pattern is already removed.
+
+`space:add`: `write`, returns `None`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+add(*atoms: Any) -> None
+```
+
+Add atoms to this space, one engine round-trip for the lot.
+
+`space:remove`: `write`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+remove(atom: Any, *more: Any) -> bool | int
+```
+
+Remove ONE unifying occurrence and say whether one was there,
+
+`space:transfer`: `write`, returns `int`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+transfer(*atoms: Any, to: Space) -> int
+```
+
+Move ONE unifying occurrence of each atom into another space.
+
+`space:atoms`: `introspection`, returns `list`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+atoms() -> list[Atom]
+```
+
+Every stored atom in this space.
+
+`space:peek`: `query`, returns `Atom`, effect `oracleIO`, determinism `nondet`; tiers `sync`, `async`.
+
+```python
+peek(pattern: Any, *, where: Any | None=None, deadline: float | None=None) -> Atom
+```
+
+Wait for one matching atom and leave it in this space.
+
+`space:take`: `write`, returns `Atom`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+take(pattern: Any, *, where: Any | None=None, deadline: float | None=None) -> Atom
+```
+
+Wait for and remove exactly one matching atom from this space.
+
+`space:cast`: `introspection`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+@overload
+cast(type_: _builtins.type[_CastT], /) -> _CastT
+@overload
+cast(type_: Atom | str, /) -> Any
+@overload
+cast(value: Any, type_: _builtins.type[_CastT], /) -> _CastT
+@overload
+cast(value: Any, type_: Atom | str, /) -> Any
+cast(value: Any, type_: Any=..., /) -> Any
+```
+
+Cast this space atom ambiently with one argument, or answer value
+
+`space:trace`: `scope`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+trace(source: Atom | str, max_events: int | None=None, *, filter: Symbol | str | Iterable[Symbol | str] | None=None, timeout: float | None=None, inferences: int | None=None) -> Trace
+```
+
+Run a TERM, or source, under the engine's reduction trace and
+
+`space:debug`: `scope`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+debug(source: Atom | str, *, on: Any=None, inferences: int | None=None, at: int | None=None) -> Debugger
+```
+
+Run a TERM, or source, under breakpoints, stepped from Python.
+
+`space:record`: `scope`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+record(source: Atom | str, *, seed: int | None=None, max_events: int | None=None, timeout: float | None=None, inferences: int | None=None) -> Recording
+```
+
+Run a TERM, or source, and keep the whole run as data.
+
+`space:lint`: `introspection`, returns `list`, effect `readOnlyLookup`, determinism `det`; tiers `sync`, `async`.
+
+```python
+lint() -> list[Finding]
+```
+
+Diagnose this space for the silently-wrong class: declared
+
+`space:effect-plan`: `introspection`, returns `value`, effect `readOnlyLookup`, determinism `det`; tiers `sync`, `async`.
+
+```python
+effect_plan(target: Any) -> _ops_module.EffectPlan
+```
+
+Return operations the target may execute and their joined effect.
+
+`space:copy`: `lifecycle`, returns `space`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+copy() -> Space
+```
+
+This space's contents in a new anonymous space, cloned through
+
+`space:reify`: `lifecycle`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+reify()
+```
+
+Capture this space as an immutable, independently evaluable world.
+
+`space:commit`: `write`, returns `None`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+commit(world: Any) -> None
+```
+
+Apply one reified world's diff through this originating space.
+
+`space:digest`: `introspection`, returns `str`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+digest() -> str
+```
+
+A sha256 hex digest of this space's content: every stored atom,
+
+`space:__len__`: `introspection`, returns `int`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+__len__() -> int
+```
+
+Read Space.__len__.
+
+`space:__bool__`: `introspection`, returns `bool`, effect `pureStructural`, determinism `det`; tiers `sync`, `context`.
+
+```python
+__bool__() -> bool
+```
+
+Always true: a space is a handle to a store, not a value that
+
+`space:__contains__`: `introspection`, returns `bool`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+__contains__(atom: Any) -> bool
+```
+
+Read Space.__contains__.
+
+`space:clear`: `write`, returns `None`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+clear() -> None
+```
+
+Remove everything stored here, compiled equations included.
+
+`space:__iadd__`: `write`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+__iadd__(atom: Any) -> Self
+```
+
+add()'s operator spelling for one atom or one fact stream.
+
+`space:__isub__`: `write`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+__isub__(atom: Any) -> Self
+```
+
+Read Space.__isub__.
+
+`space:__ior__`: `write`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+__ior__(other: Any) -> Self
+```
+
+Merge into this space in one bulk crossing: every atom of
+
+`space:__iter__`: `introspection`, returns `stream`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+__iter__()
+```
+
+Iterate one assembly-order snapshot of the stored atoms.
+
+`space:__getitem__`: `introspection`, returns `Rows`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+__getitem__(i: Any) -> Rows
+```
+
+Subscription is query. A tuple headed by an atom is one built
+
+`space:__delitem__`: `write`, returns `None`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+__delitem__(pattern: Any) -> None
+```
+
+Del m[pattern] removes every unifying occurrence, the bulk
+
+`space:match`: `query`, returns `value`, effect `oracleIO`, determinism `nondet`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+match(*patterns: Any, where: Any | None=None, limit: int | None=None, timeout: float | None=None, inferences: int | None=None, under: Any=_UNSET, into: _builtins.type | None=None, **values: Any) -> Any
+```
+
+Lazily match patterns against this space as one conjunction.
+
+`space:stream`: `query`, returns `stream`, effect `oracleIO`, determinism `nondet`; tiers `sync`, `async`.
+
+```python
+stream(*patterns: Any, where: Any | None=None, limit: int | None=None, timeout: float | None=None, inferences: int | None=None, under: Any=_UNSET) -> Cursor
+```
+
+match(), pulled: the same conjunction and guard, answered one
+
+`space:assuming`: `scope`, returns `context`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+assuming(*facts: Any) -> _Assuming
+```
+
+Facts held only inside a with-block: the assumptions reading of
+
+`space:transaction`: `scope`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+@overload
+transaction(target: Callable[[], _R], /) -> _R
+@overload
+transaction(target: Atom | str, /) -> list[Atom | Undefined]
+transaction(target: Callable[[], _R] | Any, /) -> Any
+```
+
+Run one callable or term inside a closed engine transaction.
+
+`space:saga`: `scope`, returns `context`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+saga(receipts: Space)
+```
+
+Open a committed-receipt saga over this execution space.
+
+`space:solve`: `evaluation`, returns `value`, effect `oracleIO`, determinism `nondet`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+solve(pattern: Any, subject: Any) -> Any
+```
+
+Run relational ``let`` and return bindings keyed by its variables.
+
+`space:watch`: `scope`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+watch(pattern: Any, *, on: SubscriptionEdge=SubscriptionEdge.add, where: Any | None=None, deadline: float | None=None, queue_max: int | None=None)
+```
+
+Yield matching changes, raising Timeout after each quiet deadline.
+
+- `on`: `add`, `remove`, `both`.
+
+`space:limits`: `scope`, returns `context`, effect `writesState`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+limits(*, timeout: float | None=None, inferences: int | None=None, stack: int | None=None) -> ScopedLimits
+```
+
+Scoped default bounds for every call in the with-block:
+
+`space:capture`: `scope`, returns `context`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+capture() -> CapturedOutput
+```
+
+Collect printed engine text without changing answer shapes.
+
+`space:atomic`: `scope`, returns `context`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+atomic() -> ScopedExecution
+```
+
+Make each CALL in the block one committing engine transaction.
+
+`space:speculative`: `scope`, returns `context`, effect `writesState`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+speculative() -> ScopedExecution
+```
+
+Run each CALL against a snapshot and discard its writes.
+
+`space:batch`: `scope`, returns `context`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+batch() -> _Batch
+```
+
+Collect this space's add() calls and cross once at exit:
+
+`space:transactional`: `scope`, returns `callable`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+transactional(fn: Callable[_P, _R], /) -> Callable[_P, _R]
+```
+
+transaction()'s decorator twin, the atomic shape Django made
+
+`space:prepare`: `query`, returns `value`, effect `readOnlyLookup`, determinism `det`; tiers `sync`, `async`.
+
+```python
+prepare(*patterns: Any, where: Any | None=None) -> Prepared
+```
+
+A query whose shape is fixed and whose facts are not: the wire
+
+`space:eval`: `evaluation`, returns `value`, effect `oracleIO`, determinism `nondet`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+@overload
+eval(target: Any, /, *more: Any, timeout: float | None=None, inferences: int | None=None, under: Any=_UNSET, theory: Any | None=None, interpreter: Any | None=None, answer: EvaluationAnswer | str='all', delivery: ArgumentDelivery | str, limit: int | None=None, image: ImageMode | str | None=None, on_error: OnError | str='keep', determinism: Determinism | str='nondet', **values: Any) -> Any
+@overload
+eval(target: Any, /, *more: Any, timeout: float | None=None, inferences: int | None=None, under: Any=_UNSET, theory: Any | None=None, interpreter: Any | None=None, answer: EvaluationAnswer | str, delivery: ArgumentDelivery | str='atoms', limit: int | None=None, image: ImageMode | str | None=None, on_error: OnError | str='keep', determinism: Determinism | str='nondet', **values: Any) -> Any
+@overload
+eval(target: Any, /, *, timeout: float | None=..., inferences: int | None=..., under: Any=..., theory: Any | None=..., interpreter: Any | None=..., **values: Any) -> list[Atom | Undefined]
+@overload
+eval(target: Any, _second: Any, /, *more: Any, timeout: float | None=..., inferences: int | None=..., under: Any=..., theory: Any | None=..., interpreter: Any | None=..., **values: Any) -> list[list[Atom | Undefined]]
+eval(target: Any, /, *more: Any, timeout: float | None=None, inferences: int | None=None, under: Any=_UNSET, theory: Any | None=None, interpreter: Any | None=None, answer: EvaluationAnswer | str='all', delivery: ArgumentDelivery | str='atoms', limit: int | None=None, image: ImageMode | str | None=None, on_error: OnError | str='keep', determinism: Determinism | str='nondet', **values: Any) -> Any
+```
+
+Evaluate a term, returning every answer.
+
+- `answer`: `all`, `answers`, `rows`, `atom`, `one`, `first`, `count`, `exists`, `none`, `stream`.
+- `delivery`: `atoms`, `values`.
+- `image`: `opaque`, `transparent`, `auto`.
+- `on_error`: `keep`, `empty`, `abort`.
+- `determinism`: `det`, `semidet`, `nondet`.
+
+`space:answers`: `evaluation`, returns `Answers`, effect `oracleIO`, determinism `nondet`; tiers `sync`.
+
+```python
+answers(target: Any, /, *, timeout: float | None=None, inferences: int | None=None, under: Any=_UNSET, theory: Any | None=None, interpreter: Any | None=None, **values: Any) -> Answers[Any]
+```
+
+Evaluate lazily as an immutable, cached and replayable view.
+
+`space:parallel`: `evaluation`, returns `list`, effect `oracleIO`, determinism `nondet`; tiers `sync`, `async`.
+
+```python
+parallel(*targets: Any, timeout: float | None=None) -> list[Atom | Undefined]
+```
+
+Evaluate every target concurrently, answering every branch's answers.
+
+`space:pool`: `provider`, returns `value`, effect `writesState`, determinism `det`; tiers `sync`.
+
+```python
+pool(workers: int | None=None) -> Any
+```
+
+A pool of worker threads that each hold their own Prolog engine.
+
+`space:reducible`: `introspection`, returns `bool`, effect `readOnlyLookup`, determinism `det`; tiers `sync`, `async`.
+
+```python
+reducible(target: Any) -> bool
+```
+
+Whether a head reduces here, asked without evaluating anything.
+
+`space:eval-status`: `evaluation`, returns `list`, effect `oracleIO`, determinism `nondet`; tiers `sync`, `async`.
+
+```python
+eval_status(target: Any, /, *, timeout: float | None=None, inferences: int | None=None, theory: Any | None=None, interpreter: Any | None=None, **values: Any) -> list[tuple[str, Atom | Undefined | None]]
+```
+
+Evaluate a term, pairing each answer with how it was produced.
+
+`space:run-status`: `evaluation`, returns `list`, effect `oracleIO`, determinism `nondet`; tiers `sync`, `async`.
+
+```python
+run_status(source: str, *, timeout: float | None=None, inferences: int | None=None) -> list[list[tuple[str, Atom | Undefined | None]]]
+```
+
+run(), with each directive's answers paired with how they arose.
+
+`space:one`: `evaluation`, returns `value`, effect `oracleIO`, determinism `det`; tiers `async`.
+
+```python
+one(target: Any, *, timeout: float | None=None, inferences: int | None=None) -> Any
+```
+
+Return the sole answer as a plain Python value for internal callers.
+
+`space:first`: `evaluation`, returns `value`, effect `oracleIO`, determinism `det`; tiers `async`.
+
+```python
+first(target: Any, *, timeout: float | None=None, inferences: int | None=None) -> Any
+```
+
+The first answer as a plain Python value, or None for no answers.
+
+`space:stats`: `introspection`, returns `context`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+stats() -> _StatsBlock
+```
+
+The engine's own counters over a with-block, as deltas.
+
+`space:op`: `provider`, returns `value`, effect `writesState`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+@overload
+op(fn: Callable[_P, _R], /, *, name: str | None=..., transport: Literal['encoded', 'raw']=..., effect: EffectClass | str, declarations: Iterable[Atom]=..., arities: list[int] | None=..., inverse: Callable | None=...) -> Callable[_P, _R]
+@overload
+op(*, name: str | None=..., transport: Literal['encoded', 'raw']=..., effect: EffectClass | str, declarations: Iterable[Atom]=..., arities: list[int] | None=..., inverse: Callable | None=...) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]
+op(fn: Callable | None=None, *, name: str | None=None, transport: Literal['encoded', 'raw']='encoded', effect: EffectClass | str | None=None, declarations: Iterable[Atom]=(), arities: list[int] | None=None, inverse: Callable | None=None) -> Any
+```
+
+Register a Python callable as a MeTTa function, decorator-style.
+
+- `effect`: `pureStructural`, `readOnlyLookup`, `nondeterministicReadOnly`, `writesState`, `oracleIO`.
+
+`space:pure`: `provider`, returns `value`, effect `writesState`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+pure(fn: Callable | None=None, /, **options: Any) -> Any
+```
+
+An operation whose answer depends only on its arguments.
+
+`space:reads`: `provider`, returns `value`, effect `writesState`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+reads(fn: Callable | None=None, /, **options: Any) -> Any
+```
+
+An operation that reads stable state without changing it.
+
+`space:writes`: `provider`, returns `value`, effect `writesState`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+writes(fn: Callable | None=None, /, **options: Any) -> Any
+```
+
+An operation that changes engine or host state.
+
+`space:io`: `provider`, returns `value`, effect `writesState`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+io(fn: Callable | None=None, /, **options: Any) -> Any
+```
+
+An operation that observes an external oracle.
+
+`space:unregister-op`: `provider`, returns `None`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+unregister_op(name: str) -> None
+```
+
+Remove a registered operation, every arity of it.
+
+`space:builtins`: `introspection`, returns `list`, effect `readOnlyLookup`, determinism `det`; tiers `sync`, `async`.
+
+```python
+builtins() -> list[str]
+```
+
+Every function callable from this space, plus every special form.
+
+`space:is-function`: `introspection`, returns `bool`, effect `readOnlyLookup`, determinism `det`; tiers `sync`, `async`.
+
+```python
+is_function(name: str) -> bool
+```
+
+Report whether the name is registered as a function anywhere.
+
+`space:is-function-here`: `introspection`, returns `bool`, effect `readOnlyLookup`, determinism `det`; tiers `sync`, `async`.
+
+```python
+is_function_here(name: str) -> bool
+```
+
+Whether a function would answer from THIS space: it has clauses
+
+`space:arities`: `introspection`, returns `list`, effect `readOnlyLookup`, determinism `det`; tiers `sync`, `async`.
+
+```python
+arities(name: str) -> list[int]
+```
+
+Compiled predicate arities for a name: MeTTa arity plus one each.
+
+`space:register-prolog`: `provider`, returns `tuple`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+register_prolog(source: str | None=None, *, path: str | os.PathLike[str] | None=None, names: _abc.Sequence[str] | _abc.Mapping[str, str]=()) -> tuple[str, ...]
+```
+
+Register Prolog predicates as MeTTa functions, at native speed.
+
+`space:register-foreign-library`: `provider`, returns `tuple`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+register_foreign_library(path: str | os.PathLike[str], *, entry: str | None=None, names: _abc.Sequence[str]=()) -> tuple[str, ...]
+```
+
+Load a compiled `.so` and register its predicates as MeTTa functions.
+
+`space:register-library-path`: `provider`, returns `None`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+register_library_path(directory: Any, name: str) -> None
+```
+
+Point MeTTa at a directory of files your package ships.
+
+`space:unregister-prolog`: `provider`, returns `tuple`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+unregister_prolog(extension: str) -> tuple[str, ...]
+```
+
+Release everything one extension registered, and its clauses.
+
+`space:subscribe`: `scope`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+subscribe(pattern: Any, callback: Callable | None=None, *, on: SubscriptionEdge=SubscriptionEdge.add, where: Any | None=None, queue_max: int | None=None)
+```
+
+A standing query on this space: every added (or removed, or
+
+- `on`: `add`, `remove`, `both`.
+
+`space:prolog`: `introspection`, returns `None`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+prolog() -> None
+```
+
+Drop into the engine's own interactive Prolog toplevel, the
+
+`space:derivation`: `introspection`, returns `list`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+derivation(target: Any, depth: int | None=None, *, timeout: float | None=None, inferences: int | None=None) -> list[Any]
+```
+
+Every proof of an answer, as trees in MeTTa terms.
+
+`space:why`: `introspection`, returns `str`, effect `readOnlyLookup`, determinism `det`; tiers `sync`, `async`.
+
+```python
+why(pattern: Any, *, where: Any | None=None) -> str
+```
+
+Why a pattern matches nothing here, in words.
+
+`space:define`: `provider`, returns `value`, effect `writesState`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+@overload
+@dataclass_transform(eq_default=False)
+define(fn: _builtins.type[_T], /, *, accessors: bool=..., methods: bool=...) -> _builtins.type[_T]
+@overload
+define(fn: Callable[_P, _R], /, *, name: str | None=..., accessors: bool=..., methods: bool=...) -> Defined[_P, _R]
+@overload
+define(*, name: str) -> Callable[[Callable[_P, _R]], Defined[_P, _R]]
+@overload
+define(*, prolog: str | os.PathLike[str], name: str | None=None) -> Callable[[Callable[_P, _R]], PrologBacked[_P, _R]]
+define(fn: Callable[..., Any] | None=None, *, prolog: str | os.PathLike[str] | None=None, name: str | None=None, accessors: bool=True, methods: bool=True) -> Any
+```
+
+Compile a Python function into MeTTa equations, decorator-style.
+
+`space:rules`: `provider`, returns `value`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+rules(fn: Callable[..., Any]) -> _Rules
+```
+
+Collect and land a non-exclusive equation bundle in this space.
+
+`space:pre-add`: `write`, returns `callable`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+pre_add(fn: Defined[..., Any] | Callable[..., Any]) -> Defined[..., Any]
+```
+
+Compile or accept one unary judge and claim this space's write hook.
+
+`space:type`: `introspection`, returns `Atom`, effect `readOnlyLookup`, determinism `det`; tiers `sync`, `async`.
+
+```python
+type(atom: Any) -> Atom
+```
+
+Return this space's first ``get-type`` answer, including undefined.
+
+`space:infer-types`: `write`, returns `list`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+infer_types(*, declare: bool=False) -> list[Atom]
+```
+
+Propose a `(: head (-> ...))` for every head here that has none.
+
+`space:doc`: `introspection`, returns `Atom`, effect `readOnlyLookup`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+doc(atom: Any) -> Atom
+```
+
+Return this space's structured ``get-doc`` answer for one subject.
+
+`space:fn`: `introspection`, returns `value`, effect `readOnlyLookup`, determinism `det`; tiers `sync`.
+
+```python
+fn -> _FunctionNamespace
+```
+
+Functions visible here, as bound attribute or exact-name handles.
+
+`space:integrate`: `provider`, returns `str`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+integrate(target: Any) -> str
+```
+
+Install a library integration; see metta.integrate.
+
+`space:handles`: `provider`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+handles(pattern: str | Atom, fidelity: Fidelity, *, det: Determinism | None=None) -> Atom
+```
+
+Declare how faithfully a space answers queries of one shape.
+
+- `fidelity`: `Exact`, `Partial`, `Sound`, `Refuse`.
+- `det`: `det`, `semidet`, `nondet`.
+
+`space:annotations`: `provider`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+annotations(subject_or_algebra: str, algebra: str | None=None, *, capabilities: _abc.Iterable[str]=()) -> Atom
+```
+
+Declare the algebra a context's answer annotations live in.
+
+`space:algebra`: `provider`, returns `Atom`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+algebra(name: str, *, combine: str, extend: str, zero: Any, one: Any, laws: _abc.Iterable[str]=(), carrier: _abc.Iterable[Any]=(), type: Any=None, requires: _abc.Iterable[str]=(), order: SemiringOrder | None=None) -> Atom
+```
+
+Declare operations with carrier membership and optional checked laws.
+
+- `order`: `ascending`, `descending`.
+
+`space:covers`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+covers(effect: EffectClass | str) -> Atom
+```
+
+Declare the strongest effect this reified world can handle.
+
+- `effect`: `pureStructural`, `readOnlyLookup`, `nondeterministicReadOnly`, `writesState`, `oracleIO`.
+
+`space:compensates`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+compensates(operation: str, compensation: str) -> Atom
+```
+
+Declare one recovery operation for an effectful operation.
+
+`space:add-tagged-fact`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+add_tagged_fact(tag: Any, proposition: Any) -> Atom
+```
+
+Store ``(fact tag proposition)``, the normative annotation form.
+
+`space:add-tagged-rule`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+add_tagged_rule(tag: Any, head: Any, *premises: Any) -> Atom
+```
+
+Store one rule generated by the algebra-agnostic tag threader.
+
+`space:image`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+image(type_name: str, setting: ImageMode) -> Atom
+```
+
+Choose how one Python type crosses one context boundary.
+
+- `setting`: `opaque`, `transparent`, `auto`.
+
+`space:sample`: `evaluation`, returns `list`, effect `oracleIO`, determinism `nondet`; tiers `sync`, `async`.
+
+```python
+sample(query: str | Atom, *, k: int=10, seed: int=7) -> list[Atom]
+```
+
+Choose ``k`` tagged alternatives with replacement by ``(rate n)``.
+
+`space:consumption`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+consumption(kind: SourceKind) -> Atom
+```
+
+Declare a space's consumption discipline.
+
+- `kind`: `linear`, `repeated`, `peek`.
+
+`space:on-error`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+on_error(subject_or_pattern: str | Atom, pattern_or_mode: str | Atom, mode: OnError | None=None) -> Atom
+```
+
+Declare what a context's failure becomes, per query shape.
+
+- `mode`: `keep`, `empty`, `abort`.
+
+`space:merge`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+merge(pattern: str | Atom, policy: AnswerPolicy) -> Atom
+```
+
+Declare how the engine merges one query shape's answers
+
+- `policy`: `depth`, `fair`, `best-first`.
+
+`space:context`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+context(world: World) -> Atom
+```
+
+Record what a space's absence means.
+
+- `world`: `closed-world`, `open-world`.
+
+`space:agenda`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+agenda(policy: AgendaPolicy, function: str | None=None) -> Atom
+```
+
+Declare which reaction fires first when several match one write.
+
+- `policy`: `declaration`, `recency`, `specificity`, `priority`, `user`.
+
+`space:reacts`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+reacts(pattern: str | Atom, operation: str | Atom, priority: int | None=None) -> Atom
+```
+
+Declare a reaction, stored as an (on ...) atom: when an atom
+
+`space:admits`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+admits(type_name: str) -> Atom
+```
+
+Type a pool's membership: only TYPE-carrying atoms enter.
+
+`space:capacity`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+capacity(limit: int) -> Atom
+```
+
+Bound a pool: an add beyond LIMIT atoms is refused loudly.
+
+`space:atomicity`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+atomicity(atomicity: Atomicity) -> Atom
+```
+
+Declare what a space's writes promise inside a transaction.
+
+- `atomicity`: `transactional`, `atomic-single`, `best-effort`.
+
+`space:emits`: `write`, returns `Atom`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
+
+```python
+emits(policy: AnswerPolicy) -> Atom
+```
+
+Declare the order a context emits its own answers in.
+
+- `policy`: `depth`, `fair`, `best-first`.
+
+`space:events`: `write`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+events(delivery: Delivery | None=None, order: EventOrder=EventOrder.unordered) -> Atom | Any
+```
+
+Return the event stream, or declare what this context promises.
+
+- `delivery`: `at-most-once`, `at-least-once`, `per-write-exactly`.
+- `order`: `ordered`, `unordered`.
+
+`space:runtime`: `introspection`, returns `value`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+runtime -> Runtime
+```
+
+The engine bridge itself, for callers going under the surface.
+
+`space:metta`: `introspection`, returns `value`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+metta -> MeTTa
+```
+
+The owning evaluation context, so a handle can reach every
+
+`space:alpha`: `introspection`, returns `Atom`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+alpha(other: Any) -> Expression
+```
+
+The alpha-equality TERM, (=alpha self other); alpha_eq answers now.
+
+`space:alpha-eq`: `introspection`, returns `bool`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+alpha_eq(other: Atom) -> bool
+```
+
+Whether two atoms differ only by consistent variable renaming.
+
+`space:args`: `introspection`, returns `tuple`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+args -> tuple[Atom, ...]
+```
+
+Read Space.args.
+
+`space:children`: `introspection`, returns `tuple`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+children -> tuple[Atom, ...]
+```
+
+Read Space.children.
+
+`space:eq`: `introspection`, returns `Atom`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+eq(other: Any) -> Expression
+```
+
+The equality TERM, (== self other); == itself compares atoms.
+
+`space:ge`: `introspection`, returns `Atom`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+ge(other: Any) -> Expression
+```
+
+The greater-or-equal TERM, (>= self other).
+
+`space:gt`: `introspection`, returns `Atom`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+gt(other: Any) -> Expression
+```
+
+The strictly-greater TERM, (> self other).
+
+`space:head`: `introspection`, returns `Atom`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+head -> Atom | None
+```
+
+Read Space.head.
+
+`space:le`: `introspection`, returns `Atom`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+le(other: Any) -> Expression
+```
+
+The less-or-equal TERM, (<= self other).
+
+`space:lt`: `introspection`, returns `Atom`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+lt(other: Any) -> Expression
+```
+
+The strictly-less TERM, (< self other).
+
+`space:map`: `introspection`, returns `Atom`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+map(transform: Callable[[Atom], Atom]) -> Atom
+```
+
+Transform every node, children before parents, without recursion.
+
+`space:ne`: `introspection`, returns `Atom`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+ne(other: Any) -> Expression
+```
+
+Read Space.ne.
+
+`space:subs`: `introspection`, returns `Atom`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+subs(bindings: Mapping[Atom, Any] | Any) -> Atom
+```
+
+Replace each atom the bindings name, everywhere it occurs.
+
+`space:unify`: `introspection`, returns `mapping`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+unify(other: Atom, *more: Atom) -> Mapping[Atom, Atom] | None
+```
+
+Unify with the others, returning bindings or ``None``.
+
+`space:vars`: `introspection`, returns `tuple`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+vars -> tuple[Variable, ...]
+```
+
+The variables in first-appearance order; none means ground.
+
+`space:value`: `introspection`, returns `value`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+value -> Any
+```
+
+The inherited payload slot remains unset: a Space is a Handle, and reading value raises AttributeError.
+
+### context declarations
+
+`context:close`: `lifecycle`, returns `None`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+close() -> None
+```
+
+Release the context's own home space; closing twice is a no-op.
+
+`context:closed`: `lifecycle`, returns `bool`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+closed -> bool
+```
+
+Whether :meth:`close` has released this context's own home.
+
+`context:self`: `introspection`, returns `space`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+self -> Space
+```
+
+The context's home space handle, its own ``&self``.
+
+`context:runtime`: `introspection`, returns `value`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+runtime -> Runtime
+```
+
+The engine bridge itself, for callers going under the surface.
+
+`context:info`: `introspection`, returns `mapping`, effect `readOnlyLookup`, determinism `det`; tiers `sync`.
+
+```python
+info() -> dict[str, str | None]
+```
+
+Return backend versions and the consulted MeTTa runtime tree.
+
+`context:lock`: `introspection`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+lock() -> Lock
+```
+
+Pin the knowledge this context has loaded, as a `Lock`.
+
+`context:check`: `introspection`, returns `list`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+check(lock: Lock) -> list[Drift]
+```
+
+Every entry of a lock this tree no longer matches, as `Drift` rows.
+
+`context:space`: `lifecycle`, returns `space`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+space(name: str | Symbol | Expression | Space | None=None, backing: Any=None, *, inherits: Space | None=None, restricted: bool=False, grants: _abc.Iterable[str]=(), journal: str | os.PathLike[str] | None=None, schema: _abc.Mapping[str, Any] | None=None, sync: JournalSync=JournalSync.none, rename: _abc.Mapping[str, str] | None=None, _created_at: tuple[str, int] | None=None) -> Space
+```
+
+Create one native, provider-backed, remote, or journaled space.
+
+- `sync`: `none`, `flush`, `close`.
+
+`context:fn`: `introspection`, returns `value`, effect `readOnlyLookup`, determinism `det`; tiers `sync`.
+
+```python
+fn -> _FunctionNamespace
+```
+
+The bound function namespace of this context's self space.
+
+`context:unregister-op`: `provider`, returns `None`, effect `writesState`, determinism `det`; tiers `sync`.
+
+```python
+unregister_op(name: str) -> None
+```
+
+Release an operation installed through :meth:`op`.
+
+`context:capture`: `scope`, returns `context`, effect `writesState`, determinism `det`; tiers `sync`.
+
+```python
+capture() -> CapturedOutput
+```
+
+Capture printed engine text across this context.
+
+`context:atomic`: `scope`, returns `context`, effect `writesState`, determinism `det`; tiers `sync`.
+
+```python
+atomic() -> ScopedExecution
+```
+
+Scope source execution to committing transactions.
+
+`context:transaction`: `scope`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+@overload
+transaction(target: Callable[[], _R], /) -> _R
+@overload
+transaction(target: Atom | str, /) -> list[Atom | Undefined]
+transaction(target: Any, /) -> Any
+```
+
+Run one callable or term in an engine transaction.
+
+`context:register-prolog`: `provider`, returns `tuple`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+register_prolog(*args: Any, **kwargs: Any) -> tuple[str, ...]
+```
+
+Install a declared Prolog extension.
+
+`context:register-foreign-library`: `provider`, returns `tuple`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+register_foreign_library(*args: Any, **kwargs: Any) -> tuple[str, ...]
+```
+
+Install a compiled SWI foreign library.
+
+`context:register-library-path`: `provider`, returns `None`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+register_library_path(directory: Any, name: str) -> None
+```
+
+Register one named Prolog library directory.
+
+`context:unregister-prolog`: `provider`, returns `tuple`, effect `writesState`, determinism `det`; tiers `sync`.
+
+```python
+unregister_prolog(extension: str) -> tuple[str, ...]
+```
+
+Release one declared Prolog extension.
+
+`context:prolog`: `introspection`, returns `None`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+prolog() -> None
+```
+
+Enter SWI-Prolog's interactive toplevel.
+
+### rows declarations
+
+`rows:insert`: `write`, returns `None`, effect `writesState`, determinism `det`; tiers `sync`.
+
+```python
+insert(i: int, item: Iterable[Any]) -> None
+```
+
+Read Rows.insert.
+
+`rows:append`: `write`, returns `None`, effect `writesState`, determinism `det`; tiers `sync`.
+
+```python
+append(item: Iterable[Any]) -> None
+```
+
+Read Rows.append.
+
+`rows:extend`: `write`, returns `None`, effect `writesState`, determinism `det`; tiers `sync`.
+
+```python
+extend(other: Iterable[Iterable[Any]]) -> None
+```
+
+Read Rows.extend.
+
+`rows:copy`: `query`, returns `Rows`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+copy() -> Rows
+```
+
+Read Rows.copy.
+
+`rows:column`: `query`, returns `value`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+column(name: str) -> Column
+```
+
+Project one exact column name.
+
+`rows:group-by`: `query`, returns `mapping`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+group_by(column: str) -> dict[Atom, Rows]
+```
+
+Group rows by the atom in one exact column.
+
+`rows:first`: `query`, returns `value`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+first(*, default: Any=_MISSING) -> Row | Any
+```
+
+Return the first row, or the caller's explicit default.
+
+`rows:one`: `query`, returns `value`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+one(*, default: Any=_MISSING) -> Row | Any
+```
+
+THE row, when the query is asserted to have exactly one answer;
+
+`rows:raise-for-errors`: `query`, returns `value`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+raise_for_errors() -> Self
+```
+
+Raise when any cell carries an `(Error ...)` atom; answer self
+
+`rows:why`: `query`, returns `str`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+why() -> str
+```
+
+Explain why this eager query returned no rows.
+
+`rows:explain`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+explain(*, analyze: bool=False, allow_writes: bool=False) -> Explanation
+```
+
+What the engine did with the query that produced these rows.
+
+`rows:build`: `query`, returns `list`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+@overload
+build[BuildT](cls: type[BuildT], /) -> list[BuildT]
+@overload
+build[BuildT](column: str, cls: type[BuildT]) -> list[BuildT]
+build(column: str | type, cls: type | None=None) -> list
+```
+
+Rebuild constructor atoms through the two-way translator.
+
+`rows:into`: `query`, returns `list`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+into(cls: type) -> list
+```
+
+Each row as one ``cls``, matched by field name.
+
+`rows:to-dicts`: `query`, returns `list`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+to_dicts() -> list[dict[str, Any]]
+```
+
+Return one Python-native column-to-value mapping per row.
+
+`rows:table`: `query`, returns `mapping`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+table() -> dict[str, list[Any]]
+```
+
+The columns as a dict of plain values, the one shape every
+
+`rows:arrow`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+arrow() -> ArrowView
+```
+
+These rows wearing nothing but the Arrow protocol.
+
+`rows:to`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+to(library: Any)
+```
+
+These rows as a frame of `library`: the general frame door.
+
+`rows:pipe`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+pipe(fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any
+```
+
+fn(self, *args, **kwargs), pandas' chaining shape, so a
+
+`rows:render`: `query`, returns `str`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+render(source: Any, /, **values: Any) -> str
+```
+
+These rows through a template, as text: `metta.render` with `rows` bound.
+
+`rows:to-df`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+to_df() -> Any
+```
+
+These rows as a pandas DataFrame; the declared point rows.to('pandas').
+
+`rows:to-pl`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+to_pl() -> Any
+```
+
+These rows as a polars DataFrame; the declared point rows.to('polars').
+
+### answers declarations
+
+`answers:columns`: `query`, returns `tuple`, effect `pureStructural`, determinism `det`; tiers `sync`.
+
+```python
+columns -> tuple[str, ...]
+```
+
+Caller-variable names available for projection.
+
+`answers:index`: `query`, returns `int`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+index(value: T, start: int=0, stop: int | None=None) -> int
+```
+
+Return a row position, with a remedy for column-name collisions.
+
+`answers:column`: `query`, returns `Answers`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+column(name: str) -> Answers[Any]
+```
+
+Project one exact caller-variable column.
+
+`answers:group-by`: `query`, returns `mapping`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+group_by(column: str) -> dict[Atom, Rows]
+```
+
+Materialize binding rows grouped by one atom-valued column.
+
+`answers:rows`: `query`, returns `Answers`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+rows -> Answers[Row]
+```
+
+The caller-binding row paired with each evaluation answer.
+
+`answers:into`: `query`, returns `list`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+into(cls: type) -> list
+```
+
+Materialize, then convert through Rows.into.
+
+`answers:build`: `query`, returns `list`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+build(*args: Any) -> list[Any]
+```
+
+Materialize, then rebuild one column through Rows.build.
+
+`answers:to-dicts`: `query`, returns `list`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+to_dicts() -> list[dict[str, Any]]
+```
+
+Materialize as plain column-to-value records.
+
+`answers:table`: `query`, returns `mapping`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+table() -> dict[str, list[Any]]
+```
+
+Materialize as a column mapping.
+
+`answers:to`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+to(library: Any)
+```
+
+Materialize, then build a frame of `library`: Rows.to.
+
+`answers:arrow`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+arrow() -> ArrowView
+```
+
+These answers wearing nothing but the Arrow protocol.
+
+`answers:pipe`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+pipe(fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any
+```
+
+Materialize and pass the eager Rows face to ``fn``.
+
+`answers:raise-for-errors`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+raise_for_errors() -> Self
+```
+
+Raise stored error cells after materializing the row view.
+
+`answers:why`: `query`, returns `str`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+why() -> str
+```
+
+Explain an empty query after materializing it.
+
+`answers:explain`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+explain(*, analyze: bool=False, allow_writes: bool=False) -> Explanation
+```
+
+What the engine did with the query behind this view, pulling nothing.
+
+`answers:render`: `query`, returns `str`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+render(source: Any, /, **values: Any) -> str
+```
+
+These answers through a template, as text: `Rows.render`'s lazy twin.
+
+`answers:one`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+one(*, default: Any=_MISSING) -> Any
+```
+
+Return at most one decoded value, defaulting only on absence.
+
+`answers:first`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+first(*, default: Any=_MISSING) -> Any
+```
+
+Return the first decoded value, or the caller's explicit default.
+
+`answers:close`: `lifecycle`, returns `None`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+close() -> None
+```
+
+Release the engine cursor this view holds, now rather than later.
+
+`answers:to-df`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+to_df() -> Any
+```
+
+These rows as a pandas DataFrame; the declared point rows.to('pandas').
+
+`answers:to-pl`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`.
+
+```python
+to_pl() -> Any
+```
+
+These rows as a polars DataFrame; the declared point rows.to('polars').
+
+### remote-space declarations
+
+`remote-space:delivers`: `query`, returns `None`, effect `pureStructural`, determinism `det`; tiers `remote`.
+
+```python
+delivers() -> tuple[str, str] | None
+```
+
+Nothing: the wire carries no event.
+
+`remote-space:refusal`: `query`, returns `value`, effect `pureStructural`, determinism `det`; tiers `remote`.
+
+```python
+refusal(capability: str, /, **_request: Any) -> str | None
+```
+
+Read RemoteSpace.refusal.
+
+`remote-space:match`: `query`, returns `stream`, effect `oracleIO`, determinism `nondet`; tiers `remote`.
+
+```python
+match(pattern: Atom, *, limit: int | None=None) -> Iterator[Atom]
+```
+
+Candidates for a pattern; `limit` crosses as the wire's optional
+
+`remote-space:stream`: `query`, returns `stream`, effect `oracleIO`, determinism `nondet`; tiers `remote`.
+
+```python
+stream(pattern: Atom, *, batch: int=_DEFAULT_BATCH, limit: int | None=None, arrow: bool=False) -> RemoteCursor
+```
+
+The lazy method: answers pulled a chunk at a time, so taking two
+
+`remote-space:server-capabilities`: `query`, returns `mapping`, effect `oracleIO`, determinism `det`; tiers `remote`.
+
+```python
+server_capabilities() -> dict[str, Any]
+```
+
+The server's own advertisement from GET /health: `capabilities`
+
+`remote-space:atoms`: `query`, returns `stream`, effect `oracleIO`, determinism `nondet`; tiers `remote`.
+
+```python
+atoms() -> Iterator[Atom]
+```
+
+Read RemoteSpace.atoms.
+
+`remote-space:add`: `write`, returns `None`, effect `oracleIO`, determinism `det`; tiers `remote`.
+
+```python
+add(atom: Atom) -> None
+```
+
+Store one atom on the serving side.
+
+`remote-space:add-many`: `write`, returns `None`, effect `oracleIO`, determinism `det`; tiers `remote`.
+
+```python
+add_many(atoms: list[Atom]) -> None
+```
+
+One request carries the batch, the engine's own bulk-write law on
+
+`remote-space:remove`: `write`, returns `bool`, effect `oracleIO`, determinism `det`; tiers `remote`.
+
+```python
+remove(atom: Atom) -> bool
+```
+
+Read RemoteSpace.remove.
+
+### remote-cursor declarations
+
+`remote-cursor:__next__`: `query`, returns `Atom`, effect `oracleIO`, determinism `nondet`; tiers `remote`.
+
+```python
+__next__() -> Atom
+```
+
+Read the next remote answer.
+
+`remote-cursor:to-arrow`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `remote`.
+
+```python
+to_arrow() -> Any
+```
+
+The whole remaining stream as one pyarrow Table.
+
+`remote-cursor:__arrow_c_stream__`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `remote`.
+
+```python
+__arrow_c_stream__(requested_schema: Any=None) -> Any
+```
+
+The drained stream as the Arrow PyCapsule Interface's own object.
+
+`remote-cursor:__iter__`: `query`, returns `stream`, effect `pureStructural`, determinism `nondet`; tiers `remote`.
+
+```python
+__iter__() -> Iterator[Atom]
+```
+
+Iterate the receiver.
+
+`remote-cursor:close`: `lifecycle`, returns `None`, effect `oracleIO`, determinism `det`; tiers `remote`.
+
+```python
+close() -> None
+```
+
+Release the server's cursor; idempotent, and distinct from
+
+`remote-cursor:__enter__`: `query`, returns `value`, effect `pureStructural`, determinism `det`; tiers `remote`.
+
+```python
+__enter__() -> Self
+```
+
+Enter the receiver lifetime.
+
+`remote-cursor:__exit__`: `lifecycle`, returns `None`, effect `oracleIO`, determinism `det`; tiers `remote`.
+
+```python
+__exit__(exc_type, exc, tb) -> None
+```
+
+Stop the server's cursor without letting the stop displace the
+
+### namespace declarations
+
+`arrays:install`: `provider`, returns `list`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+install(default: Any=None) -> list[str]
+```
+
+Register the array operation set on the shared engine.
+
+`arrays:uninstall`: `provider`, returns `list`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+uninstall() -> list[str]
+```
+
+Retire this space's array installation; answers what it unregistered.
+
+`arrays:ops`: `introspection`, returns `list`, effect `readOnlyLookup`, determinism `det`; tiers `sync`, `context`.
+
+```python
+ops() -> list[str]
+```
+
+The array operation names installed in this space, in install order.
+
+`arrays:backend`: `introspection`, returns `str`, effect `readOnlyLookup`, determinism `det`; tiers `sync`, `context`.
+
+```python
+backend() -> str
+```
+
+The array library this space's constructors build in.
+
+`live:view`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`, `async`.
+
+```python
+view(*query: Any, on: SubscriptionEdge=SubscriptionEdge.both, strategy: str | None=None) -> Any
+```
+
+Maintain a query's multiset through this space's committed writes.
+
+- `on`: `add`, `remove`, `both`.
+
+`tables:to-df`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+to_df(rows: Any) -> Any
+```
+
+These rows as a pandas DataFrame; the declared point rows.to('pandas').
+
+`tables:to-pl`: `query`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+to_pl(rows: Any) -> Any
+```
+
+These rows as a polars DataFrame; the declared point rows.to('polars').
+
+`remote:connect`: `provider`, returns `callable`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+connect(url: str, timeout: float=30.0, *, token: str | None=None, headers: dict[str, str] | None=None, ssl_context: Any=None) -> Transport
+```
+
+The HTTP transport for a serve()d engine: one POST per operation,
+
+`remote:serve`: `lifecycle`, returns `context`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+serve(host: str='127.0.0.1', port: int=0, spaces: list[str] | None=None, *, token: str | None=None, authorize: Callable[[Request], bool] | None=None, ssl_context: Any=None, cursor_idle: float=_CURSOR_IDLE, cursor_limit: int=_CURSOR_LIMIT, mutation_ttl: float=_MUTATION_TTL, mutation_limit: int=_MUTATION_LIMIT) -> Server
+```
+
+Expose this engine's spaces over HTTP; port 0 picks a free one.
+
+`tables:add`: `write`, returns `int`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+add(head: Any, data: Any) -> int
+```
+
+Add a tabular source to a space as ``(head column...)`` facts.
+
+`tables:declare`: `write`, returns `Atom`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+declare(name: str, declaration: Atom | str) -> Atom
+```
+
+Write one ctx-scoped bridge declaration into &metta, where explain
+
+`tables:accessors`: `provider`, returns `tuple`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+accessors() -> tuple[str, ...]
+```
+
+Install the metta accessor for every registered frame library already imported.
+
+`tables:sql-function`: `provider`, returns `str`, effect `oracleIO`, determinism `det`; tiers `sync`, `context`.
+
+```python
+sql_function(connection: Any, head: Any, name: str | None=None) -> str
+```
+
+Register a MeTTa head as a scalar SQL function, and answer its SQL name.
+
+<!-- end generated door contracts -->
+
+## Running and querying: exact return shapes
+
+The generated declarations above own the parameter lists. `run` returns one
+answer group per `!` directive. Ordinary `eval` returns a flat list for one
+target and one group per target for a batch. Its `answer` option selects the
+result shape; `under`, `delivery`, `limit`, `timeout`, `inferences`, `image`,
+`on_error` and `determinism` compose with that selection. Lazy selections own
+their cursor, and the asynchronous tier keeps every pull and close on its worker.
+
+`prepare` retains a query for repeated `.solve(given=...)` calls and exposes
+its `.columns`. `save` replaces the destination atomically and fsyncs it;
+`source` returns the same loadable MeTTa text in memory. `digest` is the
+store-independent, 64-hex content hash.
 
 `target` may be a string or an already-built atom. `bind()` maps BARE SYMBOLS
 (not `$vars`) to Python objects, which cross by identity, not by copy or repr:
@@ -1177,22 +3067,24 @@ row; distinct arrows for one function remain valid overloads. A public batch
 is checked before its first write, so `m.add(declaration, declaration)` leaves
 neither copy behind.
 
-```python
-m.handles(pattern, "Exact"|"Partial"|"Sound"|"Refuse", det=)
+The generated declarations above own the signatures; these notes explain the
+declarations' behavior.
+
+```text
+m.handles:
         how faithfully a space answers one query shape. Exact licenses pushing
         the caller's bound down to the provider; Partial and Sound stay
         candidates the engine re-unifies; Refuse makes the query a loud error
         instead of a silent partial answer. (in $x) at a position matches only
         queries arriving with it bound, so a scan-only source is three words.
-m.emits("depth"|"fair"|"best-first")                 answer order
-m.merge(pattern, "depth"|"fair"|"best-first")        how answers merge
-m.consumption("linear"|"repeated"|"peek")            consumption discipline; writes (source <space> <kind>)
-m.atomicity("transactional"|"atomic-single"|"best-effort")
-m.context("closed-world"|"open-world")               what absence means
-m.on_error(pattern, "keep"|"empty"|"abort")
-m.image(type_name, "opaque"|"transparent"|"auto")    how values cross
-m.algebra(name, *, combine, extend, zero, one, laws=(), carrier=(), type=None,
-          requires=(), order=None)
+m.emits:        answer order
+m.merge:        how answers merge
+m.consumption:  consumption discipline; writes (source <space> <kind>)
+m.atomicity:    the strength of a write's atomicity promise
+m.context:      what absence means
+m.on_error:     how a provider failure is delivered
+m.image:        how values cross
+m.algebra:
         add one catalog algebra. type= accepts a Python type, a MeTTa type atom,
         or a predicate returning one bool, and checks every input and result.
         A type alone grants no law certificate or answer fusion. Only an explicit
@@ -1218,28 +3110,25 @@ metta.algebra(name, *, plus, times, zero, one, laws=(), carrier=(), type=None,
         the space `metta.current_space()` names, so inside `with scratch:` the
         row is owned by `scratch`. Ten carriers ship, tabled under `under=`
         above, and each is also an object
-m.annotations(algebra, *, capabilities=())
-m.annotations(operation, algebra, *, capabilities=())
+m.annotations:
         choose any declared algebra for this space or an operation; required
         capabilities are checked before the catalog row lands. This row is
         keyed by the same context the algebra row above is owned by
-m.add_tagged_fact(tag, proposition)     store ordinary (fact tag proposition)
-m.add_tagged_rule(tag, head, *premises) store the generic threaded rule form
-m.match(query, under=algebra) / m.answers(call, under=algebra)
-        return annotated answers; these are the only public algebra evaluators
-m.sample(query, *, k=10, seed=7)
+m.add_tagged_fact: store ordinary (fact tag proposition)
+m.add_tagged_rule: store the generic threaded rule form
+m.match / m.answers / m.eval:
+        under= selects the algebra of their annotated answers
+m.sample:
         stable weighted selection from nonnegative `(rate n)` tags
-m.admits(type_name)                 only TYPE-carrying atoms enter
-m.capacity(limit)                   an add beyond LIMIT is refused loudly
-m.reacts(pattern, operation, priority=)  stored as an (on ...) atom
-m.agenda("declaration"|"recency"|"specificity"|"priority"|"user",
-         function=None)
+m.admits:       only TYPE-carrying atoms enter
+m.capacity:     an add beyond LIMIT is refused loudly
+m.reacts:       stored as an (on ...) atom
+m.agenda:
         which reaction fires first when several match one write. declaration
         is the default and the order they were declared; user names a MeTTa
         function that SCORES a reaction. Every policy ties on declaration
         order and an undeclared priority reads as 0.
-m.events("at-most-once"|"at-least-once"|"per-write-exactly",
-         "ordered"|"unordered")
+m.events:
         what a foreign context's change events promise. Subscribability is a
         promise about the context, not an inference from its write methods: a
         context that declares nothing refuses subscribe, bridge and reaction
@@ -1367,9 +3256,11 @@ which `(owned-by-space typing)` in the catalog is what arranges.
 
 ## Observability
 
+The generated declarations above own the door signatures. The notes below
+describe their result objects and execution behavior.
+
 ```
-m.trace(src, max_events=10_000, *, filter=, timeout=, inferences=, seed=)
-                                                     -> Trace of TraceEvent
+m.trace: Trace of TraceEvent
         (seq, time, depth, kind, term, answer). seq numbers the recorded events
         from 0 and time is the WALL nanoseconds since the run began; time is
         outside equality, so two traces of one program compare equal
@@ -1386,9 +3277,9 @@ m.trace(src, max_events=10_000, *, filter=, timeout=, inferences=, seed=)
         either way the events recorded so far are answered, never discarded
         filter= names the functions to record, before those bounds apply, and
         takes a symbol, a string, a bound handle like m.fn.double, or several
-        seed= pins the run's generator and restores it afterwards, the scope
-        `(with-seed S expr)` spells in MeTTa; `m.record` always sets it
-m.debug(src, *, on=, inferences=, at=) -> Debugger of Stop
+        `(with-seed S expr)` scopes a draw's seed in MeTTa; `m.record` captures
+        a seed for its complete run
+m.debug: Debugger of Stop
         breakpoints, suspension, stepping, resume. Iterating runs the program
         to each breakpoint; the loop body is where it is SUSPENDED and leaving
         the body resumes that same execution. on= names the functions that stop
@@ -1401,7 +3292,7 @@ m.debug(src, *, on=, inferences=, at=) -> Debugger of Stop
         compiled function until it does. No timeout, by design; inferences
         bound the whole session so a resume cannot run forever
         a Stop carries the same six fields a TraceEvent does, plus .function
-m.record(src, *, seed=None, max_events=, timeout=, inferences=) -> Recording
+m.record: Recording
         the run kept as DATA: the events plus the state that produced them, so
         they are re-runnable and not only readable. rr's shape, where the
         nondeterministic input is recorded once and the replay is deterministic
@@ -1465,11 +3356,11 @@ metta_otel.observe(m, *, tracer=None, meter=None, name="metta",
         The `metta.*` loggers need no code here: attaching
         opentelemetry.sdk._logs.LoggingHandler to logging.getLogger("metta")
         puts every engine, transport and provider message in the same pipeline
-m.derivation(target, depth=None, *, timeout=, inferences=) -> list[Derivation]
+m.derivation: list[Derivation]
         proof trees in MeTTa terms: .rules, .facts, .complete, .truncations
-m.why(pattern) -> str            one empty match explained in words
-rows.why()                       pattern miss, failed join, or rejecting guard
-m.lint() -> list[lint.Finding]   the silently-wrong class, from stored structure
+m.why:         one empty match explained in words
+rows.why:      pattern miss, failed join, or rejecting guard
+m.lint:        the silently-wrong class, from stored structure
         `# metta: ok(<kind>)` on a statement, or on the line above the lint
         CALL to cover a space built entirely from Python, suppresses that one
         kind there; it is kept as a (lint-intent ...) atom, not dropped as a
@@ -1487,9 +3378,9 @@ metta.lint.fix_file(path, findings=None, m=None) -> Repair   the same repair
         form; refuses the whole file when its digest moved
 metta.lint.diagnostics(findings) -> list[dict]   LSP 3.17 Diagnostics,
         zero-based, the remedy under `data`
-m.effect_plan(target) -> EffectPlan(operations, effect), translates and follows
+m.effect_plan: EffectPlan(operations, effect), translates and follows
         nested compiled calls without executing the target
-m.explain(query, *, analyze=False, allow_writes=False) -> Explanation
+m.explain: Explanation
         SQL's EXPLAIN over this engine's decisions for one query, as the atoms
         the MeTTa form `!(explain <query>)` answers. A match form answers
         handles, pushes, source, context, annotations, emits, events, writes,
@@ -1513,16 +3404,16 @@ m.explain(query, *, analyze=False, allow_writes=False) -> Explanation
         operations write, because an analysis that mutates is not an analysis;
         allow_writes=True measures it anyway. A match TEMPLATE is evaluated, so
         `(match &s (edge $x $y) (add-atom &s (seen $x)))` is a writing query
-rows.explain(*, analyze=False, allow_writes=False) -> Explanation
+rows.explain: Explanation
         the same, over the match form a query result came from. The lazy view
         pulls nothing to answer it. A `where=` guard is not part of it: a guard
         filters answers after the match and does not change which join runs
-m.eval_status(target) / m.run_status(src)  each answer paired with the path that
+m.eval_status / m.run_status: each answer paired with the path that
         produced it: "value" (equation, builtin or special form applied),
         "not-reducible" (no rule applied, the answer is the term itself),
         "empty" (branch pruned, answer None). A pruned branch and an unevaluated
         term are different things the answers alone cannot tell apart.
-m.stats()      with-block yielding .inferences (deterministic, gate on this),
+m.stats:       with-block yielding .inferences (deterministic, gate on this),
                .cputime, .walltime, .gc_count, .gc_freed, .gc_time, .table_bytes,
                .heartbeats
         .inferences is the BLOCK's work: the engine's interrupt poll, which
@@ -1534,7 +3425,7 @@ m.stats()      with-block yielding .inferences (deterministic, gate on this),
         beside the block is not
         The door itself costs 7 inferences of the block it measures, which is
         constant and therefore cancels out of any comparison
-m.profile(src) -> (groups, EngineProfile), per predicate
+m.profile:     (groups, EngineProfile), per predicate
         EngineProfile: .samples, .ticks, .seconds, .nodes (Rows over predicate,
         calls, redos, ticks_self, ticks_siblings, file, line, seconds_self,
         seconds_total), .top(n), .as_stats()
@@ -1543,7 +3434,7 @@ prof.as_stats() -> pstats.Stats   the same profile in the currency every Python
         .dump_stats(path) writes what snakeviz and tuna open. The key is
         (file, line, predicate), so a row is navigable; a redo has no pstats
         column, so .nodes stays the door for choice-point cost
-m.profile_extension(src, extension=, names=)  only YOUR functions
+m.profile_extension: only the selected extension's functions
 m.fn[name].origin -> tuple      where each clause of a head was written, in
         clause order: Origin(file, line) per compiled clause, or None in that
         position for a clause with no source. A `.metta` head answers the file
@@ -1553,7 +3444,7 @@ m.fn[name].origin -> tuple      where each clause of a head was written, in
         `.metta` line reads and parses that file, so this is a diagnostic
         rather than a lookup. S["car-atom"].origin and metta.fn.car_atom.origin
         ask the same question of the ambient space
-m.prolog()                    the engine's own interactive toplevel
+m.prolog:                     the engine's own interactive toplevel
 metta.engine().info() -> versions of metta, janus, swi_prolog, python, metta_path
 ```
 
@@ -1878,7 +3769,9 @@ There is no built-in tier. This is the shape Apache Airflow's providers have
 | extra | packages | what it fills |
 |---|---|---|
 | `engine` | janus-swi, which is the bridge rather than a package | the SWI-Prolog runtime |
-| `dataframes` | `metta-pandas`, `metta-polars` | the `frame` point: `rows.to_df()`, `rows.to_pl()`, and the library's own `.metta` accessor |
+| `dataframes` | `metta-tables`, `metta-pandas`, `metta-polars` | the `tables` namespace, frame conversions, and each library's own `.metta` accessor |
+| `live` | `metta-live` | the callable `m.live` namespace and `m.live.view` |
+| `remote` | `metta-remote` | `m.remote.connect` and `m.remote.serve` |
 | `sql` | `metta-duckdb`, `metta-sqlite` | the `sql` point: a MeTTa head as a scalar SQL function |
 | `arrays` | `metta-arrays`, `metta-numpy`, `metta-faiss` | the array layer, its default library, its vector index |
 | `arrow` | `metta-nanoarrow`, `metta-pyarrow` | the `arrow` capsules and the `ipc` stream |
@@ -1887,10 +3780,11 @@ There is no built-in tier. This is the shape Apache Airflow's providers have
 | `das` | `metta-websocket` | the `transport-error` point |
 | `otel` | `metta-otel` | a reduction trace as OpenTelemetry spans |
 
-`metta-arrays`, `metta-otel` and `metta-benchmarking` are LIBRARIES you import
-by name (`import metta_arrays`) and advertise no entry point, because a
-program reaches them directly and discovery would only make every other
-program pay to load them; the other eleven are rows and advertise.
+`metta-otel` and `metta-benchmarking` are libraries reached by import and
+advertise no entry point. `metta-arrays` advertises its lightweight
+`metta_arrays_doors` module, which registers deferred implementation references
+for `m.arrays` without importing the array implementation. Every other
+workspace member advertises its declaration module.
 
 Every generic door works with NONE of them installed and refuses by name,
 saying which point it was, which registrants there are, and the command that

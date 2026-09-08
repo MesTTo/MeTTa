@@ -3444,8 +3444,68 @@ solars = "solars:register"
 Nothing else. `rows.to(solars)` then answers a solars frame,
 `tables.sql_function(solars_connection, m.fn.dbl)` registers into a solars
 connection, and `EmbeddingStore(m, backend="solars")` searches through solars.
-`tests/shell/test_a_stranger_extends_the_python_seat.sh` builds exactly that
-package during the gate and drives all nine doors through it.
+`tests/shell/test_a_stranger_extends_the_python_seat.sh` builds that package
+during the gate and also reaches its namespaced door, described below.
+
+#### Declaring a host door from your package
+
+`seam.door` publishes callable host contracts. A package owns a namespace:
+`m.solars.frame(rows)` and `m.tables.to_df(rows)` can coexist. The accessor
+borrows the context or Space on which it was obtained. Its implementation is
+loaded when called, so a metadata module can advertise doors without importing
+the library they use.
+
+```python
+# solars/__init__.py, beside the frame registration above
+from metta.doors import AnswersAs, Body, Door, Kind, Owner, Provider, Receiver, Signature, Tier
+from metta.vocabularies import Determinism, EffectClass
+
+def frame(space, rows):
+    """Build a solars frame from binding rows."""
+    return rows.to("solars")
+
+DOORS = (
+    Door(
+        owner=Owner.namespace, name="frame", kind=Kind.provider,
+        signatures=(Signature("space, rows"),),
+        answers=AnswersAs.value, effect=EffectClass.oracleIO,
+        determinism=Determinism.det, tiers=(Tier.sync, Tier.context),
+        body=Body("solars", "frame", Receiver.space),
+        provider=Provider("solars", "solars"),
+        docs="Build a solars frame from binding rows.",
+        evidence=("tests/test_solars.py::test_frame",),
+    ),
+)
+
+def register_doors():
+    seam.door.register("solars", doors=DOORS)
+```
+
+Call `register_doors()` from the same advertised `register()` function that
+registers the frame builder. Supply a real behavioral test at the evidence
+target. The repository generator reads a workspace member's literal `DOORS`
+declaration; it does not execute provider code to discover signatures.
+
+A row names its receiver, complete signatures, result shape, effect,
+determinism, tiers, body reference, documentation and tests. `args` projects
+each annotation through the shared host type table. `binding` names an engine
+crossing when one exists. `refuses` contains `Refusal(kind, witness)` records,
+where `kind` is a `RefusalKind` and the witness is a pytest node that asserts
+its exception class. Assumes, Guarantees and Fails-when are typed views of
+these fields. The generated [door reference](../reference/python-door-contracts.md)
+prints them all.
+
+A convenience uses `Sugar(base, fixed)` to name its base and fixed argument
+values. `metta-pandas` and `metta-polars` declare `Rows` and `Answers` sugars
+this way, so `rows.to_df()` is a declared point in `rows.to(...)`. A second
+declaration of the same point on one receiver is refused. A package cannot replace a core door,
+an inherited result protocol member, or another package's namespace member.
+
+The rows and their typed constructors are written into `&metta` at boot.
+After a registration changes, `seam.publish(m)` refreshes that catalog
+snapshot atomically. `seam.door.unregister("solars")` withdraws the rows;
+accessors and methods already retained by callers resolve the current row
+again on their next call, so withdrawal raises and replacement takes effect.
 
 #### Your library is a package, and so is ours
 
@@ -3459,12 +3519,12 @@ Every library this repository ships support for is one of those packages, in
       tests/                what proves the row
       README.md             the four lines a reader needs
 
-`metta-pandas` is the worked example, and it is thirty lines: a `_MISSING`
-sentence, an accessor installer, a builder, and
+`metta-pandas` is the worked example: an accessor installer, a builder, its
+door contracts, and
 
 ```python
 seam.frame.register(
-    "pandas", module="pandas", accessor=_install_accessor, build=_build, sugar="to_df"
+    "pandas", module="pandas", accessor=_install_accessor, build=_build
 )
 ```
 
@@ -3476,7 +3536,7 @@ cheap, and the `seat-layering` lane holds each of them:
   manifest does not declare. `metta-faiss` declares NumPy too, because faiss'
   own `add` and `search` take contiguous float32 NumPy arrays; that is faiss'
   interface, not a second integration.
-- **The module body imports the seam and nothing heavy.** A row holds the
+- **The metadata module imports the seam and nothing heavy.** A row holds the
   module NAME of its library and imports it inside the callable that uses it,
   so `import metta_pandas` costs 5 ms where importing pandas costs 531. This is
   load-bearing rather than tidy: the first dispatch of any point loads EVERY
@@ -3487,29 +3547,27 @@ cheap, and the `seat-layering` lane holds each of them:
   `seam.at("projection").call()`, `seam.at("module").call()` -- and never
   imports a private module. That is the rule Airflow had to invent a Task SDK
   for and the rule a pytest plugin breaks every release by ignoring.
-- **A library you IMPORT need not advertise at all.** `metta-arrays` is the
-  array layer, `metta-otel` the OpenTelemetry bridge, `metta-benchmarking` the
-  measurement plumbing: a program reaches each by name, so advertising them
-  would only make every other program pay to load them. They are workspace
-  members and distributions like the rest; they simply have no row a dispatch
-  could need first.
+- **An implementation need not load during discovery.** `metta-arrays`
+  advertises `metta_arrays_doors`, whose rows point at its implementation.
+  `metta-otel` and `metta-benchmarking` remain packages reached by import;
+  they have no advertised row a dispatch needs first.
 
 The repository is a uv workspace, so `uv sync --all-packages` installs the core
 and every member from the checkout, and an extra resolves its members from the
 workspace rather than from an index.
 
-Discovery is lazy and costs nothing until it is used: `seam.advertised()` reads
-the group's names without importing any of it, and the group is loaded on the
-first dispatch that has no answer without it. That is what Pygments does for a
-plugin lexer, and for the same reason: listing has to stay cheap
-([Pygments plugins](https://pygments.org/docs/plugins)).
+`seam.advertised()` reads the group's names without importing them. A dispatch
+discovers the advertised registrations when needed. Engine boot also discovers
+them to publish the complete door catalog, which makes keeping metadata imports
+light a requirement for every package.
 
 The shipped points are `frame` (a dataframe library), `sql` (a SQL engine),
 `array` (an Array API library), `index` (a nearest-neighbour backend), `arrow`
 (who builds the Arrow C structs), `ipc` (who writes and reads the Arrow IPC
 stream), `transport-error` (which exceptions mean an
 absent backend), `image` (how a class of host types projects by default),
-`graphql` (who executes a document), `typing` (a type-equation template, below)
+`graphql` (who executes a document), `door` (a host callable's contract),
+`typing` (a type-equation template, below)
 and `law` (an algebra law a declared carrier can be held to), and
 the six whose rows already lived somewhere: `type`, `repr`, `reflector`,
 `provider`, `library` and `integration`. Those six are declared by

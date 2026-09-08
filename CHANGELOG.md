@@ -1243,6 +1243,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 
 ### Changed
+- Python host doors are declared in `metta.doors` and published as typed
+  `(door ...)` atoms in `&metta` at boot. One generator writes Space, its
+  mirrors, remote clients and operations, stubs, reference, shrink ledger and
+  the consumer sheet's declarations. `door-sync` checks their signatures,
+  structured contracts, test evidence and local refusal witnesses.
+- `eval` composes answer shape, algebra, delivery, bounds, image, error-answer
+  policy and determinism. Ordinary eager evaluation retains its existing
+  crossing; lazy selections own and close their cursors. The async tier keeps
+  acquisition, pulls and cleanup on its worker, including cancellation and
+  parent closure.
+- Packages register namespace doors through `seam.door`. Tables, arrays,
+  remote services and live queries expose their own accessors; frame packages
+  declare the short Rows and Answers conversions as sugar rows. Retained
+  accessors observe registration replacement and withdrawal on their next call.
+
 - `metta.wire` and `metta.casting` are gone into `metta.convert`, which is one
   door with `encode`, `decode`, `from_wire`, `atom_from_wire`, `cast` and the
   projection half together. No alias: the two names are removed.
@@ -1685,6 +1700,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   always was, computed where it always was.
 
 ### Removed
+- Independent door rosters and the shrink ledger's AST classifier. The
+  ledger queries declared kinds and sugar points, and public class
+  membership comes from the same rows as its generated projections.
+
 - `metta.strategies`, which was `lib_strategy`'s constructor list written out
   by hand and mixing in one head the library does not define. Its replacement
   is `metta.library.face("lib_strategy")`, projected from the library's own
@@ -1739,6 +1758,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   with its vendored corpus is the lane that reads it.
 
 ### Fixed
+- The Python bag-law machine's planted provider checks exercise their known
+  failing histories before random rules. A short random run could miss the
+  duplicate-removal sequence and report a false failure of the self-test.
+  Both histories also run against a provider that keeps the multiset laws.
+
 - The `parity` lane read a test verdict as "the line contains ` should `",
   where a verdict is `is X, should Y.`. The engine configuration echoes the
   source of every library an example imports, so `lib_torch`'s generated

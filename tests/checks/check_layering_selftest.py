@@ -186,12 +186,24 @@ def main() -> int:
         assert any("the core imports 'metta_solars'" in line for line in found), found
         assert any("metta-solars" in line for line in found), found
 
+        found = _reported(
+            scratch, "extensions/python/metta/doors.py",
+            "from typing import TYPE_CHECKING\nif TYPE_CHECKING:\n    import metta_solars\n",
+        )
+        assert any("the core imports 'metta_solars'" in line for line in found), found
+
         # 2. A member reaches the core's privates, which is what makes a
         # distribution un-releasable separately.
         found = _reported(
             scratch,
             "extensions/python/ext/metta-solars/metta_solars.py",
             "from metta._space import Space\n\n\ndef door():\n    return Space\n",
+        )
+        assert any("the core's private name" in line for line in found), found
+
+        found = _reported(
+            scratch, "extensions/python/ext/metta-solars/metta_solars.py",
+            "from typing import TYPE_CHECKING\nif TYPE_CHECKING:\n    from metta._space import Space\n",
         )
         assert any("the core's private name" in line for line in found), found
 
@@ -234,6 +246,26 @@ def main() -> int:
             MEMBER_MANIFEST.replace('metta-solars = "metta_solars"', 'wrong = "metta_solars"'),
         )
         assert any("advertises nothing at all" in line for line in found), found
+
+        # A lightweight metadata module may be the entry point while the
+        # primary implementation remains dormant until a caller needs it.
+        manifest = scratch / "extensions/python/ext/metta-solars/pyproject.toml"
+        original = manifest.read_text(encoding="utf-8")
+        metadata_module = manifest.parent / "metta_solars_doors.py"
+        metadata_module.write_text(MEMBER, encoding="utf-8")
+        try:
+            manifest.write_text(
+                MEMBER_MANIFEST.replace('metta-solars = "metta_solars"', 'metta-solars = "metta_solars_doors"')
+                .replace('py-modules = ["metta_solars"]', 'py-modules = ["metta_solars", "metta_solars_doors"]'),
+                encoding="utf-8",
+            )
+            assert _findings_over(scratch) == []
+            metadata_module.unlink()
+            found = _findings_over(scratch)
+            assert any("metta_solars_doors' and no such module" in line for line in found), found
+        finally:
+            manifest.write_text(original, encoding="utf-8")
+            metadata_module.unlink(missing_ok=True)
 
         # 6. A point names an extra the manifest does not declare, so its
         # refusal would end in a command that does not work.

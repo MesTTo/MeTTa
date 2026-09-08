@@ -22,8 +22,9 @@
 #     still classes an OSError, a dataclass still projects, and the seam still
 #     answers its whole surface.
 #   - with metta-pandas alone: to_df() builds a frame through the ENTRY POINT
-#     with nothing imported by hand, and to_pl() still refuses. A subset is a
-#     supported configuration, not a broken install.
+#     with nothing imported by hand. Unregistered namespace members and short
+#     sugars are absent; rows.to(library) retains the named missing-provider
+#     refusal [tested: sh check.sh no-packages; commit=WORKTREE].
 # Fails when: uv is absent, which it refuses on rather than skipping.
 # Open Obligations:
 #   To Do: None
@@ -94,17 +95,18 @@ rows = Rows(("who", "n"), [(S.Ada, G(1)), (S.Bob, G(2))])
 assert rows.table() == {"who": ["Ada", "Bob"], "n": [1, 2]}
 print("table           : rows.table() is the plain dict any constructor takes")
 
-for door, extra in (("to_df", "dataframes"), ("to_pl", "dataframes")):
+for door, library in (("to_df", "pandas"), ("to_pl", "polars")):
+    assert not hasattr(rows, door), f"{door} has no registered sugar row"
     try:
-        getattr(rows, door)()
+        rows.to(library)
     except TypeError as refusal:
         assert "no frame registration handles" in str(refusal), refusal
-        assert f"pymetta[{extra}]" in str(refusal), refusal
+        assert "pymetta[dataframes]" in str(refusal), refusal
         assert "metta.extensions" in str(refusal), refusal
     else:
-        message = f"{door}() answered with no frame package installed"
+        message = f"rows.to({library!r}) answered with no frame package installed"
         raise AssertionError(message)
-print("frame           : to_df() and to_pl() refuse naming the point and the extra")
+print("frame           : package sugars are absent; rows.to names the missing point and extra")
 
 try:
     rows.__arrow_c_stream__()
@@ -124,6 +126,14 @@ print("transport-error : an OSError still reads as an absent backend")
 
 m = metta.MeTTa()
 assert m.run("!(+ 1 2)") == [[3]], m.run("!(+ 1 2)")
+for receiver in (m, m.self):
+    for name in ("tables", "arrays", "live", "remote"):
+        assert not hasattr(receiver, name), f"{name} has no registered namespace"
+from metta.doors import DOORS, Owner, table
+
+assert len(table()) == len(DOORS)
+assert all(row.owner is not Owner.namespace for row in table().values())
+m.close()
 print("engine          : the engine runs, which is what zero integrations buys")
 print("the core answers with no extension package installed")
 NONE
@@ -146,13 +156,20 @@ assert "metta_pandas" in sys.modules, "the dispatch loads the advertised package
 print("subset          : to_df() through the entry point, with no import here")
 
 try:
-    rows.to_pl()
+    rows.to("polars")
 except TypeError as refusal:
     assert "registered: pandas" in str(refusal), refusal
 else:
     message = "to_pl() answered with only metta-pandas installed"
     raise AssertionError(message)
-print("subset          : to_pl() still refuses, and names what IS registered")
+assert not hasattr(rows, "to_pl"), "the absent provider contributes no short sugar"
+from metta import MeTTa
+
+with MeTTa() as context:
+    assert list(context.tables.to_df(rows)["n"]) == [1, 2]
+    assert not hasattr(context.tables, "to_pl")
+    assert not hasattr(context, "arrays")
+print("subset          : only registered sugars and namespace members exist")
 print("a subset of the packages is a configuration, not a broken install")
 SUBSET
 
