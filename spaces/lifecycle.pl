@@ -66,7 +66,7 @@
 %   structural_aliases:a_shared_alias_is_hidden_by_a_declaration_added_to_another_space;
 %   commit=60d6ca9089f50521bba869c3b7a87c92fd6a990f].
 
-%The inverse of add_sexp_in/4, written here beside it for the same reason
+%The inverse of add_sexp_in/5, written here beside it for the same reason
 %metta_module_space/2 is written beside space_module/2: the mapping is
 %injective, so the inverse is a function rather than a search, and keeping the
 %pair together is what stops one of them drifting.
@@ -86,35 +86,37 @@
 %from the CALLER's: read from the engine it arrives bare, so stripping it named
 %the engine's own module and every atom looked like something else
 %[measured 2026-08-19: the withdrawal reported 0 atoms while removing them].
-stored_atom_of_ref(Ref, Space, Atom) :-
+stored_atom_of_ref(Ref, Space, Atom, Token) :-
     catch(clause_property(Ref, predicate(Module:Name/_)), _, fail),
     native_storage_module(Space, Module),
     native_storage_functor(Space, Functor),
     catch(clause(Stored, true, Ref), _, fail),
     strip_module(Stored, _, Head),
     (   Name == '$metta_native_scalar'
-    ->  Head = '$metta_native_scalar'(Atom)
+    ->  Head = '$metta_native_scalar'(Atom, Token)
     ;   Name == Functor,
-        Head =.. [_, Rel|Args],
+        metta_storage_term(Functor, [Rel|Args], Token, Head),
         Atom = [Rel|Args]
     ).
 
 %The clause a native space stores an atom AS. This is the definition of that
-%shape, and lib_import.pl's static-import! writes exactly this to a file so a
-%large data file can be qcompiled once instead of parsed every run. The two
+%shape. lib_import.pl restores its compiled data image through the native
+%write funnel, so cached and ordinary writes use the same shape. The two
 %used to disagree and it was invisible: the converter wrote '&self'(fact,a,1)
 %into USER while native atoms live in the storage module '$metta_atoms:&self',
 %so a static import loaded clauses nothing could read and reported success
 %[tested: native_storage_shapes_agree,
 %import_facts_land_where_the_space_reads_them].
-native_atom_clause([Family|Parameters], [Rel|Args], Term) :-
+native_atom_clause([Family|Parameters], Atom, Token, Term) :-
+    nonvar(Atom), Atom = [Rel|Args],
     Space = [Family|Parameters],
     space_parametric(Space),
     !,
-    Term =.. ['$metta_parametric_atom', Rel|Args].
-native_atom_clause(Space, [Rel|Args], Term) :- !,
-    Term =.. [Space, Rel | Args].
-native_atom_clause(_, Atom, '$metta_native_scalar'(Atom)).
+    metta_storage_term('$metta_parametric_atom', [Rel|Args], Token, Term).
+native_atom_clause(Space, Atom, Token, Term) :-
+    nonvar(Atom), Atom = [Rel|Args], !,
+    metta_storage_term(Space, [Rel|Args], Token, Term).
+native_atom_clause(_, Atom, Token, '$metta_native_scalar'(Atom, Token)).
 
 %Remove ONE atom that unifies with the requested value. Expressions and
 %scalars live in different predicates, so neither erases the other.
@@ -183,7 +185,7 @@ remove_sexp(Space, Atom) :- remove_sexp(Space, Atom, _).
 %test_a_persistent_space_drains_like_a_native_one; commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
 remove_sexp('&metta', [Rel|Args], Removed) :- !,
     (   native_storage_module_ready('&metta', Module)
-    ->  Term =.. ['&metta', Rel|Args],
+    ->  metta_storage_term('&metta', [Rel|Args], _, Term),
         ( Rel == effect -> metta_refuse_owned_effect_removal(Module, Term) ; true ),
         native_retract_one(Module:Term, Removed),
         (   Removed == true
@@ -197,19 +199,19 @@ remove_sexp([Family|Parameters], [Rel|Args], Removed) :-
     space_parametric(Space),
     !,
     (   native_storage_module_ready(Space, Module)
-    ->  Term =.. ['$metta_parametric_atom', Rel|Args],
+    ->  metta_storage_term('$metta_parametric_atom', [Rel|Args], _, Term),
         native_retract_one(Module:Term, Removed)
     ;   Removed = false
     ).
 remove_sexp(Space, [Rel|Args], Removed) :- !,
     (   native_storage_module_ready(Space, Module)
-    ->  Term =.. [Space, Rel | Args],
+    ->  metta_storage_term(Space, [Rel|Args], _, Term),
         native_retract_one(Module:Term, Removed)
     ;   Removed = false
     ).
 remove_sexp(Space, Atom, Removed) :-
     (   native_storage_module_ready(Space, Module)
-    ->  native_retract_one(Module:'$metta_native_scalar'(Atom), Removed)
+    ->  native_retract_one(Module:'$metta_native_scalar'(Atom, _), Removed)
     ;   Removed = false
     ).
 
@@ -228,9 +230,9 @@ native_removal_reference(Ref) :-
     nb_current('$metta_native_removal_reference', Ref).
 
 metta_remove_atom_reference(Ref) :-
-    (   stored_atom_of_ref(Ref, Space, Atom),
+    (   stored_atom_of_ref(Ref, Space, Atom, Token),
         native_storage_module_ready(Space, Module),
-        native_atom_clause(Space, Atom, Head),
+        native_atom_clause(Space, Atom, Token, Head),
         once((clause(Module:Head, true, Live), Live == Ref))
     ->  ( native_removal_reference(Previous) -> Prior = some(Previous) ; Prior = none ),
         setup_call_cleanup(
@@ -253,13 +255,41 @@ native_retract_one(Head, Removed) :-
     native_removal_reference(Ref), !,
     (   clause(Head, true, Ref)
     ->  nb_delete('$metta_native_removal_reference'),
-        ( erase(Ref) -> Removed = true ; Removed = false )
+        flag('$metta_generation', Generation, Generation+1),
+        ( metta_erase_storage_ref(Ref) -> Removed = true ; Removed = false )
     ;   throw(error(permission_error(remove, source_reference, Head),
                     context(native_retract_one/2,
                             'the removal changed the selected imported occurrence')))
     ).
 native_retract_one(Head, Removed) :-
-    ( \+ \+ retract(Head) -> Removed = true ; Removed = false ).
+    (   metta_least_storage_reference(Head, Ref)
+    ->  flag('$metta_generation', Generation, Generation+1),
+        ( metta_erase_storage_ref(Ref) -> Removed = true ; Removed = false )
+    ;   Removed = false
+    ).
+
+% Keep only the minimum of the observed identities. Copying the pattern keeps
+% removal from binding its caller; the accumulator retains one live reference.
+metta_least_storage_reference(Head, Ref) :-
+    copy_term(Head, Probe),
+    strip_module(Probe, _, Term),
+    functor(Term, _, Arity), arg(Arity, Term, Token),
+    Least = least(none, none),
+    forall(clause(Probe, true, Candidate),
+           ( metta_token_parts(Token, Actor, Generation),
+             Key = Generation-Actor,
+             arg(1, Least, Previous),
+             (   ( Previous == none ; Key @< Previous )
+             ->  nb_setarg(1, Least, Key), nb_setarg(2, Least, Candidate)
+             ;   true ) )),
+    arg(2, Least, Ref), Ref \== none.
+
+:- meta_predicate with_native_removal_reference(+, 0).
+with_native_removal_reference(Ref, Goal) :-
+    ( native_removal_reference(Previous) -> Prior = some(Previous) ; Prior = none ),
+    setup_call_cleanup(nb_setval('$metta_native_removal_reference', Ref),
+                       call(Goal),
+                       restore_native_removal_reference(Prior)).
 
 %Which module a space's compiled clauses live in. EVERY registered space gets
 %one, &self included. Atomic names retain their prefix mapping; parametric
@@ -428,7 +458,7 @@ ensure_metta_exec_module_locked(Space, Module) :-
     %space never declares keeps the one-probe &self literal.
     (   atom(Space),
         native_storage_module_cache(Space, TierAtoms),
-        TierProbe =.. [Space, ':', _, _],
+        TierProbe =.. [Space, ':', _, _, _],
         once(TierAtoms:TierProbe)
     ->  translator:self_tier_note(Module, Space)
     ;   true
@@ -1494,6 +1524,9 @@ prolog:error_message(metta_space_capability_required(Space, Operation,
 metta_host_space_capability_error(
         error(metta_space_capability_required(Space, Operation, Capability), _),
         Space, Operation, Capability).
+metta_host_space_capability_error(
+        error(metta_foreign_tokens_required(Space, Operation), _),
+        Space, Operation, tokens).
 
 %&self's execution module exists from load, the way its storage module does,
 %so nothing has to create it on a first write and metta_self_module/1
@@ -1654,7 +1687,8 @@ compiled_predicate_arity(F, Module, Predicate, Arity, Owner) :-
 % scopes without aliases execute those bodies directly, which is what keeps a
 % space that never declares an alias paying nothing for the feature. All
 % installed references share alias lifetime.
-:- dynamic metta_add_atom/3, atoms_store_only/3.
+:- dynamic metta_add_atom/4, atoms_store_only/3.
+metta_add_atom(Space, Term, Result) :- metta_add_atom(Space, Term, _, Result).
 :- dynamic announce_declaration_changed/3, type_marker_changed/2.
 :- dynamic type_alias_mutation_scope_ref/2.
 
@@ -1668,14 +1702,14 @@ set_type_alias_mutation_scope(Scope, enabled) :-
     % variable free with nothing saying so, which SWI's var_branches reads as
     % a branch that forgot to bind it.
     type_alias_scope_space(Scope, Space),
-    asserta((metta_add_atom(Space, Term, true) :-
+    asserta((metta_add_atom(Space, Term, Token, true) :-
                 Term = [':', Name, Type], atom(Name),
                 \+ type_alias_declaration_type(Type),
                 \+ (Type = 'DontEvalType'), \+ fun(Name), !,
                 ( existing_duplicate_declaration(Space, Term, First)
                 -> print_message(warning,
                                  metta_duplicate_declaration(Space, Term, First))
-                ;  store_atom(Space, Term), space_module(Space, Owner),
+                ;  store_atom(Space, Term, Token), space_module(Space, Owner),
                    type_alias_lookup_changed(Owner, Name) )), Add),
     assertz(type_alias_mutation_scope_ref(Scope, Add)),
     asserta((atoms_store_only(Space, [[':', _, _]|_], _) :- !, fail), Batch),
@@ -1697,25 +1731,25 @@ set_type_alias_mutation_scope(Scope, enabled) :-
 set_type_alias_mutation_scope(Scope, disabled) :-
     forall(retract(type_alias_mutation_scope_ref(Scope, Ref)), erase(Ref)).
 
-metta_add_atom(Space, Term, true) :- Term = [=, [FAtom|W], _], !,
+metta_add_atom(Space, Term, Token, true) :- Term = [=, [FAtom|W], _], !,
                                      must_be(atom, FAtom),
-                                     add_equation(Space, Term, FAtom, W).
+                                     add_equation(Space, Term, FAtom, W, Token).
 %A scalar equality changes whether an eager symbol position compiles to a
 %literal or a reduction step.  Its stored callers already publish symbol
 %mentions through the support graph, so the ordinary change announcement
 %rebuilds precisely those callers and evicts matching runnable templates.
 %[tested: conformance2:symbol_arguments_evaluate_for_declared_and_undeclared_functions;
 %commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
-metta_add_atom(Space, Term, true) :-
+metta_add_atom(Space, Term, Token, true) :-
     Term = [=, Scalar, _],
     atom(Scalar),
     !,
-    store_atom(Space, Term),
+    store_atom(Space, Term, Token),
     space_module(Space, Module),
     announce_function_changed(Module, Scalar).
 % Alias validation and publication share the typing lock and transaction.
 % The raw RHS remains the stored atom, including its variable relationships.
-metta_add_atom(Space, Term, true) :-
+metta_add_atom(Space, Term, Token, true) :-
     Term = [':', Name, Type],
     nonvar(Type), Type = [Alias|_], Alias == 'Alias',
     !,
@@ -1739,7 +1773,7 @@ metta_add_atom(Space, Term, true) :-
             ( validate_type_alias_declaration(Module, Name, Type),
               ( existing_duplicate_declaration(Space, Term, _)
               -> true
-              ;  store_atom(Space, Term),
+              ;  store_atom(Space, Term, Token),
                  enable_type_alias_scope(Module),
                  type_alias_lookup_changed(Module, Name)
               ) ),
@@ -1753,7 +1787,7 @@ metta_add_atom(Space, Term, true) :-
 %because accepting one duplicate in a batch would make that transport differ
 %from its promised all-or-nothing write. Host registrations that need exclusive
 %ownership use metta_py_add_strict_declaration/2 in shim.pl.
-metta_add_atom(Space, Term, true) :-
+metta_add_atom(Space, Term, Token, true) :-
     Term = [':', Name, Type],
     (   existing_duplicate_declaration(Space, Term, First)
     ->  !,
@@ -1761,12 +1795,12 @@ metta_add_atom(Space, Term, true) :-
     ;   metta_annotated_type(Type)
     ->  !,
         metta_require_arrow_product(Name, Type, Product),
-        metta_add_annotated_declaration(Space, Name, Type, Product)
+        metta_add_annotated_declaration(Space, Name, Type, Product, Token)
     ).
 % DontEvalType changes how every arrow parameter naming this type compiles,
 % even when the type symbol is not itself a function. Store first so repairs
 % observe the new marker, then invalidate its module-qualified support root.
-metta_add_atom(Space, Term, true) :-
+metta_add_atom(Space, Term, Token, true) :-
     Term = [':', Type, 'DontEvalType'],
     atom(Type),
     !,
@@ -1774,7 +1808,7 @@ metta_add_atom(Space, Term, true) :-
     ->  retract_prelude_declarations(Type)
     ;   true
     ),
-    store_atom(Space, Term),
+    store_atom(Space, Term, Token),
     space_module(Space, DeclModule),
     ( fun(Type) -> announce_function_changed(DeclModule, Type) ; true ),
     type_marker_changed(DeclModule, Type).
@@ -1786,7 +1820,7 @@ metta_add_atom(Space, Term, true) :-
 %program behaved differently and nothing said why. The engine already knows how
 %to recompile what a change made stale; the declaration route simply never told
 %it [tested: a_late_type_declaration_repairs_its_call_sites].
-metta_add_atom(Space, Term, true) :- Term = [':', FAtom, _], atom(FAtom),
+metta_add_atom(Space, Term, Token, true) :- Term = [':', FAtom, _], atom(FAtom),
                                      fun(FAtom), !,
                                      %Read BEFORE anything is stored or evicted,
                                      %because it is the state the already-compiled
@@ -1801,14 +1835,14 @@ metta_add_atom(Space, Term, true) :- Term = [':', FAtom, _], atom(FAtom),
                                      ->  retract_prelude_declarations(FAtom)
                                      ;   true
                                      ),
-                                     store_atom(Space, Term),
+                                     store_atom(Space, Term, Token),
                                      space_module(Space, DeclModule),
                                      announce_declaration_changed(DeclModule,
                                                                   FAtom, Before).
-metta_add_atom(Space, Term, true) :- seam:foreign_space(Space), !,
+metta_add_atom(Space, Term, _Token, true) :- seam:foreign_space(Space), !,
                                      foreign_write(Space, add,
                                                    seam:foreign_add(Space, Term)).
-metta_add_atom(Space, Term, true) :- add_sexp(Space, Term, Ref),
+metta_add_atom(Space, Term, Token, true) :- add_sexp(Space, Term, Token, Ref),
                                      record_source_atom_assertion(Ref).
 
 %A variant of Term must UNIFY with a fresh copy of Term, so asking the store
@@ -1891,10 +1925,10 @@ atoms_store_only(Space, [_|Terms], Earlier) :-
 
 %Where an atom goes. A foreign space's provider owns its storage entirely; a
 %native space's storage is the Prolog database.
-store_atom(Space, Term) :- seam:foreign_space(Space), !,
+store_atom(Space, Term, _Token) :- seam:foreign_space(Space), !,
                            foreign_write(Space, add,
                                          seam:foreign_add(Space, Term)).
-store_atom(Space, Term) :- add_sexp(Space, Term, Ref),
+store_atom(Space, Term, Token) :- add_sexp(Space, Term, Token, Ref),
                            record_source_atom_assertion(Ref).
 
 %An equation is the one atom whose storage and meaning cannot be separated, so
@@ -1949,7 +1983,7 @@ store_atom(Space, Term) :- add_sexp(Space, Term, Ref),
 %[measured 2026-08-20]. Only the true duplicate is swallowed now, and the
 %probe runs only on derived-name adds, which are rare by construction
 %[tested: a_copied_space_adopts_its_specializations_instead_of_duplicating].
-add_equation(Space, Term, FAtom, _) :-
+add_equation(Space, Term, FAtom, _, _) :-
     space_module(Space, Module),
     ho_specialization(Module, _, FAtom),
     copy_term(Term, Probe),
@@ -1957,21 +1991,21 @@ add_equation(Space, Term, FAtom, _) :-
     Stored = [=, [FAtom|_], _],
     Stored =@= Probe,
     !.
-add_equation(Space, Term, FAtom, W) :-
+add_equation(Space, Term, FAtom, W, Token) :-
     seam:foreign_space(Space), !,
     refuse_ruleless_equation(Space, Term),
     space_module(Space, Module),
     length(W, InputArity),
     PredArity is InputArity + 1,
     metta_prepare_function_predicate(Module, FAtom, PredArity),
-    metta_add_function_transaction(provider, Space, Module, Term, FAtom, W).
-add_equation(Space, Term, FAtom, W) :-
+    metta_add_function_transaction(provider, Space, Module, Term, FAtom, W, Token).
+add_equation(Space, Term, FAtom, W, Token) :-
     space_module(Space, Module),
     ensure_native_storage_module(Space, Storage),
     length(W, InputArity),
     PredArity is InputArity + 1,
     metta_prepare_function_predicate(Module, FAtom, PredArity),
-    metta_add_function_transaction(Storage, Space, Module, Term, FAtom, W).
+    metta_add_function_transaction(Storage, Space, Module, Term, FAtom, W, Token).
 
 %Only a name that has carried a repaired weak import needs post-transaction
 %validation. The overwhelmingly common equation add keeps the original one
@@ -1979,30 +2013,32 @@ add_equation(Space, Term, FAtom, W) :-
 %receipt on commit, failure, or exception [tested:
 %a_failed_local_redefinition_restores_the_repaired_inherited_call;
 %commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
-metta_add_function_transaction(Storage, Space, Module, Term, FAtom, W) :-
+metta_add_function_transaction(Storage, Space, Module, Term, FAtom, W, Token) :-
     with_typing_policy_stable(
         metta_add_function_transaction_stable(
-            Storage, Space, Module, Term, FAtom, W)).
+            Storage, Space, Module, Term, FAtom, W, Token)).
 
 metta_add_function_transaction_stable(Storage, Space, Module, Term, FAtom,
-                                      W) :-
+                                      W, Token) :-
     length(W, InputArity),
     PredArity is InputArity + 1,
     (   '$metta_repaired_shadow_import'(Module, FAtom, PredArity, _)
     ->  call_cleanup(
             transaction(
-                add_function_atom(Storage, Space, Module, Term, FAtom, W)),
+                add_function_atom(Storage, Space, Module, Term, FAtom, W, Token)),
             metta_repair_emptied_shadows)
     ;   transaction(
-            add_function_atom(Storage, Space, Module, Term, FAtom, W))
+            add_function_atom(Storage, Space, Module, Term, FAtom, W, Token))
     ).
 
 %Where the equation itself goes. `provider` is a foreign space, whose provider
 %owns its storage; anything else is a native storage module. transaction/1 wraps
 %the compile either way, and rolls back only the Prolog side of it: a provider's
 %write is outside the database and stays written if the translation then fails.
-store_equation(provider, Space, Term) :- !, store_atom(Space, Term).
-store_equation(Storage, Space, Term) :- add_sexp_in(Storage, Space, Term, Ref),
+store_equation(provider, Space, Term, Token, none) :- !,
+    store_atom(Space, Term, Token).
+store_equation(Storage, Space, Term, Token, Ref) :-
+    add_sexp_in(Storage, Space, Term, Token, Ref),
                                         record_source_atom_assertion(Ref).
 
 %Everything a change to FAtom leaves stale, in one place because three callers

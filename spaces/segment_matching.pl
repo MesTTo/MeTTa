@@ -950,12 +950,12 @@ metta_seq_candidate(Space, Parsed, Candidate) :-
 metta_seq_native_candidate(Module, Space, Parsed, Candidate) :-
     metta_seq_fixed_length(Parsed, Fixed),
     current_predicate(Module:Space/Arity),
-    Arity >= Fixed,
-    Arity >= 1,
+    Arity > Fixed,
+    Arity >= 2,
     functor(Head, Space, Arity),
     metta_seq_index_head(Parsed, Head),
     call(Module:Head),
-    Head =.. [_|Candidate].
+    metta_storage_term(Space, Candidate, _, Head).
 
 %How many children a candidate must have at least: every non-gap child counts
 %one and every gap counts zero, since a gap may consume nothing.

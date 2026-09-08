@@ -216,9 +216,9 @@ conjunct_goal(Module, [Family|Parameters], [Rel|PatArgs], Module:Goal) :-
     Space = [Family|Parameters],
     space_parametric(Space),
     !,
-    Goal =.. ['$metta_parametric_atom', Rel|PatArgs].
+    metta_storage_term('$metta_parametric_atom', [Rel|PatArgs], _, Goal).
 conjunct_goal(Module, Space, [Rel|PatArgs], Module:Goal) :-
-    Goal =.. [Space, Rel|PatArgs].
+    metta_storage_term(Space, [Rel|PatArgs], _, Goal).
 
 %Has this goal AT MOST ONE solution, asked by both join paths: the native one
 %passes the storage call conjunct_goal/4 built, the routed one passes match/4
@@ -246,10 +246,10 @@ native_expression(Module, [Family|Parameters], Rel, PatArgs) :-
     Space = [Family|Parameters],
     space_parametric(Space),
     !,
-    Term =.. ['$metta_parametric_atom', Rel|PatArgs],
+    metta_storage_term('$metta_parametric_atom', [Rel|PatArgs], _, Term),
     call(Module:Term).
 native_expression(Module, Space, Rel, PatArgs) :-
-    Term =.. [Space, Rel | PatArgs],
+    metta_storage_term(Space, [Rel|PatArgs], _, Term),
     call(Module:Term).
 
 'get-atoms'(Space, Pattern) :- nonvar(Space),
@@ -369,7 +369,7 @@ metta_capacity_admission_claim(Pool) :-
     metta_hook_claim(Pool, pre_add, Guard, _).
 
 metta_capacity_count_claim(Pool) :-
-    (   '$metta_atoms:&metta':'&metta'(capacity, Pool, _)
+    (   '$metta_atoms:&metta':'&metta'(capacity, Pool, _, _)
     ->  metta_capacity_count_install(Pool)
     ;   true
     ).
@@ -412,7 +412,7 @@ metta_capacity_remove_hook_install(Space) :-
 
 metta_capacity_remove_sexp('&metta', [Rel|Args], Removed) :- !,
     (   native_storage_module_ready('&metta', Module)
-    ->  Term =.. ['&metta', Rel|Args],
+    ->  metta_storage_term('&metta', [Rel|Args], _, Term),
         ( Rel == effect -> metta_refuse_owned_effect_removal(Module, Term) ; true ),
         native_retract_one(Module:Term, Removed),
         (   Removed == true
@@ -425,14 +425,14 @@ metta_capacity_remove_sexp('&metta', [Rel|Args], Removed) :- !,
 metta_capacity_remove_sexp(Space, [Rel|Args], Removed) :- !,
     (   native_storage_module_ready(Space, Module)
     ->  native_storage_functor(Space, Functor),
-        Term =.. [Functor, Rel|Args],
+        metta_storage_term(Functor, [Rel|Args], _, Term),
         native_retract_one(Module:Term, Removed)
     ;   Removed = false
     ),
     metta_capacity_count_removed_known(Space, Removed).
 metta_capacity_remove_sexp(Space, Atom, Removed) :-
     (   native_storage_module_ready(Space, Module)
-    ->  native_retract_one(Module:'$metta_native_scalar'(Atom), Removed)
+    ->  native_retract_one(Module:'$metta_native_scalar'(Atom, _), Removed)
     ;   Removed = false
     ),
     metta_capacity_count_removed_known(Space, Removed).
@@ -441,7 +441,7 @@ metta_capacity_counts_prune :-
     findall(Pool, metta_capacity_count(Pool, _), Pools0),
     sort(Pools0, Pools),
     forall(member(Pool, Pools),
-           (   '$metta_atoms:&metta':'&metta'(capacity, Pool, _)
+           (   '$metta_atoms:&metta':'&metta'(capacity, Pool, _, _)
            ->  true
            ;   metta_capacity_count_uninstall(Pool)
            )).
@@ -563,11 +563,14 @@ clear_native_atoms_stored(Space) :-
         findall(Atom, compiled_half_atom(Space, Module, Atom), Compiled),
         forall(member(Atom, Compiled),
                ( metta_remove_atom(Space, Atom, _) -> true ; true )),
+        % The plain-store sweep is one operation; compiled withdrawals above
+        % each consume their own generation through the removal funnel.
+        flag('$metta_generation', Generation, Generation+1),
         native_storage_functor(Space, Functor),
         forall(( current_predicate(Module:Functor/Arity),
                  functor(Head, Functor, Arity) ),
-               retractall(Module:Head)),
-        retractall(Module:'$metta_native_scalar'(_))
+               metta_retract_storage(Module:Head)),
+        metta_retract_storage(Module:'$metta_native_scalar'(_, _))
     ;   SupportModule = none
     ),
     metta_prune_arrow_products(Space),
@@ -592,12 +595,12 @@ clear_native_atoms_stored(Space) :-
 %handle-round-trip [measured 2026-08-19].
 compiled_half_atom(Space, Module, [=, Head, Body]) :-
     native_storage_functor(Space, Functor),
-    Term =.. [Functor, =, Head, Body],
+    Term =.. [Functor, =, Head, Body, _],
     call(Module:Term),
     Head = [F|_], atom(F).
 compiled_half_atom(Space, Module, [':', F, Type]) :-
     native_storage_functor(Space, Functor),
-    Term =.. [Functor, ':', F, Type],
+    Term =.. [Functor, ':', F, Type, _],
     call(Module:Term),
     atom(F), fun(F).
 
@@ -661,17 +664,13 @@ get_native_atom(Module, [Family|Parameters], Pattern) :-
     Space = [Family|Parameters],
     space_parametric(Space),
     !,
-    length(Pattern, Arity),
-    functor(Head, '$metta_parametric_atom', Arity),
-    Head =.. ['$metta_parametric_atom'|Pattern],
+    metta_storage_term('$metta_parametric_atom', Pattern, _, Head),
     call(Module:Head).
 get_native_atom(Module, Space, Pattern) :-
     is_list(Pattern),
     Pattern = [_|_],
     !,
-    length(Pattern, Arity),
-    functor(Head, Space, Arity),
-    Head =.. [Space | Pattern],
+    metta_storage_term(Space, Pattern, _, Head),
     call(Module:Head).
 %A PARTIAL list with a bound head keeps the head's index too: the arity is
 %open, so one storage head cannot be built, but the held arities are a small
@@ -701,11 +700,11 @@ get_native_atom(Module, [Family|Parameters], Pattern) :-
     space_parametric(Space),
     !,
     current_predicate(Module:'$metta_parametric_atom'/Arity),
-    Arity >= 1,
+    Arity >= 2,
     functor(Head, '$metta_parametric_atom', Arity),
     arg(1, Head, Rel),
     call(Module:Head),
-    Head =.. [_|Args],
+    metta_storage_term(_, Args, _, Head),
     Args = Pattern.
 get_native_atom(Module, Space, Pattern) :-
     nonvar(Pattern),
@@ -714,11 +713,11 @@ get_native_atom(Module, Space, Pattern) :-
     \+ is_list(Pattern),
     !,
     current_predicate(Module:Space/Arity),
-    Arity >= 1,
+    Arity >= 2,
     functor(Head, Space, Arity),
     arg(1, Head, Rel),
     call(Module:Head),
-    Head =.. [_|Args],
+    metta_storage_term(_, Args, _, Head),
     Args = Pattern.
 get_native_atom(Module, [Family|Parameters], Pattern) :-
     \+ atomic(Pattern),
@@ -728,15 +727,15 @@ get_native_atom(Module, [Family|Parameters], Pattern) :-
     current_predicate(Module:'$metta_parametric_atom'/Arity),
     functor(Head, '$metta_parametric_atom', Arity),
     clause(Module:Head, true),
-    Head =.. ['$metta_parametric_atom'|Pattern].
+    metta_storage_term('$metta_parametric_atom', Pattern, _, Head).
 get_native_atom(Module, Space, Pattern) :-
     \+ atomic(Pattern),
     current_predicate(Module:Space/Arity),
     functor(Head, Space, Arity),
     clause(Module:Head, true),
-    Head =.. [Space | Pattern].
+    metta_storage_term(Space, Pattern, _, Head).
 get_native_atom(Module, _, Pattern) :-
     get_native_scalar_atom_in(Module, Pattern).
 
 get_native_scalar_atom_in(Module, Pattern) :-
-    Module:'$metta_native_scalar'(Pattern).
+    Module:'$metta_native_scalar'(Pattern, _).

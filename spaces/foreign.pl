@@ -334,7 +334,7 @@ metta_add_atoms(Space, Terms) :-
     %batch beyond capacity meets the refusal its atoms meet arriving
     %alone. Both one-crossing clauses write behind the wrapper's back, the
     %foreign one through the provider's own bulk door and the native one
-    %through add_sexp_in/4
+    %through add_sexp_in/5
     %[tested: a_batch_into_a_hooked_space_consults_the_handler_per_atom,
     %a_batch_beyond_capacity_is_refused_like_lone_adds].
     metta_hook_claim_idle(Space),
@@ -407,12 +407,15 @@ metta_add_program_atoms(Space, Atoms) :-
     metta_add_program_atoms(Space, Atoms, _).
 
 metta_add_program_atoms(Space, Atoms, Names) :-
+    metta_add_program_atoms(Space, Atoms, _, Names).
+
+metta_add_program_atoms(Space, Atoms, Tokens, Names) :-
     (   seam:foreign_space(Space)
     ;   \+ metta_hook_claim_idle(Space)
     ;   \+ metta_add_hooks_idle(Space)
     ),
     !,
-    forall(member(Atom, Atoms), metta_add_atom(Space, Atom, _)),
+    maplist(metta_add_program_atom(Space), Atoms, Tokens),
     findall(F, ( member([=, [F|_], _], Atoms), atom(F) ), Names0),
     sort(Names0, Names).
 %A batch of DATA is not a program: it has nothing to register and nothing to
@@ -427,12 +430,12 @@ metta_add_program_atoms(Space, Atoms, Names) :-
 %[measured 2026-08-17: 4737359333 against 4707855603], -41e6 recovered by
 %the loop and +80k inferences avoided by the guard
 %[measured 2026-08-24, engine-only ten-load harness, same checkout].
-metta_add_program_atoms(Space, Atoms, []) :-
+metta_add_program_atoms(Space, Atoms, Tokens, []) :-
     \+ memberchk([=|_], Atoms),
     !,
-    store_data_atoms(Atoms, Space).
+    store_data_atoms(Atoms, Space, Tokens).
 
-metta_add_program_atoms(Space, Atoms, Names) :-
+metta_add_program_atoms(Space, Atoms, Tokens, Names) :-
     space_module(Space, Module),
     ensure_native_storage_module(Space, Storage),
     %ONE ORDERED PASS, each atom stored where it stood, and ONE walk.
@@ -455,8 +458,8 @@ metta_add_program_atoms(Space, Atoms, Names) :-
     %per-name notes follow the stores, which is the per-form door's own
     %order per atom.
     journal_load_now(Load),
-    store_program_atoms(Atoms, Storage, Space, Module, Load, none,
-                        Signatures0),
+    store_program_atoms(Atoms, Tokens, Storage, Space, Module, Load, none,
+                        Signatures0, Occurrences),
     sort(Signatures0, Signatures),
     findall(F, member(F-_, Signatures), Names0),
     sort(Names0, Names),
@@ -495,10 +498,8 @@ metta_add_program_atoms(Space, Atoms, Names) :-
              defer_metta_function(Space, Module, F, InputArity, Count) )),
     forall(member(counted(F, Arity, _), StandingSignatures),
            ( InputArity is Arity - 1,
-             findall(Equation,
-                     ( member(Equation, Atoms),
-                       Equation = [=, [F|W], _],
-                       length(W, InputArity) ),
+             findall(StoredRef,
+                     member(occurrence(F, Arity, StoredRef), Occurrences),
                      Arriving),
              mark_or_translate_equation(Space, Module, F, InputArity,
                                         Arriving) )),
@@ -507,6 +508,9 @@ metta_add_program_atoms(Space, Atoms, Names) :-
     %arrival announcement is an invalidator, so a batch of a function's
     %equations is one change to them.
     forall(member(F, Names), announce_equation_arrival(Module, F)).
+
+metta_add_program_atom(Space, Atom, Token) :-
+    metta_add_atom(Space, Atom, Token, _).
 
 %A run of data atoms with every run-invariant decided ONCE: the storage
 %module, the parametric-or-named clause shape, and the journal context with
@@ -522,33 +526,24 @@ metta_add_program_atoms(Space, Atoms, Names) :-
 %and busy hooks never reach this clause; the batch door's first clause
 %already routed them per atom.
 store_data_atoms(Atoms, Space) :-
+    store_data_atoms(Atoms, Space, _).
+
+store_data_atoms(Atoms, Space, Tokens) :-
     (   Space == '&metta'
-    ->  forall(member(Atom, Atoms), metta_add_atom(Space, Atom, _))
+    ->  maplist(metta_add_program_atom(Space), Atoms, Tokens)
     ;   ensure_native_storage_module(Space, Storage),
-        (   Space = [_|_], space_parametric(Space)
-        ->  Shape = parametric
-        ;   Shape = named
-        ),
         journal_load_now(Load),
-        store_data_atoms_(Atoms, Storage, Space, Shape, Load)
+        store_data_atoms_(Atoms, Tokens, Storage, Space, Load)
     ).
 
-store_data_atoms_([], _, _, _, _).
-store_data_atoms_([Atom|Atoms], Storage, Space, Shape, Load) :-
-    (   Atom = [Rel|Args]
-    ->  (   ( Rel == (=) ; Rel == (:) )
-        ->  metta_add_atom(Space, Atom, _)
-        ;   (   Shape == parametric
-            ->  Term =.. ['$metta_parametric_atom', Rel|Args]
-            ;   Term =.. [Space, Rel|Args]
-            ),
-            assertz(Storage:Term, Ref),
-            journal_data_ref(Load, Ref)
-        )
-    ;   assertz(Storage:'$metta_native_scalar'(Atom), Ref),
+store_data_atoms_([], [], _, _, _).
+store_data_atoms_([Atom|Atoms], [Token|Tokens], Storage, Space, Load) :-
+    (   Atom = [Rel|_], ( Rel == (=) ; Rel == (:) )
+    ->  metta_add_atom(Space, Atom, Token, _)
+    ;   add_sexp_in(Storage, Space, Atom, Token, Ref),
         journal_data_ref(Load, Ref)
     ),
-    store_data_atoms_(Atoms, Storage, Space, Shape, Load).
+    store_data_atoms_(Atoms, Tokens, Storage, Space, Load).
 
 %The fused walk: classify, store, and collect the signature multiset in one
 %pass, the classification inline so it compiles to VM instructions and moves
@@ -556,31 +551,32 @@ store_data_atoms_([Atom|Atoms], Storage, Space, Shape, Load) :-
 %whose first clause swallows an alpha-duplicate of a specialization the
 %space already holds; deciding that needs the stored equations and is what
 %makes a copied space reproduce itself rather than double.
-store_program_atoms([], _, _, _, _, _, []).
-store_program_atoms([Atom|Atoms], Storage, Space, Module, Load, Q0,
-                    Signatures) :-
+store_program_atoms([], [], _, _, _, _, _, [], []).
+store_program_atoms([Atom|Atoms], [Token|Tokens], Storage, Space, Module, Load, Q0,
+                    Signatures, Occurrences) :-
     (   Atom = [=, [F|W], _],
         atom(F)
     ->  equation_walk_class(Module, F, Q0, Q1, Class),
         (   Class == ho
-        ->  metta_add_atom(Space, Atom, _),
-            Signatures = Rest
-        ;   add_sexp_in(Storage, Space, Atom, Ref),
+        ->  metta_add_atom(Space, Atom, Token, _),
+            Signatures = Rest, Occurrences = Others
+        ;   add_sexp_in(Storage, Space, Atom, Token, Ref),
             journal_data_ref(Load, Ref),
             ( Class == declared -> queue_deferred_equation_types(Module, F, Ref) ; true ),
             head_pattern_notes_for(Module, Atom),
             length(W, N),
             Arity is N + 1,
-            Signatures = [F-Arity|Rest]
+            Signatures = [F-Arity|Rest],
+            Occurrences = [occurrence(F, Arity, Ref)|Others]
         )
-    ;   metta_add_atom(Space, Atom, _),
+    ;   metta_add_atom(Space, Atom, Token, _),
         (   Atom = [':'|_]
         ->  Q1 = none
         ;   Q1 = Q0
         ),
-        Signatures = Rest
+        Signatures = Rest, Occurrences = Others
     ),
-    store_program_atoms(Atoms, Storage, Space, Module, Load, Q1, Rest).
+    store_program_atoms(Atoms, Tokens, Storage, Space, Module, Load, Q1, Rest, Others).
 
 %What the walk's per-name probes learned about the PREVIOUS equation's
 %name, the higher-order test now included: a batch
@@ -753,7 +749,7 @@ defer_metta_equation(Space, Module, Term, StoredRef) :-
     ;   queue_deferred_equation_types(Module, F, StoredRef)
     ),
     length(W, InputArity),
-    mark_or_translate_equation(Space, Module, F, InputArity, [Term]),
+    mark_or_translate_equation(Space, Module, F, InputArity, [StoredRef]),
     announce_equation_arrival(Module, F).
 
 %The marker means "translate every equation of F out of the space", so a
@@ -779,12 +775,9 @@ defer_metta_equation(Space, Module, Term, StoredRef) :-
 %commit=856434d7c1d381b3f3d7cbbd008f46c0d41b61aa]. The root is the identity case and pays no walk.
 mark_or_translate_equation(Space, Module, F, InputArity, Arriving) :-
     (   metta_function_translated(Module, F)
-    ->  forall(member(Equation, Arriving),
-               ( (   Space == '&self'
-                 ->  Resolved = Equation
-                 ;   metta_substitute_self(Space, Equation, Resolved)
-                 ),
-                 assert_translated_equation(Module, Resolved, _, _) ))
+    ->  forall(member(StoredRef, Arriving),
+               ( filereader:stored_equation_source(Space, _, Resolved, StoredRef),
+                 assert_translated_equation(Module, Resolved, StoredRef, _, _) ))
     ;   defer_metta_function(Space, Module, F, InputArity)
     ).
 
@@ -1034,8 +1027,7 @@ translate_deferred_equations_stable(Space, Module, F, InputArities) :-
               -> Load = Owner ; Load = none ) ),
             Equations),
     (   metta_function_translated(Module, F)
-    ->  translated_sources_of(Module, F, Stored),
-        translate_missing_equations(F, Equations, Module, Stored)
+    ->  translate_missing_equations(F, Equations, Module)
     ;   translate_owned_equations(Equations, Module, F)
     ).
 
@@ -1066,36 +1058,19 @@ translate_owned_equations([owned(Load, StoredRef, Equation)|Equations], Module, 
 %against every provenance row, and unifying against the row table instead
 %skipped 29 of lib_nars's 51 `|-` rules, each one swallowed by an earlier
 %rule's open-variable row [measured 2026-08-24].
-translated_sources_of(Module, F, Stored) :-
-    findall(owned(Load, Source),
-            ( translated_from(Ref, Source),
-              Source = [=, [F|_], _],
-              clause_property(Ref, module(Module)),
-              ( filereader:source_load_assertion(Owner, artifact, Ref)
-              -> Load = Owner ; Load = none ) ),
-            Stored).
-
-%One provenance row excuses ONE stored copy, consumed as it matches, because
-%equations are a multiset: the same equation stored twice answers twice, so a
-%stored copy beyond its translated rows still translates. Variance decides a
-%match, never unification, for the reason above.
-translate_missing_equations(_, [], _, _).
-translate_missing_equations(F, [owned(Load, StoredRef, Equation)|Equations], Module, Stored0) :-
-    (   select_variant_source(owned(Load, Equation), Stored0, Stored)
+% A compiled token excuses exactly its stored occurrence, including duplicate
+% equations and partially completed deferred compilation.
+translate_missing_equations(_, [], _).
+translate_missing_equations(F, [owned(Load, StoredRef, Equation)|Equations], Module) :-
+    (   stored_atom_of_ref(StoredRef, _, _, Token),
+        filereader:'$metta_equation_token'(Module, F, _, Token)
     ->  true
-    ;   Stored = Stored0,
-        transaction(
+    ;   transaction(
             with_owning_source_load(Load,
                 materialize_with_queued_types(Module, F, StoredRef,
                     assert_translated_equation(Module, Equation, StoredRef, _, _))))
     ),
-    translate_missing_equations(F, Equations, Module, Stored).
-
-select_variant_source(Equation, [Source|Rest], Rest) :-
-    Source =@= Equation,
-    !.
-select_variant_source(Equation, [Source|Rest], [Source|Kept]) :-
-    select_variant_source(Equation, Rest, Kept).
+    translate_missing_equations(F, Equations, Module).
 
 translate_deferred_shape(Space, Module, F, InputArity) :-
     translate_deferred_equations(Space, Module, F, [InputArity]).
@@ -1173,12 +1148,12 @@ metta_source_reduction_count([_|Arguments], Count) :- !,
     Count is Nested + 1.
 metta_source_reduction_count(_, 0).
 
-add_function_atom(Storage, Space, Module, Term, FAtom, W) :-
+add_function_atom(Storage, Space, Module, Term, FAtom, W, Token) :-
     %Any equation of FAtom still waiting is translated BEFORE this one is
     %stored, because the marker translates everything the space holds for
     %FAtom and this equation is about to be one of them.
     metta_ensure_compiled(FAtom),
-    store_equation(Storage, Space, Term),
+    store_equation(Storage, Space, Term, Token, StoredRef),
     length(W, N),
     Arity is N + 1,
     register_arity(FAtom, Arity),
@@ -1206,7 +1181,7 @@ add_function_atom(Storage, Space, Module, Term, FAtom, W) :-
     %Identity when the space IS '&self',
     %which is the first clause of the substitution.
     metta_substitute_self(Space, Term, Resolved),
-    compile_metta_equation(Module, Resolved, Clause, _Ref),
+    compile_metta_equation(Module, Resolved, StoredRef, Clause, _Ref),
     maybe_print_compiled_clause("added function", Term, Clause).
 
 %What is left to refuse, now that every space compiles into a module of its
@@ -1390,6 +1365,10 @@ use remove-atom to drain every atom, or name a pattern", ['subtract-atom']),
 %Each removal takes the atom the read BOUND, so the one-occurrence door does
 %exactly one occurrence and the multiplicity comes from the snapshot holding
 %one entry per stored copy.
+remove_matching_atoms(Space, Term) :-
+    \+ seam:foreign_space(Space), !,
+    findall(Ref, metta_native_pair(Space, Term, _, Ref), Refs),
+    forall(member(Ref, Refs), metta_remove_atom_reference(Ref)).
 remove_matching_atoms(Space, Term) :-
     findall(Found, match_stored(Space, Term, Term, Found), Matches),
     forall(member(Atom, Matches),
@@ -1850,7 +1829,7 @@ metta_host_removal_probe(Space, Pattern) :-
     Pattern = [Head|Arguments],
     atom(Head),
     native_storage_module(Space, Module),
-    Goal =.. ['$metta_parametric_atom', Head|Arguments],
+    metta_storage_term('$metta_parametric_atom', [Head|Arguments], _, Goal),
     call(Module:Goal),
     !.
 metta_host_removal_probe(Space, Pattern) :-
@@ -1859,7 +1838,7 @@ metta_host_removal_probe(Space, Pattern) :-
     Pattern = [Head|Arguments],
     atom(Head),
     catch(( native_storage_module(Space, Module),
-            Goal =.. [Space, Head|Arguments],
+            metta_storage_term(Space, [Head|Arguments], _, Goal),
             call(Module:Goal) ),
           error(existence_error(procedure, _), _),
           fail),
@@ -1886,7 +1865,7 @@ metta_host_native_fact(Module, Goal, Space, Fact) :-
     native_storage_module_cache(Space, Module),
     native_storage_functor(Space, Functor),
     functor(Goal, Functor, _),
-    Goal =.. [_|Fact].
+    metta_storage_term(Functor, Fact, _, Goal).
 
 %% remove_equation(+Space, +Equation, +Function:atom, +Arguments, ?Body, -Removed:boolean) is semidet.
 %The PROBE that finds the compiled clause is the equation as the space
@@ -1901,11 +1880,18 @@ metta_host_native_fact(Module, Goal, Space, Fact) :-
 %commit=856434d7c1d381b3f3d7cbbd008f46c0d41b61aa]. The STORED atom is still matched as written, which is what
 %unstore_atom/3 receives.
 remove_equation(Space, Term, F, Args, Body, Removed) :-
-    (   ( translated_equation_binding(Space, _, _)
-        ; native_removal_reference(_) )
+    (   \+ seam:foreign_space(Space)
     ->  transaction(
-            ( resolved_equation_removal(Space, Term, Source, Origin),
-              remove_equation_source(Space, Term, Source, Origin, Removed) ))
+            (   native_storage_module_ready(Space, Storage),
+                native_atom_clause(Space, Term, _, Head),
+                ( native_removal_reference(Selected)
+                -> true
+                ; metta_least_storage_reference(Storage:Head, Selected) )
+            ->  with_native_removal_reference(Selected,
+                    ( resolved_equation_removal(Space, Term, Source, Origin),
+                      remove_equation_source(Space, Term, Source, Origin, Removed) ))
+            ;   Removed = false )),
+        ( current_transaction(_) -> true ; metta_repair_emptied_shadows )
     ;   metta_substitute_self(Space, [=, [F|Args], Body], Resolved),
         copy_term(Resolved, Source),
         remove_equation_source(Space, Term, Source, ordinary, Removed)
@@ -1920,15 +1906,16 @@ resolved_equation_removal(Space, Term, Source, Origin) :-
     copy_term(Term, Pattern),
     (   \+ seam:foreign_space(Space),
         native_storage_module_ready(Space, Storage),
-        native_atom_clause(Space, Pattern, Head),
+        native_atom_clause(Space, Pattern, Token, Head),
         once(( clause(Storage:Head, true, StoredRef),
                ( native_removal_reference(Selected) -> StoredRef == Selected ; true ) ))
-    ->  (   translated_equation_binding(Space, StoredRef, Ref),
+    ->  (   space_module(Space, Module),
+            filereader:'$metta_equation_token'(Module, _, Ref, Token),
             translated_from(Ref, Bound)
         ->  Source = Bound, CompiledOrigin = bound(Ref)
-        ;   stored_atom_of_ref(StoredRef, Space, Stored),
+        ;   stored_atom_of_ref(StoredRef, Space, Stored, Token),
             metta_substitute_self(Space, Stored, Source),
-            CompiledOrigin = ordinary
+            CompiledOrigin = uncompiled
         )
     ;   metta_substitute_self(Space, Pattern, Source), CompiledOrigin = ordinary
     ),
@@ -1963,7 +1950,8 @@ remove_equation_source(Space, Term, Probe, Origin, Removed) :-
     %caller's Term would narrow every later use of it in this clause.
     (   (   CompiledOrigin = bound(Ref)
         ->  clause_property(Ref, module(Module))
-        ;   translated_from(Ref, Probe), clause_property(Ref, module(Module)),
+        ;   CompiledOrigin \== uncompiled,
+            translated_from(Ref, Probe), clause_property(Ref, module(Module)),
             \+ translated_equation_binding(_, _, Ref),
             ( Owner = source(SourceLoad)
             -> filereader:source_load_assertion(SourceLoad, artifact, Ref)

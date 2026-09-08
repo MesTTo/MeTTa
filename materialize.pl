@@ -340,8 +340,8 @@ build_materialization(Space, Module, Names, Stamp, Signatures, Trie, Owner) :-
               member(rule(_, Factors, _), Rules),
               member([Rel|Args], Factors), length(Args, Arity) ), Relations0),
     sort(Relations0, Relations),
-    findall(Arity, ( member(_/Inputs, Relations), Arity is Inputs+1 ), Arities0),
-    sort([3|Arities0], Arities),
+    findall(Arity, ( member(_/Inputs, Relations), Arity is Inputs+2 ), Arities0),
+    sort([4|Arities0], Arities),
     findall(F/A, member(spec(F, A, _), Specs), Signatures),
     materialization_source_owner(Space, Signatures, Owner),
     materialization_receipt(Space, Module, Arities, Signatures, Receipt),
@@ -366,7 +366,7 @@ build_materialization(Space, Module, Names, Stamp, Signatures, Trie, Owner) :-
 materialization_source_owner(Space, Signatures, Owner) :-
     spaces:native_storage_module_ready(Space, Storage),
     member(F/_, Signatures),
-    spaces:native_atom_clause(Space, [=,[F|_],_], Head),
+    spaces:native_atom_clause(Space, [=,[F|_],_], _, Head),
     clause(Storage:Head, true, Owner),
     !.
 
@@ -475,11 +475,11 @@ distinct_variables(Args) :-
 % Inspect candidates before binding the relation name: a stored variable in
 % that position must decline admission, even if an indexed call would bind it.
 relation_rows(Storage, Space, Rel/Arity, Rows) :-
-    StorageArity is Arity+1,
+    StorageArity is Arity+2,
     spaces:native_storage_functor(Space, Predicate),
     functor(Head, Predicate, StorageArity),
     findall(Atom,
-            ( clause(Storage:Head, true), Head =.. [_|Atom],
+            ( clause(Storage:Head, true), spaces:metta_storage_term(_, Atom, _, Head),
               Atom = [StoredRel|_],
               ( var(StoredRel) ; StoredRel == Rel ) ), Rows),
     maplist(ground_flat_row, Rows).
@@ -488,7 +488,7 @@ ground_flat_row(Row) :- ground(Row), maplist(atomic, Row).
 
 satisfy_factors(_, _, []).
 satisfy_factors(Storage, Space, [Pattern|Rest]) :-
-    spaces:native_atom_clause(Space, Pattern, Goal),
+    spaces:native_atom_clause(Space, Pattern, _, Goal),
     call(Storage:Goal),
     satisfy_factors(Storage, Space, Rest).
 
@@ -575,7 +575,7 @@ materialization_stamp(Space, Module, Arities, Signatures,
     spaces:metta_exec_module_generation(Module, Life),
     spaces:native_storage_functor(Space, Predicate),
     maplist(predicate_generation(Storage, Predicate), Arities, Generations),
-    storage_generation('&self', 3, Self),
+    storage_generation('&self', 4, Self),
     predicate_generation(translator_rules, translator_rule, 3, Rules),
     metta_engine_module(Engine), predicate_generation(Engine, fun, 1, Funs),
     maplist(compiled_generation(Module), Signatures, Clauses).
@@ -609,7 +609,7 @@ materialization_receipt(Space, Module, Arities, Signatures,
     maplist(predicate_references(Storage, Predicate), Arities, References),
     ( spaces:native_storage_module_ready('&self', SelfStorage)
     -> spaces:native_storage_functor('&self', SelfPredicate),
-       predicate_references(SelfStorage, SelfPredicate, 3, SelfReferences),
+       predicate_references(SelfStorage, SelfPredicate, 4, SelfReferences),
        Self = SelfStorage-SelfReferences
     ; Self = absent ),
     predicate_references(translator_rules, translator_rule, 3, Rules),
