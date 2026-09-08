@@ -123,6 +123,17 @@
 % only finite enumerations permit exhaustive law checks [tested:
 % test_type_carrier_cannot_certify_laws,
 % test_type_carrier_refuses_values_outside_its_type; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
+% Guarantees: a warm ground metta_vocabulary_value/2 membership checks only
+% its supporting base and member clauses; erased supports, vocabulary writes
+% and transaction rollback cannot retain the membership. The list build indexes
+% every positive member once, so first reads of all members take linear work.
+% Relational calls retain metta_vocabulary_values/2 and memberchk/2 order [tested:
+% sh engine/test.sh suites/spaces/catalog_membership.plt; commit=WORKTREE].
+% Guarantees: metta_publish_every_vocabulary_type/0 loads compiled physical
+% facts only for an unchanged initial catalog without type schemas, watchers,
+% existing type atoms or an &metta execution module. Other states use the
+% ordinary declaration door [tested: catalog_vocabulary_bootstrap;
+% commit=WORKTREE].
 
 :- dynamic native_storage_module_cache/2.
 :- dynamic space_parametric/1.
@@ -796,7 +807,7 @@ metta_catalog_clause([Rel|Args], Ref) :-
 %a transaction roll back with the catalog writes they mirror, so the two
 %cannot part ways.
 :- dynamic metta_kind_cache/3.    %Head, Spec | none, ref(Ref) | none
-:- dynamic metta_vocab_cache/3.   %Vocab, Values | none, ref(Ref) | none
+:- dynamic metta_vocab_cache/3.   %Vocab, values(Values) | member(Value), validity
 :- dynamic metta_annotations_cache/2. %Ctx, Algebra
 :- dynamic metta_algebra_descriptor_cache/9.
 %Ctx, Name, Combine, Extend, Zero, One, Laws, Carrier, Requires
@@ -852,10 +863,19 @@ metta_kind_spec(Head, Spec) :-
     ;   metta_kind_spec_fresh(Head, Spec)
     ).
 
-%A reference whose clause is gone, by property or by the reference itself
-%having been collected, either way the cached row is stale.
+%The erased property describes global generations. Inside a transaction it
+%marks new clauses erased and misses removals of committed clauses. Decode
+%the fact's indexed head, then enumerate with an unbound reference to test
+%visibility in the caller's transaction, as source_lifecycle.pl documents for
+%withdraw_source_load/3. A bound clause/3 reference alone ignores visibility.
+%[tested: catalog_membership:transaction_erasure_of_a_committed_reference_is_visible;
+%commit=WORKTREE].
 metta_catalog_ref_erased(Ref) :-
-    catch(clause_property(Ref, erased), _, true).
+    (   current_transaction(_)
+    ->  \+ catch(( clause(Head, true, Ref),
+                   clause(Head, true, Visible), Visible == Ref ), _, fail)
+    ;   catch(clause_property(Ref, erased), _, true)
+    ).
 
 metta_kind_spec_fresh(Head, Spec) :-
     (   metta_catalog_clause([kind, Head|Fresh], Ref)
@@ -877,7 +897,7 @@ metta_kind_spec_fresh(Head, Spec) :-
 %row's reference AND every member row's, and any one of them being erased
 %refreshes the whole entry, so a withdrawn member self-heals on the next read.
 metta_vocabulary_values(Vocab, Values) :-
-    (   metta_vocab_cache(Vocab, Values0, Validity)
+    (   metta_vocab_cache(Vocab, values(Values0), Validity)
     ->  (   Validity = refs(Refs)
         ->  (   ( member(Ref, Refs), metta_catalog_ref_erased(Ref) )
             ->  retractall(metta_vocab_cache(Vocab, _, _)),
@@ -893,10 +913,16 @@ metta_vocabulary_values_fresh(Vocab, Values) :-
     (   metta_catalog_clause([vocabulary, Vocab|Declared], BaseRef)
     ->  metta_registered_members(Vocab, Registered, MemberRefs),
         append(Declared, Registered, Values),
-        assertz(metta_vocab_cache(Vocab, Values, refs([BaseRef|MemberRefs])))
-    ;   assertz(metta_vocab_cache(Vocab, none, none)),
+        assertz(metta_vocab_cache(Vocab, values(Values), refs([BaseRef|MemberRefs]))),
+        forall(member(Value, Declared),
+               assertz(metta_vocab_cache(Vocab, member(Value), [BaseRef]))),
+        maplist(metta_cache_registered_member(Vocab, BaseRef), Registered, MemberRefs)
+    ;   assertz(metta_vocab_cache(Vocab, values(none), none)),
         fail
     ).
+
+metta_cache_registered_member(Vocab, BaseRef, Member, Ref) :-
+    assertz(metta_vocab_cache(Vocab, member(Member), [BaseRef, Ref])).
 
 %The registered half, asked as a FIXED-WIDTH query so it selects the '&metta'/3
 %storage predicate directly and indexes on the head rather than enumerating
@@ -908,8 +934,28 @@ metta_registered_members(Vocab, Members, Refs) :-
             Pairs),
     pairs_keys_values(Pairs, Members, Refs).
 
-%One value's membership, the question every consulting site asks.
+%A successful membership needs only the clauses that establish that word.
+%Keeping it under its own indexed key avoids copying the whole values list
+%and checking unrelated references. The references use the same erased-clause
+%test as the list cache; the write funnel invalidates both keys together.
+%Failures stay uncached so rejected words cannot accumulate point entries.
 metta_vocabulary_value(Vocab, Value) :-
+    atom(Vocab), atom(Value),
+    !,
+    (   metta_vocab_cache(Vocab, member(Value), Refs),
+        \+ ( member(Ref, Refs), metta_catalog_ref_erased(Ref) )
+    ->  true
+    ;   retractall(metta_vocab_cache(Vocab, member(Value), _)),
+        metta_vocabulary_member_fresh(Vocab, Value)
+    ).
+metta_vocabulary_value(Vocab, Value) :-
+    metta_vocabulary_values(Vocab, Values),
+    memberchk(Value, Values).
+
+metta_vocabulary_member_fresh(Vocab, Value) :-
+    %The list build installs every point in one pass. Building one point here
+    %made first reads of N different words copy and validate N whole lists.
+    %Inserting the list first also keeps the relational reader's cache order.
     metta_vocabulary_values(Vocab, Values),
     memberchk(Value, Values).
 
@@ -1081,13 +1127,66 @@ metta_unregister_semiring(Name) :-
 %walk itself write anything, and it stays up so a vocabulary a program
 %declares later is typed as its row lands.
 metta_publish_every_vocabulary_type :-
+    \+ current_module(catalog_vocabulary_seed),
+    metta_vocabulary_seed_context,
+    !,
+    source_file(metta_publish_every_vocabulary_type, Catalog),
+    file_directory_name(Catalog, Directory),
+    directory_file_path(Directory, vocabulary_seed, Seed),
+    ensure_loaded(Seed),
+    assertz(metta_vocabulary_types_published),
+    forall(( member(Head, [':', ':<']),
+             '$metta_atoms:&metta':'&metta'(Head, Subject, _) ),
+           metta_note_ctx_declared([Head, Subject])),
+    metta_vocabulary_names(Vocabs),
+    forall(member(Vocab, Vocabs), metta_vocabulary_values(Vocab, _)),
+    % Ordinary publication asks about each subject before writing its type.
+    % Prepare that lookup mode after bulk loading too: SWI creates the native
+    % index on demand, otherwise the first program pays for all catalog rows
+    % [tested: catalog_vocabulary_bootstrap:initial_publication_prepares_type_subject_lookup;
+    % commit=WORKTREE]. Choose a subject from the published data.
+    (   '$metta_atoms:&metta':'&metta'(':', IndexedSubject, _)
+    ->  once('$metta_atoms:&metta':'&metta'(':', IndexedSubject, _))
+    ;   true
+    ).
+metta_publish_every_vocabulary_type :-
     (   metta_vocabulary_types_published
     ->  true
     ;   assertz(metta_vocabulary_types_published)
     ),
-    findall(Vocab, metta_catalog_row([vocabulary, Vocab|_]), Vocabs0),
-    sort(Vocabs0, Vocabs),
+    metta_vocabulary_names(Vocabs),
     forall(member(Vocab, Vocabs), metta_publish_vocabulary_types(Vocab)).
+
+metta_vocabulary_names(Vocabs) :-
+    findall(Vocab, metta_catalog_row([vocabulary, Vocab|_]), Vocabs0),
+    sort(Vocabs0, Vocabs).
+
+%The static import has the same physical dynamic-fact representation as
+%lib/lib_import/lib_import.pl:write_static_import_facts/3. Its admissibility
+%test retains every observer and refusal that the ordinary add door owns.
+%The seed module's presence prevents a later publication from trusting
+%ensure_loaded/1 to restore facts a program has since removed.
+metta_vocabulary_seed_context :-
+    \+ metta_vocabulary_types_published,
+    forall(member(Head, [':', ':<']),
+           ( \+ metta_kind_spec(Head, _),
+             \+ metta_catalog_watched_head(Head),
+             \+ metta_catalog_row([Head|_]) )),
+    \+ metta_exec_module_known('&metta', _),
+    forall(member(Head, [vocabulary, 'vocabulary-member',
+                        'vocabulary-type', 'vocabulary-order']),
+           ( findall(Row, (Row = [Head|_], metta_catalog_row(Row)), Current0),
+             findall(Row, (Row = [Head|_], metta_catalog_preset(Row)), Preset0),
+             metta_vocabulary_rows_by_subject(Current0, Current),
+             metta_vocabulary_rows_by_subject(Preset0, Preset),
+             Current == Preset )).
+
+%Physical arities may enumerate different vocabularies in another order.
+%Rows for one vocabulary retain their order: member order and the first type
+%name or order declaration are observable. A full term sort would erase that.
+metta_vocabulary_rows_by_subject(Rows, Sorted) :-
+    findall(Subject-Row, (member(Row, Rows), Row = [_, Subject|_]), Pairs),
+    keysort(Pairs, Sorted).
 
 
 %Every (claim Vocab Value Property...) row's properties for one value, cached.
@@ -1221,8 +1320,7 @@ metta_check_value(_, term, _, _) :- !.
 metta_check_value(Arg, ['one-of', Vocab], Position, Term) :-
     !,
     (   atom(Arg),
-        metta_vocabulary_values(Vocab, Values),
-        memberchk(Arg, Values)
+        metta_vocabulary_value(Vocab, Arg)
     ->  true
     ;   metta_declaration_refused(Term, Position, ['one-of', Vocab])
     ).
@@ -1413,11 +1511,10 @@ metta_check_catalog_semantics(policy, [Axis|_], Term) :-
     ).
 metta_check_catalog_semantics(claim, [Vocab, Value|_], Term) :-
     !,
-    (   metta_vocabulary_values(Vocab, Values)
-    ->  (   memberchk(Value, Values)
-        ->  true
-        ;   metta_declaration_refused(Term, 2, 'a value of the vocabulary')
-        )
+    (   metta_vocabulary_value(Vocab, Value)
+    ->  true
+    ;   metta_vocabulary_values(Vocab, _)
+    ->  metta_declaration_refused(Term, 2, 'a value of the vocabulary')
     ;   metta_declaration_refused(Term, 1, 'a declared vocabulary')
     ).
 metta_check_catalog_semantics(algebra,

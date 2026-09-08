@@ -1,5 +1,9 @@
 % Purpose: hold the declared typing-rule registry and resolve its explicit
 %   accept, refuse(Reason), and defer outcomes for every engine type checker.
+% Guarantees: the shipped decision clauses are compiled from typing_rule_entry/7
+%   and preserve its directed matching, variable sharing and first decision
+%   [tested: sh engine/test.sh suites/typecheck/compiled_typing_rules.plt;
+%   commit=WORKTREE].
 % Assumes:
 %   - current_metta_module/1 identifies the execution module whose user rules
 %     are in scope.
@@ -90,9 +94,30 @@
 :- set_module(base(metta_engine)).
 
 :- dynamic typing_rule_entry/7.
+:- discontiguous typing_rule_entry/7, shipped_typing_rule/5.
 :- meta_predicate typing_rule_transaction(0).
 :- meta_predicate with_typing_policy_stable(0).
 :- thread_local typing_policy_snapshot/1.
+
+%Compile the invariant pattern tests beside each declaration. The source row
+%remains the reflection surface, and the generated clauses choose in the same
+%order. This is the declaration-to-clauses transformation used by SWI's record
+%library, confined to this module and this declaration shape.
+%[source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/record.pl#L541;
+%commit=WORKTREE].
+term_expansion(typing_rule_entry(shipped, '*', Name, Family, Left, Right, Decision),
+               [typing_rule_entry(shipped, '*', Name, Family, Left, Right, Decision),
+                (shipped_typing_rule(Family, Actual, Expected, Outcome, Name) :-
+                     (LeftGoal, RightGoal, Decision \== defer, !, Outcome = Decision))]) :-
+    prolog_load_context(module, type_rules),
+    compiled_typing_pattern(Actual, Left, LeftGoal),
+    compiled_typing_pattern(Expected, Right, RightGoal).
+
+compiled_typing_pattern(Value, Pattern, Goal) :-
+    (   var(Pattern)
+    ->  Goal = (Value = Pattern)
+    ;   Goal = (nonvar(Value), Value = Pattern)
+    ).
 
 % The shipped tier is data in exactly the relation add-typing-rule! extends.
 % Actual and expected patterns are ordinary Prolog terms, so repeating Same in
@@ -410,14 +435,15 @@ typing_rule_decision_resolved(Module, Family, Actual, Expected, Outcome, Name, T
         Tier = none
     ).
 
-decisive_typing_rule(Tier, Module, Family, Actual, Expected, Outcome, Name) :-
-    typing_rule_entry(Tier, Module, Name, Family, RawActual,
+decisive_typing_rule(shipped, '*', Family, Actual, Expected, Outcome, Name) :-
+    shipped_typing_rule(Family, Actual, Expected, Candidate, Name),
+    !,
+    Outcome = Candidate.
+decisive_typing_rule(user, Module, Family, Actual, Expected, Outcome, Name) :-
+    typing_rule_entry(user, Module, Name, Family, RawActual,
                       RawExpected, Candidate),
-    (   Tier == user
-    ->  normalize_callable_type_in(Module, RawActual, ActualPattern),
-        normalize_callable_type_in(Module, RawExpected, ExpectedPattern)
-    ;   ActualPattern = RawActual, ExpectedPattern = RawExpected
-    ),
+    normalize_callable_type_in(Module, RawActual, ActualPattern),
+    normalize_callable_type_in(Module, RawExpected, ExpectedPattern),
     typing_pattern_openness(ActualPattern, ActualOpen),
     typing_pattern_openness(ExpectedPattern, ExpectedOpen),
     typing_rule_pattern_matches(Actual, ActualPattern, ActualOpen),

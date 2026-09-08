@@ -1254,6 +1254,24 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 
 ### Changed
+- Compile shipped typing decisions from their declarations and index catalog
+  vocabulary membership. First reads of all members now include one linear
+  index build, and warm ground reads validate only their supporting clauses.
+  Catalog caches check transaction-local erasure and retain rollback behavior.
+- Load the initial vocabulary type atoms as compiled dynamic facts when the
+  catalog has no changed metadata or publication observers. Other states retain
+  ordinary publication. The warmed control saves 8,847 inferences while
+  preserving all 257 atoms in order. Base-space type lookup also omits the
+  prelude ownership search for a known name.
+- Index fresh Python wire-variable frames after the second distinct name,
+  preserving ordered bindings and rollback. Repeated names reject conflicting
+  prebound values. Settle Prolog setup garbage before Node benchmark windows.
+- Replace the cross-engine waivers' outdated component explanations with
+  before/after measurements, isolated controls and explicit remaining work.
+  Common C programs and direct call loops establish crossing parity; upstream
+  skips the original file preflight. Correct the Fibonacci and prime examples'
+  obsolete implicit-fuel comments. Benchmark allowances remain unchanged.
+
 - Advance the published MORK pin from
   `dd224fd7ced92ca9cfdacd399398dabb609e8faa` to
   `ed57c6716d8c510296fb5fbb8be6fbfe2df241d7` and PathMap from
