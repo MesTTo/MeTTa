@@ -2,8 +2,8 @@
 %   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: verify queryable import records, exact source undo, and static-import!.
 %   The fast path for a large data file converts a
-%   .metta file to Prolog facts once, qcompiles them, and consults the .qlf on
-%   every run after. Every one of those steps could silently produce or serve
+%   .metta file to an inert occurrence image, qcompiles it, and restores its
+%   rows on each load. Every one of those steps could silently produce or serve
 %   the wrong data, and three of them did.
 % Guarantees:
 %   - the conversion goes through the engine's own reader, so a blank line, a
@@ -96,10 +96,10 @@ check_facts_are_readable(Dir, Stem) :-
     assertion(Values == [1]),
     % And in the storage module, not in user.
     native_storage_module(Space, Module),
-    functor(Head, Space, 3),
+    functor(Head, Space, 4),
     assertion(( clause(Module:Head, true) )),
     assertion(\+ clause(user:Head, true)),
-    atomic_list_concat([Dir, '/', Stem, '.pl'], PlFile),
+    atomic_list_concat([Dir, '/', Stem, '.tokens-v1.pl'], PlFile),
     assertion(exists_file(PlFile)),
     clear_import_space.
 
@@ -117,7 +117,7 @@ check_partial_removed(Dir, Stem) :-
     import_space(Space),
     catch('static-import!'(Space, Stem, true), Error, true),
     assertion(Error = error(metta_static_import_form(_, _), _)),
-    atomic_list_concat([Dir, '/', Stem, '.pl'], PlFile),
+    atomic_list_concat([Dir, '/', Stem, '.tokens-v1.pl'], PlFile),
     assertion(\+ exists_file(PlFile)),
     findall(A, 'get-atoms'(Space, A), Atoms),
     assertion(Atoms == []).
@@ -132,8 +132,8 @@ check_stale_cache(Dir, Stem) :-
     'static-import!'(Space, Stem, true),
     clear_import_space,
     atomic_list_concat([Dir, '/', Stem, '.metta'], MettaFile),
-    atomic_list_concat([Dir, '/', Stem, '.pl'], PlFile),
-    atomic_list_concat([Dir, '/', Stem, '.qlf'], QlfFile),
+    atomic_list_concat([Dir, '/', Stem, '.tokens-v1.pl'], PlFile),
+    atomic_list_concat([Dir, '/', Stem, '.tokens-v1.qlf'], QlfFile),
     % Rewrite the source and date it after both caches.
     setup_call_cleanup(open(MettaFile, write, Out),
                        write(Out, "(fact a 1)\n(fact b 2)\n"),
@@ -149,6 +149,70 @@ check_stale_cache(Dir, Stem) :-
     clear_import_space.
 
 :- end_tests(lib_import_cache).
+
+:- begin_tests(lib_import_tokens).
+
+test(cache_preserves_tokens_in_another_space_and_after_source_deletion) :-
+    with_import_dir(tokens, "(row 1)\n(row 1)\n", check_token_cache).
+
+check_token_cache(Dir, Stem) :-
+    setup_call_cleanup(
+        ('new-space'(First), 'new-space'(Second)),
+        ( 'static-import!'(First, Stem, true),
+          metta_host_blame(First, [row,1], Tokens), assertion(length(Tokens, 2)),
+          'static-import!'(First, Stem, true),
+          metta_host_blame(First, [row,1], Repeated), assertion(Repeated == Tokens),
+          atomic_list_concat([Dir, '/', Stem, '.metta'], Source),
+          atomic_list_concat([Dir, '/', Stem, '.tokens-v1.pl'], TextCache),
+          delete_file(Source), delete_file(TextCache),
+          'static-import!'(Second, Stem, true),
+          metta_host_blame(Second, [row,1], Restored), assertion(Restored == Tokens),
+          assertion(\+ lib_import:static_import_image(_)),
+          flag('$metta_generation', Next, Next),
+          forall(member([t,_,Gen], Tokens), assertion(Next > Gen)) ),
+        (metta_release_space(First), metta_release_space(Second))).
+
+test(empty_static_cache_is_loadable) :-
+    with_import_dir(empty, "; no atoms\n", check_empty_cache).
+
+check_empty_cache(_, Stem) :-
+    setup_call_cleanup('new-space'(Space),
+        ( 'static-import!'(Space, Stem, true),
+          'static-import!'(Space, Stem, true),
+          findall(A, 'get-atoms'(Space, A), Atoms), assertion(Atoms == []) ),
+        metta_release_space(Space)).
+
+test(static_equations_and_variable_data_remain_inert) :-
+    with_import_dir(inert, "(= (t0-static-equation $x) $x)\n($head a)\n$scalar\n",
+                    check_inert_cache).
+
+check_inert_cache(_, Stem) :-
+    setup_call_cleanup('new-space'(Space),
+        ( 'static-import!'(Space, Stem, true),
+          findall(A, 'get-atoms'(Space, A), Atoms),
+          msort(Atoms, Sorted),
+          assertion(Sorted =@= [_, [_,a], [=,['t0-static-equation',X],X]]),
+          space_module(Space, Module),
+          assertion(\+ filereader:'$metta_equation_token'(Module,_,_,_)),
+          assertion(\+ spaces:deferred_metta_function(_,_,Space,_,_,_)) ),
+        metta_release_space(Space)).
+
+test(static_load_rollback_discards_its_occurrences_and_source_rows) :-
+    with_import_dir(rollback, "(row 1)\n", check_static_rollback).
+
+check_static_rollback(Dir, Stem) :-
+    setup_call_cleanup('new-space'(Space),
+        ( assertion(\+ transaction(('static-import!'(Space, Stem, true), fail))),
+          findall(A, 'get-atoms'(Space, A), Atoms), assertion(Atoms == []),
+          assertion(\+ filereader:metta_source_load(_,Space,_,_)),
+          assertion(\+ lib_import:static_import_image(_)),
+          atomic_list_concat([Dir, '/', Stem, '.tokens-v1.qlf'], Cache),
+          assertion(exists_file(Cache)),
+          'static-import!'(Space, Stem, true),
+          metta_host_blame(Space, [row,1], Tokens), assertion(length(Tokens, 1)) ),
+        metta_release_space(Space)).
+
+:- end_tests(lib_import_tokens).
 
 % Source ownership is occurrence identity, including equal caller-owned rows.
 :- begin_tests(lib_import_lifecycle).

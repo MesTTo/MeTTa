@@ -196,6 +196,26 @@ def snapshot(self) -> tuple[Atom, ...]:
 
 > Capture one immutable atom tuple at one instant.
 
+## `TokenProvider`
+
+```python
+class TokenProvider(Protocol):
+```
+
+> A provider with stable row identities, separate from row contents.
+
+### `TokenProvider.tokens`
+
+```python
+def tokens(self, pattern: Atom) -> Iterable[tuple[Atom, Atom]]:
+```
+
+> Yield ``(token, atom)`` pairs, with each token shaped ``(t actor row_id)``.
+>
+> Row IDs are nonnegative integers within the engine's ``flag/3`` range
+> and remain stable for an occurrence's lifetime. Distinct occurrences have distinct identities.
+> The engine unifies returned candidates against the offered pattern.
+
 ## `WorldCommitter`
 
 ```python
@@ -525,6 +545,14 @@ def foreign_atoms(space: str):
 ```
 
 > The shim's py_iter enumerates this; see foreign_match on ordering.
+
+## `foreign_tokens`
+
+```python
+def foreign_tokens(space: str, pattern_wire: list):
+```
+
+> Serve stable occurrence pairs through the existing guarded wire stream.
 
 ## `is_matchable`
 

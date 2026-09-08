@@ -236,6 +236,9 @@ purge_stale_qlf :-
 %retry meeting the same artifact set again.
 qlf_load_engine :-
     qlf_boot_directory(Here),
+    atom_concat(Here, '/identity.pl', Identity),
+    use_module(Identity, []),
+    metta_identity:metta_boot_identity,
     atom_concat(Here, '/metta', Umbrella),
     current_prolog_flag(qcompile, Previous),
     setup_call_cleanup(

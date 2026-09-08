@@ -243,8 +243,8 @@ test(runtime_projection_preserves_plain_types_and_variable_sharing) :-
 
 test(native_readers_and_inherited_arity_see_the_annotated_arrow,
      [ setup(('new-space'(Space),
-              assertz('$metta_atoms:&self':'&self'(':', 'arrow-native',
-                        ['-[det]->', 'Number', 'Number']), Ref))),
+              add_sexp('&self', [':', 'arrow-native',
+                        ['-[det]->', 'Number', 'Number']], Ref))),
        cleanup((erase(Ref), metta_release_space(Space))) ]) :-
     space_module(Space, Module),
     assertion(get_function_type(['arrow-native', 1], 'Number')),

@@ -134,7 +134,9 @@ class Live:
 > writes refuses, because a view MATCHES its query and never calls it, so a
 > call written where a pattern belongs would materialise nothing forever. A
 > ``tabled`` strategy refuses a head that is not tabled, and one whose policy
-> does not invalidate, naming the policy.
+> does not invalidate, naming the policy. Its atomic seed runs inside a
+> transaction, so a shared table is refused by the engine. Declare
+> ``(cache f (incremental private))`` in ``&metta`` for a tabled view of ``f``.
 >
 > space may be a context or a space.
 

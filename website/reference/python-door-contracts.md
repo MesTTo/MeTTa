@@ -926,6 +926,35 @@ Implementation failures propagate, including failures from callees and providers
 
 Evidence: `extensions/python/tests/repository/test_door_rows.py::test_generated_space_protocols_preserve_storage_and_identity`.
 
+## space:blame
+
+```python
+blame(atom: Any) -> list[Atom]
+```
+
+Kind: `introspection`. Answer: `list`. Effect: `oracleIO`. Determinism: `det`.
+
+Tiers: `sync`, `async`.
+
+Implementation: `metta._space:Space._door_blame`, receiving `method`.
+
+Assumes receiver state `live`.
+
+| argument | MeTTa type | default | delivery | parameter kind |
+|---|---|---|---|---|
+| `atom` | `%Undefined%` | `required` | `values` | `positional_or_keyword` |
+
+Guarantees result type `(host-apply (host-type metta._space list) (Atom))` with the answer shape, effect, and determinism above.
+
+Implementation failures propagate, including failures from callees and providers.
+
+> Return each matching occurrence's ``(t actor generation)`` identity.
+>
+> Results are ordered by generation then actor. Equal atoms have separate
+> tokens. A provider must implement the ``tokens`` capability.
+
+Evidence: `extensions/python/tests/ch19_spaces_backed_by_anything/test_occurrence_tokens.py::test_provider_tokens_keep_multiplicity_order_and_identity`, `extensions/python/tests/ch19_spaces_backed_by_anything/test_occurrence_tokens.py::test_tokenless_provider_refuses_blame_and_fast_save`.
+
 ## space:peek
 
 ```python
@@ -5586,7 +5615,7 @@ Evidence: `extensions/python/tests/repository/test_door_rows.py::test_space_iden
 ## context:info
 
 ```python
-info() -> dict[str, str | None]
+info() -> dict[str, str | int | None]
 ```
 
 Kind: `introspection`. Answer: `mapping`. Effect: `readOnlyLookup`. Determinism: `det`.
@@ -5600,7 +5629,7 @@ Assumes receiver state `live`.
 | argument | MeTTa type | default | delivery | parameter kind |
 |---|---|---|---|---|
 
-Guarantees result type `(host-apply (host-type metta._space dict) (String (host-union (String NoneType))))` with the answer shape, effect, and determinism above.
+Guarantees result type `(host-apply (host-type metta._space dict) (String (host-union ((host-union (String Number)) NoneType))))` with the answer shape, effect, and determinism above.
 
 Declared local refusals:
 

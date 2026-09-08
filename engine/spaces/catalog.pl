@@ -255,7 +255,7 @@ native_storage_cache_forget(Space) :-
 %instead of finding a stranded reserved module name [tested:
 %spaces_registration:rolled_back_first_write_keeps_storage_reusable].
 :- ensure_native_storage_module('&self', _).
-:- dynamic '$metta_atoms:&self':'&self'/3.
+:- dynamic '$metta_atoms:&self':'&self'/4.
 %&metta too, at load: the contract read path probes it on every foreign
 %match, and against a module that does not exist yet each probe is a thrown
 %and caught existence error, 65 inferences where the created module's
@@ -271,25 +271,28 @@ add_sexp(Space, Term) :- add_sexp(Space, Term, _).
 %the one path that pays per atom: resolving the module per write cost four
 %inferences of every seven on this path [measured 2026-08-15: 7.00 to 5.00
 %inferences per write over 200,000 writes].
-add_sexp('&self', Term, Ref) :- !, add_sexp_in('$metta_atoms:&self', '&self', Term, Ref).
+add_sexp(Space, Term, Ref) :- add_sexp(Space, Term, _, Ref).
+
+add_sexp('&self', Term, Token, Ref) :- !,
+    add_sexp_in('$metta_atoms:&self', '&self', Term, Token, Ref).
 %The contract flag rides an indexed clause of its own, so an ordinary
 %add never even tests for '&metta': first-argument indexing dispatches
 %past this clause for every other space at zero cost, where a guard
 %inside the shared funnel taxed every write (+26k on source-load's
 %counter, caught by the gate).
-add_sexp('&metta', Term, Ref) :- !,
+add_sexp('&metta', Term, Token, Ref) :- !,
     metta_declaration_check(Term),
     metta_note_ctx_declared(Term),
     ensure_native_storage_module('&metta', Module),
-    add_sexp_in(Module, '&metta', Term, Ref),
+    add_sexp_in(Module, '&metta', Term, Token, Ref),
     metta_catalog_note_added(Term).
-add_sexp(Space, Term, Ref) :- ensure_native_storage_module(Space, Module),
-                              add_sexp_in(Module, Space, Term, Ref).
+add_sexp(Space, Term, Token, Ref) :- ensure_native_storage_module(Space, Module),
+                                    add_sexp_in(Module, Space, Term, Token, Ref).
 
-%The two clause bodies below are native_atom_clause/3 written out rather than
+%The two clause bodies below are native_atom_clause/4 written out rather than
 %called, and that is measured rather than assumed: calling it cost one goal
 %per write, +2001 inferences over add-batch's thousand atoms, +2 per write on
-%a seven-inference path. native_atom_clause/3 stays the definition, this is
+%a seven-inference path. native_atom_clause/4 stays the definition, this is
 %its copy on the hot path, and native_storage_shapes_agree binds them.
 :- dynamic metta_ctx_declared/1.
 
@@ -354,27 +357,30 @@ metta_catalog_head('dispatch-policy').
 metta_catalog_head(deprecated).
 metta_catalog_head(visibility).
 
-add_sexp_in(Module, [Family|Parameters], [Rel|Args], Ref) :-
+add_sexp_in(Module, Space, Atom, Ref) :-
+    add_sexp_in(Module, Space, Atom, _, Ref).
+
+add_sexp_in(Module, [Family|Parameters], Atom, Token, Ref) :-
+    nonvar(Atom), Atom = [Rel|Args],
     Space = [Family|Parameters],
     space_parametric(Space),
     !,
-    Term =.. ['$metta_parametric_atom', Rel|Args],
+    ( var(Token) -> flag('$metta_generation', Token, Token+1), Stored = Token
+    ; metta_token_receive(Token, Stored) ),
+    metta_storage_term('$metta_parametric_atom', [Rel|Args], Stored, Term),
     assertz(Module:Term, Ref).
-%One more indexed clause, not a guard: a ':' head fails this clause's head
-%unification for every other write at zero inferences, the same trick the
-%'&metta' funnel clause above documents. A declaration LANDING in a space
-%is what upgrades that space's compile-time self tier from the &self
-%literal to the two-probe storage clause, so a space that never declares
-%never pays the second probe (alpha-unique's ten thousand data heads
-%measured the difference at +30 inferences per head when every module
-%carried the specialized clause unconditionally).
-add_sexp_in(Module, Space, [':'|Args], Ref) :- !,
-    self_tier_arrived(Space),
-    Term =.. [Space, ':' | Args],
+% Classify the supplied shape before unifying it. A variable datum is a
+% scalar; a variable expression head is not a ':' declaration. Static import
+% previously bypassed this funnel and therefore already preserved both cases.
+% These guards compile to VM instructions and add no Prolog inferences
+% [tested: spaces_tokens:all_storage_shapes_decode; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
+add_sexp_in(Module, Space, Atom, Token, Ref) :-
+    nonvar(Atom), Atom = [Rel|Args], !,
+    ( Rel == ':' -> self_tier_arrived(Space) ; true ),
+    ( var(Token) -> flag('$metta_generation', Token, Token+1), Stored = Token
+    ; metta_token_receive(Token, Stored) ),
+    metta_storage_term(Space, [Rel|Args], Stored, Term),
     assertz(Module:Term, Ref).
-add_sexp_in(Module, Space, [Rel|Args], Ref) :- !,
-                                               Term =.. [Space, Rel | Args],
-                                               assertz(Module:Term, Ref).
 
 %A scalar or empty expression cannot be a plain Space(Term) fact, because that
 %is already the encoding of the singleton expression (Term). It gets its own
@@ -385,10 +391,12 @@ add_sexp_in(Module, Space, [Rel|Args], Ref) :- !,
 %99.5 billion instructions against 1,520 billion. Keeping scalars in
 %the private scalar predicate leaves expressions as facts a direct indexed
 %call reaches.
-add_sexp_in(Module, _, Atom, Ref) :-
-    assertz(Module:'$metta_native_scalar'(Atom), Ref).
+add_sexp_in(Module, _, Atom, Token, Ref) :-
+    ( var(Token) -> flag('$metta_generation', Token, Token+1), Stored = Token
+    ; metta_token_receive(Token, Stored) ),
+    assertz(Module:'$metta_native_scalar'(Atom, Stored), Ref).
 
-%Below every add_sexp_in/4 clause so the write funnel stays contiguous for
+%Below every add_sexp_in/5 clause so the write funnel stays contiguous for
 %the source reader; the tier note itself is order-free.
 self_tier_arrived('&self') :- !.
 self_tier_arrived(Space) :-
@@ -782,11 +790,12 @@ metta_catalog_row(Row) :-
 metta_catalog_clause([Rel|Args], Ref) :-
     native_storage_module('&metta', Module),
     (   is_list(Args)
-    ->  Goal =.. ['&metta', Rel|Args]
-    ;   current_predicate(Module:'&metta'/N),
-        N >= 1,
+    ->  metta_storage_term('&metta', [Rel|Args], _, Goal)
+    ;   must_be(list_or_partial_list, Args),
+        current_predicate(Module:'&metta'/N),
+        N >= 2,
         functor(Goal, '&metta', N),
-        Goal =.. ['&metta', Rel|Args]
+        metta_storage_term('&metta', [Rel|Args], _, Goal)
     ),
     clause(Module:Goal, true, Ref).
 
@@ -2132,10 +2141,10 @@ metta_route_probes(global, Head, Module, _Ctx, Arities, Probes) :-
 
 metta_route_probe(Head, Module, Ctx, N, Module:Goal) :-
     length(Vars, N),
-    Goal =.. ['&metta', Head, Ctx, _Entry|Vars].
+    metta_storage_term('&metta', [Head, Ctx, _Entry|Vars], _, Goal).
 metta_route_probe_global(Head, Module, N, Module:Goal) :-
     length(Vars, N),
-    Goal =.. ['&metta', Head, _Entry|Vars].
+    metta_storage_term('&metta', [Head, _Entry|Vars], _, Goal).
 
 metta_probe_chain([Probe], (Probe -> true)) :- !.
 metta_probe_chain([Probe|Probes], (Probe -> true ; Chain)) :-
@@ -2325,7 +2334,7 @@ metta_catalog_preset([vocabulary, 'space-capability', file, process, network]).
 %(vocabulary-member ...) door at load.
 metta_catalog_preset([vocabulary, 'provider-capability',
                       match, enumerate, add, 'add-many', remove, clear,
-                      subscribe, plan, rules]).
+                      subscribe, plan, rules, tokens]).
 %How a callable receives its arguments: `atoms` hands the syntax through
 %untouched, `values` decodes it to the host's own data first, and the absence
 %of an (arguments ...) row means values. It is a catalog vocabulary rather
@@ -2839,9 +2848,8 @@ metta_refusal_declaration(
 metta_refusal_declaration(
     capability, 'SpaceCapabilityError',
     [ground, 'metta-law',
-     "HostLaws: engine/spaces/lifecycle.pl metta_space_capability_required/3 \c
-      -- a restricted space answers only for the capabilities its (grants \c
-      ...) rows name"],
+      "HostLaws: engine/spaces/lifecycle.pl metta_host_space_capability_error/4 \c
+       -- a space door requires its declared engine or provider capability"],
     [remedy, "grant <capability> to <space>, which <operation> needs",
      quickfix, maybe, [edit, [grants, '<space>', '<capability>']]]).
 metta_refusal_declaration(

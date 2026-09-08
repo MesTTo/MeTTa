@@ -178,8 +178,9 @@ test(a_raw_variable_relation_head_retains_native_unification) :-
                  % Public admission gives variable heads directive meaning;
                  % a native clause exercises the storage invariant directly.
                  ( spaces:native_storage_module_ready(Space, Storage),
-                   spaces:native_storage_functor(Space, Predicate),
-                   Head =.. [Predicate,_,a,b,z], assertz(Storage:Head) )),
+                   flag('$metta_generation', Token, Token+1),
+                   spaces:native_atom_clause(Space, [_,a,b,z], Token, Head),
+                   assertz(Storage:Head) )),
           materialize:with_source_materialization('&plunit_materialized',
                                                     ['wildcard-lookup'], true),
           assertion(\+ materialize:materialized_snapshot(

@@ -2,10 +2,10 @@
 %   stable identity across a transaction commit, after a snapshot discards it,
 %   after retract, and after clause garbage collection, first on the raw SWI
 %   database and then through the engine's own add_sexp/3 and
-%   stored_atom_of_ref/3.
-% Run: cd <worktree> && timeout -s KILL 120 swipl -q -g main -t halt ai-tmp/probes/probe_a_clause_ref_identity.pl
-:- ensure_loaded('../../engine/qlf_boot.pl').
-:- ensure_loaded('../../engine/metta.pl').
+%   stored_atom_of_ref/4.
+% Run: swipl -q -g main -t halt tests/prolog/probes/tokens/probe_a_clause_ref_identity.pl
+:- ensure_loaded('../../../../engine/qlf_boot.pl').
+:- ensure_loaded('../../../../engine/metta.pl').
 
 :- dynamic p/1.
 
@@ -62,15 +62,15 @@ main :-
     report("two identical clauses have two distinct references", RefA \== RefB),
     report("references are blobs of type clause",
            ( blob(RefA, T), format("   blob type = ~q~n", [T]) )),
-    % --- the engine's own door: add_sexp/3 and stored_atom_of_ref/3
+    % --- the engine's own door: add_sexp/3 and stored_atom_of_ref/4
     transaction(add_sexp('&self', [probe_fact, 1], ERef)),
     format("engine ref minted inside tx: ~q~n", [ERef]),
     report("engine: stored_atom_of_ref decodes the committed ref to its space and atom",
-           ( stored_atom_of_ref(ERef, Sp, At), format("   ~q ~q~n", [Sp, At]) )),
+           ( stored_atom_of_ref(ERef, Sp, At, _), format("   ~q ~q~n", [Sp, At]) )),
     snapshot(( add_sexp('&self', [probe_fact, 2], ERef2), nb_setval(probe_eref2, ERef2) )),
     nb_getval(probe_eref2, ERef2out),
     report("engine: stored_atom_of_ref FAILS for a snapshot-discarded ref (an erased ref decodes to nothing)",
-           \+ stored_atom_of_ref(ERef2out, _, _)),
+           \+ stored_atom_of_ref(ERef2out, _, _, _)),
     report("engine: match still answers (probe_fact 1) after the snapshot",
            ( findall(V, match('&self', [probe_fact, V], V, V), Vs), format("   ~q~n", [Vs]), Vs == [1] )),
     % --- transaction_updates inside a transaction lists refs of atoms the engine added

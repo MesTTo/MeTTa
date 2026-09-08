@@ -71,7 +71,7 @@ cleanup_hooks :-
              clear_native_atoms(S) )),
     retractall(hplt_observed(_, _)),
     metta_engine_module(Engine),
-    (   unwrap_predicate(Engine:metta_add_atom/3, metta_space_hook_guard)
+    (   unwrap_predicate(Engine:metta_add_atom/4, metta_space_hook_guard)
     ->  true
     ;   true
     ),

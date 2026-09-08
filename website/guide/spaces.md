@@ -2,10 +2,10 @@
 Purpose: explain Space handles, journal-backed stores, composition, and
 external backing providers.
 Guarantees:
-  - version 4 fast images preserve each stored equation's resolved reader
+  - version 5 fast images preserve occurrence identity and resolved reader
     bindings and refuse earlier cache schemas
-    [tested: test_fast_images_preserve_each_equations_binding,
-    test_fast_load_refuses_other_incompatible_headers; commit=c4f52c8ebbe2bd36973b150bf74cf9e54435d58d]
+    [tested: test_image_collision_rule,
+    test_fast_images_preserve_each_equations_binding; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4]
   - examples use the public metta.space() and metta.attach() functions
   - journal replay renames are documented as one-time migrations, and content
     digests state that renamed heads change their hashes
@@ -38,17 +38,24 @@ the payload, so a version mismatch refuses with a re-save message and a
 corrupt payload, even one flipped byte, refuses on integrity before the
 binary reader sees any of it. The proof costs about six milliseconds on the
 twenty-thousand-atom corpus, and text stays the durable interchange format.
-Version 4 also records resolved equation bindings alongside the original
-atoms. A reader-loaded equation keeps the space that its `&self` referred
+Version 5 also records occurrence tokens and resolved equation bindings
+alongside the original atoms. A reader-loaded equation keeps the space that its `&self` referred
 to, relocated to the restored space. An identical equation added with
 `add()` keeps its literal `&self` meaning. Duplicate occurrences retain
 their individual bindings, including after a later recompile. Earlier
-cache schemas are refused with a re-save message because they lack that
-provenance. Rebuild a cache from its original MeTTa source with the current
+cache schemas are refused with a re-save message because they lack
+occurrence identity. Loading into an empty space preserves every occurrence token.
+An incoming token that is already held receives a fresh token for the copy;
+all other tokens survive. Reloading one path replaces that path's prior
+contribution; loading an identical file under another path adds its own
+occurrences. Rebuild a cache from its original MeTTa source with the current
 engine. If only an older cache remains, open it with the matching older
 engine, export its atoms as MeTTa text, then load that text and save a new
-fast image. Older schemas did not retain reader/native binding provenance,
-so the original program is the authoritative way to recover that distinction.
+fast image. Schemas before version 4 also lacked reader/native binding
+provenance; the original program recovers that distinction.
+Static import caches use `.tokens-v1.pl` and `.tokens-v1.qlf`, with the same
+identity metadata. A present source rebuilds an older cache.
+
 A path ending `.gz` compresses either format, through zlib on the engine
 side and gzip on the Python side, interchangeably. Over the same twenty
 thousand atoms, text shrank 4.7x and the fast cache 5.1x, and load time
@@ -72,6 +79,30 @@ stays the same:
         b.add(S.dg(2), S.dg(1))
         assert a.digest() == b.digest()
 ```
+
+`blame(atom)` returns the `(t Actor Generation)` token of each stored occurrence,
+sorted by generation and then actor. Two equal atoms have separate tokens.
+Recreating the same content therefore keeps its digest while changing its
+occurrence identities:
+
+```python
+with metta.space() as facts:
+    facts.add(S.row(1), S.row(1))
+    first = facts.blame(S.row(1))
+    assert len(first) == len(set(first)) == 2
+    content = facts.digest()
+    facts.clear()
+    facts.add(S.row(1), S.row(1))
+    assert facts.digest() == content
+    assert facts.blame(S.row(1)) != first
+```
+
+The actor defaults to a boot UUID. `metta.engine().info()` reports `actor` and
+`next_generation`; set `METTA_ACTOR` and `METTA_GENERATION` before boot to
+resume them. CLI `--actor=` and `--generation=` override the environment.
+The actor stays fixed after boot, and receiving tokens advances the counter.
+Rollback discards its occurrences but can leave generation gaps. Node exposes
+`space.blame(atom)` and the awaiting `space.blamed(atom)` door.
 
 Live host objects have no cross-process identity, so a space holding one
 refuses to digest, the same contract as `save()`.
@@ -134,7 +165,9 @@ about absence, and each follows its own Python spelling:
 - `m -= atom` is that same grain without the report, because Python's in-place difference over a multiset is `collections.Counter`'s, which subtracts the multiplicity given rather than clearing the key.
 - `del m[pattern]` is the drain, since `m[pattern]` is a query answering many rows. It takes every unifying occurrence in one crossing and raises `KeyError` when nothing unified.
 
-MeTTa spells the pair `subtract-atom` and `remove-atom`.
+MeTTa spells the pair `subtract-atom` and `remove-atom`. Subtraction selects
+the least token among the observed occurrences. Draining removes the
+observed pairs, retaining any equal occurrence a removal callback adds.
 
 On a native space, `subtract-atom` and `remove()` return `False` for a
 missing occurrence without waiting for a later writer. They can run inside
@@ -347,9 +380,16 @@ fails to stop all raise instead of degrading.
 ## Python-backed spaces
 
 A `SpaceProvider` keeps atoms in Python or in another storage system. The
-engine still unifies the candidates returned by the provider. A provider may
-return an over-approximation, while bound positions can be pushed down for
-speed.
+engine still unifies the candidates returned by the provider. For identity
+reads, implement `TokenProvider.tokens(pattern)` to yield `(token, atom)`
+pairs, with tokens such as `S.t(S.provider, 42)`. Row identities must remain
+stable and distinguish equal occurrences. `blame` and fast save require the
+`tokens` capability. A provider without it, including MORK, receives a
+`SpaceCapabilityError` whose remedy names a native overlay or stable provider
+identities. Content reads and `digest()` retain their existing contract.
+
+A provider may return an over-approximation, while bound positions can be
+pushed down for speed.
 
 The DuckDB integration maps each table to a relation. The example below
 registers an in-memory database as `&crm`, queries it, writes through the

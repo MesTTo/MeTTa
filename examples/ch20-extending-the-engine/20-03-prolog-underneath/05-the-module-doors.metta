@@ -1,3 +1,7 @@
+; Purpose: exercise Prolog module doors and token-preserving static import.
+; Guarantees: static data is matchable and both versioned cache files are removed
+;   [tested: sh test.sh; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
+;
 ;Six doors that load Prolog, and what separates them. Two live in lib_import,
 ;three in lib_zar, and one is the fast path for DATA rather than for code.
 ;
@@ -65,10 +69,9 @@
 !(test (use-module! lists) True)
 
 ;`static-import!` is the odd one out, and it is for DATA rather than code. It
-;reads a .metta file holding nothing but ground forms, writes one Prolog fact
-;per form into the importing space's own storage module, compiles that to a
-;.qlf and loads it, so a large table costs one compile rather than one parse
-;per run. Every fact lands in the space, which is what makes it an import
+;reads a .metta file holding data forms and compiles a token-bearing image
+;into a .qlf. Loading restores its occurrences through the native storage
+;funnel, so a large table costs one compile rather than one parse per run. Every fact lands in the space, which is what makes it an import
 ;rather than a consult: `match` finds them.
 !(test (static-import! &self "_fixtures/static_rows") True)
 !(test (sort-atom (collapse (match &self (city $c france) $c))) (lyon paris))
@@ -78,11 +81,11 @@
 ;them if they are newer than it. They are build products rather than
 ;examples, so this file removes them again; the directory's own .gitignore
 ;names them for the run that stops before it gets here.
-!(test (file-exists "./examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/static_rows.pl")
+!(test (file-exists "./examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/static_rows.tokens-v1.pl")
        True)
-!(test (file-exists "./examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/static_rows.qlf")
+!(test (file-exists "./examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/static_rows.tokens-v1.qlf")
        True)
-!(delete-file! "./examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/static_rows.pl")
-!(delete-file! "./examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/static_rows.qlf")
-!(test (file-exists "./examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/static_rows.pl")
+!(delete-file! "./examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/static_rows.tokens-v1.pl")
+!(delete-file! "./examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/static_rows.tokens-v1.qlf")
+!(test (file-exists "./examples/ch20-extending-the-engine/20-03-prolog-underneath/_fixtures/static_rows.tokens-v1.pl")
        False)

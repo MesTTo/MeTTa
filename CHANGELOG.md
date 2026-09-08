@@ -9,6 +9,24 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A thread worker behind a spawned or timer future settles that future
+  exactly once whatever a cancellation signal interrupted. The settlement
+  now runs in a cleanup handler with thread signals blocked, so a signal
+  landing before the worker's evaluation catch is installed, or after it has
+  exited, ends in a cancelled outcome; and cancelling waits for the worker
+  thread to end rather than for its settlement, settling a worker that met
+  the signal at its very first call as cancelled. Before, such a worker died
+  unsettled and the cancelling thread waited forever under the future's
+  await mutex; one in six parallel runs of the lib_thread suite hung that
+  way.
+
+- Decoding an atom that names a future space no longer asks the engine
+  whether that future is still live. A catalog row that names a future its
+  scope has already released could not be read at all, which surfaced as
+  `No permission to access released_scope_space` from an unrelated door such
+  as `algebra()` in a later context of the same process. Liveness is asked by
+  the doors that reach the engine, as for every other handle.
+
 - `channel-close` on a closed or unknown channel raises
   `existence_error(metta_channel, ...)` again, as `recv`, `send` and
   `try-recv` do, rather than answering `True`. A scope releasing a channel
@@ -51,6 +69,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Channels are bounded FIFO spaces, sharing their buffer with ordinary space
   operations. `(capture expr)` returns the held expression and its evaluation
   space through `evalc`.
+- Every native atom occurrence now carries an actor and generation token.
+  Python `Space.blame` and Node `Space.blame` / `Space.blamed` return those
+  identities in token order. Providers can expose stable identities through
+  `tokens`; providers without it receive a capability refusal and remedy.
+  Fast image version 5 and versioned static caches preserve non-colliding
+  tokens and mint identities for colliding copies while retaining answer
+  multiplicity. Boot actor and generation overrides support identity recovery;
+  content digests retain their existing meaning.
 
 - Native and MORK skewed triangle benchmark rows at 100, 400, 1600 and
   3200 atoms, with complete answer-bag checks, retired-instruction pins and
@@ -1838,6 +1864,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   must return before cancellation can be delivered.
 - The MORK README's journal citation now names its immutable repository
   source, so including the README in the website no longer breaks the build.
+- Fast-image checksum validation takes the same inference count for every
+  valid checksum while retaining the lowercase hexadecimal format.
+
+- Shared table calls inside transactions and snapshots now refuse before
+  entering the answer trie, including through previously compiled callers.
+  SWI 10.1.13 can expose uncommitted shared-table answers to another thread.
+  An explicit private table uses SWI's transaction and rollback machinery.
 
 - The 0.8.0 regression where an integration installer's MeTTa library import
   was invisible inside the installer and survived its rollback. The function

@@ -41,8 +41,8 @@ re-runs them.
 | `website/reasoning/*.md` | weighted relations, matchers and measure | |
 | `extensions/python/examples/*/*.py` | runnable Python programs, each printing checked claims through `_common.py`: `check(label, got, expected)` raises `CheckFailed` rather than asserting, because `python -O` strips an assert while the print under it still runs, and `done(name)` refuses to print its OK line when nothing was checked, so an example that verified nothing cannot report success; the six under `gallery/` also check adjacent emitted-MeTTa and output comments plus bilingual `@example` atoms | the `examples` and `gallery` gate lanes |
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
-| `engine/**/*.pl` | `engine/metta.pl` declares `metta_engine`, the bootstrap including the fourteen `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, space_hooks, runtime, control, interop, registration, prelude), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eight `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products), `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.pl` the vocabulary tier (Prolog bodies of the 32 prelude heads). Each included unit is a plain source file owned by its umbrella module. `engine/main.pl` declares `metta_main`. Engine facades declare their own module and explicit exports; `metta_engine_reexport/2` publishes the subsystem operations the host tier needs. Execution resolves through the space parents, `&self`, `prelude`, `metta_engine`, `user`, then `system` | |
-| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 109, `service` 64, `ownership` 38, `event` 23, `declaration` 17. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
+| `engine/**/*.pl` | `engine/metta.pl` declares `metta_engine`, the bootstrap including the fourteen `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, space_hooks, runtime, control, interop, registration, prelude), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the ten `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products, tokens, receipts), `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.pl` the vocabulary tier (Prolog bodies of the 32 prelude heads). Each included unit is a plain source file owned by its umbrella module. `engine/main.pl` declares `metta_main`. Engine facades declare their own module and explicit exports; `metta_engine_reexport/2` publishes the subsystem operations the host tier needs. Execution resolves through the space parents, `&self`, `prelude`, `metta_engine`, `user`, then `system` | |
+| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 111, `service` 70, `ownership` 39, `event` 23, `declaration` 17. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
 | `lib/lib_*/` | 38 MeTTa libraries, implemented in `.metta`, `.pl`, or both; all 22 shipped Prolog halves, including the builtin and minimal-MeTTa modules, own distinct `lib_*` modules with explicit exports and local autoload tables. Libraries load with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
 | `extensions/*/extension.pl` | one control file per seat, read when argv carries `extensions` and never read without it; a seat's `entry(engine, _)` loads only where its declared needs hold and its `entry(host, _)` is recorded for the seat's own runtime to consult, so the engine names neither a host nor a backend | |
@@ -109,7 +109,7 @@ difference is checked: a context carries the evaluation doors and forwards them
 home (`run`, `eval`, `match`, `add`, `define`, `op`, `transaction`, `limits`,
 `stats`, `trace`, `debug`, `space`, `close`) plus the collection protocols,
 while storage and introspection stay on the space and are reached as
-`context.self.atoms()` (`atoms`, `type`, `cast`, `digest`, `source`, `save`,
+`context.self.atoms()` (`atoms`, `type`, `cast`, `digest`, `blame`, `source`, `save`,
 `is_function`, `arities`, `builtins`, `space_names`, `lint`, `derivation`,
 `effect_plan`, `subscribe`, `watch`, every declaration verb). Asking the
 context for a space door raises an `AttributeError` naming `m.self`, rather
@@ -470,6 +470,14 @@ atoms() -> list[Atom]
 ```
 
 Every stored atom in this space.
+
+`space:blame`: `introspection`, returns `list`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`.
+
+```python
+blame(atom: Any) -> list[Atom]
+```
+
+Return each matching occurrence's ``(t actor generation)`` identity.
 
 `space:peek`: `query`, returns `Atom`, effect `oracleIO`, determinism `nondet`; tiers `sync`, `async`.
 
@@ -1467,7 +1475,7 @@ The engine bridge itself, for callers going under the surface.
 `context:info`: `introspection`, returns `mapping`, effect `readOnlyLookup`, determinism `det`; tiers `sync`.
 
 ```python
-info() -> dict[str, str | None]
+info() -> dict[str, str | int | None]
 ```
 
 Return backend versions and the consulted MeTTa runtime tree.
@@ -3194,6 +3202,10 @@ N the table's answers:
   10.1.13 the propagation still lands at the write and the table only reads
   invalid until its next use, so it buys nothing measurable here.
 - `shared` (default) / `private`: one trie between engines, or one per engine.
+  A shared table refuses calls inside a transaction or snapshot, including
+  calls compiled before it was tabled. Its trie can expose uncommitted rows
+  to another thread on SWI 10.1.13. Write `(cache f (incremental private))`
+  for a watched table inside a transaction; keep other explicit policy words.
 - `subsumptive`: a specific call answers from a completed more general table;
   cannot watch a read on this SWI, so over a body that reads a space `plain`
   must be written.
@@ -3976,7 +3988,7 @@ space-factory door rather than their own modules.
 
 A space can be backed by anything, and the seam is universal rather than
 per-backend. From Python, implement `Matcher` / `Enumerable` / `Adder` /
-`BulkAdder` / `Remover` / `Clearer` / `Planner` / `Transactional` / `CustomMatch`
+`BulkAdder` / `Remover` / `Clearer` / `Planner` / `Transactional` / `CustomMatch` / `TokenProvider`
 and call `metta.foreign.register_provider(runtime, name, provider)` with a name
 starting with `&`; or subclass `SpaceProvider`. `can_run(capability, **request)`
 declares that the operation exists. Override
@@ -3984,7 +3996,7 @@ declares that the operation exists. Override
 and `refusal(capability, **request)` to give a declined request its own reason.
 For example, an add policy reads `request["atom"]`; it runs before the write,
 including before any bulk write.
-Capabilities are declared, not guessed: `match`, `enumerate`, `add`, `add-many`,
+Capabilities are declared, not guessed: `tokens`, `match`, `enumerate`, `add`, `add-many`,
 `remove`, `clear`, `subscribe`, `plan`, `rules`, and an unsupported operation
 refuses loudly rather than degrading. They are the engine's own
 `(vocabulary provider-capability ...)` row, which `metta.foreign.CAPABILITIES`
@@ -4011,6 +4023,15 @@ when `MatchClassifier.pushdown(pattern)` says `"exact"`; ignoring the limit is
 always sound. `Snapshotter.snapshot() -> tuple[Atom, ...]` makes a provider
 reifiable, and `WorldCommitter.commit_world(base, removed, added)` is the
 provider-owned atomic boundary for landing that world's checked multiset diff.
+`TokenProvider.tokens(pattern)` yields `(token, atom)` pairs. Each token is an
+expression such as `S.t(S.provider, 42)`, with a stable nonnegative integer row
+identity; equal atom occurrences need distinct tokens. The engine unifies the
+candidates and orders their tokens by generation then actor. `blame` and fast
+save refuse a provider without `tokens`, including MORK, with a
+`SpaceCapabilityError` naming a native overlay or stable provider identities as
+the remedy. Invalid or duplicate identities refuse rather than shortening a
+bag, and all token streams close on success or error.
+
 A provider's `match` or `atoms` may re-enter the engine and may raise at any
 point, mid-stream included: its own `MettaError` reaches the caller with its
 own sentence, anything else arrives as an `EngineError` naming the space and
@@ -4063,9 +4084,9 @@ half-loading it, and `metta_require_platform/2` for a form to refuse by name,
 with what the absence costs, rather than raising an existence error from the
 engine's interior;
 native storage: `native_storage_module/2`, `native_storage_functor/2`,
-`ensure_native_storage_module/2` and `native_atom_clause/3`, the same doors an
-ordinary atom write uses, so a library that pre-generates a space's storage
-writes the one format the space reads;
+`ensure_native_storage_module/2`, `native_atom_clause/4` and
+`stored_atom_of_ref/4`, which construct and decode tokenized native storage;
+`add_sexp/4` owns occurrence publication, and static caches restore through it;
 effects and caching: `metta_effect_class_canonical/2`, `metta_effect_rank/2`,
 `metta_effect_join/3`, `metta_effect_compose/2`, `metta_operation_effect/2`,
 `metta_annotated_operation_effect/2` for the class an annotated arrow

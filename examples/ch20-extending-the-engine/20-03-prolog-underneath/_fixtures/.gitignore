@@ -1,6 +1,6 @@
-# What static-import! writes beside static_rows.metta: one Prolog fact per
-# form and the .qlf it compiles that to. 05-the-module-doors.metta removes
+# What static-import! writes beside static_rows.metta: one token-bearing image
+# and the .qlf it compiles that to. 05-the-module-doors.metta removes
 # both at the end of its run; these two lines are for the run that stops
 # before it gets there.
-static_rows.pl
-static_rows.qlf
+static_rows.tokens-v1.pl
+static_rows.tokens-v1.qlf

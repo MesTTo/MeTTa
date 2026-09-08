@@ -54,7 +54,8 @@ CHECK_PY="$PY" sh check.sh generated-artifacts
 ```
 
 The target retains the individual `ledger`, `aio-mirror`, `init-stub` and
-`reference` checks. The complete door pipeline has one command:
+`reference` checks; `aio-mirror` must precede `reference` because
+`reference.py` reads `aio.py`. The complete door pipeline has one command:
 
 ```sh
 "$PY" extensions/python/tools/doorgen.py --write

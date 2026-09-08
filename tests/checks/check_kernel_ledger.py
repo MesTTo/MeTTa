@@ -74,7 +74,7 @@ _COUNT_CLAIMS = {
         lambda inventory: inventory.special_clauses,
     ),
     "prelude rules": (
-        re.compile(r"the remaining (?P<count>\d+) are equations"),
+        re.compile(r"the remaining (?P<count>\d+) are (?:equations|Prolog bodies)"),
         lambda inventory: len(inventory.prelude_heads),
     ),
     "special-table heading": (

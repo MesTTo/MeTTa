@@ -106,7 +106,7 @@ source_queues([Form|Forms], [positioned(_,_,_,_,Tree)|Trees], Q0, Q) :-
 record_stored(Ref) :-
     ( nb_current('$metta_source_context', Context),
       Context = context(Module, Id, Queues, _),
-      spaces:stored_atom_of_ref(Ref, _, Term),
+      spaces:stored_atom_of_ref(Ref, _, Term, _),
       nonvar(Term), Term = [=, [_|_], _],
       variant_sha1(Term, Key),
       get_assoc(Key, Queues, [origin(Original, Tree)|Rest]),
@@ -120,7 +120,7 @@ source_for_clause(Input, StoredRef, Id, Tree) :-
     variant_sha1(Input, Key),
     current_metta_module(Module),
     source_equation(Key, Module, StoredRef, Id, Tree),
-    spaces:stored_atom_of_ref(StoredRef, _, Original),
+    spaces:stored_atom_of_ref(StoredRef, _, Original, _),
     Original =@= Input,
     \+ ( clause_source(Compiled, StoredRef, _, _),
          \+ clause_property(Compiled, erased) ),

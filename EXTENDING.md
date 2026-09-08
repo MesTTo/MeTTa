@@ -1636,6 +1636,7 @@ talks to. `das.py`, `remote.py` and `persistent.py` are three real instances.
 :- multifile seam:foreign_add/2.       % add an atom
 :- multifile seam:foreign_remove/3.    % remove one
 :- multifile seam:foreign_atoms/2.     % enumerate
+:- multifile seam:foreign_token/3.     % Space, Atom, t(Actor, Generation)
 :- multifile seam:foreign_match/3.     % answer a pattern
 :- multifile seam:foreign_clear/1.     % empty the space
 :- multifile seam:foreign_erring/5.    % a declared error mode's stream
@@ -1766,6 +1767,21 @@ both. Four of the five used to fail silently: a write vanished, a removal
 reported nothing removed, and a match answered the empty set while the space
 demonstrably held matching atoms. A write that merely FAILS is an error too,
 because a write either happened or it did not.
+
+### Preserve occurrence identity
+
+Declare `tokens` when each stored occurrence has a stable identity. Implement
+`seam:foreign_token(Space, Atom, t(Actor, Generation))` once per occurrence;
+`Actor` is a nonempty symbol and `Generation` a nonnegative integer. Equal
+atoms stored twice need distinct tokens. Candidates may over-approximate the
+pattern; the engine performs unification and orders tokens by generation,
+then actor.
+
+Python providers implement `tokens(pattern)` yielding `(token, atom)` pairs.
+Node providers use the same pair order and may return an async iterable.
+`space.blame(atom)` and fast-image saving require this capability. Missing
+identities raise a capability error naming a native overlay or stable provider
+identities as the remedy. Content-only `digest()` does not identify occurrences.
 
 ### Say why you are saying no
 
@@ -2539,6 +2555,32 @@ guards in evaluation order. The built-in `(:= value)` equality view and
 `engine/translator.pl` [source: engine/ext_points.pl, seam:pattern_modifier/3
 and engine/translator.pl, lift_pattern_modifiers/3;
 commit=ea0bd45cc9f3991e41f61d8f6bf4d4e6cb992776].
+
+### Declaring what a held engine runs under, and what a kept space needs
+
+Two declaration seams belong to lifetime scopes. `seam:engine_context/1`
+declares a closure captured on the caller and applied around every goal a held
+engine runs, so a library that owns a scope wraps the engines the scope holds
+without any host re-implementing a context stack; every declared context
+composes, and `lib_thread` declares `scope_call(Id)` for the scope it owns
+[source: lib/lib_thread/lib_thread.pl, seam:engine_context/1 and
+engine/ext_points.pl; commit=WORKTREE]. `seam:space_dependency/2` declares a
+space that must stay live while a dependent space is kept out of a scope: the
+engine declares a space's parent and the home of its equations, and a scope
+that transfers a kept space to its parent transfers those with it rather than
+releasing them under a space that still reads them
+[source: engine/spaces/lifecycle.pl, seam:space_dependency/2 and
+lib/lib_thread/lib_thread.pl, scope keep; commit=WORKTREE].
+
+The events around them are the lifetime seams. `seam:space_created/1` fires
+when a space is minted, `seam:space_releasing/1` before a space is released
+and `seam:space_released/1` after, and `seam:space_access/1` runs on every
+door that reaches a space by name, which is where a scope refuses a name it
+has revoked; `seam:host_engine_created/1` and `seam:host_engine_released/1`
+bracket a host engine's life the same way. All six are event seams: every
+handler runs, so no cut [source: engine/ext_points.pl, the lifetime events,
+and lib/lib_thread/lib_thread.pl, seam:space_created/1 and
+seam:space_released/1; commit=WORKTREE].
 
 ### Making your errors read like a builtin's
 

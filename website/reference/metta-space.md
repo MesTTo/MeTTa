@@ -580,6 +580,17 @@ def atoms(self) -> list[Atom]:
 
 > Every stored atom in this space.
 
+### `Space.blame`
+
+```python
+def blame(self, atom: Any) -> list[Atom]:
+```
+
+> Return each matching occurrence's ``(t actor generation)`` identity.
+>
+> Results are ordered by generation then actor. Equal atoms have separate
+> tokens. A provider must implement the ``tokens`` capability.
+
 ### `Space.peek`
 
 ```python
@@ -3573,7 +3584,7 @@ def runtime(self) -> Runtime:
 ### `MeTTa.info`
 
 ```python
-def info(self) -> dict[str, str | None]:
+def info(self) -> dict[str, str | int | None]:
 ```
 
 > Return backend versions and the consulted MeTTa runtime tree.

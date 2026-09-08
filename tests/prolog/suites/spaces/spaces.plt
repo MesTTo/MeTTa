@@ -1493,7 +1493,7 @@ test(a_cyclic_binding_is_refused_only_when_the_template_carries_it,
     findall(R, match('&plunit_rational', [rt, Z, Z], hit, R), [hit, hit]).
 
 % spaces:add_sexp_in/4 writes the two clause bodies out rather than calling
-% native_atom_clause/3, because calling it cost one goal per write, +2 on a
+% native_atom_clause/4, because calling it cost one goal per write, +2 on a
 % seven-inference path [measured 2026-08-16: add-batch 62027 to 64028 over a
 % thousand atoms]. That copy is only safe while the two agree, and they did
 % not agree before: lib_import.pl's converter wrote its own third shape into
@@ -1508,12 +1508,13 @@ native_shape_case([]).
 
 test(native_storage_shapes_agree,
      [ cleanup(( clear_native_atoms('&plunit_shape'),
-                 abolish('$metta_atoms:&plunit_shape':'&plunit_shape'/3) )) ]) :-
+                 abolish('$metta_atoms:&plunit_shape':'&plunit_shape'/4) )) ]) :-
     forall(native_shape_case(Atom),
            ( add_sexp('&plunit_shape', Atom, Ref),
              clause_property(Ref, module(Module)),
              clause(Module:Asserted, true, Ref),
-             native_atom_clause('&plunit_shape', Atom, Predicted),
+             stored_atom_of_ref(Ref, _, _, Token),
+             native_atom_clause('&plunit_shape', Atom, Token, Predicted),
              assertion(Asserted =@= Predicted) )).
 
 :- end_tests(spaces_native_shape).
@@ -1548,7 +1549,7 @@ test(atoms_live_only_in_the_private_module) :-
     spaces:native_storage_ready(Module),
     current_prolog_flag(Module:unknown, fail),
     \+ default_module(Module, user),
-    functor(StoredHead, Space, 1),
+    functor(StoredHead, Space, 2),
     arg(1, StoredHead, from_space),
     clause(Module:StoredHead, true),
     \+ clause(user:StoredHead, true),
@@ -1625,7 +1626,7 @@ test(custom_added_hooks_keep_every_batch_event,
             Events),
     Events == [[observed, 1], [observed, 2]].
 
-%stored_atom_of_ref/3 is spaces:add_sexp_in/4 read backwards, and a reload depends on
+%stored_atom_of_ref/4 is spaces:add_sexp_in/4 read backwards, and a reload depends on
 %it telling an atom's clause reference from the compiled clauses and
 %registrations a load records beside it. Both stored shapes and one negative,
 %because answering for a reference that is not an atom's would send a
@@ -1636,9 +1637,9 @@ test(a_stored_atoms_reference_decodes_to_its_atom) :-
         ( add_sexp(Space, [pair, a, b], ExprRef),
           add_sexp(Space, scalar, ScalarRef),
           assertz(user:plunit_not_an_atom(x), OtherRef) ),
-        ( stored_atom_of_ref(ExprRef, ExprSpace, ExprAtom),
-          stored_atom_of_ref(ScalarRef, ScalarSpace, ScalarAtom),
-          \+ stored_atom_of_ref(OtherRef, _, _) ),
+        ( stored_atom_of_ref(ExprRef, ExprSpace, ExprAtom, _),
+          stored_atom_of_ref(ScalarRef, ScalarSpace, ScalarAtom, _),
+          \+ stored_atom_of_ref(OtherRef, _, _, _) ),
         ( clear_native_atoms(Space),
           retractall(user:plunit_not_an_atom(_)) )),
     ExprSpace-ExprAtom == Space-[pair, a, b],
@@ -1648,7 +1649,7 @@ test(an_erased_reference_decodes_to_nothing) :-
     Space = '&plunit_decode_erased',
     add_sexp(Space, [gone, once], Ref),
     erase(Ref),
-    \+ stored_atom_of_ref(Ref, _, _).
+    \+ stored_atom_of_ref(Ref, _, _, _).
 
 :- end_tests(spaces_storage_modules).
 
@@ -2885,7 +2886,7 @@ test(storage_equations_types_and_mutation_are_instance_local,
     metta_add_atom(Right, [':', local_token, 'RightToken'], true),
     metta_add_atom(Left, [=, [param_view], ['context-space']], true),
     metta_add_atom(Right, [=, [param_view], ['context-space']], true),
-    once(stored_atom_of_ref(LeftRef, RefSpace, RefAtom)),
+    once(stored_atom_of_ref(LeftRef, RefSpace, RefAtom, _)),
     assertion(RefSpace == Left),
     assertion(RefAtom == [edge, a, b]),
     findall(X-Z,

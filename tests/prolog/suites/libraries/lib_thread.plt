@@ -118,6 +118,19 @@ metta_test_remove_timer_barrier(Release) :-
     catch(unwrap_predicate(lib_thread:timer_dispatch_/5,
                            '$metta_test_timer_cancel_race'), _, true).
 
+% The same barrier one predicate deeper: a worker parked here has not yet
+% installed the catch its evaluation runs under.
+metta_test_install_outcome_barrier(Reached, Release) :-
+    wrap_predicate(
+        lib_thread:future_body_outcome_(_, _, _, _, _),
+        '$metta_test_outcome_barrier', Wrapped,
+        metta_test_timer_dispatch_barrier(Wrapped, Reached, Release)).
+
+metta_test_remove_outcome_barrier(Release) :-
+    catch(thread_send_message(Release, go, [timeout(0)]), _, true),
+    catch(unwrap_predicate(lib_thread:future_body_outcome_/5,
+                           '$metta_test_outcome_barrier'), _, true).
+
 metta_test_cancel_timer_thread(Space, Started, Finished) :-
     thread_send_message(Started, started),
     thread_cancel(Space, Cancelled),
@@ -471,6 +484,66 @@ test(timer_fire_and_cancel_have_one_atomic_transition) :-
           catch(message_queue_destroy(Release), _, true),
           catch(message_queue_destroy(CancelStarted), _, true),
           catch(message_queue_destroy(CancelFinished), _, true) )).
+
+% A cancellation signal delivered while the worker is parked before its own
+% evaluation catch used to end the thread unsettled, and the canceller then
+% waited forever under the await mutex; one of six parallel suite runs hung
+% that way. The worker settles from its cleanup handler now, with thread
+% signals blocked, so the signal ends in a cancelled outcome whichever port
+% it lands on.
+test(a_signal_before_the_worker_installs_its_catch_still_settles) :-
+    current_metta_module(Module),
+    lib_thread:metta_capture_python_context(Context),
+    lib_thread:next_metta_handle(Number),
+    lib_thread:future_space_name(Number, Space),
+    message_queue_create(Done, [max_size(1)]),
+    message_queue_create(Reached),
+    message_queue_create(Release),
+    assertz(lib_thread:metta_timer_context(Space, once, Context)),
+    setup_call_cleanup(
+        metta_test_install_outcome_barrier(Reached, Release),
+        ( thread_create(lib_thread:timer_once_body_(Context, Module,
+                                                    ['t-slow', finished],
+                                                    Space, Done),
+                        Worker, []),
+          assertz(lib_thread:metta_future(Space, Worker, Done)),
+          thread_get_message(Reached, reached),
+          thread_signal(Worker,
+                        lib_thread:future_cancel_signal_(Space, Worker)),
+          thread_join(Worker, Status),
+          Status == true,
+          thread_get_message(Done, Outcome, [timeout(2)]),
+          Outcome == cancelled,
+          lib_thread:metta_future_result(Space, cancelled) ),
+        ( metta_test_remove_outcome_barrier(Release),
+          retractall(lib_thread:metta_future(Space, _, _)),
+          retractall(lib_thread:metta_future_result(Space, _)),
+          retractall(lib_thread:metta_timer_context(Space, _, _)),
+          catch(message_queue_destroy(Done), _, true),
+          catch(message_queue_destroy(Reached), _, true),
+          catch(message_queue_destroy(Release), _, true) )).
+
+% The signal can also land at the worker's first call port, before any
+% cleanup handler exists; such a worker ends unsettled. Cancelling waits for
+% the thread to end and then settles it as cancelled, where it used to wait
+% forever for a settlement nobody could deliver.
+test(cancelling_a_worker_that_ended_unsettled_answers_cancelled,
+     [timeout(10)]) :-
+    lib_thread:next_metta_handle(Number),
+    lib_thread:future_space_name(Number, Space),
+    message_queue_create(Done, [max_size(1)]),
+    setup_call_cleanup(
+        true,
+        ( thread_create(true, Worker, []),
+          assertz(lib_thread:metta_future(Space, Worker, Done)),
+          thread_cancel(Space, Answer),
+          Answer == true,
+          lib_thread:metta_future_result(Space, cancelled),
+          thread_get_message(Done, Outcome, [timeout(2)]),
+          Outcome == cancelled ),
+        ( retractall(lib_thread:metta_future(Space, _, _)),
+          retractall(lib_thread:metta_future_result(Space, _)),
+          catch(message_queue_destroy(Done), _, true) )).
 
 test(every_fires_more_than_once_and_cancel_stops_it) :-
     timer_every(0.05, ['t-inc', 1], Space),

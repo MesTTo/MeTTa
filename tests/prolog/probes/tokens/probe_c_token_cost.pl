@@ -8,9 +8,9 @@
 %     v4  side table keyed by clause reference: assertz/2 + M:tok(Ref, Gen)
 %     v5  side table filled by a prolog_listen/2 hook on the storage predicate
 %   plus the cost of three generation counters over 100,000 increments.
-% Run: cd <worktree> && timeout -s KILL 300 swipl -q -g main -t halt ai-tmp/probes/probe_c_token_cost.pl
-:- ensure_loaded('../../engine/qlf_boot.pl').
-:- ensure_loaded('../../engine/metta.pl').
+% Run: swipl -q -g main -t halt tests/prolog/probes/tokens/probe_c_token_cost.pl
+:- ensure_loaded('../../../../engine/qlf_boot.pl').
+:- ensure_loaded('../../../../engine/metta.pl').
 
 :- dynamic v1:'&x'/3, v2:'&x'/4, v3:'&x'/4, v4:'&x'/3, v4:tok/2, v5:'&x'/3, v5:tok/2.
 :- dynamic gencount/1.
@@ -82,8 +82,8 @@ main :-
     format("atoms per variant: ~D~n", [N]),
     % v0: the engine's own doors
     measure("v0 add: metta_add_atom x100k", fill(add_v0), _, _),
-    pred_bytes('$metta_atoms:&self':'&self'(_, _, _), B0),
-    format("v0 bytes: '&self'/3 storage predicate = ~D~n", [B0]),
+    pred_bytes('$metta_atoms:&self':'&self'(_, _, _, _), B0),
+    format("v0 bytes: '&self'/4 storage predicate = ~D~n", [B0]),
     measure("v0 match bound first arg (1000 answers)", match_v0_bound(L0), _, _), length(L0, N0), format("   answers ~D~n", [N0]),
     measure("v0 match full scan (100000 answers)", match_v0_scan(S0), _, _), length(S0, NS0), format("   answers ~D~n", [NS0]),
     % v1

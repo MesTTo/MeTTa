@@ -250,3 +250,102 @@ counted as inferences on every process that imports the library, since
 to QLF on first import the way `engine/qlf_boot.pl` does for engine units,
 which would remove the counted expansion from every import; measure per
 library first. The twin keeps its variance band of 1,500.
+
+### The tokens-as-storage merge, on the door table
+
+Tried: `sh engine/test.sh` on the merged tree -> stuck in
+`suites/libraries/lib_thread.plt` for seven minutes with all ten threads in
+futex waits, at `timer_fire_and_cancel_have_one_atomic_transition`; six
+parallel standalone runs of the suite reproduced it once, eight watched runs
+twice, while six runs each on the pre-merge trunk cbf7a958d and on the
+pre-scope control 9a08e8cc2 all passed. A watchdog thread that dumps
+`mutex_property/2` and `thread_property/2` after 60 s
+[command=ai-tmp/integrator-849a9e/watchdog.pl] showed the await mutex
+`'$metta_future_&future-72'` held by the cancelling thread and the worker
+thread ended with status
+`exception(error(metta_control_signal(interrupted, future('&future-72')), _))`.
+Root cause: a worker's interrupt catch covered only its evaluation
+(`future_body_outcome_/5`); the settlement ran outside it, so a signal
+landing before that catch was installed, or after it exited, killed the
+worker unsettled, and the canceller in `future_settle_/2` waited forever
+for a settlement nobody could deliver. The merge widened the window (thread
+start under load), it did not create it.
+Decided: two halves. A thread worker settles its future from a cleanup
+handler (`future_worker_/5`, `setup_call_catcher_cleanup/4`), which SWI runs
+with thread signals blocked, so the settlement is exactly one whatever the
+signal interrupted: an unbound outcome reads as cancelled, a non-interrupt
+exception as its error. And `cancel_future_worker_/4` joins the worker
+thread before reading its outcome, settling a worker that ended unsettled
+(the signal met its first call port, before any cleanup handler existed) as
+cancelled. Two plt tests pin the halves; both fail against the unfixed
+library (one by assertion, one by its ten-second timeout), and the fixed
+suite passes 76 alone and eight times in parallel with no hang.
+Rejected: claiming `cancelled` before signalling, because a worker that had
+finished its evaluation and was about to record `done` would be reported
+cancelled with its answers present, which the atomic-transition test refuses;
+polling the worker's status inside every await, because it adds
+timing-dependent inferences to `thread_await`.
+
+Tried: the targeted Python run on the merged tree -> three variants of
+`test_async_evaluation_preserves_algebra_theory_interpreter_and_truth` red
+with `No permission to access released_scope_space '&future-15'`, green
+alone. Replayed with the run's shuffle seed serially over the same set
+(`-n0 --randomly-seed=2394258273`) it fails the same way on the merged tree
+and on the pre-merge trunk cbf7a958d, so it predates the merge. The chain:
+`space.algebra(...)` -> `algebra._catalog_declaration` reads every `&metta`
+atom -> `_atom_wire._space_from_wire` builds a `FutureSpace` for a row naming
+a future -> `FutureSpace.__init__` read `space.name`, the door that asks
+`lib_thread:scope_space_live/1` -> the future's scope had released it in an
+earlier test of the same process. Decided: the handle is built from the raw
+name; liveness is asked by the doors that reach the engine, whose registry
+refuses a revoked name anyway. The seeded serial replay passes.
+Open: which earlier test leaves a `&metta` row naming a released future is
+not identified; the decode is total either way.
+
+Tried: a probe spawning one future, awaiting it and collecting its handle
+[command=ai-tmp/integrator-849a9e/probe-future-warning.py] -> `ResourceWarning:
+FutureSpace &future-1 was abandoned while possibly pending` on the merged
+tree and the trunk alike. The `spawn` door decoded the engine's answer, which
+`_space_from_wire` already builds as a `FutureSpace` with the abandonment
+finalizer, then wrapped it in a second `FutureSpace`; the inner one died at
+once, unobserved, and warned about a future that had been awaited. Decided:
+the decoder builds the reference and only the creating door arms the
+finalizer (`FutureSpace._created`), so one handle stands for the
+computation. Two scope tests pin both repairs; both fail on the unfixed
+trunk cbf7a958d (the warning, and the released-scope refusal on decode) and
+pass here.
+
+Measured on this tree against the pre-merge trunk, one fresh process each
+[command=ai-tmp/integrator-849a9e/probe-t0-cost.py and probe-sc-cost.py]: a
+hundred adds 2,507 -> 3,307 (8 per add), fifty removes 2,510 -> 4,064 (31
+per remove: the least token is chosen among the matching occurrences), ten
+matches over a hundred 4,809 -> 4,808, a fast save of fifty 5,911 -> 6,092,
+a fast load of fifty 3,013 -> 5,712 (54 per atom), a mint 392 -> 398, a run
+407 -> 425. The load's 54 per atom is, from `metta_receive_occurrences/3`
+and `metta_fast_receive_occurrences/5`: each token validated twice, a
+sort-based uniqueness check, the reserve request (one per space, an assoc
+over the destination's tokens, per token get_assoc, flag and assertz), and
+per kept token an `attach_claim` round trip to the standing receipts engine
+(mutex, engine_post, retract, assertz, engine_yield) beside its marker
+clause and `metta_token_receive/2`. Open: batch the claims of one load into
+one `attach_claims(Pairs)` request, which removes the per-token engine
+switch, and measure `load-fast` again before its ceiling is re-observed in
+the sweep; the linear family is unchanged (the lane's NRMS 0.0000).
+
+Tried: the merged-tree battery -> plunit, corpus, node and cmetta green;
+Python 3 red of 4,990: `test_every_declared_seam_is_documented` for
+`space_dependency` and `engine_context`, and the ruff burn-down, which
+first refused the file-level `# ruff: noqa: D103` the scope tests carried and
+then read 2,279 suppressed docstring sites against its recorded 2,277. All
+three predate the merge (the trunk and the pre-scope control read the same).
+Found on the way: the documentation gate's pattern read one head per
+`multifile` line, so the six lifetime events declared in one grouped
+directive were never tested and none was in EXTENDING.md. Decided: the gate
+reads every head of a directive (73 seams, was 67); EXTENDING.md gains a
+section on the two scope declarations and the six lifetime events; the
+thirty-seven scope tests state their contracts as docstrings rather than
+per-line suppressions, which the burn-down would refuse as thirty-seven new
+sites; and the two sites over the ceiling were the discovery test file this
+journal's own DOORS entry added (a header in the one-invariant form and one
+test without a docstring), now a summary-line header and a docstring, so the
+count reads 2,277 again.
