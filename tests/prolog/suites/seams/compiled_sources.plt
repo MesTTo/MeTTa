@@ -11,7 +11,7 @@
    the boot can start exists, which is the shipped configuration.
    Guarantees: the governance follows the boot's pattern table and the claim
    the stamped encoding [tested: the_boot_governs_the_sources_its_patterns_name,
-   an_unstamped_encoding_claims_nothing; commit=WORKTREE]; the door's arms are
+   an_unstamped_encoding_claims_nothing; commit=f26de01fbf3e0e3c64bb691c66a59fa959fee7f3]; the door's arms are
    observed through SWI's own load_file(done(...)) message, which says loaded
    for a process that reads the artifact, *qcompiled* for one that writes it
    and compiled for a source load
@@ -19,7 +19,7 @@
    a_child_marked_process_compiles_in_place,
    an_unclaimed_source_loads_from_source_and_leaves_no_artifact,
    a_stale_artifact_is_recompiled,
-   consult_global_loads_a_library_half_through_the_door; commit=WORKTREE].
+   consult_global_loads_a_library_half_through_the_door; commit=f26de01fbf3e0e3c64bb691c66a59fa959fee7f3].
 */
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
