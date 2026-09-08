@@ -10,10 +10,10 @@
 # Guarantees:
 #   - running it twice does what running it once does, and leaves
 #     `git status --porcelain` unchanged
-#     [tested: tests/shell/test_build_is_idempotent_and_anchored.sh; commit=WORKTREE]
+#     [tested: tests/shell/test_build_is_idempotent_and_anchored.sh; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
 #   - it runs the same from any working directory, so `sh /path/to/MeTTa-Kernel/build.sh`
 #     provisions beside THIS checkout rather than beside the caller
-#     [tested: tests/shell/test_build_is_idempotent_and_anchored.sh; commit=WORKTREE]
+#     [tested: tests/shell/test_build_is_idempotent_and_anchored.sh; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
 #   - every exit is honest. This used to have no `set -e`, so a failed cargo
 #     build fell through to the next line and the run ended by printing
 #     "Successfully built mork_ffi".

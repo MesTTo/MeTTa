@@ -28,7 +28,7 @@ Guarantees:
     commit that does not resolve is refused before any file changes
     [tested: tests/checks/check_pin_provenance_selftest.py]
   - Rust header pins and MORK's Python selftest pins are reached and resolved
-    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
 Fails when: run against a tree it did not write. It asserts on a fixture it
   generates and nothing else.
 Open Obligations:

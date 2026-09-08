@@ -66,7 +66,7 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py]
   - Rust line and block header pins resolve through the same comment rule
     as C, while bare string literals stay unchanged
-    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
 Fails when: a pin sits somewhere the file's grammar cannot distinguish from
   code. It is reported, not rewritten, and finishing it is a human's call.
 Owns resources: none; it rewrites files in place and holds nothing open.
