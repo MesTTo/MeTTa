@@ -595,12 +595,17 @@ inside; `stack` is SWI's combined-stack ceiling in bytes.
 A bound that was EXCEEDED is a refusal and never an answer. `timeout=` raises
 `TimeLimitError` and `inferences=` raises `InferenceLimitError`, and both are
 decided where the answer is produced as well as armed as an interrupt, so a
-call whose alarm arrived late still refuses rather than handing back a result
-for work that ran past its bound: `call_with_time_limit(0.05,
-sig_atomic(sleep(0.3)))` succeeds in SWI with no signal at all, and a
-0.3-second load once answered after 66.170 seconds on a starved box. The cost
-of the rule is two `get_time/1` reads per bounded call, and none at all when no
-bound is set. A host resource abort inside a bound is raised too, as
+call whose interrupt never reached the frame that armed it still refuses rather
+than handing back a result for work that ran past its bound. Each loses its
+interrupt its own way: a wall alarm can arrive after the goal has finished
+(`call_with_time_limit(0.05, sig_atomic(sleep(0.3)))` succeeds in SWI with no
+signal at all, and a 0.3-second load once answered after 66.170 seconds on a
+starved box), and an inference limit is raised as a bare ball INSIDE the goal
+after SWI has disarmed the limit, so any recovery catch under the goal eats
+both (`call_with_inference_limit(catch(loop, _, true), 5000, R)` answers `R = !`
+over an endless loop). The counter read at the answer is what refuses in both
+cases. The cost of the rule is two `get_time/1` reads and one counter read per
+bounded call, and none at all when no bound is set. A host resource abort inside a bound is raised too, as
 `EngineError` naming SWI's stack ceiling. The program's OWN
 `(pragma! max-stack-depth N)` is the exception and is unchanged: running out of
 that fuel is `(Error <culprit> StackOverflow)` beside the answers that
@@ -1478,7 +1483,17 @@ m.eval_status(target) / m.run_status(src)  each answer paired with the path that
         "empty" (branch pruned, answer None). A pruned branch and an unevaluated
         term are different things the answers alone cannot tell apart.
 m.stats()      with-block yielding .inferences (deterministic, gate on this),
-               .cputime, .walltime, .gc_count, .gc_freed, .gc_time, .table_bytes
+               .cputime, .walltime, .gc_count, .gc_freed, .gc_time, .table_bytes,
+               .heartbeats
+        .inferences is the BLOCK's work: the engine's interrupt poll, which
+        crosses into Python every config.heartbeat_interval inferences so a
+        Ctrl-C can land, costs inferences of its own and they are taken out,
+        with .heartbeats saying how many times it ran inside the block. A
+        thread the block JOINS is counted, because SWI adds an exited thread's
+        inferences to the thread that waited for it; a detached one finishing
+        beside the block is not
+        The door itself costs 7 inferences of the block it measures, which is
+        constant and therefore cancels out of any comparison
 m.profile(src) -> (groups, EngineProfile), per predicate
         EngineProfile: .samples, .ticks, .seconds, .nodes (Rows over predicate,
         calls, redos, ticks_self, ticks_siblings, file, line, seconds_self,

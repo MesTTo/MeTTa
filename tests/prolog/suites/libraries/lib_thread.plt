@@ -698,6 +698,46 @@ test(await_atom_wakes_on_a_matching_write) :-
     X == marker,
     Out == [awaited, marker].
 
+% A HINT THE ENGINE COULD NOT PUBLISH. The write door carries its event
+% publisher only while some seam:atom_added/2 clause exists, so a writer
+% already inside that door when a waiter registers writes silently, and a
+% write that then lands after the waiter's own first read is one nobody
+% mentions. Planted here by taking the publisher off around the write, which
+% is exactly what such a writer sees; before the wait re-read the store it sat
+% out the whole deadline with the atom in the space beside it.
+test(a_wait_finds_an_atom_whose_hint_was_never_published) :-
+    thread_create(( sleep(0.05),
+                    seam:disable_atom_hook(added),
+                    'add-atom'('&self', [unannounced, marker], _),
+                    seam:enable_atom_hook(added) ), Thread, []),
+    get_time(Start),
+    space_await('&self', [unannounced, X], 5, Out),
+    get_time(End),
+    thread_join(Thread, _),
+    Waited is End - Start,
+    assertion(X == marker),
+    assertion(Out == [unannounced, marker]),
+    %The first slice is 50ms and the writer sleeps 50ms, so this answers in
+    %about a tenth of a second; the bound is loose because the box is shared.
+    assertion(Waited < 2.0).
+
+% The same lost hint where the waiter is a SCHEDULED task rather than a
+% thread: it parks its engine and re-reads the store on every resume, so all
+% it needs is a resume. Without a look-again wake it parks until its deadline,
+% and forever when it has none.
+test(a_scheduled_wait_finds_an_atom_whose_hint_was_never_published) :-
+    thread_spawn(['await-atom', '&self', [unheard, _], 5], Future),
+    sleep(0.05),
+    seam:disable_atom_hook(added),
+    'add-atom'('&self', [unheard, marker], _),
+    seam:enable_atom_hook(added),
+    get_time(Start),
+    once(thread_await(Future, Out)),
+    get_time(End),
+    Waited is End - Start,
+    assertion(Out == [unheard, marker]),
+    assertion(Waited < 2.0).
+
 test(await_atom_gives_up_after_its_deadline) :-
     \+ space_await('&self', [never, appears, here], 0.05, _).
 

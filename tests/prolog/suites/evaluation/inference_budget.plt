@@ -5,6 +5,11 @@
 %     the thread that created it reads through statistics/2.
 %   - call_with_inference_limit/3 bounds inferences PER SOLUTION of its goal,
 %     which is what SWI's manual says, so it is re-armed at every answer.
+%   - the Python seat's shim and the C seat's bridge consult on top of the
+%     engine, because three of the four doors this pins live in them and a
+%     bound that holds at one door and not another is not a bound. Neither
+%     needs its own artifact to load: the shim's Python crossings are called
+%     from Python and the bridge's foreign library from C.
 % Guarantees:
 %   - a budget spans resumes and stops the cursor on the answer that passes it
 %     [tested: a_budget_is_cumulative_across_resumes]
@@ -21,6 +26,14 @@
 %     the_cumulative_check_costs_three_inferences_per_answer]
 %   - one of those three is bought by the direction the comparison is written
 %     [tested: an_if_then_else_costs_more_on_the_branch_its_condition_fails_to]
+%   - a bound whose ball a catch inside the goal swallowed still REFUSES, at
+%     the builder and at each of the four doors that enforce a caller's
+%     inference bound [tested: a_swallowed_ball_defeats_the_limiter_alone,
+%     a_swallowed_ball_still_refuses_at_the_builder,
+%     a_swallowed_ball_still_refuses_at_the_pragma_door,
+%     a_swallowed_ball_still_refuses_at_the_language_form,
+%     a_swallowed_ball_still_refuses_at_the_python_door,
+%     a_swallowed_ball_still_refuses_at_the_c_door]
 % Fails when:
 %   - run from anywhere but tests/prolog; the engine is loaded by relative path.
 % Owns resources:
@@ -35,6 +48,8 @@
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
+:- ensure_loaded('../../../../extensions/python/metta/shim.pl').
+:- ensure_loaded('../../../../extensions/cmetta/bridge.pl').
 
 % About 402 inferences per answer, so a budget buys a countable number of them.
 budget_burn(0) :- !.
@@ -43,6 +58,14 @@ budget_burn(N) :- N > 0, N1 is N - 1, budget_burn(N1).
 % Endless.
 budget_gen(N, N).
 budget_gen(N, X) :- budget_burn(200), N1 is N + 1, budget_gen(N1, X).
+
+% Endless and silent: it answers nothing, which is the shape a caller's bound
+% is for. Wrapped in a catch that recovers from anything, it is also the shape
+% SWI's manual warns about, since the limiter reports the overrun by throwing
+% INSIDE the goal.
+budget_spin :- budget_spin.
+
+budget_swallowing(catch(budget_spin, _, true)).
 
 % Fifty-one answers and then done, so "drains" is a number rather than a mood.
 budget_upto(N, Max, N) :- N =< Max.
@@ -231,6 +254,56 @@ test(an_if_then_else_costs_more_on_the_branch_its_condition_fails_to) :-
 % The reserved envelope had no rendering, so a program that spent its own
 % (pragma! max-inferences N) printed the raw term. Every seat that shows
 % message text reads this, the C binding included.
+% SWI disarms the limit and then raises the bare atom
+% `inference_limit_exceeded` inside the goal, so a recovery catch anywhere
+% under the goal eats the ball AND the bound, and the limiter reports `!` for
+% a goal that never stopped. This is the control case: every door below is
+% written against it, and a door that trusted the limiter's own Result alone
+% would answer here.
+test(a_swallowed_ball_defeats_the_limiter_alone) :-
+    budget_swallowing(Goal),
+    call_with_inference_limit(Goal, 5000, Result),
+    assertion(Result == !).
+
+% The builder pairs that limiter with a counter read taken where the answer is
+% produced, so the swallowed ball costs the bound nothing.
+test(a_swallowed_ball_still_refuses_at_the_builder) :-
+    budget_swallowing(Goal),
+    metta_host_inference_budget(Goal, 5000, Bounded),
+    catch(Bounded, Ball, true),
+    assertion(subsumes_term(error(metta_control_signal(inference_limit, 5000), _),
+                            Ball)).
+
+% (pragma! max-inferences N) and (with-pragma! ((max-inferences N)) ...).
+test(a_swallowed_ball_still_refuses_at_the_pragma_door) :-
+    budget_swallowing(Goal),
+    catch(metta_call_with_inference_bound(Goal, 5000), Ball, true),
+    assertion(subsumes_term(error(metta_control_signal(inference_limit, 5000), _),
+                            Ball)).
+
+% (inferences N Expr), the language form.
+test(a_swallowed_ball_still_refuses_at_the_language_form) :-
+    budget_swallowing(Goal),
+    catch(metta_inferences(5000, Goal, _), Ball, true),
+    assertion(subsumes_term(error(metta_control_signal(inference_limit, 5000), _),
+                            Ball)).
+
+% m.run(inferences=N) and its nine siblings, through the Python seat's own
+% guard. The wall half of the same guard takes no bound here, which -1 says.
+test(a_swallowed_ball_still_refuses_at_the_python_door) :-
+    budget_swallowing(Goal),
+    catch(metta_py_guarded(-1, 5000, Goal), Ball, true),
+    assertion(subsumes_term(error(metta_control_signal(inference_limit, 5000), _),
+                            Ball)).
+
+% The C seat's bounded call, which reaches the engine's own envelope rather
+% than a second ball of its own.
+test(a_swallowed_ball_still_refuses_at_the_c_door) :-
+    budget_swallowing(Goal),
+    catch(metta_c_counted(Goal, 5000), Ball, true),
+    assertion(subsumes_term(error(metta_control_signal(inference_limit, 5000), _),
+                            Ball)).
+
 test(a_spent_budget_names_the_bound_that_stopped_it) :-
     phrase(prolog:error_message(metta_control_signal(inference_limit, 500)),
            Parts),
