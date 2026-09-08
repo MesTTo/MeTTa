@@ -701,6 +701,19 @@ assert fact not in m
 
 Both forms use the same engine transaction as `metta_transaction/1`, so
 foreign-space enlistment and nesting behave identically in both languages.
+An `answers()` or `fn` view opens its cursor on first demand. If that happens
+inside the transaction, the engine evaluates the whole answer bag eagerly on
+the transaction's thread. Reads see earlier writes, and cursor writes commit
+or roll back with the rest of the callable. An integration installer's MeTTa
+library imports follow this rule too.
+
+Holding retains memory proportional to the answer bag. Inference and time
+budgets apply during opening, and captured output arrives once with the first
+pull. Unread rows survive commit and disappear on rollback. Step a held
+cursor from its transaction's thread; opening outside a transaction keeps the
+lazy cursor that can be stepped from another thread. Consulting Prolog source
+is a separate boundary: dynamic clauses roll back, while static clauses remain.
+
 Transactions nest, with an inner commit staying relative to its outer
 transaction. `m.transactional` is the callable decorator twin, one transaction
 per call:

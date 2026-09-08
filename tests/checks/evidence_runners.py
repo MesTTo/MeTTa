@@ -35,6 +35,8 @@ Assumes:
     against the collectors declared for that directory's runners
     [source: https://docs.pytest.org/en/stable/explanation/goodpractices.html]
 Guarantees:
+  - tsc output patterns keep their declared paths when outDir is a symlink
+    [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
   - a file no runner reaches is absent from executed(), and a file only a
     REPORT lane reaches carries tier REPORT
     [tested 2026-08-18: tests/checks/check_evidence_selftest.py]
@@ -70,6 +72,7 @@ from __future__ import annotations
 
 import fnmatch
 import json
+import os
 import re
 from collections.abc import Iterator
 from dataclasses import dataclass
@@ -279,6 +282,11 @@ def tsc_projects(package: Path) -> list[tuple[Path, Path]]:
     output directory keeps its suites visible. `extends` is followed because
     tsconfig.build.json's own settings are a layer over two more, and a seat
     that put outDir in the base would otherwise read as emitting nothing.
+    These are compiler paths: following an output symlink into a shared build
+    would lose the package-relative pattern that the npm command names.
+    abspath normalizes paths without realpath's filesystem lookup
+    [source: https://github.com/python/cpython/blob/v3.14.4/Lib/posixpath.py;
+    commit=WORKTREE].
     """
     projects = []
     for project in sorted(package.glob("tsconfig*.json")):
@@ -286,8 +294,8 @@ def tsc_projects(package: Path) -> list[tuple[Path, Path]]:
         if options.get("noEmit") or "outDir" not in options:
             continue
         projects.append((
-            (package / options["outDir"]).resolve(),
-            (package / options.get("rootDir", ".")).resolve(),
+            Path(os.path.abspath(package / options["outDir"])),  # noqa: PTH100 -- preserve compiler paths through symlinks
+            Path(os.path.abspath(package / options.get("rootDir", "."))),  # noqa: PTH100 -- same lexical normalization
         ))
     return projects
 

@@ -1739,6 +1739,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   with its vendored corpus is the lane that reads it.
 
 ### Fixed
+- The 0.8.0 regression where an integration installer's MeTTa library import
+  was invisible inside the installer and survived its rollback. The function
+  door used a cursor in an SWI engine outside the creating thread's
+  transaction. Shared engine host services now evaluate a cursor opened in a
+  transaction eagerly on that thread and retain its answers there. Python
+  queries, function calls, captured cursors and Node jobs use those services;
+  cursors opened outside transactions remain lazy.
+
 - The `parity` lane read a test verdict as "the line contains ` should `",
   where a verdict is `is X, should Y.`. The engine configuration echoes the
   source of every library an example imports, so `lib_torch`'s generated

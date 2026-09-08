@@ -1187,6 +1187,15 @@ kind(metta_host_inference_budget/3, host_service).
 %The wrapper is built engine-side and handed back, where the deadline sits
 %inside the engine's own goal and can act.
 kind(metta_host_time_budget/3, host_service).
+% Cursor ownership is engine knowledge: a transaction's caller must perform
+% its work, while an outside cursor remains a suspended engine. Hosts retain
+% an opaque handle and use these services for every operation on it.
+% [tested: host_hold; commit=WORKTREE]
+kind(metta_host_hold/3, host_service).
+kind(metta_host_hold_next/2, host_service).
+kind(metta_host_hold_chunk/3, host_service).
+kind(metta_host_hold_post/3, host_service).
+kind(metta_host_hold_close/1, host_service).
 kind(metta_host_function_generation/1, host_service).
 kind(metta_host_function_callable_from/2, host_service).
 %Setting the engine-wide print-suppression flag. engine/filereader.pl decides

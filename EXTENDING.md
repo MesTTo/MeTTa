@@ -1531,7 +1531,7 @@ which leaves the newcomer silently bound to the incumbent's code.
 
 ```python
 # in your package's __init__
-m.register_library_path(Path(__file__).parent / "prolog", "pettorch")
+m.register_library_path(Path(__file__).parent / "prolog", "example_package")
 ```
 
 Or say nothing at all and let `pip install` be the whole of the wiring. An
@@ -1542,9 +1542,9 @@ integration that ships Prolog and no Python setup names its files:
 METTA_PROLOG = ["fast.pl"]
 ```
 
-`m.integrate(pettorch)` and `metta.integrate.discover(m)` then register the
+`m.integrate(example_package)` and `metta.integrate.discover(m)` then register the
 library path and every file, and each file declares its own exports, so there is
-no name list anywhere. `(library pettorch fast.pl)` then resolves, from MeTTa and
+no name list anywhere. `(library example_package fast.pl)` then resolves, from MeTTa and
 from `register_prolog(path=...)`. Without it a pip-installed library is under
 neither the engine's `lib/` nor a git checkout, so it has to compute absolute
 paths from `__file__` by hand. This is SWI's own `file_search_path/2`, so an
