@@ -25,6 +25,9 @@ Every citation is built from a TAG variable instead of being written out. A
 literal one in this file is a claim about THIS repository as far as the gate is
 concerned, and the fixtures are deliberately unbacked.
 Guarantees:
+  - a shared build symlink preserves the selected TypeScript sources and
+    still refuses a source the command does not select
+    [tested: tests/checks/check_evidence_selftest.py; commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084]
   - a planted citation of each rejected kind produces exactly one finding on
     its own line, and none of the accepted kinds produces any
     [tested 2026-08-18: tests/checks/check_evidence_selftest.py]
@@ -447,6 +450,28 @@ def run(root: Path) -> list[str]:
 
 
 
+def symlinked_output_complaints() -> list[str]:
+    """Compiler output paths belong to the command even when storage is shared."""
+    complaints = []
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory) / "tree"
+        at = build(root, PYTEST_ANCHOR)
+        shared = Path(directory) / "shared-build"
+        shared.mkdir()
+        package = root / "extensions/node"
+        (package / "build").symlink_to(shared, target_is_directory=True)
+        name = '"a case whose suite is compiled before it runs"'
+        marker = f"engine/fixture.pl:{at[name]}:"
+        if any(line.startswith(marker) for line in run(root)):
+            complaints.append("a symlinked outDir hid its selected TypeScript suite")
+
+        manifest = package / "package.json"
+        manifest.write_text(manifest.read_text().replace("build/test/", "unselected/test/"))
+        if not any(line.startswith(marker) for line in run(root)):
+            complaints.append("a symlinked outDir admitted a suite the command does not select")
+    return complaints
+
+
 def seat_relative_path_complaints() -> list[str]:
     """A path in a citation is read from the root AND from the citing file.
 
@@ -777,6 +802,7 @@ def main() -> int:
         if not any("no longer contains" in line for line in output):
             complaints.append("a collector whose anchor left the runner went unreported")
 
+    complaints += symlinked_output_complaints()
     complaints += seat_relative_path_complaints()
     complaints += seat_root_path_complaints()
     complaints += line_continuation_complaints()
@@ -789,7 +815,7 @@ def main() -> int:
     print(
         f"{len(complaints)} defect(s) in the evidence gate, over "
         f"{len(CITATIONS)} planted citations, one moved anchor, three commit "
-        f"pins, a path cited from beside its own file, a path cited from its "
+        f"pins, a symlinked output directory, a path cited from beside its own file, a path cited from its "
         f"seat root, a lane written across a line continuation, a fixture "
         f"under the scratch root beside one the tree tracks, and a tracked "
         f"probe citing a test that is not there"

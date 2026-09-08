@@ -42,7 +42,7 @@ re-runs them.
 | `extensions/python/examples/*/*.py` | runnable Python programs, each printing checked claims through `_common.py`: `check(label, got, expected)` raises `CheckFailed` rather than asserting, because `python -O` strips an assert while the print under it still runs, and `done(name)` refuses to print its OK line when nothing was checked, so an example that verified nothing cannot report success; the six under `gallery/` also check adjacent emitted-MeTTa and output comments plus bilingual `@example` atoms | the `examples` and `gallery` gate lanes |
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
 | `engine/**/*.pl` | `engine/metta.pl` engine bootstrap loading the fourteen `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, space_hooks, runtime, control, interop, registration, prelude), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eight `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products), `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.pl` the vocabulary tier (Prolog bodies of the 32 prelude heads). Each unit is a plain source file consulted by its umbrella, so predicate ownership and load order are the umbrella's | |
-| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 103, `service` 63, `ownership` 38, `event` 17, `declaration` 15. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
+| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 108, `service` 63, `ownership` 38, `event` 17, `declaration` 15. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
 | `lib/lib_*/` | 38 MeTTa libraries, implemented in `.metta`, `.pl`, or both, loaded with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
 | `extensions/*/extension.pl` | one control file per seat, read when argv carries `extensions` and never read without it; a seat's `entry(engine, _)` loads only where its declared needs hold and its `entry(host, _)` is recorded for the seat's own runtime to consult, so the engine names neither a host nor a backend | |
@@ -557,6 +557,15 @@ module-tier default context.
 `Rows` is a list of `Row` with `.columns`, and `Answers`, which is what `match`
 and `answers` hand back, is the lazy replayable cursor carrying every door
 below. `row.x` and `row["x"]` both work.
+A view opens its engine cursor on first demand. If that happens inside a
+transaction, the engine evaluates it eagerly on the transaction's thread and
+holds the answer bag. Its reads see that transaction's writes, and its writes
+belong to the transaction. Holding costs memory proportional to the answers;
+inference and time budgets are spent during opening, and captured output is
+returned once with the first pull. Unread rows survive commit and disappear
+on rollback. Stepping from another thread refuses with "step it from the
+transaction's thread, or open it outside the transaction". Outside a
+transaction cursors remain lazy and keep their logical update view.
 `rows.one()` (exactly one), `.first()`, `.column(name)` -> that column's atoms,
 `.group_by(name)` -> a dict from each column atom to its `Rows` slice,
 `.table()` -> dict of columns decoded to Python values, `.to_dicts()` -> plain
@@ -1757,6 +1766,17 @@ one engine transaction. Control signals cannot be eaten by the evaluation they
 stop, not even by a program's own `(catch ...)`: a bound, a Ctrl-C and an
 `interrupt()` all reach a running goal, the same reasoning that puts
 `KeyboardInterrupt` outside `Exception`.
+
+Function calls and MeTTa library imports made by an integration installer
+follow the same transaction ownership. The shared host services are
+`metta_host_hold/3` (template, goal, opaque handle), `metta_host_hold_next/2`,
+`metta_host_hold_chunk/3`, `metta_host_hold_post/3` and `metta_host_hold_close/1`.
+They retain an SWI engine outside a transaction or transaction-owned dynamic
+rows inside one. Closing is idempotent; a close from another thread queues
+cleanup on the owner, and owner exit releases abandoned rows. A held cursor cannot accept host
+replies because its evaluation is complete; open outside the transaction for
+that protocol. Consulting Prolog source still has no general rollback:
+dynamic clauses roll back, static clauses remain.
 
 An ordinary transaction cannot undo an external effect after it commits. For
 that boundary, declare `space.compensates(operation, recovery)`, then run each

@@ -1,4 +1,12 @@
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
+% Guarantees: host cursors opened in a transaction evaluate on its thread;
+%   their rows commit or roll back with it, and stepping on another thread refuses
+%   [tested: host_hold; commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084].
+% Owns resources: metta_host_hold/3 owns an engine or thread-local dynamic rows
+%   until metta_host_hold_close/1; rollback discards newly held rows and thread
+%   exit releases abandoned rows. Foreign close requests run on the owner.
+% Guarded by: sig_atomic/1 keeps queued closes outside held-row transitions;
+%   only the owning thread accesses its rows, so no mutex is needed.
 % Guarantees: verify-cardinality checks annotated calls while plain calls
 %   retain their generated goal [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
@@ -600,6 +608,106 @@ metta_time_budget_spent(Deadline, Seconds) :-
 metta_time_bound_exceeded(Limit) :-
     throw(error(metta_control_signal(time_limit, Limit),
                 context(metta, time_limit))).
+
+% An engine has its own LD->transaction stack, so it cannot perform its
+% creator's transaction work. Collect on the caller before publishing a
+% handle. This is PostgreSQL's held-portal lifetime: commit retains the rows,
+% rollback discards them, and explicit close releases them.
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-transaction.c#L535-L557;
+% commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084]
+:- meta_predicate metta_host_hold(?, 0, -).
+:- thread_local metta_host_held_row/4.
+:- thread_local metta_host_held_position/3.
+
+metta_host_hold(Template, Goal, Handle) :-
+    (   current_transaction(_)
+    ->  findall(Template, Goal, Rows),
+        thread_self(Thread),
+        flag('$metta_host_hold_id', Id, Id + 1),
+        Handle = held(Id, Thread),
+        catch(( metta_host_hold_rows(Rows, Id, Thread, 0),
+                assertz(metta_host_held_position(Id, Thread, 0)) ),
+              Error,
+              ( metta_host_hold_close(Handle), throw(Error) ))
+    ;   engine_create(Template, Goal, Handle)
+    ).
+
+% Separate ordinal keys avoid copying the remaining list on every pull.
+metta_host_hold_rows([], _, _, _).
+metta_host_hold_rows([Row|Rows], Id, Thread, Position) :-
+    assertz(metta_host_held_row(Id, Thread, Position, Row)),
+    Next is Position + 1,
+    metta_host_hold_rows(Rows, Id, Thread, Next).
+
+metta_host_hold_next(held(Id, Thread), Row) :- !,
+    metta_host_hold_owner(held(Id, Thread)),
+    sig_atomic(metta_host_hold_take(Id, Thread, Row)).
+metta_host_hold_next(Engine, Row) :-
+    engine_next(Engine, Row).
+
+metta_host_hold_take(Id, Thread, Row) :-
+    retract(metta_host_held_position(Id, Thread, Position)),
+    (   retract(metta_host_held_row(Id, Thread, Position, Value))
+    ->  Next is Position + 1,
+        assertz(metta_host_held_position(Id, Thread, Next)),
+        Row = Value
+    ;   fail
+    ).
+
+% No lookahead: Count asks for at most that many occurrences.
+metta_host_hold_chunk(Handle, Count, Rows) :-
+    metta_host_hold_owner(Handle),
+    metta_host_hold_chunk_rows(Handle, Count, Rows).
+
+metta_host_hold_chunk_rows(_, Count, []) :- Count =< 0, !.
+metta_host_hold_chunk_rows(Handle, Count, Rows) :-
+    (   metta_host_hold_next(Handle, Row)
+    ->  Rows = [Row|Rest],
+        Left is Count - 1,
+        metta_host_hold_chunk_rows(Handle, Left, Rest)
+    ;   Rows = []
+    ).
+
+% Only a suspended engine can consume a host reply or a capture stream.
+metta_host_hold_post(held(Id, Thread), _, _) :- !,
+    metta_host_hold_owner(held(Id, Thread)),
+    throw(error(permission_error(post, held_cursor, held(Id, Thread)),
+                context(metta_host_hold_post/3,
+                        'this cursor is already evaluated; open it outside \c
+                         the transaction to exchange host replies'))).
+metta_host_hold_post(Engine, Reply, Row) :-
+    engine_post(Engine, Reply, Row).
+
+metta_host_hold_close(held(Id, Thread)) :- !,
+    thread_self(Current),
+    (   Current == Thread
+    ->  metta_host_hold_discard(Id, Thread)
+    ;   catch(thread_signal(Thread, metta_host_hold_discard(Id, Thread)),
+              error(existence_error(thread, _), _), true)
+    ).
+metta_host_hold_close(Engine) :-
+    catch(engine_destroy(Engine), error(existence_error(_, _), _), true).
+
+% A refused pull can close a host iterator on the wrong thread. Queue that
+% cleanup on its owner, including a suspended engine; dead owners have already
+% released their thread-local clauses. SWI queues these goals in the target LD.
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-thread.c#L3629-L3690;
+% commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084]
+metta_host_hold_discard(Id, Thread) :-
+    sig_atomic(( retractall(metta_host_held_position(Id, Thread, _)),
+                 retractall(metta_host_held_row(Id, Thread, _, _)) )).
+
+metta_host_hold_owner(held(Id, Thread)) :- !,
+    thread_self(Current),
+    (   Current == Thread
+    ->  true
+    ;   throw(error(permission_error(access, transaction_cursor,
+                                     held(Id, Thread)),
+                    context(metta_host_hold/3,
+                            'step it from the transaction\'s thread, or \c
+                             open it outside the transaction')))
+    ).
+metta_host_hold_owner(_).
 
 %SWI's stack_limit is a changeable flag local to the calling thread. Its
 %push/pop pair is nestable and records absence as well as a prior value; the
