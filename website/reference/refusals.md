@@ -41,8 +41,8 @@ word; `tests/data/error-kinds.json` records what it spells and why.
 | `assertion` | `AssertionFailure` | `AssertionFailure` | `AssertionError` | `operation` |
 | `capability` | `SpaceCapabilityError` | `SpaceCapabilityError` | `CapabilityError` | `space` `operation` `capability` |
 | `operation` | `MettaOperationError` | `MettaOperationError` | `OperationError` | `operation` `kind` `expected` `culprit` |
-| `stack` | `StackLimitError` | *not classified here* | `StackLimitError` | `limit` |
-| `source` | `SourceNotFound` | *not classified here* | `SourceNotFoundError` | `source` |
+| `stack` | `StackLimitError` | `StackLimitError` | `StackLimitError` | `limit` |
+| `source` | `SourceNotFound` | `SourceNotFound` | `SourceNotFoundError` | `source` |
 | `engine` | `EngineError` | `EngineError` | `EngineError` | none |
 
 ## Each kind
@@ -121,7 +121,7 @@ Raised as `CastError`, off the reserved control envelope.
 
 An LSP `quickfix` at rustc's `prose`, with no act: the repair is a decision.
 
-On Python this is `TypeError`: Python's own word for a term of the wrong type; metta.casting.CastError already names a different meaning on this seat, a cast() refusal, so the row's name is taken here.
+On Python this is `TypeError`: Python's own word for a term of the wrong type; metta.convert.CastError already names a different meaning on this seat, a cast() refusal, so the row's name is taken here.
 
 ### `assertion`
 
@@ -169,8 +169,6 @@ Raised as `StackLimitError`, off a ball whose own shape names the refusal.
 
 An LSP `quickfix` at rustc's `prose`, whose act is `(edit (pragma! stack-limit <bytes>))`.
 
-Python does not classify this kind from the ball. the Python seat has no stack condition: a stack ball reaches _raise unclassified and arrives as EngineError. Closing this is a Python-seat change (a new public class), tracked in docs/journal/2026-09-07-two-seats-one-error-taxonomy.md.
-
 ### `source`
 
 Raised as `SourceNotFound`, off a ball whose own shape names the refusal.
@@ -180,8 +178,6 @@ Raised as `SourceNotFound`, off a ball whose own shape names the refusal.
 **Remedy.** create `<source>`, or correct the path that names it
 
 An LSP `quickfix` at rustc's `prose`, with no act: the repair is a decision.
-
-Python does not classify this kind from the ball. SourceNotFound is raised by the Python seat's own file check in _space.py, before the crossing; an existence ball that reaches _raise arrives as EngineError. Same journal entry.
 
 On TypeScript this is `SourceNotFoundError`: every condition in this package ends in Error; the row keeps the shorter name because the Python seat's own N818 exemption records that spelling as deliberate.
 

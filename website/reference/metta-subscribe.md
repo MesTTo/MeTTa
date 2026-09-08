@@ -18,6 +18,22 @@ Source: `extensions/python/metta/subscribe.py`.
 
 The entries below reproduce the source signatures and docstrings.
 
+## `queue_bound`
+
+```python
+def queue_bound() -> int:
+```
+
+> How many undrained events one subscription holds before it refuses more.
+>
+> The standing `(limit subscription-queue <n>)` row, read when a subscription
+> is MADE rather than held as a constant here, so a program that rewrites the
+> row bounds every subscription opened after the write. A queue nobody drains
+> grew for the life of the process; this is what replaces that.
+> `queue.Queue` is the precedent for the POLICY: put_nowait on a full queue
+> raises rather than dropping, where `collections.deque(maxlen=)` discards
+> the oldest without telling anyone.
+
 ## `Subscription`
 
 ```python
@@ -69,9 +85,9 @@ def subscribe(
     space: str,
     pattern: Atom,
     callback: Callable[[Event], None] | None = None,
-    on: str = 'add',
+    on: SubscriptionEdge = SubscriptionEdge.add,
     *,
-    queue_max: int = SUBSCRIPTION_QUEUE_MAX,
+    queue_max: int | None = None,
     admits: Callable[[Event], bool] | None = None,
 ) -> Subscription:
 ```
@@ -94,7 +110,13 @@ def guard_admits(guard: Atom, evaluate: Callable[[Atom], Any]) -> Callable[[Even
 ## `bridge`
 
 ```python
-def bridge(source, pattern, target, template=None, on: str = 'add') -> Subscription:
+def bridge(
+    source,
+    pattern,
+    target,
+    template=None,
+    on: SubscriptionEdge = SubscriptionEdge.add,
+) -> Subscription:
 ```
 
 > A bridge rule between spaces, the multi-context-systems reading:

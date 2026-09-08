@@ -28,7 +28,6 @@ These modules register Python behavior, translate structured objects, and enforc
 |---|---|
 | [`metta.ops`](./metta-ops) | Python operation registration and type declarations |
 | [`metta.convert`](./metta-convert) | two-way object translation |
-| [`metta.casting`](./metta-casting) | runtime typecasting through the engine's types |
 | [`metta.strategies`](./stdlib-phrasebook#rewriting-strategies) | reified strategy constructors and TP/TU traversal schemes |
 
 ## Diagnostics
@@ -70,6 +69,7 @@ These modules connect spaces, processes, event loops, subscriptions, and externa
 | [`metta.foreign`](./metta-foreign) | Python-backed spaces |
 | [`metta.integrate`](./metta-integrate) | library integration tools |
 | [`metta.seam`](./metta-seam) | the seat's extension points, and registering against one |
+| [`metta.typing`](./metta-typing) | what SHAPE a head's result has, as rows over registrable rule kinds |
 | [`metta.importing`](./metta-importing) | `.metta` files as Python modules, through a `sys.meta_path` finder |
 
 ## The MeTTa libraries

@@ -39,7 +39,7 @@ The entries below reproduce the source signatures and docstrings.
 ## `add`
 
 ```python
-def add(space: Any, head: Any, data: Any) -> int:
+def add(space: SpaceLike, head: Any, data: Any) -> int:
 ```
 
 > Add a tabular source to a space as ``(head column...)`` facts.
@@ -102,7 +102,7 @@ class TableBridge(SpaceProvider):
 ### `TableBridge.from_context`
 
 ```python
-def from_context(cls, m: Any, name: str, connection: Executes) -> TableBridge:
+def from_context(cls, m: SpaceLike, name: str, connection: Executes) -> TableBridge:
 ```
 
 > The provider for every `(bridge <name> <shape> <row>)` atom in
@@ -186,7 +186,7 @@ No docstring is defined.
 ## `declare`
 
 ```python
-def declare(m: Any, name: str, declaration: Atom | str) -> Atom:
+def declare(m: SpaceLike, name: str, declaration: Atom | str) -> Atom:
 ```
 
 > Write one ctx-scoped bridge declaration into &metta, where explain

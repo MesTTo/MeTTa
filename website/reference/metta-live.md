@@ -60,7 +60,7 @@ class Changes:
 >
 > Deltas buffer only while a consumer is open, which is what keeps a view
 > nobody reads deltas from free; the buffer holds
-> `metta.subscribe.SUBSCRIPTION_QUEUE_MAX` of them and then REFUSES the write
+> `metta.subscribe.queue_bound()` of them and then REFUSES the write
 > that would overflow it, the same policy a subscription queue takes and for
 > the same reason: dropping the oldest silently is how a gap stays hidden.
 
@@ -233,6 +233,6 @@ def changes(self, timeout: float | None = None, *, queue_max: int | None = None)
 > from costs nothing for them. `timeout` (seconds) ends the stream after
 > a quiet interval, the way `Subscription.events` does, and `queue_max`
 > bounds the buffer, the bound `subscribe` takes and defaulting to the
-> same `metta.subscribe.SUBSCRIPTION_QUEUE_MAX`. A full buffer refuses
+> same `metta.subscribe.queue_bound()`. A full buffer refuses
 > the write that would overflow it rather than dropping the oldest
 > delta, and every other open stream is still offered that delta first.

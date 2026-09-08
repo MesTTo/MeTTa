@@ -9,6 +9,10 @@ Guarantees:
     kind, are both refused [tested:
     test_a_planted_arbiter_ground_without_the_corpus_is_reported;
     commit=3fc5479961fd591b1884af118528c9a64a1afbb7]
+  - a class the refusal rows name for a SPECIFIC kind, raised without going
+    through its row, is reported, while the catch-all class raised directly is
+    accepted [tested: test_a_taxonomy_class_raised_outside_its_row_is_reported,
+    test_the_catch_all_class_may_be_raised_directly; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
 """
 
 from __future__ import annotations
@@ -26,9 +30,27 @@ def _write(root: Path, relative: str, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
-def _fixture(*, grounded_call: bool = True, central: bool = True, law: bool = True):
+def _fixture(
+    *,
+    grounded_call: bool = True,
+    central: bool = True,
+    law: bool = True,
+    row_raise: bool = False,
+):
     directory = tempfile.TemporaryDirectory()
     root = Path(directory.name)
+    # The generated refusal table, as two rows: one SPECIFIC kind whose class a
+    # site must raise through its row, and the catch-all, whose class it may
+    # raise directly.
+    _write(
+        root,
+        "extensions/python/metta/_refusals.py",
+        "REFUSALS = {\n"
+        "    'capability': Refusal(kind='capability', cls='SpaceCapabilityError',\n"
+        "                          origin='term'),\n"
+        "    'engine': Refusal(kind='engine', cls='EngineError', origin='default'),\n"
+        "}\n",
+    )
     ground_argument = ", ground=PYTHON_GROUND" if grounded_call else ""
     central_value = (
         "ground=ground or _compile_ground(construct)" if central else "ground=ground"
@@ -42,11 +64,18 @@ def _fixture(*, grounded_call: bool = True, central: bool = True, law: bool = Tr
         "    def __init__(self, message, *, construct=None, ground=None):\n"
         f"        super().__init__(message, {central_value})\n",
     )
+    planted = (
+        "    raise SpaceCapabilityError('inline')\n" if row_raise else ""
+    )
     _write(
         root,
         "extensions/python/metta/refusal.py",
         "def refuse():\n"
-        f"    raise _grounded_type_error('fixture'{ground_argument})\n",
+        f"    raise _grounded_type_error('fixture'{ground_argument})\n"
+        "\n"
+        "def other():\n"
+        "    raise EngineError('the catch-all class, raised directly')\n"
+        f"{planted}",
     )
     segment_ground = "Kutsia; metta_seq_classify/3" if law else "a finite fragment"
     _write(root, "engine/spaces/segment_matching.pl", segment_ground + "\n")
@@ -119,10 +148,35 @@ def test_a_planted_segment_fence_without_a_named_law_is_reported() -> None:
     ]
 
 
+def test_a_taxonomy_class_raised_outside_its_row_is_reported() -> None:
+    """Reject a site that raises a specific kind's class without its row."""
+    directory, root = _fixture(row_raise=True)
+    try:
+        findings, counts = scan_refusal_grounds(root)
+    finally:
+        directory.cleanup()
+    assert counts.row_raises == 1
+    assert len(findings) == 1
+    assert "SpaceCapabilityError is a class the engine's refusal rows name" in findings[0]
+
+
+def test_the_catch_all_class_may_be_raised_directly() -> None:
+    """Accept the class the taxonomy gives a refusal with no specific kind."""
+    directory, root = _fixture()
+    try:
+        findings, counts = scan_refusal_grounds(root)
+    finally:
+        directory.cleanup()
+    assert counts.row_raises == 0
+    assert findings == []
+
+
 def main() -> int:
     """Run the planted cases without depending on pytest collection."""
     tests = (
         test_a_complete_refusal_fixture_passes,
+        test_a_taxonomy_class_raised_outside_its_row_is_reported,
+        test_the_catch_all_class_may_be_raised_directly,
         test_a_planted_semantic_type_error_without_ground_is_reported,
         test_a_planted_noncentral_compile_error_ground_is_reported,
         test_a_planted_arbiter_ground_without_the_corpus_is_reported,

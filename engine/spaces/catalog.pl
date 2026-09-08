@@ -14,6 +14,14 @@
 % at most one row [tested: catalog_self_description:a_cost_witness_needs_exactly_one_hole,
 % catalog_self_description:a_second_cost_row_for_one_head_is_refused_with_its_remedy,
 % catalog_self_description:one_hole_used_twice_is_one_hole; commit=6b4dceb61ccc78e308e6678af58f8daf43c31523].
+% Guarantees: watch_catalog_rows/1 turns seam:catalog_row_changed/2 on for one
+% head and unwatch_catalog_rows/1 turns it off, watching twice leaves one
+% registration, a head nobody watched announces nothing, and a removal whose
+% head is unbound reaches every watched head [tested: run_tests(catalog_watch);
+% commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]. Guarantees: the announcement leaves the row it announced as
+% it found it, so an open head reaches the funnel's own dispatch unbound
+% [tested: catalog_watch:the_announcement_undoes_the_binding_it_made;
+% commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58].
 % Fails when: loaded directly or from another module; internal state and
 % unqualified meta-goals would acquire the wrong owner. Guarantees: counting
 % and tropical are ordinary catalog algebras, the semiring vocabulary derives
@@ -437,6 +445,33 @@ metta_declaration_check(Term) :-
     metta_check_catalog_semantics(Head, Args, Term).
 metta_declaration_check(_).
 
+%Which heads anyone asked to hear about, first-argument indexed so an
+%unwatched head costs one failing lookup on the write path. Empty in an
+%engine nothing mirrors, which is every engine until a consumer calls
+%watch_catalog_rows/1.
+:- dynamic metta_catalog_watched_head/1.
+
+%!  watch_catalog_rows(+Head) is det.
+%
+%   Turn seam:catalog_row_changed/2 on for one catalog head. Idempotent: a
+%   second call leaves one row, so two consumers of the same head cannot
+%   leave a duplicate behind for the first unwatch to miss.
+watch_catalog_rows(Head) :-
+    must_be(atom, Head),
+    (   metta_catalog_watched_head(Head)
+    ->  true
+    ;   assertz(metta_catalog_watched_head(Head))
+    ).
+
+%!  unwatch_catalog_rows(+Head) is det.
+%
+%   Stop announcing that head. Succeeds for a head nobody watched, because
+%   the caller's own teardown should not have to remember whether it won the
+%   race to register.
+unwatch_catalog_rows(Head) :-
+    must_be(atom, Head),
+    retractall(metta_catalog_watched_head(Head)).
+
 %A landed catalog row must beat any negative cache row for its subject:
 %the positive rows self-heal through their stored reference, the negative
 %ones have nothing to watch, so the write funnel retracts them here. A
@@ -444,6 +479,18 @@ metta_declaration_check(_).
 %dispatch, which is how the shipped routes come up during the preset walk
 %and how a third-party routed kind starts routing the moment its rows are
 %in.
+%
+%A watched head's rows also reach seam:catalog_row_changed/2 before any of
+%that, so a consumer holding a MIRROR of a row hears the write instead of
+%re-reading the catalog per read. The clause announces and then fails into the
+%dispatch below, so it adds nothing but its own head and one indexed lookup to
+%a head nobody watches; an unbound head announces once per watched head, which
+%is what the pattern-removal twin needs and what a partially bound add gets
+%for free, and the fail undoes the binding either way.
+metta_catalog_note_added([Head|Args]) :-
+    metta_catalog_watched_head(Head),
+    forall(seam:catalog_row_changed(added, [Head|Args]), true),
+    fail.
 metta_catalog_note_added(['dispatch-policy', Function, Axis, _]) :-
     !,
     metta_dispatch_cache_forget(Function, Axis),
@@ -553,6 +600,10 @@ metta_dispatch_all_changed :-
 %a row that actually left. A variable head means the caller removed by
 %pattern and anything may have gone, so everything derived is dropped and
 %rebuilt, which over-invalidates and never under-invalidates.
+metta_catalog_note_removed([Head|Args]) :-
+    metta_catalog_watched_head(Head),
+    forall(seam:catalog_row_changed(removed, [Head|Args]), true),
+    fail.
 metta_catalog_note_removed([Rel|_]) :-
     var(Rel),
     !,
@@ -2307,6 +2358,14 @@ metta_catalog_preset([vocabulary, 'wire-payload',
 %exception].
 metta_catalog_preset([vocabulary, limit,
                       events, memory, inferences, timeout, stack]).
+%How hard a journalled space pushes each write toward the disk, which is
+%SWI's own `sync(Sync)` option to library(persistency): `none` leaves it to
+%the operating system, `flush` writes through, `close` closes the journal after
+%every write. A seat takes the word from a caller and hands it to that option,
+%so the three are the library's rather than this engine's and the row is what
+%stops each seat spelling them again
+%[source: https://www.swi-prolog.org/pldoc/man?section=persistency, db_attach/2].
+metta_catalog_preset([vocabulary, 'journal-sync', none, flush, close]).
 metta_catalog_preset([vocabulary, 'MismatchEnum',
                       'MismatchOriginal', 'MismatchError', 'MismatchFail']).
 metta_catalog_preset([vocabulary, 'NoMatchEnum',
@@ -2388,6 +2447,17 @@ metta_catalog_preset([kind, source, symbol, ['one-of', 'source-kind']]).
 metta_catalog_preset([kind, context, symbol, ['one-of', world]]).
 metta_catalog_preset([kind, admits, symbol, term]).
 metta_catalog_preset([kind, capacity, symbol, integer]).
+%A policy number somebody DECIDED, as a row a program can read and replace:
+%(limit chunk-cap 64). The name is a plain symbol and there is no vocabulary
+%behind it, deliberately -- a seat or a library bounds work of its own and this
+%engine has no business holding a list of the words they choose. What limits
+%exist is the rows: !(match &metta (limit $name $value) ($name $value)).
+%
+%NOT the `limit` vocabulary above, which is a different question about the same
+%word: that one is which bound STOPPED a run and is what a trace reports, and
+%conflating the two would let a trace claim it was cut by a display width
+%[source: extensions/python/metta/_config.py, the row-backed settings].
+metta_catalog_preset([kind, limit, symbol, integer]).
 metta_catalog_preset([kind, writes, symbol, ['one-of', atomicity]]).
 metta_catalog_preset([kind, events, symbol, ['one-of', delivery],
                       [optional, ['one-of', 'event-order']]]).

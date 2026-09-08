@@ -61,6 +61,17 @@
 %     commit=8ec7de241ef3cdd2753f24a97c86e9e9c7240b06].
 %   - finite algebra equality is a host-owned decision with an explicit false answer
 %     [tested: test_finite_tensor_semiring_checks_every_law; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
+%   - a consumer that MIRRORS a catalog row hears every write to its head,
+%     including a removal whose head was left unbound, and hears nothing for a
+%     head it did not ask about [tested: run_tests(catalog_watch);
+%     commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
+%   - watching one head costs 1 inference on a '&metta' write and nothing on a
+%     write to any other space [measured 2026-09-08: 36.02 to 37.02 inferences
+%     per '&metta' write, 27.02 either way per '&self' write and 375.07 either
+%     way per equation;
+%     command=python extensions/python/benchmarks/probes/bound_row_cost.py --write;
+%     fixture=300 writes per arm against a control checkout at
+%     9006528e04dfcc6bf3c7f43cd77a7816ad0223d7; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -102,6 +113,7 @@
             % Events: the engine tells, every handler runs.
             atom_added/2,
             atom_removed/2,
+            catalog_row_changed/2,
             segment_committed/1,
             cache_policy_changed/1,
             forget_derived/0,
@@ -422,6 +434,35 @@ kind(atom_added/2, event).
 kind(atom_removed/2, event).
 :- dynamic atom_added/2.
 :- dynamic atom_removed/2.
+
+%One catalog head's rows landing or leaving '&metta', for a consumer that
+%MIRRORS a row it reads on a hot path. Event is added or removed and Row is
+%the row as a list; a removal by pattern leaves positions unbound and is
+%announced once per watched head, because over-announcing refreshes a mirror
+%for nothing while under-announcing leaves one wrong.
+%
+%It exists beside the two hooks above rather than inside them because their
+%price is the wrong shape for this. A single atom_added/2 clause wraps the
+%write door for EVERY space, which cost 16 inferences on every '&self' write
+%and 33 on every '&metta' one, measured against the same tree with no handler
+%[measured 2026-09-08: 43.02 against 27.02 and 70.03 against 37.02;
+%command=python extensions/python/benchmarks/probes/bound_row_cost.py --subscription;
+%fixture=200 writes per arm, both arms in one process]. This one is
+%read off the catalog's own note funnel, which only '&metta' writes reach,
+%and it is guarded by watch_catalog_rows/1, so a head nobody watches costs one
+%indexed lookup that fails.
+%
+%The shape is PostgreSQL's: the catalog is authoritative, pg_settings is a
+%view of it, and an assign hook updates the fast copy at the write rather than
+%making every reader consult the catalog [source: PostgreSQL documentation,
+%20.1 Setting Parameters, and src/backend/utils/misc/guc.c's assign_hook].
+%extensions/python/metta/_config.py is the worked instance: it mirrors the
+%`(limit <name> <value>)` bounds it reads once per cursor, where reading them
+%through a crossing cost 21 inferences and 3.2 microseconds per cursor
+%[tested: test_a_bound_read_after_the_first_costs_no_crossing].
+:- multifile catalog_row_changed/2.
+kind(catalog_row_changed/2, event).
+:- dynamic catalog_row_changed/2.
 
 %The END of one committed segment, with the sorted list of space names its
 %events touched. The two hooks above say WHAT changed, one call per atom; this
@@ -1458,6 +1499,12 @@ kind(metta_unwritable_symbol/2, service).
 %host_service above; named here in prose so an extension author finds the
 %pair together).
 kind(metta_shape_route/5, service).
+%Turning seam:catalog_row_changed/2 on for ONE head, and off again. The event
+%above is silent until a head is watched, so this pair is what makes it fire
+%and what a consumer calls when it stops mirroring; watching twice is watching
+%once and unwatching a head nobody watched succeeds.
+kind(watch_catalog_rows/1, service).
+kind(unwatch_catalog_rows/1, service).
 %The event-capability door, for an extension that BLOCKS on a context's
 %changes rather than merely observing them: lib/lib_thread/lib_thread.pl's Linda pair
 %parks a caller until an atom arrives, and parking on a context that

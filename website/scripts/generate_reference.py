@@ -42,9 +42,9 @@ MODULES = (
     ModuleSpec("metta.testing", "extensions/python/metta/testing.py"),
     ModuleSpec("metta.lint", "extensions/python/metta/lint.py"),
     ModuleSpec("metta.trace", "extensions/python/metta/_trace.py"),
-    ModuleSpec("metta.casting", "extensions/python/metta/casting.py"),
     ModuleSpec("metta.foreign", "extensions/python/metta/foreign.py"),
     ModuleSpec("metta.integrate", "extensions/python/metta/integrate.py"),
+    ModuleSpec("metta.typing", "extensions/python/metta/typing.py"),
     ModuleSpec("metta_arrays", "extensions/python/ext/metta-arrays/metta_arrays.py"),
     ModuleSpec("metta.results", "extensions/python/metta/results.py"),
 )

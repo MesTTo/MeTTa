@@ -982,7 +982,7 @@ any other class is its own name, the names `get-type` itself answers:
 Structural targets work too: casting to `(List $t)` admits anything whose
 type unifies, and a repeated variable in the target constrains. Targets the
 engine never checks (`Atom`, `%Undefined%`, `_`) pass unchecked here as
-well. The surface is in [`metta.casting`](../reference/metta-casting).
+well. The surface is in [`metta.convert`](../reference/metta-convert).
 
 `metta.tables.add(space, head, source)` reads a Polars frame, a pandas
 frame, a mapping of columns, or any iterable of rows into facts shaped as

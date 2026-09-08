@@ -188,7 +188,7 @@ async def space(
     grants: _abc.Iterable[str] = (),
     journal: str | os.PathLike[str] | None = None,
     schema: _abc.Mapping[str, Any] | None = None,
-    sync: str = 'none',
+    sync: JournalSync = JournalSync.none,
     rename: _abc.Mapping[str, str] | None = None,
     _created_at: tuple[str, int] | None = None,
 ) -> AsyncMeTTa:
@@ -420,9 +420,9 @@ def subscribe(
     self,
     pattern: Any,
     *,
-    on: str = 'add',
+    on: SubscriptionEdge = SubscriptionEdge.add,
     where: Any | None = None,
-    queue_max: int = SUBSCRIPTION_QUEUE_MAX,
+    queue_max: int | None = None,
 ) -> _AsyncSubscription:
 ```
 
@@ -442,10 +442,10 @@ def watch(
     self,
     pattern: Any,
     *,
-    on: str = 'add',
+    on: SubscriptionEdge = SubscriptionEdge.add,
     where: Any | None = None,
     deadline: float | None = None,
-    queue_max: int = SUBSCRIPTION_QUEUE_MAX,
+    queue_max: int | None = None,
 ) -> _AsyncSubscription:
 ```
 
@@ -1725,7 +1725,12 @@ async def unregister_prolog(self, extension: str) -> tuple[str, ...]:
 ### `AsyncMeTTa.live`
 
 ```python
-async def live(self, *query: Any, on: str = 'both', strategy: str | None = None) -> Any:
+async def live(
+    self,
+    *query: Any,
+    on: SubscriptionEdge = SubscriptionEdge.both,
+    strategy: str | None = None,
+) -> Any:
 ```
 
 > A materialised view of a query, current with this space's writes.

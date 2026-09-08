@@ -33,6 +33,11 @@
        and every shipped algebra row appears in the semiring vocabulary
        [tested: algebra_law_vocabulary_and_alias_claims_are_exact,
        shipped_algebra_rows_are_the_semiring_vocabulary; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]
+     - the catalog's watch point announces a watched head's adds and removals,
+       stays silent for every other head, stops when unwatched, reaches every
+       watched head for a removal whose head is unbound, and leaves the row it
+       announced as it found it [tested: run_tests(catalog_watch);
+       commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
    Open Obligations:
      To Do: None
      Hacks: None
@@ -715,3 +720,96 @@ test(the_shipped_ordered_claims_answer_through_the_cache) :-
     assertion(metta_vocabulary_claim(semiring, prob, ordered)).
 
 :- end_tests(catalog_self_description).
+
+/* The catalog's watch point: a consumer that MIRRORS a row it reads on a hot
+   path hears the write instead of asking per read. The seat's bounds table is
+   the shipped instance -- reading `(limit chunk-cap 64)` through a crossing
+   per cursor cost 21 inferences and 3.2 of the 35 microseconds a one-answer
+   match takes -- and everything below is about the point rather than that
+   consumer, which is a Python module these tests never load. */
+
+:- begin_tests(catalog_watch).
+
+:- dynamic user:cat_watch_heard/2.
+
+%Install a recorder for the duration of one test and take it out again. The
+%handler is asserted rather than written into the file because a standing
+%clause on an EVENT seam would fire for every other suite in the run.
+cat_watch_start(Head, Ref) :-
+    retractall(user:cat_watch_heard(_, _)),
+    assertz((seam:catalog_row_changed(Event, Row) :-
+                assertz(user:cat_watch_heard(Event, Row))),
+            Ref),
+    spaces:watch_catalog_rows(Head).
+
+cat_watch_stop(Head, Ref) :-
+    spaces:unwatch_catalog_rows(Head),
+    erase(Ref),
+    retractall(user:cat_watch_heard(_, _)).
+
+test(a_watched_heads_adds_and_removals_both_reach_the_handler) :-
+    setup_call_cleanup(
+        cat_watch_start(cat_watched, Ref),
+        ( add_sexp('&metta', [cat_watched, first, 1], _),
+          metta_remove_atom('&metta', [cat_watched, first, 1], _),
+          findall(E-R, user:cat_watch_heard(E, R), Heard),
+          assertion(Heard == [added-[cat_watched, first, 1],
+                              removed-[cat_watched, first, 1]]) ),
+        cat_watch_stop(cat_watched, Ref)).
+
+%The point is silent for every head nobody asked about, which is what makes it
+%free: an unwatched head costs one indexed lookup that fails on the write path.
+test(an_unwatched_head_announces_nothing) :-
+    setup_call_cleanup(
+        cat_watch_start(cat_watched, Ref),
+        ( add_sexp('&metta', [cat_unwatched, first, 1], Added),
+          assertion(\+ user:cat_watch_heard(_, _)),
+          erase(Added) ),
+        cat_watch_stop(cat_watched, Ref)).
+
+%Unwatching stops it, and watching twice leaves one registration, so the
+%second consumer of a head cannot leave a row behind for the first unwatch to
+%miss.
+test(unwatching_stops_it_and_watching_twice_is_watching_once) :-
+    setup_call_cleanup(
+        cat_watch_start(cat_watched, Ref),
+        ( spaces:watch_catalog_rows(cat_watched),
+          spaces:unwatch_catalog_rows(cat_watched),
+          add_sexp('&metta', [cat_watched, second, 2], Added),
+          assertion(\+ user:cat_watch_heard(_, _)),
+          erase(Added),
+          spaces:unwatch_catalog_rows(cat_never_watched) ),
+        cat_watch_stop(cat_watched, Ref)).
+
+%A removal whose head is left unbound could have taken anything, so every
+%watched head hears it. The engine's own funnel already carries that case as
+%its first clause, and the announcement has to agree with it: announcing for
+%nothing refreshes a mirror it did not need to, announcing for nothing at all
+%leaves one wrong.
+test(a_removal_with_an_unbound_head_reaches_every_watched_head) :-
+    setup_call_cleanup(
+        ( cat_watch_start(cat_watched, Ref),
+          spaces:watch_catalog_rows(cat_watched_too) ),
+        ( spaces:metta_catalog_note_removed([_, gone, 3]),
+          findall(E-R, user:cat_watch_heard(E, R), Heard),
+          assertion(Heard == [removed-[cat_watched, gone, 3],
+                              removed-[cat_watched_too, gone, 3]]) ),
+        ( spaces:unwatch_catalog_rows(cat_watched_too),
+          cat_watch_stop(cat_watched, Ref) )).
+
+%The announcement runs on a failure-driven clause, so a head it bound on the
+%way is unbound again before the funnel's own dispatch sees the row. Without
+%that, announcing an open row would decide what the rest of the funnel then
+%did with it. What the row is afterwards is the ENGINE's business -- its own
+%first matching clause claims an open head, `dispatch-default` here -- and
+%what this holds is that it is not the watched head the announcement used.
+test(the_announcement_undoes_the_binding_it_made) :-
+    setup_call_cleanup(
+        cat_watch_start(cat_watched, Ref),
+        ( Row = [Head, third, 3],
+          spaces:metta_catalog_note_added(Row),
+          assertion(Head \== cat_watched),
+          assertion(user:cat_watch_heard(added, [cat_watched, third, 3])) ),
+        cat_watch_stop(cat_watched, Ref)).
+
+:- end_tests(catalog_watch).

@@ -202,11 +202,11 @@ An atom's wire form is a JSON document, and it round-trips, keeping the variable
 
 ```python
 import json
-from metta import wire
+from metta import convert
 
 text = json.dumps(S.edge(S.a, 1, V.x).to_wire())
 # '["e", [["s", "edge"], ["s", "a"], ["n", 1], ["v", "x"]]]'
-wire.from_wire(json.loads(text))       # (edge a 1 $x)
+convert.from_wire(json.loads(text))       # (edge a 1 $x)
 ```
 
 That is the interchange for anything web-facing, and it preserves what

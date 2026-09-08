@@ -19,6 +19,11 @@
 %     the_dev_build_inserts_checks_and_types_a_planted_violation]; the
 %     dev-typed gate lane also runs every plunit suite under that build.
 % Guarantees:
+%   - watch_catalog_rows/1 and unwatch_catalog_rows/1 are exported, so a
+%     consumer that mirrors a catalog row reaches the point that keeps its
+%     mirror in step [tested: run_tests(catalog_watch),
+%     metta_published_surface:every_declared_seam_that_exists_is_exported;
+%     commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
 %   - the ordered match limit service is exported for host evaluation
 %     [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 %   - Files below engine/spaces/ are plain source units consulted into this
@@ -287,6 +292,11 @@
             metta_capacity_count_install/1,
             metta_capacity_count_uninstall/1,
             metta_catalog_row/1,
+            %Turning seam:catalog_row_changed/2 on and off for one head, for
+            %a consumer that MIRRORS a catalog row it reads on a hot path
+            %rather than asking per read.
+            watch_catalog_rows/1,
+            unwatch_catalog_rows/1,
             metta_cost_row/4,
             metta_value_claims/3,
             metta_require_algebra_value/3,

@@ -8,6 +8,59 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- `metta.errors.refuse(kind, message, **fields)` builds a refusal from the
+  engine's own `(refusal ...)` row: the class, the ground and the remedy come
+  from the row, and the fields fill both the remedy's `<field>` holes and the
+  class's own attributes. The table it reads, `metta/_refusals.py`, is
+  GENERATED from those rows joined with `tests/data/error-kinds.json` by
+  `tools/refusalgen.py`, gated by `refusal-sync` and its seven-case selftest.
+
+- `StackLimitError`, the class the `stack` refusal row names, joining its two
+  `ResourceLimitError` siblings; `ResourceLimitError.limit` and
+  `SourceNotFound.source` carry the fields their kinds declare. The crossing
+  now classifies every one of the thirteen kinds: `stack` and `source` were
+  recorded gaps that arrived as a bare `EngineError`.
+
+- `metta.typing`, and the `typing` seam point behind it: a shape rule is a
+  registrable equation TEMPLATE named by its kind, a head declares which kind
+  it follows as a `(typing <space> <head> <kind> <arg>...)` row, and
+  `declare` / `withdraw` / `rules` are the doors. `metta_arrays` registers its
+  twenty-one kinds from its own package; a library whose carrier is a frame
+  registers `column-select` the same way, which the tests prove.
+
+- The `law` seam point: an algebra law is a row, so a provider whose carrier
+  obeys one nobody wrote down registers it and `metta.testing.laws` runs it
+  beside the thirteen this seat ships.
+
+- `metta.library.face(name)` is one shipped library's heads as Python names,
+  projected from its own `(: ...)` and `(@doc ...)` rows: `face.try_` is the
+  head `try`, `face["◁"]` the exact door, and a name the library does not
+  declare refuses with its roster.
+
+- Every bound this seat decides is a `(limit <name> <value>)` row in `&metta`,
+  published at boot and read back from the row: `chunk-cap`,
+  `subscription-queue`, `repr-items`, `display-rows` and `declaration-limit`.
+  A MeTTa program reads them with `!(match &metta (limit $n $v) ($n $v))` and
+  changes one with `add-atom`. Reading one costs no crossing: the seat mirrors
+  the rows and the engine announces the writes.
+
+- `seam:catalog_row_changed/2`, an engine event seam for a consumer that
+  MIRRORS a catalog row it reads on a hot path, with
+  `spaces:watch_catalog_rows/1` and `spaces:unwatch_catalog_rows/1` turning it
+  on and off for one head. It fires for `&metta` writes alone and only for
+  watched heads, where a single `seam:atom_added/2` clause wraps the write
+  door for every space; watching one head costs 1 inference on a `&metta`
+  write and nothing on a write anywhere else. The seat's bounds table is the
+  first consumer: a cursor reads its chunk cap when it opens, and consulting
+  the catalog there cost 21 inferences and 3.2 of the 35 microseconds a
+  one-answer `match` takes.
+
+- The `closed-sets` gate lane: every module-level closed set in the Python seat
+  states one of three answers adjacent to it, and `closed-sets-selftest` plants
+  a FOURTH answer and five malformed ones and requires each to be reported. The
+  same lane reports a public `str` parameter whose default is a vocabulary
+  member.
+
 
 - Every catalog vocabulary carries a MeTTa TYPE NAME and the engine writes the
   type atoms itself: one `(: <TypeName> Type)` beside each `(vocabulary ...)`
@@ -1190,6 +1243,42 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 
 ### Changed
+- `metta.wire` and `metta.casting` are gone into `metta.convert`, which is one
+  door with `encode`, `decode`, `from_wire`, `atom_from_wire`, `cast` and the
+  projection half together. No alias: the two names are removed.
+
+- `Space.self` answers the space itself, which is MeTTa's own `&self` reading,
+  so the thirty-nine doors that took "a context or a space" read `m.self` and
+  the branch that asked which it was is gone. They take the `SpaceLike`
+  protocol rather than `Any`.
+
+- Nine public signatures that took `str` where a generated enum exists take the
+  enum: `on=` on `subscribe`, `watch`, `live` and `fold` is `SubscriptionEdge`,
+  `mode=` on the dispatch and provider doors is `OnError`, and `sync=` on the
+  journal doors is the new `JournalSync` vocabulary. A StrEnum member IS its
+  word, so every caller that passed the plain string still passes.
+
+- Eight tables for one relation became one: `_operator_lowerings` carries every
+  operator's `ast` node, its exactly-numeric head, its word door and its
+  augmented form, and `_prelude._PYTHON_OPERATORS`, `_name_mapping.OPERATOR_WORDS`
+  and the compiler's five `ast`-keyed tables are projections of it, each proved
+  identical to what it replaced.
+
+- A closed namespace maps a name by `python_name`, the one rule the open
+  factory already used, so `fn.not_` reaches `not` and `fn.assertEqual` reaches
+  `assertEqual`: twenty-two heads that were bracket-only are reachable by their
+  proper Python spelling.
+
+- `derivation.py`'s four node classes are projected from one declared row
+  table, and `_check_rows()` holds every class to its row at import.
+
+- `testing._TYPE_STRATEGIES` is the strategy column of the one type table, and
+  `testing._LAWS` is the `law` point's rows.
+
+- `test_m7_narrow_core` pins the context surface as a RELATION -- the doors the
+  generator renders onto MeTTa plus the ones MeTTa writes for itself -- rather
+  than as the integer four branches had edited.
+
 
 - Fifty pinned numbers -- forty-two across thirty-four rows in six committed
   baselines, and the eight automatic-tabling pins the suite carries in its own
@@ -1596,6 +1685,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   always was, computed where it always was.
 
 ### Removed
+- `metta.strategies`, which was `lib_strategy`'s constructor list written out
+  by hand and mixing in one head the library does not define. Its replacement
+  is `metta.library.face("lib_strategy")`, projected from the library's own
+  rows, or `m.fn[<head>]` for the live namespace.
+
+- `metta.wire` and `metta.casting`, folded into `metta.convert` with no alias.
+
+- `metta.subscribe.SUBSCRIPTION_QUEUE_MAX`, `metta._config._CHUNK_CAP` and
+  `metta.results._REPR_ITEMS`, which are `(limit ...)` rows now;
+  `metta.subscribe.queue_bound()` is the standing bound and `queue_max=None`
+  means it.
+
 
 - `metta/_registrants.py`, the seat's shipped registrant module. Every row it
   held is now a package of its own; the four structural images (an Enum, a
@@ -1638,6 +1739,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   with its vendored corpus is the lane that reads it.
 
 ### Fixed
+- The `parity` lane read a test verdict as "the line contains ` should `",
+  where a verdict is `is X, should Y.`. The engine configuration echoes the
+  source of every library an example imports, so `lib_torch`'s generated
+  `(@doc torch-requires-grad ...)` row -- "Change if autograd should record
+  operations on this tensor" -- was counted as a fifteenth verdict and
+  `examples/ch11-python-as-a-notation/10-torch-library-surface.metta` was
+  reported as disagreeing when both configurations print the same fourteen.
+
 
 - Three benchmark GATE lanes had measured nothing since the extension-package
   merge. `c-bench`, `mork-bench` and `node-bench` each died on
