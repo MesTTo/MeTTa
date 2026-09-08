@@ -15,6 +15,22 @@ Source: `extensions/python/metta/subscribe.py`.
 > the engine's own write hooks deliver. Every write consults the folds on its
 > space, so the dispatch is on the write path and its cost is the write's;
 > metta.events owns that dispatch and its discrimination tree.
+> .
+>   - subscription publication and cancellation update registry state, engine
+>     write guards, and reflection facts together or restore the prior state
+>
+>   - identical subscriptions share one reflection descriptor until the last
+>     subscription cancels
+>   - a watcher that raises reaches the writer as SubscriberError, naming the
+>     subscription and saying the write stands, where a refused write does
+>     not
+>   - a queue nobody drains refuses rather than dropping the oldest event
+>
+>   - the bound is a count of events, checked by type before value, so a
+>     queue_max no comparison can be true against is refused instead of
+>     silently removing the bound
+>   - a guard-rejected event does not advance the queue's arrival counter, so a
+>     blocked events() stream remains open for the next accepted event
 
 The entries below reproduce the source signatures and docstrings.
 

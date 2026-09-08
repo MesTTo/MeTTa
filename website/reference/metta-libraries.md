@@ -43,7 +43,7 @@ beside its definitions.
 | lib_strategy | 24 | 0 |
 | lib_string | 19 | 0 |
 | lib_tabling | 11 | 0 |
-| lib_thread | 55 | 0 |
+| lib_thread | 58 | 2 |
 | lib_torch | 20 | 19 |
 | lib_vector | 5 | 0 |
 | lib_zar | 4 | 0 |
@@ -526,6 +526,38 @@ Tests written symbol representation, regardless of function registration
 Returns: True for a symbol, False otherwise
 
 Undocumented: `soft-aggregation`, `soft-best`, `soft-fold`, `soft-match`, `soft-score`, `soft-score-by`, `soft-walk`, `sym-sim`
+
+## lib_thread
+
+### `scope`
+
+*lib_thread.metta:193*
+
+```metta
+(: scope (-> Atom %Undefined%))
+```
+
+Join children and release resources created by the body; child failure cancels siblings; returned spaces transfer to the enclosing scope
+
+1. the held body
+
+Returns: each body answer
+
+### `capture`
+
+*lib_thread.metta:194*
+
+```metta
+(: capture (-> Atom Atom))
+```
+
+Hold an expression with its current evaluation space as an evalc value
+
+1. the held expression
+
+Returns: (evalc expression space)
+
+Undocumented: `after`, `await`, `await-atom`, `cancel`, `channel`, `channel-close`, `channel-size`, `channel_close`, `channel_new`, `channel_recv`, `channel_send`, `channel_size`, `channel_try_recv`, `cpu-count`, `cpu_count`, `every`, `par-any`, `par-filter`, `par-forall`, `par-map`, `par-race`, `par_any`, `par_filter`, `par_forall`, `par_map`, `par_race`, `peek-atom`, `pool`, `pool-destroy`, `pool-stats`, `pool_create`, `pool_destroy`, `pool_stats`, `pool_submit`, `recv`, `scope_body`, `send`, `settled?`, `space_await`, `space_await_where`, `space_take`, `space_take_where`, `spawn`, `submit`, `take-atom`, `thread-count`, `thread_await`, `thread_cancel`, `thread_count`, `thread_settled`, `thread_spawn`, `timer_after`, `timer_every`, `try-recv`, `with-lock`, `with_lock`
 
 ## lib_torch
 

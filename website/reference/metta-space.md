@@ -98,7 +98,7 @@ def space_names(self) -> list[str]:
 def drop(self) -> None:
 ```
 
-> Clear this space and release an anonymous name for reuse.
+> Clear this space and release its owned resources.
 >
 > Dropping retires every space-owned catalog declaration, including
 > algebra rows and their Python mirrors.
@@ -109,6 +109,8 @@ def drop(self) -> None:
 > enters the anonymous pool. The engine-owned &self and &metta roots
 > refuse before any Python-side state changes; drop the caller's own
 > context or a named space instead.
+> Anonymous names outside a lifetime scope return to the pool. Scoped
+> names remain revoked, including after ownership transfers to a caller.
 > Subscriptions on the space cancel with it: a pooled name reused later
 > must not deliver to the old life's watchers. The handle itself dies
 > here, and dropping twice is a no-op, as closing twice is.
@@ -1077,6 +1079,19 @@ def capture(self) -> CapturedOutput:
 >     groups = m.run("!(println! hello) !(+ 1 2)")
 > assert groups == [[3]]
 > assert output.text == "hello\n"
+
+### `Space.scope`
+
+```python
+def scope(self) -> Scope:
+```
+
+> Join children and release resources created in this block.
+>
+> ``with m.scope() as scope:`` owns newly minted spaces, channels,
+> futures, pools and subscriptions. ``scope.keep(value)`` transfers
+> spaces on successful exit. Child failure cancels siblings. Foreign
+> calls must return before an engine checkpoint can stop them.
 
 ### `Space.atomic`
 
@@ -2821,7 +2836,9 @@ def space(
 > The context OWNS what it mints and BORROWS what it opens by name:
 > :meth:`close` releases the anonymous mints and leaves ``&kb``,
 > ``&metta`` and every other named space exactly as it found them,
-> whether or not the handle is still referenced.
+> whether or not the handle is still referenced. Inside a lifetime
+> scope, that scope owns newly created spaces and their cleanup;
+> ``scope.keep(value)`` transfers returned spaces on successful exit.
 
 ### `MeTTa.fn`
 
@@ -2854,6 +2871,14 @@ def atomic(self) -> ScopedExecution:
 ```
 
 > Scope source execution to committing transactions.
+
+### `MeTTa.scope`
+
+```python
+def scope(self) -> Scope:
+```
+
+> Own this block's children through the home space's library scope.
 
 ### `MeTTa.transaction`
 

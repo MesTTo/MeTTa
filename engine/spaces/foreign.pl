@@ -1,6 +1,10 @@
 % Guarantees: resolved_equation_removal/4 honors exact source occurrence selection
 %   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: validate foreign-provider capabilities and route foreign and native space operations
+% Guarantees: a new concrete provider claim emits seam:space_created/1;
+%   namespace claims and reopening an existing space do not mint a lifetime
+%   [tested: test_named_foreign_creation_is_owned_and_an_existing_provider_is_borrowed;
+%   commit=WORKTREE].
 % Guarantees: every capability word a provider declares is a member of the
 % catalog's (vocabulary provider-capability ...) row, checked at the three
 % declaration doors rather than per operation, so a typo is refused naming the
@@ -140,7 +144,19 @@ metta_space_conflict(prefix(Prefix), Owner, Name, Other) :-
 %it alone, and lib_redis's own metta_redis_spaces is taken OUTSIDE it, so
 %there is one order and no cycle.
 metta_claim_space(Extent, Owner) :-
-    with_mutex('$metta_space_claim', metta_claim_space_(Extent, Owner)).
+    with_mutex('$metta_space_claim',
+               sig_atomic(metta_claim_space_created(Extent, Owner))).
+
+% Namespace claims allocate no individual space. A concrete claim announces
+% creation only when it did not replace an existing native or foreign space.
+% [tested: lib_thread_scope; commit=WORKTREE]
+metta_claim_space_created(Extent, Owner) :-
+    ( Extent = prefix(_) -> New = false
+    ; metta_space_operand(Extent) -> New = false
+    ; New = true ),
+    forall(seam:space_access(Extent), true),
+    metta_claim_space_(Extent, Owner),
+    ( New == true -> forall(seam:space_created(Extent), true) ; true ).
 
 metta_claim_space_(Extent, Owner) :-
     (   once(metta_space_conflict(Extent, Owner, Held, Other))

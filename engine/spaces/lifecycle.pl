@@ -6,6 +6,10 @@
 %   from database snapshots [tested: lib_import_lifecycle,
 %   extensions/python/tests/ch05_equations_and_evaluation/test_reload.py; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: decode stored atoms and manage source, subscription, reaction, table, and clear lifecycles
+% Guarantees: release requests child cancellation before taking the execution
+%   module mutex, then publishes retirement after native teardown. Access
+%   checks also precede cache misses and allocation [tested: lib_thread_scope,
+%   test_a_rolled_back_allocation_cannot_recycle_a_revoked_name; commit=WORKTREE].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
@@ -294,7 +298,8 @@ native_retract_one(Head, Removed) :-
 space_module(Space, Module) :-
     (   metta_exec_module_known(Space, Module)
     ->  true
-    ;   metta_exec_module_name(Space, Module),
+    ;   forall(seam:space_access(Space), true),
+        metta_exec_module_name(Space, Module),
         with_mutex('$metta_metta_exec',
                    ensure_metta_exec_module_locked(Space, Module))
     ).
@@ -1264,6 +1269,10 @@ metta_forget_empty_exec_module(Space) :-
 space_read_chain(Space, Each) :-
     space_read_chain_(Space, [], Each).
 
+:- multifile seam:space_dependency/2.
+seam:space_dependency(Space, Parent) :- space_parent(Space, Parent).
+seam:space_dependency(Space, Home) :- space_equation_home(Space, Home).
+
 space_read_chain_(Space, Seen, Each) :-
     \+ memberchk(Space, Seen),
     (   Each = Space
@@ -1395,6 +1404,8 @@ restore_metta_space_releasing(absent) :-
     nb_delete('$metta_space_releasing_module').
 
 metta_release_space(Space) :-
+    metta_assert_space_releasable(Space),
+    forall(seam:space_releasing(Space), true),
     with_mutex('$metta_metta_exec',
                ( metta_assert_space_releasable(Space),
                  %The releasing flag mutes the super-user recompilation the
@@ -1416,7 +1427,8 @@ metta_release_space(Space) :-
                                metta_forget_exec_module_parent(Space),
                                retractall(metta_exec_module_known(Space, _)),
                                retractall(native_storage_module_cache(Space, _)) ))
-               )).
+               )),
+    forall(seam:space_released(Space), true).
 
 metta_forget_exec_module_parent(Space) :-
     (   metta_exec_module_known(Space, Module)

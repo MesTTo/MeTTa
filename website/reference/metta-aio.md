@@ -6,12 +6,90 @@ Source: `extensions/python/metta/aio.py`.
 > proxies a MeTTa space onto one dedicated worker thread that holds an
 > attached Prolog engine, the aiosqlite architecture (one thread per
 > connection, a request queue, results delivered back through the loop), so
-> awaiting a long query lets every other coroutine keep running. One engine
-> per process stays the rule: calls are serialized, and the win is a live
-> event loop, never parallel evaluation. interrupt() stops the running
+> awaiting a long query lets every other coroutine keep running. Requests on
+> one worker are serialized; separate workers share the runtime through private
+> engines. interrupt() stops the running
 > evaluation through the engine's own thread_signal, the sqlite3 reading,
 > and a cancelled task fires it on its own call, so asyncio timeouts stop
 > the engine instead of abandoning it.
+> .
+>   - subscription acquisition publishes on the worker, so synchronous scope
+>     cleanup does not wait for an event-loop continuation and closes waiting
+>     consumers.
+>   - Prolog-backed definitions require their reference function and construct
+>     and apply the synchronous decorator on the owning worker
+>
+>   - AsyncMeTTa.space delegates construction to MeTTa.space and preserves the
+>     caller creation site and borrowed provider lifecycle
+>   - that delegation carries the journal's one-open schema rename, so the
+>     migration is not a synchronous-only spelling
+>   - async solve, Linda verbs, watch, class/type dispatch, and the two
+>     transaction laws execute on the owning worker
+>   - interrupt_if_running throws the same reserved structured exception as
+>     shim resource guards
+>   - close refuses new work, interrupts a running request, rejects queued
+>     requests, and bounds the worker join
+>   - the transition drain discards only a structured interrupt and fails
+>     closed on every other error
+>   - a cancelled acquisition releases what the worker finished rather than
+>     leaving it live and unowned: the worker thread a cancelled connect
+>     launched, the registered subscription, the installed assumption facts
+>
+>   - aclose refuses further work only after the engine has let go, so a close
+>     that failed is retryable, and the stream's terminator reaches a consumer
+>     whose queue is full
+>   - an acquired subscription belongs to its AsyncMeTTa until it closes, and a
+>     callback whose event loop has closed retires itself before another write
+>     can reach it
+>   - an event queue is published only once its registration succeeded, and its
+>     bound is refused unless it is a count of events
+>   - an abandoned live owner emits ResourceWarning and registered workers
+>     detach during interpreter shutdown
+>   - interpreter shutdown attempts every worker and reports all expected
+>     stop failures together
+>   - interpreter shutdown without live workers does not initialize the
+>     optional engine bridge
+>   - async names and save formats retain the synchronous surface's contextual
+>     types
+>   - async declaration methods reuse the catalog-generated policy aliases and
+>     own no duplicate Literal lists
+>   - all fifteen synchronous declaration heads have asynchronous mirrors,
+>     including ``reacts`` for ``(on ...)`` and ``consumption`` for
+>     ``(source ...)``, while ``reaction`` remains and no ``declare_*``
+>     aliases return
+>   - source() mirrors the synchronous round-trippable text view on the owning
+>     worker
+>   - async cast preserves a concrete target class as its static return type and
+>     keeps the target positional-only
+>   - async space forwards anonymous-space inheritance, restriction, and grants
+>     on the owning worker
+>   - async scoped limits forward stack byte bounds through the synchronous
+>     task-local scope
+>   - async derivation keeps the synchronous effect contract: premises execute,
+>     while an explicit speculative scope discards engine writes
+>   - reader-token registration and removal run on the owning engine worker and
+>     mirror the synchronous surface
+>   - async eval mirrors the synchronous single answer shape without a
+>     residuals flag
+>   - direct, saga, and reified-world evaluations expose Undefined in their
+>     return types wherever Well Founded Semantics can return it
+>   - async function handles consume the synchronous Answers surface on their
+>     owning worker, including the composite ``neg`` operator word
+>   - async operation registration requires and forwards the canonical effect
+>     argument
+>   - execution-policy scopes cross the worker hop and never change awaited
+>     return shapes
+>   - image reaches the synchronous declaration owner on the engine
+>     worker
+>   - async peek and take keep event-loop threads unblocked while the engine
+>     worker performs the synchronous Linda wait
+>   - async match forwards the submitting task's scoped or explicit algebra,
+>     and sample mirrors the synchronous random.choices-shaped method
+>   - async reification, world evaluation, and commit keep every engine crossing
+>     on the owning worker while immutable atom snapshots remain directly
+>     readable
+>   - async coverage, compensation declarations, and saga recovery keep their
+>     complete synchronous scope on one owning worker
 > Owns:
 >   - each owning AsyncMeTTa owns one daemon worker and its attached Prolog
 >     engine until aclose(), stop(), or the atexit handler releases it
@@ -489,7 +567,7 @@ async def space_names(self) -> list[str]:
 async def drop(self) -> None:
 ```
 
-> Clear this space and release an anonymous name for reuse.
+> Clear this space and release its owned resources.
 >
 > Dropping retires every space-owned catalog declaration, including
 > algebra rows and their Python mirrors.
@@ -500,6 +578,8 @@ async def drop(self) -> None:
 > enters the anonymous pool. The engine-owned &self and &metta roots
 > refuse before any Python-side state changes; drop the caller's own
 > context or a named space instead.
+> Anonymous names outside a lifetime scope return to the pool. Scoped
+> names remain revoked, including after ownership transfers to a caller.
 > Subscriptions on the space cancel with it: a pooled name reused later
 > must not deliver to the old life's watchers. The handle itself dies
 > here, and dropping twice is a no-op, as closing twice is.
@@ -2272,10 +2352,10 @@ async def aclose(self, timeout: float = DEFAULT_CLOSE_TIMEOUT) -> None:
 ### `AsyncMeTTa.stop`
 
 ```python
-def stop(self, timeout: float = DEFAULT_CLOSE_TIMEOUT) -> None:
+def stop(self, timeout: float | None = DEFAULT_CLOSE_TIMEOUT) -> None:
 ```
 
-> Synchronously cancel streams and stop without an event loop.
+> Synchronously cancel streams and stop; None waits until the worker exits.
 
 ## `AsyncSaga`
 

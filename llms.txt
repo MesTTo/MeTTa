@@ -42,7 +42,7 @@ re-runs them.
 | `extensions/python/examples/*/*.py` | runnable Python programs, each printing checked claims through `_common.py`: `check(label, got, expected)` raises `CheckFailed` rather than asserting, because `python -O` strips an assert while the print under it still runs, and `done(name)` refuses to print its OK line when nothing was checked, so an example that verified nothing cannot report success; the six under `gallery/` also check adjacent emitted-MeTTa and output comments plus bilingual `@example` atoms | the `examples` and `gallery` gate lanes |
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
 | `engine/**/*.pl` | `engine/metta.pl` declares `metta_engine`, the bootstrap including the fourteen `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, space_hooks, runtime, control, interop, registration, prelude), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eight `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products), `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.pl` the vocabulary tier (Prolog bodies of the 32 prelude heads). Each included unit is a plain source file owned by its umbrella module. `engine/main.pl` declares `metta_main`. Engine facades declare their own module and explicit exports; `metta_engine_reexport/2` publishes the subsystem operations the host tier needs. Execution resolves through the space parents, `&self`, `prelude`, `metta_engine`, `user`, then `system` | |
-| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 109, `service` 64, `ownership` 38, `event` 17, `declaration` 15. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
+| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 109, `service` 64, `ownership` 38, `event` 23, `declaration` 17. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
 | `lib/lib_*/` | 38 MeTTa libraries, implemented in `.metta`, `.pl`, or both; all 22 shipped Prolog halves, including the builtin and minimal-MeTTa modules, own distinct `lib_*` modules with explicit exports and local autoload tables. Libraries load with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
 | `extensions/*/extension.pl` | one control file per seat, read when argv carries `extensions` and never read without it; a seat's `entry(engine, _)` loads only where its declared needs hold and its `entry(host, _)` is recorded for the seat's own runtime to consult, so the engine names neither a host nor a backend | |
@@ -1709,6 +1709,37 @@ Atom kinds are the type: a space name is a `Handle` and a call head is a
 
 ## Concurrency, transactions, bounds
 
+`with metta.scope() as scope:` and `with m.scope():` join children before
+releasing spaces, channels, pools and subscriptions created in the block.
+Existing spaces and pools are borrowed; a submission to a borrowed pool is
+still a child. A body or child exception cancels siblings before joining.
+`scope.keep(value)` transfers its spaces to the enclosing scope, or to the
+caller at the root, only after successful cleanup. Released scoped names are
+revoked, so an escaped alias refuses instead of recreating the space. The
+entering thread alone may keep or close. Repeating timers stop on exit.
+AsyncMeTTa workers created in a scope close on exit; requests and async
+subscriptions on borrowed workers are scoped while those workers survive.
+Debugger sessions and partially consumed host cursors also close on exit.
+`scope.cancel()` requests cancellation consumed by that scope. It attempts
+every child before reporting signal refusals; a refused close retains its
+resources for `scope.close()` to retry.
+`with metta.move_on_after(seconds):` uses that scope's deadline and suppresses
+only its own deadline cancellation. Scope creation and asynchronous child
+publication inside a transaction refuse; allocations rolled back inside an
+existing scope still receive cleanup.
+
+In `lib_thread`, `(scope body)` joins its children and transfers spaces in its
+returned values. `(capture expr)` holds `expr` and returns
+`(evalc expr <current-space>)`; evaluating that value uses the captured space.
+`cancel` on a running future signals its engine and waits for acknowledgement:
+True means the body stopped, False means it already finished; unknown futures
+refuse. A Prolog loop
+stops at a predicate safe point. A foreign call, including a Python callback
+in `time.sleep`, must return first; cancellation cannot undo its side effects.
+Every Python engine call boundary checks the library scope. Python owns no
+separate cancellation scheduler. The `choose`/`par` handler reading awaits
+the effect-handlers package.
+
 Engine calls belong to the thread that made the engine. `m.pool(workers)` gives
 each worker its OWN attached engine, which is what makes the calls genuinely
 concurrent (measured 2026-08-15: 1.94x, 3.90x and 7.26x at 2, 4 and 8 workers).
@@ -1751,7 +1782,8 @@ under its MeTTa name, written `!(hyperpose (t1 t2))` in source and reached from
 Python as `m.fn.hyperpose`. `metta.aio.AsyncMeTTa` runs engine calls on one worker
 thread behind `async`; `metta.parallel.engine_thread()` and `metta.current_space()`
 report the crossing.
-`metta.channel(max=)` creates a mailbox. `send` may block on capacity,
+`metta.channel(max=)` creates a FIFO space. Its mailbox and ordinary space
+operations use the same bounded buffer. `send` and `add` may block on capacity,
 `recv(deadline=)` waits, and `try_recv()` takes a waiting term or returns
 `None` immediately; close it with a context manager.
 

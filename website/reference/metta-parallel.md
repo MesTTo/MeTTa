@@ -30,8 +30,9 @@ Source: `extensions/python/metta/parallel.py`.
 >   - one process, one booted engine and one boot program per ProcessPool
 >     worker, from the first submit until shutdown(), plus the SimpleQueue
 >     carrying those workers' boot timings.
->   - one SWI message queue per Channel, released by close(), context exit, or a
->     finalizer that retains only the runtime and engine handle.
+>   - a Channel's foreign space, released by drop(), close(), context exit or a
+>     finalizer retaining its runtime and name; a scope retains owned channels
+>     through its library resource rows.
 > "; fixture=this checkout
 >     under load 44; commit=0179a14353a925115d545fc3ea0dc67eab4e4ecb].
 >   - a fan-out door answers an ITERATOR over results that already exist, not
@@ -78,8 +79,8 @@ def shutdown(self, wait: bool = True, *, cancel_futures: bool = False) -> None:
 > Executor's teardown: stop taking work, then release every engine.
 >
 > wait=False returns while the owned workers drain. A later waiting
-> shutdown still joins them, including after an earlier join timed
-> out. Cancelling a Future skips only that queued task, not worker
+> shutdown still joins them after an earlier join failed.
+> Cancelling a Future skips only that queued task, not worker
 > teardown.
 >
 > cancel_futures=True cancels every task still QUEUED, leaving what a
@@ -296,6 +297,69 @@ def process_pool(
 >
 > workers defaults to os.cpu_count().
 
+## `Scope`
+
+```python
+class Scope:
+```
+
+> A lib_thread scope that joins children before releasing their resources.
+>
+> ``keep(value)`` transfers returned spaces on successful exit. A body or
+> child failure cancels siblings; foreign calls stop at their next engine
+> checkpoint after returning. The entering thread owns close and keep.
+
+### `Scope.keep`
+
+```python
+def keep(self, value: T) -> T:
+```
+
+> Return value and transfer its spaces when the scope exits successfully.
+
+### `Scope.cancel`
+
+```python
+def cancel(self) -> None:
+```
+
+> Request cancellation; this scope consumes its own checkpoint signal.
+
+### `Scope.cancelled`
+
+```python
+def cancelled(self) -> bool:
+```
+
+> Whether the completed scope reports cancellation.
+
+### `Scope.close`
+
+```python
+def close(self) -> None:
+```
+
+> Join and release resources; retry cleanup after a cleanup failure.
+
+## `scope`
+
+```python
+def scope() -> Scope:
+```
+
+> Own spaces, channels, futures, pools and subscriptions created in the block.
+
+## `move_on_after`
+
+```python
+def move_on_after(seconds: float) -> Scope:
+```
+
+> Cancel at a lib_thread deadline and suppress only this scope's cancellation.
+>
+> A foreign call, including Python sleep, must return before cancellation
+> can reach an engine checkpoint. Exit always joins children.
+
 ## `FutureSpace`
 
 ```python
@@ -333,7 +397,10 @@ def settled(self) -> bool:
 def cancel(self) -> bool:
 ```
 
-> Stop a pending computation, answering whether it was stopped.
+> Stop and join a computation, returning True only for an acknowledged stop.
+>
+> A foreign call, including Python sleep, must return before its engine
+> can deliver cancellation. False means the computation already finished.
 
 ## `spawn`
 
@@ -370,10 +437,10 @@ def par_map(function: Any, items: Iterable[Any]) -> Expression:
 ## `Channel`
 
 ```python
-class Channel:
+class Channel(Space):
 ```
 
-> A bounded or unbounded lib_thread mailbox in Python dress.
+> A lib_thread FIFO space whose capacity blocks full senders.
 
 ### `Channel.send`
 
