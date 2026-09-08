@@ -23,6 +23,11 @@
 %   samples per arm; commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136].
 
 :- module(source_observation, [record_error/2, observe_source/4]).
+
+% Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
+% Set the base before the clauses and their engine-dependent directives.
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L239; commit=WORKTREE]
+:- set_module(base(metta_engine)).
 :- use_module(source_positions, [source_positions/3]).
 :- use_module(library(assoc)).
 :- use_module(library(prolog_wrap)).

@@ -3,10 +3,10 @@
 % Guarantees:
 %   - materialize.pl loads before source processing and shares the engine's
 %     runtime context [tested: function_free_materialization; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
-%   - Files below engine/metta/ are plain source units consulted into this
-%     implementation module in their original order; builtin, runtime, and
-%     registration predicates retain their existing ownership and clause order
-%     [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d].
+%   - The fourteen engine/metta/ units compile into metta_engine in source
+%     order. Engine and library definitions stay out of user except SWI's
+%     exception/3, thread_message_hook/3 and prolog_trace_interception/4 hooks.
+%     [tested: engine_modules; commit=WORKTREE].
 %   - A built-in call covered by the effects cluster whose declared operand
 %     types already conflict is refused before operand evaluation; shallow
 %     compile-time checks inspect literals and declared return types without
@@ -261,12 +261,546 @@
 %     688,190 -> 690,780 and examples/ch07-control-flow/07-01-if-and-booleans/09-xor.metta identical at 9,289;
 %     commit=87d998c24278fc7f020ccb0e408ebcd9332b63eb].
 % Open Obligations:
-%   To Do: check.sh does not yet gate autoload=false; the exact line is
-%     `run GATE   no-autoload  sh -c "cd '$HERE' && NO_AUTOLOAD=1 sh
-%     test.sh"`, reusing test.sh's own parallel runner and skip list
-%     unchanged (check.sh is single-owner, so this is not wired in here).
+%   To Do: None. check.sh runs the no-autoload lane through test.sh
+%     [source: check.sh no-autoload lane; commit=WORKTREE].
 %   Hacks: None
 %   Future Enhancements: None
+
+% The core owns its predicates; user holds the host's registrations and imports.
+% Execution resolves through &self, prelude, metta_engine, user and system.
+% Keeping user below the core preserves consulted host predicates while local
+% equations shadow the inherited implementation only in their execution module.
+% [tested: engine_modules:the_chain_is_self_then_prelude_then_engine_then_user,
+% engine_modules:removing_a_local_shadow_restores_a_library_export; commit=WORKTREE]
+%
+% Modules own their helper names and autoload tables. The boundary suite also
+% loads plain-file controls that demonstrate both collisions without modules.
+% [tested: engine_modules; commit=WORKTREE]
+%
+% Exports cover cross-subsystem calls, generated goals, registered builtin heads
+% and the host's query strings. Subsystems set their base before compilation so
+% goal_expansion/2 is visible while their clauses are read.
+% [tested: sh check.sh layering prolog-static; commit=WORKTREE]
+
+:- module(metta_engine,
+            % The LANGUAGE: builtin heads the host tier, the prelude tier and the
+            % test suites call BY NAME. A MeTTa program reaches these through its
+            % space's own chain instead, so this list is about Prolog callers.
+          [ '=alpha'/3,
+            'assert-answers'/5,
+            'assert-includes-answers'/5,
+            'car-atom'/2,
+            'cdr-atom'/2,
+            'decons-atom'/2,
+            'get-metatype'/2,
+            'get-type'/2,
+            'import!'/3,
+            'index-atom'/3,
+            'is-alpha-member'/3,
+            'is-space'/2,
+            'map-atom'/3,
+            'new-space'/1,
+            'read-form!'/1,
+            'require-extension!'/2,
+            'size-atom'/2,
+            'subtraction-atom'/3,
+            (#<)/3,
+            (#=)/3,
+            (#>)/3,
+            (#\=)/3,
+            % Publish division so a host lookup cannot select yall's lambda.
+            % [tested: relational_arithmetic; commit=WORKTREE]
+            (/)/3,
+            (==)/3,
+            call_goals_in/2,
+            call_goals_in_/2,
+            catch_recover/2,
+            eval/2,
+            evalc/3,
+            has_type/2,
+            metta/4,
+            metta_eval_step/2,
+            metta_predicate_goal/2,
+            metta_run_with_fuel/3,
+            metta_speculate/1,
+            or/3,
+            repr/2,
+            %
+            % Export the module queries for callers outside the expansion chain.
+            % [source: engine/metta.pl:goal_expansion/2; commit=WORKTREE]
+            current_metta_module/1,
+            metta_self_module/1,
+            metta_exec_module_prefix/1,
+            current_metta_space/1,
+            forget_registered_function/1,
+            fun_here/1,
+            fun_here_in/2,
+            metta_emits/2,
+            metta_function_cacheable/1,
+            metta_grounded_token/1,
+            metta_shared_registry/1,
+            register_arity/2,
+            register_fun/1,
+            register_fun_in/2,
+            unregister_fun_everywhere/1,
+            unregister_fun_in/2,
+            with_metta_module/2,
+            %
+            % TYPES: the declaration tables, the normalizers and the witnesses. The
+            % typing RULES are engine/type_rules.pl's; these are the core's tables.
+            check_argument_type/3,
+            check_argument_type_under_live_policy/3,
+            declared_type_for_check/2,
+            definition_type_declaration_in/3,
+            enable_type_alias_scope/1,
+            governing_type_chains_in/4,
+            governing_type_declaration/2,
+            governing_type_declaration_in/3,
+            has_declared_type/2,
+            metatype_argument_admitted/4,
+            metta_argument_type_origins/2,
+            metta_arrow_type_shape/5,
+            metta_refined_type/3,
+            metta_runtime_type/2,
+            metta_shipped_types_match/2,
+            metta_typed_dispatch_applies/2,
+            metta_types_match_in/3,
+            normalize_callable_type_in/3,
+            normalize_cast_type/3,
+            normalize_source_type_declarations/3,
+            normalize_type_in/3,
+            normalize_type_in/4,
+            normalized_self_type_declaration/2,
+            raw_definition_type_declaration_in/3,
+            raw_governing_type_declaration_in/4,
+            retire_type_alias_scope/1,
+            runtime_type_guarded/1,
+            throw_metta_type_error/3,
+            type_alias_lookup_changed/2,
+            type_alias_lookups_changed/2,
+            type_alias_scope_module/2,
+            type_alias_scope_space/2,
+            type_annotation_support/3,
+            type_declaration/2,
+            type_declaration_in/3,
+            type_position_modifier/3,
+            type_witness_in/3,
+            typing_union_decision/7,
+            untypable_declarations/2,
+            validate_type_alias_declaration/3,
+            %
+            % EFFECTS, ALGEBRA AND ANNOTATIONS: the classification a planner reads
+            % and the carrier a host installs around a query.
+            metta_algebra_one/2,
+            metta_algebra_order/2,
+            metta_annotation/2,
+            metta_annotated_operation_effect/2,
+            metta_annotations/2,
+            metta_annotations_order/2,
+            metta_annotations_ordered/1,
+            metta_apply_algebra_operation/5,
+            metta_current_algebra/3,
+            metta_effect_compose/2,
+            metta_effect_construct/2,
+            metta_effect_covered/2,
+            metta_effect_rank/2,
+            metta_effect_walk/3,
+            metta_effective_algebra/2,
+            metta_evaluation_context/1,
+            metta_k_extend/4,
+            metta_operation_effect/2,
+            metta_with_evaluation_context/2,
+            metta_with_under/2,
+            %
+            % FUEL, BUDGETS, TRANSACTIONS AND WORLDS.
+            metta_forget_world_coverage/1,
+            metta_fuel_budget_configured/0,
+            metta_fuel_note_chargeless/1,
+            metta_fuel_step_goal/3,
+            metta_host_inference_budget/3,
+            metta_host_stack_charge/3,
+            metta_host_time_budget/3,
+            metta_host_with_stack_limit/2,
+            metta_in_user_transaction/0,
+            metta_negation_world_guard/1,
+            metta_transaction/1,
+            metta_transaction_notified/3,
+            metta_with_state_write_fence/1,
+            metta_world_effect_coverage/2,
+            %
+            % ERRORS AND REFUSALS: the vocabulary every tier raises and every host reads.
+            guarded_input_position/3,
+            metta_assertion_failure/6,
+            metta_bad_argument_error/3,
+            metta_bad_argument_reason/3,
+            metta_error_answer/3,
+            metta_error_atom/4,
+            metta_error_context/3,
+            metta_host_error_kind/3,
+            metta_host_error_kind_row/3,
+            metta_host_operation_error/5,
+            metta_host_refusal/6,
+            metta_host_refusal_row/4,
+            metta_on_error_mode/3,
+            metta_record_error/1,
+            metta_refinement_violation/3,
+            metta_shallow_call_refused/2,
+            metta_transport_failure/1,
+            refuse_unbound_input/2,
+            refuse_untypable_declaration/2,
+            rethrow_metta_operation_error/2,
+            throw_missing_import/1,
+            %
+            % IMPORTS, SOURCES AND EXTENSIONS: what a MeTTa source pulls in, where a
+            % host loader puts it, and the seat census behind require-extension!.
+            check_prolog_function_names/3,
+            consult_global/1,
+            consult_string_global/2,
+            current_working_dir/1,
+            import_file_string/2,
+            import_prolog_function/2,
+            import_prolog_functions/2,
+            import_when/4,
+            metta_enlist_foreign/1,
+            metta_ensure_source_observation/0,
+            metta_extension_controls/2,
+            metta_host_source_compile_effect_plan/4,
+            metta_host_source_effect_plan/4,
+            metta_host_source_runtime_effect_plan/4,
+            metta_import_record/2,
+            metta_install_bridges/0,
+            metta_load_extension/1,
+            metta_platform/4,
+            metta_require_events/2,
+            metta_require_platform/2,
+            metta_source/2,
+            metta_source_declarations/2,
+            metta_source_guard/1,
+            metta_source_reset/1,
+            metta_unimport/2,
+            register_metta_library_path/3,
+            resolve_existing_import_path/3,
+            unregister_metta_extension/1,
+            use_module_global/1,
+            use_module_global/2,
+            %
+            % HOST DOORS: the rest of what a binding's transport calls, every one of
+            % them declared kind(..., host_service) in engine/ext_points.pl.
+            metta_host_adopt_function/4,
+            metta_host_control_signal_info/3,
+            metta_host_control_signal_line/2,
+            metta_host_drop_function/2,
+            metta_host_forget_function/1,
+            metta_host_function_callable_from/2,
+            metta_host_function_generation/1,
+            metta_host_goal_effect_plan/4,
+            metta_host_goal_repeatable/2,
+            metta_host_open_function/3,
+            %
+            % THE PRELUDE TIER'S DOORS, and the hook, contract, token, pragma and
+            % catalog tables a subsystem, a library or a seat reads.
+            evict_prelude_declaration/2,
+            evict_prelude_definition/1,
+            host_process_tier_loader/3,
+            metta_admission_claim/2,
+            metta_arguments_match_in/4,
+            metta_call_accepted/2,
+            metta_contract_fact/1,
+            metta_cost_declaration/4,
+            metta_declare_hook/3,
+            metta_deprecation/3,
+            metta_event_capability/3,
+            metta_explain/2,
+            metta_foreign_writes_lost/2,
+            metta_handles_coherent/1,
+            metta_handles_route/4,
+            metta_handles_route/5,
+            metta_hook_claim_idle/1,
+            metta_hook_drop_compiled/2,
+            metta_hook_eval/6,
+            metta_live_state_cell/1,
+            metta_merge_route/2,
+            metta_presented_arrow_chain/3,
+            metta_restore_token_snapshot/3,
+            metta_string_declarations/2,
+            metta_string_registrations/2,
+            metta_substitute_self/3,
+            metta_token_snapshot/2,
+            metta_undeclare_hook/2,
+            metta_vocabulary_claim/3,
+            metta_writes/2,
+            read_form_step/4,
+            retire_metta_tokens_in/1,
+            retract_prelude_declarations/1,
+            rewrite_parsed_form/4,
+            set_metta_pragma/2,
+            substitute_bound_tokens/2,
+            %
+            % These heads also occur in generated or host-supplied goals.
+            % [tested: sh engine/test.sh; commit=WORKTREE]
+            '!='/3,
+            'Predicate'/2,
+            'abs-math'/2,
+            'acos-math'/2,
+            'alpha-unique-atom'/2,
+            'cons-atom'/3,
+            'format-args'/3,
+            'get-doc-function'/4,
+            'get-type-space'/3,
+            'intersection-atom'/3,
+            'isinf-math'/2,
+            'log-math'/3,
+            'max-atom'/2,
+            'min-atom'/2,
+            'new-state'/2,
+            'pow-math'/3,
+            'pragma!'/3,
+            'println!'/2,
+            'sin-math'/2,
+            'sort-strings'/2,
+            'sqrt-math'/2,
+            'union-atom'/3,
+            (+)/3,
+            (-)/3,
+            (<)/3,
+            (>)/3,
+            (>=)/3,
+            (xor)/3,
+            alpha_bucket_insert/5,
+            and/3,
+            application_arrow_declared/1,
+            builtin_described_name/1,
+            builtin_fun/1,
+            builtin_implementation/2,
+            builtin_implementation_coverage_inventory/1,
+            builtin_registration_coverage_inventory/1,
+            builtin_surface_name/1,
+            builtin_surface_predicate/2,
+            builtin_tree_defined_arity/2,
+            check_argument_type_in/4,
+            check_argument_type_under_policy/3,
+            claim_function_name/3,
+            control_exception/1,
+            empty/1,
+            exp/2,
+            fun_in/2,
+            get_function_type/2,
+            get_function_type_in/3,
+            has_type_under_policy/3,
+            implies/3,
+            import_receipt/4,
+            include/2,
+            install_engine_prelude/0,
+            library/2,
+            library/3,
+            list_shaped/1,
+            max/3,
+            metatype_of/2,
+            metta_adorn_strip/3,
+            metta_adorn_strip/4,
+            metta_algebra_descriptor/9,
+            metta_annotation/1,
+            metta_arrow_type_chain/2,
+            metta_discharge_reset/0,
+            metta_discharges_verified/0,
+            metta_effect_join/3,
+            metta_engine_module/1,
+            metta_export/1,
+            metta_extension/2,
+            metta_extension_api_version/2,
+            metta_extension_loaded/1,
+            metta_extension_unmet/2,
+            metta_finish_foreign/3,
+            metta_function_determinism/2,
+            metta_function_origin/3,
+            metta_grounded_type/2,
+            metta_hook_claim/4,
+            metta_inferences/3,
+            metta_math_operation/2,
+            metta_open_fuel_scope/0,
+            metta_operation_answer/3,
+            metta_operation_plan_effect/2,
+            metta_platform_absent/1,
+            metta_platform_load/2,
+            metta_pragma/2,
+            metta_refinement_head/1,
+            metta_refinement_holds/2,
+            metta_refinement_violated/3,
+            metta_registration_names/2,
+            metta_requires/1,
+            metta_residual_check/3,
+            metta_restore_pragmas/2,
+            metta_timeout/3,
+            metta_with_pragmas/3,
+            min/3,
+            not/2,
+            prelude_cost_claim/1,
+            prelude_declaration/2,
+            prelude_doc_atom/2,
+            prelude_document/2,
+            prelude_head/2,
+            prelude_owned/1,
+            prelude_rule_registration/2,
+            prelude_shipped_equation/2,
+            prelude_translator_rule/1,
+            prelude_type_declaration/2,
+            record_metta_export/2,
+            register_builtin_fun/1,
+            release_function_name/1,
+            resolve_metta_import_path/2,
+            retract_unrelated_system_arities/0,
+            shallow_argument_types/2,
+            shallow_declared_type/2,
+            test/3,
+            test_answer_value/2,
+            tuple_positions_witness/3,
+            type_alias_gate_ref/2,
+            type_witness_candidate_matches/3,
+            unguarded_input_position/2,
+            unrelated_system_predicate/2,
+            validate_builtin_exemptions/0,
+            'bind!'/3,
+            'cos-math'/2,
+            'get-doc-params'/4,
+            'get-doc-single-atom'/3,
+            'pretty-atom'/2,
+            'test-no-answer'/2,
+            (*)/3,
+            builtin_implementation_hook_exists/2,
+            claimed_export_name/2,
+            cons/3,
+            declared_predicate_arity/2,
+            exists_file/2,
+            get_type_candidate/2,
+            import_receipt_current/2,
+            imported_metta_source/2,
+            metta_algebra_law/2,
+            metta_close_fuel_scope/0,
+            metta_compensation/2,
+            metta_discharge_coverage/1,
+            metta_evaluation_fuel/1,
+            metta_extension_info/3,
+            metta_extension_member/2,
+            metta_file_export/2,
+            metta_fuel_exhausted/1,
+            metta_function_volatility/2,
+            metta_reaction/4,
+            metta_semantic_effect/2,
+            metta_shape_route/5,
+            metta_state_cell/1,
+            pending_metta_export/3,
+            prelude_wrote_builtin_type/2,
+            register_prolog_arities/1,
+            validate_builtin_registration_coverage/0,
+            verified_discharge/3,
+            '%'/3,
+            'change-state!'/3,
+            'tan-math'/2,
+            metta_builtin_effect_override/2,
+            metta_discharge_report/0,
+            validate_builtin_implementation_coverage/0,
+            'asin-math'/2,
+            metta_builtin_structural/1,
+            validate_builtin_registry/0,
+            'atan-math'/2,
+            declare_function_volatility/2,
+            %
+            % Registered builtin heads are part of the public language surface.
+            % assert/2 and exists_file/1 keep explicit core qualification because
+            % user already imports SWI's predicates under those indicators.
+            % [tested: engine_modules:every_core_builtin_head_is_exported;
+            % commit=WORKTREE]
+            (#+)/3,
+            (#=<)/3,
+            (#>=)/3,
+            (#*)/3,
+            argv/2,
+            assertaPredicate/2,
+            assertzPredicate/2,
+            'atom-subst'/4,
+            'bit-and'/3,
+            'bit-not'/2,
+            'bit-or'/3,
+            'bit-shift-left'/3,
+            'bit-shift-right'/3,
+            'bit-xor'/3,
+            callPredicate/2,
+            'ceil-math'/2,
+            'context-space'/1,
+            'current-time'/1,
+            'declare-post-add!'/3,
+            'declare-pre-add!'/3,
+            decons/2,
+            'defined-name'/1,
+            '#div'/3,
+            documented/1,
+            'documented-space'/2,
+            'exclude-item'/3,
+            'exp-math'/2,
+            'filter-atom'/3,
+            first/2,
+            'first-from-pair'/2,
+            'floor-div'/3,
+            'floor-math'/2,
+            'foldl-atom'/4,
+            'format-time'/2,
+            'get-doc'/2,
+            'get-doc'/3,
+            'get-doc-atom'/3,
+            'get-doc-space'/3,
+            'get-state'/2,
+            'help!'/2,
+            id/2,
+            'if-decons-expr'/6,
+            'is-expr'/2,
+            'is-ground'/2,
+            'is-member'/3,
+            'isnan-math'/2,
+            'is-var'/2,
+            '#max'/3,
+            member/3,
+            'metta-thread'/4,
+            '#min'/3,
+            '#mod'/3,
+            'new-space'/2,
+            'new-space'/3,
+            noeval/2,
+            parse/2,
+            'parse-command'/2,
+            'random-float'/3,
+            'random-float'/4,
+            'random-int'/3,
+            'random-int'/4,
+            'readln!'/1,
+            repra/2,
+            retractPredicate/2,
+            'round-math'/2,
+            'second-from-pair'/2,
+            sleep/2,
+            'sort-atom'/2,
+            superpose/2,
+            'trunc-math'/2,
+            'undeclare-post-add!'/2,
+            'undeclare-pre-add!'/2,
+            undocumented/1,
+            'undocumented-space'/2,
+            'unique-atom'/2,
+            metta_engine_operator/1,
+            <= / 3,
+            install_prelude_rule/2,
+            metta_hook_apply/6,
+            refuse_other_tiers_name/2,
+            run_under_pragmas/1,
+            validate_builtin_exemption_liveness/0,
+            validate_builtin_exemption_schema/0,
+            validate_builtin_implementation_hooks/0,
+            validate_builtin_implementation_schema/0,
+            validate_builtin_implementation_unique/0,
+            (=)/3,
+            '=?'/3,
+            '#-'/3,
+            '#//'/3
+          ]).
 
 %%%%%%%%%% Dependencies %%%%%%%%%%
 %directory_file_path/3 is library(filesex)'s, not a built-in, and the
@@ -380,21 +914,6 @@ register_metta_library_path(Alias, Directory0, true) :-
    directory_file_path(Parent, 'lib', LibPath),
    asserta(standard_library_path(LibPath)).
 :- autoload(library(uuid)).
-%wfs is lib/lib_tabling/lib_tabling.pl's, not this file's: it reads a
-%restrained table's delay condition through call_delays/2. The declaration
-%lives here because `user`'s autoload table is ONE predicate and the directive
-%above defined it first, so a second file adding to it warns on every load, and
-%the `petta` conformance lane compares our stderr against upstream's. It is an
-%autoload and not a use_module because wfs is needed only where a restrained
-%table is read: the parity corpus's tabling row reads 138,172 inferences on
-%trunk, 140,178 with `use_module` and 138,995 with this
-%[measured 2026-09-07; command=swipl tests/fixtures/parity_driver.pl <root>
-%examples/ch18-performance/18-02-memoisation-and-tabling/09-tabling_fib.metta;
-%commit=c2fe16d7daecca88683c097dbd9f09a09db803b8]. An explicit declaration is honoured with the `autoload` flag
-%false, which is the whole point of naming the file rather than leaving it to
-%the library index [tested: the GATE no-autoload lane, 258 examples;
-%commit=c2fe16d7daecca88683c097dbd9f09a09db803b8].
-:- autoload(library(wfs), [call_delays/2]).
 :- use_module(library(random)).
 :- use_module(library(error)).
 :- use_module(library(listing)).
@@ -912,9 +1431,12 @@ prolog:error_message(metta_platform_required(Form, Capability, Requires,
 %    was consulted. Every wrap_predicate/4 target and every clause/2 read of
 %    the engine's own compilation tables follows it.
 %
-%The two answers coincide today. They stop coinciding the moment a host
-%consults the engine into a module of its own, and asking rather than writing
-%is what makes that a supported thing rather than a silent breakage
+%The two answers COINCIDED until the module declaration at the top of this
+%file, and every site that had to tell them apart was already written this way
+%when they stopped: the answer is `metta_engine` now and `user` means only the
+%host. It stays asked rather than written because reading it is what makes the
+%distinction checkable -- a site that means the engine and one that means the
+%host are two different reads, and only one of them moved
 %[tested: metta_engine_module].
 :- dynamic metta_engine_module/1.
 :- prolog_load_context(module, EngineModule),
@@ -938,6 +1460,15 @@ metta_self_module('$metta_exec:&self').
 %parametric spaces use their separately prefixed canonical term encoding.
 metta_exec_module_prefix('$metta_exec:').
 
+%!  metta_engine_operator(+Name) is semidet.
+%
+%   Read the engine's operator table explicitly. The unqualified current_op/3
+%   spelling reads user and misses operators imported only into metta_engine.
+%   Registration, reduction and callable_as_written/2 share this guard.
+%   [tested: engine_modules:an_operator_lent_name_is_seen_in_the_engines_own_namespace;
+%   commit=WORKTREE]
+metta_engine_operator(Name) :- current_op(_, _, metta_engine:Name).
+
 %And read for FREE. A one-clause fact still costs an inference per call, and
 %these are the hottest paths in the engine: reduce/3 reads it on every
 %dispatch and current_metta_module/1 on every compile and every runnable form.
@@ -954,6 +1485,11 @@ metta_exec_module_prefix('$metta_exec:').
 %yes.
 goal_expansion(metta_self_module(Module), Module = '$metta_exec:&self').
 goal_expansion(metta_exec_module_prefix(Prefix), Prefix = '$metta_exec:').
+% Fold the operator guard at its call sites to avoid a predicate call per
+% registered-predicate reduction. Keep metta_engine_operator/1 for other callers.
+% [tested: prolog_interface:a_registered_predicate_costs_no_more_than_a_metta_function;
+% commit=WORKTREE]
+goal_expansion(metta_engine_operator(Name), current_op(_, _, metta_engine:Name)).
 
 %The seam module loads FIRST and with an EMPTY import list. First because
 %every file below declares or asks a seam; empty because `seam:` is the whole
@@ -1040,6 +1576,234 @@ metta_import_shared_registries(Subsystem) :-
                   duals, kernel, '../lib/lib_memo/lib_memo',
                   '../lib/minimal_metta_lib/minimal_metta_lib']).
 
+
+% The host imports this facade. Re-export subsystem operations used by host
+% clauses, query strings and generated goals, keeping implementation ownership
+% in each subsystem. Declared services are checked even without static callers.
+% [tested: engine_modules:every_declared_service_is_exported_to_the_host,
+% engine_modules:the_service_census_sees_a_declared_private_predicate; commit=WORKTREE]
+
+%engine/filereader.pl: reading and running a MeTTa source: the loader's own doors,
+%which every seat's `run this text` crossing lands on.
+% silent/1 remains filereader's single shared flag through this re-export.
+% [source: engine/filereader.pl:metta_host_set_silent/1; commit=WORKTREE]
+metta_engine_reexport(filereader, metta_host_fast_header/1).
+metta_engine_reexport(filereader, active_source_program/1).
+metta_engine_reexport(filereader, recompile_function_impl/1).
+metta_engine_reexport(filereader, recompile_function_impl_in/2).
+metta_engine_reexport(filereader, run_with_loading_marker/2).
+metta_engine_reexport(filereader, silent/1).
+metta_engine_reexport(filereader, load_metta_file/2).
+metta_engine_reexport(filereader, load_metta_source_groups/3).
+metta_engine_reexport(filereader, metta_answer_term/2).
+metta_engine_reexport(filereader, metta_host_digest/2).
+metta_engine_reexport(filereader, metta_host_load_fast/2).
+metta_engine_reexport(filereader, metta_host_load_file/3).
+metta_engine_reexport(filereader, metta_host_read_forms/2).
+metta_engine_reexport(filereader, metta_host_run_source/4).
+metta_engine_reexport(filereader, metta_host_run_source_status/3).
+metta_engine_reexport(filereader, metta_host_save_fast/3).
+metta_engine_reexport(filereader, metta_host_set_silent/1).
+metta_engine_reexport(filereader, metta_host_substitute/3).
+metta_engine_reexport(filereader, parse_metta_source/2).
+metta_engine_reexport(filereader, parsed_form_parts/4).
+metta_engine_reexport(filereader, process_metta_string/2).
+metta_engine_reexport(filereader, process_metta_string/3).
+
+%engine/parser.pl: the reader and the writer, which a seat needs because a
+%backend's atoms cross an FFI boundary as bytes and a host prints answers.
+metta_engine_reexport(parser, metta_reader_token_class/3).
+metta_engine_reexport(parser, metta_host_register_reader_token/2).
+metta_engine_reexport(parser, metta_host_unregister_reader_token/1).
+metta_engine_reexport(parser, metta_name_pairs/2).
+metta_engine_reexport(parser, metta_reader_token_source/2).
+metta_engine_reexport(parser, metta_symbol_writable/1).
+metta_engine_reexport(parser, metta_token_boundary/2).
+metta_engine_reexport(parser, metta_unwritable_symbol/2).
+metta_engine_reexport(parser, sdisplay/2).
+metta_engine_reexport(parser, sdisplay_with_names/3).
+metta_engine_reexport(parser, sread/2).
+metta_engine_reexport(parser, sread_command/2).
+metta_engine_reexport(parser, sread_with_names/3).
+metta_engine_reexport(parser, swrite/2).
+metta_engine_reexport(parser, swrite_with_names/3).
+
+%engine/spaces.pl: the space surface: the atom doors, the matcher, the module
+%mapping and the lifecycle a host drives.
+metta_engine_reexport(spaces, metta_effect_class_canonical/2).
+metta_engine_reexport(spaces, metta_vocabulary_values/2).
+metta_engine_reexport(spaces, 'add-atom'/3).
+metta_engine_reexport(spaces, 'remove-atom'/3).
+metta_engine_reexport(spaces, 'subtract-atom'/3).
+metta_engine_reexport(spaces, add_sexp/2).
+metta_engine_reexport(spaces, clear_native_atoms/1).
+metta_engine_reexport(spaces, ensure_native_storage_module/2).
+metta_engine_reexport(spaces, function_still_defined/1).
+metta_engine_reexport(spaces, get_native_atom/2).
+metta_engine_reexport(spaces, match/4).
+metta_engine_reexport(spaces, match_foreign/5).
+metta_engine_reexport(spaces, match_stored/4).
+metta_engine_reexport(spaces, metta_add_atom/3).
+metta_engine_reexport(spaces, metta_add_atoms/2).
+metta_engine_reexport(spaces, metta_add_program_atoms/2).
+metta_engine_reexport(spaces, metta_assert_space_releasable/1).
+metta_engine_reexport(spaces, metta_catalog_row/1).
+metta_engine_reexport(spaces, metta_claim_space/2).
+metta_engine_reexport(spaces, metta_clear_space_for_release/1).
+metta_engine_reexport(spaces, metta_declare_parametric_space/1).
+metta_engine_reexport(spaces, metta_declare_restricted_space/2).
+metta_engine_reexport(spaces, metta_declare_space_equation_home/2).
+metta_engine_reexport(spaces, metta_declare_space_parent/2).
+metta_engine_reexport(spaces, metta_disclaim_space/2).
+metta_engine_reexport(spaces, metta_ensure_compiled/1).
+metta_engine_reexport(spaces, metta_forget_derived/0).
+metta_engine_reexport(spaces, metta_host_clear_defined/1).
+metta_engine_reexport(spaces, metta_host_clear_space/1).
+metta_engine_reexport(spaces, metta_host_explain_match/3).
+metta_engine_reexport(spaces, metta_host_native_fact/4).
+metta_engine_reexport(spaces, metta_host_remove_reported/3).
+metta_engine_reexport(spaces, metta_host_space_capability_error/4).
+metta_engine_reexport(spaces, metta_host_stored/2).
+metta_engine_reexport(spaces, metta_module_space/2).
+metta_engine_reexport(spaces, metta_ordered_match_limit/6).
+metta_engine_reexport(spaces, metta_release_space/1).
+metta_engine_reexport(spaces, metta_remove_atom/3).
+metta_engine_reexport(spaces, metta_require_algebra_value/3).
+metta_engine_reexport(spaces, metta_require_foreign_capability/2).
+metta_engine_reexport(spaces, metta_seq_query_plan/2).
+metta_engine_reexport(spaces, metta_space_name/1).
+metta_engine_reexport(spaces, metta_space_names/1).
+metta_engine_reexport(spaces, metta_vocabulary_value/2).
+metta_engine_reexport(spaces, native_storage_module/2).
+metta_engine_reexport(spaces, remove_equation/6).
+metta_engine_reexport(spaces, remove_sexp/2).
+metta_engine_reexport(spaces, space_module/2).
+metta_engine_reexport(spaces, unstore_atom/3).
+
+%engine/support_graph.pl: forgetting what a withdrawn source supported.
+metta_engine_reexport(support_graph, support_record/2).
+metta_engine_reexport(support_graph, support_memo_take_change/2).
+metta_engine_reexport(support_graph, support_memo_sccs/2).
+metta_engine_reexport(support_graph, support_forget/1).
+metta_engine_reexport(support_graph, support_forget_module/1).
+
+%engine/tracer.pl: the trace and debug session doors a host opens around its own work.
+metta_engine_reexport(tracer, metta_debug_run/3).
+metta_engine_reexport(tracer, metta_debug_begin/2).
+metta_engine_reexport(tracer, metta_debug_end/0).
+metta_engine_reexport(tracer, metta_trace_begin/3).
+metta_engine_reexport(tracer, metta_trace_end/0).
+metta_engine_reexport(tracer, metta_trace_harvest/2).
+metta_engine_reexport(tracer, metta_trace_source/5).
+metta_engine_reexport(tracer, metta_trace_start_clock/0).
+
+%engine/translator.pl: compiling a form, and the dispatch metadata a seat reads back.
+metta_engine_reexport(translator, clear_fun_meta/2).
+metta_engine_reexport(translator, clear_translation_cache/0).
+metta_engine_reexport(translator, compiled_function_name/2).
+metta_engine_reexport(translator, drop_fun_meta/4).
+metta_engine_reexport(translator, eval_metta_in_module/3).
+metta_engine_reexport(translator, lift_pattern_modifiers/4).
+metta_engine_reexport(translator, metta_host_dispatch_proof_step/6).
+metta_engine_reexport(translator, metta_reducible_head/2).
+metta_engine_reexport(translator, metta_special_form_head/1).
+metta_engine_reexport(translator, reduce/2).
+metta_engine_reexport(translator, reduce/3).
+metta_engine_reexport(translator, translate_cached_expr/3).
+metta_engine_reexport(translator, translate_clause/2).
+metta_engine_reexport(translator, translate_clause/3).
+metta_engine_reexport(translator, translate_expr/3).
+metta_engine_reexport(translator, translate_runnable_expr/3).
+metta_engine_reexport(translator, translate_tracked_clause/2).
+
+%engine/translator_rules.pl: the rule registry's own MeTTa spellings.
+metta_engine_reexport(translator_rules, 'add-translator-rule!'/3).
+metta_engine_reexport(translator_rules, 'remove-translator-rule!'/2).
+metta_engine_reexport(translator_rules, translator_rule/1).
+metta_engine_reexport(translator_rules, translator_rule_extra_variables_exempt/2).
+
+%engine/type_rules.pl: the typing-rule registry's MeTTa spellings and its readback.
+metta_engine_reexport(type_rules, 'add-typing-rule!'/6).
+metta_engine_reexport(type_rules, 'remove-typing-rule!'/2).
+metta_engine_reexport(type_rules, registered_typing_rule/7).
+
+%The rows the walk could not see, for the same reason as the core's own
+%computed-goal block above: a suite that assembles the goal. Found by
+%running the battery against the measured list and reading the existence
+%errors [tested: sh engine/test.sh; commit=WORKTREE].
+metta_engine_reexport(duals, metta_dual_goal/2).
+metta_engine_reexport(filereader, load_imported_metta_file/3).
+metta_engine_reexport(kernel, 'has-declared-type'/3).
+metta_engine_reexport(kernel, 'space-contains'/3).
+metta_engine_reexport(parser, swrite_pretty/2).
+metta_engine_reexport(spaces, 'get-atoms'/2).
+metta_engine_reexport(spaces, add_sexp/3).
+metta_engine_reexport(spaces, foreign_provides/2).
+metta_engine_reexport(spaces, foreign_pushdown_class/3).
+metta_engine_reexport(spaces, metta_capacity_count/2).
+metta_engine_reexport(spaces, metta_exec_module_generation/2).
+metta_engine_reexport(spaces, metta_exec_module_known/2).
+metta_engine_reexport(spaces, metta_exec_module_parent/2).
+metta_engine_reexport(spaces, metta_match_atoms/2).
+metta_engine_reexport(spaces, metta_policy_members/3).
+metta_engine_reexport(spaces, metta_space_claim/2).
+metta_engine_reexport(spaces, metta_space_operand/1).
+metta_engine_reexport(spaces, native_atom_clause/3).
+metta_engine_reexport(spaces, native_storage_module_cache/2).
+metta_engine_reexport(spaces, native_storage_module_ready/2).
+metta_engine_reexport(spaces, space_atom_count/2).
+metta_engine_reexport(spaces, space_operation_capability/2).
+metta_engine_reexport(spaces, space_parametric/1).
+metta_engine_reexport(spaces, space_parent/2).
+metta_engine_reexport(spaces, space_restricted/2).
+metta_engine_reexport(specializer, ho_specialization/3).
+metta_engine_reexport(specializer, maybe_specialize_call/4).
+metta_engine_reexport(support_graph, support_invalidate/1).
+metta_engine_reexport(support_graph, support_invalidate_many/1).
+metta_engine_reexport(support_graph, supports/2).
+metta_engine_reexport(translator, constrain_args/3).
+metta_engine_reexport(translator, fun_meta_clauses/3).
+metta_engine_reexport(translator, fun_meta_module/3).
+metta_engine_reexport(translator, head_pattern_note/5).
+metta_engine_reexport(translator, maybe_print_compiled_clause/3).
+metta_engine_reexport(translator, metta_special_form/1).
+metta_engine_reexport(translator, metta_translated_head/1).
+metta_engine_reexport(translator, symbol_head/2).
+metta_engine_reexport(translator_rules, 'add-translator-rule!'/2).
+metta_engine_reexport(translator_rules, protected_core_head/1).
+metta_engine_reexport(translator_rules, translator_rule/3).
+metta_engine_reexport(translator_rules, translator_rule_snapshot/3).
+metta_engine_reexport(type_rules, raw_registered_typing_rule/7).
+metta_engine_reexport(type_rules, typing_rule_accepts/4).
+metta_engine_reexport(type_rules, typing_rule_expected/3).
+metta_engine_reexport(type_rules, typing_rule_refusal/6).
+metta_engine_reexport(filereader, translated_from/2).
+metta_engine_reexport(kernel, 'space-atom-count'/2).
+metta_engine_reexport(spaces, match_foreign/4).
+metta_engine_reexport(spaces, native_storage_functor/2).
+metta_engine_reexport(spaces, protect_metta_exec_modules/0).
+metta_engine_reexport(spaces, stored_atom_of_ref/3).
+metta_engine_reexport(translator_rules, restore_translator_rule_snapshot/3).
+metta_engine_reexport(translator_rules, translator_rule_home/2).
+metta_engine_reexport(translator_rules, translator_rule_override/2).
+metta_engine_reexport(translator_rules, translator_rule_refusal/3).
+metta_engine_reexport(translator_rules, translator_rule_current/3).
+
+%engine/metta.pl's ensure_loaded/1 list carries three shipped libraries, so
+%their exports arrive here rather than in `user` and the host tier reaches
+%them through this table like any subsystem's.
+metta_engine_reexport(lib_memo, memo_size_limit/1).
+metta_engine_reexport(lib_memo, memo_answer_limit/1).
+metta_engine_reexport(lib_memo, memo_aggregate_mode/1).
+metta_engine_reexport(lib_memo, memo_function_removed/1).
+metta_engine_reexport(lib_memo, memo_dispatch_call/4).
+metta_engine_reexport(lib_memo, memo_withdraw_removed_definition/2).
+metta_engine_reexport(lib_memo, metta_memo_total_bytes/1).
+metta_engine_reexport(parser, 'register-token!'/3).
+metta_engine_reexport(spaces, clear_foreign_atoms/1).
+
+:- forall(metta_engine_reexport(_, PredicateIndicator), export(PredicateIndicator)).
+
 %The prelude tier is LOADED WITHOUT IMPORTING, which is the whole difference
 %between it and the list above. Its heads include union/3 and intersection/3,
 %which this module already imports from library(lists), so importing the tier's
@@ -1050,19 +1814,10 @@ metta_import_shared_registries(Subsystem) :-
 %metta_exec_module_base/2].
 :- use_module(prelude, []).
 
-%A subsystem that declares a module gets THIS module as its base, so the calls
-%it makes the other way -- into the engine core, into another subsystem's
-%exports, into a MeTTa builtin -- resolve without an import cycle. SWI gives a
-%module file the base `user`, which is the right answer only while the engine
-%happens to be consulted there; metta_engine_module/1 above exists precisely
-%because a host may consult the engine into a module of its own, and the
-%subsystem modules have to follow it when it does.
-%
-%The same set_module(M:base(B)) call engine/spaces.pl makes for a space's
-%execution module, and for the same reason: a chain of bases is how a name
-%written once is visible everywhere below it
-%[tested: engine_layering:test_the_engine_layering_contract_holds_and_a_violation_is_named,
-%spaces_execution_modules:the_chain_is_engine_then_prelude_then_self_then_space].
+% Shipped subsystems declare metta_engine as their base before compilation.
+% This census also bases subsystems a harness loaded before the engine.
+% Their unqualified calls resolve through the core's published exports.
+% [source: engine/metta.pl:metta_base_engine_subsystems/1; commit=WORKTREE]
 
 
 %A predicate rather than the bare directive it used to be, because a
@@ -1217,7 +1972,10 @@ metta_load_extension(Control) :-
     (   Unmet == []
     ->  forall(member(entry(engine, Relative), Controls),
                ( directory_file_path(Directory, Relative, Entry),
-                 ensure_loaded(Entry) )),
+                 % Seat definitions belong to the host tier, whose imports
+                 % reach this facade without replacing its implementations.
+                 % [source: engine/metta.pl:metta_publish_host_tier/0; commit=WORKTREE]
+                 user:ensure_loaded(Entry) )),
         (   metta_extension_loaded(Name) -> true
         ;   assertz(metta_extension_loaded(Name))
         )
@@ -1278,6 +2036,21 @@ metta_load_extensions(Pattern) :-
 :- prolog_load_context(directory, Src),
    directory_file_path(Src, '../extensions', Extensions),
    asserta(metta_extensions_path(Extensions)).
+
+%!  metta_publish_host_tier is det.
+%
+%   Publish defined exports before loading seats: their directives run before
+%   SWI's end-of-load import. MORK's metta_claim_space/2 directive needs this.
+%   Later definitions arrive through the ordinary end-of-load import.
+%   [source: extensions/mork/mork_ffi/morkspaces.pl:metta_claim_space/2;
+%   commit=WORKTREE]
+metta_publish_host_tier :-
+    module_property(metta_engine, exports(Exports)),
+    forall(( member(PredicateIndicator, Exports),
+             current_predicate(metta_engine:PredicateIndicator) ),
+           user:import(metta_engine:PredicateIndicator)).
+
+:- metta_publish_host_tier.
 
 :- current_prolog_flag(argv, Argv),
    (   memberchk(extensions, Argv)

@@ -9,6 +9,11 @@
 %   [tested: source_positions:comments_end_only_at_lf; commit=df1367c75148ca6c7262134a8736b237e1150383].
 
 :- module(source_positions, [source_positions/2, source_positions/3]).
+
+% Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
+% Set the base before the clauses and their engine-dependent directives.
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L239; commit=WORKTREE]
+:- set_module(base(metta_engine)).
 :- use_module(parser, [metta_token_boundary/2, string_state/3]).
 :- use_module(library(error), [must_be/2]).
 

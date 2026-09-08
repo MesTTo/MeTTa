@@ -62,8 +62,8 @@ register_fun(N) :- must_be(atom, N),
 %told it about 1/2 the lambda.
 register_prolog_arities(N) :-
     forall(( current_predicate(N/Arity),
-             \+ (current_op(_, _, N), Arity =< 2),
-             \+ (current_op(_, _, N), imported_predicate(N, Arity)) ),
+             \+ (metta_engine_operator(N), Arity =< 2),
+             \+ (metta_engine_operator(N), imported_predicate(N, Arity)) ),
            register_arity(N, Arity)).
 
 %%% Arities a predicate outside this tree lent a MeTTa name by accident %%%
@@ -1178,10 +1178,17 @@ builtin_implementation(evalc/2, prolog(engine)).
 builtin_implementation(reduce/2, prolog(translator)).
 builtin_implementation(reduce/1, prolog(translator)).
 builtin_implementation('import!'/2, prolog(engine)).
-builtin_implementation('git-import!'/3, prolog(engine)).
-builtin_implementation('git-import!'/4, prolog(engine)).
-builtin_implementation('git-import!'/2, prolog(engine)).
-builtin_implementation('git-import!'/1, prolog(engine)).
+%git-import! is lib/lib_gitimport/lib_gitimport.pl's, which engine/metta.pl's own
+%ensure_loaded/1 list carries at boot, so it ships with the engine and reads
+%prolog(<its module>) exactly as reduce/2 reads prolog(translator). It said
+%prolog(engine) while every library loaded into the same module the engine did,
+%and the hook check -- implementation_module/1 against the named module -- is
+%what caught the difference the moment the library declared one of its own
+%[tested: builtin_facets:the_live_registry_is_complete_in_both_directions; commit=WORKTREE].
+builtin_implementation('git-import!'/3, prolog(lib_gitimport)).
+builtin_implementation('git-import!'/4, prolog(lib_gitimport)).
+builtin_implementation('git-import!'/2, prolog(lib_gitimport)).
+builtin_implementation('git-import!'/1, prolog(lib_gitimport)).
 builtin_implementation('require-extension!'/1, prolog(engine)).
 builtin_implementation('add-atom'/2, prolog(spaces)).
 builtin_implementation('remove-atom'/2, prolog(spaces)).
@@ -1243,9 +1250,11 @@ builtin_implementation('subtraction-atom'/2, prolog(engine)).
 builtin_implementation('index-atom'/2, prolog(engine)).
 builtin_implementation('atom-subst'/3, prolog(engine)).
 builtin_implementation(id/1, prolog(engine)).
-builtin_implementation(function/1, prolog(engine)).
-builtin_implementation('collapse-bind'/1, prolog(engine)).
-builtin_implementation('superpose-bind'/1, prolog(engine)).
+%The three minimal-MeTTa heads are lib/minimal_metta_lib/minimal_metta_lib.pl's,
+%boot-loaded the same way lib_gitimport is and named the same way.
+builtin_implementation(function/1, prolog(lib_minimal_metta)).
+builtin_implementation('collapse-bind'/1, prolog(lib_minimal_metta)).
+builtin_implementation('superpose-bind'/1, prolog(lib_minimal_metta)).
 builtin_implementation('pow-math'/2, prolog(engine)).
 builtin_implementation('sqrt-math'/1, prolog(engine)).
 builtin_implementation('sort-atom'/1, prolog(engine)).
