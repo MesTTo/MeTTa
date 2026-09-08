@@ -49,14 +49,14 @@
 %     itself, and one outside it, or any source while the encoding flag is
 %     not the stamped utf8, is not claimed
 %     [tested: the_boot_governs_the_sources_its_patterns_name,
-%     an_unstamped_encoding_claims_nothing; commit=WORKTREE].
+%     an_unstamped_encoding_claims_nothing; commit=f26de01fbf3e0e3c64bb691c66a59fa959fee7f3].
 %   - a claimed source whose artifact is absent or stale is compiled by a
 %     child swipl before the claiming process loads it, so that process reads
 %     the artifact and never the compile; a process marked as such a child
 %     compiles in place
 %     [tested: a_claimed_source_is_compiled_by_a_child_and_this_process_reads_the_artifact,
 %     a_stale_artifact_is_recompiled, a_child_marked_process_compiles_in_place;
-%     commit=WORKTREE].
+%     commit=f26de01fbf3e0e3c64bb691c66a59fa959fee7f3].
 % Decides:
 %   - artifacts are written only inside the set this file stamps and purges:
 %     a program's own Prolog file, or a library under a registered or

@@ -1885,7 +1885,7 @@ metta_base_engine_subsystems(EngineSource) :-
 %either side of this predicate, one swipl per arm that consulted
 %engine/qlf_boot.pl and engine/metta.pl; the observation costs measured
 %2026-09-05 the same way on two source_observation:observe_source/4 calls on
-%`(= (o $x) (+ $x 2)) !(o 3)`; commit=WORKTREE]. Until 2026-09-09 this door
+%`(= (o $x) (+ $x 2)) !(o 3)`; commit=f26de01fbf3e0e3c64bb691c66a59fa959fee7f3]. Until 2026-09-09 this door
 %consulted the source by its .pl path, and the reading that qcompile(auto)
 %"reaches the files a loaded file loads and not the file the goal names" was
 %SWI's rule seen from that spec: a spec that names its extension compiles from
