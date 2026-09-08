@@ -27,6 +27,8 @@ Guarantees:
   - --check exits 1 while pins remain and 0 once they are resolved, and a
     commit that does not resolve is refused before any file changes
     [tested: tests/checks/check_pin_provenance_selftest.py]
+  - Rust header pins and MORK's Python selftest pins are reached and resolved
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
 Fails when: run against a tree it did not write. It asserts on a fixture it
   generates and nothing else.
 Open Obligations:
@@ -53,6 +55,23 @@ WHEN = "2026-08-31"
 
 # (path, text, lines that must be rewritten, lines that must be declined)
 PLANTS = (
+    (
+        "extensions/mork/mork_ffi/src/plant.rs",
+        [
+            f"// A Rust header pin [{TAG} {WHEN}: a case; {WORD}].",
+            "/* A block header.",
+            f"   Its pin [{TAG} {WHEN}: a case; {WORD}]. */",
+            f'const EMITTED: &str = "{WORD}";',
+        ],
+        [1, 3],
+        [4],
+    ),
+    (
+        "extensions/mork/tests/plant.py",
+        [f'"""A selftest pin [{TAG} {WHEN}: a case; {WORD}]."""'],
+        [1],
+        [],
+    ),
     (
         "engine/plant.pl",
         [

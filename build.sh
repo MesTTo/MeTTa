@@ -10,10 +10,10 @@
 # Guarantees:
 #   - running it twice does what running it once does, and leaves
 #     `git status --porcelain` unchanged
-#     [tested: tests/shell/test_build_is_idempotent_and_anchored.sh]
+#     [tested: tests/shell/test_build_is_idempotent_and_anchored.sh; commit=WORKTREE]
 #   - it runs the same from any working directory, so `sh /path/to/MeTTa-Kernel/build.sh`
 #     provisions beside THIS checkout rather than beside the caller
-#     [tested: tests/shell/test_build_is_idempotent_and_anchored.sh]
+#     [tested: tests/shell/test_build_is_idempotent_and_anchored.sh; commit=WORKTREE]
 #   - every exit is honest. This used to have no `set -e`, so a failed cargo
 #     build fell through to the next line and the run ended by printing
 #     "Successfully built mork_ffi".
@@ -70,8 +70,8 @@ provision() {
     fi
 }
 
-provision MORK    https://github.com/trueagi-io/MORK            dd224fd7ced92ca9cfdacd399398dabb609e8faa
-provision PathMap https://github.com/Adam-Vandervorst/PathMap   4c84a8b40c7b6a7ecb54e009a70f0c5abbc1b60f
+provision MORK    https://github.com/trueagi-io/MORK            ed57c6716d8c510296fb5fbb8be6fbfe2df241d7
+provision PathMap https://github.com/Adam-Vandervorst/PathMap   0010dbbd52d13fad67e9a7dabfdadb1cfea71fe1
 
 # Every component that can build itself, DISCOVERED rather than listed. Each
 # owns its own toolchain check, so this one tests only what IT uses (git,
