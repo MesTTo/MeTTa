@@ -1235,7 +1235,7 @@ declaration_of(_, []).
 %reader answers. The index rather than a line for the reason metta_py_origin/3
 %answers one: the caller that wants a position already walks the source for
 %it, and the walk is linear in the source where a second parse is not
-%[source: extensions/python/metta/_source_forms.py, positioned_forms/1].
+%[source: extensions/python/metta/_binding/positions.py:90, positioned_forms/1; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e].
 %
 %READ and never run, the promise the whole static-scan family above makes:
 %a library whose Prolog half this build cannot load still says which heads it

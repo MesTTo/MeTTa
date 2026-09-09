@@ -409,9 +409,9 @@ metta_host_error_kind_row(engine,          default, []).
 %   The clause order is the order the Python seat's four queries run in, and
 %   the two seats have to share it: a failed assertion carries a MeTTa
 %   operation too, and the assertion is the more specific reading of the same
-%   ball [source: extensions/python/metta/_engine.py, Runtime._raise, which
+%   ball [source: extensions/python/metta/_binding/runtime.py:1556, Runtime._raise, which
 %   calls _raise_assertion_failure ahead of _raise_operation_error for this
-%   reason].
+%   reason; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e].
 metta_host_error_kind(Ball, Kind, Fields) :-
     metta_host_control_signal_info(Ball, Kind, Detail),
     !,

@@ -728,7 +728,7 @@ metta_transaction_result(threw(Error), _, _) :- throw(Error).
 %cursor built findall-then-member by hand, so a held speculative cursor kept
 %every answer while the eager door beside it and the Node binding's own scope
 %did not [source: metta_py_execution_cursor_goal/4 in
-%extensions/python/metta/shim.pl, removed with this]. Answering it here means
+%extensions/python/metta/shim.pl:1165; commit=86e45a68236f01658657d272ec9fc818c52a2af1, removed with this]. Answering it here means
 %every caller of the seam inherits it
 %[tested: transaction_answers:speculation_answers_every_answer_and_still_discards_its_writes;
 %commit=f5eb8775b78519c080da4ea7c6dff81f7be21ef9].
@@ -849,8 +849,8 @@ metta_emits(Ctx, Policy) :-
 %and its contents still change on the server, so deriving "it can emit
 %events" from "it can be written" made a watcher hear this process's own
 %writes and silently miss every other one [source:
-%extensions/python/metta/remote.py, RemoteSpace.can_run; measured
-%2026-08-19]. So a foreign context serves subscriptions when it declares
+%extensions/python/metta/foreign/__init__.py:422; measured
+%2026-08-19; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]. So a foreign context serves subscriptions when it declares
 %(events ...) and is refused when it does not, naming what is missing.
 %
 %The worked foreign instances are in this tree's own dependencies: redis

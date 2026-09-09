@@ -567,8 +567,8 @@ metta_operation_effect(Name, Effect) :-
 %Only an annotated arrow makes this an author assertion on a definition.
 %Python definition reflection also writes inferred effect rows, including a
 %generator's answer-count lift; those remain governed by the body walk.
-%[source: extensions/python/metta/_define_facts.py:_EffectAnalysis;
-%commit=bbb512316280110a747e31c26adfc31e8c5104be].
+%[source: extensions/python/metta/_compile/facts.py:144;
+%commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e].
 metta_annotated_operation_effect(Name, Effect) :-
     once(spaces:metta_arrow_product(Name, _, _, _, _)),
     metta_operation_effect(Name, Effect).
