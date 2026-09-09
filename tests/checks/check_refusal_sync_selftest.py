@@ -61,7 +61,7 @@ def test_the_shipped_tree_passes_its_own_lane() -> None:
 
 
 def test_a_row_naming_an_absent_class_is_reported() -> None:
-    """A class neither metta.errors nor builtins has is named."""
+    """A class neither metta._errors.errors nor builtins has is named."""
     joined = refusalgen.join(
         [_row(**{"class": "NoSuchRefusalError"})],
         _seats(python={"error": "NoSuchRefusalError", "attributes": {}}),
@@ -69,7 +69,7 @@ def test_a_row_naming_an_absent_class_is_reported() -> None:
     findings = refusalgen.class_findings(joined)
     assert findings == [
         "the capability row names NoSuchRefusalError, which is neither in "
-        "metta.errors nor a builtin"
+        "metta._errors.errors nor a builtin"
     ]
 
 
@@ -117,6 +117,17 @@ def test_a_silent_seat_departure_stops_the_run() -> None:
         assert "with no reason" in str(refusal)
     else:
         unreported = "a silent departure from the row's class passed"
+        raise AssertionError(unreported)
+
+
+def test_a_duplicate_kind_stops_before_dictionary_projection() -> None:
+    """Two source rows cannot silently collapse to one generated mapping entry."""
+    try:
+        refusalgen.join([_row(), _row()], _seats())
+    except SystemExit as refusal:
+        assert str(refusal) == "duplicate refusal kinds in the engine rows: capability"
+    else:
+        unreported = "a duplicate source kind reached the generated mapping"
         raise AssertionError(unreported)
 
 

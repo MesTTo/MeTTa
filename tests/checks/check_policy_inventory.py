@@ -189,7 +189,7 @@ POLICY_SEAMS: dict[str, PolicySeam] = {
         "agenda", "declaration", "engine/metta/effects.pl", r"^metta_agenda_order\("
     ),
     "save-format": PolicySeam(
-        "save", "metta", "extensions/python/metta/_space_persistence.py", r'format == "fast"'
+        "save", "metta", "extensions/python/metta/_spaces/snapshot.py", r'format == "fast"'
     ),
     "volatility": PolicySeam(
         "volatility", "stable", "engine/metta/interop.pl", r"^metta_function_cacheable\("

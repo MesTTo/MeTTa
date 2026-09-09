@@ -48,7 +48,7 @@
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
-:- ensure_loaded('../../../../extensions/python/metta/shim.pl').
+:- ensure_loaded('../../../../extensions/python/metta/_binding/shim.pl').
 :- ensure_loaded('../../../../extensions/cmetta/bridge.pl').
 
 % About 402 inferences per answer, so a budget buys a countable number of them.

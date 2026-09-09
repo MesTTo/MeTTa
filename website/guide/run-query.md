@@ -53,7 +53,7 @@ or `solve` call with the engine's own guards:
 try:
     m.run("!(spin 100000000)", timeout=0.05)
     raise AssertionError("the time bound did not fire")
-except metta.errors.TimeLimitError:
+except metta._errors.errors.TimeLimitError:
     check("a 50ms bound stops a spin that would run for minutes", True)
 ```
 
@@ -817,7 +817,7 @@ for finding in m.lint():
 ### The repair, as data
 
 `remedy` is the same repair with its classification attached, and it covers
-the kinds `autofix` has no shape for. It is the `metta.errors.Remedy` every
+the kinds `autofix` has no shape for. It is the `metta._errors.errors.Remedy` every
 deliberate refusal carries, so one reader serves an exception and a finding:
 
 | field | what it says |
@@ -1019,4 +1019,4 @@ retains the query context, so `rows.why()` identifies a pattern miss, a join
 with no shared binding, or a `where` guard that rejected every joined row. It
 reads the space's current state. The complete runtime surface is in
 [`metta.Space`](../reference/metta-space), and result containers are in
-[`metta.results`](../reference/metta-results).
+[`metta._spaces.results`](../reference/metta-results).

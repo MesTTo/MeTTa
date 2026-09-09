@@ -297,7 +297,7 @@ cat > "$scratch/solars/tests/test_solars.py" <<'DOOR_TEST'
 """Purpose: witness the frame door declared by the installed solars package."""
 
 from metta import G, MeTTa, S
-from metta.results import Rows
+from metta._spaces.results import Rows
 
 
 def test_frame():
@@ -343,9 +343,9 @@ import metta
 from metta import seam, tables
 from metta_arrays import EmbeddingStore
 from metta.convert import project
-from metta.errors import is_transport_failure
+from metta._errors.errors import is_transport_failure
 from metta.integrate import LIBRARIES_GROUP, load_entry_point
-from metta.results import Rows
+from metta._spaces.results import Rows
 
 m = metta.MeTTa()
 rows = Rows(("who", "n"), [(metta.S.Ada, metta.G(1)), (metta.S.Bob, metta.G(2))])
@@ -419,7 +419,7 @@ print("reflector       : the reflector point lowers a solars.Model to facts")
 assert m.solars.frame(rows).column("n") == [1, 2]
 assert m.self.solars.frame(rows).column("who") == ["Ada", "Bob"]
 held_frame = m.solars.frame
-door_pattern = "(door frame provider namespace $args $answers $effect $det $sugar $binding (door-provider door solars solars) $body $refuses $tiers $docs $evidence $assumes $guarantees $fails)"
+door_pattern = "(door frame provider namespace $args $answers $effect $det $sugar $binding (door-provider door solars solars) $body $refuses $tiers $docs $evidence $assumes $guarantees $fails $order)"
 assert m.run(f"!(match &metta {door_pattern} True)") == [[True]]
 print("door            : m.solars.frame(rows), package contract present at boot")
 

@@ -18,7 +18,7 @@
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
-:- ensure_loaded('../../../../extensions/python/metta/shim.pl').
+:- ensure_loaded('../../../../extensions/python/metta/_binding/shim.pl').
 
 raised_stack_limit(Limit) :-
     current_prolog_flag(stack_limit, Current),

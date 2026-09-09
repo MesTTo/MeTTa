@@ -4,7 +4,7 @@
 % and refuse contradictory occurrences of one name
 % [tested: shared_decode_index; commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
 
-:- consult('../../../../extensions/python/metta/shim.pl').
+:- consult('../../../../extensions/python/metta/_binding/shim.pl').
 
 :- begin_tests(shared_decode_index).
 

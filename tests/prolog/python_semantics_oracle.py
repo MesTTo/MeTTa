@@ -1,7 +1,7 @@
 """Purpose: expose the existing Python py-eq and py-truthy definitions to plunit.
 
 Assumes:
-  - ``metta._prelude.pythonic`` remains the conversion used by the registered
+  - ``metta._declare.prelude.pythonic`` remains the conversion used by the registered
     Python operations.
 Guarantees:
   - inputs are decoded by the production wire decoder before Python equality
@@ -10,8 +10,8 @@ Fails when:
   - called with a value outside the production wire format.
 """
 
-from metta._atom_wire import _atom_from_wire
-from metta._prelude import pythonic
+from metta._atoms.wire import _atom_from_wire
+from metta._declare.prelude import pythonic
 
 
 def py_eq_wire(left, right):

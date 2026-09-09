@@ -62,7 +62,7 @@ pypi.txt
 
 # The `mutation` REPORT lane's scratch tree. It rebuilds `.mutmut/` here, one
 # level under the repository root, because mutmut copies the package into
-# <cwd>/mutants/ and only that depth puts the copy back where metta/shim.pl
+# <cwd>/mutants/ and only that depth puts the copy back where metta/_binding/shim.pl
 # finds ../../../engine; mutmut's own cache and stats file land inside it. The
 # run is kept rather than deleted, so `mutmut show` can name a survivor after
 # the lane has printed its score.

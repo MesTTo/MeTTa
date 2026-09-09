@@ -6,7 +6,7 @@
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
-:- ensure_loaded('../../../../extensions/python/metta/shim.pl').
+:- ensure_loaded('../../../../extensions/python/metta/_binding/shim.pl').
 :- ensure_loaded('../../../../extensions/node/bridge.pl').
 
 :- begin_tests(host_hold).

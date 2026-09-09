@@ -40,7 +40,7 @@ jobs:
           from pathlib import Path
           from urllib.parse import urlsplit
 
-          module = ast.parse(Path("extensions/python/metta/_lint_events.py").read_text())
+          module = ast.parse(Path("extensions/python/metta/_spaces/intents.py").read_text())
           assignment = next(
               node
               for node in module.body

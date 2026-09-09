@@ -1,6 +1,6 @@
 % Purpose: the one JSON door this repository reads and writes through, with
 %   SWI's library(json) as its specification and json_codec.c as a fast path
-%   beside it. Two callers use it: extensions/python/metta/shim.pl for the
+%   beside it. Two callers use it: extensions/python/metta/_binding/shim.pl for the
 %   network wire codec and lib/lib_json/lib_json.pl for the MeTTa surface, so
 %   there is still exactly one JSON implementation for the whole system.
 % Assumes:

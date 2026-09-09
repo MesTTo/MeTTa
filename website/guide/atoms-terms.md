@@ -98,7 +98,7 @@ compare atoms; comparison terms name their head explicitly. The full set:
 
 Reflected forms work too: `1 + V.x` builds `(+ 1 $x)`.
 
-The specialist immutable `metta.atoms.OPERATOR_LOWERINGS` table records these
+The specialist immutable `metta._atoms.factories.OPERATOR_LOWERINGS` table records these
 lowerings. A row is a builtin symbol, a composite template, a provided name, a
 reserved Python spelling, a sorting spelling, or an explicit absence.
 `matmul` is provided: `@`
@@ -149,7 +149,7 @@ Atoms expose `.vars`, `.map(transform)`, and `.alpha_eq(other)`. `unify(a, b)` i
 normalized bindings mapping or `None`. The four-argument overload, `unify(a, b, then, els)`, evaluates MeTTa's conditional in the ambient space; a
 compiled body lowers the same spelling directly. A ground atom has no
 variables, so `not atom.vars` is the groundness test. See
-[`metta.atoms`](../reference/metta-atoms) for the specialist surface.
+[`metta._atoms.factories`](../reference/metta-atoms) for the specialist surface.
 
 ## Destructuring with match/case
 
@@ -185,7 +185,7 @@ answers the bindings or `None`; `case` is for shape dispatch in Python code,
 specialist key remains available when an API asks for a key function:
 
 ```python
-from metta.atoms import order_key
+from metta._atoms.factories import order_key
 
 sorted(atoms)
 sorted(atoms, key=order_key)  # the same order

@@ -78,7 +78,7 @@ def related(term, engine: metta.MeTTa):
 
 The injected engine is bound to the calling context's space, so an operation invoked from a program running in another space queries that space, which is the `&self` reading and what lets one operation compose across spaces without a space argument. The slot never counts toward MeTTa arities or the declared arrow, and only operations that ask pay for the weaving.
 
-See [`metta.ops`](../reference/metta-ops) for annotation mapping and registration, and [`metta.convert`](../reference/metta-convert) for object projection and rebuilding.
+See [`metta._declare.operations`](../reference/metta-ops) for annotation mapping and registration, and [`metta.convert`](../reference/metta-convert) for object projection and rebuilding.
 
 ## Cross into Python inside a compiled body
 

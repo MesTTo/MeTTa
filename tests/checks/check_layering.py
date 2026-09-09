@@ -58,11 +58,14 @@ from __future__ import annotations
 import ast
 import os
 import re
+import runpy
 import subprocess
 import sys
 import tomllib
+from graphlib import CycleError
 from importlib import metadata
 from pathlib import Path
+from pkgutil import iter_modules
 from typing import NamedTuple
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -417,7 +420,7 @@ def _discovery_stays_cheap(roster: list[Member], root: Path) -> list[Finding]:
     Discovery loads the whole group on the first dispatch of any point a
     registrant writes, so what one advertised package costs to import, every
     program pays once -- including a program that never touches that package's
-    subject. `metta._space` is the facade and is the cost: with it, `import
+    subject. `metta._spaces.handle` is the facade and is the cost: with it, `import
     metta_pandas` was 124 ms and 196 modules; without, 5 ms and 33 [measured
     2026-09-08]. So the rule is one name rather than a budget: an advertised
     member's module body may register rows and may hold the NAME of its
@@ -459,13 +462,13 @@ def _discovery_stays_cheap(roster: list[Member], root: Path) -> list[Finding]:
             )
         ]
     lines = finished.stdout.split()
-    facade = [one for one in lines[1:] if one == "metta._space"]
+    facade = [one for one in lines[1:] if one == "metta._spaces.handle"]
     if not facade:
         return []
     return [
         Finding(
             "extensions/python/ext",
-            f"importing the advertised members loads metta._space and "
+            f"importing the advertised members loads metta._spaces.handle and "
             f"{lines[0]} modules in all; discovery loads every advertised "
             f"package on the first dispatch, so the facade would be dragged "
             f"in by a program that never asked for any of them. Move the "
@@ -475,10 +478,124 @@ def _discovery_stays_cheap(roster: list[Member], root: Path) -> list[Finding]:
     ]
 
 
+def _package_architecture(root: Path) -> list[Finding]:
+    """Check the actual import graph and directory against the declared DAG.
+
+    Grimp reads source without importing the package. Annotation-only edges
+    are excluded; function-local ordinary imports remain static dependencies.
+    """
+    import grimp
+
+    core = root / "extensions/python/metta"
+    try:
+        lattice = runpy.run_path(str(core / "_layers.py"))
+    except (ValueError, CycleError) as error:
+        return [Finding("extensions/python/metta/_layers.py", str(error))]
+    declared = lattice["BUILDS_ON"]
+    foundations, orders = lattice["FOUNDATIONS"], lattice["ORDERS"]
+    shipped = {entry.name for entry in iter_modules([str(core)])} | {"metta"}
+    findings = [
+        Finding("extensions/python/metta", f"package {name!r} is absent from BUILDS_ON")
+        for name in sorted(shipped - declared.keys())
+    ] + [
+        Finding("extensions/python/metta/_layers.py", f"BUILDS_ON names absent package {name!r}")
+        for name in sorted(declared.keys() - shipped)
+    ]
+    source = core / "__init__.pyi"
+    if not source.exists():
+        source = core / "__init__.py"
+    for node in ast.parse(source.read_text()).body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == "__all__" for target in node.targets
+        ):
+            findings.extend(
+                Finding(str(source.relative_to(root)), f"root export {name!r} collides with a module entry")
+                for name in sorted(set(ast.literal_eval(node.value)) & (shipped - {"metta"}))
+            )
+    if shipped != declared.keys():
+        return findings
+    original_path = list(sys.path)
+    sys.path.insert(0, str(core.parent))
+    try:
+        graph = grimp.build_graph("metta", exclude_type_checking_imports=True, cache_dir=None)
+    finally:
+        sys.path[:] = original_path
+    package_of = lattice["package_of"]
+    for importer in sorted(graph.modules):
+        origin = package_of(importer)
+        for imported in sorted(graph.find_modules_directly_imported_by(importer)):
+            target = package_of(imported)
+            if origin == target or target in foundations[origin]:
+                continue
+            findings.extend(
+                Finding(
+                    f"{importer}:{detail['line_number']}",
+                    f"static import of {imported} is outside {origin}'s declared foundations",
+                ) for detail in graph.get_import_details(importer=importer, imported=imported)
+            )
+    for path in _sources(core):
+        module = "metta." + ".".join(path.relative_to(core).with_suffix("").parts)
+        module = module.removesuffix(".__init__")
+        origin = package_of(module)
+        for target, line in _lazy_targets(path):
+            where = f"{path.relative_to(root)}:{line}"
+            if target is None:
+                findings.append(Finding(where, "lazy target is not a literal module name"))
+            elif target == "metta" or target.startswith("metta."):
+                try:
+                    destination = package_of(target)
+                except ValueError as error:
+                    findings.append(Finding(where, str(error)))
+                else:
+                    if orders[destination] <= orders[origin]:
+                        findings.append(Finding(
+                            where, f"lazy target {target} must be strictly above {origin}; "
+                            "import foundations directly",
+                        ))
+    return findings
+
+
+def _lazy_targets(path: Path) -> list[tuple[str | None, int]]:
+    """Read deferred call sites, resolving imported aliases and skipping typing."""
+    tree = ast.parse(path.read_text())
+    functions, modules = set(), set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module == "metta._lazy":
+            functions.update(alias.asname or alias.name for alias in node.names if alias.name == "lazy")
+        elif isinstance(node, ast.Import):
+            modules.update(alias.asname or alias.name for alias in node.names if alias.name == "metta._lazy")
+    found = []
+
+    class Calls(ast.NodeVisitor):
+        def visit_If(self, node: ast.If) -> None:
+            test = node.test
+            if (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
+                isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
+            ):
+                for child in node.orelse:
+                    self.visit(child)
+            else:
+                self.generic_visit(node)
+
+        def visit_Call(self, node: ast.Call) -> None:
+            target = node.func
+            is_lazy = isinstance(target, ast.Name) and target.id in functions
+            is_lazy |= isinstance(target, ast.Attribute) and target.attr == "lazy" and ast.unparse(target.value) in modules
+            if is_lazy:
+                argument = node.args[0] if node.args else None
+                value = argument.value if isinstance(argument, ast.Constant) else None
+                found.append((value if isinstance(value, str) else None, node.lineno))
+            self.generic_visit(node)
+
+    Calls().visit(tree)
+    return found
+
+
 def findings(root: Path = ROOT) -> list[Finding]:
     """Every crossing of the workspace boundary, in reading order."""
     roster = members(root)
     return [
+        *_package_architecture(root),
         *_core_imports_no_member(roster),
         *_members_reach_only_the_public_core(roster),
         *_members_declare_what_they_name(roster),

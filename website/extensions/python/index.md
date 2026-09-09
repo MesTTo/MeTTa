@@ -19,13 +19,13 @@ one that declares both `entry/2` roles in two files:
 title('MeTTa in Python: the janus bridge and the metta library''s transport').
 needs(prolog_library(janus)).
 entry(engine, 'bridge.pl').
-entry(host, 'metta/shim.pl').
+entry(host, 'metta/_binding/shim.pl').
 ```
 
 `entry(engine, 'bridge.pl')` is the ENGINE reaching Python: `py-atom` resolves a
 dotted name, `py-call` applies it, and a Python generator arrives as
 nondeterminism. The engine consults that file at boot. `entry(host,
-'metta/shim.pl')` is Python reaching the ENGINE: it is the `metta` library's
+'metta/_binding/shim.pl')` is Python reaching the ENGINE: it is the `metta` library's
 transport, consulted by the library when it boots, and the engine records it
 without ever loading it.
 

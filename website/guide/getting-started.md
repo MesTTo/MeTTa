@@ -155,7 +155,7 @@ than a process that blocks. `--json` frames the answers as
 stdout, one `{"error": "...", "line": <input line, or null>}` a line on stderr,
 and the program's own `println!` moved to stderr so `jq -c` can read the
 stream. `--json=wire` puts the tagged atom forms in `answers`, which
-`metta.atoms._atom_from_wire` reads back. The flag changes the framing and not
+`metta._atoms.factories._atom_from_wire` reads back. The flag changes the framing and not
 the run: exit status, execution and answers are what the same command without
 it gives.
 

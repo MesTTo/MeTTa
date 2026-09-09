@@ -10,7 +10,7 @@ Guarantees:
     written beside them are what it printed
     [source: extensions/python/examples/basics/first_steps.py; commit=57f21ba9edf94bcf28cde11f938bce2c241a3709]
   - the two refusal messages are the engine's own words, not a paraphrase
-    [source: extensions/python/metta/_engine.py:_no_engine; commit=57f21ba9edf94bcf28cde11f938bce2c241a3709]
+    [source: extensions/python/metta/_binding/runtime.py:502; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]
   - the page is in the navigation and its links resolve
     [tested: test_every_site_page_is_reachable_from_the_navigation,
     npm run docs:build; commit=57f21ba9edf94bcf28cde11f938bce2c241a3709]
