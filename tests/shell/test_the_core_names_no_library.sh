@@ -24,7 +24,7 @@
 #   - with metta-pandas alone: to_df() builds a frame through the ENTRY POINT
 #     with nothing imported by hand. Unregistered namespace members and short
 #     sugars are absent; rows.to(library) retains the named missing-provider
-#     refusal [tested: sh check.sh no-packages; commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543].
+#     refusal [tested: sh check.sh no-packages; commit=WORKTREE].
 # Fails when: uv is absent, which it refuses on rather than skipping.
 # Open Obligations:
 #   To Do: None
@@ -129,9 +129,11 @@ assert m.run("!(+ 1 2)") == [[3]], m.run("!(+ 1 2)")
 for receiver in (m, m.self):
     for name in ("tables", "arrays", "live", "remote"):
         assert not hasattr(receiver, name), f"{name} has no registered namespace"
-from metta.doors import DOORS, Owner, table
+from metta.doors import Owner, table
 
-assert len(table()) == len(DOORS)
+# With nothing installed, discovery contributes no row: the discovered table
+# and the core-only table are the same rows.
+assert len(table()) == len(table(discover=False))
 assert all(row.owner is not Owner.namespace for row in table().values())
 m.close()
 print("engine          : the engine runs, which is what zero integrations buys")

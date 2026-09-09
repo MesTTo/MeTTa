@@ -18,7 +18,7 @@
 #     a real distribution with real entry points.
 #   - a package-owned door reaches both Space and MeTTa as solars.frame, and
 #     a retained method refuses after withdrawal. Its typed contract is
-#     queryable at boot [tested: sh check.sh stranger-python; commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543].
+#     queryable at boot [tested: sh check.sh stranger-python; commit=WORKTREE].
 # Fails when: uv is absent, which it refuses on rather than skipping.
 # Open Obligations:
 #   To Do: None
@@ -419,7 +419,10 @@ print("reflector       : the reflector point lowers a solars.Model to facts")
 assert m.solars.frame(rows).column("n") == [1, 2]
 assert m.self.solars.frame(rows).column("who") == ["Ada", "Bob"]
 held_frame = m.solars.frame
-door_pattern = "(door frame provider namespace $args $answers $effect $det $sugar $binding (door-provider door solars solars) $body $refuses $tiers $docs $evidence $assumes $guarantees $fails $order)"
+# The row is matched through gaps rather than by spelling every field: the
+# proof is that a door row named frame, of kind provider and owner namespace,
+# carries solars as its provider, whatever other fields the catalog projects.
+door_pattern = "(door frame provider namespace ... (door-provider door solars solars) ...)"
 assert m.run(f"!(match &metta {door_pattern} True)") == [[True]]
 print("door            : m.solars.frame(rows), package contract present at boot")
 
