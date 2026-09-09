@@ -1,7 +1,7 @@
 % Purpose: pin the shared surface-arrow projection used by every runtime type
 %   consumer before the compile-time checker interprets its annotation.
 % Guarantees: annotated and plain (:seg T) arrows share arity presentation
-%   [tested: metta_arrow_projection; commit=WORKTREE].
+%   [tested: metta_arrow_projection; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Assumes: engine/metta.pl has loaded the EffectClass catalog and lattice.
 % Guarantees: legacy and annotated prefix arrows expose one unchanged runtime
 %   chain, while shape projection preserves normalized product metadata and

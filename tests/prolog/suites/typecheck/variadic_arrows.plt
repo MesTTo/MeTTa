@@ -2,7 +2,7 @@
 % Owns resources: each test releases its fresh space through plunit cleanup.
 % Guarantees: run elements keep their own BadArgType positions, held Atom
 %   arguments and empty arities; fixed arrows retain their exception.
-% [tested: run_tests(variadic_arrows); commit=WORKTREE]
+% [tested: run_tests(variadic_arrows); commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7]
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

@@ -1,5 +1,5 @@
 ; Purpose: check each splice element at its own position and hold Atom runs.
-; [tested: variadic_arrows; commit=WORKTREE]
+; [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7]
 
 (: vsum (-> (:seg Number) Number))
 (= (vsum (:seg $ns)) (foldl-atom $ns 0 +))

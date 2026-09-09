@@ -2,7 +2,7 @@
 %   functions when their source equations change.
 % Guarantees: segment_specialization/4 compiles an arriving arity once and
 %   uses the existing source rollback and specialization invalidation owner
-%   [tested: variadic_arrows; commit=WORKTREE].
+%   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Guarantees:
 %   - Specializer assertions made while loading a source participate in source
 %     rollback [tested 2026-08-14:

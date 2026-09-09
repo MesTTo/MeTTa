@@ -8,7 +8,7 @@
 
 % Purpose: compile error propagation, control forms, binding forms, and special-form calls
 % Guarantees: segment-only arity fallbacks present their compiled family while
-%   building the call site [tested: variadic_arrows; commit=WORKTREE].
+%   building the call site [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.

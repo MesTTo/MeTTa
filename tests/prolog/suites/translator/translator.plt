@@ -4,7 +4,7 @@
 %   see at all: dispatch goal ordering, equation-store growth and translation
 %   growth each leave every answer exactly as it was.
 % Guarantees: nop reflection reports its final (:seg %Undefined%) parameter
-%   [tested: tests/prolog/suites/translator/translator.plt; commit=WORKTREE].
+%   [tested: tests/prolog/suites/translator/translator.plt; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Guarantees:
 %   - Restricted-space capability and raw-goal safety guards remain visible in
 %     the compiled goal list ahead of the operation they protect, while an

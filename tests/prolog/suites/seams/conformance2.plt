@@ -2,7 +2,7 @@
 % Assumes: run from tests/prolog so ../../engine/metta.pl resolves to this tree.
 % Guarantees: every semantic fix below produces its pinned answer through an
 %   equation body and through eval/2.
-%   [tested: conformance2; commit=WORKTREE].
+%   [tested: conformance2; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

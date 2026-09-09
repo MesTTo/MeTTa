@@ -1,7 +1,7 @@
 % Purpose: resolve scoped declarations, type compatibility, metatypes, and typed-call introspection
 % Guarantees: reported_rest_arrow/3 reports the result of an empty splice run
 %   while get-type of its head retains the written arrow
-%   [tested: variadic_arrows; commit=WORKTREE].
+%   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Guarantees: builtin_surface_governs_in/2 omits the prelude lookup for a
 %   known name in the base module and retains named-space shadowing
 %   [tested: prelude:a_named_space_shadows_a_prelude_name_at_another_arity;

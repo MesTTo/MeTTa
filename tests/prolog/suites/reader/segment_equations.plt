@@ -1,7 +1,7 @@
 % Purpose: pin sequence variables in equation heads through compiled and
 %   variable-headed dynamic calls.
 % Guarantees: a declared (:seg Atom) run stays held at every tested arity
-%   [tested: segment_equations; commit=WORKTREE].
+%   [tested: segment_equations; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Assumes: run from tests/prolog, which is what check.sh does; the relative
 %   engine path resolves against that directory.
 % Guarantees:

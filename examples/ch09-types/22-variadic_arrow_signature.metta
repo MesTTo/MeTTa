@@ -1,5 +1,5 @@
 ; Purpose: present an arrow's final splice at every arriving arity.
-; [tested: variadic_arrows; commit=WORKTREE]
+; [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7]
 
 ; Each Bool-valued effect is evaluated before do2 discards its run. The body
 ; returns unit, whose type is (->); printing itself returns Bool here.
