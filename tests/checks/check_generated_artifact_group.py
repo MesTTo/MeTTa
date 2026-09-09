@@ -2,7 +2,7 @@
 
 Guarantees: every declared artifact participates in the dependency-ordered
 checks and guide [tested: check_generated_artifact_group_selftest.py;
-commit=WORKTREE].
+commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e].
 """
 
 from __future__ import annotations

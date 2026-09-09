@@ -45,7 +45,7 @@ metta_gate_scratch_open() {
     # space already uses this property for crash-safe ownership: the kernel
     # releases flock only after the last descriptor for its open-file
     # description closes [source: extensions/python/metta/foreign/_persistent.py:287,
-    # _claim_journal_lock; commit=WORKTREE].
+    # _claim_journal_lock; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e].
     exec 7>"$METTA_GATE_SCRATCH_BASE/.allocation.lock" || return 2
     flock -x 7 || {
         echo "gate scratch: cannot lock the allocator" >&2

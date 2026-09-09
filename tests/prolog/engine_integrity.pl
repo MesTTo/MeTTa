@@ -75,7 +75,7 @@ module_or_ancestor(Module, Seen, Ancestor) :-
 %A built-in name the module already holds, by whatever route. Autoloadable
 %library procedures are not excluded merely for being static, as the host
 %registration probe's assert-and-erase check also requires
-%[source: engine/metta/interop.pl:metta_host_probe_function/2; commit=WORKTREE].
+%[source: engine/metta/interop.pl:metta_host_probe_function/2; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e].
 module_holds(Module, Name, Arity, Owner) :-
     functor(Head, Name, Arity),
     predicate_property(Module:Head, built_in),

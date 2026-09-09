@@ -594,7 +594,7 @@ translate_special_dl(transaction, [Expr], AfterHead, Goals, Out) :-
 %Lisp's `with-random-state`, the same shape metta/algebra.py already uses on
 %the Python side with random.Random(seed) rather than the module generator
 %[source: extensions/python/metta/algebra/__init__.py:1701, "Draw a stable cumulative rate
-%selection using isolated seeded state"; commit=WORKTREE]. `set_random(seed(S))` alone would be
+%selection using isolated seeded state"; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]. `set_random(seed(S))` alone would be
 %the global this refuses.
 %
 %The body is compiled IN PLACE, as transaction's is, so the scope costs one

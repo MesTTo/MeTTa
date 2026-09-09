@@ -22,7 +22,7 @@
 %     - lib/ is in scope and extensions/python/metta/_binding/shim.pl is not. shim.pl is consulted
 %       by _engine.py as the Python tier's own implementation, so it is
 %       engine-internal by construction rather than an extension
-%       [source: extensions/python/metta/_binding/runtime.py:1114, _consult_shim; commit=WORKTREE].
+%       [source: extensions/python/metta/_binding/runtime.py:1114, _consult_shim; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e].
 % Open Obligations:
 %     To Do: None
 %     Hacks: None

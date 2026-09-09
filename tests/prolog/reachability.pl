@@ -19,7 +19,7 @@
 %     - the Python half names its Prolog entry points as text, so a predicate
 %       named inside a string literal in extensions/python/metta/*.py is called across
 %       janus [source: extensions/python/metta/_binding/runtime.py:1291, apply/2 and do/2 take the
-%       predicate NAME and hand it to janus.apply_once/cmd; commit=WORKTREE]
+%       predicate NAME and hand it to janus.apply_once/cmd; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]
 % Guarantees:
 %     - reachability_report/0 walks every clause of every predicate defined
 %       under engine/, lib/, extensions/mork/, extensions/mork/mork_ffi/ and

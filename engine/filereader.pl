@@ -2019,7 +2019,7 @@ print_function_form(FormStr, Ref) :-
 %test_every_unicode_whitespace_separates_top_level_forms]. Only "\n" counts a
 %line, here and in the Python locator, which counts source.count("\n"), so
 %LINE SEPARATOR and NEL are ordinary layout on both sides
-%[source: extensions/python/metta/_binding/positions.py:76; commit=WORKTREE].
+%[source: extensions/python/metta/_binding/positions.py:76; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e].
 source_layout(LC0, LC2) --> ";", !, source_comment(LC0, LC2).
 source_layout(LC0, LC2) --> "\n", !,
                              { LC1 is LC0 + 1 },

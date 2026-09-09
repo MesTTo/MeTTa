@@ -2,7 +2,7 @@
 
 Guarantees: this command uses the same discovery, renderer and drift check as
 extensions/python/tools/reference.py [tested:
-test_the_legacy_reference_generator_tracks_the_narrow_public_modules; commit=WORKTREE].
+test_the_legacy_reference_generator_tracks_the_narrow_public_modules; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e].
 """
 
 from __future__ import annotations

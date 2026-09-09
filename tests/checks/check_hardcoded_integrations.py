@@ -52,7 +52,7 @@ Assumes: a checkout of this repository, and Python 3.10+ for
 Guarantees:
   - lazy and optional loader calls expose their module names whether imported
     directly or reached through _lazy [tested:
-    tests/checks/check_hardcoded_integrations_selftest.py; commit=WORKTREE]
+    tests/checks/check_hardcoded_integrations_selftest.py; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]
   - a library named anywhere in a seat's core is reported with its path, its
     line and what to do instead, with no allowlist that could admit it
     [tested: tests/checks/check_hardcoded_integrations_selftest.py;

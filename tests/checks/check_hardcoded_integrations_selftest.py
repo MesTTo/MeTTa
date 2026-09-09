@@ -18,7 +18,7 @@ nowhere now.
 Assumes: a writable ai-tmp/ in this repository.
 Guarantees:
   - literal libraries reached through lazy() and optional() are refused in
-    both direct and qualified forms [tested: this file; commit=WORKTREE]
+    both direct and qualified forms [tested: this file; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]
   - only an exact row-generated annotation projection may name optional
     providers; runtime imports and added imports still fail [tested:
     this file; commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543]

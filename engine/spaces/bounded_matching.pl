@@ -294,9 +294,9 @@ metta_match_all([X|Xs], [Y|Ys]) :-
 %metta_require_space_name/2 refuses it at new-space and inherits [source:
 %engine/spaces/lifecycle.pl], register_provider refuses it at the Python
 %door [source: extensions/python/metta/foreign/__init__.py:583, "a space name starts with
-%&"; commit=WORKTREE], both wire codecs refuse to decode any other spelling [source:
+%&"; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e], both wire codecs refuse to decode any other spelling [source:
 %extensions/python/metta/_binding/wire.pl:242 metta_py_decode_(p, ...) and
-%extensions/node/bridge.pl; commit=WORKTREE], MORK's own ownership test is the same prefix
+%extensions/node/bridge.pl; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e], MORK's own ownership test is the same prefix
 %[source: backends/mork/mork_ffi/morkspaces.pl, mork_owns_space/1], and a
 %state cell spells its handle the same way [source: engine/metta/control.pl,
 %metta_state_cell/1]. Every seam:foreign_space/1 clause in this tree names a

@@ -2,9 +2,9 @@
 # Purpose: build and install the distribution the extension-new command writes.
 # Guarantees: installed metadata advertises its door, both receiver tiers call
 #   it, and withdrawal invalidates a retained method [tested:
-#   sh check.sh extension-scaffold; commit=WORKTREE].
+#   sh check.sh extension-scaffold; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e].
 # Owns resources: the temporary distribution, wheel and installation are removed
-#   by the EXIT trap [source: this file; commit=WORKTREE].
+#   by the EXIT trap [source: this file; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e].
 set -eu
 
 project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)

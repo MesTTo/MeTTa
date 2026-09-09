@@ -2580,7 +2580,7 @@ metta_catalog_preset([kind, capacity, symbol, integer]).
 %NOT the `limit` vocabulary above, which is a different question about the same
 %word: that one is which bound STOPPED a run and is what a trace reports, and
 %conflating the two would let a trace claim it was cut by a display width
-%[source: extensions/python/metta/_catalog/bounds.py:206, the row-backed settings; commit=WORKTREE].
+%[source: extensions/python/metta/_catalog/bounds.py:206, the row-backed settings; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e].
 metta_catalog_preset([kind, limit, symbol, integer]).
 metta_catalog_preset([kind, writes, symbol, ['one-of', atomicity]]).
 metta_catalog_preset([kind, events, symbol, ['one-of', delivery],

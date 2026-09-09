@@ -114,7 +114,7 @@ Guarantees:
   - MORK's Python benchmark selftest carries checked evidence and provenance
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
   - Python package claims remain checked after sources move into subpackages
-    [tested: test_nested_package_evidence_rejects_a_missing_test; commit=WORKTREE]
+    [tested: test_nested_package_evidence_rejects_a_missing_test; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs

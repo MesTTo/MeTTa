@@ -113,7 +113,7 @@
 #     tests/checks/check_kernel_ledger_selftest.py; commit=d7a55be4e931732a02f2178013aed47bb9cde474].
 #   - generated-artifacts derives selection, checks and dependency order from
 #     the artifact manifest [tested:
-#     tests/checks/check_generated_artifact_group_selftest.py; commit=WORKTREE].
+#     tests/checks/check_generated_artifact_group_selftest.py; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e].
 #   - the refusals page is the engine's own (refusal ...) rows rendered, and a
 #     kind on one side of the shared list only is a finding rather than a
 #     missing section [tested:
