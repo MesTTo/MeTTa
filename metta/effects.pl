@@ -568,7 +568,7 @@ metta_operation_effect(Name, Effect) :-
 %Python definition reflection also writes inferred effect rows, including a
 %generator's answer-count lift; those remain governed by the body walk.
 %[source: extensions/python/metta/_compile/facts.py:144;
-%commit=WORKTREE].
+%commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e].
 metta_annotated_operation_effect(Name, Effect) :-
     once(spaces:metta_arrow_product(Name, _, _, _, _)),
     metta_operation_effect(Name, Effect).

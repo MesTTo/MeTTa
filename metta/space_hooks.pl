@@ -850,7 +850,7 @@ metta_emits(Ctx, Policy) :-
 %events" from "it can be written" made a watcher hear this process's own
 %writes and silently miss every other one [source:
 %extensions/python/metta/foreign/__init__.py:422; measured
-%2026-08-19; commit=WORKTREE]. So a foreign context serves subscriptions when it declares
+%2026-08-19; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]. So a foreign context serves subscriptions when it declares
 %(events ...) and is refused when it does not, naming what is missing.
 %
 %The worked foreign instances are in this tree's own dependencies: redis
