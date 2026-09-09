@@ -22,6 +22,10 @@
 % Owns resources: fun_meta_head/3 and fun_meta_projection/4 are compiler
 %   artifacts journalled with their source occurrence and retired by
 %   drop_fun_meta/4, drop_fun_meta/5, clear_fun_meta/2, or source withdrawal.
+%   segment_dispatch_refs/5 holds name-indexed compile/runtime guards under
+%   that same occurrence lifetime [tested:
+%   variadic_arrows:segment_dispatch_guards_are_source_occurrence_owned;
+%   commit=WORKTREE].
 %   deferred_equation_types/4 keys captured declarations by stored occurrence;
 %   materialize_with_queued_types/4 consumes its row transactionally and source
 %   withdrawal retires unused rows [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
@@ -54,6 +58,7 @@
 :- dynamic fun_meta_clause_types/5.
 :- dynamic fun_meta_head/3.
 :- dynamic fun_meta_projection/4.
+:- dynamic segment_dispatch_refs/5.
 
 % A covering index keeps every field a read needs beside its source identity.
 % PostgreSQL 18 also requires source visibility for index-only scans:
@@ -89,15 +94,21 @@ record_fun_meta(F, Args, Body, Types) :-
                transaction(record_fun_meta_rows(Module, F, Args, Body, Types))).
 
 record_fun_meta_rows(Module, F, Args, Body, Types) :-
+    asserta(fun_meta_clause(Module, F, Args, Body), Ref),
+    record_source_assertion(Ref),
     (   metta_seq_present(Args)
     ->  (   metta_any_segment_equation
         ->  true
         ;   assertz(metta_any_segment_equation)
-        )
+        ),
+        install_segment_dispatch(Module, F, CompileRef, RuntimeRef),
+        record_source_assertion(CompileRef),
+        record_source_assertion(RuntimeRef),
+        assertz(segment_dispatch_refs(Module, F, Ref, CompileRef, RuntimeRef),
+                DispatchRef),
+        record_source_assertion(DispatchRef)
     ;   true
     ),
-    asserta(fun_meta_clause(Module, F, Args, Body), Ref),
-    record_source_assertion(Ref),
     asserta(fun_meta_head(Module, F, Args), HeadRef),
     record_source_assertion(HeadRef),
     asserta(fun_meta_projection(Module, F, Ref, HeadRef), ProjectionRef),
@@ -249,6 +260,7 @@ drop_fun_meta_rows(Module, F, Args, Body, Owner) :-
              (StoredArgs-StoredBody) =@= (Args-Body),
              source_removal_owns_metadata(Owner, Ref) ))
     -> retract(fun_meta_projection(Module, F, Ref, HeadRef)),
+       drop_segment_dispatch(Module, F, Ref),
        erase(HeadRef),
        erase(Ref)
     ; true ),
@@ -273,11 +285,20 @@ source_removal_owns_metadata(source(Load), Ref) :-
 % teardown wants and what the engine must never pass.
 clear_fun_meta(Module, F) :-
     with_mutex('$metta_fun_metadata',
-               transaction(( retractall(fun_meta_clause(Module, F, _, _)),
+               transaction(( drop_segment_dispatch(Module, F, _),
+                             retractall(fun_meta_clause(Module, F, _, _)),
                              retractall(fun_meta_clause_types(Module, F, _, _, _)),
                              retractall(fun_meta_head(Module, F, _)),
                              retractall(fun_meta_projection(Module, F, _, _)),
                              retractall(head_pattern_note(Module, F, _, _, _)) ))).
+
+% Like annotated-arrow dispatch, each installed guard belongs to the source
+% occurrence that needs it. Source withdrawal can already have erased a ref.
+% [tested: variadic_arrows; commit=WORKTREE]
+drop_segment_dispatch(Module, F, Ref) :-
+    forall(retract(segment_dispatch_refs(Module, F, Ref, CompileRef, RuntimeRef)),
+           ( ( clause_property(CompileRef, erased) -> true ; erase(CompileRef) ),
+             ( clause_property(RuntimeRef, erased) -> true ; erase(RuntimeRef) ) )).
 
 % WHAT THE COMPILER DECIDED ABOUT A HEAD PATTERN POSITION, one row per
 % position, and every decision it can take there is recorded because all of
@@ -753,7 +774,9 @@ seam:engine_emitted(dispatch_refinement_mismatch_result/4).
 seam:engine_emitted(metta_record_refinement_failure/3).
 seam:engine_emitted(metta_refined_result/6).
 seam:engine_emitted(dispatch_no_match_result/3).
-seam:engine_emitted(dispatch_policy_execute/5).
+% The dynamic policy dispatcher is emitted with its concrete translator
+% qualifier; importing a dynamic predicate cannot protect it from capture.
+% [tested: variadic_arrows; commit=WORKTREE]
 seam:engine_emitted(metta_application_result/3).
 seam:engine_emitted(metta_application_result/4).
 seam:engine_emitted(metta_eval_step/2).
@@ -964,36 +987,135 @@ restore_static_contract_shortcuts(previous(Previous)) :-
 restore_static_contract_shortcuts(absent) :-
     nb_delete('$metta_static_contract_shortcuts').
 
+% Generate one member of the arriving arity's finite cut family. The caller
+% owns publication and invalidation; this compiler does not retain another
+% source equation. A nested subject's shape is unknown here, so its already
+% parsed matcher remains a residual operation.
+% [tested: variadic_arrows, segment_equations; commit=WORKTREE]
+translate_segment_family_clause(F, Name, Args0, BodyExpr, Types, N,
+                                Clause) :-
+    with_static_contract_shortcuts(enabled,
+        ( translate_equation_head(F, Args0, true, Pattern, Prefix),
+          translate_segment_family_from_head(F, Name, Pattern, Prefix,
+                                             BodyExpr, Types, N, Clause) )).
+
+translate_segment_family_from_head(F, Name, Pattern, Prefix, BodyExpr, Types, N,
+                                (Head :- Body)) :-
+    current_metta_module(Module),
+    (   metta_seq_present(Pattern)
+    ->  metta_seq_head_plan(Pattern, Plan),
+        metta_seq_body_plan(BodyExpr, ParsedBody),
+        length(Args, N),
+        (   Plan = '$metta_seq'(one_sided(left), Items),
+            maplist(segment_shape_item, Items)
+        ->  segment_shape_items(Items, Args, [], Bindings, MatchGoals, []),
+            segment_shape_bindings(Bindings),
+            metta_seq_instantiate(ParsedBody, PresentedBody),
+            append(MatchGoals, Prefix, GoalsPrefix),
+            with_static_parameter_environment(Module, F, Args, Types,
+                translate_segment_body_plan(F, PresentedBody, GoalsPrefix,
+                                            BodyPlan)),
+            segment_family_body(Module, F, BodyPlan, RawOut, RawBody)
+        ;   with_static_parameter_environment(Module, F, Args, Types,
+                translate_segment_body_plan(F, BodyExpr, Prefix, BodyPlan)),
+            RawBody = metta_segment_rule_result(Module, F, Plan, BodyPlan,
+                                                Args, RawOut)
+        )
+    ;   length(Pattern, N),
+        Args = Pattern,
+        with_static_parameter_environment(Module, F, Args, Types,
+            translate_equation_body_result(F, BodyExpr, GoalsBody, RawOut)),
+        append(Prefix, GoalsBody, Goals),
+        goals_list_to_conj(Goals, RawBody)
+    ),
+    append(Args, [RawOut], RawArgs),
+    RawHead =.. [Name|RawArgs],
+    merge_branch_returns(RawHead, RawBody, Merged),
+    normalize_equation_result(F, Args, RawOut, Out, Merged, Normalized),
+    append(Args, [Out], HeadArgs),
+    Head =.. [Name|HeadArgs],
+    merge_branch_returns(Head, Normalized, Body0),
+    defer_application_protocol(Body0, Body, HasNegation),
+    ( HasNegation == found -> quantify_negations(Head, Body) ; true ).
+
+segment_family_body(_, _, compiled(Goals, Value), Value, Goals).
+segment_family_body(Module, F, spliced(Prefix, Template), Out,
+                    metta_segment_body_result(Module, F,
+                                              spliced(Prefix, Template), Out)).
+
+segment_shape_item(Item) :-
+    ( var(Item) -> true
+    ; atomic(Item) -> true
+    ; Item = '$metta_seg'(_, _) ).
+
+segment_shape_items([], [], Bindings, Bindings, Goals, Goals).
+segment_shape_items([Item|Items], Args, Before, After, Goals0, Goals) :-
+    (   nonvar(Item), Item = '$metta_seg'(Var, _)
+    ->  append(Run, Rest, Args),
+        segment_shape_binding(Var, Run, Before, Next, Goals0, Goals1)
+    ;   Args = [Arg|Rest],
+        (   var(Item)
+        ->  segment_shape_binding(Item, Arg, Before, Next, Goals0, Goals1)
+        ;   Next = Before,
+            Goals0 = [metta_match_atoms(Item, Arg)|Goals1]
+        )
+    ),
+    segment_shape_items(Items, Rest, Next, After, Goals1, Goals).
+
+segment_shape_binding(Var, Value, Before, After, Goals0, Goals) :-
+    (   segment_shape_lookup(Var, Before, Known)
+    ->  After = Before,
+        Goals0 = [metta_match_atoms(Known, Value)|Goals]
+    ;   After = [Var-Value|Before],
+        Goals0 = Goals
+    ).
+
+segment_shape_lookup(Var, [Key-Value|Rest], Found) :-
+    ( Var == Key -> Found = Value ; segment_shape_lookup(Var, Rest, Found) ).
+
+segment_shape_bindings([]).
+segment_shape_bindings([Var-Value|Bindings]) :-
+    Var = Value,
+    segment_shape_bindings(Bindings).
+
+segment_family_branch(Args, Out, member(BranchArgs, Value, Body), Branch) :-
+    BranchArgs = Args,
+    term_variables(Args, Parameters),
+    (   var(Value), \+ variable_member(Parameters, Value)
+    ->  Value = Out, Branch = Body
+    ;   build_branch(Body, Value, Out, Branch)
+    ).
+
+% A single member is already a complete clause. Multiple members keep their
+% output bindings inside their alternatives; each was normalized exactly once.
+segment_family_members([member(Args, Out, Body)], Args, Out, _, Body) :- !.
+segment_family_members(Members, Args, Out, Head, Body) :-
+    maplist(segment_family_branch(Args, Out), Members, Branches),
+    disj_list(Branches, Body0),
+    merge_branch_returns(Head, Body0, Body).
+
 translate_clause_impl(Input, (Head :- BodyConj), ConstrainArgs, _) :-
     Input = [=, [F|Args0], BodyExpr],
     metta_seq_present(Args0),
     !,
-    translate_equation_head(F, Args0, ConstrainArgs, Args1, GoalsPrefix),
+    translate_equation_head(F, Args0, ConstrainArgs, Args1, Prefix),
     record_fun_meta(F, Args1, BodyExpr, ArrivalTypes),
-    metta_seq_head_plan(Args1, HeadPlan),
-    current_metta_module(Module),
-    with_static_parameter_environment(
-        Module, F, Args1, ArrivalTypes,
-        translate_segment_body_plan(F, BodyExpr, GoalsPrefix, BodyPlan)),
     same_length(Args1, CallArgs),
     append(CallArgs, [Out], FinalArgs),
     compiled_function_name(F, Predicate),
     Head =.. [Predicate|FinalArgs],
     length(FinalArgs, CompiledArity),
     register_arity(F, CompiledArity),
-    RawBody = metta_segment_rule_result(Module, F, HeadPlan, BodyPlan,
-                                        CallArgs, RawOut),
-    append(CallArgs, [RawOut], RawFinalArgs),
-    RawHead =.. [Predicate|RawFinalArgs],
-    merge_branch_returns(RawHead, RawBody, MergedRawBody),
-    normalize_equation_result(F, CallArgs, RawOut, Out, MergedRawBody,
-                              BodyConj0),
-    merge_branch_returns(Head, BodyConj0, BodyConj1),
-    defer_application_protocol(BodyConj1, BodyConj, HasNegation),
-    (   HasNegation == found
-    ->  quantify_negations(Head, BodyConj)
-    ;   true
-    ).
+    length(CallArgs, N),
+    findall(member(BranchArgs, BranchOut, BranchBody),
+        ( translate_segment_family_from_head(F, Predicate, Args1, Prefix,
+                                          BodyExpr, ArrivalTypes, N,
+                                          (BranchHead :- BranchBody)),
+          BranchHead =.. [_|BranchAll],
+          append(BranchArgs, [BranchOut], BranchAll) ),
+        Members),
+    segment_family_members(Members, CallArgs, Out, Head, BodyConj).
+
 translate_clause_impl(Input, (Head :- BodyConj), ConstrainArgs, ArityPolicy) :-
                                                Input = [=, [F|Args0], BodyExpr],
                                                translate_equation_head(F, Args0, ConstrainArgs,
@@ -1134,9 +1256,9 @@ normalized_equation_tail_goal(Goal0, RawOut, [Caller|_], Out, Goal) :-
     append(Inputs, [Out], Arguments),
     Goal =.. [Predicate|Arguments].
 normalized_equation_tail_goal(
-    dispatch_policy_execute(Module, Fun, Args, Goal0, Produced), RawOut,
+    translator:dispatch_policy_execute(Module, Fun, Args, Goal0, Produced), RawOut,
     [Caller|_], Out,
-    dispatch_policy_execute(Module, Fun, Args, Goal, Out)) :-
+    translator:dispatch_policy_execute(Module, Fun, Args, Goal, Out)) :-
     Produced == RawOut,
     Fun == Caller,
     replace_goal_output(Goal0, RawOut, Out, Goal).
@@ -1207,13 +1329,10 @@ constrain_head_arguments([A0|As0], Index, Module, F, Tier, [A|As], [G|Gs],
     Next is Index + 1,
     constrain_head_arguments(As0, Next, Module, F, Tier, As, Gs, Rest).
 
-%An equation head containing `(:seg $x)` cannot be represented by Prolog's
-%fixed-arity head unification alone.  Compile its body exactly once, retain the
-%variables shared with the parsed head, and put the one-sided hedge match in
-%front of those goals.  Calls at the written arity take this ordinary compiled
-%clause; calls at another arity use metta_segment_dispatch/4 over the retained
-%source equations [tested: tests/prolog/suites/reader/segment_equations.plt;
-%commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
+% A presented run is substituted before body compilation. A splice whose
+% nested shape remains unknown retains a parsed template sharing the head's
+% variables, so matching supplies the eventual body shape.
+% [tested: tests/prolog/suites/reader/segment_equations.plt; commit=WORKTREE]
 translate_segment_body_plan(F, BodyExpr, GoalsPrefix, BodyPlan) :-
     (   metta_seq_present(BodyExpr)
     ->  metta_seq_body_plan(BodyExpr, ParsedBody),

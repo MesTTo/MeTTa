@@ -1,4 +1,7 @@
 % Purpose: resolve scoped declarations, type compatibility, metatypes, and typed-call introspection
+% Guarantees: reported_rest_arrow/3 reports the result of an empty splice run
+%   while get-type of its head retains the written arrow
+%   [tested: variadic_arrows; commit=WORKTREE].
 % Guarantees: builtin_surface_governs_in/2 omits the prelude lookup for a
 %   known name in the base module and retains named-space shadowing
 %   [tested: prelude:a_named_space_shadows_a_prelude_name_at_another_arity;
@@ -34,7 +37,7 @@
 %   runtime chain `[A,B]`. The annotation remains available only through
 %   metta_arrow_type_shape/5.
 %   - metta_presented_arrow_chain(+Raw,+Arity,-Presented) applies the existing
-%   arrow-arity and `%Rest%` presentation rules to either spelling. Arity is
+%   arrow-arity and `:seg` presentation rules to either spelling. Arity is
 %   the call's input count; Presented is the headless parameter/result chain.
 %   A named arrow-arity refusal or an invalid Raw makes the projection fail.
 %   - This plain unit is consulted into the engine implementation module.
@@ -573,14 +576,14 @@ reported_rest_arrow(Module, F, Result) :-
     nonvar(F),
     (   metta_self_module(Module)
     ->  (   normalized_self_type_declaration(F, Raw),
-            metta_runtime_type(Raw, [->, ['%Rest%', _], Result])
+            metta_runtime_type(Raw, [->, [':seg', _], Result])
         *-> true
-        ;   seam:builtin_type_declaration(F, [->, ['%Rest%', _], Result])
+        ;   seam:builtin_type_declaration(F, [->, [':seg', _], Result])
         )
     ;   (   type_declaration_in(Module, F, Raw),
-            metta_runtime_type(Raw, [->, ['%Rest%', _], Result])
+            metta_runtime_type(Raw, [->, [':seg', _], Result])
         *-> true
-        ;   seam:builtin_type_declaration(F, [->, ['%Rest%', _], Result])
+        ;   seam:builtin_type_declaration(F, [->, [':seg', _], Result])
         )
     ).
 

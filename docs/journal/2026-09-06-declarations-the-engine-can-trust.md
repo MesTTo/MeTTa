@@ -398,3 +398,10 @@ Decided: the survey's method was wrong for a mature codebase, where the
 first question is what the library already spells, and the correction stands
 beside the survey rather than replacing it, per the journal's own rule that an
 entry is true to its date.
+
+## 2026-09-09: the arrow run uses the pattern spelling
+
+The earlier `Unpack` map's `(%Rest% T)` is superseded by `(:seg T)` in the
+final arrow-parameter position. The finite arity presentation is unchanged;
+runtime diagnostics and masks now consume it too. The implementation and
+measurements are recorded in `2026-09-09-the-splice-in-an-arrow.md`.

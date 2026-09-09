@@ -1,5 +1,8 @@
 % Purpose: specialize higher-order MeTTa calls and invalidate generated
 %   functions when their source equations change.
+% Guarantees: segment_specialization/4 compiles an arriving arity once and
+%   uses the existing source rollback and specialization invalidation owner
+%   [tested: variadic_arrows; commit=WORKTREE].
 % Guarantees:
 %   - Specializer assertions made while loading a source participate in source
 %     rollback [tested 2026-08-14:
@@ -67,6 +70,7 @@
 :- encoding(utf8).
 :- module(specializer,
           [ maybe_specialize_call/4,
+            segment_specialization/4,
             prepare_specialization_invalidation/2,
             metta_refresh_specialization_verification/0,
             metta_finish_specialization_verification/0,
@@ -147,6 +151,72 @@ maybe_specialize_call(HV, AVs, Out, Goal) :-
             restore_nb_state('$metta_spec_needed', PreviousNeeded) )),
       nb_setval('$metta_spec_needed', true)
     ).
+
+% Arity is static; argument values remain dynamic. Register the residual
+% predicate before translating its bodies, as LOGEN does for a pending memo
+% entry, so recursion can name the artifact being generated.
+% https://github.com/leuschel/logen/blob/0ea806f54628162615e25177c3ed98f6b2c27935/cogen.pl#L539-L614
+segment_specialization(Fun, Args, Out, Goal) :-
+    translator:metta_segment_equation(Fun),
+    \+ get_native_atom('&metta', [tabled, _, Fun, _]),
+    current_metta_module(Module),
+    length(Args, N),
+    specialization_name(Fun, [segment_shape(N)], Name),
+    (   ho_specialization(Module, Fun, Name)
+    ->  true
+    ;   ( nb_current('$metta_segment_stack', Stack) -> true ; Stack = [] ),
+        \+ memberchk(Module-Fun, Stack),
+        setup_call_cleanup(
+            nb_setval('$metta_segment_stack', [Module-Fun|Stack]),
+            with_typing_policy_stable(
+                with_mutex('$metta_specializer',
+                    transaction(segment_specialization_locked(
+                        Module, Fun, N, Name)))),
+            nb_setval('$metta_segment_stack', Stack))
+    ),
+    specialization_goal(Name, Args, Out, Goal).
+
+segment_specialization_locked(Module, Fun, _, Name) :-
+    ho_specialization(Module, Fun, Name), !.
+segment_specialization_locked(Module, Fun, N, Name) :-
+    fun_meta_clauses(Module, Fun, Internal),
+    paired_source_meta_clauses(Module, Fun, Internal, PairedNewest),
+    reverse(PairedNewest, Paired),
+    translator:dispatch_meta_clauses(Module, Fun, Typed),
+    maplist(segment_typed_pair, Paired, Typed, Family),
+    (   member(paired_meta(fun_meta(WrittenHead, _), _, _), Paired),
+        length(WrittenHead, N)
+    ->  Selection = written
+    ;   Selection = arriving
+    ),
+    register_fun_in(Module, Name),
+    Arity is N + 1,
+    register_arity(Name, Arity),
+    assertz(ho_specialization(Module, Fun, Name), Ownership),
+    record_source_assertion(Ownership),
+    record_specialization_support(Module, Fun, Name),
+    findall(Clause,
+        ( member(segment_source(Head, SourceArgs, SourceBody, Types), Family),
+          segment_family_selected(Selection, N, Head),
+          translator:translate_segment_family_clause(
+              Fun, Name, SourceArgs, SourceBody, Types, N, Clause) ),
+        Clauses0),
+    (   Clauses0 == []
+    ->  functor(FailedHead, Name, Arity),
+        Clauses = [(FailedHead :- fail)]
+    ;   Clauses = Clauses0
+    ),
+    forall(member(Clause, Clauses),
+           ( assertz(Module:Clause, Ref), record_source_assertion(Ref) )).
+
+segment_typed_pair(paired_meta(fun_meta(Head, Body),
+                               fun_meta(SourceArgs, SourceBody), _),
+                   dispatch_clause(TypedHead, TypedBody, Types),
+                   segment_source(Head, SourceArgs, SourceBody, Types)) :-
+    Head-Body =@= TypedHead-TypedBody.
+
+segment_family_selected(written, N, Head) :- length(Head, N).
+segment_family_selected(arriving, _, Head) :- metta_seq_present(Head).
 
 active_specialization(HV, [specializing(ActiveHV, Key, SpecName)|_],
                       Key, SpecName) :-
@@ -626,7 +696,7 @@ metta_check_specialization(SpecName, Spec) :-
     copy_term(Args, SpecArgs),
     copy_term(Args, PlainArgs),
     SpecCopy =.. [SpecName|SpecArgs],
-    metta_specialization_generic(SpecName, PlainArgs, Generic),
+    metta_specialization_generic(Module, SpecName, PlainArgs, Generic),
     metta_specialization_budget(Budget),
     %Both sides run with that module IN FORCE as well as qualified. The
     %generic side reaches reduce/3 for a higher-order argument, and reduce/3
@@ -675,9 +745,16 @@ metta_specialization_budget(Budget) :-
 %The generic twin of a specialized call: the same arguments through the
 %function the specialization was cloned from, which is exactly what would
 %have run had the plan been refused.
-metta_specialization_generic(SpecName, Args, Generic) :-
-    ho_specialization(_, HV, SpecName), !,
-    Generic =.. [HV|Args].
+metta_specialization_generic(Module, SpecName, Args, Generic) :-
+    ho_specialization(Module, HV, SpecName), !,
+    append(Inputs, [Out], Args), !,
+    length(Inputs, N),
+    specialization_name(HV, [segment_shape(N)], SegmentName),
+    (   SpecName == SegmentName
+    ->  Generic = translator:metta_segment_generic_dispatch(
+                      Module, HV, Inputs, Out)
+    ;   Generic =.. [HV|Args]
+    ).
 
 %Extracts clause-head variables and their call-site copies, producing eligible Var–Copy pairs for specialization:
 specializable_vars(BodyExpr, Value, Arg, HoVars) :-

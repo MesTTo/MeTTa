@@ -3,6 +3,8 @@
 %   and for the translator's COST guarantees, which no correctness test can
 %   see at all: dispatch goal ordering, equation-store growth and translation
 %   growth each leave every answer exactly as it was.
+% Guarantees: nop reflection reports its final (:seg %Undefined%) parameter
+%   [tested: tests/prolog/suites/translator/translator.plt; commit=WORKTREE].
 % Guarantees:
 %   - Restricted-space capability and raw-goal safety guards remain visible in
 %     the compiled goal list ahead of the operation they protect, while an
@@ -943,7 +945,7 @@ test(nop_evaluates_the_arguments_it_discards) :-
 % expression's `(->)` result through the observer boundary.
 test(nop_carries_a_variadic_unit_type) :-
     process_metta_string("!(get-type nop)", Answers),
-    Answers == [['->', ['%Rest%', '%Undefined%'], ['->']]].
+    Answers == [['->', [':seg', '%Undefined%'], ['->']]].
 
 test(space_predicates_use_space_storage,
      [ setup(add_sexp('&self', [plunit_space_predicate, a, b])),

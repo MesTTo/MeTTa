@@ -1,5 +1,7 @@
 % Purpose: pin sequence variables in equation heads through compiled and
 %   variable-headed dynamic calls.
+% Guarantees: a declared (:seg Atom) run stays held at every tested arity
+%   [tested: segment_equations; commit=WORKTREE].
 % Assumes: run from tests/prolog, which is what check.sh does; the relative
 %   engine path resolves against that directory.
 % Guarantees:
@@ -85,7 +87,7 @@ test(a_written_rhs_segment_splices_its_bound_run,
 test(top_level_segment_accepts_zero_arguments_and_wider_arities,
      [ cleanup(forget_segment_function('pl-seg-all')) ]) :-
     segment_source(
-        "(: pl-seg-all (-> (%Rest% Atom) Atom))\n\c
+        "(: pl-seg-all (-> (:seg Atom) Atom))\n\c
          (= (pl-seg-all (:seg $xs)) (quote $xs))", _),
     segment_source("!(pl-seg-all)", [[quote, []]]),
     segment_source("!(pl-seg-all a)", [[quote, [a]]]),

@@ -364,7 +364,7 @@
 ;False by the source interpreter.
 ;[source: MettaHyperonFull/Minimal/Stdlib.lean:4010-4038,
 ;`is-function`; commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87]
-(: -> (-> (%Rest% Type) Type))
+(: -> (-> (:seg Type) Type))
 (: is-function (-> Type Bool))
 (= (is-function $type)
    (let $mtype (get-metatype $type)

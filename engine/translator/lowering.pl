@@ -1,4 +1,11 @@
 % Purpose: lower runnable expressions, calls, arguments, and dispatch policies into Prolog goals
+% Guarantees: data_head_masks/3 and builtin_argument_mask/4 derive each
+%   variadic mask through present_type_chain/3
+%   [tested: variadic_arrows; commit=WORKTREE].
+%   install_segment_dispatch/4 selects retained segment equations when an arriving
+%   arity resolves to a predicate outside their owner
+%   [tested: variadic_arrows:a_segment_arity_cannot_call_an_inherited_native_predicate;
+%   commit=WORKTREE].
 % Guarantees: verify-cardinality checks annotated calls while plain calls
 %   retain their generated goal [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarantees: Direct declaration probes use metta_runtime_type/2 before masking
@@ -298,6 +305,28 @@ dispatch_call_goal(Fun, Args, Out, Goal,
 %The declaration owns a name-indexed clause, like lib_memo's dispatch hook.
 %An unrelated name skips it in SWI's index and keeps the original compile path.
 :- dynamic dispatch_call_goal_in/6.
+:- dynamic dispatch_call_goal_for/6.
+:- dynamic dispatch_policy_execute/5.
+
+% A native collision matters only for names with retained segment equations.
+% Name-indexed clauses keep the guard off unrelated calls; metadata owns both
+% references through the same source journal as the retained equation.
+% [tested: variadic_arrows; commit=WORKTREE]
+install_segment_dispatch(Owner, Fun, CompileRef, RuntimeRef) :-
+    asserta(translator:(dispatch_call_goal_for(Module, Fun, Args, Out, Goal, Presented) :-
+                 fun_meta_module(Module, Fun, Owner),
+                 functor(Goal, Head, _), Head == Fun,
+                 predicate_property(Owner:Goal, imported_from(_)),
+                 metta_segment_equation_in(Owner, Fun, Owner),
+                 !,
+                 translator:present_segment_call(Fun, Args, Out, Goal, Presented)), CompileRef),
+    asserta(translator:(dispatch_policy_execute(Module, Fun, Args, Goal, Out) :-
+                 fun_meta_module(Module, Fun, Owner),
+                 functor(Goal, Head, _), Head == Fun,
+                 predicate_property(Owner:Goal, imported_from(_)),
+                 metta_segment_equation_in(Owner, Fun, Owner),
+                 !,
+                 metta_segment_dispatch(Module, Fun, Args, Out)), RuntimeRef).
 
 install_annotated_dispatch(Fun, Ref) :-
     asserta((dispatch_call_goal_in(Module, Fun, Args, Out, Goal, PolicyGoal) :-
@@ -371,7 +400,7 @@ dispatch_call_goal_for(Module, Fun, _, _, Goal, Goal) :-
     Policy == 'NoMatchFail',
     !.
 dispatch_call_goal_for(Module, Fun, Args, Out, Goal,
-                       dispatch_policy_execute(Module, Fun, Args, Goal, Out)) :-
+                       translator:dispatch_policy_execute(Module, Fun, Args, Goal, Out)) :-
     (   dispatch_selection_override(Fun)
     ;   \+ dispatch_head_covers(Module, Fun, Args, Goal),
         dispatch_any_head_matches(Module, Fun, Args, Goal)
@@ -381,6 +410,21 @@ dispatch_call_goal_for(Module, Fun, Args, Out, Goal, PolicyGoal) :-
     (   dispatch_head_covers(Module, Fun, Args, Goal)
     ->  PolicyGoal = Goal
     ;   PolicyGoal = dispatch_no_match_result(Fun, Args, Out)
+    ).
+
+% A retained segment family is presented only on the paths that already
+% established that it is needed. Fixed calls acquire no additional lookup.
+% [tested: variadic_arrows; commit=WORKTREE]
+present_segment_call(Fun, Args, Out, Resolved, Presented) :-
+    append(Args, [Out], DirectArgs),
+    Direct =.. [Fun|DirectArgs],
+    (   Resolved == Direct
+    ->  (   specializer:segment_specialization(Fun, Args, Out, Goal)
+        ->  Presented = Goal
+        ;   current_metta_module(Module),
+            Presented = metta_segment_dispatch(Module, Fun, Args, Out)
+        )
+    ;   Presented = Resolved
     ).
 
 constructor_inline_goal('cons-atom'(H, T, Out),
@@ -1517,8 +1561,15 @@ translate_data_args_dl(HV, Args, Goals0, Goals, AVs) :-
 %is static once loaded, so the masking heads are computed once and looked up
 %by name after that.
 data_head_masks(HV, Args, ArgTypes) :-
-    masking_data_head(HV, ArgTypes),
-    same_length(ArgTypes, Args),
+    masking_data_head(HV, Written),
+    (   Written = variadic(Run)
+    ->  length(Args, Arity),
+        append(Run, ['Atom'], Types),
+        present_type_chain([->|Types], Arity, [->|Presented]),
+        append(ArgTypes, [_], Presented)
+    ;   ArgTypes = Written,
+        same_length(ArgTypes, Args)
+    ),
     !.
 
 %Built from the engine's own declaration register after it loads. A program's
@@ -1562,10 +1613,14 @@ index_masking_data_heads :-
     forall(( seam:builtin_type_declaration(Name, Chain),
              chain_masks_an_argument(Chain),
              mask_positions_only(Chain, [->|Masked]),
-             append(ArgTypes, [_], Masked) ),
-           ( masking_data_head(Name, ArgTypes)
+             append(ArgTypes, [_], Masked),
+             ( append(_, [Rest], ArgTypes), rest_parameter(Rest, _)
+             -> Indexed = variadic(ArgTypes)
+             ;  Indexed = ArgTypes
+             ) ),
+           ( masking_data_head(Name, Indexed)
              -> true
-             ;  assertz(masking_data_head(Name, ArgTypes)) )).
+             ;  assertz(masking_data_head(Name, Indexed)) )).
 
 %The admission test and the projection have to move together: this one decides
 %WHETHER a chain is indexed at all, and mask_positions_only/2 below decides
@@ -1575,7 +1630,8 @@ index_masking_data_heads :-
 chain_masks_an_argument([->|Types]) :-
     append(Args, [_], Types),
     member(Arg, Args),
-    non_evaluated_parameter_type(Arg),
+    ( rest_parameter(Arg, Element) -> View = Element ; View = Arg ),
+    non_evaluated_parameter_type(View),
     !.
 
 %Everything the mask does NOT hold back is degraded to %Undefined%, which
@@ -1589,7 +1645,13 @@ mask_positions_only([->|Types], [->|Masked]) :-
 mask_positions_only(Chain, Chain).
 
 masked_position_or_undefined(T, Masked) :-
-    ( non_evaluated_parameter_type(T) -> Masked = T ; Masked = '%Undefined%' ).
+    (   rest_parameter(T, Element)
+    ->  masked_position_or_undefined(Element, View),
+        Masked = [':seg', View]
+    ;   non_evaluated_parameter_type(T)
+    ->  Masked = T
+    ;   Masked = '%Undefined%'
+    ).
 
 %THE EVALUATION MASK OF A WRITTEN BUILTIN CALL, which is the half of
 %the typed dispatch the function path above could not read. An argument mask
@@ -1604,14 +1666,23 @@ masked_position_or_undefined(T, Masked) :-
 :- dynamic builtin_call_mask/2.
 :- dynamic builtin_result_finality/3.
 
+% Classify the run once in the existing index. Fixed lists retain exact-arity
+% mask selection even when a user typing rule refuses that arity; only a
+% variadic(Types) entry needs the arriving-arity presenter.
+% [tested: variadic_arrows:fixed_builtin_mask_selection_remains_independent_of_arity_policy;
+% commit=WORKTREE].
 index_builtin_call_masks :-
     retractall(builtin_call_mask(_, _)),
     forall(( seam:builtin_type_declaration(Name, [->|Types]),
              once(( seam:builtin_type_declaration(Name, Masking),
-                    chain_masks_an_argument(Masking) )) ),
-           ( builtin_call_mask(Name, Types)
+                    chain_masks_an_argument(Masking) )),
+             ( append(_, [Rest, _], Types), rest_parameter(Rest, _)
+             -> Indexed = variadic(Types)
+             ;  Indexed = Types
+             ) ),
+           ( builtin_call_mask(Name, Indexed)
              -> true
-             ;  assertz(builtin_call_mask(Name, Types)) )).
+             ;  assertz(builtin_call_mask(Name, Indexed)) )).
 
 %Result evaluation is independent of the argument mask.  In particular `id`
 %has `(-> $t $t)`, masks no argument, and still has a non-Atom result that must
@@ -1672,7 +1743,7 @@ builtin_result_type(Fun, Args, ResultType) :-
 %argument mask and the return-type reading need an order ruling rather than a
 %convention [assumed: read from an earlier reference semantics, not re-measured
 %against upstream PeTTa]; this register carries genuinely different-arity
-%rows for `new-space`, `py-atom` and `Kwargs`, so the fitting arrow is read
+%rows for `new-space` and `py-atom`, so the fitting arrow is read
 %where there
 %is one and the reference's own fallback is used where there is not.
 %The caller has already asked the index, so this runs only for a name that
@@ -1680,12 +1751,18 @@ builtin_result_type(Fun, Args, ResultType) :-
 builtin_argument_mask(Fun, Args, ParameterTypes, ResultType) :-
     \+ metta_builtin_overridden(Fun),
     length(Args, Arity),
-    (   builtin_call_mask(Fun, Types),
-        length(Types, Count),
-        Count =:= Arity + 1
-    ->  length(ParameterTypes, Arity),
-        append(ParameterTypes, [ResultType], Types)
-    ;   once(builtin_call_mask(Fun, Presented)),
+    (   builtin_call_mask(Fun, Indexed),
+        (   Indexed = variadic(Types)
+        ->  present_type_chain([->|Types], Arity, [->|Expanded]),
+            append(ParameterTypes, [ResultType], Expanded)
+        ;   length(Indexed, Count),
+            Count =:= Arity + 1,
+            length(ParameterTypes, Arity),
+            append(ParameterTypes, [ResultType], Indexed)
+        )
+    ->  true
+    ;   once(builtin_call_mask(Fun, First)),
+        ( First = variadic(Presented) -> true ; Presented = First ),
         mask_prefix(Presented, Arity, ParameterTypes),
         %An arrow the call's arity does not fit declares nothing about this
         %call's result, so the result stays where it was produced.

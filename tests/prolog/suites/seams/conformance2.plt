@@ -2,6 +2,7 @@
 % Assumes: run from tests/prolog so ../../engine/metta.pl resolves to this tree.
 % Guarantees: every semantic fix below produces its pinned answer through an
 %   equation body and through eval/2.
+%   [tested: conformance2; commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -91,7 +92,7 @@ test(an_open_equation_result_is_not_the_not_reducible_marker) :-
                ['Variable']).
 
 test(a_rest_atom_parameter_holds_every_variadic_argument) :-
-    add_form("(: c2-pl-rest (-> Symbol (%Rest% Atom) %Undefined%))"),
+    add_form("(: c2-pl-rest (-> Symbol (:seg Atom) %Undefined%))"),
     add_form("(= (c2-pl-rest $tag $x $y $z) (quote ($tag $x $y $z)))"),
     %The barrier is what keeps the three variadic arguments AS WRITTEN here:
     %the wrapper goes, the held arguments do not.
