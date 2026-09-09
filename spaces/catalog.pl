@@ -91,7 +91,7 @@
 % that names its place, and carrying a remedy whose title holes are fields
 % that kind declares; the `refusal-kind` vocabulary is derived from the rows
 % and `ground-kind`, `remedy-kind` and `applicability` are the three closed
-% sets metta.errors validates against
+% sets metta._errors.errors validates against
 % [tested: run_tests(catalog_refusal_rows),
 % extensions/python/tests/repository/test_refusal_rows.py; commit=f33b7ab0200e6dc74c88fb4c7f827bf545a447ed].
 
@@ -1020,7 +1020,7 @@ metta_vocabulary_open(Vocab, Reason) :-
 %one (: <TypeName> Type) beside each (vocabulary ...) row and one
 %(: <member> <TypeName>) beside each of its members. A host seat writing them
 %put a seat's chosen CamelCase on the engine's vocabulary and gave the same
-%set three spellings, one of which went stale (extensions/python/metta/_contract.py
+%set three spellings, one of which went stale (extensions/python/metta/_catalog/kinds.py
 %listed six semirings while the engine derived ten).
 %
 %A member type atom is inert against evaluation, which is tested rather than
@@ -2452,7 +2452,7 @@ metta_catalog_preset([vocabulary, 'provider-capability',
 metta_catalog_preset([vocabulary, 'argument-delivery', atoms, values]).
 %The wire's own grammar, as rows, because all three seats speak the same tags
 %and the grammar had three partial copies between them: the shim's clauses,
-%metta._schemas' eight JSON payload shapes and metta._projection's nine
+%metta.remote._schemas' eight JSON payload shapes and metta._catalog.types's nine
 %decoder tags. A tag is a CLAIM about its payload rather than a label on it,
 %so a row states which class of thing the payload is and one lane holds every
 %copy to it.
@@ -2462,9 +2462,9 @@ metta_catalog_preset([vocabulary, 'argument-delivery', atoms, values]).
 %door's answer shape and is neither.
 metta_catalog_preset([vocabulary, 'wire-class', term, frame, reply]).
 %What a tag's payload IS. Each seat spells these its own way - JSON Schema in
-%metta._schemas, a Prolog type test in the shim's decoder - and the word is
+%metta.remote._schemas, a Prolog type test in the shim's decoder - and the word is
 %what the seats agree on, exactly as the type table in
-%extensions/python/metta/_projection.py carries one column per target.
+%extensions/python/metta/_catalog/types.py carries one column per target.
 metta_catalog_preset([vocabulary, 'wire-payload',
                       text, number, boolean, term, terms, host, handle,
                       truth, bindings, control]).
@@ -2521,7 +2521,7 @@ metta_catalog_preset([vocabulary, 'OutOfClausesEnum',
 %MaybeIncorrect, prose is HasPlaceholders. rustc's Unspecified is not
 %admitted, because a remedy nobody classified is a defect
 %[source: rustc_lint_defs::Applicability; LSP 3.17 CodeActionKind].
-%Held equal to metta.errors' own three tuples by
+%Held equal to metta._errors.errors' own three tuples by
 %extensions/python/tests/repository/test_refusal_rows.py.
 metta_catalog_preset([vocabulary, 'ground-kind',
                       'host-reference', 'metta-law', arbiter]).
@@ -2580,7 +2580,7 @@ metta_catalog_preset([kind, capacity, symbol, integer]).
 %NOT the `limit` vocabulary above, which is a different question about the same
 %word: that one is which bound STOPPED a run and is what a trace reports, and
 %conflating the two would let a trace claim it was cut by a display width
-%[source: extensions/python/metta/_config.py, the row-backed settings].
+%[source: extensions/python/metta/_catalog/bounds.py:206, the row-backed settings; commit=WORKTREE].
 metta_catalog_preset([kind, limit, symbol, integer]).
 metta_catalog_preset([kind, writes, symbol, ['one-of', atomicity]]).
 metta_catalog_preset([kind, events, symbol, ['one-of', delivery],
@@ -2872,7 +2872,7 @@ metta_catalog_preset([refusal, Kind, Class, Ground, Remedy]) :-
 %live; this row is where the name they depart FROM lives, so a kind added
 %here tells a new seat what to call it.
 %
-%<ground> and <remedy> are the two rows metta.errors publishes, projected
+%<ground> and <remedy> are the two rows metta._errors.errors publishes, projected
 %exactly as Ground.as_atom() and Remedy.as_atom() write them, so a seat reads
 %one back with Ground.from_atom() and Remedy.from_atom() rather than parsing a
 %shape of its own. A remedy TITLE carries <field> holes named for the fields

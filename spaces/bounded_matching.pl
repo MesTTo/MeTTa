@@ -293,10 +293,10 @@ metta_match_all([X|Xs], [Y|Ys]) :-
 %creation door [source: engine/spaces/catalog.pl, metta_space_name/1],
 %metta_require_space_name/2 refuses it at new-space and inherits [source:
 %engine/spaces/lifecycle.pl], register_provider refuses it at the Python
-%door [source: bindings/python/metta/foreign.py, "a space name starts with
-%&"], both wire codecs refuse to decode any other spelling [source:
-%bindings/python/metta/shim.pl metta_py_decode_(p, ...) and
-%bindings/node/bridge.pl], MORK's own ownership test is the same prefix
+%door [source: extensions/python/metta/foreign/__init__.py:583, "a space name starts with
+%&"; commit=WORKTREE], both wire codecs refuse to decode any other spelling [source:
+%extensions/python/metta/_binding/wire.pl:242 metta_py_decode_(p, ...) and
+%extensions/node/bridge.pl; commit=WORKTREE], MORK's own ownership test is the same prefix
 %[source: backends/mork/mork_ffi/morkspaces.pl, mork_owns_space/1], and a
 %state cell spells its handle the same way [source: engine/metta/control.pl,
 %metta_state_cell/1]. Every seam:foreign_space/1 clause in this tree names a
@@ -804,7 +804,7 @@ metta_match_error_outcome(Error, keep, kept(Error)).
 
 %A bound pattern went straight to the match hook, so a provider that
 %implements only enumeration answered NOTHING to every real query while the
-%space demonstrably held matching atoms. extensions/python/metta/foreign.py states the
+%space demonstrably held matching atoms. extensions/python/metta/foreign/__init__.py states the
 %opposite contract for the same seam, in as many words: "An Enumerable
 %provider need not implement Matcher: enumeration is the correct default
 %candidate set". Porting a working Python provider to Prolog for speed, which

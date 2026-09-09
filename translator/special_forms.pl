@@ -593,8 +593,8 @@ translate_special_dl(transaction, [Expr], AfterHead, Goals, Out) :-
 %Racket's `parameterize` over `current-pseudo-random-generator` and Common
 %Lisp's `with-random-state`, the same shape metta/algebra.py already uses on
 %the Python side with random.Random(seed) rather than the module generator
-%[source: extensions/python/metta/algebra.py, "Draw a stable cumulative rate
-%selection using isolated seeded state"]. `set_random(seed(S))` alone would be
+%[source: extensions/python/metta/algebra/__init__.py:1701, "Draw a stable cumulative rate
+%selection using isolated seeded state"; commit=WORKTREE]. `set_random(seed(S))` alone would be
 %the global this refuses.
 %
 %The body is compiled IN PLACE, as transaction's is, so the scope costs one

@@ -52,7 +52,7 @@
 %seam:foreign_space/1 asks "is this space yours" and every provider answers it
 %from a PRIVATE registry of its own -- mork_owns_space/1 in
 %extensions/mork/mork_ffi/morkspaces.pl, metta_py_foreign/1 in
-%extensions/python/metta/shim.pl, redis_space_conn/7 in
+%extensions/python/metta/_binding/shim.pl, redis_space_conn/7 in
 %lib/lib_redis/lib_redis.pl. So no party can see a collision. The engine
 %cannot enumerate claimed names, because each clause is a CONDITION on a name
 %and not a list, and a provider cannot see its peers without naming them,
@@ -2148,7 +2148,7 @@ unstore_atom(Space, Term, Removed) :- remove_sexp(Space, Term, Removed).
 %inferences a row cheaper and is the traffic: under bool an answer's k can
 %only be 1, because a provider handing one to an undeclared context raises
 %rather than setting it ("a real k is admitted exactly when its context
-%declared a non-Boolean semiring", extensions/python/metta/shim.pl), and the engine's own
+%declared a non-Boolean semiring", extensions/python/metta/_binding/shim.pl), and the engine's own
 %join writes nothing when both sides read 1. Measured on direct-join
 %[measured 2026-08-19: 320,322 inferences with the capture on every row
 %against 289,819 without it, over 10,000 rows]
