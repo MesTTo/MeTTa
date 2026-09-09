@@ -183,3 +183,74 @@ equivalence obligation); a version-constraint policy if versions arrive (MVS).
 Open: whether `lib/minimal_metta_lib/minimal_metta_lib.py`, "a thin loader kept
 for callers that already import it", survives once a `pymetta` backing row
 exists.
+
+## 2026-09-09, the substrate and theory-algebra reading
+
+Tried: deriving packages from LeaTTaRevised's code rather than its notes
+(`prelude.metta`, `stdlib.metta:36-64,300-345`, `Main.lean:88-200`,
+`Host/Boundary.lean`, `corpus/correct_semantics.metta` sections M and R; the
+tree is in progress, read as its direction). One rule shape
+`(exec kept takes absent puts)`; a file is a `(load-queue ...)` row released
+one form per settled epoch; the reader is rows; a space is a contract a
+`(space-handler name h)` row answers; import is
+`(= (m-merge $from $to) (chain (collapse (match $from $x (add-atom $to $x))) $_ ()))`;
+`evalc` reads `(in space (= ...))` rows; groundedness is a `(: op host-op)`
+row; every host exchange is a linear `host-req` consumed into a `host-ans`;
+an imperceptible request stands; no purity assumption; fuel; the store is a
+complete log. Under those rows a package is: fetch as an observation deposit
+of a `source-text` row, load as the release rule with `(in &lib form)` as its
+put, questions as `evalc`, perform as `(! (token ...))` becoming a `host-req`
+the seat's agent consumes, a claim as the `(: token host-op)` row the seat
+confers, ownership as linear take, purity as which `host-op` rows are in
+force, budget as fuel, phases as epochs, the record as the answer row,
+persistence as a projection, a catalog as a space with a handler, and pacing
+as the package's own first form (the stdlib drain, `stdlib.metta:36-60`).
+
+Tried: MeTTaIL's grammar and modules (`MeTTaIL/GSLT/src/main/bnfc/metta_venus.cf`,
+`GSLT/src/test/module/*.module`, the Lean port `LeaTTa/MeTTaIL/Theory/{Instance,Elaborate}.lean`).
+A module imports by path with an alias; a theory is a functor over theories
+composed by `/\`, `\/`, `\`; `Exports` lists and renames sorts;
+`Replacements` are refused when they shadow (`bad/ReplacementShadows.module`);
+spaces compose by `::`, `/\`, `\/`, `\`, `<|`, `**`, `|`, with `sup`/`inf`;
+`Space => { Prog }` runs a program in an assembled space; comprehensions
+receive on channels; the Lean port keeps name-keyed and path-keyed identity
+as two models and re-anchors a body in its declaring module.
+
+Decided (amendments to the laws above; the user confirmed 1 and 2):
+1. Law 10, resolution: a requirement resolves by matching the catalog spaces
+   in force, `(match &catalogs (package lib_json $where) $where)`; the `lib/`
+   directory, a git checkout, a registered path and a remote index are
+   handlers; adding a catalog is adding a row; `git-import!` is a catalog
+   whose rows fetch on demand; no resolver code. Name-keyed identity lives in
+   catalog rows; store identity stays the canonical path with the digest rule.
+2. Law 8, pacing: rows perform in source order by default; a package declares
+   another discipline in its own package rows; the loader holds no flag.
+3. Law 8, answers: a performer's answer is any atom (rows, a handle, bindings,
+   a space); a backing claimant may answer a space of the heads' rows and the
+   loader merges it with the import merge, so a tier's registration protocol
+   is the claimant's own business.
+4. Law 4, ownership: a policy row over linear take; the default stays one
+   claimant per token with the second refused, for reproducible loads.
+5. Law 6, reading: a package with several backings is a theory parameterised
+   over a host interface; the heads pattern is the parameter's signature.
+6. Law 8, `boot` confirmed as MeTTaIL's `Space => { Prog }`.
+7. Export by sort is a type-shaped `internal` pattern, to be checked against
+   FROM's pattern grading; nothing added.
+
+Rejected: refusal as absence and no purity assumption, because the tree's law
+asks for a loud refusal and the effect lattice gives the same answers as a
+reading of `host-op` rows. Rejected: explicit export lists as the face (FROM's
+grades). Rejected: constructor replacement with new syntax (grammar-level).
+
+Two cautions read off the same code, kept beside the amendments:
+- `stdlib.metta:36-54` says the drain is sound for a DECLARATION library and
+  a file whose forms carry source-order effects keeps the paced release. So
+  the default pacing is source order, and a package that declares another
+  discipline for its `setup` rows asserts those rows are independent, the
+  way a Makefile run with `-j` asserts its dependency graph is complete.
+- MeTTaIL's references are reattached by elaboration rather than composed
+  (`LeaTTa/MeTTaIL/Theory/Ops.lean:93-130`, `Elaborate.lean:159-172`: union,
+  intersection and difference create empty reference maps; the first binding
+  wins; subtraction keeps the left side's). Rejected: deriving the lock from a
+  references algebra. The lock stays the loader's normal form of transitive
+  `requires` with pins (law 11).
