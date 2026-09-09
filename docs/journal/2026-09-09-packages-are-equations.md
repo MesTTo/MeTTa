@@ -254,3 +254,62 @@ Two cautions read off the same code, kept beside the amendments:
   wins; subtraction keeps the left side's). Rejected: deriving the lock from a
   references algebra. The lock stays the loader's normal form of transitive
   `requires` with pins (law 11).
+
+## 2026-09-09, the package is an argument record and the engine knows four things
+
+Tried: "one primitive, then the package interprets the rest itself". The
+pattern is the first line naming the interpreter of the rest: a shebang; PEP
+517's `build-backend`, which names the tool pip resolves and knows nothing
+more about; Racket's `#lang`, where a module expands to
+`(module name lang (#%module-begin body ...))` and the language's
+`#%module-begin` receives the whole body as its arguments, with `#lang info`
+a restricted language for package metadata and `#lang racket` a full one;
+MeTTaIL's theory instantiation, `Theory Replaced(s: Simple)`, a function
+applied to a theory.
+
+Rejected: shell as that primitive, because a shell line means nothing to an
+implementation on another platform or without a process library, and "the
+rest interpreted any way the program desires" leaves the rest with no shared
+meaning across implementations. The primitive must be one every
+implementation already performs.
+
+Decided: the primitive is `requires`, and it is law 10 already: requirements
+load before the requirer's rows perform, and the questions are evaluated in
+the home space where a required library's equations have been merged. So a
+package file is the ARGUMENT RECORD to its packaging library: keyword
+arguments read by matching, `(match &pkg (= (package $key) $value) ...)`,
+`(= (package env) "environment.yml")` being `env=` on that program's command
+line. `(= (package requires) lib_x)` names the program; a package that names
+none is applied to the prelude's default, `lib_package`, as a file with no
+interpreter named gets the shell's default. Two packaging libraries are two
+programs over one argument protocol, rows on the `package` head; nothing
+fragments.
+
+Decided: the engine's fixed knowledge is four things: the reserved head
+`package`; `(package requires)` performed first, its meaning engine-fixed
+because it is evaluated before any packaging library is merged (the
+bootstrap bottoms out at `lib_package`, which requires nothing: initiality);
+`perform` dispatched by unification; the `reads` ceiling with its budget.
+Everything else in laws 1 to 15 (`version`, `setup`, `boot`, `backing`,
+coverage, catalogs, receipts, the lifecycle, the lock) is `lib_package`, a
+prelude library, Prolog-bodied under the 2026-09-07 prelude ruling with its
+MeTTa equations as the fixture, and replaceable by a package that requires
+another. `version` is a constant row; a computed one is refused, as Cargo
+requires a literal version.
+
+Decided: the reading-without-running cost is accepted, measured against its
+readers. Registries and resolvers need `requires` and `version`, and both are
+protected by construction (engine-fixed; constant). Security tools read the
+lock, constant rows with pins. Editors and documentation read the library's
+own rows. A computed row under any program needs a MeTTa evaluator, and the
+evaluator is safe by the ceiling and bounded by the budget, so a registry may
+run any package's pure rows against a described runtime without trusting the
+author; the same trade PEP 508 markers, Nixpkgs and Racket's `info` language
+made at index scale, and what none of them tolerated, effects inside
+metadata, the ceiling rules out. A tool that is no MeTTa implementation reads
+the constant subset and treats a foreign program's keys as opaque data,
+Cargo's `[package.metadata.*]` convention.
+
+Alignment: equations, `match`, the union law, explicit-space evaluation, the
+effect lattice; no construct added. `lib_package` is the same shape as any
+shipped library and is loaded by the mechanism it defines.
