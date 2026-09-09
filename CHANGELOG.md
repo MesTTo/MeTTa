@@ -9,6 +9,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Arrow parameter runs use `(:seg T)`, the pattern layer's splice spelling.
+  Segment equation heads compile their arriving arity's cut family once and
+  reuse it through the existing specialization invalidation mechanism.
+  `%Rest%` declarations now refuse with the replacement named. `Kwargs`
+  replaces six fixed declarations with one Atom-element splice.
+
 - A Prolog source the engine loads at run time compiles beside itself on
   first use in a boot that governs artifacts and loads from the `.qlf` in
   every process after: a library's Prolog half on `import!`, the catalog's
@@ -38,6 +44,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   class fails when instantiated.
 
 ### Fixed
+
+- A wrong variadic argument reports `BadArgType` at its own position instead
+  of emptying the answer. Empty runs, held Atom elements and verbatim splice
+  reflection share the same arity presentation. Malformed and non-final
+  splices refuse before declaration storage or source effects.
+  An arriving segment arity uses its retained equations when an inherited
+  native predicate has the same name, including CLP(FD)'s `sum/3`.
 
 - The engine's tokens, receipts and vocabulary-seed units import the list,
   ordered-set and pair predicates they call (`member/2`, `list_to_set/2`,
@@ -91,6 +104,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   path, so they hold wherever the temporary directory lives.
 
 ### Added
+
+- Chapter 9 includes variadic signature and refusal examples with Python
+  twins, covering zero through three arguments and the fixed-arrow control.
 
 - `python -m metta extension new <name>` creates an extension distribution with
   a marked example door, entry point, tests, examples and benchmark directory.

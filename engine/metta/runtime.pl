@@ -7,6 +7,8 @@
 :- encoding(utf8).
 
 % Purpose: provide test diagnostics, assertions, formatting, timing, and bounded execution helpers
+% Guarantees: get-type-space reports the result of an empty (:seg T) run
+%   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Guarantees: Rest-arrow reporting and documentation inspect metta_runtime_type/2
 %   while the reported declaration retains its written type
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
@@ -586,9 +588,9 @@ reported_scoped_type_answers(Space, [F], [Result]) :-
     nonvar(F),
     (   space_module(Space, Module),
         scoped_type_declaration(Space, Module, F, Raw),
-        metta_runtime_type(Raw, [->, ['%Rest%', _], Result])
+        metta_runtime_type(Raw, [->, [':seg', _], Result])
     *-> true
-    ;   seam:builtin_type_declaration(F, [->, ['%Rest%', _], Result])
+    ;   seam:builtin_type_declaration(F, [->, [':seg', _], Result])
     ),
     !.
 reported_scoped_type_answers(Space, X, Types) :-

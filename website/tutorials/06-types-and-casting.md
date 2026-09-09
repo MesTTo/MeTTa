@@ -33,9 +33,44 @@ def test_annotations_declare_types(metta):
 ```
 
 `get-type` asks what type the current space can derive. The arrow's final
-atom is the result type; preceding atoms are input types. A typed call that
-refuses an argument can disappear as an empty branch during nondeterministic
-evaluation.
+atom is the result type; preceding atoms are input types. A wrong argument
+produces an `Error` carrying its position, expected type and actual type.
+
+A final `(:seg T)` parameter repeats `T` for each remaining argument:
+
+```metta
+(: vsum (-> (:seg Number) Number))
+(= (vsum (:seg $ns)) (foldl-atom $ns 0 +))
+(: vflag Bool)
+!(vsum)           ; 0
+!(vsum 1 2 3)     ; 6
+!(vsum 1 vflag 3) ; (Error (vsum 1 vflag 3) (BadArgType 2 Number Bool))
+!(get-type vsum)  ; (-> (:seg Number) Number)
+```
+
+The checker presents one finite arrow for the arriving arity. Expansion takes
+linear time and space in the number of presented parameters. The empty run is
+valid, and each run element retains its own argument position. An `Atom`
+element type holds each argument unevaluated. Fixed parameters may precede the
+splice; a fixed arrow keeps its existing load-time over-application refusal.
+`get-type` retains the splice rather than reporting an expanded call shape.
+
+The compiler generates a function head's outer cut family once per arriving
+arity and reuses its predicate at compiled call sites. The written arity uses
+the original predicate; other arities use specialization artifacts. A trailing run becomes
+a list of argument variables during compilation. Calling it then costs the
+same as calling the corresponding fixed head. Two independent runs produce
+one answer per cut; consuming their whole bag still costs work proportional
+to its answer count. A nested shape that is unknown during compilation keeps
+its matcher. Editing the source equations invalidates the generated family.
+
+Write the splice once, immediately before the result type. A malformed or
+misplaced splice raises `final_arrow_splice` when the declaration is admitted.
+The retired `%Rest%` spelling raises `retired_arrow_splice` with the remedy
+`(:seg T)`. `Kwargs` uses one `(-> (:seg Atom) %Undefined%)` declaration, so
+zero pairs and more than six pairs receive the same holding rule.
+The chapter-9 cells `22-variadic_arrow_signature.metta` and
+`23-variadic_arrow_faces.metta` exercise these cases through both seats.
 
 A function's type has to be an arrow, and a source that gets this wrong is
 refused rather than accepted quietly. `(: inc Number)` beside `(= (inc $x) (+ $x 1))` types the symbol `inc`, not a call to it. So every `(inc ...)`

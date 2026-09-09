@@ -1,5 +1,7 @@
 % Purpose: read MeTTa source, split it into complete top-level forms, and
 % dispatch each parsed form to the evaluator.
+% Guarantees: plain_source_declarations/3 validates splice syntax before
+%   any source effect runs [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Owns resources: '$metta_equation_token'/4 rows link live compiled clauses to
 %   their stored occurrence; forget_translated_equation_binding/1 retires them
 %   [tested: spaces_tokens:equation_tokens_survive_recompilation_and_exact_subtraction;
@@ -1148,6 +1150,7 @@ refuse_untypable_from_summary_in(Module, Names, Decls) :-
 
 plain_source_declarations([], _, []).
 plain_source_declarations([Name-Type|Decls], Defined, Selected) :-
+    translator:validate_type_splices(Type),
     \+ (nonvar(Type), Type = [Head|_], Head == 'Alias'),
     (   get_assoc(Name, Defined, _)
     ->  Selected = [Name-Type|Rest]

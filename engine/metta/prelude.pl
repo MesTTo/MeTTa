@@ -1,6 +1,8 @@
 % Purpose: the engine prelude's REGISTRY: what the vocabulary in
 %   engine/prelude.pl declares about itself, and the doors that install it,
 %   evict a name a program takes over, and restore an evicted one.
+% Guarantees: the arrow constructor's type uses the final (:seg Type) form
+%   [tested: prelude_spec; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 %
 %   Until 2026-09-07 this was engine/prelude.metta, 783 lines of MeTTa parsed
 %   and translated at every boot by load_engine_prelude/0. The equations are
@@ -151,7 +153,7 @@ prelude_declaration(throw, [->, '%Undefined%', '%Undefined%']).
 prelude_declaration(atomically, [->, 'Atom', '%Undefined%']).
 prelude_declaration(unquote, [->, 'Atom', '%Undefined%']).
 prelude_declaration(interpret, [->, 'Atom', 'Type', 'SpaceType', 'Atom']).
-prelude_declaration(->, [->, ['%Rest%', 'Type'], 'Type']).
+prelude_declaration(->, [->, [':seg', 'Type'], 'Type']).
 prelude_declaration('is-function', [->, 'Type', 'Bool']).
 prelude_declaration('get-type', [->, 'Atom', '%Undefined%']).
 prelude_declaration('get-type-space', [->, 'SpaceType', 'Atom', '%Undefined%']).

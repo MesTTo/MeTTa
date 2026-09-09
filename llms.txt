@@ -20,7 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 318 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 320 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 37 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
@@ -2954,6 +2954,26 @@ its driver so each figure is one call's marginal cost.
 ## Types and cast
 
 Types are optional atoms: `(: Ann Person)`, `(: age (-> Person Number))`.
+A final parameter `(:seg T)` generates the arrow with `T` repeated for the
+remaining arguments. `(-> Number (:seg Atom) Atom)` checks one Number and
+holds zero or more trailing arguments. Presentation takes linear time and
+space in the produced parameter count; each element uses the ordinary check
+at its own position. For `(: vsum (-> (:seg Number) Number))` and `(: vflag
+Bool)`, `(vsum 1 vflag 3)` answers `(Error (vsum 1 vflag 3) (BadArgType 2 Number
+Bool))`. Empty runs are admitted, and `get-type` retains the written splice.
+Fixed arrows retain their arity refusal. A malformed or non-final splice
+raises `final_arrow_splice` at declaration admission; `%Rest%` raises
+`retired_arrow_splice` naming `(:seg T)` as the remedy. `Kwargs` uses one
+Atom-element splice and holds every pair at any arity. The chapter-9
+`22-variadic_arrow_signature.metta` and `23-variadic_arrow_faces.metta` cells
+exercise the signatures and the refusals through the shell and Python seats.
+An equation's written arity compiles into its ordinary predicate; other
+arriving arities are memoized by `engine/specializer.pl`. A shallow trailing run becomes a list of argument
+variables during compilation, so repeated compiled calls do no run expansion.
+Two independent runs generate one alternative per cut, preserving the complete
+answer bag and its shortest-first order. Nested shapes unknown at compilation
+retain their parsed matcher. Source changes invalidate these artifacts through
+the existing specialization support graph; they add no stored equations.
 An arrow may carry ANNOTATIONS in its own brackets,
 `(: twice (-[det]-> Number Number))`, and it then governs execution and
 compilation exactly as the plain `->` does: `!(twice "s")` is a `BadArgType`

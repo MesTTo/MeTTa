@@ -282,7 +282,7 @@ Python side does not move. Within one run the counts are exact: three fresh
 - `superpose` `(-> Expression %Undefined%)` &mdash; Nondeterminism has no primitive of its own because Python's iteration IS it: a list of values is a multiset of answers, and `yield` is the same act inside a compiled body. `space.sample(q, k=10, seed=7)` is the weighted choice method, with replacement and implicit `(rate n)` weights.
 - `collapse` `(-> Atom Atom)` &mdash; `list()` is the everyday spelling, materialising the answers; `tuple()` is the same act when you want MeTTa's own `( )` atom back, which is what collapse answers.
 - `id` `(-> $t $t)` &mdash; The identity function, which Python writes as the value itself.
-- `nop` `(-> (%Rest% %Undefined%) (->))` &mdash; Python's `pass`, or simply not writing the call. It answers the unit.
+- `nop` `(-> (:seg %Undefined%) (->))` &mdash; Python's `pass`, or simply not writing the call. It answers the unit.
 - `if-equal` `(-> Atom Atom Atom Atom %Undefined%)` &mdash; A conditional expression over `==`.
 - `quote` `(-> Atom Atom)` &mdash; There is nothing to quote: building a term with `S[...]` never evaluates it, so the quoting question does not arise. `S.quote(x)` builds the term itself where a program needs the constructor. Where they differ: a wrapper-keeping quote answers (quote (+ 1 2)); this engine and Python answer (+ 1 2), which is upstream's own lowering, `Out = Expr` [source: PeTTa@ae66fa8 src/translator.pl:320-322].
 - `noeval` `(-> Atom Atom)` &mdash; The same point as `quote`: a built term is already unevaluated.
@@ -355,7 +355,7 @@ Python side does not move. Within one run the counts are exact: three fresh
 - `get-type-space` `(-> SpaceType Atom Atom)` &mdash; The same question asked of a named space through that handle's `space.type(atom)` method.
 - `get-metatype` `(-> Atom Atom)` &mdash; Python's own builtin `type`: the four atom classes ARE the four metatypes, so `type(a).__name__` is the metatype by construction.
 - `is-function` `(-> Type Bool)` &mdash; Asking whether a type is an arrow. In Python the same question is asked of the annotation, and `m.is_function(name)` asks it of a defined name.
-- `->` `(-> (%Rest% Type) Type)` &mdash; Annotations. A parameter and return annotation on a decorated function emits the arrow, and `Callable[[int], int]` maps through the same one table; `S['->']` stays for a hand-built arrow.
+- `->` `(-> (:seg Type) Type)` &mdash; Annotations. A parameter and return annotation on a decorated function emits the arrow, and `Callable[[int], int]` maps through the same one table; `S['->']` stays for a hand-built arrow.
 - `=` `(-> $t $t %Undefined%)` &mdash; The definitional decorator. `@m.define` compiles a function into equations, `metta.equation(lhs).to(rhs)` builds one by hand, and both land as ordinary `(= ...)` atoms a program can match.
 - `SpaceType` `Type` &mdash; The type of a space. This engine does not declare the name, so there is nothing for a Python type table to map to yet. The form is shown but not run here: this engine answers SpaceType for a space but does not declare the symbol itself.
 - `TP` `Type` &mdash; Lämmel's type-preserving strategy scheme, exported as the reified `strategy.TP` symbol.

@@ -1,4 +1,8 @@
 % Purpose: provide representation, parsing, grounded-operation errors, and numeric term recovery
+% Guarantees: metta_operation_parameters/6 and
+%   metta_shallow_operation_parameters/4 present the arriving arity before
+%   diagnostic checks, retaining each element's position and alias spelling
+%   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Guarantees: a refused host object reports one corresponding refinement or
 %   its concrete type; accepted class and protocol witnesses are not blamed
 %   [tested: run_tests(grounded_refusals),
@@ -253,7 +257,14 @@ metta_type_refusal_reason(Raw, Canonical, Position, Expected, Actual, Details,
     (   Raw =@= Canonical
     ->  Written = Expected, More = Details
     ;   (   nonvar(Raw), metta_arrow_type_chain(Raw, RawTypes),
-            nth1(Position, RawTypes, RawExpected)
+            append(RawParameters, [_], RawTypes),
+            (   nth1(Position, RawParameters, Parameter),
+                \+ translator:rest_parameter(Parameter, _)
+            ->  RawExpected = Parameter
+            ;   append(Fixed, [Splice], RawParameters),
+                translator:rest_parameter(Splice, RawExpected),
+                length(Fixed, FixedArity), Position > FixedArity
+            )
         ->  declared_type_for_check(RawExpected, Written)
         ;   Written = Expected
         ),
@@ -431,9 +442,8 @@ metta_operation_parameters(Operation, Arguments, ParameterTypes, Origins,
     %through this reader, so projecting each parameter here costs an inference
     %per parameter per call and query-where paid 140 of them, 0.02%, for a
     %shape no shipped declaration uses [measured 2026-08-24].
-    append(ParameterTypes, [_], Types),
-    metta_argument_type_origins(ParameterTypes, Origins),
-    same_length(ParameterTypes, Arguments).
+    metta_operation_parameter_types(Types, Arguments, ParameterTypes),
+    metta_argument_type_origins(ParameterTypes, Origins).
 
 metta_shallow_operation_parameters(Operation, Arguments, ParameterTypes,
                                    Origins) :-
@@ -444,9 +454,19 @@ metta_shallow_operation_parameters(Operation, Arguments, ParameterTypes,
     %through this reader, so projecting each parameter here costs an inference
     %per parameter per call and query-where paid 140 of them, 0.02%, for a
     %shape no shipped declaration uses [measured 2026-08-24].
-    append(ParameterTypes, [_], Types),
-    metta_argument_type_origins(ParameterTypes, Origins),
-    same_length(ParameterTypes, Arguments).
+    metta_operation_parameter_types(Types, Arguments, ParameterTypes),
+    metta_argument_type_origins(ParameterTypes, Origins).
+
+% Remove the result and check the arriving length in one walk. Only the final
+% splice generates parameters; fixed arrows need no arity-policy presentation
+% to report their positional diagnostics.
+% [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7]
+metta_operation_parameter_types([_], [], []).
+metta_operation_parameter_types([Type,_], Arguments, Parameters) :-
+    nonvar(Type), Type = [Marker, Element], Marker == ':seg', !,
+    same_length(Arguments, Parameters), maplist(=(Element), Parameters).
+metta_operation_parameter_types([Type|Types], [_|Arguments], [Type|Parameters]) :-
+    metta_operation_parameter_types(Types, Arguments, Parameters).
 
 %Keep whether a formal was a raw type variable before an earlier argument
 %binds it. A derived Atom is an ordinary type constraint, not the literal

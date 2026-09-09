@@ -1,5 +1,7 @@
 % Purpose: pin the shared surface-arrow projection used by every runtime type
 %   consumer before the compile-time checker interprets its annotation.
+% Guarantees: annotated and plain (:seg T) arrows share arity presentation
+%   [tested: metta_arrow_projection; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Assumes: engine/metta.pl has loaded the EffectClass catalog and lattice.
 % Guarantees: legacy and annotated prefix arrows expose one unchanged runtime
 %   chain, while shape projection preserves normalized product metadata and
@@ -70,7 +72,7 @@ test(product_and_component_binders_are_canonical_data) :-
 
 test(presentation_uses_the_same_rest_expansion_for_annotated_arrows) :-
     metta_presented_arrow_chain(
-        ['-[det]->', ['%Rest%', 'Atom'], 'Bool'], 3, Presented),
+        ['-[det]->', [':seg', 'Atom'], 'Bool'], 3, Presented),
     assertion(Presented == ['Atom', 'Atom', 'Atom', 'Bool']).
 
 test(non_arrows_and_malformed_annotations_fail_instead_of_passing_through) :-
@@ -203,7 +205,7 @@ test(replacing_a_plain_arrow_instruments_only_its_callers,
 test(rest_reporting_and_documentation_read_annotated_arrows,
      [ setup('new-space'(Space)), cleanup(metta_release_space(Space)) ]) :-
     process_metta_string(
-        "(: arrow-rest (-[det]-> (%Rest% Atom) Bool))
+        "(: arrow-rest (-[det]-> (:seg Atom) Bool))
          (: arrow-doc (-[det]-> Number Number))
          (@doc arrow-doc (@desc identity) (@params ((@param input)))
                          (@return output))", _, Space),
