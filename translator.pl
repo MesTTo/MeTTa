@@ -3,7 +3,7 @@
 %   branch-return optimization.
 % Guarantees: the runtime and declaration loaders may call rest_parameter/2
 %   and validate_type_splices/1,2 through the exported module surface
-%   [tested: engine_layering, variadic_arrows; commit=WORKTREE].
+%   [tested: engine_layering, variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Assumes:
 %   - merge_branch_returns/3 keeps its occurrence stats as `translator`
 %     attributes on the clause's own variables, strips them before its return

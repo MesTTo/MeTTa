@@ -9,7 +9,7 @@
 % Guarantees: metta_add_atom/4 and ensure_new_batch_declaration/3 validate
 %   splice syntax before storage, including alias-installed observers
 %   [tested: variadic_arrows,
-%   extensions/python/tests/ch09_types/test_variadic_arrows.py; commit=WORKTREE].
+%   extensions/python/tests/ch09_types/test_variadic_arrows.py; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Guarantees: release requests child cancellation before taking the execution
 %   module mutex, then publishes retirement after native teardown. Access
 %   checks also precede cache misses and allocation [tested: lib_thread_scope,

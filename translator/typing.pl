@@ -1,12 +1,12 @@
 % Purpose: compile declared input and output types while preserving shared branch variables
 % Guarantees: present_type_chain/3 expands a final (:seg T), and
 %   validate_type_splices/1 refuses retired or misplaced forms at admission
-%   [tested: variadic_arrows; commit=WORKTREE].
+%   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Owns resources: the private variant table of type_syntax_analysis/3
 %   retains syntax analyses for the calling Prolog thread's lifetime.
 %   It reads no declarations or policy, so withdrawal cannot invalidate it
 %   [source: engine/translator/typing.pl:type_syntax_analysis/3;
-%   commit=WORKTREE].
+%   commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Guarantees: Inherited annotated arrows retain their typed arity refusal through
 %   metta_runtime_type/2
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
@@ -315,7 +315,7 @@ validate_type_splices(Type, Annotated) :-
 % Variant keys distinguish a previously open type from its later binding.
 % The scan records ordered checks instead of caching vocabulary-dependent
 % validity or exceptions. Difference lists keep nested checks in source order.
-% [source: engine/parser.pl:metta_symbol_writable/1; commit=WORKTREE]
+% [source: engine/parser.pl:metta_symbol_writable/1; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7]
 :- table type_syntax_analysis/3 as (variant, private).
 type_syntax_analysis(Type, Annotated, Checks) :-
     type_syntax_scan(Type, Seen, Checks, []),

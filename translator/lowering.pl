@@ -1,11 +1,11 @@
 % Purpose: lower runnable expressions, calls, arguments, and dispatch policies into Prolog goals
 % Guarantees: data_head_masks/3 and builtin_argument_mask/4 derive each
 %   variadic mask through present_type_chain/3
-%   [tested: variadic_arrows; commit=WORKTREE].
+%   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 %   install_segment_dispatch/4 selects retained segment equations when an arriving
 %   arity resolves to a predicate outside their owner
 %   [tested: variadic_arrows:a_segment_arity_cannot_call_an_inherited_native_predicate;
-%   commit=WORKTREE].
+%   commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Guarantees: verify-cardinality checks annotated calls while plain calls
 %   retain their generated goal [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarantees: Direct declaration probes use metta_runtime_type/2 before masking
@@ -311,7 +311,7 @@ dispatch_call_goal(Fun, Args, Out, Goal,
 % A native collision matters only for names with retained segment equations.
 % Name-indexed clauses keep the guard off unrelated calls; metadata owns both
 % references through the same source journal as the retained equation.
-% [tested: variadic_arrows; commit=WORKTREE]
+% [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7]
 install_segment_dispatch(Owner, Fun, CompileRef, RuntimeRef) :-
     asserta(translator:(dispatch_call_goal_for(Module, Fun, Args, Out, Goal, Presented) :-
                  fun_meta_module(Module, Fun, Owner),
@@ -414,7 +414,7 @@ dispatch_call_goal_for(Module, Fun, Args, Out, Goal, PolicyGoal) :-
 
 % A retained segment family is presented only on the paths that already
 % established that it is needed. Fixed calls acquire no additional lookup.
-% [tested: variadic_arrows; commit=WORKTREE]
+% [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7]
 present_segment_call(Fun, Args, Out, Resolved, Presented) :-
     append(Args, [Out], DirectArgs),
     Direct =.. [Fun|DirectArgs],
@@ -1670,7 +1670,7 @@ masked_position_or_undefined(T, Masked) :-
 % mask selection even when a user typing rule refuses that arity; only a
 % variadic(Types) entry needs the arriving-arity presenter.
 % [tested: variadic_arrows:fixed_builtin_mask_selection_remains_independent_of_arity_policy;
-% commit=WORKTREE].
+% commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 index_builtin_call_masks :-
     retractall(builtin_call_mask(_, _)),
     forall(( seam:builtin_type_declaration(Name, [->|Types]),

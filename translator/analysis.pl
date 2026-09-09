@@ -25,7 +25,7 @@
 %   segment_dispatch_refs/5 holds name-indexed compile/runtime guards under
 %   that same occurrence lifetime [tested:
 %   variadic_arrows:segment_dispatch_guards_are_source_occurrence_owned;
-%   commit=WORKTREE].
+%   commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 %   deferred_equation_types/4 keys captured declarations by stored occurrence;
 %   materialize_with_queued_types/4 consumes its row transactionally and source
 %   withdrawal retires unused rows [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
@@ -294,7 +294,7 @@ clear_fun_meta(Module, F) :-
 
 % Like annotated-arrow dispatch, each installed guard belongs to the source
 % occurrence that needs it. Source withdrawal can already have erased a ref.
-% [tested: variadic_arrows; commit=WORKTREE]
+% [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7]
 drop_segment_dispatch(Module, F, Ref) :-
     forall(retract(segment_dispatch_refs(Module, F, Ref, CompileRef, RuntimeRef)),
            ( ( clause_property(CompileRef, erased) -> true ; erase(CompileRef) ),
@@ -776,7 +776,7 @@ seam:engine_emitted(metta_refined_result/6).
 seam:engine_emitted(dispatch_no_match_result/3).
 % The dynamic policy dispatcher is emitted with its concrete translator
 % qualifier; importing a dynamic predicate cannot protect it from capture.
-% [tested: variadic_arrows; commit=WORKTREE]
+% [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7]
 seam:engine_emitted(metta_application_result/3).
 seam:engine_emitted(metta_application_result/4).
 seam:engine_emitted(metta_eval_step/2).
@@ -991,7 +991,7 @@ restore_static_contract_shortcuts(absent) :-
 % owns publication and invalidation; this compiler does not retain another
 % source equation. A nested subject's shape is unknown here, so its already
 % parsed matcher remains a residual operation.
-% [tested: variadic_arrows, segment_equations; commit=WORKTREE]
+% [tested: variadic_arrows, segment_equations; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7]
 translate_segment_family_clause(F, Name, Args0, BodyExpr, Types, N,
                                 Clause) :-
     with_static_contract_shortcuts(enabled,
@@ -1332,7 +1332,7 @@ constrain_head_arguments([A0|As0], Index, Module, F, Tier, [A|As], [G|Gs],
 % A presented run is substituted before body compilation. A splice whose
 % nested shape remains unknown retains a parsed template sharing the head's
 % variables, so matching supplies the eventual body shape.
-% [tested: tests/prolog/suites/reader/segment_equations.plt; commit=WORKTREE]
+% [tested: tests/prolog/suites/reader/segment_equations.plt; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7]
 translate_segment_body_plan(F, BodyExpr, GoalsPrefix, BodyPlan) :-
     (   metta_seq_present(BodyExpr)
     ->  metta_seq_body_plan(BodyExpr, ParsedBody),

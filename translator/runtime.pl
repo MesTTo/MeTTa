@@ -691,7 +691,7 @@ metta_segment_spliced_result(Fun, Instantiated, Out) :-
 % Dynamic calls reuse the arity family owned by the specializer. Compiled
 % call sites name that family directly. The reference below preserves source
 % order and shortest-first cuts while a recursive shape is still pending.
-% [tested: variadic_arrows, segment_equations; commit=WORKTREE]
+% [tested: variadic_arrows, segment_equations; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7]
 metta_segment_dispatch(Module, Fun, Args, Out) :-
     with_metta_module(Module,
         specializer:segment_specialization(Fun, Args, Out, Goal)),
@@ -703,7 +703,7 @@ metta_segment_dispatch(Module, Fun, Args, Out) :-
 % The unspecialized reference retains written-arity clause selection. It is
 % also the execution path while a recursive family requests a different
 % shape from the member currently being compiled.
-% [tested: variadic_arrows; commit=WORKTREE]
+% [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7]
 metta_segment_generic_dispatch(Module, Fun, Args, Out) :-
     fun_meta_module(Module, Fun, Owner),
     length(Args, N),

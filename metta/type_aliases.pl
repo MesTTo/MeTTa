@@ -1,7 +1,7 @@
 % Purpose: expand transparent, nullary type aliases in their declaration scope.
 % Guarantees: normalize_source_type_declarations/3 and
 %   validate_type_alias_syntax/2 validate splice syntax before publication
-%   [tested: variadic_arrows; commit=WORKTREE].
+%   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Assumes: this plain source unit is consulted by engine/metta/types.pl.
 % Guarantees: normalize_type_in/4 preserves raw variables, freshens each alias
 %   occurrence, reports successful and missing lookup dependencies, and rejects
