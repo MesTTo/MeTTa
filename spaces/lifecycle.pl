@@ -6,6 +6,10 @@
 %   from database snapshots [tested: lib_import_lifecycle,
 %   extensions/python/tests/ch05_equations_and_evaluation/test_reload.py; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: decode stored atoms and manage source, subscription, reaction, table, and clear lifecycles
+% Guarantees: metta_add_atom/4 and ensure_new_batch_declaration/3 validate
+%   splice syntax before storage, including alias-installed observers
+%   [tested: variadic_arrows,
+%   extensions/python/tests/ch09_types/test_variadic_arrows.py; commit=WORKTREE].
 % Guarantees: release requests child cancellation before taking the execution
 %   module mutex, then publishes retirement after native teardown. Access
 %   checks also precede cache misses and allocation [tested: lib_thread_scope,
@@ -1718,6 +1722,7 @@ set_type_alias_mutation_scope(Scope, enabled) :-
                 Term = [':', Name, Type], atom(Name),
                 \+ type_alias_declaration_type(Type),
                 \+ (Type = 'DontEvalType'), \+ fun(Name), !,
+                translator:validate_type_splices(Type),
                 ( existing_duplicate_declaration(Space, Term, First)
                 -> print_message(warning,
                                  metta_duplicate_declaration(Space, Term, First))
@@ -1801,10 +1806,11 @@ metta_add_atom(Space, Term, Token, true) :-
 %ownership use metta_py_add_strict_declaration/2 in shim.pl.
 metta_add_atom(Space, Term, Token, true) :-
     Term = [':', Name, Type],
+    translator:validate_type_splices(Type, Annotated),
     (   existing_duplicate_declaration(Space, Term, First)
     ->  !,
         print_message(warning, metta_duplicate_declaration(Space, Term, First))
-    ;   metta_annotated_type(Type)
+    ;   Annotated == true
     ->  !,
         metta_require_arrow_product(Name, Type, Product),
         metta_add_annotated_declaration(Space, Name, Type, Product, Token)
@@ -1886,6 +1892,8 @@ first_variant_declaration(Term, [_|Declarations], First) :-
     first_variant_declaration(Term, Declarations, First).
 
 ensure_new_batch_declaration(Space, Term, Earlier) :-
+    Term = [':', _, Type],
+    translator:validate_type_splices(Type),
     (   existing_duplicate_declaration(Space, Term, First)
     ->  throw(error(metta_duplicate_declaration(Space, Term, First), none))
     ;   first_variant_declaration(Term, Earlier, First)

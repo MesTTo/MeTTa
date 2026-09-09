@@ -1,4 +1,12 @@
 % Purpose: compile declared input and output types while preserving shared branch variables
+% Guarantees: present_type_chain/3 expands a final (:seg T), and
+%   validate_type_splices/1 refuses retired or misplaced forms at admission
+%   [tested: variadic_arrows; commit=WORKTREE].
+% Owns resources: the private variant table of type_syntax_analysis/3
+%   retains syntax analyses for the calling Prolog thread's lifetime.
+%   It reads no declarations or policy, so withdrawal cannot invalidate it
+%   [source: engine/translator/typing.pl:type_syntax_analysis/3;
+%   commit=WORKTREE].
 % Guarantees: Inherited annotated arrows retain their typed arity refusal through
 %   metta_runtime_type/2
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
@@ -263,7 +271,7 @@ presented_type_chains([Chain|Chains], Arity, Presented) :-
     ),
     presented_type_chains(Chains, Arity, Rest).
 
-%A final `(%Rest% T)` formal absorbs every remaining argument and presents one
+%A final `(:seg T)` formal absorbs every remaining argument and presents one
 %copy of T per position.  Fixed arrows retain the existing arity typing rule,
 %including provider refusals.
 present_type_chain([->|Types], InputArity, [->|Presented]) :-
@@ -288,7 +296,99 @@ rest_parameter(Rest, Element) :-
     nonvar(Rest),
     Rest = [Marker, Element],
     nonvar(Marker),
-    Marker == '%Rest%'.
+    Marker == ':seg'.
+
+% Validate written type syntax at admission, never on fixed call presentation.
+% Preparation and storage share one pure syntax analysis. Live vocabulary
+% checks stay outside the table and retain their position among refusals.
+validate_type_splices(Type) :-
+    validate_type_splices(Type, _).
+
+validate_type_splices(Type, Annotated) :-
+    (   acyclic_term(Type)
+    ->  type_syntax_analysis(Type, Classification, Checks),
+        ( Checks == [] -> true ; validate_type_syntax_checks(Checks) ),
+        Annotated = Classification
+    ;   throw(error(domain_error(acyclic_type_syntax, Type), none))
+    ).
+
+% Variant keys distinguish a previously open type from its later binding.
+% The scan records ordered checks instead of caching vocabulary-dependent
+% validity or exceptions. Difference lists keep nested checks in source order.
+% [source: engine/parser.pl:metta_symbol_writable/1; commit=WORKTREE]
+:- table type_syntax_analysis/3 as (variant, private).
+type_syntax_analysis(Type, Annotated, Checks) :-
+    type_syntax_scan(Type, Seen, Checks, []),
+    ( var(Seen) -> Annotated = false ; Annotated = true ).
+
+type_syntax_scan(Type, Annotated, Checks, Rest) :-
+    (   var(Type)
+    ->  Checks = Rest
+    ;   Type == '%Rest%'
+    ->  Checks = [retired(Type)|Rest]
+    ;   Type = [Head|Items]
+    ->  (   Head == '%Rest%'
+        ->  Checks = [retired(Type)|Rest]
+        ;   Head == ':seg'
+        ->  Checks = [invalid(Type)|Rest]
+        ;   (   atom(Head), sub_atom(Head, 0, 2, _, '-[')
+            ->  Annotated = true, Owner = owner(Type)
+            ;   Head == '->'
+            ->  Owner = plain
+            ;   Owner = ordinary
+            ),
+            ( compound(Head)
+            -> type_syntax_scan(Head, _, Checks, AfterHead)
+            ;  Checks = AfterHead ),
+            ( is_list(Items), Items \== [] -> Context = Owner
+            ; Context = ordinary ),
+            type_syntax_items(Items, Context, Annotated, AfterHead, Rest)
+        )
+    ;   Checks = Rest
+    ).
+
+type_syntax_items(Items, Context, Annotated, Checks, Rest) :-
+    (   var(Items)
+    ->  Checks = Rest
+    ;   Items = [Item|Tail]
+    ->  (   Context \== ordinary, Tail \== [],
+            nonvar(Item), Item = [Marker|_], Marker == ':seg'
+        ->  (   Tail = [_], is_list(Item), Item = [_, Element]
+            ->  ( Context = owner(Arrow)
+                -> Checks = [owner(Arrow, Item)|AfterOwner]
+                ;  Checks = AfterOwner ),
+                type_syntax_scan(Element, Annotated, AfterOwner, AfterItem)
+            ;   Checks = [invalid(Item)|AfterItem]
+            )
+        ;   ( compound(Item) ; Item == '%Rest%' )
+        ->  type_syntax_scan(Item, Annotated, Checks, AfterItem)
+        ;   Checks = AfterItem
+        ),
+        type_syntax_items(Tail, Context, Annotated, AfterItem, Rest)
+    ;   type_syntax_scan(Items, Annotated, Checks, Rest)
+    ).
+
+validate_type_syntax_checks([]).
+validate_type_syntax_checks([Check|Checks]) :-
+    (   Check = retired(Type)
+    ->  retired_arrow_splice(Type)
+    ;   Check = invalid(Type)
+    ->  invalid_arrow_splice(Type)
+    ;   Check = owner(Arrow, Splice),
+        ( metta_arrow_type_shape(Arrow, _, _, _, _) -> true
+        ; invalid_arrow_splice(Splice) )
+    ),
+    validate_type_syntax_checks(Checks).
+
+retired_arrow_splice(Type) :-
+    throw(error(domain_error(retired_arrow_splice, Type),
+                context(type_declaration,
+                        '%Rest% is retired; write (:seg T) as the final arrow parameter'))).
+
+invalid_arrow_splice(Type) :-
+    throw(error(domain_error(final_arrow_splice, Type),
+                context(type_declaration,
+                        'write (:seg T) once, as the final parameter before the result type'))).
 
 %THE CHEAP QUESTION FIRST, then the walk. This runs on the
 %partial-application decision of every typed call, and the walk behind it is

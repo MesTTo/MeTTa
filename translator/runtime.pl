@@ -688,13 +688,35 @@ metta_segment_spliced_result(Fun, Instantiated, Out) :-
         eval_metta_in_module(Module, Instantiated, Out)
     ).
 
-%Calls whose actual arity differs from the written marker-bearing head cannot
-%name a Prolog predicate of that arity.  Retained equations supply the finite
-%set of candidate heads; reversing the asserta/1 metadata restores source
-%order, and the one-sided matcher supplies shortest-first splits within each
-%rule [tested: tests/prolog/suites/reader/segment_equations.plt;
-%commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
+% Dynamic calls reuse the arity family owned by the specializer. Compiled
+% call sites name that family directly. The reference below preserves source
+% order and shortest-first cuts while a recursive shape is still pending.
+% [tested: variadic_arrows, segment_equations; commit=WORKTREE]
 metta_segment_dispatch(Module, Fun, Args, Out) :-
+    with_metta_module(Module,
+        specializer:segment_specialization(Fun, Args, Out, Goal)),
+    !,
+    call(Module:Goal).
+metta_segment_dispatch(Module, Fun, Args, Out) :-
+    metta_segment_generic_dispatch(Module, Fun, Args, Out).
+
+% The unspecialized reference retains written-arity clause selection. It is
+% also the execution path while a recursive family requests a different
+% shape from the member currently being compiled.
+% [tested: variadic_arrows; commit=WORKTREE]
+metta_segment_generic_dispatch(Module, Fun, Args, Out) :-
+    fun_meta_module(Module, Fun, Owner),
+    length(Args, N),
+    fun_meta_head(Owner, Fun, Head),
+    length(Head, N),
+    !,
+    append(Args, [Out], CallArgs),
+    Goal =.. [Fun|CallArgs],
+    call(Module:Goal).
+metta_segment_generic_dispatch(Module, Fun, Args, Out) :-
+    metta_segment_interpreted_dispatch(Module, Fun, Args, Out).
+
+metta_segment_interpreted_dispatch(Module, Fun, Args, Out) :-
     metta_any_segment_equation,
     fun_meta_module(Module, Fun, Owner),
     findall(Head0-Body0,

@@ -7,6 +7,8 @@
 :- encoding(utf8).
 
 % Purpose: compile error propagation, control forms, binding forms, and special-form calls
+% Guarantees: segment-only arity fallbacks present their compiled family while
+%   building the call site [tested: variadic_arrows; commit=WORKTREE].
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
@@ -1230,7 +1232,7 @@ translate_special_dl(super, [Call], AfterHead, Goals, Out) :-
     super_target_module(Module, Fun, Arity, Parent),
     note_super_call(Fun),
     resolve_dispatch(Fun, ArgValues, Out, Goal),
-    AfterArgs = [dispatch_policy_execute(Parent, Fun, ArgValues, Goal, Out)|Goals].
+    AfterArgs = [translator:dispatch_policy_execute(Parent, Fun, ArgValues, Goal, Out)|Goals].
 
 %Quote is an EVALUATION BARRIER, not a data constructor: `(quote X)` answers X
 %itself, unevaluated, and the wrapper does not survive. `!(quote (+ 1 2))`
@@ -1763,8 +1765,8 @@ build_call_or_partial_dl(Fun, AVs, Out, Goals0, Goals, Extra) :-
          dispatch_call_goal(Fun, AVs, Out, Goal, PolicyGoal),
          append([PolicyGoal|Extra], Goals, Goals0)
     ; metta_segment_equation(Fun)
-      -> current_metta_module(Module),
-         Goal = metta_segment_dispatch(Module, Fun, AVs, Out),
+      -> resolve_dispatch(Fun, AVs, Out, Resolved),
+         present_segment_call(Fun, AVs, Out, Resolved, Goal),
          dispatch_call_goal(Fun, AVs, Out, Goal, PolicyGoal),
          append([PolicyGoal|Extra], Goals, Goals0)
     ; incomplete_application_kind(Fun, Arity, partial)

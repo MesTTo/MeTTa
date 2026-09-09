@@ -1,4 +1,7 @@
 % Purpose: expand transparent, nullary type aliases in their declaration scope.
+% Guarantees: normalize_source_type_declarations/3 and
+%   validate_type_alias_syntax/2 validate splice syntax before publication
+%   [tested: variadic_arrows; commit=WORKTREE].
 % Assumes: this plain source unit is consulted by engine/metta/types.pl.
 % Guarantees: normalize_type_in/4 preserves raw variables, freshens each alias
 %   occurrence, reports successful and missing lookup dependencies, and rejects
@@ -112,7 +115,7 @@ type_alias_form_head('Alias').
 type_alias_form_head('->').
 type_alias_form_head(':Atom').
 type_alias_form_head(':Expression').
-type_alias_form_head('%Rest%').
+type_alias_form_head(':seg').
 type_alias_form_head(Head) :-
     atom(Head),
     atom_concat('-[', Rest, Head),
@@ -169,6 +172,7 @@ normalize_source_type_declarations(Module, Declarations, Normalized) :-
 normalize_source_type_declarations([], _, _, []).
 normalize_source_type_declarations([Name-Raw|Rest], Module, Prefix,
                                    [Name-type_syntax(Raw, Type)|Types]) :-
+    translator:validate_type_splices(Raw),
     type_alias_source_step(Module, Name, Raw, Prefix, Next),
     normalize_type_view(Module, source(Module, Next), Raw, Type, _, []),
     normalize_source_type_declarations(Rest, Module, Next, Types).
@@ -202,6 +206,7 @@ validate_type_alias_syntax(Name, Raw) :-
     ->  true
     ;   throw(error(domain_error(type_alias_declaration, [':', Name, Raw]), none))
     ),
+    translator:validate_type_splices(Raw),
     (   type_alias_form_head(Name)
     ->  throw(error(permission_error(redefine, type_form, Name), none))
     ;   true

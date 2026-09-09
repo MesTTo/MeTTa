@@ -1,6 +1,9 @@
 % Purpose: compile MeTTa expressions and equations into executable Prolog,
 %   including dynamic dispatch, control forms, higher-order calls, and
 %   branch-return optimization.
+% Guarantees: the runtime and declaration loaders may call rest_parameter/2
+%   and validate_type_splices/1,2 through the exported module surface
+%   [tested: engine_layering, variadic_arrows; commit=WORKTREE].
 % Assumes:
 %   - merge_branch_returns/3 keeps its occurrence stats as `translator`
 %     attributes on the clause's own variables, strips them before its return
@@ -260,6 +263,8 @@
             translate_tracked_clause/2,
             translate_tracked_clause/3,
             translate_specialized_clause/3,
+            translate_segment_family_clause/7,
+            dispatch_meta_clauses/3,
             without_runnable_name_context/1,
             translate_expr/3,
             translate_cached_expr/3,
@@ -312,6 +317,9 @@
             builtin_argument_mask/4,
             non_evaluated_parameter_type/1,
             present_type_chain/3,
+            rest_parameter/2,
+            validate_type_splices/1,
+            validate_type_splices/2,
             declared_type_for_evaluation/2,
             intrinsically_final_builtin_result/1,
             metta_runtime_argument_mask/3,
@@ -350,6 +358,8 @@
             metta_function_eval/2,
             metta_function_eval/3,
             metta_segment_dispatch/4,
+            metta_segment_equation/1,
+            metta_segment_generic_dispatch/4,
             metta_segment_rule_result/6,
             %The result half of the evaluation mask lands in a compiled clause
             %body, so a space's execution module imports it from here exactly
