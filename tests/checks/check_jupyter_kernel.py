@@ -17,7 +17,7 @@ answers each with a run rather than with a reading.
 
   AGAINST THIS FORK'S OWN TREE. This fork has every one of those things under
   different names -- `extensions/python/metta`, `engine/main.pl`,
-  `metta/shim.pl` -- and upstream compatibility was withdrawn on 2026-08-27,
+  `metta/_binding/shim.pl` -- and upstream compatibility was withdrawn on 2026-08-27,
   so it ships no `petta`. The kernel therefore cannot start here, and this
   runs it to record the refusal it actually gives rather than the one it
   probably gives.

@@ -526,7 +526,7 @@ application_arrow_declared_in(Module, [F|_]) :-
 %first witness, while an unbound shared type variable still enumerates the
 %distinct choices needed to make later arguments consistent.
 %A BOUND second argument is the witness question, "is X known to be a T", and
-%the cast door (extensions/python/metta/shim.pl, metta_py_cast/4) is its
+%the cast door (extensions/python/metta/_binding/shim.pl, metta_py_cast/4) is its
 %caller. A refined T is witnessed by a reported type the witness relation
 %admits as the whole type, or by one it admits as the BASE while every
 %constraint holds on X; the constraint is a question about the value and the
@@ -1794,7 +1794,7 @@ scoped_super_type_rounds(Module, Edges, Frontier, Accumulated, Widened) :-
 %THROWS is the registrant's bug, and reading the throw as "no bridge answered"
 %ran the class walk instead: one broken protocol predicate silently destroyed
 %typing for every host object in the process, and get-type answered Box, the
-%envelope's own class, for all of them. extensions/python/metta/_ops.py says the rule in
+%envelope's own class, for all of them. extensions/python/metta/_binding/dispatch.py says the rule in
 %as many words for the same probe on the Python side: "A broken probe is the
 %registrant's bug: surface it with the protocol's name attached, never as a
 %type quietly missing." The fallback is for a bridge that is ABSENT, which is

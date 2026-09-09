@@ -44,7 +44,7 @@ def _fixture(
     # raise directly.
     _write(
         root,
-        "extensions/python/metta/_refusals.py",
+        "extensions/python/metta/_errors/refusals.py",
         "REFUSALS = {\n"
         "    'capability': Refusal(kind='capability', cls='SpaceCapabilityError',\n"
         "                          origin='term'),\n"
@@ -57,7 +57,7 @@ def _fixture(
     )
     _write(
         root,
-        "extensions/python/metta/errors.py",
+        "extensions/python/metta/_errors/errors.py",
         "def _compile_ground(construct):\n"
         "    return construct\n"
         "class CompileError(Exception):\n"
@@ -115,7 +115,7 @@ def test_a_planted_noncentral_compile_error_ground_is_reported() -> None:
     finally:
         directory.cleanup()
     assert findings == [
-        "extensions/python/metta/errors.py: CompileError does not derive ground "
+        "extensions/python/metta/_errors/errors.py: CompileError does not derive ground "
         "from _compile_ground(construct)"
     ]
 

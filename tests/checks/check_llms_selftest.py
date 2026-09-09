@@ -529,10 +529,10 @@ def main() -> int:
     )
     expect(
         any(
-            "m._register_space" in finding
+            "m.to_wire" in finding
             for finding in method_findings(
                 PYTHON_SHEET,
-                "```python\nm._register_space(provider, '&crm')\n```",
+                "```python\nm.to_wire()\n```",
             )
         ),
         "a Space-only method written on a MeTTa context was NOT reported",
@@ -562,7 +562,7 @@ def main() -> int:
     expect(
         method_findings(
             PYTHON_SHEET,
-            "```python\nm.close()\nkb.answers(term)\nkb._register_space(provider, '&crm')\n```",
+            "```python\nm.close()\nkb.answers(term)\nkb.to_wire()\n```",
         )
         == [],
         "valid methods were reported on the Python sheet's context and Space",

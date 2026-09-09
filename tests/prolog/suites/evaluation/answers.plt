@@ -19,7 +19,7 @@
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
-:- initialization(consult('../../extensions/python/metta/shim.pl')).
+:- initialization(consult('../../extensions/python/metta/_binding/shim.pl')).
 
 :- begin_tests(python_repeatability_control).
 

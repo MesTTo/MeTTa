@@ -7,6 +7,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The Python implementation is grouped by the decisions each package owns.
+  The declared package foundations generate the dependency checks, package
+  map and boot catalog. Private import paths have moved; the public factories,
+  classes, signatures and overloads keep their existing spellings.
+- Door decorators beside the implementations now supply the catalog and the
+  generated Space, MeTTa, async and module forwarders. One artifact manifest
+  declares each generated output, its inputs, drift check and mutation tests.
+  Deferred modules and named package exports share the Python import protocol.
+- Setting descriptors supply configuration signatures and reflected limit
+  rows. Compiler collaborators are abstract methods, so an incomplete compiler
+  class fails when instantiated.
+
 ### Fixed
 
 - A thread worker behind a spawned or timer future settles that future
@@ -54,6 +68,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   path, so they hold wherever the temporary directory lives.
 
 ### Added
+
+- `python -m metta extension new <name>` creates an extension distribution with
+  a marked example door, entry point, tests, examples and benchmark directory.
+  The install proof builds the generated distribution and discovers its door.
 
 - `EvaluationAnswer.form` and `Owner.family` classify the evaluation
   answer choices (materialised, view, aggregate, stream) and the door owners

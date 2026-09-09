@@ -1,6 +1,6 @@
 % Purpose: test the Python bridge's wire codec directly, in Prolog.
 % Assumes:
-%   - extensions/python/metta/shim.pl loads without the engine, since the
+%   - extensions/python/metta/_binding/shim.pl loads without the engine, since the
 %     codec touches no engine state. The suites here consult it alone, so a
 %     decode that needed engine state would fail to load rather than pass
 %     [tested: shim_wire_decoding:every_tag_decodes].
@@ -35,7 +35,7 @@
 %   Hacks: None
 %   Future Enhancements: None
 
-:- consult('../../../../extensions/python/metta/shim.pl').
+:- consult('../../../../extensions/python/metta/_binding/shim.pl').
 
 %The bridge normally reaches the engine matcher here. This engineless codec
 %suite supplies its structural core so the relation-frame indexing can be
@@ -53,7 +53,7 @@ metta_match_atoms(Left, Right) :-
 metta_space_operand('&self').
 metta_space_operand('&metta').
 
-%extensions/python/bridge.pl's, which this engine-free suite does not load.
+%extensions/python/metta/_binding/surface.pl's, which this engine-free suite does not load.
 %metta_py_encode/2's tuple clause calls it before its compound clause, so
 %without this every non-list compound raises Unknown procedure here while
 %encoding perfectly well in a live engine. Supplied for the same reason the

@@ -443,7 +443,7 @@ effect_plan_cleanup :-
 %The same two steps a host takes: translate the term, then hand the compiled
 %body back with its source term in front, which is the shape
 %metta_host_goal_effect_plan/4's first clause reads
-%[source: extensions/python/metta/shim.pl, metta_py_world_effect_plan/4].
+%[source: extensions/python/metta/_binding/shim.pl, metta_py_world_effect_plan/4].
 effect_goal_plan(Term, Operations, Effect) :-
     metta_self_module(Module),
     with_metta_module(Module,

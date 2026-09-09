@@ -3,7 +3,7 @@
 The kinds are the host language's own reference, which on this seat is a
 Python Language Reference section, a named MeTTa law, and a measured answer of
 upstream PeTTa under the captured parity corpus. They are the catalog's own
-`ground-kind` vocabulary, held equal to metta.errors' tuple by
+`ground-kind` vocabulary, held equal to metta._errors.errors' tuple by
 extensions/python/tests/repository/test_refusal_rows.py.
 
 Assumes:
@@ -38,10 +38,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 PYTHON_PACKAGE = Path("extensions/python/metta")
-ERRORS = PYTHON_PACKAGE / "errors.py"
-#: The module that DEFINES the classes and the door; its own raises are about
-#: a malformed Remedy rather than refusals that carry one.
-_DEFINING_MODULE = "errors.py"
+ERRORS = PYTHON_PACKAGE / "_errors/errors.py"
 SEGMENTS = Path("engine/spaces/segment_matching.pl")
 #: A `host-reference` ground stands on the HOST language's own specification,
 #: which the engine spells without naming a host because it names none. This
@@ -58,7 +55,7 @@ ARBITER_CORPUS = "tests/conformance/petta"
 #: Where the seat's own refusal table lives. Every class it names is a MeTTa
 #: refusal the engine declares a kind for, and a site that raises one has a
 #: row to raise it through.
-REFUSALS = PYTHON_PACKAGE / "_refusals.py"
+REFUSALS = PYTHON_PACKAGE / "_errors/refusals.py"
 
 #: The one door that builds a refusal from its row, and the two spellings a
 #: site may still use directly: `refusing(...)` attaches the parts by hand,
@@ -223,7 +220,7 @@ def scan_refusal_grounds(root: Path) -> tuple[list[str], GateCounts]:
                     f"{relative}:{exc.lineno or 1}: cannot scan Python: {exc.msg}"
                 )
                 continue
-            defining = relative.name == _DEFINING_MODULE
+            defining = relative == ERRORS
             for raise_of in (node for node in ast.walk(tree) if isinstance(node, ast.Raise)):
                 if defining or not isinstance(raise_of.exc, ast.Call):
                     continue
@@ -288,13 +285,13 @@ def runtime_ground_findings(root: Path) -> list[str]:
     package_parent = str(root / "extensions/python")
     if package_parent not in sys.path:
         sys.path.insert(0, package_parent)
-    from metta.errors import (
+    from metta._errors.errors import (
         _EFFECT_SAFETY_GROUND,
         _PYTHON_COMPARISON_GROUND,
         _PYTHON_RICH_COMPARISON_GROUND,
         _compile_ground,
     )
-    from metta.results import _ERROR_IS_A_VALUE
+    from metta._spaces.results import _ERROR_IS_A_VALUE
 
     grounds = (
         _PYTHON_COMPARISON_GROUND,

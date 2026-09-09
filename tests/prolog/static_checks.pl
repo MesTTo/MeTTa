@@ -339,7 +339,7 @@ source_scan_sees_a_planted_cut :-
 
 hook_source_file(File) :-
     member(Pattern, ['../../engine/*.pl', '../../engine/*/*.pl',
-                     '../../lib/*/*.pl', '../../extensions/python/metta/*.pl',
+                     '../../lib/*/*.pl', '../../extensions/python/metta/_binding/*.pl',
                      '../../extensions/mork/mork_ffi/*.pl']),
     expand_file_name(Pattern, Files),
     member(File, Files).
@@ -1187,7 +1187,7 @@ a_backend_calls_only_published_surface :-
 %%%% The host binding calls only published surface %%%%
 %
 % The backends' check aimed the other way down the same wire: what the HOST
-% BINDING's transport may call back. extensions/python/metta/shim.pl is the shipped
+% BINDING's transport may call back. extensions/python/metta/_binding/shim.pl is the shipped
 % transport, the host_service kind in engine/ext_points.pl is its measured,
 % declared list, and this walk keeps the list honest: a shim call to an
 % engine internal fails here naming the pair. The walker's own eyesight is
@@ -1197,7 +1197,7 @@ a_backend_calls_only_published_surface :-
 % clauses live in. A fact each, so the next binding is a line here rather than
 % a second copy of the walk, and so the count below is the tree's rather than a
 % number in this comment.
-host_transport('../../extensions/python/metta/shim.pl', '../../extensions/python/metta').
+host_transport('../../extensions/python/metta/_binding/shim.pl', '../../extensions/python/metta/_binding').
 host_transport('../../extensions/node/bridge.pl', '../../extensions/node').
 host_transport('../../extensions/cmetta/bridge.pl', '../../extensions/cmetta').
 
@@ -1211,9 +1211,9 @@ host_transport('../../extensions/cmetta/bridge.pl', '../../extensions/cmetta').
 %
 %The rows themselves still cannot be DERIVED, because what they carry is the
 %DIRECTORY the transport's clauses live in and entry/2 names only the file:
-%the Python seat's clauses are in metta/ beside shim.pl while the Node and C
+%the Python seat's clauses are in metta/_binding/ beside shim.pl while the Node and C
 %seats' are at the seat's top. "Declares seam clauses" does not discriminate
-%either, because extensions/python/bridge.pl declares eleven of them without
+%either, because extensions/python/metta/_binding/surface.pl declares eleven of them without
 %being the transport. So the list stays hand-written, and what changes is that
 %leaving a seat off it is LOUD.
 %

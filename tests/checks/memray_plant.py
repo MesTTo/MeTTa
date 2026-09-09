@@ -55,7 +55,7 @@ import gc
 import pytest
 
 from metta import S, V
-from metta._space import Space
+from metta._faces.space import Space
 
 #: How many cursors each half opens. Two hundred is where the separation above
 #: was measured; fewer narrows it toward the engine's own retention.

@@ -18,8 +18,8 @@
 %       seam:kind/2]
 %     - the Python half names its Prolog entry points as text, so a predicate
 %       named inside a string literal in extensions/python/metta/*.py is called across
-%       janus [source: extensions/python/metta/_engine.py, apply/2 and do/2 take the
-%       predicate NAME and hand it to janus.apply_once/cmd]
+%       janus [source: extensions/python/metta/_binding/runtime.py:1291, apply/2 and do/2 take the
+%       predicate NAME and hand it to janus.apply_once/cmd; commit=WORKTREE]
 % Guarantees:
 %     - reachability_report/0 walks every clause of every predicate defined
 %       under engine/, lib/, extensions/mork/, extensions/mork/mork_ffi/ and
@@ -160,7 +160,7 @@ tree_predicate(Predicate) :- tree_predicate_index(_, Predicate).
 
 % Module-qualified throughout, unlike surface_walk.pl's indicator/2, which
 % strips the module because its question is about one module. Here a clause of
-% prolog:message//1 in extensions/python/metta/shim.pl and a user predicate of the same
+% prolog:message//1 in extensions/python/metta/_binding/shim.pl and a user predicate of the same
 % name are different nodes, and conflating them would rescue one through the
 % other.
 qualified(Module:Goal, Module:Name/Arity) :- !, plain(Goal, Name/Arity).
@@ -286,7 +286,7 @@ subterm(Term, Subterm) :-
 % clause walked twice.
 %
 % Filtered by the CLAUSE's own file, not the predicate's, because a multifile
-% seam is shared: prolog:message//1 has clauses in extensions/python/metta/shim.pl and six
+% seam is shared: prolog:message//1 has clauses in extensions/python/metta/_binding/shim.pl and six
 % more that arrive with library(prolog_xref), and walking those made the result
 % depend on which libraries this file happens to import [measured 2026-08-18: 27
 % clauses against 33]. A clause with no file is one something asserted at run
@@ -602,7 +602,7 @@ load_shipped_configuration(Unimported) :-
     findall(Base, ( analysed_library(Base), \+ library_imports(Base) ), Unimported),
     forall(( expand_file_name('../../lib/*/*.pl', Libraries), member(F, Libraries) ),
            ensure_loaded(F)),
-    ensure_loaded('../../extensions/python/metta/shim.pl').
+    ensure_loaded('../../extensions/python/metta/_binding/shim.pl').
 
 %%%% The report %%%%
 

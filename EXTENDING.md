@@ -1625,7 +1625,7 @@ requirement.
 There are two ways in, and they differ in cost the same way tiers 2 and 3 do.
 
 **From Python**, implement the `SpaceProvider` protocol in
-`extensions/python/metta/foreign.py` and `register_space`. Every match crosses
+`extensions/python/metta/foreign/__init__.py` and `register_space`. Every match crosses
 the janus boundary, which is right when the atoms live somewhere Python already
 talks to. `das.py`, `remote.py` and `persistent.py` are three real instances.
 
@@ -2465,7 +2465,7 @@ inferences per `&metta` write and left `&self` writes at 27.02 either way.
 The shape is PostgreSQL's. Its settings are catalog rows you can query through
 `pg_settings`, the value a backend actually reads is a C variable, and an
 assign hook updates that variable when the row changes rather than making
-every reader consult the catalog. `metta._config` is the worked instance: the
+every reader consult the catalog. `metta._catalog.bounds` is the worked instance: the
 seat's `(limit <name> <value>)` bounds are rows a MeTTa program can read and
 rewrite with `add-atom`, and a cursor still reads its chunk cap for free when
 it opens, where consulting the catalog per read cost 21 inferences and 3.2 of
@@ -2695,7 +2695,7 @@ head that is neither a function name nor a partial application, so an ordinary
 MeTTa call never reaches it.
 
 Nothing in the engine knows what makes a value applicable, which is the point.
-`extensions/python/bridge.pl` claims Python callables, which is what makes
+`extensions/python/metta/_binding/surface.pl` claims Python callables, which is what makes
 `((py-atom numpy.absolute) -5)` work; a bridge for something else claims its own.
 
 ### Make a value numeric without converting it
@@ -2770,7 +2770,7 @@ can reject on length alone, which is how matching `($x $y)` against a
 million-element host container costs one question rather than a million.
 
 A value with no structural reading simply has no clause here, and that is a real
-answer rather than a gap: `extensions/python/bridge.pl` gives one to Python
+answer rather than a gap: `extensions/python/metta/_binding/surface.pl` gives one to Python
 sequences and withholds it from a `dict`, a `set` and a `str`, following PEP
 634's rule for which objects a sequence pattern may take apart.
 
@@ -2786,7 +2786,7 @@ seam:grounded_text(Obj, Text) :- my_object(Obj), my_render(Obj, Text).
 The writer has no other way to know. With no provider it falls back to the
 term's own text, so this is never required and can never fail a print, but that
 fallback names an address where the value could have named itself:
-`extensions/python/bridge.pl` answers with `repr`, which is why
+`extensions/python/metta/_binding/surface.pl` answers with `repr`, which is why
 `(py-atom "[1, 2, 3]")` displays `[1, 2, 3]` and a numpy array displays
 `array([1, 2, 3])`.
 
@@ -3596,7 +3596,7 @@ cheap, and the `seat-layering` lane holds each of them:
   so `import metta_pandas` costs 5 ms where importing pandas costs 531. This is
   load-bearing rather than tidy: the first dispatch of any point loads EVERY
   advertised package, so what one costs, every program pays. The lane imports
-  every advertised member and refuses one that reaches `metta._space`.
+  every advertised member and refuses one that reaches `metta._spaces.handle`.
 - **The core is reached through public names and the seam's services.** A
   registrant that needs the seat's own machinery calls a service --
   `seam.at("projection").call()`, `seam.at("module").call()` -- and never
@@ -3628,7 +3628,7 @@ the six whose rows already lived somewhere: `type`, `repr`, `reflector`,
 `provider`, `library` and `integration`. Those six are declared by
 `metta.integrate`, where their readers and adders live, and reached with
 `seam.at(<name>)`; the seam loads that module only when a name is not already
-declared, so `metta.errors` reading its transport-error rows on every refusal
+declared, so `metta._errors.errors` reading its transport-error rows on every refusal
 never pays for it. `seam.services()` is the other direction, what a registrant
 may CALL: `projection`, `arrow-view`, `space-of`, `module`, `sql-arity`,
 `sql-types`, `image-of`, `catalog`, `field-types`, `optional-module`, `match`,

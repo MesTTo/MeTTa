@@ -23,6 +23,7 @@ Open Obligations:
 
 from __future__ import annotations
 
+import runpy
 import shutil
 import sys
 import tempfile
@@ -60,22 +61,11 @@ metta-solars = "metta_solars"
 py-modules = ["metta_solars"]
 """
 
-MEMBER = '''"""One package for one library, reaching the core the sanctioned way."""
-
-from metta import seam
-
-
-def claims(connection):
-    """This library's own connection, or None."""
-    return connection
-
-
-seam.register("sql", "solars", claims)
-'''
+MEMBER = '"""One package for one library, reaching the core the sanctioned way."""\n\nimport metta.seam as seam\n\n\ndef claims(connection):\n    """This library\'s own connection, or None."""\n    return connection\n\n\nseam.register("sql", "solars", claims)\n'
 
 CORE_MODULE = '''"""A core module that reaches only its own package."""
 
-from . import seam
+from metta import seam
 
 
 def door():
@@ -122,12 +112,25 @@ def _plant(scratch: Path) -> Path:
     member = scratch / "extensions" / "python" / "ext" / "metta-solars"
     (member / "tests").mkdir(parents=True)
     core.mkdir(parents=True)
+    (core / "_spaces").mkdir()
+    (core / "doors").mkdir()
     (scratch / "pyproject.toml").write_text(CORE_MANIFEST, encoding="utf-8")
     (core / "__init__.py").write_text(PACKAGE, encoding="utf-8")
-    (core / "_space.py").write_text(PRIVATE, encoding="utf-8")
+    (core / "_spaces/__init__.py").write_text(PACKAGE, encoding="utf-8")
+    (core / "_spaces/handle.py").write_text(PRIVATE, encoding="utf-8")
+    (core / "_lazy.py").write_text("def lazy(name):\n    return name\n", encoding="utf-8")
     (core / "seam.py").write_text(SEAM, encoding="utf-8")
     (core / "_version.py").write_text(VERSION, encoding="utf-8")
-    (core / "doors.py").write_text(CORE_MODULE, encoding="utf-8")
+    (core / "doors/__init__.py").write_text(CORE_MODULE, encoding="utf-8")
+    layers = (ROOT / "extensions/python/metta/_layers.py").read_text()
+    start, end = layers.index("BUILDS_ON:"), layers.index("\n\n\ndef analyse")
+    graph = {
+        "_layers": (), "_lazy": (), "_version": (), "seam": (),
+        "doors": ("seam", "_lazy"), "_spaces": ("doors",),
+        "metta": ("_spaces", "_layers", "_version"),
+    }
+    layers = layers[:start] + "BUILDS_ON = " + repr(graph) + layers[end:]
+    (core / "_layers.py").write_text(layers, encoding="utf-8")
     (member / "pyproject.toml").write_text(MEMBER_MANIFEST, encoding="utf-8")
     (member / "metta_solars.py").write_text(MEMBER, encoding="utf-8")
     (member / "README.md").write_text("# metta-solars\n", encoding="utf-8")
@@ -176,18 +179,60 @@ def main() -> int:
         _plant(scratch)
         assert _findings_over(scratch) == [], _findings_over(scratch)
 
+        found = _reported(scratch, "extensions/python/metta/seam.py",
+                          SEAM + "\nimport metta._spaces.handle\n")
+        assert any("static import of metta._spaces.handle" in line for line in found), found
+
+        found = _reported(scratch, "extensions/python/metta/seam.py",
+                          SEAM + "\nfrom typing import TYPE_CHECKING\nif TYPE_CHECKING:\n    import metta._spaces.handle\n")
+        assert found == [], found
+
+        found = _reported(scratch, "extensions/python/metta/_spaces/handle.py",
+                          PRIVATE + "\nfrom metta._lazy import lazy as deferred\ndef downward():\n    return deferred('metta.seam')\n")
+        assert any("must be strictly above _spaces" in line for line in found), found
+
+        found = _reported(scratch, "extensions/python/metta/doors/__init__.py",
+                          CORE_MODULE + "\nfrom metta._lazy import lazy\ndef upward():\n    return lazy('metta._spaces.handle')\n")
+        assert found == [], found
+
+        found = _reported(scratch, "extensions/python/metta/doors/__init__.py",
+                          CORE_MODULE + "\nimport metta._lazy as deferred\ndef downward():\n    return deferred.lazy('metta.seam')\n")
+        assert any("must be strictly above doors" in line for line in found), found
+
+        found = _reported(scratch, "extensions/python/metta/__init__.py",
+                          PACKAGE + "\nfrom metta._lazy import lazy\ndef recursive():\n    return lazy('metta')\n")
+        assert any("lazy target metta must be strictly above metta" in line for line in found), found
+
+        found = _reported(scratch, "extensions/python/metta/undeclared.py", PACKAGE)
+        assert any("absent from BUILDS_ON" in line for line in found), found
+
+        found = _reported(scratch, "extensions/python/metta/__init__.py",
+                          PACKAGE + "\n__all__ = ['doors']\n")
+        assert any("root export 'doors' collides" in line for line in found), found
+
+        lattice = runpy.run_path(str(scratch / "extensions/python/metta/_layers.py"))
+        for graph, reason in (({"a": ("missing",)}, "undeclared"),
+                              ({"a": ("b",), "b": ("a",)}, "cycle")):
+            try:
+                lattice["analyse"](graph)
+            except ValueError as error:
+                assert reason in str(error), error
+            else:
+                message = f"{reason} accepted"
+                raise AssertionError(message)
+
         # 1. The core reaches a member, which is the edge the whole split exists
         # to forbid: with it, deleting ext/ breaks the core.
         found = _reported(
             scratch,
-            "extensions/python/metta/doors.py",
+            "extensions/python/metta/doors/__init__.py",
             "import metta_solars\n\n\ndef door():\n    return metta_solars\n",
         )
         assert any("the core imports 'metta_solars'" in line for line in found), found
         assert any("metta-solars" in line for line in found), found
 
         found = _reported(
-            scratch, "extensions/python/metta/doors.py",
+            scratch, "extensions/python/metta/doors/__init__.py",
             "from typing import TYPE_CHECKING\nif TYPE_CHECKING:\n    import metta_solars\n",
         )
         assert any("the core imports 'metta_solars'" in line for line in found), found
@@ -197,13 +242,13 @@ def main() -> int:
         found = _reported(
             scratch,
             "extensions/python/ext/metta-solars/metta_solars.py",
-            "from metta._space import Space\n\n\ndef door():\n    return Space\n",
+            "from metta._spaces.handle import Space\n\n\ndef door():\n    return Space\n",
         )
         assert any("the core's private name" in line for line in found), found
 
         found = _reported(
             scratch, "extensions/python/ext/metta-solars/metta_solars.py",
-            "from typing import TYPE_CHECKING\nif TYPE_CHECKING:\n    from metta._space import Space\n",
+            "from typing import TYPE_CHECKING\nif TYPE_CHECKING:\n    from metta._spaces.handle import Space\n",
         )
         assert any("the core's private name" in line for line in found), found
 
@@ -213,9 +258,9 @@ def main() -> int:
         found = _reported(
             scratch,
             "extensions/python/ext/metta-solars/metta_solars.py",
-            "import metta._space\n\n\ndef door():\n    return metta._space\n",
+            "import metta._spaces.handle\n\n\ndef door():\n    return metta._spaces.handle\n",
         )
-        assert any("loads metta._space" in line for line in found), found
+        assert any("loads metta._spaces.handle" in line for line in found), found
 
         # 3. A member names a second library without declaring it.
         found = _reported(

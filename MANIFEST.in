@@ -27,6 +27,6 @@ include extensions/mork/extension.pl
 include llms.txt
 recursive-include tests/codec *
 include extensions/python/extension.pl
-include extensions/python/bridge.pl
-include extensions/python/metta_py.py
+include extensions/python/metta/_binding/surface.pl
+include extensions/python/metta/_binding/host.py
 recursive-exclude tests/codec __pycache__ *.py[co]

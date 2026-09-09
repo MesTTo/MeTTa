@@ -55,8 +55,8 @@ import dataclasses
 import metta
 from metta import G, S, seam
 from metta.convert import project
-from metta.errors import is_transport_failure
-from metta.results import Rows
+from metta._errors.errors import is_transport_failure
+from metta._spaces.results import Rows
 
 assert seam.advertised() == {}, seam.advertised()
 
@@ -144,7 +144,7 @@ cat > "$scratch/subset.py" <<'SUBSET'
 import sys
 
 from metta import G, S, seam
-from metta.results import Rows
+from metta._spaces.results import Rows
 
 assert sorted(seam.advertised()) == ["metta-pandas"], sorted(seam.advertised())
 assert "metta_pandas" not in sys.modules, "advertising must import nothing"

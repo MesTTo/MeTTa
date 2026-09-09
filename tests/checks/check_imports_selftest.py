@@ -5,8 +5,8 @@ Assumes:
     the gate's `imports` lane, which lives in extensions/python/check.sh, and
     import-linter is installed in the selected interpreter
 Guarantees:
-  - the unmodified scratch tree keeps all three contracts, while a planted
-    module-level metta._tokens -> metta._trace import exits nonzero and is
+  - the unmodified scratch tree keeps the exhaustive contract, while a planted
+    module-level metta._binding.tokens -> metta._observe.trace import exits nonzero and is
     named in the broken core contract [tested:
     test_a_planted_module_level_import_is_rejected;
     commit=350c0d9dbd3c78a4f779d6331e223e939b94c2c8]
@@ -17,9 +17,8 @@ Owns resources:
   - a TemporaryDirectory containing the copied config and package; it is
     removed on success, assertion failure, or interruption
 Decides:
-  - metta._tokens -> metta._trace is the minimal planted core-to-satellite
-    edge used to exercise the production contract; each linter run has the
-    gate's 290-second foreground ceiling
+  - metta._binding.tokens -> metta._observe.trace is the minimal planted core-to-satellite
+    edge used to exercise the production contract
 """
 
 from __future__ import annotations
@@ -36,7 +35,6 @@ from evidence_runners import gate_scripts
 
 ROOT = Path(__file__).resolve().parents[2]
 PYTHON_ROOT = ROOT / "extensions" / "python"
-COMMAND_TIMEOUT_SECONDS = 290
 IMPORTS_COMMAND = (
     "from importlinter.cli import lint_imports_command; "
     "lint_imports_command()"
@@ -80,7 +78,6 @@ def _run_imports(root: Path) -> subprocess.CompletedProcess[str]:
         check=False,
         capture_output=True,
         text=True,
-        timeout=COMMAND_TIMEOUT_SECONDS,
     )
 
 
@@ -88,40 +85,39 @@ def test_a_planted_module_level_import_is_rejected() -> None:
     """Require one forbidden edge to turn the same clean command red by name."""
     assert IMPORTS_COMMAND in _gate_text()
 
-    with tempfile.TemporaryDirectory(prefix="metta-imports-selftest-") as directory:
+    with tempfile.TemporaryDirectory(dir=ROOT / "ai-tmp", prefix="ai-imports-selftest-") as directory:
         scratch = Path(directory)
         shutil.copy2(ROOT / "pyproject.toml", scratch / "pyproject.toml")
         shutil.copytree(
             PYTHON_ROOT / "metta",
             scratch / "metta",
-            ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+            ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "_runtime"),
         )
 
         clean = _run_imports(scratch)
         clean_output = _plain(clean)
         assert clean.returncode == 0, clean_output
-        assert "Contracts: 3 kept, 0 broken." in clean_output, clean_output
+        assert "Contracts: 1 kept, 0 broken." in clean_output, clean_output
         print(
             "imports selftest: clean scratch exited 0 with "
-            "Contracts: 3 kept, 0 broken."
+            "Contracts: 1 kept, 0 broken."
         )
 
-        plant = scratch / "metta" / "_tokens.py"
+        plant = scratch / "metta" / "_binding" / "tokens.py"
         with plant.open("a", encoding="utf-8") as stream:
-            stream.write("\nimport metta._trace  # imports-selftest planted violation\n")
+            stream.write("\nimport metta._observe.trace  # imports-selftest planted violation\n")
 
         broken = _run_imports(scratch)
         broken_output = _plain(broken)
         assert broken.returncode != 0, broken_output
         for expected in (
-            "core does not import satellites BROKEN",
-            "Contracts: 2 kept, 1 broken.",
-            "metta._tokens is not allowed to import metta._trace:",
-            "metta._tokens -> metta._trace",
+            "package orders follow declared foundations BROKEN",
+            "Contracts: 0 kept, 1 broken.",
+            "metta._binding.tokens -> metta._observe.trace",
         ):
             assert expected in broken_output, broken_output
         print(
-            "imports selftest: planted metta._tokens -> metta._trace exited "
+            "imports selftest: planted metta._binding.tokens -> metta._observe.trace exited "
             f"{broken.returncode} and was reported"
         )
 

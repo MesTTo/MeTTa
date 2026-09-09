@@ -34,7 +34,7 @@
 */
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
-:- ensure_loaded('../../../../extensions/python/metta/shim.pl').
+:- ensure_loaded('../../../../extensions/python/metta/_binding/shim.pl').
 
 :- begin_tests(catalog_vocabulary_words).
 

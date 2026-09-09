@@ -113,6 +113,8 @@ Guarantees:
     [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
   - MORK's Python benchmark selftest carries checked evidence and provenance
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
+  - Python package claims remain checked after sources move into subpackages
+    [tested: test_nested_package_evidence_rejects_a_missing_test; commit=WORKTREE]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs
@@ -177,8 +179,8 @@ GUARANTEE_SOURCES = (
     # globs, so nothing reads this file's claims and nothing would ever
     # resolve them" when lib_pln2 arrived carrying one.
     "lib/*/*.metta",
-    "extensions/python/metta/*.py",
-    "extensions/python/metta/*.pl",
+    "extensions/python/metta/**/*.py",
+    "extensions/python/metta/**/*.pl",
     # The Python seat's extension DISTRIBUTIONS: one module and one suite per
     # member under `extensions/python/ext/`. Each is hand-written code that
     # makes the same kind of claim the core's modules make, and each is where a
@@ -230,7 +232,7 @@ GUARANTEE_SOURCES = (
     "examples/*/*/*.metta",
     # The Node binding is TypeScript, and its sources make the same kind of
     # claim the Python ones do. Its Prolog half is here for the same reason
-    # extensions/python/metta/*.pl is.
+    # extensions/python/metta/**/*.pl is.
     "extensions/node/*.pl",
     "extensions/node/src/*.ts",
     "extensions/node/src/*/*.ts",
@@ -335,7 +337,7 @@ CLAIM_SOURCES = (
     "website/scripts/*.py",
     "website/scripts/*.mjs",
     # The stub file states the surface's types and cites what proves them.
-    "extensions/python/metta/*.pyi",
+    "extensions/python/metta/**/*.pyi",
 )
 
 # Commentless formats, scanned for PROVENANCE ONLY. A JSON baseline is exempt
@@ -431,6 +433,8 @@ PROVENANCE_SOURCES = (
     # does not parse.
     "EXTENDING.md",
     "KERNEL.md",
+    # Website guides carry the same prose pins, including relocated sources.
+    "website/**/*.md",
 )
 
 #: Every file whose evidence TAGS are read. Both halves, because a tag is a
@@ -1316,7 +1320,7 @@ def gate_lanes() -> frozenset[str]:
     list, so a lane's file says nothing about whether the command works.
     Reading the root file alone said otherwise the moment a lane moved into a
     component, and it said it about a lane the gate runs [measured 2026-08-28:
-    `sh check.sh mypy ty` in extensions/python/metta/_rules.py:13 read as
+    `sh check.sh mypy ty` in extensions/python/metta/_declare/rules.py:13 read as
     naming a lane check.sh does not run, one commit after mypy moved into
     extensions/python/check.sh].
     """
@@ -1621,11 +1625,11 @@ def main() -> int:
 
         findings += contract_findings(root=ROOT)
         doors = "door contracts read through doorgen"
-    elif (ROOT / "extensions/python/metta/doors.py").is_file():
+    elif (ROOT / "extensions/python/metta/doors/__init__.py").is_file():
         # The table without its generator is a seat with a piece missing, not
         # a tree without doors: refuse rather than read nothing.
         findings.append(
-            "extensions/python/metta/doors.py: a door table with no "
+            "extensions/python/metta/doors/__init__.py: a door table with no "
             "extensions/python/tools/doorgen.py to read its contracts"
         )
         doors = "door table present, its generator absent"

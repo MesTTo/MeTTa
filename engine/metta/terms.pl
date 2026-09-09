@@ -941,8 +941,8 @@ metta_refined_declared_match(Actual, Refined, Origin) :-
 
 %A bridge supplies named classes in resolution order; structural protocol
 %witnesses may precede those names
-%[source: extensions/python/metta/_ops.py:type_names,
-%extensions/python/bridge.pl:seam:grounded_class_type/2; commit=074dc0a88b1605c54824de677d586b6f60998bcf].
+%[source: extensions/python/metta/_binding/dispatch.py:784,
+%extensions/python/metta/_binding/surface.pl:459; commit=WORKTREE].
 %All witnesses still participate in acceptance. Only a wholly refused host
 %value needs a diagnostic. A refined requirement reports its corresponding
 %observed refinement; ordinary requirements report the first class name once.

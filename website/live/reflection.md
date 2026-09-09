@@ -10,4 +10,4 @@ Object reflection has a separate but compatible surface. `install_reflection_ops
 
 An integration can also register a reflector that lowers its own structure into facts. `metta.integrate.reflect(m, name, object)` chooses the registered reflector and returns the number of facts written.
 
-Use [`metta.ops`](../reference/metta-ops) for operation reflection, [`metta.subscribe`](../reference/metta-subscribe) for standing queries, and [`metta.integrate`](../reference/metta-integrate) for object reflection.
+Use [`metta._declare.operations`](../reference/metta-ops) for operation reflection, [`metta.subscribe`](../reference/metta-subscribe) for standing queries, and [`metta.integrate`](../reference/metta-integrate) for object reflection.

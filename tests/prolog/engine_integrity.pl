@@ -72,9 +72,10 @@ module_or_ancestor(Module, Seen, Ancestor) :-
     Parent \== Module,
     module_or_ancestor(Parent, [Module|Seen], Ancestor).
 
-%A name the module already holds, by whatever route. built_in and nothing
-%wider, which is the same test the Python door performs before registering an
-%operation [source: extensions/python/metta/shim.pl, metta_py_probe_op_name/2].
+%A built-in name the module already holds, by whatever route. Autoloadable
+%library procedures are not excluded merely for being static, as the host
+%registration probe's assert-and-erase check also requires
+%[source: engine/metta/interop.pl:metta_host_probe_function/2; commit=WORKTREE].
 module_holds(Module, Name, Arity, Owner) :-
     functor(Head, Name, Arity),
     predicate_property(Module:Head, built_in),

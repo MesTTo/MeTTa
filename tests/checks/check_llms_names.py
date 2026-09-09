@@ -843,7 +843,7 @@ def operator_words() -> dict[str, str]:
     import operator
 
     from metta import S
-    from metta._name_mapping import attribute_name
+    from metta._atoms.names import attribute_name
 
     words: dict[str, str] = {}
     for name in sorted(name for name in dir(operator) if not name.startswith("_")):

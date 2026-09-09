@@ -250,7 +250,7 @@
 %internals [source: https://www.sqlite.org/vtab.html and loadext.html]. Naming
 %the surface is what makes "reaches past the seam" a question a checker can
 %answer, and two extensions had already answered it wrongly: morkspaces.pl and
-%extensions/python/metta/shim.pl each wrapped metta_unwritable_symbol/2 under a private
+%extensions/python/metta/_binding/shim.pl each wrapped metta_unwritable_symbol/2 under a private
 %name of its own, which is what an undeclared dependency looks like from the
 %outside [measured 2026-08-17].
 %
@@ -494,7 +494,7 @@ kind(space_dependency/2, declaration).
 %view of it, and an assign hook updates the fast copy at the write rather than
 %making every reader consult the catalog [source: PostgreSQL documentation,
 %20.1 Setting Parameters, and src/backend/utils/misc/guc.c's assign_hook].
-%extensions/python/metta/_config.py is the worked instance: it mirrors the
+%extensions/python/metta/_catalog/bounds.py is the worked instance: it mirrors the
 %`(limit <name> <value>)` bounds it reads once per cursor, where reading them
 %through a crossing cost 21 inferences and 3.2 microseconds per cursor
 %[tested: test_a_bound_read_after_the_first_costs_no_crossing].
@@ -618,7 +618,7 @@ kind(foreign_atoms/2, ownership).
 :- multifile foreign_token/3.
 kind(foreign_token/3, ownership).
 %Clear was the sixth of these all along and was declared nowhere: it lived in
-%extensions/python/metta/shim.pl, so a Prolog provider that implemented clear, as
+%extensions/python/metta/_binding/shim.pl, so a Prolog provider that implemented clear, as
 %lib/lib_redis/lib_redis.pl does, was reachable only when Python was in the process.
 :- multifile foreign_clear/1.
 kind(foreign_clear/1, ownership).
@@ -761,7 +761,7 @@ kind(foreign_plan/5, ownership).
 %in this tree writes ONE clause with a variable space and an ownership guard
 %in the body, which unifies with any space at all.
 %
-%So it is declared, the way extensions/python/metta/foreign.py derives it from the narrow
+%So it is declared, the way extensions/python/metta/foreign/__init__.py derives it from the narrow
 %protocols a provider implements. The capabilities are add, remove, match,
 %enumerate, clear, PLAN and RULES.
 %

@@ -2,8 +2,8 @@
 # Assumes: Packaging and gate commands run from the repository root with extensions/python importable.
 # Guarantees: Static import contracts keep the narrow core independent of optional satellites,
 #   while excluding annotations that cannot execute and naming every deferred boundary crossing.
-# Decides: metta._space is core; metta._world, metta._saga,
-#   metta._persistent, and public integration modules
+# Decides: metta._spaces.handle is core; metta._history.world, metta._history.saga,
+#   metta.foreign._persistent, and public integration modules
 #   are satellites; TYPE_CHECKING-only imports do not form runtime dependencies.
 # [tested: cd extensions/python && PYTHONPATH=$PWD lint-imports; commit=350c0d9dbd3c78a4f779d6331e223e939b94c2c8]
 # Decides: NetworkX and NumPy are test-only infrastructure because the
@@ -27,8 +27,8 @@ license = "MIT"
 license-files = ["LICENSE"]
 #: Runtime, by the test that decides it: delete one, ship the wheel, and a
 #: user's program stops working. Neither is imported by `import metta` --
-#: measured, both absent from sys.modules after it -- but `metta.ops` and
-#: `metta._space_definitions` reach `_documentation`, and that is mainstream
+#: measured, both absent from sys.modules after it -- but `metta._declare.operations` and
+#: `metta._declare.definitions` reach `_documentation`, and that is mainstream
 #: use, not an optional feature.
 #: The `<0.18` cap on docstring-parser is gone as of 2026-08-28. It was
 #: introduced with the typed-documentation work (bd23e0ee) with no recorded
@@ -192,6 +192,9 @@ test = [
     #: what an EXPORTER received, which is the SDK rather than the API.
     "metta-otel[test]",
     "hypothesis>=6.165",
+    #: Reference tests resolve aliases and inherited APIs without importing the
+    #: documented package. This dependency belongs to the test toolchain.
+    "griffelib>=2.3,<3",
     #: A graph fixture for the blocking gallery, and the OpenAPI
     #: specification's own validator so the document scenario holds
     #: `Gateway.openapi()` to the specification rather than to this
@@ -290,12 +293,17 @@ metta-tables = { workspace = true }
 metta-websocket = { workspace = true }
 
 [tool.setuptools]
-packages = ["metta"]
 package-dir = {"" = "extensions/python"}
 include-package-data = true
 
+[tool.setuptools.packages.find]
+where = ["extensions/python"]
+include = ["metta", "metta.*"]
+namespaces = false
+
 [tool.setuptools.package-data]
-metta = ["*.pyi", "shim.pl", "door_catalog.pl", "py.typed"]
+metta = ["*.pyi", "py.typed"]
+"metta._binding" = ["*.pl"]
 
 [tool.setuptools.dynamic]
 version = {attr = "metta._version.__version__"}
@@ -493,6 +501,8 @@ max-complexity = 35
 "examples/language-feature-examples/**" = ["S", "BLE", "PLW", "SIM", "RUF059", "PLC0415"]
 "bench.py" = ["S", "PLW"]
 "metta/__init__.py" = ["PLW0603", "PTH"]
+# The root's path helpers moved here and retain their lexical os.path behavior.
+"metta/_spaces/ambient.py" = ["PTH"]
 
 [tool.ruff.lint.isort]
 # This repository's own distributions, so a member sorts with `metta` rather
@@ -636,14 +646,14 @@ min_confidence = 60
 # core's own doors read as dead the moment their one caller became a
 # distribution. Reading both is what makes the answer true.
 paths = ["metta", "ext", "bench.py", "vulture_whitelist.py"]
-# The generated vocabulary module is data: every member is read by VALUE
+# The generated vocabulary and function-mention modules are data: every member is read by VALUE
 # (membership, iteration, the wire), so name-reachability is the wrong
 # question for it and each catalog row would need a fresh whitelist line.
 # A member's own suite and the hook file above it, for the reason the core's
 # tests are simply not in `paths`: a pytest hook is called by NAME from
 # outside, and every fixture and every declarative class attribute in a test
 # reads as dead to a reachability scan.
-exclude = ["metta/vocabularies.py", "*/ext/conftest.py", "*/tests/*"]
+exclude = ["metta/vocabularies.py", "metta/_catalog/fn.py", "*/ext/conftest.py", "*/tests/*"]
 ignore_names = ["exc_type", "exc_val", "exc_tb", "tb", "exc"]
 
 # Six of refurb's rules are wrong for this codebase rather than unfixed, and
@@ -758,166 +768,31 @@ root_package = "metta"
 # unless this root option is enabled; these annotations never execute.
 exclude_type_checking_imports = true
 
+# begin generated package layers (extensions/python/tools/layergen.py; source=metta/_layers.py:BUILDS_ON)
 [[tool.importlinter.contracts]]
-name = "atoms is the base layer"
-type = "forbidden"
-source_modules = ["metta.atoms", "metta.errors"]
-forbidden_modules = [
-    "metta._space", "metta.ops", "metta.define", "metta.convert",
-    "metta.integrate", "metta.subscribe", "metta.events",
+name = "package orders follow declared foundations"
+type = "layers"
+containers = ["metta"]
+exhaustive = true
+layers = [
+    "_history",
+    "__main__ | aio",
+    "importing | manifest | subscribe | testing",
+    "events | integrate | lint | live | remote | spaces | tables",
+    "_pygments | algebra | cli | convert | derivation | foreign | ipython | library | parallel | paths | pytest_plugin | structures | typing",
+    "_faces",
+    "_observe",
+    "_declare",
+    "_spaces",
+    "_binding | doors",
+    "_catalog | _compile",
+    "vocabularies",
+    "_atoms",
+    "_errors",
+    "seam",
+    "_layers | _lazy | _version",
 ]
-
-[[tool.importlinter.contracts]]
-name = "leaf modules do not import the facade"
-type = "forbidden"
-source_modules = [
-    "metta.subscribe", "metta.events", "metta.foreign", "metta._convert_cast",
-    "metta._debug", "metta._recording", "metta._trace", "metta.lint",
-    "metta.derivation", "metta.results", "metta.vocabularies",
-]
-forbidden_modules = ["metta._space"]
-ignore_imports = [
-    # EventStream.fold reaches Space only when a carrier was supplied, so
-    # importing the event leaf does not load the core facade.
-    "metta.events -> metta._space",
-    # The same carrier branch defers the optional algebra implementation until
-    # fold is called with under=, leaving ordinary event imports independent.
-    "metta.events -> metta.algebra",
-]
-unmatched_ignore_imports_alerting = "error"
-
-# The seat's LAYERS, in one contract. The core is the modules listed as
-# sources; a satellite is a module the core survives without and reaches, when
-# it reaches it at all, through a deferred call; and a workspace MEMBER --
-# `metta_arrays`, `metta_pandas` and the twelve others under
-# `extensions/python/ext/` -- is not reachable from here at all. That last
-# half is not written below because import-linter builds its graph from
-# `root_package` and cannot see a module outside it; `check_layering.py` holds
-# it instead, derived from the `[tool.uv.workspace] members` glob, so a package
-# added under `ext/` is gated with no edit here.
-[[tool.importlinter.contracts]]
-name = "core does not import satellites"
-type = "forbidden"
-source_modules = [
-    "metta",
-    "metta._api_types",
-    "metta._atom_namespace",
-    "metta._atom_wire",
-    "metta._atoms_core",
-    "metta._callbacks",
-    "metta._codec_kit",
-    "metta._config",
-    "metta._contract",
-    "metta._define_context",
-    "metta._define_expression",
-    "metta._define_facts",
-    "metta._define_loops",
-    "metta._define_statements",
-    "metta._define_twins",
-    "metta._documentation",
-    "metta._engine",
-    "metta._head_meaning",
-    "metta._object_fields",
-    "metta._operator_lowerings",
-    "metta._ops",
-    "metta._arrow",
-    "metta._optional",
-    "metta._projection",
-    "metta._schemas",
-    "metta._parameterized",
-    "metta._prelude",
-    "metta._source_forms",
-    "metta._space",
-    "metta._space_definitions",
-    "metta._space_diagnostics",
-    "metta._space_execution",
-    "metta._space_objects",
-    "metta._space_persistence",
-    "metta._space_query",
-    "metta._tokens",
-    "metta._type_annotations",
-    "metta._version",
-    "metta.answer",
-    "metta.atoms",
-    "metta.define",
-    "metta.errors",
-    "metta.ops",
-    "metta.results",
-    "metta._rules",
-    # seam is the extension table every seat door reads, so it sits under the
-    # base layer with atoms and errors: a satellite imported from here would
-    # drag metta.errors up the stack with it, which is why the six points
-    # whose readers are metta.integrate's are declared THERE and named here.
-    "metta.seam",
-    # vocabularies is generated data over atoms alone; core doors annotate
-    # and validate with its enum classes, so it is core, not a satellite.
-    "metta.vocabularies",
-]
-forbidden_modules = [
-    # _world is the deferred filesystem/foreign-space implementation reached
-    # only by Space.reify and Space.commit, so it belongs with the satellites.
-    "metta._world",
-    # _saga is the deferred recovery implementation reached only by
-    # Space.saga, so ordinary core imports do not load its event machinery.
-    "metta._saga",
-    # _gateway_compliance and _algebra_demand are a SATELLITE's private half
-    # rather than the core's: the first is imported only by metta.testing and
-    # imports metta.remote, the second only by metta.algebra and imports it.
-    # Naming them here is the ruling the survival split asked for -- each of
-    # the five core-to-satellite edges is cut or the module is ruled a
-    # satellite -- and it makes the edge that looked like a crossing read as
-    # what it is, a satellite reaching its own public face.
-    "metta._gateway_compliance",
-    "metta._algebra_demand",
-    "metta._persistent",
-    # _lock is the deferred lockfile implementation reached only by MeTTa.lock
-    # and MeTTa.check, so an ordinary core import does not load tomllib or the
-    # library satellite it reads the roster from.
-    "metta._lock",
-    # live is the materialised-view surface metta.structures reaches only when
-    # a LiveView is made, so importing the stores does not build it.
-    "metta.live",
-    "metta.aio",
-    "metta.algebra",
-    "metta.convert",
-    "metta.derivation",
-    "metta.events",
-    "metta.foreign",
-    "metta.importing",
-    "metta.integrate",
-    "metta.library",
-    "metta.lint",
-    "metta.manifest",
-    "metta.parallel",
-    "metta.paths",
-    "metta.remote",
-    "metta.spaces",
-    "metta.structures",
-    "metta.subscribe",
-    "metta.tables",
-    "metta.testing",
-    "metta._debug",
-    "metta._recording",
-    "metta._trace",
-    "metta.wire",
-]
-allow_indirect_imports = false
-as_packages = false
-# Forbidden contracts remove exact ignored edges before checking indirect paths.
-# [source: https://github.com/seddonym/import-linter/blob/f544debbb0efe10092cd387032ea76b94a0acee0/docs/contract_types/forbidden.md;
-#   commit=350c0d9dbd3c78a4f779d6331e223e939b94c2c8]
-ignore_imports = [
-    # Space.reify and Space.commit defer _world until those methods are called,
-    # so importing the core does not load the filesystem/foreign-space helper.
-    "metta._space -> metta._world",
-    # Space.saga defers the recovery runner until that method is called.
-    "metta._space -> metta._saga",
-    # MeTTa.lock and MeTTa.check defer the lockfile implementation until one of
-    # those two methods is called, so taking a lock is the only thing that
-    # reads a lock file.
-    "metta._space -> metta._lock",
-]
-unmatched_ignore_imports_alerting = "error"
+# end generated package layers
 
 # The `coverage` REPORT lane. Branch coverage over the library, no percentage
 # gate: the number is a map of what the suite reaches, and a threshold on it
@@ -949,12 +824,12 @@ exclude_also = [
 #     matches it at run time against the function's `__module__`, so the two
 #     agree only when the package sits DIRECTLY under the directory mutmut runs
 #     in. From the repository root, `extensions/python/metta` produced keys
-#     `extensions.python.metta.answer.*` against a runtime module `metta.answer`
+#     `extensions.python.metta._atoms.answer.*` against a runtime module `metta._atoms.answer`
 #     and every mutant read "no tests": 55 of them, 0 functions traced
 #     [measured 2026-09-07; mutmut/mutation/trampoline.py:60 builds the runtime
 #     name from `orig_func.__module__`].
 #   - mutmut runs the suite inside `mutants/`, which puts the copy back at the
-#     depth the tree assumes: `.mutmut/mutants/metta/shim.pl` reaches the
+#     depth the tree assumes: `.mutmut/mutants/metta/_binding/shim.pl` reaches the
 #     engine as `../../../engine`, and `.mutmut/mutants/tests/conftest.py`
 #     reaches bounded.sh as `parents[3]`, exactly as `extensions/python/metta`
 #     and `extensions/python/tests` do. So nothing needs copying but the two
@@ -962,7 +837,7 @@ exclude_also = [
 #     bridge.pl are read from the real tree.
 #
 # WHICH mutants are tested is the lane's argument, an fnmatch pattern over
-# mutmut's own mutant names (`mutmut run 'metta.answer.*'`); WHICH tests judge
+# mutmut's own mutant names (`mutmut run 'metta._atoms.answer.*'`); WHICH tests judge
 # them is PYTEST_ADDOPTS, because mutmut takes its test selection from
 # configuration alone and a lane cannot rewrite this file.
 [tool.mutmut]

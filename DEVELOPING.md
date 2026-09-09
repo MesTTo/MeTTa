@@ -32,6 +32,83 @@ Install the working tree for editable imports when required:
 "$PY" -m pip install -e ".[checks]"
 ```
 
+## Package foundations
+
+`metta/_layers.py:BUILDS_ON` declares each package's immediate foundations.
+The order is its longest dependency path. Static imports stay within those
+foundations; deferred body imports reach strictly higher orders. Run
+`python extensions/python/tools/layergen.py --write` after a placement changes.
+
+<!-- begin generated package layers (extensions/python/tools/layergen.py; source=metta/_layers.py:BUILDS_ON) -->
+| Order | Package | Builds on |
+|---:|---|---|
+| 0 | `_layers` |  |
+| 0 | `_lazy` |  |
+| 0 | `_version` |  |
+| 1 | `seam` | `_lazy` |
+| 2 | `_errors` | `seam` |
+| 3 | `_atoms` | `_errors`, `seam` |
+| 4 | `vocabularies` | `_atoms` |
+| 5 | `_catalog` | `vocabularies`, `_atoms`, `_errors`, `seam` |
+| 5 | `_compile` | `_atoms`, `_errors`, `vocabularies` |
+| 6 | `_binding` | `_catalog`, `_atoms`, `_errors`, `seam` |
+| 6 | `doors` | `_catalog`, `vocabularies`, `_atoms`, `_layers` |
+| 7 | `_spaces` | `_binding`, `doors`, `_catalog`, `_atoms`, `_errors`, `seam`, `_version` |
+| 8 | `_declare` | `_spaces`, `_compile`, `doors`, `_catalog`, `_atoms`, `_errors`, `seam` |
+| 9 | `_observe` | `_declare`, `_spaces`, `_binding`, `_catalog`, `_atoms`, `_errors`, `seam` |
+| 10 | `_faces` | `_declare`, `_observe`, `_spaces`, `doors`, `_atoms` |
+| 11 | `_pygments` | `_faces` |
+| 11 | `algebra` | `_faces` |
+| 11 | `cli` | `_faces` |
+| 11 | `convert` | `_faces` |
+| 11 | `derivation` | `_faces` |
+| 11 | `foreign` | `_faces` |
+| 11 | `ipython` | `_faces` |
+| 11 | `library` | `_faces`, `_version` |
+| 11 | `parallel` | `_faces` |
+| 11 | `paths` | `_faces` |
+| 11 | `pytest_plugin` | `_faces` |
+| 11 | `structures` | `_faces` |
+| 11 | `typing` | `_faces` |
+| 12 | `events` | `_faces`, `structures`, `algebra` |
+| 12 | `integrate` | `_faces`, `convert`, `foreign`, `library` |
+| 12 | `lint` | `_faces`, `foreign` |
+| 12 | `live` | `_faces`, `structures`, `foreign` |
+| 12 | `remote` | `_faces`, `foreign` |
+| 12 | `spaces` | `_faces`, `foreign`, `structures` |
+| 12 | `tables` | `_faces`, `convert`, `foreign` |
+| 13 | `importing` | `_faces`, `integrate` |
+| 13 | `manifest` | `_faces`, `remote`, `tables` |
+| 13 | `subscribe` | `_faces`, `events`, `foreign` |
+| 13 | `testing` | `_faces`, `algebra`, `convert`, `foreign`, `remote` |
+| 14 | `__main__` | `_faces`, `importing`, `library`, `lint`, `manifest`, `remote` |
+| 14 | `aio` | `_faces`, `subscribe`, `lint` |
+| 15 | `_history` | `aio`, `importing`, `manifest`, `subscribe`, `testing`, `parallel`, `spaces` |
+| 16 | `metta` | `_history`, `cli`, `derivation`, `ipython`, `paths`, `pytest_plugin`, `typing`, `__main__`, `_pygments`, `_version`, `_layers`, `lint`, `live`, `spaces` |
+<!-- end generated package layers -->
+
+## Process settings
+
+Declare each bound with a `Setting` in `metta/_catalog/bounds.py`. The descriptor
+owns its default, environment input, validator and startup policy. Run
+`python extensions/python/tools/boundsgen.py --write` to regenerate the exact
+`Config.configure` parameters and the table below. Live settings are catalog
+rows; `configure` replaces a group in one engine transaction. An enclosing
+transaction also owns those writes. A private `Config` changes only its own
+values.
+
+<!-- begin generated settings (extensions/python/tools/boundsgen.py; source=_catalog/bounds.py:Setting) -->
+| Setting | Default | Environment | Lifetime | Purpose |
+|---|---:|---|---|---|
+| `stack_limit` | 8000000000 | METTA_STACK_LIMIT | startup | Maximum SWI stack size in bytes. |
+| `heartbeat_interval` | 100000 | METTA_HEARTBEAT_INTERVAL | startup | Engine inferences between Python signal checks. |
+| `declaration_limit` | 512 | METTA_DECLARATION_LIMIT | catalog row | Maximum combinations expanded by one declaration. |
+| `display_rows` | 100 | METTA_DISPLAY_ROWS | catalog row | Maximum rows shown in a result display. |
+| `chunk_cap` | 64 |  | catalog row | Maximum items carried by one boundary refill. |
+| `subscription_queue` | 10000 |  | catalog row | Undelivered events held before refusing a write. |
+| `repr_items` | 4 |  | catalog row | Items shown before a container representation counts the rest. |
+<!-- end generated settings -->
+
 ## Gates and tests
 
 The blocking gate is:
@@ -40,6 +117,34 @@ The blocking gate is:
 CHECK_PY="$PY" GATE_ONLY=1 sh check.sh
 ```
 
+### Extension distributions
+
+Create an extension in a new directory with:
+
+```sh
+"$PY" -m metta extension new aurora-beam
+cd aurora-beam
+"$PY" -m pip install '.[test]'
+"$PY" -m pytest tests
+"$PY" examples/echo.py
+```
+
+The command writes `pyproject.toml`, `aurora_beam.py`, `README.md`, a test,
+an example, a benchmark, and the source-distribution manifest. The distribution
+advertises `aurora_beam:register` under `metta.extensions`. That function
+registers its marked bodies through `seam.door`; the example becomes
+`context.aurora_beam.echo(value)` and `space.aurora_beam.echo(value)`.
+
+The name follows Python packaging's normalization rules and must also form a
+public Python module name. A reserved name, a core door collision or an
+existing destination refuses before writing. A failed write removes the
+newly owned directory; if cleanup fails too, both errors are reported.
+Scaffolding changes no installed package or registry.
+
+`sh check.sh extension-scaffold` builds and installs the generated wheel,
+checks discovery and both receiver tiers, runs its test and example, and proves
+that withdrawal invalidates a retained method.
+
 Run the full gate and analysis report with `CHECK_PY="$PY" sh check.sh`.
 Pass check names to run a subset, for example:
 
@@ -47,34 +152,55 @@ Pass check names to run a subset, for example:
 CHECK_PY="$PY" sh check.sh ruff mypy ty
 ```
 
-Run the four Python generated-artifact checks as one target:
+<!-- begin generated artifact manifest -->
+Generated by `extensions/python/tools/artifacts.py` from `ARTIFACTS`.
 
-```sh
-CHECK_PY="$PY" sh check.sh generated-artifacts
-```
+Run `CHECK_PY="$PY" sh check.sh generated-artifacts` to check every artifact and its mutation witnesses.
 
-The target retains the individual `ledger`, `aio-mirror`, `init-stub` and
-`reference` checks; `aio-mirror` must precede `reference` because
-`reference.py` reads `aio.py`. The complete door pipeline has one command:
+The order below follows declared dependencies. Each individual artifact also selects its `-selftest` lane. `generated-artifacts-selftest` selects all mutation lanes. Emitters are shown for deliberate regeneration; `artifacts.py --write` only refreshes this table and the gate declarations.
+
+| Artifact | Inputs | Emitter | Outputs | Check and mutation witnesses | Depends on; requires |
+|---|---|---|---|---|---|
+| `layer-sync` | `extensions/python/metta/_layers.py` | `"$PY" extensions/python/tools/layergen.py --write` | `pyproject.toml` (region `# begin generated package layers`); `DEVELOPING.md` (region `&lt;!-- begin generated package layers`) | `"$PY" extensions/python/tools/layergen.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_layout_projections.py -k layergen`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_lazy_loading.py`; `"$PY" tests/checks/check_layering_selftest.py` |  |
+| `vocab-sync` | `engine/**/*.pl`; `lib/*/*.metta` | `"$PY" extensions/python/tools/vocabgen.py --write` | `extensions/python/metta/vocabularies.py`; `extensions/node/src/vocabularies.ts` | `"$PY" extensions/python/tools/vocabgen.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_artifact_projections.py -k vocabulary` | ; engine |
+| `artifact-sync` | `extensions/python/tools/artifacts.py` | `"$PY" extensions/python/tools/artifacts.py --write` | `check.sh` (region `# begin generated artifact selection`); `check.sh` (region `# begin generated artifact lanes`); `DEVELOPING.md` (region `&lt;!-- begin generated artifact manifest --&gt;`) | `"$PY" tests/checks/check_generated_artifact_group.py`; `"$PY" tests/checks/check_generated_artifact_group_selftest.py` |  |
+| `bounds-sync` | `extensions/python/metta/_catalog/bounds.py` | `"$PY" extensions/python/tools/boundsgen.py --write` | `extensions/python/metta/_catalog/bounds.py` (region `    # begin generated configure`); `DEVELOPING.md` (region `&lt;!-- begin generated settings`) | `"$PY" extensions/python/tools/boundsgen.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_layout_projections.py -k boundsgen`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/ch01_getting_started/test_config.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_artifact_projections.py -k setting_configuration` | ; engine for live setting witnesses |
+| `codec-doc` | `tests/codec/corpus.json` | `"$PY" extensions/python/tools/codecdoc.py --write` | `CODEC.md` | `"$PY" extensions/python/tools/codecdoc.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_artifact_projections.py -k codec_document` |  |
+| `example-origins` | `examples/**/*.metta`; `extensions/python/tools/example_origins.py` | `"$PY" extensions/python/tools/example_origins.py --write` | `examples/ORIGINS.tsv` | `"$PY" extensions/python/tools/example_origins.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_artifact_projections.py -k example_origins`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_executable_docs.py extensions/python/tests/repository/test_example_parity.py::test_example_parity_reports_a_planted_difference` | ; the external source checkout named by METTA_UPSTREAM for lineage remeasurement |
+| `face-sync` | `lib/*/*.metta`; `extensions/python/metta/library/_face.py` | `"$PY" extensions/python/tools/facegen.py --write` | `lib/*/*.metta` (header contains `Import:`) | `"$PY" extensions/python/tools/facegen.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/ch11_python_as_a_notation/test_face.py` | ; the installed Python modules named by each face header; missing modules are reported |
+| `pygments-sync` | `website/.vitepress/metta.tmLanguage.json` | `"$PY" extensions/python/tools/pygmentsgen.py --write` | `extensions/python/metta/_pygments.py` | `"$PY" extensions/python/tools/pygmentsgen.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_artifact_projections.py -k lexer`; `"$PY" tests/checks/check_tokenisation_parity.py`; `"$PY" tests/checks/check_tokenisation_selftest.py` | ; Node and the website tokenizer dependencies for corpus token comparison |
+| `refusal-sync` | `engine/**/*.pl`; `tests/data/error-kinds.json`; `extensions/python/metta/_errors/errors.py` | `"$PY" extensions/python/tools/refusalgen.py --write` | `extensions/python/metta/_errors/refusals.py` | `"$PY" extensions/python/tools/refusalgen.py`; `"$PY" tests/checks/check_refusal_sync_selftest.py` | ; engine |
+| `aio-mirror` | `extensions/python/metta/**/*.py`; `extensions/python/ext/metta-*/*.py` | `"$PY" extensions/python/tools/aiogen.py --write` | `extensions/python/metta/_faces/space.py`; `extensions/python/metta/_faces/metta.py`; `extensions/python/metta/aio/_mirror.py` | `"$PY" extensions/python/tools/aiogen.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_async_mirror.py` | `layer-sync`, `vocab-sync` |
+| `fn-sync` | `engine/**/*.pl`; `lib/*/*.metta`; `extensions/python/metta/_atoms/names.py`; `extensions/python/tools/phrasebook_entries.py` | `"$PY" extensions/python/tools/fngen.py --write` | `extensions/python/metta/_catalog/fn.py` | `"$PY" extensions/python/tools/fngen.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/ch11_python_as_a_notation/test_mention_doors.py extensions/python/tests/repository/test_doc_emission.py` | `vocab-sync`; engine |
+| `libdoc` | `lib/*/*.metta`; `lib/*/*.pl` | `"$PY" extensions/python/tools/libdoc.py --write` | `website/reference/metta-libraries.md` | `"$PY" extensions/python/tools/libdoc.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_artifact_projections.py -k library_document` | `face-sync` |
+| `refusals` | `engine/**/*.pl`; `tests/data/error-kinds.json` | `"$PY" extensions/python/tools/refusalsdoc.py --write` | `website/reference/refusals.md` | `"$PY" extensions/python/tools/refusalsdoc.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_refusal_rows.py` | `refusal-sync`; engine |
+| `init-stub` | `extensions/python/metta/__init__.pyi`; `extensions/python/metta/vocabularies.py`; `extensions/python/metta/_faces/*.py` | `"$PY" extensions/python/tools/rootgen.py --write` | `extensions/python/metta/__init__.py`; `extensions/python/metta/__init__.pyi` (region `# begin generated root imports`); `extensions/python/metta/__init__.pyi` (region `# begin generated root declarations`); `extensions/python/metta/__init__.pyi` (region `# begin generated algebra declaration`); `extensions/python/tests/typing/algebra_surface.py` | `"$PY" extensions/python/tools/rootgen.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_artifact_projections.py -k 'root or source_bindings'` | `aio-mirror`, `fn-sync` |
+| `door-sync` | `extensions/python/metta/**/*.py`; `extensions/python/ext/metta-*/*.py` | `"$PY" extensions/python/tools/doorgen.py --write` | `extensions/python/metta/doors/_namespaces.py`; `extensions/python/metta/remote/_schemas.py` (region `# begin generated remote operations`); `extensions/python/metta/_spaces/results.py` (region `    # begin generated extension declarations: Rows`); `extensions/python/metta/_spaces/results.py` (region `    # begin generated extension declarations: Answers`); `extensions/python/metta/_spaces/execution.py` (region `# begin generated evaluation keywords`); `website/reference/python-door-contracts.md`; `llms.txt` (region `&lt;!-- begin generated door contracts --&gt;`) | `"$PY" extensions/python/tools/doorgen.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_door_rows.py extensions/python/tests/repository/test_door_marks.py`; `"$PY" extensions/python/tools/doorgen.py --refusals` | `init-stub`, `bounds-sync`; engine for behavior and refusal witnesses |
+| `ledger` | `extensions/python/metta/**/*.py` | `"$PY" extensions/python/tools/ledger.py --write` | `website/reference/shrink-ledger.md` | `"$PY" extensions/python/tools/ledger.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_artifact_projections.py -k door_documents` | `door-sync` |
+| `phrasebook` | `extensions/python/tools/phrasebook_entries.py`; `lib/*/*.metta` | `"$PY" extensions/python/tools/phrasebook.py --markdown --gate` | `website/reference/stdlib-phrasebook.md`; `extensions/python/tools/phrasebook_answers.json` (frozen; remeasure with `"$PY" extensions/python/tools/phrasebook.py --learn --markdown --gate`) | `"$PY" extensions/python/tools/phrasebook.py --gate`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_phrasebook.py` | `fn-sync`, `door-sync`; engine; frozen answers are compared with a fresh execution |
+| `reference` | `extensions/python/metta/**/*.py`; `extensions/python/metta/__init__.pyi`; `website/reference/*.md` | `"$PY" extensions/python/tools/reference.py --write` | `website/reference/metta*.md` (header contains `&lt;!-- Generated by extensions/python/tools/reference.py`); `website/reference/index.md` (region `&lt;!-- begin generated reference index --&gt;`); `website/.vitepress/config.ts` (region `          // begin generated reference navigation`) | `"$PY" extensions/python/tools/reference.py`; `env CHECK_PY="$PY" sh extensions/python/test.sh extensions/python/tests/repository/test_reference_projections.py` | `init-stub`, `door-sync`, `ledger`, `libdoc`, `refusals`, `phrasebook`; griffelib; analyzed modules are never executed |
+<!-- end generated artifact manifest -->
+
+Regenerate the door projections with:
 
 ```sh
 "$PY" extensions/python/tools/doorgen.py --write
 CHECK_PY="$PY" sh check.sh door-sync
 ```
 
-`metta/doors.py` owns the core declarations. Workspace packages own their
-literal `DOORS` tuples. Add or change a row and its behavioral tests before
-regenerating. Each row names complete signatures, types, effects, result
-shape, tiers, implementation, documentation and evidence. Optional binding,
-provider and sugar records describe the boundary or fixed parameter point.
+`@door` marks on implementation bodies own the public declarations. Put types,
+defaults, documentation and behavior in those bodies. The mark adds the
+contract's effects, kind, tiers, refusal witnesses and optional fixed-parameter
+relationship. Core and extension providers use the same marks; scanning them
+derives the door catalog.
 
-The generator writes Space, Rows and Answers declarations, the async,
-module and context mirrors, remote client declarations and operation schemas,
-the stub, reference pages, shrink ledger, and the consumer sheet's door
-sections. A hand implementation stays outside the marked regions; its
-signature and documentation must match its row. Inherited members are checked
-against their defining class. Edit those bodies for behavior and the row for
-the public contract; public membership comes from the rows.
+The emitter generates typed forwarding classes for Space, MeTTa, AsyncMeTTa
+and the module tier. It also derives namespace and remote operation declarations,
+Rows and Answers extension methods, reference pages, the shrink ledger and the
+consumer sheet. `metta/__init__.pyi` declares named root exports; `rootgen.py`
+derives the runtime imports and export list from it. Generated regions name
+their emitter and source. Edit the authority and regenerate instead of editing
+a projection.
 
 `door-sync` checks all projections, contract fields, coverage and refusal
 witnesses, then runs its planted-defect and mirror tests. `doorgen.py
@@ -313,7 +439,7 @@ CHECK_PY="$PY" sh check.sh coverage verifytypes stubtest mutation memray
   any test fails. One module per run, because the package is 61,000 lines:
 
   ```sh
-  METTA_MUTATION_TARGET='metta.results.*' \
+  METTA_MUTATION_TARGET='metta._spaces.results.*' \
   METTA_MUTATION_TESTS='tests/ch06_many_answers/test_answers.py' \
       CHECK_PY="$PY" sh check.sh mutation
   ```
@@ -323,7 +449,7 @@ CHECK_PY="$PY" sh check.sh coverage verifytypes stubtest mutation memray
   two knobs because mutmut takes its test selection from configuration alone,
   and a lane cannot rewrite `pyproject.toml`. The lane rebuilds `.mutmut/`, a
   scratch copy one level under the repository root, each run: mutmut runs the
-  suite inside `.mutmut/mutants/`, which is the depth at which `metta/shim.pl`
+  suite inside `.mutmut/mutants/`, which is the depth at which `metta/_binding/shim.pl`
   still reaches `../../../engine` and `tests/conftest.py` still reaches
   `bounded.sh`.
 - `memray` runs the seam's five handle families -- space handles, worlds,

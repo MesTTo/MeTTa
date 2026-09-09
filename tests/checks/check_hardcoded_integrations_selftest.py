@@ -17,6 +17,8 @@ nowhere now.
 
 Assumes: a writable ai-tmp/ in this repository.
 Guarantees:
+  - literal libraries reached through lazy() and optional() are refused in
+    both direct and qualified forms [tested: this file; commit=WORKTREE]
   - only an exact row-generated annotation projection may name optional
     providers; runtime imports and added imports still fail [tested:
     this file; commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543]
@@ -156,7 +158,7 @@ def _findings_over(scratch: Path, allowed):
 
 def _check_door_annotations() -> None:
     """Only the exact generated provider annotations may name a member."""
-    path = ROOT / 'extensions/python/metta/_door_namespaces.py'
+    path = ROOT / 'extensions/python/metta/doors/_namespaces.py'
     original = path.read_text(encoding='utf-8')
     assert pass_under_test._door_annotations(path)
     assert pass_under_test._python_names(path) == []
@@ -174,12 +176,23 @@ def _check_door_annotations() -> None:
             assert pass_under_test._python_names(path)
 
 
+def _check_deferred_loaders(scratch: Path) -> None:
+    """The shared deferred and optional import APIs still expose couplings."""
+    source = scratch / "loaders.py"
+    for function in ("lazy", "optional"):
+        for receiver in ("", "_lazy.", "metta._lazy."):
+            source.write_text(f'{receiver}{function}("solarsdb", "extra")\n', encoding="utf-8")
+            assert pass_under_test._python_names(source) == [("solarsdb", 1)], (function, receiver)
+    source.unlink()
+
+
 def main() -> int:
     """Plant every shape, assert what is reported and what is not."""
     _check_door_annotations()
     scratch = Path(tempfile.mkdtemp(dir=ROOT / "ai-tmp", prefix="hardcoded-selftest-"))
     try:
         _plant(scratch)
+        _check_deferred_loaders(scratch)
 
         # Nothing registered: every planted coupling is a finding, and none of
         # the prose is.

@@ -740,12 +740,12 @@ def _locate_file(token: str) -> list[Path]:
     """Where a cited path actually lives.
 
     Checked literally against each of SEARCH_ROOTS in turn. A BARE filename
-    with no `/` -- P0.2a's `shim.pl`, meaning `extensions/python/metta/shim.pl`
+    with no `/` -- P0.2a's `shim.pl`, meaning `extensions/python/metta/_binding/shim.pl`
     -- is resolved by searching the TREE (ROOT only; WORKSPACE and its siblings
     are not this tool's to walk) for that exact basename, because the spec
     cites many files by their last path component only, and checking only `ROOT
     / token` reported `shim.pl` as absent when
-    `extensions/python/metta/shim.pl` was sitting right there [measured
+    `extensions/python/metta/_binding/shim.pl` was sitting right there [measured
     2026-08-18].
     """
     for root in SEARCH_ROOTS:

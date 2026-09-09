@@ -41,7 +41,7 @@ HERE = Path(__file__).resolve().parent
 # public surface over it. Every atom crossing the boundary passes through
 # both. Measured 2026-08-19, minimum of three instructions:u runs of the
 # wire-codec lane, 3457054691 interpreted against 2984812403 compiled, 1.16x.
-MYPYC_MODULES = ("extensions/python/metta/_atom_wire.py", "extensions/python/metta/atoms.py")
+MYPYC_MODULES = ("extensions/python/metta/_atoms/wire.py", "extensions/python/metta/_atoms/factories.py")
 
 # _atoms_core.py is NOT in that list, and the reason is behaviour rather than
 # taste. An exclusion list with its reasons is mypy's own shape for this
@@ -146,10 +146,10 @@ RUNTIME_RESOURCES = {
     "tests/codec": "tests/codec",
     "llms.txt": "llms.txt",
     "extensions/python/extension.pl": "extensions/python/extension.pl",
-    "extensions/python/bridge.pl": "extensions/python/bridge.pl",
-    "extensions/python/metta_py.py": "extensions/python/metta_py.py",
+    "extensions/python/metta/_binding/surface.pl": "extensions/python/metta/_binding/surface.pl",
+    "extensions/python/metta/_binding/host.py": "extensions/python/metta/_binding/host.py",
     "extensions/python/helper.pl": "extensions/python/helper.pl",
-    "extensions/python/metta/shim.pl": "extensions/python/metta/shim.pl",
+    "extensions/python/metta/_binding/shim.pl": "extensions/python/metta/_binding/shim.pl",
 }
 
 

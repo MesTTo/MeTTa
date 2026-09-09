@@ -41,7 +41,7 @@ needs(predicate(open_shared_object/3)).              % current_predicate; a plat
 needs(extension(mork)).                              % another extension, loaded first
 
 entry(engine, 'bridge.pl').        % the ENGINE consults this, at boot
-entry(host, 'metta/shim.pl').      % YOUR RUNTIME consults this; recorded, never loaded here
+entry(host, 'metta/_binding/shim.pl').      % YOUR RUNTIME consults this; recorded, never loaded here
 ```
 
 Every need met, and every `entry(engine, _)` loads in the file's own order and

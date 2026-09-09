@@ -339,9 +339,9 @@ test(a_pure_body_still_tables) :-
 %wrapper is what says a wrapper the walk does not descend cannot pass anything
 %[measured 2026-08-17, ai-metta-python-seams.md item 1's review].
 %py-call is the PYTHON extension's builtin, and this suite loads
-%engine/metta.pl without extensions/python/metta/shim.pl [source:
+%engine/metta.pl without extensions/python/metta/_binding/shim.pl [source:
 %extensions/python/check.sh, "the plunit suites load engine/metta.pl without
-%extensions/python/metta/shim.pl"]. Where that extension is absent the term is
+%extensions/python/metta/_binding/shim.pl"]. Where that extension is absent the term is
 %not a call at all, it is data, and a table over it is sound, so the row asks
 %the same question the classifier asks rather than demanding a refusal the
 %engine on its own cannot make. It runs wherever the extension IS loaded.

@@ -29,7 +29,7 @@ needs no line here, so a request to add one is a request to un-build the seam.
 The names are DERIVED rather than listed. For each seat the pass reads what the
 seat's own sources reach for: a Python import of a module that is neither the
 standard library nor this repository's own, and a module name handed to one of
-the four probes that import by name (`optional_module`, `require_module`,
+the probes that import by name (`lazy`, `optional`, their older local aliases,
 `importlib.import_module`, `sys.modules.get`); a TypeScript import specifier
 that is neither relative nor `node:`; a C `#include` of a header that is
 neither the C standard library nor this seat's own. A new library therefore
@@ -50,6 +50,9 @@ it by construction; the TypeScript and C scans strip comments before matching.
 Assumes: a checkout of this repository, and Python 3.10+ for
   sys.stdlib_module_names.
 Guarantees:
+  - lazy and optional loader calls expose their module names whether imported
+    directly or reached through _lazy [tested:
+    tests/checks/check_hardcoded_integrations_selftest.py; commit=WORKTREE]
   - a library named anywhere in a seat's core is reported with its path, its
     line and what to do instead, with no allowlist that could admit it
     [tested: tests/checks/check_hardcoded_integrations_selftest.py;
@@ -92,9 +95,10 @@ OURS = frozenset({"metta", "_workspace", "solars_selftest"})
 #: coupling and carries no import. Each is matched with its RECEIVER, because
 #: `.get("something")` on a dict is not a module probe and there are thousands
 #: of those.
-PROBES = frozenset({"optional_module", "require_module", "import_module"})
+PROBES = frozenset({"lazy", "optional", "optional_module", "require_module", "import_module"})
 RECEIVED_PROBES = frozenset(
     {("sys.modules", "get"), ("importlib", "import_module"), ("importlib.util", "find_spec")}
+    | {(receiver, function) for receiver in ("_lazy", "metta._lazy") for function in ("lazy", "optional")}
 )
 
 #: Headers the C seat may include: the C standard library, and SWI's own,
@@ -135,7 +139,7 @@ ALLOWED: dict[tuple[str, str], Site] = {
     # The engine this seat embeds. Not an integration: it IS the runtime, and
     # a second Prolog bridge is a different seat rather than a second row.
     ("python", "janus_swi"): Site(
-        ("extensions/python/metta/_engine.py",), "the engine this seat embeds"
+        ("extensions/python/metta/_binding/runtime.py",), "the engine this seat embeds"
     ),
     # The seat's own tooling, each written in the library named. A test
     # framework, a property-testing framework, a terminal renderer, a docstring
@@ -143,35 +147,36 @@ ALLOWED: dict[tuple[str, str], Site] = {
     # libraries a program would swap: they are what these files ARE.
     ("python", "hypothesis"): Site(
         (
-            "extensions/python/metta/testing.py",
-            "extensions/python/metta/_space_machine.py",
+            "extensions/python/metta/testing/_machine.py",
+            "extensions/python/metta/testing/_properties.py",
+            "extensions/python/metta/testing/_strategies.py",
         ),
         "the property-testing framework this seat's own generators are written in",
     ),
     ("python", "annotated_types"): Site(
         (
-            "extensions/python/metta/testing.py",
-            "extensions/python/metta/_refinements.py",
+            "extensions/python/metta/testing/_properties.py",
+            "extensions/python/metta/_catalog/refinements.py",
         ),
         "the refinement vocabulary the engine's own Len and Ge annotations use",
     ),
     ("python", "pytest"): Site(
         (
-            "extensions/python/metta/_compliance.py",
-            "extensions/python/metta/_gateway_compliance.py",
+            "extensions/python/metta/testing/_providers.py",
+            "extensions/python/metta/testing/_gateway.py",
             "extensions/python/metta/pytest_plugin.py",
         ),
         "the test framework this seat ships fixtures and compliance kits for",
     ),
     ("python", "rich"): Site(
         (
-            "extensions/python/metta/library.py",
-            "extensions/python/metta/results.py",
+            "extensions/python/metta/library/__init__.py",
+            "extensions/python/metta/_spaces/results.py",
         ),
         "the terminal renderer these two doors offer as an optional face",
     ),
     ("python", "docstring_parser"): Site(
-        ("extensions/python/metta/_documentation.py",),
+        ("extensions/python/metta/_catalog/documentation.py",),
         "the docstring reader this seat's own documentation door uses",
     ),
     ("python", "pygments"): Site(
@@ -259,7 +264,7 @@ def _python_names(path: Path) -> list[tuple[str, int]]:
 
 def _door_annotations(path: Path) -> set[tuple[str, int]]:
     """Read the door generator's exact provider annotation projection."""
-    if path != ROOT / 'extensions/python/metta/_door_namespaces.py':
+    if path != ROOT / 'extensions/python/metta/doors/_namespaces.py':
         return set()
     sys.path.insert(0, str(ROOT / 'extensions/python/tools'))
     from doorgen import declared_annotation_imports
