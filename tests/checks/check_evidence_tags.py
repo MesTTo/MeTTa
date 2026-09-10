@@ -117,7 +117,7 @@ Guarantees:
     [tested: test_nested_package_evidence_rejects_a_missing_test; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]
   - every walk reads the files git tracks or has staged and nothing else, so
     build output under an ignored directory is never read as a claim of the
-    tree [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
+    tree [tested: tests/checks/check_evidence_selftest.py; commit=b29acf394a2711a9cb1625557acdbe44997db601]
   - nested example fixtures carry checked claims and resolvable comment pins
     [tested: tests/checks/check_evidence_selftest.py,
     tests/checks/check_pin_provenance_selftest.py; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
