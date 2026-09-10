@@ -58,7 +58,7 @@ Guarantees:
     test_a_table_inside_a_declared_output_is_generated,
     test_a_table_outside_a_declared_region_is_still_asked,
     test_a_declared_region_the_tree_cannot_locate_is_reported;
-    commit=WORKTREE]
+    commit=e492f2a5bb995b6c2b86bdeb90cb1d2f27282b07]
 Fails when:
   - read as a count. The number of closed sets is not a score; a policy this
     seat decides is a closed set and should stay one, and its line is what

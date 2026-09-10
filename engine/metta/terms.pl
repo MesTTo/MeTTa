@@ -535,7 +535,7 @@ check_argument_type(Argument, Expected, Origin) :-
 %the shipped shape test knows nothing about. A semidet question that binds
 %nothing. Published for hosts (ext_points.pl); the Python seat's lint reads
 %it in place of a metatype list of its own
-%[tested: argument_admission; commit=WORKTREE].
+%[tested: argument_admission; commit=e492f2a5bb995b6c2b86bdeb90cb1d2f27282b07].
 metta_argument_admitted(Space, Argument, Expected) :-
     space_module(Space, Module),
     with_metta_module(Module,

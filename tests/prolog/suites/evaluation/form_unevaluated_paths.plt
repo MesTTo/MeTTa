@@ -10,14 +10,14 @@
 %     form_unevaluated_paths:a_match_pattern_is_unevaluated_and_its_space_and_body_are_not,
 %     form_unevaluated_paths:let_star_answers_each_pairs_pattern_and_not_its_values,
 %     form_unevaluated_paths:a_variable_both_bound_by_the_pattern_and_evaluated_in_the_body_answers_its_pattern_occurrence,
-%     form_unevaluated_paths:a_quoted_atom_is_unevaluated; commit=WORKTREE]
+%     form_unevaluated_paths:a_quoted_atom_is_unevaluated; commit=e492f2a5bb995b6c2b86bdeb90cb1d2f27282b07]
 %   - a declared Atom parameter is unevaluated and a Number parameter is not,
 %     and an undeclared head evaluates every position [tested:
 %     form_unevaluated_paths:a_declared_atom_parameter_is_unevaluated,
 %     form_unevaluated_paths:an_undeclared_head_evaluates_every_position;
-%     commit=WORKTREE]
+%     commit=e492f2a5bb995b6c2b86bdeb90cb1d2f27282b07]
 %   - a form whose head is not a symbol answers no paths [tested:
-%     form_unevaluated_paths:a_non_symbol_head_answers_nothing; commit=WORKTREE]
+%     form_unevaluated_paths:a_non_symbol_head_answers_nothing; commit=e492f2a5bb995b6c2b86bdeb90cb1d2f27282b07]
 % Owns resources: setup/cleanup releases each space; no file is written.
 % Open Obligations:
 %   To Do: None

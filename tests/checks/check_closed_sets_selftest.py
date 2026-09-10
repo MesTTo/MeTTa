@@ -23,7 +23,7 @@ Guarantees:
     outside a declared region is, and a region the tree cannot locate is
     reported [tested: test_a_table_inside_a_declared_output_is_generated,
     test_a_table_outside_a_declared_region_is_still_asked,
-    test_a_declared_region_the_tree_cannot_locate_is_reported; commit=WORKTREE]
+    test_a_declared_region_the_tree_cannot_locate_is_reported; commit=e492f2a5bb995b6c2b86bdeb90cb1d2f27282b07]
 Open Obligations:
   To Do: None
   Hacks: None

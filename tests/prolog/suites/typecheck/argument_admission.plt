@@ -7,10 +7,10 @@
 %     [tested: argument_admission:the_wildcards_admit_everything,
 %     argument_admission:a_metatype_admits_by_the_values_metatype,
 %     argument_admission:an_ordinary_type_admits_by_the_reported_type;
-%     commit=WORKTREE]
+%     commit=e492f2a5bb995b6c2b86bdeb90cb1d2f27282b07]
 %   - a user typing rule declared in the space reaches the answer, widening
 %     one pair and refusing another [tested:
-%     argument_admission:a_user_rule_reaches_the_answer; commit=WORKTREE]
+%     argument_admission:a_user_rule_reaches_the_answer; commit=e492f2a5bb995b6c2b86bdeb90cb1d2f27282b07]
 % Owns resources: setup/cleanup releases each space; no file is written.
 % Open Obligations:
 %   To Do: None

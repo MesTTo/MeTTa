@@ -1705,7 +1705,7 @@ metta_effect_plan_source_arguments(Module, Head, Args, Evaluated) :-
 %the shape around it, and a root it names is then the exact occurrence that
 %runs. Published for hosts (ext_points.pl): the Python seat's lint reads it
 %in place of a head list of binding forms of its own
-%[tested: form_unevaluated_paths; commit=WORKTREE].
+%[tested: form_unevaluated_paths; commit=e492f2a5bb995b6c2b86bdeb90cb1d2f27282b07].
 metta_form_unevaluated_variable_paths(Space, Form, Paths) :-
     space_module(Space, Module),
     (   nonvar(Form), Form = [Head|Args], atom(Head), is_list(Args)
