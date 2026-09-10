@@ -9,6 +9,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Stored `from` rows link a library's defining home or another space, with
+  live reversible references, occurrence-preserving unions and ordinary
+  `only`, `except`, `prefix`, `rename` and `qualified` maps. `internal` rows
+  grade occurrence visibility, and `get-property` answers the shared claims.
+  Python exposes `Space.from_` and `get_property` through the door registry.
+- Per-space `from-map` and `load` pragmas select mapping and eager, background
+  or lazy loading. Non-eager initializers require `pureStructural`; maps may
+  enumerate read-only names. Refusals identify the offending form and eager
+  loading remedy. Optional provider capabilities `add-token` and
+  `remove-token` declare exact mutation for foreign reference receivers.
+
 - Every workaround for a host defect names its ledger entry: a site carries
   `Workaround: <key> - <what>` in its own comment syntax,
   `docs/host-workarounds.md` holds one entry per defect with a tracked
@@ -27,6 +38,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   reuse it through the existing specialization invalidation mechanism.
   `%Rest%` declarations now refuse with the replacement named. `Kwargs`
   replaces six fixed declarations with one Atom-element splice.
+- `origin-of` reads the common `(origin space file line)` properties, one per
+  defining occurrence, including lazy definitions. `engine-origin` keeps its
+  implementation-tier classification. Library cards show common visibility
+  and origin claims and read companion README caveats in every renderer.
+- `lib_he` installs its vendored upstream equations and shadows the prelude
+  in its receiving space. The prelude aligns equality, type comparison and
+  bare-error returns with that arbiter, while retaining its documented bag
+  assertions and reduced-atom `add-reduct` result.
 
 - A Prolog source the engine loads at run time compiles beside itself on
   first use in a boot that governs artifacts and loads from the `.qlf` in
@@ -64,6 +83,23 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   splices refuse before declaration storage or source effects.
   An arriving segment arity uses its retained equations when an inherited
   native predicate has the same name, including CLP(FD)'s `sum/3`.
+- Evidence scanning reaches imported MeTTa fixtures at every nesting depth.
+  Their claims are checked and their comment pins resolve with the example's
+  functional snapshot; the same bytes inside a program remain unchanged.
+- The Python host-surface test exits after its requested walk. It previously
+  entered the static driver's registered main goal as well, running the full
+  static suite again and sometimes exceeding its subprocess deadline.
+- Reference transaction discovery stops at the nearest transaction frame.
+  Releasing a suspended background query preserves SWI's foreign-frame
+  boundary, and nested completion transfers rollback repair to its parent.
+- File programs can await background imports because source ownership is
+  keyed per canonical path and the file runner releases the loader mutex
+  before executing forms. Runnable translation misses also release their
+  publication mutex while compiling; dependency reservations prevent stale
+  publication after a concurrent change, and transaction-local misses stay
+  private to their invocation.
+- Partial catalog reads preserve occurrence order across predicate-table
+  layout changes, without adding an arity index.
 
 - The engine's tokens, receipts and vocabulary-seed units import the list,
   ordered-set and pair predicates they call (`member/2`, `list_to_set/2`,

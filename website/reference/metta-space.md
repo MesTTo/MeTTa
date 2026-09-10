@@ -1131,6 +1131,20 @@ def stats(self: Space) -> _StatsBlock:
 > Solver.statistics() reading, on the engine this library actually
 > has.
 
+### `Space.get_property`
+
+```python
+def get_property(self: Space, head: str | Symbol, /) -> tuple[Atom, ...]:
+```
+
+> Return visibility, origins and declared properties of a head.
+>
+>     space.get_property("car-atom")
+>
+> The answers are the atoms ``(get-property car-atom)`` enumerates, including
+> every defining origin. An unknown file is empty text and an unknown line
+> is -1. The query does not compile a lazy definition.
+
 ### `Space.match`
 
 ```python
@@ -1682,6 +1696,21 @@ def add(self: Space, *atoms: Any) -> None:
 > performs ``!(import! <m> (library lib_he))`` with this space as the
 > target. An import is an effect, so it refuses to hide inside an atom
 > batch or share a call with stored atoms.
+
+### `Space.from_`
+
+```python
+def from_(self: Space, source: Any, map: Any = None) -> None:
+```
+
+> Reference a library or space through a stored ``(from source map)`` row.
+>
+>     target.from_(metta.lib.string, metta.parse("(prefix str-)"))
+>     target.from_(home)
+>
+> A missing map uses this space's ``from-map`` pragma. Definitions run in
+> their home and later additions follow the standing row. Removing the row
+> withdraws its links. Loading follows this space's ``load`` pragma.
 
 ### `Space.remove`
 

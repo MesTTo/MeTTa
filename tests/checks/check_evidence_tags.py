@@ -115,6 +115,9 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
   - Python package claims remain checked after sources move into subpackages
     [tested: test_nested_package_evidence_rejects_a_missing_test; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]
+  - nested example fixtures carry checked claims and resolvable comment pins
+    [tested: tests/checks/check_evidence_selftest.py,
+    tests/checks/check_pin_provenance_selftest.py; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs
@@ -235,6 +238,8 @@ GUARANTEE_SOURCES = (
     # chapters nest one deep for their sections.
     "examples/*/*.metta",
     "examples/*/*/*.metta",
+    # Imported fixtures live below the corpus runner's example depths.
+    "examples/**/_fixtures/**/*.metta",
     # The Node binding is TypeScript, and its sources make the same kind of
     # claim the Python ones do. Its Prolog half is here for the same reason
     # extensions/python/metta/**/*.pl is.

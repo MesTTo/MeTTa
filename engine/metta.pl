@@ -332,11 +332,23 @@
             metta_self_module/1,
             metta_exec_module_prefix/1,
             current_metta_space/1,
+            metta_reference_declare/3,
+            metta_reference_admit_text/2,
+            metta_reference_changed/1,
+            metta_reference_definition_changed/1,
+            metta_reference_prepare/3,
+            metta_source_singleflight/2,
+            metta_graded_pair/5,
+            'get-property'/2,
+            metta_head_property/3,
+            metta_head_claims/3,
+            metta_head_origins/3,
             forget_registered_function/1,
             fun_here/1,
             fun_here_in/2,
             metta_emits/2,
             metta_function_cacheable/1,
+            metta_function_cacheable/2,
             metta_grounded_token/1,
             metta_shared_registry/1,
             register_arity/2,
@@ -1577,6 +1589,7 @@ metta_import_shared_registries(Subsystem) :-
    ;   assertz(metta_engine_src_dir(Dir))
    ).
 
+:- consult('metta/algebra_operations.pl').
 :- ensure_loaded([parser, type_rules, translator, translator_rules,
                   support_graph, specializer, materialize, filereader,
                   '../lib/lib_gitimport/lib_gitimport', spaces, tracer,
@@ -2257,7 +2270,10 @@ prolog:error_message(metta_extension_required(Name, Cause)) -->
 :- initialization(specializer:metta_refresh_specialization_verification).
 :- at_halt(specializer:metta_finish_specialization_verification).
 :- consult('metta/interop.pl').
+:- consult('metta/properties.pl').
 :- consult('metta/registration.pl').
+:- consult('metta/references.pl').
+:- consult('metta/reference_loading.pl').
 %%%%%%%%%% The engine's own type surface %%%%%%%%%%
 %
 %Without this, `get-type` misreported the engine to every tool that reads it.

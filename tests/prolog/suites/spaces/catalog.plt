@@ -32,7 +32,7 @@
      - algebra-law vocabulary members and aliases derive from engine facts,
        and every shipped algebra row appears in the semiring vocabulary
        [tested: algebra_law_vocabulary_and_alias_claims_are_exact,
-       shipped_algebra_rows_are_the_semiring_vocabulary; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]
+       shipped_algebra_rows_are_the_semiring_vocabulary; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
      - the catalog's watch point announces a watched head's adds and removals,
        stays silent for every other head, stops when unwatched, reaches every
        watched head for a removal whose head is unbound, and leaves the row it
@@ -47,6 +47,23 @@
 :- ensure_loaded('../../../../engine/metta.pl').
 
 :- begin_tests(catalog_self_description).
+
+test(partial_catalog_queries_follow_occurrence_order) :-
+    snapshot(
+        ( Rows = [[cat_order, first], [cat_order, second, extra, fields],
+                  [cat_order, third, extra], [cat_order, fourth],
+                  [cat_order, first]],
+          maplist(cat_order_add, Rows, References),
+          findall(Row-Ref,
+                  ( spaces:metta_catalog_clause(Row, Ref),
+                    Row = [cat_order|_] ), All),
+          findall([cat_order|Tail]-Ref,
+                  spaces:metta_catalog_clause([cat_order|Tail], Ref), Direct),
+          pairs_keys_values(Expected, Rows, References),
+          assertion(Direct == Expected),
+          assertion(All == Expected) )).
+
+cat_order_add(Row, Ref) :- add_sexp('&metta', Row, Ref).
 
 test(catalog_queries_preserve_width_multiplicity_and_references) :-
     setup_call_cleanup(
@@ -263,7 +280,7 @@ test(shipped_algebra_rows_are_the_semiring_vocabulary) :-
     once('get-atoms'('&metta', [vocabulary, semiring|Semirings])),
     findall(Name, 'get-atoms'('&metta', [algebra, Name|_]), Algebras),
     Semirings == Algebras,
-    Semirings == [bool, bag, counting, set, ranked, tropical, prob, prov,
+    Semirings == [bool, visibility, bag, counting, set, ranked, tropical, prob, prov,
                   budget, amplitude].
 
 test(algebra_law_aliases_expand_through_catalog_claims,

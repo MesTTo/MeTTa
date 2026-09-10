@@ -808,6 +808,20 @@ async def profile_extension(
 > The sampler is statistical, so profile something that runs, and
 > profiling changes execution: this is a debugging surface.
 
+### `AsyncMeTTa.get_property`
+
+```python
+async def get_property(self, head: str | Symbol, /) -> tuple[Atom, ...]:
+```
+
+> Return visibility, origins and declared properties of a head.
+>
+>     space.get_property("car-atom")
+>
+> The answers are the atoms ``(get-property car-atom)`` enumerates, including
+> every defining origin. An unknown file is empty text and an unknown line
+> is -1. The query does not compile a lazy definition.
+
 ### `AsyncMeTTa.match`
 
 ```python
@@ -1134,6 +1148,21 @@ async def add(self, *atoms: Any) -> None:
 > performs ``!(import! <m> (library lib_he))`` with this space as the
 > target. An import is an effect, so it refuses to hide inside an atom
 > batch or share a call with stored atoms.
+
+### `AsyncMeTTa.from_`
+
+```python
+async def from_(self, source: Any, map: Any = None) -> None:
+```
+
+> Reference a library or space through a stored ``(from source map)`` row.
+>
+>     target.from_(metta.lib.string, metta.parse("(prefix str-)"))
+>     target.from_(home)
+>
+> A missing map uses this space's ``from-map`` pragma. Definitions run in
+> their home and later additions follow the standing row. Removing the row
+> withdraws its links. Loading follows this space's ``load`` pragma.
 
 ### `AsyncMeTTa.remove`
 

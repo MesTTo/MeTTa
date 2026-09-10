@@ -88,3 +88,47 @@ Workaround: `metta_load_source/2` strips the extension of a source the boot
   claims, so every runtime unit reaches the artifact rule.
 Lifted when: the artifact rule applies to an extension-bearing spec too.
 Record: docs/journal/2026-09-09-runtime-units-compile-beside-their-source.md.
+
+## swi-named-listener-replacement-lock
+Host: SWI-Prolog 10.1.13, src/pl-event.c:add_event_hook at
+  fc7ef84b949378b729052c3ade79c90ce5416abb, lines 145-159.
+Defect: src/pl-event.c:add_event_hook returns at line 155 after replacing
+  a named event handler, before UNLOCK_LIST at line 159 releases its
+  recursive list mutex. Its owning thread can continue, but another thread
+  blocks while registering, invoking or removing a handler on that channel.
+Reproduction: tests/checks/host_workarounds/swi-named-listener-replacement-lock.sh,
+  a completed single-registration control followed by a replacement whose
+  worker announces its arrival before trying to unregister the handler.
+Workaround: each reference observer registers one unnamed closure carrying
+  its owning thread and unregisters only that closure at retirement.
+Lifted when: add_event_hook releases the event-list mutex before returning
+  from the named-handler replacement branch. Distinct observer ownership
+  remains necessary after that host repair.
+Record: docs/journal/2026-09-09-import-and-module-semantics.md, candidate
+  admission and concurrent rollback-listener evidence.
+
+## swi-query-frame-discarded-on-engine-destroy
+Host: SWI-Prolog 10.1.13; `PL_close_query` in src/pl-wam.c closes the
+  foreign frame before discarding the outer query frame, while
+  `prolog_frame_attribute/3` marks inspected ancestors for `frame_finished`.
+Defect: destroying a yielded engine delivers the event for that discarded
+  outer frame. Opening the listener's query aborts on the host's assertion
+  `PL_open_query: Assertion failed: (void*)fli_context > (void*)environment_frame`,
+  exit 134 in the plain-host reproduction. The same path under the engine
+  exits 139 when the crash reporter itself segfaults. A build without
+  assertions reads a discarded frame instead; exit 0 there is not proof
+  that the defect has gone.
+Reproduction: tests/checks/host_workarounds/swi-query-frame-discarded-on-engine-destroy.sh,
+  a frozen unsafe ancestor walk inside a plain-SWI transaction, followed by
+  an engine yield and destruction. It loads no repository engine predicates.
+  Exit 139, or 134 with the exact assertion above, answers `present`; exit 0
+  answers `absent`; every other result is a broken reproduction.
+Workaround: inspect only through the nearest live transaction frame and
+  transfer its watch to the surviving transaction when it finishes. Exclude
+  the finished frame ID because failure notification can start on that frame.
+Lifted when: SWI no longer delivers `frame_finished` for the frame that
+  `PL_close_query` discards, or excludes its outer query frame from
+  `prolog_frame_attribute/3` marking. Verify that host change before treating
+  `absent` from a build without assertions as a lift signal.
+Record: docs/journal/2026-09-09-the-binding-collapse.md, transfer bound watches
+  before native query destruction.

@@ -1,3 +1,7 @@
+; Purpose: trace values and propagate errors as ordinary answers.
+; Guarantees: return-on-error preserves a produced error's shape
+; [tested: examples/ch10-errors-and-refusals/02-throwing_and_tracing.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+
 ;`throw` is the half of the error story a program writes for itself, and
 ;`trace!` is the one that prints without changing what the program answers.
 ;
@@ -8,12 +12,11 @@
 !(test (throw "text") (Error (throw "text") "text"))
 
 ;Which means every form that reads an error reads this one, with no special
-;case for a raised one against a computed one. `return-on-error` stops the
-;computation by answering the error inside minimal MeTTa's own `return`
-;marker, which is the shape that form always answers in.
+;case for a raised one against a computed one. The upstream-compatible
+;`return-on-error` answers the error itself and leaves the next form unevaluated.
 !(test (if-error (throw oops) caught fine) caught)
 !(test (if-error 42 caught fine) fine)
-!(test (return-on-error (throw oops) carried-on) (return (Error (throw oops) oops)))
+!(test (return-on-error (throw oops) carried-on) (Error (throw oops) oops))
 !(test (return-on-error 42 carried-on) carried-on)
 
 ;A reason that is ALREADY an error passes through unchanged rather than being

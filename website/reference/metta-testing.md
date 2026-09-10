@@ -576,6 +576,21 @@ def test_tokens_identify_each_stored_occurrence_stably(self, provider, exercised
 
 > Identity reads preserve the stored bag and survive an unchanged read.
 
+### `SpaceComplianceSuite.test_exact_token_mutation_restores_the_occurrence_bag`
+
+```python
+def test_exact_token_mutation_restores_the_occurrence_bag(
+    self,
+    provider,
+    exercised,
+    space,
+    stored,
+    capability,
+):
+```
+
+> A returned identity selects the new copy and leaves equal old rows.
+
 ### `SpaceComplianceSuite.test_declared_length_answers_the_provider_size`
 
 ```python

@@ -16,7 +16,7 @@
 # Credited across those files, 13 authors:
 # Carlo Nucera, DagmawiKK, Leul Negash, MikeArchbold, Nil Geisweiller, Patrick Hammer, Peter Isaev, Roman Treutlein, Tewobsta Seyoum Assefa, Vitaly Bogdanov, Zar Goertzel, ermijermy, yabets.
 #
-# The other 195 examples in this directory were written here.
+# The other 201 examples in this directory were written here.
 #
 # Regenerate with: python extensions/python/tools/example_origins.py --write
 #
@@ -146,7 +146,7 @@ examples/ch20-extending-the-engine/20-02-metta-written-in-metta/03-myinterpreter
 examples/ch20-extending-the-engine/20-02-metta-written-in-metta/05-he_minimalmetta.metta	examples/he_minimalmetta.metta	0.895	Patrick Hammer
 examples/ch20-extending-the-engine/20-02-metta-written-in-metta/06-he_evaluation.metta	examples/he_evaluation.metta	0.966	Patrick Hammer
 examples/ch20-extending-the-engine/20-02-metta-written-in-metta/07-he_quoting.metta	examples/he_quoting.metta	0.979	Patrick Hammer
-examples/ch20-extending-the-engine/20-02-metta-written-in-metta/08-he_atomspace.metta	examples/he_atomspace.metta	0.956	Patrick Hammer
+examples/ch20-extending-the-engine/20-02-metta-written-in-metta/08-he_atomspace.metta	examples/he_atomspace.metta	0.923	Patrick Hammer
 examples/ch20-extending-the-engine/20-02-metta-written-in-metta/10-he_math.metta	examples/he_math.metta	0.905	Patrick Hammer; Leul Negash
 examples/ch20-extending-the-engine/20-03-prolog-underneath/01-translatepredicate.metta	examples/translatepredicate.metta	1.0	Patrick Hammer
 examples/ch20-extending-the-engine/20-03-prolog-underneath/02-prologimport.metta	examples/prologimport.metta	0.967	Patrick Hammer

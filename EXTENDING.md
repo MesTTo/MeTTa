@@ -290,6 +290,43 @@ cost of the code it emitted, and a rule that settles the answer at compile time
 emits no code at all, leaving a fact to look up. *Writing the rule in Prolog*
 below is how a library reaches that.
 
+## Share a library's definitions
+
+```metta
+(from lib_string (prefix text.))
+!(text.string-length "three") ; 5
+```
+
+`from` stores a live reference row. A library resolves as `(library name)` and
+has one process-wide home; a space can be the source too. Equations run in
+that home, so their helper calls keep their defining context. The receiver
+gets callable heads and their type and documentation rows. Data stays in the
+source. Prolog heads follow the same rule for every registered arity.
+
+The optional map accepts one head and answers symbols, no answers, or several
+symbols. `only`, `except`, `prefix`, `rename` and `qualified` are prelude
+compositions; lambdas and partial applications work too. The receiver's
+`from-map` pragma supplies the default map. New source heads pass through it,
+and deleting the reference row withdraws its contribution. A name shared by
+several references or by a reference and a local definition unions their
+answers and announces the collision with its origins. Repeated reference
+paths do not duplicate an equation; distinct stored equation occurrences do.
+
+`(internal helper ...)` assigns `INTERNAL` to matching occurrence tokens.
+Unmarked occurrences are `PUBLIC`. Reference faces read those grades under
+the existing `visibility` algebra. Explicitly selecting an internal head
+refuses with `evalc` as the remedy for a deliberate call in its home.
+`(get-property head)` enumerates the common visibility, origins, effect, cost,
+deprecation and documentation claims. `explain`, Python `get_property` and
+library cards project that same source. `origin-of` now returns defining
+occurrences; `engine-origin` still classifies implementation tiers.
+
+`(pragma! load eager|background|lazy)` belongs to the receiving space. Eager
+loading permits ordered load-time effects. Background and lazy loading refuse
+effectful initializers by name; a rows-only library qualifies. Python writes
+the same row with `target.from_(source, map)`. Use `import!` for the existing
+merge of source atoms and `include` to execute pasted forms in source order.
+
 ## 1. Translator rules: macros, and they cost nothing at all
 
 `add-translator-rule!` makes a MeTTa function run at **compile time**. Whatever
@@ -1637,6 +1674,8 @@ talks to. `das.py`, `remote.py` and `persistent.py` are three real instances.
 :- multifile seam:foreign_remove/3.    % remove one
 :- multifile seam:foreign_atoms/2.     % enumerate
 :- multifile seam:foreign_token/3.     % Space, Atom, t(Actor, Generation)
+:- multifile seam:foreign_add_token/3. % Space, Atom, added t(Actor, Generation)
+:- multifile seam:foreign_remove_token/3. % Space, t(Actor, Generation), Removed
 :- multifile seam:foreign_match/3.     % answer a pattern
 :- multifile seam:foreign_clear/1.     % empty the space
 :- multifile seam:foreign_erring/5.    % a declared error mode's stream
@@ -1782,6 +1821,28 @@ Node providers use the same pair order and may return an async iterable.
 `space.blame(atom)` and fast-image saving require this capability. Missing
 identities raise a capability error naming a native overlay or stable provider
 identities as the remedy. Content-only `digest()` does not identify occurrences.
+
+Exact mutation is optional and separate from reading tokens. These ownership
+doors follow the provider's existing transaction and hook promises:
+
+| capability | ownership door | fields and result |
+|---|---|---|
+| `tokens` | `seam:foreign_token/3` | `Space, Atom, Token`; one stable portable token per occurrence |
+| `add-token` | `seam:foreign_add_token/3` | `Space, Atom, Token`; add one occurrence and return its fresh portable token |
+| `remove-token` | `seam:foreign_remove_token/3` | `Space, Token, Removed`; remove only that identity, returning `true` if it existed and `false` otherwise |
+
+A `from` source needs `tokens`. A receiver also needs `add-token` and
+`remove-token`, because its reference row and projected declarations have
+individual owners. The native store implements these operations. A foreign
+receiver missing either mutation capability refuses by name with a native
+overlay as the remedy. Registering both doors enables that receiver through
+the same engine path; no provider-specific reference implementation is needed.
+
+Python declares those optional methods as `TokenAdder.add_token(atom)` and
+`TokenRemover.remove_token(token)`. The first returns a token atom and the
+second a Boolean. `SpaceComplianceSuite` exercises the pair or records the
+missing capability as skipped. No shipped foreign provider implements the
+pair; MORK continues through the universal provider seam.
 
 ### Say why you are saying no
 

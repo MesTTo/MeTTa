@@ -1,3 +1,5 @@
+; Purpose: observe lib_he error values alongside the engine's arithmetic refusals.
+; [tested: sh test.sh examples/ch10-errors-and-refusals/01-he_error.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 !(import! &self (library lib_he))
 
 !(test (let $result (catch (+ 40 2))
@@ -32,9 +34,8 @@
 !(test (if-error (Error 5 BadType) "Error!" "No error")
        "Error!")
 
-;At top level the reference's double return leaves one return instruction for
-;an enclosing function frame, which is what this engine answers below.
+;Upstream lib_he returns the error itself, with no return wrapper.
 !(test (return-on-error (Error 5 BadType) 6)
-       (return (Error 5 BadType)))
+       (Error 5 BadType))
 
 !(test (return-on-error 5 6) 6)

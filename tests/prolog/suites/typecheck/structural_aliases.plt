@@ -8,6 +8,9 @@
 %   alone [tested:
 %   structural_aliases:a_shared_alias_is_hidden_by_a_declaration_added_to_another_space;
 %   commit=60d6ca9089f50521bba869c3b7a87c92fd6a990f].
+% Guarantees: an alias expands before the prelude's exact type match; an
+%   untyped symbol does not acquire Atom from the requested cast target
+%   [tested: cast_targets_expand_in_the_requested_scope; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Owns resources: setup/cleanup releases each space and deletes each source file.
 %   The shared-scope case declares an alias in the process-wide &self and
 %   withdraws it in its body and again in its cleanup.
@@ -258,7 +261,7 @@ test(aliased_subtype_edges_preserve_order_duplicates_and_variables,
 test(cast_targets_expand_in_the_requested_scope,
      [setup(context(S, _)), cleanup(metta_release_space(S))]) :-
     run_in(S, "(: Count (Alias Number)) (: Held (Alias Atom)) !(type-cast 7 Count &self) !(type-cast \"bad\" Count &self) !(type-cast unknown Held &self) !(type-cast-holds 7 Count &self)", Answers),
-    assertion(Answers == [7,['Error',"bad",'BadType'],unknown,true]).
+    assertion(Answers == [7,['Error',"bad",'BadType'],['Error',unknown,'BadType'],true]).
 
 test(late_alias_repairs_a_typed_binding,
      [setup(context(S, M)), cleanup(metta_release_space(S))]) :-

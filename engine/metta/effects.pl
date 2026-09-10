@@ -16,6 +16,11 @@
 % or finite carrier, including the unit shortcut [tested:
 % run_tests(algebra_types); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 % Guarantees:
+%   - candidate definitions enter the existing effect walk before loading or
+%     compiling them [tested: reference_loading; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+% Owns resources: candidate-source analysis holds an indexed, thread-local
+%   source environment only until its admission query exits.
+% Guarantees:
 %   - one dynamic evaluation context carries algebra, limit, and ordering
 %     through nested operations and restores on every exit
 %     [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
@@ -919,6 +924,11 @@ metta_builtin_effect_override(register_metta_library_path, oracleIO).
 metta_builtin_effect_override('context-space', readOnlyLookup).
 metta_builtin_effect_override('get-atoms', nondeterministicReadOnly).
 metta_builtin_effect_override('get-metatype', readOnlyLookup).
+metta_builtin_effect_override(only, nondeterministicReadOnly).
+metta_builtin_effect_override(except, pureStructural).
+metta_builtin_effect_override(prefix, pureStructural).
+metta_builtin_effect_override(rename, pureStructural).
+metta_builtin_effect_override(qualified, pureStructural).
 metta_builtin_effect_override('get-state', readOnlyLookup).
 metta_builtin_effect_override('has-declared-type', readOnlyLookup).
 metta_builtin_effect_override('is-space', readOnlyLookup).
@@ -928,6 +938,7 @@ metta_builtin_effect_override('is-space', readOnlyLookup).
 %which is why the lane seeds atoms before sweeping.
 metta_builtin_effect_override('defined-name', nondeterministicReadOnly).
 metta_builtin_effect_override('get-doc', nondeterministicReadOnly).
+metta_builtin_effect_override('get-property', oracleIO).
 metta_builtin_effect_override('get-doc-atom', readOnlyLookup).
 metta_builtin_effect_override('get-doc-function', nondeterministicReadOnly).
 metta_builtin_effect_override('get-doc-params', readOnlyLookup).
@@ -1065,6 +1076,43 @@ metta_host_source_effect_plan(Module, Source, Operations, Effect) :-
     metta_effect_plan_source_complete(Module, Source, Roots-Direct),
     metta_effect_plan_finish(Module, Roots-Direct, Operations, Effect).
 
+% Admission sees the candidate program, including definitions not published
+% yet. Only the source lookup changes; masks, compiler actions and the effect
+% join remain the ordinary planner's. No candidate equation is compiled here.
+:- use_module(library(pairs), [group_pairs_by_key/2]).
+:- thread_local metta_effect_source_program/2.
+:- meta_predicate metta_with_source_effect_program(+, +, 0).
+
+metta_with_source_effect_program(Module, Forms, Goal) :-
+    findall(Key-Value,
+            ( member(Parsed, Forms), parsed_form_parts(Parsed, _, _, Term), nonvar(Term),
+              metta_effect_program_entry(Term, Key, Value) ), Pairs),
+    keysort(Pairs, Ordered), group_pairs_by_key(Ordered, Grouped),
+    assoc:list_to_assoc(Grouped, Index),
+    setup_call_cleanup(asserta(metta_effect_source_program(Module, Index), Ref),
+                       call(Goal), erase(Ref)).
+
+metta_effect_program_entry([=,[Name|Args],Body], definition(Name), source([Name|Args],Body)) :-
+    atom(Name).
+metta_effect_program_entry([=,Name,Body], definition(Name), source([Name],Body)) :- atom(Name).
+metta_effect_program_entry([':',Name,Type], type(Name), Type) :- atom(Name).
+metta_effect_program_entry([from|_], references, true).
+
+metta_effect_program_lookup(Module, Key, Values) :-
+    metta_effect_source_program(Module, Index), !, get_assoc(Key, Index, Values).
+
+metta_effect_plan_type_chains(Module, Name, Chains) :-
+    metta_effect_program_lookup(Module, type(Name), Types), !,
+    findall([->|Chain],
+            (member(Type, Types), metta_arrow_type_chain(Type, Chain)), Chains).
+metta_effect_plan_type_chains(Module, Name, []) :-
+    metta_effect_program_lookup(Module, definition(Name), _), !.
+metta_effect_plan_type_chains(Module, Name, Chains) :-
+    with_metta_module(Module, translator:call_site_type_chains(Name, Chains)).
+
+metta_effect_plan_ensure_compiled(Module, _) :- metta_effect_source_program(Module, _), !.
+metta_effect_plan_ensure_compiled(_, Name) :- metta_ensure_compiled(Name).
+
 %Replaying a frozen program executes only its compilation positions. Publish
 %that projection separately so world admission can cover translator actions
 %before it allocates and populates the receiver that will run them.
@@ -1136,13 +1184,16 @@ metta_effect_plan_compile_source(Module, [Head|Args], State0, State) :-
 %opposite: it does not run the body now, but its constructor compiles that
 %body immediately. Space updates compile only their space operand here; the
 %runtime program-write pass below owns equation and declaration compilation.
-metta_effect_plan_compile_arguments(_, function, [_], []).
-metta_effect_plan_compile_arguments(_, '|->', [_, Body], [Body]).
+metta_effect_plan_compile_arguments(Module, Head, Args, Compiled) :-
+    atom(Head), metta_effect_program_lookup(Module, definition(Head), _), !,
+    metta_effect_plan_source_masked_arguments(Module, Head, Args, Compiled).
+metta_effect_plan_compile_arguments(_, function, [_], []) :- !.
+metta_effect_plan_compile_arguments(_, '|->', [_, Body], [Body]) :- !.
 metta_effect_plan_compile_arguments(_, Operation, [Space, _], [Space]) :-
 % policy-inventory-exempt: mechanism-internal; reason=the five space updates whose SPACE operand compiles, a shape of the operation rather than a policy value a catalog vocabulary could own; evidence=extensions/python/tests/ch15_writing_transactions_and_worlds/test_worlds.py:test_program_write_compilation_is_included_in_world_admission
     memberchk(Operation,
               ['add-atom', 'remove-atom', 'subtract-atom', 'add-atoms',
-               'add-reduct', 'add-reducts']).
+               'add-reduct', 'add-reducts']), !.
 metta_effect_plan_compile_arguments(Module, Head, Args, Compiled) :-
     metta_effect_plan_source_special_arguments(
         Module, Head, Args, Compiled),
@@ -1243,6 +1294,13 @@ metta_effect_plan_walk(Module, [PI|Rest], Seen, Effects0, Effects) :-
     !,
     metta_effect_plan_walk(Module, Rest, Seen, Effects0, Effects).
 metta_effect_plan_walk(Module, [Name/Arity|Rest], Seen, Effects0, Effects) :-
+    metta_effect_program_lookup(Module, definition(Name), Sources), !,
+    ( translator_rules:translator_rule(Name, _, _)
+    -> Next = Rest, Effects1 = [Name-oracleIO|Effects0]
+    ; foldl(metta_effect_plan_pending_clause(Module, Arity), Sources,
+            Rest-Effects0, Next-Effects1) ),
+    metta_effect_plan_walk(Module, Next, [Name/Arity|Seen], Effects1, Effects).
+metta_effect_plan_walk(Module, [Name/Arity|Rest], Seen, Effects0, Effects) :-
     (   metta_annotated_operation_effect(Name, Declared)
     ->  DeclaredEffects = [Name-Declared|Effects0]
     ;   DeclaredEffects = Effects0
@@ -1297,6 +1355,30 @@ metta_effect_plan_clause_source(Module, source(Head, Source), State0, State) :-
 metta_effect_plan_clause_source(Module, source(_, Source), State0, State) :-
     metta_effect_plan_source_root(Module, Source, State0, State).
 
+metta_effect_plan_pending_clause(Module, Arity, source(Head, Body), State0, State) :-
+    Head = [_|Args], length(Args, Inputs), Extra is Arity-Inputs-1,
+    ( Extra =:= 0
+    -> metta_effect_plan_clause_source(Module, source(Head, Body), State0, State)
+    ; Extra > 0
+    -> metta_effect_plan_applied_source(Module, Body, Extra, State0, State)
+    ; State = State0 ).
+
+% Oversaturation can apply the returned closure. A literal lambda or partial
+% call exposes that work; an opaque returned callable remains oracleIO.
+metta_effect_plan_applied_source(Module, Source, 0, State0, State) :- !,
+    metta_effect_plan_source_root(Module, Source, State0, State).
+metta_effect_plan_applied_source(Module, ['|->',Parameters,Body], Extra, State0, State) :-
+    is_list(Parameters), length(Parameters, Count), Extra >= Count, !,
+    Remaining is Extra-Count,
+    metta_effect_plan_applied_source(Module, Body, Remaining, State0, State).
+metta_effect_plan_applied_source(Module, [Name|Args], Extra, State0, State) :-
+    atom(Name), \+ translator:metta_special_form(Name), is_list(Args), !,
+    length(More, Extra), append(Args, More, Applied),
+    metta_effect_plan_source_root(Module, [Name|Applied], State0, State).
+metta_effect_plan_applied_source(Module, Source, _, State0, State) :-
+    metta_effect_plan_source_root(Module, Source, State0, Mid),
+    metta_effect_plan_dynamic_state(Mid, State).
+
 %A bare equation RHS is callable only when the selected result type asks the
 %application boundary to evaluate it. Atom, Number, BigInt, String and
 %Grounded are final result types in the translator itself; a variable of one
@@ -1306,11 +1388,9 @@ metta_effect_plan_declared_final_result(Module, [Name|Args]) :-
     atom(Name),
     length(Args, Arity),
     catch_recover(
-        with_metta_module(
-            Module,
-            ( translator:call_site_type_chains(Name, Chains),
+        ( metta_effect_plan_type_chains(Module, Name, Chains),
               Chains \== [],
-              translator:fitting_type_chains(Chains, Arity, Selection) )),
+              translator:fitting_type_chains(Chains, Arity, Selection) ),
         fail),
     Selection = [_|_],
     forall(member(Chain, Selection),
@@ -1490,6 +1570,9 @@ metta_effect_plan_source(Module, metta_mapped_operation(Operation),
                          State0, State) :-
     !,
     metta_effect_plan_source_root(Module, [Operation, _], State0, State).
+metta_effect_plan_source(Module, Name, State0, State) :-
+    atom(Name), metta_effect_program_lookup(Module, definition(Name), _), !,
+    metta_effect_plan_named_call(Module, Name, 1, State0, State).
 metta_effect_plan_source(_, Source, State, State) :-
     \+ Source = [_|_],
     !.
@@ -1503,6 +1586,7 @@ metta_effect_plan_source(_, Source, Queue-Effects,
 %fitting_type_chains/3 gate rather than refusing a host effect that cannot run.
 metta_effect_plan_source(Module, [Head|Args], State, State) :-
     atom(Head),
+    \+ metta_effect_source_program(Module, _),
     \+ translator:metta_special_form(Head),
     catch_recover(
         with_metta_module(
@@ -1569,6 +1653,7 @@ metta_effect_plan_source_head(Module, Head, Args, State0, State) :-
     atom(Head),
     (   metta_operation_effect(Head, _)
     ;   fun(Head)
+    ;   metta_effect_program_lookup(Module, definition(Head), _)
     ),
     !,
     length(Args, ArgCount),
@@ -1580,12 +1665,18 @@ metta_effect_plan_source_head(Module, Head, _, Queue-Effects0,
     !,
     metta_effect_plan_source(Module, Head, Queue-Effects0, Queue-Mid),
     metta_effect_plan_dynamic(Mid, Effects).
+metta_effect_plan_source_head(Module, Head, _, Queue-Effects,
+                              Queue-[Head-oracleIO|Effects]) :-
+    atom(Head), metta_effect_program_lookup(Module, references, _), !.
 metta_effect_plan_source_head(_, _, _, State, State).
 
 %Special forms decide which written positions execute. This table mirrors the
 %successful translator clauses: patterns, binders, write payloads and quoted
 %atoms stay data; conditions, possible branches and nested evaluators are
 %walked. Any shape not named here falls through to the declaration mask below.
+metta_effect_plan_source_arguments(Module, Head, Args, Evaluated) :-
+    atom(Head), metta_effect_program_lookup(Module, definition(Head), _), !,
+    metta_effect_plan_source_masked_arguments(Module, Head, Args, Evaluated).
 metta_effect_plan_source_arguments(Module, Head, Args, Evaluated) :-
     metta_effect_plan_source_special_arguments(
         Module, Head, Args, Evaluated),
@@ -1844,6 +1935,14 @@ metta_effect_plan_binding_value_list([Malformed|Bindings],
 %declaration decides, all arguments are evaluated, which is the translator's
 %fallback and the conservative answer for an unfamiliar constructor.
 metta_effect_plan_source_masked_arguments(Module, Head, Args, Evaluated) :-
+    atom(Head), metta_effect_program_lookup(Module, type(Head), _),
+    metta_effect_plan_type_chains(Module, Head, Chains),
+    Chains \== [], !,
+    length(Args, Arity), translator:fitting_type_chains(Chains, Arity, Selection),
+    metta_effect_plan_arguments_by_selection(Args, Selection, Evaluated).
+metta_effect_plan_source_masked_arguments(Module, Head, Args, Args) :-
+    atom(Head), metta_effect_program_lookup(Module, definition(Head), _), !.
+metta_effect_plan_source_masked_arguments(Module, Head, Args, Evaluated) :-
     atom(Head),
     catch_recover(
         with_metta_module(
@@ -1911,8 +2010,10 @@ metta_effect_plan_grounded(Name, Effects0, [Name-Effect|Effects0]) :-
 metta_effect_plan_named_call(Module, Name, Arity,
                              Queue0-Effects0, Queue-Effects) :-
     functor(Head, Name, Arity),
-    (   fun(Name),
-        metta_ensure_compiled(Name),
+    (   metta_effect_program_lookup(Module, definition(Name), _)
+    ->  Queue = [Name/Arity|Queue0], Effects = Effects0
+    ;   fun(Name),
+        metta_effect_plan_ensure_compiled(Module, Name),
         current_predicate(Module:Name/Arity),
         \+ predicate_property(Module:Head, imported_from(_))
     ->  Queue = [Name/Arity|Queue0],
@@ -1924,7 +2025,7 @@ metta_effect_plan_named_call(Module, Name, Arity,
     ->  Queue = Queue0,
         Effects = [Name-Effect|Effects0]
     ;   fun(Name),
-        metta_ensure_compiled(Name),
+        metta_effect_plan_ensure_compiled(Module, Name),
         current_predicate(Module:Name/Arity)
     ->  Queue = [Name/Arity|Queue0],
         Effects = Effects0
@@ -2338,25 +2439,6 @@ metta_k_extend(Ctx, K1, K2, K) :-
     ),
     metta_require_algebra_value(Algebra, Carrier, K).
 
-metta_apply_algebra_operation(_, '*', A, B, R) :-
-    number(A), number(B), !,
-    R is A * B.
-metta_apply_algebra_operation(_, '+', A, B, R) :-
-    number(A), number(B), !,
-    R is A + B.
-metta_apply_algebra_operation(_, min, A, B, R) :-
-    number(A), number(B), !,
-    R is min(A, B).
-metta_apply_algebra_operation(_, max, A, B, R) :-
-    number(A), number(B), !,
-    R is max(A, B).
-metta_apply_algebra_operation(Algebra, Operation, A, B, R) :-
-    (   once(metta_with_under(Algebra, eval([Operation, A, B], R0)))
-    ->  R = R0
-    ;   throw(error(metta_algebra_operation_failed(Algebra, Operation, A, B),
-                    none))
-    ).
-
 prolog:error_message(metta_algebra_requirement_missing(Ctx, Algebra,
                                                         Requirement)) -->
     [ 'algebra_requirement_missing: ~w declares algebra ~w, which requires \c
@@ -2487,7 +2569,7 @@ metta_explain_plan_relation([Rel|_], Columns, [Rel|Columns]).
 metta_explain_op_item(Op, _, [op, Op, Arity, Kind]) :-
     metta_contract_fact([op, Op, Arity, Kind]).
 metta_explain_op_item(Op, _, [effect, Effect]) :-
-    (   metta_operation_effect(Op, Declared)
+    (   current_metta_space(Space), metta_head_property(Space, Op, [effect, Declared])
     ->  Effect = Declared
     ;   Effect = none
     ).
@@ -2503,10 +2585,9 @@ metta_explain_op_item(Op, Args, ['on-error', Mode]) :-
     ).
 metta_explain_op_item(Op, _, [cache, Choice, Reason]) :-
     seam:automatic_cache_explanation(Op, Choice, Reason).
-metta_explain_op_item(Op, _, [cost, Class, Measure]) :-
-    metta_cost_declaration(Op, _, Class, Measure).
-metta_explain_op_item(Op, _, [deprecated, Since, Remedy]) :-
-    metta_deprecation(Op, Since, Remedy).
+metta_explain_op_item(Op, _, Property) :-
+    current_metta_space(Space), metta_head_property(Space, Op, Property),
+    Property = [Kind|_], Kind \== effect.
 
 %(cost (nrev $n) quadratic) is one head's claim about how its cost GROWS with
 %the size of one argument, checked by the cost-rows benchmark lane rather than

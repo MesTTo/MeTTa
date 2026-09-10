@@ -1,4 +1,7 @@
 % Purpose: compose occurrence reads and ordering with the native storage shape.
+% Guarantees: raw occurrence storage returns its identity; reference scopes
+%   remove selected occurrences through the ordinary semantic write doors
+%   [tested: reference_providers; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Assumes: spaces.pl consults this unit before catalog initialization.
 % Guarantees: received generations advance the same flag used by fresh writes;
 %   rollback may leave gaps but cannot reuse an allocated generation
@@ -6,7 +9,8 @@
 %   A forced source reload preserves the native constructor registration
 %   [tested: test_reloading_storage_preserves_occurrences; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 % Assumes: metta_identity owns the actor and generation flags for the runtime.
-% Owns resources: the native constructor registration lasts until SWI cleanup.
+% Owns resources: the native constructor registration lasts until SWI cleanup;
+%   exact foreign removal restores its thread-local selector at call exit.
 % Guarded by: flag/3 atomically reads and replaces the generation counter
 %   [tested: spaces_tokens:concurrent_minting_is_unique; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 % Decides: actor defaults to a UUID; generation defaults to zero. SWI's flag/3
@@ -51,6 +55,57 @@ metta_space_pair(Space, Pattern, Token, Ref) :-
     ;   metta_native_pair(Space, Pattern, Token, Ref)
     ).
 
+% Read identities and mutate identities are separate provider promises. The
+% native store implements both; a foreign owner must declare each operation.
+metta_require_token_mutation(Space, Operation) :-
+    metta_require_token_read(Space, Operation),
+    ( seam:foreign_space(Space)
+    -> forall(member(Capability, ['add-token', 'remove-token']),
+              ( foreign_provides(Space, Capability) -> true
+              ; throw(error(metta_foreign_token_mutation_required(
+                                Space, Operation, Capability), none)) ))
+    ; true ).
+
+metta_store_occurrence(Space, Atom, Token, Ref) :-
+    ( seam:foreign_space(Space)
+    -> foreign_write(Space, 'add-token',
+                     seam:foreign_add_token(Space, Atom, Provided)),
+       metta_token_receive(Provided, Token), Ref = none
+    ; add_sexp(Space, Atom, Token, Ref), record_source_atom_assertion(Ref) ).
+
+metta_remove_occurrence(Space, Token, Removed) :-
+    ( once(metta_space_pair(Space, Atom, Token, Ref))
+    -> ( Ref == none
+       -> ( nb_current('$metta_foreign_removal_token', Previous)
+          -> Prior = some(Previous) ; Prior = none ),
+          setup_call_cleanup(
+              nb_setval('$metta_foreign_removal_token', Space-Token),
+              metta_remove_atom(Space, Atom, Removed),
+              metta_restore_removal_token(Prior))
+       ; metta_remove_atom_reference(Ref), Removed = true )
+    ; Removed = false ).
+
+metta_restore_removal_token(some(Previous)) :-
+    nb_setval('$metta_foreign_removal_token', Previous).
+metta_restore_removal_token(none) :- nb_delete('$metta_foreign_removal_token').
+
+% Consume the selector before calling the provider, so a callback's removal
+% cannot inherit the selected identity. The exact door also implements value
+% removal for receivers that do not register the older remove capability.
+metta_remove_provider_occurrence(Space, Atom, Removed) :-
+    ( nb_current('$metta_foreign_removal_token', Space-Token)
+    -> nb_delete('$metta_foreign_removal_token'),
+       metta_token_portable(Token, Portable),
+       foreign_write(Space, 'remove-token',
+                     seam:foreign_remove_token(Space, Portable, Removed))
+    ; foreign_provides(Space, remove)
+    -> foreign_write(Space, remove, seam:foreign_remove(Space, Atom, Removed))
+    ; once(metta_space_pair(Space, Atom, Token, _))
+    -> metta_token_portable(Token, Portable),
+       foreign_write(Space, 'remove-token',
+                     seam:foreign_remove_token(Space, Portable, Removed))
+    ; Removed = false ).
+
 metta_host_blame(Space, Pattern, Tokens) :-
     metta_require_token_read(Space, blame),
     findall((Generation-Actor)-[t, Actor, Generation],
@@ -73,6 +128,10 @@ prolog:error_message(metta_foreign_tokens_required(Space, Operation)) -->
     [ '~w cannot run ~w because its provider has no tokens capability; copy its \c
        atoms into a native overlay, or implement stable provider identities'-
       [Space, Operation] ].
+prolog:error_message(metta_foreign_token_mutation_required(Space, Operation, Capability)) -->
+    [ '~w cannot run ~w because its provider has no ~w capability; copy its \c
+       atoms into a native overlay, or register exact-token mutation'-
+      [Space, Operation, Capability] ].
 
 % The native constructor implements this specification in one foreign call.
 % This path also runs in WASM, whose bundle has no native shared object.

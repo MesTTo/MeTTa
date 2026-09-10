@@ -68,6 +68,13 @@ metta_pragma_key('materialize-source-relations',
                   boundary and answer admitted ground calls from it').
 metta_pragma_key('type-check', 'HE spelling; accepted, NOT enforced').
 metta_pragma_key(interpreter, 'HE spelling; accepted, NOT enforced').
+metta_pragma_key('from-map', 'the current space default function over referenced heads').
+metta_pragma_key(load, 'the current space library load policy').
+
+metta_pragma('from-map', Value) :-
+    current_metta_space(Space), metta_reference_option(Space, 'from-map', Value).
+metta_pragma(load, Value) :-
+    current_metta_space(Space), metta_reference_option(Space, load, Value).
 
 %Which argument type checks the translator left in the compiled code, and
 %which it discharged. Adapted from upstream's --warn-runtime-checks
@@ -168,6 +175,14 @@ metta_runtime_check_report :-
 %execution wrapper ignores it. `none` is the explicit disable operation and
 %therefore valid for every registered key.
 require_metta_pragma_value(_, none, _) :- !.
+require_metta_pragma_value(load, Value, _) :- !,
+    must_be(oneof([eager, background, lazy]), Value).
+require_metta_pragma_value('from-map', Value, _) :- !,
+    ( atom(Value) -> true
+    ; is_list(Value), Value = [_|_] -> true
+    ; nonvar(Value), Value = partial(Name, Args), atom(Name), is_list(Args) -> true
+    ; atomic(Value), seam:grounded_applicable(Value) -> true
+    ; type_error(metta_function, Value) ).
 require_metta_pragma_value('max-time', Value, Door) :- !,
     (   number(Value), Value > 0
     ->  true
@@ -202,6 +217,10 @@ require_metta_pragma_value(_, _, _).
 %tests/checks/check_specialization_differential_selftest.py;
 %commit=694dff934a11dbc2ee99267b60f39564053baf87] [tested:
 %metta_metatype_guards:the_pragma_turns_verification_on].
+set_metta_pragma('from-map', Value) :- !,
+    metta_reference_set_option('from-map', Value).
+set_metta_pragma(load, Value) :- !,
+    metta_reference_set_option(load, Value).
 set_metta_pragma(Key, Value) :-
     retractall(metta_pragma(Key, _)),
     (   Value == none

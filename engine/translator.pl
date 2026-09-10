@@ -235,8 +235,12 @@
 %   Future Enhancements: None
 % Owns resources:
 %   - '$metta_translation_cache' serializes first publication and dependency
-%     eviction; translated_form_cache/6 and translated_form_mention/2 retain
-%     templates until a mentioned function changes or the process exits.
+%     eviction; translated_form_pending/3 reserves dependencies before a miss
+%     compiles outside that mutex under metta_source_singleflight/2.
+%     translated_form_cache/6 and translated_form_mention/2 retain published
+%     templates until invalidation or space release. A transaction's miss
+%     remains private to the invocation [tested: translation_cache;
+%     commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 %The compiler's surface: what compiles a form, what the compiled clause's
 %metadata answers, the runtime helpers a compiled body calls, and the

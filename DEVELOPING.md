@@ -629,7 +629,7 @@ on 2026-09-05 with nothing on it at all.
 
 ## Engine and library module ownership
 
-`engine/metta.pl` declares `metta_engine`. Its fourteen included files under
+`engine/metta.pl` declares `metta_engine`. Its eighteen included files under
 `engine/metta/` compile into that module. The other engine facades retain their
 own modules; `engine/main.pl` declares `metta_main`, and `engine/kernel.pl`
 retains `kernel`. Every shipped Prolog library declares a distinct `lib_*`
@@ -658,6 +658,39 @@ library definitions do not. The three exceptions are SWI's named hooks
 module when stored as data or installed elsewhere. `thread_wait/2` also needs
 the module owning the dynamic predicates it watches. The timer barrier test
 checks the wrapper's owner before any worker waits on it.
+
+## Source loading and live references
+
+`metta_source_singleflight/2` in `engine/metta/interop.pl` serializes one source
+key. Its owner can re-enter for an import cycle; other threads wait for that
+attempt's outcome on owned message queues. Failure wakes every waiter and a
+later attempt can retry. The registry mutex covers reservation and publication,
+not file forms. `working_dir/1` is thread-local, and source doors retain their
+semidet contract with `once/1` around the grouped result.
+
+`references.pl` projects stored `from` rows into execution-module bindings.
+Occurrence tokens own reference rows and derived declarations; the support
+graph withdraws them together. Native bindings require reconciliation when a
+transaction finishes because Prolog module imports are not transactional.
+Observers exist only for participating spaces. A face publishes its bindings,
+demand and metadata in one deferred-repair batch before dependent callers
+recompile. Grading uses the existing `visibility` algebra over occurrence
+tokens. `properties.pl` projects the same rows into origins and head claims.
+
+`reference_loading.pl` gives each resolved library one canonical home. Eager
+loading uses the ordinary import lifecycle. Lazy homes retain declaration
+summaries and compile equations on demand. Background homes own a `lib_thread`
+future; callers wait for its outcome. Both deferred policies check the source
+effect plan, including nested reference rows and the text the reader actually
+opens. Releasing a home cancels its pending future and retires its observers.
+
+Runnable cache misses use a separate `translation(Module, Key)` flight.
+`translate_runnable_expr_cached/6` reserves dependency mentions under
+`'$metta_translation_cache'`, compiles outside that mutex and publishes only
+if invalidation has not removed the reservation. A transaction's miss compiles
+privately. Cache hits keep their existing path. Holding the global mutex while
+forcing a background home would deadlock against a worker needing the cache;
+the translation-cache suite carries that regression.
 
 ## Adding a form to the engine's prelude
 

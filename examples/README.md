@@ -59,7 +59,7 @@ website.
 | `ch06-many-answers` | `superpose`, `collapse`, `once`, `empty`: multiplicity is meaning |
 | `ch07-control-flow` | `if` and the booleans, `case`, `let` and sequencing, bounded and committed searches, recursion |
 | `ch08-data` | atoms, lists and folds, sequence variables, the shipped MeTTa libraries |
-| `ch09-types` | declarations, `get-type`, parametric, recursive, dependent and nondeterministic types, variadic arrows |
+| `ch09-types` | declarations, `get-type`, parametric, recursive, dependent and nondeterministic types |
 | `ch10-errors-and-refusals` | an error is data, and where it raises |
 | `ch11-python-as-a-notation` | `py-atom`, `py-call`, the Python surface from the MeTTa side |
 | `ch12-testing` | the assertion family and equality by reduction |
@@ -77,7 +77,7 @@ website.
 `test.sh` discovers examples recursively. It excludes `_fixtures` and the five
 interactive, network-backed, or optional-dependency examples named in
 `tests/data/example_skips.txt`, each with its reason.
-The merged corpus contains 315 examples that run in the shell suite.
+The merged corpus contains 323 examples that run in the shell suite.
 That count is `len(example_parity.corpus())`, the corpus's one definition in
 `extensions/python/tools/example_parity.py`; the `pytest` gate lane fails the
 moment this sentence and the tree disagree.
@@ -94,13 +94,13 @@ add no `examples/**/*.metta` files, so the count above is unchanged.
 
 ## Origins
 
-143 of the 338 programs here derive from the MeTTa examples of the project at
+143 of the 344 programs here derive from the MeTTa examples of the project at
 https://github.com/patham9/PeTTa, MIT licensed, at commit
 `43705f5d9ff8958ffe7f0aa6777fb8477f2401f2` (2026-07-24). They were reorganised
 into the reading order above, and some were edited. Thirteen people wrote them
 there, most of them Patrick Hammer; the rest are credited file by file, because
 naming only the most prolific contributor would miscredit the others. The other
-195 examples were written for this repository.
+201 examples were written for this repository.
 
 `ORIGINS.tsv` names every derived file beside the upstream file it came from,
 how much of the original body survives with comments ignored, and who wrote it

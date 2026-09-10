@@ -2024,6 +2024,44 @@ Implementation failures propagate, including failures from callees and providers
 
 Evidence: `extensions/python/tests/ch14_seeing_your_program/test_explain_plan.py::test_analyze_numbers_equal_the_stats_of_the_same_query`, `extensions/python/tests/ch14_seeing_your_program/test_features.py::test_a_profile_exports_as_pstats`, `extensions/python/tests/ch14_seeing_your_program/test_features.py::test_a_stats_counter_is_unreadable_until_its_block_closes`.
 
+## space:get-property
+
+```python
+get_property(head: str | Symbol, /) -> tuple[Atom, ...]
+```
+
+Kind: `introspection`. Answer: `tuple`. Effect: `oracleIO`. Determinism: `det`.
+
+Tiers: `sync`, `async`, `module`, `context`.
+
+Implementation: `metta._spaces.properties:get_property`, receiving `space`.
+
+Engine binding: `metta_py_head_claims`, wire `tagged-atoms`.
+
+Assumes receiver state `live`.
+
+| argument | MeTTa type | default | delivery | parameter kind |
+|---|---|---|---|---|
+| `head` | `(host-union (String Symbol))` | `required` | `values` | `positional_only` |
+
+Guarantees result type `(host-apply (host-type metta._spaces.properties tuple) (Atom ...))` with the answer shape, effect, and determinism above.
+
+Declared local refusals:
+
+- `type`: `extensions/python/tests/ch20_extending_the_engine/test_references.py::test_get_property_requires_a_head_name`.
+
+Implementation failures propagate, including failures from callees and providers.
+
+> Return visibility, origins and declared properties of a head.
+>
+>     space.get_property("car-atom")
+>
+> The answers are the atoms ``(get-property car-atom)`` enumerates, including
+> every defining origin. An unknown file is empty text and an unknown line
+> is -1. The query does not compile a lazy definition.
+
+Evidence: `extensions/python/tests/ch20_extending_the_engine/test_references.py::test_get_property_matches_metta_and_explain`.
+
 ## space:match
 
 ```python
@@ -4125,6 +4163,42 @@ Implementation failures propagate, including failures from callees and providers
 > batch or share a call with stored atoms.
 
 Evidence: `extensions/python/ext/metta-arrays/tests/test_arrays.py::test_embedding_store_validates_added_vectors`, `extensions/python/tests/ch04_spaces_and_matching/test_r2_space_handle.py::test_add_atom_accepts_a_computed_space_handle`, `extensions/python/tests/ch04_spaces_and_matching/test_space.py::test_add_query_atoms`.
+
+## space:from-
+
+```python
+from_(source: Any, map: Any=None) -> None
+```
+
+Kind: `write`. Answer: `None`. Effect: `oracleIO`. Determinism: `det`.
+
+Tiers: `sync`, `async`, `module`, `context`.
+
+Implementation: `metta._spaces.store:from_`, receiving `space`.
+
+Engine binding: `metta_py_add`, wire `prolog-goal`.
+
+Assumes receiver state `live`.
+
+| argument | MeTTa type | default | delivery | parameter kind |
+|---|---|---|---|---|
+| `source` | `%Undefined%` | `required` | `values` | `positional_or_keyword` |
+| `map` | `%Undefined%` | `None` | `values` | `positional_or_keyword` |
+
+Guarantees result type `NoneType` with the answer shape, effect, and determinism above.
+
+Implementation failures propagate, including failures from callees and providers.
+
+> Reference a library or space through a stored ``(from source map)`` row.
+>
+>     target.from_(metta.lib.string, metta.parse("(prefix str-)"))
+>     target.from_(home)
+>
+> A missing map uses this space's ``from-map`` pragma. Definitions run in
+> their home and later additions follow the standing row. Removing the row
+> withdraws its links. Loading follows this space's ``load`` pragma.
+
+Evidence: `extensions/python/tests/ch20_extending_the_engine/test_references.py::test_from_is_a_live_stored_row`.
 
 ## space:remove
 

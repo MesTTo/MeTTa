@@ -11,9 +11,13 @@
 %       result is a claim this file has just tested rather than an assumption
 %       [tested: scan_sees_every_planted_reach, one planted door per way a
 %       call hides; commit=8fa9d546b3eebf3424ef1d667feab40c6b0f32ae]
-%     - exits nonzero when a shipped .metta library writes a head pattern
-%       against a name the ENGINE gives meaning to, which the compiler matches
-%       structurally and the engine's function then consumes
+%     - compares answer bags, output and raised errors for every reused engine
+%       name; a missing case refuses and planted changed meanings are detected
+%       [tested: planted_library_meaning_change_is_named,
+%       planted_library_shadow_is_named, library_lazy_import_differential;
+%       commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
+% Owns resources: each meaning arm releases its scratch space and restores
+%     prelude translator registrations, including on failure.
 % Fails when:
 %     - a call is assembled at run time from a term no analysis can see,
 %       `Goal =.. L, call(Goal)` being the shape. That is the residue this
@@ -43,6 +47,7 @@
 % defined is not exported and does not pass this gate either.
 
 :- ensure_loaded(surface_walk).
+:- ensure_loaded(prelude_model).
 :- initialization(main, main).
 
 library_directories(['../../lib']).
@@ -50,6 +55,8 @@ library_directories(['../../lib']).
 main :-
     consult('../../engine/qlf_boot.pl'),
     consult('../../engine/metta.pl'),
+    library_lazy_import_differential,
+    no_library_shadows_an_engine_function,
     forall(( expand_file_name('../../lib/*/*.pl', Files), member(File, Files) ),
            ensure_loaded(File)),
     library_directories(Directories),
@@ -57,113 +64,190 @@ main :-
     findall(Callee-Caller, member(Caller-Callee, Reaches0), Reaches1),
     sort(Reaches1, Reaches),
     extension_clause_count(Directories, Examined),
-    report(Reaches, Examined),
-    no_library_shadows_an_engine_function.
+    report(Reaches, Examined).
 
-%%%% The .metta half: a library must not write a head pattern against an
-%%%% engine function's name %%%%
-%
-% The .pl half above asks what a library CALLS. This asks what a library
-% NAMES, which is the same contract one tier down: lib/lib_pln/lib_pln.metta wrote
-% (Evaluation (Predicate $x) ...) as PLN's predicate atom, and Predicate is the
-% engine's Prolog-interop builder, the one callPredicate and assertaPredicate
-% take their goal term from. A head-argument position holding a name the engine
-% gives meaning to is matched STRUCTURALLY, so the rule only fires for a caller
-% that hands the term unevaluated, and every ordinary caller evaluates it first
-% and arrives as something else. Three PLN rules answered nothing at all for as
-% long as that was true, and the file's own tests could not see it because no
-% shipped example uses those rules [measured 2026-08-22: !(Predicate likes)
-% answers [], and the three rules answered [] until the constructor was renamed
-% to upstream's own PredicateNode].
-%
-% The engine already NOTICES this and says so through head_pattern_note/5. What
-% was missing is that nobody was listening: the note goes to print_message/2 at
-% import, where an import that prints and succeeds looks exactly like one that
-% does not. Reading the table is what turns the note into an answer.
-%
-% Translated rather than imported, so nothing here starts a Redis connection or
-% calls an LLM: translate_clause/2 alone raises the note
-% [measured 2026-08-22].
+%%%% The .metta half: compare meanings, not head-pattern spellings %%%%
+
 library_metta_source(File) :-
     tree_directory('../../lib', Directory),
     directory_member(Directory, File, [recursive(true), extensions([metta])]).
 
-library_equation(File, Form) :-
-    library_metta_source(File),
-    catch(( filereader:read_metta_source(File, Source),
-            parse_metta_source(Source, Forms) ), _, fail),
-    member(parsed(function, _, Form), Forms),
-    Form = [=, _, _].
+library_source_forms(File, Forms) :-
+    filereader:read_metta_source(File, Source),
+    parse_metta_source(Source, Forms).
 
-% Qualified, because head_pattern_note/5 is engine/translator.pl's table and an
-% unqualified retractall here would make a second one in THIS module and clear
-% that instead, leaving every note standing and this check reporting clean.
-%BOTH reasons, because both say the same thing about the same head pattern:
-%the engine gives that name a meaning. `defined_label(Route)` is a label whose
-%name resolves through head_meaning_route/3; `functional_pattern` is a head
-%argument that is a CALL to a known function, which the compiler runs backwards
-%(engine/translator/analysis.pl, head_pattern_reason/7).
-%
-%Reading only defined_label/1 is what this check did until 2026-08-30, and
-%functional patterns took the planted Predicate shadow out of its reach: the
-%walk reported clean over every library while its own planted fault went
-%unnamed. The self-test below is what said so, which is the whole reason it
-%exists.
-library_shadow(File, Fun, Label, Route) :-
-    library_equation(File, Form),
-    retractall(translator:head_pattern_note(_, _, _, _, _)),
-    catch(translate_clause(Form, _), _, true),
-    translator:head_pattern_note(_, Fun, _, Label, Reason),
-    engine_meaning_reason(Reason, Route).
+library_definition_name(Form, Name) :-
+    parsed_form_parts(Form, function, _, [=,Head,_]),
+    ( atom(Head) -> Name = Head ; Head = [Name|_], atom(Name) ).
 
-engine_meaning_reason(defined_label(Route), Route).
-engine_meaning_reason(functional_pattern, functional_pattern).
+library_engine_name(Name) :- builtin_fun(Name), !.
+library_engine_name(Name) :- translator:metta_special_form(Name).
+
+% The shipped compatibility library is held to its vendored upstream model.
+% Every other library keeps the engine's existing meaning at its old arities.
+library_meaning_reference(File, Forms) :-
+    same_file(File, '../../lib/lib_he/lib_he.metta'), !,
+    library_source_forms('../conformance/petta/lib/lib_he.metta', Forms).
+library_meaning_reference(_, []).
+
+library_meaning_case(Name, Text) :- prelude_spec_case(Name, Text).
+library_meaning_case(Name, Text) :- prelude_spec_expansion_case(Name, Text).
+library_meaning_case(first, "(first (a b))").
+library_meaning_case(first, "(first (1 2))").
+library_meaning_case(first, "(first ())").
+library_meaning_case(once, "(once (superpose (a b a)))").
+library_meaning_case(once, "(once (superpose ()))").
+library_meaning_case(once, "(once 3)").
+library_meaning_case(once, "(once (trace! touched (superpose (a b))))").
+library_meaning_case(unify, "(unify (a $x) (a 1) $x no)").
+library_meaning_case(unify, "(unify (a $x) (b 1) $x no)").
+library_meaning_case(unify, "(unify &self (absent $x) $x no)").
+library_meaning_case(evalc, "(evalc (+ 1 2) &self)").
+library_meaning_case('get-type-space', "(get-type-space &self 5)").
+library_meaning_case('get-type-space', "(get-type-space &self a)").
+library_meaning_case('add-reduct',
+    "(let $r (add-reduct &self (= (meaning-added) (+ 1 2))) (observed $r (collapse (match &self (= (meaning-added) $v) $v))))").
+
+library_meaning_cases(File, Names, Cases) :-
+    forall(member(Name, Names),
+           ( library_meaning_case(Name, _) -> true
+           ; throw(error(existence_error(library_meaning_case, File:Name),
+                         context(library_meaning_cases/3,
+                                 'add engine answer cases before reusing this name'))) )),
+    findall(Name-Text,
+            (member(Name, Names), library_meaning_case(Name, Text)), Cases).
+
+% Read declarations, equations and translator registrations in written order.
+% Other initializers and service connections stay outside this name check.
+% Both arms reuse one released scratch identity, so
+% source-space names in values and errors are compared without renaming them.
+library_meaning_observations(Forms, Cases, Observed) :-
+    Space = '&library-meaning',
+    setup_call_cleanup(space_module(Space, _),
+        ( maplist(library_meaning_install(Space), Forms),
+          maplist(library_meaning_observe(Space), Cases, Observed) ),
+        (metta_release_space(Space), install_engine_prelude)).
+
+library_meaning_install(Space, Form) :-
+    parsed_form_parts(Form, Kind, _, Row),
+    ( Kind == function -> metta_add_atom(Space, Row, _)
+    ; Kind == expression, Row = [':',_,_] -> metta_add_atom(Space, Row, _)
+    ; Kind == runnable, Row = ['add-translator-rule!'|_]
+    -> once(evalc(Row, Space, _))
+    ; true ).
+
+library_meaning_observe(Space, Name-Text, Name-Text-Observation) :-
+    sread(Text, Term),
+    metta_substitute_self(Space, Term, Bound),
+    prelude_spec_observed_term(Space, Bound, Observation).
+
+library_meaning_differences(Cases, Expected, Actual, Differences) :-
+    findall(Name-Text-Before-After,
+            ( nth0(Index, Cases, Name-Text),
+              nth0(Index, Expected, Name-Text-Before),
+              nth0(Index, Actual, Name-Text-After),
+              \+ prelude_spec_agrees(Before, After) ),
+            Differences).
+
+library_meaning_findings(File-Forms, Count-Findings) :-
+    findall(Name,
+            ( member(Form, Forms), library_definition_name(Form, Name),
+              library_engine_name(Name) ), Names0),
+    sort(Names0, Names),
+    library_meaning_cases(File, Names, Cases), length(Cases, Count),
+    ( Cases == [] -> Findings = []
+    ; library_meaning_reference(File, Reference),
+      library_meaning_observations(Reference, Cases, Expected),
+      library_meaning_observations(Forms, Cases, Actual),
+      library_meaning_differences(Cases, Expected, Actual, Differences),
+      maplist(library_meaning_file(File), Differences, Findings) ).
+
+library_meaning_file(File, Difference, File-Difference).
 
 no_library_shadows_an_engine_function :-
-    findall(File-Fun-Label-Route, library_shadow(File, Fun, Label, Route),
-            Shadows0),
-    sort(Shadows0, Shadows),
-    aggregate_all(count, library_equation(_, _), Equations),
-    shadow_report(Shadows, Equations).
+    findall(File-Forms,
+            (library_metta_source(File), library_source_forms(File, Forms)),
+            Libraries),
+    setup_call_cleanup(metta_host_set_silent(true),
+        ( maplist(library_meaning_findings, Libraries, Reports),
+          pairs_keys_values(Reports, Counts, FindingLists),
+          sum_list(Counts, Checked), append(FindingLists, Findings),
+          library_meaning_report(Findings, Checked) ),
+        metta_host_set_silent(false)).
 
-shadow_report([], Equations) :-
+library_meaning_report([], Checked) :-
     !,
-    (   planted_library_shadow_is_named
-    ->  format("library surface: no head pattern in ~d shipped library \c
-                equations names an engine function, and the check named a \c
-                planted one~n", [Equations])
-    ;   format(user_error,
-               'the library head-pattern check reported clean against a \c
-                planted shadow of the engine\'s Predicate, so its clean result \c
-                says nothing~n', []),
-        halt(1)
-    ).
-shadow_report(Shadows, Equations) :-
-    length(Shadows, Count),
+    ( planted_library_shadow_is_named,
+      planted_library_meaning_change_is_named
+    -> format("library surface: ~d engine-name cases preserve answer bags, \c
+               output and raised errors; changed and duplicate equations \c
+               are detected; the functional-pattern note and lazy-import \c
+               cell pass~n", [Checked])
+    ;  format(user_error,
+              "library meaning differential missed a planted changed meaning~n", []),
+       halt(1) ).
+library_meaning_report(Findings, Checked) :-
     format(user_error,
-           "library surface: ~d head pattern(s) in ~d shipped library equations \c
-            name a function the engine defines~n", [Count, Equations]),
-    forall(member(File-Fun-Label-Route, Shadows),
+           "library surface: changed meaning among ~d engine-name cases~n", [Checked]),
+    forall(member(File-(Name-Text-Before-After), Findings),
            format(user_error,
-                  "  ~w~t~40| ~w matches ~w, which the engine gives meaning to \c
-                   as a ~w~n", [File, Fun, Label, Route])),
+                  "  ~w: ~w on ~s~n    expected ~q~n    actual   ~q~n",
+                  [File, Name, Text, Before, After])),
     format(user_error,
-           "that position is matched structurally, so the rule fires only for a \c
-            caller that hands the term unevaluated and the engine's own ~w \c
-            consumes every other one. Rename the library's constructor~n", []),
+           "Use a distinct library name for different engine meaning, or \c
+            restore the declared reference equations.~n", []),
     halt(1).
 
-% The plant is an equation of the shape the real one had, translated through
-% the same door, so a check that stops reading the table fails here rather than
-% at the next library to collide.
+% A wrong equation has no nested head pattern for the old note-based check to
+% see. A duplicate has the same answers as a set and a different answer bag.
+planted_library_meaning_change_is_named :-
+    prelude_spec_fixture(File),
+    prelude_declaration('if-equal', Type),
+    prelude_shipped_equation('if-equal', Equation),
+    Correct = [parsed(expression,0,[':','if-equal',Type]),
+               parsed(function,0,Equation)],
+    Wrong = [parsed(expression,0,[':','if-equal',Type]),
+             parsed(function,0,[=,['if-equal',_,_,Then,_],Then])],
+    append(Correct, [parsed(function,0,Equation)], Duplicate),
+    library_meaning_findings(File-Correct, Count-[]),
+    Count > 0,
+    forall(member(Changed,[Wrong,Duplicate]),
+           ( library_meaning_findings(File-Changed, Count-Findings),
+             member(File-('if-equal'-_-_-_), Findings) )).
+
+% Keep both note routes observable. Functional-pattern lowering once made the
+% old defined_label-only scan miss precisely this planted Predicate collision.
 planted_library_shadow_is_named :-
     sread("(= (metta-planted-shadow ((Evaluation (Predicate $x)) $t)) $x)", Form),
-    retractall(translator:head_pattern_note(_, _, _, _, _)),
-    catch(translate_clause(Form, _), _, true),
-    translator:head_pattern_note(_, 'metta-planted-shadow', _, 'Predicate',
-                                 Reason),
-    engine_meaning_reason(Reason, _),
-    retractall(translator:head_pattern_note(_, _, _, _, _)).
+    setup_call_cleanup(
+        retractall(translator:head_pattern_note(_, _, _, _, _)),
+        ( translate_clause(Form, _),
+          translator:head_pattern_note(_, 'metta-planted-shadow', _,
+                                       'Predicate', Reason),
+          engine_meaning_reason(Reason) ),
+        retractall(translator:head_pattern_note(_, _, _, _, _))).
+
+engine_meaning_reason(defined_label(_)).
+engine_meaning_reason(functional_pattern).
+
+% Run before any library is consulted. implementation_module/1 only guards;
+% imported_from/1 in the repair must load backcomp before import/1 uses it.
+% The expected bag comes from the already loaded sum_list/2 implementation.
+library_lazy_import_differential :-
+    Space = '&library-lazy-import',
+    setup_call_cleanup(space_module(Space, Module),
+        ( functor(Head, sumlist, 2),
+          assertion(\+ current_predicate(backward_compatibility:sumlist/2)),
+          assertion(predicate_property(Module:Head,
+                                       implementation_module(backward_compatibility))),
+          assertion(\+ current_predicate(backward_compatibility:sumlist/2)),
+          findall(Sum, sum_list([1,2,3], Sum), Expected),
+          spaces:metta_restore_inherited_predicate(Module, sumlist, 2),
+          assertion(predicate_property(Module:Head,
+                                       imported_from(backward_compatibility))),
+          findall(Sum, Module:sumlist([1,2,3], Sum), Actual),
+          assertion(prelude_spec_bag_equal(Expected, Actual)) ),
+        metta_release_space(Space)).
 
 report([], Examined) :-
     !,

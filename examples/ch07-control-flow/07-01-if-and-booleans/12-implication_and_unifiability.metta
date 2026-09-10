@@ -1,3 +1,7 @@
+; Purpose: distinguish Boolean implication, unifiability and exact equality.
+; Guarantees: if-equal2 follows upstream ==, preserving variable identity
+;   [tested: examples/ch07-control-flow/07-01-if-and-booleans/12-implication_and_unifiability.metta;
+;   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 ;Three engine forms that answer a question about two things rather than
 ;computing a value from them: `implies`, `=?` and `if-equal2`.
 ;
@@ -33,13 +37,13 @@
 !(test (and (=? (f $x) (f 1)) (=? (f $x) (f 2))) True)
 
 ;`if-equal2` is `if-equal` under its second historical name, and it is
-;alpha-equivalence rather than unifiability: two atoms equal up to a
-;consistent renaming of their variables take the third branch.
-!(test (if-equal2 (f $x) (f $y) renamed different) renamed)
+;upstream's == comparison preserves variable identity. Distinct variables
+;select the fourth branch even when their expressions are alpha-equivalent.
+!(test (if-equal2 (f $x) (f $x) same different) same)
+!(test (if-equal2 (f $x) (f $y) renamed different) different)
 !(test (if-equal2 (f $x) (f 1) renamed different) different)
 !(test (if-equal2 (f $x $x) (f $y $z) renamed different) different)
 
-;So the two are genuinely different questions, and this is the pair that
-;separates them: (f $x) and (f 1) unify, and are not alpha-equivalent.
+;The pair (f $x) and (f 1) is unifiable but fails exact equality.
 !(test (=? (f $x) (f 1)) True)
 !(test (if-equal2 (f $x) (f 1) renamed different) different)

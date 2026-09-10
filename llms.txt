@@ -20,7 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 320 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 323 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 37 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
@@ -41,8 +41,8 @@ re-runs them.
 | `website/reasoning/*.md` | weighted relations, matchers and measure | |
 | `extensions/python/examples/*/*.py` | runnable Python programs, each printing checked claims through `_common.py`: `check(label, got, expected)` raises `CheckFailed` rather than asserting, because `python -O` strips an assert while the print under it still runs, and `done(name)` refuses to print its OK line when nothing was checked, so an example that verified nothing cannot report success; the six under `gallery/` also check adjacent emitted-MeTTa and output comments plus bilingual `@example` atoms | the `examples` and `gallery` gate lanes |
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
-| `engine/**/*.pl` | `engine/metta.pl` declares `metta_engine`, the bootstrap including the fourteen `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, space_hooks, runtime, control, interop, registration, prelude), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eleven `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products, tokens, receipts, vocabulary_seed); vocabulary_seed has its own module and compiles the guarded initial vocabulary atoms, `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.pl` the vocabulary tier (Prolog bodies of the 32 prelude heads). Each included unit is a plain source file owned by its umbrella module. `engine/main.pl` declares `metta_main`. Engine facades declare their own module and explicit exports; `metta_engine_reexport/2` publishes the subsystem operations the host tier needs. Execution resolves through the space parents, `&self`, `prelude`, `metta_engine`, `user`, then `system` | |
-| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 111, `service` 70, `ownership` 40, `event` 23, `declaration` 17. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
+| `engine/**/*.pl` | `engine/metta.pl` declares `metta_engine`, the bootstrap including the eighteen `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, algebra_operations, space_hooks, runtime, control, interop, references, reference_loading, properties, registration, prelude), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eleven `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products, tokens, receipts, vocabulary_seed); vocabulary_seed has its own module and compiles the guarded initial vocabulary atoms, `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.pl` the vocabulary tier (Prolog bodies of the 37 prelude heads). Each included unit is a plain source file owned by its umbrella module. `engine/main.pl` declares `metta_main`. Engine facades declare their own module and explicit exports; `metta_engine_reexport/2` publishes the subsystem operations the host tier needs. Execution resolves through the space parents, `&self`, `prelude`, `metta_engine`, `user`, then `system` | |
+| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 115, `service` 71, `ownership` 42, `event` 23, `declaration` 17. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
 | `lib/lib_*/` | 38 MeTTa libraries, implemented in `.metta`, `.pl`, or both; all 22 shipped Prolog halves, including the builtin and minimal-MeTTa modules, own distinct `lib_*` modules with explicit exports and local autoload tables. Libraries load with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
 | `extensions/*/extension.pl` | one control file per seat, read when argv carries `extensions` and never read without it; a seat's `entry(engine, _)` loads only where its declared needs hold and its `entry(host, _)` is recorded for the seat's own runtime to consult, so the engine names neither a host nor a backend | |
@@ -611,6 +611,14 @@ stats() -> _StatsBlock
 
 The engine's own counters over a with-block, as deltas.
 
+`space:get-property`: `introspection`, returns `tuple`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+get_property(head: str | Symbol, /) -> tuple[Atom, ...]
+```
+
+Return visibility, origins and declared properties of a head.
+
 `space:match`: `query`, returns `value`, effect `oracleIO`, determinism `nondet`; tiers `sync`, `async`, `module`, `context`.
 
 ```python
@@ -792,6 +800,14 @@ add(*atoms: Any) -> None
 ```
 
 Add atoms to this space, one engine round-trip for the lot.
+
+`space:from-`: `write`, returns `None`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
+
+```python
+from_(source: Any, map: Any=None) -> None
+```
+
+Reference a library or space through a stored ``(from source map)`` row.
 
 `space:remove`: `write`, returns `value`, effect `oracleIO`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
 
@@ -2336,13 +2352,14 @@ Variables shared across query patterns join: `m.match(S.p(V.x,V.y), S.p(V.y,V.z)
 constructor expression captured in one column.
 
 `under=` changes the annotation algebra for either a relational match or a
-call. Ten carriers ship. The answers below are one program's: two facts tagged
+call. Eleven carriers ship. The answers below are one program's: two facts tagged
 `0.6` and `0.3` reaching one head through a rule tagged `1.0`.
 
 | carrier | combine, extend | answers | |
 |---|---|---|---|
 | `bag` | `+` `*` | `0.9` | the default when `under=` is omitted |
 | `bool` | `max` `*` | `0.6` | |
+| `visibility` | `max` `min` | refuses | requires `INTERNAL` or `PUBLIC`; reference faces read occurrence grades under this carrier |
 | `set` | `max` `*` | `0.6` | combine is idempotent, so multiplicity collapses |
 | `counting` | `+` `*` | `2` | an engine aggregate crossing no answer rows |
 | `ranked` | `max` `*` | `0.6` | orders highest first |
@@ -2352,11 +2369,11 @@ call. Ten carriers ship. The answers below are one program's: two facts tagged
 | `prov` | `plus` `times` | `(plus (times 1.0 0.6) (times 1.0 0.3))` | a TERM, not a number |
 | `amplitude` | `amplitude-add` `amplitude-multiply` | refuses | outside its declared fragment |
 
-Ten are objects: `metta.bool`, `.bag`, `.counting`, `.set`, `.ranked`,
+Eleven are objects: `metta.bool`, `.visibility`, `.bag`, `.counting`, `.set`, `.ranked`,
 `.tropical`, `.prob`, `.prov`, `.budget` and `.amplitude`. The bare name works
 wherever an object does, `under="budget"`.
 
-`metta.vocabularies.Semiring` names the closed set: `bool`, `bag`, `counting`,
+`metta.vocabularies.Semiring` names the closed set: `bool`, `visibility`, `bag`, `counting`,
 `set`, `ranked`, `tropical`, `prob`, `prov`, `budget`, `amplitude`.
 
 `metta.vocabularies.AlgebraLaw` names the accepted set: `combine-associative`,
@@ -2765,6 +2782,72 @@ rather than a badly typed argument. `!(and a a)`, `!(and True 5)` and
 `!(not 5)` answer nothing, which is upstream PeTTa's answer, while
 `!(collapse (and $a $b))` is still `(True False False False)`.
 
+## References and definition properties
+
+```metta
+(from lib_string (prefix text.))
+!(text.string-length "abc") ; 3
+```
+
+`(from source map)` stores a reference row. A library name resolves through
+`library` to one canonical defining home per process; a source can also be a
+space. Definitions execute in that home, so private helper calls keep their
+meaning. A reference brings callable heads and their type and documentation
+rows. Ordinary data remains in the source. `import!` keeps its existing merge
+semantics; `include` pastes forms in order and answers the last result.
+
+References follow later definitions and disappear when their rows or homes
+are withdrawn. Colliding heads form a union with one informational note naming
+the origins. Multiple reference paths to one defining occurrence contribute it
+once; two actual equal equations still contribute two answers. Cycles stop at
+visited spaces. Prolog definitions participate at every registered arity.
+
+A map is an ordinary function taking a head symbol. It may return one symbol,
+no answers or several symbols. The engine applies it once per visible head per
+reference row, including later additions, and refuses a non-symbol result.
+The prelude provides `only`, `except`, `prefix`, `rename` and `qualified`:
+`(only (a b))`, `(except (a b))`, `(prefix api.)`,
+`(rename ((a x) (b y)))` and `(qualified api)`. `qualified` inserts `.`;
+`rename` leaves an unlisted name unchanged. Partial applications and lambdas
+use the same evaluator. `(pragma! from-map map)` sets the current space's
+default for a two-element `(from source)` row; the initial map is identity.
+
+`(internal helper another-helper)` grades every matching occurrence
+`INTERNAL`, including later additions. Ungraded occurrences are `PUBLIC`.
+The `visibility` algebra orders `INTERNAL < PUBLIC`, with `min` for extension
+and `max` for combination. References read public faces under that algebra.
+Selecting an internal head explicitly refuses with `evalc` in its defining
+space as the remedy; a selected missing head produces an informational note.
+
+`(get-property head)` enumerates `(visibility public|internal)`,
+`(origin space file line)`, `(effect class)`, `(cost class measure)`, declared
+`(deprecated since remedy)` and `(doc ...)` claims. Origins retain defining
+occurrences through aliases and do not compile lazy equations. An unavailable
+or changed source retains its path and answers line `-1`. `explain`, Python
+`space.get_property(head)`, `head.origin`, `lib_reflect`'s `origin-of` and
+library cards consume the same engine claims. Python `space.from_(source,
+map)` adds the corresponding stored row through the ordinary write door.
+
+`(pragma! load eager|background|lazy)` belongs to the current receiver. Eager
+is the default. Background uses a future, and a call waits for its home to
+finish. Lazy reads the source summary and compiles an equation at first use.
+Both deferred policies require pure structural load-time forms and name the
+offending form with eager loading as the remedy. Map evaluation may enumerate
+read-only answers. A wait inside a transaction refuses; load eagerly before
+opening that transaction. Source owners wake waiters on failure and allow a
+later retry.
+
+Same-name references use native module imports. In the 3,000-call extension
+driver, a local call and its reference each cost 3 inferences beyond the loop;
+prefix and rename each cost 4. A 2,000-call `eval-arith` loop costs 278,007 for
+local and referenced heads and 280,007 for renamed heads. Ordinary 1,000-row
+imports keep their per-row slopes and cost nine fewer inferences when warm:
+one rollback-state collection replaces three collections and an append. The
+first cold equation import grows by 483 for six new engine heads, the cost of
+the loader's initial predicate census. The design journal records paired
+control counts and the reference-publication batch that avoids rebuilding a
+shared caller once per changed dependency.
+
 ## Python functions as MeTTa functions
 
 ```python
@@ -2858,8 +2941,9 @@ transport.
 `S.name(...)` stages the term explicitly, while `.py` keeps the plain function.
 There is no unsupported-construct list. A body may say `try`/`except`/`else`/
 `finally` and `raise`, which ride the engine's own error algebra (a raise
-PRODUCES through `throw`, the body runs under `catch`, `except` matches by
-MRO NAMES so a custom hierarchy matches as `isinstance` would, and `as e`
+PRODUCES through `throw`, the body runs under `catch`, `py-except` matches by
+live exception-class identity and inheritance, so a custom hierarchy matches
+as `isinstance` would, and `as e`
 reconstructs the live instance); dict and set literals, which lower to
 `lib_dict`'s `dict-space` and reach it through `get-value`, `dict-has`,
 `dict-put`, `dict-remove`, `dict-size` and the view methods, comprehensions
@@ -2954,26 +3038,6 @@ its driver so each figure is one call's marginal cost.
 ## Types and cast
 
 Types are optional atoms: `(: Ann Person)`, `(: age (-> Person Number))`.
-A final parameter `(:seg T)` generates the arrow with `T` repeated for the
-remaining arguments. `(-> Number (:seg Atom) Atom)` checks one Number and
-holds zero or more trailing arguments. Presentation takes linear time and
-space in the produced parameter count; each element uses the ordinary check
-at its own position. For `(: vsum (-> (:seg Number) Number))` and `(: vflag
-Bool)`, `(vsum 1 vflag 3)` answers `(Error (vsum 1 vflag 3) (BadArgType 2 Number
-Bool))`. Empty runs are admitted, and `get-type` retains the written splice.
-Fixed arrows retain their arity refusal. A malformed or non-final splice
-raises `final_arrow_splice` at declaration admission; `%Rest%` raises
-`retired_arrow_splice` naming `(:seg T)` as the remedy. `Kwargs` uses one
-Atom-element splice and holds every pair at any arity. The chapter-9
-`22-variadic_arrow_signature.metta` and `23-variadic_arrow_faces.metta` cells
-exercise the signatures and the refusals through the shell and Python seats.
-An equation's written arity compiles into its ordinary predicate; other
-arriving arities are memoized by `engine/specializer.pl`. A shallow trailing run becomes a list of argument
-variables during compilation, so repeated compiled calls do no run expansion.
-Two independent runs generate one alternative per cut, preserving the complete
-answer bag and its shortest-first order. Nested shapes unknown at compilation
-retain their parsed matcher. Source changes invalidate these artifacts through
-the existing specialization support graph; they add no stored equations.
 An arrow may carry ANNOTATIONS in its own brackets,
 `(: twice (-[det]-> Number Number))`, and it then governs execution and
 compilation exactly as the plain `->` does: `!(twice "s")` is a `BadArgType`
@@ -3008,8 +3072,8 @@ is read: `(|-> ($x) ...)` is still a lambda and `(| a b)` is still data.
 union naming `Atom` is an ordinary evaluated, checked parameter rather than an
 evaluation mask. Testing a union-typed value does NOT narrow it: there is no
 occurrence typing, so a later use still faces the whole union. `match-types`
-and the `type-cast` built on it compare written types by unification with
-wildcards and do not decompose a union; union membership is the argument and
+and the `type-cast` built on it compare written types by identity and do not
+decompose a union; union membership is the argument and
 result relation.
 A typed mismatch answers an `Error` value whose reason is `BadArgType` or
 `IncorrectNumberOfArguments`, so a MeTTa program can handle it with `if-error`.
@@ -4029,7 +4093,7 @@ and `refusal(capability, **request)` to give a declined request its own reason.
 For example, an add policy reads `request["atom"]`; it runs before the write,
 including before any bulk write.
 Capabilities are declared, not guessed: `tokens`, `match`, `enumerate`, `add`, `add-many`,
-`remove`, `clear`, `subscribe`, `plan`, `rules`, and an unsupported operation
+`remove`, `clear`, `subscribe`, `plan`, `rules`, `add-token`, `remove-token`, and an unsupported operation
 refuses loudly rather than degrading. They are the engine's own
 `(vocabulary provider-capability ...)` row, which `metta.foreign.CAPABILITIES`
 reads rather than restates, and the row is OPEN: a seat or library that
@@ -4713,7 +4777,9 @@ registers.
 `pragma!` accepts `max-time`, `max-inferences`, `verify-specializations`,
 `verify-discharges`, `verify-cardinality`, `max-stack-depth`, `stack-limit`,
 `plan-cyclic-joins`, `materialize-source-relations`, `type-check`, and
-`interpreter`. The bounds, the verification modes and the two planning
+`interpreter`, `from-map`, and `load`. The last two belong to the current
+receiver: `from-map` takes a head map, and `load` takes `eager`, `background`,
+or `lazy`. The bounds, the verification modes and the two planning
 switches change live engine mechanisms. `max-stack-depth` is validated exactly as the
 arbiter validates it: a value that is not a non-negative integer
 answers an `(Error ...)` atom while the program keeps running.
@@ -4740,9 +4806,9 @@ at each source boundary and answers admitted ground calls from it.
 provided patterns, and evaluates the selected branch. Empty expressions and
 incompatible patterns select the fallback.
 
-302 builtins are registered; `m.self.builtins()` lists the live union of the
+307 builtins are registered; `m.self.builtins()` lists the live union of the
 functions callable from `&self` and the translator special forms. That live union in full, measured
-2026-09-07 on a boot with this tree's extensions present, which is where the
+2026-09-10 on a boot with this tree's extensions present, which is where the
 three `mork-add-atoms`, `mork-flush` and `mm2-exec` heads come from:
 
 `!=` `#*` `#+` `#-` `#//` `#<` `#=` `#=<` `#>` `#>=` `#\=` `#div` `#max`
@@ -4768,26 +4834,26 @@ three `mork-add-atoms`, `mork-flush` and `mm2-exec` heads come from:
 `floor-math` `foldall` `foldl` `foldl-atom` `for-each-in-atom` `forall`
 `format-args` `format-time` `function` `get-atoms` `get-doc`
 `get-doc-atom` `get-doc-function` `get-doc-params` `get-doc-single-atom`
-`get-doc-space` `get-metatype` `get-state` `get-type` `get-type-space`
+`get-doc-space` `get-metatype` `get-property` `get-state` `get-type` `get-type-space`
 `git-import!` `has-declared-type` `help!` `hyperpose` `id` `if`
 `if-decons-expr` `if-equal` `if-equal2` `if-error` `implies` `import!`
 `import_prolog_function` `import_prolog_functions` `include` `index-atom`
 `inferences` `interpret` `intersection` `intersection-atom`
 `is-alpha-member` `is-expr` `is-function` `is-ground` `is-member`
-`is-space` `is-var` `isinf-math` `isnan-math` `lambda_1` `last` `length`
+`is-space` `is-var` `isinf-math` `isnan-math` `last` `length`
 `let` `let*` `library` `list_to_set` `log-math` `map-atom` `maplist`
 `match` `match-type-or` `match-types` `max` `max-atom` `member` `metta`
 `metta-thread` `min` `min-atom` `mm2-exec` `mork-add-atoms` `mork-flush`
 `msort` `new-space` `new-state` `noeval` `nop` `noreduce-eq` `not`
-`not-provable` `once` `or` `or-else` `parse` `parse-command` `pow-math`
-`pragma!` `pretty-atom` `println!` `prog1` `progn` `py-at` `py-atom`
-`py-call` `py-container-kind` `py-dict` `py-dict-pairs` `py-dot` `py-eq`
+`not-provable` `once` `only` `or` `or-else` `parse` `parse-command` `pow-math`
+`pragma!` `prefix` `pretty-atom` `println!` `prog1` `progn` `py-at` `py-atom`
+`py-call` `py-container-kind` `py-dict` `py-dict-pairs` `py-dot` `py-eq` `py-except`
 `py-format` `py-global-read` `py-global-write` `py-in` `py-iter`
 `py-iter-once` `py-len` `py-list` `py-operator` `py-range` `py-repr`
 `py-round` `py-set` `py-set-pairs` `py-slice` `py-str` `py-str-join`
-`py-truthy` `py-tuple` `quote` `random-float` `random-int` `read-form!`
+`py-truthy` `py-tuple` `qualified` `quote` `random-float` `random-int` `read-form!`
 `readln!` `reduce` `register-token!` `register_metta_library_path`
-`remove-atom` `remove-translator-rule!` `remove-typing-rule!` `repr`
+`remove-atom` `remove-translator-rule!` `remove-typing-rule!` `rename` `repr`
 `repra` `require-extension!` `residual-goals` `retractPredicate` `return`
 `return-on-error` `reverse` `round-math` `sealed` `second-from-pair`
 `sin-math` `size-atom` `sleep` `sort` `sort-atom` `sort-strings`
@@ -4856,7 +4922,12 @@ product, threshold, strict win probability, exact joint conditioning, average
 and Bernoulli addition; `lib_doc` keeps the old doc import path working after
 its vocabulary moved; `lib_file` text files, directory creation, byte copies, queryable metadata, lexical paths and process streams;
 `lib_gitimport` git-import!, Prolog-only, a module fetched from a repository;
-`lib_he` Hyperon-Experimental compatibility, nearly all of it core now;
+`lib_he` the exact upstream compatibility equations, which shadow the
+importing space's prelude locally. Its assertions compare individual answers;
+native assertions compare answer bags. Its `add-reduct` equation returns the
+Boolean from `add-atom`; native `add-reduct` returns the reduced atom. The
+shared `if-equal`, `if-equal2`, and `match-types` use identity, `match-type-or`
+takes the upstream arguments, and `return-on-error` returns the bare error;
 `lib_import` importing that fails LOUDLY where a missing file once answered
 nothing; matchable `(import Path)` rows through `(imports &space)`,
 and `unimport!` for exact source-owned atom withdrawal; `lib_json` JSON, decoding into that dict-as-space; `lib_measure`

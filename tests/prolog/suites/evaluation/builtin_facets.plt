@@ -8,9 +8,9 @@
 %   commit=90aa1e67c6d1cda45e27dbaa565f2c537f70ad40].
 %   A predicate outside this tree that lends a builtin its name loses the arity
 %   nothing describes, whether or not the build calls that predicate built_in,
-%   and the nine the pass removes are named
-%   [tested: builtin_facets:the_retraction_set_is_the_same_nine_on_every_build;
-%   commit=7eff330776f703cb603d7eea03fc1166d9e08e5e].
+%   and the ten the pass removes are named
+%   [tested: builtin_facets:the_retraction_set_is_the_same_ten_on_every_build;
+%   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -322,9 +322,9 @@ test(a_tree_defined_arity_is_told_from_a_foreign_one) :-
     assertion(\+ builtin_tree_defined_arity('plunit-foreign-lender', 1)),
     assertion(\+ builtin_tree_defined_arity(sleep, 1)).
 
-% The nine the pass removes, named, so a build that stops removing one of them
-% or starts removing a tenth fails here rather than at a seat's boot.
-test(the_retraction_set_is_the_same_nine_on_every_build) :-
+% prefix/2 belongs to SWI's lists library; the head map has two inputs and an
+% output. Its unrelated inherited arity joins the nine earlier lenders.
+test(the_retraction_set_is_the_same_ten_on_every_build) :-
     forall(builtin_fun(Name), register_prolog_arities(Name)),
     findall(Key,
             ( arity(Name, Arity),
@@ -333,7 +333,7 @@ test(the_retraction_set_is_the_same_nine_on_every_build) :-
             Keys0),
     msort(Keys0, Keys),
     assertion(Keys == [ append/1, assert/1, copy_term/3, copy_term/4, not/1,
-                        sleep/1, sort/4, term_hash/4, throw/1 ]),
+                        prefix/2, sleep/1, sort/4, term_hash/4, throw/1 ]),
     retract_unrelated_system_arities,
     builtin_registration_coverage_inventory(Inventory),
     assertion(Inventory == []).

@@ -789,26 +789,29 @@ metta_retire_space_catalog(Space) :-
     retractall(metta_ctx_declared(Space)),
     retractall(metta_events_declared(Space)).
 
-%One catalog row as a list, whatever its arity: '&metta'(kind, handles,
-%symbol, ...) reads back as [kind, handles, symbol, ...]. The walk over the
-%arities is needed only when the query leaves its width open. A fixed-width
-%query already names one storage predicate, as get_native_atom/3 does
-%[source: engine/spaces/native_matching.pl:get_native_atom/3;
-%commit=2458294ae03b8dc1c982a5bc7d31601cc6332dd3].
+% A fixed-width query names one storage predicate. An open-tail query orders
+% matching occurrences by their native generation, independently of SWI's
+% predicate-table enumeration [tested:
+% catalog_self_description:partial_catalog_queries_follow_occurrence_order;
+% commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 metta_catalog_row(Row) :-
     metta_catalog_clause(Row, _).
 
 metta_catalog_clause([Rel|Args], Ref) :-
     native_storage_module('&metta', Module),
     (   is_list(Args)
-    ->  metta_storage_term('&metta', [Rel|Args], _, Goal)
+    ->  metta_storage_term('&metta', [Rel|Args], _, Goal),
+        clause(Module:Goal, true, Ref)
     ;   must_be(list_or_partial_list, Args),
-        current_predicate(Module:'&metta'/N),
-        N >= 2,
-        functor(Goal, '&metta', N),
-        metta_storage_term('&metta', [Rel|Args], _, Goal)
-    ),
-    clause(Module:Goal, true, Ref).
+        findall((Generation-Actor)-([Rel|Args]-Stored),
+                ( current_predicate(Module:'&metta'/N), N >= 2,
+                  functor(Goal, '&metta', N),
+                  metta_storage_term('&metta', [Rel|Args], Token, Goal),
+                  clause(Module:Goal, true, Stored),
+                  metta_token_parts(Token, Actor, Generation) ), Rows),
+        keysort(Rows, Ordered),
+        member(_-([Rel|Args]-Ref), Ordered)
+    ).
 
 %The write-path cache. The checker runs on every '&metta' write, and the
 %uncached lookup walks current_predicate over the storage arities, which
@@ -2432,11 +2435,12 @@ metta_catalog_preset([vocabulary, volatility, volatile, stable, immutable]).
 metta_catalog_preset([vocabulary, 'route-key', context, global]).
 metta_catalog_preset([vocabulary, 'space-capability', file, process, network]).
 %What a space PROVIDER can be asked to do, in the engine's own words. The
-%nine are the operations engine/spaces/foreign.pl gates: match, enumerate,
+%ordinary operations engine/spaces/foreign.pl gates are match, enumerate,
 %add, add-many, remove and clear are the seam hooks a provider implements,
 %plan is the pushdown offer, and subscribe and rules are the two PROMISES no
 %method list can derive - one about what the context delivers, one about
-%whether the space's atoms include equations.
+%whether the space's atoms include equations. tokens reads stable occurrences;
+%add-token and remove-token separately promise exact occurrence mutation.
 %
 %Open, because seam:foreign_capability/2 and engine/ext_points.pl's kind/2
 %are both multifile: a seat or a library declares a hook of its own and the
@@ -2445,7 +2449,7 @@ metta_catalog_preset([vocabulary, 'space-capability', file, process, network]).
 %(vocabulary-member ...) door at load.
 metta_catalog_preset([vocabulary, 'provider-capability',
                       match, enumerate, add, 'add-many', remove, clear,
-                      subscribe, plan, rules, tokens]).
+                      subscribe, plan, rules, tokens, 'add-token', 'remove-token']).
 %How a callable receives its arguments: `atoms` hands the syntax through
 %untouched, `values` decodes it to the host's own data first, and the absence
 %of an (arguments ...) row means values. It is a catalog vocabulary rather
@@ -2746,6 +2750,13 @@ metta_catalog_preset([algebra, bool, max, '*', 0, 1,
                        'extend-one-identity', 'extend-zero-annihilates',
                        contraction],
                       [carrier], [requires], global]).
+metta_catalog_preset([algebra, visibility, max, min, 'INTERNAL', 'PUBLIC',
+                      [laws, 'combine-associative', 'combine-commutative',
+                       'extend-associative', 'left-distributive',
+                       'right-distributive', 'combine-zero-identity',
+                       'extend-one-identity', 'extend-zero-annihilates',
+                       contraction],
+                      [carrier, 'INTERNAL', 'PUBLIC'], [requires], global]).
 metta_catalog_preset([algebra, bag, '+', '*', 0, 1,
                       [laws, 'combine-associative', 'combine-commutative',
                        'extend-associative', 'left-distributive',

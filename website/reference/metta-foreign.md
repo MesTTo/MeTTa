@@ -358,6 +358,22 @@ def supports(self, capability: str, /, **request: Any) -> bool:
 
 > Compatibility spelling for can_run().
 
+## `TokenAdder`
+
+```python
+class TokenAdder(Protocol):
+```
+
+> A provider that returns the fresh identity of each added occurrence.
+
+### `TokenAdder.add_token`
+
+```python
+def add_token(self, atom: Atom) -> Atom:
+```
+
+> Store one occurrence and return its ``(t actor row_id)`` identity.
+
 ## `TokenProvider`
 
 ```python
@@ -377,6 +393,22 @@ def tokens(self, pattern: Atom) -> Iterable[tuple[Atom, Atom]]:
 > Row IDs are nonnegative integers within the engine's ``flag/3`` range
 > and remain stable for an occurrence's lifetime. Distinct occurrences have distinct identities.
 > The engine unifies returned candidates against the offered pattern.
+
+## `TokenRemover`
+
+```python
+class TokenRemover(Protocol):
+```
+
+> A provider that removes exactly one selected occurrence.
+
+### `TokenRemover.remove_token`
+
+```python
+def remove_token(self, token: Atom) -> bool:
+```
+
+> Remove that identity, returning False if it no longer exists.
 
 ## `Transactional`
 
