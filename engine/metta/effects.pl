@@ -1685,6 +1685,97 @@ metta_effect_plan_source_arguments(Module, Head, Args, Evaluated) :-
     metta_effect_plan_source_masked_arguments(
         Module, Head, Args, Evaluated).
 
+%Where one written form leaves a variable UNEVALUATED: the path, from the
+%form's own root, of every variable occurrence inside an argument the engine
+%does not evaluate. A pattern, a binder, a quoted atom and a write payload
+%are all such arguments, and this answer does not tell them apart: it says
+%where a variable is NOT a call's input, which is what a host asks before it
+%calls a body variable unbound. It is read off the same table the planner
+%above reads to decide which written positions execute, and off the
+%declaration masks below it for a defined or declared head, so a form added
+%to either is covered the day it is added. Paths count the head as child 0:
+%`(let (cons $h $t) (g $x) $h)` answers [[1,1],[1,2]] for the pattern and
+%nothing for the value or the body; a head with no signature evaluates every
+%position and answers []; a form whose head is not a symbol answers [].
+%
+%Identity is by OCCURRENCE, not by term: `(match &self (parent $p $k) $k)`
+%evaluates the body's `$k` and binds the pattern's, and the two are one
+%variable. Each occurrence is therefore replaced by a ground marker carrying
+%its own path before the planner is asked, the planner's clauses read only
+%the shape around it, and a root it names is then the exact occurrence that
+%runs. Published for hosts (ext_points.pl): the Python seat's lint reads it
+%in place of a head list of binding forms of its own
+%[tested: form_unevaluated_paths; commit=WORKTREE].
+metta_form_unevaluated_variable_paths(Space, Form, Paths) :-
+    space_module(Space, Module),
+    (   nonvar(Form), Form = [Head|Args], atom(Head), is_list(Args)
+    ->  metta_occurrence_marked(Args, 1, Marked),
+        metta_effect_plan_source_arguments(Module, Head, Marked, Evaluated),
+        metta_evaluated_roots(Evaluated, Roots),
+        metta_unevaluated_marker_paths(Marked, Roots, Paths, [])
+    ;   Paths = []
+    ).
+
+%Every variable occurrence in the arguments, replaced by '$metta_occurrence'(Path).
+metta_occurrence_marked([], _, []).
+metta_occurrence_marked([Arg|Args], Index, [Marked|Rest]) :-
+    metta_occurrence_marked_in(Arg, [Index], Marked),
+    Next is Index + 1,
+    metta_occurrence_marked(Args, Next, Rest).
+
+metta_occurrence_marked_in(Term, Path, '$metta_occurrence'(Path)) :-
+    var(Term), !.
+metta_occurrence_marked_in(Term, Path, Marked) :-
+    is_list(Term), !,
+    metta_occurrence_marked_list(Term, 0, Path, Marked).
+metta_occurrence_marked_in(Term, _, Term).
+
+metta_occurrence_marked_list([], _, _, []).
+metta_occurrence_marked_list([Term|Terms], Index, Path, [Marked|Rest]) :-
+    append(Path, [Index], Child),
+    metta_occurrence_marked_in(Term, Child, Marked),
+    Next is Index + 1,
+    metta_occurrence_marked_list(Terms, Next, Path, Rest).
+
+%The planner's evaluated entries in their shapes: a masked argument returned
+%as itself, and a marked root whose one argument is the source that runs. A
+%write marker names a payload that is WRITTEN rather than evaluated, so it is
+%no root. The roots are the marked form's own subterms, kept by identity
+%rather than collected through findall/3, whose copies would never be == to
+%them.
+metta_evaluated_roots([], []).
+metta_evaluated_roots([Entry|Entries], Roots) :-
+    (   nonvar(Entry), Entry = metta_program_write(_, _, _)
+    ->  Roots = Rest
+    ;   nonvar(Entry), compound(Entry), \+ is_list(Entry),
+        Entry =.. [Marker, Source], metta_evaluated_marker(Marker)
+    ->  Roots = [Source|Rest]
+    ;   Roots = [Entry|Rest]
+    ),
+    metta_evaluated_roots(Entries, Rest).
+
+%The markers metta_effect_plan_source/4 above dispatches on, each wrapping
+%one source that runs.
+metta_evaluated_marker(metta_evaluated_source_root).
+metta_evaluated_marker(metta_unquoted_source).
+metta_evaluated_marker(metta_mapped_operation).
+metta_evaluated_marker(metta_function_instruction_root).
+
+%A subterm that IS an evaluated root is skipped whole; every occurrence
+%marker left outside one is a place a variable is not evaluated.
+metta_unevaluated_marker_paths([], _, Paths, Paths).
+metta_unevaluated_marker_paths([Term|Terms], Roots, Paths0, Paths) :-
+    metta_unevaluated_marker_paths_in(Term, Roots, Paths0, Paths1),
+    metta_unevaluated_marker_paths(Terms, Roots, Paths1, Paths).
+
+metta_unevaluated_marker_paths_in(Term, Roots, Paths, Paths) :-
+    member(Root, Roots), Root == Term, !.
+metta_unevaluated_marker_paths_in('$metta_occurrence'(Path), _, [Path|Paths], Paths) :- !.
+metta_unevaluated_marker_paths_in(Term, Roots, Paths0, Paths) :-
+    is_list(Term), !,
+    metta_unevaluated_marker_paths(Term, Roots, Paths0, Paths).
+metta_unevaluated_marker_paths_in(_, _, Paths, Paths).
+
 metta_effect_plan_source_special_arguments(_, annotation, [], []).
 metta_effect_plan_source_special_arguments(_, cut, [], []).
 metta_effect_plan_source_special_arguments(_, explain, [_], []).

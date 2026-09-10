@@ -1190,6 +1190,14 @@ kind(metta_cost_declaration/4, host_service).
 kind(metta_head_claims/3, host_service).
 kind(metta_head_property/3, host_service).
 kind(metta_head_origins/3, host_service).
+%Two questions a host's static analysis asks the engine instead of restating
+%its tables: where a written form leaves a variable unevaluated, read off the
+%effect planner's evaluated-argument table and the declaration masks, so the
+%Python lint keeps no head list of binding forms; and whether a value would
+%be admitted for a declared parameter type under a space's typing policy, the
+%compiled call check's own relation, so a user typing rule reaches the lint.
+kind(metta_form_unevaluated_variable_paths/3, host_service).
+kind(metta_argument_admitted/3, host_service).
 %Which heads one MeTTa source REGISTERS, read from the source and never run.
 %The registration spellings are the engine's own (`import_prolog_function` and
 %its four importer siblings), so a host that read them itself would carry a

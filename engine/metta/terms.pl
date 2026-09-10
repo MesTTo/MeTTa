@@ -522,6 +522,29 @@ check_argument_type(Argument, Expected, Origin) :-
     current_metta_module(Module),
     check_argument_type_in(Module, Argument, Expected, Origin).
 
+%Whether the engine would ADMIT one value for one declared parameter type in
+%a space: the same origin classification and the same relation the compiled
+%call check runs, under that space's typing policy, so a user rule that
+%widens or refuses a pair reaches a host's answer with nothing host-side to
+%change. `Atom` and `%Undefined%` admit everything, a metatype admits by the
+%value's own metatype, an ordinary type by the value's reported types, and an
+%unbound expected type admits anything, as a bare type variable does. The
+%module's policy selects the relation exactly as the generated call check
+%does: the shipped one where no user rule is declared, the policy-strict one
+%where one is, since a user rule may widen or narrow a metatype family that
+%the shipped shape test knows nothing about. A semidet question that binds
+%nothing. Published for hosts (ext_points.pl); the Python seat's lint reads
+%it in place of a metatype list of its own
+%[tested: argument_admission; commit=WORKTREE].
+metta_argument_admitted(Space, Argument, Expected) :-
+    space_module(Space, Module),
+    with_metta_module(Module,
+        \+ \+ ( metta_argument_type_origin([Expected], Expected, Origin),
+                (   type_rules:typing_policy_is_default(Module)
+                ->  check_argument_type_in(Module, Argument, Expected, Origin)
+                ;   check_argument_type_under_policy_in(Module, Argument, Expected, Origin)
+                ) )).
+
 %%%%%%%%%% Verifying what the compiler decided not to check %%%%%%%%%%
 %
 %This engine DISCHARGES type checks statically in four places: a literal whose

@@ -9,6 +9,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Two host services the Python lint asks instead of keeping tables of its own:
+  `metta_form_unevaluated_variable_paths/3` answers where a written form leaves
+  a variable unevaluated (its patterns, binders, quoted atoms and write
+  payloads), read off the effect planner's evaluated-argument table and the
+  declaration masks, and `metta_argument_admitted/3` answers whether a value
+  would be admitted for a declared parameter type under a space's typing
+  policy, the compiled call check's own relation, so a user typing rule
+  reaches the lint.
 - Stored `from` rows link a library's defining home or another space, with
   live reversible references, occurrence-preserving unions and ordinary
   `only`, `except`, `prefix`, `rename` and `qualified` maps. `internal` rows
@@ -33,6 +41,22 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- The lint's `unbound-variable` rule reports a body variable the head never
+  bound and no written position leaves unevaluated, per form, instead of
+  skipping a whole body that mentions one of seven listed heads: a `let`
+  elsewhere in the body no longer hides a variable nothing binds, a `match`
+  pattern binds its fresh names, and a defined function's `Atom` parameter may
+  bind what it is handed. The `type-mismatch` rule follows the engine's own
+  admission, so a slot declared with a metatype refuses what the engine would
+  refuse and a typing rule declared in the space widens the check.
+- The closed-sets gate recognises a generated table from the artifact
+  manifest's declared outputs, whole files and regions alike, instead of from
+  a header spelling; a declared region the tree cannot locate is a finding.
+- Generated faces and the root module say which tool wrote them from which
+  inputs and which lane refuses drift, read from the artifact manifest.
+- Lint event kinds carry their authority and remedy text in one record beside
+  the rule kinds' authorities, and the stats block's counter set is its own
+  annotated slots.
 - Arrow parameter runs use `(:seg T)`, the pattern layer's splice spelling.
   Segment equation heads compile their arriving arity's cut family once and
   reuse it through the existing specialization invalidation mechanism.
@@ -77,6 +101,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The root module's header named `doorgen.py` and the `door-sync` lane where
+  the manifest declares `rootgen.py` and `init-stub`.
 - A wrong variadic argument reports `BadArgType` at its own position instead
   of emptying the answer. Empty runs, held Atom elements and verbatim splice
   reflection share the same arity presentation. Malformed and non-final

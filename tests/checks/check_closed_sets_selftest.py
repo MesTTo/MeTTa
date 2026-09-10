@@ -19,6 +19,11 @@ Guarantees:
     test_a_stated_reason_clears_the_parameter; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
   - the shipped tree passes the same gate, so a red above is the fixture
     [tested: test_the_shipped_tree_passes_its_own_gate; commit=c26b6a4d28ef8fb50742440feed2c0578ebb0f58]
+  - a table inside an output the artifact manifest declares is not asked, one
+    outside a declared region is, and a region the tree cannot locate is
+    reported [tested: test_a_table_inside_a_declared_output_is_generated,
+    test_a_table_outside_a_declared_region_is_still_asked,
+    test_a_declared_region_the_tree_cannot_locate_is_reported; commit=WORKTREE]
 Open Obligations:
   To Do: None
   Hacks: None
@@ -37,6 +42,7 @@ from check_closed_sets import (
     _validate_parameter,
     closed_sets,
     main,
+    scan_closed_sets,
     scan_string_parameters,
     validate_answer,
 )
@@ -143,6 +149,42 @@ def test_a_reason_naming_no_vocabulary_is_reported() -> None:
     problem = _validate_parameter(line, {"SubscriptionEdge": {"add"}})
     assert problem is not None
     assert "no generated vocabulary" in problem
+
+
+def test_a_table_inside_a_declared_output_is_generated(tmp_path: Path) -> None:
+    """A table in a whole-file output the manifest declares is never asked."""
+    package = tmp_path / "extensions" / "python" / "metta"
+    package.mkdir(parents=True)
+    (package / "vocabularies.py").write_text(
+        '"""planted"""\nWORDS = ("a", "b", "c", "d", "e", "f")\n', encoding="utf-8"
+    )
+    assert scan_closed_sets(tmp_path) == []
+
+
+def test_a_table_outside_a_declared_region_is_still_asked(tmp_path: Path) -> None:
+    """A region output covers the tables between its markers and no other."""
+    package = tmp_path / "extensions" / "python" / "metta" / "_spaces"
+    package.mkdir(parents=True)
+    (package / "execution.py").write_text(
+        '"""planted"""\n'
+        'OUTSIDE = ("a", "b", "c", "d", "e", "f")\n'
+        "# begin generated evaluation keywords\n"
+        'INSIDE = ("a", "b", "c", "d", "e", "f")\n'
+        "# end generated evaluation keywords\n",
+        encoding="utf-8",
+    )
+    findings = scan_closed_sets(tmp_path)
+    assert len(findings) == 1, findings
+    assert "OUTSIDE" in findings[0] and "INSIDE" not in findings[0]
+
+
+def test_a_declared_region_the_tree_cannot_locate_is_reported(tmp_path: Path) -> None:
+    """A declared region without its markers is a finding of its own, not a silent skip."""
+    package = tmp_path / "extensions" / "python" / "metta" / "_spaces"
+    package.mkdir(parents=True)
+    (package / "execution.py").write_text('"""planted"""\n', encoding="utf-8")
+    findings = scan_closed_sets(tmp_path)
+    assert any("missing or repeated output region" in finding for finding in findings), findings
 
 
 def test_the_shipped_tree_passes_its_own_gate() -> None:
