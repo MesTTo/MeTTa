@@ -66,7 +66,7 @@ website.
 | `ch14-seeing-your-program` | pragmas, timing, inference counts, the console |
 | `ch15-writing-transactions-and-worlds` | mutation, state, transactions, pre-add hooks, admission |
 | `ch16-events-and-standing-queries` | the event layer's declared delivery and reaction rows |
-| `ch17-concurrency-and-the-loop` | threads, mutexes, Linda, `hyperpose` |
+| `ch17-concurrency-and-the-loop` | threads, mutexes, Linda, `hyperpose`, scopes and captured calls |
 | `ch18-performance` | larger workloads, memoisation and tabling, algebra carriers |
 | `ch19-spaces-backed-by-anything` | inherited, restricted and parametric spaces; a space and a builtin in C; a space on MORK's Rust trie |
 | `ch20-extending-the-engine` | translator rules, MeTTa written in MeTTa, Prolog underneath, queryable imports and source undo, modules and the `&metta` catalog |
@@ -77,7 +77,7 @@ website.
 `test.sh` discovers examples recursively. It excludes `_fixtures` and the five
 interactive, network-backed, or optional-dependency examples named in
 `tests/data/example_skips.txt`, each with its reason.
-The merged corpus contains 318 examples that run in the shell suite.
+The merged corpus contains 319 examples that run in the shell suite.
 That count is `len(example_parity.corpus())`, the corpus's one definition in
 `extensions/python/tools/example_parity.py`; the `pytest` gate lane fails the
 moment this sentence and the tree disagree.
@@ -94,13 +94,13 @@ add no `examples/**/*.metta` files, so the count above is unchanged.
 
 ## Origins
 
-143 of the 344 programs here derive from the MeTTa examples of the project at
+143 of the 345 programs here derive from the MeTTa examples of the project at
 https://github.com/patham9/PeTTa, MIT licensed, at commit
 `43705f5d9ff8958ffe7f0aa6777fb8477f2401f2` (2026-07-24). They were reorganised
 into the reading order above, and some were edited. Thirteen people wrote them
 there, most of them Patrick Hammer; the rest are credited file by file, because
 naming only the most prolific contributor would miscredit the others. The other
-201 examples were written for this repository.
+202 examples were written for this repository.
 
 `ORIGINS.tsv` names every derived file beside the upstream file it came from,
 how much of the original body survives with comments ignored, and who wrote it

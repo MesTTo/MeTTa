@@ -207,7 +207,6 @@ pragma!                           09-00-17
 type-cast                         09-00-20
 type-cast-holds                   09-00-20
 return-on-error                   10-00-01
-return                            10-00-02
 throw                             10-00-02
 trace!                            10-00-02
 py-atom                           11-00-01
@@ -266,6 +265,7 @@ add-translator-rule!              20-01-01
 remove-translator-rule!           20-01-02
 collapse-bind                     20-02-04
 function                          20-02-04
+return                            20-02-04
 superpose-bind                    20-02-04
 for-each-in-atom                  20-02-06
 noreduce-eq                       20-02-07
