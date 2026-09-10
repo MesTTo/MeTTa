@@ -378,3 +378,8 @@ skipped`, between 150.05 s and 180.20 s, at loadavg 33 to 40 with other agents
 on the box. None of the seven named tests is red in any of them, and the ten
 runs carry ONE distinct failure between them, the twin pin that is red on the
 control at the same base.
+
+## 2026-09-10, the door kind a sibling's withdrawal decided
+Tried: the `door-sync-selftest` lane on the merged tree d7020edeb -> `test_nested_door_records_have_declared_types` red with `door-provider` as the one arrow no record visited; the same test alone on the same tree green; the whole lane green on the cut 3e5855a35 and on the references branch a9749477623, so the merge's changed worker order surfaced it rather than caused it.
+Mechanism: the test visits `table().values()`, the live door registry, and expects every `door-*` arrow to appear in some record. No shipped row carries a provider, so `door-provider` was covered only while a sibling's `seam.door.register` was still standing; in a worker where the sibling's fixture had withdrawn first, or ran later, the kind was never visited. The coverage came from ambient registry state, which is what made it intermittent.
+Decided: the test visits the file's own provider-bearing `_record()` beside the registry's rows, so the provider kind is covered by construction and no order can remove it. The registry read stays, because the shipped rows are still what the test is about.
