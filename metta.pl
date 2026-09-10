@@ -343,6 +343,8 @@
             metta_head_property/3,
             metta_head_claims/3,
             metta_head_origins/3,
+            metta_form_unevaluated_variable_paths/3,
+            metta_argument_admitted/3,
             forget_registered_function/1,
             fun_here/1,
             fun_here_in/2,
