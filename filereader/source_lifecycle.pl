@@ -16,7 +16,7 @@
 %   version-5 images preserve occurrence tokens, original atoms and each compiled equation's
 %   resolved source across relocation and later recompilation [tested:
 %   test_fast_images_preserve_each_equations_binding, test_image_collision_rule;
-%   commit=WORKTREE];
+%   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043];
 %   checksum validation accepts exactly 64 lowercase hexadecimal characters and
 %   its inference cost is independent of their values [tested:
 %   spaces_token_images:hash_header_keeps_the_lowercase_hexadecimal_language,

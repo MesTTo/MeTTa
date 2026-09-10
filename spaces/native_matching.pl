@@ -1,7 +1,7 @@
 % Purpose: plan and execute indexed native-space matches and relational conjunction joins
 % Guarantees: open reads enumerate expressions and scalars in named and
 %   parametric spaces [tested: spaces_tokens:public_and_bulk_writes_preserve_tokens_and_duplicate_bags;
-%   commit=WORKTREE].
+%   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarded by: catalog clear acquires '$metta_typing_policy' before

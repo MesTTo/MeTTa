@@ -2,13 +2,13 @@
 % Assumes: native erasures use metta_erase_storage_ref/1 or metta_retract_storage/1.
 % Guarantees: overlapping image receipts retain distinct tokens, while a load
 %   into an empty destination preserves its tokens [tested: spaces_token_images;
-%   commit=WORKTREE].
+%   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 %   A completed inner transaction transfers its scope to the live outer one;
 %   destroying its suspended engine does not notify a discarded query frame
-%   [tested: spaces_receipt_frames; commit=WORKTREE].
+%   [tested: spaces_receipt_frames; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Owns resources: one standing engine; reservations and erased references last
 %   only until their enclosing load or transaction finishes. Nested rollback
-%   releases its reservations [tested: spaces_token_images; commit=WORKTREE].
+%   releases its reservations [tested: spaces_token_images; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Guarded by: '$metta_occurrence_receipts' serializes requests to the engine.
 
 :- use_module(library(ordsets), [ord_memberchk/2]).
@@ -86,7 +86,7 @@ metta_receipt_watch_transaction(Finished, Scope) :-
 % ancestry, so exclude it when transferring the watch [source:
 % https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-wam.c#L902-L916
 % and https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-trace.c#L2484-L2503;
-% commit=WORKTREE].
+% commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Workaround: swi-query-frame-discarded-on-engine-destroy - stop before the engine's outer query frame.
 metta_receipt_nearest_frame(Current, Finished, Nearest) :-
     prolog_frame_attribute(Current, predicate_indicator, Predicate),
