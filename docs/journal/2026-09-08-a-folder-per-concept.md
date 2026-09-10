@@ -1545,3 +1545,19 @@ historical runs. The final census is 189 source files, 98947 physical lines,
 files above 2000 remain the three permitted owners. Every changed code file
 has a Purpose or a generated-source marker. Engine and library edits are
 source references and comments only.
+
+## 2026-09-10
+
+BINDING landed (merge 765c60587), so `door-order` gates, as decided above.
+Measured at the landing: 332 findings on the unchanged door graph, 92 mixed,
+165 open, 75 recursive, 185 doors unnumbered; the numbered ones are 22 at
+order zero, 16 first order and 4 second order.
+Rejected: running the lane as a REPORT until that backlog clears, the general
+rule for a check with a backlog, because this entry made it the gate after
+BINDING on purpose: the findings are the debt the programme exists to burn
+down, and a report is what let forty-six doors cross where ten would do. The
+integrator demoted it in the merge and restored it the same night. Revisit
+only if the gate blocks work that cannot resolve its own doors' boundaries,
+and then by resolving them, never by baselining.
+Open: which package resolves the 332 (each at its body: a door that both
+crosses and composes is a partial abstraction); SEAT-REVIEW is the candidate.

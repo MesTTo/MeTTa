@@ -83,10 +83,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   all guards. The first failed Janus text query resolves its required library
   dependency at binding startup, removing the 229-inference variation caused
   by an expired file-search cache under concurrent startup.
-- `door-order` refuses mixed, open or recursive boundaries and keeps their
-  diagnostic evidence, leaving unresolved orders unnumbered. It runs as a
-  REPORT lane until the 332 findings on the current door graph clear, when it
-  becomes a gate; its selftest proves the refusals on planted defects now.
+- `door-order` now fails on mixed, open or recursive boundaries and keeps
+  their diagnostic evidence. It leaves unresolved orders unnumbered.
 
 - A Prolog source the engine loads at run time compiles beside itself on
   first use in a boot that governs artifacts and loads from the `.qlf` in

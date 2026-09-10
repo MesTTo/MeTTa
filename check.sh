@@ -787,13 +787,12 @@ run GATE closed-sets-selftest "$PY" "$HERE/tests/checks/check_closed_sets_selfte
 run GATE host-workarounds "$PY" "$HERE/tests/checks/check_host_workarounds.py"
 run GATE host-workarounds-selftest "$PY" "$HERE/tests/checks/check_host_workarounds_selftest.py"
 
-# REPORT, not GATE, until the backlog clears: the tool refuses mixed, open and
-# recursive boundaries, and the cut's unchanged door graph carries 332 of them
-# (92 mixed, 165 open, 75 recursive; 185 doors unnumbered), which is a
-# burn-down surface and not a regression. The selftest below stays a GATE, so
-# the refusals themselves are proven on planted defects. Backlog: ai-todo.md,
-# "door order backlog".
-run REPORT door-order "$PY" "$HERE/extensions/python/tools/doororder.py"
+# A GATE by the 2026-09-08 layout ruling ("reports until BINDING lands and
+# gates after"): the 332 mixed, open and recursive boundaries it refuses on
+# the current door graph are the measured form of "about ten doors cross
+# where forty-six do", the debt the doors programme burns down, and the gate
+# stays red until each is resolved at its body rather than baselined.
+run GATE door-order "$PY" "$HERE/extensions/python/tools/doororder.py"
 door_order_witnesses() {
     bounded env CHECK_PY="$PY" sh "$HERE/extensions/python/test.sh" "$HERE/extensions/python/tests/repository/test_door_order.py"
 }
