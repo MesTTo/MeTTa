@@ -118,6 +118,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 - The root module's header named `doorgen.py` and the `door-sync` lane where
   the manifest declares `rootgen.py` and `init-stub`.
+- Observing source after an artifact boot preserves arithmetic in compiled
+  equations. The observer defers SWI stack collection across watched frame
+  completion and restores the starting thread's collector setting on every
+  exit, including hook exceptions and cancellation.
 - A wrong variadic argument reports `BadArgType` at its own position instead
   of emptying the answer. Empty runs, held Atom elements and verbatim splice
   reflection share the same arity presentation. Malformed and non-final

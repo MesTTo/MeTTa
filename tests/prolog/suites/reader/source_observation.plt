@@ -1,7 +1,9 @@
 % Purpose: verify opt-in source coverage and Error-frame observations.
 % Guarantees: source coordinates distinguish repeated expressions; generated
 %   closures disclose their origin and uncompiled functions disclose absent maps
-%   [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
+%   [tested: source_observation; commit=6f634f6705fc1e40e0c2e3970d4156ee574ab70d].
+% Owns resources: probe wrappers, hook clauses, thread flags and queue-backed
+%   workers are released after each test, including exceptions.
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 :- use_module(library(prolog_wrap)).
@@ -219,7 +221,7 @@ test(generated_token_owns_only_its_lexical_span) :-
 
 test(partial_install_failure_releases_wrappers_and_state) :-
     setup_call_cleanup(
-      wrap_predicate(source_observation:install_runtime_observers, setup_failure, _,
+      wrap_predicate(source_observation:install_runtime_observers(_,_), setup_failure, _,
         ( wrap_predicate(filereader:metta_host_run_source(_,_,_,_),
                          source_observer,Call,Call),
           throw(error(observer_install_probe,context(test,partial_install))) )),
@@ -232,7 +234,7 @@ test(partial_install_failure_releases_wrappers_and_state) :-
         \+ (predicate_property(filereader:metta_host_run_source(_,_,_,_),wrapped(Names)),
              memberchk(source_observer,Names)),
         \+ source_observation:installed_hook(_) ),
-      unwrap_predicate(source_observation:install_runtime_observers/0,setup_failure)).
+      unwrap_predicate(source_observation:install_runtime_observers/2,setup_failure)).
 
 observation_worker(Queue) :-
     catch((observe("!(+ 5 6)",Rows),Outcome=success(Rows)),Error,Outcome=error(Error)),
@@ -241,7 +243,7 @@ observation_worker(Queue) :-
 test(ordinary_other_thread_execution_does_not_enter_observation) :-
     setup_call_cleanup(
       ( message_queue_create(Queue),
-        wrap_predicate(source_observation:install_runtime_observers, concurrent_probe, Call,
+        wrap_predicate(source_observation:install_runtime_observers(_,_), concurrent_probe, Call,
           ( Call, thread_send_message(Queue,installed),
             thread_get_message(Queue,continue) )),
         thread_create(observation_worker(Queue),Worker,[]) ),
@@ -253,8 +255,119 @@ test(ordinary_other_thread_execution_does_not_enter_observation) :-
         memberchk(['observation-answer',0,11],Rows),
         \+ member(['source-error',_,_],Rows) ),
       ( thread_send_message(Queue,continue), thread_join(Worker,_),
-        unwrap_predicate(source_observation:install_runtime_observers/0,concurrent_probe),
+        unwrap_predicate(source_observation:install_runtime_observers/2,concurrent_probe),
         message_queue_destroy(Queue) )).
+
+:- meta_predicate with_gc(+,0), throwing_exit_hook(+,0).
+
+with_gc(Value, Goal) :-
+    current_prolog_flag(gc, Previous),
+    setup_call_cleanup(set_prolog_flag(gc,Value), Goal,
+                       set_prolog_flag(gc,Previous)).
+
+test(observation_restores_the_original_gc_flag,
+     [forall(member(GC,[true,false]))]) :-
+    with_gc(GC,
+      ( observe("!(+ 1 2)",Rows),
+        memberchk(['observation-answer',0,3],Rows),
+        current_prolog_flag(gc,GC), no_observer_hooks )).
+
+throwing_exit_hook(exit, _) :- !,
+    current_prolog_flag(gc, GC), nb_setval('$observer_throw_gc',GC),
+    throw(error(observer_gc_hook_probe,context(test,exit_hook))).
+throwing_exit_hook(_, Goal) :- call(Goal).
+
+test(a_throwing_exit_hook_restores_gc,
+     [forall(member(GC,[true,false]))]) :-
+    with_gc(GC,
+      setup_call_cleanup(
+        ( asserta((user:message_hook(error(observer_gc_hook_probe,_),error,_) :-
+                       nb_setval('$observer_throw_reported',true)), Message),
+          wrap_predicate(source_observation:observe_port(Port,_,_), gc_throw,
+                         Call, throwing_exit_hook(Port,Call)) ),
+        ( observe("!(+ 1 2)",Rows),
+          memberchk(['observation-answer',0,3],Rows),
+          nb_getval('$observer_throw_gc',false),
+          nb_getval('$observer_throw_reported',true),
+          current_prolog_flag(gc,GC), no_observer_hooks ),
+        ( unwrap_predicate(source_observation:observe_port/3,gc_throw),
+          erase(Message), nb_delete('$observer_throw_gc'),
+          nb_delete('$observer_throw_reported') ))).
+
+cancel_at_finished_frame(Owner, Queue, _) :-
+    thread_self(Thread),
+    ( Thread == Owner, nb_current('$observer_cancel_once',true),
+      current_prolog_flag(gc,false)
+    -> nb_delete('$observer_cancel_once'),
+       thread_send_message(Queue,window_open),
+       thread_get_message(Queue,release)
+    ; true ).
+
+cancelled_observation(GC, Queue) :-
+    set_prolog_flag(gc,GC), thread_self(Owner),
+    setup_call_cleanup(
+      ( prolog_listen(frame_finished,cancel_at_finished_frame(Owner,Queue)),
+        nb_setval('$observer_cancel_once',true) ),
+      ( observe("!(+ 1 2)",Rows),
+        memberchk(['observation-status',exception],Rows),
+        memberchk(['observation-exception',Message],Rows),
+        term_string(error(observer_cancel_probe,context(test,cancel)),Message),
+        current_prolog_flag(gc,GC), no_observer_hooks ),
+      ( prolog_unlisten(frame_finished,cancel_at_finished_frame(Owner,Queue)),
+        nb_delete('$observer_cancel_once') )).
+
+test(cancelling_an_open_window_restores_gc,
+     [forall(member(GC,[true,false]))]) :-
+    setup_call_cleanup(
+      ( message_queue_create(Queue),
+        thread_create(cancelled_observation(GC,Queue),Worker,[]) ),
+      ( thread_get_message(Queue,window_open),
+        thread_signal(Worker,throw(error(observer_cancel_probe,context(test,cancel)))),
+        thread_join(Worker,Status) ),
+      ( ( var(Status) -> thread_send_message(Queue,release), thread_join(Worker,_)
+        ; true ),
+        message_queue_destroy(Queue) )),
+    Status == true.
+
+child_collector(GC) :-
+    current_prolog_flag(gc,GC),
+    \+ nb_current('$metta_observation',_).
+
+test(source_thread_creation_inherits_the_restored_flag,
+     [forall(member(GC,[true,false]))]) :-
+    with_gc(GC,
+      setup_call_cleanup(
+        wrap_predicate(filereader:metta_host_run_source(_,_,_,_), gc_child, Call,
+          ( thread_create(child_collector(GC),Child,[]),
+            thread_join(Child,true), Call )),
+        ( observe("!(+ 1 2)",Rows),
+          memberchk(['observation-answer',0,3],Rows),
+          current_prolog_flag(gc,GC) ),
+        unwrap_predicate(filereader:metta_host_run_source/4,gc_child))).
+
+test(the_process_wide_trace_hook_leaves_other_threads_gc_alone,
+     [forall(member(GC,[true,false]))]) :-
+    with_gc(GC,
+      setup_call_cleanup(
+        ( message_queue_create(Queue),
+          ( GC == true -> OwnerGC=false ; OwnerGC=true ),
+          wrap_predicate(source_observation:install_runtime_observers(_,_), gc_owner,
+            Call, ( Call, thread_send_message(Queue,installed),
+                    thread_get_message(Queue,continue) )),
+          thread_create((set_prolog_flag(gc,OwnerGC),observation_worker(Queue)),Worker,[]) ),
+        ( thread_get_message(Queue,installed),
+          setup_call_cleanup(
+            assertz((user:prolog_trace_interception(_,_,_,continue) :-
+                       current_prolog_flag(gc,Observed),
+                       ( Observed == GC -> true
+                       ; nb_setval('$other_gc_changed',true) )), Fallback),
+            ( trace, thread_self(_), notrace, current_prolog_flag(gc,GC),
+              \+ nb_current('$other_gc_changed',_) ),
+            ( notrace, erase(Fallback), nb_delete('$other_gc_changed') )) ),
+        ( thread_send_message(Queue,continue), thread_join(Worker,Status),
+          unwrap_predicate(source_observation:install_runtime_observers/2,gc_owner),
+          message_queue_destroy(Queue) ))),
+    Status == true.
 
 % Attribution asks whether a goal is a meta predicate, and the goals it walks
 % are a compiled clause's own, so most of them are MeTTa functions living in
