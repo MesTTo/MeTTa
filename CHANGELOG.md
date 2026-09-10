@@ -124,6 +124,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Python declaration generators import shared typing parameters by name and
+  reuse existing module bindings. Static analysis now follows binding-generator
+  consumers, dynamic record fields and relocated policy evidence. Context-manager
+  signatures, optional package metadata and exception metadata retain their
+  runtime contracts under both type checkers.
 - The root module's header named `doorgen.py` and the `door-sync` lane where
   the manifest declares `rootgen.py` and `init-stub`.
 - Observing source after an artifact boot preserves arithmetic in compiled

@@ -3441,7 +3441,12 @@ No docstring is defined.
 ### `Channel.__exit__`
 
 ```python
-def __exit__(self, *_exc_info: object) -> None:
+def __exit__(
+    self,
+    exc_type: type[BaseException] | None,
+    exc: BaseException | None,
+    tb: types.TracebackType | None,
+) -> None:
 ```
 
 No docstring is defined.
@@ -3615,7 +3620,12 @@ No docstring is defined.
 ### `EnginePool.__exit__`
 
 ```python
-def __exit__(self, *_exc_info: object) -> None:
+def __exit__(
+    self,
+    exc_type: type[BaseException] | None,
+    exc_val: BaseException | None,
+    exc_tb: types.TracebackType | None,
+) -> None:
 ```
 
 No docstring is defined.

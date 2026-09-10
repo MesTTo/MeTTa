@@ -519,6 +519,13 @@ convention = "google"
 # finding that is not covered by one is a real finding.
 [tool.pylint."messages control"]
 disable = [
+    # PEP 562 declarations use the explicit re-export idiom required by mypy;
+    # Pylint documents C0414 as a false positive for that convention.
+    "useless-import-alias",
+    # Concept modules colocate public doors with their implementations. A
+    # function-local parameter may name the same concept as a module's door;
+    # Python's lexical binding makes that deliberate shadow unambiguous.
+    "redefined-outer-name",
     # Style the project settles elsewhere: ruff owns line length and import
     # order, and interrogate owns docstring coverage with a threshold.
     "line-too-long",
@@ -532,6 +539,9 @@ disable = [
     "too-many-arguments",
     "too-many-locals",
     "too-many-branches",
+    # Evaluation predicates state their full fast-path contract together;
+    # xenon measures complexity, as for branch counts above.
+    "too-many-boolean-expressions",
     "too-many-statements",
     "too-many-return-statements",
     "too-many-instance-attributes",
@@ -645,7 +655,7 @@ min_confidence = 60
 # only by the Arrow producer package, and without the members in the scan the
 # core's own doors read as dead the moment their one caller became a
 # distribution. Reading both is what makes the answer true.
-paths = ["metta", "ext", "bench.py", "vulture_whitelist.py"]
+paths = ["metta", "ext", "bench.py", "vulture_whitelist.py", "tools/bindinggen.py"]
 # The generated vocabulary and function-mention modules are data: every member is read by VALUE
 # (membership, iteration, the wire), so name-reachability is the wrong
 # question for it and each catalog row would need a fresh whitelist line.
@@ -689,9 +699,9 @@ exclude_dirs = ["tests", "build"]
 # project-wide for the same reason, so this only makes the two tools agree.
 [tool.bandit.assert_used]
 skips = [
-    "*/_compliance.py",
-    "*/_gateway_compliance.py",
-    "*/_space_machine.py",
+    "*/testing/_providers.py",
+    "*/testing/_gateway.py",
+    "*/testing/_machine.py",
 ]
 
 [tool.deptry]

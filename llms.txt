@@ -438,7 +438,7 @@ Read Space.metatype.
 `space:bind`: `scope`, returns `context`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
 
 ```python
-bind(values: _abc.Mapping[str, Any] | None=None, /, **named: Any) -> _spaces_scope._BoundValues
+bind(values: _abc.Mapping[str, Any] | None=None, /, **named: Any) -> _spaces_scope_module._BoundValues
 ```
 
 Scope named host values for :meth:`run` without a call flag.
@@ -630,7 +630,7 @@ Lazily match patterns against this space as one conjunction.
 `space:stream`: `query`, returns `stream`, effect `oracleIO`, determinism `nondet`; tiers `sync`, `async`.
 
 ```python
-stream(*patterns: Any, where: Any | None=None, limit: int | None=None, timeout: float | None=None, inferences: int | None=None, under: Any=_UNSET) -> _spaces_cursor.Cursor
+stream(*patterns: Any, where: Any | None=None, limit: int | None=None, timeout: float | None=None, inferences: int | None=None, under: Any=_UNSET) -> _spaces_cursor_module.Cursor
 ```
 
 match(), pulled: the same conjunction and guard, answered one
@@ -682,7 +682,7 @@ Scoped default bounds for every call in the with-block:
 `space:capture`: `scope`, returns `context`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
 
 ```python
-capture() -> _spaces_execution.CapturedOutput
+capture() -> _spaces_execution_module.CapturedOutput
 ```
 
 Collect printed engine text without changing answer shapes.
@@ -698,7 +698,7 @@ Join children and release resources created in this block.
 `space:atomic`: `scope`, returns `context`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
 
 ```python
-atomic() -> _spaces_execution.ScopedExecution
+atomic() -> _spaces_execution_module.ScopedExecution
 ```
 
 Make each CALL in the block one committing engine transaction.
@@ -706,7 +706,7 @@ Make each CALL in the block one committing engine transaction.
 `space:speculative`: `scope`, returns `context`, effect `writesState`, determinism `det`; tiers `sync`, `async`, `module`, `context`.
 
 ```python
-speculative() -> _spaces_execution.ScopedExecution
+speculative() -> _spaces_execution_module.ScopedExecution
 ```
 
 Run each CALL against a snapshot and discard its writes.
@@ -1186,7 +1186,7 @@ define(fn: Callable[_P, _R], /, *, name: str | None=..., accessors: bool=..., me
 @overload
 define(*, name: str) -> Callable[[Callable[_P, _R]], _root.Defined[_P, _R]]
 @overload
-define(*, prolog: str | os.PathLike[str], name: str | None=None) -> Callable[[Callable[_P, _R]], _declare_define.PrologBacked[_P, _R]]
+define(*, prolog: str | os.PathLike[str], name: str | None=None) -> Callable[[Callable[_P, _R]], _declare_define_module.PrologBacked[_P, _R]]
 define(fn: Callable[..., Any] | None=None, *, prolog: str | os.PathLike[str] | None=None, name: str | None=None, accessors: bool=True, methods: bool=True) -> Any
 ```
 
@@ -1195,7 +1195,7 @@ Compile a Python function into MeTTa equations, decorator-style.
 `space:rules`: `provider`, returns `value`, effect `writesState`, determinism `det`; tiers `sync`, `async`.
 
 ```python
-rules(fn: Callable[..., Any]) -> _declare_rules.Rules
+rules(fn: Callable[..., Any]) -> _declare_rules_module.Rules
 ```
 
 Collect and land a non-exclusive equation bundle in this space.
