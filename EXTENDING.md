@@ -48,22 +48,25 @@ marginal cost of **one call** rather than of the loop around it.
 | Prolog grounded predicate | 2.00 | 0.67x | 0.04 | 0.58x |
 | ordinary MeTTa function | 3.00 | 1.00x | 0.07 | 1.00x |
 | @m.define, annotated | 3.00 | 1.00x | 0.08 | 1.15x |
-| Python operation, transport="raw" | 12.00 | 4.00x | 1.15 | 15.69x |
-| Python operation, encoded | 20.00 | 6.67x | 4.27 | 58.15x |
-| @m.define, no annotations | 28.00 | 9.33x | 5.64 | 76.77x |
+| Python operation, transport="raw" | 11.00 | 3.67x | 1.15 | 15.69x |
+| Python operation, encoded | 19.00 | 6.33x | 4.27 | 58.15x |
+| @m.define, no annotations | 27.00 | 9.00x | 5.64 | 76.77x |
 
 Six of each operation row's inferences are the scheduler admission probe: every
 operation call asks the effect and lane question that lets an `oracleIO` call
 detach onto an offload thread inside a scheduler, and the unscheduled call pays
 the same probe.
 
-This is one run's output, not a best-of, because the columns divide by each
-other and mixing runs would give ratios no run measured. The inference column
-is exact; the microsecond column is not, because the four native tiers land
-near the timer's resolution. The annotated `@m.define` row has varied between
+The inference columns in this table and the write table below derive from
+the committed tier and driver pins. Their ratios use those same pins
+[tested: test_the_extension_cost_tables_match_the_committed_pins; commit=8358dfc233bf299bb23eceddd94593a62372fe4b].
+The microsecond columns retain the 2026-09-06 run and its within-run ratios;
+they are advisory measurements of that tree, not timings of the current
+binding. The four native tiers land near the timer's resolution. The annotated
+`@m.define` row has varied between
 about 1.1x and 1.7x on runs minutes apart at the same load, while its inference
 figure was identical every time. Any native-tier ratio inside about 2x is timer
-noise. [measured 2026-09-06: table output above, and the two tables below it
+noise. [measured 2026-09-06: timing columns above and in the write table below
 from the same run; command=$CHECK_PY -m benchmarks.extension_cost;
 fixture=3000 calls, min-of-3, C reader, writer, JSON codec and chapter-19
 artifacts present, measured in a clone of the branch whose path is as long as
@@ -117,7 +120,13 @@ by `extensions/python/benchmarks/axes.py`. They are reported as retired
 instructions beside engine inferences, because inferences are BLIND across the
 janus boundary: foreign code retires none, so the inference column understates
 every row here and is printed to show that. Reproduce with
-`cd extensions/python && python -m benchmarks.axes` [measured 2026-08-29].
+`cd extensions/python && python -m benchmarks.axes`
+[measured 2026-09-10: the direction and value-image tables below;
+command=cd extensions/python && python -m benchmarks.axes;
+fixture=20000 direction crossings, 2000 value-image crossings, min-of-3
+instruction samples and one inference sample in separate fresh processes per
+case, native reader and both MORK shared objects present;
+commit=8358dfc233bf299bb23eceddd94593a62372fe4b].
 
 The two columns carry different weight, and the difference is worth knowing
 before you plan around either. The instruction figures are a recorded run: they
@@ -126,7 +135,7 @@ and carry the claims this section actually argues from, so they have a test
 rather than a date. `tests/ch18_performance/test_axes.py` asserts that an
 opaque crossing stays flat in the value's size, that a transparent one stays
 linear AND stays at four inferences an element, and that the engine-out row
-keeps agreeing with the gated cost table's 12.00. Both halves are needed: the
+keeps agreeing with the gated cost table's raw-operation point. Both halves are needed: the
 class alone would admit a transparent crossing costing a hundred inferences an
 element, and the rate alone would not notice it becoming quadratic. A few
 percent of drift is not a failure and either change is.
@@ -137,16 +146,16 @@ crossing removed:
 
 | direction | instructions/crossing | inferences/crossing |
 |---|---|---|
-| the engine calls out, a Python `op` from MeTTa | 19,557 | 12.03 |
-| the host drives in, `space.eval` of a built term | 96,771 | 108.07 |
-| the host drives in, `space.eval` of source text | 97,485 | 106.07 |
+| the engine calls out, a Python `op` from MeTTa | 34,746 | 11.02 |
+| the host drives in, `space.eval` of a built term | 154,698 | 134.03 |
+| the host drives in, `space.eval` of source text | 154,862 | 132.03 |
 
-**Letting the engine call out is about five times cheaper per crossing than
-driving it from Python.** A host-driven call re-enters the engine, opens a
+Letting the engine call out takes about 4.5 times fewer retired instructions
+per crossing than driving it from Python in this run. A host-driven call re-enters the engine, opens a
 query and tears it down for every item; an engine-driven call is already inside
 and pays the crossing alone. So a loop over many items belongs in MeTTa calling
-out rather than in Python calling in. The engine-out row's 12.03 inferences is
-the same figure the gated table pins at 12.00 for a raw Python operation, which
+out rather than in Python calling in. The engine-out row's 11.02 inferences agrees
+with the gated table's 11.00 for a raw Python operation, which
 is the cross-check that these two harnesses agree.
 
 The two host-driven rows are within noise of each other, and that refutes the
@@ -159,10 +168,10 @@ so what is priced is the crossing and not the construction:
 
 | elements | transparent instructions | transparent inferences | opaque instructions | opaque inferences |
 |---|---|---|---|---|
-| 1 | 73,514 | 21.32 | 24,613 | 12.31 |
-| 10 | 161,979 | 57.32 | 24,543 | 12.31 |
-| 100 | 1,042,933 | 417.31 | 24,475 | 12.31 |
-| 1,000 | 10,270,349 | 4,017.31 | 24,521 | 12.31 |
+| 1 | 89,154 | 21.16 | 38,547 | 11.16 |
+| 10 | 187,194 | 57.16 | 38,520 | 11.16 |
+| 100 | 1,170,053 | 417.16 | 38,556 | 11.16 |
+| 1,000 | 11,311,100 | 4,017.16 | 38,769 | 11.16 |
 
 **This axis is a complexity class, not a constant factor**, and the fit says so
 rather than the ratio. Fitted in log-log space by the same `power_fit` the
@@ -171,8 +180,8 @@ scaling gate uses, the transparent ladder's consecutive-pair slopes climb
 washing out as the values get bigger; the opaque ladder fits an exponent of
 exactly 0.0 and reports no R-squared at all, which is what a flat curve does.
 In plain terms a transparent crossing costs four inferences per element plus a
-fixed 17.3 and an opaque one costs 12.31 whatever the size, so at a thousand
-elements the gap is 419 times the instructions and 326 times the inferences,
+fixed 17.16 and an opaque one costs 11.16 whatever the size, so at a thousand
+elements the gap is 292 times the instructions and 360 times the inferences,
 and it keeps growing.
 
 The same shape appears twice more on this page, in the argument-size table
@@ -220,8 +229,9 @@ hook claim never probes for one.
 ### Read both columns, because each one hides something
 
 **Inferences understate Python.** The janus crossing counts as one inference
-and costs real microseconds, so inferences say a raw Python operation is four
-times a MeTTa function while wall clock says **more than fifteen times**. If you
+and costs real microseconds, so the current pins price a raw Python operation
+at 3.67 times a MeTTa function. The dated timing columns put it at more than
+fifteen times. If you
 are deciding whether to move a hot loop out of Python, trust the microseconds.
 
 **Inferences flatter C.** A foreign predicate is one inference no matter how
@@ -232,7 +242,7 @@ buys you is that the work inside is invisible to the Prolog engine.
 **An annotation can select the native operator path.** `@m.define` compiles a
 Python body into MeTTa equations, but it must preserve Python's live operator
 protocol when an operand's type is unknown. The unannotated `x + 1` row
-therefore calls Python and costs 28.00 inferences. Declaring `x: int` proves
+therefore calls Python and costs 27.00 inferences. Declaring `x: int` proves
 that the same source can use the pure engine `+` head, so the annotated row is
 back at the hand-written equation's 3.00.
 
@@ -260,16 +270,20 @@ term, so the single number above is its best case, on a one-argument integer:
 
 | argument | encoded | `transport="raw"` | ratio |
 |---|---|---|---|
-| integer | 20.00 | 12.00 | 1.67x |
-| flat, 4 items | 31.00 | 12.00 | 2.58x |
-| flat, 16 items | 55.00 | 12.00 | 4.58x |
-| flat, 64 items | 151.00 | 12.00 | 12.58x |
-| nested, depth 4 | 63.00 | 12.00 | 5.25x |
-| nested, depth 8 | 103.00 | 12.00 | 8.58x |
+| integer | 19.00 | 11.00 | 1.73x |
+| flat, 4 items | 30.00 | 11.00 | 2.73x |
+| flat, 16 items | 54.00 | 11.00 | 4.91x |
+| flat, 64 items | 150.00 | 11.00 | 13.64x |
+| nested, depth 4 | 62.00 | 11.00 | 5.64x |
+| nested, depth 8 | 102.00 | 11.00 | 9.27x |
+
+[measured 2026-09-10: argument-size table; command=cd extensions/python &&
+python -m benchmarks.extension_cost; fixture=200 calls per argument shape,
+driver subtracted, min-of-3 fresh processes; commit=8358dfc233bf299bb23eceddd94593a62372fe4b]
 
 The raw path is **flat whatever the argument is**. The encoded one costs about
 two inferences per flat item and about eight per nesting level, so a 64-item
-list through an encoded operation costs 144 inferences against a Prolog
+list through an encoded operation costs 150 inferences against a Prolog
 predicate's 2.
 
 One of the raw path's inferences is the catch that turns a Python failure into
@@ -3542,6 +3556,51 @@ it ([provider packages](https://airflow.apache.org/docs/apache-airflow-providers
 SQLAlchemy's dialects, Pygments' lexers and pytest's plugins are the same shape.
 `pymetta[dataframes]` is that extra, and it installs `metta-pandas` and
 `metta-polars` rather than pandas and polars.
+
+### One binding interface, a projection for each host
+
+The Python binding under `extensions/python/metta/_binding/` is a worked
+example. Its door declaration supplies an evaluation options record;
+`metta_py_evaluate/4` accepts that record, the receiving space, a target and
+the result. Input form, substitutions, collection, fuel, budgets, evaluation
+context and execution policy vary independently. The reference is generated
+from the same fields that generate the native and Python record layouts.
+Unmodified defaults cross by a generated numeric identifier. Both forms
+compile from `evaluation_policy.pl` into the same evaluator and collectors;
+the host combines per-call options and active scopes before making a record.
+
+An operation crosses through `metta_py_dispatch/4` with the key
+`[Kind, Raw, Inverse]`. `Kind` comes from the declared operation row. A context
+token is a separate argument at the Python callback. An inverse enumerates
+all its answers even when the forward operation is deterministic. Native
+equality and truth policy remains in the native binding.
+
+`_binding/interface.py` names imported services and callback exports.
+`bindinggen.py` checks their signatures and generates mechanical forwards
+from the engine's `service` and `host_service` rows. Clauses supplied to the
+host expand at each `binding_forward(Name/Arity)` declaration, keeping local
+policy clauses in their original order. Clauses supplied to the
+engine live in `provides/ownership.pl`, `provides/declaration.pl` and
+`provides/event.pl`; their declarations retain the engine/host load audience
+and defining module. Generated files supply each entry's clauses without
+restating which seam owns them. Each handwritten unit retains the preparation,
+conversion, error and resource policy that makes it more than a forward.
+
+The same generator derives held execution mappings from the shim's admitted
+`_controlled` predicates. An explicit `prolog/1` output identifies an opener;
+a `[payload,text]` output identifies a resume. The host lookup name removes
+the `_controlled` suffix, including the debugger's virtual base name. Adding
+an admitted native entry updates the maps through `bindinggen.py --write`;
+the `binding` lane rejects missing definitions, conflicting return signatures
+and stale maps. Execution scopes remain inside the held goal.
+
+The `(wire-tag ...)` rows remain the grammar for every host. Tests enumerate
+each row through the Python and native codec or frame consumer, check the
+schema and projection, and exercise Node's supported terms. A second host can
+instantiate the evaluation axes, dispatch key and service descriptions with
+its own transport and resource handles. Node keeps its current implementation
+and its explicit refusal of native process-local handles; its future binding
+projection can reuse these declarations without inheriting Python objects.
 
 ### The Python seat
 

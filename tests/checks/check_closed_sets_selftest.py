@@ -38,6 +38,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from check_closed_sets import (
+    ARTIFACTS,
     _parameter_answer,
     _validate_parameter,
     closed_sets,
@@ -162,17 +163,26 @@ def test_a_table_inside_a_declared_output_is_generated(tmp_path: Path) -> None:
 
 
 def test_a_table_outside_a_declared_region_is_still_asked(tmp_path: Path) -> None:
-    """A region output covers the tables between its markers and no other."""
+    """A region output covers the tables between its markers and no other.
+
+    Every region the manifest declares for the planted path is written, one
+    table inside the first, so the case follows the manifest when a region is
+    added rather than reporting the ones it did not plant.
+    """
     package = tmp_path / "extensions" / "python" / "metta" / "_spaces"
     package.mkdir(parents=True)
-    (package / "execution.py").write_text(
-        '"""planted"""\n'
-        'OUTSIDE = ("a", "b", "c", "d", "e", "f")\n'
-        "# begin generated evaluation keywords\n"
-        'INSIDE = ("a", "b", "c", "d", "e", "f")\n'
-        "# end generated evaluation keywords\n",
-        encoding="utf-8",
-    )
+    regions = [
+        output.region
+        for artifact in ARTIFACTS
+        for output in artifact.outputs
+        if output.path == "extensions/python/metta/_spaces/execution.py" and output.region
+    ]
+    assert regions, "the manifest declares no region for the planted path"
+    body = '"""planted"""\nOUTSIDE = ("a", "b", "c", "d", "e", "f")\n'
+    for index, (begin, end) in enumerate(regions):
+        inside = 'INSIDE = ("a", "b", "c", "d", "e", "f")\n' if index == 0 else ""
+        body += f"{begin}\n{inside}{end}\n"
+    (package / "execution.py").write_text(body, encoding="utf-8")
     findings = scan_closed_sets(tmp_path)
     assert len(findings) == 1, findings
     assert "OUTSIDE" in findings[0] and "INSIDE" not in findings[0]

@@ -132,3 +132,27 @@ Lifted when: SWI no longer delivers `frame_finished` for the frame that
   `absent` from a build without assertions as a lift signal.
 Record: docs/journal/2026-09-09-the-binding-collapse.md, transfer bound watches
   before native query destruction.
+
+## swi-file-search-cache-autoload
+Host: Janus 1.5.3 on SWI-Prolog 10.1.13; janus.pl's `py_call/4` failed-query
+  branch resolves its declared `maplist/2` autoload on first use.
+Defect: the first failed text query walks the file search path when the
+  dependency's cached path has expired. The same query therefore pays a
+  different inference cost according to earlier wall-clock state, despite
+  performing the same program work. `file_search_cache_time=0` disables the
+  cache before either the hit or sweep clauses; it reproduces the uncached
+  walk, not a cache-expiry sweep.
+Reproduction: tests/checks/host_workarounds/swi-file-search-cache-autoload.sh,
+  four fresh Python Janus processes with no engine loaded. The first failed
+  text query costs 1,281 with the primed default cache and 1,507 with the cache
+  disabled at zero; explicitly importing `maplist/2` gives 8 in both arms.
+  The native count surrounds the query, and each child restores the default
+  flag value 10. This is the zero-setting uncached-walk control.
+Workaround: import Janus's `maplist/2` dependency once at binding boot. Do
+  not put the import on a query path or preload optional library helpers.
+Lifted when: Janus resolves this dependency before its first failed text
+  query, or SWI's autoload resolution no longer gives that query a cache-state
+  dependent inference cost. Equal warm and uncached costs answer `absent`.
+Record: docs/journal/2026-09-09-the-binding-collapse.md, first-use dependency
+  attribution and deterministic 226/229 controls. The separate file-search
+  cache maintenance sweep belongs to its own host-workaround entry.

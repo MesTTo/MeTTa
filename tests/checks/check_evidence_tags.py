@@ -201,6 +201,7 @@ GUARANTEE_SOURCES = (
     "extensions/mork/mork_ffi/*.pl",
     "extensions/mork/tests/*.py",
     "extensions/python/tools/*.py",
+    "extensions/python/tools/*.pl",
     "tests/checks/*.py",
     # The Python suites carry 536 tags of their own, the largest block
     # the lane could not see.
