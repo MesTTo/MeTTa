@@ -2,7 +2,7 @@
 % Guarantees: pending and arrived definitions answer the same on the first
 %   and repeated guard call, with equal inference counts whether retired
 %   clauses remain or have been collected [tested:
-%   run_tests(runnable_definition_counter); commit=WORKTREE].
+%   run_tests(runnable_definition_counter); commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Owns resources: each fresh child owns its reader rows and collection policy;
 %   the parent closes its output stream and joins the child on every exit.
 

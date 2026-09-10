@@ -39,7 +39,7 @@
 % Guarantees: the source-prefix guard reads filereader:source_pending_definition/2
 %   directly, so its first call has the same cost with retained or collected
 %   reader clauses [tested: run_tests(runnable_definition_counter);
-%   commit=WORKTREE].
+%   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 
 %% translate_cached_expr(+Expression, -Goals, -Value) is det.
 % This cache stores translation templates, not evaluation answers. Any future

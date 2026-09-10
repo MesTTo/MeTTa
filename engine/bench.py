@@ -20,7 +20,7 @@ Guarantees:
   - both boot counters decline a different declared checkout length or depth,
     even when the reading matches its pin; runtime rows still compare
     [tested: test_boot_path_refuses_both_counters_and_preserves_pins,
-    test_comparable_counters_still_gate; commit=WORKTREE]
+    test_comparable_counters_still_gate; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
   - a box that would not count is told apart from a tree that moved: this
     lane exits 0 with a named skip on a developer's box and 1 where CI=true,
     and never reports a refused measurement as a moved row

@@ -3,7 +3,7 @@
 %   be forced without waiting or changing the lookup being measured.
 % Guarantees: compares the next lookup after the aged load with two warm
 %   lookups; an unequal warm control or a reversed difference is a broken
-%   reproduction [tested: sh check.sh host-workarounds; commit=WORKTREE].
+%   reproduction [tested: sh check.sh host-workarounds; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Owns resources: this fresh process's cache timestamps and loaded libraries;
 %   neither survives process exit.
 

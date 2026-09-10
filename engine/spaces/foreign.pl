@@ -4,7 +4,7 @@
 % Guarantees: the native bulk loop calls add_sexp_in/5 directly, retaining
 %   unique occurrence tokens and the same duplicate bag as public writes
 %   [tested: spaces_tokens:public_and_bulk_writes_preserve_tokens_and_duplicate_bags;
-%   commit=WORKTREE].
+%   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Guarantees: a new concrete provider claim emits seam:space_created/1;
 %   namespace claims and reopening an existing space do not mint a lifetime
 %   [tested: test_named_foreign_creation_is_owned_and_an_existing_provider_is_borrowed;

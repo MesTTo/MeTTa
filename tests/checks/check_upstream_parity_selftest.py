@@ -31,20 +31,20 @@ Assumes: an ``examples/`` corpus with at least two files, used only for their
 Guarantees:
   - each program has a fresh null sample: a changed fixed cost cancels in
     either direction, while added program work still fails the same band
-    [tested: check_upstream_parity_selftest.fresh_null_failures; commit=WORKTREE]
+    [tested: check_upstream_parity_selftest.fresh_null_failures; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
   - two shipping fixture generations have the same artifact set and content
     digests after removing only the embedded temporary filename's compiler
     PID and its derived offsets. A planted foreign artifact is removed
-    [tested: check_upstream_parity_selftest.artifact_fixture_failures; commit=WORKTREE]
+    [tested: check_upstream_parity_selftest.artifact_fixture_failures; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
   - every active waiver remains visible while its separate measurement verdict
-    is preserved [tested: parity-perf-selftest; commit=WORKTREE]
+    is preserved [tested: parity-perf-selftest; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
   - null extrema bound the compared difference, an overrun beyond the whole
     range still fails, and a null spread beyond its measured resolution is
     explicitly unmeasurable without hiding inference drift [tested:
-    check_upstream_parity_selftest.null_range_failures; commit=WORKTREE]
+    check_upstream_parity_selftest.null_range_failures; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
   - both upstream lanes prefer METTA_UPSTREAM to the sibling checkout, including
     a configured path that is absent [tested: check_upstream_parity_selftest.upstream_selection_failures;
-    commit=WORKTREE]
+    commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
   - a planted engine whose fixed cost exceeds its program run is reported as
     ``negative-net`` by ``measure`` and turns ``verdicts`` red, while the rule
     this file replaced records the same numbers and stays green

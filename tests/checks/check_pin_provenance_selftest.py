@@ -30,7 +30,7 @@ Guarantees:
   - Rust header pins and MORK's Python selftest pins are reached and resolved
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
   - nested C Prolog fixtures resolve their header pins and preserve code atoms
-    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
 Fails when: run against a tree it did not write. It asserts on a fixture it
   generates and nothing else.
 Open Obligations:

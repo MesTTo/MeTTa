@@ -2,7 +2,7 @@
 % Guarantees: ordinary and scheduled await join a worker whose result is already
 %   published; concurrent awaiters wait through a competing or interrupted
 %   native join; pool statistics describe one manager snapshot [tested:
-%   lib_thread_completion; commit=WORKTREE].
+%   lib_thread_completion; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Owns resources: each fixture releases its worker barrier, joins both threads,
 %   removes its predicate wrapper, closes its queues and destroys its pool.
 

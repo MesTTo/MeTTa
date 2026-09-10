@@ -116,7 +116,7 @@ Guarantees:
   - Python package claims remain checked after sources move into subpackages
     [tested: test_nested_package_evidence_rejects_a_missing_test; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]
   - C-embedded Prolog fixtures carry checked evidence and provenance
-    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs

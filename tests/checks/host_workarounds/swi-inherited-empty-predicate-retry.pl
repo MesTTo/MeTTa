@@ -3,7 +3,7 @@
 %   diagnostic process compares retained and explicitly collected clauses.
 % Guarantees: first/warm inherited and direct calls run in separate fresh
 %   processes; unequal controls and child failures refuse a verdict [tested:
-%   sh check.sh host-workarounds host-workarounds-selftest; commit=WORKTREE].
+%   sh check.sh host-workarounds host-workarounds-selftest; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Owns resources: children own their clauses and collector policy; the parent
 %   closes each output stream and joins the child, including on read errors.
 

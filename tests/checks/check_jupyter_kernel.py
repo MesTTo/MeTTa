@@ -52,7 +52,7 @@ Assumes:
 Guarantees:
   - METTA_UPSTREAM selects the reference checkout; when unset, the sibling
     PeTTa-upstream remains the default [tested:
-    check_upstream_parity_selftest.upstream_selection_failures; commit=WORKTREE]
+    check_upstream_parity_selftest.upstream_selection_failures; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
   - the kernel is installed at a pinned commit and started, rather than read
     [tested: tests/checks/check_jupyter_kernel.py; commit=7ba114f280ec3b132658cacb562064d0bac23f41]
   - the fork's launcher runs an upstream `src/main.pl` tree, which is the

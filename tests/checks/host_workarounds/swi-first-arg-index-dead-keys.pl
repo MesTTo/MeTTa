@@ -4,7 +4,7 @@
 % Guarantees: reports the retained and collected bytes, CPU time and inference
 %   counts; equal inference counts and a second collected sample check that
 %   the comparison measures the hidden clause scan [tested: sh check.sh
-%   host-workarounds; commit=WORKTREE].
+%   host-workarounds; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Owns resources: this fresh process's dynamic clauses and collection policy;
 %   neither survives process exit.
 % Decides: a fourfold CPU ratio distinguishes the scan from the collected

@@ -1,6 +1,6 @@
 % Purpose: pin occurrence identity, ordering, rollback and provider refusals.
 % Guarantees: ordinary bags omit tokens; exact removal preserves later arrivals
-%   [tested: sh engine/test.sh suites/spaces/tokens.plt; commit=WORKTREE].
+%   [tested: sh engine/test.sh suites/spaces/tokens.plt; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Owns resources: each fixture releases its space and joins its minting threads.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

@@ -9,7 +9,7 @@
 % Guarantees: public writes reach metta_add_atom/4 directly and retain unique
 %   occurrence tokens and duplicate bags in named and parametric stores
 %   [tested: spaces_tokens:public_and_bulk_writes_preserve_tokens_and_duplicate_bags;
-%   commit=WORKTREE].
+%   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Guarantees: release requests child cancellation before taking the execution
 %   module mutex, then publishes retirement after native teardown. Access
 %   checks also precede cache misses and allocation [tested: lib_thread_scope,
