@@ -179,6 +179,26 @@ target exists, whether it can fail, and whether a runner executes it. It
 cannot answer the fourth, which is whether the target tests the particular
 guarantee it is cited for. That one is yours.
 
+## Host workarounds
+
+The engine runs on hosts it does not own, SWI-Prolog first among them. A
+change that works around something a host does, rather than something this
+tree does, records the workaround where a later reader, an upstream fix or a
+port can find every one of them:
+
+- at the site, one comment line in the file's own comment syntax of the shape
+  `Workaround: <key> - <what this site does instead>`, followed by whatever
+  explanation the site needs;
+- in `docs/host-workarounds.md`, one entry under `## <key>` with the host and
+  version, the defect as a mechanism, a tracked reproduction that prints
+  `present` while the host still has the defect and `absent` once it does
+  not, and the host change that lifts it.
+
+Both land in the same commit as the workaround. The `host-workarounds` lane
+holds the two in step in both directions and runs every reproduction, so a
+host upgrade that removes a defect fails the gate naming the sites to lift,
+rather than leaving the workaround to outlive its reason.
+
 ## Commits
 
 One commit is one logical change, with a message that says what changed and

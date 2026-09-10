@@ -7,6 +7,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Every workaround for a host defect names its ledger entry: a site carries
+  `Workaround: <key> - <what>` in its own comment syntax,
+  `docs/host-workarounds.md` holds one entry per defect with a tracked
+  reproduction, and the `host-workarounds` gate lane refuses a site without
+  an entry, an entry without a site, and an entry whose reproduction no
+  longer answers `present` on the running host, naming the sites to lift.
+  Three entries open the ledger: the cleanup-registration window an
+  inference limit can strike (`swi-cleanup-window`), the locale-derived
+  default encoding (`swi-locale-default-encoding`) and the extension-bearing
+  load spec that never reaches the artifact rule (`swi-qlf-extension-spec`).
+
 ### Changed
 
 - Arrow parameter runs use `(:seg T)`, the pattern layer's splice spelling.
