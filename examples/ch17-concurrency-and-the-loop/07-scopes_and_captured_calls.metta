@@ -1,7 +1,7 @@
 ; Purpose: join child work, release local resources and carry a call's space.
 ; Guarantees: scope preserves answer multiplicity, joins children before
 ; answering and releases unreturned spaces; capture holds a call with its home.
-; [tested: examples/ch17-concurrency-and-the-loop/07-scopes_and_captured_calls.metta; commit=WORKTREE]
+; [tested: examples/ch17-concurrency-and-the-loop/07-scopes_and_captured_calls.metta; commit=801110debd5646a41c40391cee4075355a49d27b]
 ; Owns resources: outer scopes release the channels, temporary spaces and
 ; captured homes used below; a returned inner space transfers to its outer scope.
 
