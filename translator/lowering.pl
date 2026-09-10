@@ -2,7 +2,7 @@
 % Guarantees: a translation miss can await a background reference without
 %   holding the cache publication mutex; hits retain translated_form_hit/5
 %   [tested: reference_loading:non_eager_file_cycles_preserve_both_defining_homes;
-%   commit=WORKTREE].
+%   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Guarantees: verify-cardinality checks annotated calls while plain calls
 %   retain their generated goal [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarantees: Direct declaration probes use metta_runtime_type/2 before masking

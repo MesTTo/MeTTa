@@ -17,7 +17,7 @@
 % run_tests(algebra_types); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 % Guarantees:
 %   - candidate definitions enter the existing effect walk before loading or
-%     compiling them [tested: reference_loading; commit=WORKTREE].
+%     compiling them [tested: reference_loading; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Owns resources: candidate-source analysis holds an indexed, thread-local
 %   source environment only until its admission query exits.
 % Guarantees:

@@ -2,7 +2,7 @@
 %   metta_unimport/2 withdraws it transactionally [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Guarded by: metta_loader protects source-flight ownership, never user forms.
 % Owns resources: each source owner destroys its queue on every exit; waiters
-%   recheck receipts after waking [tested: loader_singleflight; commit=WORKTREE].
+%   recheck receipts after waking [tested: loader_singleflight; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
 % Guarantees: declared determinism is applied to the predicate's implementation
 %   module, including plain host files reached through the core's base chain

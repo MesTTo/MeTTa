@@ -1,11 +1,11 @@
 % Purpose: answer head properties from occurrence provenance and engine claims.
 % Guarantees: get-property, explain and host reflection share these answers;
 %   origins retain each defining occurrence and resolve aliases at their home
-%   [tested: head_properties; commit=WORKTREE].
+%   [tested: head_properties; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 %   Named equation ownership uses the storage index before general row
 %   classification; unrelated atoms do not add work to compilation claims
 %   [tested: head_properties:unrelated_rows_do_not_change_a_named_definition_claim_cost;
-%   commit=WORKTREE].
+%   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Owns resources: source text and positions are cached only for one origin read.
 % Decides: absent source files retain their path and answer line -1. Reflection
 %   does not compile a deferred equation or load an unimported library.

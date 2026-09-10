@@ -1758,7 +1758,7 @@ set_type_alias_mutation_scope(Scope, disabled) :-
 % A successful semidet mutation commits before its observer: collecting its
 % answers must not fall through and execute the original clause a second time.
 % [tested: references:enumerating_a_write_answer_mutates_exactly_one_occurrence;
-% commit=WORKTREE].
+% commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 metta_reference_mutation_scope(Space, enabled) :-
     space_module(Space, Module),
     findall((Head :- Before, Scoped, !, After),

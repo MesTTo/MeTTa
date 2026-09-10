@@ -1,7 +1,7 @@
 % Purpose: compose occurrence reads and ordering with the native storage shape.
 % Guarantees: raw occurrence storage returns its identity; reference scopes
 %   remove selected occurrences through the ordinary semantic write doors
-%   [tested: reference_providers; commit=WORKTREE].
+%   [tested: reference_providers; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Assumes: spaces.pl consults this unit before catalog initialization.
 % Guarantees: received generations advance the same flag used by fresh writes;
 %   rollback may leave gaps but cannot reuse an allocated generation
