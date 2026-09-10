@@ -213,6 +213,30 @@ def resolve(self) -> Any:
 
 > Load the implementation and preserve import failures verbatim.
 
+## `EvaluationInput`
+
+```python
+class EvaluationInput(enum.StrEnum):
+```
+
+> The representation supplied to the binding's evaluation entry.
+
+## `EvaluationCollection`
+
+```python
+class EvaluationCollection(enum.StrEnum):
+```
+
+> How one producer delivers its answers across the binding.
+
+## `EvaluationOptions`
+
+```python
+class EvaluationOptions:
+```
+
+> The evaluation record grammar; binding code and documents are projections.
+
 ## `Binding`
 
 ```python

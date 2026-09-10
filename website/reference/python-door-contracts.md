@@ -612,7 +612,23 @@ Declared option vocabularies:
 
 Implementation: `metta._spaces.evaluate:eval`, receiving `space`.
 
-Engine binding: `metta_py_eval_all`, wire `prolog-goal`.
+Engine binding: `metta_py_evaluate`, wire `prolog-goal`.
+
+| evaluation field | default | meaning |
+|---|---|---|
+| `form` | `wire` | Wire/text target or an already decoded term. |
+| `using` | `()` | Named substitutions applied to the decoded term. |
+| `answers` | `all` | One solution, eager bag, cursor, count, retained count, or status rows. |
+| `fuel` | `True` | Reuse or open the engine fuel scope. |
+| `inferences` | `-1` | Cumulative engine-step quota; negative means unbounded. |
+| `seconds` | `-1.0` | Engine time quota in seconds; negative means unbounded. |
+| `under` | `None` | Evaluation algebra, demand limit and direction, or no override. |
+| `policy` | `None` | Execution mode and capture policy retained inside a cursor. |
+| `repeatable` | `False` | Refuse a separate count when the goal is not effect-safe. |
+| `columns` | `()` | Caller variable names projected beside each cursor answer. |
+| `accounting` | `False` | Return the work measured inside this evaluation. |
+| `batch` | `False` | Return one result group per target, in input order. |
+| `unmatched` | `True` | Preserve an unreduced original after an empty eager bag. |
 
 Assumes receiver state `live`.
 
@@ -716,7 +732,23 @@ Longhand: `space:eval(..., answer='answers')`.
 
 Implementation: `metta._spaces.evaluate:answers`, receiving `space`.
 
-Engine binding: `metta_py_eval_cursor`, wire `prolog-goal`.
+Engine binding: `metta_py_evaluate`, wire `prolog-goal`.
+
+| evaluation field | default | meaning |
+|---|---|---|
+| `form` | `wire` | Wire/text target or an already decoded term. |
+| `using` | `()` | Named substitutions applied to the decoded term. |
+| `answers` | `cursor` | One solution, eager bag, cursor, count, retained count, or status rows. |
+| `fuel` | `True` | Reuse or open the engine fuel scope. |
+| `inferences` | `-1` | Cumulative engine-step quota; negative means unbounded. |
+| `seconds` | `-1.0` | Engine time quota in seconds; negative means unbounded. |
+| `under` | `None` | Evaluation algebra, demand limit and direction, or no override. |
+| `policy` | `None` | Execution mode and capture policy retained inside a cursor. |
+| `repeatable` | `False` | Refuse a separate count when the goal is not effect-safe. |
+| `columns` | `()` | Caller variable names projected beside each cursor answer. |
+| `accounting` | `False` | Return the work measured inside this evaluation. |
+| `batch` | `False` | Return one result group per target, in input order. |
+| `unmatched` | `True` | Preserve an unreduced original after an empty eager bag. |
 
 Assumes receiver state `live`.
 
@@ -943,6 +975,24 @@ Kind: `evaluation`. Answer: `list`. Effect: `oracleIO`. Determinism: `nondet`.
 Tiers: `sync`, `async`.
 
 Implementation: `metta._spaces.evaluate:eval_status`, receiving `space`.
+
+Engine binding: `metta_py_evaluate`, wire `prolog-goal`.
+
+| evaluation field | default | meaning |
+|---|---|---|
+| `form` | `wire` | Wire/text target or an already decoded term. |
+| `using` | `()` | Named substitutions applied to the decoded term. |
+| `answers` | `status` | One solution, eager bag, cursor, count, retained count, or status rows. |
+| `fuel` | `True` | Reuse or open the engine fuel scope. |
+| `inferences` | `-1` | Cumulative engine-step quota; negative means unbounded. |
+| `seconds` | `-1.0` | Engine time quota in seconds; negative means unbounded. |
+| `under` | `None` | Evaluation algebra, demand limit and direction, or no override. |
+| `policy` | `None` | Execution mode and capture policy retained inside a cursor. |
+| `repeatable` | `False` | Refuse a separate count when the goal is not effect-safe. |
+| `columns` | `()` | Caller variable names projected beside each cursor answer. |
+| `accounting` | `False` | Return the work measured inside this evaluation. |
+| `batch` | `False` | Return one result group per target, in input order. |
+| `unmatched` | `True` | Preserve an unreduced original after an empty eager bag. |
 
 Assumes receiver state `live`.
 

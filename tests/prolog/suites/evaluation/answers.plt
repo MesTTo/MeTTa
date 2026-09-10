@@ -5,9 +5,11 @@
 %   apart from python_surface.plt because shim hooks change which bridge
 %   answers the typing tests there.
 % Guarantees:
+%   - context snapshots and nested scopes survive every tested inference
+%     interrupt [tested: run_tests(evaluation_context); commit=WORKTREE].
 %   - evaluation context preserves demand across carrier overrides, restores
 %     after every exit, and licenses ordered provider bounds consistently
-%     [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
+%     [tested: run_tests(evaluation_context); commit=WORKTREE].
 %   - the Python repeatability bridge fails closed on an ordinary classifier
 %     refusal but never catches a control limit [tested:
 %     python_repeatability_control:the_bridge_preserves_inference_limits;
@@ -30,7 +32,7 @@ test(the_bridge_preserves_inference_limits) :-
     maplist(=(true), Goals),
     foldl(repeatability_term_conjoin, Goals, true, Term),
     call_with_inference_limit(
-        ( metta_py_eval_repeatable('&metta', Term)
+        ( metta_py_repeatable('&metta', Term)
         -> Outcome = repeatable
         ;  Outcome = declined ),
         50,
@@ -262,6 +264,45 @@ test(suspended_engines_keep_distinct_contexts) :-
           \+ metta_evaluation_context(_) ),
         ( engine_destroy(E1), engine_destroy(E2) )),
     \+ metta_evaluation_context(_).
+
+test(context_push_snapshots_its_input) :-
+    Context = evaluation_context(Carrier, 2, descending),
+    metta_with_evaluation_context(Context,
+        ( Carrier = original,
+          metta_evaluation_context(evaluation_context(Held, 2, descending)),
+          assertion(var(Held)),
+          Held = snapshot,
+          assertion(Carrier == original) )),
+    \+ metta_evaluation_context(_).
+
+% The fuel-scope thread of 2026-09-07 established SWI's interruption window.
+% Sweep both the first scope and a nested one: a swallowed cleanup signal
+% leaked only the first, while an untrailed push leaked either.
+test(context_scopes_restore_after_every_inference_interrupt,
+     [forall(member(Outer, [none, evaluation_context(outer, 5, ascending)])),
+      cleanup(nb_delete('$metta_evaluation_contexts'))]) :-
+    findall(Limit-Inside-After,
+        ( between(1, 2000, Limit),
+          context_interrupt_under(Outer, Limit, Expected, Inside),
+          findall(Context, metta_evaluation_context(Context), After),
+          Inside-After \== Expected-[] ), Leaks),
+    assertion(Leaks == []),
+    \+ metta_evaluation_context(_).
+
+context_interrupt_under(none, Limit, [], Inside) :- !,
+    context_interrupt(Limit, Inside).
+context_interrupt_under(Outer, Limit, [Outer], Inside) :-
+    metta_with_evaluation_context(Outer, context_interrupt(Limit, Inside)).
+
+context_interrupt(Limit, Inside) :-
+    catch(call_with_inference_limit(
+        once(metta_with_evaluation_context(evaluation_context(inner, 2, descending),
+                                          context_spin(300))),
+        Limit, _), inference_limit_exceeded, true),
+    findall(Context, metta_evaluation_context(Context), Inside).
+
+context_spin(0) :- !.
+context_spin(N) :- Next is N - 1, context_spin(Next).
 
 ordered_fixture :-
     'add-atom'('&metta', [annotations, '&plunit_topk', ranked], _),

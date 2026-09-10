@@ -4869,6 +4869,15 @@ there is no `metta.measure` and no `metta.matching`.
 
 ## Contracts that cost real debugging
 
+The Python binding lives under `extensions/python/metta/_binding/`.
+Evaluation axes belong to `doors.EvaluationOptions`; each door's
+`Binding.evaluation` selects its fixed record. `metta_py_evaluate/4` is the
+shared entry. `interface.py` and `provides/<kind>.pl` own the service and
+supplied-clause declarations; `bindinggen.py` generates their projections.
+Run `sh check.sh binding` after changing a crossing. Every wire-tag row is
+held by codec and frame tests, and `door-order` fails on unresolved boundaries.
+Tagged query guards spend the same cumulative budget as their derivation.
+
 `match` evaluates its space and its body, never its pattern: patterns are
 structural, so compute first and match after with `let`.
 MeTTa equations ACCUMULATE. Redefining a function ADDS an alternative rather

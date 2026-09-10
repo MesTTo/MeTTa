@@ -7,7 +7,36 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Every workaround for a host defect names its ledger entry: a site carries
+  `Workaround: <key> - <what>` in its own comment syntax,
+  `docs/host-workarounds.md` holds one entry per defect with a tracked
+  reproduction, and the `host-workarounds` gate lane refuses a site without
+  an entry, an entry without a site, and an entry whose reproduction no
+  longer answers `present` on the running host, naming the sites to lift.
+  Three entries open the ledger: the cleanup-registration window an
+  inference limit can strike (`swi-cleanup-window`), the locale-derived
+  default encoding (`swi-locale-default-encoding`) and the extension-bearing
+  load spec that never reaches the artifact rule (`swi-qlf-extension-spec`).
+
 ### Changed
+
+- Python evaluation uses one native entry and a fixed options record derived
+  from each door's declaration. Default records cross by generated numeric
+  identifiers; one policy compiles both forms before evaluation, and the host
+  combines scoped options once. Operation dispatch uses one key for kind,
+  transport and direction, with execution context supplied independently.
+  Binding service declarations generate the callback facade and native
+  forwards; supplied engine clauses are grouped by seam kind and checked
+  against their load audience. Every catalog wire tag has an executable
+  Python/native witness, with the Node tables checked against the same rows.
+- Tagged matching shares one inference and time budget across derivation and
+  all guards. The first failed Janus text query resolves its required library
+  dependency at binding startup, removing the 229-inference variation caused
+  by an expired file-search cache under concurrent startup.
+- `door-order` now fails on mixed, open or recursive boundaries and keeps
+  their diagnostic evidence. It leaves unresolved orders unnumbered.
 
 - A Prolog source the engine loads at run time compiles beside itself on
   first use in a boot that governs artifacts and loads from the `.qlf` in
@@ -38,6 +67,32 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   class fails when instantiated.
 
 ### Fixed
+
+- The binding's numeric adapter tables declare their policy ownership for
+  the closed-set check. Held opener and resume maps derive from the shim's
+  admitted controlled return signatures. The callback and execution map
+  projections carry their generated-table declarations and drift checks.
+- An inference limit during automatic memo reconciliation no longer leaves
+  its worker permanently suppressing later decisions. Reconciliation trails
+  its active marker, so unwinding restores it even before a cleanup could be
+  registered. Recursive profiles and automatic occurrence caches keep their
+  behavior after the interruption.
+- The deferred-compilation quota proof releases its observer by clause
+  reference, preserving the engine and library call-graph listeners for
+  subsequent tests.
+- Destroying a native engine after a transaction changes a limit no longer
+  enters a listener on a discarded query frame. Mirror suspension follows
+  outer transaction completion, including nested rollback and independent
+  native engines sharing one Python thread.
+- A quota interruption restores the native evaluation context even if it
+  lands during scope setup or cleanup. Tagged algebra operations no longer
+  leave their carrier selected for later calls after exhausting a quota.
+- The Python binding declares its direct `aggregate_all/3`, `gensym/2` and
+  `limit/2` imports at boot. The Redis library declares `uuid/1` for its
+  process, listener and readiness identifiers. A census of all 277 Python
+  twins found these dependencies being resolved on first use. Optional
+  libraries still load at their owning import doors; file-cache maintenance
+  is a separate measurement-harness concern.
 
 - The engine's tokens, receipts and vocabulary-seed units import the list,
   ordered-set and pair predicates they call (`member/2`, `list_to_set/2`,
@@ -1864,6 +1919,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   always was, computed where it always was.
 
 ### Removed
+- The separate native evaluation entry family and Python operation-dispatch
+  function family. Their combinations are represented by the door options
+  record and dispatch key. Handwritten service forwards, duplicate remedy-act
+  readers and three independent wide-query threshold skeletons are replaced
+  by their shared declarations or parser. The empty binding `algebra.pl` unit
+  is removed after its sole supplied clause moves to `provides/ownership.pl`.
+
 - Independent door rosters and the shrink ledger's AST classifier. The
   ledger queries declared kinds and sugar points, and public class
   membership comes from the same rows as its generated projections.

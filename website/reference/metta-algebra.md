@@ -420,7 +420,7 @@ def evaluate(
     query: str | Atom,
     *,
     algebra: str | DeclaredAlgebra,
-    max_rounds: int = 64,
+    max_rounds: int = _MAX_ROUNDS,
     context: EvaluationContext | None = None,
     timeout: float | None = None,
     inferences: int | None = None,

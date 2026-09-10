@@ -1,6 +1,10 @@
 % Purpose: direct PlUnit coverage for memoization storage, eviction, and the
 %   per-space keying that keeps one space's cache out of another's answers.
 % Guarantees:
+%   - every inference budget through the first completed reconciliation leaves
+%     no active marker and permits the next reconciliation to publish its plan
+%     [tested: memo_reconciliation_interrupt:every_budget_restores_the_guard;
+%     commit=WORKTREE].
 %   - A changed callee invalidates transitive caller caches through supports/2
 %     while an unrelated cache survives [tested:
 %     memo_support_graph:a_leaf_change_invalidates_transitive_callers_only;
@@ -818,3 +822,44 @@ test(a_hit_only_thread_records_its_own_frequency) :-
     assertion(Seen >= 20).
 
 :- end_tests(memo_admission_sketch).
+
+:- begin_tests(memo_reconciliation_interrupt).
+
+clean_reconciliation_fixture :-
+    retractall(lib_memo:memo_automatic_dirty('$plunit_memo_interrupt')),
+    retractall(lib_memo:memo_automatic_decision(_, '$plunit_memo_interrupt', _, _)),
+    nb_delete('$metta_memo_reconciling').
+
+prepare_reconciliation :-
+    retractall(lib_memo:memo_automatic_decision(_, '$plunit_memo_interrupt', _, _)),
+    assertz(lib_memo:memo_automatic_decision(stale, '$plunit_memo_interrupt',
+                                           declined, stale)),
+    lib_memo:memo_automatic_mark_dirty('$plunit_memo_interrupt').
+
+sweep_reconciliation(Budget, Initial, Completed) :-
+    ( Initial == unset -> nb_delete('$metta_memo_reconciling')
+    ; nb_setval('$metta_memo_reconciling', false) ),
+    prepare_reconciliation,
+    call_with_inference_limit(lib_memo:memo_automatic_reconcile_dirty,
+                              Budget, Result),
+    assertion(\+ nb_current('$metta_memo_reconciling', true)),
+    % A clear marker alone is insufficient: the next drain must replace a
+    % stale decision with the empty module's actual plan.
+    prepare_reconciliation,
+    lib_memo:memo_automatic_reconcile_dirty,
+    assertion(\+ lib_memo:memo_automatic_dirty('$plunit_memo_interrupt')),
+    assertion(\+ lib_memo:memo_automatic_decision(_, '$plunit_memo_interrupt', _, _)),
+    ( Result == inference_limit_exceeded
+    -> Next is Budget + 1,
+       sweep_reconciliation(Next, Initial, Completed)
+    ; Completed = Budget ).
+
+test(every_budget_restores_the_guard,
+     [ forall(member(Initial, [unset, false])),
+       setup(clean_reconciliation_fixture),
+       cleanup(clean_reconciliation_fixture) ]) :-
+    sweep_reconciliation(1, Initial, Completed),
+    assertion(Completed > 1),
+    assertion(\+ nb_current('$metta_memo_reconciling', true)).
+
+:- end_tests(memo_reconciliation_interrupt).

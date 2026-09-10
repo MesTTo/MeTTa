@@ -25,6 +25,8 @@ Every citation is built from a TAG variable instead of being written out. A
 literal one in this file is a claim about THIS repository as far as the gate is
 concerned, and the fixtures are deliberately unbacked.
 Guarantees:
+  - Prolog tools accept a backed claim and report an absent test on its own line
+    [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
   - a shared build symlink preserves the selected TypeScript sources and
     still refuses a source the command does not select
     [tested: tests/checks/check_evidence_selftest.py; commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084]
@@ -641,6 +643,28 @@ def tracked_probe_complaints() -> list[str]:
     return complaints
 
 
+def prolog_tool_complaints() -> list[str]:
+    """A Prolog tool's claims are checked beside the Python tools' claims."""
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        build(root, PYTEST_ANCHOR)
+        relative = "extensions/python/tools/fixture.pl"
+        tool = root / relative
+        tool.parent.mkdir(parents=True, exist_ok=True)
+        tool.write_text(
+            "% Purpose: a fixture among the binding checker's native tools.\n"
+            "% Guarantees:\n"
+            f"%   - a collected test backs this [{TAG} {WHEN}: test_collected].\n"
+            f"%   - this names no test [{TAG} {WHEN}: no_such_binding_tool_test].\n"
+        )
+        reported = [line for line in run(root) if line.startswith(f"{relative}:")]
+        if len(reported) != 1 or not reported[0].startswith(f"{relative}:4:") or (
+            "no_such_binding_tool_test" not in reported[0]
+        ):
+            return [f"Prolog tools must report only their planted absent test: {reported!r}"]
+    return []
+
+
 def scratch_path_complaints() -> list[str]:
     """A tag may not offer a path under the repository's own scratch directory.
 
@@ -811,6 +835,7 @@ def main() -> int:
     complaints += seat_root_path_complaints()
     complaints += line_continuation_complaints()
     complaints += tracked_probe_complaints()
+    complaints += prolog_tool_complaints()
     complaints += scratch_path_complaints()
     complaints += commit_pin_complaints()
 
@@ -822,7 +847,7 @@ def main() -> int:
         f"pins, a symlinked output directory, a path cited from beside its own file, a path cited from its "
         f"seat root, a lane written across a line continuation, a fixture "
         f"under the scratch root beside one the tree tracks, and a tracked "
-        f"probe citing a test that is not there"
+        f"probe and a Prolog tool citing tests that are not there"
     )
     return 1 if complaints else 0
 
