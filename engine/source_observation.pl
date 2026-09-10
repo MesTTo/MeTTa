@@ -10,10 +10,10 @@
 %   source maps and execution buffers are thread-local.
 % Guarantees: compiler observation emits no runtime goals and changes no atom
 %   representation [tested: source_observation:compiled_goals_are_unchanged;
-%   commit=WORKTREE].
+%   commit=6f634f6705fc1e40e0c2e3970d4156ee574ab70d].
 % Guarantees: only the starting thread is observed; its collector setting
 %   survives completion, hook exceptions and cancellation [tested:
-%   source_observation; commit=WORKTREE].
+%   source_observation; commit=6f634f6705fc1e40e0c2e3970d4156ee574ab70d].
 % Guarantees: an engine that never runs observe-source loads none of this and
 %   pays nothing for it. Loading it at boot cost 3,696 inferences, and its
 %   resident prolog:prolog_exception_hook/5 clause cost another 119 on the

@@ -1,7 +1,7 @@
 % Purpose: verify opt-in source coverage and Error-frame observations.
 % Guarantees: source coordinates distinguish repeated expressions; generated
 %   closures disclose their origin and uncompiled functions disclose absent maps
-%   [tested: source_observation; commit=WORKTREE].
+%   [tested: source_observation; commit=6f634f6705fc1e40e0c2e3970d4156ee574ab70d].
 % Owns resources: probe wrappers, hook clauses, thread flags and queue-backed
 %   workers are released after each test, including exceptions.
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

@@ -2,7 +2,7 @@
 % Assumes: a plain SWI process; no repository engine or workaround is loaded.
 % Owns resources: the trace and frame-finished listener end with the probe.
 % Guarantees: a lost intermediate answers present; otherwise absent [tested:
-%   sh check.sh host-workarounds; commit=WORKTREE].
+%   sh check.sh host-workarounds; commit=6f634f6705fc1e40e0c2e3970d4156ee574ab70d].
 :- use_module(library(lists), [append/3]).
 
 user:prolog_trace_interception(Port, Frame, _, continue) :-

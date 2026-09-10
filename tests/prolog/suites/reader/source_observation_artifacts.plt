@@ -3,7 +3,7 @@
 %   closed and removed. This serial suite purges the checkout's governed QLFs.
 % Guarantees: the second shipping runner preserves the observed arithmetic
 %   while retaining the warmed engine and observer artifacts [tested:
-%   source_observation_artifacts; commit=WORKTREE].
+%   source_observation_artifacts; commit=6f634f6705fc1e40e0c2e3970d4156ee574ab70d].
 :- use_module(library(process)).
 :- use_module(library(readutil), [read_file_to_string/3]).
 
