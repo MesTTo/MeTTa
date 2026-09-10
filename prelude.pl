@@ -91,7 +91,12 @@
             'alpha-unique'/2,
             union/3,
             intersection/3,
-            subtraction/3
+            subtraction/3,
+            only/3,
+            except/3,
+            prefix/3,
+            rename/3,
+            qualified/2
           ]).
 
 % Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
@@ -99,17 +104,23 @@
 % [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L239; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 :- set_module(base(metta_engine)).
 
+% Head maps use the same operations as their one-line MeTTa equations.
+only(Names, Head, Head) :- 'is-member'(Head, Names, true).
+except(Names, Head, Head) :- 'is-member'(Head, Names, false).
+prefix(Prefix, Head, Name) :- atom_concat(Prefix, Head, Name).
+rename(Pairs, Head, Name) :-
+    ( member([Head, Renamed], Pairs) -> Name = Renamed ; Name = Head ).
+qualified(Library, Map) :-
+    atom_concat(Library, '.', Prefix), eval([prefix, Prefix], Map).
+
 %%%% Equality and reduction %%%%
 
-%(if-equal $a $b $then $else) compares by ALPHA-EQUIVALENCE, not ==: atoms
-%equal up to a consistent variable renaming, which is what upstream's own
-%if-equal does [source: hyperon-experimental lib/src/atom/mod.rs,
-%atoms_are_equivalent]. All four parameters carry the Atom mask, so the two
-%operands are compared as written and the selected branch leaves unevaluated;
-%the %Undefined% result is what evaluates it at the call site.
+% PeTTa's vendored lib_he equations compare by identity. The Atom masks keep
+% operands written and the selected branch is evaluated by the result path
+% [tested: prelude_spec:aligned_equations_are_the_vendored_arbiter;
+% commit=WORKTREE].
 'if-equal'(A, B, Then, Else, Out) :-
-    '=alpha'(A, B, Verdict),
-    (   Verdict == true
+    (   A == B
     ->  Out = Then
     ;   Out = Else
     ).
@@ -118,8 +129,7 @@
 %so the two cost the same; the delegation cost one extra frame per call and
 %this vocabulary is on the minimal-MeTTa instruction path.
 'if-equal2'(A, B, Then, Else, Out) :-
-    '=alpha'(A, B, Verdict),
-    (   Verdict == true
+    (   A == B
     ->  Out = Then
     ;   Out = Else
     ).
@@ -240,15 +250,9 @@ assertAlphaEqualToResultMsg(A, B, _Message, Out) :-
 throw(Reason, Out) :-
     'if-error'(Reason, Reason, ['Error', [throw, Reason], Reason], Out).
 
-%(return-on-error $atom $then) answers the frame marker `(return $atom)` when
-%$atom is an error, `(return Empty)` when it is Empty, and $then otherwise.
-%The two markers are what the spec's nested `(return (return ...))` leaves
-%once the enclosing function frame consumes one level.
+% The error is the answer, with no residual function-frame marker.
 'return-on-error'(Atom, Then, Out) :-
-    (   Atom == 'Empty'
-    ->  Out = [return, 'Empty']
-    ;   'if-error'(Atom, [return, Atom], Then, Out)
-    ).
+    'if-error'(Atom, Atom, Then, Out).
 
 %%%% Evaluation control %%%%
 
@@ -324,34 +328,16 @@ interpret(Atom, Type, Space, Out) :-
     ;   Out = false
     ).
 
-%match-types is UNIFICATION with wildcards, not equality: %Undefined% and
-%Atom on either side match anything, and otherwise the two types unify,
-%bindings and all. The soft cut is the `unify` instruction's own: every
-%binding set the match offers is one answer, and the else branch runs exactly
-%when none exists.
-%
-%The spec reaches this through a function frame and four nested if-equal
-%steps, 5,401.01 inferences a call against 156.01 here, and it is the fold
-%type-cast runs once per declared type [measured 2026-09-07:
-%`(match-types (List $x) (List Number) t e)`, 200 rounds through eval/2 with
-%the engine's own counter; commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
+% Type identity follows the vendored arbiter, including variables and Atom.
 'match-types'(Type1, Type2, Then, Else, Out) :-
-    (   (   Type1 == '%Undefined%'
-        ;   Type2 == '%Undefined%'
-        ;   Type1 == 'Atom'
-        ;   Type2 == 'Atom'
-        )
+    (   Type1 == Type2
     ->  Out = Then
-    ;   metta_match_atoms(Type1, Type2)
-    *-> Out = Then
     ;   Out = Else
     ).
 
-%Upstream's parameter order: the fold accumulator FIRST, then the candidate
-%type, then the wanted type.
+% An unmatched pair preserves any accumulator value, not just a Boolean.
 'match-type-or'(Folded, Next, Type, Out) :-
-    'match-types'(Next, Type, true, false, Matched),
-    or(Folded, Matched, Out).
+    'match-types'(Next, Type, true, Folded, Out).
 
 %Whether any declared type of the atom in the space unifies with the
 %requested one. The space argument keeps the call-site check its SpaceType

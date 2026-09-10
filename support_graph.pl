@@ -1,6 +1,10 @@
 % Purpose: record module-qualified support edges and propagate invalidation
 %   from changed inputs to the derived engine artifacts that depend on them.
 % Guarantees:
+%   - A reference face can defer dependent repairs until all its bindings and
+%     metadata are published [tested:
+%     references:one_face_publication_recompiles_a_shared_caller_once;
+%     commit=WORKTREE].
 %   - Replacing a derived node's support set removes its former incoming
 %     edges before publishing the new set [tested:
 %     support_graph:replacing_supports_detaches_the_old_source;
@@ -54,16 +58,17 @@
 %same qualified or not. What the metta_ prefixes on the handler seams were
 %doing, this one never did.
 %
-%Everything else is the graph's machinery: the dirty set, the stabilization
-%cutoff, the deferral flags and the walk. A caller that wants one says
-%support_graph: and means it, which is what tests/prolog/suites/translator/support_graph.plt now
-%does for support_replace/2 and support_stabilize/3
+%The stabilization and batch doors also serve reference publication. The dirty
+%set and traversal remain private machinery; graph tests qualify their direct
+%inspection with support_graph:
 %[tested: engine_layering:test_the_engine_layering_contract_holds_and_a_violation_is_named,
 %test_every_seam_is_reached_under_its_module].
 :- module(support_graph,
           [ supports/2,
             support_publish/3,
             support_publish_compiled_form/5,
+            support_stabilize/3,
+            with_support_repairs_deferred/1,
             support_memo_take_change/2,
             support_memo_sccs/2,
             support_record/2,

@@ -1539,6 +1539,9 @@ metta_host_space_capability_error(
 metta_host_space_capability_error(
         error(metta_foreign_tokens_required(Space, Operation), _),
         Space, Operation, tokens).
+metta_host_space_capability_error(
+        error(metta_foreign_token_mutation_required(Space, Operation, Capability), _),
+        Space, Operation, Capability).
 
 %&self's execution module exists from load, the way its storage module does,
 %so nothing has to create it on a first write and metta_self_module/1
@@ -1700,6 +1703,13 @@ compiled_predicate_arity(F, Module, Predicate, Arity, Owner) :-
 % space that never declares an alias paying nothing for the feature. All
 % installed references share alias lifetime.
 :- dynamic metta_add_atom/4, atoms_store_only/3.
+:- dynamic metta_prepare_function_predicate/3, announce_function_changed/2.
+:- dynamic announce_equation_arrival/2, metta_add_program_atoms/4.
+:- dynamic store_data_atoms/3, metta_remove_atom/3.
+:- dynamic metta_reference_mutation_ref/2.
+:- dynamic defer_metta_function/5, metta_reference_defer_ref/2.
+:- dynamic store_atom/3, unstore_atom/3, remove_equation/6.
+:- dynamic add_function_atom/7.
 metta_add_atom(Space, Term, Result) :- metta_add_atom(Space, Term, _, Result).
 :- dynamic announce_declaration_changed/3, type_marker_changed/2.
 :- dynamic type_alias_mutation_scope_ref/2.
@@ -1743,6 +1753,129 @@ set_type_alias_mutation_scope(Scope, enabled) :-
 set_type_alias_mutation_scope(Scope, disabled) :-
     forall(retract(type_alias_mutation_scope_ref(Scope, Ref)), erase(Ref)).
 
+% Install only in participating spaces. Copy standing bodies in their original
+% order, as alias observers do, so write policy retains one implementation.
+% A successful semidet mutation commits before its observer: collecting its
+% answers must not fall through and execute the original clause a second time.
+% [tested: references:enumerating_a_write_answer_mutates_exactly_one_occurrence;
+% commit=WORKTREE].
+metta_reference_mutation_scope(Space, enabled) :-
+    space_module(Space, Module),
+    findall((Head :- Before, Scoped, !, After),
+            ( metta_reference_observer(Space, Module, Head, Before, After),
+              clause(Head, Body, Original),
+              \+ metta_reference_mutation_ref(_, Original),
+              metta_reference_storage_body(Space, Head, Body, Scoped) ), Clauses),
+    reverse(Clauses, Reversed),
+    forall(member(Clause, Reversed),
+           ( asserta(Clause, Ref),
+             assertz(metta_reference_mutation_ref(Space, Ref)) )),
+    asserta((atoms_store_only(Space, _, _) :- !, fail), Batch),
+    assertz(metta_reference_mutation_ref(Space, Batch)),
+    asserta((store_data_atoms(Atoms, Space, Tokens) :- !,
+                maplist(metta_add_program_atom(Space), Atoms, Tokens)), Data),
+    assertz(metta_reference_mutation_ref(Space, Data)),
+    asserta((metta_add_program_atoms(Space, Atoms, Tokens, Names) :- !,
+                maplist(metta_add_program_atom(Space), Atoms, Tokens),
+                findall(F, (member([=, [F|_], _], Atoms), atom(F)), Found),
+                sort(Found, Names)), Program),
+    assertz(metta_reference_mutation_ref(Space, Program)).
+metta_reference_mutation_scope(Space, disabled) :-
+    forall(retract(metta_reference_mutation_ref(Space, Ref)), erase(Ref)).
+
+% Only a participating foreign receiver changes storage doors. Copying the
+% standing semantic bodies keeps type invalidation, hooks and equation cleanup
+% in the same funnel; ordinary imports do not execute this transformation.
+metta_reference_storage_body(Space, Head, Body, Scoped) :-
+    seam:foreign_space(Space), foreign_provides(Space, 'add-token'),
+    foreign_provides(Space, 'remove-token'), !,
+    ( Head = metta_add_atom(_, _, Token, _) -> true
+    ; Head = store_atom(_, _, Token) -> true
+    ; Head = add_function_atom(_, _, _, _, _, _, Token) -> true
+    ; Token = unused ),
+    metta_reference_token_body(Space, Token, Body, Scoped).
+metta_reference_storage_body(_, _, Body, Body).
+
+metta_reference_token_body(_, _, Body, Body) :- var(Body), !.
+metta_reference_token_body(Space, Token,
+                           foreign_write(Space, add, seam:foreign_add(Space, Atom)),
+                           metta_store_occurrence(Space, Atom, Token, _)) :- !.
+metta_reference_token_body(Space, _,
+                           foreign_write(Space, remove, seam:foreign_remove(Space, Atom, Removed)),
+                           spaces:metta_remove_provider_occurrence(Space, Atom, Removed)) :- !.
+metta_reference_token_body(Space, _,
+                           remove_equation_source(Space, Term, Source, ordinary, Removed),
+                           spaces:metta_reference_remove_equation_source(Space, Term, Source, Removed)) :- !.
+metta_reference_token_body(_, Token,
+                           compile_metta_equation(Module, Source, Stored, Clause, Ref),
+                           (compile_metta_equation(Module, Source, Stored, Clause, Ref),
+                            Source = [=,[Name|_],_],
+                            filereader:record_equation_token(Ref, Name, Token))) :- !.
+metta_reference_token_body(Space, Token, Body, Scoped) :-
+    compound(Body), !, compound_name_arguments(Body, Name, Args),
+    maplist(metta_reference_token_body(Space, Token), Args, Changed),
+    compound_name_arguments(Scoped, Name, Changed).
+metta_reference_token_body(_, _, Body, Body).
+
+% The token binds both halves of an equation. Reuse the native removal funnel
+% with that clause identity, so two equal equations retain distinct owners.
+metta_reference_remove_equation_source(Space, Term, Source, Removed) :-
+    metta_reference_removal_selection(Space, Prior, Token),
+    ( once(metta_space_pair(Space, Term, Token, _))
+    -> space_module(Space, Module),
+       ( filereader:'$metta_equation_token'(Module, _, Ref, Token),
+         translated_from(Ref, Bound)
+       -> Probe = Bound, Origin = bound(Ref)
+       ; Probe = Source, Origin = ordinary ),
+       setup_call_cleanup(
+           nb_setval('$metta_foreign_removal_token', Space-Token),
+           remove_equation_source(Space, Term, Probe, Origin, Removed),
+           metta_restore_removal_token(Prior))
+    ; Removed = false ).
+
+% Without an explicit selection, leave the token free for the occurrence read.
+metta_reference_removal_selection(Space, some(Space-Token), Token) :-
+    nb_current('$metta_foreign_removal_token', Space-Token), !.
+metta_reference_removal_selection(_, none, _).
+
+% A lazy home uses the existing deferral publication body even when its name
+% shadows an inherited predicate. Keep the original count and load journal.
+metta_reference_lazy_equations(Space, enabled) :-
+    space_module(Space, Module),
+    findall((defer_metta_function(Space, Module, Name, Arity, Count) :- Body),
+            ( clause(defer_metta_function(Space, Module, Name, Arity, Count),
+                     Body, Ref),
+              \+ metta_reference_defer_ref(_, Ref) ), Bodies),
+    last(Bodies, (Head :- Body)),
+    asserta((Head :- !, Body),
+            Installed),
+    assertz(metta_reference_defer_ref(Space, Installed)).
+metta_reference_lazy_equations(Space, disabled) :-
+    forall(retract(metta_reference_defer_ref(Space, Ref)), erase(Ref)).
+
+metta_reference_observer(Space, _, metta_add_atom(Space, _, _, _), true,
+                         metta_reference_changed(Space)).
+metta_reference_observer(Space, _, metta_remove_atom(Space, _, _), true,
+                         metta_reference_changed(Space)).
+metta_reference_observer(Space, _, store_atom(Space, _, _), true, true) :-
+    seam:foreign_space(Space).
+metta_reference_observer(Space, _, unstore_atom(Space, _, _), true, true) :-
+    seam:foreign_space(Space).
+metta_reference_observer(Space, _, remove_equation(Space, _, _, _, _, _), true, true) :-
+    seam:foreign_space(Space).
+metta_reference_observer(Space, _, add_function_atom(_, Space, _, _, _, _, _), true, true) :-
+    seam:foreign_space(Space).
+metta_reference_observer(Space, Module, announce_equation_arrival(Module, _), !,
+                         metta_reference_definition_changed(Space)).
+metta_reference_observer(Space, Module, announce_function_changed(Module, _), !,
+                         metta_reference_definition_changed(Space)).
+metta_reference_observer(_, Module,
+                         metta_prepare_function_predicate(Module, Name, Arity),
+                         (!, metta_reference_prepare(Module, Name, Arity)), true).
+
+metta_add_atom(Space, Term, Token, true) :-
+    nonvar(Term), Term = [Head|_], (Head == from ; Head == internal), !,
+    metta_reference_declare(Space, Term, Token).
 metta_add_atom(Space, Term, Token, true) :- Term = [=, [FAtom|W], _], !,
                                      must_be(atom, FAtom),
                                      add_equation(Space, Term, FAtom, W, Token).
@@ -1921,6 +2054,8 @@ atoms_store_only(Space, Terms) :- atoms_store_only(Space, Terms, []).
 
 atoms_store_only(_, [], _).
 atoms_store_only(_, [[=|_]|_], _) :- !, fail.
+atoms_store_only(_, [[from|_]|_], _) :- !, fail.
+atoms_store_only(_, [[internal|_]|_], _) :- !, fail.
 atoms_store_only(_, [[':', _, Type]|_], _) :-
     nonvar(Type), Type = [Alias|_], Alias == 'Alias', !, fail.
 atoms_store_only(_, [[':', _, 'DontEvalType']|_], _) :- !, fail.
