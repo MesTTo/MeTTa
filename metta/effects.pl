@@ -16,9 +16,11 @@
 % or finite carrier, including the unit shortcut [tested:
 % run_tests(algebra_types); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 % Guarantees:
+%   - context push/pop survive inference interrupts [tested:
+%     evaluation_context:context_scopes_restore_after_every_inference_interrupt; commit=WORKTREE].
 %   - one dynamic evaluation context carries algebra, limit, and ordering
 %     through nested operations and restores on every exit
-%     [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
+%     [tested: run_tests(evaluation_context); commit=WORKTREE].
 %   - every definition retains engine/metta.pl's implementation module and
 %     original load order [tested: tests/prolog/suites/evaluation/metta.plt,
 %     tests/prolog/static_checks.pl; commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
@@ -2140,17 +2142,24 @@ metta_with_evaluation_context(Context, Goal) :-
         Goal,
         metta_evaluation_context_pop(Previous)).
 
+% Workaround: swi-cleanup-window - trail the context push and let cleanup propagate inference-limit exceptions.
 metta_evaluation_context_push(Context, Previous) :-
     (   nb_current('$metta_evaluation_contexts', Old)
     ->  Previous = some(Old)
     ;   Old = [], Previous = none
     ),
-    nb_setval('$metta_evaluation_contexts', [Context|Old]).
+    % A limit can interrupt setup_call_cleanup before registration or during
+    % cleanup. Trail the scope, as metta_open_fuel_scope/0 does, so exception
+    % unwinding restores it independently. Keep nb_setval's input snapshot.
+    % SWI 10.1.13: boot/init.pl:setup_call_cleanup/3 and src/pl-gvar.c:setval
+    % at fc7ef84b949378b729052c3ade79c90ce5416abb.
+    duplicate_term(Context, Snapshot),
+    b_setval('$metta_evaluation_contexts', [Snapshot|Old]).
 
 metta_evaluation_context_pop(some(Previous)) :- !,
     nb_setval('$metta_evaluation_contexts', Previous).
 metta_evaluation_context_pop(none) :-
-    catch(nb_delete('$metta_evaluation_contexts'), _, true).
+    nb_delete('$metta_evaluation_contexts').
 
 metta_evaluation_context(Context) :-
     nb_current('$metta_evaluation_contexts', [Context|_]).
