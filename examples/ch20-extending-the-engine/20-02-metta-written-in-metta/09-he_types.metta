@@ -1,5 +1,5 @@
 ; Purpose: observe exact type comparison and the resulting cast refusals.
-; [tested: sh test.sh examples/ch20-extending-the-engine/20-02-metta-written-in-metta/09-he_types.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch20-extending-the-engine/20-02-metta-written-in-metta/09-he_types.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 ; lib_he shadows the prelude locally with upstream's equations. Its
 ; match-types uses exact equality; type-cast remains an engine prelude head.
 !(import! &self (library lib_he))

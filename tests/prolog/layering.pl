@@ -50,7 +50,7 @@
 %   Error through a sink the observation buffer carries, so source_observation
 %   remains a leaf consumer. Common origin properties consume source_positions,
 %   which rejoins the declared tangle
-%   [tested: engine_layering, scc_components; commit=WORKTREE].
+%   [tested: engine_layering, scc_components; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Assumes: engine/metta.pl no longer loads the observer at boot, so
 %   measure_layer_edges/0 asks for it through metta_ensure_source_observation/0
 %   before the walk; the walk reads the database and would otherwise report

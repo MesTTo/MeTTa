@@ -2,7 +2,7 @@
 % Guarantees: missing exact mutation refuses before a row is written; a source
 %   needs only tokens, and an owner of both mutation doors can receive live
 %   links and withdraw only their metadata [tested: reference_providers;
-%   commit=WORKTREE].
+%   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Owns resources: fixtures release their modules and native backing stores.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

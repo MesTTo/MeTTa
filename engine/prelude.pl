@@ -118,7 +118,7 @@ qualified(Library, Map) :-
 % PeTTa's vendored lib_he equations compare by identity. The Atom masks keep
 % operands written and the selected branch is evaluated by the result path
 % [tested: prelude_spec:aligned_equations_are_the_vendored_arbiter;
-% commit=WORKTREE].
+% commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 'if-equal'(A, B, Then, Else, Out) :-
     (   A == B
     ->  Out = Then

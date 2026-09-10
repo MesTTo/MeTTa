@@ -2,7 +2,7 @@
 % Owns resources: fixtures release receivers and library homes, join callers,
 %   remove loader instrumentation and delete their temporary source files.
 % Guarantees: background coordination uses queues, never sleeps or deadlines
-%   [tested: reference_loading; commit=WORKTREE].
+%   [tested: reference_loading; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

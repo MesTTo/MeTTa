@@ -1,5 +1,5 @@
 ; Purpose: show lib_reflect's surface queries and defining occurrence origins.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/14-reflect_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/14-reflect_lib.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 ;lib_reflect: the engine's own surface as data you can match. A tool that
 ;keeps its own list of what the engine knows drifts; a list the engine
 ;answers cannot.

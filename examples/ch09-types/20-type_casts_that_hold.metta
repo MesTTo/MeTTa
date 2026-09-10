@@ -1,6 +1,6 @@
 ; Purpose: ask whether an atom has exactly the requested type in a space.
 ; Guarantees: unknown types match only themselves
-; [tested: examples/ch09-types/20-type_casts_that_hold.metta; commit=WORKTREE].
+; [tested: examples/ch09-types/20-type_casts_that_hold.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 ;`type-cast-holds` is the question `type-cast` asks before it decides: is
 ;any declared type of this atom, in this space, identical to the one asked

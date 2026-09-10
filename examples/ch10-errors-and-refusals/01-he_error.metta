@@ -1,5 +1,5 @@
 ; Purpose: observe lib_he error values alongside the engine's arithmetic refusals.
-; [tested: sh test.sh examples/ch10-errors-and-refusals/01-he_error.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch10-errors-and-refusals/01-he_error.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 !(import! &self (library lib_he))
 
 !(test (let $result (catch (+ 40 2))

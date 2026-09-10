@@ -6,7 +6,7 @@
 % Guarantees:
 %   - metta_apply_algebra_operation/5 exposes the native carrier operation
 %     semantics to host bindings [tested:
-%     test_visibility_operations_share_the_native_carrier; commit=WORKTREE].
+%     test_visibility_operations_share_the_native_carrier; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 %   - evaluation context and ordered-match demand are published engine
 %     services [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 %   - metta_import_record/2 and metta_unimport/2 expose one source lifecycle
@@ -626,7 +626,7 @@ kind(foreign_token/3, ownership).
 % Optional exact mutation. add-token stores one Atom and returns its fresh
 % portable token. remove-token consumes only Token and returns true iff it
 % existed. Both follow the provider's existing transaction and hook contract.
-% [tested: reference_providers; commit=WORKTREE]
+% [tested: reference_providers; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
 :- multifile foreign_add_token/3, foreign_remove_token/3.
 kind(foreign_add_token/3, ownership).
 kind(foreign_remove_token/3, ownership).

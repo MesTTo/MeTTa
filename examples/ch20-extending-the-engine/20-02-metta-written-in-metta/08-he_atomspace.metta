@@ -1,5 +1,5 @@
 ; Purpose: observe upstream lib_he's equation storage and space queries.
-; [tested: sh test.sh examples/ch20-extending-the-engine/20-02-metta-written-in-metta/08-he_atomspace.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch20-extending-the-engine/20-02-metta-written-in-metta/08-he_atomspace.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 !(import! &self (library lib_he))
 
 !(add-atom &self (= (addnormal) (+ 1 3)))

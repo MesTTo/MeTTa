@@ -1,6 +1,6 @@
 ; Purpose: trace values and propagate errors as ordinary answers.
 ; Guarantees: return-on-error preserves a produced error's shape
-; [tested: examples/ch10-errors-and-refusals/02-throwing_and_tracing.metta; commit=WORKTREE].
+; [tested: examples/ch10-errors-and-refusals/02-throwing_and_tracing.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 ;`throw` is the half of the error story a program writes for itself, and
 ;`trace!` is the one that prints without changing what the program answers.

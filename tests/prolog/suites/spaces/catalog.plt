@@ -32,7 +32,7 @@
      - algebra-law vocabulary members and aliases derive from engine facts,
        and every shipped algebra row appears in the semiring vocabulary
        [tested: algebra_law_vocabulary_and_alias_claims_are_exact,
-       shipped_algebra_rows_are_the_semiring_vocabulary; commit=WORKTREE]
+       shipped_algebra_rows_are_the_semiring_vocabulary; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
      - the catalog's watch point announces a watched head's adds and removals,
        stays silent for every other head, stops when unwatched, reaches every
        watched head for a removal whose head is unbound, and leaves the row it

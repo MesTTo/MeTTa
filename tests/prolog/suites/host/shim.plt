@@ -22,7 +22,7 @@
 %   - the message hook always fails and leaves its reentrancy flag down,
 %     whatever delivery did. Source occurrence selection is now tested at
 %     the engine-owned head_properties surface
-%     [tested: shim_observation_doors, head_properties; commit=WORKTREE].
+%     [tested: shim_observation_doors, head_properties; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 %   - the inference rule is decided here rather than by a live engine: the
 %     narrowest kind per position, a variable contributing none, an equation
 %     body's result, and a declared head skipped

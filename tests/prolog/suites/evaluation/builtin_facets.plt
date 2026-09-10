@@ -10,7 +10,7 @@
 %   nothing describes, whether or not the build calls that predicate built_in,
 %   and the ten the pass removes are named
 %   [tested: builtin_facets:the_retraction_set_is_the_same_ten_on_every_build;
-%   commit=WORKTREE].
+%   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

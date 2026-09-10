@@ -2,21 +2,21 @@
 % dispatch each parsed form to the evaluator.
 % Guarded by: import_when/4 claims one source; runnable forms run outside the
 %   loader mutex. working_dir/1 belongs to its thread
-%   [tested: loader_singleflight; commit=WORKTREE].
+%   [tested: loader_singleflight; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Owns resources: '$metta_equation_token'/4 rows link live compiled clauses to
 %   their stored occurrence; forget_translated_equation_binding/1 retires them
 %   [tested: spaces_tokens:equation_tokens_survive_recompilation_and_exact_subtraction;
 %   commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 %   metta_reference_source_reader/2 installs a home-scoped admission observer;
 %   metta_reference_admission_scope/3 removes it on success, failure, cancellation
-%   or home release [tested: reference_loading; commit=WORKTREE].
+%   or home release [tested: reference_loading; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Guarantees:
 %   - file and string source doors return their complete answer groups once;
 %     removing their loader mutex retains with_mutex/2's once/1 behavior
-%     [tested: structural_aliases; commit=WORKTREE].
+%     [tested: structural_aliases; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 %   - record_equation_token/3 accepts provider identities after compilation;
 %     exact removal preserves equal equations and their separate clauses
-%     [tested: reference_providers; commit=WORKTREE].
+%     [tested: reference_providers; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 %   - resolved reader equations retain their stored clause reference through
 %     deferred reconstruction, recompilation and fast-cache relocation
 %     [tested: test_forcing_a_deferred_equation_keeps_a_resolved_sibling_once,
@@ -1556,7 +1556,7 @@ record_translated_from(Ref, Term, SourceRef) :-
 % Keep the native record_translated_from/4 body in place: its per-equation
 % inference cost is part of import!'s existing contract.
 % [tested: reference_providers:exact_equation_removal_keeps_the_other_equal_occurrence_and_clause;
-% commit=WORKTREE].
+% commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 record_equation_token(Ref, Name, Token) :-
     clause_property(Ref, module(Module)),
     assertz('$metta_equation_token'(Module, Name, Ref, Token), TokenRef),

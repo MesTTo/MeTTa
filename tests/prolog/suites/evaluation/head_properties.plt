@@ -1,7 +1,7 @@
 % Purpose: check common claims, defining origins and reflection without demand.
 % Owns resources: each fixture releases its receiver and home and deletes its source.
 % Guarantees: source changes cannot leave a fabricated origin line
-%   [tested: head_properties; commit=WORKTREE].
+%   [tested: head_properties; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

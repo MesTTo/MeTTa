@@ -1,5 +1,5 @@
 ; Purpose: demonstrate head maps and the receiving space's default map.
-; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/12-reference_maps.metta; commit=WORKTREE].
+; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/12-reference_maps.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 ; only selects named public heads; except selects the remaining public heads.
 (from ../examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/references/maps (only (map-value)))

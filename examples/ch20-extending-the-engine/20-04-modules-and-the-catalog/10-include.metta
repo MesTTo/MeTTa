@@ -1,5 +1,5 @@
 ; Purpose: compare include's last directive with import!'s Boolean result.
-; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/10-include.metta; commit=WORKTREE].
+; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/10-include.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 ;
 ; `import!` merges a module into its named receiving space and answers True.
 ; `include` pastes its forms in order into the current space and answers what

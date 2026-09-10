@@ -5,7 +5,7 @@
 # Guarantees: the single-registration control completes before replacement
 #   is tested; a contained deadlock answers present, a joined worker absent
 #   [tested: sh check.sh host-workarounds host-workarounds-selftest;
-#   commit=WORKTREE].
+#   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 # Owns resources: the private child processes hold their own event handlers;
 #   bounded.sh links children to their owner; its selected timeout contains
 #   the known deadlocking replacement process and its worker.

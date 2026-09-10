@@ -1,6 +1,6 @@
 ; Purpose: exercise strategy application, traversal and exact type selection.
 ; Guarantees: a subject with no matching type declines the typed strategy
-; [tested: examples/ch20-extending-the-engine/20-02-metta-written-in-metta/13-strategy_internals.metta; commit=WORKTREE].
+; [tested: examples/ch20-extending-the-engine/20-02-metta-written-in-metta/13-strategy_internals.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 ;lib_strategy from the inside. The file before this one uses the combinators;
 ;these are the seven operations they are written over, and they are ordinary

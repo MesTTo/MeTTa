@@ -13,7 +13,7 @@ Guarantees:
     [tested: tests/checks/check_cumulative_syntax_selftest.py]
   - stored reference and visibility rows are scanned without loading their
     source [tested: tests/checks/check_cumulative_syntax_selftest.py;
-    commit=WORKTREE]
+    commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
 Owns resources: the parser witness removes its temporary directory on exit.
 """
 

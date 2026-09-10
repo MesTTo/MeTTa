@@ -3,18 +3,18 @@
 %   foreign receivers declare tokens, add-token and remove-token.
 % Guarantees: reference paths identify defining predicates, while their clauses
 %   retain their original multiplicity and execution module
-%   [tested: references; commit=WORKTREE].
+%   [tested: references; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 %   Suspended reference queries can be destroyed: transaction discovery leaves
 %   their outer query frame unwatched [tested:
 %   reference_loading:a_suspended_background_qualified_query_survives_release;
-%   commit=WORKTREE].
+%   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Owns resources: observed spaces own mutation observers, projected metadata and
 %   native bindings; space release withdraws all three. Transaction completion
 %   reconciles native bindings with the rows surviving commit or rollback.
 %   A completion callback excludes its finishing frame only until its cleanup;
 %   inner rollback retains one outer watch and outer completion retires it
 %   [tested: references:inner_failure_transfers_one_watch_and_outer_completion_retires_it;
-%   commit=WORKTREE].
+%   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Guarded by: with_typing_policy_stable/1 serializes binding publication. Maps
 %   run before publication, outside the typing and support-graph mutexes.
 % Decides: INTERNAL is visibility's zero and PUBLIC its one. A visited-space
@@ -233,7 +233,7 @@ metta_reference_refresh_now :-
     % projection is installed. This is the same observer boundary as
     % https://github.com/solidjs/solid/releases/tag/v1.5.0
     % [tested: references:one_face_publication_recompiles_a_shared_caller_once;
-    % commit=WORKTREE].
+    % commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
     with_typing_policy_stable(support_graph:with_support_repairs_deferred(
         ( flag('$metta_reference_epoch', Current, Current),
           ( Current =:= Version
@@ -252,7 +252,7 @@ metta_reference_refresh_now :-
 % through its imports. prolog_wrap retains the static definition and its guard:
 % https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/prolog_wrap.pl
 % [tested: reference_loading:demand_keeps_the_compiler_goal_static_and_retires;
-% commit=WORKTREE].
+% commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 metta_reference_publish_demand(Faces) :-
     findall(Name,
             ( member(Space-_-Face, Faces), member(Name/_-root(Home, Original, _), Face),
@@ -525,7 +525,7 @@ metta_reference_track_frames(Frame) :-
 % its list mutex locked at this revision:
 % https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-event.c#L145-L160
 % [tested: reference_loading:concurrent_transactions_keep_each_others_rollback_listener;
-% commit=WORKTREE].
+% commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 metta_reference_frame_finished(Owner, Frame) :-
     thread_self(Thread),
     ( Owner == Thread -> metta_reference_finish_frame(Owner, Frame) ; true ).

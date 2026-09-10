@@ -3,7 +3,7 @@
 %   compiler observer, queues, pending reservations and temporary space.
 % Guarantees: a miss compiles once outside the publication mutex; a concurrent
 %   source change or cache clear prevents stale publication
-%   [tested: translation_cache; commit=WORKTREE].
+%   [tested: translation_cache; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

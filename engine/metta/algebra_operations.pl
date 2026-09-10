@@ -2,7 +2,7 @@
 % Assumes: metta_engine loads this unit before spaces seeds finite algebras.
 % Guarantees: visibility operations accept only INTERNAL and PUBLIC; numeric
 %   operations keep their native arithmetic calls
-%   [tested: references:visibility_is_a_checked_two_element_lattice; commit=WORKTREE].
+%   [tested: references:visibility_is_a_checked_two_element_lattice; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Decides: a custom operation runs under the requested algebra after boot.
 
 metta_apply_algebra_operation(visibility, min, A, B, R) :-

@@ -1,7 +1,7 @@
 % Purpose: exercise reference meaning, multiplicity, visibility and withdrawal.
 % Owns resources: each test releases its fresh native spaces in reverse order.
 % Guarantees: comparisons inspect answer bags, stored occurrence identities and
-%   SWI's actual import property [tested: references; commit=WORKTREE].
+%   SWI's actual import property [tested: references; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

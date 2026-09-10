@@ -41,7 +41,7 @@ Guarantees:
     METTA_EVIDENCE_MUTATION patches the COPIED checker and nothing else
     [tested 2026-09-07: evidence-mutations; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
   - tracked probes and nested example fixtures reject a nonexistent test
-    [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_evidence_selftest.py; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
 Fails when:
   - run against a tree it did not write. It asserts exact line numbers in a
     fixture it generates, and nothing else.

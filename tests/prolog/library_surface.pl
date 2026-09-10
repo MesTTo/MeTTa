@@ -15,7 +15,7 @@
 %       name; a missing case refuses and planted changed meanings are detected
 %       [tested: planted_library_meaning_change_is_named,
 %       planted_library_shadow_is_named, library_lazy_import_differential;
-%       commit=WORKTREE]
+%       commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
 % Owns resources: each meaning arm releases its scratch space and restores
 %     prelude translator registrations, including on failure.
 % Fails when:

@@ -4,7 +4,7 @@
 %   receipts; background and lazy admission names every effectful runnable.
 %   Reference maps may enumerate read-only results; initializers must be
 %   pureStructural
-%   [tested: reference_loading; commit=WORKTREE].
+%   [tested: reference_loading; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Owns resources: a home owns its spawn future and loading wrappers until the
 %   load settles or the home is released. Scoped lazy observers leave at exit.
 % Guarded by: metta_source_singleflight/2 owns each canonical source; short

@@ -117,7 +117,7 @@ Guarantees:
     [tested: test_nested_package_evidence_rejects_a_missing_test; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]
   - nested example fixtures carry checked claims and resolvable comment pins
     [tested: tests/checks/check_evidence_selftest.py,
-    tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
+    tests/checks/check_pin_provenance_selftest.py; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs

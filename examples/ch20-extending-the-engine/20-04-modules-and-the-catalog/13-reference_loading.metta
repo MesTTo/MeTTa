@@ -1,5 +1,5 @@
 ; Purpose: demonstrate lazy/background policies and effect admission.
-; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/13-reference_loading.metta; commit=WORKTREE].
+; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/13-reference_loading.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 ; Lazy publishes the manifest and compiles an equation when first called.
 !(pragma! load lazy)

@@ -1,7 +1,7 @@
 % Purpose: verify source ownership, re-entry, wakeup and independent progress.
 % Owns resources: each fixture joins its workers and destroys its queues.
 % Guarantees: the tests coordinate through messages, with no timing assumption
-%   [tested: loader_singleflight; commit=WORKTREE].
+%   [tested: loader_singleflight; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

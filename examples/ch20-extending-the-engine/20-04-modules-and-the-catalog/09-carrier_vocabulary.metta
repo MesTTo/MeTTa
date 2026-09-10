@@ -1,6 +1,6 @@
 ; Purpose: relate the open carrier vocabulary to its algebra declarations.
 ; Guarantees: a sequence variable reads every carrier in catalog order
-; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/09-carrier_vocabulary.metta; commit=WORKTREE].
+; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/09-carrier_vocabulary.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 ;; A vocabulary row and the rows that USE its values are two halves of one
 ;; statement, and they have to agree. The previous file showed the SHAPE of

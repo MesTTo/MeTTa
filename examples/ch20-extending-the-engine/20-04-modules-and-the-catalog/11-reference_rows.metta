@@ -1,6 +1,6 @@
 ; Purpose: demonstrate live references, defining homes and occurrence visibility.
 ; Guarantees: each claim runs through the stored row's public behavior
-; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/11-reference_rows.metta; commit=WORKTREE].
+; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/11-reference_rows.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 ; A reference exposes definitions and their metadata. The body still calls
 ; its own helper, and the source's data stays in its home.

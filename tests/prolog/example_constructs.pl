@@ -13,7 +13,7 @@
 %     metta_special_form_head/1, plus runnable `!` and stored `from`/`internal`
 %     rows; a program's own function names are not constructs and are not
 %     printed [tested: tests/checks/check_cumulative_syntax_selftest.py;
-%     commit=WORKTREE]
+%     commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
 %   - --vocabulary prints `?VOCABULARY<TAB>NAME` for every such name, so the
 %     lane can refuse a table row naming something the language does not have
 %   - a file that cannot be parsed prints `FILE<TAB>?PARSE-ERROR` rather than

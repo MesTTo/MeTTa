@@ -4,7 +4,7 @@
 %   - A reference face can defer dependent repairs until all its bindings and
 %     metadata are published [tested:
 %     references:one_face_publication_recompiles_a_shared_caller_once;
-%     commit=WORKTREE].
+%     commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 %   - Replacing a derived node's support set removes its former incoming
 %     edges before publishing the new set [tested:
 %     support_graph:replacing_supports_detaches_the_old_source;

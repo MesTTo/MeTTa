@@ -793,7 +793,7 @@ metta_retire_space_catalog(Space) :-
 % matching occurrences by their native generation, independently of SWI's
 % predicate-table enumeration [tested:
 % catalog_self_description:partial_catalog_queries_follow_occurrence_order;
-% commit=WORKTREE].
+% commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 metta_catalog_row(Row) :-
     metta_catalog_clause(Row, _).
 

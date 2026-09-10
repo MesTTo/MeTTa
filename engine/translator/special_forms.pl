@@ -32,7 +32,7 @@
 % Guarantees: a generated lambda retains its exact clause's source, so effect
 %   admission reads its body before generated result-boundary code
 %   [tested: reference_loading:non_eager_admission_reads_an_already_evaluated_default_map;
-%   commit=WORKTREE].
+%   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 %%% An evaluated operand that produced an Error finishes the call %%%
 %

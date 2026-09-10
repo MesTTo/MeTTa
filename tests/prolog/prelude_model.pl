@@ -3,7 +3,7 @@
 % Assumes: the caller boots engine/metta.pl and runs from tests/prolog.
 % Guarantees: answer comparison preserves multiplicity and ignores variable
 %   renaming; output and raised balls remain observable
-%   [tested: prelude_spec_selftest; commit=WORKTREE].
+%   [tested: prelude_spec_selftest; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Owns resources: each observation erases its assertion-message capture flag.
 % Guarded by: the capture flag and message hook are local to the calling thread.
 

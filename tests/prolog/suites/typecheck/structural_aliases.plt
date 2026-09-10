@@ -10,7 +10,7 @@
 %   commit=60d6ca9089f50521bba869c3b7a87c92fd6a990f].
 % Guarantees: an alias expands before the prelude's exact type match; an
 %   untyped symbol does not acquire Atom from the requested cast target
-%   [tested: cast_targets_expand_in_the_requested_scope; commit=WORKTREE].
+%   [tested: cast_targets_expand_in_the_requested_scope; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Owns resources: setup/cleanup releases each space and deletes each source file.
 %   The shared-scope case declares an alias in the process-wide &self and
 %   withdraws it in its body and again in its cleanup.

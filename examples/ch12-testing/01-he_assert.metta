@@ -1,5 +1,5 @@
 ; Purpose: compare imported assertions per answer and retained prelude bag heads.
-; [tested: sh test.sh examples/ch12-testing/01-he_assert.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch12-testing/01-he_assert.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 !(import! &self (library lib_he))
 
 !(test (assertEqual (+ 1 2) (- 6 3)) True)

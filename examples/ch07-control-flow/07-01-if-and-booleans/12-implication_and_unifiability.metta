@@ -1,7 +1,7 @@
 ; Purpose: distinguish Boolean implication, unifiability and exact equality.
 ; Guarantees: if-equal2 follows upstream ==, preserving variable identity
 ;   [tested: examples/ch07-control-flow/07-01-if-and-booleans/12-implication_and_unifiability.metta;
-;   commit=WORKTREE].
+;   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 ;Three engine forms that answer a question about two things rather than
 ;computing a value from them: `implies`, `=?` and `if-equal2`.
 ;
