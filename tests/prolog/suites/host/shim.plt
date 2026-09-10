@@ -19,9 +19,10 @@
 %     filter contradictory ground candidates, and a terminal generator frame
 %     carries the live exception and is recognised only with one
 %     [tested: shim_relation_form; commit=0ee5a2dfee0e37a23b0eb9c765b477d7f90295fe].
-%   - a source form is selected for a head at ONE predicate arity, and the
-%     message hook always fails and leaves its reentrancy flag down, whatever
-%     the delivery did [tested: shim_observation_doors; commit=6375a7c8f3c035b04bc9d41c8f7f22e56b42fb41].
+%   - the message hook always fails and leaves its reentrancy flag down,
+%     whatever delivery did. Source occurrence selection is now tested at
+%     the engine-owned head_properties surface
+%     [tested: shim_observation_doors, head_properties; commit=WORKTREE].
 %   - the inference rule is decided here rather than by a live engine: the
 %     narrowest kind per position, a variable contributing none, an equation
 %     body's result, and a declared head skipped
@@ -633,48 +634,10 @@ test(a_frame_shaped_answer_without_a_live_exception_is_not_one) :-
 
 %%%%%%%%%% Observation doors %%%%%%%%%%
 %
-% The engine-free halves of the two doors Python reaches end to end: which
-% top-level forms define a head, and how a SWI message kind reaches the Python
-% side. Both are decisions Prolog makes alone, and an end-to-end test that goes
-% through janus exercises only the shapes that happen to arise.
+% Message kinds and hook cleanup are engine-free bridge decisions. Defining
+% occurrences belong to the common engine origin reader and its own suite.
 
 :- begin_tests(shim_observation_doors).
-
-shim_parsed_source(
-    [ parsed(expression, "(: quad (-> Number Number))", [:, quad, [->, 'Number', 'Number']]),
-      parsed(function,   "(= (quad $x) (* 4 $x))",      [=, [quad, _X1], [*, 4, _X1]]),
-      parsed(function,   "(= (pent $x) (* 5 $x))",      [=, [pent, _X2], [*, 5, _X2]]),
-      parsed(function,   "(= (pent 0) 0)",              [=, [pent, 0], 0]),
-      parsed(runnable,   "(pent 1)",                    [pent, 1]),
-      parsed(function,   "(= (pent 1 2) both)",         [=, [pent, 1, 2], both]),
-      parsed(function,   "(= (nil) empty)",             [=, [nil], empty])
-    ]).
-
-%The index is into the reader's own form list, which is the list
-%metta_py_read_forms/2 hands the Python position walk, so the two sides agree
-%on what form number 3 is without either reproducing the other's work.
-test(equation_indices_select_one_heads_forms_at_one_arity) :-
-    shim_parsed_source(Forms),
-    metta_py_equation_indices(Forms, quad, 2, Quad),
-    assertion(Quad == [1]),
-    metta_py_equation_indices(Forms, pent, 2, Pent),
-    assertion(Pent == [2, 3]).
-
-%A predicate arity counts the output slot a MeTTa call does not, so the two
-%pent definitions at different argument counts are different predicates and
-%must not share an index list.
-test(equation_indices_separate_the_arities_of_one_name) :-
-    shim_parsed_source(Forms),
-    metta_py_equation_indices(Forms, pent, 3, Both),
-    assertion(Both == [5]),
-    metta_py_equation_indices(Forms, nil, 1, Nil),
-    assertion(Nil == [6]).
-
-test(equation_indices_ignore_declarations_runnables_and_other_heads) :-
-    shim_parsed_source(Forms),
-    assertion(metta_py_equation_indices(Forms, quad, 1, [])),
-    assertion(metta_py_equation_indices(Forms, absent, 2, [])),
-    \+ metta_py_equation_indices(Forms, quad, 0, _).
 
 %SWI's kinds are names; debug/1 is the one compound kind that ships, and its
 %topic stays SWI's business rather than becoming part of a logging level.

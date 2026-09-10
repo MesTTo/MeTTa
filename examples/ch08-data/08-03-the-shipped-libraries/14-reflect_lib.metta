@@ -1,3 +1,5 @@
+; Purpose: show lib_reflect's surface queries and defining occurrence origins.
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/14-reflect_lib.metta; commit=WORKTREE].
 ;lib_reflect: the engine's own surface as data you can match. A tool that
 ;keeps its own list of what the engine knows drifts; a list the engine
 ;answers cannot.
@@ -18,13 +20,12 @@
 !(test (collapse (arity-of cons-atom)) (3))
 !(test (collapse (arity-of no-such-name-anywhere)) ())
 
-;`origin-of` says where a name comes from, which a flat list of names cannot:
-;a builtin, a translator special form, a Prolog file, an equation this space
-;holds, or a specialization the ENGINE wrote while evaluating a higher-order
-;call.
-!(test (collapse (origin-of car-atom)) ((builtin)))
-!(test (car-atom (origin-of mine)) equation)
-!(test (collapse (origin-of case)) ((special-form)))
+;`origin-of` gives (origin space file line), one per defining occurrence.
+;The common property reader supplies these rows, including a deferred head's
+;source position. An unknown name has no origin.
+!(test (once (car-atom (origin-of car-atom))) origin)
+!(test (car-atom (origin-of mine)) origin)
+!(test (collapse (origin-of no-such-name-anywhere)) ())
 
 ;The four enumerations. `builtins` is what is registered, `special-forms` is
 ;what the translator COMPILES and so appears in no registry, `functions` is
@@ -61,9 +62,9 @@
 !(test (> (string-length (surface-json)) 1000) True)
 !(test (string-starts-with (surface-json) "{") True)
 
-;Every name above has a Prolog rung under it, imported from lib_reflect.pl,
-;and the MeTTa name is one equation over it. Calling either is calling the
-;same operation.
+;The enumerations have Prolog rungs imported from lib_reflect.pl. The legacy
+;engine-origin door classifies implementation tiers; origin-of gives source
+;origins through the common property reader.
 !(test (== (collapse (engine-arity car-atom)) (collapse (arity-of car-atom))) True)
 !(test (engine-knows car-atom) True)
 !(test (engine-knows no-such-name-anywhere) False)

@@ -48,8 +48,9 @@
 % Guarantees: source observation reaches only the reviewed published subsystem
 %   surfaces below, and nothing reaches IT: the engine announces a constructed
 %   Error through a sink the observation buffer carries, so source_observation
-%   and source_positions are leaf consumers and left the declared tangle
-%   [tested: engine_layering, scc_components; commit=b96e1a15260b7538a8e42be613bcc5dd0dddd136].
+%   remains a leaf consumer. Common origin properties consume source_positions,
+%   which rejoins the declared tangle
+%   [tested: engine_layering, scc_components; commit=WORKTREE].
 % Assumes: engine/metta.pl no longer loads the observer at boot, so
 %   measure_layer_edges/0 asks for it through metta_ensure_source_observation/0
 %   before the walk; the walk reads the database and would otherwise report
@@ -372,9 +373,11 @@ reaches(materialize, translator_rules, 'rewritten match calls and evaluated resu
 reaches(metta, ext_points, 'installs the atom-write wrappers when a handler exists').
 reaches(metta, materialize, 'effect classification retains operation identity and user transactions own image publication').
 reaches(metta, filereader, 'import! and the file builtins are the loader\'s surface').
+reaches(metta, identity, 'property declaration precedence follows occurrence generation and actor').
 reaches(metta, parser, 'sread, swrite and sdisplay are the core\'s text builtins').
 reaches(metta, qlf_boot, 'the runtime loader asks the boot, through seam:compiled_source/1, whether it governs a source before compiling it beside itself').
 reaches(metta, spaces, 'the space builtins are the space subsystem\'s surface').
+reaches(metta, source_positions, 'common defining origins attach lines through the parser\'s position projection').
 reaches(metta, specializer, 'the verify-specializations pragma write opens a fresh coverage tally and closing it reports one').
 reaches(metta, support_graph, 'a world admits a program write only after walking who its recompilation reaches').
 reaches(metta, translator, 'a runnable form is compiled before it runs').
@@ -449,9 +452,12 @@ reaches(type_rules, translator, 'a changed typing rule clears the translation ca
 %   retires them, the shared support-invalidation action reaches it, and it
 %   reads module context, storage and dispatch policy back, so it sits on a
 %   cycle rather than at the end of one.
+%
+%   source_positions rejoins on 2026-09-10: common origin properties use its
+%   existing position projection. The observer itself remains a leaf.
 
 tangle([duals, ext_points, filereader, materialize, metta, parser,
-        spaces, specializer,
+        source_positions, spaces, specializer,
         support_graph, tracer, translator, translator_rules, type_rules]).
 
 %%%% What the lane checks %%%%

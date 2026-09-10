@@ -40,6 +40,8 @@ Guarantees:
   - every plant here fails when the rule it pins is taken away, because
     METTA_EVIDENCE_MUTATION patches the COPIED checker and nothing else
     [tested 2026-09-07: evidence-mutations; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
+  - tracked probes and nested example fixtures reject a nonexistent test
+    [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
 Fails when:
   - run against a tree it did not write. It asserts exact line numbers in a
     fixture it generates, and nothing else.
@@ -599,7 +601,7 @@ def seat_root_path_complaints() -> list[str]:
 
 
 def tracked_probe_complaints() -> list[str]:
-    """A tracked probe's own claims are read, and a stale citation is reported.
+    """Probe and nested fixture claims are read, and a stale citation is reported.
 
     A probe is where a measurement's reproduction is KEPT when the fixture is
     worth having, which is exactly what the scratch rule asks an author to do
@@ -610,34 +612,29 @@ def tracked_probe_complaints() -> list[str]:
     citation there going stale would have been nobody's finding.
     """
     complaints = []
-    with tempfile.TemporaryDirectory() as directory:
-        root = Path(directory)
-        build(root, PYTEST_ANCHOR)
-        probe = root / "extensions/python/benchmarks/probes/probe.py"
-        probe.parent.mkdir(parents=True, exist_ok=True)
-        probe.write_text(
-            '"""Purpose: a fixture probe among the seat\'s tracked ones.\n'
-            "Guarantees:\n"
-            f"  - the collected test backs this [{TAG} {WHEN}: test_collected].\n"
-            f"  - this one names nothing [{TAG} {WHEN}: no_such_probe_test].\n"
-            "Open Obligations:\n"
-            "  To Do: None\n"
-            "  Hacks: None\n"
-            "  Future Enhancements: None\n"
-            '"""\n'
-        )
-        output = run(root)
-        mine = [
-            line for line in output
-            if line.startswith("extensions/python/benchmarks/probes/probe.py:")
-        ]
-        if [line for line in mine if "test_collected" in line]:
-            complaints.append("rejected a probe's citation of a test the pytest lane collects")
-        if not [line for line in mine if "no_such_probe_test" in line]:
-            complaints.append(
-                "accepted a probe's citation of a name the tree does not define, so "
-                "nothing reads a tracked probe's claims"
-            )
+    for name in ("extensions/python/benchmarks/probes/probe.py",
+                 "examples/ch-plant/_fixtures/nested/library.metta"):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            build(root, PYTEST_ANCHOR)
+            probe = root / name
+            probe.parent.mkdir(parents=True, exist_ok=True)
+            lines = [
+                "Purpose: a tracked fixture's own evidence.",
+                "Guarantees:",
+                f"  - the collected test backs this [{TAG} {WHEN}: test_collected].",
+                f"  - this one names nothing [{TAG} {WHEN}: no_such_probe_test].",
+            ]
+            source = ('"""' + "\n".join(lines) + '\n"""\n'
+                      if probe.suffix == ".py"
+                      else "".join("; " + line + "\n" for line in lines))
+            probe.write_text(source)
+            output = run(root)
+            mine = [line for line in output if line.startswith(name + ":")]
+            if [line for line in mine if "test_collected" in line]:
+                complaints.append(f"{name}: rejected a test the pytest lane collects")
+            if not [line for line in mine if "no_such_probe_test" in line]:
+                complaints.append(f"{name}: accepted a nonexistent test; its claims went unread")
     return complaints
 
 
@@ -822,7 +819,7 @@ def main() -> int:
         f"pins, a symlinked output directory, a path cited from beside its own file, a path cited from its "
         f"seat root, a lane written across a line continuation, a fixture "
         f"under the scratch root beside one the tree tracks, and a tracked "
-        f"probe citing a test that is not there"
+        f"probe and a nested example fixture citing a test that is not there"
     )
     return 1 if complaints else 0
 

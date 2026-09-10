@@ -28,6 +28,10 @@
 % Guarded by: '$metta_fun_metadata' serializes metadata writers; transaction/1
 %   publishes the source and its projections together and rolls back failures
 %   [tested: run_tests(translator_metadata_projection); commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
+%   '$metta_translation_cache' guards translation reservations, publication
+%   and invalidation. metta_source_singleflight/2 serializes misses per key;
+%   compilation runs outside the publication mutex and releases reservations
+%   on every exit [tested: translation_cache; commit=WORKTREE].
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: retained and deferred equation type groups preserve written
 %   aliases, and with_equation_types/4 restores its enclosing translation
@@ -1431,6 +1435,7 @@ translating_runnable :- b_getval('$metta_translating_runnable', true).
 %that compiled against an old function is not. Both function change events use
 %the same indexed first lookup.
 :- dynamic translated_form_cache/6.
+:- dynamic translated_form_pending/3.
 :- dynamic translated_form_mention/2.
 :- dynamic translation_cache_hook_ref/2.
 
@@ -1556,16 +1561,31 @@ translated_form_hit(Module, Key, Source, Goals, Out) :-
     StoredSource = Source,
     !.
 
-cache_translated_form(Module, Key, Source, Goals, Out) :-
+reserve_translated_form(Module, Key, Source, Id) :-
     install_translation_cache_hooks,
     gensym(translated_form_, Id),
-    assertz(translated_form_cache(Module, Key, Id, Source, Goals, Out), Ref),
-    record_source_assertion(Ref),
+    assertz(translated_form_pending(Module, Key, Id)),
     findall(Symbol, (sub_term(Symbol, Source), atom(Symbol)), Symbols0),
     sort(Symbols0, Symbols),
     forall(member(Symbol, Symbols),
-           ( assertz(translated_form_mention(Symbol, Id), MentionRef),
-             record_source_assertion(MentionRef) )).
+           assertz(translated_form_mention(Symbol, Id))).
+
+% A change can evict the reservation while compilation is outside the lock.
+% Return this invocation's guarded goals, but never cache that stale snapshot.
+publish_translated_form(Module, Key, Id, Source, Goals, Out) :-
+    ( retract(translated_form_pending(Module, Key, Id))
+    -> assertz(translated_form_cache(Module, Key, Id, Source, Goals, Out), Ref),
+       record_source_assertion(Ref),
+       forall(clause(translated_form_mention(_, Id), true, MentionRef),
+              record_source_assertion(MentionRef))
+    ; true ).
+
+release_translated_form(Id) :-
+    with_mutex('$metta_translation_cache',
+        ( ( retract(translated_form_pending(_, _, Id))
+          -> retractall(translated_form_mention(_, Id))
+          ; true ),
+          uninstall_idle_translation_cache_hooks )).
 
 %The lifecycle sweep for one execution module, called when its space is
 %cleared or its pooled name is recycled. The cached translations are the
@@ -1578,6 +1598,8 @@ cache_translated_form(Module, Key, Source, Goals, Out) :-
 %and the next life must not inherit either.
 clear_module_translation_state(Module) :-
     forall(retract(translated_form_cache(Module, _, Id, _, _, _)),
+           retractall(translated_form_mention(_, Id))),
+    forall(retract(translated_form_pending(Module, _, Id)),
            retractall(translated_form_mention(_, Id))),
     retractall(deferred_equation_types(_, Module, _, _)),
     retractall(head_pattern_note(Module, _, _, _, _)).
@@ -1594,9 +1616,20 @@ install_translation_cache_hooks :-
 translate_runnable_expr_cached(Module, Key, Source, Template, Goals, Out) :-
     (   translated_form_hit(Module, Key, Source, Goals, Out)
     ->  true
-    ;   translate_runnable_expr(Template, TemplateGoals, TemplateOut),
-        cache_translated_form(Module, Key, Template, TemplateGoals,
-                              TemplateOut),
+    ;   current_transaction(_)
+    ->  % A transaction's pending rows are invisible to another thread's
+        % invalidation, and its snapshot may already precede that change.
+        % Compile for this invocation without publishing a shared template.
+        % https://www.swi-prolog.org/pldoc/man?predicate=transaction%2F1
+        translate_runnable_expr(Source, Goals, Out)
+    ;   setup_call_cleanup(
+            with_mutex('$metta_translation_cache',
+                       reserve_translated_form(Module, Key, Template, Id)),
+            ( translate_runnable_expr(Template, TemplateGoals, TemplateOut),
+              with_mutex('$metta_translation_cache',
+                  publish_translated_form(Module, Key, Id, Template,
+                                          TemplateGoals, TemplateOut)) ),
+            release_translated_form(Id)),
         Source = Template,
         Goals = TemplateGoals,
         Out = TemplateOut
@@ -1614,11 +1647,13 @@ invalidate_translated_forms_locked(Symbol) :-
     sort(Ids0, Ids),
     forall(member(Id, Ids),
            ( retractall(translated_form_cache(_, _, Id, _, _, _)),
+             retractall(translated_form_pending(_, _, Id)),
              retractall(translated_form_mention(_, Id)) )),
     uninstall_idle_translation_cache_hooks.
 
 uninstall_idle_translation_cache_hooks :-
-    (   translated_form_cache(_, _, _, _, _, _)
+    (   ( translated_form_cache(_, _, _, _, _, _)
+        ; translated_form_pending(_, _, _) )
     ->  true
     ;   forall(retract(translation_cache_hook_ref(_, Ref)), erase(Ref))
     ).
@@ -1626,6 +1661,7 @@ uninstall_idle_translation_cache_hooks :-
 clear_translation_cache :-
     with_mutex('$metta_translation_cache',
                ( retractall(translated_form_cache(_, _, _, _, _, _)),
+                 retractall(translated_form_pending(_, _, _)),
                  retractall(translated_form_mention(_, _)),
                  uninstall_idle_translation_cache_hooks )).
 note_symbol_head(HV) :- atom(HV), !,

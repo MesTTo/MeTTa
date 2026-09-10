@@ -11,18 +11,26 @@ Guarantees:
     character every other table in this tree comments with, and a `#` reader
     dropped all of them silently
     [tested: tests/checks/check_cumulative_syntax_selftest.py]
+  - stored reference and visibility rows are scanned without loading their
+    source [tested: tests/checks/check_cumulative_syntax_selftest.py;
+    commit=WORKTREE]
+Owns resources: the parser witness removes its temporary directory on exit.
 """
 
 from __future__ import annotations
 
 import sys
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from check_cumulative_syntax import (
+    ROOT,
     control_findings,
     coordinate,
     dependency_findings,
     law_findings,
     read_table,
+    run_scanner,
     table_findings,
     write_table,
 )
@@ -82,6 +90,26 @@ def hash_row_problems() -> list[str]:
     if table.get("#*") == (5, 4, 1):
         return []
     return [f"#* was lost in the table round trip; read back as {table.get('#*')!r}"]
+
+
+def reference_row_problems() -> list[str]:
+    """The real parser sees row syntax and never loads the named source."""
+    with TemporaryDirectory(prefix="ai-cumulative-reference-", dir=ROOT / "ai-tmp") as directory:
+        path = Path(directory) / "rows.metta"
+        path.write_text("(from does-not-exist (only (visible)))\n(internal hidden)\n")
+        shadow = Path(directory) / "own-heads.metta"
+        shadow.write_text("(= (only $x) $x)\n(= (from $n) (from (+ $n 1)))\n!(only (from 0))\n")
+        found: dict[str, set[str]] = {str(path): set(), str(shadow): set()}
+        for line in run_scanner(str(path), str(shadow)).splitlines():
+            file, name = line.split("\t")
+            found[file].add(name)
+    missing = {"from", "internal", "only"} - found[str(path)]
+    mistaken = {"from", "only"} & found[str(shadow)]
+    return (
+        [f"reference-row scanner omitted {sorted(missing)}"] if missing else []
+    ) + (
+        [f"program-owned heads counted as constructs: {sorted(mistaken)}"] if mistaken else []
+    )
 
 
 def plant_problems() -> list[str]:
@@ -166,12 +194,12 @@ def plant_problems() -> list[str]:
 
 def main() -> int:
     """Print every way the gate failed to notice a planted violation."""
-    problems = plant_problems() + coordinate_problems() + hash_row_problems()
+    problems = plant_problems() + coordinate_problems() + hash_row_problems() + reference_row_problems()
     for problem in problems:
         print(problem)
     print(
         f"cumulative-syntax selftest: {len(problems)} problem(s) across "
-        f"8 plants, 3 coordinate shapes and 1 table round trip"
+        f"8 plants, 3 coordinate shapes, 1 table round trip and 1 reference-row scan"
     )
     return 1 if problems else 0
 

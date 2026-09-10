@@ -1,3 +1,7 @@
+; Purpose: demonstrate the imported text and file library operations.
+; Guarantees: a short format argument list leaves later placeholders empty
+;   [tested: examples/ch08-data/08-03-the-shipped-libraries/03-text_lib.metta;
+;   commit=WORKTREE].
 ;Text and files, imported the way C reaches for string.h. Neither library is
 ;loaded until you ask for it, so a program that never touches text never pays
 ;for it.
@@ -46,7 +50,7 @@
        "Probability of head is 50%")
 ;A short argument list produces NOTHING for the placeholders it cannot fill,
 ;which is the dyn_fmt formatter upstream interpolates through.
-!(test (format-args "{} and {}" (only)) "only and ")
+!(test (format-args "{} and {}" ("only")) "only and ")
 
 !(test (sort-strings ("pear" "apple" "fig")) ("apple" "fig" "pear"))
 !(test (parse-number "42") 42)

@@ -1,3 +1,7 @@
+; Purpose: exercise strategy application, traversal and exact type selection.
+; Guarantees: a subject with no matching type declines the typed strategy
+; [tested: examples/ch20-extending-the-engine/20-02-metta-written-in-metta/13-strategy_internals.metta; commit=WORKTREE].
+
 ;lib_strategy from the inside. The file before this one uses the combinators;
 ;these are the seven operations they are written over, and they are ordinary
 ;functions rather than a hidden layer, which is the library's whole claim:
@@ -57,13 +61,11 @@
 !(test (collapse (strategy-typed-tu summarize DA da)) ())
 
 ;Both then hand the sort they selected to `strategy-typed-apply`, which is
-;the one gradual type check: the term's type against the expected one, and
-;the strategy runs only if they unify.
+;the type check: the term's type against the expected one, and the strategy
+;runs only if they are identical under the upstream-compatible match-types.
 !(test (strategy-typed-apply preserve DA da) (kept da))
 !(test (collapse (strategy-typed-apply preserve DA 1)) ())
 !(test (== (strategy-typed-apply preserve DA da) (◁ preserve TP da)) True)
 
-;An ill-typed subject reports its OWN error rather than being silently
-;declined, so a term that cannot be typed at all is a different answer from a
-;term whose type does not fit.
-!(test (strategy-typed-apply preserve DA (undeclared-name)) (kept (undeclared-name)))
+;An undeclared subject has no type identical to DA, so it declines too.
+!(test (collapse (strategy-typed-apply preserve DA (undeclared-name))) ())

@@ -93,6 +93,10 @@
 %already carried their own `:- encoding(utf8).`, which is the same fix
 %applied one file at a time; this is that fix at the boot, where it covers
 %every file including the ones a later commit adds.
+%Workaround: swi-locale-default-encoding - the encoding flag and both
+%standard streams are pinned to UTF-8 before any file loads, and the
+%artifact stamp carries the encoding so a set compiled under another one
+%is purged.
 :- set_prolog_flag(encoding, utf8).
 
 %The standard streams take the same pinning, because an ASCII output stream

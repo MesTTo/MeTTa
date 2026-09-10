@@ -10,8 +10,10 @@
 %   - one `FILE<TAB>CONSTRUCT` line per distinct construct in each file,
 %     sorted, so the reader gets a set rather than a bag
 %   - a construct is a name the ENGINE publishes, builtin_fun/1 or
-%     metta_special_form_head/1, plus `!`; a program's own function names are
-%     not constructs and are not printed
+%     metta_special_form_head/1, plus runnable `!` and stored `from`/`internal`
+%     rows; a program's own function names are not constructs and are not
+%     printed [tested: tests/checks/check_cumulative_syntax_selftest.py;
+%     commit=WORKTREE]
 %   - --vocabulary prints `?VOCABULARY<TAB>NAME` for every such name, so the
 %     lane can refuse a table row naming something the language does not have
 %   - a file that cannot be parsed prints `FILE<TAB>?PARSE-ERROR` rather than
@@ -58,10 +60,11 @@ main :-
 %`!` is the third case and is not a head at all: the parser records the
 %runnable prefix as the form's KIND, so it is emitted from there. It is a
 %construct a reader has to be taught like any other, which is why it is in the
-%vocabulary rather than filtered out of it.
+%vocabulary rather than filtered out of it. Stored `from` and `internal`
+%rows are also syntax without a callable predicate; their heads enter here.
 vocabulary(Name) :-
     findall(N, ( builtin_fun(N) ; metta_special_form_head(N) ), Names0),
-    sort(['!'|Names0], Names),
+    sort(['!', from, internal|Names0], Names),
     member(Name, Names).
 
 scan(File) :-
@@ -83,7 +86,10 @@ form_head(Forms, Name) :-
     member(Form, Forms),
     parsed_form_parts(Form, Kind, _, Term),
     (   Kind == runnable, Name = '!'
-    ;   head(Term, Name)
+    ;   Kind == expression, Term = [Name|_], memberchk(Name, [from,internal])
+    ;   head(Term, Name),
+        \+ ( member(Definition, Forms),
+             parsed_form_parts(Definition, function, _, [=,[Name|_],_]) )
     ).
 
 % Every head position anywhere in the term, including nested ones: a reader

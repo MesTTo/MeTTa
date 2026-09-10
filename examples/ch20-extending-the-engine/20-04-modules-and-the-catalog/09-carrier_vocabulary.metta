@@ -1,16 +1,19 @@
+; Purpose: relate the open carrier vocabulary to its algebra declarations.
+; Guarantees: a sequence variable reads every carrier in catalog order
+; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/09-carrier_vocabulary.metta; commit=WORKTREE].
+
 ;; A vocabulary row and the rows that USE its values are two halves of one
 ;; statement, and they have to agree. The previous file showed the SHAPE of
 ;; a (claim ...) row; this one is about the set those claims are drawn from,
 ;; and about what goes wrong when the two halves drift.
 
-;; Ten algebras ship and the semiring vocabulary is exactly their names.
+;; Eleven algebras ship and the semiring vocabulary is exactly their names.
 ;; This row is the authority rather than a copy of one:
 ;; extensions/python/metta/vocabularies.py is GENERATED from it, so
 ;; `Semiring.budget` exists in a Python annotation because this row says
 ;; budget does.
-!(test (match &metta (vocabulary semiring $a $b $c $d $e $f $g $h $i $j)
-                     ($a $b $c $d $e $f $g $h $i $j))
-       (bool bag counting set ranked tropical prob prov budget amplitude))
+!(test (match &metta (vocabulary semiring (:seg $names)) $names)
+       (bool visibility bag counting set ranked tropical prob prov budget amplitude))
 
 ;; Each of those names also has an (algebra ...) row saying what it
 ;; computes. budget is a cost carrier: it combines with min, extends with

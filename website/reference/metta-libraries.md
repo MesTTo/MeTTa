@@ -23,7 +23,7 @@ beside its definitions.
 | lib_doc | 0 | 0 |
 | lib_file | 32 | 18 |
 | lib_gitimport | 0 | 0 |
-| lib_he | 0 | 0 |
+| lib_he | 18 | 0 |
 | lib_import | 8 | 4 |
 | lib_json | 5 | 0 |
 | lib_measure | 17 | 0 |
@@ -35,7 +35,7 @@ beside its definitions.
 | lib_pln | 49 | 0 |
 | lib_pln2 | 9 | 0 |
 | lib_redis | 2 | 0 |
-| lib_reflect | 19 | 9 |
+| lib_reflect | 19 | 10 |
 | lib_regex | 12 | 0 |
 | lib_roman | 36 | 0 |
 | lib_soft | 9 | 1 |
@@ -441,31 +441,31 @@ Returns: a queryable space of observation-status, observation-answer, observatio
 
 ### `builtins`
 
-*lib_reflect.metta:29*
+*lib_reflect.metta:33*
 
 Every builtin name, one per solution
 
 ### `special-forms`
 
-*lib_reflect.metta:32*
+*lib_reflect.metta:36*
 
 Every translator special form, one per solution. These are compiled rather than called, so they are in no registry
 
 ### `functions`
 
-*lib_reflect.metta:36*
+*lib_reflect.metta:40*
 
 Every function the engine knows, builtin or not
 
 ### `user-functions`
 
-*lib_reflect.metta:39*
+*lib_reflect.metta:43*
 
 Every function this space defines itself
 
 ### `arity-of`
 
-*lib_reflect.metta:42*
+*lib_reflect.metta:46*
 
 The registered arities for a name, one per solution
 
@@ -475,7 +475,7 @@ Returns: an arity
 
 ### `knows?`
 
-*lib_reflect.metta:48*
+*lib_reflect.metta:52*
 
 Whether the engine knows a name at all, as True or False
 
@@ -483,9 +483,19 @@ Whether the engine knows a name at all, as True or False
 
 Returns: True or False
 
+### `origin-of`
+
+*lib_reflect.metta:60*
+
+```metta
+(: origin-of (-> Atom Expression))
+```
+
+The (origin space file line) rows from get-property, one per defining occurrence; an unavailable line is -1
+
 ### `extension-points`
 
-*lib_reflect.metta:74*
+*lib_reflect.metta:72*
 
 Every extension point the engine declares, as (name arity kind), one per solution
 
@@ -493,7 +503,7 @@ Returns: (name arity kind)
 
 ### `surface-counts`
 
-*lib_reflect.metta:79*
+*lib_reflect.metta:77*
 
 How many builtins, special forms, functions and user functions
 
@@ -501,13 +511,13 @@ Returns: ((key count) ...)
 
 ### `surface-json`
 
-*lib_reflect.metta:86*
+*lib_reflect.metta:84*
 
 The engine's whole surface as a JSON string, for external tools
 
 Returns: a JSON string
 
-Undocumented: `engine-arity`, `engine-builtin`, `engine-extension-point`, `engine-function`, `engine-knows`, `engine-origin`, `engine-special-form`, `engine-surface-counts`, `engine-user-function`, `origin-of`
+Undocumented: `engine-arity`, `engine-builtin`, `engine-extension-point`, `engine-function`, `engine-knows`, `engine-origin`, `engine-special-form`, `engine-surface-counts`, `engine-user-function`
 
 ## lib_soft
 

@@ -47,20 +47,25 @@
 
 ;;; Equality and reduction ;;;
 
-;if-equal compares by ALPHA-EQUIVALENCE, not ==: Hyperon implements it
-;with core.rs atoms_are_equivalent, atoms equal up to a consistent
-;variable renaming, and this engine's if-equal does exactly that
-;[source: hyperon-experimental lib/src/atom/mod.rs, atoms_are_equivalent]. The
-;library shim compared with ==, which misses (f $x $x) against
-;(f $y $y); the promotion fixes the contract, the same way add-reduct's
-;promotion fixed its.
+;The aligned equations are PeTTa's vendored lib_he equations. The differential
+;also checks their parsed identity against that file.
 (: if-equal (-> Atom Atom Atom Atom %Undefined%))
+(: only (-> Atom Symbol Symbol))
+(: except (-> Atom Symbol Symbol))
+(: prefix (-> Symbol Symbol Symbol))
+(: rename (-> Atom Symbol Symbol))
+(: qualified (-> Symbol %Undefined%))
 (= (if-equal $A $B $Then $Else)
-   (if (=alpha $A $B) $Then $Else))
+   (if (== $A $B) $Then $Else))
+(= (only $names $head) (if (is-member $head $names) $head (empty)))
+(= (except $names $head) (if (is-member $head $names) (empty) $head))
+(= (prefix $prefix $head) (atom_concat $prefix $head))
+(= (rename $pairs $head) (let $cases (union-atom $pairs (($other $other))) (case $head $cases)))
+(= (qualified $lib) (prefix (atom_concat $lib .)))
 
 (: if-equal2 (-> Atom Atom Atom Atom %Undefined%))
 (= (if-equal2 $A $B $Then $Else)
-   (if (=alpha $A $B) $Then $Else))
+   (if (== $A $B) $Then $Else))
 
 ;A structural comparison whose operands stay written.  This declaration must
 ;precede the assert family because the engine prelude is compiled form by form;
@@ -278,13 +283,10 @@
 (= (throw $reason)
    (if-error $reason $reason (Error (throw $reason) $reason)))
 
-;Like if-error, this outer frame is the staging boundary consumed by eval.
-;[source: MettaHyperonFull/Minimal/Stdlib.lean:4033-4043,
-;`return-on-error`; commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87]
-(= (return-on-error $atom $then)
-   (function (eval (if-equal $atom Empty (return (return Empty))
-     (eval (if-error $atom (return (return $atom))
-       (return $then)))))))
+(= (return-on-error $result $B)
+   (if-error $result
+             $result
+             $B))
 
 ;;; Evaluation control ;;;
 
@@ -423,30 +425,13 @@
 (: get-type (-> Atom %Undefined%))
 (: get-type-space (-> SpaceType Atom %Undefined%))
 
-;match-types is UNIFICATION with wildcards, not equality: %Undefined%
-;and Atom on either side match anything, and otherwise the two types unify,
-;bindings and all. The function frame is the reference's one-step boundary.
-;[source: MettaHyperonFull/Minimal/Stdlib.lean:4114-4125, `match-types`;
-;commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87]
-(= (match-types $type1 $type2 $then $else)
-   (function (eval (if-equal $type1 %Undefined%
-     (return $then)
-     (eval (if-equal $type2 %Undefined%
-       (return $then)
-       (eval (if-equal $type1 Atom
-         (return $then)
-         (eval (if-equal $type2 Atom
-           (return $then)
-           (unify $type1 $type2 (return $then) (return $else))))))))))))
+;Identity has no wildcard and does not bind either type.
+(= (match-types $A $B $Then $Else)
+   (if (== $A $B) $Then $Else))
 
-;Upstream's parameter order: the fold accumulator FIRST, then the
-;candidate type, then the wanted type [source: same file,
-;(= (match-type-or $folded $next $type) ...)]. The library had the
-;accumulator first but swapped the two types through its own helper.
-(= (match-type-or $folded $next $type)
-   (function
-     (chain (eval (match-types $next $type True False)) $matched
-       (chain (eval (or $folded $matched)) $or (return $or)))))
+;A failed comparison preserves the accumulator's value and type.
+(= (match-type-or $value $type1 $type2)
+   (match-types $type1 $type2 True $value))
 
 ;The fold used by type-cast is defined before its caller so the engine prelude's
 ;single-pass compiler sees an executable function rather than a constructor.
@@ -496,6 +481,7 @@
 ;from the selected space [source: hyperon-experimental@3f76dc4,
 ;lib/src/metta/runner/stdlib/stdlib.metta:795-875].
 (: get-doc (-> Atom %Undefined%))
+(: get-property (-> Atom Expression))
 (: get-doc (-> SpaceType Atom %Undefined%))
 (: get-doc-atom (-> SpaceType Atom %Undefined%))
 (: get-doc-single-atom (-> SpaceType Atom %Undefined%))
@@ -503,13 +489,19 @@
 (: get-doc-params (-> Expression Atom Expression (Expression Atom)))
 
 (@doc if-equal
-  (@desc "Selects the third argument when the first two are alpha-equivalent, atoms equal up to a consistent variable renaming, and the fourth otherwise")
+  (@desc "Selects the third argument when the first two are identical by ==, and the fourth otherwise")
   (@params ((@param "First atom") (@param "Second atom") (@param "Result on equivalence") (@param "Result otherwise")))
   (@return "Third or fourth argument"))
 (@doc if-equal2
   (@desc "if-equal under its second historical name")
   (@params ((@param "First atom") (@param "Second atom") (@param "Result on equivalence") (@param "Result otherwise")))
   (@return "Third or fourth argument"))
+(@doc only (@desc "Keeps a head present in the supplied names; partial application is a from map"))
+(@doc except (@desc "Keeps a head absent from the supplied names; partial application is a from map"))
+(@doc prefix (@desc "Concatenates a prefix and a head; partial application is a from map"))
+(@doc rename (@desc "Uses the first matching (old new) pair, or keeps the head; partial application is a from map"))
+(@doc qualified (@desc "Builds a prefix map using the library name and a dot"))
+(@doc get-property (@desc "Answers visibility, defining origins and declared effect, cost, deprecation and documentation properties, one per answer"))
 (@doc assert-answers
   (@desc "Asserts a verdict about two answer bags; a false verdict reports the call as written and the two directed bag differences, what was missing and what was in excess")
   (@params ((@param "Verdict, evaluated") (@param "Call to report, as written") (@param "Answers produced") (@param "Answers expected")))
@@ -579,13 +571,13 @@
   (@params ((@param "Type atom")))
   (@return "True or False"))
 (@doc match-types
-  (@desc "Checks if two types can be unified and returns the third argument if so, the fourth otherwise; %Undefined% and Atom on either side match anything")
-  (@params ((@param "First type") (@param "Second type") (@param "Atom to be returned if types can be unified") (@param "Atom to be returned if types cannot be unified")))
+  (@desc "Compares two types by == and returns the third argument if identical, the fourth otherwise; neither type is bound")
+  (@params ((@param "First type") (@param "Second type") (@param "Result on identity") (@param "Result otherwise")))
   (@return "Third or fourth argument"))
 (@doc match-type-or
-  (@desc "Checks if two types (second and third arguments) can be unified and returns the result of OR between the first argument and the type checking result")
-  (@params ((@param "Boolean value") (@param "First type") (@param "Second type")))
-  (@return "True or False"))
+  (@desc "Returns True when the second and third arguments are identical by ==, and the first argument otherwise")
+  (@params ((@param "Accumulator value") (@param "First type") (@param "Second type")))
+  (@return "True or the accumulator"))
 (@doc type-cast
   (@desc "Casts atom passed as a first argument to the type passed as a second argument using space as a context")
   (@params ((@param "Atom to be casted") (@param "Type to cast atom to") (@param "Context atomspace")))

@@ -10,7 +10,7 @@ Source: `extensions/python/metta/library/__init__.py`.
 > A library card is a model card for a `lib_*`: what it is, which heads it
 > publishes and what each is declared, documented, classified and priced as,
 > which examples exercise it, what it needs from the platform, and the digest
-> that identifies the exact source all of that was read from. The section
+> that identifies its executable source files. The section
 > mapping is Mitchell et al.'s, one to one -- model details to name, files,
 > version and digest; intended use to the prose and the head roster; factors to
 > the effect classes and the platform capabilities; metrics to the declared cost
@@ -187,6 +187,14 @@ class HeadCard:
 > and `cost` are the live engine's answers and are None for a head it has
 > not classified, which includes every head of a library this process has
 > not imported.
+
+### `HeadCard.origin_text`
+
+```python
+def origin_text(self) -> str:
+```
+
+> Every live defining space and available source location.
 
 ### `HeadCard.signature`
 

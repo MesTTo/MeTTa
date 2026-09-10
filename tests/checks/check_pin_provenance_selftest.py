@@ -29,6 +29,8 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py]
   - Rust header pins and MORK's Python selftest pins are reached and resolved
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
+  - nested example fixtures resolve their comment pins and preserve code
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
 Fails when: run against a tree it did not write. It asserts on a fixture it
   generates and nothing else.
 Open Obligations:
@@ -55,6 +57,16 @@ WHEN = "2026-08-31"
 
 # (path, text, lines that must be rewritten, lines that must be declined)
 PLANTS = (
+    (
+        "examples/ch-plant/_fixtures/nested/library.metta",
+        [
+            "; Purpose: a library loaded by an example.",
+            f"; A fixture pin [{TAG} {WHEN}: test_collected; {WORD}].",
+            f'(= (emitted-pin) "{WORD}")',
+        ],
+        [2],
+        [3],
+    ),
     (
         "extensions/mork/mork_ffi/src/plant.rs",
         [

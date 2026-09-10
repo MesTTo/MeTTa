@@ -112,8 +112,8 @@ register_prolog_arities(N) :-
 %[tested: builtin_facets:a_foreign_predicate_lending_a_builtin_name_loses_its_arity,
 %builtin_facets:the_pass_removes_a_foreign_arity_and_keeps_the_described_one,
 %builtin_facets:a_tree_defined_arity_is_told_from_a_foreign_one,
-%builtin_facets:the_retraction_set_is_the_same_nine_on_every_build;
-%commit=7eff330776f703cb603d7eea03fc1166d9e08e5e].
+%builtin_facets:the_retraction_set_is_the_same_ten_on_every_build;
+%commit=WORKTREE].
 %
 %IT RUNS AFTER THE DECLARATIONS AND THE PRELUDE, not while the names register,
 %and that ordering is the whole reason it is a separate pass:
@@ -545,6 +545,14 @@ metta_host_refusal_row(Kind, Class, Ground, Remedy) :-
 %   seat that gets no answer keeps the classification it already had, which is
 %   what it had before this table existed. once/1 because a program may hold a
 %   second row for one kind and a refusal has one reading.
+metta_host_refusal(Ball, Kind, Fields, Class, Ground, Remedy) :-
+    Ball = error(metta_foreign_token_mutation_required(_, _, _), _),
+    !,
+    metta_host_error_kind(Ball, Kind, Fields),
+    once(metta_host_refusal_row(Kind, Class, Ground, _)),
+    Remedy = [remedy,
+              "copy the atoms into a native overlay, or register exact-token mutation",
+              quickfix, prose].
 metta_host_refusal(Ball, Kind, Fields, Class, Ground, Remedy) :-
     Ball = error(metta_foreign_tokens_required(_, _), _),
     !,
@@ -1226,6 +1234,7 @@ builtin_implementation(cons/2, prolog(engine)).
 builtin_implementation(reverse/1, prolog(lists)).
 builtin_implementation('get-doc'/2, prolog(engine)).
 builtin_implementation('get-doc'/1, prolog(engine)).
+builtin_implementation('get-property'/1, prolog(engine)).
 builtin_implementation('get-doc-space'/2, prolog(engine)).
 builtin_implementation('get-doc-atom'/2, prolog(engine)).
 builtin_implementation('get-doc-single-atom'/2, prolog(engine)).

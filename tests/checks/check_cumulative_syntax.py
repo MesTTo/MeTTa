@@ -33,8 +33,9 @@ Guarantees:
     [tested: tests/checks/check_cumulative_syntax_selftest.py]
 Decides:
   - the vocabulary is the engine's, builtin_fun/1 and metta_special_form_head/1
-    plus `!`; `:` and `->` are type-declaration syntax the engine publishes as
+    plus `!` and the stored `from`/`internal` rows; `:` and `->` are type-declaration syntax the engine publishes as
     neither, so the law does not reach them
+    [tested: tests/checks/check_cumulative_syntax_selftest.py; commit=WORKTREE]
 """
 
 from __future__ import annotations

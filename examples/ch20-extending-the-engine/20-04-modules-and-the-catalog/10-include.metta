@@ -1,7 +1,9 @@
-;`include` is `import!`'s other half, and the difference is where the atoms
-;land. `import!` gives a module its own space and answers the unit; `include`
-;PASTES the module's forms into the space that included it, and answers what
-;the module's LAST directive answered.
+; Purpose: compare include's last directive with import!'s Boolean result.
+; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/10-include.metta; commit=WORKTREE].
+;
+; `import!` merges a module into its named receiving space and answers True.
+; `include` pastes its forms in order into the current space and answers what
+; its last directive answered. Both put the definitions in their receiver.
 ;
 ;It is upstream PeTTa's one gap here: that engine has no `include`, so
 ;everything below is this engine's own reading rather than an arbiter's.
@@ -15,9 +17,7 @@
 !(test (included-double 5) 10)
 !(test (collapse (match &self (included-fact $x) $x)) (carried))
 
-;Which is the whole difference from `import!`: that door answers the unit and
-;the module's atoms are reachable through the space it made, and this one
-;answers a value and the atoms are simply here.
+; Importing into &self also puts the atoms here, but reports load success.
 !(test (import! &self _fixtures/included/rows) True)
 
 ;A module with no directive has no last answer, so the include answers

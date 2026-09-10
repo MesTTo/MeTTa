@@ -115,6 +115,9 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
   - Python package claims remain checked after sources move into subpackages
     [tested: test_nested_package_evidence_rejects_a_missing_test; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]
+  - nested example fixtures carry checked claims and resolvable comment pins
+    [tested: tests/checks/check_evidence_selftest.py,
+    tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs
@@ -217,6 +220,11 @@ GUARANTEE_SOURCES = (
     "tests/prolog/module_fixtures/*.pl",
     # Diagnostic probes carry measured claims even when no gate runs them.
     "tests/prolog/probes/*.pl",
+    # A host-workaround reproduction is the same class, tracked so its
+    # `present`/`absent` answer can be re-run; its header states what was
+    # measured [source: docs/host-workarounds.md; commit=2bd6b250a22d9898ced449595c168a8dc3a78768].
+    "tests/checks/host_workarounds/*.pl",
+    "tests/checks/host_workarounds/*.sh",
     # And the Python half of the same class, which the seat grew on 2026-09-07.
     # A probe is where a measurement's reproduction is TRACKED rather than left
     # in a checkout, which is what the scratch rule below asks authors to do, so
@@ -230,6 +238,8 @@ GUARANTEE_SOURCES = (
     # chapters nest one deep for their sections.
     "examples/*/*.metta",
     "examples/*/*/*.metta",
+    # Imported fixtures live below the corpus runner's example depths.
+    "examples/**/_fixtures/**/*.metta",
     # The Node binding is TypeScript, and its sources make the same kind of
     # claim the Python ones do. Its Prolog half is here for the same reason
     # extensions/python/metta/**/*.pl is.

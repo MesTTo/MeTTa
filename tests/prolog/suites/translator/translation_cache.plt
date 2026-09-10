@@ -1,4 +1,9 @@
 % Purpose: verify runnable translation caching, variant keys, and invalidation.
+% Owns resources: concurrency fixtures join their worker and remove their
+%   compiler observer, queues, pending reservations and temporary space.
+% Guarantees: a miss compiles once outside the publication mutex; a concurrent
+%   source change or cache clear prevents stale publication
+%   [tested: translation_cache; commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -96,14 +101,71 @@ test(a_function_change_evicts_only_templates_that_mention_its_name,
     run_translated(['tc-late', 2], ['tc-late', 2]).
 
 test(concurrent_first_use_publishes_one_template,
-     [ setup(clear_translation_cache_test_state),
-       cleanup(clear_translation_cache_test_state) ]) :-
+     [ setup((clear_translation_cache_test_state,install_translation_compile_counter)),
+       cleanup((remove_translation_compile_counter,clear_translation_cache_test_state)) ]) :-
     concurrent_forall(between(1, 32, _),
                       run_translated([+, 40, 2], 42),
                       [threads(32)]),
     aggregate_all(count,
                   translator:translated_form_cache(_, _, _, _, _, _),
-                  1).
+                  1),
+    assertion(translation_compile_count(1)).
+
+test(a_compiling_miss_releases_publication_and_observes_invalidation,
+     [forall((member(Change,[definition,cache,module]),member(Snapshot,[live,transaction]))),
+      condition(current_prolog_flag(threads,true)),
+      setup(clear_translation_cache_test_state),
+      cleanup(clear_translation_cache_test_state)]) :-
+    gensym('&translation-pending-',Space), space_module(Space,Module),
+    setup_call_cleanup(
+        ( message_queue_create(Entered), message_queue_create(Release),
+          wrap_predicate(translator:translate_runnable_expr(Form,_,_),
+                         translation_pending_test,Compile,
+                         (call(Compile),
+                          (Form = ['tc-pending'|_]
+                          -> thread_send_message(Entered,compiled),
+                             thread_get_message(Release,continue)
+                          ; true))) ),
+        ( setup_call_cleanup(
+            thread_create(translate_pending_snapshot(Snapshot,Module),Worker,[]),
+            ( thread_get_message(Entered,compiled),
+              setup_call_cleanup(mutex_trylock('$metta_translation_cache'),
+                                 true,mutex_unlock('$metta_translation_cache')),
+              run_translated([+,40,2],42),
+              invalidate_pending_translation(Change,Space,Module),
+              assertion(\+ translator:translated_form_pending(Module,_,_)),
+              thread_send_message(Release,continue) ),
+            (thread_send_message(Release,continue),thread_join(Worker,true)) ),
+          assertion(\+ translator:translated_form_cache(Module,_,_,_,_,_)),
+          assertion(\+ translator:translated_form_mention('tc-pending',_)) ),
+        ( unwrap_predicate(translator:translate_runnable_expr(_,_,_),translation_pending_test),
+          message_queue_destroy(Entered), message_queue_destroy(Release),
+          metta_release_space(Space) )).
+
+translate_pending_snapshot(live,Module) :-
+    with_metta_module(Module,translate_cached_expr(['tc-pending',2],_,_)).
+translate_pending_snapshot(transaction,Module) :-
+    transaction(translate_pending_snapshot(live,Module)).
+
+invalidate_pending_translation(definition,Space,_) :-
+    metta_add_atom(Space,[=,['tc-pending',X],[+,X,1]],_).
+invalidate_pending_translation(cache,_,_) :- clear_translation_cache_test_state.
+invalidate_pending_translation(module,_,Module) :-
+    translator:clear_module_translation_state(Module).
+
+test(a_failed_compiler_releases_its_reservation_and_key,
+     [setup(clear_translation_cache_test_state),
+      cleanup(clear_translation_cache_test_state)]) :-
+    setup_call_cleanup(
+        wrap_predicate(translator:translate_runnable_expr(Form,_,_),
+                       translation_failure_test,Compile,
+                       (Form = ['tc-failed'|_] -> throw(compile_failure) ; call(Compile))),
+        catch(translate_cached_expr(['tc-failed',2],_,_),compile_failure,true),
+        unwrap_predicate(translator:translate_runnable_expr(_,_,_),translation_failure_test)),
+    assertion(\+ translator:translated_form_pending(_,_,_)),
+    assertion(\+ translator:translated_form_mention('tc-failed',_)),
+    assertion(\+ metta_engine:metta_source_flight(translation(_,_),_,_)),
+    run_translated(['tc-failed',2],['tc-failed',2]).
 
 test(test_a_repeated_eval_does_not_recompile_and_the_effects_cluster_conforms,
      [ setup(( clear_translation_cache_test_state,

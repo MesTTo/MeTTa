@@ -1,10 +1,22 @@
 % Purpose: read MeTTa source, split it into complete top-level forms, and
 % dispatch each parsed form to the evaluator.
+% Guarded by: import_when/4 claims one source; runnable forms run outside the
+%   loader mutex. working_dir/1 belongs to its thread
+%   [tested: loader_singleflight; commit=WORKTREE].
 % Owns resources: '$metta_equation_token'/4 rows link live compiled clauses to
 %   their stored occurrence; forget_translated_equation_binding/1 retires them
 %   [tested: spaces_tokens:equation_tokens_survive_recompilation_and_exact_subtraction;
 %   commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
+%   metta_reference_source_reader/2 installs a home-scoped admission observer;
+%   metta_reference_admission_scope/3 removes it on success, failure, cancellation
+%   or home release [tested: reference_loading; commit=WORKTREE].
 % Guarantees:
+%   - file and string source doors return their complete answer groups once;
+%     removing their loader mutex retains with_mutex/2's once/1 behavior
+%     [tested: structural_aliases; commit=WORKTREE].
+%   - record_equation_token/3 accepts provider identities after compilation;
+%     exact removal preserves equal equations and their separate clauses
+%     [tested: reference_providers; commit=WORKTREE].
 %   - resolved reader equations retain their stored clause reference through
 %     deferred reconstruction, recompilation and fast-cache relocation
 %     [tested: test_forcing_a_deferred_equation_keeps_a_resolved_sibling_once,
@@ -236,6 +248,10 @@
             load_metta_source_groups/3,
             process_metta_string/3,
             parse_metta_source/2,
+            parse_metta_source_summary/4,
+            metta_reference_lazy_reader/2,
+            metta_reference_source_reader/2,
+            read_source_text/2,
             parse_metta_source_prolog/2,
             parsed_form_parts/4,
             metta_answer_term/2,
@@ -252,8 +268,10 @@
             %to, for anything that must be replaced rather than accumulated
             %when that file is loaded again.
             current_source_identity/2,
+            source_load_identity/3,
             record_translated_from/3,
             record_translated_from/4,
+            record_equation_token/3,
             translated_equation_binding/3,
             '$metta_equation_token'/4,
             stored_equation_source/4,
@@ -279,6 +297,7 @@
             %before it defers a runnable's definition.
             load_metta_file/2,
             active_source_program/1,
+            source_definition_arrived/1,
             process_metta_string/2,
             %source_pending_definition/2 is the translator's question about a
             %definition later in the file it is compiling; translated_from/2 is
@@ -307,6 +326,7 @@
             journal_load_now/1,
             journal_data_ref/2,
             metta_host_read_forms/2,
+            metta_host_tagged_parse/2,
             metta_host_save_fast/3,
             metta_host_load_fast/2,
             metta_host_fast_header/1,
@@ -403,7 +423,7 @@ metta_host_set_silent(Silent) :-
     retractall(silent(_)),
     assertz(silent(Silent)).
 
-:- dynamic working_dir/1.
+:- thread_local working_dir/1.
 :- dynamic compiled_metta_source/1.
 :- thread_local active_source_load/1.
 :- dynamic source_load_assertion/3.
@@ -510,10 +530,9 @@ pop_working_dir.
 %Read Filename into string S and process it (S holds MeTTa code):
 load_metta_file(Filename, Results) :- load_metta_file(Filename, Results, '&self').
 load_metta_file(Filename, Results, Space) :-
-    with_mutex(metta_loader,
-               catch(load_entry_metta_file(Filename, Results, Space),
-                     Error,
-                     rethrow_metta_file_error(Filename, Error))).
+    once(catch(load_entry_metta_file(Filename, Results, Space),
+               Error,
+               rethrow_metta_file_error(Filename, Error))).
 
 load_entry_metta_file(Filename, Results, Space) :-
     absolute_file_name(Filename, CanonPath, [access(read)]),
@@ -545,10 +564,9 @@ load_metta_file_impl(Filename, Results, Space) :-
 %translate this form", so a caller that fails after a successful load is told
 %the source was malformed.
 load_metta_source_groups(Filename, Space, Groups) :-
-    with_mutex(metta_loader,
-               catch(load_entry_metta_source_groups(Filename, Space, Groups),
-                     Error,
-                     rethrow_metta_file_error(Filename, Error))).
+    once(catch(load_entry_metta_source_groups(Filename, Space, Groups),
+               Error,
+               rethrow_metta_file_error(Filename, Error))).
 
 load_entry_metta_source_groups(Filename, Space, Groups) :-
     absolute_file_name(Filename, CanonPath, [access(read)]),
@@ -770,8 +788,7 @@ metta_host_form_pair(parsed(Kind, Text, _, _), [Kind, Text]).
 %Extract function definitions, call invocations, and S-expressions part of &self space:
 process_metta_string(S, Results) :- process_metta_string(S, Results, '&self').
 process_metta_string(S, Results, Space) :-
-    with_mutex(metta_loader,
-               process_direct_metta_string(S, Results, Space)).
+    once(process_direct_metta_string(S, Results, Space)).
 process_direct_metta_string(S, Results, Space) :-
     prepare_metta_source_in(Space, S, ParsedForms, Names),
     with_named_program_order(
@@ -780,6 +797,22 @@ process_direct_metta_string(S, Results, Space) :-
             ( process_forms(process_form(Space), Space, ParsedForms, ResultsList), !,
               append(ResultsList, Carried),
               maplist(metta_answer_term, Carried, Results) ))).
+:- dynamic process_loader_string/3, metta_reference_admission_ref/2.
+
+% Only a non-eager home installs this observer. The ordinary loader body and
+% its source digest consume the same text that admission examines.
+metta_reference_source_reader(Space, enabled) :-
+    !,
+    findall((process_loader_string(Text, Results, Space) :-
+                 !, metta_reference_admit_text(Space, Text), Body),
+            ( clause(process_loader_string(Text, Results, Space), Body, Original),
+              \+ metta_reference_admission_ref(_, Original) ), Clauses),
+    reverse(Clauses, Reversed),
+    forall(member(Clause, Reversed),
+           ( asserta(Clause, Ref), assertz(metta_reference_admission_ref(Space, Ref)) )).
+metta_reference_source_reader(Space, disabled) :-
+    forall(retract(metta_reference_admission_ref(Space, Ref)), erase(Ref)).
+
 process_loader_string(S, Results, Space) :-
     prepare_metta_source_in(Space, S, ParsedForms, Names),
     with_named_program_order(
@@ -848,7 +881,7 @@ data_run(Forms, Space, Run, Rest) :-
 data_prefix([parsed(expression, _, Term)|Forms], [Term|Run], Rest) :-
     (   Term = [Head|_]
     ->  Head \== (=),
-        Head \== (:)
+        Head \== (:), Head \== from, Head \== internal
     ;   true
     ),
     !,
@@ -1518,6 +1551,19 @@ recompile_definitions_mentioning(F) :-
 record_translated_from(Ref, Term, SourceRef) :-
     record_translated_from(Ref, Term, none, SourceRef).
 
+% A provider's occurrence has no native clause reference. Its optional
+% token-returning add supplies the identity directly after ordinary compilation.
+% Keep the native record_translated_from/4 body in place: its per-equation
+% inference cost is part of import!'s existing contract.
+% [tested: reference_providers:exact_equation_removal_keeps_the_other_equal_occurrence_and_clause;
+% commit=WORKTREE].
+record_equation_token(Ref, Name, Token) :-
+    clause_property(Ref, module(Module)),
+    assertz('$metta_equation_token'(Module, Name, Ref, Token), TokenRef),
+    ( source_recompile_owners(Owners)
+    -> record_recompiled_source_assertion(Owners, TokenRef)
+    ; record_source_assertion(TokenRef) ).
+
 % A binding row records what arrival-time rewriting did to the occurrence
 % BEYOND resolving &self: a bound token, a form rewriter. &self itself needs
 % no row, because every compile path resolves it against the storing space
@@ -1986,6 +2032,18 @@ print_runnable_form(FormStr, Goals) :-
 %Equality by ==, never head unification: Term and BoundTerm both carry
 %variables, and unifying them can succeed by BINDING across the two where
 %the rewrite in fact changed the term.
+:- dynamic store_metta_equation/6, metta_reference_lazy_ref/2.
+
+metta_reference_lazy_reader(Space, enabled) :-
+    space_module(Space, Module),
+    asserta((store_metta_equation(Space, Module, Term, Bound, Ref, _) :-
+                stored_equation_source(Space, _, Expected, Ref),
+                Bound =@= Expected, !,
+                defer_metta_equation(Space, Module, Term, Ref)), Installed),
+    assertz(metta_reference_lazy_ref(Space, Installed)).
+metta_reference_lazy_reader(Space, disabled) :-
+    forall(retract(metta_reference_lazy_ref(Space, Ref)), erase(Ref)).
+
 store_metta_equation(Space, Module, Term, BoundTerm, StoredRef, _) :-
     silent(true),
     Term == BoundTerm,

@@ -1,5 +1,9 @@
-;`type-cast-holds` is the question `type-cast` asks before it decides: does
-;any declared type of this atom, in this space, unify with the one asked
+; Purpose: ask whether an atom has exactly the requested type in a space.
+; Guarantees: unknown types match only themselves
+; [tested: examples/ch09-types/20-type_casts_that_hold.metta; commit=WORKTREE].
+
+;`type-cast-holds` is the question `type-cast` asks before it decides: is
+;any declared type of this atom, in this space, identical to the one asked
 ;about? It answers a Bool, so it composes with `if` where `type-cast`
 ;answers the atom or an error.
 
@@ -24,12 +28,12 @@
 !(test (type-cast-holds twice (-> Number Number) &self) True)
 !(test (type-cast-holds twice (-> String String) &self) False)
 
-;`%Undefined%` unifies with everything, which is what makes it the gradual
-;default rather than a type: an atom nothing declares answers True for any
-;question, because it has no declared type to contradict one.
-!(test (type-cast-holds five %Undefined% &self) True)
-!(test (type-cast-holds undeclared-name Number &self) True)
-!(test (type-cast-holds undeclared-name String &self) True)
+;The upstream-compatible match-types uses identity. An unknown type does
+;not establish Number or String, but it is identical to %Undefined%.
+!(test (type-cast-holds five %Undefined% &self) False)
+!(test (type-cast-holds undeclared-name Number &self) False)
+!(test (type-cast-holds undeclared-name String &self) False)
+!(test (type-cast-holds undeclared-name %Undefined% &self) True)
 
 ;The space is the third argument and it is the context the declarations are
 ;read from, so the same atom answers differently in two spaces.

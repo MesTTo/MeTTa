@@ -4,6 +4,9 @@
 %   own scope lifetimes across host engines [tested: lib_thread_scope;
 %   commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
 % Guarantees:
+%   - metta_apply_algebra_operation/5 exposes the native carrier operation
+%     semantics to host bindings [tested:
+%     test_visibility_operations_share_the_native_carrier; commit=WORKTREE].
 %   - evaluation context and ordered-match demand are published engine
 %     services [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 %   - metta_import_record/2 and metta_unimport/2 expose one source lifecycle
@@ -176,6 +179,8 @@
             foreign_add_many/2,
             foreign_atoms/2,
             foreign_token/3,
+            foreign_add_token/3,
+            foreign_remove_token/3,
             foreign_begin/1,
             foreign_clear/1,
             foreign_commit/1,
@@ -618,6 +623,13 @@ kind(foreign_atoms/2, ownership).
 % extra candidates; the seat unifies each against the offered pattern.
 :- multifile foreign_token/3.
 kind(foreign_token/3, ownership).
+% Optional exact mutation. add-token stores one Atom and returns its fresh
+% portable token. remove-token consumes only Token and returns true iff it
+% existed. Both follow the provider's existing transaction and hook contract.
+% [tested: reference_providers; commit=WORKTREE]
+:- multifile foreign_add_token/3, foreign_remove_token/3.
+kind(foreign_add_token/3, ownership).
+kind(foreign_remove_token/3, ownership).
 %Clear was the sixth of these all along and was declared nowhere: it lived in
 %extensions/python/metta/_binding/shim.pl, so a Prolog provider that implemented clear, as
 %lib/lib_redis/lib_redis.pl does, was reachable only when Python was in the process.
@@ -1175,6 +1187,9 @@ kind(metta_deprecation/3, host_service).
 %from the head's arrow -- is the engine's. Publishing it is what stops a binding
 %deriving the measure a second time and drifting from what (explain ...) says.
 kind(metta_cost_declaration/4, host_service).
+kind(metta_head_claims/3, host_service).
+kind(metta_head_property/3, host_service).
+kind(metta_head_origins/3, host_service).
 %Which heads one MeTTa source REGISTERS, read from the source and never run.
 %The registration spellings are the engine's own (`import_prolog_function` and
 %its four importer siblings), so a host that read them itself would carry a
@@ -1195,6 +1210,7 @@ kind(metta_effective_algebra/2, host_service).
 kind(metta_current_algebra/3, host_service).
 kind(metta_algebra_one/2, host_service).
 kind(metta_require_algebra_value/3, host_service).
+kind(metta_apply_algebra_operation/5, host_service).
 kind(metta_annotation/2, host_service).
 kind(metta_k_extend/4, host_service).
 %A binding's cast asks which refinement a value violates once the witness has
@@ -1668,6 +1684,7 @@ kind(metta_annotated_operation_effect/2, service).
 kind(metta_operation_plan_effect/2, service).
 kind(metta_effect_walk/3, service).
 kind(metta_function_cacheable/1, service).
+kind(metta_function_cacheable/2, service).
 %A library that batches a compile-time analysis needs to distinguish one
 %source program from an isolated equation and recompile the affected call
 %surface through the loader's established invalidation path.
