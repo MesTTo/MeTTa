@@ -124,6 +124,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Python tool-lane verification commands select their interpreter through the
+  repository's portable selector.
 - Attaching structured refusal metadata preserves custom exception setters,
   property descriptors and attribute-write refusals.
 - Python declaration generators import shared typing parameters by name and

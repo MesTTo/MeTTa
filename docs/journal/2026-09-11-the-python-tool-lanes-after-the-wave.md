@@ -30,7 +30,21 @@ Open: the host or artifact mechanism behind the two minus-eight differences from
 
 ## 2026-09-11: preserve the exception attribute protocol
 
-Tried: compare the original assignment, dictionary write and builtin setattr over plain exceptions, writable properties, a readonly property, a custom setter and a refusing setter, with remedy and ground independently absent or present. `/home/user/Dev/.venv-pypetta/bin/python ai-tmp/reds-tools-exception-contract.py --require-current` finds 11 dictionary-write regressions; all 20 setattr cases match the original return identity, attributes, setter events and raised errors.
+Tried: compare the original assignment, dictionary write and builtin setattr over plain exceptions, writable properties, a readonly property, a custom setter and a refusing setter, with remedy and ground independently absent or present. `"$PY" ai-tmp/reds-tools-exception-contract.py --require-current` with the interpreter selected by `select-python.sh` finds 11 dictionary-write regressions; all 20 setattr cases match the original return identity, attributes, setter events and raised errors.
 Rejected: the earlier dictionary-metadata decision, because it bypasses descriptors and custom __setattr__ methods. Generic metadata follows ordinary attribute assignment, including its refusals. Python documents setattr as equivalent to assignment: https://github.com/python/cpython/blob/v3.12.12/Doc/library/functions.rst.
 Decided: use setattr with two local Ruff B010 markers naming the generic exception protocol. The ongoing whole gate was allowed to finish without tracked edits; a second whole gate verifies the corrected committed state. The original functional and provenance commits remain in history, followed by the correction and its provenance pin.
 Tried: the corrected exception probe with `--require-current` -> 20 matches, zero differences. The focused error/refusal suite -> 164 passed in 6.60 seconds. Each assigned analyzer lane passes again; `sh check.sh ruff mypy door-sync init-stub imports slotscheck` passes, including the projection mutation tests. Logs: `ai-tmp/reds-tools-exception-{contract-after,focused}.log`, `ai-tmp/reds-tools-corrected-*.log`.
+
+## 2026-09-11: portable verification commands
+
+Tried: the second whole gate -> 5586 passed, 99 skipped and 2 pytest failures in 417.48 seconds. The expected identity-twin failure remains; `test_no_tracked_file_cites_an_absolute_workspace_path` also rejects the interpreter path quoted in this journal.
+Rejected: retaining the machine-local interpreter citation, because every tracked file must remain portable. The historical command above now spells that interpreter through the existing selector.
+Decided: use the repository's `select-python.sh`, which already chooses the interpreter for `check.sh`. The portable command below preserves all 20 exception-protocol cases, with zero differences (`ai-tmp/reds-tools-portable-probe.log`).
+
+```sh
+METTA_ROOT=$PWD
+. ./select-python.sh
+"$PY" ai-tmp/reds-tools-exception-contract.py --require-current
+```
+
+Tried: `sh extensions/python/test.sh tests/repository/test_workspace_paths.py` after the citation repair -> 1 passed. Log: `ai-tmp/reds-tools-workspace-portability.log`. The final whole gate is rerun on the documentation-corrected tip; no implementation changes follow the exception-protocol correction.
