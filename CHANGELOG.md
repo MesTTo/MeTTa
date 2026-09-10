@@ -124,6 +124,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Attaching structured refusal metadata preserves custom exception setters,
+  property descriptors and attribute-write refusals.
 - Python declaration generators import shared typing parameters by name and
   reuse existing module bindings. Static analysis now follows binding-generator
   consumers, dynamic record fields and relocated policy evidence. Context-manager
