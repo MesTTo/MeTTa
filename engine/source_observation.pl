@@ -3,13 +3,17 @@
 %   through metta_ensure_source_observation/0, which also gives it the engine's
 %   base module, and the only callers of that door are lib_observe's
 %   observe-source and the tests that drive this module directly.
-% Owns resources: source maps, compiler wrappers, observation buffers, the two
-%   SWI hook clauses and debugger settings are released at observation exit.
+% Owns resources: source maps, compiler wrappers, observation buffers and the
+%   two SWI hook clauses are released at observation exit; debugger settings
+%   and the starting thread's gc flag are restored.
 % Guarded by: an observation mutex serializes compiler wrapper installation;
 %   source maps and execution buffers are thread-local.
 % Guarantees: compiler observation emits no runtime goals and changes no atom
 %   representation [tested: source_observation:compiled_goals_are_unchanged;
-%   commit=df1367c75148ca6c7262134a8736b237e1150383].
+%   commit=WORKTREE].
+% Guarantees: only the starting thread is observed; its collector setting
+%   survives completion, hook exceptions and cancellation [tested:
+%   source_observation; commit=WORKTREE].
 % Guarantees: an engine that never runs observe-source loads none of this and
 %   pays nothing for it. Loading it at boot cost 3,696 inferences, and its
 %   resident prolog:prolog_exception_hook/5 clause cost another 119 on the
@@ -396,7 +400,7 @@ observation_error(Buffer, Error, Frames) :-
 %the whole observation, so one process-wide record is enough.
 :- dynamic installed_hook/1.
 
-install_exception_observers :-
+install_exception_observers(Owner, GC) :-
     assertz((prolog:prolog_exception_hook(Error, Error, Frame, _, _) :-
                  nb_current('$metta_observation', Buffer),
                  source_observation:source_frames(Frame,call,Frames),
@@ -404,7 +408,21 @@ install_exception_observers :-
                  source_observation:observation_error(Buffer,Error,Frames)),
             ExceptionReference),
     assertz(installed_hook(ExceptionReference)),
+    % Workaround: swi-gc-in-frame-finished-listener-clears-a-live-slot - defer stack collection from an exit hook to the next non-exit port or teardown.
+    % A watched debug-mode B_UNIFY_FV frame can finish with its caller's saved
+    % PC still pointing just after the instruction. Collection in its finished
+    % listener rewinds that PC and clears the completed first-write slot.
+    % https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-gc.c#L3584-L3694
+    % Identity dispatch precedes the flag write; neither inspects the frame.
+    % A pending collection at the hook's first call port still precedes both.
+    % Consecutive exit ports keep the window closed to collection. All other
+    % ports restore the saved flag before any observer work. These hooks only
+    % inspect frames and update maps; they never create a thread. Source code
+    % reaches its next call port before it can create one.
     assertz((user:prolog_trace_interception(Port, Frame, _, continue) :-
+                 thread_self(Thread), Thread == Owner,
+                 ( Port == exit -> set_prolog_flag(gc,false)
+                 ; set_prolog_flag(gc,GC) ),
                  nb_current('$metta_observation', Buffer),
                  source_observation:observe_port(Port,Frame,Buffer)),
             TraceReference),
@@ -501,8 +519,8 @@ source_forms(Parsed,Space,Goal) :-
        with_source(Source,Parsed,Space,Goal)
     ; call(Goal) ).
 
-install_runtime_observers :-
-    install_exception_observers,
+install_runtime_observers(Owner, GC) :-
+    install_exception_observers(Owner, GC),
     wrap_predicate(filereader:metta_host_run_source(Source,_,_,_), source_observer,
                    Host, source_observation:source_input(Source,Host)),
     wrap_predicate(filereader:process_direct_metta_string(Source,_,_), source_observer,
@@ -577,18 +595,21 @@ observe_source_locked(Space,Label,Source,Atoms) :-
     save_context('$metta_observe_label', PreviousLabel),
     current_prolog_flag(debug, Debug),
     current_prolog_flag(last_call_optimisation,LCO),
+    current_prolog_flag(gc,GC),
+    thread_self(Owner),
     '$visible'(Visible,Visible),
     setup_call_cleanup(
         true,
         ( nb_linkval('$metta_observe_label',Label),
           nb_linkval('$metta_observation',Buffer),
-          install_compiler_observers, install_runtime_observers,
-          visible(+unify),
+          install_compiler_observers, install_runtime_observers(Owner, GC),
+          visible([+all,+cut,+exception]),
           catch((trace,filereader:metta_host_run_source(Source,Space,[],Groups)),
                 Error,true),
-          notrace,
+          notrace, set_prolog_flag(gc,GC),
           collect_observation(Buffer,Groups,Error,Atoms) ),
-        ( notrace, '$visible'(_,Visible), set_prolog_flag(debug,Debug),
+        ( notrace, set_prolog_flag(gc,GC),
+          '$visible'(_,Visible), set_prolog_flag(debug,Debug),
           set_prolog_flag(last_call_optimisation,LCO),
           remove_runtime_observers, remove_compiler_observers,
           retractall(source_document(_,_,_)),
