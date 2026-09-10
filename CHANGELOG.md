@@ -7,6 +7,24 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Receipt frame watches, twin file-search cache normalisation and C cursor
+  record ownership now name their host-workaround entries. The ledger runs
+  frozen reproductions for discarded engine query frames, cache expiry and
+  retired first-argument index keys, and reports when each workaround can lift.
+
+- Every workaround for a host defect names its ledger entry: a site carries
+  `Workaround: <key> - <what>` in its own comment syntax,
+  `docs/host-workarounds.md` holds one entry per defect with a tracked
+  reproduction, and the `host-workarounds` gate lane refuses a site without
+  an entry, an entry without a site, and an entry whose reproduction no
+  longer answers `present` on the running host, naming the sites to lift.
+  Three entries open the ledger: the cleanup-registration window an
+  inference limit can strike (`swi-cleanup-window`), the locale-derived
+  default encoding (`swi-locale-default-encoding`) and the extension-bearing
+  load spec that never reaches the artifact rule (`swi-qlf-extension-spec`).
+
 ### Changed
 
 - A Prolog source the engine loads at run time compiles beside itself on
@@ -38,6 +56,80 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   class fails when instantiated.
 
 ### Fixed
+
+- Runnable source-prefix checks call their reader provider directly. SWI's
+  clause-collection schedule no longer changes the first pending-definition
+  read's inference count; the host ledger carries the isolated reproduction.
+- Each parity program gets a fresh null control. A library's newly generated
+  QLF artifacts can no longer change the boot cost while the lane subtracts
+  an earlier program's cached control.
+- Concurrent future awaiters wait through a competing native join before
+  returning their shared result. An interrupted joiner releases the claim
+  for another awaiter; timeout and cancellation exceptions propagate, and
+  repeated awaits still return the settled value.
+- Parity comparisons regenerate their QLF fixture through the shipping loader
+  before measuring, so a previous lane's compilation context cannot choose
+  the artifacts being priced. Repeated-generation and foreign-artifact tests
+  preserve the whole-process counter boundary and all existing limits.
+- Evidence and provenance checks include the C binding's nested Prolog test
+  fixtures, resolving header pins while preserving code literals.
+- Parity instruction overruns print the program and null ranges that produced
+  the failed comparison, retaining the same limits and verdicts.
+- Receipt ownership transfers between live transaction frames, keeping the
+  outer scope through nested commit or rollback. Destroying a suspended
+  engine no longer enters the receipt listener through a discarded query
+  frame; each completed scope is retired once.
+- The upstream performance lane retains uncertainty in its subtracted null
+  control. Straddling verdicts print both sample ranges, an excessively wide
+  control explicitly declines the instruction comparison, and definite
+  overruns and inference drift still fail with their existing allowances.
+  Active root-caused waivers remain visible beside each measurement verdict.
+- The C binding retires cursor ownership immediately through a bound record
+  reference. Repeated open and close no longer retain clauses for later index
+  scans. Concurrent closes have one winner, and close errors still release
+  the engine and C reference; stale handles remain generation-safe.
+- The awaited-future finalisation test observes warnings in its own process,
+  so collection of an older query cannot be misattributed to the future.
+  An abandoned cursor inside the probe still fails its warning assertion.
+- Twin failure reports retain the child's process status, including when it
+  exits without producing output.
+- Steady benchmark workloads collect Prolog warmup garbage before their
+  measured operation, keeping warmup's collection and stack growth in setup.
+- The twin measurement protocol fixes SWI's file-search cache lifetime before
+  engine creation, so
+  first library loads keep their inference count when a lane exceeds the
+  default cache expiry. Library loading remains part of the measured work.
+- The C boot benchmark normalises its governed QLF caches before sampling and
+  checks the resulting governed artifact count. Running the test suites no
+  longer changes the boot fixture; a changed engine artifact set fails with
+  its measured and pinned counts.
+- Engine and C boot counters explicitly decline comparisons outside the
+  canonical checkout length and depth. Non-monotonic atom inventory costs
+  are reported as a different measurement configuration, preserving the pins.
+- Open reads of parametric spaces include scalar atoms as well as expressions.
+- The parity report identifies four retained module and source-publication
+  costs as root-caused waivers, with their measured controls and removal condition.
+- Public and bulk writes call their token-aware bodies directly, removing
+  one forwarding call per atom while retaining atomic identity allocation.
+- The MORK benchmark imports its counting helper before measurement, removing
+  159 inferences of first-use library resolution from the operation window.
+- The MORK benchmark sends each perf control command in one buffered flush,
+  preventing partial tags from being mistaken for an unavailable counter,
+  and consumes each complete acknowledgement including its terminating NUL.
+- The MORK lane reports empty-window instruction modes as calibration and
+  subtracts their minimum. All operation instruction gates remain active,
+  and the empty Prolog operation must still cost exactly five inferences.
+- The upstream performance and Jupyter lanes honor `METTA_UPSTREAM`, keeping
+  the sibling `PeTTa-upstream` checkout as the default when it is unset.
+- Fast-image loads reserve tokens with one rollback marker per batch and keep
+  the portable tokens produced by validation. A 10,000-atom load falls from
+  891,612 to 591,623 inferences. Ordinary removals stop at the nearest native
+  transaction frame when unnested and send no receipt cleanup request when
+  they reserved nothing; nested transactions retain their outer owner.
+- Awaiting a future whose result is already recorded still joins its native
+  worker. Pool capacity is therefore released before await returns, including
+  the publication window exercised by the channels/pools example. Pool
+  statistics read all four properties from one manager snapshot.
 
 - The engine's tokens, receipts and vocabulary-seed units import the list,
   ordered-set and pair predicates they call (`member/2`, `list_to_set/2`,

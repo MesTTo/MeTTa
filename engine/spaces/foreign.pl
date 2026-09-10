@@ -1,6 +1,10 @@
 % Guarantees: resolved_equation_removal/4 honors exact source occurrence selection
 %   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: validate foreign-provider capabilities and route foreign and native space operations
+% Guarantees: the native bulk loop calls add_sexp_in/5 directly, retaining
+%   unique occurrence tokens and the same duplicate bag as public writes
+%   [tested: spaces_tokens:public_and_bulk_writes_preserve_tokens_and_duplicate_bags;
+%   commit=WORKTREE].
 % Guarantees: a new concrete provider claim emits seam:space_created/1;
 %   namespace claims and reopening an existing space do not mint a lifetime
 %   [tested: test_named_foreign_creation_is_owned_and_an_existing_provider_is_borrowed;
@@ -387,7 +391,7 @@ add_atoms_in_one_crossing(Space, Terms) :-
     ;   true
     ),
     forall(member(Term, Terms),
-           ( add_sexp_in(Storage, Space, Term, Ref),
+           ( add_sexp_in(Storage, Space, Term, _, Ref),
              record_source_atom_assertion(Ref) )),
     (   Space == '&metta'
     ->  forall(member(Term, Terms), metta_catalog_note_added(Term))

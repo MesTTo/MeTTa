@@ -41,6 +41,8 @@
 #                                            door-sync door-coverage door-refusals
 #                                            closed-sets
 #                                            closed-sets-selftest
+#                                            host-workarounds
+#                                            host-workarounds-selftest
 #                                            cumulative-syntax
 #                                            cumulative-syntax-selftest
 #                                            parity twins twins-selftest
@@ -776,6 +778,8 @@ run GATE extension-scaffold sh "$HERE/tests/shell/test_python_extension_scaffold
 # eleven were, and one of those listed six members where the engine derived ten.
 run GATE closed-sets "$PY" "$HERE/tests/checks/check_closed_sets.py"
 run GATE closed-sets-selftest "$PY" "$HERE/tests/checks/check_closed_sets_selftest.py"
+run GATE host-workarounds "$PY" "$HERE/tests/checks/check_host_workarounds.py"
+run GATE host-workarounds-selftest "$PY" "$HERE/tests/checks/check_host_workarounds_selftest.py"
 
 run REPORT door-order "$PY" "$HERE/extensions/python/tools/doororder.py"
 run REPORT filesizes "$PY" "$HERE/extensions/python/tools/filesizes.py"

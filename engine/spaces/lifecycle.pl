@@ -6,6 +6,10 @@
 %   from database snapshots [tested: lib_import_lifecycle,
 %   extensions/python/tests/ch05_equations_and_evaluation/test_reload.py; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: decode stored atoms and manage source, subscription, reaction, table, and clear lifecycles
+% Guarantees: public writes reach metta_add_atom/4 directly and retain unique
+%   occurrence tokens and duplicate bags in named and parametric stores
+%   [tested: spaces_tokens:public_and_bulk_writes_preserve_tokens_and_duplicate_bags;
+%   commit=WORKTREE].
 % Guarantees: release requests child cancellation before taking the execution
 %   module mutex, then publishes retirement after native teardown. Access
 %   checks also precede cache misses and allocation [tested: lib_thread_scope,
@@ -1650,12 +1654,12 @@ compiled_predicate_arity(F, Module, Predicate, Arity, Owner) :-
     Space = [Family|Parameters],
     space_parametric(Space),
     !,
-    (   metta_add_atom(Space, Term, _)
+    (   metta_add_atom(Space, Term, _, _)
     ->  Result = true
     ;   fail
     ).
 'add-atom'(Space, Term, Result) :-
-    (   atom(Space), metta_add_atom(Space, Term, _)
+    (   atom(Space), metta_add_atom(Space, Term, _, _)
     ->  Result = true
     ;   metta_space_name(Space)
     ->  fail

@@ -261,6 +261,10 @@ git checkout FETCH_HEAD
 python tests/checks/check_upstream_parity.py
 ```
 
+Set `METTA_UPSTREAM=/path/to/checkout` to use an existing reference tree.
+The performance and Jupyter kernel lanes use that path when the variable is
+set, including their presence and commit checks.
+
 The script measures both engines over the corpus and compares against the
 committed baseline. `--rebaseline` rewrites the baseline from a fresh
 measurement, which is how the numbers on this page were produced, and

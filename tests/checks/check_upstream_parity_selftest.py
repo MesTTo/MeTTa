@@ -2,9 +2,10 @@
 
 Every plant passes through ``check_upstream_parity`` itself, with only
 ``_perf`` replaced, so the selftest and the production lane cannot drift into
-testing different questions. No engine is started: ``_perf`` is the single
-place this lane touches a process, and a table standing in for it exercises
-the whole sampling, marker-parsing, memoising, netting and verdict path.
+testing different questions. A table standing in for ``_perf`` exercises the
+sampling, marker-parsing, fresh calibration, netting and verdict path. The artifact
+fixture test separately runs the real shipping loader twice and restores the
+generated files it borrowed.
 
 The questions are the halves of the 2026-09-06 defect:
 
@@ -28,6 +29,22 @@ runs them in order and prints what they answer.
 Assumes: an ``examples/`` corpus with at least two files, used only for their
   names and path shapes.
 Guarantees:
+  - each program has a fresh null sample: a changed fixed cost cancels in
+    either direction, while added program work still fails the same band
+    [tested: check_upstream_parity_selftest.fresh_null_failures; commit=WORKTREE]
+  - two shipping fixture generations have the same artifact set and content
+    digests after removing only the embedded temporary filename's compiler
+    PID and its derived offsets. A planted foreign artifact is removed
+    [tested: check_upstream_parity_selftest.artifact_fixture_failures; commit=WORKTREE]
+  - every active waiver remains visible while its separate measurement verdict
+    is preserved [tested: parity-perf-selftest; commit=WORKTREE]
+  - null extrema bound the compared difference, an overrun beyond the whole
+    range still fails, and a null spread beyond its measured resolution is
+    explicitly unmeasurable without hiding inference drift [tested:
+    check_upstream_parity_selftest.null_range_failures; commit=WORKTREE]
+  - both upstream lanes prefer METTA_UPSTREAM to the sibling checkout, including
+    a configured path that is absent [tested: check_upstream_parity_selftest.upstream_selection_failures;
+    commit=WORKTREE]
   - a planted engine whose fixed cost exceeds its program run is reported as
     ``negative-net`` by ``measure`` and turns ``verdicts`` red, while the rule
     this file replaced records the same numbers and stays green
@@ -53,7 +70,10 @@ Guarantees:
     naming the pin elsewhere, the sibling checkout is AT that pin, and a
     kernel or container that denies the counter is named with the two knobs
     that decide it [tested: this file is its own gate; commit=fc990fa3042ee05d931d3928694e89021be32855]
-Fails when: the production lane stops exposing ``_perf`` as its only process
+Owns resources: artifact_fixture_failures restores the bytes and timestamps of
+  the checkout's original generated artifacts and stamp, including on failure.
+  check.sh serializes lanes that share them.
+Fails when: the production lane stops exposing ``_perf`` as its measured process
   call, or stops computing a row's net inside ``measure``.
 Open Obligations:
   To Do: None
@@ -63,14 +83,18 @@ Open Obligations:
 
 from __future__ import annotations
 
+import argparse
 import contextlib
+import hashlib
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
@@ -514,6 +538,34 @@ def null_program_failures(example: Path) -> list[str]:
     return failures
 
 
+def upstream_selection_failures() -> list[str]:
+    """Both lanes honor the configured checkout before testing its presence."""
+    failures: list[str] = []
+    configured = lane.REPO / "ai-tmp" / "ai upstream selection fixture"
+    code = (
+        "import runpy, sys; from pathlib import Path; "
+        "sys.path.insert(0, str(Path(sys.argv[1]).parent)); "
+        "print(runpy.run_path(sys.argv[1])['UPSTREAM'])"
+    )
+    for script in ("check_upstream_parity.py", "check_jupyter_kernel.py"):
+        for value in (None, str(configured)):
+            environment = dict(os.environ)
+            environment.pop("METTA_UPSTREAM", None)
+            if value is not None:
+                environment["METTA_UPSTREAM"] = value
+            result = subprocess.run(
+                [sys.executable, "-c", code, str(HERE / script)],
+                capture_output=True, text=True, env=environment, check=False,
+            )
+            expected = configured if value is not None else lane.REPO.parent / "PeTTa-upstream"
+            if result.returncode or Path(result.stdout.strip()).resolve() != expected.resolve():
+                failures.append(
+                    f"{script} with METTA_UPSTREAM={value!r}: expected {expected}, "
+                    f"exit {result.returncode}, stdout {result.stdout!r}, stderr {result.stderr!r}"
+                )
+    return failures
+
+
 def upstream_prerequisite_failures() -> list[str]:
     """The lane must not be able to pass in CI without measuring.
 
@@ -713,6 +765,8 @@ def straddled_allowance_failures(name: str) -> list[str]:
             "instructions": median,
             "lowest": lowest,
             "highest": median + (median - lowest),
+            "program_range": [FIXED + lowest, FIXED + median + (median - lowest)],
+            "null_range": [FIXED, FIXED],
             "runs": 5,
             "inferences": PLANTED_INFERENCES,
         }
@@ -786,6 +840,263 @@ def counter_refusal_policy_failures() -> list[str]:
     return failures
 
 
+def null_range_failures(example: Path, name: str) -> list[str]:
+    """Plant both sides of interval subtraction and a control beyond resolution."""
+    failures: list[str] = []
+    allowed = 1_170_000
+    frozen = {name: {"status": "measured", "upstream_instructions": 1_000_000,
+                     "our_instructions": 1_000_000,
+                     "our_inferences": PLANTED_INFERENCES}}
+    original_ci = os.environ.get("CI")
+    try:
+        for delta, below, above, ci, inference_delta, expected in (
+            (1, 13_405, 12_852, False, 0, "straddle"),
+            (1, 13_405, 12_852, True, 0, "straddle"),
+            (12_853, 13_405, 12_852, False, 0, "overrun"),
+            (-13_406, 13_405, 12_852, False, 0, "within"),
+            (1, 13_406, 12_852, False, 0, "unmeasurable-null"),
+            (1, 13_405, 12_853, False, 0, "unmeasurable-null"),
+            (1, 13_406, 12_852, True, 0, "unmeasurable-null"),
+            (1, 13_406, 12_852, False, 1_000, "unmeasurable-null"),
+        ):
+            if ci:
+                os.environ["CI"] = "true"
+            else:
+                os.environ.pop("CI", None)
+            null_calls = 0
+            program = FIXED + allowed + delta
+
+            def cost(_root, path, program_cost=(program, PLANTED_INFERENCES + inference_delta),
+                     null_offsets=(-below, 0, above)):
+                nonlocal null_calls
+                if not is_null(path):
+                    return program_cost
+                index = null_calls - lane.WARMUP_RUNS
+                null_calls += 1
+                return FIXED + (null_offsets[index % 3] if index >= 0 else 0)
+
+            with planted(cost):
+                measured = lane.measure(lane.REPO, example)
+                printed = io.StringIO()
+                with contextlib.redirect_stdout(printed):
+                    answer = lane.verdicts(frozen, remeasure=True)
+                summary = lane._null_summary(lane.REPO)
+            label = f"null range {below}/{above}, delta {delta}, CI={ci}"
+            expected_status = expected if expected == "unmeasurable-null" else "ok"
+            if measured["status"] != expected_status:
+                failures.append(f"{label}: expected {expected_status}, got {measured}")
+            if measured.get("lowest") != allowed + delta - above or measured.get("highest") != allowed + delta + below:
+                failures.append(f"{label}: difference does not subtract both null extrema: {measured}")
+            if null_calls != 2 * (lane.WARMUP_RUNS + lane.RUNS) or summary.get("median") != FIXED:
+                failures.append(f"{label}: fresh null sampling lost its sample or median")
+            text = printed.getvalue()
+            should_fail = expected == "overrun" or inference_delta or (ci and expected != "within")
+            if bool(answer) != bool(should_fail):
+                failures.append(f"{label}: verdict {answer}, expected failure={bool(should_fail)}")
+            if expected == "straddle":
+                failures.extend(
+                    f"{label}: verdict does not print {fragment!r}"
+                    for fragment in ("straddle the allowance", f"program {program}..{program}",
+                                     f"null {FIXED - below}..{FIXED + above}")
+                    if fragment not in text
+                )
+            if expected == "overrun":
+                failures.extend(
+                    f"{label}: overrun does not print {fragment!r}"
+                    for fragment in (f"difference {measured['lowest']}..{measured['highest']}",
+                                     f"program {program}..{program}",
+                                     f"null {FIXED - below}..{FIXED + above}")
+                    if fragment not in text
+                )
+            if expected == "unmeasurable-null":
+                failures.extend(
+                    f"{label}: refusal does not print {fragment!r}"
+                    for fragment in ("NOT MEASURED ON THIS BOX", "unmeasurable-null",
+                                     "resolution -13405/+12852", f"{FIXED - below}..{FIXED + above}")
+                    if fragment not in text
+                )
+            if inference_delta and "TREE DRIFT" not in text:
+                failures.append(f"{label}: the unusable null hid the program's inference drift")
+    finally:
+        if original_ci is None:
+            os.environ.pop("CI", None)
+        else:
+            os.environ["CI"] = original_ci
+    return failures
+
+
+def fresh_null_failures(example: Path, name: str) -> list[str]:
+    """A lazy artifact can change boot cost between rows of the same shape."""
+    failures: list[str] = []
+    allowed = WORK * lane.INSTRUCTION_RATIO + lane.INSTRUCTION_ABSOLUTE
+    frozen = {name: {"status": "measured", "upstream_instructions": WORK,
+                     "our_instructions": WORK,
+                     "our_inferences": PLANTED_INFERENCES}}
+    for fixed_delta in (-500_000, 500_000):
+        for added_work in (0, int(allowed - WORK) + 1):
+            epoch = [0]
+            null_calls = 0
+
+            def cost(_root, path, delta=fixed_delta, work=added_work, phase=epoch):
+                nonlocal null_calls
+                if is_null(path):
+                    null_calls += 1
+                    return FIXED + phase[0] * delta
+                return FIXED + phase[0] * delta + WORK + phase[0] * work
+
+            with planted(cost):
+                first = lane.measure(lane.REPO, example)
+                epoch[0] = 1
+                second = lane.measure(lane.REPO, example)
+                printed = io.StringIO()
+                with contextlib.redirect_stdout(printed):
+                    answer = lane.verdicts(frozen, remeasure=True)
+                summary = lane._null_summary(lane.REPO)
+            label = f"fixed cost {fixed_delta:+d}, program work {added_work:+d}"
+            if first["instructions"] != WORK or second["instructions"] != WORK + added_work:
+                failures.append(f"{label}: a previous null contaminated the next program: {second}")
+            if null_calls != 3 * (lane.WARMUP_RUNS + lane.RUNS):
+                failures.append(f"{label}: each program did not receive a fresh null sample")
+            if summary.get("median") != FIXED + fixed_delta:
+                failures.append(f"{label}: the summary did not retain the latest measured null")
+            if bool(answer) != bool(added_work):
+                failures.append(f"{label}: verdict {answer} changed the program's allowance")
+            if added_work and "CROSS-ENGINE REGRESSION" not in printed.getvalue():
+                failures.append(f"{label}: the planted program increase was not reported")
+    return failures
+
+
+def waiver_reporting_failures() -> list[str]:
+    """Keep active rulings visible beside each independent measurement verdict."""
+    failures: list[str] = []
+    names = tuple(lane.WAIVERS)
+    for instructions, status in ((WORK, "measured"),
+                                 (2_000_000, "measured"),
+                                 (WORK, "unmeasurable-null")):
+        baseline = {name: {"status": status, "our_instructions": instructions,
+                           "upstream_instructions": 1_000_000,
+                           "our_inferences": PLANTED_INFERENCES}
+                    for name in names}
+        printed = io.StringIO()
+        with contextlib.redirect_stdout(printed):
+            answer = lane.verdicts(baseline, remeasure=False)
+        text = printed.getvalue()
+        expected = int(status == "unmeasurable-null" and os.environ.get("CI") == "true")
+        if answer != expected:
+            failures.append(f"active waivers changed {status}'s verdict: {answer}, expected {expected}")
+        failures.extend(
+            f"active waiver disappeared at {instructions}/{status}: {name}"
+            for name in names
+            if text.count(f"WAIVED (root-caused, see WAIVERS) {name}:") != 1
+        )
+        if status == "unmeasurable-null" and "NOT MEASURED ON THIS BOX" not in text:
+            failures.append("an active waiver hid the independent null-control refusal")
+    return failures
+
+
+def qlf_content_digest(data: bytes) -> str:
+    """Hash every QLF byte except its compiler PID and the resulting offsets.
+
+    qlfOpen stores the atomic writer's temporary pathname; qlfClose appends
+    source offsets. The three signed varints and the four-byte offset table
+    are defined in SWI's src/pl-qlf.c at fc7ef84b949378b729052c3ade79c90ce5416abb,
+    qlfPutInt64, qlfOpen and writeSourceMarks. No export or instruction bytes
+    are omitted, and differing PID digit counts change no digest.
+    """
+    magic = b"SWI-Prolog .qlf file\n\0"
+    if not data.startswith(magic):
+        message = "fixture is not a QLF artifact"
+        raise ValueError(message)
+    position = len(magic)
+    for _ in range(3):
+        start, value, shift = position, 0, 0
+        while True:
+            byte = data[position]
+            position += 1
+            value |= (byte & 0x7f) << shift
+            if byte & 0x80:
+                break
+            shift += 7
+        value = (value >> 1) ^ -(value & 1)
+    end = position + value
+    filename, replacements = re.subn(rb"(\.[^/]+\.qlf)\.[0-9]+$", rb"\1.PID",
+                                    data[position:end])
+    if replacements != 1:
+        message = "QLF header has no atomic compiler pathname"
+        raise ValueError(message)
+    count = int.from_bytes(data[-4:], "big")
+    table = len(data) - 4 * (count + 1)
+    if not end <= table < len(data):
+        message = "QLF source index overlaps its header"
+        raise ValueError(message)
+    offsets = b"".join((int.from_bytes(data[i:i + 4], "big") - end).to_bytes(4, "big")
+                       for i in range(table, len(data) - 4, 4))
+    content = data[:start] + filename + b"\0" + data[end:table] + offsets + data[-4:]
+    return hashlib.sha256(content).hexdigest()
+
+
+def artifact_fixture_failures() -> list[str]:
+    """Regenerate twice after a foreign artifact, then restore the borrowed set."""
+    def artifacts():
+        return {path for directory in (lane.REPO / "engine", lane.REPO / "lib")
+                for path in directory.rglob("*.qlf")}
+
+    stamp = lane.REPO / "engine" / ".qlf-stamp"
+    originals = artifacts() | ({stamp} if stamp.exists() else set())
+    saved = {path: (path.stat(), path.read_bytes()) for path in originals}
+    foreign = lane.REPO / "engine" / "ai-parity-foreign.qlf"
+    if foreign.exists():
+        return [f"artifact fixture refuses to overwrite {foreign}"]
+    failures, generations = [], []
+    calls = []
+
+    def compare(_baseline, *, remeasure):
+        calls.append(("compare", remeasure))
+        return 0
+
+    with (patch.object(lane, "prepare_artifacts", lambda: calls.append("prepare")),
+          patch.object(lane, "verdicts", compare),
+          patch.object(lane, "upstream_head", lambda: lane.UPSTREAM_COMMIT)):
+        for frozen in (False, True):
+            calls.clear()
+            lane._judge(argparse.Namespace(rebaseline=False, frozen=frozen))
+            expected = [("compare", False)] if frozen else ["prepare", ("compare", True)]
+            if calls != expected:
+                failures.append(f"parity fixture setup order at frozen={frozen}: {calls}")
+    try:
+        for generation in range(2):
+            foreign.write_bytes(b"foreign producer; this artifact must be purged")
+            paths = lane.prepare_artifacts()
+            if foreign.exists():
+                failures.append("shipping fixture retained a planted foreign artifact")
+            inventory, raw_digests = {}, {}
+            for path in paths:
+                data = path.read_bytes()
+                relative = str(path.relative_to(lane.REPO))
+                inventory[relative] = qlf_content_digest(data)
+                raw_digests[relative] = hashlib.sha256(data).hexdigest()
+                # An executable-byte change must remain visible to this digest.
+                if b"metta_engine" in data and qlf_content_digest(
+                        data.replace(b"metta_engine", b"netta_engine", 1)) == inventory[relative]:
+                    failures.append("QLF digest hid a planted module-name change")
+            generations.append(inventory)
+            print(f"parity fixture generation {generation + 1}: "
+                  f"{json.dumps({'content': inventory, 'raw': raw_digests}, sort_keys=True)}")
+        if generations[0] != generations[1]:
+            failures.append("repeated shipping generations changed artifact set or content digests")
+    finally:
+        for path in artifacts() - originals:
+            path.unlink()
+        if stamp not in originals:
+            stamp.unlink(missing_ok=True)
+        for path, (metadata, data) in saved.items():
+            path.write_bytes(data)
+            path.chmod(metadata.st_mode & 0o7777)
+            os.utime(path, ns=(metadata.st_atime_ns, metadata.st_mtime_ns))
+        lane._FIXED_COST.clear()
+    return failures
+
+
 def main() -> int:
     """Plant every way this measurement can break, and report the ones the lane missed."""
     corpus = lane.corpus()
@@ -806,12 +1117,17 @@ def main() -> int:
         *carried_meta_failures(),
         *timeout_failures(),
         *null_program_failures(example),
+        *upstream_selection_failures(),
         *upstream_prerequisite_failures(),
         *denied_counter_failures(),
         *null_program_refusal_failures(),
         *unmeasured_row_failures(name),
         *straddled_allowance_failures(name),
+        *null_range_failures(example, name),
+        *fresh_null_failures(example, name),
         *counter_refusal_policy_failures(),
+        *waiver_reporting_failures(),
+        *artifact_fixture_failures(),
     ]
 
     for failure in failures:

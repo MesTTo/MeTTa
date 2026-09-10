@@ -29,6 +29,8 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py]
   - Rust header pins and MORK's Python selftest pins are reached and resolved
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
+  - nested C Prolog fixtures resolve their header pins and preserve code atoms
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
 Fails when: run against a tree it did not write. It asserts on a fixture it
   generates and nothing else.
 Open Obligations:
@@ -89,6 +91,16 @@ PLANTS = (
         [
             "% Purpose: a fixture.",
             f"%   - a Prolog pin [{TAG} {WHEN}: a_plunit_test; {WORD}].",
+            f"an_atom('{WORD}').",
+        ],
+        [2],
+        [3],
+    ),
+    (
+        "extensions/cmetta/tests/plant.pl",
+        [
+            "% Purpose: a C-embedded Prolog fixture.",
+            f"% A header pin [{TAG} {WHEN}: a_plunit_test; {WORD}].",
             f"an_atom('{WORD}').",
         ],
         [2],

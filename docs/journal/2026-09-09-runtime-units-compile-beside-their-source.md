@@ -172,3 +172,139 @@ every pin exactly before the predicates were added.
 Rejected: recording the compile-shaping flags in the stamp, because the
 list rots and a stamp cannot see an initialisation file or a pack; a
 canonical writer needs no list.
+
+## 2026-09-09, merged performance controls
+
+Goal: retain the runtime artifact policy while reconciling the boot costs
+after token storage and the Python layout merge.
+
+Decided: use pristine controls at the package cut, `3734fc364` for the
+requested layout comparison, and `cbf7a958de1e87d648bb723c97fa3960f94e258d`
+for the token merge's first parent. Each control builds its native engine
+units, uses the same Python environment, and purges and warms its own QLF
+files before measurement. Preserve baseline digests, advisory wall figures
+and every declared allowance; append mechanism, control and command beside
+every moved pin. A full-lane empirical twin observation is pooled with its
+prior observations and never converted into a point re-pin.
+
+Tried: the nested cut control's first combined cost run found MORK's sibling
+Cargo path absent (`failed to read .../ai-tmp/MORK/kernel/Cargo.toml`). Its
+prebuilt shared objects remained available to the lane. The control's parent
+directory now links the same MORK and PathMap checkouts as the task worktree;
+the MORK lane must be rerun after that provisioning correction.
+
+## 2026-09-09, boot location is a measurement configuration
+
+Tried: relocated six owned tmpfs controls to the sibling `boot0` through
+`boot5` directories, all length29 and depth5. Rebuilt the C driver because
+it embeds its root, cleared each QLF set and ran three fresh engine and C
+boot processes per control. All eighteen measurement/build steps exit zero;
+`ai-tmp/ai-canonical-boot-results.json` retains their commands and logs.
+Removed all six tmpfs originals after verification. The two auxiliary shape
+controls also moved to disk under this worktree's `ai-tmp`, and their tmpfs
+originals and empty parents were removed. The earlier tmpfs placement violated
+the workspace scratch rule and is not the location of the final evidence.
+
+Tried: equal-length29 checkouts at depths2,3,4,5,6,7, with the same runtime
+at `2e075fe7e`. Engine inference triples all read296185. C triples read
+456391,456394,456395,456391,456397,456396 in that order. Depth2 is the retained
+pre-relocation reading; the other five are on disk. Instrumented engine boots
+make88 calls to `absolute_file_name/3` at every measured depth. The C series
+is non-monotonic and is not88 times a fixed per-component price. Both owned
+matchers make the path relative before their segment recursion.
+
+Tried: at the canonical shape, intern0,1,2,3,5,8,16 fresh atoms before the
+ordinary benchmark goal. Three processes per point read296185 except the
+three-atom point, which reads296158 three times. This reproduces the
+non-monotonic inventory sensitivity recorded in the gate journal's
+2026-09-07 TMP control. `ai-tmp/ai-boot-depth-series.json` and
+`ai-tmp/ai-boot-inventory.json` retain the series; the wrapper probe is
+`ai-tmp/ai-boot-absolute-calls.pl`. The 44-character worktree reads296195 for
+engine boot and456398 for C boot. These offsets are not per-component work.
+
+Rejected: attributing the inference offset to SWI path traversal, because
+neither the depth series nor the fresh-atom control supports that mechanism.
+Rejected: moving a band or pinning the canonical row from another shape.
+
+Decided before implementation: both drivers measure and explicitly decline
+both boot counter comparisons outside the canonical length29 and depth5,
+including samples inside the band. Update mode must preserve those boot pins.
+The shared baseline reader owns the shape and its measured reason; runtime
+rows keep their comparisons. Driver regressions cover different length,
+different depth at equal length, updates, and an independent runtime failure.
+
+Verified: the driver regression suite reads12 failures and4 passes before
+the guard and16 passes after it. With the shared harness tests, the after
+command `python -m pytest -q extensions/python/ext/metta-benchmarking/tests/test_boot_configuration.py extensions/python/ext/metta-benchmarking/tests/test_benchmarking.py`
+passes64 tests. The first draft fixture omitted the required instruction and
+CPU noise declarations; adding the declarations made its before failures
+exercise the location contract rather than a malformed baseline.
+
+## 2026-09-09: normalise the C boot artifact fixture
+
+Tried: the canonical checkout at `2e075fe7e` with21 governed QLF artifacts
+reads456391 inferences in three processes. Compiling the16 library artifacts
+that the full suites leave behind produces37 artifacts and456505 in each
+of three processes, with no tracked change. `ai-tmp/ai-boot-cache-probe.json`
+records the original inventory, added files and successful compile commands.
+The C driver counts from process start, including the freshness walk; the
+engine benchmark puts that walk outside its region.
+
+Rejected: declining every changed cache inventory. A developer checkout that
+has run the suites would then usually leave this row uncompared. Rejected:
+precompiling every governed source, because included engine units cannot be
+compiled as standalone modules.
+
+Decided before implementation: before the C boot sample only, delete library
+QLF caches and run the engine benchmark's ordinary warm boot. Ask
+`metta_qlf_boot:qlf_files/2` for the resulting governed inventory and require
+the count recorded beside the boot row. A different count is a hard failure,
+including update mode; the checkout-shape guard remains independent. Purging
+ignored library caches makes the next library import compile them again.
+The measured C region and its whole-process counter remain unchanged.
+
+## 2026-09-10: verify the boot fixture and location guard together
+
+Verified: the five artifact-fixture regressions fail before the fixture and
+pass after it. The shared harness and driver suites pass69 tests together;
+Ruff passes for both drivers, the shared reader and both affected test files.
+Logs: `ai-tmp/ai-boot-fixture-before.log`, `ai-tmp/ai-boot-fixture-after.log`.
+
+Verified: `python ai-tmp/ai-canonical-boot-fixture-check.py` runs the final
+drivers against the canonical control's binaries and exits zero for both.
+Engine inferences are296185 in each process; instructions are963622434,
+963627666,963632727, inside the retained965561590 pin's band. The C fixture
+restores21 artifacts from the37-artifact control; its inference triple is
+456391,456391,456391 and its instruction triple1248619576,1248612329,
+1248626326 is inside the retained1248231076 pin's band. Neither instruction
+pin moves for these confirming samples. The worktree's C boot prints its
+length44/depth7 refusal and measured inventory-sensitivity series explicitly.
+Both counter comparisons remain active at length29/depth5.
+
+## 2026-09-10: include optional engine artifacts in the boot fixture
+
+Tried: the full engine suite creates `engine/source_observation.qlf` through
+`metta_ensure_source_observation/0`. That module is optional and deliberately
+absent from ordinary boot. The library-only fixture consequently refused
+`governed QLF inventory 22; pinned 21; attribute the engine artifact-set change
+before re-pinning` in `ai-tmp/ai-verified-cost.log`.
+
+Measured: `python ai-tmp/ai-boot-optional-engine.py` at canonical length29 and
+depth5 gives 456391 in all three ordinary-boot processes with21 artifacts,
+456397 in all three with the optional observer's22, then456391 in all three
+after purge and ordinary warmup. The restored inventory is byte-for-byte
+the same ordered path list. `ai-tmp/ai-boot-optional-engine.json` retains it.
+
+Decided: the fixture calls `metta_qlf_boot:purge_all_qlf/0` before the existing
+ordinary engine warm. That predicate derives artifacts from the same table
+that stamps sources and claims runtime child compilation. The benchmark
+holds no duplicate glob. The canonical21 is what ordinary boot creates,
+not every module a suite may activate. The hard inventory assertion remains
+active in update mode, the C process still counts its freshness walk, and
+neither pin nor band moves. Removing ignored caches costs an engine child
+compile at warmup and an optional library child compile on its next import.
+
+Verified before the extension: the optional-observer control reproduces the
+library-only refusal. The regression now runs the real stamp purge against
+private engine and library artifacts, preserves sources and an ungoverned
+artifact, then checks warmup and both directions of inventory drift.

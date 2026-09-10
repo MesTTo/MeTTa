@@ -115,6 +115,8 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
   - Python package claims remain checked after sources move into subpackages
     [tested: test_nested_package_evidence_rejects_a_missing_test; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]
+  - C-embedded Prolog fixtures carry checked evidence and provenance
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs
@@ -217,6 +219,11 @@ GUARANTEE_SOURCES = (
     "tests/prolog/module_fixtures/*.pl",
     # Diagnostic probes carry measured claims even when no gate runs them.
     "tests/prolog/probes/*.pl",
+    # A host-workaround reproduction is the same class, tracked so its
+    # `present`/`absent` answer can be re-run; its header states what was
+    # measured [source: docs/host-workarounds.md; commit=2bd6b250a22d9898ced449595c168a8dc3a78768].
+    "tests/checks/host_workarounds/*.pl",
+    "tests/checks/host_workarounds/*.sh",
     # And the Python half of the same class, which the seat grew on 2026-09-07.
     # A probe is where a measurement's reproduction is TRACKED rather than left
     # in a checkout, which is what the scratch rule below asks authors to do, so
@@ -255,7 +262,7 @@ GUARANTEE_SOURCES = (
     # the same reason the other two seats' halves are here.
     "extensions/cmetta/*.c",
     "extensions/cmetta/*.h",
-    "extensions/cmetta/*.pl",
+    "extensions/cmetta/**/*.pl",
     # The site's runnable-fence machinery: the container that refuses a fence
     # that has drifted from the example it names, the component that runs one,
     # the client that holds the page's one engine, and the worker it holds it
