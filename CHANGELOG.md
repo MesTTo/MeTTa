@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- A concurrency example exercises scope answer multiplicity, child joining,
+  resource release and transfer, the `scope_body` longhand, and deferred
+  evaluation through a captured space.
+
 - Two host services the Python lint asks instead of keeping tables of its own:
   `metta_form_unevaluated_variable_paths/3` answers where a written form leaves
   a variable unevaluated (its patterns, binders, quoted atoms and write
@@ -123,6 +127,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   class fails when instantiated.
 
 ### Fixed
+
+- The dependency gate derives local tool modules from their source directory
+  and recognises the reference generator's development dependency. The parity
+  fixture producer uses the shared process bound. The syntax introduction
+  table places `return` at its first remaining written use in chapter 20.
 
 - The root module's header named `doorgen.py` and the `door-sync` lane where
   the manifest declares `rootgen.py` and `init-stub`.

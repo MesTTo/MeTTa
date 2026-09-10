@@ -695,11 +695,7 @@ skips = [
 ]
 
 [tool.deptry]
-known_first_party = [
-    "metta", "example_parity", "twin_coverage", "phrasebook", "phrasebook_entries",
-    "alpha", "aio_divergences", "aiogen", "ledger", "ledger_entries", "reference",
-    "vocabgen",
-]
+# check.sh supplies both source roots, so local modules follow their directories.
 # `ext` is excluded because deptry reads ONE manifest and every member has its
 # own: it would judge `metta-nanoarrow`'s import of nanoarrow against pymetta's
 # dependencies, which do not and must not contain it. What it would have said
@@ -725,7 +721,7 @@ optional_dependencies_dev_groups = ["test", "checks"]
 # `metta.testing.SpaceMachine` behind PEP 562 and whose require_module guard
 # runs first, so importing metta or metta.testing loads neither the module nor
 # the package it needs.
-DEP004 = ["pytest", "hypothesis"]
+DEP004 = ["pytest", "hypothesis", "griffe"] # griffe is used by tools/reference.py, shipped development tooling in the checks extra.
 # pygments is imported only by metta/_pygments.py, which nothing in this
 # package imports: Pygments itself loads it through the entry point above,
 # so its presence is the precondition of the load, exactly as rich's is
