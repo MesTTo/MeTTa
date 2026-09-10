@@ -4,7 +4,7 @@
 # Guarantees: an eager dependency removes the cache-state delta while the
 #   unmodified host exposes it [measured 2026-09-10: 226 inferences with cache disabled;
 #   command=sh check.sh host-workarounds; fixture=Janus 1.5.3, SWI 10.1.13;
-#   commit=WORKTREE].
+#   commit=8358dfc233bf299bb23eceddd94593a62372fe4b].
 # Owns resources: each fresh Python child is joined; no engine source is loaded.
 set -eu
 exec "${CHECK_PY:-python3}" - <<'PY'

@@ -6,10 +6,10 @@
 %   answers the typing tests there.
 % Guarantees:
 %   - context snapshots and nested scopes survive every tested inference
-%     interrupt [tested: run_tests(evaluation_context); commit=WORKTREE].
+%     interrupt [tested: run_tests(evaluation_context); commit=8358dfc233bf299bb23eceddd94593a62372fe4b].
 %   - evaluation context preserves demand across carrier overrides, restores
 %     after every exit, and licenses ordered provider bounds consistently
-%     [tested: run_tests(evaluation_context); commit=WORKTREE].
+%     [tested: run_tests(evaluation_context); commit=8358dfc233bf299bb23eceddd94593a62372fe4b].
 %   - the Python repeatability bridge fails closed on an ordinary classifier
 %     refusal but never catches a control limit [tested:
 %     python_repeatability_control:the_bridge_preserves_inference_limits;

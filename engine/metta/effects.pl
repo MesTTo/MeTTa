@@ -17,10 +17,10 @@
 % run_tests(algebra_types); commit=074dc0a88b1605c54824de677d586b6f60998bcf].
 % Guarantees:
 %   - context push/pop survive inference interrupts [tested:
-%     evaluation_context:context_scopes_restore_after_every_inference_interrupt; commit=WORKTREE].
+%     evaluation_context:context_scopes_restore_after_every_inference_interrupt; commit=8358dfc233bf299bb23eceddd94593a62372fe4b].
 %   - one dynamic evaluation context carries algebra, limit, and ordering
 %     through nested operations and restores on every exit
-%     [tested: run_tests(evaluation_context); commit=WORKTREE].
+%     [tested: run_tests(evaluation_context); commit=8358dfc233bf299bb23eceddd94593a62372fe4b].
 %   - every definition retains engine/metta.pl's implementation module and
 %     original load order [tested: tests/prolog/suites/evaluation/metta.plt,
 %     tests/prolog/static_checks.pl; commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].

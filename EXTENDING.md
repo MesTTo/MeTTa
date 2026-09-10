@@ -59,7 +59,7 @@ the same probe.
 
 The inference columns in this table and the write table below derive from
 the committed tier and driver pins. Their ratios use those same pins
-[tested: test_the_extension_cost_tables_match_the_committed_pins; commit=WORKTREE].
+[tested: test_the_extension_cost_tables_match_the_committed_pins; commit=8358dfc233bf299bb23eceddd94593a62372fe4b].
 The microsecond columns retain the 2026-09-06 run and its within-run ratios;
 they are advisory measurements of that tree, not timings of the current
 binding. The four native tiers land near the timer's resolution. The annotated
@@ -126,7 +126,7 @@ command=cd extensions/python && python -m benchmarks.axes;
 fixture=20000 direction crossings, 2000 value-image crossings, min-of-3
 instruction samples and one inference sample in separate fresh processes per
 case, native reader and both MORK shared objects present;
-commit=WORKTREE].
+commit=8358dfc233bf299bb23eceddd94593a62372fe4b].
 
 The two columns carry different weight, and the difference is worth knowing
 before you plan around either. The instruction figures are a recorded run: they
@@ -279,7 +279,7 @@ term, so the single number above is its best case, on a one-argument integer:
 
 [measured 2026-09-10: argument-size table; command=cd extensions/python &&
 python -m benchmarks.extension_cost; fixture=200 calls per argument shape,
-driver subtracted, min-of-3 fresh processes; commit=WORKTREE]
+driver subtracted, min-of-3 fresh processes; commit=8358dfc233bf299bb23eceddd94593a62372fe4b]
 
 The raw path is **flat whatever the argument is**. The encoded one costs about
 two inferences per flat item and about eight per nesting level, so a 64-item

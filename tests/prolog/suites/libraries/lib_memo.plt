@@ -4,7 +4,7 @@
 %   - every inference budget through the first completed reconciliation leaves
 %     no active marker and permits the next reconciliation to publish its plan
 %     [tested: memo_reconciliation_interrupt:every_budget_restores_the_guard;
-%     commit=WORKTREE].
+%     commit=8358dfc233bf299bb23eceddd94593a62372fe4b].
 %   - A changed callee invalidates transitive caller caches through supports/2
 %     while an unrelated cache survives [tested:
 %     memo_support_graph:a_leaf_change_invalidates_transitive_callers_only;
