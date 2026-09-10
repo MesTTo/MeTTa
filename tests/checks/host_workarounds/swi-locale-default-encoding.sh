@@ -9,7 +9,7 @@
 # Guarantees:
 #   - `present` iff an atom written as U+2705 reads back under LC_ALL=C as any
 #     other code sequence [measured 2026-09-10: three U+FFFD; command=sh
-#     check.sh host-workarounds; fixture=SWI-Prolog 10.1.13; commit=WORKTREE]
+#     check.sh host-workarounds; fixture=SWI-Prolog 10.1.13; commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
 # Open Obligations:
 #   To Do: None
 #   Hacks: None

@@ -10,7 +10,7 @@
 %   - `present` iff some budget in 1..64 leaves the asserted guard behind
 %     [measured 2026-09-10: budget 4 leaks and every other budget is clean;
 %     command=sh check.sh host-workarounds; fixture=SWI-Prolog 10.1.13;
-%     commit=WORKTREE]
+%     commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

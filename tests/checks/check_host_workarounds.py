@@ -33,14 +33,14 @@ Guarantees:
     required field, a key entered twice, a malformed site line and a
     reproduction that is not a tracked .pl or .sh file are each reported with
     their path and line [tested:
-    tests/checks/check_host_workarounds_selftest.py; commit=WORKTREE]
+    tests/checks/check_host_workarounds_selftest.py; commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
   - an entry whose reproduction answers `absent` is reported with every site
     to lift, and one whose reproduction answers neither word or exits nonzero
     is reported as broken [tested:
-    tests/checks/check_host_workarounds_selftest.py; commit=WORKTREE]
+    tests/checks/check_host_workarounds_selftest.py; commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
   - the shipped tree passes: every entry has a site and a reproduction that
     answers `present` on SWI-Prolog 10.1.13 [tested:
-    test_the_shipped_tree_passes_its_own_gate; commit=WORKTREE]
+    test_the_shipped_tree_passes_its_own_gate; commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
 Fails when:
   - read as a count. The number of entries is not a score; the lane's value is
     that every one of them is live, reproduced and findable.

@@ -219,7 +219,7 @@ GUARANTEE_SOURCES = (
     "tests/prolog/probes/*.pl",
     # A host-workaround reproduction is the same class, tracked so its
     # `present`/`absent` answer can be re-run; its header states what was
-    # measured [source: docs/host-workarounds.md; commit=WORKTREE].
+    # measured [source: docs/host-workarounds.md; commit=2bd6b250a22d9898ced449595c168a8dc3a78768].
     "tests/checks/host_workarounds/*.pl",
     "tests/checks/host_workarounds/*.sh",
     # And the Python half of the same class, which the seat grew on 2026-09-07.

@@ -11,7 +11,7 @@
 #     writes two.qlf; a stem that writes nothing prints neither word, which
 #     the lane reports as a broken reproduction [measured 2026-09-10: source,
 #     artifact; command=sh check.sh host-workarounds; fixture=SWI-Prolog
-#     10.1.13; commit=WORKTREE]
+#     10.1.13; commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
 # Open Obligations:
 #   To Do: None
 #   Hacks: None

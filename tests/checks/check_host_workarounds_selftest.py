@@ -10,12 +10,12 @@ TMPDIR, because the gate reads sites from `git ls-files`.
 Guarantees:
   - each planted defect is reported on its own while the well-formed fixture
     passes [tested: tests/checks/check_host_workarounds_selftest.py;
-    commit=WORKTREE]
+    commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
   - an `absent` answer names the site to lift, and a third word is reported as
     a broken reproduction [tested: test_an_absent_answer_names_the_sites_to_lift,
-    test_a_third_word_is_a_broken_reproduction; commit=WORKTREE]
+    test_a_third_word_is_a_broken_reproduction; commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
   - the shipped tree passes the same gate, so a red above is the fixture
-    [tested: test_the_shipped_tree_passes_its_own_gate; commit=WORKTREE]
+    [tested: test_the_shipped_tree_passes_its_own_gate; commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
 Open Obligations:
   To Do: None
   Hacks: None
