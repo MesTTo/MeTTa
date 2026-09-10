@@ -23,10 +23,10 @@
 %   Hacks: None
 %   Future Enhancements: None
 
-%The QLF boot FIRST where the checkout has one, and the load under
-%qcompile(auto), which together are what engine/main.pl does and therefore
-%what the shipping configuration is. Without the flag SWI compiles the engine
-%from SOURCE every run and never reads the artifacts.
+%The parity lane first generates this tree's artifacts through the shipping
+%qlf_load_engine/0 door. Each measured process checks freshness and reads that
+%set under qcompile(auto). Keeping setup outside this driver preserves the
+%whole-process price; without the flag this consult would compile from source.
 %Consulting engine/metta.pl on its own compiles the engine from source every
 %run: 1.69e9 instructions against 1.04e9 through the artifacts, measured
 %2026-08-30, so a comparison without it prices a configuration nobody ships.

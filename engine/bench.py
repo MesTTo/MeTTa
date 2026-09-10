@@ -17,6 +17,10 @@ Assumes:
     `bench_describe` with its case table and its workload list, so no case
     name, unit, operation count or corpus path is written twice.
 Guarantees:
+  - both boot counters decline a different declared checkout length or depth,
+    even when the reading matches its pin; runtime rows still compare
+    [tested: test_boot_path_refuses_both_counters_and_preserves_pins,
+    test_comparable_counters_still_gate; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
   - a box that would not count is told apart from a tree that moved: this
     lane exits 0 with a named skip on a developer's box and 1 where CI=true,
     and never reports a refused measurement as a moved row
@@ -335,35 +339,30 @@ def observe(
     case: Case,
     *,
     instructions: bool,
-    path_decides: bool,
+    path_refusal: str | None,
 ) -> str:
     """Measure one case and either compare it or re-pin it.
 
-    `path_decides` is false when this checkout's path is not the length the
-    pins were taken at. A whole-process row is then measured and REPORTED
-    rather than compared, because the offset it reads is the location and not
-    the engine; every other row's window excludes the load and still decides.
+    A different declared checkout shape refuses both boot counters. Every
+    other row's window excludes the load and keeps its comparisons.
     """
     previous = dict(baseline.cases[name]) if name in baseline.cases else None
     samples, cpu, wall = counter_samples(name)
     moved = [_movement(previous, "inferences", min(samples))]
     reported = [f"inference samples={samples}"]
-    baseline.observe_counter(
-        name, unit=case.unit, operations=case.operations, samples=samples
-    )
+    refusal = path_refusal if case.whole_process else None
+    if refusal is None:
+        baseline.observe_counter(
+            name, unit=case.unit, operations=case.operations, samples=samples
+        )
     baseline.observe_wall(name, wall / case.operations)
-    refusal: str | None = None
     if instructions:
         retired = instruction_samples(name)
         moved.append(_movement(previous, "instructions", min(retired)))
         spread = 100.0 * (max(retired) - min(retired)) / min(retired)
         reported.append(f"instruction samples={list(retired)} spread={spread:.3f}%")
-        try:
+        if refusal is None:
             baseline.observe_instructions(name, retired)
-        except AssertionError as band:
-            if not (case.whole_process and not path_decides):
-                raise
-            refusal = str(band)
     line = (
         f"{name}: {'; '.join(moved)}; {'; '.join(reported)}; "
         f"cpu={cpu:.6f}s wall={wall:.6f}s (advisory)"
@@ -427,28 +426,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"engine/bench.sh: cannot measure this tree: {unusable}", file=sys.stderr)
         return 2
 
-    # The boot row's instruction count is true of a checkout LENGTH rather than
-    # of a tree: its window is the engine load, which resolves a path for every
-    # file it reads, and this file's baseline prices the difference at 2.51%
-    # between a 72-character worktree and the 30-character repository root with
-    # the inference count identical in both. A run from another length measures
-    # that row and REPORTS it instead of calling the offset a regression, which
-    # is what extensions/cmetta/benchmarks/bench.py does with the same fact.
-    # An UPDATE is the deliberate re-pin and must not silently write a pin the
-    # gate will read as wrong, so it refuses the row there too.
-    pinned_length = baseline.pinned_checkout_path_length()
-    path_decides = pinned_length is None or pinned_length == len(str(ROOT))
+    # Boot also carries non-monotonic atom/predicate inventory costs. The
+    # baseline records the depth controls and the fresh-atom positive control;
+    # neither a different length nor a different depth can re-pin this row.
+    path_refusal = baseline.checkout_path_refusal(ROOT)
 
     failures: list[str] = []
     refused: list[str] = []
     for name in selected:
         case = cases[name]
-        if arguments.update_baseline and case.whole_process and not path_decides:
+        if arguments.update_baseline and case.whole_process and path_refusal is not None:
             refused.append(
-                f"{name}: not re-pinned; this checkout's path is "
-                f"{len(str(ROOT))} characters against the {pinned_length} the "
-                "instruction pin was taken at. `sh engine/bench.sh "
-                f"{name}` reports what it reads here without writing it"
+                f"{name}: not re-pinned; {path_refusal}. `sh engine/bench.sh "
+                f"{name}` reports the samples here"
             )
             print(f"{name}: NOT RE-PINNED IN THIS CONFIGURATION")
             continue
@@ -459,7 +449,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     name,
                     case,
                     instructions=instructions,
-                    path_decides=path_decides,
+                    path_refusal=path_refusal,
                 )
             )
         except RowRefusedError as refusal:

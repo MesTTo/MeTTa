@@ -10,6 +10,10 @@
 %   splice syntax before storage, including alias-installed observers
 %   [tested: variadic_arrows,
 %   extensions/python/tests/ch09_types/test_variadic_arrows.py; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
+% Guarantees: public writes reach metta_add_atom/4 directly and retain unique
+%   occurrence tokens and duplicate bags in named and parametric stores
+%   [tested: spaces_tokens:public_and_bulk_writes_preserve_tokens_and_duplicate_bags;
+%   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Guarantees: release requests child cancellation before taking the execution
 %   module mutex, then publishes retirement after native teardown. Access
 %   checks also precede cache misses and allocation [tested: lib_thread_scope,
@@ -1657,12 +1661,12 @@ compiled_predicate_arity(F, Module, Predicate, Arity, Owner) :-
     Space = [Family|Parameters],
     space_parametric(Space),
     !,
-    (   metta_add_atom(Space, Term, _)
+    (   metta_add_atom(Space, Term, _, _)
     ->  Result = true
     ;   fail
     ).
 'add-atom'(Space, Term, Result) :-
-    (   atom(Space), metta_add_atom(Space, Term, _)
+    (   atom(Space), metta_add_atom(Space, Term, _, _)
     ->  Result = true
     ;   metta_space_name(Space)
     ->  fail

@@ -1,6 +1,6 @@
 % Purpose: pin occurrence identity, ordering, rollback and provider refusals.
 % Guarantees: ordinary bags omit tokens; exact removal preserves later arrivals
-%   [tested: sh engine/test.sh suites/spaces/tokens.plt; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
+%   [tested: sh engine/test.sh suites/spaces/tokens.plt; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Owns resources: each fixture releases its space and joins its minting threads.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
@@ -47,6 +47,22 @@ test(all_storage_shapes_decode,
              native_atom_clause(Space, Atom, Token, Expected),
              assertion(Head =@= Expected) )).
 
+test(public_and_bulk_writes_preserve_tokens_and_duplicate_bags,
+     [setup(('new-space'(Named),
+             metta_declare_parametric_space([t0, write_funnel]))),
+      cleanup((metta_release_space(Named),
+               metta_release_space([t0, write_funnel])))]) :-
+    Atoms = [[row], [row,a,a], scalar, 17, [], "text"],
+    append(Atoms, Atoms, Twice), msort(Twice, Expected),
+    forall(member(Space, [Named, [t0, write_funnel]]),
+           ( forall(member(Atom, Atoms), 'add-atom'(Space, Atom, true)),
+             metta_add_atoms(Space, Atoms),
+             tokens(Space, Tokens), sort(Tokens, Unique),
+             assertion(same_length(Twice, Tokens)),
+             assertion(same_length(Tokens, Unique)),
+             findall(Read, 'get-atoms'(Space, Read), Bag), msort(Bag, Sorted),
+             assertion(Sorted == Expected) )).
+
 test(storage_constructor_matches_specification) :-
     forall(between(0, 1000, Width),
            ( length(Fields, Width), maplist(=(shared(X)), Fields),
@@ -56,6 +72,15 @@ test(storage_constructor_matches_specification) :-
              metta_storage_term(Name, Decoded, Token, Native),
              assertion(Name == row), assertion(Decoded == Fields),
              assertion(Token == X) )).
+
+test(parametric_open_enumeration_includes_scalar_storage,
+     [setup(metta_declare_parametric_space([t0, scalar_enumeration])),
+      cleanup(metta_release_space([t0, scalar_enumeration]))]) :-
+    Atoms = [[row], scalar, 17, [], "text"],
+    metta_add_atoms([t0, scalar_enumeration], Atoms),
+    findall(Atom, 'get-atoms'([t0, scalar_enumeration], Atom), Found),
+    msort(Atoms, Expected), msort(Found, Actual),
+    assertion(Actual == Expected).
 
 test(storage_constructor_refuses_a_partial_list,
      [throws(error(instantiation_error, _))]) :-
@@ -232,7 +257,30 @@ reservations_released :-
     assertion(\+ spaces:metta_receipt_pending(_,_,_,_)),
     assertion(\+ spaces:metta_receipt_marker(_,_)),
     assertion(\+ spaces:metta_receipt_erased(_,_)),
+    assertion(\+ spaces:metta_receipt_reserved(_)),
     assertion(\+ nb_current('$metta_occurrence_transaction', _)).
+
+test(batch_receipts_preserve_noncolliding_tokens,
+     [forall(member(Count, [0,1,2,17]))]) :-
+    tmp_file(t0_batch_image, File),
+    setup_call_cleanup(
+        ('new-space'(Source), 'new-space'(Target)),
+        ( forall(between(1, Count, I),
+                 add_sexp(Source, [batch,I], t(t0_batch_actor,I), _)),
+          metta_host_save_fast(File, Source, saved(Count)),
+          forall((between(1, Count, I), 0 is I mod 2),
+                 add_sexp(Target, [batch,I], t(t0_batch_actor,I), _)),
+          metta_host_load_fast(File, Target),
+          forall(between(1, Count, I),
+                 ( metta_host_blame(Target, [batch,I], Tokens),
+                   ( 0 is I mod 2
+                   -> metta_actor(Actor),
+                      Tokens = [[t,t0_batch_actor,I],[t,Actor,Fresh]],
+                      assertion(Fresh > Count)
+                   ; assertion(Tokens == [[t,t0_batch_actor,I]]) ) )),
+          reservations_released ),
+        ( metta_release_space(Source), metta_release_space(Target),
+          (exists_file(File) -> delete_file(File) ; true) )).
 
 test(parent_clear_and_nested_load_preserve_the_empty_destinations_tokens) :-
     with_image(check_parent_clear).

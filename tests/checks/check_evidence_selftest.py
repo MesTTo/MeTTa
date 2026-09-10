@@ -413,6 +413,10 @@ def build(root: Path, pytest_anchor: str) -> dict[str, int]:
         component.parent.mkdir(parents=True, exist_ok=True)
         component.write_text(content)
     (root / "test.sh").write_text(TEST_SH)
+    # The checker reads the files git tracks or has staged and nothing else, so
+    # every fixture tree is a repository; run() stages whatever a case planted
+    # after this, and an ignored file stays unread on purpose.
+    subprocess.run(["git", "init", "-q"], cwd=root, check=True, capture_output=True)
 
     # Two levels down, mirroring the real tests/checks/ so the checker's own
     # ROOT, which is parents[2] of evidence_runners.py, lands on <tree>. Not
@@ -441,6 +445,8 @@ def build(root: Path, pytest_anchor: str) -> dict[str, int]:
 
 def run(root: Path) -> list[str]:
     """Run the real checker over one fixture tree and answer its report lines."""
+    # unbounded: git over a temporary directory, which returns.
+    subprocess.run(["git", "add", "-A"], cwd=root, check=True, capture_output=True)
     finished = subprocess.run(
         [sys.executable, str(root / "tools/checks/check_evidence_tags.py")],
         capture_output=True,
@@ -640,6 +646,32 @@ def tracked_probe_complaints() -> list[str]:
     return complaints
 
 
+def ignored_output_complaints() -> list[str]:
+    """A stale copy under an ignored build directory is not a claim of the tree.
+
+    On 2026-09-11 the C seat's install check had left a copy of the engine under
+    extensions/cmetta/build/, and a widened glob read its stale citation as the
+    tree's own. The checker reads what git tracks, so the copy is invisible.
+    """
+    complaints = []
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        build(root, PYTEST_ANCHOR)
+        (root / ".gitignore").write_text("build/\n")
+        copy = root / "extensions/cmetta/build/install-check/engine/copy.pl"
+        copy.parent.mkdir(parents=True, exist_ok=True)
+        copy.write_text(
+            "% Purpose: a stale installed copy.\n"
+            "% Guarantees:\n"
+            f"%   - this one names nothing [{TAG} {WHEN}: no_such_copied_test].\n"
+            "% Open Obligations:\n"
+        )
+        output = run(root)
+        if [line for line in output if "extensions/cmetta/build/" in line]:
+            complaints.append("read an ignored build copy as a claim of the tree")
+    return complaints
+
+
 def prolog_tool_complaints() -> list[str]:
     """A Prolog tool's claims are checked beside the Python tools' claims."""
     with tempfile.TemporaryDirectory() as directory:
@@ -833,6 +865,7 @@ def main() -> int:
     complaints += line_continuation_complaints()
     complaints += tracked_probe_complaints()
     complaints += prolog_tool_complaints()
+    complaints += ignored_output_complaints()
     complaints += scratch_path_complaints()
     complaints += commit_pin_complaints()
 
@@ -844,7 +877,8 @@ def main() -> int:
         f"pins, a symlinked output directory, a path cited from beside its own file, a path cited from its "
         f"seat root, a lane written across a line continuation, a fixture "
         f"under the scratch root beside one the tree tracks, and a tracked "
-        f"probe, a nested example fixture and a Prolog tool citing tests that are not there"
+        f"probe, a nested example fixture and a Prolog tool citing tests that are not there, "
+        f"and a stale copy under an ignored build directory"
     )
     return 1 if complaints else 0
 

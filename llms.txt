@@ -5037,6 +5037,17 @@ digest rather than written unreadably.
 
 ## Measuring
 
+Native writes allocate one occurrence generation through SWI's atomic `flag/3`.
+That adds five inferences per accepted atom while preserving linear bulk-write
+cost. Fast-image validation retains its normalized tokens, and a nonempty load
+uses one rollback marker and three receipt requests for the whole batch. The
+10,000-atom memory-scale load falls from 891612 to 591623 inferences. A drop of
+2,000 equations falls from 1036804 to 914781: unnested removals find the nearest
+transaction frame, and scopes with no reservation send no receipt cleanup.
+Nested transactions retain the outer receipt owner. These measurements and the
+rejected attachment-only batch are in
+docs/journal/2026-09-07-every-fact-has-a-token.md.
+
 Vocabulary membership uses an index built once from the declared and registered
 members. A warm ground membership read checks at most its base and member
 clause references; a cold read builds all positive entries in one pass. The

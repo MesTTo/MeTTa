@@ -205,10 +205,15 @@ pre-add hook with the `space-admission-verdict` judge.
 
 | write door | inferences/add | vs plain add | microseconds/add | vs plain add |
 |---|---|---|---|---|
-| add-atom, no claims on the space | 30.00 | 1.00x | 1.72 | 1.00x |
-| add-atom through an accept-all pre-add hook | 47.00 | 1.57x | 2.62 | 1.53x |
-| add-atom into a pool with a declared admits type | 59.00 | 1.97x | 3.27 | 1.90x |
-| add-atom into a pool with a declared capacity | 67.00 | 2.23x | 5.03 | 2.92x |
+| add-atom, no claims on the space | 35.00 | 1.00x | 1.72 | 1.00x |
+| add-atom through an accept-all pre-add hook | 52.00 | 1.49x | 2.62 | 1.53x |
+| add-atom into a pool with a declared admits type | 64.00 | 1.83x | 3.27 | 1.90x |
+| add-atom into a pool with a declared capacity | 72.00 | 2.06x | 5.03 | 2.92x |
+
+Each accepted native occurrence now allocates a process-wide generation through
+SWI's mutex-protected `flag/3`, adding five inferences per write. The hook and
+pool checks retain their marginal costs. The time columns retain their earlier
+advisory measurements; the counter columns are from the current committed pins.
 
 The admits row read 58.00 until 2026-09-08 and the difference is the atom
 offered, not the door: `add-atom` takes upstream PeTTa's domain, an atom with a

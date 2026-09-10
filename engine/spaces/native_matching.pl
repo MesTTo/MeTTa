@@ -1,4 +1,7 @@
 % Purpose: plan and execute indexed native-space matches and relational conjunction joins
+% Guarantees: open reads enumerate expressions and scalars in named and
+%   parametric spaces [tested: spaces_tokens:public_and_bulk_writes_preserve_tokens_and_duplicate_bags;
+%   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarded by: catalog clear acquires '$metta_typing_policy' before
@@ -719,21 +722,13 @@ get_native_atom(Module, Space, Pattern) :-
     call(Module:Head),
     metta_storage_term(_, Args, _, Head),
     Args = Pattern.
-get_native_atom(Module, [Family|Parameters], Pattern) :-
-    \+ atomic(Pattern),
-    Space = [Family|Parameters],
-    space_parametric(Space),
-    !,
-    current_predicate(Module:'$metta_parametric_atom'/Arity),
-    functor(Head, '$metta_parametric_atom', Arity),
-    clause(Module:Head, true),
-    metta_storage_term('$metta_parametric_atom', Pattern, _, Head).
 get_native_atom(Module, Space, Pattern) :-
     \+ atomic(Pattern),
-    current_predicate(Module:Space/Arity),
-    functor(Head, Space, Arity),
+    native_storage_functor(Space, Functor),
+    current_predicate(Module:Functor/Arity),
+    functor(Head, Functor, Arity),
     clause(Module:Head, true),
-    metta_storage_term(Space, Pattern, _, Head).
+    metta_storage_term(Functor, Pattern, _, Head).
 get_native_atom(Module, _, Pattern) :-
     get_native_scalar_atom_in(Module, Pattern).
 

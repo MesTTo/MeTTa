@@ -583,3 +583,78 @@ Tried: the MORK README's relative journal link fails when VitePress includes it 
 ### Evidence references at landing
 
 Tried: the final evidence gate rejected four claims: a measurement tag had no date and named a scratch-only command; two Node test references omitted their parameter suffixes. The full sampler suite had passed. Cite its exact registered suite name, `the sampler`, and cite the tracked final-price journal section for the waiver table. The measurement records and executable behavior remain unchanged. Fold these documentation corrections into the functional snapshot before the final provenance pin.
+
+## 2026-09-09, four module and source-publication costs
+
+Goal: distinguish module isolation, occurrence bookkeeping and receipt cleanup
+in the four remaining comparable parity failures. Every column below is the
+existing lane's net retired-instruction estimator, with the same workloads.
+
+| Program | Before modules 127b8235d | Modules b64291369 | Before tokens cbf7a958d | Tokens 50e34286f | Cut 3e5855a35 | Receipt repair 61a914f80 | Fresh upstream ae66fa8e4 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| functionremovalspec | 10911538 | 11631471 | 11853636 | 13354438 | 13600744 | 12599791 | 10539101 |
+| casenew | 4748292 | 5195530 | 5311852 | 5385325 | 5454014 | 5532374 | 4499725 |
+| holfunctions | 17597505 | 18786454 | 18980758 | 19288742 | 19558657 | 19509745 | 17064672 |
+| plntest | 29913555 | 31347294 | 31516636 | 32499336 | 32661810 | 32573296 | 30029126 |
+
+Tried: the module comparison also raises inferences from
+11117/4602/16126/27519 to 11140/4640/16273/27792. Later token and receipt
+costs cannot explain that earlier movement. The existing module-boundary
+record's lookup probes establish that imported predicate resolution costs
+work even when the caller's answer and exported surface stay fixed.
+
+Tried: five paired interventions on the final runtime retain all program
+answer checks. Suppressing `record_source_assertion/1` changes the four
+instruction/inference pairs from 12486893/11959, 5374601/4798,
+19368041/16885, 32264520/28325 to 8661372/9022, 5193828/4662,
+18471832/16345, 31725555/27869. For functionremovalspec this also removes
+ownership-dependent withdrawal work, so the saving is not only the cost of
+journal assertions. Suppressing all ownership recorders gives different
+withdrawal behavior internally, despite these successful answer checks.
+Replacing transaction visibility with the global erased property does not
+remove the instruction excess. Prewarming catalog point reads does not
+remove it either. None of these interventions ships.
+
+Decided: retain module isolation and record four explicit root-caused waivers.
+Each remains OPEN for its publication cost and is removed when the
+source-owned publication package lands. That separately reserved package
+groups owned artifact retirement while preserving every reference and
+callback, compiles the source-owned runnable-form envelope once while
+preserving withdrawal, batches clause ownership at publication while
+preserving exact withdrawal and ordered effects, and separates installed
+typing witnesses from repeated query checks with callback and error-trace
+controls. The parity lane continues printing `WAIVED (root-caused, see
+WAIVERS)`; its instruction and inference bands and upstream pins stay fixed.
+
+Evidence retained for integration:
+`ai-tmp/wt-perf/ai-tmp/ai-module-parity-controls.json`,
+`ai-tmp/wt-perf/ai-tmp/ai-parity-causal.json`, and
+`ai-tmp/wt-perf/ai-tmp/ai-parity-interventions.log`, relative to the integration
+checkout. The worktree itself holds them directly under its `ai-tmp/`.
+The corresponding scripts use the lane's unchanged `measure/2` implementation.
+The integrator copies these three records into the main checkout's `ai-tmp`
+before removing the performance worktree.
+
+## 2026-09-10: print the ruling independently of its latest measurement
+
+The final report audit found the four frozen instruction prices remain
+inside their bands. The lane printed no waiver for those rows, although
+the module and publication rulings still apply. A fresh e70 lane prints
+three as WAIVED, but plntest has an unmeasurable null control and only its
+refusal appears. The retained receipts are
+`ai-tmp/ai-four-waivers-frozen.log` and `ai-tmp/ai-verified-e70deddaa-cost.log`.
+
+Decided: print every active WAIVERS entry named by the compared baseline.
+An established excess keeps its measured instruction line; otherwise the
+line says that the ruling remains active and no excess was established by
+this comparison. Null-control refusals, negative nets and inference drift
+keep their independent printed verdicts and exit policy. Neither a historical
+price inside the band nor an unmeasurable sample retires a publication ruling.
+The four OPEN entries retain their source-owned-package revisit condition.
+
+The planted comparator tests every active waiver with a sample inside the
+band, outside it and unmeasurable. The before run fails on the missing labels
+in the first and third states; the repaired complete parity selftest and
+Ruff gates exit 0. The receipts are `ai-tmp/ai-waiver-report-{before,after}.log`
+and `ai-tmp/ai-waiver-report-ruff.log`. No measured value, comparison rule,
+allowance or upstream pin changes in this reporting repair.

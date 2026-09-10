@@ -3,6 +3,47 @@
 Goal: identify each stored occurrence by actor and generation while preserving ordinary answer bags, indexed reads and the measured storage budget.
 Constraint: step 0 of the substrate design; the cut is f0d33dcad438f91556459ba43c80212d9b46b760. History and commit records belong to step 1.
 
+## 2026-09-09, parametric enumeration reaches scalar storage
+
+Tried: the new public/bulk write regression stores two copies of six atom
+shapes in named and parametric spaces. Both contain twelve unique tokens,
+but the parametric unbound read returns only four expression rows. On the
+pristine cut, storing `[[row],scalar,17,[],"text"]` and enumerating the
+parametric space returns `[[row]]`, exit 1 against the five-row assertion.
+The cut in the parametric enumeration clause dates to b48abf7576 and excludes
+the shared scalar clause. SWI's `!/0` contract confirms that it commits to
+the current predicate clause, not just the expression alternative.
+
+Decided: use `native_storage_functor/2`, already used by token enumeration,
+in one open expression clause. Its next clause then enumerates scalar storage
+for both name shapes. Keep the bound indexed clauses. This repair needs
+`engine/spaces/native_matching.pl`; the integrator has been asked to reserve
+that hunk. The write regression covers both bags and occurrence identity.
+
+## 2026-09-09, call the token-aware write body directly
+
+Tried: the MORK workload's foreign scalar additions gain exactly one inference
+per atom at the tokens merge: 36174 to 36674 at 500 before resolving the
+separate 159-inference autoload. `metta_add_atom/3` now only forwards to /4.
+Native additions gain six per atom: the same forwarding call and five
+inferences in SWI's atomic `flag/3` update. An isolated update reads six
+including the ending `statistics(inferences,_)` call.
+
+Decided: the two public `add-atom/3` bodies call the existing /4 body with an
+unbound token, and the native bulk loop calls `add_sexp_in/5` directly.
+The lower-arity entry points remain available to callers. Allocation, type
+alias observers, source journaling and provider effects stay in their existing
+canonical bodies. `engine/spaces/lifecycle.pl` is outside the initial file
+list because it owns both public write bodies; the integrator is coordinating
+these two calls with the import package. Add a public/bulk token-and-bag
+differential for named and parametric stores, then rerun the complete focused
+space suites and cost families.
+
+Rejected: replacing the atomic generation counter with thread-local state,
+because independent writers must mint distinct identities and loads advance
+the same clock. The native write remains O(n), with one retained identity per
+occurrence; that output bound prevents a sublinear total write cost.
+
 ## 2026-09-08
 
 The purpose is to distinguish equal stored occurrences without retaining dead storage. The settled mechanism appends the identity to the storage clause. The related structures are database row identities, observed-remove multiset dots, Lamport clocks, MVCC rollback, incremental dataflow aggregates and source-to-compiled-code provenance. They respectively explain duplicate identity, observed deletion, ordering, abandoned generations, the non-idempotent sum hazard and the equation link. Sections 25 and 22 of `2026-09-06-the-python-ecosystem-as-faces-of-the-engine.md` fix the migration order and design law.
@@ -208,3 +249,197 @@ Tried: the final memory-scale pass retains all 23 expected growth families withi
 Tried: `sh check.sh ledger aio-mirror init-stub reference vocab-sync refusals refusal-sync evidence provenance-pin-selftest` exits 0. All generated mirrors, inventories and reference pages agree, and the provenance selftest restores its guarded files. The final header audit names the compiled-equation link and static payload owners explicitly.
 
 Open: empirical envelope reconciliation remains the integrator's merged-tree observation. No empirical envelope was changed here.
+
+## 2026-09-09, receipt and fast-load cost repair
+
+Goal: remove repeated receipt ownership and token conversion work while
+preserving native occurrence identity, nested rollback and concurrent loads.
+
+Tried: on cut `3e5855a35d7b206c847845f12467551ea4c54a59`, after deleting
+engine and library QLF files and warming one Python boot,
+`python ai-tmp/ai-profile.py drop 2000` reads 1,036,804 inferences.
+Adding `--profile` reads 1,308,143, with 104,000 frame-attribute calls,
+52,000 member checks and 24,011 frame-finished callbacks. The unprofiled
+wall observation is 0.159505 seconds at load averages 25.25/23.95/19.68.
+`python ai-tmp/ai-profile.py load-fast 10000` reads 891,612 inferences,
+0.096691 seconds at 24.46/23.82/19.68; profiling reads 1,075,911 and
+20,002 engine posts. Wall observations do not decide either change.
+The tokens, materialization, spaces and filereader suites all exit zero.
+
+Decided: an unnested transaction stops ownership discovery at its nearest
+native transaction frame. `current_transaction/1` enumerates the native
+transaction stack, including snapshots, so one `findall/3` distinguishes
+that case from a nested transaction, which retains the outer-frame walk.
+The implementation is grounded in SWI's
+[transaction stack and native frame definitions](https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-transaction.c#L678-L762).
+Only a transaction that reserved tokens posts a reservation cleanup request.
+The frame-finished listener remains installed for the engine's lifetime.
+
+Decided: each incoming batch has one transactional rollback marker. Its
+clause reference is the reservation key before the standing engine sees the
+request, so no later attachment is needed. A nested rollback removes only
+that batch's claims; outer completion removes its remaining claims. This is
+the existing transaction-ownership protocol at batch granularity. The
+supplied attachment-batching patch is measured independently before choosing
+it; batching attachments alone retains one cleanup post per kept token.
+
+Decided: image validation returns its normalized portable occurrence tokens
+instead of discarding them. Restore advances the generation clock once per
+image, passes the validated identities to the receipt, then lets the native
+write funnel convert each retained identity exactly once. No image format or
+collision rule changes. The load remains linear in incoming atom content
+plus sorting/indexing cost; the measured repeated boundary work is the
+constant being removed. Tests must cover malformed images, duplicate tokens,
+mixed collisions, nested rollback, and overlapping transaction views.
+
+Tried: the first full enumeration of `current_transaction/1` raises
+`Stack limit (1.0Gb) exceeded` in the nested rollback and materialization
+fixtures. A standalone
+`transaction(transaction(findnsols(5,T,current_transaction(T),Ts)))`
+returns the inner transaction followed by four copies of its parent. The
+installed SWI source's redo arm retains the same stack pointer. Rejected:
+unbounded counting; revisit only if enumeration is needed and SWI advances
+that pointer. Decided: `findnsols(2,1,current_transaction(_),[_,_])` asks only
+whether a second answer exists. The outer-frame walk still identifies the
+actual owner at any nesting depth; no full count is needed.
+
+Tried: with both MORK shared objects present, the supplied attachment-batching
+patch reads 901,625 inferences against 891,612 on a pristine cut at an equal
+path length. Controlled instruction triples are
+1,371,655,317/1,368,005,282/1,367,156,702 versus
+1,327,192,237/1,322,168,897/1,326,105,240. The minima increase 3.40%.
+The command is `python ai-tmp/ai-profile.py load-fast 10000 --controlled`
+through `metta_benchmarking.measure_counters`, three fresh processes per arm,
+after a purge and warm boot. Load averages are 10.72/13.67/18.04. Rejected:
+the attachment-batching patch, because it adds a second list traversal and
+retains per-token rollback cleanup. The batch marker replaces attachment.
+
+Measured after the repair, with the same profiling command and fixtures:
+
+| Counter | Before | After |
+| --- | ---: | ---: |
+| Drop 2,000 equations, unprofiled inferences | 1,036,804 | 914,781 |
+| Drop, profiled inferences | 1,308,143 | 1,101,760 |
+| Drop, frame-attribute calls | 104,000 | 34,000 |
+| Drop, frame-finished callbacks | 24,011 | 20,000 |
+| Drop, receipt engine posts | 2,000 | 0 |
+| Load 10,000 atoms, unprofiled inferences | 891,612 | 591,623 |
+| Load, receipt engine posts | 20,002 | 3 |
+| Load, occurrence validation calls | 20,000 | 10,000 |
+| Load, native token receive calls | 20,000 | 10,000 |
+
+The repaired load instruction triple is 754,137,710/754,119,609/754,028,133.
+Its unprofiled wall observation is 0.039450 seconds at 12.63/19.25/20.94;
+drop is 0.100187 seconds at 12.86/19.41/21.00. The load retains 10,000 atoms.
+Validation and physical insertion remain linear in atom content; only the
+per-atom receipt messages become a fixed three per batch. The native write
+door still validates received identities and advances its atomic counter.
+
+Tried: the four required suites exit zero, with 26 tests plus two subtests,
+53 tests, 217 tests plus 118 subtests, and 60 tests plus three subtests.
+The added batch test then passes empty, singleton, two-atom and 17-atom images
+with mixed local collisions and retained remote identities. Cleanup assertions
+also check that no reserved-owner fact survives. The duplication scan over
+the changed source and tests reports zero clones; `git diff --check` passes.
+
+## 2026-09-10: receipt watches stop before the discarded query frame
+
+The final helper is `metta_receipt_nearest_frame/3`. SWI's `frameFailed`
+sets `environment_frame` to the finishing frame, so a callback ancestry walk
+can reselect the completed transaction. The helper excludes that finished
+frame while walking the callback's live ancestry, then watches the nearest
+remaining native transaction with the same receipt scope.
+Source: [SWI V10.1.13 frameFailed](https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-wam.c#L902-L916).
+
+FROM found a pre-existing receipts crash at the cut
+`3e5855a35d7b206c847845f12467551ea4c54a59`. This command exits 139 there and
+on its branch, with receipts in each checkout's `ai-tmp/ai-receipt-query-frame.log`:
+
+```sh
+/usr/bin/swipl -f none -q -s engine/qlf_boot.pl -s engine/metta.pl -g "engine_create(ready,(transaction(spaces:metta_receipt_transaction_scope(_)),engine_yield(ready)),E),engine_next(E,ready),engine_destroy(E)" -t halt
+```
+
+`prolog_frame_attribute/3` marks every inspected input frame `FR_NOTIFY`.
+The former outer walk reaches the engine's outer query frame. During
+`engine_destroy/1`, `PL_close_query` discards that frame after closing its
+foreign frame, and the frame-finished event enters Prolog before the receipt
+callback's body can run. The assertion is
+`PL_open_query: Assertion failed: (void*)fli_context > (void*)environment_frame`.
+FROM's debug build identifies `destroy_interactor` immediately after
+`PL_close_query`, `engine_destroy/1`, and `pl-event.c`'s `call_event_list`.
+The stripped binary's nearest exported `PL_thread_at_exit` label was an
+incorrect attribution. Source: [the notification flag](https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-trace.c#L2484-L2503)
+and [discard_query](https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-wam.c#L3052-L3064).
+
+The earlier unnested shortcut already makes the exact command pass at e70.
+Adding an inner transaction still aborts with exit 134 there, in
+`ai-tmp/ai-receipt-query-frame-perf-nested-before.log`. The new ownership
+regression against e70 exits 139 in `ai-tmp/ai-receipts-frame-regression-before.log`.
+Moving `engine_yield/1` inside a native transaction is not an equivalent
+control: SWI rejects it with `No permission to execute vmi 'I_YIELD' (not an engine)`.
+The regression retains the reported order: finish the receipt transaction,
+yield the engine, then destroy it.
+
+Rejected: reading the completed frame's parent in the callback. The success
+path has already invalidated that frame; the probe raises
+`prolog_frame_attribute/3: Type error: 'frame_reference' expected, found '158' (an integer)`.
+Rejected: transfer through the callback's nearest transaction without excluding
+the completed frame. The failure path selects itself, `1351 -> 1351`, and
+leaks the owner after inner rollback. Both failures and the corrected control
+are retained in `ai-tmp/ai-receipt-watch-transfer-{probe,current-probe,isolated,excluded}.log`.
+An outer-frame walk bounded by a query-frame guess was not implemented:
+the public choicepoint parent chain stops at each foreign query and supplies
+no safe general outer bound. Ownership transfer follows the native transaction
+completion boundary instead.
+
+Decided: every first receipt watches its nearest native transaction. At
+completion, an active outer transaction inherits the same scope; otherwise
+the scope retires. This removes the nesting query and the unbounded outer
+walk. No frame above the live transaction needs inspection. The standing
+listener remains installed, and the existing transactional markers still
+release only the rolled-back batch. A scope with no reservations still sends
+no cleanup request.
+
+The complete throwaway candidate passes four new tests with seven subtests,
+including depths 1..4, exactly one scope retirement after engine destruction,
+no early retirement during nested commit, failure and exception rollback,
+and transaction/1, transaction/2, transaction/3 and snapshot/1 outer owners.
+The eight existing image tests and five subtests also pass. Command:
+`swipl -f none -q -s engine/qlf_boot.pl -s engine/metta.pl -s tests/prolog/suites/spaces/tokens.plt -s ai-tmp/ai-receipts-frame-candidate.pl -s ai-tmp/ai-receipts-frame-tests.pl -g 'run_tests([receipt_frames_probe,spaces_token_images])' -t halt`.
+The receipt is `ai-tmp/ai-receipts-frame-candidate-complete.log`, exit 0.
+Tracked implementation, focused verification and cost controls follow this
+design; their results will be appended when measured.
+
+Tracked verification: `sh engine/test.sh suites/spaces/receipt_frames.plt
+suites/spaces/tokens.plt suites/spaces/materialization.plt
+suites/spaces/spaces.plt suites/libraries/lib_thread_completion.plt` exits 0.
+The counts are 4+7, 29+5, 53, 217+118 and 3 tests/subtests, respectively,
+in `ai-tmp/ai-receipts-frame-tracked-focused.log`. The literal command above
+and its nested-transaction variant both exit 0, with empty output, in
+`ai-tmp/ai-receipt-query-frame-{final,nested-final}.log`.
+
+Paired measurements at `../../../boot5`, relative to the worktree root, change only receipts.pl
+from its e70 body to the tracked watcher. Three unprofiled processes per
+arm read 914,781 to 886,777 inferences for 2,000-equation drop. The profile
+removes 2,000 `findnsols2/5` and `findnsols_loop/5` calls; frame inspection
+stays 34,000, receipt listener calls stay 20,000 and cleanup requests stay
+zero. Watching the nearest transaction directly removes the separate
+nesting enumeration while retaining every ownership boundary. The 10,000-atom
+load stays 591,623 inferences and three receipt requests. Profiled counts
+are 1,101,602 to 1,073,712 for drop and 775,368 to 775,475 for load; profile
+overhead differs and is not used as an unprofiled cost.
+
+The same-path engine boot stays 296,185 inferences in three processes.
+C boot changes 457,890 to 457,910, also three identical processes per arm,
+with 21 governed artifacts in both. Its instruction minima are 1,249,000,372
+and 1,249,269,201, both inside the existing 0.1% band around 1,248,231,076.
+The changed receipt predicate inventory is isolated; the whole-process
+boundary, fixture and instruction price stay fixed. The controls are
+`ai-tmp/ai-receipts-frame-cost-control.py` and
+`ai-tmp/ai-receipts-frame-cost-{before,after}.{json,log}`. The remaining
+point-counter and relative-ceiling checks follow this runtime change.
+
+C boot retains its 457,890 inference pin: the isolated 457,910 reading is
+inside the existing allowance of 32. The other boot prices, margins and
+the 21-artifact fixture also stay. This is a measured movement inside the
+published comparison rule, not a new boot re-pin.

@@ -46,10 +46,13 @@ installed pymetta colours a MeTTa cell in every front end that asks Pygments.
 
 Assumes:
   - nbclient, nbformat, ipykernel and janus_swi are importable, pip can reach
-    github.com, and the upstream checkout the parity lanes already require is
-    beside the repository; each missing piece is named and skipped, and under
+    github.com, and the configured upstream checkout the parity lanes require
+    exists; each missing piece is named and skipped, and under
     CI the workflow provides them and this refuses instead
 Guarantees:
+  - METTA_UPSTREAM selects the reference checkout; when unset, the sibling
+    PeTTa-upstream remains the default [tested:
+    check_upstream_parity_selftest.upstream_selection_failures; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
   - the kernel is installed at a pinned commit and started, rather than read
     [tested: tests/checks/check_jupyter_kernel.py; commit=7ba114f280ec3b132658cacb562064d0bac23f41]
   - the fork's launcher runs an upstream `src/main.pl` tree, which is the
@@ -74,7 +77,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-UPSTREAM = ROOT / ".." / "PeTTa-upstream"
+UPSTREAM = Path(os.environ.get("METTA_UPSTREAM", ROOT.parent / "PeTTa-upstream"))
 PYDIR = ROOT / "extensions" / "python"
 
 #: The kernel, at the commit this was measured against. A moving branch would

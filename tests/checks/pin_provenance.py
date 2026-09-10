@@ -95,6 +95,7 @@ from check_evidence_tags import (  # noqa: E402  -- HERE must be on the path fir
     PROVENANCE_SOURCES,
     ROOT,
     SOURCES,
+    owned,
 )
 
 TOKEN = re.compile(rf"\bcommit={re.escape(PLACEHOLDER)}\b")
@@ -327,7 +328,7 @@ def scan() -> tuple[list[tuple[Path, list[tuple[int, int, str | None]], str]], s
     seen: set[Path] = set()
     out = []
     for glob in (*SOURCES, *PROVENANCE_SOURCES):
-        for path in sorted(ROOT.glob(glob)):
+        for path in owned(ROOT.glob(glob)):
             if path in seen:
                 continue
             seen.add(path)

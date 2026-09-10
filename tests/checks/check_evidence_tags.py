@@ -115,9 +115,14 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
   - Python package claims remain checked after sources move into subpackages
     [tested: test_nested_package_evidence_rejects_a_missing_test; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]
+  - every walk reads the files git tracks or has staged and nothing else, so
+    build output under an ignored directory is never read as a claim of the
+    tree [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
   - nested example fixtures carry checked claims and resolvable comment pins
     [tested: tests/checks/check_evidence_selftest.py,
     tests/checks/check_pin_provenance_selftest.py; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
+  - C-embedded Prolog fixtures carry checked evidence and provenance
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs
@@ -143,15 +148,36 @@ Open Obligations:
 from __future__ import annotations
 
 import ast
+import functools
 import os
 import re
 import subprocess
 import sys
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
 from evidence_runners import ROOT, Execution, executed, gate_scripts, prolog_loads
+
+
+@functools.cache
+def tracked() -> frozenset[Path]:
+    """Every file git tracks or has staged under ROOT, read once.
+
+    What the repository tracks is what it is responsible for, asked of git
+    rather than walked: a walk finds build output nothing here owns, and on
+    2026-09-11 it read a stale installed copy of the engine under
+    extensions/cmetta/build/ as a claim of the tree. check.sh's ruff-drivers
+    lane states the same rule.
+    """
+    listing = subprocess.run(["git", "ls-files", "-z"], cwd=ROOT, capture_output=True, check=True)
+    return frozenset(ROOT / name for name in listing.stdout.decode("utf-8").split("\0") if name)
+
+
+def owned(paths: Iterable[Path]) -> list[Path]:
+    """The tracked files among these, sorted: the one filter every walk passes."""
+    kept = tracked()
+    return sorted(path for path in paths if path in kept)
 
 #: Where BOTH obligations apply: a tag that names something must be backed,
 #: and a Guarantees line must carry a tag at all. The second is the stricter
@@ -266,7 +292,7 @@ GUARANTEE_SOURCES = (
     # the same reason the other two seats' halves are here.
     "extensions/cmetta/*.c",
     "extensions/cmetta/*.h",
-    "extensions/cmetta/*.pl",
+    "extensions/cmetta/**/*.pl",
     # The site's runnable-fence machinery: the container that refuses a fence
     # that has drifted from the example it names, the component that runs one,
     # the client that holds the page's one engine, and the worker it holds it
@@ -657,7 +683,7 @@ def _text(path: Path) -> str:
 
 
 def _python_files() -> list[Path]:
-    return [path for tree in PYTHON_TREES for path in sorted((ROOT / tree).rglob("*.py"))]
+    return [path for tree in PYTHON_TREES for path in owned((ROOT / tree).rglob("*.py"))]
 
 
 def _unconditionally_skipped(node: ast.AST) -> bool:
@@ -782,9 +808,9 @@ def _prolog_suites() -> list[Path]:
     seat that grows a suite is covered without an edit here, which is the rule
     build.sh and check.sh already follow for a component.
     """
-    found = list((ROOT / "tests").rglob("*.pl*"))
+    found = owned((ROOT / "tests").rglob("*.pl*"))
     for seat in sorted(ROOT.glob("extensions/*/tests")):
-        found += seat.rglob("*.pl*")
+        found += owned(seat.rglob("*.pl*"))
     return sorted(set(found))
 
 
@@ -884,14 +910,13 @@ def _node_suites() -> list[Path]:
     """
     scratch, _ = scratch_root()
     skipped = NODE_GENERATED | ({scratch} if scratch else frozenset())
-    found = []
-    for base, directories, files in os.walk(ROOT):
-        directories[:] = sorted(
-            name for name in directories
-            if name not in skipped and not name.startswith(".")
-        )
-        found += [Path(base) / name for name in files if name.endswith(NODE_SUITE)]
-    return sorted(found)
+    # The tracked files, not a walk: a generated bundle or a checked-out copy
+    # under an ignored directory is not a suite of this tree.
+    return [
+        path for path in sorted(tracked())
+        if path.name.endswith(NODE_SUITE)
+        and not any(part in skipped or part.startswith(".") for part in path.relative_to(ROOT).parts[:-1])
+    ]
 
 
 def _node_targets(runs: dict[Path, Execution]) -> dict[str, list[Target]]:
@@ -982,7 +1007,7 @@ def _c_targets(runs: dict[Path, Execution]) -> dict[str, list[Target]]:
     component's scripts: a seat that grows a C suite grows its own cases.
     """
     targets: dict[str, list[Target]] = {}
-    for path in sorted(ROOT.glob("extensions/*/tests/*.c")):
+    for path in owned(ROOT.glob("extensions/*/tests/*.c")):
         text = _text(path)
         body = C_MAIN.search(text)
         called = set(C_CALL.findall(body.group(1))) if body else set()
@@ -1020,9 +1045,9 @@ def gather() -> tuple[Evidence, list[str]]:
         targets.setdefault(name, []).extend(found)
     for name, found in _c_targets(runs).items():
         targets.setdefault(name, []).extend(found)
-    for path in sorted((ROOT / "examples").rglob("*.metta")):
+    for path in owned((ROOT / "examples").rglob("*.metta")):
         targets.setdefault(path.stem, []).append(file_target(path, reports))
-    for path in sorted((ROOT / "tests").rglob("*.sh")):
+    for path in owned((ROOT / "tests").rglob("*.sh")):
         targets.setdefault(path.stem, []).append(file_target(path, reports))
     files = {target.path.name for group in targets.values() for target in group}
     return Evidence(targets, runs, frozenset(files), reports), problems
@@ -1308,7 +1333,7 @@ def npm_scripts() -> frozenset[str]:
 
     names: set[str] = set()
     for pattern in ("package.json", "*/package.json", "*/*/package.json"):
-        for manifest in ROOT.glob(pattern):
+        for manifest in owned(ROOT.glob(pattern)):
             if "node_modules" in manifest.parts:
                 continue
             try:
@@ -1549,7 +1574,7 @@ def provenance_sites() -> list[tuple[Path, int, str, str]]:
     """Commit pins in commentless formats, for the pin check and nothing else."""
     sites: list[tuple[Path, int, str, str]] = []
     for glob in PROVENANCE_SOURCES:
-        for path in sorted(ROOT.glob(glob)):
+        for path in owned(ROOT.glob(glob)):
             text = _text(path)
             for line, body in enumerate(text.split("\n"), start=1):
                 if "commit=" in body:
@@ -1561,7 +1586,7 @@ def claim_sites() -> list[tuple[Path, int, str, str]]:
     """Every evidence tag the tree carries, as (path, line, kind, body)."""
     sites: list[tuple[Path, int, str, str]] = []
     for glob in SOURCES:
-        for path in sorted(ROOT.glob(glob)):
+        for path in owned(ROOT.glob(glob)):
             text = _text(path)
             for match in CLAIM.finditer(text):
                 line = text.count("\n", 0, match.start()) + 1
@@ -1605,7 +1630,7 @@ def untagged_guarantees() -> list[str]:
     )
     findings: list[str] = []
     for glob in GUARANTEE_SOURCES:
-        for path in sorted(ROOT.glob(glob)):
+        for path in owned(ROOT.glob(glob)):
             found = block.search(_text(path))
             if found is None:
                 continue

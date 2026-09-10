@@ -31,6 +31,8 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
   - nested example fixtures resolve their comment pins and preserve code
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
+  - nested C Prolog fixtures resolve their header pins and preserve code atoms
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
 Fails when: run against a tree it did not write. It asserts on a fixture it
   generates and nothing else.
 Open Obligations:
@@ -101,6 +103,16 @@ PLANTS = (
         [
             "% Purpose: a fixture.",
             f"%   - a Prolog pin [{TAG} {WHEN}: a_plunit_test; {WORD}].",
+            f"an_atom('{WORD}').",
+        ],
+        [2],
+        [3],
+    ),
+    (
+        "extensions/cmetta/tests/plant.pl",
+        [
+            "% Purpose: a C-embedded Prolog fixture.",
+            f"% A header pin [{TAG} {WHEN}: a_plunit_test; {WORD}].",
             f"an_atom('{WORD}').",
         ],
         [2],

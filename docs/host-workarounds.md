@@ -202,3 +202,62 @@ Lifted when: the reproduction prints absent because collection after a
   treatment also removes the pre-hook residual boundary; a timing change is
   not evidence that the host condition has been repaired.
 Record: docs/journal/2026-09-10-the-observed-equation-loses-its-arithmetic.md.
+## swi-file-search-cache-sweep
+Host: SWI-Prolog 10.1.13; boot/init.pl:1531-1564,
+  https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/init.pl#L1531-L1564.
+Defect: the first library load after the file-search cache expires runs
+  gc_file_search_cache/1, removing other expired lookup entries. The next
+  lookup pays resolution and insertion work instead of the warm-cache cost;
+  wall-clock state changes measured Prolog inferences. A zero timeout bypasses
+  insertion and the sweep, so it tests an uncached walk rather than this event.
+Reproduction: tests/checks/host_workarounds/swi-file-search-cache-sweep.pl,
+  ages cache and sweep timestamps under a positive timeout, loads a previously
+  unloaded library, and compares the next lookup with two warm lookups.
+Workaround: extensions/python/tools/twin_coverage.py sets
+  file_search_cache_time to 9223372036854775807 before MeTTa boot, so every
+  measured child and its inherited engines keep the cache live for the lane.
+Lifted when: the aged load's next lookup costs the same inferences as a warm
+  lookup; the reproduction then answers absent instead of the current 818
+  against 680. Unequal warm controls or a reversed difference are broken.
+Record: docs/journal/2026-09-07-merged-tree-reconciliations.md, the cache-age
+  controls and the 2026-09-10 host-reproduction section.
+
+## swi-first-arg-index-dead-keys
+Host: SWI-Prolog 10.1.13; next_clause_primary_index in src/pl-index.c:293-346
+  and the clause-collection contract in src/pl-proc.c:2248-2276,
+  https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-index.c#L293-L346.
+Defect: retract leaves dead ClauseRef keys in the primary index until clause
+  collection. A bound lookup for the sole live tail scans the retired keys;
+  the physical scan grows although Prolog reports the same inference count.
+Reproduction: tests/checks/host_workarounds/swi-first-arg-index-dead-keys.pl,
+  retains 20000 retired rows, measures live-tail lookups, then collects clauses
+  and measures the same lookups twice. Automatic collection is held off only
+  in this fresh diagnostic process so it cannot erase the inspected state.
+Workaround: extensions/cmetta/bridge.pl keeps cursor owners under one static
+  recorded key; the C handle carries a bound record reference, and close erases
+  the owner immediately instead of retracting a dynamic cursor row.
+Lifted when: retained-key lookups cost no more than four times the collected
+  control, so the reproduction answers absent. Unequal inference counts or
+  a fourfold spread between collected controls report a broken reproduction.
+Record: docs/journal/2026-09-07-merged-tree-reconciliations.md, immediate cursor
+  retirement and the 2026-09-10 host-reproduction section.
+
+## swi-inherited-empty-predicate-retry
+Host: SWI-Prolog 10.1.13; S_VIRGIN in src/pl-vmi.c:3244-3270,
+  https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-vmi.c#L3244-L3270.
+Defect: resolving a first inherited call retries and increments inferences
+  when the provider's first-clause pointer is nonnull, even when every clause
+  is retired. Clause collection clears that pointer and removes the retry,
+  so identical logical state has a different first-call cost by GC schedule.
+Reproduction: tests/checks/host_workarounds/swi-inherited-empty-predicate-retry.pl,
+  compares inherited first/warm calls with retained and collected clauses in
+  fresh plain-SWI processes, with direct provider calls controlling both arms.
+Workaround: translator:runnable_head_awaits_its_definition/1 calls
+  filereader:source_pending_definition/2 explicitly. The reader remains the
+  same unique provider; no collection or counter adjustment enters the path.
+Lifted when: inherited first-call counts agree in both states; the reproduction
+  then answers absent. Currently retained reads4/3 and collected3/3, while
+  direct calls read3/3 in both states. Inconsistent warm or direct controls,
+  reversed costs and child failures are broken reproductions.
+Record: docs/journal/2026-09-07-merged-tree-reconciliations.md, the 2026-09-11
+  buffered VM trace and unchanged-body foldall controls.
