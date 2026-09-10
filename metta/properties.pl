@@ -51,6 +51,7 @@ metta_head_property(Space, Name, [deprecated, Since, Remedy]) :-
 metta_head_property(Space, Name, [doc|Fields]) :-
     'get-doc-space'(Space, Name, ['@doc', Name|Fields]).
 metta_head_property(Space, Name, [Key, Value]) :-
+    % policy-inventory-exempt: mechanism-internal; reason=source export properties handled by this generic property clause; evidence=engine/metta/properties.pl:metta_head_export_property/4
     member(Key, [volatility, determinism]),
     metta_head_sources(Space, Name, Sources),
     findall(Claim, (member(Home-Original, Sources),

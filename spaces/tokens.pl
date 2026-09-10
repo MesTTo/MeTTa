@@ -60,6 +60,7 @@ metta_space_pair(Space, Pattern, Token, Ref) :-
 metta_require_token_mutation(Space, Operation) :-
     metta_require_token_read(Space, Operation),
     ( seam:foreign_space(Space)
+    % policy-inventory-exempt: mechanism-internal; reason=an occurrence mutation requires both insertion and withdrawal capabilities; evidence=engine/spaces/tokens.pl:metta_require_token_mutation/2
     -> forall(member(Capability, ['add-token', 'remove-token']),
               ( foreign_provides(Space, Capability) -> true
               ; throw(error(metta_foreign_token_mutation_required(

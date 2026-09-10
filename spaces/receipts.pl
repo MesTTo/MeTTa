@@ -96,7 +96,6 @@ metta_receipt_nearest_frame(Current, Finished, Nearest) :-
     -> metta_receipt_nearest_frame(Parent, Finished, Nearest)
     ; Nearest = none ).
 
-% policy-inventory-exempt: mechanism-internal; reason=the three native frames implementing transaction/1,2,3 and snapshot/1 in SWI V10.1.13 src/pl-transaction.c; evidence=engine/spaces/receipts.pl:metta_receipt_transaction_predicate/1
 metta_receipt_transaction_predicate(system:'$transaction'/2).
 metta_receipt_transaction_predicate(system:'$transaction'/3).
 metta_receipt_transaction_predicate(system:'$snapshot'/1).
