@@ -31,6 +31,10 @@
 % Guarantees: explicit cast targets and typed bindings resolve aliases inside
 %   the engine; emitted checks preserve already resolved type observations
 %   [tested: structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
+% Guarantees: a generated lambda retains its exact clause's source, so effect
+%   admission reads its body before generated result-boundary code
+%   [tested: reference_loading:non_eager_admission_reads_an_already_evaluated_default_map;
+%   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 
 %%% An evaluated operand that produced an Error finishes the call %%%
 %
@@ -1022,6 +1026,8 @@ translate_special_dl('|->', [Args, Body0], AfterHead, Goals, Out) :-
     register_fun_in(Module, Function),
     assert_function_clause(Module, Clause, Ref),
     record_source_assertion(Ref),
+    record_translated_from(Ref, [=, [Function|FullArgs], Body], SourceRef),
+    record_source_assertion(SourceRef),
     format(atom(Label), "metta lambda (~w)", [Function]),
     maybe_print_compiled_clause(Label, ['|->', Args, Body], Clause),
     length(FullArgs, InputArity),

@@ -554,7 +554,7 @@ store_data_atoms(Atoms, Space, Tokens) :-
 
 store_data_atoms_([], [], _, _, _).
 store_data_atoms_([Atom|Atoms], [Token|Tokens], Storage, Space, Load) :-
-    (   Atom = [Rel|_], ( Rel == (=) ; Rel == (:) )
+    (   Atom = [Rel|_], ( Rel == (=) ; Rel == (:) ; Rel == from ; Rel == internal )
     ->  metta_add_atom(Space, Atom, Token, _)
     ;   add_sexp_in(Storage, Space, Atom, Token, Ref),
         journal_data_ref(Load, Ref)

@@ -1,6 +1,8 @@
 % Guarantees: metta_import_record/2 exposes live source ownership and
 %   metta_unimport/2 withdraws it transactionally [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
-% Guarded by: metta_unimport/2 shares metta_loader with import_when/4.
+% Guarded by: metta_loader protects source-flight ownership, never user forms.
+% Owns resources: each source owner destroys its queue on every exit; waiters
+%   recheck receipts after waking [tested: loader_singleflight; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
 % Guarantees: declared determinism is applied to the predicate's implementation
 %   module, including plain host files reached through the core's base chain
@@ -86,6 +88,10 @@ import_prolog_function(N, true) :-
 %make the good one. The scan stays for the legacy `names=` route, where
 %nothing was declared and discovery is all there is
 %[tested: a_declared_export_publishes_only_its_declared_arity].
+import_prolog_function_at(N, Arity) :-
+    metta_reference_prolog_context(Home, Module), !,
+    must_be(atom, N),
+    metta_reference_register_prolog(Home, Module, N, Arity).
 import_prolog_function_at(N, Arity) :-
     must_be(atom, N),
     %ALREADY DONE is not a failure. The name is a builtin, the clauses behind
@@ -441,7 +447,7 @@ prolog:error_message(metta_op_name_taken(Name, Arity, PredArity, Owner)) -->
 %predicates exist. consult_global/1 and its two siblings are the funnel every
 %route enters through, so the MeTTa spelling, register_prolog and a bare
 %consult all get this [tested: prolog_interface_exports].
-:- dynamic pending_metta_export/3.     %pending_metta_export(File, Name, Type)
+:- thread_local pending_metta_export/3. %pending_metta_export(File, Name, Type)
 :- dynamic metta_extension_info/3.     %metta_extension_info(Extension, File, Options)
 :- dynamic metta_extension_member/2.   %metta_extension_member(Extension, Name)
 
@@ -688,10 +694,14 @@ record_metta_export(File, Parsed) :-
     %'&metta' widens what this parser accepts, one authority.
     ;   Term = [volatility, Name, Level], atom(Name),
         metta_vocabulary_value(volatility, Level)
-    ->  declare_function_volatility(Name, Level)
+    ->  ( metta_reference_prolog_context(Home, _)
+        -> metta_reference_export_property(Home, volatility, Name, Level)
+        ; declare_function_volatility(Name, Level) )
     ;   Term = [determinism, Name, Mode], atom(Name),
         metta_vocabulary_value(determinism, Mode)
-    ->  declare_function_determinism(Name, Mode)
+    ->  ( metta_reference_prolog_context(Home, _)
+        -> metta_reference_export_property(Home, determinism, Name, Mode)
+        ; declare_function_determinism(Name, Mode) )
     ;   throw(error(metta_export_form(Text),
                     context(metta_export/1,
                             'an export is (: name (-> ...)), (export name arity), \c
@@ -699,6 +709,10 @@ record_metta_export(File, Parsed) :-
                              (determinism name <a determinism vocabulary value>); \c
                              both vocabularies are (vocabulary ...) rows in &metta')))
     ).
+
+metta_reference_export_property(Home, Key, Name, Value) :-
+    Row = [Key, Name, Value],
+    ( get_native_atom(Home, Row) -> true ; metta_add_atom(Home, Row, _) ).
 
 %How much a caller may assume about a function's answers, and therefore what
 %an optimiser or a cache is allowed to do with it. PostgreSQL's ladder,
@@ -728,6 +742,14 @@ declare_function_volatility(Name, Level) :-
 
 %True when a cache MAY BE CHOSEN for this function without being asked for.
 metta_function_cacheable(Name) :- \+ metta_function_volatility(Name, volatile).
+
+% A declaration belongs to a function's defining namespace. PostgreSQL's
+% function identity likewise includes its schema, not merely its spelling:
+% https://www.postgresql.org/docs/18/sql-alterfunction.html
+metta_function_cacheable(Module, Name) :-
+    ( metta_module_space(Module, Space)
+    -> \+ metta_head_property(Space, Name, [volatility, volatile])
+    ; metta_function_cacheable(Name) ).
 
 %How many answers a caller may expect. Only det is ENFORCED, by handing the
 %predicate to SWI's own det/1, and it is worth having because a leaked choice
@@ -770,9 +792,28 @@ register_pending_exports :-
 %functions/2's rule reaching this route too: a declaration with one bad entry
 %registers nothing.
 register_declared_exports(Pending) :-
+    metta_reference_prolog_context(_, _), !,
+    check_and_register_declared_exports(Pending).
+register_declared_exports(Pending) :-
     catch(check_and_register_declared_exports(Pending), Error,
           ( undo_declared_exports(Pending), throw(Error) )).
 
+check_and_register_declared_exports(Pending) :-
+    metta_reference_prolog_context(Home, Module), !,
+    forall(member(_-Name-Type, Pending),
+           ( declared_predicate_arity(Type, Arity),
+             metta_reference_prolog_arities(Module, Name, Arity, _) )),
+    forall(member(File-Name-Type, Pending),
+           ( declared_predicate_arity(Type, Arity),
+             metta_reference_register_prolog(Home, Module, Name, Arity),
+             ( Type = arity(_) -> true
+             ; metta_add_atom(Home, [':', Name, Type], _) ),
+             ( metta_head_property(Home, Name, [determinism, det])
+             -> functor(Head, Name, Arity),
+                predicate_property(Module:Head, implementation_module(Owner)),
+                det(Owner:Name/Arity)
+             ; true ),
+             record_extension_membership(File, Name) )).
 check_and_register_declared_exports(Pending) :-
     forall(member(_-Name-_, Pending), refuse_reserved_registration(Name)),
     forall(member(_-Name-_, Pending), refuse_other_tiers_name(Name, prolog)),
@@ -927,6 +968,10 @@ forget_registered_function(Name) :-
 %answered B's implementation from then on
 %[tested: a_name_another_source_owns_is_refused_before_the_load].
 check_prolog_function_names(Names, Source, true) :-
+    metta_reference_prolog_context(_, _), !,
+    prolog_function_name_list(Names, check_prolog_function_names/3),
+    canonical_prolog_source(Source, _).
+check_prolog_function_names(Names, Source, true) :-
     prolog_function_name_list(Names, check_prolog_function_names/3),
     canonical_prolog_source(Source, Canonical),
     forall(member(N, Names), refuse_reserved_registration(N)),
@@ -939,6 +984,11 @@ check_prolog_function_names(Names, Source, true) :-
 %learn what to undo. This is the shape metta_py_register_op_set already uses
 %one file over: probe every name first, touch state only after
 %[tested: a_typo_in_the_list_registers_nothing].
+import_prolog_functions(Names, true) :-
+    metta_reference_prolog_context(Home, Module), !,
+    prolog_function_name_list(Names, import_prolog_functions/2),
+    forall(member(N, Names), metta_reference_prolog_arities(Module, N, scan, _)),
+    forall(member(N, Names), metta_reference_register_prolog(Home, Module, N, scan)).
 import_prolog_functions(Names, true) :-
     prolog_function_name_list(Names, import_prolog_functions/2),
     forall(member(N, Names), refuse_reserved_registration(N)),
@@ -1026,13 +1076,26 @@ refuse_absent_prolog_function_scan(N) :-
 %itself where register_fun/1 cannot see it: the arities never register and every
 %call to it compiles to a partial application instead. In &self the load module
 %already is user, so this states that behaviour rather than adding a rule.
+consult_global(File) :- metta_reference_prolog_context(_, Module), !,
+                        metta_reference_check_prolog_source(File),
+                        loading_loudly(metta_load_source(Module:File, [expand(true)])),
+                        metta_reference_register_exports(File).
 consult_global(File) :- refuse_unloadable_source_file(File),
                         loading_loudly(metta_load_source(user:File, [expand(true)])),
                         register_pending_exports.
+use_module_global(File) :- metta_reference_prolog_context(_, Module), !,
+                           metta_reference_check_prolog_source(File),
+                           loading_loudly(metta_load_source(Module:File,
+                                           [if(not_loaded), must_be_module(true)])),
+                           metta_reference_register_exports(File).
 use_module_global(File) :- refuse_unloadable_source_file(File),
                            loading_loudly(metta_load_source(user:File,
                                                             [if(not_loaded), must_be_module(true)])),
                            register_pending_exports.
+ensure_loaded_global(File) :- metta_reference_prolog_context(_, Module), !,
+                             metta_reference_check_prolog_source(File),
+                             loading_loudly(metta_load_source(Module:File, [if(not_loaded)])),
+                             metta_reference_register_exports(File).
 ensure_loaded_global(File) :- refuse_unloadable_source_file(File),
                               loading_loudly(metta_load_source(user:File, [if(not_loaded)])),
                               register_pending_exports.
@@ -1529,6 +1592,9 @@ metta_import_base(top, Directory) :-
 :- dynamic imported_metta_source/2.
 :- dynamic import_life/3.
 :- dynamic import_receipt/4.
+:- dynamic metta_source_flight/3.
+:- volatile metta_source_flight/3.
+:- '$notransact'(metta_source_flight/3).
 
 %A committed receipt is a cache entry for one exact source load. The temporary
 %loading pair stays separate, because it is a cycle breaker rather than proof
@@ -1560,9 +1626,9 @@ metta_unimport(Space0, File0) :-
     resolve_space_form(Space0, Space),
     metta_require_space_update_capability('unimport!', Space),
     resolve_module_form(File0, File),
-    with_mutex(metta_loader,
-        ( resolve_unimport_path(Space, File, CanonPath),
-          (   import_life(Space, CanonPath, loading)
+    resolve_unimport_path(Space, File, CanonPath),
+    metta_source_singleflight(CanonPath,
+        ( (   import_life(Space, CanonPath, loading)
           ->  throw(error(permission_error(unimport, loading_source, CanonPath),
                           context('unimport!', 'wait until this source finishes loading')))
           ;   true
@@ -1603,16 +1669,14 @@ unimport_source(Space, CanonPath) :-
     clear_import_state(Space, CanonPath).
 
 capture_import_state(Space, CanonPath, Terms) :-
-    findall(imported_metta_source(Space, CanonPath),
-            imported_metta_source(Space, CanonPath),
-            Imported),
-    findall(import_life(Space, CanonPath, State),
-            import_life(Space, CanonPath, State),
-            Lives),
-    findall(import_receipt(Space, CanonPath, LoadId, Digest),
-            import_receipt(Space, CanonPath, LoadId, Digest),
-            Receipts),
-    append([Imported, Lives, Receipts], Terms).
+    findall(Term,
+            ( imported_metta_source(Space, CanonPath),
+              Term = imported_metta_source(Space, CanonPath)
+            ; import_life(Space, CanonPath, State),
+              Term = import_life(Space, CanonPath, State)
+            ; import_receipt(Space, CanonPath, LoadId, Digest),
+              Term = import_receipt(Space, CanonPath, LoadId, Digest)
+            ), Terms).
 
 clear_import_state(Space, CanonPath) :-
     retractall(imported_metta_source(Space, CanonPath)),
@@ -1661,8 +1725,9 @@ run_import_attempt(Space, CanonPath, Goal) :-
         Catcher,
         finish_import_attempt(Space, CanonPath, Previous, Catcher)).
 
-% Assert both markers before loading to break cycles. Retain them on success
-% and retract them on failure. The recursive mutex serializes the loader graph.
+% Assert both destination markers before loading to break same-owner cycles.
+% Source ownership is separate from a receipt: a failed owner releases its
+% queue and a waiter retries the destination's ordinary receipt check.
 %
 %Whether an already-loaded file loads AGAIN is a condition, and the condition
 %is named at the call site rather than fixed here, which is how SWI writes the
@@ -1697,13 +1762,54 @@ run_import_attempt(Space, CanonPath, Goal) :-
 %existence_error(procedure, load_imported_metta_source_groups/3)
 %[measured 2026-08-22, once engine/filereader.pl became a module].
 :- meta_predicate import_when(+, +, +, 0),
-                  run_import_attempt(+, +, 0).
+                  run_import_attempt(+, +, 0),
+                  metta_source_singleflight(+, 0).
 
 import_when(Condition, Space, CanonPath, Goal) :-
+    metta_source_singleflight(CanonPath,
+        import_when_owned(Condition, Space, CanonPath, Goal)).
+
+:- meta_predicate import_when_owned(+, +, +, 0).
+import_when_owned(Condition, Space, CanonPath, Goal) :-
     (   import_load_needed(Condition, Space, CanonPath)
     ->  run_import_attempt(Space, CanonPath, Goal)
     ;   true
     ).
+
+% SWI's loader uses a queue's lifetime as a broadcast completion event.
+% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/init.pl#L2631-L2705
+% Recheck after waking, since this caller may name a different destination or
+% the previous load may have failed. No result is cached beside import_receipt.
+:- if(current_prolog_flag(threads, true)).
+metta_source_singleflight(Path, Goal) :-
+    setup_call_cleanup(
+        with_mutex(metta_loader, metta_source_flight_enter(Path, Claim)),
+        metta_source_flight_run(Claim, Path, Goal),
+        metta_source_flight_leave(Claim)).
+
+metta_source_flight_enter(Path, Claim) :-
+    thread_self(Self),
+    (   metta_source_flight(Path, Owner, Queue)
+    ->  ( Owner == Self -> Claim = reentrant ; Claim = waiting(Queue) )
+    ;   message_queue_create(Queue),
+        assertz(metta_source_flight(Path, Self, Queue), Ref),
+        Claim = owner(Ref, Queue)
+    ).
+
+:- meta_predicate metta_source_flight_run(+, +, 0).
+metta_source_flight_run(waiting(Queue), Path, Goal) :- !,
+    catch(thread_get_message(Queue, _),
+          error(existence_error(message_queue, Queue), _), true),
+    metta_source_singleflight(Path, Goal).
+metta_source_flight_run(_, _, Goal) :- call(Goal).
+
+metta_source_flight_leave(owner(Ref, Queue)) :- !,
+    with_mutex(metta_loader,
+        ( erase(Ref), message_queue_destroy(Queue) )).
+metta_source_flight_leave(_).
+:- else.
+metta_source_singleflight(_, Goal) :- call(Goal).
+:- endif.
 
 %SWI's three if(Condition) values, asked as a question about THIS load rather
 %than about the previous one.
@@ -1743,7 +1849,7 @@ resolve_space_form(Form, Form).
 %mask honoured the form arrives whole, and resolving it is import!'s job.
 importer_helper(Space, File0) :-
     resolve_module_form(File0, File),
-    with_mutex(metta_loader, importer_helper_impl(Space, File)).
+    importer_helper_impl(Space, File).
 
 resolve_module_form(Form, Path) :-
     nonvar(Form), Form = [library, Name], !,

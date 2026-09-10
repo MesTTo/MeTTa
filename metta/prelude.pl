@@ -98,6 +98,11 @@
 %The heads and their MeTTa arities. The Prolog predicate behind each has
 %one more argument, the result.
 prelude_head('if-equal', 4).
+prelude_head(only, 2).
+prelude_head(except, 2).
+prelude_head(prefix, 2).
+prelude_head(rename, 2).
+prelude_head(qualified, 1).
 prelude_head('if-equal2', 4).
 prelude_head('noreduce-eq', 2).
 prelude_head(assertEqual, 2).
@@ -135,6 +140,11 @@ prelude_head(subtraction, 2).
 %an Atom mask so the atom they are asked about arrives unreduced, and this
 %file is where that mask lives.
 prelude_declaration('if-equal', [->, 'Atom', 'Atom', 'Atom', 'Atom', '%Undefined%']).
+prelude_declaration(only, [->, 'Atom', 'Symbol', 'Symbol']).
+prelude_declaration(except, [->, 'Atom', 'Symbol', 'Symbol']).
+prelude_declaration(prefix, [->, 'Symbol', 'Symbol', 'Symbol']).
+prelude_declaration(rename, [->, 'Atom', 'Symbol', 'Symbol']).
+prelude_declaration(qualified, [->, 'Symbol', '%Undefined%']).
 prelude_declaration('if-equal2', [->, 'Atom', 'Atom', 'Atom', 'Atom', '%Undefined%']).
 prelude_declaration('noreduce-eq', [->, 'Atom', 'Atom', 'Bool']).
 prelude_declaration(assertEqual, [->, 'Atom', 'Atom', '%Undefined%']).
@@ -158,6 +168,7 @@ prelude_declaration('is-function', [->, 'Type', 'Bool']).
 prelude_declaration('get-type', [->, 'Atom', '%Undefined%']).
 prelude_declaration('get-type-space', [->, 'SpaceType', 'Atom', '%Undefined%']).
 prelude_declaration('get-doc', [->, 'Atom', '%Undefined%']).
+prelude_declaration('get-property', [->, 'Atom', 'Expression']).
 prelude_declaration('get-doc', [->, 'SpaceType', 'Atom', '%Undefined%']).
 prelude_declaration('get-doc-atom', [->, 'SpaceType', 'Atom', '%Undefined%']).
 prelude_declaration('get-doc-single-atom', [->, 'SpaceType', 'Atom', '%Undefined%']).
@@ -178,8 +189,14 @@ prelude_declaration('space-admission-verdict', [->, '%Undefined%', 'Atom', '%Und
 %The documents get-doc's first tier answers from, so (help! type-cast)
 %answers with no import and a program's own (@doc ...) atoms stay the
 %program's.
-prelude_document('if-equal', ['@doc', 'if-equal', ['@desc', "Selects the third argument when the first two are alpha-equivalent, atoms equal up to a consistent variable renaming, and the fourth otherwise"], ['@params', [['@param', "First atom"], ['@param', "Second atom"], ['@param', "Result on equivalence"], ['@param', "Result otherwise"]]], ['@return', "Third or fourth argument"]]).
+prelude_document('if-equal', ['@doc', 'if-equal', ['@desc', "Selects the third argument when the first two are identical by ==, and the fourth otherwise"], ['@params', [['@param', "First atom"], ['@param', "Second atom"], ['@param', "Result on equivalence"], ['@param', "Result otherwise"]]], ['@return', "Third or fourth argument"]]).
 prelude_document('if-equal2', ['@doc', 'if-equal2', ['@desc', "if-equal under its second historical name"], ['@params', [['@param', "First atom"], ['@param', "Second atom"], ['@param', "Result on equivalence"], ['@param', "Result otherwise"]]], ['@return', "Third or fourth argument"]]).
+prelude_document(only, ['@doc', only, ['@desc', "Keeps a head present in the supplied names; partial application is a from map"]]).
+prelude_document(except, ['@doc', except, ['@desc', "Keeps a head absent from the supplied names; partial application is a from map"]]).
+prelude_document(prefix, ['@doc', prefix, ['@desc', "Concatenates a prefix and a head; partial application is a from map"]]).
+prelude_document(rename, ['@doc', rename, ['@desc', "Uses the first matching (old new) pair, or keeps the head; partial application is a from map"]]).
+prelude_document(qualified, ['@doc', qualified, ['@desc', "Builds a prefix map using the library name and a dot"]]).
+prelude_document('get-property', ['@doc', 'get-property', ['@desc', "Answers visibility, defining origins and declared effect, cost, deprecation and documentation properties, one per answer"]]).
 prelude_document('assert-answers', ['@doc', 'assert-answers', ['@desc', "Asserts a verdict about two answer bags; a false verdict reports the call as written and the two directed bag differences, what was missing and what was in excess"], ['@params', [['@param', "Verdict, evaluated"], ['@param', "Call to report, as written"], ['@param', "Answers produced"], ['@param', "Answers expected"]]], ['@return', "unit"]]).
 prelude_document('assert-includes-answers', ['@doc', 'assert-includes-answers', ['@desc', "assert-answers for a containment: a false verdict reports the call as written and only the answers missing from the expectation, because an answer in excess of it is legal under this relation"], ['@params', [['@param', "Verdict, evaluated"], ['@param', "Call to report, as written"], ['@param', "Answers produced"], ['@param', "Answers expected to be included"]]], ['@return', "unit"]]).
 prelude_document(assertEqual, ['@doc', assertEqual, ['@desc', "Compares the result sets of two expressions; passes silently or raises a failed assertion naming the expression and the answers missing from and in excess of the expectation"], ['@params', [['@param', "First expression, not evaluated on the way in"], ['@param', "Second expression, not evaluated on the way in"]]], ['@return', "unit"]]).
@@ -197,8 +214,8 @@ prelude_document('for-each-in-atom', ['@doc', 'for-each-in-atom', ['@desc', "App
 prelude_document(unquote, ['@doc', unquote, ['@desc', "Unquotes a quoted atom and evaluates it, e.g. (unquote (quote $x)) evaluates $x; a non-quote argument stays as written"], ['@params', [['@param', "Quoted atom"]]], ['@return', "Unquoted atom"]]).
 prelude_document('noreduce-eq', ['@doc', 'noreduce-eq', ['@desc', "Compares two atoms as written, neither evaluated"], ['@params', [['@param', "First atom, as written"], ['@param', "Second atom, as written"]]], ['@return', "True or False"]]).
 prelude_document('is-function', ['@doc', 'is-function', ['@desc', "True when the argument is an arrow type"], ['@params', [['@param', "Type atom"]]], ['@return', "True or False"]]).
-prelude_document('match-types', ['@doc', 'match-types', ['@desc', "Checks if two types can be unified and returns the third argument if so, the fourth otherwise; %Undefined% and Atom on either side match anything"], ['@params', [['@param', "First type"], ['@param', "Second type"], ['@param', "Atom to be returned if types can be unified"], ['@param', "Atom to be returned if types cannot be unified"]]], ['@return', "Third or fourth argument"]]).
-prelude_document('match-type-or', ['@doc', 'match-type-or', ['@desc', "Checks if two types (second and third arguments) can be unified and returns the result of OR between the first argument and the type checking result"], ['@params', [['@param', "Boolean value"], ['@param', "First type"], ['@param', "Second type"]]], ['@return', "True or False"]]).
+prelude_document('match-types', ['@doc', 'match-types', ['@desc', "Compares two types by == and returns the third argument if identical, the fourth otherwise; neither type is bound"], ['@params', [['@param', "First type"], ['@param', "Second type"], ['@param', "Result on identity"], ['@param', "Result otherwise"]]], ['@return', "Third or fourth argument"]]).
+prelude_document('match-type-or', ['@doc', 'match-type-or', ['@desc', "Returns True when the second and third arguments are identical by ==, and the first argument otherwise"], ['@params', [['@param', "Accumulator value"], ['@param', "First type"], ['@param', "Second type"]]], ['@return', "True or the accumulator"]]).
 prelude_document('type-cast', ['@doc', 'type-cast', ['@desc', "Casts atom passed as a first argument to the type passed as a second argument using space as a context"], ['@params', [['@param', "Atom to be casted"], ['@param', "Type to cast atom to"], ['@param', "Context atomspace"]]], ['@return', "Atom if casting is successful, (Error ... BadType) otherwise"]]).
 prelude_document('type-cast-holds', ['@doc', 'type-cast-holds', ['@desc', "Whether any declared type of the atom in the space unifies with the requested type; type-cast's fold, named because MeTTa is applicative where the corelib chains"], ['@params', [['@param', "Atom"], ['@param', "Requested type"], ['@param', "Context atomspace"]]], ['@return', "True or False"]]).
 prelude_document('get-type-space', ['@doc', 'get-type-space', ['@desc', "get-type run with the selected space as the context"], ['@params', [['@param', "Space to select"], ['@param', "Atom to type"]]], ['@return', "The type, as get-type answers it in that space"]]).
@@ -246,8 +263,13 @@ prelude_rule_registration(subtraction, [['extra-variables-exempt', "the let bind
 %view of the prelude; the confluence reporter reads the eight derived ones
 %as the shipped rewrite tier; and the differential suite runs them against
 %the Prolog bodies in engine/prelude.pl.
-prelude_shipped_equation('if-equal', [=, ['if-equal', A, B, C, D], [if, ['=alpha', A, B], C, D]]).
-prelude_shipped_equation('if-equal2', [=, ['if-equal2', A, B, C, D], [if, ['=alpha', A, B], C, D]]).
+prelude_shipped_equation('if-equal', [=, ['if-equal', A, B, C, D], [if, ['==', A, B], C, D]]).
+prelude_shipped_equation(only, [=, [only, Names, Head], [if, ['is-member', Head, Names], Head, [empty]]]).
+prelude_shipped_equation(except, [=, [except, Names, Head], [if, ['is-member', Head, Names], [empty], Head]]).
+prelude_shipped_equation(prefix, [=, [prefix, Prefix, Head], [atom_concat, Prefix, Head]]).
+prelude_shipped_equation(rename, [=, [rename, Pairs, Head], [let, Cases, ['union-atom', Pairs, [[Other, Other]]], [case, Head, Cases]]]).
+prelude_shipped_equation(qualified, [=, [qualified, Library], [prefix, [atom_concat, Library, '.']]]).
+prelude_shipped_equation('if-equal2', [=, ['if-equal2', A, B, C, D], [if, ['==', A, B], C, D]]).
 prelude_shipped_equation('noreduce-eq', [=, ['noreduce-eq', A, B], ['=alpha', A, B]]).
 prelude_shipped_equation(assertEqual, [=, [assertEqual, A, B], [let, C, [collapse, A], [let, D, [collapse, B], [let, E, [==, C, D], ['assert-answers', E, [assertEqual, A, B], C, D]]]]]).
 prelude_shipped_equation(assertAlphaEqual, [=, [assertAlphaEqual, A, B], [let, C, [collapse, A], [let, D, [collapse, B], [let, E, ['=alpha', C, D], [assert, E]]]]]).
@@ -260,15 +282,15 @@ prelude_shipped_equation(assertEqualToResultMsg, [=, [assertEqualToResultMsg, A,
 prelude_shipped_equation(assertAlphaEqualToResultMsg, [=, [assertAlphaEqualToResultMsg, A, B, _], [assertAlphaEqualToResult, A, B]]).
 prelude_shipped_equation('if-error', [=, ['if-error', A, B, C], [function, [chain, [eval, ['get-metatype', A]], D, [eval, ['if-equal', D, 'Expression', [eval, ['if-equal', A, [], [return, C], [chain, ['decons-atom', A], E, [unify, E, [F, _], [eval, ['if-equal', F, 'Error', [return, B], [return, C]]], [return, C]]]]], [return, C]]]]]]).
 prelude_shipped_equation(throw, [=, [throw, A], ['if-error', A, A, ['Error', [throw, A], A]]]).
-prelude_shipped_equation('return-on-error', [=, ['return-on-error', A, B], [function, [eval, ['if-equal', A, 'Empty', [return, [return, 'Empty']], [eval, ['if-error', A, [return, [return, A]], [return, B]]]]]]]).
+prelude_shipped_equation('return-on-error', [=, ['return-on-error', A, B], ['if-error', A, A, B]]).
 prelude_shipped_equation('for-each-in-atom', [=, ['for-each-in-atom', A, B], ['map-atom', A, B]]).
 prelude_shipped_equation(atomically, [=, [atomically, A], [transaction, [eval, A]]]).
 prelude_shipped_equation(unquote, [=, [unquote, [quote, A]], [let, _, [cut], [eval, A]]]).
 prelude_shipped_equation(unquote, [=, [unquote, A], [quote, [unquote, A]]]).
 prelude_shipped_equation(interpret, [=, [interpret, A, B, C], [function, [chain, [eval, [metta, A, B, C]], D, [return, D]]]]).
 prelude_shipped_equation('is-function', [=, ['is-function', A], [let, B, ['get-metatype', A], [unify, B, 'Expression', [let, C, ['size-atom', A], [unify, C, 0, false, [let, [D, _], ['decons-atom', A], [unify, D, ->, true, false]]]], false]]]).
-prelude_shipped_equation('match-types', [=, ['match-types', A, B, C, D], [function, [eval, ['if-equal', A, '%Undefined%', [return, C], [eval, ['if-equal', B, '%Undefined%', [return, C], [eval, ['if-equal', A, 'Atom', [return, C], [eval, ['if-equal', B, 'Atom', [return, C], [unify, A, B, [return, C], [return, D]]]]]]]]]]]]).
-prelude_shipped_equation('match-type-or', [=, ['match-type-or', A, B, C], [function, [chain, [eval, ['match-types', B, C, true, false]], D, [chain, [eval, [or, A, D]], E, [return, E]]]]]).
+prelude_shipped_equation('match-types', [=, ['match-types', A, B, C, D], [if, ['==', A, B], C, D]]).
+prelude_shipped_equation('match-type-or', [=, ['match-type-or', A, B, C], ['match-types', B, C, true, A]]).
 prelude_shipped_equation('type-cast-holds', [=, ['type-cast-holds', A, B, C], [let, D, ['__metta_type_syntax__', B, C], [let, E, [collapse, ['get-type-space', C, A]], ['foldl-atom', E, false, F, G, ['match-type-or', F, G, D]]]]]).
 prelude_shipped_equation('type-cast', [=, ['type-cast', A, B, C], [let, D, ['__metta_type_syntax__', B, C], [let, E, ['get-metatype', A], [if, ['=alpha', D, E], A, [if, ['type-cast-holds', A, B, C], A, ['Error', A, 'BadType']]]]]]).
 prelude_shipped_equation('and-then', [=, ['and-then', A, B], [noeval, [if, A, B, false]]]).
@@ -284,6 +306,11 @@ prelude_shipped_equation(subtraction, [=, [subtraction, [superpose, A], [superpo
 prelude_shipped_equation(subtraction, [=, [subtraction, A, B], [noeval, [noeval, [subtraction, A, B]]]]).
 
 prelude_builtin_facet('if-equal'/4, prolog(prelude)).
+prelude_builtin_facet(only/2, prolog(prelude)).
+prelude_builtin_facet(except/2, prolog(prelude)).
+prelude_builtin_facet(prefix/2, prolog(prelude)).
+prelude_builtin_facet(rename/2, prolog(prelude)).
+prelude_builtin_facet(qualified/1, prolog(prelude)).
 prelude_builtin_facet('if-equal2'/4, prolog(prelude)).
 prelude_builtin_facet('noreduce-eq'/2, prolog(prelude)).
 prelude_builtin_facet(assertEqual/2, prolog(prelude)).

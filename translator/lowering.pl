@@ -6,6 +6,10 @@
 %   arity resolves to a predicate outside their owner
 %   [tested: variadic_arrows:a_segment_arity_cannot_call_an_inherited_native_predicate;
 %   commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
+% Guarantees: a translation miss can await a background reference without
+%   holding the cache publication mutex; hits retain translated_form_hit/5
+%   [tested: reference_loading:non_eager_file_cycles_preserve_both_defining_homes;
+%   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Guarantees: verify-cardinality checks annotated calls while plain calls
 %   retain their generated goal [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarantees: Direct declaration probes use metta_runtime_type/2 before masking
@@ -54,9 +58,9 @@ translate_cached_expr(C, Goals, Out) :-
         translation_template(C, Template, Key),
         (   translated_form_hit(Module, Key, C, Goals, Out)
         ->  true
-        ;   with_mutex('$metta_translation_cache',
-                       translate_runnable_expr_cached(Module, Key, C,
-                                                      Template, Goals, Out))
+        ;   metta_engine:metta_source_singleflight(translation(Module, Key),
+                translator:translate_runnable_expr_cached(Module, Key, C,
+                                                          Template, Goals, Out))
         )
     ;   translate_runnable_expr(C, Goals, Out)
     ).
