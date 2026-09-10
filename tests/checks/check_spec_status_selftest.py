@@ -235,7 +235,10 @@ def build(root: Path) -> None:
         component.parent.mkdir(parents=True, exist_ok=True)
         component.write_text(content, encoding="utf-8")
     (root / "test.sh").write_text(TEST_SH, encoding="utf-8")
-    (root / ".git").mkdir(exist_ok=True)
+    # A repository, not a marker directory: the checker's discovery reads the
+    # tracked set (evidence_runners.tracked), so a tree git does not know owns
+    # no test at all; run() stages what a case plants after this build.
+    subprocess.run(["git", "init", "-q"], cwd=root, check=True, capture_output=True)
 
     # The copy sits one directory deeper than the tree root, exactly as
     # tests/checks/ does under this repository, because check_spec_status.py
@@ -249,6 +252,7 @@ def build(root: Path) -> None:
 
 def run(root: Path) -> dict:
     """Run the copied checker against `root` and parse its --json output."""
+    subprocess.run(["git", "add", "-A"], cwd=root, check=True, capture_output=True)
     finished = subprocess.run(
         [sys.executable, str(root / "tools/checks/check_spec_status.py"), "--json"],
         capture_output=True,

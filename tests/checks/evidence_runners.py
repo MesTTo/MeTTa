@@ -71,14 +71,47 @@ Open Obligations:
 from __future__ import annotations
 
 import fnmatch
+import functools
 import json
 import os
 import re
-from collections.abc import Iterator
+import subprocess
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+@functools.cache
+def tracked(root: Path) -> frozenset[Path]:
+    """Every file git tracks or has staged under `root`, read once per root.
+
+    What the repository tracks is what it is responsible for, asked of git
+    rather than walked: a walk finds build output nothing here owns, and on
+    2026-09-11 one read a stale installed copy of the engine under
+    extensions/cmetta/build/ as a claim of the tree. check.sh's ruff-drivers
+    lane states the same rule; every discovery here and in the evidence lane
+    passes through owned(). The root is an argument, not the module's ROOT,
+    because a selftest points a checker at a planted tree: a tree that is not
+    a repository owns nothing, so a planted tree is one (`git init -q`, then
+    `git add -A` before the checker runs).
+    """
+    listing = subprocess.run(["git", "ls-files", "-z"], cwd=root, capture_output=True, check=False)
+    if listing.returncode != 0:
+        msg = (
+            f"{root} is not a git repository, so it owns no files: evidence walks read the tracked set, "
+            "and a planted tree is a repository (git init -q; git add -A) or it is not scanned"
+        )
+        raise RuntimeError(msg)
+    return frozenset(root / name for name in listing.stdout.decode("utf-8").split("\0") if name)
+
+
+def owned(paths: Iterable[Path], root: Path) -> list[Path]:
+    """The files among these that `root`'s repository tracks, sorted: the one filter every walk passes."""
+    kept = tracked(root)
+    return sorted(path for path in paths if path.resolve() in kept or path in kept)
+
 
 def _component_runners() -> tuple[str, ...]:
     """Every component's own check.sh, test.sh and bench.sh, discovered.
@@ -107,7 +140,7 @@ def _component_runners() -> tuple[str, ...]:
         "extensions/*/test.sh",
         "extensions/*/bench.sh",
     ):
-        found += [str(p.relative_to(ROOT)) for p in sorted(ROOT.glob(pattern))]
+        found += [str(p.relative_to(ROOT)) for p in owned(ROOT.glob(pattern), ROOT)]
     return tuple(found)
 
 
@@ -289,7 +322,7 @@ def tsc_projects(package: Path) -> list[tuple[Path, Path]]:
     commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084].
     """
     projects = []
-    for project in sorted(package.glob("tsconfig*.json")):
+    for project in owned(package.glob("tsconfig*.json"), ROOT):
         options = _tsconfig(project, frozenset())
         if options.get("noEmit") or "outDir" not in options:
             continue
@@ -362,7 +395,7 @@ def node_test_files(package: Path, command: str) -> list[Path]:
             for pattern in (token, *tsc_sources(package, token)):
                 found += [
                     path.resolve()
-                    for path in sorted(package.glob(pattern))
+                    for path in owned(package.glob(pattern), ROOT)
                     if path.is_file()
                 ]
     return found
@@ -729,7 +762,7 @@ def executed() -> tuple[dict[Path, Execution], list[str]]:
                 # so the install lane owns install_consumer.c and the suite lane
                 # owns test_cmetta.c instead of both owning everything.
                 owners = recipe.read_text(encoding="utf-8")
-                for suite in sorted((directory / "tests").glob("*.c")):
+                for suite in owned((directory / "tests").glob("*.c"), ROOT):
                     if (make_owner(owners, suite.name) or "test") in wanted:
                         record(suite.resolve(), tier, lane)
                 break
@@ -746,7 +779,7 @@ def executed() -> tuple[dict[Path, Execution], list[str]]:
         problems.extend(trouble)
         root = ROOT / collector.root
         for pattern in collector.patterns:
-            for found in root.rglob(pattern) if collector.recursive else root.glob(pattern):
+            for found in owned(root.rglob(pattern) if collector.recursive else root.glob(pattern), ROOT):
                 relative = str(found.relative_to(ROOT))
                 if relative in skips or found.is_symlink():
                     continue

@@ -328,7 +328,7 @@ def scan() -> tuple[list[tuple[Path, list[tuple[int, int, str | None]], str]], s
     seen: set[Path] = set()
     out = []
     for glob in (*SOURCES, *PROVENANCE_SOURCES):
-        for path in owned(ROOT.glob(glob)):
+        for path in owned(ROOT.glob(glob), ROOT):
             if path in seen:
                 continue
             seen.add(path)

@@ -45,6 +45,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- The evidence, provenance-pin and spec-status gates read the set git tracks
+  for the root they scan, keyed by that root, so a selftest's planted tree is
+  a repository and a stale build copy under an ignored directory is never a
+  claim of the tree.
 - The lint's `unbound-variable` rule reports a body variable the head never
   bound and no written position leaves unevaluated, per form, instead of
   skipping a whole body that mentions one of seven listed heads: a `let`
