@@ -1077,6 +1077,9 @@ ensure_loaded_global(File) :- refuse_unloadable_source_file(File),
 %an_unclaimed_source_loads_from_source_and_leaves_no_artifact,
 %a_stale_artifact_is_recompiled,
 %consult_global_loads_a_library_half_through_the_door; commit=f26de01fbf3e0e3c64bb691c66a59fa959fee7f3].
+%Workaround: swi-qlf-extension-spec - a claimed source loads by its bare
+%stem, because a spec that names its .pl extension compiles from source
+%whatever qcompile(auto) says and only a stem reaches the artifact rule.
 :- meta_predicate metta_load_source(:, +).
 metta_load_source(Module:Spec, Options) :-
     (   absolute_file_name(Spec, File,

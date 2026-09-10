@@ -16,7 +16,7 @@
 %   version-5 images preserve occurrence tokens, original atoms and each compiled equation's
 %   resolved source across relocation and later recompilation [tested:
 %   test_fast_images_preserve_each_equations_binding, test_image_collision_rule;
-%   commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4];
+%   commit=WORKTREE];
 %   checksum validation accepts exactly 64 lowercase hexadecimal characters and
 %   its inference cost is independent of their values [tested:
 %   spaces_token_images:hash_header_keeps_the_lowercase_hexadecimal_language,
@@ -63,8 +63,8 @@ metta_static_import_image(Atoms, Image) :-
         metta_release_space(Space)).
 
 metta_restore_static_import(File, Space, Image) :-
-    (   metta_fast_image_valid(Image, none),
-        Image = metta_fast_image(_, [space(0, root, _, [], _)], [], [], [])
+    (   metta_fast_image_valid(Image, Portable, none),
+        Portable = metta_fast_image(_, [space(0, root, _, [], _)], [], [], [])
     ->  true
     ;   throw(error(metta_fast_payload_invalid(File),
                     context(metta_restore_static_import/3,
@@ -74,18 +74,19 @@ metta_restore_static_import(File, Space, Image) :-
     metta_source_digest(CanonPath, Digest),
     import_when(true, Space, CanonPath,
         replacing_previous_load(CanonPath, Space,
-            metta_restore_static_into(CanonPath, Digest, Image),
-            metta_restore_static_into(CanonPath, Digest, Image, Space))).
+            metta_restore_static_into(CanonPath, Digest, Portable),
+            metta_restore_static_into(CanonPath, Digest, Portable, Space))).
 
 metta_restore_static_into(Path, Digest,
-                          metta_fast_image(identity(Actor, Next),
+                          metta_fast_image(identity(_, Next),
                                            [space(0, root, Atoms, [], Incoming)],
                                            [], [], []), Space) :-
     with_source_load(Path, Space,
         ( active_source_load(Load),
           assertz(source_load_digest(Load, Path, Digest)),
+          metta_identity:metta_generation_receive(Next),
           spaces:metta_with_occurrence_load(
-              filereader:( metta_fast_receive_occurrences(Space, Actor, Next, Incoming, Tokens),
+              filereader:( spaces:metta_receive_occurrences(Space, Incoming, Tokens),
                            maplist(metta_static_store_atom(Space), Atoms, Tokens) )) )).
 
 metta_static_store_atom(Space, Atom, Token) :-
@@ -427,8 +428,8 @@ metta_host_fast_expect_header([Expected|Rest], In) :-
 metta_host_fast_read(In, File, Image, Seen) :-
     catch(fast_read(In, Read), Caught,
           throw(error(metta_fast_read_failed(File, Caught), none))),
-    (   metta_fast_image_valid(Read, Seen)
-    ->  Image = Read
+    (   metta_fast_image_valid(Read, Image, Seen)
+    ->  true
     ;   throw(error(metta_fast_payload_invalid(File),
                     context(metta_host_fast_read/4,
                             'the cache payload is not a complete version-5 \c
@@ -447,7 +448,7 @@ metta_host_fast_read(In, File, Image, Seen) :-
 %`none` otherwise, and `none` is what lets the restore skip the decode instead
 %of rebuilding a term that cannot change. The object check moves into the same
 %walk's atomic leaf, which is the only place a blob can sit.
-metta_fast_image_valid(Image, Seen) :-
+metta_fast_image_valid(Image, Portable, Seen) :-
     acyclic_term(Image),
     Image = metta_fast_image(identity(Actor, Next), Spaces, Tokens, Rules, Derived),
     atom(Actor), Actor \== '',
@@ -461,7 +462,9 @@ metta_fast_image_valid(Image, Seen) :-
     length(Ids, Count),
     Last is Count - 1,
     numlist(0, Last, Ids),
-    foldl(metta_fast_space_row_valid(Last, Actor, Next), Spaces, none, SeenSpaces),
+    maplist(metta_fast_space_row_valid(Last, Actor, Next),
+            Spaces, PortableSpaces, SeenRows),
+    ( memberchk(refs, SeenRows) -> SeenSpaces = refs ; SeenSpaces = none ),
     foldl(metta_fast_token_row_valid(Last), Tokens, SeenSpaces, SeenTokens),
     foldl(metta_fast_rule_row_valid(Last), Rules, SeenTokens, SeenRules),
     findall(Name, member(token(Name, _, _), Tokens), TokenNames),
@@ -471,10 +474,13 @@ metta_fast_image_valid(Image, Seen) :-
     sort(RuleNames, UniqueRuleNames),
     same_length(RuleNames, UniqueRuleNames),
     foldl(metta_fast_derived_row_valid(Last, UniqueRuleNames), Derived,
-          SeenRules, Seen).
+          SeenRules, Seen),
+    Portable = metta_fast_image(identity(Actor, Next), PortableSpaces,
+                                Tokens, Rules, Derived).
 
 metta_fast_space_row_valid(Last, Actor, Next,
-                            space(Id, Parent, Atoms, Bindings, Occurrences), Seen0, Seen) :-
+                            space(Id, Parent, Atoms, Bindings, Occurrences),
+                            space(Id, Parent, Atoms, Bindings, Portable), Seen) :-
     integer(Id),
     is_list(Atoms), is_list(Bindings), is_list(Occurrences),
     same_length(Atoms, Occurrences),
@@ -484,7 +490,7 @@ metta_fast_space_row_valid(Last, Actor, Next,
     ->  Parent == root
     ;   integer(Parent), Parent >= 0, Parent < Id, Parent =< Last
     ),
-    foldl(metta_fast_term_scan(Last), Atoms, Seen0, SeenAtoms),
+    foldl(metta_fast_term_scan(Last), Atoms, none, SeenAtoms),
     length(Atoms, Count),
     metta_fast_bindings_valid(Bindings, Atoms, 1, Count),
     foldl(metta_fast_term_scan(Last), Bindings, SeenAtoms, Seen).
@@ -496,15 +502,6 @@ metta_fast_occurrence_valid(ImageActor, Next, Token, t(Actor, Generation)) :-
     ; nonvar(Token), Token = t(Actor, Generation) ),
     atom(Actor), Actor \== '',
     integer(Generation), Generation >= 0, Generation < Next.
-
-% Receipt advances the clock before any write. A collision leaves a fresh
-% variable for add_sexp_in/5 to mint. Incoming tokens are distinct and below
-% Next, so a replacement cannot collide with another incoming occurrence.
-% Reservations cover other pending transactions as well as visible rows.
-metta_fast_receive_occurrences(Space, Actor, Next, Incoming, Stored) :-
-    metta_identity:metta_generation_receive(Next),
-    maplist(metta_fast_occurrence_valid(Actor, Next), Incoming, Portable),
-    spaces:metta_receive_occurrences(Space, Portable, Stored).
 
 metta_fast_bindings_valid([], _, _, _).
 metta_fast_bindings_valid([Binding|Bindings], Atoms, Position, Count) :-
@@ -662,8 +659,11 @@ metta_host_fast_add_atoms(FA, Space) :-
 %node and answer the term it was given [measured 2026-09-04: 116,011
 %inferences over a 2,000-equation cache, none of which could change anything].
 metta_host_fast_restore_image(Target,
-                              metta_fast_image(identity(Actor, Next), Spaces0,
+                              metta_fast_image(identity(_, Next), Spaces0,
                                                Tokens0, Rules0, Derived0), Seen) :-
+    % Validation retained portable identities. Advancing once before restore
+    % puts every reminted collision above every incoming generation.
+    metta_identity:metta_generation_receive(Next),
     metta_fast_allocate_space_nodes(Spaces0, Target, NodeSpaces),
     (   Seen == none
     ->  Spaces = Spaces0, Tokens = Tokens0,
@@ -679,7 +679,7 @@ metta_host_fast_restore_image(Target,
     translator_rules:restore_translator_rule_snapshot(Rules, NodeSpaces,
                                                        Installed),
     forall(member(Rule, Installed), record_source_resource(Rule)),
-    metta_host_fast_restore_spaces(NodeSpaces, Spaces, Actor, Next),
+    metta_host_fast_restore_spaces(NodeSpaces, Spaces),
     translator_rules:restore_translator_rule_derived_snapshot(
         Derived, NodeSpaces, DerivedRefs),
     forall(member(Ref, DerivedRefs), record_source_assertion(Ref)),
@@ -747,7 +747,7 @@ metta_fast_decode_term(IdSpaces, Term, Decoded) :-
 %function_call_graph_changed after each equation and rebuilt the growing SCC
 %and effect plan once per atom. metta_add_program_atoms/3 stores each node as
 %one batch while the shared boundary rebuilds derived analyses once.
-metta_host_fast_restore_spaces(NodeSpaces, Spaces, Actor, Next) :-
+metta_host_fast_restore_spaces(NodeSpaces, Spaces) :-
     findall(F,
             ( member(space(_, _, Atoms, _, _), Spaces),
               metta_fast_equation_name(Atoms, F) ),
@@ -755,15 +755,15 @@ metta_host_fast_restore_spaces(NodeSpaces, Spaces, Actor, Next) :-
     sort(Names0, Names),
     with_named_definition_order(
         Names,
-        ( metta_fast_restore_space_rows(Spaces, NodeSpaces, Actor, Next, Arrived0),
+        ( metta_fast_restore_space_rows(Spaces, NodeSpaces, Arrived0),
           sort(Arrived0, Arrived),
           forall(member(F, Arrived), source_definition_arrived(F)) )).
 
-metta_fast_restore_space_rows([], _, _, _, []).
+metta_fast_restore_space_rows([], _, []).
 metta_fast_restore_space_rows([space(Id, _, Atoms, Bindings, Incoming)|Rows],
-                              NodeSpaces, Actor, Next, Arrived) :-
+                              NodeSpaces, Arrived) :-
     memberchk(Id-Space, NodeSpaces),
-    metta_fast_receive_occurrences(Space, Actor, Next, Incoming, Tokens),
+    spaces:metta_receive_occurrences(Space, Incoming, Tokens),
     (   Bindings == []
     ->  metta_add_program_atoms(Space, Atoms, Tokens, Here)
     ;   metta_fast_signatures(Atoms, Signatures),
@@ -771,7 +771,7 @@ metta_fast_restore_space_rows([space(Id, _, Atoms, Bindings, Incoming)|Rows],
         metta_fast_restore_bound_atoms(Bindings, Atoms, Tokens, 1, Space),
         pairs_keys(Signatures, Here)
     ),
-    metta_fast_restore_space_rows(Rows, NodeSpaces, Actor, Next, Rest),
+    metta_fast_restore_space_rows(Rows, NodeSpaces, Rest),
     append(Here, Rest, Arrived).
 
 metta_fast_restore_bound_atoms([], Atoms, Tokens, _, Space) :-

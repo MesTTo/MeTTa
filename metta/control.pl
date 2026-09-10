@@ -907,6 +907,9 @@ metta_run_with_fuel(Value, Answer, Goal) :-
 %writes here happen together or not at all
 %[source: SWI-Prolog 10.1.13 boot/init.pl, setup_call_cleanup/3;
 %tested: fuel:an_interrupted_scope_leaves_the_balance_off].
+%Workaround: swi-cleanup-window - the marker and the balance are trailed
+%writes, so a limit that trips at the call port after Setup unwinds them
+%with no cleanup owed.
 metta_open_fuel_scope :-
     b_setval('$metta_fuel_scope', []),
     b_setval('$metta_fuel_remaining', unstarted).

@@ -36,6 +36,10 @@
 %   still answers rather than throws; each announces its Error through the
 %   engine's metta_record_error/1, which reaches an observer only while one is
 %   running [tested: source_observation; commit=df1367c75148ca6c7262134a8736b237e1150383].
+% Guarantees: the source-prefix guard reads filereader:source_pending_definition/2
+%   directly, so its first call has the same cost with retained or collected
+%   reader clauses [tested: run_tests(runnable_definition_counter);
+%   commit=WORKTREE].
 
 %% translate_cached_expr(+Expression, -Goals, -Value) is det.
 % This cache stores translation templates, not evaluation answers. Any future
@@ -1276,7 +1280,11 @@ translate_expr_dl([H|T], Goals0, Goals, Out) :-
 runnable_head_awaits_its_definition(Fun) :-
     translating_runnable,
     active_source_program(Id), !,
-    source_pending_definition(Id, Fun),
+    % Workaround: swi-inherited-empty-predicate-retry - call the reader's provider directly.
+    % S_VIRGIN retries an inherited first call when a retired ClauseRef still
+    % supplies its defined pointer; collection changes the counter by one.
+    % SWI fc7ef84b949378b729052c3ade79c90ce5416abb, src/pl-vmi.c:3244-3270.
+    filereader:source_pending_definition(Id, Fun),
     current_metta_module(Module),
     \+ current_predicate(Module:Fun/_).
 
