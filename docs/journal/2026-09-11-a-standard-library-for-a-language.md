@@ -253,3 +253,223 @@ reports zero defects across 36 citation cases and all source-scope probes.
 Evidence logs: ai-tmp/ai-libraries-datetime-{before,after,prolog,card,records}.log,
 ai-tmp/ai-libraries-datetime-twin-{measure,repin,final}.log,
 ai-tmp/ai-libraries-{distribution-projections,card-tests,face-reference-fixed,shape-final}.log.
+
+## 2026-09-11: regex provider investigation
+
+Tried: the existing regex example -> seven passing assertions. The installed
+provider is SWI-Prolog 10.1.13 library(pcre), pinned by its release's submodule
+to [52a0e9486c4770f2fbfac3f4fb8a1cd9e8c77af1](https://github.com/SWI-Prolog/packages-pcre/tree/52a0e9486c4770f2fbfac3f4fb8a1cd9e8c77af1).
+Its re_foldl_ loop increments a byte after an empty match, including at the
+subject's end. Folding the empty pattern over both ASCII and Unicode text
+raises `representation_error(regex-offset)`. Starting re_matchsub at character
+index 1 of either "a" or "é" raises `domain_error(offset,1)` because utf8_seek
+rejects the end position. A Prolog loop over that predicate therefore cannot
+fix the complete empty-match contract on this host.
+
+Tried: a compiled regex round trip through a MeTTa let and Python's native
+handle -> matching succeeds in both seats. Python repr raises
+`AttributeError: 'metta._atoms.model._NativeHandle' object has no attribute 'value'`.
+The handle deliberately has no Grounded.value payload; its display method
+must use the native identity and text, as its wire encoding already does.
+The defining lines were authored by MesTTo. Calling native re_split with a
+compiled blob raises `type_error(text, <regex>(...))`; native split's range
+compiler expects source text. Native capture types therefore need to remain
+available beside any public compiled value.
+
+Decided: native handle repr reads its identity and retained display text.
+Its regression first failed with the AttributeError above while the other
+three wire and persistence cases passed. SpaceHandle already supplies its
+own repr, and ordinary Grounded values retain their payload representation.
+
+Rejected: rewriting patterns to force progress, because extra captures and
+lookarounds change numbering, anchors, backreferences and control verbs.
+Rejected: dropping empty matches or suppressing the host error, because both
+lose valid answers. Rejected: repeated whole-subject searches as the complete
+fix, because the host refuses the end offset and each restart rescans a UTF-8
+prefix. Target the provider's iteration boundary and retain native capture,
+split and replacement semantics. A targeted primary-source research request
+is checking available fixes and project-local integration choices.
+
+Open: settle the provider repair before implementing the regex face. JSON
+preparation verified that empty objects and duplicate object keys already
+round-trip; preserve these space and bag semantics when its turn arrives.
+
+### Provider design, before implementation
+
+Tried: an isolated copy of the pinned SWI binding, with a separate module and
+blob type, passes five probes for empty ASCII/Unicode matches, the empty
+subject, end offsets and a nonempty alternative after an empty match. The
+stock provider remains usable in the same process. The upstream suite passes
+158 of 160 cases; one expects the defective end-offset refusal and the other
+lacks its save/load input fixture in the scratch copy.
+
+Decided: vendor that binding under lib_regex, retain its license and pin, and
+repair its native iteration using the complete algorithm in
+[PCRE2 10.46 pcre2demo.c](https://github.com/PCRE2Project/pcre2/blob/pcre2-10.46/src/pcre2demo.c).
+This retries an empty match at the same position, then advances one Unicode
+character or a configured CRLF pair. Keep its progress rule for backtracking
+control and \\K. The installed 10.46 header has no pcre2_next_match declaration;
+the pinned 10.47 NEWS introduces that API. Rejected: upgrading the linked
+engine solely to obtain it, because that also changes Unicode data and global
+matching behavior. Revisit when the supported host version advances.
+
+Decided: retain actual compiled blobs across both seats. Split and replacement
+request a private capture projection from the same compiled code: range(S,L)
+for text geometry, value(Term) for parsed captures. A parsed term such as 1-2
+therefore cannot be mistaken for geometry. Omit unmatched groups before using
+their PCRE2_UNSET offsets. Build a character-boundary index only when ranges
+are requested; conversion then costs O(subject bytes + capture count), with
+O(subject bytes) temporary space, instead of repeatedly scanning prefixes.
+The PCRE matching cost and materialized answers remain additional costs.
+
+Decided: build the private native object on first import in an adjacent
+ignored .native directory. A Prolog mutex and an OS file lock serialize
+threads and processes; build to a temporary sibling and rename only after a
+successful synchronous compiler exit. The loader owns and cleans the stage
+and lock. The object name includes the host architecture and SWI version;
+source and recipe timestamps invalidate it. Wheels carry the portable source
+and recipe, and first import builds in the installed library. A missing
+compiler, PCRE2 headers or writable artifact directory raises with an install
+and prebuild remedy. No global SWI files or environment settings change.
+
+Verification plan: adapt the upstream suite only for the private namespace
+and corrected end-offset contract; test empty/optional/typed captures, Unicode
+and CRLF progress, compiled operations, native error propagation, concurrent
+builds, failed-build cleanup, cache reuse, and installed-wheel import. Every
+public regex head appears in the MeTTa example and its Python twin.
+
+Tried: the first private provider build emits `swipl-ld: warning: Unknown
+option: --home=/usr/lib/swi-prolog`. library(process)'s prolog(Tool) adapter
+adds the interpreter option to swipl-ld. Use the compiler next to the active
+SWI executable, following that adapter's path resolution without its unsupported
+option. A Janus probe confirms the active executable resolves to the same SWI
+installation. The corrected build emits no warning.
+
+Tried: the first vendored upstream run reports `Syntax error: Operator
+expected` in the edited end-offset test and four `wrong error` failures.
+The test edit had retained the re_ prefix before a comment. The error payload
+exposed private range tags. Restore the test macro and strip private projection
+tags only when constructing the existing missing-key error, preserving the
+upstream error assertions rather than weakening them.
+
+Tried: all 160 adapted upstream tests pass, including save/load and the original
+missing-key error payloads. A literal-quoting boundary probe then reproduces
+`representation_error(nul_byte)` for a pattern containing U+0000. PCRE2's
+compile call already receives the full explicit byte length; the binding's
+strlen precheck alone rejects the value. Remove that precheck, compare patterns
+with their explicit lengths, and print diagnostic patterns by character count.
+The normal blob display and save/load already carry lengths. Quote properties
+will include U+0000 and embedded quoting terminators.
+
+Tried: `sh engine/test.sh suites/libraries/lib_regex.plt` -> 188 passing tests.
+The upstream wb_2 case retains its existing blocked(javascript_compat) marker.
+The first run's callback-release case named its closure in the provider module;
+qualifying the test closure repairs the fixture. The suite covers optional
+capture holes, typed minus terms, end offsets, CRLF/Unicode progression,
+compiled operations, NUL patterns, callback errors and 200,001 counted matches.
+
+Tried: `python -m pytest extensions/python/tests/ch08_data/test_regex_lib.py -q`
+-> six passes, including generated checks against Python re over common syntax
+and literal-quoting round trips. `test_regex_native_build.py` -> four passes:
+reuse and failed rebuild, six processes with four threads each, cancellation
+while the compiler waits on an include FIFO, and a wheel built from its source
+archive then installed and executed. Cancellation joins the compiler, discards
+the stage and preserves the previous object. No .native content enters either
+distribution. The face-generator selftest passes 13 cases; its new case plants
+invalid private sources that discovery must leave outside the public layout.
+
+Tried: `swipl -q --on-error=status -s lib/lib_regex/support/benchmark.pl -g
+regex_benchmark -t halt` compares precompiled two-capture Unicode scans. Minimum
+CPU seconds of three runs, with equal checksums at every size:
+
+| Characters | Installed binding | Private binding | Checksum |
+|---:|---:|---:|---:|
+| 1,024 | 0.000697 | 0.000387 | 787456 |
+| 4,096 | 0.006410 | 0.001521 | 12587008 |
+| 16,384 | 0.085111 | 0.006212 | 201342976 |
+
+Decided: retain the single lazy boundary index. A fourfold size increase from
+4,096 to 16,384 costs 13.3 times the CPU in the installed prefix scan and
+4.1 times in the indexed conversion. The indexed case is 13.7 times faster at
+16,384 characters. This is a range-conversion fixture, not a bound on arbitrary
+PCRE pattern matching. Counting skips capture materialization entirely.
+
+Tried: the expanded MeTTa example -> 25 passing assertions. It calls all 18
+heads, including the six retained native spellings. Logs are
+ai-tmp/ai-libraries-regex-{prolog,python-first,build-tests-first,after}.log and
+ai-tmp/ai-libraries-regex-ranges-benchmark.log.
+
+Tried: targeted Ruff -> two new style findings, repaired in the regex tests,
+and seven existing findings in setup.py. Blame attributes the header and
+optional-compiler branch to MesTTo; clarify the header, retain the necessary
+lazy import with its reason, and bind the refusal message before raising it.
+The unchanged build_py_with_runtime class name and missing run-method docstring
+belong to Leul Negash. Their N801 and D102 findings remain outside this library
+change; the established Ruff lane does not select setup.py.
+
+Tried: native `index-atom(0-1,0,V)` answers `-`, while the same range capture
+with the Python seat loaded answers `0`. Python's Janus tuple provider claims
+the native minus functor. Decided: project compound capture values to explicit
+MeTTa expressions at the library boundary. Preserve the functor, including
+minus; proper lists remain expressions and improper lists use `(cons Head
+Tail)`, following the shared wire grammar recorded in the Node runtime journal
+on 2026-09-05. Variables keep their identity. Cyclic terms raise a named
+refusal because a finite expression cannot represent the cycle. Replacement
+still consumes native values inside the provider, before this projection.
+
+Tried: the new example initially evaluates minus in its expected value, giving
+`(span -1)` where the capture correctly holds `(span (- 0 1))`. Quote the
+expected expression. Native tests now pass 191 cases with the same upstream
+blocked case; the combined regex, native-build and handle-wire Python tests
+pass all 15 cases.
+
+Tried: the final example passes 26 assertions. Minimum-of-three fresh runs
+measure 103,895 MeTTa inferences and 103,248 Python inferences, ratio 0.9938.
+Only this twin's budget changes, from 28,947 to 103,248, retaining every
+committed historical entry. Its uncommitted intermediate measurements remain
+in this journal rather than claiming that the final evidence commit supplied
+an earlier implementation. Regeneration leaves origins, cumulative syntax,
+the llms roster and vocabularies unchanged; the library reference gains the
+18 declared regex heads and their types and documentation.
+
+Tried: integration checks find `Unknown procedure:
+lib_regex_native_build:directory_file_path/3` with autoload disabled. Declare
+its filesex import explicitly; the nine missing native names are consequences
+of that loader failure. Evidence reports the still-untracked native/build test
+files, an individual unittest method outside its collected file citation, and
+a missing measurement date. Stage the owned files, cite the executed selftest
+file, and date the measurement. VitePress reports `1 dead link(s) found` for
+the provider record linked from the mirrored engine guide. Name its repository
+path as code, which remains valid in both guide locations.
+
+Tried: the repaired autoload check passes all 22 library files, and VitePress
+builds successfully. The remaining evidence finding names `regex_upstream`,
+whose vendored path is outside the named-test index. Cite the executed native
+gate command that includes that suite; its 160 upstream cases remain executed
+and unchanged. The evidence and provenance mutation selftests pass.
+
+Tried: the full twin check proves 26 of 26 claims and equal stored content,
+then rejects 29 bare expected strings under the corpus's explicit Grounded
+data convention. Wrap those expected values with G, preserving the assertions.
+The explicit filesex import changes the twin's inference count by ten; measure
+and price the final import graph before pinning its evidence commit.
+
+Verified: the final regex native gate passes 191 tests, with the upstream
+javascript_compat case still blocked. The combined Python regression command
+passes 15 tests, including installed-wheel execution, failed and cancelled
+builds, and concurrent first imports. The full twin check proves 26 claims,
+equal stored content and zero findings. Minimum-of-three costs are 103,904
+MeTTa and 103,258 Python inferences, ratio 0.9938. Ruff passes the nine changed
+Python files selected for this library. jscpd finds zero clones in five changed
+Python implementation/example/test files, 897 lines and 8,589 tokens.
+
+Verified: coverage reports 251 engine callables, 677 library heads, four
+allowed entries and no findings. Cumulative syntax remains 324 examples and
+284 constructs; origins remain 143 derived and 202 original examples. llms
+passes five sheets and 68 mutation cases. Reference, docs, face generation,
+library documentation, artifact declarations and their selected mutation
+witnesses pass. Engine no-autoload and the 22-file library autoload check
+pass. Evidence reports zero unbacked tags in 7,448 claims; the evidence and
+provenance mutation selftests pass. Logs use the ai-libraries-regex prefix in
+ai-tmp; the final combined integration corrections are recorded separately
+from their initial failures.

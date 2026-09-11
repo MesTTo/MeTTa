@@ -36,7 +36,7 @@ beside its definitions.
 | lib_pln2 | 9 | 0 |
 | lib_redis | 2 | 0 |
 | lib_reflect | 19 | 10 |
-| lib_regex | 12 | 0 |
+| lib_regex | 18 | 18 |
 | lib_roman | 36 | 0 |
 | lib_soft | 9 | 1 |
 | lib_spaces | 5 | 0 |
@@ -756,6 +756,280 @@ The engine's whole surface as a JSON string, for external tools
 Returns: a JSON string
 
 Undocumented: `engine-arity`, `engine-builtin`, `engine-extension-point`, `engine-function`, `engine-knows`, `engine-origin`, `engine-special-form`, `engine-surface-counts`, `engine-user-function`
+
+## lib_regex
+
+### `re-captures`
+
+*lib_regex.metta:12*
+
+```metta
+(: re-captures (-> %Undefined% %Undefined% Expression))
+```
+
+Return the first match's capture pairs, with the regex_captures contract.
+
+1. Pattern
+2. Text
+
+Returns: Groups
+
+### `re-compile`
+
+*lib_regex.metta:18*
+
+```metta
+(: re-compile (-> %Undefined% %Undefined%))
+```
+
+Compile pattern text to an immutable native regex value accepted by every regex operation. It can be stored, passed between functions and reused across threads. Inline flags belong to Pattern. Invalid pattern syntax raises.
+
+1. Pattern
+
+Returns: Compiled
+
+### `re-count`
+
+*lib_regex.metta:24*
+
+```metta
+(: re-count (-> %Undefined% %Undefined% Number))
+```
+
+Count matches using re-find's empty-match progression. This does not collect answers or parse typed capture values; counting needs constant auxiliary space.
+
+1. Pattern
+2. Text
+
+Returns: Count
+
+### `re-escape`
+
+*lib_regex.metta:30*
+
+```metta
+(: re-escape (-> %Undefined% String))
+```
+
+Quote literal text for a PCRE2 pattern, including whitespace in extended mode and embedded \E quoting terminators. The result matches exactly that text when used with re-fullmatch.
+
+1. Text
+
+Returns: Pattern
+
+### `re-find`
+
+*lib_regex.metta:36*
+
+```metta
+(: re-find (-> %Undefined% %Undefined% String))
+```
+
+Enumerate every whole match, with the regex_find contract.
+
+1. Pattern
+2. Text
+
+Returns: Match
+
+### `re-fullmatch`
+
+*lib_regex.metta:42*
+
+```metta
+(: re-fullmatch (-> %Undefined% %Undefined% Bool))
+```
+
+Return whether one match covers all Text. Native anchoring applies to the entire pattern, including every alternative, without adding capture groups.
+
+1. Pattern
+2. Text
+
+Returns: Answer
+
+### `re-match`
+
+*lib_regex.metta:48*
+
+```metta
+(: re-match (-> %Undefined% %Undefined% Bool))
+```
+
+Return whether Pattern matches anywhere in Text, with the regex_match contract.
+
+1. Pattern
+2. Text
+
+Returns: Answer
+
+### `re-ranges`
+
+*lib_regex.metta:54*
+
+```metta
+(: re-ranges (-> %Undefined% %Undefined% Expression))
+```
+
+Enumerate (Start Length) records for whole matches in Unicode characters, starting at zero. Empty matches have length zero. A byte-oriented \C match that splits a Unicode character raises regex_character_boundary.
+
+1. Pattern
+2. Text
+
+Returns: Range
+
+### `re-replace`
+
+*lib_regex.metta:60*
+
+```metta
+(: re-replace (-> %Undefined% %Undefined% %Undefined% String))
+```
+
+Replace the first match, with the regex_replace contract.
+
+1. Pattern
+2. With
+3. Text
+
+Returns: Replaced
+
+### `re-replace-all`
+
+*lib_regex.metta:66*
+
+```metta
+(: re-replace-all (-> %Undefined% %Undefined% %Undefined% String))
+```
+
+Replace every match, with the regex_replace_all contract.
+
+1. Pattern
+2. With
+3. Text
+
+Returns: Replaced
+
+### `re-scan`
+
+*lib_regex.metta:72*
+
+```metta
+(: re-scan (-> %Undefined% %Undefined% Expression))
+```
+
+Enumerate capture-pair records for every match in order. The capture shape and typed suffixes follow re-captures; match progression follows re-find.
+
+1. Pattern
+2. Text
+
+Returns: Groups
+
+### `re-split`
+
+*lib_regex.metta:78*
+
+```metta
+(: re-split (-> %Undefined% %Undefined% Expression))
+```
+
+Split Text into skipped/matched parts, with the regex_split contract.
+
+1. Pattern
+2. Text
+
+Returns: Parts
+
+### `regex_captures`
+
+*lib_regex.metta:84*
+
+```metta
+(: regex_captures (-> %Undefined% %Undefined% Expression))
+```
+
+Return the first match as ((Key Value) ...) pairs. Key 0 names the whole match; other keys are group numbers or names. Unmatched optional groups are omitted. Suffixes _S/_A/_R select String/Symbol/(- Start Length), and _I/_F/_N/_T parse a native Prolog term. Compounds become (Functor Argument ...) expressions; proper lists remain expressions and improper lists become (cons Head Tail). Invalid text and cyclic terms raise; no match has no answer.
+
+1. Pattern
+2. Text
+
+Returns: Groups
+
+### `regex_find`
+
+*lib_regex.metta:90*
+
+```metta
+(: regex_find (-> %Undefined% %Undefined% String))
+```
+
+Enumerate every whole match in left-to-right order, preserving repeated and empty answers. After an empty match, try a nonempty alternative at the same position before advancing one character. The final empty match is included.
+
+1. Pattern
+2. Text
+
+Returns: Match
+
+### `regex_match`
+
+*lib_regex.metta:96*
+
+```metta
+(: regex_match (-> %Undefined% %Undefined% Bool))
+```
+
+Return whether Pattern matches anywhere in Text. Pattern is text or a compiled re-compile value. Invalid patterns and native matching failures raise.
+
+1. Pattern
+2. Text
+
+Returns: Answer
+
+### `regex_replace`
+
+*lib_regex.metta:102*
+
+```metta
+(: regex_replace (-> %Undefined% %Undefined% %Undefined% String))
+```
+
+Replace the first match. With references captures as $name, $1 or \1; braces can delimit the name. Double a dollar or backslash to quote it. Missing or unbound groups raise. Typed captures substitute their parsed value, so 007 with _I becomes 7; compound values use native quoted term syntax.
+
+1. Pattern
+2. With
+3. Text
+
+Returns: Replaced
+
+### `regex_replace_all`
+
+*lib_regex.metta:108*
+
+```metta
+(: regex_replace_all (-> %Undefined% %Undefined% %Undefined% String))
+```
+
+Replace every match, including empty matches and a nonempty alternative at the same position. With follows the regex_replace capture-reference syntax.
+
+1. Pattern
+2. With
+3. Text
+
+Returns: Replaced
+
+### `regex_split`
+
+*lib_regex.metta:114*
+
+```metta
+(: regex_split (-> %Undefined% %Undefined% Expression))
+```
+
+Return alternating skipped and matched Strings, beginning and ending with a skipped part. The list always has odd length, including for an empty pattern.
+
+1. Pattern
+2. Text
+
+Returns: Parts
 
 ## lib_soft
 

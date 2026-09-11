@@ -726,6 +726,13 @@ host services that are not MeTTa calls use a PlDoc `@private` explanation.
 `lib_datetime` is the working example. Its native modes generate its imports,
 types and help text; its example calls every public head. The library card
 and `website/reference/metta-libraries.md` read those same declarations.
+Discovery follows `lib/*/*.pl`; private support and vendored provider modules
+live below that level and do not acquire public faces. `lib_regex` demonstrates
+a native provider with a local build recipe, immutable compiled values and
+multiple answers. The record at `lib/lib_regex/vendor/VENDOR.md` pins the
+upstream source, lists local repairs and gives the prebuild command.
+The wheel ships that source, excludes its `.native` directory and builds the
+object on first import. Prebuild before making an installed runtime read-only.
 Regenerate the page with `python extensions/python/tools/libdoc.py --write`.
 `python tests/checks/check_llms_names.py --write` refreshes the source counts
 and library roster while retaining the authored library notes. Corpus lineage

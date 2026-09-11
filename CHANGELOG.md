@@ -9,6 +9,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_regex` provides compiled pattern values, full matching, capture scans,
+  character ranges, counting and literal quoting. Empty matches retain valid
+  nonempty alternatives; optional captures, typed substitutions and embedded
+  NUL text keep their values. All matching operations accept compiled patterns.
+  Compound captures retain their functor as an expression in every seat.
+  Its private PCRE2 binding builds locally on first import and reports missing
+  build dependencies. Portable wheels carry the source and build recipe.
+  Python native handles also retain a usable representation inside containers.
 - `lib_datetime` provides parsing, explicit-zone formatting, visible date
   records, field queries, Gregorian calendar queries and calendar addition.
   Existing clock and formatting names retain their results.

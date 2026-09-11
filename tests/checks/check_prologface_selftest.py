@@ -1,5 +1,8 @@
 """Purpose: falsify native face generation through source and execution fixtures.
 
+Guarantees: private support and vendor sources do not become public faces
+[tested: tests/checks/check_prologface_selftest.py; commit=WORKTREE].
+
 Owns resources: every mutable fixture lives in a temporary directory under
 ai-tmp, removed by unittest cleanup; native readers use the bounded runner.
 """
@@ -118,7 +121,7 @@ class PrologFaceTests(unittest.TestCase):
 
     def test_deleted_face_and_marker_remain_detectable(self) -> None:
         """Native modes discover a face even after its output markers disappear."""
-        with patch.object(model, "SOURCE_ROOTS", (self.root,)), patch.object(model, "notice", return_value="fixture notice"):
+        with patch.object(model, "SOURCE_ROOTS", ((self.root, "*.pl"),)), patch.object(model, "notice", return_value="fixture notice"):
             self.assertEqual(model.review(rewrite=True), ([], 1, 0))
             for transform in (lambda _: "", lambda text: text.replace(model.BEGIN, ""),
                               lambda text: text.replace("Number Number Number", "String String String")):
@@ -136,6 +139,20 @@ class PrologFaceTests(unittest.TestCase):
             problems, _, _ = model.review([self.source, bad], rewrite=True)
         self.assertTrue(problems)
         self.assertFalse(self.face.exists())
+
+    def test_discovery_excludes_private_support_and_vendor_sources(self) -> None:
+        """Only the declared library layout supplies public backing modules."""
+        library = self.root / "lib_fixture"
+        library.mkdir()
+        source = library / FIXTURE.name
+        source.write_text(FIXTURE.read_text(encoding="utf-8"), encoding="utf-8")
+        for name in ("support", "vendor"):
+            private = library / name
+            private.mkdir()
+            (private / "broken.pl").write_text("must_not_be_read(.\n", encoding="utf-8")
+        with patch.object(model, "SOURCE_ROOTS", ((self.root, "*/*.pl"),)), patch.object(model, "notice", return_value="fixture notice"):
+            self.assertEqual(model.review(rewrite=True), ([], 1, 0))
+            self.assertEqual(model.review(), ([], 1, 0))
 
     def test_relative_source_paths_use_the_same_projection(self) -> None:
         """A command-line path relative to this checkout is a valid source."""

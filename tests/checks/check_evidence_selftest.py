@@ -25,8 +25,8 @@ Every citation is built from a TAG variable instead of being written out. A
 literal one in this file is a claim about THIS repository as far as the gate is
 concerned, and the fixtures are deliberately unbacked.
 Guarantees:
-  - nested distribution modules and native face fixtures report stale citations
-    [tested: tests/checks/check_evidence_selftest.py; commit=9b22993447a5ddba93643895e3025661ba9f693e]
+  - nested distribution modules, library support and native face fixtures report stale citations
+    [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
   - Prolog tools accept a backed claim and report an absent test on its own line
     [tested: tests/checks/check_evidence_selftest.py; commit=8358dfc233bf299bb23eceddd94593a62372fe4b]
   - a shared build symlink preserves the selected TypeScript sources and
@@ -628,6 +628,7 @@ def tracked_probe_complaints() -> list[str]:
                  "extensions/python/ext/metta-fixture/library/__init__.py",
                  "tests/data/prologface/fixture.pl",
                  "tests/data/prologface/fixture.metta",
+                 "lib/lib_fixture/support/native_build.pl",
                  "examples/ch-plant/_fixtures/nested/library.metta",
                  "setup.py", "extensions/mork/tests/plant.sh"):
         with tempfile.TemporaryDirectory() as directory:
