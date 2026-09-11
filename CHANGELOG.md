@@ -49,6 +49,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Expected-type family classification reuses compiled shipped patterns. User
+  rules still normalize aliases when queried and retain their precedence.
+
 - The engine benchmark's boot row prepares its own artifact state: the governed
   `.qlf` set is purged and warmed through the ordinary boot in children of the
   driver before the row's samples, the same preparation the C fixture takes, so
