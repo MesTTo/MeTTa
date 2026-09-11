@@ -44,6 +44,8 @@ Guarantees:
     [tested 2026-09-07: evidence-mutations; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
   - tracked probes and nested example fixtures reject a nonexistent test
     [tested: tests/checks/check_evidence_selftest.py; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
+  - root build hooks and component shell tests reject a nonexistent test
+    [tested: tests/checks/check_evidence_selftest.py; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
 Fails when:
   - run against a tree it did not write. It asserts exact line numbers in a
     fixture it generates, and nothing else.
@@ -609,7 +611,7 @@ def seat_root_path_complaints() -> list[str]:
 
 
 def tracked_probe_complaints() -> list[str]:
-    """Probe and nested fixture claims are read, and a stale citation is reported.
+    """Tracked source claims are read, and a stale citation is reported.
 
     A probe is where a measurement's reproduction is KEPT when the fixture is
     worth having, which is exactly what the scratch rule asks an author to do
@@ -621,7 +623,8 @@ def tracked_probe_complaints() -> list[str]:
     """
     complaints = []
     for name in ("extensions/python/benchmarks/probes/probe.py",
-                 "examples/ch-plant/_fixtures/nested/library.metta"):
+                 "examples/ch-plant/_fixtures/nested/library.metta",
+                 "setup.py", "extensions/mork/tests/plant.sh"):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             build(root, PYTEST_ANCHOR)
@@ -633,9 +636,10 @@ def tracked_probe_complaints() -> list[str]:
                 f"  - the collected test backs this [{TAG} {WHEN}: test_collected].",
                 f"  - this one names nothing [{TAG} {WHEN}: no_such_probe_test].",
             ]
+            marker = "#" if probe.suffix == ".sh" else ";"
             source = ('"""' + "\n".join(lines) + '\n"""\n'
                       if probe.suffix == ".py"
-                      else "".join("; " + line + "\n" for line in lines))
+                      else "".join(marker + " " + line + "\n" for line in lines))
             probe.write_text(source)
             output = run(root)
             mine = [line for line in output if line.startswith(name + ":")]
@@ -877,7 +881,8 @@ def main() -> int:
         f"pins, a symlinked output directory, a path cited from beside its own file, a path cited from its "
         f"seat root, a lane written across a line continuation, a fixture "
         f"under the scratch root beside one the tree tracks, and a tracked "
-        f"probe, a nested example fixture and a Prolog tool citing tests that are not there, "
+        f"probe, a nested example fixture, a root build hook, a component shell test "
+        f"and a Prolog tool citing tests that are not there, "
         f"and a stale copy under an ignored build directory"
     )
     return 1 if complaints else 0

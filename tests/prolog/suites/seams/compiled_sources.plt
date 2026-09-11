@@ -9,8 +9,13 @@
    lib/lib_datetime/lib_datetime.pl and removed again; each test that makes
    one removes it before and after, and unloads the unit it loaded. A swipl
    the boot can start exists, which is the shipped configuration.
-   Guarantees: the governance follows the boot's pattern table and the claim
-   the stamped encoding [tested: the_boot_governs_the_sources_its_patterns_name,
+   Guarantees: the claim remains an artifact claim when dev_typed loads the
+   engine and this suite with source=true: source=false is scoped to the
+   tests' runtime loads, then restored along with library cleanup
+   [tested: sh check.sh dev-typed
+   dev-typed-selftest prolog; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]. The governance follows
+   the boot's pattern table and the claim follows the stamped encoding
+   [tested: the_boot_governs_the_sources_its_patterns_name,
    an_unstamped_encoding_claims_nothing; commit=5f8a823d23fbed5c7395912a89ba32760e2df4b1]; the door's arms are
    observed through SWI's own load_file(done(...)) message, which says loaded
    for a process that reads the artifact, *qcompiled* for one that writes it
@@ -28,7 +33,10 @@
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 
-:- begin_tests(compiled_sources).
+:- begin_tests(compiled_sources,
+               [setup((current_prolog_flag(source, Source),
+                       set_prolog_flag(source, false))),
+                cleanup(call_cleanup(cs_forget, set_prolog_flag(source, Source)))]).
 :- dynamic cs_load_seen/2.
 
 % SWI's own account of how a file was loaded, kept per source stem: the done

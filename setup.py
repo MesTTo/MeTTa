@@ -5,9 +5,11 @@ Assumes:
     stays pure Python and platform-independent [tested
     test_the_codec_builds_under_mypyc_as_an_option]
 Guarantees:
-  - the default build is byte-identical to the one before compilation was
-    offered: mypycify is not imported, mypy is not required, and ext_modules
-    is empty [tested test_the_codec_builds_under_mypyc_as_an_option]
+  - the binding's owned directory supplies its runtime resource closure,
+    including newly introduced nested includes, without booting an engine
+    [tested: tests/shell/test_packaged_cli.sh; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
+  - the default build does not import mypycify or require mypy, and uses
+    no ext_modules [source: setup.py:104, compiled_modules; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
   - PYMETTA_USE_MYPYC=1 without mypy installed stops the build naming the fix,
     rather than quietly producing the pure-Python wheel the builder did not
     ask for [tested test_the_codec_builds_under_mypyc_as_an_option]
@@ -146,10 +148,8 @@ RUNTIME_RESOURCES = {
     "tests/codec": "tests/codec",
     "llms.txt": "llms.txt",
     "extensions/python/extension.pl": "extensions/python/extension.pl",
-    "extensions/python/metta/_binding/surface.pl": "extensions/python/metta/_binding/surface.pl",
-    "extensions/python/metta/_binding/host.py": "extensions/python/metta/_binding/host.py",
+    "extensions/python/metta/_binding": "extensions/python/metta/_binding",
     "extensions/python/helper.pl": "extensions/python/helper.pl",
-    "extensions/python/metta/_binding/shim.pl": "extensions/python/metta/_binding/shim.pl",
 }
 
 

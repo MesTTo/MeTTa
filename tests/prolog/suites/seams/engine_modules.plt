@@ -430,6 +430,13 @@ shadow_by_design('$autoload'/3,
 % [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/tabling.pl#L1220; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 shadow_by_design('$tabled'/2, 'SWI records table declarations per module').
 shadow_by_design('$table_mode'/3, 'SWI records table modes per module').
+% PlDoc stores structured comments, modes and re-export links in their source
+% modules. dev_typed enables that collector to instrument declared modes.
+% [source: https://github.com/SWI-Prolog/packages-pldoc/blob/76fde4c3f1b623273b236dc6cb3a76929722729b/doc_process.pl#L439;
+% commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
+shadow_by_design('$mode'/2, 'PlDoc records source modes per module').
+shadow_by_design('$pldoc'/4, 'PlDoc records structured comments per module').
+shadow_by_design('$pldoc_link'/2, 'PlDoc records documentation links per module').
 % SWI applies each source module's hook before its inherited expansion hooks.
 % [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L129; commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c]
 shadow_by_design(term_expansion/2,

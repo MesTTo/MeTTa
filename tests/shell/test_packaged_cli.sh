@@ -5,6 +5,9 @@
 #   setup.py maps into metta/_runtime/ is all there, metta.llms() prints the
 #   whole cheat sheet, and the CLI carries its filter surface.
 # Guarantees:
+#   - new nested binding files ship through both source archives and wheels;
+#     damaged wheel runtimes refuse by path through standalone and embedded
+#     boot [tested: sh check.sh packaged; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 #   - every claim is made against the INSTALL. A resource the wheel drops is
 #     invisible in a checkout, where the same door reads the repository root,
 #     so a source-tree test cannot answer this question at all.
@@ -15,6 +18,8 @@
 #     engine extra, which this dependency-free install does not have, and is
 #     checked in the checkout instead.
 # Fails when: uv or swipl is absent, which it refuses on rather than skipping.
+# Owns resources: the EXIT trap removes the private build and install tree;
+#   bounded.sh reaps subprocesses.
 # Open Obligations:
 #   To Do: None
 #   Hacks: None
@@ -33,13 +38,16 @@ command -v uv >/dev/null
 command -v swipl >/dev/null
 
 project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+METTA_ROOT="$project_dir"
+. "$project_dir/select-python.sh"
+bounded() { sh "$project_dir/bounded.sh" "$@"; }
 fixture=$(mktemp -d)
 trap 'rm -rf "$fixture"' EXIT HUP INT TERM
 
-uv build --wheel --out-dir "$fixture/dist" "$project_dir"
+bounded uv build --out-dir "$fixture/dist" "$project_dir"
 wheel=$(find "$fixture/dist" -name 'pymetta-*.whl' -print -quit)
-uv venv "$fixture/venv"
-uv pip install --python "$fixture/venv/bin/python" --no-deps "$wheel"
+bounded uv venv --python "$PY" "$fixture/venv"
+bounded uv pip install --python "$fixture/venv/bin/python" --no-deps "$wheel"
 test -x "$fixture/venv/bin/metta"
 
 mkdir "$fixture/unrelated cwd"
@@ -51,11 +59,11 @@ printf '!(import! &self (library lib_roman))\n!(map-flat (+ 1) (1 2 3))\n' \
 (
     cd "$fixture/unrelated cwd"
     unset METTA_PATH
-    "$fixture/venv/bin/metta" "$fixture/basic.metta" > "$fixture/basic.log"
-    "$fixture/venv/bin/metta" "$fixture/import.metta" > "$fixture/import.log"
-    "$fixture/venv/bin/metta" "$fixture/roman.metta" > "$fixture/roman.log"
-    "$fixture/venv/bin/python" -c 'import metta; metta.llms()' > "$fixture/llms.log"
-    "$fixture/venv/bin/python" -m metta llms > "$fixture/llms-verb.log"
+    bounded "$fixture/venv/bin/metta" "$fixture/basic.metta" > "$fixture/basic.log"
+    bounded "$fixture/venv/bin/metta" "$fixture/import.metta" > "$fixture/import.log"
+    bounded "$fixture/venv/bin/metta" "$fixture/roman.metta" > "$fixture/roman.log"
+    bounded "$fixture/venv/bin/python" -c 'import metta; metta.llms()' > "$fixture/llms.log"
+    bounded "$fixture/venv/bin/python" -m metta llms > "$fixture/llms-verb.log"
     # The filter faces as far as an install WITHOUT the engine extra reaches:
     # the operand and the flag are argparse, and argparse runs before anything
     # imports janus. Running a program through them needs janus_swi, which
@@ -64,14 +72,14 @@ printf '!(import! &self (library lib_roman))\n!(map-flat (+ 1) (1 2 3))\n' \
     # BEHAVIOUR is checked in the checkout by
     # extensions/python/tests/ch01_getting_started/test_main_module.py and what
     # is checked here is that the wheel ships the surface at all.
-    "$fixture/venv/bin/python" -m metta run --help > "$fixture/run-help.log"
-    "$fixture/venv/bin/python" -m metta doc --help > "$fixture/doc-help.log"
+    bounded "$fixture/venv/bin/python" -m metta run --help > "$fixture/run-help.log"
+    bounded "$fixture/venv/bin/python" -m metta doc --help > "$fixture/doc-help.log"
     # The provenance faces, at the same depth and for the same reason: `card`
     # reads a library's own sources through the engine's reader and `lock`
     # runs the programs it pins, so both need janus to DO anything, and what
     # this install can answer is that the wheel ships them at all.
-    "$fixture/venv/bin/python" -m metta card --help > "$fixture/card-help.log"
-    "$fixture/venv/bin/python" -m metta lock --help > "$fixture/lock-help.log"
+    bounded "$fixture/venv/bin/python" -m metta card --help > "$fixture/card-help.log"
+    bounded "$fixture/venv/bin/python" -m metta lock --help > "$fixture/lock-help.log"
 )
 
 grep -Fxq '2' "$fixture/basic.log"
@@ -105,7 +113,7 @@ cmp "$project_dir/llms.txt" "$fixture/llms-verb.log"
 # tells them apart. setup.py did not ship it until 2026-08-17, which made
 # EXTENDING.md's "a seat is a folder with a control file" false for every
 # wheel.
-"$fixture/venv/bin/python" - <<'PY'
+bounded "$fixture/venv/bin/python" - <<'PY'
 from pathlib import Path
 import metta
 import importlib.util
@@ -122,5 +130,7 @@ for required in (
 assert list((runtime / "extensions").glob("*/extension.pl")), "extensions/ shipped empty"
 assert importlib.util.find_spec("pymetta") is None, "the distribution name became a module"
 PY
+
+bounded "$PY" "$project_dir/tests/checks/check_packaged_runtime.py" "$wheel"
 
 echo "packaged pymetta CLI tests passed"

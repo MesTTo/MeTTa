@@ -13,6 +13,8 @@
 %   while the reported declaration retains its written type
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
+% Assumes: engine/source_loading.pl renders metta_load_failed/1 before this
+%   runtime unit loads [tested: source_loading; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 % Guarantees:
 %   - every definition retains engine/metta.pl's implementation module and original load order
 %     [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
@@ -213,8 +215,6 @@ prolog:error_message(metta_untypable_declaration(Name, Type)) -->
 prolog:error_message(metta_export_form(Text)) -->
     [ 'this is not an export declaration: ~w. An export is (: name (-> ...)) \c
        or (export name arity).'-[Text] ].
-prolog:error_message(metta_load_failed(Summary)) -->
-    [ 'the Prolog source did not load cleanly: ~w'-[Summary] ].
 prolog:error_message(metta_name_owned_by_source(Name, Owner)) -->
     [ '~w is already registered from ~w. Two libraries defining one name \c
        destroy each other\'s predicate, because a consulted file REPLACES a \c

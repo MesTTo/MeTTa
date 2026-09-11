@@ -4,6 +4,8 @@
 % Owns resources: each source owner destroys its queue on every exit; waiters
 %   recheck receipts after waking [tested: loader_singleflight; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
+% Assumes: engine/source_loading.pl:loading_loudly/1 collects printed failures
+%   and restores nested loader state [tested: source_loading; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 % Guarantees: declared determinism is applied to the predicate's implementation
 %   module, including plain host files reached through the core's base chain
 %   [tested: test_a_declared_det_function_that_leaks_a_choice_point_raises,
@@ -1405,50 +1407,6 @@ consult_string_global(Name, Text) :-
                        close(In)),
     register_pending_exports.
 
-%Raise what SWI would only have printed. A syntax error inside a consulted
-%file goes through print_message/2 and the load then SUCCEEDS with the
-%predicate undefined, so a library author's whole diagnostic was one line on
-%stderr while the API reported success:
-%  ERROR: .../lib.pl:1:28: Syntax error: Operator expected
-%and register_prolog then said "no predicate named 'f' was defined by that
-%source", which names the symptom and not the cause. Wrapping the load in
-%catch/3 does not help, because these are printed rather than thrown.
-%
-%thread_message_hook/3 is SWI's own answer for exactly this, "intended to
-%catch messages that may be produced by calling some goal without affecting
-%other threads", and being thread-local is what lets a Pool worker load a file
-%without collecting another worker's messages
-%[source: SWI-Prolog 10.1 Reference Manual, section 4.11, message_hook/3].
-%
-%Only error-kind messages are collected. A warning is not a failed load:
-%singleton variables are a style note, and the redefinition warning that
-%matters is caught positively instead, by asking after the load whether each
-%name resolves where it should [tested: a_syntax_error_in_a_library_raises].
-:- thread_local metta_load_diagnostic/1, metta_watching_load/0.
-:- multifile user:thread_message_hook/3.
-user:thread_message_hook(Term, error, _Lines) :-
-    metta_watching_load,
-    message_to_string(Term, Text),
-    assertz(metta_load_diagnostic(Text)),
-    %Fail deliberately: SWI still prints the message with its full context,
-    %and the throw below carries the summary a caller can act on.
-    fail.
-
-:- meta_predicate loading_loudly(0).
-loading_loudly(Goal) :-
-    setup_call_cleanup(( retractall(metta_load_diagnostic(_)),
-                         assertz(metta_watching_load) ),
-                       Goal,
-                       retractall(metta_watching_load)),
-    findall(Text, metta_load_diagnostic(Text), Diagnostics),
-    retractall(metta_load_diagnostic(_)),
-    (   Diagnostics == []
-    ->  true
-    ;   atomic_list_concat(Diagnostics, '; ', Summary),
-        throw(error(metta_load_failed(Summary),
-                    context(loading_loudly/1,
-                            'the Prolog source reported an error while loading')))
-    ).
 %A predicate term headed by a space is a provider query, not a raw Prolog
 %call into the module where native atoms happen to be stored. Other heads keep
 %the Prolog interop constructor's original meaning.
