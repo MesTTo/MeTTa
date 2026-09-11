@@ -17,10 +17,14 @@
 %   with user-predicate count, the stamp file, and .qlf presence each
 %   ruled out by A/B].
 % Assumes:
-%   - loaded with autoload possibly OFF (tests/fixtures/no_autoload_boot.pl), so
-%     only true builtins appear: no member/2, no max_list/2, no
-%     library(readutil).
+%   - autoload may be OFF (tests/fixtures/no_autoload_boot.pl). The inventory
+%     and freshness predicates depend only on builtins; qlf_load_engine/0
+%     explicitly loads identity.pl and source_loading.pl before the engine
+%     [tested: sh check.sh qlf-freshness no-autoload; commit=WORKTREE].
 % Guarantees:
+%   - a missing runtime source or failed extension directive raises a named
+%     load error after restoring the loader's source module
+%     [tested: tests/shell/test_packaged_cli.sh; commit=WORKTREE].
 %   - an edit to ANY engine or lib source, unit files included, defeats
 %     every .qlf on the next boot: SWI's own staleness check covers a
 %     .qlf's immediate source only, and the engine's units are consulted
@@ -444,6 +448,8 @@ purge_stale_qlf :-
 %retry meeting the same artifact set again.
 qlf_load_engine :-
     qlf_boot_directory(Here),
+    atom_concat(Here, '/source_loading.pl', SourceLoading),
+    use_module(SourceLoading, []),
     atom_concat(Here, '/identity.pl', Identity),
     use_module(Identity, []),
     metta_identity:metta_boot_identity,
@@ -452,11 +458,12 @@ qlf_load_engine :-
     current_prolog_flag(qcompile, Previous),
     setup_call_cleanup(
         set_prolog_flag(qcompile, auto),
-        catch(user:ensure_loaded(Umbrella),
-              Error,
-              ( print_message(warning, Error),
-                purge_all_qlf,
-                user:ensure_loaded(Umbrella) )),
+        metta_source_loading:loading_loudly(
+            metta_qlf_boot:catch(user:ensure_loaded(Umbrella),
+                  Error,
+                  ( print_message(warning, Error),
+                    purge_all_qlf,
+                    user:ensure_loaded(Umbrella) ))),
         set_prolog_flag(qcompile, Previous)).
 
 :- purge_stale_qlf.

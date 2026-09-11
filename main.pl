@@ -1,6 +1,8 @@
 % Purpose: run the standalone MeTTa command-line entry point and display each
 %   result from a requested MeTTa source file.
 % Guarantees:
+%   - a failed engine boot ends the standalone command before running a
+%     program [tested: tests/shell/test_packaged_cli.sh; commit=WORKTREE].
 %   - command-line answers use sdisplay/2, so host-only values and non-finite
 %     numbers remain printable presentation values without weakening
 %     swrite/2's reader-inverse contract [tested:
@@ -40,7 +42,11 @@
 :- use_module(library(apply), [maplist/2, maplist/3]).
 :- use_module(library(listing), [listing/1]).
 :- ensure_loaded(qlf_boot).
-:- metta_qlf_boot:qlf_load_engine.
+% SWI prints a directive exception and continues consulting. This standalone
+% entry owns process termination; embedding hosts call qlf_load_engine/0 and
+% receive its exception through their own query boundary.
+:- catch((metta_qlf_boot:qlf_load_engine -> true ; halt(1)), Error,
+         (print_message(error, Error), halt(1))).
 
 %Tokens the engine reads for itself, which are therefore not the file to run.
 %`extensions` asks engine/metta.pl to read every seat's control file and load
