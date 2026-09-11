@@ -49,6 +49,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- The engine benchmark's boot row prepares its own artifact state: the governed
+  `.qlf` set is purged and warmed through the ordinary boot in children of the
+  driver before the row's samples, the same preparation the C fixture takes, so
+  the pin reads one state whatever lane ran before it. The boot-determinism lane
+  reads the driver's regression shape as a reading too, so a stale pin is
+  engine-bench's finding and never "no sample".
+- The end-of-wave re-pins: engine boot, evaluate, parse-prolog and translate;
+  the Python benchmark rows the wave moved; the automatic-tabling pins;
+  memory-scale `support-drop-spaces`; the Node rows; the C boot row. Each row
+  carries the ladder across the wave's landing tips that attributes its move.
 - The evidence, provenance-pin and spec-status gates read the set git tracks
   for the root they scan, keyed by that root, so a selftest's planted tree is
   a repository and a stale build copy under an ignored directory is never a
