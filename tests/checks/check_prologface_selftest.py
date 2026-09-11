@@ -1,7 +1,7 @@
 """Purpose: falsify native face generation through source and execution fixtures.
 
 Guarantees: private support and vendor sources do not become public faces
-[tested: tests/checks/check_prologface_selftest.py; commit=WORKTREE].
+[tested: tests/checks/check_prologface_selftest.py; commit=7dcfe83fcf74742a1e944db240aa918596c8d4b0].
 
 Owns resources: every mutable fixture lives in a temporary directory under
 ai-tmp, removed by unittest cleanup; native readers use the bounded runner.

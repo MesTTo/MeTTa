@@ -26,7 +26,7 @@ literal one in this file is a claim about THIS repository as far as the gate is
 concerned, and the fixtures are deliberately unbacked.
 Guarantees:
   - nested distribution modules, library support and native face fixtures report stale citations
-    [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_evidence_selftest.py; commit=7dcfe83fcf74742a1e944db240aa918596c8d4b0]
   - Prolog tools accept a backed claim and report an absent test on its own line
     [tested: tests/checks/check_evidence_selftest.py; commit=8358dfc233bf299bb23eceddd94593a62372fe4b]
   - a shared build symlink preserves the selected TypeScript sources and

@@ -1,9 +1,9 @@
 % Purpose: verify regex values, match progression, projections and native errors.
 % Guarantees: the suite includes the pinned provider's upstream tests and the
 % public library's Unicode, optional-capture and substitution regressions
-% [tested: sh engine/test.sh suites/libraries/lib_regex.plt; commit=WORKTREE].
+% [tested: sh engine/test.sh suites/libraries/lib_regex.plt; commit=7dcfe83fcf74742a1e944db240aa918596c8d4b0].
 % Owns resources: concurrent_maplist/2 joins its native matching workers
-% [source: tests/prolog/suites/libraries/lib_regex.plt:compiled_values_support_concurrent_scans; commit=WORKTREE].
+% [source: tests/prolog/suites/libraries/lib_regex.plt:compiled_values_support_concurrent_scans; commit=7dcfe83fcf74742a1e944db240aa918596c8d4b0].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

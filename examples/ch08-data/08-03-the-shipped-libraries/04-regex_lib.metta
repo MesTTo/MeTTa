@@ -2,7 +2,7 @@
 ; A MeTTa string reads \\ as one backslash, so "\\d" spells the regex \d,
 ; the same convention as Python's non-raw strings.
 ; Cost: 103,904 MeTTa inferences and 103,258 Python inferences, ratio 0.9938.
-; [measured 2026-09-11: minimum of three runs; command=python extensions/python/tools/twin_coverage.py --measure --rounds 3 examples/ch08-data/08-03-the-shipped-libraries/04-regex_lib.metta; fixture=26 assertions, warm native objects and QLFs; commit=WORKTREE]
+; [measured 2026-09-11: minimum of three runs; command=python extensions/python/tools/twin_coverage.py --measure --rounds 3 examples/ch08-data/08-03-the-shipped-libraries/04-regex_lib.metta; fixture=26 assertions, warm native objects and QLFs; commit=7dcfe83fcf74742a1e944db240aa918596c8d4b0]
 !(import! &self (library lib_regex))
 
 !(test (re-match "(?i)^needle" "Needle in a haystack") True)

@@ -6,7 +6,7 @@ Assumes:
     test_the_codec_builds_under_mypyc_as_an_option]
 Guarantees:
   - private native build directories do not enter the portable wheel
-    [tested: test_regex_source_builds_after_wheel_install; commit=WORKTREE]
+    [tested: test_regex_source_builds_after_wheel_install; commit=7dcfe83fcf74742a1e944db240aa918596c8d4b0]
   - the binding's owned directory supplies its runtime resource closure,
     including newly introduced nested includes, without booting an engine
     [tested: tests/shell/test_packaged_cli.sh; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
