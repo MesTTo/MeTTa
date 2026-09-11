@@ -6,6 +6,7 @@
 %   workers are released after each test, including exceptions.
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
+:- use_module('../../../../engine/metta.pl', [metta_with_trailed/3]).
 :- use_module(library(prolog_wrap)).
 
 :- begin_tests(source_observation).
@@ -19,6 +20,9 @@ observe(Source,Rows) :-
     setup_call_cleanup('new-space'(Space),
         source_observation:observe_source(Space,"unit.metta",Source,Rows),
         spaces:metta_release_space(Space)).
+
+no_observation_buffer :-
+    \+ (nb_current('$metta_observation',Buffer), Buffer \== []).
 
 test(identical_branches_have_distinct_coverage) :-
     observe("(= (obs-pick $flag $x)\n  (if $flag\n    (+ $x 2)\n    (+ $x 2)))\n!(obs-pick True 1)",Rows),
@@ -69,11 +73,12 @@ test(exception_keeps_source_frames_and_restores_debugger, [nondet]) :-
     '$visible'(Visible,Visible),
     observe("(= (obs-check $x) (assertEqual $x 3)) !(obs-check 0)",Rows),
     memberchk(['observation-status',exception],Rows),
+    findall(Error, member(['source-error',_,Error], Rows), [_]),
     member(['source-frame',_,_,'obs-check',"unit.metta",1,_,1,_,_],Rows),
     current_prolog_flag(debug,Debug),
     current_prolog_flag(last_call_optimisation,LCO),
     '$visible'(Visible,Visible),
-    \+ nb_current('$metta_observation',_),
+    no_observation_buffer,
     \+ source_observation:source_document(_,_,_),
     \+ source_observation:installed_hook(_).
 
@@ -82,6 +87,14 @@ test(repeated_observations_do_not_retain_errors_or_documents, [nondet]) :-
     observe("!(+ 1 2)",Second),
     \+ member(['source-error',_,_],Second),
     memberchk(['observation-answer',0,3],Second).
+
+test(an_observed_error_does_not_mark_an_engines_outer_query_frame) :-
+    setup_call_cleanup(
+        engine_create(Rows, source_observation:observe_source(
+            '&self', "engine.metta", "!(/ 1 0)", Rows), Engine),
+        ( engine_next(Engine, Rows),
+          memberchk(['source-error',_,['Error',['/',1,0],'DivisionByZero']], Rows) ),
+        engine_destroy(Engine)).
 
 test(decons_refusal_is_observed_as_unchanged_data, [nondet]) :-
     observe("!(decons-atom ())",Rows),
@@ -93,7 +106,7 @@ test(error_hooks_keep_each_existing_refusal_shape) :-
     % These failure policies are internal dispatch branches, so exercising each
     % exact branch isolates recording from unrelated function-policy lookup.
     source_observation:new_observation_buffer(Buffer),
-    setup_call_cleanup(nb_setval('$metta_observation',Buffer),
+    metta_with_trailed('$metta_observation',Buffer,
       ( translator:dispatch_no_match('NoMatchError',missing,[1],A),
         translator:dispatch_out_of_clauses('FailureError',emptying,[2],B),
         translator:dispatch_mismatch('MismatchError',typed,[3],C),
@@ -103,8 +116,7 @@ test(error_hooks_keep_each_existing_refusal_shape) :-
         C==['Error',[typed,3],'ArgumentTypeMismatch'],
         D==['Error',[declared,4],'IncorrectNumberOfArguments'],
         nb_getval('$metta_observation',Recorded), arg(2,Recorded,Errors),
-        length(Errors,4) ),
-      nb_delete('$metta_observation')).
+        length(Errors,4) )).
 
 % SWI consults prolog:prolog_exception_hook/5 whenever the predicate HOLDS A
 % CLAUSE rather than whenever it exists, so one resident clause taxes every
@@ -127,7 +139,7 @@ no_observer_hooks :-
     \+ source_observation:installed_hook(_).
 
 test(the_observer_holds_no_hook_outside_an_observation) :-
-    \+ nb_current('$metta_observation',_),
+    no_observation_buffer,
     no_observer_hooks.
 
 test(an_observation_takes_its_process_wide_hooks_away_again) :-
@@ -138,7 +150,7 @@ test(an_observation_takes_its_process_wide_hooks_away_again) :-
 test(ordinary_errors_keep_no_observation_buffer) :-
     metta_error_atom('/',[1,0],'DivisionByZero',Error),
     Error==['Error',['/',1,0],'DivisionByZero'],
-    \+ nb_current('$metta_observation',_).
+    no_observation_buffer.
 
 test(invalid_source_type_refuses,
      [throws(error(type_error(string,42),_))]) :-
@@ -146,11 +158,10 @@ test(invalid_source_type_refuses,
 
 test(nested_observation_refuses_without_destroying_outer_buffer) :-
     source_observation:new_observation_buffer(Buffer),
-    setup_call_cleanup(nb_setval('$metta_observation',Buffer),
+    metta_with_trailed('$metta_observation',Buffer,
         ( catch(source_observation:observe_source('&self',"nested","!(+ 1 2)",_),Error,true),
           nonvar(Error), Error=error(permission_error(observe,execution,nested),_),
-          nb_current('$metta_observation',_) ),
-        nb_delete('$metta_observation')).
+          nb_current('$metta_observation',Still), same_term(Buffer,Still) )).
 
 
 test(exception_preserves_completed_form_answers) :-
@@ -228,7 +239,7 @@ test(partial_install_failure_releases_wrappers_and_state) :-
       ( catch(source_observation:observe_source('&self',"unit.metta","!(+ 1 2)",_),
               Error,true),
         nonvar(Error), Error=error(observer_install_probe,_),
-        \+ nb_current('$metta_observation',_),
+        no_observation_buffer,
         \+ (predicate_property(translator:translate_expr_dl(_,_,_,_),wrapped(Names)),
              memberchk(source_map,Names)),
         \+ (predicate_property(filereader:metta_host_run_source(_,_,_,_),wrapped(Names)),
@@ -249,7 +260,7 @@ test(ordinary_other_thread_execution_does_not_enter_observation) :-
         thread_create(observation_worker(Queue),Worker,[]) ),
       ( thread_get_message(Queue,installed),
         filereader:metta_host_run_source("!(/ 1 0)",'&self',[],_),
-        \+ nb_current('$metta_observation',_),
+        no_observation_buffer,
         thread_send_message(Queue,continue),
         thread_get_message(Queue,finished(success(Rows))),
         memberchk(['observation-answer',0,11],Rows),
@@ -331,7 +342,7 @@ test(cancelling_an_open_window_restores_gc,
 
 child_collector(GC) :-
     current_prolog_flag(gc,GC),
-    \+ nb_current('$metta_observation',_).
+    no_observation_buffer.
 
 test(source_thread_creation_inherits_the_restored_flag,
      [forall(member(GC,[true,false]))]) :-

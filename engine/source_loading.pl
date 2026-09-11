@@ -13,6 +13,9 @@
    watching clause on success, failure or exception.
    Guarded by: watching/0 and diagnostic/2 are thread-local; clause references
    distinguish nested calls on the same thread.
+   Guarantees: loading_loudly/1 registers retirement before assertion and
+   retains its watcher reference across interrupted publication
+   [tested: trailed_scopes; commit=WORKTREE].
 */
 :- module(metta_source_loading, [loading_loudly/1]).
 
@@ -50,12 +53,17 @@ load_failure(initialization_failure(_, _), warning).
 :- meta_predicate loading_loudly(0).
 loading_loudly(Goal) :-
     '$current_source_module'(Module),
-    setup_call_cleanup(
-        assertz(watching, Ref),
-        ( setup_call_cleanup(
+    Owner = owned(none),
+    % Workaround: swi-cleanup-window - register retirement first; mask signals while catch protects the ownership write from an inference trip.
+    setup_call_cleanup(true,
+        ( sig_atomic(( assertz(watching, Ref),
+                       catch(nb_setarg(1, Owner, Ref), AcquireBall,
+                             (ignore(erase(Ref)), throw(AcquireBall))) )),
+          setup_call_cleanup(
               true,
               ( call(Goal) -> Succeeded = true ; Succeeded = false ),
-              '$set_source_module'(Module)),
+              catch('$set_source_module'(Module), RestoreBall,
+                    ('$set_source_module'(Module), throw(RestoreBall)))),
           findall(Text, diagnostic(Ref, Text), Diagnostics),
           (   Diagnostics == []
           ->  Succeeded == true
@@ -63,4 +71,10 @@ loading_loudly(Goal) :-
               throw(error(metta_load_failed(Summary),
                           context(loading_loudly/1, Goal)))
           ) ),
-        ( erase(Ref), retractall(diagnostic(Ref, _)) )).
+        catch(retire_watcher(Owner), CleanupBall,
+              (retire_watcher(Owner), throw(CleanupBall)))).
+
+retire_watcher(Owner) :-
+    arg(1, Owner, Ref),
+    ( Ref == none -> true
+    ; ignore(erase(Ref)), retractall(diagnostic(Ref, _)) ).

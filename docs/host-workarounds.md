@@ -154,6 +154,10 @@ Reproduction: tests/checks/host_workarounds/swi-query-frame-discarded-on-engine-
 Workaround: inspect only through the nearest live transaction frame and
   transfer its watch to the surviving transaction when it finishes. Exclude
   the finished frame ID because failure notification can start on that frame.
+  Source observation stops before its own frame. It collects raised errors
+  through the debugger's exception port, whose host wrapper saves and clears
+  the pending ball before calling the trace hook. Its exception hook only
+  schedules notification; it never walks frames or records the pending ball.
 Lifted when: SWI no longer delivers `frame_finished` for the frame that
   `PL_close_query` discards, or excludes its outer query frame from
   `prolog_frame_attribute/3` marking. Verify that host change before treating

@@ -53,6 +53,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   enclosing value after inference limits, exceptions, failure, cut and redo.
   Source and materialization rollback retain their ownership records until
   cleanup completes.
+- Scoped executable clauses register retirement before acquisition and retain
+  ownership across interruption. Source observation trails its contexts,
+  collects raised errors through the debugger, and stops its frame walk at
+  the observation boundary.
 - The engine benchmark's boot row prepares its own artifact state: the governed
   `.qlf` set is purged and warmed through the ordinary boot in children of the
   driver before the row's samples, the same preparation the C fixture takes, so
