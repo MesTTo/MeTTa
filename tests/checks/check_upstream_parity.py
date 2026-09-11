@@ -775,12 +775,12 @@ WAIVERS = {
     # Publication removes repeated owner selection and fixed envelope work.
     # These four entries remain until an accepted measurement clears the same
     # band; a refused null is never evidence for removing a waiver.
-    # [source: docs/journal/2026-09-08-what-the-waivers-were-paying-for.md:662;
+    # [source: docs/journal/2026-09-08-what-the-waivers-were-paying-for.md:728;
     # commit=WORKTREE].
     "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/03-functionremovalspec.metta": (
         "RULING for module isolation, OPEN for specialization invalidation and"
         " rebuilding. Grouped exact-reference retirement and scoped publication"
-        " reduce the cut's 12613617/11932 to 12503784/11814 instructions/"
+        " reduce the cut's 12631234/11932 to 12521592/11814 instructions/"
         " inferences; the unchanged upstream instruction pin is 10547671."
         " This remains outside the band. Suppressing source recording also"
         " changes three specialization installations to one and two retirements"
@@ -792,9 +792,10 @@ WAIVERS = {
         "RULING for module isolation, OPEN for form-specific translation."
         " Fixed runnable controls now share compiled reader clauses and source"
         " publication reuses its owner decision. Inferences fall from 4791 to"
-        " 4754. The final instruction null refuses; its raw subtraction is not"
-        " an accepted cost. The last accepted envelope observation was 5625723"
-        " against the unchanged upstream pin 4500639. Each form still translates"
+        " 4754. The supplied-window observation accepts 5623210 instructions"
+        " against cut 5624218 and the unchanged upstream pin 4500639; the cut"
+        " and final ranges overlap. Earlier null refusals remain recorded."
+        " Each form still translates"
         " against its arrived source prefix and retains its ordinary effects."
     ),
     "examples/ch08-data/08-01-atoms-lists-and-folds/02-holfunctions.metta": (
@@ -802,14 +803,15 @@ WAIVERS = {
         " and its required ownership rows. Owner selection is now installed"
         " once per publication scope; every reference is still journalled at"
         " its original callback boundary. Inferences fall from 17360 to 17057."
-        " The final instruction null refuses, so the unchanged upstream pin"
-        " 17067487 has no accepted final comparison. Omitting the remaining"
+        " The supplied window accepts 20080712 instructions against cut"
+        " 20319982 and the unchanged upstream pin 17067487. Earlier null"
+        " refusals remain recorded. Omitting the remaining"
         " journal writes loses failed-load cleanup and exact reload withdrawal."
     ),
     "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/03-plntest.metta": (
         "RULING for module isolation, OPEN for runtime type derivation and"
         " declaration publication. Compiled indexed expected-family witnesses"
-        " and scoped ownership reduce 32727710/28408 to 32120461/27335"
+        " and scoped ownership reduce 32700368/28408 to 32117704/27335"
         " instructions/inferences; the unchanged upstream instruction pin is"
         " 30032944, so the band is still exceeded. Actual accepted, failed and"
         " throwing get_type_rule callbacks retain their output and source error"
@@ -819,9 +821,9 @@ WAIVERS = {
     "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/04-nilbc.metta": (
         "OPEN: repeated tuple type-witness derivation and dynamic rule-state"
         " reads. Indexed expected-family witnesses and source publication"
-        " reduce the current cut's 150872095798/318186853 to"
-        " 144677369904/310976936 instructions/inferences; live pinned upstream"
-        " reads 11588342959/17937607. The unchanged instruction pin is"
+        " reduce the current cut's 150872089770/318186853 to"
+        " 144677296125/310976936 instructions/inferences; live pinned upstream"
+        " reads 11588345604/17937607. The unchanged instruction pin is"
         " 11592875186. The throwing tuple-retry differential retains four first"
         " callbacks followed by the second callback's exception and source"
         " frame. Installed policy witnesses cannot replace those runtime effects."
@@ -829,8 +831,9 @@ WAIVERS = {
     "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/02-twostage.metta": (
         "OPEN: form-specific translation and source ownership. Fixed runnable"
         " controls are now compiled once in the reader. Inferences fall from"
-        " 4794 to 4763; final instructions are 5366090 against the unchanged"
-        " upstream pin 4225208. The cut's instruction null refuses. Translation"
+        " 4794 to 4763; final instructions are 5365097 against the unchanged"
+        " upstream pin 4225208. Cut instructions are 5360867 with an overlapping"
+        " range; the earlier null refusal remains recorded. Translation"
         " still reads the source prefix before each form; suppressing journal"
         " writes is not a sound substitute for that work."
     ),
@@ -838,8 +841,10 @@ WAIVERS = {
         "OPEN: runnable test-form translation and effect classification."
         " The fixed answer, name and fuel envelope is now shared compiled code;"
         " scoped publication retains every journal write. Inferences fall from"
-        " 11244 to 11159. Both instruction nulls refuse; the unchanged upstream"
-        " instruction pin is 10184408. The remaining form-specific conjunction"
+        " 11244 to 11159. The supplied window accepts cut 12499450 and final"
+        " 12547385 instructions with overlapping ranges; the unchanged upstream"
+        " instruction pin is 10184408. Earlier null refusals remain recorded."
+        " The remaining form-specific conjunction"
         " still compiles against the current source prefix."
     ),
     "examples/ch07-control-flow/07-05-recursion/02-fib.metta": (

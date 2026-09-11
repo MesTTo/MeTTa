@@ -319,3 +319,11 @@ required. The updated rulings, upstream pins, loads and controls are recorded
 in the repository journal
 `docs/journal/2026-09-08-what-the-waivers-were-paying-for.md`, under
 "2026-09-11: source-owned publication".
+
+The supplied 2026-09-12 measurement window accepts all seven final instruction
+prices. Functionremovalspec reads 12,521,592, casenew 5,623,210, holfunctions
+20,080,712 and plntest 32,117,704. Their inference counts remain unchanged from
+the table above. Every waiver remains above its unchanged ceiling. The cut,
+upstream, related-program values, sample ranges, loads and retained refusals
+are recorded in the same journal's "2026-09-12: publication window controls"
+section. The observations do not replace the merged-tree release re-pin.
