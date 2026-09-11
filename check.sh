@@ -26,6 +26,9 @@
 #                                            codespell imports imports-selftest
 #                                            jscpd jscpd-prolog prolog
 #                                            ciao-grade
+#                                            qlf-freshness qlf-freshness-selftest
+#                                            qlf-provenance
+#                                            qlf-provenance-selftest
 #                                            codec-doc petta parity-perf
 #                                            face-sync pygments-sync
 #                                            tokenisation
@@ -435,6 +438,19 @@ run GATE refusal-grounds-selftest "$PY" "$HERE/tests/checks/check_refusal_ground
 # The selftest plants a missing purge, a late one and a mismatched prefix.
 run GATE qlf-freshness "$PY" "$HERE/tests/checks/check_qlf_freshness.py"
 run GATE qlf-freshness-selftest "$PY" "$HERE/tests/checks/check_qlf_freshness_selftest.py"
+
+# A .qlf records the directory it was written in, and SWI loads one found in
+# another directory as MOVED: it rewrites every recorded source path and calls
+# system:'$translated_source'/2 for each, in Prolog, so every process that
+# loads it pays 8 inferences per source for where it was compiled. A test that
+# linked the checkout's lib/ into a scratch tree wrote such artifacts here and
+# the twins lane read +8 on two twins in three gates before anything named it
+# (docs/journal/2026-09-11-the-end-of-wave-battery.md, 2026-09-12). This gate
+# reads the header of every artifact under engine/ and lib/ and refuses one
+# written anywhere else; the selftest plants one SWI compiled in one directory
+# and found in another, an unreadable one, and an empty root.
+run GATE qlf-provenance "$PY" "$HERE/tests/checks/check_qlf_provenance.py"
+run GATE qlf-provenance-selftest "$PY" "$HERE/tests/checks/check_qlf_provenance_selftest.py"
 
 # Conformance against the semantics arbiter. PeTTa is the arbiter, and
 # tests/conformance/petta/ is upstream's example corpus beside the exact

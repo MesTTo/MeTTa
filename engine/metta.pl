@@ -1350,13 +1350,16 @@ prolog:error_message(metta_platform_required(Form, Capability, Requires,
 %[measured 2026-09-07: `-p randomly --randomly-seed=3222813221
 %tests/ch14_seeing_your_program` answers 29 failed, 347 passed, and touching
 %prolog_wrap:member/2 once from the top level beforehand answers 376 passed].
-%The reason SWI declines that one resolution is NOT established -- the flag is
-%`true`, the module is loaded, the declaration is intact, and the same call
-%inside sig_atomic/1, with_mutex/2, transaction/1 and snapshot/1 resolves
-%normally in a plain SWI of the same version. What IS established is that the
-%engine does not have to depend on it: the same reasoning as the library(option)
-%and library(gensym) blocks below, and the same policy the rest of this section
-%holds, which is that nothing the engine needs resolves lazily.
+%Why SWI declined that one resolution was established on 2026-09-11: the
+%inference-limited derivation before it cut the resolution itself, and SWI's
+%trap installs the undefined supervisor on a predicate whose resolution
+%query raised (engine/metta/limits.pl; docs/host-workarounds.md,
+%swi-autoload-cut-installs-the-undefined-supervisor). That file finishes a
+%cut resolution now, so the lazy path is safe; this import stays because it
+%is the cheaper resolution of a predicate every boot reaches, the same
+%reasoning as the library(option) and library(gensym) blocks below, and the
+%same policy the rest of this section holds, which is that nothing the
+%engine needs resolves lazily.
 %Only member/2, not pairs_keys/2: that one is reached from
 %predicate_property/2's `wrapped(List)` property, which nothing here asks for,
 %and resolving it would load library(pairs) at every boot for nothing.
@@ -2264,6 +2267,7 @@ prolog:error_message(metta_extension_required(Name, Cause)) -->
 :- consult('metta/space_hooks.pl').
 :- consult('metta/runtime.pl').
 :- consult('metta/control.pl').
+:- consult('metta/limits.pl').
 
 %The environment half of verify-discharges is materialised HERE, not beside its
 %own predicates in metta/terms.pl, because metta_pragma/2 belongs to

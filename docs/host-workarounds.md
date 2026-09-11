@@ -283,3 +283,74 @@ Lifted when: inherited first-call counts agree in both states; the reproduction
   reversed costs and child failures are broken reproductions.
 Record: docs/journal/2026-09-07-merged-tree-reconciliations.md, the 2026-09-11
   buffered VM trace and unchanged-body foldall controls.
+
+## swi-autoload-cut-installs-the-undefined-supervisor
+Host: SWI-Prolog 10.1.13; trapUndefined and autoLoader in src/pl-proc.c:2962-3047,
+  the undefined supervisor in src/pl-supervisor.c:235-240 and 433-443,
+  raiseInferenceLimitException in src/pl-prims.c:5676-5718,
+  https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-proc.c#L2962-L3047.
+Defect: the trap for an undefined predicate runs `'$undefined_procedure'/4` as
+  a query and reads its answer, fail, error or retry. A query that raised has
+  no answer, so the trap installs the undefined supervisor on the definition
+  and lets the ball go on. Every later compiled call that is not the last call
+  of its clause runs that supervisor and never traps again, so the predicate
+  answers "Unknown procedure" for the rest of the process although its library
+  is loaded; a last call, a meta-call, an explicit import or a defining assert
+  resolve it, which is why the symptom hides in library code. An inference
+  limit, an alarm or an interrupt landing inside a first-use resolution is
+  enough, and the resolution's absolute_file_name/3 walk is hundreds of
+  inferences wide. When the ball is the inference limit and the trip landed
+  after the definition arrived, the trap continues into the resolved
+  predicate with the ball pending and the first foreign call drops it, so the
+  bound is lost instead.
+Reproduction: tests/checks/host_workarounds/swi-autoload-cut-installs-the-undefined-supervisor.pl,
+  a budget sweep over fresh modules whose clause calls sum_list/2 before
+  another goal, each bounded on its first call; every budget from 1 to 64
+  leaves the predicate undefined on 10.1.13.
+Workaround: engine/metta/limits.pl wraps `'$undefined_procedure'/4`: the
+  resolution runs under a catch, a cut resolution is run again once the limit
+  has disarmed, the second attempt's answer is returned, and the ball is
+  re-raised through thread_signal/2 from the next call port. A cut on the
+  query's own entry ports, which precede the catch, is repaired from
+  prolog:prolog_exception_hook/5 by asking for the resolution again from the
+  thread's next safe point; only the inference limit's ball is repaired there,
+  because reading the frame the ball surfaces at marks it and a time limit or
+  interrupt can surface at an engine's outer query frame
+  (swi-query-frame-discarded-on-engine-destroy).
+Lifted when: trapUndefined leaves the definition untouched when the
+  resolution query raised, so the next call traps and resolves again, and the
+  pending ball is raised instead of the resolved predicate being entered.
+Record: docs/journal/2026-09-07-every-intermittent-root-caused.md, the
+  2026-09-11 section; docs/journal/2026-09-11-the-end-of-wave-battery.md.
+
+## swi-findall-bag-push-window
+Host: SWI-Prolog 10.1.13; cleanup_bag/2 in boot/bags.pl:104-106, findnsols2/5
+  in boot/bags.pl:147-152, the bag stack in src/pl-bag.c:157-190 and 366-385,
+  https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/bags.pl#L94-L112.
+Defect: findall/4 pushes its bag with `'$new_findall_bag'` and registers
+  `'$destroy_findall_bag'` one call port later, and findnsols2/5 does the same
+  through setup_call_cleanup/3. An inference limit that trips on that port
+  unwinds with the bag on the thread's bag stack and no cleanup owed
+  (swi-cleanup-window is the same host rule seen from the engine's own state).
+  Every later answer of the enclosing findall is then added to the stale bag,
+  and the enclosing findall collects its own bag, which is short. The
+  cleanup's own entry port is a second window of the same shape.
+Reproduction: tests/checks/host_workarounds/swi-findall-bag-push-window.pl,
+  a findall over two hundred budgets each bounding a goal that runs a nested
+  findall; 13 of 200 are collected on 10.1.13, and a thrown ball through the
+  same nesting collects 200.
+Workaround: engine/metta/limits.pl wraps `'$bags':cleanup_bag/2` and
+  `'$bags':findnsols2/5` from the first `call_with_inference_limit/3` of the
+  process on, and the wrappers stay. findall's loop is deterministic and
+  never fails, so its bag is pushed and then the loop and the pop are caught
+  together, with the pop in the recovery: one inference more than the host's
+  own shape. findnsols keeps a registered cleanup, registered before the
+  push, with the push followed by catch/3 and the record of the push as the
+  first goal inside it, and a cleanup that is itself a catch/3 term whose
+  drop records before it pops. Each step rests on the host's rule that a
+  trip on catch/3's call port is raised at the next call port instead.
+Lifted when: the inference-limit check honours the atomic region, or
+  cleanup_bag/2 and findnsols2/5 register their cleanup before the push and
+  the push records itself.
+Record: docs/journal/2026-09-11-the-end-of-wave-battery.md, the section on the
+  final gate's reds; docs/journal/2026-09-07-every-intermittent-root-caused.md.

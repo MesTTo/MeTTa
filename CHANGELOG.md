@@ -9,6 +9,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The `qlf-provenance` gate lane reads the directory every compiled artifact
+  under `engine/` and `lib/` records as the one it was saved in and refuses one
+  written anywhere else, naming both directories and the purge that repairs
+  it; SWI loads a moved artifact by rewriting its recorded source paths and
+  calling `system:'$translated_source'/2` per path, which every process then
+  pays for. Its selftest plants one SWI compiled in one directory and found in
+  another. The header reader is shared with the parity selftest's digest.
 - A concurrency example exercises scope answer multiplicity, child joining,
   resource release and transfer, the `scope_body` longhand, and deferred
   evaluation through a captured space.
@@ -144,6 +151,23 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   class fails when instantiated.
 
 ### Fixed
+
+- The mork seat's missing-artefacts test no longer writes compiled library
+  artifacts into the checkout: its scratch tree linked the checkout's `lib/`
+  directory, so the halves its boots compiled landed beside the real sources
+  recorded under the scratch path, and SWI loads such an artifact as moved,
+  calling `system:'$translated_source'/2` per recorded source at every load.
+  The tree now links `lib/` per file as it links `engine/`, and the test checks
+  the checkout gained no artifact while it ran.
+- The twins lane prints a band ceiling to the tenth it compares with, so a
+  finding no longer reads as a cost equal to its own ceiling.
+- A bound that cuts a first-use library resolution no longer leaves that
+  predicate answering "Unknown procedure" for the rest of the process, and a
+  bound that cuts a nested findall no longer shortens the enclosing findall's
+  answers. Both are SWI-Prolog 10.1.13 defects, reproduced by the
+  host-workarounds lane and worked around in `engine/metta/limits.pl`;
+  `docs/host-workarounds.md` names the mechanism and the host change that
+  lifts each workaround.
 
 - The dependency gate derives local tool modules from their source directory
   and recognises the reference generator's development dependency. The parity
