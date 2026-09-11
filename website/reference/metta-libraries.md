@@ -13,7 +13,7 @@ beside its definitions.
 | lib_combinatorics | 8 | 0 |
 | lib_conformance | 2 | 0 |
 | lib_constraints | 5 | 0 |
-| lib_crypto | 4 | 0 |
+| lib_crypto | 12 | 12 |
 | lib_csv | 2 | 2 |
 | lib_datastructures | 26 | 9 |
 | lib_datetime | 16 | 16 |
@@ -47,6 +47,191 @@ beside its definitions.
 | lib_torch | 20 | 19 |
 | lib_vector | 5 | 0 |
 | lib_zar | 4 | 0 |
+
+## lib_crypto
+
+### `crypto-hash`
+
+*lib_crypto.metta:12*
+
+```metta
+(: crypto-hash (-> %Undefined% %Undefined% String))
+```
+
+Hash UTF-8 text, with the same contract as crypto_hash.
+
+1. Algorithm
+2. Text
+
+Returns: Hex
+
+### `crypto-hash-bytes`
+
+*lib_crypto.metta:18*
+
+```metta
+(: crypto-hash-bytes (-> %Undefined% Expression String))
+```
+
+Hash an expression of byte integers 0..255 without text transcoding. Empty bytes are valid. Algorithms and reduced-platform support match crypto-hash.
+
+1. Algorithm
+2. Bytes
+
+Returns: Hex
+
+### `crypto-hash-file!`
+
+*lib_crypto.metta:24*
+
+```metta
+(: crypto-hash-file! (-> %Undefined% %Undefined% String))
+```
+
+Hash a file's bytes through a bounded buffer. Missing files and read failures raise. The binary stream closes on every exit; the file is never modified.
+
+1. Algorithm
+2. Path
+
+Returns: Hex
+
+### `crypto-hmac`
+
+*lib_crypto.metta:30*
+
+```metta
+(: crypto-hmac (-> %Undefined% %Undefined% %Undefined% String))
+```
+
+Authenticate UTF-8 text with a UTF-8 key and a fixed-output digest. The result is lowercase hexadecimal. Empty keys/text are valid. Without crypto, sha1 and sha256 remain available; other algorithms name the missing capability.
+
+1. Algorithm
+2. Key
+3. Text
+
+Returns: Hex
+
+### `crypto-hmac-bytes`
+
+*lib_crypto.metta:36*
+
+```metta
+(: crypto-hmac-bytes (-> %Undefined% Expression Expression String))
+```
+
+Authenticate raw bytes with a raw byte key; both expressions contain only integers 0..255. Algorithms and reduced support match crypto-hmac.
+
+1. Algorithm
+2. Key
+3. Bytes
+
+Returns: Hex
+
+### `crypto-password-hash`
+
+*lib_crypto.metta:43*
+
+```metta
+(: crypto-password-hash (-> %Undefined% Number String))
+```
+
+```metta
+(: crypto-password-hash (-> %Undefined% String))
+```
+
+Derive a PBKDF2-SHA512 password record from UTF-8 Password with 16 random salt bytes and 2^Cost iterations. Default Cost is 18 (262144 iterations). Explicit costs must fit the provider's positive C int iteration count (0..30 on this ABI); low costs are for fixtures, not stored credentials. The record preserves SWI's format. Native failures and absent crypto capability raise.
+
+1. Password
+2. Cost
+
+Returns: Record
+
+### `crypto-password-verify`
+
+*lib_crypto.metta:49*
+
+```metta
+(: crypto-password-verify (-> %Undefined% %Undefined% Bool))
+```
+
+Verify a PBKDF2-SHA512 record, returning True or False for a valid record. Malformed records, invalid iteration counts and native failures raise. Legacy salt lengths remain valid. Parsing checks the complete envelope and canonical unpadded Base64; the equal-length digest comparison uses CRYPTO_memcmp.
+
+1. Password
+2. Record
+
+Returns: Matches
+
+### `crypto-random-bytes`
+
+*lib_crypto.metta:55*
+
+```metta
+(: crypto-random-bytes (-> Number Expression))
+```
+
+Return Count cryptographically secure byte integers. Zero returns (). Negative or unrepresentable sizes raise; native allocation and entropy failures raise.
+
+1. Count
+
+Returns: Bytes
+
+### `crypto-random-hex`
+
+*lib_crypto.metta:61*
+
+```metta
+(: crypto-random-hex (-> Number String))
+```
+
+Return secure random hexadecimal, with the same contract as crypto_random_hex.
+
+1. Count
+
+Returns: Hex
+
+### `crypto-random-integer`
+
+*lib_crypto.metta:67*
+
+```metta
+(: crypto-random-integer (-> Number Number Number))
+```
+
+Uniformly sample Lower <= Value < Upper with secure randomness. Bounds may be arbitrary-size signed integers. Empty/reversed intervals raise. A singleton returns its sole integer without drawing entropy. Requires crypto capability.
+
+1. Lower
+2. Upper
+
+Returns: Value
+
+### `crypto_hash`
+
+*lib_crypto.metta:73*
+
+```metta
+(: crypto_hash (-> %Undefined% %Undefined% String))
+```
+
+Hash UTF-8 text to lowercase hexadecimal. Text may be a String, Symbol or character-code expression. Use a fixed-output OpenSSL digest name such as sha256, sha512, sha3_256 or blake2b512. Unknown algorithms raise. A platform without crypto retains sha1, sha224, sha256, sha384 and sha512 through sha.
+
+1. Algorithm
+2. Text
+
+Returns: Hex
+
+### `crypto_random_hex`
+
+*lib_crypto.metta:79*
+
+```metta
+(: crypto_random_hex (-> Number String))
+```
+
+Return Count secure random bytes as 2*Count lowercase hexadecimal characters. Count may be zero. Negative counts and absent crypto capability raise.
+
+1. Count
+
+Returns: Hex
 
 ## lib_csv
 

@@ -1005,6 +1005,30 @@ From MeTTa, load and register it the same way as any other Prolog:
 
 Give `use_foreign_library/2` an absolute path or a `foreign(Name)` alias.
 
+The shipped regex and crypto libraries build their private adapters through
+`lib/_support/native_build.pl`. Each owner supplies its C source, recipe, object
+stem and link arguments. The helper selects the host SWI ABI, checks source
+freshness, serializes concurrent builders and publishes by atomic rename.
+Cancellation waits for the compiler before removing its stage. An existing
+current object loads on a platform without `library(process)`; a cold build
+names the missing service and asks for a prebuild on the same SWI ABI.
+
+The crypto adapter requires OpenSSL 3 headers and `libcrypto`. On Debian or
+Ubuntu, install `build-essential swi-prolog-nox libssl-dev`, then prebuild with:
+
+```sh
+swipl -q -s lib/lib_crypto/support/native_build.pl \
+  -g 'lib_crypto_native_build:native_object(_)' -t halt
+```
+
+The regex owner uses `libpcre2-dev` and the corresponding
+`lib/lib_regex/support/native_build.pl` recipe. Wheels and source distributions
+carry both adapters' sources and omit `.native` objects. A wheel installed on a
+new host compiles on first import, so its library directory must be writable
+until prebuilding is complete. The checked crypto adapter preserves SWI's
+password record format and propagates native failure returns; its journal
+records why the existing crypto wrapper could not supply those guarantees.
+
 Two obligations the convention puts on you. Return `TRUE` or `FALSE`, and use
 the `_ex` accessors (`PL_get_int64_ex` and friends) so a wrong argument type
 raises a proper Prolog type error rather than failing silently. And if your

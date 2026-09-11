@@ -25,8 +25,8 @@ Every citation is built from a TAG variable instead of being written out. A
 literal one in this file is a claim about THIS repository as far as the gate is
 concerned, and the fixtures are deliberately unbacked.
 Guarantees:
-  - nested distribution modules, library support and native face fixtures report stale citations
-    [tested: tests/checks/check_evidence_selftest.py; commit=7dcfe83fcf74742a1e944db240aa918596c8d4b0]
+  - nested distribution modules, Prolog/C library support and native face fixtures report stale citations
+    [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
   - Prolog tools accept a backed claim and report an absent test on its own line
     [tested: tests/checks/check_evidence_selftest.py; commit=8358dfc233bf299bb23eceddd94593a62372fe4b]
   - a shared build symlink preserves the selected TypeScript sources and
@@ -629,6 +629,7 @@ def tracked_probe_complaints() -> list[str]:
                  "tests/data/prologface/fixture.pl",
                  "tests/data/prologface/fixture.metta",
                  "lib/lib_fixture/support/native_build.pl",
+                 "lib/lib_fixture/support/native.c",
                  "examples/ch-plant/_fixtures/nested/library.metta",
                  "setup.py", "extensions/mork/tests/plant.sh"):
         with tempfile.TemporaryDirectory() as directory:
@@ -642,7 +643,7 @@ def tracked_probe_complaints() -> list[str]:
                 f"  - the collected test backs this [{TAG} {WHEN}: test_collected].",
                 f"  - this one names nothing [{TAG} {WHEN}: no_such_probe_test].",
             ]
-            marker = "#" if probe.suffix == ".sh" else ";"
+            marker = {".sh": "#", ".c": "//"}.get(probe.suffix, ";")
             source = ('"""' + "\n".join(lines) + '\n"""\n'
                       if probe.suffix == ".py"
                       else "".join(marker + " " + line + "\n" for line in lines))
@@ -887,7 +888,7 @@ def main() -> int:
         f"pins, a symlinked output directory, a path cited from beside its own file, a path cited from its "
         f"seat root, a lane written across a line continuation, a fixture "
         f"under the scratch root beside one the tree tracks, and a tracked "
-        f"probe, a nested example fixture, a root build hook, a component shell test "
+        f"probe, native support sources, a nested example fixture, a root build hook, a component shell test "
         f"and a Prolog tool citing tests that are not there, "
         f"and a stale copy under an ignored build directory"
     )

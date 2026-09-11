@@ -9,6 +9,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_crypto` provides byte and streamed file digests, HMAC, secure byte
+  expressions and arbitrary-size integer intervals, PBKDF2-SHA512 password
+  records and Boolean verification. A checked OpenSSL 3 adapter propagates
+  provider failures and compares password digests through `CRYPTO_memcmp`.
+  Zero-sized random requests are valid. Reduced platforms retain five SHA
+  digests and SHA-1/SHA-256 HMAC. Regex and crypto share atomic native building;
+  current objects load without the optional subprocess library. Native C
+  support files now participate in evidence and provenance checks.
 - `lib_json` provides native JSON formatting, UTF-8 document files, streaming
   JSON Lines and structural path lookup. File writes publish atomically after
   close. Object construction reserves fresh names, stores special keys as data

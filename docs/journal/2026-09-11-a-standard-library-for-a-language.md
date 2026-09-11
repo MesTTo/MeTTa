@@ -632,3 +632,245 @@ provenance-pin-selftest passes. Fifteen WORKTREE tags await the standard
 header-only pin. Final logs are ai-tmp/ai-libraries-json-{twin-final,
 twin-measure-final,ruff-final,records-final}.log. The native/Python tests,
 example, records, docs and pricing obligations for JSON are closed.
+
+## 2026-09-11: crypto design before implementation
+
+Goal: extend the four existing hashing/randomness heads with byte and file
+digests, HMAC, secure bytes and integer intervals, password records and Boolean
+verification. Keep the five reduced-platform SHA algorithms. Twelve heads and
+thirteen arities derive their faces from the native declarations.
+
+Tried: the original example passes three assertions and the Python suite passes
+three tests. `sh engine/test.sh suites/seams/platform_capabilities.plt` passes
+41 and fails four clean-boot assertions: the regex loader unconditionally
+imports absent `library(process)`. Logs are
+ai-tmp/ai-libraries-{json-crypto-baseline,crypto-python-before,crypto-platform-before}.log.
+
+Tried: SWI 10.1.13's private PBKDF2 function accepts zero iterations and returns
+a 64-byte value. The probe printed only its length. OpenSSL rejects this
+parameter, but the SWI binding ignores that return. The same source ignores
+digest/HMAC finalization status and uses Prolog unification to verify password
+digests. Its random-byte count narrows size_t to int. These are present in
+[the installed ssl revision](https://github.com/SWI-Prolog/packages-ssl/blob/07e4afd5087a5decdff1de63ab25dc4f28af24dc/crypto4pl.c)
+and unchanged at upstream 7673a282d2868d69172ecfbcc0824eb6b47d373a.
+
+Rejected: public SWI crypto wrappers for the new operations, because boundary
+checks cannot repair ignored native returns or make unification a constant-time
+comparison. No compatible maintained repair was confirmed. Revisit when that
+binding checks each native failure and exposes a suitable comparison. A Rust
+password stack adds a toolchain and changes the established record parameters;
+it does not improve this integration over checked calls to the installed provider.
+
+Decided: a private OpenSSL 3 adapter checks allocation, fetch, init, update,
+finalization, entropy and derivation results. It raises a named native error
+even when the provider's error queue is empty. Each call owns its contexts and
+temporary buffers and releases them on failure, output mismatch and success.
+Temporary secret copies are cleansed before release. No mutable native state
+crosses calls. The default OpenSSL context owns its thread-safe random generator.
+[CPython's PBKDF2 and comparison bindings](https://github.com/python/cpython/blob/v3.14.0/Modules/_hashopenssl.c)
+supply the checked-status and CRYPTO_memcmp precedents. Algorithms remain
+OpenSSL's fixed-output digest names, including SWI's underscore SHA-3 aliases.
+
+Decided: sources are UTF-8 text, checked byte lists or binary input streams.
+Text preserves the existing atom/string/code-list conversion, including NUL.
+File hashing opens once, streams through a 64 KiB buffer, checks read errors
+and signals, and closes on every exit. Time is O(n), the lower bound for
+reading content; auxiliary file space is O(1), instead of a whole-file O(n)
+list. The reduced provider folds SWI sha contexts through the same bounded
+reads, including the empty file. Reduced HMAC supports SWI sha's actual SHA-1
+and SHA-256 algorithms and names crypto for the others.
+
+Decided: secure byte counts include zero. RAND_priv_bytes_ex uses size_t and
+must return one. Integer intervals are [Lower, Upper), reject empty/reversed
+bounds, and use BN_priv_rand_range without modulo bias. Native hexadecimal
+interchange avoids a GMP build dependency and a repeated large-integer byte
+fold. A singleton needs no entropy. The native sampler's own failure remains
+an exception, as in
+[OpenSSL's implementation](https://github.com/openssl/openssl/blob/openssl-3.5.0/crypto/bn/bn_rand.c).
+
+Decided: password records preserve SWI's PBKDF2-SHA512 format, a 64-byte digest
+and unpadded Base64. New records have 16 random salt bytes. The explicit cost
+is log2(iterations); validate against the C int ABI before shifting. Default
+cost 18 gives 262144 iterations, above the current
+[OWASP PBKDF2-SHA512 recommendation](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
+of 220000. This policy preserves the native record format; it does not claim
+PBKDF2 is preferable to Argon2id for a new authentication system. Verification
+accepts valid legacy salt lengths, parses the complete record without a Prolog
+term reader, checks positive representable iterations and canonical Base64,
+then compares equal-length digests through CRYPTO_memcmp. A well-formed wrong
+password returns False. Malformed records and native failures raise. Record
+parsing and derivation time depend on public record parameters; only the digest
+comparison carries the constant-time claim.
+
+Decided: both native libraries use the existing atomic build protocol through
+one private helper. Per-object mutexes, process file locks, freshness checks,
+staging rename and compiler cancellation cleanup remain. A missing process
+library is harmless for a current object and refuses a cold build with an
+explicit prebuild remedy. Each owner supplies its own link flags and dependency
+instructions. Wheels and sdists keep source and omit host objects.
+
+Verification plan: native and Python hash/HMAC vectors, generated Unicode and
+byte inputs, streamed empty/large/error files, SWI/Python password-format
+interoperation, malformed-record properties, wrong-password False, arbitrary
+integer bounds, zero/singleton cases, and injected provider failures. Compile
+test copies with native calls replaced by failure returns, including an empty
+error queue; no runtime test switch enters the library. Extend the native build
+tests to both consumers and prove the reduced boot regression is closed. The
+example calls every head and both password arities; its twin proves the same
+claims and stored content. Price only this library's measured twin.
+
+### Crypto verification findings
+
+Tried: the first native suite passes 33 cases and exposes five failures.
+`must_be(list(byte), ...)` is invalid because SWI has no byte type. The native
+type `between(0,255)` requires integers when its bounds are integers; a probe
+accepts 0 and 255 and rejects 1.5 and 256. Decided: use that native parametric
+type, retaining the list/cycle check. The SHAKE refusal must check the XOF flag
+before asking for a fixed digest size; OpenSSL returns no fixed size for SHAKE.
+
+Tried: full and reduced streamed hashes agree for empty input, byte 255 and
+140003 bytes of 255. The test's SWI crypto_file_hash comparison disagrees on
+non-ASCII bytes because its default encoding is UTF-8. Decided: request
+encoding(octet) from that independent oracle. Both library paths already read
+the file's actual bytes. Log: ai-tmp/ai-libraries-crypto-native-first.log.
+
+Verified: the corrected native suite passes all 25 tests and 13 subcases.
+The example then catches an inter-seat representation error:
+`'True' does not match true`. Native Boolean results use Prolog true/false;
+uppercase atoms remain Symbols. Decided: return PL_unify_bool from the adapter
+and assert native booleans in its direct tests. The example remains the MeTTa
+contract. Logs: ai-tmp/ai-libraries-crypto-{native-second,example-first}.log.
+
+Verified: the expanded example passes all 18 claims. The first combined Python
+run passes 52 tests, including 21 injected provider failures, the comparison
+control, both libraries' build/cancellation/concurrency/reduced-platform cases,
+and an installed wheel built from the source archive. One file-refusal test
+expects EngineError, while the existing Python boundary correctly classifies
+the native existence error as SourceNotFound. Decided: assert that existing
+structured error. Log: ai-tmp/ai-libraries-crypto-python-first.log.
+
+Tried: the repaired loader passes warm and cold imports with process.pl and
+its cached autoload entries removed. The next platform run passes 42 tests
+and fails three stderr assertions, all from duplicate type declarations.
+Two imports alone emit no warnings. Saving &self and loading that image into
+the same &self emits one warning per existing arrow: a different source is
+adding a declaration already owned by the original library. The warnings
+are the documented declaration behavior, not an import regression. Logs:
+ai-tmp/ai-crypto-{repeat-import,fast-import}.log and
+ai-tmp/ai-libraries-crypto-platform-final.log.
+
+Rejected: changing duplicate diagnostics or import semantics to satisfy the
+capability fixture. The fixture saved unrelated prior probes and restored
+them over their originals. Merely changing its target also fails with
+metta_fast_translator_rule_conflict('and-then',[],'$metta_exec:&self'), because
+that global rule belongs to the original source. Revisit only for a requested
+change to image relocation or declaration ownership.
+
+Decided: isolate the capability probe's source and destination spaces. Save
+one type and two equal data occurrences, restore into an empty space, and
+verify that exact bag. Release both spaces through setup_call_cleanup. The
+throwaway isolated-space probe passes without diagnostics. The existing
+clean-boot assertions remain strict. No engine or generated-face change is
+needed. Logs: ai-tmp/ai-crypto-fast-{fresh,isolated}.log.
+
+Tried: Valgrind's adapter-load-only control exits 99 with 11 contexts and
+99984 definitely lost bytes, all allocated inside SWI startup. The installed
+release deliberately skips reclamation in PL_halt. Decided: use an embedded
+probe calling PL_cleanup(0), which reclaims memory, before comparing adapter
+operations. This follows
+[SWI's cleanup implementation](https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-init.c#L1909-L2099).
+The initial run establishes no adapter leak result. Log:
+ai-tmp/ai-libraries-crypto-valgrind-baseline.log.
+
+Tried: the isolated fixture emits no warnings, but its new bag check initially
+fails: grouped execution returns named-answer carriers for a variable match.
+Decided: use the existing metta_answer_term/2 seam before comparing atoms,
+as filereader_source_reload already does. The exact failure is
+`unexpected fast-load failed without refusing`; the saved count is three and
+the probe shows all three correct atoms inside their carriers. Logs:
+ai-tmp/ai-libraries-crypto-platform-repaired.log and
+ai-tmp/ai-crypto-fast-bag.log.
+
+Verified: the combined crypto, native failure-injection, shared native-build
+and existing regex Python suites pass all 53 tests in 14.51 seconds. This
+includes 270 generated input cases and the source-archive-to-installed-wheel
+check. jscpd finds zero clones in the four Python files and native adapter:
+1301 lines and 10957 tokens. Logs:
+ai-tmp/ai-libraries-crypto-{python-final,clones}.log.
+
+Verified: native crypto passes 27 tests and 13 subcases, including cancellation
+and output-mismatch cleanup. All 45 platform tests pass, including four real
+reduced-platform boots. The evidence selftest passes all planted cases and
+now includes native support C. Logs:
+ai-tmp/ai-libraries-crypto-{native-platform-verified,evidence-selftest}.log.
+
+Measured: the embedded PL_cleanup control and 1000 repetitions of thirteen
+native success, mismatch and refusal operations both exit 99 with exactly
+five identical SWI contexts: 32872 definitely lost and 72 indirectly lost
+bytes. There are no new reported errors or lost bytes in the exercised run.
+Reachable memory rises by 56 bytes in one block. These are differential
+results, not a claim that this SWI process is leak-free. The C runner is
+ai-tmp/ai-crypto-memcheck.c; compile with
+`swipl-ld -Wall -Wextra -Werror -o ai-tmp/ai-crypto-memcheck ai-tmp/ai-crypto-memcheck.c`.
+The exact goals are in the command headers of
+ai-tmp/ai-libraries-crypto-valgrind-{cleanup-control,exercise}.log. Both use
+`valgrind --leak-check=full --show-leak-kinds=definite,indirect --errors-for-leak-kinds=definite,indirect --error-exitcode=99`.
+
+Decided: lib/.gitignore owns the common .native exclusion now that two
+libraries use the shared builder. Remove the redundant regex-only ignore
+file. Packaging already excludes those host objects and the installed-wheel
+test verifies this for both consumers.
+
+Verified: the example passes eighteen claims. The record and documentation
+lanes all pass: coverage is 693 carried heads, 251 engine callables and four
+allowed constructors/types, with zero findings; cumulative syntax remains
+324 examples and 284 constructs. Origins remains 143 derived and 202 original
+examples against PeTTa-base 43705f5d9ff8958ffe7f0aa6777fb8477f2401f2.
+The no-autoload corpus, library autoload, thirteen face-generator selftests,
+sixty-eight llms selftests, cards, reference and VitePress build pass. Ruff
+passes all six changed Python files. Logs:
+ai-tmp/ai-libraries-crypto-{example-final,records-final,ruff}.log.
+
+Measured: minimum of three fresh processes gives crypto 77933 MeTTa and
+78285 Python inferences, ratio 1.0045. Regex gives 108279 and 107645,
+ratio .9941. To attribute the latter, a detached control at
+6dab7f8c1cc17e3d37c6ab512c2770ebcb1ec971, with the same nine native artifacts,
+reproduces regex's prior 103904/103258. Applying only the new regex recipe
+and lib/_support/native_build.pl to that control gives exactly
+108279/107645. Shared source loading adds 4375/4387; neither regex's program
+nor matching implementation changed. Decided: record that measured loader
+movement on the regex twin as part of this shared repair, alongside crypto's
+expanded program. No unrelated twin is repriced. Commands:
+`python extensions/python/tools/twin_coverage.py --measure --rounds 3` with
+the respective 04-regex_lib.metta and 06-crypto_lib.metta paths. Logs:
+ai-tmp/ai-libraries-crypto-{twin-measure-corrected,regex-control,regex-loader-control}.log.
+
+Verified: the repriced crypto and regex twins prove all 44 claims, preserve
+equal stored content and report zero findings. The first evidence run reports
+seven missing-test citations: six refer to new tests not yet staged in its
+tracked-source census; setup.py still names the old regex-only wheel test.
+Decided: stage the completed test sources and update that consumer header to
+test_native_sources_build_after_wheel_install, the passing shared test.
+The provenance selftest already passes. Logs:
+ai-tmp/ai-libraries-crypto-{twins-final,evidence-final}.log.
+
+Verified: after staging, evidence reports zero unbacked tags in 7456 claims,
+13435 known test names and 1115 runner files. All planted evidence and
+provenance checks pass; 33 placeholders await the normal provenance commit.
+Log: ai-tmp/ai-libraries-crypto-evidence-staged.log.
+
+Tried: including setup.py in the manual Ruff command finds I001 on the
+optional import this thread annotated earlier, plus the same N801/D102
+findings recorded in the regex section. Blame still attributes the class
+and method declarations to Leul Negash; the established Ruff lane excludes
+setup.py. Decided: format the owned import as Ruff requests. Keep the earlier
+scope ruling for the other two findings. Log:
+ai-tmp/ai-libraries-crypto-ruff-final.log.
+
+Verified: the final six owned Python files pass Ruff, and setup.py passes
+its owned import-order check. The final clone scan after pricing finds zero
+clones in 1306 lines and 10967 tokens. Logs:
+ai-tmp/ai-libraries-crypto-ruff-owned-final.log,
+ai-tmp/ai-libraries-crypto-ruff-setup-import.log and
+ai-tmp/ai-crypto-clones-final/jscpd-report.json. The staged diff passes
+`git diff --cached --check`.
