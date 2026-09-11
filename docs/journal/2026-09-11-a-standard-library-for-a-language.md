@@ -1649,3 +1649,327 @@ unbacked tags. The final duplicate check of the writer and its selftest finds
 zero clones in two Python files. Logs: ai-string-provenance-gates.log and
 ai-string-provenance-jscpd.log. The String behavior, import attribution and
 installation evidence above still applies to the unchanged runtime sources.
+
+String completion: functional commit 3aaad3435292e4c7d5cc3a01bfda39430aacc6e8
+and provenance commit f0052a29b2bd13eb829129bf4be5b541b0022ba4 are verified.
+B changes 53 header references in 37 files; reversing those substitutions
+reproduces A byte-for-byte. The pinned example and twin prove 42 claims with
+equal storage, 121067/126928 inferences and zero audit findings. Pinned evidence,
+provenance, face and library-documentation gates and their selftests pass all
+six gates. Release evidence reports zero unbacked tags and zero placeholders.
+
+## 2026-09-11: Vector numerical investigation
+
+Tried: the old library loses the residual in four cancellation/product/underflow
+controls, returns NaN after cancelling overflowing products, and produces
+infinity or zero for representable large or small norms. Unequal dimensions
+return no answer. Empty dot/norm return 0.0; zero cosine returns NaN.
+Negative random counts retain the accumulator and normalize it; count 1.5
+draws twice. The initial Python measurement misused stats() as a snapshot and
+raised its documented pre-exit RuntimeError. The corrected context-manager
+probe records all 22 cases in ai-libraries-vector-baseline-fixed.log.
+
+Measured: dot at dimensions 32/128/512/2048 uses 1563/4782/14382/52782
+inferences and 0.00016253/0.00052409/0.00139378/0.004893081 CPU seconds,
+minimum of three, through the Python call door. The existing compiler already
+gives linear traversal. Every component must be read, so this dimension bound
+is optimal; the native design targets accuracy and dispatch cost within it.
+
+Rejected: an ordinary floating sum and sqrt(sum of squares) lose cancellation
+and range. LAPACK's scaled norm avoids overflow for floating inputs, but does
+not by itself specify mixed exact integers/rationals or cosine whose norms
+cannot be represented as floats. Revisit a floating accumulator only if it
+preserves the same contract and a measurement justifies a specialized path.
+
+Investigated: exact rational accumulation through SWI's existing GMP arithmetic,
+CPython 3.14 statistics' fraction square root, and integer quotient/remainder
+rounding as used by CPython long_true_divide. The exact inputs are the stored
+values: rational/1, not rationalize/1, converts each finite float before products.
+The CPython sources and license are pinned at
+ebf955df7a89ed0c7968f79faec1de49f61ed7cb. Norm, distance and direction can then
+round only their final result. No new numerical runtime dependency is needed.
+
+Measured: SWI 10.1.13 converts ((1<<54)+1) rdiv (1<<1129) to 0.0. The exact
+value lies above half the smallest subnormal and must round to 2^-1074.
+src/pl-gmp.c at fc7ef84b949378b729052c3ade79c90ce5416abb rounds a significand
+before ldexp, causing the second rounding. A prospective adapter will round
+integer quotient/remainder to the final binary64 quantum and pass only an
+already representable dyadic to float/1. A tracked host reproduction must
+identify when this workaround can lift.
+
+Open: verify the numerical kernel's rounding, nonfinite arithmetic and cost in
+an isolated probe before freezing the complete Vector implementation. For an
+operation with at least one infinity or NaN, finite operands can be replaced
+by signed zero or signed unit without changing the IEEE result. Check this
+class/sign reduction and use the engine's existing flag-restoration owner.
+
+## 2026-09-12: Vector kernel probe
+
+Verified: the prospective integer-rounding kernel passes 4412 rational
+conversions against Python Fraction and 2206 square roots against independent
+exact squared-midpoint intervals. The first scalar check then fails:
+`AssertionError: ('/', -0.0, -inf, -0.0, 0.0)`. Direct SWI, direct Janus and
+each probe layer return the same wrong sign, locating the defect in the host.
+
+Source: src/pl-arith.c:ar_divide at the pinned SWI revision computes X/inf with
+`0.0*sign_f(X)*sign_f(Y)`. sign_f maps negative zero to zero, so it loses X's
+sign. The ordinary finite-division controls preserve signs. The proxy-domain
+division can instead multiply by the divisor's exact signed reciprocal.
+Check this against the complete scalar matrix and register a second host
+workaround if adopted.
+
+Measured: setting max_rational_size=1 and max_rational_size_action=float turns
+1 rdiv 3 into 0.3333333333333333. Exact reductions must detect and refuse that
+configured approximation. The proposed exact_eval boundary checks its result
+is rational and otherwise raises representation_error(exact_vector_arithmetic).
+
+Verified: the corrected scalar probe passes 260 nonfinite/zero cases against
+Decimal and restores all three float flags. The configured approximation
+refuses by name. The unoptimized exact dot takes 88013 inferences and
+0.008020292 CPU seconds at dimension 2048, against the old 52782 and
+0.004893081. Dynamic arithmetic expression construction and repeated exact
+conversion checks occur for both product and accumulation. The next probe
+uses one compiled arithmetic expression for their shared product-sum reduction,
+as SWI's sum_list uses a compiled expression for its accumulator, preserving
+exactness and the nonfinite class/sign rule. No public library is written yet.
+
+Verified: the fused probe passes 4412 rational rounds, 2206 exact squared-midpoint
+root checks, 260 scalar class/sign cases, 405 exact dot controls and a further
+243 product-sum class/sign controls. It restores the host's float flags and
+refuses configured rational approximation. At dimensions 32/128/512/2048 it
+uses 1964/6349/19405/71629 inferences and
+0.000220890/0.000411820/0.001139821/0.004208181 CPU seconds through the call
+door, minimum of three. These probes omit public validation and are not a
+release speed claim. Commands and complete oracles are the scratch
+ai-vector-kernel-check.py and ai-vector-kernel-probe.pl; final tests will carry
+the independent checks against the public operations.
+
+Tried: importing profile/1 and show_profile/1 from library(statistics) fails
+because this host already imports them from prolog_profile. Direct Janus
+queries also tried to convert an internal predicate indicator and unbound
+collector variables. Moving the collector into the probe succeeds. For
+300 native dots of dimension 8192, profile_data reports 4915200 float_class
+and membership calls and 7376385 arithmetic evaluations. All sampled tick
+counts are zero, so only the call counts are evidence. Keep the fused native
+loop; a new floating-only provider would not satisfy the chosen Number model.
+
+Baseline: `sh test.sh examples/ch08-data/08-03-the-shipped-libraries/13-vector_lib.metta`
+passes all 17 existing claims. The full twin passes the same claims and equal
+stores at 30798/32104 MeTTa/Python inferences but reports the Python budget
+31537 exceeded beyond its allowance of 4. This cut already differs by 567;
+keep that attribution separate from the new example and provider costs.
+
+## 2026-09-12: Vector design frozen
+
+Decided: publish thirteen heads at fourteen arities. Preserve dot, norm, cosine,
+cosine-of-normalized and both random-normal-vector forms. Add vector-add,
+vector-subtract, vector-multiply, vector-divide, vector-scale(Vector,Factor),
+vector-normalize, vector-distance and vector-fill. Ordinary numeric expressions
+remain the representation. The existing size-atom already gives dimension;
+a second name would duplicate that operation. Matrices are outside this concern.
+
+Inputs: validate complete proper numeric lists before reduction or random draws.
+Paired lists must have equal dimensions or raise domain_error(vector_dimensions,
+[LeftLength,RightLength]). Counts must be integers. Fill requires a nonnegative
+count, including zero; random preserves historical negative-count clamping and
+normalizes the supplied accumulator. Reject fractional random counts. Every
+public operation preserves the formal exception and names itself through
+rethrow_metta_operation_error/2. Control exceptions propagate unchanged.
+
+Numbers: exact integers and rationals remain exact in elementwise arithmetic;
+exact division uses rdiv and exact zero division raises. If either scalar
+operand is floating, convert finite values with rational/1 before arithmetic
+and round once. Dot always returns a float, retaining its empty 0.0 result.
+Norm and distance round the exact sum of squares only at its square root.
+Cosine uses sign(D)*sqrt(D^2/(A2*B2)); normalization uses signed coordinate
+sqrt(X^2/A2). These ratios keep finite directions even when a separately
+rounded norm would overflow or underflow. Every intermediate rational result
+is checked; the host's configured approximation is a named refusal.
+
+IEEE behavior: preserve infinities, NaNs and signed zeros. NaN propagates in
+squared sums; infinity without NaN gives an infinite norm. Empty normalization
+is empty, every coordinate of a zero vector normalizes to NaN, and cosine of
+zero or nonfinite vectors is NaN. Infinity normalization yields signed zero
+for finite coordinates and NaN for infinite ones. The normalized shortcut is
+still dot on any inputs, including the existing nonunit result 25.
+
+Mechanism: use the probed integer quotient/remainder rounding at the final
+binary64 quantum and CPython 3.14's fraction square root with round-to-odd
+intermediate precision. Include the pinned Python license and translation
+notice. Register the measured SWI subnormal rounding and signed-zero/infinity
+division defects with positive-control reproductions. Proxy arithmetic uses
+the engine's existing flag restoration; no mutable numeric registry is added.
+SWI's unbounded integer and rational arithmetic is required and a missing
+capability names that requirement. Dimension traversal is O(n), already
+optimal; exact arithmetic also costs the bit complexity of its operands.
+
+Random: use the existing thread-local SWI generator and prepend each positive
+uniform draw before normalizing the full accumulator. This is projection of
+the positive cube, not Gaussian sampling or a uniform sphere. Preserve draw
+order and the with-seed seam; validation consumes no draws. Returned vectors
+are ordinary immutable values and no resources outlive a call.
+
+Verification: preserve all seventeen example claims and call every added head
+and both random arities. Native tests cover dimensional/type/count refusals,
+exact/mixed arithmetic, zero/nonfinite signs, cancellation and restored host
+flags and seeds. Python property tests use Fraction sums, squared-midpoint root
+intervals and independent Decimal class/sign results, including extreme
+exponents and engine-returned rationals through the public door. Check the
+library card, generated face, example/twin, recorded costs, host ledger,
+documentation records, evidence and provenance before A/B. Record the measured
+dimension costs with complete-output assertions; do not widen unrelated pins.
+
+## 2026-09-12: Vector integration requires preserving native rational atoms
+
+Verified: the first native implementation passes 33 tests and eight subcases.
+The initial suite had one missing closing parenthesis and supplied the compound
+-Huge instead of an evaluated negative integer; correcting those test fixtures
+makes the complete suite pass. The copied Python license now matches its source
+SHA-256 b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231.
+
+Found: `m.fn.vector_divide((1,),(3,)).one()` returns `(1r3)`, but passing that
+expression to vector-scale raises `number expected, found <py_Box>`.
+Both wire._number_from_wire and its inline expression path build Grounded(Fraction).
+Grounded.to_wire then boxes the Fraction as an opaque object. Commit
+a0f1cc5f15a15e5ca6958fe02a20be8832c7237f correctly preserved Python-created
+nonprimitive identity but removed native rational retransmission too. The older
+da3f92c4ae42404d618c252ccbb05c871ccb3c6e preserved rationals by treating every
+Fraction as native; restoring that approach would violate the later identity law.
+
+Decided: represent a decoded native rational as a private Grounded species,
+following the existing _NativeHandle distinction. Its wire tag, value equality,
+hash, ordering and pickle remain native; Python-created Fraction objects retain
+the existing opaque identity contract. Canonicalize denominator-one wire values
+to integer atoms, as Janus and SWI already do. Keep the hot integer/float
+expression decoder inline, and share only the uncommon rational construction.
+Update the number ordering boundary to include exact rationals, IEEE NaNs and
+signed-zero ties. The host orders NaN before negative infinity, -0.0 before
++0.0, and a float before an equal rational. Exact-type tests distinguish native
+values from opaque Python numeric subclasses.
+
+Rejected: unboxing Fractions inside Vector would patch one consumer and erase
+the native-versus-host distinction. Merely retaining the wire tag would leave
+equal native rationals unequal as dictionary keys and unable to pickle. The
+repair belongs to the shared atom model and codec, with equality, hashing,
+storage, matching, ordering, copy/pickle and public Vector composition checks.
+No declaration or compiler module needs an edit.
+
+Sources: the Janus data-conversion table maps rationals and Fraction in both
+directions (https://www.swi-prolog.org/pldoc/man?section=janus-data). Python's
+data model gives a subclass's reflected rich comparison priority and requires
+equal hashable values to share a hash
+(https://docs.python.org/3/reference/datamodel.html#object.__eq__). Source reads
+cover Grounded, both wire number paths, Expression's equality/hash/encoding,
+order_key, matcher dispatch and exact-Grounded consumers. The demand evaluator
+already declines nonprimitive payloads; that boundary remains valid. MatchIndex
+already reads the payload of Grounded subclasses and verifies candidates by
+unification.
+
+Verification design: the existing source-archive wheel test will require Vector's
+provider, generated face, documentation and copied license, then compose an exact
+rational after installation. The optional mypyc build test will execute its built
+codec through a temporary package copy and the real Vector provider. The source
+package is 8.9 MB and contains no shared objects; ignore bytecode and runtime
+copies when completing the temporary compiled package. This tests the supported
+optional backend without changing the modules selected for compilation.
+
+The durable vector_numeric benchmark will time the public dot door at increasing
+dimensions, checking each complete result. Record minimum-of-three inference and
+process-CPU costs. Cancellation, overflow and underflow goldens execute before
+timing. Dimension traversal remains linear; neither the old fold nor the exact
+provider admits a lower asymptotic class when every coordinate must be read.
+
+Tried: the expanded Python selection passes 213 tests but executing the optional
+compiled codec raises `RuntimeError: Reached allegedly unreachable code!` at
+factories.py's runtime lazy import. Its TYPE_CHECKING/else split was introduced
+by cd62330ceacc8f1254eed9791c3f6203b48a1c9e; compilation alone never exercised it.
+The generated C contains an unconditional RuntimeError at that existing line.
+Mypyc 2.3.0's irbuild/statement.py:transform_block emits that refusal for a nonempty
+block excluded from type analysis. Source:
+https://github.com/python/mypy/blob/v2.3.0/mypyc/irbuild/statement.py#L142-L165.
+
+Decided: the single _type_atom consumer imports type_atom_for inside the function,
+after its already-an-Atom return. This preserves deferred annotation loading and
+gives both mypy and runtime one ordinary import. Remove the unused conditional
+catalogue imports. Reject changing TYPE_CHECKING's meaning or disabling mypyc;
+neither repairs the supported backend. Extend the compiled execution probe to
+call the annotation builders as well as native rational operations.
+
+Verified: the corrected compiled execution test passes in 13.48 seconds. Both
+wire and factories load from built extensions; native rationals retain wire,
+pickle and ordering, typed/arrow accept Python annotations, and Vector's returned
+ratios compose. The existing missing-mypyc refusal still names `pip install mypy`.
+
+Verified: final native suite passes 33 tests and eight subcases. The extended
+MeTTa example passes all 34 claims, including all thirteen heads and both random
+arities. Host workarounds pass 16 entries, 21 sites and ten planted selftests;
+both new native defects still reproduce. The first ledger run did not see the
+new untracked files; adding them to the index resolves all four findings without
+changing the ledger or its gate. Mypy passes its 176-source and three public
+surface checks.
+
+Measured: `PYTHONPATH=extensions/python python -m benchmarks.vector_numeric`
+passes all four accuracy controls and every timed result. Minimum of three
+public calls per dimension:
+
+| Dimension | Previous inferences | Exact native inferences | Previous CPU seconds | Exact native CPU seconds |
+| --- | ---: | ---: | ---: | ---: |
+| 32 | 1563 | 1959 | .000162530 | .000179261 |
+| 128 | 4782 | 6248 | .000524090 | .000390110 |
+| 512 | 14382 | 18920 | .001393780 | .001115090 |
+| 2048 | 52782 | 69608 | .004893081 | .003756770 |
+| 8192 | unrun | 272360 | unrun | .016807914 |
+| 32768 | unrun | 1083368 | unrun | .071840087 |
+
+The previous values come from the unchanged String B baseline probe above.
+Both traversals are linear. Native exact arithmetic adds validation and integer
+work, while the previous fold loses the four numerical controls. CPU values are
+descriptive and do not constitute a PMU release result. Logs:
+ai-libraries-vector-native-final.log, ai-libraries-vector-example.log,
+ai-libraries-vector-host-final.log and ai-libraries-vector-bench.log.
+
+Measured: the extended twin's minimum-of-three is 58,375 MeTTa and 61,500 Python
+inferences. The unchanged seventeen-claim baseline was 30,798/32,104 against its
+older 31,537 Python pin. The new provider and seventeen added claims account for
+the movement from that live baseline; the older 567-inference difference is
+recorded separately. Price only this owned example.
+
+Found: two unseeded pricing runs return 61,500 and 61,503. Exact rounding has
+data-dependent branches, so the example's random inputs must be reproducible.
+Use the existing with-seed scope for each positive-count example and its twin;
+retain all assertions and leave the library's generator behavior unchanged.
+Verify repeated fresh-process costs before writing the final pin. The existing
+seeded-randomness example supplies the held-body Python spelling with S atoms.
+
+## 2026-09-12: Vector completion
+
+Measured: the seeded example passes all 34 claims. `python
+extensions/python/tools/twin_coverage.py --measure --rounds 3
+examples/ch08-data/08-03-the-shipped-libraries/13-vector_lib.metta` -> 58,433
+MeTTa and 62,208 Python inferences, ratio 1.0646; the 58,375/61,500 figures
+above precede the with-seed change. Ten seeded fresh processes read 62,208
+with zero spread (ai-libraries-vector-seeded-costs.log). `--repin` moves the
+twin from 31,537 to 62,208 and records the mechanism, the seed and the 567
+inferences of pre-Vector drift beside it. Logs:
+ai-tmp/ai-lib2-vector-{example-resume,measure,repin}.log.
+
+Verified: `sh engine/test.sh suites/libraries/lib_vector_surface.plt` passes
+33 tests and eight subcases. `sh extensions/python/test.sh` over
+test_vector_lib, test_rational_wire, test_library_card and
+test_library_native_build passes 55 tests in 19.78 seconds, including the
+source-archive wheel installation composing an exact rational. The optional
+mypyc packaging test passes in 14.08 seconds; the one recorded failure of that
+test (ai-libraries-vector-python-final.log) precedes the factories repair
+above and its rerun passes. Logs: ai-tmp/ai-lib2-vector-{native-resume,
+python-resume,mypyc}.log.
+
+Verified: `prologface --write` reads eight described sources with zero
+findings; cumulative syntax stays 284 constructs; origins stay 143 derived and
+204 original; llms reads five sheets with zero findings; libdoc rewrites the
+library reference, whose lib_vector row becomes 13 heads and 13 documented.
+`llms.txt` counts 25 shipped Prolog halves. The 34-lane battery of prolog-face,
+libdoc, corpus-coverage, cumulative-syntax, example-origins, llms, reference,
+vocab-sync, fn-sync, phrasebook, face-sync, artifact-sync, lib-autoload,
+no-autoload, host-workarounds, evidence, provenance-pin-selftest, ruff, mypy
+and docs, with every selftest, passes. Logs:
+ai-tmp/ai-lib2-vector-{records-regen,lanes}.log.

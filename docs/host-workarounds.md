@@ -326,3 +326,30 @@ Workaround: the String differential oracle uses call/5 so all option combination
 Lifted when: compilation preserves option variables and both Bool branches agree
   with the runtime control. Restore the direct oracle call after that proof.
 Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-rational-subnormal-rounding
+Host: SWI-Prolog 10.1.13, fc7ef84b949378b729052c3ade79c90ce5416abb;
+  src/pl-gmp.c:mpq_to_double rounds a significand before ldexp.
+Defect: converting ((1<<54)+1) rdiv (1<<1129) returns zero although its exact
+  value is above half the smallest subnormal and must round to 2^-1074.
+Reproduction: tests/checks/host_workarounds/swi-rational-subnormal-rounding.pl,
+  compares normal and exact subnormal controls with the above-midpoint value.
+Workaround: Vector rounds integer quotient/remainder at the final binary64
+  quantum and converts only an already representable dyadic with float/1.
+Lifted when: the host's rational conversion rounds subnormals once and the
+  reproduction returns absent. Preserve Vector's explicit IEEE overflow and
+  signed-underflow policy when replacing the conversion.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-infinite-division-zero-sign
+Host: SWI-Prolog 10.1.13, fc7ef84b949378b729052c3ade79c90ce5416abb;
+  src/pl-arith.c:ar_divide computes X/inf as 0.0*sign_f(X)*sign_f(Y).
+Defect: sign_f loses a negative-zero numerator's sign, reversing the expected
+  sign of -0.0 divided by either infinity. Finite division controls are correct.
+Reproduction: tests/checks/host_workarounds/swi-infinite-division-zero-sign.pl,
+  checks both finite controls and all four zero/infinity sign combinations.
+Workaround: Vector's class/sign proxies divide by multiplying the exact signed
+  reciprocal. Proxies contain only units, zeros, infinities and NaNs.
+Lifted when: the host preserves the numerator's zero sign and the reproduction
+  returns absent; restore direct division inside the proxy arithmetic boundary.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.

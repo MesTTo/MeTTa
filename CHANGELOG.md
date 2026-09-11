@@ -9,6 +9,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_vector` adds validated component arithmetic, scaling, normalization,
+  distance and fill. Finite reductions use exact stored values and round once,
+  retaining cancellation residuals and finite directions across extreme ranges.
+  Generated imports, types and docs cover thirteen heads at fourteen arities.
+  Dimension mismatches raise by name. Existing shortcut, IEEE and random-draw
+  semantics remain; random counts now require integers and its documentation
+  identifies the positive-cube projection distribution.
+- Python atoms decoded from native rationals retain their numeric wire, value
+  identity, hashing, ordering and pickle across subsequent calls. Python-created
+  `Fraction` objects retain their existing opaque identity. Native number sorting
+  includes rational/float ties, NaN and signed zero. The optional mypyc codec
+  executes annotation builders through a deferred import instead of raising
+  from a branch omitted by type analysis; its build test now runs the artifact.
 - `lib_string` adds scalar-code conversion, exact splitting, last-index search,
   overlap-aware counts, centering, lines, indentation, wrapping, named templates,
   exact Levenshtein distance and ISub similarity. Literal operations share a

@@ -45,7 +45,7 @@ beside its definitions.
 | lib_tabling | 11 | 0 |
 | lib_thread | 58 | 2 |
 | lib_torch | 20 | 19 |
-| lib_vector | 5 | 0 |
+| lib_vector | 13 | 13 |
 | lib_zar | 4 | 0 |
 
 ## lib_crypto
@@ -2453,3 +2453,202 @@ This attribute is ``None`` by default and becomes a Tensor the first time a call
 1. %Undefined%
 
 Undocumented: `torch-relu`
+
+## lib_vector
+
+### `cosine`
+
+*lib_vector.metta:8*
+
+```metta
+(: cosine (-> Expression Expression Number))
+```
+
+Return the cosine similarity of equal-dimensional numeric expressions. Compute the exact finite ratio before rounding, even if a norm would overflow or underflow. Zero or nonfinite vectors produce NaN.
+
+1. Left
+2. Right
+
+Returns: Similarity
+
+### `cosine-of-normalized`
+
+*lib_vector.metta:14*
+
+```metta
+(: cosine-of-normalized (-> Expression Expression Number))
+```
+
+Return dot without checking normalization. This is cosine only when both inputs are unit vectors; for example (3 4) with itself still returns 25.0.
+
+1. Left
+2. Right
+
+Returns: Product
+
+### `dot`
+
+*lib_vector.metta:20*
+
+```metta
+(: dot (-> Expression Expression Number))
+```
+
+Return the dot product as a float. Accumulate exact finite products before one rounding; preserve IEEE infinities and NaNs. Empty inputs return 0.0. Both complete numeric expressions must have the same dimension.
+
+1. Left
+2. Right
+
+Returns: Product
+
+### `norm`
+
+*lib_vector.metta:26*
+
+```metta
+(: norm (-> Expression Number))
+```
+
+Return the correctly rounded Euclidean length of a numeric expression. Exact squared sums avoid intermediate overflow and underflow. Empty inputs return 0.0; NaN propagates and infinity without NaN returns infinity.
+
+1. Vector
+
+Returns: Length
+
+### `random-normal-vector`
+
+*lib_vector.metta:33*
+
+```metta
+(: random-normal-vector (-> Number Expression))
+```
+
+```metta
+(: random-normal-vector (-> Number Expression Expression))
+```
+
+Prepend Count independent uniform draws in (0,1) to Accumulator, then normalize the whole expression. The default accumulator is empty; negative integer counts draw nothing. Validate before drawing. Use the caller thread's generator, including with-seed. With no accumulator this projects the positive cube: it is neither Gaussian nor a uniform spherical direction.
+
+1. Count
+2. Accumulator
+
+Returns: Vector
+
+### `vector-add`
+
+*lib_vector.metta:39*
+
+```metta
+(: vector-add (-> Expression Expression Expression))
+```
+
+Add equal-dimensional numeric expressions component by component. Exact operands stay exact; a floating operand makes that result a float rounded once. Preserve IEEE signed zeros, infinities and NaNs.
+
+1. Left
+2. Right
+
+Returns: Vector
+
+### `vector-distance`
+
+*lib_vector.metta:45*
+
+```metta
+(: vector-distance (-> Expression Expression Number))
+```
+
+Return the correctly rounded Euclidean distance of equal-dimensional numeric expressions. Subtract and sum squared differences exactly before the final root; preserve IEEE infinity and NaN behavior. Empty returns 0.0.
+
+1. Left
+2. Right
+
+Returns: Distance
+
+### `vector-divide`
+
+*lib_vector.metta:51*
+
+```metta
+(: vector-divide (-> Expression Expression Expression))
+```
+
+Divide corresponding components. Exact operands return exact rationals; an exact zero divisor raises for the whole operation. A floating operand selects rounded floating results and IEEE zero division. Dimensions match.
+
+1. Left
+2. Right
+
+Returns: Vector
+
+### `vector-fill`
+
+*lib_vector.metta:57*
+
+```metta
+(: vector-fill (-> Number Number Expression))
+```
+
+Construct Count copies of Value. Count must be a nonnegative integer and Value a Number, including when Count is zero. Preserve its numeric type.
+
+1. Count
+2. Value
+
+Returns: Vector
+
+### `vector-multiply`
+
+*lib_vector.metta:63*
+
+```metta
+(: vector-multiply (-> Expression Expression Expression))
+```
+
+Multiply corresponding components, with vector-add's exact, floating and dimension rules. Use dot to sum the exact products before rounding.
+
+1. Left
+2. Right
+
+Returns: Vector
+
+### `vector-normalize`
+
+*lib_vector.metta:69*
+
+```metta
+(: vector-normalize (-> Expression Expression))
+```
+
+Return floating coordinates in the same direction with unit length, rounding each exact finite ratio once. Keep direction when a rounded norm would overflow or underflow. Empty stays empty; zero vectors yield NaNs. An infinite norm maps finite coordinates to signed zero and infinities to NaN; a NaN norm yields NaNs. Signed zero coordinates keep their signs.
+
+1. Vector
+
+Returns: Unit
+
+### `vector-scale`
+
+*lib_vector.metta:75*
+
+```metta
+(: vector-scale (-> Expression Number Expression))
+```
+
+Multiply every component by Factor, with vector-multiply's number rules. Validate Factor even when the vector is empty.
+
+1. Vector
+2. Factor
+
+Returns: Scaled
+
+### `vector-subtract`
+
+*lib_vector.metta:81*
+
+```metta
+(: vector-subtract (-> Expression Expression Expression))
+```
+
+Subtract Right from Left component by component, with vector-add's exact, floating and dimension rules.
+
+1. Left
+2. Right
+
+Returns: Vector

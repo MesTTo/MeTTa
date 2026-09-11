@@ -754,6 +754,13 @@ declares every transitive vendor include. Pass these declared paths to
 only existing files would hide a deleted header behind a warm object. Its
 tests verify the include closure, modified and missing headers, concurrent
 builds, cancellation and execution after installation from a source archive.
+`lib_vector` demonstrates exact numeric reduction over the host's existing
+GMP arithmetic. Its finite dot products, squared lengths and direction ratios
+retain exact stored values until the final float rounding. Public declarations
+use `list(number)` for an expression of Numbers; the native predicate validates
+every component and reports dimension mismatches through the operation-error
+boundary. The source includes the pinned CPython fraction-root method and its
+license, with independent Fraction and squared-midpoint tests.
 `lib_json` demonstrates resource ownership at a native boundary. It validates
 object fields before allocation, reserves fresh space names and stores fields
 through `add_sexp/2`, so a key such as `from` remains data. Failed construction
