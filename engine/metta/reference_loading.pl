@@ -1,6 +1,6 @@
 % Guarantees: metta_reference_check_manifest/5 uses
 %   filereader:with_working_directory/2 for its import directory scope
-%   [source: engine/metta/reference_loading.pl:metta_reference_check_manifest/5; commit=WORKTREE].
+%   [source: engine/metta/reference_loading.pl:metta_reference_check_manifest/5; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: load canonical library homes through import!'s existing ownership door.
 % Assumes: filereader:parse_metta_source_summary/4 supplies manifest signatures.

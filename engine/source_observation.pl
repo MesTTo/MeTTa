@@ -1,6 +1,6 @@
 % Guarantees: observation contexts use metta_with_trailed/3; temporary clauses
 %   retire on interruption, and error frame walks stop at the observer frame
-%   [tested: trailed_scopes, source_observation; commit=WORKTREE].
+%   [tested: trailed_scopes, source_observation; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: retain source maps beside compiled clauses and collect observations.
 % Assumes: nothing loads this file at boot. engine/metta.pl reaches it only

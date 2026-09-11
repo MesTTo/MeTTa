@@ -1,6 +1,6 @@
 % Guarantees: materialization_transaction/2, with_source_materialization/3 and
 %   with_source_materialization_batch/3 scope roots through metta_with_trailed/3
-%   [tested: trailed_scopes; commit=WORKTREE].
+%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: materialize finite function-free equation bags at source boundaries.
 % Guarantees: only ground acyclic dependency graphs replace ordinary dispatch;

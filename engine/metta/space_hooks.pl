@@ -8,7 +8,7 @@
 
 % Guarantees: hook grants, user transactions and speculation use
 %   metta_with_trailed/3 for their scoped state
-%   [source: engine/metta/space_hooks.pl:metta_outer_transaction_prepare/5; commit=WORKTREE].
+%   [source: engine/metta/space_hooks.pl:metta_outer_transaction_prepare/5; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: implement pre-add hooks, transforms, watchers, views, digests, and purity inventories
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.

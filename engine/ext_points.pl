@@ -1,5 +1,5 @@
 % Guarantees: metta_with_trailed/3 is published as a host_service
-%   [source: engine/ext_points.pl:kind/2; commit=WORKTREE].
+%   [source: engine/ext_points.pl:kind/2; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: declare each engine extension seam, its direction and its cut
 %   semantics, and publish the predicates extensions and host bindings may call.

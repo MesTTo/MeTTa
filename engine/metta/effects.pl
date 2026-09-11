@@ -1,6 +1,6 @@
 % Guarantees: metta_with_source_effect_program/3, metta_with_evaluation_context/2
 %   and metta_bridge_descend/1 restore roots through metta_with_trailed/3
-%   [source: engine/metta/effects.pl:metta_with_evaluation_context/2; commit=WORKTREE].
+%   [source: engine/metta/effects.pl:metta_with_evaluation_context/2; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: classify compiled effects, compose the five-rank effect lattice,
 %   plan reified-world admission, and manage memoization, dependencies, and

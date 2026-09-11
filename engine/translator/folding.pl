@@ -1,6 +1,6 @@
 % Guarantees: fold_native_scalar_call/5 treats the inactive observation root
 %   left by metta_with_trailed/3 as outside an observation
-%   [source: engine/translator/folding.pl:fold_native_scalar_call/5; commit=WORKTREE].
+%   [source: engine/translator/folding.pl:fold_native_scalar_call/5; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: fold immutable native scalar calls while compiling retained clauses.
 % Assumes: translator.pl owns this unit and retained clause publication keeps

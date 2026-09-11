@@ -1,6 +1,6 @@
 % Guarantees: metta_argument_types_in/3 scopes its recursion guard through
 %   metta_with_trailed/3; metta_record_error/1 ignores an inactive observation
-%   [source: engine/metta/terms.pl:metta_argument_types_in/3; commit=WORKTREE].
+%   [source: engine/metta/terms.pl:metta_argument_types_in/3; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: provide representation, parsing, grounded-operation errors, and numeric term recovery
 % Guarantees: metta_operation_parameters/6 and

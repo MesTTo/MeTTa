@@ -1,6 +1,6 @@
 % Guarantees: with_typing_policy_stable/1 scopes typing_policy_snapshot/1 through
 %   metta_with_trailed/3 while retaining the typing-policy mutex
-%   [tested: trailed_scopes; commit=WORKTREE].
+%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: hold the declared typing-rule registry and resolve its explicit
 %   accept, refuse(Reason), and defer outcomes for every engine type checker.

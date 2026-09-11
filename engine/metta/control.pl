@@ -1,6 +1,6 @@
 % Guarantees: metta_with_trailed/3 preserves linked values and restores the prior root
 %   on ordinary return, failure, exception, redo and cut
-%   [tested: trailed_scopes; commit=WORKTREE].
+%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
 % Guarantees: metta_host_hold/3 installs seam:engine_context/1 inside its
@@ -769,7 +769,7 @@ metta_host_with_stack_limit(StackBytes, Goal) :-
 % value before resuming Goal. Failure and exceptions unwind the entry write.
 % Goal may mutate its value, but must not nb_setval/2, nb_linkval/2 or
 % nb_delete/1 the same key: those replace the root that owns the trail entry.
-% [tested: trailed_scopes; commit=WORKTREE]
+% [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539]
 :- meta_predicate metta_with_trailed(+, ?, 0).
 metta_with_trailed(Key, Value, Goal) :-
     ( nb_current(Key, Previous) -> true ; Previous = [] ),

@@ -1,6 +1,6 @@
 % Guarantees: no_mutating_scope_setup/0 refuses writes in either cleanup Setup
 %   and setup_mutation_selftest/0 checks the declared fixture exception
-%   [tested: setup_mutation_selftest; commit=WORKTREE].
+%   [tested: setup_mutation_selftest; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: run SWI's source checks after compiling representative MeTTa code,
 %     and enforce the two rules about engine/ext_points.pl's seams that no SWI
@@ -153,7 +153,7 @@ main :-
 % Workaround: swi-cleanup-window - reject writes before cleanup registration.
 % The exception door is the first goal of a checker fixture, names that exact
 % predicate and gives its reason. It cannot exempt a runtime source file.
-% [tested: setup_mutation_selftest; commit=WORKTREE]
+% [tested: setup_mutation_selftest; commit=40b71fc99571872ca5fc85cdaf7902b467166539]
 setup_mutation_fixture(_, _).
 
 no_mutating_scope_setup :-
