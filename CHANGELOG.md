@@ -55,6 +55,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   the pin reads one state whatever lane ran before it. The boot-determinism lane
   reads the driver's regression shape as a reading too, so a stale pin is
   engine-bench's finding and never "no sample".
+- The twins re-pinned on the merged tree: 265 point budgets under the serial
+  min-of-three protocol with the wave's mechanism in each chain, eight empirical
+  envelopes re-observed over ten full-lane rounds under the 282-example protocol,
+  the authoring constants re-derived (the first definition's premium fell from
+  1,482 to 303 with the binding's boot import; 1,362 per definition), six retired
+  overruns dropped and thirteen residuals priced where a twin still pays the
+  first use of its own lowering paths.
 - The end-of-wave re-pins: engine boot, evaluate, parse-prolog and translate;
   the Python benchmark rows the wave moved; the automatic-tabling pins;
   memory-scale `support-drop-spaces`; the Node rows; the C boot row. Each row
