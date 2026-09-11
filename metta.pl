@@ -1,6 +1,9 @@
 % Purpose: provide MeTTa's Prolog runtime, builtins, type system, evaluator,
 %   imports, function registration, and named-space execution context.
 % Guarantees:
+%   - metta_operation_parameters/4 exposes the joint argument types and
+%     origins used by constructor compilation and runtime admission
+%     [tested: translator_constructors, engine_layering; commit=WORKTREE].
 %   - broken extension entries raise through loading_loudly/1 with their
 %     diagnostic instead of allowing boot to report success
 %     [tested: tests/shell/test_packaged_cli.sh; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
@@ -456,6 +459,7 @@
             metta_assertion_failure/6,
             metta_bad_argument_error/3,
             metta_bad_argument_reason/3,
+            metta_operation_parameters/4,
             metta_error_answer/3,
             metta_error_atom/4,
             metta_error_context/3,

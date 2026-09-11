@@ -1,4 +1,7 @@
 % Purpose: lower runnable expressions, calls, arguments, and dispatch policies into Prolog goals
+% Guarantees: declared constructors compile their checks at construction and
+%   sorted structural projections resolve through their retained dependencies
+%   [tested: run_tests(translator_constructors); commit=WORKTREE].
 % Guarantees: data_head_masks/3 and builtin_argument_mask/4 derive each
 %   variadic mask through present_type_chain/3
 %   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
@@ -348,6 +351,8 @@ install_annotated_dispatch(Fun, Ref) :-
 dispatch_call_goal_in(Module, Fun, Args, Out, Goal, PolicyGoal) :-
     metta_ensure_compiled(Fun),
     (   fold_native_scalar_call(Module, Fun, Args, Out, Goal)
+    ->  PolicyGoal = true
+    ;   fold_sorted_constructor_projection(Module, Fun, Args, Out, Goal)
     ->  PolicyGoal = true
     ;   dispatch_call_goal_for(Module, Fun, Args, Out, Goal, PolicyGoal)
     ).
@@ -1394,16 +1399,21 @@ call_site_type_chains(Fun, UniqueTypeChains) :-
 %instructions [measured 2026-08-19], which is the same trap the note above
 %data_head_masks/3 records at +20% for 2026-08-16.
 %
-%It reads &self, which is where a program's declarations go and is the limit
-%get_function_type/2 already lives with; a declaration written only into a
-%named space does not gate that space's data heads.
+%The lexical declaration tier governs both construction and its diagnostic.
+%A retained proof belongs to that tier's source dependencies; untracked code
+%keeps the live check in the same home.
 data_head_answer_dl(HV, Written, AVs, Out, Goals0, Goals) :-
-    (   arrow_declared_data_head(HV, DeclarationTier),
+    (   arrow_declared_data_head(HV, DeclarationTier, Chain),
         \+ written_args_settled(DeclarationTier, HV, Written)
-    ->  Goals0 = [( metta_bad_argument_error(HV, Written, Out)
-                  *-> true
-                  ;   Out = [HV|AVs]
-                  )|Goals]
+    ->  (   compiled_constructor_answer(HV, Chain, Written, AVs, Out,
+                                       Goals0, Goals)
+        ->  true
+        ;   current_metta_module(Owner),
+            Goals0 = [with_metta_module(Owner,
+                          ( metta_bad_argument_error(HV, Written, Out)
+                          *-> true
+                          ;   Out = [HV|AVs] ))|Goals]
+        )
     ;   Goals0 = Goals,
         Out = [HV|AVs]
     ).
@@ -1430,16 +1440,18 @@ data_head_answer_dl(HV, Written, AVs, Out, Goals0, Goals) :-
 %lib_strategy:settled_nested_arguments_use_the_governing_outer_arrow;
 %commit=7b238053d2907cd514e3fd9a29927d43a53c5a3c]. Reporting remains additive, but this proof is about the
 %single declaration tier that controls dispatch.
-written_args_settled(self, HV, Written) :-
-    current_metta_module(SelfTierModule),
-    self_tier_clause(SelfTierModule, HV, _),
-    governing_type_declaration_in(SelfTierModule, HV, Chain),
-    written_args_settled_by_chain(Chain, Written).
-written_args_settled(local(Space), HV, Written) :-
-    match_stored(Space, [':', HV, Raw], Raw, _),
-    space_module(Space, Module),
-    normalize_callable_type_in(Module, Raw, Chain),
-    written_args_settled_by_chain(Chain, Written).
+written_args_settled(Tier, HV, [First|Rest]) :-
+    nonvar(First), First = [_|_],
+    (   Tier == self
+    ->  current_metta_module(Module),
+        self_tier_clause(Module, HV, _),
+        governing_type_declaration_in(Module, HV, Chain)
+    ;   Tier = local(Space),
+        match_stored(Space, [':', HV, Raw], Raw, _),
+        space_module(Space, Module),
+        normalize_callable_type_in(Module, Raw, Chain)
+    ),
+    written_args_settled_by_chain(Chain, [First|Rest]).
 
 written_args_settled_by_chain(Chain, Written) :-
     nonvar(Chain),
@@ -1463,13 +1475,15 @@ written_arg_settled(Expected, Written) :-
     Result == Expected.
 
 arrow_declared_data_head(HV, DeclarationTier) :-
+    arrow_declared_data_head(HV, DeclarationTier, _).
+
+arrow_declared_data_head(HV, DeclarationTier, Chain) :-
     atom(HV),
-    current_metta_module(SelfTierModule),
-    self_tier_clause(SelfTierModule, HV, _),
-    governing_type_declaration_in(SelfTierModule, HV, Chain),
+    current_metta_module(Module),
+    self_tier_clause(Module, HV, _),
+    governing_type_declaration_in(Module, HV, Chain),
     nonvar(Chain),
     Chain = [->|_],
-    current_metta_module(Module),
     inherited_data_head_arrow_tier(Module, HV, DeclarationTier),
     !.
 

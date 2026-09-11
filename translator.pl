@@ -1,6 +1,9 @@
 % Purpose: compile MeTTa expressions and equations into executable Prolog,
 %   including dynamic dispatch, control forms, higher-order calls, and
 %   branch-return optimization.
+% Guarantees: sorted constructor proofs use the engine's exported declaration
+%   reader and retire through the existing source dependency graph
+%   [tested: translator_constructors, engine_layering; commit=WORKTREE].
 % Guarantees: the runtime and declaration loaders may call rest_parameter/2
 %   and validate_type_splices/1,2 through the exported module surface
 %   [tested: engine_layering, variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
@@ -416,6 +419,7 @@
 
 :- consult('translator/analysis.pl').
 :- consult('translator/folding.pl').
+:- consult('translator/constructors.pl').
 :- consult('translator/lowering.pl').
 :- consult('translator/special_forms.pl').
 :- consult('translator/typing.pl').
