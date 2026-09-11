@@ -60,3 +60,70 @@ Tried: the compiler-context sweep with its stored-clause fixture outside the bou
 Tried: `sh engine/test.sh suites/evaluation/trailed_scopes.plt` -> 17 tests and 40 subtests passed in 2.479 seconds. The separate `source_observation` suite passes 38 cases, including unchanged error multiplicity and destruction of an engine that observed an error. The final per-door report also passes all 46 rows after explicitly forcing the specialization fixture's three definitions; silent source loading alone had left the segment fixture uncompiled. Each budget checks restored state and a clean second entry. The loader watcher completes at 63, executable observation clause at 102, registration probe at 11, and failed loading marker at 53, with zero retained clauses at every earlier budget.
 
 Tried: the actual Node and C rendering doors under every budget through completion -> 172 and 173, zero leaked capture flags, and a clean second render after each trial. Python's shipped Prolog hook and delivery body, with a guard-checking receiver replacing the external callback, complete at 51 with zero leaked guards. Its existing delivery catch suppresses the bounded attempt at 11..47; each trial then delivers unbounded and observes the active guard inside the receiver. The hook is thread-local to an engine, so the fixture installs the shipped clause in each fresh engine before applying the bound.
+
+Tried: the structural parser over the pristine cut -> 61 direct setup-write findings at 60 source clauses. The changed tree has 15 findings, all in files owned by the concurrent packages: `engine/spaces/{foreign,lifecycle}.pl`, `engine/translator/lowering.pl`, and `lib/lib_{import,memo,tabling,thread}/`. There is no ownership exemption. The selftest covers both wrappers crossed with all 12 write predicates, eight parser fixtures, misplaced/unused exemptions, zero-arity compound data and malformed source. A cold cut scan lacked Janus's `@` operator and printed syntax errors; importing its declared operator source corrected that diagnostic. Decided: request `syntax_errors(error)` so a parsing error cannot skip a clause and leave the new check green.
+
+The following table records the implemented sites. Budgets are the complete ranges `1..N` of the named fixtures in `trailed_scopes`, unless a seat receiver is stated. Every range has zero retained root or clause leaks and checks a clean second entry. A grouped row lists its budgets in predicate order. Calls that compose an already listed directory scope inherit its root proof; their file-loading behavior remains covered by the loader suites.
+
+| File | Predicate | Class | Before | After | Complete budget |
+| --- | --- | --- | --- | --- | --- |
+| `engine/metta/control.pl` | `metta_with_trailed/3` | primitive | repeated setup/restore implementations | trailed entry and ordinary restoration | 39 |
+| `engine/metta/control.pl` | `metta_with_state_write_fence/1` | flag | nonbacktrackable depth counter | trailed boolean, nested restoration | 41 |
+| `engine/support_graph.pl` | `support_atomic/1`; `with_support_repairs_deferred/1` | flags | asserted markers | trailed flags; existing mutex/transaction | 51; 44 |
+| `engine/type_rules.pl` | `with_typing_policy_stable/1` | context | asserted snapshot | trailed `snapshot/1`; existing mutex | 46 |
+| `engine/metta/terms.pl` | `metta_argument_types_in/3` | flag | asserted declared-type guard | trailed flag | 48 |
+| `engine/specializer.pl` | `maybe_specialize_call/4`; `segment_specialization/4`; `metta_verified_specialization/2` | stacks and flag | replaced roots; asserted checking marker | trailed stacks and retained `needed/1` payload | 1122; 702; 264 |
+| `engine/filereader.pl` | `with_source_definition_order/3`; `with_source_recompile_owners/2` | contexts | asserted contexts | trailed stacks; protected pending-row retirement | 59; 53 |
+| `engine/filereader.pl` | `with_working_directory/2`; `with_file_directory/2`; `metta_host_load_file/3` | directory | asserted directory stack and replacement | trailed stack or replacement list | directory scope 44 |
+| `engine/metta/reference_loading.pl` | `metta_reference_check_manifest/5` | directory | asserted import directory | existing trailed directory door | directory scope 44 |
+| `engine/filereader/source_lifecycle.pl` | `with_owning_source_load/2`; `with_source_load/3`; `rollback_source_load_stable/1` | ownership | asserted contexts; destructively consumed undo rows | trailed stacks; retained undo plan and retry | 44; 126; 278 |
+| `engine/filereader/source_lifecycle.pl` | `run_with_loading_marker/2` | real clause | assertion before cleanup registration | registered rollback and retained clause owner | 53 |
+| `engine/materialize.pl` | `materialization_transaction/1,2`; `with_source_materialization_batch/3`; `with_source_materialization/3` | ownership | asserted owner, batch and candidates | trailed roots, mutable early-close cell, protected retirement | 66; 77; 221 |
+| `engine/materialize.pl` | `discard_space_rows/1`; `discard_image_rows/2` | retirement | ownership rows removed before effects | retain snapshot until retirement finishes | materialization and loader suites |
+| `engine/translator_rules.pl` | `rollback_restored_translator_rule/3` | retirement | generation could disappear before cleanup ended | retry inside the captured rule identity | source rollback and rule suites |
+| `engine/metta/effects.pl` | `metta_with_source_effect_program/3`; `metta_with_evaluation_context/2`; `metta_bridge_descend/1` | contexts | asserted program, copied global stack, depth setup | trailed roots; preserve input snapshot and depth cap | 58; 43; 29 |
+| `engine/metta/references.pl` | `metta_reference_refresh/0`; `metta_reference_force/1`; `metta_reference_finish_frame/2` | flags and stacks | asserted guards | trailed flag and stacks | 90; 15; 111 |
+| `engine/metta/registration.pl` | `with_metta_module/2` | context | setup/cleanup writes | trailed module; inactive root defaults to self | 43 |
+| `engine/translator/analysis.pl` | `with_static_contract_shortcuts/2`; `with_equation_types/4` | contexts | nonbacktrackable roots | trailed policy and linked equation types | 40; 42 |
+| `engine/translator/typing.pl` | `with_static_parameter_environment/5` | context | linked nonbacktrackable root | trailed environment preserving variable identity | 137 |
+| `engine/metta/space_hooks.pl` | `metta_hook_apply_counted/6`; `metta_hook_apply/6`; `metta_hook_post_apply/4` | grants | setup/cleanup writes | trailed grants restoring the enclosing value | 32; 24; 161 |
+| `engine/metta/space_hooks.pl` | `metta_outer_transaction_prepare/5`; `metta_speculate_prepare/4` | flags | setup/cleanup transaction markers | trailed ownership; unchanged transaction protocol | 137; 82 |
+| `engine/spaces/receipts.pl` | `metta_with_occurrence_load/1`; `metta_receipt_forget_scope/1` | ownership | nonbacktrackable root; reservation erased before release | trailed root; retain retirement record | occurrence scope 57 |
+| `engine/spaces/tokens.pl` | `metta_remove_occurrence/3`; `metta_remove_provider_occurrence/3` | selector | nonbacktrackable setup and deletion | trailed selection and consumption | 50; 58 |
+| `engine/source_observation.pl` | `with_observation/4` | resource scope | context writes before cleanup registration | register teardown first; trail three roots; retain hook ownership | 760 |
+| `engine/source_observation.pl` | `source_input/2`; `with_source/4`; `compile_clause/3` | contexts | linked nonbacktrackable roots | trailed roots; retained mutable pending-map cell | 60; 92; 84 |
+| `engine/source_observation.pl` | `observe_form/4`; `observe_goals/3` | runnable contexts | replaced/deleted roots | trailed linked locations and runnable suspension | 88; 123 |
+| `engine/source_observation.pl` | `execute_observed_goals/5` | real clause | assertion before registration | retained owner; erase and abolish on every exit | 102 |
+| `engine/source_loading.pl` | `loading_loudly/1` | real clause | asserted watcher before registration | retained owner; protected watcher and source-module retirement | 63 |
+| `engine/metta/interop.pl` | `metta_host_probe_function/2` | real clause | asserted probe before registration | signal-masked assert/catch-erase pair | 11 |
+| `extensions/node/bridge.pl` | `metta_node_render/2` | capture | nonbacktrackable flag | engine trailed scope | 172 |
+| `extensions/cmetta/bridge.pl` | `metta_c_error_text/2` | capture | nonbacktrackable flag | engine trailed scope | 173 |
+| `extensions/python/metta/_binding/messages.pl` | `user:thread_message_hook/3` | reentrancy | nonbacktrackable guard | engine trailed scope; preserve delivery module | 51, test receiver |
+
+The compiler-context budgets 26..29 and 33..34 return failure because the owned `stored_atom_of_ref/4` catches the bound. These are recorded failed exits, not successful propagation. The foreign selector row exercises the owned route's exact capability refusal; the following row exercises actual token consumption. Both still prove restoration. The three public-fuel reproductions now pass all budgets 1..600 without a leaked guard.
+
+Tried: each direct scope warmed for 100 calls and measured over 1000 calls in three samples, using the provisioned cut and changed tree with engine/library QLF files cleared first. All three counts in each arm agree. Subtracting the common empty-loop cost gives the per-entry inference counts below. These are bounded constant-cost replacements; the change closes an interruption window rather than claiming an asymptotic speedup.
+
+| Scope | Cut per entry | Changed per entry | Delta |
+| --- | ---: | ---: | ---: |
+| support lock | 12 | 13 | +1 |
+| support deferral | 7 | 8 | +1 |
+| typing snapshot | 10 | 10 | 0 |
+| source program | 16 | 21 | +5 |
+| source recompile | 9 | 10 | +1 |
+| source owner | 6 | 6 | 0 |
+| materialization owner | 28 | 30 | +2 |
+| effect program | 18 | 18 | 0 |
+| evaluation context | 10 | 7 | -3 |
+| module context | 8 | 6 | -2 |
+| compiler policy | 9 | 5 | -4 |
+| equation types | 9 | 5 | -4 |
+| parameter environment | 104 | 100 | -4 |
+| state fence | 7 | 5 | -2 |
+| occurrence load | 25 | 22 | -3 |
+| transaction | 101 | 102 | +1 |
+| speculation | 51 | 47 | -4 |
+
+Tried: `jscpd --format prolog --formats-exts prolog:pl,plt --min-lines 5 --min-tokens 50 --max-lines 20000 --max-size 2mb --skipComments --noTips` over the 32 changed Prolog files -> six clones, 38 duplicated lines out of 35728, 0.11%. Five are outside the changed code. The counted and ordinary grant branches already shared their setup shape on the cut and now share the same primitive call. Rejected: another wrapper for that single call, because it would add indirection without merging the distinct counting policies. An earlier 8-line/80-token scan reported zero and is not used as evidence that the existing clones disappeared.
+
+Open: run the prescribed whole-tree lanes on the committed state and record the exact counter movements in the landing receipt. The concurrent owners must remove their 15 direct setup findings and reconcile their indirect scopes, the umbrella export, exact foreign removal and compiler-reference catches. The broader plain-host tracing diagnostic above is not repaired by these scope changes.

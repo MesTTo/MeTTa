@@ -59,6 +59,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   the observation boundary.
 - Python message forwarding and Node/C error capture use the engine's trailed
   scope for their reentrancy and capture flags.
+- The `prolog-static` lane refuses state writes in either cleanup wrapper's
+  setup, validates the checker's declared fixture exceptions, and refuses
+  malformed source during its scan.
 - The engine benchmark's boot row prepares its own artifact state: the governed
   `.qlf` set is purged and warmed through the ordinary boot in children of the
   driver before the row's samples, the same preparation the C fixture takes, so

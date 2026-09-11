@@ -5153,3 +5153,4 @@ exception, cut and redo restore the correct enclosing value. An unset key reads
 as the inactive value `[]` after ordinary return. Read through `nb_current/2`;
 never replace a scoped root with `nb_setval/2`, `nb_linkval/2` or `nb_delete/1`.
 Mutate a context payload through `nb_setarg/3` or `nb_linkarg/3` when needed.
+The `prolog-static` lane refuses state writes in cleanup-wrapper setup goals.

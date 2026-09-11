@@ -59,6 +59,9 @@ Workaround: `metta_with_trailed/3` in `engine/metta/control.pl` uses `b_setval/2
   goal inside `catch/3`, whose call port defers an inference trip to that goal.
   Cleanup is itself a catch that retries idempotent retirement before
   propagating the ball. Ownership records remain until retirement completes.
+  The structural `prolog-static` check refuses writes in either cleanup
+  wrapper's Setup and checks its declared fixture exception with a planted
+  selftest.
 Lifted when: the cleanup is registered before the call port that follows
   Setup, or the inference check honours the atomic region.
 Record: docs/journal/2026-09-07-every-intermittent-root-caused.md, the

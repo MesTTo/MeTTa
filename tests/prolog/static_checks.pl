@@ -1,3 +1,7 @@
+% Guarantees: no_mutating_scope_setup/0 refuses writes in either cleanup Setup
+%   and setup_mutation_selftest/0 checks the declared fixture exception
+%   [tested: setup_mutation_selftest; commit=WORKTREE].
+%
 % Purpose: run SWI's source checks after compiling representative MeTTa code,
 %     and enforce the two rules about engine/ext_points.pl's seams that no SWI
 %     check knows about: every seam declares its kind, and a seam whose kind
@@ -109,6 +113,8 @@
 
 :- use_module(library(check)).
 :- use_module(library(solution_sequences)).
+:- use_module(library(prolog_source)).
+:- use_module(library(filesex)).
 :- ensure_loaded(surface_walk).
 :- initialization(main, main).
 
@@ -141,7 +147,126 @@ main :-
     every_engine_emitted_goal_is_protected,
     every_emitted_goal_is_reachable,
     every_registered_space_name_is_an_ampersand_atom,
-    no_unit_computes_its_own_directory.
+    no_unit_computes_its_own_directory,
+    no_mutating_scope_setup.
+
+% Workaround: swi-cleanup-window - reject writes before cleanup registration.
+% The exception door is the first goal of a checker fixture, names that exact
+% predicate and gives its reason. It cannot exempt a runtime source file.
+% [tested: setup_mutation_selftest; commit=WORKTREE]
+setup_mutation_fixture(_, _).
+
+no_mutating_scope_setup :-
+    setup_mutation_selftest,
+    source_file(no_mutating_scope_setup, Checker),
+    source_file(metta_engine:metta_with_trailed(_,_,_), Control),
+    file_directory_name(Control, Units), file_directory_name(Units, Engine),
+    file_directory_name(Engine, Root),
+    findall(File, scope_source_file(Root, File), Runtime),
+    sort([Checker|Runtime], Files),
+    findall(File-Line-Finding,
+            ( member(File, Files),
+              ( File == Checker -> Role = checker ; Role = runtime ),
+              setup_mutation_file(File, Role, Findings),
+              member(Line-Finding, Findings) ), All),
+    forall(member(File-Line-Finding, All),
+           format(user_error, '~w:~d: ~q; use metta_with_trailed/3 for scoped state~n',
+                  [File, Line, Finding])),
+    length(Files, Count), length(All, Violations),
+    format('static: scope setup scanned ~d files, ~d violations; planted selftest passed~n',
+           [Count, Violations]),
+    All == [].
+
+scope_source_file(Root, File) :-
+    member(Relative, ['engine', 'lib', 'extensions/python/metta/_binding',
+                      'extensions/mork/mork_ffi']),
+    directory_file_path(Root, Relative, Directory),
+    directory_member(Directory, File, [recursive(true), extensions([pl])]).
+scope_source_file(Root, File) :-
+    member(Relative, ['extensions/node/bridge.pl', 'extensions/cmetta/bridge.pl']),
+    directory_file_path(Root, Relative, File).
+
+setup_mutation_file(File, Role, Findings) :-
+    setup_call_cleanup(prolog_open_source(File, Stream),
+                       setup_mutation_stream(Stream, Role, Findings, []),
+                       prolog_close_source(Stream)).
+
+setup_mutation_stream(Stream, Role, Findings, Tail) :-
+    prolog_read_source_term(Stream, Term, _,
+                            [term_position(Position),syntax_errors(error)]),
+    ( Term == end_of_file -> Findings = Tail
+    ; stream_position_data(line_count, Position, Line),
+      setup_mutation_term(Term, Role, Here),
+      setup_mutation_locations(Here, Line, Findings, Rest),
+      setup_mutation_stream(Stream, Role, Rest, Tail) ).
+
+setup_mutation_locations([], _, Tail, Tail).
+setup_mutation_locations([Finding|More], Line, [Line-Finding|Rest], Tail) :-
+    setup_mutation_locations(More, Line, Rest, Tail).
+
+setup_mutation_term(Term, Role, Findings) :-
+    findall(unsafe_setup(Wrapper, Effect),
+            ( sub_term(Scope, Term), compound(Scope),
+              compound_name_arity(Scope, Wrapper, Arity), cleanup_wrapper(Wrapper/Arity),
+              arg(1, Scope, Setup), sub_term(Write, Setup), compound(Write),
+              compound_name_arity(Write, Name, N), Effect = Name/N, setup_write(Effect) ), Raw),
+    sort(Raw, Writes),
+    ( Term = (Head :- Body), nonvar(Body), Body = (Marker, _),
+      nonvar(Marker), Marker = setup_mutation_fixture(Indicator, Reason)
+    -> ( Role == checker, callable(Head),
+         ( atom(Head) -> Name=Head, Arity=0 ; compound_name_arity(Head,Name,Arity) ),
+         Indicator == Name/Arity, string(Reason), Reason \== "", Writes \== []
+       -> Findings = []
+       ; Findings = [invalid_setup_fixture(Indicator)|Writes] )
+    ; Findings = Writes ).
+
+cleanup_wrapper(setup_call_cleanup/3).
+cleanup_wrapper(setup_call_catcher_cleanup/4).
+
+setup_write(assert/1).
+setup_write(assert/2).
+setup_write(asserta/1).
+setup_write(asserta/2).
+setup_write(assertz/1).
+setup_write(assertz/2).
+setup_write(retract/1).
+setup_write(retractall/1).
+setup_write(nb_setval/2).
+setup_write(b_setval/2).
+setup_write(nb_linkval/2).
+setup_write(nb_delete/1).
+
+setup_mutation_selftest :-
+    forall((cleanup_wrapper(Wrapper/Arity), setup_write(Name/N)),
+           ( functor(Effect, Name, N), functor(Scope, Wrapper, Arity),
+             arg(1, Scope, (true, nested:call(Effect))),
+             setup_mutation_term((planted :- Scope), runtime,
+                                 [unsafe_setup(Wrapper, Name/N)]) )),
+    Plant = "planted :- setup_call_cleanup(assertz(probe), true, true).\n",
+    Marked = "planted :- setup_mutation_fixture(planted/0, \"scanner witness\"), setup_call_cleanup(assertz(probe), true, true).\n",
+    Invalid = "planted :- setup_mutation_fixture(other/0, \"wrong owner\"), setup_call_cleanup(assertz(probe), true, true).\n",
+    Unused = "planted :- setup_mutation_fixture(planted/0, \"unused\"), true.\n",
+    setup_mutation_plant(Plant, runtime, [_-unsafe_setup(setup_call_cleanup, assertz/1)]),
+    setup_mutation_plant(Marked, checker, []),
+    setup_mutation_plant(Marked, runtime, [_-invalid_setup_fixture(planted/0)|_]),
+    setup_mutation_plant(Invalid, checker, [_-invalid_setup_fixture(other/0)|_]),
+    setup_mutation_plant(Unused, checker, [_-invalid_setup_fixture(planted/0)]),
+    setup_mutation_plant("clean :- setup_call_cleanup(true, assertz(probe), true).\n",
+                         runtime, []),
+    setup_mutation_plant("clean :- setup_call_cleanup(true, foreign:call(zero()), true).\n",
+                         runtime, []),
+    catch(setup_mutation_plant("broken :- setup_call_cleanup(", runtime, _),
+          error(syntax_error(_),_), Malformed=true),
+    Malformed == true,
+    format('static: scope setup selftest caught all writes in both wrappers and checked the fixture door~n', []).
+
+setup_mutation_plant(Source, Role, Findings) :-
+    tmp_file(scope_setup_fixture, File),
+    setup_call_cleanup(
+        setup_call_cleanup(open(File, write, Stream, [encoding(utf8)]),
+                           format(Stream, '~s', [Source]), close(Stream)),
+        setup_mutation_file(File, Role, Findings),
+        delete_file(File)).
 
 %%%% A unit below engine/ cannot compute its own directory %%%%
 %
@@ -478,6 +603,7 @@ library_source(Library) :-
 % space-name scan below reported the fixture as a registered space with no '&'
 % prefix, which is how this was found [measured 2026-08-28].
 live_scan_sees_a_planted_cut :-
+    setup_mutation_fixture(live_scan_sees_a_planted_cut/0, "plants live event clauses"),
     aggregate_all(count, live_hook_clause(_, _), Live),
     Planted = seam:function_removed(_),
     space_module('&self', TodayModule),
@@ -659,6 +785,7 @@ no_compile_time_helper_in_a_compiled_body :-
 % generated_clause/2 is the predicate the survey measured going from 275
 % bodies to 1 while still reporting clean, and this is what closes that.
 detector_sees_a_planted_helper(Bodies) :-
+    setup_mutation_fixture(detector_sees_a_planted_helper/1, "plants compiled helper calls"),
     Planted = 'static-check-planted-helper',
     space_module('&self', TodayModule),
     Fixture = '$static-check-fixture:&helper-probe',
@@ -805,6 +932,7 @@ control_shaped(T) :-
 % shape, one per name, so an earlier probe cannot free a later one, and asked
 % by doing the assert the engine would do rather than by reading a property.
 capturable(Name/Arity) :-
+    setup_mutation_fixture(capturable/1, "asks whether SWI permits an assertion"),
     gensym('$static-check-capture:&probe', Space),
     space_module(Space, Module),
     functor(Probe, Name, Arity),
@@ -953,6 +1081,7 @@ unreachable_constructed_goals(Constructed, Blind) :-
 planted_unreachable_goal(metta_capacity_remove_sexp/3).
 
 with_planted_emitter(Goal) :-
+    setup_mutation_fixture(with_planted_emitter/1, "plants an unreachable emitted goal"),
     planted_unreachable_goal(Name/Arity),
     functor(Planted, Name, Arity),
     setup_call_cleanup(
@@ -1112,6 +1241,7 @@ expansion_leaves_run_time_arithmetic(Report) :-
           Report = threw(Error)).
 
 arithmetic_expansion_stays_at_run_time :-
+    setup_mutation_fixture(arithmetic_expansion_stays_at_run_time/0, "plants a throwing expander"),
     expansion_leaves_run_time_arithmetic(Report),
     (   Report == clean
     ->  (   setup_call_cleanup(
