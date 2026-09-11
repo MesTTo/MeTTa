@@ -18,7 +18,7 @@
 %   - `present` iff some budget in 1..64 leaves the predicate undefined after
 %     the cut [measured 2026-09-11: every budget from 1 to 64 does;
 %     command=sh check.sh host-workarounds; fixture=SWI-Prolog 10.1.13;
-%     commit=WORKTREE]
+%     commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

@@ -21,7 +21,7 @@ command=python extensions/python/tools/twin_coverage.py, one twin child under
 the lane's environment, after qcompile of
 lib/minimal_metta_lib/minimal_metta_lib.pl through a symlink to its directory;
 fixture=examples/ch20-extending-the-engine/20-02-metta-written-in-metta/04-minimal_metta.metta;
-commit=WORKTREE].
+commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d].
 
 Assumes:
   - the QLF header of SWI-Prolog 10.1.13 as tests/checks/qlf_header.py reads it
@@ -31,9 +31,9 @@ Assumes:
 Guarantees:
   - every *.qlf under engine/ and lib/ was written in the directory it sits in,
     or the run fails naming the artifact, the directory it was written in and
-    the remedy [tested: tests/checks/check_qlf_provenance_selftest.py; commit=WORKTREE]
+    the remedy [tested: tests/checks/check_qlf_provenance_selftest.py; commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d]
   - a file that is not a readable QLF is a finding, never a traceback
-    [tested: tests/checks/check_qlf_provenance_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_qlf_provenance_selftest.py; commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d]
 Decides:
   - only engine/ and lib/ are walked, the directories the engine's boot
     governs (engine/qlf_boot.pl qlf_files/2) and the only ones a process on

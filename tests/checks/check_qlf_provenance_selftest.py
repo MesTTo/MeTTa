@@ -5,7 +5,7 @@ Guarantees:
     finding naming both directories; the same artifact where it was compiled
     is not; a file that is not a QLF is a finding and not a traceback; an
     empty root is quiet [tested: tests/checks/check_qlf_provenance_selftest.py;
-    commit=WORKTREE]
+    commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d]
 Assumes:
   - swipl on PATH, because the planted artifact is compiled by SWI itself so
     the header the gate parses is the real one and never a re-implementation

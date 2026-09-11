@@ -15,7 +15,7 @@ Guarantees:
   - read_header answers the offsets the two readers splice at and the saved
     path bytes, or raises NotQlfError naming what is missing; it never indexes
     past the data it was given [tested: tests/checks/check_qlf_provenance_selftest.py,
-    tests/checks/check_upstream_parity_selftest.py; commit=WORKTREE]
+    tests/checks/check_upstream_parity_selftest.py; commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d]
 """
 
 from __future__ import annotations
