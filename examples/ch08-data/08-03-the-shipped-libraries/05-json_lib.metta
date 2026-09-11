@@ -1,5 +1,5 @@
 ; Purpose: query JSON objects as spaces, navigate paths, format and exchange files.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/05-json_lib.metta; commit=WORKTREE]
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/05-json_lib.metta; commit=5e212d77a567d6d6c118529e4a226e5047ec2cfd]
 ; Objects retain duplicate fields; arrays are expressions. Each example file
 ; is removed after reading. Decoded object spaces remain caller-owned data.
 !(import! &self (library lib_json))

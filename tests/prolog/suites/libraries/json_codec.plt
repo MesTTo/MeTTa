@@ -6,7 +6,7 @@
 %   shape lib_json uses.
 % Guarantees: explicit formatting agrees with SWI at every tested width;
 % compact conversion retains the same differential and C-admission evidence
-% [tested: json_codec, json_codec_differential; commit=WORKTREE].
+% [tested: json_codec, json_codec_differential; commit=5e212d77a567d6d6c118529e4a226e5047ec2cfd].
 %
 %   Two things this suite does that a plain "does it work" suite would not.
 %   It compares the SEAM against the Prolog implementation inside one process,
