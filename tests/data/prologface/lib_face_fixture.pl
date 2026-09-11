@@ -1,6 +1,6 @@
 % Purpose: provide native signatures and answer bags for the face generator.
 % Guarantees: fixture behavior is checked through the generated MeTTa face
-% [tested: tests/checks/check_prologface_selftest.py; commit=WORKTREE].
+% [tested: tests/checks/check_prologface_selftest.py; commit=9b22993447a5ddba93643895e3025661ba9f693e].
 
 :- module(lib_face_fixture,
           ['face-add'/3, 'face-choice'/2, 'face-count'/2, 'face-count'/3,

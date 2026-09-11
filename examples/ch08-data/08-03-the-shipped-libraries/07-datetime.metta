@@ -1,6 +1,6 @@
 ; Purpose: check every datetime head, explicit zones, records and normalization.
 ; Guarantees: fixed dates make calendar results reproducible
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta; commit=9b22993447a5ddba93643895e3025661ba9f693e].
 
 !(import! &self (library lib_datetime))
 

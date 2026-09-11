@@ -753,7 +753,7 @@ def refresh_source_claims(text: str, root: Path = REPO) -> str:
 
     The checker remains the authority for which prose makes a count claim.
     Missing claim anchors refuse regeneration rather than discarding prose
-    [tested: tests/checks/check_llms_selftest.py; commit=WORKTREE].
+    [tested: tests/checks/check_llms_selftest.py; commit=9b22993447a5ddba93643895e3025661ba9f693e].
     """
     counts = source_counts(root)
     shipped = sorted(path.name for path in (root / "lib").glob("lib_*") if path.is_dir())

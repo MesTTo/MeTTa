@@ -1,6 +1,6 @@
 ; Purpose: retain handwritten equations beside a generated native face.
 ; Guarantees: the generator preserves this equation byte for byte
-; [tested: tests/checks/check_prologface_selftest.py; commit=WORKTREE].
+; [tested: tests/checks/check_prologface_selftest.py; commit=9b22993447a5ddba93643895e3025661ba9f693e].
 
 (: face-square (-> Number Number))
 (@doc face-square (@desc "Square a number through a handwritten equation"))
