@@ -4,7 +4,7 @@
 %   name and fuel envelope from compiled clauses while each form keeps its
 %   source-prefix translation, effects and observation boundary
 %   [tested: source_runnable_envelope, source_observation, fuel; commit=WORKTREE].
-% Guarantees: retire_translated_clauses/2 consumes an ordered set of exact
+% Guarantees: retire_translated_clauses/2 consumes an ordered list of exact
 %   executable references, stopping at the first failed erase or callback
 %   [tested: source_retirement; commit=WORKTREE].
 % Owns resources: a trailed publication context selects a source's journal
@@ -1722,7 +1722,7 @@ forget_translated_from(_, Ref, _) :-
     forget_translated_equation_binding(Ref),
     retractall(translated_from(Ref, _)).
 
-% Retire the selected executable set in its supplied order. Each provenance
+% Retire the selected executable list in its supplied order. Each provenance
 % withdrawal stays adjacent to its erase, so a callback sees the same prefix
 % and a refusal leaves the same unvisited suffix. The traversal is linear:
 % every retained reference still requires its own erase and callbacks.
