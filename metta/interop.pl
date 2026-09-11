@@ -5,7 +5,7 @@
 %   recheck receipts after waking [tested: loader_singleflight; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
 % Assumes: engine/source_loading.pl:loading_loudly/1 collects printed failures
-%   and restores nested loader state [tested: source_loading; commit=WORKTREE].
+%   and restores nested loader state [tested: source_loading; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 % Guarantees: declared determinism is applied to the predicate's implementation
 %   module, including plain host files reached through the core's base chain
 %   [tested: test_a_declared_det_function_that_leaks_a_choice_point_raises,

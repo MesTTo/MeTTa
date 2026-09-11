@@ -20,11 +20,11 @@
 %   - autoload may be OFF (tests/fixtures/no_autoload_boot.pl). The inventory
 %     and freshness predicates depend only on builtins; qlf_load_engine/0
 %     explicitly loads identity.pl and source_loading.pl before the engine
-%     [tested: sh check.sh qlf-freshness no-autoload; commit=WORKTREE].
+%     [tested: sh check.sh qlf-freshness no-autoload; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 % Guarantees:
 %   - a missing runtime source or failed extension directive raises a named
 %     load error after restoring the loader's source module
-%     [tested: tests/shell/test_packaged_cli.sh; commit=WORKTREE].
+%     [tested: tests/shell/test_packaged_cli.sh; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 %   - an edit to ANY engine or lib source, unit files included, defeats
 %     every .qlf on the next boot: SWI's own staleness check covers a
 %     .qlf's immediate source only, and the engine's units are consulted
