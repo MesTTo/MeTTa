@@ -1,7 +1,7 @@
 % Purpose: detect lost numerator signs when the host divides signed zero by infinity.
 % Guarantees: finite division and all four infinite-divisor signs distinguish
 % an active defect, a repaired implementation and an unexpected result.
-% [tested: sh check.sh host-workarounds host-workarounds-selftest; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds host-workarounds-selftest; commit=615e8a68dce996a0c05b3ddddc71b80bc598442d].
 
 :- use_module(library(apply), [maplist/3]).
 

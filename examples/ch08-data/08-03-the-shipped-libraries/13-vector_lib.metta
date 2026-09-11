@@ -1,7 +1,7 @@
 ; Purpose: exercise every Vector head over ordinary numeric expressions.
 ; Guarantees: exact reductions preserve cancellation and extreme finite
 ; directions; component operations and both random arities compose.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/13-vector_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/13-vector_lib.metta; commit=615e8a68dce996a0c05b3ddddc71b80bc598442d].
 ; A vector is an ordinary expression, so existing list operations still apply.
 !(import! &self (library lib_vector))
 
