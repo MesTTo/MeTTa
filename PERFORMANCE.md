@@ -316,4 +316,6 @@ costs still exceed their unchanged bands, and refused comparisons do not
 establish a pass. Live pinned upstream nilbc costs 11,588,342,959 instructions
 and 17,937,607 inferences. Its runtime tuple derivations and callbacks remain
 required. The updated rulings, upstream pins, loads and controls are recorded
-in the [waiver journal](docs/journal/2026-09-08-what-the-waivers-were-paying-for.md#2026-09-11-source-owned-publication).
+in the repository journal
+`docs/journal/2026-09-08-what-the-waivers-were-paying-for.md`, under
+"2026-09-11: source-owned publication".

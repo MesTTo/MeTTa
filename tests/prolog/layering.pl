@@ -15,7 +15,10 @@
 %       lib_tabling into an engine subsystem, is named in the contract below,
 %       or the lane exits nonzero naming caller, callee and the missing line
 %       [tested: test_the_engine_layering_contract_holds_and_a_violation_is_named;
-%       commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
+%       commit=WORKTREE]
+%     - a multifile caller belongs to its actual clause's source subsystem,
+%       independently of which contributing file defines the first clause
+%       [tested: multifile_callers_keep_each_clauses_source_owner; commit=WORKTREE]
 %     - a contract line no call needs any more is reported, so the allow-list
 %       cannot silently widen the surface as the engine changes
 %     - a cross-subsystem call into a subsystem that declares a module reaches
@@ -189,13 +192,13 @@ layer_edge_parts(Callee, Caller, Location) :-
 
 %A multifile head's predicate_property(file/1) names one contributing file,
 %not necessarily the clause being walked. The code walker supplies that
-%clause's exact source location, so caller ownership comes from it; otherwise
-%a callback implemented by lib_tabling is falsely attributed to ext_points
-%and its real library-to-engine reach disappears.
+%clause's exact source location, so caller ownership comes from it. The same
+%rule applies to engine handlers and the reviewed library. SWI supplies this
+%location even with source(false):
+%https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/prolog_codewalk.pl#L208-L220
 caller_goal(Caller, Location, Base, PI) :-
     get_dict(file, Location, File),
-    tabling_source_file(File),
-    Base = 'lib_tabling.pl',
+    contract_source_subsystem(File, Base),
     caller_indicator(Caller, PI),
     !.
 caller_goal(Caller, _, Base, PI) :- engine_goal(Caller, Base, _, PI).
@@ -345,9 +348,6 @@ reaches(duals, filereader, 'records the assertion of a generated dual clause').
 reaches(duals, metta, 'reads the module context, the function registry and the type declarations it duals over').
 reaches(duals, spaces, 'asserts the generated clause into the space it duals for').
 reaches(duals, translator, 'duals are generated FROM translated clauses, so it reads the translator\'s metadata and reuses its expression compiler').
-reaches(ext_points, filereader, 'a function-changed handler recompiles the affected source').
-reaches(ext_points, tracer, 'the tracer is the shipped consumer of the function-changed seam').
-reaches(ext_points, translator, 'names the compiled predicate a seam is about, and asks whether a function uses super').
 reaches(filereader, identity, 'captures portable image identity and advances the receipt clock').
 reaches(filereader, metta, 'a load runs forms, which is the engine core\'s job').
 reaches(filereader, materialize, 'source prefixes and completed loads prepare counted relations inside their rollback boundary').
@@ -394,6 +394,7 @@ reaches(spaces, ext_points, 'announces function changes and asks whether an atom
 reaches(spaces, filereader, 'a write records or forgets what its source assertion supports').
 reaches(spaces, metta, 'a space write reaches the core\'s registries, contract atoms and error vocabulary').
 reaches(spaces, materialize, 'clearing or releasing a space retires its counted relations transactionally').
+reaches(spaces, parser, 'error messages render rejected atoms through the parser printer').
 reaches(spaces, specializer, 'a changed function invalidates the specializations built over it').
 reaches(spaces, support_graph, 'a cleared space forgets the support edges of its module').
 reaches(spaces, translator, 'storing an equation compiles it').
@@ -401,7 +402,6 @@ reaches(spaces, translator_rules, 'a release retires global translator registrat
 reaches(spaces, type_rules, 'equation compilation holds the typing policy stable while installing translated clauses, and a release retires the user typing rules declared in the module it is clearing').
 reaches(specializer, filereader, 'records and forgets the assertion of a generated specialization').
 reaches(specializer, metta, 'reads the module and space context and the type declarations it specializes over').
-reaches(specializer, materialize, 'the shared support-invalidation action retires materialized relations as well as specializations').
 reaches(specializer, parser, 'a minted specialization name must be a symbol the reader reads back').
 reaches(specializer, spaces, 'a specialization is stored and compiled into the space it belongs to').
 reaches(specializer, support_graph, 'a specialization is a derived artifact with support edges').
@@ -459,10 +459,12 @@ reaches(type_rules, translator, 'a changed typing rule clears the translation ca
 %
 %   source_positions rejoins on 2026-09-10: common origin properties use its
 %   existing position projection. The observer itself remains a leaf.
+%   Clause-location attribution removes ext_points and tracer on 2026-09-12:
+%   their apparent cycle edges belonged to handlers defined in other files.
 
-tangle([duals, ext_points, filereader, materialize, metta, parser,
+tangle([duals, filereader, materialize, metta, parser,
         source_positions, spaces, specializer,
-        support_graph, tracer, translator, translator_rules, type_rules]).
+        support_graph, translator, translator_rules, type_rules]).
 
 %%%% What the lane checks %%%%
 

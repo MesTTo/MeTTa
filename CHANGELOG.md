@@ -49,6 +49,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Engine call-graph checks attribute multifile calls to each clause's source
+  file. Handler implementations no longer create false cross-module reaches
+  or enlarge the declared dependency cycle.
+
 - Source cleanup and specialization invalidation retire ordered groups of exact
   artifact references. Transactional native retirement reuses its receipt
   owner while retaining every per-reference erase and callback.
