@@ -1,6 +1,9 @@
 % Guarantees: working_dir/1, active_source_load/1, active_source_program/1 and
 %   source_recompile_context/2 read stacks scoped by metta_with_trailed/3
-%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%   [tested: trailed_scopes; commit=WORKTREE].
+% Guarantees: active_source_load/1 and with_working_directory/2 are exported
+%   to their compiler and manifest consumers [tested: engine_layering;
+%   commit=WORKTREE].
 %
 % Purpose: read MeTTa source, split it into complete top-level forms, and
 % dispatch each parsed form to the evaluator.
@@ -302,17 +305,19 @@
             %and engine/translator.pl asks whether a source load is active
             %before it defers a runnable's definition.
             load_metta_file/2,
+            active_source_load/1,
             active_source_program/1,
             source_definition_arrived/1,
             process_metta_string/2,
             %source_pending_definition/2 is the translator's question about a
             %definition later in the file it is compiling; translated_from/2 is
             %the compiled clause's source equation, which the specializer and
-            %the tracer both read; working_dir/1 is the relative-path base a
-            %parity driver asserts from outside.
+            %the tracer both read; working_dir/1 reads the relative-path base
+            %that a driver scopes through with_working_directory/2.
             source_pending_definition/2,
             translated_from/2,
             working_dir/1,
+            with_working_directory/2,
             %The engine-wide print-suppression flag, READ by
             %engine/translator.pl, engine/specializer.pl and engine/metta.pl as
             %well as by the three printers here, so there has to be exactly one
