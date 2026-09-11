@@ -35,6 +35,9 @@
 %   - every case CHECKS its own result before its counters are printed, so a
 %     case that stopped doing its work fails instead of reporting a cheaper
 %     number [tested: engine/bench.sh; commit=c41b54d69e951882e5075393f851a33438247372].
+%   - constructor rows reduce the same sum through a sorted projection, an
+%     untyped projection and a literal control, checking the final sum
+%     [tested: translator_constructors; commit=WORKTREE].
 %   - the measured region excludes setup and excludes the check, and when perf
 %     supplies its control descriptors the enabled window brackets exactly the
 %     same region [tested: engine/bench.sh; commit=c41b54d69e951882e5075393f851a33438247372].
@@ -103,6 +106,11 @@ bench_case(translate,      function,  49).
 bench_case(match,          query,    600).
 bench_case('match-skew',   query,     20).
 bench_case(evaluate,       reduction, 50000).
+bench_case(Case, reduction, 10000) :- constructor_case(Case).
+
+constructor_case('constructor-control').
+constructor_case('constructor-sorted').
+constructor_case('constructor-plain').
 
 % bench_whole_process(Name). Whether a case's measured region CONTAINS the
 % engine load, and so scales with the length of THIS CHECKOUT'S path: the load
@@ -128,6 +136,7 @@ bench_source('tests/data/prelude-spec.metta').
 bench_source('lib/lib_pln/lib_pln.metta').
 bench_source('examples/ch18-performance/18-01-larger-workloads/01-scale.metta').
 bench_source('examples/ch18-performance/18-01-larger-workloads/02-holbenchmark.metta').
+bench_source('examples/ch09-types/24-sorted_constructors.metta').
 
 %%%% Booting the engine %%%%
 %
@@ -233,6 +242,13 @@ bench_setup('match-skew', Space) :- bench_setup_scale(Space).
 % pragma raises the evaluator's 100,000-reduction fuel the way the corpus file
 % raises it for its own million-element run.
 bench_setup(evaluate, Space) :- bench_setup_hol(Space).
+bench_setup(Case, '&bench-constructor') :-
+    constructor_case(Case),
+    bench_boot_quiet,
+    bench_text('examples/ch09-types/24-sorted_constructors.metta', Text),
+    bench_definitions(Text, Definitions),
+    process_metta_string(Definitions, _, '&bench-constructor'),
+    once(evalc([Case, 1, 0], '&bench-constructor', 3)).
 
 bench_setup_parse(Text) :-
     bench_boot_quiet,
@@ -297,6 +313,9 @@ bench_work('match-skew', Space, Rows) :-
 bench_work(evaluate, Space, Result) :-
     process_metta_string("!(let $t (map-flat (+ 1) (range 50000)) (length $t))",
                          Result, Space).
+bench_work(Case, Space, Result) :-
+    constructor_case(Case),
+    once(evalc([Case, 10000, 0], Space, Result)).
 
 % A usable engine, not merely a loaded one: the check evaluates through the
 % same door a program uses.
@@ -346,6 +365,7 @@ bench_check(match, rows(First, Both, Relation)) :-
     length(First, 1), length(Both, 1), length(Relation, 1).
 bench_check('match-skew', Rows) :- length(Rows, 5000).
 bench_check(evaluate, [50000]).
+bench_check(Case, 30000) :- constructor_case(Case).
 
 bench_prelude_forms(Reader, Count) :-
     bench_text('tests/data/prelude-spec.metta', Text),

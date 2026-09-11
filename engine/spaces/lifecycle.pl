@@ -6,6 +6,9 @@
 %   from database snapshots [tested: lib_import_lifecycle,
 %   extensions/python/tests/ch05_equations_and_evaluation/test_reload.py; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: decode stored atoms and manage source, subscription, reaction, table, and clear lifecycles
+% Guarantees: constructor declarations invalidate retained sort proofs,
+%   including declarations arriving through the bulk atom door
+%   [tested: run_tests(translator_constructors); commit=WORKTREE].
 % Guarantees: metta_add_atom/4 and ensure_new_batch_declaration/3 validate
 %   splice syntax before storage, including alias-installed observers
 %   [tested: variadic_arrows,
@@ -1975,30 +1978,41 @@ metta_add_atom(Space, Term, Token, true) :-
 %program behaved differently and nothing said why. The engine already knows how
 %to recompile what a change made stale; the declaration route simply never told
 %it [tested: a_late_type_declaration_repairs_its_call_sites].
-metta_add_atom(Space, Term, Token, true) :- Term = [':', FAtom, _], atom(FAtom),
-                                     fun(FAtom), !,
-                                     %Read BEFORE anything is stored or evicted,
-                                     %because it is the state the already-compiled
-                                     %clauses were built under.
-                                     result_finality(FAtom, Before),
-                                     %A declaration written into &self replaces the
-                                     %prelude's for the same name, the user-wins rule
-                                     %evict_prelude_definition/1 documents; the
-                                     %recompile below then re-reads call sites under
-                                     %the user's masking.
-                                     (   Space == '&self'
-                                     ->  retract_prelude_declarations(FAtom)
-                                     ;   true
-                                     ),
-                                     store_atom(Space, Term, Token),
-                                     space_module(Space, DeclModule),
-                                     announce_declaration_changed(DeclModule,
-                                                                  FAtom, Before).
+% A variable subject can govern every head. It therefore invalidates the
+% module's retained definitions and runnable plans as one declaration change.
+metta_add_atom(Space, Term, Token, true) :-
+    Term = [':', Subject, _], var(Subject), !,
+    space_module(Space, Module),
+    with_typing_policy_stable(transaction(
+        ( store_atom(Space, Term, Token), anonymous_declaration_changed(Module) ))).
+metta_add_atom(Space, Term, Token, true) :-
+    Term = [':', FAtom, _], atom(FAtom), !,
+    space_module(Space, Module),
+    with_typing_policy_stable(transaction(with_metta_module(Module, spaces:
+        ( result_finality(FAtom, Before),
+          % A declaration in &self replaces the prelude's for the same name.
+          ( Space == '&self', fun(FAtom)
+          -> retract_prelude_declarations(FAtom)
+          ; true ),
+          store_atom(Space, Term, Token),
+          announce_declaration_changed(Module, FAtom, Before) )))).
 metta_add_atom(Space, Term, _Token, true) :- seam:foreign_space(Space), !,
                                      foreign_write(Space, add,
                                                    seam:foreign_add(Space, Term)).
 metta_add_atom(Space, Term, Token, true) :- add_sexp(Space, Term, Token, Ref),
                                      record_source_atom_assertion(Ref).
+
+% A wildcard declaration can govern any operation. Shared declarations also
+% govern other spaces, so retire every retained definition in its scope.
+anonymous_declaration_changed(Module) :-
+    findall(Context,
+            ( support_function_module(_, Context),
+              ( metta_self_module(Module)
+              ; Context == Module
+              ; metta_exec_module_descendant(Module, Context) ) ),
+            Contexts0),
+    sort([Module|Contexts0], Contexts),
+    forall(member(Context, Contexts), typing_policy_changed(Context)).
 
 %A variant of Term must UNIFY with a fresh copy of Term, so asking the store
 %for that copy decides the common case, a declaration nothing else in the space
@@ -2053,9 +2067,8 @@ batch_declarations_unique(Space, [Term|Terms], Earlier) :-
 %Whether every atom in a batch stores and does nothing else, which is the only
 %kind a bulk crossing may carry. It repeats metta_add_atom/3's first two clause
 %heads, and they are repeated rather than shared for the reason given there.
-%The same traversal preflights otherwise-plain type declarations against both
-%the space and earlier batch members. This keeps the one-crossing fast path
-%without letting two declarations bypass the single-atom refusal.
+%Declarations also change retained code, so their batch takes the ordinary
+%semantic door after batch_declarations_unique/2 has checked the whole input.
 %
 %Written as clause heads and not as a test called per atom, which is measured:
 %head unification costs no inference where a call costs one, and over a whole
@@ -2068,17 +2081,7 @@ atoms_store_only(_, [], _).
 atoms_store_only(_, [[=|_]|_], _) :- !, fail.
 atoms_store_only(_, [[from|_]|_], _) :- !, fail.
 atoms_store_only(_, [[internal|_]|_], _) :- !, fail.
-atoms_store_only(_, [[':', _, Type]|_], _) :-
-    nonvar(Type), Type = [Alias|_], Alias == 'Alias', !, fail.
-atoms_store_only(_, [[':', _, 'DontEvalType']|_], _) :- !, fail.
-atoms_store_only(_, [[':', _, Type]|_], _) :-
-    metta_annotated_type(Type), !, fail.
-atoms_store_only(_, [[':', FAtom, _]|_], _) :-
-    atom(FAtom), fun(FAtom), !, fail.
-atoms_store_only(Space, [Term|Terms], Earlier) :-
-    Term = [':', _, _], !,
-    ensure_new_batch_declaration(Space, Term, Earlier),
-    atoms_store_only(Space, Terms, [Term|Earlier]).
+atoms_store_only(_, [[':', _, _]|_], _) :- !, fail.
 atoms_store_only(Space, [_|Terms], Earlier) :-
     atoms_store_only(Space, Terms, Earlier).
 

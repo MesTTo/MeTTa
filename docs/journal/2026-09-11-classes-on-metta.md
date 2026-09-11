@@ -197,3 +197,74 @@ The user's point holds and is already the design: a `yield` is one nondeterminis
 3. The dunder heads and the type-directed operator lowering; keyword class patterns; `with` on context managers; iterator classes.
 4. The decorator rows the 2026-09-06 thread ordered (cache, cached_property, total_ordering, singledispatch, abstractmethod/Protocol, override/final).
 5. The five examples with twins, the corpus records, the reference pages, README, `llms.txt`, CHANGELOG, this thread's closing section with the measured numbers.
+
+## 2026-09-11: constructor checks and sorted projections
+
+Tried: the original loop forms with one warm call, then 100, 1,000 and 10,000 iterations, through `MeTTa.stats()` -> accessor deltas of 156 inferences for declared `Point`, 1 for undeclared `Pt`, and 1 for quoted `Point`; `norm` costs 171. The same deltas hold at every size. `profile/2` over 10,000 typed iterations records 10,000 calls to `metta_bad_argument_error/3` and `metta_operation_parameters/6`, and 20,000 calls to `metta_argument_type_origin/3` and `check_argument_type/3`. The old 168/15 table includes cold translation work.
+
+Rejected: memoising complete terms in a separate global registry. The translator already retains the constructed term and owns dependency invalidation; a second cache would duplicate its lifetime and transaction rules. Removing only the constructor check also loses to the requirement: one accessor call still equals the untyped call's one inference.
+
+Decided: compile the constructor's declaration into argument checks at construction, using the existing literal discharge and intrinsic tests. Keep the original written-call diagnostic and the original route for untracked or policy-unstable code. Resolve a projection from a sorted ground constructor only when one matching structural equation returns a head variable and its result is already data. Keep duplicate matches, custom dispatch, observations, and executable results on their ordinary route. Source occurrence dependencies own invalidation; no additional stored representation is introduced.
+
+Source: Maude `46e89557efc7791d01b3399f10df7b30d615972c`, `src/FreeTheory/freeDagNode.cc:FreeDagNode::computeBaseSortForGroundSubterms` and `src/Interface/dagNode.hh:DagNode::reduce`. Ground subterms acquire sort information; a reduced node retains that information. This engine applies that principle to its retained compiled terms and source dependencies. The projection rule is partial evaluation of a finite structural equation, as the existing scalar folder is partial evaluation of a finite primitive.
+
+Open: verification of construction errors, shared type variables, declaration and equation withdrawal, policy changes, inherited ownership, duplicate answers, and the strict typed-versus-untyped cost comparison.
+
+## 2026-09-11: constructor declaration invalidation
+
+Tried: the integrator's unchanged cold loop through the worktree binding -> 18.25 inferences per sorted accessor above the empty loop. Warm projection elimination passed, but first-call translation still exceeded the original untyped 15. `MeTTa.profile()` showed the accessor's translation and source publication even though the caller erased its call.
+
+Tried: resolve a wholly deferred accessor from its stored equation bag before forcing compilation -> the cold cost test passed, but `a_changed_constructor_equation_recompiles_its_consumers` failed with `Assertion: []==[3]` after adding and withdrawing a constructor equation. Keeping the accessor deferred changes when its head is classified as data or as a call.
+
+Rejected: bypassing accessor materialization, because it changes the existing arrival-order semantics. Revisit only if that language rule changes. Sort-proof reuse during compilation must preserve materialization.
+
+Tried: warming `read-point` before replacing `(: Point (-> Number Number Point))` with its String-first arrow returned `3`, while the untracked call refused the Number. The declaration mutation doors notified the support graph only when `fun(Point)` held. A constructor has no equation, so its retained sort proof was never retired. The failing regression is `translator_constructors:a_changed_arrow_recompiles_constructor_checks`.
+
+Decided: named declarations take the semantic declaration door whether their subject has an equation or not. Bulk admission applies the same rule. Declaration subtraction captures affected names and marker types before removal, then invalidates them in the same transaction. Variable subtraction patterns use that same captured set. The existing graph still owns all proof lifetimes.
+
+Tried: the first equation-mutation test changed a deferred accessor before compiling it and encountered `Unknown procedure: '$metta_exec:&metta-space-43':'Point'/3` after withdrawal. A warmed control with projection folding disabled agrees with the optimized route: constructor equation arrival changes `[3]` to `[]`; withdrawal restores `[3]`. The regression now warms the accessor before changing its constructor, so it tests retained-code invalidation and preserves the existing source-order rule for head patterns.
+
+Tried: an accessor declared to accept String over a Point pattern exposed premature result binding: its argument refusal became `[]` because the folded result constrained the diagnostic alternative. Resolve a projection only after proving its method input contract as well as the constructor's. Result checks still use the ordinary typed-call continuation. Alias refusals retain their source spelling and `TypeExpansion` evidence. A `from` reference currently imports callable heads and their metadata; the home-sort test calls the imported method whose body constructs the value at home.
+
+Tried: `(: $head (-> String Number Point))` after warming a constructor left its old sort proof live. An anonymous declaration governs every matching head, including an accessor's arity, so the regression calls a retained constructor body directly. The original accessor-based expected error was wrong: its live result is `IncorrectNumberOfArguments` on `point-x`.
+
+Decided: anonymous declarations invalidate retained definitions in their visible scope; shared declarations include dependent spaces. All declaration batches take the semantic mutation door. Native withdrawal reads the stored occurrence before interpreting its subject, because unification with a named removal pattern would otherwise hide a wildcard. Named declaration publication and repair share the typing lock and transaction, and read finality in the declaration's home module.
+
+Tried: the complete engine suite passed every functional suite but rejected the new translator dependency with `translator reaches metta_engine:metta_operation_parameters/4, which metta_engine's module does not export; add it to the module's export list or change the caller`. Exporting the authoritative parameter projection repaired the layering suite, with all seven tests passing.
+
+Tried: enclosing publication in `with_metta_module/2` raised `Unknown procedure: metta_engine:store_atom/3`. The context setter does not capture its caller's Prolog module. Its storage continuation now names `spaces:` explicitly while the dynamic MeTTa context selects the declaration's home.
+
+Tried: `sh engine/test.sh suites/translator/constructors.plt` passes 26 tests and 37 subtests, including shared wildcard declarations and conservative constructor checks called through `from`. Warm `MeTTa.stats()` loops at 100, 1,000 and 10,000 iterations measure the following marginal inferences above the empty loop. Construction checks no longer run for proved ground fields.
+
+| Operation | Before | After |
+|---|---:|---:|
+| Typed field projection | 156 | 0 |
+| Untyped field projection | 1 | 1 |
+| Quoted field projection | 1 | 2 |
+| Typed `norm` method | 171 | 16 |
+
+The quoted form still preserves its answers and performs no argument checks in the profile; its source-run inference count increased by one. Profiling the retained quoted body records 10,000 subtraction calls and 10,001 equality calls, with no constructor checker. The strict typed-versus-untyped claim is guarded by the test at all three sizes. The untracked checking route now also fixes its diagnostic to the constructor's home.
+
+Found: an imported method entered its defining predicate but constructor diagnostics read the caller's ambient declaration table. Its invalid Point became ordinary data when the caller had no Point arrow. Constructor check fallbacks and diagnostics now retain the module where their sort was compiled. Intrinsic tests and discharged ground constructions still carry no runtime scope switch. All 23 constructor tests with 34 generated subtests pass. The full engine run reached every suite and reported only a missing module export for the new reader use; `metta_operation_parameters/4` is now exported for the translator.
+
+## 2026-09-11: construction proof reuse and final arrow cost
+
+Decided: preserve accessor materialization. Reuse the already selected, normalized arrow for intrinsic literal fields, and retain successful ground constructions in the existing clause-local static parameter environment. A projection consumes that construction proof; quoted inputs retain the full check. Compilation restores its parent environment on success, failure and exception. Before reading a nested constructor's declaration, rule out a scalar first argument, which cannot satisfy the existing nested-boundary proof.
+
+Tried: the integrator's complete `probe-classes.py` with this worktree's binding, then the same source with only the Point arrow removed. The first 100 accessor calls cost 14.80 inferences each above the empty loop with the arrow and 14.91 without it. Both empty controls cost 48.83. The typed call is below the original 15 threshold and its current untyped control. At 100, 1,000 and 10,000 warmed iterations, typed, untyped and quoted projections cost 0, 1 and 2 respectively; norm costs 16 above the control. The quoted count remains one above its pre-change pin; no repeated constructor checker appears in its profile.
+
+Tried: `sh engine/test.sh` -> exit 0; `translator_constructors` contains 29 tests plus 37 generated subtests. The new exception test checks construction-proof cleanup before changing the arrow. The cold and warm comparisons share one loop fixture. Clone review kept the repeated mutation/error golden local to its two behavioral tests; production code has no detected clone.
+
+Tried: `sh engine/bench.sh constructor-control constructor-sorted constructor-plain` -> all three pass. Each row measures 10,000 reductions after loading and one warm call, in three fresh processes per counter with six native engine objects, two C example objects, two MORK objects and warm QLF. All inference samples agree; instruction minima are below.
+
+| Case | Inferences | Instructions |
+|---|---:|---:|
+| Literal control | 60079 | 32243459 |
+| Sorted projection | 60079 | 32323843 |
+| Untyped projection | 70079 | 40623831 |
+
+The new corpus example has seven assertions and a Python twin. Its full-example pin is 19,782 inferences after construction proof reuse, down 443 from 20,225. Only the three new engine benchmark rows and this new twin are pinned here. Existing benchmark allowances and unrelated pins stay as they were.
+
+Tried: the final corpus run and its twin -> seven of seven assertions, equal stored content, 21,949 MeTTa inferences and 19,782 Python inferences, zero findings. `jscpd --format prolog --formats-exts 'prolog:pl,plt' --min-lines 5 --min-tokens 50` reports one seven-line test clone, 1.38% over the two new Prolog files; no production clone. The duplicated mutation and error golden remains beside each test because the two cases change different declaration scopes.
+
+Tried: the artifact battery -> 23 passing lanes and two failures, `llms` and `llms-selftest`. The new file and translator unit require source-table counts of 325 and seven. The five Node path findings name generated browser artifacts absent from this worktree; `npm --prefix extensions/node run build:browser --silent` creates them from the existing build scripts. With those counts and artifacts, `sh check.sh llms llms-selftest example-origins evidence provenance-pin-selftest` passes all six selected or implied lanes. The attribution check uses `METTA_UPSTREAM=/home/user/Dev/PyPeTTa1/PeTTa-base` and reports 143 derived and 203 original programs. The llms negative control detects all 64 planted cases. No allowances were widened.

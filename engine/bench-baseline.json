@@ -1,5 +1,32 @@
 {
   "benchmarks": {
+    "constructor-control": {
+      "inferences": 60079,
+      "instruction_noise_percent": 1.0,
+      "instructions": 32243459,
+      "operations": 10000,
+      "unit": "reduction",
+      "wall_seconds_per_operation": 2.214e-07,
+      "measures": "10000 reductions adding the same literal field. Definition loading and one warm call precede the measured region. The sorted constructor reuses its construction proof and resolves its singleton structural projection; the untyped accessor retains its call. [measured: 60079 inferences and 32243459 instructions; command=sh engine/bench.sh constructor-control constructor-sorted constructor-plain; fixture=three fresh processes per counter, six native engine objects, both C example objects, both MORK objects, warm QLF; commit=WORKTREE]."
+    },
+    "constructor-sorted": {
+      "inferences": 60079,
+      "instruction_noise_percent": 1.0,
+      "instructions": 32323843,
+      "operations": 10000,
+      "unit": "reduction",
+      "wall_seconds_per_operation": 1.98e-07,
+      "measures": "10000 reductions adding the same sort-proved field projection. Definition loading and one warm call precede the measured region. The sorted constructor reuses its construction proof and resolves its singleton structural projection; the untyped accessor retains its call. [measured: 60079 inferences and 32323843 instructions; command=sh engine/bench.sh constructor-control constructor-sorted constructor-plain; fixture=three fresh processes per counter, six native engine objects, both C example objects, both MORK objects, warm QLF; commit=WORKTREE]."
+    },
+    "constructor-plain": {
+      "inferences": 70079,
+      "instruction_noise_percent": 1.0,
+      "instructions": 40623831,
+      "operations": 10000,
+      "unit": "reduction",
+      "wall_seconds_per_operation": 3.427e-07,
+      "measures": "10000 reductions adding the same untyped field projection. Definition loading and one warm call precede the measured region. The sorted constructor reuses its construction proof and resolves its singleton structural projection; the untyped accessor retains its call. [measured: 70079 inferences and 40623831 instructions; command=sh engine/bench.sh constructor-control constructor-sorted constructor-plain; fixture=three fresh processes per counter, six native engine objects, both C example objects, both MORK objects, warm QLF; commit=WORKTREE]."
+    },
     "boot": {
       "checksum_validation_repin_comment": "RE-PINNED 2026-09-08: 301330 to 301230 after sharing the two lowercase hexadecimal validators and removing their content-dependent branches. Equal-length, fully provisioned control at f9c1ba822 reads 301330; f5069cade33a5afe8cc4555e7f40fefc7db42bc1 reads 301230 in every fresh process. Other six inference rows are unchanged. Boot retired instructions 965089743 remain inside the existing 965561590 pin and its one-percent band, which is retained. The old validator fails spaces_token_images:hash_header_cost_is_content_independent at [198,390]; the shared validator passes. [measured 2026-09-08: min of three fresh processes after clearing and warming QLF; command=sh engine/bench.sh --counter-only; fixture=same 29-character checkout and native artifacts; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4]",
       "catalog_types_its_own_words_repin_comment": "RE-PINNED 2026-09-08 at the feat/the-catalog-types-its-own-words merge (1a3579fa), 250573 to 274587 (+24014, +9.58%), one cause: the engine now writes 251 (: member Type) atoms, 2 (:< ...) fidelity edges and the sibling rows (vocabulary-type, vocabulary-order, vocabulary-open, wire-tag) into &metta from its own initialization, where the Python contract used to write twelve of the member sets after boot outside this row's window. About 95 inferences per atom through the ordinary add door, paid once per process. evaluate and translate read -1 each, inside the allowance. A static-clause form of the type atoms would cost this row nothing and is a candidate for the cross-engine performance package.",
@@ -107,6 +134,7 @@
     "c_reader": true,
     "c_writer": true,
     "workloads": {
+      "examples/ch09-types/24-sorted_constructors.metta": "a400b4b3bdf470e8",
       "examples/ch18-performance/18-01-larger-workloads/01-scale.metta": "0dd3eb4503a88781",
       "examples/ch18-performance/18-01-larger-workloads/02-holbenchmark.metta": "f80d38fdc8b0000c",
       "lib/lib_pln/lib_pln.metta": "a04d5ba0065c589c",

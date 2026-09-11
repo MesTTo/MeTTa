@@ -128,6 +128,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Typed data constructors discharge proved argument checks during retained
+  compilation. A checked ground constructor's unique structural projection
+  resolves at compilation and runs faster than its untyped counterpart.
+  Constructor declaration changes and withdrawal invalidate the retained
+  proof; imported methods report constructor refusals from their defining
+  space. The sorted-constructor corpus example and three engine benchmark
+  rows compare the typed path, untyped path and literal control.
+
 - The dependency gate derives local tool modules from their source directory
   and recognises the reference generator's development dependency. The parity
   fixture producer uses the shared process bound. The syntax introduction

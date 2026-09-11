@@ -1,6 +1,9 @@
 % Guarantees: resolved_equation_removal/4 honors exact source occurrence selection
 %   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: validate foreign-provider capabilities and route foreign and native space operations
+% Guarantees: declaration subtraction invalidates the affected names before
+%   returning, including constructor arrows and variable removal patterns
+%   [tested: run_tests(translator_constructors); commit=WORKTREE].
 % Guarantees: the native bulk loop calls add_sexp_in/5 directly, retaining
 %   unique occurrence tokens and the same duplicate bag as public writes
 %   [tested: spaces_tokens:public_and_bulk_writes_preserve_tokens_and_duplicate_bags;
@@ -1678,8 +1681,8 @@ metta_remove_declaration_atom(Space, Term, Removed) :-
     with_typing_policy_stable(
         transaction(
             ( findall(Name,
-                      ( copy_term(Term, Probe), Probe = [':', Name, _],
-                        match_stored(Space, Probe, Name, Name), atom(Name) ),
+                      ( stored_declaration_match(Space, Term, Name, _),
+                        atom(Name) ),
                       Names0),
               sort(Names0, Names),
               metta_remove_atom_raw(Space, Term, Removed),
@@ -1708,46 +1711,45 @@ metta_remove_atom_raw(Space, Term, Removed) :-
         announce_function_changed(Module, Scalar)
     ;   true
     ).
+% Capture names and marker changes before subtraction. Constructor arrows
+% govern retained code just as function arrows do; an unbound removal pattern
+% must invalidate every declaration it actually withdraws.
 metta_remove_atom_raw(Space, Term, Removed) :-
-    Term = [':', Type, Marker],
-    atom(Type),
-    ( Marker == 'DontEvalType' ; var(Marker) ),
-    !,
-    unstore_atom(Space, Term, Removed),
-    (   Removed == true
-    ->  space_module(Space, DeclModule),
-        ( fun(Type) -> announce_function_changed(DeclModule, Type) ; true ),
-        type_marker_changed(DeclModule, Type)
-    ;   true
-    ).
-metta_remove_atom_raw(Space, Term, Removed) :-
-    Term = [':', Type, Marker],
-    var(Type),
-    ( Marker == 'DontEvalType' ; var(Marker) ),
-    !,
-    findall(MarkerType,
-            ( match_stored(Space,
-                           [':', MarkerType, 'DontEvalType'], MarkerType, _),
-              atom(MarkerType) ),
-            MarkerTypes0),
-    sort(MarkerTypes0, MarkerTypes),
-    unstore_atom(Space, Term, Removed),
-    (   Removed == true
-    ->  space_module(Space, DeclModule),
-        forall(member(MarkerType, MarkerTypes),
-               type_marker_changed(DeclModule, MarkerType))
-    ;   true
-    ).
-%A declaration decides how call sites compile, so taking one away leaves them
-%stale exactly as adding one did, and for the same reason: the argument that
-%arrived as written now arrives evaluated. The write path learned this and the
-%removal path did not.
-metta_remove_atom_raw(Space, Term, Removed) :- Term = [':', F, _], atom(F), fun(F), !,
-                                           result_finality(F, Before),
-                                           unstore_atom(Space, Term, Removed),
-                                           space_module(Space, DeclModule),
-                                           announce_declaration_changed(DeclModule, F, Before).
+    Term = [':', _, _], !,
+    space_module(Space, Module),
+    with_typing_policy_stable(transaction(
+        ( findall(Subject,
+                  ( stored_declaration_match(Space, Term, Name, Type),
+                    ( var(Name) -> Subject = all
+                    ; atom(Name),
+                      with_metta_module(Module, spaces:result_finality(Name, Before)),
+                      ( Type == 'DontEvalType' -> Marker = true ; Marker = false ),
+                      Subject = name(Name, Before, Marker) ) ),
+                  Subjects0),
+          sort(Subjects0, Subjects),
+          unstore_atom(Space, Term, Removed),
+          ( Removed == true
+          -> ( memberchk(all, Subjects) -> anonymous_declaration_changed(Module)
+             ; true ),
+             forall(member(name(Name, Before, Marker), Subjects),
+                    ( with_metta_module(Module,
+                          spaces:announce_declaration_changed(Module, Name, Before)),
+                      ( Marker == true -> type_marker_changed(Module, Name)
+                      ; true ) ))
+          ;  true ) ))).
 metta_remove_atom_raw(Space, Term, Removed) :- unstore_atom(Space, Term, Removed).
+
+% Matching binds stored variables. Re-read the occurrence itself so removing
+% (: Point $type) can still recognize a stored (: $head $type) as a wildcard.
+stored_declaration_match(Space, Pattern, Name, Type) :-
+    \+ seam:foreign_space(Space), !,
+    copy_term(Pattern, Probe),
+    metta_native_pair(Space, Probe, _, Ref),
+    stored_atom_of_ref(Ref, Space, [':', Name, Type], _).
+stored_declaration_match(Space, Pattern, Name, Type) :-
+    match_stored(Space, [':', N, T], [':', N, T], Stored),
+    unifiable(Pattern, Stored, _),
+    Stored = [':', Name, Type].
 
 type_marker_changed(Module, Type) :-
     findall(Function-Context,
