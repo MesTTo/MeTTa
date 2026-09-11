@@ -9,6 +9,12 @@
 % Guarantees: withdraw_source_load/3 preserves equal atoms owned by other loads
 %   or the caller [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
+% Owns resources: with_source_publication_context/2 restores its trailed
+%   context on exit, failure and exception
+%   [tested: source_publication; commit=WORKTREE].
+% Guarantees: source and recompile scopes resolve their owner selection once;
+%   each artifact, stored atom and support group still writes its original
+%   indexed journal row immediately [tested: source_publication; commit=WORKTREE].
 % Assumes: engine/filereader.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/filereader.pl's implementation module and original load order;
 %   each source load is atomic with every dependent recompile it triggers;
@@ -943,15 +949,16 @@ load_imported_metta_source_groups_impl(Filename, Groups, Space) :-
 :- meta_predicate with_source_load(+, +, 0).
 with_source_load(CanonPath, Space, Goal) :-
     gensym(source_load_, LoadId),
+    source_publication_load_context(LoadId, LoadId, Context),
     setup_call_catcher_cleanup(
-        asserta(active_source_load(LoadId), ContextRef),
-        once(materialize:with_source_materialization_batch(
+        true,
+        with_source_publication_context(Context,
+          once(materialize:with_source_materialization_batch(
                  Space,
                  filereader:( call(Goal), run_source_repairs(LoadId) ),
-                 filereader:publish_source_load(CanonPath, Space, LoadId))),
+                 filereader:publish_source_load(CanonPath, Space, LoadId)))),
         Catcher,
-        ( erase(ContextRef),
-          retractall(source_load_repair(LoadId, _)),
+        ( retractall(source_load_repair(LoadId, _)),
           retractall(support_recompile_pending(LoadId, _, _)),
           retractall(source_load_digest(LoadId, _, _)),
           ( Catcher == exit -> true
@@ -1227,41 +1234,53 @@ run_with_loading_marker(Marker, Goal) :-
         Catcher,
         ( Catcher == exit -> true ; erase(Ref) )).
 
-record_recompiled_source_assertion(Owners, Ref) :-
-    forall(member(LoadId, Owners),
-           assertz(source_load_assertion(LoadId, artifact, Ref))).
-%Both recorders unwrap the deferral door's ownership pin: a clause a force
-%materialises belongs to the source that DEFINED it, so the pin names that
-%closed load and the journal row lands there; a none owner journals
-%nowhere, exactly as its arrival did. The row keeps this tree's KIND
-%column either way.
-% Recompiled metadata belongs to the executable clause's original owners.
-% The same precedence already governs grouped support-graph assertions below.
-% [tested: filereader_source_reload:recompiled_metadata_keeps_the_equations_source_owner; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4]
+% Resolve the journal's owner once at scope entry. A recompile replaces an
+% artifact for its original owners; a nested pin supersedes that context
+% unless it names the same marked load. Stored atoms always belong to the
+% active source or pin, independently of recompile ownership.
+source_publication_load_context(Load, Marker,
+        source_context([Marker|Loads], Recompiles, Owners, Load)) :-
+    b_getval('$metta_source_publication', source_context(Loads, Recompiles, _, _)),
+    ( Recompiles = [recompile(load(Marker), Recompiled)|_] -> Owners = Recompiled
+    ; Load == none -> Owners = []
+    ; Owners = [Load] ).
+
+active_source_load(Load) :-
+    b_getval('$metta_source_publication', source_context(Loads, _, _, _)),
+    member(Load, Loads).
+source_recompile_context(Context, Owners) :-
+    b_getval('$metta_source_publication', source_context(_, Recompiles, _, _)),
+    member(recompile(Context, Owners), Recompiles).
+
 record_source_assertion(Ref) :-
-    source_recompile_owners(Owners), !,
-    record_recompiled_source_assertion(Owners, Ref).
-record_source_assertion(Ref) :-
-    active_source_load(Load0), !,
-    (   Load0 = '$metta_owner_pin'(Load)
-    ->  (   Load == none
-        ->  true
-        ;   assertz(source_load_assertion(Load, artifact, Ref))
-        )
-    ;   assertz(source_load_assertion(Load0, artifact, Ref))
-    ).
-record_source_assertion(_).
+    b_getval('$metta_source_publication', source_context(_, _, Owners, _)),
+    ( Owners == [] -> true
+    ; Owners = [Load] -> assertz(source_load_assertion(Load, artifact, Ref))
+    ; forall(member(Load, Owners), assertz(source_load_assertion(Load, artifact, Ref))) ).
 
 record_source_atom_assertion(Ref) :-
-    active_source_load(Load0), !,
-    (   Load0 = '$metta_owner_pin'(Load)
-    ->  (   Load == none
-        ->  true
-        ;   assertz(source_load_assertion(Load, stored, Ref))
-        )
-    ;   assertz(source_load_assertion(Load0, stored, Ref))
-    ).
-record_source_atom_assertion(_).
+    b_getval('$metta_source_publication', source_context(_, _, _, Load)),
+    ( Load == none -> true ; assertz(source_load_assertion(Load, stored, Ref)) ).
+
+record_source_support_assertions(Refs) :-
+    b_getval('$metta_source_publication', source_context(_, _, Owners, _)),
+    ( Owners == [] -> true
+    ; Owners = [Load] -> assertz(source_load_support_assertions(Load, Refs))
+    ; forall(member(Load, Owners), assertz(source_load_support_assertions(Load, Refs))) ).
+
+:- meta_predicate with_source_publication_context(+, 0).
+
+% Workaround: swi-cleanup-window - trail the publication context so abandonment restores it even if cleanup is interrupted.
+% Source IDs and owner bags contain no mutable program terms. Both writes
+% are trailed: an inner non-backtrackable restore can overwrite the outer
+% scope's undo record. This follows with_metta_module/2's nested restoration.
+% Transaction rollback cannot resurrect an already closed scope.
+with_source_publication_context(Context, Goal) :-
+    b_getval('$metta_source_publication', Previous),
+    setup_call_cleanup(
+        b_setval('$metta_source_publication', Context),
+        call(Goal),
+        b_setval('$metta_source_publication', Previous)).
 
 %The same journal decision hoisted out of a run: the context lookup and the
 %owner-pin unwrap happen once, and the run's store loop journals each
@@ -1269,10 +1288,7 @@ record_source_atom_assertion(_).
 %The two must stay one policy: journal_data_ref(L, R) for the L this
 %answers writes exactly the row record_source_atom_assertion(R) writes.
 journal_load_now(Load) :-
-    (   active_source_load(Load0)
-    ->  ( Load0 = '$metta_owner_pin'(L) -> Load = L ; Load = Load0 )
-    ;   Load = none
-    ).
+    b_getval('$metta_source_publication', source_context(_, _, _, Load)).
 
 journal_data_ref(none, _) :- !.
 journal_data_ref(Load, Ref) :-
@@ -1283,7 +1299,8 @@ journal_data_ref(Load, Ref) :-
 %definition's clauses are only asserted when something first calls it, and
 %that can be inside a DIFFERENT load, on another thread, or nowhere at all.
 current_owning_source_load(Load) :-
-    (   active_source_load(Load0),
+    (   b_getval('$metta_source_publication', source_context(Loads, _, _, _)),
+        member(Load0, Loads),
         Load0 \= '$metta_owner_pin'(_)
     ->  Load = Load0
     ;   Load = none
@@ -1339,17 +1356,13 @@ source_load_identity(Load, Path, Digest) :-
 %CLOSED owning load is the point: its journal rows are exactly what
 %withdrawal walks when the OWNING file is reloaded, so the materialised
 %clauses leave with their definitions. A rollback for a closed load never
-%runs, so the pin cannot widen any failure. The pin is a MARKED term
-%asserted on top of the stack and erased by ITS OWN clause reference, the
-%discipline with_source_load keeps for its own marker; the journal writers
-%UNWRAP it with inline unification while the repair schedulers and the
-%recompile-pending context SKIP pins to the topmost real load.
+%runs, so the pin cannot widen any failure. The context keeps the marked pin
+%on its load stack and caches the unwrapped journal owner. Queries that skip
+%pins still reach the nearest real load beneath it.
 :- meta_predicate with_owning_source_load(+, 0).
 with_owning_source_load(Load, Goal) :-
-    setup_call_cleanup(
-        asserta(active_source_load('$metta_owner_pin'(Load)), Ref),
-        call(Goal),
-        erase(Ref)).
+    source_publication_load_context(Load, '$metta_owner_pin'(Load), Context),
+    with_source_publication_context(Context, Goal).
 
 %A receipt consults the source journal rather than the support graph because
 %its dependencies are physical source-load and clause-reference identities,
@@ -1381,19 +1394,7 @@ support_graph:support_assertion_record(Ref) :-
 % bookkeeping while rollback still erases every clause precisely.
 :- multifile support_graph:support_assertion_records/1.
 support_graph:support_assertion_records(Refs) :-
-    (   source_recompile_owners(Owners)
-    ->  forall(member(LoadId, Owners),
-               assertz(source_load_support_assertions(LoadId, Refs)))
-    ;   active_source_load(Load0)
-    ->  (   Load0 = '$metta_owner_pin'(Load)
-        ->  (   Load == none
-            ->  true
-            ;   assertz(source_load_support_assertions(Load, Refs))
-            )
-        ;   assertz(source_load_support_assertions(Load0, Refs))
-        )
-    ;   true
-    ).
+    record_source_support_assertions(Refs).
 
 %One pass over the stored equations answers the whole batch. Repairing each
 %function separately walked every equation in the system once per function, so
@@ -1514,3 +1515,6 @@ rethrow_metta_file_error(_, Error) :- Error = error(_, context(_, _)), !,
 rethrow_metta_file_error(Filename, error(Type, _)) :- !,
                                                       throw(error(Type, context(Filename, 'while loading MeTTa file'))).
 rethrow_metta_file_error(_, Error) :- throw(Error).
+
+:- thread_initialization(
+       nb_setval('$metta_source_publication', source_context([], [], [], none))).
