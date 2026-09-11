@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- A standard-library census maps language concerns to the installed SWI-Prolog
+  libraries and records the implementation order, existing heads and boundaries.
+
 - A concurrency example exercises scope answer multiplicity, child joining,
   resource release and transfer, the `scope_body` longhand, and deferred
   evaluation through a captured space.
