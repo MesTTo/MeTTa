@@ -772,76 +772,75 @@ def build_baseline() -> dict:
 # [source: docs/journal/2026-09-08-what-the-waivers-were-paying-for.md:515;
 # commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
 WAIVERS = {
-    # The paired module and publication controls are indexed in the dated
-    # journal section. These four OPEN entries are removed when the separately
-    # reserved source-owned publication package lands.
-    # [source: docs/journal/2026-09-08-what-the-waivers-were-paying-for.md:587;
-    # commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
+    # Publication removes repeated owner selection and fixed envelope work.
+    # These four entries remain until an accepted measurement clears the same
+    # band; a refused null is never evidence for removing a waiver.
+    # [source: docs/journal/2026-09-08-what-the-waivers-were-paying-for.md:662;
+    # commit=WORKTREE].
     "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/03-functionremovalspec.metta": (
-        "RULING for module isolation, OPEN for declaration withdrawal and"
-        " occurrence ownership. The module merge raises 10911538 to 11631471"
-        " instructions; tokens raise the later 11853636 to 13354438, and"
-        " receipt cleanup reduces the cut's 13600744 to 12599791. Suppressing"
-        " source artifact recording reduces 12486893/11959 to 8661372/9022"
-        " in a paired control, but also suppresses ownership-dependent"
-        " withdrawal work. Removing that recorder breaks reload and failed-load"
-        " cleanup. Next: group owned artifact retirement while preserving every"
-        " reference and callback; removed when the source-owned publication"
-        " package lands."
+        "RULING for module isolation, OPEN for specialization invalidation and"
+        " rebuilding. Grouped exact-reference retirement and scoped publication"
+        " reduce the cut's 12613617/11932 to 12503784/11814 instructions/"
+        " inferences; the unchanged upstream instruction pin is 10547671."
+        " This remains outside the band. Suppressing source recording also"
+        " changes three specialization installations to one and two retirements"
+        " to one by leaving metadata behind, so that control cannot price"
+        " removable journal work. Each erase and callback remains required;"
+        " further savings must preserve ownership-dependent rebuilds."
     ),
     "examples/ch06-many-answers/02-casenew.metta": (
-        "RULING for module isolation, OPEN for source-owned runnable-form"
-        " publication. The module merge raises 4748292 to 5195530 instructions"
-        " and 4602 to 4640 inferences. The paired artifact-recorder control"
-        " removes 180773 instructions and 136 inferences; prewarming catalog"
-        " point reads does not remove the excess. Next: compile the source-owned"
-        " runnable-form envelope once while preserving withdrawal; removed when"
-        " the source-owned publication package lands."
+        "RULING for module isolation, OPEN for form-specific translation."
+        " Fixed runnable controls now share compiled reader clauses and source"
+        " publication reuses its owner decision. Inferences fall from 4791 to"
+        " 4754. The final instruction null refuses; its raw subtraction is not"
+        " an accepted cost. The last accepted envelope observation was 5625723"
+        " against the unchanged upstream pin 4500639. Each form still translates"
+        " against its arrived source prefix and retains its ordinary effects."
     ),
     "examples/ch08-data/08-01-atoms-lists-and-folds/02-holfunctions.metta": (
-        "RULING for module isolation, OPEN for source-owned generated clauses."
-        " The module merge raises 17597505 to 18786454 instructions and 16126"
-        " to 16273 inferences. The paired artifact-recorder control removes"
-        " 896209 instructions and 540 inferences, retaining these answers but"
-        " losing failure and reload ownership. Next: batch clause ownership at"
-        " publication while preserving exact withdrawal and ordered effects;"
-        " removed when the source-owned publication package lands."
+        "RULING for module isolation, OPEN for generated-clause translation"
+        " and its required ownership rows. Owner selection is now installed"
+        " once per publication scope; every reference is still journalled at"
+        " its original callback boundary. Inferences fall from 17360 to 17057."
+        " The final instruction null refuses, so the unchanged upstream pin"
+        " 17067487 has no accepted final comparison. Omitting the remaining"
+        " journal writes loses failed-load cleanup and exact reload withdrawal."
     ),
     "examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/03-plntest.metta": (
-        "RULING for module isolation, OPEN for declaration and type-witness"
-        " work. The module merge raises 29913555 to 31347294 instructions and"
-        " 27519 to 27792 inferences. The paired artifact-recorder control removes"
-        " 538965 instructions and 456 inferences; it does not explain the entire"
-        " gap. Catalog prewarming does not remove it. Next: separate installed"
-        " typing witnesses from repeated query checks with callback and"
-        " error-trace controls; removed when the source-owned publication"
-        " package lands."
+        "RULING for module isolation, OPEN for runtime type derivation and"
+        " declaration publication. Compiled indexed expected-family witnesses"
+        " and scoped ownership reduce 32727710/28408 to 32120461/27335"
+        " instructions/inferences; the unchanged upstream instruction pin is"
+        " 30032944, so the band is still exceeded. Actual accepted, failed and"
+        " throwing get_type_rule callbacks retain their output and source error"
+        " frames. Query-dependent tuple derivations cannot be discarded merely"
+        " because the installed policy patterns are compiled."
     ),
     "examples/ch22-a-reasoner-you-can-serve/22-01-logic-programs/04-nilbc.metta": (
         "OPEN: repeated tuple type-witness derivation and dynamic rule-state"
-        " reads. Compiling shipped pattern decisions removes interpretation:"
-        " 164167590122 to 152410418994 instructions, 332595825 to 318243258"
-        " inferences; upstream 11588339197/17937607. A paired empty-rule"
-        " control removes 24849388 inferences and 10549316535 instructions."
-        " Skipping the remaining tuple retry is rejected: a later throwing"
-        " get_type_rule callback changes from an exception to success. Next:"
-        " share witnesses while preserving ordered callback and error traces."
+        " reads. Indexed expected-family witnesses and source publication"
+        " reduce the current cut's 150872095798/318186853 to"
+        " 144677369904/310976936 instructions/inferences; live pinned upstream"
+        " reads 11588342959/17937607. The unchanged instruction pin is"
+        " 11592875186. The throwing tuple-retry differential retains four first"
+        " callbacks followed by the second callback's exception and source"
+        " frame. Installed policy witnesses cannot replace those runtime effects."
     ),
     "examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/02-twostage.metta": (
-        "OPEN: runnable-form translation and source-ownership recording."
-        " Removing only record_source_assertion/1's journal writes costs"
-        " 30 fewer inferences and 91658 fewer instructions on this file;"
-        " this is below the cross-engine absolute floor and does not explain"
-        " the whole excess. Next: compile the runnable-form envelope once"
-        " while preserving source withdrawal and ordered effects."
+        "OPEN: form-specific translation and source ownership. Fixed runnable"
+        " controls are now compiled once in the reader. Inferences fall from"
+        " 4794 to 4763; final instructions are 5366090 against the unchanged"
+        " upstream pin 4225208. The cut's instruction null refuses. Translation"
+        " still reads the source prefix before each form; suppressing journal"
+        " writes is not a sound substitute for that work."
     ),
     "examples/ch08-data/08-01-atoms-lists-and-folds/03-holfunctions_intrinsicop.metta": (
-        "OPEN: runnable test-form translation and source-ownership recording."
-        " The journal-write control removes 66 inferences and 315759"
-        " instructions with identical answers. The remaining per-form"
-        " translation and effect classification must be separated before a"
-        " cost is assigned to either. Next: specialize the form envelope"
-        " against its declared effects and source owner."
+        "OPEN: runnable test-form translation and effect classification."
+        " The fixed answer, name and fuel envelope is now shared compiled code;"
+        " scoped publication retains every journal write. Inferences fall from"
+        " 11244 to 11159. Both instruction nulls refuse; the unchanged upstream"
+        " instruction pin is 10184408. The remaining form-specific conjunction"
+        " still compiles against the current source prefix."
     ),
     "examples/ch07-control-flow/07-05-recursion/02-fib.metta": (
         "RULING: pinned upstream fails the explicit with-pragma! wrapper."

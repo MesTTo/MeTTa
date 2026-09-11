@@ -49,6 +49,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Source cleanup and specialization invalidation retire ordered groups of exact
+  artifact references. Transactional native retirement reuses its receipt
+  owner while retaining every per-reference erase and callback.
+
 - Source runnable forms share a compiled answer, name and fuel envelope. Each
   form still translates and runs against its arrived source prefix, with the
   same ordered effects and source-observation boundary.

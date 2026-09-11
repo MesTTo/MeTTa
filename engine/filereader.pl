@@ -4,6 +4,9 @@
 %   name and fuel envelope from compiled clauses while each form keeps its
 %   source-prefix translation, effects and observation boundary
 %   [tested: source_runnable_envelope, source_observation, fuel; commit=WORKTREE].
+% Guarantees: retire_translated_clauses/2 consumes an ordered set of exact
+%   executable references, stopping at the first failed erase or callback
+%   [tested: source_retirement; commit=WORKTREE].
 % Owns resources: a trailed publication context selects a source's journal
 %   owners for its lexical scope; source rows remain transactional
 %   [tested: source_publication; commit=WORKTREE].
@@ -285,6 +288,7 @@
             '$metta_equation_token'/4,
             stored_equation_source/4,
             forget_translated_from/3,
+            retire_translated_clauses/2,
             forget_space_source_loads/1,
             recompile_function_impl/1,
             recompile_function_impl_in/2,
@@ -1717,6 +1721,17 @@ forget_translated_from(Module, Ref, [=, [G|_], _]) :-
 forget_translated_from(_, Ref, _) :-
     forget_translated_equation_binding(Ref),
     retractall(translated_from(Ref, _)).
+
+% Retire the selected executable set in its supplied order. Each provenance
+% withdrawal stays adjacent to its erase, so a callback sees the same prefix
+% and a refusal leaves the same unvisited suffix. The traversal is linear:
+% every retained reference still requires its own erase and callbacks.
+retire_translated_clauses(_, []).
+retire_translated_clauses(Module, [Ref|Refs]) :-
+    ( translated_from(Ref, Term) -> forget_translated_from(Module, Ref, Term)
+    ; true ),
+    erase(Ref),
+    retire_translated_clauses(Module, Refs).
 
 forget_translated_equation_binding(Ref) :-
     forall(clause('$metta_equation_token'(_, _, Ref, _), true, TokenRef),

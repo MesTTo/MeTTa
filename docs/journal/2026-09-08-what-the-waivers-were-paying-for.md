@@ -658,3 +658,69 @@ in the first and third states; the repaired complete parity selftest and
 Ruff gates exit 0. The receipts are `ai-tmp/ai-waiver-report-{before,after}.log`
 and `ai-tmp/ai-waiver-report-ruff.log`. No measured value, comparison rule,
 allowance or upstream pin changes in this reporting repair.
+
+## 2026-09-11: source-owned publication
+
+The four publication levers are implemented with their observable boundaries
+intact. Owner selection is installed in the existing source and recompile
+scopes. The fixed runnable envelope is shared compiled reader code; each
+form's conjunction still translates immediately before execution. Retirement
+consumes exact reference groups and reuses a transaction's receipt owner.
+Expected-family typing patterns compile beside the shipped declarations;
+user patterns and runtime type callbacks retain their original evaluation.
+
+Tried: the unchanged lane's `prepare_artifacts` and `measure` on the pristine
+`b1d175f13b67baf1090f74f309407b763d421744` cut and functional checkpoint
+`621597ecf84492297db0f449a8774bce4c279374`. Each tree has the same C and MORK
+artifacts and prepares 21 governed QLF files. Every raw sample, its load and
+the exact refusal is retained in `ai-tmp/publication-d9d1201b/ai-*.json`.
+The following instruction values are accepted median-of-3 observations.
+`refused` means the null exceeded the existing resolution; its raw subtraction
+is not substituted for a cost. Inference counts remain exact.
+
+| Program | Cut instructions / inferences | Final instructions / inferences | Live pinned upstream instructions / inferences | Waiver |
+|---|---:|---:|---:|---|
+| functionremovalspec | 12,613,617 / 11,932 | 12,503,784 / 11,814 | 10,540,162 / 12,790 | retained |
+| casenew | refused / 4,791 | refused / 4,754 | 4,498,703 / 7,170 | retained |
+| holfunctions | refused / 17,360 | refused / 17,057 | 17,059,997 / 22,389 | retained |
+| plntest | 32,727,710 / 28,408 | 32,120,461 / 27,335 | 30,021,210 / 39,839 | retained |
+| twostage | refused / 4,794 | 5,366,090 / 4,763 | 4,208,723 / 6,701 | retained |
+| holfunctions_intrinsicop | refused / 11,244 | refused / 11,159 | refused / 12,729 | retained |
+| nilbc | 150,872,095,798 / 318,186,853 | 144,677,369,904 / 310,976,936 | 11,588,342,959 / 17,937,607 | retained |
+
+The first four unchanged upstream instruction pins are 10,547,671,
+4,500,639, 17,067,487 and 30,032,944. Their unchanged ceilings are
+10,908,624.42, 4,740,651.78, 17,558,836.74 and 30,783,602.88. The two accepted
+final prices remain above those ceilings; the two refused prices establish
+no passing comparison. No waiver is removed and no baseline or band changes.
+The related upstream pins also remain unchanged at 4,225,208, 10,184,408
+and 11,592,875,186.
+
+The final four-row attempts start at loads 13.25 / 17.68 / 16.22 and finish
+at 14.11 / 17.79 / 16.26. Casenew refuses its null interval
+1,304,811,086..1,304,830,732 around median 1,304,813,460. Holfunctions refuses
+1,304,864,883..1,305,026,246 around median 1,305,015,239. The permitted
+resolution remains -13,405/+12,852. Nilbc starts at 14.11 / 17.79 / 16.26
+and finishes at 40.58 / 25.18 / 18.96. Those loads are observations, not a
+claim that the machine was quiet. The integrator retains the release
+instruction comparison on the merged tree.
+
+Decided: rewrite the four rulings around the work that remains. The record
+suppression control changes specialization installations from three to one
+and retirements from two to one, so it cannot identify an eliminable recorder
+cost. Each reference's erase and callback remains an output-sensitive linear
+obligation. Form-specific translation and its source-prefix decisions remain.
+The typed source differential retains the failed candidate, `BadArgType`,
+callback output and the throwing tuple retry's exact source frame. Installed
+policy witnesses do not permit discarding those runtime derivations.
+
+Tried: receipt-owner reuse changes a 1000-reference transaction from 7063 to
+5069 inferences; a four-reference callback control changes owner probes from
+four to one. The executable and cleanup traversals retain their old inference
+counts, and all 24 retirement cases pass. The envelope's ten kernel and five
+source-observation cases pass. The typing suite passes 11 cases and the source
+publication suite passes 12, including 1500 inference budgets. The separate
+transaction-completion listener leak reproduces at the pristine cut and is
+assigned to the cleanup repair; its first failing budget is retained rather
+than mistaken for a publication regression. The full design and rejected
+alternatives are in `2026-09-11-source-owned-publication.md`.
