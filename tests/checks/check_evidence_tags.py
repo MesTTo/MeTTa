@@ -8,7 +8,7 @@ which is what makes it corrosive rather than untidy.
 
 Guarantees: nested distribution modules, Prolog/C library support and native face fixtures participate in
 the same evidence and provenance checks as their callers
-[tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE].
+[tested: tests/checks/check_evidence_selftest.py; commit=28c6146d805b5adba3047ffc72b2508c11816636].
 
 Reads files and the engine-free door grammar. Structured row assumptions,
 guarantees, local refusals and evidence are checked through doorgen's contract

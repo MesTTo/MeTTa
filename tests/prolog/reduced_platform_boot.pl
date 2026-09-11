@@ -22,7 +22,7 @@
 %   - fast_cache_probe/0 saves and restores a private typed bag and releases
 %     both spaces, preserving duplicate data while avoiding a second source's
 %     declaration ownership [tested: platform_capabilities_reduced;
-%     commit=WORKTREE].
+%     commit=28c6146d805b5adba3047ffc72b2508c11816636].
 %   - the four file_search_path/2 clauses that reach SWI's own library tree,
 %     two under the `library` alias and two under `autoload`, are replaced by
 %     the farms before any engine file loads, so absence is real rather than

@@ -1,6 +1,6 @@
 % Purpose: verify crypto formats, reduced providers, refusal and resource paths.
 % Guarantees: every public crypto head is called by the shipped example
-% [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/06-crypto_lib.metta; commit=WORKTREE].
+% [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/06-crypto_lib.metta; commit=28c6146d805b5adba3047ffc72b2508c11816636].
 % Owns resources: fixture files and streams are closed and removed on every exit.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

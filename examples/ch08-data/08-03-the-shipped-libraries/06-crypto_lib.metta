@@ -1,6 +1,6 @@
 ; Purpose: content keys, authenticated bytes, secure values and password records.
 ; Guarantees: the example calls every crypto head and both password arities
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/06-crypto_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/06-crypto_lib.metta; commit=28c6146d805b5adba3047ffc72b2508c11816636].
 
 !(import! &self (library lib_crypto))
 
