@@ -1,5 +1,9 @@
 % Purpose: read MeTTa source, split it into complete top-level forms, and
 % dispatch each parsed form to the evaluator.
+% Guarantees: run_source_runnable/2 executes the translator's fixed answer,
+%   name and fuel envelope from compiled clauses while each form keeps its
+%   source-prefix translation, effects and observation boundary
+%   [tested: source_runnable_envelope, source_observation, fuel; commit=WORKTREE].
 % Owns resources: a trailed publication context selects a source's journal
 %   owners for its lexical scope; source rows remain transactional
 %   [tested: source_publication; commit=WORKTREE].
@@ -1927,13 +1931,7 @@ process_form(Space, parsed(expression, _, Term0), []) :-
     metta_add_atom(Space, Term, _),
     print_expression_form(Term).
 process_form(Space, parsed(runnable, FormStr, Term, Names), Result) :-
-    flush_source_program_analysis_if_needed,
-    rewrite_parsed_form(Space, FormStr, Term, BoundTerm),
-    space_module(Space, Module),
-    with_metta_module(Module,
-                      translate_runnable_expr(BoundTerm, Names, Goals, Result)),
-    print_runnable_form(FormStr, Goals),
-    call_goals_in(Module, Goals).
+    process_runnable_form(Space, FormStr, Term, Names, Result).
 process_form(Space, parsed(function, FormStr, Term), []) :-
     Term = [=, [F|Args], _],
     must_be(atom, F),
@@ -1975,13 +1973,7 @@ process_loader_form(Space, parsed(expression, _, Term), []) :-
     metta_add_atom(Space, Term, _),
     print_expression_form(Term).
 process_loader_form(Space, parsed(runnable, FormStr, Term, Names), Result) :-
-    flush_source_program_analysis_if_needed,
-    rewrite_parsed_form(Space, FormStr, Term, BoundTerm),
-    space_module(Space, Module),
-    with_metta_module(Module,
-                      translate_runnable_expr(BoundTerm, Names, Goals, Result)),
-    print_runnable_form(FormStr, Goals),
-    call_goals_in(Module, Goals).
+    process_runnable_form(Space, FormStr, Term, Names, Result).
 process_loader_form(Space, parsed(function, FormStr, Term), []) :-
     Term = [=, [F|_], _],
     add_sexp(Space, Term, SpaceRef),
@@ -1993,6 +1985,41 @@ process_loader_form(Space, parsed(function, FormStr, Term), []) :-
 process_loader_form(_, In, _) :-
     throw(error(metta_translation_failed(In),
                 context(process_loader_form/3, 'could not translate MeTTa form'))).
+
+process_runnable_form(Space, FormStr, Term, Names, Result) :-
+    flush_source_program_analysis_if_needed,
+    rewrite_parsed_form(Space, FormStr, Term, BoundTerm),
+    space_module(Space, Module),
+    with_metta_module(Module,
+                      translate_runnable_expr(BoundTerm, Names, Goals, Result)),
+    print_runnable_form(FormStr, Goals),
+    call_goals_in(Module, [filereader:run_source_runnable(Module, Goals)]).
+
+% Unpack the fixed envelope emitted by translate_runnable_expr/4 as data.
+% Its controls are compiled here once; only the current form's conjunction
+% remains a runtime goal. SWI's I_CALL1 compiles a control term at each call:
+% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-vmi.c#L5457
+% Keep call_goals_in/2 outside this executor: pragma limits and source
+% observation own that boundary, and the original goals still print there.
+run_source_runnable(Module, [(Collect, metta_prune_empty_answers(All, Out))]) :-
+    !,
+    collect_source_answers(Module, Collect),
+    spaces:metta_prune_empty_answers(All, Out).
+run_source_runnable(Module, [Collect]) :-
+    collect_source_answers(Module, Collect).
+
+collect_source_answers(_, Out = []) :- !, Out = [].
+collect_source_answers(Module,
+        findall(Template, metta_run_with_fuel(Value, Fuel, Boundary), Out)) :-
+    findall(Template,
+            metta_engine:metta_run_with_fuel(Value, Fuel,
+                filereader:run_source_answer(Module, Boundary)), Out).
+
+run_source_answer(Module,
+        (metta_run_named(Names, Conj, Generated),
+         (Value == '$metta_not_reducible' -> Boundary = Form ; Boundary = Value))) :-
+    spaces:metta_run_named(Names, Module:Conj, Generated),
+    ( Value == '$metta_not_reducible' -> Boundary = Form ; Boundary = Value ).
 
 print_expression_form(_) :- silent(true), !.
 print_expression_form(Term) :-

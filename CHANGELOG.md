@@ -49,6 +49,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Source runnable forms share a compiled answer, name and fuel envelope. Each
+  form still translates and runs against its arrived source prefix, with the
+  same ordered effects and source-observation boundary.
+
 - Source publication selects clause and support ownership once per load,
   deferred owner or recompile scope. Individual journal references remain
   immediately visible and retain exact withdrawal and rollback behavior.
