@@ -265,3 +265,103 @@ are the receipt tests' declared fixtures and budget loops. Their boundary,
 operation, cleanup and state checks already share predicates; retaining each
 plunit setup/cleanup declaration keeps ownership explicit. The other six
 clones are the previously inspected pairs.
+
+## 2026-09-12, committed-tree verification and cost attribution
+
+Tried: the four prescribed commands on
+2b820c2afa0962522651e19936979de8b44ad669, whose executable content is
+cdcb23421809ec3a493059a381e0245cf08a1984:
+sh engine/test.sh exits 1; sh extensions/python/test.sh exits 1;
+sh test.sh exits 0; sh check.sh prolog prolog-static evidence
+provenance-pin-selftest host-workarounds host-workarounds-selftest
+engine-bench twins exits 1. Each complete output and captured status is
+retained in the landing receipt. No extra shell deadline was added.
+
+The engine has 29 owned import fixtures asserting the now-static
+filereader:working_dir/1 and one owned umbrella export assertion:
+[metta_with_trailed/3]==[]. The reader exports, support layering and Python
+service-manifest corrections pass. The new receipt suite passes all 15000
+trials within the complete engine run; the MORK-backed token test executes
+and passes. The static rule still names the 15 owned sites, with its planted
+and parser selftests green. Evidence finds 0 unbacked tags in 7455 claims,
+0 WORKTREE placeholders and 13220 known test names. Provenance's selftest
+reports 0 defects over 44 plants in 19 files. The host ledger reports all
+11 reproductions present at 77 sites; its ten planted defects are reported.
+
+Tried: ordinary counter-only engine benchmarks at the same physical control
+path through each functional commit, clearing generated QLF files and
+checking all 11 native artifact hashes before each stage. Three samples
+agree in every row. All original movements enter with the contexts commit;
+actual-clause, binding and consumer commits add zero to these four cases.
+Receipt completion and the public envelope add 2 to evaluate and 58 to
+translate.
+
+| Case | Cut | Contexts | Clauses, bindings, consumers | Receipts and final |
+| --- | ---: | ---: | ---: | ---: |
+| evaluate | 558928 | 559093 | 559093 | 559095 |
+| match | 267402 | 263802 | 263802 | 263802 |
+| match-skew | 208102 | 208002 | 208002 | 208002 |
+| translate | 315275 | 317877 | 317877 | 317935 |
+
+The measured mechanisms are changed scope entry/exit costs and the extra
+lookup when a formerly empty dynamic guard becomes a context reader.
+Each of seven inactive guard readers costs two inferences through ignore/1,
+versus one on the cut; the module reader remains three. All three warmed
+1000-read samples agree. Direct scope costs are recorded above. The boot
+counter is 320124 versus the earlier same-path cut's 319100, a 1024 increase.
+The canonical boot PMU row is explicitly not measured at this checkout
+shape; its pin is not advanced. Parse and parse-prolog inference counts
+remain 152 and 3539934.
+
+Twins prove all 2190 claims over 282 examples. Every claim-count and
+storage-status row agrees with the cut. The 282 findings are cost findings:
+257 pinned increases, six pinned decreases, twelve relative/authoring bands,
+six empirical ranges and one obsolete overrun. The receipt's complete TSV
+records each example's before/after MeTTa and twin counts and exact findings.
+The cut already exceeds git_import's empirical range at 26263 versus 26247.
+Redis is the only capability-dependent skipped budget in either arm; MORK
+executes. No counter pin or allowance is changed here.
+
+Found: the first final Python run stops after 5223 passes and 93 skips when
+worker gw3 receives SIGSEGV in the compiled-tail-duals statement case. It
+also reports the identity twin's 2622 versus 2586+20 and the cut's authored
+cost fixture. The complete suite had collected 5691 items, leaving 372
+unreported when the worker died. A read-only core backtrace enters stripped
+libswipl frames from Janus. It does not establish the faulting predicate.
+Matching debug-symbol downloads return HTTP 404; symbols for another
+release are not substituted.
+
+Tried: the six-case tail-duals file with seed 2092133236 passes on both arms.
+The complete Python suite with that seed then finishes on both arms:
+the branch has 5588 passes, 100 skips and three failures; the cut has
+5589 passes, 100 skips and two failures. Both fail the authored cost fixture
+and the owned classes journal's absolute path. Only the branch exceeds the
+identity twin pin. The original native crash remains unassigned and is not
+claimed fixed by a successful rerun.
+
+Tried: a diagnostic using public wrap_predicate/4 passes the four benchmark
+bodies on the branch but segfaults in translation on the cut. Its translation
+call counts are excluded from attribution; this different instrumented
+failure does not explain the Python crash. A module-reader-only profile
+passes all four bodies on both arms. A process-only hook ablation first
+abolished a predicate the host had cached and raised
+Unknown procedure: prolog:prolog_exception_hook/5. Retaining the empty
+dynamic predicate makes both ablation arms complete. These diagnostic
+inference counts are not substituted for the ordinary benchmark samples.
+
+Found: a gate rebuild replaces the final Rust MORK object after the initial
+eleven-artifact equality check. Its text and data sections differ from the
+control object, so equality cannot be inferred from unchanged source alone.
+Tried: give both arms the same final Rust object, then run the token/image
+suite and the MORK example/twin directly. Both suites pass 29 tests and five
+subtests, including the MORK-conditioned refusal. Both twins prove two
+claims with equal storage. The measured MeTTa/twin costs exactly repeat
+the complete lanes: cut 55621/49959 and final 56849/51333. The cut twin exits
+0; the final twin exits 1 for its unchanged cost pin. This focused check
+closes the native-artifact comparability question for the MORK result.
+
+Open: owners must apply the exact scope, reader-fixture, service-export and
+foreign-removal corrections in the landing receipt. The broader debugger
+bound failure described above and the non-reproduced Python native crash
+remain unresolved diagnostics. They are not evidence of repaired host
+debugging or permission to widen a bound.
