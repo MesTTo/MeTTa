@@ -49,6 +49,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Source publication selects clause and support ownership once per load,
+  deferred owner or recompile scope. Individual journal references remain
+  immediately visible and retain exact withdrawal and rollback behavior.
+
 - Expected-type family classification reuses compiled shipped patterns. User
   rules still normalize aliases when queried and retain their precedence.
 
