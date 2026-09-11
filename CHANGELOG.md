@@ -133,6 +133,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   fixture producer uses the shared process bound. The syntax introduction
   table places `return` at its first remaining written use in chapter 20.
 
+- Python tool-lane verification commands select their interpreter through the
+  repository's portable selector.
+- Attaching structured refusal metadata preserves custom exception setters,
+  property descriptors and attribute-write refusals.
+- Python declaration generators import shared typing parameters by name and
+  reuse existing module bindings. Static analysis now follows binding-generator
+  consumers, dynamic record fields and relocated policy evidence. Context-manager
+  signatures, optional package metadata and exception metadata retain their
+  runtime contracts under both type checkers.
 - The root module's header named `doorgen.py` and the `door-sync` lane where
   the manifest declares `rootgen.py` and `init-stub`.
 - Observing source after an artifact boot preserves arithmetic in compiled

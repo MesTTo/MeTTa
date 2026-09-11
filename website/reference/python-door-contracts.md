@@ -1371,7 +1371,7 @@ Evidence: `extensions/python/tests/repository/test_door_rows.py::test_space_iden
 ## space:bind
 
 ```python
-bind(values: _abc.Mapping[str, Any] | None=None, /, **named: Any) -> _spaces_scope._BoundValues
+bind(values: _abc.Mapping[str, Any] | None=None, /, **named: Any) -> _spaces_scope_module._BoundValues
 ```
 
 Kind: `scope`. Answer: `context`. Effect: `writesState`. Determinism: `det`.
@@ -1387,7 +1387,7 @@ Assumes receiver state `live`.
 | `values` | `(host-union ((host-apply (host-type metta._spaces.handle _abc.Mapping) (String %Undefined%)) NoneType))` | `None` | `values` | `positional_only` |
 | `named` | `%Undefined%` | `required` | `values` | `var_keyword` |
 
-Guarantees result type `(host-type metta._spaces.handle _spaces_scope._BoundValues)` with the answer shape, effect, and determinism above.
+Guarantees result type `(host-type metta._spaces.handle _spaces_scope_module._BoundValues)` with the answer shape, effect, and determinism above.
 
 Declared local refusals:
 
@@ -2194,7 +2194,7 @@ Evidence: `extensions/python/tests/ch03_atoms_and_expressions/test_identity_wire
 ## space:stream
 
 ```python
-stream(*patterns: Any, where: Any | None=None, limit: int | None=None, timeout: float | None=None, inferences: int | None=None, under: Any=_UNSET) -> _spaces_cursor.Cursor
+stream(*patterns: Any, where: Any | None=None, limit: int | None=None, timeout: float | None=None, inferences: int | None=None, under: Any=_UNSET) -> _spaces_cursor_module.Cursor
 ```
 
 Kind: `query`. Answer: `stream`. Effect: `oracleIO`. Determinism: `nondet`.
@@ -2214,7 +2214,7 @@ Assumes receiver state `live`.
 | `inferences` | `(host-union (Number NoneType))` | `None` | `values` | `keyword_only` |
 | `under` | `%Undefined%` | `_UNSET` | `values` | `keyword_only` |
 
-Guarantees result type `(host-type metta._spaces.query _spaces_cursor.Cursor)` with the answer shape, effect, and determinism above.
+Guarantees result type `(host-type metta._spaces.query _spaces_cursor_module.Cursor)` with the answer shape, effect, and determinism above.
 
 Declared local refusals:
 
@@ -3605,7 +3605,7 @@ Evidence: `extensions/python/tests/ch11_python_as_a_notation/test_ladder.py::tes
 ## space:capture
 
 ```python
-capture() -> _spaces_execution.CapturedOutput
+capture() -> _spaces_execution_module.CapturedOutput
 ```
 
 Kind: `scope`. Answer: `context`. Effect: `writesState`. Determinism: `det`.
@@ -3619,7 +3619,7 @@ Assumes receiver state `live`.
 | argument | MeTTa type | default | delivery | parameter kind |
 |---|---|---|---|---|
 
-Guarantees result type `(host-type metta._spaces.scope _spaces_execution.CapturedOutput)` with the answer shape, effect, and determinism above.
+Guarantees result type `(host-type metta._spaces.scope _spaces_execution_module.CapturedOutput)` with the answer shape, effect, and determinism above.
 
 Implementation failures propagate, including failures from callees and providers.
 
@@ -3665,7 +3665,7 @@ Evidence: `extensions/python/tests/ch17_concurrency_and_the_loop/test_scopes.py:
 ## space:atomic
 
 ```python
-atomic() -> _spaces_execution.ScopedExecution
+atomic() -> _spaces_execution_module.ScopedExecution
 ```
 
 Kind: `scope`. Answer: `context`. Effect: `writesState`. Determinism: `det`.
@@ -3679,7 +3679,7 @@ Assumes receiver state `live`.
 | argument | MeTTa type | default | delivery | parameter kind |
 |---|---|---|---|---|
 
-Guarantees result type `(host-type metta._spaces.scope _spaces_execution.ScopedExecution)` with the answer shape, effect, and determinism above.
+Guarantees result type `(host-type metta._spaces.scope _spaces_execution_module.ScopedExecution)` with the answer shape, effect, and determinism above.
 
 Implementation failures propagate, including failures from callees and providers.
 
@@ -3698,7 +3698,7 @@ Evidence: `extensions/python/tests/ch14_seeing_your_program/test_features.py::te
 ## space:speculative
 
 ```python
-speculative() -> _spaces_execution.ScopedExecution
+speculative() -> _spaces_execution_module.ScopedExecution
 ```
 
 Kind: `scope`. Answer: `context`. Effect: `writesState`. Determinism: `det`.
@@ -3712,7 +3712,7 @@ Assumes receiver state `live`.
 | argument | MeTTa type | default | delivery | parameter kind |
 |---|---|---|---|---|
 
-Guarantees result type `(host-type metta._spaces.scope _spaces_execution.ScopedExecution)` with the answer shape, effect, and determinism above.
+Guarantees result type `(host-type metta._spaces.scope _spaces_execution_module.ScopedExecution)` with the answer shape, effect, and determinism above.
 
 Implementation failures propagate, including failures from callees and providers.
 
@@ -5794,7 +5794,7 @@ define(fn: Callable[_P, _R], /, *, name: str | None=..., accessors: bool=..., me
 @overload
 define(*, name: str) -> Callable[[Callable[_P, _R]], _root.Defined[_P, _R]]
 @overload
-define(*, prolog: str | os.PathLike[str], name: str | None=None) -> Callable[[Callable[_P, _R]], _declare_define.PrologBacked[_P, _R]]
+define(*, prolog: str | os.PathLike[str], name: str | None=None) -> Callable[[Callable[_P, _R]], _declare_define_module.PrologBacked[_P, _R]]
 define(fn: Callable[..., Any] | None=None, *, prolog: str | os.PathLike[str] | None=None, name: str | None=None, accessors: bool=True, methods: bool=True) -> Any
 ```
 
@@ -5880,7 +5880,7 @@ Evidence: `extensions/python/tests/ch09_types/test_refinements.py::test_a_define
 ## space:rules
 
 ```python
-rules(fn: Callable[..., Any]) -> _declare_rules.Rules
+rules(fn: Callable[..., Any]) -> _declare_rules_module.Rules
 ```
 
 Kind: `provider`. Answer: `value`. Effect: `writesState`. Determinism: `det`.
@@ -5895,7 +5895,7 @@ Assumes receiver state `live`.
 |---|---|---|---|---|
 | `fn` | `(host-apply (host-type metta._declare.definitions Callable) (... %Undefined%))` | `required` | `values` | `positional_or_keyword` |
 
-Guarantees result type `(host-type metta._declare.definitions _declare_rules.Rules)` with the answer shape, effect, and determinism above.
+Guarantees result type `(host-type metta._declare.definitions _declare_rules_module.Rules)` with the answer shape, effect, and determinism above.
 
 Implementation failures propagate, including failures from callees and providers.
 
