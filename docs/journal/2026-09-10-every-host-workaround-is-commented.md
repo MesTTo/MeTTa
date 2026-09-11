@@ -127,3 +127,24 @@ Tried: each direct scope warmed for 100 calls and measured over 1000 calls in th
 Tried: `jscpd --format prolog --formats-exts prolog:pl,plt --min-lines 5 --min-tokens 50 --max-lines 20000 --max-size 2mb --skipComments --noTips` over the 32 changed Prolog files -> six clones, 38 duplicated lines out of 35728, 0.11%. Five are outside the changed code. The counted and ordinary grant branches already shared their setup shape on the cut and now share the same primitive call. Rejected: another wrapper for that single call, because it would add indirection without merging the distinct counting policies. An earlier 8-line/80-token scan reported zero and is not used as evidence that the existing clones disappeared.
 
 Open: run the prescribed whole-tree lanes on the committed state and record the exact counter movements in the landing receipt. The concurrent owners must remove their 15 direct setup findings and reconcile their indirect scopes, the umbrella export, exact foreign removal and compiler-reference catches. The broader plain-host tracing diagnostic above is not repaired by these scope changes.
+
+## 2026-09-11, scope consumer contracts
+
+Tried: the four prescribed gates on 20a1f54f2fd38237ec96002f99e347ae76b12b40
+exit 1, 1, 0, 1. The engine finds 29 owned import fixtures still asserting
+the directory reader, the owned umbrella's missing primitive export, and
+two layering tests. Python finds the new service absent from its manifest,
+changed twin costs, the cut's authoring-cost fixture and absolute-path
+findings, and an existing 30-second subprocess timeout in the snippet test.
+The checks pass prolog, evidence, provenance and both host-workaround lanes;
+static refusal names the 15 owned sites, and engine-bench and twins report
+changed counters. The receipt preserves every line and status.
+
+Decided: export active_source_load/1 and with_working_directory/2 from their
+owning reader, declare support_graph's use of the trailed primitive in the
+layering contract, and classify the primitive as a host door in the binding
+manifest. These are dependencies introduced by the scope change.
+
+Tried: `sh engine/test.sh suites/seams/layering.plt` passes all seven tests.
+The two service-manifest pytest tests pass. The owned umbrella export and
+import fixtures remain explicit integration needs.

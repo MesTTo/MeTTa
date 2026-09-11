@@ -7,6 +7,8 @@
 %       DATABASE rather than the sources
 %     - the working directory is tests/prolog
 % Guarantees:
+%     - support scopes use the engine's trailed context door
+%       [tested: engine_layering; commit=WORKTREE].
 %     - boot and runtime imports share the source_loading leaf
 %       [tested: engine_layering; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 %     - identity is a leaf reached by boot validation, storage and image receipt
@@ -408,6 +410,7 @@ reaches(specializer, support_graph, 'a specialization is a derived artifact with
 reaches(specializer, translator, 'a specialization is a translated clause').
 reaches(specializer, type_rules, 'specialization holds the typing policy stable while deriving a compiled clause').
 reaches(support_graph, filereader, 'the loader owns the assertion records the graph tracks').
+reaches(support_graph, metta, 'the engine trails the support lock and deferred-repair scopes').
 reaches(support_graph, scc, 'the support graph classifies recursive call components').
 reaches(support_graph, specializer, 'invalidating a support node runs the specializer\'s invalidation action').
 reaches(tracer, filereader, 'a traced form is processed through the loader\'s string door').

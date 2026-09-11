@@ -49,6 +49,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Reader source-load and directory scopes are published to their compiler
+  and manifest consumers; the binding service manifest records the shared
+  trailed context door.
 - Temporary engine contexts use `metta_with_trailed/3` to restore their
   enclosing value after inference limits, exceptions, failure, cut and redo.
   Source and materialization rollback retain their ownership records until
