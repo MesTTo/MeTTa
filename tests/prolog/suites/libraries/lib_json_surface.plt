@@ -1,7 +1,7 @@
 % Purpose: verify JSON object ownership, graph conversion, paths and file I/O.
 % Guarantees: fault injection checks rollback and close-before-publication;
 % codec and UTF-8 checks cover ordinary values and malformed boundary inputs
-% [tested: lib_json_surface; commit=WORKTREE].
+% [tested: lib_json_surface; commit=bd027d8b7a9ef1d96fb4cdb160c9b3eb4157d52e].
 % Owns resources: fixtures remove their directories; suite cleanup releases
 % object spaces created by these tests and restores every wrapped predicate.
 

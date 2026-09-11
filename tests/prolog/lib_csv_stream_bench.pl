@@ -1,7 +1,7 @@
 % Purpose: measure CSV traversal storage against retained-answer and append controls.
 % Guarantees: every mode consumes the same fixed records and reports its
 % checksum, inferences and peak sampled live storage after collection.
-% [tested: swipl --on-error=status -q -s tests/prolog/lib_csv_stream_bench.pl; commit=WORKTREE].
+% [tested: swipl --on-error=status -q -s tests/prolog/lib_csv_stream_bench.pl; commit=bd027d8b7a9ef1d96fb4cdb160c9b3eb4157d52e].
 % Owns resources: the fixture and writer lock are removed on exit; the append
 % observation wrapper and linked statistics are released after measurement.
 % Decides: 1000, 10000 and 100000 records separate constant auxiliary storage

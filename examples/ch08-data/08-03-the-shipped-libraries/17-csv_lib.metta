@@ -1,5 +1,5 @@
 ; Purpose: exchange lossless CSV text and files through every library head.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/17-csv_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/17-csv_lib.metta; commit=bd027d8b7a9ef1d96fb4cdb160c9b3eb4157d52e].
 ; Owns resources: the example deletes its files, writer lock and temporary
 ; directory. Snapshots follow the engine's ordinary space lifetime.
 !(import! &self (library lib_csv))

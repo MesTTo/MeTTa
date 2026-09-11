@@ -1,7 +1,7 @@
 % Purpose: verify lossless CSV syntax, dialects, streaming and atomic writes.
 % Guarantees: failure injection exercises snapshot and file ownership;
 % generated boundary cases cover Unicode, widths and independent cursors.
-% [tested: lib_csv_surface; commit=WORKTREE].
+% [tested: lib_csv_surface; commit=bd027d8b7a9ef1d96fb4cdb160c9b3eb4157d52e].
 % Owns resources: fixtures remove their directories, suite cleanup releases
 % added native spaces, and each fault injection restores its wrapped predicate.
 
