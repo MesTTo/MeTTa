@@ -1,3 +1,7 @@
+% Guarantees: rollback_restored_translator_rule/3 retries an interrupted
+%   retirement before propagating the interruption
+%   [source: engine/translator_rules.pl:rollback_restored_translator_rule/3; commit=WORKTREE].
+%
 % Purpose: hold the translator rule registry and everything a registration
 %   DECLARES about a rule, and derive the inverse a bidirectional declaration
 %   asks for instead of making its author write it twice.
@@ -411,7 +415,9 @@ restore_translator_rule_derived_rows(
 rollback_restored_translator_rule(Name, Home, Generation) :-
     (   translator_rule(Name, _, Home),
         translator_rule_generation(Name, Home, Generation)
-    ->  forget_translator_rule(Name)
+    ->  % Workaround: swi-cleanup-window - finish retirement even after its generation row is gone.
+        catch(forget_translator_rule(Name), Ball,
+              (forget_translator_rule(Name), throw(Ball)))
     ;   true
     ).
 

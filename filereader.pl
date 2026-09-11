@@ -1,3 +1,7 @@
+% Guarantees: working_dir/1, active_source_load/1, active_source_program/1 and
+%   source_recompile_context/2 read stacks scoped by metta_with_trailed/3
+%   [tested: trailed_scopes; commit=WORKTREE].
+%
 % Purpose: read MeTTa source, split it into complete top-level forms, and
 % dispatch each parsed form to the evaluator.
 % Guarantees: plain_source_declarations/3 validates splice syntax before
@@ -425,14 +429,18 @@ metta_host_set_silent(Silent) :-
     retractall(silent(_)),
     assertz(silent(Silent)).
 
-:- thread_local working_dir/1.
+working_dir(Directory) :-
+    nb_current('$metta_working_dirs', Directories), member(Directory, Directories).
 :- dynamic compiled_metta_source/1.
-:- thread_local active_source_load/1.
+active_source_load(Load) :-
+    nb_current('$metta_source_loads', Loads), member(Load, Loads).
 :- dynamic source_load_assertion/3.
 :- dynamic source_load_support_assertions/2.
 :- dynamic source_load_resource/2.
 :- dynamic source_load_repair/2.
-:- thread_local source_recompile_context/2.
+source_recompile_context(Context, Owners) :-
+    nb_current('$metta_source_recompile_contexts', Contexts),
+    member(Context-Owners, Contexts).
 %What a file put where, so that loading it again can REPLACE that rather than
 %add to it. SWI states the rule this implements: "clauses are owned by the file
 %in which they are defined. This information is used to replace the old
@@ -520,14 +528,17 @@ metta_octets_digest(Payload, Digest) :-
 %one]. Paid here instead, where it belongs.
 :- metta_text_digest("", _).
 
-push_working_dir(Filename) :- file_directory_name(Filename, Dir0),
-                              ( absolute_file_name(Dir0, Dir, [file_type(directory), file_errors(fail)])
-                                -> true
-                                 ; Dir = Dir0 ),
-                              asserta(working_dir(Dir)).
+:- meta_predicate with_file_directory(+, 0), with_working_directory(+, 0).
+with_file_directory(Filename, Goal) :-
+    file_directory_name(Filename, Dir0),
+    ( absolute_file_name(Dir0, Dir, [file_type(directory), file_errors(fail)])
+    -> true ; Dir = Dir0 ),
+    with_working_directory(Dir, Goal).
 
-pop_working_dir :- retract(working_dir(_)), !.
-pop_working_dir.
+with_working_directory(Directory, Goal) :-
+    ( nb_current('$metta_working_dirs', Directories) -> true ; Directories = [] ),
+    % Workaround: swi-cleanup-window - nested import directories are a trailed stack.
+    metta_with_trailed('$metta_working_dirs', [Directory|Directories], Goal).
 
 %Read Filename into string S and process it (S holds MeTTa code):
 load_metta_file(Filename, Results) :- load_metta_file(Filename, Results, '&self').
@@ -543,10 +554,9 @@ load_entry_metta_file(Filename, Results, Space) :-
     ( var(Results) -> Results = [] ; true ).
 
 load_metta_file_impl(Filename, Results, Space) :-
-    setup_call_cleanup(push_working_dir(Filename),
-                       ( read_metta_source(Filename, S),
-                         process_loader_string(S, Results, Space) ),
-                       pop_working_dir).
+    with_file_directory(Filename,
+                        ( read_metta_source(Filename, S),
+                          process_loader_string(S, Results, Space) )).
 
 %One answer GROUP per runnable form, in source order, which the flattening
 %above deliberately loses: a program wants every answer and nothing else, and
@@ -576,9 +586,7 @@ load_entry_metta_source_groups(Filename, Space, Groups) :-
                 load_imported_metta_source_groups(CanonPath, Groups, Space)).
 
 load_metta_source_groups_impl(Filename, Space, Groups) :-
-    setup_call_cleanup(push_working_dir(Filename),
-                       read_metta_source_groups(Filename, Space, Groups),
-                       pop_working_dir).
+    with_file_directory(Filename, read_metta_source_groups(Filename, Space, Groups)).
 
 read_metta_source_groups(Filename, Space, Groups) :-
     read_metta_source(Filename, Source),
@@ -646,7 +654,7 @@ metta_host_rethrow_syntax(syntax_error(M)) :- !,
 metta_host_rethrow_syntax(Caught) :-
     throw(Caught).
 
-%The CLI asserts working_dir/1 from the file it loads and import! reads it
+%The CLI scopes working_dir/1 from the file it loads and import! reads it
 %unconditionally, so a string run needs one too; the process's own
 %directory is the honest analogue of "the file's directory" for source
 %with no file.
@@ -654,7 +662,7 @@ metta_host_default_working_dir :-
     (   working_dir(_)
     ->  true
     ;   working_directory(Dir, Dir),
-        assertz(working_dir(Dir))
+        nb_setval('$metta_working_dirs', [Dir])
     ).
 
 %Run source with one answer group per runnable form, in source order.
@@ -762,18 +770,14 @@ metta_host_load_file(File, Space, Groups) :-
     ( atom(File) -> FA = File ; atom_string(FA, File) ),
     absolute_file_name(FA, CanonPath, [access(read)]),
     file_directory_name(CanonPath, Dir),
-    findall(W, working_dir(W), Saved),
-    setup_call_cleanup(
-        ( retractall(working_dir(_)),
-          assertz(working_dir(Dir)) ),
+    % Workaround: swi-cleanup-window - a host file load trails its replacement directory.
+    metta_with_trailed('$metta_working_dirs', [Dir],
         import_when(true, Space, CanonPath,
             replacing_previous_load(CanonPath, Space,
                 load_imported_metta_file_impl(CanonPath, _),
                 with_source_load(CanonPath, Space,
                     ( read_metta_source(CanonPath, S),
-                      metta_host_run_source(S, Space, [], Groups) )))),
-        ( retractall(working_dir(_)),
-          forall(member(W, Saved), assertz(working_dir(W))) )).
+                      metta_host_run_source(S, Space, [], Groups) ))))).
 
 %Every form as a [Kind, Text] pair, none compiled, stored, or run: the
 %boot-manifest door. Text is the form's own source, which keeps the
@@ -986,7 +990,8 @@ source_summary_of_forms(Forms, Sigs, Decls) :-
 %the latter must still know which names have no equation in the source prefix
 %that has run so far. A keyed thread-local context survives every source door,
 %nests safely across imports, and disappears even when a form throws.
-:- thread_local active_source_program/1.
+active_source_program(Id) :-
+    nb_current('$metta_source_programs', Programs), member(Id, Programs).
 :- thread_local source_pending_definition/2.
 :- thread_local source_compiled_definition/1.
 :- meta_predicate with_source_program_order(+, +, 0).
@@ -1021,14 +1026,19 @@ with_named_definition_order(Names, Goal) :-
     with_source_definition_order(Id, Names, Goal).
 
 with_source_definition_order(Id, Names, Goal) :-
+    ( nb_current('$metta_source_programs', Programs) -> true ; Programs = [] ),
+    % Workaround: swi-cleanup-window - register retirement before the trailed context.
     setup_call_cleanup(
-        asserta(active_source_program(Id), ContextRef),
-        ( forall(member(F, Names), assertz(source_pending_definition(Id, F))),
-          call(Goal),
-          flush_source_program_analysis_if_needed ),
-        ( erase(ContextRef),
-          retractall(source_pending_definition(Id, _)),
-          retractall(source_compiled_definition(Id)) )).
+        true,
+        metta_with_trailed('$metta_source_programs', [Id|Programs],
+            ( forall(member(F, Names), assertz(source_pending_definition(Id, F))),
+              call(Goal), flush_source_program_analysis_if_needed )),
+        catch(retire_source_program(Id), Ball,
+              (retire_source_program(Id), throw(Ball)))).
+
+retire_source_program(Id) :-
+    retractall(source_pending_definition(Id, _)),
+    retractall(source_compiled_definition(Id)).
 
 source_definition_arrived(F) :-
     active_source_program(Id),
@@ -1530,9 +1540,9 @@ translate_recompiled_clause(Module, G, Term, types(Types), Clause) :-
 :- meta_predicate with_source_recompile_owners(+, 0).
 with_source_recompile_owners(Owners, Goal) :-
     recompile_load_context(Context),
-    setup_call_cleanup(asserta(source_recompile_context(Context, Owners), ContextRef),
-                       call(Goal),
-                       erase(ContextRef)).
+    ( nb_current('$metta_source_recompile_contexts', Contexts) -> true ; Contexts = [] ),
+    % Workaround: swi-cleanup-window - recompile ownership unwinds with its context.
+    metta_with_trailed('$metta_source_recompile_contexts', [Context-Owners|Contexts], Goal).
 
 % Forcing a deferred dependency pushes its own source pin. It must not inherit
 % the recompile owner of the caller that happened to force it.

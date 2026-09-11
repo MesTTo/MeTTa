@@ -1,3 +1,7 @@
+% Guarantees: refresh, force and frame-finish guards use metta_with_trailed/3
+%   and treat an absent root as inactive
+%   [source: engine/metta/references.pl:metta_reference_refresh/0; commit=WORKTREE].
+%
 % Purpose: derive live definition references and occurrence visibility from rows.
 % Assumes: spaces:metta_space_pair/4 retains each stored occurrence's token;
 %   foreign receivers declare tokens, add-token and remove-token.
@@ -27,11 +31,14 @@
 :- volatile metta_reference_seen_space/2, metta_reference_slot/4.
 :- '$notransact'(metta_reference_seen_space/2).
 :- '$notransact'(metta_reference_slot/4).
-:- thread_local metta_reference_refreshing/0, metta_reference_finishing/1.
+metta_reference_refreshing :- nb_current('$metta_reference_refreshing', true).
+metta_reference_finishing(Frame) :-
+    nb_current('$metta_reference_finishing', Frames), member(Frame, Frames).
 :- dynamic metta_reference_hooks/0.
 :- dynamic metta_reference_demand/1.
 :- volatile metta_reference_demand/1.
-:- thread_local metta_reference_forcing/1.
+metta_reference_forcing(Name) :-
+    nb_current('$metta_reference_forcing', Names), member(Name, Names).
 
 metta_reference_declare(Space, Term, Token) :-
     spaces:metta_require_token_mutation(Space, from),
@@ -212,10 +219,9 @@ metta_reference_definition_changed(Space) :-
 metta_reference_refresh :-
     (   metta_reference_refreshing
     ->  true
-    ;   setup_call_cleanup(
-            asserta(metta_reference_refreshing, Guard),
-            metta_reference_refresh_now,
-            erase(Guard))
+    ;   % Workaround: swi-cleanup-window - reference refresh has a trailed guard.
+        metta_with_trailed('$metta_reference_refreshing', true,
+                           metta_reference_refresh_now)
     ).
 
 metta_reference_refresh_now :-
@@ -283,14 +289,14 @@ metta_reference_unsettled(Home, Name) :-
 metta_reference_force(Name) :-
     (   metta_reference_forcing(Name)
     ->  true
-    ;   setup_call_cleanup(
-            asserta(metta_reference_forcing(Name), Guard),
+    ;   ( nb_current('$metta_reference_forcing', Names) -> true ; Names = [] ),
+        % Workaround: swi-cleanup-window - each active force is a trailed stack entry.
+        metta_with_trailed('$metta_reference_forcing', [Name|Names],
             forall(( metta_reference_roots(_, Name, _, Roots),
                      member(root(Home, Original, _), Roots) ),
                    ( metta_reference_wait(Home),
                      ( Original == Name -> true
-                     ; spaces:metta_ensure_compiled(Original) ) )),
-            erase(Guard))
+                     ; spaces:metta_ensure_compiled(Original) ) )))
     ).
 
 :- multifile user:exception/3.
@@ -534,10 +540,10 @@ metta_reference_finish_frame(Owner, Frame) :-
     metta_reference_pending_frames(Frames),
     (   selectchk(Frame, Frames, Remaining)
     ->  nb_setval('$metta_reference_frames', Remaining),
-        setup_call_cleanup(
-            asserta(metta_reference_finishing(Frame), Guard),
-            metta_reference_refresh,
-            erase(Guard)),
+        ( nb_current('$metta_reference_finishing', Finishing) -> true ; Finishing = [] ),
+        % Workaround: swi-cleanup-window - finishing frames unwind with their callback.
+        metta_with_trailed('$metta_reference_finishing', [Frame|Finishing],
+                           metta_reference_refresh),
         ( metta_reference_pending_frame(_) -> true
         ; nb_delete('$metta_reference_listening'),
           prolog_unlisten(frame_finished,

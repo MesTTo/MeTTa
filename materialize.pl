@@ -1,3 +1,7 @@
+% Guarantees: materialization_transaction/2, with_source_materialization/3 and
+%   with_source_materialization_batch/3 scope roots through metta_with_trailed/3
+%   [tested: trailed_scopes; commit=WORKTREE].
+%
 % Purpose: materialize finite function-free equation bags at source boundaries.
 % Guarantees: only ground acyclic dependency graphs replace ordinary dispatch;
 %   every tuple retains its proof count and unsupported calls retain compiled
@@ -65,10 +69,14 @@
 :- meta_predicate with_source_materialization_batch(+, 0, 0).
 :- meta_predicate materialization_transaction(0).
 :- meta_predicate materialization_transaction(0, 0).
-:- thread_local source_materialization/2.
-:- thread_local materialization_transaction_owner/0.
+source_materialization(Space, Candidates) :-
+    nb_current('$metta_source_materializations', Sources),
+    member(Space-Candidates, Sources).
+materialization_transaction_owner :- nb_current('$metta_materialization_owner', true).
 :- thread_local materialization_changed_space/1.
-:- thread_local materialization_batch/1.
+materialization_batch(Batch) :-
+    nb_current('$metta_materialization_batches', Batches),
+    member(Batch, Batches), arg(1, Batch, open).
 :- thread_local materialization_pending/1.
 :- dynamic materialized_snapshot/5.
 :- dynamic materialized_predicate/4.
@@ -102,13 +110,15 @@ materialization_transaction(Goal) :-
 materialization_transaction(Goal, Constraint) :-
     (   current_transaction(_)
     ->  transaction(Goal, Constraint, '$metta_materialization')
-    ;   setup_call_cleanup(
-            assertz(materialization_transaction_owner, Ref),
-            transaction(( call(Goal), materialization_proposals(Proposals) ),
-                        ( call(Constraint),
-                          reconcile_materialization(Proposals) ),
-                        '$metta_materialization'),
-            ( erase(Ref), retractall(materialization_changed_space(_)) ))
+    ;   % Workaround: swi-cleanup-window - register row cleanup before the trailed owner.
+        setup_call_cleanup(
+            true,
+            metta_with_trailed('$metta_materialization_owner', true,
+                transaction(( call(Goal), materialization_proposals(Proposals) ),
+                            ( call(Constraint), reconcile_materialization(Proposals) ),
+                            '$metta_materialization')),
+            catch(retractall(materialization_changed_space(_)), Ball,
+                  (retractall(materialization_changed_space(_)), throw(Ball))))
     ).
 
 materialization_changed(Space) :-
@@ -178,11 +188,15 @@ with_source_materialization(Space, Names, Goal) :-
     sort(All, Candidates),
     (   Candidates == []
     ->  call(Goal)
-    ;   setup_call_catcher_cleanup(
-            asserta(source_materialization(Space, Candidates), Ref),
-            ( call(Goal), flush_source_materialization ),
+    ;   ( nb_current('$metta_source_materializations', Sources) -> true ; Sources = [] ),
+        % Workaround: swi-cleanup-window - candidate contexts unwind before image cleanup.
+        setup_call_catcher_cleanup(
+            true,
+            metta_with_trailed('$metta_source_materializations', [Space-Candidates|Sources],
+                              (call(Goal), flush_source_materialization)),
             Catcher,
-            ( erase(Ref), source_materialization_cleanup(Catcher, Space) ))
+            catch(source_materialization_cleanup(Catcher, Space), Ball,
+                  (source_materialization_cleanup(Catcher, Space), throw(Ball))))
     ).
 
 source_materialization_cleanup(exit, _) :- !.
@@ -202,20 +216,22 @@ source_materialization_cleanup(_, Space) :- discard_space(Space).
 % [tested: extensions/python/tests/ch18_performance/test_materialization.py,
 % test_a_reloaded_program_builds_its_relation_once; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 with_source_materialization_batch(Space, Prepare, Publish) :-
-    gensym(materialization_batch_, Id),
+    ( nb_current('$metta_materialization_batches', Batches) -> true ; Batches = [] ),
+    Batch = batch(open),
+    % Workaround: swi-cleanup-window - trail the batch root and retain its early-close cell.
     setup_call_catcher_cleanup(
-        assertz(materialization_batch(Id)),
-        ( call(Prepare),
-          close_materialization_batch(Id, Space),
-          call(Publish) ),
+        true,
+        metta_with_trailed('$metta_materialization_batches', [Batch|Batches],
+            ( call(Prepare), close_materialization_batch(Batch, Space), call(Publish) )),
         Catcher,
-        abandon_materialization_batch(Id, Catcher)).
+        catch(abandon_materialization_batch(Catcher), Ball,
+              (abandon_materialization_batch(Catcher), throw(Ball)))).
 
 % The queue closes before publication, so every prepared relation is still
 % inside the load's own rollback boundary. A nested load forwards its spaces
 % to the enclosing batch, which is the boundary that runs the last repair.
-close_materialization_batch(Id, Space) :-
-    retractall(materialization_batch(Id)),
+close_materialization_batch(Batch, Space) :-
+    nb_setarg(1, Batch, closed),
     queue_materialization(Space),
     (   materialization_batch(_)
     ->  true
@@ -231,8 +247,7 @@ queue_materialization(Space) :-
 % The queue outlives construction and publication, so a throw after one image
 % was installed discards every space this load touched rather than only the
 % one the caller named.
-abandon_materialization_batch(Id, Catcher) :-
-    retractall(materialization_batch(Id)),
+abandon_materialization_batch(Catcher) :-
     (   materialization_batch(_)
     ->  true
     ;   (   batch_completed(Catcher)
@@ -727,7 +742,7 @@ materialized_query_context(Module) :-
     % [source: engine/translator/analysis.pl, translate_tracked_clause/3,
     % translate_clause/3; engine/translator/lowering.pl,
     % translate_runnable_expr/3; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
-    ( nb_current('$metta_static_contract_shortcuts', Mode) -> Mode == guarded
+    ( nb_current('$metta_static_contract_shortcuts', Mode), Mode \== [] -> Mode == guarded
     ; true ),
     current_metta_module(Module).
 
@@ -784,7 +799,7 @@ discard_space_locked(Space) :-
     ; transaction(discard_space_rows(Space)) ).
 
 discard_space_rows(Space) :-
-    forall(retract(materialized_snapshot(Space, _, Token, _, _)),
+    forall(materialized_snapshot(Space, _, Token, _, _),
            discard_image_rows(Space, Token)).
 
 % The caller owns both the publication lock and its transaction. Exact refs
@@ -792,10 +807,12 @@ discard_space_rows(Space) :-
 % [tested: materialization_dispatch, function_free_materialization;
 % commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 discard_image_rows(Space, Token) :-
-    forall(retract(materialized_dispatch_ref(Token, Ref)), erase(Ref)),
-    retractall(materialized_snapshot(Space, _, Token, _, _)),
+    % Workaround: swi-cleanup-window - retain retirement records until their effects finish.
+    forall(materialized_dispatch_ref(Token, Ref), ignore(erase(Ref))),
+    retractall(materialized_dispatch_ref(Token, _)),
     retractall(materialized_predicate(_, _, _, Token)),
-    retractall(materialized_owner(_, Space, Token)).
+    retractall(materialized_owner(_, Space, Token)),
+    retractall(materialized_snapshot(Space, _, Token, _, _)).
 
 % The channel opens with the first image instead of at load time. SWI delivers
 % this event from clause garbage collection, which runs on the `gc` thread or

@@ -1,3 +1,7 @@
+% Guarantees: metta_remove_occurrence/3 scopes its foreign selector through
+%   metta_with_trailed/3; consuming the selector preserves its trailed root
+%   [source: engine/spaces/tokens.pl:metta_remove_provider_occurrence/3; commit=WORKTREE].
+%
 % Purpose: compose occurrence reads and ordering with the native storage shape.
 % Guarantees: raw occurrence storage returns its identity; reference scopes
 %   remove selected occurrences through the ordinary semantic write doors
@@ -77,12 +81,9 @@ metta_store_occurrence(Space, Atom, Token, Ref) :-
 metta_remove_occurrence(Space, Token, Removed) :-
     ( once(metta_space_pair(Space, Atom, Token, Ref))
     -> ( Ref == none
-       -> ( nb_current('$metta_foreign_removal_token', Previous)
-          -> Prior = some(Previous) ; Prior = none ),
-          setup_call_cleanup(
-              nb_setval('$metta_foreign_removal_token', Space-Token),
-              metta_remove_atom(Space, Atom, Removed),
-              metta_restore_removal_token(Prior))
+       -> % Workaround: swi-cleanup-window - exact removal trails its selector.
+          metta_with_trailed('$metta_foreign_removal_token', Space-Token,
+                             metta_remove_atom(Space, Atom, Removed))
        ; metta_remove_atom_reference(Ref), Removed = true )
     ; Removed = false ).
 
@@ -95,7 +96,8 @@ metta_restore_removal_token(none) :- nb_delete('$metta_foreign_removal_token').
 % removal for receivers that do not register the older remove capability.
 metta_remove_provider_occurrence(Space, Atom, Removed) :-
     ( nb_current('$metta_foreign_removal_token', Space-Token)
-    -> nb_delete('$metta_foreign_removal_token'),
+    % Workaround: swi-cleanup-window - consuming a selector must retain its trailed root.
+    -> b_setval('$metta_foreign_removal_token', []),
        metta_token_portable(Token, Portable),
        foreign_write(Space, 'remove-token',
                      seam:foreign_remove_token(Space, Portable, Removed))

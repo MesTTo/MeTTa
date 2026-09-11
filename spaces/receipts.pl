@@ -1,3 +1,7 @@
+% Guarantees: metta_with_occurrence_load/1 restores its root through
+%   metta_with_trailed/3 before catch-protected receipt retirement
+%   [source: engine/spaces/receipts.pl:metta_with_occurrence_load/1; commit=WORKTREE].
+%
 % Purpose: reserve incoming occurrence identities across transaction views.
 % Assumes: native erasures use metta_erase_storage_ref/1 or metta_retract_storage/1.
 % Guarantees: overlapping image receipts retain distinct tokens, while a load
@@ -22,18 +26,19 @@ metta_with_occurrence_load(Goal) :-
     flag('$metta_occurrence_scope', Load, Load+1),
     ( current_transaction(_) -> metta_receipt_transaction_scope(Scope), Held = transaction
     ; Scope = Load, Held = load ),
-    ( nb_current('$metta_occurrence_load', Previous) -> Prior = some(Previous)
-    ; Prior = none ),
+    % Workaround: swi-cleanup-window - register receipt cleanup before trailing the load.
     setup_call_catcher_cleanup(
-        nb_setval('$metta_occurrence_load', Scope-Load),
-        call(Goal), Catcher,
-        ( ( Held == load -> metta_receipt_forget_scope(Scope)
-          % policy-inventory-exempt: mechanism-internal; reason=exit and ! are the two catcher values setup_call_catcher_cleanup/4 hands a goal that completed, beside exception, fail and external; evidence=engine/spaces/receipts.pl:metta_with_occurrence_load/1
-          ; memberchk(Catcher, [exit, !]) -> true
-          ; metta_receipt_request(forget_load(Load), done),
-            retractall(metta_receipt_marker(Scope, Load)) ),
-          ( Prior = some(Saved) -> nb_setval('$metta_occurrence_load', Saved)
-          ; nb_delete('$metta_occurrence_load') ) )).
+        true,
+        metta_with_trailed('$metta_occurrence_load', Scope-Load, Goal), Catcher,
+        catch(metta_finish_occurrence_load(Held, Scope, Load, Catcher), Ball,
+              (metta_finish_occurrence_load(Held, Scope, Load, Catcher), throw(Ball)))).
+
+metta_finish_occurrence_load(Held, Scope, Load, Catcher) :-
+    ( Held == load -> metta_receipt_forget_scope(Scope)
+    % policy-inventory-exempt: mechanism-internal; reason=exit and ! are SWI's completed cleanup outcomes; evidence=engine/spaces/receipts.pl:metta_finish_occurrence_load/4
+    ; memberchk(Catcher, [exit, !]) -> true
+    ; metta_receipt_request(forget_load(Load), done),
+      retractall(metta_receipt_marker(Scope, Load)) ).
 
 metta_receive_occurrences(_, [], []) :- !.
 metta_receive_occurrences(Space, Incoming, Stored) :-
@@ -110,8 +115,10 @@ metta_receipt_frame_finished(Frame) :-
     ).
 
 metta_receipt_forget_scope(Scope) :-
-    ( retract(metta_receipt_reserved(Scope))
-    -> metta_receipt_request(forget_scope(Scope), done)
+    % Workaround: swi-cleanup-window - release the reservation before removing its retry record.
+    ( metta_receipt_reserved(Scope)
+    -> metta_receipt_request(forget_scope(Scope), done),
+       retractall(metta_receipt_reserved(Scope))
     ; true ),
     retractall(metta_receipt_marker(Scope, _)),
     retractall(metta_receipt_erased(Scope, _)).
