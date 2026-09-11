@@ -71,7 +71,7 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
   - C and C++ pins resolve inside comments while quoted and raw strings,
     macro strings and header names retain their bytes
-    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8]
 Fails when: a pin sits somewhere the file's grammar cannot distinguish from
   code. It is reported, not rewritten, and finishing it is a human's call.
 Owns resources: none; it rewrites files in place and holds nothing open.

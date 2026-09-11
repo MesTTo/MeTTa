@@ -1,7 +1,7 @@
 % Purpose: detect NUL truncation in the host's ISub boundary and core.
 % Guarantees: the identity control and exact expected scores distinguish a
 % live defect, a repaired provider and an unexpected result.
-% [tested: sh check.sh host-workarounds host-workarounds-selftest; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds host-workarounds-selftest; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8].
 
 :- use_module(library(isub), [isub/4]).
 

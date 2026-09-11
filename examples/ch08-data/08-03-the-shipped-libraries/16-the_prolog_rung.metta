@@ -1,6 +1,6 @@
 ; Purpose: compare retained Prolog spellings with their MeTTa library names.
 ; Guarantees: the paired calls below agree on their results.
-; [tested: examples/ch08-data/08-03-the-shipped-libraries/16-the_prolog_rung.metta; commit=WORKTREE].
+; [tested: examples/ch08-data/08-03-the-shipped-libraries/16-the_prolog_rung.metta; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8].
 ; The libraries retain underscore spellings beside their MeTTa names. Both
 ; are callable; the assertions show when they share an operation. Their
 ; source declarations publish both spellings.

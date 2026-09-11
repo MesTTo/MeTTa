@@ -1,6 +1,6 @@
 % Purpose: detect compile-time binding of the host ISub option variables.
 % Guarantees: exact runtime controls distinguish the defect from a host repair.
-% [tested: sh check.sh host-workarounds host-workarounds-selftest; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds host-workarounds-selftest; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8].
 
 :- use_module(library(isub), [isub/4]).
 

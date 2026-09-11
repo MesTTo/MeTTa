@@ -2,7 +2,7 @@
 ; Guarantees: codepoints, literal matching, layout and metrics retain their
 ; documented empty-input and overlap cases.
 ; [tested: examples/ch08-data/08-03-the-shipped-libraries/18-string_lib.metta;
-; commit=WORKTREE].
+; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8].
 
 !(import! &self (library lib_string))
 

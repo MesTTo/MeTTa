@@ -3,7 +3,7 @@
 % Purpose: check complete String data, host equivalence and named refusals.
 % Guarantees: the tests exercise NUL, supplementary scalars, overlap, empty
 % inputs, layout, templates, native cancellation and distinct metrics.
-% [tested: lib_string_surface; commit=WORKTREE].
+% [tested: lib_string_surface; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8].
 % Owns resources: each cancellation alarm is removed on every outcome.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

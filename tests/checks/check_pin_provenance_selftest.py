@@ -38,7 +38,7 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
   - C and C++ literal, macro and header data survive pinning, and malformed
     lexical forms refuse before any file changes
-    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8]
 Fails when: run against a tree it did not write. It asserts on a fixture it
   generates and nothing else.
 Open Obligations:
