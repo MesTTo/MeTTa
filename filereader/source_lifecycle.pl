@@ -15,6 +15,9 @@
 % Guarantees: source and recompile scopes resolve their owner selection once;
 %   each artifact, stored atom and support group still writes its original
 %   indexed journal row immediately [tested: source_publication; commit=WORKTREE].
+% Guarantees: rollback_source_load/1 retires its detached artifact groups in
+%   order and keeps the existing per-reference cleanup failure policy
+%   [tested: source_retirement, filereader_source_rollback; commit=WORKTREE].
 % Assumes: engine/filereader.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/filereader.pl's implementation module and original load order;
 %   each source load is atomic with every dependent recompile it triggers;
@@ -1449,12 +1452,10 @@ rollback_source_load_stable(LoadId) :-
                        LoadId, restored_rule(Name, Home, Generation))),
            translator_rules:rollback_restored_translator_rule(
                Name, Home, Generation)),
-    forall(( member(Refs, SupportGroups), member(Ref, Refs) ),
-           ( catch(erase(Ref), _, true) -> true ; true )),
+    maplist(retire_source_artifacts, SupportGroups),
     findall(Ref, retract(source_load_assertion(LoadId, _, Ref)), Asserted),
     reverse(Asserted, Refs),
-    forall(member(Ref, Refs),
-           ( catch(erase(Ref), _, true) -> true ; true )),
+    retire_source_artifacts(Refs),
     findall(Space,
             retract(source_load_resource(LoadId, owned_space(Space))),
             Owned0),
@@ -1465,6 +1466,14 @@ rollback_source_load_stable(LoadId) :-
     support_prune_orphans,
     repair_after_source_rollback(Functions),
     repair_type_aliases_after_rollback(TypeLookups).
+
+% Cleanup already owns these exact reference groups. Attempt every reference,
+% including stale ones and duplicates, and preserve the established policy
+% that one failed cleanup does not abandon the rest of a failed source load.
+retire_source_artifacts([]).
+retire_source_artifacts([Ref|Refs]) :-
+    ( catch(erase(Ref), _, true) -> true ; true ),
+    retire_source_artifacts(Refs).
 
 repair_type_aliases_after_rollback(_) :- current_transaction(_), !.
 repair_type_aliases_after_rollback(Lookups) :-
