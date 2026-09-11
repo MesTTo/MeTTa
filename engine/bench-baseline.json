@@ -7,7 +7,7 @@
       "operations": 10000,
       "unit": "reduction",
       "wall_seconds_per_operation": 2.214e-07,
-      "measures": "10000 reductions adding the same literal field. Definition loading and one warm call precede the measured region. The sorted constructor reuses its construction proof and resolves its singleton structural projection; the untyped accessor retains its call. [measured: 60079 inferences and 32243459 instructions; command=sh engine/bench.sh constructor-control constructor-sorted constructor-plain; fixture=three fresh processes per counter, six native engine objects, both C example objects, both MORK objects, warm QLF; commit=WORKTREE]."
+      "measures": "10000 reductions adding the same literal field. Definition loading and one warm call precede the measured region. The sorted constructor reuses its construction proof and resolves its singleton structural projection; the untyped accessor retains its call. [measured: 60079 inferences and 32243459 instructions; command=sh engine/bench.sh constructor-control constructor-sorted constructor-plain; fixture=three fresh processes per counter, six native engine objects, both C example objects, both MORK objects, warm QLF; commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5]."
     },
     "constructor-sorted": {
       "inferences": 60079,
@@ -16,7 +16,7 @@
       "operations": 10000,
       "unit": "reduction",
       "wall_seconds_per_operation": 1.98e-07,
-      "measures": "10000 reductions adding the same sort-proved field projection. Definition loading and one warm call precede the measured region. The sorted constructor reuses its construction proof and resolves its singleton structural projection; the untyped accessor retains its call. [measured: 60079 inferences and 32323843 instructions; command=sh engine/bench.sh constructor-control constructor-sorted constructor-plain; fixture=three fresh processes per counter, six native engine objects, both C example objects, both MORK objects, warm QLF; commit=WORKTREE]."
+      "measures": "10000 reductions adding the same sort-proved field projection. Definition loading and one warm call precede the measured region. The sorted constructor reuses its construction proof and resolves its singleton structural projection; the untyped accessor retains its call. [measured: 60079 inferences and 32323843 instructions; command=sh engine/bench.sh constructor-control constructor-sorted constructor-plain; fixture=three fresh processes per counter, six native engine objects, both C example objects, both MORK objects, warm QLF; commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5]."
     },
     "constructor-plain": {
       "inferences": 70079,
@@ -25,7 +25,7 @@
       "operations": 10000,
       "unit": "reduction",
       "wall_seconds_per_operation": 3.427e-07,
-      "measures": "10000 reductions adding the same untyped field projection. Definition loading and one warm call precede the measured region. The sorted constructor reuses its construction proof and resolves its singleton structural projection; the untyped accessor retains its call. [measured: 70079 inferences and 40623831 instructions; command=sh engine/bench.sh constructor-control constructor-sorted constructor-plain; fixture=three fresh processes per counter, six native engine objects, both C example objects, both MORK objects, warm QLF; commit=WORKTREE]."
+      "measures": "10000 reductions adding the same untyped field projection. Definition loading and one warm call precede the measured region. The sorted constructor reuses its construction proof and resolves its singleton structural projection; the untyped accessor retains its call. [measured: 70079 inferences and 40623831 instructions; command=sh engine/bench.sh constructor-control constructor-sorted constructor-plain; fixture=three fresh processes per counter, six native engine objects, both C example objects, both MORK objects, warm QLF; commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5]."
     },
     "boot": {
       "checksum_validation_repin_comment": "RE-PINNED 2026-09-08: 301330 to 301230 after sharing the two lowercase hexadecimal validators and removing their content-dependent branches. Equal-length, fully provisioned control at f9c1ba822 reads 301330; f5069cade33a5afe8cc4555e7f40fefc7db42bc1 reads 301230 in every fresh process. Other six inference rows are unchanged. Boot retired instructions 965089743 remain inside the existing 965561590 pin and its one-percent band, which is retained. The old validator fails spaces_token_images:hash_header_cost_is_content_independent at [198,390]; the shared validator passes. [measured 2026-09-08: min of three fresh processes after clearing and warming QLF; command=sh engine/bench.sh --counter-only; fixture=same 29-character checkout and native artifacts; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4]",

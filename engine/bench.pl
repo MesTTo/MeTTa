@@ -37,7 +37,7 @@
 %     number [tested: engine/bench.sh; commit=c41b54d69e951882e5075393f851a33438247372].
 %   - constructor rows reduce the same sum through a sorted projection, an
 %     untyped projection and a literal control, checking the final sum
-%     [tested: translator_constructors; commit=WORKTREE].
+%     [tested: translator_constructors; commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
 %   - the measured region excludes setup and excludes the check, and when perf
 %     supplies its control descriptors the enabled window brackets exactly the
 %     same region [tested: engine/bench.sh; commit=c41b54d69e951882e5075393f851a33438247372].

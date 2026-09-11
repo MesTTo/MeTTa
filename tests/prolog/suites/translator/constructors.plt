@@ -1,7 +1,7 @@
 % Purpose: verify constructor checking, sorted projections and their invalidation.
 % Guarantees: public evaluation preserves complete answer bags while a warm
 %   sorted accessor costs less than the same untyped accessor
-%   [tested: run_tests(translator_constructors); commit=WORKTREE].
+%   [tested: run_tests(translator_constructors); commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
 % Owns resources: each test releases its native space through plunit cleanup.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

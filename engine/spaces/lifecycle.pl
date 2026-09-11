@@ -8,7 +8,7 @@
 % Purpose: decode stored atoms and manage source, subscription, reaction, table, and clear lifecycles
 % Guarantees: constructor declarations invalidate retained sort proofs,
 %   including declarations arriving through the bulk atom door
-%   [tested: run_tests(translator_constructors); commit=WORKTREE].
+%   [tested: run_tests(translator_constructors); commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
 % Guarantees: metta_add_atom/4 and ensure_new_batch_declaration/3 validate
 %   splice syntax before storage, including alias-installed observers
 %   [tested: variadic_arrows,

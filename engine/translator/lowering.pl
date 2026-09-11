@@ -1,7 +1,7 @@
 % Purpose: lower runnable expressions, calls, arguments, and dispatch policies into Prolog goals
 % Guarantees: declared constructors compile their checks at construction and
 %   sorted structural projections resolve through their retained dependencies
-%   [tested: run_tests(translator_constructors); commit=WORKTREE].
+%   [tested: run_tests(translator_constructors); commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
 % Guarantees: data_head_masks/3 and builtin_argument_mask/4 derive each
 %   variadic mask through present_type_chain/3
 %   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
