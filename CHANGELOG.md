@@ -9,6 +9,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_datetime` provides parsing, explicit-zone formatting, visible date
+  records, field queries, Gregorian calendar queries and calendar addition.
+  Existing clock and formatting names retain their results.
+- Prolog library faces derive imports, types and help from module exports and
+  typed PlDoc modes. The `prolog-face` gate refuses incomplete or stale faces.
+  Python faces also ship inside independent distributions; `metta-arrays`
+  advertises its generated library through `metta.libraries`. Evidence checks
+  cover nested distribution packages and the native declaration fixtures.
+
 - A standard-library census maps language concerns to the installed SWI-Prolog
   libraries and records the implementation order, existing heads and boundaries.
 
@@ -51,6 +60,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   load spec that never reaches the artifact rule (`swi-qlf-extension-spec`).
 
 ### Changed
+
+- Library reference entries and cards retain every declared overload.
+  `HeadCard.types` replaces the scalar `HeadCard.arrow` field with the complete
+  tuple of declarations. Source rosters,
+  counts and the example README can be regenerated from their existing
+  checkers and lineage generator. The twin idiom checker now verifies that
+  suggested attribute names preserve exact symbols, including `-`.
 
 - The evidence, provenance-pin and spec-status gates read the set git tracks
   for the root they scan, keyed by that root, so a selftest's planted tree is

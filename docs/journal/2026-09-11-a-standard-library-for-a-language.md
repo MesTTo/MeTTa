@@ -123,3 +123,133 @@ Open: verify detailed contracts and native edge cases before each library's
 implementation; settle generator failure cases and the generated-region boundary
 before the first library changes. The census fixes concerns and order; subsequent
 dated sections record measurements and justified design corrections.
+
+## 2026-09-11: the library declaration shape
+
+Tried: xref_source/2 over all 22 shipped Prolog halves -> each has an export
+list, none has PlDoc mode declarations. A separate probe with an initialization
+that throws was read without executing it; process_modes/6 retained argument
+names, types, determinism and the documentation body.
+
+Decided: the Prolog module owns its exports and typed PlDoc comments. The
+generator uses prolog_xref and PlDoc to emit one import, arrow rows and @doc
+rows in a delimited region of the adjacent MeTTa face. Pure MeTTa equations
+and their documentation remain outside that region. Existing exported host
+services that are not MeTTa heads use PlDoc's @private tag with their reason.
+No new engine registration protocol is needed.
+
+Decided: standard Prolog scalar types map to the existing MeTTa types; lists
+map to Expression, and term/any map to %Undefined%. An explicitly named MeTTa
+type remains that type. Arguments require named, explicit types. A forward
+mode must put its single result last. Other relational modes do not change
+the emitted arrow. Different arities and distinct typed overloads remain
+distinct rows. Nondeterminism is left to the native call, with no collecting
+wrapper.
+
+Decided: discovery reads Prolog source modes as well as generated regions.
+Removing the region marker or deleting the face therefore remains detectable.
+A source with no export modes is reported as an unmigrated source; once any
+export is described, missing metadata for another non-private export refuses
+generation. Explicitly requested sources also require complete metadata.
+Generation checks all inputs before writing, preserves handwritten bytes and
+atomically replaces each changed file beside itself.
+
+Rejected: a new Prolog parser or a hand-maintained face manifest, because the
+host already supplies both syntax and public declarations. Rejected: loading
+a library to inspect it, because an initializer can perform I/O. Rejected:
+inferring a missing type or silently converting a relation's extra outputs to
+a list, because neither is the declared interface.
+
+Verification plan: native metadata fixtures with punctuation, nullary results,
+overloads and multiple answers; real generated calls; planted type/doc/export,
+module-name, syntax and region drift; a non-executed initializer; preservation
+of handwritten equations; installed Python distribution discovery through
+metta.libraries. The generated-artifact manifest owns the regions and the
+gate's invocation. Documentation and corpus records use their existing
+sources, with a regeneration command where the current checker has none.
+
+Tried: the first face self-test run -> nine passes, a syntax-refusal failure,
+and a fixture-loader error. xref_source/2 with silent(true) discards syntax
+diagnostics; silent(false) lets --on-error=status refuse the source. Relative
+CLI paths now resolve before output ownership is checked. The fixture uses
+MeTTa.load, and generated native paths are relative to the standard library
+root so the same projection reaches both libraries and source fixtures.
+The corrected command, `python tests/checks/check_prologface_selftest.py`,
+passes 12 tests in 3.094 seconds. jscpd over the new Python emitter and its
+tests reports zero duplicate lines. Logs: ai-tmp/ai-libraries-face-selftest.log.
+
+## 2026-09-11: datetime
+
+Tried: `sh test.sh examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta`
+before changes -> five passing assertions. Read library(date) and the native
+date conversion documentation. SWI accepts UTC, local time and integer offsets
+west of Greenwich; date_time_stamp/2 normalizes overflowing calendar fields.
+
+Decided: keep the five existing heads and Symbol formatting results. Add
+strictly reported parsing, explicit-zone String formatting, visible date
+records, field queries, weekday/year-day, leap-year/month lengths and calendar
+addition. A full record is `(date Y M D H Min S Offset Zone DST)`; a date-only
+record is `(date Y M D)` at UTC midnight. Calendar addition normalizes overflow
+and recomputes the local offset after the addition. Numeric seconds remain
+ordinary arithmetic. The native calls do constant calendar work; parsing and
+formatting depend on text length. No duplicate time-zone database or timer.
+
+Rejected: changing TZ globally to emulate an IANA-zone API, because that
+changes concurrent callers' environment. Revisit with a declared provider
+that resolves named zones per call. The host's supported explicit-zone
+interface remains available.
+
+Tried: the datetime twin -> the idiom checker recommended S._ for S["-"].
+The runtime probe returned `_` for S._ and `-` for S["-"], so following the
+advice changed a date record. The hyphen branch copied an incomplete inverse
+name map. Decided: require attribute_name(candidate) == name before suggesting
+an attribute, using the factory's existing map. The same guard protects
+trailing hyphens, whose trailing underscore is a keyword escape. Added both
+to the existing exact-name regression. No declaration or compiler code changes.
+
+Decided: library documentation and cards retain every declaration in
+HeadRow.types. Both previously selected only the final arrow, hiding one of
+parse-date's call forms. HeadCard now stores types as a tuple; its text, Rich
+and HTML renderers share that representation. The regression checks both
+arrows in the reference, the card data and all three displays.
+
+Tried: `sh test.sh examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta`
+after implementation -> 25 passing assertions; `sh engine/test.sh
+suites/libraries/lib_datetime.plt` -> 15 passing tests. The card census reports
+16 heads and 17 types, every head documented and called in the same example.
+`python extensions/python/tools/twin_coverage.py --measure --rounds 3
+examples/ch08-data/08-03-the-shipped-libraries/07-datetime.metta` measures
+46,283 MeTTa inferences and 44,390 Python inferences, ratio 0.9591. The twin
+then passes all 25 claims with equal stored content and zero findings. Only
+its own budget was repinned; the point allowance is unchanged.
+
+Tried: the built metta-arrays wheel -> the metta.libraries entry point locates
+the installed generated face; both array and ordinary-list answers pass.
+The distribution and record-projection run passes five tests. Native face
+generation passes 12 tests; artifact ownership passes 14 tests; the README
+count projection passes two tests; llms falsification passes 68 cases; the
+card's overload and documentation checks pass two tests. jscpd reports zero
+duplicate lines across the five new Python files. Changed Python files pass
+ruff. Source and face syntax, metadata defects, malformed output regions,
+concurrent edits and replacement errors all have refusal witnesses.
+
+Tried: the per-library record lanes -> coverage grows from 660 to 671 carried
+heads with zero findings; cumulative syntax remains 324 examples and 284
+constructs; lineage remains 143 derived and 202 original files. llms, reference
+and docs pass. The first gate invocation exposed a fixture assumption that
+the working directory was the repository root. The test now uses a relative
+path that can include parent components; `sh check.sh prolog-face reference`
+passes both lanes and their witnesses from the gate's tests/prolog directory.
+`sh check.sh artifact-sync face-sync no-autoload lib-autoload` also passes,
+including the full corpus with autoload disabled and the wheel witness.
+
+Tried: `pin_provenance.py --check` -> the installed distribution's nested module
+and the two native face fixtures were outside the evidence source globs. The
+distribution glob now recurses through packages, and the fixture directory is
+included explicitly. Planted stale citations exercise all three paths; ignored
+build copies remain outside the tracked-source scan. The evidence selftest
+reports zero defects across 36 citation cases and all source-scope probes.
+
+Evidence logs: ai-tmp/ai-libraries-datetime-{before,after,prolog,card,records}.log,
+ai-tmp/ai-libraries-datetime-twin-{measure,repin,final}.log,
+ai-tmp/ai-libraries-{distribution-projections,card-tests,face-reference-fixed,shape-final}.log.

@@ -4914,15 +4914,21 @@ unknowns and refuses; the `#` operators POST rather than solve and compose
 across several operations, which is what they are for.
 `examples/ch05-equations-and-evaluation/05-04-arithmetic-that-runs-backwards/02-relational_arithmetic.metta` runs all of it.
 
-38 libraries load with `!(import! &self (library lib_x))`, each one line of
-what it is for: `lib_builtin_types` the declared type surface of the shipped
+<!-- begin generated library roster -->
+38 libraries load with `!(import! &self (library lib_x))`:
+`lib_builtin_types`, `lib_combinatorics`, `lib_conformance`, `lib_constraints`, `lib_crypto`, `lib_csv`, `lib_datastructures`, `lib_datetime`, `lib_derived`, `lib_dict`, `lib_distribution`, `lib_doc`, `lib_file`, `lib_gitimport`, `lib_he`, `lib_import`, `lib_json`, `lib_measure`, `lib_memo`, `lib_mm2`, `lib_nars`, `lib_observe`, `lib_patrick`, `lib_pln`, `lib_pln2`, `lib_redis`, `lib_reflect`, `lib_regex`, `lib_roman`, `lib_soft`, `lib_spaces`, `lib_strategy`, `lib_string`, `lib_tabling`, `lib_thread`, `lib_torch`, `lib_vector`, `lib_zar`. Scored answers and every documented head are listed in
+`website/reference/metta-libraries.md`.
+<!-- end generated library roster -->
+
+Library contracts: `lib_builtin_types` the declared type surface of the shipped
 builtins; `lib_combinatorics` range, take, choose-k, and exact independent
 weighted-subset posterior marginals; `lib_conformance` proves
 a foreign space provider before its users find out; `lib_constraints` CLP(Q)
 over rationals and CLP(B) over booleans; `lib_csv` streams CSV rows through the foreign space seam; `lib_crypto` hashes and secure
 randomness, refusing by name where OpenSSL is absent; `lib_datastructures` an
-amortised O(1) functional queue and a finger tree; `lib_datetime` now,
-format-date, day-of-week; `lib_derived` the derived forms the engine keeps FUSED
+amortised O(1) functional queue and a finger tree; `lib_datetime` clocks,
+parsing, explicit-zone formatting, date records, calendar fields and addition;
+`lib_derived` the derived forms the engine keeps FUSED
 into its compiler, written out as equations; `lib_dict` a dictionary that IS a
 space; `lib_distribution` pure finite value-distribution map, independent
 product, threshold, strict win probability, exact joint conditioning, average

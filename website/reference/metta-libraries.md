@@ -16,7 +16,7 @@ beside its definitions.
 | lib_crypto | 4 | 0 |
 | lib_csv | 2 | 2 |
 | lib_datastructures | 26 | 9 |
-| lib_datetime | 5 | 0 |
+| lib_datetime | 16 | 16 |
 | lib_derived | 1 | 1 |
 | lib_dict | 7 | 0 |
 | lib_distribution | 7 | 0 |
@@ -162,6 +162,244 @@ Both trees' elements, left then right, in O(log n): the operation finger trees e
 Returns: one finger tree
 
 Undocumented: `FTDeep`, `FTEmpty`, `FTSingle`, `FTree`, `add-unique-or-fail`, `dequeue`, `empty-queue`, `enqueue`, `ft-app3`, `ft-borrow-l`, `ft-borrow-r`, `ft-node-digit`, `ft-nodes`, `ft-push-back`, `ft-push-front`, `ft-push-list-back`, `ft-push-list-front`
+
+## lib_datetime
+
+### `date-add`
+
+*lib_datetime.metta:10*
+
+```metta
+(: date-add (-> Number Expression %Undefined% Number))
+```
+
+Add (Years Months Days Hours Minutes Seconds) in Zone's calendar, then normalize overflow. January 31 plus one month can enter March. Local time recomputes daylight saving using the host's mktime policy; fixed offsets stay fixed. The first five deltas are integers; seconds may be fractional.
+
+1. Timestamp
+2. Delta
+3. Zone
+
+Returns: Shifted
+
+### `date-field`
+
+*lib_datetime.metta:16*
+
+```metta
+(: date-field (-> Expression Symbol %Undefined%))
+```
+
+Read year, month, day, hour, minute, second, utc_offset, time_zone, daylight_saving, date or time. Missing or unknown fields have no answer; date and time fields are visible expressions.
+
+1. Parts
+2. Field
+
+Returns: Value
+
+### `date-fields`
+
+*lib_datetime.metta:22*
+
+```metta
+(: date-fields (-> Expression Expression))
+```
+
+Enumerate (Field Value) pairs from a date record, omitting unknown zone/DST.
+
+1. Parts
+
+Returns: Pair
+
+### `date-timestamp`
+
+*lib_datetime.metta:28*
+
+```metta
+(: date-timestamp (-> Expression Number))
+```
+
+Convert (date Y M D) at UTC midnight or a full timestamp-date record to Unix seconds. Overflowing calendar fields normalize, as in SWI date_time_stamp.
+
+1. Parts
+
+Returns: Timestamp
+
+### `date-weekday`
+
+*lib_datetime.metta:34*
+
+```metta
+(: date-weekday (-> Expression Number))
+```
+
+Return the weekday of a normalized calendar date: Monday 1 through Sunday 7.
+
+1. Parts
+
+Returns: Day
+
+### `date-year-day`
+
+*lib_datetime.metta:40*
+
+```metta
+(: date-year-day (-> Expression Number))
+```
+
+Return the one-based day of the normalized year, including leap days.
+
+1. Parts
+
+Returns: Day
+
+### `day-of-week`
+
+*lib_datetime.metta:46*
+
+```metta
+(: day-of-week (-> Number Symbol))
+```
+
+Return the UTC weekday name, with the same contract as day_of_week.
+
+1. Timestamp
+
+Returns: Day
+
+### `day_of_week`
+
+*lib_datetime.metta:52*
+
+```metta
+(: day_of_week (-> Number Symbol))
+```
+
+Return the UTC weekday name in the process locale as a Symbol.
+
+1. Timestamp
+
+Returns: Day
+
+### `format-date`
+
+*lib_datetime.metta:58*
+
+```metta
+(: format-date (-> Number %Undefined% Symbol))
+```
+
+Format Timestamp in UTC as a Symbol, with the same contract as format_date.
+
+1. Timestamp
+2. Pattern
+
+Returns: Formatted
+
+### `format-datetime`
+
+*lib_datetime.metta:64*
+
+```metta
+(: format-datetime (-> Number %Undefined% %Undefined% String))
+```
+
+Format Timestamp as String in UTC, local, or integer seconds west of UTC. Zone may be a Symbol or String; unsupported zones raise a native domain error.
+
+1. Timestamp
+2. Pattern
+3. Zone
+
+Returns: Text
+
+### `format_date`
+
+*lib_datetime.metta:70*
+
+```metta
+(: format_date (-> Number %Undefined% Symbol))
+```
+
+Format Timestamp in UTC using SWI strftime directives; return a Symbol.
+
+1. Timestamp
+2. Pattern
+
+Returns: Formatted
+
+### `leap-year`
+
+*lib_datetime.metta:76*
+
+```metta
+(: leap-year (-> Number Bool))
+```
+
+Test the proleptic Gregorian leap-year rule, including negative years.
+
+1. Year
+
+Returns: Leap
+
+### `month-days`
+
+*lib_datetime.metta:82*
+
+```metta
+(: month-days (-> Number Number Number))
+```
+
+Count days in Month 1 through 12 of the proleptic Gregorian Year.
+
+1. Year
+2. Month
+
+Returns: Days
+
+### `now`
+
+*lib_datetime.metta:88*
+
+```metta
+(: now (-> Number))
+```
+
+Read Unix seconds from the system wall clock. Clock adjustments can move it backwards.
+
+Returns: Timestamp
+
+### `parse-date`
+
+*lib_datetime.metta:95*
+
+```metta
+(: parse-date (-> %Undefined% Number))
+```
+
+```metta
+(: parse-date (-> %Undefined% Symbol Number))
+```
+
+Parse ISO 8601, RFC 1123, RFC 1036 or asctime text, optionally selecting iso_8601, rfc_1123, rfc_1036 or asctime. Invalid text or format raises. ISO dates alone use UTC; a time without a zone uses the process local zone.
+
+1. Text
+2. Format
+
+Returns: Timestamp
+
+### `timestamp-date`
+
+*lib_datetime.metta:101*
+
+```metta
+(: timestamp-date (-> Number %Undefined% Expression))
+```
+
+Convert Unix seconds to (date Y M D H Min S Offset Zone DST). The input zone is UTC, local or integer seconds west of UTC. Unknown Zone and DST fields are the Symbol -. Fractional seconds survive at the host clock precision.
+
+1. Timestamp
+2. Zone
+
+Returns: Parts
 
 ## lib_derived
 
@@ -590,6 +828,22 @@ Returns: %Undefined%
 *lib_torch.metta:39*
 
 ```metta
+(: torch-zeros (-[det,writesState]-> %Undefined%))
+```
+
+```metta
+(: torch-zeros (-[det,writesState]-> %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-zeros (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-zeros (-[det,writesState]-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+```metta
 (: torch-zeros (-[det,writesState]-> %Undefined% %Undefined% %Undefined% %Undefined% %Undefined%))
 ```
 
@@ -605,6 +859,22 @@ Returns: %Undefined%
 ### `torch-ones`
 
 *lib_torch.metta:51*
+
+```metta
+(: torch-ones (-[det,writesState]-> %Undefined%))
+```
+
+```metta
+(: torch-ones (-[det,writesState]-> %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-ones (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-ones (-[det,writesState]-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
 
 ```metta
 (: torch-ones (-[det,writesState]-> %Undefined% %Undefined% %Undefined% %Undefined% %Undefined%))
@@ -624,6 +894,22 @@ Returns: %Undefined%
 *lib_torch.metta:63*
 
 ```metta
+(: torch-randn (-[det,oracleIO]-> %Undefined%))
+```
+
+```metta
+(: torch-randn (-[det,oracleIO]-> %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-randn (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-randn (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+```metta
 (: torch-randn (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined% %Undefined% %Undefined%))
 ```
 
@@ -639,6 +925,14 @@ Returns: %Undefined%
 ### `torch-arange`
 
 *lib_torch.metta:73*
+
+```metta
+(: torch-arange (-[det,writesState]-> %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-arange (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
+```
 
 ```metta
 (: torch-arange (-[det,writesState]-> %Undefined% %Undefined% %Undefined% %Undefined%))
@@ -812,6 +1106,10 @@ Returns: %Undefined%
 *lib_torch.metta:127*
 
 ```metta
+(: torch-requires-grad (-[det,writesState]-> %Undefined% %Undefined%))
+```
+
+```metta
 (: torch-requires-grad (-[det,writesState]-> %Undefined% %Undefined% %Undefined%))
 ```
 
@@ -825,6 +1123,22 @@ Returns: %Undefined%
 ### `torch-backward`
 
 *lib_torch.metta:136*
+
+```metta
+(: torch-backward (-[det,oracleIO]-> %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-backward (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-backward (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+```metta
+(: torch-backward (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined% %Undefined% %Undefined%))
+```
 
 ```metta
 (: torch-backward (-[det,oracleIO]-> %Undefined% %Undefined% %Undefined% %Undefined% %Undefined% %Undefined%))

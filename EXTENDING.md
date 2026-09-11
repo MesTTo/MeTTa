@@ -691,6 +691,9 @@ file registers. The shipped Prolog libraries use this shape:
 :- module(lib_double, ['my-double'/2]).
 :- set_module(base(metta_engine)).
 
+%! 'my-double'(+Value:number, -Doubled:number) is det.
+%
+% Double Value through native arithmetic.
 'my-double'(X, Y) :- double_value(X, Y).
 double_value(X, Y) :- Y is X * 2.
 ```
@@ -700,6 +703,45 @@ The loader imports the exports into `user`; `double_value/2` stays in
 each SWI dependency with `use_module/2` or `autoload/2` in the file that uses
 it. Autoload declarations belong to the declaring module too. A plain Prolog
 file still loads into the host module, `user`, through `consult_global/1`.
+
+### Derive the MeTTa face from the native declaration
+
+For a shipped library, the module export list and typed PlDoc modes own the
+interface. Run `python extensions/python/tools/prologface.py --write` after
+editing its Prolog source. The generator reads SWI's cross-reference records
+without loading the source. It writes one native import, all declared arrow
+types and the documentation into the adjacent MeTTa file's generated region.
+The `prolog-face` lane refuses a stale region, a deleted face, incomplete
+metadata or a source syntax error. Handwritten equations remain outside the
+region and survive regeneration.
+
+Each public mode names and types every argument, with inputs followed by one
+result. Use `number`, `string`, `atom`, `boolean`, `list` or `any` for the
+existing language types, or an explicit MeTTa type such as `'Expression'`.
+Several arities can share a head. A nondeterministic native result stays a
+stream of MeTTa answers, including duplicate answers. Adapt a host predicate
+whose arguments have another order in the Prolog library itself. Exported
+host services that are not MeTTa calls use a PlDoc `@private` explanation.
+
+`lib_datetime` is the working example. Its native modes generate its imports,
+types and help text; its example calls every public head. The library card
+and `website/reference/metta-libraries.md` read those same declarations.
+Regenerate the page with `python extensions/python/tools/libdoc.py --write`.
+`python tests/checks/check_llms_names.py --write` refreshes the source counts
+and library roster while retaining the authored library notes. Corpus lineage
+and README counts come from `python extensions/python/tools/example_origins.py
+--write`; set `METTA_UPSTREAM` to the upstream source checkout.
+
+Python frameworks keep their faces in their own distributions. The existing
+`facegen.py` generator reads `Import:` declarations under both `lib/` and
+`extensions/python/ext/`. A distribution packages its generated `.metta` file
+as package data and advertises a directory function through `metta.libraries`.
+The `metta-arrays` wheel demonstrates that contract with
+`lib_arrays = "metta_arrays_library:sources"`. Its wheel test builds the
+package, discovers the entry point and runs the installed face. No framework
+name is added to the engine or the Python seat's core.
+
+### Resolution through a space
 
 Every space, `&self` included, compiles its equations into a module of its own,
 which `space_module/2` names. Resolution follows the space's parents, `&self`,

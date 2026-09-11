@@ -6,6 +6,10 @@ history, including all four cited by the engine pool's Guarantees block. A
 claim with nothing behind it is indistinguishable from the many that are real,
 which is what makes it corrosive rather than untidy.
 
+Guarantees: nested distribution modules and native face fixtures participate in
+the same evidence and provenance checks as their callers
+[tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE].
+
 Reads files and the engine-free door grammar. Structured row assumptions,
 guarantees, local refusals and evidence are checked through doorgen's contract
 reader [tested: test_contract_checks_detect_signature_and_evidence_drift,
@@ -198,9 +202,8 @@ GUARANTEE_SOURCES = (
     # library's row now lives, so leaving them out would make the ruling of
     # 2026-09-08 the one change whose evidence nothing reads [measured
     # 2026-09-08 by tests/checks/pin_provenance.py: 24 placeholders in fourteen
-    # files sat outside these globs before the two lines below].
-    "extensions/python/ext/metta-*/*.py",
-    "extensions/python/ext/metta-*/tests/*.py",
+    # files sat outside these globs before distribution sources were included].
+    "extensions/python/ext/metta-*/**/*.py",
     # And the two files above them: the hook that puts a member on the path for
     # the suite, and the one implementation both it and the benchmark drivers
     # call.
@@ -210,6 +213,8 @@ GUARANTEE_SOURCES = (
     "extensions/mork/tests/*.py",
     "extensions/python/tools/*.py",
     "extensions/python/tools/*.pl",
+    "tests/data/prologface/*.pl",
+    "tests/data/prologface/*.metta",
     "tests/checks/*.py",
     # The Python suites carry 536 tags of their own, the largest block
     # the lane could not see.
