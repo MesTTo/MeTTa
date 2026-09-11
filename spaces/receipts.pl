@@ -1,21 +1,21 @@
 % Guarantees: metta_with_occurrence_load/1 restores its root through
 %   metta_with_trailed/3 before catch-protected receipt retirement
-%   [source: engine/spaces/receipts.pl:metta_with_occurrence_load/1; commit=WORKTREE].
+%   [source: engine/spaces/receipts.pl:metta_with_occurrence_load/1; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 % Guarantees: interrupted native completion retires every finished scope's
 %   rows and standing-engine reservations; nested rollback preserves the live
-%   outer owner [tested: spaces_receipt_limits; commit=WORKTREE].
+%   outer owner [tested: spaces_receipt_limits; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 %
 % Purpose: reserve incoming occurrence identities across transaction views.
 % Assumes: native erasures use metta_erase_storage_ref/1 or metta_retract_storage/1.
 % Guarantees: overlapping image receipts retain distinct tokens, while a load
 %   into an empty destination preserves its tokens [tested: spaces_token_images;
-%   commit=WORKTREE].
+%   commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 %   A completed inner transaction transfers its scope to the live outer one;
 %   destroying its suspended engine does not notify a discarded query frame
-%   [tested: spaces_receipt_frames; commit=WORKTREE].
+%   [tested: spaces_receipt_frames; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 % Owns resources: one standing engine; reservations and erased references last
 %   only until their enclosing load or transaction finishes. Nested rollback
-%   releases its reservations [tested: spaces_token_images; commit=WORKTREE].
+%   releases its reservations [tested: spaces_token_images; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 % Guarded by: '$metta_occurrence_receipts' serializes requests to the engine.
 
 :- use_module(library(ordsets), [ord_memberchk/2]).
