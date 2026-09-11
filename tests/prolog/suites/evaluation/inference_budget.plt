@@ -23,7 +23,7 @@
 %     the goal it was given [tested: a_non_positive_budget_installs_no_wrapper]
 %   - the cumulative check costs three inferences per answer plus two at
 %     entry for the base read and envelope catch, at every answer cost [tested:
-%     the_cumulative_check_costs_three_inferences_per_answer; commit=WORKTREE]
+%     the_cumulative_check_costs_three_inferences_per_answer; commit=cdcb23421809ec3a493059a381e0245cf08a1984]
 %   - one of those three is bought by the direction the comparison is written
 %     [tested: an_if_then_else_costs_more_on_the_branch_its_condition_fails_to]
 %   - a bound whose ball a catch inside the goal swallowed still REFUSES, at

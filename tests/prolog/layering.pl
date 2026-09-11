@@ -8,7 +8,7 @@
 %     - the working directory is tests/prolog
 % Guarantees:
 %     - support scopes use the engine's trailed context door
-%       [tested: engine_layering; commit=WORKTREE].
+%       [tested: engine_layering; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 %     - boot and runtime imports share the source_loading leaf
 %       [tested: engine_layering; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 %     - identity is a leaf reached by boot validation, storage and image receipt

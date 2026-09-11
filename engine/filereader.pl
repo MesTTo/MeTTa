@@ -1,9 +1,9 @@
 % Guarantees: working_dir/1, active_source_load/1, active_source_program/1 and
 %   source_recompile_context/2 read stacks scoped by metta_with_trailed/3
-%   [tested: trailed_scopes; commit=WORKTREE].
+%   [tested: trailed_scopes; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 % Guarantees: active_source_load/1 and with_working_directory/2 are exported
 %   to their compiler and manifest consumers [tested: engine_layering;
-%   commit=WORKTREE].
+%   commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 %
 % Purpose: read MeTTa source, split it into complete top-level forms, and
 % dispatch each parsed form to the evaluator.

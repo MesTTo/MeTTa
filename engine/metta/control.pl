@@ -6,7 +6,7 @@
 % Guarantees: metta_host_inference_budget/3 converts a deferred native
 %   inference ball to its existing metta_control_signal/2 envelope
 %   [tested: spaces_receipt_limits:the_public_bound_keeps_its_control_envelope;
-%   commit=WORKTREE].
+%   commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 % Guarantees: metta_host_hold/3 installs seam:engine_context/1 inside its
 %   held goal and announces its lifetime through seam:host_engine_created/1
 %   and seam:host_engine_released/1 [tested: lib_thread_scope,

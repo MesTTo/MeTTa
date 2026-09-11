@@ -4,7 +4,7 @@
 % Guarantees: the actual scope doors restore their prior state and permit a
 %   clean second entry after interruption; ordinary answers, redo, cut and
 %   nested mutable contexts preserve their dynamic extent
-%   [tested: sh engine/test.sh suites/evaluation/trailed_scopes.plt; commit=WORKTREE].
+%   [tested: sh engine/test.sh suites/evaluation/trailed_scopes.plt; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 % Owns resources: every sweep engine is destroyed after its result is read;
 %   temporary clauses are owned by the production doors under test.
 

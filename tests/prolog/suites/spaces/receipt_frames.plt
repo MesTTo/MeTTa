@@ -1,7 +1,7 @@
 % Purpose: prove receipt ownership and safe suspended-engine destruction.
 % Guarantees: nested completion retains the outer owner and retires each scope
 %   once, including failure and exception rollback [tested: spaces_receipt_frames;
-%   commit=WORKTREE].
+%   commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 % Owns resources: fixtures destroy their engines and spaces, remove the scope
 %   retirement wrapper, and close their event queues.
 

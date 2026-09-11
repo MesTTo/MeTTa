@@ -1,7 +1,7 @@
 % Purpose: sweep native receipt acquisition, rollback and completion under a bound.
 % Guarantees: every budget 1..600 preserves native storage atomicity, retires
 %   finished receipt rows and engine reservations, and keeps a live outer owner
-%   [tested: spaces_receipt_limits; commit=WORKTREE].
+%   [tested: spaces_receipt_limits; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 % Owns resources: fixtures release their spaces, erase their artifact clauses
 %   and destroy the engines used to inspect committed reservation state.
 
