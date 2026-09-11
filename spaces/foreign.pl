@@ -3,7 +3,7 @@
 % Purpose: validate foreign-provider capabilities and route foreign and native space operations
 % Guarantees: declaration subtraction invalidates the affected names before
 %   returning, including constructor arrows and variable removal patterns
-%   [tested: run_tests(translator_constructors); commit=WORKTREE].
+%   [tested: run_tests(translator_constructors); commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
 % Guarantees: the native bulk loop calls add_sexp_in/5 directly, retaining
 %   unique occurrence tokens and the same duplicate bag as public writes
 %   [tested: spaces_tokens:public_and_bulk_writes_preserve_tokens_and_duplicate_bags;

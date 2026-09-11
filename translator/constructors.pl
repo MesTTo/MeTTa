@@ -3,11 +3,11 @@
 %   policy stable and filereader:record_translated_supports/3 records its source.
 % Guarantees: constructor checks preserve written-call refusals and joint type
 %   variables; sorted projections preserve duplicate answers and live changes
-%   [tested: run_tests(translator_constructors); commit=WORKTREE].
+%   [tested: run_tests(translator_constructors); commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
 % Owns resources: construction facts extend the clause's static parameter
 %   environment, which restores its parent on exit. Retained clauses and sort
 %   proofs belong to translated-form support nodes and retire with their source
-%   [tested: run_tests(translator_constructors); commit=WORKTREE].
+%   [tested: run_tests(translator_constructors); commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
 % Decides: only a finite structural projection with an already-normal result
 %   is resolved; arbitrary method bodies remain compiled calls.
 

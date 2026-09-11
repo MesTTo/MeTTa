@@ -3,7 +3,7 @@
 % Guarantees:
 %   - metta_operation_parameters/4 exposes the joint argument types and
 %     origins used by constructor compilation and runtime admission
-%     [tested: translator_constructors, engine_layering; commit=WORKTREE].
+%     [tested: translator_constructors, engine_layering; commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
 %   - broken extension entries raise through loading_loudly/1 with their
 %     diagnostic instead of allowing boot to report success
 %     [tested: tests/shell/test_packaged_cli.sh; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
