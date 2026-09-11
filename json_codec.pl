@@ -14,10 +14,10 @@
 %     and what json_read/3 answers for shape(classic), and json_codec_write/3
 %     answers what json_write_dict/3 and json_write/3 answer under width(0),
 %     whether or not the artefact is present
-%     [tested: json_codec; commit=WORKTREE]
+%     [tested: json_codec; commit=5e212d77a567d6d6c118529e4a226e5047ec2cfd]
 %   - json_codec_write/4 accepts a nonnegative target width; zero retains the
 %     compact codec and positive widths use the native writer's layout
-%     [tested: json_codec:formatted_output_matches_the_native_writer; commit=WORKTREE]
+%     [tested: json_codec:formatted_output_matches_the_native_writer; commit=5e212d77a567d6d6c118529e4a226e5047ec2cfd]
 %   - text after one JSON value is refused in BOTH shapes and BOTH paths, and a
 %     non-finite number is refused before anything is written
 %     [tested: json_codec:trailing_content_is_refused_in_both_shapes,
