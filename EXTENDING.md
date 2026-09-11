@@ -748,6 +748,12 @@ multiple answers. The record at `lib/lib_regex/vendor/VENDOR.md` pins the
 upstream source, lists local repairs and gives the prebuild command.
 The wheel ships that source, excludes its `.native` directory and builds the
 object on first import. Prebuild before making an installed runtime read-only.
+`lib_string` adds a C++ provider with vendored headers. Its checksum manifest
+declares every transitive vendor include. Pass these declared paths to
+`native_build:native_object/6` along with the main source and recipe; discovering
+only existing files would hide a deleted header behind a warm object. Its
+tests verify the include closure, modified and missing headers, concurrent
+builds, cancellation and execution after installation from a source archive.
 `lib_json` demonstrates resource ownership at a native boundary. It validates
 object fields before allocation, reserves fresh space names and stores fields
 through `add_sexp/2`, so a key such as `from` remains data. Failed construction

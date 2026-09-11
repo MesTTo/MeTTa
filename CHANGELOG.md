@@ -9,6 +9,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_string` adds scalar-code conversion, exact splitting, last-index search,
+  overlap-aware counts, centering, lines, indentation, wrapping, named templates,
+  exact Levenshtein distance and ISub similarity. Literal operations share a
+  linear KMP traversal; text boundaries preserve NUL. Generated imports, types
+  and documentation cover all 34 heads. The C++ provider ships its source,
+  header dependencies and licenses; changed or missing headers invalidate the
+  native build cache. Unexpected `parse-number` exceptions now propagate.
+- Provenance pinning recognizes C++ comments and preserves C/C++ string,
+  raw-string, macro and header data. Malformed lexical forms refuse before
+  any file is rewritten.
 - `lib_csv` parses and encodes text, streams field lists, and atomically writes
   or appends UTF-8 files. Every head accepts an explicit dialect. Fields retain
   Unicode, NUL, quoted line endings and duplicates. Blank records now contain

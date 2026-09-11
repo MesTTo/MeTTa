@@ -6,9 +6,9 @@ history, including all four cited by the engine pool's Guarantees block. A
 claim with nothing behind it is indistinguishable from the many that are real,
 which is what makes it corrosive rather than untidy.
 
-Guarantees: nested distribution modules, Prolog/C library support and native face fixtures participate in
+Guarantees: nested distribution modules, Prolog/C/C++ library support and native face fixtures participate in
 the same evidence and provenance checks as their callers
-[tested: tests/checks/check_evidence_selftest.py; commit=28c6146d805b5adba3047ffc72b2508c11816636].
+[tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE].
 
 Reads files and the engine-free door grammar. Structured row assumptions,
 guarantees, local refusals and evidence are checked through doorgen's contract
@@ -190,6 +190,7 @@ GUARANTEE_SOURCES = (
     "lib/*/*.pl",
     "lib/*/support/*.pl",
     "lib/*/support/*.c",
+    "lib/*/support/*.cpp",
     "lib/*/*.py",
     # A library's MeTTa half makes the same claims its Prolog half does,
     # and pin_provenance reported them as "OUTSIDE the evidence gate's

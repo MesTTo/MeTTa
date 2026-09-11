@@ -41,7 +41,7 @@ beside its definitions.
 | lib_soft | 9 | 1 |
 | lib_spaces | 5 | 0 |
 | lib_strategy | 24 | 0 |
-| lib_string | 19 | 0 |
+| lib_string | 34 | 34 |
 | lib_tabling | 11 | 0 |
 | lib_thread | 58 | 2 |
 | lib_torch | 20 | 19 |
@@ -1543,6 +1543,525 @@ Tests written symbol representation, regardless of function registration
 Returns: True for a symbol, False otherwise
 
 Undocumented: `soft-aggregation`, `soft-best`, `soft-fold`, `soft-match`, `soft-score`, `soft-score-by`, `soft-walk`, `sym-sim`
+
+## lib_string
+
+### `number-to-string`
+
+*lib_string.metta:15*
+
+```metta
+(: number-to-string (-> Number String))
+```
+
+Return the host String representation of a Number, including rationals.
+
+1. Number
+
+Returns: Out
+
+### `parse-number`
+
+*lib_string.metta:21*
+
+```metta
+(: parse-number (-> %Undefined% Number))
+```
+
+Parse the host numeric syntax. Ordinary nonnumbers produce no answer; type, resource and interruption exceptions remain visible.
+
+1. Value
+
+Returns: Number
+
+### `string-center`
+
+*lib_string.metta:27*
+
+```metta
+(: string-center (-> %Undefined% Number %Undefined% String))
+```
+
+Pad both sides to Width codepoints, with an odd extra character on the right. Each side starts at the beginning of Pad; empty filler leaves the input unchanged.
+
+1. Value
+2. Width
+3. Pad
+
+Returns: Out
+
+### `string-chars`
+
+*lib_string.metta:33*
+
+```metta
+(: string-chars (-> %Undefined% Expression))
+```
+
+Return one-character Strings, preserving Unicode and embedded NUL.
+
+1. Value
+
+Returns: Chars
+
+### `string-codes`
+
+*lib_string.metta:39*
+
+```metta
+(: string-codes (-> %Undefined% Expression))
+```
+
+Return Unicode scalar integers. NUL is 0; supplementary characters count once.
+
+1. Value
+
+Returns: Codes
+
+### `string-contains`
+
+*lib_string.metta:45*
+
+```metta
+(: string-contains (-> %Undefined% %Undefined% Bool))
+```
+
+Return True when Part occurs literally, including an empty Part.
+
+1. Value
+2. Part
+
+Returns: Answer
+
+### `string-count`
+
+*lib_string.metta:52*
+
+```metta
+(: string-count (-> %Undefined% %Undefined% Bool Number))
+```
+
+```metta
+(: string-count (-> %Undefined% %Undefined% Number))
+```
+
+Count literal occurrences, nonoverlapping by default. True enables overlap. An empty Part counts every boundary, including both ends, giving length+1.
+
+1. Value
+2. Part
+3. Overlap
+
+Returns: Count
+
+### `string-dedent`
+
+*lib_string.metta:58*
+
+```metta
+(: string-dedent (-> %Undefined% String))
+```
+
+Remove the common literal space/tab prefix of nonblank LF-separated lines. Blank lines become empty and the final LF is preserved. Tabs are not expanded.
+
+1. Value
+
+Returns: Out
+
+### `string-edit-distance`
+
+*lib_string.metta:64*
+
+```metta
+(: string-edit-distance (-> %Undefined% %Undefined% Number))
+```
+
+Return exact unit-cost Levenshtein distance over Unicode codepoints. NUL is data. No normalization or score cutoff changes the comparison.
+
+1. First
+2. Second
+
+Returns: Distance
+
+### `string-ends-with`
+
+*lib_string.metta:70*
+
+```metta
+(: string-ends-with (-> %Undefined% %Undefined% Bool))
+```
+
+Return True exactly when Suffix ends the text. An empty suffix matches.
+
+1. Value
+2. Suffix
+
+Returns: Answer
+
+### `string-from-chars`
+
+*lib_string.metta:76*
+
+```metta
+(: string-from-chars (-> Expression String))
+```
+
+Join text items into one String. Retain the existing acceptance of items containing zero or several characters, Symbols and Numbers.
+
+1. Chars
+
+Returns: Out
+
+### `string-from-codes`
+
+*lib_string.metta:82*
+
+```metta
+(: string-from-codes (-> Expression String))
+```
+
+Build a String from Unicode scalar integers. Reject improper lists, nonintegers, surrogates and values outside 0 through 0x10FFFF.
+
+1. Codes
+
+Returns: Out
+
+### `string-indent`
+
+*lib_string.metta:88*
+
+```metta
+(: string-indent (-> %Undefined% %Undefined% String))
+```
+
+Prefix each LF-separated line except lines containing only spaces and tabs. Preserve blank-line contents and a final LF.
+
+1. Prefix
+2. Value
+
+Returns: Out
+
+### `string-index-of`
+
+*lib_string.metta:94*
+
+```metta
+(: string-index-of (-> %Undefined% %Undefined% Number))
+```
+
+Return the first zero-based codepoint index, or -1. An empty Part returns 0.
+
+1. Value
+2. Part
+
+Returns: Index
+
+### `string-isub`
+
+*lib_string.metta:101*
+
+```metta
+(: string-isub (-> %Undefined% %Undefined% Expression Number))
+```
+
+```metta
+(: string-isub (-> %Undefined% %Undefined% Number))
+```
+
+Return SWI's substring-based ontology-label ISub score, preserving complete text. Unique options are (normalize Bool), (zero-to-one Bool) and (substring-threshold Number), defaulting to False, False and 2. Threshold is nonnegative; matched substrings must be longer than it. Normalization lowercases and removes dot, underscore and ASCII space. The usual range is [-1,1], or [0,1] with zero-to-one. Both empty score 1; one empty scores 0.
+
+1. First
+2. Second
+3. Options
+
+Returns: Score
+
+### `string-join`
+
+*lib_string.metta:107*
+
+```metta
+(: string-join (-> %Undefined% Expression String))
+```
+
+Join coerced text parts once with Separator; an empty list produces "".
+
+1. Separator
+2. Parts
+
+Returns: Out
+
+### `string-last-index-of`
+
+*lib_string.metta:113*
+
+```metta
+(: string-last-index-of (-> %Undefined% %Undefined% Number))
+```
+
+Return the last zero-based codepoint index, including overlapping matches, or -1. An empty Part returns the input length.
+
+1. Value
+2. Part
+
+Returns: Index
+
+### `string-length`
+
+*lib_string.metta:119*
+
+```metta
+(: string-length (-> %Undefined% Number))
+```
+
+Count Unicode codepoints, including embedded NUL. Text coercions apply.
+
+1. Value
+
+Returns: Length
+
+### `string-lines`
+
+*lib_string.metta:125*
+
+```metta
+(: string-lines (-> %Undefined% Expression))
+```
+
+Split at LF and omit one terminal empty component. Empty input gives (). CR and NUL remain data. Duplicate and internal empty lines survive.
+
+1. Value
+
+Returns: Lines
+
+### `string-lower`
+
+*lib_string.metta:131*
+
+```metta
+(: string-lower (-> %Undefined% String))
+```
+
+Apply the host Unicode lowercase mapping and return a String.
+
+1. Value
+
+Returns: Out
+
+### `string-pad-left`
+
+*lib_string.metta:137*
+
+```metta
+(: string-pad-left (-> %Undefined% Number %Undefined% String))
+```
+
+Pad on the left to Width codepoints. Repeat and truncate a multicharacter filler. An empty filler or a width no greater than the input leaves it unchanged.
+
+1. Value
+2. Width
+3. Pad
+
+Returns: Out
+
+### `string-pad-right`
+
+*lib_string.metta:143*
+
+```metta
+(: string-pad-right (-> %Undefined% Number %Undefined% String))
+```
+
+Pad on the right using string-pad-left's width and filler rules.
+
+1. Value
+2. Width
+3. Pad
+
+Returns: Out
+
+### `string-repeat`
+
+*lib_string.metta:149*
+
+```metta
+(: string-repeat (-> %Undefined% Number String))
+```
+
+Repeat the text Times times. Zero and negative counts produce an empty String.
+
+1. Value
+2. Times
+
+Returns: Out
+
+### `string-replace`
+
+*lib_string.metta:155*
+
+```metta
+(: string-replace (-> %Undefined% %Undefined% %Undefined% String))
+```
+
+Replace every nonoverlapping literal occurrence. An empty From preserves the original input. Matching and output assembly do not copy shrinking suffixes.
+
+1. Value
+2. From
+3. To
+
+Returns: Out
+
+### `string-similarity`
+
+*lib_string.metta:161*
+
+```metta
+(: string-similarity (-> %Undefined% %Undefined% Number))
+```
+
+Return 1 - edit-distance/max(lengths), in [0,1]. Two empty Strings score 1.
+
+1. First
+2. Second
+
+Returns: Score
+
+### `string-slice`
+
+*lib_string.metta:167*
+
+```metta
+(: string-slice (-> %Undefined% Number Number String))
+```
+
+Return the half-open codepoint interval [From,To). Clamp each endpoint to the input; negative starts and reversed or beyond-end intervals are safe.
+
+1. Value
+2. From
+3. To
+
+Returns: Out
+
+### `string-split`
+
+*lib_string.metta:173*
+
+```metta
+(: string-split (-> %Undefined% %Undefined% Expression))
+```
+
+Split on each character in Separators, retaining empty fields. An empty separator set returns the whole input; NUL splits only when explicitly listed.
+
+1. Separators
+2. Value
+
+Returns: Parts
+
+### `string-split-exact`
+
+*lib_string.metta:179*
+
+```metta
+(: string-split-exact (-> %Undefined% %Undefined% Expression))
+```
+
+Split at nonoverlapping occurrences of the complete, nonempty Separator. Preserve empty fields and text verbatim. An empty separator raises.
+
+1. Separator
+2. Value
+
+Returns: Parts
+
+### `string-starts-with`
+
+*lib_string.metta:185*
+
+```metta
+(: string-starts-with (-> %Undefined% %Undefined% Bool))
+```
+
+Return True exactly when Prefix begins the text. An empty prefix matches.
+
+1. Value
+2. Prefix
+
+Returns: Answer
+
+### `string-template`
+
+*lib_string.metta:191*
+
+```metta
+(: string-template (-> %Undefined% Expression String))
+```
+
+Replace {Name} or {Name,Default} using unique (Name Value) pairs. Names are Prolog variable identifiers. Render values through the engine's console renderer. Missing names raise; unrecognized braces remain literal. Goals never run.
+
+1. Template
+2. Bindings
+
+Returns: Out
+
+### `string-trim`
+
+*lib_string.metta:197*
+
+```metta
+(: string-trim (-> %Undefined% String))
+```
+
+Remove ASCII space, tab, LF and CR from both ends. Interior text and NUL stay.
+
+1. Value
+
+Returns: Out
+
+### `string-unlines`
+
+*lib_string.metta:203*
+
+```metta
+(: string-unlines (-> Expression String))
+```
+
+Append LF to every coerced line and concatenate. An empty list produces "".
+
+1. Lines
+
+Returns: Out
+
+### `string-upper`
+
+*lib_string.metta:209*
+
+```metta
+(: string-upper (-> %Undefined% String))
+```
+
+Apply the host Unicode uppercase mapping and return a String.
+
+1. Value
+
+Returns: Out
+
+### `string-wrap`
+
+*lib_string.metta:216*
+
+```metta
+(: string-wrap (-> %Undefined% Number %Undefined% String))
+```
+
+```metta
+(: string-wrap (-> %Undefined% Number String))
+```
+
+Greedily wrap words to a positive codepoint width. Collapse ASCII space, tab, LF and CR. Keep long words whole. Alignment is left (default), right, center or justify. The final justified line aligns left; no final LF is added.
+
+1. Value
+2. Width
+3. Alignment
+
+Returns: Out
 
 ## lib_thread
 

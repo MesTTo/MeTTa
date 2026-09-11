@@ -283,3 +283,46 @@ Lifted when: inherited first-call counts agree in both states; the reproduction
   reversed costs and child failures are broken reproductions.
 Record: docs/journal/2026-09-07-merged-tree-reconciliations.md, the 2026-09-11
   buffered VM trace and unchanged-body foldall controls.
+
+## swi-string-nul-membership
+Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
+  src/pl-string.c:split_string uses text_chr for separator and padding membership.
+Defect: NUL-terminated membership lookup counts the terminator as a member even
+  of an empty set. Splitting the codes [97,0,98] with comma returns ["a","b"],
+  losing NUL. Line and wrapping utilities that use this splitter inherit the defect.
+Reproduction: tests/checks/host_workarounds/swi-string-nul-membership.pl,
+  compares a normal split control with the embedded-NUL input.
+Workaround: the String provider scans complete codepoint sets and explicit input
+  bounds. Line and layout adapters use that corrected boundary.
+Lifted when: the host splitter preserves NUL unless explicitly listed in the
+  separator or padding set. The private KMP search and exact edit-distance
+  provider remain necessary for their independent operations and complexity.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-isub-nul-lengths
+Host: SWI-Prolog 10.1.13, packages-nlp dd69ae95342d7a0429a0f8bcc7deab2bd514570e;
+  pl-isub.c:get_chars uses wcscpy/wcsdup and isub.c:isub_score_inplace uses wcslen.
+Defect: ISub compares only the prefix before NUL. Codes [97,0,98] against "a"
+  score 1 at threshold zero, instead of the complete-input score 0.55.
+Reproduction: tests/checks/host_workarounds/swi-isub-nul-lengths.pl,
+  checks the identity control and the complete-input score.
+Workaround: the String provider owns codepoint vectors and passes explicit
+  lengths through its licensed ISub adaptation.
+Lifted when: the host ISub boundary and core preserve complete strings and the
+  reproduction returns the complete-input score. Re-evaluate the adapter's
+  scalar, length and cancellation contracts before replacing it with the host.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-isub-variable-options
+Host: SWI-Prolog 10.1.13, packages-nlp dd69ae95342d7a0429a0f8bcc7deab2bd514570e;
+  isub.pl:user:goal_expansion/2 calls isub_options/3 on variable options.
+Defect: normalize_int/2 binds a variable Bool to true while compiling its caller.
+  A predicate intended to accept either Bool is compiled for true only. A wholly
+  variable options list instead raises from option/3 during compilation.
+Reproduction: tests/checks/host_workarounds/swi-isub-variable-options.pl,
+  compares compiled options with the public predicate called at runtime.
+Workaround: the String differential oracle uses call/5 so all option combinations
+  reach the public host predicate at runtime.
+Lifted when: compilation preserves option variables and both Bool branches agree
+  with the runtime control. Restore the direct oracle call after that proof.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.

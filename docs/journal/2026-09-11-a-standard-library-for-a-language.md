@@ -1220,3 +1220,432 @@ three importing examples and the intended prose in its text rendering; every
 head appears in text and HTML. Log: ai-tmp/ai-libraries-csv-card-final.log.
 The CSV functional state is complete. Its 31 evidence placeholders are the
 only remaining provenance operation before the next census concern.
+
+Verified: CSV functional commit bd027d8b7a9ef1d96fb4cdb160c9b3eb4157d52e
+is followed by provenance commit 02d05add8a092c5d83c853192fe442ea6e2b6a06.
+There are 27 literal pin replacements in 15 files. A byte comparison proves
+that replacing the new object ID with WORKTREE reconstructs each A file.
+The first comparison incorrectly replaced executable placeholder fixtures as
+well; the pin tool correctly preserves them. The pinned example, CSV/JSON
+twins, evidence, face and libdoc pass. Evidence has zero pending placeholders.
+The owned JSON control is removed after checking its diff, binary hashes and
+absence of process working directories. Logs: ai-libraries-csv-pinned-example.log,
+ai-libraries-csv-pinned-twins.log and ai-libraries-csv-pinned-evidence.log in ai-tmp.
+
+## 2026-09-11: strings, formatting and similarity
+
+Tried: the current native text/file/JSON suite passes 58 tests plus eight
+subcases; Python text properties pass twelve tests in 6.58 seconds. Commands:
+`sh engine/test.sh suites/libraries/lib_text.plt` and
+`python -m pytest -q extensions/python/tests/ch08_data/test_text_libraries.py`.
+Logs: ai-tmp/ai-libraries-string-native-baseline.log and
+ai-tmp/ai-libraries-string-python-baseline.log.
+
+Measured: ai-tmp/ai-string-baseline-bench.pl compares current literal
+replacement with atomic_list_concat/3 followed by atomics_to_string/3.
+For 1000/4000/16000/64000 one-character replacements, current CPU seconds are
+.000400/.003385/.031335/.486955; the host control is
+.000049/.000198/.000838/.003289. Every output is twice its input length.
+Current inference counts are 5015/20014/80014/320014; host counts 7/6/6/6.
+The initial probe lacked use_module(lib_string) and raised Unknown procedure:
+lib_string:'string-repeat'/3. Explicit loading fixes the probe and contradicts
+the old library header's default-loading claim. Log:
+ai-tmp/ai-libraries-string-replacement-baseline.log.
+
+Source: SWI's split_atom and sub_text compare at successive positions. Host
+split/join removes the repeated suffix allocation, but matching is still
+worst O(n*m). The replacement target is O(n+m+output bytes), shared with exact
+splitting, search and counting. The original String coercions and empty-pattern
+replacement behavior remain authoritative. Source:
+https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-prims.c#L4626-L4661.
+
+Tried: for input codes [97,0,98], native split_string with separator comma
+returns ["a","b"], string_lines also returns ["a","b"], and format_paragraph
+returns codes [97,32,98]. Native isub against "a", threshold zero, gives 1.0.
+Log: ai-tmp/ai-libraries-string-nul-baseline.log. The report's NUL warnings are
+therefore reproduced. These boundaries must preserve full String inputs;
+restricting ordinary Strings to NUL-free data would leave the required surface
+incomplete. Native ISub is a distinct ontology-label metric, not Levenshtein.
+
+Research: RapidFuzz C++ v3.3.4 at
+82662f3623b3ca3645e543f677fc32fb8bd1fb95 supplies exact codepoint Levenshtein
+through explicit iterator ranges; the live release is dated 2026-08-30.
+Its forty headers total 393533 bytes. Boost KMP and CPython two-way are the
+literal-search candidates. SWI provides indentation, named interpolation and
+paragraph layout, with the NUL boundaries above requiring correction.
+Full primary-source leads are saved in ai-tmp/ai-string-research.md; selection,
+native ownership and the complete head roster remain open before implementation.
+
+## 2026-09-11: String design frozen before implementation
+
+Decided: preserve the nineteen existing heads and add string-codes,
+string-from-codes, string-split-exact, string-last-index-of, string-count,
+string-center, string-lines, string-unlines, string-dedent, string-indent,
+string-wrap, string-template, string-edit-distance, string-similarity and
+string-isub. Text inputs retain String/Symbol/Number coercion. Scalar codes
+include NUL and exclude surrogates. Indexes and widths count codepoints.
+Exact split refuses an empty delimiter; replacement keeps its existing
+empty-pattern identity. Count uses nonoverlapping matches by default, an
+optional Bool enables overlap, and an empty pattern counts n+1 boundaries.
+First/last indexes of an empty pattern are 0/n. Center puts the odd filler
+character on the right. Existing negative clamp and empty filler cases stay.
+
+Decided: one private C++ provider shares length-aware Unicode conversion and
+KMP traversal across literal search, count, split and replacement. Adapt Boost
+1.89.0's prefix table with size_t indexes and no retained caller iterators.
+Traversal keeps overlap state rather than restarting at successive suffixes.
+The target is O(n+m+output), with O(m) search state beyond converted inputs.
+Character-set splitting adapts SWI split_string's scan with length-aware
+membership. It preserves explicitly listed NUL delimiters and padding too.
+SWI's indentation/line algorithms are a licensed private subset with that
+split boundary replaced. Wrapping passes correctly split word tokens to
+text_format:format_paragraph/2; widths must be positive, alignment is
+left/right/center/justify, whitespace collapses and long words remain whole.
+
+Decided: named templates use strings:interpolate_string/4 with goals(false).
+Bindings are unique pairs whose names are Prolog variable identifiers; values
+go through metta_console_text/2. Missing names raise, named defaults work,
+and unrecognized brace syntax remains literal as in the provider. Existing
+format-args remains the positional renderer. Lines use LF, omit one terminal
+empty component, and unlines appends LF to each supplied line. Dedent removes
+the common literal space/tab prefix; indent leaves blank space/tab lines alone.
+
+Decided: vendor RapidFuzz v3.3.4's full transitive Levenshtein include closure:
+21 headers, 220687 bytes, plus its MIT license. The first closure omitted two
+relative SIMD includes; resolving quoted includes finds both. Use explicit
+uint32 iterator ranges, unit costs and no cutoff, so the answer is exact.
+Similarity is 1-distance/max(lengths), with two empty strings scoring 1.
+Source: https://github.com/rapidfuzz/rapidfuzz-cpp/blob/82662f3623b3ca3645e543f677fc32fb8bd1fb95/rapidfuzz/distance/Levenshtein.hpp.
+The source documents bit-vector O(ceil(n/64)*m) uniform distance. Its range
+source confirms raw pointer convenience overloads stop at NUL; do not use them.
+The release and commit activity establish current maintenance. The upstream
+Python implementation uses the same core; no independent adoption claim is made.
+
+Decided: adapt the SWI ISub core under its LGPL-2.0-or-later license, replacing
+NUL-terminated buffers and int lengths with owned codepoint vectors and size_t.
+Preserve its substring selection, threshold and edge scores. Explicit options
+are normalize (default False), zero-to-one (False), and substring-threshold (2).
+Normalization uses the existing lowercase operation and removes dot, underscore
+and ASCII space; it is not Unicode normalization. Threshold is nonnegative.
+Source: https://github.com/SWI-Prolog/packages-nlp/blob/dd69ae95342d7a0429a0f8bcc7deab2bd514570e/isub.c.
+
+Decided: C++ RAII owns every temporary buffer. Exceptions stop at the foreign
+boundary and become named Prolog resource/provider errors. KMP, conversion,
+split and ISub check pending signals while walking. RapidFuzz completes its
+native calculation before delivering a pending signal; it holds no external
+resource. Native building keeps the existing atomic/thread/process protocol,
+with explicit header dependencies in native_object/6 for every consumer.
+String's recipe discovers all vendor headers; changed included inputs invalidate
+the object. Wheels and source archives carry sources, headers and licenses.
+
+Rejected: suffix copying and repeated sub_string search, because they retain
+quadratic work; CPython's forward two-way source requires a sentinel and its
+reverse path has a different bound. Revisit if a shared provider removes those
+integration constraints. Rejected: no-NUL restrictions and a separate formatter,
+because they drop required String cases or duplicate the engine's renderer.
+
+Tried: native number_string fails normally for bad, empty, 1r0 and 1e99999
+texts, while accepting +42, 0x10 and 1.0Inf. Remove parse-number's catch-all;
+ordinary nonnumbers still fail and unexpected exceptions remain visible.
+
+Verification plan: preserve the existing suite; add generated Unicode/NUL
+oracles, native error and determinism checks, host layout/ISub differential
+controls, exact-distance dynamic-programming goldens, cold/warm/concurrent/
+cancelled/header-invalidated builds and an installed wheel. Measure replacement
+and adversarial long-needle search, then run every-head example/twin, records,
+docs, cards, evidence and A/B. Attribute shared startup changes using unchanged
+library controls; do not reprice unrelated examples.
+
+Tried: the native adapter builds and returns bXna for banana/ana/X and distance
+3 for kitten/sitting. swipl-ld warns `Unknown option: -std=c++11`; its -help
+documents `-cc-options,...`. Corrected the recipe to -cc-options,-std=c++11.
+The original text/file/JSON suite still passes 58 cases plus eight subcases.
+
+Tried: the new header-invalidation test proves changed headers trigger a failed
+rebuild while preserving the object, but deleting isub.hpp incorrectly returns
+success from the warm cache. Log: ai-tmp/ai-libraries-string-header-baseline.log,
+one failure, thirteen deselections, 3.35 seconds. Directory discovery cannot
+name a deleted dependency. Corrected the recipe to read the checksum manifest's
+declared header paths, and track the manifest itself. Missing declared files now
+reach the shared builder's time_file check. Add a closure/hash check so an
+included vendor header cannot be omitted from that declaration.
+
+Tried: applying the upstream header copies normalizes three terminal newlines;
+the initial byte comparison raises `AssertionError: lib/lib_string/vendor/rapidfuzz/details/simd.hpp`.
+All 21 headers compare equal after newline normalization. VENDOR.md records
+the difference, and SHA256SUMS records the distributed bytes.
+
+Tried: native String verification passes 31 cases and fails the template
+case with `strings:interpolate_string/4: Procedure strings:interpolate_string/4
+called from a deterministic procedure succeeded with a choicepoint`. The
+provider's grammar has a residual search point after its unique String result.
+Use once around the host interpolation call, after validating unique bindings;
+named interpolation is a function and does not expose alternative parses.
+The preserved text/file/JSON suite passes all 58 cases plus eight subcases.
+Log: ai-tmp/ai-libraries-string-native-surface.log.
+
+Tried: Python verification passes 28 tests and exposes two fixture errors.
+Python 3.14 textwrap.dedent uses str.isspace for blank lines and turns CR into
+empty text, while the frozen SWI contract preserves CR. Protect CR with a
+character outside the generated alphabet while using Python's independent
+dedent algorithm. The installed-wheel probe raises `ValueError: embedded null
+byte` because the outer Python string decodes its source escapes; use a raw
+source literal. Log: ai-tmp/ai-libraries-string-python.log, 18.31 seconds.
+The inspected Python source has no _whitespace_only_re; probing that old private
+name raises `AttributeError: module 'textwrap' has no attribute '_whitespace_only_re'`.
+The corrected native suite passes all 29 cases plus three subcases.
+
+Tried: the corrected Python run passes 29 tests and finds a provider discrepancy
+for `" \na"`: SWI dedent retains the blank line's space when the common prefix
+is empty. It can also retain excess spaces on a longer blank line. This violates
+the frozen public contract that blank lines become empty. Normalize blank lines
+inside the adapted dedent operation using its declared indentation characters.
+Keep CR as data. Extend the native differential control with that explicit
+normalization and add all three prefix-length regressions. Log:
+ai-tmp/ai-libraries-string-python-fixed.log, one failure in 43.30 seconds.
+The installed-wheel execution and all native build lifecycle tests pass.
+
+Measured: the first 42-claim String example passes. Its initial minimum-of-three
+cost is 120715 MeTTa and 126575 Python, ratio 1.0485. These figures precede the
+blank-line correction and will be replaced by a fresh measurement before pinning.
+jscpd inspects six owned files, 945 lines and 13857 tokens, finding no clones.
+Vendor sources are excluded from that maintenance-cost check.
+
+Clarified: the general replacement bound includes all input text, including
+the replacement argument even when no match uses it. After text coercion the
+bound is O(n+m+r+output); the original fixed-pattern/fixed-replacement benchmark
+still distinguishes quadratic copying from linear traversal. Native and Python
+verification of the corrected dedent passes 30+3 cases and ten tests respectively.
+The eight deselected native-build cases are regex/crypto cases that passed in
+the preceding full run. Two FBT003 suppressions state that MeTTa calls require
+positional arguments; the owned Ruff check passes after sorting one import.
+
+Recorded: the two reproduced NUL defects now have separate host-workaround
+keys, source sites and plain-SWI reproductions. Dedent's blank-line normalization
+and the functional template wrapper are deliberate public contracts, not claims
+that the corresponding host predicates violate their documented contracts.
+
+Measured: `swipl --on-error=status -q -s tests/prolog/lib_string_bench.pl`
+passes every complete output and index assertion. At 1000/4000/16000/64000
+characters, old replacement takes .000535/.002767/.026894/.387170 CPU seconds;
+native takes .000043/.000071/.000382/.001361. Search with an absent final
+character and a quarter-input-length repeated prefix takes 3.588987 seconds
+for 256000 ASCII characters versus .001527 native; the supplementary-character
+control takes 4.841229 versus .001277. Log: ai-tmp/ai-libraries-string-bench.log.
+Native inferences do not count C++ comparisons; CPU figures are descriptive.
+The former replacement copies quadratic suffix volume. Shared KMP traversal
+and output assembly have the all-input-plus-output bound stated above.
+
+Measured: final minimum-of-three String costs are 121067 MeTTa and 126928
+Python, ratio 1.0484, after the blank-line correction. An unchanged control
+at 02d05add8 with eight identical engine/MORK binaries measures the five
+affected existing examples, then receives only String/provider and shared
+native-builder source changes. The resulting costs exactly match this tree:
+
+| Example | Before MeTTa/Python | After MeTTa/Python |
+|---|---:|---:|
+| text | 41471/36171 | 109796/110303 |
+| regex | 108279/107645 | 108302/107668 |
+| JSON | 78103/70088 | 136764/128844 |
+| crypto | 77933/78285 | 126361/126822 |
+| CSV | 107047/103630 | 167087/163857 |
+
+The String face carries fifteen new heads and the private provider; importers
+pay their declarations and build-input checks. The regex-only change is the
+shared builder's explicit dependency argument. Repin these five attributable
+movements through the twin owner. Logs: ai-tmp/ai-libraries-string-control-before.log,
+ai-libraries-string-control-after.log and ai-libraries-string-final-measure.log.
+
+Clarified: the old text twin's stored budget was 37228 while this unchanged
+cut measures 36171. Its String change adds 74132 to that live baseline; the
+new pin is 110303. The inherited 1057-inference discrepancy is not attributed
+to String. The owner repins five changed twins and finds zero stored-content
+divergences. The control is removed after checking its 37 owned source files,
+all eight binary hashes and the absence of process working directories there.
+
+Verified: `sh engine/test.sh suites/libraries/lib_text.plt
+suites/libraries/lib_string_surface.plt` passes 58+8 existing and 31+3 String
+cases, including NUL through retained case/slice/join/padding operations.
+`python -m pytest -q extensions/python/tests/ch08_data/test_string_surface.py
+extensions/python/tests/ch08_data/test_text_libraries.py
+extensions/python/tests/ch08_data/test_library_native_build.py` passes thirty
+tests in 23.15 seconds, including the source-archive wheel installation.
+Logs: ai-tmp/ai-libraries-string-native-final.log and ai-libraries-string-python-final.log.
+
+Tried: both host-workaround gates fail because the ISub reproduction passes a
+variable options list to a compile-time expander. Exact error:
+`swi_option:option/3: No rule matches swi_option:option(normalize(_2898),_2902,false)`.
+The subsequent main call reports `catch/3: Unknown procedure: main/1`, and the
+selftest's shipped-tree assertion fails. Log: ai-tmp/ai-libraries-string-host-gates.log.
+Read isub.pl: its goal_expansion calls isub_options without a groundness guard;
+normalize_int also binds variable Bool options to true. The earlier differential
+test therefore did not exercise its apparent full product of options.
+
+Decided: literal options keep the NUL reproduction focused. The differential
+oracle calls the public host predicate through call/5 with runtime options.
+Register the separate compiler defect as swi-isub-variable-options with a
+compiled/runtime positive control. Both new plain-SWI probes print present.
+Rerun the complete 588-case option product before claiming host equivalence.
+
+Verified: the runtime oracle passes all 588 combinations within the 31+3
+native suite. Both host-workaround gates pass: fourteen entries, nineteen
+sites, every reproduction present, and ten checker selftests pass. The face
+generator reads seven described sources with zero findings. Records report
+143 derived and 204 original examples. Log: ai-libraries-string-host-fixed.log.
+
+Tried: the six full twins prove all 173 claims with equal stored content and
+the measured costs, but the new String twin has two notation findings:
+`S["substring-threshold"] is S.substring_threshold` and
+`S["zero-to-one"] is S.zero_to_one`. Use the direct symbol attributes and
+rerun that twin before integration. The other five twins have no findings.
+Log: ai-tmp/ai-libraries-string-twins-final.log.
+
+Verified: the corrected String twin proves all42 claims with equal content,
+cost126928 and zero findings. The named integration run passes all21 selected
+and implied gates, including no-autoload, source/face drift, documentation,
+Ruff, mypy and evidence. The origins gate reports no configured upstream;
+rerun its direct checker with METTA_UPSTREAM before claiming attribution.
+Evidence:7478 claims,13636 known tests,1126 executed files,zero unbacked tags.
+Log: ai-tmp/ai-libraries-string-integration.log.
+
+Tried: the card probe incorrectly assumes two examples and raises AssertionError.
+The card actually reports34 heads,34 docs,37 arrows and five direct examples,
+including the Prolog-alias and clock examples. Tracing file/JSON/dict/reflection
+imports identifies ten more existing twins beyond the first five cost controls.
+Extend attribution to that complete importer set before committing. The new
+control at02d05add8 has eleven identical binaries: six engine, two MORK and
+three C example objects. Selection: ai-tmp/ai-string-import-examples.txt.
+
+Corrected: the Prolog-alias example and twin still described removed MeTTa
+wrappers. Their prose now describes the retained native aliases. The random
+fixture's comment describes its two draws rather than claiming collisions
+are impossible. Executable claims remain unchanged. git diff --check also
+finds one extra blank line after the copied SWI license; remove it and advance
+the distributed checksum, then recheck the manifest and installed wheel.
+
+Verified: the ten additional importers' Python costs match the changed-source
+control exactly. The unchanged-cut baseline separates earlier stored-budget
+drift from this String increment. Counts are MeTTa/Python except the three
+explicit Python-only columns.
+
+| Example | Old Python pin | CSV-cut baseline | String control | Earlier Python drift | String Python increment |
+|---|---:|---:|---:|---:|---:|
+| 12-dict_lib | 54190 | 70367/67459 | 128174/125362 | 13269 | 57903 |
+| 14-reflect_lib | 117490 | 152660/133838 | 212681/193660 | 16348 | 59822 |
+| 16-the_prolog_rung | 63602 | 154402/154793 | 202161/203169 | 91191 | 48376 |
+| ch14/03-the_clock_and_the_command_line | 21614 | 26041/21924 | 85723/83710 | 310 | 61786 |
+| 01-c_space | 40920 | 51968/41624 | 109923/99651 | 704 | 58027 |
+| 01-c_extension | 26972 | 28415/27557 | 86377/85593 | 585 | 58036 |
+| 02-handle | 33691 | 35157/33173 | 93119/91209 | -518 | 58036 |
+| 01-mm2-operators | 48893 | 55621/49959 | 113574/107978 | 1066 | 58019 |
+| 05-the-module-doors | 74240 | 74561/74314 | 133224/133051 | 74 | 58737 |
+| 05-seeking-and-sizing | 31243 | 34066/31734 | 92028/89762 | 491 | 58028 |
+
+The twin owner updates these ten pins; it creates no stored-content divergence.
+The full run proves113/113 claims with zero findings, nine equal stores and
+02-handle's existing declared divergence. The single MeTTa C-space run is
+109922, one inference below the control; its declined hyperposed write has a
+schedule-dependent count. All other MeTTa counts match the control. Logs:
+ai-libraries-string-import-before.log, ai-libraries-string-import-after.log,
+ai-libraries-string-import-repin.log and ai-libraries-string-import-twins.log.
+The new budget prose explicitly distinguishes older drift from String's change.
+
+Verified: the card has34 heads,34 documentation rows,37 arrows and five direct
+examples. Its text, Rich and HTML displays all carry the heads and summary.
+Direct `METTA_UPSTREAM=/home/user/Dev/PyPeTTa1/PeTTa-base python
+extensions/python/tools/example_origins.py` reports143 derived/204 original
+examples. Logs: ai-libraries-string-card-final.log and
+ai-libraries-string-origins-live.log.
+
+Tried: `LC_ALL=C sh engine/test.sh suites/libraries/lib_string_surface.plt`
+reports `Illegal multibyte Sequence` and three failed tests, because the new
+test source did not declare UTF-8. The assertions read corrupted literals;
+the provider and existing codepoint-constructed tests still pass. Add the
+established `encoding(utf8)` directive to that source and the new benchmark,
+the only two new Prolog files containing non-ASCII literals. The repeated
+suite passes31+3 cases with no warnings in0.087 seconds. Logs:
+ai-libraries-string-native-locale.log and ai-libraries-string-native-locale-fixed.log.
+
+Verified: the full benchmark under LC_ALL=C checks every result after that
+source-encoding correction. At64000 replacement characters, old/native CPU
+seconds are0.254360/0.000958; at256000 search characters, ASCII is
+3.329132/0.001621 and supplementary Unicode is4.633524/0.001469. These are
+descriptive CPU observations, not a PMU release result. The final manifest
+and source-archive wheel tests pass2/2 in7.29 seconds after the license hash
+change. Logs: ai-libraries-string-bench-locale.log and
+ai-libraries-string-install-final.log.
+
+Verified: the final records/docs/Ruff/evidence command passes all14 selected
+and implied gates. Evidence finds zero unbacked tags in7479 claims against
+13636 known tests in1126 executed files. There are53 functional-state pins to
+resolve in the provenance commit. The separate correctly named prolog-face
+lane and its13 selftests pass; `prologface` had selected no such lane in the
+earlier command. Both direct examples pass61 assertions. The final duplicate
+scan finds zero clones across six files; its Prolog inputs use its Perl lexer.
+Logs: ai-libraries-string-final-gates.log, ai-libraries-string-face-final.log,
+ai-libraries-string-examples-precommit.log and ai-libraries-string-jscpd-final.log.
+
+The extended import control is removed after verifying its37 owned source
+changes, eleven identical binary hashes and no process working directory in
+the control. Its measurement logs remain outside that deleted checkout.
+String is ready for its functional commit and header-only evidence pinning.
+
+Tried: the functional state is committed as1b4b83542f2b187bb8d5e7b1a94608b2813e4a62.
+The provenance writer resolves47 references, then reports four C++ references
+as `.cpp has no comment rule here; add one rather than guessing`. The audit's
+assumed53 replacement count raises `AssertionError: 47`; the gate's textual
+placeholder count is not the writer's classified pin count. Restore only the
+47 verified header substitutions and complete the writer before amending A.
+
+Tried: the existing C rule also classifies `"/* commit=WORKTREE */"` as a
+comment, including inside a #define. Pygments2.20.0 and Tree-sitter C++0.23.4
+over Tree-sitter0.26.0 both classify the macro string's contents as a comment;
+Tree-sitter also marks that valid directive as an error. Their ordinary string
+and raw-string controls distinguish the other cases. Neither provider is
+suitable for rewriting these source bytes. The Tree-sitter probe packages
+are isolated under ai-tmp, with no project dependency change.
+
+Decided: the C/C++ path scans lexical forms before locating comments. Reuse
+the existing declaration of file classes, with a shared C-family scanner for
+C and C++ spellings. Apply line splicing with an original-offset map, preserve
+ordinary/character/raw literals and header names, and skip preprocessing
+numbers so digit separators cannot open character literals. Raw strings use
+the original unspliced text and their exact delimiter. Unterminated lexical
+forms refuse before any file writes. Comment-local backtick spans prevent a
+backtick inside code from suppressing a real header pin. The rules are
+[C++23 N4950 translation phases](https://timsong-cpp.github.io/cppwp/n4950/lex.phases),
+[preprocessing tokens](https://timsong-cpp.github.io/cppwp/n4950/lex.pptoken)
+and [string literals](https://timsong-cpp.github.io/cppwp/n4950/lex.string).
+
+Verification plan: end-to-end C++ plants cover line/block pins, emitted strings,
+macro bodies, escaped quotes, raw delimiters, Unicode offsets, spliced comments,
+header data and digit separators. C/header plants cover the shared string rule.
+The original writer must fail these controls; the completed writer must leave
+every code occurrence unchanged and resolve each real comment. No language
+runtime behavior or previously measured String source is changed by this repair.
+
+Verified: the provenance selftest passes 57 planted placeholders in 20 files,
+69 C-family lexical cases and five refusals before writes. Running the new
+fixture with the original writer exposes 32 defects, including rewritten C
+macro strings and unresolved C++ comment pins. The real tree now classifies
+all 53 current pins, including four native C++ header claims, and leaves one
+backticked prose mention unchanged. The pre-pin `--check` exit 1 is expected.
+Logs: ai-string-provenance-mutation.log and ai-string-provenance-check.log.
+
+Decided: C++ module imports follow the directive-introducing token rule in
+[N4950 cpp.pre paragraph 1](https://timsong-cpp.github.io/cppwp/n4950/cpp.pre#1).
+The draft's proposed semicolon lookahead was wrong: the opening token and
+logical line determine header-token context before the directive is validated.
+Parenthesized comparisons retain ordinary comment syntax. Header-name quotes
+have no escape processing, so the scanner consumes them before string literals.
+
+Tried: the owned Ruff check reports PERF401 on the generated case loop and
+TRY003/EM102 on an inline exception message. Use a generator passed to extend
+and a named diagnostic message, preserving the test cases and refusal text.
+
+Verified: `sh check.sh provenance-pin-selftest evidence evidence-selftest
+ruff-drivers` passes all four gates. Evidence reads 7481 claims with zero
+unbacked tags. The final duplicate check of the writer and its selftest finds
+zero clones in two Python files. Logs: ai-string-provenance-gates.log and
+ai-string-provenance-jscpd.log. The String behavior, import attribution and
+installation evidence above still applies to the unchanged runtime sources.
