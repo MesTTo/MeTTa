@@ -25,7 +25,7 @@ beside its definitions.
 | lib_gitimport | 0 | 0 |
 | lib_he | 18 | 0 |
 | lib_import | 8 | 4 |
-| lib_json | 5 | 0 |
+| lib_json | 13 | 13 |
 | lib_measure | 17 | 0 |
 | lib_memo | 9 | 0 |
 | lib_mm2 | 5 | 0 |
@@ -639,6 +639,201 @@ Withdraw exactly one MeTTa source's surviving native atoms and compiled definiti
 Returns: true
 
 Undocumented: `consult_global`, `static-import!`, `use-module!`, `use_module_global`
+
+## lib_json
+
+### `dict-space`
+
+*lib_json.metta:17*
+
+```metta
+(: dict-space (-> Expression SpaceType))
+```
+
+Build a fresh object space from (Key Value) pairs. Keys and values are data, including from and internal. Duplicate pairs stay distinct. Validate the whole list before allocation; failed construction releases every space it created.
+
+1. Pairs
+
+Returns: Space
+
+### `get-keys`
+
+*lib_json.metta:23*
+
+```metta
+(: get-keys (-> SpaceType %Undefined%))
+```
+
+Enumerate object keys in storage order, preserving duplicates. Use collapse to collect them. Non-pair atoms do not participate in this pattern query.
+
+1. Space
+
+Returns: Key
+
+### `get-value`
+
+*lib_json.metta:29*
+
+```metta
+(: get-value (-> SpaceType %Undefined% %Undefined%))
+```
+
+Enumerate values whose keys unify with Key. A missing key has no answers. Symbols and Strings are distinct keys, as in an ordinary space query.
+
+1. Space
+2. Key
+
+Returns: Value
+
+### `json-at`
+
+*lib_json.metta:35*
+
+```metta
+(: json-at (-> %Undefined% Expression %Undefined%))
+```
+
+Follow object keys and zero-based array indexes. An empty Path returns Value. Object keys use get-value's unification and preserve duplicate alternatives. Missing keys or indexes have no answers; invalid indexes and scalar traversal raise.
+
+1. Value
+2. Path
+
+Returns: Found
+
+### `json-decode`
+
+*lib_json.metta:41*
+
+```metta
+(: json-decode (-> %Undefined% %Undefined%))
+```
+
+Decode one JSON document. Objects become spaces, arrays become expressions, strings and numbers retain their types, and literals become True, False and Null. Duplicate fields remain queryable. Malformed or trailing content raises.
+
+1. Text
+
+Returns: Value
+
+### `json-encode`
+
+*lib_json.metta:47*
+
+```metta
+(: json-encode (-> %Undefined% String))
+```
+
+Encode one compact JSON document. Objects are spaces of (Key Value) fields; every stored atom must be a pair. Repeated aliases are valid, but cyclic objects or expressions raise cyclic_json_value. Non-finite numbers raise.
+
+1. Value
+
+Returns: Text
+
+### `json-lines-decode`
+
+*lib_json.metta:53*
+
+```metta
+(: json-lines-decode (-> %Undefined% %Undefined%))
+```
+
+Enumerate JSON values from LF or CRLF lines. Empty input has no records; blank lines and a BOM are errors naming the line. A final newline is optional. Returned objects remain caller-owned when enumeration advances or is cut.
+
+1. Text
+
+Returns: Value
+
+### `json-lines-encode`
+
+*lib_json.metta:59*
+
+```metta
+(: json-lines-encode (-> Expression String))
+```
+
+Encode each value as one compact JSON line, ending every record with LF. Empty Values returns the empty String. Validate the complete proper list; each record follows json-encode's value and error contracts.
+
+1. Values
+
+Returns: Text
+
+### `json-lines-read!`
+
+*lib_json.metta:65*
+
+```metta
+(: json-lines-read! (-> %Undefined% %Undefined%))
+```
+
+Stream UTF-8 JSON Lines from Path, reading at most one record ahead. Invalid bytes, JSON and blank lines raise with their line number. Close on exhaustion, cut or error; already returned object spaces remain caller-owned.
+
+1. Path
+
+Returns: Value
+
+### `json-lines-write!`
+
+*lib_json.metta:71*
+
+```metta
+(: json-lines-write! (-> %Undefined% Expression Bool))
+```
+
+Atomically replace Path with UTF-8 JSON Lines, serializing one record at a time. Every record ends in LF; empty Values writes an empty file. Publication and failure cleanup follow json-write!.
+
+1. Path
+2. Values
+
+Returns: Written
+
+### `json-pretty`
+
+*lib_json.metta:78*
+
+```metta
+(: json-pretty (-> %Undefined% Number String))
+```
+
+```metta
+(: json-pretty (-> %Undefined% String))
+```
+
+Format JSON with a nonnegative target column width. Zero selects compact encoding; one puts nonempty containers on multiple lines. Width is a layout target, not a truncation limit. The value and error contracts match json-encode.
+
+Format JSON with SWI's default target width of 72 columns and two-space indentation. Short documents can remain on one line; long strings are not split.
+
+1. Value
+2. Width
+
+Returns: Text
+
+### `json-read!`
+
+*lib_json.metta:84*
+
+```metta
+(: json-read! (-> %Undefined% %Undefined%))
+```
+
+Read one UTF-8 JSON file, closing it before creating object spaces. Malformed UTF-8, a BOM, invalid JSON and trailing content raise; no partial value is returned.
+
+1. Path
+
+Returns: Value
+
+### `json-write!`
+
+*lib_json.metta:90*
+
+```metta
+(: json-write! (-> %Undefined% %Undefined% Bool))
+```
+
+Atomically replace Path with one compact UTF-8 JSON document. Stage beside the destination and publish after close succeeds. A failed conversion, write, close or rename preserves an existing destination and removes staging.
+
+1. Path
+2. Value
+
+Returns: Written
 
 ## lib_observe
 

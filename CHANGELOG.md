@@ -9,6 +9,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_json` provides native JSON formatting, UTF-8 document files, streaming
+  JSON Lines and structural path lookup. File writes publish atomically after
+  close. Object construction reserves fresh names, stores special keys as data
+  and releases allocations on failure. Encoding preserves duplicate fields and
+  repeated aliases, and now rejects cyclic values and non-pair object atoms
+  instead of looping or silently discarding fields.
 - `lib_regex` provides compiled pattern values, full matching, capture scans,
   character ranges, counting and literal quoting. Empty matches retain valid
   nonempty alternatives; optional captures, typed substitutions and embedded

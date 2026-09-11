@@ -14,7 +14,10 @@
 %     and what json_read/3 answers for shape(classic), and json_codec_write/3
 %     answers what json_write_dict/3 and json_write/3 answer under width(0),
 %     whether or not the artefact is present
-%     [tested: json_codec in tests/prolog/suites/libraries/json_codec.plt]
+%     [tested: json_codec; commit=WORKTREE]
+%   - json_codec_write/4 accepts a nonnegative target width; zero retains the
+%     compact codec and positive widths use the native writer's layout
+%     [tested: json_codec:formatted_output_matches_the_native_writer; commit=WORKTREE]
 %   - text after one JSON value is refused in BOTH shapes and BOTH paths, and a
 %     non-finite number is refused before anything is written
 %     [tested: json_codec:trailing_content_is_refused_in_both_shapes,
@@ -37,6 +40,7 @@
 :- module(json_codec,
           [ json_codec_read/3,          % +Text, -Value, +Options
             json_codec_write/3,         % +Value, -Text, +Options
+            json_codec_write/4,         % +Value, -Text, +Options, +Width
             json_codec_c_active/0
           ]).
 
@@ -96,6 +100,7 @@ json_codec_require_library :-
 
 :- use_module(library(apply), [maplist/2]).
 :- use_module(library(lists), [memberchk/2]).
+:- use_module(library(error), [must_be/2]).
 % An embedding that cannot load shared objects at all must still boot: the
 % reader seam already treats a failed foreign load as "use the Prolog
 % implementation", and this is the same absence rather than an error.
@@ -281,7 +286,18 @@ json_codec_write(Value, Text, Options) :-
         metta_c_json_write(Value, Text, COptions)
     ->  true
     ;   json_codec_finite(Value),
-        json_codec_write_prolog(Value, Text, Shape, COptions)
+        json_codec_write_prolog(Value, Text, Shape, COptions, 0)
+    ).
+
+% Formatting is explicit and shares option and number validation. The existing
+% compact call pays no additional wrapper or formatting dispatch.
+json_codec_write(Value, Text, Options, Width) :-
+    must_be(nonneg, Width),
+    (   Width == 0
+    ->  json_codec_write(Value, Text, Options)
+    ;   json_codec_request(Options, Shape, COptions),
+        json_codec_finite(Value),
+        json_codec_write_prolog(Value, Text, Shape, COptions, Width)
     ).
 
 %library(json) declares two multifile hooks that change what its WRITER does:
@@ -299,20 +315,18 @@ json_codec_hook_defined(Head) :-
     predicate_property(Head, number_of_clauses(Count)),
     Count > 0.
 
-%width(0) in both shapes, so the two callers get the SAME text for the same
-%value. The alternative, library(json)'s default width(72), lays a document
-%out over many lines once it passes 72 columns, which is a second output
-%format for the one codec to have and is not a form the C writer implements.
-json_codec_write_prolog(Value, Text, Shape, Options) :-
+% The compact API passes zero; only the explicit formatting API supplies a
+% positive target width. Both shapes retain the same native literal options.
+json_codec_write_prolog(Value, Text, Shape, Options, Width) :-
     json_codec_require_library,
     json_codec_library_options(Options, LibraryOptions),
     (   Shape == dicts
     ->  with_output_to(string(Text),
                        json_write_dict(current_output, Value,
-                                       [width(0)|LibraryOptions]))
+                                       [width(Width)|LibraryOptions]))
     ;   with_output_to(string(Text),
                        json_write(current_output, Value,
-                                  [width(0)|LibraryOptions]))
+                                  [width(Width)|LibraryOptions]))
     ).
 
 %JSON has no spelling for NaN or the infinities, and json_write_dict/3 emits

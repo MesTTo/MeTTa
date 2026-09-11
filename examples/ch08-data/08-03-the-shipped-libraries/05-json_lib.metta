@@ -1,7 +1,7 @@
-;JSON through lib_json, with MeTTa HE's names. The design decision worth
-;noticing is HE's and it is the mettafied one: a JSON object decodes into a
-;SPACE of (key value) atoms rather than an opaque dict, so looking a key up is
-;a match and a decoded document is queryable like any other space.
+; Purpose: query JSON objects as spaces, navigate paths, format and exchange files.
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/05-json_lib.metta; commit=WORKTREE]
+; Objects retain duplicate fields; arrays are expressions. Each example file
+; is removed after reading. Decoded object spaces remain caller-owned data.
 !(import! &self (library lib_json))
 
 ;;; An object becomes a space. get-keys answers one key per solution, the way
@@ -32,3 +32,40 @@
 
 ;;; dict-space builds one from pairs directly, without going through text.
 !(test (let $d (dict-space ((name "ann") (age 3))) (get-value $d name)) "ann")
+
+;;; Paths mix object keys with zero-based array indexes. Duplicate fields keep
+;;; their alternatives; missing fields have none. An empty path returns the input.
+!(test (json-at (json-decode "{\"rows\":[{\"name\":\"ann\"}]}") (rows 0 name)) "ann")
+!(test (collapse (json-at (json-decode "{\"a\":[1],\"a\":[2]}") (a 0))) (1 2))
+!(test (collapse (json-at (json-decode "{}") (missing))) ())
+!(test (json-at 42 ()) 42)
+!(test (json-encode (dict-space ())) "{}")
+!(test (let $d (dict-space ((from 1) (internal 2))) (collapse (get-keys $d)))
+       (quote (from internal)))
+
+;;; Formatting uses the native writer's target width. Width zero keeps one
+;;; line; width one expands nonempty containers. Short defaults stay on one line.
+!(test (json-pretty (1 2)) "[1, 2 ]")
+!(test (json-pretty (1 2) 1) "[\n  1,\n  2\n]")
+!(test (json-decode (json-pretty (1 2) 0)) (1 2))
+
+;;; Every physical JSON Lines line is a value. Blank lines are errors, while
+;;; empty input has no records. A writer ends every record with LF.
+!(test (collapse (json-lines-decode "1\r\ntrue\nnull\n")) (1 True Null))
+!(test (json-lines-encode (1 True "é")) "1\ntrue\n\"é\"\n")
+!(test (collapse (json-lines-decode "")) ())
+!(test (json-lines-encode ()) "")
+
+;;; Files are UTF-8. Writes stage beside the destination and publish after
+;;; close succeeds; the reader closes on exhaustion, cut or error.
+!(import! &self (library lib_file))
+!(test (let* (($path (temp-path! "json-document"))
+              ($written (json-write! $path (7 8)))
+              ($value (json-read! $path)))
+         (chain (delete-file! $path) $_ ($written $value)))
+       (True (7 8)))
+!(test (let* (($path (temp-path! "json-lines"))
+              ($written (json-lines-write! $path (1 True "é")))
+              ($values (collapse (json-lines-read! $path))))
+         (chain (delete-file! $path) $_ ($written $values)))
+       (True (1 True "é")))

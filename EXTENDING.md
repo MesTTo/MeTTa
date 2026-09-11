@@ -733,6 +733,13 @@ multiple answers. The record at `lib/lib_regex/vendor/VENDOR.md` pins the
 upstream source, lists local repairs and gives the prebuild command.
 The wheel ships that source, excludes its `.native` directory and builds the
 object on first import. Prebuild before making an installed runtime read-only.
+`lib_json` demonstrates resource ownership at a native boundary. It validates
+object fields before allocation, reserves fresh space names and stores fields
+through `add_sexp/2`, so a key such as `from` remains data. Failed construction
+releases all allocations; returned spaces remain caller-owned. Its JSON Lines
+reader closes on exhaustion, cut or error. Its writers close a sibling staging
+file before publishing it with a rename. Native fault-injection tests exercise
+failed writes, failed closes, cancellation and cleanup.
 Regenerate the page with `python extensions/python/tools/libdoc.py --write`.
 `python tests/checks/check_llms_names.py --write` refreshes the source counts
 and library roster while retaining the authored library notes. Corpus lineage

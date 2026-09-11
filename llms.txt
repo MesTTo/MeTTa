@@ -4943,7 +4943,9 @@ shared `if-equal`, `if-equal2`, and `match-types` use identity, `match-type-or`
 takes the upstream arguments, and `return-on-error` returns the bare error;
 `lib_import` importing that fails LOUDLY where a missing file once answered
 nothing; matchable `(import Path)` rows through `(imports &space)`,
-and `unimport!` for exact source-owned atom withdrawal; `lib_json` JSON, decoding into that dict-as-space; `lib_measure`
+and `unimport!` for exact source-owned atom withdrawal; `lib_json` JSON objects
+as spaces, native formatting, structural paths, UTF-8 document files and
+streaming JSON Lines, with atomic file publication and cycle refusal; `lib_measure`
 weighted superpositions: normalize, softmax, rank, top-k, sample; `lib_memo` the
 resident automatic and explicit memoisation controls; `lib_mm2` notation over
 &mork, loaded on demand: `＋` and `－` add and remove one atom, `＋*`

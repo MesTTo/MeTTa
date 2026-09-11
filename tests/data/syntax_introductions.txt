@@ -187,6 +187,8 @@ decons-atom                       08-01-19
 get-metatype                      08-02-01
 format-args                       08-03-03
 sort-strings                      08-03-03
+from                              08-03-05
+internal                          08-03-05
 get-doc                           08-03-08
 undocumented                      08-03-08
 defined-name                      08-03-10
@@ -287,9 +289,7 @@ register_metta_library_path       20-03-04
 retractPredicate                  20-03-04
 git-import!                       20-04-06
 include                           20-04-10
-from                              20-04-11
 get-property                      20-04-11
-internal                          20-04-11
 except                            20-04-12
 only                              20-04-12
 prefix                            20-04-12

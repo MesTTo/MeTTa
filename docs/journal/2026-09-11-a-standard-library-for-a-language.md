@@ -473,3 +473,162 @@ pass. Evidence reports zero unbacked tags in 7,448 claims; the evidence and
 provenance mutation selftests pass. Logs use the ai-libraries-regex prefix in
 ai-tmp; the final combined integration corrections are recorded separately
 from their initial failures.
+
+## 2026-09-11: JSON design before implementation
+
+Tried: the existing JSON example passes 13 assertions. The existing lib_text
+and json_codec native suites pass. A direct lib_json import raises
+`Unknown procedure: lib_json:metta_text/2`; its MeTTa face had supplied the
+dependency through lib_string. Import metta_text/2 explicitly.
+
+Tried: native constructor and encoder probes reproduce four defects. A later
+malformed pair throws `type_error(key_value_pair,[invalid])` after registering
+an object. A pre-existing next `&json-N` receives the new object's fields.
+The key `from` invokes import handling and raises
+`existence_error(source_sink,'.../engine/../lib/')`; `internal` raises
+`type_error(atom,[])`. A self-reference exhausts the explicitly bounded
+10,000-inference reproduction. A non-pair stored atom disappears on encoding.
+The bound contains that known cyclic probe only. Baseline logs are
+ai-tmp/ai-libraries-json-{before,native-before}.log.
+
+Decided: preserve classic JSON objects as spaces, duplicate fields, arrays,
+scalars and the existing number codec. Add file reading and atomic writing,
+native width-based formatting, streaming JSON Lines and structural path
+lookup. Thirteen heads have fourteen arities. Every declared mode receives a
+generated type, documentation row and example call. Object path components
+use the same key values as get-value; array components are nonnegative
+integer indexes. Missing paths have no answers; malformed paths raise.
+
+Decided: validate all constructor pairs before allocation. Allocate global
+data carriers under the existing native-storage mutex, skip occupied names,
+register even empty objects, and store fields with published add_sexp/2.
+Track allocations until an answer is returned and release them on failure.
+Attempt every release if one fails and report the original outcome together
+with cleanup failures. Successful objects retain the established data
+lifetime; advancing or cutting a JSON Lines reader does not revoke its values.
+
+Decided: encode through one memoized snapshot per object. Insert each native
+JSON term into library(assoc) before traversing its fields and reject cyclic
+terms after construction. Repeated aliases stay valid. The graph conversion
+cost is O((V + E) log V + S) for atomic names, where V is distinct objects, E
+object references and S their stored term size; emitted JSON can be larger
+because JSON repeats aliases. Native acyclic_term supplies the graph cycle
+check. Reject non-pair stored atoms explicitly instead of losing them.
+The CPython check_circular behavior establishes the cycle/alias distinction:
+https://github.com/python/cpython/blob/v3.14.0/Lib/json/encoder.py.
+
+Rejected: switch the allocator to new-space/1, because it assigns the current
+equation world while existing JSON carriers are global data. Revisit if JSON
+receives an explicit world-owned lifetime. Rejected: repeat ancestor-list
+membership checks and reread aliased spaces, because both redo graph work.
+
+Decided: add json_codec_write/4 for a nonnegative layout width. Width zero
+delegates to the existing compact C/Prolog codec; positive widths use the
+same native options and finite-number validation with SWI's writer. Keep
+json_codec_write/3's fast path and option contract. Native step/tab require
+positive integers, so do not invent indent-zero behavior or fork formatting.
+
+Tried: a UTF-8 text stream with representation_errors(error) warns
+`Illegal UTF-8 continuation` and substitutes U+FFFD. string_bytes/3 and
+library(utf8) also accept some malformed or obsolete encodings. Decided:
+read bytes, use native string_bytes/3, verify canonical byte round-trip and
+Unicode scalar bounds. This preserves valid Unicode and rejects malformed,
+overlong and surrogate encodings under RFC 3629 sections 3 and 4:
+https://www.rfc-editor.org/rfc/rfc3629. JSON Lines reads one physical LF/CRLF
+line at a time; empty input has no records, blank lines and BOMs raise with
+their line number, and a final LF is optional. Writers append LF per record.
+The format contract is https://jsonlines.org/.
+
+Decided: reuse the file library's publication algorithm locally: acquire a
+sibling staging directory, write its contents file, close before rename,
+then remove staging on every exit. Both JSON writers share this helper.
+The existing file-library journal supplies the rejected direct-truncation
+approach and close-failure evidence. File readers and line generators use
+setup_call_cleanup for exhaustion, cuts and exceptions.
+
+Open: verify constructor rollback and concurrent name ownership, cycles and
+aliases, special keys, non-pair refusal, every new interface, formatting
+against SWI, Unicode against Python, line/error/cut behavior, failed writes
+and close/publication faults. Preserve the thirteen original assertions and
+all codec differential cases; regenerate records and measure the JSON twin.
+
+## 2026-09-11: JSON verification findings
+
+Tried: the first native gate -> ten failed surface cases before an invalid
+unwind fixture terminated that suite; all 26 codec tests with four subcases
+and 58 existing text/file/JSON tests with eight subcases pass. The allocation
+log's nb_linkarg shared bindings that backtracking undid; cleanup then received
+a variable and raised `permission_error(clear,metta_base_space,'&self')`.
+Decided: nb_setarg copies each new cell and shares the old tail. SWI 9.3.18
+already implements this constant-cost push, so no custom linked allocator is
+needed. The installed version is 10.1.13. The upstream change is
+https://github.com/SWI-Prolog/swipl-devel/commit/7de5ef58661b9d776627ad0f1167197a89430d0c.
+A two-push/backtracking probe retains owned([b,a]).
+
+Tried: the new exact-output assertions assumed whitespace-free JSON. Native
+width(0) retains spaces around arrays and nested objects. The codec's native
+differential passes; compare document structure and preserve its spelling.
+The engine refuses a partial stored atom before the JSON writer can see it;
+constructor tests cover partial pairs at their actual boundary.
+
+Tried: throw(unwind(json_surface_stop)) -> `Unknown "unwind" exception:
+json_surface_stop`, even with an explicit catch pattern. SWI bypasses ordinary
+catch for unwind, so the custom rethrow clause was unreachable. Remove it and
+verify reader cancellation with a joined thread and an explicit stop signal.
+The initial log remains ai-tmp/ai-libraries-json-native-first.log.
+
+Verified: the repaired native gate passes 41 surface tests with twelve
+subcases, 26 codec tests with four subcases, and 58 existing text/file/JSON
+tests with eight subcases. The expanded example passes 28 assertions.
+The first Python gate's six failures were fixture assumptions: the public
+function API already returns Python strings, and SWI renders instantiation
+errors as `Arguments are not sufficiently instantiated`. Correcting those
+assumptions yields 25 passing tests, including recursive JSON and JSON Lines
+properties against Python's json codec and the existing dictionary story.
+Two RUF043 findings required raw regular-expression strings. Ruff then passes;
+jscpd reports zero clones across two Python files, 425 lines and 3,383 tokens.
+
+Tried: message_to_string on a JSON Lines error prints `Unknown error term:
+json_line(...)`. Decided: use prolog:error_message//1, matching lib_file and
+lib_csv, to render the record number and native cause while retaining the
+structured exception. Add a message assertion and preserve the file reader's
+Python refusal checks. All remaining generated records, integration checks
+and the final twin cost must run on this completed source.
+
+Verified: the completed native source passes 42 surface tests with twelve
+subcases, 26 codec tests with four subcases, and 58 existing tests with eight
+subcases. The Python gate passes 25 tests. Logs are
+ai-tmp/ai-libraries-json-{native-final,python-final}.log.
+
+Tried: the per-library integration battery passes every requested record,
+reference, documentation and generated-face check, but no-autoload fails in
+14-reflect_lib.metta. Its string-length call stays unreduced and the numeric
+comparison raises `> expects two numbers`. The old JSON face imported
+lib_string, which that consumer uses. Decided: preserve that existing import
+outside the generated region, alongside the native module's explicit helper
+import. Regeneration owns native declarations, not authored dependencies.
+The first integration log is ai-tmp/ai-libraries-json-integration.log.
+
+Verified: restoring the authored import passes all 319 no-autoload examples.
+The resulting four-line reference offset makes libdoc report
+`metta-libraries.md no longer matches the libraries' @doc atoms`; its owning
+generator refreshes the page and the final libdoc and docs lanes pass.
+Corpus coverage now has 685 carried library heads, 251 callable engine heads,
+four allowed omissions and zero findings. Cumulative syntax has 324 examples
+and 284 constructs; origins retains 143 derived and 202 original examples.
+The five llms sheets and their 68 planted checks pass. Prolog-face, its
+thirteen selftests, reference, its four selftests and lib-autoload pass.
+
+Measured: `python extensions/python/tools/twin_coverage.py --measure --rounds 3
+examples/ch08-data/08-03-the-shipped-libraries/05-json_lib.metta` -> 73,856
+MeTTa inferences, 65,839 Python inferences, ratio 0.8915. Both programs prove
+all 28 claims and have equal stored content with zero findings. Only this
+twin's budget changes, from 24,799 to 65,839, for its expanded public surface,
+allocation ownership, graph conversion and generated declarations.
+
+Verified: Ruff passes both changed Python files. The evidence lane reports
+zero unbacked tags in 7,445 claims, 13,361 known tests and 1,109 runner files;
+provenance-pin-selftest passes. Fifteen WORKTREE tags await the standard
+header-only pin. Final logs are ai-tmp/ai-libraries-json-{twin-final,
+twin-measure-final,ruff-final,records-final}.log. The native/Python tests,
+example, records, docs and pricing obligations for JSON are closed.
