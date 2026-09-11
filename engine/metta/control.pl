@@ -3,6 +3,10 @@
 %   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
+% Guarantees: metta_host_inference_budget/3 converts a deferred native
+%   inference ball to its existing metta_control_signal/2 envelope
+%   [tested: spaces_receipt_limits:the_public_bound_keeps_its_control_envelope;
+%   commit=WORKTREE].
 % Guarantees: metta_host_hold/3 installs seam:engine_context/1 inside its
 %   held goal and announces its lifetime through seam:host_engine_created/1
 %   and seam:host_engine_released/1 [tested: lib_thread_scope,
@@ -539,9 +543,13 @@ metta_host_inference_budget(Goal, Inferences, Bounded) :-
     ->  type_error(integer, Inferences)
     ;   Inferences =< 0
     ->  Bounded = Goal
-    ;   Bounded = ( statistics(inferences, Base),
-                    call_with_inference_limit(Goal, Inferences, Outcome),
-                    metta_engine:metta_inference_budget_spent(Outcome, Base, Inferences) )
+    % Workaround: swi-cleanup-window - classify a deferred cleanup ball after the native limiter returns.
+    ;   Bounded = catch(
+                    ( statistics(inferences, Base),
+                      call_with_inference_limit(Goal, Inferences, Outcome),
+                      metta_engine:metta_inference_budget_spent(Outcome, Base, Inferences) ),
+                    inference_limit_exceeded,
+                    metta_engine:metta_inference_bound_exceeded(Inferences))
     ).
 
 %Takes no goal, so no module travels with it and it may be called from

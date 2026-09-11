@@ -1,7 +1,7 @@
 % Purpose: prove receipt ownership and safe suspended-engine destruction.
 % Guarantees: nested completion retains the outer owner and retires each scope
 %   once, including failure and exception rollback [tested: spaces_receipt_frames;
-%   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
+%   commit=WORKTREE].
 % Owns resources: fixtures destroy their engines and spaces, remove the scope
 %   retirement wrapper, and close their event queues.
 
@@ -30,7 +30,7 @@ reserve(Space, Scope) :-
     spaces:metta_with_occurrence_load((
         spaces:metta_receive_occurrences(Space, [[t,receipt_frames,1]], Stored),
         assertion(Stored == [[t,receipt_frames,1]]),
-        nb_current('$metta_occurrence_transaction', _-Scope) )).
+        nb_current('$metta_occurrence_transaction', _-scope(Scope, _)) )).
 
 nested_transactions(0, Goal, _) :- !, call(Goal).
 nested_transactions(Depth, Goal, Events) :-
@@ -74,7 +74,7 @@ inner_rollback(Mode, Space, Events) :-
     transaction((
         rollback(Mode, reserve(Space, _)),
         assertion(message_queue_property(Events, size(0))),
-        nb_current('$metta_occurrence_transaction', _-Scope),
+        nb_current('$metta_occurrence_transaction', _-scope(Scope, _)),
         reserve(Space, Again), assertion(Again == Scope),
         assertion(message_queue_property(Events, size(0))) )),
     one_retirement(Events, Scope).
@@ -109,7 +109,7 @@ outer_transaction(snapshot, Goal) :- snapshot(Goal).
 native_owner(Mode, Space, Events) :-
     outer_transaction(Mode,
         ( transaction(reserve(Space, Scope)),
-          nb_current('$metta_occurrence_transaction', _-Owner),
+          nb_current('$metta_occurrence_transaction', _-scope(Owner, _)),
           assertion(Owner == Scope),
           assertion(message_queue_property(Events, size(0))) )),
     one_retirement(Events, Scope).

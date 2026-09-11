@@ -59,6 +59,14 @@ Workaround: `metta_with_trailed/3` in `engine/metta/control.pl` uses `b_setval/2
   goal inside `catch/3`, whose call port defers an inference trip to that goal.
   Cleanup is itself a catch that retries idempotent retirement before
   propagating the ball. Ownership records remain until retirement completes.
+  Receipt listeners schedule interrupted retirement with thread_signal/2;
+  a scheduling-only exception hook covers interruption before the listener's
+  catch starts. The retained transaction owner remembers engine reservations
+  after rollback erases its rows. Recovery compares pending claim references
+  with live markers before preserving a surviving outer scope.
+  The shared inference-bound door catches a deferred native ball through its
+  final cumulative check and preserves the existing control envelope. The
+  budget and measured goal stay unchanged.
   The structural `prolog-static` check refuses writes in either cleanup
   wrapper's Setup and checks its declared fixture exception with a planted
   selftest.

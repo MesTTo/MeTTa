@@ -4,7 +4,7 @@
 % Guarantees: the actual scope doors restore their prior state and permit a
 %   clean second entry after interruption; ordinary answers, redo, cut and
 %   nested mutable contexts preserve their dynamic extent
-%   [tested: sh engine/test.sh suites/evaluation/trailed_scopes.plt; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%   [tested: sh engine/test.sh suites/evaluation/trailed_scopes.plt; commit=WORKTREE].
 % Owns resources: every sweep engine is destroyed after its result is read;
 %   temporary clauses are owned by the production doors under test.
 
@@ -26,10 +26,17 @@ seam:foreign_remove_token('&guard-token-provider', t(guard,1), true) :-
 
 :- metta_ensure_source_observation.
 :- meta_predicate within(+, 0), minimum_budget(0, 0, -), sweep_trials(2, +, +, -),
-                  minimum_budget(1, 0, 0, -), scope_fixture(+,0), observation_fixture(0).
+                  minimum_budget(1, 0, 0, -), scope_fixture(+,0), observation_fixture(0),
+                  bounded_call(0, +, -).
 
 spin(0) :- !.
 spin(N) :- M is N-1, spin(M).
+
+% A native notification can defer the same limit ball past the limiter's
+% return. Both forms mean interruption; neither skips the restoration check.
+bounded_call(Goal, Budget, Outcome) :-
+    catch(call_with_inference_limit(Goal, Budget, Outcome),
+          inference_limit_exceeded, Outcome=inference_limit_exceeded).
 
 test(answers_restore_the_outer_value_and_redo_restores_the_inner_value) :-
     metta_with_trailed('$plunit_trailed', outer,
@@ -249,7 +256,7 @@ sweep_entry(Site, Key, Budget, Result) :-
     % restoration rather than the separate undefined-supervisor host defect.
     once(within(Site, inside(Site))),
     nb_setval(Key, []),
-    ( call_with_inference_limit(once(within(Site,(inside(Site),spin(30)))), Budget, Outcome)
+    ( bounded_call(once(within(Site,(inside(Site),spin(30)))), Budget, Outcome)
     -> true ; Outcome=failed ),
     ( nb_current(Key, []) -> true
     ; nb_current(Key, Leaked), throw(error(scope_leaked(Site,Budget,Leaked),none)) ),
@@ -398,7 +405,7 @@ operation_sweep(Site,Key,Budget,Completed) :-
 
 operation_entry(Site,Key,Budget,Result) :-
     nb_setval(Key,[]), once(perform(Site)), nb_setval(Key,[]),
-    ( call_with_inference_limit(once(perform(Site)), Budget, Outcome)
+    ( bounded_call(once(perform(Site)), Budget, Outcome)
     -> true ; throw(error(operation_failed(Site,Budget),none)) ),
     ( nb_current(Key,[]) -> true
     ; nb_current(Key,Leaked), throw(error(scope_leaked(Site,Budget,Leaked),none)) ),
@@ -430,7 +437,7 @@ clause_sweep(Site, Budget, Completed) :-
 
 clause_entry(Site, Budget, Result) :-
     once(clause_scope(Site)),
-    ( call_with_inference_limit(once(clause_scope(Site)),Budget,Outcome)
+    ( bounded_call(once(clause_scope(Site)),Budget,Outcome)
     -> true ; throw(error(clause_scope_failed(Site,Budget),none)) ),
     no_scoped_clause(Site),
     once(clause_scope(Site)), no_scoped_clause(Site),

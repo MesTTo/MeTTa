@@ -49,6 +49,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Receipt retirement completes after an inference limit interrupts a native
+  transaction's completion listener. Rolled-back marker notifications release
+  their standing-engine claims while preserving a live outer transaction.
+  The shared inference-bound door preserves its control envelope when the
+  native notification raises the limit after the host limiter returns.
 - Reader source-load and directory scopes are published to their compiler
   and manifest consumers; the binding service manifest records the shared
   trailed context door.

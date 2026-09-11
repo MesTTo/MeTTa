@@ -1,18 +1,21 @@
 % Guarantees: metta_with_occurrence_load/1 restores its root through
 %   metta_with_trailed/3 before catch-protected receipt retirement
-%   [source: engine/spaces/receipts.pl:metta_with_occurrence_load/1; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%   [source: engine/spaces/receipts.pl:metta_with_occurrence_load/1; commit=WORKTREE].
+% Guarantees: interrupted native completion retires every finished scope's
+%   rows and standing-engine reservations; nested rollback preserves the live
+%   outer owner [tested: spaces_receipt_limits; commit=WORKTREE].
 %
 % Purpose: reserve incoming occurrence identities across transaction views.
 % Assumes: native erasures use metta_erase_storage_ref/1 or metta_retract_storage/1.
 % Guarantees: overlapping image receipts retain distinct tokens, while a load
 %   into an empty destination preserves its tokens [tested: spaces_token_images;
-%   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
+%   commit=WORKTREE].
 %   A completed inner transaction transfers its scope to the live outer one;
 %   destroying its suspended engine does not notify a discarded query frame
-%   [tested: spaces_receipt_frames; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
+%   [tested: spaces_receipt_frames; commit=WORKTREE].
 % Owns resources: one standing engine; reservations and erased references last
 %   only until their enclosing load or transaction finishes. Nested rollback
-%   releases its reservations [tested: spaces_token_images; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
+%   releases its reservations [tested: spaces_token_images; commit=WORKTREE].
 % Guarded by: '$metta_occurrence_receipts' serializes requests to the engine.
 
 :- use_module(library(ordsets), [ord_memberchk/2]).
@@ -48,7 +51,12 @@ metta_receive_occurrences(Space, Incoming, Stored) :-
               metta_token_portable(Token, Portable) ), Local),
     findall(Ref, metta_receipt_erased(Scope, Ref), Erased0), sort(Erased0, Erased),
     ( metta_receipt_reserved(Scope) -> true
-    ; assertz(metta_receipt_reserved(Scope)) ),
+    ; % Workaround: swi-cleanup-window - retain the engine obligation across native rollback.
+      ( nb_current('$metta_occurrence_transaction', _-Owner),
+        Owner = scope(Scope, _)
+      -> nb_setarg(2, Owner, true)
+      ; true ),
+      assertz(metta_receipt_reserved(Scope)) ),
     % One marker owns this batch before any reservation can escape to the
     % standing engine. Rolling it back releases exactly these incoming rows.
     assertz(metta_receipt_marker(Scope, Load), Ref),
@@ -58,11 +66,13 @@ metta_receive_occurrences(Space, Incoming, Stored) :-
 % The journal is itself transactional, so a nested rollback restores the
 % parent's deletion set. No native clause reference survives outer completion.
 metta_erase_storage_ref(Ref) :-
-    erase(Ref),
     (   current_transaction(_)
     ->  metta_receipt_transaction_scope(Scope),
-        assertz(metta_receipt_erased(Scope, Ref))
-    ;   true
+        % Workaround: swi-cleanup-window - make the journal follow erasure even if its call port trips.
+        sig_atomic((erase(Ref),
+                    catch(assertz(metta_receipt_erased(Scope, Ref)), Ball,
+                          (assertz(metta_receipt_erased(Scope, Ref)), throw(Ball)))))
+    ;   erase(Ref)
     ).
 
 metta_retract_storage(Head) :-
@@ -72,7 +82,7 @@ metta_retract_storage(Head) :-
     ).
 
 metta_receipt_transaction_scope(Scope) :-
-    (   nb_current('$metta_occurrence_transaction', _-Scope)
+    (   nb_current('$metta_occurrence_transaction', _-scope(Scope, _))
     ->  true
     ;   flag('$metta_occurrence_scope', Scope, Scope+1),
         metta_receipt_watch_transaction(none, Scope)
@@ -83,7 +93,12 @@ metta_receipt_watch_transaction(Finished, Scope) :-
     prolog_current_frame(Current),
     metta_receipt_nearest_frame(Current, Finished, Frame),
     ( Frame == none -> existence_error(transaction_frame, Current) ; true ),
-    nb_setval('$metta_occurrence_transaction', Frame-Scope).
+    % This completion record outlives forall/2 and inner rollback. The native
+    % transaction owns it; a local trail would end before that owner finishes.
+    ( nb_current('$metta_occurrence_transaction', Owner),
+      Owner = _-scope(Scope, _)
+    -> nb_setarg(1, Owner, Frame)
+    ; nb_setval('$metta_occurrence_transaction', Frame-scope(Scope, false)) ).
 
 % Inspection marks its input FR_NOTIFY. Stop at a live transaction rather than
 % marking the outer query, which discard_query notifies after its foreign frame
@@ -106,17 +121,50 @@ metta_receipt_transaction_predicate(system:'$transaction'/3).
 metta_receipt_transaction_predicate(system:'$snapshot'/1).
 
 metta_receipt_frame_finished(Frame) :-
-    (   nb_current('$metta_occurrence_transaction', Frame-Scope)
+    % Workaround: swi-cleanup-window - resume interrupted completion at a clean call port.
+    catch(metta_receipt_finish_frame(Frame), Ball,
+          ( thread_self(Me),
+            thread_signal(Me, (spaces:metta_receipt_finish_frame(Frame), throw(Ball))) )).
+
+metta_receipt_finish_frame(Frame) :-
+    (   nb_current('$metta_occurrence_transaction', Frame-scope(Scope, _))
     ->  ( current_transaction(_)
         -> metta_receipt_watch_transaction(Frame, Scope)
-        ; nb_delete('$metta_occurrence_transaction'),
-          metta_receipt_forget_scope(Scope) )
+        ; metta_receipt_forget_scope(Scope),
+          nb_delete('$metta_occurrence_transaction') )
     ;   true
     ).
 
+% The host can cut the listener before its catch starts. At that point the
+% hook may report the enclosing native frame. Only schedule here: calling
+% retirement from an exception hook would run it with an outstanding ball.
+% Workaround: swi-cleanup-window - schedule reconciliation when a bound cuts an owned transaction.
+:- multifile prolog:prolog_exception_hook/5.
+prolog:prolog_exception_hook(inference_limit_exceeded, _, _, _, _) :-
+    nb_current('$metta_occurrence_transaction', _-scope(Scope, _)),
+    thread_self(Me),
+    thread_signal(Me, spaces:metta_receipt_reconcile_scope(Scope)),
+    fail.
+
+metta_receipt_reconcile_scope(Scope) :-
+    ( nb_current('$metta_occurrence_transaction', _-scope(Scope, Reserved))
+    -> ( current_transaction(_)
+       -> metta_receipt_watch_transaction(none, Scope),
+          ( Reserved == true
+          -> metta_receipt_request(claims(Scope), Claims),
+             forall(member(Claim, Claims),
+                    ( clause(metta_receipt_marker(Scope, _), true, Claim)
+                    -> true
+                    ; metta_receipt_request(forget_claim(Claim), done) ))
+          ; true )
+       ; metta_receipt_forget_scope(Scope),
+         nb_delete('$metta_occurrence_transaction') )
+    ; true ).
+
 metta_receipt_forget_scope(Scope) :-
     % Workaround: swi-cleanup-window - release the reservation before removing its retry record.
-    ( metta_receipt_reserved(Scope)
+    ( ( metta_receipt_reserved(Scope)
+      ; nb_current('$metta_occurrence_transaction', _-scope(Scope, true)) )
     -> metta_receipt_request(forget_scope(Scope), done),
        retractall(metta_receipt_reserved(Scope))
     ; true ),
@@ -125,11 +173,17 @@ metta_receipt_forget_scope(Scope) :-
 
 % A rolled-back marker no longer decodes. Its reference was attached while
 % live, so rollback only compares identity and never inspects the dead clause.
-metta_receipt_marker_changed(rollback(assertz), Ref) :-
+metta_receipt_marker_changed(Action, Ref) :-
+    % Workaround: swi-cleanup-window - finish a cut marker notification outside its native query.
+    catch(metta_receipt_marker_change(Action, Ref), Ball,
+          ( thread_self(Me),
+            thread_signal(Me, (spaces:metta_receipt_marker_change(Action, Ref), throw(Ball))) )).
+
+metta_receipt_marker_change(rollback(assertz), Ref) :-
     !, metta_receipt_request(forget_claim(Ref), done).
-metta_receipt_marker_changed(retract, Ref) :-
+metta_receipt_marker_change(retract, Ref) :-
     !, metta_receipt_request(forget_claim(Ref), done).
-metta_receipt_marker_changed(_, _).
+metta_receipt_marker_change(_, _).
 
 metta_receipt_request(Request, Reply) :-
     with_mutex('$metta_occurrence_receipts',
@@ -160,6 +214,9 @@ metta_receipt_apply(reserve(owner(Scope,Load), Claim, Space, Local, Erased, Inco
     maplist(metta_receipt_reserve(owner(Scope,Load), Claim, Space, Index), Incoming, Stored).
 metta_receipt_apply(forget_scope(Scope), done) :-
     retractall(metta_receipt_pending(_, _, owner(Scope,_), _)).
+metta_receipt_apply(claims(Scope), Claims) :-
+    findall(Claim, metta_receipt_pending(_, _, owner(Scope,_), Claim), All),
+    sort(All, Claims).
 metta_receipt_apply(forget_load(Load), done) :-
     retractall(metta_receipt_pending(_, _, owner(_,Load), _)).
 metta_receipt_apply(forget_claim(Claim), done) :-

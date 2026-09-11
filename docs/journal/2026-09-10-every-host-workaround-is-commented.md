@@ -148,3 +148,120 @@ manifest. These are dependencies introduced by the scope change.
 Tried: `sh engine/test.sh suites/seams/layering.plt` passes all seven tests.
 The two service-manifest pytest tests pass. The owned umbrella export and
 import fixtures remain explicit integration needs.
+
+## 2026-09-11, receipt retirement after native completion
+
+Goal: every budget 1..600 around a native transaction leaves its clauses
+committed or rolled back together and retires the finished receipt scope,
+including reservations in the standing engine.
+
+Origin: the PUBLICATION finding came from the main checkout's
+`ai-tmp/wt-publication/ai-tmp/publication-d9d1201b/ai-receipt-limit-probe.pl`.
+The unchanged probe fails on this branch at budget 77 with
+`receipt_limit_residue(77,inference_limit_exceeded,0,Frame-Scope,Refs)`:
+four erasures committed, while the owner and four receipt rows remained.
+
+Tried: catch the completion listener, keep its owner until retirement ends,
+and schedule recovery with thread_signal/2. The listener's entry can still
+be cut before its catch starts. The exception hook then sees the enclosing
+host frame, so matching only the listener's predicate misses that entry.
+A scheduling-only hook captures the owned scope and reconciles it at the
+next clean call port; the original 600-budget reproduction then passes.
+
+Tried: eight sweeps covering erasure and reservation through transaction/1,
+transaction/2, transaction/3 and snapshot/1. Snapshot reservation leaks at
+budget 142 after rollback removes the reserved row used to decide whether
+the standing engine needs retirement. Retaining that obligation fixes all
+eight. A nested snapshot then leaves an orphan claim at budget 92: its
+rollback marker notification was cut. Reconciling the standing engine's
+claim references against the caller's live marker view fixes all twelve
+600-budget cohorts, including preservation of the live outer owner.
+
+Rejected: trailing the cached transaction owner at first use. The first
+use can run inside forall/2 or another local rollback boundary; its trail
+ends before the native transaction does. Wrapping every native transaction
+would move that trail boundary but adds a global mechanism to an existing
+lazy ownership protocol. The receipt owner is retained retirement metadata:
+native transaction state defines its lifetime, and completion removes it.
+Its mutable reservation bit survives rollback of the transactional rows.
+
+Decided: retain that owner through complete retirement; catch both native
+listeners and schedule their interrupted work before propagating the same
+ball from a clean port. An inference exception hook only schedules scope
+reconciliation and fails so other hooks still run. A live scope drops only
+claims whose markers rolled back; a finished scope drops every claim and
+then its rows and owner. Publish the owner before native erasure and put
+the erasure's journal write inside an immediately following catch, masking
+signals across the pair. The standing engine answers a claims(Scope)
+request only for recovery. Ordinary erasure-only scopes still send no
+reservation retirement request.
+
+The sites use swi-cleanup-window: interruption between cleanup goals is
+already the ledger's host rule, including a listener called after native
+commit. The existing tracked reproduction remains its host test; the new
+receipt suite tests this application, including marker and reserved rows
+and reservations read through an engine outside the caller's snapshot.
+
+Probe correction: replacing a named atom listener with another atom changes
+the stored closure but keeps its old procedure in SWI's add_event_hook;
+the first throwaway replacement therefore never called its candidate.
+Removing that probe listener before registration made the comparison valid.
+Production retains its single boot registration and needs no workaround
+for replacement. Source: pinned SWI pl-event.c:add_event_hook and
+call_event_list at fc7ef84b949378b729052c3ade79c90ce5416abb.
+
+## 2026-09-12, a deferred receipt limit retains its public envelope
+
+Tried: the implemented receipt sweep passes 17 cohorts of 600 budgets,
+including every completed scope's rows and standing-engine claims, clean
+second entries, existing and newly allocated outer ownership, and a bound
+caught inside a transaction after one erasure. The existing frame tests
+pass 4 tests and 7 subtests; token and image tests pass 29 and 5 subtests.
+The supplied reproduction passes all 600 budgets.
+
+Found: a deferred callback can raise inference_limit_exceeded after SWI's
+limiter has returned. The native sweep accepts that same ball as a raised
+exception as well as a limiter result; its first assertion had incorrectly
+accepted only the result. The shared public builder must still return its
+documented control envelope: its direct erasure probe instead exposes the
+raw atom at budgets 101..116.
+
+Decided: one catch around the shared bounded conjunction converts that raw
+atom through metta_inference_bound_exceeded/1. The positive budget, its
+native limiter and its cumulative check are unchanged. Non-positive budgets
+still return the original goal. A warmed direct counter probe measures one
+additional inference at entry; the per-answer slope stays three. Extend
+the receipt sweep through the public builder for all four native boundaries
+and both operations, and update the affine cost assertion to three per
+answer plus two at entry.
+
+Tried: the final receipt suite passes all 25 cohorts of 600 budgets, 15000
+trials. The public-envelope probe reports no raw ball at any budget. The
+17 inference-budget tests pass with the changed entry charge; the 17 scope
+tests and 40 subtests pass with native delayed balls counted as interrupted
+exits. Every restoration and second-entry assertion remains in place.
+
+Tried: load the main checkout's limits.pl unchanged beside this receipt
+implementation, then run its four host-limit tests and all receipt cohorts:
+all pass, and the process reports two exception-hook clauses. The temporary
+compatibility fixture changes only source paths and explicitly loads that
+file; the owned engine umbrella is unchanged.
+
+Tried: regenerate all 46 production-door budget ranges after receipt
+integration. Five completion budgets change: occurrence load 57 to 61,
+source rollback 278 to 279, post hook 161 to 184, foreign selector 50 to 51,
+and loading marker 53 to 54. Every range still has zero retained state and
+a clean second entry. The remaining table values above are unchanged.
+Three 1000-entry counter samples agree at every measured door. The standalone
+empty occurrence load now costs 26 inferences per entry, versus 25 on the
+cut and 22 before receipt reconciliation: its retirement checks the retained
+transaction record before deciding that no engine request is owed. All other
+direct scope costs above remain unchanged. The recovery-only claims request
+reuses forget_claim/1; no additional protocol is needed for normal execution.
+
+Tried: the same 5-line/50-token duplication scan over all 36 changed Prolog
+files finds eight clones, 52 lines out of 37009, 0.14%. The two added clones
+are the receipt tests' declared fixtures and budget loops. Their boundary,
+operation, cleanup and state checks already share predicates; retaining each
+plunit setup/cleanup declaration keeps ownership explicit. The other six
+clones are the previously inspected pairs.
