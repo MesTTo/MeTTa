@@ -6,6 +6,9 @@
 #   engine-bench lane red with no code behind it and makes every engine number
 #   unfalsifiable.
 # Guarantees:
+#   - an empty driver sample includes the command's exit status and full
+#     output, so a refused configuration keeps its diagnostic
+#     [tested: sh check.sh boot-determinism; commit=WORKTREE].
 #   - clause garbage collection costs a booted engine no Prolog work that grows
 #     with the number of clauses it reclaims. That is the mechanism half and it
 #     is deterministic: it runs the collector on this thread and compares the
@@ -42,6 +45,7 @@
 #     comparison against a pinned baseline is the other half of the cover --
 #     a trap that fires on EVERY boot moves the row by its whole cost and
 #     leaves these eight in perfect agreement.
+# Owns resources: the EXIT trap removes the private temporary-directory fixture.
 # Open Obligations:
 #   To Do: None
 #   Hacks: None
@@ -132,8 +136,8 @@ bounded swipl -g "metta_bench:bench_run(boot)" -t halt engine/bench.pl >/dev/nul
 readings=""
 sample=1
 while [ "$sample" -le 8 ]; do
-    reading=$(bounded swipl -g "metta_bench:bench_run(boot)" -t halt engine/bench.pl |
-        sed -n 's/.*inferences=\([0-9][0-9]*\).*/\1/p')
+    output=$(bounded swipl -g "metta_bench:bench_run(boot)" -t halt engine/bench.pl)
+    reading=$(printf '%s\n' "$output" | sed -n 's/.*inferences=\([0-9][0-9]*\).*/\1/p')
     if [ -z "$reading" ]; then
         printf 'boot sample %s produced no counter line\n' "$sample" >&2
         exit 1
@@ -165,10 +169,18 @@ fi
 # out-of-band failure, so this arm does not depend on the pin being current.
 scratch="$ROOT/ai-tmp/boot-determinism-tmp.$$"
 mkdir -p "$scratch"
+trap 'rm -rf "$scratch"' EXIT HUP INT TERM
 boot_sample() {
-    bounded sh "$ROOT/engine/bench.sh" --counter-only boot 2>&1 |
+    status=0
+    output=$(bounded sh "$ROOT/engine/bench.sh" --counter-only boot 2>&1) || status=$?
+    reading=$(printf '%s\n' "$output" |
         sed -n 's/.*samples=\[\([0-9][0-9]*\).*/\1/p;s/.*every sample of \[\([0-9][0-9]*\).*/\1/p' |
-        head -1
+        head -1)
+    if [ -z "$reading" ]; then
+        printf 'boot driver produced no sample (exit %s):\n%s\n' "$status" "$output" >&2
+        return 1
+    fi
+    printf '%s\n' "$reading"
 }
 # Both arms are set explicitly, in subshells. This lane runs UNDER check.sh,
 # which has already exported the three names, so an arm that merely leaves

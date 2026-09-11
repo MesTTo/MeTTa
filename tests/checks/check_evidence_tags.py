@@ -123,6 +123,9 @@ Guarantees:
     tests/checks/check_pin_provenance_selftest.py; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
   - C-embedded Prolog fixtures carry checked evidence and provenance
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
+  - root build hooks and component shell tests carry checked claims and
+    resolvable comment pins [tested: tests/checks/check_evidence_selftest.py,
+    tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs
@@ -311,6 +314,8 @@ GUARANTEE_SOURCES = (
 #: `tests/prolog/vendor/*.pl` 3; `tests/fixtures/*.pl` 2; `engine/*.metta` 1;
 #: `extensions/cmetta/kit/*.c` 1; `tests/conformance/*.py` 1.
 CLAIM_SOURCES = (
+    # Root build hooks state the resources their distributions contain.
+    "*.py",
     # THE GATE'S OWN RUNNERS. Every shell script the repository ships, which
     # is where the gate states what it guarantees and where the largest single
     # block of unread claims sat: 63 tags across sixteen files. Three of them
@@ -322,6 +327,7 @@ CLAIM_SOURCES = (
     "*.sh",
     "engine/*.sh",
     "extensions/*/*.sh",
+    "extensions/*/tests/*.sh",
     "tests/shell/*.sh",
     "tests/checks/*.sh",
     # The Python seat's Prolog half, 26 claims. `extensions/python/metta/*.pl`

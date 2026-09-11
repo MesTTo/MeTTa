@@ -89,6 +89,28 @@ Workaround: `metta_load_source/2` strips the extension of a source the boot
 Lifted when: the artifact rule applies to an extension-bearing spec too.
 Record: docs/journal/2026-09-09-runtime-units-compile-beside-their-source.md.
 
+## swi-qlf-failed-include-source-module
+Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
+  boot/init.pl:$consult_file and src/pl-qlf.c:loadPredicate.
+Defect: a failed nested include under qcompile(auto) leaves the source module
+  changed. QLF replay then defines the next predicate in that module. A strong
+  import there makes lookupProcedureToDefine return null, which loadPredicate
+  dereferences, producing signal 11. The stripped library reports the nearest
+  exported symbol, PL_cut_query, although the fault is in the QLF loader.
+Reproduction: tests/checks/host_workarounds/swi-qlf-failed-include-source-module.sh,
+  a module that imports an export into user before a failed nested include.
+  The same QLF loads in the control with its optional entry disabled; replay
+  with the broken entry enabled exits 139. The crash reporter can instead
+  abort with exit 134 after its stack_avail___LD assertion; that result counts
+  only with the original signal-11 report and the exact secondary assertion.
+  No engine or Janus is loaded.
+Workaround: loading_loudly/1 restores the source module on success, failure
+  and exception before QLF replay continues. Nested diagnostic collection
+  turns the printed include error into a refusal at the boot boundary.
+Lifted when: the reproduction safely rejects or finishes replay instead of
+  crashing, and the loader restores module state after a failed consult.
+Record: docs/journal/2026-09-11-the-engine-and-packaging-lanes-after-the-wave.md.
+
 ## swi-named-listener-replacement-lock
 Host: SWI-Prolog 10.1.13, src/pl-event.c:add_event_hook at
   fc7ef84b949378b729052c3ade79c90ce5416abb, lines 145-159.

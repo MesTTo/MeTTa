@@ -1,12 +1,15 @@
 % Purpose: provide MeTTa's Prolog runtime, builtins, type system, evaluator,
 %   imports, function registration, and named-space execution context.
 % Guarantees:
+%   - broken extension entries raise through loading_loudly/1 with their
+%     diagnostic instead of allowing boot to report success
+%     [tested: tests/shell/test_packaged_cli.sh; commit=WORKTREE].
 %   - materialize.pl loads before source processing and shares the engine's
 %     runtime context [tested: function_free_materialization; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
-%   - The fourteen engine/metta/ units compile into metta_engine in source
+%   - The engine/metta/ units compile into metta_engine in source
 %     order. Engine and library definitions stay out of user except SWI's
 %     exception/3, thread_message_hook/3 and prolog_trace_interception/4 hooks.
-%     [tested: engine_modules; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
+%     [tested: engine_modules; commit=WORKTREE].
 %   - A built-in call covered by the effects cluster whose declared operand
 %     types already conflict is refused before operand evaluation; shallow
 %     compile-time checks inspect literals and declared return types without
@@ -1378,6 +1381,7 @@ prolog:error_message(metta_platform_required(Form, Capability, Requires,
 :- use_module(library(option)).
 :- use_module(library(lists)).
 :- use_module(library(yall), except([(/)/3])).
+:- use_module(source_loading, [loading_loudly/1]).
 :- use_module(library(apply)).
 :- use_module(library(apply_macros)).
 %next_lambda_name/1 (translator.pl) calls gensym/2 to name every compiled
@@ -2010,7 +2014,9 @@ metta_load_extension(Control) :-
                  % Seat definitions belong to the host tier, whose imports
                  % reach this facade without replacing its implementations.
                  % [source: engine/metta.pl:metta_publish_host_tier/0; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
-                 user:ensure_loaded(Entry) )),
+                 % A printed include error or failed directive is a failed
+                 % seat, even when SWI's ensure_loaded/1 succeeds.
+                 loading_loudly(user:ensure_loaded(Entry)) )),
         (   metta_extension_loaded(Name) -> true
         ;   assertz(metta_extension_loaded(Name))
         )

@@ -7,6 +7,8 @@
 %       DATABASE rather than the sources
 %     - the working directory is tests/prolog
 % Guarantees:
+%     - boot and runtime imports share the source_loading leaf
+%       [tested: engine_layering; commit=WORKTREE].
 %     - identity is a leaf reached by boot validation, storage and image receipt
 %       [tested: engine_layering; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 %     - every call from one engine subsystem into another, and every call from
@@ -378,6 +380,7 @@ reaches(metta, parser, 'sread, swrite and sdisplay are the core\'s text builtins
 reaches(metta, qlf_boot, 'the runtime loader asks the boot, through seam:compiled_source/1, whether it governs a source before compiling it beside itself').
 reaches(metta, spaces, 'the space builtins are the space subsystem\'s surface').
 reaches(metta, source_positions, 'common defining origins attach lines through the parser\'s position projection').
+reaches(metta, source_loading, 'runtime sources and extension entries share diagnostic collection and loader-state restoration with boot').
 reaches(metta, specializer, 'the verify-specializations pragma write opens a fresh coverage tally and closing it reports one').
 reaches(metta, support_graph, 'a world admits a program write only after walking who its recompilation reaches').
 reaches(metta, translator, 'a runnable form is compiled before it runs').
@@ -385,6 +388,7 @@ reaches(metta, translator_rules, 'add-translator-rule! is the rule registry\'s d
 reaches(metta, type_rules, 'every type question resolves through the typing-rule registry').
 reaches(parser, metta, 'refuses an unbound input in the core\'s error vocabulary').
 reaches(qlf_boot, identity, 'validates actor and generation before engine initialization').
+reaches(qlf_boot, source_loading, 'boot reports errors SWI prints while replaying the engine artifact').
 reaches(spaces, identity, 'normalizes and orders occurrence tokens through the process identity owner').
 reaches(spaces, ext_points, 'announces function changes and asks whether an atom hook is installed').
 reaches(spaces, filereader, 'a write records or forgets what its source assertion supports').

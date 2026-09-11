@@ -1,3 +1,4 @@
+# Purpose: include runtime sources and release metadata in the source archive.
 recursive-include engine *
 recursive-include lib *
 recursive-exclude engine __pycache__ *.py[co]
@@ -27,6 +28,6 @@ include extensions/mork/extension.pl
 include llms.txt
 recursive-include tests/codec *
 include extensions/python/extension.pl
-include extensions/python/metta/_binding/surface.pl
-include extensions/python/metta/_binding/host.py
+recursive-include extensions/python/metta/_binding *
+recursive-exclude extensions/python/metta/_binding __pycache__ *.py[co] *.qlf .qlf-stamp *.so *.o
 recursive-exclude tests/codec __pycache__ *.py[co]

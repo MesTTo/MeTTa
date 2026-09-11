@@ -33,6 +33,9 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
   - nested C Prolog fixtures resolve their header pins and preserve code atoms
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
+  - root build hooks and component shell tests resolve header pins and
+    preserve code strings
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
 Fails when: run against a tree it did not write. It asserts on a fixture it
   generates and nothing else.
 Open Obligations:
@@ -80,11 +83,12 @@ PLANTS = (
         [1, 3],
         [4],
     ),
-    (
-        "extensions/mork/tests/plant.py",
-        [f'"""A selftest pin [{TAG} {WHEN}: a case; {WORD}]."""'],
-        [1],
-        [],
+    *(
+        (name,
+         [f'"""A Python header pin [{TAG} {WHEN}: a case; {WORD}]."""',
+          f'EMITTED = "{WORD}"'],
+         [1], [2])
+        for name in ("extensions/mork/tests/plant.py", "setup.py")
     ),
     # A guide at the root: its pins sit inside evidence tags in prose, and the
     # same prose discusses the placeholder, backticked or bare, beside them.
@@ -157,15 +161,13 @@ PLANTS = (
         [1, 2],
         [3],
     ),
-    (
-        "engine/plant.sh",
-        [
-            "# Purpose: a fixture runner.",
-            f"# Guarantees: it runs [{TAG} {WHEN}: a case; {WORD}].",
-            f'echo "{WORD}"',
-        ],
-        [2],
-        [3],
+    *(
+        (name,
+         ["# Purpose: a fixture runner.",
+          f"# Guarantees: it runs [{TAG} {WHEN}: a case; {WORD}].",
+          f'echo "{WORD}"'],
+         [2], [3])
+        for name in ("engine/plant.sh", "extensions/mork/tests/plant.sh")
     ),
     (
         "extensions/cmetta/plant.h",

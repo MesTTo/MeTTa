@@ -124,6 +124,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Installed runtimes ship the Python binding's owned directory, including
+  nested Prolog includes. Broken extension loads report their source path
+  through standalone and embedded boot instead of continuing into a QLF
+  loader crash. Artifact tests preserve their compiled-load assertions under
+  development instrumentation, and derived-form corpus comparisons use
+  private source copies. The C boot fixture accounts for FROM's source-position
+  dependency and the shared source-loading module. Evidence and provenance
+  scans include root build hooks and component shell tests.
+
 - The root module's header named `doorgen.py` and the `door-sync` lane where
   the manifest declares `rootgen.py` and `init-stub`.
 - Observing source after an artifact boot preserves arithmetic in compiled
