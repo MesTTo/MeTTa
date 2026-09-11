@@ -450,7 +450,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 # boot in children of their own (a library artifact another lane
                 # left beside the three the boot compiles moved this row 17
                 # inferences, past its four-inference allowance
-                # [measured 2026-09-11: 319,073 against 319,090; commit=WORKTREE]).
+                # [measured 2026-09-11: 319,073 against 319,090; commit=23033852660c31aeadeb2719a1eead355c36e0bf]).
                 try:
                     inventory = prepare_governed_artifacts(ROOT)
                 except subprocess.CalledProcessError as unprepared:
