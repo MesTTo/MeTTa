@@ -1,6 +1,6 @@
 % Guarantees: metta_with_trailed/3 owns specialization recursion and checking
 %   roots; mark_specialization_needed/0 mutates only the retained payload
-%   [source: engine/specializer.pl:maybe_specialize_call/4; commit=WORKTREE].
+%   [source: engine/specializer.pl:maybe_specialize_call/4; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: specialize higher-order MeTTa calls and invalidate generated
 %   functions when their source equations change.

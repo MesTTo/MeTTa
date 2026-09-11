@@ -1,6 +1,6 @@
 % Guarantees: with_metta_module/2 scopes through metta_with_trailed/3 and
 %   current_metta_module/1 treats the inactive root as the self module
-%   [tested: trailed_scopes; commit=WORKTREE].
+%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: register function names and arities, protect callable surface, and import host and backend builtins
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.

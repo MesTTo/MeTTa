@@ -1,6 +1,6 @@
 % Guarantees: rollback_restored_translator_rule/3 retries an interrupted
 %   retirement before propagating the interruption
-%   [source: engine/translator_rules.pl:rollback_restored_translator_rule/3; commit=WORKTREE].
+%   [source: engine/translator_rules.pl:rollback_restored_translator_rule/3; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: hold the translator rule registry and everything a registration
 %   DECLARES about a rule, and derive the inverse a bidirectional declaration

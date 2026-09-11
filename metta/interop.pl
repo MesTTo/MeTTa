@@ -5,7 +5,7 @@
 %   recheck receipts after waking [tested: loader_singleflight; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Guarantees: metta_host_probe_function/2 retires its probe at every swept
 %   inference budget while preserving the static-predicate refusal
-%   [tested: trailed_scopes; commit=WORKTREE].
+%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
 % Assumes: engine/source_loading.pl:loading_loudly/1 collects printed failures

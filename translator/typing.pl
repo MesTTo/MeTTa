@@ -1,6 +1,6 @@
 % Guarantees: with_static_parameter_environment/5 preserves parameter identity
 %   through metta_with_trailed/3 and restores enclosing proof environments
-%   [tested: trailed_scopes; commit=WORKTREE].
+%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: compile declared input and output types while preserving shared branch variables
 % Guarantees: present_type_chain/3 expands a final (:seg T), and

@@ -1,6 +1,6 @@
 % Guarantees: metta_remove_occurrence/3 scopes its foreign selector through
 %   metta_with_trailed/3; consuming the selector preserves its trailed root
-%   [source: engine/spaces/tokens.pl:metta_remove_provider_occurrence/3; commit=WORKTREE].
+%   [source: engine/spaces/tokens.pl:metta_remove_provider_occurrence/3; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: compose occurrence reads and ordering with the native storage shape.
 % Guarantees: raw occurrence storage returns its identity; reference scopes

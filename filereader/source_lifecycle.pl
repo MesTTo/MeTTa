@@ -10,7 +10,7 @@
 %   or the caller [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Guarantees: with_source_load/3 restores its context through metta_with_trailed/3;
 %   rollback_source_load_stable/1 retains its undo plan until retirement ends
-%   [tested: trailed_scopes; commit=WORKTREE].
+%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
 % Assumes: engine/filereader.pl consults this plain file while its owning module is the load context.

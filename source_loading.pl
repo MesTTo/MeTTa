@@ -15,7 +15,7 @@
    distinguish nested calls on the same thread.
    Guarantees: loading_loudly/1 registers retirement before assertion and
    retains its watcher reference across interrupted publication
-   [tested: trailed_scopes; commit=WORKTREE].
+   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 */
 :- module(metta_source_loading, [loading_loudly/1]).
 

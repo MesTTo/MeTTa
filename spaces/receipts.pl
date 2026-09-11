@@ -1,6 +1,6 @@
 % Guarantees: metta_with_occurrence_load/1 restores its root through
 %   metta_with_trailed/3 before catch-protected receipt retirement
-%   [source: engine/spaces/receipts.pl:metta_with_occurrence_load/1; commit=WORKTREE].
+%   [source: engine/spaces/receipts.pl:metta_with_occurrence_load/1; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: reserve incoming occurrence identities across transaction views.
 % Assumes: native erasures use metta_erase_storage_ref/1 or metta_retract_storage/1.
