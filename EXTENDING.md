@@ -723,6 +723,21 @@ stream of MeTTa answers, including duplicate answers. Adapt a host predicate
 whose arguments have another order in the Prolog library itself. Exported
 host services that are not MeTTa calls use a PlDoc `@private` explanation.
 
+An input declared `list` becomes an evaluating `Expression` parameter. Quote
+literal configuration data when its heads must remain data, as in
+`(csv-parse "a,b\n" (quote ((quote ""))))`. Functions can compute and return
+that same configuration. Declaring `Atom` instead holds the written call and
+changes how a computed argument behaves.
+
+For a nondeterministic file reader, the cleanup goal should hold the stream
+and result variables. Create the lazy input list inside a worker that passes
+its tail onward; capturing the list in the cleanup goal retains consumed
+input. `lib_csv:csv_stream_rows/6` and its streaming benchmark demonstrate
+that boundary. For a deterministic constructor whose cleanup must retain both
+an operation error and a release error, `lib/_support/owned_resources.pl`
+captures the outcome before invoking the owner's cleanup. It refuses a
+nondeterministic goal; streaming readers use the native cleanup scope.
+
 `lib_datetime` is the working example. Its native modes generate its imports,
 types and help text; its example calls every public head. The library card
 and `website/reference/metta-libraries.md` read those same declarations.

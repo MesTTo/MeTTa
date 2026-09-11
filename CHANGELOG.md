@@ -9,6 +9,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_csv` parses and encodes text, streams field lists, and atomically writes
+  or appends UTF-8 files. Every head accepts an explicit dialect. Fields retain
+  Unicode, NUL, quoted line endings and duplicates. Blank records now contain
+  zero fields; a quoted empty field contains one. Live views retain bounded
+  traversal storage; snapshots allocate fresh names and preserve logical record
+  numbers. Concurrent writers coordinate through a persistent sibling lock.
+  Failed constructors retain primary and cleanup errors through a shared
+  resource guard, including JSON object construction.
+- The Python twin audit follows locally assigned factory and source-door
+  aliases, including destructuring, and retains findings for ambiguous or
+  rebound names.
 - `lib_crypto` provides byte and streamed file digests, HMAC, secure byte
   expressions and arbitrary-size integer intervals, PBKDF2-SHA512 password
   records and Boolean verification. A checked OpenSSL 3 adapter propagates

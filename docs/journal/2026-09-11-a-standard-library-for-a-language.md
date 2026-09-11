@@ -874,3 +874,349 @@ ai-tmp/ai-libraries-crypto-ruff-owned-final.log,
 ai-tmp/ai-libraries-crypto-ruff-setup-import.log and
 ai-tmp/ai-crypto-clones-final/jscpd-report.json. The staged diff passes
 `git diff --cached --check`.
+
+## 2026-09-11: CSV design before implementation
+
+Verified: crypto A is 28c6146d805b5adba3047ffc72b2508c11816636; B is
+e5efe36f7e55d81b1b8ea61c783fabbd58a6cd84. B changes thirty literal pins in
+eighteen files. Pinned examples, twins, evidence, libdoc and the direct
+prologface check pass. Evidence has zero placeholders. CSV's existing
+native suite passes all 28 tests. Logs:
+ai-tmp/ai-libraries-crypto-pinned-{example,twins,evidence}.log and
+ai-tmp/ai-libraries-csv-baseline-native.log.
+
+Tried: SWI V10.1.13 csv_read_row/3 on quoted CRLF produces LF; its
+strip(true) branch splits a whitespace-prefixed quoted field at its comma.
+An unquoted single quote also makes the physical-line reader fail. The
+native grammar has no public single-record entry, and its line reader
+counts quotes rather than threading the grammar's remainder. Source:
+[pinned csv.pl](https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/csv.pl).
+The public lazy input API is stream_to_lazy_codes/2. Log:
+ai-tmp/ai-csv-native-framing-probe.log.
+
+Tried: an occupied &metta-space-1 with a sentinel, followed by resetting the
+allocator in an isolated process, makes csv-snapshot! return that same
+space containing the sentinel and its new row. Command:
+`swipl -q -s ai-tmp/ai-csv-snapshot-probe.pl -- extensions`.
+Log: ai-tmp/ai-csv-snapshot-probe.log.
+
+Tried: string_bytes/3 accepts nonminimal UTF-8, surrogate encodings and
+out-of-range values. A byte round trip rejects the first two; the last
+also needs a scalar-range check, as JSON already does. read_term_from_atom/3
+accepts a complete first term followed by another term, so descriptor
+validation must compare the complete canonical encoding. Log:
+ai-tmp/ai-csv-text-boundary-probe.log.
+
+Rejected: unversioned private csv:row//2 calls, because private layout is not
+a supported provider interface. Revisit after a public lossless row parser
+ships. Rejected: the native physical-line reader, because it changes field
+characters. Rejected: decoding entire lazy input chunks before parsing,
+because invalid bytes in a prefetched later row would refuse a valid bounded
+query. Rejected: libcsv's C parser, because its byte-valued delimiter excludes
+Unicode delimiters and no maintained SWI binding was verified. Source:
+[libcsv](https://github.com/rgamble/libcsv/tree/b1d5212831842ee5869d99bc208a21837e4037d5).
+
+Decided: extract and adapt SWI's deterministic field and quoting grammar
+under lib_csv/support, retaining its license and immutable source reference.
+Thread one lazy binary code list per file traversal. Parse UTF-8 byte
+sequences for delimiters and quotes, then validate and decode each completed
+field. Double the configured quote to escape it. This preserves embedded
+CR, LF, CRLF, NUL and Unicode without an incremental codec or a size limit.
+The adaptation shares a parser across text, streamed rows, live spaces and
+snapshots. No installed module is changed. Errors distinguish clean EOF,
+malformed quoting, invalid UTF-8 and row-width mismatch with logical position.
+
+Decided: seven heads with default and explicit-option arities: csv-parse,
+csv-encode, csv-read!, csv-write!, csv-append!, csv-space and csv-snapshot!.
+csv-parse returns the row list; csv-read! yields one field list per answer.
+Keep live (row Field...) and snapshot (row Number Field...) bags, with the
+physical file's one-based logical number after skipped header records.
+Options are a proper list of unique (Name Value) expressions: separator,
+quote, newline, width and skip. Defaults are comma, double quote, CRLF,
+inferred width and zero skipped records. Separator is one Unicode scalar;
+quote is one scalar or an empty String to disable quoting. Neither may be
+CR/LF, and a present quote differs from separator. Newline is CRLF, LF or CR
+for writing; readers recognize all three. Width is infer, any or a nonnegative
+integer. Skip is a nonnegative count applied only to reads; skipped records
+still establish and validate width. Writers preserve every supplied row.
+Unknown, repeated, malformed or unbound options raise. There is no numeric,
+case, whitespace or header-name coercion.
+
+Decided: distinguish a blank record with zero fields from a quoted empty
+field. Encode a singleton empty field with quotes. This closes the native
+writer's ambiguous zero/singleton representation and follows
+[CPython's tests](https://github.com/python/cpython/blob/823f0323ee6ec1402088b73bce1a38473cac36dc/Lib/test/test_csv.py).
+It changes the old implicit blank-line result from one empty field to zero
+fields. Quoting-disabled output refuses values that need escaping, including
+a singleton empty field. All write-side fields must be Strings.
+
+Decided: retain &csv:<absolute-path> for the default live descriptor. Other
+configurations use a separate versioned prefix and the complete canonical
+serialization of the ground path and options. Validate shape and canonical
+round trip on decoding; never evaluate a descriptor. Streams, inferred width
+variables and query positions remain local. No registry or core change is
+needed. Each query owns its stream through setup_call_cleanup/3.
+
+Decided: snapshots allocate a vacant &csv-snapshot-N under the engine's
+native-storage mutex. Record ownership before creation hooks, fill directly
+from the row iterator, and release on failed output unification, parse/write
+failure or cancellation. A returned snapshot transfers ownership to the
+engine. Release failure retains the primary outcome in a named error.
+
+Decided: write and append stage a complete file beside the destination,
+close it, then rename it. Append validates the existing file, copies its
+bytes unchanged through copy_stream_data/2, and inserts a record terminator
+only when a nonempty addition follows a valid unterminated record. Preserve
+the inferred/fixed width across old and new rows. Use one canonical-path
+mutex and an advisory lock on <path>.metta-csv.lock for both write operations.
+The lock file remains: unlinking it could separate waiting writers onto
+different lock inodes. Readers need no lock and observe an atomic publication.
+The protocol coordinates callers using the same canonical path; external
+writers and crash durability are outside that guarantee. The native open/4
+[lock contract](https://www.swi-prolog.org/pldoc/man?predicate=open/4) supplies
+the process lock. A failed validation, conversion, close or publication
+preserves the old destination and removes staging. Empty append leaves
+existing bytes unchanged and creates an empty file when absent.
+
+Complexity: consumed input must be examined, giving an O(bytes) lower bound.
+Streaming auxiliary space targets O(current record + read buffer); retained
+answers and snapshot storage are output costs. Append is O(existing bytes +
+new bytes), including validation and native copying; batches avoid repeated
+whole-file transactions. Text parse/encode necessarily materialize their
+returned value. Verify scaling through discarded answers, not findall/3.
+
+Verification plan: preserve the 28 original tests; add dialect, zero-width,
+UTF-8, quoting and buffer-boundary cases; compare generated documents with
+CPython; exercise MeTTa and Python answer bags, descriptor round trips,
+independent queries, cut and cancellation; inject allocation, storage, close,
+publication and cleanup failures; test concurrent thread/process appends;
+measure discarded-row memory and inference scaling; cover every head and
+arity in an example and twin; regenerate records/docs and run the native,
+Python, face, autoload, evidence and provenance checks before A/B.
+
+Tried: the new CSV suite first reports 23 failed and 53 passed instances.
+The text door lacks lib_string's explicit metta_text/2 import; seek/4 names
+the end position eof, not end. The cyclic-list fixture instead constructed
+a cyclic field, correctly getting type_error(string, ...) rather than its
+expected list error. Fix those local mistakes. The new fixture must derive
+its directory from TMPDIR because this host's tmp_file/2 uses /tmp despite
+that environment setting. Log: ai-tmp/ai-libraries-csv-surface-first.log.
+
+Tried: simultaneous read/write and cleanup faults preserve only the original
+exception. The standalone probe
+`setup_call_catcher_cleanup(true,throw(primary),_,throw(secondary))` throws
+primary. JSON's new simultaneous write/release probe reproduces the same
+loss. SWI's documented cleanup exception priority causes it; adding another
+throw inside Cleanup cannot combine the errors. Logs:
+ai-tmp/ai-libraries-csv-json-cleanup-reproduction.log and
+ai-tmp/ai-csv-cleanup-priority-docs.log.
+
+Decided: share a deterministic resource guard between CSV and JSON. Capture
+exit, failure or exception as data before running each owner's cleanup, then
+restore the outcome. Refuse an accidentally nondeterministic operation; the
+streaming read path continues to use its nondeterministic native guard.
+The owner can now report both primary and release errors without SWI
+suppressing its combined exception. JSON's affected constructor uses this
+same correction and retains its existing aggregate error format.
+
+Decided: publication and acknowledgement are separate facts. Record the
+publication flag atomically with rename, and include it in a staging-cleanup
+error. Validation, conversion, close and publication failures preserve the
+old destination; an error removing staging after publication must say that
+the new file is already committed. The injected cleanup test exercises both
+sides. This refines the wording of the original file-failure guarantee.
+
+Tried: the CSV language example evaluates the option (quote "") as a call
+and raises domain_error(csv_option, ""). Quoting the complete option list
+preserves it. A function whose body returns the quoted options also works.
+A bind! constant is substituted before argument evaluation and needs quoting
+at its use site. Probe: ai-tmp/ai-csv-option-probe.metta, first two assertions
+pass; its later unquoted constant reproduces the failure.
+
+Decided: retain the evaluating Expression parameter and use the language's
+existing quote barrier for literal option data. Changing the type to Atom
+would prevent computed options from being called. Renaming quote would leave
+the same collision with user-defined option names. The existing rule is in
+engine/prelude.pl:unquote/2 and tests/prolog/suites/evaluation/metatype_mask.plt.
+The source reader supports five escapes; a written backslash-u0000 becomes
+the literal text u0000. The language example now uses Unicode and CRLF;
+native tests and Python properties supply actual NUL characters directly.
+
+Tried: forty CSV surface tests now exercise simultaneous snapshot allocation,
+snapshot cancellation and an injected input-close error. Seventy-nine test
+instances pass; the close case receives raw io_error(close, Stream) instead
+of csv_io_error(Path, close). The existing error boundary covers open only.
+Log: ai-tmp/ai-libraries-csv-close-reproduction.log.
+
+Decided: one input scope owns open, the nondeterministic traversal and close,
+with the CSV file-error mapping around that complete scope. The same scope
+validates a live descriptor. Cancellation and malformed-record exceptions
+retain their original shapes through the existing catch-all rethrow.
+
+Tried: the native gate passes 28 original CSV tests, 40 surface tests with
+40 additional instances, and 43 JSON surface tests with 12 additional
+instances. Python's first run reports 8 failed and 24 passed. Seven tests
+used fn["csv-read!"], whose trailing bang deliberately drains the answers;
+the streaming interface is Space.answers(call). The generated snapshot case
+assumed native storage order across different arities. Native spaces are bags;
+sorting by the stored logical record number reconstructs file order. Preserve
+both established contracts and correct the tests. Logs:
+ai-tmp/ai-libraries-csv-native-final.log and
+ai-tmp/ai-libraries-csv-python-first.log.
+
+Measured: the corrected Python suite passes 32 tests, including 180 text
+and 60 file property cases, six process writers, seven malformed UTF-8
+encodings and installation from a source-built wheel. Log:
+ai-tmp/ai-libraries-csv-python-verified.log. jscpd finds zero clones in three
+Python files, 568 lines and 7,057 tokens. Ruff flags PERF401 in the process
+fixture; list.extend over its generator preserves partial-start cleanup.
+
+Measured: a discarded-answer scan still retains the input root in the goal
+passed to setup_call_cleanup. At 1,000/10,000/100,000 fixed 20-byte records,
+live global storage after collection is 481848/4810296/48094072 bytes.
+Local storage stays 936 bytes. The materialized-answer control retains
+152088/1520088/15200088 bytes. Log: ai-tmp/ai-csv-stream-scaling-first.log.
+
+Tried: a throwaway predicate wrapper puts stream_to_lazy_codes/2 and the
+tail-recursive row iterator in an ordinary worker predicate, leaving only the
+stream and row outputs in the resource scope's retained goal. Live global
+storage is 98808 bytes at all three sizes; checksums and record counts match
+the original and the materialized control. At 100,000 rows the scan executes
+19015312 inferences and 0.482150 CPU seconds in the probe. Log:
+ai-tmp/ai-csv-stream-scaling-discard-probe.log.
+
+Decided: use that worker boundary for both streamed rows and append's existing
+file validation. The resource scope must never capture the lazy input root.
+SWI's pure-input contract reclaims committed list prefixes only when they are
+unreachable. Source: https://www.swi-prolog.org/pldoc/man?section=pureinput.
+Keep a reproducible benchmark with a materialized-output control; measure
+live global and local storage separately from retained answers.
+
+Measured: the implemented benchmark reports the following peaks after
+collection. Counts and checksums agree in all modes. Command:
+`swipl --on-error=status -q -s tests/prolog/lib_csv_stream_bench.pl`.
+Log: ai-tmp/ai-libraries-csv-stream-bench-verified.log.
+
+| Records | Stream global bytes | Materialized global bytes | Append global bytes | Stream inferences | Append inferences |
+|---:|---:|---:|---:|---:|---:|
+| 1,000 | 98,808 | 152,096 | 101,568 | 190,382 | 193,513 |
+| 10,000 | 98,800 | 1,520,080 | 101,568 | 1,901,742 | 1,931,869 |
+| 100,000 | 98,800 | 15,200,080 | 101,568 | 19,015,312 | 19,315,439 |
+
+Local storage is 936 bytes for streaming and 4,488 bytes for instrumented
+append. The fixed-record scan changes auxiliary storage from O(input bytes)
+to O(current record + buffer). Time remains linear because every input byte
+must be checked. The first append observation wrapper copied its statistics
+term and left the caller's count zero; the benchmark correctly failed. Linking
+the one owned statistics term during the wrapper's lifetime fixes observation.
+The benchmark now raises a named mismatch if counts or checksums differ.
+
+Measured: the full CSV example and Python twin prove 22 assertions, covering
+seven heads at both arities. Minimum-of-three costs are 107047 MeTTa and
+103630 Python, ratio .9681. The original live and snapshot examples pass
+their 3 and 9 assertions; run_example's three fresh-process samples are
+70609/70609/70609 and 81973/81973/81973 inferences. Logs:
+ai-tmp/ai-libraries-csv-example-quoted.log and
+ai-tmp/ai-libraries-csv-existing-examples-verified.log.
+
+Measured: JSON's unchanged-cut control at e5efe36f7 reports 73856 MeTTa and
+65839 Python. Applying only lib_json's resource-guard change and the shared
+owned_resources.pl module gives 78103/70088, exactly the current worktree's
+result. The +4247/+4249 costs belong to this necessary constructor correction.
+No unrelated twin is repinned. Logs: ai-tmp/ai-libraries-csv-json-control-before.log,
+ai-tmp/ai-libraries-csv-json-control-after.log and
+ai-tmp/ai-libraries-csv-twin-measure.log. The control's eight native objects
+were copied from the working tree, and its only source changes are those two
+files. The final Python run after the input-root repair passes 32 tests in
+12.50 seconds: 12 CSV, 11 JSON and 9 native-build tests, including the installed
+wheel proof. Log: ai-tmp/ai-libraries-csv-python-bounded-final.log.
+
+Tried: the complete CSV/JSON twin lane passes 50 assertions and both stored
+content comparisons, but reports 33 syntax findings. Six identify the local
+`parse = m.fn.csv_parse` alias as the source parser; the rest require expected
+MeTTa Strings to use `G`, as existing library twins do. The records battery
+passes every requested lane except evidence: the CSV memory measurement lacks
+its required date. Logs: ai-tmp/ai-libraries-csv-twins-final.log and
+ai-tmp/ai-libraries-csv-records-final.log.
+
+Decided: trace single-assignment local aliases before classifying source
+calls. Resolve tuple/list destructuring and alias chains from their assigned
+expressions; reject a factory exemption when any parameter, rebinding, loop,
+context, import, pattern, deletion or indirect scope declaration makes the
+origin uncertain. Keep scope-local proof: unresolved closures, class bodies
+and lambda bodies retain the existing conservative source-name rule. A known
+alias of a source door must also be reported under its original door name.
+This applies the same structural classification as direct factory access and
+needs no new dependency. Bandit's `get_call_name` resolves aliases before
+classifying a call, while explicitly separating syntactic origin from runtime
+identity: https://github.com/PyCQA/bandit/blob/92ae8b82fb422a639f0ed8d99e96cea769594e08/bandit/core/utils.py#L20-L53.
+
+Rejected: rename `parse` in the CSV example, because another library alias
+would reproduce the checker defect. Do not exempt bare expected strings or
+add a CSV-specific name list. The checker remains a syntax audit, not a
+Python runtime identity proof.
+
+Tried: new alias regressions before the correction -> 10 failures, 18 passes.
+The first complete checker run after the correction -> 107 passes and two
+cost-control failures: tabling's cache-age witness reports 50463 versus 50410;
+identity costs 2586 against its existing 2478 budget and allowance 20. No
+runtime or budget in those examples changed. Their unchanged-cut controls
+remain required before attribution. Logs: ai-tmp/ai-libraries-csv-alias-before.log
+and ai-tmp/ai-libraries-csv-alias-after.log.
+
+Tried: a 2000-link alias chain raises `RecursionError: maximum recursion depth
+exceeded` in the first resolver. Decided: follow earlier assignment edges
+iteratively and memoize resolved origins per scope. Rebinding in function
+defaults, decorators and class bases must count in the enclosing scope too.
+The structural regressions include those cases and a chain with 2001 calls.
+Ruff initially names three B023 captures in loop-local functions; explicit
+mapping arguments remove those captures.
+
+Verified: the final alias, source-scan and numeric-idiom selection passes
+38 tests; the preceding checker run excluding the three existing runtime
+cost cases passes 110 tests. The unchanged checker at e5efe36f7 reproduces
+both failures: identity is again 2586 against 2478 with allowance 20, and
+tabling's forced-age equality is 50438 versus 50410. Its third case passes.
+The control's only source changes are the previously measured JSON guard and
+its consumer; all six engine and both MORK objects have equal SHA256 hashes.
+Logs: ai-tmp/ai-libraries-csv-alias-complete.log,
+ai-tmp/ai-libraries-csv-alias-owned-final.log and
+ai-tmp/ai-libraries-csv-alias-control.log. These existing cost failures remain
+open; no allowance or unrelated pin changes.
+
+Verified: owned Ruff passes. jscpd with its default 1000-line ceiling silently
+omits the large checker and selftest; rerunning with `--max-lines 100000
+--max-size 2mb` examines all three selected files, 5528 lines and 37696 tokens.
+It reports two existing declaration-reader clones, ten duplicated lines,
+0.18 percent. The clone sites predate this change and apply different value
+validation; the new alias implementation adds none. Report:
+ai-tmp/ai-csv-clones-alias-complete/jscpd-report.json.
+
+Verified: after grounding expected String values, minimum-of-three costs stay
+107047/103630 for CSV and 78103/70088 for JSON. The complete twin lane proves
+50 of 50 assertions, both stored-content comparisons equal, zero findings.
+The final scaling benchmark reproduces every count, checksum, inference and
+storage value in the table above; all nine modes/sizes pass. Logs:
+ai-tmp/ai-libraries-csv-twin-measure-final.log,
+ai-tmp/ai-libraries-csv-twins-verified.log and
+ai-tmp/ai-libraries-csv-stream-bench-final.log.
+
+Verified: evidence reports 7468 claims, 13562 known tests in 1120 executed
+source files, zero unbacked tags and 31 provisional pins. Provenance selftests
+pass 44 planted placeholders across 19 files; face generation reports six
+described sources and zero findings, its 13 selftests pass, and libdoc with
+both selftests passes. Log: ai-tmp/ai-libraries-csv-evidence-final.log.
+
+Tried: CSV's library card has all seven documented heads and fourteen arrows,
+but its summary begins with the README's fenced example. Move the existing
+field-contract paragraph before that example so the companion README's
+opening-paragraph convention supplies prose. The first standalone probe
+omitted the Python seat's PYTHONPATH and raised `ModuleNotFoundError: No
+module named 'metta'`; the explicit seat path reaches the card and reproduces
+the summary failure.
+
+Verified: the corrected card has seven documented heads, fourteen arrows,
+three importing examples and the intended prose in its text rendering; every
+head appears in text and HTML. Log: ai-tmp/ai-libraries-csv-card-final.log.
+The CSV functional state is complete. Its 31 evidence placeholders are the
+only remaining provenance operation before the next census concern.

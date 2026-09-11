@@ -1,7 +1,7 @@
 % Purpose: verify JSON object ownership, graph conversion, paths and file I/O.
 % Guarantees: fault injection checks rollback and close-before-publication;
 % codec and UTF-8 checks cover ordinary values and malformed boundary inputs
-% [tested: lib_json_surface; commit=5e212d77a567d6d6c118529e4a226e5047ec2cfd].
+% [tested: lib_json_surface; commit=WORKTREE].
 % Owns resources: fixtures remove their directories; suite cleanup releases
 % object spaces created by these tests and restores every wrapped predicate.
 
@@ -126,6 +126,23 @@ test(cleanup_attempts_all_releases_and_retains_the_primary_outcome) :-
           Error = error(json_space_cleanup_failed(Errors), context(lib_json, fail)),
           assertion(length(Errors, 3)) ),
         unwrap_predicate(spaces:metta_release_space(_), json_surface_release)),
+    metta_space_names(After), assertion(After == Before).
+
+test(cleanup_retains_a_write_exception_beside_release_failures) :-
+    metta_space_names(Before),
+    setup_call_cleanup(
+        wrap_predicate(spaces:add_sexp(_Space, Atom), json_primary_write, Write,
+            ( call(Write), ( Atom = [explode, _]
+                          -> throw(error(json_injected_write, _)) ; true ) )),
+        setup_call_cleanup(
+            wrap_predicate(spaces:metta_release_space(_), json_secondary_release, Release,
+                           (call(Release), throw(error(json_injected_release, _)))),
+            ( catch('json-decode'("{\"child\":{},\"explode\":1}", _), Error, true),
+              assertion(nonvar(Error)),
+              assertion(Error = error(json_space_cleanup_failed([_,_]),
+                  context(lib_json, exception(error(json_injected_write, _))))) ),
+            unwrap_predicate(spaces:metta_release_space(_), json_secondary_release)),
+        unwrap_predicate(spaces:add_sexp(_, _), json_primary_write)),
     metta_space_names(After), assertion(After == Before).
 
 test(self_reference_raises_a_named_finite_error,

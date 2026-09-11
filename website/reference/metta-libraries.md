@@ -14,7 +14,7 @@ beside its definitions.
 | lib_conformance | 2 | 0 |
 | lib_constraints | 5 | 0 |
 | lib_crypto | 12 | 12 |
-| lib_csv | 2 | 2 |
+| lib_csv | 7 | 7 |
 | lib_datastructures | 26 | 9 |
 | lib_datetime | 16 | 16 |
 | lib_derived | 1 | 1 |
@@ -235,25 +235,140 @@ Returns: Hex
 
 ## lib_csv
 
-### `csv-space`
+### `csv-append!`
 
-*lib_csv.metta:22*
+*lib_csv.metta:14*
 
-A read-only CSV row space; each query streams the file anew, every cell is a String, and the first record is data
+```metta
+(: csv-append! (-> %Undefined% Expression Bool))
+```
 
-1. a readable UTF-8 CSV file path
+```metta
+(: csv-append! (-> %Undefined% Expression Expression Bool))
+```
 
-Returns: Space
+Append field lists as one atomic file transaction and return True. Create a missing file. Validate existing CSV, retain its bytes and width, and add a terminator after a valid unterminated last record when needed. Options are csv-space's. Cost is linear in old and new bytes; batch related rows. A persistent .metta-csv.lock coordinates writers using the same path.
+
+1. Path
+2. Rows
+3. Options
+
+Returns: Written
+
+### `csv-encode`
+
+*lib_csv.metta:21*
+
+```metta
+(: csv-encode (-> Expression Expression String))
+```
+
+```metta
+(: csv-encode (-> Expression String))
+```
+
+Encode field lists as CSV. Every field must be a String. Quote and escape fields when needed, including a singleton empty field. Options are csv-space's; newline selects CRLF, LF or CR output and skip only affects reading. Empty rows encode as blank records. Empty input produces "".
+
+1. Rows
+2. Options
+
+Returns: Text
+
+### `csv-parse`
+
+*lib_csv.metta:28*
+
+```metta
+(: csv-parse (-> %Undefined% Expression))
+```
+
+```metta
+(: csv-parse (-> %Undefined% Expression Expression))
+```
+
+Parse text into a list of field lists. Preserve empty fields, duplicates, Unicode, whitespace, NUL and quoted newlines. A blank record has zero fields; a quoted empty field has one. Options are csv-space's. Malformed records raise with their logical number; empty input produces an empty list.
+
+1. Text
+2. Options
+
+Returns: Rows
+
+### `csv-read!`
+
+*lib_csv.metta:35*
+
+```metta
+(: csv-read! (-> %Undefined% Expression))
+```
+
+```metta
+(: csv-read! (-> %Undefined% Expression Expression))
+```
+
+Stream one field list per answer from a UTF-8 file, preserving order and duplicates. Options are csv-space's. Width checking precedes answer filtering. Only consumed records are validated. Exhaustion, cut and cancellation close the traversal's independent stream.
+
+1. Path
+2. Options
+
+Returns: Fields
 
 ### `csv-snapshot!`
 
-*lib_csv.metta:26*
+*lib_csv.metta:42*
 
-Read a CSV file ONCE into an ordinary space of (row Number Field...) atoms; the record number is 1-based, the rows do not change under the program, and repeated queries pay one parse between them
+```metta
+(: csv-snapshot! (-> %Undefined% Expression SpaceType))
+```
 
-1. a readable UTF-8 CSV file path
+```metta
+(: csv-snapshot! (-> %Undefined% SpaceType))
+```
+
+Read once into a fresh mutable space of (row Number Field...) atoms. Number is the file's one-based logical record number, including skipped headers. Preserve duplicates and Strings. Options are csv-space's. Failed reads, writes, cancellation and output matching release the new space.
+
+1. Path
+2. Options
 
 Returns: Space
+
+### `csv-space`
+
+*lib_csv.metta:49*
+
+```metta
+(: csv-space (-> %Undefined% Expression SpaceType))
+```
+
+```metta
+(: csv-space (-> %Undefined% SpaceType))
+```
+
+Return a live read-only space of (row Field...) atoms. Each query reopens the UTF-8 file and preserves order and duplicate rows. Fields are Strings. Options are unique (separator String), (quote String), (newline String), (width infer|any|Number), and (skip Number) expressions. Defaults are comma, double quote, CRLF, inferred width and zero skipped records. An empty quote disables quoting. Skipped records still establish and validate width. Quote literal option data, for example (quote ((quote ""))). The parameter evaluates, so a function may also compute and return the complete options.
+
+1. Path
+2. Options
+
+Returns: Space
+
+### `csv-write!`
+
+*lib_csv.metta:56*
+
+```metta
+(: csv-write! (-> %Undefined% Expression Bool))
+```
+
+```metta
+(: csv-write! (-> %Undefined% Expression Expression Bool))
+```
+
+Atomically replace a UTF-8 CSV file with field lists and return True. Options are csv-space's; skip does not discard output. Validate Strings and widths, close staging, then publish. Failures before publication preserve the destination. A staging-cleanup error reports whether publication occurred. Writers coordinate through a persistent sibling .metta-csv.lock file.
+
+1. Path
+2. Rows
+3. Options
+
+Returns: Written
 
 ## lib_datastructures
 
