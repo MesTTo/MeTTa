@@ -1,3 +1,7 @@
+% Guarantees: metta_with_trailed/3 preserves linked values and restores the prior root
+%   on ordinary return, failure, exception, redo and cut
+%   [tested: trailed_scopes; commit=WORKTREE].
+%
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
 % Guarantees: metta_host_hold/3 installs seam:engine_context/1 inside its
 %   held goal and announces its lifetime through seam:host_engine_created/1
@@ -758,6 +762,20 @@ metta_host_with_stack_limit(StackBytes, Goal) :-
     setup_call_cleanup(push_prolog_flag(stack_limit, StackBytes),
                        Goal,
                        pop_prolog_flag(stack_limit)).
+
+% Workaround: swi-cleanup-window - restore scoped roots through the trail.
+% An unset key and [] both mean inactive. A successful answer restores the
+% previous value with another trailed write, so redo reinstates the inner
+% value before resuming Goal. Failure and exceptions unwind the entry write.
+% Goal may mutate its value, but must not nb_setval/2, nb_linkval/2 or
+% nb_delete/1 the same key: those replace the root that owns the trail entry.
+% [tested: trailed_scopes; commit=WORKTREE]
+:- meta_predicate metta_with_trailed(+, ?, 0).
+metta_with_trailed(Key, Value, Goal) :-
+    ( nb_current(Key, Previous) -> true ; Previous = [] ),
+    b_setval(Key, Value),
+    call(Goal),
+    b_setval(Key, Previous).
 
 %Every runnable uses one limit scope. Recursive clauses spend from its
 %backtrackable balance, so trying a sibling restores the balance it started
@@ -1572,25 +1590,15 @@ rewrite_parsed_form(Space, FormStr, Term, Rewritten) :-
 :- dynamic metta_state_counter/1, metta_state_value/2.
 
 %State lives in a process-shared non-backtrackable store, so snapshot/1 cannot
-%undo it. A nesting counter is thread-local engine state: speculative entry
-%increments it, every exit restores the previous value, and direct or compiled
-%state heads consult the same fence before touching the store.
+%undo it. Direct and compiled state heads consult the same thread-local fence.
 :- meta_predicate metta_with_state_write_fence(0).
 
 metta_with_state_write_fence(Goal) :-
-    (   nb_current('$metta_state_write_fence', Previous)
-    ->  true
-    ;   Previous = 0
-    ),
-    Current is Previous + 1,
-    setup_call_cleanup(
-        nb_setval('$metta_state_write_fence', Current),
-        call(Goal),
-        nb_setval('$metta_state_write_fence', Previous)).
+    % Workaround: swi-cleanup-window - nesting restores the prior trailed fence.
+    metta_with_trailed('$metta_state_write_fence', true, Goal).
 
 metta_state_write_fenced :-
-    nb_current('$metta_state_write_fence', Depth),
-    Depth > 0.
+    nb_current('$metta_state_write_fence', true).
 
 %The journal admission door asks this exact engine fact. Prefixes are not
 %enough because named cells are valid too, and a dead generated name is plain

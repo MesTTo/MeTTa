@@ -1,3 +1,7 @@
+% Guarantees: metta_argument_types_in/3 scopes its recursion guard through
+%   metta_with_trailed/3; metta_record_error/1 ignores an inactive observation
+%   [source: engine/metta/terms.pl:metta_argument_types_in/3; commit=WORKTREE].
+%
 % Purpose: provide representation, parsing, grounded-operation errors, and numeric term recovery
 % Guarantees: metta_operation_parameters/6 and
 %   metta_shallow_operation_parameters/4 present the arriving arity before
@@ -163,7 +167,7 @@ metta_error_atom(Operation, Arguments, Reason, Error) :-
 %reach this name through the translator's base module, the way they already
 %reach metta_bad_argument_error/3 below.
 metta_record_error(Error) :-
-    (   nb_current('$metta_observation', Buffer)
+    (   nb_current('$metta_observation', Buffer), Buffer \== []
     ->  arg(5, Buffer, Sink),
         call(Sink, Buffer, Error)
     ;   true
@@ -1030,7 +1034,7 @@ metta_host_refusal_type(Types, Expected, Actual) :-
 %than only at its top: the walk reaches them again through a list member's
 %type. The flag is thread-local because the refusal is, and re-entrant because
 %a nested lookup must not turn them back on when it finishes.
-:- thread_local metta_reading_declared_types/0.
+metta_reading_declared_types :- nb_current('$metta_reading_declared_types', true).
 
 metta_argument_types(Argument, Types) :-
     current_metta_module(Module),
@@ -1104,9 +1108,9 @@ shallow_declared_type(Name, Type) :-
 metta_argument_types_in(Module, Argument, Types) :-
     (   metta_reading_declared_types
     ->  type_answers(Module, Argument, Types)
-    ;   setup_call_cleanup(assertz(metta_reading_declared_types, Ref),
-                           type_answers(Module, Argument, Types),
-                           erase(Ref))
+    ;   % Workaround: swi-cleanup-window - a trailed guard bounds the type lookup.
+        metta_with_trailed('$metta_reading_declared_types', true,
+                           type_answers(Module, Argument, Types))
     ).
 
 %The call site's compatibility relation is declared in type_rules.pl.

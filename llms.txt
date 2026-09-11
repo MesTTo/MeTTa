@@ -5146,3 +5146,10 @@ report space contains binary `source-coverage` rows, unchanged `source-error`
 values and `source-frame` rows with exact or `generated-by` attribution.
 Coordinates are one-based Unicode codepoints with exclusive ends. Unavailable
 source metadata is explicit; only the observation collects diagnostic state.
+
+`metta_with_trailed(Key, Value, Goal)` runs a host goal with temporary engine
+context. Entry and ordinary return use backtrackable global writes, so failure,
+exception, cut and redo restore the correct enclosing value. An unset key reads
+as the inactive value `[]` after ordinary return. Read through `nb_current/2`;
+never replace a scoped root with `nb_setval/2`, `nb_linkval/2` or `nb_delete/1`.
+Mutate a context payload through `nb_setarg/3` or `nb_linkarg/3` when needed.

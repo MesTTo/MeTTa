@@ -119,10 +119,8 @@ test(source_journal_retires_the_primary_and_both_projections,
      [setup(clean_metadata),
       cleanup((clean_source_journal, clean_metadata))]) :-
     Load = '$plunit_projection_source_owner',
-    setup_call_cleanup(
-        asserta(filereader:active_source_load(Load), OwnerRef),
-        record([X], [owned, X]),
-        erase(OwnerRef)),
+    filereader:with_owning_source_load(Load,
+        plunit_translator_metadata_projection:record([X], [owned, X])),
     consistent_projection,
     findall(Ref, filereader:source_load_assertion(Load, artifact, Ref), Refs),
     assertion(Refs \== []),

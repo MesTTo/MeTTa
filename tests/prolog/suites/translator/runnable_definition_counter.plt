@@ -42,7 +42,7 @@ counter_child(State, Collection) :-
     set_prolog_gc_thread(false),
     '$cgc_params'(_, _, _, 0, 1.0e20, 1.0e20),
     b_setval('$metta_translating_runnable', true),
-    asserta(filereader:active_source_program(counter_source)),
+    b_setval('$metta_source_programs', [counter_source]),
     assertz(filereader:source_pending_definition(counter_source,
                                                 counter_function)),
     translator:active_source_program(counter_source),

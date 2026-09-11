@@ -49,6 +49,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Temporary engine contexts use `metta_with_trailed/3` to restore their
+  enclosing value after inference limits, exceptions, failure, cut and redo.
+  Source and materialization rollback retain their ownership records until
+  cleanup completes.
 - The engine benchmark's boot row prepares its own artifact state: the governed
   `.qlf` set is purged and warmed through the ordinary boot in children of the
   driver before the row's samples, the same preparation the C fixture takes, so

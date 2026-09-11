@@ -1,3 +1,7 @@
+% Guarantees: metta_reference_check_manifest/5 uses
+%   filereader:with_working_directory/2 for its import directory scope
+%   [source: engine/metta/reference_loading.pl:metta_reference_check_manifest/5; commit=WORKTREE].
+%
 % Purpose: load canonical library homes through import!'s existing ownership door.
 % Assumes: filereader:parse_metta_source_summary/4 supplies manifest signatures.
 % Guarantees: eager, background and lazy loads share source identity and reload
@@ -70,10 +74,10 @@ metta_reference_check_manifest(Home, Path, Forms, Seen0, Seen) :-
     put_assoc(Path, Seen0, true, Entered),
     space_module(Home, Module),
     file_directory_name(Path, Directory),
-    setup_call_cleanup(asserta(filereader:working_dir(Directory), Ref),
+    % Workaround: swi-cleanup-window - manifest imports share the trailed directory scope.
+    filereader:with_working_directory(Directory,
         metta_with_source_effect_program(Module, Forms,
-            foldl(metta_reference_check_form(Home, Module, Path), Forms, Entered, Seen)),
-        erase(Ref)).
+            foldl(metta_reference_check_form(Home, Module, Path), Forms, Entered, Seen))).
 
 metta_reference_check_form(Home, Module, Path, Parsed, Seen0, Seen) :-
     parsed_form_parts(Parsed, Kind, _, Original), copy_term(Original, Form),

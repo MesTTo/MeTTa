@@ -49,10 +49,16 @@ Defect: one call port lies between Setup returning and the cleanup being
   `sig_atomic/1` defers it; an inference limit is not a signal.
 Reproduction: tests/checks/host_workarounds/swi-cleanup-window.pl, a budget
   sweep over an asserted guard; budget 4 of 64 leaks on 10.1.13.
-Workaround: state that must not outlive its scope is a trailed write,
-  `b_setval/2` on entry, `nb_setval/2` on the ordinary exit and `b_getval/2`
-  to read; unwinding the exception unwinds the trail, so the cleanup is the
-  fast ordinary exit rather than the thing correctness rests on.
+Workaround: `metta_with_trailed/3` in `engine/metta/control.pl` uses `b_setval/2`
+  on entry and ordinary return; failure, exceptions, cut and redo use the
+  trail. Readers use `nb_current/2`, treating absence and `[]` as inactive.
+  A root held by this primitive is never replaced by `nb_setval/2`, `nb_linkval/2` or
+  `nb_delete/1`; mutable payloads use `nb_setarg/3` or `nb_linkarg/3`.
+  Real clause scopes register cleanup first, then signal-mask assertion and
+  publication into a retained ownership cell. The publication is the first
+  goal inside `catch/3`, whose call port defers an inference trip to that goal.
+  Cleanup is itself a catch that retries idempotent retirement before
+  propagating the ball. Ownership records remain until retirement completes.
 Lifted when: the cleanup is registered before the call port that follows
   Setup, or the inference check honours the atomic region.
 Record: docs/journal/2026-09-07-every-intermittent-root-caused.md, the

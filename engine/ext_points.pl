@@ -1,3 +1,6 @@
+% Guarantees: metta_with_trailed/3 is published as a host_service
+%   [source: engine/ext_points.pl:kind/2; commit=WORKTREE].
+%
 % Purpose: declare each engine extension seam, its direction and its cut
 %   semantics, and publish the predicates extensions and host bindings may call.
 % Guarantees: allocation, release and held-goal context hooks let lib_thread
@@ -1240,6 +1243,10 @@ kind(metta_host_run_source_status/3, host_service).
 kind(metta_host_load_file/3, host_service).
 kind(metta_host_read_forms/2, host_service).
 kind(metta_host_with_stack_limit/2, host_service).
+% A thread-local dynamic context whose ordinary exit and unwind both restore
+% its prior value. Absence reads as []; a caller never replaces a scoped root
+% nonbacktrackably. Payload mutation belongs inside the root instead.
+kind(metta_with_trailed/3, host_service).
 %An inference budget over a goal an engine will RESUME, which is knowledge a
 %host cannot hold correctly on its own: the engine counts its own inferences
 %and the host thread cannot see them, so a bound placed around engine_next/2

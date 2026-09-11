@@ -1,3 +1,7 @@
+% Guarantees: metta_with_source_effect_program/3, metta_with_evaluation_context/2
+%   and metta_bridge_descend/1 restore roots through metta_with_trailed/3
+%   [source: engine/metta/effects.pl:metta_with_evaluation_context/2; commit=WORKTREE].
+%
 % Purpose: classify compiled effects, compose the five-rank effect lattice,
 %   plan reified-world admission, and manage memoization, dependencies, and
 %   bridge cascades.
@@ -1082,7 +1086,9 @@ metta_host_source_effect_plan(Module, Source, Operations, Effect) :-
 % yet. Only the source lookup changes; masks, compiler actions and the effect
 % join remain the ordinary planner's. No candidate equation is compiled here.
 :- use_module(library(pairs), [group_pairs_by_key/2]).
-:- thread_local metta_effect_source_program/2.
+metta_effect_source_program(Module, Index) :-
+    nb_current('$metta_effect_source_program', Programs),
+    member(Module-Index, Programs).
 :- meta_predicate metta_with_source_effect_program(+, +, 0).
 
 metta_with_source_effect_program(Module, Forms, Goal) :-
@@ -1091,8 +1097,9 @@ metta_with_source_effect_program(Module, Forms, Goal) :-
               metta_effect_program_entry(Term, Key, Value) ), Pairs),
     keysort(Pairs, Ordered), group_pairs_by_key(Ordered, Grouped),
     assoc:list_to_assoc(Grouped, Index),
-    setup_call_cleanup(asserta(metta_effect_source_program(Module, Index), Ref),
-                       call(Goal), erase(Ref)).
+    ( nb_current('$metta_effect_source_program', Programs) -> true ; Programs = [] ),
+    % Workaround: swi-cleanup-window - candidate programs live in a trailed stack.
+    metta_with_trailed('$metta_effect_source_program', [Module-Index|Programs], Goal).
 
 metta_effect_program_entry([=,[Name|Args],Body], definition(Name), source([Name|Args],Body)) :-
     atom(Name).
@@ -2329,29 +2336,10 @@ metta_with_under(Algebra, Goal) :-
         evaluation_context(Algebra, Limit, Direction), Goal).
 
 metta_with_evaluation_context(Context, Goal) :-
-    setup_call_cleanup(
-        metta_evaluation_context_push(Context, Previous),
-        Goal,
-        metta_evaluation_context_pop(Previous)).
-
-% Workaround: swi-cleanup-window - trail the context push and let cleanup propagate inference-limit exceptions.
-metta_evaluation_context_push(Context, Previous) :-
-    (   nb_current('$metta_evaluation_contexts', Old)
-    ->  Previous = some(Old)
-    ;   Old = [], Previous = none
-    ),
-    % A limit can interrupt setup_call_cleanup before registration or during
-    % cleanup. Trail the scope, as metta_open_fuel_scope/0 does, so exception
-    % unwinding restores it independently. Keep nb_setval's input snapshot.
-    % SWI 10.1.13: boot/init.pl:setup_call_cleanup/3 and src/pl-gvar.c:setval
-    % at fc7ef84b949378b729052c3ade79c90ce5416abb.
+    ( nb_current('$metta_evaluation_contexts', Old) -> true ; Old = [] ),
+    % Workaround: swi-cleanup-window - preserve the input snapshot and trail both scope transitions.
     duplicate_term(Context, Snapshot),
-    b_setval('$metta_evaluation_contexts', [Snapshot|Old]).
-
-metta_evaluation_context_pop(some(Previous)) :- !,
-    nb_setval('$metta_evaluation_contexts', Previous).
-metta_evaluation_context_pop(none) :-
-    nb_delete('$metta_evaluation_contexts').
+    metta_with_trailed('$metta_evaluation_contexts', [Snapshot|Old], Goal).
 
 metta_evaluation_context(Context) :-
     nb_current('$metta_evaluation_contexts', [Context|_]).
@@ -2983,17 +2971,15 @@ metta_bridge_apply(Pattern, Term, Op) :-
     ).
 
 metta_bridge_descend(Op) :-
-    (   catch(b_getval('$metta_bridge_depth', Depth0), _, fail)
+    (   nb_current('$metta_bridge_depth', depth(Depth0))
     ->  true
     ;   Depth0 = 0
     ),
     Depth is Depth0 + 1,
     (   Depth > 32
     ->  throw(error(metta_bridge_cascade(Op), none))
-    ;   setup_call_cleanup(
-            b_setval('$metta_bridge_depth', Depth),
-            metta_bridge_op(Op),
-            b_setval('$metta_bridge_depth', Depth0))
+    ;   % Workaround: swi-cleanup-window - the cascade depth is trailed.
+        metta_with_trailed('$metta_bridge_depth', depth(Depth), metta_bridge_op(Op))
     ).
 
 metta_bridge_op([insert, Target, Template]) :- !,
