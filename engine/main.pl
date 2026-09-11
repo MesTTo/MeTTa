@@ -2,7 +2,7 @@
 %   result from a requested MeTTa source file.
 % Guarantees:
 %   - a failed engine boot ends the standalone command before running a
-%     program [tested: tests/shell/test_packaged_cli.sh; commit=WORKTREE].
+%     program [tested: tests/shell/test_packaged_cli.sh; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 %   - command-line answers use sdisplay/2, so host-only values and non-finite
 %     numbers remain printable presentation values without weakening
 %     swrite/2's reader-inverse contract [tested:

@@ -125,7 +125,7 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
   - root build hooks and component shell tests carry checked claims and
     resolvable comment pins [tested: tests/checks/check_evidence_selftest.py,
-    tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
+    tests/checks/check_pin_provenance_selftest.py; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs

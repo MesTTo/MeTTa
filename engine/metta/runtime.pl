@@ -14,7 +14,7 @@
 %   [tested: run_tests(metta_arrow_projection); commit=cba149fe709e7e11b343d7c722ea81b81275a1a5].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Assumes: engine/source_loading.pl renders metta_load_failed/1 before this
-%   runtime unit loads [tested: source_loading; commit=WORKTREE].
+%   runtime unit loads [tested: source_loading; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 % Guarantees:
 %   - every definition retains engine/metta.pl's implementation module and original load order
 %     [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]

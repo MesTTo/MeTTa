@@ -2,13 +2,13 @@
    loading boundary, including before the engine itself has loaded.
    Assumes: SWI's message hook and source-module accessors are available even
    with autoload disabled [tested: sh check.sh no-autoload;
-   commit=WORKTREE].
+   commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
    Guarantees: nested loads collect their own diagnostics without losing the
    outer load's errors; ordinary warnings and plain goal failure retain their
    meaning; the source module is restored before QLF replay resumes and load
    errors have a readable message before the engine runtime unit is loaded
    [tested: tests/prolog/suites/seams/source_loading.plt,
-   tests/shell/test_packaged_cli.sh; commit=WORKTREE].
+   tests/shell/test_packaged_cli.sh; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
    Owns resources: each loading_loudly/1 call erases its diagnostic records and
    watching clause on success, failure or exception.
    Guarded by: watching/0 and diagnostic/2 are thread-local; clause references
@@ -46,7 +46,7 @@ load_failure(initialization_failure(_, _), warning).
 % failed include can leave user as the source module; loadPredicate then
 % dereferences a null lookupProcedureToDefine result for a strong import.
 % [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-qlf.c#L1423;
-% commit=WORKTREE]
+% commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
 :- meta_predicate loading_loudly(0).
 loading_loudly(Goal) :-
     '$current_source_module'(Module),

@@ -7,7 +7,7 @@
 # Guarantees:
 #   - new nested binding files ship through both source archives and wheels;
 #     damaged wheel runtimes refuse by path through standalone and embedded
-#     boot [tested: sh check.sh packaged; commit=WORKTREE].
+#     boot [tested: sh check.sh packaged; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 #   - every claim is made against the INSTALL. A resource the wheel drops is
 #     invisible in a checkout, where the same door reads the repository root,
 #     so a source-tree test cannot answer this question at all.

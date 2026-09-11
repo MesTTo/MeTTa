@@ -433,7 +433,7 @@ shadow_by_design('$table_mode'/3, 'SWI records table modes per module').
 % PlDoc stores structured comments, modes and re-export links in their source
 % modules. dev_typed enables that collector to instrument declared modes.
 % [source: https://github.com/SWI-Prolog/packages-pldoc/blob/76fde4c3f1b623273b236dc6cb3a76929722729b/doc_process.pl#L439;
-% commit=WORKTREE]
+% commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
 shadow_by_design('$mode'/2, 'PlDoc records source modes per module').
 shadow_by_design('$pldoc'/4, 'PlDoc records structured comments per module').
 shadow_by_design('$pldoc_link'/2, 'PlDoc records documentation links per module').

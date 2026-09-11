@@ -3,7 +3,7 @@
 Guarantees: a fixture's new nested include ships through the real setuptools
 builder, a file-enumerating control omits it, and incomplete wheel runtimes
 refuse through both standalone and embedded boot with the failing path named
-[tested: tests/shell/test_packaged_cli.sh; commit=WORKTREE].
+[tested: tests/shell/test_packaged_cli.sh; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 Owns resources: TemporaryDirectory owns all fixture sources and wheel copies;
 bounded subprocesses are reaped before those trees are removed.
 """

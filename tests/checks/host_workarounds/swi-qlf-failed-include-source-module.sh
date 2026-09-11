@@ -5,7 +5,7 @@
 #   the host interpreter.
 # Guarantees: present means the QLF that loads with its optional entry disabled
 #   dies with signal 11 when replay loads that entry's missing include
-#   [tested: sh check.sh host-workarounds; commit=WORKTREE].
+#   [tested: sh check.sh host-workarounds; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 # Owns resources: only the supplied scratch tree is written; bounded.sh reaps
 #   children, and core files are disabled for the deliberate crash.
 set -eu

@@ -8,7 +8,7 @@
 %     - the working directory is tests/prolog
 % Guarantees:
 %     - boot and runtime imports share the source_loading leaf
-%       [tested: engine_layering; commit=WORKTREE].
+%       [tested: engine_layering; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 %     - identity is a leaf reached by boot validation, storage and image receipt
 %       [tested: engine_layering; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
 %     - every call from one engine subsystem into another, and every call from

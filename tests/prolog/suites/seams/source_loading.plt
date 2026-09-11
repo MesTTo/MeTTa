@@ -1,7 +1,7 @@
 /* Purpose: verify the shared source loader's diagnostics, nested scopes and
    restoration on every exit, independently of an engine boot.
    Guarantees: errors remain visible to enclosing loads and other threads do
-   not contaminate a successful load [tested: source_loading; commit=WORKTREE].
+   not contaminate a successful load [tested: source_loading; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
    Owns resources: each test joins its worker and destroys its message queue;
    the suite checks that loading_loudly/1 leaves no diagnostic scope behind.
 */

@@ -3,13 +3,13 @@
 % Guarantees:
 %   - broken extension entries raise through loading_loudly/1 with their
 %     diagnostic instead of allowing boot to report success
-%     [tested: tests/shell/test_packaged_cli.sh; commit=WORKTREE].
+%     [tested: tests/shell/test_packaged_cli.sh; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 %   - materialize.pl loads before source processing and shares the engine's
 %     runtime context [tested: function_free_materialization; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 %   - The engine/metta/ units compile into metta_engine in source
 %     order. Engine and library definitions stay out of user except SWI's
 %     exception/3, thread_message_hook/3 and prolog_trace_interception/4 hooks.
-%     [tested: engine_modules; commit=WORKTREE].
+%     [tested: engine_modules; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 %   - A built-in call covered by the effects cluster whose declared operand
 %     types already conflict is refused before operand evaluation; shallow
 %     compile-time checks inspect literals and declared return types without

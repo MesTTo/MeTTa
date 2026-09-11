@@ -45,7 +45,7 @@ Guarantees:
   - tracked probes and nested example fixtures reject a nonexistent test
     [tested: tests/checks/check_evidence_selftest.py; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
   - root build hooks and component shell tests reject a nonexistent test
-    [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_evidence_selftest.py; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
 Fails when:
   - run against a tree it did not write. It asserts exact line numbers in a
     fixture it generates, and nothing else.
