@@ -3,13 +3,13 @@
 % Guarantees: run_source_runnable/2 executes the translator's fixed answer,
 %   name and fuel envelope from compiled clauses while each form keeps its
 %   source-prefix translation, effects and observation boundary
-%   [tested: source_runnable_envelope, source_observation, fuel; commit=WORKTREE].
+%   [tested: source_runnable_envelope, source_observation, fuel; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Guarantees: retire_translated_clauses/2 consumes an ordered list of exact
 %   executable references, stopping at the first failed erase or callback
-%   [tested: source_retirement; commit=WORKTREE].
+%   [tested: source_retirement; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Owns resources: a trailed publication context selects a source's journal
 %   owners for its lexical scope; source rows remain transactional
-%   [tested: source_publication; commit=WORKTREE].
+%   [tested: source_publication; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Guarantees: plain_source_declarations/3 validates splice syntax before
 %   any source effect runs [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Guarded by: import_when/4 claims one source; runnable forms run outside the

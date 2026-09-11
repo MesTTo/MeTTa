@@ -13,7 +13,7 @@
 % Guarantees: metta_retract_storage/1 resolves the receipt owner after its first
 %   successful erase and reuses it for that logical-update snapshot, preserving
 %   each erase, callback and transactional receipt in order
-%   [tested: source_retirement, spaces_receipt_frames; commit=WORKTREE].
+%   [tested: source_retirement, spaces_receipt_frames; commit=e246959279271d22f166a1c8fb1840896295a020].
 
 :- use_module(library(ordsets), [ord_memberchk/2]).
 :- dynamic metta_receipt_pending/4, metta_receipt_marker/2,
