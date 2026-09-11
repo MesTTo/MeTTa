@@ -27,12 +27,12 @@
 % Guarantees:
 %   - a bound that cuts a first-use resolution leaves the predicate callable
 %     from the compiled call site that trapped, and the bounded call reports
-%     the bound's own ball [tested: limits:a_bound_landing_anywhere_inside_a_first_use_resolution_leaves_the_predicate_callable; commit=WORKTREE]
+%     the bound's own ball [tested: limits:a_bound_landing_anywhere_inside_a_first_use_resolution_leaves_the_predicate_callable; commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d]
 %   - a bound that cuts a nested findall, a findnsols or one of the engine's
 %     own bounded doors leaves the enclosing findall's answers whole
-%     [tested: limits:a_bound_landing_inside_a_nested_findall_keeps_the_enclosing_answers; commit=WORKTREE]
+%     [tested: limits:a_bound_landing_inside_a_nested_findall_keeps_the_enclosing_answers; commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d]
 %   - a predicate nothing defines still refuses with an existence error under
-%     a bound, and afterwards [tested: limits:an_undefined_predicate_under_a_bound_still_refuses; commit=WORKTREE]
+%     a bound, and afterwards [tested: limits:an_undefined_predicate_under_a_bound_still_refuses; commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d]
 % Fails when:
 %   - a bound other than an inference limit lands on the two call ports of the
 %     trap's own query that precede the wrapper's catch. The predicate then
@@ -92,7 +92,7 @@ metta_host_wrap_once(Head, Name, Wrapped, Body) :-
 %vertices_edges_to_ugraph([a],[a-b],G)" -t halt raises
 %existence_error(procedure, ugraphs:append/3), and a fresh module whose
 %clause calls sum_list/2 before another goal is poisoned at every budget from
-%1 to 64; commit=WORKTREE].
+%1 to 64; commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d].
 %
 %The wrapper catches the cut and runs the resolution again: the limit is
 %disarmed once it has raised and an alarm fires once, so the second attempt
@@ -102,7 +102,7 @@ metta_host_wrap_once(Head, Name, Wrapped, Body) :-
 %the query instead leaves the C trap to continue into the resolved predicate
 %with the ball pending, where the first foreign call drops it and the bound
 %is silently lost [measured 2026-09-11: 105 of 200 budgets returned `!` from
-%a bounded goal that had tripped, with that shape; commit=WORKTREE]. The
+%a bounded goal that had tripped, with that shape; commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d]. The
 %re-raise happens only when the second attempt resolved the predicate; a
 %predicate nothing defines keeps the host's own existence error, which is
 %what a bounded goal reaching it is owed either way. After a resolution that
@@ -153,7 +153,7 @@ metta_host_finish_resolution(Resolve, Action, Ball) :-
 %[measured 2026-09-11: budgets 1 and 2 of a 200-budget sweep reached this
 %hook and both left the predicate callable with the limit reported; the C
 %seat's error-ball row rose 2,000 inferences while the hook was static;
-%commit=WORKTREE].
+%commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d].
 :- multifile prolog:prolog_exception_hook/5.
 :- dynamic prolog:prolog_exception_hook/5.
 
@@ -189,7 +189,7 @@ metta_host_repair_resolution(Head) :-
 %which is now short [measured 2026-09-11: swipl -q -f none, a findall over
 %two hundred budgets each bounding a goal that runs a nested findall,
 %collects 13 of 200; a thrown ball through the same nesting collects 200
-%and a depth limit collects 200; commit=WORKTREE]. The cleanup's own entry
+%and a depth limit collects 200; commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d]. The cleanup's own entry
 %is a second window of the same shape: a trip on '$destroy_findall_bag''s
 %call port leaves the bag as well. findnsols2/5 pushes the same way through
 %setup_call_cleanup/3 and has both windows too.
@@ -213,7 +213,7 @@ metta_host_repair_resolution(Head) :-
 %
 %The shape costs one inference per findall, the catch, against the host's
 %own [measured 2026-09-11: 16 inferences per findall of three answers with
-%the host's shape, 17 with this one, bare SWI; commit=WORKTREE]. It is paid
+%the host's shape, 17 with this one, bare SWI; commit=23ed2559a7c9b5712e1f6f4710ed02f8d5c6a23d]. It is paid
 %only in a process that has bounded something: the first
 %call_with_inference_limit/3 of the process installs the two wrappers and
 %the exception hook above, and they stay, because unwrap_predicate/2
