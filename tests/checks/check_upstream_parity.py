@@ -776,7 +776,7 @@ WAIVERS = {
     # These four entries remain until an accepted measurement clears the same
     # band; a refused null is never evidence for removing a waiver.
     # [source: docs/journal/2026-09-08-what-the-waivers-were-paying-for.md:728;
-    # commit=WORKTREE].
+    # commit=e246959279271d22f166a1c8fb1840896295a020].
     "examples/ch05-equations-and-evaluation/05-02-changing-the-equations/03-functionremovalspec.metta": (
         "RULING for module isolation, OPEN for specialization invalidation and"
         " rebuilding. Grouped exact-reference retirement and scoped publication"

@@ -7,7 +7,7 @@
 %   - the contract's allow-list, its export half and its declared tangles are
 %     all satisfied by the measured call graph
 %     [tested: test_the_engine_layering_contract_holds_and_a_violation_is_named;
-%     commit=WORKTREE]
+%     commit=e246959279271d22f166a1c8fb1840896295a020]
 %   - each of the six violation kinds is NAMED rather than only counted, and
 %     the walk that finds them is proven to still see every planted reach
 %     [tested: test_the_engine_layering_contract_holds_and_a_violation_is_named,
@@ -18,7 +18,7 @@
 %     [tested: consulted_source_units_are_attributed_to_their_umbrella; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 %   - each clause contributing to a multifile handler keeps its own source
 %     owner through the real code walker
-%     [tested: multifile_callers_keep_each_clauses_source_owner; commit=WORKTREE]
+%     [tested: multifile_callers_keep_each_clauses_source_owner; commit=e246959279271d22f166a1c8fb1840896295a020]
 %   - lib_tabling itself is in the measured graph and reaches exactly the four
 %     reviewed engine surfaces named by reaches/3
 %     [tested: lib_tabling_reaches_only_its_four_declared_surfaces]

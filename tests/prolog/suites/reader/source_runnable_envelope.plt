@@ -1,7 +1,7 @@
 % Purpose: compare the compiled source envelope with the original goal executor.
 % Guarantees: ordered answers, variable sharing, source effects and error
 %   locations agree with direct execution of translate_runnable_expr/4's goals
-%   [tested: source_runnable_envelope; commit=WORKTREE].
+%   [tested: source_runnable_envelope; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Owns resources: cases release their spaces and oracle wrapper, and restore
 %   the loader output and host backtrace settings.
 

@@ -3,10 +3,10 @@
 % Guarantees: the shipped decision clauses are compiled from typing_rule_entry/7
 %   and preserve its directed matching, variable sharing and first decision
 %   [tested: sh engine/test.sh suites/typecheck/compiled_typing_rules.plt;
-%   commit=WORKTREE].
+%   commit=e246959279271d22f166a1c8fb1840896295a020].
 %   Expected-family queries reuse compiled shipped patterns while user rules
 %   retain query-time normalization and precedence [tested: sh engine/test.sh
-%   suites/typecheck/compiled_typing_rules.plt; commit=WORKTREE].
+%   suites/typecheck/compiled_typing_rules.plt; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Assumes:
 %   - current_metta_module/1 identifies the execution module whose user rules
 %     are in scope.
@@ -520,7 +520,7 @@ typing_rule_refusal_resolved(Module, Family, Actual, Expected, Name, Reason) :-
 % A bound expected value can use the clause index directly. An initially free
 % value keeps the directed checks: matching Family can bind a shared variable
 % before the expected pattern is tested, so filtering open patterns in advance
-% would change the relation [tested: compiled_typing_rules; commit=WORKTREE].
+% would change the relation [tested: compiled_typing_rules; commit=e246959279271d22f166a1c8fb1840896295a020].
 typing_rule_expected_resolved(Module, Family, Expected) :-
     (   typing_rule_entry(user, Module, _, Family, _, RawPattern, _),
         normalize_callable_type_in(Module, RawPattern, Pattern),

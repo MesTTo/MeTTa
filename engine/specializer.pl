@@ -2,7 +2,7 @@
 %   functions when their source equations change.
 % Guarantees: forget_symbol/2 retires its selected executable references through
 %   filereader:retire_translated_clauses/2, preserving provenance and callback
-%   order [tested: source_retirement, specializer_invalidation; commit=WORKTREE].
+%   order [tested: source_retirement, specializer_invalidation; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Guarantees: segment_specialization/4 compiles an arriving arity once and
 %   uses the existing source rollback and specialization invalidation owner
 %   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].

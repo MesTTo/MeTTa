@@ -1,7 +1,7 @@
 % Purpose: compare source observations in an explicitly owned execution context.
 % Guarantees: retain program output, answers, coverage and every source error
 %   frame; compare serialized host exceptions by variable identity
-%   [tested: source_runnable_envelope, compiled_typing_rules; commit=WORKTREE].
+%   [tested: source_runnable_envelope, compiled_typing_rules; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Owns resources: release the fixture space and restore loader output and the
 %   optional host backtrace flag after success, failure or an exception.
 

@@ -1,7 +1,7 @@
 % Purpose: compare projected function metadata with its complete source rows.
 % Guarantees: head aliases, duplicate occurrences, source ownership and runtime
 %   answer bags agree through insertion, removal and rollback
-%   [tested: run_tests(translator_metadata_projection); commit=WORKTREE].
+%   [tested: run_tests(translator_metadata_projection); commit=e246959279271d22f166a1c8fb1840896295a020].
 % Assumes: private metadata access is needed to compare the indexed read with
 %   its source relation and to inspect the exact occurrence references.
 

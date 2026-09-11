@@ -15,10 +15,10 @@
 %       lib_tabling into an engine subsystem, is named in the contract below,
 %       or the lane exits nonzero naming caller, callee and the missing line
 %       [tested: test_the_engine_layering_contract_holds_and_a_violation_is_named;
-%       commit=WORKTREE]
+%       commit=e246959279271d22f166a1c8fb1840896295a020]
 %     - a multifile caller belongs to its actual clause's source subsystem,
 %       independently of which contributing file defines the first clause
-%       [tested: multifile_callers_keep_each_clauses_source_owner; commit=WORKTREE]
+%       [tested: multifile_callers_keep_each_clauses_source_owner; commit=e246959279271d22f166a1c8fb1840896295a020]
 %     - a contract line no call needs any more is reported, so the allow-list
 %       cannot silently widen the surface as the engine changes
 %     - a cross-subsystem call into a subsystem that declares a module reaches

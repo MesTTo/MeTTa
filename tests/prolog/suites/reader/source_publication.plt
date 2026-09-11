@@ -1,7 +1,7 @@
 % Purpose: compare scoped publication with the source journal's original policy.
 % Guarantees: ownership, callback order and transaction visibility agree through
 %   nested pins and recompiles, failure, exceptions, threads and engines
-%   [tested: source_publication; commit=WORKTREE].
+%   [tested: source_publication; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Owns resources: fixtures erase their journal rows and listeners and release
 %   the temporary empty source and its space.
 

@@ -2,14 +2,14 @@
    interpreter, including directed matching, variable sharing and cuts.
    Guarantees: the comparison includes accepted and refused outcome queries
    and constrained rule names [tested: sh engine/test.sh
-   suites/typecheck/compiled_typing_rules.plt; commit=WORKTREE].
+   suites/typecheck/compiled_typing_rules.plt; commit=e246959279271d22f166a1c8fb1840896295a020].
    Expected-family classification agrees with the original interpreter for
    shipped and user tiers, including aliases, free values and rule order
    [tested: sh engine/test.sh suites/typecheck/compiled_typing_rules.plt;
-   commit=WORKTREE].
+   commit=e246959279271d22f166a1c8fb1840896295a020].
    Runtime get_type_rule/2 callbacks retain their order and source error
    frames, including a throwing tuple retry [tested: compiled_typing_rules;
-   commit=WORKTREE].
+   commit=e246959279271d22f166a1c8fb1840896295a020].
    Owns resources: cases release their spaces and oracle wrapper.
 */
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

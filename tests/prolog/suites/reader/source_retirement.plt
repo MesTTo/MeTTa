@@ -1,7 +1,7 @@
 % Purpose: compare grouped retirement with the original per-reference loops.
 % Guarantees: exact references, callback order, logical-update visibility,
 %   failure prefixes and nested transaction receipts agree
-%   [tested: source_retirement; commit=WORKTREE].
+%   [tested: source_retirement; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Owns resources: fixtures retire their clauses, listeners, queues and spaces.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

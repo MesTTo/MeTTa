@@ -11,13 +11,13 @@
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
 % Owns resources: with_source_publication_context/2 restores its trailed
 %   context on exit, failure and exception
-%   [tested: source_publication; commit=WORKTREE].
+%   [tested: source_publication; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Guarantees: source and recompile scopes resolve their owner selection once;
 %   each artifact, stored atom and support group still writes its original
-%   indexed journal row immediately [tested: source_publication; commit=WORKTREE].
+%   indexed journal row immediately [tested: source_publication; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Guarantees: rollback_source_load/1 retires its detached artifact groups in
 %   order and keeps the existing per-reference cleanup failure policy
-%   [tested: source_retirement, filereader_source_rollback; commit=WORKTREE].
+%   [tested: source_retirement, filereader_source_rollback; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Assumes: engine/filereader.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/filereader.pl's implementation module and original load order;
 %   each source load is atomic with every dependent recompile it triggers;
