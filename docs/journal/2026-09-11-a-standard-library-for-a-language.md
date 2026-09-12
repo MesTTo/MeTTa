@@ -2761,3 +2761,52 @@ Measured: the example proves 58 claims and its twin the same 58, 89,803 MeTTa
 against 89,855 Python inferences, minimum of three fresh processes, a first pin:
 a grammar is a term, so building one in Python and writing one in MeTTa are the
 same work. Logs: ai-tmp/ai-lib3-parsing-{example,suite}.log.
+
+## 2026-09-12: yaml
+
+Decided: a YAML mapping is a SPACE, a sequence an expression and the scalars
+their own types, which is lib_json's decision taken rather than re-made. The
+whole point is that one traversal walks both formats: `json-at` follows a path
+through a YAML document, `get-keys` and `get-value` query a YAML mapping, and
+`dict-space` builds one. lib_yaml's Prolog half imports lib_json's `dict-space`
+directly, the way lib_json imports lib_string's `metta_text/2`.
+
+Decided: the file doors are DERIVED in the face. `yaml-read!` is
+`(yaml-decode (read-file! $path))` and `yaml-write!` is
+`(replace-file! $path (yaml-encode $value))`, one line each, so the library holds
+no second copy of the staging-and-rename protocol. There are three in the tree
+already (lib_file's sibling-directory stage, lib_json's tmp_file, lib_csv's), and
+a fourth would have been the wrong answer to a solved problem.
+
+Tried: reading a multi-document stream -> the host's `yaml_read/2` FAILS, and
+fails on the FIRST document, whatever markers the stream carries (`---` between,
+`---` before each, `...` then `---`). A second read after a single document
+answers an unbound variable, which is the empty document. So the library refuses a
+multi-document stream naming the marker, with the remedy: split the stream and
+decode each piece. A silent first-document answer would have answered less than
+the text says. Rejected: splitting the stream here, because a `---` line inside a
+block scalar would mis-split and answer two wrong documents rather than refusing.
+
+Measured: the host reads an omitted value as the EMPTY STRING, not null:
+`yaml_read` over "k:\n" answers `yaml{k:""}` where YAML 1.2 reads an omitted value
+as null, and it cannot be told from `k: ""`. Normalising it here would corrupt an
+explicitly empty string, so the divergence is documented in the header, the face,
+the example and the suite, and a document that means null writes `~` or `null`.
+
+Tried: `with_outcome_cleanup(Setup, Goal, true)` for the nested-mapping release ->
+`Unknown procedure: lib_yaml:true/1`; the cleanup is called with the outcome. The
+rows are built before `dict-space` allocates instead, so a nested mapping that
+raises leaves no space of the outer one behind and lib_json's own cleanup owns
+what it made.
+
+Verified: `sh engine/test.sh suites/libraries/lib_yaml.plt` passes 7 tests. The
+twelve scalar shapes are checked against the host's reader, the mapping's keys
+against its dict, the round trip over ten documents with a space equality that
+compares pairs rather than handles, the multi-document failure against the host's
+own silence, the tags both ways, and the four refusals.
+
+Measured: the example proves 32 claims and its twin the same 32, 182,395 MeTTa
+against 179,414 Python inferences, minimum of three fresh processes, a first pin.
+The twin declares one stored-content divergence, the scope function's four
+statements compiling to nested `let*` forms where the example writes `let`.
+Logs: ai-tmp/ai-lib3-yaml-{example,suite}.log.

@@ -9,6 +9,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_yaml` is a new library reading and writing YAML: `yaml-decode`,
+  `yaml-encode`, and `yaml-read!` and `yaml-write!` derived from `lib_file`'s
+  `read-file!` and `replace-file!`, so the library holds no second copy of the
+  publication protocol. A mapping becomes a space of (Key Value) atoms, which is
+  `lib_json`'s own shape, so `get-keys`, `get-value` and `json-at` query a YAML
+  document; a sequence becomes an expression and the scalars keep their types,
+  with null and an empty document answering `Null`. Four refusals the host only
+  fails or answers opaquely at: a stream with more than one document, an
+  unsupported tag, a duplicate key and malformed text, the last with the line the
+  reader stopped on. A key written with no value decodes as the empty string, not
+  null, because the host's reader cannot tell it from `note: ""`. The library
+  declares the new `yaml` platform capability.
 - `lib_parsing` is a new library of grammars as values: `grammar-parse`,
   `grammar-parse-prefix`, `grammar-forms` and `grammar-is` over fourteen
   primitives (`lit`, `any`, `char-in`, `char-not-in`, `char-if`, `digits`,

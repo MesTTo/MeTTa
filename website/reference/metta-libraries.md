@@ -52,6 +52,7 @@ beside its definitions.
 | lib_torch | 20 | 19 |
 | lib_unicode | 8 | 8 |
 | lib_vector | 13 | 13 |
+| lib_yaml | 4 | 4 |
 | lib_zar | 4 | 0 |
 
 ## lib_combinatorics
@@ -4954,3 +4955,62 @@ Subtract Right from Left component by component, with vector-add's exact, floati
 2. Right
 
 Returns: Vector
+
+## lib_yaml
+
+### `yaml-read!`
+
+*lib_yaml.metta:36*
+
+```metta
+(: yaml-read! (-> %Undefined% %Undefined%))
+```
+
+One YAML document read from a file, as yaml-decode answers it. The file is read whole through read-file!, so its encoding and refusals are lib_file's.
+
+1. the path
+
+Returns: the document's value
+
+### `yaml-write!`
+
+*lib_yaml.metta:40*
+
+```metta
+(: yaml-write! (-> %Undefined% %Undefined% Bool))
+```
+
+One YAML document written to a file, published atomically through replace-file!: the destination is replaced only after the whole document is written, so a reader never sees half of one.
+
+1. the path
+2. the value
+
+Returns: True
+
+### `yaml-decode`
+
+*lib_yaml.metta:52*
+
+```metta
+(: yaml-decode (-> String %Undefined%))
+```
+
+One YAML document as a MeTTa value: a mapping becomes a space of (Key Value) atoms, a sequence an expression, a string a String, a number a Number, the booleans True and False, and null Null. An empty document is Null, because that is what YAML says an empty document holds. A stream holding more than one document is refused naming the marker: the host's reader loads exactly one and fails on the rest, so answering the first would be answering less than the text says. An unsupported tag, a duplicate key and malformed text are each refused, the last with the line the host reports.
+
+1. Text
+
+Returns: Value
+
+### `yaml-encode`
+
+*lib_yaml.metta:58*
+
+```metta
+(: yaml-encode (-> %Undefined% String))
+```
+
+One YAML document as text: a space becomes a mapping of its (Key Value) atoms, an expression a sequence, a String a string, a Number a number, True and False the booleans and Null the null scalar. The text ends in a newline, as a YAML document does, and keys come out in the host writer's order rather than the space's.
+
+1. Value
+
+Returns: Text

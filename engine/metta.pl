@@ -1164,6 +1164,13 @@ metta_platform_capability(regex, library(pcre),
 %from swipl-wasm, so a build can be complete without it. Nothing else provides
 %normalization or the character database: code_type/2 answers the classes and
 %string_upper/2 the case conversions, both of which stay.
+%library(yaml) is SWI's ext/yaml pack over libyaml, absent from swipl-wasm and
+%from a build without the C library. Nothing else reads YAML here; lib_json's
+%doors read the format a YAML document can always be converted to.
+metta_platform_capability(yaml, library(yaml),
+                          'lib_yaml, so (yaml-decode ...), (yaml-encode ...), \c
+                           (yaml-read! ...) and (yaml-write! ...); lib_json\'s \c
+                           own doors still read and write JSON').
 metta_platform_capability(unicode, library(unicode),
                           'lib_unicode, so (unicode-normalize ...), \c
                            (unicode-casefold ...), (unicode-map ...), \c
