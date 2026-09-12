@@ -7,6 +7,9 @@
 %   metta/terms.pl, 'get-type'/2 from metta/types.pl and the translator's
 %   exported metta_dynamic_value_call/4 are all callable unqualified.
 % Guarantees:
+%   - a produced Error crosses a result refinement unchanged
+%     [tested: refinements:a_result_refinement_preserves_a_produced_error;
+%     commit=WORKTREE].
 %   - a constraint is decided three ways: it HOLDS, it is VIOLATED, or its head
 %     is outside the vocabulary and it decides nothing. metta_refinements_hold/2
 %     requires every constraint to hold, so an undecided one keeps the
@@ -254,7 +257,9 @@ metta_refinement_predicate(Test, Value) :-
 %and reading the module's policy per call costs less than compiling three
 %variants of it.
 metta_refined_result(Fun, Written, Produced, OutType, Origin, Out) :-
-    (   check_argument_type_under_live_policy(Produced, OutType, Origin)
+    (   metta_error_operand([Produced], Error)
+    ->  Out = Error
+    ;   check_argument_type_under_live_policy(Produced, OutType, Origin)
     ->  Out = Produced
     ;   metta_refined_type(OutType, Base, Constraints),
         check_argument_type_under_live_policy(Produced, Base, Origin),

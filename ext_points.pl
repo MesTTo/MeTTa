@@ -3,6 +3,8 @@
 % Guarantees: context_reader/4 defines a scoped reader and compiles resolving
 %   calls directly to its read; malformed declarations refuse at load
 %   [tested: reference_scopes; commit=WORKTREE].
+% Guarantees: metta_transaction/2 publishes the result-aware transaction service
+%   [tested: classes_transaction_results; commit=WORKTREE].
 % Guarantees: allocation, release and held-goal context hooks let lib_thread
 %   own scope lifetimes across host engines [tested: lib_thread_scope;
 %   commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
@@ -1511,6 +1513,7 @@ kind(metta_on_error_mode/3, host_service).
 kind(metta_source_reset/1, host_service).
 kind(metta_speculate/1, host_service).
 kind(metta_transaction/1, host_service).
+kind(metta_transaction/2, host_service).
 kind(metta_transaction_notified/3, host_service).
 kind(metta_world_effect_coverage/2, host_service).
 kind(metta_effect_covered/2, host_service).
