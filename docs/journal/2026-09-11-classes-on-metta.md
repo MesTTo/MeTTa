@@ -268,6 +268,14 @@ The new corpus example has seven assertions and a Python twin. Its full-example 
 Tried: the final corpus run and its twin -> seven of seven assertions, equal stored content, 21,949 MeTTa inferences and 19,782 Python inferences, zero findings. `jscpd --format prolog --formats-exts 'prolog:pl,plt' --min-lines 5 --min-tokens 50` reports one seven-line test clone, 1.38% over the two new Prolog files; no production clone. The duplicated mutation and error golden remains beside each test because the two cases change different declaration scopes.
 
 Tried: the artifact battery -> 23 passing lanes and two failures, `llms` and `llms-selftest`. The new file and translator unit require source-table counts of 325 and seven. The five Node path findings name generated browser artifacts absent from this worktree; `npm --prefix extensions/node run build:browser --silent` creates them from the existing build scripts. With those counts and artifacts, `sh check.sh llms llms-selftest example-origins evidence provenance-pin-selftest` passes all six selected or implied lanes. The attribution check uses `METTA_UPSTREAM=/home/user/Dev/PyPeTTa1/PeTTa-base` and reports 143 derived and 203 original programs. The llms negative control detects all 64 planted cases. No allowances were widened.
+## 2026-09-11: class-space admission and open recursion
+
+Tried: two spaces defining `Shape`, `Circle`, `(:< Circle Shape)`, typed `area` equations returning 1 and 2, and `describe` calling `area` on its explicit receiver. After the Circle space references Shape, `area (Circle 3)` answers both 1 and 2. `describe (Circle 3)` in Circle refuses with `(BadArgType 1 Shape Circle)`. A third space referencing Circle reports `%Undefined%` for that constructor's type. Adding the reverse reference makes `describe` answer both areas too. The fixture is `ai-tmp/ai-classes-dispatch-probe.py`; the completed probe exits 0.
+
+Found: `metta_reference_local_head/3` exports callable heads; `metta_reference_metadata/4` projects their arrows and docs. A data constructor has no callable head, so its declaration does not travel through `from`. `widening_applies_to/2` deliberately excludes every arrow application's result from subsort widening, including a constructor with no equation. A native reference union preserves every source's answers; it does not select the Python receiver's method resolution order.
+
+Decided: retain the reference union's bag law and the original defining space of each equation. Class lowering must publish its data declarations and derive receiver applicability from the completed Python class hierarchy. A method body and its qualified `super` entry must remain shared. Constructor sorts and callable return types need distinct admission rules, as the order-sorted design requires.
+
 ## 2026-09-12: the cache-expiry negative control includes assertion ownership
 
 Found: `sh check.sh binding binding-selftest llms llms-selftest` reports one

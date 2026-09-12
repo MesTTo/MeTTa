@@ -1,4 +1,7 @@
 % Purpose: exercise reference meaning, multiplicity, visibility and withdrawal.
+% Guarantees: data declarations share reference visibility and occurrence
+%   ownership without acquiring callable bindings
+%   [tested: references; commit=WORKTREE].
 % Owns resources: each test releases its fresh native spaces in reverse order.
 % Guarantees: comparisons inspect answer bags, stored occurrence identities and
 %   SWI's actual import property [tested: references; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
@@ -27,6 +30,62 @@ reference_from(Target, Source) :-
 reference_answers(Index, Call, Bag) :-
     reference_space(Index, Space), findall(R, evalc(Call, Space, R), Answers),
     msort(Answers, Bag).
+
+test(a_reference_map_accepts_a_name_that_is_already_a_grounded_function,
+     [setup(reference_setup), cleanup(reference_cleanup),
+      forall(member(map(Operation, Arguments, Expected),
+                    [map(only, [['+']], '+'), map(except, [[other]], '+'),
+                     map(prefix, ['mapped-'], 'mapped-+'),
+                     map(rename, [[['+', 'mapped-plus']]], 'mapped-plus')]))]) :-
+    reference_add(1, [':', '+', [->, 'Number', 'Number', 'Number']]),
+    append([Operation|Arguments], [Name], Body),
+    reference_from(2, 1, ['|->', [Name], Body]),
+    reference_space(2, Target),
+    assertion(spaces:metta_space_pair(Target,
+              [':', Expected, [->, 'Number', 'Number', 'Number']], _, _)).
+
+test(declaration_diamonds_preserve_one_origin_and_follow_withdrawal,
+     [setup(reference_setup), cleanup(reference_cleanup)]) :-
+    Arrow = [':', 'SortedPoint', [->, 'Number', 'SortedPoint']],
+    reference_add(1, Arrow),
+    reference_from(2, 1), reference_from(3, 1),
+    reference_from(4, 2), reference_from(4, 3),
+    reference_space(4, Receiver),
+    findall(Token, spaces:metta_space_pair(Receiver, Arrow, Token, _), Tokens),
+    assertion(length(Tokens, 1)),
+    reference_space(1, Home), metta_remove_atom(Home, Arrow, true),
+    assertion(\+ spaces:metta_space_pair(Receiver, Arrow, _, _)),
+    reference_answers(4, ['get-type', ['SortedPoint', 3]], Types),
+    assertion(Types == ['%Undefined%']).
+
+test(declaration_cycles_retire_the_last_source_occurrence,
+     [setup(reference_setup), cleanup(reference_cleanup)]) :-
+    Arrow = [':', 'SortedPoint', [->, 'Number', 'SortedPoint']],
+    reference_add(1, Arrow), reference_from(2, 1), reference_from(1, 2),
+    reference_space(1, Home), metta_remove_atom(Home, Arrow, true),
+    forall(member(Index, [1,2]),
+           ( reference_space(Index, Space),
+             assertion(\+ spaces:metta_space_pair(Space, Arrow, _, _)) )).
+
+test(renaming_a_constructor_keeps_its_declared_result_sort,
+     [setup(reference_setup), cleanup(reference_cleanup)]) :-
+    reference_add(1, [':', 'SortedPoint', [->, 'Number', 'SortedPoint']]),
+    reference_from(2, 1, [rename, [['SortedPoint', 'RenamedPoint']]]),
+    reference_answers(2, ['get-type', ['RenamedPoint', 3]], Types),
+    assertion(Types == ['SortedPoint']),
+    reference_space(2, Space), space_module(Space, Module),
+    assertion(\+ metta_host_function_callable_from(Module, 'RenamedPoint')).
+
+test(internal_constructor_declarations_stay_private,
+     [setup(reference_setup), cleanup(reference_cleanup)]) :-
+    reference_add(1, [':', 'PrivatePoint', [->, 'Number', 'PrivatePoint']]),
+    reference_add(1, [internal, 'PrivatePoint']),
+    reference_from(2, 1),
+    reference_answers(2, ['get-type', ['PrivatePoint', 3]], Types),
+    assertion(Types == ['%Undefined%']),
+    reference_space(1, Home),
+    catch(reference_from(3, 1, [only, ['PrivatePoint']]), Error, true),
+    assertion(Error == error(metta_internal_reference(Home,'PrivatePoint'),none)).
 
 test(a_same_name_binding_is_native_and_its_body_resolves_at_home,
      [setup(reference_setup), cleanup(reference_cleanup)]) :-

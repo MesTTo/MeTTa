@@ -1321,6 +1321,9 @@ kind(metta_host_hold_close/1, host_service).
 kind(metta_platform_absent/1, host_service).
 kind(metta_host_function_generation/1, host_service).
 kind(metta_host_function_callable_from/2, host_service).
+% Written and explicitly referenced names in one namespace, including its
+% private names. Inherited process-wide functions are not explicit imports.
+kind(metta_host_reference_names/2, host_service).
 %Setting the engine-wide print-suppression flag. engine/filereader.pl decides
 %it from argv at load time and an embedded host has no argv, so two seats had each
 %written the same retract-then-assert under a private name and the engine's own

@@ -32,6 +32,10 @@
 %     removed, which is what lets a suite evict a name and put it back
 %     [tested: prelude_derived_forms:a_user_definition_withdraws_the_registration_with_the_clauses;
 %     commit=3e778d4d13f6bee7304f7500e8e914c22bd07cec].
+%   - reference maps consume held names even when those names already denote
+%     grounded functions [tested:
+%     references:a_reference_map_accepts_a_name_that_is_already_a_grounded_function;
+%     commit=WORKTREE].
 % Fails when: a prelude_rule_registration/2 row names a head no
 %   prelude_head/2 row defines. That is an inconsistency between two tables in
 %   this file and it raises rather than registering a rule that would expand
@@ -140,11 +144,11 @@ prelude_head(subtraction, 2).
 %an Atom mask so the atom they are asked about arrives unreduced, and this
 %file is where that mask lives.
 prelude_declaration('if-equal', [->, 'Atom', 'Atom', 'Atom', 'Atom', '%Undefined%']).
-prelude_declaration(only, [->, 'Atom', 'Symbol', 'Symbol']).
-prelude_declaration(except, [->, 'Atom', 'Symbol', 'Symbol']).
-prelude_declaration(prefix, [->, 'Symbol', 'Symbol', 'Symbol']).
-prelude_declaration(rename, [->, 'Atom', 'Symbol', 'Symbol']).
-prelude_declaration(qualified, [->, 'Symbol', '%Undefined%']).
+prelude_declaration(only, [->, 'Atom', 'Atom', '%Undefined%']).
+prelude_declaration(except, [->, 'Atom', 'Atom', '%Undefined%']).
+prelude_declaration(prefix, [->, '%Undefined%', 'Atom', '%Undefined%']).
+prelude_declaration(rename, [->, 'Atom', 'Atom', '%Undefined%']).
+prelude_declaration(qualified, [->, '%Undefined%', '%Undefined%']).
 prelude_declaration('if-equal2', [->, 'Atom', 'Atom', 'Atom', 'Atom', '%Undefined%']).
 prelude_declaration('noreduce-eq', [->, 'Atom', 'Atom', 'Bool']).
 prelude_declaration(assertEqual, [->, 'Atom', 'Atom', '%Undefined%']).

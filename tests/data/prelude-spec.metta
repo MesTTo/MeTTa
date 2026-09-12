@@ -15,6 +15,9 @@
 ;     [tested: prelude_spec:the_shipped_register_is_the_spec_fixture].
 ;   - every head answers here what it answers in the engine
 ;     [tested: prelude_spec:every_head_agrees_with_its_spec_equation].
+;   - reference maps hold names independently of their current metatype
+;     [tested: references:a_reference_map_accepts_a_name_that_is_already_a_grounded_function;
+;     commit=WORKTREE].
 ; Assumes: the suite loads the declarations and the equations and SKIPS the
 ;   `!(add-translator-rule! ...)` runnables. A translator registration is
 ;   global, so running one from a scratch space would point the engine's own
@@ -50,11 +53,11 @@
 ;The aligned equations are PeTTa's vendored lib_he equations. The differential
 ;also checks their parsed identity against that file.
 (: if-equal (-> Atom Atom Atom Atom %Undefined%))
-(: only (-> Atom Symbol Symbol))
-(: except (-> Atom Symbol Symbol))
-(: prefix (-> Symbol Symbol Symbol))
-(: rename (-> Atom Symbol Symbol))
-(: qualified (-> Symbol %Undefined%))
+(: only (-> Atom Atom %Undefined%))
+(: except (-> Atom Atom %Undefined%))
+(: prefix (-> %Undefined% Atom %Undefined%))
+(: rename (-> Atom Atom %Undefined%))
+(: qualified (-> %Undefined% %Undefined%))
 (= (if-equal $A $B $Then $Else)
    (if (== $A $B) $Then $Else))
 (= (only $names $head) (if (is-member $head $names) $head (empty)))
