@@ -9,6 +9,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_pairs` is a new library that reads a collection of (Key Value) pairs as a
+  relation: `pairs-is`, `pairs-keys`, `pairs-values`, `pairs-swap`,
+  `pairs-sort-by-key`, `pairs-sort-by-value`, `pairs-group`, `pairs-ungroup` and
+  `pairs-lookup`. Duplicates survive every operation, both orderings are stable,
+  and `pairs-lookup` answers once per value a key has, so an absent key has no
+  answer at all. `pairs-group` sorts by key itself, because the host's
+  `group_pairs_by_key/2` groups only adjacent pairs and answers the same key
+  twice for an unsorted relation.
 - `lib_sets` is a new library of sets as ordered expressions: `set-of`,
   `set-is`, `set-member`, `set-insert`, `set-remove`, `set-union`,
   `set-intersection`, `set-difference`, `set-symmetric-difference`,

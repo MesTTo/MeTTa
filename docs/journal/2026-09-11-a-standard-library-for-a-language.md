@@ -2522,3 +2522,52 @@ against 71,496 Python inferences, minimum of three fresh processes, a first pin.
 The twin declares an OVERRUN of 1,399: the example nests each law claim in one
 evaluation, where Python reads the same law as separate calls whose intermediate
 sets cross into the host and back. Logs: ai-tmp/ai-lib3-sets-{example,suite}.log.
+
+## 2026-09-12: pairs
+
+Decided: the library owns the operations that only make sense once a collection
+is READ as pairs, and nothing else. lib_functional's `zip` and `unzip` build a
+relation and split it, and its `group-by` and `sort-by` take a key function over
+arbitrary elements, so what is left is the pair shape itself: the two
+projections, the converse, the two stable orderings, the multimap grouping and
+its inverse, and the lookup. Nine heads.
+
+Decided: `pairs-group` sorts by key itself. The host's `group_pairs_by_key/2`
+gathers only ADJACENT pairs, so an unsorted relation answers the same key twice
+and nothing says so; the sort is `keysort/2`, which is stable, so the values
+still arrive in the relation's own order. That makes the head total, and the
+differential against the host is then `keysort` plus its grouping rather than its
+grouping alone.
+
+Decided: `pairs-lookup` is the library's one nondeterministic head, answering
+once per value the key has. A collapse over it is the list of values, an `if`
+over that collapse is the presence test, and an absent key is no answer at all
+rather than an empty one, which is what makes it compose. The key is compared
+with `==`, as lib_sets' membership is, so a variable key matches nothing.
+
+Tried: `if-empty` in the example -> there is no such head in this engine; the
+emptiness test the corpus writes is `(== () (collapse ...))`, which four examples
+already use. The claim became that, in both directions.
+
+Tried: `refused(S.pairs_lookup(7, S.a))` in the twin -> False. A first argument
+of the wrong TYPE is refused by the declaration rather than by the head, so it
+answers `(Error (pairs-lookup 7 a) (BadArgType 1 Expression Number))` where the
+head's own `type_error` raises. `if-error` reads both the same way, so the
+example's claim held either way; the twin now asserts the Error atom.
+
+Verified: `sh engine/test.sh suites/libraries/lib_pairs.plt` passes 7 tests. The
+projections, the sort by key, the grouping and the converse are checked against
+`library(pairs)` over 300 generated relations, and the host's
+`transpose_pairs/2` is checked to BE this library's swap followed by its sort,
+which is why no third head exists for it. Stability is checked by hand on a
+five-row relation with repeated keys and values, including the two-pass sort;
+duplicates are checked to survive all six row-preserving heads over 200
+relations; and the grouping and ungrouping round trip is checked to answer the
+relation sorted by key, with the one thing it cannot promise recorded: a group
+with no values contributes no pair.
+
+Measured: the example proves 28 claims and its twin the same 28, 47,975 MeTTa
+against 47,584 Python inferences, minimum of three fresh processes, a first pin.
+The twin is CHEAPER than the example: the example's `collapse` is `list()` here,
+which the lookup's answers stream into directly. Logs:
+ai-tmp/ai-lib3-pairs-{example,suite}.log.

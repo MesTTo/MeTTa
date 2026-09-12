@@ -32,6 +32,7 @@ beside its definitions.
 | lib_mm2 | 5 | 0 |
 | lib_nars | 38 | 0 |
 | lib_observe | 2 | 2 |
+| lib_pairs | 9 | 9 |
 | lib_patrick | 4 | 0 |
 | lib_pln | 49 | 0 |
 | lib_pln2 | 9 | 0 |
@@ -2671,6 +2672,135 @@ Run source with coverage and error diagnostics. Source coordinates are one-based
 3. MeTTa source text
 
 Returns: a queryable space of observation-status, observation-answer, observation-exception, source-coverage, source-coverage-unavailable, source-function-unavailable, source-error, source-frame, and source-frame-unavailable atoms
+
+## lib_pairs
+
+### `pairs-group`
+
+*lib_pairs.metta:22*
+
+```metta
+(: pairs-group (-> Expression Expression))
+```
+
+The relation as a multimap: every key once, in the standard order of terms, with every value it has as (Key Values). The sort is this head's own and is stable, so the values arrive in the relation's own order; the host's group_pairs_by_key/2 groups only ADJACENT pairs and answers a key twice for an unsorted relation, which is why this one sorts first.
+
+1. Pairs
+
+Returns: Groups
+
+### `pairs-is`
+
+*lib_pairs.metta:28*
+
+```metta
+(: pairs-is (-> %Undefined% Bool))
+```
+
+Whether the value is a relation: a collection whose every element is a two-element expression. This is the question every other head asks before it walks one, asked out loud.
+
+1. Value
+
+Returns: Answer
+
+### `pairs-keys`
+
+*lib_pairs.metta:34*
+
+```metta
+(: pairs-keys (-> Expression Expression))
+```
+
+The key of every pair, in order and with duplicates kept, so the length is the relation's own. unzip answers both sides at once; this is the one projection.
+
+1. Pairs
+
+Returns: Keys
+
+### `pairs-lookup`
+
+*lib_pairs.metta:40*
+
+```metta
+(: pairs-lookup (-> Expression %Undefined% %Undefined%))
+```
+
+Every value the key has, one answer each, in the relation's own order. A key the relation does not hold has no answer, which is what makes a lookup composable with collapse and with an if over one; the key is compared as a TERM, so a variable matches nothing.
+
+1. Pairs
+2. Key
+
+Returns: Value
+
+### `pairs-sort-by-key`
+
+*lib_pairs.metta:46*
+
+```metta
+(: pairs-sort-by-key (-> Expression Expression))
+```
+
+The relation ordered by key in the standard order of terms, STABLY: pairs with equal keys keep their relative order, and none is dropped.
+
+1. Pairs
+
+Returns: Sorted
+
+### `pairs-sort-by-value`
+
+*lib_pairs.metta:52*
+
+```metta
+(: pairs-sort-by-value (-> Expression Expression))
+```
+
+The relation ordered by value in the standard order of terms, STABLY. This is the other half of the same question, and it is a sort of the converse rather than a second algorithm.
+
+1. Pairs
+
+Returns: Sorted
+
+### `pairs-swap`
+
+*lib_pairs.metta:58*
+
+```metta
+(: pairs-swap (-> Expression Expression))
+```
+
+The converse relation with the order kept: every (Key Value) becomes (Value Key) where it stands. pairs-sort-by-key over the answer is the sorted converse, which is what transposing a relation usually means.
+
+1. Pairs
+
+Returns: Swapped
+
+### `pairs-ungroup`
+
+*lib_pairs.metta:64*
+
+```metta
+(: pairs-ungroup (-> Expression Expression))
+```
+
+The relation a multimap holds: one (Key Value) per value, keys in the multimap's order and values in each group's order. This inverts pairs-group, and a group whose values are not a collection raises.
+
+1. Groups
+
+Returns: Pairs
+
+### `pairs-values`
+
+*lib_pairs.metta:70*
+
+```metta
+(: pairs-values (-> Expression Expression))
+```
+
+The value of every pair, in order and with duplicates kept.
+
+1. Pairs
+
+Returns: Values
 
 ## lib_reflect
 
