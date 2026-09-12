@@ -1018,8 +1018,11 @@ guard_arithmetic_goal_expansion_clause(Ref) :-
                         error(type_error(evaluable, _), _),
                         fail) )).
 
+% The first listener the engine registers, so the door loads here; every later
+% engine file reaches metta_listen/2 through the engine's module.
+:- use_module(host_listeners, [metta_listen/2]).
 :- guard_arithmetic_goal_expansion,
-   prolog_listen(system:goal_expansion/2, guard_arithmetic_goal_expansion).
+   metta_listen(system:goal_expansion/2, guard_arithmetic_goal_expansion).
 :- use_module(library(aggregate)).
 %sub_term/2, which the saturating recovery uses to ask whether an erroring
 %arithmetic expression holds a float operand at all.
@@ -1645,6 +1648,8 @@ metta_engine_reexport(filereader, process_metta_string/3).
 
 %engine/parser.pl: the reader and the writer, which a seat needs because a
 %backend's atoms cross an FFI boundary as bytes and a host prints answers.
+% The host binding registers its listeners through the engine's one door.
+metta_engine_reexport(host_listeners, metta_listen/2).
 metta_engine_reexport(parser, metta_reader_token_class/3).
 metta_engine_reexport(parser, metta_host_register_reader_token/2).
 metta_engine_reexport(parser, metta_host_unregister_reader_token/1).
