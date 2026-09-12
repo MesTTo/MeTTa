@@ -10,7 +10,7 @@
 %   metta_refresh_repaired_shadow_imports/1 retain a native import when its
 %   provider still wins the current base chain. Concurrent callers retain
 %   that provider's clauses and metadata [tested:
-%   filereader_import_lifecycle; commit=WORKTREE].
+%   filereader_import_lifecycle; commit=518e67bc11d72ed28dfda7dd0646d1f48d14ac24].
 % Guarantees: add-atom's third input binds the stored native occurrence's own
 %   portable token before admission, including self-referential identity rows
 %   [tested: spaces_tokens:an_atom_can_contain_its_own_occurrence_token;
@@ -591,7 +591,7 @@ metta_restore_inherited_predicate(Module, Name, Arity) :-
 %[tested: test_a_recycled_child_name_may_choose_a_different_parent and
 %filereader_import_lifecycle:
 %a_repaired_shadow_import_follows_a_recycled_modules_new_parent;
-%commit=WORKTREE].
+%commit=518e67bc11d72ed28dfda7dd0646d1f48d14ac24].
 metta_capture_default_imports(Module) :-
     (   current_module(Module)
     ->  findall(Name-Arity-Source,
@@ -629,7 +629,7 @@ metta_capture_default_imports(Module) :-
 %load can restore the inherited link after rolling that definition back. This
 %keeps the repair dependency-directed rather than copying a parent's interface
 %into every child [tested:
-%test_a_recycled_child_name_may_choose_a_different_parent; commit=WORKTREE].
+%test_a_recycled_child_name_may_choose_a_different_parent; commit=518e67bc11d72ed28dfda7dd0646d1f48d14ac24].
 metta_refresh_repaired_shadow_imports(Module) :-
     findall(Name-Arity,
             '$metta_repaired_shadow_import'(Module, Name, Arity, _),
@@ -711,7 +711,7 @@ metta_existing_import(Module, Head, Source) :-
 %Otherwise import/1 revives the child's procedure identity after the local
 %definition disappears [tested:
 %a_failed_local_redefinition_restores_the_repaired_inherited_call;
-%commit=WORKTREE].
+%commit=518e67bc11d72ed28dfda7dd0646d1f48d14ac24].
 metta_repair_shadow_imports :-
     findall(Module-Name-Arity,
             '$metta_repaired_shadow_import'(Module, Name, Arity, _),
@@ -733,7 +733,7 @@ metta_repair_shadow_imports :-
 % rereads that pointer. Concurrent autoImport can replace it with the provider
 % in between, so the reset clears the provider's count and meta declaration
 % [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-proc.c#L1510-L1544;
-% commit=WORKTREE]. Inspect the first resolving base before comparing sources:
+% commit=518e67bc11d72ed28dfda7dd0646d1f48d14ac24]. Inspect the first resolving base before comparing sources:
 % a later base matching the old source must not hide a nearer new definition.
 % Actual shadow removal or parent replacement still needs the native rebind;
 % this guard prevents unrelated repair sweeps from detaching a live provider.
