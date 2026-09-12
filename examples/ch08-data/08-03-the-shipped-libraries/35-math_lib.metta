@@ -1,5 +1,5 @@
 ; Purpose: exact number operations and native floating functions.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta; commit=4d17f1af15fe125e3b8cd488502ba1e0e688fb3e].
 !(import! &self (library lib_math))
 
 ; Counts compose from combinatorics. Gcd and lcm accept any number of integers.

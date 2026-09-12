@@ -1,7 +1,7 @@
 % Purpose: verify exact number identities, finite factor search and float boundaries.
 % Guarantees: finite domains exercise signs, zero and arbitrary precision;
 % conversion tests cover final subnormal ties, signed zero and saturation.
-% [tested: lib_math; commit=WORKTREE].
+% [tested: lib_math; commit=4d17f1af15fe125e3b8cd488502ba1e0e688fb3e].
 % Owns resources: arithmetic policy tests restore the host's rational flags.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
