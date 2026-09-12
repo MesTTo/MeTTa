@@ -1,6 +1,6 @@
 ; Purpose: exercise the File library: bytes, publication, renames, trees,
 ; traversal, globbing, paths, kinds, links, scopes and the handle surface.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/19-file_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/19-file_lib.metta; commit=0f22b69cfca5c108e4126bdd56ab9bb2e493744d].
 ; Owns resources: everything the example creates lives under one temporary
 ; directory that delete-tree! removes at the end; every handle is closed.
 !(import! &self (library lib_file))

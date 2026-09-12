@@ -1,5 +1,5 @@
 ; Purpose: route local HTTP requests through MeTTa equations and owned byte streams.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/38-http_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/38-http_lib.metta; commit=0f22b69cfca5c108e4126bdd56ab9bb2e493744d].
 ; Owns resources: the named server is stopped below; scoped servers and response
 ; handles close through their owners. Every request stays on loopback.
 !(import! &self (library lib_http))

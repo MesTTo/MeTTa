@@ -1,7 +1,7 @@
 % Purpose: detect workers and queues retained after an HTTP server startup error.
 % Guarantees: only the deliberately occupied accept-thread alias triggers the
 % verdict; every fixture resource is released before present or absent prints.
-% [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds; commit=0f22b69cfca5c108e4126bdd56ab9bb2e493744d].
 % Owns resources: a bound socket, alias-holder thread and any leaked worker queue.
 
 :- use_module(library(http/thread_httpd), [http_server/2,http_stop_server/2]).

@@ -1153,7 +1153,7 @@ metta_platform_capability(subprocess, library(process),
                           '(git-import! ...), and anything else that starts \c
                            a program').
 % HTTP's optional TLS transport does not remove plain HTTP when SSL is absent.
-% [tested: lib_http:http_capabilities_are_separate; commit=WORKTREE].
+% [tested: lib_http:http_capabilities_are_separate; commit=0f22b69cfca5c108e4126bdd56ab9bb2e493744d].
 metta_platform_capability(http,
                           [library(http/http_open), library(http/thread_httpd),
                            library(http/http_client), library(socket), library(uri)],
