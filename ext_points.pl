@@ -1391,6 +1391,7 @@ kind(swrite_with_names/3, host_service).
 %caller.
 kind(metta_host_save_fast/3, host_service).
 kind(metta_host_source_atoms/2, host_service).
+kind(metta_host_program_source/2, host_service).
 kind(metta_host_load_fast/2, host_service).
 kind(metta_host_fast_header/1, host_service).
 kind(metta_host_digest/2, host_service).

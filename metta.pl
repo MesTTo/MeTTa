@@ -1649,6 +1649,7 @@ metta_engine_reexport(filereader, metta_host_run_source/4).
 metta_engine_reexport(filereader, metta_host_run_source_status/3).
 metta_engine_reexport(filereader, metta_host_save_fast/3).
 metta_engine_reexport(filereader, metta_host_source_atoms/2).
+metta_engine_reexport(filereader, metta_host_program_source/2).
 metta_engine_reexport(filereader, metta_host_set_silent/1).
 metta_engine_reexport(filereader, metta_host_substitute/3).
 metta_engine_reexport(filereader, parse_metta_source/2).
