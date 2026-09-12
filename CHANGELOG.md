@@ -56,6 +56,25 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Engine call-graph checks attribute multifile calls to each clause's source
+  file. Handler implementations no longer create false cross-module reaches
+  or enlarge the declared dependency cycle.
+
+- Source cleanup and specialization invalidation retire ordered groups of exact
+  artifact references. Transactional native retirement reuses its receipt
+  owner while retaining every per-reference erase and callback.
+
+- Source runnable forms share a compiled answer, name and fuel envelope. Each
+  form still translates and runs against its arrived source prefix, with the
+  same ordered effects and source-observation boundary.
+
+- Source publication selects clause and support ownership once per load,
+  deferred owner or recompile scope. Individual journal references remain
+  immediately visible and retain exact withdrawal and rollback behavior.
+
+- Expected-type family classification reuses compiled shipped patterns. User
+  rules still normalize aliases when queried and retain their precedence.
+
 - The engine benchmark's boot row prepares its own artifact state: the governed
   `.qlf` set is purged and warmed through the ordinary boot in children of the
   driver before the row's samples, the same preparation the C fixture takes, so

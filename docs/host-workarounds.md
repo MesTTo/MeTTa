@@ -53,10 +53,15 @@ Workaround: state that must not outlive its scope is a trailed write,
   `b_setval/2` on entry, `nb_setval/2` on the ordinary exit and `b_getval/2`
   to read; unwinding the exception unwinds the trail, so the cleanup is the
   fast ordinary exit rather than the thing correctness rests on.
+  Nested publication contexts trail the exit restore too, as
+  `with_metta_module/2` does, so an inner restore cannot overwrite the outer
+  scope's undo record.
 Lifted when: the cleanup is registered before the call port that follows
   Setup, or the inference check honours the atomic region.
 Record: docs/journal/2026-09-07-every-intermittent-root-caused.md, the
   20,000-budget sweep; docs/journal/2026-09-10-every-host-workaround-is-commented.md.
+  docs/journal/2026-09-11-source-owned-publication.md records the scoped
+  publication differential and its inference-budget sweep.
 
 ## swi-locale-default-encoding
 Host: SWI-Prolog 10.1.13; the default source encoding follows `setlocale()`.

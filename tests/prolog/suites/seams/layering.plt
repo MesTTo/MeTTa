@@ -7,7 +7,7 @@
 %   - the contract's allow-list, its export half and its declared tangles are
 %     all satisfied by the measured call graph
 %     [tested: test_the_engine_layering_contract_holds_and_a_violation_is_named;
-%     commit=dd407a40f623b16eda0bb51a74458f7dd3760e21]
+%     commit=e246959279271d22f166a1c8fb1840896295a020]
 %   - each of the six violation kinds is NAMED rather than only counted, and
 %     the walk that finds them is proven to still see every planted reach
 %     [tested: test_the_engine_layering_contract_holds_and_a_violation_is_named,
@@ -16,6 +16,9 @@
 %   - consulted source units are attributed to their umbrella subsystem rather
 %     than becoming accidental new layer nodes
 %     [tested: consulted_source_units_are_attributed_to_their_umbrella; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+%   - each clause contributing to a multifile handler keeps its own source
+%     owner through the real code walker
+%     [tested: multifile_callers_keep_each_clauses_source_owner; commit=e246959279271d22f166a1c8fb1840896295a020]
 %   - lib_tabling itself is in the measured graph and reaches exactly the four
 %     reviewed engine surfaces named by reaches/3
 %     [tested: lib_tabling_reaches_only_its_four_declared_surfaces]
@@ -119,6 +122,30 @@ test(consulted_source_units_are_attributed_to_their_umbrella) :-
     assertion(Base == 'filereader.pl'),
     assertion(Definer == filereader),
     assertion(Indicator == metta_source_changed/1).
+
+:- dynamic walked_handler_owner/2.
+
+test(multifile_callers_keep_each_clauses_source_owner) :-
+    findall(Ref,
+            ( clause(support_graph:support_invalidation_action(_), _, Ref),
+              clause_property(Ref, file(File)),
+              contract_source_subsystem(File, _) ),
+            References),
+    setup_call_cleanup(
+        retractall(walked_handler_owner(_, _)),
+        ( walk_clause_edges(References, record_handler_owner),
+          setof(Owner, Actual^walked_handler_owner(Owner, Actual), Owners),
+          assertion(Owners == ['filereader.pl', 'materialize.pl', 'specializer.pl']),
+          forall(walked_handler_owner(Expected, Found),
+                 assertion(Found == Expected)) ),
+        retractall(walked_handler_owner(_, _))).
+
+record_handler_owner(_, Caller, Location) :-
+    caller_indicator(Caller, support_invalidation_action/1),
+    get_dict(file, Location, File),
+    contract_source_subsystem(File, Expected),
+    ( caller_goal(Caller, Location, Found, _) -> true ; Found = unattributed ),
+    assertz(walked_handler_owner(Expected, Found)).
 
 % The contract's own shape, said out loud: the engine is one large mutual
 % recursion plus whatever sits outside it. A reader who expects a layer order

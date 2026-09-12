@@ -10,6 +10,10 @@
 %   only until their enclosing load or transaction finishes. Nested rollback
 %   releases its reservations [tested: spaces_token_images; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Guarded by: '$metta_occurrence_receipts' serializes requests to the engine.
+% Guarantees: metta_retract_storage/1 resolves the receipt owner after its first
+%   successful erase and reuses it for that logical-update snapshot, preserving
+%   each erase, callback and transactional receipt in order
+%   [tested: source_retirement, spaces_receipt_frames; commit=e246959279271d22f166a1c8fb1840896295a020].
 
 :- use_module(library(ordsets), [ord_memberchk/2]).
 :- dynamic metta_receipt_pending/4, metta_receipt_marker/2,
@@ -60,9 +64,21 @@ metta_erase_storage_ref(Ref) :-
     ;   true
     ).
 
+% The local cell survives forall's backtracking, but cannot outlive this
+% retirement call. Resolve only after erase succeeds, as the single-reference
+% door does: a throwing or failing callback has not published a receipt yet.
+% The surrounding transaction cannot finish while its traversal is running;
+% nested callback transactions keep the same owner and transactional journal.
 metta_retract_storage(Head) :-
     (   current_transaction(_)
-    ->  forall(clause(Head, true, Ref), metta_erase_storage_ref(Ref))
+    ->  Context = receipt_scope(_),
+        forall(clause(Head, true, Ref),
+               ( erase(Ref),
+                 arg(1, Context, Scope),
+                 ( nonvar(Scope) -> true
+                 ; metta_receipt_transaction_scope(Owner),
+                   nb_setarg(1, Context, Owner), Scope = Owner ),
+                 assertz(metta_receipt_erased(Scope, Ref)) ))
     ;   retractall(Head)
     ).
 
