@@ -3113,6 +3113,25 @@ its structured reason. `lib_memo` supplies `automatic`, `forced`, `refused`,
 `declined`, and `manual` decisions. A different caching extension may publish its
 own decision without moving that state into the engine.
 
+**`seam:context_reader/4`** is the declaration seam behind a trailed context's
+reader. A library that scopes state through the `metta_with_trailed/3` host
+service declares the read side once, beside the door that writes the key:
+
+```prolog
+:- seam:context_reader(my_lib_reconciling, '$my_lib_reconciling', value(true)).
+:- seam:context_reader(my_lib_frame(Frame), '$my_lib_frames', stack(Frame)).
+```
+
+The directive defines the predicate and compiles every call that resolves to
+it, unqualified in the declaring module, qualified, imported or inherited,
+into its `nb_current/2` read, so the trailed guard costs what an asserted one
+cost: one inference for an absent, an inactive `[]` or a one-element context.
+`value(Pattern)` reads one term and `stack(Pattern)` a nearest-first list. The
+row `seam:context_reader(Head, Owner, Key, Shape)` stays readable, which is
+how the reachability report and the constructed-goal scan still see a reader
+nothing calls by name. `docs/host-workarounds.md`, entry `swi-cleanup-window`,
+says why the write is trailed in the first place.
+
 **`seam:grounded_extra_type/2`, `seam:grounded_type_names/2` and
 `seam:grounded_class_type/2`** are how a host value gets a TYPE. The class walk
 itself is the host bridge's clause of `seam:grounded_class_type/2`, because
