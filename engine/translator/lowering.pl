@@ -465,9 +465,10 @@ metta_dispatch_goal_exists(Module, Goal) :-
 
 dispatch_selection_override(Fun) :-
     % policy-inventory-exempt: mechanism-internal; reason=these are the four axes whose nondefault values require the retained-clause interpreter instead of the compiled direct goal; evidence=engine/translator/lowering.pl:dispatch_selection_override/1
-    member(Axis, ['EvaluationOrderEnum', 'FunctionResultEnum',
-                  'ClauseFailedEnum', 'OutOfClausesEnum']),
+    % Query this function's indexed override rows once, then select an axis.
     metta_catalog_row(['dispatch-policy', Fun, Axis, _]),
+    memberchk(Axis, ['EvaluationOrderEnum', 'FunctionResultEnum',
+                     'ClauseFailedEnum', 'OutOfClausesEnum']),
     !.
 
 dispatch_head_covers(Module, Fun, Args, _) :-

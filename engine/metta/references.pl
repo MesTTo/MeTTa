@@ -487,11 +487,14 @@ metta_reference_note(Module, Name, Reason) :-
       record_source_assertion(Ref),
       print_message(informational, metta_head_pattern_note(Name, [], Name, Reason)) ).
 
+% The declaration pattern is fixed before the store is asked, so the query is
+% the indexed lookup of that head and subject rather than a walk over the
+% provider's whole population (a class space holds its instances' facts).
 metta_reference_metadata(Space, Face, Key, Row) :-
     member(Name/_-root(Home, Original, _), Face), Home \== Space,
+    metta_reference_metadata_row(OriginalRow, Original, Name, Row),
     spaces:metta_space_pair(Home, OriginalRow, Token, _),
     \+ metta_reference_projection(Home, _, Token, _),
-    metta_reference_metadata_row(OriginalRow, Original, Name, Row),
     Key = origin(Home, Token, Name).
 metta_reference_metadata(Space, Face, Key, Row) :-
     member(Name/_-root(Home, Original, _), Face), Home \== Space,

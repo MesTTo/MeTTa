@@ -305,6 +305,28 @@ The test continues to detect the lazy import. The additional assertion cost
 belongs to the nested-rollback repair already in this package, not to a
 heartbeat or accounting correction.
 
+## 2026-09-12: declaration discovery selects its storage index
+
+Tried: `PYTHONPATH=extensions/python $CHECK_PY
+ai-tmp/ai-classes-c3-prototype-profile.py 100` and the same command with `1000`.
+The scratch probe suppresses `prolog_profile:show_profile/1` and collects the
+native profiler's call and redo counters. At 1000 instances,
+`metta_reference_type_subject/2`, `metta_space_pair/4` and
+`metta_native_pair/4` each execute 8,100,000 more ports than ten times their
+100-instance counts. Logs are
+`ai-tmp/ai-classes-c3-prototype-profile-{100,1000}-native.log`.
+
+Decided: select `:` or `:<` before querying the store in
+`metta_reference_declared_head/2`. The previous order reads every population
+row before rejecting non-declarations, making N prototype allocations O(N²).
+Indexed declaration discovery makes that population contribution O(N), with
+the class program held fixed.
+
+Rejected: the profiler's default graphical report failed with X/GLX
+`BadValue (integer parameter out of range for operation)`. Wrapping the
+`prolog_statistics` import did not suppress its defining module's call.
+The successful probe wraps `prolog_profile` itself and changes no runtime code.
+
 ## 2026-09-12: closure reconstruction preserves every defining source
 
 Tried: the owned-key repair passes all 3,056 rollback inference cuts
