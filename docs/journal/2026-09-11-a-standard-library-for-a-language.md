@@ -1973,3 +1973,229 @@ vocab-sync, fn-sync, phrasebook, face-sync, artifact-sync, lib-autoload,
 no-autoload, host-workarounds, evidence, provenance-pin-selftest, ruff, mypy
 and docs, with every selftest, passes. Logs:
 ai-tmp/ai-lib2-vector-{records-regen,lanes}.log.
+
+## 2026-09-12: File design frozen before implementation
+
+Tried: the ten File-importing twins on the committed Vector tree with artifacts
+purged (`find engine lib -name '*.qlf' -delete`, then `python
+extensions/python/tools/twin_coverage.py --measure --rounds 3` over the ten
+examples) -> text 109796/110303, JSON 136764/128844, crypto 126361/126822, CSV
+167087/163857, c_space 109923/99651, c_extension 86377/85593, handle 93119/91209,
+mm2-operators 113574/107978, module-doors 133224/133051, seeking-and-sizing
+92028/89762 MeTTa/Python. Log: ai-tmp/ai-lib2-file-importers-before.log. These
+are the controls for File's importer re-pins.
+
+Tried: plain-SWI probes of the host's filesystem surface (ai-tmp/ai-lib3-file-probe).
+`rename_file/2` across devices raises `existence_error(file, Source)` with the
+context message `Invalid cross-device link` and leaves the source in place; a
+file onto a directory and a directory onto a file raise the same formal with
+`Is a directory` and `Not a directory`; a directory onto a nonempty directory
+raises `permission_error(rename, file, Source)` with `Directory not empty`; a
+directory onto an empty directory replaces it. `delete_directory_and_contents/1`
+on a symbolic link to a directory unlinks the link only. `copy_directory/2` from
+a directory into its own subdirectory recurses until
+`representation_error(max_path_length)`. `directory_member/3` with
+`follow_links(false)` omits links entirely. `expand_file_name/2` applies the
+shell rule that `*` skips names starting with a dot and treats `**` as `*`.
+`wildcard_match/2` raises `syntax_error` for an unmatched `[` or `{`, matches
+`*` across `/`, knows no negated sets, and takes `\` as an escape. `write/2` of
+a string holding codes 0 to 255 on a `type(binary)` stream writes exactly
+those bytes and `read_stream_to_codes/2` reads them back; `get_byte/2` and
+`put_byte/2` refuse a text stream, while `read_string/3` and `write/2` are
+accepted on a binary stream under the default `stream_type_check=loose`.
+`tmp_file/2` and `tmp_file_stream/3` create under the `tmp_dir` flag, `/tmp`
+here, whatever `TMPDIR` says. `file_name_extension/3` gives `.env` the
+extension `env` and an empty stem.
+
+Tried: `(file-space! Path)` on an empty file answers a name no space was
+registered for; `(space-atom-count)` reads 0 and `get-type` does not answer
+`SpaceType`. A `temp-path!` prefix carrying a separator is already refused by
+`tmp_file_stream/3`'s renamed path failing, but the exclusively created file
+stays behind. A lambda evaluates to a Grounded closure and
+`eval_metta_in_module(Module, [Function, Argument], Out)` applies a lambda, a
+bound lambda or a function name, nondeterministically, as `par_map/3` does.
+`setup_call_cleanup/3` propagates a cleanup exception after failure and
+discards it after a goal exception.
+
+Decided: keep all 32 heads and their names and publish 56 heads at 60 arities
+from PlDoc declarations. Binary data is an expression of integers 0 to 255:
+`read-bytes!`, `write-bytes!` and `append-bytes!` mirror the text path trio;
+`file-open!` accepts the letter `b` beside HE's `r w c a t`, and
+`file-read-bytes!` (all remaining, or at most a count) and `file-write-bytes!`
+work on binary handles. Text operations refuse a binary handle and byte
+operations refuse a text handle by name, because the host's loose type check
+would otherwise decode octets as text. `replace-file!` writes text or bytes,
+chosen by the content's structure, through the staged sibling directory,
+close-then-rename protocol `copy-file!` already uses; `write-file!` and
+`write-bytes!` stay in place, so an open handle or a hard link keeps seeing the
+file. `rename-file!` is the host rename with POSIX replacement of a file by a
+file and of an empty directory by a directory; a same-file rename, a
+cross-device rename and a kind mismatch refuse by name and never fall back to
+copying. `copy-dir!` validates the source kind, an absent destination and no
+lexical overlap before allocating, copies into an exclusively created sibling
+stage, preserves symbolic links as raw link text, refuses FIFOs, sockets and
+devices, publishes with one rename and removes the stage on every exit; it
+copies contents and links, never ownership, modes or times. `delete-tree!`
+unlinks a link root, removes a directory tree or a file, and refuses a missing
+path. `dir-walk` answers every descendant path, depth first, per-directory
+sorted by codepoint, links reported and not followed unless
+`(follow-links True)`, where a link whose target is an ancestor of the current
+chain by `same_file/2` is reported and not entered. `dir-glob` takes a directory
+and a relative pattern of `/`-separated components: a literal component is
+joined without listing, a component with `* ? [ { \` lists the directory and
+filters with the host's `wildcard_match/2`, and `**` matches zero or more
+directory levels; wildcards skip names beginning with a dot unless
+`(hidden True)`; `**` enters links only under `(follow-links True)`; answers
+pass through `distinct/1` so two `**` components cannot answer one path twice.
+`path-normalize`, `path-absolute`, `path-relative` and `path-resolve` translate
+CPython 3.14.7's `posixpath.normpath`, `abspath`, `relpath` and non-strict
+`realpath` at 823f0323ee6ec1402088b73bce1a38473cac36dc; `path-stem` and
+`path-parts` follow the library's existing SWI conventions, so `.env` has stem
+`""`. `file-kind` classifies without following the entry itself: `link`,
+`directory`, `file`, `other`, `missing`. `same-file`, `read-link` and
+`make-link!` expose physical identity and symbolic links. `with-file` and
+`with-temp-dir` apply a function to the acquired handle or directory under
+`setup_call_cleanup/3`, so every answer of a nondeterministic body streams
+while the resource stays open and the close or removal runs on exhaustion, cut
+or exception. `file-close!` reports a failed close instead of swallowing it;
+closing twice stays silent because the second close finds no handle.
+`file-space!` allocates through `new-space` so the answer is a registered space
+even for an empty file. `temp-path!` refuses a separator in its prefix like
+`temp-dir!` and removes the exclusively created file when the rename fails.
+`list-dir!` answers names sorted by codepoint, the same order the traversal
+uses. `file-lines!` splits through `lib_string`'s `string-lines`, which keeps
+NUL.
+
+Rejected: dispatching `write-file!` on content structure, because a Number
+already coerces to text there and `(65)` next to `65` would be two different
+files. Rejected: making `write-file!` staged, because the change would alter
+inode identity under open handles in sixteen importing examples; a caller who
+wants publication writes `replace-file!`. Rejected: SWI's `copy_directory/2`
+and `directory_member/3` as the traversal engines, because the first recurses
+into its own output and the second hides links. Rejected: following links by
+default under `**` and `dir-walk`, because the host cannot bound a cycle
+without a visited set and pathlib's 3.13 default is the same. Rejected: an
+exclusive temporary file in an arbitrary directory, because the host exposes
+no exclusive open; `temp-dir!` under `mkdir` is the exclusive primitive and
+`replace-file!` composes it. Rejected: negated character sets and Python's
+`[!...]`, because the declared grammar is the host's `wildcard_match/2`. Revisit
+any of these when a host primitive appears.
+
+Verification plan: extend `lib_file_surface.plt` with byte round trips of all
+256 values, handle-type refusals, bytes validated before truncation, staged
+replacement preserving the destination on failure, rename shapes, tree copy
+with links and refusals, tree removal of a link root, traversal order and link
+policy, glob literal, wildcard, `**`, dotfile and distinct cases, CPython
+goldens for the four path functions, kinds for every entry class, scopes closing
+on exhaustion, cut and exception with a close failure surfacing. Python tests
+compare `path-normalize`, `path-absolute`, `path-relative`, `path-resolve`,
+`dir-glob` and `dir-walk` with `os.path` and `glob` over generated trees. The
+example `19-file_lib.metta` calls all 56 heads; its twin proves the same
+claims; the ten importer twins re-pin against the control above.
+
+## 2026-09-12: File verification findings
+
+Tried: the first native suite -> 49 tests, four failures, each a contract this
+implementation had not settled. `file-write!` on a binary handle named the
+handle's kind as `text` where the handle carries `binary`; the message reads the
+handle, so the refusal names what the handle IS. `replace-file!` into a missing
+parent raised `file-operation-failed` wrapping the staging directory's own
+existence error, which named a path the caller never wrote; the publisher checks
+the destination's parent before acquiring a stage and raises
+`file-not-found` for it. `copy-dir!` over a socket entry and `make-link!` under a
+missing parent both wrapped a refusal this library had already named, so the
+caller saw `file-operation-failed(copy-dir!, error(file-kind-mismatch(...)))`.
+Decided: the refusal mapper passes its own nine formals through unchanged, so a
+nested operation's name and remedy reach the caller once.
+
+Tried: `assertion(Answers = [[H, "abc"], [H, 3]])` in the scope test leaves H
+unbound, because SWI implements assertion/1 with double negation and discards
+its bindings; the next line then read handle `_G123` and the test failed on
+`nonvar`. Decided: bind outside the assertion and compare with `==`, the shape
+the rest of the suite already uses.
+
+Verified: `sh engine/test.sh suites/libraries/lib_file_surface.plt` passes 49
+tests and 48 subcases, covering byte round trips of all 256 values through both
+doors, handle-kind refusals in both directions, bytes validated before a
+destination is touched, staged publication with an injected close failure, a
+close failure reported rather than swallowed, the five rename shapes including
+cross-device, tree copy with links preserved and a socket refused, link-root
+removal, traversal order and the ancestor-cycle guard, the glob grammar
+including escapes and `distinct`, the CPython path goldens, entry kinds, links
+and the three scope exits. `sh engine/test.sh suites/libraries/lib_text.plt
+suites/libraries/lib_json_surface.plt suites/libraries/lib_csv_surface.plt
+suites/libraries/lib_string_surface.plt` still passes 58+8, 43+12, 40+40 and
+31+3. Logs: ai-tmp/ai-lib3-file-surface-{first,third}.log and
+ai-lib3-file-neighbours.log.
+
+Tried: the first Python differential run -> 14 failures, all in the oracle
+rather than the library. `str()` of a String atom quotes it, so every path
+comparison read `"/tmp/..."` against `/tmp/...`; the atom's `.value` is the
+path. `m.fn.path_relative(...)` is lazy, so `pytest.raises` saw no refusal until
+the answers were drained. And `glob.glob` recurses THROUGH a symbolic link under
+`**` and skips dot names, while `Path.glob` does neither: the two disagree with
+each other, so one comparison cannot hold both policies.
+
+Decided: compare each policy against the oracle that has it. With
+`(follow-links True)` the library answers exactly `glob.glob(pattern,
+recursive=True)`; with `(hidden True)` it answers exactly `Path.glob(pattern)`;
+and a pattern ending in `**` answers the directories `Path.glob("**")` yields,
+because `**` matches directory LEVELS. All three hold over twelve patterns.
+Verified: `CHECK_PY=... sh extensions/python/test.sh tests/ch08_data/test_file_lib.py`
+passes 33 tests, including the 256-value round trip, the four generated path
+comparisons and the two traversal comparisons. Log:
+ai-tmp/ai-lib3-file-python-third.log.
+
+Measured: the example proves 90 claims over all 56 heads and 60 arities; its
+twin proves the same 90 with equal stored content. Minimum of three fresh
+processes: 245,536 MeTTa and 209,508 Python inferences, ratio 0.8533; five
+single runs read 209,508 with zero spread (ai-tmp/ai-lib3-file-spread.log). The
+209,500 measured before the lint repairs precedes the module space door the
+twin now uses for a returned space name. The
+twin's three scope bodies are named equations rather than inline lambdas on both
+sides, so the stored content matches: a generator compiles to the example's two
+`size-then-two` equations, and the scratch name is a PARAMETER, so the compiled
+body carries no text and the scope receives the partial application
+`(fill-and-list "scratch")`. Inside a compiled body a Python string literal
+lowers to a MeTTa String while `G(...)` becomes a host object, which is why the
+name arrives from outside. Logs: ai-tmp/ai-lib3-file-{example-third,twin-seventh}.log.
+
+Measured: the ten twins that import File directly or through JSON move by the
+face's growth from 32 heads to 56. The control is the unchanged branch cut at
+8eb04b55a with artifacts purged (ai-tmp/ai-lib2-file-importers-before.log); the
+after column is the same command on this tree
+(ai-tmp/ai-lib3-file-importers-after.log). Commands:
+`python extensions/python/tools/twin_coverage.py --measure --rounds 3 <paths>`.
+
+| Example | Python before | Python after | Increment |
+|---|---:|---:|---:|
+| 03-text_lib | 110,303 | 140,561 | +30,258 |
+| 05-json_lib | 128,844 | 151,582 | +22,738 |
+| 06-crypto_lib | 126,822 | 151,609 | +24,787 |
+| 17-csv_lib | 163,857 | 188,409 | +24,552 |
+| 19-02/01-c_space | 99,651 | 122,130 | +22,479 |
+| 19-03/01-c_extension | 85,593 | 108,072 | +22,479 |
+| 19-03/02-handle | 91,209 | 113,688 | +22,479 |
+| 19-04/01-mm2-operators | 107,978 | 130,457 | +22,479 |
+| 20-03/05-the-module-doors | 133,051 | 157,913 | +24,862 |
+| 20-06/05-seeking-and-sizing | 89,762 | 120,449 | +30,687 |
+
+The four transitive importers pay exactly 22,479, the declarations and doc rows
+alone; the six that call the library pay its compiled call sites as well. The
+twin owner re-pinned all ten with that mechanism and reported zero
+stored-content divergences. Log: ai-tmp/ai-lib3-file-importers-repin.log.
+
+Verified: `sh check.sh prolog-face prolog-face-selftest libdoc libdoc-selftest
+corpus-coverage cumulative-syntax example-origins llms llms-selftest reference
+reference-selftest lib-autoload no-autoload host-workarounds evidence
+provenance-pin-selftest ruff mypy` passes every lane. Coverage reads 744 carried
+library heads and 251 engine callables with zero findings, cumulative syntax 327
+examples and 284 constructs, origins 143 derived and 205 original, llms five
+sheets and zero findings. Evidence reports zero unbacked tags in 7,510 claims
+with 32 placeholders for the provenance commit. Three findings were repaired on
+the way: the twin's docstring needed its summary line, two compiled-body
+intermediates read as unused locals, and the Prolog header cited a test name
+that does not exist (the four generated path comparisons are separate tests).
+Ruff's pathlib preferences are answered by the comparison itself, which names
+`posixpath` and `glob` as the oracles the heads translate. Logs:
+ai-tmp/ai-lib3-file-{lanes,lint,lint2,lint3,lint4}.log.

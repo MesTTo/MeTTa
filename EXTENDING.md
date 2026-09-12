@@ -761,6 +761,25 @@ use `list(number)` for an expression of Numbers; the native predicate validates
 every component and reports dimension mismatches through the operation-error
 boundary. The source includes the pinned CPython fraction-root method and its
 license, with independent Fraction and squared-midpoint tests.
+`lib_file` demonstrates the three shapes a library needs beyond one call per
+head. A NONDETERMINISTIC head is an ordinary Prolog predicate with several
+solutions: `dir-walk/2` and `dir-glob/3` answer one path per answer and their
+declared modes end in one output, so the generated face needs nothing special
+and `collapse` sees the whole stream. A SCOPED head takes a function and applies
+it: `with-file/4` and `with-temp-dir/3` call
+`eval_metta_in_module(Module, [Function, Resource], Answer)` inside
+`setup_call_cleanup/3`, which is what makes every answer of a nondeterministic
+body stream while the resource is open and releases it on exhaustion, a cut and
+an exception alike; the function argument is a name, a lambda or a partial
+application, as `par-map`'s is. A head whose ARGUMENT IS A POLICY takes a proper
+expression of `(Name Value)` pairs, the shape `lib_csv`'s dialects already use,
+and validates the whole option list before doing any work. Its publication
+protocol is one predicate: `metta_staged_publish/2` acquires a staging
+directory beside the destination with `make_directory/1`, lets the writer fill
+`contents`, and renames it, so `replace-file!`, `copy-file!` and `copy-dir!`
+share one description of "publish this atomically". Its refusal mapper passes a
+refusal the library already named through unchanged, so a nested operation's own
+name and remedy reach the caller instead of being wrapped twice.
 `lib_json` demonstrates resource ownership at a native boundary. It validates
 object fields before allocation, reserves fresh space names and stores fields
 through `add_sexp/2`, so a key such as `from` remains data. Failed construction

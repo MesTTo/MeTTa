@@ -21,7 +21,7 @@ beside its definitions.
 | lib_dict | 7 | 0 |
 | lib_distribution | 7 | 0 |
 | lib_doc | 0 | 0 |
-| lib_file | 32 | 18 |
+| lib_file | 55 | 55 |
 | lib_gitimport | 0 | 0 |
 | lib_he | 18 | 0 |
 | lib_import | 8 | 4 |
@@ -719,179 +719,803 @@ Returns: Its first answer
 
 ## lib_file
 
-### `make-dir!`
+### `append-bytes!`
 
-*lib_file.metta:64*
+*lib_file.metta:21*
 
-Create a directory and missing parents; an existing directory succeeds
+```metta
+(: append-bytes! (-> %Undefined% Expression Bool))
+```
 
-1. directory path
+Append an expression of integers 0 to 255 to the file at Path, creating it when absent. The bytes are validated before the file is touched.
 
-Returns: Bool
+1. Path
+2. Bytes
 
-### `delete-dir!`
+Returns: Done
 
-*lib_file.metta:65*
+### `append-file!`
 
-Remove an empty directory; missing or nonempty directories raise
+*lib_file.metta:27*
 
-1. directory path
+```metta
+(: append-file! (-> %Undefined% %Undefined% Bool))
+```
 
-Returns: Bool
+Append UTF-8 text to the file at Path, creating it when absent.
+
+1. Path
+2. Content
+
+Returns: Done
+
+### `copy-dir!`
+
+*lib_file.metta:33*
+
+```metta
+(: copy-dir! (-> %Undefined% %Undefined% Bool))
+```
+
+Copy a directory tree to a new path: the contents of Source become the contents of Destination, which must not exist; missing parents of Destination are created. Regular files are copied byte for byte, symbolic links are recreated with the text they hold, and a FIFO, socket or device raises. The tree is built in a staging directory beside Destination and published with one rename, so a reader sees no tree or the whole tree, and a failure leaves nothing behind. A destination inside the source raises before anything is written. Ownership, modes and times are not copied.
+
+1. Source
+2. Destination
+
+Returns: Done
 
 ### `copy-file!`
 
-*lib_file.metta:66*
+*lib_file.metta:39*
 
-Copy bytes to a destination filename with staged replacement; copying onto the source raises
+```metta
+(: copy-file! (-> %Undefined% %Undefined% Bool))
+```
 
-1. source file
-2. destination filename
+Copy bytes to a destination filename with staged replacement: the copy is written beside the destination, both streams close, and one rename publishes it, so an existing destination is replaced only after the complete copy succeeds. A directory destination and copying a file onto itself are errors.
 
-Returns: Bool
+1. Source
+2. Destination
 
-### `file-metadata!`
+Returns: Done
 
-*lib_file.metta:67*
+### `delete-dir!`
 
-Snapshot kind, modified Unix time and file size as queryable atoms in a new space
+*lib_file.metta:45*
 
-1. file or directory path
+```metta
+(: delete-dir! (-> %Undefined% Bool))
+```
 
-Returns: Space
+Remove an empty directory; missing or nonempty directories raise. delete-tree! removes a directory with its contents.
 
-### `path-join`
+1. Path
 
-*lib_file.metta:68*
+Returns: Done
 
-Join lexical paths; an absolute second path replaces the first
+### `delete-file!`
 
-1. directory
-2. name
+*lib_file.metta:51*
 
-Returns: String
+```metta
+(: delete-file! (-> %Undefined% Bool))
+```
 
-### `path-parent`
+Remove a regular file; an absent file is already removed and answers True.
 
-*lib_file.metta:69*
+1. Path
 
-Lexical parent directory; a bare filename has parent dot
+Returns: Done
 
-1. path
+### `delete-tree!`
 
-Returns: String
+*lib_file.metta:57*
 
-### `path-name`
+```metta
+(: delete-tree! (-> %Undefined% Bool))
+```
 
-*lib_file.metta:70*
+Remove whatever is at Path: a directory with everything under it, a file, or a symbolic link, which is unlinked without touching its target. A missing path raises.
 
-Lexical final path component
+1. Path
 
-1. path
-
-Returns: String
-
-### `path-extension`
-
-*lib_file.metta:71*
-
-Text after the final dot in the filename, without the dot; empty when absent
-
-1. path
-
-Returns: String
-
-### `temp-dir!`
-
-*lib_file.metta:72*
-
-A unique fresh directory in the system temporary directory, created exclusively so concurrent runners cannot mint the same name; the caller owns it and removes it with delete-dir!
-
-1. a name prefix, which may not contain a path separator
-
-Returns: String
-
-### `stdin`
-
-*lib_file.metta:73*
-
-The handle for standard input, which is 0; every handle operation takes it, so (file-read-to-string! (stdin)) reads standard input through EOF
-
-Returns: Number
-
-### `stdout`
-
-*lib_file.metta:74*
-
-The handle for standard output, which is 1; (file-write! (stdout) $text) writes without a newline
-
-Returns: Number
-
-### `stderr`
-
-*lib_file.metta:75*
-
-The handle for standard error, which is 2; (file-write! (stderr) $text) is stderr! reached through the handle surface
-
-Returns: Number
-
-### `stderr!`
-
-*lib_file.metta:76*
-
-Write text to stderr and flush, without adding a newline
-
-1. text
-
-Returns: Bool
-
-### `stdin-to-string!`
-
-*lib_file.metta:77*
-
-Consume standard input through EOF as UTF-8 text
-
-Returns: String
-
-### `exit!`
-
-*lib_file.metta:78*
-
-Terminate the entire process with integer status 0 through 255; not an application-level return
-
-1. process status
-
-### `temp-path!`
-
-*lib_file.metta:82*
-
-A unique fresh path in the system temporary directory, created exclusively so concurrent runners cannot mint the same name; the caller owns the file
-
-1. a name prefix for the path
-
-Returns: String
-
-### `file-exists`
-
-*lib_file.metta:86*
-
-True when a regular file exists at the path, False otherwise
-
-1. the path
-
-Returns: Bool
+Returns: Done
 
 ### `dir-exists`
 
-*lib_file.metta:90*
+*lib_file.metta:63*
 
-True when a directory exists at the path, False otherwise
+```metta
+(: dir-exists (-> %Undefined% Bool))
+```
 
-1. the path
+True when a directory exists at the path, following links, False otherwise.
 
-Returns: Bool
+1. Path
 
-Undocumented: `append-file!`, `delete-file!`, `file-close!`, `file-get-size!`, `file-lines!`, `file-open!`, `file-read-exact!`, `file-read-to-string!`, `file-seek!`, `file-space!`, `file-write!`, `list-dir!`, `read-file!`, `write-file!`
+Returns: Answer
+
+### `dir-glob`
+
+*lib_file.metta:70*
+
+```metta
+(: dir-glob (-> %Undefined% %Undefined% Expression String))
+```
+
+```metta
+(: dir-glob (-> %Undefined% %Undefined% String))
+```
+
+Answer every path under Directory matching a relative pattern of slash-separated components, in depth-first codepoint order. A component uses the host's wildcard grammar: * and ? match within a name, [abc] and [a-c] match one character, {alt,alt} alternates, and \ escapes the next character. The component ** matches zero or more directory levels, so "**/*.txt" finds every text file below Directory. A wildcard skips names beginning with a dot unless Options holds (hidden True) or the component itself begins with a dot; ** enters symbolic links only under (follow-links True) and never re-enters a directory on its chain. A literal component is looked up without listing, so a pattern without wildcards answers the path exactly when it exists. An absolute or empty pattern and a malformed component raise. Each path is answered once.
+
+1. Directory
+2. Pattern
+3. Options
+
+Returns: Path
+
+### `dir-walk`
+
+*lib_file.metta:77*
+
+```metta
+(: dir-walk (-> %Undefined% Expression String))
+```
+
+```metta
+(: dir-walk (-> %Undefined% String))
+```
+
+Answer every descendant of a directory, one full path per answer, depth first with each directory's names in codepoint order. A symbolic link is reported and not entered unless Options holds (follow-links True); a link whose target is a directory already on the current chain is then reported and still not entered, so a cycle cannot loop. Hidden names are included. An unreadable directory raises.
+
+1. Path
+2. Options
+
+Returns: Entry
+
+### `exit!`
+
+*lib_file.metta:83*
+
+```metta
+(: exit! (-> Number %Undefined%))
+```
+
+Terminate the entire process with integer status 0 through 255, including an embedding host; not an application-level return, so MeTTa catch does not turn it into a local value.
+
+1. Status
+
+Returns: Never
+
+### `file-close!`
+
+*lib_file.metta:89*
+
+```metta
+(: file-close! (-> Number Bool))
+```
+
+Close a handle file-open! gave. Closing twice is silent, because a cleanup path should not have to check first; a failed close raises by name, because a write that never reached the disk is data lost. The three standard streams are refused: the process owns them and a closed one cannot be put back. Not in HE's stdlib. A process that can open files and never close them leaks descriptors until it dies, so this exists.
+
+1. Handle
+
+Returns: Done
+
+### `file-exists`
+
+*lib_file.metta:95*
+
+```metta
+(: file-exists (-> %Undefined% Bool))
+```
+
+True when a regular file exists at the path, following links, False otherwise. No ! because it changes nothing.
+
+1. Path
+
+Returns: Answer
+
+### `file-get-size!`
+
+*lib_file.metta:101*
+
+```metta
+(: file-get-size! (-> Number Number))
+```
+
+Answer the size of the whole file in bytes, not of what is left to read, so seeking does not change the answer; a handle without a file name measures the stream position instead.
+
+1. Handle
+
+Returns: Size
+
+### `file-kind`
+
+*lib_file.metta:107*
+
+```metta
+(: file-kind (-> %Undefined% Symbol))
+```
+
+Classify the entry at Path without following it: link for a symbolic link, dangling or not; directory; file; other for an entry that exists and is none of those, such as a FIFO, socket or device; missing when nothing is observable at the path.
+
+1. Path
+
+Returns: Kind
+
+### `file-lines!`
+
+*lib_file.metta:113*
+
+```metta
+(: file-lines! (-> %Undefined% Expression))
+```
+
+The lines of a UTF-8 file as an expression of Strings, split on LF with one terminal empty line omitted; CR and NUL stay data. file-space! is the form that makes the lines matchable.
+
+1. Path
+
+Returns: Lines
+
+### `file-metadata!`
+
+*lib_file.metta:119*
+
+```metta
+(: file-metadata! (-> %Undefined% %Undefined%))
+```
+
+Snapshot kind, modified Unix time and file size as queryable atoms in a new space: (kind file|directory), (modified Seconds) and, for a file, (size Bytes). Links are followed; file-kind classifies the entry itself.
+
+1. Path
+
+Returns: Space
+
+### `file-open!`
+
+*lib_file.metta:125*
+
+```metta
+(: file-open! (-> %Undefined% %Undefined% Number))
+```
+
+Open a file and answer a handle. The option letters are HE's: r read, w write, c create if absent, a append, t truncate; c demands w or a, so "rc" is refused loudly rather than quietly opening for reading. The letter b opens the file for bytes, so file-read-bytes! and file-write-bytes! apply and the text operations refuse; without it the handle carries UTF-8 text.
+
+1. Path
+2. Options
+
+Returns: Handle
+
+### `file-read-bytes!`
+
+*lib_file.metta:132*
+
+```metta
+(: file-read-bytes! (-> Number Expression))
+```
+
+```metta
+(: file-read-bytes! (-> Number Number Expression))
+```
+
+Read the remaining bytes, or at most Count bytes, from a binary handle's cursor as an expression of integers 0 to 255. A short read at the end of the file is the answer. A text handle refuses.
+
+1. Handle
+2. Count
+
+Returns: Bytes
+
+### `file-read-exact!`
+
+*lib_file.metta:138*
+
+```metta
+(: file-read-exact! (-> Number Number String))
+```
+
+Read at most Count characters from a text handle's cursor, HE's contract: a short read near the end of the file is the answer, not an error.
+
+1. Handle
+2. Count
+
+Returns: Content
+
+### `file-read-to-string!`
+
+*lib_file.metta:144*
+
+```metta
+(: file-read-to-string! (-> Number String))
+```
+
+Read from the cursor to the end of a text handle as one String.
+
+1. Handle
+
+Returns: Content
+
+### `file-seek!`
+
+*lib_file.metta:150*
+
+```metta
+(: file-seek! (-> Number Number Bool))
+```
+
+Move the cursor to a byte offset from the start of the file, so the next read starts there; a negative position moves to the start.
+
+1. Handle
+2. Position
+
+Returns: Done
+
+### `file-space!`
+
+*lib_file.metta:156*
+
+```metta
+(: file-space! (-> %Undefined% %Undefined%))
+```
+
+A file as a SPACE, the mettafied reading of reading a file: its lines become (line Number Text) atoms in a fresh space, so the file is queryable with match instead of being one long string to take apart. The line number is kept because a space is unordered, and losing which line came first would make the space strictly less useful than the string it replaced. (let $log (file-space! "app.log") (match $log (line $n $text) ($n $text)))
+
+1. Path
+
+Returns: Space
+
+### `file-write!`
+
+*lib_file.metta:162*
+
+```metta
+(: file-write! (-> Number %Undefined% Bool))
+```
+
+Write text to a text handle and flush, adding no newline.
+
+1. Handle
+2. Content
+
+Returns: Done
+
+### `file-write-bytes!`
+
+*lib_file.metta:168*
+
+```metta
+(: file-write-bytes! (-> Number Expression Bool))
+```
+
+Write an expression of integers 0 to 255 to a binary handle and flush. The bytes are validated before anything is written. A text handle refuses.
+
+1. Handle
+2. Bytes
+
+Returns: Done
+
+### `list-dir!`
+
+*lib_file.metta:174*
+
+```metta
+(: list-dir! (-> %Undefined% Expression))
+```
+
+The names in a directory, without . and .., as Strings sorted by codepoint. A missing directory raises.
+
+1. Path
+
+Returns: Entries
+
+### `make-dir!`
+
+*lib_file.metta:180*
+
+```metta
+(: make-dir! (-> %Undefined% Bool))
+```
+
+Create a directory and missing parents; an existing directory succeeds.
+
+1. Path
+
+Returns: Done
+
+### `make-link!`
+
+*lib_file.metta:186*
+
+```metta
+(: make-link! (-> %Undefined% %Undefined% Bool))
+```
+
+Create a symbolic link at Path holding Target exactly as written; a relative target is read relative to the link's own directory. The target need not exist. An existing entry at Path raises.
+
+1. Target
+2. Path
+
+Returns: Done
+
+### `path-absolute`
+
+*lib_file.metta:192*
+
+```metta
+(: path-absolute (-> %Undefined% String))
+```
+
+Anchor a relative path to the process working directory and normalize it lexically, as CPython's posixpath.abspath does; no links are resolved.
+
+1. Path
+
+Returns: Absolute
+
+### `path-extension`
+
+*lib_file.metta:198*
+
+```metta
+(: path-extension (-> %Undefined% String))
+```
+
+Text after the final dot in the filename, without the dot; empty when absent. A name that is only an extension, such as .env, has extension env.
+
+1. Path
+
+Returns: Extension
+
+### `path-join`
+
+*lib_file.metta:204*
+
+```metta
+(: path-join (-> %Undefined% %Undefined% String))
+```
+
+Join lexical paths; an absolute second path replaces the first.
+
+1. Directory
+2. Name
+
+Returns: Path
+
+### `path-name`
+
+*lib_file.metta:210*
+
+```metta
+(: path-name (-> %Undefined% String))
+```
+
+Lexical final path component.
+
+1. Path
+
+Returns: Name
+
+### `path-normalize`
+
+*lib_file.metta:216*
+
+```metta
+(: path-normalize (-> %Undefined% String))
+```
+
+Collapse repeated separators and dot components and resolve .. lexically, as CPython's posixpath.normpath does: "a/./b/../c" is "a/c", ".." stays at the start of a relative path, "/.." is "/", exactly two leading slashes are kept, and "" is ".". No filesystem lookup occurs, so a .. across a symbolic link is resolved as if the link were a directory; path-resolve consults the filesystem.
+
+1. Path
+
+Returns: Normalized
+
+### `path-parent`
+
+*lib_file.metta:222*
+
+```metta
+(: path-parent (-> %Undefined% String))
+```
+
+Lexical parent directory; a bare filename has parent dot.
+
+1. Path
+
+Returns: Parent
+
+### `path-parts`
+
+*lib_file.metta:228*
+
+```metta
+(: path-parts (-> %Undefined% Expression))
+```
+
+The components of a path as an expression of Strings: "/" first for an absolute path, empty and dot components dropped, .. kept. "" answers ().
+
+1. Path
+
+Returns: Parts
+
+### `path-relative`
+
+*lib_file.metta:234*
+
+```metta
+(: path-relative (-> %Undefined% %Undefined% String))
+```
+
+The path from the directory Start to Path, lexically, as CPython's posixpath.relpath does: both are made absolute, the common prefix is dropped, and one .. is written per remaining component of Start; the same place is ".". An empty Path raises.
+
+1. Path
+2. Start
+
+Returns: Relative
+
+### `path-resolve`
+
+*lib_file.metta:240*
+
+```metta
+(: path-resolve (-> %Undefined% String))
+```
+
+The absolute path with every symbolic link on the way replaced by what it points to, as CPython's non-strict posixpath.realpath does: a relative path starts at the process working directory, a link's target is read before any later .. applies, a link loop or a missing component is kept as written, and the result is normalized.
+
+1. Path
+
+Returns: Resolved
+
+### `path-stem`
+
+*lib_file.metta:246*
+
+```metta
+(: path-stem (-> %Undefined% String))
+```
+
+The final path component without its extension, the complement of path-extension: "a/b.tar.gz" has stem "b.tar", and ".env" has stem "".
+
+1. Path
+
+Returns: Stem
+
+### `read-bytes!`
+
+*lib_file.metta:252*
+
+```metta
+(: read-bytes! (-> %Undefined% Expression))
+```
+
+Read a whole file as an expression of integers 0 to 255. A missing file is an error rather than a failure.
+
+1. Path
+
+Returns: Bytes
+
+### `read-file!`
+
+*lib_file.metta:258*
+
+```metta
+(: read-file! (-> %Undefined% String))
+```
+
+Read a whole UTF-8 file as one String without the open/close dance. A missing file is an error rather than a failure, so it can never be mistaken for an empty file. Not HE's, and named so it cannot be mistaken for HE's.
+
+1. Path
+
+Returns: Content
+
+### `read-link`
+
+*lib_file.metta:264*
+
+```metta
+(: read-link (-> %Undefined% String))
+```
+
+The text a symbolic link holds, exactly as it was written, relative or absolute; a path that is not a link raises with its kind.
+
+1. Path
+
+Returns: Target
+
+### `rename-file!`
+
+*lib_file.metta:270*
+
+```metta
+(: rename-file! (-> %Undefined% %Undefined% Bool))
+```
+
+Rename a file or directory within one filesystem, the host's own rename: a file replaces an existing file and a directory replaces an existing empty directory in one step, so a reader sees the old entry or the new one. A missing source, a same-file rename, a file onto a directory, a directory onto a file or a nonempty directory, and a destination on another filesystem raise; nothing is ever copied.
+
+1. Source
+2. Destination
+
+Returns: Done
+
+### `replace-file!`
+
+*lib_file.metta:276*
+
+```metta
+(: replace-file! (-> %Undefined% %Undefined% Bool))
+```
+
+Publish a new file at Path by rename: the content is written to a staging file beside the destination, closed, and renamed over Path in one step, so a reader sees the old file or the complete new one and never a partial write. A String, Symbol or Number is UTF-8 text; an expression of integers 0 to 255 is bytes. A failed write, close or rename keeps the old file.
+
+1. Path
+2. Content
+
+Returns: Done
+
+### `same-file`
+
+*lib_file.metta:282*
+
+```metta
+(: same-file (-> %Undefined% %Undefined% Bool))
+```
+
+True when both paths name one physical file or directory, through links, hard links and different spellings; False when they differ or either is missing.
+
+1. Left
+2. Right
+
+Returns: Answer
+
+### `stderr`
+
+*lib_file.metta:288*
+
+```metta
+(: stderr (-> Number))
+```
+
+The handle for standard error, which is 2; (file-write! (stderr) $text) is stderr! reached through the handle surface.
+
+Returns: Handle
+
+### `stderr!`
+
+*lib_file.metta:294*
+
+```metta
+(: stderr! (-> %Undefined% Bool))
+```
+
+Write text to stderr and flush, without adding a newline.
+
+1. Content
+
+Returns: Done
+
+### `stdin`
+
+*lib_file.metta:300*
+
+```metta
+(: stdin (-> Number))
+```
+
+The handle for standard input, which is 0; every handle operation takes it, so (file-read-to-string! (stdin)) reads standard input through EOF.
+
+Returns: Handle
+
+### `stdin-to-string!`
+
+*lib_file.metta:306*
+
+```metta
+(: stdin-to-string! (-> String))
+```
+
+Consume standard input through EOF as UTF-8 text.
+
+Returns: Content
+
+### `stdout`
+
+*lib_file.metta:312*
+
+```metta
+(: stdout (-> Number))
+```
+
+The handle for standard output, which is 1; (file-write! (stdout) $text) writes without a newline.
+
+Returns: Handle
+
+### `temp-dir!`
+
+*lib_file.metta:318*
+
+```metta
+(: temp-dir! (-> %Undefined% String))
+```
+
+A unique fresh directory in the system temporary directory, created exclusively so concurrent runners cannot mint the same name; the caller owns it and removes it with delete-dir! or delete-tree!. The prefix names the directory and may not contain a separator.
+
+1. Prefix
+
+Returns: Path
+
+### `temp-path!`
+
+*lib_file.metta:324*
+
+```metta
+(: temp-path! (-> %Undefined% String))
+```
+
+A unique fresh path in the system temporary directory, created exclusively so concurrent runners cannot mint the same name; the caller owns the file from that point (write-file! truncates it, delete-file! ends it). The prefix names the file and may not contain a separator.
+
+1. Prefix
+
+Returns: Path
+
+### `with-file`
+
+*lib_file.metta:330*
+
+```metta
+(: with-file (-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+Open Path with file-open!'s option letters, apply Function to the handle and answer every result of that application; the handle closes when the answers are exhausted, when the caller stops after one, and when the body raises. Function is a lambda, a function name or a partial application, as par-map takes. A close failure raises unless the body already raised.
+
+1. Path
+2. Options
+3. Function
+
+Returns: Answer
+
+### `with-temp-dir`
+
+*lib_file.metta:336*
+
+```metta
+(: with-temp-dir (-> %Undefined% %Undefined% %Undefined%))
+```
+
+Mint a fresh directory with temp-dir!, apply Function to its path and answer every result; the directory and everything under it are removed when the answers are exhausted, when the caller stops after one, and when the body raises. A body that already removed or renamed the directory is fine.
+
+1. Prefix
+2. Function
+
+Returns: Answer
+
+### `write-bytes!`
+
+*lib_file.metta:342*
+
+```metta
+(: write-bytes! (-> %Undefined% Expression Bool))
+```
+
+Create or truncate the file at Path in place and write an expression of integers 0 to 255. The bytes are validated before the file is touched.
+
+1. Path
+2. Bytes
+
+Returns: Done
+
+### `write-file!`
+
+*lib_file.metta:348*
+
+```metta
+(: write-file! (-> %Undefined% %Undefined% Bool))
+```
+
+Create or truncate the file at Path in place and write UTF-8 text. An open handle or a hard link to the file keeps seeing it; replace-file! is the form that publishes a new file by rename instead.
+
+1. Path
+2. Content
+
+Returns: Done
 
 ## lib_import
 

@@ -9,6 +9,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_file` publishes 56 heads at 60 arities where it published 32: whole-file
+  and handle byte operations with text and byte handles kept apart by name,
+  `replace-file!` publishing by rename beside the in-place writers,
+  `rename-file!` as the host's rename with no copy fallback, `copy-dir!` and
+  `delete-tree!` over whole trees with symbolic links preserved as their text,
+  `dir-walk` and `dir-glob` answering one path per answer with declared link,
+  hidden-name and cycle policies, `path-normalize`, `path-absolute`,
+  `path-relative`, `path-resolve`, `path-stem` and `path-parts`, `file-kind`,
+  `same-file`, `read-link` and `make-link!`, and `with-file` and
+  `with-temp-dir` releasing their resource on exhaustion, cut and exception.
+  `file-close!` now reports a failed close instead of swallowing it,
+  `list-dir!` answers names in codepoint order, `file-space!` answers a
+  registered space for an empty file, and `temp-path!` refuses a prefix holding
+  a separator.
 - `lib_vector` adds validated component arithmetic, scaling, normalization,
   distance and fill. Finite reductions use exact stored values and round once,
   retaining cancellation residuals and finite directions across extreme ranges.
