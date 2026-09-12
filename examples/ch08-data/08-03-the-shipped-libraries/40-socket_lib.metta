@@ -1,5 +1,5 @@
 ; Purpose: exchange TCP bytes and IPv6 datagrams through owned File handles.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/40-socket_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/40-socket_lib.metta; commit=781ee98e188c23ea7ef9298636d6e5e6c7fdc727].
 ; Owns resources: the loopback listener, connections and datagram handle close
 ; below; with-socket closes every scoped acquisition with its answer stream.
 !(import! &self (library lib_file))

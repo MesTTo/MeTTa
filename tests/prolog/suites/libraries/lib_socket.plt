@@ -1,7 +1,7 @@
 % Purpose: verify socket byte identity, endpoint metadata and resource lifetime.
 % Guarantees: TCP and UDP cases use both IP families; generated datagrams exceed
 % the host's default receive buffer, and concurrent readers preserve packets.
-% [tested: lib_socket; commit=WORKTREE].
+% [tested: lib_socket; commit=781ee98e188c23ea7ef9298636d6e5e6c7fdc727].
 % Owns resources: fixtures close handles, cancel and join workers, restore
 % wrapped predicates and release temporary execution spaces.
 

@@ -1166,7 +1166,7 @@ metta_platform_capability(https,
 metta_platform_capability(uri, library(uri),
                           'lib_uri percent encoding and URI reference operations').
 % Sockets use the native clib transport and the shared File handle owner.
-% [tested: lib_socket:socket_capability_is_declared; commit=WORKTREE].
+% [tested: lib_socket:socket_capability_is_declared; commit=781ee98e188c23ea7ef9298636d6e5e6c7fdc727].
 metta_platform_capability(socket, library(socket),
                           'lib_socket TCP, UDP and socket readiness').
 metta_platform_capability(regex, library(pcre),

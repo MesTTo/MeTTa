@@ -1,7 +1,7 @@
 % Purpose: isolate the native IPv6 UDP address assertion from its parent process.
 % Guarantees: an IPv4 control passes first; only the known unify_address abort
 % gives present, while a complete IPv6 packet gives absent.
-% [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds; commit=781ee98e188c23ea7ef9298636d6e5e6c7fdc727].
 % Owns resources: the parent closes the merged output pipe and joins its child;
 % successful child cases close their sockets, and an abort releases process FDs.
 
