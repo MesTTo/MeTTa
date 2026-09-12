@@ -1,6 +1,8 @@
 % Purpose: store MeTTa atoms, compile equations into per-space modules,
 %   route matching to native and foreign space providers, and validate
 %   '&metta' declarations against the self-describing catalog.
+% Guarantees: add-atom/4 exposes the native occurrence-output write
+%   [tested: spaces_tokens; commit=WORKTREE].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarantees: algebra membership is shared by declaration, native annotations
@@ -195,6 +197,7 @@
 :- module(spaces,
           [
             'add-atom'/3,
+            'add-atom'/4,
             'add-atoms'/3,
             'add-reduct'/3,
             'add-reducts'/3,

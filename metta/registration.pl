@@ -1,4 +1,6 @@
 % Purpose: register function names and arities, protect callable surface, and import host and backend builtins
+% Guarantees: the occurrence-output add-atom arity names its native owner
+%   [tested: builtin_facets; commit=WORKTREE].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
 %   builtin_fun/1 remains the only builtin name authority, while
@@ -1207,6 +1209,7 @@ builtin_implementation('git-import!'/2, prolog(lib_gitimport)).
 builtin_implementation('git-import!'/1, prolog(lib_gitimport)).
 builtin_implementation('require-extension!'/1, prolog(engine)).
 builtin_implementation('add-atom'/2, prolog(spaces)).
+builtin_implementation('add-atom'/3, prolog(spaces)).
 builtin_implementation('remove-atom'/2, prolog(spaces)).
 builtin_implementation('subtract-atom'/2, prolog(spaces)).
 builtin_implementation('add-atoms'/2, prolog(spaces)).
