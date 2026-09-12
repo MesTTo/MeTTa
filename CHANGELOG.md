@@ -134,6 +134,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   roots until reconciliation finishes. Shared context scopes unwind with the
   engine trail. Native wrapper reconstruction preserves distinct defining
   closures, and transaction existence checks avoid SWI's repeating ancestor.
+- Python profiling collects native sampler data directly, so it works when
+  SWI's optional graphical profiler is installed and opens no viewer.
 - A documented host workaround retains fresh assertion references across
   nested SWI transactions, so an inner retraction cannot make an aborted
   outer assertion survive. The tracked reproduction, workaround ledger and

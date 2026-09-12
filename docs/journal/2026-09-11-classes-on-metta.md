@@ -715,6 +715,51 @@ suites/spaces/references.plt suites/reader/reference_loading.plt` passes
 (`ai-tmp/ai-classes-c5-transaction-repair.log`). The tracked host reproduction
 prints `present` (`ai-tmp/ai-classes-c5-transaction-host-repro.log`).
 
+## 2026-09-12: whole-suite integration and profiling data
+
+Tried: `sh engine/test.sh` passes 114 suite processes, 2,828 tests and 1,668
+subtests, exit 0, with no error lines or choicepoint warnings
+(`ai-tmp/ai-classes-c5-engine-battery.log`).
+
+Tried: `sh extensions/python/test.sh` stops after a profiling worker crashes:
+8 failed, 835 passed, 52 skipped; 5,769 tests were collected
+(`ai-tmp/ai-classes-c5-python-battery.log`). This partial run does not verify
+the remaining tests. Five focused controls at pristine `c75181adc` pass four
+and fail the website dependency check; the isolated profile control exits 1
+before printing a test result
+(`ai-tmp/ai-classes-c5-python-failure-control.log`,
+`ai-tmp/ai-classes-c5-profile-control.log`).
+
+Found: tagged Enum values and constructor subsort widening deliberately change
+the old declaration assertions. The value fixtures now say frozen explicitly;
+Enum patterns carry their class, and reflection records include Declaration
+alongside their specific type. EXTENDING.md was missing grounded_length and
+transaction_constraint; the generated library reference missed four new
+thread operations. Regenerated it with
+`python extensions/python/tools/libdoc.py --write`. `npm ci --prefix website`
+installs the locked documentation dependencies in this worktree.
+
+Found: `profile(Goal, [top(0)])` still calls SWI's interactive display hook;
+top controls only the textual report. A wrapper that raises from that hook
+makes the public profile test fail with
+`EngineError: Unknown message: '$profile-display-test'`
+(`ai-tmp/ai-classes-c5-profile-display-before2.log`).
+
+Decided: call the same native sampler with the same validated flags and read
+profile_data directly. The native sampler stops before propagating an exception
+at `fc7ef84b949378b729052c3ade79c90ce5416abb`, `src/pl-prof.c:942-970`.
+This removes interactive rendering and its zero-tick division from the data
+door; profile_data itself has no such division. No display hook is installed
+or disabled by the binding.
+
+Tried: `sh extensions/python/test.sh -n 4
+tests/ch14_seeing_your_program/test_features.py
+tests/ch20_extending_the_engine/test_contract.py
+tests/repository/test_documentation.py` passes 299 tests, skips one, exit 0
+(`ai-tmp/ai-classes-c5-python-failures-repaired.log`). This includes the planted
+display-hook refusal, profile tables, pstats export and the repaired class,
+reflection and documentation assertions.
+
 ## 2026-09-13: reference dependencies and source lifetimes
 
 Tried: native Literal parameter and result checks pass, including exact
