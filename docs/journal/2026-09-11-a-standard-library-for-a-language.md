@@ -2960,3 +2960,52 @@ and not eleven. `env-all` refuses by name where the capability is lost.
 Measured: the example proves 29 claims and its twin the same 29, 122,661 MeTTa
 against 117,508 Python inferences, minimum of three fresh processes, a first pin.
 Logs: ai-tmp/ai-lib3-system-{example,suite}.log.
+
+## 2026-09-12: process
+
+Decided: a program is named and its arguments are a COLLECTION, with no head anywhere
+that hands text to a shell. That is the whole reason this library exists beside
+lib_system's promise of no shell: `(process-run! "rm" ("; rm -rf /"))` deletes a file
+with that name, and a caller who wants a shell writes one as the program,
+`(process-run! "sh" ("-c" "..."))`, which is visible in the call.
+
+Decided: a nonzero exit is a STATUS. `(process-result Code Output Error)` answers
+whatever the program exited with, because a program that ran and failed is not one
+that could not run, and only the second raises. A signalled death answers the negative
+of the signal number, which is what a single Number can carry and what every shell
+reports; `process-status` answers the same shape without blocking, and `running` while
+the program is.
+
+Decided: both pipes are read to completion before the wait. A program whose output
+exceeds the pipe buffer would otherwise block writing while this process blocks
+waiting; the suite runs `seq 1 30000`, 168,894 bytes against Linux's 65,536-byte pipe,
+which deadlocks under the other order.
+
+Decided: the LAUNCH is the setup of the cleanup that closes the pipes, rather than a
+`setup_call_cleanup(true, ...)` after it. process_create/3 is what creates the
+descriptors, so with the launch anywhere else there is a window in which they exist
+and nothing is registered to close them. The suite counts open streams before and
+after a large run, ten runs, and a refused launch.
+
+Tried: `:- use_module(library(readutil), [read_string/3])` -> `import/1:
+system:read_string/3 is not exported (still imported into lib_process)`. read_string/3
+is a system builtin, not one of readutil's exports; the line is dropped and a comment
+says so, because the next author's instinct is to add it back.
+
+Decided: four signals and no more, `term`, `kill`, `int` and `hup`, listed by
+`process-signals` and named in the refusal for any other. The host takes a number or
+any signal name, and a library that passed one through would publish the whole POSIX
+table as a typo surface; these four are what a program that starts a child needs.
+
+Verified: `sh engine/test.sh suites/libraries/lib_process.plt` passes 8 tests: the
+exit code and the two streams against `sh -c`, the argument that looks like a command,
+a Symbol and a Number as argument text, the 168,894-byte read with the stream count
+before and after, the fed input against `cat` and `wc -c`, the started process polled,
+signalled twice over and waited for, the double wait and the missing program refused,
+and every type refusal naming what it was given.
+
+Measured: the example proves 24 claims and its twin the same 24, 50,892 MeTTa against
+47,068 Python inferences, minimum of three fresh processes, a first pin. Both numbers
+are less than half the other libraries' rows, because the work here is the child's and
+not the engine's.
+Logs: ai-tmp/ai-lib3-process-{measure,plt}.log, ai-tmp/ai-lib3-suite-lib_process.log.

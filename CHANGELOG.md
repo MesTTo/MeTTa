@@ -9,6 +9,23 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_process` is a new library for running a program: `process-run!`,
+  `process-run-input!`, `process-start!`, `process-wait!`, `process-status`,
+  `process-signal!` and `process-signals`. A program is NAMED and its arguments are a
+  collection, so a file called `; rm -rf /` is an argument and never a second command;
+  running a shell is the caller's explicit choice in the program's own name,
+  `(process-run! "sh" ("-c" "..."))`. A captured run answers
+  `(process-result Code Output Error)`, so a nonzero exit is a status rather than an
+  error and a signalled death is the negative of its signal number, the way every
+  shell reports it; only a launch that could not happen raises, and it names the
+  program rather than the search form. Both pipes are read to completion before the
+  wait, which is what keeps a program whose output is larger than the pipe buffer from
+  deadlocking, and the launch is the cleanup's setup, so no descriptor outlives the
+  call. A started process is the caller's: `process-status` polls it without blocking,
+  `process-signal!` sends one of four named signals and refuses any other with all
+  four listed, and `process-wait!` collects it. The library rests on the existing
+  `subprocess` capability, so it refuses to load on a build without
+  `library(process)`.
 - `lib_system` is a new library over the environment, the working directory and the
   platform: `env-get`, `env-all`, `env-set!`, `env-unset!`, `platform-info`,
   `platform-keys`, `working-directory` and `change-directory!`. A variable that is
