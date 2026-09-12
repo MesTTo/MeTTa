@@ -58,6 +58,21 @@ Lifted when: the cleanup is registered before the call port that follows
 Record: docs/journal/2026-09-07-every-intermittent-root-caused.md, the
   20,000-budget sweep; docs/journal/2026-09-10-every-host-workaround-is-commented.md.
 
+## swi-wrapper-roundtrip-merges-closures
+Host: SWI-Prolog 10.1.13; `library/prolog_wrap.pl:body_closure/3` at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: `current_predicate_wrapper/4` replaces every native closure in a
+  wrapper body with the same variable. Reinstalling its documented round-trip
+  result makes other retained definitions call the wrapper's own definition.
+Reproduction: tests/checks/host_workarounds/swi-wrapper-roundtrip-merges-closures.pl,
+  an own/other union becomes own/own after the public round trip.
+Workaround: read the wrapper's clause reference through `'$wrapped_predicate'/2`
+  and copy its native body before reinstalling it to recover the original.
+Lifted when: the public round trip preserves distinct closure identities and
+  the reproduction prints absent.
+Record: docs/journal/2026-09-11-classes-on-metta.md, binding ownership spans the
+  native transition and its closure reconstruction follow-up.
+
 ## swi-locale-default-encoding
 Host: SWI-Prolog 10.1.13; the default source encoding follows `setlocale()`.
 Defect: a boot under `LC_ALL=C` reads a UTF-8 source as single bytes and

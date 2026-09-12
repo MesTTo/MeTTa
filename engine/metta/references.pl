@@ -423,7 +423,7 @@ metta_reference_goal_list([root(Home, OriginalName, Arity)|Roots],
         HomeHead =.. [HomePredicate|Args],
         (   HomeRoots == [Root]
         ->  Call = HomeModule:HomeHead
-        ;   metta_reference_own_closure(HomeModule, OriginalName, HomeHead, Closure),
+        ;   metta_reference_own_closure(HomeModule, HomeHead, Closure),
             Call = call(Closure)
         )
     ),
@@ -432,13 +432,25 @@ metta_reference_goal_list([root(Home, OriginalName, Arity)|Roots],
     ; Goal = Call ),
     metta_reference_goal_list(Roots, Space, Name, Args, Own, Faces, Goals).
 
-metta_reference_own_closure(Module, Name, Head, Closure) :-
-    functor(Head, _, Arity),
-    (   metta_reference_slot(Module, Name, Arity, wrapped(Template, Own))
-    ->  Template = Head, Closure = Own
-    ;   wrap_predicate(Module:Head, metta_reference_capture, Closure,
-                      call(Closure)),
-        unwrap_predicate(Module:Head, metta_reference_capture)
+% Reinstalling the unchanged native body returns its original definition,
+% including when the body never called that definition.
+% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/prolog_wrap.pl#L113-L145
+metta_reference_own_closure(Module, Head, Closure) :-
+    % Workaround: swi-wrapper-roundtrip-merges-closures - copy the native clause body without conflating its original with other retained closures.
+    (   '$wrapped_predicate'(Module:Head, Wrappers),
+        memberchk(metta_reference_union-Ref, Wrappers)
+    ->  clause(Module:WrappedHead, Body, Ref),
+        Head =.. [_|Args], WrappedHead =.. [_|Args],
+        wrap_predicate(Module:Head, metta_reference_union, Closure, Body)
+    ;   setup_call_cleanup(
+            true,
+            wrap_predicate(Module:Head, metta_reference_capture, Closure,
+                           call(Closure)),
+            % Workaround: swi-cleanup-window - register capture cleanup before mutation and retry retirement if cleanup is cut.
+            catch(ignore(unwrap_predicate(Module:Head, metta_reference_capture)),
+                  Ball,
+                  ( ignore(unwrap_predicate(Module:Head, metta_reference_capture)),
+                    throw(Ball) )))
     ).
 
 metta_reference_disjunction([], fail).

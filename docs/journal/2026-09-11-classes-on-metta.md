@@ -305,6 +305,25 @@ The test continues to detect the lazy import. The additional assertion cost
 belongs to the nested-rollback repair already in this package, not to a
 heartbeat or accounting correction.
 
+## 2026-09-12: closure reconstruction preserves every defining source
+
+Tried: the owned-key repair passes all 3,056 rollback inference cuts
+(`ai-tmp/ai-classes-c4-frame-cuts-owned.log`). Broader reference checks find
+the three-vertex graph oracle returning `[1,1,1,1]` where `[1,1,2]` is owed
+(`ai-tmp/ai-classes-c4-reference-ownership.log`). The earlier closure probe
+covered only one native closure, so it did not establish union preservation.
+
+Tried: `swipl -q -f none -s
+tests/checks/host_workarounds/swi-wrapper-roundtrip-merges-closures.pl -g main
+-t halt` prints `present` (`ai-tmp/ai-classes-c4-wrapper-roundtrip.log`).
+SWI's `body_closure/3` substitutes the same variable for every closure in the
+body, conflating a retained foreign definition with the original definition.
+
+Decided: preserve the native wrapper clause verbatim when recovering its own
+closure. The public reconstruction is rejected until its round trip preserves
+distinct closure identities; the host-workaround ledger carries the tracked
+reproduction and removal condition.
+
 ## 2026-09-12: reference cancellation includes its shared context owners
 
 Tried: the reference suite passed its rollback oracle but failed the following
