@@ -1164,6 +1164,14 @@ metta_platform_capability(regex, library(pcre),
 %from swipl-wasm, so a build can be complete without it. Nothing else provides
 %normalization or the character database: code_type/2 answers the classes and
 %string_upper/2 the case conversions, both of which stay.
+%library(sgml) and library(xpath) are SWI's ext/sgml pack, absent from
+%swipl-wasm. Nothing else parses XML or HTML here.
+metta_platform_capability(markup, [library(sgml), library(sgml_write), library(xpath)],
+                          'lib_markup, so (markup-parse-xml ...), \c
+                           (markup-parse-html ...), (markup-write ...), \c
+                           (markup-select ...), (markup-attribute ...) and \c
+                           (markup-text ...); lib_json and lib_yaml still read \c
+                           their own formats').
 %library(yaml) is SWI's ext/yaml pack over libyaml, absent from swipl-wasm and
 %from a build without the C library. Nothing else reads YAML here; lib_json's
 %doors read the format a YAML document can always be converted to.
