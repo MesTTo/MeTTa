@@ -72,6 +72,10 @@
 %   refinements:a_refined_parameter_refuses_with_the_constraint_and_the_value,
 %   refinements:a_base_mismatch_keeps_the_ordinary_bad_arg_type;
 %   commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
+% Guarantees: refinement diagnostics admit a base through the value's metatype
+%   as well as its reported types, including a metatype inside a union
+%   [tested: refinements:a_refined_metatype_reports_the_constraint_once;
+%   commit=WORKTREE].
 
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 
@@ -942,8 +946,8 @@ metta_bad_argument([Declared|Rest], [Origin|Origins], [Argument|Arguments], N,
         )
     ).
 
-%What one position rejects. A refined expected type whose base some reported
-%type admits, while no reported type matches the whole refined type, rejects
+%What one position rejects. A refined expected type whose base the value's
+%metatype or reported type admits, while no type matches the whole refinement, rejects
 %by the first decided constraint the VALUE fails, as `violated(Constraint,
 %Value)`, and metta_type_refusal_reason/7 spells that BadArgValue; a value
 %every constraint accepts is not rejected here and the carrying alternative
@@ -954,7 +958,7 @@ metta_argument_rejection(Argument, Types, Expected, Origin, Rejection) :-
         \+ ( member(Whole, Types),
              metta_refined_declared_match(Whole, Expected, Origin) ),
         member(Actual, Types),
-        metta_argument_type_matches(Actual, Base, Origin),
+        metta_refined_base_admits(Argument, Actual, Base, Origin),
         metta_refinement_violated(Constraints, Argument, Constraint)
     ->  Rejection = violated(Constraint, Argument)
     ;   metta_rejected_argument_type(Argument, Types, Expected, Origin,
@@ -963,17 +967,25 @@ metta_argument_rejection(Argument, Types, Expected, Origin, Rejection) :-
 
 %A reported type carries an argument past a parameter when it matches the
 %expected type, or, for a refined expected type, when it matches the whole
-%type by evidence or matches the base while the value satisfies every
+%type by evidence or admits the base while the value satisfies every
 %constraint: the acceptance relation the refusal walk has to agree with,
 %restated over one reported type. The wildcard exclusion is
 %metta_refined_declared_match_in/3's, for the reason given there.
 metta_argument_type_admits(Argument, Actual, Expected, Origin) :-
     (   metta_refined_type(Expected, Base, Constraints)
     ->  (   metta_refined_declared_match(Actual, Expected, Origin)
-        ;   metta_argument_type_matches(Actual, Base, Origin),
+        ;   metta_refined_base_admits(Argument, Actual, Base, Origin),
             metta_refinements_hold(Constraints, Argument)
         )
     ;   metta_argument_type_matches(Actual, Expected, Origin)
+    ).
+
+% The runtime witness in type_witness_direct/4 also reads the metatype. A
+% numeric expression reports (Number ...), which cannot match Expression by
+% ordinary type equality, but its shape still satisfies that refined base.
+metta_refined_base_admits(Argument, Actual, Base, Origin) :-
+    (   satisfies_metatype(Argument, Base)
+    ;   metta_argument_type_matches(Actual, Base, Origin)
     ).
 
 metta_refined_declared_match(Actual, Refined, Origin) :-

@@ -3,6 +3,10 @@
 % Guarantees: a body Error remains visible across a result refinement
 %   [tested: refinements:a_result_refinement_preserves_a_produced_error;
 %   commit=WORKTREE].
+% Guarantees: a refined metatype, including a union member, rejects an expression
+%   by its failed length constraint rather than its numeric tuple type
+%   [tested: refinements:a_refined_metatype_reports_the_constraint_once;
+%   commit=WORKTREE].
 % Assumes: engine/metta.pl owns type checking; the Python seat supplies host
 %   numerics for the seam case, so this suite runs under `-- extensions`.
 % Guarantees: a refined parameter accepts what its constraints admit and
@@ -98,6 +102,23 @@ test(a_return_refinement_refuses_with_the_constraint_and_the_value,
     answers(Space, [decrement, 0], Refused),
     assertion(Refused == [['Error', [decrement, 0],
                            ['BadReturnValue', ['Ge', 0], -1]]]).
+
+test(a_refined_metatype_reports_the_constraint_once,
+     [ setup(setup_refined(Space)), cleanup(cleanup_refined(Space)),
+       forall(member(Base, ['Expression', ['|', 'Expression', list],
+                           ['|', ['|', 'Expression', list],
+                                 ['|', 'Expression', tuple]]])) ]) :-
+    Type = ['Annotated', Base, ['MinLen', 2]],
+    'add-atom'(Space, [':', 'metatype-pair', [->, Type, 'Number', 'Atom']], _),
+    'add-atom'(Space, [=, ['metatype-pair', X, _], X], _),
+    answers(Space, ['metatype-pair', [3, 4], 0], Accepted),
+    assertion(Accepted == [[3, 4]]),
+    answers(Space, ['metatype-pair', [3], 0], Refused),
+    assertion(Refused == [['Error', ['metatype-pair', [3], 0],
+                           ['BadArgValue', 1, ['MinLen', 2], [3]]]]),
+    answers(Space, ['metatype-pair', [3, 4], "s"], Later),
+    assertion(Later == [['Error', ['metatype-pair', [3, 4], "s"],
+                         ['BadArgType', 2, 'Number', 'String']]]).
 
 test(a_return_base_mismatch_stays_silent,
      [ setup(setup_refined(Space)), cleanup(cleanup_refined(Space)) ]) :-
