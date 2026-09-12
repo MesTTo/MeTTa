@@ -1,7 +1,7 @@
 % Purpose: verify occurrence sampling, distribution domains and generator ownership.
 % Guarantees: seeded finite domains test multiplicities, supports and moments;
 % scale and shape extremes retain representable results and every scope restores.
-% [tested: lib_random; commit=WORKTREE].
+% [tested: lib_random; commit=505b45e1d9184608c818a8a4fdba5cf6406bf3e7].
 % Owns resources: each test borrows and restores its host generator state;
 % concurrent/3 joins its workers and the inference-limit test closes its scope.
 

@@ -1,5 +1,5 @@
 ; Purpose: occurrence sampling, distribution values and seeded answer streams.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/36-random_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/36-random_lib.metta; commit=505b45e1d9184608c818a8a4fdba5cf6406bf3e7].
 !(import! &self (library lib_random))
 
 ; Populations and distribution forms are held data. Bind a computed value first.
