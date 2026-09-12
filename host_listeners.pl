@@ -30,6 +30,10 @@
      spelling from two modules is two channels and two keys
      [tested: host_listeners:the_same_listener_registers_once; commit=WORKTREE]
 
+   - no prolog_listen/2,3 or prolog_unlisten/2 exists outside this file under
+     engine/, lib/ or a seat's binding half
+     [tested: tests/prolog/static_checks.pl, every_host_listener_registers_through_the_door;
+     commit=WORKTREE]
    Owns resources: the listeners it registers, which live until the process
      ends. There is no removal door: SWI frees a removed callback while another
      thread may still be walking the list that held it.
