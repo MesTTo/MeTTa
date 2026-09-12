@@ -15,7 +15,7 @@ beside its definitions.
 | lib_constraints | 5 | 0 |
 | lib_crypto | 12 | 12 |
 | lib_csv | 7 | 7 |
-| lib_datastructures | 26 | 9 |
+| lib_datastructures | 48 | 31 |
 | lib_datetime | 16 | 16 |
 | lib_derived | 1 | 1 |
 | lib_dict | 11 | 4 |
@@ -460,6 +460,322 @@ Both trees' elements, left then right, in O(log n): the operation finger trees e
 2. the right finger tree
 
 Returns: one finger tree
+
+### `map-empty`
+
+*lib_datastructures.metta:210*
+
+```metta
+(: map-empty (-> %Undefined%))
+```
+
+The empty sorted map. Every other map grows from it with map-put, and two empty maps are the same value.
+
+Returns: Map
+
+### `map-from-pairs`
+
+*lib_datastructures.metta:216*
+
+```metta
+(: map-from-pairs (-> Expression %Undefined%))
+```
+
+A map holding every (Key Value) pair. A repeated key raises, because two values for one key is not a map; put the second one with map-put to say which wins.
+
+1. Pairs
+
+Returns: Map
+
+### `map-get`
+
+*lib_datastructures.metta:222*
+
+```metta
+(: map-get (-> %Undefined% %Undefined% %Undefined%))
+```
+
+The value Key holds. An absent key has no answer, so absence and a stored value are different things; map-get-or takes a default instead.
+
+1. Map
+2. Key
+
+Returns: Value
+
+### `map-get-or`
+
+*lib_datastructures.metta:228*
+
+```metta
+(: map-get-or (-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+The value Key holds, or Default when the key is absent.
+
+1. Map
+2. Key
+3. Default
+
+Returns: Value
+
+### `map-has`
+
+*lib_datastructures.metta:234*
+
+```metta
+(: map-has (-> %Undefined% %Undefined% Bool))
+```
+
+True when the map holds Key, False otherwise.
+
+1. Map
+2. Key
+
+Returns: Answer
+
+### `map-keys`
+
+*lib_datastructures.metta:240*
+
+```metta
+(: map-keys (-> %Undefined% Expression))
+```
+
+Every key, in the standard order of terms.
+
+1. Map
+
+Returns: Keys
+
+### `map-max`
+
+*lib_datastructures.metta:246*
+
+```metta
+(: map-max (-> %Undefined% Expression))
+```
+
+The (Key Value) pair with the largest key. An empty map has no answer.
+
+1. Map
+
+Returns: Pair
+
+### `map-min`
+
+*lib_datastructures.metta:252*
+
+```metta
+(: map-min (-> %Undefined% Expression))
+```
+
+The (Key Value) pair with the smallest key. An empty map has no answer.
+
+1. Map
+
+Returns: Pair
+
+### `map-pairs`
+
+*lib_datastructures.metta:258*
+
+```metta
+(: map-pairs (-> %Undefined% Expression))
+```
+
+Every (Key Value) pair, in key order. This is the shape map-from-pairs reads, so a map round-trips through it.
+
+1. Map
+
+Returns: Pairs
+
+### `map-put`
+
+*lib_datastructures.metta:264*
+
+```metta
+(: map-put (-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+The map with Key holding Value, replacing whatever Key held. The input map is unchanged, because a map is a value.
+
+1. Map
+2. Key
+3. Value
+
+Returns: Result
+
+### `map-remove`
+
+*lib_datastructures.metta:270*
+
+```metta
+(: map-remove (-> %Undefined% %Undefined% %Undefined%))
+```
+
+The map without Key. Removing a key that is absent answers the same map, so a caller need not look first.
+
+1. Map
+2. Key
+
+Returns: Result
+
+### `map-size`
+
+*lib_datastructures.metta:276*
+
+```metta
+(: map-size (-> %Undefined% Number))
+```
+
+How many keys the map holds.
+
+1. Map
+
+Returns: Size
+
+### `map-values`
+
+*lib_datastructures.metta:282*
+
+```metta
+(: map-values (-> %Undefined% Expression))
+```
+
+Every value, in its key's order.
+
+1. Map
+
+Returns: Values
+
+### `pq-empty`
+
+*lib_datastructures.metta:288*
+
+```metta
+(: pq-empty (-> %Undefined%))
+```
+
+The empty priority queue. Every other queue grows from it with pq-insert.
+
+Returns: Queue
+
+### `pq-from-pairs`
+
+*lib_datastructures.metta:294*
+
+```metta
+(: pq-from-pairs (-> Expression %Undefined%))
+```
+
+A queue holding every (Priority Value) pair, repeated priorities included.
+
+1. Pairs
+
+Returns: Queue
+
+### `pq-insert`
+
+*lib_datastructures.metta:300*
+
+```metta
+(: pq-insert (-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+The queue with Value added at Priority. A repeated priority is kept, so a queue holds as many entries as were inserted; the input queue is unchanged.
+
+1. Queue
+2. Priority
+3. Value
+
+Returns: Result
+
+### `pq-merge`
+
+*lib_datastructures.metta:306*
+
+```metta
+(: pq-merge (-> %Undefined% %Undefined% %Undefined%))
+```
+
+One queue holding every entry of both, which a pairing heap does in constant time. Both inputs are unchanged.
+
+1. Left
+2. Right
+
+Returns: Result
+
+### `pq-min`
+
+*lib_datastructures.metta:312*
+
+```metta
+(: pq-min (-> %Undefined% Expression))
+```
+
+The (Priority Value) pair at the smallest priority, without removing it. An empty queue has no answer.
+
+1. Queue
+
+Returns: Pair
+
+### `pq-pairs`
+
+*lib_datastructures.metta:318*
+
+```metta
+(: pq-pairs (-> %Undefined% Expression))
+```
+
+Every (Priority Value) pair in priority order, which is the sorted sequence the queue exists to produce. This is the shape pq-from-pairs reads.
+
+1. Queue
+
+Returns: Pairs
+
+### `pq-pop`
+
+*lib_datastructures.metta:324*
+
+```metta
+(: pq-pop (-> %Undefined% Expression))
+```
+
+The (Priority Value Rest) triple: the smallest entry and the queue without it, in one operation, because reading and removing separately would walk the queue twice. An empty queue has no answer.
+
+1. Queue
+
+Returns: Answer
+
+### `pq-remove`
+
+*lib_datastructures.metta:330*
+
+```metta
+(: pq-remove (-> %Undefined% %Undefined% %Undefined% %Undefined%))
+```
+
+The queue without one entry holding exactly this priority and value, which is how a scheduled item is cancelled. An entry that is not there has no answer.
+
+1. Queue
+2. Priority
+3. Value
+
+Returns: Result
+
+### `pq-size`
+
+*lib_datastructures.metta:336*
+
+```metta
+(: pq-size (-> %Undefined% Number))
+```
+
+How many entries the queue holds, counting repeated priorities separately.
+
+1. Queue
+
+Returns: Size
 
 Undocumented: `FTDeep`, `FTEmpty`, `FTSingle`, `FTree`, `add-unique-or-fail`, `dequeue`, `empty-queue`, `enqueue`, `ft-app3`, `ft-borrow-l`, `ft-borrow-r`, `ft-node-digit`, `ft-nodes`, `ft-push-back`, `ft-push-front`, `ft-push-list-back`, `ft-push-list-front`
 

@@ -2244,3 +2244,65 @@ dict twin's re-pin from 125,362 first wrote a DIVERGENCE, because the twin was
 measured before its four new claims existed; completing it made the two spaces
 agree and the lane then refused the stale declaration by name, which is the
 check working. Logs: ai-tmp/ai-lib3-{spaces-example3,dict-example,sd-twins2}.log.
+
+## 2026-09-12: datastructures, and why a library value is an expression
+
+Tried: a Prolog half whose map and queue values are the HOST's own terms, so
+library(assoc) and library(heaps) could be the implementation with no adaptation
+at all. A registered predicate's compound answer crosses into MeTTa as one
+opaque Grounded value, compares by structure and crosses back unchanged: the
+probe's seven claims pass, including `(== $a $b)` over two separately built maps
+(ai-tmp/ai-lib3-ds/probe.metta).
+
+Found: that value cannot be WRITTEN into a form. `!(bind! &m (map-from-pairs
+...))` stores it and the next call answers itself, unreduced:
+`['map-size', t(b,2,<,t(a,1,-,t,t),t)]`. bind! substitutes the value into the
+form before evaluation, and the translator reads the compound as a nested call,
+so the whole form stops being a program. A `let` over the bound name fails the
+same way. A regex blob survives the same test, because a blob is atomic where a
+compound is not.
+
+Decided: the nodes are MeTTa EXPRESSIONS. An expression IS a list in this
+engine, so a list-shaped node costs nothing to pass in either direction, and it
+is a value every position accepts: bind! stores it, a program prints and
+compares it, and a pattern can walk it. vendor/structures.pl carries SWI's AVL
+insert, delete, adjust, rebalance and rotation clauses and its pairing-heap
+meld, pop, merge and listing with `t(K,V,B,L,R)` written `(MapNode K V B L R)`,
+`t` written `MapEmpty`, `heap(T,S)` written `(PqHeap T S)` and `t(V,P,Sub)`
+written `(PqNode V P Sub)`; vendor/VENDOR.md pins both sources with their
+installed checksums and records exactly that change, and SWI-LICENSE is beside
+it. Rejected: converting between compound and list at the boundary, because it
+is O(n) per call and would make a logarithmic operation linear. Rejected: a
+handle table over host terms, because the values would then need freeing and
+two maps built from the same pairs would not be equal.
+
+Decided: 22 heads, none a synonym. A map answers no value for an absent key and
+map-get-or takes the default, which is the distinction the dict library makes
+too; pq-pop answers `(Priority Value Rest)` in one operation because reading and
+removing separately walks the queue twice; a repeated key is refused where
+map-from-pairs is written, and a repeated priority is kept, because a queue holds
+what was inserted. Rejected: a deque, because the finger tree already pushes and
+pops at both ends; rejected: a set, because census row 15 is its own library.
+
+Verified: the adaptation is checked against its sources. `sh engine/test.sh
+suites/libraries/lib_datastructures.plt` passes 12 tests and 15 subcases: for
+key counts 0, 1, 2, 3, 7, 64 and 257 in a seeded random insertion order the map
+answers exactly what library(assoc) answers for the pairs, the keys, the values,
+every probed lookup and both extremes, and for 1, 2, 3, 8 and 65 keys deleted in
+a different seeded order it agrees at EVERY step, which is what catches a
+mistranscribed rotation; for 0, 1, 2, 3, 9 and 128 entries the queue agrees with
+library(heaps) on the sorted listing, the size, the minimum and the pop, and on
+merge and named removal. The suite also proves the bind! claim the design turns
+on, immutability, the standard order over mixed key types, and the six refusals.
+Two findings on the way: `numlist(1, 0, _)` fails, so the empty case needs its
+own sequence, and the term writer the bind! test needs is `swrite/2` rather than
+a `metta_write_term/2` that does not exist.
+
+Measured: the example proves 41 claims over all 22 new heads and the queue and
+finger-tree heads that were already there, and its twin the same 41 with equal
+stored content: 229,830 MeTTa against 240,981 Python inferences, minimum of
+three fresh processes. The two existing finger-tree twins move with the library's
+new face, 236,727 to 291,869 and 208,121 to 262,458, and the 4,101-inference
+OVERRUN the first one declared is gone: the face's own load now costs both sides
+more than the distance the declaration was covering, so the twin fits its band
+without one. Logs: ai-tmp/ai-lib3-ds-{suite2,example,twins-final,ft}.log.

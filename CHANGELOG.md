@@ -9,6 +9,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_datastructures` adds a sorted map and a priority queue as immutable
+  values: `map-empty`, `map-put`, `map-get`, `map-get-or`, `map-remove`,
+  `map-has`, `map-size`, `map-keys`, `map-values`, `map-pairs`,
+  `map-from-pairs`, `map-min`, `map-max`, `pq-empty`, `pq-insert`, `pq-min`,
+  `pq-pop`, `pq-remove`, `pq-size`, `pq-merge`, `pq-pairs` and
+  `pq-from-pairs`. Their nodes are MeTTa expressions, so `bind!` stores one and
+  a program prints, compares and walks one; the algorithms are SWI's own AVL
+  tree and pairing heap, adapted to that shape under `vendor/` and checked
+  against `library(assoc)` and `library(heaps)` over generated key sequences. A
+  lookup, a minimum and a removal of something absent have no answer; a
+  repeated key is refused where it is written and a repeated priority is kept.
 - `lib_spaces` adds `space-copy`, `move-atoms`, `space-drain`,
   `space-snapshot` and `space-subtract` over whole spaces, each answering once
   per atom it touched. `move-atoms` is what `migrateAtoms`' name promises;
