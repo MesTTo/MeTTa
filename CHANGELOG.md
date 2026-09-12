@@ -9,6 +9,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_uuid` provides explicit version 4 random and version 1 time identifiers,
+  deterministic version 3/5 names in standard or application UUID namespaces,
+  strict text validation, version/variant inspection, version-1 timestamps,
+  nil and 16-byte conversion. Names preserve complete UTF-8 text and NULs through
+  the existing encoding and crypto libraries. Version 1 documents its timestamp
+  and possible MAC disclosure. Two tracked host reproductions cover invalid
+  hyphen acceptance and the OSSP name-encoding boundary.
 - `lib_process` is a new library for running a program: `process-run!`,
   `process-run-input!`, `process-start!`, `process-wait!`, `process-status`,
   `process-signal!` and `process-signals`. A program is NAMED and its arguments are a

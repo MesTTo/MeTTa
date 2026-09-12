@@ -3009,3 +3009,84 @@ Measured: the example proves 24 claims and its twin the same 24, 50,892 MeTTa ag
 are less than half the other libraries' rows, because the work here is the child's and
 not the engine's.
 Logs: ai-tmp/ai-lib3-process-{measure,plt}.log, ai-tmp/ai-lib3-suite-lib_process.log.
+
+## 2026-09-12: UUID design
+
+Tried: library(uuid) on SWI 10.1.13 generates versions 1 and 4; namespace
+versions 3 and 5 match the DNS example.com vectors. is_uuid/1 accepts 36
+hyphens. An atom with codes [97,0,98] produces the same name UUID as "a";
+U+00E9 produces 61372fd7-1aa6-5e91-8e3e-c1e3ecc18450 instead of the UTF-8
+vector ebfe0af8-3997-5ade-b634-ba92cf69f557. U+6F22 raises
+representation_error(encoding). The tracked reproductions in
+tests/checks/host_workarounds/ record the two defects separately.
+
+Decided: explicit host generation for versions 1 and 4, and the byte construction
+for versions 3 and 5 from
+[CPython 3.14 uuid3/uuid5](https://github.com/python/cpython/blob/v3.14.0/Lib/uuid.py#L763-L790).
+lib_encoding owns UTF-8 and hexadecimal; lib_crypto owns the digest. One
+construction covers standard and arbitrary UUID namespaces, Unicode, NUL and
+empty names. Generation acquires no library-owned scope or handle. Version 1
+discloses time and potentially MAC data; the default public random door selects 4.
+
+Rejected: direct OSSP name calls, because their text boundary loses input; revisit
+only after the tracked reproduction reports absent and arbitrary namespaces are
+supported. Rejected: host is_uuid/1 as the validation authority, because it accepts
+nonhex digits; revisit after its reproduction reports absent. Version 2 generation
+is outside the host's working versions, and versions 6 through 8 have no selected
+provider. Version 2 timestamp extraction is omitted because its local identifier
+replaces timestamp bits; only RFC version 1 exposes a complete timestamp.
+
+Verified: the 43-claim example and Python twin pass. The seven plunit tests include
+40 host name comparisons, six independent Unicode/NUL vectors, 256 byte patterns
+covering every value at every position, 36 malformed mutations and refusal checks.
+The initial suite used a forall-local Random after forall returned and raised
+domain_error(uuid, Variable); moving that assertion inside its quantified body
+fixed the suite without changing the provider. The two host reproductions answer
+present. jscpd over lib_uuid and its twin reports zero clones.
+
+Measured: `twin_coverage.py --measure --rounds 3
+examples/ch08-data/08-03-the-shipped-libraries/33-uuid_lib.metta` gives 198800
+MeTTa and 195441 Python inferences, minimum of three fresh serial processes.
+Logs: ai-tmp/ai-lib4-uuid-{example,twin,measure,suite-fixed,jscpd,records}.log.
+
+## 2026-09-12: UUID verification and pricing
+
+Tried: the full twins lane rejected the initial 195441 pin at 176007.
+ai-tmp/ai-lib4-uuid-cost-probe.log separates two causes: the native crypto
+dependency loads from source until its own example creates lib_crypto.qlf,
+and decoding random UUID bytes varies with their hexadecimal digits.
+engine/qlf_boot.pl:qlf_compile_argument compiles the requested library half;
+it does not compile the closure of native use_module dependencies.
+
+Decided: validate UUID digits with the host's native character predicate and
+inspect version/variant fields directly. These queries need no byte collection.
+The example now imports and exercises crypto-random-bytes alongside identifiers,
+making the secret/identifier distinction executable and including that API's
+import cost in both notations. Six observations before and after a separate crypto
+example then gave the same 186022 twin count. The original measurement above is
+superseded by this section's final fixture and measurement.
+
+Tried: replacing any of the four UUID hyphens with NUL passed the host splitter,
+total length and group lengths. The new delimiters_are_literal_hyphens regression
+failed at true==false for all four positions. Requiring exact reserialization
+with literal hyphens fixes it and names the existing swi-string-nul-membership
+workaround. No existing library source or engine loader changed.
+
+Verified: all eight plunit tests and all 45 example/twin claims pass. The new
+claim rejects NUL separators, and the added crypto claim demonstrates the
+separate secret-generation operation. The staged evidence checker accepts the
+new tags. The additional host-workarounds lane exposed the earlier graph row's
+missing swi-ugraphs-append2 ledger and reproduction; that repair is a separate
+functional/provenance pair after UUID.
+
+Measured: `twin_coverage.py --measure --rounds 3
+examples/ch08-data/08-03-the-shipped-libraries/33-uuid_lib.metta` gives 190880
+MeTTa and 188846 Python inferences, minimum of three fresh serial processes.
+Logs: ai-tmp/ai-lib4-uuid-{example,twin,measure,suite,records}-complete.log and
+ai-tmp/ai-lib4-uuid-nul-regression-before.log.
+
+Verified: the required library lane batch passes, including staged evidence.
+The full twins lane also reads UUID at 190880/188846 with equal stored contents
+and all 45 claims. Its 263 remaining corpus findings exclude this row;
+43/336 files pass with 3004/3004 claims proved, and twins-selftest passes.
+Logs: ai-tmp/ai-lib4-uuid-{lanes,twins}-complete.log.

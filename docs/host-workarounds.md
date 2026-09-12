@@ -293,7 +293,8 @@ Defect: NUL-terminated membership lookup counts the terminator as a member even
 Reproduction: tests/checks/host_workarounds/swi-string-nul-membership.pl,
   compares a normal split control with the embedded-NUL input.
 Workaround: the String provider scans complete codepoint sets and explicit input
-  bounds. Line and layout adapters use that corrected boundary.
+  bounds. Line and layout adapters use that corrected boundary. UUID validation
+  requires exact reserialization of the separators after the host split.
 Lifted when: the host splitter preserves NUL unless explicitly listed in the
   separator or padding set. The private KMP search and exact edit-distance
   provider remain necessary for their independent operations and complexity.
@@ -352,4 +353,28 @@ Workaround: Vector's class/sign proxies divide by multiplying the exact signed
   reciprocal. Proxies contain only units, zeros, infinities and NaNs.
 Lifted when: the host preserves the numerator's zero sign and the reproduction
   returns absent; restore direct division inside the proxy arithmetic boundary.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-uuid-nonhex-hyphens
+Host: SWI-Prolog 10.1.13; library/ext/clib/uuid.pl:is_uuid/1 calls
+  hex_or_minus/1 at every position, including hexadecimal digit positions.
+Defect: is_uuid/1 accepts 36 hyphens as a UUID, although 32 positions must be hex.
+Reproduction: tests/checks/host_workarounds/swi-uuid-nonhex-hyphens.pl,
+  with a valid UUID and a nonhex control before the all-hyphen probe.
+Workaround: lib_uuid validates all five group lengths and their hexadecimal digits.
+Lifted when: the host accepts the valid control and rejects both malformed inputs.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-uuid-name-encoding
+Host: SWI-Prolog 10.1.13; packages-clib uuid.c:pl_uuid uses PL_get_chars with
+  CVT_ATOM and passes a NUL-terminated name to OSSP uuid_make;
+  https://github.com/SWI-Prolog/packages-clib/blob/2d74666697ba12af386644638b3e563390affbf6/uuid.c.
+Defect: UUID names are read as Latin-1 and truncated at NUL. Non-Latin-1 names
+  raise representation_error(encoding); accepted names can hash different bytes.
+Reproduction: tests/checks/host_workarounds/swi-uuid-name-encoding.pl,
+  comparing ASCII, accented and embedded-NUL names with UTF-8 UUID vectors.
+Workaround: lib_uuid composes lib_encoding and lib_crypto over namespace bytes
+  and the complete UTF-8 name, then sets the RFC version and variant bits.
+Lifted when: the host produces both UTF-8/NUL vectors. Arbitrary namespace support
+  still requires the byte construction unless the host also admits a UUID namespace.
 Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.

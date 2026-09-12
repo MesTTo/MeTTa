@@ -55,6 +55,7 @@ beside its definitions.
 | lib_thread | 58 | 2 |
 | lib_torch | 20 | 19 |
 | lib_unicode | 8 | 8 |
+| lib_uuid | 11 | 11 |
 | lib_vector | 13 | 13 |
 | lib_yaml | 4 | 4 |
 | lib_zar | 4 | 0 |
@@ -5146,6 +5147,156 @@ Returns: Value
 ```
 
 The version of the Unicode database every other answer here comes from. A normalization is reproducible only beside the version that produced it, which is why this is a head rather than a comment.
+
+Returns: Version
+
+## lib_uuid
+
+### `uuid-bytes`
+
+*lib_uuid.metta:12*
+
+```metta
+(: uuid-bytes (-> String Expression))
+```
+
+The 16 bytes of a UUID in network order. These compose with hex-encode, base64-encode and write-bytes!, which use the same byte expression.
+
+1. UUID
+
+Returns: Bytes
+
+### `uuid-is`
+
+*lib_uuid.metta:18*
+
+```metta
+(: uuid-is (-> %Undefined% Bool))
+```
+
+Whether Text is a UUID String with exactly 8-4-4-4-12 hexadecimal digits, accepting either case. This checks representation, not uniqueness or origin. Nil and reserved version/variant bit patterns remain valid 128-bit values.
+
+1. Text
+
+Returns: Valid
+
+### `uuid-name`
+
+*lib_uuid.metta:24*
+
+```metta
+(: uuid-name (-> Number %Undefined% String String))
+```
+
+Derive a version 3 (MD5) or version 5 (SHA-1) UUID from a namespace and the complete UTF-8 name. Namespace is dns, url, oid or x500, or any UUID String. Equal inputs give equal identifiers. Empty names and embedded NULs are valid. Version 3 requires the crypto capability; these digests identify names and provide no authentication. Prefer version 5 for new name-based identifiers.
+
+1. Version
+2. Namespace
+3. Name
+
+Returns: UUID
+
+### `uuid-namespaces`
+
+*lib_uuid.metta:30*
+
+```metta
+(: uuid-namespaces (-> Expression))
+```
+
+The predefined namespace Symbols accepted by uuid-name. A UUID String supplies an application namespace, so identifiers can themselves name further namespaces.
+
+Returns: Namespaces
+
+### `uuid-nil`
+
+*lib_uuid.metta:36*
+
+```metta
+(: uuid-nil (-> String))
+```
+
+The all-zero identifier, distinct from a missing answer.
+
+Returns: UUID
+
+### `uuid-of-bytes`
+
+*lib_uuid.metta:42*
+
+```metta
+(: uuid-of-bytes (-> Expression String))
+```
+
+Exactly 16 byte integers as a canonical lower-case UUID String. Every 128-bit value is preserved; this conversion does not change version or variant bits.
+
+1. Bytes
+
+Returns: UUID
+
+### `uuid-random!`
+
+*lib_uuid.metta:48*
+
+```metta
+(: uuid-random! (-> String))
+```
+
+Generate a version 4 random identifier. A UUID is not a secret; use crypto-random-bytes when unpredictability is a security requirement.
+
+Returns: UUID
+
+### `uuid-time!`
+
+*lib_uuid.metta:54*
+
+```metta
+(: uuid-time! (-> String))
+```
+
+Generate a version 1 identifier using the host's OSSP provider. It contains a timestamp and may expose the host's MAC address. A host without that provider raises; uuid-random! is available independently of version 1 support.
+
+Returns: UUID
+
+### `uuid-timestamp`
+
+*lib_uuid.metta:60*
+
+```metta
+(: uuid-timestamp (-> String Number))
+```
+
+Seconds since the Unix epoch for an RFC version 1 UUID. Other layouts and versions have no answer. Malformed text raises, so absence is not a parse error.
+
+1. UUID
+
+Returns: Timestamp
+
+### `uuid-variant`
+
+*lib_uuid.metta:66*
+
+```metta
+(: uuid-variant (-> String Symbol))
+```
+
+The layout selected by the variant bits: ncs, rfc, microsoft or future. Versions 1, 3, 4 and 5 generated here use rfc; nil uses ncs.
+
+1. UUID
+
+Returns: Variant
+
+### `uuid-version`
+
+*lib_uuid.metta:72*
+
+```metta
+(: uuid-version (-> String Number))
+```
+
+The four version bits as a Number from 0 to 15. Nil has zero; a bit pattern is not evidence that the identifier was generated according to that version.
+
+1. UUID
 
 Returns: Version
 
