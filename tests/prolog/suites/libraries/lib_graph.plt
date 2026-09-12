@@ -5,7 +5,7 @@
 % over the same graph in its own representation, every answer that is a graph is
 % in this library's representation, a vertex is reachable exactly when the closure
 % holds the edge, and a topological order puts every edge's tail before its head
-% [tested: lib_graph; commit=WORKTREE].
+% [tested: lib_graph; commit=a5738e9390f2941d8f1c3207b5a28310a22e1f14].
 % Owns resources: none; every value is a term.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

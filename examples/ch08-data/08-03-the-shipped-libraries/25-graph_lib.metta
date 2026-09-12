@@ -1,6 +1,6 @@
 ; Purpose: directed graphs as expressions: the vertices, the edges, the walks and
 ; the two orderings.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/25-graph_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/25-graph_lib.metta; commit=a5738e9390f2941d8f1c3207b5a28310a22e1f14].
 !(import! &self (library lib_graph))
 
 ; A graph is built from its edges, each written (From To). Every vertex an edge
