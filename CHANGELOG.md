@@ -19,7 +19,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   the receipt engine's two listeners, the reference watch and the Python
   seat's bound watch register through it; the reference watch is now one process listener registered at load,
   reading each thread's own pending frames, rather than one registration and
-  removal per transaction.
+  removal per transaction. The `prolog-static` lane refuses a
+  raw `prolog_listen/2,3` or `prolog_unlisten/2` anywhere else.
 - The plunit lane runs every suite under `tests/prolog/lock_order.pl`, which
   records the order each thread acquires SWI mutexes, with each channel's
   event-list lock as one more, and fails the lane on any cycle, naming the

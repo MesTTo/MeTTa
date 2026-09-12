@@ -21,6 +21,9 @@
 % Guarantees:
 %   - The driver runs the four reviewed library(check) predicates and check/0
 %     after a function with control flow has been compiled.
+%   - every prolog_listen/2,3 and prolog_unlisten/2 under engine/, lib/ and
+%     the seats' binding halves is the one inside engine/host_listeners.pl
+%     [tested: every_host_listener_registers_through_the_door; commit=WORKTREE].
 %   - var_branches warnings are fatal for repository engine sources without
 %     attributing warnings from SWI's own libraries to the repository.
 %   - Every unqualified multifile seam declared anywhere under engine, lib,
@@ -130,6 +133,7 @@ main :-
     every_seam_declares_one_kind,
     every_seam_kind_matches_its_direction,
     no_cut_in_an_event_hook,
+    every_host_listener_registers_through_the_door,
     arithmetic_expansion_stays_at_run_time,
     metta_host_set_silent(true),
     representative_source(Source),
@@ -625,6 +629,69 @@ source_stream_term(Stream, Term) :-
     repeat,
     prolog_read_source_term(Stream, Read, _, []),
     ( Read == end_of_file -> !, fail ; Term = Read ).
+
+%%%% Every host listener registers through the door %%%%
+%
+% SWI holds a channel's event-list lock across every callback it delivers and
+% takes that lock to register, so a registration made while holding a mutex a
+% callback takes is a lock-order cycle, and this tree hung on that cycle four
+% times (docs/journal/2026-09-13-one-door-for-host-listeners.md). The door,
+% engine/host_listeners.pl, is the one place a raw prolog_listen/2 may appear:
+% it registers once, takes no name and holds no mutex. This scan reads the
+% files the hook scan reads and refuses any other raw call, in a clause body
+% or a directive, module-qualified or not.
+every_host_listener_registers_through_the_door :-
+    findall(File-Indicator,
+            ( hook_source_file(File),
+              File \== '../../engine/host_listeners.pl',
+              source_term(File, Term),
+              raw_listener_call(Term, Indicator) ),
+            Offenders0),
+    sort(Offenders0, Offenders),
+    (   Offenders == []
+    ->  source_scan_sees_a_raw_registration
+    ;   forall(member(File-Indicator, Offenders),
+               format(user_error,
+                      'raw ~w in ~w~nregister through metta_listen/2 in \c
+                       engine/host_listeners.pl; a listener is registered \c
+                       once, unnamed, and never removed~n',
+                      [Indicator, File])),
+        fail
+    ).
+
+% Every compound subterm rather than every goal, as the compile-time helper
+% scan does: a registration wrapped in catch/3 or forall/2 is still one.
+raw_listener_call(Term, Name/Arity) :-
+    nonvar(Term),
+    (   Term = (_ :- Body) -> Goal = Body
+    ;   Term = (:- Directive) -> Goal = Directive
+    ;   fail
+    ),
+    body_subterm(Goal, Call),
+    compound_name_arity(Call, Name, Arity),
+    memberchk(Name/Arity, [prolog_listen/2, prolog_listen/3, prolog_unlisten/2]).
+
+% The door's own raw call is the real positive this scan must see, and three
+% planted terms cover the other arity, removal and a qualified directive.
+source_scan_sees_a_raw_registration :-
+    Planted = [ (planted :- prolog_listen(erase, planted_handler)),
+                (:- prolog_listen(erase, planted_handler, [])),
+                (:- system:prolog_unlisten(erase, planted_handler)) ],
+    aggregate_all(count,
+                  ( member(Term, Planted), raw_listener_call(Term, _) ),
+                  Seen),
+    (   Seen =:= 3,
+        source_term('../../engine/host_listeners.pl', Door),
+        raw_listener_call(Door, prolog_listen/2)
+    ->  aggregate_all(count, hook_source_file(_), Files),
+        format("static: no raw listener registration outside the door in \c
+                ~d source files, and the scan saw the door's own call and \c
+                three planted ones~n", [Files])
+    ;   format(user_error,
+               'the raw listener scan saw ~d of 3 planted calls, so its \c
+                clean result says nothing~n', [Seen]),
+        fail
+    ).
 
 %%%% No cut in a live hook clause %%%%
 %
