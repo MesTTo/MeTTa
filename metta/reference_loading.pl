@@ -11,6 +11,9 @@
 %   manifest publication precedes worker admission through the same key.
 % Decides: a space defaults to identity mapping and eager loading. Waiting for
 %   another worker follows thread_await/2's transaction refusal.
+% Guarantees: a source path has one live home; a reload after release receives
+%   a fresh space identity and does not revive revoked handles [tested:
+%   test_a_library_reloads_after_its_first_scope_closes; commit=WORKTREE].
 
 :- dynamic metta_reference_library_home/2, metta_reference_prolog_head/3.
 :- dynamic metta_reference_manifest_head/3, metta_reference_manifest_row/2.
@@ -38,13 +41,22 @@ metta_reference_source(_, Source, Source) :-
     metta_space_name(Source), !.
 metta_reference_source(Space, Source, Home) :-
     metta_reference_source_path(Source, Path),
-    atom_concat('&library:', Path, Home),
+    metta_reference_home(Path, Home),
     metta_reference_option(Space, load, Policy),
     ( Policy == eager -> Manifest = none
     ; metta_reference_read_manifest(Home, Path, Manifest) ),
     metta_source_singleflight(Path,
         metta_reference_start(Home, Path, Policy, Manifest, Action)),
     metta_reference_complete_start(Action).
+
+% The path identifies source content; the allocated home identifies one live
+% load. Scope revocation belongs to that allocation and survives its release.
+metta_reference_home(Path, Home) :-
+    metta_source_singleflight(Path,
+        ( metta_reference_library_home(Standing, Path)
+        -> Home = Standing
+        ; atom_concat('&library:', Path, Prefix0), atom_concat(Prefix0, '#', Prefix),
+          gensym(Prefix, Home), assertz(metta_reference_library_home(Home, Path)) )).
 
 metta_reference_source_path(Source, Path) :-
     ( nonvar(Source), Source = [library|_]
@@ -94,7 +106,7 @@ metta_reference_check_dependency(Source, Seen, Seen) :- metta_space_name(Source)
 metta_reference_check_dependency(Source, Seen0, Seen) :-
     metta_reference_source_path(Source, Path),
     ( get_assoc(Path, Seen0, _) -> Seen = Seen0
-    ; atom_concat('&library:', Path, Home),
+    ; metta_reference_home(Path, Home),
       filereader:read_source_text(Path, Text),
       filereader:parse_metta_source_summary(Text, Forms, _, _),
       metta_reference_check_manifest(Home, Path, Forms, Seen0, Seen) ).
