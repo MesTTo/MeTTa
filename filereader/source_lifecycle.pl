@@ -13,7 +13,7 @@
 %   rebuilds owned equation spaces and resolved bindings with fresh identities
 %   [tested: program_source,
 %   extensions/python/tests/ch18_performance/test_program_source.py;
-%   commit=WORKTREE].
+%   commit=10d17763d8bd55cf70c14efe965846893eb03c81].
 %   A translator rule with a missing derived equation is refused before text
 %   publication [tested: test_program_source_refuses_an_incomplete_translator_rule;
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
