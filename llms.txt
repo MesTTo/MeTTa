@@ -4965,7 +4965,7 @@ weighted superpositions: normalize, softmax, rank, top-k, sample; `lib_memo` the
 resident automatic and explicit memoisation controls; `lib_mm2` notation over
 &mork, loaded on demand: `＋` and `－` add and remove one atom, `＋*`
 bulk-adds a whole expression in one crossing, and `~>` runs one MM2 transform; `lib_nars` NARS truth functions, inference rules and
-bounded derivation; `lib_observe` filtered traces, source coverage and attributed error frames as queryable atoms; `lib_parsing` grammars as VALUES: fourteen primitives and eleven combinators,
+bounded derivation; `lib_observe` filtered traces, source coverage and attributed error frames as queryable atoms; `lib_parsing` grammars as VALUES: fourteen primitives and twelve combinators,
 run over text whole or by prefix, every way a grammar matches being an answer and
 no match being no answer; a grammar recurses through `(ref f)`, `map` and `as`
 shape the parse tree, the classes are ASCII and locale-free, and a malformed
@@ -4991,7 +4991,7 @@ function names, with grounded values compared crisply; match quality as a measur
 `lib_spaces` whole-space work: find, match-count, copying, moving, draining, snapshotting, subtracting and clearing, each answering once per atom it touched;
 `lib_strategy` a Stratego-style strategy basis whose plans are ordinary atoms;
 `lib_string` text, imported when you need it; `lib_system` the environment as a relation, a read with no answer for an unset
-variable, process-wide writes, the working directory and eleven platform keys, with
+variable, process-wide writes, the working directory and ten platform keys, with
 no shell anywhere; `lib_tabling` expert-only tabling
 control; `lib_thread` parallel data operations, M:N futures and timers;
 `lib_torch` PyTorch from plain MeTTa through py-call, GENERATED from torch's

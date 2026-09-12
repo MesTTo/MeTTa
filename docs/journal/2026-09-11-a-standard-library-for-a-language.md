@@ -2718,7 +2718,7 @@ by running a det-declared test through them.
 ## 2026-09-12: parsing
 
 Decided: a grammar is a VALUE, an expression built from fourteen primitives and
-eleven combinators, and the library is one DCG that interprets it. The
+twelve combinators, and the library is one DCG that interprets it. The
 alternative, generating a DCG per grammar, was rejected: a grammar a program can
 build, inspect, store in a space and check with `grammar-is` is worth more than
 the one dispatch per node it costs, and `grammar-forms` publishes the vocabulary
@@ -2942,7 +2942,7 @@ Decided: no shell, and the header says so where a reader looks for one. lib_proc
 runs an executable with an argument vector; nothing in this library hands text to a
 shell to interpret.
 
-Verified: `sh engine/test.sh suites/libraries/lib_system.plt` passes 5 tests. The
+Verified: `sh engine/test.sh suites/libraries/lib_system.plt` passes 6 tests. The
 environment relation is checked against the host's own environ/1 over the same
 process, every platform key against the host's flag or predicate, the version text
 against its three numbers, and the working directory against what the process

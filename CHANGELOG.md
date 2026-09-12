@@ -14,7 +14,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `platform-keys`, `working-directory` and `change-directory!`. A variable that is
   not set has no answer, where an empty value answers the empty String, so unset and
   empty stay different states; the whole environment is a `lib_pairs` relation with
-  String names, which is what keeps it inert. `platform-info` takes one of eleven
+  String names, which is what keeps it inert. `platform-info` takes one of ten
   keys and refuses an unknown one with all of them listed; the host NAME is not
   among them, because `gethostname/1` is `library(socket)`'s and a whole network
   library is too much to link for one string. `env-all` rests on `library(unix)`'s
@@ -68,7 +68,7 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `grammar-parse-prefix`, `grammar-forms` and `grammar-is` over fourteen
   primitives (`lit`, `any`, `char-in`, `char-not-in`, `char-if`, `digits`,
   `integer`, `number`, `blanks`, `nonblanks`, `until`, `quoted`, `eos`, `rest`)
-  and eleven combinators (`cat`, `alt`, `many`, `many1`, `optional`, `sep-by`,
+  and twelve combinators (`cat`, `alt`, `many`, `many1`, `optional`, `sep-by`,
   `between`, `skip`, `map`, `as`, `token`, `ref`). A grammar is an expression, so
   a program builds and inspects one; every way it matches is an answer and a text
   it does not match is no answer, which is what makes `alt` and `optional`
