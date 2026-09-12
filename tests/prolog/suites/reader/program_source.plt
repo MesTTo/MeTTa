@@ -22,5 +22,18 @@ test(scoped_allocation_preserves_the_equation_home) :-
             metta_release_space(Child)),
         metta_release_space(Home)).
 
+test(source_omits_only_projected_occurrences) :-
+    setup_call_cleanup(
+        ('new-space'(Library), 'new-space'(Caller)),
+        ( 'add-atom'(Library, [':', documented, [->, 'Number']], true),
+          'add-atom'(Library, ['@doc', documented, ['@desc', "one"]], true),
+          'add-atom'(Caller, [from, Library], true),
+          'add-atom'(Caller, ['@doc', local, ['@desc', "two"]], true),
+          metta_host_source_atoms(Caller, Source),
+          msort(Source, Sorted),
+          msort([[from, Library], ['@doc', local, ['@desc', "two"]]], Expected),
+          assertion(Sorted == Expected),
+          assertion('get-atoms'(Caller, ['@doc', documented, ['@desc', "one"]])) ),
+        (metta_release_space(Caller), metta_release_space(Library))).
 
 :- end_tests(program_source).

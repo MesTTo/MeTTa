@@ -1271,6 +1271,68 @@ loader commits its writes. The Empty-ending arm leaves the root empty.
 Open: verify source lifetimes, implement authored source persistence and the
 portable converter, then resume order-dependent native-state diagnosis.
 
+## 2026-09-13: portable programs preserve their namespace graph
+
+Tried: the fresh library-home repair passes reference_loading,
+head_properties and refinements (`ai-classes-c7-reference-lifetimes.log`).
+The Python construction, grains, refinements, lint and reference files pass
+129 tests with `--randomly-seed=2926690707`
+(`ai-classes-c8-class-consumers.log`). This closes the scope reload failure.
+
+Decided: source/save(text) retain their direct boundary and enumerate authored
+occurrences. A FROM projection is derived metadata and is regenerated on load.
+The direct roundtrip and four CLI conversion tests pass
+(`ai-classes-c8-convert-graph.log`). The CLI writes a reconstruction program
+using let, new-space and add-atom; its output no longer relies on the Python
+process retaining a class home. The existing atomic UTF-8 sibling writer owns
+file publication for both source and program views.
+
+Rejected: using the fast image's owned-child tree as the complete program.
+Class homes are referenced spaces with an engine-root equation home, so the
+tree misses them (`ai-classes-c8-convert.log`: one failure, four passes).
+Capture closes over references and owned children with one identity index.
+Reference cycles are legal; library(ugraphs) orders the separate model edges.
+The existing fast-image relocation preserves shared node identities. Scoped,
+inherited and restricted models retain their declarations. Foreign providers
+and parametric identities require a restore contract and are refused.
+
+Rejected: embedding a deferred equation's raw &self, including under evalc.
+The reader rewrites an entire directive before evaluation, so the equation
+read the importing root (`ai-classes-c8-program-lexical.log`). The native
+stored_equation_source/4 already supplies the precise binding law, including
+the ordinary storing-space meaning when no exceptional binding row exists.
+Literal engine-root references are computed symbols, distinct from the
+directive's lexical receiver. Source-created spaces join the existing load
+resource journal through new-space; shared library allocation keeps its own
+owner.
+
+Tried: reference cycles, shared nodes, private lexical reads, native entity
+construction/mutation, repeated replacement, failed replacement and live
+object refusal pass all four tests in test_program_source.py
+(`ai-classes-c8-program-bindings.log`). The entity probe initially called the
+data constructor; make-ExportedCounter is the documented factory and works
+before and after export. The native allocation/projection suite passes two
+tests (`ai-classes-c8-program-native.log`).
+
+Tried: jscpd with --no-gitignore, --max-lines 10000 and --max-size 1mb analyzes
+1,703 Prolog lines and 1,231 Python lines and reports zero clones in each
+(`ai-classes-c8-duplication-checked.log`, `ai-classes-c8-duplication-python.log`).
+Earlier invocations selected no files because this worktree lives below an
+ignored ai-tmp directory; their zero exit is not duplication evidence.
+
+Found: a failed first file load leaves a bind! token pointing at its released
+child (`ai-classes-c8-program-registries.log`). Five other tests pass; the
+bidirectional-rule fixture also refused because its expansion needed noeval.
+That fixture is corrected. with_source_load/3 uses a source assertion journal,
+while register_metta_token/2 neither journals its assertions nor retains the
+binding it replaces. A whole-file transaction would conflict with the
+reference loader's explicit wait-in-transaction refusal; it is not an
+interchangeable repair.
+
+Open: repair source-owned token and translator registry restoration, verify
+release of referenced allocations when their importing context closes, run
+the complete persistence checks, then finish H and the remaining brief items.
+
 ## 2026-09-13: source ownership covers registrations and referenced spaces
 
 Decided: bind! stores ordered claims owned by the existing source assertion

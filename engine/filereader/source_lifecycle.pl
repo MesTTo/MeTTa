@@ -9,6 +9,12 @@
 % Guarantees: withdraw_source_load/3 preserves equal atoms owned by other loads
 %   or the caller [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
+% Guarantees: source atoms omit reference projections; portable program text
+%   rebuilds owned equation spaces and resolved bindings with fresh identities
+%   [tested: program_source; commit=WORKTREE].
+%   A translator rule with a missing derived equation is refused before text
+%   publication [tested: test_program_source_refuses_an_incomplete_translator_rule;
+%   commit=WORKTREE].
 % Owns resources: source claims, registrations and explicit space allocations
 %   retire with their load; retained spaces retain their source owner through
 %   seam:space_dependency/2 [tested:
@@ -55,6 +61,8 @@
 %   test_a_failed_first_file_load_restores_existing_callers,
 %   test_file_replacement_updates_aliases_and_failed_replacement_restores_them;
 %   commit=acad923476d21110870f235192757281a737ee71].
+
+:- use_module(library(ugraphs), []).
 
 % Static QLF files contain inert data, never executable native storage clauses.
 % Their temporary space mints at the same funnel as every ordinary write.
@@ -320,6 +328,9 @@ metta_fast_read_space(Space, Each) :-
 % [source: engine/spaces/native_matching.pl, get_native_atom/3; commit=3c64e2e24787362a5a5081513bc24b880711a1d7]
 metta_fast_atom_binding(Space, Atom, Bound, Token) :-
     metta_fast_read_space(Space, Each),
+    metta_direct_atom_binding(Each, Atom, Bound, Token).
+
+metta_direct_atom_binding(Each, Atom, Bound, Token) :-
     spaces:metta_require_token_read(Each, save),
     metta_source_occurrence(Each, Atom, Token, StoredRef),
     (   StoredRef \== none,
@@ -342,6 +353,176 @@ metta_host_source_atoms(Space, Atoms) :-
               -> 'get-atoms'(Each, Atom)
               ;  metta_source_occurrence(Each, Atom, _, _) ) ), Atoms).
 
+% Text conversion closes over referenced spaces as well as owned children.
+% Reference edges may cycle; creation-time model edges remain a DAG. The fast
+% image's occurrence capture and relocation preserve shared bindings in both.
+metta_host_program_source(Space, Result) :-
+    snapshot(( metta_program_capture_image(Space, Image, Problem),
+               ( Problem == none
+               -> metta_program_image(Image, Program), Result = program(Program)
+               ;  Result = Problem ) )).
+
+metta_program_capture_image(Root, Image, Problem) :-
+    empty_assoc(Empty),
+    metta_program_capture_nodes([Root], Root, Empty, 0, RawSpaces, NodeSpaces),
+    metta_token_snapshot(NodeSpaces, Tokens),
+    translator_rules:translator_rule_snapshot(NodeSpaces, Rules, Derived),
+    (   metta_fast_persisted_term(RawSpaces, Tokens, Term),
+        metta_host_atom_carries_object(Term)
+    ->  Problem = object(Term)
+    ;   metta_fast_persisted_term(RawSpaces, Tokens, Term),
+        metta_unwritable_symbol(Term, Bad)
+    ->  Problem = symbol(Bad)
+    ;   metta_fast_encode_image(fast_raw(none, RawSpaces, Tokens, Rules, Derived),
+                                NodeSpaces, Image),
+        Problem = none
+    ).
+
+metta_program_capture_nodes([], _, _, _, [], []).
+metta_program_capture_nodes([Space|Pending], Root, Seen, Next, Rows, Nodes) :-
+    (   get_assoc(Space, Seen, _)
+    ->  metta_program_capture_nodes(Pending, Root, Seen, Next, Rows, Nodes)
+    ;   metta_program_space_model(Space, Model0),
+        ( Space == Root -> Model = root ; Model = Model0 ),
+        findall(row(Atom, Bound, Token),
+                metta_program_atom_binding(Space, Atom, Bound, Token), Captured),
+        metta_fast_binding_rows(Captured, 1, Atoms, Bindings, Occurrences),
+        Rows = [raw_space(Next, Model, Space, Atoms, Bindings, Occurrences)|Rest],
+        Nodes = [Next-Space|RestNodes],
+        put_assoc(Space, Seen, Next, Seen1),
+        After is Next+1,
+        findall(Dependency,
+                ( member(Term, [Atoms, Bindings, Model]),
+                  metta_program_term_space(Term, Dependency),
+                  \+ spaces:metta_engine_owned_base_space(Dependency) ), Referenced),
+        metta_space_equation_children(Space, Children),
+        append([Referenced, Children, Pending], Queue),
+        metta_program_capture_nodes(Queue, Root, Seen1, After, Rest, RestNodes)
+    ).
+
+% A missing binding row means the ordinary storing-space law, not raw &self.
+% Resolve it before embedding the equation in a directive read by another space.
+metta_program_atom_binding(Space, Atom, Bound, Token) :-
+    spaces:metta_require_token_read(Space, save),
+    metta_source_occurrence(Space, Atom, Token, Ref),
+    (   Ref \== none, metta_fast_equation(Atom, _, _)
+    ->  stored_equation_source(Space, Atom, Resolved, Ref),
+        Bound = resolved(Resolved)
+    ;   Bound = none
+    ).
+
+metta_program_space_model(Space, Model) :-
+    (   seam:foreign_space(Space)
+    ->  throw(error(permission_error(snapshot, foreign_space, Space),
+                    context(metta_host_program_source/2,
+                            'a foreign space needs a provider restore contract')))
+    ;   \+ atom(Space)
+    ->  throw(error(permission_error(snapshot, parametric_space, Space),
+                    context(metta_host_program_source/2,
+                            'a parametric identity needs an explicit data serialization')))
+    ;   spaces:space_parent(Space, Parent)
+    ->  Model = [inherits, Parent]
+    ;   spaces:space_restricted(Space, Grants)
+    ->  Model = [restricted, [grants|Grants]]
+    ;   spaces:space_equation_home(Space, Home)
+    ->  Model = [scoped, Home]
+    ;   Model = [scoped, '&self']
+    ).
+
+metta_program_term_space(Term, Space) :-
+    nonvar(Term),
+    (   ground(Term), spaces:metta_space_identity_live(Term)
+    ->  Space = Term
+    ;   compound(Term), compound_name_arguments(Term, _, Arguments),
+        member(Argument, Arguments), metta_program_term_space(Argument, Space)
+    ).
+
+metta_program_image(metta_fast_image(_, Spaces, Tokens, Rules, Derived), Program) :-
+    maplist(metta_program_space(Derived), Spaces, SpaceGoals),
+    append(SpaceGoals, AtomGoals),
+    maplist(metta_program_token, Tokens, TokenGoals),
+    exclude(metta_program_derived_rule, Rules, SourceRules),
+    maplist(metta_program_rule, SourceRules, RuleGoals),
+    append([TokenGoals, AtomGoals, RuleGoals, [true]], Goals),
+    metta_program_creation_order(Spaces, Children),
+    metta_program_allocations(Children, [progn|Goals], Body0),
+    % The receiver's &self is lexical; an engine-root reference is literal.
+    % A computed symbol crosses the reader without becoming the receiver.
+    metta_host_substitute(['&self'-Global], Body0, Body),
+    Encoded = [let, '$metta_fast_space_ref'(0), '&self',
+               [let, Global, [atom_concat, "&self", ""], Body]],
+    findall(Id-_, member(space(Id, _, _, _, _), Spaces), Pairs),
+    ord_list_to_assoc(Pairs, IdVariables),
+    metta_fast_decode_term(IdVariables, Encoded, Program).
+
+metta_program_allocations([], Body, Body).
+metta_program_allocations([space(Id, Model, _, _, _)|Rows], Body,
+                          [let, '$metta_fast_space_ref'(Id),
+                           ['new-space', _, Model],
+                           Rest]) :-
+    metta_program_allocations(Rows, Body, Rest).
+
+metta_program_creation_order(Spaces, Children) :-
+    maplist(metta_program_node_pair, Spaces, Pairs),
+    ord_list_to_assoc(Pairs, Index),
+    findall(Parent-Id,
+            ( member(space(Id, Model, _, _, _), Spaces),
+              metta_program_term_node(Model, Parent) ), Edges),
+    pairs_keys(Pairs, Ids),
+    ugraphs:vertices_edges_to_ugraph(Ids, Edges, Graph),
+    ( ugraphs:top_sort(Graph, Order) -> true
+    ; throw(error(metta_program_model_cycle, context(metta_host_program_source/2,
+                                                   'space models must be acyclic'))) ),
+    delete(Order, 0, ChildIds),
+    maplist(metta_program_index_node(Index), ChildIds, Children).
+
+metta_program_node_pair(Node, Id-Node) :- Node = space(Id, _, _, _, _).
+metta_program_index_node(Index, Id, Node) :- get_assoc(Id, Index, Node).
+
+metta_program_term_node(Term, Id) :-
+    nonvar(Term),
+    ( Term = '$metta_fast_space_ref'(Id) -> true
+    ; compound(Term), compound_name_arguments(Term, _, Arguments),
+      member(Argument, Arguments), metta_program_term_node(Argument, Id) ).
+
+metta_program_space(Derived, space(Id, _, Atoms, Bindings, _), Goals) :-
+    findall(Source-Equation, member(derived(Source, Id, Equation), Derived), Generated),
+    metta_program_atoms(Atoms, Bindings, Generated, 1, Id, Goals).
+
+metta_program_atoms([], _, Generated, _, _, []) :-
+    (   Generated = []
+    ->  true
+    ;   Generated = [Source-_|_],
+        throw(error(permission_error(snapshot, incomplete_translator_rule, Source),
+                    context(metta_host_program_source/2,
+                            'a derived equation is missing; remove or re-register \c
+                             its translator rule before exporting')))
+    ).
+metta_program_atoms([Atom|Atoms], Bindings, Generated0, Index, Id, Goals) :-
+    (   select(_-Equation, Generated0, Generated), Equation =@= Atom
+    ->  Goals = Rest
+    ;   Generated = Generated0,
+        ( memberchk(binding(Index, Resolved), Bindings) -> Value = Resolved
+        ; Value = Atom ),
+        Goals = [['add-atom', '$metta_fast_space_ref'(Id), Value]|Rest]
+    ),
+    Next is Index+1,
+    metta_program_atoms(Atoms, Bindings, Generated, Next, Id, Rest).
+
+metta_program_token(token(Name, Id, Value),
+                    [let, Token, [atom_concat, Text, ""],
+                     [evalc, ['bind!', Token, Value], '$metta_fast_space_ref'(Id)]]) :-
+    atom_string(Name, Text).
+
+metta_program_rule(rule(Name, Declarations, Id, _),
+                   [evalc, ['add-translator-rule!', Name, Forms],
+                    '$metta_fast_space_ref'(Id)]) :-
+    maplist(translator_rules:translator_rule_declaration, Forms, Declarations).
+
+% install_inverse_equation/3 derives this registry row with its equation.
+% Emitting it independently would turn an internal direction into source syntax.
+metta_program_derived_rule(rule(_, Declarations, _, _)) :-
+    memberchk(direction(inverse(_)), Declarations).
 
 metta_fast_binding_rows([], _, [], [], []).
 metta_fast_binding_rows([row(Atom, Bound, Token)|Rows], Index, [Atom|Atoms],
@@ -386,7 +567,8 @@ metta_fast_index_spaces([Id-Space|Rows], SpaceIds0, SpaceIds) :-
     metta_fast_index_spaces(Rows, SpaceIds1, SpaceIds).
 
 metta_fast_encode_space(SpaceIds, raw_space(Id, Parent, _, Atoms, Bindings, Occurrences),
-                        space(Id, Parent, Encoded, EncodedBindings, Occurrences)) :-
+                        space(Id, EncodedParent, Encoded, EncodedBindings, Occurrences)) :-
+    metta_fast_encode_term(SpaceIds, Parent, EncodedParent),
     maplist(metta_fast_encode_term(SpaceIds), Atoms, Encoded),
     maplist(metta_fast_encode_term(SpaceIds), Bindings, EncodedBindings).
 

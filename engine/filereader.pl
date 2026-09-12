@@ -336,6 +336,7 @@
             metta_host_tagged_parse/2,
             metta_host_save_fast/3,
             metta_host_source_atoms/2,
+            metta_host_program_source/2,
             metta_host_load_fast/2,
             metta_host_fast_header/1,
             metta_static_import_image/2,
