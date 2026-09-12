@@ -3132,6 +3132,13 @@ how the reachability report and the constructed-goal scan still see a reader
 nothing calls by name. `docs/host-workarounds.md`, entry `swi-cleanup-window`,
 says why the write is trailed in the first place.
 
+The write side has two doors. `metta_with_trailed/3` restores the prior value
+on every answer, so each answer's continuation reads the enclosing context;
+`metta_with_trailed_enumeration/3` holds the value over the goal's whole
+enumeration and restores once it is finished, cut, failed or raised. A scope a
+caller COLLECTS through takes the second: the first charges one write per
+answer, which a million-answer query feels.
+
 **`seam:grounded_extra_type/2`, `seam:grounded_type_names/2` and
 `seam:grounded_class_type/2`** are how a host value gets a TYPE. The class walk
 itself is the host bridge's clause of `seam:grounded_class_type/2`, because

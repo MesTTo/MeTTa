@@ -64,6 +64,28 @@ test(failure_exception_and_nested_mutation_restore_the_same_outer_object) :-
           nb_current('$plunit_trailed', After), same_term(Outer,After),
           arg(1,After,before) )).
 
+% The enumeration door: the value covers the goal's whole enumeration, and
+% the prior one returns once the goal is finished, cut, failed or raised.
+% The last answer is the exception the host's own rule makes: a goal with no
+% choicepoint left has finished, so its cleanup has already run when that
+% answer's continuation reads the key. The per-answer primitive above reads
+% the prior value after EVERY answer; this is setup_call_cleanup/3's scope
+% and the shape the cut's own push/pop pair had.
+test(an_enumeration_scope_covers_every_answer_and_returns_once_finished) :-
+    metta_with_trailed('$plunit_trailed', outer,
+        ( findall(In-Between,
+              ( metta_engine:metta_with_trailed_enumeration('$plunit_trailed', inner,
+                    (member(N,[1,2]), nb_current('$plunit_trailed',In))),
+                nb_current('$plunit_trailed',Between), N > 0 ), Rows),
+          Rows == [inner-inner,inner-outer],
+          nb_current('$plunit_trailed',outer),
+          once(metta_engine:metta_with_trailed_enumeration('$plunit_trailed', inner, member(_,[a,b]))),
+          nb_current('$plunit_trailed',outer),
+          \+ metta_engine:metta_with_trailed_enumeration('$plunit_trailed', inner, fail),
+          nb_current('$plunit_trailed',outer),
+          catch(metta_engine:metta_with_trailed_enumeration('$plunit_trailed', inner, throw(witness)),witness,true),
+          nb_current('$plunit_trailed',outer) )).
+
 test(absent_contexts_are_inactive_after_success_and_absent_after_unwind) :-
     nb_delete('$plunit_trailed'),
     \+ metta_with_trailed('$plunit_trailed', inner, fail),

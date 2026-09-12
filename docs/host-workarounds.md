@@ -57,6 +57,9 @@ Workaround: `metta_with_trailed/3` in `engine/metta/control.pl` uses `b_setval/2
   resolving call to the read itself, so the trailed guard costs what the
   asserted guard it replaced cost: one inference for an absent, an inactive
   or a one-element context.
+  `metta_with_trailed_enumeration/3` beside it holds one value over a goal's
+  whole enumeration, its entry write registered after the cleanup and trailed
+  the same way, for a scope a collector pulls answers through.
   A root held by this primitive is never replaced by `nb_setval/2`, `nb_linkval/2` or
   `nb_delete/1`; mutable payloads use `nb_setarg/3` or `nb_linkarg/3`.
   Real clause scopes register cleanup first, then signal-mask assertion and

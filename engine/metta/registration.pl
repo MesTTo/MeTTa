@@ -291,8 +291,11 @@ with_metta_module(Module, Goal) :-
                             'space_module/2 maps a space to the module its \c
                              clauses are in; pass that, not the space')))
     ),
+    % The module covers every answer of Goal: the binding's solution
+    % generator runs under it, and its collector reads nothing between
+    % answers that the per-answer restore would serve.
     % Workaround: swi-cleanup-window - the execution module restores on unwind.
-    metta_with_trailed('$metta_module', Module, Goal).
+    metta_with_trailed_enumeration('$metta_module', Module, Goal).
 
 %Control signals pass through every recovery catch: a caught abort, limit,
 %alarm, or interrupt is a stopped program pretending it succeeded. This is

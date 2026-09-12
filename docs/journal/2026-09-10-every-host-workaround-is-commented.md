@@ -494,3 +494,53 @@ cut) and the owned classes journal's absolute path.
 Decided: the profile and read-shape probes the seam's measured tags name are
 tracked under tests/prolog/probes/, because the evidence lane refuses a
 claim whose command lives under ai-tmp/.
+
+## 2026-09-12, one write per answer
+
+Tried: the twins lane on 5dac08615 against the pristine cut -> example costs
+277 of 282 below the cut and twin costs 188 below, 85 above; the largest
+twin increases 03-matespace +1,061,546 (24,117,750 to 25,179,296),
+04-matespace2 +1,294,628, 01-thread_lib +12,393, 14-reflect_lib +3,056, all
+present at the wrapper stage ebeb82e0a too, so none from the reader door.
+Measured: the matespace twin profiled per predicate on both arms
+(`tests/prolog/probes/twin_profile.py`): the whole difference is
+system:b_setval/2, 1,585 calls on the cut against 1,064,767, one per
+tabled answer boundary; counted by key, 1,064,711 writes of '$metta_module'
+against the cut's 1,572, every one attributed to the frame of
+metta_with_trailed/3 under metta_py_solution/4, the binding's per-solution
+module scope.
+Mechanism: metta_with_trailed/3 writes the prior value back on EVERY exit,
+so a scope around a solution generator pays one write per answer and the
+trail reinstates the inner value on each redo. The cut's with_metta_module/2
+was setup_call_cleanup(b_setval(Module), Goal, b_setval(Previous)): the
+value held across the enumeration and the prior returned once, when the goal
+finished, cut, failed or raised. The engine's fuel scope has the same shape.
+The rule refusing b_setval/2 in a Setup made the module door migrate with
+the rest, and the evaluation context, whose push was already trailed,
+followed it for uniformity; a trailed setup write was never the leak, the
+unwinding undoes it.
+Rejected: opening the module scope once around the binding's collector, so
+the per-solution scope becomes a same-value no-op, because it costs +4
+inferences on a one-answer evaluation, the common shape, to save N on an
+N-answer one. Rejected: skipping the write when the value already held is
+the same atom, because registration.pl records that skip measured and taken
+out on 2026-08-16 (+2 on every annotated typed call), and it is not needed
+once the generator scopes take the enumeration shape.
+Decided: a second door beside the primitive, metta_with_trailed_enumeration/3:
+setup_call_cleanup(true, (b_setval(Key, Value), Goal), b_setval(Key, Previous)).
+The entry write comes after the cleanup is registered and is trailed, so a
+limit tripping at any port unwinds it; the cleanup writes the prior back
+once. with_metta_module/2 and metta_with_evaluation_context/2, the two doors
+that wrap generators, take it; every other scope keeps the per-answer
+primitive, cheaper by two inferences per deterministic entry. Not a seam
+row: only engine fragments call it; a seat that needs it publishes it with
+the scoreboard entry and the umbrella export.
+Measured: the matespace twin reads 24,117,731 through the enumeration door,
+19 below the cut, and its '$metta_module' writes 1,572, the cut's count.
+The engine rows: evaluate 558,915, match 265,602, match-skew 208,042,
+translate 314,835, every one below the cut (558,928 / 267,402 / 208,102 /
+315,275). Python rows that went below their pins with the reader door
+(foreign-match 779,234, eval-arith 275,234, run-source 435,234) read
+787,234, 279,234 and 439,234 through the enumeration door, still at or
+below the cut's pins; query-2k-rows, query-where, loop-1m and add-single at
+their pins on both trees.

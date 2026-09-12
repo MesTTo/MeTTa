@@ -49,6 +49,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- A trailed context has two doors: `metta_with_trailed/3` restores the prior
+  value on every answer, and `metta_with_trailed_enumeration/3` holds the
+  value over a goal's whole enumeration and restores once it is finished, cut,
+  failed or raised. The execution module and the evaluation context take the
+  second, which is the scope their cut's setup/cleanup pair had: a collector
+  that pulls a million answers through them pays one write, not a million.
 - A context reader is declared once, `:- seam:context_reader(Head, Key, Shape)`,
   and every call to it compiles to its `nb_current/2` read, so the trailed
   guards cost what the asserted guards they replaced cost: an absent, inactive

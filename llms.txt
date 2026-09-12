@@ -5158,4 +5158,13 @@ key, `:- seam:context_reader(Head, Key, Shape)` with `Shape` one of
 `value(Pattern)` or `stack(Pattern)`; the declaration defines the predicate and
 compiles every resolving call to the read, one inference for an absent,
 inactive or one-element context, the cost of the dynamic fact it replaced.
+
+`metta_with_trailed_enumeration(Key, Value, Goal)` is the same context over
+Goal's WHOLE enumeration: the value stays in place between answers and the
+prior value returns once Goal is finished, cut, failed or raised, which is
+`setup_call_cleanup/3`'s scope with its entry write registered first and
+trailed. Use it where a caller collects Goal's answers and reads nothing
+between them, and `metta_with_trailed/3` where each answer's continuation
+must see the enclosing value. The enumeration door costs one write per scope
+where the other costs one per answer.
 The `prolog-static` lane refuses state writes in cleanup-wrapper setup goals.
