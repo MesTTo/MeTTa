@@ -5,7 +5,7 @@
 % counterpart answers over generated text, a whole parse is the prefix parse whose
 % rest is empty, the combinator laws hold over generated grammars, a grammar may
 % recurse through ref, the classes are ASCII under any locale, and every malformed
-% form is named [tested: lib_parsing; commit=WORKTREE].
+% form is named [tested: lib_parsing; commit=7bdd5ace3f8272c2806ac0b925e56a78dc0894a8].
 % Owns resources: none; every value is a term.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

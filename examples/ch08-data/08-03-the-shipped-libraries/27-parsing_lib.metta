@@ -1,5 +1,5 @@
 ; Purpose: grammars as values, and what running one over text answers.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta; commit=7bdd5ace3f8272c2806ac0b925e56a78dc0894a8].
 !(import! &self (library lib_parsing))
 ; lib_unicode is beside it for the one primitive that takes a FUNCTION: the
 ; classes here are ASCII, and a Unicode class is (char-if f) over unicode-is.
