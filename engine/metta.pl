@@ -1162,7 +1162,7 @@ metta_platform_capability(https,
                           [library(http/http_ssl_plugin), library(ssl)],
                           'HTTPS client requests; plain HTTP remains available').
 % URI percent encoding is supplied by the native clib provider.
-% [tested: lib_uri:uri_capability_is_declared; commit=WORKTREE].
+% [tested: lib_uri:uri_capability_is_declared; commit=24b96f8ec8468bc97cec35e1d71ce689ede7fdcf].
 metta_platform_capability(uri, library(uri),
                           'lib_uri percent encoding and URI reference operations').
 metta_platform_capability(regex, library(pcre),

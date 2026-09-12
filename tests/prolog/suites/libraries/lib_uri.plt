@@ -1,7 +1,7 @@
 % Purpose: verify RFC3986 examples, component round trips and strict URI codecs.
 % Guarantees: the fixtures cover empty delimiters, reserved octets, Unicode
 % scalar boundaries, malformed input and generated references/query relations.
-% [tested: lib_uri; commit=WORKTREE].
+% [tested: lib_uri; commit=24b96f8ec8468bc97cec35e1d71ce689ede7fdcf].
 % Owns resources: the generated query test restores its native random state.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

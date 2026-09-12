@@ -1,5 +1,5 @@
 % Purpose: detect loss of a defined-empty URI query during native composition.
-% [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds; commit=24b96f8ec8468bc97cec35e1d71ce689ede7fdcf].
 :- use_module(library(uri), [uri_components/2]).
 main :-
     uri_components('http://host?q',Control), uri_components(ControlText,Control),

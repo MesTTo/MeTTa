@@ -1,5 +1,5 @@
 ; Purpose: compose URI components, resolve references and encode query relations.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/39-uri_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/39-uri_lib.metta; commit=24b96f8ec8468bc97cec35e1d71ce689ede7fdcf].
 !(import! &self (library lib_uri))
 !(import! &self (library lib_pairs))
 !(import! &self (library lib_encoding))

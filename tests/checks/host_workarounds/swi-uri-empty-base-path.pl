@@ -1,5 +1,5 @@
 % Purpose: detect a lost merged path when the native URI base has no path.
-% [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds; commit=24b96f8ec8468bc97cec35e1d71ce689ede7fdcf].
 :- use_module(library(uri), [uri_resolve/3]).
 main :-
     uri_resolve(g,'http://a/',Control),
