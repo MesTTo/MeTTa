@@ -1,7 +1,7 @@
 % Purpose: verify exact statistical identities, domains and numerical range.
 % Guarantees: finite exhaustive domains use centered reference calculations;
 % edge fixtures exercise ties, binary64 range and complete refusals.
-% [tested: lib_statistics; commit=WORKTREE].
+% [tested: lib_statistics; commit=84824f5cf870f5cd7ac89d6580093d0459d91a9b].
 % Owns resources: the arithmetic-policy test restores both host flags;
 % concurrent/3 joins all workers, and cancellation leaves only query-local terms.
 
