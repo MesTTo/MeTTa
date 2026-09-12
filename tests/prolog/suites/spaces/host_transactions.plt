@@ -138,3 +138,66 @@ test(reinstalling_one_door_keeps_the_existing_primitive,
 
 :- end_tests(host_transactions).
 
+:- begin_tests(host_transaction_completion).
+
+completion_outcome(commit, Goal) :- transaction(Goal).
+completion_outcome(rollback, Goal) :- \+ transaction((call(Goal), fail)).
+completion_outcome(snapshot, Goal) :- snapshot(Goal).
+completion_outcome(exception, Goal) :-
+    catch(transaction((call(Goal), throw(completion_test))), completion_test, true).
+completion_outcome(constraint, Goal) :-
+    \+ transaction(Goal, fail, host_completion_test).
+
+completion_note :-
+    ( current_transaction(_) -> State = parent ; State = outside ),
+    nb_getval(host_completion_results, Before),
+    nb_setval(host_completion_results, [State|Before]).
+
+test(completion_runs_after_every_native_outcome,
+     [forall(member(Outcome, [commit,rollback,snapshot,exception,constraint])),
+      setup(nb_setval(host_completion_results, [])),
+      cleanup(nb_delete(host_completion_results))]) :-
+    completion_outcome(Outcome,
+        host_transactions:host_transaction_on_exit(
+            plunit_host_transaction_completion:completion_note)),
+    nb_getval(host_completion_results, Results),
+    assertion(Results == [outside]).
+
+test(completion_observes_the_surviving_parent,
+     [forall(member(Outcome, [commit,rollback,snapshot,exception,constraint])),
+      setup(nb_setval(host_completion_results, [])),
+      cleanup(nb_delete(host_completion_results))]) :-
+    transaction((
+        completion_outcome(Outcome,
+            host_transactions:host_transaction_on_exit(
+                ( plunit_host_transaction_completion:completion_note,
+                  host_transactions:host_transaction_on_exit(
+                      plunit_host_transaction_completion:completion_note) ))),
+        nb_getval(host_completion_results, During),
+        assertion(During == [parent]))),
+    nb_getval(host_completion_results, Results),
+    assertion(Results == [outside,parent]).
+
+test(registration_outside_a_transaction_is_refused,
+     [throws(error(context_error(transaction), _))]) :-
+    host_transactions:host_transaction_on_exit(true).
+
+test(failed_reconciliation_is_loud,
+     [throws(error(goal_failed(_), _))]) :-
+    transaction(host_transactions:host_transaction_on_exit(fail)).
+
+completion_armed :-
+    host_transactions:host_transaction_on_exit(
+        nb_setval(host_completion_pending, false)),
+    nb_setval(host_completion_pending, true).
+
+test(an_inference_cut_cannot_skip_registered_completion,
+     [cleanup(nb_delete(host_completion_pending))]) :-
+    statistics(inferences, Before), transaction(completion_armed),
+    statistics(inferences, After), Last is After-Before+1,
+    forall(between(1, Last, Budget),
+           ( nb_setval(host_completion_pending, false),
+             ignore(call_with_inference_limit(transaction(completion_armed), Budget, _)),
+             nb_getval(host_completion_pending, Pending), assertion(Pending == false) )).
+
+:- end_tests(host_transaction_completion).
