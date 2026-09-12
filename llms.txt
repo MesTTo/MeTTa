@@ -4921,7 +4921,7 @@ across several operations, which is what they are for.
 <!-- end generated library roster -->
 
 Library contracts: `lib_builtin_types` the declared type surface of the shipped
-builtins; `lib_combinatorics` range, take, choose-k, and exact independent
+builtins; `lib_combinatorics` range and stepped range, take, choose-k, permutations, subsets, Cartesian products and powers, exact factorial, binomial and falling counts, and exact independent
 weighted-subset posterior marginals; `lib_conformance` proves
 a foreign space provider before its users find out; `lib_constraints` CLP(Q)
 over rationals and CLP(B) over booleans; `lib_csv` streams CSV rows through the foreign space seam; `lib_crypto` hashes and secure

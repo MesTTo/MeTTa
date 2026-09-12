@@ -9,6 +9,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_combinatorics` adds `permutations`, `subsets`, `tuples`,
+  `cartesian-power` and `range-step`, each answering one choice per answer, and
+  the exact counts `factorial`, `binomial` and `permutation-count`, which never
+  build what they count. Its two weighted-subset heads now declare their modes,
+  so the whole library's face is generated from the source.
 - `lib_datastructures` adds a sorted map and a priority queue as immutable
   values: `map-empty`, `map-put`, `map-get`, `map-get-or`, `map-remove`,
   `map-has`, `map-size`, `map-keys`, `map-values`, `map-pairs`,

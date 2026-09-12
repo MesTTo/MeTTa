@@ -10,7 +10,7 @@ beside its definitions.
 | library | names | documented |
 |---|---|---|
 | lib_builtin_types | 193 | 0 |
-| lib_combinatorics | 8 | 0 |
+| lib_combinatorics | 16 | 10 |
 | lib_conformance | 2 | 0 |
 | lib_constraints | 5 | 0 |
 | lib_crypto | 12 | 12 |
@@ -47,6 +47,157 @@ beside its definitions.
 | lib_torch | 20 | 19 |
 | lib_vector | 13 | 13 |
 | lib_zar | 4 | 0 |
+
+## lib_combinatorics
+
+### `binomial`
+
+*lib_combinatorics.metta:53*
+
+```metta
+(: binomial (-> Number Number Number))
+```
+
+How many unordered choices of Chosen items there are among Count of them, exactly. Choosing more than there are is 0, and choosing none is 1. The multiplication runs over the smaller side and divides as it goes, so the intermediate values stay near the answer rather than reaching Count factorial.
+
+1. Count
+2. Chosen
+
+Returns: Result
+
+### `cartesian-power`
+
+*lib_combinatorics.metta:59*
+
+```metta
+(: cartesian-power (-> Expression Number Expression))
+```
+
+Every tuple of that length over the items, repetition allowed, one per answer: the Cartesian power, so k from n items gives n^k answers. Length zero gives one answer, the empty tuple, whatever the items are.
+
+1. Items
+2. Length
+
+Returns: Tuple
+
+### `factorial`
+
+*lib_combinatorics.metta:65*
+
+```metta
+(: factorial (-> Number Number))
+```
+
+The product of 1 through Number, exactly, with 0 giving 1. A negative number raises, because the factorial of one is not a whole number.
+
+1. Number
+
+Returns: Result
+
+### `permutation-count`
+
+*lib_combinatorics.metta:71*
+
+```metta
+(: permutation-count (-> Number Number Number))
+```
+
+How many ordered choices of Chosen items there are among Count of them, exactly: Count falling by one, Chosen times. Choosing more than there are is 0, and choosing none is 1.
+
+1. Count
+2. Chosen
+
+Returns: Result
+
+### `permutations`
+
+*lib_combinatorics.metta:77*
+
+```metta
+(: permutations (-> Expression Expression))
+```
+
+Every ordering of the items, one per answer, in the host's own order: the items as given first, then the orderings that swap the latest elements. A repeated item makes repeated answers, because a permutation counts positions and not values. Empty items have exactly one permutation, the empty one.
+
+1. Items
+
+Returns: Permutation
+
+### `range-step`
+
+*lib_combinatorics.metta:83*
+
+```metta
+(: range-step (-> Number Number Number Number))
+```
+
+The numbers from From towards To, one per answer, moving by Step and stopping before To, which is excluded as it is in range. A negative step counts down; a zero step raises, because it would never arrive. A step that already points away from To has no answers.
+
+1. From
+2. To
+3. Step
+
+Returns: Value
+
+### `subsets`
+
+*lib_combinatorics.metta:89*
+
+```metta
+(: subsets (-> Expression Expression))
+```
+
+Every subset, one per answer, each keeping the items' own order: the powerset, so n items give 2^n answers, starting with the whole set and ending with the empty one. A repeated item is a distinct position, so (a a) has four subsets.
+
+1. Items
+
+Returns: Subset
+
+### `tuples`
+
+*lib_combinatorics.metta:95*
+
+```metta
+(: tuples (-> Expression Expression))
+```
+
+One element chosen from each set, one tuple per answer: the Cartesian product, in the order that varies the LAST set fastest. Any empty set means no answers, and no sets at all mean one answer, the empty tuple.
+
+1. Sets
+
+Returns: Tuple
+
+### `weighted-subset-mass-independent`
+
+*lib_combinatorics.metta:101*
+
+```metta
+(: weighted-subset-mass-independent (-> Expression Number Expression))
+```
+
+The exact probability that the losses of the independently chosen candidates add up to Target, as the reduced (ratio Numerator Denominator). Each candidate is (candidate Id Loss (ratio Numerator Denominator)) with a nonnegative integer loss, and equal partial sums are merged at every layer rather than enumerated, so the work is bounded by the target and not by 2^n. A target that cannot be reached has mass (ratio 0 1).
+
+1. Candidates
+2. Target
+
+Returns: Ratio
+
+### `weighted-subset-posterior-independent`
+
+*lib_combinatorics.metta:107*
+
+```metta
+(: weighted-subset-posterior-independent (-> Expression Number Expression))
+```
+
+The observation's own mass and every candidate's posterior probability of having been chosen given that the losses add up to Target, as (subset-posterior Mass ((candidate-posterior Id Ratio) ...)) in the candidates' own order. The marginals come from one forward and one backward pass rather than from enumerating subsets. Conditioning on a target of zero mass refuses and names weighted-subset-mass-independent as the operation that still reports reachability.
+
+1. Candidates
+2. Target
+
+Returns: Posterior
+
+Undocumented: `choose2`, `choose2l`, `chooseK`, `chooseKl`, `range`, `takeK`
 
 ## lib_crypto
 

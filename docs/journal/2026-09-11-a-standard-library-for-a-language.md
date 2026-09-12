@@ -2306,3 +2306,41 @@ new face, 236,727 to 291,869 and 208,121 to 262,458, and the 4,101-inference
 OVERRUN the first one declared is gone: the face's own load now costs both sides
 more than the distance the declaration was covering, so the twin fits its band
 without one. Logs: ai-tmp/ai-lib3-ds-{suite2,example,twins-final,ft}.log.
+
+## 2026-09-12: combinatorics
+
+Decided: eight heads, and not one that already had a name. `chooseK` and
+`chooseKl` are the k-subsets, so no `combinations`; what was missing is every
+ORDERING (`permutations`), every subset (`subsets`, the powerset), one element
+from each of several sets (`tuples`, the Cartesian product), the same set k times
+(`cartesian-power`), a stride walk (`range-step`), and the three exact counts
+`factorial`, `binomial` and `permutation-count`. The counts never build what they
+count: `binomial` multiplies over the smaller side and divides as it goes, so a
+52-choose-5 costs five multiplications and never reaches 52 factorial.
+
+Tried: generating the face -> `weighted-subset-mass-independent/3: add a PlDoc
+description and typed mode`. Once one export is described the generator requires
+every non-private export to be, which is the drift rule working: the two
+weighted-subset heads now declare their modes and the whole library's face is
+generated, so its authored import line is gone.
+
+Verified: `sh engine/test.sh suites/libraries/lib_combinatorics_surface.plt
+suites/libraries/lib_combinatorics.plt` passes 11 tests with 73 subcases and the
+5 existing weighted-subset tests. Each enumeration is counted and compared with
+its closed form: permutations against factorial for 0 to 6 items, subsets against
+2^n for 0 to 8, the subsets of each size against binomial for 0 to 7, a power
+against size^length for 0 to 5, binomial against Pascal's rule for every pair up
+to 20, and permutation-count against binomial times factorial up to 15. Every
+answer is distinct where the structure says it should be, and each subset is an
+ordered sublist rather than a permutation of one. Two findings on the way:
+`numlist(1, 0, _)` FAILS rather than answering the empty list, so the size-zero
+case of three generators needed its own sequence, and a `=` inside assertion/1
+left the posterior's parts unbound, which is the binding-discard trap this suite
+hit once before.
+
+Measured: the example proves 49 claims, 27 of them new, and its twin the same 49
+with equal stored content: 118,355 MeTTa against 122,318 Python inferences,
+minimum of three fresh processes, re-pinned from 86,991. The 3,945-inference
+OVERRUN the twin declared is gone: the enumerations and counts now cost both
+sides more than the distance it was covering. Logs:
+ai-tmp/ai-lib3-comb-{suite2,example,twin2}.log.
