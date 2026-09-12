@@ -16,6 +16,8 @@
 %   - consulted source units are attributed to their umbrella subsystem rather
 %     than becoming accidental new layer nodes
 %     [tested: consulted_source_units_are_attributed_to_their_umbrella; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
+%   - a multifile callback's private calls stay with its implementing subsystem
+%     [tested: multifile_callbacks_keep_their_implementation_owners; commit=WORKTREE].
 %   - lib_tabling itself is in the measured graph and reaches exactly the four
 %     reviewed engine surfaces named by reaches/3
 %     [tested: lib_tabling_reaches_only_its_four_declared_surfaces]
@@ -119,6 +121,13 @@ test(consulted_source_units_are_attributed_to_their_umbrella) :-
     assertion(Base == 'filereader.pl'),
     assertion(Definer == filereader),
     assertion(Indicator == metta_source_changed/1).
+
+test(multifile_callbacks_keep_their_implementation_owners) :-
+    measured,
+    assertion(\+ layer_edge('specializer.pl', support_invalidation_action/1,
+                            'metta.pl', _, metta_reference_queue/1)),
+    assertion(layer_edge('materialize.pl', support_invalidation_action/1,
+                         'spaces.pl', spaces, metta_module_space/2)).
 
 % The contract's own shape, said out loud: the engine is one large mutual
 % recursion plus whatever sits outside it. A reader who expects a layer order

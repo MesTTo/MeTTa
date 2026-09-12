@@ -154,6 +154,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   roots until reconciliation finishes. Shared context scopes unwind with the
   engine trail. Native wrapper reconstruction preserves distinct defining
   closures, and transaction existence checks avoid SWI's repeating ancestor.
+- Class declaration discovery selects indexed type rows before reading the
+  population. The layering check attributes shared callback bodies to their
+  implementing files and verifies the reference publisher's native import API.
 - Python profiling collects native sampler data directly, so it works when
   SWI's optional graphical profiler is installed and opens no viewer.
 - Annotated field contracts preserve their metadata, report failed value

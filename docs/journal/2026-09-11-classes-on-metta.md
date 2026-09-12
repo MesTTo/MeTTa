@@ -1096,6 +1096,37 @@ suites/spaces/references.plt suites/reader/reference_loading.plt` passes
 (`ai-tmp/ai-classes-c5-transaction-repair.log`). The tracked host reproduction
 prints `present` (`ai-tmp/ai-classes-c5-transaction-host-repro.log`).
 
+## 2026-09-12: callback clauses retain their implementing subsystem
+
+Tried: the full engine battery's layering failure attributed the new reference
+callback to specializer, the first file contributing to
+`support_graph:support_invalidation_action/1`. The same walker already used
+the clause's exact location for lib_tabling. Apply that rule to every measured
+file. The regression proves that materialization's callback reaches spaces
+and that specializer does not reach the private reference queue.
+
+Decided: keep `metta_reference_queue/1` private. Export the existing native
+import query `spaces:metta_existing_import/3` for reference publication.
+Declare the actual completion-journal and trailed-scope dependencies. Correct
+attribution removes four phantom callback edges, adds spaces' own error-writer
+edge, and makes ext_points and tracer leaves of the measured component.
+
+Tried: `sh engine/test.sh suites/seams/layering.plt` passes all 7 tests at
+pristine `c75181adc` and all 8 after repair, both exit 0
+(`ai-tmp/ai-classes-c5-layering-{control,complete}.log`). The initial repaired
+walk found the stale edges; its next run named the now-smaller component
+(`ai-tmp/ai-classes-c5-layering-{first,repaired}.log`). The final contract
+matches the graph and its planted violations still fail as intended.
+
+Tried: `jscpd --format prolog,python --formats-exts 'prolog:pl,plt;python:py'
+--max-lines 100000 --max-size 10mb --min-lines 5 --min-tokens 50
+--reporters console,json --noTips --output ai-tmp/ai-classes-c5-jscpd-complete`
+over `git diff --name-only HEAD -- engine extensions/python/metta` inspects
+23 files and reports four clones, 36 lines, 0.17%
+(`ai-tmp/ai-classes-c5-jscpd-complete.log`). Two are generated binding bodies
+and their authoritative templates; the other two are unchanged fragments in
+factories.py and terms.pl. No extraction serves this change.
+
 ## 2026-09-12: whole-suite integration and profiling data
 
 Tried: `sh engine/test.sh` passes 114 suite processes, 2,828 tests and 1,668
