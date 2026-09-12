@@ -2,7 +2,7 @@
 % against the host's own arithmetic.
 % Guarantees: every enumeration answers each choice exactly once and as many
 % times as its count says, and each count agrees with a second way of computing
-% it [tested: lib_combinatorics_surface; commit=WORKTREE].
+% it [tested: lib_combinatorics_surface; commit=08b21037caed98b220eb50b39630b32bea62e535].
 % Owns resources: none; every answer is a term.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
