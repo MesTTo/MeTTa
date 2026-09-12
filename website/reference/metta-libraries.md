@@ -39,6 +39,7 @@ beside its definitions.
 | lib_reflect | 19 | 10 |
 | lib_regex | 18 | 18 |
 | lib_roman | 36 | 0 |
+| lib_sets | 13 | 13 |
 | lib_soft | 9 | 1 |
 | lib_spaces | 10 | 5 |
 | lib_strategy | 24 | 0 |
@@ -2143,7 +2144,7 @@ Returns: Done
 
 ### `while`
 
-*lib_functional.metta:49*
+*lib_functional.metta:48*
 
 ```metta
 (: while (-> Atom Atom %Undefined%))
@@ -2158,7 +2159,7 @@ Returns: each body result
 
 ### `repeat`
 
-*lib_functional.metta:53*
+*lib_functional.metta:52*
 
 ```metta
 (: repeat (-> Number Atom %Undefined%))
@@ -2173,7 +2174,7 @@ Returns: each body result
 
 ### `unless`
 
-*lib_functional.metta:57*
+*lib_functional.metta:56*
 
 ```metta
 (: unless (-> Atom Atom %Undefined%))
@@ -2188,7 +2189,7 @@ Returns: the body's answers, or none
 
 ### `apply-to`
 
-*lib_functional.metta:69*
+*lib_functional.metta:68*
 
 ```metta
 (: apply-to (-> %Undefined% Expression %Undefined%))
@@ -2203,7 +2204,7 @@ Returns: Result
 
 ### `chunk`
 
-*lib_functional.metta:75*
+*lib_functional.metta:74*
 
 ```metta
 (: chunk (-> Expression Number Expression))
@@ -2218,7 +2219,7 @@ Returns: Chunks
 
 ### `drop`
 
-*lib_functional.metta:81*
+*lib_functional.metta:80*
 
 ```metta
 (: drop (-> Expression Number Expression))
@@ -2233,7 +2234,7 @@ Returns: Rest
 
 ### `flatten-deep`
 
-*lib_functional.metta:87*
+*lib_functional.metta:86*
 
 ```metta
 (: flatten-deep (-> Expression Expression))
@@ -2247,7 +2248,7 @@ Returns: Flat
 
 ### `flatten-once`
 
-*lib_functional.metta:93*
+*lib_functional.metta:92*
 
 ```metta
 (: flatten-once (-> Expression Expression))
@@ -2261,7 +2262,7 @@ Returns: Flat
 
 ### `group-by`
 
-*lib_functional.metta:99*
+*lib_functional.metta:98*
 
 ```metta
 (: group-by (-> %Undefined% Expression Expression))
@@ -2276,7 +2277,7 @@ Returns: Groups
 
 ### `partition`
 
-*lib_functional.metta:105*
+*lib_functional.metta:104*
 
 ```metta
 (: partition (-> %Undefined% Expression Expression))
@@ -2291,7 +2292,7 @@ Returns: Sides
 
 ### `pipe`
 
-*lib_functional.metta:111*
+*lib_functional.metta:110*
 
 ```metta
 (: pipe (-> Atom %Undefined% %Undefined%))
@@ -2306,7 +2307,7 @@ Returns: Result
 
 ### `scan`
 
-*lib_functional.metta:117*
+*lib_functional.metta:116*
 
 ```metta
 (: scan (-> %Undefined% %Undefined% Expression Expression))
@@ -2322,7 +2323,7 @@ Returns: Running
 
 ### `sort-by`
 
-*lib_functional.metta:123*
+*lib_functional.metta:122*
 
 ```metta
 (: sort-by (-> %Undefined% Expression Expression))
@@ -2337,7 +2338,7 @@ Returns: Sorted
 
 ### `unfold`
 
-*lib_functional.metta:129*
+*lib_functional.metta:128*
 
 ```metta
 (: unfold (-> %Undefined% %Undefined% Expression))
@@ -2352,7 +2353,7 @@ Returns: Items
 
 ### `unzip`
 
-*lib_functional.metta:135*
+*lib_functional.metta:134*
 
 ```metta
 (: unzip (-> Expression Expression))
@@ -2366,7 +2367,7 @@ Returns: Sides
 
 ### `window`
 
-*lib_functional.metta:141*
+*lib_functional.metta:140*
 
 ```metta
 (: window (-> Expression Number Expression))
@@ -2381,7 +2382,7 @@ Returns: Windows
 
 ### `zip`
 
-*lib_functional.metta:147*
+*lib_functional.metta:146*
 
 ```metta
 (: zip (-> Expression Expression Expression))
@@ -3026,6 +3027,199 @@ Return alternating skipped and matched Strings, beginning and ending with a skip
 2. Text
 
 Returns: Parts
+
+## lib_sets
+
+### `set-difference`
+
+*lib_sets.metta:23*
+
+```metta
+(: set-difference (-> Expression Expression Expression))
+```
+
+The elements of the first that the second does not hold. The order matters: this is not symmetric, and set-symmetric-difference is the one that is.
+
+1. Left
+2. Right
+
+Returns: Rest
+
+### `set-disjoint`
+
+*lib_sets.metta:29*
+
+```metta
+(: set-disjoint (-> Expression Expression Bool))
+```
+
+Whether they share no element. The empty set is disjoint from everything, including itself.
+
+1. Left
+2. Right
+
+Returns: Answer
+
+### `set-insert`
+
+*lib_sets.metta:35*
+
+```metta
+(: set-insert (-> Expression %Undefined% Expression))
+```
+
+The set with the element added, which is the set itself when it was already there. The input is left alone, as every operation here leaves its inputs.
+
+1. Set
+2. Element
+
+Returns: Bigger
+
+### `set-intersection`
+
+*lib_sets.metta:41*
+
+```metta
+(: set-intersection (-> Expression Expression Expression))
+```
+
+The elements in both, once.
+
+1. Left
+2. Right
+
+Returns: Common
+
+### `set-intersection-all`
+
+*lib_sets.metta:47*
+
+```metta
+(: set-intersection-all (-> Expression Expression))
+```
+
+The elements every set in the collection holds. A collection of no sets has no intersection to speak of, so that raises rather than answering a universe it cannot name.
+
+1. Sets
+
+Returns: Common
+
+### `set-is`
+
+*lib_sets.metta:53*
+
+```metta
+(: set-is (-> %Undefined% Bool))
+```
+
+Whether the value is a set: an expression in the standard order of terms with no duplicates. This is the question every other head asks before it merges, asked out loud.
+
+1. Value
+
+Returns: Answer
+
+### `set-member`
+
+*lib_sets.metta:59*
+
+```metta
+(: set-member (-> Expression %Undefined% Bool))
+```
+
+Whether the element is in the set, compared as a TERM rather than unified: a variable is not a member of a set of numbers, where member/2 would bind it to the first one. The comparison is the standard order, so the search stops at the first element that is larger.
+
+1. Set
+2. Element
+
+Returns: Answer
+
+### `set-of`
+
+*lib_sets.metta:65*
+
+```metta
+(: set-of (-> Expression Expression))
+```
+
+The set of an expression's elements: the same elements in the standard order of terms, each once. This is the only head that sorts, because every other one answers a set already.
+
+1. Items
+
+Returns: Set
+
+### `set-remove`
+
+*lib_sets.metta:71*
+
+```metta
+(: set-remove (-> Expression %Undefined% Expression))
+```
+
+The set without the element, which is the set itself when it was not there, so removing something absent is not an error.
+
+1. Set
+2. Element
+
+Returns: Smaller
+
+### `set-subset`
+
+*lib_sets.metta:77*
+
+```metta
+(: set-subset (-> Expression Expression Bool))
+```
+
+Whether every element of the first is in the second. A set is a subset of itself, and the empty set is a subset of everything.
+
+1. Left
+2. Right
+
+Returns: Answer
+
+### `set-symmetric-difference`
+
+*lib_sets.metta:83*
+
+```metta
+(: set-symmetric-difference (-> Expression Expression Expression))
+```
+
+The elements exactly one of them holds, which is the union of the two differences and the same set whichever way round the arguments go.
+
+1. Left
+2. Right
+
+Returns: Either
+
+### `set-union`
+
+*lib_sets.metta:89*
+
+```metta
+(: set-union (-> Expression Expression Expression))
+```
+
+Every element of either, once: one merge down both sets rather than a scan of one for each element of the other.
+
+1. Left
+2. Right
+
+Returns: Union
+
+### `set-union-all`
+
+*lib_sets.metta:95*
+
+```metta
+(: set-union-all (-> Expression Expression))
+```
+
+The union of a collection of sets, in one pass over all of them: the fold a caller would otherwise write, and the empty collection's union is the empty set.
+
+1. Sets
+
+Returns: Union
 
 ## lib_soft
 

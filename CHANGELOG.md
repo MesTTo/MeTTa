@@ -9,6 +9,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_sets` is a new library of sets as ordered expressions: `set-of`,
+  `set-is`, `set-member`, `set-insert`, `set-remove`, `set-union`,
+  `set-intersection`, `set-difference`, `set-symmetric-difference`,
+  `set-union-all`, `set-intersection-all`, `set-subset` and `set-disjoint`. A
+  set IS an expression in the standard order of terms with no duplicates, so
+  `()` is the empty set, `size-atom` is the cardinality and `==` is equality;
+  each merge is one pass down both sets. Membership compares terms rather than
+  unifying, so a variable is not a member of a set of numbers, and every head
+  refuses an argument that is not a set, which is where the host's own merge
+  answers `(2 1 1)` for `(2 1)` and `(1)` with nothing said.
 - `lib_functional` is a new library of the collection operations a program
   writes over and over, each one pass over an expression: `zip`, `unzip`,
   `drop`, `chunk`, `window`, `flatten-once`, `flatten-deep`, `partition`,

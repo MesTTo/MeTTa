@@ -2479,3 +2479,46 @@ extension artifacts the same control read 17,889 for 11-patrick, which is the
 isolated-checkout trap the 2026-09-05 benchmark thread already recorded: a
 missing seat artifact silently changes the boot. Logs:
 ai-tmp/ai-lib3-cut-patrick-{control,lane}.log, ai-tmp/ai-lib3-patrick-bisect.log.
+
+## 2026-09-12: sets
+
+Decided: a set IS an expression in the standard order of terms with no
+duplicates, which is SWI's own ordered-set representation, so the library
+introduces no value type of its own. That decides three heads out of existence:
+the empty set is `()`, the cardinality is `size-atom`, and equality is `==`,
+because the representation is canonical. `ord_seteq/2` exists upstream only
+because its inputs may be unsorted; ours never are.
+
+Decided: every head that takes a set CHECKS it, which is the library's whole
+contribution over `library(ordsets)`. The host's merges read their arguments as
+already ordered and answer nonsense otherwise: `ord_union([2,1], [1], U)` gives
+`U = [2,1,1]`, which is not even a set, with nothing printed. The refusal names
+the head and names `set-of` as the remedy.
+
+Decided: hyphenated, domain-qualified names, which the functional row's flatten
+finding makes mandatory rather than stylistic: `union/3`, `intersection/3`,
+`subtract/3` and `subset/2` are all in `library(lists)`, which the engine module
+imports whole, and `prelude` holds MeTTa's own `union` and `intersection` besides
+[source: engine/prelude.pl, the Decides field naming both].
+
+Rejected: a second spelling of lib_roman's `/?\`, `\?` and `\?/`. Those take the
+COMPARISON as an argument and work over unordered lists in quadratic time; these
+merge two ordered sets in one pass. Both libraries name the other's trade.
+Rejected: a powerset head, because lib_combinatorics' `subsets` enumerates one
+choice per answer already.
+
+Verified: `sh engine/test.sh suites/libraries/lib_sets.plt` passes 8 tests with
+198 subcases. Each merge is checked against its definition as a filter over
+`member/2` for 300 generated set pairs, `set-of` against `sort/4`'s own dedup and
+a hand count for 100 draws, and every answer of every head against `is_ordset/1`.
+The laws are checked over 200 generated triples against a ten-element universe:
+commutativity of both merges, associativity of the union, distribution of
+intersection over union, De Morgan, the symmetric difference as the union of the
+two differences, and subset and disjointness against their definitions.
+Insertion and removal are checked to BE the merges with a one-element set.
+
+Measured: the example proves 41 claims and its twin the same 41, 63,725 MeTTa
+against 71,496 Python inferences, minimum of three fresh processes, a first pin.
+The twin declares an OVERRUN of 1,399: the example nests each law claim in one
+evaluation, where Python reads the same law as separate calls whose intermediate
+sets cross into the host and back. Logs: ai-tmp/ai-lib3-sets-{example,suite}.log.
