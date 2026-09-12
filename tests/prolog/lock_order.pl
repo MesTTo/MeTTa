@@ -5,41 +5,41 @@
    first time each of its edges is walked rather than the day the timing lines
    up, which is what a validator adds over a detector
    [source: https://github.com/torvalds/linux/blob/v6.10/Documentation/locking/lockdep-design.rst;
-   commit=WORKTREE].
+   commit=85d5c97fcc249810cb3dafea75506311796969d0].
    Assumes:
    - it is loaded before the suite it records (engine/test.sh passes it with
      -s), so the engine's boot-time registrations and every later acquisition
      pass through the wrappers; library(prolog_wrap) wraps a system predicate
      and a predicate that is defined later
      [tested: lock_order:a_registration_carries_the_channel_lock_into_its_callback;
-     commit=WORKTREE]
+     commit=85d5c97fcc249810cb3dafea75506311796969d0]
    - a callback runs on the thread whose event fired, with that channel's
      event-list lock held
      [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-event.c#L415-L470;
-     commit=WORKTREE]
+     commit=85d5c97fcc249810cb3dafea75506311796969d0]
    - prolog_current_frame/1 and prolog_frame_attribute/3 mark the frame they
      inspect for frame_finished, so an instrument that inspected frames to
      name an acquirer would raise the events its own callback wrapper then
      records, without end
      [measured 2026-09-13: 105 of 118 suites died at a C-stack depth of 4476
      nested frame_finished callbacks under a frame-walking attribution;
-     command=sh engine/test.sh; commit=WORKTREE]
+     command=sh engine/test.sh; commit=85d5c97fcc249810cb3dafea75506311796969d0]
    Guarantees:
    - acquiring B while holding A records A -> B once, with the goal B was
      first taken for; registering while holding A records
      A -> event_list(Channel) with the closure; a callback holds
      event_list(Channel) while it runs; a mutex the thread already holds
      records nothing; a trylock records no order, because it cannot wait
-     [tested: lock_order; commit=WORKTREE]
+     [tested: lock_order; commit=85d5c97fcc249810cb3dafea75506311796969d0]
    - lock_order_report/0 prints every cycle with the goal each edge was first
      taken for, then the line `lock-order: cycle` when one is not in the
      inventory, or one line with the counts when every cycle is inventoried
      or there is none, so a suite whose output has neither ran unrecorded;
      lock_order_audit/1 fails naming every inventoried cycle a whole run
      showed nowhere, so the inventory can only shrink
-     [tested: lock_order; commit=WORKTREE]
+     [tested: lock_order; commit=85d5c97fcc249810cb3dafea75506311796969d0]
    - nothing here inspects a frame, so the recorder raises no event of its
-     own [source: tests/prolog/lock_order.pl, every clause; commit=WORKTREE]
+     own [source: tests/prolog/lock_order.pl, every clause; commit=85d5c97fcc249810cb3dafea75506311796969d0]
    - the held stack is a trailed write, so a goal the host abandons, by an
      inference limit inside a callback or a thread signal that throws at the
      next call port, unwinds its own entry; nothing here runs in a
@@ -48,16 +48,16 @@
      setup_call_cleanup/3, spaces_receipt_limits leaked 130 entries per test
      and spent 96 of its 130 seconds copying the stack in nb_setval/2;
      command=sh engine/test.sh suites/spaces/receipt_limits.plt under a
-     profile and a depth probe; commit=WORKTREE]
+     profile and a depth probe; commit=85d5c97fcc249810cb3dafea75506311796969d0]
      [tested: lock_order:an_abandoned_acquisition_unwinds_its_own_entry;
-     commit=WORKTREE]
+     commit=85d5c97fcc249810cb3dafea75506311796969d0]
    - a registration keeps its closure an atom: the generated predicate that
      stands in for it is registered by name, so the host resolves a procedure
      rather than building a closure term on the frame it is delivering for
      [measured 2026-09-13: with compound stand-ins, reference_loading died at
      signal 11 in the cell the swi-query-frame-discarded-on-engine-destroy
      entry names, printing the closure as garbage; command=sh engine/test.sh
-     suites/reader/reference_loading.plt; commit=WORKTREE]
+     suites/reader/reference_loading.plt; commit=85d5c97fcc249810cb3dafea75506311796969d0]
    Owns resources: the seven wrappers and the edge table, for the life of the
      process.
    Guarded by: lock_order_edge/3 is a shared dynamic predicate written under
@@ -70,7 +70,7 @@
      report follows Abseil's Mutex, which keeps each edge with where it was
      first taken and prints the cycle's path
      [source: https://github.com/abseil/abseil-cpp/blob/20240722.0/absl/synchronization/internal/graphcycles.h;
-     commit=WORKTREE]; the site is the goal taken under the lock rather than
+     commit=85d5c97fcc249810cb3dafea75506311796969d0]; the site is the goal taken under the lock rather than
      the caller, because naming the caller needs the frame.
    Known issue: an engine that waits for a mutex held by the thread that
      resumes it deadlocks without a cycle, because the engine borrows that
@@ -238,7 +238,7 @@ site(Goal, Module:Name/Arity) :-
 % would have done for a caller watching its own predicate
 % [measured 2026-09-13: m1:go/0 registering f/1 through a wrapper that only
 % called the original never heard m1:f/1, while its closure arrived as m1:cb;
-% command=swipl -q -g main -t halt ai-tmp/ai-ctx-probe.pl; commit=WORKTREE].
+% command=swipl -q -g main -t halt ai-tmp/ai-ctx-probe.pl; commit=85d5c97fcc249810cb3dafea75506311796969d0].
 % Known issue: a caller that watches another module's predicate with a
 % closure of its own is qualified with the closure's module here. A channel
 % the host does not know is passed through, so the host raises its own error.
@@ -277,7 +277,7 @@ qualified_channel(Name/Arity, Module, Module:Name/Arity) :- !.
 qualified_channel(Channel, _, Channel).
 
 % What each channel adds to its closure [source: `swipl -g "help(prolog_listen/3)"`,
-% SWI-Prolog 10.1.13; commit=WORKTREE].
+% SWI-Prolog 10.1.13; commit=85d5c97fcc249810cb3dafea75506311796969d0].
 channel_arity(abort, 0).
 channel_arity(erase, 1).
 channel_arity(break, 3).
