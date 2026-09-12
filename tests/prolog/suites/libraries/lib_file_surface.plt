@@ -2,7 +2,7 @@
 % Guarantees: bytes, staged publication, renames, tree copy and removal,
 % traversal, globbing, path functions, entry kinds, links and scopes are each
 % checked against the host and against CPython's posixpath goldens
-% [tested: lib_file_surface; commit=WORKTREE].
+% [tested: lib_file_surface; commit=e40ef941310bddd1f57074eb559e78aac8a263b0].
 % Owns resources: each fixture directory is removed through setup_call_cleanup;
 % every space a test allocates is released by the suite's cleanup; a wrapped
 % host predicate is unwrapped before the test's assertions run.
