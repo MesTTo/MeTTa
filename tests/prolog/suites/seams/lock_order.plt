@@ -51,6 +51,14 @@ test(a_trylock_records_no_order_but_is_held_afterwards,
     mutex_unlock(lo_j),
     assertion(lock_order_edge(lo_j, lo_i, _)).
 
+% An inference limit that trips inside the goal abandons it between any
+% setup and its cleanup; the trailed stack unwinds with it.
+test(an_abandoned_acquisition_unwinds_its_own_entry, [cleanup(forget([lo_z]))]) :-
+    call_with_inference_limit(with_mutex(lo_z, ( repeat, fail )), 200, Result),
+    assertion(Result == inference_limit_exceeded),
+    lock_order:held(Held),
+    assertion(\+ memberchk(lo_z, Held)).
+
 :- dynamic lo_fact/1, lo_heard/1.
 lo_listener(Action, _Context) :-
     assertz(lo_heard(Action)),

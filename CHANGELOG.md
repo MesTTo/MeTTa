@@ -27,17 +27,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   event-list lock as one more, and fails the lane on any cycle not in its
   inventory, naming the goal each edge was first taken for; a suite that ran
   without the recorder fails the lane too, and so does an inventoried cycle a
-  whole run shows nowhere. The inventory holds the twenty-five lock-order
-  inversions the engine carries today, among the typing policy, the
-  exec-module lock, deferred translation, the specializer, the receipts
-  engine, the two receipt channels and SWI's own `flag/3` mutex, which the
-  receipts completion enters from a thread signal; their burn-down is
+  whole run shows nowhere. The inventory holds the six lock-order inversions
+  the engine carries today: four are a watched transaction frame finishing
+  inside the typing policy, the specializer or the exec-module lock while the
+  reference refresh that `frame_finished` runs needs that mutex, and two put
+  deferred translation on both sides of the typing policy; their burn-down is
   tracked in the workspace ledger.
-- The plunit lane runs every suite under `tests/prolog/lock_order.pl`, which
-  records the order each thread acquires SWI mutexes, with each channel's
-  event-list lock as one more, and fails the lane on any cycle, naming the
-  predicate that first took each edge; a suite that ran without the recorder
-  fails the lane too.
 - The `qlf-provenance` gate lane reads the directory every compiled artifact
   under `engine/` and `lib/` records as the one it was saved in and refuses one
   written anywhere else, naming both directories and the purge that repairs
