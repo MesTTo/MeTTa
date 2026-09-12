@@ -1,5 +1,5 @@
 ; Purpose: the environment, the working directory and the platform, as data.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/31-system_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/31-system_lib.metta; commit=b109f59a8095add8ecf264b011e683184274acbb].
 !(import! &self (library lib_system))
 ; lib_pairs is beside it because the environment IS a relation: its operations are
 ; what reads one.

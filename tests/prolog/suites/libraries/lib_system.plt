@@ -4,7 +4,7 @@
 % the environment relation holds exactly what the host's environ/1 holds,
 % platform-info answers the host's own flags and refuses an unknown key with every
 % key listed, and the working directory is absolute with no trailing separator
-% [tested: lib_system; commit=WORKTREE].
+% [tested: lib_system; commit=b109f59a8095add8ecf264b011e683184274acbb].
 % Owns resources: every variable this suite writes it removes again, and it changes
 % no directory.
 
