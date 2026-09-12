@@ -7,13 +7,13 @@
 % Guarantees: the exception hook that finishes a cut listener is clausal only
 %   from the process's first bound on, so a process that never bounds pays
 %   nothing per ball [tested: spaces_receipt_limits:the_limit_hook_is_armed_by_the_first_bound;
-%   commit=WORKTREE].
+%   commit=bbfde009bde3ef93e9518899d34763eec0fe482d].
 % Guarantees: a process that does bound pays three inferences per bounded call
 %   for the test that arms it, and nothing else after the first
 %   [measured 2026-09-12: 38,107 against 37,807 with the wrapper absent;
 %   command=extensions/python/bench.py --counter-only query-limit-guarded;
 %   fixture=one hundred guarded Python queries, min of three fresh processes;
-%   commit=WORKTREE].
+%   commit=bbfde009bde3ef93e9518899d34763eec0fe482d].
 %
 % Purpose: reserve incoming occurrence identities across transaction views.
 % Assumes: native erasures use metta_erase_storage_ref/1 or metta_retract_storage/1.
@@ -175,7 +175,7 @@ metta_receipt_finish_frame(Frame) :-
 % inferences a bounded query: with this unit at its pre-wrapper state the same
 % tree reads 37,807 [measured 2026-09-12: extensions/python/bench.py
 % --counter-only query-limit-guarded, min of three fresh processes per arm,
-% each after a boot that rebuilds the .qlf set; commit=WORKTREE].
+% each after a boot that rebuilds the .qlf set; commit=bbfde009bde3ef93e9518899d34763eec0fe482d].
 metta_receipt_arm_limit_hook :-
     with_mutex('$metta_receipt_limit_hook', metta_receipt_arm_limit_hook_once).
 

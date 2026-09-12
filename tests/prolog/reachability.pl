@@ -30,7 +30,7 @@
 %       construct edges, 24 reported, 1.10s min of 3; measured 2026-09-12:
 %       4764 predicates, 9555 clauses, 23232 call and 2882 construct edges,
 %       1832 reported, 9.13s min of 3; command=swipl -q -g reachability_report
-%       -t 'halt(0)' reachability.pl from tests/prolog; commit=WORKTREE]
+%       -t 'halt(0)' reachability.pl from tests/prolog; commit=bbfde009bde3ef93e9518899d34763eec0fe482d]
 %     - the walk is SWI's own prolog_walk_code/1, so it reaches a call through
 %       control structure, through a declared meta-argument and through a
 %       meta-predicate nobody declared, which it infers [source: SWI-Prolog
@@ -48,7 +48,7 @@
 %       `extensions` in argv 26. The same experiment for the doors added since,
 %       and the probe that runs it [measured 2026-09-12, against a baseline of
 %       1832; command=sh tests/prolog/probes/reachability_doors.sh;
-%       commit=WORKTREE]: a directive's own module 120, the second glob level
+%       commit=bbfde009bde3ef93e9518899d34763eec0fe482d]: a directive's own module 120, the second glob level
 %       63, the module-qualified name 9 of which its arity lower bound is 7,
 %       the context_reader root 6; all four off, 2007
 %     - reachability_selftest/0 fails unless the analysis puts each of fifteen
@@ -59,7 +59,7 @@
 %       nothing else, 0.90s min of 3; measured 2026-09-12: five more, one per
 %       door added that day, each caught naming exactly the door disabled and
 %       nothing else, 7.90s min of 3;
-%       command=sh tests/prolog/probes/reachability_doors.sh; commit=WORKTREE]
+%       command=sh tests/prolog/probes/reachability_doors.sh; commit=bbfde009bde3ef93e9518899d34763eec0fe482d]
 %     - the report answers about the tree it is run against and not about a
 %       fixture [measured 2026-08-18 on a throwaway branch: appending an
 %       uncalled predicate to engine/parser.pl took the report from 24 to 25 and
