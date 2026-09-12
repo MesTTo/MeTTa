@@ -3,7 +3,7 @@
 % Guarantees: for generated key sequences the list-shaped map answers exactly
 % what library(assoc) answers and the queue exactly what library(heaps) answers,
 % so the adaptation is checked against its source rather than against a table
-% [tested: lib_datastructures; commit=WORKTREE].
+% [tested: lib_datastructures; commit=2072899a9f6ba36f92faabb92f9e0b12e6e0f666].
 % Owns resources: none; every value is an immutable term.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
