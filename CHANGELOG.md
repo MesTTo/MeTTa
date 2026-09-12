@@ -171,6 +171,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A profile whose sampler took no sample answers the goal's answers instead of
+  raising: SWI's own `profile/2` prints a report as the cleanup of the goal and
+  that report divides by the total tick count, so a goal finishing inside one
+  sampling period raised an arithmetic error that also discarded the answer.
+  The engine's profile door runs the profiler primitive `profile/2` itself runs
+  and reads the rows directly.
+
 - The mork seat's missing-artefacts test no longer writes compiled library
   artifacts into the checkout: its scratch tree linked the checkout's `lib/`
   directory, so the halves its boots compiled landed beside the real sources

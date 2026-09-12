@@ -359,3 +359,31 @@ Lifted when: the inference-limit check honours the atomic region, or
   the push records itself.
 Record: docs/journal/2026-09-11-the-end-of-wave-battery.md, the section on the
   final gate's reds; docs/journal/2026-09-07-every-intermittent-root-caused.md.
+
+## swi-profile-report-divides-by-zero-samples
+Host: SWI-Prolog 10.1.13; profile/2 in library/prolog_profile.pl:107-118, its
+  report in the same file at 146-168 and time_data/7 at 204-210, the primitive
+  in src/pl-prof.c:942-970,
+  https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/prolog_profile.pl#L104-L210.
+Defect: profile/2 is `call_cleanup('$profile'(Goal, How, Ports, Rate),
+  show_profile(Options))`, and the report divides each predicate's ticks by
+  the total tick count, and the net time by it again. A goal that finishes
+  inside one sampling period (5 ms by default) leaves the total at zero, so
+  the report raises `evaluation_error(zero_divisor)` as the CLEANUP of a goal
+  that already answered, and the ball unwinds the goal's bindings on its way
+  out: the answer is gone before any catcher can read it. `top(0)`, which asks
+  for no rows at all, does not avoid the division. The report also consults
+  `prolog:show_profile_hook/1` first, which SWI autoloads from xpce whenever
+  DISPLAY is set.
+Reproduction: tests/checks/host_workarounds/swi-profile-report-divides-by-zero-samples.pl,
+  `profile(X is 1 + 1, [top(0)])` with the report's output swallowed; on
+  10.1.13 it raises with samples=0 and X unbound at the catcher.
+Workaround: extensions/python/metta/_binding/profiling.pl calls the primitive
+  profile/2 itself calls, `'$profile'(Goal, cputime, Ports, Rate)` with the
+  flags profile/2 reads for its defaults, and never the report; the rows come
+  from profile_data/1, whose own division is guarded and answers an empty
+  profile when nothing was sampled.
+Lifted when: profile/2's report treats a zero tick count as an empty profile,
+  or the division moves behind the `top(0)` option.
+Record: docs/journal/2026-09-11-the-end-of-wave-battery.md, the 2026-09-12
+  section on the publication merge.
