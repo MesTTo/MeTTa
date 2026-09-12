@@ -1,7 +1,7 @@
 % Purpose: detect top_sort/2's missing append/2 import with autoload disabled.
 % Guarantees: only the missing import counts as present; the explicit import
 % must restore the independently known topological order.
-% [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds; commit=95ed74d83453b1fa3a24629ca914656b76d610b4].
 
 :- use_module(library(ugraphs), [top_sort/2]).
 
