@@ -580,3 +580,50 @@ umbrella's .qlf fresh by mtime, so a process started without the engine's own
 warm boot measures the previous compile. Together they read identical
 inference counts for three different versions of engine/spaces/receipts.pl,
 the cut's included, which looks exactly like a change that costs nothing.
+
+## 2026-09-12, the report that walked a directive in the wrong module
+
+Tried: the prolog-reach REPORT on this branch against the pristine cut ->
+1,995 findings on the cut and 2,007 here through the cut's own doors, 16 of
+them new and 4 of the cut's rescued. The 16: six context readers of arity zero,
+which no clause names because every call to one compiles to its read; the seven
+predicates of the armed receipt hook, named only inside a wrapper body and an
+asserted clause; retire_loading_marker/2 and metta_py_profile_answering/3; and
+three bodies this thread extracted from callers the cut already reports,
+mark_specialization_needed/0 with metta_receipt_finish_frame/1 and
+metta_receipt_marker_change/2.
+Decided: a root class for the declaration table, seam:context_reader/4, since
+the row's head is the only place a reader is named. Worth 6.
+Decided: the directive door globs '*/*.pl' as well, because a subsystem's units
+live one directory down and install as much as any file at the top. Worth 63.
+Decided: a module-qualified name held as data is a goal, at whatever arity that
+module defines it with. prolog_listen/3 and thread_signal/2 take a handler NAME
+and call it with the event's arguments, so receipts.pl spells its two listeners
+as atoms and defines them at 1 and 2, and the body it asserts into
+prolog:prolog_exception_hook/5 is an atom of arity 0. Worth 9, of which the
+arity lower bound is 7. A BARE atom stays data: reading one as a name would
+make every atom in the tree a reference.
+Mechanism, and the largest of the four: a directive runs in the module its file
+belongs to, and the probe clause that carries it is asserted here, in user. So
+`:- metta_boot_receipts.` was walked as user:metta_boot_receipts/0, a predicate
+nothing defines, and every predicate that directive reaches counted as dead.
+The module a file declares answers through source_file_property/2, and a unit
+that declares none is consulted into one, which its load_context answers.
+Worth 120: the engine's builtin census and its prelude installation are both
+reached only from their own file's directive.
+Measured: 1,832 findings with all four, 2,007 with none of them, against the
+cut's 1,995 [sh tests/prolog/probes/reachability_doors.sh, which disables one
+door at a time and counts]. The one finding of the 16 that survives is
+mark_specialization_needed/0, whose two callers, maybe_specialize_call/4 and
+specialize_call/9, the cut already reports: a call from an unreachable clause
+does not rescue its callee, which is this lane's own rule.
+Tried: the plant for the directive door, which passed with the door disabled.
+run_selftest matched planted(Door, Name/Arity, Expectation), and a row naming a
+module is Module:Name/Arity, which does not unify with Name/Arity, so the row
+was dropped from the findall in silence while the count still included it. The
+mutation experiment is what caught it, which is the reason it exists.
+Decided: the selftest reads a plant's whole indicator and plant_qualified/2
+adds user: to a row that names no module, so the table can name one. Fifteen
+plants now, five of them for the doors above, and the probe that disables each
+door re-runs the discrimination: every mutation is caught naming exactly the
+door it disabled.

@@ -64,6 +64,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   bound on, so a process that never bounds pays nothing per ball it throws and
   one that does pays three inferences per bounded call for the test that arms
   it, read from a fact rather than searched for among the hook's clauses.
+- The report of predicates nothing can reach reads a load-time directive in
+  the module that directive runs in, scans the units a subsystem keeps one
+  directory down, takes a module-qualified name held as data as the goal it is
+  at whatever arity it is defined with, and roots a declared context reader in
+  its declaration row. The four doors take 175 findings off the report, led by
+  the engine's builtin census and its prelude installation: both are reached
+  only from their own module file's directive, which the probe clause ran as
+  user's until now. Five planted predicates and
+  `tests/prolog/probes/reachability_doors.sh` keep each door attached to the
+  plant that proves it, and the self-test reads a plant's whole indicator, so
+  a row naming a module can no longer be skipped in silence.
 - Receipt retirement completes after an inference limit interrupts a native
   transaction's completion listener. Rolled-back marker notifications release
   their standing-engine claims while preserving a live outer transaction.

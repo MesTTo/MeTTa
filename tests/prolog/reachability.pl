@@ -24,9 +24,13 @@
 %     - reachability_report/0 walks every clause of every predicate defined
 %       under engine/, lib/, extensions/mork/, extensions/mork/mork_ffi/ and
 %       extensions/python/metta/, plus one probe
-%       clause per directive, and reports the predicates no root reaches
+%       clause per directive, in the module that directive runs in, and reports
+%       the predicates no root reaches
 %       [measured 2026-08-18: 1550 predicates, 2602 clauses, 6984 call and 760
-%       construct edges, 24 reported, 1.10s min of 3]
+%       construct edges, 24 reported, 1.10s min of 3; measured 2026-09-12:
+%       4764 predicates, 9555 clauses, 23232 call and 2882 construct edges,
+%       1832 reported, 9.13s min of 3; command=swipl -q -g reachability_report
+%       -t 'halt(0)' reachability.pl from tests/prolog; commit=WORKTREE]
 %     - the walk is SWI's own prolog_walk_code/1, so it reaches a call through
 %       control structure, through a declared meta-argument and through a
 %       meta-predicate nobody declared, which it infers [source: SWI-Prolog
@@ -41,13 +45,21 @@
 %       [measured 2026-08-18, against a baseline of 24]: the MeTTa dispatch root
 %       422, the janus root 235, the construct edge 206, the head half of it 40,
 %       the directive probe 37, the seam root 31, the closure arity rule 26,
-%       `extensions` in argv 26
-%     - reachability_selftest/0 fails unless the analysis puts each of nine
-%       planted predicates on the side its door predicts, three of them
+%       `extensions` in argv 26. The same experiment for the doors added since,
+%       and the probe that runs it [measured 2026-09-12, against a baseline of
+%       1832; command=sh tests/prolog/probes/reachability_doors.sh;
+%       commit=WORKTREE]: a directive's own module 120, the second glob level
+%       63, the module-qualified name 9 of which its arity lower bound is 7,
+%       the context_reader root 6; all four off, 2007
+%     - reachability_selftest/0 fails unless the analysis puts each of fifteen
+%       planted predicates on the side its door predicts, four of them
 %       REPORTED, and names which door stopped firing [measured 2026-08-18:
 %       eleven mutations, each disabling exactly one root class, edge kind or
 %       scan, were each caught with the exact set of doors predicted and
-%       nothing else, 0.90s min of 3]
+%       nothing else, 0.90s min of 3; measured 2026-09-12: five more, one per
+%       door added that day, each caught naming exactly the door disabled and
+%       nothing else, 7.90s min of 3;
+%       command=sh tests/prolog/probes/reachability_doors.sh; commit=WORKTREE]
 %     - the report answers about the tree it is run against and not about a
 %       fixture [measured 2026-08-18 on a throwaway branch: appending an
 %       uncalled predicate to engine/parser.pl took the report from 24 to 25 and
@@ -57,6 +69,11 @@
 %     - a predicate is reached only by a name assembled at run time from parts,
 %       `atom_concat(Prefix, Suffix, Name), Goal =.. [Name|Args]` being the
 %       shape. Nothing static sees that, and neither does list_undefined.
+%     - a module-qualified name held as data marks every predicate that module
+%       defines under that name reached, whatever its arity. A handler is
+%       called with its event's arguments and an asserted body with none, and
+%       the name alone does not say which, so the analysis takes the whole
+%       family rather than guessing an arity.
 %     - a term that merely LOOKS like one of this tree's predicates sits in a
 %       goal's argument. That marks its lookalike reached, so the report
 %       under-counts rather than crying wolf, which is the error direction a
@@ -83,8 +100,7 @@
 %       callee, which is what stops a dead feature's own internals hiding
 %       inside it.
 % Open Obligations:
-%     To Do: check.sh runs neither entry point yet, so nothing runs this on a
-%         push. The two lines belong beside the other Prolog lanes:
+%     To Do: None. Both entry points run on a push, from engine/check.sh:
 %         a REPORT for reachability_report/0 and a GATE for
 %         reachability_selftest/0, the second being the one that fails.
 %     Hacks: None
@@ -213,13 +229,29 @@ record_constructions(References) :-
              catch(clause(Head, Body, Reference), _, fail),
              qualified(Head, From),
              clause_data(Head, Body, Data),
-             compound_name_arity(Data, Name, Arity),
-             Arity > 0,
-             tree_predicate_index(Name, Module:Name/Total),
-             Total >= Arity,
-             To = Module:Name/Total,
+             constructed_indicator(Data, To),
              To \== From ),
            add_edge(construct, From, To)).
+
+constructed_indicator(Data, Module:Name/Total) :-
+    compound_name_arity(Data, Name, Arity),
+    Arity > 0,
+    tree_predicate_index(Name, Module:Name/Total),
+    Total >= Arity.
+% A MODULE-QUALIFIED name is a goal: nothing else spells one that way, where a
+% bare atom is ordinary data and reading it as a predicate name would make
+% every atom in the tree a reference. The arity is a lower bound for the reason
+% it is above, and here that is the whole point: prolog_listen/3 and
+% thread_signal/2 take a handler NAME and call it with the event's arguments,
+% so engine/spaces/receipts.pl spells its two listeners as atoms and defines
+% them at 1 and 2, while the body the same file asserts into
+% prolog:prolog_exception_hook/5 is an atom of arity 0 [measured 2026-09-12:
+% seven findings, the two listeners and the two bodies they call among them,
+% each reported dead while the directive that installs it stands two lines
+% away].
+constructed_indicator(Module:Name, Module:Name/Total) :-
+    atom(Module), atom(Name),
+    tree_predicate_index(Name, Module:Name/Total).
 
 % Every term the clause HOLDS rather than calls. The head half is not about
 % patterns and is not optional: SWI hoists a leading body unification into the
@@ -317,13 +349,40 @@ directive_probe_clauses(References) :-
     retractall(directive_probe),
     findall(Reference,
             ( analysed_source_file(File),
+              directive_module(File, Module),
               source_directive(File, Directive),
-              assertz((directive_probe :- Directive), Reference) ),
+              assertz((directive_probe :- Module:Directive), Reference) ),
             References).
 
+% A directive runs in the module its file belongs to, and a name it calls
+% unqualified is that module's. Reading the file as text loses that, and the
+% probe clause is asserted here, in user: `:- metta_boot_receipts.` in
+% engine/spaces/receipts.pl was walked as user:metta_boot_receipts/0, a
+% predicate nothing defines, so the standing engine and the two receipt
+% listeners that directive installs were all reported dead. A unit that
+% declares no module of its own is consulted into one, which is what
+% load_context answers: engine/spaces.pl consults receipts.pl into `spaces`
+% [measured 2026-09-12: 116 findings, led by the engine's builtin census and
+% its prelude installation].
+directive_module(File, Module) :-
+    (   source_file_property(File, module(Module))
+    ->  true
+    ;   source_file_property(File, load_context(Module, _, _))
+    ->  true
+    ;   Module = user
+    ).
+
+% Both levels, because a subsystem's units live one directory down
+% (engine/spaces/receipts.pl, engine/metta/control.pl, lib/lib_thread/) and
+% their directives install just as much: the receipts unit wraps the host's
+% inference limit in one, and reading only the top level reported every
+% predicate that directive reaches as dead. The clause walk already covers
+% both levels through the predicate index; this is the directive door
+% catching up with it.
 analysed_source_file(File) :-
     analysed_directory(Directory),
-    atom_concat(Directory, '*.pl', Pattern),
+    member(Glob, ['*.pl', '*/*.pl']),
+    atom_concat(Directory, Glob, Pattern),
     expand_file_name(Pattern, Files),
     member(File, Files).
 
@@ -382,6 +441,17 @@ root_of(seam, Module:Name/Arity) :-
 root_of(directive, Predicate) :- edge(call, user:directive_probe/0, Predicate).
 root_of(directive, Predicate) :- edge(construct, user:directive_probe/0, Predicate).
 root_of(directive, Predicate) :- edge(call, '<initialization>', Predicate).
+
+% A declared context reader (engine/ext_points.pl, context_reader/4). Every
+% call to one compiles to its nb_current/2 read, so no clause in the database
+% calls it by name; the declaration row is where it is named, and the row's
+% head is what reaches it. The construct edge already sees a compound head in
+% the row; a reader with no arguments is an atom there, which no construct
+% scan can tell from data, so the table is a root in its own right.
+root_of(context_reader, Owner:Name/Arity) :-
+    seam:context_reader(Head, Owner, _, _),
+    functor(Head, Name, Arity),
+    tree_predicate(Owner:Name/Arity).
 
 % An entry point Python names across janus. The name is text there, so this
 % reads the STRING LITERALS of the shipped library rather than its identifiers.
@@ -622,7 +692,7 @@ print_counts :-
     aggregate_all(count, edge(call, _, _), Calls),
     aggregate_all(count, edge(construct, _, _), Constructions),
     findall(Class-Count,
-            ( member(Class, [metta_dispatch, seam, directive, janus]),
+            ( member(Class, [metta_dispatch, seam, directive, janus, context_reader]),
               aggregate_all(count, distinct_root(Class, _), Count) ),
             Roots),
     format("reachability: ~d predicates in ~d clauses, ~d call and ~d \c
@@ -710,6 +780,24 @@ planted(seam,        'metta_reachability_planted_hook'/1,          reachable).
 planted(construct,   'metta_reachability_planted_built'/2,         reachable).
 planted(directive,   'metta_reachability_planted_directed'/1,      reachable).
 planted(janus,       'metta_reachability_planted_from_python'/1,   reachable).
+% A declared reader with no arguments: an atom in its row, which the construct
+% door cannot see, so only the context_reader door can rescue it.
+planted(context_reader, 'metta_reachability_planted_reader'/0,    reachable).
+% A module-qualified name held as data is a goal, at arity zero when it is the
+% body of an asserted clause and at its own arity when a listener will call it
+% with the event's arguments; a bare atom beside the pair is data and must stay
+% reported.
+planted(qualified_atom, 'metta_reachability_planted_scheduled'/0, reachable).
+planted(closure_atom,   'metta_reachability_planted_listener'/1,  reachable).
+planted(bare_atom,      'metta_reachability_planted_atom'/0,      reported).
+% A directive in a module file, calling its own module's predicate unqualified.
+% The probe clause is asserted in user, so without the file's module the goal
+% names a predicate nothing defines and the door rescues nothing.
+planted(directive_module,
+        metta_reachability_planted_module:'metta_reachability_planted_moduled'/1,
+        reachable).
+% A directive one directory down, where a subsystem's units live.
+planted(nested_directive, 'metta_reachability_planted_nested'/1, reachable).
 % The Python scan reads string LITERALS, so a name that appears only in a
 % comment must not rescue anything. Without this the janus door passes just as
 % well when the scanner degenerates to reading every identifier, which is the
@@ -733,6 +821,7 @@ metta_reachability_planted_called.
 
 metta_reachability_planted_hook(_) :-
     metta_reachability_planted_builder(_),
+    metta_reachability_planted_scheduler(_),
     once(metta_reachability_planted_goal(1, 2)).
 metta_reachability_planted_builder(Goal) :-
     Goal = metta_reachability_planted_built(1, 2).
@@ -743,6 +832,37 @@ metta_reachability_planted_directed(_).
 :- ignore(metta_reachability_planted_directed(1)).
 
 metta_reachability_planted_from_python(_).
+
+metta_reachability_planted_scheduled.
+metta_reachability_planted_atom.
+metta_reachability_planted_listener(_).
+% The asserted-clause and installed-listener shapes: a module-qualified name is
+% the goal it plants, at arity zero for a clause body and at its own arity for
+% a handler something else will call; a bare atom beside them is data.
+metta_reachability_planted_scheduler(Clause) :-
+    Clause = (user:metta_reachability_planted_scheduled),
+    Listener = user:metta_reachability_planted_listener,
+    Data = metta_reachability_planted_atom,
+    Clause = _-Data-Listener.
+
+:- seam:context_reader(metta_reachability_planted_reader,
+                       '$metta_reachability_planted_reader', value(true)).
+").
+
+fixture_nested_source("
+% A unit one directory down, where a subsystem's own units live. It declares no
+% module of its own, so it is the second glob level alone that reaches it.
+metta_reachability_planted_nested(_).
+:- ignore(metta_reachability_planted_nested(1)).
+").
+
+fixture_module_source("
+:- module(metta_reachability_planted_module, []).
+
+% A directive in a module file calls its own module's predicate unqualified,
+% which is the shape every engine unit's load-time directive has.
+metta_reachability_planted_moduled(_).
+:- ignore(metta_reachability_planted_moduled(1)).
 ").
 
 fixture_python("# metta_reachability_planted_commented is named in a COMMENT only
@@ -758,13 +878,22 @@ reachability_selftest :-
 fixture_file(Directory, Name, Path) :-
     atomic_list_concat([Directory, '/', Name], Path).
 
+% Each fixture file with the predicate holding its text. The Prolog halves are
+% consulted, so their clauses are in the database the analysis walks; the
+% Python half is read as text by the janus scan and is never loaded.
+fixture_part('planted.pl',              fixture_source,        prolog).
+fixture_part('planted_module.pl',       fixture_module_source, prolog).
+fixture_part('nested/planted_nested.pl', fixture_nested_source, prolog).
+fixture_part('planted.py',              fixture_python,        text).
+
 plant_fixture(Directory) :-
     tmp_file_stream(text, Scratch, Stream), close(Stream), delete_file(Scratch),
     atom_concat(Scratch, '_reachability', Directory),
     make_directory(Directory),
-    forall(member(Name-Content,
-                  ['planted.pl'-fixture_source, 'planted.py'-fixture_python]),
+    forall(fixture_part(Name, Content, _),
            ( fixture_file(Directory, Name, Path),
+             file_directory_name(Path, Holder),
+             ( exists_directory(Holder) -> true ; make_directory(Holder) ),
              Read =.. [Content, Text],
              call(Read),
              setup_call_cleanup(open(Path, write, Out), write(Out, Text),
@@ -774,8 +903,8 @@ plant_fixture(Directory) :-
     % run one of them in the same process.
     retractall(python_entry_scanned),
     retractall(python_entry_name_(_)),
-    fixture_file(Directory, 'planted.pl', Source),
-    consult(Source),
+    forall(fixture_part(Name, _, prolog),
+           ( fixture_file(Directory, Name, Source), consult(Source) )),
     % metta_reachability_planted_live/1 stands for a name MeTTa can call, and
     % arity/2 is how the engine says so.
     assertz(arity('metta_reachability_planted_live', 1)).
@@ -796,23 +925,45 @@ remove_fixture(Directory) :-
                    'metta_reachability_planted_goal'/2,
                    'metta_reachability_planted_goal'/3,
                    'metta_reachability_planted_directed'/1,
-                   'metta_reachability_planted_from_python'/1]),
+                   'metta_reachability_planted_from_python'/1,
+                   'metta_reachability_planted_reader'/0,
+                   'metta_reachability_planted_scheduled'/0,
+                   'metta_reachability_planted_atom'/0,
+                   'metta_reachability_planted_scheduler'/1,
+                   'metta_reachability_planted_listener'/1,
+                   'metta_reachability_planted_nested'/1]),
            ( functor(Head, Name, Arity),
              ( predicate_property(user:Head, dynamic) -> retractall(user:Head)
              ; true ),
              catch(abolish(user:Name/Arity), _, true) )),
-    forall(member(Name, ['planted.pl', 'planted.py']),
+    % The planted reader's row and the planted module's clauses are static
+    % clauses of their files, so they leave with the file that declared them
+    % rather than through retract/1.
+    forall(fixture_part(Name, _, prolog),
+           ( fixture_file(Directory, Name, Loaded),
+             ( source_file(Loaded) -> unload_file(Loaded) ; true ) )),
+    forall(fixture_part(Name, _, _),
            ( fixture_file(Directory, Name, Path),
              ( exists_file(Path) -> delete_file(Path) ; true ) )),
-    ( exists_directory(Directory) -> delete_directory(Directory) ; true ).
+    % Deepest first, because a part may name a subdirectory of its own.
+    findall(Holder,
+            ( fixture_part(Name, _, _),
+              fixture_file(Directory, Name, Path),
+              file_directory_name(Path, Holder),
+              Holder \== Directory ),
+            Holders0),
+    sort(0, @>, Holders0, Holders),
+    append(Holders, [Directory], Order),
+    forall(member(Holder, Order),
+           ( exists_directory(Holder) -> delete_directory(Holder) ; true )).
 
 run_selftest :-
     build_graph,
     close_reachable,
     unreachable(Unreachable),
     findall(Door,
-            ( planted(Door, Name/Arity, Expectation),
-              \+ planted_as_expected(Expectation, Name/Arity, Unreachable) ),
+            ( planted(Door, Indicator, Expectation),
+              \+ planted_as_expected(Expectation, Indicator, Unreachable) ),
             Wrong),
     aggregate_all(count, planted(_, _, _), Total),
     (   Wrong == []
@@ -832,8 +983,15 @@ run_selftest :-
         halt(1)
     ).
 
-planted_as_expected(reported, Name/Arity, Unreachable) :-
-    memberchk(user:Name/Arity, Unreachable).
-planted_as_expected(reachable, Name/Arity, Unreachable) :-
-    \+ memberchk(user:Name/Arity, Unreachable),
-    reached(user:Name/Arity).
+planted_as_expected(reported, Indicator, Unreachable) :-
+    plant_qualified(Indicator, Qualified),
+    memberchk(Qualified, Unreachable).
+planted_as_expected(reachable, Indicator, Unreachable) :-
+    plant_qualified(Indicator, Qualified),
+    \+ memberchk(Qualified, Unreachable),
+    reached(Qualified).
+
+% A row carries its module only when its door is about one; every other plant
+% is consulted into user, where the fixture lands.
+plant_qualified(Module:Name/Arity, Module:Name/Arity) :- !.
+plant_qualified(Name/Arity, user:Name/Arity).
