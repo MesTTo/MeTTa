@@ -11,15 +11,15 @@
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
 % Guarantees: source atoms omit reference projections; portable program text
 %   rebuilds owned equation spaces and resolved bindings with fresh identities
-%   [tested: program_source; commit=WORKTREE].
+%   [tested: program_source; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 %   A translator rule with a missing derived equation is refused before text
 %   publication [tested: test_program_source_refuses_an_incomplete_translator_rule;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Owns resources: source claims, registrations and explicit space allocations
 %   retire with their load; retained spaces retain their source owner through
 %   seam:space_dependency/2 [tested:
 %   extensions/python/tests/ch18_performance/test_program_source.py;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Assumes: engine/filereader.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/filereader.pl's implementation module and original load order;
 %   failed loads withdraw their assertions and repair dependent recompiles;
@@ -1431,7 +1431,7 @@ restore_surviving_source_functions(Names) :-
 % caller additions. Release keeps its normal inherited-child refusal.
 % [tested: test_a_cleared_space_forgets_what_a_file_put_in_it,
 % test_a_program_releases_referenced_class_spaces_with_its_context;
-% commit=WORKTREE].
+% commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 forget_space_source_loads(Space) :-
     source_owned_release_plan(Space, Plan),
     forall(member(Child, Plan), metta_release_space(Child)),

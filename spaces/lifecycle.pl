@@ -9,7 +9,7 @@
 % Guarantees: add-atom's third input binds the stored native occurrence's own
 %   portable token before admission, including self-referential identity rows
 %   [tested: spaces_tokens:an_atom_can_contain_its_own_occurrence_token;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: constructor declarations invalidate retained sort proofs,
 %   including declarations arriving through the bulk atom door
 %   [tested: run_tests(translator_constructors); commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
@@ -64,7 +64,7 @@
 %   Source-owned allocations join equation-world release plans; external
 %   heirs refuse before teardown and owned heirs retire before their bases
 %   [tested: test_source_release_refuses_an_external_heir_before_removing_the_program;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 %   A fast-cache restore can enumerate one equation world and mint fresh
 %   children without reusing a persisted runtime identity [tested:
 %   test_fast_cache_restores_translator_rules_and_bound_spaces;

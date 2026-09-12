@@ -1,6 +1,6 @@
 % Purpose: register function names and arities, protect callable surface, and import host and backend builtins
 % Guarantees: the occurrence-output add-atom arity names its native owner
-%   [tested: builtin_facets; commit=WORKTREE].
+%   [tested: builtin_facets; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
 %   builtin_fun/1 remains the only builtin name authority, while

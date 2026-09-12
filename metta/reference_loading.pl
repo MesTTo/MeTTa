@@ -13,7 +13,7 @@
 %   another worker follows thread_await/2's transaction refusal.
 % Guarantees: a source path has one live home; a reload after release receives
 %   a fresh space identity and does not revive revoked handles [tested:
-%   test_a_library_reloads_after_its_first_scope_closes; commit=WORKTREE].
+%   test_a_library_reloads_after_its_first_scope_closes; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 
 :- dynamic metta_reference_library_home/2, metta_reference_prolog_head/3.
 :- dynamic metta_reference_manifest_head/3, metta_reference_manifest_row/2.

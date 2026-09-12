@@ -2,7 +2,7 @@
 % Guarantees: a computed Error crosses an ordinary result arrow unchanged;
 %   other result mismatches still filter that branch
 %   [tested: classes_transaction_results:typed_results_preserve_errors_and_filter_other_mismatches;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: a retained call reuses the proved sort of a ground constructor
 %   argument when its result exactly matches an ordinary parameter; live
 %   refinements and unsupported translations keep their check [tested:
@@ -10,7 +10,7 @@
 %   translator_constructors:a_callee_arrow_change_retires_its_argument_proof,
 %   translator_constructors:a_constructed_argument_keeps_a_live_callee_refinement,
 %   translator_constructors:a_nullary_construction_proof_reaches_the_audit;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: present_type_chain/3 expands a final (:seg T), and
 %   validate_type_splices/1 refuses retired or misplaced forms at admission
 %   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].

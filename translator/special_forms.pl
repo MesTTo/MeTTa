@@ -9,7 +9,7 @@
 % Purpose: compile error propagation, control forms, binding forms, and special-form calls
 % Guarantees: transactions retain their result bag across error rollback, and
 %   add-atom keeps its optional occurrence binder unbound until the write
-%   [tested: classes_transaction_results, spaces_tokens; commit=WORKTREE].
+%   [tested: classes_transaction_results, spaces_tokens; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: segment-only arity fallbacks present their compiled family while
 %   building the call site [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.

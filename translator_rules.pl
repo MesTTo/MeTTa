@@ -19,7 +19,7 @@
 %   its derived equations; withdrawal cannot retire a later registration
 %   [tested: test_a_failed_rule_registration_retires_only_its_source_artifacts,
 %   test_source_withdrawal_keeps_a_later_registration_in_the_same_module;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Assumes:
 %   - current_metta_module/1 names the module a registration is written in and
 %     metta_module_space/2 turns that into the space holding its equations, so

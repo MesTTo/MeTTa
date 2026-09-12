@@ -2,25 +2,25 @@
 % Assumes: references.pl owns reference rows, faces, bindings and visibility.
 % Guarantees: adding an importer publishes no existing sibling; changing a
 %   provider publishes its affected importers
-%   [tested: reference_publication; commit=WORKTREE].
+%   [tested: reference_publication; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: nested completion transfers mutation roots to the live parent,
 %   then reconciles bindings against rows surviving the transaction
 %   [tested: references:rollback_restores_native_links_and_nested_rollback_restores_its_parent,
 %   references:inner_failure_transfers_one_watch_and_outer_completion_retires_it;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: inference cuts cannot abandon a registered reference frame or
 %   its reconciliation [tested:
 %   references:an_inference_cut_cannot_abandon_reference_completion;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Owns resources: pending faces and frame roots are engine-local SWI global
 %   variables. Publication consumes its pending set; completion retires its
 %   frame. host_transaction_on_exit/1 invokes completion after SWI releases its
-%   global event mutex [tested: host_transaction_completion; commit=WORKTREE].
+%   global event mutex [tested: host_transaction_completion; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarded by: with_typing_policy_stable/1 serializes native publication. Maps
 %   run outside that mutex and the support graph mutex; an epoch change retries
 %   their publication against the current rows
 %   [source: engine/metta/reference_refresh.pl:metta_reference_refresh_now/0;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 
 :- use_module(library(nb_set), [empty_nb_set/1, add_nb_set/2, nb_set_to_list/2]).
 :- use_module(library(ordsets), [ord_subtract/3]).

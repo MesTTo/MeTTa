@@ -2,7 +2,7 @@
 %   from changed inputs to the derived engine artifacts that depend on them.
 % Guarantees: support_atomic/1 and with_support_repairs_deferred/1 restore
 %   their scoped markers on inference cuts, without changing mutex ownership
-%   [tested: reference_scopes; commit=WORKTREE].
+%   [tested: reference_scopes; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees:
 %   - A reference face can defer dependent repairs until all its bindings and
 %     metadata are published [tested:

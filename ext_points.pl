@@ -2,12 +2,12 @@
 %   semantics, and publish the predicates extensions and host bindings may call.
 % Guarantees: context_reader/4 defines a scoped reader and compiles resolving
 %   calls directly to its read; malformed declarations refuse at load
-%   [tested: reference_scopes; commit=WORKTREE].
+%   [tested: reference_scopes; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: metta_transaction/2 publishes the result-aware transaction service
-%   [tested: classes_transaction_results; commit=WORKTREE].
+%   [tested: classes_transaction_results; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: grounded_length/2 lets the value's owner answer a length query
 %   independently of its structural view [tested:
-%   refinements:a_length_provider_does_not_read_structure; commit=WORKTREE].
+%   refinements:a_length_provider_does_not_read_structure; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: allocation, release and held-goal context hooks let lib_thread
 %   own scope lifetimes across host engines [tested: lib_thread_scope;
 %   commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
@@ -993,7 +993,7 @@ kind(pure_operation/1, declaration).
 % savepoints leave their checks for the outer owner, and rolled-back writes
 % must leave no surviving check that could reject unrelated later work.
 % [tested: test_overlapping_transactions_cannot_publish_distinct_proxies,
-% test_a_rolled_back_proxy_check_cannot_refuse_the_outer_commit; commit=WORKTREE].
+% test_a_rolled_back_proxy_check_cannot_refuse_the_outer_commit; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 :- multifile transaction_constraint/1.
 kind(transaction_constraint/1, declaration).
 

@@ -9,7 +9,7 @@
 % Guarantees:
 %   - a produced Error crosses a result refinement unchanged
 %     [tested: refinements:a_result_refinement_preserves_a_produced_error;
-%     commit=WORKTREE].
+%     commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 %   - a constraint is decided three ways: it HOLDS, it is VIOLATED, or its head
 %     is outside the vocabulary and it decides nothing. metta_refinements_hold/2
 %     requires every constraint to hold, so an undecided one keeps the
@@ -32,7 +32,7 @@
 %     [tested: refinements:a_length_refinement_reads_strings_and_expressions,
 %     refinements:a_length_provider_does_not_read_structure,
 %     refinements:a_structural_provider_still_answers_length;
-%     commit=WORKTREE].
+%     commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 %   - Predicate applies its test to the value as a finished value, through the
 %     translator's dynamic-value door, so a MeTTa head runs its equations and
 %     a grounded host callable runs through seam:grounded_apply/3; the
@@ -53,7 +53,7 @@
 %     refinements:a_return_base_mismatch_stays_silent; commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 % Guarantees: Literal constraints test exact finite membership without binding
 %   the value [tested: refinements:literal_membership_is_exact_and_does_not_bind;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Decides: the refinement vocabulary is the twelve heads below, and the
 %   catalog's `(vocabulary refinement ...)` row in engine/spaces/catalog.pl
 %   names the same twelve; the two are held equal by

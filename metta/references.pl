@@ -2,14 +2,14 @@
 % Guarantees: data writes update only their occurrence grades; unchanged
 %   callable bindings keep their compiled clauses
 %   [tested: references:data_mutations_keep_compiled_clauses_and_retire_only_removed_grades;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: declaration-only faces carry sorts, constructor arrows and
 %   subsorts without making their subjects callable
 %   [tested: references:constructor_declarations_travel_without_callable_heads;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: a kept importing space retains its scoped FROM providers
 %   [tested: lib_thread_scope_deferred:a_kept_cleanup_retains_its_captured_space_and_reference_provider;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Assumes: spaces:metta_space_pair/4 retains each stored occurrence's token;
 %   foreign receivers declare tokens, add-token and remove-token.
 % Guarantees: reference paths identify defining predicates, while their clauses
@@ -25,21 +25,21 @@
 %   Completion excludes its finishing frame only until its cleanup;
 %   inner rollback retains one outer watch and outer completion retires it
 %   [tested: references:inner_failure_transfers_one_watch_and_outer_completion_retires_it;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Owns resources: metta_reference_slot/3 reserves native binding ownership before
 %   mutation and retires it after cleanup; interrupted publication can reconcile
 %   every intermediate state [tested:
 %   references:an_inference_cut_cannot_abandon_reference_completion;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: declaration discovery reads matching rows rather than the class
 %   population [tested:
 %   reference_publication:declaration_discovery_does_not_enumerate_a_providers_population;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: metta_host_reference_names/2 reads written definitions and
 %   explicit references, including private local names, independently of
 %   globally resident functions [tested:
 %   test_constructor_dependencies_survive_a_previous_global_import_leaving;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarded by: with_typing_policy_stable/1 serializes binding publication. Maps
 %   run before publication, outside the typing and support-graph mutexes.
 % Decides: INTERNAL is visibility's zero and PUBLIC its one. A visited-space
