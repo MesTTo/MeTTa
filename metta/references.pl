@@ -7,6 +7,9 @@
 %   subsorts without making their subjects callable
 %   [tested: references:constructor_declarations_travel_without_callable_heads;
 %   commit=WORKTREE].
+% Guarantees: a kept importing space retains its scoped FROM providers
+%   [tested: lib_thread_scope_deferred:a_kept_cleanup_retains_its_captured_space_and_reference_provider;
+%   commit=WORKTREE].
 % Assumes: spaces:metta_space_pair/4 retains each stored occurrence's token;
 %   foreign receivers declare tokens, add-token and remove-token.
 % Guarantees: reference paths identify defining predicates, while their clauses
@@ -55,6 +58,9 @@
 :- dynamic metta_reference_demand/1.
 :- volatile metta_reference_demand/1.
 :- seam:context_reader(metta_reference_forcing(Name), '$metta_reference_forcing', stack(Name)).
+:- multifile seam:space_dependency/2.
+
+seam:space_dependency(Space, Home) :- metta_reference_row(Space, _, Home, _).
 
 % The declaring space is the mutation root. Its change queues exactly the
 % spaces whose faces the support graph derives from it; the transaction frame
