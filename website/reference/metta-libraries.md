@@ -29,6 +29,7 @@ beside its definitions.
 | lib_he | 18 | 0 |
 | lib_import | 8 | 4 |
 | lib_json | 13 | 13 |
+| lib_logging | 7 | 7 |
 | lib_markup | 6 | 6 |
 | lib_measure | 17 | 0 |
 | lib_memo | 9 | 0 |
@@ -2954,6 +2955,110 @@ Atomically replace Path with one compact UTF-8 JSON document. Stage beside the d
 2. Value
 
 Returns: Written
+
+## lib_logging
+
+### `log!`
+
+*lib_logging.metta:12*
+
+```metta
+(: log! (-> String Symbol Atom Expression))
+```
+
+Send a held payload through print_message/2 when its topic is enabled. The structured host term contains (log-event Topic Level Payload). Host hooks can capture it; otherwise the host prints the diagnostic text from log-format.
+
+1. Topic
+2. Level
+3. Payload
+
+Returns: Unit
+
+### `log-enabled`
+
+*lib_logging.metta:18*
+
+```metta
+(: log-enabled (-> String Bool))
+```
+
+Whether the exact topic is enabled. An unknown topic answers False without registering it. The setting is sampled once for each log! or log-to! call.
+
+1. Topic
+
+Returns: Enabled
+
+### `log-format`
+
+*lib_logging.metta:24*
+
+```metta
+(: log-format (-> String Symbol Atom String))
+```
+
+The message's diagnostic text, whether or not its topic is enabled. It uses the engine's display syntax for the held payload, not a serialization format.
+
+1. Topic
+2. Level
+3. Payload
+
+Returns: Text
+
+### `log-levels`
+
+*lib_logging.metta:30*
+
+```metta
+(: log-levels (-> Expression))
+```
+
+The supported host message levels. informational follows SWI's verbose flag; unhandled warnings and errors follow the host on_warning and on_error flags.
+
+Returns: Levels
+
+### `log-to!`
+
+*lib_logging.metta:36*
+
+```metta
+(: log-to! (-> Atom String Symbol Atom Expression))
+```
+
+Send through the host message mechanism with an explicit MeTTa handler. It takes an evaluated Expression (log-event Topic Level Payload) and answers True to consume or False to leave the host printer and later hooks active. The event is quoted at the call boundary to preserve its held payload; Atom-typed parameters retain that written quote by normal argument rules. Only the first verdict is used. Missing/non-Bool answers and exceptions raise. Earlier host hooks retain precedence. Disabled topics never apply Handler.
+
+1. Handler
+2. Topic
+3. Level
+4. Payload
+
+Returns: Unit
+
+### `log-topic!`
+
+*lib_logging.metta:42*
+
+```metta
+(: log-topic! (-> String Bool Expression))
+```
+
+Enable or disable this exact topic for every level. Settings are process-wide in the host debug registry under metta_log(Topic); unrelated host topics are untouched. Configured topics remain discoverable when disabled.
+
+1. Topic
+2. Enabled
+
+Returns: Unit
+
+### `log-topics`
+
+*lib_logging.metta:48*
+
+```metta
+(: log-topics (-> Expression))
+```
+
+A sorted snapshot of configured (log-topic Name Enabled) rows. The names are Strings and disabled topics remain in the snapshot.
+
+Returns: Topics
 
 ## lib_markup
 

@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_logging` sends structured topic/level events through host message hooks,
+  with process-wide topic controls, pure diagnostic formatting and explicit
+  MeTTa capture handlers. Each message carries its handler and calling module;
+  payloads stay unevaluated, and handler errors propagate.
 - The graph library's existing topological-sort import repair now has a tracked
   host reproduction and ledger entry, so the host-workarounds gate detects when
   the host no longer needs it.

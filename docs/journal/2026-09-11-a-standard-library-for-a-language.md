@@ -3106,3 +3106,71 @@ Verified: `sh check.sh host-workarounds host-workarounds-selftest evidence`
 passes. All 19 reproductions answer present, 25 sites resolve, all 10 planted
 negative controls are reported, and evidence has zero unbacked tags.
 Log: ai-tmp/ai-lib4-graph-evidence.log.
+
+## 2026-09-12: logging design
+
+Tried: the host message probe confirms that a succeeding message_hook/3 consumes
+the message, failure leaves the printer active, and a thrown handler error
+propagates. The engine's existing thread_message_hook observes and fails before
+user:message_hook. Sources: SWI-Prolog boot/messages.pl:print_message_guarded/2 at
+fc7ef84b949378b729052c3ade79c90ce5416abb and library/debug.pl:debug_topic/1.
+Log: ai-tmp/ai-lib4-logging-host-probe.log.
+
+Decided: carry the handler and calling module inside each structured host message.
+log-to! composes as a partial application; no scoped handler database or global
+key is needed. log-topic! stores its Boolean under metta_log(Topic) in the host
+debug registry. The host's topic declaration and update share prolog_debug's
+mutex. Unknown topics are disabled. The private debug_topic/1 is the host's own
+declaration mechanism, needed because public debug/1 warns on an unknown topic.
+Its source is pinned at
+https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/debug.pl.
+
+Rejected: a second registry and ambient handler scope, because the host already
+owns topic state and the message can carry its handler. Revisit a scoped handler
+only for a requirement to intercept messages that do not carry an explicit one.
+
+Tried: passing a constructed event directly to an eager callback evaluates a
+nested (+ 1 2). Quoting the argument preserves it; an Atom-typed callback instead
+receives the written quote. Log: ai-tmp/ai-lib4-logging-values-probe.log.
+Decided: message payloads are held, and handlers accept an evaluated Expression
+and answer Bool. The event crosses under quote, then follows normal function
+argument semantics. True consumes; False delegates; a missing or non-Bool first
+answer raises. Existing host hooks retain their precedence. log-format uses
+the engine's diagnostic sdisplay/2 and the same message translation as log!.
+
+## 2026-09-12: logging verification
+
+Tried: the Python twin used module-level match as a built expression. Its runtime
+meaning is a conjunction query against the default space, and evaluating that
+query raised `EngineError: one() expected exactly one answer, got 0`. The captured
+record was intact. The twin now queries records[pattern].one() and inspects the
+payload value directly. Log: ai-tmp/ai-lib4-logging-twin-probe.log.
+
+Tried: the exception test expected division by zero to throw a native exception.
+The engine instead returns (Error (/ 1 0) DivisionByZero), correctly refused as
+a non-Bool verdict. The test now covers both that value and a native log-format
+domain error, which propagates unchanged. Log: ai-tmp/ai-lib4-logging-suite.log.
+
+Verified: 28 example/twin claims and all 10 plunit tests pass. The suite checks
+every level, host registry agreement, exact topic names, hook precedence,
+held runnable and NUL payloads, first-verdict consumption, refusals and formatting.
+Eight concurrent jobs toggle two shared topic names 32 times apiece, retaining
+exactly one final host registry row per topic. jscpd reports zero clones.
+Logs: ai-tmp/ai-lib4-logging-{example,twin-fixed,suite-complete,jscpd}.log.
+
+Measured: `twin_coverage.py --measure --rounds 3
+examples/ch08-data/08-03-the-shipped-libraries/34-logging_lib.metta` gives
+53732 example and 54976 twin inferences. The twin's compiled capture helper
+and explicit value inspection are within the required band.
+Log: ai-tmp/ai-lib4-logging-measure.log.
+
+Tried: the required library lanes passed except Ruff FBT003 at the twin's two
+positional Python Bool arguments. The calls now pass the existing MeTTa TRUE
+and FALSE values. Repeating the three-round measurement gives the same
+53732/54976 counts. Log: ai-tmp/ai-lib4-logging-measure-final.log.
+
+Verified: Ruff now passes, completing the required library lane batch. The full
+twins lane reads logging at 53732/54976 with all 28 claims and equal stored
+contents. It retains 263 unrelated findings; 44/337 files pass with 3032 claims
+proved. UUID retains its exact 188846 pin. twins-selftest passes.
+Logs: ai-tmp/ai-lib4-logging-{lanes,ruff-final,twins-lane}.log.
