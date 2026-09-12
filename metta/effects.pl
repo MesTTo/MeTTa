@@ -2339,9 +2339,11 @@ metta_with_under(Algebra, Goal) :-
 
 metta_with_evaluation_context(Context, Goal) :-
     ( nb_current('$metta_evaluation_contexts', Old) -> true ; Old = [] ),
-    % Workaround: swi-cleanup-window - preserve the input snapshot and trail both scope transitions.
+    % Workaround: swi-cleanup-window - preserve the input snapshot and trail the entry after cleanup registration.
+    % The context covers every answer of Goal, as the cut's push and pop did:
+    % a cursor's answers are pulled under it one at a time.
     duplicate_term(Context, Snapshot),
-    metta_with_trailed('$metta_evaluation_contexts', [Snapshot|Old], Goal).
+    metta_with_trailed_enumeration('$metta_evaluation_contexts', [Snapshot|Old], Goal).
 
 metta_effective_algebra(_, Algebra) :-
     metta_evaluation_context(evaluation_context(Algebra, _, _)), !.

@@ -2,6 +2,11 @@
 %   on ordinary return, failure, exception, redo and cut; the state fence it
 %   scopes is a declared context reader compiled to its read
 %   [tested: trailed_scopes; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
+% Guarantees: metta_with_trailed_enumeration/3 holds its value over the goal's
+%   whole enumeration and restores the prior root once the goal is finished,
+%   cut, failed or raised, with its entry write registered after the cleanup
+%   [tested: trailed_scopes:an_enumeration_scope_covers_every_answer_and_returns_once_finished;
+%   commit=WORKTREE].
 %
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
 % Guarantees: metta_host_inference_budget/3 converts a deferred native
@@ -785,6 +790,33 @@ metta_with_trailed(Key, Value, Goal) :-
     b_setval(Key, Value),
     call(Goal),
     b_setval(Key, Previous).
+
+% The same context over the WHOLE enumeration of Goal: the value stays in
+% place between answers and the prior value returns once Goal is finished,
+% which is setup_call_cleanup/3's own scope and the fuel scope's above. A
+% solution generator's answers then cross no scope boundary. The primitive
+% above restores on every exit and reinstates on every redo, one write per
+% answer: the right price for a context a caller reads between answers, the
+% wrong one around a generator whose caller only collects, where it charged
+% one inference per answer [measured 2026-09-12: the matespace twin,
+% 1,063,920 answers through the binding's per-solution module scope, read
+% 25,179,296 inferences under the per-answer restore, 24,117,731 through this
+% door and 24,117,750 on the cut b1d175f13b67baf1090f74f309407b763d421744;
+% the writes of '$metta_module' fell from 1,064,711 to 1,572, the cut's own
+% count; command=python tests/prolog/probes/twin_profile.py <root>
+% extensions/python/examples/language-feature-examples/ch22-a-reasoner-you-can-serve/22-03-search/03-matespace.py <out>;
+% fixture=warm QLF set, both MORK objects; commit=WORKTREE].
+% The entry write is trailed and made after the cleanup is registered, so a
+% limit tripping at any port unwinds it; the cleanup writes the prior value
+% back once, on completion, cut, failure or exception, and its write is
+% trailed too, so backtracking past the whole scope still reads the prior.
+% Workaround: swi-cleanup-window - the entry write follows cleanup registration and is trailed.
+:- meta_predicate metta_with_trailed_enumeration(+, ?, 0).
+metta_with_trailed_enumeration(Key, Value, Goal) :-
+    ( nb_current(Key, Previous) -> true ; Previous = [] ),
+    setup_call_cleanup(true,
+                       ( b_setval(Key, Value), Goal ),
+                       b_setval(Key, Previous)).
 
 %Every runnable uses one limit scope. Recursive clauses spend from its
 %backtrackable balance, so trying a sibling restores the balance it started
