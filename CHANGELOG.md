@@ -9,6 +9,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_distribution` adds `ws-variance`, `ws-deviation`, `ws-central-moment`,
+  `ws-mass-at-most`, `ws-quantile`, `ws-median`, `ws-support` and
+  `ws-sum-independent`, each a fold over the normalized finite support rather
+  than a sample of it. The variance is computed about the mean in two passes,
+  because the one-pass form loses every significant digit at a large mean; a
+  quantile level outside (0, 1] and a negative draw count refuse with a remedy.
 - `lib_combinatorics` adds `permutations`, `subsets`, `tuples`,
   `cartesian-power` and `range-step`, each answering one choice per answer, and
   the exact counts `factorial`, `binomial` and `permutation-count`, which never

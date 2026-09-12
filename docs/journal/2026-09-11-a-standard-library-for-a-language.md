@@ -2344,3 +2344,40 @@ minimum of three fresh processes, re-pinned from 86,991. The 3,945-inference
 OVERRUN the twin declared is gone: the enumerations and counts now cost both
 sides more than the distance it was covering. Logs:
 ai-tmp/ai-lib3-comb-{suite2,example,twin2}.log.
+
+## 2026-09-12: distribution
+
+Decided: eight heads in MeTTa over the existing weighted carrier, because each
+is a fold over a finite support and the library's whole style is equations over
+lib_measure's rows. `ws-variance` is computed about the mean in TWO passes; the
+one-pass E[X^2] - E[X]^2 is algebraically identical and numerically useless at a
+large mean, which the example proves rather than asserts: at a mean of a billion
+the one-pass form answers something other than 1.0 for a law whose variance is
+1.0. `ws-central-moment` generalises it, and its first moment is exactly 0.0.
+`ws-mass-at-most` is the cumulative function and pairs with the existing
+inclusive `ws-mass-at-least`; `ws-quantile` walks the sorted support adding mass
+until the level is reached, `ws-median` is the quantile at one half, `ws-support`
+is the ordered support with weights dropped, and `ws-sum-independent` convolves
+the law with itself n times, so a total is a LAW rather than a simulation.
+
+Rejected: a sampling head for moments, because the carrier is finite and exact
+and `ws-sample!` already exists for a draw. Rejected: skew and kurtosis as their
+own heads, because each is one division over `ws-central-moment`, which is the
+head that earns its place.
+
+Tried: the Python differential against `statistics.fmean` with weights ->
+`assert 2.0 == 1.0` for the law `((2 1))`. `ws-expect` reads the weights it is
+GIVEN, so on an unnormalized carrier it answers a weighted sum and not a mean;
+the new heads normalize for themselves. The differential normalizes before
+asking for the mean and takes the raw rows for the rest, which is the contract
+each head actually has.
+
+Verified: the example proves 43 claims, 27 of them new, and
+`CHECK_PY=... sh extensions/python/test.sh tests/ch08_data/test_distribution.py`
+passes 23 tests: the mean, variance, deviation and first two central moments
+against `statistics` over 100 generated supports each, the cumulative function
+against the running sum of the sorted support with the quantile never answering a
+later value, the support against the sorted oracle, the sum of 0 to 3 independent
+draws scaling both moments by n, and the four refusals. The example has no twin,
+as it did not before: nine of its nineteen neighbours in that section have none.
+Logs: ai-tmp/ai-lib3-dist-{example,python2}.log.

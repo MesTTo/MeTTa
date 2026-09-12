@@ -19,7 +19,7 @@ beside its definitions.
 | lib_datetime | 16 | 16 |
 | lib_derived | 1 | 1 |
 | lib_dict | 11 | 4 |
-| lib_distribution | 7 | 0 |
+| lib_distribution | 16 | 8 |
 | lib_doc | 0 | 0 |
 | lib_file | 55 | 55 |
 | lib_gitimport | 0 | 0 |
@@ -1249,6 +1249,94 @@ The key's value, removed from the dict. An absent key has no answer, which is ho
 Returns: the removed value
 
 Undocumented: `dict-has`, `dict-pairs`, `dict-put`, `dict-remove`, `dict-remove-pair`, `dict-size`, `dict-values`
+
+## lib_distribution
+
+### `ws-variance`
+
+*lib_distribution.metta:218*
+
+The variance of a numeric distribution, computed about the mean in two passes over the finite support, because the one-pass E[X^2]-E[X]^2 form loses its significant digits when the mean is large.
+
+1. a distribution of (weight value) pairs
+
+Returns: the variance
+
+### `ws-deviation`
+
+*lib_distribution.metta:222*
+
+The standard deviation, the square root of the variance, in the values' own units.
+
+1. a distribution of (weight value) pairs
+
+Returns: the standard deviation
+
+### `ws-central-moment`
+
+*lib_distribution.metta:226*
+
+The nth moment about the mean: 2 is the variance, and 3 and 4 are what skew and kurtosis are computed from. The first is exactly 0.0.
+
+1. a distribution of (weight value) pairs
+2. which moment
+
+Returns: the moment
+
+### `ws-mass-at-most`
+
+*lib_distribution.metta:230*
+
+The probability that a draw is at most the threshold, which is the cumulative distribution function at that point. ws-mass-at-least is the inclusive upper tail.
+
+1. a distribution of (weight value) pairs
+2. the threshold, included
+
+Returns: the mass at or below it
+
+### `ws-quantile`
+
+*lib_distribution.metta:234*
+
+The smallest value whose cumulative mass reaches the level, the quantile function. A level outside (0, 1] refuses, because no value answers it.
+
+1. a distribution of (weight value) pairs
+2. a level in (0, 1]
+
+Returns: the value at that level
+
+### `ws-median`
+
+*lib_distribution.metta:238*
+
+The median, which is the quantile at one half.
+
+1. a distribution of (weight value) pairs
+
+Returns: the median value
+
+### `ws-support`
+
+*lib_distribution.metta:242*
+
+The values the distribution can answer, once each, smallest first, with the weights dropped.
+
+1. a distribution of (weight value) pairs
+
+Returns: the ordered support
+
+### `ws-sum-independent`
+
+*lib_distribution.metta:246*
+
+The distribution of the sum of n independent draws, by exact convolution rather than simulation. Zero draws are the point mass at 0; a negative count refuses.
+
+1. a distribution of (weight value) pairs
+2. how many independent draws
+
+Returns: the distribution of the total
+
+Undocumented: `ws-add-bernoulli-independent`, `ws-average-independent`, `ws-condition-joint`, `ws-map`, `ws-map2-independent`, `ws-mass-at-least`, `ws-prob-gt-independent`, `ws-quantile-walk`
 
 ## lib_file
 

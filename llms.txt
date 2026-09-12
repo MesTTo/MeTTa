@@ -4931,7 +4931,7 @@ parsing, explicit-zone formatting, date records, calendar fields and addition;
 `lib_derived` the derived forms the engine keeps FUSED
 into its compiler, written out as equations; `lib_dict` a dictionary that IS a
 space, with defaulted lookup, update, merge and pop; `lib_distribution` pure finite value-distribution map, independent
-product, threshold, strict win probability, exact joint conditioning, average
+product, threshold and cumulative mass, quantile and median, variance, deviation and central moments, the sum of n independent draws, strict win probability, exact joint conditioning, average
 and Bernoulli addition; `lib_doc` keeps the old doc import path working after
 its vocabulary moved; `lib_file` text and byte files whole or through handles, publication by rename, directory creation, tree copy and removal, renaming, a link-aware walk and glob, lexical and resolved paths, entry kinds, symbolic links, scoped handles and temporary directories, queryable metadata and process streams;
 `lib_gitimport` git-import!, Prolog-only, a module fetched from a repository;
