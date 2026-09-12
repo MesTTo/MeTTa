@@ -2300,6 +2300,7 @@ prolog:error_message(metta_extension_required(Name, Cause)) -->
 :- consult('metta/properties.pl').
 :- consult('metta/registration.pl').
 :- consult('metta/references.pl').
+:- consult('metta/reference_refresh.pl').
 :- consult('metta/reference_loading.pl').
 %%%%%%%%%% The engine's own type surface %%%%%%%%%%
 %

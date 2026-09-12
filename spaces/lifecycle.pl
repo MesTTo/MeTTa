@@ -1298,6 +1298,7 @@ metta_exec_module_owns_clauses(Child) :-
     current_predicate(Module:Name/Arity),
     functor(Head, Name, Arity),
     \+ predicate_property(Module:Head, imported_from(_)),
+    predicate_property(Module:Head, number_of_clauses(Count)), Count > 0,
     !.
 
 %Forget an execution module that exists and owns nothing, so the next
@@ -1750,6 +1751,7 @@ prolog:error_message(metta_native_occurrence_binder_required(Space)) -->
 :- dynamic metta_add_atom/4, atoms_store_only/3.
 :- dynamic metta_prepare_function_predicate/3, announce_function_changed/2.
 :- dynamic announce_equation_arrival/2, metta_add_program_atoms/4.
+:- dynamic translate_deferred_equations/4.
 :- dynamic store_data_atoms/3, metta_remove_atom/3.
 :- dynamic metta_reference_mutation_ref/2.
 :- dynamic defer_metta_function/5, metta_reference_defer_ref/2.
@@ -1899,10 +1901,11 @@ metta_reference_lazy_equations(Space, enabled) :-
 metta_reference_lazy_equations(Space, disabled) :-
     forall(retract(metta_reference_defer_ref(Space, Ref)), erase(Ref)).
 
-metta_reference_observer(Space, _, metta_add_atom(Space, _, _, _), true,
-                         metta_reference_changed(Space)).
-metta_reference_observer(Space, _, metta_remove_atom(Space, _, _), true,
-                         metta_reference_changed(Space)).
+metta_reference_observer(Space, _, metta_add_atom(Space, Row, Token, _), true,
+                         metta_engine:metta_reference_added(Space, Row, Token)).
+metta_reference_observer(Space, _, metta_remove_atom(Space, Row, _),
+                         metta_engine:metta_reference_removing(Space, Row, Selected),
+                         metta_engine:metta_reference_removed(Space, Selected)).
 metta_reference_observer(Space, _, store_atom(Space, _, _), true, true) :-
     seam:foreign_space(Space).
 metta_reference_observer(Space, _, unstore_atom(Space, _, _), true, true) :-
@@ -1915,6 +1918,13 @@ metta_reference_observer(Space, Module, announce_equation_arrival(Module, _), !,
                          metta_reference_definition_changed(Space)).
 metta_reference_observer(Space, Module, announce_function_changed(Module, _), !,
                          metta_reference_definition_changed(Space)).
+% Materialising a deferred function fires no arrival event (foreign.pl,
+% assert_translated_equation/4: the observers heard the equation arrive), yet
+% it settles the head's physical arity and ends its demand, both of which an
+% importer's face reads. A repair inside a running publication can force it,
+% so this one bypasses the refresh guard and the drain's loop republishes.
+metta_reference_observer(Space, Module, translate_deferred_equations(Space, Module, _, _), !,
+                         metta_engine:metta_reference_face_changed(Space)).
 metta_reference_observer(_, Module,
                          metta_prepare_function_predicate(Module, Name, Arity),
                          (!, metta_reference_prepare(Module, Name, Arity)), true).

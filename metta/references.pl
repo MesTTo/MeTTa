@@ -1,4 +1,12 @@
 % Purpose: derive live definition references and occurrence visibility from rows.
+% Guarantees: data writes update only their occurrence grades; unchanged
+%   callable bindings keep their compiled clauses
+%   [tested: references:data_mutations_keep_compiled_clauses_and_retire_only_removed_grades;
+%   commit=WORKTREE].
+% Guarantees: declaration-only faces carry sorts, constructor arrows and
+%   subsorts without making their subjects callable
+%   [tested: references:constructor_declarations_travel_without_callable_heads;
+%   commit=WORKTREE].
 % Assumes: spaces:metta_space_pair/4 retains each stored occurrence's token;
 %   foreign receivers declare tokens, add-token and remove-token.
 % Guarantees: reference paths identify defining predicates, while their clauses
@@ -11,10 +19,24 @@
 % Owns resources: observed spaces own mutation observers, projected metadata and
 %   native bindings; space release withdraws all three. Transaction completion
 %   reconciles native bindings with the rows surviving commit or rollback.
-%   A completion callback excludes its finishing frame only until its cleanup;
+%   Completion excludes its finishing frame only until its cleanup;
 %   inner rollback retains one outer watch and outer completion retires it
 %   [tested: references:inner_failure_transfers_one_watch_and_outer_completion_retires_it;
-%   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+%   commit=WORKTREE].
+% Owns resources: metta_reference_slot/3 reserves native binding ownership before
+%   mutation and retires it after cleanup; interrupted publication can reconcile
+%   every intermediate state [tested:
+%   references:an_inference_cut_cannot_abandon_reference_completion;
+%   commit=WORKTREE].
+% Guarantees: declaration discovery reads matching rows rather than the class
+%   population [tested:
+%   reference_publication:declaration_discovery_does_not_enumerate_a_providers_population;
+%   commit=WORKTREE].
+% Guarantees: metta_host_reference_names/2 reads written definitions and
+%   explicit references, including private local names, independently of
+%   globally resident functions [tested:
+%   test_constructor_dependencies_survive_a_previous_global_import_leaving;
+%   commit=WORKTREE].
 % Guarded by: with_typing_policy_stable/1 serializes binding publication. Maps
 %   run before publication, outside the typing and support-graph mutexes.
 % Decides: INTERNAL is visibility's zero and PUBLIC its one. A visited-space
@@ -23,16 +45,20 @@
 :- dynamic metta_reference_row/4, metta_reference_map/3.
 :- dynamic metta_occurrence_grade/4, metta_reference_projection/4.
 :- dynamic metta_reference_roots/4, metta_reference_seen_space/2.
-:- dynamic metta_reference_slot/4, metta_reference_observed/1.
-:- volatile metta_reference_seen_space/2, metta_reference_slot/4.
+:- dynamic metta_reference_slot/3, metta_reference_observed/1.
+:- volatile metta_reference_seen_space/2, metta_reference_slot/3.
 :- '$notransact'(metta_reference_seen_space/2).
-:- '$notransact'(metta_reference_slot/4).
-:- thread_local metta_reference_refreshing/0, metta_reference_finishing/1.
+:- '$notransact'(metta_reference_slot/3).
+:- seam:context_reader(metta_reference_refreshing, '$metta_reference_refreshing', value(true)).
+:- seam:context_reader(metta_reference_finishing(Frame), '$metta_reference_finishing', stack(Frame)).
 :- dynamic metta_reference_hooks/0.
 :- dynamic metta_reference_demand/1.
 :- volatile metta_reference_demand/1.
-:- thread_local metta_reference_forcing/1.
+:- seam:context_reader(metta_reference_forcing(Name), '$metta_reference_forcing', stack(Name)).
 
+% The declaring space is the mutation root. Its change queues exactly the
+% spaces whose faces the support graph derives from it; the transaction frame
+% retains that root so rollback republishes the same set (reference_refresh.pl).
 metta_reference_declare(Space, Term, Token) :-
     spaces:metta_require_token_mutation(Space, from),
     metta_reference_watch(Space),
@@ -43,13 +69,11 @@ metta_reference_declare(Space, Term, Token) :-
         metta_reference_validate_selection(Home, Map),
         transaction(( spaces:metta_store_occurrence(Space, Term, Token, _),
                       assertz(metta_reference_row(Space, Token, Home, Map)),
-                      metta_reference_refresh )),
-        metta_reference_changed(Space)
+                      metta_reference_changed(Space) ))
     ;   Term = [internal|Names]
     ->  maplist(must_be(atom), Names),
         transaction(( spaces:metta_store_occurrence(Space, Term, Token, _),
-                      metta_reference_refresh )),
-        metta_reference_changed(Space)
+                      metta_reference_changed(Space) ))
     ;   domain_error(reference_declaration, Term)
     ).
 
@@ -58,12 +82,17 @@ metta_reference_row_map(Space, [], _, Map) :- !,
     metta_reference_option(Space, 'from-map', Map).
 metta_reference_row_map(_, _, Original, _) :- domain_error(from_row, Original).
 
+% A space seen for the first time owes one publication: its grades and its
+% face node. A provider already watched stays clean when another importer
+% appears, which is what keeps allocation of the Nth prototype independent of
+% the N-1 before it.
 metta_reference_watch(Space) :-
     spaces:metta_require_token_read(Space, from),
     metta_reference_install_hooks,
     space_module(Space, Module),
     ( metta_reference_seen_space(Space, Module) -> true
-    ; assertz(metta_reference_seen_space(Space, Module)) ),
+    ; assertz(metta_reference_seen_space(Space, Module)),
+      metta_reference_queue(Space) ),
     ( metta_reference_observed(Space) -> true
     ; spaces:metta_reference_mutation_scope(Space, enabled),
       assertz(metta_reference_observed(Space)) ),
@@ -109,6 +138,35 @@ metta_reference_refresh_grades(Space) :-
              metta_reference_row_head(Row, Name),
              metta_reference_internal(Space, Name) ),
            assertz(metta_occurrence_grade(Space, Token, visibility, 'INTERNAL'))).
+
+% Data changes a population, not its exported definitions. Retain the ordinary
+% occurrence grade and reserve binding publication for the rows that define it.
+metta_reference_interface_row([=, _, _]).
+metta_reference_interface_row([from|_]).
+metta_reference_interface_row([internal|_]).
+metta_reference_interface_row(Row) :- metta_reference_metadata_row(Row, _, _, _).
+
+metta_reference_added(Space, Row, Token) :-
+    (   \+ \+ metta_reference_interface_row(Row)
+    ->  metta_reference_changed(Space)
+    ;   metta_reference_row_head(Row, Name), metta_reference_internal(Space, Name)
+    ->  assertz(metta_occurrence_grade(Space, Token, visibility, 'INTERNAL'))
+    ;   true
+    ).
+
+metta_reference_removing(Space, Pattern, Selected) :-
+    findall(Token-Pattern, spaces:metta_space_pair(Space, Pattern, Token, _), Selected).
+
+metta_reference_removed(Space, Selected) :-
+    foldl(metta_reference_retire_grade(Space), Selected, false, Changed),
+    ( Changed == true -> metta_reference_changed(Space) ; true ).
+
+metta_reference_retire_grade(Space, Token-Row, Before, After) :-
+    (   spaces:metta_space_pair(Space, Row, Token, _)
+    ->  After = Before
+    ;   retractall(metta_occurrence_grade(Space, Token, visibility, _)),
+        ( \+ \+ metta_reference_interface_row(Row) -> After = true ; After = Before )
+    ).
 
 % The same dynamically scoped algebra used by under determines a row's grade.
 % Absence of an annotation is the selected algebra's one, not a stored row.
@@ -211,91 +269,9 @@ metta_reference_map_once(Space, Token, Map, Head, Names) :-
     sort(Results, Names),
     assertz(metta_reference_map(Token, Head, Names)).
 
-metta_reference_changed(Space) :-
-    (   metta_reference_refreshing
-    ->  true
-    ;   metta_reference_track_transaction,
-        metta_reference_definition_changed(Space),
-        ( filereader:active_source_program(_)
-        -> filereader:source_definition_arrived('$metta_reference_face')
-        ; metta_reference_refresh )
-    ).
-
-metta_reference_definition_changed(Space) :-
-    (   metta_reference_refreshing
-    ->  true
-    ;   flag('$metta_reference_epoch', Epoch, Epoch+1),
-        space_module(Space, Module),
-        support_graph:support_invalidate(derived(Module, reference_face)),
-        filereader:source_definition_arrived('$metta_reference_face')
-    ).
-
-metta_reference_refresh :-
-    (   metta_reference_refreshing
-    ->  true
-    ;   setup_call_cleanup(
-            asserta(metta_reference_refreshing, Guard),
-            metta_reference_refresh_now,
-            erase(Guard))
-    ).
-
-metta_reference_refresh_now :-
-    flag('$metta_reference_epoch', Version, Version),
-    findall(Space-Module, metta_reference_seen_space(Space, Module), Spaces),
-    forall(member(Space-_, Spaces),
-           ( metta_reference_watch(Space),
-             metta_reference_retire_rows(Space),
-             metta_reference_refresh_grades(Space) )),
-    findall(Space-Module-Face,
-            ( member(Space-Module, Spaces),
-              metta_reference_local_face(Space, [], Face) ), Faces),
-    % One face can change several dependencies of the same compiled caller.
-    % Reuse the graph's batch so callers rebuild after every binding and type
-    % projection is installed. This is the same observer boundary as
-    % https://github.com/solidjs/solid/releases/tag/v1.5.0
-    % [tested: references:one_face_publication_recompiles_a_shared_caller_once;
-    % commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
-    with_typing_policy_stable(support_graph:with_support_repairs_deferred(
-        ( flag('$metta_reference_epoch', Current, Current),
-          ( Current =:= Version
-          -> forall(member(Space-Module-Face, Faces),
-                    metta_reference_publish_face(Space, Module, Face, Faces)),
-             metta_reference_publish_demand(Faces),
-             forall(member(Space-_-Face, Faces),
-                    metta_reference_publish_metadata(Space, Face)),
-             Result = published
-          ; Result = changed ) ))),
-    ( Result == changed -> metta_reference_refresh_now
-    ; forall(support_graph:support_repair_invalidations, true) ).
-
-% Static imports protect compiler goals from a program's equations. Wrap that
-% static entry while demands exist; turning it dynamic would allow assertion
-% through its imports. prolog_wrap retains the static definition and its guard:
-% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/prolog_wrap.pl
-% [tested: reference_loading:demand_keeps_the_compiler_goal_static_and_retires;
-% commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
-metta_reference_publish_demand(Faces) :-
-    findall(Name,
-            ( member(Space-_-Face, Faces), member(Name/_-root(Home, Original, _), Face),
-              Home \== Space,
-              metta_reference_unsettled(Home, Original) ), Names0),
-    sort(Names0, Names),
-    forall(( metta_reference_demand(Name), \+ memberchk(Name, Names) ),
-           retractall(metta_reference_demand(Name))),
-    forall(member(Name, Names),
-           ( metta_reference_demand(Name) -> true
-           ; assertz(metta_reference_demand(Name)) )),
-    ( Names == []
-    -> ( unwrap_predicate(spaces:metta_ensure_compiled/1, metta_reference_demand)
-       -> true ; true )
-    ; current_predicate_wrapper(spaces:metta_ensure_compiled(_),
-                                metta_reference_demand, _, _)
-    -> true
-    ; wrap_predicate(spaces:metta_ensure_compiled(Name), metta_reference_demand,
-                     Wrapped,
-                     ( ( metta_reference_demand(Name)
-                       -> metta_reference_force(Name) ; true ), Wrapped ))
-    ).
+% Change notification, the pending publication queue, its drain and the
+% transaction frame roots live in engine/metta/reference_refresh.pl. This unit
+% keeps what a face IS and how a binding is installed.
 
 metta_reference_unsettled(Home, _) :- metta_reference_loading(Home), !.
 metta_reference_unsettled(Home, Name) :-
@@ -304,14 +280,14 @@ metta_reference_unsettled(Home, Name) :-
 metta_reference_force(Name) :-
     (   metta_reference_forcing(Name)
     ->  true
-    ;   setup_call_cleanup(
-            asserta(metta_reference_forcing(Name), Guard),
+    ;   ( nb_current('$metta_reference_forcing', Before) -> true ; Before = [] ),
+        % Workaround: swi-cleanup-window - a suspended force owns a trailed stack entry.
+        metta_with_trailed_enumeration('$metta_reference_forcing', [Name|Before],
             forall(( metta_reference_roots(_, Name, _, Roots),
                      member(root(Home, Original, _), Roots) ),
                    ( metta_reference_wait(Home),
                      ( Original == Name -> true
-                     ; spaces:metta_ensure_compiled(Original) ) )),
-            erase(Guard))
+                     ; spaces:metta_ensure_compiled(Original) ) )))
     ).
 
 :- multifile user:exception/3.
@@ -341,7 +317,7 @@ metta_reference_publish_face(Space, Module, Face, Faces) :-
                                    =(Face), _),
     findall(Name/Arity,
             ( member(Name/Arity-_, Face), integer(Arity)
-            ; metta_reference_slot(Module, Name, Arity, _) ), Keys0),
+            ; metta_reference_slot(Module, Name, Arity) ), Keys0),
     sort(Keys0, Keys),
     forall(member(Name/Arity, Keys),
            ( findall(Root, member(Name/Arity-Root, Face), Roots),
@@ -357,9 +333,9 @@ metta_reference_publish_face(Space, Module, Face, Faces) :-
 
 metta_reference_bind(Space, Module, Name, Arity, Roots, Faces) :-
     (   Roots = [root(Space, Name, Arity)],
-        \+ metta_reference_slot(Module, Name, Arity, _)
+        \+ metta_reference_slot(Module, Name, Arity)
     ->  true
-    ;   Roots == [], \+ metta_reference_slot(Module, Name, Arity, _)
+    ;   Roots == [], \+ metta_reference_slot(Module, Name, Arity)
     ->  true
     ;   metta_reference_binding(Space, Module, Name, Arity, Roots, Faces),
         (   Roots == []
@@ -380,26 +356,25 @@ metta_reference_bind(Space, Module, Name, Arity, Roots, Faces) :-
 % https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-modul.c
 metta_reference_binding(_, Module, Name, Arity, [], _) :-
     \+ current_transaction(_), !,
-    metta_reference_drop_binding(Module, Name, Arity).
+    metta_reference_retire_binding(Module, Name, Arity, discard).
 metta_reference_binding(Space, Module, Name, Arity,
-                        [root(Space, Name, Arity)], _) :-
-    metta_reference_slot(Module, Name, Arity, wrapped(_, _)), !,
-    compiled_function_name(Name, Predicate), functor(Head, Predicate, Arity),
-    unwrap_predicate(Module:Head, metta_reference_union),
-    retractall(metta_reference_slot(Module, Name, Arity, _)).
+                        [root(Space, Name, Arity)], _) :- !,
+    metta_reference_retire_binding(Module, Name, Arity, preserve).
 metta_reference_binding(Space, Module, Name, Arity,
                         [root(Home, Name, Arity)], Faces) :-
     Home \== Space,
     memberchk(Home-HomeModule-Face, Faces),
     findall(R, member(Name/Arity-R, Face), [root(Home, Name, Arity)]),
-    \+ ( metta_reference_slot(Module, Name, Arity, wrapped(_, _)),
-         current_transaction(_) ),
+    compiled_function_name(Name, Predicate), functor(Head, Predicate, Arity),
+    % Workaround: swi-transaction-enumerator-repeats-parent - test existence once before the wrapper check can fail.
+    \+ ( once(current_transaction(_)),
+         current_predicate_wrapper(Module:Head, metta_reference_union, _, _) ),
     !,
-    metta_reference_drop_binding(Module, Name, Arity),
-    compiled_function_name(Name, Predicate),
-    HomeModule:export(Predicate/Arity), Module:import(HomeModule:Predicate/Arity),
-    assertz(metta_reference_slot(Module, Name, Arity, imported(HomeModule))).
+    metta_reference_retire_binding(Module, Name, Arity, discard),
+    metta_reference_reserve_binding(Module, Name, Arity),
+    HomeModule:export(Predicate/Arity), Module:import(HomeModule:Predicate/Arity).
 metta_reference_binding(Space, Module, Name, Arity, Roots, Faces) :-
+    metta_reference_reserve_binding(Module, Name, Arity),
     metta_reference_detach_import(Module, Name, Arity),
     compiled_function_name(Name, Predicate),
     Module:dynamic(Predicate/Arity),
@@ -407,9 +382,11 @@ metta_reference_binding(Space, Module, Name, Arity, Roots, Faces) :-
     Head =.. [_|Args],
     metta_reference_goal_list(Roots, Space, Name, Args, Original, Faces, Goals),
     metta_reference_disjunction(Goals, Body),
-    wrap_predicate(Module:Head, metta_reference_union, Original, Body),
-    retractall(metta_reference_slot(Module, Name, Arity, _)),
-    assertz(metta_reference_slot(Module, Name, Arity, wrapped(Head, Original))).
+    wrap_predicate(Module:Head, metta_reference_union, Original, Body).
+
+metta_reference_reserve_binding(Module, Name, Arity) :-
+    ( metta_reference_slot(Module, Name, Arity) -> true
+    ; assertz(metta_reference_slot(Module, Name, Arity)) ).
 
 metta_reference_goal_list([], _, _, _, _, _, []).
 metta_reference_goal_list([root(Home, OriginalName, Arity)|Roots],
@@ -459,18 +436,24 @@ metta_reference_disjunction([Goal|Goals], (Goal;Rest)) :-
     metta_reference_disjunction(Goals, Rest).
 
 metta_reference_detach_import(Module, Name, Arity) :-
-    (   retract(metta_reference_slot(Module, Name, Arity, imported(_)))
-    ->  compiled_function_name(Name, Predicate), abolish(Module:Predicate/Arity)
+    compiled_function_name(Name, Predicate), functor(Head, Predicate, Arity),
+    (   metta_reference_slot(Module, Name, Arity),
+        spaces:metta_existing_import(Module, Head, _)
+    ->  abolish(Module:Predicate/Arity)
     ;   true
     ).
 
-metta_reference_drop_binding(Module, Name, Arity) :-
-    (   retract(metta_reference_slot(Module, Name, Arity, Binding))
+% A cut after unwrapping or abolishing still leaves the key owned. The next
+% reconciliation repeats those idempotent effects before releasing ownership.
+metta_reference_retire_binding(Module, Name, Arity, Own) :-
+    (   metta_reference_slot(Module, Name, Arity)
     ->  compiled_function_name(Name, Predicate),
-        ( Binding = imported(_) -> abolish(Module:Predicate/Arity)
-        ; functor(Head, Predicate, Arity),
-          unwrap_predicate(Module:Head, metta_reference_union),
-          abolish(Module:Predicate/Arity) )
+        functor(Head, Predicate, Arity),
+        ignore(unwrap_predicate(Module:Head, metta_reference_union)),
+        ( ( Own == discard ; spaces:metta_existing_import(Module, Head, _) )
+        -> abolish(Module:Predicate/Arity)
+        ; true ),
+        retractall(metta_reference_slot(Module, Name, Arity))
     ;   true
     ).
 
@@ -525,74 +508,16 @@ metta_reference_publish_metadata(Space, Face) :-
              -> assertz(metta_reference_projection(Space, Key, Token, Ref))
              ; true ) )).
 
-metta_reference_track_transaction :-
-    (   current_transaction(_)
-    ->  ( nb_current('$metta_reference_listening', true) -> true
-        ; nb_setval('$metta_reference_listening', true),
-          thread_self(Owner),
-          prolog_listen(frame_finished,
-                        metta_engine:metta_reference_frame_finished(Owner)) ),
-        prolog_current_frame(Frame), metta_reference_track_frames(Frame)
-    ;   true
-    ).
-
-% Workaround: swi-query-frame-discarded-on-engine-destroy - watch the nearest live transaction and exclude finishing frames when transferring its watch.
-% prolog_frame_attribute/3 marks its input frame FR_NOTIFY. Stop at the
-% nearest transaction: SWI's discard_query notifies an inspected outer query
-% after closing its foreign frame, so destroying a suspended engine asserts.
-% Its completion refresh registers the next enclosing transaction, if any.
-% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-wam.c#L3052-L3064
-% frameFailed leaves the finishing frame in the callback's ancestry. Exclude
-% every active completion callback's frame so rollback transfers to a live one.
-% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-wam.c#L903-L915
-metta_reference_track_frames(Frame) :-
-    prolog_frame_attribute(Frame, predicate_indicator, Predicate),
-    % policy-inventory-exempt: mechanism-internal; reason=the three native transaction and snapshot frames from the pinned SWI source above; evidence=engine/metta/references.pl:metta_reference_track_frames/1
-    (   memberchk(Predicate, [system:'$transaction'/2, system:'$transaction'/3,
-                             system:'$snapshot'/1]),
-        \+ metta_reference_finishing(Frame)
-    ->  ( metta_reference_pending_frame(Frame) -> true
-        ; metta_reference_pending_frames(Frames),
-          nb_setval('$metta_reference_frames', [Frame|Frames]) )
-    ; prolog_frame_attribute(Frame, parent, Parent),
-      metta_reference_track_frames(Parent) ).
-
-% Workaround: swi-named-listener-replacement-lock - register distinct unnamed owner closures and unregister each once.
-% frame_finished is global; the frame identifiers and pending set are local.
-% Distinct closures also avoid SWI's named-hook replacement path, which leaves
-% its list mutex locked at this revision:
-% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-event.c#L145-L160
-% [tested: reference_loading:concurrent_transactions_keep_each_others_rollback_listener;
-% commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
-metta_reference_frame_finished(Owner, Frame) :-
-    thread_self(Thread),
-    ( Owner == Thread -> metta_reference_finish_frame(Owner, Frame) ; true ).
-
-metta_reference_finish_frame(Owner, Frame) :-
-    metta_reference_pending_frames(Frames),
-    (   selectchk(Frame, Frames, Remaining)
-    ->  nb_setval('$metta_reference_frames', Remaining),
-        setup_call_cleanup(
-            asserta(metta_reference_finishing(Frame), Guard),
-            metta_reference_refresh,
-            erase(Guard)),
-        ( metta_reference_pending_frame(_) -> true
-        ; nb_delete('$metta_reference_listening'),
-          prolog_unlisten(frame_finished,
-                          metta_engine:metta_reference_frame_finished(Owner)) )
-    ;   true
-    ).
-
-metta_reference_pending_frames(Frames) :-
-    ( nb_current('$metta_reference_frames', Frames) -> true ; Frames = [] ).
-
-metta_reference_pending_frame(Frame) :-
-    metta_reference_pending_frames(Frames), member(Frame, Frames).
-
+% The released space is the mutation root of its own disappearance: its
+% dependents are queued through the graph BEFORE the edges that reach them
+% are forgotten, and the names it alone demanded are pruned after the drain.
 metta_reference_release(Space) :-
     retractall(metta_reference_space_option(Space, _, _)),
-    (   retract(metta_reference_seen_space(Space, Module))
-    ->  metta_reference_release_loader(Space),
+    (   metta_reference_seen_space(Space, Module)
+    ->  metta_reference_demand_names([Space-Module], Demanded),
+        metta_reference_invalidate([Space]),
+        retract(metta_reference_seen_space(Space, Module)),
+        metta_reference_release_loader(Space),
         spaces:metta_reference_mutation_scope(Space, disabled),
         retractall(metta_reference_observed(Space)),
         forall(retract(metta_reference_row(Space, Token, _, _)),
@@ -603,13 +528,14 @@ metta_reference_release(Space) :-
                ( retractall(metta_reference_map(Token, _, _)),
                  space_module(Receiver, ReceiverModule),
                  support_graph:support_forget(derived(ReceiverModule, reference_row(Token))) )),
-        forall(retract(metta_reference_slot(Module, Name, Arity, Binding)),
-               ( compiled_function_name(Name, Predicate),
-                 ( Binding = imported(_) -> abolish(Module:Predicate/Arity)
-                 ; functor(Head, Predicate, Arity),
-                   unwrap_predicate(Module:Head, metta_reference_union) ) )),
+        forall(metta_reference_slot(Module, Name, Arity),
+               metta_reference_retire_binding(Module, Name, Arity, preserve)),
         retractall(metta_reference_roots(Module, _, _, _)),
-        metta_reference_refresh
+        support_graph:support_forget(derived(Module, reference_face)),
+        metta_reference_refresh,
+        forall(( member(Name, Demanded), \+ metta_reference_demanded_elsewhere(Name) ),
+               retractall(metta_reference_demand(Name))),
+        with_typing_policy_stable(metta_reference_demand_wrapper)
     ;   true
     ).
 
