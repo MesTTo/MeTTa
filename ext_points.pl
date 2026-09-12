@@ -1276,7 +1276,7 @@ kind(metta_with_trailed/3, host_service).
 %command=swipl tests/prolog/probes/bench_case_profile.pl <root> translate <out>
 %on the branch and on its pristine cut b1d175f13b67baf1090f74f309407b763d421744,
 %the two TSVs diffed by predicate; fixture=warm QLF set, both MORK objects;
-%commit=WORKTREE].
+%commit=bcc22a1fd4458e1d85de7ffd8c55fcf02bfeb668].
 %
 %Two shapes cover every reader in the tree. value(Pattern) reads one term, a
 %flag when the pattern is `true`. stack(Pattern) reads a nearest-first list:
@@ -1289,7 +1289,7 @@ kind(metta_with_trailed/3, host_service).
 %dynamic fact 2/2/1, the inlined stack read 2/2/1, the predicate wrapper it
 %replaces 3/3/2 and the wrapper over nb_current/2 then member/2 3/4/4;
 %command=swipl tests/prolog/probes/context_read_shapes.pl; fixture=bare
-%SWI-Prolog 10.1.13; commit=WORKTREE].
+%SWI-Prolog 10.1.13; commit=bcc22a1fd4458e1d85de7ffd8c55fcf02bfeb668].
 %
 %The expansion applies wherever the call resolves to the declaring module:
 %unqualified in that module, qualified from anywhere, imported, or inherited
