@@ -15,6 +15,11 @@
 %   [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarded by: '$metta_arrow_products' serializes rule registration against
 %   annotated-declaration publication.
+% Owns resources: a source load owns each newly installed registry clause and
+%   its derived equations; withdrawal cannot retire a later registration
+%   [tested: test_a_failed_rule_registration_retires_only_its_source_artifacts,
+%   test_source_withdrawal_keeps_a_later_registration_in_the_same_module;
+%   commit=WORKTREE].
 % Assumes:
 %   - current_metta_module/1 names the module a registration is written in and
 %     metta_module_space/2 turns that into the space holding its equations, so
@@ -127,7 +132,7 @@
             translator_rule_snapshot/3,
             restore_translator_rule_snapshot/3,
             restore_translator_rule_derived_snapshot/3,
-            rollback_restored_translator_rule/3
+            rollback_source_translator_rule/2
           ]).
 
 % Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
@@ -366,10 +371,10 @@ restore_translator_rule_rows(
 restore_translator_rule_row(reuse, _, _, _, _, Installed, Installed).
 restore_translator_rule_row(
         install, Name, Declarations, Home, Override,
-        [restored_rule(Name, Home, Generation)|Installed], Installed) :-
+        [translator_rule(Name, Ref)|Installed], Installed) :-
     metta_exec_module_generation(Home, Generation),
     assertz(translator_rule_generation(Name, Home, Generation)),
-    assertz(translator_rule(Name, Declarations, Home)),
+    assertz(translator_rule(Name, Declarations, Home), Ref),
     restore_translator_rule_override(Name, Override),
     restore_translator_rule_cost(Name, Declarations).
 
@@ -406,14 +411,15 @@ restore_translator_rule_derived_rows(
     assertz(translator_rule_derived(Source, Space, Equation), Ref),
     restore_translator_rule_derived_rows(Rows, NodeSpaces, Refs).
 
-%A later explicit removal or re-registration wins. Source cleanup retires only
-%the exact module generation installed from its cache image.
-rollback_restored_translator_rule(Name, Home, Generation) :-
-    (   translator_rule(Name, _, Home),
-        translator_rule_generation(Name, Home, Generation)
-    ->  forget_translator_rule(Name)
-    ;   true
-    ).
+% A clause reference distinguishes registrations within one module generation.
+% Enumerate the current row before comparing references: bound-reference reads
+% can still expose a row erased inside the current transaction.
+rollback_source_translator_rule(Name, Ref) :-
+    metta_with_arrow_product_update(
+        (   clause(translator_rule(Name, _, _), true, Current), Current == Ref
+        ->  forget_translator_rule(Name)
+        ;   true
+        )).
 
 %What a registration for an UNPROTECTED name that already means something did
 %to that meaning. It does not delete it: the older clause or special form is
@@ -588,7 +594,8 @@ install_translator_rule(Name, Declarations, Home) :-
     ->  assertz(translator_rule_generation(Name, Home, Generation))
     ;   true
     ),
-    assertz(translator_rule(Name, Declarations, Home)),
+    assertz(translator_rule(Name, Declarations, Home), Ref),
+    filereader:record_source_resource(translator_rule(Name, Ref)),
     note_cost_ordered_rule(Name, Declarations).
 
 
@@ -664,7 +671,8 @@ install_conjunctive_rule(Name, Declarations) :-
         conjunctive_body(Space, Conjuncts, [noeval, Expansion], Body),
         Equation = [=, Head, Body],
         'add-atom'(Space, Equation, _),
-        assertz(translator_rule_derived(Name, Space, Equation))
+        assertz(translator_rule_derived(Name, Space, Equation), Ref),
+        filereader:record_source_assertion(Ref)
     ;   \+ memberchk(right(_), Declarations)
     ->  true
     ;   throw(error(metta_conjunctive_left_side(Name, missing),
@@ -783,7 +791,8 @@ install_inverse_equation(Source, Space, Equation) :-
     ;   register_translator_rule(InvHead, [direction(inverse(Source))])
     ),
     'add-atom'(Space, Equation, _),
-    assertz(translator_rule_derived(Source, Space, Equation)).
+    assertz(translator_rule_derived(Source, Space, Equation), Ref),
+    filereader:record_source_assertion(Ref).
 
 %%%% Refusal %%%%
 %
