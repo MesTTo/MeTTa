@@ -15,8 +15,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   holds no mutex while SWI takes the channel's event-list lock. SWI holds that
   lock across every callback it delivers, and four hangs in this tree were
   that lock ordered against an engine mutex. The arithmetic-expansion guard,
-  the seam table, the atom-hook watchers and materialization's erase listener
-  register through it.
+  the seam table, the atom-hook watchers, materialization's erase listener
+  and the receipt engine's two listeners register through it.
 - The plunit lane runs every suite under `tests/prolog/lock_order.pl`, which
   records the order each thread acquires SWI mutexes, with each channel's
   event-list lock as one more, and fails the lane on any cycle, naming the

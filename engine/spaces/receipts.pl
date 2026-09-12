@@ -268,15 +268,16 @@ metta_receipt_reserve(Owner, Ref, Space, Index, Token, Stored) :-
     ; assertz(metta_receipt_pending(Space, Token, Owner, Ref)),
       Stored = Token ).
 
+% The standing engine is created once; the two listeners go through the door,
+% which registers each once and holds no mutex while the host takes the
+% channel's event-list lock.
 metta_boot_receipts :-
     flag('$metta_occurrence_receipts_ready', Ready, Ready),
     ( Ready == 1 -> true
     ; engine_create(_, spaces:metta_receipt_loop, _,
                     [alias('$metta_occurrence_receipts')]),
-      prolog_listen(frame_finished, spaces:metta_receipt_frame_finished,
-                    [name(metta_occurrence_transaction)]),
-      prolog_listen(metta_receipt_marker/2, spaces:metta_receipt_marker_changed,
-                    [name(metta_occurrence_rollback)]),
-      flag('$metta_occurrence_receipts_ready', _, 1) ).
+      flag('$metta_occurrence_receipts_ready', _, 1) ),
+    metta_listen(frame_finished, spaces:metta_receipt_frame_finished),
+    metta_listen(metta_receipt_marker/2, spaces:metta_receipt_marker_changed).
 
 :- metta_boot_receipts.

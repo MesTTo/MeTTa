@@ -393,6 +393,7 @@ reaches(parser, metta, 'refuses an unbound input in the core\'s error vocabulary
 reaches(qlf_boot, identity, 'validates actor and generation before engine initialization').
 reaches(qlf_boot, source_loading, 'boot reports errors SWI prints while replaying the engine artifact').
 reaches(spaces, identity, 'normalizes and orders occurrence tokens through the process identity owner').
+reaches(spaces, host_listeners, 'the receipt engine\'s frame and marker listeners are registered through the one door').
 reaches(spaces, ext_points, 'announces function changes and asks whether an atom hook is installed').
 reaches(spaces, filereader, 'a write records or forgets what its source assertion supports').
 reaches(spaces, metta, 'a space write reaches the core\'s registries, contract atoms and error vocabulary').
