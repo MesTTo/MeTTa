@@ -267,7 +267,8 @@ The new corpus example has seven assertions and a Python twin. Its full-example 
 
 Tried: the final corpus run and its twin -> seven of seven assertions, equal stored content, 21,949 MeTTa inferences and 19,782 Python inferences, zero findings. `jscpd --format prolog --formats-exts 'prolog:pl,plt' --min-lines 5 --min-tokens 50` reports one seven-line test clone, 1.38% over the two new Prolog files; no production clone. The duplicated mutation and error golden remains beside each test because the two cases change different declaration scopes.
 
-Tried: the artifact battery -> 23 passing lanes and two failures, `llms` and `llms-selftest`. The new file and translator unit require source-table counts of 325 and seven. The five Node path findings name generated browser artifacts absent from this worktree; `npm --prefix extensions/node run build:browser --silent` creates them from the existing build scripts. With those counts and artifacts, `sh check.sh llms llms-selftest example-origins evidence provenance-pin-selftest` passes all six selected or implied lanes. The attribution check uses `METTA_UPSTREAM=/home/user/Dev/PyPeTTa1/PeTTa-base` and reports 143 derived and 203 original programs. The llms negative control detects all 64 planted cases. No allowances were widened.
+Tried: the artifact battery -> 23 passing lanes and two failures, `llms` and `llms-selftest`. The new file and translator unit require source-table counts of 325 and seven. The five Node path findings name generated browser artifacts absent from this worktree; `npm --prefix extensions/node run build:browser --silent` creates them from the existing build scripts. With those counts and artifacts, `sh check.sh llms llms-selftest example-origins evidence provenance-pin-selftest` passes all six selected or implied lanes. The attribution check uses `METTA_UPSTREAM=../../../PeTTa-base` and reports 143 derived and 203 original programs. The llms negative control detects all 64 planted cases. No allowances were widened.
+
 ## 2026-09-11: class-space admission and open recursion
 
 Tried: two spaces defining `Shape`, `Circle`, `(:< Circle Shape)`, typed `area` equations returning 1 and 2, and `describe` calling `area` on its explicit receiver. After the Circle space references Shape, `area (Circle 3)` answers both 1 and 2. `describe (Circle 3)` in Circle refuses with `(BadArgType 1 Shape Circle)`. A third space referencing Circle reports `%Undefined%` for that constructor's type. Adding the reverse reference makes `describe` answer both areas too. The fixture is `ai-tmp/ai-classes-dispatch-probe.py`; the completed probe exits 0.
@@ -939,6 +940,88 @@ The test continues to detect the lazy import. The additional assertion cost
 belongs to the nested-rollback repair already in this package, not to a
 heartbeat or accounting correction.
 
+## 2026-09-12: the grain pair declares its lexical dependencies
+
+Measured: `swipl -q -s ai-tmp/ai-classes-c3-callee-cost.pl` runs the constructor
+regression fixture directly. Typed and untyped loops both cost 1,151, 11,051
+and 110,051 inferences at 100, 1,000 and 10,000 iterations. The earlier typed
+counts were 19,251, 192,051 and 1,920,051. Log:
+`ai-tmp/ai-classes-c3-callee-cost3.log`.
+
+Found: the native grain example passes `sh test.sh` but fails through the
+Python loader with population `(50)` and remaining count zero. A trace of
+the returned receivers shows distinct tokens. A match before the first write
+finds no field rows. Removing `scope-defer` in a disposable source probe restores
+the expected population (`ai-tmp/ai-classes-c3-grain-without-defer.log`). The
+class space had not imported that operation, so ordinary evaluation of its
+unknown head evaluated the cleanup argument immediately. The native shell's
+shared `&self` import had hidden the missing lexical dependency.
+
+Decided: the example's Account space imports `scope-defer` through `from` and
+hides it with `internal`, matching generated class declarations. Changing the
+engine's lexical lookup would change the language to accommodate a missing
+import and was rejected.
+
+Found: the twin runner loads a module outside `sys.modules`. Concrete class
+annotations raised `KeyError: 'metta_twin'`; after allowing the missing module,
+generated constructors still asked `inspect.getfile` for nonexistent source.
+Python's `typing.get_type_hints` uses an empty module namespace in this case.
+Generated initialization has no handwritten source and now says so in its
+diagnostic location. `sh extensions/python/test.sh
+tests/ch09_types/test_class_construction.py -k concrete_field_annotations -n 0`
+passes one test (`ai-tmp/ai-classes-c3-unimported-after2.log`).
+
+Verified: `sh test.sh examples/ch17-concurrency-and-the-loop/08-class_grains.metta`
+passes the grain and native cleanup claims. The added cleanup claim exercises
+the longhand `scope_defer`, `drop-space` and `space_drop`; the coverage gate had
+correctly reported those three new callable heads without an example.
+`python extensions/python/tools/twin_coverage.py
+examples/ch17-concurrency-and-the-loop/08-class_grains.metta` proves both claims,
+compares equal stored content and reports zero findings. Native and Python
+costs are 2,530,717 and 14,914,066 inferences. The twin's separate overrun is the
+measured whole-program difference, 12,383,349. Logs:
+`ai-tmp/ai-classes-c3-grain-{corpus,twin}-complete.log`;
+three-process measurement: `ai-tmp/ai-classes-c3-grain-twin-measure5.log`.
+
+Verified: `sh check.sh corpus-coverage cumulative-syntax example-origins llms`
+passes every selected lane and the implied origins selftest. The corpus has
+321 executable non-skipped programs, 326 non-fixture files, and 347 files
+including fixtures. Upstream attribution remains 143 derived, with 204 written
+here. `from`, `internal` and `only` now first occur at 17-00-08. Log:
+`ai-tmp/ai-classes-c3-grain-records-complete.log`.
+
+## 2026-09-12: grain costs after reference publication repair
+
+Measured: `PYTHONPATH=extensions/python
+$CHECK_PY -m benchmarks.class_grains --sizes 1 100 1000`
+completed all nine fresh-process samples after deleting engine/lib QLF files.
+The log is `ai-tmp/ai-classes-c3-grain-costs.log`. Reads and writes include the
+public text-query crossing; a value write constructs its replacement.
+
+| Grain | Population | Creation inferences | Read inferences | Write inferences | Native module byte delta | Retained Python byte delta |
+|---|---:|---:|---:|---:|---:|---:|
+| value | 1 | 2,032 | 1,502 | 2,032 | 0 | 27,150 |
+| value | 100 | 202,507 | 1,502 | 2,032 | -1,992 | 55,958 |
+| value | 1000 | 2,025,007 | 1,502 | 2,032 | -1,992 | 317,883 |
+| entity | 1 | 3,177 | 1,464 | 2,314 | 112 | 27,441 |
+| entity | 100 | 317,007 | 1,464 | 2,314 | 125,432 | 60,931 |
+| entity | 1000 | 3,170,007 | 1,464 | 2,314 | 1,259,872 | 365,914 |
+| prototype | 1 | 242,540 | 1,282 | 2,121 | 19,664 | 27,952 |
+| prototype | 100 | 24,416,602 | 1,282 | 2,116 | 1,989,440 | 88,730 |
+| prototype | 1000 | 260,382,602 | 1,282 | 2,116 | 19,881,440 | 448,363 |
+
+Each five-read and five-write sample had identical counts within its row.
+Declaration cost was 2,743,146 for the first value sample and 2,743,096 for
+the later value samples; every entity declaration cost 3,382,599 and every
+prototype declaration 3,536,798. Module deltas are signed changes in live
+storage/execution modules, not process memory or object sizes. The JSON retains
+the separate collection, RSS, stack, native and Python measurements.
+
+Value and entity creation fit `2025*N + 7` and `3170*N + 7` at every measured
+population. Prototype creation grows faster than linearly across these samples;
+the responsible traversal has not been identified. Profiler call counts are
+the next check, independent of sampled time on this shared machine.
+
 ## 2026-09-12: cancellation exposes unfinished reference ownership
 
 Tried: `swipl -q -s ai-tmp/ai-classes-c3-frame-cuts.pl` enumerates every
@@ -1425,3 +1508,165 @@ spaces. Native release uses the same plan, while ordinary clear releases only
 the source-owned portion and preserves other equation-world children. The
 existing source journal remains the sole allocation ownership record.
 
+## 2026-09-13: reconcile the complete Python battery
+
+Tried: `PYTHONPATH=ai-tmp sh extensions/python/test.sh -n4
+--randomly-seed=1125382488 -p ai_classes_autoload_probe` completes with
+14 failures, 5,686 passes and 99 skips. Receipt:
+`ai-tmp/ai-classes-c9-python-battery.log`. The per-worker trace reports no
+autoload probe errors and one unchanged ugraphs import state per worker.
+Neither the earlier missing append/3 nor the restricted-space display crash
+recurs. Their runtime cause remains unproved. The concurrency_handles display
+failure and the spaces3 and identity twin pins retain their pristine-control
+attributions.
+
+Found: the tagged-guard fixture charges first compilation to its execution
+quota. The same file alone passes all 28 tests. The recursive-graph mechanism
+is already recorded in `2026-09-09-the-binding-collapse.md`, under
+"distinguish compilation work from the fuel-policy witness".
+
+Tried: after deleting engine/lib QLF files, run
+`PYTHONPATH=extensions/python $CHECK_PY ai-tmp/ai-classes-c10-guard-cost.py 128`
+and repeat with `prepare`. Both current and pristine c75181adc exceed the
+unchanged 20,000 quota on the cold call and admit the warm call. Explicit
+preparation costs 28,811 current and 34,883 control inferences. The first
+prepared execution costs 867 and 876; repeated execution costs 862 and 871.
+The cumulative tagged query still reaches its 20,000 limit, and the unbounded
+query returns all 24 rows. Control commands set METTA_PATH and PYTHONPATH to
+`ai-tmp/ai-classes-c75181adc-control` and its Python extension. Receipts:
+`ai-tmp/ai-classes-c10-guard-{current,control}-{cold,prepared}-clean.log`.
+
+Decided: explicitly prepare binding-guard before the cumulative execution
+witness, as the adjacent fuel-policy witness already does. The separate cold
+compilation test still proves that compilation spends an evaluation quota.
+No quota or answer assertion changes. Rejected: widening the quota, which
+would retain an accidental dependence on the worker's recursive graph.
+
+Found: seven journal citations embedded a local workspace path. Commands now
+use CHECK_PY and a relative upstream checkout; their recorded results are
+unchanged. The constructor receiver fixture intentionally uses `this` and
+a separate `self` argument. Retain that fixture and its N805 exception.
+CompilerContext's unused abstract _x_BinOp requirement has no caller; the
+expression mixin owns dynamic AST dispatch. Removing that obsolete interface
+requirement keeps the naming-exception count within its existing cap.
+
+Decided: regenerate vocabulary, function catalog, faces, root exports,
+binding adapters, door documents, ledger and references in dependency order.
+All eight generator commands exit zero. The Literal fixture now expects its
+finite Annotated domain. The rollback-only grain example raises ValueError
+without an unused message; its two semantic assertions are unchanged.
+
+Found: removing a generated inverse equation leaves its source rule's
+ownership association. The portable exporter then fails with "the engine
+refused metta_py_limited: the goal failed rather than erring, which for this
+entry point means the inputs were not accepted". Receipt:
+`ai-tmp/ai-classes-c10-derived-corrected.log`.
+
+Decided: preserve the owning rule name while matching generated equations
+against the source bag. A missing derivative explicitly refuses with
+incomplete_translator_rule and the remedy to remove or re-register that rule.
+Dropping the receipt would recreate an equation the program no longer holds.
+The regression verifies the old destination survives and exporting succeeds
+after removing the incomplete registration.
+
+Verified: the reconciliation cohort passes 238 tests and fails one Ruff check
+because the new refusal's regex needs a raw-string prefix. After that textual
+correction, the same Ruff configuration and suppression audit passes. Receipts:
+`ai-tmp/ai-classes-c10-reconciliation.log` and
+`ai-tmp/ai-classes-c10-naming-verified.log`. The intentional receiver exception
+fits the existing naming cap; no suppression allowance changes.
+
+Verified: the state-cell fixture's corrected assertion also holds on pristine
+c75181adc. `METTA_PATH=ai-tmp/ai-classes-c75181adc-control
+PYTHONPATH=ai-tmp/ai-classes-c75181adc-control/extensions/python
+$CHECK_PY ai-tmp/ai-classes-c10-state-cell.py` exits zero and prints
+"the actual state-cell token binding is present". Receipt:
+`ai-tmp/ai-classes-c10-state-cell-control.log`. The earlier negative fixture
+was inspecting an empty local predicate, not an alternative state-cell policy.
+
+## 2026-09-13: grain measurements after declaration indexing
+
+Measured: delete engine/lib QLF files, then run
+`PYTHONPATH=extensions/python $CHECK_PY -m benchmarks.class_grains
+--sizes 1 100 1000`. All nine fresh-process samples complete, exit zero.
+Receipt: `ai-tmp/ai-classes-c10-grain-costs.log`.
+
+| Grain | Population | Creation inferences | Read inferences | Write inferences | Native module byte delta | Retained Python byte delta |
+|---|---:|---:|---:|---:|---:|---:|
+| Value | 1 | 2,032 | 1,502 | 2,032 | -3,176 | 27,209 |
+| Value | 100 | 202,507 | 1,502 | 2,032 | -1,992 | 56,013 |
+| Value | 1,000 | 2,025,007 | 1,502 | 2,032 | -3,176 | 317,824 |
+| Entity | 1 | 3,149 | 1,464 | 2,307 | -4,544 | 27,441 |
+| Entity | 100 | 314,207 | 1,464 | 2,307 | 115,800 | 60,762 |
+| Entity | 1,000 | 3,142,007 | 1,464 | 2,307 | 1,185,456 | 364,649 |
+| Prototype | 1 | 228,331 | 1,282 | 2,116 | 8,480 | 27,806 |
+| Prototype | 100 | 22,815,962 | 1,282 | 2,121 | 1,977,744 | 78,661 |
+| Prototype | 1,000 | 228,176,572 | 1,282 | 2,116 | 19,882,464 | 443,937 |
+
+Every five-read and five-write sample within one process agrees to the digit.
+Reads are constant across populations. Value creation is 2,025N + 7 and
+entity creation is 3,142N + 7 in these samples. Prototype creation no longer
+scans the growing population to discover declarations; the earlier 1,000-row
+cost was 260,382,602. The measured retained native modules at 1,000 instances
+remain about 1.19 MB for entities and 19.88 MB for prototypes. Native values
+are module-size deltas, not object heap sizes; the small negative deltas show
+that a module can shrink across the measurement. Python retained bytes include
+the list of projected receiver terms. Neither column measures total process
+memory or supplies an exact per-instance allocation claim.
+
+Measured: `$CHECK_PY extensions/python/tools/twin_coverage.py --measure
+examples/ch17-concurrency-and-the-loop/08-class_grains.metta` takes the minimum
+of three serial fresh processes: 14,249,592 twin and 2,530,741 native inferences.
+The updated BUDGET is 14,249,592 and OVERRUN is 11,718,851. The ordinary lane
+then proves both claims and equal stored content at 14,249,593 and 2,530,791;
+its existing deterministic allowance admits the one-inference twin difference.
+The native example itself also passes. Receipts:
+`ai-tmp/ai-classes-c10-grain-{native,twin-measure,twin-verified}.log`.
+
+Verified: after deleting engine/lib QLF files, `sh engine/test.sh` exits zero
+across all 118 suite processes: 2,847 tests and 3,723 subtests. Receipt:
+`ai-tmp/ai-classes-c10-engine-battery.log`. Count both "All N tests passed"
+and the singular "test passed", and accept commas in the subtest count.
+The earlier summaries missed two singular results and one 2,052-subtest row.
+Recounting c5 gives 117 passing processes, 2,842 tests and 3,720 subtests;
+c9 has 115 fully passing processes with 2,793 tests and 3,713 subtests, plus
+its three failed processes. Those corrections change the reported totals,
+not the recorded gate outcomes.
+
+Verified: `sh extensions/python/test.sh -n4 --randomly-seed=1125382488`
+finishes with 5,698 passes, 99 skips and three failures, exit one. Receipt:
+`ai-tmp/ai-classes-c10-python-battery.log`. The same three failures were
+reproduced on pristine c75181adc in
+`ai-tmp/ai-classes-c6-python-failed-controls.log`: spaces3 costs 383 against
+its 371 pin here and 412 on control; identity costs 3,024 against its 2,478
+pin here and 3,777 on control; concurrency_handles receives GLX BadValue,
+opcode 152, minor opcode 3. Every other test passes. The tagged-guard fixture
+passes in this full retained-worker run, and neither previous native
+order-dependent failure recurs.
+
+Verified: `sh check.sh host-workarounds evidence provenance-pin-selftest llms
+llms-selftest corpus-coverage cumulative-syntax example-origins ruff mypy`
+passes every check except four evidence citations. The source ownership tag
+used a basename instead of its repository path; the three bare-host probes
+named explicit -g main commands that the evidence parser did not recognize
+as registered runners. Cite their actual host-workarounds gate, whose protocol
+already runs those commands and validates their terminal verdicts. No probe
+or evidence-checker behavior changes.
+
+Verified: `METTA_UPSTREAM=../../../PeTTa-base sh check.sh evidence
+host-workarounds example-origins` then passes all selected and implied lanes.
+There are zero unbacked tags across 7,547 claims, 13 host workaround entries
+and 33 sites; every reproduction reports present. Attribution reports
+143 derived and 204 original examples. Receipts:
+`ai-tmp/ai-classes-c10-metadata{,-verified}.log`. The first attribution run
+had no upstream checkout configured and did not verify provenance; the second
+run supplies it explicitly.
+
+Measured: jscpd with --no-gitignore --noTips --max-lines 10000 --max-size 1mb
+reports zero clones in the six touched native ownership/persistence modules
+(6,323 lines, 51,129 tokens). A separate --format python run reports zero
+clones in classes, constructors, field_values, records, snapshot, annotations
+and project (2,829 lines, 29,379 tokens). The first --formats-exts prolog:pl,plt
+run scans only Prolog, so it supplies no Python claim. Receipts:
+`ai-tmp/ai-classes-c10-duplication.log` and
+`ai-tmp/ai-classes-c10-python-duplication.log`. No extraction is justified.

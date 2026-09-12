@@ -254,6 +254,9 @@ atomically                        17-00-04
 call                              17-00-04
 test-no-answer                    17-00-04
 translatePredicate                17-00-04
+from                              17-00-08
+internal                          17-00-08
+only                              17-00-08
 exists_file                       19-01-02
 context-space                     19-01-03
 super                             19-01-04
@@ -287,11 +290,8 @@ register_metta_library_path       20-03-04
 retractPredicate                  20-03-04
 git-import!                       20-04-06
 include                           20-04-10
-from                              20-04-11
 get-property                      20-04-11
-internal                          20-04-11
 except                            20-04-12
-only                              20-04-12
 prefix                            20-04-12
 qualified                         20-04-12
 rename                            20-04-12

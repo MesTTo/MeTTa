@@ -16,6 +16,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   factories, post-init and inheritance. Entity and prototype attributes read
   and replace the same engine facts, with transactional initialization,
   explicit retirement and Scope cleanup.
+- A class-grains corpus example and Python twin expose a generated value
+  projection, shared account population, replacement rollback, compiled `del`
+  and two private prototype rules.
 - Trailed context services restore state either after each answer or when
   enumeration finishes. Context-reader declarations compile callers directly
   to the read used by reference publication, support repairs and typing policy.
