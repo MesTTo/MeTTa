@@ -9,6 +9,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_encoding` is a new library of the three encodings a program moves bytes
+  through: `utf8-encode`, `utf8-decode`, `hex-encode`, `hex-decode`,
+  `base64-encode` and `base64-decode`. Bytes are an expression of Numbers from 0 to
+  255, which is `lib_file`'s own byte shape, so a file's bytes are these heads'
+  input; the UTF-8 codec is `lib_csv`'s vendored one rather than a second
+  implementation. Base64 takes its alphabet as an argument, `standard` padded or
+  `url` unpadded, and encodes BYTES: the host's own `base64_encoded/3` defaults to
+  UTF-8 text, so `(255 254)` came out as the base64 of four bytes until the
+  `iso_latin_1` encoding was named. Hex answers lower case and reads either case.
+  Bytes that are not UTF-8, hex of odd length or with a stray character, base64 the
+  decoder rejects, an unknown alphabet and a number that is not a byte are each
+  refused naming what was wrong.
 - `lib_pairs`' and `lib_graph`' refusals name the cause when a key or a vertex
   names a function. `((id 1) (b 2))` reaches `pairs-keys` as `(1 (b 2))`, because
   the engine read `(id 1)` as a call to the identity function where the relation

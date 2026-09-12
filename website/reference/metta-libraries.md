@@ -21,6 +21,7 @@ beside its definitions.
 | lib_dict | 11 | 4 |
 | lib_distribution | 16 | 8 |
 | lib_doc | 0 | 0 |
+| lib_encoding | 6 | 6 |
 | lib_file | 55 | 55 |
 | lib_functional | 17 | 17 |
 | lib_gitimport | 0 | 0 |
@@ -1345,6 +1346,94 @@ The distribution of the sum of n independent draws, by exact convolution rather 
 Returns: the distribution of the total
 
 Undocumented: `ws-add-bernoulli-independent`, `ws-average-independent`, `ws-condition-joint`, `ws-map`, `ws-map2-independent`, `ws-mass-at-least`, `ws-prob-gt-independent`, `ws-quantile-walk`
+
+## lib_encoding
+
+### `base64-decode`
+
+*lib_encoding.metta:27*
+
+```metta
+(: base64-decode (-> Symbol String Expression))
+```
+
+The bytes that base64 spells, in the named alphabet. Text the decoder rejects, which includes a character outside the alphabet and a truncated group, is refused naming the text.
+
+1. Alphabet
+2. Text
+
+Returns: Bytes
+
+### `base64-encode`
+
+*lib_encoding.metta:33*
+
+```metta
+(: base64-encode (-> Symbol Expression String))
+```
+
+The bytes as base64 in one of the two RFC 4648 alphabets: `standard`, padded with `=` as mail and JSON carry it, or `url`, which uses `-` and `_` and no padding, as a URL and a file name carry it. An alphabet the library does not know is refused with both named.
+
+1. Alphabet
+2. Bytes
+
+Returns: Text
+
+### `hex-decode`
+
+*lib_encoding.metta:39*
+
+```metta
+(: hex-decode (-> String Expression))
+```
+
+The bytes that hexadecimal spells, in either case. An odd number of digits or a character outside 0-9a-fA-F is refused naming it, because a truncated or mistyped dump is not bytes.
+
+1. Text
+
+Returns: Bytes
+
+### `hex-encode`
+
+*lib_encoding.metta:45*
+
+```metta
+(: hex-encode (-> Expression String))
+```
+
+The bytes as hexadecimal, two lower-case digits each and nothing between them, which is how a hash, a key and a wire dump are all written.
+
+1. Bytes
+
+Returns: Text
+
+### `utf8-decode`
+
+*lib_encoding.metta:51*
+
+```metta
+(: utf8-decode (-> Expression String))
+```
+
+The text those UTF-8 bytes spell. A byte sequence that is not UTF-8 is refused, because the alternative is a string holding whatever the bytes happened to mean.
+
+1. Bytes
+
+Returns: Text
+
+### `utf8-encode`
+
+*lib_encoding.metta:57*
+
+```metta
+(: utf8-encode (-> String Expression))
+```
+
+The UTF-8 bytes of the text, as an expression of Numbers from 0 to 255. This is the length a wire format and a file both count in: an accented letter is two bytes, an emoji four, where string-length counts one character each.
+
+1. Text
+
+Returns: Bytes
 
 ## lib_file
 
