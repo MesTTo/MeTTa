@@ -1,4 +1,7 @@
 % Purpose: pin occurrence identity, ordering, rollback and provider refusals.
+% Guarantees: occurrence-output writes bind their own identity and reject
+%   bound outputs or unsupported providers before storing a row
+%   [tested: spaces_tokens; commit=WORKTREE].
 % Guarantees: ordinary bags omit tokens; exact removal preserves later arrivals
 %   [tested: sh engine/test.sh suites/spaces/tokens.plt; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Owns resources: each fixture releases its space and joins its minting threads.
@@ -207,6 +210,50 @@ test(concurrent_minting_is_unique,
         (thread_join(Left, LeftStatus), assertion(LeftStatus == true))),
     tokens(Space, Minted), length(Minted, Count), sort(Minted, Unique),
     assertion(Count == 200000), assertion(length(Unique, 200000)).
+
+test(an_atom_can_contain_its_own_occurrence_token,
+     [setup('new-space'(Space)), cleanup(metta_release_space(Space))]) :-
+    Atom = ['owned-by', ['Account', Token]],
+    findall(Token-R, 'add-atom'(Space, Atom, Token, R), Answers),
+    Answers = [Portable-true], Portable = [t, Actor, Generation],
+    metta_actor(Actor),
+    findall(Stored-Row, spaces:metta_native_pair(Space, Row, Stored, _), Rows),
+    assertion(Rows == [Generation-['owned-by', ['Account', Portable]]]).
+
+test(the_language_binder_is_shared_with_the_stored_atom,
+     [setup('new-space'(Space)), cleanup(metta_release_space(Space))]) :-
+    findall(Out, evalc([chain,
+                        ['add-atom', Space, [owned, Token], Token], _, Token],
+                       Space, Out), [Portable]),
+    metta_host_blame(Space, [owned, Portable], Tokens),
+    assertion(Tokens == [Portable]).
+
+test(a_bound_occurrence_output_refuses_before_mutation,
+     [setup('new-space'(Space)), cleanup(metta_release_space(Space))]) :-
+    catch('add-atom'(Space, [unwritten, row], already_bound, _), Error, true),
+    assertion(Error = error(uninstantiation_error(already_bound), _)),
+    tokens(Space, Tokens), assertion(Tokens == []).
+
+test(a_foreign_occurrence_output_names_the_native_overlay_remedy) :-
+    catch('add-atom'('&t0-token-provider', [unwritten, row], _, _), Error, true),
+    assertion(Error == error(metta_native_occurrence_binder_required('&t0-token-provider'), none)),
+    message_to_string(Error, Message),
+    assertion(sub_string(Message, _, _, _, "native overlay")).
+
+test(a_rolled_back_binder_never_reuses_its_generation,
+     [setup('new-space'(Space)), cleanup(metta_release_space(Space))]) :-
+    snapshot('add-atom'(Space, [owned, First], First, true)),
+    tokens(Space, Gone), assertion(Gone == []),
+    'add-atom'(Space, [owned, Second], Second, true),
+    First = [t, Actor, Before], Second = [t, Actor, After],
+    assertion(After > Before).
+
+test(a_parametric_space_keeps_its_occurrence_output,
+     [setup(metta_declare_parametric_space([class, binder])),
+      cleanup(metta_release_space([class, binder]))]) :-
+    'add-atom'([class, binder], [owned, Token], Token, true),
+    metta_host_blame([class, binder], [owned, Token], Tokens),
+    assertion(Tokens == [Token]).
 
 :- end_tests(spaces_tokens).
 

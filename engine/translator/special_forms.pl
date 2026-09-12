@@ -1671,6 +1671,15 @@ translate_space_update_dl(Operation, [SpaceExpr, Atom], AfterHead, Goals,
         metta_require_space_update_capability(Operation, Space),
         [Guarded|Goals], BeforeOperation).
 
+translate_space_update_dl('add-atom', [SpaceExpr, Atom, Token], AfterHead,
+                          Goals, Out) :-
+    translate_space_expr_dl(SpaceExpr, AfterHead, BeforeOperation, Space),
+    Goal = 'add-atom'(Space, Atom, Token, Out),
+    space_update_domain_goal('add-atom', Atom, Goal, Guarded),
+    translate_restricted_guard_dl(
+        metta_require_space_update_capability('add-atom', Space),
+        [Guarded|Goals], BeforeOperation).
+
 %`add-atom` and `remove-atom` are PeTTa's spellings and take PeTTa's domain:
 %an atom with no head cannot be stored there and the operation answers nothing
 %[source: PeTTa@ae66fa8 src/spaces.pl:1-7; see metta_space_update_atom/1 for

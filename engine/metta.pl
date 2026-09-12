@@ -1675,6 +1675,7 @@ metta_engine_reexport(spaces, watch_catalog_rows/1).
 metta_engine_reexport(spaces, unwatch_catalog_rows/1).
 metta_engine_reexport(spaces, metta_vocabulary_values/2).
 metta_engine_reexport(spaces, 'add-atom'/3).
+metta_engine_reexport(spaces, 'add-atom'/4).
 metta_engine_reexport(spaces, 'remove-atom'/3).
 metta_engine_reexport(spaces, 'subtract-atom'/3).
 metta_engine_reexport(spaces, add_sexp/2).

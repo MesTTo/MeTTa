@@ -6,6 +6,10 @@
 %   from database snapshots [tested: lib_import_lifecycle,
 %   extensions/python/tests/ch05_equations_and_evaluation/test_reload.py; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: decode stored atoms and manage source, subscription, reaction, table, and clear lifecycles
+% Guarantees: add-atom's third input binds the stored native occurrence's own
+%   portable token before admission, including self-referential identity rows
+%   [tested: spaces_tokens:an_atom_can_contain_its_own_occurrence_token;
+%   commit=WORKTREE].
 % Guarantees: constructor declarations invalidate retained sort proofs,
 %   including declarations arriving through the bulk atom door
 %   [tested: run_tests(translator_constructors); commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
@@ -1679,6 +1683,32 @@ compiled_predicate_arity(F, Module, Predicate, Arity, Owner) :-
     ->  fail
     ;   space_argument_error('add-atom', [Space, Term], Result)
     ).
+
+% The output binder exposes the store's identity; it does not allocate a
+% second label. Native admission can inspect the complete ground row because
+% its own generation is supplied to the same semantic write door.
+'add-atom'(Space, Term, Token, Result) :-
+    (   metta_space_writable_name(Space)
+    ->  ( var(Token) -> true
+        ; throw(error(uninstantiation_error(Token),
+                      context('add-atom'/4,
+                              'the occurrence output must be a fresh variable'))) ),
+        forall(seam:space_access(Space), true),
+        ( seam:foreign_space(Space)
+        -> throw(error(metta_native_occurrence_binder_required(Space), none))
+        ; true ),
+        flag('$metta_generation', Generation, Generation+1),
+        metta_token_parts(Generation, Actor, Generation),
+        Token = [t, Actor, Generation],
+        metta_add_atom(Space, Term, Generation, _),
+        Result = true
+    ;   space_argument_error('add-atom', [Space, Term, Token], Result)
+    ).
+
+:- multifile prolog:error_message//1.
+prolog:error_message(metta_native_occurrence_binder_required(Space)) -->
+    [ '~w cannot bind an occurrence before its provider creates it; use a \c
+       native overlay for atoms that contain their own occurrence token'-[Space] ].
 
 %Adding an atom is two independent decisions: WHERE it is stored, which is a
 %property of the space, and WHAT the engine must do because of what the atom
