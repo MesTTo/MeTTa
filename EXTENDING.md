@@ -3206,6 +3206,16 @@ loaded answers no at one failed lookup.
 every handler loaded after it. See *The one way to get a handler wrong* above,
 and write `( Condition -> Action ; true )`.
 
+### Check a transaction before commit
+
+`seam:transaction_constraint/1` is a declaration seam. A provider enumerates
+module-qualified goals for its pending writes. The outer transaction runs every
+goal in its refreshed commit view; a failure or exception aborts before commit
+notifications. Nested savepoints leave their checks to that outer owner.
+Store the pending checks transactionally so rollback removes them with the
+writes they validate. The Python proxy provider uses this door to prevent two
+concurrent transactions from publishing different proxies for one receiver.
+
 ### The `host_service` surface
 
 The other half of the host contract is the engine predicates a host BINDING's

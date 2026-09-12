@@ -158,6 +158,7 @@
             observe/3,
 
             % Declarations: fact tables the engine reads as data.
+            transaction_constraint/1,
             extension_builtin/2,
             builtin_type_declaration/2,
             context_reader/4,
@@ -981,6 +982,16 @@ kind(grounded_numeric_operation/3, ownership).
 %away a space write, and suppressed a println!.
 :- multifile pure_operation/1.
 kind(pure_operation/1, declaration).
+
+% Qualified goals validated in the refreshed outer transaction commit view.
+% A provider enumerates its pending checks; every check must succeed. Failure
+% or exception aborts the transaction before any commit notification. Nested
+% savepoints leave their checks for the outer owner, and rolled-back writes
+% must leave no surviving check that could reject unrelated later work.
+% [tested: test_overlapping_transactions_cannot_publish_distinct_proxies,
+% test_a_rolled_back_proxy_check_cannot_refuse_the_outer_commit; commit=WORKTREE].
+:- multifile transaction_constraint/1.
+kind(transaction_constraint/1, declaration).
 
 %An operation whose only unrepeatable input is the random generator.
 %
