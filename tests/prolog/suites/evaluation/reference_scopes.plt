@@ -74,6 +74,18 @@ test(every_inference_cut_restores_each_production_guard,
                    inference_limit_exceeded, true),
              assertion(\+ nb_current(Key, Value)) )).
 
+probe_flag :- support_graph:support_repairs_deferred.
+probe_stack(Frame) :- metta_engine:metta_reference_finishing(Frame).
+probe_value(Snapshot) :- type_rules:typing_policy_snapshot(Snapshot).
+
+test(readers_compile_directly_to_their_context_read) :-
+    clause(probe_flag, Flag),
+    assertion(Flag = support_graph:nb_current('$metta_support_repairs_deferred',true)),
+    clause(probe_stack(_), Stack),
+    assertion(Stack = (metta_engine:nb_current('$metta_reference_finishing',[_|_]), _)),
+    clause(probe_value(_), Value),
+    assertion(Value = type_rules:nb_current('$metta_typing_policy_snapshot',snapshot(_))).
+
 test(a_malformed_reader_declaration_refuses_at_load) :-
     catch(expand_term((:- seam:context_reader(planted_reader, '$reference_scope_bad', ring)), _),
           error(domain_error(context_reader_shape, ring), _), Refused = shape),

@@ -58,6 +58,20 @@ Lifted when: the cleanup is registered before the call port that follows
 Record: docs/journal/2026-09-07-every-intermittent-root-caused.md, the
   20,000-budget sweep; docs/journal/2026-09-10-every-host-workaround-is-commented.md.
 
+## swi-transaction-enumerator-repeats-parent
+Host: SWI-Prolog 10.1.13; `src/pl-transaction.c:current_transaction/1` at
+  fc7ef84b949378b729052c3ade79c90ce5416abb, lines 721-745.
+Defect: a successful redo retains the same parent stack pointer, so enumerating
+  two nested transactions returns the parent indefinitely.
+Reproduction: tests/checks/host_workarounds/swi-transaction-enumerator-repeats-parent.pl,
+  which asks for at most three answers from exactly two nested transactions.
+Workaround: ask for existence with `once(current_transaction(_))` before a
+  later condition can backtrack into the enumerator.
+Lifted when: successful redo advances the parent pointer and the reproduction
+  returns exactly two answers, printing absent.
+Record: docs/journal/2026-09-11-classes-on-metta.md, transaction existence does
+  not enumerate ancestors; docs/journal/2026-09-05-function-free-materialization.md.
+
 ## swi-wrapper-roundtrip-merges-closures
 Host: SWI-Prolog 10.1.13; `library/prolog_wrap.pl:body_closure/3` at
   fc7ef84b949378b729052c3ade79c90ce5416abb.
@@ -125,24 +139,6 @@ Workaround: loading_loudly/1 restores the source module on success, failure
 Lifted when: the reproduction safely rejects or finishes replay instead of
   crashing, and the loader restores module state after a failed consult.
 Record: docs/journal/2026-09-11-the-engine-and-packaging-lanes-after-the-wave.md.
-
-## swi-named-listener-replacement-lock
-Host: SWI-Prolog 10.1.13, src/pl-event.c:add_event_hook at
-  fc7ef84b949378b729052c3ade79c90ce5416abb, lines 145-159.
-Defect: src/pl-event.c:add_event_hook returns at line 155 after replacing
-  a named event handler, before UNLOCK_LIST at line 159 releases its
-  recursive list mutex. Its owning thread can continue, but another thread
-  blocks while registering, invoking or removing a handler on that channel.
-Reproduction: tests/checks/host_workarounds/swi-named-listener-replacement-lock.sh,
-  a completed single-registration control followed by a replacement whose
-  worker announces its arrival before trying to unregister the handler.
-Workaround: each reference observer registers one unnamed closure carrying
-  its owning thread and unregisters only that closure at retirement.
-Lifted when: add_event_hook releases the event-list mutex before returning
-  from the named-handler replacement branch. Distinct observer ownership
-  remains necessary after that host repair.
-Record: docs/journal/2026-09-09-import-and-module-semantics.md, candidate
-  admission and concurrent rollback-listener evidence.
 
 ## swi-query-frame-discarded-on-engine-destroy
 Host: SWI-Prolog 10.1.13; `PL_close_query` in src/pl-wam.c closes the

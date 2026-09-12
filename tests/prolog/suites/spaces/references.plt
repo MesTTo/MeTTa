@@ -5,6 +5,10 @@
 % Owns resources: each test releases its fresh native spaces in reverse order.
 % Guarantees: comparisons inspect answer bags, stored occurrence identities and
 %   SWI's actual import property [tested: references; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+% Guarantees: every inference cut through a rollback preserves its reference
+%   and retires its frame [tested:
+%   references:an_inference_cut_cannot_abandon_reference_completion;
+%   commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -113,11 +117,32 @@ test(one_face_publication_recompiles_a_shared_caller_once,
                        ( ( Owner == Module, Name == 'reference-sum'
                          -> flag(reference_repairs, N, N+1) ; true ),
                          call(Original) )),
-        ( metta_engine:metta_reference_refresh,
+        ( reference_space(1, Home), metta_engine:metta_reference_changed(Home),
           flag(reference_repairs, Count, Count), assertion(Count == 1),
           reference_answers(2, ['reference-sum'], Bag), assertion(Bag == [5]) ),
         unwrap_predicate(filereader:recompile_function_in_module_stable(_, _),
                          reference_repairs)).
+
+test(data_mutations_keep_compiled_clauses_and_retire_only_removed_grades,
+     [setup(reference_setup), cleanup(reference_cleanup)]) :-
+    reference_add(3, [=, ['reference-callee'], true]), reference_from(1, 3),
+    reference_add(1, [internal, 'reference-field']),
+    reference_add(1, [=, ['reference-read', Key],
+                      [chain, ['reference-callee'], _,
+                       [match, '&self', ['reference-field', Key, Value], Value]]]),
+    reference_from(2, 1), reference_space(1, Home), space_module(Home, Module),
+    findall(Ref, filereader:'$metta_equation_token'(Module, 'reference-read', Ref, _), Before),
+    metta_add_atom(Home, ['reference-field', first, 1], First, true),
+    metta_add_atom(Home, ['reference-field', second, 2], Second, true),
+    metta_add_atom(Home, [public, data], _, true),
+    assertion(metta_engine:metta_occurrence_grade(Home, First, visibility, 'INTERNAL')),
+    assertion(metta_engine:metta_occurrence_grade(Home, Second, visibility, 'INTERNAL')),
+    metta_remove_atom(Home, ['reference-field', first, _], true),
+    assertion(\+ metta_engine:metta_occurrence_grade(Home, First, visibility, _)),
+    assertion(metta_engine:metta_occurrence_grade(Home, Second, visibility, 'INTERNAL')),
+    reference_answers(2, ['reference-read', second], Answers), assertion(Answers == [2]),
+    findall(Ref, filereader:'$metta_equation_token'(Module, 'reference-read', Ref, _), After),
+    assertion(Before == After).
 
 test(every_arity_travels_and_actual_equation_duplicates_survive,
      [setup(reference_setup), cleanup(reference_cleanup)]) :-
@@ -296,6 +321,35 @@ test(inner_failure_transfers_one_watch_and_outer_completion_retires_it,
     assertion(\+ nb_current('$metta_reference_listening', true)),
     assertion(\+ metta_engine:metta_reference_finishing(_)).
 
+test(an_inference_cut_cannot_abandon_reference_completion,
+     [forall(( member(Name, ['reference-cut','reference-cut-alias']),
+               member(Own, [false,true]), member(Providers, [1,2]) )),
+      setup(reference_setup), cleanup(reference_cleanup)]) :-
+    Map = [rename, [['reference-cut',Name]]],
+    forall(between(1, Providers, Index),
+           ( reference_add(Index, [=, ['reference-cut'], Index]),
+             reference_from(4, Index, Map) )),
+    ( Own == true -> reference_add(4, [=, [Name], own]) ; true ),
+    findall(Value, (between(1, Providers, Value); Own == true, Value = own), Values),
+    msort(Values, Expected),
+    reference_space(1, Home), reference_space(4, Target),
+    Goal = transaction((metta_remove_atom(Target, [from, Home, Map], true), fail)),
+    ignore(Goal),
+    statistics(inferences, Before), ignore(Goal), statistics(inferences, After),
+    Last is After-Before+1,
+    forall(between(1, Last, Budget),
+           ( catch(ignore(call_with_inference_limit(Goal, Budget, _)),
+                   inference_limit_exceeded, true),
+             metta_engine:metta_reference_pending_frames(Frames),
+             assertion(Frames == []),
+             assertion(\+ metta_engine:metta_reference_refreshing),
+             assertion(\+ metta_engine:metta_reference_finishing(_)),
+             assertion(\+ support_graph:support_repairs_deferred),
+             assertion(\+ support_graph:support_graph_locked),
+             assertion(\+ type_rules:typing_policy_snapshot(_)),
+             reference_answers(4, [Name], Answers),
+             assertion(Answers == Expected) )).
+
 test(the_bulk_data_loop_executes_from_and_internal_rows,
      [setup(reference_setup), cleanup(reference_cleanup)]) :-
     reference_add(1, [=, ['reference-bulk'], value]),
@@ -368,7 +422,7 @@ test(a_reused_receiver_inherits_no_union_wrapper,
     reference_space(2, Target), metta_release_space(Target),
     reference_add(2, [=, ['reference-reuse'], new]),
     reference_answers(2, ['reference-reuse'], [new]),
-    assertion(\+ metta_engine:metta_reference_slot(_, 'reference-reuse', _, _)).
+    assertion(\+ metta_engine:metta_reference_slot(_, 'reference-reuse', _)).
 
 test(a_compiled_caller_is_repaired_when_a_reference_arrives_and_leaves,
      [setup(reference_setup), cleanup(reference_cleanup), nondet]) :-

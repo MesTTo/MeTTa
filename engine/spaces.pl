@@ -3,6 +3,9 @@
 %   '&metta' declarations against the self-describing catalog.
 % Guarantees: add-atom/4 exposes the native occurrence-output write
 %   [tested: spaces_tokens; commit=WORKTREE].
+% Guarantees: metta_existing_import/3 reports an existing native import without
+%   resolving missing names [tested: reference_loading, engine_layering;
+%   commit=WORKTREE].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarantees: algebra membership is shared by declaration, native annotations
@@ -281,6 +284,7 @@
             metta_clear_space_for_release/1,
             metta_exec_module_known/2,
             metta_exec_module_generation/2,
+            metta_existing_import/3,
             metta_forget_space_parent/1,
             metta_host_clear_defined/1,
             metta_host_clear_space/1,

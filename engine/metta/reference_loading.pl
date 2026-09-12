@@ -308,7 +308,9 @@ metta_reference_finish(Home, Catcher) :-
             ; Error = error(metta_reference_load_failed(Home, Catcher), none) ),
             assertz(metta_reference_load_state(Home, failed(Error, Future)))
         ),
-        metta_reference_refresh,
+        % The finished home is the mutation root: its importers republish,
+        % spaces elsewhere in the process stay untouched.
+        metta_reference_changed(Home),
         metta_reference_update_namespace_watch
     ;   true
     ).

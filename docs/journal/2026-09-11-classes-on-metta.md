@@ -276,6 +276,148 @@ Found: `metta_reference_local_head/3` exports callable heads; `metta_reference_m
 
 Decided: retain the reference union's bag law and the original defining space of each equation. Class lowering must publish its data declarations and derive receiver applicability from the completed Python class hierarchy. A method body and its qualified `super` entry must remain shared. Constructor sorts and callable return types need distinct admission rules, as the order-sorted design requires.
 
+## 2026-09-11: reference publication and prototype allocation cost
+
+Tried: `PYTHONPATH=extensions/python $CHECK_PY
+-m benchmarks.class_grains --sizes 1 100 1000` runs each grain and population
+in a fresh process. Eight samples have completed; the 1,000-prototype sample
+is still running. The completed samples in
+`ai-tmp/ai-classes-grain-costs-initial.jsonl` show:
+
+| Grain | Population | Creation inferences per instance | Read inferences | Write inferences | Retained native module bytes |
+|---|---:|---:|---:|---:|---:|
+| Value | 1 | 1,755 | 1,500 | 1,755 | 0 |
+| Value | 100 | 1,748.07 | 1,500 | 1,755 | 0 |
+| Value | 1,000 | 1,748.007 | 1,500 | 1,755 | 0 |
+| Entity | 1 | 3,018 | 1,462 | 2,306 | 1,416 |
+| Entity | 100 | 3,011.07 | 1,462 | 2,306 | 125,720 |
+| Entity | 1,000 | 3,011.007 | 1,462 | 2,306 | 1,190,512 |
+| Prototype | 1 | 816,899 | 1,280 | 2,118 | 21,168 |
+| Prototype | 100 | 11,765,576.8 | 1,280 | 2,108 | 1,991,968 |
+
+These are `Space.run` calls, including parsing and the host crossing. They
+are not marginal compiled-body costs. A value write constructs a replacement.
+Native bytes are class and private-space storage/execution module deltas,
+not complete process memory. Declaration costs are recorded separately:
+2,558,182 to 2,558,193 inferences for the value, 3,320,277 for the entity and
+3,473,706 for the prototype.
+
+Found: `metta_reference_refresh_now/0` enumerates every seen space and
+republishes its face, bindings and metadata. Prototype allocation adds a
+reference and an internal declaration. Each allocation therefore revisits
+all previous prototypes. Removing only the prototype's reference would leave
+the internal-declaration refresh and the global scan.
+
+Tried: a five-second `perf record -F 99 -g --call-graph dwarf` sample of the
+running prototype process records 636 samples with none lost. The stripped
+SWI library prevents attribution to Prolog predicates. The kernel-address
+restriction and missing `tips.txt` are recorded in
+`ai-tmp/ai-classes-prototype-perf.log` and its report. This profile does not
+establish which Prolog predicate dominates; the source and the new publication
+trace test establish the repeated publication mechanism.
+
+Rejected: exposing and scanning the support graph's entire dirty-node table,
+because unrelated dirty artifacts would become another global scan. Also
+rejected a second reference adjacency graph. The existing support graph owns
+the affected forward closure. Its callback queue in
+`filereader:support_recompile_pending/3` is the local publication precedent.
+Ninja's forward dependent walk provides the same affected-subgraph boundary
+([v1.13.1 source](https://github.com/ninja-build/ninja/blob/79feac0f3e3bc9da9effc586cd5fea41e7550051/src/build.cc#L446-L464)).
+
+Decided: queue affected reference faces through
+`support_invalidation_action/1`; retain mutation roots per watched transaction
+frame and invalidate those roots as one batch on completion. Unmodified
+defining homes supply read-only binding context. Only changed modules supply
+old demand candidates, so a new importer does not scan all other consumers
+of the same name. Release captures dependents before removing graph edges.
+Background completion must mark its home changed before draining publication.
+The queue and frame roots use the existing engine-local non-backtrackable set;
+they do not label entities or answers.
+
+Open: integrate `reference_refresh.pl` after the running baseline finishes,
+then prove the affected-space boundary, nested rollback, lazy/background
+loading and class allocation curves. The baseline implementation remains fixed
+during its measurement. Test fixtures and the corpus pair are prepared
+independently and are not yet verified.
+
+## 2026-09-12: policy publication deadlock investigation
+
+Tried: a bounded probe of
+`reference_loading:non_eager_admission_keeps_pure_initializers_and_masked_data`
+wraps `with_typing_policy_stable/1`, `scheduler_future_settle_/3`, and
+`scheduler_space_claim_/8`. The background case reaches the watchdog with
+the policy mutex held by the loader engine. Neither scheduler suspension
+predicate has entered. Native stacks captured by launching SWI under gdb
+show the loader's carrier waiting on a second mutex while the main thread
+waits for the policy mutex. A borrowed engine identity alone does not
+establish that an engine yielded. The caller holding the second mutex is
+still being identified.
+
+Tried: wrapping the protected foreign `engine_yield/1` raises
+`No permission to redefine built-in predicate engine_yield/1`.
+`redefine_system_predicate/1` followed by wrapping a protected foreign
+listener loses its implementation and raises
+`call/1: Unknown procedure: system:prolog_listen/2`. Those diagnostic
+wrappers are discarded; neither failure establishes an engine defect.
+Five runs with additional Prolog-level listener-boundary tracing finish,
+so that instrumentation changes the scheduling of the intermittent failure.
+
+Found: SWI `src/pl-event.c:418-468` at
+`fc7ef84b949378b729052c3ade79c90ce5416abb` holds its event-list mutex across
+Prolog callbacks. This is a candidate second lock, not yet the measured
+identity of the blocked mutex. The existing typing-policy lock also prevents
+publication of a static proof after a concurrent policy change. Removing
+that guarantee while shortening the critical section would be unsound.
+
+Open: identify the second lock, repair the general synchronization boundary,
+and verify policy changes, transaction cleanup, and repeated background loads.
+
+## 2026-09-12: transaction completion outside host event callbacks
+
+Found: the main engine's native/Prolog stack in
+`ai-tmp/ai-classes-c3-native-stack-strings.log` places its policy wait in
+`metta_reference_finish_frame/2`, called by the global frame event. SWI holds
+the event-list mutex throughout that callback and takes the same mutex to
+register a listener (`src/pl-event.c:99-110,418-468` at
+`fc7ef84b949378b729052c3ade79c90ce5416abb`). A loader holding the policy mutex
+registers its transaction listener through `metta_reference_track_transaction/1`.
+Those acquisitions have opposite order. No scheduler suspension appears in
+the hanging run.
+
+Rejected: self-signalling to defer repair. The independent probe
+`swipl -q -f none -s ai-tmp/ai-classes-c3-event-signals.pl -g main -t halt`
+prints `[first,signal,second,after]`: SWI delivers the signal between the two
+event callbacks, while the event-list mutex remains held.
+
+Rejected: removing the compiler's policy mutex while retaining its stable
+marker. A concurrent policy change could finish before an in-flight compiler
+records its source supports, then that compiler could publish an invalid
+static proof. Revisit with version-validated artifact publication, not a
+task-local marker alone.
+
+Decided: derive reference reconciliation from the existing native transaction
+wrapper's cleanup boundary. Each transaction journal retains its idempotent
+completion work; the wrapper restores the parent journal and retires aborted
+assertions before executing that work. Reference completion transfers roots
+to the live parent and reconciles native links there. It no longer registers
+or runs a global frame callback. Policy proof serialization stays intact.
+This addresses the observed lock cycle without assuming an unobserved yield.
+
+Verification plan: completion on commit, rollback, snapshot, exception, nested
+transactions and inference cuts; reference restoration and affected-space
+publication; five full `reference_loading` runs; static-policy regressions.
+
+Verified: `METTA_CHILD_CEILING=0 sh engine/test.sh
+suites/spaces/host_transactions.plt suites/spaces/references.plt
+suites/spaces/reference_publication.plt` passes 20 (+13), 30 (+1), and 3 (+2)
+tests respectively (`ai-tmp/ai-classes-c3-completion-tests.log`). Five separate
+`sh engine/test.sh suites/reader/reference_loading.plt` runs each pass 38 (+46)
+tests (`ai-tmp/ai-classes-c3-loading-{1..5}.log`). The translator suite passes
+209 (+85) tests (`ai-tmp/ai-classes-c3-typing-after.log`). The obsolete
+named-listener workaround has no remaining site, so its live ledger entry is
+removed. Its host reproduction and earlier journal record remain historical
+evidence; no host fix is claimed.
+
 ## 2026-09-12: the cache-expiry negative control includes assertion ownership
 
 Found: `sh check.sh binding binding-selftest llms llms-selftest` reports one
@@ -304,6 +446,56 @@ delta 226, and update the expired-cache negative control to the measured 232.
 The test continues to detect the lazy import. The additional assertion cost
 belongs to the nested-rollback repair already in this package, not to a
 heartbeat or accounting correction.
+
+## 2026-09-12: cancellation exposes unfinished reference ownership
+
+Tried: `swipl -q -s ai-tmp/ai-classes-c3-frame-cuts.pl` enumerates every
+inference budget through a reference withdrawal that rolls back. The unmodified
+completion code measures 3,032 ports and fails at budget 262 with
+`frame_cut_failure(262,[366],[visible])`: the reference answers correctly but
+its registered frame survives (`ai-tmp/ai-classes-c3-frame-cuts-before.log`).
+The pristine `c75181adc` control also leaks a frame, at budget 183 of 3,004
+ports (`ai-tmp/ai-classes-c3-frame-cuts-control.log`).
+
+Decided: register the exit callback before publishing the untrailed frame, and
+retain its roots until reconciliation succeeds. Parent transfer can register
+another frame, so retirement reads the current map after that transfer.
+
+Tried: those changes pass the earlier cut but expose a second failure at budget
+1,179 of 3,030 ports: `import/1: No permission to import
+'$metta_exec:&reference-test-1':'reference-cut'/1 into
+$metta_exec:&reference-test-2 (name clash)`. Inspection finds an empty dynamic
+predicate and no `metta_reference_slot/4` row
+(`ai-tmp/ai-classes-c3-frame-cuts-state.log`). Binding retirement removes the
+ownership row before native cleanup; publication creates native state before
+recording ownership. A cut can therefore leave native state without an owner.
+
+Open: settle and test ownership across every native binding transition. The
+registry already uses `'$notransact'`; making it nontransactional is not the
+missing repair. Native SWI stores import and wrapper identity itself.
+`current_predicate_wrapper/4` can read the wrapper body, but its `Wrapped`
+argument remains unbound when the body never used the original closure.
+Reinstalling that same wrapper body can recover its original closure through
+`wrap_predicate/4`. Evaluate that mechanism before removing duplicated binding
+state from the registry.
+
+## 2026-09-12: binding ownership spans the native transition
+
+Tried: `swipl -q -s ai-tmp/ai-classes-c3-wrapper-closure.pl` verifies that
+reinstalling a named wrapper's current body returns the retained own closure,
+including after new own clauses arrive. It passes when the body ignores the
+original and when it calls it (`ai-tmp/ai-classes-c3-wrapper-closure2.log`).
+`current_predicate_wrapper/4` returns a variable hole shared with its body;
+the reinstall must pass that same variable to `wrap_predicate/4`.
+
+Decided: retain the owned predicate key before any native mutation, and remove
+it after native cleanup. Read import and wrapper identity from SWI instead of
+keeping a second copy in `metta_reference_slot/4`. Retiring a reference owner
+preserves own clauses; withdrawing or replacing the entire binding removes
+them. Register cleanup before installing the temporary capture wrapper too.
+
+Rejected: special-casing the orphaned empty predicate, because it covers only
+one cut location and leaves the other native transitions unowned.
 
 ## 2026-09-12: declaration discovery selects its storage index
 
@@ -377,4 +569,38 @@ the digest-update test raised `No permission to redefine built-in predicate
 'loading-value'/1`. The existing `spaces:metta_existing_import/3` asks only
 whether the module already owns a native import. That replacement restores
 all 38 + 46 loading tests (`ai-tmp/ai-classes-c4-reference-existing-import.log`).
+
+## 2026-09-12: transaction existence does not enumerate ancestors
+
+Tried: `sh engine/test.sh` reached the class-home rollback regression and
+looped in publication. SIGINT sent to the verified suite PID let the runner
+continue and clean up; the run exited 1 and does not verify that test
+(`ai-tmp/ai-classes-c4-engine-battery.log`). Its other failures were the
+layering contract's missing new edges and a multifile caller misattribution.
+
+Tried: wrapping `current_predicate_wrapper/4` shows repeated calls from the
+same publication frame, not recursive publication
+(`ai-tmp/ai-classes-c5-rollback-wrapper-stack2.log`). A bare SWI probe with two
+nested transactions and `findnsols(4, Goal, current_transaction(Goal), Goals)`
+returns the inner goal once and its parent three times. Plain, wrapped and
+journal-owned transactions agree
+(`ai-tmp/ai-classes-c5-nested-enumeration-{plain,wrapped,journal}.log`).
+SWI's `FRG_REDO` reads `stack->id` but its successful branch retains the same
+stack pointer at `fc7ef84b949378b729052c3ade79c90ce5416abb`,
+`src/pl-transaction.c:721-745`.
+
+Rejected: requiring an existing binding before wrapper inspection. A fresh
+binding merely makes the following condition fail; an owned unwrapped binding
+can do the same. Ownership was not the cause of this loop.
+
+Decided: use `once(current_transaction(_))` for the existence question, as
+`materialize:flush_space_materialization/2` already does. Record both sites
+against one host reproduction. The other transaction queries cut immediately
+through negation, if-then or an explicit cut and cannot enumerate ancestors.
+
+Tried: `sh engine/test.sh suites/spaces/transaction_results.plt
+suites/spaces/references.plt suites/reader/reference_loading.plt` passes
+12, 31 + 8 and 38 + 46 tests, exit 0
+(`ai-tmp/ai-classes-c5-transaction-repair.log`). The tracked host reproduction
+prints `present` (`ai-tmp/ai-classes-c5-transaction-host-repro.log`).
 

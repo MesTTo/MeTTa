@@ -130,11 +130,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   class fails when instantiated.
 
 ### Fixed
+- Interrupted reference publication retains its owned bindings and completion
+  roots until reconciliation finishes. Shared context scopes unwind with the
+  engine trail. Native wrapper reconstruction preserves distinct defining
+  closures, and transaction existence checks avoid SWI's repeating ancestor.
 - A documented host workaround retains fresh assertion references across
   nested SWI transactions, so an inner retraction cannot make an aborted
   outer assertion survive. The tracked reproduction, workaround ledger and
   transaction tests cover rollback, snapshots, cancellation and concurrent
   ownership without changing the installed runtime.
+- Transaction evaluation rolls back every write when any answer is an
+  `Error`, then replays the complete answer bag. FROM carries constructor
+  declarations and subsorts while preserving their original occurrence
+  ownership. Data-only writes retain compiled reference bindings and update
+  only the affected occurrence grades.
 
 - Typed data constructors discharge proved argument checks during retained
   compilation. A checked ground constructor's unique structural projection
