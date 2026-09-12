@@ -16,8 +16,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   lock across every callback it delivers, and four hangs in this tree were
   that lock ordered against an engine mutex. The arithmetic-expansion guard,
   the seam table, the atom-hook watchers, materialization's erase listener,
-  the receipt engine's two listeners and the reference watch register through
-  it; the reference watch is now one process listener registered at load,
+  the receipt engine's two listeners, the reference watch and the Python
+  seat's bound watch register through it; the reference watch is now one process listener registered at load,
   reading each thread's own pending frames, rather than one registration and
   removal per transaction.
 - The plunit lane runs every suite under `tests/prolog/lock_order.pl`, which
