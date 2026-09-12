@@ -9,6 +9,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_markup` is a new library reading and writing XML and HTML:
+  `markup-parse-xml`, `markup-parse-html`, `markup-write`, `markup-select`,
+  `markup-attribute` and `markup-text`. An element is
+  `(element Name Attributes Children)` with each attribute an `(attr Name Value)`
+  row, so a document is inert data a program pattern-matches: the tag is what
+  keeps `(id "7")` from being read as a call to the identity function. The
+  selector language is an expression converted to the host's XPath term, with
+  `(descendant Name)`, `(child Name)` and `(self Name)` as steps and
+  `(index N)`, `(attribute Name)` and `(text)` as modifiers on the step they
+  follow; every match is an answer, in document order. Every parse is strict: a
+  missing end tag, a stray close tag, text outside any element and an external
+  SYSTEM entity are each refused, where the host's reader repairs the first three
+  with a warning on stderr and drops the entity's content silently. The library
+  declares the new `markup` platform capability.
 - `lib_yaml` is a new library reading and writing YAML: `yaml-decode`,
   `yaml-encode`, and `yaml-read!` and `yaml-write!` derived from `lib_file`'s
   `read-file!` and `replace-file!`, so the library holds no second copy of the

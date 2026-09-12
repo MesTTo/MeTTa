@@ -2810,3 +2810,61 @@ against 179,414 Python inferences, minimum of three fresh processes, a first pin
 The twin declares one stored-content divergence, the scope function's four
 statements compiling to nested `let*` forms where the example writes `let`.
 Logs: ai-tmp/ai-lib3-yaml-{example,suite}.log.
+
+## 2026-09-12: markup
+
+Decided: an element is `(element Name Attributes Children)` with each attribute an
+`(attr Name Value)` row, and the tag on the attribute row is the whole finding of
+this row. An untagged `(Name Value)` pair is an EXPRESSION whose head is the
+attribute's name, and `id`, `class`, `type` and `value` are all names the engine
+knows: `(element d ((id "7")) ())` answers `(element d ("7") ())`, because the
+engine evaluated `(id "7")` as a call to the identity function and kept its answer.
+Measured through the engine, both ways. With the tag the row's head is `attr`,
+which names no function, and the whole document is inert data a program
+pattern-matches.
+
+Measured, and worth knowing for every library whose rows hold user symbols: the
+hazard is LOUD rather than silent wherever a library checks its own shape.
+`(pairs-keys ((id 1) (b 2)))` raises `type_error(pair, 1)`, because `(id 1)`
+evaluated to `1` before lib_pairs saw it, and `(graph-of () ((id b)))` raises
+`type_error(edge, b)`. The answer is never wrong; the message names the shape
+rather than the cause, which the next entry fixes.
+
+Decided: every parse is STRICT, through `max_errors(0)`. The host's parser repairs
+a missing end tag, a stray close tag and character data outside any element, warns
+on stderr and answers a DOM anyway, and an external SYSTEM entity is declined with
+a warning that leaves the element silently empty. A document that needed repair is
+a document its sender got wrong, so each is a refusal here; that is also what keeps
+a parse from reading a file or a URL the document names.
+
+Tried: catching only `syntax_error` from the loader -> the empty document raises
+`representation_error(code_point)` from the reader instead, so nothing refused it.
+Every complaint now maps to one `syntax_error(markup(Reason))`, with a control
+signal rethrown untouched.
+
+Decided: the selector language is an expression converted to the host's xpath term,
+with three steps and three modifiers, and the modifiers attach to the step they
+follow rather than being steps of their own, because that is how xpath spells them:
+`//(item(text))` and not `//(item)/text`. Measured the host's own path shapes
+before writing the converter: a child is the BARE name under a path, a descendant
+is `//(Name)`, the element itself is `/(Name)`, and a path folds to the left.
+
+Tried: `markup-attribute` with the name declared Symbol -> refused with
+`BadArgType 2 Symbol (-> $_0 $_0)`, the identity function's own arrow, because `id`
+is a name the engine knows a type for. Declared `%Undefined%` the name was
+evaluated and matched nothing. The name is HELD, declared `'Atom'`, which is what
+an attribute name has to be.
+
+Verified: `sh engine/test.sh suites/libraries/lib_markup.plt` passes 6 tests. A
+parse is checked against the host's own DOM in this shape, every selector against
+the xpath term it stands for over nine forms, the write-and-parse round trip over
+200 generated trees whose text and attribute values carry the characters the writer
+escapes, the five malformed documents, the two external entities against an
+internal one that IS expanded, and the refusals for an unknown selector form, a
+modifier with nothing to modify and an untagged attribute row. The round trip's law
+is stated up to text MERGING, which is the strongest one XML has: two adjacent text
+nodes are one run of characters in the markup.
+
+Measured: the example proves 30 claims and its twin the same 30, 104,676 MeTTa
+against 110,488 Python inferences, minimum of three fresh processes, a first pin.
+Logs: ai-tmp/ai-lib3-markup-{example,suite}.log.

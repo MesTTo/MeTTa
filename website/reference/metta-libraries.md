@@ -28,6 +28,7 @@ beside its definitions.
 | lib_he | 18 | 0 |
 | lib_import | 8 | 4 |
 | lib_json | 13 | 13 |
+| lib_markup | 6 | 6 |
 | lib_measure | 17 | 0 |
 | lib_memo | 9 | 0 |
 | lib_mm2 | 5 | 0 |
@@ -2861,6 +2862,94 @@ Atomically replace Path with one compact UTF-8 JSON document. Stage beside the d
 2. Value
 
 Returns: Written
+
+## lib_markup
+
+### `markup-attribute`
+
+*lib_markup.metta:35*
+
+```metta
+(: markup-attribute (-> Expression Atom String))
+```
+
+One attribute's value as a String, with no answer when the element does not carry it, which is the shape a lookup has here and in lib_pairs. The name is HELD, which an attribute name has to be: one is often called id, class or type, and each of those is also a name the engine knows. Declared Symbol the call was refused with a BadArgType naming the identity function's arrow, and declared %Undefined% the name was evaluated and matched nothing [measured 2026-09-12: both, over (markup-attribute $doc id)].
+
+1. Element
+2. Name
+
+Returns: Value
+
+### `markup-parse-html`
+
+*lib_markup.metta:41*
+
+```metta
+(: markup-parse-html (-> String Expression))
+```
+
+One HTML document in the same shape. HTML's own rules are the host's: an omitted end tag that HTML allows is not an error, so `<p>one<p>two` parses, while a stray close tag or unparseable text is still a refusal.
+
+1. Text
+
+Returns: Element
+
+### `markup-parse-xml`
+
+*lib_markup.metta:47*
+
+```metta
+(: markup-parse-xml (-> String Expression))
+```
+
+One XML document as (element Name Attributes Children): the name a Symbol, each attribute an (attr Name Value) row and the children an expression of elements and Strings. The attribute row is tagged so that a document holding an `id` or a `class` is inert data rather than a call. The parse is STRICT. The host's parser repairs a missing end tag, a stray close tag and character data outside any element, warns on stderr and answers a DOM anyway; every one of those becomes a refusal here, because a document that needed repair is a document the sender got wrong. An external SYSTEM entity is refused for the same reason, which is also what keeps a parse from fetching a file or a URL the document names.
+
+1. Text
+
+Returns: Element
+
+### `markup-select`
+
+*lib_markup.metta:53*
+
+```metta
+(: markup-select (-> Expression Atom %Undefined%))
+```
+
+Every match of the selector, one answer each and in document order. A selector that matches nothing has no answer, which is what makes a selection compose with collapse and with an if over it. The selector is an expression, and a collection of steps is a path: (descendant Name) is every element of that name at any depth, (child Name) every immediate child of that name, and (self Name) the element itself when it carries that name. The other three MODIFY the step they follow: (index N) takes the Nth match counting from one, (attribute Name) answers that attribute's value as a String and (text) answers the element's text content. An unknown form is refused with the five listed.
+
+1. Element
+2. Selector
+
+Returns: Selected
+
+### `markup-text`
+
+*lib_markup.metta:59*
+
+```metta
+(: markup-text (-> Expression String))
+```
+
+Every text node under the element, in document order, joined: the content a reader sees with the markup taken out. An element with no text answers the empty String.
+
+1. Element
+
+Returns: Text
+
+### `markup-write`
+
+*lib_markup.metta:65*
+
+```metta
+(: markup-write (-> Expression String))
+```
+
+The element as XML text, without the declaration the host writes by default and without layout, so the text is exactly the element's own markup and parses back to it.
+
+1. Element
+
+Returns: Text
 
 ## lib_observe
 
