@@ -2714,3 +2714,50 @@ Open: the hazard belongs to any head declared det that answers a Bool, which is
 most of this package's `*-is` and `*-member` heads. Nothing in the tree refuses a
 caller that threads an expected answer in; the two places that did it were found
 by running a det-declared test through them.
+
+## 2026-09-12: parsing
+
+Decided: a grammar is a VALUE, an expression built from fourteen primitives and
+eleven combinators, and the library is one DCG that interprets it. The
+alternative, generating a DCG per grammar, was rejected: a grammar a program can
+build, inspect, store in a space and check with `grammar-is` is worth more than
+the one dispatch per node it costs, and `grammar-forms` publishes the vocabulary
+as data because the refusal has to list it anyway.
+
+Decided: every way a grammar matches is an ANSWER. `alt` is a superposition
+rather than a first-match choice, so an ambiguous grammar says so, and a text
+that does not match has no answer rather than an error, which is what makes
+`optional` and `alt` compose. The example's CSV row shows the cost of that
+honesty: with a bare field of `(until ",")` the quoted row parsed two ways, so
+the field stops at a quote as well and the grammar is unambiguous.
+
+Decided: the classes are ASCII, written here rather than taken from
+`code_type/2`, for the reason the unicode row measured: a class that moves with
+the locale is not portable. A Unicode class is `(char-if f)` over lib_unicode's
+`unicode-is`, which is the one primitive that takes a function, and the example
+parses "héllo" through it.
+
+Tried: `(char-if F)` as `eval_metta_in_module(Module, [F, Value], true)` -> the
+verdict trap of the entry above. It reads the verdict and compares.
+
+Tried: the twin's recursive grammar with `G("(")` inside a `@m.define` body ->
+`Domain error: grammar expected, found [lit,<py_Grounded>]`. A `G(...)` inside a
+compiled body is a host object, where a plain Python string literal lowers to the
+String the form wants, which is what the file row's twin recorded for
+`(write-file! ...)`. The three grammar-answering definitions use literals.
+
+Verified: `sh engine/test.sh suites/libraries/lib_parsing.plt` passes 7 tests.
+The primitives the host also has are checked against `dcg/basics` over 300
+generated strings, with the one difference named: its `integer//1` accepts a
+leading plus and this library's does not. A whole parse is checked to be exactly
+the prefix parse whose rest is empty, over eight grammars and 200 strings. The
+algebra is checked over 200 strings: `alt` of one branch is that branch, `many`
+is `many1` or nothing, `many1` is one then `many`, a one-part `cat` wraps its
+value, and `sep-by` with an absent separator is one part or none. The recursion
+through `ref` is checked to three levels, the classes under `LC_ALL=C` as well,
+and every malformed form to be named before any text is read.
+
+Measured: the example proves 58 claims and its twin the same 58, 89,803 MeTTa
+against 89,855 Python inferences, minimum of three fresh processes, a first pin:
+a grammar is a term, so building one in Python and writing one in MeTTa are the
+same work. Logs: ai-tmp/ai-lib3-parsing-{example,suite}.log.

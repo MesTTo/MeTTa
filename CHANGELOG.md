@@ -9,6 +9,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_parsing` is a new library of grammars as values: `grammar-parse`,
+  `grammar-parse-prefix`, `grammar-forms` and `grammar-is` over fourteen
+  primitives (`lit`, `any`, `char-in`, `char-not-in`, `char-if`, `digits`,
+  `integer`, `number`, `blanks`, `nonblanks`, `until`, `quoted`, `eos`, `rest`)
+  and eleven combinators (`cat`, `alt`, `many`, `many1`, `optional`, `sep-by`,
+  `between`, `skip`, `map`, `as`, `token`, `ref`). A grammar is an expression, so
+  a program builds and inspects one; every way it matches is an answer and a text
+  it does not match is no answer, which is what makes `alt` and `optional`
+  compose. `(ref f)` evaluates a function to a grammar when the parse reaches it,
+  so a recursive language is expressible; `map` and `as` make the answer a parse
+  tree; the character classes are ASCII and never the locale, and a Unicode class
+  is `(char-if f)` over `lib_unicode`'s `unicode-is`. A form the library does not
+  know is refused before any text is read, naming it with the vocabulary beside
+  it.
 - `lib_functional`'s `partition` reads its test's verdict and compares it, where
   it used to pass `True` in as the expected answer. A test whose own head is
   declared deterministic then failed with its output already bound instead of

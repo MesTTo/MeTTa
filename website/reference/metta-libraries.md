@@ -34,6 +34,7 @@ beside its definitions.
 | lib_nars | 38 | 0 |
 | lib_observe | 2 | 2 |
 | lib_pairs | 9 | 9 |
+| lib_parsing | 4 | 4 |
 | lib_patrick | 4 | 0 |
 | lib_pln | 49 | 0 |
 | lib_pln2 | 9 | 0 |
@@ -3023,6 +3024,64 @@ The value of every pair, in order and with duplicates kept.
 1. Pairs
 
 Returns: Values
+
+## lib_parsing
+
+### `grammar-forms`
+
+*lib_parsing.metta:26*
+
+```metta
+(: grammar-forms (-> Expression))
+```
+
+Every form a grammar may be built from, as (Name Arity) pairs, with the arity of the variadic ones written as *. This is the vocabulary the refusal lists, published so a program can ask for it.
+
+Returns: Forms
+
+### `grammar-is`
+
+*lib_parsing.metta:32*
+
+```metta
+(: grammar-is (-> %Undefined% Bool))
+```
+
+Whether the value is a well-formed grammar: every node a known form with its arity and every text argument a string. A ref's target is not followed, because it is a function evaluated only when the parse reaches it.
+
+1. Value
+
+Returns: Answer
+
+### `grammar-parse`
+
+*lib_parsing.metta:38*
+
+```metta
+(: grammar-parse (-> Atom String %Undefined%))
+```
+
+The value of the grammar over the WHOLE text, one answer per way it matches and no answer when it does not. The grammar is held, so its forms are read as data; it is checked before any text is read, and a form the library does not know is refused naming it.
+
+1. Grammar
+2. Text
+
+Returns: Value
+
+### `grammar-parse-prefix`
+
+*lib_parsing.metta:44*
+
+```metta
+(: grammar-parse-prefix (-> Atom String Expression))
+```
+
+The value of the grammar over a PREFIX of the text, with the unread rest, as (Value Rest): one answer per way it matches, longest first where a repetition decides, and no answer when no prefix matches. This is phrase/3 with the remainder, and the way a text is read one construct at a time.
+
+1. Grammar
+2. Text
+
+Returns: Answer
 
 ## lib_reflect
 
