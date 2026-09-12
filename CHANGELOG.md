@@ -9,6 +9,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_socket` connects, listens and accepts TCP, exchanges complete UDP packets
+  and reads actual IPv4/IPv6 endpoints. File handles own sockets and carry TCP
+  bytes; readiness, directional shutdown and cancellable acquisition compose
+  with scopes. Cleanup releases partial native streams and retains the original
+  outcome if closing also fails. Failed Socket and HTTP publication now removes
+  its File record before closing the stream. Tracked host reproductions cover
+  incorrect IPv6 TCP peers and the native IPv6 UDP assertion.
 - `lib_uri` composes encoded components, normalizes identifying URI text,
   resolves RFC3986 references and preserves empty delimiters and duplicate query
   keys. Encoding contexts distinguish paths, segments, query values and fragments;

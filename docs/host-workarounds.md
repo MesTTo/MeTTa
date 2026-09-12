@@ -39,6 +39,30 @@ An entry lands with its first site and its reproduction in the same commit. A
 site the ledger does not know is refused, and so is an entry nothing uses. The
 journal keeps the history; this file holds only what is live.
 
+## swi-tcp-ipv6-peer
+
+Host: SWI-Prolog10.1.13, packages-clib socket.c:pl_accept at
+  a69cf00dcf0dd2e3ac1aa9565fbebf4aa4ceb5da.
+Defect: native accept uses sockaddr_in and IPv4 address formatting for an IPv6
+  connection, returning ip(0,0,0,0) for the IPv6 loopback peer.
+Reproduction: tests/checks/host_workarounds/swi-tcp-ipv6-peer.pl
+Workaround: query the connected descriptor with getpeername, sockaddr_storage
+  and getnameinfo to retain its family and actual source port.
+Lifted when: native accept returns the complete IPv6 loopback address.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-udp-ipv6-address
+
+Host: SWI-Prolog10.1.13, packages-clib socket.c:unify_address at
+  a69cf00dcf0dd2e3ac1aa9565fbebf4aa4ceb5da.
+Defect: udp_receive passes its IPv6 sockaddr to an address formatter that handles
+  only AF_INET and aborts the process in its default branch.
+Reproduction: tests/checks/host_workarounds/swi-udp-ipv6-address.pl
+Workaround: receive complete datagrams with the OS API and format either address
+  family through getnameinfo, retaining the sender's actual port.
+Lifted when: the native IPv6 packet and sender endpoint pass in the isolated child.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
 ## swi-uri-empty-query
 
 Host: SWI-Prolog10.1.13, packages-clib uri.c:add_query_and_fragment,

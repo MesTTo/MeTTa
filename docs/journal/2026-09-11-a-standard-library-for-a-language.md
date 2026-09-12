@@ -3631,3 +3631,189 @@ Verified: the final full twins run retains263 existing findings over305 twins.
 URI proves55 claims with equal stored contents and exactly118602 inferences;
 49/342 corpus examples pass and3330 claims are proved. twins-selftest, Ruff,
 mypy and evidence pass. Logs: ai-lib4-uri-{twins-final,notation-lanes}.log.
+
+## 2026-09-13: socket design
+
+Tried: library(socket) loopback streams preserve binary bytes and accept File's
+stream operations. Native UDP receive aborts on IPv6 at socket.c:unify_address,
+which handles only AF_INET. The isolated probe exits134 after its own datagram
+arrives; IPv4 controls pass. Logs: ai-lib4-socket-{probe,udp6-probe}.log.
+
+Rejected: restricting UDP to IPv4, because the repository's existing native
+adapter builder permits a complete address-family repair. A second socket
+registry would duplicate File ownership. Native tcp_accept reports no peer port;
+recording zero or inferring it from the listening port would invent an endpoint.
+
+Tried: a scratch adapter using PL_get_stream, Sfileno, getsockname, getnameinfo
+and recvmsg. Both address families preserve zero/255 and empty datagrams;
+wait_for_input returns the same stream-pair identity and a waiting thread exits
+with exception(cancelled). Compile with swipl-ld -shared -Wall -Wextra -Werror.
+Commands and fixtures: ai-lib4-socket-fli-probe.{c,pl}, its .log.
+
+Decided: share File's integer handles and expose its existing known_file/2 as
+a private borrowing door. TCP connect/listen/accept and UDP bind transfer owned
+streams to File; file-close! and byte I/O retain their contracts. Endpoint values
+are (endpoint ipv4|ipv6 HostString Port), with the actual local or peer address
+queried from the locked descriptor. Port zero asks the OS to bind; destinations
+require a positive port. Hostnames resolve through the requested native family.
+
+Decided: a small adapter built by native_build supplies kind, endpoint, shutdown
+and complete datagram receive. POSIX recvmsg reports truncation; Windows recvfrom
+reports WSAEMSGSIZE. UDP streams are nonblocking before publication, and receive
+retries only after native readiness, keeping cancellation outside a blocking
+foreign call. A packet larger than the ordinary UDP bound raises, never truncates.
+The native provider still creates sockets, connects, listens, accepts and sends.
+
+Decided: socket-wait! preserves supplied handle order and duplicates; an empty
+list returns immediately. Its timeout is nonnegative seconds or infinite.
+socket-shutdown! accepts read/write/both and retains the descriptor until close;
+write shutdown flushes pending output. with-socket holds an acquisition expression
+and a function, transfers the first acquired socket into its scope, streams all
+function answers, and closes on every exit. Handles and callbacks travel as
+arguments. Opening sockets refuses database transactions before effects because
+File's registration must survive until explicit release. No new global scope key.
+
+Verified: the native adapter compiles with -Wall -Wextra -Werror and the first
+example passes53 claims. The twin initially returns only second for its callback:
+the Python write door replaces a repeated equation head. A direct callback
+probe gives the same result before any socket scope runs. Use one superpose
+equation in both notations to describe the two answers. The library is unchanged.
+Logs: ai-lib4-socket-{native-build,example,twin,scope-probe}.log.
+
+Verified: the initial write-replacement attribution was insufficient. The stored
+superpose equation is intact, but first has type (-> %Undefined% Atom), while
+second is untyped. Returning that function name under a Symbol result filters
+it out. Numeric controls and fresh Symbol controls each return both answers,
+directly and through with-socket. Use Number results1/2 for the scope fixture.
+The final example and twin pass53 claims. Logs: ai-lib4-socket-{scope-types-probe,
+example-numeric,twin-numeric}.log.
+
+Decided: index the native ready set with library(assoc) before restoring input
+order and duplicates. This avoids a quadratic membership scan when many sockets
+are ready; the transformation costs O(k log k + n log k) for n handles and k
+distinct ready streams. The native readiness operation remains the I/O authority.
+
+Tried: the19-test socket suite passes18 tests and exposes a cancellation gap
+after adopt_file_stream returns. The stream closes, but its registered handle
+remains: socket_adopt_cancelled leaves handle39 in the table. The same outer
+handover exists in HTTP. Log: ai-lib4-socket-suite.log.
+
+Decided: File owns release_file_stream/1 for rollback before publication, both
+before and after adoption. Socket and HTTP use that one withdrawal/close path.
+HTTP acquires its final response stream in Setup, including the no-body range
+filter, so cleanup retains its identity after an exception unwinds body bindings.
+Add HTTP get/head cancellation cases and remeasure all affected File consumers.
+
+Tried: the combined Socket/HTTP/File suite reaches a blocked IPv6 accept with
+its cancellation pending. /proc/1110743/task shows inet_csk_accept; the only
+owned listening endpoint is ::1:44843. A diagnostic connection wakes it and
+allows cleanup. All91 tests and48 subtests then finish, but this assisted run
+is not a passing cancellation gate. Logs: ai-lib4-socket-{suite-process,
+suite-listener,suite-wake,suites-owned}.log.
+
+Found: sig_atomic/1 documentation explicitly includes setup_call_cleanup Setup.
+The blocking native accept currently runs there, so cancellation is deferred.
+The native nonblock accept still retries internally; waiting for readiness first
+does not settle races between acceptors. Research the acquisition protocol before
+changing it. No host-defect label applies to the documented atomic Setup rule.
+
+## 2026-09-13 socket acquisition ownership
+
+Verified: opening a native binary stream before tcp_connect/2 works for IPv4
+and IPv6. A scratch one-shot accept adapter using public Snew stream callbacks
+passes bidirectional bytes, cancelled reads and shared owner-cell identity.
+Logs: ai-lib4-socket-{connect-owned-probe,accept-probe,accept-probe-build}.log.
+The independent File/HTTP repair passes72 tests and48 subtests in
+ai-lib4-socket-http-file-owned.log.
+
+Rejected: completion cleanup as the first owner of an acquisition result.
+Exceptions unwind its ordinary variables, and generic acquisition can run more
+goals before returning. Revisit only if an owner already retains the resource.
+Rejected: an infinite readiness wait as the sole cancellation mechanism. Native
+clib itself checks signals between250ms waits. A finite check interval also
+observes cancellation that arrived immediately before the next wait.
+
+Decided: install an empty native accept owner before attempting accept. The
+foreign call records its descriptor immediately and roots each constructed
+stream. Publication retains the final stream before File adoption. Rollback
+withdraws any File registration and closes both halves before releasing the
+owner. A successful handover leaves the stream halves as the descriptor owners.
+The native owner handles partial construction and foreign-output failures.
+
+Decided: the listener stays nonblocking; a losing acceptor returns to readiness.
+Accepted sockets use separate input/output Snew streams and shared reference
+counting. Public File byte operations retain their existing interface. Native
+socket callbacks are not interchangeable with clib's private callback identity.
+The OS and public SWI interfaces are the basis:
+https://man7.org/linux/man-pages/man2/accept.2.html,
+https://www.swi-prolog.org/pldoc/man?section=foreign-create-iostream,
+and packages-clib a69cf00dcf0dd2e3ac1aa9565fbebf4aa4ceb5da/sockcommon.c.
+
+Decided: evaluate with-socket acquisition in guarded Goal. During that evaluation,
+one thread-local key, '$metta_socket_acquisition', exposes a call-local allocation
+set to socket publication. Failure closes the allocations; successful selection
+transfers the first returned handle into the callback scope. Restore the previous
+key before invoking the callback and on every exit. No database or global value
+write occurs in Setup. The integrator converts this key to metta_with_trailed/3
+and seam:context_reader/3, which this branch predates.
+
+Decided: exception cleanup shuts down TCP before closing buffered streams, so
+unwind does not wait for peer cooperation. Normal close retains File's flush
+semantics. Owners keep listeners alive until their acceptors are cancelled and
+joined. Windows uses its socket-width descriptor and clears inherited event
+selection on accepted sockets; platform runtime verification here is Linux.
+
+Tried: the first native ownership build names Sacquire/Srelease, which are not
+declared by the installed public headers. Compilation refuses both implicit
+declarations. Use rooted stream blobs and PL_get_stream_from_blob for rollback;
+Sclose consumes its borrowed stream lock. The corrected build passes all
+warnings as errors. Logs: ai-lib4-socket-owned-native-build{,-fixed}.log.
+
+Tried: the concurrent accept fixture waits for a message after an unevaluated
+lambda makes its worker fail. The isolated fixture probe prints
+callback [[[lambda,_32678,true],3]], and the peer has already closed. The runner
+has no remaining producer for the expected completion message; it was terminated
+with exit143, not accepted as a gate. Use the registered native callback and
+always report worker completion, including failure. Log:
+ai-lib4-socket-suite-owned-barriers.log; probe:
+ai-lib4-socket-accept-fixture-probe.log.
+
+Found: aborting a scope with pending buffered output releases the descriptor,
+but SWI prioritises close's io_error over the callback's atom exception. Preserve
+the original outcome and all failed handles in socket_cleanup(Outcome,Failures),
+after attempting every close. The corrected combined suite passes99 tests and
+48 subtests, including actual empty-wait barriers, competing acceptors, nested
+acquisition, partial native publication, module capture and buffered cleanup.
+Logs: ai-lib4-socket-suites-{buffered,cleanup-errors}.log.
+
+Verified: native TCP accept returns ip(0,0,0,0) for an IPv6 loopback peer while
+the IPv4 control passes. The tracked swi-tcp-ipv6-peer reproduction prints
+present; the endpoint adapter and ledger record the complete-address repair.
+The UDP IPv6 reproduction separately prints present for its native assertion.
+
+Verified: the final example and twin each pass53 claims. Three fresh serial
+measurements give example189530 and twin178533, within the existing allowance.
+All13 older File consumers are remeasured and repinned; HTTP moves323580 to
+323706. Commands and every point are in ai-lib4-socket-price-owned.sh and
+ai-lib4-socket-{measure-owned,repin-file-consumers}.log. The five record generators
+pass in ai-lib4-socket-records-owned.log.
+
+Verified: ordinary collapse lowers to findall in
+engine/translator/special_forms.pl:translate_special_dl/5. A failed acquisition
+after collecting a socket closes that socket and the two later allocations.
+The27-test socket suite passes in ai-lib4-socket-suite-collected.log. Separate
+cursors and worker tasks keep their own allocation responsibility; this scope's
+call-local cell is not claimed to be shared across copied engine contexts.
+
+Tried: the required lane batch passed18 of19 lanes; evidence mistook the new
+reproduction helper child/0 for the word child in an existing Node test title.
+Renaming the helper udp_reproduction_child/0 removes that collision. Evidence,
+host-workarounds and its selftest then pass; all27 reproductions answer present.
+Logs: ai-lib4-socket-{lanes,evidence-final}.log.
+
+Verified: the final Socket suite passes27 tests in
+ai-lib4-socket-suite-reaping.log. Full twins retains263 older findings over306
+twins, with equal Socket contents and178534 inferences against its178533 pin,
+inside the gate's existing deterministic allowance of4. All13 repriced File
+consumers pass their price checks. The twins selftest passes. Log:
+ai-lib4-socket-twins-final.log.

@@ -232,6 +232,19 @@ test(adoption_cancellation_withdraws_the_registered_handle) :-
         unwrap_predicate(system:assertz(_),http_adopt_abort)),
     assertion(\+ is_stream(Stream)),handles(After),assertion(After==Before).
 
+test(post_adoption_cancellation_releases_filtered_responses) :-
+    fixed(['http-response',200,[],[42]],Handler),
+    with_server(Handler,post_adoption_cancellation).
+post_adoption_cancellation(_,URL) :-
+    forall(member(Method,[get,head]),
+        (handles(Before),
+         setup_call_cleanup(
+            wrap_predicate(lib_file:adopt_file_stream(Stream,_),http_adopt_after,Wrapped,
+                           (call(Wrapped),throw(http_adopt_cancelled(Stream)))),
+            must_throw('http-open!'(Method,URL,[],_),http_adopt_cancelled(_)),
+            unwrap_predicate(lib_file:adopt_file_stream(_,_),http_adopt_after)),
+         handles(After),assertion(After==Before))).
+
 close_barrier(Main) :-
     thread_self(Self),thread_send_message(Main,ready(Self)),thread_get_message(continue).
 test(concurrent_file_close_claims_once) :-
