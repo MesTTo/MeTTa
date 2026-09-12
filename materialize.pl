@@ -1,6 +1,7 @@
 % Guarantees: materialization_transaction/2, with_source_materialization/3 and
-%   with_source_materialization_batch/3 scope roots through metta_with_trailed/3
-%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%   with_source_materialization_batch/3 scope roots through metta_with_trailed/3,
+%   read by declared context readers; an open batch is asked for as batch(open)
+%   [tested: trailed_scopes, function_free_materialization; commit=WORKTREE].
 %
 % Purpose: materialize finite function-free equation bags at source boundaries.
 % Guarantees: only ground acyclic dependency graphs replace ordinary dispatch;
@@ -69,14 +70,14 @@
 :- meta_predicate with_source_materialization_batch(+, 0, 0).
 :- meta_predicate materialization_transaction(0).
 :- meta_predicate materialization_transaction(0, 0).
-source_materialization(Space, Candidates) :-
-    nb_current('$metta_source_materializations', Sources),
-    member(Space-Candidates, Sources).
-materialization_transaction_owner :- nb_current('$metta_materialization_owner', true).
+:- seam:context_reader(source_materialization(Space, Candidates),
+                       '$metta_source_materializations', stack(Space-Candidates)).
+:- seam:context_reader(materialization_transaction_owner,
+                       '$metta_materialization_owner', value(true)).
 :- thread_local materialization_changed_space/1.
-materialization_batch(Batch) :-
-    nb_current('$metta_materialization_batches', Batches),
-    member(Batch, Batches), arg(1, Batch, open).
+%A batch cell is batch(open) until its load closes it, so a caller that needs
+%an open batch asks for that pattern; the nearest closed cell is skipped.
+:- seam:context_reader(materialization_batch(Batch), '$metta_materialization_batches', stack(Batch)).
 :- thread_local materialization_pending/1.
 :- dynamic materialized_snapshot/5.
 :- dynamic materialized_predicate/4.
@@ -233,7 +234,7 @@ with_source_materialization_batch(Space, Prepare, Publish) :-
 close_materialization_batch(Batch, Space) :-
     nb_setarg(1, Batch, closed),
     queue_materialization(Space),
-    (   materialization_batch(_)
+    (   materialization_batch(batch(open))
     ->  true
     ;   forall(materialization_pending(Queued), materialize_source(Queued))
     ).
@@ -248,7 +249,7 @@ queue_materialization(Space) :-
 % was installed discards every space this load touched rather than only the
 % one the caller named.
 abandon_materialization_batch(Catcher) :-
-    (   materialization_batch(_)
+    (   materialization_batch(batch(open))
     ->  true
     ;   (   batch_completed(Catcher)
         ->  true
@@ -263,7 +264,7 @@ batch_completed(!).
 flush_source_materialization :-
     source_materialization(Space, Names),
     !,
-    (   materialization_batch(_)
+    (   materialization_batch(batch(open))
     ->  queue_materialization(Space)
     ;   flush_space_materialization(Space, Names)
     ).

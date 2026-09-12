@@ -1086,9 +1086,8 @@ metta_host_source_effect_plan(Module, Source, Operations, Effect) :-
 % yet. Only the source lookup changes; masks, compiler actions and the effect
 % join remain the ordinary planner's. No candidate equation is compiled here.
 :- use_module(library(pairs), [group_pairs_by_key/2]).
-metta_effect_source_program(Module, Index) :-
-    nb_current('$metta_effect_source_program', Programs),
-    member(Module-Index, Programs).
+:- seam:context_reader(metta_effect_source_program(Module, Index),
+                       '$metta_effect_source_program', stack(Module-Index)).
 :- meta_predicate metta_with_source_effect_program(+, +, 0).
 
 metta_with_source_effect_program(Module, Forms, Goal) :-
@@ -2326,6 +2325,9 @@ metta_annotations_resolved([First, Second|Rest], Ctx, _) :-
 %commit=c7468b2789746bcf95c4bacc0e2d517ec4d972fa].
 :- meta_predicate metta_with_under(+, 0),
                   metta_with_evaluation_context(+, 0).
+%Declared before its first reader below, so that call compiles to the read.
+:- seam:context_reader(metta_evaluation_context(Context),
+                       '$metta_evaluation_contexts', value([Context|_])).
 
 metta_with_under(Algebra, Goal) :-
     (   metta_evaluation_context(evaluation_context(_, Limit, Direction))
@@ -2340,9 +2342,6 @@ metta_with_evaluation_context(Context, Goal) :-
     % Workaround: swi-cleanup-window - preserve the input snapshot and trail both scope transitions.
     duplicate_term(Context, Snapshot),
     metta_with_trailed('$metta_evaluation_contexts', [Snapshot|Old], Goal).
-
-metta_evaluation_context(Context) :-
-    nb_current('$metta_evaluation_contexts', [Context|_]).
 
 metta_effective_algebra(_, Algebra) :-
     metta_evaluation_context(evaluation_context(Algebra, _, _)), !.

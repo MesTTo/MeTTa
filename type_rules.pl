@@ -1,6 +1,7 @@
 % Guarantees: with_typing_policy_stable/1 scopes typing_policy_snapshot/1 through
-%   metta_with_trailed/3 while retaining the typing-policy mutex
-%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%   metta_with_trailed/3 while retaining the typing-policy mutex, and the
+%   snapshot is a declared context reader compiled to its read
+%   [tested: trailed_scopes; commit=WORKTREE].
 %
 % Purpose: hold the declared typing-rule registry and resolve its explicit
 %   accept, refuse(Reason), and defer outcomes for every engine type checker.
@@ -101,8 +102,8 @@
 :- discontiguous typing_rule_entry/7, shipped_typing_rule/5.
 :- meta_predicate typing_rule_transaction(0).
 :- meta_predicate with_typing_policy_stable(0).
-typing_policy_snapshot(Snapshot) :-
-    nb_current('$metta_typing_policy_snapshot', snapshot(Snapshot)).
+:- seam:context_reader(typing_policy_snapshot(Snapshot),
+                       '$metta_typing_policy_snapshot', value(snapshot(Snapshot))).
 
 %Compile the invariant pattern tests beside each declaration. The source row
 %remains the reflection surface, and the generated clauses choose in the same

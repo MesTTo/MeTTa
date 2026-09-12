@@ -3,7 +3,11 @@
 %   [source: engine/spaces/receipts.pl:metta_with_occurrence_load/1; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 % Guarantees: interrupted native completion retires every finished scope's
 %   rows and standing-engine reservations; nested rollback preserves the live
-%   outer owner [tested: spaces_receipt_limits; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
+%   outer owner [tested: spaces_receipt_limits; commit=WORKTREE].
+% Guarantees: the exception hook that finishes a cut listener is clausal only
+%   from the process's first bound on, so a process that never bounds pays
+%   nothing per ball [tested: spaces_receipt_limits:the_limit_hook_is_armed_by_the_first_bound;
+%   commit=WORKTREE].
 %
 % Purpose: reserve incoming occurrence identities across transaction views.
 % Assumes: native erasures use metta_erase_storage_ref/1 or metta_retract_storage/1.
@@ -138,13 +142,55 @@ metta_receipt_finish_frame(Frame) :-
 % The host can cut the listener before its catch starts. At that point the
 % hook may report the enclosing native frame. Only schedule here: calling
 % retirement from an exception hook would run it with an outstanding ball.
+%
+% The hook is DECLARED at load and CLAUSED by the first bound of the process:
+% SWI consults prolog:prolog_exception_hook/5 on every ball the process
+% throws once it holds a clause, one inference each, which
+% engine/source_observation.pl measured at 119 on the engine's translate case
+% and 2 per compiled host request, and only a bound can cut the listener. A
+% process that never bounds keeps no clause and pays nothing per ball; a
+% bounded one pays the inference on every ball it throws from its first bound
+% on [tested: spaces_receipt_limits:the_limit_hook_is_armed_by_the_first_bound;
+% commit=WORKTREE]. The clause is its own armed record: a trip on assertz/1's
+% call port inside the mutex leaves nothing behind and the next bound arms it.
+% The wrapper below is the arming point; the host's own limit predicate keeps
+% its definition under the wrapper, so the deferral on its call port survives.
 % Workaround: swi-cleanup-window - schedule reconciliation when a bound cuts an owned transaction.
 :- multifile prolog:prolog_exception_hook/5.
-prolog:prolog_exception_hook(inference_limit_exceeded, _, _, _, _) :-
+:- dynamic prolog:prolog_exception_hook/5.
+:- use_module(library(prolog_wrap), [wrap_predicate/4, current_predicate_wrapper/4]).
+
+metta_receipt_arm_limit_hook :-
+    (   metta_receipt_limit_hook_armed
+    ->  true
+    ;   with_mutex('$metta_receipt_limit_hook', metta_receipt_arm_limit_hook_once)
+    ).
+
+metta_receipt_arm_limit_hook_once :-
+    (   metta_receipt_limit_hook_armed
+    ->  true
+    ;   assertz((prolog:prolog_exception_hook(inference_limit_exceeded, _, _, _, _) :-
+                     spaces:metta_receipt_schedule_reconciliation))
+    ).
+
+metta_receipt_limit_hook_armed :-
+    clause(prolog:prolog_exception_hook(inference_limit_exceeded, _, _, _, _),
+           spaces:metta_receipt_schedule_reconciliation).
+
+metta_receipt_schedule_reconciliation :-
     nb_current('$metta_occurrence_transaction', _-scope(Scope, _)),
     thread_self(Me),
     thread_signal(Me, spaces:metta_receipt_reconcile_scope(Scope)),
     fail.
+
+% Installed once per process; a second consult finds the wrapper in place.
+:- (   current_predicate_wrapper('$syspreds':call_with_inference_limit(_, _, _),
+                                 metta_receipt_first_bound, _, _)
+   ->  true
+   ;   wrap_predicate('$syspreds':call_with_inference_limit(_, _, _),
+                      metta_receipt_first_bound, Bounded,
+                      ( spaces:metta_receipt_arm_limit_hook, Bounded ))
+   ).
 
 metta_receipt_reconcile_scope(Scope) :-
     ( nb_current('$metta_occurrence_transaction', _-scope(Scope, Reserved))
