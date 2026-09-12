@@ -8,6 +8,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+
+- Python class declarations derive value, entity or prototype storage from
+  the completed class. Each class owns a referenced space; entities share
+  indexed field facts under occurrence-token handles, while Space subclasses
+  own private spaces. Constructors preserve Python signatures, defaults,
+  factories, post-init and inheritance. Entity and prototype attributes read
+  and replace the same engine facts, with transactional initialization,
+  explicit retirement and Scope cleanup.
 - Trailed context services restore state either after each answer or when
   enumeration finishes. Context-reader declarations compile callers directly
   to the read used by reference publication, support repairs and typing policy.
@@ -130,12 +138,23 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   class fails when instantiated.
 
 ### Fixed
+
+- Reference reconciliation runs after native transaction completion, avoiding
+  the lock inversion between SWI frame listeners and typing-policy publication.
+  Kept receivers retain their class programs, and prototype operands encode
+  their declared constructor through every atom-building door.
 - Interrupted reference publication retains its owned bindings and completion
   roots until reconciliation finishes. Shared context scopes unwind with the
   engine trail. Native wrapper reconstruction preserves distinct defining
   closures, and transaction existence checks avoid SWI's repeating ancestor.
 - Python profiling collects native sampler data directly, so it works when
   SWI's optional graphical profiler is installed and opens no viewer.
+- Annotated field contracts preserve their metadata, report failed value
+  refinements consistently, and check Python initialization before storing
+  fields. Host length refinements use `len` without enumerating a container.
+  Generated constructors also accept concrete annotations outside an imported
+  module. Typed callees reuse a ground argument's construction proof, including
+  nullary constructors, while retaining refinements and invalidation.
 - A documented host workaround retains fresh assertion references across
   nested SWI transactions, so an inner retraction cannot make an aborted
   outer assertion survive. The tracked reproduction, workaround ledger and
@@ -146,6 +165,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   declarations and subsorts while preserving their original occurrence
   ownership. Data-only writes retain compiled reference bindings and update
   only the affected occurrence grades.
+- Entity and prototype container fields preserve Python aliases through the
+  existing Grounded boundary. Native expressions are adopted once when
+  written. Generated class operations retire with their declaration while
+  preserving a later replacement implementation.
 
 - Typed data constructors discharge proved argument checks during retained
   compilation. A checked ground constructor's unique structural projection

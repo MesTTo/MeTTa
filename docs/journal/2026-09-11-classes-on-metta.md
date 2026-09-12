@@ -276,6 +276,306 @@ Found: `metta_reference_local_head/3` exports callable heads; `metta_reference_m
 
 Decided: retain the reference union's bag law and the original defining space of each equation. Class lowering must publish its data declarations and derive receiver applicability from the completed Python class hierarchy. A method body and its qualified `super` entry must remain shared. Constructor sorts and callable return types need distinct admission rules, as the order-sorted design requires.
 
+## 2026-09-11: grain ownership and constructor boundary
+
+Tried: `ai-tmp/ai-classes-token-probe.pl` binds the portable token before `metta_add_atom/4` stores `(owned-by (Account token))`. Reading that occurrence returns the same generation as the token inside its atom. The probe exits 0. `ai-tmp/ai-classes-ownership-probe.py` stores a slotted, unhashable dataclass inside an ordinary grounded atom; lookup by the same object succeeds and decoding returns that exact Python object. An empty transaction leaves no new live space. An `Error` result commits its allocation, because the prelude's `throw/2` produces an error value rather than a Prolog exception.
+
+Rejected: a Python object-to-token table or an injected instance slot. The engine's existing `Box` already preserves object identity, and an internal `(_python-proxy receiver object)` fact can own that reference. This also admits non-weak-referenceable classes and preserves the completed class object, its metaclass and its slot layout. SQLAlchemy's class instrumentation and `new_instance` supply the relevant separation between allocation and initialization ([source](https://github.com/sqlalchemy/sqlalchemy/blob/a303102a7bfbbb6da992a89b6610d71f080fb5eb/lib/sqlalchemy/orm/instrumentation.py#L502-L521)). The proxy fact, field facts and ownership occurrence share native transaction lifetime.
+
+Rejected: opening a constructor Scope around its transaction. `scope_open/4` refuses inside a caller's transaction, as the existing scope journal requires. A factory must compose with that caller. Native allocation already rolls back its live storage registration; SWI module names persist after ordinary release too. Scope's recorded ownership can therefore remain responsible for resources acquired in an existing outer Scope.
+
+Decided: expose the native occurrence token through a held third `add-atom` argument. A fresh variable receives `(t actor generation)` before semantic admission, so a row may contain its own identity. A bound output or a foreign provider that cannot preallocate its own occurrence refuses before mutation. Keep the two-argument write's cost unchanged.
+
+Decided: a MeTTa transaction inspects its result bag before commit. Any `Error` answer rolls back the whole bag's writes and returns the original answers in order; host exceptions and an empty bag keep their existing rollback laws. The native goal-only transaction service retains its contract. This is the result-valued counterpart of SWI's exception rollback, using the same transaction, foreign enlistment and observation boundary. It is needed by compiled `raise`, which returns an error through the existing compiler.
+
+### 2026-09-11: class construction integration
+
+Tried: the native token, reference and lifetime changes pass the corrected selected battery: evaluation 274 tests and 142 subtests, Scope 18, transaction results 9, constructor specialization 29 and 37 subtests. The first Python grain battery passes two tests and fails six. The counter constructor already compiles assignment and augmented assignment to shared field heads and answers 10 from an input of 7. Its remaining failure is a test calling the `Defined.source` method as a property.
+
+Rejected: importing the complete thread library into every class space. Its bootstrap heads become public class heads and conflict with inherited `import_prolog_functions_from_file/3` when another class is referenced. Class dependencies now reference the canonical library home through `from` with `only`, and mark those dependency names internal. Deferred retirement carries an explicit `evalc` home because the dependency equation retains its own home.
+
+Open: a declared constructor's result arrow filters its initializer's Error answer, although direct initialization and a literal transaction retain the Error. The source confirms ordinary output checks filter base-type mismatches. Removing the constructor arrow exposed an unbounded evaluation in the throwaway probe. Native stack attachment was refused (`ptrace: Inappropriate ioctl for device.`); interrupting that probe produced `KeyboardInterrupt` at the subsequent untyped constructor call. No gate was interrupted. A rolled-back class declaration also leaves a stale execution-module shape that refuses declaration on retry; this requires an ownership fix, not a fresh name.
+
+Decided: Scope gains a deferred native expression associated with an owned value. The descriptor is transactional, its owner is Scope's existing recorded child set, and returning or keeping that value transfers the cleanup with it. A rolled-back descriptor has no action left to run. Entity retirement drains its keyed facts; prototype retirement also uses the existing space release operation. No finalizer or additional instance identity is introduced.
+
+Decided: class declarations own one class space, schema and borrower set. The original completed Python class is instrumented only after publication, and the existing registry undo frame restores instrumentation and registrations on outer rollback. Value reconstruction bypasses initialization; entity and prototype reconstruction retrieves or attaches the Python proxy for the existing receiver. Constructor bodies use the same AST compiler as functions, with field bindings and writes selected from the declared grain. Constructor defaults, factories, InitVars and post-initialization belong to that one factory boundary.
+
+Verification plan: token self-reference and refusal before mutation; transaction bags, bindings, nested rollback and foreign observers; Scope transfer, rollback and cleanup retry; declaration-only references through diamonds, renaming, privacy, withdrawal and cycles; sorted constructor widening versus callable return types; each grain's Python/MeTTa identity, field writes, retirement, failed initialization, defaults, slots and inheritance. Measure creation, field reads/writes and retained memory for all three grains. The pre-change declaration battery passes 174 tests with one skip.
+
+### 2026-09-11: constructor rollback reaches the host transaction journal
+
+Tried: the grain battery passes six tests and fails two. A typed factory loses its initializer's Error to the ordinary output sort filter. Retrying a rolled-back declaration first refused the empty execution module; checking actual clause count fixes that admission, but retry then produces four mint answers. The storage has one mint equation occurrence. Three executable clauses have lost their occurrence owner.
+
+Found: assertion and rollback events on `filereader:translated_from/2` show `rollback(retract)` for compiler records asserted inside the aborted outer transaction and erased inside committed nested transactions. They are absent outside a transaction, then become visible as a later transaction advances its local generation. A standalone SWI-Prolog 10.1.13 probe loads no engine: `transaction((assertz(row(aborted), Ref), transaction(erase(Ref)), fail))`, followed by a transaction that asserts 100 unrelated rows and reads `row/1`, prints `outside: []` and `inside later transaction: [aborted]`. `swipl -q ai-tmp/ai-classes-swi-nested-rollback.pl` exits 1.
+
+Found: [`merge_clause_tables`](https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-transaction.c#L417-L427) replaces the outer assertion entry with `GEN_NESTED_RETRACT`. The outer discard restores its erased generation instead of discarding the assertion. Deduplicating compiled equations or omitting nested savepoints cannot repair this storage contract. Runtime repair is an integration dependency; the standalone probe and occurrence trace identify it independently of class lowering.
+
+Decided: computed Error answers pass ordinary and refined result crossings unchanged, so `transaction` and `try` can observe them. Ordinary values of the wrong result sort still filter their branch. The ordinary successful type check remains first; its soft cut retains its answer multiplicity. The regression covers duplicate Error alternatives, valid alternatives and wrong-sort filtering together.
+
+Tried: ordinary Error-result tests pass 12, refinements 16, existing evaluation 274 plus 142 subtests. The mixed-result fixture initially used an untyped symbol as its wrong sort, which gradual typing correctly admits; a string supplies the intended mismatch. A field-write probe shows imported method dependencies recompile on every data mutation because `metta_reference_observer` announces every atom as an interface change. `references:data_mutations_keep_compiled_clauses_and_retire_only_removed_grades` fails by comparing the executable clause reference before and after three fact insertions and one removal.
+
+Decided: classify interface rows through the existing metadata mapping plus equation, reference and visibility declarations. Other insertions grade only their new occurrence. Removal captures matching occurrence identities and retires grades only for occurrences actually removed, preserving a provider's equal siblings. Only removed interface rows republish bindings. Work for a field write depends on matching occurrences instead of the complete population and reference graph.
+
+### 2026-09-11: repository ownership after nested rollback
+
+Decided: the preceding runtime-repair dependency is superseded. The repository
+must use the installed, unpatched SWI runtime. The host-workarounds ledger,
+tracked present/absent reproduction and keyed site comments own the exception.
+Savepoints remain useful and must retain rollback semantics.
+
+Rejected: source-load assertion records as a creation journal. They can adopt
+existing clauses, so retiring every recorded reference could remove an older
+owner's clause. Scanning an outer transaction's complete update list before
+each nested operation also loses: N successive writes would rescan a growing
+prefix and cost O(N²). Deduplication would hide lost ownership.
+
+Tried: a plain-SWI assertion journal passes eight controls: outer failure,
+child failure with parent commit or failure, preservation of an older row,
+restoration of an outer row on child failure, snapshot rollback, failed commit
+constraint and a nontransactional predicate. Command:
+`swipl -q -f none -s ai-tmp/ai-classes-host-journal-probe.pl -g main -t halt`.
+The tracked host reproduction exits 0 with the last line `present`.
+
+Decided: record fresh clause references at the Prolog assertion doors. A
+transaction owns a linked journal before it runs; nested journals belong to
+their parent before any child assertion. After host rollback, erase those
+references explicitly. Older references never enter that journal. The host's
+`transact` predicate flag excludes its nontransactional state. This is a host
+workaround, not a new engine rollback rule. Work is O(assertions + savepoints)
+and retained ownership is O(assertions + active depth); empty savepoints are
+removed as they return. No native library or host executable changes.
+
+Tried: the first native run passes 11 tests plus five assertion-door subtests
+and all 12 result-transaction tests. All eight Python grain tests now pass,
+including the declaration retry that previously produced four mint answers:
+`sh extensions/python/test.sh tests/ch09_types/test_class_grains.py -n 0`,
+5.59 seconds. A sweep cutting each inference port of an aborted nested write
+also passes. A proposed yield-inside-transaction control is not a supported
+host operation: `'$engine_yield'/2: No permission to execute vmi 'I_YIELD'
+(not an engine)`. The replacement checks an engine created inside an outer
+transaction for separate ownership and visibility.
+
+Tried: the complete engine battery reports two failures. The cold sorted
+projection remains faster than its untyped twin but costs 1,528 inferences
+above the 100-iteration empty loop, exceeding its unchanged 1,500 ceiling.
+The typed Error continuation is also refused as
+`metta_impure_goal(metta_error_operand/2)` before the actual effectful callee.
+The effect walk now recognizes only the emitted, module-qualified inspection;
+adding its name to the primitive list incorrectly advertised a new builtin
+and the boot refused `unregistered_builtin_implementation(metta_engine:metta_error_operand/2)`.
+
+Tried: direct assertion wrappers remove an extra helper call. The cold
+projection still costs 1,533 above its empty loop. Its retained metadata was
+collected into one bag, then copied into a second bag of matching equations.
+Read the defining owner's indexed metadata directly into the matching bag.
+The construction proof already records that its head was data; repeat that
+lookup only on the uncached quoted-input path. Accessor materialization and
+the complete matching-occurrence check remain in place.
+
+Tried: the indexed metadata lookup reduces the cold difference to 1,518.
+The constructor proof is created and consumed under the same typing-policy
+lock, so its consumer need not query the unchanged policy a second time.
+Quoted inputs still check that policy. Consume literal arguments alongside
+the selected fixed arrow, instead of copying its parameter prefix and walking
+it again. Keep observation, discharge verification and dispatch guards.
+
+Tried: those compiler changes reduce the cold difference to 1,510. The host
+wrapper also sends its own fresh `assert/1` reference through the check for a
+caller-supplied `assert/2` reference. Generate both wrappers from the same
+journal body, allowing the one-argument door to use its known fresh reference.
+Keep the bound and attributed reference handling at the two-argument door.
+
+Tried: the fresh-reference wrapper gives a 1,506 cold difference. The shared
+dispatch guard performs four catalog lookups, one per selection axis, even
+when the function has no override. Query the function's indexed override
+rows once and test their axes. This preserves the existential policy check
+and reduces the common compiler path for every function using the guard.
+
+Verified: `sh engine/test.sh` passes the complete engine battery after the
+indexed dispatch change. `sh check.sh host-workarounds host-workarounds-selftest`
+passes: 12 ledger entries, 21 sites, all reproductions answer `present`, and
+all ten planted violations are reported.
+
+Tried: reinstall one removed assertion wrapper while its two-argument wrapper
+remains installed. The installer discarded the existing original closure,
+and `$c_wrap_predicate/5` refused the resulting body with an unbound goal as
+`Type error: callable expected`. Reuse the closure returned by
+`current_predicate_wrapper/4` when a wrapper already exists.
+
+Tried: passing that inspection argument through is insufficient; the same
+reinstall test still fails. The library returns an unbound placeholder for
+recreating the wrapper, not its executable closure. `wrap_predicate/4` with
+the same name replaces the body in place and supplies the actual closure.
+Always install that named wrapper, including during a partial reinstall.
+
+## 2026-09-11: constructor signatures and class-program lifetime
+
+Decided: use the completed class's actual initializer signature, including an
+inherited dataclass initializer. Keep the receiver distinct from Python
+parameter names, and resolve private names in the defining class. Storage
+heads uniformly prefix field names, so a field named `internal` cannot become
+a declaration. CPython 3.14's `Lib/dataclasses.py` at
+`ebf955df7a89ed0c7968f79faec1de49f61ed7cb`, `_field_init` and `_init_fn`, supplies
+the default-factory and generated-initializer rules.
+
+Tried: new construction regressions initially fail on a duplicate `self`
+parameter, a positional-only receiver, an inherited initializer's extra
+fields, recursive reconstruction of an empty dict, a retired referenced
+class, and a reference cycle. Preserve the actual signature and field schema;
+use the catalog's empty expression image for empty containers. The annotation
+chooses their Python species. The catalog now reconstructs an already
+grounded, concrete container without recursively applying its annotation.
+
+Decided: supplied argument expressions run before constructor entry. Omitted
+defaults, factories, initialization and post-init run inside its transaction,
+including Python value construction. A real child entity default verifies
+rollback; an empty immutable container alone could not prove allocation
+rollback. The regression covers native expressions, compiled Python and the
+Python proxy door, for both entity and frozen-value parents.
+
+Decided: class declarations form a dependency graph from bases and referenced
+classes. Explicit declaring homes and callable annotation consumers are its
+roots. Reachability retains shared declarations and collects unowned cycles.
+SQLAlchemy's registry disposal graph at
+`a303102a7bfbbb6da992a89b6610d71f080fb5eb`, `orm/decl_api.py:1361-1378`, supplies
+the disposal precedent. FROM carries constructor metadata; copying local
+constructor rows would create a second owner. Filter constructor library
+dependencies to actual used public heads, then mark the imported helpers
+internal.
+
+Tried: static class inference rejected the existing symbolic annotation
+`S.Animal` with `the local annotation attribute 'S.Animal' is not a module or
+nested type`. Class inference is optional evidence; its failure must leave
+the ordinary annotation resolver in charge. The corrected annotation test
+passes. An earlier assertion that `match` sees no imported constructor rows
+was wrong: FROM intentionally projects metadata. The corrected test checks
+that the consumer stores no local constructor occurrence.
+
+Tried: Scope rollback dropped a class program but left its Python declaration
+registered. Closing a class space now retires that declaration and its class
+dependents before other handles can reuse the dead program. A returned value
+keeps the existing deferred cleanup associated with its constructor symbol.
+Keeping a deferred cleanup also keeps its captured spaces and their FROM
+providers. Nested transfer preserves acquisition order so the parent still
+releases dependents before their inputs.
+
+Tried: an initial cleanup fixture stored the bare symbol `done`, outside
+`add-atom`'s headed-expression domain; another stored an unevaluated `evalc`
+expression. These fixture failures do not establish a module or parser bug.
+The corrected cleanup evaluates the marker and stores `(released done)`.
+`sh engine/test.sh suites/libraries/lib_thread_scope.plt suites/spaces/references.plt`
+passes 20 Scope tests and 30 reference tests plus one subtest, recorded in
+`ai-tmp/ai-classes-scope-headed-marker.log`.
+
+Verified: `sh extensions/python/test.sh tests/ch09_types/test_class_construction.py tests/ch09_types/test_class_grains.py tests/ch03_atoms_and_expressions/test_p5_annotations.py::test_an_atom_in_annotation_position_is_the_type_itself -n 0`
+passes 23 tests in 13.91 seconds, recorded in
+`ai-tmp/ai-classes-construction-lifetime-verified.log`. The preceding broader
+run passed 43 tests and failed only the symbolic-annotation case above.
+The last focused failure was a test leaving a process-global host operation
+registered between parameter cases; explicit operation retirement fixes the
+fixture. Scope names remain revoked after release, as required by its law.
+
+Measured: jscpd over the eight changed declaration/catalog source files finds
+four clones, 26 lines out of 6,237 (0.42 percent). All are in existing
+declaration/operation publication paths; none is in the three new class
+modules. Inspect these paths with the final publication changes before any
+extraction. Proxy reconstruction concurrency and packed constructor
+parameters remain to be checked before the grain landing.
+
+Tried: three new regressions fail in 3.76 seconds. Packed keyword arguments
+reach `py-at` as an unreduced `dict-space`, producing `tuple indices must be
+integers or slices, not str`; a literal `object.__setattr__(self, "__value", 3)`
+is incorrectly mangled; four simultaneous reconstructions publish distinct
+Python proxies for one receiver. The failures are recorded in
+`ai-tmp/ai-classes-packed-concurrency-before.log`.
+
+Decided: packed positional arguments are tuple expressions; packed keyword
+arguments use the existing dict-space library in the class's home. Their
+arrows describe the containers, while the compiler retains their local
+species. Literal attribute strings bypass lexical name mangling.
+
+Decided: serialize ordinary proxy reconstruction under the declaration lock,
+including its transaction entry. Also validate each new proxy occurrence
+against the refreshed outer commit view. A stale overlapping transaction
+must roll back and name the retry remedy; a nested constraint alone cannot
+see the winning commit. Reuse the outer boundary established by
+`2026-09-05-type-declarations-in-overlapping-transactions.md` and SWI 10.1.13
+`src/pl-transaction.c:541-648` at
+`fc7ef84b949378b729052c3ade79c90ce5416abb`. A declaration seam supplies qualified
+commit-check goals; the binding owns its transaction-local pending occurrence
+rows, while the engine owns the commit boundary. No object table or additional
+identity label is introduced. Validation is proportional to newly attached
+proxies and uses indexed receiver rows.
+
+Research service failure: Tavily returned `This request exceeds your plan's
+set usage limit. Please upgrade your plan or contact support@tavily.com`.
+The SWI documentation and the locally pinned upstream source supplied the
+remaining transaction evidence.
+
+Tried: the first commit-check implementation called an unpublished predicate
+and failed with `metta_py_validate_proxy/3: Unknown procedure:
+metta_store_occurrence/4`. That storage predicate inserts occurrences, so it
+was also the wrong operation. Read the published `metta_host_blame/3` and
+`metta_host_stored/2` contracts and use their token and atom queries. The
+corrected constructor suite passes all 19 tests in 18.22 seconds, including
+overlapping snapshots, retry, and discarded nested proxy checks:
+`ai-tmp/ai-classes-packed-concurrency-published-read.log`.
+
+Tried: `accessors=False` correctly hides the native getter but leaves compiled
+Python field reads unreduced, in both value and entity grains. A known private
+field now calls its defining home through `evalc` when that getter is absent
+from the caller's space. Python proxies already use that home. Public accessors
+retain their direct call. ClassVar getters follow the same visibility flag.
+
+Tried: the broader class, annotation, type-inspection and binding-interface
+battery passes 84 tests and fails only the two private-accessor cases. The
+compiler's callable-name knowledge does not establish that a private getter
+is imported into the caller. Always use its defining home for a private
+accessor. Both cases then pass. A new retirement regression shows a native
+writer recreating a field after its receiver's ownership row was removed.
+The writer now checks ownership within its transaction and returns a
+`ReferenceError` answer with a new-construction remedy instead of publishing
+orphan fields. Reads still use their single indexed field lookup.
+
+Verified: the two grain/construction files pass all 30 tests in 19.69 seconds
+(`ai-tmp/ai-classes-grains-retirement-verified.log`). `sh engine/test.sh` then
+passes the complete engine battery, including constructor costs, host
+workarounds and the extension seam checks
+(`ai-tmp/ai-classes-grains-engine-complete.log`).
+### 2026-09-11: container fields retain their existing host identity
+
+Tried: `PYTHONPATH=extensions/python $CHECK_PY
+ai-tmp/ai-classes-mutable-fields.py` exits 0. Two entities initialized with the
+same list report `shared False False`; `a.items.append(2)` leaves `a.items`
+equal to `[1]`. The generated `_FactoryOwnerProbe-default-item` operation also
+remains registered after its class closes.
+
+Rejected: a field-path collection proxy. Replacing a field would redirect an
+old alias to the new collection, and a caller's original list could still
+mutate without notifying the proxy. Parent listeners require another object
+state mechanism. Pybind11 records the same copied-property defect and retains
+opaque references to preserve mutation ([v3.0.1 source](https://github.com/pybind/pybind11/blob/f5fbe867d2d26e4a0a9177a51f6e568868ad3dc8/docs/advanced/cast/stl.rst#L106-L159)).
+
+Decided: entity and prototype container fields retain the existing `Grounded`
+object reference. A native container expression is rebuilt once when a writer
+adopts it, using the catalog's full annotation. The derived adopter and host
+default factories carry `oracleIO` catalog rows. Field arrows admit both the
+catalog expression and its host container type. Scalar fields and value-grain
+projection keep their existing representation. Whole-field replacement is an
+engine write and rolls back; mutations of an externally owned Python
+container obey the existing host-effect contract. Every class-generated host
+operation retires with its declaration, unless another operation has replaced
+that exact implementation. No collection identity table or listener is added.
+
+Tried: `sh extensions/python/test.sh tests/ch09_types/test_class_field_values.py
+tests/ch09_types/test_class_construction.py tests/ch09_types/test_class_grains.py
+-n 0` passes 37 tests in 28.37 seconds. Both entity and prototype tests retain
+supplied aliases, fresh defaults, nested aliases, and old aliases after
+replacement. Native constructors adopt list, dict, set and nested tuple
+expressions. Replacement rollback preserves the original object. Declaration
+rollback retries, generated operation retirement, and a later replacement
+implementation's independent lifetime all pass.
+
 ## 2026-09-11: reference publication and prototype allocation cost
 
 Tried: `PYTHONPATH=extensions/python $CHECK_PY
@@ -339,6 +639,36 @@ then prove the affected-space boundary, nested rollback, lazy/background
 loading and class allocation curves. The baseline implementation remains fixed
 during its measurement. Test fixtures and the corpus pair are prepared
 independently and are not yet verified.
+
+## 2026-09-12: population indexing and retained class contracts
+
+Correction to the previous publication entry: the new publication trace
+fixture is prepared but has not run. Source inspection establishes the
+global scan; the trace does not yet supply verification.
+
+Found: `metta_reference_metadata/4` enumerates a provider's occurrences before
+matching the declaration head. Limiting publication to affected spaces alone
+would therefore still scan the shared population for each new prototype.
+The declaration pattern already determines the indexed storage query.
+
+Decided: select the metadata row pattern before querying occurrences. The
+prepared regression projects one arrow from a provider containing 512
+population facts and requires exactly one enumerated occurrence. It also
+checks the arrow's original occurrence token, so indexing cannot substitute
+a reconstructed declaration with different provenance.
+
+Found: class `_hints` calls `get_type_hints` without `include_extras=True`,
+and `field_values.type_atoms` adds unrefined host container alternatives.
+Either operation loses an `Annotated` constraint. The existing annotation
+encoder owns refinement metadata; both container representations must retain
+the same constraints. Prepared tests reject short native and host values,
+then require the preceding field object to remain unchanged.
+
+Open: a kept receiver's current test uses a declaring home outside the inner
+Scope. The expanded test also creates that home inside Scope and covers all
+three grains. Native Scope owns the retained class space; verify that Python
+declaration retirement recognizes that ownership before deciding whether it
+needs a change. The running baseline still uses the unchanged implementation.
 
 ## 2026-09-12: argument proof reuse and host container length
 
@@ -474,6 +804,57 @@ tests (`ai-tmp/ai-classes-c3-loading-{1..5}.log`). The translator suite passes
 named-listener workaround has no remaining site, so its live ledger entry is
 removed. Its host reproduction and earlier journal record remain historical
 evidence; no host fix is claimed.
+
+## 2026-09-12: kept receiver ownership and operand projection
+
+Tried: `sh extensions/python/test.sh tests/ch09_types/test_class_construction.py
+-n 0` reproduces four kept-receiver failures and passes 21 tests
+(`ai-tmp/ai-classes-c3-construction-before.log`). A released declaring home
+collects a class whose space is still owned by Scope. A prototype additionally
+passes through `_to_atom` as an Atom before its explicit `__metta__` encoder
+can run, so Scope sees only its raw space and misses the constructor's cleanup.
+
+Decided: the native lifetime of a scoped class space is another root in the
+existing declaration dependency graph. Explicit class-space retirement still
+invalidates its dependents. Operand and expression construction use `encode`,
+whose exact-class fast table already preserves plain atoms and whose fallback
+honours a subclass's explicit image. No Scope-specific class case is needed.
+Verify the six kept-receiver combinations and ordinary atom conversion.
+
+Verified: the construction, grain and conversion files pass all 66 tests in
+`ai-tmp/ai-classes-c3-construction-after2.log`. The preceding test import used
+the obsolete top-level `encode` spelling and failed collection; the test now
+uses the public `convert.encode` door.
+
+## 2026-09-12: one field contract across its representations
+
+Tried: preserving Annotated metadata and wrapping each native/host alternative
+enforces the constraint, but independent arrow declarations emit three Error
+answers for one refused setter (`ai-tmp/ai-classes-c3-annotated-after.log`).
+That is an overload bag where the field requires one choice of representation.
+
+Decided: use the existing union type at each field position, keeping its
+refinements around the whole union. `examples/ch09-types/19-union-types.metta`
+already verifies overlapping alternatives answer once and a refusal names
+one contract. This also avoids a constructor's cross-product of arrows.
+Annotated metadata is retained by `get_type_hints(..., include_extras=True)`.
+
+Tried: the resulting native `(3)` refusal is one answer but names BadArgType.
+`swipl -q -s ai-tmp/ai-classes-c3-refined-metatype.pl -- extensions` proves
+the runtime accepts `(3 4)` for both plain and union Expression bases, while
+the refusal reads only the numeric tuple type. The same standalone call on
+an archive of pristine `c75181adc` reports BadArgType
+(`ai-tmp/ai-classes-c3-refined-control2.log`). Blame names `19093dd75e`.
+Decided: the diagnostic's base admission must read the metatype, as the runtime
+already does in `type_witness_direct/4`. A regression covers a plain base,
+a union, a nested union, and a later argument's independent type error.
+
+Found: Python initialization attaches the proxy before running `_initialize`,
+so post-init observes its own object. That private head carried no parameter
+arrow; only `make-Class` did. A rejected field writer could return an Error
+which a later initialization step discarded. Decided: both entry heads carry
+the same signature, adding the receiver type to `_initialize` for mutable
+grains. The outer transaction removes the provisional proxy on a refusal.
 
 ## 2026-09-12: length is independent of structure
 
@@ -759,6 +1140,33 @@ tests/repository/test_documentation.py` passes 299 tests, skips one, exit 0
 (`ai-tmp/ai-classes-c5-python-failures-repaired.log`). This includes the planted
 display-hook refusal, profile tables, pstats export and the repaired class,
 reflection and documentation assertions.
+
+## 2026-09-12: finite class domains and portable programs
+
+Tried: the loop continuation's existing backward liveness analysis replaces
+the current-scope read scan. The new overwritten-target controls fail before
+the repair; the four compiler and declaration files then pass 114 tests,
+exit 0 (`ai-tmp/ai-classes-c6-compiler-consumers.log`).
+
+Tried: tagged Enum coverage with a Literal constructor input reports the
+missing `(Shade vivid)` and respects repeated pattern variables. Native calls
+do not enforce Literal: the word is annotation metadata alone, as the
+2026-09-06 shape-claims thread already recorded. The two tests fail with an
+unreduced unknown member and then an empty answer, respectively
+(`ai-tmp/ai-classes-c7-enum-lint{,-repaired}.log`).
+
+Rejected: treating the Literal annotation as an existing engine refinement.
+The native refinement vocabulary has no such rule. Revisit only after the
+rule is implemented and tested at the parameter and result crossings.
+
+Decided: Literal uses the existing Annotated admission path with one exact
+membership constraint. Python Literal signatures and tagged Enum fields
+share that constraint. The linter enumerates finite constructor domains and
+uses its existing one-way pattern matcher; unrestricted constructors retain
+their head-only lower bound. No alternate dispatch mechanism is introduced.
+
+Open: verify Literal admission and its generated vocabulary, then finish
+portable conversion and the remaining battery failures.
 
 ## 2026-09-13: reference dependencies and source lifetimes
 
