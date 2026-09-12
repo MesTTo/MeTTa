@@ -25,6 +25,8 @@ Every citation is built from a TAG variable instead of being written out. A
 literal one in this file is a claim about THIS repository as far as the gate is
 concerned, and the fixtures are deliberately unbacked.
 Guarantees:
+  - MeTTa data fixtures accept a collected test and reject a missing citation
+    [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
   - Prolog tools accept a backed claim and report an absent test on its own line
     [tested: tests/checks/check_evidence_selftest.py; commit=8358dfc233bf299bb23eceddd94593a62372fe4b]
   - a shared build symlink preserves the selected TypeScript sources and
@@ -624,6 +626,7 @@ def tracked_probe_complaints() -> list[str]:
     complaints = []
     for name in ("extensions/python/benchmarks/probes/probe.py",
                  "examples/ch-plant/_fixtures/nested/library.metta",
+                 "tests/data/spec.metta", "tests/data/nested/spec.metta",
                  "setup.py", "extensions/mork/tests/plant.sh"):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

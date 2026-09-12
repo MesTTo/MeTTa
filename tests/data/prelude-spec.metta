@@ -12,9 +12,11 @@
 ; Guarantees:
 ;   - the engine's prelude_shipped_equation/2 register is exactly the 36
 ;     equations below, parsed
-;     [tested: prelude_spec:the_shipped_register_is_the_spec_fixture].
+;     [tested: prelude_spec:the_shipped_register_is_the_spec_fixture;
+;     commit=WORKTREE].
 ;   - every head answers here what it answers in the engine
-;     [tested: prelude_spec:every_head_agrees_with_its_spec_equation].
+;     [tested: prelude_spec:every_head_agrees_with_its_spec_equation;
+;     commit=WORKTREE].
 ;   - reference maps hold names independently of their current metatype
 ;     [tested: references:a_reference_map_accepts_a_name_that_is_already_a_grounded_function;
 ;     commit=WORKTREE].
@@ -423,7 +425,7 @@
 ;(get-type $x))`, with no declaration at all, and under an Atom RESULT this
 ;engine answered that body's `(get-type a)` as produced instead of evaluating
 ;it [measured 2026-08-30: `(A)` upstream against `((get-type a))` here;
-;tested: examples/he_atomspace.metta]. The Atom spelling came from Hyperon's
+;tested: examples/ch20-extending-the-engine/20-02-metta-written-in-metta/08-he_atomspace.metta]. The Atom spelling came from Hyperon's
 ;stdlib.md:849-868 through the previous arbiter, not from PeTTa.
 (: get-type (-> Atom %Undefined%))
 (: get-type-space (-> SpaceType Atom %Undefined%))

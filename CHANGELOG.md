@@ -29,6 +29,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   retire with their source context. Scope retention keeps the program together;
   an external inherited child refuses teardown before any content is removed.
   Export refuses an incomplete translator rule by name before replacing a file.
+- Evidence checks and provenance pinning include executable MeTTa fixtures
+  under `tests/data/`, including nested fixtures.
 
 - A concurrency example exercises scope answer multiplicity, child joining,
   resource release and transfer, the `scope_body` longhand, and deferred

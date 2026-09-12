@@ -1670,3 +1670,31 @@ and project (2,829 lines, 29,379 tokens). The first --formats-exts prolog:pl,plt
 run scans only Prolog, so it supplies no Python claim. Receipts:
 `ai-tmp/ai-classes-c10-duplication.log` and
 `ai-tmp/ai-classes-c10-python-duplication.log`. No extraction is justified.
+
+## 2026-09-13: evidence covers the executable prelude fixture
+
+Found: the first provenance sweep pins 156 occurrences but exits one because
+tests/data/prelude-spec.metta is outside the evidence globs. Receipt:
+`ai-tmp/ai-classes-c10-pin.log`. The partial provenance changes are restored
+before changing the checker, so the final pin commit remains metadata alone.
+
+Tried: extend the existing tracked-probe negative control with one flat and
+one nested MeTTa data fixture. Both missing citations go unread, producing
+two defects in `ai-tmp/ai-classes-c10-fixture-evidence-before.log`.
+
+Decided: include tests/data/**/*.metta in the existing source family shared
+by claim checking and provenance pinning. The fixture's two earlier prelude
+claims also receive evidence pins; the complete native battery already ran
+both differential checks. No checker policy or allowance is weakened.
+
+Tried: the fixture negative controls now pass, but the new source family
+exposes a stale examples/he_atomspace.metta citation. ORIGINS.tsv identifies
+its current ch20 path; update that citation without changing the historical
+measurement. Receipt: `ai-tmp/ai-classes-c10-fixture-metadata.log`.
+
+Verified: `CHECK_PY tests/checks/check_evidence_selftest.py` reports zero
+defects; `sh check.sh evidence provenance-pin-selftest ruff` passes all three
+lanes after the citation correction. Receipts:
+`ai-tmp/ai-classes-c10-fixture-evidence-after.log` and
+`ai-tmp/ai-classes-c11-evidence-metadata.log`. Runtime code and fixture forms
+are unchanged from the full native and Python verification above.

@@ -12,6 +12,9 @@ reader [tested: test_contract_checks_detect_signature_and_evidence_drift,
 test_contract_checks_refuse_missing_coverage_and_unbacked_refusals;
 commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543].
 
+Guarantees: MeTTa data fixtures carry checked citations and resolvable provenance
+[tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE].
+
 What each tag has to carry, and why only this much:
 
   tested    every name in it exists as a test, a plunit unit, a named check,
@@ -227,6 +230,8 @@ GUARANTEE_SOURCES = (
     # The module-boundary fixtures carry their own test-backed contracts
     # [source: tests/prolog/suites/seams/engine_modules.plt; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
     "tests/prolog/module_fixtures/*.pl",
+    # Executable data fixtures state the semantics their differential suites check.
+    "tests/data/**/*.metta",
     # Diagnostic probes carry measured claims even when no gate runs them.
     "tests/prolog/probes/*.pl",
     # A host-workaround reproduction is the same class, tracked so its
