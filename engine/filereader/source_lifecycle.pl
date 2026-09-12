@@ -9,9 +9,14 @@
 % Guarantees: withdraw_source_load/3 preserves equal atoms owned by other loads
 %   or the caller [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
+% Owns resources: source claims, registrations and explicit space allocations
+%   retire with their load; retained spaces retain their source owner through
+%   seam:space_dependency/2 [tested:
+%   extensions/python/tests/ch18_performance/test_program_source.py;
+%   commit=WORKTREE].
 % Assumes: engine/filereader.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/filereader.pl's implementation module and original load order;
-%   each source load is atomic with every dependent recompile it triggers;
+%   failed loads withdraw their assertions and repair dependent recompiles;
 %   source_load_receipt_current/4 accepts a receipt only while its source row, digest, and every tagged stored output remain current;
 %   version-5 images preserve occurrence tokens, original atoms and each compiled equation's
 %   resolved source across relocation and later recompilation [tested:
@@ -729,6 +734,40 @@ record_source_resource(Resource) :-
     forall(source_assertion_owner(LoadId),
            assertz(source_load_resource(LoadId, Resource))).
 
+% Only a program's explicit allocation belongs to its source load. Provider
+% libraries may allocate while that load runs but have their own shared owners.
+record_source_space(Space) :-
+    (   active_source_load(LoadId), LoadId \= '$metta_owner_pin'(_)
+    ->  ( source_load_resource(LoadId, owned_space(Space)) -> true
+        ; record_source_resource(owned_space(Space)) )
+    ;   true
+    ).
+
+% A referenced allocation may use a global equation home while its source
+% owns its lifetime. Scope retention follows that ownership through the same
+% dependency relation as equation homes and FROM references. Keeping either
+% side retains the source program, including allocations reachable only as data.
+:- multifile seam:space_dependency/2.
+seam:space_dependency(Space, Home) :-
+    source_load_resource(Load, owned_space(Space)),
+    metta_source_load(_, Home, Load, _),
+    Space \== Home.
+seam:space_dependency(Home, Space) :-
+    metta_source_load(_, Home, Load, _),
+    source_load_resource(Load, owned_space(Space)),
+    Space \== Home.
+
+% The journal records native allocations, including ones whose equation home
+% is elsewhere. A Scope may already have retired one before its source closes.
+source_owned_space(Home, Space) :-
+    metta_source_load(_, Home, Load, _),
+    source_load_resource(Load, owned_space(Space)),
+    spaces:native_storage_module_cache(Space, _).
+
+source_owned_release_plan(Home, Plan) :-
+    findall(Space, source_owned_space(Home, Space), Spaces),
+    spaces:metta_space_release_plan(Spaces, Plan).
+
 metta_fast_decode_space(IdSpaces, space(Id, Parent, Atoms, Bindings, Occurrences),
                         space(Id, Parent, Decoded, DecodedBindings, Occurrences)) :-
     maplist(metta_fast_decode_term(IdSpaces), Atoms, Decoded),
@@ -1205,20 +1244,20 @@ restore_surviving_source_functions(Names) :-
            ( register_fun_in(Module, F),
              Arity is Inputs+1, register_arity(F, Arity) )).
 
-%A cleared space keeps no record of what a file put in it, because nothing of
-%it is left to replace and the name is POOLED: a later life reusing the name
-%would otherwise be told it already holds a file's atoms and have them
-%withdrawn from under it. This is the storage half of the same lifecycle
-%clear_native_atoms/1 owns for the execution module
-%[tested: test_a_cleared_space_forgets_what_a_file_put_in_it,
-%test_a_recycled_space_name_inherits_no_clauses_from_its_past_life].
+% Clearing a source owner withdraws its artifacts in other spaces too. Unlike
+% file replacement, explicit clearing also releases owned children containing
+% caller additions. Release keeps its normal inherited-child refusal.
+% [tested: test_a_cleared_space_forgets_what_a_file_put_in_it,
+% test_a_program_releases_referenced_class_spaces_with_its_context;
+% commit=WORKTREE].
 forget_space_source_loads(Space) :-
+    source_owned_release_plan(Space, Plan),
+    forall(member(Child, Plan), metta_release_space(Child)),
     forall(translated_equation_binding(Space, _, Ref),
            forget_translated_equation_binding(Ref)),
     forall(retract(metta_source_load(_, Space, LoadId, _)),
-           ( retractall(source_load_assertion(LoadId, _, _)),
-             retractall(source_load_support_assertions(LoadId, _)),
-             retractall(source_load_resource(LoadId, _)),
+           ( with_typing_policy_stable(
+                 rollback_source_load_stable(LoadId, release_source_owned_space)),
              retractall(source_load_digest(LoadId, _, _)) )).
 
 %The marker is the CALLER's fact, so the caller's module has to travel with
@@ -1451,9 +1490,11 @@ repair_stale_definitions_batch(Functions) :-
 %and a failing erase/1 made forall/2 fail and took the whole withdrawal down
 %with it [measured 2026-08-19: it reported one atom and then failed].
 rollback_source_load(LoadId) :-
-    with_typing_policy_stable(rollback_source_load_stable(LoadId)).
+    with_typing_policy_stable(
+        rollback_source_load_stable(LoadId, rollback_source_owned_space)).
 
-rollback_source_load_stable(LoadId) :-
+:- meta_predicate rollback_source_load_stable(+, 1).
+rollback_source_load_stable(LoadId, ReleaseSpace) :-
     source_typing_policy_modules(LoadId, PolicyModules),
     findall(Module-Name,
             ( source_load_assertion(LoadId, stored, Ref),
@@ -1482,7 +1523,7 @@ rollback_source_load_stable(LoadId) :-
             retract(source_load_resource(LoadId, owned_space(Space))),
             Owned0),
     reverse(Owned0, Owned),
-    forall(member(Space, Owned), rollback_source_owned_space(Space)),
+    forall(member(Space, Owned), call(ReleaseSpace, Space)),
     retractall(source_load_resource(LoadId, _)),
     forall(member(Module, PolicyModules), typing_policy_changed(Module)),
     support_prune_orphans,
@@ -1494,6 +1535,15 @@ repair_type_aliases_after_rollback(Lookups) :-
     transaction(
         forall(member(Module-Name, Lookups),
                type_alias_lookup_changed(Module, Name))).
+
+release_source_owned_space(Space) :-
+    % A Scope tombstone reserves an identity through foreign_space/1 but owns
+    % no live native storage. Another owner may already have released this
+    % allocation, so only its surviving storage requires teardown.
+    (   spaces:native_storage_module_cache(Space, _)
+    ->  metta_release_space(Space)
+    ;   true
+    ).
 
 rollback_source_owned_space(Space) :-
     (   once('get-atoms'(Space, _))

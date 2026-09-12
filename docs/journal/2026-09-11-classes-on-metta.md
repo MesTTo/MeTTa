@@ -1271,3 +1271,64 @@ loader commits its writes. The Empty-ending arm leaves the root empty.
 Open: verify source lifetimes, implement authored source persistence and the
 portable converter, then resume order-dependent native-state diagnosis.
 
+## 2026-09-13: source ownership covers registrations and referenced spaces
+
+Decided: bind! stores ordered claims owned by the existing source assertion
+journal. Removing a file exposes the newest remaining claim; an explicit
+caller replacement discards older claims. The bound-name view selects the
+current claim before comparing its value, so a query cannot see an older
+binding by constraining its result. Fast restore uses the same claim table.
+Rejected: compensating preimages, because out-of-order source withdrawal
+would require repairing a chain of erased references. A live clause already
+represents both the binding and its ownership.
+
+Verified: `sh extensions/python/test.sh -n4
+tests/ch18_performance/test_program_source.py
+tests/ch18_performance/test_fast_io.py
+tests/ch18_performance/test_fast_bindings.py` passes 86 tests, exit 0
+(`ai-classes-c8-token-claims-after.log`). The generated inverse registry is
+omitted from portable source using its direction(inverse(_)) declaration;
+the source rule recreates that row and its equation.
+
+Found: failed forward, bidirectional and conjunctive registrations retain
+their registry after source rollback. Closing a portable class program also
+retains its referenced class home. The five new checks fail four and pass
+one (`ai-classes-c9-source-resources-before.log`).
+
+Decided: source and cache registrations own the actual registry clause
+reference. The module generation alone cannot distinguish a later explicit
+registration in the same module life. Cleanup compares the current row's
+reference under the existing arrow-product lock before retiring it. Derived
+equation associations use the ordinary assertion journal. Ownership follows
+the same recompile-owner and deferred-source pin precedence as other compiler
+artifacts.
+
+Verified: the persistence command above with `-k 'not releases_referenced'`
+passes 90 tests, exit 0 (`ai-classes-c9-source-rules-after.log`). Referenced
+space cleanup and its Scope retention law remain under test.
+
+Verified: 149 Python persistence, reload and class tests pass, exit 0
+(`ai-classes-c9-source-lifetimes-python.log`). Four native files pass 2, 60,
+217 and 274 tests; python_surface's token assertion still inspected an
+unqualified fixture predicate. That assertion now names metta_engine like
+its cleanup. The native file awaits revalidation.
+
+Found: a Scope tombstone reserves an identity through foreign_space/1, so
+metta_space_identity_live/1 answers a collision question, not whether native
+storage remains. Source cleanup now checks its native allocation directly.
+Retaining a source owner and retaining one of its allocated spaces each retain
+the entire program through seam:space_dependency/2. The first direction alone
+lost a child stored only as data (`ai-classes-c9-source-owner-retention-before.log`).
+
+Found: an external inherited child correctly refuses source release, but the
+refusal arrived after clearing the owner's rows. Both clear and drop lose the
+program (`ai-classes-c9-source-release-refusal-before.log`).
+
+Decided: compute a release plan over native equation-world ownership and
+source-owned allocations. Validate every inheritance edge against that set
+before changing storage; an external heir refuses, an owned heir releases
+before its base. A topological order handles multiple files owning related
+spaces. Native release uses the same plan, while ordinary clear releases only
+the source-owned portion and preserves other equation-world children. The
+existing source journal remains the sole allocation ownership record.
+
