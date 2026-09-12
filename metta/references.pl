@@ -129,11 +129,19 @@ metta_reference_own_head(Space, Name, Arity) :-
 metta_reference_own_head(Space, Name, Arity) :-
     metta_reference_manifest_head(Space, Name, Arity),
     \+ metta_reference_internal(Space, Name).
+metta_reference_own_head(Space, Name, declaration) :-
+    metta_reference_declared_head(Space, Name),
+    \+ metta_reference_internal(Space, Name).
 
 metta_reference_face(Space, Visited, Face) :-
     metta_with_under(visibility,
         ( metta_reference_local_face(Space, Visited, Local),
           include(metta_reference_public_entry(Space), Local, Face) )).
+
+metta_host_reference_names(Space, Names) :-
+    metta_with_under(visibility, metta_reference_local_face(Space, [], Face)),
+    findall(Name, member(Name/_-_, Face), Heads),
+    sort(Heads, Names).
 
 metta_reference_public_entry(Space, Name/Arity-root(Home, Original, _)) :-
     ( Space == Home, Name == Original
@@ -161,6 +169,19 @@ metta_reference_local_head(Space, Name, Arity) :-
     metta_reference_prolog_head(Space, Name, Arity).
 metta_reference_local_head(Space, Name, Arity) :-
     metta_reference_manifest_head(Space, Name, Arity).
+metta_reference_local_head(Space, Name, declaration) :-
+    metta_reference_declared_head(Space, Name).
+
+% A projected declaration retains its original source. Treating that copy as
+% a new local root would make diamonds duplicate it and cycles retain it.
+metta_reference_declared_head(Space, Name) :-
+    metta_reference_type_subject(Row, Name),
+    spaces:metta_space_pair(Space, Row, Token, _),
+    atom(Name),
+    \+ metta_reference_projection(Space, _, Token, _).
+
+metta_reference_type_subject([':', Name, _], Name).
+metta_reference_type_subject([':<', Name, _], Name).
 
 % Eta expansion can add inputs. The occurrence-to-clause registry gives the
 % actual arity after translation; before it, the source head is a manifest.
@@ -319,7 +340,7 @@ metta_reference_publish_face(Space, Module, Face, Faces) :-
     support_graph:support_stabilize(derived(Module, reference_face),
                                    =(Face), _),
     findall(Name/Arity,
-            ( member(Name/Arity-_, Face)
+            ( member(Name/Arity-_, Face), integer(Arity)
             ; metta_reference_slot(Module, Name, Arity, _) ), Keys0),
     sort(Keys0, Keys),
     forall(member(Name/Arity, Keys),
@@ -470,6 +491,8 @@ metta_reference_metadata(Space, Face, Key, Row) :-
 
 metta_reference_metadata_row([':', Original, Type], Original, Name,
                              [':', Name, Type]).
+metta_reference_metadata_row([':<', Original, Type], Original, Name,
+                             [':<', Name, Type]).
 metta_reference_metadata_row(['@doc', Original|Fields], Original, Name,
                              ['@doc', Name|Fields]).
 

@@ -532,6 +532,7 @@
             metta_host_drop_function/2,
             metta_host_forget_function/1,
             metta_host_function_callable_from/2,
+            metta_host_reference_names/2,
             metta_host_function_generation/1,
             metta_host_goal_effect_plan/4,
             metta_host_goal_repeatable/2,
