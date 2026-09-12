@@ -11,7 +11,9 @@
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
 % Guarantees: source atoms omit reference projections; portable program text
 %   rebuilds owned equation spaces and resolved bindings with fresh identities
-%   [tested: program_source; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+%   [tested: program_source,
+%   extensions/python/tests/ch18_performance/test_program_source.py;
+%   commit=WORKTREE].
 %   A translator rule with a missing derived equation is refused before text
 %   publication [tested: test_program_source_refuses_an_incomplete_translator_rule;
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
@@ -470,11 +472,11 @@ metta_program_creation_order(Spaces, Children) :-
               metta_program_term_node(Model, Parent) ), Edges),
     pairs_keys(Pairs, Ids),
     ugraphs:vertices_edges_to_ugraph(Ids, Edges, Graph),
-    ( ugraphs:top_sort(Graph, Order) -> true
+    ( ugraphs:top_sort(Graph, Order)
+    -> delete(Order, 0, ChildIds),
+       maplist(metta_program_index_node(Index), ChildIds, Children)
     ; throw(error(metta_program_model_cycle, context(metta_host_program_source/2,
-                                                   'space models must be acyclic'))) ),
-    delete(Order, 0, ChildIds),
-    maplist(metta_program_index_node(Index), ChildIds, Children).
+                                                   'space models must be acyclic'))) ).
 
 metta_program_node_pair(Node, Id-Node) :- Node = space(Id, _, _, _, _).
 metta_program_index_node(Index, Id, Node) :- get_assoc(Id, Index, Node).
