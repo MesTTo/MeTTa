@@ -151,6 +151,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Native import repair preserves unchanged providers during unrelated space
+  mutation, preventing concurrent inherited calls from losing core predicate
+  metadata through SWI's imported-predicate removal race.
 - Reference reconciliation runs after native transaction completion, avoiding
   the lock inversion between SWI frame listeners and typing-policy publication.
   Kept receivers retain their class programs, and prototype operands encode

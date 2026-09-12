@@ -6,6 +6,11 @@
 %   from database snapshots [tested: lib_import_lifecycle,
 %   extensions/python/tests/ch05_equations_and_evaluation/test_reload.py; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: decode stored atoms and manage source, subscription, reaction, table, and clear lifecycles
+% Guarantees: metta_repair_shadow_import/3 and
+%   metta_refresh_repaired_shadow_imports/1 retain a native import when its
+%   provider still wins the current base chain. Concurrent callers retain
+%   that provider's clauses and metadata [tested:
+%   filereader_import_lifecycle; commit=WORKTREE].
 % Guarantees: add-atom's third input binds the stored native occurrence's own
 %   portable token before admission, including self-referential identity rows
 %   [tested: spaces_tokens:an_atom_can_contain_its_own_occurrence_token;
@@ -580,13 +585,13 @@ metta_restore_inherited_predicate(Module, Name, Arity) :-
 %space never defined that name.  A pooled execution module keeps the import
 %after its space life ends, while its next life may name a different parent.
 %Capture only imports whose source belongs to the standing default-module
-%chain: explicit engine imports live outside that chain and protect_engine_emitted/1
-%owns them.  The ordinary repair pass below then abolishes the old link after
-%set_module/1 changes the base and re-imports the name from the new chain.
+%chain. This includes engine predicates reached through that chain. Imports
+%from unrelated providers keep their explicit ownership. The repair pass
+%below compares each link with the new chain after set_module/1 changes it.
 %[tested: test_a_recycled_child_name_may_choose_a_different_parent and
 %filereader_import_lifecycle:
 %a_repaired_shadow_import_follows_a_recycled_modules_new_parent;
-%commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
+%commit=WORKTREE].
 metta_capture_default_imports(Module) :-
     (   current_module(Module)
     ->  findall(Name-Arity-Source,
@@ -617,26 +622,21 @@ metta_capture_default_imports(Module) :-
     ).
 
 %A pooled module may acquire a different parent in its next life. Explicit
-%imports outlive set_module/1, so each repair is rebound after the new base is
-%set and before any code is compiled in that life. The marker set contains
-%only names whose own shadow has needed this repair. It remains dormant while
+%imports outlive set_module/1, so each repair is reconciled after the new base
+%is set and before any code is compiled in that life. The marker set contains
+%removed shadows and captured default imports. It remains dormant while
 %a new local definition owns the name, so a failed transactional or source
 %load can restore the inherited link after rolling that definition back. This
 %keeps the repair dependency-directed rather than copying a parent's interface
 %into every child [tested:
-%test_a_recycled_child_name_may_choose_a_different_parent; commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
+%test_a_recycled_child_name_may_choose_a_different_parent; commit=WORKTREE].
 metta_refresh_repaired_shadow_imports(Module) :-
     findall(Name-Arity,
             '$metta_repaired_shadow_import'(Module, Name, Arity, _),
             PIs0),
     sort(PIs0, PIs),
     forall(member(Name-Arity, PIs),
-           ( functor(Head, Name, Arity),
-             (   predicate_property(Module:Head, imported_from(_))
-             ->  catch(abolish(Module:Name/Arity), _, true)
-             ;   true
-             ),
-             metta_restore_inherited_predicate(Module, Name, Arity) )).
+           metta_repair_shadow_import(Module, Name, Arity)).
 
 %Called by the one ordinary equation/lambda assertion door. A repaired weak
 %import must be removed before assertz/2, or SWI follows the link and appends
@@ -707,11 +707,11 @@ metta_existing_import(Module, Head, Source) :-
 
 %Repair receipts survive both kinds of rollback used by the loader: native
 %transaction rollback and the first-load reference sweep. A local clause means
-%the dependency is dormant; otherwise repeating import/1 revives the exact
-%procedure identity even when a fresh default-module lookup already finds the
-%right ancestor [tested:
+%the dependency is dormant; an unchanged inherited provider needs no repair.
+%Otherwise import/1 revives the child's procedure identity after the local
+%definition disappears [tested:
 %a_failed_local_redefinition_restores_the_repaired_inherited_call;
-%commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
+%commit=WORKTREE].
 metta_repair_shadow_imports :-
     findall(Module-Name-Arity,
             '$metta_repaired_shadow_import'(Module, Name, Arity, _),
@@ -726,14 +726,29 @@ metta_repair_shadow_imports :-
 %through the undefined-procedure trap, so asking it about such a name searched
 %the autoload library index to learn "no" [see
 %metta_restore_inherited_predicate/3 above]. The guard cannot change the
-%answer: a name current_predicate/1 does not find is imported or absent, and
-%both take the repair branch either way.
+%answer: a name current_predicate/1 does not find has no local clause count.
+%
+% Workaround: swi-concurrent-import-removal-resets-provider - retain unchanged imports.
+% abolishProcedure installs an empty child definition before resetProcedure
+% rereads that pointer. Concurrent autoImport can replace it with the provider
+% in between, so the reset clears the provider's count and meta declaration
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-proc.c#L1510-L1544;
+% commit=WORKTREE]. Inspect the first resolving base before comparing sources:
+% a later base matching the old source must not hide a nearer new definition.
+% Actual shadow removal or parent replacement still needs the native rebind;
+% this guard prevents unrelated repair sweeps from detaching a live provider.
 metta_repair_shadow_import(Module, Name, Arity) :-
     functor(Head, Name, Arity),
     (   current_predicate(Module:Name/Arity),
         predicate_property(Module:Head, number_of_clauses(Clauses)),
         \+ predicate_property(Module:Head, imported_from(_)),
         Clauses > 0
+    ->  true
+    ;   metta_existing_import(Module, Head, Source),
+        once(( import_module(Module, Base),
+               current_predicate(Base:Name/Arity),
+               predicate_property(Base:Head, implementation_module(Inherited)) )),
+        Source == Inherited
     ->  true
     ;   catch(abolish(Module:Name/Arity), _, true),
         metta_restore_inherited_predicate(Module, Name, Arity)

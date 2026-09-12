@@ -19,6 +19,9 @@
 %     filereader_import_lifecycle:
 %     a_receipt_tracks_the_liveness_of_its_exact_stored_outputs;
 %     commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
+%   - Import repair preserves concurrent inherited calls and follows a new
+%     nearer provider or a recycled module's new parent [tested:
+%     filereader_import_lifecycle; commit=WORKTREE].
 %   - A typing rule asserted by a failed source load is erased with that load,
 %     and the affected retained clauses regain their static proofs
 %     [tested:
@@ -805,6 +808,32 @@ test(a_repaired_shadow_import_follows_a_recycled_modules_new_parent) :-
           user:metta_release_space(FirstParent),
           user:metta_release_space(SecondParent) )).
 
+test(a_repaired_import_follows_a_new_nearer_definition) :-
+    Ancestor = '&plunit_repair_ancestor',
+    Parent = '&plunit_repair_parent',
+    Child = '&plunit_repair_descendant',
+    Function = 'plunit-repair-nearer-call',
+    AncestorEquation = [=, [Function], ancestor],
+    ParentEquation = [=, [Function], parent],
+    setup_call_cleanup(
+        ( user:metta_add_atom(Ancestor, AncestorEquation, true),
+          user:metta_declare_space_parent(Parent, Ancestor),
+          user:metta_declare_space_parent(Child, Parent),
+          user:space_module(Child, Module),
+          spaces:metta_restore_inherited_predicate(Module, Function, 1),
+          Call =.. [Function, Answer],
+          assertz(user:(plunit_saved_nearer_call(Answer) :- Module:Call), Ref) ),
+        ( findall(Before, user:plunit_saved_nearer_call(Before), [ancestor]),
+          user:metta_add_atom(Parent, ParentEquation, true),
+          spaces:metta_refresh_repaired_shadow_imports(Module),
+          findall(After, user:plunit_saved_nearer_call(After), [parent]),
+          user:metta_remove_atom(Parent, ParentEquation, true),
+          findall(Restored, user:plunit_saved_nearer_call(Restored), [ancestor]) ),
+        ( erase(Ref),
+          user:metta_release_space(Child),
+          user:metta_release_space(Parent),
+          user:metta_release_space(Ancestor) )).
+
 test(a_failed_local_redefinition_restores_the_repaired_inherited_call) :-
     ParentSpace = '&self',
     ChildSpace = '&plunit_failed_shadow_child',
@@ -1004,6 +1033,36 @@ repair_cost(Goal, Per) :-
     forall(between(1, Rounds, _), ( Goal -> true ; true )),
     statistics(inferences, After),
     Per is (After - Before - 3 * Rounds) // Rounds.
+
+:- meta_predicate import_repair_sample(0).
+
+import_repair_sample(Goal) :- call(Goal).
+
+% Compile the child call before its base is installed. A runtime meta-call
+% resolves straight to the provider and cannot observe the child's rebinding.
+read_repaired_import :- plunit_import_repair_child:import_repair_sample(true).
+
+test(repair_preserves_a_provider_while_its_import_is_called,
+     [ cleanup(( abolish(plunit_import_repair_child:import_repair_sample/1),
+                 retractall(spaces:'$metta_repaired_shadow_import'(
+                     plunit_import_repair_child, _, _, _)) )) ]) :-
+    set_module(plunit_import_repair_child:base(plunit_filereader_import_lifecycle)),
+    spaces:metta_restore_inherited_predicate(
+        plunit_import_repair_child, import_repair_sample, 1),
+    setup_call_cleanup(
+        thread_create(
+            forall(between(1, 100000, _),
+                   spaces:metta_repair_shadow_import(
+                       plunit_import_repair_child, import_repair_sample, 1)),
+            Writer, []),
+        ( thread_create(forall(between(1, 1000000, _), read_repaired_import),
+                        Reader, []),
+          thread_join(Reader, ReaderStatus) ),
+        thread_join(Writer, WriterStatus)),
+    assertion(WriterStatus == true),
+    assertion(ReaderStatus == true),
+    assertion(predicate_property(import_repair_sample(_), number_of_clauses(1))),
+    assertion(predicate_property(import_repair_sample(_), meta_predicate(_))).
 
 :- end_tests(filereader_import_lifecycle).
 

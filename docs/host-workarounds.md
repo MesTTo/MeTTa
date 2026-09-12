@@ -295,6 +295,29 @@ Lifted when: inherited first-call counts agree in both states; the reproduction
 Record: docs/journal/2026-09-07-merged-tree-reconciliations.md, the 2026-09-11
   buffered VM trace and unchanged-body foldall controls.
 
+## swi-concurrent-import-removal-resets-provider
+Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
+  src/pl-proc.c:388-416, 1510-1544 and 2871-2935.
+Defect: abolishProcedure replaces an imported Procedure's Definition with an
+  empty child definition, then resetProcedure reads the Procedure again.
+  Concurrent autoImport can install the provider between those operations.
+  The reset then clears the provider's clause count and meta declaration
+  while its original clauses remain. The two operations use different locks.
+Reproduction: tests/checks/host_workarounds/swi-concurrent-import-removal-resets-provider.pl,
+  a compiled child call racing with one million imported abolish operations.
+  It loads no engine. The original provider clause survives but its metadata
+  disappears; the last line is present.
+Workaround: import repair retains an existing link when the first resolving
+  base still selects its provider. Module refresh and rollback repair use
+  that same reconciliation. This removes repeated detachment during unrelated
+  mutation; actual concurrent shadow replacement still depends on the host's
+  native rebinding semantics.
+Lifted when: abolishProcedure resets its captured child Definition before
+  publication, or synchronizes the entire transition with autoImport, and
+  the reproduction retains the provider's metadata and prints absent.
+Record: docs/journal/2026-09-11-classes-on-metta.md, import repair retains an
+  unchanged provider.
+
 ## swi-nested-retract-loses-outer-assert
 Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
   src/pl-transaction.c:417-427, merge_clause_tables.

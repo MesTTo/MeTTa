@@ -1698,3 +1698,104 @@ lanes after the citation correction. Receipts:
 `ai-tmp/ai-classes-c10-fixture-evidence-after.log` and
 `ai-tmp/ai-classes-c11-evidence-metadata.log`. Runtime code and fixture forms
 are unchanged from the full native and Python verification above.
+
+## 2026-09-13: import repair retains an unchanged provider
+
+Found: the full Python battery loses get-type/2 while SWI still lists that
+predicate as defined. A throwing-thread capture later observes the same
+state for metta_transaction/1: its original clause and generation remain,
+but clause count, transparency and meta declaration disappear. Receipts:
+`ai-tmp/ai-classes-split-tip-python.log` and
+`ai-tmp/ai-classes-c14-exceptions-fixed-gw2-throws.log`.
+
+Source: SWI commit fc7ef84b949378b729052c3ade79c90ce5416abb,
+src/pl-proc.c:1510–1544 publishes an empty child Definition during imported
+abolish, then resetProcedure:388–416 rereads that Procedure pointer. Native
+autoImport:2871–2935 can replace it with the provider under a different lock.
+The reset clears exactly the metadata missing from the captured provider.
+
+Tried: bare SWI concurrent import removal with a runtime child call. It
+resolves directly to the provider and prints absent. Compiling the child call
+before installing its base retains the child Procedure and prints present.
+The same reader against pristine c75181adc's unchanged
+spaces:metta_repair_shadow_imports also prints present. Command:
+`swipl -q -f none -s ../ai-classes-c14-import-control.pl
+-g classes_import_control:main -t halt -- "$PWD"`, run in the audited
+`ai-tmp/ai-classes-c75181adc-control`. Receipt:
+`ai-tmp/ai-classes-c14-import-control.log`. Its 2748 tracked blobs equal the
+cut. This attributes the missing-core family to the existing host producer.
+
+Tried: `sh engine/test.sh tests/prolog/suites/reader/filereader.plt` with a
+concurrent inherited-call regression before the repair. It passes 64 tests
+and fails that regression: import_repair_sample/1 becomes an unknown
+procedure and loses its count and meta declaration. Receipt:
+`ai-tmp/ai-classes-c15-import-before.log`. The standalone tracked host
+reproduction also exits 0 and prints present in
+`ai-tmp/ai-classes-c15-host-import-1.log`.
+
+Decided: compare the native import's provider with the first resolving base
+and retain a matching link. Module refresh and global rollback repair share
+that reconciliation. Own definitions retain their dormant repair receipt;
+new nearer definitions and recycled parents still replace the old link.
+
+Rejected: excluding engine-emitted names from capture. Shadowable get-type
+is affected too, and unchanged user providers need the same rule. Revisit
+only if those names acquire distinct ownership semantics. Rejected: wrapping
+caller goals in a new global mutex. Native autoImport does not acquire that
+mutex, and yielded engines cannot retain caller locks across resumption.
+
+Limit: actual concurrent shadow replacement still reaches SWI's native
+abolish transition. The workaround removes unnecessary transitions during
+unrelated repair sweeps; a host fix must synchronize or reset the captured
+Definition before publication to remove the underlying race entirely.
+
+Verified: `sh engine/test.sh tests/prolog/suites/reader/filereader.plt
+tests/prolog/suites/spaces/spaces.plt
+tests/prolog/suites/reader/reference_loading.plt
+tests/prolog/suites/spaces/references.plt
+tests/prolog/suites/spaces/host_transactions.plt
+tests/prolog/suites/libraries/lib_thread_scope.plt` exits 0. The concurrent
+provider regression, nearer-definition replacement, recycled parent, rollback
+and full reference inference-cut matrix pass. Receipt:
+`ai-tmp/ai-classes-c15-import-native-verified.log`.
+
+Verified: `sh extensions/python/test.sh -n 4 --randomly-seed=1125382488
+tests/ch09_types/test_class_construction.py tests/ch09_types/test_class_grains.py
+tests/ch05_equations_and_evaluation/test_reload.py
+tests/ch17_concurrency_and_the_loop/test_scopes.py` passes 100 tests.
+Receipt: `ai-tmp/ai-classes-c15-import-python.log`.
+
+Measured: after deleting engine/lib QLF,
+`python extensions/python/tools/twin_coverage.py --measure --rounds 3
+examples/ch17-concurrency-and-the-loop/08-class_grains.metta` reads native
+2530741 and twin 14248264, a twin reduction of 1328. The same file's
+`--repin --rounds 3 --reason 'Native import reconciliation retains unchanged
+providers during class and scope cleanup; the body and stored contents are
+unchanged'` reproduces that minimum. The normal lane then reads 14248265
+within its four-inference allowance, proves both claims and reports equal
+stored content. Its declared gap decreases to 11717523. Receipts:
+`ai-tmp/ai-classes-c15-grain-{measure,repin,verified}.log`.
+
+Measured: `PYTHONPATH=extensions/python python -m benchmarks.class_grains
+--sizes 1 100 1000`, again after deleting engine/lib QLF, reproduces every
+declaration, construction, minimum read and minimum write count from the
+previous nine samples. The reduction above belongs to import reconciliation
+during cleanup. The earlier grain-cost table therefore remains current.
+
+Receipts: `ai-tmp/ai-classes-c15-grain-costs.log` and the exact comparison
+with the earlier sample set in `ai-tmp/ai-classes-c15-grain-comparison.log`.
+
+Verified: `sh check.sh host-workarounds evidence` passes both lanes after
+staging the required tracked reproduction. The ledger now has 14 entries
+and 34 sites; every host reproduction answers present. The first attempt
+correctly refuses the reproduction while it is still untracked. Receipt:
+`ai-tmp/ai-classes-c15-import-metadata-verified.log`.
+
+Verified: the additional space-lifecycle Python file passes all 15 tests,
+including recycled child names. Ruff and evidence pass. The complete static
+checker reaches the same GLX BadValue failure at pristine c75181adc, after
+its generated-body check; receipts are
+`ai-tmp/ai-classes-c15-final-checks.log` and
+`ai-tmp/ai-classes-c15-static-control.log`. Its separate Order branch-scope
+warning comes from the earlier portable-program construction order and is
+handled separately from import repair.
