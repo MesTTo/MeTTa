@@ -491,3 +491,6 @@ zero-sample profile keeps its call rows with zero ticks
 (test_a_profile_with_no_samples_still_answers). The two remaining Python reds
 are the cut's own: the authored-cost fixture (repaired on trunk after this
 cut) and the owned classes journal's absolute path.
+Decided: the profile and read-shape probes the seam's measured tags name are
+tracked under tests/prolog/probes/, because the evidence lane refuses a
+claim whose command lives under ai-tmp/.

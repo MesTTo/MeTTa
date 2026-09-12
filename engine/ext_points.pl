@@ -1273,9 +1273,10 @@ kind(metta_with_trailed/3, host_service).
 %3,367, lists:member/2 6,891 against 6,100 and the five wrapper readers 1,873
 %calls, the whole +4,522 of the case; a 20,000-atom add loop read +19,938
 %inferences, one per active_source_load/1 read;
-%command=swipl ai-tmp/ai-guard3-profile-bench.pl <root> translate <out> on the
-%branch and on its pristine cut b1d175f13b67baf1090f74f309407b763d421744;
-%fixture=warm QLF set, both MORK objects; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
+%command=swipl tests/prolog/probes/bench_case_profile.pl <root> translate <out>
+%on the branch and on its pristine cut b1d175f13b67baf1090f74f309407b763d421744,
+%the two TSVs diffed by predicate; fixture=warm QLF set, both MORK objects;
+%commit=WORKTREE].
 %
 %Two shapes cover every reader in the tree. value(Pattern) reads one term, a
 %flag when the pattern is `true`. stack(Pattern) reads a nearest-first list:
@@ -1286,8 +1287,9 @@ kind(metta_with_trailed/3, host_service).
 %one-element stack, as a one-clause fact did [measured 2026-09-12: inferences
 %per read above an empty loop, key unset, inactive [] and one element: a
 %dynamic fact 2/2/1, the inlined stack read 2/2/1, the predicate wrapper it
-%replaces 3/3/2; command=swipl ai-tmp/tmp/gx/run.pl; fixture=bare SWI-Prolog
-%10.1.13; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
+%replaces 3/3/2 and the wrapper over nb_current/2 then member/2 3/4/4;
+%command=swipl tests/prolog/probes/context_read_shapes.pl; fixture=bare
+%SWI-Prolog 10.1.13; commit=WORKTREE].
 %
 %The expansion applies wherever the call resolves to the declaring module:
 %unqualified in that module, qualified from anywhere, imported, or inherited
