@@ -247,7 +247,7 @@ test(a_declaration_lands_in_the_module_that_is_speaking,
 %tests/prolog/lock_order.pl, which costs about twenty inferences per mutex
 %acquisition and the missing path takes mutexes the present one does not
 %[measured 2026-09-13: missing 73 against present 12 under the recorder;
-%command=sh engine/test.sh suites/libraries/lib_memo.plt; commit=WORKTREE].
+%command=sh engine/test.sh suites/libraries/lib_memo.plt; commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f].
 %The hundredfold search this bound exists to catch is two orders away either way.
 test(asking_who_owns_an_undefined_name_costs_what_asking_about_an_inherited_one_costs) :-
     space_module('&memo_iso', Iso),

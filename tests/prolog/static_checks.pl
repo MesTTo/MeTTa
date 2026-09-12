@@ -23,7 +23,7 @@
 %     after a function with control flow has been compiled.
 %   - every prolog_listen/2,3 and prolog_unlisten/2 under engine/, lib/ and
 %     the seats' binding halves is the one inside engine/host_listeners.pl
-%     [tested: every_host_listener_registers_through_the_door; commit=WORKTREE].
+%     [tested: every_host_listener_registers_through_the_door; commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f].
 %   - var_branches warnings are fatal for repository engine sources without
 %     attributing warnings from SWI's own libraries to the repository.
 %   - Every unqualified multifile seam declared anywhere under engine, lib,

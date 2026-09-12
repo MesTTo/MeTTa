@@ -17,7 +17,7 @@
 %       materialization, and reaches nothing; the seam table, the core's
 %       arithmetic guard and the reference watch call it from load directives,
 %       which this walk of the database does not see
-%       [tested: engine_layering; commit=WORKTREE].
+%       [tested: engine_layering; commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f].
 %     - every call from one engine subsystem into another, and every call from
 %       lib_tabling into an engine subsystem, is named in the contract below,
 %       or the lane exits nonzero naming caller, callee and the missing line

@@ -8,9 +8,9 @@
      callback is ordered after it
      [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-event.c#L99-L110
      and https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-event.c#L415-L470;
-     commit=WORKTREE]
+     commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f]
    - flag/3 updates atomically, so its compare-and-set is the once-only claim
-     [source: `swipl -g "help(flag/3)"`, SWI-Prolog 10.1.13; commit=WORKTREE]
+     [source: `swipl -g "help(flag/3)"`, SWI-Prolog 10.1.13; commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f]
    - a registration is reached from inside a caller's transaction, where
      thread_wait/2 is refused and an ordinary assertion is invisible to other
      threads and undone by rollback, so the completion row is a
@@ -18,21 +18,21 @@
      [measured 2026-09-13: `thread_wait/2: No permission to thread wait ...
      (in transaction)` from function_free_materialization:overlapping_owned_publications_leave_one_image
      with a thread_wait/2 door; command=sh engine/test.sh suites/spaces/materialization.plt;
-     commit=WORKTREE]
+     commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f]
    Guarantees:
    - two calls with the same channel and closure register once, and neither
      returns before the registration is live; a registration that raises
      raises the same error from every call that waited on it; an unbound
      channel or closure is refused before anything is registered; a
      registration made inside a transaction survives that transaction's
-     rollback [tested: host_listeners; commit=WORKTREE]
+     rollback [tested: host_listeners; commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f]
    - a bare predicate indicator names the closure's own module, so the same
      spelling from two modules is two channels and two keys
-     [tested: host_listeners:the_same_listener_registers_once; commit=WORKTREE]
+     [tested: host_listeners:the_same_listener_registers_once; commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f]
    - no prolog_listen/2,3 or prolog_unlisten/2 exists outside this file under
      engine/, lib/ or a seat's binding half
      [tested: tests/prolog/static_checks.pl, every_host_listener_registers_through_the_door;
-     commit=WORKTREE]
+     commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f]
    Owns resources: the listeners it registers, which live until the process
      ends. There is no removal door: SWI frees a removed callback while another
      thread may still be walking the list that held it.

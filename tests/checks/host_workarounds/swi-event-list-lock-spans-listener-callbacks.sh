@@ -7,7 +7,7 @@
 # Guarantees: a control whose worker registers after releasing the mutex joins
 #   before the cycle is tried; a contained deadlock answers present, a joined
 #   worker absent [tested: sh check.sh host-workarounds host-workarounds-selftest;
-#   commit=WORKTREE].
+#   commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f].
 # Owns resources: the private child processes hold their own listener, mutex
 #   and queue; bounded.sh links children to their owner and its selected
 #   timeout contains the known deadlocking child.

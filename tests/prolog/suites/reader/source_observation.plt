@@ -407,7 +407,7 @@ test(attributing_a_goal_that_is_not_a_host_predicate_costs_what_one_that_is_cost
     %inferences per mutex acquisition and the missing path takes mutexes the
     %present one does not [measured 2026-09-13: missing 78 against present 15
     %under the recorder; command=sh engine/test.sh suites/reader/source_observation.plt;
-    %commit=WORKTREE].
+    %commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f].
     assertion(Missing =< 10 * Present).
 
 attribution_cost(Goal, Per) :-
