@@ -1,7 +1,7 @@
 % Guarantees: materialization_transaction/2, with_source_materialization/3 and
 %   with_source_materialization_batch/3 scope roots through metta_with_trailed/3,
 %   read by declared context readers; an open batch is asked for as batch(open)
-%   [tested: trailed_scopes, function_free_materialization; commit=WORKTREE].
+%   [tested: trailed_scopes, function_free_materialization; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
 %
 % Purpose: materialize finite function-free equation bags at source boundaries.
 % Guarantees: only ground acyclic dependency graphs replace ordinary dispatch;

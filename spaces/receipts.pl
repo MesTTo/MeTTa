@@ -3,11 +3,11 @@
 %   [source: engine/spaces/receipts.pl:metta_with_occurrence_load/1; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
 % Guarantees: interrupted native completion retires every finished scope's
 %   rows and standing-engine reservations; nested rollback preserves the live
-%   outer owner [tested: spaces_receipt_limits; commit=WORKTREE].
+%   outer owner [tested: spaces_receipt_limits; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
 % Guarantees: the exception hook that finishes a cut listener is clausal only
 %   from the process's first bound on, so a process that never bounds pays
 %   nothing per ball [tested: spaces_receipt_limits:the_limit_hook_is_armed_by_the_first_bound;
-%   commit=WORKTREE].
+%   commit=3ff7688a605c1f0de0e021f66f3075353476a992].
 %
 % Purpose: reserve incoming occurrence identities across transaction views.
 % Assumes: native erasures use metta_erase_storage_ref/1 or metta_retract_storage/1.
@@ -151,7 +151,7 @@ metta_receipt_finish_frame(Frame) :-
 % process that never bounds keeps no clause and pays nothing per ball; a
 % bounded one pays the inference on every ball it throws from its first bound
 % on [tested: spaces_receipt_limits:the_limit_hook_is_armed_by_the_first_bound;
-% commit=WORKTREE]. The clause is its own armed record: a trip on assertz/1's
+% commit=3ff7688a605c1f0de0e021f66f3075353476a992]. The clause is its own armed record: a trip on assertz/1's
 % call port inside the mutex leaves nothing behind and the next bound arms it.
 % The wrapper below is the arming point; the host's own limit predicate keeps
 % its definition under the wrapper, so the deferral on its call port survives.

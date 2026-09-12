@@ -1,7 +1,7 @@
 % Guarantees: with_typing_policy_stable/1 scopes typing_policy_snapshot/1 through
 %   metta_with_trailed/3 while retaining the typing-policy mutex, and the
 %   snapshot is a declared context reader compiled to its read
-%   [tested: trailed_scopes; commit=WORKTREE].
+%   [tested: trailed_scopes; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
 %
 % Purpose: hold the declared typing-rule registry and resolve its explicit
 %   accept, refuse(Reason), and defer outcomes for every engine type checker.
