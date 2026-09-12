@@ -267,6 +267,9 @@
             metta_add_atoms/2,
             metta_add_hooks_idle/1,
             metta_assert_space_releasable/1,
+            metta_space_release_plan/2,
+            metta_engine_owned_base_space/1,
+            metta_space_identity_live/1,
             %The claim door, and the table it keeps. A provider takes a space
             %name (or a namespace, as prefix(P)) when it goes live and gives
             %it back when it stops, so ownership is engine data instead of
@@ -435,6 +438,7 @@
 
 :- use_module(library(sandbox), [safe_goal/1]).
 :- use_module(library(assoc), [list_to_assoc/2, get_assoc/3, put_assoc/4]).
+:- use_module(library(ugraphs), [vertices_edges_to_ugraph/3, top_sort/2]).
 %spaces/catalog.pl's claim-row cache splits the findall pairs of a value's
 %claims with it. The gate loads the engine with the autoloader off, so a
 %library predicate a unit calls is imported here, where the umbrella owns

@@ -1341,23 +1341,41 @@ metta_metta_result_is_final(Atom) :-
                       (   Home == '&self'
                       ->  ensure_native_storage_module(Space, _)
                       ;   metta_declare_space_equation_home(Space, Home)
-                      ).
+                      ),
+                      filereader:record_source_space(Space).
 %The one-input form holds its Atom argument as written. A ground expression
 %there is an entity identifier, registered before either canonical module is
 %created; later SpaceType positions recognize that exact term and no other
 %expression as a literal space operand.
 'new-space'(Space, Space) :-
-    metta_declare_parametric_space(Space).
-'new-space'(Child, [inherits, Parent], Child) :- !,
+    ( nonvar(Space), spaces:metta_space_identity_live(Space)
+    -> Existing = true ; Existing = false ),
+    metta_declare_parametric_space(Space),
+    ( Existing == true -> true ; filereader:record_source_space(Space) ).
+'new-space'(Space, Relation, Space) :-
+    ( var(Space) -> gensym('&metta-space-', Space), Existing = false
+    ; spaces:metta_space_identity_live(Space) -> Existing = true
+    ; Existing = false ),
+    metta_new_space_relation(Space, Relation),
+    ( Existing == true -> true ; filereader:record_source_space(Space) ).
+
+% A fresh variable and a written identity use the same creation-time model.
+% scoped preserves only the equation home; inherits also exposes parent data.
+% [tested: program_source:scoped_allocation_preserves_the_equation_home;
+% commit=WORKTREE]
+metta_new_space_relation(Child, [inherits, Parent]) :- !,
     metta_declare_space_parent(Child, Parent).
-'new-space'(Space, [restricted], Space) :- !,
+metta_new_space_relation(Child, [scoped, Home]) :- !,
+    metta_declare_space_equation_home(Child, Home).
+metta_new_space_relation(Space, [restricted]) :- !,
     metta_declare_restricted_space(Space, []).
-'new-space'(Space, [restricted, [grants|Capabilities]], Space) :- !,
+metta_new_space_relation(Space, [restricted, [grants|Capabilities]]) :- !,
     metta_declare_restricted_space(Space, Capabilities).
-'new-space'(_, Relation, _) :-
+metta_new_space_relation(_, Relation) :-
     throw(error(type_error(inheritance_declaration, Relation),
                 context('new-space',
-                        'the second argument is (inherits <parent>)'))).
+                        'the second argument is (inherits <parent>), \c
+                         (scoped <home>), or (restricted (grants ...))'))).
 
 %%% States: %%%
 'bind!'(Var, _, _) :- var(Var), !, refuse_unbound_input('bind!', 1).

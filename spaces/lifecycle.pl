@@ -61,6 +61,10 @@
 %   The engine-owned &self and &metta roots refuse clear and release before
 %   teardown starts, directing callers to their own context or a named space
 %   [tested: base_space_lifecycle; commit=6229e43cb68cc3685360810d462d992874992f6c].
+%   Source-owned allocations join equation-world release plans; external
+%   heirs refuse before teardown and owned heirs retire before their bases
+%   [tested: test_source_release_refuses_an_external_heir_before_removing_the_program;
+%   commit=WORKTREE].
 %   A fast-cache restore can enumerate one equation world and mint fresh
 %   children without reusing a persisted runtime identity [tested:
 %   test_fast_cache_restores_translator_rules_and_bound_spaces;
@@ -1352,30 +1356,51 @@ metta_assert_space_destructible(Operation, Space) :-
     ;   true
     ).
 
-%An (inherits ...) heir refuses: that relationship is program-owned and a
-%recycled parent name must not be followable. An equation-home child does
-%NOT refuse: it is the world's own mint and the release cascades it, so the
-%python pre-ask and the release door answer the same question by
-%construction [tested: a_context_close_takes_its_world_with_it].
+% A release owns its equation-world and source allocations. An heir outside
+% that set refuses before any member is cleared. Internal heirs leave first.
 metta_assert_space_releasable(Space) :-
-    metta_assert_space_destructible(release, Space),
-    (   space_parent(Child, Space)
-    ->  throw(error(metta_space_parent_live_child(Space, Child), none))
-    ;   true
+    metta_space_release_plan([Space], _).
+
+metta_space_owned_child(Space, Child) :- space_equation_home(Child, Space).
+metta_space_owned_child(Space, Child) :- filereader:source_owned_space(Space, Child).
+
+% Ownership closes the set; inheritance and ownership order its teardown.
+% The same ugraph operation orders portable program allocations in the reader.
+metta_space_release_plan([], []) :- !.
+metta_space_release_plan(Roots, Plan) :-
+    list_to_assoc([], Empty),
+    metta_space_release_nodes(Roots, Empty, Seen, Nodes),
+    forall(member(Space, Nodes), metta_assert_space_destructible(release, Space)),
+    forall(( member(Parent, Nodes), space_parent(Child, Parent) ),
+           ( get_assoc(Child, Seen, _) -> true
+           ; throw(error(metta_space_parent_live_child(Parent, Child), none)) )),
+    findall(Child-Parent,
+            ( member(Parent, Nodes),
+              ( metta_space_owned_child(Parent, Child) ; space_parent(Child, Parent) ) ),
+            Edges),
+    vertices_edges_to_ugraph(Nodes, Edges, Graph),
+    (   top_sort(Graph, Plan)
+    ->  true
+    ;   throw(error(domain_error(acyclic_space_ownership, Nodes),
+                    context(metta_space_release_plan/2,
+                            'space ownership and inheritance must admit a release order')))
     ).
 
-%A space that is the equation HOME of others is a world, and dropping the
-%world drops the spaces living in it first: a context's own mints read its
-%equations and cannot outlive it meaningfully, and their names return to
-%the pool with their world's. The space_parent refusal in the releasable
-%check STAYS a refusal, because an (inherits ...) declaration is
-%program-owned and dropping the parent out from under it is the caller's
-%mistake to hear about; that check runs before any child is touched so a
-%refused release tears nothing down. The mutex is recursive, so a child's
-%own release re-enters it safely.
-metta_release_world_children(Space) :-
-    forall(space_equation_home(Child, Space),
-           metta_release_space(Child)).
+metta_space_release_nodes([], Seen, Seen, []).
+metta_space_release_nodes([Space|Pending], Seen0, Seen, Nodes) :-
+    (   get_assoc(Space, Seen0, _)
+    ->  metta_space_release_nodes(Pending, Seen0, Seen, Nodes)
+    ;   put_assoc(Space, Seen0, true, Seen1),
+        findall(Child, metta_space_owned_child(Space, Child), Children),
+        append(Children, Pending, Next),
+        Nodes = [Space|Rest],
+        metta_space_release_nodes(Next, Seen1, Seen, Rest)
+    ).
+
+metta_release_owned_children(Space) :-
+    findall(Child, metta_space_owned_child(Space, Child), Children),
+    metta_space_release_plan(Children, Plan),
+    forall(member(Child, Plan), metta_release_space(Child)).
 
 %The world a running program mints into: the last space before '&self' on
 %the equation-home chain of the space evaluating right now. A context home
@@ -1467,7 +1492,7 @@ metta_release_space(Space) :-
                  %[tested: a_context_close_takes_its_world_with_it].
                  with_metta_space_releasing(
                      Space,
-                     ( metta_release_world_children(Space),
+                     ( metta_release_owned_children(Space),
                        metta_host_clear_space(Space) )),
                  transaction(( metta_forget_space_parent(Space),
                                retractall(space_equation_home(Space, _)),
@@ -2480,6 +2505,7 @@ seam:atom_hook_ref_idle(Space, Ref) :-
 metta_host_clear_space(Space) :-
     seam:foreign_space(Space), !,
     metta_assert_space_destructible(clear, Space),
+    filereader:source_owned_release_plan(Space, _),
     materialize:discard_space(Space),
     (   metta_exec_module_known(Space, Module)
     ->  % A foreign clear removes stored equations, so untabling must precede
@@ -2521,6 +2547,7 @@ metta_host_clear_space(Space) :-
 %spaces_drop_untables_first; commit=b33102fbd50a30ae44d58eca08abd49e447ea60d].
 metta_host_clear_space(Space) :-
     metta_assert_space_destructible(clear, Space),
+    filereader:source_owned_release_plan(Space, _),
     materialize:discard_space(Space),
     space_module(Space, Module),
     metta_host_clear_tabling(Space, Module),
