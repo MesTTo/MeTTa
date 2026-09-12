@@ -60,6 +60,7 @@ beside its definitions.
 | lib_string | 34 | 34 |
 | lib_system | 8 | 8 |
 | lib_tabling | 11 | 0 |
+| lib_testing | 5 | 5 |
 | lib_thread | 58 | 2 |
 | lib_torch | 20 | 19 |
 | lib_unicode | 8 | 8 |
@@ -5743,6 +5744,85 @@ Returns: Keys
 The process's current directory, as an absolute path with no trailing separator. Every relative path a program writes is read against this one.
 
 Returns: Path
+
+## lib_testing
+
+### `test-choices`
+
+*lib_testing.metta:11*
+
+```metta
+(: test-choices (-> Atom %Undefined%))
+```
+
+One fresh copy of each occurrence in a held expression, in order. Empty choices give no answers and duplicates remain distinct cases. Runnable expressions remain data. Variables shared inside one choice stay shared; choices do not bind the original template. Bind computed choices with let.
+
+1. Choices
+
+Returns: Value
+
+### `test-forall`
+
+*lib_testing.metta:17*
+
+```metta
+(: test-forall (-> Atom Atom Atom Number))
+```
+
+For every answer of the finite held Generator, apply held Function to that input as literal data and compare its complete answer bag with held Expected. Return the number of cases checked. Zero reports an empty domain explicitly. For a Boolean property, Expected is (True), requiring exactly one True answer. Expected () instead asserts that every application has no answers. Reordered answers agree and duplicates count, using assertEqualToResult's equality. Use an =alpha property when separately copied variables should match. The first mismatch raises the engine's assertion failure with the generated call, missing answers and excess answers. Generator/function errors propagate. Lambdas, names and partial applications resolve in the calling module.
+
+1. Generator
+2. Function
+3. Expected
+
+Returns: Count
+
+### `test-integers`
+
+*lib_testing.metta:23*
+
+```metta
+(: test-integers (-> Number Number Number))
+```
+
+Every integer from Low through High, in ascending order. Equal bounds give one value; reversed bounds give no answers. Both bounds must be finite integers. Arbitrarily large integers use the native between generator.
+
+1. Low
+2. High
+
+Returns: Value
+
+### `test-lists`
+
+*lib_testing.metta:29*
+
+```metta
+(: test-lists (-> Atom Number Number Expression))
+```
+
+All lists whose lengths lie in the inclusive interval, shortest first and with the last position varying fastest. Snapshot the finite held element generator once in the calling module, then use its answer occurrences as the population. Each position copies its choice independently. Variables shared within a choice stay shared. Nested generators build nested lists. Both lengths must be nonnegative integers. Reversed bounds yield nothing; maximum zero yields one empty list without running the element generator. An empty population yields only the empty list when Minimum is zero. Working storage is the population plus one list; the complete output has the sum of n^k lists over the requested lengths for n population entries.
+
+1. Generator
+2. Minimum
+3. Maximum
+
+Returns: Values
+
+### `test-witness`
+
+*lib_testing.metta:35*
+
+```metta
+(: test-witness (-> Atom Atom Atom %Undefined%))
+```
+
+The first generated input whose complete function answer bag equals Expected, using the same comparison and literal input application as test-forall. Return no answer when the finite domain contains no witness, including an empty domain. Stop the generator after the first witness; skipped mismatches print nothing. Exceptions propagate. Use core test or bag assertions to state whether a witness must exist or what it must be.
+
+1. Generator
+2. Function
+3. Expected
+
+Returns: Value
 
 ## lib_thread
 

@@ -4289,3 +4289,95 @@ Verified: the full twins lane preserves Database's 58 claims, equal stored
 contents and exact 222382 inference point. It reports 263 older findings over
 308 twins, with 52/345 examples passing and 3495 claims. twins-selftest passes.
 Receipt: ai-lib4-database-twins.log. Database introduces no additional finding.
+
+## 2026-09-13: Testing generation and quantified assertions
+
+Goal: supply bounded integer, choice and list families, quantified properties
+and assertion helpers while preserving the engine's verdict and failure format.
+
+Tried: SmallCheck separates a series from its quantifier and assertion runner.
+Property.hs:109-143 and 283-325 at
+[433ada587bf4ff898031aaa5530c0b7aaab10e3a](https://github.com/Bodigrim/smallcheck/blob/433ada587bf4ff898031aaa5530c0b7aaab10e3a/Test/SmallCheck/Property.hs#L109-L143)
+show that separation; Series.hs:858 generates lists through constructor choice.
+The local engine already supplies answer streams, Cartesian powers, core bag
+comparison and assertion reporting. ai-lib4-testing-host-probe-final.log verifies
+bag multiplicity, reordered answers, variable sharing and held runnable data.
+
+Rejected: a second tagged domain language, because ordinary held generator
+expressions already compose builtins, library heads and user definitions.
+Revisit only if a consumer needs inspectable domains rather than executable
+generators. Random sampling and shrinking remain the existing Random and
+Hypothesis facilities; finite families require neither another random state nor
+a shrink protocol. Core forall remains unchanged, including its existential
+search for a True result from each predicate application.
+
+Decided: five heads. test-integers uses inclusive finite integer bounds;
+test-choices copies each held occurrence. test-lists snapshots a finite held
+generator once and uses lib_combinatorics:cartesian-power/3 across an inclusive
+length interval. Each list position copies its chosen value independently,
+preserving sharing inside that value. Length zero needs no element generator;
+an empty pool has only the empty list. Reversed intervals are empty.
+
+Decided: test-forall takes a held generator, held function and held expected
+answer bag. It checks every application with the core subtraction-atom/=alpha
+comparison, reports failures through assert-answers, and returns the number of
+cases checked. Zero makes a vacuous check observable. test-witness uses the same
+comparison and returns the first matching input or no answer. Each application
+quotes its input, so generated runnable data is not evaluated a second time.
+Function answers and the exhausted generator must be finite; exceptions propagate.
+Caller variables are copied together before evaluation. No ambient state or scope.
+
+Decided: snapshot storage is O(n) for n generated elements; Cartesian output
+adds O(k) working storage at length k. Complete enumeration necessarily emits
+the sum of n^k lists across the requested lengths. The universal counter uses
+library(aggregate):aggregate_all(count,...), whose native incremental path uses
+constant counter storage. Property comparison retains one application's answer
+bag at a time. No arbitrary input, length or case limit is introduced.
+
+### Testing example corrections
+
+Tried: an expected bag containing a separately copied variable failed both the
+new helper and core assertEqualToResult. Receipt:
+ai-lib4-testing-core-variable-probe.log. The example now asserts an explicit
+=alpha property instead of changing core bag equality. A second fixture tried
+to match a native exception ball as a MeTTa expression and answered no-bags.
+The established repr door returns the complete call, missing and excess bags;
+ai-lib4-testing-error-probe.log supplies the exact expected string. These are
+fixture corrections; the library implementation is unchanged.
+
+Tried: adding --on-error=status to the native suite command turned its three
+deliberate assertion-reporting tests red with "Generated unexpected warning or
+error". engine/test.sh:113-119 already records why that flag is inappropriate
+for these tests. The prescribed invocation passes all 20 tests; the repository
+runner checks load errors separately. Receipts: ai-lib4-testing-suite{,-complete}.log.
+
+### Testing verification before lanes
+
+Verified: the example and twin prove 48 claims. engine/test.sh
+tests/prolog/suites/libraries/lib_testing.plt passes all 20 native tests under
+the shipped extensions configuration. Independent models cover 121 integer
+intervals, 80 list families and 81 answer-bag pairs; queue fixtures verify
+snapshotting and generator cleanup. Three Python tests pass, with 80 generated
+examples configured for each of the product and quantified-bag models, plus
+opaque-value identity. Receipts: ai-lib4-testing-{example-complete,twin,
+native-runner,python}.log.
+
+Measured: three fresh serial processes, engine/lib QLF artifacts purged,
+python extensions/python/tools/twin_coverage.py --measure --rounds 3
+examples/ch08-data/08-03-the-shipped-libraries/43-testing_lib.metta yields
+174886/175727, ratio 1.0048, with no overrun allowance. Clarifying variable
+equality in PlDoc leaves both counts unchanged in ai-lib4-testing-measure-final.log.
+
+Verified: five record generators ran in order, with 33 described native sources,
+143 derived examples, 229 originals and 60 library imports. The initial jscpd
+format prolog scanned no source; the required perl mapping scans 109 lines and
+1991 tokens, finding zero clones. Receipts: ai-lib4-testing-records.log and
+ai-lib4-testing-jscpd-final.log.
+
+### Testing row completion
+
+Verified: all 19 required library lanes pass in ai-lib4-testing-lanes.log.
+The full twins lane retains 263 older findings over 309 twins, with 53/346
+examples passing and 3543 claims. Testing proves 48/48 claims, equal stored
+contents and the exact 175727 inference pin. twins-selftest passes. Receipt:
+ai-lib4-testing-twins.log. Testing introduces no additional finding.
