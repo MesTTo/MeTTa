@@ -3,6 +3,8 @@
 %   engine/metta_py.py and adds it to Python's path itself, so none of this needs
 %   the `metta` package installed.
 % Guarantees:
+%   - token fixtures inspect and retire the engine-owned claim registry
+%     [tested: python_surface; commit=WORKTREE].
 %   - a dotted name of any depth resolves, which splitting on the first dot
 %     could not do [tested: a_dotted_path_of_any_depth_resolves]
 %   - a resolved callable is applicable in head position, through the engine's
@@ -188,13 +190,13 @@ test(a_python_object_is_typed_without_the_python_library) :-
 % MeTTa's bind! accepted only (new-state V) and FAILED SILENTLY on anything
 % else, so the language's own idiom could not work.
 test(a_bound_token_is_substituted_into_later_forms,
-     [ cleanup(retractall(metta_token(_, _))) ]) :-
+     [ cleanup(retractall(metta_engine:metta_token_claim(_, _, _, _))) ]) :-
     process_metta_string("!(bind! plunit-token 6)", _),
     process_metta_string("!(collapse plunit-token)", Answer),
     assertion(Answer == [[6]]).
 
 test(a_bound_token_can_hold_any_atom,
-     [ cleanup(retractall(metta_token(_, _))) ]) :-
+     [ cleanup(retractall(metta_engine:metta_token_claim(_, _, _, _))) ]) :-
     process_metta_string("!(bind! plunit-greet (Hello world))", _),
     process_metta_string("!(collapse plunit-greet)", Answer),
     assertion(Answer == [[['Hello', world]]]).
@@ -203,19 +205,20 @@ test(a_bound_token_can_hold_any_atom,
 % the token substitution above, and a grounded head reaching reduce/3 rather
 % than being built as data.
 test(a_token_bound_to_a_callable_is_applied,
-     [ cleanup(retractall(metta_token(_, _))) ]) :-
+     [ cleanup(retractall(metta_engine:metta_token_claim(_, _, _, _))) ]) :-
     process_metta_string("!(bind! plunit-abs (py-atom \"abs\"))", _),
     process_metta_string("!(collapse (plunit-abs -5))", Answer),
     assertion(Answer == [[5]]).
 
-% The state form binds no token, because MeTTa models a state cell by NAME and
-% substituting the name away would take get-state with it.
+% A state cell is a value, and bind! names it through the same token registry
+% as every other value. get-state reads the substituted cell.
 test(the_state_form_still_makes_a_state_cell,
-     [ cleanup(retractall(metta_token(_, _))) ]) :-
+     [ cleanup(retractall(metta_engine:metta_token_claim(_, _, _, _))) ]) :-
     process_metta_string("!(bind! plunit-cell (new-state 7))", _),
     process_metta_string("!(collapse (get-state plunit-cell))", Answer),
     assertion(Answer == [[7]]),
-    assertion(\+ metta_token('plunit-cell', _)).
+    assertion(( metta_engine:metta_token('plunit-cell', Cell),
+                'get-state'(Cell, 7) )).
 
 test(an_unresolvable_name_raises_rather_than_answering_nothing,
      [throws(_)]) :-

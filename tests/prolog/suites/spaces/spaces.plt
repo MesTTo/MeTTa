@@ -2,6 +2,8 @@
 %   matching, and lifecycle behavior, including what a selective match COSTS
 %   as the space grows, which a scan would answer identically.
 % Guarantees:
+%   - bound-space fixtures retire their engine-owned token claims
+%     [tested: space_handle_type; commit=WORKTREE].
 %   - Native storage modules do not inherit user predicates, while execution
 %     modules keep undefined calls loud [tested: spaces_storage_modules].
 %   - Every seam:engine_emitted/1 declaration is protected from capture in
@@ -2423,7 +2425,7 @@ test(a_fresh_space_is_one_before_anything_is_written_to_it) :-
 % Through the surface, where bind! makes the handle reachable by a name the
 % reader substitutes away before the engine sees it.
 test(a_bound_space_answers_the_same_through_its_token,
-     [cleanup(retractall(metta_token('&plunit-handle-space', _)))]) :-
+     [cleanup(retractall(metta_engine:metta_token_claim('&plunit-handle-space', _, _, _)))]) :-
     process_metta_string("!(bind! &plunit-handle-space (new-space))", _),
     process_metta_string("!(add-atom &plunit-handle-space (handle-canary 1))",
                          _),

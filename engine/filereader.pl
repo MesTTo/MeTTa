@@ -260,6 +260,7 @@
             metta_source_changed/1,
             run_with_loading_marker/2,
             record_source_assertion/1,
+            recording_source_assertion/0,
             record_source_atom_assertion/1,
             source_load_assertion/3,
             withdraw_source_load/3,
@@ -873,7 +874,7 @@ process_forms(PerForm, Space, [Form|Forms], [Result|Results]) :-
 %[tested: filereader_data_runs; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 data_run(Forms, Space, Run, Rest) :-
     silent(true),
-    \+ metta_token(_, _),
+    \+ metta_engine:metta_token_claim(_, _, _, _),
     \+ seam:foreign_space(Space),
     Space \== '&metta',
     metta_hook_claim_idle(Space),
@@ -917,7 +918,7 @@ definition_run(Forms, Space, Run, Rest) :-
     %[tested: filereader_data_runs, spaces_deferred_translation;
     %commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
     (   \+ seam:form_rewriter(_),
-        \+ metta_token(_, _)
+        \+ metta_engine:metta_token_claim(_, _, _, _)
     ->  plain_definition_prefix(Forms, Run, Rest)
     ;   definition_prefix(Forms, Space, Run, Rest)
     ),
@@ -1589,7 +1590,7 @@ record_translated_from(Ref, Term, StoredRef, SourceRef) :-
     ;   true
     ),
     (   StoredRef \== none,
-        ( seam:form_rewriter(_) ; metta_token(_, _) ),
+        ( seam:form_rewriter(_) ; metta_engine:metta_token_claim(_, _, _, _) ),
         stored_atom_of_ref(StoredRef, Space, Original, _),
         (   Space == '&self'
         ->  Law = Original

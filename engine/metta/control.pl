@@ -44,6 +44,13 @@
 % Fails when: loaded directly or from another module; internal state and unqualified meta-goals would acquire the wrong owner.
 % Guarded by: '$metta_token_registry' serializes token replacement, image
 %   restore, and execution-module retirement.
+% Guarantees: source-owned token claims expose the newest surviving binding;
+%   failed loads and out-of-order withdrawal preserve earlier claims, and a
+%   subsequent explicit replacement survives either [tested:
+%   test_source_token_claims_withdraw_in_either_order,
+%   test_a_failed_source_token_binding_restores_the_previous_value,
+%   test_a_later_explicit_token_binding_survives_source_withdrawal;
+%   commit=WORKTREE].
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
 %%% Interpreter pragmas: %%%
@@ -1387,19 +1394,34 @@ metta_metta_result_is_final(Atom) :-
 %A token, and the substitution that makes it one. Both are guarded on anything
 %being registered at all, so a program that binds no token pays one indexed
 %lookup per form it parses and nothing else.
-:- dynamic metta_token/2.
-:- dynamic metta_token_owner/3.
-%metta_token_owner(Name, OwnerModule, OwnerGeneration)
+:- dynamic metta_token_claim/4.
+
+% A source owns its claim's clause reference. Removing that claim reveals the
+% previous live binding without reconstructing erased clauses or undo chains.
+% Bound-name lookup selects the latest claim before testing its value, so a
+% query for an older value cannot select a shadowed binding.
+metta_token(Name, Value) :- metta_current_token(Name, Value, _, _).
+metta_token_owner(Name, Owner, Generation) :-
+    metta_current_token(Name, _, Owner, Generation).
+
+metta_current_token(Name, Value, Owner, Generation) :-
+    nonvar(Name), !,
+    once(metta_token_claim(Name, Current, CurrentOwner, CurrentGeneration)),
+    Value = Current, Owner = CurrentOwner, Generation = CurrentGeneration.
+metta_current_token(Name, Value, Owner, Generation) :-
+    clause(metta_token_claim(Name, Value, Owner, Generation), true, Ref),
+    once(clause(metta_token_claim(Name, _, _, _), true, First)),
+    Ref == First.
 
 register_metta_token(Name, Value) :-
     current_metta_module(Owner),
     metta_token_module_generation(Owner, Generation),
     with_mutex('$metta_token_registry',
-               transaction(( retractall(metta_token(Name, _)),
-                             retractall(metta_token_owner(Name, _, _)),
-                             assertz(metta_token(Name, Value)),
-                             assertz(metta_token_owner(Name, Owner,
-                                                       Generation)) ))).
+               transaction(( ( filereader:recording_source_assertion -> true
+                             ; retractall(metta_token_claim(Name, _, _, _)) ),
+                             asserta(metta_token_claim(Name, Value, Owner,
+                                                       Generation), Ref),
+                             record_source_assertion(Ref) ))).
 
 metta_token_module_generation(Module, Generation) :-
     (   metta_exec_module_generation(Module, Current)
@@ -1413,8 +1435,7 @@ metta_token_module_generation(Module, Generation) :-
 %row left from an earlier module generation.
 metta_token_snapshot(NodeSpaces, Tokens) :-
     findall(token(Name, OwnerId, Value),
-            ( metta_token(Name, Value),
-              metta_token_owner(Name, Owner, Generation),
+            ( metta_current_token(Name, Value, Owner, Generation),
               metta_exec_module_generation(Owner, Generation),
               member(OwnerId-Space, NodeSpaces),
               metta_exec_module_known(Space, Owner),
@@ -1455,12 +1476,11 @@ metta_restore_token_snapshot_locked(Tokens, NodeSpaces, Refs) :-
 
 metta_restore_token_rows([], _, []).
 metta_restore_token_rows([token(Name, OwnerId, Value)|Rows], NodeSpaces,
-                         [ValueRef, OwnerRef|Refs]) :-
+                         [Ref|Refs]) :-
     memberchk(OwnerId-Space, NodeSpaces),
     space_module(Space, Owner),
     metta_exec_module_generation(Owner, Generation),
-    assertz(metta_token(Name, Value), ValueRef),
-    assertz(metta_token_owner(Name, Owner, Generation), OwnerRef),
+    asserta(metta_token_claim(Name, Value, Owner, Generation), Ref),
     metta_restore_token_rows(Rows, NodeSpaces, Refs).
 
 %A token cannot meaningfully outlive the execution module that supplied its
@@ -1468,15 +1488,13 @@ metta_restore_token_rows([token(Name, OwnerId, Value)|Rows], NodeSpaces,
 %name can acquire a new generation.
 retire_metta_tokens_in(Owner) :-
     with_mutex('$metta_token_registry',
-               transaction(
-                   forall(retract(metta_token_owner(Name, Owner, _)),
-                          retractall(metta_token(Name, _))))).
+               transaction(retractall(metta_token_claim(_, _, Owner, _)))).
 
 %ONE indexed lookup when no token is bound, which is what a token table costs
 %and all it costs. A program that binds none pays that per parsed form and
 %nothing else; the walk below runs only once something is registered.
 substitute_bound_tokens(Term, Out) :-
-    metta_token(_, _), !,
+    metta_token_claim(_, _, _, _), !,
     substitute_bound_tokens_(Term, Out).
 substitute_bound_tokens(Term, Term).
 
@@ -1558,7 +1576,7 @@ rewrite_parsed_form(Space, FormStr, Term, Rewritten) :-
     ->  call(Rewriter, Term1, Bound)
     ;   Bound = Term1
     ),
-    (   metta_token(_, _)
+    (   metta_token_claim(_, _, _, _)
     ->  substitute_bound_tokens_(Bound, Rewritten)
     ;   Rewritten = Bound
     ).
