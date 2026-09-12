@@ -1,5 +1,5 @@
 ; Purpose: structured messages, topic controls and explicit capture handlers.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/34-logging_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/34-logging_lib.metta; commit=cf6b111ffad74477d9fa7169b215379dcabe721c].
 !(import! &self (library lib_logging))
 
 ; A handler takes an evaluated event expression and returns a Boolean verdict.

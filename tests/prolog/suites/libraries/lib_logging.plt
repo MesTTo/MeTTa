@@ -1,7 +1,7 @@
 % Purpose: verify structured host routing, explicit handlers and topic state.
 % Guarantees: hooks keep their precedence, complete payloads remain held,
 % handler failures propagate and concurrent topic changes keep one registry row.
-% [tested: lib_logging; commit=WORKTREE].
+% [tested: lib_logging; commit=cf6b111ffad74477d9fa7169b215379dcabe721c].
 % Owns resources: the host owns concurrent workers; test topic names remain
 % registered but disabled. Each test clears its thread-local observed messages.
 % Guarded by: observed/3 is thread-local; topic changes use the library's mutex.
