@@ -31,10 +31,12 @@
 %   commit=81d05b34f938ff97f835ca1c00205220690cb6f0]. Between posts that
 %   engine stays suspended holding the last reference it was handed, one
 %   already-collected clause reference, which the next post unbinds.
-%   One process-wide erase listener carries that channel, registered by
-%   flush_space_materialization/2 before the first publication, outside
-%   '$metta_materialization' because the callback takes it, and held for the
-%   life of the process because the registration is not transactional.
+%   One process-wide erase listener carries that channel, registered through
+%   metta_listen/2 by flush_space_materialization/2 before the first
+%   publication, outside '$metta_materialization' because the callback takes
+%   it and under no mutex at all because the host holds the channel's
+%   event-list lock across the callback, and held for the life of the process
+%   because the registration is not transactional.
 % Guarded by: '$metta_materialization' protects publication, lookup and removal.
 %   Owned outer transactions reconcile touched images in their commit
 %   constraint while holding that mutex through commit. Building reads one
@@ -847,29 +849,27 @@ discard_image_rows(Space, Token) :-
 % load-time directive was also present, so it is the run-time call and not the
 % absence of the old one [measured 2026-09-06: gdb `thread apply all bt` over
 % the hung process, and the same run with the directive restored beside this
-% call]. The single registration this does perform runs when no handler of
-% that name exists, so no delivery of it can be in flight to contend with.
+% call]. The door, metta_listen/2, registers once and takes no name, so the
+% replacement path is never entered.
 %
 % The flag is flag/3 rather than a clause because this is reached from inside a
-% caller's transaction and a rollback must not forget that the listener is
-% installed: a forgotten registration is a repeated one, which is the deadlock
-% above [measured 2026-09-06: after a rolled-back transaction that set all
+% caller's transaction and a rollback must not forget that the engine exists:
+% a forgotten creation is a repeated one, which the alias refuses
+% [measured 2026-09-06: after a rolled-back transaction that set all
 % three, flag/3 reads 1, the asserted clause is gone and the recorded term
-% survives]. The mutex is this listener's own and the handler never takes it,
-% so the two cannot invert; '$metta_materialization' could not be used here for
-% exactly that reason.
+% survives]. The mutex guards only the engine's creation and is released before
+% the door registers the listener, so nothing is held while the host takes the
+% channel's event-list lock, which it also holds across the handler. The
+% handler never takes this mutex; '$metta_materialization' could not be used
+% here because the handler takes that one.
 %
 % It is never removed: the registration is not transactional, and a publication
 % still inside another thread's uncommitted transaction is invisible to any
 % emptiness test a remover could run, so removing it would race a commit into
 % an image nothing retires.
 ensure_source_owner_listener :-
-    flag(materialized_source_owner_listener, Installed, Installed),
-    (   Installed == 1
-    ->  true
-    ;   with_mutex('$metta_materialization_listener',
-                   register_source_owner_listener)
-    ).
+    with_mutex('$metta_source_owner_engine', ensure_source_owner_engine),
+    metta_listen(erase, materialize:source_owner_erased).
 
 % The retirement engine is created HERE, beside the listener and under the same
 % flag, and never destroyed. It cannot be created from the callback, and this
@@ -904,14 +904,12 @@ ensure_source_owner_listener :-
 %
 % Creating it here rather than at load time keeps a process that publishes no
 % image free of it, which is the same reason the listener is registered here.
-register_source_owner_listener :-
+ensure_source_owner_engine :-
     flag(materialized_source_owner_listener, Installed, Installed),
     (   Installed == 1
     ->  true
     ;   engine_create(_, materialize:source_owner_retirement_loop, _,
                       [alias('$metta_source_owner_retirement')]),
-        prolog_listen(erase, materialize:source_owner_erased,
-                      [name(materialized_source_owner)]),
         flag(materialized_source_owner_listener, _, 1)
     ).
 
