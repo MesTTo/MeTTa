@@ -130,6 +130,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   class fails when instantiated.
 
 ### Fixed
+- A documented host workaround retains fresh assertion references across
+  nested SWI transactions, so an inner retraction cannot make an aborted
+  outer assertion survive. The tracked reproduction, workaround ledger and
+  transaction tests cover rollback, snapshots, cancellation and concurrent
+  ownership without changing the installed runtime.
 
 - Typed data constructors discharge proved argument checks during retained
   compilation. A checked ground constructor's unique structural projection

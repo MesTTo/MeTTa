@@ -3,6 +3,9 @@
 % Guarantees: both trailed context scopes are published host services
 %   [tested: reference_scopes:both_scope_doors_are_published_host_services;
 %   commit=WORKTREE].
+% Guarantees: engine/host_transactions.pl supplies the documented host rollback
+%   workaround before runtime declarations load [tested:
+%   host_transactions, test_class_declaration_rollback; commit=WORKTREE].
 % Guarantees:
 %   - metta_operation_parameters/4 exposes the joint argument types and
 %     origins used by constructor compilation and runtime admission
@@ -2264,6 +2267,7 @@ prolog:error_message(metta_extension_required(Name, Cause)) -->
                                  refuse_unbound_input('require-extension!', 1).
 'require-extension!'(Name, []) :- metta_require_extension(Name).
 
+:- use_module(host_transactions, []).
 :- consult('metta/terms.pl').
 :- consult('metta/operators.pl').
 :- consult('metta/input_guards.pl').

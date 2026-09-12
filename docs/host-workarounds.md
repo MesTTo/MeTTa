@@ -283,3 +283,24 @@ Lifted when: inherited first-call counts agree in both states; the reproduction
   reversed costs and child failures are broken reproductions.
 Record: docs/journal/2026-09-07-merged-tree-reconciliations.md, the 2026-09-11
   buffered VM trace and unchanged-body foldall controls.
+
+## swi-nested-retract-loses-outer-assert
+Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
+  src/pl-transaction.c:417-427, merge_clause_tables.
+Defect: committing a nested erase of a clause asserted by its outer transaction
+  overwrites the outer GEN_ASSERTA or GEN_ASSERTZ entry with GEN_NESTED_RETRACT.
+  Outer rollback restores the erased generation instead of discarding the
+  assertion. The clause is invisible outside a transaction but reappears when
+  a later transaction advances past its creation generation.
+Reproduction: tests/checks/host_workarounds/swi-nested-retract-loses-outer-assert.pl,
+  an outer assert, committed inner erase, failed outer transaction, then 100
+  unrelated assertions in a later transaction. No engine is loaded.
+Workaround: engine/host_transactions.pl records fresh assertion references in
+  a journal local to the executing engine and thread. A child journal belongs
+  to its parent before any child writes. After rollback or snapshot exit it
+  erases those references explicitly. Nontransactional host predicates retain
+  their own semantics. This preserves savepoints and never deduplicates rows.
+Lifted when: merge_clause_tables preserves outer assertion ownership when it
+  merges a nested retract, so the plain-host reproduction prints absent.
+Record: docs/journal/2026-09-11-classes-on-metta.md, repository ownership after
+  nested rollback.

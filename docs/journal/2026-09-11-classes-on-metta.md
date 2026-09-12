@@ -268,6 +268,35 @@ The new corpus example has seven assertions and a Python twin. Its full-example 
 Tried: the final corpus run and its twin -> seven of seven assertions, equal stored content, 21,949 MeTTa inferences and 19,782 Python inferences, zero findings. `jscpd --format prolog --formats-exts 'prolog:pl,plt' --min-lines 5 --min-tokens 50` reports one seven-line test clone, 1.38% over the two new Prolog files; no production clone. The duplicated mutation and error golden remains beside each test because the two cases change different declaration scopes.
 
 Tried: the artifact battery -> 23 passing lanes and two failures, `llms` and `llms-selftest`. The new file and translator unit require source-table counts of 325 and seven. The five Node path findings name generated browser artifacts absent from this worktree; `npm --prefix extensions/node run build:browser --silent` creates them from the existing build scripts. With those counts and artifacts, `sh check.sh llms llms-selftest example-origins evidence provenance-pin-selftest` passes all six selected or implied lanes. The attribution check uses `METTA_UPSTREAM=/home/user/Dev/PyPeTTa1/PeTTa-base` and reports 143 derived and 203 original programs. The llms negative control detects all 64 planted cases. No allowances were widened.
+## 2026-09-12: the cache-expiry negative control includes assertion ownership
+
+Found: `sh check.sh binding binding-selftest llms llms-selftest` reports one
+counter failure after the reference counts are corrected. The eager first
+failed query still costs 14 under every cache lifetime. The deliberately lazy
+control costs 1,307/1,533/1,539 at lifetimes 10/0/-1, so the expired-minus-fresh
+delta is 232 against the prior 229 (`ai-tmp/ai-classes-c3-length-lanes-after.log`).
+
+Tried: pristine `c75181adc`, extracted under `ai-tmp/ai-classes-c75181adc-control`,
+runs `python extensions/python/tests/ch18_performance/test_heartbeat_accounting.py
+'["failure", false, <expiry>]'` at 10/0/-1 and reads 1,295/1,521/1,524.
+The three logs are `ai-tmp/ai-classes-c3-heartbeat-control-{10,0,-1}.log`.
+The class branch therefore accounts for the added three, rather than an
+unrelated pre-existing failure.
+
+Tried: `PYTHONPATH=extensions/python python
+ai-tmp/ai-classes-c3-assertion-counter.py <expiry>` unwraps only `asserta/1`
+in its disposable process after boot. At 10/-1 the same worker reads
+1,301/1,530, restoring exactly 229. SWI's `'$cache_file_found'/4` refreshes an
+expired entry with one additional asserta; the assertion ownership wrapper
+adds three inferences to that call. Logs:
+`ai-tmp/ai-classes-c3-assertion-counter-{10,-1}.log`.
+
+Decided: retain both eager equality assertions and the exact disabled-cache
+delta 226, and update the expired-cache negative control to the measured 232.
+The test continues to detect the lazy import. The additional assertion cost
+belongs to the nested-rollback repair already in this package, not to a
+heartbeat or accounting correction.
+
 ## 2026-09-12: reference cancellation includes its shared context owners
 
 Tried: the reference suite passed its rollback oracle but failed the following
