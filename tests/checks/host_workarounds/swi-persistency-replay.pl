@@ -1,6 +1,6 @@
 % Purpose: detect native replay continuing past an unsupported journal record.
 % Guarantees: a valid control reopens; present requires the record after the
-% invalid action to load. [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% invalid action to load. [tested: sh check.sh host-workarounds; commit=060bea3199e9f504c6d425f60841f229fc96e861].
 % Owns resources: detach the probe schema and remove its journal on every exit.
 
 :- use_module(library(persistency)).

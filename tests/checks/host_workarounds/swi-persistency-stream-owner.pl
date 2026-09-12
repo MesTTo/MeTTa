@@ -1,6 +1,6 @@
 % Purpose: detect journal streams left open before their native registration.
 % Guarantees: the probe throws after native open, detaches, and observes only
-% that journal's streams. [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% that journal's streams. [tested: sh check.sh host-workarounds; commit=060bea3199e9f504c6d425f60841f229fc96e861].
 % Owns resources: restore the wrapped predicate, close orphan streams, detach
 % the probe schema and remove its journal on every exit.
 

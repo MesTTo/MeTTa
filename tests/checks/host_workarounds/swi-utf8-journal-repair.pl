@@ -1,6 +1,6 @@
 % Purpose: detect a UTF-8 term reader accepting noncanonical encoded input.
 % Guarantees: a valid NUL control decodes first; present requires the overlong
-% bytes to decode as the same String. [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% bytes to decode as the same String. [tested: sh check.sh host-workarounds; commit=060bea3199e9f504c6d425f60841f229fc96e861].
 % Owns resources: close the byte writer and reader and remove their temporary file.
 
 :- use_module(library(apply), [maplist/2]).

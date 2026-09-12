@@ -1,6 +1,6 @@
 % Purpose: detect attachment bookkeeping left behind by a failed stream close.
 % Guarantees: normal detach removes registration; a second detach must finish
-% the failed case. [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% the failed case. [tested: sh check.sh host-workarounds; commit=060bea3199e9f504c6d425f60841f229fc96e861].
 % Owns resources: detach the probe schema and remove its journal on every exit.
 
 :- use_module(library(persistency)).

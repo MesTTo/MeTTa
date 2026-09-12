@@ -1219,7 +1219,7 @@ metta_platform_capability('memory-files', library(memfile),
                           'lib_compression byte encoding through owned memory streams').
 metta_platform_capability(archive, library(archive),
                           'lib_compression archive metadata, entry reads and extraction').
-% [tested: lib_database; commit=WORKTREE].
+% [tested: lib_database; commit=060bea3199e9f504c6d425f60841f229fc96e861].
 metta_platform_capability(persistency, [library(persistency),library(shlib)],
                           'lib_database independent journals and owned file locks').
 %One capability over two libraries, because engine/filereader.pl imports both

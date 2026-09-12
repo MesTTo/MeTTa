@@ -1,5 +1,5 @@
 ; Purpose: persist independent stores, match their values and close their owners.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/42-database_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/42-database_lib.metta; commit=060bea3199e9f504c6d425f60841f229fc96e861].
 ; Owns resources: each explicit handle closes below; with-database closes its
 ; callback handles. The temporary directory is removed after the final check.
 !(import! &self (library lib_file))
