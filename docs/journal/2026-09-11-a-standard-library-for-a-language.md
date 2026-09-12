@@ -2571,3 +2571,63 @@ against 47,584 Python inferences, minimum of three fresh processes, a first pin.
 The twin is CHEAPER than the example: the example's `collapse` is `list()` here,
 which the lookup's answers stream into directly. Logs:
 ai-tmp/ai-lib3-pairs-{example,suite}.log.
+
+## 2026-09-12: graph
+
+Decided: a graph IS a collection of (Vertex Neighbours) pairs, which is SWI's own
+S-representation with its `V-Ns` compounds written as expressions. The conversion
+is forced rather than chosen: a host compound crosses into MeTTa as an opaque
+value that a written form cannot hold, which the datastructures row measured, so
+`bind!` over a host ugraph would store something no example could read back. The
+shape that falls out is lib_pairs' multimap, so `graph-vertices` answers a
+lib_sets set and `graph-edges` answers a lib_pairs relation, and the three
+libraries compose with no adapters.
+
+Decided: two refusals the host does not make. `neighbours/3` and `reachable/3`
+FAIL for a vertex the graph does not hold, which a caller reads as an empty
+answer, so a typo looks like a sink; these name the vertex and point at
+`graph-vertices`. `top_sort/2` fails for a cyclic graph, which reads the same way,
+so `graph-topological-order` refuses and NAMES a vertex that reaches itself,
+found through the closure on the refusal path where one extra walk costs nothing.
+`graph-is-acyclic` is the total question beside it.
+
+Decided: `graph-of` takes the isolated vertices and the edges, in that order,
+because every vertex an edge mentions is a vertex already; that is the invariant
+`graph-is` checks and the one a hand-written graph misses. Rejected: `compose/3`
+and `complement/2`, which the host has and the census does not name; neither has
+a caller here yet.
+
+Tried: the twin holding each intermediate graph through `.one()` -> 95,766
+inferences against the example's 81,614. Writing the nested calls as the built
+terms they are, `S.graph_transpose(tasks)` rather than `transpose(tasks).one()`,
+took it to 92,465; the remaining 2,690 over the band is the graph value itself
+crossing into the host and back on each of the sixteen calls that take it, where
+the example's `bind!` keeps it inside the engine. Declared as OVERRUN with both
+measurements.
+
+Tried: comparing a graph in the twin as `Expression((S.coffee, S.shower))` -> the
+twins lane refused eight of them, because a symbol-headed expression is what
+calling the head builds. The comparison is now `(vertex, [neighbours])` tuples
+through one helper, which reads better than either spelling.
+
+Verified: `sh engine/test.sh suites/libraries/lib_graph.plt` passes 6 tests. Every
+head that a host predicate backs is checked against that predicate over 300
+generated graphs of five vertices and up to eight edges, which is dense enough
+that most have a cycle; every answer that is a graph is checked against the
+representation, including the neighbour-is-a-vertex condition; and the three
+walks are checked against each other, a vertex being reachable exactly when the
+closure holds the edge or it is the same vertex, and a topological order existing
+exactly when no vertex reaches itself, with every edge's tail before its head.
+
+Tried: the no-autoload lane over the new example -> `existence_error(procedure,
+ugraphs:append/2)` on the topological-order claim. `ugraphs.pl` declares
+`:- autoload(library(lists),[append/3])` and its `top_sort/2` also calls the OTHER
+`append/2`, declared nowhere, which resolves by global autoload. Same trap and
+same fix as lib_constraints' and lib_memo's own reach into that library:
+`:- ugraphs:use_module(library(lists), [append/2])`, injected into the host
+module's namespace, idempotent whichever library loads it first. With it,
+`NO_AUTOLOAD=1 sh test.sh` over the example passes all 34 claims.
+
+Measured: the example proves 34 claims and its twin the same 34, 81,614 MeTTa
+against 92,465 Python inferences, minimum of three fresh processes, a first pin.
+Logs: ai-tmp/ai-lib3-graph-{example,suite,noautoload}.log.

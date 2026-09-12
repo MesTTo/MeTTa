@@ -9,6 +9,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_graph` is a new library of directed graphs as expressions: `graph-of`,
+  `graph-is`, `graph-vertices`, `graph-edges`, `graph-neighbours`,
+  `graph-add-vertices`, `graph-remove-vertices`, `graph-add-edges`,
+  `graph-remove-edges`, `graph-transpose`, `graph-union`, `graph-closure`,
+  `graph-reachable`, `graph-topological-order` and `graph-is-acyclic`. A graph is
+  a collection of (Vertex Neighbours) pairs, so its vertices are a `lib_sets` set
+  and its edges a `lib_pairs` relation. Two refusals the host does not make: a
+  vertex the graph does not hold is named rather than answered as a sink, and a
+  cycle refuses the topological order naming a vertex that reaches itself, where
+  `top_sort/2` only fails.
 - `lib_pairs` is a new library that reads a collection of (Key Value) pairs as a
   relation: `pairs-is`, `pairs-keys`, `pairs-values`, `pairs-swap`,
   `pairs-sort-by-key`, `pairs-sort-by-value`, `pairs-group`, `pairs-ungroup` and
