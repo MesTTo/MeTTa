@@ -1,4 +1,8 @@
 % Purpose: resolve scoped declarations, type compatibility, metatypes, and typed-call introspection
+% Guarantees: constructor result sorts widen through subsorts while callable
+%   result types retain their direct arrow result
+%   [tested: a_data_constructor_result_sort_is_widened,
+%   an_application_return_type_is_not_widened; commit=WORKTREE].
 % Guarantees: reported_rest_arrow/3 reports the result of an empty splice run
 %   while get-type of its head retains the written arrow
 %   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
@@ -1107,10 +1111,9 @@ inapplicable_typed_application(Module, X, Candidates) :-
 %where it shows [source: hyperon-experimental@3f76dc4 lib/src/metta/types.rs,
 %get_atom_types_internal].
 %
-%What is NOT widened: a grounded literal's built-in type and an application's
-%return type, because upstream's get_atom_types_internal queries the space only
-%for symbols and expressions. So `(:< Number Foo)` leaves `(get-type 1)` at
-%Number, and `(: f (-> A B))` with `(:< B C)` leaves `(get-type (f a))` at B.
+%Grounded intrinsic types and callable application results keep their direct
+%types. A head with no implementation constructs sorted data instead; its
+%result sort participates in the same subsort closure as a declared symbol.
 %Two phases, because the ORDER is observable through collapse and upstream's
 %is not the order one pass produces: tuple products first, then the direct
 %declarations already widened, then one more widening over the whole list. With
@@ -1148,7 +1151,11 @@ widening_applies_to(Module, X) :-
     \+ string(X),
     X \== true,
     X \== false,
-    \+ application_return_type(Module, X).
+    (   nonvar(X), X = [Head|_], atom(Head),
+        \+ metta_host_function_callable_from(Module, Head)
+    ->  true
+    ;   \+ application_return_type(Module, X)
+    ).
 
 application_return_type(Module, X) :- metta_self_module(Module), !, get_function_type(X, _).
 application_return_type(Module, X) :- get_function_type_in(Module, X, _).

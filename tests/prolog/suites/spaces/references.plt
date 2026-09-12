@@ -35,6 +35,18 @@ reference_answers(Index, Call, Bag) :-
     reference_space(Index, Space), findall(R, evalc(Call, Space, R), Answers),
     msort(Answers, Bag).
 
+test(constructor_declarations_travel_without_callable_heads,
+     [setup(reference_setup), cleanup(reference_cleanup)]) :-
+    reference_add(1, [':', 'SortedPoint', [->, 'Number', 'SortedPoint']]),
+    reference_add(1, [':<', 'SortedPoint', 'Located']),
+    reference_from(2, 1),
+    reference_answers(2, ['get-type', ['SortedPoint', 3]], Types),
+    assertion(Types == ['Located','SortedPoint']),
+    reference_space(2, Receiver), space_module(Receiver, Module),
+    assertion(\+ metta_host_function_callable_from(Module, 'SortedPoint')),
+    reference_answers(2, ['SortedPoint', 3], Values),
+    assertion(Values == [['SortedPoint',3]]).
+
 test(a_reference_map_accepts_a_name_that_is_already_a_grounded_function,
      [setup(reference_setup), cleanup(reference_cleanup),
       forall(member(map(Operation, Arguments, Expected),

@@ -1,5 +1,8 @@
 % Purpose: direct PlUnit coverage for core runtime builtins, their error
 %   contracts, and Python import state cleanup.
+% Guarantees: data constructors participate in the subsort closure while an
+%   implemented operation retains its direct result type
+%   [tested: metta_subtyping; commit=WORKTREE].
 % Guarantees:
 %   - recovery preserves the engine's bound-control exceptions [tested:
 %     limit_expiry_is_a_control_signal_no_recovery_catch_eats; commit=bbb512316280110a747e31c26adfc31e8c5104be].
@@ -2069,8 +2072,9 @@ test(a_list_argument_stays_a_list,
 %The mechanism is the part that is easy to get wrong. Upstream never DECIDES a
 %subtyping relation while checking an argument; it WIDENS the argument's type
 %LIST and runs the ordinary check against the wider list, so the matcher learns
-%nothing about subtyping and `get-type` is where it shows. Every expectation
-%below is the answer measured from pinned hyperon 0.2.10 at 3f76dc4
+%nothing about subtyping and `get-type` is where it shows. Constructor sort
+%widening follows the order-sorted declaration rule. The remaining expectations
+%below are the answers measured from pinned hyperon 0.2.10 at 3f76dc4
 %[source: hyperon-experimental@3f76dc4, get_atom_types_internal and
 %get_tuple_types, which the two lines above name].
 
@@ -2088,10 +2092,15 @@ test(a_declared_type_widens_to_its_supertype) :-
 test(a_literals_builtin_type_is_not_widened) :-
     subtype_case(["(:< Number SubFoo)"], 1, ['Number']).
 
-%Nor is an application's return type.
+%A callable application's return type remains direct.
 test(an_application_return_type_is_not_widened) :-
-    subtype_case(["(: sub-c C1)", "(: sub-f (-> C1 D1))", "(:< D1 E1)"],
+    subtype_case(["(: sub-c C1)", "(: sub-f (-> C1 D1))", "(:< D1 E1)",
+                  "(= (sub-f $x) $x)"],
                  '(sub-f sub-c)', ['D1']).
+
+test(a_data_constructor_result_sort_is_widened) :-
+    subtype_case(["(: sub-data-c C2)", "(: sub-data-f (-> C2 D2))", "(:< D2 E2)"],
+                 '(sub-data-f sub-data-c)', ['D2','E2']).
 
 %Tuple products first, then the direct declarations already widened, then one
 %more widening over the whole list. A single pass answers ((A B) D C E) and
