@@ -1,3 +1,13 @@
+% Guarantees: metta_with_trailed/3 is published as a host_service
+%   [source: engine/ext_points.pl:kind/2; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+% Guarantees: a `:- seam:context_reader(Head, Key, Shape)` declaration defines
+%   the reader and compiles every resolving call to its nb_current/2 read, at
+%   the inferences of the dynamic fact the reader replaced; a malformed shape
+%   or key refuses at load [tested: trailed_scopes:every_declared_reader_is_compiled_to_its_read,
+%   trailed_scopes:a_call_site_carries_the_read_rather_than_a_call,
+%   trailed_scopes:an_inactive_reader_costs_what_the_asserted_guard_cost,
+%   trailed_scopes:a_malformed_reader_declaration_refuses_at_load; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
+%
 % Purpose: declare each engine extension seam, its direction and its cut
 %   semantics, and publish the predicates extensions and host bindings may call.
 % Guarantees: allocation, release and held-goal context hooks let lib_thread
@@ -155,6 +165,7 @@
             % Declarations: fact tables the engine reads as data.
             extension_builtin/2,
             builtin_type_declaration/2,
+            context_reader/4,
             context_events/3,
             engine_context/1,
             engine_emitted/1,
@@ -1240,6 +1251,97 @@ kind(metta_host_run_source_status/3, host_service).
 kind(metta_host_load_file/3, host_service).
 kind(metta_host_read_forms/2, host_service).
 kind(metta_host_with_stack_limit/2, host_service).
+% A thread-local dynamic context whose ordinary exit and unwind both restore
+% its prior value. Absence reads as []; a caller never replaces a scoped root
+% nonbacktrackably. Payload mutation belongs inside the root instead.
+kind(metta_with_trailed/3, host_service).
+
+%The read side of that context. A reader is declared once, beside the door
+%that writes its key:
+%
+%    :- seam:context_reader(working_dir(Directory), '$metta_working_dirs', stack(Directory)).
+%
+%Two things derive from the row: the predicate itself, for meta-calls, exports
+%and the checkers, and a goal expansion that compiles every call to the reader
+%into its nb_current/2 read. The expansion is what makes a trailed context
+%cost what the asserted guard it replaced cost. A predicate that only reads a
+%global costs its own call plus the read, two inferences where the empty
+%dynamic fact cost one, and that inference landed on every stored atom, whose
+%loader asks active_source_load/1, and on every reader the compiler consults
+%per equation [measured 2026-09-12: engine/bench.pl's translate case under
+%library(prolog_profile) read 5,509 nb_current/2 calls against the cut's
+%3,367, lists:member/2 6,891 against 6,100 and the five wrapper readers 1,873
+%calls, the whole +4,522 of the case; a 20,000-atom add loop read +19,938
+%inferences, one per active_source_load/1 read;
+%command=swipl tests/prolog/probes/bench_case_profile.pl <root> translate <out>
+%on the branch and on its pristine cut b1d175f13b67baf1090f74f309407b763d421744,
+%the two TSVs diffed by predicate; fixture=warm QLF set, both MORK objects;
+%commit=bcc22a1fd4458e1d85de7ffd8c55fcf02bfeb668].
+%
+%Two shapes cover every reader in the tree. value(Pattern) reads one term, a
+%flag when the pattern is `true`. stack(Pattern) reads a nearest-first list:
+%the head is unified inside the same nb_current/2 call, so an absent key, an
+%inactive [] and a one-element stack each cost that single inference, exactly
+%the dynamic fact's, and enumeration continues through lists:member/2 only
+%for the elements behind it. The first answer leaves no choicepoint on a
+%one-element stack, as a one-clause fact did [measured 2026-09-12: inferences
+%per read above an empty loop, key unset, inactive [] and one element: a
+%dynamic fact 2/2/1, the inlined stack read 2/2/1, the predicate wrapper it
+%replaces 3/3/2 and the wrapper over nb_current/2 then member/2 3/4/4;
+%command=swipl tests/prolog/probes/context_read_shapes.pl; fixture=bare
+%SWI-Prolog 10.1.13; commit=bcc22a1fd4458e1d85de7ffd8c55fcf02bfeb668].
+%
+%The expansion applies wherever the call resolves to the declaring module:
+%unqualified in that module, qualified from anywhere, imported, or inherited
+%through a base module. The resolution is asked through
+%'$get_predicate_attribute'/3, because predicate_property/2 on a name the
+%module does not have walks the autoload index, 15,265 inferences per goal
+%at compile time and a library load when the name is in it
+%(docs/journal/2026-09-06-the-price-of-asking-whether-a-predicate-exists.md).
+%A cross-referencer sees the calls, not the reads, the way library(apply_macros)
+%hides its expansion under the xref flag. Every declared row remains a
+%readable fact, which is what makes the reader reachable for the reachability
+%report through this multifile table rather than through a call nothing
+%compiles any more [tested: trailed_scopes:every_declared_reader_is_compiled_to_its_read,
+%trailed_scopes:a_call_site_carries_the_read_rather_than_a_call,
+%trailed_scopes:an_inactive_reader_costs_what_the_asserted_guard_cost,
+%trailed_scopes:a_malformed_reader_declaration_refuses_at_load; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
+%Workaround: swi-cleanup-window - a reader compiles to its trailed read, so the trailed guard costs what the asserted guard cost.
+:- multifile context_reader/4.
+kind(context_reader/4, declaration).
+
+context_read(value(Pattern), Key, nb_current(Key, Pattern)).
+context_read(stack(Pattern), Key,
+             ( nb_current(Key, [First|Rest]),
+               (   Rest == []
+               ->  Pattern = First
+               ;   ( Pattern = First ; lists:member(Pattern, Rest) )
+               ) )).
+
+:- multifile system:term_expansion/2.
+system:term_expansion((:- seam:context_reader(Head, Key, Shape)),
+                      [ seam:context_reader(Head, Owner, Key, Shape),
+                        (Head :- Read) ]) :-
+    must_be(callable, Head),
+    must_be(atom, Key),
+    (   nonvar(Shape),
+        context_read(Shape, Key, Read)
+    ->  true
+    ;   domain_error(context_reader_shape, Shape)
+    ),
+    prolog_load_context(module, Owner).
+
+:- multifile system:goal_expansion/2.
+system:goal_expansion(Head, Read) :-
+    nonvar(Head),
+    context_reader(Head, Owner, Key, Shape),
+    \+ current_prolog_flag(xref, true),
+    prolog_load_context(module, Module),
+    (   Module == Owner
+    ->  true
+    ;   '$get_predicate_attribute'(Module:Head, imported, Owner)
+    ),
+    context_read(Shape, Key, Read).
 %An inference budget over a goal an engine will RESUME, which is knowledge a
 %host cannot hold correctly on its own: the engine counts its own inferences
 %and the host thread cannot see them, so a bound placed around engine_next/2

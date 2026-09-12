@@ -75,6 +75,53 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Expected-type family classification reuses compiled shipped patterns. User
   rules still normalize aliases when queried and retain their precedence.
 
+- A trailed context has two doors: `metta_with_trailed/3` restores the prior
+  value on every answer, and `metta_with_trailed_enumeration/3` holds the
+  value over a goal's whole enumeration and restores once it is finished, cut,
+  failed or raised. The execution module and the evaluation context take the
+  second, which is the scope their cut's setup/cleanup pair had: a collector
+  that pulls a million answers through them pays one write, not a million.
+- A context reader is declared once, `:- seam:context_reader(Head, Key, Shape)`,
+  and every call to it compiles to its `nb_current/2` read, so the trailed
+  guards cost what the asserted guards they replaced cost: an absent, inactive
+  or one-element context reads in one inference, and the loader's per-atom
+  read and the compiler's per-equation reads return to the cut's counts. The
+  receipt listener's exception hook is clausal only from the process's first
+  bound on, so a process that never bounds pays nothing per ball it throws and
+  one that does pays three inferences per bounded call for the test that arms
+  it, read from a fact rather than searched for among the hook's clauses.
+- The report of predicates nothing can reach reads a load-time directive in
+  the module that directive runs in, scans the units a subsystem keeps one
+  directory down, takes a module-qualified name held as data as the goal it is
+  at whatever arity it is defined with, and roots a declared context reader in
+  its declaration row. The four doors take 175 findings off the report, led by
+  the engine's builtin census and its prelude installation: both are reached
+  only from their own module file's directive, which the probe clause ran as
+  user's until now. Five planted predicates and
+  `tests/prolog/probes/reachability_doors.sh` keep each door attached to the
+  plant that proves it, and the self-test reads a plant's whole indicator, so
+  a row naming a module can no longer be skipped in silence.
+- Receipt retirement completes after an inference limit interrupts a native
+  transaction's completion listener. Rolled-back marker notifications release
+  their standing-engine claims while preserving a live outer transaction.
+  The shared inference-bound door preserves its control envelope when the
+  native notification raises the limit after the host limiter returns.
+- Reader source-load and directory scopes are published to their compiler
+  and manifest consumers; the binding service manifest records the shared
+  trailed context door.
+- Temporary engine contexts use `metta_with_trailed/3` to restore their
+  enclosing value after inference limits, exceptions, failure, cut and redo.
+  Source and materialization rollback retain their ownership records until
+  cleanup completes.
+- Scoped executable clauses register retirement before acquisition and retain
+  ownership across interruption. Source observation trails its contexts,
+  collects raised errors through the debugger, and stops its frame walk at
+  the observation boundary.
+- Python message forwarding and Node/C error capture use the engine's trailed
+  scope for their reentrancy and capture flags.
+- The `prolog-static` lane refuses state writes in either cleanup wrapper's
+  setup, validates the checker's declared fixture exceptions, and refuses
+  malformed source during its scan.
 - The engine benchmark's boot row prepares its own artifact state: the governed
   `.qlf` set is purged and warmed through the ordinary boot in children of the
   driver before the row's samples, the same preparation the C fixture takes, so
@@ -195,6 +242,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `docs/host-workarounds.md` names the mechanism and the host change that
   lifts each workaround.
 
+- The Python profile door keeps the goal's answers when SWI's sampler took no
+  sample: the profiler's report divides by the total tick count as the cleanup
+  of the goal, and the raised division unwound the answer it was meant to
+  carry, so every profile door raised an engine error on a box quiet enough to
+  finish the profiled goal inside one sampling period. The answer is recorded
+  beside the run and an empty profile keeps its call rows.
 - The dependency gate derives local tool modules from their source directory
   and recognises the reference generator's development dependency. The parity
   fixture producer uses the shared process bound. The syntax introduction

@@ -6,6 +6,10 @@
 % environment from a small allowlist carrying no locale.
 :- encoding(utf8).
 
+% Guarantees: hook grants, user transactions and speculation use
+%   metta_with_trailed/3 for their scoped state
+%   [source: engine/metta/space_hooks.pl:metta_outer_transaction_prepare/5; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%
 % Purpose: implement pre-add hooks, transforms, watchers, views, digests, and purity inventories
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
@@ -339,10 +343,9 @@ metta_hook_post_apply([accept, Term1], Space, _, Term) :- !,
     (   Term1 == Term
     ->  true
     ;   metta_remove_atom(Space, Term, _),
-        setup_call_cleanup(
-            b_setval('$metta_hook_granted', granted(Space, Term1)),
-            metta_add_atom(Space, Term1, _),
-            b_setval('$metta_hook_granted', [])),
+        % Workaround: swi-cleanup-window - restore the enclosing hook grant on every exit.
+        metta_with_trailed('$metta_hook_granted', granted(Space, Term1),
+                           metta_add_atom(Space, Term1, _)),
         metta_capacity_count_added(Space, Term1)
     ).
 %The refusal's undo is the catch handler's, once for every error path.
@@ -354,7 +357,7 @@ metta_hook_post_apply(Got, Space, Handler, Term) :-
     metta_hook_invalid_verdict('post-add', Got, Space, Handler, Term).
 
 metta_hook_granted_form(Space, Term) :-
-    catch(b_getval('$metta_hook_granted', granted(GSpace, GTerm)), _, fail),
+    nb_current('$metta_hook_granted', granted(GSpace, GTerm)),
     GSpace == Space,
     GTerm == Term.
 
@@ -368,10 +371,9 @@ metta_hook_apply_counted([accept], Space, _, Term, _, Wrapped) :- !,
 metta_hook_apply_counted([accept, Term1], Space, _, Term, R, Wrapped) :- !,
     (   Term1 == Term
     ->  call(Wrapped)
-    ;   setup_call_cleanup(
-            b_setval('$metta_hook_granted', granted(Space, Term1)),
-            metta_add_atom(Space, Term1, R),
-            b_setval('$metta_hook_granted', []))
+    ;   % Workaround: swi-cleanup-window - a transformed counted write trails its grant.
+        metta_with_trailed('$metta_hook_granted', granted(Space, Term1),
+                           metta_add_atom(Space, Term1, R))
     ),
     metta_capacity_count_added_known(Space, Term1).
 metta_hook_apply_counted(Verdict, Space, Handler, Term, R, Wrapped) :-
@@ -381,10 +383,9 @@ metta_hook_apply([accept], _, _, _, _, Wrapped) :- !, call(Wrapped).
 metta_hook_apply([accept, Term1], Space, _, Term, R, Wrapped) :- !,
     (   Term1 == Term
     ->  call(Wrapped)
-    ;   setup_call_cleanup(
-            b_setval('$metta_hook_granted', granted(Space, Term1)),
-            metta_add_atom(Space, Term1, R),
-            b_setval('$metta_hook_granted', []))
+    ;   % Workaround: swi-cleanup-window - a transformed write trails its grant.
+        metta_with_trailed('$metta_hook_granted', granted(Space, Term1),
+                           metta_add_atom(Space, Term1, R))
     ).
 metta_hook_apply([refuse, Words], Space, _, Term, _, _) :- !,
     throw(error(metta_add_refused(Space, Term, Words), none)).
@@ -555,12 +556,11 @@ metta_outer_transaction_prepare(Goal, Vars, Answers,
     %declaration time cannot see and which left both declarations standing
     %[measured 2026-09-05; the nested branch does NOT refresh, which is why
     %only the outer boundary carries this].
-    catch(( setup_call_cleanup(
-                b_setval('$metta_user_tx', true),
+    % Workaround: swi-cleanup-window - transaction ownership is a trailed flag.
+    catch(( metta_with_trailed('$metta_user_tx', true,
                 materialization_transaction(
                     metta_transaction_answers(Goal, Vars, Answers),
-                    metta_validate_pending_type_aliases),
-                b_setval('$metta_user_tx', false))
+                    metta_validate_pending_type_aliases))
         ->  Outcome = committed ; Outcome = failed ),
           Error,
           Outcome = threw(Error)),
@@ -745,12 +745,10 @@ metta_speculate_prepare(Goal, Vars, Answers, Outcome) :-
     ->  true
     ;   OuterEnlisted = []
     ),
-    ( metta_in_user_transaction -> OuterFlag = true ; OuterFlag = false ),
     nb_setval('$metta_tx_enlisted', []),
-    catch(( setup_call_cleanup(
-                b_setval('$metta_user_tx', true),
-                snapshot(metta_transaction_answers(Goal, Vars, Answers)),
-                b_setval('$metta_user_tx', OuterFlag))
+    % Workaround: swi-cleanup-window - speculation restores its enclosing transaction flag.
+    catch(( metta_with_trailed('$metta_user_tx', true,
+                snapshot(metta_transaction_answers(Goal, Vars, Answers)))
         ->  Outcome = succeeded
         ;   Outcome = failed
         ),
@@ -801,7 +799,7 @@ metta_transaction_answers(Goal, Vars, Answers) :-
 %backtrackable and thread-local; the outermost user transaction sets it,
 %a nested one runs inside it untouched.
 metta_in_user_transaction :-
-    catch(b_getval('$metta_user_tx', true), _, fail).
+    nb_current('$metta_user_tx', true).
 
 metta_enlist_foreign(Space) :-
     nb_getval('$metta_tx_enlisted', Enlisted),

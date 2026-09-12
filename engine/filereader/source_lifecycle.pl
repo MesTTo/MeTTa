@@ -8,6 +8,10 @@
 
 % Guarantees: withdraw_source_load/3 preserves equal atoms owned by other loads
 %   or the caller [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
+% Guarantees: with_source_load/3 restores its context through metta_with_trailed/3;
+%   rollback_source_load_stable/1 retains its undo plan until retirement ends
+%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
 % Owns resources: with_source_publication_context/2 restores its trailed
 %   context on exit, failure and exception
@@ -961,15 +965,16 @@ with_source_load(CanonPath, Space, Goal) :-
                  filereader:( call(Goal), run_source_repairs(LoadId) ),
                  filereader:publish_source_load(CanonPath, Space, LoadId)))),
         Catcher,
-        ( retractall(source_load_repair(LoadId, _)),
-          retractall(support_recompile_pending(LoadId, _, _)),
-          retractall(source_load_digest(LoadId, _, _)),
-          ( Catcher == exit -> true
-          ; materialize:discard_space(Space), rollback_source_load(LoadId) ),
-          (   current_transaction(_)
-          ->  true
-          ;   metta_repair_emptied_shadows
-          ) )).
+        catch(finish_source_load(Catcher, Space, LoadId), Ball,
+              (finish_source_load(Catcher, Space, LoadId), throw(Ball)))).
+
+finish_source_load(Catcher, Space, LoadId) :-
+    retractall(source_load_repair(LoadId, _)),
+    retractall(support_recompile_pending(LoadId, _, _)),
+    retractall(source_load_digest(LoadId, _, _)),
+    ( Catcher == exit -> true
+    ; materialize:discard_space(Space), rollback_source_load(LoadId) ),
+    ( current_transaction(_) -> true ; metta_repair_emptied_shadows ).
 
 publish_source_load(CanonPath, Space, LoadId) :-
     (   source_load_digest(LoadId, CanonPath, Digest)
@@ -1231,11 +1236,20 @@ forget_space_source_loads(Space) :-
 :- meta_predicate run_with_loading_marker(:, 0).
 
 run_with_loading_marker(Marker, Goal) :-
-    setup_call_catcher_cleanup(
-        assertz(Marker, Ref),
-        once(Goal),
+    Owner = owned(none),
+    % Workaround: swi-cleanup-window - register rollback first, then protect the marker and its ownership write from signals and inference trips.
+    setup_call_catcher_cleanup(true,
+        ( sig_atomic(( assertz(Marker, Ref),
+                       catch(nb_setarg(1,Owner,Ref), AcquireBall,
+                             (ignore(erase(Ref)), throw(AcquireBall))) )),
+          once(Goal) ),
         Catcher,
-        ( Catcher == exit -> true ; erase(Ref) )).
+        catch(retire_loading_marker(Catcher, Owner), Ball,
+              (retire_loading_marker(Catcher, Owner), throw(Ball)))).
+
+retire_loading_marker(exit, _) :- !.
+retire_loading_marker(_, Owner) :-
+    arg(1, Owner, Ref), ( Ref == none -> true ; ignore(erase(Ref)) ).
 
 % Resolve the journal's owner once at scope entry. A recompile replaces an
 % artifact for its original owners; a nested pin supersedes that context
@@ -1274,16 +1288,16 @@ record_source_support_assertions(Refs) :-
 :- meta_predicate with_source_publication_context(+, 0).
 
 % Workaround: swi-cleanup-window - trail the publication context so abandonment restores it even if cleanup is interrupted.
-% Source IDs and owner bags contain no mutable program terms. Both writes
-% are trailed: an inner non-backtrackable restore can overwrite the outer
-% scope's undo record. This follows with_metta_module/2's nested restoration.
-% Transaction rollback cannot resurrect an already closed scope.
+% Source IDs and owner bags contain no mutable program terms. The engine's
+% own primitive is the write: it trails the entry and restores on the
+% ordinary exit, so failure, an exception, a cut and a redo all unwind
+% through the trail and an inner restore cannot overwrite an outer scope's
+% undo record. The pair this was, a `b_setval/2` in a setup_call_cleanup/3
+% Setup, put the write one call port before the cleanup was registered,
+% which is the window the ledger entry names and the prolog-static rule
+% refuses. Transaction rollback cannot resurrect an already closed scope.
 with_source_publication_context(Context, Goal) :-
-    b_getval('$metta_source_publication', Previous),
-    setup_call_cleanup(
-        b_setval('$metta_source_publication', Context),
-        call(Goal),
-        b_setval('$metta_source_publication', Previous)).
+    metta_with_trailed('$metta_source_publication', Context, Goal).
 
 %The same journal decision hoisted out of a run: the context lookup and the
 %owner-pin unwrap happen once, and the run's store loop journals each
@@ -1446,26 +1460,35 @@ rollback_source_load_stable(LoadId) :-
             Functions0),
     sort(Functions0, Functions),
     findall(Refs,
-            retract(source_load_support_assertions(LoadId, Refs)),
+            source_load_support_assertions(LoadId, Refs),
             SupportGroups),
-    forall(retract(source_load_resource(
-                       LoadId, restored_rule(Name, Home, Generation))),
+    findall(restored_rule(Name, Home, Generation),
+            source_load_resource(LoadId, restored_rule(Name, Home, Generation)),
+            Rules),
+    findall(Ref, source_load_assertion(LoadId, _, Ref), Asserted),
+    reverse(Asserted, Refs),
+    findall(Space, source_load_resource(LoadId, owned_space(Space)), Owned0),
+    reverse(Owned0, Owned),
+    % Workaround: swi-cleanup-window - retain the complete undo plan across an interrupted retirement.
+    Undo = rollback_source_load_rows(LoadId, SupportGroups, Rules, Refs, Owned,
+                                    PolicyModules, Functions, TypeLookups),
+    catch(Undo, Ball, (call(Undo), throw(Ball))).
+
+rollback_source_load_rows(LoadId, SupportGroups, Rules, Refs, Owned,
+                          PolicyModules, Functions, TypeLookups) :-
+    forall(member(restored_rule(Name, Home, Generation), Rules),
            translator_rules:rollback_restored_translator_rule(
                Name, Home, Generation)),
     maplist(retire_source_artifacts, SupportGroups),
-    findall(Ref, retract(source_load_assertion(LoadId, _, Ref)), Asserted),
-    reverse(Asserted, Refs),
     retire_source_artifacts(Refs),
-    findall(Space,
-            retract(source_load_resource(LoadId, owned_space(Space))),
-            Owned0),
-    reverse(Owned0, Owned),
     forall(member(Space, Owned), rollback_source_owned_space(Space)),
-    retractall(source_load_resource(LoadId, _)),
     forall(member(Module, PolicyModules), typing_policy_changed(Module)),
     support_prune_orphans,
     repair_after_source_rollback(Functions),
-    repair_type_aliases_after_rollback(TypeLookups).
+    repair_type_aliases_after_rollback(TypeLookups),
+    retractall(source_load_support_assertions(LoadId, _)),
+    retractall(source_load_assertion(LoadId, _, _)),
+    retractall(source_load_resource(LoadId, _)).
 
 % Cleanup already owns these exact reference groups. Attempt every reference,
 % including stale ones and duplicates, and preserve the established policy

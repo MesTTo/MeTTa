@@ -1,3 +1,8 @@
+% Guarantees: support_atomic/1 and with_support_repairs_deferred/1 scope their
+%   markers through metta_with_trailed/3 without changing lock ownership, and
+%   both markers are declared context readers compiled to their reads
+%   [tested: trailed_scopes; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
+%
 % Purpose: record module-qualified support edges and propagate invalidation
 %   from changed inputs to the derived engine artifacts that depend on them.
 % Guarantees:
@@ -168,8 +173,8 @@ support_edge_retractall(Support, Derived) :-
 %indexed and never hashed; this mapping is how the two meet.
 :- dynamic support_translated_form_id/3.
 :- dynamic support_memo_changed/2.
-:- thread_local support_graph_locked/0.
-:- thread_local support_repairs_deferred/0.
+:- seam:context_reader(support_graph_locked, '$metta_support_graph_locked', value(true)).
+:- seam:context_reader(support_repairs_deferred, '$metta_support_repairs_deferred', value(true)).
 
 :- multifile support_invalidation_action/1.
 seam:kind(support_invalidation_action/1, event).
@@ -338,11 +343,10 @@ must_be_support_node(Node) :-
 support_atomic(Goal) :-
     (   support_graph_locked
     ->  call(Goal)
-    ;   with_mutex('$metta_support_graph',
-                   setup_call_cleanup(
-                       asserta(support_graph_locked, Ref),
-                       support_transaction(Goal),
-                       erase(Ref)))
+    ;   % Workaround: swi-cleanup-window - the lock marker unwinds on the trail.
+        with_mutex('$metta_support_graph',
+                   metta_with_trailed('$metta_support_graph_locked', true,
+                                      support_transaction(Goal)))
     ).
 
 % The equation compile door already owns a database transaction. Reusing it
@@ -354,9 +358,8 @@ support_transaction(Goal) :-
 with_support_repairs_deferred(Goal) :-
     (   support_repairs_deferred
     ->  call(Goal)
-    ;   setup_call_cleanup(asserta(support_repairs_deferred, Ref),
-                           Goal,
-                           erase(Ref))
+    ;   % Workaround: swi-cleanup-window - abandoned deferral restores its marker.
+        metta_with_trailed('$metta_support_repairs_deferred', true, Goal)
     ).
 
 % Replace the complete incoming support set of one derived artifact.

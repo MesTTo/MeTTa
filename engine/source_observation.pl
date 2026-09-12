@@ -1,3 +1,7 @@
+% Guarantees: observation contexts use metta_with_trailed/3; temporary clauses
+%   retire on interruption, and error frame walks stop at the observer frame
+%   [tested: trailed_scopes, source_observation; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%
 % Purpose: retain source maps beside compiled clauses and collect observations.
 % Assumes: nothing loads this file at boot. engine/metta.pl reaches it only
 %   through metta_ensure_source_observation/0, which also gives it the engine's
@@ -48,6 +52,7 @@
 :- meta_predicate with_source(+, +, +, 0).
 :- meta_predicate compile_clause(+, -, 0).
 :- meta_predicate compile_expression(+, ?, ?, 0).
+:- meta_predicate with_observation(+, +, -, 0).
 
 :- thread_local source_document/3, source_equation/5, clause_source/4,
                 clause_location/5, unavailable_location/4, unavailable_function/1.
@@ -68,33 +73,25 @@ remove_compiler_observers :-
     remove_wrapper(translator:translate_clause_impl/4, source_map),
     remove_wrapper(translator:translate_expr_dl/4, source_map).
 
-save_context(Key, saved(Value)) :- nb_current(Key, Value), !.
-save_context(_, absent).
-restore_context(Key, saved(Value)) :- !, nb_linkval(Key, Value).
-restore_context(Key, absent) :- nb_delete(Key).
-
 with_source(Source, Parsed, Space, Goal) :-
     source_positions(Source, Parsed, Positioned),
     spaces:space_module(Space, Module),
     source_label(Label),
     flag('$metta_source_document', Id, Id+1),
     assertz(source_document(Id, Label, Source)),
-    ( nb_current('$metta_source_context',_) -> true
+    ( nb_current('$metta_source_context',context(_,_,_,_)) -> true
     ; nb_current('$metta_observation',Buffer), nb_setarg(4,Buffer,Id) ),
     empty_assoc(Empty),
     source_queues(Parsed, Positioned, Empty, Queues),
-    save_context('$metta_source_context', Previous),
     pairs_keys_values(FormPairs, Parsed, Positioned),
-    setup_call_cleanup(
-        nb_linkval('$metta_source_context', context(Module, Id, Queues, FormPairs)),
-        call(Goal),
-        restore_context('$metta_source_context', Previous)).
+    % Workaround: swi-cleanup-window - source maps use a trailed context root.
+    metta_with_trailed('$metta_source_context', context(Module, Id, Queues, FormPairs), Goal).
 
 source_label(Label) :-
-    ( nb_current('$metta_source_context',_),
+    ( nb_current('$metta_source_context',context(_,_,_,_)),
       filereader:current_source_identity(file(Path), _) -> atom_string(Path, Label)
-    ; nb_current('$metta_source_context',_) -> Label="<nested-source>"
-    ; nb_current('$metta_observe_label', Label) -> true
+    ; nb_current('$metta_source_context',context(_,_,_,_)) -> Label="<nested-source>"
+    ; nb_current('$metta_observe_label', Label), Label \== [] -> true
     ; Label = "<string>" ).
 
 source_queues([], [], Queues, Queues).
@@ -132,20 +129,17 @@ source_for_clause(Input, StoredRef, Id, Tree) :-
 
 compile_clause(Input, Clause, Goal) :-
     ( source_for_clause(Input, StoredRef, Id, Tree)
-    -> save_context('$metta_compile_locations', Previous),
-       Context = compiling(Input, Tree, []),
-       setup_call_cleanup(
-           nb_linkval('$metta_compile_locations', Context),
+    -> Context = compiling(Input, Tree, []),
+       % Workaround: swi-cleanup-window - compilation locations retain a trailed root.
+       metta_with_trailed('$metta_compile_locations', Context,
            ( call(Goal),
              arg(3, Context, Records),
-             save_pending(Clause, StoredRef, Id, Tree, Records) ),
-           restore_context('$metta_compile_locations', Previous))
+             save_pending(Clause, StoredRef, Id, Tree, Records) ))
     ; call(Goal) ).
 
 save_pending(Clause, StoredRef, Id, Tree, Records) :-
-    ( nb_current('$metta_pending_source_maps', Pending) -> true ; Pending=[] ),
-    nb_linkval('$metta_pending_source_maps',
-               [pending(Clause, StoredRef, Id, Tree, Records)|Pending]).
+    nb_current('$metta_pending_source_maps', Cell), arg(1, Cell, Pending),
+    nb_linkarg(1, Cell, [pending(Clause, StoredRef, Id, Tree, Records)|Pending]).
 
 compile_expression(Expression, Start, End, Goal) :-
     call(Goal),
@@ -174,9 +168,9 @@ source_subterms([_|Terms], [_|Trees], Wanted, Span, Kind) :-
 % those identities against the final clause before assertz copies the term.
 % Recursive fuel prefixes may add goals but leave the original goals shared.
 publish_clause(Ref, Clause) :-
-    ( nb_current('$metta_pending_source_maps', Pending),
+    ( nb_current('$metta_pending_source_maps', Cell), Cell = pending(Pending),
       select_pending(Clause, Pending, Entry, Rest)
-    -> nb_linkval('$metta_pending_source_maps', Rest),
+    -> nb_linkarg(1, Cell, Rest),
        Entry = pending(_, StoredRef, Id, node(ClauseSpan,_), Records),
        assertz(clause_source(Ref, StoredRef, Id, ClauseSpan)),
        publish_locations(Ref, Clause, Id, Records)
@@ -327,12 +321,20 @@ current_source_frames(Frames) :-
     source_frames(Current, call, Frames).
 
 source_frames(Current, PC, Frames) :-
+    nb_current('$metta_observation', Buffer),
+    arg(6, Buffer, trace(Boundary, _)),
+    ( Boundary == none -> Frames = []
+    ; source_frames_until(Current, PC, Boundary, Frames) ).
+
+% Workaround: swi-query-frame-discarded-on-engine-destroy - stop before the observation's own frame, never inspect an outer query frame.
+source_frames_until(Current, _, Boundary, []) :- Current == Boundary, !.
+source_frames_until(Current, PC, Boundary, Frames) :-
     ( source_frame(Current, PC, Frame)
     -> Frames=[Frame|Rest]
     ; Frames=Rest ),
     ( prolog_frame_attribute(Current, parent, Parent)
     -> ( prolog_frame_attribute(Current, pc, ParentPC) -> true ; ParentPC=foreign ),
-       source_frames(Parent, ParentPC, Rest)
+       source_frames_until(Parent, ParentPC, Boundary, Rest)
     ; Rest=[] ).
 
 source_frame(Current, PC, frame(Name,Label,Span,Attribution)) :-
@@ -386,28 +388,32 @@ observation_error(Buffer, Error, Frames) :-
 % a clause of its own, so removal erases THIS clause by reference and never
 % retracts the predicate [source: /usr/lib/swi-prolog/library/prolog_stack.pl
 % lines 699-702, SWI-Prolog 10.1.13].
-:- multifile prolog:prolog_exception_hook/5.
-:- dynamic prolog:prolog_exception_hook/5.
 
 % Dynamic clauses are omitted by SWI's native coverage counters. Its debugger
 % still exposes the caller clause and program counter at each call port, so
 % the observer maps those events through the same code metadata as errors.
 :- multifile user:prolog_trace_interception/4.
 :- dynamic user:prolog_trace_interception/4.
+:- multifile prolog:prolog_exception_hook/5.
+:- dynamic prolog:prolog_exception_hook/5.
 
-%The clause refs of the two hooks above, erased when the observation that
-%asserted them ends. observe_source/4 holds '$metta_observation_session' for
+%The hooks' clause references, erased when their observation ends.
+%observe_source/4 holds '$metta_observation_session' for
 %the whole observation, so one process-wide record is enough.
 :- dynamic installed_hook/1.
 
-install_exception_observers(Owner, GC) :-
-    assertz((prolog:prolog_exception_hook(Error, Error, Frame, _, _) :-
-                 nb_current('$metta_observation', Buffer),
-                 source_observation:source_frames(Frame,call,Frames),
-                 Frames \== [],
-                 source_observation:observation_error(Buffer,Error,Frames)),
-            ExceptionReference),
-    assertz(installed_hook(ExceptionReference)),
+install_trace_observer(Owner, GC) :-
+    % Workaround: swi-query-frame-discarded-on-engine-destroy - schedule notification only; the bounded frame walk runs on the debugger port.
+    % Cleanup calls also have ordinary trace ports. Only a new exception,
+    % announced by this hook, reopens recording after the previous unwind.
+    % Workaround: swi-cleanup-window - publication is signal-masked and catch protects its ownership record.
+    sig_atomic((
+      assertz((prolog:prolog_exception_hook(_, _, _, _, _) :-
+                 thread_self(Thread), Thread == Owner,
+                 thread_signal(Thread, source_observation:exception_pending),
+                 fail), ExceptionReference),
+      catch(assertz(installed_hook(ExceptionReference)), ExceptionBall,
+            (ignore(erase(ExceptionReference)), throw(ExceptionBall))) )),
     % Workaround: swi-gc-in-frame-finished-listener-clears-a-live-slot - defer stack collection from an exit hook to the next non-exit port or teardown.
     % A watched debug-mode B_UNIFY_FV frame can finish with its caller's saved
     % PC still pointing just after the instruction. Collection in its finished
@@ -419,25 +425,45 @@ install_exception_observers(Owner, GC) :-
     % ports restore the saved flag before any observer work. These hooks only
     % inspect frames and update maps; they never create a thread. Source code
     % reaches its next call port before it can create one.
-    assertz((user:prolog_trace_interception(Port, Frame, _, continue) :-
+    % Workaround: swi-cleanup-window - teardown is registered; signal masking and catch protect publication of its ownership record.
+    sig_atomic((
+      assertz((user:prolog_trace_interception(Port, Frame, _, continue) :-
                  thread_self(Thread), Thread == Owner,
                  ( Port == exit -> set_prolog_flag(gc,false)
                  ; set_prolog_flag(gc,GC) ),
-                 nb_current('$metta_observation', Buffer),
+                 nb_current('$metta_observation', Buffer), Buffer \== [],
                  source_observation:observe_port(Port,Frame,Buffer)),
             TraceReference),
-    assertz(installed_hook(TraceReference)).
+      catch(assertz(installed_hook(TraceReference)), TraceBall,
+            (ignore(erase(TraceReference)), throw(TraceBall))) )).
 
 %Total, like remove_wrapper/2 below, because this runs in the cleanup that
 %also takes the eleven wrappers off: a raise here would strand them, and a
 %hook clause outlives the whole rest of the process. Nothing hides behind the
 %catch, because the_observer_holds_no_hook_outside_an_observation asks the
 %database whether the clauses are actually gone.
-remove_exception_observers :-
-    forall(retract(installed_hook(Reference)),
-           catch(erase(Reference), _, true)).
+remove_trace_observer :-
+    forall(installed_hook(Reference), ignore(erase(Reference))),
+    retractall(installed_hook(_)).
 
-observe_port(call, Frame, Buffer) :- !,
+exception_pending :-
+    ( nb_current('$metta_observation',Buffer), Buffer \== []
+    -> arg(6,Buffer,Trace), nb_setarg(2,Trace,false)
+    ; true ).
+
+% The debugger saves and clears the pending ball before invoking its hook.
+% Exception ports repeat while unwinding; record once per queued notification.
+% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-trace.c#L544-L556
+observe_port(exception(Error), Frame, Buffer) :- !,
+    arg(6, Buffer, Trace),
+    ( arg(2, Trace, true) -> true
+    ; source_frames(Frame, call, Frames),
+      ( Frames == [] -> true
+      ; observation_error(Buffer, Error, Frames), nb_setarg(2, Trace, true) ) ).
+observe_port(Port, Frame, Buffer) :-
+    observe_running_port(Port, Frame, Buffer).
+
+observe_running_port(call, Frame, Buffer) :- !,
     ( prolog_frame_attribute(Frame,pc,PC),
       prolog_frame_attribute(Frame,parent,Parent),
       prolog_frame_attribute(Parent,clause,Ref),
@@ -446,7 +472,7 @@ observe_port(call, Frame, Buffer) :- !,
       clause_location(Ref,Path,Id,Span,_)
     -> observation_hit(Buffer, site(Ref,Path,Id,Span))
     ; true ).
-observe_port(unify, Frame, Buffer) :- !,
+observe_running_port(unify, Frame, Buffer) :- !,
     ( prolog_frame_attribute(Frame,clause,Ref),
       clause_source(Ref,_,Id,Span)
     -> observation_hit(Buffer, clause(Ref,Id,Span))
@@ -454,7 +480,7 @@ observe_port(unify, Frame, Buffer) :- !,
       filereader:translated_from(Ref,[=,[Name|_],_])
     -> ( unavailable_function(Name) -> true ; assertz(unavailable_function(Name)) )
     ; true ).
-observe_port(_,_,_).
+observe_running_port(_,_,_).
 
 observation_hit(Buffer, Key) :-
     arg(1,Buffer,Hits),
@@ -465,29 +491,23 @@ observation_hit(Buffer, Key) :-
 :- meta_predicate observe_goals(+, +, 0).
 
 observe_form(Space, Form, Answers, Goal) :-
-    ( nb_current('$metta_observation', _),
+    ( nb_current('$metta_observation', Buffer), Buffer \== [],
       Form=parsed(runnable,_,Term,_),
       nb_current('$metta_source_context',context(_,Id,_,Pairs)),
       member(PairForm-positioned(_,_,_,_,Tree),Pairs),
       same_term(Form,PairForm)
-    -> save_context('$metta_compile_locations', Previous),
-       save_context('$metta_observed_runnable', PreviousRunnable),
-       Context=compiling(Term,Tree,[]),
-       setup_call_cleanup(
-           ( nb_linkval('$metta_compile_locations',Context),
-             nb_linkval('$metta_observed_runnable',runnable(Space,Id,Tree,Context)) ),
-           (call(Goal),record_answers(Id,Answers)),
-           ( restore_context('$metta_compile_locations',Previous),
-             restore_context('$metta_observed_runnable',PreviousRunnable) ))
+    -> Context=compiling(Term,Tree,[]),
+       % Workaround: swi-cleanup-window - trail the locations and their runnable together.
+       metta_with_trailed('$metta_compile_locations', Context,
+           metta_with_trailed('$metta_observed_runnable', runnable(Space,Id,Tree,Context),
+                             (call(Goal),record_answers(Id,Answers))))
     ; call(Goal) ).
 
 observe_goals(Module, Goals, Original) :-
     ( nb_current('$metta_observed_runnable', runnable(_,Id,Tree,Context))
-    -> save_context('$metta_observed_runnable', Previous),
-       setup_call_cleanup(
-           nb_delete('$metta_observed_runnable'),
-           execute_observed_goals(Module,Goals,Id,Tree,Context),
-           restore_context('$metta_observed_runnable',Previous))
+    -> % Workaround: swi-cleanup-window - suspension trails an inactive runnable value.
+       metta_with_trailed('$metta_observed_runnable', [],
+                          execute_observed_goals(Module,Goals,Id,Tree,Context))
     ; call(Original) ).
 
 execute_observed_goals(Module,Goals,Id,node(Span,_),Context) :-
@@ -496,22 +516,31 @@ execute_observed_goals(Module,Goals,Id,node(Span,_),Context) :-
     flag('$metta_observed_goal',Serial,Serial+1),
     atomic_list_concat(['$metta_observed_',Serial],Name),
     Head=..[Name,Variables], Clause=(Head:-Body),
-    setup_call_cleanup(
-        assertz(Module:Clause,Ref),
-        ( assertz(clause_source(Ref,temporary,Id,Span)),
+    Owner = owned(none),
+    % Workaround: swi-cleanup-window - register retirement before acquiring code; publish ownership under signal masking and catch-port deferral.
+    setup_call_cleanup(true,
+        ( sig_atomic(( assertz(Module:Clause,Ref),
+                       catch(nb_setarg(1,Owner,Ref), AcquireBall,
+                             (ignore(erase(Ref)), throw(AcquireBall))) )),
+          assertz(clause_source(Ref,temporary,Id,Span)),
           arg(3,Context,Records),
           publish_locations(Ref,Clause,Id,Records),
           forall((goal_path(Clause,[],Path,_),\+ clause_location(Ref,Path,_,_,_)),
                  assertz(clause_location(Ref,Path,Id,Span,['generated-by',execution]))),
           call(Module:Head) ),
-        ( erase(Ref), abolish(Module:Name/1) )).
+        catch(retire_observed_clause(Module, Name, Owner), CleanupBall,
+              (retire_observed_clause(Module, Name, Owner), throw(CleanupBall)))).
+
+retire_observed_clause(Module, Name, Owner) :-
+    arg(1, Owner, Ref),
+    ( Ref == none -> true ; ignore(erase(Ref)) ),
+    abolish(Module:Name/1).
 
 :- meta_predicate source_input(+,0), source_forms(+,+,0).
 source_input(Source,Goal) :-
-    ( nb_current('$metta_observation',_) ->
-      save_context('$metta_source_input',Previous),
-      setup_call_cleanup(nb_linkval('$metta_source_input',pending(Source,new)),
-                         Goal,restore_context('$metta_source_input',Previous))
+    ( nb_current('$metta_observation',Buffer), Buffer \== [] ->
+      % Workaround: swi-cleanup-window - a pending input is a trailed mutable context.
+      metta_with_trailed('$metta_source_input', pending(Source,new), Goal)
     ; call(Goal) ).
 source_forms(Parsed,Space,Goal) :-
     ( nb_current('$metta_source_input',Pending), Pending=pending(Source,new)
@@ -520,7 +549,7 @@ source_forms(Parsed,Space,Goal) :-
     ; call(Goal) ).
 
 install_runtime_observers(Owner, GC) :-
-    install_exception_observers(Owner, GC),
+    install_trace_observer(Owner, GC),
     wrap_predicate(filereader:metta_host_run_source(Source,_,_,_), source_observer,
                    Host, source_observation:source_input(Source,Host)),
     wrap_predicate(filereader:process_direct_metta_string(Source,_,_), source_observer,
@@ -544,7 +573,7 @@ install_runtime_observers(Owner, GC) :-
                    OriginalGoals, source_observation:observe_goals(Module,Goals,OriginalGoals)).
 
 remove_runtime_observers :-
-    remove_exception_observers,
+    remove_trace_observer,
     % policy-inventory-exempt: mechanism-internal; reason=the eight loader predicates this observer wraps at install, listed so removal unwraps exactly the set installation wrapped; evidence=engine/source_observation.pl:remove_wrapper/2
     forall(member(PI,[metta_host_run_source/4,process_direct_metta_string/3,
                       process_loader_string/3,metta_host_process_groups/3,
@@ -564,7 +593,7 @@ observe_source(Space, Label, Source, Atoms) :-
     ( spaces:metta_space_name(Space) -> true
     ; throw(error(type_error('SpaceType',Space),
                   context('observe-source','pass &self or a space returned by new-space'))) ),
-    ( nb_current('$metta_observation',_)
+    ( nb_current('$metta_observation',Buffer), Buffer \== []
     -> throw(error(permission_error(observe,execution,nested),
                     context('observe-source','finish the current observation first')))
     ; true ),
@@ -581,46 +610,55 @@ observation_string(Value,Remedy) :-
 
 %The shape the engine reads. Argument five is the sink engine/metta/terms.pl
 %calls for a constructed Error, which is what keeps the engine free of any
-%reference to this module; the other four are the hit set, the recorded
-%errors, the completed root-form answers and the document being observed.
+%reference to this module. Arguments one through four are the hit set, the
+%recorded errors, completed root-form answers and document being observed.
+%Argument six holds the observer frame boundary and exception-recording state.
 %One constructor because the shape has two readers, this file and
 %tests/prolog/suites/reader/source_observation.plt, and a second spelling of
 %it in the suite is a shape that can drift.
 new_observation_buffer(observations(Hits,[],answers(0,[]),none,
-                                    source_observation:record_error)) :-
+                                    source_observation:record_error,trace(none,false))) :-
     empty_assoc(Hits).
 
 observe_source_locked(Space,Label,Source,Atoms) :-
     new_observation_buffer(Buffer),
-    save_context('$metta_observe_label', PreviousLabel),
+    prolog_current_frame(Boundary),
+    arg(6, Buffer, Trace), nb_setarg(1, Trace, Boundary),
+    with_observation(Label, Buffer, GC,
+        ( catch((trace,filereader:metta_host_run_source(Source,Space,[],Groups)),
+                Error,true),
+          notrace, set_prolog_flag(gc,GC),
+          collect_observation(Buffer,Groups,Error,Atoms) )).
+
+with_observation(Label, Buffer, GC, Goal) :-
     current_prolog_flag(debug, Debug),
     current_prolog_flag(last_call_optimisation,LCO),
     current_prolog_flag(gc,GC),
     thread_self(Owner),
     '$visible'(Visible,Visible),
+    % Workaround: swi-cleanup-window - register teardown before trailing observation state.
     setup_call_cleanup(
         true,
-        ( nb_linkval('$metta_observe_label',Label),
-          nb_linkval('$metta_observation',Buffer),
-          install_compiler_observers, install_runtime_observers(Owner, GC),
-          visible([+all,+cut,+exception]),
-          catch((trace,filereader:metta_host_run_source(Source,Space,[],Groups)),
-                Error,true),
-          notrace, set_prolog_flag(gc,GC),
-          collect_observation(Buffer,Groups,Error,Atoms) ),
-        ( notrace, set_prolog_flag(gc,GC),
-          '$visible'(_,Visible), set_prolog_flag(debug,Debug),
-          set_prolog_flag(last_call_optimisation,LCO),
-          remove_runtime_observers, remove_compiler_observers,
-          retractall(source_document(_,_,_)),
-          retractall(source_equation(_,_,_,_,_)),
-          retractall(clause_source(_,_,_,_)),
-          retractall(clause_location(_,_,_,_,_)),
-          retractall(unavailable_location(_,_,_,_)),
-          retractall(unavailable_function(_)),
-          nb_delete('$metta_pending_source_maps'),
-          nb_delete('$metta_observation'),
-          restore_context('$metta_observe_label',PreviousLabel) )).
+        metta_with_trailed('$metta_observe_label', Label,
+            metta_with_trailed('$metta_observation', Buffer,
+                metta_with_trailed('$metta_pending_source_maps', pending([]),
+                    ( install_compiler_observers, install_runtime_observers(Owner, GC),
+                      visible([+all,+cut,+exception]),
+                      call(Goal) )))),
+        catch(finish_observation(GC, Visible, Debug, LCO), Ball,
+              (finish_observation(GC, Visible, Debug, LCO), throw(Ball)))).
+
+finish_observation(GC, Visible, Debug, LCO) :-
+    notrace, set_prolog_flag(gc,GC),
+    '$visible'(_,Visible), set_prolog_flag(debug,Debug),
+    set_prolog_flag(last_call_optimisation,LCO),
+    remove_runtime_observers, remove_compiler_observers,
+    retractall(source_document(_,_,_)),
+    retractall(source_equation(_,_,_,_,_)),
+    retractall(clause_source(_,_,_,_)),
+    retractall(clause_location(_,_,_,_,_)),
+    retractall(unavailable_location(_,_,_,_)),
+    retractall(unavailable_function(_)).
 
 collect_observation(Buffer, _Groups, Error, Atoms) :-
     arg(1,Buffer,Hits), arg(2,Buffer,Errors0), reverse(Errors0,Errors),

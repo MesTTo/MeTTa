@@ -298,12 +298,14 @@ check_reachability() {
 run REPORT prolog-reach check_reachability
 
 # The report is itself a claim, so it is checked the way the evidence gate is.
-# A fixture of nine planted predicates, one per door and three of them required
-# to be REPORTED, is written to a temporary directory and the analysis runs over
-# it a second time; the check names WHICH door stopped firing. Eleven mutations,
-# each disabling exactly one root class, edge kind or scan, were each caught
-# with the exact set of doors predicted and nothing else, which is what stops
-# the fixture passing vacuously [measured 2026-08-18: 0.90s].
+# A fixture of fifteen planted predicates, one per door and four of them
+# required to be REPORTED, is written to a temporary directory and the analysis
+# runs over it a second time; the check names WHICH door stopped firing. Eleven
+# mutations, each disabling exactly one root class, edge kind or scan, were each
+# caught with the exact set of doors predicted and nothing else, which is what
+# stops the fixture passing vacuously [measured 2026-08-18: 0.90s]; five more,
+# one per door added on 2026-09-12, are re-run by
+# tests/prolog/probes/reachability_doors.sh [measured 2026-09-12: 7.90s].
 check_reachability_selftest() {
     cd "$HERE/tests/prolog" || return 1
     bounded swipl -q --on-error=status -g reachability_selftest -t 'halt(0)' reachability.pl

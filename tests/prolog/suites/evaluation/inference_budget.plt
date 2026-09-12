@@ -21,9 +21,9 @@
 %     a_budget_charges_a_host_thread_goal_for_its_own_work]
 %   - a non-positive budget installs no wrapper, so an unbounded cursor runs
 %     the goal it was given [tested: a_non_positive_budget_installs_no_wrapper]
-%   - the cumulative check costs three inferences per answer plus one for the
-%     base read, the same at every answer cost [tested:
-%     the_cumulative_check_costs_three_inferences_per_answer]
+%   - the cumulative check costs three inferences per answer plus two at
+%     entry for the base read and envelope catch, at every answer cost [tested:
+%     the_cumulative_check_costs_three_inferences_per_answer; commit=cdcb23421809ec3a493059a381e0245cf08a1984]
 %   - one of those three is bought by the direction the comparison is written
 %     [tested: an_if_then_else_costs_more_on_the_branch_its_condition_fails_to]
 %   - a bound whose ball a catch inside the goal swallowed still REFUSES, at
@@ -96,13 +96,13 @@ budget_charge(K, Max, Charge) :-
     metta_host_inference_budget(budget_cost(K, 0, Max, _), 1000000000, Guarded),
     budget_drain(Guarded, Answers, Metered),
     Delta is Metered - Unguarded,
-    % AFFINE, not proportional: the wrapper reads the counter once at goal
-    % start to take its base, and then once per answer. Solving for the slope
+    % AFFINE, not proportional: the wrapper enters its envelope catch and
+    % reads its base once, then checks each answer. Solving for the slope
     % is what makes this a per-answer constant rather than an average, and the
     % equation is asserted rather than divided so a charge that is not a fixed
     % constant fails here instead of rounding into one.
-    Charge is (Delta - 1) // Answers,
-    Delta =:= Charge * Answers + 1.
+    Charge is (Delta - 2) // Answers,
+    Delta =:= Charge * Answers + 2.
 
 % Twelve cheap answers, then a resume that never yields one. Only a bound that
 % acts INSIDE a solution can stop the thirteenth.
@@ -223,7 +223,7 @@ test(a_budget_that_is_not_an_integer_is_refused,
      [throws(error(type_error(integer, half), _))]) :-
     metta_host_inference_budget(true, half, _).
 
-% A fixed charge per answer plus one for the base read, so its COST is a
+% A fixed charge per answer plus two for entry, so its COST is a
 % fraction of what an answer costs and the cheapest generator pays the most:
 % about 0.7% where an answer costs 407 inferences, 9.7% at 31, and half again
 % at 6. Pinned as a NUMBER because

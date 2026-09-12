@@ -45,20 +45,20 @@ import_space('&plunit_import').
 
 % A directory of its own per test, so a leftover cache cannot make the next
 % test pass for the wrong reason. meta_predicate because the checks below are
-% compiled into their unit's module, not into this file's.
+% compiled into their unit's module, not into this file's. The working
+% directory is the reader's own scope door: `working_dir/1` is a declared
+% context reader over a trailed stack, not a dynamic fact a fixture can assert.
 :- meta_predicate with_import_dir(+, +, 2).
 with_import_dir(Stem, Source, Goal) :-
     tmp_file(import, Dir),
     make_directory(Dir),
     atomic_list_concat([Dir, '/', Stem, '.metta'], MettaFile),
     setup_call_cleanup(
-        ( setup_call_cleanup(open(MettaFile, write, Out),
-                             write(Out, Source),
-                             close(Out)),
-          asserta(filereader:working_dir(Dir)) ),
-        call(Goal, Dir, Stem),
-        ( retract(filereader:working_dir(Dir)),
-          delete_directory_and_contents(Dir) )).
+        setup_call_cleanup(open(MettaFile, write, Out),
+                           write(Out, Source),
+                           close(Out)),
+        filereader:with_working_directory(Dir, call(Goal, Dir, Stem)),
+        delete_directory_and_contents(Dir)).
 
 clear_import_space :-
     import_space(Space),

@@ -49,13 +49,39 @@ Defect: one call port lies between Setup returning and the cleanup being
   `sig_atomic/1` defers it; an inference limit is not a signal.
 Reproduction: tests/checks/host_workarounds/swi-cleanup-window.pl, a budget
   sweep over an asserted guard; budget 4 of 64 leaks on 10.1.13.
-Workaround: state that must not outlive its scope is a trailed write,
-  `b_setval/2` on entry, `nb_setval/2` on the ordinary exit and `b_getval/2`
-  to read; unwinding the exception unwinds the trail, so the cleanup is the
-  fast ordinary exit rather than the thing correctness rests on.
-  Nested publication contexts trail the exit restore too, as
-  `with_metta_module/2` does, so an inner restore cannot overwrite the outer
-  scope's undo record.
+Workaround: `metta_with_trailed/3` in `engine/metta/control.pl` uses `b_setval/2`
+  on entry and ordinary return; failure, exceptions, cut and redo use the
+  trail. Readers use `nb_current/2`, treating absence and `[]` as inactive.
+  A reader is declared once, `:- seam:context_reader(Head, Key, Shape)` in
+  `engine/ext_points.pl`, which defines the predicate and compiles every
+  resolving call to the read itself, so the trailed guard costs what the
+  asserted guard it replaced cost: one inference for an absent, an inactive
+  or a one-element context.
+  `metta_with_trailed_enumeration/3` beside it holds one value over a goal's
+  whole enumeration, its entry write registered after the cleanup and trailed
+  the same way, for a scope a collector pulls answers through.
+  A root held by this primitive is never replaced by `nb_setval/2`, `nb_linkval/2` or
+  `nb_delete/1`; mutable payloads use `nb_setarg/3` or `nb_linkarg/3`.
+  Real clause scopes register cleanup first, then signal-mask assertion and
+  publication into a retained ownership cell. The publication is the first
+  goal inside `catch/3`, whose call port defers an inference trip to that goal.
+  Cleanup is itself a catch that retries idempotent retirement before
+  propagating the ball. Ownership records remain until retirement completes.
+  Receipt listeners schedule interrupted retirement with thread_signal/2;
+  a scheduling-only exception hook, clausal from the process's first bound
+  on and never before, covers interruption before the listener's catch
+  starts. The retained transaction owner remembers engine reservations
+  after rollback erases its rows. Recovery compares pending claim references
+  with live markers before preserving a surviving outer scope.
+  The shared inference-bound door catches a deferred native ball through its
+  final cumulative check and preserves the existing control envelope. The
+  budget and measured goal stay unchanged.
+  The structural `prolog-static` check refuses writes in either cleanup
+  wrapper's Setup and checks its declared fixture exception with a planted
+  selftest.
+  A publication context that nests trails its exit restore too, as
+  `with_metta_module/2` does, so an inner restore cannot overwrite the
+  outer scope's undo record.
 Lifted when: the cleanup is registered before the call port that follows
   Setup, or the inference check honours the atomic region.
 Record: docs/journal/2026-09-07-every-intermittent-root-caused.md, the
@@ -153,6 +179,10 @@ Reproduction: tests/checks/host_workarounds/swi-query-frame-discarded-on-engine-
 Workaround: inspect only through the nearest live transaction frame and
   transfer its watch to the surviving transaction when it finishes. Exclude
   the finished frame ID because failure notification can start on that frame.
+  Source observation stops before its own frame. It collects raised errors
+  through the debugger's exception port, whose host wrapper saves and clears
+  the pending ball before calling the trace hook. Its exception hook only
+  schedules notification; it never walks frames or records the pending ball.
 Lifted when: SWI no longer delivers `frame_finished` for the frame that
   `PL_close_query` discards, or excludes its outer query frame from
   `prolog_frame_attribute/3` marking. Verify that host change before treating

@@ -469,4 +469,30 @@ test(a_metta_side_effect_declaration_is_a_purity_claim,
     'remove-atom'('&metta', [effect, 'purity-eff', pureStructural], _),
     assertion(\+ seam:pure_operation('purity-eff')).
 
+%The walk reads SWI's own meta_predicate declaration for every construct the
+%rows above do not name, and it has to read ALL of it: the caller commits to
+%the first solution, so a clause answering one goal argument at a time left
+%the rest of a construct unseen. setup_call_cleanup(0,0,0) yielded its Setup
+%and nothing else, which made an impure Goal or Cleanup inside it read as
+%pure. The non-goal positions stay out: a findall template and a catcher are
+%data whatever surrounds them.
+test(every_goal_argument_of_a_meta_predicate_is_walked) :-
+    walked(setup_call_cleanup(setup_probe, goal_probe, cleanup_probe),
+           [setup_probe, goal_probe, cleanup_probe]),
+    walked(setup_call_catcher_cleanup(setup_probe, goal_probe, catcher_probe,
+                                      cleanup_probe),
+           [setup_probe, goal_probe, cleanup_probe]),
+    walked(call_cleanup(goal_probe, cleanup_probe), [goal_probe, cleanup_probe]),
+    walked(with_mutex(mutex_probe, goal_probe), [goal_probe]),
+    walked(transaction(goal_probe), [goal_probe]),
+    walked(aggregate_all(count, goal_probe, count_probe), [goal_probe]),
+    %A closure is walked with the arguments its meta-predicate will add, and
+    %foldall/4 carries a goal beside one: both are yielded, neither dropped.
+    walked(foldall(closure_probe, goal_probe, in_probe, out_probe),
+           [closure_probe(_, _), goal_probe]).
+
+walked(Construct, Expected) :-
+    findall(Goal, metta_engine:metta_effect_goal(Construct, Goal), Walked),
+    assertion(Walked =@= Expected).
+
 :- end_tests(lib_tabling_purity).

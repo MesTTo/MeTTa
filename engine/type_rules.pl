@@ -1,3 +1,8 @@
+% Guarantees: with_typing_policy_stable/1 scopes typing_policy_snapshot/1 through
+%   metta_with_trailed/3 while retaining the typing-policy mutex, and the
+%   snapshot is a declared context reader compiled to its read
+%   [tested: trailed_scopes; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
+%
 % Purpose: hold the declared typing-rule registry and resolve its explicit
 %   accept, refuse(Reason), and defer outcomes for every engine type checker.
 % Guarantees: the shipped decision clauses are compiled from typing_rule_entry/7
@@ -102,7 +107,8 @@
                  shipped_typing_rule_expected_unbound/2.
 :- meta_predicate typing_rule_transaction(0).
 :- meta_predicate with_typing_policy_stable(0).
-:- thread_local typing_policy_snapshot/1.
+:- seam:context_reader(typing_policy_snapshot(Snapshot),
+                       '$metta_typing_policy_snapshot', value(snapshot(Snapshot))).
 
 %Compile the invariant pattern tests beside each declaration. The source row
 %remains the reflection surface, and the generated clauses choose in the same
@@ -343,10 +349,9 @@ with_typing_policy_stable(Goal) :-
     ),
     with_mutex(
         '$metta_typing_policy',
-        setup_call_cleanup(
-            asserta(typing_policy_snapshot(Snapshot), Ref),
-            call(Goal),
-            erase(Ref))).
+        % Workaround: swi-cleanup-window - the policy snapshot is trailed.
+        metta_with_trailed('$metta_typing_policy_snapshot', snapshot(Snapshot),
+                           Goal)).
 
 % A static proof is valid only under the shipped ordinary/widening relation.
 % Other rule families do not participate in an argument contract.

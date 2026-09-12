@@ -1,3 +1,7 @@
+% Guarantees: with_static_parameter_environment/5 preserves parameter identity
+%   through metta_with_trailed/3 and restores enclosing proof environments
+%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%
 % Purpose: compile declared input and output types while preserving shared branch variables
 % Guarantees: present_type_chain/3 expands a final (:seg T), and
 %   validate_type_splices/1 refuses retired or misplaced forms at admission
@@ -885,7 +889,7 @@ unchecked_parameter_type(Type) :-
 %tracked. A merely consistent %Undefined% chain, a metatype, and a value
 %computed from the parameter all retain their runtime checks.
 %
-%The environment keeps variable identity through nb_linkval/2. Translation can
+%The environment keeps variable identity through metta_with_trailed/3. Translation can
 %force another function recursively, so the previous environment is restored
 %rather than deleted unconditionally. The chain group is the exact
 %arrival-order group retained for this equation, rather than every compatible
@@ -899,19 +903,8 @@ unchecked_parameter_type(Type) :-
 %DOI 10.1145/2628136.2628156; commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd]
 with_static_parameter_environment(Module, Function, Arguments, Chains, Goal) :-
     static_parameter_entries(Module, Function, Arguments, Chains, Entries),
-    (   nb_current('$metta_static_parameter_environment', Previous)
-    ->  Restore = previous(Previous)
-    ;   Restore = absent
-    ),
-    setup_call_cleanup(
-        nb_linkval('$metta_static_parameter_environment', Entries),
-        call(Goal),
-        restore_static_parameter_environment(Restore)).
-
-restore_static_parameter_environment(previous(Previous)) :-
-    nb_linkval('$metta_static_parameter_environment', Previous).
-restore_static_parameter_environment(absent) :-
-    nb_delete('$metta_static_parameter_environment').
+    % Workaround: swi-cleanup-window - trail the linked parameter environment across recursive translation.
+    metta_with_trailed('$metta_static_parameter_environment', Entries, Goal).
 
 static_parameter_entries(Module, Function, Arguments, Chains, Entries) :-
     length(Arguments, Arity),
