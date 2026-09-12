@@ -1,7 +1,7 @@
 % Purpose: verify finite generators, quantified bags and generator cleanup.
 % Guarantees: independent products and bag models preserve occurrence counts;
 % fixtures exercise bounds, variable copying, module context and failure exits.
-% [tested: lib_testing; commit=WORKTREE].
+% [tested: lib_testing; commit=a283d39342d891aae0edc58949e2ccbb48911cd8].
 % Owns resources: fixtures destroy message queues and release execution spaces.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

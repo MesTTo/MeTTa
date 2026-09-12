@@ -1,5 +1,5 @@
 ; Purpose: finite input families, counted assertions and first witnesses.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/43-testing_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/43-testing_lib.metta; commit=a283d39342d891aae0edc58949e2ccbb48911cd8].
 !(import! &self (library lib_combinatorics))
 !(import! &self (library lib_testing))
 
