@@ -726,9 +726,8 @@ metta_fast_allocate_space_rows([space(Id, ParentId, _, _, _)|Rows], Known,
     metta_fast_allocate_space_rows(Rows, NextKnown, NodeSpaces).
 
 record_source_resource(Resource) :-
-    active_source_load(LoadId),
-    LoadId \= '$metta_owner_pin'(_),
-    assertz(source_load_resource(LoadId, Resource)).
+    forall(source_assertion_owner(LoadId),
+           assertz(source_load_resource(LoadId, Resource))).
 
 metta_fast_decode_space(IdSpaces, space(Id, Parent, Atoms, Bindings, Occurrences),
                         space(Id, Parent, Decoded, DecodedBindings, Occurrences)) :-
@@ -1471,10 +1470,8 @@ rollback_source_load_stable(LoadId) :-
     findall(Refs,
             retract(source_load_support_assertions(LoadId, Refs)),
             SupportGroups),
-    forall(retract(source_load_resource(
-                       LoadId, restored_rule(Name, Home, Generation))),
-           translator_rules:rollback_restored_translator_rule(
-               Name, Home, Generation)),
+    forall(retract(source_load_resource(LoadId, translator_rule(Name, Ref))),
+           translator_rules:rollback_source_translator_rule(Name, Ref)),
     forall(( member(Refs, SupportGroups), member(Ref, Refs) ),
            ( catch(erase(Ref), _, true) -> true ; true )),
     findall(Ref, retract(source_load_assertion(LoadId, _, Ref)), Asserted),

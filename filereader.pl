@@ -261,6 +261,7 @@
             run_with_loading_marker/2,
             record_source_assertion/1,
             recording_source_assertion/0,
+            record_source_resource/1,
             record_source_atom_assertion/1,
             source_load_assertion/3,
             withdraw_source_load/3,
