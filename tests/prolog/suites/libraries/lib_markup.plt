@@ -4,7 +4,7 @@
 % Guarantees: a parse answers the host's DOM in this library's shape, every selector
 % answers what the equivalent xpath term answers, writing an element parses back to
 % it over generated documents, and a malformed document, an external entity and an
-% unknown selector form are each refused by name [tested: lib_markup; commit=WORKTREE].
+% unknown selector form are each refused by name [tested: lib_markup; commit=ed976b0e70c1176a7ef9feabb0359313105c786e].
 % Owns resources: none; every value is a term.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

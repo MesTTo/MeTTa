@@ -1,5 +1,5 @@
 ; Purpose: XML and HTML as expressions, and the selector language over them.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/29-markup_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/29-markup_lib.metta; commit=ed976b0e70c1176a7ef9feabb0359313105c786e].
 !(import! &self (library lib_markup))
 
 ; An element is (element Name Attributes Children): the name a Symbol, each
