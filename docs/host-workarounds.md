@@ -39,6 +39,78 @@ An entry lands with its first site and its reproduction in the same commit. A
 site the ledger does not know is refused, and so is an entry nothing uses. The
 journal keeps the history; this file holds only what is live.
 
+## swi-absolute-path-nul
+
+Host: SWI-Prolog 10.1.13, absolute_file_name/3 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: canonicalization truncates an input String at NUL, producing a valid
+  pathname for a different file or directory instead of preserving or refusing it.
+Reproduction: tests/checks/host_workarounds/swi-absolute-path-nul.pl
+Workaround: reject NUL before canonicalizing a database directory.
+Lifted when: canonicalization refuses NUL or retains the complete input path.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, Database pathname validation.
+
+## swi-utf8-journal-repair
+
+Host: SWI-Prolog 10.1.13, src/os/pl-stream.c:Sgetcode at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: the UTF-8 reader accepts overlong sequences; other invalid sequences
+  warn and substitute a character instead of refusing the input term.
+Reproduction: tests/checks/host_workarounds/swi-utf8-journal-repair.pl
+Workaround: validate original byte lines using csv_codec:utf8_text/2 before
+  opening the journal with the host text reader. The existing codec checks
+  canonical encoding and Unicode scalar values.
+Lifted when: the overlong NUL raises after the canonical NUL control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, Database journal boundaries.
+
+## swi-persistency-write-memory
+
+Host: SWI-Prolog 10.1.13, library/persistency.pl:db_assert_sync/1 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: db_assert_sync asserts the in-memory row before opening or writing its
+  journal. An append error leaves that row visible in the attachment.
+Reproduction: tests/checks/host_workarounds/swi-persistency-write-memory.pl
+Workaround: update and sync failures end the owning database engine and its
+  attachment, so later queries refuse instead of exposing partially changed memory.
+Lifted when: the failed append leaves no row after the normal reopen control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, Database ownership.
+
+## swi-persistency-replay
+
+Host: SWI-Prolog 10.1.13, library/persistency.pl:load_db/3 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: unsupported journal records print illegal_term and replay continues
+  with later records, returning a partially interpreted store as a valid attachment.
+Reproduction: tests/checks/host_workarounds/swi-persistency-replay.pl
+Workaround: validate the entire journal before attachment; reject unknown or
+  malformed records with the journal path and an explicit repair instruction.
+Lifted when: native attachment raises for the unknown record after its valid control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, Database ownership.
+
+## swi-persistency-detach
+
+Host: SWI-Prolog 10.1.13, library/persistency.pl:db_sync/2 detach at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: detach retracts db_stream before close; a close exception skips removal
+  of db_file and db_option registrations. A second detach drains those records.
+Reproduction: tests/checks/host_workarounds/swi-persistency-detach.pl
+Workaround: retry detach only after its close fails, then propagate the close
+  error alongside any earlier operation or subsequent cleanup error.
+Lifted when: failed close leaves no attachment registration after a normal detach control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, Database ownership.
+
+## swi-persistency-stream-owner
+
+Host: SWI-Prolog 10.1.13, library/persistency.pl:persistent/2 and db_open_file/3 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: native journal opening precedes db_stream registration. An interruption
+  between them leaves a stream that db_detach cannot discover or close.
+Reproduction: tests/checks/host_workarounds/swi-persistency-stream-owner.pl
+Workaround: after native detach, the exclusive store owner closes remaining
+  streams naming its journal and retains their errors beside the operation outcome.
+Lifted when: interruption after native open leaves no journal stream after detach.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, Database cancellation ownership.
+
 ## swi-relative-compound-source
 Host: SWI-Prolog 10.1.13; boot/init.pl:$register_resolved_source_path/2 at
   https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/init.pl#L2571-L2580.

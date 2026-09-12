@@ -4108,3 +4108,184 @@ Verified: the repeated full twin lane retains263 older findings over307 twins;
 has54 matching claims, equal stored contents and the exact204351 point against
 229506. All24 affected consumers pass. Ruff, evidence and twins-selftest pass
 in the same run. Receipt: ai-lib4-compression-twins-repinned.log.
+
+## 2026-09-13: Database ownership and design
+
+Goal: independent persistent stores with add, one-occurrence removal, pattern
+queries, synchronization, close and reopening through MeTTa and Python.
+
+Tried: native persistency keeps a newly asserted fact in memory after its
+journal append fails. Unknown journal actions print an error and replay
+continues. A failed db_detach close leaves file/options registration behind;
+its next detach removes that bookkeeping. Receipts:
+ai-lib4-database-{host,detach}-probe.log.
+
+Tried: engine_post/3 serialized 400 request/reply pairs across four threads.
+An engine owns its temporary schema and attachment through ordinary cleanup.
+Its garbage collection runs cleanup on a native reaper, so the probe waits
+for that cleanup's message. Loading a non-module source preserves the module's
+temporary class, and unloading its source removes persistency's external
+schema clauses. A module/2 directive changed the class and prevented module
+destruction. Receipt: ai-lib4-database-engine-gc-probe.log.
+
+Decided: one anonymous engine owns each store, with state passed as arguments.
+Requests use the engine's native serialization. Close is a final request whose
+answer arrives after cleanup; the completed handle remains safe for callers
+already waiting. The protocol-close probe passes 1600 competing calls.
+Use engine_destroy only while an acquisition is unpublished. A native handle
+already crosses Python's generic blob wire and retains identity; ordinary,
+numeric and sequence-pattern queries pass through that existing bridge.
+Receipts: ai-lib4-database-{close,surface-opaque}-probe.log.
+
+Rejected: a transaction around native persistency writes. It rolls back the
+stream registration as well as memory, while the acquired stream remains an
+external resource. A write or sync error instead ends the engine and its
+attachment, so callers cannot observe the host's partially updated memory.
+Opening validates the entire journal and refuses malformed or unsupported
+records. No tail is trimmed automatically and flushing is not an fsync claim.
+
+Tried: native lock(write) admits two descriptors in one process. A stream-owned
+flock refuses another descriptor, hard link, thread and process; close releases
+the claim. Locking the journal itself would conflict with later journal handles
+on Windows and hosts where flock and fcntl interact. Receipt:
+ai-lib4-database-lock-complete-probe.log.
+
+Decided: a store is a directory containing journal.pl and a permanent lock file.
+This follows LMDB's default environment representation at
+700e10f91a65fae69520301926fb9819f16d292f, libraries/liblmdb/lmdb.h:605..636.
+Directory aliases reach the same physical lock. POSIX uses flock; Windows uses
+LockFileEx on the separate lock stream. Streams own those OS claims and the
+shared native builder owns compilation. Runtime evidence is Linux; the Windows
+branch follows MicrosoftDocs/sdk-api at 554e06be52a53ae819b1011353303a6c72fbdb5d,
+sdk-api-src/content/fileapi/nf-fileapi-lockfileex.md. The store's directory and
+contents remain exclusively managed through this API while it is open.
+
+Decided: seven heads, database-open!, database-query, database-add!,
+database-remove!, database-sync!, database-close! and with-database. The scope
+takes Directory, Sync and a held function, so it owns creation directly.
+Sync uses the existing journal-sync vocabulary. Stored values are ground
+native Symbols, Strings, Numbers and proper expression lists. Query takes a
+held pattern/template and applies the core matcher to one stored value at a
+time; it retains insertion order, duplicates, numeric promotion and sequence
+patterns. Removal deletes one exactly equal stored value. Queries collect a
+snapshot in memory; persistent writes remain independent of caller backtracking
+and in-memory transactions.
+
+Decided: defer quasi-quotation handlers during journal validation, then reject
+their syntax. Distinguish actual EOF from a literal end_of_file term through
+the reader's end-of-stream state. Reject invalid records before native replay.
+The reader probe checks both controls in ai-lib4-database-reader-probe.log.
+Native floating infinities, NaN, signed zero and rationals round-trip through
+the provider's writer/reader in ai-lib4-database-numeric-probe.log.
+
+### Database cancellation ownership
+
+Tried: interrupt persistency:db_open_file/3 after opening and before its caller
+registers db_stream/2. The operation raised database_stream_cancelled, but one
+journal stream remained open after the store ended. Receipt:
+ai-lib4-database-stream-probe.log. This invalidates relying on db_detach alone
+to finish journal ownership.
+
+Decided: the exclusive store owner also closes open streams naming its journal
+after native detach, including streams whose registration was interrupted.
+The permanent directory lock prevents another API owner from opening that
+journal concurrently. Reuse owned_resources:with_outcome_cleanup/3 so an
+operation error survives alongside detach and stream-close errors. No global
+wrapper or ambient ownership key is added. The host defect gets an independent
+reproduction under swi-persistency-stream-owner.
+
+Tried: the example's written \\u0000 escape produced ordinary text. Constructing
+the String with string-from-codes (97 0 98) now exercises the intended NUL.
+The corrected example and twin pass 58 claims. Their initial price is
+196064/195138; the ownership correction requires a new measurement.
+
+Tried: the abandoned-store test stopped at its cleanup message, including when
+the creator ran in a joined thread. An isolated probe adds garbage_collect and
+trim_stacks before the next yield and then receives cleanup. Dead engine-self
+values on a suspended engine's stack remain atom-collection roots. The earlier
+counter probe had not exercised schema loading or persistency. Receipts:
+ai-lib4-database-gc-{isolation,apply-probe}.log. The stalled test and probe were
+interrupted explicitly; neither is a passing verification result.
+
+Decided: collect and trim the engine stack before each published answer,
+including initial readiness. SWI's Engine resource usage section recommends
+this sequence for inactive engines. It releases dead temporary values and
+unused stack capacity while retaining the current reply. This is ordinary
+engine memory management, and adds no ownership registry.
+
+### Database journal boundaries and verification repairs
+
+Tried: four malformed UTF-8 fixtures were accepted by native replay, two with
+warnings. The bytes included overlong NUL, a surrogate and an out-of-range code.
+The Python test log ai-lib4-database-python.log records all four failed refusal
+checks. Reusing csv_codec:utf8_text/2 on binary lines rejects all four. ASCII
+line boundaries cannot split a valid UTF-8 sequence, so this pass needs only
+one line of storage. Journal opening now makes a byte-validation pass, a term
+validation pass and the native replay pass, each linear in journal length.
+No second UTF-8 implementation is introduced.
+
+Tried: the garbage-collection fixture needs its creator in a joined thread to
+remove references retained by its test stack. It then observes engine cleanup.
+A thread signal must target the active database engine, which owns the request's
+execution state; signaling its waiting caller does not interrupt that state.
+The revised native suite passes its first 24 tests, including both controls,
+in ai-lib4-database-suite-final.log. Its final argument test exposed blob/2
+enumerating live handles for a variable input; a nonvar guard now refuses that
+input before enumeration. This is an input validation fix in the new library.
+
+Tried: the Python subprocess fixture initially selected extensions/ instead of
+extensions/python for PYTHONPATH and raised ModuleNotFoundError: No module named
+'metta'. Its corrected fixture and the strict-byte repair pass all eight Python
+tests in ai-lib4-database-python-fixed.log, including 80 generated action sequences.
+
+### Database pathname validation
+
+Superseded: the preceding variable-handle diagnosis. The isolated argument
+probe identifies nul_path-success; blob/2 on a variable simply fails, so its
+existing domain refusal was already correct. The unnecessary nonvar guard
+was removed. Receipts: ai-lib4-database-{invalid,variable-blob}-probe.log.
+
+Tried: absolute_file_name/3 truncates "a" followed by NUL and "b" to the path
+ending in /a. Direct file opening had refused the same String, which is why
+the earlier provider probe missed this canonicalization boundary. The API now
+rejects NUL before that call. The regression fixture's path stays inside its
+temporary directory even if truncation returns. The two empty lock directories
+created by the failed fixture and diagnostic are removed explicitly.
+
+### Database verification before the lane batch
+
+Verified: all 25 lib_database native tests pass in ai-lib4-database-suite-path.log.
+The suite includes 1500 model operations over all three sync policies, 400
+concurrent writes, 1600 concurrent closes, explicit and collected ownership,
+failed append/sync/close, combined errors, native cancellation and replay refusal.
+The example and twin pass the same 58 claims in
+ai-lib4-database-{example,twin}-final.log. All eight Python tests pass; four
+native provider build tests pass. A fresh source archive, wheel installation,
+native build and database reopen pass in ai-lib4-database-wheel.log. No existing
+native provider implementation changed.
+
+Measured: python extensions/python/tools/twin_coverage.py --measure --rounds 3
+examples/ch08-data/08-03-the-shipped-libraries/42-database_lib.metta reads
+223237/222382 after purging engine/lib QLF artifacts. This replaces 196064/195138
+before ownership and strict-input corrections. Receipt:
+ai-lib4-database-measure-final.log. The ratio is 0.9962; no overrun allowance.
+
+Verified: all six independent host reproductions print present. The five record
+generators run in order with 32 described native sources, 143 derived examples,
+228 original examples and 59 library imports; no generator findings. Receipts:
+ai-lib4-database-host-*.log and ai-lib4-database-records.log. jscpd scans four
+native files, 347 lines, and reports zero clones in ai-lib4-database-jscpd.log.
+
+### Database row complete
+
+Verified: all 19 required library lanes pass in ai-lib4-database-lanes.log.
+The host lane checks 40 ledger entries and 48 sites. The full native-provider
+matrix passes all 23 tests with pytest -p no:benchmark -n 3 in
+ai-lib4-database-native-build-parallel.log. The first parallel invocation raised
+PytestBenchmarkWarning before collection because that plugin disables itself
+under xdist; disabling the unrelated plugin permits the intended build tests.
+
+Verified: the full twins lane preserves Database's 58 claims, equal stored
+contents and exact 222382 inference point. It reports 263 older findings over
+308 twins, with 52/345 examples passing and 3495 claims. twins-selftest passes.
+Receipt: ai-lib4-database-twins.log. Database introduces no additional finding.

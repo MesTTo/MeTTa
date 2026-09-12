@@ -16,6 +16,7 @@ beside its definitions.
 | lib_constraints | 5 | 0 |
 | lib_crypto | 12 | 12 |
 | lib_csv | 7 | 7 |
+| lib_database | 7 | 7 |
 | lib_datastructures | 48 | 31 |
 | lib_datetime | 16 | 16 |
 | lib_derived | 1 | 1 |
@@ -662,6 +663,113 @@ Atomically replace a UTF-8 CSV file with field lists and return True. Options ar
 3. Options
 
 Returns: Written
+
+## lib_database
+
+### `database-add!`
+
+*lib_database.metta:11*
+
+```metta
+(: database-add! (-> %Undefined% Atom Bool))
+```
+
+Append one held ground value, retaining duplicate occurrences. Values may contain native Symbols, Strings, Numbers and proper expression lists. Variables, cycles and foreign resource/Python objects raise before writing. Bind computed values before passing them to this held argument. A write error closes the store; its journal may need repair before reopening.
+
+1. Handle
+2. Value
+
+Returns: Done
+
+### `database-close!`
+
+*lib_database.metta:17*
+
+```metta
+(: database-close! (-> %Undefined% Bool))
+```
+
+Finish journal, schema and lock cleanup before answering. Requests already waiting on the native engine serialize with close; later requests raise. Close is idempotent for completed handles. A close error is propagated after cleanup, retaining any earlier operation error in database_cleanup/2.
+
+1. Handle
+
+Returns: Done
+
+### `database-open!`
+
+*lib_database.metta:23*
+
+```metta
+(: database-open! (-> %Undefined% Symbol %Undefined%))
+```
+
+Open or create a store directory and return an opaque native handle. The directory contains journal.pl and a permanent lock file. A second owner, including one reached through a directory alias, raises immediately. Keep the directory and its contents unchanged through other tools while open. Sync is none, flush or close from journal-sync: buffer writes, flush each write, or close its journal stream after each write. Flushing does not fsync. Close explicitly or use with-database to surface close errors. Atom garbage collection releases abandoned engines asynchronously. Malformed journals raise before native replay; repair from a verified copy before reopening.
+
+1. Directory
+2. Sync
+
+Returns: Handle
+
+### `database-query`
+
+*lib_database.metta:29*
+
+```metta
+(: database-query (-> %Undefined% Atom Atom Expression))
+```
+
+Match a held pattern against each stored value and collect the shared held template. Use the core matcher, including numeric promotion, equality guards and sequence variables. Stored marker-shaped values remain data. Queries match one row at a time; compose joins explicitly. Preserve insertion order, duplicates and all matches of each row. The result is a snapshot occupying memory proportional to its output. A query error leaves the store open.
+
+1. Handle
+2. Pattern
+3. Template
+
+Returns: Rows
+
+### `database-remove!`
+
+*lib_database.metta:35*
+
+```metta
+(: database-remove! (-> %Undefined% Atom Bool))
+```
+
+Remove one exactly equal held ground occurrence, returning False if absent. Duplicates need one removal each. Exact stored-value equality distinguishes integer 1 from float 1.0; database-query instead uses core numeric matching. A native write failure closes the store and propagates its error.
+
+1. Handle
+2. Value
+
+Returns: Removed
+
+### `database-sync!`
+
+*lib_database.metta:41*
+
+```metta
+(: database-sync! (-> %Undefined% Bool))
+```
+
+Flush and close the journal stream while retaining the store's lifetime lock. Subsequent writes reopen that stream under the selected sync policy. An I/O failure ends the attachment. This is a flush boundary, not fsync or a transaction commit; process or machine failure can still lose data.
+
+1. Handle
+
+Returns: Done
+
+### `with-database`
+
+*lib_database.metta:47*
+
+```metta
+(: with-database (-> %Undefined% Symbol Atom %Undefined%))
+```
+
+Own opening directly, apply held Function to the native handle in the calling module, and yield its answers. Close on exhaustion, cut, failure or exception. Writes made before callback failure remain persistent. A callback may close early; closing an already completed store succeeds. Returned handles are closed when this scope ends.
+
+1. Directory
+2. Sync
+3. Function
+
+Returns: Answer
 
 ## lib_datastructures
 
