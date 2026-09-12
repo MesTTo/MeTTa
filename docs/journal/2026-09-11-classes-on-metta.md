@@ -1141,6 +1141,61 @@ tests/repository/test_documentation.py` passes 299 tests, skips one, exit 0
 display-hook refusal, profile tables, pstats export and the repaired class,
 reflection and documentation assertions.
 
+## 2026-09-12: complete-suite declaration consumers
+
+Tried: the complete Python replay with `--randomly-seed=1125382488` reaches
+5,140 passing tests and 92 skips, then exits 1 with 37 failures, including
+a worker crash (`ai-tmp/ai-classes-c5-python-battery2.log`). The native stack
+reaches XPCE's GLX context creation while creating a restricted space. The
+materialization failures report `ugraphs:vertices_edges_to_ugraph/3: Unknown
+procedure: ugraphs:append/3`. These order-dependent failures remain open.
+
+Tried: the same complete command at pristine `c75181adc` stops at the known
+profiling display failure, with 828 passes and 52 skips. Excluding tests whose
+names contain profile still reaches profile through
+`test_every_public_execution_door_honours_speculative_policy` and stops with
+854 passes and 52 skips. Both runs exit 1; neither verifies the later tests
+(`ai-tmp/ai-classes-c6-python-control.log`,
+`ai-tmp/ai-classes-c6-python-control-no-profile.log`).
+
+Tried: the 36 applicable failed nodes, listed as the first line of
+`ai-tmp/ai-classes-c6-python-failed-controls.log`, pass 33 at pristine
+`c75181adc`. The two twin budgets fail with 412 versus 371 and 3,777 versus
+2,478 inferences; `operations/concurrency_handles` fails with
+`X Error of failed request: BadValue (integer parameter out of range for
+operation)`, GLX opcode 152/3. This attributes those three failures to the cut.
+The materialization and restricted-space controls pass in this isolated run.
+
+Decided: value-specific conversion fixtures declare frozen dataclasses.
+Ordinary classes, including empty ones, instead assert retained identity and
+mutable fields. DefinitionFact reflection also records its Declaration
+supertype. The compiler's optional receiver-type proof follows the existing
+numeric-proof rule: a MeTTa local type alias does not need a Python namespace
+binding, while the ordinary annotation claim still owns validation.
+
+Tried: `sh check.sh mypy ruff` passes both lanes, including all four mypy
+invocations (`ai-tmp/ai-classes-c6-types-style-complete.log`). The initial run
+found 138 style findings and one remaining optional-hook type error after the
+class and compiler annotations were reconciled. Targeted Ruff fixes were
+prepared as patches; test names retain the repository's existing descriptive
+name convention. Earlier failed logs are `ai-classes-c6-types-style.log` and
+`ai-classes-c6-types-style-repaired.log` in ai-tmp.
+
+Found: `ai-tmp/ai-classes-c6-text-probe.py` exports a frozen TextPoint, closes
+its original context and reloads its text in another context. The accessor
+answers `(TextPoint-x (TextPoint 3 4))` unreduced. The root contains the from
+row and projected metadata; the implementation lives in the class space
+(`ai-tmp/ai-classes-c6-text-probe.log`). The direct-space source boundary is
+documented in `2026-09-04-seeing-the-metta-behind-the-python.md`; portable
+command conversion must preserve the class program without silently changing
+that boundary. The existing fast image already captures owned space graphs
+and equation bindings in `engine/filereader/source_lifecycle.pl`.
+
+Open: finish the current failed-node replay, preserve Enum coverage over its
+tagged values, make private library imports independent of previous global
+loads, repair portable class conversion, attribute the order-dependent
+materialization and restricted-space failures, and remeasure grain costs.
+
 ## 2026-09-12: finite class domains and portable programs
 
 Tried: the loop continuation's existing backward liveness analysis replaces
