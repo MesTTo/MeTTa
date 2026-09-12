@@ -3242,3 +3242,79 @@ The full twins lane matches all 67 math claims, equal stored contents and the
 121592 pin against 118980. Its existing 263 findings remain across 301 twins;
 45 of 338 corpus files pass, proving 3099 claims. The twins selftest passes.
 Logs: ai-tmp/ai-lib4-math-{lanes,twins-lane}.log.
+
+## 2026-09-12: random design
+
+Decided: five heads provide occurrence choice, shuffling, sampling with a
+replacement Bool, a finite draw stream and distribution discovery. A distribution
+is held data, with ten forms: uniform, normal, lognormal, exponential, triangular,
+gamma, beta, bernoulli, pareto and weibull. Collapse already collects a stream;
+cutting it stops draws. Validate complete inputs before consuming random state.
+Degenerate distributions consume none. The existing with-seed scope owns generator
+restoration; each new draw declares seam:seeded_operation/1 beside its definition.
+
+Decided: use library(random)'s occurrence selection, random-key permutation and
+randseq. One population compound makes indexed sample reads constant-time after
+an O(n) conversion, avoiding k linked-list walks. With replacement costs O(n+k);
+without replacement adds randseq's index selection and O(k log k) permutation.
+Shuffling keeps the host's O(n log n) algorithm. Weighted distribution algebra
+and sampling stay in lib_measure/lib_distribution.
+
+Decided: continuous parameters convert through math-float to finite binary64.
+Normal sampling uses a stateless Box-Muller draw, with no cached spare beyond the
+host generator. Uniform and triangular interpolation use Vector's exact dot
+accumulator; final conversions follow its signed IEEE saturation policy. The
+distribution laws use native floating precision and can round to support endpoints.
+Source: CPython random.py at ebf955df7a89ed0c7968f79faec1de49f61ed7cb, gauss,
+triangular, expovariate and weibullvariate.
+
+Tried: a logarithmic gamma sample avoided underflow in beta ratios but changed
+gamma(1e308,1) to1.0000000000000136e308, far beyond that distribution's spread.
+Rejected: converting every product through log/exp. Revisit only with a numerical
+representation that preserves the concentrated distribution at huge shapes.
+
+Decided: retain the Marsaglia/Tsang factors and a separate logarithmic power
+correction. Multiply ordinary factors exactly, using logarithms together only
+when the power would be subnormal, zero or infinite before the final scale.
+Beta divides exact products when the corrections cancel; otherwise it forms a
+log-ratio and a bounded logistic expression. Exact rational log combinations
+avoid overflow for subnormal shape parameters. This is the paper's boosting
+identity with delayed multiplication, not an approximation to a different law.
+Primary implementation and license:
+https://github.com/rust-random/rand_distr/blob/d65b9bbf991e56d8a097a35d934e6f93d9194ac0/src/gamma.rs.
+NumPy's logarithmic beta ratio motivated preserving underflowed powers:
+https://github.com/numpy/numpy/blob/2f7fe64b8b6d7591dd208942f1cc74473d5db4cb/numpy/random/src/distributions/distributions.c.
+
+Verified: ai-lib4-random-probe-final.log preserves gamma(1e308,1)=1e308,
+beta(1e308,1e308)=0.5 and the large-scale tiny-power product1e308. Seed2 with
+shape0.001 underflows at scale1 but gives2.6489501936835076e-34 at scale1e300.
+Ten thousand draws give gamma(2,3) mean5.9453975406840645 and beta(2,5)
+mean0.28835538137241828. These are provider probes, not library measurements.
+
+## 2026-09-12: random verification
+
+Tried: querying get-type on an unevaluated random-draw! expression reported
+%Undefined%, as required by get-type's held argument. Binding its result first
+gives Bool. The Python twin then exposed the existing rational wire boundary:
+Answers.one() decodes a native rational into Fraction, which re-enters a held
+distribution as a Python object. Answers[0] retains the native atom. The example
+and twin now pass the same 59 claims, including computed rational parameters.
+
+Verified: three measured rounds after deleting QLF artifacts price the twin at
+117876 inferences against 122535 for the example. The initial measurement ran
+before inspecting the twin helper's failure and returned twin[None,None,None];
+it is not price evidence.
+
+Tried: the initial native suite returned exit 0 after a syntax error omitted one
+test. Correcting the missing parenthesis gives all 14 tests passing with no load
+errors. The suite checks finite occurrence domains over 32 seeds, ten distribution
+moments over 10000 draws each, extreme scales and shapes, parameter refusals before
+state changes, early cuts, exceptions, inference cancellation and concurrent
+generator replay. Logs: ai-lib4-random-{example-fixed,twin-fixed,measure-fixed,
+suite-fixed}.log. No existing library implementation changed.
+
+Verified: all required library lanes pass and jscpd finds zero clones. The full
+twins lane gives equal stored contents, all 59 claims and the exact 117876 pin;
+UUID, logging and math also retain their pins. The corpus still reports 263
+older findings over 302 twins; twins-selftest passes. Logs:
+ai-tmp/ai-lib4-random-{lanes,twins-lane,jscpd-final}.log.

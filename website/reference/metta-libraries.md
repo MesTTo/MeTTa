@@ -43,6 +43,7 @@ beside its definitions.
 | lib_pln | 49 | 0 |
 | lib_pln2 | 9 | 0 |
 | lib_process | 7 | 7 |
+| lib_random | 5 | 5 |
 | lib_redis | 2 | 0 |
 | lib_reflect | 19 | 10 |
 | lib_regex | 18 | 18 |
@@ -3646,6 +3647,79 @@ Wait for the process and answer its exit code, or the negative of the signal tha
 1. Process
 
 Returns: Code
+
+## lib_random
+
+### `random-choice!`
+
+*lib_random.metta:14*
+
+```metta
+(: random-choice! (-> Atom %Undefined%))
+```
+
+Choose one occurrence uniformly from a nonempty expression. Items are held, so runnable expressions remain data; bind a computed population with let first. Equal values at different positions remain separate choices. Empty input raises.
+
+1. Items
+
+Returns: Item
+
+### `random-distributions`
+
+*lib_random.metta:20*
+
+```metta
+(: random-distributions (-> Expression))
+```
+
+The accepted distribution values as (random-distribution Name Parameters) rows, with parameter names as Strings. Uniform requires Low=<High; triangular requires Low=<Mode=<High. Normal/lognormal take a mean and nonnegative standard deviation; exponential a positive rate; gamma a positive shape and scale; beta two positive shapes; bernoulli a probability in [0,1]; pareto a positive shape and minimum one; weibull a positive scale and shape.
+
+Returns: Forms
+
+### `random-draw!`
+
+*lib_random.metta:26*
+
+```metta
+(: random-draw! (-> Atom Number %Undefined%))
+```
+
+Stream Count samples of a held value such as (normal 0 1) or (gamma 2 3). Count is nonnegative; zero validates the distribution but yields no answers. Collapse collects the stream, while once/cut consumes only the demanded prefix. Bind computed parameters before building the held distribution value. Every parameter converts to finite binary64. Continuous results are floats; bernoulli returns Bool. Degenerate valid bounds or deviation and probabilities zero/one consume no random state. Use with-seed to replay and restore state. Numerical algorithms use native floating precision: results may round to an endpoint, underflow to zero or overflow to infinity. No cached normal spare or library generator exists; secure bytes remain lib_crypto's separate operation.
+
+1. Distribution
+2. Count
+
+Returns: Value
+
+### `random-sample!`
+
+*lib_random.metta:32*
+
+```metta
+(: random-sample! (-> Atom Number Bool Expression))
+```
+
+Count ordered draws from held Items. Replacement True permits repeated positions; False chooses distinct positions, so Count cannot exceed the input length. Duplicate values can appear in either case. Count zero returns empty, even for an empty population. Validate every argument before drawing. Index the population once: O(n+k) with replacement; without replacement add the host's distinct-index selection and O(k log k) permutation.
+
+1. Items
+2. Count
+3. Replacement
+
+Returns: Sample
+
+### `random-shuffle!`
+
+*lib_random.metta:38*
+
+```metta
+(: random-shuffle! (-> Atom Expression))
+```
+
+A new permutation of the held expression, preserving every occurrence and leaving the input unchanged. Empty input returns empty. Uses the host's random-key sort, O(n log n), and the same generator as with-seed.
+
+1. Items
+
+Returns: Shuffled
 
 ## lib_reflect
 

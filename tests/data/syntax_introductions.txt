@@ -201,7 +201,7 @@ get-doc-single-atom               08-03-10
 get-doc-space                     08-03-10
 help!                             08-03-10
 undocumented-space                08-03-10
-get-type                          09-00-01
+get-type                          08-03-36
 new-state                         09-00-15
 add-typing-rule!                  09-00-16
 remove-typing-rule!               09-00-16

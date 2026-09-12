@@ -9,6 +9,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_random` chooses and samples population occurrences, shuffles expressions
+  and streams draws from ten explicit distribution forms. All draws share the
+  existing seeded generator; cuts consume only the demanded prefix. Parameters
+  are checked before drawing, and degenerate distributions consume no state.
+  Gamma scaling and beta ratios retain values through intermediate underflow.
 - `lib_math` composes the existing factorial/binomial heads with exact gcd/lcm,
   rational construction and decomposition, explicit rationalization, integer
   roots, modular powers and a factor-pair answer stream. Its scalar conversion
