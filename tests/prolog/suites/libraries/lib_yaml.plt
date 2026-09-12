@@ -3,7 +3,7 @@
 % Guarantees: every value the library decodes encodes back to text that decodes to
 % the same value, the mapping shape is lib_json's, and a multi-document stream, an
 % unknown tag, a duplicate key and malformed text are each refused by name
-% [tested: lib_yaml; commit=WORKTREE].
+% [tested: lib_yaml; commit=672e5be181839a8301ba70bc6ead69678f3735bd].
 % Owns resources: the mappings a decode answers are spaces the test releases.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

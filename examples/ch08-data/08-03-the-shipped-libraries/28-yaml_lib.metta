@@ -1,5 +1,5 @@
 ; Purpose: YAML documents as values, in the shape lib_json already uses.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/28-yaml_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/28-yaml_lib.metta; commit=672e5be181839a8301ba70bc6ead69678f3735bd].
 !(import! &self (library lib_yaml))
 
 ; A mapping becomes a SPACE of (Key Value) atoms, which is lib_json's own shape,
