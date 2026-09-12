@@ -4,7 +4,7 @@
 % Guarantees: for generated relations the projections, the converse, the sorts
 % and the grouping answer exactly what library(pairs) answers over the same rows
 % as Key-Value terms, duplicates survive every operation, and a lookup compares
-% keys as terms [tested: lib_pairs; commit=WORKTREE].
+% keys as terms [tested: lib_pairs; commit=40b3353b9ae721bf42b832fb953e93a5dc230e6c].
 % Owns resources: none; every value is a term.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
