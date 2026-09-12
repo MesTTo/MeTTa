@@ -1,7 +1,7 @@
 % Purpose: test whether native archive names depend on the process locale.
 % Guarantees: present requires the UTF8 control to read the exact Unicode name
 % and the C locale alone to raise its character-conversion error.
-% [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds; commit=7b42d5ee5cecb82709617b7ed08dfa2c1441f268].
 % Owns resources: archive handles close and this isolated process's original
 % character locale is restored on every exit.
 

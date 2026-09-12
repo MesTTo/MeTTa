@@ -1,7 +1,7 @@
 % Purpose: verify complete compression members and owned archive publication.
 % Guarantees: malformed input, path collisions and injected close failures leave
 % destination data and the process stream set unchanged.
-% [tested: lib_compression; commit=WORKTREE].
+% [tested: lib_compression; commit=7b42d5ee5cecb82709617b7ed08dfa2c1441f268].
 % Owns resources: fixtures remove their trees; close wrappers and random state
 % are restored on every exit. The cancellation fixture joins its encoder thread
 % and destroys its message queue after observing the owned-stream barrier.

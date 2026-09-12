@@ -76,7 +76,7 @@ Guarantees:
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8]
   - CMake comment pins resolve while all three argument forms retain their
     bytes; unterminated quotes and brackets refuse before writing
-    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=7b42d5ee5cecb82709617b7ed08dfa2c1441f268]
 Fails when: a pin sits somewhere the file's grammar cannot distinguish from
   code. It is reported, not rewritten, and finishing it is a human's call.
 Owns resources: none; it rewrites files in place and holds nothing open.

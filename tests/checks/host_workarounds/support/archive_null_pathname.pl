@@ -1,7 +1,7 @@
 % Purpose: distinguish a missing-name refusal from the native archive crash.
 % Guarantees: present requires a successful UTF8 name control before SIGSEGV;
 % absent requires a decoded legacy name or its explicit representation refusal.
-% [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds; commit=7b42d5ee5cecb82709617b7ed08dfa2c1441f268].
 % Owns resources: the parent drains/closes output and joins its isolated child.
 
 :- use_module(library(process), [process_create/3,process_wait/2]).

@@ -2,7 +2,7 @@
 
 Guarantees: present requires passing name controls before observing either
 missing default CP437 conversion or an ignored valid Unicode extra field.
-[tested: sh check.sh host-workarounds; commit=WORKTREE].
+[tested: sh check.sh host-workarounds; commit=7b42d5ee5cecb82709617b7ed08dfa2c1441f268].
 Owns resources: each native reader is freed and the isolated process restores
 its original character locale on every exit.
 """

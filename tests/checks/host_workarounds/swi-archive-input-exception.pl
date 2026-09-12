@@ -1,7 +1,7 @@
 % Purpose: capture archive callbacks leaving a decoder exception pending.
 % Guarantees: both versions refuse the corrupt input; present additionally
 % requires the native archive_close protocol violation after a valid control.
-% [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds; commit=7b42d5ee5cecb82709617b7ed08dfa2c1441f268].
 % Owns resources: the parent drains/closes output and joins its child; the
 % child closes input, decoder, archive and entry streams on each exit.
 

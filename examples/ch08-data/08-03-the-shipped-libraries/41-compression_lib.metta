@@ -1,5 +1,5 @@
 ; Purpose: compress complete byte streams and extract validated archive data.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/41-compression_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/41-compression_lib.metta; commit=7b42d5ee5cecb82709617b7ed08dfa2c1441f268].
 ; Owns resources: the temporary directory is removed below; each library call
 ; owns its streams and staging files until it succeeds or raises.
 !(import! &self (library lib_file))

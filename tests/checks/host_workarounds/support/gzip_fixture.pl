@@ -1,6 +1,6 @@
 % Purpose: create a native gzip control and the same member with a corrupt CRC.
 % Owns resources: memory and encoder streams close before the byte lists return.
-% [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds; commit=7b42d5ee5cecb82709617b7ed08dfa2c1441f268].
 
 :- module(gzip_host_fixture, [gzip_fixture/3]).
 :- use_module(library(zlib), [zopen/3]).
