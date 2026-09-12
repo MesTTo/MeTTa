@@ -8,6 +8,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 ## [Unreleased]
 
 ### Added
+- Trailed context services restore state either after each answer or when
+  enumeration finishes. Context-reader declarations compile callers directly
+  to the read used by reference publication, support repairs and typing policy.
 
 - A concurrency example exercises scope answer multiplicity, child joining,
   resource release and transfer, the `scope_body` longhand, and deferred

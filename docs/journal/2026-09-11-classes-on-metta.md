@@ -268,3 +268,35 @@ The new corpus example has seven assertions and a Python twin. Its full-example 
 Tried: the final corpus run and its twin -> seven of seven assertions, equal stored content, 21,949 MeTTa inferences and 19,782 Python inferences, zero findings. `jscpd --format prolog --formats-exts 'prolog:pl,plt' --min-lines 5 --min-tokens 50` reports one seven-line test clone, 1.38% over the two new Prolog files; no production clone. The duplicated mutation and error golden remains beside each test because the two cases change different declaration scopes.
 
 Tried: the artifact battery -> 23 passing lanes and two failures, `llms` and `llms-selftest`. The new file and translator unit require source-table counts of 325 and seven. The five Node path findings name generated browser artifacts absent from this worktree; `npm --prefix extensions/node run build:browser --silent` creates them from the existing build scripts. With those counts and artifacts, `sh check.sh llms llms-selftest example-origins evidence provenance-pin-selftest` passes all six selected or implied lanes. The attribution check uses `METTA_UPSTREAM=/home/user/Dev/PyPeTTa1/PeTTa-base` and reports 143 derived and 203 original programs. The llms negative control detects all 64 planted cases. No allowances were widened.
+## 2026-09-12: reference cancellation includes its shared context owners
+
+Tried: the reference suite passed its rollback oracle but failed the following
+compiled-caller test. The pair reproduces independently
+(`ai-tmp/ai-classes-c4-caller-after-cuts.log`). Adding context-state checks to
+`swipl -q -s ai-tmp/ai-classes-c3-frame-cuts.pl` identifies
+`frame_cut_support_guard(2697)` of 3,053 ports
+(`ai-tmp/ai-classes-c4-frame-cut-context.log`). The leaked
+`support_repairs_deferred/0` marker suppresses later recompilation.
+
+Decided: use the shared trailed scopes and context-reader design already
+implemented at `3a931690116abfa8a5a37ecba3fe179d826cd712`. Apply it to reference
+refresh, forcing and completion, plus the support and policy scopes they call.
+Use the enumeration door where the former scope retained context between
+answers. Its native engine test covers suspension and resumption. The inline
+reader avoids adding a predicate call to each hot guard read. Other scope
+owners remain the integration of that existing change.
+
+Tried: `sh engine/test.sh suites/evaluation/reference_scopes.plt
+suites/spaces/references.plt suites/reader/reference_loading.plt` passes
+9 + 4, 31 + 1, and 38 + 46 tests, respectively
+(`ai-tmp/ai-classes-c4-trailed-reference-scopes.log`). The reference budget
+sweep now also checks the policy snapshot, support lock/deferral and reference
+completion markers. The subsequent compiled-caller test passes.
+
+Rejected: `predicate_property/2` for import retirement. It resolves missing
+definitions and can create inherited links while a provider is being replaced;
+the digest-update test raised `No permission to redefine built-in predicate
+'loading-value'/1`. The existing `spaces:metta_existing_import/3` asks only
+whether the module already owns a native import. That replacement restores
+all 38 + 46 loading tests (`ai-tmp/ai-classes-c4-reference-existing-import.log`).
+

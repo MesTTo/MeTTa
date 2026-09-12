@@ -1,5 +1,8 @@
 % Purpose: provide MeTTa's Prolog runtime, builtins, type system, evaluator,
 %   imports, function registration, and named-space execution context.
+% Guarantees: both trailed context scopes are published host services
+%   [tested: reference_scopes:both_scope_doors_are_published_host_services;
+%   commit=WORKTREE].
 % Guarantees:
 %   - metta_operation_parameters/4 exposes the joint argument types and
 %     origins used by constructor compilation and runtime admission
@@ -452,6 +455,8 @@
             metta_transaction/1,
             metta_transaction_notified/3,
             metta_with_state_write_fence/1,
+            metta_with_trailed/3,
+            metta_with_trailed_enumeration/3,
             metta_world_effect_coverage/2,
             %
             % ERRORS AND REFUSALS: the vocabulary every tier raises and every host reads.

@@ -33,6 +33,24 @@ call, so you call it unqualified and the engine's module puts it in scope:
 `swrite/2`, `space_module/2`, `current_metta_module/1`. `seam:kind/2` says
 which of the two any given seam is.
 
+Use `metta_with_trailed(Key, Value, Goal)` for context that returns to the
+caller after each answer. Use `metta_with_trailed_enumeration/3` when the
+context must stay active between a generator's answers, including suspension.
+Both restore the prior root after failure, cut or exception. An unset key and
+`[]` mean inactive. You may mutate the payload, but must not replace the scoped
+root with `nb_setval/2`, `nb_linkval/2` or `nb_delete/1`.
+
+Declare its reader beside the writer:
+
+```prolog
+:- seam:context_reader(active, '$my_library_active', value(true)).
+:- seam:context_reader(owner(Owner), '$my_library_owners', stack(Owner)).
+```
+
+The directive defines the reader and compiles resolving calls to its context
+read. `value(Pattern)` reads one value; `stack(Pattern)` enumerates a list from
+its head. Module qualification or importing the reader preserves that meaning.
+
 ## What each one costs
 
 Measured by `extensions/python/benchmarks/extension_cost.py`, which `check.sh`
