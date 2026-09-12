@@ -9,6 +9,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_functional`'s `partition` reads its test's verdict and compares it, where
+  it used to pass `True` in as the expected answer. A test whose own head is
+  declared deterministic then failed with its output already bound instead of
+  answering `False`, which SWI reports as `Deterministic procedure ... failed`:
+  `(partition (|-> ($c) (unicode-is $c letter)) ("a" "1"))` raised rather than
+  splitting the two.
 - `lib_unicode` is a new library over the host's Unicode database (utf8proc):
   `unicode-version`, `unicode-normalize` in the five forms nfc, nfd, nfkc, nfkd
   and nfkc-casefold, `unicode-casefold`, the general `unicode-map` with

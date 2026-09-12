@@ -4,6 +4,10 @@
 ; The two libraries are separate imports, so a program pays for the half it
 ; asks for; this file asks for both, the general half here and the idioms below.
 !(import! &self (library lib_functional))
+; lib_unicode is imported for one claim below, whose test is a head the library
+; declares deterministic: that is the case a verdict has to be read rather than
+; asked for.
+!(import! &self (library lib_unicode))
 
 (= (double $x) (* 2 $x))
 (= (odd? $x) (== 1 (% $x 2)))
@@ -52,6 +56,11 @@
 !(test (partition odd? (1 2 3 4)) ((1 3) (2 4)))
 !(test (partition odd? ()) (() ()))
 !(test (partition (|-> ($x) (> $x 10)) (1 2)) (() (1 2)))
+; The test's verdict is READ and compared, never threaded into the call as an
+; expected answer, so a test whose own head is declared deterministic answers
+; False rather than failing: this one is lib_unicode's, over one-character
+; strings.
+!(test (partition (|-> ($c) (unicode-is $c letter)) ("a" "1")) (("a") ("1")))
 
 ; `group-by` gathers by what a key function answers, keys in first-appearance
 ; order and members in the collection's order, so grouping needs no sort.

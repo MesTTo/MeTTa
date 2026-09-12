@@ -2690,3 +2690,27 @@ eight boundary code points.
 Measured: the example proves 54 claims and its twin the same 54, 139,207 MeTTa
 against 129,667 Python inferences, minimum of three fresh processes, a first pin.
 Logs: ai-tmp/ai-lib3-unicode-{example,suite,caps}.log.
+
+## 2026-09-12: a verdict is read, not asked for
+
+Tried: lib_parsing's `(char-if F)` as `eval_metta_in_module(Module, [F, Value],
+true)` -> `Deterministic procedure lib_unicode:'unicode-is'/3 failed` on the
+first character the test rejects. The engine compiles a call whose expected
+answer is known as `( nonvar(Out) -> Tmp = Out ; true ), Head(Args, Tmp)`, so
+passing `true` in threads it into the callee's output argument; a Bool head that
+answers false then FAILS with its output bound, and SWI's det/1 declaration turns
+that failure into an error. The same trap was already live in lib_functional's
+`partition`, landed at a2a80061c: `(partition (|-> ($c) (unicode-is $c letter))
+("a" "1"))` raised, while the same test written over `==` answered, which is why
+no example had caught it.
+
+Decided: every caller that wants "is it true?" evaluates into a fresh variable
+and compares, `applied(Module, Test, Item, Verdict), Verdict == true`. Both
+libraries do that now, the functional example carries the claim that used to
+raise, and the twin's budget moves 134,567 to 151,546 for the claim and the
+lib_unicode import it needs.
+
+Open: the hazard belongs to any head declared det that answers a Bool, which is
+most of this package's `*-is` and `*-member` heads. Nothing in the tree refuses a
+caller that threads an expected answer in; the two places that did it were found
+by running a det-declared test through them.
