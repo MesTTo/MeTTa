@@ -17,7 +17,7 @@
 %     [measured 2026-09-12: `profile(true, [top(0)])` raises on 10.1.13 at
 %     loadavg 4, where a 3,000,000-inference loop profiles to samples=6
 %     ticks=26; command=sh check.sh host-workarounds; fixture=SWI-Prolog
-%     10.1.13; commit=WORKTREE]
+%     10.1.13; commit=d9c15a2e39c743ee44f92dc4eedcd82b5f3f8509]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
