@@ -39,6 +39,35 @@ An entry lands with its first site and its reproduction in the same commit. A
 site the ledger does not know is refused, and so is an entry nothing uses. The
 journal keeps the history; this file holds only what is live.
 
+## swi-http-stop-ack
+
+Host: SWI-Prolog10.1.13, packages-http thread_httpd.pl:http_stop_server/2,
+  upstream8e6b758778aed1986f81a4a7a8efeb475faa35aa.
+Defect: the timeout-and-connect shutdown branch joins the accept thread but
+  leaves its untagged http_stopped acknowledgement in the caller mailbox. A
+  later stop can consume it and join a listener it has not woken.
+Reproduction: tests/checks/host_workarounds/swi-http-stop-ack.pl
+Workaround: run each native stop in a fresh thread, joining it in cleanup so
+  its mailbox and leftover acknowledgement die with that operation.
+Lifted when: the forced timeout branch leaves no http_stopped message after
+  native stop returns, so the reproduction prints absent.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md,
+  2026-09-12 HTTP design and verification.
+
+## swi-http-partial-startup
+
+Host: SWI-Prolog10.1.13, packages-http thread_httpd.pl:http_server/2,
+  create_workers/1 and create_server/3, upstream8e6b758778aed1986f81a4a7a8efeb475faa35aa.
+Defect: workers and their message queue are created before the accept thread;
+  an exception creating that thread leaves those resources alive.
+Reproduction: tests/checks/host_workarounds/swi-http-partial-startup.pl
+Workaround: own the bound listener before starting, and release its fresh worker
+  queue and socket if native startup fails. Successful servers use native stop.
+Lifted when: the injected accept-thread alias collision leaves no worker or
+  message queue, so the reproduction prints absent.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md,
+  2026-09-12 HTTP design and verification.
+
 ## swi-cleanup-window
 Host: SWI-Prolog 10.1.13; `setup_call_cleanup/3` is `sig_atomic(Setup),
   '$call_cleanup'` (boot/init.pl:680-682).

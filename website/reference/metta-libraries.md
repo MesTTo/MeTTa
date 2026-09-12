@@ -27,6 +27,7 @@ beside its definitions.
 | lib_gitimport | 0 | 0 |
 | lib_graph | 15 | 15 |
 | lib_he | 18 | 0 |
+| lib_http | 9 | 9 |
 | lib_import | 8 | 4 |
 | lib_json | 13 | 13 |
 | lib_logging | 7 | 7 |
@@ -2716,6 +2717,147 @@ Every vertex, in the standard order of terms, which is a set and therefore what 
 1. Graph
 
 Returns: Vertices
+
+## lib_http
+
+### `http-header`
+
+*lib_http.metta:12*
+
+```metta
+(: http-header (-> Expression String %Undefined%))
+```
+
+Enumerate every matching parsed field, case-insensitively and in received order. Missing fields give no answers. Values retain their parsed structure.
+
+1. Fields
+2. Name
+
+Returns: Value
+
+### `http-methods`
+
+*lib_http.metta:18*
+
+```metta
+(: http-methods (-> Expression))
+```
+
+The installed client's method symbols, including extensions registered with its native method map. The standard provider supplies delete/get/head/post/ put/patch/options. A request refuses a method outside this catalog.
+
+Returns: Methods
+
+### `http-open!`
+
+*lib_http.metta:24*
+
+```metta
+(: http-open! (-> Symbol String Expression Expression))
+```
+
+Open (http-response Status Fields Handle). Handle is a binary File handle; file-read-bytes! reads it and file-close! releases it. HEAD and no-content statuses expose an empty stream. Status codes, including errors, are data. Options are (header Name Value), (body MediaType Bytes), (timeout Seconds), (redirect Bool) and (max-redirect Count). Headers repeat; other options do not. Timeout accepts positive seconds or infinite; the default is native infinite. Redirect defaults to False, with the native maximum of ten when enabled. Host, Connection, Content-Length and Transfer-Encoding belong to the client; Content-Type comes from body, and a User-Agent header replaces its default. Fields are String-key pairs in received order. Names use the native lowercase hyphen spelling. Values preserve parsed numbers, Strings, lists and compound structures, whose first element is their String name. Cookies and media preferences therefore remain data; fields are not the original wire text.
+
+1. Method
+2. URL
+3. Options
+
+Returns: Response
+
+### `http-request!`
+
+*lib_http.metta:30*
+
+```metta
+(: http-request! (-> Symbol String Expression Expression))
+```
+
+Read (http-response Status Fields Bytes) and close its stream before returning. The arguments and parsed fields are those of http-open!. Encode/decode text with lib_encoding, JSON with lib_json, and store bytes through lib_file.
+
+1. Method
+2. URL
+3. Options
+
+Returns: Response
+
+### `http-server-start!`
+
+*lib_http.metta:36*
+
+```metta
+(: http-server-start! (-> String Number Atom Expression Expression))
+```
+
+Listen at Host and Port; zero asks the OS for a free port. Return (http-server Host BoundPort ID). ID distinguishes later reuse of the same port. The caller must stop it. Options are (workers Count), (timeout Seconds) and (keep-alive-timeout Seconds), retaining the native defaults of five workers, sixty seconds and two seconds. Handler and its calling module travel to each worker. Handler accepts an evaluated (http-request Method Path Target Fields Bytes), where Path is decoded and Target is the raw request URI. It supplies its first (http-response Status Headers Bytes). Routes are ordinary MeTTa equations. Headers are String/String pairs, with one optional Content-Type; other framing, Connection, Status and Date fields are owned by the server. Final statuses range 200..599. Statuses 204/205/304 require empty bytes. HEAD sends only the metadata of the returned bytes. An empty answer stream gives 404; malformed answers and handler exceptions become the host's error responses. Handler printing goes to standard error; only its response defines the wire. Start and stop refuse inside a transaction: its database snapshot cannot share lifecycle changes with workers. Start outside it and scope requests.
+
+1. Host
+2. Port
+3. Handler
+4. Options
+
+Returns: Server
+
+### `http-server-stop!`
+
+*lib_http.metta:42*
+
+```metta
+(: http-server-stop! (-> Expression Bool))
+```
+
+Finish active requests and release the server's workers, queue and listener. Repeated stop is harmless. A worker cannot stop its own server, and a handle whose ID is no longer live cannot stop a later server on the same port. Pending connections follow native stop. Stop refuses inside a transaction, whose database snapshot cannot observe the workers' lifecycle changes.
+
+1. Server
+
+Returns: Done
+
+### `http-server-url`
+
+*lib_http.metta:48*
+
+```metta
+(: http-server-url (-> Expression String))
+```
+
+The server's HTTP origin, with IPv6 brackets when needed and a trailing slash. It remains endpoint data after the server stops; it does not check liveness.
+
+1. Server
+
+Returns: URL
+
+### `with-http`
+
+*lib_http.metta:54*
+
+```metta
+(: with-http (-> Symbol String Expression Atom %Undefined%))
+```
+
+Apply a held Function to the evaluated streaming response and yield every answer. Its handle closes on exhaustion, early cut and exception. Function takes an Expression parameter; the response is quoted at the call boundary.
+
+1. Method
+2. URL
+3. Options
+4. Function
+
+Returns: Answer
+
+### `with-http-server`
+
+*lib_http.metta:60*
+
+```metta
+(: with-http-server (-> String Number Atom Expression Atom %Undefined%))
+```
+
+Apply held Function to the evaluated server value and yield every answer. Stop on exhaustion, cut or exception. Handler and Function take Expression parameters; their values are quoted at their respective call boundaries.
+
+1. Host
+2. Port
+3. Handler
+4. Options
+5. Function
+
+Returns: Answer
 
 ## lib_import
 

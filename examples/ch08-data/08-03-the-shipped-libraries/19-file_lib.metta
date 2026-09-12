@@ -1,6 +1,6 @@
 ; Purpose: exercise the File library: bytes, publication, renames, trees,
 ; traversal, globbing, paths, kinds, links, scopes and the handle surface.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/19-file_lib.metta; commit=e40ef941310bddd1f57074eb559e78aac8a263b0].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/19-file_lib.metta; commit=WORKTREE].
 ; Owns resources: everything the example creates lives under one temporary
 ; directory that delete-tree! removes at the end; every handle is closed.
 !(import! &self (library lib_file))
@@ -38,7 +38,7 @@
        "AB")
 ; A byte operation on a text handle, or a text operation on a binary one,
 ; refuses by name rather than decoding octets as text.
-!(test (if-error (catch (let $h (file-open! &blob "r") (file-read-bytes! $h))) refused fine) refused)
+!(test (if-error (catch (with-file &blob "r" (|-> ($h) (file-read-bytes! $h)))) refused fine) refused)
 !(test (if-error (catch (write-bytes! &blob (1 300))) refused fine) refused)
 
 ; The handle surface: size, seek, exact reads, and the three standard streams.

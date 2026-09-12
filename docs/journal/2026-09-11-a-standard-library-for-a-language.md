@@ -3408,3 +3408,154 @@ random also reach their refreshed pins exactly. The corpus result remains
 263 pre-existing findings over 303 twins; 47 of 340 files pass, proving all
 3234 claims in those files. twins-selftest passes. Logs:
 ai-lib4-statistics-{lanes,twins-lane}.log.
+
+## 2026-09-12: HTTP design
+
+Decided: use the host HTTP client and threaded server. A request supplies a
+method, URL and structured options; its response carries status, parsed header
+fields and bytes. The streaming door substitutes a File handle for the bytes.
+Scopes close that handle or stop a server on exhaustion, cut and exception.
+UTF-8, JSON and file storage compose their existing libraries.
+
+Decided: pass the calling module and a MeTTa handler as the native server Goal's
+arguments. The handler receives (http-request Method Path Target Fields Bytes)
+and returns its first (http-response Status Headers Bytes). MeTTa equations
+route by method/path. Empty answers produce404; malformed answers become a
+host500 response. No handler table, ambient scope key or route language is added.
+Start returns (http-server Host Port), with0 requesting a free port; an explicit
+URL door formats the endpoint. Stop is idempotent, graceful, and refuses a worker
+trying to stop its own server. Native server options control workers and idle
+timeouts. Plain HTTP and optional HTTPS client support have separate capabilities.
+
+Decided: HTTP owns framing. Outgoing headers are String pairs and reject control
+characters, invalid field names, duplicate single-valued options and user-supplied
+framing headers before acquisition. Body options specify bytes and their media
+type. Redirects default to false so every HTTP status is an answer; callers can
+enable native bounded redirection. Timeouts otherwise keep the host defaults.
+Parsed incoming fields use normalized String names and recursively preserve
+native numeric, list and compound values. Repeated fields remain repeated;
+header lookup enumerates every match. Final server statuses range200..599, and
+204,205,304 require an empty body. HEAD exposes an empty body with its metadata.
+
+Rejected: a process-wide http_handler table, because two servers must route the
+same path independently. Revisit if a separately requested global router owns
+that state. Rejected: reconstructing raw headers by printing native terms;
+the provider has already parsed cookies, ports and media preferences. Retain
+those structures and describe them instead of claiming the original wire text.
+
+Verified: ai-lib4-http-native-reply-probe.log preserves all256 byte values,
+duplicate X-Reply fields, HEAD's256-byte metadata with an empty body and a299
+status. Use the native http_reply(bytes(...), Headers) response mechanism;
+manual CGI Content-Length produced duplicate framing fields in the first probe.
+ai-lib4-http-callback-probe.log evaluates a captured MeTTa equation on a worker
+and returns201 with bytes0,128,255. Source:
+https://github.com/SWI-Prolog/packages-http/tree/8e6b758778aed1986f81a4a7a8efeb475faa35aa.
+
+Decided: publish File's native stream adoption through @private, keeping one
+handle table for HTTP and later socket streams. The forced close race in
+ai-lib4-file-close-before.log gives one success and one file-not-found exception
+because both callers read the entry before either takes its mutex. Claim the
+entry by retracting under the mutex, then close the claimed stream outside it.
+Blame assigns the existing race to946e4fca1a, authored MesTTo. Existing File
+tests pass49 tests and48 subtests before the change. Reprice affected twins.
+
+Verified: after a server thread alias collision, the host leaves its newly
+created worker and queue alive. ai-lib4-http-startup-probe-fixed.log reports
+permission_error(create,thread,'http@40769') and one remaining worker. The first
+probe used the queue prefix for the thread alias and did not cause a failure;
+its result is discarded. Record swi-http-partial-startup with a strict tracked
+reproduction. Own the bound socket before starting the server, serialize this
+library's lifecycle calls, and roll back that fresh queue on startup failure.
+The native server owns successful listeners and workers until stop.
+
+Tried: a lambda first compiled on a server worker printed its compilation trace
+to that worker's CGI stream. The host reported Illegal HTTP parameter: --> metta
+lambda (lambda_1) -->, and the malformed response left the native client waiting.
+The isolated smoke process was terminated after recording the error. Route handler
+printing to standard error with the native with_output_to scope; only the returned
+response supplies HTTP bytes. This also separates explicit println! calls from
+framing. The earlier named-equation probe did not print on its worker.
+
+Decided after the lifecycle review: identify a server by a monotone integer ID
+carried in its native Goal, and return (http-server Host Port ID). A stale handle
+must not stop a new server that reuses its port. Serialize stop on a mutex named
+for that port, independently of the startup mutex. Holding one global lifecycle
+mutex while waiting for workers would deadlock a worker starting another server.
+The native port registry remains the sole live-server map; no dynamic scope
+state is introduced. The damaged smoke process ignored SIGTERM and required
+SIGKILL; the corrected smoke returns200 and bytes0,128,255, then stops normally.
+
+Tried: replacing a HEAD response with open_string("") and changing that stream
+to binary raised set_stream/2: No permission to encoding stream. Use the native
+stream_range_open/3 with size0 over the real response, with its onclose callback
+closing the parent. The same ownership rule handles no-content statuses.
+The first example also had excess closing parentheses in six refusal claims;
+the reader failed before running it. Correct the expressions before rerunning.
+
+Tried: the first Python measurement hung after all request claims passed. A
+native wrapper trace in ai-lib4-http-load-probe-mailbox.log rules out a source
+transaction: both stops report TRANSACTIONS []. The first stop takes the host's
+timeout-and-connect branch and leaves http_stopped in the caller mailbox. The
+second consumes that stale acknowledgement, skips its wake-up connection and
+joins an accept thread still blocked in tcp_accept/3. The original measurement
+was aborted with exit137 after this diagnosis; it supplies no price.
+
+Decided: give each native stop its own short-lived thread and await its completion
+in cleanup. Its untagged acknowledgements cannot contaminate the caller's mailbox
+or another stop. Do not drain the caller's messages, which might belong to an
+unrelated native operation. Record swi-http-stop-ack with a real-server fixture
+that forces the first acknowledgement wait to take its timeout branch.
+
+Verified: the revised Python source load finishes39 claims and both stops leave
+its mailbox empty. The first completed three-round measurement reports321151
+twin inferences against325873 example inferences. This price precedes the two
+transaction refusal claims added below. Eighteen of the first20 native tests
+pass, including all256 byte values and a method/length cross-product, parsed
+cookies, streaming cleanup and concurrent close. The capability test mistakenly
+expected a scalar source where the census correctly declares a dependency list.
+
+Decided: start and stop refuse inside a transaction before acquiring any resource.
+lib_thread already refuses scopes and database-backed waits for the same reason:
+the caller snapshot cannot share lifecycle changes with workers. The regression
+initially reached an injected listener_was_entered instead of refusing, and a
+stop returned normally. Add both public refusal claims and remeasure HTTP.
+
+Verified: the final example and twin pass41 claims. Three fresh measurements
+after QLF purge give324057 twin inferences against328687 for the example.
+All22 HTTP tests and49 File tests pass, with48 File subtests. The suite also
+proves a TLS request refuses a plaintext listener and that a worker can start
+a second server while another thread stops its first server. There are no load
+errors or warnings. Logs: ai-lib4-http-{example-transaction,twin-transaction,
+measure-final,suites}.log. jscpd reports zero clones before the last two tests.
+
+Verified: re-pricing File's six shipped-library consumers moves text to140583,
+JSON to151596, crypto to151623, CSV to188422, File to209603 and YAML to179426.
+Their stored-content comparison remains unchanged. The same command refused
+HTTP's provisional price because its block was above the function; move that
+block to the end and replace it with the final measurement above. The refusal
+and six successful pin updates are in ai-lib4-http-repin.log.
+
+## 2026-09-13: HTTP notation and final gates
+
+Verified: every required library gate, including both host-workarounds lanes,
+passes. The first full twins run reports281 findings. Twelve belong to HTTP:
+eleven route strings were wrapped only after assignment rather than at their
+data boundary, and a stored let used MeTTa's assignment spelling. Six belong
+to previously passing File consumers whose import or close now costs more.
+The remaining263 are the prior corpus findings. Logs: ai-lib4-http-{lanes,
+twins-lane,new-findings}.log.
+
+Decided: make each route literal ground data at its definition. Let the scoped
+server callback return its whole response and project the status in the claim,
+preserving metadata and removing the redundant inner destructuring. Both
+examples still prove41 claims. Three rounds give323580 twin inferences against
+328540 for the example, superseding the earlier HTTP price. The six additional
+File consumers are being remeasured; native source remains unchanged.
+
+Verified: all twelve File consumers have fresh prices. The final twins lane
+reports equal HTTP contents,41 claims and exactly323580 inferences. Its263
+findings are the existing corpus findings;48/341 files pass and3275 claims
+are proved. twins-selftest passes. All19 required library gate summaries pass,
+including both host-workarounds lanes. Logs: ai-lib4-http-{repin-additional,
+lanes-final,twins-final}.log. The combined native suite passes71 tests and48
+subtests; jscpd finds zero clones. No scope value requires a trailed-key merge.

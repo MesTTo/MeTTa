@@ -9,6 +9,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_http` sends HTTP byte requests and exposes parsed headers, status codes
+  and owned response streams. Local servers route through MeTTa equations;
+  scopes close streams and stop servers, and server IDs protect reused ports.
+  HTTP owns framing, redirects are explicit, and HTTPS uses the native TLS
+  provider when installed. File now exposes native stream adoption and claims
+  a handle under its mutex before closing, so concurrent closes succeed once.
+  Tracked host reproductions cover partial HTTP startup and stale shutdown
+  acknowledgements; the library releases failed starts and isolates stop mailboxes.
 - `lib_statistics` computes totals, three means, median, quantiles, tied modes,
   variance, deviation, covariance, correlation, ranks and linear regression.
   Exact stored observations prevent cancellation and intermediate overflow;

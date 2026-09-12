@@ -202,6 +202,8 @@ get-doc-space                     08-03-10
 help!                             08-03-10
 undocumented-space                08-03-10
 get-type                          08-03-36
+timeout                           08-03-38
+transaction                       08-03-38
 new-state                         09-00-15
 add-typing-rule!                  09-00-16
 remove-typing-rule!               09-00-16
@@ -237,13 +239,11 @@ evalc                             14-00-01
 inferences                        14-00-01
 metta                             14-00-01
 sleep                             14-00-01
-timeout                           14-00-01
 read-form!                        14-00-02
 argv                              14-00-03
 current-time                      14-00-03
 format-time                       14-00-03
 hyperpose                         15-00-01
-transaction                       15-00-01
 with_mutex                        15-00-01
 change-state!                     15-00-02
 declare-pre-add!                  15-00-03
