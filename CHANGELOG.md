@@ -17,10 +17,22 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   that lock ordered against an engine mutex. The arithmetic-expansion guard,
   the seam table, the atom-hook watchers, materialization's erase listener,
   the receipt engine's two listeners, the reference watch and the Python
-  seat's bound watch register through it; the reference watch is now one process listener registered at load,
-  reading each thread's own pending frames, rather than one registration and
-  removal per transaction. The `prolog-static` lane refuses a
+  seat's bound watch register through it; the reference watch is now one
+  process listener registered at load, reading each thread's own pending
+  frames, rather than one registration and removal per transaction. The
+  `prolog-static` lane refuses a
   raw `prolog_listen/2,3` or `prolog_unlisten/2` anywhere else.
+- The plunit lane runs every suite under `tests/prolog/lock_order.pl`, which
+  records the order each thread acquires SWI mutexes, with each channel's
+  event-list lock as one more, and fails the lane on any cycle not in its
+  inventory, naming the goal each edge was first taken for; a suite that ran
+  without the recorder fails the lane too, and so does an inventoried cycle a
+  whole run shows nowhere. The inventory holds the twenty-five lock-order
+  inversions the engine carries today, among the typing policy, the
+  exec-module lock, deferred translation, the specializer, the receipts
+  engine, the two receipt channels and SWI's own `flag/3` mutex, which the
+  receipts completion enters from a thread signal; their burn-down is
+  tracked in the workspace ledger.
 - The plunit lane runs every suite under `tests/prolog/lock_order.pl`, which
   records the order each thread acquires SWI mutexes, with each channel's
   event-list lock as one more, and fails the lane on any cycle, naming the

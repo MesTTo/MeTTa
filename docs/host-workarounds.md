@@ -176,7 +176,8 @@ Reproduction: tests/checks/host_workarounds/swi-event-list-lock-spans-listener-c
   registration made while holding the mutex the callback waits for.
 Workaround: every registration goes through engine/host_listeners.pl, which
   holds no mutex while it registers, so no mutex is ever ordered before a
-  channel's event-list lock.
+  channel's event-list lock; tests/prolog/lock_order.pl records that lock as
+  one more mutex and the plunit lane fails on any cycle through it.
 Lifted when: call_event_list copies the callback list and releases the lock
   before calling into Prolog, at which point the reproduction's worker joins.
   The door stays: registering once, unnamed, is the shape the entry above

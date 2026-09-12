@@ -29,7 +29,6 @@
    - a bare predicate indicator names the closure's own module, so the same
      spelling from two modules is two channels and two keys
      [tested: host_listeners:the_same_listener_registers_once; commit=WORKTREE]
-
    - no prolog_listen/2,3 or prolog_unlisten/2 exists outside this file under
      engine/, lib/ or a seat's binding half
      [tested: tests/prolog/static_checks.pl, every_host_listener_registers_through_the_door;
@@ -40,7 +39,8 @@
    Guarded by: nothing. The once-only claim is flag/3's atomic compare-and-set
      and completion is the listener/2 row, both outside every transaction, so
      no mutex is held across prolog_listen/2 and a registration orders no mutex
-     before the event-list lock.
+     before the event-list lock. tests/prolog/lock_order.pl records that lock
+     as one more mutex and the plunit lane fails on any cycle through it.
    Decides: a listener is process-wide and permanent, and its closure is ground,
      so the same registration is the same key from every thread.
 */

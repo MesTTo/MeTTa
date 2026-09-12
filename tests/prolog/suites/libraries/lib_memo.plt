@@ -242,13 +242,19 @@ test(a_declaration_lands_in_the_module_that_is_speaking,
 %searches the whole autoload library index before raising the existence error
 %memo_owner_module/4 discards. 1,033 inferences against 10 for a name the
 %space inherits [measured 2026-09-06; commit=693b1bdb6ed06cd0ba01e901a8a6d774bc733d19]. A RATIO rather than a
-%count, because the honest number moves a few inferences with clause layout.
+%count, because the honest number moves a few inferences with clause layout,
+%and ten rather than four because the plunit lane runs under
+%tests/prolog/lock_order.pl, which costs about twenty inferences per mutex
+%acquisition and the missing path takes mutexes the present one does not
+%[measured 2026-09-13: missing 73 against present 12 under the recorder;
+%command=sh engine/test.sh suites/libraries/lib_memo.plt; commit=WORKTREE].
+%The hundredfold search this bound exists to catch is two orders away either way.
 test(asking_who_owns_an_undefined_name_costs_what_asking_about_an_inherited_one_costs) :-
     space_module('&memo_iso', Iso),
     assertion(\+ current_predicate(Iso:'plunit-memo-no-such-name'/2)),
     memo_owner_cost('car-atom', Iso, 2, Present),
     memo_owner_cost('plunit-memo-no-such-name', Iso, 2, Missing),
-    assertion(Missing =< 4 * Present).
+    assertion(Missing =< 10 * Present).
 
 memo_owner_cost(Fun, Module, PredArity, Per) :-
     Rounds = 1000,

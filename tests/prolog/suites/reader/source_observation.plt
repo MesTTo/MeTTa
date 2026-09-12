@@ -402,8 +402,13 @@ test(attributing_a_goal_that_is_not_a_host_predicate_costs_what_one_that_is_cost
     %[measured: 2026-09-08 present=10 and missing=41, cut=10/38; command=swipl -q tests/prolog/probes/module_attribution.pl; fixture=provisioned module tree and cut 9006528e0; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]. The bound is here to
     %catch the 1,030-inference library-index search that
     %predicate_property(defined) used to trigger, which is two orders of
-    %magnitude away either way.
-    assertion(Missing =< 5 * Present).
+    %magnitude away either way. Ten rather than five because the plunit lane
+    %runs under tests/prolog/lock_order.pl, which costs about twenty
+    %inferences per mutex acquisition and the missing path takes mutexes the
+    %present one does not [measured 2026-09-13: missing 78 against present 15
+    %under the recorder; command=sh engine/test.sh suites/reader/source_observation.plt;
+    %commit=WORKTREE].
+    assertion(Missing =< 10 * Present).
 
 attribution_cost(Goal, Per) :-
     Rounds = 1000,

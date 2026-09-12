@@ -29,7 +29,8 @@
 #     scan, the load-time error scan that catches a test which never ran, and
 #     the bound that keeps a suite from outliving the run or the session.
 #   - the exit status is nonzero when any suite fails, prints an error while
-#     LOADING, leaves a choicepoint, or names a suite that does not exist.
+#     LOADING, leaves a choicepoint, names a suite that does not exist, records
+#     a mutex acquisition cycle, or runs without the lock-order recorder.
 # Open Obligations:
 #   To Do: None
 #   Hacks: None
@@ -74,7 +75,9 @@ run_plunit() {
     # themselves use, or as the path from the repository root that `find` and
     # an editor both print. Neither resolving is guessed: the one that exists
     # wins, and a name that is neither is an error rather than a silent skip.
+    all=0
     if [ "$#" -eq 0 ]; then
+        all=1
         set -- suites/*/*.plt
     else
         for named in "$@"; do
@@ -86,10 +89,15 @@ run_plunit() {
             }
         done
     fi
+    ran=0
     for suite in "$@"; do
         [ -e "$suite" ] || suite=${suite#tests/prolog/}
         [ -e "$suite" ] || continue
-        bounded swipl -g "set_test_options([format(log)]), run_tests" \
+        ran=$((ran + 1))
+        # lock_order.pl loads before the suite, so every mutex acquisition and
+        # every listener registration of the process is recorded; its header
+        # says what it sees.
+        bounded swipl -s lock_order.pl -g "set_test_options([format(log)]), run_tests" \
             -t halt "$suite" -- extensions >"$out" 2>&1 || ok=1
         cat "$out"; cat "$out" >>"$log"
     done
@@ -122,6 +130,36 @@ run_plunit() {
         echo "is dropped silently and its test never runs:"
         grep -A1 "^ERROR" "$log"
         ok=1
+    fi
+    # Every suite runs under tests/prolog/lock_order.pl, which records the
+    # order each thread acquires SWI mutexes, with the event-list lock SWI
+    # holds across a listener callback as one more, and reports at halt. A
+    # cycle is a deadlock some interleaving reaches; four hung this tree before
+    # the recorder existed (docs/journal/2026-09-13-one-door-for-host-listeners.md).
+    # The cycles the tree carries today are inventoried in the recorder, so a
+    # new one fails here and a listed one is reported as known.
+    if grep -q "^lock-order: cycle$" "$log"; then
+        echo "plunit: the lock-order recorder found an acquisition cycle the"
+        echo "inventory in tests/prolog/lock_order.pl does not list:"
+        grep "^lock-order: new cycle" -A6 "$log"
+        ok=1
+    fi
+    # A suite that printed neither verdict ran without the recorder, and that
+    # silence is the silence a clean run prints, so the count is checked.
+    reported=$(grep -cE "^lock-order: ([0-9]+ mutexes|cycle$)" "$log")
+    if [ "$reported" -ne "$ran" ]; then
+        echo "plunit: the lock-order recorder reported for $reported of $ran suites"
+        ok=1
+    fi
+    # After a run of every suite, an inventoried cycle no suite showed is a
+    # row to delete, which is how the inventory only shrinks.
+    if [ "$all" -eq 1 ]; then
+        if ! bounded swipl -q -s lock_order.pl -g "lock_order:lock_order_audit('$log')" \
+                -t halt >"$out" 2>&1; then
+            echo "plunit: the lock-order inventory has a row no suite shows any more:"
+            grep "^lock-order: inventory row" "$out"
+            ok=1
+        fi
     fi
     rm -f "$log" "$out"
     return $ok
