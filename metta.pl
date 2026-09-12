@@ -1219,6 +1219,9 @@ metta_platform_capability('memory-files', library(memfile),
                           'lib_compression byte encoding through owned memory streams').
 metta_platform_capability(archive, library(archive),
                           'lib_compression archive metadata, entry reads and extraction').
+% [tested: lib_database; commit=WORKTREE].
+metta_platform_capability(persistency, [library(persistency),library(shlib)],
+                          'lib_database independent journals and owned file locks').
 %One capability over two libraries, because engine/filereader.pl imports both
 %and the cache is what a user loses when either goes. The row is CONSERVATIVE
 %about fastrw and deliberately so: fast_read/2 and fast_write/2 are SWI core
