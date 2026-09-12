@@ -49,6 +49,7 @@ beside its definitions.
 | lib_spaces | 10 | 5 |
 | lib_strategy | 24 | 0 |
 | lib_string | 34 | 34 |
+| lib_system | 8 | 8 |
 | lib_tabling | 11 | 0 |
 | lib_thread | 58 | 2 |
 | lib_torch | 20 | 19 |
@@ -4427,6 +4428,115 @@ Greedily wrap words to a positive codepoint width. Collapse ASCII space, tab, LF
 3. Alignment
 
 Returns: Out
+
+## lib_system
+
+### `change-directory!`
+
+*lib_system.metta:25*
+
+```metta
+(: change-directory! (-> String Bool))
+```
+
+Change the process's current directory. This is process-wide, like the environment: every space and every later relative path sees it. A path that is not a directory raises, naming it.
+
+1. Path
+
+Returns: Done
+
+### `env-all`
+
+*lib_system.metta:31*
+
+```metta
+(: env-all (-> Expression))
+```
+
+The whole environment as a relation of (Name Value) pairs, names and values both Strings, in the order the host reports. This is lib_pairs' shape, so pairs-lookup and pairs-sort-by-key answer over it.
+
+Returns: Variables
+
+### `env-get`
+
+*lib_system.metta:37*
+
+```metta
+(: env-get (-> String String))
+```
+
+One environment variable's value, with NO answer when it is not set: unset and empty are different states, and a program that defaults one has to be able to tell. A collapse over this is the presence test, and if-empty over the collapse is the default.
+
+1. Name
+
+Returns: Value
+
+### `env-set!`
+
+*lib_system.metta:43*
+
+```metta
+(: env-set! (-> String String Bool))
+```
+
+Set the variable for this PROCESS: every space sees it and so does every child process started afterwards. Answers True, because a set that failed raises.
+
+1. Name
+2. Value
+
+Returns: Done
+
+### `env-unset!`
+
+*lib_system.metta:49*
+
+```metta
+(: env-unset! (-> String Bool))
+```
+
+Remove the variable from this process. Removing one that is not set is silent, because a cleanup path should not have to check first.
+
+1. Name
+
+Returns: Done
+
+### `platform-info`
+
+*lib_system.metta:55*
+
+```metta
+(: platform-info (-> Symbol %Undefined%))
+```
+
+What the host says about itself: the architecture, the operating-system family, the SWI-Prolog version as a String and as its three numbers, this process's identifier, how many cores the host reports, whether integers are bounded, and the executable and home directory of the running system. The host NAME is not among them: gethostname/1 is library(socket)'s, and a whole network library is too much to link for one string. A key the library does not know is refused with every key listed, because a typo would otherwise read as a platform that does not have it.
+
+1. Key
+
+Returns: Value
+
+### `platform-keys`
+
+*lib_system.metta:61*
+
+```metta
+(: platform-keys (-> Expression))
+```
+
+Every key platform-info answers for, as data: the same list its refusal names.
+
+Returns: Keys
+
+### `working-directory`
+
+*lib_system.metta:67*
+
+```metta
+(: working-directory (-> String))
+```
+
+The process's current directory, as an absolute path with no trailing separator. Every relative path a program writes is read against this one.
+
+Returns: Path
 
 ## lib_thread
 

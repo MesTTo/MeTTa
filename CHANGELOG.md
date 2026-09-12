@@ -9,6 +9,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_system` is a new library over the environment, the working directory and the
+  platform: `env-get`, `env-all`, `env-set!`, `env-unset!`, `platform-info`,
+  `platform-keys`, `working-directory` and `change-directory!`. A variable that is
+  not set has no answer, where an empty value answers the empty String, so unset and
+  empty stay different states; the whole environment is a `lib_pairs` relation with
+  String names, which is what keeps it inert. `platform-info` takes one of eleven
+  keys and refuses an unknown one with all of them listed; the host NAME is not
+  among them, because `gethostname/1` is `library(socket)`'s and a whole network
+  library is too much to link for one string. `env-all` rests on `library(unix)`'s
+  `environ/1` through the new `environment-listing` capability and refuses by name
+  on a build without it. There is no shell: no head here hands text to one, which is
+  the line between running a program and letting a string become one.
 - `lib_encoding` is a new library of the three encodings a program moves bytes
   through: `utf8-encode`, `utf8-decode`, `hex-encode`, `hex-decode`,
   `base64-encode` and `base64-decode`. Bytes are an expression of Numbers from 0 to

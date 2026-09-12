@@ -2921,3 +2921,42 @@ generated inputs and for the padding law. Every refusal names what it found.
 Measured: the example proves 39 claims and its twin the same 39, 149,599 MeTTa
 against 147,669 Python inferences, minimum of three fresh processes, a first pin.
 Logs: ai-tmp/ai-lib3-encoding-{example,suite}.log.
+
+## 2026-09-12: system
+
+Decided: a read of an unset variable has NO answer, where an empty value answers the
+empty String. Unset and empty are different states and a program that defaults one
+has to be able to tell; a collapse over the read is the presence test, which the
+example shows both ways.
+
+Decided: the environment is a relation of (Name Value) pairs with STRING names, so
+lib_pairs reads it and the row stays inert whatever a variable is called: a Symbol
+key named like a function would be evaluated where the relation is written, which
+the markup row measured.
+
+Decided: the working directory is read and changed here rather than in lib_file,
+because it is a property of the process and not of a path, and the header says the
+write outlives the space that made it, as the environment's does.
+
+Decided: no shell, and the header says so where a reader looks for one. lib_process
+runs an executable with an argument vector; nothing in this library hands text to a
+shell to interpret.
+
+Verified: `sh engine/test.sh suites/libraries/lib_system.plt` passes 5 tests. The
+environment relation is checked against the host's own environ/1 over the same
+process, every platform key against the host's flag or predicate, the version text
+against its three numbers, and the working directory against what the process
+reports, with a refused move leaving it unchanged and a real move undone by the
+test's own cleanup.
+
+Tried: `environ/1` for the listing and `gethostname/1` for a hostname key -> the
+lib-autoload lane named both: they are library(unix)'s and library(socket)'s, SWI's
+ext/clib pack, reachable here only through the autoloader. The listing is worth a
+census row, `environment-listing` over library(unix), because getenv/2 answers only
+a variable a caller can already name; the hostname is not, because linking a whole
+network library for one string is the wrong trade, so `platform-info` has ten keys
+and not eleven. `env-all` refuses by name where the capability is lost.
+
+Measured: the example proves 29 claims and its twin the same 29, 122,661 MeTTa
+against 117,508 Python inferences, minimum of three fresh processes, a first pin.
+Logs: ai-tmp/ai-lib3-system-{example,suite}.log.
