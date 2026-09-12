@@ -3,7 +3,7 @@
 % Guarantees: every operation agrees with an oracle built from the host's own
 % predicates over generated inputs, the two flattens agree with append/2 and with
 % library(lists)' flatten/2 respectively, and the cost of one pass stays linear
-% [tested: lib_functional; commit=WORKTREE].
+% [tested: lib_functional; commit=a2a80061cd8264d8f714b14c76b94d00f44a0755].
 % Owns resources: none; every answer is a term, and the one space the control
 % forms count in is created inside its own test.
 

@@ -28,7 +28,7 @@
 %     - exits nonzero when that walk stops seeing a planted published head whose
 %       name a tier already answers, so a clean result is again a tested claim
 %       [tested: prove_shadow_eyesight/0, which publishes a library name the
-%       engine module imports from library(lists); commit=WORKTREE]
+%       engine module imports from library(lists); commit=a2a80061cd8264d8f714b14c76b94d00f44a0755]
 % Fails when:
 %     - a call is assembled at run time from a term no analysis can see,
 %       `Goal =.. L, call(Goal)` being the shape. That is the residue this
