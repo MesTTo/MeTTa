@@ -2,7 +2,7 @@
 % Guarantees: committing generated type checks adds no native call around
 %   intrinsic tests and preserves the caller's alternatives [tested:
 %   run_tests(translator_check_commits), run_tests(translator_typed_checks);
-%   commit=WORKTREE].
+%   commit=6c70946993db4811ebc46c618e8c68a18474694c].
 % Guarantees: a computed Error crosses an ordinary result arrow unchanged;
 %   other result mismatches still filter that branch
 %   [tested: classes_transaction_results:typed_results_preserve_errors_and_filter_other_mismatches;
