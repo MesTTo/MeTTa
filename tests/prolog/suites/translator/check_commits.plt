@@ -1,7 +1,7 @@
 % Purpose: verify the cost and choicepoint scope of compiled type checks.
 % Guarantees: intrinsic argument checks add no native calls to their untyped
 %   equivalent, while joint type witnesses commit independently of caller
-%   alternatives [tested: run_tests(translator_check_commits); commit=WORKTREE].
+%   alternatives [tested: run_tests(translator_check_commits); commit=6c70946993db4811ebc46c618e8c68a18474694c].
 % Owns resources: each measured fixture releases its native space in cleanup.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
