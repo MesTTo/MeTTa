@@ -15,7 +15,7 @@
 %   One process frame_finished listener, registered through metta_listen/2 at
 %   load, serves every thread's pending frames [tested:
 %   reference_loading:concurrent_transactions_keep_each_others_rollback_listener;
-%   commit=WORKTREE].
+%   commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f].
 % Owns resources: observed spaces own mutation observers, projected metadata and
 %   native bindings; space release withdraws all three. Transaction completion
 %   reconciles native bindings with the rows surviving commit or rollback.
