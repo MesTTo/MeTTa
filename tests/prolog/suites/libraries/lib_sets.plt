@@ -3,7 +3,7 @@
 % Guarantees: for generated sets each merge answers exactly what its definition
 % over member/2 answers, every answer is itself a set, membership compares terms
 % rather than unifying, and an unordered argument is refused by every head that
-% takes a set [tested: lib_sets; commit=WORKTREE].
+% takes a set [tested: lib_sets; commit=e3e8c891065765765ee8fe567c5eb6864e79b652].
 % Owns resources: none; every value is a term.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

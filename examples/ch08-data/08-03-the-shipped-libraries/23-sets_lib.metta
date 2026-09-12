@@ -1,5 +1,5 @@
 ; Purpose: sets as ordered expressions, and the merge operations over them.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/23-sets_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/23-sets_lib.metta; commit=e3e8c891065765765ee8fe567c5eb6864e79b652].
 !(import! &self (library lib_sets))
 
 ; A set is an expression in the standard order of terms with no duplicates, so
