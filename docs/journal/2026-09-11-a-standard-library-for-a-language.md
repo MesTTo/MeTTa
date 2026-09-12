@@ -2631,3 +2631,62 @@ module's namespace, idempotent whichever library loads it first. With it,
 Measured: the example proves 34 claims and its twin the same 34, 81,614 MeTTa
 against 92,465 Python inferences, minimum of three fresh processes, a first pin.
 Logs: ai-tmp/ai-lib3-graph-{example,suite,noautoload}.log.
+
+## 2026-09-12: unicode
+
+Decided: one head per QUESTION with the variant as an argument, so the five
+normalization forms, the thirteen properties and the fourteen classes are three
+heads rather than thirty-two, and each refusal lists the names it knows. The
+forms are stated as the flag sets the host's own convenience predicates use, so
+`unicode-normalize` is one line per form over `unicode-map`, and the suite checks
+each statement against the host's predicate over generated text.
+
+Decided: no case CONVERSION here, because lib_string's `string-upper` and
+`string-lower` are that; case FOLDING is the different operation of UAX#31, and
+the example shows the difference on sharp s. `library(unicode)` is SWI's
+ext/utf8proc pack, absent from swipl-wasm, so the library declares a new
+`unicode` platform capability in the engine's census table, the seam that exists
+for exactly this, and the platform_capabilities suite's 45 tests pass with the
+row present.
+
+Tried: `unicode-is` over `code_type/2` -> every claim passed under `sh test.sh`
+and `(unicode-is "é" alpha)` answered False under the twins lane, which runs its
+children under `LC_ALL=C`; `code_type(233, alpha)` is false there and true under
+a UTF-8 locale. A classification that moves with the locale is not a Unicode
+classification. Rewritten over the general category: letter, number, mark,
+punctuation, symbol and separator are the category groups, upper, lower, title,
+digit and control are single categories, white-space is the standard's own
+White_Space list, ascii is the range and assigned is whether the database has a
+category at all. The suite switches `setlocale(ctype, _, 'C')` and checks the
+same twenty-five answers under both.
+
+Tried: `unicode_map/3` with a runtime flag list -> `domain_error(unicode_map_options,
+[decompose,stripmark,compose])`. The host refuses composing and decomposing at
+once, and stripmark with neither, with that bare error and no reason; the
+library refuses both combinations itself, naming the conflict, and the accent
+strip is `(compose stripmark)`.
+
+Tried: validating a numeric character with `unicode_codepoint_valid/1` -> that
+predicate answers ASSIGNMENT, not range: 55295, 65534 and 1114111 are in range,
+are not surrogates, and are invalid because they have no category, while a
+private-use code point is valid. So `unicode-codepoint-valid` is documented as
+the assignment question, the character check is the range, and an unassigned
+number in range is a fair question for a property, which the database answers by
+having nothing to say.
+
+Tried: the grapheme claim as `("é" "x")` -> `["é","x"] does not match ["é","x"]`:
+the answer is the decomposed form and the written one is composed, and they print
+the same. The claim compares code points instead, which is what makes the
+grouping visible at all.
+
+Verified: `sh engine/test.sh suites/libraries/lib_unicode.plt` passes 8 tests.
+Every form and the fold are checked against the host's predicate for it over 200
+generated strings; idempotence and the nfc/nfd agreement of UAX#15 over the same;
+the thirteen properties against the host's terms over seven characters; the
+classes under both locales and against the category's initial letter; graphemes
+rejoining to their text over 100 strings; and validity as assignment over the
+eight boundary code points.
+
+Measured: the example proves 54 claims and its twin the same 54, 139,207 MeTTa
+against 129,667 Python inferences, minimum of three fresh processes, a first pin.
+Logs: ai-tmp/ai-lib3-unicode-{example,suite,caps}.log.

@@ -9,6 +9,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_unicode` is a new library over the host's Unicode database (utf8proc):
+  `unicode-version`, `unicode-normalize` in the five forms nfc, nfd, nfkc, nfkd
+  and nfkc-casefold, `unicode-casefold`, the general `unicode-map` with
+  utf8proc's fourteen flags, `unicode-property` for thirteen per-character
+  properties, `unicode-is` for fourteen character classes, `unicode-graphemes`
+  and `unicode-codepoint-valid`. Each head takes its variant as an argument and
+  refuses an unknown one with the names listed. The classes are the database's
+  general categories and never the process locale, so a letter is a letter
+  under `LC_ALL=C` too, where `code_type/2` says otherwise. The library declares
+  the new `unicode` platform capability, so a build without SWI's utf8proc pack
+  refuses it by name before it loads.
 - `lib_graph` is a new library of directed graphs as expressions: `graph-of`,
   `graph-is`, `graph-vertices`, `graph-edges`, `graph-neighbours`,
   `graph-add-vertices`, `graph-remove-vertices`, `graph-add-edges`,

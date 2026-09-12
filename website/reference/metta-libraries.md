@@ -49,6 +49,7 @@ beside its definitions.
 | lib_tabling | 11 | 0 |
 | lib_thread | 58 | 2 |
 | lib_torch | 20 | 19 |
+| lib_unicode | 8 | 8 |
 | lib_vector | 13 | 13 |
 | lib_zar | 4 | 0 |
 
@@ -4579,6 +4580,122 @@ This attribute is ``None`` by default and becomes a Tensor the first time a call
 1. %Undefined%
 
 Undocumented: `torch-relu`
+
+## lib_unicode
+
+### `unicode-casefold`
+
+*lib_unicode.metta:29*
+
+```metta
+(: unicode-casefold (-> String String))
+```
+
+The text case-folded for caseless comparison, which is NOT a lowercasing: it maps to whatever compares equal regardless of case, so German sharp s becomes two letters and the answer may be longer than the input. lib_string's string-lower is the lowercasing.
+
+1. Text
+
+Returns: Folded
+
+### `unicode-codepoint-valid`
+
+*lib_unicode.metta:35*
+
+```metta
+(: unicode-codepoint-valid (-> Number Bool))
+```
+
+Whether the database ASSIGNS this number a character: in range, not a surrogate half, and not unassigned or a noncharacter. It is stricter than "a scalar value": U+D7FF and U+10FFFF are in range and are not surrogates, and both are unassigned, so both answer False, while a private-use code point is assigned and answers True. The same question through the database is whether unicode-property answers a category at all [measured 2026-09-12: unicode_codepoint_valid/1 answers false for 55295, 65534 and 1114111, each of which has no category, and true for 57344, whose category is Co].
+
+1. Code
+
+Returns: Answer
+
+### `unicode-graphemes`
+
+*lib_unicode.metta:41*
+
+```metta
+(: unicode-graphemes (-> String Expression))
+```
+
+The user-perceived characters of UAX#29, one string each: a base character with its combining marks is ONE answer, where string-chars answers a code point each. This is the length a person counts and the boundary a cursor moves over.
+
+1. Text
+
+Returns: Graphemes
+
+### `unicode-is`
+
+*lib_unicode.metta:47*
+
+```metta
+(: unicode-is (-> %Undefined% Symbol Bool))
+```
+
+Whether the character belongs to a class the Unicode database defines: letter, upper, lower, title, digit, number, mark, punctuation, symbol, separator, white-space, control, ascii or assigned. Each is a general category or a group of them, white-space is the standard's own White_Space list, and ascii is the range; none of them consults the process locale, which is what code_type/2 does and why it is not the mechanism here. This is the question a lexer asks per character, a Bool rather than a failure so it composes with if, and an unknown class is refused with the names listed.
+
+1. Character
+2. Class
+
+Returns: Answer
+
+### `unicode-map`
+
+*lib_unicode.metta:53*
+
+```metta
+(: unicode-map (-> String Expression String))
+```
+
+The text transformed by a collection of flags in ONE pass, which is the general operation the normalizations and the fold are compositions of: stable, compat, compose, decompose, ignore, rejectna, nlf2ls, nlf2ps, nlf2lf, stripcc, casefold, charbound, lump and stripmark. Stripping accents is (compose stripmark); normalising typographic quotes and dashes to ASCII is (lump). An unknown flag is refused with the fourteen listed, and so are the two combinations the host refuses with nothing but a domain error: compose together with decompose, which asks for both directions at once, and stripmark without either, which has no form to strip marks from.
+
+1. Text
+2. Flags
+
+Returns: Mapped
+
+### `unicode-normalize`
+
+*lib_unicode.metta:59*
+
+```metta
+(: unicode-normalize (-> Symbol String String))
+```
+
+The text in one of the five standard forms: nfc and nfd are the canonical composition and decomposition of UAX#15, nfkc and nfkd their compatibility counterparts, and nfkc-casefold the caseless identifier form of UAX#31. Each is one composition of unicode-map's flags, named; an unknown form is refused with the five listed.
+
+1. Form
+2. Text
+
+Returns: Normalized
+
+### `unicode-property`
+
+*lib_unicode.metta:65*
+
+```metta
+(: unicode-property (-> %Undefined% Symbol %Undefined%))
+```
+
+What the database says about one character: its general category, combining class, bidi class and mirroring, compatibility decomposition type, default ignorability, grapheme boundary class, display width, East-Asian ambiguity, its three single-character case mappings and its Indic conjunct break. A property the character has no value for has NO answer, which is data about the character; an unknown property name is refused, which is a mistake in the program. A case mapping answers the code point, because the mapping is defined on code points and not every one has a single-character mapping.
+
+1. Character
+2. Property
+
+Returns: Value
+
+### `unicode-version`
+
+*lib_unicode.metta:71*
+
+```metta
+(: unicode-version (-> String))
+```
+
+The version of the Unicode database every other answer here comes from. A normalization is reproducible only beside the version that produced it, which is why this is a head rather than a comment.
+
+Returns: Version
 
 ## lib_vector
 
