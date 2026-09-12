@@ -12,8 +12,16 @@
 % Guarded by: the journal is a SWI global variable, local to its engine and
 %   thread [tested: host_transactions:concurrent_journals_keep_their_owners;
 %   commit=WORKTREE].
-:- module(host_transactions, []).
+% Guarantees: host_transaction_on_exit/1 runs its registered reconciliation
+%   after the native transaction returns and the parent journal is restored
+%   [tested: host_transaction_completion; commit=WORKTREE].
+% Assumes: registered reconciliation is idempotent and succeeds; cleanup may
+%   repeat it after an inference cut [tested: host_transaction_completion;
+%   commit=WORKTREE].
+
+:- module(host_transactions, [host_transaction_on_exit/1]).
 :- use_module(library(prolog_wrap), [wrap_predicate/4]).
+:- meta_predicate host_transaction_on_exit(0).
 
 % Workaround: swi-nested-retract-loses-outer-assert - retain assertion ownership outside SWI's transaction table.
 % merge_clause_tables replaces an outer GEN_ASSERTZ/GEN_ASSERTA entry with
@@ -88,7 +96,7 @@ host_record_assertion(Journal, Clause, Ref) :-
 % catch term and can repeat retirement after an inference cut.
 host_transaction(Original, Policy) :-
     ( nb_current('$metta_host_assertions', Parent) -> true ; Parent = none ),
-    Journal = journal([]),
+    Journal = journal([], []),
     setup_call_catcher_cleanup(
         true,
         ( host_transaction_enter(Parent, Journal), call(Original) ),
@@ -118,7 +126,28 @@ host_transaction_leave(Parent, Journal, Catcher, Policy) :-
         arg(1, Parent, [scope(Last)|Older]), Last == Journal
     ->  nb_linkarg(1, Parent, Older)
     ;   true
+    ),
+    host_transaction_finalize(Journal).
+
+% Native event callbacks run under SWI's global event-list mutex. Completion
+% that can acquire an application lock belongs after the native call returns.
+% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-event.c#L418-L468
+host_transaction_on_exit(Goal) :-
+    (   nb_current('$metta_host_assertions', Journal), Journal \== none
+    ->  arg(2, Journal, Goals), nb_linkarg(2, Journal, [Goal|Goals])
+    ;   throw(error(context_error(transaction),
+                    context(host_transaction_on_exit/1,
+                            'register completion inside a native transaction')))
     ).
+
+host_transaction_finalize(Journal) :-
+    arg(2, Journal, Goals),
+    forall(member(Goal, Goals),
+           ( call(Goal) -> true
+           ; throw(error(goal_failed(Goal),
+                         context(host_transaction_on_exit/1,
+                                 'transaction reconciliation must succeed'))) )),
+    nb_linkarg(2, Journal, []).
 
 host_erase_assertions([]).
 host_erase_assertions([ref(Ref)|Entries]) :-
