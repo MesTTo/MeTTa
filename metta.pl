@@ -1164,6 +1164,14 @@ metta_platform_capability(regex, library(pcre),
 %from swipl-wasm, so a build can be complete without it. Nothing else provides
 %normalization or the character database: code_type/2 answers the classes and
 %string_upper/2 the case conversions, both of which stay.
+%library(unix) is SWI's ext/clib pack, absent from swipl-wasm. environ/1 is the
+%only name any of this tree's code wants out of it, and it is the only way to
+%enumerate the whole environment: getenv/2 answers one variable a caller can
+%already name.
+metta_platform_capability('environment-listing', library(unix),
+                          'lib_system\'s (env-all ...), which lists every \c
+                           variable; (env-get ...), (env-set! ...) and \c
+                           (env-unset! ...) name one variable each and still work').
 %library(sgml) and library(xpath) are SWI's ext/sgml pack, absent from
 %swipl-wasm. Nothing else parses XML or HTML here.
 metta_platform_capability(markup, [library(sgml), library(sgml_write), library(xpath)],
