@@ -39,6 +39,51 @@ An entry lands with its first site and its reproduction in the same commit. A
 site the ledger does not know is refused, and so is an entry nothing uses. The
 journal keeps the history; this file holds only what is live.
 
+## swi-uri-empty-query
+
+Host: SWI-Prolog10.1.13, packages-clib uri.c:add_query_and_fragment,
+  upstream a69cf00dcf0dd2e3ac1aa9565fbebf4aa4ceb5da.
+Defect: native composition adds the query delimiter only for a nonempty query,
+  collapsing a present-empty component into an absent one.
+Reproduction: tests/checks/host_workarounds/swi-uri-empty-query.pl
+Workaround: compose all defined components using RFC3986 section5.3.
+Lifted when: the native builder retains the question mark for an empty query.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-uri-empty-base-path
+
+Host: SWI-Prolog10.1.13, packages-clib uri.c:resolve_guarded,
+  upstream a69cf00dcf0dd2e3ac1aa9565fbebf4aa4ceb5da.
+Defect: the authority-with-empty-path branch creates a merged buffer but does
+  not assign its range to the target path, so resolving g against http://a loses g.
+Reproduction: tests/checks/host_workarounds/swi-uri-empty-base-path.pl
+Workaround: RFC3986 section5.2.3 prepends slash and retains the merged path.
+Lifted when: resolving g against http://a returns http://a/g.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-uri-urn-resolution
+
+Host: SWI-Prolog10.1.13, packages-clib uri.c:resolve_guarded/ranges_in_charbuf,
+  upstream a69cf00dcf0dd2e3ac1aa9565fbebf4aa4ceb5da.
+Defect: native absolute URN parsing stores nid/nss, while resolution emits only
+  the generic path slot; an absolute URN becomes urn:.
+Reproduction: tests/checks/host_workarounds/swi-uri-urn-resolution.pl
+Workaround: carry the entire opaque path through generic RFC3986 resolution.
+Lifted when: resolving an absolute URN retains its namespace content.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-uri-normalization-data
+
+Host: SWI-Prolog10.1.13, packages-clib uri.c:normalize_in_charbuf,
+  upstream a69cf00dcf0dd2e3ac1aa9565fbebf4aa4ceb5da.
+Defect: unconditional lowercasing includes case-sensitive userinfo and URN
+  content; liberal percent decoding rewrites arbitrary octets through Unicode.
+Reproduction: tests/checks/host_workarounds/swi-uri-normalization-data.pl
+Workaround: normalize unreserved bytes and scheme/host case only, retaining
+  userinfo case and every other encoded octet.
+Lifted when: all identifying-case and octet fixtures retain their data.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
 ## swi-http-stop-ack
 
 Host: SWI-Prolog10.1.13, packages-http thread_httpd.pl:http_stop_server/2,

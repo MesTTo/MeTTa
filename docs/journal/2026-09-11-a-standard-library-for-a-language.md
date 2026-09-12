@@ -3559,3 +3559,75 @@ are proved. twins-selftest passes. All19 required library gate summaries pass,
 including both host-workarounds lanes. Logs: ai-lib4-http-{repin-additional,
 lanes-final,twins-final}.log. The combined native suite passes71 tests and48
 subtests; jscpd finds zero clones. No scope value requires a trailed-key merge.
+
+## 2026-09-13: URI design
+
+Tried: installed library(uri) against empty delimiters, URNs, userinfo and an
+authority-only base. uri_components loses '?'; uri_resolve(g,'http://a',R)
+returns http://a; resolving urn:Example:ABC returns urn:. uri_normalized
+lowercases User:Pass and the URN namespace-specific string. Percent normalization
+rewrites %FF to%C3%BF and an overlong UTF8 slash to a literal slash. Commands
+and outputs: ai-lib4-uri-probe.pl, ai-lib4-uri-{probe,normalize-probe}.log.
+
+Rejected: direct native component, normalization and resolution wrappers,
+because their returned values lose case-sensitive or structural data. Revisit
+when the tracked swi-uri-reference-loss reproduction prints absent. Native
+percent encoding is correct across its four contexts, Unicode and NUL.
+
+Decided: use RFC3986 AppendixB and sections5.2/5.3 for generic components and
+resolution. Represent optional components as omitted String-key rows; an empty
+String retains its delimiter. Keep authorities encoded and paths generic,
+including URNs. Normalize only unreserved percent bytes and ASCII scheme/host
+case; leave userinfo and reserved bytes intact. Relative paths retain dot
+segments until resolution supplies a base. A reversed output stack gives dot
+removal linear work over consumed characters, including parent segments.
+
+Decided: expose the native four encoding contexts; strict decoding combines
+percent octets with lib_encoding's verified UTF8 codec. Query pairs keep order,
+duplicates and blank values. Their uri/form argument controls only plus-space
+convention, following CPython v3.14.0 parse_qsl with keep_blank_values=True;
+empty segments are ignored and bare keys become empty-valued. References use
+ASCII URI spelling; percent encoding supplies Unicode data. Authorities remain
+encoded data and are not a DNS or address validator. These nine heads require
+the native URI capability, no resource registry and no scoped global value.
+
+Verified: native smoke checks retain empty delimiters, opaque URNs, an empty
+port spelling and strict decoded NUL; an authority-only base resolves g to/g.
+The first executable example stopped at its NUL fixture: the reader interprets
+the unrecognized backslash-u escape as literal u0000. Construct that String
+through the existing utf8-decode byte door. The library's native NUL handling
+was unchanged. Logs: ai-lib4-uri-{native-smoke,example}.log.
+
+Decided: track four independent host defects with separate reproductions:
+swi-uri-empty-query, swi-uri-empty-base-path, swi-uri-urn-resolution and
+swi-uri-normalization-data. These replace the provisional combined key above.
+
+Verified: the example and twin pass55 claims. Three fresh measurements give
+118602 twin inferences against125852 for the example. All four independent
+host reproductions print present. Initial native tests pass every RFC3986
+resolution fixture; test defects were a missing parenthesis in the generated
+case fixture, a hex-width field that counted the preceding percent character,
+and an attempted surrogate String that the host refuses to construct. Fix the
+fixtures; malformed UTF8 already tests surrogate rejection at the public door.
+No library code changed. Logs: ai-lib4-uri-{twin,measure,host-reproductions,suite}.log.
+
+Verified: all12 native tests pass. They include all42 RFC3986 resolution cases,
+576 component combinations, all256 percent octets,84 scalar/context cases and
+1002 generated Unicode query relations. No load warnings or errors remain.
+The dot-removal fixture uses193760 inferences for1500 segment/parent pairs and
+387260 for3000, consistent with the linear stack design. Exact command and
+results are in ai-lib4-uri-suite-fixed.log. All record generators pass; jscpd
+reports zero clones. URI owns no handles and adds no scoped state.
+
+Verified: all19 required library gate summaries pass. The full twins run
+reports305 findings:42 are ungrounded String literals in URI's expected values,
+and263 are the existing corpus findings. Compare the returned typed expressions
+directly against typed expected pairs. The corrected twin passes55 claims,
+has equal stored contents and retains118602 inferences over three fresh rounds.
+Its targeted lane reports zero findings. Logs: ai-lib4-uri-{lanes,twins-lane,
+twin-grounded,measure-grounded,twin-targeted}.log.
+
+Verified: the final full twins run retains263 existing findings over305 twins.
+URI proves55 claims with equal stored contents and exactly118602 inferences;
+49/342 corpus examples pass and3330 claims are proved. twins-selftest, Ruff,
+mypy and evidence pass. Logs: ai-lib4-uri-{twins-final,notation-lanes}.log.

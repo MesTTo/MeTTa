@@ -9,6 +9,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_uri` composes encoded components, normalizes identifying URI text,
+  resolves RFC3986 references and preserves empty delimiters and duplicate query
+  keys. Encoding contexts distinguish paths, segments, query values and fragments;
+  decoding is strict UTF8, and query pairs choose literal or form-style plus.
+  Four tracked native URI defects cover lost queries, resolved paths and
+  namespace content, and normalization that changes identifying data.
 - `lib_http` sends HTTP byte requests and exposes parsed headers, status codes
   and owned response streams. Local servers route through MeTTa equations;
   scopes close streams and stop servers, and server IDs protect reused ports.

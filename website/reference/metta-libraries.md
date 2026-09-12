@@ -60,6 +60,7 @@ beside its definitions.
 | lib_thread | 58 | 2 |
 | lib_torch | 20 | 19 |
 | lib_unicode | 8 | 8 |
+| lib_uri | 9 | 9 |
 | lib_uuid | 11 | 11 |
 | lib_vector | 13 | 13 |
 | lib_yaml | 4 | 4 |
@@ -5854,6 +5855,136 @@ Returns: Value
 The version of the Unicode database every other answer here comes from. A normalization is reproducible only beside the version that produced it, which is why this is a head rather than a comment.
 
 Returns: Version
+
+## lib_uri
+
+### `uri-build`
+
+*lib_uri.metta:11*
+
+```metta
+(: uri-build (-> Expression String))
+```
+
+Compose encoded String pairs. Their order is immaterial; missing path means empty. Unknown or repeated keys and ambiguous component separators raise. Encode component data before building; this operation does not encode it.
+
+1. Parts
+
+Returns: URI
+
+### `uri-contexts`
+
+*lib_uri.metta:17*
+
+```metta
+(: uri-contexts (-> Expression))
+```
+
+Encoding contexts: path keeps slash; segment encodes it; query-value protects pair separators and plus; fragment retains its own reserved punctuation.
+
+Returns: Contexts
+
+### `uri-decode`
+
+*lib_uri.metta:23*
+
+```metta
+(: uri-decode (-> String String))
+```
+
+Decode percent octets exactly once as strict UTF8. Literal plus stays plus. Malformed escapes, overlong UTF8, surrogate scalars and truncated sequences raise. Unescaped Unicode and encoded NUL survive. Decode after splitting the reference, since decoding a reserved slash or question mark changes structure.
+
+1. Encoded
+
+Returns: Text
+
+### `uri-encode`
+
+*lib_uri.metta:29*
+
+```metta
+(: uri-encode (-> Symbol String String))
+```
+
+Encode Unicode text as UTF8 percent octets in a context from uri-contexts. A literal percent is encoded too; encode raw data exactly once. NUL is %00.
+
+1. Context
+2. Text
+
+Returns: Encoded
+
+### `uri-normalize`
+
+*lib_uri.metta:35*
+
+```metta
+(: uri-normalize (-> String String))
+```
+
+Lowercase the scheme and host, decode unreserved percent bytes and uppercase other escape digits. Preserve userinfo case, reserved bytes and empty query delimiters. Remove dot segments from anchored paths; a relative path keeps its dots until uri-resolve supplies a base. No scheme-specific port or URN namespace rules are guessed, and percent bytes need not represent UTF8.
+
+1. URI
+
+Returns: Normalized
+
+### `uri-parts`
+
+*lib_uri.metta:41*
+
+```metta
+(: uri-parts (-> String Expression))
+```
+
+Encoded String pairs in scheme/authority/path/query/fragment order. Path is always present. Other missing components have no row; ("query" "") retains the question mark. URNs have an ordinary opaque path. References use ASCII URI spelling and valid percent triples; uri-encode carries Unicode data. Authorities remain encoded text: this is not a DNS or IP address validator.
+
+1. URI
+
+Returns: Parts
+
+### `uri-query-build`
+
+*lib_uri.metta:47*
+
+```metta
+(: uri-query-build (-> Symbol Expression String))
+```
+
+Encode String pairs in order using the native query-value safe characters. uri spells spaces %20; form spells them plus. Literal plus and pair separators are always escaped. Slash and question mark can remain within a value. Every pair gets an equals sign, including an empty key or value.
+
+1. Style
+2. Pairs
+
+Returns: Query
+
+### `uri-query-parse`
+
+*lib_uri.metta:53*
+
+```metta
+(: uri-query-parse (-> Symbol String Expression))
+```
+
+Decode an ampersand-separated query into String pairs, preserving order, duplicates and empty values. Bare keys get an empty value; empty segments are ignored. uri preserves literal plus; form reads plus as space in both keys and values. A semicolon is data. Escapes and UTF8 are checked strictly.
+
+1. Style
+2. Query
+
+Returns: Pairs
+
+### `uri-resolve`
+
+*lib_uri.metta:59*
+
+```metta
+(: uri-resolve (-> String String String))
+```
+
+Resolve by RFC3986 section5.2. Base must have a scheme. An explicit reference scheme wins, including http:g; empty query replaces the base query. Resolution removes literal dot segments but does not decode percent escapes or fold case.
+
+1. Reference
+2. Base
+
+Returns: Absolute
 
 ## lib_uuid
 
