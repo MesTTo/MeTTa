@@ -1,5 +1,5 @@
 ; Purpose: the Unicode database and the standard transformations over text.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/26-unicode_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/26-unicode_lib.metta; commit=a30e0a59e8e16d15705dc0258d7e0a004ae63e4b].
 !(import! &self (library lib_unicode))
 ; lib_string is beside it here because the two answer different questions about
 ; the same text: `string-codes` and `string-chars` count code points, this

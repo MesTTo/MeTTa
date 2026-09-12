@@ -6,7 +6,7 @@
 % agree on every string, the classes are the general category and never the
 % locale, a character is a string or a code, an absent property has no answer
 % where a wrong name is refused, and graphemes group what code points split
-% [tested: lib_unicode; commit=WORKTREE].
+% [tested: lib_unicode; commit=a30e0a59e8e16d15705dc0258d7e0a004ae63e4b].
 % Owns resources: none; every value is a term.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
