@@ -2323,7 +2323,7 @@ metta_catalog_preset([vocabulary, semiring|Semirings]) :-
 metta_catalog_preset([vocabulary, 'algebra-law'|Laws]) :-
     metta_algebra_law_vocabulary(Laws).
 %The heads a refinement may carry inside `(Annotated Base ...)` and still
-%constrain a VALUE: the eleven engine/metta/refinements.pl decides, spelled as
+%constrain a VALUE: the rules engine/metta/refinements.pl decides, spelled as
 %annotated_types spells them so a Python `Annotated[int, Gt(0)]` and a MeTTa
 %`(Annotated Number (Gt 0))` are one declaration. The type reader admits an
 %encoded metadata atom as a refinement only when its head is here; anything
@@ -2331,7 +2331,7 @@ metta_catalog_preset([vocabulary, 'algebra-law'|Laws]) :-
 %Held equal to the rule table by refinements:the_rule_table_and_the_catalog_vocabulary_agree.
 metta_catalog_preset([vocabulary, refinement,
                       'Gt', 'Ge', 'Lt', 'Le', 'Interval', 'MultipleOf',
-                      'MinLen', 'MaxLen', 'Len', 'Predicate', 'Unit']).
+                      'MinLen', 'MaxLen', 'Len', 'Predicate', 'Unit', 'Literal']).
 metta_catalog_preset([vocabulary, 'source-kind', linear, repeated, peek]).
 metta_catalog_preset([vocabulary, world, 'closed-world', 'open-world']).
 metta_catalog_preset([vocabulary, atomicity,
