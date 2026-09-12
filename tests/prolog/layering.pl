@@ -13,6 +13,11 @@
 %       [tested: engine_layering; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 %     - identity is a leaf reached by boot validation, storage and image receipt
 %       [tested: engine_layering; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
+%     - host_listeners is a leaf reached from clause bodies by spaces and
+%       materialization, and reaches nothing; the seam table, the core's
+%       arithmetic guard and the reference watch call it from load directives,
+%       which this walk of the database does not see
+%       [tested: engine_layering; commit=WORKTREE].
 %     - every call from one engine subsystem into another, and every call from
 %       lib_tabling into an engine subsystem, is named in the contract below,
 %       or the lane exits nonzero naming caller, callee and the missing line

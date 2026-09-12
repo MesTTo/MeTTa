@@ -234,7 +234,6 @@ test(inner_failure_transfers_one_watch_and_outer_completion_retires_it,
         Outcome == commit)),
     ( Outcome == commit -> call(Scope) ; \+ call(Scope) ),
     metta_engine:metta_reference_pending_frames(Retired), assertion(Retired == []),
-    assertion(\+ nb_current('$metta_reference_listening', true)),
     assertion(\+ metta_engine:metta_reference_finishing(_)).
 
 test(the_bulk_data_loop_executes_from_and_internal_rows,

@@ -341,9 +341,8 @@ perform(source_rollback) :-
     catch(filereader:with_source_load(guard_source, '&self',
               plunit_trailed_scopes:rollback_payload), guard_rollback, true).
 perform(reference_finishing) :-
-    thread_self(Owner),
     nb_setval('$metta_reference_frames',[guard_frame]),
-    metta_engine:metta_reference_finish_frame(Owner,guard_frame).
+    metta_engine:metta_reference_frame_finished(guard_frame).
 perform(bridge_depth) :-
     snapshot(metta_engine:metta_bridge_descend([insert,'&self',[guard_payload]])).
 perform(counted_hook) :-
