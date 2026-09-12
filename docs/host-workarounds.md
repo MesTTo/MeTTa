@@ -152,13 +152,36 @@ Defect: src/pl-event.c:add_event_hook returns at line 155 after replacing
 Reproduction: tests/checks/host_workarounds/swi-named-listener-replacement-lock.sh,
   a completed single-registration control followed by a replacement whose
   worker announces its arrival before trying to unregister the handler.
-Workaround: each reference observer registers one unnamed closure carrying
-  its owning thread and unregisters only that closure at retirement.
+Workaround: every listener is registered once, unnamed, through
+  engine/host_listeners.pl, so the replacement branch is never entered.
 Lifted when: add_event_hook releases the event-list mutex before returning
-  from the named-handler replacement branch. Distinct observer ownership
-  remains necessary after that host repair.
+  from the named-handler replacement branch. The once-only door stays after
+  that host repair, because a listener is process-wide by design.
 Record: docs/journal/2026-09-09-import-and-module-semantics.md, candidate
-  admission and concurrent rollback-listener evidence.
+  admission and concurrent rollback-listener evidence;
+  docs/journal/2026-09-13-one-door-for-host-listeners.md.
+
+## swi-event-list-lock-spans-listener-callbacks
+Host: SWI-Prolog 10.1.13, src/pl-event.c at
+  fc7ef84b949378b729052c3ade79c90ce5416abb: call_event_list holds the
+  channel's recursive list lock across every callback it delivers (lines
+  415-470) and link_event takes the same lock to register (lines 99-110).
+Defect: a callback runs with its channel's event-list lock held, so a callback
+  that waits for a mutex some other thread holds while that thread registers
+  on the same channel never returns, and neither does the registration: two
+  threads in futex_do_wait and a process that reports nothing. Four hangs in
+  this tree were that cycle, each through a different engine mutex.
+Reproduction: tests/checks/host_workarounds/swi-event-list-lock-spans-listener-callbacks.sh,
+  a control whose worker registers after releasing the mutex, then the same
+  registration made while holding the mutex the callback waits for.
+Workaround: every registration goes through engine/host_listeners.pl, which
+  holds no mutex while it registers, so no mutex is ever ordered before a
+  channel's event-list lock.
+Lifted when: call_event_list copies the callback list and releases the lock
+  before calling into Prolog, at which point the reproduction's worker joins.
+  The door stays: registering once, unnamed, is the shape the entry above
+  still needs.
+Record: docs/journal/2026-09-13-one-door-for-host-listeners.md.
 
 ## swi-query-frame-discarded-on-engine-destroy
 Host: SWI-Prolog 10.1.13; `PL_close_query` in src/pl-wam.c closes the

@@ -235,6 +235,11 @@
 % [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L239; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 :- set_module(base(metta_engine)).
 
+% Every listener this file registers goes through the engine's one door, which
+% registers once, takes no name and holds no mutex while SWI takes the
+% channel's event-list lock (engine/host_listeners.pl).
+:- use_module(host_listeners, [metta_listen/2]).
+
 %%%% What kind of seam each extension point is %%%%
 %
 %Every seam below is declared multifile and then given a KIND on the line
@@ -1216,6 +1221,11 @@ kind(metta_argument_admitted/3, host_service).
 %exactly what the generated library reference did by not reading them at all,
 %counting lib_memo at zero names while nine were callable.
 kind(metta_string_registrations/2, host_service).
+%The one door through which a host binding registers a listener with SWI: once
+%per process, unnamed, never removed, and holding no mutex while SWI takes the
+%channel's event-list lock, which it also holds across every callback it
+%delivers (engine/host_listeners.pl).
+kind(metta_listen/2, host_service).
 %A host query supplies one dynamic carrier around an engine-owned goal, then
 %reads the same effective carrier and its multiplicative identity when it
 %decodes or initializes answer annotations. These are doors into the algebra
@@ -2052,7 +2062,7 @@ declared(Action, Reference) :-
     ;   true
     ).
 
-:- prolog_listen(kind/2, declared).
+:- metta_listen(kind/2, declared).
 %And the ones declared above, which the listener could not have seen. The
 %sweep runs again from engine/metta.pl's own initialization, after every file
 %the engine loads has defined what it declared here.
@@ -2335,8 +2345,8 @@ atom_hook_changed(Kind, Action, Context) :-
       -> sync_atom_hook(Kind)
     ; true ).
 
-:- prolog_listen(atom_added/2, atom_hook_changed(added)).
-:- prolog_listen(atom_removed/2, atom_hook_changed(removed)).
+:- metta_listen(atom_added/2, atom_hook_changed(added)).
+:- metta_listen(atom_removed/2, atom_hook_changed(removed)).
 :- sync_atom_hook(added).
 :- sync_atom_hook(removed).
 :- initialization(sync_atom_hook(added), restore_state).

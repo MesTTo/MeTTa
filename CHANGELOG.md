@@ -9,6 +9,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- One door for host event listeners: `metta_listen/2` in
+  `engine/host_listeners.pl` registers a listener once per process, unnamed
+  and permanent, through an atomic `flag/3` claim and a completion wait, and
+  holds no mutex while SWI takes the channel's event-list lock. SWI holds that
+  lock across every callback it delivers, and four hangs in this tree were
+  that lock ordered against an engine mutex. The arithmetic-expansion guard,
+  the seam table and the atom-hook watchers register through it.
+- The plunit lane runs every suite under `tests/prolog/lock_order.pl`, which
+  records the order each thread acquires SWI mutexes, with each channel's
+  event-list lock as one more, and fails the lane on any cycle, naming the
+  predicate that first took each edge; a suite that ran without the recorder
+  fails the lane too.
 - The `qlf-provenance` gate lane reads the directory every compiled artifact
   under `engine/` and `lib/` records as the one it was saved in and refuses one
   written anywhere else, naming both directories and the purge that repairs
