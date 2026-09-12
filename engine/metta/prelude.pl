@@ -35,7 +35,7 @@
 %   - reference maps consume held names even when those names already denote
 %     grounded functions [tested:
 %     references:a_reference_map_accepts_a_name_that_is_already_a_grounded_function;
-%     commit=WORKTREE].
+%     commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Fails when: a prelude_rule_registration/2 row names a head no
 %   prelude_head/2 row defines. That is an inconsistency between two tables in
 %   this file and it raises rather than registering a rule that would expand

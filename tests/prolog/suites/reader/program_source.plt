@@ -1,7 +1,7 @@
 % Purpose: check native source projection and portable space allocation.
 % Guarantees: scoped allocation preserves the equation home while parent data
 %   stays private; references regenerate projected metadata once
-%   [tested: program_source; commit=WORKTREE].
+%   [tested: program_source; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

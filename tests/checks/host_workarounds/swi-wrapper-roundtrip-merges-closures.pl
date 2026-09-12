@@ -2,7 +2,7 @@
 % Guarantees: the last line is present when current_predicate_wrapper/4 loses
 %   the second closure's identity, absent when its documented round trip holds
 %   [tested: sh check.sh host-workarounds;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Owns resources: fixture predicates and wrappers die with the probe process.
 
 :- use_module(library(prolog_wrap)).

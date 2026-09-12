@@ -29,7 +29,7 @@
 %       [tested: consulted_source_units_are_attributed_to_their_umbrella; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 %     - a multifile caller belongs to the clause being walked, including when
 %       another subsystem contributes the predicate's first clause
-%       [tested: multifile_callbacks_keep_their_implementation_owners; commit=WORKTREE].
+%       [tested: multifile_callbacks_keep_their_implementation_owners; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 %     - the spaces lifecycle may retire module-owned translator registrations
 %       before clearing the module that supplies their bodies
 %       [tested: translator_rule_module_home, engine_layering; commit=d1318d20b5d89d33079c49d0e94aa29e12685664]

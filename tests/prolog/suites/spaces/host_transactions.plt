@@ -1,7 +1,7 @@
 % Purpose: verify the repository workaround for nested host rollback.
 % Guarantees: later transactions cannot observe aborted assertions, older
 %   rows survive rollback, and journals remain local to their executing thread
-%   [tested: host_transactions; commit=WORKTREE].
+%   [tested: host_transactions; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Owns resources: each test removes its private rows; worker threads are joined.
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- use_module('../../../../engine/host_transactions', []).

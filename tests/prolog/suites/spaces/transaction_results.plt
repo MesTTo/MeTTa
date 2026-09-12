@@ -1,7 +1,7 @@
 % Purpose: preserve MeTTa answer bags while rolling back Error-valued work.
 % Guarantees: failure, exception and Error results all roll back writes;
 %   successful bags retain order, duplicates and external variable bindings
-%   [tested: classes_transaction_results; commit=WORKTREE].
+%   [tested: classes_transaction_results; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Owns resources: each test releases its private native space.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

@@ -1,7 +1,7 @@
 % Purpose: verify trailed scopes used by reference publication and its locks.
 % Guarantees: answer and enumeration scopes preserve linked context and retire
 %   after success, failure, cut, exception and every native inference limit
-%   [tested: reference_scopes; commit=WORKTREE].
+%   [tested: reference_scopes; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Owns resources: each fixture restores its context; worker tests join their
 %   native thread and engine tests destroy their suspended engine.
 

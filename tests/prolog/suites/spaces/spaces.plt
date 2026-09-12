@@ -3,7 +3,7 @@
 %   as the space grows, which a scan would answer identically.
 % Guarantees:
 %   - bound-space fixtures retire their engine-owned token claims
-%     [tested: space_handle_type; commit=WORKTREE].
+%     [tested: space_handle_type; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 %   - Native storage modules do not inherit user predicates, while execution
 %     modules keep undefined calls loud [tested: spaces_storage_modules].
 %   - Every seam:engine_emitted/1 declaration is protected from capture in

@@ -2,10 +2,10 @@
 %   route matching to native and foreign space providers, and validate
 %   '&metta' declarations against the self-describing catalog.
 % Guarantees: add-atom/4 exposes the native occurrence-output write
-%   [tested: spaces_tokens; commit=WORKTREE].
+%   [tested: spaces_tokens; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: metta_existing_import/3 reports an existing native import without
 %   resolving missing names [tested: reference_loading, engine_layering;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarantees: algebra membership is shared by declaration, native annotations

@@ -9,7 +9,7 @@
 % Purpose: implement pre-add hooks, transforms, watchers, views, digests, and purity inventories
 % Guarantees: metta_transaction/2 rolls back Error-valued answer bags and
 %   replays their exact order and bindings after rollback
-%   [tested: classes_transaction_results; commit=WORKTREE].
+%   [tested: classes_transaction_results; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
 %   an internal SWI transaction never impersonates the outermost user transaction coordinator.
@@ -497,7 +497,7 @@ metta_writes(Ctx, Atomicity) :-
 % MeTTa's Error is a value. Inspect the complete bag inside the transaction,
 % then carry it through a private exception so rollback cannot lose answers.
 % The goal-only host door keeps Prolog's ordinary success/failure contract.
-% [tested: classes_transaction_results; commit=WORKTREE].
+% [tested: classes_transaction_results; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 :- meta_predicate metta_transaction(0), metta_transaction(0, ?).
 metta_transaction(Goal) :-
     term_variables(Goal, Vars),

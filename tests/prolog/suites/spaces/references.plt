@@ -1,14 +1,14 @@
 % Purpose: exercise reference meaning, multiplicity, visibility and withdrawal.
 % Guarantees: data declarations share reference visibility and occurrence
 %   ownership without acquiring callable bindings
-%   [tested: references; commit=WORKTREE].
+%   [tested: references; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Owns resources: each test releases its fresh native spaces in reverse order.
 % Guarantees: comparisons inspect answer bags, stored occurrence identities and
 %   SWI's actual import property [tested: references; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Guarantees: every inference cut through a rollback preserves its reference
 %   and retires its frame [tested:
 %   references:an_inference_cut_cannot_abandon_reference_completion;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

@@ -13,7 +13,7 @@ test_contract_checks_refuse_missing_coverage_and_unbacked_refusals;
 commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543].
 
 Guarantees: MeTTa data fixtures carry checked citations and resolvable provenance
-[tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE].
+[tested: tests/checks/check_evidence_selftest.py; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 
 What each tag has to carry, and why only this much:
 

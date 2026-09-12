@@ -13,13 +13,13 @@
 ;   - the engine's prelude_shipped_equation/2 register is exactly the 36
 ;     equations below, parsed
 ;     [tested: prelude_spec:the_shipped_register_is_the_spec_fixture;
-;     commit=WORKTREE].
+;     commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 ;   - every head answers here what it answers in the engine
 ;     [tested: prelude_spec:every_head_agrees_with_its_spec_equation;
-;     commit=WORKTREE].
+;     commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 ;   - reference maps hold names independently of their current metatype
 ;     [tested: references:a_reference_map_accepts_a_name_that_is_already_a_grounded_function;
-;     commit=WORKTREE].
+;     commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 ; Assumes: the suite loads the declarations and the equations and SKIPS the
 ;   `!(add-translator-rule! ...)` runnables. A translator registration is
 ;   global, so running one from a scratch space would point the engine's own

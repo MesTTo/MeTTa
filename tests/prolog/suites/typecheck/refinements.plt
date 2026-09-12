@@ -2,11 +2,11 @@
 %   a refined parameter, a refined result, the cast witness, and each rule.
 % Guarantees: a body Error remains visible across a result refinement
 %   [tested: refinements:a_result_refinement_preserves_a_produced_error;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: a refined metatype, including a union member, rejects an expression
 %   by its failed length constraint rather than its numeric tuple type
 %   [tested: refinements:a_refined_metatype_reports_the_constraint_once;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Assumes: engine/metta.pl owns type checking; the Python seat supplies host
 %   numerics for the seam case, so this suite runs under `-- extensions`.
 % Guarantees: a refined parameter accepts what its constraints admit and
@@ -18,7 +18,7 @@
 % Guarantees: Literal constraints use exact membership, including an empty
 %   domain, and never bind a variable while testing it [tested:
 %   refinements:literal_membership_is_exact_and_does_not_bind;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

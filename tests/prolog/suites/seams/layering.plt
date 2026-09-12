@@ -17,7 +17,7 @@
 %     than becoming accidental new layer nodes
 %     [tested: consulted_source_units_are_attributed_to_their_umbrella; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 %   - a multifile callback's private calls stay with its implementing subsystem
-%     [tested: multifile_callbacks_keep_their_implementation_owners; commit=WORKTREE].
+%     [tested: multifile_callbacks_keep_their_implementation_owners; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 %   - lib_tabling itself is in the measured graph and reaches exactly the four
 %     reviewed engine surfaces named by reaches/3
 %     [tested: lib_tabling_reaches_only_its_four_declared_surfaces]

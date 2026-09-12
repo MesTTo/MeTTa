@@ -2,7 +2,7 @@
 % Guarantees: metta_with_trailed/3 restores context at each answer;
 %   metta_with_trailed_enumeration/3 retains it until enumeration finishes.
 %   Both preserve linked payloads and unwind on inference cuts
-%   [tested: reference_scopes; commit=WORKTREE].
+%   [tested: reference_scopes; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Owns resources: scoped roots belong to their engine's trail. An unset key
 %   and [] mean inactive; a goal may mutate its payload but must not replace
 %   the scoped root with nb_setval/2, nb_linkval/2 or nb_delete/1.
@@ -50,7 +50,7 @@
 %   test_source_token_claims_withdraw_in_either_order,
 %   test_a_failed_source_token_binding_restores_the_previous_value,
 %   test_a_later_explicit_token_binding_survives_source_withdrawal;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % [tested: tests/prolog/suites/evaluation/metta.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 
 %%% Interpreter pragmas: %%%
@@ -1362,7 +1362,7 @@ metta_metta_result_is_final(Atom) :-
 % A fresh variable and a written identity use the same creation-time model.
 % scoped preserves only the equation home; inherits also exposes parent data.
 % [tested: program_source:scoped_allocation_preserves_the_equation_home;
-% commit=WORKTREE]
+% commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1]
 metta_new_space_relation(Child, [inherits, Parent]) :- !,
     metta_declare_space_parent(Child, Parent).
 metta_new_space_relation(Child, [scoped, Home]) :- !,

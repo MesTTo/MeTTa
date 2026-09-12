@@ -75,7 +75,7 @@
 % Guarantees: refinement diagnostics admit a base through the value's metatype
 %   as well as its reported types, including a metatype inside a union
 %   [tested: refinements:a_refined_metatype_reports_the_constraint_once;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 
 %%%%%%%%%% Standard Library for MeTTa %%%%%%%%%%
 

@@ -4,7 +4,7 @@
 %   the `metta` package installed.
 % Guarantees:
 %   - token fixtures inspect and retire the engine-owned claim registry
-%     [tested: python_surface; commit=WORKTREE].
+%     [tested: python_surface; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 %   - a dotted name of any depth resolves, which splitting on the first dot
 %     could not do [tested: a_dotted_path_of_any_depth_resolves]
 %   - a resolved callable is applicable in head position, through the engine's

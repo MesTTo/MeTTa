@@ -2,7 +2,7 @@
 %   accept, refuse(Reason), and defer outcomes for every engine type checker.
 % Guarantees: with_typing_policy_stable/1 restores its snapshot on inference
 %   cuts while retaining the policy publication mutex
-%   [tested: reference_scopes; commit=WORKTREE].
+%   [tested: reference_scopes; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: the shipped decision clauses are compiled from typing_rule_entry/7
 %   and preserve its directed matching, variable sharing and first decision
 %   [tested: sh engine/test.sh suites/typecheck/compiled_typing_rules.plt;

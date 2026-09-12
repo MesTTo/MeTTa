@@ -1,7 +1,7 @@
 % Purpose: verify lib_thread's lifetime tree through native entry points.
 % Guarantees: native deferred cleanup follows scope transfer and rollback,
 %   reports every failure and can retry a failed close
-%   [tested: lib_thread_scope_deferred; commit=WORKTREE].
+%   [tested: lib_thread_scope_deferred; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: normal exit joins children, failure stops siblings, return
 % transfers spaces and escaped names refuse [tested: lib_thread_scope;
 % commit=c6e1198c490a824b96f6fc6e1c0622a542917024].

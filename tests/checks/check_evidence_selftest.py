@@ -26,7 +26,7 @@ literal one in this file is a claim about THIS repository as far as the gate is
 concerned, and the fixtures are deliberately unbacked.
 Guarantees:
   - MeTTa data fixtures accept a collected test and reject a missing citation
-    [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_evidence_selftest.py; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1]
   - Prolog tools accept a backed claim and report an absent test on its own line
     [tested: tests/checks/check_evidence_selftest.py; commit=8358dfc233bf299bb23eceddd94593a62372fe4b]
   - a shared build symlink preserves the selected TypeScript sources and

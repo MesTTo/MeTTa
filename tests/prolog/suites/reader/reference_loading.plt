@@ -5,7 +5,7 @@
 %   [tested: reference_loading; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Guarantees: fixtures read the loader's live home instead of deriving a
 %   reusable address from its source path [tested: reference_loading;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

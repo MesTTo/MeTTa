@@ -1,9 +1,9 @@
 % Purpose: verify that reference publication visits only affected spaces.
 % Guarantees: adding an importer leaves existing siblings untouched, while a
 %   provider change reaches its transitive importers
-%   [tested: reference_publication; commit=WORKTREE].
+%   [tested: reference_publication; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: declaration discovery and projection read only matching stored
-%   declarations [tested: reference_publication; commit=WORKTREE].
+%   declarations [tested: reference_publication; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Owns resources: fixtures release their spaces and remove publication tracing.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

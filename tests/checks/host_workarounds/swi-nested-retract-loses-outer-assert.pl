@@ -1,7 +1,7 @@
 % Purpose: expose an aborted assertion revived by a later transaction.
 % Assumes: plain SWI-Prolog, with no repository engine or workaround loaded.
 % Guarantees: the last line is present exactly when the aborted row returns
-%   [tested: sh check.sh host-workarounds; commit=WORKTREE].
+%   [tested: sh check.sh host-workarounds; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 :- dynamic row/1, clock/1.
 
 main :-

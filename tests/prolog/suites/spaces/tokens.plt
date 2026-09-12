@@ -1,7 +1,7 @@
 % Purpose: pin occurrence identity, ordering, rollback and provider refusals.
 % Guarantees: occurrence-output writes bind their own identity and reject
 %   bound outputs or unsupported providers before storing a row
-%   [tested: spaces_tokens; commit=WORKTREE].
+%   [tested: spaces_tokens; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: ordinary bags omit tokens; exact removal preserves later arrivals
 %   [tested: sh engine/test.sh suites/spaces/tokens.plt; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
 % Owns resources: each fixture releases its space and joins its minting threads.

@@ -2,7 +2,7 @@
 % Guarantees: constructor result sorts widen through subsorts while callable
 %   result types retain their direct arrow result
 %   [tested: a_data_constructor_result_sort_is_widened,
-%   an_application_return_type_is_not_widened; commit=WORKTREE].
+%   an_application_return_type_is_not_widened; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: reported_rest_arrow/3 reports the result of an empty splice run
 %   while get-type of its head retains the written arrow
 %   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].

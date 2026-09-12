@@ -2,13 +2,13 @@
 %   imports, function registration, and named-space execution context.
 % Guarantees: both trailed context scopes are published host services
 %   [tested: reference_scopes:both_scope_doors_are_published_host_services;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: engine/host_transactions.pl supplies the documented host rollback
 %   workaround before runtime declarations load [tested:
-%   host_transactions, test_class_declaration_rollback; commit=WORKTREE].
+%   host_transactions, test_class_declaration_rollback; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: occurrence-output writes and result-aware transactions are
 %   exported through their owning runtime modules
-%   [tested: spaces_tokens, classes_transaction_results; commit=WORKTREE].
+%   [tested: spaces_tokens, classes_transaction_results; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees:
 %   - metta_operation_parameters/4 exposes the joint argument types and
 %     origins used by constructor compilation and runtime admission

@@ -2,22 +2,22 @@
 % Assumes: Prolog assertions cross assert/1,2, asserta/1,2 or assertz/1,2;
 %   native engine storage and compiled equations use these doors
 %   [source: engine/spaces/catalog.pl:add_sexp_in/5,
-%   engine/spaces/foreign.pl:assert_function_clause/3; commit=WORKTREE].
+%   engine/spaces/foreign.pl:assert_function_clause/3; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: failed transactions and snapshots retire their new clauses even
 %   after a nested erase, while older clauses and nontransactional predicates
-%   keep their host semantics [tested: host_transactions; commit=WORKTREE].
+%   keep their host semantics [tested: host_transactions; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Owns resources: each transaction retains its assertion references until its
 %   outermost transaction finishes; empty child journals are removed on exit
-%   [tested: host_transactions:empty_savepoints_do_not_accumulate; commit=WORKTREE].
+%   [tested: host_transactions:empty_savepoints_do_not_accumulate; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarded by: the journal is a SWI global variable, local to its engine and
 %   thread [tested: host_transactions:concurrent_journals_keep_their_owners;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: host_transaction_on_exit/1 runs its registered reconciliation
 %   after the native transaction returns and the parent journal is restored
-%   [tested: host_transaction_completion; commit=WORKTREE].
+%   [tested: host_transaction_completion; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Assumes: registered reconciliation is idempotent and succeeds; cleanup may
 %   repeat it after an inference cut [tested: host_transaction_completion;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 
 :- module(host_transactions, [host_transaction_on_exit/1]).
 :- use_module(library(prolog_wrap), [wrap_predicate/4]).

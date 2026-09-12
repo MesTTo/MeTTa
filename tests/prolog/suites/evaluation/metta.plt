@@ -2,7 +2,7 @@
 %   contracts, and Python import state cleanup.
 % Guarantees: data constructors participate in the subsort closure while an
 %   implemented operation retains its direct result type
-%   [tested: metta_subtyping; commit=WORKTREE].
+%   [tested: metta_subtyping; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees:
 %   - recovery preserves the engine's bound-control exceptions [tested:
 %     limit_expiry_is_a_control_signal_no_recovery_catch_eats; commit=bbb512316280110a747e31c26adfc31e8c5104be].

@@ -2,7 +2,7 @@
 ; Guarantees: the three representations support field access, transactional
 ;   replacement and scoped retirement
 ;   [tested: examples/ch17-concurrency-and-the-loop/08-class_grains.metta;
-;   commit=WORKTREE].
+;   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 ; Owns resources: scope releases the class spaces, population and prototypes.
 
 !(import! &self (library lib_thread))

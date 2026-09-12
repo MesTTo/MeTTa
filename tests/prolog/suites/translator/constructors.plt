@@ -7,7 +7,7 @@
 %   [tested: translator_constructors:a_typed_callee_reuses_the_constructed_argument_sort,
 %   translator_constructors:a_callee_arrow_change_retires_its_argument_proof,
 %   translator_constructors:a_constructed_argument_keeps_a_live_callee_refinement;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Owns resources: each test releases its native space through plunit cleanup.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

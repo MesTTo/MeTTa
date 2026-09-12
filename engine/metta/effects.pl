@@ -6,7 +6,7 @@
 % Guarantees: inspecting a produced Error is inert and cannot mask the called
 %   operation's effect [tested:
 %   metta_arrow_products:an_annotated_callee_is_not_hidden_by_a_plain_caller;
-%   commit=WORKTREE].
+%   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: a head's declared cost class reaches explain and every host
 % docstring through ONE resolution, so a row that names no measure takes it
