@@ -1,6 +1,6 @@
 ; Purpose: running a program with an argument vector, and watching one that outlives
 ; the call.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/32-process_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/32-process_lib.metta; commit=623a2848ef49a936cd82b07adfbed2999d8548a4].
 !(import! &self (library lib_process))
 
 ; A run answers (process-result Code Output Error): the exit code as a Number and

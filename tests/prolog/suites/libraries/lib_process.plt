@@ -5,7 +5,7 @@
 % Guarantees: a nonzero exit and a signalled death both answer a Number, a run whose
 % output is larger than a pipe's buffer completes and leaves no descriptor behind, a
 % started process answers `running` until it is signalled and its code afterwards,
-% and every refusal names what it was given [tested: lib_process; commit=WORKTREE].
+% and every refusal names what it was given [tested: lib_process; commit=623a2848ef49a936cd82b07adfbed2999d8548a4].
 % Owns resources: every process this suite starts it waits for, and every stream the
 % library opens it closes; the suite checks the second by counting.
 
