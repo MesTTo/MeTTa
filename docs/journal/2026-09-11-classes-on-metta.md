@@ -418,6 +418,30 @@ named-listener workaround has no remaining site, so its live ledger entry is
 removed. Its host reproduction and earlier journal record remain historical
 evidence; no host fix is claimed.
 
+## 2026-09-12: reusing the constructed argument sort
+
+Tried: `sh engine/test.sh suites/translator/constructors.plt` passes every
+case except the typed callee cost. At 100/1,000/10,000 calls it spends
+19,251/192,051/1,920,051 inferences against 1,151/11,051/110,051 for the
+untyped control (`ai-tmp/ai-classes-c3-constructor-callee-before.log`).
+The redundant term check costs 181 inferences per iteration for this fixture.
+
+Decided: the argument emitter consumes `constructor_sort_proved/2` and exact
+result agreement through `constructor_argument_proved/3`, only under retained
+compilation's policy guarantee. The ordinary residual is no check, including
+no `once(true)`; the audit residual uses `discharge_goal/6`. Refined callee
+parameters retain their runtime predicate. Exact result agreement applies to
+nullary constructors too; the former nonempty-parameter guard had no semantic
+role. Source invalidation remains responsible for both constructor and callee
+arrows. The existing invalidation and live-refinement regressions remain gates.
+
+Verified: `sh engine/test.sh suites/translator/constructors.plt
+suites/translator/translator.plt suites/typecheck/typing_rule_scope.plt
+suites/typecheck/tensor_shapes.plt` passes 33+37, 209+85, 4 and 17 tests
+(`ai-tmp/ai-classes-c3-constructor-callee-after.log`). The nullary regression
+executes the emitted audited check, and the cost regression covers
+100/1,000/10,000 calls.
+
 ## 2026-09-12: the cache-expiry negative control includes assertion ownership
 
 Found: `sh check.sh binding binding-selftest llms llms-selftest` reports one

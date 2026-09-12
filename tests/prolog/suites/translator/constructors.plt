@@ -2,6 +2,12 @@
 % Guarantees: public evaluation preserves complete answer bags while a warm
 %   sorted accessor costs less than the same untyped accessor
 %   [tested: run_tests(translator_constructors); commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
+% Guarantees: a typed callee reuses a ground argument's construction proof
+%   while retaining changes to its own argument contract and live refinements
+%   [tested: translator_constructors:a_typed_callee_reuses_the_constructed_argument_sort,
+%   translator_constructors:a_callee_arrow_change_retires_its_argument_proof,
+%   translator_constructors:a_constructed_argument_keeps_a_live_callee_refinement;
+%   commit=WORKTREE].
 % Owns resources: each test releases its native space through plunit cleanup.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
@@ -354,5 +360,67 @@ test(a_warm_sorted_accessor_is_faster_than_its_untyped_twin,
           call_cost(S, ['plain-loop', N], Plain),
           assertion(Typed =:= Empty), assertion(Typed < Plain),
           assertion(Plain - Empty =:= N) )).
+
+test(a_typed_callee_reuses_the_constructed_argument_sort,
+     [setup(setup_points(S)), cleanup(metta_release_space(S))]) :-
+    run_in(S, "
+       (: sorted-norm (-> Point Number))
+       (= (sorted-norm (Point $x $y)) (+ (* $x $x) (* $y $y)))
+       (= (untyped-norm (Point $x $y)) (+ (* $x $x) (* $y $y)))
+       (= (sorted-norm-loop $n) (if (== $n 0) done
+          (let $_ (sorted-norm (Point 3 4)) (sorted-norm-loop (- $n 1)))))
+       (= (untyped-norm-loop $n) (if (== $n 0) done
+          (let $_ (untyped-norm (Point 3 4)) (untyped-norm-loop (- $n 1)))))", []),
+    forall(member(Head, ['sorted-norm-loop', 'untyped-norm-loop']),
+           call_cost(S, [Head, 1], _)),
+    forall(member(N, [100, 1000, 10000]),
+           ( call_cost(S, ['sorted-norm-loop', N], Typed),
+             call_cost(S, ['untyped-norm-loop', N], Plain),
+             assertion(Typed - Plain =< N) )),
+    evaluate_in(S, ['sorted-norm', ['Point', 3, 4]], [25]).
+
+test(a_callee_arrow_change_retires_its_argument_proof,
+     [setup(setup_points(S)), cleanup(metta_release_space(S))]) :-
+    run_in(S, "(: accepts-point (-> Point Number))
+               (= (accepts-point $self) 7)
+               (= (read-accepted-point) (accepts-point (Point 3 4)))", []),
+    evaluate_in(S, ['read-accepted-point'], [7]),
+    metta_remove_atom(S, [':', 'accepts-point', [->, 'Point', 'Number']], true),
+    run_in(S, "(: accepts-point (-> String Number))", []),
+    evaluate_in(S, ['read-accepted-point'], Answers),
+    assertion(Answers == [['Error', ['accepts-point', ['Point', 3, 4]],
+                          ['BadArgType', 1, 'String', 'Point']]]).
+
+test(a_constructed_argument_keeps_a_live_callee_refinement,
+     [setup(setup_points(S)), cleanup(metta_release_space(S))]) :-
+    run_in(S, "(: admits-point (-> Point Bool))
+               (= (admits-point $p) (match &self (admitted $p) True))
+               (: refined-point (-> (Annotated Point (Predicate admits-point)) Number))
+               (= (refined-point $self) 7)
+               (= (read-refined-point) (refined-point (Point 3 4)))", []),
+    evaluate_in(S, ['read-refined-point'], Before),
+    assertion(Before = [['Error', _, ['BadArgValue', 1, ['Predicate', 'admits-point'], _]]]),
+    metta_add_atom(S, [admitted, ['Point', 3, 4]], _),
+    evaluate_in(S, ['read-refined-point'], [7]),
+    metta_remove_atom(S, [admitted, ['Point', 3, 4]], true),
+    evaluate_in(S, ['read-refined-point'], After),
+    assertion(After == Before).
+
+test(a_nullary_construction_proof_reaches_the_audit,
+     [setup(setup_points(S)), cleanup(metta_release_space(S))]) :-
+    run_in(S, "(: Unit (-> Unit)) (: unit-callee (-> Unit Number))
+               (= (unit-callee $unit) 7)", []),
+    space_module(S, Module),
+    setup_call_cleanup(asserta(user:metta_discharges_verified, Ref),
+        with_metta_module(Module,
+            type_rules:with_typing_policy_stable(
+                translator:with_static_contract_shortcuts(enabled,
+                    translator:translate_expr(['unit-callee', ['Unit']], Goals, Value)))),
+        erase(Ref)),
+    assertion((sub_term(Goal, Goals), nonvar(Goal),
+               Goal = verified_discharge(_, _,
+                        discharge(constructed_argument, 'Unit', ['Unit'])))),
+    findall(Value, with_metta_module(Module, call_goals_in(Module, Goals)), Answers),
+    assertion(Answers == [7]).
 
 :- end_tests(translator_constructors).
