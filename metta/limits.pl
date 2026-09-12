@@ -157,6 +157,23 @@ metta_host_finish_resolution(Resolve, Action, Ball) :-
 :- multifile prolog:prolog_exception_hook/5.
 :- dynamic prolog:prolog_exception_hook/5.
 
+%What the first bound arms beside the bag scope: one clause of
+%prolog:prolog_exception_hook/5 per row of this seam, its head matching
+%the inference limit's ball and its body the row's goal, which may name the
+%frame the ball surfaced at. A row's goal SCHEDULES and never works: it runs
+%with the ball pending. Every unit whose listener a bound can cut writes its
+%row beside that listener, so there is one wrapper on the host's limit
+%predicate and one seam that says what a bound arms: this file's resolution
+%repair, and engine/spaces/receipts.pl's reconciliation of a native
+%transaction listener cut after its commit. Two wrappers on one predicate
+%would be two tests on every bounded call [measured 2026-09-12: the Python
+%seat's hundred guarded queries read 38,107 with one wrapper's test and
+%38,407 with a second; command=extensions/python/bench.py --counter-only
+%query-limit-guarded; commit=WORKTREE].
+:- multifile seam:bound_hook/2.
+seam:kind(bound_hook/2, declaration).
+seam:bound_hook(Frame, metta_host_repair_cut_resolution(Frame)).
+
 metta_host_repair_cut_resolution(Frame) :-
     prolog_frame_attribute(Frame, predicate_indicator, Indicator),
     metta_host_indicator_head(Indicator, Head),
@@ -253,8 +270,17 @@ metta_host_first_bound_once :-
                              metta_host_bag_scope,
                              Original,
                              metta_host_findnsols2(Original, Count, Template, Goal2, List, Tail)),
-        assertz((prolog:prolog_exception_hook(inference_limit_exceeded, _, Frame, _, _) :-
-                     metta_host_repair_cut_resolution(Frame))),
+        %The clause lands in `prolog`, which resolves no engine predicate, so
+        %each body carries the module of the row that declared it:
+        %strip_module/3 answers a row's own qualifier or, for an unqualified
+        %goal, this file's own module. `assertz(prolog:(Head :- Body))` rather
+        %than `assertz((prolog:Head :- Body))`, because the second wraps the
+        %body in this module as well, and a row then reads as a clause of a
+        %body nobody declared.
+        forall(( clause(seam:bound_hook(Frame, Goal), true),
+                 strip_module(Goal, Owner, Plain) ),
+               assertz(prolog:(prolog_exception_hook(inference_limit_exceeded, _, Frame, _, _) :-
+                                   Owner:Plain))),
         assertz(metta_host_bound_seen)
     ).
 

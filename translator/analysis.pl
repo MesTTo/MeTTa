@@ -1,5 +1,9 @@
 % Guarantees: source withdrawal selects retained metadata by source owner
 %   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
+% Guarantees: with_equation_types/4 and with_static_contract_shortcuts/2
+%   preserve linked contexts through metta_with_trailed/3
+%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%
 % Purpose: retain function metadata, translation caches, symbol analysis, and callable-head discovery
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
@@ -190,16 +194,9 @@ materialize_with_queued_types(Module, F, StoredRef, Goal) :-
 
 :- meta_predicate with_equation_types(+, +, +, 0).
 with_equation_types(Module, F, Types, Goal) :-
-    ( nb_current('$metta_queued_equation_types', Old) -> Saved = some(Old)
-    ; Saved = none ),
-    setup_call_cleanup(
-        nb_linkval('$metta_queued_equation_types', queued(Module, F, Types)),
-        call(Goal),
-        restore_equation_types(Saved)).
-
-restore_equation_types(some(Old)) :-
-    nb_linkval('$metta_queued_equation_types', Old).
-restore_equation_types(none) :- nb_delete('$metta_queued_equation_types').
+    % Workaround: swi-cleanup-window - trail the equation context while preserving its variable links.
+    metta_with_trailed('$metta_queued_equation_types',
+                       queued(Module, F, Types), Goal).
 
 %Associate each equation with the arrow declarations that appeared since the
 %previous equation for the same function. Source commonly writes an arrow and
@@ -977,19 +974,8 @@ specialized_clause_arity([=, [_|SourceArgs], _], (Head :- _)) :-
 
 :- meta_predicate with_static_contract_shortcuts(+, 0).
 with_static_contract_shortcuts(Mode, Goal) :-
-    (   nb_current('$metta_static_contract_shortcuts', Previous)
-    ->  Restore = previous(Previous)
-    ;   Restore = absent
-    ),
-    setup_call_cleanup(
-        nb_setval('$metta_static_contract_shortcuts', Mode),
-        call(Goal),
-        restore_static_contract_shortcuts(Restore)).
-
-restore_static_contract_shortcuts(previous(Previous)) :-
-    nb_setval('$metta_static_contract_shortcuts', Previous).
-restore_static_contract_shortcuts(absent) :-
-    nb_delete('$metta_static_contract_shortcuts').
+    % Workaround: swi-cleanup-window - compiler policy is a trailed context.
+    metta_with_trailed('$metta_static_contract_shortcuts', Mode, Goal).
 
 % Generate one member of the arriving arity's finite cut family. The caller
 % owns publication and invalidation; this compiler does not retain another
