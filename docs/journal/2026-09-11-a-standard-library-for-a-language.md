@@ -2868,3 +2868,22 @@ nodes are one run of characters in the markup.
 Measured: the example proves 30 claims and its twin the same 30, 104,676 MeTTa
 against 110,488 Python inferences, minimum of three fresh processes, a first pin.
 Logs: ai-tmp/ai-lib3-markup-{example,suite}.log.
+
+## 2026-09-12: a row whose head names a function
+
+Decided: the refusals in lib_pairs and lib_graph name the CAUSE, which the markup
+row measured: a key or a vertex that names a function is evaluated where the row is
+written, before any head sees it, so `((id 1) (b 2))` arrives as `(1 (b 2))` and
+`((id b))` as `(b)`. The shape check caught both already, which is why no answer was
+ever wrong, but its message named the shape it wanted and left the reader to
+discover the evaluation. Each now says what happened and what to do: write such a
+key as a String, or tag the row as lib_markup's `(attr Name Value)` does.
+
+Rejected: tagging lib_pairs' and lib_graph's rows. A relation of (Key Value) pairs
+is the shape lib_functional's zip answers, lib_json's dict-space takes and
+group_pairs_by_key reads, and a tag there would fork all of those; the vertices and
+keys that collide are the engine's own function names, which a program can spell as
+Strings. Revisit if a caller turns up whose keys are symbols it does not choose.
+
+Verified: both suites gain a test that the message names the cause and that the same
+key written as a String answers, and pass at 8 and 6 tests.

@@ -164,4 +164,20 @@ test(a_collection_that_is_not_pairs_is_refused_by_name) :-
     'pairs-is'(Bad, false), 'pairs-is'([[a, 1]], true), 'pairs-is'([], true),
     'pairs-is'(notalist, false), 'pairs-is'([[a, 1, 2]], false).
 
+% A key that names a function is evaluated where the relation is WRITTEN, before
+% any head here sees it, so the row arrives as the call's answer and the refusal
+% has to name that cause rather than only the shape: `((id 1) (b 2))` reaches
+% pairs-keys as `(1 (b 2))`, because the engine read `(id 1)` as a call to the
+% identity function [measured 2026-09-12 through the engine: the whole relation
+% answers type_error(pair, 1)].
+test(a_key_that_names_a_function_is_refused_with_the_cause) :-
+    % The relation arrives as the call's answer, `(1 (b 2))`, which is what any
+    % head here actually receives; the MeTTa call itself raises, so the shape is
+    % passed straight in rather than run through the engine again.
+    catch('pairs-keys'([1, [b, 2]], _), error(type_error(pair, 1), context(_, Reason)), true),
+    assertion(sub_atom(Reason, _, _, _, 'names a function')),
+    % Written as a String the same key is data, and every head answers.
+    'pairs-keys'([["id", 1], [b, 2]], Keys),
+    assertion(Keys == ["id", b]).
+
 :- end_tests(lib_pairs).

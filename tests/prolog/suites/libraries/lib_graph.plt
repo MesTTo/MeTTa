@@ -210,6 +210,17 @@ test(a_value_that_is_not_a_graph_is_refused_by_every_head) :-
     must_throw('graph-add-edges'(Empty, [[a, b, c]], _),
                error(type_error(edge, [a, b, c]), _)),
     must_throw('graph-of'(notalist, [], _), error(type_error(list, notalist), _)),
-    must_throw('graph-of'([], notalist, _), error(type_error(list, notalist), _)).
+    must_throw('graph-of'([], notalist, _), error(type_error(list, notalist), _)),
+    % An edge whose TAIL names a function is evaluated where the edge is written,
+    % before graph-of sees it, so the refusal names that cause and not only the
+    % shape: `(id b)` reaches this head as `b`, the identity function's answer
+    % [measured 2026-09-12 through the engine].
+    catch('graph-of'([], [b], _), error(type_error(edge, b), context(_, Reason)), true),
+    assertion(sub_atom(Reason, _, _, _, 'names a function')),
+    % Written as a String the same vertex is data.
+    'graph-of'([], [["id", b]], Graph),
+    % A String sorts before an atom in the standard order of terms, which is the
+    % order every graph answer is in.
+    'graph-vertices'(Graph, Vertices), assertion(Vertices == ["id", b]).
 
 :- end_tests(lib_graph).

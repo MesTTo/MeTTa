@@ -9,6 +9,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_pairs`' and `lib_graph`' refusals name the cause when a key or a vertex
+  names a function. `((id 1) (b 2))` reaches `pairs-keys` as `(1 (b 2))`, because
+  the engine read `(id 1)` as a call to the identity function where the relation
+  was written, and the old message named only the shape it expected. Both now say
+  so and give the remedy: write such a key as a String, or tag the row.
 - `lib_markup` is a new library reading and writing XML and HTML:
   `markup-parse-xml`, `markup-parse-html`, `markup-write`, `markup-select`,
   `markup-attribute` and `markup-text`. An element is
