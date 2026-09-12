@@ -49,6 +49,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- A context reader is declared once, `:- seam:context_reader(Head, Key, Shape)`,
+  and every call to it compiles to its `nb_current/2` read, so the trailed
+  guards cost what the asserted guards they replaced cost: an absent, inactive
+  or one-element context reads in one inference, and the loader's per-atom
+  read and the compiler's per-equation reads return to the cut's counts. The
+  receipt listener's exception hook is clausal only from the process's first
+  bound on, so a process that never bounds pays nothing per ball it throws.
 - Receipt retirement completes after an inference limit interrupts a native
   transaction's completion listener. Rolled-back marker notifications release
   their standing-engine claims while preserving a live outer transaction.

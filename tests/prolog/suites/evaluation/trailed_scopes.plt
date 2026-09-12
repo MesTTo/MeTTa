@@ -5,6 +5,12 @@
 %   clean second entry after interruption; ordinary answers, redo, cut and
 %   nested mutable contexts preserve their dynamic extent
 %   [tested: sh engine/test.sh suites/evaluation/trailed_scopes.plt; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
+% Guarantees: every declared context reader compiles to its nb_current/2 read,
+%   a call site carries that read in place of a call, and an inactive or
+%   one-element read costs the inferences of the dynamic fact it replaced
+%   [tested: every_declared_reader_is_compiled_to_its_read,
+%   a_call_site_carries_the_read_rather_than_a_call,
+%   an_inactive_reader_costs_what_the_asserted_guard_cost; commit=WORKTREE].
 % Owns resources: every sweep engine is destroyed after its result is read;
 %   temporary clauses are owned by the production doors under test.
 
@@ -518,5 +524,86 @@ test(a_worker_needs_no_global_initialization) :-
                          nb_current('$plunit_late_context',[])), Worker, []),
           thread_send_message(Queue,go), thread_join(Worker,true) ),
         message_queue_destroy(Queue)).
+
+% The read side (engine/ext_points.pl, context_reader/4): a declared reader is
+% a predicate for meta-calls and a compile-time read everywhere it is called.
+test(every_declared_reader_is_compiled_to_its_read) :-
+    aggregate_all(count, seam:context_reader(_,_,_,_), Declared),
+    Declared >= 18,
+    forall(seam:context_reader(Head, Owner, Key, _),
+           ( once(clause(Owner:Head, Body)),
+             ( Body = (nb_current(Key, _), _) -> true ; Body = nb_current(Key, _) ) )).
+
+% These clauses are compiled by this suite, so their bodies show what any
+% production caller compiles to: the read, qualified by the declaring module.
+probe_flag_read :- support_graph:support_graph_locked.
+probe_stack_read(Load) :- filereader:active_source_load(Load).
+probe_value_read(Snapshot) :- type_rules:typing_policy_snapshot(Snapshot).
+probe_imported_read(Context) :- metta_evaluation_context(Context).
+
+test(a_call_site_carries_the_read_rather_than_a_call) :-
+    clause(probe_flag_read, Flag),
+    Flag = support_graph:nb_current('$metta_support_graph_locked', true),
+    clause(probe_stack_read(_), Stack),
+    Stack = (filereader:nb_current('$metta_source_loads', [_|_]), _),
+    clause(probe_value_read(_), Value),
+    Value = type_rules:nb_current('$metta_typing_policy_snapshot', snapshot(_)),
+    clause(probe_imported_read(_), Imported),
+    Imported = nb_current('$metta_evaluation_contexts', [_|_]).
+
+% Per-call inferences of a compiled read against the empty dynamic fact it
+% replaced, in the three states a reader meets: key unset, inactive [] and a
+% one-element context. The loops are compiled the way production callers
+% are, so the read is inlined rather than called.
+:- dynamic reader_cost_fact/1.
+cost_loop(empty) :- ( between(1, 10000, _), fail ; true ).
+cost_loop(fact_absent) :- ( between(1, 10000, _), \+ reader_cost_fact(_), fail ; true ).
+cost_loop(fact_present) :- ( between(1, 10000, _), reader_cost_fact(_), fail ; true ).
+cost_loop(flag_absent) :- ( between(1, 10000, _), \+ support_graph:support_graph_locked, fail ; true ).
+cost_loop(flag_present) :- ( between(1, 10000, _), support_graph:support_graph_locked, fail ; true ).
+cost_loop(stack_absent) :- ( between(1, 10000, _), \+ filereader:active_source_load(_), fail ; true ).
+cost_loop(stack_present) :- ( between(1, 10000, _), filereader:active_source_load(_), fail ; true ).
+
+loop_cost(Loop, Cost) :-
+    cost_loop(Loop), cost_loop(Loop),
+    statistics(inferences, Before), cost_loop(Loop), statistics(inferences, After),
+    Cost is After - Before.
+
+test(an_inactive_reader_costs_what_the_asserted_guard_cost,
+     [setup((nb_delete('$metta_support_graph_locked'), nb_delete('$metta_source_loads'),
+             retractall(reader_cost_fact(_)))),
+      cleanup((nb_setval('$metta_support_graph_locked', []), nb_setval('$metta_source_loads', []),
+               retractall(reader_cost_fact(_))))]) :-
+    loop_cost(fact_absent, FactAbsent),
+    loop_cost(flag_absent, FlagUnset), loop_cost(stack_absent, StackUnset),
+    assertion(FlagUnset == FactAbsent), assertion(StackUnset == FactAbsent),
+    nb_setval('$metta_support_graph_locked', []), nb_setval('$metta_source_loads', []),
+    loop_cost(flag_absent, FlagInactive), loop_cost(stack_absent, StackInactive),
+    assertion(FlagInactive == FactAbsent), assertion(StackInactive == FactAbsent),
+    assertz(reader_cost_fact(guard)),
+    nb_setval('$metta_support_graph_locked', true), nb_setval('$metta_source_loads', [guard]),
+    loop_cost(fact_present, FactPresent),
+    loop_cost(flag_present, FlagPresent), loop_cost(stack_present, StackPresent),
+    assertion(FlagPresent == FactPresent), assertion(StackPresent == FactPresent).
+
+test(a_one_element_stack_reads_without_a_choicepoint,
+     [cleanup(nb_setval('$metta_source_loads', []))]) :-
+    nb_setval('$metta_source_loads', [only]),
+    prolog_current_choice(Before),
+    filereader:active_source_load(Read),
+    prolog_current_choice(After),
+    assertion(Read == only), assertion(Before == After),
+    nb_setval('$metta_source_loads', [inner, outer]),
+    findall(L, filereader:active_source_load(L), Both),
+    assertion(Both == [inner, outer]).
+
+test(a_malformed_reader_declaration_refuses_at_load) :-
+    catch(expand_term((:- seam:context_reader(planted_reader, '$plunit_planted', ring)), _),
+          error(domain_error(context_reader_shape, ring), _), Refused = shape),
+    assertion(Refused == shape),
+    catch(expand_term((:- seam:context_reader(planted_reader, "not an atom", value(true))), _),
+          error(type_error(atom, _), _), Typed = key),
+    assertion(Typed == key),
+    \+ clause(planted_reader, _).
 
 :- end_tests(trailed_scopes).

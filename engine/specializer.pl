@@ -111,8 +111,8 @@
 :- dynamic ho_specialization_unverified/2.
 %Held while a specialization's own check is running, so the recursive
 %calls inside it do not each start another check.
-ho_specialization_checking(Name) :-
-    nb_current('$metta_specialization_checking', Names), member(Name, Names).
+:- seam:context_reader(ho_specialization_checking(Name),
+                       '$metta_specialization_checking', stack(Name)).
 %The report lifecycle, distinct from the per-specialization memo tables: the
 %marker says this run opted into a coverage statement and still needs one.
 :- dynamic metta_specializations_verified/0.

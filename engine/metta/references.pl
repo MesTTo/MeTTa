@@ -31,14 +31,12 @@
 :- volatile metta_reference_seen_space/2, metta_reference_slot/4.
 :- '$notransact'(metta_reference_seen_space/2).
 :- '$notransact'(metta_reference_slot/4).
-metta_reference_refreshing :- nb_current('$metta_reference_refreshing', true).
-metta_reference_finishing(Frame) :-
-    nb_current('$metta_reference_finishing', Frames), member(Frame, Frames).
+:- seam:context_reader(metta_reference_refreshing, '$metta_reference_refreshing', value(true)).
+:- seam:context_reader(metta_reference_finishing(Frame), '$metta_reference_finishing', stack(Frame)).
 :- dynamic metta_reference_hooks/0.
 :- dynamic metta_reference_demand/1.
 :- volatile metta_reference_demand/1.
-metta_reference_forcing(Name) :-
-    nb_current('$metta_reference_forcing', Names), member(Name, Names).
+:- seam:context_reader(metta_reference_forcing(Name), '$metta_reference_forcing', stack(Name)).
 
 metta_reference_declare(Space, Term, Token) :-
     spaces:metta_require_token_mutation(Space, from),

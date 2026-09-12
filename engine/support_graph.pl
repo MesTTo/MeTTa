@@ -1,6 +1,7 @@
 % Guarantees: support_atomic/1 and with_support_repairs_deferred/1 scope their
-%   markers through metta_with_trailed/3 without changing lock ownership
-%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%   markers through metta_with_trailed/3 without changing lock ownership, and
+%   both markers are declared context readers compiled to their reads
+%   [tested: trailed_scopes; commit=WORKTREE].
 %
 % Purpose: record module-qualified support edges and propagate invalidation
 %   from changed inputs to the derived engine artifacts that depend on them.
@@ -172,8 +173,8 @@ support_edge_retractall(Support, Derived) :-
 %indexed and never hashed; this mapping is how the two meet.
 :- dynamic support_translated_form_id/3.
 :- dynamic support_memo_changed/2.
-support_graph_locked :- nb_current('$metta_support_graph_locked', true).
-support_repairs_deferred :- nb_current('$metta_support_repairs_deferred', true).
+:- seam:context_reader(support_graph_locked, '$metta_support_graph_locked', value(true)).
+:- seam:context_reader(support_repairs_deferred, '$metta_support_repairs_deferred', value(true)).
 
 :- multifile support_invalidation_action/1.
 seam:kind(support_invalidation_action/1, event).

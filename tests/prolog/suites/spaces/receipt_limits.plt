@@ -2,6 +2,10 @@
 % Guarantees: every budget 1..600 preserves native storage atomicity, retires
 %   finished receipt rows and engine reservations, and keeps a live outer owner
 %   [tested: spaces_receipt_limits; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
+% Guarantees: the exception hook that finishes a cut listener is clausal only
+%   from the process's first bound on, and a ball costs one inference more
+%   from then, none before [tested: the_limit_hook_is_armed_by_the_first_bound;
+%   commit=WORKTREE].
 % Owns resources: fixtures release their spaces, erase their artifact clauses
 %   and destroy the engines used to inspect committed reservation state.
 
@@ -158,5 +162,44 @@ test(a_bound_caught_inside_the_transaction_keeps_each_erasure_journaled,
              assertion(memberchk(Atoms, [[a,b,b,c],[b,b,c]])),
              assertion(Owner-Erased-Markers-Reserved-Pending == none-[]-[]-[]-[]),
              retractall(artifact(_)) )).
+
+% A fresh process: no clause before its first bound, one after, and a caught
+% ball costs the hook's one inference only from then on. The child is this
+% file, booted the way the suite boots.
+test(the_limit_hook_is_armed_by_the_first_bound) :-
+    source_file(limit_hook_child, File),
+    current_prolog_flag(executable, Swipl),
+    setup_call_cleanup(
+        process_create(Swipl,
+            ['-f', none, '-q', '-s', File,
+             '-g', 'plunit_spaces_receipt_limits:limit_hook_child', '-t', halt],
+            [stdout(pipe(Output)), process(Pid)]),
+        read_term(Output, Sample, []),
+        (close(Output), process_wait(Pid, Status))),
+    assertion(Status == exit(0)),
+    Sample = armed(Before, After, Unarmed, Armed),
+    assertion(Before == 0), assertion(After == 1),
+    assertion(Armed =:= Unarmed + 1).
+
+limit_hook_child :-
+    ball_cost(Unarmed),
+    hook_clauses(Before),
+    call_with_inference_limit(true, 1000, _),
+    hook_clauses(After),
+    ball_cost(Armed),
+    format("~q.~n", [armed(Before, After, Unarmed, Armed)]).
+
+hook_clauses(Count) :-
+    aggregate_all(count,
+                  clause(prolog:prolog_exception_hook(inference_limit_exceeded, _, _, _, _),
+                         spaces:metta_receipt_schedule_reconciliation),
+                  Count).
+
+ball_cost(Cost) :-
+    caught_ball, caught_ball,
+    statistics(inferences, Before), caught_ball, statistics(inferences, After),
+    Cost is After - Before.
+
+caught_ball :- catch(throw(receipt_limit_probe), receipt_limit_probe, true).
 
 :- end_tests(spaces_receipt_limits).

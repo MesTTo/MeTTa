@@ -1,6 +1,7 @@
 % Guarantees: metta_with_trailed/3 preserves linked values and restores the prior root
-%   on ordinary return, failure, exception, redo and cut
-%   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
+%   on ordinary return, failure, exception, redo and cut; the state fence it
+%   scopes is a declared context reader compiled to its read
+%   [tested: trailed_scopes; commit=WORKTREE].
 %
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
 % Guarantees: metta_host_inference_budget/3 converts a deferred native
@@ -1605,8 +1606,7 @@ metta_with_state_write_fence(Goal) :-
     % Workaround: swi-cleanup-window - nesting restores the prior trailed fence.
     metta_with_trailed('$metta_state_write_fence', true, Goal).
 
-metta_state_write_fenced :-
-    nb_current('$metta_state_write_fence', true).
+:- seam:context_reader(metta_state_write_fenced, '$metta_state_write_fence', value(true)).
 
 %The journal admission door asks this exact engine fact. Prefixes are not
 %enough because named cells are valid too, and a dead generated name is plain

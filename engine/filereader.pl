@@ -1,6 +1,7 @@
 % Guarantees: working_dir/1, active_source_load/1, active_source_program/1 and
-%   source_recompile_context/2 read stacks scoped by metta_with_trailed/3
-%   [tested: trailed_scopes; commit=cdcb23421809ec3a493059a381e0245cf08a1984].
+%   source_recompile_context/2 read stacks scoped by metta_with_trailed/3, and
+%   each is a declared context reader compiled to its read at every call site
+%   [tested: trailed_scopes; commit=WORKTREE].
 % Guarantees: active_source_load/1 and with_working_directory/2 are exported
 %   to their compiler and manifest consumers [tested: engine_layering;
 %   commit=cdcb23421809ec3a493059a381e0245cf08a1984].
@@ -434,18 +435,18 @@ metta_host_set_silent(Silent) :-
     retractall(silent(_)),
     assertz(silent(Silent)).
 
-working_dir(Directory) :-
-    nb_current('$metta_working_dirs', Directories), member(Directory, Directories).
+%The loader's contexts are trailed stacks read at every stored atom and
+%every compiled equation, so each reader is declared and compiled to its read
+%(engine/ext_points.pl, context_reader/4).
+:- seam:context_reader(working_dir(Directory), '$metta_working_dirs', stack(Directory)).
 :- dynamic compiled_metta_source/1.
-active_source_load(Load) :-
-    nb_current('$metta_source_loads', Loads), member(Load, Loads).
+:- seam:context_reader(active_source_load(Load), '$metta_source_loads', stack(Load)).
 :- dynamic source_load_assertion/3.
 :- dynamic source_load_support_assertions/2.
 :- dynamic source_load_resource/2.
 :- dynamic source_load_repair/2.
-source_recompile_context(Context, Owners) :-
-    nb_current('$metta_source_recompile_contexts', Contexts),
-    member(Context-Owners, Contexts).
+:- seam:context_reader(source_recompile_context(Context, Owners),
+                       '$metta_source_recompile_contexts', stack(Context-Owners)).
 %What a file put where, so that loading it again can REPLACE that rather than
 %add to it. SWI states the rule this implements: "clauses are owned by the file
 %in which they are defined. This information is used to replace the old
@@ -995,8 +996,7 @@ source_summary_of_forms(Forms, Sigs, Decls) :-
 %the latter must still know which names have no equation in the source prefix
 %that has run so far. A keyed thread-local context survives every source door,
 %nests safely across imports, and disappears even when a form throws.
-active_source_program(Id) :-
-    nb_current('$metta_source_programs', Programs), member(Id, Programs).
+:- seam:context_reader(active_source_program(Id), '$metta_source_programs', stack(Id)).
 :- thread_local source_pending_definition/2.
 :- thread_local source_compiled_definition/1.
 :- meta_predicate with_source_program_order(+, +, 0).

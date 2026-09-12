@@ -365,3 +365,103 @@ foreign-removal corrections in the landing receipt. The broader debugger
 bound failure described above and the non-reproduced Python native crash
 remain unresolved diagnostics. They are not evidence of repaired host
 debugging or permission to widen a bound.
+
+## 2026-09-12, the reader tax and the resident hook
+
+Goal: a trailed guard costs what the asserted guard it replaced cost, and a
+process that never bounds pays nothing for the receipt listener's hook.
+
+Tried: the PUBLICATION reproduction
+`ai-tmp/wt-publication/ai-tmp/publication-d9d1201b/ai-receipt-limit-probe.pl`
+(SHA256 75286fec11eb07d3ba0a9d9b9cd8a0ac296c949109786eae19839e841499f7ec)
+against this branch at ebeb82e0a -> `passed_600_budgets`, exit 0; against the
+pristine cut b1d175f13 -> `receipt_limit_residue(77,inference_limit_exceeded,0,-(299,60),[four clause refs])`,
+exit 1. Both arms had their engine and library artifacts purged first.
+
+Measured: each engine benchmark case under library(prolog_profile), branch
+against cut (`ai-tmp/ai-guard3-profile-bench.pl`, `ai-tmp/guard3-receipts/profile-*.tsv`).
+translate +4,522: nb_current/2 +2,142, lists:member/2 +791 and member_/3
++761, b_setval/2 +615, metta_with_trailed/3 +497, the wrapper readers
+themselves 1,873 calls (source_recompile_context/2 838, active_source_load/1
+761, typing_policy_snapshot/1 161, support_graph_locked/0 83,
+active_source_program/1 30), prolog:prolog_exception_hook/5 +58 (one per
+ball the workload throws). evaluate +433: nb_current +149, the hook +2.
+match -3,683 and match-skew -156: the trailed door replaces
+setup_call_cleanup/3, sig_atomic/1, nb_setval/2 and nb_delete/1 per query.
+A 20,000-atom add loop reads +19,938, one nb_current/2 per
+active_source_load/1 the loader asks per stored atom. So the tax is one
+inference per reader call (the wrapper predicate around nb_current/2), one
+more per stack read whose list is [] or non-empty (member/2), and one per
+ball thrown while the hook clause is resident.
+
+Measured: per read above an empty loop in bare SWI 10.1.13, key unset /
+inactive [] / one element (`ai-tmp/tmp/gx/run.pl`): a dynamic fact under \+
+2/2/1; the wrapper `head_read/1` 3/3/2; an inlined `nb_current(K, L),
+member(X, L)` 2/3/4; an inlined `nb_current(K, [X0|More]), (More == [] -> X
+= X0 ; (X = X0 ; member(X, More)))` 2/2/1, deterministic on one element,
+the choicepoint member/2 would leave on two. So the wrapper call is the
+whole tax in the unset state and the member call the rest, and only a
+compile-time expansion removes the call.
+
+Rejected: a predicate_property/2 guard on the caller's module, because on a
+name the module does not have it walks the autoload index (15,265
+inferences at compile time) and loads a library when the name is in one
+(partition/4 became defined); `'$get_predicate_attribute'(Module:Head,
+imported, Owner)` answers the same question at 4 to 7 inferences with no
+autoload and resolves through the base chain
+(docs/journal/2026-09-06-the-price-of-asking-whether-a-predicate-exists.md).
+Rejected: a new `engine/contexts.pl` unit, because a module file loaded
+through use_module/2 under qcompile(auto) is a 24th governed artifact, which
+the C seat's `boot_qlf_count` refuses in update mode too, and the seam
+already publishes the write side (`kind(metta_with_trailed/3, host_service)`)
+and hosts declaration seams whose rows other files write (`engine_emitted/1`,
+`builtin_type_declaration/2`). Rejected: a directive that calls
+compile_aux_clauses/1 at load, because a directive is recorded in the
+artifact and runs again when the artifact loads, so the clauses would be
+added twice; library(record) and library(persistency) expand their
+declaration directive away through term_expansion for the same reason.
+Rejected: module-local goal_expansion/2 clauses in each subsystem, because an
+imported reader called unqualified from another module is expanded through
+the caller's module chain, which never reaches the owner (probe
+`ai-tmp/tmp/gx/run.pl`: `caller:imported(X) :- rd(X)` stayed a call), and
+metta_engine:goal_expansion/2 belongs to the umbrella, which another package
+owns at this cut.
+
+Decided: `:- seam:context_reader(Head, Key, Shape)` in engine/ext_points.pl,
+a declaration seam. system:term_expansion/2 turns the directive into the
+row `seam:context_reader(Head, Owner, Key, Shape)` and the clause
+`Head :- Read`; system:goal_expansion/2 compiles a call to the read wherever
+`Module == Owner` or `'$get_predicate_attribute'(Module:Head, imported,
+Owner)`, the binding's guarded system:goal_expansion shape
+(extensions/python/metta/_binding/source_macros.pl). Two shapes:
+`value(Pattern)` and `stack(Pattern)`. Eighteen readers declared: filereader
+4, materialize 3, support_graph 2, type_rules 1, specializer 1, and in the
+engine fragments terms 1, effects 2, references 3, control 1.
+materialization_batch/1 loses its arg/3 guard and its three callers ask for
+`batch(open)`, the cell's own shape. A qcompile round trip keeps the rows and
+the static clauses (`ai-tmp/tmp/gx/run2.pl`). One caller stays a call:
+translator:runnable_head_awaits_its_definition/1 compiles before filereader
+loads, so no row exists for it yet; that is the umbrella's load order, owned
+by another package at this cut.
+
+Decided: the receipt listener's exception hook is clausal only from the
+process's first bound on. engine/source_observation.pl records why a
+resident clause is refused (119 on translate, 2 per compiled host request),
+and the profile above reads the same +58 on translate for this branch's
+resident clause. receipts.pl wraps '$syspreds':call_with_inference_limit/3
+once (`metta_receipt_first_bound`) and the wrapper asserts the clause under a
+mutex if it is absent; the clause is its own armed record. A child process
+reads `armed(0,1,7,8)`: no clause before its first bound, one after, a caught
+ball 7 inferences before and 8 after
+(tests/prolog/suites/spaces/receipt_limits.plt,
+the_limit_hook_is_armed_by_the_first_bound). At the merge this wrapper folds
+into engine/metta/limits.pl's `metta_host_first_bound_once/0`, which installs
+the same kind of clause for the same reason.
+
+Tried: `sh engine/test.sh suites/evaluation/trailed_scopes.plt` -> 22 tests
+and 40 subtests passed, the new ones: every declared reader is compiled to
+its read, a call site carries the read, an inactive and a one-element read
+cost the dynamic fact's inferences (10,000-iteration loops, equal counts), a
+one-element stack leaves no choicepoint, a malformed shape or key refuses.
+`sh engine/test.sh suites/spaces/receipt_limits.plt` -> 5 tests and 21
+subtests passed, 15,000 budget trials and the armed-hook child.

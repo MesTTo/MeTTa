@@ -52,6 +52,11 @@ Reproduction: tests/checks/host_workarounds/swi-cleanup-window.pl, a budget
 Workaround: `metta_with_trailed/3` in `engine/metta/control.pl` uses `b_setval/2`
   on entry and ordinary return; failure, exceptions, cut and redo use the
   trail. Readers use `nb_current/2`, treating absence and `[]` as inactive.
+  A reader is declared once, `:- seam:context_reader(Head, Key, Shape)` in
+  `engine/ext_points.pl`, which defines the predicate and compiles every
+  resolving call to the read itself, so the trailed guard costs what the
+  asserted guard it replaced cost: one inference for an absent, an inactive
+  or a one-element context.
   A root held by this primitive is never replaced by `nb_setval/2`, `nb_linkval/2` or
   `nb_delete/1`; mutable payloads use `nb_setarg/3` or `nb_linkarg/3`.
   Real clause scopes register cleanup first, then signal-mask assertion and
@@ -60,8 +65,9 @@ Workaround: `metta_with_trailed/3` in `engine/metta/control.pl` uses `b_setval/2
   Cleanup is itself a catch that retries idempotent retirement before
   propagating the ball. Ownership records remain until retirement completes.
   Receipt listeners schedule interrupted retirement with thread_signal/2;
-  a scheduling-only exception hook covers interruption before the listener's
-  catch starts. The retained transaction owner remembers engine reservations
+  a scheduling-only exception hook, clausal from the process's first bound
+  on and never before, covers interruption before the listener's catch
+  starts. The retained transaction owner remembers engine reservations
   after rollback erases its rows. Recovery compares pending claim references
   with live markers before preserving a surviving outer scope.
   The shared inference-bound door catches a deferred native ball through its

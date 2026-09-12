@@ -1034,7 +1034,7 @@ metta_host_refusal_type(Types, Expected, Actual) :-
 %than only at its top: the walk reaches them again through a list member's
 %type. The flag is thread-local because the refusal is, and re-entrant because
 %a nested lookup must not turn them back on when it finishes.
-metta_reading_declared_types :- nb_current('$metta_reading_declared_types', true).
+:- seam:context_reader(metta_reading_declared_types, '$metta_reading_declared_types', value(true)).
 
 metta_argument_types(Argument, Types) :-
     current_metta_module(Module),

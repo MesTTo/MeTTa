@@ -1006,7 +1006,13 @@ emitted_goal_module(Module) :-
 measure_called_goals :-
     retractall(emitted_goal_called(_, _)),
     extension_clauses(['../../engine'], References),
-    walk_clause_edges(References, record_emitted_goal_call).
+    walk_clause_edges(References, record_emitted_goal_call),
+    % A declared context reader is called at every site as its compiled read
+    % (engine/ext_points.pl, context_reader/4), so the walk sees nb_current/2
+    % where the reader's name stood and the declaration row is the one place
+    % that still names it. Its name is a call, not a constructed goal.
+    forall(seam:context_reader(Head, _, _, _),
+           record_emitted_goal_call(Head, declaration, none)).
 
 record_emitted_goal_call(Callee, _Caller, _Location) :-
     ( Callee = _:Goal -> true ; Goal = Callee ),
