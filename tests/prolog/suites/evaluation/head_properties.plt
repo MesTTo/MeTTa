@@ -2,6 +2,8 @@
 % Owns resources: each fixture releases its receiver and home and deletes its source.
 % Guarantees: source changes cannot leave a fabricated origin line
 %   [tested: head_properties; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+% Guarantees: origins identify the source's allocated live home
+%   [tested: head_properties; commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -17,7 +19,7 @@ properties_setup(Text) :-
     setup_call_cleanup(open(Path, write, Out),
         format(Out, '~s', [Text]),
         close(Out)),
-    atom_concat('&library:', Path, Home), gensym('&properties-', Receiver),
+    metta_engine:metta_reference_home(Path, Home), gensym('&properties-', Receiver),
     space_module(Receiver, Module),
     with_metta_module(Module, 'pragma!'(load, lazy, _)),
     metta_add_atom(Receiver, [from,Path,[prefix,'alias.']], _),

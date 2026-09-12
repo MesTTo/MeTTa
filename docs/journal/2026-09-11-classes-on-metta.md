@@ -715,3 +715,51 @@ suites/spaces/references.plt suites/reader/reference_loading.plt` passes
 (`ai-tmp/ai-classes-c5-transaction-repair.log`). The tracked host reproduction
 prints `present` (`ai-tmp/ai-classes-c5-transaction-host-repro.log`).
 
+## 2026-09-13: reference dependencies and source lifetimes
+
+Tried: native Literal parameter and result checks pass, including exact
+membership and nonbinding rejection of variables; vocabulary generation exits
+0 (`ai-tmp/ai-classes-c7-literal-after.log`, `ai-classes-c7-vocabulary.log`).
+The Python finite-domain run passes 93 tests and exposes a multiline exception
+message that the length test's regex did not match; the regex now spans lines.
+
+Tried: warming a global library before class declaration makes a from map
+reject a function name as `BadArgType ... Symbol (-> ...)`. The native `+`
+regression reproduces the same error (`ai-classes-c7-map-name-before.log`).
+All four map operations now hold their name input as Atom. Their result stays
+evaluated: using Atom there returned the spec's unevaluated body. The corrected
+declarations and executable spec pass references and prelude_spec, including
+all four grounded-name subcases (`ai-classes-c7-map-names-complete.log`).
+
+Tried: declare a constructor while a global reference supplies dict-space and
+get-value, then withdraw that reference. Construction returned an unreduced
+get-value expression instead of 4 (`ai-classes-c7-warm-dependency-before.log`).
+Decided: derive dependencies from the written namespace and explicit from
+rows, through metta_host_reference_names/2, rather than globally callable
+functions. The dependency remains explicit and private after the unrelated
+global reference leaves. The regression passes
+(`ai-classes-c7-warm-dependency-after.log`).
+
+Found: a first library load inside Scope leaves a revoked canonical home
+after that Scope closes. A later import reuses the address and fails with
+`metta_foreign_tokens_required`; the class consumer run fails 26 tests after
+its first scoped prototype (`ai-classes-c7-class-consumers.log`). A standalone
+library reload reproduces it without classes
+(`ai-classes-c7-library-lifetime-before.log`).
+Decided: retain the existing path-to-home registry and allocate a new home
+identity when a released source is loaded again. A live source still has one
+home. Scope revocation continues to protect old handles. Namespace reflection
+reads the registered home rather than computing an address from the path.
+
+Found: direct text persistence duplicates a projected @doc row on reload,
+changing the content digest. The source and class stay live during this
+probe, so disappearance is not its cause
+(`ai-classes-c7-direct-source-probe.log`). A separate ordinary-MeTTa bundle
+allocates a new space, restores authored rows with relocated handles and
+references it from the root; the accessor returns 3 after the original context
+has closed (`ai-classes-c7-program-probe5.log`). Its load returns True so the
+loader commits its writes. The Empty-ending arm leaves the root empty.
+
+Open: verify source lifetimes, implement authored source persistence and the
+portable converter, then resume order-dependent native-state diagnosis.
+

@@ -3,6 +3,9 @@
 %   remove loader instrumentation and delete their temporary source files.
 % Guarantees: background coordination uses queues, never sleeps or deadlines
 %   [tested: reference_loading; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+% Guarantees: fixtures read the loader's live home instead of deriving a
+%   reusable address from its source path [tested: reference_loading;
+%   commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -14,7 +17,7 @@
 loading_setup(Text) :-
     metta_host_set_silent(true),
     tmp_file(metta, Stem), atom_concat(Stem, '.metta', Path),
-    loading_write(Path, Text), atom_concat('&library:', Path, Home),
+    loading_write(Path, Text), metta_engine:metta_reference_home(Path, Home),
     gensym('&reference-loading-', A), gensym('&reference-loading-', B),
     space_module(A, _), space_module(B, _),
     nb_setval(reference_loading_fixture, fixture(Path, Home, A, B)).
@@ -27,8 +30,7 @@ loading_cleanup :-
     loading_fixture(Path, Home, A, B),
     maplist(metta_release_space, [B, A, Home]),
     forall(loading_auxiliary(Extra),
-           ( atom_concat('&library:', Extra, ExtraHome),
-             ( metta_engine:metta_reference_library_home(ExtraHome, _)
+           ( ( metta_engine:metta_reference_library_home(ExtraHome, Extra)
              -> metta_release_space(ExtraHome) ; true ),
              ( file_name_extension(_, pl, Extra) -> unload_file(Extra) ; true ),
              delete_file(Extra) )),
@@ -228,7 +230,7 @@ test(a_refused_home_registration_keeps_a_shared_prolog_provider_loaded,
     loading_aux_file(pl, Code, Prolog), loading_prolog_source(Prolog, Source),
     loading_write(Path, Source), metta_add_atom(A, [from,Path], _),
     loading_aux_file(metta,"(= (loading-marker) marker)\n",Other),
-    metta_add_atom(B,[from,Other],_), atom_concat('&library:',Other,HomeB),
+    metta_add_atom(B,[from,Other],_), metta_engine:metta_reference_library_home(HomeB, Other),
     space_module(HomeB, Module),
     with_metta_module(Module, metta_engine:use_module_global(Prolog)),
     catch(with_metta_module(Module,
@@ -514,7 +516,7 @@ test(prolog_export_properties_belong_to_the_home_and_leave_with_its_source,
     format(string(SourceA),"!(import! &self (library lib_import))~n!(import_prolog_functions_from_file \"~w\" ())~n",[PA]),
     format(string(SourceB),"!(import! &self (library lib_import))~n!(import_prolog_functions_from_file \"~w\" ())~n",[PB]),
     loading_write(Path,SourceA), loading_aux_file(metta,SourceB,Other),
-    atom_concat('&library:',Other,HomeB),
+    metta_engine:metta_reference_home(Other,HomeB),
     metta_add_atom(A,[from,Path],_), metta_add_atom(B,[from,Other],_),
     assertion(metta_head_property(HomeA,'loading-declared',[volatility,volatile])),
     assertion(metta_head_property(HomeB,'loading-declared',[volatility,immutable])),
