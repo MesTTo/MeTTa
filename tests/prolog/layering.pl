@@ -371,6 +371,7 @@ reaches(lib_tabling, parser, 'the published writer renders a rejected reflection
 reaches(lib_tabling, spaces, 'declared space, storage and module services resolve table dependencies; the ordinary atom doors store reflection rows').
 reaches(materialize, ext_points, 'admission preserves existing dispatch ownership').
 reaches(materialize, metta, 'module context, type declarations, algebra and reduction bounds gate relation construction and lookup').
+reaches(materialize, host_listeners, 'the erase listener that retires a collected source owner is registered through the one door').
 reaches(materialize, spaces, 'native storage, compiled source signatures and dispatch policies define the relation being materialized').
 reaches(materialize, support_graph, 'prepared relations depend on their compiled function definitions').
 reaches(materialize, translator_rules, 'rewritten match calls and evaluated result constructors remain outside relational admission').
