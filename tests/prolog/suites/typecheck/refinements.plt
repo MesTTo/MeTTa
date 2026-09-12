@@ -1,5 +1,8 @@
 % Purpose: check the refinement vocabulary through the ordinary arrow rules:
 %   a refined parameter, a refined result, the cast witness, and each rule.
+% Guarantees: a body Error remains visible across a result refinement
+%   [tested: refinements:a_result_refinement_preserves_a_produced_error;
+%   commit=WORKTREE].
 % Assumes: engine/metta.pl owns type checking; the Python seat supplies host
 %   numerics for the seam case, so this suite runs under `-- extensions`.
 % Guarantees: a refined parameter accepts what its constraints admit and
@@ -100,6 +103,14 @@ test(a_return_base_mismatch_stays_silent,
      [ setup(setup_refined(Space)), cleanup(cleanup_refined(Space)) ]) :-
     answers(Space, ['as-text', 4], Values),
     assertion(Values == []).
+
+test(a_result_refinement_preserves_a_produced_error,
+     [ setup(setup_refined(Space)), cleanup(cleanup_refined(Space)) ]) :-
+    process_metta_string(
+        "(: refined-error (-> Number (Annotated Number (Gt 0))))
+         (= (refined-error $x) (throw (Error refused $x)))", _, Space),
+    answers(Space, ['refined-error', 7], Values),
+    assertion(Values == [['Error', refused, 7]]).
 
 test(a_length_refinement_reads_strings_and_expressions,
      [ setup(setup_refined(Space)), cleanup(cleanup_refined(Space)) ]) :-

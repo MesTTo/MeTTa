@@ -3,6 +3,10 @@
 %   bridge cascades.
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
+% Guarantees: inspecting a produced Error is inert and cannot mask the called
+%   operation's effect [tested:
+%   metta_arrow_products:an_annotated_callee_is_not_hidden_by_a_plain_caller;
+%   commit=WORKTREE].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: a head's declared cost class reaches explain and every host
 % docstring through ONE resolution, so a row that names no measure takes it
@@ -171,6 +175,9 @@ metta_effect_construct(metta_top(_, A, _), [A]).
 %engine helper or, worse, call the helper pure as a whole.
 metta_effect_construct(dispatch_policy_execute(_, _, _, Goal, _), [Goal]).
 metta_effect_construct(metta_verify_annotated_call(_, _, _, _, Goal), [Goal]).
+% A typed result crossing only inspects its produced term. Match the emitted
+% module qualification so a user's equation of the same name is still walked.
+metta_effect_construct(metta_engine:metta_error_operand(_, _), []).
 %A MODULE-QUALIFIED goal holds its effect in the goal, not in the module, and
 %it has to be here rather than left to the meta_predicate clause below: that
 %clause reads `functor(Meta, Name, Arity)` for a `:`/2 term, SWI answers a

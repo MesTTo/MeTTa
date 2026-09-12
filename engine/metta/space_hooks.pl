@@ -7,6 +7,9 @@
 :- encoding(utf8).
 
 % Purpose: implement pre-add hooks, transforms, watchers, views, digests, and purity inventories
+% Guarantees: metta_transaction/2 rolls back Error-valued answer bags and
+%   replays their exact order and bindings after rollback
+%   [tested: classes_transaction_results; commit=WORKTREE].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
 %   an internal SWI transaction never impersonates the outermost user transaction coordinator.
@@ -491,13 +494,38 @@ metta_writes(Ctx, Atomicity) :-
 %[tested: tests/prolog/static_checks.pl:check_project_var_branches,
 %tests/prolog/static_checks.pl:every_seam_kind_matches_its_direction;
 %commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
-:- meta_predicate metta_transaction(0).
+% MeTTa's Error is a value. Inspect the complete bag inside the transaction,
+% then carry it through a private exception so rollback cannot lose answers.
+% The goal-only host door keeps Prolog's ordinary success/failure contract.
+% [tested: classes_transaction_results; commit=WORKTREE].
+:- meta_predicate metta_transaction(0), metta_transaction(0, ?).
 metta_transaction(Goal) :-
     term_variables(Goal, Vars),
     metta_transaction_run(Goal, Vars, Answers,
                           Outcome, Foreign, Observation),
     metta_transaction_result(Outcome, Foreign, Observation),
     member(Vars, Answers).
+
+metta_transaction(Goal, Value) :-
+    term_variables(Goal, Vars),
+    metta_transaction_prepare_goal(
+        metta_transaction_value_answers(Goal, [Value|Vars], Answers),
+        Outcome, Completion),
+    metta_transaction_finish(Completion, Outcome, Foreign, Observation),
+    (   Outcome = threw('$metta_transaction_error_answers'(Rejected))
+    ->  metta_transaction_result(committed, Foreign, Observation),
+        member([Value|Vars], Rejected)
+    ;   metta_transaction_result(Outcome, Foreign, Observation),
+        member([Value|Vars], Answers)
+    ).
+
+metta_transaction_value_answers(Goal, Template, Answers) :-
+    metta_transaction_answers(Goal, Template, Answers),
+    (   member([Value|_], Answers), nonvar(Value),
+        Value = [Head|Tail], Head == 'Error', nonvar(Tail)
+    ->  throw('$metta_transaction_error_answers'(Answers))
+    ;   true
+    ).
 
 %Run the same transaction while notifying an owner of the durable database
 %outcome before a foreign-commit or post-commit observer error is rethrown.
@@ -524,25 +552,25 @@ metta_transaction_run(Goal, Vars, Answers,
 %raises BaseException cannot make committed receipt bookkeeping look rolled
 %back. Ordinary transactions use the same phases without a notification.
 metta_transaction_prepare(Goal, Vars, Answers, Outcome, Completion) :-
+    metta_transaction_prepare_goal(
+        metta_transaction_answers(Goal, Vars, Answers), Outcome, Completion).
+
+metta_transaction_prepare_goal(Goal, Outcome, Completion) :-
     (   metta_in_user_transaction
-    ->  metta_nested_transaction_prepare(Goal, Vars, Answers,
-                                        Outcome, Completion)
-    ;   metta_outer_transaction_prepare(Goal, Vars, Answers,
-                                       Outcome, Completion)
+    ->  metta_nested_transaction_prepare(Goal, Outcome, Completion)
+    ;   metta_outer_transaction_prepare(Goal, Outcome, Completion)
     ).
 
-metta_nested_transaction_prepare(Goal, Vars, Answers,
-                                 Outcome, nested) :-
+metta_nested_transaction_prepare(Goal, Outcome, nested) :-
     seam:observation_begin,
-    catch(( transaction(metta_transaction_answers(Goal, Vars, Answers))
+    catch(( transaction(Goal)
           -> Outcome = committed
           ;  Outcome = failed
           ),
           Error,
           Outcome = threw(Error)).
 
-metta_outer_transaction_prepare(Goal, Vars, Answers,
-                                Outcome, outer(Enlisted)) :-
+metta_outer_transaction_prepare(Goal, Outcome, outer(Enlisted)) :-
     seam:observation_begin,
     nb_setval('$metta_tx_enlisted', []),
     nb_setval('$metta_tx_aliases', []),
@@ -558,7 +586,7 @@ metta_outer_transaction_prepare(Goal, Vars, Answers,
     catch(( setup_call_cleanup(
                 b_setval('$metta_user_tx', true),
                 materialization_transaction(
-                    metta_transaction_answers(Goal, Vars, Answers),
+                    Goal,
                     metta_validate_pending_type_aliases),
                 b_setval('$metta_user_tx', false))
         ->  Outcome = committed ; Outcome = failed ),

@@ -3230,7 +3230,8 @@ honest. Today's list: `catch_recover/2`, `match_foreign/5`, `metta_add_atoms/2`,
 `metta_require_algebra_value/3`,
 `metta_with_evaluation_context/2`, `metta_evaluation_context/1`,
 `metta_ordered_match_limit/6`,
-`metta_source_reset/1`, `metta_transaction/1`, `metta_transport_failure/1`,
+`metta_source_reset/1`, `metta_transaction/1`, `metta_transaction/2`,
+`metta_transport_failure/1`,
 `sread_with_names/3`, `translate_expr/3`, `unregister_metta_extension/1` and
 `with_metta_module/2`. Shrinking this list is the shim-thinning work's
 scoreboard; growing it is a deliberate publication, not a drive-by.

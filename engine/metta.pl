@@ -6,6 +6,9 @@
 % Guarantees: engine/host_transactions.pl supplies the documented host rollback
 %   workaround before runtime declarations load [tested:
 %   host_transactions, test_class_declaration_rollback; commit=WORKTREE].
+% Guarantees: occurrence-output writes and result-aware transactions are
+%   exported through their owning runtime modules
+%   [tested: spaces_tokens, classes_transaction_results; commit=WORKTREE].
 % Guarantees:
 %   - metta_operation_parameters/4 exposes the joint argument types and
 %     origins used by constructor compilation and runtime admission
@@ -456,6 +459,7 @@
             metta_in_user_transaction/0,
             metta_negation_world_guard/1,
             metta_transaction/1,
+            metta_transaction/2,
             metta_transaction_notified/3,
             metta_with_state_write_fence/1,
             metta_with_trailed/3,

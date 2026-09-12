@@ -1,4 +1,8 @@
 % Purpose: compile declared input and output types while preserving shared branch variables
+% Guarantees: a computed Error crosses an ordinary result arrow unchanged;
+%   other result mismatches still filter that branch
+%   [tested: classes_transaction_results:typed_results_preserve_errors_and_filter_other_mismatches;
+%   commit=WORKTREE].
 % Guarantees: present_type_chain/3 expands a final (:seg T), and
 %   validate_type_splices/1 refuses retired or misplaced forms at admission
 %   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
@@ -495,7 +499,10 @@ typed_functioncall_branch(Fun, TypeChain, T, GsH, IsPartial, Bound, Out,
         type_check_goal(Out, OutType,
                         check_argument_type(Out, OutType, OutOrigin),
                         OutGoal),
-        OutCheck = [OutGoal],
+        % A produced Error has already crossed the operation's failure door.
+        % Keep it visible to transaction and try; other wrong sorts still fail.
+        OutCheck = [(OutGoal *-> true
+                    ; metta_engine:metta_error_operand([Out], Out))],
         Produced = Out
     ),
     %NO RESULT CONTINUATION IS EMITTED HERE, and the reason is that this engine
