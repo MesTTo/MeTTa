@@ -43,7 +43,7 @@ beside its definitions.
 | lib_strategy | 24 | 0 |
 | lib_string | 19 | 0 |
 | lib_tabling | 11 | 0 |
-| lib_thread | 58 | 2 |
+| lib_thread | 62 | 6 |
 | lib_torch | 20 | 19 |
 | lib_vector | 5 | 0 |
 | lib_zar | 4 | 0 |
@@ -541,7 +541,7 @@ Undocumented: `soft-aggregation`, `soft-best`, `soft-fold`, `soft-match`, `soft-
 
 ### `scope`
 
-*lib_thread.metta:193*
+*lib_thread.metta:202*
 
 ```metta
 (: scope (-> Atom %Undefined%))
@@ -555,7 +555,7 @@ Returns: each body answer
 
 ### `capture`
 
-*lib_thread.metta:194*
+*lib_thread.metta:203*
 
 ```metta
 (: capture (-> Atom Atom))
@@ -566,6 +566,64 @@ Hold an expression with its current evaluation space as an evalc value
 1. the held expression
 
 Returns: (evalc expression space)
+
+### `scope-defer`
+
+*lib_thread.metta:204*
+
+```metta
+(: scope-defer (-> %Undefined% Atom Bool))
+```
+
+Register held cleanup in the current scope; returning its value transfers cleanup to the enclosing scope; outside a scope no cleanup is registered
+
+1. the owned ground value
+2. the held cleanup expression in its defining space
+
+Returns: True
+
+### `scope_defer`
+
+*lib_thread.metta:205*
+
+```metta
+(: scope_defer (-> %Undefined% Atom Bool))
+```
+
+Native spelling of scope-defer
+
+1. the owned ground value
+2. the held cleanup expression
+
+Returns: True
+
+### `drop-space`
+
+*lib_thread.metta:206*
+
+```metta
+(: drop-space (-> SpaceType Bool))
+```
+
+Release a space through its scope owner, including owned children and deferred cleanup
+
+1. the space to release
+
+Returns: True
+
+### `space_drop`
+
+*lib_thread.metta:207*
+
+```metta
+(: space_drop (-> SpaceType Bool))
+```
+
+Native spelling of drop-space
+
+1. the space to release
+
+Returns: True
 
 Undocumented: `after`, `await`, `await-atom`, `cancel`, `channel`, `channel-close`, `channel-size`, `channel_close`, `channel_new`, `channel_recv`, `channel_send`, `channel_size`, `channel_try_recv`, `cpu-count`, `cpu_count`, `every`, `par-any`, `par-filter`, `par-forall`, `par-map`, `par-race`, `par_any`, `par_filter`, `par_forall`, `par_map`, `par_race`, `peek-atom`, `pool`, `pool-destroy`, `pool-stats`, `pool_create`, `pool_destroy`, `pool_stats`, `pool_submit`, `recv`, `scope_body`, `send`, `settled?`, `space_await`, `space_await_where`, `space_take`, `space_take_where`, `spawn`, `submit`, `take-atom`, `thread-count`, `thread_await`, `thread_cancel`, `thread_count`, `thread_settled`, `thread_spawn`, `timer_after`, `timer_every`, `try-recv`, `with-lock`, `with_lock`
 

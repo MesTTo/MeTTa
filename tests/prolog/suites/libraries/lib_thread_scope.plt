@@ -1,4 +1,7 @@
 % Purpose: verify lib_thread's lifetime tree through native entry points.
+% Guarantees: native deferred cleanup follows scope transfer and rollback,
+%   reports every failure and can retry a failed close
+%   [tested: lib_thread_scope_deferred; commit=WORKTREE].
 % Guarantees: normal exit joins children, failure stops siblings, return
 % transfers spaces and escaped names refuse [tested: lib_thread_scope;
 % commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
@@ -137,3 +140,117 @@ test(capture_retains_the_evaluation_space,
 :- end_tests(lib_thread_scope).
 
 sc_scope_result(Q, N) :- thread_get_message(Q, done(N), [timeout(0)]).
+
+:- begin_tests(lib_thread_scope_deferred).
+
+deferred_setup(Space, Owner, Id) :-
+    'new-space'(Space), thread_self(Owner), scope_open(none, Owner, infinite, Id).
+deferred_cleanup(Space, Owner, Id) :-
+    ( lib_thread:scope_state_(Id, _, _, _, _)
+    -> scope_close(Id, Owner, failure, _) ; true ),
+    metta_release_space(Space).
+
+test(native_cleanups_run_in_reverse_acquisition_order,
+     [setup(deferred_setup(Space, Owner, Id)),
+      cleanup(deferred_cleanup(Space, Owner, Id))]) :-
+    scope_call(Id,
+        ( scope_defer([entity,1], ['add-atom',Space,[released,1]], true),
+          scope_defer([entity,2], ['add-atom',Space,[released,2]], true) )),
+    scope_close(Id, Owner, success, Report),
+    assertion(Report == [none,[],true]),
+    findall(Row, 'get-atoms'(Space, Row), Rows),
+    assertion(Rows == [[released,2],[released,1]]).
+
+test(a_kept_value_transfers_its_cleanup_to_the_parent,
+     [setup(deferred_setup(Space, Owner, Outer)),
+      cleanup(deferred_cleanup(Space, Owner, Outer))]) :-
+    scope_open(Outer, Owner, infinite, Inner),
+    scope_call(Inner, scope_defer([entity,1], ['add-atom',Space,[released,1]], true)),
+    scope_keep(Inner, Owner, [answer,[entity,1]]),
+    scope_close(Inner, Owner, success, [none,[],true]),
+    assertion(\+ 'get-atoms'(Space, _)),
+    scope_close(Outer, Owner, success, [none,[],true]),
+    findall(Row, 'get-atoms'(Space, Row), Rows), assertion(Rows == [[released,1]]).
+
+test(a_kept_root_value_releases_its_scope_descriptor,
+     [setup(deferred_setup(Space, Owner, Id)),
+      cleanup(deferred_cleanup(Space, Owner, Id))]) :-
+    scope_call(Id, scope_defer([entity,1], ['add-atom',Space,[released,1]], true)),
+    recorded(Id, child(deferred, Token), _),
+    scope_keep(Id, Owner, [entity,1]),
+    scope_close(Id, Owner, success, [none,[],true]),
+    assertion(\+ lib_thread:scope_deferred_(Token, _, _, _, _)),
+    assertion(\+ 'get-atoms'(Space, _)).
+
+test(a_kept_cleanup_retains_its_captured_space_and_reference_provider,
+     [setup(deferred_setup(Log, Owner, Outer)),
+      cleanup(deferred_cleanup(Log, Owner, Outer))]) :-
+    scope_open(Outer, Owner, infinite, Inner),
+    scope_call(Inner,
+        ( 'new-space'(Provider), 'new-space'(Consumer),
+          'add-atom'(Provider, ['=', ['sc-deferred-mark'], done], _),
+          'add-atom'(Consumer, [from,Provider], _),
+          scope_defer([entity,1], [let,Mark,[evalc,['sc-deferred-mark'],Consumer],
+                                  ['add-atom',Log,[released,Mark]]], true) )),
+    scope_keep(Inner, Owner, [entity,1]),
+    scope_close(Inner, Owner, success, [none,[],true]),
+    assertion(\+ scope_space_dead(Provider)),
+    assertion(\+ scope_space_dead(Consumer)),
+    scope_close(Outer, Owner, success, Report),
+    assertion(Report == [none,[],true]),
+    findall(Row, 'get-atoms'(Log, Row), Rows), assertion(Rows == [[released,done]]),
+    assertion(scope_space_dead(Provider)),
+    assertion(scope_space_dead(Consumer)).
+
+test(a_nested_transfer_preserves_cleanup_acquisition_order,
+     [setup(deferred_setup(Log, Owner, Outer)),
+      cleanup(deferred_cleanup(Log, Owner, Outer))]) :-
+    scope_open(Outer, Owner, infinite, Inner),
+    scope_call(Inner,
+        ( scope_defer([entity,1], ['add-atom',Log,[released,1]], true),
+          scope_defer([entity,2], ['add-atom',Log,[released,2]], true) )),
+    scope_keep(Inner, Owner, [[entity,1],[entity,2]]),
+    scope_close(Inner, Owner, success, [none,[],true]),
+    scope_close(Outer, Owner, success, [none,[],true]),
+    findall(Row, 'get-atoms'(Log, Row), Rows),
+    assertion(Rows == [[released,2],[released,1]]).
+
+test(a_rolled_back_descriptor_has_no_cleanup_left_to_run,
+     [setup(deferred_setup(Space, Owner, Id)),
+      cleanup(deferred_cleanup(Space, Owner, Id))]) :-
+    scope_call(Id, snapshot(scope_defer([entity,1], ['add-atom',Space,[released,1]], true))),
+    scope_close(Id, Owner, success, [none,[],true]),
+    assertion(\+ 'get-atoms'(Space, _)).
+
+test(failure_does_not_transfer_a_kept_value,
+     [setup(deferred_setup(Space, Owner, Id)),
+      cleanup(deferred_cleanup(Space, Owner, Id))]) :-
+    scope_call(Id, scope_defer([entity,1], ['add-atom',Space,[released,1]], true)),
+    scope_keep(Id, Owner, [entity,1]),
+    scope_close(Id, Owner, failure, [body_failure,[],true]),
+    findall(Row, 'get-atoms'(Space, Row), Rows), assertion(Rows == [[released,1]]).
+
+test(explicit_space_retirement_is_safe_in_a_cleanup_snapshot,
+     [setup(deferred_setup(Log, Owner, Id)),
+      cleanup(deferred_cleanup(Log, Owner, Id))]) :-
+    scope_call(Id,
+        ( 'new-space'(Private),
+          scope_defer([agent,Private], ['drop-space',Private], true) )),
+    scope_close(Id, Owner, success, [none,[],true]),
+    assertion(scope_space_dead(Private)).
+
+test(a_failed_cleanup_is_retained_for_retry_and_siblings_still_run,
+     [setup(deferred_setup(Space, Owner, Id)),
+      cleanup(deferred_cleanup(Space, Owner, Id))]) :-
+    scope_call(Id,
+        ( scope_defer([entity,1], ['add-atom',Space,[released,1]], true),
+          scope_defer([entity,2], [throw, ['Error',cleanup,retry]], true) )),
+    scope_close(Id, Owner, success, [none, Errors, false]),
+    assertion(Errors = [[prolog,_]]),
+    findall(Row, 'get-atoms'(Space, Row), Rows), assertion(Rows == [[released,1]]),
+    retract(lib_thread:scope_deferred_(Token, Id, [entity,2], Module, _)),
+    assertz(lib_thread:scope_deferred_(Token, Id, [entity,2], Module, true)),
+    scope_close(Id, Owner, success, [none,[],true]),
+    findall(Row, 'get-atoms'(Space, Row), After), assertion(After == Rows).
+
+:- end_tests(lib_thread_scope_deferred).
