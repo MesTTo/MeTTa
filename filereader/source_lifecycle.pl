@@ -1252,6 +1252,19 @@ record_recompiled_source_assertion(Owners, Ref) :-
 % Recompiled metadata belongs to the executable clause's original owners.
 % The same precedence already governs grouped support-graph assertions below.
 % [tested: filereader_source_reload:recompiled_metadata_keeps_the_equations_source_owner; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4]
+% The same precedence as the recorder, for a mutator that must retain a
+% previous version only when this source will own its new assertion.
+recording_source_assertion :-
+    once(source_assertion_owner(_)).
+
+source_assertion_owner(Load) :-
+    (   source_recompile_owners(Owners)
+    ->  member(Load, Owners)
+    ;   active_source_load(Load0)
+    ->  ( Load0 = '$metta_owner_pin'(Load) -> Load \== none ; Load = Load0 )
+    ;   fail
+    ).
+
 record_source_assertion(Ref) :-
     source_recompile_owners(Owners), !,
     record_recompiled_source_assertion(Owners, Ref).
