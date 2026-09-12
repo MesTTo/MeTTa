@@ -6,7 +6,7 @@
 %   whole enumeration and restores the prior root once the goal is finished,
 %   cut, failed or raised, with its entry write registered after the cleanup
 %   [tested: trailed_scopes:an_enumeration_scope_covers_every_answer_and_returns_once_finished;
-%   commit=WORKTREE].
+%   commit=aedde810f4af0e4fc55de275c06a6758e6edae21].
 %
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
 % Guarantees: metta_host_inference_budget/3 converts a deferred native
@@ -805,7 +805,7 @@ metta_with_trailed(Key, Value, Goal) :-
 % the writes of '$metta_module' fell from 1,064,711 to 1,572, the cut's own
 % count; command=python tests/prolog/probes/twin_profile.py <root>
 % extensions/python/examples/language-feature-examples/ch22-a-reasoner-you-can-serve/22-03-search/03-matespace.py <out>;
-% fixture=warm QLF set, both MORK objects; commit=WORKTREE].
+% fixture=warm QLF set, both MORK objects; commit=aedde810f4af0e4fc55de275c06a6758e6edae21].
 % The entry write is trailed and made after the cleanup is registered, so a
 % limit tripping at any port unwinds it; the cleanup writes the prior value
 % back once, on completion, cut, failure or exception, and its write is
