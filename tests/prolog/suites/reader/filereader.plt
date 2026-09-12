@@ -21,7 +21,7 @@
 %     commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
 %   - Import repair preserves concurrent inherited calls and follows a new
 %     nearer provider or a recycled module's new parent [tested:
-%     filereader_import_lifecycle; commit=WORKTREE].
+%     filereader_import_lifecycle; commit=518e67bc11d72ed28dfda7dd0646d1f48d14ac24].
 %   - A typing rule asserted by a failed source load is erased with that load,
 %     and the affected retained clauses regain their static proofs
 %     [tested:

@@ -2,7 +2,7 @@
 % Assumes: plain SWI-Prolog, with no repository engine or workaround loaded.
 % Guarantees: the last line is present when the provider loses its clause count
 %   or meta declaration while its original clause remains [tested:
-%   sh check.sh host-workarounds; commit=WORKTREE].
+%   sh check.sh host-workarounds; commit=518e67bc11d72ed28dfda7dd0646d1f48d14ac24].
 % Owns resources: two finite worker threads, joined before inspecting metadata.
 :- module(import_removal_probe, [main/0, sample/1]).
 :- meta_predicate sample(0).
