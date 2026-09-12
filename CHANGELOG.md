@@ -151,6 +151,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Compiled type checks commit their joint witnesses through inline control
+  flow, eliminating the extra native calls around intrinsic scalar checks.
 - Portable program export keeps its topological order inside the successful
   sort branch, satisfying the source scope check while preserving cycle errors.
 - Native import repair preserves unchanged providers during unrelated space

@@ -1,4 +1,8 @@
 % Purpose: compile declared input and output types while preserving shared branch variables
+% Guarantees: committing generated type checks adds no native call around
+%   intrinsic tests and preserves the caller's alternatives [tested:
+%   run_tests(translator_check_commits), run_tests(translator_typed_checks);
+%   commit=WORKTREE].
 % Guarantees: a computed Error crosses an ordinary result arrow unchanged;
 %   other result mismatches still filter that branch
 %   [tested: classes_transaction_results:typed_results_preserve_errors_and_filter_other_mismatches;
@@ -642,11 +646,10 @@ argument_applicability_checks(Args, Types, Origins, Checks) :-
     memberchk(derived_variable, Origins),
     !,
     maplist(argument_applicability_check, Args, Types, Origins, Raw),
-    goals_list_to_conj(Raw, Conj),
-    Checks = [once(Conj)].
+    commit_checks(Raw, Checks, []).
 argument_applicability_checks(Args, Types, Origins, Checks) :-
     metatype_applicability_checks(Args, Types, Origins, Raw),
-    commit_checks(Raw, Checks).
+    commit_checks(Raw, Checks, []).
 
 metatype_applicability_checks([], _, _, []).
 metatype_applicability_checks([Argument|Arguments], [Type|Types],
@@ -739,13 +742,18 @@ place_type_checks(ArgTypes, OutType, ArgChecks, OutCheck, InnerEval, Inner, Extr
     ( shares_a_variable(ArgVars, OutVars)
       -> Inner = InnerEval,
          append(ArgChecks, OutCheck, Both),
-         commit_checks(Both, Extra)
-       ; commit_checks(ArgChecks, Committed),
+         commit_checks(Both, Extra, [])
+       ; commit_checks(ArgChecks, Committed, []),
          append(InnerEval, Committed, Inner),
          Extra = OutCheck ).
 
-commit_checks([], []) :- !.
-commit_checks(Checks, [once(Conj)]) :- goals_list_to_conj(Checks, Conj).
+% Asserted clauses do not receive source-level apply_macros expansion. Emit
+% its scoped once form here; the final true keeps an enclosing disjunction
+% outside the condition's commit.
+% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/apply_macros.pl#L204-L210
+commit_checks([], Tail, Tail) :- !.
+commit_checks(Checks, [((Conj -> true), true)|Tail], Tail) :-
+    goals_list_to_conj(Checks, Conj).
 
 shares_a_variable(As, Bs) :- member(A, As), member(B, Bs), A == B, !.
 
@@ -775,10 +783,7 @@ translate_args_by_type_dl(Args, Types, Goals0, Goals, AVs) :-
     metta_argument_type_origins(Types, Origins),
     translate_args_by_type_dl(Args, Types, Origins,
                               Goals0, Tail, AVs, Checks, [], _),
-    ( Checks == []
-      -> Tail = Goals
-       ; goals_list_to_conj(Checks, CheckConj),
-         Tail = [once(CheckConj)|Goals] ).
+    commit_checks(Checks, Tail, Goals).
 
 translate_args_by_type_dl([], _, _, Goals, Goals, [], Checks, Checks, []) :- !.
 translate_args_by_type_dl([A|As], [T|Ts], [Origin|Origins],

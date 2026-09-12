@@ -1826,3 +1826,88 @@ tests/ch18_performance/test_program_source.py` passes all 24 tests.
 Receipts: `ai-tmp/ai-classes-c16-var-branches-after.log`,
 `ai-tmp/ai-classes-c16-program-native.log` and
 `ai-tmp/ai-classes-c16-program-python.log`.
+
+## 2026-09-13: generated type-check commits use inline control flow
+
+Tried: `PYTHONPATH=extensions/python $CHECK_PY
+ai-tmp/ai-classes-c16-private-contracts.py` compares typed constructor-pattern
+entries over a shared body. The handwritten norm costs 9.0018 inferences per
+call. An untyped helper costs 10.0018; a helper declaring its retained receiver
+as Atom and both lifted fields as Number costs 13.0026. A second class-type
+check on the helper's receiver costs 194.0258. These are direct native calls
+inside one engine, with 100 warm calls followed by 10,000 measured calls.
+Receipt: `ai-tmp/ai-classes-c16-private-contracts.log`.
+
+Found: `commit_checks/2` emits `once(Conjunction)` into an asserted clause.
+Its compound goal is meta-called at runtime even when its Number tests are
+VM instructions. The shared body still needs those field checks; removing
+them would lose the contract when a subclass changes a field's declaration.
+
+Tried: the same command with `--inline-checks` wraps only this emitter in the
+probe process. SWI's documented `((Goal -> true), true)` expansion reduces
+the Atom-receiver helper to 10.0018, equal to the untyped helper and exactly
+one inference above the handwritten equation. Receipt:
+`ai-tmp/ai-classes-c16-private-contracts-inline.log`.
+
+Decided: all three generated check-group paths use the same difference-list
+emitter. It commits the group through inline control flow. The native tests
+cover a surrounding disjunction, failed-group bindings, nondeterministic
+arguments and the original BadArgType result. The existing shared-type tests
+cover witnesses that only become consistent after the callee returns.
+The expansion follows
+[SWI's scoped once expansion](https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/apply_macros.pl#L204-L210).
+The work per group remains linear in its checks; the measured avoidable cost
+is the meta-call around that group.
+
+Rejected: a bare `(Goal -> true)`, because a surrounding disjunction becomes
+its else branch. Rejected: omitting scalar checks or adding a method-specific
+emitter, because the shared compiler can retain the checks at the same cost.
+
+The regression before the repair reports 130,002 checked inferences against
+100,003 plain inferences over 10,000 calls. Its other three tests pass.
+Receipt: `ai-tmp/ai-classes-c16-check-commits-baseline.log`. The final fixture
+warms the counter helper itself before comparing the two totals.
+
+Verified: `sh engine/test.sh` on translator/{check_commits,translator,
+constructors}.plt, typecheck/{typing_rule_scope,compiled_typing_rules,
+refinements,tensor_shapes}.plt and spaces/transaction_results.plt passes
+306 tests and 124 subtests in eight suite processes. All paths are under
+tests/prolog/suites. Receipt: `ai-tmp/ai-classes-c16-inline-native.log`.
+`PYTHONPATH=extensions/python $CHECK_PY -m pytest -q -n 4 --benchmark-disable
+--randomly-seed=1125382488 extensions/python/tests/ch09_types
+extensions/python/tests/ch10_errors_and_refusals/test_refusal_grounds.py
+extensions/python/tests/ch11_python_as_a_notation/test_compiler_requirements.py
+extensions/python/tests/ch11_python_as_a_notation/test_define.py` passes 320.
+Receipt: `ai-tmp/ai-classes-c17-inline-python-verified.log`. The direct native
+probe on the final emitter measures 9.0018 handwritten and 10.0018 with the
+typed shared helper, `ai-tmp/ai-classes-c17-inline-cost.log`.
+
+Measured: `PYTHONPATH=extensions/python $CHECK_PY -m benchmarks.class_grains
+--sizes 1 100 1000` finishes all nine fresh-process samples. Creation counts
+are 2030/202307/2023007 for values, 3141/313407/3134007 for entities and
+228323/22815162/228168572 for prototypes. Reads stay independent of population:
+1501, 1463 and 1281 respectively. Writes cost 2030 for values, 2306 for
+entities and 2115/2120/2115 for prototypes. Values save two inferences per
+creation; the other grains save eight. Each read saves one. Receipt:
+`ai-tmp/ai-classes-c17-inline-grain-costs.log`.
+
+Measured: `PYTHONPATH=extensions/python $CHECK_PY
+extensions/python/tools/twin_coverage.py --repin --rounds 3 --reason
+'Generated type checks use inline control flow instead of a runtime once
+meta-call; their joint witnesses and scalar validation are unchanged.'
+examples/ch17-concurrency-and-the-loop/08-class_grains.metta` reprices the
+whole twin from 14248264 to 14248453. Its declaration work grows despite
+cheaper calls. The normal lane over the same example passes two claims,
+equal stored content, 2530792 native and 14248453 twin inferences. Receipts:
+`ai-tmp/ai-classes-c17-inline-grain-repin-verified.log` and
+`ai-tmp/ai-classes-c17-inline-grain-twin.log`. Engine and library QLF files
+were deleted before every measurement; the corpus lane ran alone.
+
+Verified: `sh check.sh evidence provenance-pin-selftest ruff host-workarounds`
+passes all four lanes, with 14 host entries and 34 sites. Receipt:
+`ai-tmp/ai-classes-c17-inline-metadata.log`. `jscpd
+engine/translator/typing.pl tests/prolog/suites/translator/check_commits.plt
+--max-lines 10000 --format prolog --formats-exts 'prolog:pl,plt'
+--reporters json --output ai-tmp/ai-classes-c17-inline-clones-complete`
+finds zero clones across both files. The explicit line cap includes typing.pl,
+which exceeds the tool's default 1000 lines.
