@@ -1,4 +1,11 @@
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
+% Guarantees: metta_with_trailed/3 restores context at each answer;
+%   metta_with_trailed_enumeration/3 retains it until enumeration finishes.
+%   Both preserve linked payloads and unwind on inference cuts
+%   [tested: reference_scopes; commit=WORKTREE].
+% Owns resources: scoped roots belong to their engine's trail. An unset key
+%   and [] mean inactive; a goal may mutate its payload but must not replace
+%   the scoped root with nb_setval/2, nb_linkval/2 or nb_delete/1.
 % Guarantees: metta_host_hold/3 installs seam:engine_context/1 inside its
 %   held goal and announces its lifetime through seam:host_engine_created/1
 %   and seam:host_engine_released/1 [tested: lib_thread_scope,
@@ -758,6 +765,25 @@ metta_host_with_stack_limit(StackBytes, Goal) :-
     setup_call_cleanup(push_prolog_flag(stack_limit, StackBytes),
                        Goal,
                        pop_prolog_flag(stack_limit)).
+
+% Workaround: swi-cleanup-window - the trail restores scoped roots after an abandoned call.
+% An answer restores the previous value; redo reinstates the inner value.
+:- meta_predicate metta_with_trailed(+, ?, 0).
+metta_with_trailed(Key, Value, Goal) :-
+    ( nb_current(Key, Previous) -> true ; Previous = [] ),
+    b_setval(Key, Value),
+    call(Goal),
+    b_setval(Key, Previous).
+
+% Workaround: swi-cleanup-window - register cleanup before the trailed entry write.
+% A generator keeps its context between answers. Completion, cut, failure or
+% exception restores the previous root once, matching setup_call_cleanup/3.
+:- meta_predicate metta_with_trailed_enumeration(+, ?, 0).
+metta_with_trailed_enumeration(Key, Value, Goal) :-
+    ( nb_current(Key, Previous) -> true ; Previous = [] ),
+    setup_call_cleanup(true,
+                       ( b_setval(Key, Value), Goal ),
+                       b_setval(Key, Previous)).
 
 %Every runnable uses one limit scope. Recursive clauses spend from its
 %backtrackable balance, so trying a sibling restores the balance it started

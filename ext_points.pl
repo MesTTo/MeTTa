@@ -1,5 +1,8 @@
 % Purpose: declare each engine extension seam, its direction and its cut
 %   semantics, and publish the predicates extensions and host bindings may call.
+% Guarantees: context_reader/4 defines a scoped reader and compiles resolving
+%   calls directly to its read; malformed declarations refuse at load
+%   [tested: reference_scopes; commit=WORKTREE].
 % Guarantees: allocation, release and held-goal context hooks let lib_thread
 %   own scope lifetimes across host engines [tested: lib_thread_scope;
 %   commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
@@ -155,6 +158,7 @@
             % Declarations: fact tables the engine reads as data.
             extension_builtin/2,
             builtin_type_declaration/2,
+            context_reader/4,
             context_events/3,
             engine_context/1,
             engine_emitted/1,
@@ -1240,6 +1244,43 @@ kind(metta_host_run_source_status/3, host_service).
 kind(metta_host_load_file/3, host_service).
 kind(metta_host_read_forms/2, host_service).
 kind(metta_host_with_stack_limit/2, host_service).
+kind(metta_with_trailed/3, host_service).
+kind(metta_with_trailed_enumeration/3, host_service).
+
+% Declare a reader beside its writer:
+%   :- seam:context_reader(active, '$module_active', value(true)).
+% value(Pattern) reads one term; stack(Pattern) enumerates a nearest-first
+% stack. The declaration supplies both the callable predicate and its inline
+% read, avoiding an extra predicate call on each hot-path guard check.
+% [source: engine/ext_points.pl:context_read/3; commit=3a931690116abfa8a5a37ecba3fe179d826cd712]
+% Workaround: swi-cleanup-window - context readers inspect the trailed root instead of an asserted guard.
+:- multifile context_reader/4.
+kind(context_reader/4, declaration).
+
+context_read(value(Pattern), Key, nb_current(Key, Pattern)).
+context_read(stack(Pattern), Key,
+             ( nb_current(Key, [First|Rest]),
+               ( Rest == [] -> Pattern = First
+               ; ( Pattern = First ; lists:member(Pattern, Rest) ) ) )).
+
+:- multifile system:term_expansion/2.
+system:term_expansion((:- seam:context_reader(Head, Key, Shape)),
+                      [ seam:context_reader(Head, Owner, Key, Shape),
+                        (Head :- Read) ]) :-
+    must_be(callable, Head),
+    must_be(atom, Key),
+    ( nonvar(Shape), context_read(Shape, Key, Read) -> true
+    ; domain_error(context_reader_shape, Shape) ),
+    prolog_load_context(module, Owner).
+
+:- multifile system:goal_expansion/2.
+system:goal_expansion(Head, Read) :-
+    nonvar(Head), context_reader(Head, Owner, Key, Shape),
+    \+ current_prolog_flag(xref, true),
+    prolog_load_context(module, Module),
+    ( Module == Owner -> true
+    ; '$get_predicate_attribute'(Module:Head, imported, Owner) ),
+    context_read(Shape, Key, Read).
 %An inference budget over a goal an engine will RESUME, which is knowledge a
 %host cannot hold correctly on its own: the engine counts its own inferences
 %and the host thread cannot see them, so a bound placed around engine_next/2
