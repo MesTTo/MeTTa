@@ -1799,3 +1799,30 @@ its generated-body check; receipts are
 `ai-tmp/ai-classes-c15-static-control.log`. Its separate Order branch-scope
 warning comes from the earlier portable-program construction order and is
 handled separately from import repair.
+
+## 2026-09-13: exported creation order keeps its successful branch scope
+
+Tried: reload the file-reader umbrella with SWI's branch-variable check:
+
+```sh
+swipl -q --on-warning=status --on-error=status \
+  -g "set_prolog_flag(argv,[extensions]),consult('engine/qlf_boot.pl'),consult('engine/metta.pl'),style_check(+var_branches),load_files('engine/filereader.pl',[if(true)])" \
+  -t halt
+```
+
+It exits 1 with `Variable not introduced in all branches: Order` at
+source_lifecycle.pl:465. Receipt:
+`ai-tmp/ai-classes-c16-var-branches-before.log`. The topological sort's other
+branch throws; the check does not model that branch's inability to return.
+
+Decided: put the two consumers of Order inside the successful sort branch.
+The result and cycle refusal stay the same, and its uses remain inside the
+branch that binds it. No helper or checker exception is needed.
+
+Verified: the same branch-check command exits 0 with no output. Native
+program_source passes both tests, and
+`sh extensions/python/test.sh -n 4 --randomly-seed=1125382488
+tests/ch18_performance/test_program_source.py` passes all 24 tests.
+Receipts: `ai-tmp/ai-classes-c16-var-branches-after.log`,
+`ai-tmp/ai-classes-c16-program-native.log` and
+`ai-tmp/ai-classes-c16-program-python.log`.

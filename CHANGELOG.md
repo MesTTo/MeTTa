@@ -151,6 +151,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Portable program export keeps its topological order inside the successful
+  sort branch, satisfying the source scope check while preserving cycle errors.
 - Native import repair preserves unchanged providers during unrelated space
   mutation, preventing concurrent inherited calls from losing core predicate
   metadata through SWI's imported-predicate removal race.
