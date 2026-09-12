@@ -3174,3 +3174,71 @@ twins lane reads logging at 53732/54976 with all 28 claims and equal stored
 contents. It retains 263 unrelated findings; 44/337 files pass with 3032 claims
 proved. UUID retains its exact 188846 pin. twins-selftest passes.
 Logs: ai-tmp/ai-lib4-logging-{lanes,ruff-final,twins-lane}.log.
+
+## 2026-09-12: math design
+
+Decided: compose factorial and binomial from lib_combinatorics, whose exact
+implementations landed in 08b2103. Add collection gcd/lcm, rational construction
+and decomposition, host rationalization, exact integer roots, modular powers,
+finite-domain factor pairs, scalar floating conversion and number classification.
+One function/arity table supplies native floating dispatch and discovery for
+hyperbolics, error functions, lgamma, log10, atan2, sign/adjacent-float operations,
+floating parts and constants. Existing core arithmetic and bit names remain.
+
+Tried: the native provider probe confirms negative odd roots, including
+root(3,-28,-3,-1), and normalized modular powers, (-2)^3 mod5=2. The host's
+powm requires nonnegative base/exponent and positive modulus; reduce the integer
+base modulo that positive modulus before calling. Primary source:
+https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-arith.c,
+nth_integer_root_and_remainder and ar_powm. Log: ai-tmp/ai-lib4-math-host-probe.log.
+
+Decided: positive factor pairs are a native clpfd query. The first factor is
+bounded by the exact square root, eliminating mirrored pairs; labeling streams
+solutions and zero is refused because it has infinitely many factor pairs.
+The probe enumerates all five pairs of36 in2773 inferences. This is finite
+constraint search, with no cryptographic factorization performance claim.
+
+Tried: vector-scale([Value],1.0,[Float]) preserves signed zero and rounds the
+known above-midpoint subnormal rational correctly. It also handles signed
+overflow, infinities and NaN. The first probe passed unevaluated -Tiny compounds
+and raised a number type error; explicitly calculating their values fixes it.
+Logs: ai-tmp/ai-lib4-math-float-{probe,complete}.log.
+
+Decided: scalar conversion is that multiplication by the floating unit. It uses
+lib_vector's established rounding policy and requires no second numeric kernel.
+dot is unsuitable because its zero accumulator loses a single negative zero.
+Import the Vector and combinatorics faces before the native math half so their
+compiled dependency state is consistent in isolated and corpus runs.
+
+Verified: the host ar_rationalize source preserves exact numbers, rejects NaN
+and infinity, and uses mpq_set_double for finite floats. Its documented result
+is an approximation within floating rounding error, while rational/1 represents
+the binary value exactly. The boundary probe covers both zeros, subnormal and
+normal tiny numbers,0.1 and the largest finite float; 0.1 rationalizes to1r10.
+Log: ai-tmp/ai-lib4-math-rationalize.log. Documentation:
+https://www.swi-prolog.org/pldoc/man?function=rationalize%2F1.
+
+Tried: the Python twin initially used div, while the binding's catalog maps
+truediv to /. Correcting the alias passes all67 claims. The first three-round
+measurement reads118966 example/121577 twin inferences.
+
+Tried: configured_approximation_refuses_exact_construction exposed a contract
+violation: max_rational_size=1 with max_rational_size_action=float made rdiv
+return0.3333333333333333. The regression failed with assertion nonvar(Error).
+Decided: inspect the constructed numeric species and refuse the host's explicit
+approximation policy when it would replace an exact result. This follows Vector's
+existing exact_result boundary and leaves process flags untouched. The runtime
+configuration is not a host defect and needs no host-workaround key.
+
+Verified: lib_math's13 tests pass, including exhaustive finite integer identities,
+all factor pairs for1..256, exact big-integer boundaries and subnormal ties.
+The67-claim example passes again after the approximation refusal. Three fresh
+measurement processes give118980 example/121592 twin inferences, superseding the
+initial price. jscpd finds zero clones in the native source and twin.
+
+Verified: the required library, documentation, corpus, provenance and Python
+lanes pass; host-workarounds reports 19 entries and 26 sites, all present.
+The full twins lane matches all 67 math claims, equal stored contents and the
+121592 pin against 118980. Its existing 263 findings remain across 301 twins;
+45 of 338 corpus files pass, proving 3099 claims. The twins selftest passes.
+Logs: ai-tmp/ai-lib4-math-{lanes,twins-lane}.log.

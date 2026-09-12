@@ -337,6 +337,7 @@ Reproduction: tests/checks/host_workarounds/swi-rational-subnormal-rounding.pl,
   compares normal and exact subnormal controls with the above-midpoint value.
 Workaround: Vector rounds integer quotient/remainder at the final binary64
   quantum and converts only an already representable dyadic with float/1.
+  Math converts scalar numbers through Vector's multiplication by a floating unit.
 Lifted when: the host's rational conversion rounds subnormals once and the
   reproduction returns absent. Preserve Vector's explicit IEEE overflow and
   signed-underflow policy when replacing the conversion.

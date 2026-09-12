@@ -9,6 +9,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_math` composes the existing factorial/binomial heads with exact gcd/lcm,
+  rational construction and decomposition, explicit rationalization, integer
+  roots, modular powers and a factor-pair answer stream. Its scalar conversion
+  shares Vector's signed-zero and final subnormal rounding policy. One catalog
+  provides native floating functions and their arities; exact construction
+  refuses a host policy that would approximate its result.
 - `lib_logging` sends structured topic/level events through host message hooks,
   with process-wide topic controls, pure diagnostic formatting and explicit
   MeTTa capture handlers. Each message carries its handler and calling module;

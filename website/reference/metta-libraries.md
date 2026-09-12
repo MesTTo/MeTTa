@@ -31,6 +31,7 @@ beside its definitions.
 | lib_json | 13 | 13 |
 | lib_logging | 7 | 7 |
 | lib_markup | 6 | 6 |
+| lib_math | 12 | 12 |
 | lib_measure | 17 | 0 |
 | lib_memo | 9 | 0 |
 | lib_mm2 | 5 | 0 |
@@ -3147,6 +3148,179 @@ The element as XML text, without the declaration the host writes by default and 
 1. Element
 
 Returns: Text
+
+## lib_math
+
+### `math-class`
+
+*lib_math.metta:15*
+
+```metta
+(: math-class (-> Number Symbol))
+```
+
+The numeric species: integer, rational, or a host float class of zero, subnormal, normal, infinite or nan. Both signs of zero have class zero.
+
+1. Value
+
+Returns: Class
+
+### `math-factor-pairs`
+
+*lib_math.metta:21*
+
+```metta
+(: math-factor-pairs (-> Number Expression))
+```
+
+Stream the positive (A B) factor pairs of a positive integer with A=<B, in ascending A order. A square's equal pair appears once. The host FD solver searches A only through the exact square root; large inputs can need search. Zero is refused because it has infinitely many factor pairs.
+
+1. Value
+
+Returns: Pair
+
+### `math-float`
+
+*lib_math.metta:27*
+
+```metta
+(: math-float (-> Number Number))
+```
+
+Convert a Number to binary64 through multiplication by the floating unit. Round once to nearest with ties to even, preserving negative zero, subnormal values, infinities and NaNs. Overflow saturates to signed infinity; underflow preserves the sign. The rounding policy is shared with vector-scale.
+
+1. Value
+
+Returns: Float
+
+### `math-gcd`
+
+*lib_math.metta:33*
+
+```metta
+(: math-gcd (-> Expression Number))
+```
+
+The nonnegative greatest common divisor of any number of integers. Empty input and a collection of zeros give zero. Negative signs do not affect it.
+
+1. Integers
+
+Returns: Divisor
+
+### `math-integer-root`
+
+*lib_math.metta:39*
+
+```metta
+(: math-integer-root (-> Number Number Expression))
+```
+
+Exact (Root Remainder) with Root^Degree+Remainder=Value. Degree is positive. For nonnegative Value, Root is the floor of the real root. A negative Value requires odd Degree and gives negative Root and Remainder, toward zero. The host degree parameter must fit its native signed long; Value is unbounded.
+
+1. Degree
+2. Value
+
+Returns: RootAndRemainder
+
+### `math-lcm`
+
+*lib_math.metta:45*
+
+```metta
+(: math-lcm (-> Expression Number))
+```
+
+The nonnegative least common multiple. Empty input gives the multiplicative identity one; any zero makes the result zero. Validate the complete input.
+
+1. Integers
+
+Returns: Multiple
+
+### `math-power-mod`
+
+*lib_math.metta:51*
+
+```metta
+(: math-power-mod (-> Number Number Number Number))
+```
+
+Compute Base^Exponent modulo a positive Modulus using native modular exponentiation, without constructing the full power. Exponent is nonnegative; any signed integer Base is reduced modulo Modulus before the host call.
+
+1. Base
+2. Exponent
+3. Modulus
+
+Returns: Result
+
+### `math-ratio`
+
+*lib_math.metta:57*
+
+```metta
+(: math-ratio (-> Number Expression))
+```
+
+The exact (Numerator Denominator) of a finite Number. For a float these represent its binary value, so 0.1 has a larger denominator than 1/10. Both floating zeros give (0 1). NaN and infinities raise.
+
+1. Value
+
+Returns: Parts
+
+### `math-rational`
+
+*lib_math.metta:63*
+
+```metta
+(: math-rational (-> Number Number Number))
+```
+
+Construct an exact reduced Number with a positive denominator. Whole results are integers. A zero denominator or host policy that approximates the exact result raises. Use math-ratio to recover its parts; rationals have no signed zero.
+
+1. Numerator
+2. Denominator
+
+Returns: Value
+
+### `math-rationalize`
+
+*lib_math.metta:69*
+
+```metta
+(: math-rationalize (-> Number Number))
+```
+
+Preserve exact numbers and approximate finite floats within the host's floating rounding error, often with a much smaller denominator. Thus 0.1 becomes exactly 1/10. math-ratio instead preserves the exact binary value. Both zeros become integer zero; NaN and infinities raise.
+
+1. Value
+
+Returns: Rational
+
+### `math-real`
+
+*lib_math.metta:75*
+
+```metta
+(: math-real (-> Symbol Expression Number))
+```
+
+Apply one function listed by math-real-functions to its numeric arguments. Each argument first passes through math-float; the native function then uses the host arithmetic error policy. Empty arguments select a constant. Unknown names, wrong arities, nonnumbers and native domain errors raise.
+
+1. Function
+2. Arguments
+
+Returns: Result
+
+### `math-real-functions`
+
+*lib_math.metta:81*
+
+```metta
+(: math-real-functions (-> Expression))
+```
+
+The native floating functions provided here as (math-function Name Arity) rows. Each row describes one accepted math-real call. Existing core trig, arithmetic and bit heads keep their names; factorial and binomial come from the imported combinatorics face.
+
+Returns: Functions
 
 ## lib_observe
 
