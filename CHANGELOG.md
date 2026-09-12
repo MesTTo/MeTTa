@@ -9,6 +9,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_functional` is a new library of the collection operations a program
+  writes over and over, each one pass over an expression: `zip`, `unzip`,
+  `drop`, `chunk`, `window`, `flatten-once`, `flatten-deep`, `partition`,
+  `group-by`, `sort-by`, `scan`, `unfold`, `pipe` and `apply-to`, plus the three
+  held control forms `while`, `repeat` and `unless`. Every head that takes a
+  function applies it through the evaluator, so a lambda, a defined name and a
+  partial application all work; `group-by` keeps its keys in first-appearance
+  order and `sort-by` is stable. The control forms hold their body and their
+  condition, which is what lets a loop decide whether to run the body at all.
+  Neither flatten takes the bare name `flatten`, which is the host's own
+  every-level one, and `sh check.sh lib-autoload` now refuses a published
+  library head that a module above `lib/` answers instead of the library.
+  `lib_patrick` keeps its four idioms and stays a separate import.
 - `lib_distribution` adds `ws-variance`, `ws-deviation`, `ws-central-moment`,
   `ws-mass-at-most`, `ws-quantile`, `ws-median`, `ws-support` and
   `ws-sum-independent`, each a fold over the normalized finite support rather

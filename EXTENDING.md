@@ -1723,6 +1723,32 @@ Without it SWI declines the second import, prints `No permission to import
 libb:'norm'/2 into user (already imported from liba)` on stderr, and continues,
 which leaves the newcomer silently bound to the incumbent's code.
 
+### A name the engine's own module holds is not yours either
+
+The collision above is between two libraries. The other one is between your
+library and the host: a registered head is reached by NAME, and the execution
+chain is `your space -> prelude -> metta_engine -> user -> system`. A library's
+clauses are consulted into `user`, the LAST link but one, so any name a tier
+above already holds answers before yours does. `engine/metta.pl` imports the
+whole of `library(lists)`, which puts `append/3`, `member/2`, `flatten/2`,
+`subtract/3`, `union/3`, `intersection/3`, `last/2`, `permutation/2` and the
+rest of that export list out of reach at those arities, and `prelude` holds
+MeTTa's own `union` and `intersection` the same way.
+
+Nothing warns, because nothing goes wrong at load time: your predicate is
+registered, the arity matches, and every call reaches the host's clauses
+instead. `lib_functional` hit exactly this with a one-level `flatten/2`, whose
+MeTTa calls answered `library(lists)`' every-level `flatten/2`
+(`docs/journal/2026-09-11-a-standard-library-for-a-language.md`, 2026-09-12).
+
+So give the head a name of its own. The shipped libraries' hyphenated,
+domain-qualified spellings (`vector-add`, `csv-parse`, `map-insert`,
+`flatten-once`) are what keeps them clear of that chain, and the MeTTa name is
+what has to be free: `flatten-once` is reached as `'flatten-once'/2`, which no
+host library defines. `sh check.sh lib-autoload` refuses a published head a tier
+above `lib/` answers, naming the module that answers it, so this is a red rather
+than a wrong answer.
+
 ### Ship files beside your Python package
 
 ```python

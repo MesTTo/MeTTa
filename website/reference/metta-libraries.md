@@ -22,6 +22,7 @@ beside its definitions.
 | lib_distribution | 16 | 8 |
 | lib_doc | 0 | 0 |
 | lib_file | 55 | 55 |
+| lib_functional | 17 | 17 |
 | lib_gitimport | 0 | 0 |
 | lib_he | 18 | 0 |
 | lib_import | 8 | 4 |
@@ -2137,6 +2138,261 @@ Create or truncate the file at Path in place and write UTF-8 text. An open handl
 2. Content
 
 Returns: Done
+
+## lib_functional
+
+### `while`
+
+*lib_functional.metta:49*
+
+```metta
+(: while (-> Atom Atom %Undefined%))
+```
+
+Evaluate the held body while the held condition answers True, answering each body result. The condition is asked again after every body, so a condition that never changes never stops.
+
+1. the held condition
+2. the held body
+
+Returns: each body result
+
+### `repeat`
+
+*lib_functional.metta:53*
+
+```metta
+(: repeat (-> Number Atom %Undefined%))
+```
+
+Evaluate the held body that many times, answering each result. A count of zero or less answers nothing.
+
+1. how many times
+2. the held body
+
+Returns: each body result
+
+### `unless`
+
+*lib_functional.metta:57*
+
+```metta
+(: unless (-> Atom Atom %Undefined%))
+```
+
+Evaluate the held body when the held condition answers False, and answer nothing when it answers True: if with one arm, read the other way round.
+
+1. the held condition
+2. the held body
+
+Returns: the body's answers, or none
+
+### `apply-to`
+
+*lib_functional.metta:69*
+
+```metta
+(: apply-to (-> %Undefined% Expression %Undefined%))
+```
+
+The function applied to the arguments an expression holds, so a collection of arguments becomes a call: (apply-to + (1 2)) is 3. A function of one argument takes a one-element collection.
+
+1. Function
+2. Arguments
+
+Returns: Result
+
+### `chunk`
+
+*lib_functional.metta:75*
+
+```metta
+(: chunk (-> Expression Number Expression))
+```
+
+The collection cut into pieces of that size, in order, with a shorter last piece when the size does not divide the length. A size of zero or less raises, because it would never finish; an empty collection has no chunks.
+
+1. Items
+2. Size
+
+Returns: Chunks
+
+### `drop`
+
+*lib_functional.metta:81*
+
+```metta
+(: drop (-> Expression Number Expression))
+```
+
+The collection without its first Count elements, and empty when there are fewer than that. Dropping a negative count raises; the PREFIX is takeK, which lib_combinatorics already publishes.
+
+1. Items
+2. Count
+
+Returns: Rest
+
+### `flatten-deep`
+
+*lib_functional.metta:87*
+
+```metta
+(: flatten-deep (-> Expression Expression))
+```
+
+Every level of nesting removed, so the answer holds only the leaves, in order. An empty collection nested anywhere contributes nothing; flatten-once removes exactly one.
+
+1. Items
+
+Returns: Flat
+
+### `flatten-once`
+
+*lib_functional.metta:93*
+
+```metta
+(: flatten-once (-> Expression Expression))
+```
+
+One level of nesting removed: the elements of every element that is itself a collection, in order, with anything else kept as it is. flatten-deep removes every level, and the bare name flatten is the host's own every-level one, which is why neither of these is spelled that way.
+
+1. Items
+
+Returns: Flat
+
+### `group-by`
+
+*lib_functional.metta:99*
+
+```metta
+(: group-by (-> %Undefined% Expression Expression))
+```
+
+The elements gathered by what the key function answers for each, as ((Key Members) ...). The keys come in first-appearance order and the members in the collection's own order, so grouping is stable and needs no sort.
+
+1. Key
+2. Items
+
+Returns: Groups
+
+### `partition`
+
+*lib_functional.metta:105*
+
+```metta
+(: partition (-> %Undefined% Expression Expression))
+```
+
+The elements the test answers True for and the rest, as (Yes No), each in the collection's order. A test that answers anything but True puts its element in the second side, so a partition never loses an element.
+
+1. Test
+2. Items
+
+Returns: Sides
+
+### `pipe`
+
+*lib_functional.metta:111*
+
+```metta
+(: pipe (-> Atom %Undefined% %Undefined%))
+```
+
+The value passed through each function in turn, left to right: (pipe (f g) x) is g applied to f applied to x. compose in lib_patrick composes the other way, right to left, which is the mathematical order; this is the reading order. The collection of functions is HELD, because an expression of function names would otherwise be evaluated as a call to the first of them.
+
+1. Functions
+2. Value
+
+Returns: Result
+
+### `scan`
+
+*lib_functional.metta:117*
+
+```metta
+(: scan (-> %Undefined% %Undefined% Expression Expression))
+```
+
+The running results of folding the function over the collection, starting with Start and ending with the whole fold: a prefix sum is scan with +. The answer is one longer than the collection, because the start is its first element.
+
+1. Function
+2. Start
+3. Items
+
+Returns: Running
+
+### `sort-by`
+
+*lib_functional.metta:123*
+
+```metta
+(: sort-by (-> %Undefined% Expression Expression))
+```
+
+The elements in the order of what the key function answers for each, compared in the standard order of terms. The sort is STABLE and keeps duplicates, so elements with equal keys stay in their original order.
+
+1. Key
+2. Items
+
+Returns: Sorted
+
+### `unfold`
+
+*lib_functional.metta:129*
+
+```metta
+(: unfold (-> %Undefined% %Undefined% Expression))
+```
+
+The collection a seed grows into: the step function is applied to the seed and answers (Value NextSeed) to continue or nothing to stop, so unfold is the opposite of a fold. A step that never stops never answers, which is the caller's own contract.
+
+1. Step
+2. Seed
+
+Returns: Items
+
+### `unzip`
+
+*lib_functional.metta:135*
+
+```metta
+(: unzip (-> Expression Expression))
+```
+
+The two collections a zip was made from, as (Lefts Rights). Every element must be a two-element expression; anything else raises.
+
+1. Pairs
+
+Returns: Sides
+
+### `window`
+
+*lib_functional.metta:141*
+
+```metta
+(: window (-> Expression Number Expression))
+```
+
+Every run of that many consecutive elements, overlapping by all but one: the sliding window a moving average or a bigram is written over. A collection shorter than the window has none. A size of zero or less raises.
+
+1. Items
+2. Size
+
+Returns: Windows
+
+### `zip`
+
+*lib_functional.metta:147*
+
+```metta
+(: zip (-> Expression Expression Expression))
+```
+
+The pairs of corresponding elements, truncating at the shorter collection, so zipping a long one with a short one answers the short one's length. unzip inverts it.
+
+1. Left
+2. Right
+
+Returns: Pairs
 
 ## lib_import
 

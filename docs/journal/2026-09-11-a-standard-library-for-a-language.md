@@ -2381,3 +2381,101 @@ later value, the support against the sorted oracle, the sum of 0 to 3 independen
 draws scaling both moments by n, and the four refusals. The example has no twin,
 as it did not before: nine of its nineteen neighbours in that section have none.
 Logs: ai-tmp/ai-lib3-dist-{example,python2}.log.
+
+## 2026-09-12: functional
+
+Decided: fourteen collection operations in Prolog and three control forms in
+MeTTa. The split is what each one needs: a zip, a chunk, a window, a scan is one
+pass over a list and the host does that in its own arithmetic, while a loop has
+to decide whether to run its body at all, which needs a HELD parameter and the
+evaluator. Each head that takes a function applies it through
+`eval_metta_in_module/3`, the way `lib_thread:par_map/3` already applies one, so
+a lambda, a defined name and a partial application all work and the library never
+inspects what it was handed. `pipe`'s first parameter declares `'Atom'` in its
+PlDoc mode, because an expression of function names is otherwise evaluated as a
+call to the first of them.
+
+Rejected: `while` and `repeat` as translator rules, the way `for` is one. A rule
+rewrites the written form, so a RECURSIVE rule rewrites itself, and the two of
+them exhausted the 8GB stack at translation time. The held parameter already
+stops the body being evaluated too early, so the rule buys nothing and they are
+ordinary equations whose body runs through `eval`.
+
+Rejected: a `take`, because `takeK` is lib_combinatorics' and the library adds no
+second spelling of a prefix; `drop` and the two chunking forms are what was
+missing.
+
+Tried: publishing the one-level flatten as `flatten/2` -> `!(flatten ((a (b c))
+d))` answered `(a b c d)`, the EVERY-level answer, while
+`lib_functional:flatten([[a,[b,c]],d], F)` answered `[a,[b,c],d]` in Prolog. A
+registered head is reached by NAME through the module chain the calling space
+resolves in, which is `space -> prelude -> metta_engine -> user -> system`; a
+library's clauses are consulted into `user`, and `engine/metta.pl` imports the
+whole of `library(lists)` into `metta_engine`, whose own `flatten/2` is the deep
+one. The registration reported success, the arity matched, and every call reached
+the host's clauses. Nothing warns: `metta_reference_prolog_owner/3` finds the
+name in the chain and the import that would have collided is never attempted.
+Probes: ai-tmp/ai-lib3-flatten-probe{,2,3}.pl.
+
+Decided: the heads are `flatten-once` and `flatten-deep`, and neither takes the
+bare name. Measured first: of the 255 heads the shipped faces register, that one
+was the only collision, because the hyphenated, domain-qualified spelling every
+other library uses is already clear of the chain. The alternative repairs were
+both weighed and both rejected here. Binding the library's predicate into the
+tier below the engine module (`prelude:import/1`) is refused by SWI, which
+already holds `flatten/2` there from `library(lists)`
+(`permission_error(import_into(prelude), ...) already_from(lists)`); binding it
+into the execution module works, measured `(a (b c) d)` in `&self` and in a named
+space after `abolish/1` then `import/1`, but a program defining its own equation
+for that name then fails, because the engine's shadow-repair machinery only
+abolishes an import it holds a `'$metta_repaired_shadow_import'/4` receipt for.
+Doing it properly means teaching that receipt an explicit owner and carrying it
+through four passes, pooled module recycling and the unimport lifecycle, which is
+engine work with its own lane and not a libraries branch's to land. Revisit if a
+library genuinely needs a name `library(lists)` exports.
+
+Decided: the gate catches the class instead. `tests/prolog/library_autoload.pl`
+already loads every `lib/*/*.pl` to ask what they call; it now also asks what
+they PUBLISH, joining each face's registration forms (through the engine's own
+`metta_registration_names/2`) to its module's export list, and walking
+`default_module/2` from `prelude` with the two primitives the engine's shadow
+bookkeeping uses. A head a tier above answers is a finding naming that module.
+Reverting the rename makes it exit 1 with `lib_functional:flatten/2 answered by
+lists`; each half has its own self-test, the resolution one planting a published
+name a tier holds and the enumeration one requiring every library directory with
+registrations to contribute a head, which caught the first version of the join
+comparing a relative directory against an absolute one and reporting 0 heads
+clean.
+
+Rejected: `lib_patrick` importing this library so that either import gives both.
+Measured: it costs every program that imports lib_patrick 19,326 inferences,
+against 18,105 for the whole of 11-patrick's twin, for a library it may not use.
+The two are separate imports and lib_patrick's comment points at this one.
+
+Verified: `sh engine/test.sh suites/libraries/lib_functional.plt` passes 13 tests
+with 75 subcases. Each operation is checked against a second way of computing the
+same answer: zip against `nth1/3` and the smaller length, drop against
+`append/3`, the chunks against `append/2` and the ceiling of the division, the
+windows against the run at each offset, one-level flatten against `append/2`,
+every-level flatten against `library(lists)`' own `flatten/2` over 200 generated
+nestings, sort-by against `keysort/2` (stable, and documented to be), group-by
+against first-appearance order with nothing lost, scan against the sum of each
+prefix, unfold against the range it grows. The one-pass claim is measured rather
+than asserted: ten times the input costs less than thirty times the inferences
+for all six heads, where a quadratic pass would cost a hundred.
+
+Measured: the example proves 51 claims and its twin the same 51, 127,108 MeTTa
+against 134,567 Python inferences, minimum of three fresh processes, a first pin.
+The twin declares one stored-content divergence, the loop's `tick` helper: four
+Python statements compile to four nested one-binding `let*` forms where the
+example writes four nested `let` forms.
+
+Attributed: the four twins of the lib_patrick examples report the same findings
+at the branch cut as here (11-patrick 18,105 against a pinned 17,788; the other
+three BELOW their pins by more than the allowance), measured in a control
+worktree at c75181adc with `engine/*.so`, `extensions/cmetta/libcmetta.so`,
+`morklib.so` and `libmork_ffi.so` provisioned into it. Without those three
+extension artifacts the same control read 17,889 for 11-patrick, which is the
+isolated-checkout trap the 2026-09-05 benchmark thread already recorded: a
+missing seat artifact silently changes the boot. Logs:
+ai-tmp/ai-lib3-cut-patrick-{control,lane}.log, ai-tmp/ai-lib3-patrick-bisect.log.
