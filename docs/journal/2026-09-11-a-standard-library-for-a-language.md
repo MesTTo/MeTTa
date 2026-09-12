@@ -3817,3 +3817,294 @@ twins, with equal Socket contents and178534 inferences against its178533 pin,
 inside the gate's existing deterministic allowance of4. All13 repriced File
 consumers pass their price checks. The twins selftest passes. Log:
 ai-lib4-socket-twins-final.log.
+
+## 2026-09-13: compression and archive design
+
+Tried: native zopen rejects truncated gzip/zlib input, bad checksums and trailing
+junk; complete concatenated members produce concatenated bytes. Binary memory
+streams preserve all256 octets. Commands and fixtures:
+ai-lib4-compression-{read,memory}-probe.pl and their logs.
+
+Tried: libarchive accepts gzip with a corrupt trailer, including gzip inside
+bzip2 or xz. Its consume_trailer still omits CRC and size verification at
+libarchive commit c719b9b1f56621d92063a85361cc8d114f5575a9. Wrapping a live
+zopen stream in archive then loses the original read error and reports
+"foreign predicate archive:archive_close/1 did not clear exception". Logs:
+ai-lib4-compression-{read-default,layer-probe}.log.
+
+Rejected: relying on libarchive's gzip filter or passing a failing zopen stream
+through its callbacks. Revisit when both tracked reproductions answer absent.
+Decided: detect gzip anywhere in the native filter chain, decode that chain
+through owned intermediate files, and run zopen for every gzip layer. Other
+layers use the native raw reader with gzip excluded from its declared filter
+catalog. Close each decoder before another archive reader opens. Delete each
+consumed intermediate; only adjacent layer files coexist. The final file is
+seekable, preserving archive formats that require seeking. Gzip-free archives
+use the native reader directly. The passing file-layer probe covers gzip,
+bzip2/gzip, xz/gzip and an additional outer gzip, including bad inner trailers:
+ai-lib4-compression-layer-files-probe.pl and its log.
+
+Decided: eight heads cover the format roster, parametrized byte/file compression
+and decompression, archive metadata, ordinal entry reads and extraction. Byte
+forms own memory/decoder streams; file replacements reuse File's staged writer.
+Expose metta_staged_publish/2 privately with its callback qualification. A native
+fold over ordinal entries shares traversal and stream ownership across all three
+archive operations. Duplicate names remain distinct in metadata and ordinal
+reads. Inputs are stable archive files during a call; no reader promises a
+snapshot against concurrent file modification.
+
+Decided: extraction publishes regular files and directories into a missing or
+empty destination directory. It refuses links, unknown types and special files;
+the native metadata remains available for inspection. Native hardlinks report
+filetype(0) and no target, so treating them as empty files would lose data.
+No ownership, modes or times are restored. Reject file duplicates and file/tree
+collisions; repeated directories and ./ root directory headers remain valid.
+
+Decided: extraction accepts portable relative names. Reject parent segments,
+absolute paths, backslashes, colon/ADS, control characters, trailing dots/spaces
+and reserved Windows device components, including their extensions and
+superscript digits. Normalize only empty and dot components. A new staging tree
+contains no preexisting links. The path rules follow Microsoft's FileIO naming
+specification at63e70903d18b0637e62ffab6656c4a388ef0f2ce and CPython's data
+filter checks at v3.13.7, Lib/tarfile.py:_get_filtered_attrs. The extraction
+policy preserves data only and refuses unsupported filesystem entities explicitly.
+
+## 2026-09-13: compression verification
+
+Corrected: the first native archive probe explicitly enabled raw. Default
+formats(all) excludes raw, as the provider's enable_type bit check and
+ai-lib4-compression-read-default.log establish. No raw-format repair is needed.
+
+Tried: the input-error reproduction first used 32768 identical bytes. Archive
+bidding consumed that short compressed input before the intended cleanup path,
+producing unexpected_archive_input_result(error(archive_error(-30,fatal),_)).
+The cyclic octet fixture reaches the entry read and cleanup. Both independent
+host reproductions now print present; logs are
+ai-lib4-compression-{input,trailer}-reproduction-cycle.log.
+
+Measured: the 51-claim example and Python twin pass with equal expected values.
+Three-round minima are 209206 and 189939 inferences, respectively. File's private
+export/meta declaration changes fourteen existing consumers, all remeasured by
+ai-lib4-compression-price.sh. Logs: ai-lib4-compression-{measure,
+repin-file-consumers,example,twin}.log.
+
+Tried: the first combined native command loaded suites from the repository root
+and put the new module imports before File's consult initializers. Module
+redefinition and consequent missing predicates made that command invalid. The
+prescribed tests/prolog working directory and File-first loading pass. Two new
+assertions also expected error/2 where File publishes publication_refused/2.
+Python refusals return EngineError for these native errors; the initial suite
+incorrectly required the narrower MettaOperationError. Corrected assertions
+preserve the expected error reason rather than changing the implementation.
+
+Verified: 65 native tests and 48 subcases pass for File and Compression in
+ai-lib4-compression-suites-corrected.log. The 16 Compression cases cover all
+octets/levels, 256 generated round trips, every truncated member prefix,
+concatenation, publication, paths/kinds/collisions, seekable ZIP/7zip wrappers,
+visitor errors and cancellation after stream acquisition. The 43 Python cases
+pass in ai-lib4-compression-python-corrected.log, including Hypothesis byte
+interoperability, independent TAR/ZIP writers and twelve nested-filter cases.
+
+Observed: this SWI build reads TMP, not TMPDIR, for tmp_dir. Export TMP and TEMP
+alongside TMPDIR for subsequent direct runners, matching check.sh's environment.
+The native probe prints the requested project directory after that export;
+temporary names alone never justify changing File's system-temp policy.
+
+## 2026-09-13: archive names under a C locale
+
+Tried: LC_ALL=C PYTHONCOERCECLOCALE=0 PYTHONUTF8=1 with the two Unicode archive
+tests fails for both TAR and ZIP. The host raises archive_error(84, ...) because
+the pathname cannot be converted from UTF8 to the current locale. Receipt:
+ai-lib4-compression-python-c-locale.log. This newly tested environment invalidates
+the assumption that native archive name conversion is independent of locale.
+
+Source: packages-archive archive_next_header at
+13a3f4af8f8219e10faf4895ce9fb189bc6aaefd rejects libarchive's conversion warning
+before calling archive_entry_pathname_w. No reader character-set option is
+exposed by that provider. SWI's locale_create only reads numeric conventions;
+it does not establish a native character-decoding context.
+
+Tried: a public-FLI callback inside newlocale/uselocale reads both Unicode
+archives, preserves bytes, supports nesting and restores the C locale after
+success, failure and exception. ai-lib4-compression-locale-probe.log prints
+ANSI_X3.4-1968 before, UTF-8 inside and restored after. The adapter compiles with
+-Wall -Wextra -Werror. The successful mechanism follows mpv's archive wrapper,
+stream/stream_libarchive.c at14f2d48cbc7dda61adb4bd181e107a1f3f76e533.
+
+Rejected: changing the process-wide locale, or inheriting an arbitrary locale
+after a failed UTF8 selection. The former changes other threads; the latter
+retains the demonstrated defect. Revisit only when the native reader itself
+handles Unicode names under C, as the tracked reproduction must establish.
+
+Decided: wrap the one shared archive operation in a native, single-answer UTF8
+call. POSIX duplicates the calling thread's locale and changes only LC_CTYPE;
+Windows enables per-thread locale changes and restores its previous mode and
+LC_CTYPE. macOS names that character locale UTF-8; other POSIX builds require
+C.UTF-8, and Windows UCRT uses .UTF8. A missing locale is a named refusal.
+The callback closes all archives and streams before its C frame restores the
+locale. No Prolog registry or scoped key is introduced. Runtime evidence here
+is Linux; the other native branches require verification on their platforms.
+
+Sources: POSIX Issue8 uselocale and newlocale specify thread ownership and
+category inheritance; Microsoft's setlocale-wsetlocale and configthreadlocale
+references specify UCRT UTF8 and per-thread restoration. The existing shared
+native builder owns compilation, locking and atomic publication.
+
+Tried: declaring meta_predicate before loading the foreign definition leaves
+its mode metadata but loses module transparency. The archive suite then raises
+"Unknown procedure: lib_compression_native:archive_file_utf8/4". Register the
+callback with PL_FA_META and the "0" template, as SWI's foreign reference
+specifies, so the FLI declaration supplies both metadata and transparency.
+Receipts: ai-lib4-compression-{suites-locale-fixed,python-c-locale-fixed}.log.
+The loaded archive_version_string reports libarchive3.8.5.
+
+Verified: PL_FA_META plus PL_strip_module preserve the callback's defining
+module. File and Compression pass all65 tests and48 subcases in
+ai-lib4-compression-suites-locale-meta.log. All44 Python tests pass under C
+in ai-lib4-compression-python-c-locale-meta.log. The locale test reads UTF8
+inside nested callbacks while setlocale's process query remains unchanged,
+and checks restoration after success, failure and a propagated exception.
+The new host reproduction prints present in
+ai-lib4-compression-locale-reproduction.log. The final C source compiles with
+-Wall -Wextra -Werror in ai-lib4-compression-locale-build-final.log.
+
+## 2026-09-13: ZIP names and native ownership
+
+Tried: a valid unflagged ZIP name caf\x82 crashes archive_next_header in SWI's
+wide-string call. The native libarchive call returns ARCHIVE_OK but its wide
+pathname is NULL. Explicit ZIP hdrcharset=CP437 produces café and retains the
+UTF8 flag control. Sources: PKWARE APPNOTE6.3.10, D.1-D.2; libarchive3.8.5
+archive_read_support_format_zip.c atdd897a78c662a2c7a003e7ec158cea7909557bee.
+Receipts: ai-lib4-compression-{python-final,legacy-probe,charset-unicode-control}.log.
+
+Decided: keep a private copy of packages-archive's binding, with its own blob
+type and registration module. Refuse NULL before PL_unify_wchars. Allocate an
+empty archive owner before opening its parent reader; cleanup then includes
+partial acquisition, errors and failure. Parent file ownership remains in its
+enclosing Prolog scope. The binding's original stream protocol and parsers stay
+in use. The independent charset and crash reproductions both print present.
+File and Compression pass66 native tests and48 subcases, including failed
+acquisition, borrowed-stream usability and callback failure/exception. Receipts:
+ai-lib4-compression-{charset-reproduction,null-reproduction,suites-private}.log.
+
+Tried: the49-case Python run under C passes48 but reveals an incorrect oracle
+expectation. Python3.14 honors a valid Unicode extra field; after correcting the
+expectation, native output still differs. The same fixture through ctypes reads
+café/π🙂 with default options and café with hdrcharset=CP437. Libarchive computes
+the extra field's filename CRC after converting CP437 to UTF8, so it compares
+different bytes with the stored CRC and ignores a valid field. The current
+upstream source atc719b9b1f56621d92063a85361cc8d114f5575a9 has the same code.
+Receipts: ai-lib4-compression-{python-private,python-private-final,
+unicode-extra-probe}.log.
+
+Rejected: disabling CRC checks, because that also disables payload verification
+and admits stale Unicode extra fields. Rejected: a second pathname parser in the
+binding, because the public header position is not a reliable raw ZIP header
+location around skipped data and seeking. The position probe reports0,32,68,113
+for the seekable fixture and0,34,70,119 through bzip2. Revisit if the provider
+exposes original filename bytes, encoding flags and extra fields together.
+
+Decided: correct the CRC at its source in a private build of the pinned native
+provider. Save the original filename CRC before character conversion and use it
+for the extra-field check. Preserve the provider's parsers and payload checks.
+The shared atomic native builder will own the final object; a qualified build
+callback permits CMake to supply this multi-source compiler job under the same
+locking, cancellation and publication protocol. Source configuration/build and
+the corrected UTF8 extra-field fixture are being checked before that integration.
+
+## 2026-09-13: private archive provider verification
+
+Verified: the corrected provider preserves CP437 names, UTF8 flags and valid
+Unicode extra fields, while rejecting stale fields through the provider's CRC
+rule. All 53 Python compression cases pass under LC_ALL=C, including Hypothesis
+byte round trips and the filename cross-product. File and Compression pass
+66 native tests and 48 subcases. Receipts: ai-lib4-compression-python-source-provider.log
+and ai-lib4-compression-suites-source-provider.log.
+
+Verified: the native object exports only install_lib_compression and does not
+link the system libarchive. The source archive and wheel carry every provider
+input; a fresh wheel installation builds and executes the native libraries and
+the Unicode extra-field fixture. Command: CHECK_PY=/home/user/Dev/.venv-pypetta/bin/python
+sh extensions/python/test.sh tests/ch08_data/test_library_native_build.py
+-k test_native_sources_build_after_wheel_install. Result: one passing test.
+Receipts: ai-lib4-compression-{native-exports,native-links,wheel}.log.
+
+Tried: the 18 build tests passed their acquisition, concurrency, cancellation,
+warm-cache and dependency checks, but three final directory assertions assumed
+build.lock sorted before every object filename. archive_locale sorts first.
+Use exact set equality for the same two entries. The original run has 15 passes;
+the three corrected cases all pass in ai-lib4-compression-native-build-tests-fixed.log.
+
+Measured: the final 54-claim example costs 229505 inferences and its twin 204350,
+the minimum of three serial fresh processes after engine/lib QLF removal.
+This supersedes the earlier 51-claim price. Receipt:
+ai-lib4-compression-measure-source-provider.log. Native builder consumers are
+remeasured after the shared callback addition; source and recipe evidence pins
+advance with the same verified dependency state.
+
+Verified: all 22 priced consumers of File and the shared native builder were
+remeasured over three rounds. Their stored contents remain unchanged; the
+inference increase is 530..533, mostly 531, from loading the updated builder.
+Receipt: ai-lib4-compression-repin-native-consumers.log. The File/Socket consumer
+suite also passes 76 tests and 48 subcases after that dependency change in
+ai-lib4-compression-socket-consumer-suite.log.
+
+## 2026-09-13: native source isolation and CMake evidence
+
+Tried: the required library batch passed 17 lanes and failed Ruff plus
+lib-autoload. Ruff requires raw regex literals in two pytest match arguments.
+Lib-autoload reported all ten Socket native predicates missing. Removing QLF
+artifacts preserved that failure, and the loaded foreign-library list contained
+Compression but no Socket object. A four-file SWI-only probe loaded only the
+first native provider when both imports used compound support/native. Quoted
+pathname atoms loaded both providers. Receipts: ai-lib4-compression-{lanes,
+autoload-source-only,autoload-owners-cwd,compound-load-host,atom-load-host}.log.
+
+Decided: use quoted relative pathname atoms in both libraries. SWI's
+boot/init.pl:$register_resolved_source_path/2 caches every compound specification
+by specification and dialect, omitting the importing directory. Record the
+host defect as swi-relative-compound-source, with independent atom controls.
+Reprice Compression and Socket after their import changes.
+
+Tried: pin_provenance --check found five files outside its evidence globs:
+the CMake recipe, provider configuration header and three nested host helpers.
+Extend the existing source classes and recognize CMake's actual comments,
+consuming quoted, bracket and escaped unquoted arguments first. The token
+productions follow CMake 3.18's cmListFileLexer.in.l; bracket length remains
+unbounded. The selftest passes 71 placeholders in 26 files, 69 C-family and
+110 CMake lexical cases, plus eight refusals before any file is written.
+Ruff, evidence, evidence-selftest and provenance-pin-selftest pass in
+ai-lib4-compression-cmake-gates.log.
+
+Verified: git diff --check reports only inherited space-before-tab indentation
+in archive.h and archive_read_support_format_zip.c. Preserve those upstream
+source lines and the header checksum. Receipt: ai-lib4-compression-diff-check.log.
+
+Verified: the isolated relative-source reproduction prints atom=[a,b],
+compound=[a], then present. The repaired lib-autoload lane passes over 46
+Prolog files and 457 published heads. File, Compression and Socket loaded
+together pass 93 native tests and 48 subcases; all 53 Compression Python
+cases pass under C. Receipts: ai-lib4-compression-{relative-source-reproduction,
+autoload-isolation,suites-isolation,python-isolation}.log.
+
+Measured: after the import correction, Compression's 54-claim example/twin
+costs 229506/204351 inferences and Socket costs 190074/179079, minimums of
+three serial fresh processes after QLF removal. The Compression header now
+carries this final point; Socket's existing point is unchanged. Receipt:
+ai-lib4-compression-measure-isolation.log.
+
+## 2026-09-13: Compression row complete
+
+Verified: all19 required library lanes pass in ai-lib4-compression-lanes-final.log.
+The host lane confirms34 ledger entries and42 sites, with every reproduction
+answering present. The first full twin run identified two missed transitive
+String consumers, Dict and Reflect, each531 inferences above its point.
+Three-round measurements repin them to167440 and194191. This brings the
+native/File consumer set to24. Receipt:
+ai-lib4-compression-repin-indirect-consumers.log.
+
+Verified: the repeated full twin lane retains263 older findings over307 twins;
+51 of344 examples pass all twin checks and3437 claims are proved. Compression
+has54 matching claims, equal stored contents and the exact204351 point against
+229506. All24 affected consumers pass. Ruff, evidence and twins-selftest pass
+in the same run. Receipt: ai-lib4-compression-twins-repinned.log.

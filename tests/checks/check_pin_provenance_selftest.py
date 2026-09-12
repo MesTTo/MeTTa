@@ -39,6 +39,9 @@ Guarantees:
   - C and C++ literal, macro and header data survive pinning, and malformed
     lexical forms refuse before any file changes
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8]
+  - CMake argument data survives comment pinning, malformed delimiters refuse
+    before writing, and nested host fixtures and provider headers are reached
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
 Fails when: run against a tree it did not write. It asserts on a fixture it
   generates and nothing else.
 Open Obligations:
@@ -66,6 +69,25 @@ WHEN = "2026-08-31"
 
 # (path, text, lines that must be rewritten, lines that must be declined)
 PLANTS = (
+    *(
+        (name,
+         [f"# A build pin [{TAG} {WHEN}: a case; {WORD}].",
+          f'set(QUOTED "# {WORD}")',
+          f"#[=[ A bracket pin [{TAG} {WHEN}: a case; {WORD}]. ]=]",
+          f"set(BRACKET [==[# {WORD}]==])",
+          rf"set(BARE \#{WORD})"],
+         [1, 3], [2, 4, 5])
+        for name in ("lib/lib_plant/support/CMakeLists.txt", "extensions/plant/build.cmake")
+    ),
+    *(
+        (name, [f"{prefix} A fixture pin [{TAG} {WHEN}: a case; {WORD}].{suffix}"], [1], [])
+        for name, prefix, suffix in (
+            ("lib/lib_plant/vendor/config.h", "/*", " */"),
+            ("tests/checks/host_workarounds/support/probe.pl", "%", ""),
+            ("tests/checks/host_workarounds/support/probe.py", "#", ""),
+            ("tests/checks/host_workarounds/support/probe.sh", "#", ""),
+        )
+    ),
     (
         "examples/ch-plant/_fixtures/nested/library.metta",
         [
@@ -421,7 +443,6 @@ def complaints() -> list[str]:
         # Scan every candidate before opening the first output for writing.
         # A valid earlier file must survive a malformed later file unchanged.
         early = root / "engine/plant.pl"
-        malformed = root / "lib/lib_plant/support/plant.cpp"
         failures = (
             (f"/* {WORD}", "unterminated C/C++ block comment"),
             (f'const char *p = "{WORD}', "unterminated C/C++ string or character literal"),
@@ -429,16 +450,27 @@ def complaints() -> list[str]:
             (f'R"bad delimiter({WORD})bad delimiter"', "invalid C++ raw-string delimiter"),
             (f'#include <{WORD}', "unterminated C/C++ header name"),
         )
-        for content, reason in failures:
+        refusal_cases = [("lib/lib_plant/support/plant.cpp", content, reason)
+                         for content, reason in failures]
+        refusal_cases.extend(("lib/lib_plant/support/CMakeLists.txt", content, reason)
+                             for content, reason in (
+                                 (f'set(X "{WORD}', "unterminated CMake quoted argument"),
+                                 (f"#[=[ {WORD}", "unterminated CMake bracket argument or comment"),
+                                 (f"set(X [==[{WORD}", "unterminated CMake bracket argument or comment"),
+                             ))
+        for name, content, reason in refusal_cases:
+            malformed = root / name
+            original = malformed.read_bytes()
             early.write_text(f"% A header pin {WORD}.\n")
             malformed.write_text(content + "\n")
             before = {path: path.read_bytes() for path in root.rglob("*")
                       if path.is_file() and ".git" not in path.parts}
             refused = run(root, "--commit", live)
             if refused.returncode == 0 or reason not in refused.stderr:
-                found.append(f"malformed C++ did not refuse with {reason!r}: {refused.stderr!r}")
+                found.append(f"{name} did not refuse with {reason!r}: {refused.stderr!r}")
             if any(path.read_bytes() != data for path, data in before.items()):
-                found.append(f"malformed C++ rewrote files before refusing {reason!r}")
+                found.append(f"{name} rewrote files before refusing {reason!r}")
+            malformed.write_bytes(original)
     return found
 
 
@@ -479,18 +511,45 @@ def c_lexical_complaints() -> tuple[list[str], int]:
     return found, len(cases) + 9
 
 
+def cmake_lexical_complaints() -> tuple[list[str], int]:
+    """Vary independent CMake argument forms and bracket lengths around pins."""
+    cases = [
+        (f'set(X "# {WORD}") # {WORD}', [False, True]),
+        (rf'set(X \#{WORD}) # {WORD}', [False, True]),
+        (f'set(X "a\\\n# {WORD}") # {WORD}', [False, True]),
+        (f'set(X -Da="a {WORD}") # {WORD}', [False, True]),
+        (f'set(X abc[[) # {WORD}', [True]),
+        (f'set(X "`{WORD}`") # {WORD}', [False, True]),
+        (f'# A `{WORD}` mention and a pin {WORD}', [False, True]),
+    ]
+    for length in range(8):
+        delimiter = "=" * length
+        for payload in (f"# {WORD}", f'"# {WORD}"', f"\\\n{WORD}"):
+            cases.append((f'set(X [{delimiter}[{payload}]{delimiter}]) # {WORD}', [False, True]))
+            cases.append((f'#[{delimiter}[{payload}]{delimiter}]', [True]))
+    found = []
+    for name in ("CMakeLists.txt", "plant.cmake"):
+        for index, (source, expected) in enumerate(cases):
+            actual = [reason is None for _at, _line, reason in sites(Path(name), source)]
+            if actual != expected:
+                found.append(f"{name} lexical case {index}: expected {expected}, got {actual}: {source!r}")
+    return found, len(cases) * 2
+
+
 def main() -> int:
     """Report the defects and exit nonzero if there are any."""
     found = complaints()
     lexical, cases = c_lexical_complaints()
     found.extend(lexical)
+    cmake, cmake_cases = cmake_lexical_complaints()
+    found.extend(cmake)
     for one in found:
         print(one)
     planted = sum(len(rewritten) + len(declined) for _n, _l, rewritten, declined in PLANTS)
     print(
         f"pin-provenance selftest: {len(found)} defect(s), over {planted} planted placeholders "
         f"in {len(PLANTS)} files, one of them outside the gate's globs; "
-        f"{cases} C-family lexical cases and five pre-write refusals"
+        f"{cases} C-family and {cmake_cases} CMake lexical cases; eight pre-write refusals"
     )
     return 1 if found else 0
 

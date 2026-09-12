@@ -11,6 +11,7 @@ beside its definitions.
 |---|---|---|
 | lib_builtin_types | 193 | 0 |
 | lib_combinatorics | 16 | 10 |
+| lib_compression | 8 | 8 |
 | lib_conformance | 2 | 0 |
 | lib_constraints | 5 | 0 |
 | lib_crypto | 12 | 12 |
@@ -217,6 +218,128 @@ The observation's own mass and every candidate's posterior probability of having
 Returns: Posterior
 
 Undocumented: `choose2`, `choose2l`, `chooseK`, `chooseKl`, `range`, `takeK`
+
+## lib_compression
+
+### `archive-entries!`
+
+*lib_compression.metta:11*
+
+```metta
+(: archive-entries! (-> %Undefined% Expression))
+```
+
+Inspect every entry as (archive-entry Index NameString PropertyPairs), with zero-based ordinals and archive order, retaining duplicate names. Properties are native filetype, mtime, size, optional link_target, format and permissions. Textual link targets and format descriptions are Strings; a native unknown filetype remains its integer code. Inspection creates no extracted paths. Native name conversion uses a call-local UTF8 character locale, preserving the process locale. Unflagged ZIP names use CP437; UTF8 flags and Unicode extra fields retain native precedence. Unconvertible pathnames raise before returning. All entry data is consumed to surface native read errors. Gzip layers are checked through zlib, including gzip inside other compression filters.
+
+1. Path
+
+Returns: Entries
+
+### `archive-extract!`
+
+*lib_compression.metta:17*
+
+```metta
+(: archive-extract! (-> %Undefined% %Undefined% Bool))
+```
+
+Publish regular files and directories into a missing or empty destination directory. Its parent must exist. Build a separate tree first; errors leave the destination unchanged. Links, unknown kinds, devices and pipes raise. Modes, ownership and times are not restored. File duplicates and file/tree collisions raise; repeated directories and ./ directory entries are valid. Names must be portable relative paths: no .. components, absolute paths, backslashes, controls, Windows device names, reserved punctuation or trailing dots/spaces. Empty and . components are normalized. Inspection retains names that extraction refuses. Input files must remain unchanged during the call. Archives containing gzip use temporary seekable files for validation; only adjacent decoded layers coexist. Other archives use the linked reader directly.
+
+1. Path
+2. Destination
+
+Returns: Done
+
+### `archive-read!`
+
+*lib_compression.metta:23*
+
+```metta
+(: archive-read! (-> %Undefined% Number Expression))
+```
+
+Read one regular entry by its zero-based ordinal. Ordinals distinguish equal names. An absent ordinal or a nonregular entry raises. Other entries are consumed as well, so a later archive read error is not hidden by selection.
+
+1. Path
+2. Index
+
+Returns: Bytes
+
+### `compress-bytes`
+
+*lib_compression.metta:29*
+
+```metta
+(: compress-bytes (-> Symbol Number Expression Expression))
+```
+
+Compress integers 0..255 using gzip or zlib and level 0..9. Level 0 stores data; higher levels trade encoding work for size. Empty input produces a complete empty member. The result is bytes, independent of locale and text encoding.
+
+1. Format
+2. Level
+3. Bytes
+
+Returns: Compressed
+
+### `compress-file!`
+
+*lib_compression.metta:35*
+
+```metta
+(: compress-file! (-> Symbol Number %Undefined% %Undefined% Bool))
+```
+
+Stream a file into gzip or zlib and replace Destination after all streams close successfully. Its parent must exist. Source and Destination may be the same path. A failure before publication preserves the old destination.
+
+1. Format
+2. Level
+3. Source
+4. Destination
+
+Returns: Done
+
+### `compression-formats`
+
+*lib_compression.metta:41*
+
+```metta
+(: compression-formats (-> Expression))
+```
+
+Return the byte/file envelope names gzip and zlib. These use native zlib; archive operations separately detect formats supported by linked libarchive.
+
+Returns: Formats
+
+### `decompress-bytes`
+
+*lib_compression.metta:47*
+
+```metta
+(: decompress-bytes (-> Symbol Expression Expression))
+```
+
+Decode complete gzip or zlib members, concatenating their bytes. Empty input, a different envelope, truncation, checksum errors and trailing junk raise. A compressed empty member returns (). Results require memory proportional to the input and decoded bytes; use the file operation for streaming output.
+
+1. Format
+2. Compressed
+
+Returns: Bytes
+
+### `decompress-file!`
+
+*lib_compression.metta:53*
+
+```metta
+(: decompress-file! (-> Symbol %Undefined% %Undefined% Bool))
+```
+
+Stream complete gzip/zlib members into one file, replacing Destination after checksum validation and close. The input may name Destination. Its parent must exist; malformed input preserves an existing destination. Memory use is bounded by decoder/stream buffers instead of the decoded file's length.
+
+1. Format
+2. Source
+3. Destination
+
+Returns: Done
 
 ## lib_crypto
 

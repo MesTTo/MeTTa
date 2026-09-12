@@ -39,6 +39,97 @@ An entry lands with its first site and its reproduction in the same commit. A
 site the ledger does not know is refused, and so is an entry nothing uses. The
 journal keeps the history; this file holds only what is live.
 
+## swi-relative-compound-source
+Host: SWI-Prolog 10.1.13; boot/init.pl:$register_resolved_source_path/2 at
+  https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/init.pl#L2571-L2580.
+Defect: every compound file specification enters the global resolved-source
+  cache keyed by specification and dialect, including relative /(support,native).
+  A later importing directory therefore reuses the first directory's file.
+Reproduction: tests/checks/host_workarounds/swi-relative-compound-source.pl,
+  whose quoted atom control loads both providers while the compound path loads
+  only the first, using two independent directories for each form.
+Workaround: use quoted pathname atoms for relative native-provider imports.
+Lifted when: both forms load both directory-local providers and the reproduction
+  answers absent.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md,
+  native source isolation and CMake evidence.
+
+## libarchive-zip-unicode-crc
+
+Host: libarchive 3.8.5, archive_read_support_format_zip.c:process_extra at
+  dd897a78c662a2c7a003e7ec158cea7909557bee.
+Defect: a Unicode path extra field's CRC is compared with the already-converted
+  pathname. CP437-to-UTF8 conversion changes those bytes and invalidates a valid
+  field, so the reader silently returns the legacy name instead.
+Reproduction: tests/checks/host_workarounds/libarchive-zip-unicode-crc.sh
+Workaround: a private provider build saves the original filename CRC before
+  conversion and uses it for the extra-field check. Payload checks remain enabled.
+Lifted when: explicit CP437 conversion retains the valid Unicode extra-field name
+  after the default reader and ordinary CP437/UTF8 controls pass.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## libarchive-zip-default-charset
+
+Host: libarchive 3.8.5, archive_read_support_format_zip.c:zip_read_local_file_header
+  at dd897a78c662a2c7a003e7ec158cea7909557bee.
+Defect: unflagged CP437 names use the ambient locale by default. Under UTF8,
+  the valid ZIP name caf\x82 has no wide representation despite ARCHIVE_OK.
+Reproduction: tests/checks/host_workarounds/libarchive-zip-default-charset.sh
+Workaround: set the ZIP hdrcharset option to CP437. The native UTF8 flag and
+  Unicode extra-field handling still take precedence.
+Lifted when: the default reader returns café after explicit CP437 and UTF8 controls pass.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-archive-null-pathname
+
+Host: SWI-Prolog 10.1.13, packages-archive archive_next_header at
+  13a3f4af8f8219e10faf4895ce9fb189bc6aaefd.
+Defect: archive_entry_pathname_w may return NULL after ARCHIVE_OK. Passing it
+  to PL_unify_wchars with length -1 calls wcslen(NULL) and crashes the process.
+Reproduction: tests/checks/host_workarounds/swi-archive-null-pathname.sh
+Workaround: a private copy of the binding raises representation_error(archive_pathname)
+  before attempting the wide-string conversion.
+Lifted when: the native reader decodes or explicitly refuses the legacy name
+  after its Unicode control, instead of terminating with SIGSEGV.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## libarchive-utf8-locale
+
+Host: SWI-Prolog 10.1.13, packages-archive archive_next_header at
+  13a3f4af8f8219e10faf4895ce9fb189bc6aaefd, using libarchive 3.8.5.
+Defect: reading a Unicode pathname converts through the current C character
+  locale and raises archive_error(84, ...) under C, even for explicitly UTF8 ZIP/TAR.
+Reproduction: tests/checks/host_workarounds/libarchive-utf8-locale.pl
+Workaround: enter a thread-local UTF8 character locale for the complete archive
+  operation and restore the caller's locale after its streams and archives close.
+Lifted when: the same Unicode name reads under C after its UTF8 control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## libarchive-gzip-trailer
+
+Host: SWI-Prolog 10.1.13 library(archive); libarchive consume_trailer at
+  c719b9b1f56621d92063a85361cc8d114f5575a9.
+Defect: the gzip filter consumes CRC and length fields without checking them;
+  its optional header CRC is also unchecked.
+Reproduction: tests/checks/host_workarounds/libarchive-gzip-trailer.pl
+Workaround: decode each gzip layer through zopen and read it completely before
+  the archive operation can publish results. Other filters retain native decoding.
+Lifted when: the valid member reads correctly and the corrupt CRC raises.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-archive-input-exception
+
+Host: SWI-Prolog 10.1.13, packages-archive libarchive_close_cb at
+  13a3f4af8f8219e10faf4895ce9fb189bc6aaefd.
+Defect: closing an archive whose parent decoder raised ignores the failure of
+  PL_release_stream, returning with an exception pending and losing its original
+  read error. The runtime prints a foreign-predicate protocol violation.
+Reproduction: tests/checks/host_workarounds/swi-archive-input-exception.pl
+Workaround: close and validate a decoded intermediate file before opening the
+  next archive reader; remove each consumed intermediate during the traversal.
+Lifted when: corrupt input raises and archive_close leaves no exception pending.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
 ## swi-tcp-ipv6-peer
 
 Host: SWI-Prolog10.1.13, packages-clib socket.c:pl_accept at

@@ -6,9 +6,11 @@ history, including all four cited by the engine pool's Guarantees block. A
 claim with nothing behind it is indistinguishable from the many that are real,
 which is what makes it corrosive rather than untidy.
 
-Guarantees: nested distribution modules, Prolog/C/C++ library support and native face fixtures participate in
+Guarantees: nested distribution modules, native library support, CMake recipes,
+vendor configuration headers and nested host reproductions participate in
 the same evidence and provenance checks as their callers
-[tested: tests/checks/check_evidence_selftest.py; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8].
+[tested: tests/checks/check_evidence_selftest.py,
+tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE].
 
 Reads files and the engine-free door grammar. Structured row assumptions,
 guarantees, local refusals and evidence are checked through doorgen's contract
@@ -240,8 +242,9 @@ GUARANTEE_SOURCES = (
     # A host-workaround reproduction is the same class, tracked so its
     # `present`/`absent` answer can be re-run; its header states what was
     # measured [source: docs/host-workarounds.md; commit=2bd6b250a22d9898ced449595c168a8dc3a78768].
-    "tests/checks/host_workarounds/*.pl",
-    "tests/checks/host_workarounds/*.sh",
+    "tests/checks/host_workarounds/**/*.pl",
+    "tests/checks/host_workarounds/**/*.sh",
+    "tests/checks/host_workarounds/**/*.py",
     # And the Python half of the same class, which the seat grew on 2026-09-07.
     # A probe is where a measurement's reproduction is TRACKED rather than left
     # in a checkout, which is what the scratch rule below asks authors to do, so
@@ -322,6 +325,10 @@ GUARANTEE_SOURCES = (
 #: `tests/prolog/vendor/*.pl` 3; `tests/fixtures/*.pl` 2; `engine/*.metta` 1;
 #: `extensions/cmetta/kit/*.c` 1; `tests/conformance/*.py` 1.
 CLAIM_SOURCES = (
+    # Native build recipes and their handwritten provider configuration.
+    "**/CMakeLists.txt",
+    "**/*.cmake",
+    "lib/*/vendor/*.h",
     # Root build hooks state the resources their distributions contain.
     "*.py",
     # THE GATE'S OWN RUNNERS. Every shell script the repository ships, which

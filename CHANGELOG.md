@@ -9,6 +9,23 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_compression` encodes complete gzip/zlib byte members and streams file
+  replacement through File's shared staged publisher. Archive inspection keeps
+  entry ordinals and duplicate names; extraction publishes validated regular
+  files and directories, refusing unsafe paths, links, special kinds and path
+  collisions. Every gzip layer checks integrity, including gzip inside other
+  filters. Native UTF8 name decoding preserves the process locale and restores
+  the caller's thread locale. Unflagged ZIP names use CP437; UTF8 flags and
+  Unicode extra fields take precedence. The private archive binding refuses
+  unconvertible names before string conversion. A pinned private provider fixes
+  Unicode extra-field CRC checks after character conversion. Six host reproductions
+  cover gzip integrity, stream-error cleanup, locale conversion, default ZIP encoding,
+  a null-pathname crash and the extra-field CRC error. CMake builds the provider
+  through the shared native builder's locking and atomic publication protocol.
+  Compression and Socket quote their relative provider paths so SWI resolves
+  each library's own source; a seventh host reproduction covers that cache bug.
+  Evidence checks now reach CMake recipes, provider configuration headers and
+  nested host fixtures, and pin CMake comments while preserving argument data.
 - `lib_socket` connects, listens and accepts TCP, exchanges complete UDP packets
   and reads actual IPv4/IPv6 endpoints. File handles own sockets and carry TCP
   bytes; readiness, directional shutdown and cancellable acquisition compose

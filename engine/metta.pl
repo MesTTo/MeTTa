@@ -1211,8 +1211,14 @@ metta_platform_capability(unicode, library(unicode),
                            the Unicode version; lib_string\'s (string-upper ...), \c
                            (string-lower ...) and (string-chars ...) still work').
 metta_platform_capability('compressed-sources', library(zlib),
-                          'reading or writing a .gz program or space file; \c
+                          'lib_compression gzip/zlib operations and reading \c
+                           or writing a .gz program or space file; \c
                            the same content uncompressed still loads').
+% [tested: lib_compression; commit=WORKTREE].
+metta_platform_capability('memory-files', library(memfile),
+                          'lib_compression byte encoding through owned memory streams').
+metta_platform_capability(archive, library(archive),
+                          'lib_compression archive metadata, entry reads and extraction').
 %One capability over two libraries, because engine/filereader.pl imports both
 %and the cache is what a user loses when either goes. The row is CONSERVATIVE
 %about fastrw and deliberately so: fast_read/2 and fast_write/2 are SWI core

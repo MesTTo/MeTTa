@@ -38,6 +38,8 @@ than per byte:
   .json         commentless, so the measurement prose is the only place a pin
                 can be, and every placeholder in one is a pin. This is the rule
                 check_evidence_tags.provenance_sites already applies to them.
+  .cmake        CMakeLists.txt shares CMake's line and bracket comments;
+                quoted, bracket and escaped unquoted arguments remain data.
 
 Anything else is REFUSED by name rather than guessed at, and every occurrence
 the pass declines is printed with its reason, so a file class that starts
@@ -72,6 +74,9 @@ Guarantees:
   - C and C++ pins resolve inside comments while quoted and raw strings,
     macro strings and header names retain their bytes
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8]
+  - CMake comment pins resolve while all three argument forms retain their
+    bytes; unterminated quotes and brackets refuse before writing
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
 Fails when: a pin sits somewhere the file's grammar cannot distinguish from
   code. It is reported, not rewritten, and finishing it is a human's call.
 Owns resources: none; it rewrites files in place and holds nothing open.
@@ -237,10 +242,60 @@ def _c_comment_spans(path: Path, text: str) -> list[tuple[int, int]]:
     return comments
 
 
+# Consume complete unquoted arguments before looking for brackets or comments.
+# These productions follow CMake 3.18's lexer, including its legacy arguments:
+# https://github.com/Kitware/CMake/blob/v3.18.0/Source/LexerParser/cmListFileLexer.in.l#L76-L79
+CMAKE_MAKEVAR = r"\$\([A-Za-z0-9_]*\)"
+CMAKE_UNQUOTED = r'(?:[^ \0\t\r\n()#\\"\[=]|\\[^\0\n])'
+CMAKE_LEGACY = rf'(?:{CMAKE_MAKEVAR}|{CMAKE_UNQUOTED}|"(?:{CMAKE_MAKEVAR}|{CMAKE_UNQUOTED}|[ \t\[=])*")'
+CMAKE_WORD = re.compile(rf'(?:{CMAKE_MAKEVAR}|{CMAKE_UNQUOTED}|=|\[=*{CMAKE_LEGACY})(?:{CMAKE_LEGACY}|[\[=])*')
+CMAKE_BRACKET = re.compile(r"#?\[(=*)\[")
+CMAKE_QUOTED = re.compile(r'"(?:\\[\s\S]|[^"\\\0])*"')
+
+
+def _cmake_comment_spans(path: Path, text: str) -> list[tuple[int, int]]:
+    """Locate comments after consuming CMake's bracket, quoted and bare tokens."""
+    comments = []
+    position = 0
+
+    def refuse(description: str) -> None:
+        line = text.count("\n", 0, position) + 1
+        raise SystemExit(f"pin_provenance: {path}:{line}: {description}")
+
+    while position < len(text):
+        start = position
+        if text[position] == "\0":
+            refuse("NUL in CMake source")
+        if bracket := CMAKE_BRACKET.match(text, position):
+            closing = "]" + bracket[1] + "]"
+            end = text.find(closing, bracket.end())
+            if end < 0:
+                refuse("unterminated CMake bracket argument or comment")
+            position = end + len(closing)
+            if text[start] == "#":
+                comments.append((start, position))
+        elif text[position] == "#":
+            end = text.find("\n", position)
+            position = len(text) if end < 0 else end
+            comments.append((start, position))
+        elif text[position] == '"':
+            quoted = CMAKE_QUOTED.match(text, position)
+            if quoted is None:
+                refuse("unterminated CMake quoted argument")
+            position = quoted.end()
+        elif word := CMAKE_WORD.match(text, position):
+            position = word.end()
+        else:
+            position += 1
+    return comments
+
+
 def _grammar(path: Path) -> str | None:
     """The comment rule this file's class implies, or None to refuse it."""
     if path.suffix == ".py":
         return "py"
+    if path.name == "CMakeLists.txt" or path.suffix == ".cmake":
+        return "cmake"
     if path.suffix in PERCENT_COMMENT:
         return "%"
     if path.suffix in HASH_COMMENT or path.name in MAKEFILE_NAMES:
@@ -365,6 +420,8 @@ def sites(path: Path, text: str) -> list[tuple[int, int, str | None]]:
         skip = _docstring_spans(text)
     elif grammar == "c":
         skip = _c_comment_spans(path, text)
+    elif grammar == "cmake":
+        skip = _cmake_comment_spans(path, text)
     elif grammar in BLOCK_GRAMMARS:
         skip = [match.span() for match in BLOCK_COMMENT.finditer(text)]
     elif grammar == "md":
@@ -375,10 +432,11 @@ def sites(path: Path, text: str) -> list[tuple[int, int, str | None]]:
         at = match.start()
         line = text.count("\n", 0, at) + 1
         reason: str | None = None
-        if grammar == "c":
+        if grammar in ("c", "cmake"):
             comment = next(((low, high) for low, high in skip if low <= at < high), None)
             if comment is None:
-                reason = "outside a C/C++ comment: this code emits or matches pins"
+                language = "C/C++" if grammar == "c" else "CMake"
+                reason = f"outside a {language} comment: this code emits or matches pins"
             elif _backticked(text[comment[0]:comment[1]], at - comment[0]):
                 reason = "a backticked mention of the placeholder, not a pin"
         elif _backticked(text, at):
