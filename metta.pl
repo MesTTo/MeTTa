@@ -1160,6 +1160,16 @@ metta_platform_capability(regex, library(pcre),
                            own; and importing re_replace as a Prolog \c
                            function. lib_text''s plain string forms still \c
                            work').
+%library(unicode) is SWI's ext/utf8proc pack rather than its core, and is absent
+%from swipl-wasm, so a build can be complete without it. Nothing else provides
+%normalization or the character database: code_type/2 answers the classes and
+%string_upper/2 the case conversions, both of which stay.
+metta_platform_capability(unicode, library(unicode),
+                          'lib_unicode, so (unicode-normalize ...), \c
+                           (unicode-casefold ...), (unicode-map ...), \c
+                           (unicode-property ...), (unicode-graphemes ...) and \c
+                           the Unicode version; lib_string\'s (string-upper ...), \c
+                           (string-lower ...) and (string-chars ...) still work').
 metta_platform_capability('compressed-sources', library(zlib),
                           'reading or writing a .gz program or space file; \c
                            the same content uncompressed still loads').
