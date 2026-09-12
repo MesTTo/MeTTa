@@ -51,6 +51,7 @@ beside its definitions.
 | lib_sets | 13 | 13 |
 | lib_soft | 9 | 1 |
 | lib_spaces | 10 | 5 |
+| lib_statistics | 14 | 14 |
 | lib_strategy | 24 | 0 |
 | lib_string | 34 | 34 |
 | lib_system | 8 | 8 |
@@ -4367,6 +4368,215 @@ Remove from a space every atom another space holds; one answer per atom attempte
 Returns: the removal's verdict, once per atom
 
 Undocumented: `find`, `match-count`, `migrateAtoms`, `remove-all-atoms`, `succeedsPredicate`
+
+## lib_statistics
+
+### `stats-correlation`
+
+*lib_statistics.metta:13*
+
+```metta
+(: stats-correlation (-> Expression Expression Number))
+```
+
+Pearson correlation, correctly rounded into [-1,1] from exact paired moments. Both finite expressions need equal lengths, at least two observations and nonzero variance. Constant input raises. Compose stats-ranks on both inputs to obtain Spearman correlation with averaged ties.
+
+1. Left
+2. Right
+
+Returns: Correlation
+
+### `stats-covariance`
+
+*lib_statistics.metta:19*
+
+```metta
+(: stats-covariance (-> Expression Expression Number Number))
+```
+
+Paired covariance, dividing the sum of centered products by N-DegreesOfFreedom. The finite expressions have equal lengths and N must exceed the nonnegative integer DegreesOfFreedom. Exact paired moments and final rounding follow stats-variance; choose 0 for population covariance or 1 for a sample estimate.
+
+1. Left
+2. Right
+3. DegreesOfFreedom
+
+Returns: Covariance
+
+### `stats-geometric-mean`
+
+*lib_statistics.metta:25*
+
+```metta
+(: stats-geometric-mean (-> Expression Number))
+```
+
+Floating geometric mean of nonnegative finite observations. Validate the whole expression before returning zero for a zero observation. Empty or negative input raises. Sum binary exponents separately from mantissa logs, so huge and tiny exact observations can cancel without an overflowing product. Native log/exp precision applies; bound the approximation by the observed minimum and maximum before final rounding. Equal observations retain their rounded value. A result outside binary64 rounds to zero or infinity.
+
+1. Data
+
+Returns: Mean
+
+### `stats-harmonic-mean`
+
+*lib_statistics.metta:31*
+
+```metta
+(: stats-harmonic-mean (-> Expression Number))
+```
+
+N divided by the sum of reciprocals, for nonnegative finite observations. A zero makes the mean zero after every observation is validated. Empty or negative input raises. Exact inputs retain an exact result.
+
+1. Data
+
+Returns: Mean
+
+### `stats-mean`
+
+*lib_statistics.metta:37*
+
+```metta
+(: stats-mean (-> Expression Number))
+```
+
+Arithmetic mean of a nonempty finite expression, with stats-sum's exact accumulation and result type. A sum may exceed binary64 while its mean fits.
+
+1. Data
+
+Returns: Mean
+
+### `stats-median`
+
+*lib_statistics.metta:43*
+
+```metta
+(: stats-median (-> Expression Number))
+```
+
+Middle observation, or the exact mean of the two middle observations. Empty input raises. Numeric result types follow stats-sum, including mixed inputs.
+
+1. Data
+
+Returns: Median
+
+### `stats-mode`
+
+*lib_statistics.metta:49*
+
+```metta
+(: stats-mode (-> Atom %Undefined%))
+```
+
+Every most frequent held term, once, in first-occurrence order. Terms compare by identity, so 1 and 1.0 count separately and runnable expressions stay data. Collapse collects ties; once selects the first mode. Empty and cyclic data raise. Native stable sorting counts occurrences in O(n log n).
+
+1. Data
+
+Returns: Mode
+
+### `stats-quantile`
+
+*lib_statistics.metta:55*
+
+```metta
+(: stats-quantile (-> Expression Number Symbol Number))
+```
+
+Linearly interpolate sorted observations at Probability in [0,1]. Inclusive places the minimum at 0 and maximum at 1. Exclusive places sorted observation i at i/(N+1), extrapolating with the nearest endpoint pair outside those positions. A singleton returns its observation. Empty input or an unknown method raises. Exact observations retain exact interpolation; a float observation rounds once.
+
+1. Data
+2. Probability
+3. Method
+
+Returns: Value
+
+### `stats-quantiles`
+
+*lib_statistics.metta:61*
+
+```metta
+(: stats-quantiles (-> Expression Number Symbol Expression))
+```
+
+The Partitions-1 cut points at i/Partitions, using stats-quantile's inclusive or exclusive interpolation. Partitions must be positive. One partition gives empty cuts after validating the nonempty data and method. Sort once, then index each pair: O(n log n+k) arithmetic/index operations for k cuts.
+
+1. Data
+2. Partitions
+3. Method
+
+Returns: Cuts
+
+### `stats-ranks`
+
+*lib_statistics.metta:67*
+
+```metta
+(: stats-ranks (-> Expression Expression))
+```
+
+One-based numeric ranks in input order. Tied numeric values receive their exact mean rank, so 1 and 1.0 tie. Empty input returns empty. Sort/group once, then restore original positions in O(n log n); no observation is dropped.
+
+1. Data
+
+Returns: Ranks
+
+### `stats-regression`
+
+*lib_statistics.metta:73*
+
+```metta
+(: stats-regression (-> Expression Expression Bool Expression))
+```
+
+Least-squares (linear-fit Slope Intercept) from finite paired observations. False fits an affine line and needs at least two observations with nonconstant x. True fits through the origin and needs at least one observation with nonzero sum of squared x values. Lengths match. Coefficients use exact moments and retain exact results unless either expression contains a float.
+
+1. Independent
+2. Dependent
+3. Proportional
+
+Returns: Fit
+
+### `stats-stdev`
+
+*lib_statistics.metta:79*
+
+```metta
+(: stats-stdev (-> Expression Number Number))
+```
+
+Correctly rounded floating square root of the exact variance. The same sample-size rules as stats-variance apply. Take the root before rounding, so a representable deviation survives an unrepresentable floating variance.
+
+1. Data
+2. DegreesOfFreedom
+
+Returns: Deviation
+
+### `stats-sum`
+
+*lib_statistics.metta:85*
+
+```metta
+(: stats-sum (-> Expression Number))
+```
+
+Sum finite observations exactly before any rounding. Empty input returns 0. All integer/rational observations produce an exact result; any float makes the result a float rounded once. Every numeric head refuses NaN and infinity.
+
+1. Data
+
+Returns: Total
+
+### `stats-variance`
+
+*lib_statistics.metta:91*
+
+```metta
+(: stats-variance (-> Expression Number Number))
+```
+
+Sum of squared deviations divided by N-DegreesOfFreedom. Use 0 for a whole population and 1 for the usual sample estimate. DegreesOfFreedom is a nonnegative integer and N must exceed it. Exact moments prevent cancellation; result types follow stats-sum, with only the final result rounded.
+
+1. Data
+2. DegreesOfFreedom
+
+Returns: Variance
 
 ## lib_string
 

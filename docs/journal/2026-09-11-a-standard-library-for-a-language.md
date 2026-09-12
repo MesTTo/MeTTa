@@ -3318,3 +3318,93 @@ twins lane gives equal stored contents, all 59 claims and the exact 117876 pin;
 UUID, logging and math also retain their pins. The corpus still reports 263
 older findings over 302 twins; twins-selftest passes. Logs:
 ai-tmp/ai-lib4-random-{lanes,twins-lane,jscpd-final}.log.
+
+## 2026-09-12: statistics design
+
+Decided: fourteen heads cover totals, arithmetic/geometric/harmonic means,
+median, individual and partition quantiles, tied modes, variance, deviation,
+covariance, Pearson correlation, ranks and affine/proportional regression.
+Degrees of freedom is an integer parameter, with N greater than that value.
+Ranking both inputs composes Spearman correlation. Tied modes are an answer
+stream in first-occurrence order, with terms compared by identity.
+
+Decided: accept finite numeric observations and accumulate their exact stored
+values. Exact inputs retain exact arithmetic results; floating observations
+select one final binary64 rounding. Deviation and correlation use the existing
+fraction square root. Exact moments make N*sum(x*x)-sum(x)^2 safe, as in CPython
+statistics._ss at ebf955df7a89ed0c7968f79faec1de49f61ed7cb. Paired moments give
+covariance and regression; a squared ratio gives correlation before its root.
+Reductions use O(n) arithmetic operations; sorting for ranks, modes and quantiles
+uses O(n log n), and a sorted compound indexes k quantiles in O(k).
+
+Rejected: converting variance to float before sqrt. The plain host probe
+ai-lib4-statistics-host-magnitudes.log overflows on sqrt(2^2000) and answers zero
+for sqrt(2^-2000), though both roots are representable. Revisit only if the host
+can preserve the fraction through its final root. Export Vector's existing
+fraction_sqrt/2 using the native @private convention already used by metta_text/2;
+its implementation and MeTTa surface stay the same. Reprice all affected twins.
+
+Decided: quantiles follow CPython's inclusive and exclusive interpolation, with
+explicit method validation even for one observation or one partition. Exclusive
+interpolation can extrapolate beyond observed endpoints. Mode alone accepts
+held nonnumeric terms. Empty totals are zero; other descriptive statistics need
+observations. Affine fits need two observations and nonconstant x; proportional
+fits need one observation and nonzero sum of squared x values.
+
+Decided: geometric mean uses floating log/exp precision, summing binary exponents
+as integers and native mantissa logs as exact rational images. Split the mean
+exponent before exponentiating and round through math-float. Project the
+approximation into the observed minimum/maximum interval before rounding, which
+preserves the geometric-mean bound and equal-input identity. Validate complete
+nonnegative inputs before handling zero for both geometric and harmonic means.
+This adapts CPython's geometric_mean log reduction and the standard mantissa/
+exponent decomposition; it constructs no product of all observations.
+
+Verified: ai-lib4-statistics-probe.log gives geometric means36 for54,24,36;
+one for2^2000 and2^-2000; 1e308 for equal large floats; and the smallest subnormal
+for equal smallest subnormals. Vector's roots preserve both extreme magnitudes.
+Source: https://github.com/python/cpython/blob/ebf955df7a89ed0c7968f79faec1de49f61ed7cb/Lib/statistics.py.
+
+## 2026-09-12: statistics pricing
+
+Verified: example and twin pass all 76 claims. Three rounds after purging QLFs
+give statistics 141717/157714, Vector 58439/62215, math 118986/121599 and
+random 122541/117883 inferences (example/twin). The new Vector export moves each
+existing twin by seven; numerical implementations and declared MeTTa heads did
+not change. Re-pin through the measured tool with that reason.
+
+Tried: keep the geometric mean's huge reciprocal pair inside a built let* term.
+The warm probe costs 950 against 1145 for the twin's three calls that name and
+reinsert the values. Rejected: changing this one claim to recover 195 inferences;
+the small reduction does not justify obscuring the direct Python values. The
+twin's complete fn/eval assertions cross results where MeTTa test reads them
+inside the engine. Declare its measured 1826 excess over the 1.1 band explicitly.
+Logs: ai-lib4-statistics-{measure,crossing-probe}.log.
+
+## 2026-09-12: statistics verification
+
+Tried: the new native test directly called fraction_sqrt/2 without importing it;
+the host raised Unknown procedure: plunit_lib_statistics:fraction_sqrt/2. Import
+the native provider explicitly in the test too. The tied-mode fixture also left
+the documented answer stream's choicepoint open; once now closes its single
+answer probes, while findall verifies every tie. All 16 statistics tests pass.
+
+Verified: the Python statistics and Vector files pass 19 tests. Five statistical
+properties have generation limits totaling 820 datasets, plus extreme fixtures, comparing
+Fraction arithmetic, independently centered moments, exact root midpoint bounds,
+CPython quantile interpolation, Decimal geometric means and Counter modes.
+The Vector tests also recheck their existing numerical and wire contracts.
+Logs: ai-lib4-statistics-{suites-fixed,python}.log.
+
+Verified: the combined statistics, Vector, math and random native suites pass
+76 tests and eight subtests with no load errors or warnings. Each suite needs
+an explicit -s option: a command with four bare paths loaded only the first
+suite and left the other paths in argv. The corrected command and complete
+result are ai-lib4-statistics-suites-all.log. jscpd finds zero clones.
+
+Verified: the required library gates pass. Full twins proves all 76 statistics
+claims with equal stored contents and the exact 157714 pin. Vector, math and
+random also reach their refreshed pins exactly. The corpus result remains
+263 pre-existing findings over 303 twins; 47 of 340 files pass, proving all
+3234 claims in those files. twins-selftest passes. Logs:
+ai-lib4-statistics-{lanes,twins-lane}.log.

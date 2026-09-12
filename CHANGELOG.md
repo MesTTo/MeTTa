@@ -9,6 +9,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_statistics` computes totals, three means, median, quantiles, tied modes,
+  variance, deviation, covariance, correlation, ranks and linear regression.
+  Exact stored observations prevent cancellation and intermediate overflow;
+  degrees of freedom and quantile interpolation are explicit parameters.
+  Standard deviation and correlation share Vector's existing fraction root,
+  now exported as a native service. Generated property checks compare the
+  arithmetic with Fraction and Decimal references.
 - `lib_random` chooses and samples population occurrences, shuffles expressions
   and streams draws from ten explicit distribution forms. All draws share the
   existing seeded generator; cuts consume only the demanded prefix. Parameters
