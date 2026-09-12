@@ -1,7 +1,7 @@
 % Guarantees: metta_with_trailed/3 preserves linked values and restores the prior root
 %   on ordinary return, failure, exception, redo and cut; the state fence it
 %   scopes is a declared context reader compiled to its read
-%   [tested: trailed_scopes; commit=WORKTREE].
+%   [tested: trailed_scopes; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
 %
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
 % Guarantees: metta_host_inference_budget/3 converts a deferred native

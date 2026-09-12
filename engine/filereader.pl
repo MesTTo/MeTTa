@@ -1,7 +1,7 @@
 % Guarantees: working_dir/1, active_source_load/1, active_source_program/1 and
 %   source_recompile_context/2 read stacks scoped by metta_with_trailed/3, and
 %   each is a declared context reader compiled to its read at every call site
-%   [tested: trailed_scopes; commit=WORKTREE].
+%   [tested: trailed_scopes; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
 % Guarantees: active_source_load/1 and with_working_directory/2 are exported
 %   to their compiler and manifest consumers [tested: engine_layering;
 %   commit=cdcb23421809ec3a493059a381e0245cf08a1984].

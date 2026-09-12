@@ -10,7 +10,7 @@
 %   one-element read costs the inferences of the dynamic fact it replaced
 %   [tested: every_declared_reader_is_compiled_to_its_read,
 %   a_call_site_carries_the_read_rather_than_a_call,
-%   an_inactive_reader_costs_what_the_asserted_guard_cost; commit=WORKTREE].
+%   an_inactive_reader_costs_what_the_asserted_guard_cost; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
 % Owns resources: every sweep engine is destroyed after its result is read;
 %   temporary clauses are owned by the production doors under test.
 

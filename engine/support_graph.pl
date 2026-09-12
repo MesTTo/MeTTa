@@ -1,7 +1,7 @@
 % Guarantees: support_atomic/1 and with_support_repairs_deferred/1 scope their
 %   markers through metta_with_trailed/3 without changing lock ownership, and
 %   both markers are declared context readers compiled to their reads
-%   [tested: trailed_scopes; commit=WORKTREE].
+%   [tested: trailed_scopes; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
 %
 % Purpose: record module-qualified support edges and propagate invalidation
 %   from changed inputs to the derived engine artifacts that depend on them.

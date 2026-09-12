@@ -5,7 +5,7 @@
 % Guarantees: the exception hook that finishes a cut listener is clausal only
 %   from the process's first bound on, and a ball costs one inference more
 %   from then, none before [tested: the_limit_hook_is_armed_by_the_first_bound;
-%   commit=WORKTREE].
+%   commit=3ff7688a605c1f0de0e021f66f3075353476a992].
 % Owns resources: fixtures release their spaces, erase their artifact clauses
 %   and destroy the engines used to inspect committed reservation state.
 

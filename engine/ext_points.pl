@@ -6,7 +6,7 @@
 %   or key refuses at load [tested: trailed_scopes:every_declared_reader_is_compiled_to_its_read,
 %   trailed_scopes:a_call_site_carries_the_read_rather_than_a_call,
 %   trailed_scopes:an_inactive_reader_costs_what_the_asserted_guard_cost,
-%   trailed_scopes:a_malformed_reader_declaration_refuses_at_load; commit=WORKTREE].
+%   trailed_scopes:a_malformed_reader_declaration_refuses_at_load; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
 %
 % Purpose: declare each engine extension seam, its direction and its cut
 %   semantics, and publish the predicates extensions and host bindings may call.
@@ -1275,7 +1275,7 @@ kind(metta_with_trailed/3, host_service).
 %inferences, one per active_source_load/1 read;
 %command=swipl ai-tmp/ai-guard3-profile-bench.pl <root> translate <out> on the
 %branch and on its pristine cut b1d175f13b67baf1090f74f309407b763d421744;
-%fixture=warm QLF set, both MORK objects; commit=WORKTREE].
+%fixture=warm QLF set, both MORK objects; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
 %
 %Two shapes cover every reader in the tree. value(Pattern) reads one term, a
 %flag when the pattern is `true`. stack(Pattern) reads a nearest-first list:
@@ -1287,7 +1287,7 @@ kind(metta_with_trailed/3, host_service).
 %per read above an empty loop, key unset, inactive [] and one element: a
 %dynamic fact 2/2/1, the inlined stack read 2/2/1, the predicate wrapper it
 %replaces 3/3/2; command=swipl ai-tmp/tmp/gx/run.pl; fixture=bare SWI-Prolog
-%10.1.13; commit=WORKTREE].
+%10.1.13; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
 %
 %The expansion applies wherever the call resolves to the declaring module:
 %unqualified in that module, qualified from anywhere, imported, or inherited
@@ -1303,7 +1303,7 @@ kind(metta_with_trailed/3, host_service).
 %compiles any more [tested: trailed_scopes:every_declared_reader_is_compiled_to_its_read,
 %trailed_scopes:a_call_site_carries_the_read_rather_than_a_call,
 %trailed_scopes:an_inactive_reader_costs_what_the_asserted_guard_cost,
-%trailed_scopes:a_malformed_reader_declaration_refuses_at_load; commit=WORKTREE].
+%trailed_scopes:a_malformed_reader_declaration_refuses_at_load; commit=3ff7688a605c1f0de0e021f66f3075353476a992].
 %Workaround: swi-cleanup-window - a reader compiles to its trailed read, so the trailed guard costs what the asserted guard cost.
 :- multifile context_reader/4.
 kind(context_reader/4, declaration).
