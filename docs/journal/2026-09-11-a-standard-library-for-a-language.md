@@ -3090,3 +3090,19 @@ The full twins lane also reads UUID at 190880/188846 with equal stored contents
 and all 45 claims. Its 263 remaining corpus findings exclude this row;
 43/336 files pass with 3004/3004 claims proved, and twins-selftest passes.
 Logs: ai-tmp/ai-lib4-uuid-{lanes,twins}-complete.log.
+
+## 2026-09-12: track the graph host import repair
+
+Tried: host-workarounds refused lib_graph's swi-ugraphs-append2 site because its
+ledger entry and tracked reproduction were absent. Blame attributes the site
+to this package's a5738e939. With autoload disabled, top_sort([a-[b],b-[]],Order)
+raises existence_error(procedure,ugraphs:append/2); importing append/2 explicitly
+restores Order=[a,b]. Scratch reproduction: ai-tmp/ai-lib4-graph-probe.log.
+
+Decided: track the two-arm reproduction and ledger entry. The existing import
+and all library code remain unchanged, so no library twin cost changes.
+
+Verified: `sh check.sh host-workarounds host-workarounds-selftest evidence`
+passes. All 19 reproductions answer present, 25 sites resolve, all 10 planted
+negative controls are reported, and evidence has zero unbacked tags.
+Log: ai-tmp/ai-lib4-graph-evidence.log.

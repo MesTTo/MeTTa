@@ -365,6 +365,18 @@ Workaround: lib_uuid validates all five group lengths and their hexadecimal digi
 Lifted when: the host accepts the valid control and rejects both malformed inputs.
 Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
 
+## swi-ugraphs-append2
+Host: SWI-Prolog 10.1.13; library/ugraphs.pl:top_sort/2 calls append/2 at
+  line 460, while its library(lists) declaration at line 79 imports append/3.
+Defect: with autoload disabled, top_sort/2 raises
+  existence_error(procedure,ugraphs:append/2) even for a two-vertex DAG.
+Reproduction: tests/checks/host_workarounds/swi-ugraphs-append2.pl,
+  requiring the expected order after adding the missing import as a control.
+Workaround: lib_graph explicitly imports append/2 into the ugraphs module.
+Lifted when: top_sort/2 computes the expected order with autoload disabled
+  before the reproduction supplies the import.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
 ## swi-uuid-name-encoding
 Host: SWI-Prolog 10.1.13; packages-clib uuid.c:pl_uuid uses PL_get_chars with
   CVT_ATOM and passes a NUL-terminated name to OSSP uuid_make;

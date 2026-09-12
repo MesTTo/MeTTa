@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The graph library's existing topological-sort import repair now has a tracked
+  host reproduction and ledger entry, so the host-workarounds gate detects when
+  the host no longer needs it.
 - `lib_uuid` provides explicit version 4 random and version 1 time identifiers,
   deterministic version 3/5 names in standard or application UUID namespaces,
   strict text validation, version/variant inspection, version-1 timestamps,
