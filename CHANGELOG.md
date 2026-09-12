@@ -9,6 +9,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_spaces` adds `space-copy`, `move-atoms`, `space-drain`,
+  `space-snapshot` and `space-subtract` over whole spaces, each answering once
+  per atom it touched. `move-atoms` is what `migrateAtoms`' name promises;
+  `migrateAtoms` keeps upstream's own equation, which drains the source.
+- `lib_dict` adds `dict-get` with a default, `dict-update` over the stored
+  value, `dict-merge` and `dict-pop`. A key still holds one value, and an
+  absent key still has no answer where the operation answers values.
 - `lib_file` publishes 56 heads at 60 arities where it published 32: whole-file
   and handle byte operations with text and byte handles kept apart by name,
   `replace-file!` publishing by rename beside the in-place writers,

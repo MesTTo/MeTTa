@@ -18,7 +18,7 @@ beside its definitions.
 | lib_datastructures | 26 | 9 |
 | lib_datetime | 16 | 16 |
 | lib_derived | 1 | 1 |
-| lib_dict | 7 | 0 |
+| lib_dict | 11 | 4 |
 | lib_distribution | 7 | 0 |
 | lib_doc | 0 | 0 |
 | lib_file | 55 | 55 |
@@ -39,7 +39,7 @@ beside its definitions.
 | lib_regex | 18 | 18 |
 | lib_roman | 36 | 0 |
 | lib_soft | 9 | 1 |
-| lib_spaces | 5 | 0 |
+| lib_spaces | 10 | 5 |
 | lib_strategy | 24 | 0 |
 | lib_string | 34 | 34 |
 | lib_tabling | 11 | 0 |
@@ -716,6 +716,72 @@ The first answer of an expression, and no more. Derived here as (take 1 ...); th
 1. The expression to take one answer of
 
 Returns: Its first answer
+
+## lib_dict
+
+### `dict-get`
+
+*lib_dict.metta:116*
+
+```metta
+(: dict-get (-> SpaceType %Undefined% %Undefined% %Undefined%))
+```
+
+The key's value, or the supplied default when the key is absent. dict-values answers nothing for an absent key; this answers something a caller can use.
+
+1. the dict
+2. the key
+3. the value to answer when the key is absent
+
+Returns: the value or the default
+
+### `dict-update`
+
+*lib_dict.metta:120*
+
+```metta
+(: dict-update (-> SpaceType %Undefined% %Undefined% SpaceType))
+```
+
+Apply a function to the key's current value and put the result back, answering the dict. An absent key leaves the dict unchanged.
+
+1. the dict
+2. the key
+3. the function to apply to the value
+
+Returns: the dict
+
+### `dict-merge`
+
+*lib_dict.metta:124*
+
+```metta
+(: dict-merge (-> SpaceType SpaceType SpaceType))
+```
+
+Put every pair of the second dict into the first, so the second's value wins on a shared key. Answers the dict written into.
+
+1. the dict to write into
+2. the dict to read
+
+Returns: the dict written into
+
+### `dict-pop`
+
+*lib_dict.metta:128*
+
+```metta
+(: dict-pop (-> SpaceType %Undefined% %Undefined%))
+```
+
+The key's value, removed from the dict. An absent key has no answer, which is how it differs from a stored value.
+
+1. the dict
+2. the key
+
+Returns: the removed value
+
+Undocumented: `dict-has`, `dict-pairs`, `dict-put`, `dict-remove`, `dict-remove-pair`, `dict-size`, `dict-values`
 
 ## lib_file
 
@@ -2167,6 +2233,86 @@ Tests written symbol representation, regardless of function registration
 Returns: True for a symbol, False otherwise
 
 Undocumented: `soft-aggregation`, `soft-best`, `soft-fold`, `soft-match`, `soft-score`, `soft-score-by`, `soft-walk`, `sym-sim`
+
+## lib_spaces
+
+### `space-copy`
+
+*lib_spaces.metta:80*
+
+```metta
+(: space-copy (-> SpaceType SpaceType Atom %Undefined%))
+```
+
+Copy the atoms matching a pattern into another space, leaving the source unchanged; one answer per atom copied. A bare variable pattern copies the whole space, which is how two spaces merge.
+
+1. the source space
+2. the destination space
+3. the pattern to copy
+
+Returns: the destination write's verdict, once per atom
+
+### `move-atoms`
+
+*lib_spaces.metta:84*
+
+```metta
+(: move-atoms (-> SpaceType SpaceType Atom %Undefined%))
+```
+
+Add the atoms matching a pattern to another space and remove them from the source; one answer per atom moved. This is what migrateAtoms' name promises; migrateAtoms keeps upstream's own equation, which drains the source instead.
+
+1. the source space
+2. the destination space
+3. the pattern to move
+
+Returns: the removal's verdict, once per atom
+
+### `space-drain`
+
+*lib_spaces.metta:88*
+
+```metta
+(: space-drain (-> SpaceType Atom %Undefined%))
+```
+
+Remove the atoms matching a pattern and answer each removed atom, so a caller sees what left.
+
+1. the space
+2. the pattern to remove
+
+Returns: each removed atom
+
+### `space-snapshot`
+
+*lib_spaces.metta:92*
+
+```metta
+(: space-snapshot (-> SpaceType SpaceType))
+```
+
+A fresh space holding a copy of every atom, so what a space holds now survives later writes to it. The two spaces are independent from that point.
+
+1. the space to copy
+
+Returns: the new space
+
+### `space-subtract`
+
+*lib_spaces.metta:96*
+
+```metta
+(: space-subtract (-> SpaceType SpaceType %Undefined%))
+```
+
+Remove from a space every atom another space holds; one answer per atom attempted, including an atom the space did not hold.
+
+1. the space to remove from
+2. the space whose atoms to remove
+
+Returns: the removal's verdict, once per atom
+
+Undocumented: `find`, `match-count`, `migrateAtoms`, `remove-all-atoms`, `succeedsPredicate`
 
 ## lib_string
 

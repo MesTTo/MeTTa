@@ -2199,3 +2199,48 @@ that does not exist (the four generated path comparisons are separate tests).
 Ruff's pathlib preferences are answered by the comparison itself, which names
 `posixpath` and `glob` as the oracles the heads translate. Logs:
 ai-tmp/ai-lib3-file-{lanes,lint,lint2,lint3,lint4}.log.
+
+## 2026-09-12: spaces and dict
+
+Tried: probes of the operations these two compose (ai-tmp/ai-lib3-spaces-probe*.metta).
+`(match $from $pattern (add-atom $to $pattern))` copies the matched atom, which
+is the shape migrateAtoms already uses; `remove-atom` answers `true` for an atom
+the space does not hold, so a subtraction reports work attempted rather than
+failing; a match that removes from the space it is matching over completes,
+which is what makes a drain one expression.
+
+Decided: five heads for lib_spaces and four for lib_dict, each an equation over
+published operations and none a synonym of one. `space-copy` with a bare
+variable pattern IS the merge of two spaces, so no separate head; `find` already
+answers the "any match" question and `space-atom-count` the emptiness one, so
+neither is added; `remove-all-atoms` already clears, so `dict-clear` is not
+added and the dict example says the space operation is the clear.
+
+Decided: `migrateAtoms` keeps upstream's equation byte for byte. Upstream PeTTa
+is the semantics arbiter and that equation names the source on both sides, so it
+drains rather than moves; `move-atoms` is the head whose name matches what it
+does, and both examples state the difference. Rejected: correcting migrateAtoms
+in place, because the census's "correct it after reproducing the defect" reads
+against the arbiter ruling once the reproduction shows the equation is upstream's
+own. Revisit if upstream changes it.
+
+Tried: the first spaces example -> `(collapse (remove-all-atoms &everything))`
+answers `((true))` and not `(true)`: the library's own body is a collapse over
+every atom's removal, so one call answers one expression of verdicts and a
+second call over the emptied space answers the empty one. The example states
+that shape rather than the shape a reader would guess.
+
+Tried: the spaces twin passing `ledger.name` to succeedsPredicate ->
+`=../2: Type error: atom expected, found "&ledger"`. The existing ch04 twin
+passes the HANDLE, which the door converts; a name written as text is the thing
+the seat's rules refuse anyway.
+
+Verified: `sh test.sh examples/ch08-data/08-03-the-shipped-libraries/20-spaces_lib.metta`
+passes 27 claims over all nine lib_spaces heads, and the extended
+12-dict_lib.metta passes 25 over all eleven lib_dict heads. Both twins prove the
+same claims with equal stored content: spaces 45,668 MeTTa against 43,720
+Python, dict 168,008 against 166,909, minimum of three fresh processes. The
+dict twin's re-pin from 125,362 first wrote a DIVERGENCE, because the twin was
+measured before its four new claims existed; completing it made the two spaces
+agree and the lane then refused the stale declaration by name, which is the
+check working. Logs: ai-tmp/ai-lib3-{spaces-example3,dict-example,sd-twins2}.log.
