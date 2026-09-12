@@ -1,6 +1,6 @@
 % Purpose: detect hyphens accepted as UUID hexadecimal digits.
 % Guarantees: valid and malformed controls distinguish a repaired validator.
-% [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds; commit=d5de00cc183b4b395b552f3aae7fca87752ef38c].
 
 :- use_module(library(uuid), [is_uuid/1]).
 

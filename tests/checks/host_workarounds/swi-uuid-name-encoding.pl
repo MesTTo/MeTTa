@@ -1,6 +1,6 @@
 % Purpose: detect Latin-1 and NUL truncation at the OSSP UUID name boundary.
 % Guarantees: the ASCII control and UTF-8/NUL vectors identify a corrected host.
-% [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds; commit=d5de00cc183b4b395b552f3aae7fca87752ef38c].
 
 :- use_module(library(uuid), [uuid/2]).
 

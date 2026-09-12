@@ -2,7 +2,7 @@
 % and validation/refusal boundaries through the public library heads.
 % Guarantees: standard ASCII names agree with the host, complete names agree with
 % CPython vectors, and each byte value occurs at each position in the round trips.
-% [tested: lib_uuid; commit=WORKTREE].
+% [tested: lib_uuid; commit=d5de00cc183b4b395b552f3aae7fca87752ef38c].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
