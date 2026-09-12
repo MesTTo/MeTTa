@@ -627,3 +627,27 @@ adds user: to a row that names no module, so the table can name one. Fifteen
 plants now, five of them for the doors above, and the probe that disables each
 door re-runs the discrimination: every mutation is caught naming exactly the
 door it disabled.
+
+## 2026-09-12, the guarded query row placed on this branch's own chain
+
+Measured: query-limit-guarded over the branch's functional commits, each point
+the engine, extensions and lib of that commit checked out in place with the
+compiled set rebuilt by the engine's warm boot, min of three fresh processes
+[extensions/python/bench.py --counter-only query-limit-guarded]: cdc8c199e
+passes the 37,707 pin, cdcb23421 reads 37,807, 3ff7688a6 reads 38,307,
+aedde810f reads 38,307, e7a45516b reads 38,107.
+Placed: +100 at cdcb23421, one inference per guarded query, the receipt
+retirement that completes after a native transaction; +500 at 3ff7688a6, the
+wrapper on the host's limit predicate that every bounded call runs; -200 at
+e7a45516b, the memo. query-limit-plain, the identical workload without a
+bound, keeps its pin at every point, which is the negative half, and the
+pristine cut passes the old pin in its own checkout, so none of it is
+configuration.
+Decided: re-pin the row at 38,107 with that arithmetic in its own comment.
+Trunk's engine/metta/limits.pl pins the same row at the same number for its
+own first-bound wrapper, so the merged tree pays the cost once, whichever
+wrapper survives the fold.
+Open: the Python benchmark is not in this package's prescribed battery, and
+this row was found only because the wrapper's cost was questioned. The rest of
+the roster is unmeasured on this branch; the bound is the only door this
+thread put on a path every process takes.
