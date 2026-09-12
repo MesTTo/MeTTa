@@ -1214,7 +1214,7 @@ metta_platform_capability('compressed-sources', library(zlib),
                           'lib_compression gzip/zlib operations and reading \c
                            or writing a .gz program or space file; \c
                            the same content uncompressed still loads').
-% [tested: lib_compression; commit=WORKTREE].
+% [tested: lib_compression; commit=7b42d5ee5cecb82709617b7ed08dfa2c1441f268].
 metta_platform_capability('memory-files', library(memfile),
                           'lib_compression byte encoding through owned memory streams').
 metta_platform_capability(archive, library(archive),
