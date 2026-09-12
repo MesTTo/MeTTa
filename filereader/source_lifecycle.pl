@@ -316,13 +316,27 @@ metta_fast_read_space(Space, Each) :-
 metta_fast_atom_binding(Space, Atom, Bound, Token) :-
     metta_fast_read_space(Space, Each),
     spaces:metta_require_token_read(Each, save),
-    spaces:metta_space_pair(Each, Atom, Token, StoredRef),
+    metta_source_occurrence(Each, Atom, Token, StoredRef),
     (   StoredRef \== none,
         translated_equation_binding(Each, StoredRef, Ref),
         translated_from(Ref, Resolved)
     ->  Bound = resolved(Resolved)
     ;   Bound = none
     ).
+
+% FROM regenerates its projected declarations and documentation. Persisting
+% those occurrences as source would give them a second, independent owner.
+metta_source_occurrence(Space, Atom, Token, Ref) :-
+    spaces:metta_space_pair(Space, Atom, Token, Ref),
+    \+ metta_engine:metta_reference_projection(Space, _, Token, _).
+
+metta_host_source_atoms(Space, Atoms) :-
+    findall(Atom,
+            ( metta_fast_read_space(Space, Each),
+              ( seam:foreign_space(Each)
+              -> 'get-atoms'(Each, Atom)
+              ;  metta_source_occurrence(Each, Atom, _, _) ) ), Atoms).
+
 
 metta_fast_binding_rows([], _, [], [], []).
 metta_fast_binding_rows([row(Atom, Bound, Token)|Rows], Index, [Atom|Atoms],
