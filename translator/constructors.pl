@@ -3,11 +3,11 @@
 %   policy stable and filereader:record_translated_supports/3 records its source.
 % Guarantees: constructor checks preserve written-call refusals and joint type
 %   variables; sorted projections preserve duplicate answers and live changes
-%   [tested: run_tests(translator_constructors); commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
+%   [tested: run_tests(translator_constructors); commit=WORKTREE].
 % Owns resources: construction facts extend the clause's static parameter
 %   environment, which restores its parent on exit. Retained clauses and sort
 %   proofs belong to translated-form support nodes and retire with their source
-%   [tested: run_tests(translator_constructors); commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
+%   [tested: run_tests(translator_constructors); commit=WORKTREE].
 % Decides: only a finite structural projection with an already-normal result
 %   is resolved; arbitrary method bodies remain compiled calls.
 
@@ -19,8 +19,7 @@ compiled_constructor_answer(Fun, Chain, Written, Values, Out, Goals0, Goals) :-
     % The selected arrow is already normalized in its defining scope. Its
     % intrinsic literal fields need no second declaration or origin lookup.
     (   Chain = [->|Types], is_list(Types),
-        append(Parameters, [_], Types),
-        maplist(statically_typed_literal, Written, Parameters),
+        constructor_literal_parameters(Written, Types),
         \+ metta_discharges_verified
     ->  Checks = true
     ;   findall(Parameters-Origins,
@@ -47,6 +46,12 @@ compiled_constructor_answer(Fun, Chain, Written, Values, Out, Goals0, Goals) :-
                          ; Out = [Fun|Values] ))
                   )|Goals]
     ).
+
+% Consume a fixed arrow beside its arguments, leaving exactly its result.
+constructor_literal_parameters([], [_]).
+constructor_literal_parameters([Value|Values], [Type|Types]) :-
+    statically_typed_literal(Value, Type),
+    constructor_literal_parameters(Values, Types).
 
 constructor_signature_checks([], _, fail).
 constructor_signature_checks([Parameters-Origins|Rest], Written, Check) :-
@@ -91,18 +96,16 @@ constructor_argument_proved(Value, Type, ordinary) :-
 fold_sorted_constructor_projection(Module, Fun, Args, Out, Goal) :-
     member(Value, Args),
     nonvar(Value), Value = [Constructor|_], atom(Constructor),
-    \+ fun_here(Constructor),
     ground(Args),
     static_contract_shortcuts_enabled,
-    type_rules:typing_policy_shortcuts_allowed(Module),
     \+ metta_discharges_verified,
     \+ nb_current('$metta_observation', _),
     var(Out), term_attvars(Out, []),
     \+ dispatch_selection_override(Fun),
     constructor_sort_proved(Module, Value),
-    fun_meta_clauses(Module, Fun, Clauses),
+    fun_meta_module(Module, Fun, Owner),
     findall(Head-Body,
-            ( member(fun_meta(Head, Body), Clauses),
+            ( fun_meta_clause(Owner, Fun, Head, Body),
               subsumes_term(Head, Args) ),
             [Head-Body]),
     var(Body),
@@ -128,7 +131,8 @@ fold_sorted_constructor_projection(Module, Fun, Args, Out, Goal) :-
     !,
     Out = Body.
 
-% Bottom-up construction has already proved an unchanged ground argument.
+% Bottom-up construction has already proved an unchanged ground argument
+% under the typing-policy lock held for this compilation environment.
 % Quoted terms and standalone translations have no such construction fact
 % and use the same complete check before a projection can be resolved.
 constructor_sort_proved(Module, Value) :-
@@ -136,7 +140,9 @@ constructor_sort_proved(Module, Value) :-
     member(sorted_constructor(Owner, Known), Entries),
     Owner == Module, Known == Value,
     !.
-constructor_sort_proved(_, [Constructor|Fields]) :-
+constructor_sort_proved(Module, [Constructor|Fields]) :-
+    type_rules:typing_policy_shortcuts_allowed(Module),
+    \+ fun_here(Constructor),
     arrow_declared_data_head(Constructor, _),
     metta_operation_parameters(Constructor, Fields, Types, Origins),
     constructor_argument_checks(Fields, Types, Origins, []).

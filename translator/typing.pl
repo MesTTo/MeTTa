@@ -3,6 +3,14 @@
 %   other result mismatches still filter that branch
 %   [tested: classes_transaction_results:typed_results_preserve_errors_and_filter_other_mismatches;
 %   commit=WORKTREE].
+% Guarantees: a retained call reuses the proved sort of a ground constructor
+%   argument when its result exactly matches an ordinary parameter; live
+%   refinements and unsupported translations keep their check [tested:
+%   translator_constructors:a_typed_callee_reuses_the_constructed_argument_sort,
+%   translator_constructors:a_callee_arrow_change_retires_its_argument_proof,
+%   translator_constructors:a_constructed_argument_keeps_a_live_callee_refinement,
+%   translator_constructors:a_nullary_construction_proof_reaches_the_audit;
+%   commit=WORKTREE].
 % Guarantees: present_type_chain/3 expands a final (:seg T), and
 %   validate_type_splices/1 refuses retired or misplaced forms at admission
 %   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
@@ -829,6 +837,21 @@ translate_args_by_type_dl([A|As], [T|Ts], [Origin|Origins],
                                               discharge(literal, T, AV))
                           |AfterCheck]
              ;  AfterCheck = Checks0 )
+      % Construction established the sort before this argument arrived. Its
+      % retained source dependencies retire that proof when either arrow
+      % changes; a refinement still needs its live value predicate.
+      ; Origin == ordinary, ground(AV), AV = [_|_], ground(T),
+        \+ metta_refined_type(T, _, _),
+        retained_static_type_shortcuts_allowed,
+        current_metta_module(Module),
+        constructor_sort_proved(Module, AV),
+        constructor_argument_proved(AV, T, ordinary)
+        -> contract_fallback_goal(check_argument_type(AV, T, Origin), Slow),
+           ( metta_discharges_verified -> Audit = audited ; Audit = plain ),
+           discharge_goal(Audit, true, true, Slow,
+                          discharge(constructed_argument, T, AV), Proved),
+           ( Proved == true -> AfterCheck = Checks0
+           ; Checks0 = [Proved|AfterCheck] )
       ; type_check_goal(AV, T,
                         check_argument_type(AV, T, Origin),
                         ArgGoal),
