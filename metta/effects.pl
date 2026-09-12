@@ -231,7 +231,7 @@ metta_effect_construct(_:Goal, [Goal]).
 %impure Goal or Cleanup inside it read as pure, which is the collapse defect
 %in a third wrapper. `setup_call_catcher_cleanup/4` hid three of its four the
 %same way [tested: lib_tabling_purity:every_goal_argument_of_a_meta_predicate_is_walked;
-%commit=WORKTREE].
+%commit=3a931690116abfa8a5a37ecba3fe179d826cd712].
 metta_effect_construct(Meta, Goals) :-
     functor(Meta, Name, Arity),
     functor(Head, Name, Arity),
