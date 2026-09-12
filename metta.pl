@@ -1152,6 +1152,15 @@ metta_platform_capability(deadlines, library(time),
 metta_platform_capability(subprocess, library(process),
                           '(git-import! ...), and anything else that starts \c
                            a program').
+% HTTP's optional TLS transport does not remove plain HTTP when SSL is absent.
+% [tested: lib_http:http_capabilities_are_separate; commit=WORKTREE].
+metta_platform_capability(http,
+                          [library(http/http_open), library(http/thread_httpd),
+                           library(http/http_client), library(socket), library(uri)],
+                          'lib_http client requests, response streams and local servers').
+metta_platform_capability(https,
+                          [library(http/http_ssl_plugin), library(ssl)],
+                          'HTTPS client requests; plain HTTP remains available').
 metta_platform_capability(regex, library(pcre),
                           'lib_regex, so (re-match ...), (re-find ...), \c
                            (re-captures ...), (re-split ...), \c
