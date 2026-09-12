@@ -1,5 +1,15 @@
 % Purpose: read MeTTa source, split it into complete top-level forms, and
 % dispatch each parsed form to the evaluator.
+% Guarantees: run_source_runnable/2 executes the translator's fixed answer,
+%   name and fuel envelope from compiled clauses while each form keeps its
+%   source-prefix translation, effects and observation boundary
+%   [tested: source_runnable_envelope, source_observation, fuel; commit=e246959279271d22f166a1c8fb1840896295a020].
+% Guarantees: retire_translated_clauses/2 consumes an ordered list of exact
+%   executable references, stopping at the first failed erase or callback
+%   [tested: source_retirement; commit=e246959279271d22f166a1c8fb1840896295a020].
+% Owns resources: a trailed publication context selects a source's journal
+%   owners for its lexical scope; source rows remain transactional
+%   [tested: source_publication; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Guarantees: plain_source_declarations/3 validates splice syntax before
 %   any source effect runs [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Guarded by: import_when/4 claims one source; runnable forms run outside the
@@ -278,6 +288,7 @@
             '$metta_equation_token'/4,
             stored_equation_source/4,
             forget_translated_from/3,
+            retire_translated_clauses/2,
             forget_space_source_loads/1,
             recompile_function_impl/1,
             recompile_function_impl_in/2,
@@ -427,12 +438,10 @@ metta_host_set_silent(Silent) :-
 
 :- thread_local working_dir/1.
 :- dynamic compiled_metta_source/1.
-:- thread_local active_source_load/1.
 :- dynamic source_load_assertion/3.
 :- dynamic source_load_support_assertions/2.
 :- dynamic source_load_resource/2.
 :- dynamic source_load_repair/2.
-:- thread_local source_recompile_context/2.
 %What a file put where, so that loading it again can REPLACE that rather than
 %add to it. SWI states the rule this implements: "clauses are owned by the file
 %in which they are defined. This information is used to replace the old
@@ -1482,9 +1491,9 @@ recompile_function_in_module_stable(Module, G) :-
                  %clause body; commit=e8270f8551083f236ce5134ca299adf5347d6898].
                  metta_instrument_recursive_clause(Fresh, RawClause, Clause),
                  assertz(Module:Clause, NewRef),
-                 record_recompiled_source_assertion(Owners, NewRef),
+                 record_source_assertion(NewRef),
                  record_translated_from(NewRef, Term, StoredRef, NewSourceRef),
-                 record_recompiled_source_assertion(Owners, NewSourceRef) ))).
+                 record_source_assertion(NewSourceRef) ))).
 
 % Preserve arrival groups only while the written declaration set is unchanged.
 % Alias edits change expansions, not those raw groups. A declaration edit still
@@ -1529,20 +1538,19 @@ translate_recompiled_clause(Module, G, Term, types(Types), Clause) :-
 %commit=b77e3ce5233e5f6032cfc8546ff83ecf4dc3de87].
 :- meta_predicate with_source_recompile_owners(+, 0).
 with_source_recompile_owners(Owners, Goal) :-
-    recompile_load_context(Context),
-    setup_call_cleanup(asserta(source_recompile_context(Context, Owners), ContextRef),
-                       call(Goal),
-                       erase(ContextRef)).
+    b_getval('$metta_source_publication', source_context(Loads, Recompiles, _, Stored)),
+    ( Loads = [Load|_] -> Context = load(Load) ; Context = none ),
+    with_source_publication_context(
+        source_context(Loads, [recompile(Context, Owners)|Recompiles], Owners, Stored), Goal).
 
 % Forcing a deferred dependency pushes its own source pin. It must not inherit
 % the recompile owner of the caller that happened to force it.
 % [tested: test_source_replacement_retains_recompiled_binding_ownership; commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4]
 source_recompile_owners(Owners) :-
-    source_recompile_context(Context, Owners), !,
-    recompile_load_context(Context).
-
-recompile_load_context(Context) :-
-    ( active_source_load(Load) -> Context = load(Load) ; Context = none ).
+    b_getval('$metta_source_publication',
+             source_context(Loads, Recompiles, _, _)),
+    member(recompile(Context, Owners), Recompiles), !,
+    ( Loads = [Load|_] -> Context = load(Load) ; Context = none ).
 
 % Compatibility name for the former name-index walk. Every compiled form now
 % records its supports at record_translated_from/3, so one indexed forward
@@ -1563,9 +1571,7 @@ record_translated_from(Ref, Term, SourceRef) :-
 record_equation_token(Ref, Name, Token) :-
     clause_property(Ref, module(Module)),
     assertz('$metta_equation_token'(Module, Name, Ref, Token), TokenRef),
-    ( source_recompile_owners(Owners)
-    -> record_recompiled_source_assertion(Owners, TokenRef)
-    ; record_source_assertion(TokenRef) ).
+    record_source_assertion(TokenRef).
 
 % A binding row records what arrival-time rewriting did to the occurrence
 % BEYOND resolving &self: a bound token, a form rewriter. &self itself needs
@@ -1582,9 +1588,7 @@ record_translated_from(Ref, Term, StoredRef, SourceRef) :-
         stored_atom_of_ref(StoredRef, _, [=, [Name|_], _], Token),
         clause_property(Ref, module(TokenModule))
     ->  assertz('$metta_equation_token'(TokenModule, Name, Ref, Token), TokenRef),
-        ( source_recompile_owners(TokenOwners)
-        -> record_recompiled_source_assertion(TokenOwners, TokenRef)
-        ; record_source_assertion(TokenRef) )
+        record_source_assertion(TokenRef)
     ;   true
     ),
     (   StoredRef \== none,
@@ -1596,9 +1600,7 @@ record_translated_from(Ref, Term, StoredRef, SourceRef) :-
         ),
         \+ Law =@= Term
     ->  assertz(translated_equation_binding(Space, StoredRef, Ref), BindingRef),
-        ( source_recompile_owners(Owners)
-        -> record_recompiled_source_assertion(Owners, BindingRef)
-        ; record_source_assertion(BindingRef) )
+        record_source_assertion(BindingRef)
     ;   true
     ),
     (   clause_property(Ref, module(Module))
@@ -1719,6 +1721,17 @@ forget_translated_from(Module, Ref, [=, [G|_], _]) :-
 forget_translated_from(_, Ref, _) :-
     forget_translated_equation_binding(Ref),
     retractall(translated_from(Ref, _)).
+
+% Retire the selected executable list in its supplied order. Each provenance
+% withdrawal stays adjacent to its erase, so a callback sees the same prefix
+% and a refusal leaves the same unvisited suffix. The traversal is linear:
+% every retained reference still requires its own erase and callbacks.
+retire_translated_clauses(_, []).
+retire_translated_clauses(Module, [Ref|Refs]) :-
+    ( translated_from(Ref, Term) -> forget_translated_from(Module, Ref, Term)
+    ; true ),
+    erase(Ref),
+    retire_translated_clauses(Module, Refs).
 
 forget_translated_equation_binding(Ref) :-
     forall(clause('$metta_equation_token'(_, _, Ref, _), true, TokenRef),
@@ -1933,13 +1946,7 @@ process_form(Space, parsed(expression, _, Term0), []) :-
     metta_add_atom(Space, Term, _),
     print_expression_form(Term).
 process_form(Space, parsed(runnable, FormStr, Term, Names), Result) :-
-    flush_source_program_analysis_if_needed,
-    rewrite_parsed_form(Space, FormStr, Term, BoundTerm),
-    space_module(Space, Module),
-    with_metta_module(Module,
-                      translate_runnable_expr(BoundTerm, Names, Goals, Result)),
-    print_runnable_form(FormStr, Goals),
-    call_goals_in(Module, Goals).
+    process_runnable_form(Space, FormStr, Term, Names, Result).
 process_form(Space, parsed(function, FormStr, Term), []) :-
     Term = [=, [F|Args], _],
     must_be(atom, F),
@@ -1981,13 +1988,7 @@ process_loader_form(Space, parsed(expression, _, Term), []) :-
     metta_add_atom(Space, Term, _),
     print_expression_form(Term).
 process_loader_form(Space, parsed(runnable, FormStr, Term, Names), Result) :-
-    flush_source_program_analysis_if_needed,
-    rewrite_parsed_form(Space, FormStr, Term, BoundTerm),
-    space_module(Space, Module),
-    with_metta_module(Module,
-                      translate_runnable_expr(BoundTerm, Names, Goals, Result)),
-    print_runnable_form(FormStr, Goals),
-    call_goals_in(Module, Goals).
+    process_runnable_form(Space, FormStr, Term, Names, Result).
 process_loader_form(Space, parsed(function, FormStr, Term), []) :-
     Term = [=, [F|_], _],
     add_sexp(Space, Term, SpaceRef),
@@ -1999,6 +2000,41 @@ process_loader_form(Space, parsed(function, FormStr, Term), []) :-
 process_loader_form(_, In, _) :-
     throw(error(metta_translation_failed(In),
                 context(process_loader_form/3, 'could not translate MeTTa form'))).
+
+process_runnable_form(Space, FormStr, Term, Names, Result) :-
+    flush_source_program_analysis_if_needed,
+    rewrite_parsed_form(Space, FormStr, Term, BoundTerm),
+    space_module(Space, Module),
+    with_metta_module(Module,
+                      translate_runnable_expr(BoundTerm, Names, Goals, Result)),
+    print_runnable_form(FormStr, Goals),
+    call_goals_in(Module, [filereader:run_source_runnable(Module, Goals)]).
+
+% Unpack the fixed envelope emitted by translate_runnable_expr/4 as data.
+% Its controls are compiled here once; only the current form's conjunction
+% remains a runtime goal. SWI's I_CALL1 compiles a control term at each call:
+% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-vmi.c#L5457
+% Keep call_goals_in/2 outside this executor: pragma limits and source
+% observation own that boundary, and the original goals still print there.
+run_source_runnable(Module, [(Collect, metta_prune_empty_answers(All, Out))]) :-
+    !,
+    collect_source_answers(Module, Collect),
+    spaces:metta_prune_empty_answers(All, Out).
+run_source_runnable(Module, [Collect]) :-
+    collect_source_answers(Module, Collect).
+
+collect_source_answers(_, Out = []) :- !, Out = [].
+collect_source_answers(Module,
+        findall(Template, metta_run_with_fuel(Value, Fuel, Boundary), Out)) :-
+    findall(Template,
+            metta_engine:metta_run_with_fuel(Value, Fuel,
+                filereader:run_source_answer(Module, Boundary)), Out).
+
+run_source_answer(Module,
+        (metta_run_named(Names, Conj, Generated),
+         (Value == '$metta_not_reducible' -> Boundary = Form ; Boundary = Value))) :-
+    spaces:metta_run_named(Names, Module:Conj, Generated),
+    ( Value == '$metta_not_reducible' -> Boundary = Form ; Boundary = Value ).
 
 print_expression_form(_) :- silent(true), !.
 print_expression_form(Term) :-
