@@ -169,7 +169,7 @@ metta_host_finish_resolution(Resolve, Action, Ball) :-
 %would be two tests on every bounded call [measured 2026-09-12: the Python
 %seat's hundred guarded queries read 38,107 with one wrapper's test and
 %38,407 with a second; command=extensions/python/bench.py --counter-only
-%query-limit-guarded; commit=WORKTREE].
+%query-limit-guarded; commit=3a931690116abfa8a5a37ecba3fe179d826cd712].
 :- multifile seam:bound_hook/2.
 seam:kind(bound_hook/2, declaration).
 seam:bound_hook(Frame, metta_host_repair_cut_resolution(Frame)).
