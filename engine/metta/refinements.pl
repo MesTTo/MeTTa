@@ -51,9 +51,12 @@
 %     branch failure the arbiter gives it
 %     [tested: refinements:a_return_refinement_refuses_with_the_constraint_and_the_value,
 %     refinements:a_return_base_mismatch_stays_silent; commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
-% Decides: the refinement vocabulary is the eleven heads below, and the
+% Guarantees: Literal constraints test exact finite membership without binding
+%   the value [tested: refinements:literal_membership_is_exact_and_does_not_bind;
+%   commit=WORKTREE].
+% Decides: the refinement vocabulary is the twelve heads below, and the
 %   catalog's `(vocabulary refinement ...)` row in engine/spaces/catalog.pl
-%   names the same eleven; the two are held equal by
+%   names the same twelve; the two are held equal by
 %   refinements:the_rule_table_and_the_catalog_vocabulary_agree rather than
 %   derived from one another, because catalog.pl is consulted into the spaces
 %   module and may not reach an engine predicate.
@@ -94,6 +97,7 @@ metta_refinement_head('MaxLen').
 metta_refinement_head('Len').
 metta_refinement_head('Predicate').
 metta_refinement_head('Unit').
+metta_refinement_head('Literal').
 
 metta_refinement_constraint(Constraint, Head, Arguments) :-
     nonvar(Constraint),
@@ -166,6 +170,8 @@ metta_refinement_rule('Len', [Least, Most], Value) :-
 metta_refinement_rule('Predicate', [Test], Value) :-
     metta_refinement_predicate(Test, Value).
 metta_refinement_rule('Unit', [_], _).
+metta_refinement_rule('Literal', Values, Value) :-
+    member(Candidate, Values), Value == Candidate, !.
 
 metta_interval_bound(Bound, Value) :-
     nonvar(Bound),

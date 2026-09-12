@@ -15,6 +15,10 @@
 %   undecided rather than violated, and the rule table equals the catalog row
 %   [tested: run_tests(refinements); commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 % Owns resources: each fixture releases its space.
+% Guarantees: Literal constraints use exact membership, including an empty
+%   domain, and never bind a variable while testing it [tested:
+%   refinements:literal_membership_is_exact_and_does_not_bind;
+%   commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -88,6 +92,30 @@ test(a_declared_refined_type_still_admits_by_unification,
     assertion(check_argument_type_in(Module, n,
                                      ['Annotated', 'Number', ['Gt', 0]],
                                      ordinary)).
+
+test(literal_membership_is_exact_and_does_not_bind) :-
+    assertion(metta_refinement_holds(['Literal', a, b], a)),
+    assertion(metta_refinement_holds(['Literal', 1, "one", [a, b]], [a, b])),
+    assertion(\+ metta_refinement_holds(['Literal', 1], 1.0)),
+    assertion(\+ metta_refinement_holds(['Literal'], a)),
+    assertion(\+ metta_refinement_holds(['Literal', a], Variable)),
+    assertion(var(Variable)).
+
+test(a_literal_parameter_and_result_enforce_their_finite_domains,
+     [ setup(setup_refined(Space)), cleanup(cleanup_refined(Space)) ]) :-
+    process_metta_string(
+        "(: mood (-> (Annotated Symbol (Literal up down)) Symbol))
+         (= (mood $x) $x)
+         (: result (-> Number (Annotated Number (Literal 1 2))))
+         (= (result $n) $n)", _, Space),
+    answers(Space, [mood, up], Allowed), assertion(Allowed == [up]),
+    answers(Space, [mood, sideways], Refused),
+    assertion(Refused == [['Error', [mood, sideways],
+                           ['BadArgValue', 1, ['Literal', up, down], sideways]]]),
+    answers(Space, [result, 2], Result), assertion(Result == [2]),
+    answers(Space, [result, 3], BadResult),
+    assertion(BadResult == [['Error', [result, 3],
+                             ['BadReturnValue', ['Literal', 1, 2], 3]]]).
 
 test(a_wildcard_typed_value_is_decided_by_the_constraint,
      [ setup(setup_refined(Space)), cleanup(cleanup_refined(Space)) ]) :-
