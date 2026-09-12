@@ -465,3 +465,29 @@ cost the dynamic fact's inferences (10,000-iteration loops, equal counts), a
 one-element stack leaves no choicepoint, a malformed shape or key refuses.
 `sh engine/test.sh suites/spaces/receipt_limits.plt` -> 5 tests and 21
 subtests passed, 15,000 budget trials and the armed-hook child.
+
+Tried: the four prescribed commands on 5dac08615593fffd7536cbd50e4fd4955b09f305
+(engine 1, python 1, repository 0, checks 1; `ai-tmp/guard3-receipts/gates.tsv`).
+The engine suite's reds are the 29 owned lib_import fixtures that assert
+`filereader:working_dir/1` and the owned umbrella's missing
+`metta_with_trailed/3` export, unchanged. The Python suite read 17 reds, 12
+of them every profile door raising `//2: Arithmetic: evaluation error:
+zero_divisor`; the same test is red on the pristine cut at today's load
+(`ai-tmp/guard3-receipts/repro-profile-control.log`) and green in the
+predecessor's runs at loadavg 30.
+Found: SWI's profile/2 prints its report as the cleanup of the goal
+(library/prolog_profile.pl:117), and time_data/7 divides each predicate's
+ticks by the total, so a zero-sample profile raises from the report after
+the goal answered; the absorb clause in
+extensions/python/metta/_binding/profiling.pl tested `nonvar(Out)` in the
+catch's recovery, where the goal's bindings have already been unwound, so it
+never fired. A quiet box finishes `!(prof-stats 20000)` inside one 5 ms
+sampling period (samples=0 ticks=0 time=0.0004 s), which is when the latent
+defect shows.
+Decided: the profiled goal records its answer into a cell with nb_setarg/3
+before the report can raise; the recovery absorbs the report's zero divisor
+only when the cell holds an answer, and the door answers from the cell. A
+zero-sample profile keeps its call rows with zero ticks
+(test_a_profile_with_no_samples_still_answers). The two remaining Python reds
+are the cut's own: the authored-cost fixture (repaired on trunk after this
+cut) and the owned classes journal's absolute path.

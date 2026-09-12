@@ -173,6 +173,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Python profile door keeps the goal's answers when SWI's sampler took no
+  sample: the profiler's report divides by the total tick count as the cleanup
+  of the goal, and the raised division unwound the answer it was meant to
+  carry, so every profile door raised an engine error on a box quiet enough to
+  finish the profiled goal inside one sampling period. The answer is recorded
+  beside the run and an empty profile keeps its call rows.
 - The dependency gate derives local tool modules from their source directory
   and recognises the reference generator's development dependency. The parity
   fixture producer uses the shared process bound. The syntax introduction
