@@ -1,6 +1,6 @@
 ; Purpose: every lib_spaces operation over whole spaces: counting, finding,
 ; copying, moving, draining, snapshotting, subtracting and clearing.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/20-spaces_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/20-spaces_lib.metta; commit=a8b4bab6eb0bf1b42eb441e9145144cf91befa7d].
 ; Each bulk operation answers once per atom it touched, so the count of
 ; answers is the count of work it did.
 !(import! &self (library lib_spaces))
