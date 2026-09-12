@@ -587,7 +587,8 @@ metta_outer_transaction_prepare(Goal, Outcome, outer(Enlisted)) :-
                 b_setval('$metta_user_tx', true),
                 materialization_transaction(
                     Goal,
-                    metta_validate_pending_type_aliases),
+                    ( metta_validate_pending_type_aliases,
+                      forall(seam:transaction_constraint(Check), call(Check)) )),
                 b_setval('$metta_user_tx', false))
         ->  Outcome = committed ; Outcome = failed ),
           Error,
