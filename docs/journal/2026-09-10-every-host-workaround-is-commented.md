@@ -544,3 +544,39 @@ translate 314,835, every one below the cut (558,928 / 267,402 / 208,102 /
 787,234, 279,234 and 439,234 through the enumeration door, still at or
 below the cut's pins; query-2k-rows, query-where, loop-1m and add-single at
 their pins on both trees.
+
+## 2026-09-12, what a bounded call pays for the armed hook
+
+Tried: the Python seat's guarded query row against the cut's pin ->
+query-limit-guarded 38,407 where the pin is 37,707, over one hundred guarded
+queries [extensions/python/bench.py --counter-only query-limit-guarded, min of
+three fresh processes; the pristine control at b1d175f13 passes the pin].
+Mechanism: the wrapper this thread put on '$syspreds':call_with_inference_limit/3
+runs on every bounded call of the process, and its body asked whether the hook
+was armed with clause/2 over prolog:prolog_exception_hook/5, four inferences a
+call. Placed by arms: the same tree with this unit at its pre-wrapper state
+reads 37,807, so 600 of the 700 is the wrapper and 100 is the rest of the
+package, one inference a guarded query.
+Decided: a dynamic metta_receipt_bound_seen/0 is the memo every later bound
+reads, asserted after the hook clause it records and under the same mutex, and
+the test moves into the wrapper's own body so a bound pays one predicate call
+and not two. The clause stays the armed record: the arming path re-checks it,
+so a bound cut between the two assertions leaves a state the next bound
+completes and neither assertion can happen twice. The row reads 38,107.
+Measured: a meta-called bound costs 9 inferences against the cut's 6, 11 with
+the previous body and 12 with a named wrapper predicate
+(ai-tmp/ai-guard3-bound-cost.pl, min of three loops of a thousand).
+Rejected: unwrap_predicate/2 after the first bound, which would make every
+later bound free, because it releases the closure blob another thread may be
+executing at that moment; trunk's engine/metta/limits.pl records the same
+refusal for its own wrappers.
+Note: trunk pins this row at 38,107 for its own first-bound wrapper, the same
+number this branch now reads, so the merged tree pays the cost once and the
+pin it already carries is the one that survives.
+Note: two measurement traps cost a full round each, both silent. A probe under
+ai-tmp/ that spells `../../engine/metta.pl` loads the NEIGHBOURING CHECKOUT,
+not this worktree, and reads its engine; and an edit to a unit leaves its
+umbrella's .qlf fresh by mtime, so a process started without the engine's own
+warm boot measures the previous compile. Together they read identical
+inference counts for three different versions of engine/spaces/receipts.pl,
+the cut's included, which looks exactly like a change that costs nothing.

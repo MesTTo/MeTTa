@@ -7,7 +7,13 @@
 % Guarantees: the exception hook that finishes a cut listener is clausal only
 %   from the process's first bound on, so a process that never bounds pays
 %   nothing per ball [tested: spaces_receipt_limits:the_limit_hook_is_armed_by_the_first_bound;
-%   commit=3ff7688a605c1f0de0e021f66f3075353476a992].
+%   commit=WORKTREE].
+% Guarantees: a process that does bound pays three inferences per bounded call
+%   for the test that arms it, and nothing else after the first
+%   [measured 2026-09-12: 38,107 against 37,807 with the wrapper absent;
+%   command=extensions/python/bench.py --counter-only query-limit-guarded;
+%   fixture=one hundred guarded Python queries, min of three fresh processes;
+%   commit=WORKTREE].
 %
 % Purpose: reserve incoming occurrence identities across transaction views.
 % Assumes: native erasures use metta_erase_storage_ref/1 or metta_retract_storage/1.
@@ -158,19 +164,35 @@ metta_receipt_finish_frame(Frame) :-
 % Workaround: swi-cleanup-window - schedule reconciliation when a bound cuts an owned transaction.
 :- multifile prolog:prolog_exception_hook/5.
 :- dynamic prolog:prolog_exception_hook/5.
-:- use_module(library(prolog_wrap), [wrap_predicate/4, current_predicate_wrapper/4]).
+:- dynamic metta_receipt_bound_seen/0.
+:- use_module(library(prolog_wrap), []).
 
+% Every bounded call in the process runs the test in the wrapper's body, so
+% the test is a dynamic fact and not a search for the clause it records:
+% clause/2 over the hook costs four inferences against the fact's one, and the
+% Python seat's hundred guarded queries read 38,407 with the search against
+% 38,107 with the fact. The wrapper itself is the remaining 300, three
+% inferences a bounded query: with this unit at its pre-wrapper state the same
+% tree reads 37,807 [measured 2026-09-12: extensions/python/bench.py
+% --counter-only query-limit-guarded, min of three fresh processes per arm,
+% each after a boot that rebuilds the .qlf set; commit=WORKTREE].
 metta_receipt_arm_limit_hook :-
-    (   metta_receipt_limit_hook_armed
-    ->  true
-    ;   with_mutex('$metta_receipt_limit_hook', metta_receipt_arm_limit_hook_once)
-    ).
+    with_mutex('$metta_receipt_limit_hook', metta_receipt_arm_limit_hook_once).
 
+% Under the mutex. The outer test is for the thread that was waiting on it and
+% the inner one for a bound that was cut between the two assertions: the hook
+% clause is the armed record and the fact is the memo of it, so a trip on
+% either call port leaves a state the next bound completes and neither
+% assertion can happen twice.
 metta_receipt_arm_limit_hook_once :-
-    (   metta_receipt_limit_hook_armed
+    (   metta_receipt_bound_seen
     ->  true
-    ;   assertz((prolog:prolog_exception_hook(inference_limit_exceeded, _, _, _, _) :-
-                     spaces:metta_receipt_schedule_reconciliation))
+    ;   (   metta_receipt_limit_hook_armed
+        ->  true
+        ;   assertz((prolog:prolog_exception_hook(inference_limit_exceeded, _, _, _, _) :-
+                         spaces:metta_receipt_schedule_reconciliation))
+        ),
+        assertz(metta_receipt_bound_seen)
     ).
 
 metta_receipt_limit_hook_armed :-
@@ -183,13 +205,19 @@ metta_receipt_schedule_reconciliation :-
     thread_signal(Me, spaces:metta_receipt_reconcile_scope(Scope)),
     fail.
 
-% Installed once per process; a second consult finds the wrapper in place.
-:- (   current_predicate_wrapper('$syspreds':call_with_inference_limit(_, _, _),
-                                 metta_receipt_first_bound, _, _)
+% Installed once per process; a second consult finds the wrapper in place. The
+% library is named on the call rather than imported, so a reader of this
+% directive resolves both goals of the body it installs.
+:- (   prolog_wrap:current_predicate_wrapper('$syspreds':call_with_inference_limit(_, _, _),
+                                             metta_receipt_first_bound, _, _)
    ->  true
-   ;   wrap_predicate('$syspreds':call_with_inference_limit(_, _, _),
-                      metta_receipt_first_bound, Bounded,
-                      ( spaces:metta_receipt_arm_limit_hook, Bounded ))
+   ;   prolog_wrap:wrap_predicate('$syspreds':call_with_inference_limit(_, _, _),
+                                  metta_receipt_first_bound, Bounded,
+                                  ( (   spaces:metta_receipt_bound_seen
+                                    ->  true
+                                    ;   spaces:metta_receipt_arm_limit_hook
+                                    ),
+                                    Bounded ))
    ).
 
 metta_receipt_reconcile_scope(Scope) :-

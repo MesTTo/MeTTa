@@ -61,7 +61,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   or one-element context reads in one inference, and the loader's per-atom
   read and the compiler's per-equation reads return to the cut's counts. The
   receipt listener's exception hook is clausal only from the process's first
-  bound on, so a process that never bounds pays nothing per ball it throws.
+  bound on, so a process that never bounds pays nothing per ball it throws and
+  one that does pays three inferences per bounded call for the test that arms
+  it, read from a fact rather than searched for among the hook's clauses.
 - Receipt retirement completes after an inference limit interrupts a native
   transaction's completion listener. Rolled-back marker notifications release
   their standing-engine claims while preserving a live outer transaction.
