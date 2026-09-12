@@ -340,6 +340,63 @@ loading and class allocation curves. The baseline implementation remains fixed
 during its measurement. Test fixtures and the corpus pair are prepared
 independently and are not yet verified.
 
+## 2026-09-12: argument proof reuse and host container length
+
+Tried: a standalone reference-publication probe added one importer beside
+one existing sibling. The trace published the provider and both importers,
+three spaces in total. `ai-tmp/ai-classes-publication-old-probe.log` records
+the exact spaces. The affected-space regression expects only the new importer.
+
+Tried: `PYTHONPATH=extensions/python $CHECK_PY
+ai-tmp/ai-classes-method-qualification-probe.py` measured 1,000 calls inside
+`with_metta_module/2`. The constant control cost 5.002 inferences per call;
+the untyped norm cost 10.002, its forwarding equation 11.002, the typed norm
+192.026, and the typed forwarding equation 377.058. A literal `evalc` cost
+507.082. The compiled typed caller contains
+`check_argument_type(['ProbePoint',3,4],'ProbePoint',ordinary)` even though
+construction has already checked that unchanged term.
+
+Tried: the same command with `--discharge` installed temporary wrappers only
+in that probe's process. Reusing `constructor_sort_proved/2` and the exact
+result-sort agreement reduced the typed norm to 10.010; the untyped control
+remained 10.002. Returning `true` from the checker alone left `once(true)`
+and two inferences per call. Omitting the discharged argument check removed
+that cost. The typed forwarding equation still cost 195.034 because its
+variable argument retains the existing defining-module guard. This probe
+does not establish a method dispatch implementation.
+
+Decided: extend the existing argument-check emitter to consume a ground
+construction proof, with its existing discharge audit and source invalidation.
+Do not evaluate arbitrary refinement predicates at compilation. Prepared
+tests measure typed versus untyped calls and change both a callee's arrow
+and the data read by a callee's refinement. They have not run.
+
+Found: `metta_refinement_length/2` currently asks `grounded_structure/2` for
+all elements and then counts them. Python's structural view intentionally
+follows sequence-pattern rules, so dictionaries and sets have no such view.
+That mechanism both enumerates sequences unnecessarily and rejects sized
+containers that the class field boundary now retains as host objects.
+[The annotated-types 0.7.0 definitions](https://github.com/annotated-types/annotated-types/blob/v0.7.0/annotated_types/__init__.py)
+define these constraints through `len(value)`;
+[Python's Sized protocol](https://docs.python.org/3.14/library/collections.abc.html#collections.abc.Sized)
+requires only `__len__`.
+
+Decided: separate the host length query from structural matching, retaining
+the structural route for providers that supply only that view. This changes
+the Python sequence path from enumerating its elements to one length query
+and admits mappings and sets without changing their pattern semantics. The
+prepared tests cover every retained container grain and a million-element
+sequence whose iteration and element reads raise. The host service, binding
+declaration, generated provisions, kind row and reference documentation must
+land together after the unchanged grain baseline finishes.
+
+Open: full suites and final costs remain pending. Earlier versions of the
+qualification probe omitted the dynamic module context; their numbers are
+superseded by the measurements above. The first listing attempt also parsed
+hyphenated predicate names as subtraction, and the first experimental wrapper
+left `current_metta_module/1` unqualified in `prolog_wrap`'s context. Both
+diagnostic errors were repaired before these successful runs.
+
 ## 2026-09-12: policy publication deadlock investigation
 
 Tried: a bounded probe of
@@ -417,6 +474,36 @@ tests (`ai-tmp/ai-classes-c3-loading-{1..5}.log`). The translator suite passes
 named-listener workaround has no remaining site, so its live ledger entry is
 removed. Its host reproduction and earlier journal record remain historical
 evidence; no host fix is claimed.
+
+## 2026-09-12: length is independent of structure
+
+Tried: the unchanged length test raises `a length refinement must not iterate`
+for Sequence and returns BadArgValue for a merely Sized object. Command:
+`sh extensions/python/test.sh tests/ch09_types/test_refinements.py
+-k host_length_refinements_do_not_read_elements -n 0`; 2 failed,
+`ai-tmp/ai-classes-c3-host-length-before.log`.
+
+Decided: `grounded_length/2` is an ownership seam. Python supplies Sized's
+`__len__` and reads a Janus tuple's arity without constructing its argument
+list. Native strings and expressions keep their own length operations;
+a provider offering only structure retains the structural fallback. An
+exception from a claimed length query propagates, rather than requesting a
+different representation. The Python cost is one length query, independent
+of element count, replacing one query plus N iterator reads and a list of N
+references. Its provider's own `__len__` determines the remaining complexity.
+
+Verified: `python extensions/python/tools/bindinggen.py --write` exits 0
+(`ai-tmp/ai-classes-c3-length-bindinggen.log`).
+`sh engine/test.sh suites/typecheck/refinements.plt
+suites/typecheck/union_types.plt suites/seams/ext_points.plt` passes 19+2,
+35+3 and 28 tests (`ai-tmp/ai-classes-c3-length-engine.log`).
+`sh extensions/python/test.sh tests/ch09_types/test_class_construction.py
+tests/ch09_types/test_class_grains.py tests/ch09_types/test_class_field_values.py
+tests/ch09_types/test_refinements.py
+tests/ch03_atoms_and_expressions/test_convert.py -n 0` passes 128 tests
+(`ai-tmp/ai-classes-c3-length-python.log`). The length fixture rejects element
+access at sizes 0, 1 and 1,000,000, and a separate fixture checks a failing
+`__len__`. All Python commands use `$CHECK_PY`, the interpreter with `janus_swi` installed.
 
 ## 2026-09-12: reusing the constructed argument sort
 

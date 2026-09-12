@@ -5,6 +5,9 @@
 %   [tested: reference_scopes; commit=WORKTREE].
 % Guarantees: metta_transaction/2 publishes the result-aware transaction service
 %   [tested: classes_transaction_results; commit=WORKTREE].
+% Guarantees: grounded_length/2 lets the value's owner answer a length query
+%   independently of its structural view [tested:
+%   refinements:a_length_provider_does_not_read_structure; commit=WORKTREE].
 % Guarantees: allocation, release and held-goal context hooks let lib_thread
 %   own scope lifetimes across host engines [tested: lib_thread_scope;
 %   commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
@@ -206,6 +209,7 @@
             grounded_algebra_equal/3,
             grounded_algebra_type/3,
             grounded_class_type/2,
+            grounded_length/2,
             grounded_numeric/1,
             grounded_numeric_operation/3,
             grounded_structure/2,
@@ -1082,6 +1086,13 @@ kind(interposed_dispatch/4, declaration).
 %answers it the same way, and no caller learns who did.
 :- multifile grounded_structure/2.
 kind(grounded_structure/2, ownership).
+
+% The length of a grounded value, independently of whether it supports
+% expression matching. Its owner returns a nonnegative integer or declines.
+% A length constraint asks this door before grounded_structure/2, so a sized
+% value need not enumerate its contents or offer a sequence pattern.
+:- multifile grounded_length/2.
+kind(grounded_length/2, ownership).
 
 %How a grounded value RENDERS, for a writer that has no other way to know.
 %

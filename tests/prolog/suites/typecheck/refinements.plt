@@ -19,6 +19,13 @@
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 
+:- multifile seam:grounded_length/2, seam:grounded_structure/2.
+seam:grounded_length(plunit_length_owned(N), N).
+seam:grounded_structure(plunit_length_owned(_), _) :-
+    throw(error(unexpected_structure_read, none)).
+seam:grounded_structure(plunit_structure_owned(N), Elements) :-
+    length(Elements, N).
+
 :- begin_tests(refinements).
 
 setup_refined(Space) :-
@@ -163,6 +170,16 @@ test(every_numeric_refinement_decides_a_number) :-
     assertion(metta_refinement_holds(['MultipleOf', 0.5], 1.5)),
     assertion(\+ metta_refinement_holds(['MultipleOf', 0], 4)),
     assertion(\+ metta_refinement_holds(['Gt', 0], abc)).
+
+test(a_length_provider_does_not_read_structure) :-
+    assertion(metta_refinement_holds(['Len', 0, 0], plunit_length_owned(0))),
+    assertion(metta_refinement_holds(['Len', 1000000], plunit_length_owned(1000000))),
+    assertion(\+ metta_refinement_holds(['MinLen', 2], plunit_length_owned(1))),
+    assertion(metta_refinement_holds(['Len', 2, 2], -(1, 2))).
+
+test(a_structural_provider_still_answers_length) :-
+    assertion(metta_refinement_holds(['Len', 2, 2], plunit_structure_owned(2))),
+    assertion(\+ metta_refinement_holds(['MinLen', 2], plunit_structure_owned(1))).
 
 numpy_scalar(Value) :-
     catch(py_call(numpy:int64(5), Value), _, fail).

@@ -26,10 +26,13 @@
 %     [tested: refinements:every_numeric_refinement_decides_a_number,
 %     refinements:a_host_numeric_decides_through_the_seam; commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
 %   - MinLen, MaxLen and Len read a string's length, an expression's child
-%     count, and a host sequence's length through seam:grounded_structure/2;
+%     count, and a grounded value's length through seam:grounded_length/2,
+%     falling back to seam:grounded_structure/2 when no length provider claims it;
 %     a value with no length satisfies no length refinement
-%     [tested: refinements:a_length_refinement_reads_strings_and_expressions;
-%     commit=19093dd75eda0102eb0329a71460e8a0c7a0c727].
+%     [tested: refinements:a_length_refinement_reads_strings_and_expressions,
+%     refinements:a_length_provider_does_not_read_structure,
+%     refinements:a_structural_provider_still_answers_length;
+%     commit=WORKTREE].
 %   - Predicate applies its test to the value as a finished value, through the
 %     translator's dynamic-value door, so a MeTTa head runs its equations and
 %     a grounded host callable runs through seam:grounded_apply/3; the
@@ -214,19 +217,18 @@ metta_refinement_multiple(Value, Divisor) :-
         metta_refinement_compare('<=', Remainder, 0)
     ).
 
-%A string's length, an expression's child count, and a host sequence's
-%length. seam:grounded_structure/2 asks the host for the sequence protocol
-%first and declines a value that has none, so a host object with no length
-%satisfies no length refinement rather than raising out of the check.
+% Native values supply their own length. A grounded owner's length query can
+% avoid enumeration and admit sized values that have no structural reading.
+% Providers supplying only structure retain that route; no provider means the
+% constraint fails. An exception from a claimed length query still propagates.
 metta_refinement_length(Value, Length) :-
     (   string(Value)
     ->  string_length(Value, Length)
     ;   is_list(Value)
     ->  length(Value, Length)
-    ;   atomic(Value),
-        \+ atom(Value),
-        seam:host_object(Value)
-    ->  once(seam:grounded_structure(Value, Elements)),
+    ;   once(seam:grounded_length(Value, Length))
+    ->  true
+    ;   once(seam:grounded_structure(Value, Elements)),
         length(Elements, Length)
     ).
 

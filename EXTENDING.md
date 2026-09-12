@@ -2872,6 +2872,13 @@ answer rather than a gap: `extensions/python/metta/_binding/surface.pl` gives on
 sequences and withholds it from a `dict`, a `set` and a `str`, following PEP
 634's rule for which objects a sequence pattern may take apart.
 
+Length refinements also accept `seam:grounded_length(Value, Length)`. This
+ownership seam asks for a nonnegative integer without reading the elements.
+The Python provider uses `len` on `collections.abc.Sized`, so mappings and sets
+can satisfy a length constraint while retaining their own structural meaning.
+If no length provider claims a value, refinement checking tries its existing
+structural reading.
+
 ### Say how a value prints
 
 ```prolog
