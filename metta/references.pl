@@ -12,6 +12,10 @@
 %   their outer query frame unwatched [tested:
 %   reference_loading:a_suspended_background_qualified_query_survives_release;
 %   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+%   One process frame_finished listener, registered through metta_listen/2 at
+%   load, serves every thread's pending frames [tested:
+%   reference_loading:concurrent_transactions_keep_each_others_rollback_listener;
+%   commit=WORKTREE].
 % Owns resources: observed spaces own mutation observers, projected metadata and
 %   native bindings; space release withdraws all three. Transaction completion
 %   reconciles native bindings with the rows surviving commit or rollback.
@@ -491,14 +495,16 @@ metta_reference_publish_metadata(Space, Face) :-
              -> assertz(metta_reference_projection(Space, Key, Token, Ref))
              ; true ) )).
 
+% One process listener, registered below at load, serves every thread:
+% frame_finished fires on the thread whose frame finished, and the pending
+% frames it consults are that thread's own global variable, so one thread's
+% completion never touches another's watch. Registered at load rather than on
+% the first tracked transaction, because that transaction runs under whatever
+% mutex its caller holds, and a registration made there orders that mutex
+% before the channel's event-list lock.
 metta_reference_track_transaction :-
     (   current_transaction(_)
-    ->  ( nb_current('$metta_reference_listening', true) -> true
-        ; nb_setval('$metta_reference_listening', true),
-          thread_self(Owner),
-          prolog_listen(frame_finished,
-                        metta_engine:metta_reference_frame_finished(Owner)) ),
-        prolog_current_frame(Frame), metta_reference_track_frames(Frame)
+    ->  prolog_current_frame(Frame), metta_reference_track_frames(Frame)
     ;   true
     ).
 
@@ -523,29 +529,20 @@ metta_reference_track_frames(Frame) :-
     ; prolog_frame_attribute(Frame, parent, Parent),
       metta_reference_track_frames(Parent) ).
 
-% Workaround: swi-named-listener-replacement-lock - register distinct unnamed owner closures and unregister each once.
-% frame_finished is global; the frame identifiers and pending set are local.
-% Distinct closures also avoid SWI's named-hook replacement path, which leaves
-% its list mutex locked at this revision:
-% https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-event.c#L145-L160
-% [tested: reference_loading:concurrent_transactions_keep_each_others_rollback_listener;
-% commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
-metta_reference_frame_finished(Owner, Frame) :-
-    thread_self(Thread),
-    ( Owner == Thread -> metta_reference_finish_frame(Owner, Frame) ; true ).
-
-metta_reference_finish_frame(Owner, Frame) :-
-    metta_reference_pending_frames(Frames),
-    (   selectchk(Frame, Frames, Remaining)
+% A frame this thread never tracked is another thread's or an untracked one,
+% and either way there is nothing to finish. The listener is process-wide
+% from load, so it runs for every marked frame that finishes, one per
+% transaction the receipts watch; a thread that tracks nothing pays the call
+% and one failed global-variable read and nothing else.
+:- metta_listen(frame_finished, metta_engine:metta_reference_frame_finished).
+metta_reference_frame_finished(Frame) :-
+    (   nb_current('$metta_reference_frames', Frames),
+        selectchk(Frame, Frames, Remaining)
     ->  nb_setval('$metta_reference_frames', Remaining),
         ( nb_current('$metta_reference_finishing', Finishing) -> true ; Finishing = [] ),
         % Workaround: swi-cleanup-window - finishing frames unwind with their callback.
         metta_with_trailed('$metta_reference_finishing', [Frame|Finishing],
-                           metta_reference_refresh),
-        ( metta_reference_pending_frame(_) -> true
-        ; nb_delete('$metta_reference_listening'),
-          prolog_unlisten(frame_finished,
-                          metta_engine:metta_reference_frame_finished(Owner)) )
+                           metta_reference_refresh)
     ;   true
     ).
 
