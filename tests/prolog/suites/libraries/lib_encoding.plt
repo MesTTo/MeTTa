@@ -4,7 +4,7 @@
 % Guarantees: every encoding round-trips over generated inputs, UTF-8 is the host's
 % own bytes for the same text, hex is lower case and case-insensitive, base64 is
 % RFC 4648 in both alphabets against the host's own encoder, and a byte that is not
-% one is refused naming it [tested: lib_encoding; commit=WORKTREE].
+% one is refused naming it [tested: lib_encoding; commit=2b8c0afd38dcfe3994d5047dba2d035970311d0e].
 % Owns resources: none; every value is a term.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

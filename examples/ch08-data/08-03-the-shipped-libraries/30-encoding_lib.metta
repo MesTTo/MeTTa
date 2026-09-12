@@ -1,5 +1,5 @@
 ; Purpose: UTF-8, hex and base64, each one head in and one head out.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/30-encoding_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/30-encoding_lib.metta; commit=2b8c0afd38dcfe3994d5047dba2d035970311d0e].
 !(import! &self (library lib_encoding))
 ; lib_string is beside it for the one comparison that makes UTF-8 worth having:
 ; `string-length` counts characters where these bytes count bytes.
