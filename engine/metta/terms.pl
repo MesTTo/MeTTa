@@ -971,12 +971,19 @@ metta_argument_rejection(Argument, Types, Expected, Origin, Rejection) :-
 %constraint: the acceptance relation the refusal walk has to agree with,
 %restated over one reported type. The wildcard exclusion is
 %metta_refined_declared_match_in/3's, for the reason given there.
+% The refusal walk shares the value relation used to admit a refined union.
+% [tested: union_types:a_refined_alternative_retains_the_assignment_a_later_parameter_needs;
+% commit=WORKTREE].
 metta_argument_type_admits(Argument, Actual, Expected, Origin) :-
     (   metta_refined_type(Expected, Base, Constraints)
     ->  (   metta_refined_declared_match(Actual, Expected, Origin)
         ;   metta_refined_base_admits(Argument, Actual, Base, Origin),
             metta_refinements_hold(Constraints, Argument)
         )
+    ;   nonvar(Expected), Expected = [Head|_], Head == '|',
+        metta_refined_union_type(Expected)
+    ->  current_metta_module(Module),
+        metta_refined_value_admits(Module, Actual, Argument, Expected)
     ;   metta_argument_type_matches(Actual, Expected, Origin)
     ).
 
@@ -985,7 +992,7 @@ metta_argument_type_admits(Argument, Actual, Expected, Origin) :-
 % ordinary type equality, but its shape still satisfies that refined base.
 metta_refined_base_admits(Argument, Actual, Base, Origin) :-
     (   satisfies_metatype(Argument, Base)
-    ;   metta_argument_type_matches(Actual, Base, Origin)
+    ;   metta_argument_type_admits(Argument, Actual, Base, Origin)
     ).
 
 metta_refined_declared_match(Actual, Refined, Origin) :-

@@ -78,6 +78,7 @@
             typing_rule_accepts_resolved/4,
             typing_rule_decision/7,
             typing_rule_decision_resolved/7,
+            decisive_typing_rule/7,
             typing_rule_expected/3,
             typing_rule_expected_resolved/3,
             typing_rule_refusal/6,
@@ -438,6 +439,10 @@ typing_rule_decision_resolved(Module, Family, Actual, Expected, Outcome, Name, T
         Tier = none
     ).
 
+% A value-level type operator must read a declared decision on the whole pair
+% before decomposing it. This door deliberately performs no union lifting.
+% [tested: union_types:a_user_whole_union_refusal_precedes_its_value_refinements;
+% commit=WORKTREE].
 decisive_typing_rule(shipped, '*', Family, Actual, Expected, Outcome, Name) :-
     shipped_typing_rule(Family, Actual, Expected, Candidate, Name),
     !,

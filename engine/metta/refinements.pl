@@ -1,6 +1,12 @@
 % Purpose: decide the refinements an `(Annotated Base C1 ... Cn)` type carries
 %   against a VALUE, one rule per head of the refinement vocabulary, and name
 %   the first constraint a value violates so the refusal can say which.
+% Guarantees: union alternatives decide their constraints on the value under
+%   one shared type assignment; whole-pair user decisions precede decomposition
+%   [tested: union_types:a_refined_union_member_checks_the_value_at_each_call_door,
+%   union_types:a_refined_alternative_retains_the_assignment_a_later_parameter_needs,
+%   union_types:a_user_whole_union_refusal_precedes_its_value_refinements;
+%   commit=WORKTREE].
 % Assumes: engine/metta.pl consults this plain file after metta/types.pl while
 %   its owning module is the load context, so metta_grounded_numeric_type/2,
 %   check_argument_type_under_live_policy/3 and metta_error_atom/4 from
@@ -80,6 +86,48 @@ metta_refined_type(Type, Base, Constraints) :-
     Rest = [Base|Constraints],
     nonvar(Constraints),
     Constraints = [_|_].
+
+% Union flattening preserves member order and shared variables. An ordinary
+% union keeps its existing type-only path; a refined member needs the value.
+metta_refined_union_type(Type) :-
+    metta_union_alternatives(Type, Members),
+    member(Member, Members),
+    metta_refined_type(Member, _, _),
+    !.
+
+metta_refined_union_admits(Module, Value, Expected) :-
+    type_answers(Module, Value, Types),
+    (   ground(Expected)
+    ->  once(( member(Actual, Types),
+               metta_refined_value_admits(Module, Actual, Value, Expected) ))
+    ;   member(Actual, Types),
+        metta_refined_value_admits(Module, Actual, Value, Expected)
+    ).
+
+% Keep the actual candidate while decomposing the requirement. Reading a
+% different candidate after a whole-pair refusal would evade that decision.
+% Unknown and Atom candidates cannot prove a complete refinement, but may
+% satisfy its base before the constraints are checked against the value.
+metta_refined_value_admits(Module, Actual, Value, Expected) :-
+    (   type_rules:decisive_typing_rule(user, Module, ordinary, Actual,
+                                       Expected, Decision, _)
+    ->  Decision == accept
+    ;   metta_refined_type(Expected, Base, Constraints)
+    ->  (   metta_refined_declared_match_in(Module, Actual, Expected)
+        ;   metta_refined_value_admits(Module, Actual, Value, Base),
+            metta_refinements_hold(Constraints, Value)
+        )
+    ;   nonvar(Expected), Expected = [Head|_], Head == '|'
+    ->  (   metta_refined_declared_match_in(Module, Actual, Expected)
+        ;   metta_union_admits(metta_refined_value_admits(Module, Actual),
+                               Value, Expected)
+        )
+    ;   var(Expected)
+    ->  Expected = Actual,
+        metta_resolved_types_match_in(Module, Actual, Expected)
+    ;   metta_resolved_types_match_in(Module, Actual, Expected)
+    ;   satisfies_metatype_in(Module, Value, Expected)
+    ).
 
 %%%%%%%%%% The vocabulary %%%%%%%%%%
 %

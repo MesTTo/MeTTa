@@ -6,7 +6,7 @@
 %   actual union fits a requirement when every alternative does under one
 %   assignment of the type variables they share, and the upstream relation's
 %   shared-constraint loss cannot be reproduced here
-%   [tested: run_tests(union_types); commit=78d1d8946990498965fa940a676d1b91fb8bd35f].
+%   [tested: run_tests(union_types); commit=WORKTREE].
 % Owns resources: setup/cleanup releases each space; no file is written.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
@@ -144,6 +144,66 @@ test(a_value_admitted_through_its_supertype_is_admitted_through_a_union,
     assertion(Answers = [got, got, ['Error', _, ['BadArgType', 1, _, 'String']]]).
 
 %%%%%%%%%% Duplicates and multiply-admitted values answer once %%%%%%%%%%
+
+test(a_refined_union_member_checks_the_value_at_each_call_door,
+     [setup(context(S, _)), cleanup(metta_release_space(S))]) :-
+    run_in(S, "(: refined-in (-> (| (Annotated Number (Gt 0)) String) Number)) (= (refined-in $x) 1) (= (forward $x) (refined-in $x)) !(refined-in 2) !(forward 2) !(refined-in \"s\") !(forward -2)", Answers),
+    assertion(Answers = [1, 1, 1, ['Error', _, ['BadArgType'|_]]]).
+
+test(a_refined_union_result_admits_only_a_satisfied_alternative,
+     [setup(context(S, _)), cleanup(metta_release_space(S))]) :-
+    run_in(S, "(: refined-out (-> Atom (| (Annotated Number (Gt 0)) String))) (= (refined-out $x) $x) !(refined-out 2) !(refined-out \"s\") !(refined-out -2)", Answers),
+    assertion(Answers == [2, "s"]).
+
+test(an_outer_refinement_reports_its_constraint_after_a_refined_union_base,
+     [setup(context(S, _)), cleanup(metta_release_space(S))]) :-
+    run_in(S, "(: outer-refined (-> (Annotated (| (Annotated Number (Gt 0)) String) (Gt 2)) Number)) (= (outer-refined $x) 1) !(outer-refined 3) !(outer-refined 1)", Answers),
+    assertion(Answers == [1, ['Error', ['outer-refined', 1],
+                              ['BadArgValue', 1, ['Gt', 2], 1]]]).
+
+test(a_gradual_unknown_does_not_discharge_refined_union_constraints,
+     [setup(context(S, _)), cleanup(metta_release_space(S))]) :-
+    run_in(S, "(: nonzero (-> (| (Annotated Number (Gt 0)) (Annotated Number (Lt 0))) Number)) (= (nonzero $x) 1) !(nonzero 2) !(nonzero -2) !(nonzero 0) !(nonzero mystery)", Answers),
+    assertion(Answers = [1, 1, ['Error', _, _], ['Error', _, _]]).
+
+test(a_refined_alternative_retains_the_assignment_a_later_parameter_needs,
+     [setup(context(S, _)), cleanup(metta_release_space(S))]) :-
+    run_in(S, "(: refined-shared (-> (| $t (Annotated Number (Gt 0))) $t Number)) (= (refined-shared $x $y) 1) !(refined-shared 2 \"s\") !(refined-shared -2 \"s\")", Answers),
+    assertion(Answers = [1, ['Error', _, ['BadArgType'|_]]]).
+
+test(a_declared_actual_union_still_proves_a_refined_union_requirement,
+     [setup(context(S, _)), cleanup(metta_release_space(S))]) :-
+    run_in(S, "(: known (| (Annotated Number (Gt 0)) String)) (: refined-known (-> (| (Annotated Number (Gt 0)) String Bool) Number)) (= (refined-known $x) 1) !(refined-known known)", Answers),
+    assertion(Answers == [1]).
+
+test(a_user_whole_union_refusal_precedes_its_value_refinements,
+     [setup(context(S, M)), cleanup(metta_release_space(S))]) :-
+    run_in(S, "(: guarded-refined (-> (| (Annotated Number (Gt 0)) String) Number)) (= (guarded-refined $x) 1) (= (forward $x) (guarded-refined $x))", []),
+    with_metta_module(M,
+        'add-typing-rule!'('deny-refined-whole', ordinary, 'Number',
+                           ['|', ['Annotated', 'Number', ['Gt', 0]], 'String'],
+                           [refuse, 'the whole union is denied'], true)),
+    answers_in(M, ['guarded-refined', 2], Direct),
+    answers_in(M, [forward, 2], Retained),
+    assertion(Direct = [['Error', _, ['BadArgType'|_]]]),
+    assertion(Retained = [['Error', _, ['BadArgType'|_]]]),
+    with_metta_module(M, 'remove-typing-rule!'('deny-refined-whole', true)),
+    answers_in(M, ['guarded-refined', 2], Restored),
+    assertion(Restored == [1]).
+
+test(a_refused_member_does_not_hide_a_satisfied_value_refinement,
+     [setup(context(S, M)), cleanup(metta_release_space(S))]) :-
+    run_in(S, "(: value-choice (-> (| (Annotated Number (Gt 0)) String) Number)) (= (value-choice $x) 1)", []),
+    with_metta_module(M,
+        'add-typing-rule!'('deny-text-member', ordinary, 'Number', 'String',
+                           [refuse, 'a number is not text'], true)),
+    answers_in(M, ['value-choice', 2], Answers),
+    assertion(Answers == [1]).
+
+test(refined_union_failures_do_not_evaluate_an_argument_twice,
+     [setup(context(S, _)), cleanup(metta_release_space(S))]) :-
+    run_in(S, "(: refined-effect (-> (| (Annotated Number (Gt 0)) String) Number)) (= (refined-effect $x) 1) (= (produce) (chain (add-atom &self (observed)) $ignored -2)) !(refined-effect (produce)) !(collapse (match &self (observed) seen))", Answers),
+    assertion(Answers = [['Error', _, _], [seen]]).
 
 test(a_repeated_member_neither_duplicates_an_answer_nor_a_side_effect,
      [setup(context(S, _)), cleanup(metta_release_space(S))]) :-

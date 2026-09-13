@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Native union types check refinements against the value at typed calls and
+  returns. Shared type variables, whole-pair user refusals and evaluated
+  arguments survive those checks; nested constraints retain their diagnostic.
 - Python value conversion reconstructs native functions, partials and lambdas
   with their lexical spaces and editable native call contracts. Nested and
   union annotations retain the callable's return conversion. Stream returns
