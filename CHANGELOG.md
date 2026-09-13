@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Native callable contract lookup preserves distinct lambda binders and live
+  references to authored functions, including functions already compiled
+  before conversion. Reading a contract cannot specialize the caller's body.
 - Native callable conversion retains a lambda's written signature when
   carrying its lexical home. Keyword names, defaults and later contract edits
   survive evaluation and storage in another space.
