@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Defined functions and converted native callables preserve already computed
+  atom arguments and record fields. Typed entries inspect the supplied value;
+  rule-variable calls retain their staged term and ground calls still fold
+  when they have one answer.
 - Field assignment preserves computed atom values. Plain assignment evaluates
   its right side before the target; augmented assignment evaluates its target
   once before reading the field and evaluating the right side.
