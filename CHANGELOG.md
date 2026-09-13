@@ -12,6 +12,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Native union types check refinements against the value at typed calls and
   returns. Shared type variables, whole-pair user refusals and evaluated
   arguments survive those checks; nested constraints retain their diagnostic.
+- Python container call declarations admit structural and borrowed values
+  through one native type alternative. Abstract containers use their Python
+  membership rule, including virtual subclasses; annotation wrappers and
+  native refinements retain the same acceptance rule through callable types.
 - Python value conversion reconstructs native functions, partials and lambdas
   with their lexical spaces and editable native call contracts. Nested and
   union annotations retain the callable's return conversion. Stream returns
