@@ -2788,13 +2788,13 @@ Returns: Result
 
 ### `graph-add-edges`
 
-*lib_graph.metta:23*
+*lib_graph.metta:20*
 
 ```metta
 (: graph-add-edges (-> Expression Expression Expression))
 ```
 
-The graph with those edges, and with any vertex they mention that it did not hold. An edge that is there changes nothing.
+Add edges written (From To), including their endpoints as vertices. Duplicates do not change the graph.
 
 1. Graph
 2. Edges
@@ -2803,13 +2803,13 @@ Returns: Bigger
 
 ### `graph-add-vertices`
 
-*lib_graph.metta:29*
+*lib_graph.metta:32*
 
 ```metta
 (: graph-add-vertices (-> Expression Expression Expression))
 ```
 
-The graph with those vertices, each with no neighbours unless it had some already. Adding a vertex that is there changes nothing.
+Add vertices, retaining existing edges. A new vertex has no neighbours.
 
 1. Graph
 2. Vertices
@@ -2818,13 +2818,13 @@ Returns: Bigger
 
 ### `graph-closure`
 
-*lib_graph.metta:35*
+*lib_graph.metta:50*
 
 ```metta
 (: graph-closure (-> Expression Expression))
 ```
 
-The transitive closure: an edge for every path of one step or more, so a vertex's neighbours in the answer are everything it can reach. A vertex on a cycle reaches itself, which is how graph-is-acyclic and the ordering's refusal find one.
+The transitive closure: an edge for every path of one or more steps. Fold intermediate vertices and rewrite neighbour sets with set union. A vertex on a cycle reaches itself.
 
 1. Graph
 
@@ -2832,13 +2832,13 @@ Returns: Closure
 
 ### `graph-edges`
 
-*lib_graph.metta:41*
+*lib_graph.metta:57*
 
 ```metta
 (: graph-edges (-> Expression Expression))
 ```
 
-Every edge as a (From To) pair, ordered by tail and then by head. This is lib_pairs' relation shape, so the edges of a graph are a relation and its operations apply to them.
+Every edge as a (From To) pair, ordered by tail and then head. The result is an ordinary relation for Pairs operations.
 
 1. Graph
 
@@ -2846,13 +2846,13 @@ Returns: Edges
 
 ### `graph-is`
 
-*lib_graph.metta:47*
+*lib_graph.metta:78*
 
 ```metta
 (: graph-is (-> %Undefined% Bool))
 ```
 
-Whether the value is a graph: a collection of (Vertex Neighbours) pairs whose vertices are a set, whose neighbour collections are sets, and whose every neighbour is itself a vertex of the graph. That last condition is what the walks rely on, and the one a hand-written graph most often misses.
+Whether a finite expression consists of (Vertex Neighbours) rows with canonical vertex and neighbour sets, and every neighbour identical to a vertex. Variables are never unified with different vertices.
 
 1. Value
 
@@ -2860,13 +2860,13 @@ Returns: Answer
 
 ### `graph-is-acyclic`
 
-*lib_graph.metta:53*
+*lib_graph.metta:86*
 
 ```metta
 (: graph-is-acyclic (-> Expression Bool))
 ```
 
-Whether the graph has no cycle, which is exactly whether it has a topological order. This is the total question beside the ordering's refusal.
+Whether no vertex reaches itself through one or more edges. This shares closure with reachability and the ordering's cycle refusal.
 
 1. Graph
 
@@ -2874,13 +2874,13 @@ Returns: Answer
 
 ### `graph-neighbours`
 
-*lib_graph.metta:59*
+*lib_graph.metta:99*
 
 ```metta
 (: graph-neighbours (-> Expression %Undefined% Expression))
 ```
 
-The vertices this one points at, as a set. A vertex the graph does not hold is a refusal naming it, because an empty answer there reads as a sink and a typo would go unnoticed.
+The vertex's outgoing neighbours as a set. An absent vertex raises with (unknown-vertex Vertex), including a fresh variable distinct from every stored vertex. An existing sink returns the empty set.
 
 1. Graph
 2. Vertex
@@ -2889,13 +2889,13 @@ Returns: Neighbours
 
 ### `graph-of`
 
-*lib_graph.metta:65*
+*lib_graph.metta:117*
 
 ```metta
 (: graph-of (-> Expression Expression Expression))
 ```
 
-The graph of those edges, each written (From To), with those vertices added: every vertex an edge mentions is a vertex whether it is listed or not, so the first argument is for the ISOLATED ones. Vertices come out in the standard order of terms and each neighbour collection is a set.
+Build canonical (Vertex Neighbours) rows from (From To) edges and extra isolated vertices. Every endpoint becomes a vertex; duplicate edges collapse. Quote runnable vertices and rows to keep them as data.
 
 1. Vertices
 2. Edges
@@ -2904,13 +2904,13 @@ Returns: Graph
 
 ### `graph-reachable`
 
-*lib_graph.metta:71*
+*lib_graph.metta:126*
 
 ```metta
 (: graph-reachable (-> Expression %Undefined% Expression))
 ```
 
-Every vertex reachable from this one, itself included, as a set. The vertex itself is always in the answer, whether or not a path returns to it, which is the reflexive reading the host's reachable/3 takes.
+Every reachable vertex, including the origin, as a set. Select the origin's closure row and insert the origin. The recipe is an ordinary equation that matching can reconstruct or specialize.
 
 1. Graph
 2. Vertex
@@ -2919,13 +2919,13 @@ Returns: Reachable
 
 ### `graph-remove-edges`
 
-*lib_graph.metta:77*
+*lib_graph.metta:139*
 
 ```metta
 (: graph-remove-edges (-> Expression Expression Expression))
 ```
 
-The graph without those edges. The vertices stay, because removing the last edge of a vertex leaves the vertex; graph-remove-vertices is how a vertex goes.
+Remove the named edges, retaining every vertex. Absent edges change nothing; malformed edge expressions refuse.
 
 1. Graph
 2. Edges
@@ -2934,13 +2934,13 @@ Returns: Smaller
 
 ### `graph-remove-vertices`
 
-*lib_graph.metta:83*
+*lib_graph.metta:155*
 
 ```metta
 (: graph-remove-vertices (-> Expression Expression Expression))
 ```
 
-The graph without those vertices AND without every edge that touched one, which is what keeps the answer a graph. Removing a vertex that is not there changes nothing.
+Remove vertices and every incident edge. Compare identity without binding variables; removing an absent vertex changes nothing.
 
 1. Graph
 2. Vertices
@@ -2949,13 +2949,13 @@ Returns: Smaller
 
 ### `graph-topological-order`
 
-*lib_graph.metta:89*
+*lib_graph.metta:176*
 
 ```metta
 (: graph-topological-order (-> Expression Expression))
 ```
 
-The vertices in an order that puts every edge's tail before its head. A graph with a cycle has no such order, and this refuses NAMING a vertex on a cycle, where the host's top_sort/2 simply fails and a caller reads that as "no answer".
+Unfold zero-indegree layers and concatenate them. Each layer is in canonical vertex order; every edge's tail precedes its head. A cycle raises with (cyclic-graph Vertex), naming a vertex actually on a cycle.
 
 1. Graph
 
@@ -2963,13 +2963,13 @@ Returns: Order
 
 ### `graph-transpose`
 
-*lib_graph.metta:95*
+*lib_graph.metta:186*
 
 ```metta
 (: graph-transpose (-> Expression Expression))
 ```
 
-The graph with every edge reversed and the same vertices. The union of a graph and its transpose is the undirected reading of it.
+Reverse every edge, retaining all vertices. Union with this transpose gives the graph's undirected reading.
 
 1. Graph
 
@@ -2977,28 +2977,27 @@ Returns: Transposed
 
 ### `graph-union`
 
-*lib_graph.metta:101*
+*lib_graph.metta:198*
 
 ```metta
-(: graph-union (-> Expression Expression Expression))
+(: graph-union (-> (:seg Expression) Expression))
 ```
 
-Every vertex and every edge of either, once.
+Unite zero or more graphs. Zero returns the empty graph, one preserves its input, and duplicates do not change the result. apply-to supplies a runtime collection of graph arguments.
 
-1. Left
-2. Right
+1. Graphs
 
 Returns: Union
 
 ### `graph-vertices`
 
-*lib_graph.metta:107*
+*lib_graph.metta:205*
 
 ```metta
 (: graph-vertices (-> Expression Expression))
 ```
 
-Every vertex, in the standard order of terms, which is a set and therefore what lib_sets' operations take: membership of a vertex is set-member over this.
+Every vertex in canonical term order. The expression is a set and accepts ordinary Sets operations.
 
 1. Graph
 

@@ -5101,3 +5101,87 @@ matrix. for-each-in-atom is the historical map-atom form; member binds through
 native membership and yields True for each success. Neither name alone proves
 the same held-value or numeric-matching contract as another operation.
 Receipts: ai-lib4-builtins-census.log and ai-lib4-builtins-census-fixed.log.
+
+## 2026-09-13: Graphs derive from relations, sets and rewrites
+
+Tried: the preceding six native tests pass, but graph-is accepts
+`((a ($x)) (b ()))` although the unbound neighbour is no vertex. Native
+graph-neighbours also binds a fresh lookup variable to a. The reproduction
+prints present in ai-lib4-graph-identity-before.log. These are library
+unification errors, not host defects. Twelve MeTTa probe claims preserve
+identity and derive construction, closure and ordering in
+ai-lib4-graph-rewrite-probe.log.
+
+Decided: the later derivability and identity requirements supersede the native
+graph wrapper ruling. Keep canonical adjacency expressions; derive their
+operations from Sets, Pairs and Functional. Closure folds intermediate vertices
+and rewrites neighbour sets. Reachability and cycle detection share that closure.
+Topological ordering unfolds zero-indegree layers, with canonical order within
+each layer. Graph union accepts zero or any number of arguments. Core assertion
+messages name unknown vertices and actual cycle vertices.
+
+Prior art: the intermediate-vertex invariant and layer decomposition in
+[SWI-Prolog V10.1.13 ugraphs.pl](https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/ugraphs.pl)
+remain the independent ground-graph reference. MeTTa folds, sets and unfold
+replace its native recursion and degree counters. No source is copied.
+
+Rejected: retaining a native graph algorithm for speed. The existing expression
+operations cover its cases, and the later requirement accepts slower derived
+recipes. Single-origin reachability computes closure before selecting its row;
+this extra work shares one definition of paths. A separate walker is justified
+only if a later requirement needs streamed or partial reachability. The census
+still supplies no caller for complement or composition.
+
+Tried: constructing a lambda directly in the match template compiled the body
+before matching supplied its syntax. The resulting function returned that body
+as data. Quote the reconstructed lambda and explicitly eval it, as the existing
+Statistics example does. The repaired example proves 49 claims; its Python twin
+proves the same 49 with equal stored contents. Receipts:
+ai-lib4-graph-example.log and ai-lib4-graph-example-fixed.log.
+
+Measured: three fresh serial processes after deleting engine/lib QLF files give
+8675592 MeTTa and 8659169 Python inferences. The old 92402 point correctly fails
+before replacement, and the former 2649 overrun is no longer needed. Receipts:
+ai-lib4-graph-twin.log and ai-lib4-graph-price.log.
+
+Tried: all three native generated-model loops pass, but the new arity fixture
+calls =../2 before completing its argument list and raises
+`=../2: Arguments are not sufficiently instantiated`. Building the list first
+fixes the fixture. The two existential reflection checks now explicitly commit
+their successful answers; their previous choicepoint is refused by the suite
+runner. Twelve Python tests pass, and the literal-vertex fixture fails because
+it re-enters an answered graph as runnable syntax: its (+ 1 2) vertex becomes 3.
+Quote that graph on re-entry, matching the literal-input contract. Receipts:
+ai-lib4-graph-native.log and ai-lib4-graph-python.log. No library change or new
+host workaround follows from either fixture failure.
+
+Tried: quoting the Python fixture's input exposes a library error: removing
+a vertex also drops an Error-valued sink, and an Error-valued self-cycle reports
+acyclic. Computed row keys passed straight to set-member take error propagation
+instead of literal comparison. An ordinary vertex set spelled (Error a b)
+exposes the same boundary in neighbours and reachability. Bind and quote
+computed data before applying another library operation. This is a composition
+repair, not an engine change. The probe and repaired answers are in
+ai-lib4-graph-error-values-probe.log and ai-lib4-graph-error-values-fixed2.log.
+An extra closing parenthesis during that repair prevented the source import;
+the intermediate fixed.log contains unreduced calls and supplies no evidence.
+
+Verified: the revised native suite passes all fourteen tests, including the
+same three generated-model loops and eighteen graphs with runnable, Error or
+mixed numeric vertices checked against the independent host oracle. The thirteen
+Python tests pass with shuffled seed 2912975243. Both README snippets execute.
+The example and twin now prove 52 matching claims with equal stored contents.
+Three fresh measurements give 8991153/8975689, superseding the 49-claim points.
+Receipts: ai-lib4-graph-native-literals.log, ai-lib4-graph-python-literals.log,
+ai-lib4-graph-readme-metta.log, ai-lib4-graph-readme-python.log,
+ai-lib4-graph-example-literals.log and ai-lib4-graph-price-literals.log.
+
+Verified: eighteen required lanes pass; evidence rejects the abbreviated
+test_graph_lib.py path in the Graph header. Qualifying its repository path
+makes evidence and the four face/documentation lanes pass. Repeating all three
+measurements after that header change retains 8991153/8975689. Full twins proves
+52 equal claims and equal stored contents at those exact points. Its 263
+findings have the preceding Testing run's identities and multiplicities;
+twins-selftest passes. Receipts: ai-lib4-graph-lanes.log,
+ai-lib4-graph-evidence-fixed.log, ai-lib4-graph-price-final.log,
+ai-lib4-graph-fulltwins.log and ai-lib4-graph-findings-diff.log.

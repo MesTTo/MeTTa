@@ -708,7 +708,9 @@ Defect: with autoload disabled, top_sort/2 raises
   existence_error(procedure,ugraphs:append/2) even for a two-vertex DAG.
 Reproduction: tests/checks/host_workarounds/swi-ugraphs-append2.pl,
   requiring the expected order after adding the missing import as a control.
-Workaround: lib_graph explicitly imports append/2 into the ugraphs module.
+Workaround: the graph differential suite explicitly imports append/2 into
+  the ugraphs module for its independent host oracle. The public graph library
+  derives its operations from MeTTa expressions and no longer reaches top_sort/2.
 Lifted when: top_sort/2 computes the expected order with autoload disabled
   before the reproduction supplies the import.
 Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.

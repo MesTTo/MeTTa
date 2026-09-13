@@ -9,6 +9,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Graph operations are MeTTa equations over Sets, Pairs and Functional. Closure
+  folds intermediate vertices; reachability and cycle detection share that
+  inspectable recipe, and topology unfolds canonical zero-indegree layers.
+  Graph union accepts zero or any number of arguments. Vertex identity replaces
+  native unification, so a fresh variable cannot act as a lookup wildcard or an
+  unknown neighbour. Quoted runnable vertices remain data. Core refusals name
+  absent vertices and actual cycle vertices. The host graph library remains an
+  independent test oracle; its missing-import workaround moves to that suite.
 - `lib_statistics` consolidates sample summaries and finite probability laws.
   Its sample calculations are MeTTa equations over exact numbers, collections
   and the shared rounding provider. Matching can reconstruct or specialize a
