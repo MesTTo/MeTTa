@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Python value conversion reconstructs native functions, partials and lambdas
+  with their lexical spaces and editable native call contracts. Nested and
+  union annotations retain the callable's return conversion. Stream returns
+  use the existing scoped cursor and preserve conversion and cleanup failures.
 - Python function catalogues, signature lookup, head properties and inherited
   spaces preserve native expression identities. Property queries distinguish
   a space from a library's source paths explicitly.
