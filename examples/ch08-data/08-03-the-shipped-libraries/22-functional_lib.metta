@@ -1,6 +1,6 @@
 ; Purpose: the functional and iteration utilities, beside lib_patrick's four
 ; idioms that this library grew out of.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/22-functional_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/22-functional_lib.metta; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
 ; The two libraries are separate imports, so a program pays for the half it
 ; asks for; this file asks for both, the general half here and the idioms below.
 !(import! &self (library lib_functional))

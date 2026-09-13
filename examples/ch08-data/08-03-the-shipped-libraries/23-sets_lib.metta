@@ -1,5 +1,5 @@
 ; Purpose: canonical sets composed from ordinary collection operations.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/23-sets_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/23-sets_lib.metta; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
 !(import! &self (library lib_sets))
 !(import! &self (library lib_functional))
 

@@ -1,5 +1,5 @@
 ; Purpose: a collection of (Key Value) pairs read as a relation.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/24-pairs_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/24-pairs_lib.metta; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
 !(import! &self (library lib_pairs))
 
 ; A relation is a collection of two-element expressions, so nothing has to be

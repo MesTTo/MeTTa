@@ -1,7 +1,7 @@
 % Purpose: compare derived set operations with independent definitions and laws.
 % Guarantees: generated canonical sets retain order, identity and uniqueness;
 % every variadic argument is checked, including singleton intersections.
-% [tested: lib_sets; commit=WORKTREE].
+% [tested: lib_sets; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
 :- use_module(collection_test_support).
 :- use_module(library(lists), [append/2,member/2,memberchk/2,numlist/3]).
 :- use_module(library(apply), [maplist/2]).

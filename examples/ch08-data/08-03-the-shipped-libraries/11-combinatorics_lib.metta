@@ -1,7 +1,7 @@
 ; Purpose: finite choices as streams, collected values and exact counts.
 ; Guarantees: positional choices preserve literal data and multiplicity, and a
 ; consumer can stop before the remaining choices are built.
-; [tested: lib_combinatorics_surface; commit=WORKTREE].
+; [tested: lib_combinatorics_surface; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
 !(import! &self (library lib_combinatorics))
 
 ;`choose2` answers every unordered pair, one per solution: (a b) but never

@@ -2,7 +2,7 @@
 %   including dynamic dispatch, control forms, higher-order calls, and
 %   branch-return optimization.
 % Guarantees: a generated segment-body continuation is exported for execution
-%   in its owning space [tested: segment_equations; commit=WORKTREE].
+%   in its owning space [tested: segment_equations; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
 % Guarantees: the runtime and declaration loaders may call rest_parameter/2
 %   and validate_type_splices/1,2 through the exported module surface
 %   [tested: engine_layering, variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].

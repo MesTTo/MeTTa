@@ -10,7 +10,7 @@ Guarantees: nested distribution modules, native library and suite support,
 CMake recipes, vendor configuration headers and nested host reproductions participate in
 the same evidence and provenance checks as their callers
 [tested: tests/checks/check_evidence_selftest.py,
-tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE].
+tests/checks/check_pin_provenance_selftest.py; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
 
 Reads files and the engine-free door grammar. Structured row assumptions,
 guarantees, local refusals and evidence are checked through doorgen's contract

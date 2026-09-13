@@ -1,7 +1,7 @@
 % Purpose: exercise collection libraries through their public MeTTa equations.
 % Guarantees: each argument enters as a bound literal, preserving held values,
 % variables and caller identity [tested: lib_combinatorics_surface, lib_functional,
-% lib_pairs, lib_sets; commit=WORKTREE].
+% lib_pairs, lib_sets; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
 :- module(collection_test_support,
           [load_collection_library/1, eval_expr/2, invoke/1, collection_answers/1,
            refused/1, collection_items/2]).

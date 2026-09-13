@@ -26,7 +26,7 @@ literal one in this file is a claim about THIS repository as far as the gate is
 concerned, and the fixtures are deliberately unbacked.
 Guarantees:
   - nested Prolog suite helpers accept backed claims and reject stale citations
-    [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_evidence_selftest.py; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3]
   - nested distribution modules, Prolog/C/C++ library support and native face fixtures report stale citations
     [tested: tests/checks/check_evidence_selftest.py; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8]
   - Prolog tools accept a backed claim and report an absent test on its own line

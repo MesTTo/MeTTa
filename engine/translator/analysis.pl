@@ -2,7 +2,7 @@
 %   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: retain function metadata, translation caches, symbol analysis, and callable-head discovery
 % Guarantees: segment-body continuations are protected from user equation
-%   capture [tested: segment_equations; commit=WORKTREE].
+%   capture [tested: segment_equations; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
 % Assumes: engine/translator.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/translator.pl's implementation module and original load order.
 %   Deferred and eager equation metadata retain only declarations that govern

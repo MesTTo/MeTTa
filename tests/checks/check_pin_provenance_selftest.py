@@ -18,7 +18,7 @@ these fixtures are deliberately unbacked.
 Assumes: git on PATH, and a writable temporary directory.
 Guarantees:
   - nested Prolog suite helpers resolve header pins and preserve code atoms
-    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3]
   - each planted shape lands on the side the pass documents, and
     the pass reports the declined ones with a reason
     [tested: tests/checks/check_pin_provenance_selftest.py]

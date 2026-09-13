@@ -1,7 +1,7 @@
 % Purpose: compare MeTTa relation compositions with the host pairs library.
 % Guarantees: generated relations preserve stable ordering and duplicates;
 % literal keys and values retain identity, and malformed shapes are refused.
-% [tested: lib_pairs; commit=WORKTREE].
+% [tested: lib_pairs; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
 :- use_module(collection_test_support).
 :- use_module(library(lists), [member/2,nth1/3]).
 :- use_module(library(apply), [maplist/2]).

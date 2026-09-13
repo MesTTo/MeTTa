@@ -2,7 +2,7 @@
 %   variable-headed dynamic calls.
 % Guarantees: nested runs include the empty expression, and variadic bodies
 %   can match local segments through the protected compiler continuation.
-%   [tested: segment_equations; commit=WORKTREE].
+%   [tested: segment_equations; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
 % Guarantees: a declared (:seg Atom) run stays held at every tested arity
 %   [tested: segment_equations; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Assumes: run from tests/prolog, which is what check.sh does; the relative

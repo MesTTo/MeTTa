@@ -1,6 +1,6 @@
 % Purpose: parse, classify and solve expression-child gap patterns (sequence variables) inside the three fragments Kutsia proved finite
 % Guarantees: a nested segment can consume an empty expression without
-%   binding unrelated inputs [tested: segment_equations; commit=WORKTREE].
+%   binding unrelated inputs [tested: segment_equations; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context; metta_match_atoms/2 decides one atom position.
 % Guarantees: a pattern the program wrote without a gap never reaches any predicate here, so a gap-free ask pays nothing [tested: tests/prolog/suites/reader/segments.plt:segments_costs_nothing; commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
 % Guarantees: a written `unify` reaches all three fragments and both refusals, because metta_seq_pair_plan/4 parses BOTH operands and classifies over the two parsed sides [tested: tests/prolog/suites/reader/segments.plt:segments_written_pairs; commit=f4ae837efd23791200846ba72556c2ce96a7d05a].
