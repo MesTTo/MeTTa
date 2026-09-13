@@ -1,10 +1,10 @@
 % Purpose: verify Vector arithmetic, dimension refusals and generator ownership.
 % Guarantees: tests cover exact/mixed values, extreme ranges, IEEE signs,
 % complete input validation and state restoration after error or cancellation.
-% [tested: lib_vector_surface; commit=WORKTREE].
+% [tested: lib_vector_surface; commit=c7bacead4feb29b9761d026b52b952e91b26b10b].
 % Owns resources: each borrowed generator state and rational policy is restored
 % by its cleanup, including an exception in the tested operation.
-% [tested: lib_vector_surface; commit=WORKTREE].
+% [tested: lib_vector_surface; commit=c7bacead4feb29b9761d026b52b952e91b26b10b].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
