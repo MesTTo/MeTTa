@@ -10,6 +10,7 @@ beside its definitions.
 | library | names | documented |
 |---|---|---|
 | lib_builtin_types | 193 | 0 |
+| lib_cli | 4 | 4 |
 | lib_combinatorics | 16 | 10 |
 | lib_compression | 8 | 8 |
 | lib_conformance | 2 | 0 |
@@ -69,6 +70,62 @@ beside its definitions.
 | lib_vector | 13 | 13 |
 | lib_yaml | 4 | 4 |
 | lib_zar | 4 | 0 |
+
+## lib_cli
+
+### `cli-arguments!`
+
+*lib_cli.metta:11*
+
+```metta
+(: cli-arguments! (-> Expression))
+```
+
+The host process argument vector as Strings, preserving numeric spelling, empty tokens and order. Runner arguments remain present; the caller selects the tokens that belong to its application before passing them to cli-parse. This reads argv directly and performs no shell tokenization or process exit.
+
+Returns: Arguments
+
+### `cli-help`
+
+*lib_cli.metta:17*
+
+```metta
+(: cli-help (-> Atom String))
+```
+
+Validate the same held declarations as cli-parse and render their aliases, types, literal defaults, metavariables and help. meta is a String label; help is a String or an expression of String lines. Empty and flagless declarations produce empty help. Custom converters do not run. Default type validation follows the ordinary type rules and can run a Predicate refinement.
+
+1. Specification
+
+Returns: Help
+
+### `cli-parse`
+
+*lib_cli.metta:23*
+
+```metta
+(: cli-parse (-> Atom Expression Symbol Expression))
+```
+
+Parse a held String argument vector into (Pairs Operands), where each pair is (Key Value). Bind computed declarations and arguments with let. A row is an expression of fields, for example ((opt count) (type integer) (shortflags (n)) (longflags (count)) (default 1) (help "Item count")). opt is required; the other fields are type, shortflags, longflags, default, meta and help. Each field occurs at most once. Type defaults to string; flags and help default to empty. Keys and complete dashed names are unique. Names are Strings or atoms. Short names have one character and cannot be a dash. Names contain no whitespace, control character or equals sign; digits and punctuation are otherwise permitted. Short and long namespaces are separate. Flagless default rows are allowed. Built-in types come from cli-types. boolean accepts lowercase true/false tokens and returns True/False; integer and float use native numeric parsing; atom returns a native atom, including its Boolean atoms true/false; string retains text; metta reads one literal form without evaluating it. A (parse Type Function) type applies the held function to the quoted String token in the calling module, requiring exactly one acyclic answer. Names, lambdas and partial applications work. The result and declared default must pass the engine's live argument-type check, including aliases, refinements and gradual typing. Defaults are ground literal values. Accept --name=value, --name value, -nvalue and -n value. A bare Boolean is true; --no-name is false unless that complete name has its own declaration. Short names do not cluster and -n=value is refused. -- ends option parsing; a lone dash and unclaimed signed numeric operands are data. Attach a dash-led value with equals or directly to a short name. Explicit empty tokens remain empty. Duplicates is keepfirst, keeplast or keepall. Defaults precede supplied occurrences; retained supplied occurrences keep their input order. An absent option without a default contributes no pair. Validate syntax, then convert every occurrence before selecting repeats. An invalid earlier value cannot hide behind a later one. Errors retain their cause, name the option and give the repair. Parsing itself prints nothing; custom functions keep their effects.
+
+1. Specification
+2. Arguments
+3. Duplicates
+
+Returns: Parsed
+
+### `cli-types`
+
+*lib_cli.metta:29*
+
+```metta
+(: cli-types (-> Expression))
+```
+
+The built-in option conversion names, in declaration order. A custom (parse Type Function) descriptor also accepts any ordinary held MeTTa function.
+
+Returns: Types
 
 ## lib_combinatorics
 

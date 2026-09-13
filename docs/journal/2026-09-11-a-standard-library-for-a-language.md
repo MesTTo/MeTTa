@@ -4381,3 +4381,145 @@ The full twins lane retains 263 older findings over 309 twins, with 53/346
 examples passing and 3543 claims. Testing proves 48/48 claims, equal stored
 contents and the exact 175727 inference pin. twins-selftest passes. Receipt:
 ai-lib4-testing-twins.log. Testing introduces no additional finding.
+
+## 2026-09-13: CLI declarations, token boundaries and value conversion
+
+Goal: parse typed options and operands, generate help from the same declarations,
+and preserve the actual process argument strings.
+
+Tried: the native optparse source at
+[fc7ef84b949378b729052c3ade79c90ce5416abb](https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/optparse.pl)
+is byte-identical to the installed provider, SHA256
+b6e20f2d28352b058c8c9abeecec1e0b97bc1eedbd74fa1ad2db559ec6738d36.
+Its absent-value sentinel makes --text and --text followed by an explicit
+empty argument indistinguishable. It treats -- as an operand and continues
+parsing, emits --no-verbose twice under keepall, ignores declared count2,
+accepts identical duplicate declarations and conflates short/long namespaces.
+Conversion failure prints its flag to stdout but throws an error that omits it.
+Receipt: ai-lib4-cli-host-probe-final.log. Empty help, short-only help and NUL
+text controls pass. Literal underscore defaults are a documented native
+sentinel convention; the adapter must represent absence separately.
+
+Tried: Logtalk's adaptation at
+[9d0906cf4a4344e01d26c6bf2b3d7844fe9856ac](https://github.com/LogtalkDotOrg/logtalk3/blob/9d0906cf4a4344e01d26c6bf2b3d7844fe9856ac/library/command_line_options/command_line_options.lgt)
+uses literal dashed names and consumes a negated Boolean once. Its parser and
+tests supply the closest correction, while its object declarations add no
+value to a language that already carries expressions. The local Pure manual,
+section 2.5.13, likewise separates named results from remaining operands.
+
+Rejected: rewriting tokens before calling the untouched parser, because that
+requires a second scanner to reconstruct information the provider has lost.
+Rejected: importing Logtalk's runtime or introducing a separate parser
+dependency. The selected implementation remains a private copy of optparse,
+with its BSD license, pinned source and a recorded patch. Token recognition
+adapts the literal-name approach above; the provider retains conversion,
+default insertion, repeat policies and help layout. Revisit the private copy
+when its tracked native reproductions answer absent.
+
+Decided: four heads: cli-parse, cli-help, cli-types and cli-arguments!.
+Declarations keep optparse's field expressions: opt, type, shortflags,
+longflags, default, meta and help. opt is required; type defaults to string.
+Every field occurs at most once. Keys and complete dashed names are unique;
+short and long names have separate namespaces. Names are case-sensitive,
+nonempty and contain no whitespace, control character or equals sign. Short
+names contain one character; long names can contain digits and punctuation.
+No option or alias count limit is introduced. Flagless default rows are valid.
+
+Decided: built-in value types are boolean, integer, float, atom, string and
+metta. The first four retain native conversion; atom returns a Symbol, string
+retains the token, and metta reads one literal MeTTa form without evaluating it.
+A (parse Type Function) descriptor applies an ordinary held function to the
+quoted String token in the calling module. Exactly one answer is required;
+the bounded collection stops after its second answer and closes the generator.
+The result and any declared default use the engine's live argument-type check,
+including aliases, refinements and gradual typing. The function may be a name,
+lambda or partial application. Defaults are ground literal values. Declarations
+are copied before parsing so lambda binders cannot bind the caller's template.
+
+Tried: has_type witnesses a reported type, while the published argument check
+also applies value refinements. For 3 against (Annotated Number (Gt 0)), the
+former answers false and the latter true; both argument checks reject -1.
+normalize_type_in/3, metta_argument_type_origins/2 and
+check_argument_type_under_live_policy/3 supply the complete existing route.
+Receipt: ai-lib4-cli-conversion-probe-final.log. No core type rule changes.
+
+Decided: cli-parse takes the declarations, a held String token vector and
+keepfirst, keeplast or keepall. It returns (Pairs Operands), with each pair
+(Key Value). Missing options with no default contribute no pair. Defaults
+precede supplied occurrences; supplied occurrences retain their selected
+input order. Parse and convert every supplied occurrence before applying the
+repeat policy, so an invalid earlier value cannot disappear behind a later one.
+Syntax is validated before custom converters execute. Exceptions name the
+option, retain the underlying cause and give the repair; parsing prints nothing.
+
+Decided: support --name=value, --name value, -nvalue and -n value. A bare
+Boolean implies true; explicit true/false and --no-name are supported. A
+declared --no-name wins over generated negation. Short flags do not cluster;
+-n=value is refused with the accepted forms. -- terminates option recognition
+and disappears from operands. A lone dash and signed numeric operands remain
+data. A missing value, a following option or malformed/unknown dashed token
+raises; attach a dash-led value with equals to state that it is data. An
+explicit empty token remains distinct from absence, including trailing operands.
+
+Decided: cli-help validates the same declarations and formats types, literal
+defaults, aliases and help through the provider's layout. It does not execute
+custom converters. cli-arguments! returns the host argv as Strings exactly,
+including runner arguments; the caller chooses which tokens belong to its app.
+There is no shell tokenization, implicit process exit, global parser registry
+or new ambient scope. All parse state travels in arguments.
+
+### CLI implementation and verification
+
+Corrected: the design's atom description above is too narrow. Native atom
+conversion includes true/false, which the language represents as Booleans.
+The final documentation states that distinction. Names accept either Strings
+or atoms so numeric short names remain expressible; unclaimed numeric operands
+remain data, while a declared numeric short flag wins.
+
+Tried: a typed two-argument cli-plus underapplication returned no answers both
+inside the converter and in direct core controls. The existing untyped curry
+shape in examples/ch08-data/08-01-atoms-lists-and-folds/04-curry.metta returned
+15 in both cases. The example uses that existing shape and retains its explicit
+Number converter result type. Receipts: ai-lib4-cli-partial-controls.log and
+ai-lib4-cli-partial-untyped.log. No evaluator rule changed. The structured literal
+fixture quotes its expected expression because the core test evaluates that
+argument. NUL uses string-from-codes rather than a nonexistent reader escape.
+
+Verified: the example and twin each pass 64 claims. The 23 native tests include
+375 independent repeat-policy cases, 100 aliases and 100 declarations, literal
+NUL/Unicode/empty inputs, converter cardinality and cleanup, template copying,
+refinements and calling-module separation. The three Python tests include two
+Hypothesis models configured for 100 examples each and a real-process argv check.
+Receipts: ai-lib4-cli-example-complete.log, ai-lib4-cli-twin.log,
+ai-lib4-cli-native-fixed.log and ai-lib4-cli-python.log.
+
+Corrected: the first native suite omitted integer type on numeric defaults and
+expected a stripped flag in an error that correctly retained the full attached
+token. Both fixture defects are repaired; the library implementation did not
+change. Its original failure receipt is ai-lib4-cli-native.log.
+
+Verified: all seven independent native optparse reproductions answer present
+in ai-lib4-cli-host-reproductions.log. The provider's inherited namespace,
+terminator and missing-default help descriptions were reconciled with its code.
+The adapter introduces no ambient scope or acquisition key.
+
+Measured: after the provider documentation repair and QLF purge, three fresh
+serial rounds still read example 347414 and twin 366038 inferences, ratio 1.0536,
+with no overrun. Receipt: ai-lib4-cli-measure-final.log. The final native suite
+also passes after replacing its empty acquisition scope with call_cleanup/2:
+ai-lib4-cli-native-final.log. jscpd reads 238 lines and 3905 tokens through its
+Perl lexer and finds no clones in the handwritten adapter, ai-lib4-cli-jscpd.log.
+
+Verified: all 19 required library lanes pass across ai-lib4-cli-lanes.log and
+ai-lib4-cli-ruff-final.log. Ruff's four tuple-concatenation findings were fixed
+with tuple unpacking; ai-lib4-cli-measure-ruff.log confirmed the same count.
+The full twins lane then found 94 unmarked String literals in the Python twin.
+The argv helper hid their data boundary from the source checker. Explicit G
+literals and the example's string-contains operation replace that helper and
+the four Python substring checks. No library behavior changed.
+
+Measured: three serial rounds after QLF removal give example 347414 and twin
+367784 inferences, ratio 1.0586, with no overrun. The complete twins lane
+confirms all 64 claims, equal stored contents and that exact point. Its 263
+remaining findings are the older corpus findings; twins-selftest and Ruff pass.
+Receipts: ai-lib4-cli-measure-literals.log and ai-lib4-cli-twins-literals.log.

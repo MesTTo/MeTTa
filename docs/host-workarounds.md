@@ -39,6 +39,80 @@ An entry lands with its first site and its reproduction in the same commit. A
 site the ledger does not know is refused, and so is an entry nothing uses. The
 journal keeps the history; this file holds only what is live.
 
+## swi-optparse-missing-value
+
+Host: SWI-Prolog 10.1.13, library/optparse.pl:parse_options/4 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: a synthetic final empty argument makes an absent value indistinguishable
+  from an explicitly supplied empty token.
+Reproduction: tests/checks/host_workarounds/swi-optparse-missing-value.pl
+Workaround: the private parser keeps absence distinct and refuses missing values.
+Lifted when: a missing value raises after the explicit-empty control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, CLI declarations.
+
+## swi-optparse-separator
+
+Host: SWI-Prolog 10.1.13, library/optparse.pl:parse_args_/3 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: the double dash becomes an operand while later options still parse.
+Reproduction: tests/checks/host_workarounds/swi-optparse-separator.pl
+Workaround: consume the terminator and retain every following token as an operand.
+Lifted when: the native parser consumes the terminator and leaves later flags literal.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, CLI declarations.
+
+## swi-optparse-negation
+
+Host: SWI-Prolog 10.1.13, library/optparse.pl:parse_args_/3 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: one negated Boolean produces two false occurrences under keepall.
+Reproduction: tests/checks/host_workarounds/swi-optparse-negation.pl
+Workaround: recognize and consume a negated Boolean once.
+Lifted when: one negated token yields one false occurrence after the explicit control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, CLI declarations.
+
+## swi-optparse-name-grammar
+
+Host: SWI-Prolog 10.1.13, library/optparse.pl:name_long//1 and name_char/1 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: the restrictive name grammar ignores declared digit or punctuation names
+  and accepts unknown dashed tokens as operands.
+Reproduction: tests/checks/host_workarounds/swi-optparse-name-grammar.pl
+Workaround: match literal declared dashed names and refuse unrecognized options.
+Lifted when: count2 and 9? declarations parse and the unknown --bad? token raises.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, CLI declarations.
+
+## swi-optparse-flag-namespace
+
+Host: SWI-Prolog 10.1.13, library/optparse.pl:invalidate_opts_spec/2 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: uniqueness validation compares short and long names without their dash
+  prefixes, rejecting separate options named -x and --x.
+Reproduction: tests/checks/host_workarounds/swi-optparse-flag-namespace.pl
+Workaround: validate full dashed names in the adapter and private provider.
+Lifted when: distinct -x and --x declarations both parse after the disjoint control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, CLI declarations.
+
+## swi-optparse-schema-ambiguity
+
+Host: SWI-Prolog 10.1.13, library/optparse.pl:invalidate_opts_spec/2 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: the O1 \\= O2 guard excludes identical rows from duplicate-name detection.
+Reproduction: tests/checks/host_workarounds/swi-optparse-schema-ambiguity.pl
+Workaround: index each declaration, field and full flag name in call-local associations.
+Lifted when: identical repeated declarations raise after the single-row control passes.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, CLI declarations.
+
+## swi-optparse-value-report
+
+Host: SWI-Prolog 10.1.13, library/optparse.pl:parse_val/4 at
+  fc7ef84b949378b729052c3ade79c90ce5416abb.
+Defect: conversion failure prints the option name to stdout but omits it from
+  the exception, so a caller cannot reliably display or retain its context.
+Reproduction: tests/checks/host_workarounds/swi-optparse-value-report.pl
+Workaround: include the token, declared type and original cause in the exception.
+Lifted when: conversion failure prints nothing and its exception identifies count.
+Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md, CLI declarations.
+
 ## swi-absolute-path-nul
 
 Host: SWI-Prolog 10.1.13, absolute_file_name/3 at

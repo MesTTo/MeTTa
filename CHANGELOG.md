@@ -9,6 +9,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_cli` parses typed options and literal argument vectors, with explicit
+  repeat policies, separate short/long namespaces, defaults and positional
+  operands. Custom converters are ordinary held functions checked against the
+  declared language type. Bounded answer collection releases generators on
+  every exit, and conversion precedes repeat selection. Help shares declaration
+  validation; raw process arguments retain empty and numeric spellings. Seven
+  native optparse corrections have tracked reproductions and lift conditions.
 - `lib_testing` generates finite integer, choice and list families, retaining
   duplicate occurrences and literal terms. A counted universal assertion checks
   complete function answer bags through the engine's existing comparison and
