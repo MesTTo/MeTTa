@@ -9,6 +9,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Python conversion of evaluated native lambdas executes the assembled
+  variadic call, including captured arguments and subsequent native edits.
 - Native union types check refinements against the value at typed calls and
   returns. Shared type variables, whole-pair user refusals and evaluated
   arguments survive those checks; nested constraints retain their diagnostic.
