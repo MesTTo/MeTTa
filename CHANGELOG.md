@@ -151,6 +151,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Compiled functions preserve `None` from explicit returns, bare returns and
+  fallthrough, so callers continue after a void operation. Return annotations
+  retain `NoneType`, and a bare `yield` produces one `None` answer.
 - Compiled type checks commit their joint witnesses through inline control
   flow, eliminating the extra native calls around intrinsic scalar checks.
 - Portable program export keeps its topological order inside the successful

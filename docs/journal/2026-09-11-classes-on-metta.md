@@ -1911,3 +1911,72 @@ engine/translator/typing.pl tests/prolog/suites/translator/check_commits.plt
 --reporters json --output ai-tmp/ai-classes-c17-inline-clones-complete`
 finds zero clones across both files. The explicit line cap includes typing.pl,
 which exceeds the tool's default 1000 lines.
+
+## 2026-09-13: ordinary None returns retain their value
+
+Tried: `PYTHONPATH=extensions/python $CHECK_PY
+ai-tmp/ai-classes-c17-none-probe.py` before changing the compiler. Explicit
+None raises "None has no MeTTa value"; bare return raises "a compiled function
+returns a value"; fallthrough raises "has no body to compile". The same process
+installs Grounded(None) as an equation result, reads exactly one answer and
+gets NoneType from the engine. The raw atom is Grounded(<NoneType>); the
+ordinary answer view already decodes it to Python None. Receipt:
+`ai-tmp/ai-classes-c17-none-baseline-verified.log`.
+
+Decided: ordinary return, fallthrough and the literal use that existing image.
+An omitted yield value is the same singleton answer. Generator exhaustion
+continues to produce no answers. Branch and loop continuation scopes retain
+their existing closing functions; a bare return exits the current function
+instead of calling a loop's closer. Return annotations retain NoneType in
+their alternatives, including unions. This supplies the shared compiler
+semantics needed by methods that mutate a receiver and return None.
+
+Rejected: an empty answer stream for None, because `result = a.deposit(1)`
+would stop the caller before its next statement. Rejected: an empty tuple or
+a new symbolic singleton, because the existing Grounded image already retains
+Python's value and type. The old declarations journal's classification of
+every None return as semidet is superseded: a None value and no answer are
+different outcomes. Generator return statements remain a compiler refusal.
+
+Measured boundary: the existing text persistence rule refuses Grounded(None)
+as a live Python object, just as it refuses other opaque host constants.
+The probe reports the exact refusal before any destination is written. No
+alternate image or serialization policy is introduced by this return change.
+
+Verified: `PYTHONPATH=extensions/python $CHECK_PY -m pytest -q
+--benchmark-disable --randomly-seed=1125382488
+extensions/python/tests/ch11_python_as_a_notation/test_none_results.py
+extensions/python/tests/ch11_python_as_a_notation/test_define.py
+extensions/python/tests/ch11_python_as_a_notation/test_compiled_statements.py
+extensions/python/tests/ch11_python_as_a_notation/test_compiled_generator_joins.py
+extensions/python/tests/ch10_errors_and_refusals/test_refusal_grounds.py`
+passes 121 tests. The new property test compares Python and compiled branches
+and loop exits across negative, empty and positive ranges. The tests also
+cover the None literal as a default head pattern, a typed caller rejecting
+a numeric result under NoneType, and two equal None yields retaining their
+multiplicity. Receipt: `ai-tmp/ai-classes-c17-none-cohort.log`.
+
+Found during validation: ordinary function declaration has an existing
+argument-annotation requirement in `_declare_definition`; a return-only
+annotation publishes no arrow. Its None result still has the intrinsic
+NoneType. The negative contract witness therefore uses an annotated callee
+argument, the path that publishes its signature. An initial harness also
+used an exact underscore spelling for a name installed with hyphens and an
+unsupported `is` comparison. Corrected the harness to call its declared name
+and return the bound singleton with the next statement's result. Identity
+operator lowering belongs to the remaining data-model work.
+
+Verified: the annotation and operation consumer cohort passes 332 tests with
+`PYTHONPATH=extensions/python $CHECK_PY -m pytest -q -n 4 --benchmark-disable
+--randomly-seed=1125382488 extensions/python/tests/ch09_types
+extensions/python/tests/ch11_python_as_a_notation/test_ops.py
+extensions/python/tests/ch11_python_as_a_notation/test_integrate.py
+extensions/python/tests/ch03_atoms_and_expressions/test_p5_annotations.py
+extensions/python/tests/ch14_seeing_your_program/test_features.py::test_define_methods_run_on_terms_and_handles`.
+Receipt: `ai-tmp/ai-classes-c17-none-consumers.log`. The ordinary grain twin
+lane passes both claims with equal final stores, native 2530792 and Python
+14248454 inferences, within its existing budget. Receipt:
+`ai-tmp/ai-classes-c17-none-grain-twin.log`. Ruff, mypy and the provenance pin
+self-test pass. Evidence initially misses six references to the untracked
+test file; staging that file makes it part of the gate's test inventory.
+The focused jscpd report covers all six Python files and finds zero clones.
