@@ -166,6 +166,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Host-operation return arrows exclude empty `None` alternatives through
+  unions and refinements. Nullable parameters, contained values, full
+  annotation records and explicitly supplied declarations retain their types.
 - Effect plans follow renamed and patterned references to their defining
   bodies. Recursive aliases terminate in the planner, unions retain each
   source's effects, and equal helper names in separate spaces keep their
