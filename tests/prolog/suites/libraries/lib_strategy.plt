@@ -5,18 +5,18 @@
 % Guarantees:
 %   - strategy-apply is admitted as a translator rule while a stored plan stays
 %     queryable data [tested: lib_strategy:stored_plans_lower_through_the_translator;
-%     commit=WORKTREE]
+%     commit=505ce25b9384e782afa26f621527d4b1fd695924]
 %   - left-biased choice, strict traversal, and TP/TU filtering retain their
 %     observable laws at the engine door [tested:
 %     lib_strategy:choice_uses_the_complete_left_result_bag,
 %     lib_strategy:traversals_keep_their_strict_order,
-%     lib_strategy:typed_schemes_filter_by_the_declared_arrow; commit=WORKTREE]
+%     lib_strategy:typed_schemes_filter_by_the_declared_arrow; commit=505ce25b9384e782afa26f621527d4b1fd695924]
 %   - a named space's own choice definition hides lib_strategy's inherited
 %     arrow for dispatch while get-type keeps reporting the arrow [tested:
 %     lib_strategy:an_inherited_arrow_does_not_veto_a_local_definition,
 %     lib_strategy:settled_nested_arguments_use_the_governing_outer_arrow,
 %     lib_strategy:removing_a_local_shadow_recompiles_its_callers;
-%     commit=WORKTREE]
+%     commit=505ce25b9384e782afa26f621527d4b1fd695924]
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

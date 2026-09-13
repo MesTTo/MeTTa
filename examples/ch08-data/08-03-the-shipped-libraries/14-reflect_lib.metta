@@ -1,6 +1,6 @@
 ; Purpose: inspect engine declarations and manipulate literal code through MeTTa.
 ; Guarantees: exact replacements preserve topmost matches, shared variables,
-; runnable syntax and every alternative [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/14-reflect_lib.metta; commit=WORKTREE].
+; runnable syntax and every alternative [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/14-reflect_lib.metta; commit=505ce25b9384e782afa26f621527d4b1fd695924].
 ;lib_reflect: the engine's own surface as data you can match. A tool that
 ;keeps its own list of what the engine knows drifts; a list the engine
 ;answers cannot.

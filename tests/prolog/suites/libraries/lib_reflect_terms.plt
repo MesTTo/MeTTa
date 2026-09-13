@@ -1,7 +1,7 @@
 % Purpose: prove literal inspection and exact simultaneous term replacement.
 % Guarantees: tests compare live Prolog variable identity as well as answer bags,
 % preserving runnable syntax, shared replacements and every duplicate occurrence.
-% [tested: lib_reflect_terms; commit=WORKTREE].
+% [tested: lib_reflect_terms; commit=505ce25b9384e782afa26f621527d4b1fd695924].
 :- use_module(collection_test_support).
 :- use_module(library(lists), [member/2]).
 :- initialization(load_collection_library(lib_reflect)).

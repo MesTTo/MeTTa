@@ -4,7 +4,7 @@
 ;   through `(library lib_strategy)`.
 ; Guarantees: all 35 assertions distinguish the strategy laws from plausible
 ;   eager, right-biased, host-callback, or non-traversing implementations
-;   [tested: sh test.sh examples/ch20-extending-the-engine/20-02-metta-written-in-metta/11-strategy.metta; commit=WORKTREE]
+;   [tested: sh test.sh examples/ch20-extending-the-engine/20-02-metta-written-in-metta/11-strategy.metta; commit=505ce25b9384e782afa26f621527d4b1fd695924]
 
 !(import! &self (library lib_strategy))
 
