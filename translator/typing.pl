@@ -2,7 +2,7 @@
 % Guarantees: a variable binding carries checked parameter contracts into its
 %   continuation without proving other values or sibling branches; declaration
 %   and policy edits retire those proofs [tested:
-%   run_tests(translator_parameter_aliases); commit=WORKTREE].
+%   run_tests(translator_parameter_aliases); commit=59a1783102aa6d8d6a9b7766761b094c891fc417].
 % Guarantees: committing generated type checks adds no native call around
 %   intrinsic tests and preserves the caller's alternatives [tested:
 %   run_tests(translator_check_commits), run_tests(translator_typed_checks);
