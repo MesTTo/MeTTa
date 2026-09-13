@@ -155,6 +155,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Effect plans follow renamed and patterned references to their defining
+  bodies. Recursive aliases terminate in the planner, unions retain each
+  source's effects, and equal helper names in separate spaces keep their
+  lexical meaning. Operation reclassification and reference withdrawal are
+  visible to the next inspection without executing the inspected program.
+
 - Class declarations, prototype handles and annotation dependencies follow
   the package import order; the integration callback remains deferred.
 - Compiled functions preserve `None` from explicit returns, bare returns and

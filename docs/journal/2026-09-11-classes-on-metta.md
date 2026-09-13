@@ -2128,3 +2128,80 @@ budgets. Logs use the `ai-classes-c20-import-` prefix: `python-corrected`,
 `ruff-corrected`, `gates-corrected` and `twins`. The clone scan covers all
 three Python files; its two unchanged fragments are overload signatures and
 door marks, whose distinct declarations must remain visible to their readers.
+
+## 2026-09-13: method references use the existing effect planner
+
+Measured: a pure source body's renamed alias reports `oracleIO` on both this
+tree and pristine c75181adc. The commands are
+`PYTHONPATH=extensions/python python ai-tmp/ai-classes-c21-effects-control.py`
+and the same command with the control archive's `extensions/python` path.
+Both logs end `present`; the source plan contains `(+ pureStructural)`, while
+the alias plan contains only its own name and `oracleIO`. Logs:
+`ai-classes-c21-effects-current.log` and `ai-classes-c21-effects-control.log`.
+The reference-effect suite fails all five cases before the repair, covering
+plain and patterned aliases, self recursion, private equal-named helpers in
+different homes, withdrawal and an original body wrapped in a union.
+
+Decided: keep the native planner as the authority. The existing reference
+roots already identify physical contributions. Queue those bodies and keep
+the defining module in each queue entry and visited key. The retained source
+association remains the authority for a body, including an original body
+behind a public union. Alias arrow assertions still contribute their declared
+effect, and candidate source programs retain their existing admission path.
+No program body or reference representation changes.
+
+Rejected: a separate Python method-effect fixed point. It would duplicate the
+engine's effect lattice, body walk and invalidation. Rejected: inspecting a
+renamed wrapper as an opaque native predicate; the wrapper has no original
+equation and loses the source association. The import journal's 2026-09-09
+binding experiment already establishes that an original body's clause and
+source references remain available behind its union wrapper.
+
+Verified: `swipl -q -f none -l
+tests/prolog/suites/spaces/reference_effects.plt -g
+'(run_tests(reference_effects)->halt(0);halt(1))'` passes all five cases in
+`ai-classes-c21-effects-after.log`. The Python effect-plan file passes seven
+tests with `pytest -q --benchmark-disable --randomly-seed=1125382488`, including
+the four self/peer and plain/patterned operation-reclassification cases. The
+callbacks remain uncalled. Log: `ai-classes-c21-effects-python.log`.
+
+The existing effect lattice, arrow product, reference loading and pattern
+suites pass in separate native processes. Their logs use
+`ai-classes-c21-effects-native-{effects,arrows,loading,patterns}.log`.
+The Python effects, memoization, cache, reference, world, saga and admission
+cohort passes 109 tests with `pytest -q -n 4 --benchmark-disable
+--randomly-seed=1125382488`; `ai-classes-c21-effects-consumers.log` names the
+result. Ruff and both layering checks pass. Prolog static checking reaches
+the already-attributed `X_GLXCreateContext` failure: `BadValue (integer
+parameter out of range for operation)`, major opcode 152 and minor opcode 3.
+The same failure appears in the pristine-cut `ai-classes-c15-static-control.log`.
+No static-checker or display workaround was added. The clone scans read two
+Prolog sources (3111 lines) and one Python source (181 lines), with no clones.
+
+The three affected twins prove 27 claims and equal stores. Two old point
+budgets move under the changed effect walk: maps cost 271057 (+90) and grains
+14262549 (-705) in that run. A min-of-three measurement with
+`python extensions/python/tools/twin_coverage.py --measure --rounds 3`
+and the maps and grains paths gives 260623/271057 and 2532874/14262546 native/
+Python inferences. The corresponding point pins and grain difference are
+updated from that measurement; the rows twin stays at 95712. Logs:
+`ai-classes-c21-effects-twins.log` and
+`ai-classes-c21-effects-twins-measure.log`.
+
+The source-name audit adds the existing `get-type` translation case. Its alias
+still omitted the source operation because the native body is named
+`get_type_rule/2`; `ai-classes-c21-effects-native-name-before.log` fails that
+operation-membership assertion. Use `compiled_function_name/2`, the same
+mapping reference publication already uses. The final reference/effect/arrow
+cohort passes 70 cases, and the combined Python cohort passes 116 tests.
+Logs: `ai-classes-c21-effects-native-final.log` and
+`ai-classes-c21-effects-python-final.log`. The original reproduction now ends
+`absent` in `ai-classes-c21-effects-repaired.log`. Final min-of-three counters
+are maps260623/271057 and grains2532874/14262547; the final point pins use
+those values. Log: `ai-classes-c21-effects-twins-final-measure.log`.
+
+Final verification: the normal rows/maps/grains twin lane passes 27 claims,
+three equal stores and zero findings in `ai-classes-c21-effects-twins-final.log`.
+Ruff, both layering checks and evidence pass. Layering checks 1254 calls under
+93 contracts; evidence checks 7600 claims against 13510 test names. The final
+Prolog clone scan reads 3120 lines across two files and finds no clones.
