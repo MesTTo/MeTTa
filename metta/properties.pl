@@ -2,8 +2,10 @@
 % Guarantees: get-property, explain and host reflection share these answers;
 %   origins retain each defining occurrence and resolve aliases at their home
 %   [tested: head_properties; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
-%   Named equation ownership uses the storage index before general row
-%   classification; unrelated atoms do not add work to compilation claims
+% Guarantees: argument-pattern aliases report the original definition's home
+%   [tested: reference_patterns; commit=WORKTREE].
+% Guarantees: named equation ownership uses the storage index before general
+%   row classification; unrelated atoms do not add work to compilation claims
 %   [tested: head_properties:unrelated_rows_do_not_change_a_named_definition_claim_cost;
 %   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Owns resources: source text and positions are cached only for one origin read.
@@ -91,7 +93,7 @@ metta_head_sources(Space, Name, Sources) :-
     space_module(Space, Module),
     findall(Home-Original,
             ( metta_reference_roots(Module, Name, _, Roots),
-              member(root(Home, Original, _), Roots) ), Found),
+              member(root(Home, Original, _, _), Roots) ), Found),
     ( Found == []
     -> metta_head_home(Space, Module, Name, Home), Sources = [Home-Name]
     ; sort(Found, Sources) ).

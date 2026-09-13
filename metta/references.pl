@@ -15,8 +15,12 @@
 % Guarantees: reference paths identify defining predicates, while their clauses
 %   retain their original multiplicity and execution module
 %   [tested: references; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
-%   Suspended reference queries can be destroyed: transaction discovery leaves
-%   their outer query frame unwatched [tested:
+% Guarantees: a mapper's call pattern constrains the alias's inputs while
+%   retaining its provider's body and declarations; equal patterns share a
+%   source root, and each invocation receives fresh variables
+%   [tested: reference_patterns; commit=WORKTREE].
+% Guarantees: suspended reference queries can be destroyed: transaction discovery
+%   leaves their outer query frame unwatched [tested:
 %   reference_loading:a_suspended_background_qualified_query_survives_release;
 %   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Owns resources: observed spaces own mutation observers, projected metadata and
@@ -44,6 +48,8 @@
 %   run before publication, outside the typing and support-graph mutexes.
 % Decides: INTERNAL is visibility's zero and PUBLIC its one. A visited-space
 %   traversal bounds cycles, including cycles whose maps change names.
+
+:- use_module(library(varnumbers), [varnumbers/2]).
 
 :- dynamic metta_reference_row/4, metta_reference_map/3.
 :- dynamic metta_occurrence_grade/4, metta_reference_projection/4.
@@ -207,24 +213,44 @@ metta_host_reference_names(Space, Names) :-
     findall(Name, member(Name/_-_, Face), Heads),
     sort(Heads, Names).
 
-metta_reference_public_entry(Space, Name/Arity-root(Home, Original, _)) :-
-    ( Space == Home, Name == Original
+metta_reference_public_entry(Space, Name/Arity-root(Home, Original, _, Patterns)) :-
+    ( Space == Home, Name == Original, Patterns == []
     -> once(metta_reference_own_head(Space, Name, Arity))
     ; \+ metta_reference_internal(Space, Name) ).
 
 metta_reference_local_face(Space, Visited, Face) :-
     (   memberchk(Space, Visited)
     ->  Face = []
-    ;   findall(Name/Arity-root(Space, Name, Arity),
+    ;   findall(Name/Arity-root(Space, Name, Arity, []),
                 metta_reference_local_head(Space, Name, Arity), Own),
         findall(Name/Arity-Root,
                 ( metta_reference_row(Space, Token, Home, Map),
-                  metta_reference_face(Home, [Space|Visited], Source),
-                  member(Original/Arity-Root, Source),
+                  metta_reference_source_face(Space, Home, Visited, Source),
+                  member(Original/Arity-SourceRoot, Source),
                   metta_reference_names(Space, Token, Map, Original, Names),
-                  member(Name, Names) ), Imported),
+                  member(Target, Names),
+                  metta_reference_target(Target, Arity, SourceRoot, Name, Root) ), Imported),
         append(Own, Imported, All), sort(All, Face)
     ).
+
+% A self reference aliases the space's own definitions once. Following its
+% imported face would repeatedly apply the same map to its previous aliases.
+metta_reference_source_face(Space, Space, _, Face) :- !,
+    findall(Name/Arity-root(Space, Name, Arity, []),
+            metta_reference_own_head(Space, Name, Arity), Face).
+metta_reference_source_face(Space, Home, Visited, Face) :-
+    metta_reference_face(Home, [Space|Visited], Face).
+
+% A symbol retains every arity. A full head selects its input arity and adds
+% a structural constraint. Numbered variables make the path key independent
+% of a mapper invocation; publication restores fresh variables for each guard.
+metta_reference_target(Name, _, Root, Name, Root) :- atom(Name), !.
+metta_reference_target([Name|Arguments], Arity,
+                       root(Home, Original, Arity, Before), Name,
+                       root(Home, Original, Arity, Patterns)) :-
+    integer(Arity),
+    length(Arguments, Inputs), Arity =:= Inputs+1,
+    sort([Arguments|Before], Patterns).
 
 metta_reference_local_head(Space, Name, Arity) :-
     spaces:metta_space_pair(Space, [=, [Name|Args], _], Token, _),
@@ -269,11 +295,17 @@ metta_reference_map_once(Space, Token, Map, Head, Names) :-
     findall(Name,
             with_metta_module(Module,
                 eval([let, Mapper, Map, [Mapper, Head]], Name)), Results),
-    forall(member(Result, Results),
-           ( atom(Result) -> true
-           ; throw(error(metta_reference_map_result(Map, Head, Result), none)) )),
-    sort(Results, Names),
+    maplist(metta_reference_map_target(Map, Head), Results, Targets),
+    sort(Targets, Names),
     assertz(metta_reference_map(Token, Head, Names)).
+
+metta_reference_map_target(_, _, Name, Name) :- atom(Name), !.
+metta_reference_map_target(_, _, Target, Canonical) :-
+    is_list(Target), Target = [Name|_], atom(Name),
+    acyclic_term(Target), term_attvars(Target, []), !,
+    copy_term(Target, Canonical), numbervars(Canonical, 0, _).
+metta_reference_map_target(Map, Head, Result, _) :-
+    throw(error(metta_reference_map_result(Map, Head, Result), none)).
 
 % Change notification, the pending publication queue, its drain and the
 % transaction frame roots live in engine/metta/reference_refresh.pl. This unit
@@ -290,7 +322,7 @@ metta_reference_force(Name) :-
         % Workaround: swi-cleanup-window - a suspended force owns a trailed stack entry.
         metta_with_trailed_enumeration('$metta_reference_forcing', [Name|Before],
             forall(( metta_reference_roots(_, Name, _, Roots),
-                     member(root(Home, Original, _), Roots) ),
+                     member(root(Home, Original, _, _), Roots) ),
                    ( metta_reference_wait(Home),
                      ( Original == Name -> true
                      ; spaces:metta_ensure_compiled(Original) ) )))
@@ -338,7 +370,7 @@ metta_reference_publish_face(Space, Module, Face, Faces) :-
              ; assertz(metta_reference_roots(Module, Name, Arity, Roots)) ) )).
 
 metta_reference_bind(Space, Module, Name, Arity, Roots, Faces) :-
-    (   Roots = [root(Space, Name, Arity)],
+    (   Roots = [root(Space, Name, Arity, [])],
         \+ metta_reference_slot(Module, Name, Arity)
     ->  true
     ;   Roots == [], \+ metta_reference_slot(Module, Name, Arity)
@@ -348,7 +380,7 @@ metta_reference_bind(Space, Module, Name, Arity, Roots, Faces) :-
         ->  ( metta_reference_roots(Module, Name, OtherArity, Other),
               OtherArity =\= Arity, Other \== []
             -> true ; unregister_fun_in(Module, Name) )
-        ;   ( member(root(Home, Original, _), Roots),
+        ;   ( member(root(Home, Original, _, _), Roots),
               \+ metta_reference_unsettled(Home, Original)
             -> register_arity(Name, Arity) ; true ),
             register_fun_in(Module, Name),
@@ -364,13 +396,13 @@ metta_reference_binding(_, Module, Name, Arity, [], _) :-
     \+ current_transaction(_), !,
     metta_reference_retire_binding(Module, Name, Arity, discard).
 metta_reference_binding(Space, Module, Name, Arity,
-                        [root(Space, Name, Arity)], _) :- !,
+                        [root(Space, Name, Arity, [])], _) :- !,
     metta_reference_retire_binding(Module, Name, Arity, preserve).
 metta_reference_binding(Space, Module, Name, Arity,
-                        [root(Home, Name, Arity)], Faces) :-
+                        [root(Home, Name, Arity, [])], Faces) :-
     Home \== Space,
     memberchk(Home-HomeModule-Face, Faces),
-    findall(R, member(Name/Arity-R, Face), [root(Home, Name, Arity)]),
+    findall(R, member(Name/Arity-R, Face), [root(Home, Name, Arity, [])]),
     compiled_function_name(Name, Predicate), functor(Head, Predicate, Arity),
     % Workaround: swi-transaction-enumerator-repeats-parent - test existence once before the wrapper check can fail.
     \+ ( once(current_transaction(_)),
@@ -395,12 +427,12 @@ metta_reference_reserve_binding(Module, Name, Arity) :-
     ; assertz(metta_reference_slot(Module, Name, Arity)) ).
 
 metta_reference_goal_list([], _, _, _, _, _, []).
-metta_reference_goal_list([root(Home, OriginalName, Arity)|Roots],
+metta_reference_goal_list([root(Home, OriginalName, Arity, Patterns)|Roots],
                           Space, Name, Args, Own, Faces, [Goal|Goals]) :-
     (   Home == Space, OriginalName == Name
     ->  Call = call(Own)
     ;   memberchk(Home-HomeModule-Face, Faces),
-        Root = root(Home, OriginalName, Arity),
+        Root = root(Home, OriginalName, Arity, []),
         findall(R, member(OriginalName/Arity-R, Face), HomeRoots),
         compiled_function_name(OriginalName, HomePredicate),
         HomeHead =.. [HomePredicate|Args],
@@ -411,9 +443,23 @@ metta_reference_goal_list([root(Home, OriginalName, Arity)|Roots],
         )
     ),
     ( metta_reference_loading(Home)
-    -> Goal = (metta_reference_wait(Home), Call)
-    ; Goal = Call ),
+    -> Ready = (metta_reference_wait(Home), Call)
+    ; Ready = Call ),
+    metta_reference_pattern_goal(Patterns, Args, Ready, Goal),
     metta_reference_goal_list(Roots, Space, Name, Args, Own, Faces, Goals).
+
+% These unifications become native clause instructions. A rejected receiver
+% never enters the provider, and its body sees the same input term.
+metta_reference_pattern_goal([], _, Call, Call).
+metta_reference_pattern_goal([Pattern|Patterns], Args, Call, Goal) :-
+    varnumbers(Pattern, Values), append(Inputs, [_], Args),
+    metta_reference_argument_guards(Inputs, Values, Rest, Goal),
+    metta_reference_pattern_goal(Patterns, Args, Call, Rest).
+
+metta_reference_argument_guards([], [], Rest, Rest).
+metta_reference_argument_guards([Input|Inputs], [Value|Values], Rest,
+                                (Input = Value, Goal)) :-
+    metta_reference_argument_guards(Inputs, Values, Rest, Goal).
 
 % Reinstalling the unchanged native body returns its original definition,
 % including when the body never called that definition.
@@ -480,13 +526,15 @@ metta_reference_note(Module, Name, Reason) :-
 % the indexed lookup of that head and subject rather than a walk over the
 % provider's whole population (a class space holds its instances' facts).
 metta_reference_metadata(Space, Face, Key, Row) :-
-    member(Name/_-root(Home, Original, _), Face), Home \== Space,
+    member(Name/_-root(Home, Original, _, _), Face),
+    \+ ( Home == Space, Name == Original ),
     metta_reference_metadata_row(OriginalRow, Original, Name, Row),
     spaces:metta_space_pair(Home, OriginalRow, Token, _),
     \+ metta_reference_projection(Home, _, Token, _),
     Key = origin(Home, Token, Name).
 metta_reference_metadata(Space, Face, Key, Row) :-
-    member(Name/_-root(Home, Original, _), Face), Home \== Space,
+    member(Name/_-root(Home, Original, _, _), Face),
+    \+ ( Home == Space, Name == Original ),
     metta_reference_manifest_row(Home, OriginalRow),
     metta_reference_metadata_row(OriginalRow, Original, Name, Row),
     \+ spaces:metta_space_pair(Home, OriginalRow, _, _),
@@ -564,5 +612,5 @@ prolog:error_message(metta_internal_reference(Home, Name)) -->
     [ '~w is internal in ~w; call (evalc (~w ...) ~w) to use its defining space'-
       [Name, Home, Name, Home] ].
 prolog:error_message(metta_reference_map_result(Map, Head, Result)) -->
-    [ 'from map ~q returned ~q for ~w; each answer must be a symbol'-
+    [ 'from map ~q returned ~q for ~w; each answer must be a symbol or a finite call pattern with a symbol head and ordinary variables'-
       [Map, Result, Head] ].

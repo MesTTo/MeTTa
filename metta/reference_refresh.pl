@@ -3,6 +3,9 @@
 % Guarantees: adding an importer publishes no existing sibling; changing a
 %   provider publishes its affected importers
 %   [tested: reference_publication; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: patterned references participate in demand, publication and
+%   rollback through their original defining home
+%   [tested: reference_patterns; commit=WORKTREE].
 % Guarantees: nested completion transfers mutation roots to the live parent,
 %   then reconciles bindings against rows surviving the transaction
 %   [tested: references:rollback_restores_native_links_and_nested_rollback_restores_its_parent,
@@ -133,7 +136,7 @@ metta_reference_refresh_now :-
 
 metta_reference_binding_context(Faces, Context) :-
     findall(Home,
-            ( member(_-_-Face, Faces), member(_-root(Home, _, _), Face),
+            ( member(_-_-Face, Faces), member(_-root(Home, _, _, _), Face),
               \+ memberchk(Home-_-_, Faces) ), Homes0),
     sort(Homes0, Homes),
     findall(Home-Module-Face,
@@ -153,8 +156,8 @@ metta_reference_demand_names(Spaces, Names) :-
 % https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/library/prolog_wrap.pl
 metta_reference_publish_demand(Faces, Previous) :-
     findall(Name,
-            ( member(Space-_-Face, Faces), member(Name/Arity-root(Home, Original, _), Face),
-              integer(Arity), Home \== Space,
+            ( member(Space-_-Face, Faces), member(Name/Arity-root(Home, Original, _, _), Face),
+              integer(Arity), \+ ( Home == Space, Name == Original ),
               metta_reference_unsettled(Home, Original) ), Names0),
     sort(Names0, Names),
     forall(( member(Name, Previous), \+ memberchk(Name, Names),
@@ -167,8 +170,9 @@ metta_reference_publish_demand(Faces, Previous) :-
 
 metta_reference_demanded_elsewhere(Name) :-
     metta_reference_roots(Module, Name, _, Roots),
-    member(root(Home, Original, _), Roots),
-    metta_reference_seen_space(Home, HomeModule), HomeModule \== Module,
+    member(root(Home, Original, _, _), Roots),
+    metta_reference_seen_space(Home, HomeModule),
+    \+ ( HomeModule == Module, Name == Original ),
     metta_reference_unsettled(Home, Original), !.
 
 metta_reference_demand_wrapper :-
