@@ -3,12 +3,14 @@
 % Purpose: check complete String data, host equivalence and named refusals.
 % Guarantees: the tests exercise NUL, supplementary scalars, overlap, empty
 % inputs, layout, templates, native cancellation and distinct metrics.
-% [tested: lib_string_surface; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8].
+% [tested: lib_string_surface; commit=WORKTREE].
 % Owns resources: each cancellation alarm is removed on every outcome.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 :- use_module('../../../../lib/lib_string/lib_string').
+:- use_module(collection_test_support).
+:- load_collection_library(lib_string).
 :- use_module(library(isub), [isub/4]).
 :- use_module(library(strings), []).
 :- use_module(library(time), [alarm/4, remove_alarm/1]).
@@ -20,7 +22,7 @@ test(codepoints_round_trip) :-
     'string-from-codes'(Codes, Text), 'string-codes'(Text, Back),
     assertion(Back == Codes), 'string-length'(Text, 5),
     'string-chars'(Text, Chars), assertion(length(Chars,5)),
-    'string-from-chars'(Chars, Text).
+    invoke('string-from-chars'(Chars, Text)).
 
 test(invalid_scalars, [forall(member(Code,[-1,0xd800,0xdfff,0x110000])),
                       throws(error(domain_error(unicode_scalar_value,Code),_))]) :-
@@ -49,11 +51,11 @@ test(embedded_nul_survives_the_retained_text_operations) :-
     string_codes(Text,[97,0,98]), string_codes(Upper,[65,0,66]),
     'string-upper'(Text,Upper), 'string-lower'(Upper,Text),
     string_codes(Suffix,[0,98]), 'string-slice'(Text,1,3,Suffix),
-    'string-starts-with'(Text,"a",true), 'string-ends-with'(Text,Suffix,true),
-    'string-join'("",["a",Suffix],Text), 'string-repeat'(Text,2,Repeated),
+    invoke('string-starts-with'(Text,"a",true)), invoke('string-ends-with'(Text,Suffix,true)),
+    'string-join'("",["a",Suffix],Text), invoke('string-repeat'(Text,2,Repeated)),
     string_codes(Repeated,[97,0,98,97,0,98]),
-    string_codes(Left,[120,97,0,98]), 'string-pad-left'(Text,4,"x",Left),
-    string_codes(Right,[97,0,98,120]), 'string-pad-right'(Text,4,"x",Right).
+    string_codes(Left,[120,97,0,98]), invoke('string-pad-left'(Text,4,"x",Left)),
+    string_codes(Right,[97,0,98,120]), invoke('string-pad-right'(Text,4,"x",Right)).
 
 test(literal_operations_keep_overlap_and_empty_rules) :-
     'string-index-of'("aaaa", "aa", 0), 'string-last-index-of'("aaaa", "aa", 2),
@@ -110,14 +112,14 @@ test(nul_line_layout) :-
     'string-indent'(">",First,Indented), string_codes(Indented,[62,97,0]).
 
 test(padding_contracts) :-
-    'string-center'("x", 6, "ab", "abxaba"),
-    'string-center'("🦊", 4, ".", ".🦊.."),
-    'string-center'("long", -1, "x", "long"),
-    'string-center'("x", 12, "", "x"),
-    'string-pad-left'("x", 4, "ab", "abax"),
-    'string-pad-right'("x", 4, "ab", "xaba"),
-    'string-repeat'("a", -9, ""),
-    'string-from-chars'(["ab",c,42,""], "abc42").
+    invoke('string-center'("x", 6, "ab", "abxaba")),
+    invoke('string-center'("🦊", 4, ".", ".🦊..")),
+    invoke('string-center'("long", -1, "x", "long")),
+    invoke('string-center'("x", 12, "", "x")),
+    invoke('string-pad-left'("x", 4, "ab", "abax")),
+    invoke('string-pad-right'("x", 4, "ab", "xaba")),
+    invoke('string-repeat'("a", -9, "")),
+    invoke('string-from-chars'(["ab",c,42,""], "abc42")).
 
 test(wrapping_and_alignment) :-
     'string-wrap'("one two three",7,"one two\nthree"),
@@ -159,8 +161,8 @@ test(exact_edit_distance_and_similarity) :-
     'string-edit-distance'("é","é",2),
     'string-edit-distance'("🦊","🦊x",1),
     'string-edit-distance'("","abc",3),
-    'string-similarity'("","",1.0), 'string-similarity'("","a",0.0),
-    'string-similarity'("cat","cut",Score), assertion(abs(Score-2/3) < 1.0e-12).
+    invoke('string-similarity'("","",1.0)), invoke('string-similarity'("","a",0.0)),
+    invoke('string-similarity'("cat","cut",Score)), assertion(abs(Score-2/3) < 1.0e-12).
 
 test(isub_matches_host) :-
     forall(( member(Left,["","a","ab","abc","aabac","E56.Language","éclair"]),
@@ -198,7 +200,7 @@ test(native_failed_output_unification_releases_call_state) :-
     'string-edit-distance'("abc","abc",0).
 
 test(native_walk_delivers_cancellation) :-
-    'string-repeat'("ab",1000000,Text),
+    length(Copies,1000000), maplist(=("ab"),Copies), atomics_to_string(Copies,Text),
     setup_call_cleanup(
         alarm(0.001,throw(string_cancelled),Alarm,[]),
         catch((lib_string_native:count_matches(Text,"a",false,_),Outcome=completed),
@@ -206,5 +208,38 @@ test(native_walk_delivers_cancellation) :-
         remove_alarm(Alarm)),
     assertion(Outcome == cancelled),
     'string-count'("aa","a",2).
+
+test(empty_construction_still_validates_complete_inputs) :-
+    forall(member(Count,[_,1.0,1.5,true,"2"]),
+           (refused('string-repeat'("",Count,_)),
+            refused('string-center'("x",Count,"",_)))),
+    forall(member(Value,[_,[code,1],[['+',1,2]]]),
+           (refused('string-repeat'(Value,0,_)),
+            refused('string-pad-left'("x",0,Value,_)),
+            refused('string-from-chars'([Value],_)))).
+
+test(large_empty_construction_does_not_enumerate_the_count) :-
+    Huge is 1<<100,
+    invoke('string-repeat'("",Huge,"")),
+    invoke('string-center'("x",Huge,"","x")).
+
+test(prefix_suffix_and_similarity_keep_coercions) :-
+    invoke('string-starts-with'(123,12,true)),
+    invoke('string-ends-with'(123,23,true)),
+    invoke('string-ends-with'("ab","abc",false)),
+    invoke('string-ends-with'("ab","",true)),
+    invoke('string-center'(12,7,3,"3312333")),
+    invoke('string-similarity'(12,'12',1.0)).
+
+test(from_chars_refuses_open_and_cyclic_literal_data) :-
+    Open=["a"|Tail], Cycle=["a"|Cycle],
+    forall(member(Items,[Open,Cycle,["a"|bad]]), refused('string-from-chars'(Items,_))),
+    assertion(var(Tail)).
+
+test(repeat_equation_is_callable_data) :-
+    once(eval_expr([match,'&self',['=',['string-repeat',Value,Count],Body],
+                    [quote,['|->',[Value,Count],Body]]],Recipe)),
+    once(eval_expr([eval,Recipe],Function)),
+    once(eval_expr([Function,"ab",3],Text)), assertion(Text=="ababab").
 
 :- end_tests(lib_string_surface).

@@ -5813,3 +5813,72 @@ preceding run. Twins-selftest passes; the lane remains red for those recorded
 older findings and exits1 with GATE FAILED: twins. Receipts:
 ai-lib4-vector-lanes.log, ai-lib4-vector-fulltwins.log and
 ai-lib4-vector-findings.log.
+
+## 2026-09-14: String recipes compose the shared text boundary
+
+Goal: derive ordinary text recipes while preserving the complete Unicode,
+coercion, overlap and empty-input contracts.
+
+Decided before implementation: derive contains, starts-with, ends-with,
+from-chars, repeat, pad-left, pad-right, center and similarity. Padding shares
+one equation parameterized by the function assigning padding to the left;
+its three callers choose all, none or half. Repeat collects a range and joins
+once. Empty text validates its count but needs no traversal. Similarity uses
+the exact distance provider and retains 1.0 for two empty strings. Public names,
+34 heads and 37 arities stay unchanged. Snapshot: e289439f372a0323d8959e619c7562c480bd072e.
+
+Rejected: a second implementation of the licensed text and metric providers.
+RapidFuzz 3.3.4 already owns exact unit-cost edit distance; the shared KMP code
+owns search, count, split and replacement. Host grammars own Unicode mapping,
+layout and templates. Retaining those authoritative implementations avoids
+duplicating their maintenance; speed alone would not justify this boundary.
+Revisit if a common MeTTa representation can replace the provider and its
+complete contracts at lower total description cost.
+
+Tried: 26 candidate claims pass against the original native face, including
+Unicode, numeric coercion, huge empty outputs, empty/long suffixes, negative
+counts, fractional refusals and literal nontext inputs. Existing native suites
+also pass. Native consumers import only retained metta_text/2 and string-lines/2;
+the MeTTa import closure names 27 twins. Receipts:
+ai-lib4-string-recipes-probe.log, ai-lib4-string-native-control.log and
+ai-lib4-string-consumers.log. Design:ai-lib4-string-derivation-plan.md.
+
+Tried: the implementation passes 36 native surface tests with 3 subtests, all 58
+legacy text/file/JSON tests with 8 subtests and 50 example claims. Python initially
+passes 19 cases and fails two refusal fixtures with Failed: DID NOT RAISE
+MettaError. Bool and String literals in a Number position return the engine's
+typed Error value before the body runs; fractional Numbers reach the assertion
+and raise. Preserve both behaviors and test their exact distinct outcomes.
+The direct eval/fn/catch probe confirms the boundary. Receipts:
+ai-lib4-string-native.log, ai-lib4-string-example.log,
+ai-lib4-string-python.log and ai-lib4-string-count-boundary.log.
+
+Verified: all 21 Python cases pass, retaining the 120 Unicode, 80 line and
+80 edit-distance generated cases, and adding 100 padding/repetition cases.
+The README's eight MeTTa results and one Python assertion pass. The six native
+consumer suites pass 205 tests with 100 subtests; their Python counterparts
+pass 121 cases. All nineteen required lanes pass. jscpd finds no clones in
+314 Python lines. Receipts: ai-lib4-string-python-types.log,
+ai-lib4-string-readme.log, ai-lib4-string-consumer-{native,python}.log,
+ai-lib4-string-lanes.log and ai-lib4-string-jscpd.log.
+
+Tried: explicitly calling main also runs its initialization(main,main), giving
+two complete benchmark traversals. The final command supplies -g true -t halt
+and runs it once. All 24 search/replacement cases still match their exact
+expected values after moving fixture construction outside the public recipe.
+Native comparison costs remain opaque to Prolog inference counters; the CPU
+figures are descriptive only. Receipts: ai-lib4-string-benchmark{,-final}.log
+and ai-lib4-string-benchmark-host.log.
+
+Measured: all 27 consumer twins have fresh three-run inference minima; none
+changes its stored-content divergence. String reaches 329461 inferences against
+the example's 325512, proves all 50 claims, has equal stored content and reports
+zero standalone findings. Receipts: ai-lib4-string-measure-host.log,
+ai-lib4-string-prices.log and ai-lib4-string-twin.log.
+
+Verified: the full twins lane reports 257 findings over 311 pairs. Its complete
+diagnostic multiset matches Vector's preceding run, with none added or removed.
+Twins-selftest passes; those recorded older findings keep the lane red with
+exit 1 and GATE FAILED: twins. Receipts: ai-lib4-string-fulltwins.log and
+ai-lib4-string-findings.log. The String pair retains all 50 claims, equal stored
+content and the exact 329461 inference point in that full run.

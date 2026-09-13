@@ -5928,9 +5928,146 @@ Returns: Typed rewrite
 
 ## lib_string
 
+### `string-contains`
+
+*lib_string.metta:13*
+
+```metta
+(: string-contains (-> %Undefined% %Undefined% Bool))
+```
+
+Test the shared search index for a literal occurrence, including an empty Part.
+
+1. Value
+2. Part
+
+Returns: Answer
+
+### `string-starts-with`
+
+*lib_string.metta:20*
+
+```metta
+(: string-starts-with (-> %Undefined% %Undefined% Bool))
+```
+
+Test whether the first literal occurrence is at index zero. An empty prefix matches.
+
+1. Value
+2. Prefix
+
+Returns: Answer
+
+### `string-ends-with`
+
+*lib_string.metta:31*
+
+```metta
+(: string-ends-with (-> %Undefined% %Undefined% Bool))
+```
+
+Compare the final codepoint slice with the coerced suffix. An empty suffix matches; a longer suffix does not.
+
+1. Value
+2. Suffix
+
+Returns: Answer
+
+### `string-from-chars`
+
+*lib_string.metta:38*
+
+```metta
+(: string-from-chars (-> Expression String))
+```
+
+Join text items with an empty separator. Accept zero or several characters per item, Symbols and Numbers; code inside a literal expression stays data and is refused as nontext.
+
+1. Chars
+
+Returns: Text
+
+### `string-repeat`
+
+*lib_string.metta:50*
+
+```metta
+(: string-repeat (-> %Undefined% Number String))
+```
+
+Collect a range of text copies and join once. Validate text and integer Times even when the result is empty. Zero and negative counts produce an empty String; empty text needs no traversal. Invalid counts raise a named assertion.
+
+1. Value
+2. Times
+
+Returns: Text
+
+### `string-pad-left`
+
+*lib_string.metta:58*
+
+```metta
+(: string-pad-left (-> %Undefined% Number %Undefined% String))
+```
+
+Assign all missing padding to the left through the shared MeTTa padding equation. Repeat and truncate a multicharacter filler. Empty filler or a width no greater than the input leaves it unchanged; both texts and the integer width still validate.
+
+1. Value
+2. Width
+3. Pad
+
+Returns: Text
+
+### `string-pad-right`
+
+*lib_string.metta:66*
+
+```metta
+(: string-pad-right (-> %Undefined% Number %Undefined% String))
+```
+
+Assign no padding to the left, using string-pad-left's width and filler rules. The shared string-pad assertion refuses noninteger widths.
+
+1. Value
+2. Width
+3. Pad
+
+Returns: Text
+
+### `string-center`
+
+*lib_string.metta:74*
+
+```metta
+(: string-center (-> %Undefined% Number %Undefined% String))
+```
+
+Assign half the missing codepoints to the left; an odd extra character goes on the right. Each side restarts Pad. Empty filler leaves the input unchanged; the shared assertion still validates Width as an integer.
+
+1. Value
+2. Width
+3. Pad
+
+Returns: Text
+
+### `string-similarity`
+
+*lib_string.metta:84*
+
+```metta
+(: string-similarity (-> %Undefined% %Undefined% Number))
+```
+
+Normalize the shared exact edit distance as 1 - distance/max(lengths), in [0,1]. Two empty Strings score 1.0. An ordinary equation preserves the metric's codepoint and coercion rules.
+
+1. First
+2. Second
+
+Returns: Score
+
 ### `number-to-string`
 
-*lib_string.metta:15*
+*lib_string.metta:96*
 
 ```metta
 (: number-to-string (-> Number String))
@@ -5944,7 +6081,7 @@ Returns: Out
 
 ### `parse-number`
 
-*lib_string.metta:21*
+*lib_string.metta:102*
 
 ```metta
 (: parse-number (-> %Undefined% Number))
@@ -5956,25 +6093,9 @@ Parse the host numeric syntax. Ordinary nonnumbers produce no answer; type, reso
 
 Returns: Number
 
-### `string-center`
-
-*lib_string.metta:27*
-
-```metta
-(: string-center (-> %Undefined% Number %Undefined% String))
-```
-
-Pad both sides to Width codepoints, with an odd extra character on the right. Each side starts at the beginning of Pad; empty filler leaves the input unchanged.
-
-1. Value
-2. Width
-3. Pad
-
-Returns: Out
-
 ### `string-chars`
 
-*lib_string.metta:33*
+*lib_string.metta:108*
 
 ```metta
 (: string-chars (-> %Undefined% Expression))
@@ -5988,7 +6109,7 @@ Returns: Chars
 
 ### `string-codes`
 
-*lib_string.metta:39*
+*lib_string.metta:114*
 
 ```metta
 (: string-codes (-> %Undefined% Expression))
@@ -6000,24 +6121,9 @@ Return Unicode scalar integers. NUL is 0; supplementary characters count once.
 
 Returns: Codes
 
-### `string-contains`
-
-*lib_string.metta:45*
-
-```metta
-(: string-contains (-> %Undefined% %Undefined% Bool))
-```
-
-Return True when Part occurs literally, including an empty Part.
-
-1. Value
-2. Part
-
-Returns: Answer
-
 ### `string-count`
 
-*lib_string.metta:52*
+*lib_string.metta:121*
 
 ```metta
 (: string-count (-> %Undefined% %Undefined% Bool Number))
@@ -6037,7 +6143,7 @@ Returns: Count
 
 ### `string-dedent`
 
-*lib_string.metta:58*
+*lib_string.metta:127*
 
 ```metta
 (: string-dedent (-> %Undefined% String))
@@ -6051,7 +6157,7 @@ Returns: Out
 
 ### `string-edit-distance`
 
-*lib_string.metta:64*
+*lib_string.metta:133*
 
 ```metta
 (: string-edit-distance (-> %Undefined% %Undefined% Number))
@@ -6064,38 +6170,9 @@ Return exact unit-cost Levenshtein distance over Unicode codepoints. NUL is data
 
 Returns: Distance
 
-### `string-ends-with`
-
-*lib_string.metta:70*
-
-```metta
-(: string-ends-with (-> %Undefined% %Undefined% Bool))
-```
-
-Return True exactly when Suffix ends the text. An empty suffix matches.
-
-1. Value
-2. Suffix
-
-Returns: Answer
-
-### `string-from-chars`
-
-*lib_string.metta:76*
-
-```metta
-(: string-from-chars (-> Expression String))
-```
-
-Join text items into one String. Retain the existing acceptance of items containing zero or several characters, Symbols and Numbers.
-
-1. Chars
-
-Returns: Out
-
 ### `string-from-codes`
 
-*lib_string.metta:82*
+*lib_string.metta:139*
 
 ```metta
 (: string-from-codes (-> Expression String))
@@ -6109,7 +6186,7 @@ Returns: Out
 
 ### `string-indent`
 
-*lib_string.metta:88*
+*lib_string.metta:145*
 
 ```metta
 (: string-indent (-> %Undefined% %Undefined% String))
@@ -6124,7 +6201,7 @@ Returns: Out
 
 ### `string-index-of`
 
-*lib_string.metta:94*
+*lib_string.metta:151*
 
 ```metta
 (: string-index-of (-> %Undefined% %Undefined% Number))
@@ -6139,7 +6216,7 @@ Returns: Index
 
 ### `string-isub`
 
-*lib_string.metta:101*
+*lib_string.metta:158*
 
 ```metta
 (: string-isub (-> %Undefined% %Undefined% Expression Number))
@@ -6159,7 +6236,7 @@ Returns: Score
 
 ### `string-join`
 
-*lib_string.metta:107*
+*lib_string.metta:164*
 
 ```metta
 (: string-join (-> %Undefined% Expression String))
@@ -6174,7 +6251,7 @@ Returns: Out
 
 ### `string-last-index-of`
 
-*lib_string.metta:113*
+*lib_string.metta:170*
 
 ```metta
 (: string-last-index-of (-> %Undefined% %Undefined% Number))
@@ -6189,7 +6266,7 @@ Returns: Index
 
 ### `string-length`
 
-*lib_string.metta:119*
+*lib_string.metta:176*
 
 ```metta
 (: string-length (-> %Undefined% Number))
@@ -6203,7 +6280,7 @@ Returns: Length
 
 ### `string-lines`
 
-*lib_string.metta:125*
+*lib_string.metta:182*
 
 ```metta
 (: string-lines (-> %Undefined% Expression))
@@ -6217,7 +6294,7 @@ Returns: Lines
 
 ### `string-lower`
 
-*lib_string.metta:131*
+*lib_string.metta:188*
 
 ```metta
 (: string-lower (-> %Undefined% String))
@@ -6229,56 +6306,9 @@ Apply the host Unicode lowercase mapping and return a String.
 
 Returns: Out
 
-### `string-pad-left`
-
-*lib_string.metta:137*
-
-```metta
-(: string-pad-left (-> %Undefined% Number %Undefined% String))
-```
-
-Pad on the left to Width codepoints. Repeat and truncate a multicharacter filler. An empty filler or a width no greater than the input leaves it unchanged.
-
-1. Value
-2. Width
-3. Pad
-
-Returns: Out
-
-### `string-pad-right`
-
-*lib_string.metta:143*
-
-```metta
-(: string-pad-right (-> %Undefined% Number %Undefined% String))
-```
-
-Pad on the right using string-pad-left's width and filler rules.
-
-1. Value
-2. Width
-3. Pad
-
-Returns: Out
-
-### `string-repeat`
-
-*lib_string.metta:149*
-
-```metta
-(: string-repeat (-> %Undefined% Number String))
-```
-
-Repeat the text Times times. Zero and negative counts produce an empty String.
-
-1. Value
-2. Times
-
-Returns: Out
-
 ### `string-replace`
 
-*lib_string.metta:155*
+*lib_string.metta:194*
 
 ```metta
 (: string-replace (-> %Undefined% %Undefined% %Undefined% String))
@@ -6292,24 +6322,9 @@ Replace every nonoverlapping literal occurrence. An empty From preserves the ori
 
 Returns: Out
 
-### `string-similarity`
-
-*lib_string.metta:161*
-
-```metta
-(: string-similarity (-> %Undefined% %Undefined% Number))
-```
-
-Return 1 - edit-distance/max(lengths), in [0,1]. Two empty Strings score 1.
-
-1. First
-2. Second
-
-Returns: Score
-
 ### `string-slice`
 
-*lib_string.metta:167*
+*lib_string.metta:200*
 
 ```metta
 (: string-slice (-> %Undefined% Number Number String))
@@ -6325,7 +6340,7 @@ Returns: Out
 
 ### `string-split`
 
-*lib_string.metta:173*
+*lib_string.metta:206*
 
 ```metta
 (: string-split (-> %Undefined% %Undefined% Expression))
@@ -6340,7 +6355,7 @@ Returns: Parts
 
 ### `string-split-exact`
 
-*lib_string.metta:179*
+*lib_string.metta:212*
 
 ```metta
 (: string-split-exact (-> %Undefined% %Undefined% Expression))
@@ -6353,24 +6368,9 @@ Split at nonoverlapping occurrences of the complete, nonempty Separator. Preserv
 
 Returns: Parts
 
-### `string-starts-with`
-
-*lib_string.metta:185*
-
-```metta
-(: string-starts-with (-> %Undefined% %Undefined% Bool))
-```
-
-Return True exactly when Prefix begins the text. An empty prefix matches.
-
-1. Value
-2. Prefix
-
-Returns: Answer
-
 ### `string-template`
 
-*lib_string.metta:191*
+*lib_string.metta:218*
 
 ```metta
 (: string-template (-> %Undefined% Expression String))
@@ -6385,7 +6385,7 @@ Returns: Out
 
 ### `string-trim`
 
-*lib_string.metta:197*
+*lib_string.metta:224*
 
 ```metta
 (: string-trim (-> %Undefined% String))
@@ -6399,7 +6399,7 @@ Returns: Out
 
 ### `string-unlines`
 
-*lib_string.metta:203*
+*lib_string.metta:230*
 
 ```metta
 (: string-unlines (-> Expression String))
@@ -6413,7 +6413,7 @@ Returns: Out
 
 ### `string-upper`
 
-*lib_string.metta:209*
+*lib_string.metta:236*
 
 ```metta
 (: string-upper (-> %Undefined% String))
@@ -6427,7 +6427,7 @@ Returns: Out
 
 ### `string-wrap`
 
-*lib_string.metta:216*
+*lib_string.metta:243*
 
 ```metta
 (: string-wrap (-> %Undefined% Number %Undefined% String))

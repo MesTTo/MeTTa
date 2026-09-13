@@ -9,6 +9,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- String derives nine text recipes from MeTTa equations and shared native
+  boundaries. Padding uses a function to split the missing width between sides;
+  repetition composes with answer streams and can be reconstructed from its
+  stored equation. Unicode, NUL, coercion and empty-input contracts remain.
+  Empty text and filler need no traversal for large counts. Invalid construction
+  counts raise named assertions, and recordings conservatively refuse replay.
 - Vector derives fill, positive random directions and normalized-dot from MeTTa
   answer streams and the existing numerical kernels. Construction equations can
   be inspected and reconstructed. Exact rational values, signed zeros, seeded

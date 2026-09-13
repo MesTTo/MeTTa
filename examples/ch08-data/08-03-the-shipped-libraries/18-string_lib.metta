@@ -2,7 +2,7 @@
 ; Guarantees: codepoints, literal matching, layout and metrics retain their
 ; documented empty-input and overlap cases.
 ; [tested: examples/ch08-data/08-03-the-shipped-libraries/18-string_lib.metta;
-; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8].
+; commit=WORKTREE].
 
 !(import! &self (library lib_string))
 
@@ -54,3 +54,15 @@
 !(test (parse-number "0x10") 16)
 !(test (number-to-string 42) "42")
 !(test (collapse (parse-number "not a number")) ())
+
+; Text recipes are ordinary equations over literal text and answer streams.
+!(test (string-repeat 42 2) "4242")
+!(test (string-repeat "" 1000000000000000000000000) "")
+!(test (string-center 12 7 3) "3312333")
+!(test (string-center "x" 1000000000000000000000000 "") "x")
+!(test (string-ends-with "ab" "abc") False)
+!(test (if-error (catch (string-repeat "" 1.5)) True False) True)
+!(test (collapse (string-repeat "x" (superpose (0 2)))) ("" "xx"))
+!(test (let $recipe (match &self (= (string-repeat $value $n) $body)
+                           (quote (|-> ($value $n) $body)))
+         (let $function (eval $recipe) ($function "ab" 2))) "abab")

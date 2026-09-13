@@ -2,10 +2,10 @@
 
 % Purpose: compare String traversal with the previous copying and host-search controls.
 % Guarantees: each timed result is checked against its complete expected value.
-% [tested: swipl --on-error=status -q -s tests/prolog/lib_string_bench.pl; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8].
+% [tested: swipl --on-error=status -q -s tests/prolog/lib_string_bench.pl -g true -t halt; commit=WORKTREE].
 % Decides: CPU measurements are descriptive; the controls retain their actual
 % algorithms and do not use inference counts to estimate native comparisons.
-% [source: tests/prolog/lib_string_bench.pl:measure/5; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8].
+% [source: tests/prolog/lib_string_bench.pl:measure/5; commit=WORKTREE].
 
 :- ensure_loaded('../../engine/qlf_boot.pl').
 :- ensure_loaded('../../engine/metta.pl').
@@ -15,14 +15,18 @@
 main :-
     writeln('operation,mode,first_codepoint,characters,pattern_characters,inferences,cpu_seconds'),
     forall(member(N,[1000,4000,16000,64000]),
-           ('string-repeat'("a",N,Text), 'string-repeat'("bb",N,Expected),
+           (repeat_fixture("a",N,Text), repeat_fixture("bb",N,Expected),
             measure(replace,control,Text,"a",Expected),
             measure(replace,native,Text,"a",Expected))),
     forall((member(Char,["a","🦊"]),member(N,[4000,16000,64000,256000])),
-           ('string-repeat'(Char,N,Text), M is N//4,
-            'string-repeat'(Char,M,Prefix), string_concat(Prefix,"b",Pattern),
+           (repeat_fixture(Char,N,Text), M is N//4,
+            repeat_fixture(Char,M,Prefix), string_concat(Prefix,"b",Pattern),
             measure(search,control,Text,Pattern,-1),
             measure(search,native,Text,Pattern,-1))).
+
+% Construct fixtures outside the measured search and replacement operations.
+repeat_fixture(Text,Count,Out) :-
+    length(Copies,Count), maplist(=(Text),Copies), atomics_to_string(Copies,Out).
 
 measure(Operation,Mode,Text,Pattern,Expected) :-
     garbage_collect, statistics(inferences,I0), statistics(cputime,T0),

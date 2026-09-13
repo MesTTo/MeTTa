@@ -5135,7 +5135,14 @@ root replacement; topdown, bottomup and innermost retain their distinct orders.
 strategy-repeat names direct rewriting until failure; held (repeat Rule) plans
 coexist with Functional's numeric repeat. Type selection reads current-space
 declarations and filters with match-types;
-`lib_string` text, imported when you need it; `lib_system` the environment as a relation, a read with no answer for an unset
+`lib_string` codepoint text with String/Symbol/Number coercion and embedded NUL
+preservation. Nine MeTTa recipes derive literal membership, prefixes/suffixes,
+character joining, repetition, padding and normalized edit similarity. One
+function parameter assigns padding to the left; empty construction still
+validates complete inputs, and retained assertions keep replay conservative.
+Shared native boundaries own conversion, exact search, licensed layout/template
+grammars, RapidFuzz edit distance and ISub; no second text representation;
+`lib_system` the environment as a relation, a read with no answer for an unset
 variable, process-wide writes, the working directory and ten platform keys, with
 no shell anywhere; `lib_tabling` expert-only tabling
 control; `lib_testing` imports finite generators for properties expressed with
