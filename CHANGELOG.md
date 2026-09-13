@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Compiled dictionary `get` accepts an optional default and returns `None`
+  when an omitted default is needed. Key and default expressions run in
+  source order; falsey values, stored atoms and native relation edits survive
+  lookup through the dictionary space.
 - Native callable contracts can name an editable applicator through
   `@python-application`. It receives separate positional and keyword data
   frames, preserving literal atoms, partial captures and native default logic.
