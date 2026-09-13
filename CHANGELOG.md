@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Native callable conversion retains a lambda's written signature when
+  carrying its lexical home. Keyword names, defaults and later contract edits
+  survive evaluation and storage in another space.
 - Python operations receive native callbacks with the calling program's
   lexical context. Nested values, async calls and inverse operations retain
   the same native lookup and observe later edits to the program.
