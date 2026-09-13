@@ -166,6 +166,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Compiled sequences bind computed elements in source order and
+  retain returned callables as elements. Unpacking follows those temporary
+  bindings to preserve dictionary and segment value information.
 - Host-operation return arrows exclude empty `None` alternatives through
   unions and refinements. Nullable parameters, contained values, full
   annotation records and explicitly supplied declarations retain their types.
