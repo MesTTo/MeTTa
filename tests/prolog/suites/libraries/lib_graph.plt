@@ -1,7 +1,7 @@
 % Purpose: compare graph equations with independent graph models and identity laws.
 % Guarantees: ground models cover every operation, while literal terms, variables,
 % alternative answers and reflected recipes exercise the public MeTTa contract.
-% [tested: lib_graph; commit=WORKTREE].
+% [tested: lib_graph; commit=2951a00d660131f008c2779be828c97f53aa1555].
 % Owns resources: none; graph values and model state are local terms.
 
 :- use_module(collection_test_support).

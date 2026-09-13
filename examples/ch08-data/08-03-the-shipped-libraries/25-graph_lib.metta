@@ -1,7 +1,7 @@
 ; Purpose: compose and reflect on graph equations over relation and set expressions.
 ; Guarantees: variadic unions, alternative graphs and reconstructed path recipes
 ; retain literal vertices and variable sharing.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/25-graph_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/25-graph_lib.metta; commit=2951a00d660131f008c2779be828c97f53aa1555].
 !(import! &self (library lib_graph))
 
 ; A graph is built from its edges, each written (From To). Every vertex an edge
