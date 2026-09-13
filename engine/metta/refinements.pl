@@ -6,7 +6,7 @@
 %   [tested: union_types:a_refined_union_member_checks_the_value_at_each_call_door,
 %   union_types:a_refined_alternative_retains_the_assignment_a_later_parameter_needs,
 %   union_types:a_user_whole_union_refusal_precedes_its_value_refinements;
-%   commit=WORKTREE].
+%   commit=7e2de138f59cd8137f55dce9e7f2f955906c76d1].
 % Assumes: engine/metta.pl consults this plain file after metta/types.pl while
 %   its owning module is the load context, so metta_grounded_numeric_type/2,
 %   check_argument_type_under_live_policy/3 and metta_error_atom/4 from

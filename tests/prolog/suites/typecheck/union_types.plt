@@ -6,7 +6,7 @@
 %   actual union fits a requirement when every alternative does under one
 %   assignment of the type variables they share, and the upstream relation's
 %   shared-constraint loss cannot be reproduced here
-%   [tested: run_tests(union_types); commit=WORKTREE].
+%   [tested: run_tests(union_types); commit=7e2de138f59cd8137f55dce9e7f2f955906c76d1].
 % Owns resources: setup/cleanup releases each space; no file is written.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

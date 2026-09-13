@@ -973,7 +973,7 @@ metta_argument_rejection(Argument, Types, Expected, Origin, Rejection) :-
 %metta_refined_declared_match_in/3's, for the reason given there.
 % The refusal walk shares the value relation used to admit a refined union.
 % [tested: union_types:a_refined_alternative_retains_the_assignment_a_later_parameter_needs;
-% commit=WORKTREE].
+% commit=7e2de138f59cd8137f55dce9e7f2f955906c76d1].
 metta_argument_type_admits(Argument, Actual, Expected, Origin) :-
     (   metta_refined_type(Expected, Base, Constraints)
     ->  (   metta_refined_declared_match(Actual, Expected, Origin)

@@ -54,7 +54,7 @@
 %   the original written call after all overloads decline
 %   [tested: run_tests(tensor_shapes),
 %   union_types:refined_union_failures_do_not_evaluate_an_argument_twice;
-%   commit=WORKTREE].
+%   commit=7e2de138f59cd8137f55dce9e7f2f955906c76d1].
 % Guarantees: a refined declared result type is checked at the result crossing
 %   by metta_refined_result/6, which answers the produced value, the
 %   BadReturnValue Error on the written call, or fails as a plain mismatch

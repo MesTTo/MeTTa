@@ -442,7 +442,7 @@ typing_rule_decision_resolved(Module, Family, Actual, Expected, Outcome, Name, T
 % A value-level type operator must read a declared decision on the whole pair
 % before decomposing it. This door deliberately performs no union lifting.
 % [tested: union_types:a_user_whole_union_refusal_precedes_its_value_refinements;
-% commit=WORKTREE].
+% commit=7e2de138f59cd8137f55dce9e7f2f955906c76d1].
 decisive_typing_rule(shipped, '*', Family, Actual, Expected, Outcome, Name) :-
     shipped_typing_rule(Family, Actual, Expected, Candidate, Name),
     !,
