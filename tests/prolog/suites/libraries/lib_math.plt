@@ -1,7 +1,7 @@
 % Purpose: verify exact number identities, finite factor search and float boundaries.
 % Guarantees: finite domains exercise signs, zero and arbitrary precision;
 % conversion tests cover final subnormal ties, signed zero and saturation.
-% [tested: lib_math; commit=WORKTREE].
+% [tested: lib_math; commit=6fa571d1b7059b610f73e9feed657711414251e5].
 % Owns resources: arithmetic policy tests restore the host's rational flags.
 
 :- use_module(collection_test_support).

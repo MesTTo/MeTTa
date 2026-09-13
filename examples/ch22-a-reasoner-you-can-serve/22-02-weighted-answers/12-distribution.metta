@@ -1,7 +1,7 @@
 ; Purpose: executable semantics for transparent finite value distributions.
 ; Guarantees: every finite-law head in lib_statistics has a checked example, including
 ;   invalid mass and the distinction between independent marginals and a joint
-;   law [tested: this file's !(test ...) forms; commit=WORKTREE].
+;   law [tested: this file's !(test ...) forms; commit=6fa571d1b7059b610f73e9feed657711414251e5].
 ; Fails when: a library operation changes its boundary, ordering, dependence,
 ;   or normalization contract without updating this consumer-facing example.
 

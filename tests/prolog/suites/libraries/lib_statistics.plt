@@ -1,7 +1,7 @@
 % Purpose: verify statistical equations against exact independent references.
 % Guarantees: finite exhaustive models cover moments, ties and interpolation;
 % range and domain fixtures exercise public MeTTa calls and host input guards.
-% [tested: lib_statistics; commit=WORKTREE].
+% [tested: lib_statistics; commit=6fa571d1b7059b610f73e9feed657711414251e5].
 % Owns resources: arithmetic-policy flags are restored; concurrent/3 joins its
 % workers, and cancellation leaves only query-local terms.
 

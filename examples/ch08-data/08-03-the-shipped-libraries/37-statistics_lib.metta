@@ -1,5 +1,5 @@
 ; Purpose: exact finite descriptive statistics and explicit sample domains.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/37-statistics_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/37-statistics_lib.metta; commit=6fa571d1b7059b610f73e9feed657711414251e5].
 !(import! &self (library lib_statistics))
 
 ; Accumulate the stored numbers exactly, then round only a floating result.
