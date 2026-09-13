@@ -1,7 +1,7 @@
 ; Purpose: exercise every Vector head over ordinary numeric expressions.
 ; Guarantees: exact reductions preserve cancellation and extreme finite
-; directions; component operations and both random arities compose.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/13-vector_lib.metta; commit=615e8a68dce996a0c05b3ddddc71b80bc598442d].
+; directions; construction equations can be inspected and reused as functions.
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/13-vector_lib.metta; commit=WORKTREE].
 ; A vector is an ordinary expression, so existing list operations still apply.
 !(import! &self (library lib_vector))
 
@@ -67,3 +67,24 @@
 ; Zero draws normalize the supplied accumulator; negative counts also draw nothing.
 !(test (random-normal-vector 0 (3 4)) (0.6 0.8))
 !(test (random-normal-vector -2) ())
+
+; Construction is a relation over answer streams, with inspectable equations.
+!(test (collapse (vector-fill (superpose (0 2)) 7)) (() (7 7)))
+!(test (let $recipe
+         (match &self (= (vector-fill $count $value) $body)
+           (quote (|-> ($count $value) $body)))
+         (let $constructor (eval $recipe) ($constructor 3 7))) (7 7 7))
+!(test (let $q (index-atom (vector-divide (1) (3)) 0)
+         (vector-scale (vector-fill 3 $q) 3)) (1 1 1))
+!(test (vector-fill 2 -0.0) (-0.0 -0.0))
+
+; Invalid inputs refuse even when no values would be produced.
+!(test (if-error (catch (vector-fill -1 7)) refused accepted) refused)
+!(test (if-error (catch (vector-fill 0 bad)) refused accepted) refused)
+!(test (if-error (catch (random-normal-vector 1.5)) refused accepted) refused)
+!(test (if-error (catch (random-normal-vector 0 (bad))) refused accepted) refused)
+; A literal runnable component is rejected without running it or drawing.
+!(test (== (with-seed 17
+             (if-error (catch (random-normal-vector 3 (quote ((random-float 0 1)))))
+               (random-float 0 1) 0))
+           (with-seed 17 (random-float 0 1))) True)

@@ -5728,3 +5728,88 @@ findings. Twins-selftest passes. The whole lane remains red for those recorded
 older findings and exits1 with GATE FAILED: twins. Parsing's74claims, equal stored
 content and exact4666705point pass. Receipts:
 ai-lib4-parsing-fulltwins-final.log and ai-lib4-parsing-findings-final.log.
+
+## 2026-09-14: Vector construction follows the answer stream
+
+Goal: derive construction and the normalized-dot spelling through the existing
+MeTTa basis while preserving the numeric and seeded contracts.
+
+Decided before implementation: keep ten exact numerical kernels and derive
+vector-fill, both random-normal-vector arities and cosine-of-normalized. The
+native kernels round only the final exact result and preserve IEEE signs and
+classes. Composing the exposed scalar operations would round each intermediate.
+Math already imports Vector's conversion and fractional root; importing Math
+back into Vector would introduce a dependency cycle. The kernel's licensed
+CPython rounding sources and host-workaround reproductions remain unchanged.
+Design snapshot:031f5cf5da5b5df87b365a15bad331be6cf5d528.
+
+Tried: the first range probe returned one7for count0. builtins() has no range;
+the unimported range expression was one unreduced answer. Import Combinatorics
+explicitly. Core division also returns a float, and the MeTTa reader treats
+SWI's1r3notation as a symbol. Obtain the rational fixture from vector-divide.
+The corrected candidate agrees exactly with two native seeded constructions,
+retains rational fill and signedzero, and validates before consuming entropy.
+Receipts:ai-lib4-vector-recipes-probe{,-imported,-rational}.log.
+
+Decided: fill collapses a range; random construction folds core random-float
+answers with cons-atom before normalization. The generator is a let body so
+each range answer triggers one fresh draw. Negative counts normalize the
+unchanged accumulator. Empty vector-scale validates each Number without doing
+arithmetic. Count refusals are named MeTTa assertions; numeric refusals name the
+supplying vector-scale or dot. No additional random provider or scope key exists.
+
+Tried: all33original native tests pass on the first implementation, while new
+reflection fixtures expose two authoring mistakes. Quote a lambda in match's
+result and compile it after the body is bound. Python Row.count is its tuple
+method, so the constructor fixture uses n/x bindings. Number parameters evaluate
+arithmetic expressions; use an irreducible expression for the refusal witness.
+Receipts:ai-lib4-vector-{native,python,example,reflection-probe}.log.
+
+Verified:37native tests with12subtests pass, retaining every original exact,
+IEEE, cancellation and seeded-state test. All42example claims pass. The five
+twinned consumers are Vector, Math, Random, Statistics and weighted subsets;
+the sole native import consumer is Math, already in this closure. Receipts:
+ai-lib4-vector-native-final.log, ai-lib4-vector-example-final.log and
+ai-lib4-vector-consumers.log. Final Python, lane and price results follow.
+
+Tried: a stronger literal-accumulator witness finds that validation passed a
+quoted runnable component through the eager Number argument of vector-scale,
+then drew before normalization rejected the original component. A structural
+expression check is required before that scalar call. The assertion evaluates
+its held body after values are bound, so its finite collection must also remain
+quoted. Use foldl-atom over that quoted collection; this traverses components
+once rather than repeatedly indexing a range. No extra native predicate is
+needed. Direct Expression arguments retain ordinary evaluation; the Python
+literal witness must quote its accumulator. The repaired suite passes37tests
+and12subtests, including arithmetic and entropy-producing literal components
+at negative, zero and positive counts. Receipts:ai-lib4-vector-native-{literal,
+values,quoted}.log and ai-lib4-vector-literal-boundary-{python,full}.log.
+
+Tried: the wider Python consumer run passes47cases and exposes the Statistics
+card's old29-head assertion. The weighted transfer added two public heads at
+e1be99ea1c08f70444c1c35cada441e089777906; the correct catalog count is31. Update
+that assertion and its evidence, retaining all independent numeric oracles.
+Receipt:ai-lib4-vector-consumer-python-found.log.
+
+Verified: the final Vector suite passes37native tests with12subtests and30Python
+cases. Its43example claims and the README's five MeTTa results and one Python
+assertion pass. The consumer suites pass47native and48Python cases. Retained
+construction assertions can print diagnostics, so recordings refuse replay
+even with a seed; cosine-of-normalized inherits dot's replayable effect. These
+four recording cases pass in ai-lib4-vector-python-effects.log. Other receipts:
+ai-lib4-vector-native-quoted.log, ai-lib4-vector-example-quoted.log,
+ai-lib4-vector-readme.log and ai-lib4-vector-consumer-{native,python}-final.log.
+
+Measured: after removing QLFs, the fresh three-run minima for the complete
+five-twin consumer closure are Vector244365, Math359493, Random1150796,
+Statistics40976038 and weighted subsets1757926. Every pair preserves its claim
+count and stored content. Vector's standalone check reports43claims and no
+findings. Receipts:ai-lib4-vector-measure-host.log, ai-lib4-vector-prices.log
+and ai-lib4-vector-twin.log.
+
+Verified: all nineteen required lanes pass. The full twins run reports257
+findings over311pairs, and its complete diagnostic multiset matches Parsing's
+preceding run. Twins-selftest passes; the lane remains red for those recorded
+older findings and exits1 with GATE FAILED: twins. Receipts:
+ai-lib4-vector-lanes.log, ai-lib4-vector-fulltwins.log and
+ai-lib4-vector-findings.log.

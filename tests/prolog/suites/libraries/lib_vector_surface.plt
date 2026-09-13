@@ -1,18 +1,28 @@
 % Purpose: verify Vector arithmetic, dimension refusals and generator ownership.
 % Guarantees: tests cover exact/mixed values, extreme ranges, IEEE signs,
 % complete input validation and state restoration after error or cancellation.
-% [tested: lib_vector_surface; commit=615e8a68dce996a0c05b3ddddc71b80bc598442d].
+% [tested: lib_vector_surface; commit=WORKTREE].
 % Owns resources: each borrowed generator state and rational policy is restored
 % by its cleanup, including an exception in the tested operation.
-% [tested: lib_vector_surface; commit=615e8a68dce996a0c05b3ddddc71b80bc598442d].
+% [tested: lib_vector_surface; commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 :- use_module('../../../../lib/lib_vector/lib_vector').
+:- use_module(collection_test_support).
 :- use_module(library(random), [getrand/1, setrand/1, random/1]).
+:- load_collection_library(lib_vector).
 
 :- begin_tests(lib_vector_surface).
 :- meta_predicate with_seed(+, 0).
+
+% Only the derived heads cross the MeTTa fixture; numeric oracles stay native.
+'cosine-of-normalized'(Left, Right, Product) :-
+    invoke('cosine-of-normalized'(Left, Right, Product)).
+'vector-fill'(Count, Value, Vector) :- invoke('vector-fill'(Count, Value, Vector)).
+'random-normal-vector'(Count, Vector) :- invoke('random-normal-vector'(Count, Vector)).
+'random-normal-vector'(Count, Accumulator, Vector) :-
+    invoke('random-normal-vector'(Count, Accumulator, Vector)).
 
 with_seed(Seed, Goal) :-
     setup_call_cleanup(getrand(State), (set_random(seed(Seed)), Goal), setrand(State)).
@@ -109,9 +119,11 @@ test(float_zero_division) :-
     'vector-divide'([1,-1,0.0], [0.0,0.0,0], [1.0Inf,-1.0Inf,Nan]), is_nan(Nan).
 
 test(mismatched_dimensions,
-     [forall(member(Name,[dot,cosine,'cosine-of-normalized','vector-add','vector-subtract',
-                          'vector-multiply','vector-divide','vector-distance'])),
-      throws(error(domain_error(vector_dimensions,[1,0]),context(Name,_)))]) :-
+     [forall(member(Name-Provider,[dot-dot,cosine-cosine,'cosine-of-normalized'-dot,
+               'vector-add'-'vector-add','vector-subtract'-'vector-subtract',
+               'vector-multiply'-'vector-multiply','vector-divide'-'vector-divide',
+               'vector-distance'-'vector-distance'])),
+      throws(error(domain_error(vector_dimensions,[1,0]),context(Provider,_)))]) :-
     call(Name, [1], [], _).
 
 test(nonnumber_component,
@@ -133,15 +145,17 @@ test(empty_scale_validates_factor,
     'vector-scale'([], bad, _).
 
 test(empty_fill_validates_value,
-     [throws(error(type_error(number,bad),context('vector-fill',_)))]) :-
+     [throws(error(type_error(number,bad),context('vector-scale',_)))]) :-
     'vector-fill'(0, bad, _).
 
 test(fill_invalid_count, [forall(member(Count,[-1,1.5])),
-                        throws(error(type_error(nonneg,Count),context('vector-fill',_)))]) :-
+     throws(error(metta_assertion_failed([assertEqualMsg,_,true,
+       [quote,['vector-fill',"use a nonnegative integer count",Count]]],_,_),_))]) :-
     'vector-fill'(Count, 0, _).
 
 test(random_fractional_count,
-     [throws(error(type_error(integer,1.5),context('random-normal-vector',_)))]) :-
+     [throws(error(metta_assertion_failed([assertEqualMsg,_,true,
+       [quote,['random-normal-vector',"use an integer count",1.5]]],_,_),_))]) :-
     'random-normal-vector'(1.5, _).
 
 test(random_draw_order_and_state) :-
@@ -161,8 +175,8 @@ test(random_nondrawing_cases_keep_state) :-
 test(random_invalid_input_draws_nothing) :-
     with_seed(314159,
         ( getrand(Before),
-          catch('random-normal-vector'(3, [bad], _), error(type_error(number,bad),_), true),
-          catch('random-normal-vector'(1.5, _), error(type_error(integer,1.5),_), true),
+          refused('random-normal-vector'(3, [bad], _)),
+          refused('random-normal-vector'(1.5, _)),
           getrand(After), assertion(After == Before) )).
 
 test(random_results_are_positive_unit_vectors) :-
@@ -197,5 +211,27 @@ test(public_traversal_yields_to_cancellation) :-
     assertion(Outcome == inference_limit_exceeded), dot([3,4],[3,4],25.0).
 
 test(output_mismatch_does_not_leak_an_answer, [fail]) :- dot([3],[4],0.0).
+
+test(fill_preserves_all_numeric_kinds,
+     [forall(member(Value,[0,-0.0,1.0Inf,-1.0Inf,1.5NaN]))]) :-
+    'vector-fill'(3,Value,Actual), assertion(Actual == [Value,Value,Value]).
+
+test(fill_count_zero_still_refuses_literal_nonvalues) :-
+    forall(member(Value,[_,true,"text",[code,1,2]]), refused('vector-fill'(0,Value,_))).
+
+test(random_open_improper_cyclic_and_nonnumeric_inputs_draw_nothing) :-
+    Open=[1|Tail], Cycle=[1|Cycle],
+    with_seed(17,
+      (getrand(Before),
+       forall((member(Count,[-1,0,3]),member(Accumulator,
+                  [Open,[1|bad],Cycle,[1,_],[1,true],[['+',1,2]],[['random-float',0,1]]])),
+              refused('random-normal-vector'(Count,Accumulator,_))),
+       getrand(After), assertion(After==Before), assertion(var(Tail)))).
+
+test(construction_equations_are_callable_data) :-
+    once(eval_expr([match,'&self',['=',['vector-fill',Count,Value],Body],
+                    [quote,['|->',[Count,Value],Body]]],Recipe)),
+    once(eval_expr([eval,Recipe],Constructor)),
+    once(eval_expr([Constructor,3,7],Filled)), assertion(Filled==[7,7,7]).
 
 :- end_tests(lib_vector_surface).

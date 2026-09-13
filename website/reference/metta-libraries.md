@@ -7351,9 +7351,58 @@ Returns: Version
 
 ## lib_vector
 
+### `cosine-of-normalized`
+
+*lib_vector.metta:12*
+
+```metta
+(: cosine-of-normalized (-> Expression Expression Number))
+```
+
+The dot specialization used for normalized vectors, as an ordinary equation. No unit-length check: (3 4) with itself gives 25.0. Numeric and dimension errors come from dot.
+
+1. Left
+2. Right
+
+Returns: Product
+
+### `vector-fill`
+
+*lib_vector.metta:25*
+
+```metta
+(: vector-fill (-> Number Number Expression))
+```
+
+Collect Count copies of Value from a MeTTa range. Count must be a nonnegative integer and Value a Number, including when Count is zero. Preserve its numeric type and signed zero. Invalid counts raise a named assertion; vector-scale supplies numeric validation.
+
+1. Count
+2. Value
+
+Returns: Vector
+
+### `random-normal-vector`
+
+*lib_vector.metta:47*
+
+```metta
+(: random-normal-vector (-> Number Expression))
+```
+
+```metta
+(: random-normal-vector (-> Number Expression Expression))
+```
+
+Fold Count fresh positive uniform draws onto Accumulator with cons-atom, then normalize. The default accumulator is empty; negative integer counts draw nothing. Validate every literal component before core random-float and with-seed draws; code inside an accumulator is refused without running it. An empty accumulator projects the positive cube, neither Gaussian nor a uniform spherical direction. Count and expression errors are named assertions; numeric errors come from vector-scale.
+
+1. Count
+2. Accumulator
+
+Returns: Vector
+
 ### `cosine`
 
-*lib_vector.metta:8*
+*lib_vector.metta:59*
 
 ```metta
 (: cosine (-> Expression Expression Number))
@@ -7366,24 +7415,9 @@ Return the cosine similarity of equal-dimensional numeric expressions. Compute t
 
 Returns: Similarity
 
-### `cosine-of-normalized`
-
-*lib_vector.metta:14*
-
-```metta
-(: cosine-of-normalized (-> Expression Expression Number))
-```
-
-Return dot without checking normalization. This is cosine only when both inputs are unit vectors; for example (3 4) with itself still returns 25.0.
-
-1. Left
-2. Right
-
-Returns: Product
-
 ### `dot`
 
-*lib_vector.metta:20*
+*lib_vector.metta:65*
 
 ```metta
 (: dot (-> Expression Expression Number))
@@ -7398,7 +7432,7 @@ Returns: Product
 
 ### `norm`
 
-*lib_vector.metta:26*
+*lib_vector.metta:71*
 
 ```metta
 (: norm (-> Expression Number))
@@ -7410,28 +7444,9 @@ Return the correctly rounded Euclidean length of a numeric expression. Exact squ
 
 Returns: Length
 
-### `random-normal-vector`
-
-*lib_vector.metta:33*
-
-```metta
-(: random-normal-vector (-> Number Expression))
-```
-
-```metta
-(: random-normal-vector (-> Number Expression Expression))
-```
-
-Prepend Count independent uniform draws in (0,1) to Accumulator, then normalize the whole expression. The default accumulator is empty; negative integer counts draw nothing. Validate before drawing. Use the caller thread's generator, including with-seed. With no accumulator this projects the positive cube: it is neither Gaussian nor a uniform spherical direction.
-
-1. Count
-2. Accumulator
-
-Returns: Vector
-
 ### `vector-add`
 
-*lib_vector.metta:39*
+*lib_vector.metta:77*
 
 ```metta
 (: vector-add (-> Expression Expression Expression))
@@ -7446,7 +7461,7 @@ Returns: Vector
 
 ### `vector-distance`
 
-*lib_vector.metta:45*
+*lib_vector.metta:83*
 
 ```metta
 (: vector-distance (-> Expression Expression Number))
@@ -7461,7 +7476,7 @@ Returns: Distance
 
 ### `vector-divide`
 
-*lib_vector.metta:51*
+*lib_vector.metta:89*
 
 ```metta
 (: vector-divide (-> Expression Expression Expression))
@@ -7474,24 +7489,9 @@ Divide corresponding components. Exact operands return exact rationals; an exact
 
 Returns: Vector
 
-### `vector-fill`
-
-*lib_vector.metta:57*
-
-```metta
-(: vector-fill (-> Number Number Expression))
-```
-
-Construct Count copies of Value. Count must be a nonnegative integer and Value a Number, including when Count is zero. Preserve its numeric type.
-
-1. Count
-2. Value
-
-Returns: Vector
-
 ### `vector-multiply`
 
-*lib_vector.metta:63*
+*lib_vector.metta:95*
 
 ```metta
 (: vector-multiply (-> Expression Expression Expression))
@@ -7506,7 +7506,7 @@ Returns: Vector
 
 ### `vector-normalize`
 
-*lib_vector.metta:69*
+*lib_vector.metta:101*
 
 ```metta
 (: vector-normalize (-> Expression Expression))
@@ -7520,7 +7520,7 @@ Returns: Unit
 
 ### `vector-scale`
 
-*lib_vector.metta:75*
+*lib_vector.metta:107*
 
 ```metta
 (: vector-scale (-> Expression Number Expression))
@@ -7535,7 +7535,7 @@ Returns: Scaled
 
 ### `vector-subtract`
 
-*lib_vector.metta:81*
+*lib_vector.metta:113*
 
 ```metta
 (: vector-subtract (-> Expression Expression Expression))

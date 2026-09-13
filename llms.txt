@@ -5165,8 +5165,14 @@ ASCII, and authorities remain encoded data rather than resolved addresses;
 and time UUIDs, UTF-8 namespace/name identifiers for versions 3 and 5, validation,
 version/variant fields, version-1 timestamps, nil and lossless 16-byte conversion;
 custom UUID namespaces and embedded NUL names are preserved, and version 1 may
-expose the host's MAC address; `lib_vector` dot, norm,
-cosine and random-normal-vector; `lib_yaml` YAML documents as values in lib_json's own shape, a mapping becoming a
+expose the host's MAC address; `lib_vector` exact finite numeric kernels with
+one final rounding and IEEE signs/classes; MeTTa equations derive fill from
+range, random construction from foldall/cons-atom and the core seeded draws,
+and cosine-of-normalized from dot. Complete validation precedes entropy;
+count assertions and supplying numeric operations identify their own refusals;
+retained construction assertions make recording replay conservative, while
+the dot specialization keeps its structural numeric effect;
+`lib_yaml` YAML documents as values in lib_json's own shape, a mapping becoming a
 space and a sequence an expression, with the file doors derived from lib_file's
 and four refusals the host only fails at: a multi-document stream, an unsupported
 tag, a duplicate key and malformed text; declares the `yaml` capability;

@@ -9,6 +9,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Vector derives fill, positive random directions and normalized-dot from MeTTa
+  answer streams and the existing numerical kernels. Construction equations can
+  be inspected and reconstructed. Exact rational values, signed zeros, seeded
+  draw order and validation before entropy consumption are preserved. Invalid
+  counts raise named MeTTa assertions; numeric refusals identify the supplying
+  vector-scale or dot operation. Construction recordings conservatively refuse
+  replay because assertions may print diagnostics; the dot specialization
+  remains replayable.
 - Parsing prepares grammar data as written MeTTa lambdas. String conversions
   supply its host boundary; ordinary equations compose alternatives, sequences,
   repetitions and callbacks. One metadata relation defines and extends its
