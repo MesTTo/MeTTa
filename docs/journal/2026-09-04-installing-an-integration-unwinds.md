@@ -33,3 +33,23 @@ Tried: `sh ../ai-gate-lock.sh integrate env GATE_ONLY=1 sh check.sh` with both M
 Tried: equal-length detached `dca33c9f` controls, with the three changed Python modules applied only to the modified arm and `engine/build.sh` rebuilding each arm's QLF, measured three identical inference samples per row. The pristine and modified engine rows were identical: boot 539606, evaluate 559327, match 338002, match-skew 210482, parse 152, parse-prolog 3076184, and translate 380634. The C operational rows were also identical: cursor-step 2200005, term-in 5220009, term-out 1560005, space-pair 1140032, and error-ball 406008; C boot changed from 1494624 to 1494622. The integration change therefore adds no measured engine or C workload inferences and changes only C setup by -2, inside the four-inference band.
 Tried: a direct equal-path `space_name_case` control under the same lock rebuilt each QLF, then ran three fresh processes per arm. Every pristine process returned `[4200419, 4202799, 4202772]`; every modified process returned `[4200421, 4202799, 4202772]`. The fixed +2 first-sample movement is inside the four-inference band. The committed benchmark's documented upper mode explains why a separate modified-only roster run reported minimum 4200421 against 4200416 plus four, while the serialized full gate's `benchmarks` lane passed; no baseline was changed.
 Decided: hardware-counter rows are unrun for final attribution while an unrelated repository owns the exclusive PMU with `perf stat -x, -e instructions:u`. An unopened counter window is not a measurement. `engine-bench` and `c-bench` inference rows remain valid and are attributed by the equal-path controls above; `mork-bench` and every `instructions:u` verdict await a free PMU and are neither blamed on this diff nor re-pinned.
+
+## 2026-09-14: the uninspectable-callable fixture releases its module operation
+
+Tried: the callable/compiler cohort passes 1117 cases and fails the host
+expanded-call witness with `missing a required argument: 'x2'`. The earlier
+integration witness leaves its `target` operation visible in the session's
+home space, so a later source name selects that native function. Log:
+`ai-classes-c35-application-A-python.log`.
+
+The same integration witness leaves `target` present on pristine
+`c75181adc999adf0028616ee69565e2bbfbf739f`. The probe invokes the existing test,
+checks visibility, and unregisters the residue. Command: `python
+ai-tmp/ai-classes-c35-integration-fixture-probe.py`. Logs:
+`ai-classes-c35-integration-fixture-ai-call-signature-check.log` and
+`ai-classes-c35-integration-fixture-ai-classes-c75181adc-control.log` both end
+`present`.
+
+Decided: save the names returned by `module_ops` and unregister each in
+`finally`. The classifier assertions and native vocabulary precedence remain
+unchanged. This completes the fixture's registration ownership.
