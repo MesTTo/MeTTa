@@ -41,7 +41,7 @@ beside its definitions.
 | lib_nars | 38 | 0 |
 | lib_observe | 2 | 2 |
 | lib_pairs | 9 | 9 |
-| lib_parsing | 4 | 4 |
+| lib_parsing | 5 | 5 |
 | lib_patrick | 4 | 0 |
 | lib_pln | 49 | 0 |
 | lib_pln2 | 9 | 0 |
@@ -3904,41 +3904,29 @@ Returns: Values
 
 ## lib_parsing
 
-### `grammar-forms`
+### `grammar-parser`
 
 *lib_parsing.metta:26*
 
 ```metta
-(: grammar-forms (-> Expression))
+(: grammar-parser (-> Atom %Undefined%))
 ```
 
-Every form a grammar may be built from, as (Name Arity) pairs, with the arity of the variadic ones written as *. This is the vocabulary the refusal lists, published so a program can ask for it.
+Prepare a held grammar as an ordinary unary function over a finite expression of input tokens. Each answer is (Contribution Remainder), with () for a skipped contribution or (Value) for a retained literal value. Apply it with apply-to, compose it with let, or inspect and rewrite its ordinary equations. The function checks result shape and finite remainders. Grammar preparation never runs a parsing callback or ref target; parsing-form metadata supplies names, argument kinds and parsing functions.
 
-Returns: Forms
+1. Grammar
 
-### `grammar-is`
-
-*lib_parsing.metta:32*
-
-```metta
-(: grammar-is (-> %Undefined% Bool))
-```
-
-Whether the value is a well-formed grammar: every node a known form with its arity and every text argument a string. A ref's target is not followed, because it is a function evaluated only when the parse reaches it.
-
-1. Value
-
-Returns: Answer
+Returns: Parser function
 
 ### `grammar-parse`
 
-*lib_parsing.metta:38*
+*lib_parsing.metta:37*
 
 ```metta
 (: grammar-parse (-> Atom String %Undefined%))
 ```
 
-The value of the grammar over the WHOLE text, one answer per way it matches and no answer when it does not. The grammar is held, so its forms are read as data; it is checked before any text is read, and a form the library does not know is refused naming it.
+Parse the whole String with a held grammar. Return one literal value per successful parse and no answer for a mismatch. Validate the grammar before consuming text. Alternatives retain duplicates; many and sep-by try longer parses first. A skipped result surfaces as (). Numeric and text primitives compose String operations; ASCII classes do not depend on the locale.
 
 1. Grammar
 2. Text
@@ -3947,18 +3935,44 @@ Returns: Value
 
 ### `grammar-parse-prefix`
 
-*lib_parsing.metta:44*
+*lib_parsing.metta:50*
 
 ```metta
 (: grammar-parse-prefix (-> Atom String Expression))
 ```
 
-The value of the grammar over a PREFIX of the text, with the unread rest, as (Value Rest): one answer per way it matches, longest first where a repetition decides, and no answer when no prefix matches. This is phrase/3 with the remainder, and the way a text is read one construct at a time.
+Parse a prefix and return (Value UnreadString), one answer per match. Repetition keeps longest-first order and all shorter alternatives. Literal Error, Empty, executable expressions and shared variables remain values. A repeated parser that fails to shorten its input raises an assertion with an input-consumption remedy.
 
 1. Grammar
 2. Text
 
-Returns: Answer
+Returns: Value and remainder
+
+### `grammar-is`
+
+*lib_parsing.metta:61*
+
+```metta
+(: grammar-is (-> Atom Bool))
+```
+
+Whether the held value is a well-formed grammar under parsing-form metadata. Validate argument count, literal String fields and recursive grammar positions; callback and tag values remain opaque. Ref targets and parsing functions do not run. Empty cat and alt are valid. Host-injected cycles or improper expression tails refuse before traversal.
+
+1. Grammar
+
+Returns: Boolean
+
+### `grammar-forms`
+
+*lib_parsing.metta:72*
+
+```metta
+(: grammar-forms (-> Expression))
+```
+
+Return the (Name Arity) rows from the same parsing-form metadata that prepares grammars. Cat and alt accept zero or any number of grammars and report *. The stock vocabulary has fourteen primitives and twelve combinators; a new distinct metadata name can supply an ordinary parsing function with the same contribution/remainder contract.
+
+Returns: Grammar forms
 
 ## lib_process
 

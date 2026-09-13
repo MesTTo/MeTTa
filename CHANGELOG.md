@@ -9,6 +9,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Parsing prepares grammar data as written MeTTa lambdas. String conversions
+  supply its host boundary; ordinary equations compose alternatives, sequences,
+  repetitions and callbacks. One metadata relation defines and extends its
+  vocabulary. Parser values survive Python round trips and retain literal code
+  and shared variables. An optional contribution separates skipping from every
+  payload, including `Empty`, `Error` and `$skip`. Empty `alt` is valid and has
+  no answers. Repeated steps that consume no input raise a named assertion.
+  `grammar-is` holds its argument and never runs parsing functions or ref targets.
 - Statistics owns the two exact weighted-subset operations formerly imported
   through Combinatorics. MeTTa folds and unfolds replace their native provider,
   retaining sparse target-truncated coefficient rows and forward/backward

@@ -5607,3 +5607,124 @@ findings. No empirical envelope is repinned by a point measurement. Receipts:
 ai-lib4-weighted-fulltwins.log, ai-lib4-weighted-findings-diff.log and
 ai-lib4-weighted-findings-expected.log. The whole lane still exits1 with
 GATE FAILED: twins; that result is retained rather than reported as a pass.
+
+## 2026-09-14: grammar plans compile to ordinary parser functions
+
+The September12 design made grammars data but kept their composition in a native
+interpreter. The changed condition is the package-wide ruling to derive the
+library through MeTTa even when it needs more inferences. Hutton and Meijer's
+parser is an input-to-value/remainder relation; PeTTa already supplies dependent
+composition and nondeterministic answers. Primary source:
+https://github.com/haskell-pkg-janitors/polyparse/blob/ac51dcebcdeeffea21cc4094513564d9247646c3/src/Text/ParserCombinators/HuttonMeijer.hs .
+Use its relation/composition model, retaining both alternative streams instead
+of its derived first-result choice. No source is copied.
+
+Tried: the native seven-test suite still passes. A separate literal probe maps
+to Symbol$skip and receives(), while cat drops that value and many(skip(lit"x"))
+over"xx" leaks($skip $skip). Greedy many(cat)over empty text exceeds100000
+inferences without answering. Receipts: ai-lib4-parsing-native-before.log,
+ai-lib4-parsing-old-boundaries.log and ai-lib4-parsing-nullable-before-fixed.log.
+The nullable probe's first suite load used the wrong working directory and
+reported source_sink '../../lib/lib_parsing/lib_parsing.pl' does not exist;
+loading the provider directly establishes the reproduction.
+
+Tried: a twelve-claim MeTTa callable probe retains duplicate alternatives,
+longest-first prefixes, empty sequence/choice, skipped repetitions, literal
+Error/Empty and shared variables. Its first sequence binder reused a name for
+both the input collection and its tail; the engine correctly refused mixed_roles.
+Separate names pass every claim. Receipts:
+ai-lib4-parsing-callable-shape{,-fixed}.log. No engine correction is needed.
+
+Decided before implementation: one metadata relation supplies the26form names,
+argument kinds and parsing functions. A generic analysis validates and prepares
+closures; it never runs a parsing callback or ref target. grammar-parser exposes
+the function value. Each answer holds an optional value contribution and its
+remainder, distinguishing skip from every payload. The common closure checks
+that result shape; ordinary let/apply-to composition implements the operators.
+String supplies character conversion and numeric conversion. Decimal lexical
+rules, ASCII spans and four quoted escapes are MeTTa recipes, so the native
+Parsing provider can be removed completely.
+
+Decided: retain all existing named tests and generated bounds. Correct the
+sentinel collision and leak; reject a repeated step that does not shorten its
+input with a named consumption remedy. Left recursion remains the caller's
+contract. Empty alt becomes a well-formed parser with no answers, the identity
+for variadic nondeterministic choice. These cases get explicit regression
+evidence. No scoped state, resource owner or host workaround is introduced.
+
+Tried: all58 original example claims pass. The first expanded native run has
+14passing tests and one error: atomics_to_string/3 called from a deterministic
+procedure failed. The old test supplied a prebound empty remainder to a native
+output; the public functional fixture must produce the complete prefix answer
+before filtering its remainder. Retain the original200x8case comparison in
+that direction. Two single-result checks also need invoke/1 or once/1 to avoid
+choicepoints, which the native runner refuses even when every assertion passes.
+Receipts: ai-lib4-parsing-example-metadata-fixed.log and
+ai-lib4-parsing-native-{initial,values}.log.
+
+Tried: the first Python model run has11failures and13passes. A native partial
+closure returns as (partial parsing-close (parsing-any ())) and applying that
+printed expression has no answers. A written lambda preserves code and captures
+through the same Python round trip and composes inside MeTTa too. Use written
+lambdas for prepared parsers. A callback's held underapplication must be evaluated
+when parsing reaches it, then applied to finished argument values. The same
+normalization serves map, char-if, ref and metadata-supplied functions. Receipts:
+ai-lib4-parsing-python-initial.log and
+ai-lib4-parsing-callable-roundtrip{,-fixed}.log.
+
+Tried: defining (lit $text) changes lit's metatype from Symbol to Grounded under
+PeTTa's function-name semantics. Reject variable or expression heads and match
+the identifier against metadata; a function name remains a valid literal grammar
+identifier. Argument-kind membership is by identity, so an unbound metadata kind
+cannot unify with the first case. Preparation still runs no callbacks.
+
+Tried: written lambdas expose a mistaken use of superpose-bind on an ordinary
+collection. That operator extracts the first field of a non-pair expression,
+so alternatives produce |-> instead of a parser and collections-expression
+refuses that atom. Enumerate parser occurrences with index-atom and range;
+binding packets are unnecessary. The revised native suite has16passing tests,
+and Python has25passes, including100independent grammar-model cases and60literal
+tree cases. The expanded example has74passing claims. Receipts:
+ai-lib4-parsing-native-values.log, ai-lib4-parsing-python-values.log and
+ai-lib4-parsing-example-extended.log. The native runner still flags its two
+choicepoints in that receipt; final verification follows their fixture repair.
+
+Tried: adding an unbound metadata-kind test corrects the membership claim above.
+Core is-member is relational and binds that variable to all three known kinds;
+one() reports more than one answer. Explicitly reject a variable kind before
+membership, keeping the known kind collection quoted. No public collection
+semantics change is needed. Receipt: ai-lib4-parsing-python-final.log.
+
+Verified: all16native tests pass without choicepoints, and all27Python cases
+pass, retaining the100grammar-model and60literal-tree examples. All74example
+claims and the README's four MeTTa results and one Python assertion pass.
+The nineteen required lanes pass; jscpd finds no clones in511Python lines.
+The import closure finds only Parsing's own twin. Receipts:
+ai-lib4-parsing-native-kinds.log, ai-lib4-parsing-python-kinds.log,
+ai-lib4-parsing-example-extended.log, ai-lib4-parsing-readme.log,
+ai-lib4-parsing-lanes.log, ai-lib4-parsing-jscpd.log and
+ai-lib4-parsing-consumers.log.
+
+Tried: full twins reports260findings against the preceding257. Two new findings
+correct the Python example: use a shared-context identity comparison directly,
+and represent the unreachable ref assertion as literal tuple code. The third
+is an HTTP point overrun,325260against324253with allowance4, while its example
+and twin still prove41claims and have equal stored content. HTTP and its source
+dependencies are unchanged by Parsing. A fresh three-run HTTP measurement
+reaches324251, within the existing allowance; its point stays unchanged.
+Receipts: ai-lib4-parsing-fulltwins.log, ai-lib4-parsing-findings-diff.log and
+ai-lib4-parsing-http-control.log.
+
+Measured: the final Parsing twin reaches4666705inferences, minimum of three
+fresh serial processes, after its two authoring corrections. Its74claims and
+stored content match the example; the standalone twins check reports0findings.
+The initial expanded measurement was4666804, before the99-inference authoring
+change. Receipts: ai-lib4-parsing-price{,-final}.log and
+ai-lib4-parsing-twin-final.log.
+
+Verified: the final full twins run reports257findings over311pairs. The complete
+diagnostic multiset matches the preceding weighted run, with no added or removed
+findings. Twins-selftest passes. The whole lane remains red for those recorded
+older findings and exits1 with GATE FAILED: twins. Parsing's74claims, equal stored
+content and exact4666705point pass. Receipts:
+ai-lib4-parsing-fulltwins-final.log and ai-lib4-parsing-findings-final.log.

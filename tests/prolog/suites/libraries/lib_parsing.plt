@@ -1,27 +1,36 @@
-% Purpose: check the grammar interpreter against hand-written DCGs over the same
+% Purpose: check callable MeTTa grammars against independent DCGs over the same
 % text, check the combinators' algebra, and check that a malformed grammar is
 % refused before any text is read.
 % Guarantees: each primitive answers what its dcg/basics or hand-written
 % counterpart answers over generated text, a whole parse is the prefix parse whose
 % rest is empty, the combinator laws hold over generated grammars, a grammar may
 % recurse through ref, the classes are ASCII under any locale, and every malformed
-% form is named [tested: lib_parsing; commit=7bdd5ace3f8272c2806ac0b925e56a78dc0894a8].
+% form is named [tested: lib_parsing; commit=WORKTREE].
 % Owns resources: none; every value is a term.
 
-:- ensure_loaded('../../../../engine/qlf_boot.pl').
-:- ensure_loaded('../../../../engine/metta.pl').
+:- use_module(collection_test_support).
 :- use_module(library(lists), [member/2, memberchk/2, nth1/3, append/3]).
 :- use_module(library(apply), [maplist/2, maplist/3]).
 :- use_module(library(yall), [(>>)/3]).
 :- use_module(library(dcg/basics), [integer/3, number/3]).
 :- use_module(library(random), [random_between/3]).
-:- initialization(consult('../../lib/lib_parsing/lib_parsing.pl')).
+:- load_collection_library(lib_parsing).
 
 :- begin_tests(lib_parsing).
-:- meta_predicate must_throw(0, ?).
+% Keep the independent oracle loops separate from the public execution fixture.
+'grammar-parse'(Grammar, Text, Value) :-
+    collection_answers('grammar-parse'(Grammar, Text, Value)).
+'grammar-parse-prefix'(Grammar, Text, Value) :-
+    collection_answers('grammar-parse-prefix'(Grammar, Text, Value)).
+'grammar-is'(Grammar, Verdict) :- invoke('grammar-is'(Grammar, Verdict)).
+'grammar-forms'(Forms) :- invoke('grammar-forms'(Forms)).
 
-must_throw(Goal, Expected) :-
-    catch(Goal, Error, true), assertion(nonvar(Error)), assertion(Error = Expected).
+must_name(Grammar, Bad) :-
+    catch(invoke('grammar-parse'(Grammar, "a", _)), Error, true),
+    assertion(nonvar(Error)),
+    assertion(Error = error(metta_assertion_failed(
+        [assertEqualMsg,false,true,[quote,['grammar-parser',
+          "use a well-formed grammar from grammar-forms",Bad]]],_,_),_)).
 
 % Random text over an alphabet that every primitive has something to say about:
 % digits, letters, a comma, a quote, a minus, a space and a non-ASCII letter.
@@ -66,7 +75,8 @@ test(whole_and_prefix_parses_agree_with_phrase) :-
            ( random_text(Text),
              forall(member(Grammar, Grammars),
                     ( findall(V, 'grammar-parse'(Grammar, Text, V), Whole),
-                      findall(V, ( 'grammar-parse-prefix'(Grammar, Text, [V, ""]) ), Prefixed),
+                      findall(V, ( 'grammar-parse-prefix'(Grammar, Text, Pair),
+                                   Pair=[V,Rest], Rest=="" ), Prefixed),
                       assertion(Whole == Prefixed) )) )).
 
 % The algebra: alt of one branch is that branch, many is optional over many1,
@@ -100,17 +110,17 @@ test(the_combinators_obey_their_algebra) :-
 % skip contributes nothing to a cat and map and as reshape a value, which is what
 % makes a grammar answer a parse tree.
 test(skip_map_and_as_shape_the_value) :-
-    'grammar-parse'([cat, [digits], [skip, [lit, "-"]], [digits]], "12-34", Skipped),
+    invoke('grammar-parse'([cat, [digits], [skip, [lit, "-"]], [digits]], "12-34", Skipped)),
     assertion(Skipped == ["12", "34"]),
-    'grammar-parse'([skip, [digits]], "12", Alone), assertion(Alone == []),
-    'grammar-parse'([as, amount, [integer]], "7", Tagged), assertion(Tagged == [amount, 7]),
-    'grammar-parse'([between, [lit, "("], [digits], [lit, ")"]], "(5)", Inner),
+    invoke('grammar-parse'([skip, [digits]], "12", Alone)), assertion(Alone == []),
+    invoke('grammar-parse'([as, amount, [integer]], "7", Tagged)), assertion(Tagged == [amount, 7]),
+    invoke('grammar-parse'([between, [lit, "("], [digits], [lit, ")"]], "(5)", Inner)),
     assertion(Inner == "5"),
-    'grammar-parse'([token, [digits]], "  5 ", Token), assertion(Token == "5"),
+    invoke('grammar-parse'([token, [digits]], "  5 ", Token)), assertion(Token == "5"),
     % A quoted string keeps its escapes' meaning rather than their text.
-    'grammar-parse'([quoted], "\"a\\nb\"", Quoted), assertion(Quoted == "a\nb"),
-    'grammar-parse'([quoted], "\"\"", Empty), assertion(Empty == ""),
-    'grammar-parse'([quoted], "\"a\\\"b\"", Escaped), assertion(Escaped == "a\"b").
+    invoke('grammar-parse'([quoted], "\"a\\nb\"", Quoted)), assertion(Quoted == "a\nb"),
+    invoke('grammar-parse'([quoted], "\"\"", Empty)), assertion(Empty == ""),
+    invoke('grammar-parse'([quoted], "\"a\\\"b\"", Escaped)), assertion(Escaped == "a\"b").
 
 % A grammar may name itself through ref, which evaluates a MeTTa function when the
 % parse reaches it, so a nested language is expressible; the depth is the text's.
@@ -125,8 +135,7 @@ test(a_grammar_may_recurse_through_ref) :-
     % A ref whose function answers something that is not a grammar is refused
     % where the parse reaches it, naming what it found.
     process_metta_string("(= (notagrammar) (nosuch))", _),
-    must_throw('grammar-parse'([ref, notagrammar], "x", _),
-               error(domain_error(grammar, [nosuch]), _)).
+    must_name([ref, notagrammar], [nosuch]).
 
 % The classes are ASCII and defined here, so they do not move with the locale,
 % which is what makes a grammar portable; a Unicode class is (char-if F).
@@ -148,16 +157,17 @@ test(the_classes_are_ascii_and_locale_free) :-
 % Every malformed grammar is refused before any text is read, and the refusal
 % names the innermost form that is wrong with the vocabulary beside it.
 test(a_malformed_grammar_is_refused_before_parsing) :-
-    must_throw('grammar-parse'([nosuch], "a", _), error(domain_error(grammar, [nosuch]), _)),
-    must_throw('grammar-parse'([cat, [digits], [nosuch]], "1", _),
-               error(domain_error(grammar, [nosuch]), _)),
-    must_throw('grammar-parse'([many], "a", _), error(domain_error(grammar, [many]), _)),
-    must_throw('grammar-parse'([lit, 7], "a", _), error(domain_error(grammar, [lit, 7]), _)),
-    must_throw('grammar-parse'([alt], "a", _), error(domain_error(grammar, [alt]), _)),
-    must_throw('grammar-parse'(notalist, "a", _), error(domain_error(grammar, notalist), _)),
-    must_throw('grammar-parse'([digits], 7, _), error(type_error(string, 7), _)),
-    catch('grammar-parse'([nosuch], "a", _), error(_, context(_, Names)), true),
-    assertion(memberchk(cat, Names)), assertion(memberchk(ref, Names)),
+    must_name([nosuch], [nosuch]),
+    must_name([cat, [digits], [nosuch]], [nosuch]),
+    must_name([many], [many]),
+    must_name([lit, 7], [lit, 7]),
+    must_name(notalist, notalist),
+    % Choice's empty expression is valid and has no alternatives.
+    'grammar-is'([alt], true),
+    findall(V, 'grammar-parse'([alt], "a", V), []),
+    once(eval_expr(['grammar-parse',[digits],7], BadText)),
+    assertion(BadText == ['Error',['grammar-parse',[digits],7],
+                         ['BadArgType',2,'String','Number']]),
     % The same question without the refusal, and the vocabulary as data.
     'grammar-is'([cat, [digits], [eos]], true),
     'grammar-is'([lit, 7], false),
@@ -165,6 +175,86 @@ test(a_malformed_grammar_is_refused_before_parsing) :-
     'grammar-is'(7, false),
     'grammar-is'([ref, anything], true),
     'grammar-forms'(Forms), length(Forms, Count), assertion(Count == 26),
+    assertion(memberchk([cat,*], Forms)), assertion(memberchk([ref,1], Forms)),
     forall(member([Name, Arity], Forms), ( atom(Name), ( integer(Arity) ; Arity == * ) )).
+
+test(decimal_prefixes_agree_with_the_host_lexer) :-
+    forall(member(Text,["+1!","-0!","1.","1.e3","1e","1e+","1E-2!",
+                         "01!","0x12","-.1","+2.50e+2z","1e-300!","1e300!",
+                         "9007199254740993!","1.234567890123456789!"]),
+        (string_codes(Text,Codes),
+         findall([N,Rest],(phrase(number(N),Codes,Tail),string_codes(Rest,Tail)),Expected),
+         findall(Value,'grammar-parse-prefix'([number],Text,Value),Actual),
+         assertion(Actual==Expected))),
+    findall(V,'grammar-parse'([integer],"+1",V),[]).
+
+test(quoted_strings_decode_only_the_four_literal_escapes) :-
+    forall(member(Text-Expected,["\"\\\"\\\\\\n\\t\""-"\"\\\n\t",
+                                  "\"\u0000😀\""-"\u0000😀"]),
+        (invoke('grammar-parse'([quoted],Text,Actual)),assertion(Actual==Expected))),
+    forall(member(Text,["\"\\r\"","\"\\u0041\"","\"unfinished","\"x\\"]),
+        findall(V,'grammar-parse'([quoted],Text,V),[])).
+
+test(answer_order_keeps_duplicates_and_shorter_prefixes) :-
+    findall(V,'grammar-parse-prefix'([many,[any]],"ab",V),Many),
+    assertion(Many==[[["a","b"],""],[["a"],"b"],[[],"ab"]]),
+    findall(V,'grammar-parse-prefix'([optional,[lit,""]],"x",V),Optional),
+    assertion(Optional==[[[""],"x"],[[],"x"]]),
+    findall(V,'grammar-parse'([alt,[digits],[digits],[nonblanks]],"12",V),
+            ["12","12","12"]),
+    findall(V,'grammar-parse'(['sep-by',[until,","],[lit,","]],"",V),[[""],[]]).
+
+test(skipped_and_arbitrary_literal_contributions_are_distinct) :-
+    forall(member(Value,['$skip','Empty',['Error',data,code],['+',1,2]]),
+        (Callback=['|->',[_Token],[quote,Value]],
+         invoke('grammar-parse'([map,Callback,[digits]],"12",Actual)),
+         assertion(Actual==Value),
+         invoke('grammar-parse'([cat,[map,Callback,[digits]]],"12",Wrapped)),
+         assertion(Wrapped==[Value]))),
+    invoke('grammar-parse'([many,[skip,[lit,"x"]]],"xx",[[],[]])),
+    Callback=['|->',[_Input],[quote,[X,Y,X]]],
+    invoke('grammar-parse'([map,Callback,[digits]],"12",Shared)),
+    assertion(Shared==[X,Y,X]), assertion(var(X)), assertion(var(Y)), assertion(X\==Y).
+
+test(repeated_success_must_consume_input) :-
+    forall(member(Grammar,[[many,[cat]],[many1,[lit,""]],
+                            ['sep-by',[cat],[cat]]]),
+        (catch(invoke('grammar-parse'(Grammar,"",_)),Error,true),
+         assertion(nonvar(Error)),
+         assertion(Error=error(metta_assertion_failed(
+            [assertEqualMsg,_,true,[quote,['grammar-parser',
+              "a repeated parser must consume input; change the repeated part or its separator",_]]],_,_),_)))).
+
+test(checking_a_grammar_does_not_run_its_callbacks) :-
+    process_metta_string("(= (parsing-must-not-run) (assertEqual False True))",_),
+    forall(member(Grammar,[[ref,'parsing-must-not-run'],
+                           [map,'parsing-must-not-run',[digits]],
+                           ['char-if','parsing-must-not-run'],
+                           [as,[nosuch],[digits]]]),
+        invoke('grammar-is'(Grammar,true))).
+
+test(callable_parsers_and_literal_tokens_keep_caller_identity) :-
+    invoke('grammar-parser'([any],Parser)),
+    invoke('apply-to'(Parser,[[X,Y]],Answer)),
+    assertion(Answer==[[X],[Y]]), assertion(var(X)), assertion(var(Y)), assertion(X\==Y),
+    invoke('apply-to'(Parser,[[['+',1,2],['Error',data,code]]],Literal)),
+    assertion(Literal==[[['+',1,2]],[['Error',data,code]]]).
+
+test(variadic_grammar_forms_have_no_fixed_limit) :-
+    forall(member(Count,[0,1,2,12,24]),
+        (length(Parts,Count),maplist(=([lit,""]),Parts),
+         invoke('grammar-parse'([cat|Parts],"",Values)),length(Values,Count),
+         findall(V,'grammar-parse'([alt|Parts],"",V),Answers),length(Answers,Count))).
+
+test(host_injected_open_improper_and_cyclic_values_refuse) :-
+    Open=[any|Tail], Cycle=[many,Cycle],
+    forall(member(Grammar,[Open,[any|bad],Cycle]),
+        refused('grammar-parser'(Grammar,_))),
+    assertion(var(Tail)),
+    invoke('grammar-parser'([any],Parser)),
+    CyclicInput=[a|CyclicInput],
+    forall(member(Input,[[a|Tail],[a|bad],CyclicInput]),
+        refused('apply-to'(Parser,[Input],_))),
+    assertion(var(Tail)).
 
 :- end_tests(lib_parsing).

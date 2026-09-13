@@ -1,5 +1,5 @@
-; Purpose: grammars as values, and what running one over text answers.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta; commit=7bdd5ace3f8272c2806ac0b925e56a78dc0894a8].
+; Purpose: compose grammar values and inspect their ordinary parser functions.
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta; commit=WORKTREE].
 !(import! &self (library lib_parsing))
 ; lib_unicode is beside it for the one primitive that takes a FUNCTION: the
 ; classes here are ASCII, and a Unicode class is (char-if f) over unicode-is.
@@ -111,3 +111,40 @@
 !(test (if-error (catch (grammar-parse (nosuch) "a")) refused fine) refused)
 !(test (if-error (catch (grammar-parse (cat (digits) (nosuch)) "1")) refused fine) refused)
 !(test (if-error (catch (grammar-parse (digits) 7)) refused fine) refused)
+
+; Zero alternatives answer nothing; zero sequence parts contribute ().
+!(test (grammar-is (alt)) True)
+!(test (collapse (grammar-parse (alt) "")) ())
+!(test (grammar-parse (cat) "") ())
+!(test (collapse (grammar-parse-prefix (many (any)) "ab"))
+       ((("a" "b") "") (("a") "b") (() "ab")))
+!(test (grammar-parse (many (skip (lit "x"))) "xx") (() ()))
+!(test (grammar-parse (map (|-> ($text) (quote (+ 1 2))) (any)) "x")
+       (noeval (+ 1 2)))
+!(test (grammar-parse (map (|-> ($text) (quote (Error data code))) (any)) "x")
+       (noeval (Error data code)))
+!(test (grammar-parse (map (|-> ($text) (quote Empty)) (any)) "x") (noeval Empty))
+!(test (let $parsed (grammar-parse (map (|-> ($text) (quote ($x $y $x))) (any)) "x")
+         (== $parsed (quote ($x $y $x)))) True)
+
+; A prepared parser is a written lambda. It can consume arbitrary literal
+; tokens, and normal application supplies its answer stream.
+!(test (let $parser (grammar-parser (any))
+         (apply-to $parser (quote (((+ 1 2) Empty)))))
+       (noeval (((+ 1 2)) (Empty))))
+!(test (let $parser (grammar-parser (lit "x")) (get-metatype $parser)) Expression)
+!(test (let $recipe (match &self (= (grammar-parser $grammar) $body)
+                     (quote (|-> ($grammar) $body)))
+         (let* (($compile (eval $recipe))
+                ($parser (apply-to $compile (quote ((digits))))))
+           (apply-to $parser (("1" "2" "!"))))) (("12") ("!")))
+
+; One metadata row adds a form. Its ordinary function receives the prepared
+; arguments followed by input, and returns an optional contribution and rest.
+(parsing-form pure-value (Atom) parsing-example-value)
+(: parsing-example-value (-> Atom Atom Expression))
+(= (parsing-example-value $value $input) (quote (($value) $input)))
+!(test (grammar-parse (pure-value (+ 1 2)) "") (noeval (+ 1 2)))
+!(test (size-atom (grammar-forms)) 27)
+!(test (grammar-is (ref (|-> () (assertEqual False True)))) True)
+!(test (if-error (catch (grammar-parse (many (cat)) "")) refused fine) refused)
