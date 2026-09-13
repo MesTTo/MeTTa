@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Field assignment preserves computed atom values. Plain assignment evaluates
+  its right side before the target; augmented assignment evaluates its target
+  once before reading the field and evaluating the right side.
 - Class construction preserves supplied and literal default atoms and runs
   factory defaults before typed initialization, including fields excluded
   from `__init__`. Python, compiled and native constructor entries share the
