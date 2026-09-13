@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Generated getters for `Atom` fields and class variables execute their
+  native lookup and return the stored atom. Field annotations, refinements
+  and writer contracts retain their original meaning.
 - Compiled dictionary `get` accepts an optional default and returns `None`
   when an omitted default is needed. Key and default expressions run in
   source order; falsey values, stored atoms and native relation edits survive
