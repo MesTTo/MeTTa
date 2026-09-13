@@ -46,7 +46,7 @@ beside its definitions.
 | lib_pln | 49 | 0 |
 | lib_pln2 | 9 | 0 |
 | lib_process | 7 | 7 |
-| lib_random | 5 | 5 |
+| lib_random | 13 | 13 |
 | lib_redis | 2 | 0 |
 | lib_reflect | 19 | 10 |
 | lib_regex | 18 | 18 |
@@ -4096,76 +4096,196 @@ Returns: Code
 
 ## lib_random
 
-### `random-choice!`
-
-*lib_random.metta:14*
-
-```metta
-(: random-choice! (-> Atom %Undefined%))
-```
-
-Choose one occurrence uniformly from a nonempty expression. Items are held, so runnable expressions remain data; bind a computed population with let first. Equal values at different positions remain separate choices. Empty input raises.
-
-1. Items
-
-Returns: Item
-
-### `random-distributions`
+### `random-choice`
 
 *lib_random.metta:20*
 
 ```metta
-(: random-distributions (-> Expression))
+(: random-choice (-> Atom Expression))
 ```
 
-The accepted distribution values as (random-distribution Name Parameters) rows, with parameter names as Strings. Uniform requires Low=<High; triangular requires Low=<Mode=<High. Normal/lognormal take a mean and nonnegative standard deviation; exponential a positive rate; gamma a positive shape and scale; beta two positive shapes; bernoulli a probability in [0,1]; pareto a positive shape and minimum one; weibull a positive scale and shape.
+A sample program that chooses one occurrence uniformly from held, nonempty Items. Construction validates without drawing. eval runs one choice; repeat streams choices and map-atom builds a collection while retaining variable sharing. Runnable terms remain literal data. Equal values at different positions remain separate choices; a singleton uses no entropy.
 
-Returns: Forms
+1. Items
 
-### `random-draw!`
-
-*lib_random.metta:26*
-
-```metta
-(: random-draw! (-> Atom Number %Undefined%))
-```
-
-Stream Count samples of a held value such as (normal 0 1) or (gamma 2 3). Count is nonnegative; zero validates the distribution but yields no answers. Collapse collects the stream, while once/cut consumes only the demanded prefix. Bind computed parameters before building the held distribution value. Every parameter converts to finite binary64. Continuous results are floats; bernoulli returns Bool. Degenerate valid bounds or deviation and probabilities zero/one consume no random state. Use with-seed to replay and restore state. Numerical algorithms use native floating precision: results may round to an endpoint, underflow to zero or overflow to infinity. No cached normal spare or library generator exists; secure bytes remain lib_crypto's separate operation.
-
-1. Distribution
-2. Count
-
-Returns: Value
+Returns: Program
 
 ### `random-sample!`
 
-*lib_random.metta:32*
+*lib_random.metta:43*
 
 ```metta
-(: random-sample! (-> Atom Number Bool Expression))
+(: random-sample! (-> Atom Number Expression))
 ```
 
-Count ordered draws from held Items. Replacement True permits repeated positions; False chooses distinct positions, so Count cannot exceed the input length. Duplicate values can appear in either case. Count zero returns empty, even for an empty population. Validate every argument before drawing. Index the population once: O(n+k) with replacement; without replacement add the host's distinct-index selection and O(k log k) permutation.
+Select Count ordered, distinct positions from held Items. Duplicate values remain separate occurrences and caller variables keep their identity. Validate the finite population and nonnegative integer count before drawing; Count cannot exceed its size. Zero returns empty. An unfold removes one selected position per step, using immutable expressions in O(n*Count) work. For replacement, compose random-choice with repeat or map-atom.
 
 1. Items
 2. Count
-3. Replacement
 
 Returns: Sample
 
 ### `random-shuffle!`
 
-*lib_random.metta:38*
+*lib_random.metta:51*
 
 ```metta
 (: random-shuffle! (-> Atom Expression))
 ```
 
-A new permutation of the held expression, preserving every occurrence and leaving the input unchanged. Empty input returns empty. Uses the host's random-key sort, O(n log n), and the same generator as with-seed.
+A permutation of all held occurrences, derived by sampling the population size without replacement. The input remains unchanged. Empty and singleton populations consume no entropy.
 
 1. Items
 
 Returns: Shuffled
+
+### `random-uniform`
+
+*lib_random.metta:62*
+
+```metta
+(: random-uniform (-> Number Number Expression))
+```
+
+A uniform sample program between finite Low and High, with Low<=High. Equal bounds consume no entropy and retain the floating value's sign. Interpolation rounds only its final result, including opposite bounds near binary64 limits. Rounding may reach an endpoint.
+
+1. Low
+2. High
+
+Returns: Program
+
+### `random-normal`
+
+*lib_random.metta:73*
+
+```metta
+(: random-normal (-> Number Number Expression))
+```
+
+A normal sample program with finite Mean and nonnegative StandardDeviation. Zero deviation returns Mean without entropy, including negative zero. Box-Muller uses two open-unit core draws with no cached spare. The final affine transform rounds once and may saturate.
+
+1. Mean
+2. StandardDeviation
+
+Returns: Program
+
+### `random-lognormal`
+
+*lib_random.metta:82*
+
+```metta
+(: random-lognormal (-> Number Number Expression))
+```
+
+Exponentiate the program made by random-normal. MeanOfLog and StandardDeviationOfLog describe the logarithm. Construction validates without entropy; evaluation may underflow to zero or overflow to infinity.
+
+1. MeanOfLog
+2. StandardDeviationOfLog
+
+Returns: Program
+
+### `random-exponential`
+
+*lib_random.metta:94*
+
+```metta
+(: random-exponential (-> Number Expression))
+```
+
+An exponential sample program with a finite positive Rate. Divide the inverse-transform logarithm by Rate exactly before final binary64 rounding.
+
+1. Rate
+
+Returns: Program
+
+### `random-triangular`
+
+*lib_random.metta:115*
+
+```metta
+(: random-triangular (-> Number Number Number Expression))
+```
+
+A triangular sample program with finite Low<=Mode<=High. Equal bounds consume no entropy. Compute the mode position exactly before conversion and share uniform's final interpolation so extreme finite bounds remain usable.
+
+1. Low
+2. High
+3. Mode
+
+Returns: Program
+
+### `random-gamma`
+
+*lib_random.metta:128*
+
+```metta
+(: random-gamma (-> Number Number Expression))
+```
+
+A gamma sample program with finite positive Shape and Scale. Marsaglia/Tsang rejection and shape boosting keep multiplicative factors separate from the power correction until Scale is applied. This retains results which premature underflow or overflow would lose, including subnormal shapes.
+
+1. Shape
+2. Scale
+
+Returns: Program
+
+### `random-beta`
+
+*lib_random.metta:139*
+
+```metta
+(: random-beta (-> Number Number Expression))
+```
+
+A beta sample program with finite positive Alpha and Beta. Compose two gamma factor/correction values. Equal corrections use an exact product ratio; otherwise a bounded logistic transform of exact log differences preserves extreme shapes. Rounding may reach zero or one.
+
+1. Alpha
+2. Beta
+
+Returns: Program
+
+### `random-bernoulli`
+
+*lib_random.metta:152*
+
+```metta
+(: random-bernoulli (-> Number Expression))
+```
+
+A Bool sample program with finite Probability in [0,1]. Zero and one are constant programs and consume no entropy.
+
+1. Probability
+
+Returns: Program
+
+### `random-pareto`
+
+*lib_random.metta:164*
+
+```metta
+(: random-pareto (-> Number Expression))
+```
+
+A Pareto sample program with finite positive Shape and minimum one. The inverse transform may saturate to infinity for small shapes.
+
+1. Shape
+
+Returns: Program
+
+### `random-weibull`
+
+*lib_random.metta:178*
+
+```metta
+(: random-weibull (-> Number Number Expression))
+```
+
+A Weibull sample program with finite positive Scale and Shape. Keep the logarithmic power correction until applying Scale, preserving representable final values across extreme parameters.
+
+1. Scale
+2. Shape
+
+Returns: Program
 
 ## lib_reflect
 

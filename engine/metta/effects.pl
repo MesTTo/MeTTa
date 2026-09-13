@@ -1,6 +1,15 @@
 % Purpose: classify compiled effects, compose the five-rank effect lattice,
 %   plan reified-world admission, and manage memoization, dependencies, and
 %   bridge cascades.
+% Guarantees: seam:extension_builtin/2 declarations loaded after startup reach
+% effect plans while native floors and cache admission retain their policy.
+% [tested: effects_lattice:late_library_declarations_reach_effect_plans,
+% effects_lattice:late_library_profiles_bound_catalog_declarations;
+% commit=WORKTREE].
+% Guarantees: a computed function head retains queued definition analysis and
+% still treats its returned callable as dynamic.
+% [tested: effects_lattice:a_computed_head_keeps_its_queued_definitions;
+% commit=WORKTREE].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
@@ -603,10 +612,16 @@ metta_declared_operation_effect(Name, Effect) :-
         Effect = pureStructural
     ).
 
+% A library imported after startup is registered by import_prolog_function/2
+% as an ordinary function. Its provider declaration still supplies a fixed
+% effect; the startup builtin registry does not determine that declaration's
+% lifetime. Native and semantic profiles below retain precedence.
 metta_fixed_operation_effect(Name, Effect) :-
     (   metta_semantic_effect(Name, Semantic)
     ->  Effect = Semantic
-    ;   metta_builtin_effect(Name, Effect)
+    ;   metta_builtin_effect(Name, Builtin)
+    ->  Effect = Builtin
+    ;   seam:extension_builtin(Name, Effect)
     ).
 
 %The native vocabulary has the same closed effect boundary as registered host
@@ -1661,11 +1676,11 @@ metta_effect_plan_source_head(Module, Head, Args, State0, State) :-
     length(Args, ArgCount),
     Arity is ArgCount + 1,
     metta_effect_plan_named_call(Module, Head, Arity, State0, State).
-metta_effect_plan_source_head(Module, Head, _, Queue-Effects0,
+metta_effect_plan_source_head(Module, Head, _, Queue0-Effects0,
                               Queue-Effects) :-
     Head = [_|_],
     !,
-    metta_effect_plan_source(Module, Head, Queue-Effects0, Queue-Mid),
+    metta_effect_plan_source(Module, Head, Queue0-Effects0, Queue-Mid),
     metta_effect_plan_dynamic(Mid, Effects).
 metta_effect_plan_source_head(Module, Head, _, Queue-Effects,
                               Queue-[Head-oracleIO|Effects]) :-

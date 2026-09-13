@@ -9,6 +9,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Random's eleven constructors return inspectable sample programs. MeTTa's
+  `eval`, `repeat`, `collapse` and `once` control sampling and demand; matching
+  can reconstruct constructors or rewrite their returned code. Distinct-position
+  sampling uses `unfold` and segment removal, preserving literal values and
+  variable sharing. `random-choice!`, `random-draw!`, `random-distributions` and
+  the replacement flag are replaced by these compositions. All ten numeric
+  families retain finite validation, extreme-value arithmetic and seeded cleanup.
+  Native numeric providers declare their effects, and the engine reads late
+  declarations and retains definition analysis for computed function heads.
 - Graph operations are MeTTa equations over Sets, Pairs and Functional. Closure
   folds intermediate vertices; reachability and cycle detection share that
   inspectable recipe, and topology unfolds canonical zero-indegree layers.
@@ -117,11 +126,6 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   Standard deviation and correlation share Vector's existing fraction root,
   now exported as a native service. Generated property checks compare the
   arithmetic with Fraction and Decimal references.
-- `lib_random` chooses and samples population occurrences, shuffles expressions
-  and streams draws from ten explicit distribution forms. All draws share the
-  existing seeded generator; cuts consume only the demanded prefix. Parameters
-  are checked before drawing, and degenerate distributions consume no state.
-  Gamma scaling and beta ratios retain values through intermediate underflow.
 - `lib_math` composes the existing factorial/binomial heads with exact gcd/lcm,
   rational construction and decomposition, explicit rationalization, integer
   roots, modular powers and a factor-pair answer stream. Its scalar conversion

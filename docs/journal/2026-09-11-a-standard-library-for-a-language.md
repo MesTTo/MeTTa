@@ -5185,3 +5185,112 @@ findings have the preceding Testing run's identities and multiplicities;
 twins-selftest passes. Receipts: ai-lib4-graph-lanes.log,
 ai-lib4-graph-evidence-fixed.log, ai-lib4-graph-price-final.log,
 ai-lib4-graph-fulltwins.log and ai-lib4-graph-findings-diff.log.
+
+## 2026-09-13: Random samples are programs
+
+Changed condition: the derivability requirement prefers MeTTa equations even
+when their traversal costs more. The native registry and combined distribution,
+count and drawing operation no longer determine the representation. The live
+Python `m.self.builtins()` census lists 307 callables, including the arithmetic,
+entropy, quotation, evaluation and collection basis used here.
+
+Decided: eleven constructors return ordinary sample programs, comprising the
+ten numeric families and occurrence choice. Construction validates without
+drawing; `eval` runs one program, `repeat` streams it, and existing collection
+forms control demand and sharing. Matching can reconstruct a constructor or
+rewrite a program's entropy position. Distinct-position sampling unfolds an
+immutable population, removing one position through segments. Shuffling samples
+its size; independent choices with replacement compose choice and repetition.
+The O(n × count) removal cost replaces the native index shuffle. No new seed,
+scope, cached normal spare or distribution-tag interpreter is introduced.
+
+Tried: returning a capturing lambda, with nested and open return declarations,
+fails `process_loader_form/3` with `Could not translate MeTTa form`. Quoted
+programs need no closure wrapper and support direct code inspection. Binding
+the constructor result before `eval` preserves the evaluation stage. Passing
+`(quote Items)` to an already held population makes `quote` an occurrence;
+pass Items directly. A functional head in a destructuring pattern invokes that
+function, so program inspection matches a variable head instead. These controls
+and the corrected cases are in ai-lib4-random-{callable,basis,example}-*.log.
+
+Retained: Box-Muller without a spare, Marsaglia/Tsang rejection with factor and
+log-correction pairs, exact final interpolation, and stable extreme beta ratios.
+The pinned Rand, CPython and NumPy sources and their licenses remain the basis
+identified in `lib/lib_random/vendor/README.md`. An exact intermediate cannot
+use Vector's floating `dot`: the scratch extreme-difference probe overflowed.
+One higher-order adapter instead composes exact component operations and uses
+`dot` only for final interpolation. The previously rejected always-log gamma
+transform remains rejected because it loses large-shape precision.
+
+Tried: recording a normal program identifies `dot` and `math-real` as oracleIO
+despite their numeric bodies. Provider declarations existed, but their late
+imports were ordinary functions and the effect reader required startup
+`builtin_fun` registration. Decided: read the existing declaration seam after
+native and semantic profiles, preserving their floors and narrower cache
+admission. Vector, Math and the finite-expression validator declare their own
+effects; no library names enter engine policy. Both native negative controls
+fail before the repair, and all 25 effect tests then pass.
+
+A second planner defect made a computed function head fail analysis entirely:
+its clause required the pending-definition queue to remain unchanged. Carrying
+the resulting queue preserves the called body's effects while retaining the
+dynamic-call classification. The planted arithmetic and writer heads fail
+before that two-variable repair; all 26 effect tests pass afterwards. Receipts:
+ai-lib4-random-late-effects-{before,after}.log and
+ai-lib4-random-computed-head-{before,after}.log.
+
+Verified: the example and direct twin each prove 68 claims. Sixteen native tests
+retain all ten 10000-draw moment checks, 32 seed/position cases, finite extremes,
+signed zero, literal sharing, cut, errors, concurrent generators and cancellation
+after an actual draw. Python's 35 tests include independent Fraction and
+Box-Muller models, generated occurrence populations, reflected programs and
+recording of every family. Seed 3019339591 passes, including the order that
+previously exposed cold specialization. Forty-one existing Python effect and
+recording tests also pass before the computed-head repair and are rerun below.
+
+Recording keeps its initial content digest. A first sample run can publish
+specialization equations; replay correctly refuses that changed space. The
+next recording over those equations replays identically. Occurrence validation
+retains assertions whose possible diagnostic output remains conservatively
+unseeded I/O. These are explicit recording boundaries, not a new sampler state
+mechanism. The fresh-process cold refusal and subsequent replay both pass in
+ai-lib4-random-cold-contract.log. The clone experiment does not supply a matching
+digest: compiling the copied equations creates further specializations. Its
+exact refusal is retained in ai-lib4-random-recording-cold-replay.log.
+
+Measured: three fresh processes read example=1075465 and twin=1134786
+inferences for the 68 claims, ratio 1.0552. No overrun is required. The Python
+clone scan reports no clones; it makes no MeTTa or Prolog coverage claim.
+Receipts: ai-lib4-random-price.log, ai-lib4-random-jscpd.log,
+ai-lib4-random-native-scope-fixed.log and ai-lib4-random-python-final.log.
+
+Verified after the final planner change: Random16, Math14, Vector33 and
+effects_lattice26 native tests pass. The 75 Python effect, recording and world
+tests pass. Both README answers are checked. Five record generators pass in
+their dependency order: 27 described native sources, 17 private sources,
+284 constructs, 143 derived and 230 original examples, 319 live engine names
+and 60 libraries. Thirteen consumer twins were measured three times; eleven
+pins advanced and File and module-door points remain within their allowance.
+The resulting points are recorded beside each twin. Receipts:
+ai-lib4-random-native-final.log, ai-lib4-random-python-effect-final.log,
+ai-lib4-random-readme.log, ai-lib4-random-records.log and
+ai-lib4-random-consumer-prices.log.
+
+Verified: all nineteen required lanes pass. Full twins proves 68 equal claims
+and equal stored contents, with the same 263 older finding identities and
+multiplicities as Graph; twins-selftest passes. Its example counter differs
+from the three-process minimum, exposing an unseeded variable-sharing fixture.
+Sampling two equal values can take different removal paths even though the
+answer is identical: the ten-seed probe reads 13709 or 13746 inferences. Seed
+that fixture in both examples before renewing its point. This supersedes the
+1075465/1134786 measurement above. Receipts: ai-lib4-random-lanes.log,
+ai-lib4-random-fulltwins.log and ai-lib4-random-occurrence-cost-fixed.log.
+
+Verified: the seeded fixture's three-process measurement and full twin lane
+both read example=1075529 and twin=1134846, with 68 equal claims and equal
+stored contents. The five generators pass again. The final 263 findings match
+Graph's identities and multiplicities; only inference numbers are normalized
+when comparing budget findings, while other diagnostics are compared exactly.
+Twins-selftest passes. Receipts: ai-lib4-random-price-seeded.log,
+ai-lib4-random-records-seeded.log, ai-lib4-random-fulltwins-seeded.log and
+ai-lib4-random-findings-diff.log.
