@@ -1,5 +1,5 @@
 ; Purpose: UUID generations, namespaces, complete names and byte round trips.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/33-uuid_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/33-uuid_lib.metta; commit=8fe20f1bdcde1af8b3e1753c545924f978246dba].
 !(import! &self (library lib_crypto))
 !(import! &self (library lib_uuid))
 !(import! &self (library lib_encoding))

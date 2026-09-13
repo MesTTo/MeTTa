@@ -4,7 +4,7 @@
 % Guarantees: every encoding round-trips over generated inputs, UTF-8 is the host's
 % own bytes for the same text, hex is lower case and case-insensitive, base64 is
 % RFC 4648 in both alphabets against the host's own encoder, and a byte that is not
-% one is refused naming it [tested: lib_encoding; commit=WORKTREE].
+% one is refused naming it [tested: lib_encoding; commit=8fe20f1bdcde1af8b3e1753c545924f978246dba].
 % Owns resources: each memory file and stream closes on every outcome; provider
 % wrappers are removed after injection and the borrowed random state is restored.
 
