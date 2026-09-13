@@ -817,16 +817,30 @@ Returns: Written
 (: database-add! (-> %Undefined% Atom Bool))
 ```
 
-Append one held ground value, retaining duplicate occurrences. Values may contain native Symbols, Strings, Numbers and proper expression lists. Variables, cycles and foreign resource/Python objects raise before writing. Bind computed values before passing them to this held argument. A write error closes the store; its journal may need repair before reopening.
+Append one held value, retaining duplicate occurrences. Values may contain native Symbols, Strings, Numbers, plain Variables and proper expressions. Each occurrence owns fresh variables, preserving sharing within that value. Equations remain passive syntax until a caller explicitly evaluates them. Attributed variables, cycles and foreign resource/Python objects raise before writing. Bind computed values before this held argument. A write error closes the store; its journal may need repair before reopening.
 
 1. Handle
 2. Value
 
 Returns: Done
 
-### `database-close!`
+### `database-atoms`
 
 *lib_database.metta:17*
+
+```metta
+(: database-atoms (-> %Undefined% Expression))
+```
+
+Return an expression containing every stored value in insertion order, including duplicates. Each value has fresh variables on each snapshot, with sharing preserved within that value. Binding a snapshot never changes the store. Nothing is evaluated. Compose selection and joins with let segment patterns, and explicit rule reconstruction with eval or add-atom. Snapshot memory is proportional to the complete stored syntax.
+
+1. Handle
+
+Returns: Rows
+
+### `database-close!`
+
+*lib_database.metta:23*
 
 ```metta
 (: database-close! (-> %Undefined% Bool))
@@ -840,7 +854,7 @@ Returns: Done
 
 ### `database-open!`
 
-*lib_database.metta:23*
+*lib_database.metta:29*
 
 ```metta
 (: database-open! (-> %Undefined% Symbol %Undefined%))
@@ -853,22 +867,6 @@ Open or create a store directory and return an opaque native handle. The directo
 
 Returns: Handle
 
-### `database-query`
-
-*lib_database.metta:29*
-
-```metta
-(: database-query (-> %Undefined% Atom Atom Expression))
-```
-
-Match a held pattern against each stored value and collect the shared held template. Use the core matcher, including numeric promotion, equality guards and sequence variables. Stored marker-shaped values remain data. Queries match one row at a time; compose joins explicitly. Preserve insertion order, duplicates and all matches of each row. The result is a snapshot occupying memory proportional to its output. A query error leaves the store open.
-
-1. Handle
-2. Pattern
-3. Template
-
-Returns: Rows
-
 ### `database-remove!`
 
 *lib_database.metta:35*
@@ -877,7 +875,7 @@ Returns: Rows
 (: database-remove! (-> %Undefined% Atom Bool))
 ```
 
-Remove one exactly equal held ground occurrence, returning False if absent. Duplicates need one removal each. Exact stored-value equality distinguishes integer 1 from float 1.0; database-query instead uses core numeric matching. A native write failure closes the store and propagates its error.
+Remove one alpha-identical held occurrence, returning False if absent. Variable names may differ, but their sharing must agree. Variables are data, not deletion wildcards. Duplicates need one removal each; integer 1 and float 1.0 remain distinct. A native write failure closes the store and propagates.
 
 1. Handle
 2. Value

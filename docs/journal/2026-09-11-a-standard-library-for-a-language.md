@@ -5002,3 +5002,102 @@ old count fields; the generator now owns all three values again. Receipts:
 ai-lib4-statistics-final-edits-check.log,
 ai-lib4-statistics-llms-clean-directory.log and
 ai-lib4-statistics-final-roster.log.
+
+## 2026-09-13: Persistent syntax composes with core matching
+
+Goal: apply the later reflective-rewriting and derivability requirements to
+Database, preserving its existing passive syntax and resource contracts.
+
+Tried: generic let patterns do not interpret bound equality guards. superpose
+evaluates expression values, and unify reduces a goal-free nonground branch
+result. Direct let segment patterns preserve passive values; explicit guards
+compose through a Boolean unify condition followed by quote. The two final
+probes each pass seven claims covering numeric promotion, segment splits,
+literal runnable data and reconstructed functions. Receipts:
+ai-lib4-database-selection-composed.log and
+ai-lib4-database-selection-direct-fixed.log. These are core semantics, so no
+engine change or host workaround is needed.
+
+Decided: replace database-query with database-atoms. The native half owns a
+fresh snapshot, serialization and external resources. Selection, projection,
+joins and rule reconstruction use ordinary MeTTa expressions. The later
+composition requirement supersedes the original native-query and ground-only
+rulings above. Variables retain sharing per occurrence; snapshots are fresh.
+Removal compares canonical encodings and deletes one alpha-identical value.
+
+Tried: numbervars with a private compound retains ground journal records under
+persistency's numbervars(true) writer. mapsubterms plus varnumbers_names restores
+sharing and allocates by variable count rather than an untrusted largest index.
+Re-encoding checks canonical numbering before replay. Literal marker expressions
+remain disjoint from that native compound. The actual writer probe passes in
+ai-lib4-database-codec-probe.log. Existing ground journal bytes need no migration.
+
+Rejected: automatically executable database spaces. The preceding contract
+stores equations as passive data; making add compile them changes that behavior.
+A borrowed space projection adds compiler replay, cleanup and another lifetime
+to supply an executable world that this census did not request. Revisit when
+persistent executable worlds are requested. Weak class lookup and engine cleanup
+were probed, but no host concurrency defect was established by that research.
+
+Adapted: the edge-reference model from metta-examples at
+799ad9dbf92987cabeede6d1eca02ac7f8abb0ad, edges-to-edges/nte.metta. The example
+uses ordinary PeTTa snapshot patterns to join two edges and their supporting
+relation. No query DSL or repository-specific native integration is added.
+
+Verified: the preceding native suite passes 25 tests. The revised example and
+twin prove 71 claims with equal stored contents. Three fresh serial measurements
+after deleting engine/lib QLF files give 244929 example and 226128 twin, replacing
+the original 58-claim fixture's 223237/222382. The unpriced twin correctly refused
+its old 222382 point before this measured update. Receipts:
+ai-lib4-database-composition-before.log,
+ai-lib4-database-snapshot-example.log,
+ai-lib4-database-snapshot-twin.log and
+ai-lib4-database-snapshot-price.log.
+
+Verified: all 28 native tests pass, retaining resource, error, process and
+cancellation cases and adding variable freshness, eighty sharing graphs and
+noncanonical journal refusals. Receipt: ai-lib4-database-snapshot-native.log.
+
+Tried: the combined Python model/build suite passes 31 tests, including wheel
+installation, and fails concurrent native publication for Database at
+test_library_native_build.py:155 with one child returning `(1, '', '')`.
+Its executable probes all open the same probe.lock, so correct exclusive
+locking makes concurrent probes compete after the build has succeeded.
+Holding that fixture file externally reproduces precisely `(1, '', '')`;
+releasing it makes the same built object pass. Receipts:
+ai-lib4-database-snapshot-python.log and ai-lib4-database-build-lock-probe.log.
+The runtime fixture now owns a separate temporary lock stream per probe.
+The existing Database process-lock test continues to check actual contention;
+the native-build test continues to require one publication across six processes
+and their four builder threads. No production lock or builder behavior changes.
+
+Verified: the held-lock control passes with independent probe streams. All 32
+Python model and native-build tests pass with the original shuffled seed
+2254016849, including process contention, variable-sharing models, compiler
+cancellation and installed-wheel execution. Receipts:
+ai-lib4-database-build-lock-fixed.log and
+ai-lib4-database-snapshot-python-fixed.log. Ruff and the seven focused lanes
+pass. Jscpd reports zero clones in two Python files and one .pl file classified
+as Perl; it does not establish Prolog or MeTTa semantic duplication coverage.
+
+Verified: all nineteen required library lanes pass. The full twins lane proves
+the Database snapshot's 71 matching claims and equal stored contents at
+244928/226127, within the deterministic allowance of the three-round points.
+Its 263 findings retain the preceding Testing run's identities and multiplicities;
+the Statistics reflection additions are gone. Twins-selftest passes. Receipts:
+ai-lib4-database-snapshot-lanes.log,
+ai-lib4-database-snapshot-fulltwins.log and
+ai-lib4-database-snapshot-findings-diff.log.
+
+## 2026-09-13: Inspect the live callable basis
+
+Tried: `m.builtins()` on a MeTTa context raises `AttributeError: MeTTa has no
+'builtins': it is a Space door, and a context is not its space.` The named
+repair, `m.self.builtins()`, returns 307 callable names before additional
+library imports. The inventory includes forall, foldall, map-atom, filter-atom,
+for-each-in-atom, member, expression operations, reflection and random primitives.
+Use their actual type and evaluation contracts in the remaining derivation
+matrix. for-each-in-atom is the historical map-atom form; member binds through
+native membership and yields True for each success. Neither name alone proves
+the same held-value or numeric-matching contract as another operation.
+Receipts: ai-lib4-builtins-census.log and ai-lib4-builtins-census-fixed.log.

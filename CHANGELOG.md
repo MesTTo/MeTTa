@@ -49,15 +49,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   exact answer bags and ordinary selected bindings. Native and Python model
   tests cover products, multiplicity, calling modules and generator cleanup.
 - `lib_database` owns independent persistent stores through opaque native engines.
-  Ground native values retain order and duplicates; held queries use the core
-  matcher and removal deletes one exactly equal occurrence. Directory locks
+  Native syntax retains order, duplicates and variable sharing. `database-atoms`
+  replaces `database-query`: snapshots compose with MeTTa segment patterns for
+  selection and joins, and stored equations can be reconstructed as functions.
+  Removal deletes one alpha-identical occurrence; variables are not wildcards.
+  Old ground journals reopen unchanged. Journals containing variables require
+  this codec, which rejects noncanonical encodings before replay. Directory locks
   exclude competing handles and processes. Sync selects native journal buffering;
   scopes and close release schemas, registrations and streams, retaining combined
   operation and cleanup errors. Opening rejects malformed UTF8 and unsupported
   journal records before native replay. Six tracked host reproductions cover
   failed-write memory, permissive replay, interrupted stream registration,
   failed detach, UTF8 repair and pathname truncation at NUL. The private lock
-  provider uses the shared native build and installed-wheel path.
+  provider uses the shared native build and installed-wheel path. Concurrent
+  build probes own separate lock streams so the publication check does not
+  mistake correct store-lock contention for a build failure.
 - `lib_compression` encodes complete gzip/zlib byte members and streams file
   replacement through File's shared staged publisher. Archive inspection keeps
   entry ordinals and duplicate names; extraction publishes validated regular

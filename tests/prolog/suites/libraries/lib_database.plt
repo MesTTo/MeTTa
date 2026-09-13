@@ -1,7 +1,7 @@
 % Purpose: verify persistent multiset semantics and complete store ownership.
 % Guarantees: generated operations agree with a list model; lifecycle tests
 % exercise independent engines, aliases, cancellation, failed I/O and replay.
-% [tested: lib_database; commit=060bea3199e9f504c6d425f60841f229fc96e861].
+% [tested: lib_database; commit=WORKTREE].
 % Owns resources: fixtures close stores, join workers, release execution spaces,
 % restore wrapped predicates and delete their temporary directories.
 
@@ -10,9 +10,10 @@
 :- use_module('../../../../lib/lib_file/lib_file', []).
 :- use_module('../../../../lib/lib_database/lib_database').
 :- use_module(library(filesex), [directory_file_path/3,delete_directory_and_contents/1,link_file/3]).
-:- use_module(library(lists), [member/2,append/3,selectchk/3]).
-:- use_module(library(apply), [maplist/2]).
+:- use_module(library(lists), [member/2,append/3,selectchk/3,nth0/3]).
+:- use_module(library(apply), [maplist/2,maplist/3]).
 :- use_module(library(thread), [concurrent/3]).
+:- use_module(library(dif), [dif/2]).
 :- use_module(library(readutil), [read_file_to_string/3]).
 :- use_module(library(prolog_wrap), [wrap_predicate/4,unwrap_predicate/2]).
 :- initialization(database_suite_setup).
@@ -44,14 +45,20 @@ store_fixture(Sync,Goal,Directory) :-
                        call(Goal,Directory,Handle),'database-close!'(Handle,_)).
 journal(Directory,Path) :- directory_file_path(Directory,'journal.pl',Path).
 closed(Handle) :-
-    must_throw('database-query'(Handle,X,X,_),error(existence_error(database,Handle),_)),
+    must_throw('database-atoms'(Handle,_),error(existence_error(database,Handle),_)),
     'database-close!'(Handle,true).
 write_text(Path,Text) :-
     setup_call_cleanup(open(Path,write,Out,[encoding(utf8)]),write(Out,Text),close(Out)).
 add_value(Handle,Value) :- 'database-add!'(Handle,Value,true).
+select_snapshot(Handle,Pattern,Template,Rows) :-
+    'database-atoms'(Handle,Snapshot),current_metta_module(Module),
+    Expression=[collapse,
+                [let,[[':seg',_],Row,[':seg',_]],[quote,Snapshot],
+                 [let,true,[unify,Pattern,Row,true,false],[quote,Template]]]],
+    eval_metta_in_module(Module,Expression,Rows).
 reopen_rows(Directory,Expected) :-
     setup_call_cleanup('database-open!'(Directory,flush,Handle),
-        ('database-query'(Handle,X,X,Rows),assertion(Rows==Expected)),
+        ('database-atoms'(Handle,Rows),assertion(Rows==Expected)),
         'database-close!'(Handle,_)).
 store_module(Directory,Module) :- journal(Directory,Path),persistency:db_file(Module,Path,_,_,_).
 no_registration(Module,Journal) :-
@@ -78,7 +85,7 @@ model_operations(I,Last,Handle,Before,After) :-
       -> (selectchk(Value,Before,Next)->Expected=true;Next=Before,Expected=false),
          'database-remove!'(Handle,Value,Removed),assertion(Removed==Expected)
       ; 'database-add!'(Handle,Value,true),append(Before,[Value],Next) ),
-      'database-query'(Handle,X,X,Rows),assertion(Rows==Next),
+      'database-atoms'(Handle,Rows),assertion(Rows==Next),
       J is I+1,model_operations(J,Last,Handle,Next,After) ).
 
 test(native_values_round_trip_without_changing_their_representation) :-
@@ -87,47 +94,44 @@ native_values(Directory,Handle) :-
     string_codes(Nul,[97,0,98]),Big is 1<<2000,Ratio is 1 rdiv Big,
     Values=[[],a,'',true,"",Nul,"π🙂",0,Big,Ratio,1.0,-0.0,1.0Inf,-1.0Inf,1.5NaN,
             ['+',1,2],[':=',a],[':seg',a],[':',x,'Type'],[row,[[],[a,b]]]],
-    maplist(add_value(Handle),Values),'database-query'(Handle,X,X,Rows),
+    maplist(add_value(Handle),Values),'database-atoms'(Handle,Rows),
     assertion(Rows==Values),'database-close!'(Handle,true),reopen_rows(Directory,Values).
 
 test(queries_share_core_numeric_gap_and_guard_semantics) :- with_store(none,matching).
 matching(_,Handle) :-
     maplist(add_value(Handle),[[number,1],[number,1.0],[path,a,b,c],[same,a,a],[same,a,b]]),
-    'database-query'(Handle,[number,1],hit,Numbers),assertion(Numbers==[hit,hit]),
+    select_snapshot(Handle,[number,1],hit,Numbers),assertion(Numbers==[hit,hit]),
     'database-remove!'(Handle,[number,1],true),
-    'database-query'(Handle,[number,N],N,Remaining),assertion(Remaining==[1.0]),
-    'database-query'(Handle,[path,[':seg',Left],[':seg',Right]],[Left,Right],Gaps),
+    select_snapshot(Handle,[number,N],N,Remaining),assertion(Remaining==[1.0]),
+    select_snapshot(Handle,[path,[':seg',Left],[':seg',Right]],[Left,Right],Gaps),
     assertion(Gaps==[[[],[a,b,c]],[[a],[b,c]],[[a,b],[c]],[[a,b,c],[]]]),
-    'database-query'(Handle,[same,X,X],X,Shared),assertion(Shared==[a]),
-    'database-query'(Handle,[same,[':=',a],Y],Y,Equal),assertion(Equal==[a,b]),
+    select_snapshot(Handle,[same,X,X],X,Shared),assertion(Shared==[a]),
+    select_snapshot(Handle,[same,[':=',a],Y],Y,Equal),assertion(Equal==[a,b]),
     assertion(var(X)),assertion(var(Y)),assertion(var(N)).
 
-test(query_errors_and_invalid_patterns_leave_the_store_open) :- with_store(none,query_errors).
+test(selection_errors_leave_the_store_open) :- with_store(none,query_errors).
 query_errors(_,Handle) :-
     'database-add!'(Handle,a,true),
-    must_throw('database-query'(Handle,[database_suite_guard],x,_),database_query_cancelled),
-    Cycle=[x|Cycle],
-    forall(member(Bad,[Cycle,[x|bad],compound(x)]),
-           must_throw('database-query'(Handle,Bad,x,_),error(domain_error(persistent_pattern,_),_))),
-    'database-query'(Handle,X,X,Rows),assertion(Rows==[a]),
+    must_throw(select_snapshot(Handle,[database_suite_guard],x,_),database_query_cancelled),
+    'database-atoms'(Handle,Rows),assertion(Rows==[a]),
     'database-add!'(Handle,b,true).
 
 test(invalid_values_are_refused_before_mutation) :- with_store(none,invalid_values).
 invalid_values(_,Handle) :-
-    Cycle=[x|Cycle],
+    Cycle=[x|Cycle],dif(Attributed,excluded),
     setup_call_cleanup(open_string("resource",Stream),
-        forall(member(Bad,[_Variable,[a,_],Cycle,[a|bad],compound(x),Stream,Handle]),
+        forall(member(Bad,[Attributed,[a,Attributed],Cycle,[a|bad],compound(x),Stream,Handle]),
             (must_throw('database-add!'(Handle,Bad,_),error(domain_error(persistent_value,_),_)),
              must_throw('database-remove!'(Handle,Bad,_),error(domain_error(persistent_value,_),_)))),
         close(Stream)),
-    'database-query'(Handle,X,X,Rows),assertion(Rows==[]).
+    'database-atoms'(Handle,Rows),assertion(Rows==[]).
 
 test(independent_stores_keep_separate_schemas_and_locks) :- with_store(none,independent).
 independent(Directory,First) :-
     directory_file_path(Directory,second,Other),
     setup_call_cleanup('database-open!'(Other,close,Second),
         (maplist(add_value(First),[a,a]),'database-add!'(Second,b,true),
-         'database-query'(First,X,X,A),'database-query'(Second,Y,Y,B),
+         'database-atoms'(First,A),'database-atoms'(Second,B),
          assertion(A==[a,a]),assertion(B==[b]),
          store_module(Directory,AM),store_module(Other,BM),assertion(AM\==BM)),
         'database-close!'(Second,_)).
@@ -191,12 +195,12 @@ callback_spaces(Directory,Left,Right) :-
 test(concurrent_request_replies_preserve_every_worker_value) :- with_store(none,concurrent_writes).
 concurrent_writes(Directory,Handle) :-
     findall(write_worker(Handle,I),between(1,4,I),Goals),concurrent(4,Goals,[]),
-    'database-query'(Handle,X,X,Rows),length(Rows,400),sort(Rows,Unique),length(Unique,400),
+    'database-atoms'(Handle,Rows),length(Rows,400),sort(Rows,Unique),length(Unique,400),
     'database-close!'(Handle,true),reopen_rows(Directory,Rows).
 write_worker(Handle,Worker) :-
     forall(between(1,100,I),
            ('database-add!'(Handle,[worker,Worker,I],true),
-            'database-query'(Handle,[worker,Worker,I],I,[I]))).
+            select_snapshot(Handle,[worker,Worker,I],I,[I]))).
 
 test(concurrent_close_is_idempotent_and_other_requests_refuse) :- with_store(none,close_race).
 close_race(_,Handle) :-
@@ -204,7 +208,7 @@ close_race(_,Handle) :-
 close_worker(Handle) :-
     forall(between(1,100,_),
            ('database-close!'(Handle,true),
-            catch('database-query'(Handle,X,X,[]),error(existence_error(database,Handle),_),true))).
+            catch('database-atoms'(Handle,[]),error(existence_error(database,Handle),_),true))).
 
 test(close_releases_module_source_schema_registration_and_streams) :- with_store(none,close_resources).
 close_resources(Directory,Handle) :-
@@ -323,5 +327,61 @@ invalid_arguments(Directory) :-
     forall(member(Handle,[none,0,"handle",[],_]),
            must_throw('database-close!'(Handle,_),error(domain_error(database_handle,_),_))),
     must_throw('database-open!'(Path,none,wrong),error(_,_)),reopen_rows(Path,[]).
+
+test(variable_sharing_is_local_to_each_occurrence_and_snapshot) :-
+    with_store(close,variable_values).
+variable_values(Directory,Handle) :-
+    Shared=[pair,X,X],Separate=[pair,Y,Z],Literal=['$metta_database_variable',0],
+    maplist(add_value(Handle),[Shared,Shared,Separate,_Plain,Literal]),
+    assertion(var(X)),assertion(var(Y)),assertion(var(Z)),
+    'database-atoms'(Handle,[First,Second,Third,Plain,Literal]),
+    assertion(First =@= Shared),assertion(Second =@= Shared),
+    assertion(First \== Second),assertion(Third =@= Separate),
+    assertion(var(Plain)),First=[pair,bound,bound],
+    'database-atoms'(Handle,[Fresh|_]),assertion(Fresh =@= Shared),
+    'database-remove!'(Handle,[pair,Renamed,Renamed],true),
+    'database-remove!'(Handle,[pair,Other,Other],true),
+    'database-remove!'(Handle,[pair,Last,Last],false),
+    'database-remove!'(Handle,_Any,true),
+    'database-remove!'(Handle,_Absent,false),
+    'database-close!'(Handle,true),
+    setup_call_cleanup('database-open!'(Directory,flush,Reopened),
+        ('database-atoms'(Reopened,Rows),
+         assertion(Rows =@= [Separate,Literal])),
+        'database-close!'(Reopened,true)).
+
+test(variable_graphs_round_trip_and_reject_nonidentical_removal) :-
+    forall(between(1,80,Seed),with_store(close,variable_graph(Seed))).
+variable_graph(Seed,Directory,Handle) :-
+    length(Variables,7),
+    findall(Index,(between(0,30,I),Index is (I*Seed+I*I) mod 7),Indices),
+    maplist(index_variable(Variables),Indices,Occurrences),
+    Value=[graph,Occurrences,Variables],
+    'database-add!'(Handle,Value,true),
+    'database-close!'(Handle,true),
+    setup_call_cleanup('database-open!'(Directory,close,Reopened),
+        ('database-atoms'(Reopened,[Copy]),assertion(Copy =@= Value),
+         'database-remove!'(Reopened,[graph,_Unshared,_AlsoUnshared],false),
+         'database-remove!'(Reopened,Copy,true),
+         'database-atoms'(Reopened,Empty),assertion(Empty==[])),
+        'database-close!'(Reopened,true)).
+index_variable(Variables,Index,Variable) :-
+    nth0(Index,Variables,Variable).
+
+test(noncanonical_variable_journals_refuse_without_repair) :-
+    with_directory(noncanonical_variables).
+noncanonical_variables(Directory) :-
+    journal(Directory,Journal),
+    Huge is 1<<2000,
+    forall(member(Value,[
+        '$metta_database_variable'(-1),
+        '$metta_database_variable'(Huge),
+        '$metta_database_variable'(1),
+        '$metta_database_variable'(name),
+        ['$metta_database_variable'(1),'$metta_database_variable'(0)],
+        '$VAR'(0)]),
+        (format(string(Text),'assert(row(~q)).~n',[Value]),write_text(Journal,Text),
+         must_throw('database-open!'(Directory,close,_),error(database_journal(Journal,_),_)),
+         read_file_to_string(Journal,After,[]),assertion(After==Text))).
 
 :- end_tests(lib_database).
