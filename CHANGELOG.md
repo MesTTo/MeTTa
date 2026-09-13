@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Expanded Python calls preserve native atom elements in both expression
+  sequences and borrowed Python iterables.
+
 - Compiled Python calls accept `*args` and `**kwargs` from native callable
   values, host mappings and native keyword spaces. Operand evaluation follows
   Python order, and named functions, partials and streams read their current
