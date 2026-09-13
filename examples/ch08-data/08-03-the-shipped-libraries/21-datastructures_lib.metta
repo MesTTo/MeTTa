@@ -1,6 +1,6 @@
 ; Purpose: the sorted map and the priority queue lib_datastructures publishes,
 ; beside the functional queue and the finger tree it already had.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/21-datastructures_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/21-datastructures_lib.metta; commit=9c9e60542491416e2c5e431a2672bb20f04264fa].
 ; Both are VALUES: an operation answers a new one and leaves its input alone,
 ; so a program can hold both the before and the after.
 !(import! &self (library lib_datastructures))

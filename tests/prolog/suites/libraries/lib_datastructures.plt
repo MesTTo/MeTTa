@@ -1,7 +1,7 @@
 % Purpose: compare immutable collection equations with independent host models.
 % Guarantees: insertion/deletion sequences, order, duplicates, absence and
 % refusal are checked alongside literal values, variable identity and reflection.
-% [tested: lib_datastructures; commit=WORKTREE].
+% [tested: lib_datastructures; commit=9c9e60542491416e2c5e431a2672bb20f04264fa].
 % Owns resources: none; every collection and model is an immutable local term.
 
 :- use_module(collection_test_support).
