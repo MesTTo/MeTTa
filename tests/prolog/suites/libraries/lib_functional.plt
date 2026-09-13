@@ -1,7 +1,10 @@
 % Purpose: compare derived MeTTa transformations with independent list models.
 % Guarantees: generated inputs cover slicing, flattening, stable keys, branching
 % callbacks, held controls, literal values and variable identity.
-% [tested: lib_functional; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
+% [tested: lib_functional; commit=WORKTREE].
+% Guarantees: held, eager, lambda and partial callbacks share the same literal
+% value application, including zero or variadic arguments.
+% [tested: lib_functional; commit=WORKTREE].
 % Owns resources: the loop fixture uses one garbage-collected state cell.
 :- use_module(collection_test_support).
 :- use_module(library(lists), [append/2,append/3,flatten/2,last/2,member/2,
@@ -12,7 +15,25 @@
 :- initialization(functional_suite_setup).
 functional_suite_setup :-
     load_collection_library(lib_functional),
-    filereader:metta_host_run_source("(= (remainder $x) (% $x 5))",'&self',[],_).
+    filereader:metta_host_run_source("
+        (= (remainder $x) (% $x 5))
+        (: functional-hold (-> Atom %Undefined%))
+        (= (functional-hold $x) (noeval $x))
+        (= (functional-eager $x) (noeval $x))
+        (: functional-pick (-> Atom Atom %Undefined%))
+        (= (functional-pick $tag $x) (noeval $x))
+        (: functional-last (-> Atom Atom Atom %Undefined%))
+        (= (functional-last $tag $acc $item) (noeval $item))
+        (: functional-same (-> Atom Atom Bool))
+        (= (functional-same $expected $value) (== $expected $value))
+        (: functional-next (-> Number Atom Expression))
+        (= (functional-next $limit $state)
+           (let ($n $value) (noeval $state)
+             (if (< $n $limit)
+               (let $next (+ $n 1) (noeval ($value ($next $value)))) (empty))))
+        (: functional-args (-> (:seg Atom) Expression))
+        (= (functional-args (:seg $args)) (noeval $args))
+        ",'&self',[],_).
 
 :- begin_tests(lib_functional).
 
@@ -167,5 +188,36 @@ test(literal_values_and_caller_variables_survive_the_compositions) :-
     invoke('group-by'(['|->',[_],0],Data,Groups)),assertion(Groups==[[0,Data]]),
     invoke(scan(['|->',[_A,Item],[quote,Item]],seed,Data,History)),
     assertion(History==[seed,['+',1,2],['Error',a,b],X]),assertion(var(X)).
+
+test(apply_to_preserves_literals_for_every_callable_kind) :-
+    Lambda=['|->',[Parameter],[noeval,Parameter]],
+    Callables=['functional-hold','functional-eager',
+               partial('functional-pick',[marker]),Lambda],
+    forall((member(Callable,Callables),
+            member(Value,[['+',1,2],['Error',a,b],'Empty',[X,X]])),
+           (invoke('apply-to'(Callable,[Value],Result)),
+            assertion(Result==Value),assertion(var(X)))).
+
+test(callback_operators_share_value_application) :-
+    Identity=partial('functional-pick',[marker]),
+    Latest=partial('functional-last',[marker]),
+    Next=partial('functional-next',[2]),
+    forall(member(Value,[['+',1,2],['Error',a,b],'Empty',[X,X]]),
+           (invoke(unfold(Next,[0,Value],Items)),assertion(Items==[Value,Value]),
+            invoke('group-by'(Identity,[Value,Value],Groups)),
+            assertion(Groups==[[Value,[Value,Value]]]),
+            invoke('sort-by'(Identity,[Value,Value],Sorted)),
+            assertion(Sorted==[Value,Value]),
+            invoke(partition(partial('functional-same',[Value]),[Value,other],Sides)),
+            assertion(Sides==[[Value],[other]]),
+            invoke(scan(Latest,seed,[Value,Value],History)),
+            assertion(History==[seed,Value,Value]),
+            invoke(pipe([Identity,Identity],Value,Passed)),assertion(Passed==Value),
+            assertion(var(X)))).
+
+test(apply_to_accepts_zero_or_any_number_of_values,
+     [forall(member(Size,[0,1,2,12,24]))]) :-
+    collection_items(Size,Items),invoke('apply-to'('functional-args',Items,Result)),
+    assertion(Result==Items).
 
 :- end_tests(lib_functional).

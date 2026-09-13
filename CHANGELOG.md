@@ -9,6 +9,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Statistics owns the two exact weighted-subset operations formerly imported
+  through Combinatorics. MeTTa folds and unfolds replace their native provider,
+  retaining sparse target-truncated coefficient rows and forward/backward
+  marginal joins. Candidate identities remain literal data, integer ratios
+  remain exact, and callers can reconstruct the equation as a function.
+  Invalid domains and zero-mass conditioning use ordinary assertion refusals,
+  exposed as `AssertionFailure` by the Python binding, with the same remedies.
+  Functional's callback operators share `apply-to`, which reduces an application
+  of finished values and preserves held/eager, lambda and partial callbacks.
+  Grouping binds a key before comparing it, so a literal `Error` key remains data.
 - Reflect adds `atom-variables` and `atom-replace` as MeTTa compositions over
   Functional, Pairs and Strategy. They preserve literal code and shared variable
   identity. Replacement uses ordinary pairs, prefers a matching root, leaves

@@ -11,7 +11,7 @@ beside its definitions.
 |---|---|---|
 | lib_builtin_types | 193 | 0 |
 | lib_cli | 4 | 4 |
-| lib_combinatorics | 16 | 16 |
+| lib_combinatorics | 14 | 14 |
 | lib_compression | 8 | 8 |
 | lib_conformance | 2 | 0 |
 | lib_constraints | 5 | 0 |
@@ -55,7 +55,7 @@ beside its definitions.
 | lib_socket | 11 | 11 |
 | lib_soft | 9 | 1 |
 | lib_spaces | 10 | 5 |
-| lib_statistics | 29 | 29 |
+| lib_statistics | 31 | 31 |
 | lib_strategy | 26 | 26 |
 | lib_string | 34 | 34 |
 | lib_system | 8 | 8 |
@@ -332,36 +332,6 @@ The exact number of unordered choices. Divide a falling product by its factorial
 2. Chosen
 
 Returns: Result
-
-### `weighted-subset-mass-independent`
-
-*lib_combinatorics.metta:178*
-
-```metta
-(: weighted-subset-mass-independent (-> Expression Number Expression))
-```
-
-The exact probability that the losses of the independently chosen candidates add up to Target, as the reduced (ratio Numerator Denominator). Each candidate is (candidate Id Loss (ratio Numerator Denominator)) with a nonnegative integer loss, and equal partial sums are merged at every layer rather than enumerated, so the work is bounded by the target and not by 2^n. A target that cannot be reached has mass (ratio 0 1).
-
-1. Candidates
-2. Target
-
-Returns: Ratio
-
-### `weighted-subset-posterior-independent`
-
-*lib_combinatorics.metta:184*
-
-```metta
-(: weighted-subset-posterior-independent (-> Expression Number Expression))
-```
-
-The observation's own mass and every candidate's posterior probability of having been chosen given that the losses add up to Target, as (subset-posterior Mass ((candidate-posterior Id Ratio) ...)) in the candidates' own order. The marginals come from one forward and one backward pass rather than from enumerating subsets. Conditioning on a target of zero mass refuses and names weighted-subset-mass-independent as the operation that still reports reachability.
-
-1. Candidates
-2. Target
-
-Returns: Posterior
 
 ## lib_compression
 
@@ -2532,7 +2502,7 @@ Returns: Done
 
 ### `while`
 
-*lib_functional.metta:44*
+*lib_functional.metta:46*
 
 ```metta
 (: while (-> Atom Atom %Undefined%))
@@ -2547,7 +2517,7 @@ Returns: each body result
 
 ### `repeat`
 
-*lib_functional.metta:48*
+*lib_functional.metta:50*
 
 ```metta
 (: repeat (-> Number Atom %Undefined%))
@@ -2562,7 +2532,7 @@ Returns: each body result
 
 ### `unless`
 
-*lib_functional.metta:52*
+*lib_functional.metta:54*
 
 ```metta
 (: unless (-> Atom Atom %Undefined%))
@@ -2577,7 +2547,7 @@ Returns: the body's answers, or none
 
 ### `zip`
 
-*lib_functional.metta:64*
+*lib_functional.metta:66*
 
 ```metta
 (: zip (-> Expression Expression Expression))
@@ -2592,7 +2562,7 @@ Returns: Pairs
 
 ### `unzip`
 
-*lib_functional.metta:77*
+*lib_functional.metta:79*
 
 ```metta
 (: unzip (-> Expression Expression))
@@ -2606,7 +2576,7 @@ Returns: Sides
 
 ### `drop`
 
-*lib_functional.metta:89*
+*lib_functional.metta:91*
 
 ```metta
 (: drop (-> Expression Number Expression))
@@ -2621,7 +2591,7 @@ Returns: Rest
 
 ### `chunk`
 
-*lib_functional.metta:105*
+*lib_functional.metta:107*
 
 ```metta
 (: chunk (-> Expression Number Expression))
@@ -2636,7 +2606,7 @@ Returns: Chunks
 
 ### `window`
 
-*lib_functional.metta:121*
+*lib_functional.metta:123*
 
 ```metta
 (: window (-> Expression Number Expression))
@@ -2651,7 +2621,7 @@ Returns: Windows
 
 ### `flatten-once`
 
-*lib_functional.metta:132*
+*lib_functional.metta:134*
 
 ```metta
 (: flatten-once (-> Expression Expression))
@@ -2665,7 +2635,7 @@ Returns: Flat
 
 ### `flatten-deep`
 
-*lib_functional.metta:144*
+*lib_functional.metta:146*
 
 ```metta
 (: flatten-deep (-> Expression Expression))
@@ -2679,7 +2649,7 @@ Returns: Flat
 
 ### `partition`
 
-*lib_functional.metta:157*
+*lib_functional.metta:159*
 
 ```metta
 (: partition (-> %Undefined% Expression Expression))
@@ -2694,7 +2664,7 @@ Returns: Sides
 
 ### `unfold`
 
-*lib_functional.metta:170*
+*lib_functional.metta:172*
 
 ```metta
 (: unfold (-> %Undefined% %Undefined% Expression))
@@ -2709,7 +2679,7 @@ Returns: Items
 
 ### `group-by`
 
-*lib_functional.metta:192*
+*lib_functional.metta:195*
 
 ```metta
 (: group-by (-> %Undefined% Expression Expression))
@@ -2724,7 +2694,7 @@ Returns: Groups
 
 ### `sort-by`
 
-*lib_functional.metta:202*
+*lib_functional.metta:205*
 
 ```metta
 (: sort-by (-> %Undefined% Expression Expression))
@@ -2739,7 +2709,7 @@ Returns: Sorted
 
 ### `scan`
 
-*lib_functional.metta:214*
+*lib_functional.metta:217*
 
 ```metta
 (: scan (-> %Undefined% %Undefined% Expression Expression))
@@ -2755,7 +2725,7 @@ Returns: Running
 
 ### `pipe`
 
-*lib_functional.metta:224*
+*lib_functional.metta:227*
 
 ```metta
 (: pipe (-> Atom %Undefined% %Undefined%))
@@ -2770,13 +2740,13 @@ Returns: Result
 
 ### `apply-to`
 
-*lib_functional.metta:235*
+*lib_functional.metta:237*
 
 ```metta
 (: apply-to (-> %Undefined% Expression %Undefined%))
 ```
 
-Apply Function to the literal arguments held by an expression. A computed head, lambda or other function value uses ordinary application, preserving all answers and variable sharing.
+Apply Function to zero or more literal argument values. Build the application with cons-atom and take its reduce step; the arguments already are values, so eval and per-argument quote wrappers would reinterpret them as syntax. Held/eager functions, lambdas and partial applications preserve all answers, literal runnable contents and variable sharing. Functional's callback operators share this boundary.
 
 1. Function
 2. Arguments
@@ -5097,9 +5067,39 @@ Undocumented: `find`, `match-count`, `migrateAtoms`, `remove-all-atoms`, `succee
 
 ## lib_statistics
 
+### `weighted-subset-mass-independent`
+
+*lib_statistics.metta:30*
+
+```metta
+(: weighted-subset-mass-independent (-> Atom Number Expression))
+```
+
+Exact mass of an independent additive observation, as a reduced (ratio N D). Hold Candidates as literal (candidate ID LOSS (ratio N D)) rows with distinct ground acyclic IDs, nonnegative integer losses and integer 0<=N<=D with D>0. Target is a nonnegative integer on the same scale. Fold sparse ordered coefficient rows, merging equal sums and discarding sums above Target; an unreachable target has mass (ratio 0 1). Integer coefficients avoid host rational approximation.
+
+1. Candidates
+2. Target
+
+Returns: Exact mass
+
+### `weighted-subset-posterior-independent`
+
+*lib_statistics.metta:53*
+
+```metta
+(: weighted-subset-posterior-independent (-> Atom Number Expression))
+```
+
+Return (subset-posterior Mass ((candidate-posterior ID Ratio) ...)) in candidate order under the mass operation's exact-input contract. Unfold sparse prefix and suffix rows, then map two-pointer coefficient joins to recover every marginal. For N candidates and maximum reachable row width R, coefficient arithmetic and retained row cells are O(NR); integer bit cost grows with prior denominator products. Zero-mass conditioning refuses and names weighted-subset-mass-independent. Recipes and coefficient rows remain ordinary inspectable MeTTa data.
+
+1. Candidates
+2. Target
+
+Returns: Mass and exact marginals
+
 ### `stats-correlation`
 
-*lib_statistics.metta:144*
+*lib_statistics.metta:184*
 
 ```metta
 (: stats-correlation (-> Expression Expression Number))
@@ -5114,7 +5114,7 @@ Returns: Correlation
 
 ### `stats-covariance`
 
-*lib_statistics.metta:150*
+*lib_statistics.metta:190*
 
 ```metta
 (: stats-covariance (-> Expression Expression Number Number))
@@ -5130,7 +5130,7 @@ Returns: Covariance
 
 ### `stats-geometric-mean`
 
-*lib_statistics.metta:156*
+*lib_statistics.metta:196*
 
 ```metta
 (: stats-geometric-mean (-> Expression Number))
@@ -5144,7 +5144,7 @@ Returns: Mean
 
 ### `stats-harmonic-mean`
 
-*lib_statistics.metta:162*
+*lib_statistics.metta:202*
 
 ```metta
 (: stats-harmonic-mean (-> Expression Number))
@@ -5158,7 +5158,7 @@ Returns: Mean
 
 ### `stats-mean`
 
-*lib_statistics.metta:168*
+*lib_statistics.metta:208*
 
 ```metta
 (: stats-mean (-> Expression Number))
@@ -5172,7 +5172,7 @@ Returns: Mean
 
 ### `stats-median`
 
-*lib_statistics.metta:174*
+*lib_statistics.metta:214*
 
 ```metta
 (: stats-median (-> Expression Number))
@@ -5186,7 +5186,7 @@ Returns: Median
 
 ### `stats-mode`
 
-*lib_statistics.metta:180*
+*lib_statistics.metta:220*
 
 ```metta
 (: stats-mode (-> Atom %Undefined%))
@@ -5200,7 +5200,7 @@ Returns: Mode
 
 ### `stats-quantile`
 
-*lib_statistics.metta:186*
+*lib_statistics.metta:226*
 
 ```metta
 (: stats-quantile (-> Expression Number Symbol Number))
@@ -5216,7 +5216,7 @@ Returns: Value
 
 ### `stats-quantiles`
 
-*lib_statistics.metta:192*
+*lib_statistics.metta:232*
 
 ```metta
 (: stats-quantiles (-> Expression Number Symbol Expression))
@@ -5232,7 +5232,7 @@ Returns: Cuts
 
 ### `stats-ranks`
 
-*lib_statistics.metta:198*
+*lib_statistics.metta:238*
 
 ```metta
 (: stats-ranks (-> Expression Expression))
@@ -5246,7 +5246,7 @@ Returns: Ranks
 
 ### `stats-regression`
 
-*lib_statistics.metta:204*
+*lib_statistics.metta:244*
 
 ```metta
 (: stats-regression (-> Expression Expression Bool Expression))
@@ -5262,7 +5262,7 @@ Returns: Fit
 
 ### `stats-stdev`
 
-*lib_statistics.metta:210*
+*lib_statistics.metta:250*
 
 ```metta
 (: stats-stdev (-> Expression Number Number))
@@ -5277,7 +5277,7 @@ Returns: Deviation
 
 ### `stats-sum`
 
-*lib_statistics.metta:216*
+*lib_statistics.metta:256*
 
 ```metta
 (: stats-sum (-> Expression Number))
@@ -5291,7 +5291,7 @@ Returns: Total
 
 ### `stats-variance`
 
-*lib_statistics.metta:222*
+*lib_statistics.metta:262*
 
 ```metta
 (: stats-variance (-> Expression Number Number))
@@ -5306,7 +5306,7 @@ Returns: Variance
 
 ### `ws-map-independent`
 
-*lib_statistics.metta:247*
+*lib_statistics.metta:287*
 
 ```metta
 (: ws-map-independent (-> %Undefined% (:seg Expression) %Undefined%))
@@ -5321,7 +5321,7 @@ Returns: Law or refusal
 
 ### `ws-map`
 
-*lib_statistics.metta:254*
+*lib_statistics.metta:294*
 
 ```metta
 (: ws-map (-> %Undefined% Expression %Undefined%))
@@ -5336,7 +5336,7 @@ Returns: Law or refusal
 
 ### `ws-mass-at-least`
 
-*lib_statistics.metta:262*
+*lib_statistics.metta:302*
 
 ```metta
 (: ws-mass-at-least (-> Expression Number %Undefined%))
@@ -5351,7 +5351,7 @@ Returns: Mass or refusal
 
 ### `ws-mass-at-most`
 
-*lib_statistics.metta:270*
+*lib_statistics.metta:310*
 
 ```metta
 (: ws-mass-at-most (-> Expression Number %Undefined%))
@@ -5366,7 +5366,7 @@ Returns: Mass or refusal
 
 ### `ws-prob-gt-independent`
 
-*lib_statistics.metta:279*
+*lib_statistics.metta:319*
 
 ```metta
 (: ws-prob-gt-independent (-> Expression Expression %Undefined%))
@@ -5381,7 +5381,7 @@ Returns: Probability or refusal
 
 ### `ws-condition-joint`
 
-*lib_statistics.metta:294*
+*lib_statistics.metta:334*
 
 ```metta
 (: ws-condition-joint (-> Expression Atom %Undefined%))
@@ -5396,7 +5396,7 @@ Returns: Conditional law or refusal
 
 ### `ws-average-independent`
 
-*lib_statistics.metta:306*
+*lib_statistics.metta:346*
 
 ```metta
 (: ws-average-independent (-> Expression %Undefined%))
@@ -5410,7 +5410,7 @@ Returns: Mean law or refusal
 
 ### `ws-add-bernoulli-independent`
 
-*lib_statistics.metta:317*
+*lib_statistics.metta:357*
 
 ```metta
 (: ws-add-bernoulli-independent (-> Expression Number %Undefined%))
@@ -5425,7 +5425,7 @@ Returns: Law or refusal
 
 ### `ws-central-moment`
 
-*lib_statistics.metta:334*
+*lib_statistics.metta:374*
 
 ```metta
 (: ws-central-moment (-> Expression Number %Undefined%))
@@ -5440,7 +5440,7 @@ Returns: Moment or refusal
 
 ### `ws-variance`
 
-*lib_statistics.metta:341*
+*lib_statistics.metta:381*
 
 ```metta
 (: ws-variance (-> Expression %Undefined%))
@@ -5454,7 +5454,7 @@ Returns: Variance or refusal
 
 ### `ws-deviation`
 
-*lib_statistics.metta:350*
+*lib_statistics.metta:390*
 
 ```metta
 (: ws-deviation (-> Expression %Undefined%))
@@ -5468,7 +5468,7 @@ Returns: Deviation or refusal
 
 ### `ws-quantile`
 
-*lib_statistics.metta:364*
+*lib_statistics.metta:404*
 
 ```metta
 (: ws-quantile (-> Expression Number %Undefined%))
@@ -5483,7 +5483,7 @@ Returns: Value or refusal
 
 ### `ws-median`
 
-*lib_statistics.metta:371*
+*lib_statistics.metta:411*
 
 ```metta
 (: ws-median (-> Expression %Undefined%))
@@ -5497,7 +5497,7 @@ Returns: Value or refusal
 
 ### `ws-support`
 
-*lib_statistics.metta:382*
+*lib_statistics.metta:422*
 
 ```metta
 (: ws-support (-> Expression %Undefined%))
@@ -5511,7 +5511,7 @@ Returns: Support or refusal
 
 ### `ws-sum-independent`
 
-*lib_statistics.metta:397*
+*lib_statistics.metta:437*
 
 ```metta
 (: ws-sum-independent (-> Expression Number %Undefined%))

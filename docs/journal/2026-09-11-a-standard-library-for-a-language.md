@@ -5504,3 +5504,106 @@ Receipts: ai-lib4-reflect-phrasebook-final.log,
 ai-lib4-reflect-phrasebook-tests-final.log and
 ai-lib4-reflect-generated-checks-final.log. The library code and measured
 fixtures are unchanged.
+
+## 2026-09-14: derive exact additive conditioning in Statistics
+
+The remaining Combinatorics provider is an exact probability algorithm. The
+September5 journal maps it to polynomial coefficients and forward/backward
+messages. Retain its sparse target-truncated rows and two-pointer convolution;
+move the operations to Statistics with the other probability laws. The changed
+condition is the package-wide ruling to derive from the MeTTa basis even when
+the current engine needs more inferences. No approximation or subset enumeration
+is introduced.
+
+Found: is-ground is already a builtin. The fresh builtins() census lists307
+heads. Ordinary pairs represent coefficient rows, while map/filter, folds and
+unfold express their transitions. The candidate carrier can remain literal
+syntax throughout validation and normalization. A ten-case probe preserves
+runnable IDs and shadowed candidate/ratio names, distinguishes1 from1.0, and
+merges empty and nonempty rows. Its first load refused a guessed binary
+math-gcd call; the actual public operation takes an expression of integers.
+Baseline native5 and Python10 pass. Receipts:
+ai-lib4-weighted-builtins.log, ai-lib4-weighted-shape{,-fixed}.log,
+ai-lib4-weighted-native-before.log and ai-lib4-weighted-python-before.log.
+
+Decided before implementation: keep exact integer coefficients, canonicalize
+ratios with math-gcd/floor-div, and avoid host rational construction because its
+size-limit policy would change the contract. Mass retains a running row;
+posterior retains prefix/suffix rows and maps their joins. O(NR) describes
+coefficient arithmetic and retained posterior cells, not engine inference cost.
+The implementation owns no mutable state or scoped value. Existing exhaustive
+properties and the24-candidate/13-cell regression remain required evidence.
+
+Found during verification: exact mass, the24-candidate row bound, all12
+Combinatorics cases with73 subtests and all17 existing Statistics cases pass.
+Four weighted cases fail because every inclusion marginal is zero. The join's
+partial step works directly and through a lambda, but produces no unfold steps;
+a plain-variable wrapper also fails, excluding the initial patterned-parameter
+hypothesis. Receipts: ai-lib4-weighted-native.log,
+ai-lib4-weighted-convolution{,-curried}.log and ai-lib4-weighted-python.log.
+
+The shared boundary is apply-to: its inputs already are values. cons-atom builds
+the call and reduce dispatches those finished arguments. Six probes preserve
+native arithmetic, held/eager functions, lambdas, partial applications and shared
+variables. Routing unfold through that boundary preserves literal runnable and
+Error seeds as well. Apply the same correction to Functional's other callback
+operators. A direct computed-head segment call was considered but this cut
+retains the marker as one operand; reduce already provides the needed semantics.
+Receipts: ai-lib4-weighted-bound-callbacks{,-reduce,-layers,-value-apply}.log.
+
+The seven refusal tests initially expect EngineError, but the binding classifies
+core assertions as AssertionFailure, a distinct language outcome. Require that
+precise type and retain every remedy check. The generator initially refuses the
+orphaned Combinatorics face after its provider is removed; retire the generated
+region with that provider. Regeneration then reports25 described sources,
+17 private sources and0 findings. Receipt: ai-lib4-weighted-face-final.log.
+
+Verified after sharing value application: all15 weighted native cases pass,
+and31 of32 Python weighted/collection cases pass. The new complete callback
+matrix isolates two remaining data-evaluation boundaries. Grouping a literal
+Error key propagates the freshly computed key through equality, leaving every
+item in the remainder and recursing. Bind the key before comparing it, as the
+literal equality probe already does. The named native reverse call evaluates
+returned candidate syntax when the caller defines candidate/ratio; applying
+reverse through apply-to retains the returned data. The shadowing probe then
+isolates that boundary from normalization, row construction, zip and marginal
+arithmetic, which already preserve the syntax. Receipts:
+ai-lib4-weighted-functional-native.log, ai-lib4-weighted-functional-python.log,
+ai-lib4-weighted-functional-layers.log and ai-lib4-weighted-shadow-reduce.log.
+
+Verified after both corrections: weighted15, Functional17 with79 subtests,
+Combinatorics12 with73 subtests and Statistics17 all pass. The32 Python
+weighted/collection cases and the extended11-claim example pass. Every original
+exhaustive bound and property remains. Receipts:
+ai-lib4-weighted-native-final.log, ai-lib4-weighted-python-final.log and
+ai-lib4-weighted-example-final.log.
+
+Measured: the new eleven-claim twin costs1755787 against example1749167,
+minimum of three fresh processes. The literal import closure identifies18
+affected twins; all complete three runs, and17 existing points move. Functional
+costs1189061 against1173251 in its isolated content audit. Its existing three
+surplus atoms per side remain the tick helper's let/let* lowering and two unfold
+specialization atoms. Normalizing only lambda_63/lambda_65 makes those two atoms
+identical; their body now calls apply-to. Renew the divergence digest for that
+specific source change, not for a new semantic discrepancy. Receipts:
+ai-lib4-weighted-primary-measure.log, ai-lib4-weighted-consumers.log,
+ai-lib4-weighted-prices.log and ai-lib4-weighted-functional-content-final.log.
+
+Verified: all nineteen required lanes pass. Random16 and effects_lattice26
+native cases pass, as do110 Python Random/effect/recording/world cases. These
+checks retain seed, replay, effect admission, cancellation and callback behavior
+after the shared application change. Ruff passes and jscpd finds0 clones in the
+three changed Python files,530lines at8lines/70tokens. Receipts:
+ai-lib4-weighted-lanes.log, ai-lib4-weighted-effect-{native,python}.log,
+ai-lib4-weighted-ruff.log and ai-lib4-weighted-jscpd.log.
+
+Verified: full twins reports257 older findings over311 pairs, and its selftest
+passes. The new weighted pair has11equal claims, equal stored content and its
+exact inference pin. Comparing the complete diagnostic multiset initially
+raises AssertionError because eight existing empirical-protocol refusals name
+the new311-pair protocol instead of310. An explicit eight-path comparison
+changes only that current-protocol count and confirms no added or removed
+findings. No empirical envelope is repinned by a point measurement. Receipts:
+ai-lib4-weighted-fulltwins.log, ai-lib4-weighted-findings-diff.log and
+ai-lib4-weighted-findings-expected.log. The whole lane still exits1 with
+GATE FAILED: twins; that result is retained rather than reported as a pass.

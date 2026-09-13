@@ -1,7 +1,7 @@
 % Purpose: compare public MeTTa enumerations with independent counts and models.
 % Guarantees: order, multiplicity, exact arithmetic, literal values and streaming
 % first answers survive the derived operations.
-% [tested: lib_combinatorics_surface; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
+% [tested: lib_combinatorics_surface; commit=WORKTREE].
 :- use_module(collection_test_support).
 :- use_module(library(lists), [append/3,member/2,numlist/3]).
 :- use_module(library(apply), [foldl/4]).
@@ -110,14 +110,5 @@ test(segment_choice_preserves_order_literals_and_variable_identity) :-
     assertion(var(X)),assertion(var(Y)),
     numlist(1,100,Large),once(invoke(chooseK(Large,50,First))),
     numlist(1,50,Expected),assertion(First==Expected).
-
-test(the_weighted_subset_heads_keep_their_contracts) :-
-    Candidates=[[candidate,a,1,[ratio,1,2]],[candidate,b,1,[ratio,1,2]]],
-    invoke('weighted-subset-mass-independent'(Candidates,1,[ratio,1,2])),
-    invoke('weighted-subset-posterior-independent'(Candidates,1,Posterior)),
-    assertion(Posterior==['subset-posterior',[ratio,1,2],
-                          [['candidate-posterior',a,[ratio,1,2]],
-                           ['candidate-posterior',b,[ratio,1,2]]]]),
-    invoke('weighted-subset-mass-independent'(Candidates,9,[ratio,0,1])).
 
 :- end_tests(lib_combinatorics_surface).
