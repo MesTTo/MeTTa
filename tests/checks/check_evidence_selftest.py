@@ -25,6 +25,8 @@ Every citation is built from a TAG variable instead of being written out. A
 literal one in this file is a claim about THIS repository as far as the gate is
 concerned, and the fixtures are deliberately unbacked.
 Guarantees:
+  - nested Prolog suite helpers accept backed claims and reject stale citations
+    [tested: tests/checks/check_evidence_selftest.py; commit=WORKTREE]
   - nested distribution modules, Prolog/C/C++ library support and native face fixtures report stale citations
     [tested: tests/checks/check_evidence_selftest.py; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8]
   - Prolog tools accept a backed claim and report an absent test on its own line
@@ -628,6 +630,7 @@ def tracked_probe_complaints() -> list[str]:
                  "extensions/python/ext/metta-fixture/library/__init__.py",
                  "tests/data/prologface/fixture.pl",
                  "tests/data/prologface/fixture.metta",
+                 "tests/prolog/suites/libraries/support/fixture.pl",
                  "lib/lib_fixture/support/native_build.pl",
                  "lib/lib_fixture/support/native.c",
                  "lib/lib_fixture/support/native.cpp",
@@ -644,7 +647,7 @@ def tracked_probe_complaints() -> list[str]:
                 f"  - the collected test backs this [{TAG} {WHEN}: test_collected].",
                 f"  - this one names nothing [{TAG} {WHEN}: no_such_probe_test].",
             ]
-            marker = {".sh": "#", ".c": "//"}.get(probe.suffix, ";")
+            marker = {".sh": "#", ".c": "//", ".pl": "%"}.get(probe.suffix, ";")
             source = ('"""' + "\n".join(lines) + '\n"""\n'
                       if probe.suffix == ".py"
                       else "".join(marker + " " + line + "\n" for line in lines))

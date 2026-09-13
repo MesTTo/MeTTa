@@ -1,6 +1,6 @@
 ; Purpose: the functional and iteration utilities, beside lib_patrick's four
 ; idioms that this library grew out of.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/22-functional_lib.metta; commit=a2a80061cd8264d8f714b14c76b94d00f44a0755].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/22-functional_lib.metta; commit=WORKTREE].
 ; The two libraries are separate imports, so a program pays for the half it
 ; asks for; this file asks for both, the general half here and the idioms below.
 !(import! &self (library lib_functional))
@@ -126,3 +126,45 @@
 !(test (@ $x (+ 1 2)) 3)
 !(test (collapse (for $x (1 2 3) (* $x 10))) (10 20 30))
 !(test (iterate 0 3 0 (|-> ($i $s) (+ $s $i))) 3)
+
+; Functions can answer several values. Each answer remains a possible path.
+(= (branch-add $a $b) (+ $a $b))
+(= (branch-add $a $b) (+ 1 (+ $a $b)))
+(= (branch-key $x) (% $x 2))
+(= (branch-key $x) (+ 2 (% $x 2)))
+(= (branch-step $seed) (if (< $seed 2) ($seed (+ $seed 1)) (empty)))
+(= (branch-step $seed) (if (< $seed 2) ((+ $seed 10) (+ $seed 1)) (empty)))
+(= (increment-function) (|-> ($x) (+ $x 1)))
+(= (increment-function) (|-> ($x) (+ $x 2)))
+
+!(test (collapse (scan branch-add 0 (1 2))) ((0 1 3) (0 1 4) (0 2 4) (0 2 5)))
+!(test (collapse (unfold branch-step 0)) ((0 1) (0 11) (10 1) (10 11)))
+!(test (collapse (group-by branch-key (0 1)))
+       (((0 (0)) (1 (1))) ((0 (0)) (3 (1))) ((2 (0)) (1 (1))) ((2 (0)) (3 (1)))))
+!(test (collapse (pipe ((increment-function) (increment-function)) 0)) (2 3 3 4))
+!(test (collapse (apply-to (increment-function) (1))) (2 3))
+!(test (partition (|-> ($x) (superpose (False True))) (1 2)) ((1 2) ()))
+!(test (partition (|-> ($x) (empty)) (1 2)) (() (1 2)))
+!(test (collapse (scan (|-> ($a $b) (empty)) 0 (1))) ())
+!(test (if-error (catch (unfold (|-> ($n) (if (== $n 0) (1 2 3) (empty))) 0))
+                refused fine) refused)
+
+; Literal values survive the same operations, including Error-headed data.
+!(test (zip (quote ((+ 1 2) (Error a b))) (a b))
+       (quote (((+ 1 2) a) ((Error a b) b))))
+!(test (unzip (quote ((+ a) (Error b)))) (quote ((+ Error) (a b))))
+!(test (flatten-once (quote (((+ 1 2)) (Error a b)))) (quote ((+ 1 2) Error a b)))
+!(test (flatten-deep (quote (((+ 1 2)) (Error a b)))) (quote (+ 1 2 Error a b)))
+!(test (partition (|-> ($x) (== (get-metatype $x) Expression))
+                   (quote ((+ 1 2) (Error a b) 3)))
+       (quote (((+ 1 2) (Error a b)) (3))))
+!(test (group-by (|-> ($x) (get-metatype $x)) (quote ((+ 1 2) (Error a b))))
+       (quote ((Expression ((+ 1 2) (Error a b))))))
+!(test (sort-by (|-> ($x) 0) (quote ((+ 1 2) (Error a b))))
+       (quote ((+ 1 2) (Error a b))))
+!(test (scan (|-> ($acc $item) (quote $item)) a (quote ((+ 1 2) (Error a b))))
+       (quote (a (+ 1 2) (Error a b))))
+!(test (chunk (quote ((+ 1 2) (Error a b))) 1) (quote (((+ 1 2)) ((Error a b)))))
+!(test (window (quote ((+ 1 2) (Error a b))) 2) (quote (((+ 1 2) (Error a b)))))
+!(test (apply-to (|-> ($data) (quote $data)) (quote ((+ 1 2)))) (quote (+ 1 2)))
+!(test (pipe ((|-> ($data) (quote $data))) (quote (+ 1 2))) (quote (+ 1 2)))

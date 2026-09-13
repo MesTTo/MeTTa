@@ -11,7 +11,7 @@ beside its definitions.
 |---|---|---|
 | lib_builtin_types | 193 | 0 |
 | lib_cli | 4 | 4 |
-| lib_combinatorics | 16 | 10 |
+| lib_combinatorics | 16 | 16 |
 | lib_compression | 8 | 8 |
 | lib_conformance | 2 | 0 |
 | lib_constraints | 5 | 0 |
@@ -52,7 +52,7 @@ beside its definitions.
 | lib_reflect | 19 | 10 |
 | lib_regex | 18 | 18 |
 | lib_roman | 36 | 0 |
-| lib_sets | 13 | 13 |
+| lib_sets | 11 | 11 |
 | lib_socket | 11 | 11 |
 | lib_soft | 9 | 1 |
 | lib_spaces | 10 | 5 |
@@ -129,53 +129,170 @@ Returns: Types
 
 ## lib_combinatorics
 
-### `binomial`
+### `range`
 
-*lib_combinatorics.metta:53*
+*lib_combinatorics.metta:13*
 
 ```metta
-(: binomial (-> Number Number Number))
+(: range (-> Number Number Number))
 ```
 
-How many unordered choices of Chosen items there are among Count of them, exactly. Choosing more than there are is 0, and choosing none is 1. The multiplication runs over the smaller side and divides as it goes, so the intermediate values stay near the answer rather than reaching Count factorial.
+Answer numbers from K to the excluded N in unit steps; the unit-stride specialization of range-step.
+
+1. K
+2. N
+
+Returns: Value
+
+### `choose2`
+
+*lib_combinatorics.metta:25*
+
+```metta
+(: choose2 (-> Expression Expression))
+```
+
+Choose two positions, the later index varying slowest. Duplicate values at distinct positions remain separate choices.
+
+1. Items
+
+Returns: Pair
+
+### `choose2l`
+
+*lib_combinatorics.metta:32*
+
+```metta
+(: choose2l (-> Expression Expression))
+```
+
+The existing collected spelling of choose2: collapse its answer stream.
+
+1. Items
+
+Returns: Pairs
+
+### `chooseK`
+
+*lib_combinatorics.metta:50*
+
+```metta
+(: chooseK (-> Expression Number Expression))
+```
+
+Choose a nonnegative integer Count of the positions, keeping input order. Each choice is an answer, so once can stop before later choices are built. Zero gives one empty choice; too many gives no answers.
+
+1. Items
+2. Count
+
+Returns: Choice
+
+### `chooseKl`
+
+*lib_combinatorics.metta:57*
+
+```metta
+(: chooseKl (-> Expression Number Expression))
+```
+
+The existing collected spelling of chooseK: collapse its answer stream.
+
+1. Items
+2. Count
+
+Returns: Choices
+
+### `takeK`
+
+*lib_combinatorics.metta:70*
+
+```metta
+(: takeK (-> Number Expression Expression))
+```
+
+The first K items, or the whole expression when it is shorter. Zero or a negative count gives the empty prefix.
 
 1. Count
-2. Chosen
+2. Items
 
-Returns: Result
+Returns: Prefix
+
+### `range-step`
+
+*lib_combinatorics.metta:84*
+
+```metta
+(: range-step (-> Number Number Number Number))
+```
+
+Answer numbers from From toward the excluded To, moving by a nonzero integer Step. Endpoints may be finite fractions. Refuse non-finite endpoints and a step too small to change the current float. A step pointing away from To has no answers.
+
+1. From
+2. To
+3. Step
+
+Returns: Value
+
+### `tuples`
+
+*lib_combinatorics.metta:96*
+
+```metta
+(: tuples (-> Expression Expression))
+```
+
+Choose one literal value from every population, the last varying fastest. Validate every population before enumerating. An empty population gives no answers; no populations gives one empty tuple. Variable sharing is retained.
+
+1. Sets
+
+Returns: Tuple
 
 ### `cartesian-power`
 
-*lib_combinatorics.metta:59*
+*lib_combinatorics.metta:110*
 
 ```metta
 (: cartesian-power (-> Expression Number Expression))
 ```
 
-Every tuple of that length over the items, repetition allowed, one per answer: the Cartesian power, so k from n items gives n^k answers. Length zero gives one answer, the empty tuple, whatever the items are.
+The Cartesian product of Length copies of Items, retaining literal values and variable sharing. A nonnegative integer length of zero gives one empty tuple. An empty population at a positive length gives no answers.
 
 1. Items
 2. Length
 
 Returns: Tuple
 
-### `factorial`
+### `permutations`
 
-*lib_combinatorics.metta:65*
+*lib_combinatorics.metta:122*
 
 ```metta
-(: factorial (-> Number Number))
+(: permutations (-> Expression Expression))
 ```
 
-The product of 1 through Number, exactly, with 0 giving 1. A negative number raises, because the factorial of one is not a whole number.
+Every ordering of the items, one per answer, in the host's own order: the items as given first, then the orderings that swap the latest elements. A repeated item makes repeated answers, because a permutation counts positions and not values. Empty items have exactly one permutation, the empty one.
 
-1. Number
+1. Items
 
-Returns: Result
+Returns: Permutation
+
+### `subsets`
+
+*lib_combinatorics.metta:135*
+
+```metta
+(: subsets (-> Expression Expression))
+```
+
+Every subset, one per answer, each keeping the items' own order: the powerset, so n items give 2^n answers, starting with the whole set and ending with the empty one. A repeated item is a distinct position, so (a a) has four subsets.
+
+1. Items
+
+Returns: Subset
 
 ### `permutation-count`
 
-*lib_combinatorics.metta:71*
+*lib_combinatorics.metta:148*
 
 ```metta
 (: permutation-count (-> Number Number Number))
@@ -188,67 +305,38 @@ How many ordered choices of Chosen items there are among Count of them, exactly:
 
 Returns: Result
 
-### `permutations`
+### `factorial`
 
-*lib_combinatorics.metta:77*
-
-```metta
-(: permutations (-> Expression Expression))
-```
-
-Every ordering of the items, one per answer, in the host's own order: the items as given first, then the orderings that swap the latest elements. A repeated item makes repeated answers, because a permutation counts positions and not values. Empty items have exactly one permutation, the empty one.
-
-1. Items
-
-Returns: Permutation
-
-### `range-step`
-
-*lib_combinatorics.metta:83*
+*lib_combinatorics.metta:156*
 
 ```metta
-(: range-step (-> Number Number Number Number))
+(: factorial (-> Number Number))
 ```
 
-The numbers from From towards To, one per answer, moving by Step and stopping before To, which is excluded as it is in range. A negative step counts down; a zero step raises, because it would never arrive. A step that already points away from To has no answers.
+The exact factorial of a nonnegative integer, with zero giving one. This specializes permutation-count to choose every position.
 
-1. From
-2. To
-3. Step
+1. Number
 
-Returns: Value
+Returns: Result
 
-### `subsets`
+### `binomial`
 
-*lib_combinatorics.metta:89*
+*lib_combinatorics.metta:166*
 
 ```metta
-(: subsets (-> Expression Expression))
+(: binomial (-> Number Number Number))
 ```
 
-Every subset, one per answer, each keeping the items' own order: the powerset, so n items give 2^n answers, starting with the whole set and ending with the empty one. A repeated item is a distinct position, so (a a) has four subsets.
+The exact number of unordered choices. Divide a falling product by its factorial over the smaller side. An integer Chosen outside zero through Count gives zero; a negative Count or non-integer raises.
 
-1. Items
+1. Count
+2. Chosen
 
-Returns: Subset
-
-### `tuples`
-
-*lib_combinatorics.metta:95*
-
-```metta
-(: tuples (-> Expression Expression))
-```
-
-One element chosen from each set, one tuple per answer: the Cartesian product, in the order that varies the LAST set fastest. Any empty set means no answers, and no sets at all mean one answer, the empty tuple.
-
-1. Sets
-
-Returns: Tuple
+Returns: Result
 
 ### `weighted-subset-mass-independent`
 
-*lib_combinatorics.metta:101*
+*lib_combinatorics.metta:178*
 
 ```metta
 (: weighted-subset-mass-independent (-> Expression Number Expression))
@@ -263,7 +351,7 @@ Returns: Ratio
 
 ### `weighted-subset-posterior-independent`
 
-*lib_combinatorics.metta:107*
+*lib_combinatorics.metta:184*
 
 ```metta
 (: weighted-subset-posterior-independent (-> Expression Number Expression))
@@ -275,8 +363,6 @@ The observation's own mass and every candidate's posterior probability of having
 2. Target
 
 Returns: Posterior
-
-Undocumented: `choose2`, `choose2l`, `chooseK`, `chooseKl`, `range`, `takeK`
 
 ## lib_compression
 
@@ -2538,7 +2624,7 @@ Returns: Done
 
 ### `while`
 
-*lib_functional.metta:48*
+*lib_functional.metta:44*
 
 ```metta
 (: while (-> Atom Atom %Undefined%))
@@ -2553,7 +2639,7 @@ Returns: each body result
 
 ### `repeat`
 
-*lib_functional.metta:52*
+*lib_functional.metta:48*
 
 ```metta
 (: repeat (-> Number Atom %Undefined%))
@@ -2568,7 +2654,7 @@ Returns: each body result
 
 ### `unless`
 
-*lib_functional.metta:56*
+*lib_functional.metta:52*
 
 ```metta
 (: unless (-> Atom Atom %Undefined%))
@@ -2581,39 +2667,38 @@ Evaluate the held body when the held condition answers False, and answer nothing
 
 Returns: the body's answers, or none
 
-### `apply-to`
+### `zip`
 
-*lib_functional.metta:68*
-
-```metta
-(: apply-to (-> %Undefined% Expression %Undefined%))
-```
-
-The function applied to the arguments an expression holds, so a collection of arguments becomes a call: (apply-to + (1 2)) is 3. A function of one argument takes a one-element collection.
-
-1. Function
-2. Arguments
-
-Returns: Result
-
-### `chunk`
-
-*lib_functional.metta:74*
+*lib_functional.metta:64*
 
 ```metta
-(: chunk (-> Expression Number Expression))
+(: zip (-> Expression Expression Expression))
 ```
 
-The collection cut into pieces of that size, in order, with a shorter last piece when the size does not divide the length. A size of zero or less raises, because it would never finish; an empty collection has no chunks.
+The pairs of corresponding elements, truncating at the shorter collection, so zipping a long one with a short one answers the short one's length. unzip inverts it.
 
-1. Items
-2. Size
+1. Left
+2. Right
 
-Returns: Chunks
+Returns: Pairs
+
+### `unzip`
+
+*lib_functional.metta:77*
+
+```metta
+(: unzip (-> Expression Expression))
+```
+
+The two collections a zip was made from, as (Lefts Rights). Every element must be a two-element expression; anything else raises.
+
+1. Pairs
+
+Returns: Sides
 
 ### `drop`
 
-*lib_functional.metta:80*
+*lib_functional.metta:89*
 
 ```metta
 (: drop (-> Expression Number Expression))
@@ -2626,142 +2711,24 @@ The collection without its first Count elements, and empty when there are fewer 
 
 Returns: Rest
 
-### `flatten-deep`
+### `chunk`
 
-*lib_functional.metta:86*
+*lib_functional.metta:105*
 
 ```metta
-(: flatten-deep (-> Expression Expression))
+(: chunk (-> Expression Number Expression))
 ```
 
-Every level of nesting removed, so the answer holds only the leaves, in order. An empty collection nested anywhere contributes nothing; flatten-once removes exactly one.
+The collection cut into pieces of that size, in order, with a shorter last piece when the size does not divide the length. A size of zero or less raises, because it would never finish; an empty collection has no chunks.
 
 1. Items
+2. Size
 
-Returns: Flat
-
-### `flatten-once`
-
-*lib_functional.metta:92*
-
-```metta
-(: flatten-once (-> Expression Expression))
-```
-
-One level of nesting removed: the elements of every element that is itself a collection, in order, with anything else kept as it is. flatten-deep removes every level, and the bare name flatten is the host's own every-level one, which is why neither of these is spelled that way.
-
-1. Items
-
-Returns: Flat
-
-### `group-by`
-
-*lib_functional.metta:98*
-
-```metta
-(: group-by (-> %Undefined% Expression Expression))
-```
-
-The elements gathered by what the key function answers for each, as ((Key Members) ...). The keys come in first-appearance order and the members in the collection's own order, so grouping is stable and needs no sort.
-
-1. Key
-2. Items
-
-Returns: Groups
-
-### `partition`
-
-*lib_functional.metta:104*
-
-```metta
-(: partition (-> %Undefined% Expression Expression))
-```
-
-The elements the test answers True for and the rest, as (Yes No), each in the collection's order. A test that answers anything but True puts its element in the second side, so a partition never loses an element.
-
-1. Test
-2. Items
-
-Returns: Sides
-
-### `pipe`
-
-*lib_functional.metta:110*
-
-```metta
-(: pipe (-> Atom %Undefined% %Undefined%))
-```
-
-The value passed through each function in turn, left to right: (pipe (f g) x) is g applied to f applied to x. compose in lib_patrick composes the other way, right to left, which is the mathematical order; this is the reading order. The collection of functions is HELD, because an expression of function names would otherwise be evaluated as a call to the first of them.
-
-1. Functions
-2. Value
-
-Returns: Result
-
-### `scan`
-
-*lib_functional.metta:116*
-
-```metta
-(: scan (-> %Undefined% %Undefined% Expression Expression))
-```
-
-The running results of folding the function over the collection, starting with Start and ending with the whole fold: a prefix sum is scan with +. The answer is one longer than the collection, because the start is its first element.
-
-1. Function
-2. Start
-3. Items
-
-Returns: Running
-
-### `sort-by`
-
-*lib_functional.metta:122*
-
-```metta
-(: sort-by (-> %Undefined% Expression Expression))
-```
-
-The elements in the order of what the key function answers for each, compared in the standard order of terms. The sort is STABLE and keeps duplicates, so elements with equal keys stay in their original order.
-
-1. Key
-2. Items
-
-Returns: Sorted
-
-### `unfold`
-
-*lib_functional.metta:128*
-
-```metta
-(: unfold (-> %Undefined% %Undefined% Expression))
-```
-
-The collection a seed grows into: the step function is applied to the seed and answers (Value NextSeed) to continue or nothing to stop, so unfold is the opposite of a fold. A step that never stops never answers, which is the caller's own contract.
-
-1. Step
-2. Seed
-
-Returns: Items
-
-### `unzip`
-
-*lib_functional.metta:134*
-
-```metta
-(: unzip (-> Expression Expression))
-```
-
-The two collections a zip was made from, as (Lefts Rights). Every element must be a two-element expression; anything else raises.
-
-1. Pairs
-
-Returns: Sides
+Returns: Chunks
 
 ### `window`
 
-*lib_functional.metta:140*
+*lib_functional.metta:121*
 
 ```metta
 (: window (-> Expression Number Expression))
@@ -2774,20 +2741,139 @@ Every run of that many consecutive elements, overlapping by all but one: the sli
 
 Returns: Windows
 
-### `zip`
+### `flatten-once`
 
-*lib_functional.metta:146*
+*lib_functional.metta:132*
 
 ```metta
-(: zip (-> Expression Expression Expression))
+(: flatten-once (-> Expression Expression))
 ```
 
-The pairs of corresponding elements, truncating at the shorter collection, so zipping a long one with a short one answers the short one's length. unzip inverts it.
+One level of nesting removed: the elements of every element that is itself a collection, in order, with anything else kept as it is. flatten-deep removes every level, and the bare name flatten is the host's own every-level one, which is why neither of these is spelled that way.
 
-1. Left
-2. Right
+1. Items
 
-Returns: Pairs
+Returns: Flat
+
+### `flatten-deep`
+
+*lib_functional.metta:144*
+
+```metta
+(: flatten-deep (-> Expression Expression))
+```
+
+Every level of nesting removed, so the answer holds only the leaves, in order. An empty collection nested anywhere contributes nothing; flatten-once removes exactly one.
+
+1. Items
+
+Returns: Flat
+
+### `partition`
+
+*lib_functional.metta:157*
+
+```metta
+(: partition (-> %Undefined% Expression Expression))
+```
+
+Split Items into (Yes No), preserving input order. The predicate runs in input order; an item belongs to Yes when some answer is True, and otherwise to No. Predicate search bindings remain local to that question.
+
+1. Test
+2. Items
+
+Returns: Sides
+
+### `unfold`
+
+*lib_functional.metta:170*
+
+```metta
+(: unfold (-> %Undefined% %Undefined% Expression))
+```
+
+Grow a collection from a seed. Each step answer must be (Value NextSeed); no answer ends that path. Multiple step answers produce multiple collections. Malformed results raise. A step that never stops never completes its collection.
+
+1. Step
+2. Seed
+
+Returns: Items
+
+### `group-by`
+
+*lib_functional.metta:192*
+
+```metta
+(: group-by (-> %Undefined% Expression Expression))
+```
+
+Gather items into (Key Members) groups in first-appearance order. Compute keys in input order and preserve each function answer as an alternative grouping. Members retain their order and variable identity.
+
+1. Key
+2. Items
+
+Returns: Groups
+
+### `sort-by`
+
+*lib_functional.metta:202*
+
+```metta
+(: sort-by (-> %Undefined% Expression Expression))
+```
+
+Compute a key for each item, sort the groups by term order and concatenate their members. Equal keys retain input order and duplicates. Alternative key answers give alternative stable sorts.
+
+1. Key
+2. Items
+
+Returns: Sorted
+
+### `scan`
+
+*lib_functional.metta:214*
+
+```metta
+(: scan (-> %Undefined% %Undefined% Expression Expression))
+```
+
+Every running fold result, beginning with Start. Each callback answer extends a history, so a branching function produces alternative histories and a function with no answer ends that history.
+
+1. Function
+2. Start
+3. Items
+
+Returns: Running
+
+### `pipe`
+
+*lib_functional.metta:224*
+
+```metta
+(: pipe (-> Atom %Undefined% %Undefined%))
+```
+
+Pass Value through a held collection of functions from left to right. Evaluate each function entry, then apply the resulting function to the current literal value. Preserve zero or many answers from every application.
+
+1. Functions
+2. Value
+
+Returns: Result
+
+### `apply-to`
+
+*lib_functional.metta:235*
+
+```metta
+(: apply-to (-> %Undefined% Expression %Undefined%))
+```
+
+Apply Function to the literal arguments held by an expression. A computed head, lambda or other function value uses ordinary application, preserving all answers and variable sharing.
+
+1. Function
+2. Arguments
+
+Returns: Result
 
 ## lib_graph
 
@@ -3796,7 +3882,7 @@ Returns: a queryable space of observation-status, observation-answer, observatio
 
 ### `pairs-group`
 
-*lib_pairs.metta:22*
+*lib_pairs.metta:18*
 
 ```metta
 (: pairs-group (-> Expression Expression))
@@ -3810,7 +3896,7 @@ Returns: Groups
 
 ### `pairs-is`
 
-*lib_pairs.metta:28*
+*lib_pairs.metta:32*
 
 ```metta
 (: pairs-is (-> %Undefined% Bool))
@@ -3824,7 +3910,7 @@ Returns: Answer
 
 ### `pairs-keys`
 
-*lib_pairs.metta:34*
+*lib_pairs.metta:39*
 
 ```metta
 (: pairs-keys (-> Expression Expression))
@@ -3838,13 +3924,13 @@ Returns: Keys
 
 ### `pairs-lookup`
 
-*lib_pairs.metta:40*
+*lib_pairs.metta:49*
 
 ```metta
 (: pairs-lookup (-> Expression %Undefined% %Undefined%))
 ```
 
-Every value the key has, one answer each, in the relation's own order. A key the relation does not hold has no answer, which is what makes a lookup composable with collapse and with an if over one; the key is compared as a TERM, so a variable matches nothing.
+Every value whose key is identical to Key, in input order. An absent key has no answer. A variable key matches only the same variable in the relation, without binding it to a different key.
 
 1. Pairs
 2. Key
@@ -3853,7 +3939,7 @@ Returns: Value
 
 ### `pairs-sort-by-key`
 
-*lib_pairs.metta:46*
+*lib_pairs.metta:58*
 
 ```metta
 (: pairs-sort-by-key (-> Expression Expression))
@@ -3867,13 +3953,13 @@ Returns: Sorted
 
 ### `pairs-sort-by-value`
 
-*lib_pairs.metta:52*
+*lib_pairs.metta:67*
 
 ```metta
 (: pairs-sort-by-value (-> Expression Expression))
 ```
 
-The relation ordered by value in the standard order of terms, STABLY. This is the other half of the same question, and it is a sort of the converse rather than a second algorithm.
+The relation ordered stably by its values in the standard order of terms. This specializes sort-by to the second component; duplicates and equal-value order survive.
 
 1. Pairs
 
@@ -3881,7 +3967,7 @@ Returns: Sorted
 
 ### `pairs-swap`
 
-*lib_pairs.metta:58*
+*lib_pairs.metta:77*
 
 ```metta
 (: pairs-swap (-> Expression Expression))
@@ -3895,7 +3981,7 @@ Returns: Swapped
 
 ### `pairs-ungroup`
 
-*lib_pairs.metta:64*
+*lib_pairs.metta:90*
 
 ```metta
 (: pairs-ungroup (-> Expression Expression))
@@ -3909,7 +3995,7 @@ Returns: Pairs
 
 ### `pairs-values`
 
-*lib_pairs.metta:70*
+*lib_pairs.metta:97*
 
 ```metta
 (: pairs-values (-> Expression Expression))
@@ -4515,7 +4601,7 @@ Returns: Parts
 
 ### `set-difference`
 
-*lib_sets.metta:23*
+*lib_sets.metta:17*
 
 ```metta
 (: set-difference (-> Expression Expression Expression))
@@ -4530,7 +4616,7 @@ Returns: Rest
 
 ### `set-disjoint`
 
-*lib_sets.metta:29*
+*lib_sets.metta:25*
 
 ```metta
 (: set-disjoint (-> Expression Expression Bool))
@@ -4545,7 +4631,7 @@ Returns: Answer
 
 ### `set-insert`
 
-*lib_sets.metta:35*
+*lib_sets.metta:32*
 
 ```metta
 (: set-insert (-> Expression %Undefined% Expression))
@@ -4560,28 +4646,13 @@ Returns: Bigger
 
 ### `set-intersection`
 
-*lib_sets.metta:41*
+*lib_sets.metta:45*
 
 ```metta
-(: set-intersection (-> Expression Expression Expression))
+(: set-intersection (-> (:seg Expression) Expression))
 ```
 
-The elements in both, once.
-
-1. Left
-2. Right
-
-Returns: Common
-
-### `set-intersection-all`
-
-*lib_sets.metta:47*
-
-```metta
-(: set-intersection-all (-> Expression Expression))
-```
-
-The elements every set in the collection holds. A collection of no sets has no intersection to speak of, so that raises rather than answering a universe it cannot name.
+The elements every argument holds, once. Accept one or more canonical sets; one returns that set. Zero arguments raises because no universe was supplied. Pass a runtime collection through apply-to.
 
 1. Sets
 
@@ -4589,7 +4660,7 @@ Returns: Common
 
 ### `set-is`
 
-*lib_sets.metta:53*
+*lib_sets.metta:56*
 
 ```metta
 (: set-is (-> %Undefined% Bool))
@@ -4603,13 +4674,13 @@ Returns: Answer
 
 ### `set-member`
 
-*lib_sets.metta:59*
+*lib_sets.metta:65*
 
 ```metta
 (: set-member (-> Expression %Undefined% Bool))
 ```
 
-Whether the element is in the set, compared as a TERM rather than unified: a variable is not a member of a set of numbers, where member/2 would bind it to the first one. The comparison is the standard order, so the search stops at the first element that is larger.
+Whether the term belongs to the canonical set. Compare terms by identity, without unifying a variable with a different member.
 
 1. Set
 2. Element
@@ -4618,13 +4689,13 @@ Returns: Answer
 
 ### `set-of`
 
-*lib_sets.metta:65*
+*lib_sets.metta:74*
 
 ```metta
 (: set-of (-> Expression Expression))
 ```
 
-The set of an expression's elements: the same elements in the standard order of terms, each once. This is the only head that sorts, because every other one answers a set already.
+Canonicalize an expression through unique-atom and sort-atom: each literal term once, in the standard order of terms. Variables are compared by identity and remain the caller's variables.
 
 1. Items
 
@@ -4632,7 +4703,7 @@ Returns: Set
 
 ### `set-remove`
 
-*lib_sets.metta:71*
+*lib_sets.metta:81*
 
 ```metta
 (: set-remove (-> Expression %Undefined% Expression))
@@ -4647,7 +4718,7 @@ Returns: Smaller
 
 ### `set-subset`
 
-*lib_sets.metta:77*
+*lib_sets.metta:89*
 
 ```metta
 (: set-subset (-> Expression Expression Bool))
@@ -4662,7 +4733,7 @@ Returns: Answer
 
 ### `set-symmetric-difference`
 
-*lib_sets.metta:83*
+*lib_sets.metta:99*
 
 ```metta
 (: set-symmetric-difference (-> Expression Expression Expression))
@@ -4677,28 +4748,13 @@ Returns: Either
 
 ### `set-union`
 
-*lib_sets.metta:89*
+*lib_sets.metta:109*
 
 ```metta
-(: set-union (-> Expression Expression Expression))
+(: set-union (-> (:seg Expression) Expression))
 ```
 
-Every element of either, once: one merge down both sets rather than a scan of one for each element of the other.
-
-1. Left
-2. Right
-
-Returns: Union
-
-### `set-union-all`
-
-*lib_sets.metta:95*
-
-```metta
-(: set-union-all (-> Expression Expression))
-```
-
-The union of a collection of sets, in one pass over all of them: the fold a caller would otherwise write, and the empty collection's union is the empty set.
+Every element of any canonical input set, once and in term order. Accept zero or more sets; zero returns the empty set. Pass a runtime collection through apply-to.
 
 1. Sets
 

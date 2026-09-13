@@ -1,4 +1,6 @@
 % Purpose: parse, classify and solve expression-child gap patterns (sequence variables) inside the three fragments Kutsia proved finite
+% Guarantees: a nested segment can consume an empty expression without
+%   binding unrelated inputs [tested: segment_equations; commit=WORKTREE].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context; metta_match_atoms/2 decides one atom position.
 % Guarantees: a pattern the program wrote without a gap never reaches any predicate here, so a gap-free ask pays nothing [tested: tests/prolog/suites/reader/segments.plt:segments_costs_nothing; commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
 % Guarantees: a written `unify` reaches all three fragments and both refusals, because metta_seq_pair_plan/4 parses BOTH operands and classifies over the two parsed sides [tested: tests/prolog/suites/reader/segments.plt:segments_written_pairs; commit=f4ae837efd23791200846ba72556c2ce96a7d05a].
@@ -192,8 +194,8 @@ metta_seq_body_plan(Body, Parsed) :-
 metta_seq_head_match('$metta_seq'(one_sided(left), Parsed), Subject) :-
     %An equation head stores only the argument HEDGE, not an atom with its
     %function head.  Enter the child-list matcher directly so the all-segment
-    %head can match the empty argument hedge; metta_seq_atoms/2 quite properly
-    %requires two nonempty expressions at its atom boundary [tested:
+    %head can match the empty argument hedge without wrapping it in a synthetic
+    %function expression [tested:
     %tests/prolog/suites/reader/segment_equations.plt:top_level_segment_accepts_zero_arguments_and_wider_arities;
     %commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
     metta_seq_items(Parsed, Subject).
@@ -549,12 +551,12 @@ metta_seq_unify(refused(Why), _, _) :-
 %a hand-written index walk.
 %
 %The cost is the enumeration's own and no more: matching m gaps against n
-%subject children is the integer compositions of n into m parts, C(n-1, m-1),
+%subject children is the weak compositions of n into m parts, C(n+m-1, m-1),
 %so it is exponential in the NUMBER OF GAPS and polynomial in the subject
 %[source: Krebber, "Non-linear Associative-Commutative Many-to-One Pattern
 %Matching with Sequence Variables", arXiv:1705.00907, Section 2.1, "The matches
 %are analogous to integer partitions of n with m parts ... O(n^m) many"]. One
-%gap is linear, which is the shape every gap pattern in the corpus has.
+%gap takes linear work over the subject.
 %
 %Runs bind EAGERLY here, unlike the two-sided solvers below, and that is what
 %makes a repeated `(:seg $x)` decide against the run its first occurrence took.
@@ -568,7 +570,7 @@ metta_seq_atoms(Pattern, Subject) :-
     ;   nonvar(Pattern),
         Pattern = [_|_]
     ->  (   nonvar(Subject),
-            Subject = [_|_]
+            ( Subject == [] ; Subject = [_|_] )
         ->  metta_seq_items(Pattern, Subject)
         ;   metta_seq_faces(Pattern, Subject)
         )

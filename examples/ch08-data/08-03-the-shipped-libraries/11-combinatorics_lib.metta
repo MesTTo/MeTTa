@@ -1,8 +1,7 @@
-;lib_combinatorics: choosing from a finite collection, in both of the two
-;shapes MeTTa offers for a set of answers. Each operation comes as a
-;nondeterministic version answering one choice per solution and an `l`
-;version answering the whole tuple, so a caller picks whether the choices
-;stream or land.
+; Purpose: finite choices as streams, collected values and exact counts.
+; Guarantees: positional choices preserve literal data and multiplicity, and a
+; consumer can stop before the remaining choices are built.
+; [tested: lib_combinatorics_surface; commit=WORKTREE].
 !(import! &self (library lib_combinatorics))
 
 ;`choose2` answers every unordered pair, one per solution: (a b) but never
@@ -97,3 +96,26 @@
 !(test (== (size-atom (collapse (chooseK (a b c d) 2))) (binomial 4 2)) True)
 !(test (== (size-atom (collapse (subsets (a b c)))) (pow-math 2 3)) True)
 !(test (== (size-atom (collapse (cartesian-power (a b) 3))) (pow-math 2 3)) True)
+
+; Quoted expressions stay data through the choices and their collected forms.
+!(test (choose2 (quote ((+ 1 2) a))) (quote ((+ 1 2) a)))
+!(test (chooseKl (quote ((+ 1 2) a)) 1) (quote (((+ 1 2)) (a))))
+!(test (takeK 1 (quote ((+ 1 2) a))) (quote ((+ 1 2))))
+!(test (collapse (permutations (quote ((+ 1 2) (Error a b)))))
+       (quote (((+ 1 2) (Error a b)) ((Error a b) (+ 1 2)))))
+!(test (collapse (subsets (quote ((+ 1 2) a))))
+       (quote (((+ 1 2) a) (a) ((+ 1 2)) ())))
+!(test (collapse (tuples (quote (((+ 1 2) (Error a b)) (a)))))
+       (quote (((+ 1 2) a) ((Error a b) a))))
+
+; There are over 10^29 possible choices here. once asks for the first one.
+!(test (once (chooseK (collapse (range 0 100)) 50)) (collapse (range 0 50)))
+!(test (collapse (cartesian-power () 9999999999999999999999999999999)) ())
+!(test (if-error (catch (tuples (() 3))) refused fine) refused)
+!(test (if-error (catch (cartesian-power (0 1) 1.0)) refused fine) refused)
+!(test (if-error (catch (factorial 1.0)) refused fine) refused)
+!(test (binomial 100 50) 100891344545564193334812497256)
+!(test (collapse (range-step 0.5 2.0 1)) (0.5 1.5))
+; A stalled float yields its first value, then refuses when asked to advance.
+!(test (collapse (if-error (catch (range-step 1.0e20 1.0e21 1)) refused fine))
+       (fine refused))

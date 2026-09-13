@@ -17,6 +17,8 @@ these fixtures are deliberately unbacked.
 
 Assumes: git on PATH, and a writable temporary directory.
 Guarantees:
+  - nested Prolog suite helpers resolve header pins and preserve code atoms
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
   - each planted shape lands on the side the pass documents, and
     the pass reports the declined ones with a reason
     [tested: tests/checks/check_pin_provenance_selftest.py]
@@ -138,15 +140,14 @@ PLANTS = (
         [2],
         [3],
     ),
-    (
-        "extensions/cmetta/tests/plant.pl",
-        [
-            "% Purpose: a C-embedded Prolog fixture.",
-            f"% A header pin [{TAG} {WHEN}: a_plunit_test; {WORD}].",
-            f"an_atom('{WORD}').",
-        ],
-        [2],
-        [3],
+    *(
+        (name,
+         ["% Purpose: a native suite fixture.",
+          f"% A header pin [{TAG} {WHEN}: a_plunit_test; {WORD}].",
+          f"an_atom('{WORD}')."],
+         [2], [3])
+        for name in ("extensions/cmetta/tests/plant.pl",
+                     "tests/prolog/suites/spaces/support/plant.pl")
     ),
     # Prolog's OTHER comment form. A plunit suite writes its whole contract in
     # one `/* ... */`, so a pin there has no `%` on its line and was declined

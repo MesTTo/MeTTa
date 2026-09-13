@@ -4595,3 +4595,225 @@ Testing claims, equal stored contents and the exact 74003 pin. Ruff and
 twins-selftest pass; full twins returns to the same 263 older findings over
 310 twins, with 54/347 passing files and 3596 proved claims.
 Receipt: ai-lib4-testing-composition-twins-final.log.
+
+## 2026-09-13: collection derivations and their boundaries
+
+Constraint changed: the composition ruling above supersedes the native-speed
+choice for Combinatorics, Functional, Pairs and Sets. These four libraries form
+one dependency chain, so their replacement and consumer prices share one verified
+state. The existing weighted-subset sparse probability algorithm remains native;
+the ordinary enumeration and collection operations become equations.
+
+Tried: the complete scratch composition passes 101 assertions covering positional
+permutations, powers, subsets, exact counts, fractional range endpoints, tuple
+validation after an empty population, empty huge powers, stable grouping and
+sorting, branching callbacks, plain and runnable data, Error-headed collections,
+and identity with the caller's variables. The four existing native suites also
+pass before replacement. Receipts: ai-lib4-collections-identity-probe.log and
+ai-lib4-collections-native-before.log.
+
+Tried: returning an Error directly from a Number-result equation answers nothing.
+The existing result-type rule rejects that non-number. Declaring the union of
+Number and Expression instead makes an ordinary addition refuse the call's union
+type. Core assertions provide operational preconditions that raise on failure
+while preserving the successful Number result, including with type checking off.
+Receipts: ai-lib4-size-guard-translated.log, ai-lib4-size-guard-union.log and
+ai-lib4-size-assert-probe.log. Rejected: a new exception protocol or a weakened
+numeric result type; the language already supplies the necessary assertion.
+
+Decided: two shared equations in _support/collections.metta check a finite
+expression's size and recognize integers. They support existing operations and
+do not add another traversal or assertion protocol. Invalid domains use the core
+assertion report or a caught host arithmetic refusal. A predicate that asks about
+shape answers False. It does not use an exception as its ordinary negative case.
+
+Decided: tuples maps a positional choice over its populations; cartesian-power
+reuses tuples; permutations chooses positions and recurses; subsets chooses
+inclusion after the tail so its prior answer order remains. range uses range-step
+with a unit stride. A range validates finite endpoints and refuses a step that
+makes no progress. permutation-count folds multiplication, factorial specializes
+it, and binomial divides a falling product by a factorial over the smaller side.
+Empty and out-of-range cases preserve their earlier results.
+
+Decided: Functional uses map-atom, foldl-atom, forall, case and the finite-choice
+library. Callbacks run in input order. Multiple answers remain multiple answers;
+partition asks whether a True answer exists and keeps every input on one side.
+unfold refuses a malformed step result instead of treating it as termination.
+sort-by sorts unique-key groups and flattens their members, reusing group-by's
+stable ties. repeat traverses range and evaluates its held body. Slicing and
+growing collection accumulators can cost quadratic work; native speed no longer
+justifies their separate loops, and the old linear-cost claim is removed.
+
+Decided: Pairs reuses unzip, zip, group-by and sort-by; ungrouping retains the
+caller's variable identity through map and flatten instead of a native findall.
+Sets uses unique-atom and sort-atom for canonical values and the core multiset
+intersection and subtraction over those values. The other set operations are
+compositions and folds. Every input requiring a canonical set is checked,
+including a lone input to set-intersection-all; no sets still raises there.
+
+Tried: raw reverse and append re-evaluate runnable data at their untyped result
+boundary. The core union-atom preserves a collection as a value. Naming groups
+before sort-atom also preserves their data, whereas nesting a masked call beneath
+that boundary can re-enter evaluation. The behavior follows the result-mask rule
+recorded in engine/translator/runtime.pl:metta_masked_result/2, so the equations
+use named values and explicit quote at application boundaries. Wrapping every
+sort element in quote was rejected because a named sort preserves those wrappers
+as data. Receipts: ai-lib4-collection-composition-{probe,quote-probe,
+primitives-probe,values-probe,sort-probe,named-sort-probe}.log.
+
+Verification required: keep the existing example claims, add the semantic cases
+above, update the ordinary Python twins, and test the public MeTTa calls against
+independent host models. Reprice every direct and transitive consumer after the
+last library change, then run generated-record, required-lane and provenance
+checks before committing the implementation and its evidence pins.
+
+Tried after replacement: all four existing shipped examples pass. A literal-data
+probe of the original chooseKl returns ((3) (a)) for quoted ((+ 1 2) a), where
+the literal choice is (((+ 1 2)) (a)). Its native append re-evaluates the value.
+Its chooseK also collects every choice before superposing them, contradicting
+the example's claim that a consumer may stop before building the rest.
+Receipt: ai-lib4-legacy-choice-values.log.
+
+Decided: the failed literal-data contract changes the earlier decision to leave
+those equations untouched. chooseK now makes each choice directly through held
+values and superpose; chooseKl collapses that stream. The seven-claim prototype
+preserves ordering, duplicate positions, literal values and caller identity.
+The existing collected names remain as their upstream MeTTa compositions.
+choose2 keeps its distinct later-index-first order and takeK keeps its prefix
+equations; all original heads now declare their types and documentation.
+Receipt: ai-lib4-choices-stream-probe.log.
+
+## 2026-09-13: segments, variadic operations and the standard-library basis
+
+The composition review includes lib_builtin_types, the prelude and existing
+libraries. The 36 concern rows are the package's work census; the complete
+standard library also includes facilities already supplied, including the
+builtin type declarations. Evaluation masks, quote, ordinary variable binding,
+answer streams, segments, variadic arrows and resource scopes are part of the
+basis against which a proposed primitive is evaluated. Performance alone does
+not justify a separate native implementation of derivable behavior.
+
+Read: examples/ch08-data/08-02-sequence-variables/01-segments.metta through
+03-the-one-sided-fragment.metta, examples/ch09-types/22-variadic_arrow_signature.metta,
+lib_strategy:strategy-one and the 2026-09-09 splice-in-an-arrow journal. Segments
+capture zero or more children in shortest-prefix-first order. Variadic arrows
+repeat the same element contract at each arriving argument position.
+
+Tried: a local segment bound by let does not enable equation-head RHS splicing.
+Writing those markers inside a reconstructed value kept them literal; a scratch
+permutation failed with an 8.0Gb stack-limit error. Selection can use the local
+segment directly, and union-atom/cons-atom already reconstruct literal values.
+A separate segment application adapter required another equation for behavior
+that apply-to already derives with cons-atom and eval, so it was rejected.
+
+Found: an empty expression bypassed the nested sequence matcher, and the
+variadic family emitted metta_segment_body_result/4 without exporting and
+protecting it. The new segment_equations regressions fail independently: one
+has no answer, the other raises Unknown procedure for that helper in &self.
+The general fixes admit an empty subject to the existing child matcher and
+register the continuation beside metta_segment_rule_result/6. They introduce
+no library-specific compiler case. The 10 segment-equation tests, 54 matcher
+tests and 29 variadic-arrow tests with 10 subtests pass. Receipts:
+ai-lib4-segments-engine-{before,fixed}.log.
+
+Decided: choose2 and permutations select positions through segment patterns;
+chooseK and subsets destructure head and tail through the same matcher. Tuples
+maps an element selected by a segment pattern over its populations. Zip unfolds
+pairs of heads until either side fails to match. Drop matches the prefix takeK
+already supplies, then returns its captured remainder. Chunk and window unfold
+those existing prefix/remainder operations. Scan reads its last accumulator
+through a segment pattern. Pair lookup selects relation rows structurally and
+then compares keys strictly. Existing ordered answers and literal values remain
+the contract. The scratch collection probe and 247-case slicing comparisons
+pass, including empty inputs and variable identity.
+
+Decided: set-union and set-intersection accept a variadic run of canonical sets.
+The former has empty identity; the latter requires at least one argument and
+validates that first argument. Their folds subsume set-union-all and
+set-intersection-all, which are removed. A runtime collection is passed through
+the existing apply-to. No new spread adapter or fixed arity ceiling is added.
+Receipt: ai-lib4-segments-collections-probe-after-engine.log and
+ai-lib4-segments-slices-probe.log. Verification and final prices follow the
+earlier collection procedure after the final source edit.
+
+Verified: the four examples and twins pass 63, 73, 54 and 37 claims. The native
+public-interface suites pass 44 tests with 346 subtests; the existing weighted
+algorithm suite adds five passing tests. Python's 20 collection tests include
+seven 100-example Hypothesis models, and the ten existing weighted tests pass.
+Their independent models use itertools, integer arithmetic, Python slicing,
+stable maps, finite sets and the host pairs/list libraries. Literal expressions,
+Error-headed data, caller variable identity and branching callbacks are covered.
+Receipts: ai-lib4-collections-segments-native-verified.log and
+ai-lib4-collections-segments-python-{fixed,verified}.log.
+
+Tried: moving native suites to the public evaluator exposed fixture assumptions.
+The host extension bootstrap needs the engine imported into user; a generic
+items/2 export collides with Janus; chooseK takes its population before its count.
+The corrected shared fixture binds literal arguments before calling, commits
+single-value checks explicitly and retains every answer for stream checks.
+Collection callbacks are no longer falsely tested as deterministic native calls.
+
+Measured: three fresh rounds after removing engine/lib QLF files give
+example/twin 850820/747785 for Combinatorics, 1074085/1091943 for Functional,
+348761/366379 for Sets, 837557/813769 for Pairs and 390681/364240 for Testing.
+Sets no longer needs its earlier overrun declaration. Functional's stored-content
+difference retains the tick helper's let/let* translation and now includes two
+otherwise identical specializations whose generated lambda names shift by two
+after the Python generator's two lambda bodies. The 73 matching claims cover
+those callback paths. Receipts: ai-lib4-collections-segments-measure.log and
+ai-lib4-functional-segments-repin.log. Every transitive consumer is remeasured
+before the provenance commit.
+
+Measured: the ten-consumer re-pin confirms the five collection/Testing points
+above and updates System to 200522, Math to 192956, Random to 123955,
+Statistics to 163787 and URI to 180593. All three runs of each twin complete;
+no additional stored-content divergence changes. Receipt:
+ai-lib4-collections-consumers-repin.log.
+
+Tried: the corpus lane identified combinatorics-range-loop as a public head with
+no direct example. Its unchecked continuation belongs to the private support
+file, which the validated public range operation imports. Moving the unchanged
+equation there preserves its contract without adding a public API or an exception
+to the corpus gate. The five record generators pass. Three fresh rounds update
+the ten affected twins to Combinatorics 749122, Functional 1093280, Sets 367716,
+Pairs 815106, System 201865, Math 194299, Random 125298, Statistics 165130,
+URI 181936 and Testing 365541; no stored-content divergence changes. Receipts:
+ai-lib4-collections-private-records.log and ai-lib4-collections-private-repin.log.
+
+Verified after the private continuation move: all 19 required lanes pass, and
+the native suites retain 49 passing tests with 346 subtests. The full twins lane
+reports 265 findings, including two new point mismatches in File and the module
+loading example. Exporting the segment continuation changes their module setup
+costs by 6 and 19 inferences. Three fresh rounds give 210172 and 158506, with
+equal stored contents. After those two pins move, the focused twelve-consumer
+lane passes all 661 claims with zero findings; twins-selftest also passes.
+The other 263 findings have the same paths and categories as the earlier Testing
+receipt. Logs: ai-lib4-collections-private-{lanes,native}.log,
+ai-lib4-collections-fulltwins.log, ai-lib4-collections-engine-consumers-repin.log
+and ai-lib4-collections-twins-verified.log.
+
+Tried: prolog-static on this tree and the provisioned c75181adc control. Both
+reach the same five static checks, then abort with the X server error
+`BadValue (integer parameter out of range for operation)`, major opcode
+`152 (GLX)`, minor opcode `3 (X_GLXCreateContext)`. The control also repeats its
+known MORK build failure because its sibling kernel Cargo.toml is absent.
+No static-check or graphics workaround is introduced. Receipts:
+ai-lib4-collections-prolog-static.log and
+ai-lib4-collections-prolog-static-control.log.
+
+Found during provenance pinning: collection_test_support.pl is the first shared
+Prolog helper under suites, whose source pattern previously covered only .plt.
+The pin guard reports the helper outside the evidence globs and leaves it
+unresolved. Decided: include recursive suite .pl sources in the evidence scope.
+The existing checker selftests gain a nested helper with a backed and an absent
+citation, and a comment pin beside a code atom that pinning must preserve.
+The functional commit is amended before its provenance commit, retaining the
+original unresolved-pin receipt in ai-lib4-collections-pin.log.
+
+Verified: the evidence selftest reports zero defects, and the pin selftest
+reports zero defects over 73 placeholders in 27 files, 69 C-family cases,
+110 CMake cases and eight pre-write refusals. The repository evidence and Ruff
+lanes pass with the helper's claim now read. Receipts:
+ai-lib4-collections-evidence-selftest.log,
+ai-lib4-collections-provenance-selftest.log and
+ai-lib4-collections-helper-evidence.log.

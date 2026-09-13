@@ -1,5 +1,5 @@
 ; Purpose: a collection of (Key Value) pairs read as a relation.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/24-pairs_lib.metta; commit=40b3353b9ae721bf42b832fb953e93a5dc230e6c].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/24-pairs_lib.metta; commit=WORKTREE].
 !(import! &self (library lib_pairs))
 
 ; A relation is a collection of two-element expressions, so nothing has to be
@@ -63,3 +63,18 @@
 !(test (if-error (catch (pairs-group ((a 1) (b 2 3)))) refused fine) refused)
 !(test (if-error (catch (pairs-lookup 7 a)) refused fine) refused)
 !(test (if-error (catch (pairs-ungroup ((a 1)))) refused fine) refused)
+
+; Projections and grouping reuse the functional library and retain literal data.
+!(test (pairs-is $x) False)
+!(test (pairs-is (quote ((+ a) (Error b)))) True)
+!(test (pairs-keys (quote ((+ a) (Error b)))) (quote (+ Error)))
+!(test (pairs-values (quote ((a (+ 1 2)) (b (Error a b))))) (quote ((+ 1 2) (Error a b))))
+!(test (pairs-swap (quote ((a (+ 1 2)) (b (Error a b)))))
+       (quote (((+ 1 2) a) ((Error a b) b))))
+!(test (pairs-group (quote ((b (+ 1 2)) (a 2) (b (Error a b)))))
+       (quote ((a (2)) (b ((+ 1 2) (Error a b))))))
+!(test (pairs-ungroup (quote ((a ()) (b ((+ 1 2) (Error a b))))))
+       (quote ((b (+ 1 2)) (b (Error a b)))))
+!(test (collapse (pairs-lookup (quote ((a (+ 1 2)) (a (Error a b)))) a))
+       (quote ((+ 1 2) (Error a b))))
+!(test (collapse (pairs-lookup (quote (($key 7) (a 8))) $key)) (7))

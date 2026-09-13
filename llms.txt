@@ -43,7 +43,7 @@ re-runs them.
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
 | `engine/**/*.pl` | `engine/metta.pl` declares `metta_engine`, the bootstrap including the eighteen `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, algebra_operations, space_hooks, runtime, control, interop, references, reference_loading, properties, registration, prelude), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eleven `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products, tokens, receipts, vocabulary_seed); vocabulary_seed has its own module and compiles the guarded initial vocabulary atoms, `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.pl` the vocabulary tier (Prolog bodies of the 37 prelude heads). Each included unit is a plain source file owned by its umbrella module. `engine/main.pl` declares `metta_main`. Engine facades declare their own module and explicit exports; `metta_engine_reexport/2` publishes the subsystem operations the host tier needs. Execution resolves through the space parents, `&self`, `prelude`, `metta_engine`, `user`, then `system` | |
 | `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 117, `service` 71, `ownership` 42, `event` 23, `declaration` 17. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
-| `lib/lib_*/` | 61 MeTTa libraries, implemented in `.metta`, `.pl`, or both; all 48 shipped Prolog halves, including the builtin and minimal-MeTTa modules, own distinct `lib_*` modules with explicit exports and local autoload tables. Libraries load with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
+| `lib/lib_*/` | 61 MeTTa libraries, implemented in `.metta`, `.pl`, or both; all 45 shipped Prolog halves, including the builtin and minimal-MeTTa modules, own distinct `lib_*` modules with explicit exports and local autoload tables. Libraries load with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
 | `extensions/*/extension.pl` | one control file per seat, read when argv carries `extensions` and never read without it; a seat's `entry(engine, _)` loads only where its declared needs hold and its `entry(host, _)` is recorded for the seat's own runtime to consult, so the engine names neither a host nor a backend | |
 | `extensions/node/src/*.ts` | MeTTa as a TypeScript library, the engine embedded in a Node process over swipl-wasm and the seam's second consumer: interned atoms, spaces as collections, lazy thenable answers, a lowered-source `define`, a traced generator `define`, host `op`s the engine calls back into, and `using` scopes. `extensions/node/bridge.pl` is its Prolog half and calls published surface only | the `node-binding` gate lane, and `extensions/python/tests/ch21_another_language_at_the_seam/test_node_binding.py` answers the same corpus in both hosts |
@@ -4930,8 +4930,11 @@ occurrence converts before repeat selection; syntax validates before custom effe
 The terminator preserves later operands, empty tokens remain empty and malformed
 options raise with their cause and repair. Help uses the same declarations;
 raw argv retains runner arguments and spelling. All parse state travels in arguments;
-`lib_combinatorics` range and stepped range, take, choose-k, permutations, subsets, Cartesian products and powers, exact factorial, binomial and falling counts, and exact independent
-weighted-subset posterior marginals; `lib_compression` complete gzip/zlib byte
+`lib_combinatorics` derives ranges, prefixes, choices, permutations, subsets,
+Cartesian products and exact counts from MeTTa equations, segments and folds.
+Choices preserve literal occurrences and answer order; chooseK streams and
+chooseKl collects. Native weighted-subset operations retain exact independent
+posterior marginals; `lib_compression` complete gzip/zlib byte
 members and streaming file replacements, with levels 0..9. Archive metadata keeps
 order, duplicate names and native properties; ordinal reads distinguish entries.
 Extraction publishes regular files and directories only after the whole archive
@@ -4965,10 +4968,13 @@ and Bernoulli addition; `lib_doc` keeps the old doc import path working after
 its vocabulary moved; `lib_encoding` UTF-8, hex and base64 over the byte shape lib_file's doors use,
 base64 taking its alphabet as an argument and every malformed input refused naming
 what was wrong; `lib_file` text and byte files whole or through handles, publication by rename, directory creation, tree copy and removal, renaming, a link-aware walk and glob, lexical and resolved paths, entry kinds, symbolic links, scoped handles and temporary directories, queryable metadata and process streams;
-`lib_functional` the collection operations one pass each: zip and unzip, drop,
+`lib_functional` derives collection operations in MeTTa: zip and unzip, drop,
 chunk and window, one-level and every-level flatten, partition, group and sort
 by a key function, scan, unfold, pipe and apply-to, and the three held control
-forms while, repeat and unless. Neither flatten takes the bare name, which is
+forms while, repeat and unless. Segments select heads, tails and prefixes;
+unfold supplies zip, chunk and window. Callback alternatives remain alternative
+results, partition asks for a True answer, and quoted values retain identity.
+Growing accumulators and slices can take quadratic work. Neither flatten takes the bare name, which is
 the host's own every-level one; `lib_gitimport` git-import!, Prolog-only, a
 module fetched from a repository;
 `lib_graph` directed graphs as (Vertex Neighbours) expressions: construction
@@ -5036,12 +5042,17 @@ delayed multiplication and logarithms; `lib_redis` shared spaces over Redis;
 `lib_reflect` the engine's own surface as data you can match; `lib_regex` PCRE2
 over strings; `lib_pairs` a collection of (Key Value) pairs read as a relation: the two
 projections, the converse, the two stable orderings, the grouping into a multimap
-and back, and a lookup that answers once per value a key has. Duplicates survive
-every operation and a key is compared as a term;
+and back, and a lookup that answers once per value a key has. These equations
+reuse Functional's projections, grouping and sorting. Duplicates and caller
+variable identity survive; lookup selects a row by segments and compares its key
+by identity without binding a different key;
 `lib_sets` sets as ordered expressions: construction, membership by term rather
-than unification, insertion and removal, the four merges and their collection
-forms, subset and disjointness, and a refusal for any argument that is not a
-set, which is what the host's own merges answer nonsense for;
+than unification, insertion and removal, union, intersection, differences, subset
+and disjointness. Union accepts zero or more canonical sets; intersection accepts
+one or more. Both use variadic arrows and folds, subsuming the former all-forms.
+Pass runtime argument collections through apply-to. Core unique-atom, sort-atom,
+intersection-atom and subtraction-atom supply the operations; invalid canonical
+inputs raise through core assertions;
 `lib_roman` a list and fold basis, head, init, fold-flat,
 foldr-flat; the three general set operations `/?\`, `\?` and `\?/`, which take
 the comparison as an argument and are what the nine fixed spellings are sugar

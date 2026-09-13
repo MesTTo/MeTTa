@@ -1,6 +1,8 @@
 % Purpose: compile MeTTa expressions and equations into executable Prolog,
 %   including dynamic dispatch, control forms, higher-order calls, and
 %   branch-return optimization.
+% Guarantees: a generated segment-body continuation is exported for execution
+%   in its owning space [tested: segment_equations; commit=WORKTREE].
 % Guarantees: the runtime and declaration loaders may call rest_parameter/2
 %   and validate_type_splices/1,2 through the exported module surface
 %   [tested: engine_layering, variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
@@ -365,6 +367,7 @@
             metta_segment_equation/1,
             metta_segment_generic_dispatch/4,
             metta_segment_rule_result/6,
+            metta_segment_body_result/4,
             %The result half of the evaluation mask lands in a compiled clause
             %body, so a space's execution module imports it from here exactly
             %as it imports reduce/3 and the two dispatch results.

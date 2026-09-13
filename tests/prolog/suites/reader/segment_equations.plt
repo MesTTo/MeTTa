@@ -1,5 +1,8 @@
 % Purpose: pin sequence variables in equation heads through compiled and
 %   variable-headed dynamic calls.
+% Guarantees: nested runs include the empty expression, and variadic bodies
+%   can match local segments through the protected compiler continuation.
+%   [tested: segment_equations; commit=WORKTREE].
 % Guarantees: a declared (:seg Atom) run stays held at every tested arity
 %   [tested: segment_equations; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Assumes: run from tests/prolog, which is what check.sh does; the relative
@@ -150,5 +153,27 @@ test(the_reference_stratego_one_rule_rebuilds_the_successful_child,
          (= (pl-seg-one $strategy $leaf) Empty)", _),
     segment_source("!(collapse (pl-seg-one pl-seg-child (a b c)))",
                    [[[a, 'B', c]]]).
+
+test(a_nested_run_matches_an_empty_expression,
+     [ cleanup(forget_segment_function('pl-seg-bare-run')) ]) :-
+    segment_source(
+        "(: pl-seg-bare-run (-> Atom Expression))\n\c
+         (= (pl-seg-bare-run ((:seg $xs))) (quote $xs))", _),
+    segment_source("!(pl-seg-bare-run ())", [[]]),
+    segment_source("!(pl-seg-bare-run (a))", [[a]]),
+    segment_source("!(pl-seg-bare-run (a b c))", [[a,b,c]]),
+    segment_source("!(let $f pl-seg-bare-run ($f ()))", [[]]),
+    segment_source("!(let ((:seg $xs)) () (quote $xs))", [[]]).
+
+test(a_variadic_body_can_match_a_local_segment,
+     [ cleanup(forget_segment_function('pl-seg-local-tail')) ]) :-
+    segment_source(
+        "(: pl-seg-local-tail (-> (:seg Atom) Expression))\n\c
+         (= (pl-seg-local-tail (:seg $args))\n\c
+            (let ($first (:seg $rest)) (quote $args) (quote $rest)))", _),
+    segment_source("!(pl-seg-local-tail a)", [[]]),
+    segment_source("!(pl-seg-local-tail a b)", [[b]]),
+    segment_source("!(pl-seg-local-tail a b c)", [[b,c]]),
+    segment_source("!(let $f pl-seg-local-tail ($f a b c))", [[b,c]]).
 
 :- end_tests(segment_equations).

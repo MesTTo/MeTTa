@@ -9,6 +9,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Combinatorics, Functional, Pairs and Sets now derive their collection behavior
+  from MeTTa matching, folds, function application and answer streams. Segment
+  patterns express position choice and slicing; zip, chunk and window reuse
+  unfold. Callback alternatives, quoted runnable values and variable identity
+  survive composition. chooseK streams its choices and chooseKl collects them.
+  Set union and intersection accept variable numbers of arguments, replacing
+  their separate all-forms; apply-to supplies a runtime argument collection.
+  Two general segment fixes admit nested empty expressions and make generated
+  body continuations available in execution modules. Model suites exercise the
+  public MeTTa surface against independent list, arithmetic and set operations.
+  Shared native suite helpers participate in evidence and provenance checking.
 - `lib_cli` parses typed options and literal argument vectors, with explicit
   repeat policies, separate short/long namespaces, defaults and positional
   operands. Custom converters are ordinary held functions checked against the

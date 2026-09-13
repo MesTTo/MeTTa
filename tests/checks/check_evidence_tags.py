@@ -6,11 +6,11 @@ history, including all four cited by the engine pool's Guarantees block. A
 claim with nothing behind it is indistinguishable from the many that are real,
 which is what makes it corrosive rather than untidy.
 
-Guarantees: nested distribution modules, native library support, CMake recipes,
-vendor configuration headers and nested host reproductions participate in
+Guarantees: nested distribution modules, native library and suite support,
+CMake recipes, vendor configuration headers and nested host reproductions participate in
 the same evidence and provenance checks as their callers
 [tested: tests/checks/check_evidence_selftest.py,
-tests/checks/check_pin_provenance_selftest.py; commit=7b42d5ee5cecb82709617b7ed08dfa2c1441f268].
+tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE].
 
 Reads files and the engine-free door grammar. Structured row assumptions,
 guarantees, local refusals and evidence are checked through doorgen's contract
@@ -234,6 +234,8 @@ GUARANTEE_SOURCES = (
     # The plunit suites make the same claims their subjects do, in their
     # own headers, and 271 of them across 50 files went unread.
     "tests/prolog/suites/*/*.plt",
+    # Shared suite helpers carry contracts even when they declare no test unit.
+    "tests/prolog/suites/**/*.pl",
     # The module-boundary fixtures carry their own test-backed contracts
     # [source: tests/prolog/suites/seams/engine_modules.plt; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
     "tests/prolog/module_fixtures/*.pl",
