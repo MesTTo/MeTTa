@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Native `let` and `chain` bindings preserve checked parameter contracts in
+  their continuation. Forwarding an alias costs the same as forwarding the
+  original parameter; declaration and typing-policy edits retain their checks.
 - Python twins belong to their native definition space and head. Independent
   closures and aliases retain their own clauses, clear starts a new family,
   and compiling source alone leaves installed twins unchanged.
