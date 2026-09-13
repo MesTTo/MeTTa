@@ -1,6 +1,6 @@
 ; Purpose: the sorted map and the priority queue lib_datastructures publishes,
 ; beside the functional queue and the finger tree it already had.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/21-datastructures_lib.metta; commit=2072899a9f6ba36f92faabb92f9e0b12e6e0f666].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/21-datastructures_lib.metta; commit=WORKTREE].
 ; Both are VALUES: an operation answers a new one and leaves its input alone,
 ; so a program can hold both the before and the after.
 !(import! &self (library lib_datastructures))
@@ -38,15 +38,13 @@
 !(test (if-error (catch (map-from-pairs ((k 1) (k 2)))) refused fine) refused)
 !(test (if-error (catch (map-get 42 k)) refused fine) refused)
 
-; A priority queue answers its smallest priority first, which is the one thing
-; a space cannot do in less than a scan.
+; A priority queue stores its entries in priority order, keeping every occurrence.
 !(bind! &work (pq-from-pairs ((3 sweep) (1 wake) (2 boil))))
 !(test (pq-size &work) 3)
 !(test (pq-min &work) (1 wake))
 !(test (pq-pairs &work) ((1 wake) (2 boil) (3 sweep)))
 
-; pq-pop answers the smallest entry AND the queue without it, because reading
-; and removing separately would walk the queue twice.
+; pq-pop decomposes the first entry and the remaining queue together.
 !(test (let ($priority $value $rest) (pq-pop &work) ($priority $value (pq-size $rest)))
        (1 wake 2))
 !(test (let ($priority $value $rest) (pq-pop &work) (pq-pairs $rest)) ((2 boil) (3 sweep)))
@@ -76,3 +74,40 @@
 !(test (ft-back (ft-from-list (1 2 3))) 3)
 !(test (ft-to-list (ft-concat (ft-from-list (1 2)) (ft-from-list (3 4)))) (1 2 3 4))
 !(test (ft-is-empty (ft-empty)) True)
+
+; A map's relation is available to ordinary patterns and Pairs operations.
+!(test (== &prices (SortedMap ((apple 3) (pear 5) (plum 7)))) True)
+!(test (let (SortedMap $rows) &prices (pairs-lookup $rows pear)) 5)
+
+; Merge accepts zero, one or any number of queues, including a runtime sequence.
+!(test (pq-merge) (pq-empty))
+!(test (pq-merge &work) &work)
+!(test (pq-size (pq-merge &work &work &work)) 9)
+!(test (pq-size (apply-to pq-merge (quote (&work &work)))) 6)
+!(test (pq-pairs (pq-from-pairs ((1 a) (1 b) (1 c)))) ((1 a) (1 b) (1 c)))
+!(test (pq-pairs (pq-insert (pq-from-pairs ((1 a) (1 b))) 1 c)) ((1 a) (1 b) (1 c)))
+!(test (pq-pairs (pq-remove (pq-from-pairs ((1 a) (1 a) (2 b))) 1 a)) ((1 a) (2 b)))
+
+; Variables retain identity, and malformed or cross-kind values are refused.
+!(test (if-error (catch (map-from-pairs (($x a) ($x b)))) refused fine) refused)
+!(test (if-error (catch (map-from-pairs ($pair))) refused fine) refused)
+!(test (let $map (map-from-pairs (($x a) ($y b)))
+         (map-get $map $x)) a)
+!(test (map-get (map-from-pairs (quote (((+ 1 2) (Error data code)))))
+               (quote (+ 1 2))) (quote (Error data code)))
+!(test (if-error (catch (map-size (pq-empty))) refused fine) refused)
+!(test (if-error (catch (pq-size (map-empty))) refused fine) refused)
+!(test (collapse (map-get (map-from-pairs (superpose (((a 1)) ((a 2))))) a)) (1 2))
+
+; Reconstruct an equation, or specialize its collection before applying it.
+!(test (let $source
+         (match &self (= (map-remove $map $key) $body)
+           (quote (|-> ($map $key) $body)))
+         (let $remove (eval $source) (map-pairs ($remove &prices pear))))
+       ((apple 3) (plum 7)))
+!(test (let $map &prices
+         (let $source
+           (match &self (= (map-remove $map $key) $body)
+             (quote (|-> ($key) $body)))
+           (let $remove (eval $source) (map-pairs ($remove plum)))))
+       ((apple 3) (pear 5)))

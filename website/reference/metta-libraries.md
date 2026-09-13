@@ -916,7 +916,7 @@ Returns: Answer
 
 ### `ft-empty`
 
-*lib_datastructures.metta:45*
+*lib_datastructures.metta:57*
 
 The empty finger tree; every other tree grows from it with ft-push-front and ft-push-back.
 
@@ -924,7 +924,7 @@ Returns: FTEmpty
 
 ### `ft-is-empty`
 
-*lib_datastructures.metta:50*
+*lib_datastructures.metta:62*
 
 Whether a finger tree holds nothing.
 
@@ -934,7 +934,7 @@ Returns: True or False
 
 ### `ft-pop-front`
 
-*lib_datastructures.metta:79*
+*lib_datastructures.metta:91*
 
 The front element and the remaining tree, as the pair ($x $rest). Popping the empty tree has no answer.
 
@@ -944,7 +944,7 @@ Returns: ($front $rest)
 
 ### `ft-pop-back`
 
-*lib_datastructures.metta:100*
+*lib_datastructures.metta:112*
 
 The back element and the remaining tree, as the pair ($x $rest): ft-pop-front's mirror.
 
@@ -954,7 +954,7 @@ Returns: ($back $rest)
 
 ### `ft-front`
 
-*lib_datastructures.metta:119*
+*lib_datastructures.metta:131*
 
 The front element, the tree untouched.
 
@@ -964,7 +964,7 @@ Returns: the first element
 
 ### `ft-back`
 
-*lib_datastructures.metta:126*
+*lib_datastructures.metta:138*
 
 The back element, the tree untouched.
 
@@ -974,7 +974,7 @@ Returns: the last element
 
 ### `ft-from-list`
 
-*lib_datastructures.metta:136*
+*lib_datastructures.metta:148*
 
 A finger tree holding the expression's elements in order.
 
@@ -984,7 +984,7 @@ Returns: a finger tree
 
 ### `ft-to-list`
 
-*lib_datastructures.metta:146*
+*lib_datastructures.metta:158*
 
 The elements front to back, as an expression: ft-from-list's inverse.
 
@@ -994,7 +994,7 @@ Returns: an expression
 
 ### `ft-concat`
 
-*lib_datastructures.metta:197*
+*lib_datastructures.metta:209*
 
 Both trees' elements, left then right, in O(log n): the operation finger trees exist to make cheap.
 
@@ -1005,10 +1005,10 @@ Returns: one finger tree
 
 ### `map-empty`
 
-*lib_datastructures.metta:210*
+*lib_datastructures.metta:220*
 
 ```metta
-(: map-empty (-> %Undefined%))
+(: map-empty (-> Expression))
 ```
 
 The empty sorted map. Every other map grows from it with map-put, and two empty maps are the same value.
@@ -1017,10 +1017,10 @@ Returns: Map
 
 ### `map-from-pairs`
 
-*lib_datastructures.metta:216*
+*lib_datastructures.metta:230*
 
 ```metta
-(: map-from-pairs (-> Expression %Undefined%))
+(: map-from-pairs (-> Expression Expression))
 ```
 
 A map holding every (Key Value) pair. A repeated key raises, because two values for one key is not a map; put the second one with map-put to say which wins.
@@ -1031,7 +1031,7 @@ Returns: Map
 
 ### `map-get`
 
-*lib_datastructures.metta:222*
+*lib_datastructures.metta:238*
 
 ```metta
 (: map-get (-> %Undefined% %Undefined% %Undefined%))
@@ -1046,7 +1046,7 @@ Returns: Value
 
 ### `map-get-or`
 
-*lib_datastructures.metta:228*
+*lib_datastructures.metta:248*
 
 ```metta
 (: map-get-or (-> %Undefined% %Undefined% %Undefined% %Undefined%))
@@ -1062,7 +1062,7 @@ Returns: Value
 
 ### `map-has`
 
-*lib_datastructures.metta:234*
+*lib_datastructures.metta:256*
 
 ```metta
 (: map-has (-> %Undefined% %Undefined% Bool))
@@ -1077,7 +1077,7 @@ Returns: Answer
 
 ### `map-keys`
 
-*lib_datastructures.metta:240*
+*lib_datastructures.metta:263*
 
 ```metta
 (: map-keys (-> %Undefined% Expression))
@@ -1091,7 +1091,7 @@ Returns: Keys
 
 ### `map-max`
 
-*lib_datastructures.metta:246*
+*lib_datastructures.metta:272*
 
 ```metta
 (: map-max (-> %Undefined% Expression))
@@ -1105,7 +1105,7 @@ Returns: Pair
 
 ### `map-min`
 
-*lib_datastructures.metta:252*
+*lib_datastructures.metta:281*
 
 ```metta
 (: map-min (-> %Undefined% Expression))
@@ -1119,7 +1119,7 @@ Returns: Pair
 
 ### `map-pairs`
 
-*lib_datastructures.metta:258*
+*lib_datastructures.metta:288*
 
 ```metta
 (: map-pairs (-> %Undefined% Expression))
@@ -1133,10 +1133,10 @@ Returns: Pairs
 
 ### `map-put`
 
-*lib_datastructures.metta:264*
+*lib_datastructures.metta:298*
 
 ```metta
-(: map-put (-> %Undefined% %Undefined% %Undefined% %Undefined%))
+(: map-put (-> %Undefined% %Undefined% %Undefined% Expression))
 ```
 
 The map with Key holding Value, replacing whatever Key held. The input map is unchanged, because a map is a value.
@@ -1149,10 +1149,10 @@ Returns: Result
 
 ### `map-remove`
 
-*lib_datastructures.metta:270*
+*lib_datastructures.metta:308*
 
 ```metta
-(: map-remove (-> %Undefined% %Undefined% %Undefined%))
+(: map-remove (-> %Undefined% %Undefined% Expression))
 ```
 
 The map without Key. Removing a key that is absent answers the same map, so a caller need not look first.
@@ -1164,7 +1164,7 @@ Returns: Result
 
 ### `map-size`
 
-*lib_datastructures.metta:276*
+*lib_datastructures.metta:315*
 
 ```metta
 (: map-size (-> %Undefined% Number))
@@ -1178,7 +1178,7 @@ Returns: Size
 
 ### `map-values`
 
-*lib_datastructures.metta:282*
+*lib_datastructures.metta:322*
 
 ```metta
 (: map-values (-> %Undefined% Expression))
@@ -1192,10 +1192,10 @@ Returns: Values
 
 ### `pq-empty`
 
-*lib_datastructures.metta:288*
+*lib_datastructures.metta:329*
 
 ```metta
-(: pq-empty (-> %Undefined%))
+(: pq-empty (-> Expression))
 ```
 
 The empty priority queue. Every other queue grows from it with pq-insert.
@@ -1204,13 +1204,13 @@ Returns: Queue
 
 ### `pq-from-pairs`
 
-*lib_datastructures.metta:294*
+*lib_datastructures.metta:340*
 
 ```metta
-(: pq-from-pairs (-> Expression %Undefined%))
+(: pq-from-pairs (-> Expression Expression))
 ```
 
-A queue holding every (Priority Value) pair, repeated priorities included.
+A queue holding every (Priority Value) pair, repeated priorities included. Stable sorting preserves input order among equal priorities.
 
 1. Pairs
 
@@ -1218,13 +1218,13 @@ Returns: Queue
 
 ### `pq-insert`
 
-*lib_datastructures.metta:300*
+*lib_datastructures.metta:349*
 
 ```metta
-(: pq-insert (-> %Undefined% %Undefined% %Undefined% %Undefined%))
+(: pq-insert (-> %Undefined% %Undefined% %Undefined% Expression))
 ```
 
-The queue with Value added at Priority. A repeated priority is kept, so a queue holds as many entries as were inserted; the input queue is unchanged.
+The queue with Value added at Priority, after existing entries of that priority. Every occurrence is kept; the input queue is unchanged.
 
 1. Queue
 2. Priority
@@ -1234,22 +1234,21 @@ Returns: Result
 
 ### `pq-merge`
 
-*lib_datastructures.metta:306*
+*lib_datastructures.metta:360*
 
 ```metta
-(: pq-merge (-> %Undefined% %Undefined% %Undefined%))
+(: pq-merge (-> (:seg %Undefined%) Expression))
 ```
 
-One queue holding every entry of both, which a pairing heap does in constant time. Both inputs are unchanged.
+One queue holding every entry of zero or more queues. Zero returns the empty queue; one returns an equal value. Equal priorities retain left-to-right input order. Pass a runtime collection through apply-to.
 
-1. Left
-2. Right
+1. Queues
 
 Returns: Result
 
 ### `pq-min`
 
-*lib_datastructures.metta:312*
+*lib_datastructures.metta:369*
 
 ```metta
 (: pq-min (-> %Undefined% Expression))
@@ -1263,7 +1262,7 @@ Returns: Pair
 
 ### `pq-pairs`
 
-*lib_datastructures.metta:318*
+*lib_datastructures.metta:376*
 
 ```metta
 (: pq-pairs (-> %Undefined% Expression))
@@ -1277,13 +1276,13 @@ Returns: Pairs
 
 ### `pq-pop`
 
-*lib_datastructures.metta:324*
+*lib_datastructures.metta:386*
 
 ```metta
 (: pq-pop (-> %Undefined% Expression))
 ```
 
-The (Priority Value Rest) triple: the smallest entry and the queue without it, in one operation, because reading and removing separately would walk the queue twice. An empty queue has no answer.
+The (Priority Value Rest) triple: the first entry at the smallest priority and the queue without that occurrence. An empty queue has no answer.
 
 1. Queue
 
@@ -1291,13 +1290,13 @@ Returns: Answer
 
 ### `pq-remove`
 
-*lib_datastructures.metta:330*
+*lib_datastructures.metta:398*
 
 ```metta
-(: pq-remove (-> %Undefined% %Undefined% %Undefined% %Undefined%))
+(: pq-remove (-> %Undefined% %Undefined% %Undefined% Expression))
 ```
 
-The queue without one entry holding exactly this priority and value, which is how a scheduled item is cancelled. An entry that is not there has no answer.
+The queue without the first entry holding this identical priority and value. Remove one occurrence without binding variables. An absent entry has no answer.
 
 1. Queue
 2. Priority
@@ -1307,7 +1306,7 @@ Returns: Result
 
 ### `pq-size`
 
-*lib_datastructures.metta:336*
+*lib_datastructures.metta:405*
 
 ```metta
 (: pq-size (-> %Undefined% Number))

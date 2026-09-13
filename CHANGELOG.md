@@ -9,6 +9,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Immutable maps and priority queues are MeTTa equations over ordered pair
+  expressions. Their distinct tags retain the difference between unique keys
+  and queued occurrences. Variable keys compare by identity, duplicate variable
+  keys and unbound pairs are refused, and literal programs remain data.
+  `pq-merge` accepts zero or any number of queues; ties retain insertion order
+  and left-to-right merge order. These values replace the native AVL and
+  pairing-heap representation. The existing MeTTa finger tree remains available
+  for both-end access and concatenation.
 - Random's eleven constructors return inspectable sample programs. MeTTa's
   `eval`, `repeat`, `collapse` and `once` control sampling and demand; matching
   can reconstruct constructors or rewrite their returned code. Distinct-position

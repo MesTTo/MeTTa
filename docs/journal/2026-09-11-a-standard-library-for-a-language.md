@@ -5294,3 +5294,91 @@ when comparing budget findings, while other diagnostics are compared exactly.
 Twins-selftest passes. Receipts: ai-lib4-random-price-seeded.log,
 ai-lib4-random-records-seeded.log, ai-lib4-random-fulltwins-seeded.log and
 ai-lib4-random-findings-diff.log.
+
+## 2026-09-13: immutable collections as ordinary relations
+
+The changed condition is the preference for deriving library operations in
+MeTTa even at greater runtime cost. This supersedes the native AVL/pairing-heap
+choice in the September 12 datastructures section. Immutable map and queue
+values retain their distinct kinds, key identity, every queue occurrence,
+absent answers, immutable updates and usable written representation.
+
+Decided: `(SortedMap Rows)` and `(PriorityQueue Rows)`, with an ordinary ordered
+pair expression as Rows. Pairs supplies projections and identity lookup; core
+filters and segment decomposition supply replacement, selection and removal.
+Map construction rejects repeated keys, so sorting whole pairs orders by their
+unique keys without a separate key-function sort. Priority sorting is stable;
+variadic merge concatenates inputs left-to-right and sorts once. Matching the
+public equations can reconstruct or specialize the collection recipes.
+
+Rejected: porting AVL rotations and heap meld clauses into MeTTa, because the
+existing relation operations derive the complete public behavior with less
+code. Revisit if an independently needed persistent search-tree abstraction
+supplies semantics beyond this map API. Mutable Dict already uses a queryable
+Space and remains distinct from these immutable values. The existing MeTTa
+finger tree retains its 2-3 node invariant and endpoint/concatenation operations.
+
+Found: the original duplicate-key validator uses findall, which copies keys,
+and its pair validator unifies an unbound pair under forall. The expected
+refusals for repeated variable keys and unbound pairs fail before the change;
+the derived checks reject both without binding them. Original literal runnable
+and Error-value finger-tree probes pass. Receipts:
+ai-lib4-datastructures-before.log and ai-lib4-datastructures-native.log.
+
+Decided: queue ties retain construction/insertion order and left-to-right
+merge order. The old public contract specified priority order only; its tied
+oracle fixture exposed the host heap's internal order. Retain that fixture's
+contents, removal and immutable-input checks, and add an independent stable
+ordered-list oracle. Preserve all other original oracle sizes and checks.
+
+Tried: quoting a nested segment splice left `(:seg ...)` as literal data.
+Join the captured prefix and suffix with union-atom before quoting the tagged
+value. Two earlier probe failures were fixture syntax: an extra closing
+parenthesis produced exit1 with no diagnostic, and an unquoted expected
+`(+ 1 2)` evaluated to3. The corrected shape probe passes nine claims.
+Receipts: ai-lib4-datastructures-shape-probe{,-fixed,-final,-passed}.log.
+
+Verified: the public MeTTa suite passes19 tests and15 subtests, retaining the
+257-key insertion,65-key deletion and128-entry heap models. Added checks cover
+open/cyclic host input, malformed and cross-kind values, variable identity,
+literal data, one-occurrence removal, zero-to24 queue arguments, alternative
+rewrites and reconstructed/specialized equations. No engine or scoped state
+change is needed. Receipt: ai-lib4-datastructures-native.log.
+
+Verified: Python's23 model/refusal cases pass. A first run failed one literal
+lookup because the fixture passed a returned collection containing runnable
+syntax into a fresh call without S.quote; that re-evaluates its key by ordinary
+expression semantics. Quote the collection when reusing it across Python calls,
+as the README now explains. The same shuffled order then passes. Ruff's single
+RUF005 finding is corrected; jscpd reports no clones across307 Python lines.
+Receipts: ai-lib4-datastructures-python{,-final}.log,
+ai-lib4-datastructures-ruff{,-final}.log and ai-lib4-datastructures-jscpd.log.
+
+Measured: three fresh serial processes read example3172230/twin3062504 for
+59 claims. The four direct consumers are renewed after the final library
+change: finger-tree323363, finger-tree-internals293952, declared-types103861,
+tile-puzzle31583779. Each measurement follows an engine/lib QLF purge; load
+and memory readings are recorded instead of interpreting wall time. The five
+record generators pass with26 described native sources and60 libraries.
+Receipts: ai-lib4-datastructures-prices.log and ai-lib4-datastructures-records.log.
+
+Verified: all nineteen required lanes pass. The first full twins pass confirms
+59 equal claims and equal stored contents, and removes five older stale points
+for this library and its four consumers. It also catches one new Python
+notation finding: a written MeTTa let where Python should compose the public
+calls. Replace that identity witness with lookup using the same variable key;
+the native and Python model suites retain the full key-order/sharing checks.
+Remeasure the changed example/twin; library sources and consumer fixtures stay
+unchanged. Receipts: ai-lib4-datastructures-lanes.log,
+ai-lib4-datastructures-fulltwins.log and ai-lib4-datastructures-findings-diff.log.
+
+Verified: the final three-process measurement and full twins both read
+example3172046/twin3062103, with59 equal claims and equal stored contents.
+This supersedes the first primary measurement above. Full twins retains258
+older findings, exactly the preceding263 minus the five renewed points for
+Datastructures and its direct consumers; there are no added findings.
+Twins-selftest and all five record generators pass. Receipts:
+ai-lib4-datastructures-price-final.log,
+ai-lib4-datastructures-records-final.log,
+ai-lib4-datastructures-fulltwins-final.log and
+ai-lib4-datastructures-findings-final-diff.log.
