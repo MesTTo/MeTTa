@@ -1,4 +1,8 @@
 % Purpose: resolve scoped declarations, type compatibility, metatypes, and typed-call introspection
+% Guarantees: refined union requirements retain value constraints at runnable
+%   and compiled calls [tested:
+%   union_types:a_refined_union_member_checks_the_value_at_each_call_door;
+%   commit=WORKTREE].
 % Guarantees: constructor result sorts widen through subsorts while callable
 %   result types retain their direct arrow result
 %   [tested: a_data_constructor_result_sort_is_widened,
@@ -686,6 +690,9 @@ has_resolved_type_in(Module, X, T) :-
         ;   has_resolved_type_in(Module, X, Base),
             metta_refinements_hold(Constraints, X)
         )
+    ;   nonvar(T), T = [UnionHead|_], UnionHead == '|',
+        metta_refined_union_type(T)
+    ->  metta_refined_union_admits(Module, X, T)
     ;   has_type_derive(Module, X, T)
     ).
 
@@ -851,6 +858,9 @@ has_type_under_policy(Module, X, T) :-
         ;   has_type_under_policy(Module, X, Base),
             metta_refinements_hold(Constraints, X)
         )
+    ;   nonvar(T), T = [UnionHead|_], UnionHead == '|',
+        metta_refined_union_type(T)
+    ->  metta_refined_union_admits(Module, X, T)
     ;   has_type_under_policy_declared(Module, X, T)
     ).
 

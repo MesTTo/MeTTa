@@ -390,6 +390,7 @@
             metta_argument_type_origins/2,
             metta_arrow_type_shape/5,
             metta_refined_type/3,
+            metta_refined_union_type/1,
             metta_runtime_type/2,
             metta_shipped_types_match/2,
             metta_typed_dispatch_applies/2,

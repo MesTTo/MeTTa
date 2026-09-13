@@ -48,10 +48,13 @@
 %   parameter masks and static proofs are chosen [tested:
 %   structural_aliases; commit=acad923476d21110870f235192757281a737ee71].
 
-% Guarantees: Annotated parameter checks run before the body, retain joint
+% Guarantees: Annotated parameter checks, including union members, run before
+%   the body, retain joint
 %   bindings with the result, and report observed refinement failures using
 %   the original written call after all overloads decline
-%   [tested: run_tests(tensor_shapes); commit=4eaefdd8d40e53b2613722287302a14b41704662].
+%   [tested: run_tests(tensor_shapes),
+%   union_types:refined_union_failures_do_not_evaluate_an_argument_twice;
+%   commit=WORKTREE].
 % Guarantees: a refined declared result type is checked at the result crossing
 %   by metta_refined_result/6, which answers the produced value, the
 %   BadReturnValue Error on the written call, or fails as a plain mismatch
@@ -589,7 +592,9 @@ typed_parameters([Type|Types], [Type|Parameters], OutType, Refined) :-
         declared_type_for_check(Type, Checked),
         nonvar(Checked),
         Checked = [Head, _, _|_],
-        Head == 'Annotated'
+        (   Head == 'Annotated'
+        ;   Head == '|', metta_refined_union_type(Checked)
+        )
     ->  Refined = true
     ;   true
     ),
