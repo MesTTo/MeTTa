@@ -3,7 +3,7 @@
 %   bridge cascades.
 % Guarantees: reference plans follow canonical source bodies in their own
 %   modules, including recursive aliases and wrapped unions
-%   [tested: reference_effects; commit=WORKTREE].
+%   [tested: reference_effects; commit=89084b43ff1a758f703ce77cd96b026f56510116].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarantees: inspecting a produced Error is inert and cannot mask the called

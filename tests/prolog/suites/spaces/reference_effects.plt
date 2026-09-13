@@ -1,6 +1,6 @@
 % Purpose: classify reference bodies in their defining execution modules.
 % Guarantees: aliases, unions and recursive references retain their sources'
-%   effects without executing them [tested: reference_effects; commit=WORKTREE].
+%   effects without executing them [tested: reference_effects; commit=89084b43ff1a758f703ce77cd96b026f56510116].
 % Owns resources: each fixture releases its spaces and native reference links.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
