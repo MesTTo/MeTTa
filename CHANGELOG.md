@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Native callable contracts can name an editable applicator through
+  `@python-application`. It receives separate positional and keyword data
+  frames, preserving literal atoms, partial captures and native default logic.
 - Expanded Python calls preserve native atom elements in both expression
   sequences and borrowed Python iterables.
 
