@@ -2082,3 +2082,49 @@ are 95712, 270967 and 14263252; the grain count is within the existing
 four-inference allowance of its min-of-three pin. The command is
 `python extensions/python/tools/twin_coverage.py` followed by those three
 example paths; `ai-classes-c19-reference-twins-verified.log` records the run.
+
+## 2026-09-13: class imports follow the package foundations
+
+Measured: `sh check.sh layering` reports 14 Python violations in the grain
+implementation; the same command at pristine c75181adc passes. The control's
+1836 source files match their commit objects. Native layering passes on both
+trees. Logs: `ai-classes-c19-reference-layering-corrected.log` and
+`ai-classes-c19-layering-control.log`.
+
+Decided: follow the existing ruling in the folder-per-concept journal's
+2026-09-09 source-projection section. Same-package and foundation imports
+are ordinary imports; the higher integrate callback uses lazy. Registration
+and class reconstruction defer their ordinary peer imports until invocation
+because classes imports the registration journal and definitions imports the
+class installer. Field conversion and SpaceHandle are direct foundations.
+Read SpaceHandle's property statically when installing the prototype proxy.
+The existing registration postcondition becomes an explicit assertion so
+the direct import retains its concrete return contract.
+
+Rejected: weakening BUILDS_ON or exempting the new class files. The required
+package directions already exist; these call sites chose the wrong import
+mechanism. Verification remains open.
+
+The first direct import closes operations -> functions -> definitions ->
+classes -> operations before `_record_registry_undo` exists. Fourteen fresh
+import orders fail with `ImportError: cannot import name
+'_record_registry_undo' from partially initialized module
+'metta._declare.operations'`; the other 385 tests pass. Keep the operations
+module binding and read its journal function when invoked, as the existing
+peer module bindings do. No partial symbol is read during module execution.
+Mypy also exposes the prototype identifier's broad Atom annotation; its
+encoded Symbol/Expression type is made explicit without changing the
+SpaceHandle validation. The three long import lines need Ruff's formatting.
+Logs: `ai-classes-c20-import-python.log` and `ai-classes-c20-import-gates.log`.
+
+Verified: the corrected import and class cohort passes all 399 tests with
+`pytest -q -n 4 --benchmark-disable --randomly-seed=1125382488`, over
+`test_lazy_loading.py`, `test_class_grains.py`, `test_class_field_values.py`,
+`test_class_construction.py`, `test_type_inspection.py` and
+`test_reference_patterns.py`. Ruff and `sh check.sh layering mypy` pass;
+mypy checks 179, 1, 3 and 1 source files in its four configurations. The
+reference rows and grain twins pass 15 claims with equal stores and unchanged
+budgets. Logs use the `ai-classes-c20-import-` prefix: `python-corrected`,
+`ruff-corrected`, `gates-corrected` and `twins`. The clone scan covers all
+three Python files; its two unchanged fragments are overload signatures and
+door marks, whose distinct declarations must remain visible to their readers.

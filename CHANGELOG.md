@@ -155,6 +155,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Class declarations, prototype handles and annotation dependencies follow
+  the package import order; the integration callback remains deferred.
 - Compiled functions preserve `None` from explicit returns, bare returns and
   fallthrough, so callers continue after a void operation. Return annotations
   retain `NoneType`, and a bare `yield` produces one `None` answer.
