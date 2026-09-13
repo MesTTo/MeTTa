@@ -1,5 +1,5 @@
 ; Purpose: demonstrate name and argument-pattern maps and a space's default map.
-; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/12-reference_maps.metta; commit=WORKTREE].
+; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/12-reference_maps.metta; commit=a95e6c90c910db30c72311abadd58dee5349978c].
 
 ; only selects named public heads; except selects the remaining public heads.
 (from ../examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/references/maps (only (map-value)))

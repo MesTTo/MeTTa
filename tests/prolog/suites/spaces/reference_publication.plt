@@ -5,7 +5,7 @@
 % Guarantees: declaration discovery and projection read only matching stored
 %   declarations [tested: reference_publication; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Assumes: reference roots carry their canonical argument-pattern list
-%   [source: engine/metta/references.pl:metta_reference_target/5; commit=WORKTREE].
+%   [source: engine/metta/references.pl:metta_reference_target/5; commit=a95e6c90c910db30c72311abadd58dee5349978c].
 % Owns resources: fixtures release their spaces and remove publication tracing.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

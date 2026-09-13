@@ -3,7 +3,7 @@
 %   origins retain each defining occurrence and resolve aliases at their home
 %   [tested: head_properties; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Guarantees: argument-pattern aliases report the original definition's home
-%   [tested: reference_patterns; commit=WORKTREE].
+%   [tested: reference_patterns; commit=a95e6c90c910db30c72311abadd58dee5349978c].
 % Guarantees: named equation ownership uses the storage index before general
 %   row classification; unrelated atoms do not add work to compilation claims
 %   [tested: head_properties:unrelated_rows_do_not_change_a_named_definition_claim_cost;

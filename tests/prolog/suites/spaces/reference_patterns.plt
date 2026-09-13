@@ -1,6 +1,6 @@
 % Purpose: verify argument patterns on live references to shared definitions.
 % Guarantees: aliases retain input contracts, original receivers, source
-%   multiplicity and lifetime [tested: reference_patterns; commit=WORKTREE].
+%   multiplicity and lifetime [tested: reference_patterns; commit=a95e6c90c910db30c72311abadd58dee5349978c].
 % Owns resources: fixtures release every native space and its reference rows.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

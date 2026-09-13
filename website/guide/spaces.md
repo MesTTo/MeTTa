@@ -3,7 +3,7 @@ Purpose: explain Space handles, journal-backed stores, composition, and
 external backing providers.
 Guarantees:
   - reference call patterns preserve the defining body and its declarations
-    [tested: reference_patterns; commit=WORKTREE]
+    [tested: reference_patterns; commit=a95e6c90c910db30c72311abadd58dee5349978c]
   - version 5 fast images preserve occurrence identity and resolved reader
     bindings and refuse earlier cache schemas
     [tested: test_image_collision_rule,
