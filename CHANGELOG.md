@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Python function catalogues, signature lookup, head properties and inherited
+  spaces preserve native expression identities. Property queries distinguish
+  a space from a library's source paths explicitly.
 - Python call contracts have a native representation of parameter names,
   kinds, annotations and defaults. Native graph edits change the contract
   reconstructed by Python; named annotations preserve their Python species
