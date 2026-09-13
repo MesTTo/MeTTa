@@ -1,13 +1,14 @@
 % Purpose: verify exact number identities, finite factor search and float boundaries.
 % Guarantees: finite domains exercise signs, zero and arbitrary precision;
 % conversion tests cover final subnormal ties, signed zero and saturation.
-% [tested: lib_math; commit=4d17f1af15fe125e3b8cd488502ba1e0e688fb3e].
+% [tested: lib_math; commit=WORKTREE].
 % Owns resources: arithmetic policy tests restore the host's rational flags.
 
-:- ensure_loaded('../../../../engine/qlf_boot.pl').
-:- ensure_loaded('../../../../engine/metta.pl').
+:- use_module(collection_test_support).
 :- use_module('../../../../lib/lib_math/lib_math').
+:- use_module('../../../../lib/_support/collections_data', []).
 :- use_module(library(lists), [member/2]).
+:- load_collection_library(lib_math).
 
 :- begin_tests(lib_math).
 :- meta_predicate must_throw(0, ?).
@@ -16,17 +17,17 @@ must_throw(Goal, Expected) :-
     catch(Goal, Error, true), assertion(nonvar(Error)), assertion(Error = Expected).
 
 test(gcd_and_lcm_identities) :-
-    'math-gcd'([],G0), assertion(G0 == 0),
-    'math-lcm'([],L0), assertion(L0 == 1),
+    invoke('math-gcd'([],G0)), assertion(G0 == 0),
+    invoke('math-lcm'([],L0)), assertion(L0 == 1),
     forall((between(-20,20,A),between(-20,20,B)),
-           ('math-gcd'([A,B],G), 'math-lcm'([A,B],L),
+           (invoke('math-gcd'([A,B],G)), invoke('math-lcm'([A,B],L)),
             assertion(G >= 0), assertion(L >= 0),
             assertion(G*L =:= abs(A*B)),
             (G =:= 0 -> assertion(A =:= 0),assertion(B =:= 0)
             ; assertion(A mod G =:= 0),assertion(B mod G =:= 0)))),
     Huge is 1<<2000, Twice is Huge*2,
-    'math-gcd'([Huge,Twice],G), assertion(G == Huge),
-    'math-lcm'([Huge,Twice],L), assertion(L == Twice).
+    invoke('math-gcd'([Huge,Twice],G)), assertion(G == Huge),
+    invoke('math-lcm'([Huge,Twice],L)), assertion(L == Twice).
 
 test(rational_reduction_and_signs) :-
     forall((between(-16,16,N),between(-16,16,D),D =\= 0),
@@ -64,31 +65,39 @@ test(factor_stream_is_complete_ordered_and_unmirrored) :-
     forall(between(1,256,Value),
            (findall([A,B],(between(1,Value,A),0 is Value mod A,
                            B is Value div A,A =< B),Expected),
-            findall(Pair,'math-factor-pairs'(Value,Pair),Actual),
+            findall(Pair,collection_answers('math-factor-pairs'(Value,Pair)),Actual),
             assertion(Actual == Expected))).
 
 test(factor_stream_cut_leaves_no_constraints_or_state) :-
-    once('math-factor-pairs'(360,First)), assertion(First == [1,360]),
-    findall(Pair,'math-factor-pairs'(7,Pair),Again), assertion(Again == [[1,7]]).
+    invoke('math-factor-pairs'(360,First)), assertion(First == [1,360]),
+    findall(Pair,collection_answers('math-factor-pairs'(7,Pair)),Again), assertion(Again == [[1,7]]).
 
 test(final_subnormal_rounding_and_signs) :-
     Half is 1 rdiv (1<<1075), Below is ((1<<54)-1) rdiv (1<<1129),
     Above is ((1<<54)+1) rdiv (1<<1129), Tiny is 2.0** -1074,
     forall(member(Q-Expected,[Half-0.0,Below-0.0,Above-Tiny]),
-           ('math-float'(Q,Actual),assertion(Actual == Expected),
-            Negative is -Q, 'math-float'(Negative,Signed),
+           (invoke('math-float'(Q,Actual)),assertion(Actual == Expected),
+            Negative is -Q, invoke('math-float'(Negative,Signed)),
             assertion(Signed =:= -Expected),assertion(copysign(1.0,Signed) =:= -1.0))),
-    'math-float'(-0.0,Zero), assertion(copysign(1.0,Zero) =:= -1.0).
+    invoke('math-float'(-0.0,Zero)), assertion(copysign(1.0,Zero) =:= -1.0).
 
 test(float_saturation_and_classes) :-
     Huge is 1<<2000, Negative is -Huge,
-    'math-float'(Huge,PositiveInf), assertion(PositiveInf == 1.0Inf),
-    'math-float'(Negative,NegativeInf), assertion(NegativeInf == -1.0Inf),
+    invoke('math-float'(Huge,PositiveInf)), assertion(PositiveInf == 1.0Inf),
+    invoke('math-float'(Negative,NegativeInf)), assertion(NegativeInf == -1.0Inf),
     Q is 1 rdiv 3, Tiny is 2.0** -1074,
     forall(member(Value-Class,[1-integer,Q-rational,0.0-zero,-0.0-zero,
                               Tiny-subnormal,1.0-normal,1.0Inf-infinite,1.5NaN-nan]),
            ('math-class'(Value,Actual),assertion(Actual == Class))),
-    'math-float'(1.5NaN,Nan), assertion(float_class(Nan,nan)).
+    invoke('math-float'(1.5NaN,Nan)), assertion(float_class(Nan,nan)).
+
+test(unary_rational_and_root_use_the_shared_numeric_boundary) :-
+    invoke('math-rational'(0.1,Rational)),assertion(Rational =:= rational(0.1)),
+    Big is 1<<2000,Tiny is 1 rdiv Big,
+    invoke('math-sqrt'(Big,Root)),assertion(Root =:= float(1<<1000)),
+    invoke('math-sqrt'(Tiny,Small)),assertion(Small =:= float(1 rdiv (1<<1000))),
+    invoke('math-sqrt'(-0.0,Zero)),assertion(copysign(1.0,Zero) =:= -1.0),
+    refused('math-sqrt'(-1,_)),refused('math-sqrt'(1.0Inf,_)).
 
 test(real_catalog_covers_exactly_its_dispatch) :-
     Cases=[sinh-[0]-0.0,cosh-[0]-1.0,tanh-[0]-0.0,asinh-[0]-0.0,
@@ -106,10 +115,12 @@ test(real_catalog_covers_exactly_its_dispatch) :-
             ; assertion(Value == Reference)))).
 
 test(complete_list_validation) :-
-    must_throw('math-lcm'([0,bad],_),error(type_error(integer,bad),_)),
-    must_throw('math-gcd'([1|bad],_),error(type_error(list(integer),_),_)),
+    refused('math-lcm'([0,bad],_)),refused('math-gcd'([1,1.0],_)),
+    must_throw(collections_data:'collections-expression'([1|bad],_),error(type_error(list,_),_)),
     Cycle=[1|Cycle],
-    must_throw('math-gcd'(Cycle,_),error(type_error(list(integer),_),_)),
+    must_throw(collections_data:'collections-expression'(Cycle,_),error(type_error(list,_),_)),
+    must_throw(collections_data:'collections-expression'([1|Tail],_),error(instantiation_error,_)),
+    assertion(var(Tail)),
     must_throw('math-real'(erf,[_],_),error(instantiation_error,_)).
 
 test(refusals_identify_domains) :-
@@ -122,7 +133,7 @@ test(refusals_identify_domains) :-
                error(domain_error(odd_degree_for_negative_integer,2),_)),
     must_throw('math-power-mod'(2,-1,7,_),error(type_error(nonneg,-1),_)),
     must_throw('math-power-mod'(2,3,0,_),error(type_error(positive_integer,0),_)),
-    must_throw('math-factor-pairs'(0,_),error(type_error(positive_integer,0),_)),
+    refused('math-factor-pairs'(0,_)),
     must_throw('math-real'(missing,[],_),error(domain_error(math_real_function,missing),_)),
     must_throw('math-real'(atan2,[1],_),error(domain_error(math_real_arguments,[1]),_)),
     must_throw('math-real'(acosh,[0],_),error(evaluation_error(undefined),_)).

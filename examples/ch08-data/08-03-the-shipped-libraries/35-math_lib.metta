@@ -1,5 +1,5 @@
 ; Purpose: exact number operations and native floating functions.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta; commit=4d17f1af15fe125e3b8cd488502ba1e0e688fb3e].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/35-math_lib.metta; commit=WORKTREE].
 !(import! &self (library lib_math))
 
 ; Counts compose from combinatorics. Gcd and lcm accept any number of integers.
@@ -20,6 +20,7 @@
 !(test (math-class (math-rational 6 3)) integer)
 !(test (math-class (math-rational 1 3)) rational)
 !(test (math-ratio 0.1) (3602879701896397 36028797018963968))
+!(test (math-ratio (math-rational 0.1)) (3602879701896397 36028797018963968))
 !(test (math-ratio -0.0) (0 1))
 !(test (math-ratio (math-rationalize 0.1)) (1 10))
 !(test (math-rationalize 42) 42)
@@ -36,6 +37,15 @@
 !(test (collapse (math-factor-pairs 1)) ((1 1)))
 !(test (collapse (math-factor-pairs 36)) ((1 36) (2 18) (3 12) (4 9) (6 6)))
 !(test (once (math-factor-pairs 36)) (1 36))
+
+; Take a floating root before rounding its exact input, retaining signed zero.
+!(test (math-sqrt 4) 2.0)
+!(test (math-sqrt (bit-shift-left 1 2000)) (math-float (bit-shift-left 1 1000)))
+!(test (math-sqrt (math-rational 1 (bit-shift-left 1 2000)))
+       (math-float (math-rational 1 (bit-shift-left 1 1000))))
+!(test (math-real copysign (1.0 (math-sqrt -0.0))) -1.0)
+!(test (if-error (catch (math-sqrt -1)) refused fine) refused)
+!(test (if-error (catch (math-sqrt (math-real inf ()))) refused fine) refused)
 
 ; Scalar conversion shares Vector's final rounding and signed-zero policy.
 !(test (math-float (math-rational 1 10)) 0.1)

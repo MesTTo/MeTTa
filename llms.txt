@@ -43,7 +43,7 @@ re-runs them.
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
 | `engine/**/*.pl` | `engine/metta.pl` declares `metta_engine`, the bootstrap including the eighteen `engine/metta/*.pl` units (terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, algebra_operations, space_hooks, runtime, control, interop, references, reference_loading, properties, registration, prelude), `engine/translator.pl` compilation facade over the six `engine/translator/*.pl` units (analysis, lowering, folding, special_forms, typing, runtime), `engine/spaces.pl` store facade over the eleven `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products, tokens, receipts, vocabulary_seed); vocabulary_seed has its own module and compiles the guarded initial vocabulary atoms, `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.pl` the vocabulary tier (Prolog bodies of the 37 prelude heads). Each included unit is a plain source file owned by its umbrella module. `engine/main.pl` declares `metta_main`. Engine facades declare their own module and explicit exports; `metta_engine_reexport/2` publishes the subsystem operations the host tier needs. Execution resolves through the space parents, `&self`, `prelude`, `metta_engine`, `user`, then `system` | |
 | `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 117, `service` 71, `ownership` 42, `event` 23, `declaration` 17. The first three are contributed BY an extension, the two service kinds are defined by the engine and called by one (`clauses_from/2`). The contract for extending the engine | `ext_points.plt` |
-| `lib/lib_*/` | 61 MeTTa libraries, implemented in `.metta`, `.pl`, or both; all 45 shipped Prolog halves, including the builtin and minimal-MeTTa modules, own distinct `lib_*` modules with explicit exports and local autoload tables. Libraries load with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
+| `lib/lib_*/` | 60 MeTTa libraries, implemented in `.metta`, `.pl`, or both; all 45 shipped Prolog halves, including the builtin and minimal-MeTTa modules, own distinct `lib_*` modules with explicit exports and local autoload tables. Libraries load with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
 | `extensions/*/extension.pl` | one control file per seat, read when argv carries `extensions` and never read without it; a seat's `entry(engine, _)` loads only where its declared needs hold and its `entry(host, _)` is recorded for the seat's own runtime to consult, so the engine names neither a host nor a backend | |
 | `extensions/node/src/*.ts` | MeTTa as a TypeScript library, the engine embedded in a Node process over swipl-wasm and the seam's second consumer: interned atoms, spaces as collections, lazy thenable answers, a lowered-source `define`, a traced generator `define`, host `op`s the engine calls back into, and `using` scopes. `extensions/node/bridge.pl` is its Prolog half and calls published surface only | the `node-binding` gate lane, and `extensions/python/tests/ch21_another_language_at_the_seam/test_node_binding.py` answers the same corpus in both hosts |
@@ -2446,18 +2446,19 @@ so choose by the question you are asking:
 - what VALUE does this quantity take, over a distribution: `lib_measure`
   holds transparent weighted superpositions, where `ws-normalize` makes a
   distribution and `ws-sample!` draws from it, its bang naming the choice it
-  makes. `lib_distribution` maps one distribution, combines independent ones,
+  makes. `lib_statistics` maps one distribution, combines independent ones,
   conditions an explicit joint law, and asks named probability questions. The
   value belongs to the quantity.
 - how did this DERIVATION combine the tags it passed through: `under=`, above.
   The value belongs to the proof.
 
-For the value question, import `lib_distribution` and write a finite law as
+For the value question, import `lib_statistics` and write a finite law as
 `((weight value) ...)`. Choose the head by the question:
 
 - `(ws-map fun dist)` pushes one distribution through a pure unary function.
-- `(ws-map2-independent fun left right)` pushes the product of two independent
-  distributions through a binary function. If the values are correlated, put
+- `(ws-map-independent fun dist ...)` pushes the product of zero or more
+  independent distributions through a function with matching arity. Alternative
+  function rewrites give alternative complete laws. If the values are correlated, put
   `(Pair left right)` values in one joint distribution and use `ws-map`.
 - `(ws-mass-at-least dist threshold)` answers the inclusive probability
   `P(X >= threshold)`.
@@ -4915,8 +4916,8 @@ across several operations, which is what they are for.
 `examples/ch05-equations-and-evaluation/05-04-arithmetic-that-runs-backwards/02-relational_arithmetic.metta` runs all of it.
 
 <!-- begin generated library roster -->
-61 libraries load with `!(import! &self (library lib_x))`:
-`lib_builtin_types`, `lib_cli`, `lib_combinatorics`, `lib_compression`, `lib_conformance`, `lib_constraints`, `lib_crypto`, `lib_csv`, `lib_database`, `lib_datastructures`, `lib_datetime`, `lib_derived`, `lib_dict`, `lib_distribution`, `lib_doc`, `lib_encoding`, `lib_file`, `lib_functional`, `lib_gitimport`, `lib_graph`, `lib_he`, `lib_http`, `lib_import`, `lib_json`, `lib_logging`, `lib_markup`, `lib_math`, `lib_measure`, `lib_memo`, `lib_mm2`, `lib_nars`, `lib_observe`, `lib_pairs`, `lib_parsing`, `lib_patrick`, `lib_pln`, `lib_pln2`, `lib_process`, `lib_random`, `lib_redis`, `lib_reflect`, `lib_regex`, `lib_roman`, `lib_sets`, `lib_socket`, `lib_soft`, `lib_spaces`, `lib_statistics`, `lib_strategy`, `lib_string`, `lib_system`, `lib_tabling`, `lib_testing`, `lib_thread`, `lib_torch`, `lib_unicode`, `lib_uri`, `lib_uuid`, `lib_vector`, `lib_yaml`, `lib_zar`. Scored answers and every documented head are listed in
+60 libraries load with `!(import! &self (library lib_x))`:
+`lib_builtin_types`, `lib_cli`, `lib_combinatorics`, `lib_compression`, `lib_conformance`, `lib_constraints`, `lib_crypto`, `lib_csv`, `lib_database`, `lib_datastructures`, `lib_datetime`, `lib_derived`, `lib_dict`, `lib_doc`, `lib_encoding`, `lib_file`, `lib_functional`, `lib_gitimport`, `lib_graph`, `lib_he`, `lib_http`, `lib_import`, `lib_json`, `lib_logging`, `lib_markup`, `lib_math`, `lib_measure`, `lib_memo`, `lib_mm2`, `lib_nars`, `lib_observe`, `lib_pairs`, `lib_parsing`, `lib_patrick`, `lib_pln`, `lib_pln2`, `lib_process`, `lib_random`, `lib_redis`, `lib_reflect`, `lib_regex`, `lib_roman`, `lib_sets`, `lib_socket`, `lib_soft`, `lib_spaces`, `lib_statistics`, `lib_strategy`, `lib_string`, `lib_system`, `lib_tabling`, `lib_testing`, `lib_thread`, `lib_torch`, `lib_unicode`, `lib_uri`, `lib_uuid`, `lib_vector`, `lib_yaml`, `lib_zar`. Scored answers and every documented head are listed in
 `website/reference/metta-libraries.md`.
 <!-- end generated library roster -->
 
@@ -4962,9 +4963,7 @@ amortised O(1) functional queue, a finger tree, and a sorted map and priority qu
 parsing, explicit-zone formatting, date records, calendar fields and addition;
 `lib_derived` the derived forms the engine keeps FUSED
 into its compiler, written out as equations; `lib_dict` a dictionary that IS a
-space, with defaulted lookup, update, merge and pop; `lib_distribution` pure finite value-distribution map, independent
-product, threshold and cumulative mass, quantile and median, variance, deviation and central moments, the sum of n independent draws, strict win probability, exact joint conditioning, average
-and Bernoulli addition; `lib_doc` keeps the old doc import path working after
+space, with defaulted lookup, update, merge and pop; `lib_doc` keeps the old doc import path working after
 its vocabulary moved; `lib_encoding` UTF-8, hex and base64 over the byte shape lib_file's doors use,
 base64 taking its alphabet as an argument and every malformed input refused naming
 what was wrong; `lib_file` text and byte files whole or through handles, publication by rename, directory creation, tree copy and removal, renaming, a link-aware walk and glob, lexical and resolved paths, entry kinds, symbolic links, scoped handles and temporary directories, queryable metadata and process streams;
@@ -5009,13 +5008,14 @@ retain precedence, and log-format uses the same diagnostic translation;
 (element Name Attributes Children) with tagged (attr Name Value) rows, a selector
 language over it converted to the host's xpath, strict parses that refuse every
 repair the host's own reader would make quietly, and an external entity refused
-rather than fetched; declares the `markup` capability; `lib_math` exact gcd/lcm,
-rationals, integer roots and modular powers, with finite-domain factor pairs as
-an answer stream. Rationalization explicitly admits floating rounding error;
-ratio decomposition preserves the exact binary value. Scalar float conversion
-shares Vector's final rounding and signed-zero policy; native function names
-and arities come from one catalog. Factorial and binomial compose from
-combinatorics, and exact construction refuses host-configured approximation;
+rather than fetched; declares the `markup` capability; `lib_math` derives gcd/lcm
+folds, factor-pair choices and scalar floating conversion as MeTTa equations.
+Unary math-rational converts a finite Number exactly; its binary form constructs
+a ratio. Rationalization explicitly permits approximation. Integer roots,
+modular powers and floating-function names use the native numeric provider.
+math-sqrt takes the root before final rounding and retains signed zero.
+Vector supplies shared conversion and root rounding. Factorial and binomial
+compose from Combinatorics; exact construction refuses host approximation;
 `lib_measure`
 weighted superpositions: normalize, softmax, rank, top-k, sample; `lib_memo` the
 resident automatic and explicit memoisation controls; `lib_mm2` notation over
@@ -5068,13 +5068,19 @@ capability. Native adapters preserve complete IPv6 addresses and release failed
 stream publication; `lib_soft` soft structural unification over written symbols, including
 function names, with grounded values compared crisply; match quality as a measure;
 `lib_spaces` whole-space work: find, match-count, copying, moving, draining, snapshotting, subtracting and clearing, each answering once per atom it touched;
-`lib_statistics` finite descriptive data: exact totals and moments, three means,
-median and explicit inclusive/exclusive quantiles, tied modes as answers, variance
-and covariance with degrees of freedom, correctly rounded deviation and Pearson
-correlation, ranks and affine/proportional regression. Floating observations round
-algebraic results once; roots precede floating conversion. Ranking both inputs
-composes Spearman correlation. Empty or insufficient samples and nonfinite
-observations raise; modes hold terms and compare identity;
+`lib_statistics` sample summaries and finite probability laws expressed as
+MeTTa equations. Sample totals, moments, three means, quantiles, ranks and
+regression retain exact intermediates; floating observations round the final
+result once. Variance composes covariance, deviation takes its root before
+rounding, and ranking both inputs composes Spearman correlation. Modes preserve
+term identity and answer every tie. Match can reconstruct or specialize a
+recipe as a function. Finite laws use Measure's (Weight Value) rows for mapping,
+independent products, conditioning, thresholds, inverse CDFs and moments.
+ws-map-independent is variadic and preserves alternative function rewrites as
+separate laws. Sample quantiles interpolate; law quantiles retain support values.
+First central moments are exactly zero after finite numeric validation.
+Insufficient samples, nonfinite data and invalid count domains refuse. The
+former lib_distribution import is consolidated into this library;
 `lib_strategy` a Stratego-style strategy basis whose plans are ordinary atoms;
 `lib_string` text, imported when you need it; `lib_system` the environment as a relation, a read with no answer for an unset
 variable, process-wide writes, the working directory and ten platform keys, with

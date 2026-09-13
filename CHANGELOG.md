@@ -9,6 +9,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `lib_statistics` consolidates sample summaries and finite probability laws.
+  Its sample calculations are MeTTa equations over exact numbers, collections
+  and the shared rounding provider. Matching can reconstruct or specialize a
+  recipe as a function. `ws-map-independent` replaces `ws-map2-independent`
+  and accepts any number of independent laws. Function rewrites produce
+  alternative complete laws, preserving their probability masses. Import
+  `lib_statistics` in place of `lib_distribution`. Independent averages inherit
+  the sample mean's exact or floating result type. Central moment one is exactly
+  zero, and nonfinite levels and noninteger counts refuse before traversal.
+- Math derives gcd/lcm folds, factor choices and floating conversion in MeTTa.
+  Unary `math-rational` preserves a finite value's exact binary representation;
+  `math-sqrt` reuses Vector's root-before-rounding kernel and retains signed
+  zero. Collection consumers share one native finite-expression check that
+  rejects host-injected cycles, improper lists and open tails without binding
+  caller variables.
 - Combinatorics, Functional, Pairs and Sets now derive their collection behavior
   from MeTTa matching, folds, function application and answer streams. Segment
   patterns express position choice and slicing; zip, chunk and window reuse

@@ -4817,3 +4817,188 @@ lanes pass with the helper's claim now read. Receipts:
 ai-lib4-collections-evidence-selftest.log,
 ai-lib4-collections-provenance-selftest.log and
 ai-lib4-collections-helper-evidence.log.
+
+## 2026-09-13: Statistics as a reflective domain
+
+The consolidation and derivability ruling changes the opening census's
+separate Distribution/Statistics ownership and native sample recipes.
+Decided: put finite laws and observed-sample summaries in lib_statistics.
+Measure remains the algebra of weighted answers and attention scores, which
+need not be normalized probability laws. Sample quantiles interpolate;
+finite-law quantiles invert cumulative mass.
+
+Decided: derive all fourteen sample heads from the existing exact-number and
+collection operations. A private native check validates finite expression
+structure, including host-injected cycles. Math's shared fractional root is
+the rounding boundary. Its gcd/lcm, factor choices, unary rational conversion
+and floating conversion become equations as well. Native integer-root and
+modular-power kernels and number representations remain in the numeric provider.
+
+Decided: replace the binary independent map with a variadic map. Form product
+tuples first, then map the function over that collection. Alternative rewrites
+produce alternative complete laws. Collapsing function answers into the tuple
+generator would incorrectly assign them probability mass. Average, Bernoulli
+addition and repeated sums compose this operation; repeated sums merge partial
+totals after each convolution.
+
+Tried: the exact mean/reflection probe passes eight claims. The numerical-domain
+probe passes eleven binary-range, variadic, branching and refusal claims plus
+three imports. Its first run omitted conversion of float observations before
+scaling and raised an exact-arithmetic assertion on infinity. Performing the
+conversion required by the existing contract resolves it. Receipts:
+ai-lib4-statistics-basis-probe-matched.log, ai-lib4-numerical-domain-probe.log
+and ai-lib4-numerical-domain-probe-exact.log.
+
+The geometric-mean recipe retains the pinned CPython exponent/log reduction.
+Bit-shift-right and unfold derive its binary exponents; no new native
+decomposition head is needed. The independent product follows the existing
+pinned NumPy/ProbLog/Scallop product-law sources. No dependency is added.
+The first source-edit script stopped at its dead-fragment guard before writing
+anything; its multiline import match was incomplete. The direct patch removes
+the complete FD import together with the replaced factor-search implementation.
+
+The finite-expression check is shared with Math and the other collection
+consumers. Their old native boundaries also rejected improper and open lists;
+deriving their arithmetic must preserve that validation. The check now lives
+under _support/collections and collections-size uses it without copying terms.
+Nested cycles through space contents remain valid; only cyclic host terms
+cannot be finite expressions.
+
+Tried: Math's existing 67-claim example passes. The first sample run passes all
+54 numerical claims, then exposes a nonnumeric observation disappearing through
+typed dispatch. An exact get-type comparison rejects BigInt and is therefore
+not the numeric acceptance relation. A case for no answers also misses a
+reified typed Error. Check the conversion's Error result before traversing
+numeric classes. The first native run passes Math's 14 tests and 16 of 17
+Statistics tests; the same complete-input refusal is the failing test.
+
+Tried: the distribution example rejects a forced 3.0 where its input arithmetic
+previously returned integer 3. Average now inherits stats-mean's exact or
+floating result type directly. It also catches a nonexistent range-list head
+being treated as a three-element expression, producing three draws for count
+one. Compose collapse with the existing range generator and fold the bound
+result. Receipts: ai-lib4-statistics-equations-example.log,
+ai-lib4-statistics-{math,samples,laws}-example.log,
+ai-lib4-statistics-{samples,laws}-example-fixed.log and
+ai-lib4-statistics-native.log.
+
+Tried: the final collection/sample run passes 66 native tests and 346 subtests.
+Python initially passes 55 tests and fails three normalization-refusal tests.
+Compiled clauses show if-error evaluates both branch values before selecting
+one. Guard each computation with lazy core if and use if-error only to inspect
+the value. This is the documented prelude behavior, not a host workaround.
+The corrected finite-law example passes all 51 claims. Receipts:
+ai-lib4-statistics-collections-native-fixed.log, ai-lib4-statistics-python.log,
+ai-lib4-statistics-laws-example-final.log.
+
+Tried: reconstructing an equation as an already compiled lambda captures
+unbound variables before matching. Quoting the lambda syntax during the match
+and evaluating it afterwards produces the callable equation. Matching a fixed
+degrees-of-freedom argument first specializes variance to population variance.
+The sample example now passes 78 claims including both reflective uses. The
+Python twin initially compares its native rational result to a boxed Fraction;
+retain the expected native atom through Answers.__getitem__, as the existing
+numeric boundary requires. Receipts: ai-lib4-statistics-reflection-probe.log,
+ai-lib4-statistics-reflection-probe-syntax.log,
+ai-lib4-statistics-samples-example-final.log, ai-lib4-statistics-twin-trace.log.
+
+Tried: the new square-root regression finds that exact conversion loses the
+sign of floating zero. Preserve that zero before converting other inputs.
+The regression fails before the fix and all 14 Math tests pass after it;
+the same run passes all 17 Statistics tests. The Math example passes 74 claims.
+Receipts: ai-lib4-statistics-root-zero-before.log,
+ai-lib4-statistics-math-native-final.log,
+ai-lib4-statistics-math-example-final.log.
+
+Verified: all 58 Python sample, finite-law and collection model tests pass.
+The geometric-mean property run emits the configured 180-second diagnostic
+stack dump and then completes; no runtime deadline was added. The corrected
+sample twin passes. jscpd reports no exact clones across the four recognized
+Python/Prolog files; its Perl tokenizer for .pl does not establish semantic
+duplication coverage, and it does not parse MeTTa. The equations were reviewed
+for shared reductions and orthogonal arguments. Five record generators pass;
+the public roster now has 60 libraries. Receipts:
+ai-lib4-statistics-python-final.log, ai-lib4-statistics-twin-final-fixed.log,
+ai-lib4-statistics-clones.log and ai-lib4-statistics-records.log.
+
+Measured: after purging engine/lib QLF artifacts, three fresh serial runs give
+Math 359401 example / 362843 twin inferences and Statistics 40093976 / 40110888.
+The equations deliberately cost more than the replaced native recipes; both
+twins remain within the ordinary band. Retire Statistics' former 1826 overrun.
+The same three-round protocol verifies every known consumer below and changes
+ten point pins. Stored contents retain their existing parity. Receipt:
+ai-lib4-statistics-prices.log; command: sh ai-tmp/ai-lib4-statistics-prices.sh.
+
+| Consumer | Final twin inferences |
+|---|---:|
+| 11 Combinatorics | 742907 |
+| 19 File | 210172 |
+| 22 Functional | 1094922 |
+| 23 Sets | 365308 |
+| 24 Pairs | 808811 |
+| 31 System | 207449 |
+| 35 Math | 362843 |
+| 36 Random | 137157 |
+| 37 Statistics | 40110888 |
+| 39 URI | 187333 |
+| 43 Testing | 369669 |
+| 20-03/05 Module doors | 158506 |
+
+Tried: 17 of 19 required lanes pass. lib-autoload reports that _support's
+registration cannot be joined to its native provider because the provider was
+placed in a separate nested directory. Put collections_data.pl beside the
+MeTTa support file, following owned_resources.pl's private-helper shape. Its
+internal signature remains declared in the MeTTa file; ordinary native comments
+avoid requesting a public generated face for an implementation detail. The
+gate now sees the same exports that registration names. Ruff also identifies
+one import-order error in the sample twin. Both repairs are local; no gate or
+allowlist changes. Receipt: ai-lib4-statistics-lanes.log. Remeasure after the
+provider path changes, retaining the preceding measurement as its earlier state.
+
+Verified: the corrected lib-autoload and Ruff lanes pass. All 14 Math and
+17 Statistics native tests pass after the private-provider move. The source
+inventory includes 29 described providers and 17 private or undescribed sources,
+with no generated face for the private guard. Receipts:
+ai-lib4-statistics-private-{checks,native,records}.log.
+
+The preceding price table is superseded by the final colocated-provider state.
+Three fresh serial runs give Math 357731 example / 361166 twin and Statistics
+40092306 / 40109211. All twelve consumers remeasure; ten points move and no
+stored-content divergence changes. File remains 210172 and Module doors 158506.
+Final changed points are Combinatorics 741230, Functional 1093245, Sets 363631,
+Pairs 807134, System 205772, Math 361166, Random 135480, Statistics 40109211,
+URI 185656 and Testing 367992. Receipt: ai-lib4-statistics-prices-final.log.
+Each twin keeps its committed price history and records one move from its
+previous committed point to this final point. An AST comparison proves that
+reconciling provisional measurement comments changes no twin behavior.
+
+Verified: all nineteen required lanes pass. Full twins reports 281 findings:
+the 263 preceding corpus categories and eighteen new Python-notation findings
+in the two sample reflection claims. Their explicit match/let/eval syntax
+becomes ordinary space queries, Python bindings and the evaluation door. The
+same rule variables remain shared when the callable equation is reconstructed.
+Three fresh runs price the changed twin at 40107888 against example 40092306;
+this supersedes only Statistics' point above. No library source changed.
+The provenance reconciliation briefly reintroduced the retired overrun from
+the committed pricing suffix; the lane refused it and that suffix is removed.
+Receipts: ai-lib4-statistics-lanes-final.log,
+ai-lib4-statistics-fulltwins.log,
+ai-lib4-statistics-reflection-python.log,
+ai-lib4-statistics-twin-idiomatic-price.log and
+ai-lib4-statistics-twin-idiomatic.log.
+
+Verified: the corrected 78-claim twin has zero findings. Comparing full-lane
+finding identities to the preceding Testing run confirms that all eighteen
+additions belonged to the repaired reflection syntax. The other 263 findings
+retain the preceding identities. Receipts:
+ai-lib4-statistics-twin-idiomatic-fixed.log and
+ai-lib4-statistics-findings-diff.log.
+
+Cleanup: the removed Distribution directory remained empty in this checkout,
+so the directory-based roster generator still counted it. Removing that empty
+directory and regenerating the roster produces 60 libraries and zero findings.
+The initial manual roster removal exposed the stale directory, then the two
+old count fields; the generator now owns all three values again. Receipts:
+ai-lib4-statistics-final-edits-check.log,
+ai-lib4-statistics-llms-clean-directory.log and
+ai-lib4-statistics-final-roster.log.

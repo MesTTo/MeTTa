@@ -1,11 +1,11 @@
 ; Purpose: executable semantics for transparent finite value distributions.
-; Guarantees: every lib_distribution head has a checked example, including
+; Guarantees: every finite-law head in lib_statistics has a checked example, including
 ;   invalid mass and the distinction between independent marginals and a joint
-;   law [tested: this file's !(test ...) forms; commit=f99382c5b4127b49de6e0a6e355d50eda39c5df6].
+;   law [tested: this file's !(test ...) forms; commit=WORKTREE].
 ; Fails when: a library operation changes its boundary, ordering, dependence,
 ;   or normalization contract without updating this consumer-facing example.
 
-!(import! &self (library lib_distribution))
+!(import! &self (library lib_statistics))
 
 ;Normalization collapses equal outcomes at their first position, removes zero
 ;support, and retains exact dyadic weights when the mass is already one.
@@ -20,7 +20,7 @@
 
 ;Binary map visits the left distribution first, then the right. Addition is
 ;convolution, and the name says that the two inputs are assumed independent.
-!(test (ws-map2-independent + ((0.25 0) (0.75 1)) ((0.5 0) (0.5 1)))
+!(test (ws-map-independent + ((0.25 0) (0.75 1)) ((0.5 0) (0.5 1)))
        ((0.125 0) (0.5 1) (0.375 2)))
 
 ;Threshold is inclusive. Comparison is the strict independent probability
@@ -45,7 +45,7 @@
 ;The same uniform marginal used twice independently can sum to one. A perfectly
 ;correlated joint law cannot: only zero and two occur. Use ws-map over the joint
 ;when correlation is part of the model.
-!(test (ws-map2-independent + ((0.5 0) (0.5 1)) ((0.5 0) (0.5 1)))
+!(test (ws-map-independent + ((0.5 0) (0.5 1)) ((0.5 0) (0.5 1)))
        ((0.25 0) (0.5 1) (0.25 2)))
 !(test (ws-map
          (|-> ($pair) (+ (index-atom $pair 1) (index-atom $pair 2)))
@@ -102,13 +102,20 @@
 !(test (if-error (ws-quantile &two-sided 0.0) refused fine) refused)
 !(test (if-error (ws-quantile &two-sided 1.5) refused fine) refused)
 
-;`ws-quantile-walk` is the recursion the quantile is defined by: values in
-;increasing order, mass added until the level is reached, so the last value
-;answers whatever rounding leaves. Calling it directly is how the definition
-;reads, and the quantile is that call over the sorted support.
-!(test (ws-quantile-walk ((1 0.5) (3 0.5)) 0.5 0.0) 1)
-!(test (ws-quantile-walk ((1 0.5) (3 0.5)) 0.75 0.0) 3)
-!(test (ws-quantile-walk ((1 0.5) (3 0.5)) 1.0 0.0) 3)
+; Product mapping accepts zero, one or any number of independent laws.
+!(test (ws-map-independent (|-> () answer)) ((1 answer)))
+!(test (ws-map-independent (|-> ($x) (+ $x 1)) ((1 2))) ((1 3)))
+!(test (ws-map-independent (|-> ((:seg $values)) (stats-sum $values))
+                           ((1 2)) ((1 3)) ((1 4))) ((1 9)))
+
+; Alternative rewrites remain alternative complete laws.
+!(test (collapse
+         (ws-map-independent (|-> ($x) (superpose ($x (+ $x 1)))) ((1 2))))
+       (((1 2)) ((1 3))))
+!(test (ws-central-moment ((1 1) (1 2) (1 2)) 1) 0.0)
+!(test (if-error (ws-quantile &two-sided (math-real nan ())) refused fine) refused)
+!(test (if-error (ws-sum-independent &two-sided 0.5) refused fine) refused)
+!(test (if-error (ws-central-moment &two-sided -1) refused fine) refused)
 
 ;`ws-support` is what the distribution can answer, once each, smallest first.
 !(test (ws-support &two-sided) (1 3))

@@ -1,5 +1,5 @@
 ; Purpose: exact finite descriptive statistics and explicit sample domains.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/37-statistics_lib.metta; commit=84824f5cf870f5cd7ac89d6580093d0459d91a9b].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/37-statistics_lib.metta; commit=WORKTREE].
 !(import! &self (library lib_statistics))
 
 ; Accumulate the stored numbers exactly, then round only a floating result.
@@ -62,6 +62,21 @@
 !(test (stats-regression (0.0 1 2) (1 5 9) False) (linear-fit 4.0 1.0))
 !(test (stats-regression (2) (6) True) (linear-fit 3 0))
 !(test (stats-regression (0 1 2) (7 7 7) False) (linear-fit 0 7))
+
+; Reconstruct a callable recipe from its equation. Match can specialize the
+; degree argument before the resulting syntax becomes a function.
+!(test
+   (let $source
+        (match &self (= (stats-variance $data $degrees) $body)
+          (quote (|-> ($data $degrees) $body)))
+     (let $spread (eval $source) ($spread (1 2 3) 1)))
+   1)
+!(test
+   (let $source
+        (match &self (= (stats-variance $data 0) $body)
+          (quote (|-> ($data) $body)))
+     (let $population (eval $source) ($population (1 2 3))))
+   (math-rational 2 3))
 
 ; Refusals check complete data, even when a zero or singleton could return early.
 !(test (if-error (catch (stats-mean ())) refused fine) refused)

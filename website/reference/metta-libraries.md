@@ -22,7 +22,6 @@ beside its definitions.
 | lib_datetime | 16 | 16 |
 | lib_derived | 1 | 1 |
 | lib_dict | 11 | 4 |
-| lib_distribution | 16 | 8 |
 | lib_doc | 0 | 0 |
 | lib_encoding | 6 | 6 |
 | lib_file | 55 | 55 |
@@ -35,7 +34,7 @@ beside its definitions.
 | lib_json | 13 | 13 |
 | lib_logging | 7 | 7 |
 | lib_markup | 6 | 6 |
-| lib_math | 12 | 12 |
+| lib_math | 13 | 13 |
 | lib_measure | 17 | 0 |
 | lib_memo | 9 | 0 |
 | lib_mm2 | 5 | 0 |
@@ -56,7 +55,7 @@ beside its definitions.
 | lib_socket | 11 | 11 |
 | lib_soft | 9 | 1 |
 | lib_spaces | 10 | 5 |
-| lib_statistics | 14 | 14 |
+| lib_statistics | 29 | 29 |
 | lib_strategy | 24 | 0 |
 | lib_string | 34 | 34 |
 | lib_system | 8 | 8 |
@@ -1643,94 +1642,6 @@ The key's value, removed from the dict. An absent key has no answer, which is ho
 Returns: the removed value
 
 Undocumented: `dict-has`, `dict-pairs`, `dict-put`, `dict-remove`, `dict-remove-pair`, `dict-size`, `dict-values`
-
-## lib_distribution
-
-### `ws-variance`
-
-*lib_distribution.metta:218*
-
-The variance of a numeric distribution, computed about the mean in two passes over the finite support, because the one-pass E[X^2]-E[X]^2 form loses its significant digits when the mean is large.
-
-1. a distribution of (weight value) pairs
-
-Returns: the variance
-
-### `ws-deviation`
-
-*lib_distribution.metta:222*
-
-The standard deviation, the square root of the variance, in the values' own units.
-
-1. a distribution of (weight value) pairs
-
-Returns: the standard deviation
-
-### `ws-central-moment`
-
-*lib_distribution.metta:226*
-
-The nth moment about the mean: 2 is the variance, and 3 and 4 are what skew and kurtosis are computed from. The first is exactly 0.0.
-
-1. a distribution of (weight value) pairs
-2. which moment
-
-Returns: the moment
-
-### `ws-mass-at-most`
-
-*lib_distribution.metta:230*
-
-The probability that a draw is at most the threshold, which is the cumulative distribution function at that point. ws-mass-at-least is the inclusive upper tail.
-
-1. a distribution of (weight value) pairs
-2. the threshold, included
-
-Returns: the mass at or below it
-
-### `ws-quantile`
-
-*lib_distribution.metta:234*
-
-The smallest value whose cumulative mass reaches the level, the quantile function. A level outside (0, 1] refuses, because no value answers it.
-
-1. a distribution of (weight value) pairs
-2. a level in (0, 1]
-
-Returns: the value at that level
-
-### `ws-median`
-
-*lib_distribution.metta:238*
-
-The median, which is the quantile at one half.
-
-1. a distribution of (weight value) pairs
-
-Returns: the median value
-
-### `ws-support`
-
-*lib_distribution.metta:242*
-
-The values the distribution can answer, once each, smallest first, with the weights dropped.
-
-1. a distribution of (weight value) pairs
-
-Returns: the ordered support
-
-### `ws-sum-independent`
-
-*lib_distribution.metta:246*
-
-The distribution of the sum of n independent draws, by exact convolution rather than simulation. Zero draws are the point mass at 0; a negative count refuses.
-
-1. a distribution of (weight value) pairs
-2. how many independent draws
-
-Returns: the distribution of the total
-
-Undocumented: `ws-add-bernoulli-independent`, `ws-average-independent`, `ws-condition-joint`, `ws-map`, `ws-map2-independent`, `ws-mass-at-least`, `ws-prob-gt-independent`, `ws-quantile-walk`
 
 ## lib_encoding
 
@@ -3672,9 +3583,65 @@ Returns: Text
 
 ## lib_math
 
+### `math-gcd`
+
+*lib_math.metta:13*
+
+```metta
+(: math-gcd (-> Expression Number))
+```
+
+The nonnegative greatest common divisor of a finite expression of integers. Empty input and all zeros give zero. Validate every integer before the Euclidean fold; signs do not affect the result.
+
+1. Integers
+
+Returns: Divisor
+
+### `math-lcm`
+
+*lib_math.metta:23*
+
+```metta
+(: math-lcm (-> Expression Number))
+```
+
+The nonnegative least common multiple. Empty input gives one; any zero gives zero after every input has been validated. Derive the fold from math-gcd and exact integer division.
+
+1. Integers
+
+Returns: Multiple
+
+### `math-factor-pairs`
+
+*lib_math.metta:42*
+
+```metta
+(: math-factor-pairs (-> Number Expression))
+```
+
+Stream positive (A B) factor pairs of a positive integer with A<=B, in ascending A order. A square's equal pair appears once. Derive candidates from range up to math-integer-root and retain exact divisors. Zero raises because it has infinitely many factor pairs.
+
+1. Value
+
+Returns: Pair
+
+### `math-float`
+
+*lib_math.metta:49*
+
+```metta
+(: math-float (-> Number Number))
+```
+
+Convert a Number to binary64 by scaling one coordinate by 1.0. Vector supplies nearest rounding with ties to even, signed zero, subnormals, infinities and NaNs. Overflow saturates to signed infinity; underflow preserves the sign.
+
+1. Value
+
+Returns: Float
+
 ### `math-class`
 
-*lib_math.metta:15*
+*lib_math.metta:61*
 
 ```metta
 (: math-class (-> Number Symbol))
@@ -3686,51 +3653,9 @@ The numeric species: integer, rational, or a host float class of zero, subnormal
 
 Returns: Class
 
-### `math-factor-pairs`
-
-*lib_math.metta:21*
-
-```metta
-(: math-factor-pairs (-> Number Expression))
-```
-
-Stream the positive (A B) factor pairs of a positive integer with A=<B, in ascending A order. A square's equal pair appears once. The host FD solver searches A only through the exact square root; large inputs can need search. Zero is refused because it has infinitely many factor pairs.
-
-1. Value
-
-Returns: Pair
-
-### `math-float`
-
-*lib_math.metta:27*
-
-```metta
-(: math-float (-> Number Number))
-```
-
-Convert a Number to binary64 through multiplication by the floating unit. Round once to nearest with ties to even, preserving negative zero, subnormal values, infinities and NaNs. Overflow saturates to signed infinity; underflow preserves the sign. The rounding policy is shared with vector-scale.
-
-1. Value
-
-Returns: Float
-
-### `math-gcd`
-
-*lib_math.metta:33*
-
-```metta
-(: math-gcd (-> Expression Number))
-```
-
-The nonnegative greatest common divisor of any number of integers. Empty input and a collection of zeros give zero. Negative signs do not affect it.
-
-1. Integers
-
-Returns: Divisor
-
 ### `math-integer-root`
 
-*lib_math.metta:39*
+*lib_math.metta:67*
 
 ```metta
 (: math-integer-root (-> Number Number Expression))
@@ -3743,23 +3668,9 @@ Exact (Root Remainder) with Root^Degree+Remainder=Value. Degree is positive. For
 
 Returns: RootAndRemainder
 
-### `math-lcm`
-
-*lib_math.metta:45*
-
-```metta
-(: math-lcm (-> Expression Number))
-```
-
-The nonnegative least common multiple. Empty input gives the multiplicative identity one; any zero makes the result zero. Validate the complete input.
-
-1. Integers
-
-Returns: Multiple
-
 ### `math-power-mod`
 
-*lib_math.metta:51*
+*lib_math.metta:73*
 
 ```metta
 (: math-power-mod (-> Number Number Number Number))
@@ -3775,7 +3686,7 @@ Returns: Result
 
 ### `math-ratio`
 
-*lib_math.metta:57*
+*lib_math.metta:79*
 
 ```metta
 (: math-ratio (-> Number Expression))
@@ -3789,13 +3700,17 @@ Returns: Parts
 
 ### `math-rational`
 
-*lib_math.metta:63*
+*lib_math.metta:85*
+
+```metta
+(: math-rational (-> Number Number))
+```
 
 ```metta
 (: math-rational (-> Number Number Number))
 ```
 
-Construct an exact reduced Number with a positive denominator. Whole results are integers. A zero denominator or host policy that approximates the exact result raises. Use math-ratio to recover its parts; rationals have no signed zero.
+Construct an exact reduced Number with a positive denominator. Whole results are integers. A zero denominator or host policy that approximates the exact result raises. The unary MeTTa form converts a finite Number to its exact binary rational value through math-ratio; rationalize is the approximation. Use math-ratio to recover the parts; rationals have no signed zero.
 
 1. Numerator
 2. Denominator
@@ -3804,7 +3719,7 @@ Returns: Value
 
 ### `math-rationalize`
 
-*lib_math.metta:69*
+*lib_math.metta:91*
 
 ```metta
 (: math-rationalize (-> Number Number))
@@ -3818,7 +3733,7 @@ Returns: Rational
 
 ### `math-real`
 
-*lib_math.metta:75*
+*lib_math.metta:97*
 
 ```metta
 (: math-real (-> Symbol Expression Number))
@@ -3833,7 +3748,7 @@ Returns: Result
 
 ### `math-real-functions`
 
-*lib_math.metta:81*
+*lib_math.metta:103*
 
 ```metta
 (: math-real-functions (-> Expression))
@@ -3842,6 +3757,20 @@ Returns: Result
 The native floating functions provided here as (math-function Name Arity) rows. Each row describes one accepted math-real call. Existing core trig, arithmetic and bit heads keep their names; factorial and binomial come from the imported combinatorics face.
 
 Returns: Functions
+
+### `math-sqrt`
+
+*lib_math.metta:109*
+
+```metta
+(: math-sqrt (-> Number Number))
+```
+
+Correctly rounded floating square root of a nonnegative finite Number. Take the root before rounding, so huge or tiny exact inputs can still have representable roots. Reuse Vector's fractional-root kernel and final IEEE saturation. Preserve the sign of floating zero. A negative or nonfinite input raises.
+
+1. Value
+
+Returns: Root
 
 ## lib_observe
 
@@ -5025,7 +4954,7 @@ Undocumented: `find`, `match-count`, `migrateAtoms`, `remove-all-atoms`, `succee
 
 ### `stats-correlation`
 
-*lib_statistics.metta:13*
+*lib_statistics.metta:144*
 
 ```metta
 (: stats-correlation (-> Expression Expression Number))
@@ -5040,7 +4969,7 @@ Returns: Correlation
 
 ### `stats-covariance`
 
-*lib_statistics.metta:19*
+*lib_statistics.metta:150*
 
 ```metta
 (: stats-covariance (-> Expression Expression Number Number))
@@ -5056,7 +4985,7 @@ Returns: Covariance
 
 ### `stats-geometric-mean`
 
-*lib_statistics.metta:25*
+*lib_statistics.metta:156*
 
 ```metta
 (: stats-geometric-mean (-> Expression Number))
@@ -5070,7 +4999,7 @@ Returns: Mean
 
 ### `stats-harmonic-mean`
 
-*lib_statistics.metta:31*
+*lib_statistics.metta:162*
 
 ```metta
 (: stats-harmonic-mean (-> Expression Number))
@@ -5084,7 +5013,7 @@ Returns: Mean
 
 ### `stats-mean`
 
-*lib_statistics.metta:37*
+*lib_statistics.metta:168*
 
 ```metta
 (: stats-mean (-> Expression Number))
@@ -5098,7 +5027,7 @@ Returns: Mean
 
 ### `stats-median`
 
-*lib_statistics.metta:43*
+*lib_statistics.metta:174*
 
 ```metta
 (: stats-median (-> Expression Number))
@@ -5112,13 +5041,13 @@ Returns: Median
 
 ### `stats-mode`
 
-*lib_statistics.metta:49*
+*lib_statistics.metta:180*
 
 ```metta
 (: stats-mode (-> Atom %Undefined%))
 ```
 
-Every most frequent held term, once, in first-occurrence order. Terms compare by identity, so 1 and 1.0 count separately and runnable expressions stay data. Collapse collects ties; once selects the first mode. Empty and cyclic data raise. Native stable sorting counts occurrences in O(n log n).
+Every most frequent held term, once, in first-occurrence order. Terms compare by identity, so 1 and 1.0 count separately and runnable expressions stay data. Collapse collects ties; once selects the first mode. Empty and cyclic data raise. Stable grouping and identity comparisons derive the counts; all tied terms remain alternative answers.
 
 1. Data
 
@@ -5126,7 +5055,7 @@ Returns: Mode
 
 ### `stats-quantile`
 
-*lib_statistics.metta:55*
+*lib_statistics.metta:186*
 
 ```metta
 (: stats-quantile (-> Expression Number Symbol Number))
@@ -5142,13 +5071,13 @@ Returns: Value
 
 ### `stats-quantiles`
 
-*lib_statistics.metta:61*
+*lib_statistics.metta:192*
 
 ```metta
 (: stats-quantiles (-> Expression Number Symbol Expression))
 ```
 
-The Partitions-1 cut points at i/Partitions, using stats-quantile's inclusive or exclusive interpolation. Partitions must be positive. One partition gives empty cuts after validating the nonempty data and method. Sort once, then index each pair: O(n log n+k) arithmetic/index operations for k cuts.
+The Partitions-1 cut points at i/Partitions, using stats-quantile's inclusive or exclusive interpolation. Partitions must be positive. One partition gives empty cuts after validating the nonempty data and method. Sort once, then derive each cut with ordinary indexing and exact interpolation.
 
 1. Data
 2. Partitions
@@ -5158,13 +5087,13 @@ Returns: Cuts
 
 ### `stats-ranks`
 
-*lib_statistics.metta:67*
+*lib_statistics.metta:198*
 
 ```metta
 (: stats-ranks (-> Expression Expression))
 ```
 
-One-based numeric ranks in input order. Tied numeric values receive their exact mean rank, so 1 and 1.0 tie. Empty input returns empty. Sort/group once, then restore original positions in O(n log n); no observation is dropped.
+One-based numeric ranks in input order. Tied numeric values receive their exact mean rank, so 1 and 1.0 tie. Empty input returns empty. Count smaller and equal observations for each input through ordinary predicates; no observation is dropped.
 
 1. Data
 
@@ -5172,7 +5101,7 @@ Returns: Ranks
 
 ### `stats-regression`
 
-*lib_statistics.metta:73*
+*lib_statistics.metta:204*
 
 ```metta
 (: stats-regression (-> Expression Expression Bool Expression))
@@ -5188,7 +5117,7 @@ Returns: Fit
 
 ### `stats-stdev`
 
-*lib_statistics.metta:79*
+*lib_statistics.metta:210*
 
 ```metta
 (: stats-stdev (-> Expression Number Number))
@@ -5203,7 +5132,7 @@ Returns: Deviation
 
 ### `stats-sum`
 
-*lib_statistics.metta:85*
+*lib_statistics.metta:216*
 
 ```metta
 (: stats-sum (-> Expression Number))
@@ -5217,7 +5146,7 @@ Returns: Total
 
 ### `stats-variance`
 
-*lib_statistics.metta:91*
+*lib_statistics.metta:222*
 
 ```metta
 (: stats-variance (-> Expression Number Number))
@@ -5229,6 +5158,226 @@ Sum of squared deviations divided by N-DegreesOfFreedom. Use 0 for a whole popul
 2. DegreesOfFreedom
 
 Returns: Variance
+
+### `ws-map-independent`
+
+*lib_statistics.metta:247*
+
+```metta
+(: ws-map-independent (-> %Undefined% (:seg Expression) %Undefined%))
+```
+
+Push a function through zero or more independent finite laws. Normalize each input in order and preserve the first refusal. Enumerate product tuples in input order, multiply their masses and merge equal outputs. With no inputs, apply the nullary function and give its result unit mass. Function alternatives produce alternative complete laws; they do not acquire probabilities. Correlated inputs belong in one joint law passed to ws-map.
+
+1. Function
+2. Distributions
+
+Returns: Law or refusal
+
+### `ws-map`
+
+*lib_statistics.metta:254*
+
+```metta
+(: ws-map (-> %Undefined% Expression %Undefined%))
+```
+
+Push a function through one finite law. Equal mapped outcomes merge at their first occurrence. Each alternative mapping remains a separate normalized law. This is the single-input case of ws-map-independent.
+
+1. Function
+2. Law
+
+Returns: Law or refusal
+
+### `ws-mass-at-least`
+
+*lib_statistics.metta:262*
+
+```metta
+(: ws-mass-at-least (-> Expression Number %Undefined%))
+```
+
+Inclusive upper-tail probability P(X>=Threshold) of a numeric finite law.
+
+1. Law
+2. Threshold
+
+Returns: Mass or refusal
+
+### `ws-mass-at-most`
+
+*lib_statistics.metta:270*
+
+```metta
+(: ws-mass-at-most (-> Expression Number %Undefined%))
+```
+
+Inclusive cumulative probability P(X<=Threshold) of a numeric finite law.
+
+1. Law
+2. Threshold
+
+Returns: Mass or refusal
+
+### `ws-prob-gt-independent`
+
+*lib_statistics.metta:279*
+
+```metta
+(: ws-prob-gt-independent (-> Expression Expression %Undefined%))
+```
+
+Strict independent win probability P(X>Y). Ties contribute zero. This does not test stochastic dominance and cannot recover correlation from marginals.
+
+1. Left
+2. Right
+
+Returns: Probability or refusal
+
+### `ws-condition-joint`
+
+*lib_statistics.metta:294*
+
+```metta
+(: ws-condition-joint (-> Expression Atom %Undefined%))
+```
+
+Condition a joint law of (Pair Input Output) values on the held observed Input, using term identity. Return the Output law. An absent observation refuses because it has no positive conditional mass.
+
+1. Joint
+2. Observed
+
+Returns: Conditional law or refusal
+
+### `ws-average-independent`
+
+*lib_statistics.metta:306*
+
+```metta
+(: ws-average-independent (-> Expression %Undefined%))
+```
+
+The law of the arithmetic mean of a nonempty expression of mutually independent numeric laws. A variadic function composes stats-mean with the independent product operation, retaining its exact or floating result type. Preserve the first input refusal.
+
+1. Laws
+
+Returns: Mean law or refusal
+
+### `ws-add-bernoulli-independent`
+
+*lib_statistics.metta:317*
+
+```metta
+(: ws-add-bernoulli-independent (-> Expression Number %Undefined%))
+```
+
+Add one independent Bernoulli trial with finite Probability in [0,1] to every numeric outcome. Compose the two-point law with ws-map-independent.
+
+1. Law
+2. Probability
+
+Returns: Law or refusal
+
+### `ws-central-moment`
+
+*lib_statistics.metta:334*
+
+```metta
+(: ws-central-moment (-> Expression Number %Undefined%))
+```
+
+The nonnegative integer Degree moment about a numeric law's mean. Degree zero is 1.0 and degree one is exactly 0.0 after validating the law and its finite numeric support. Degree two is variance. Other degrees map centered powers and take their expectation.
+
+1. Law
+2. Degree
+
+Returns: Moment or refusal
+
+### `ws-variance`
+
+*lib_statistics.metta:341*
+
+```metta
+(: ws-variance (-> Expression %Undefined%))
+```
+
+The second central moment of a numeric finite law. Center before squaring to avoid subtracting two nearly equal floating moments.
+
+1. Law
+
+Returns: Variance or refusal
+
+### `ws-deviation`
+
+*lib_statistics.metta:350*
+
+```metta
+(: ws-deviation (-> Expression %Undefined%))
+```
+
+The floating square root of ws-variance, in the outcome's units.
+
+1. Law
+
+Returns: Deviation or refusal
+
+### `ws-quantile`
+
+*lib_statistics.metta:364*
+
+```metta
+(: ws-quantile (-> Expression Number %Undefined%))
+```
+
+The smallest supported value whose cumulative mass reaches the finite Level in (0,1]. This inverse CDF retains supported values, whereas stats-quantile interpolates observations. At level one, the last supported value absorbs final cumulative rounding.
+
+1. Law
+2. Level
+
+Returns: Value or refusal
+
+### `ws-median`
+
+*lib_statistics.metta:371*
+
+```metta
+(: ws-median (-> Expression %Undefined%))
+```
+
+The finite law's inverse CDF at one half.
+
+1. Law
+
+Returns: Value or refusal
+
+### `ws-support`
+
+*lib_statistics.metta:382*
+
+```metta
+(: ws-support (-> Expression %Undefined%))
+```
+
+The law's supported values, once each, in increasing term order.
+
+1. Law
+
+Returns: Support or refusal
+
+### `ws-sum-independent`
+
+*lib_statistics.metta:397*
+
+```metta
+(: ws-sum-independent (-> Expression Number %Undefined%))
+```
+
+The law of a total of Count independent draws. Count is a nonnegative integer. Zero draws give unit mass at zero. Normalize and merge equal partial totals after each convolution, rather than retaining all draw tuples.
+
+1. Law
+2. Count
+
+Returns: Total law or refusal
 
 ## lib_string
 
