@@ -9,6 +9,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Encoding derives hex from MeTTa arithmetic, segments and one ASCII alphabet;
+  UUID derives seven operations from shared byte boundaries, namespace pairs,
+  Crypto and one field layout. Their equations can be inspected and called as
+  data. Names preserve complete UTF8 and NUL. The existing public surfaces remain
+  six and eleven heads. Decoder cancellation and resource exceptions now retain
+  their original terms; only malformed-input exceptions become codec errors.
 - String derives nine text recipes from MeTTa equations and shared native
   boundaries. Padding uses a function to split the missing width between sides;
   repetition composes with answer streams and can be reconstructed from its

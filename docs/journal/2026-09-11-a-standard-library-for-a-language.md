@@ -5882,3 +5882,104 @@ Twins-selftest passes; those recorded older findings keep the lane red with
 exit 1 and GATE FAILED: twins. Receipts: ai-lib4-string-fulltwins.log and
 ai-lib4-string-findings.log. The String pair retains all 50 claims, equal stored
 content and the exact 329461 inference point in that full run.
+
+## 2026-09-14: Encoding derivation and native UUID consumers
+
+Goal: derive byte formulas through the MeTTa basis while preserving strict
+byte/text boundaries and the exceptions that control evaluation.
+
+Tried: a temporary wrapper on each actual decoder injects cancellation,
+resource_error(stack) and an unrelated representation error after input
+validation. Both library catch-all handlers replace all three with malformed
+data errors. The probe restores each wrapper and ends with present; no timing
+race or deadline is involved. Receipt: ai-lib4-encoding-control-before.log.
+The defect belongs to these handlers, so it is not a host workaround.
+
+Tried: the retained UTF8 provider rejects malformed sequences with
+representation_error(utf8) or representation_error(unicode_scalar_value).
+The host base64 provider fails normally, raises syntax_error(base64_char(...)),
+or raises representation_error(encoding) when ISO-Latin1 cannot carry input
+text. Valid NUL and supplementary UTF8 values still round-trip. Both standard
+padded and URL unpadded base64 policies are probed. Receipt:
+ai-lib4-encoding-malformed-probe.log. The existing Encoding and UUID native
+suites pass before changes in ai-lib4-encoding-uuid-native-control.log.
+
+Decided for exception handling: convert only those demonstrated malformed-input
+cases to the existing named domain errors; propagate cancellation, resources
+and unrelated exceptions unchanged. The boundary will have deterministic
+injection regressions as well as malformed-input cases.
+
+Found: UUID imports Encoding's native hex heads for name hashing and byte
+conversion. A derivation must include those compositions; deleting exports
+alone would break the native consumer, and adding hardcoded calls upward into
+MeTTa would reverse the library dependency. Its strict UUID parser can remain
+the shared boundary while byte/name formulas become ordinary equations.
+The complete Encoding/UUID split is still under examination.
+
+## 2026-09-14: shared byte boundaries and inspectable UUID composition
+
+Tried: MeTTa hex and UUID recipes pass22 assertions including every byte value,
+mixed-case ASCII digits, malformed alphabets, complete UTF8/NUL names and custom
+namespaces. Measuring128 generated v4 identifiers gives one inference cost for
+each query:14949 for version and14924 for variant. Commands and fixtures are
+ai-lib4-encoding-uuid-recipes.metta and ai-lib4-uuid-inference-probe.pl; the latter
+exits0 and ends with stable. String's native alphabet lookup removes the former
+hex decoder's data-dependent Prolog branches. This changes the condition behind
+the2026-09-12 decision to keep field inspection native.
+
+Decided: Encoding keeps the UTF8/base64 providers and private strict byte/text
+identity boundaries; hex is an ordinary alphabet, arithmetic and segment recipe.
+UUID keeps generation, strict validation and the host timestamp. Its namespace
+relation, byte formatting, name hashing and bit fields are MeTTa compositions.
+One layout value supplies both native validation and formatting. The complete
+UTF8 name workaround moves with its composition. Native modules no longer need
+an upward evaluator call or their own duplicate hex implementation.
+
+Rejected: using base64 to validate bytes, duplicating byte/hex validators, or
+loosening Encoding inputs to String's Number coercions. Each would add an
+unrelated operation or another authoritative boundary. Malformed recipe shapes
+use named MeTTa assertions; host providers retain their precise malformed errors
+and propagate interruption/resource exceptions.
+
+Tried after implementation: all original39 Encoding and45 UUID example claims
+still pass; adding reconstruction, alternatives and NUL claims gives43 and49.
+The first native fixture constructed a lambda before match bound its body, so
+it returned the body as data. The existing Vector pattern quotes the constructor
+and evaluates it after matching; using that pattern passes all10 Encoding and11
+UUID tests. Python likewise distinguishes the Number-in-String Error value from
+a Symbol rejected by the strict byte-list boundary. The corrected36 cases and
+all nine README values plus two Python blocks pass.
+
+Found by extending provider injection: unification-based exception classification
+can instantiate an unknown formal, representation kind or context into a known
+codec error. Four of twelve cases are misclassified in
+ai-lib4-encoding-control-nonground-before.log, which ends with present.
+Decided: use subsumes_term against the error-pattern relation, so classification
+cannot bind an incoming exception. The regression includes nonground throws.
+
+Verified: Encoding10, UUID11 and URI12 native cases,38 Python cases,43/49 paired
+claims, nine README values and two Python blocks pass. All19 required lanes
+pass. Three fresh measurements give Encoding243765, UUID1291086, HTTP369064
+and URI262887, with equal stored contents. No divergence declarations change.
+Receipts: ai-lib4-encoding-uuid-{native-final,python-final,lanes,prices,twins}.log.
+
+Found during full verification: both full runs add one HTTP import SIGSEGV to
+the preceding257 findings. The core places PL_unregister_atom inside table
+cleanup during PL_thread_destroy_engine; Python is still in library import.
+Sixty-four isolated HTTP runs and a cold-artifact run pass. A plain SWI probe
+that loads no PeTTa reproduces the same instruction and teardown stack:
+`swipl -q -s ai-tmp/ai-lib4-table-destroy-agc.pl -g
+'forall(between(1,20000,Round),observe(Round)),writeln(absent)' -t halt`, exit139
+in ai-lib4-table-destroy-default-current.log. Disabling automatic atom collection
+passes2000 engine lifetimes. The installed SWI binary remains unchanged.
+Three runs from the pristine c75181adc control do not observe this intermittent
+host race; they do not establish its absence. The explicit collector experiment
+also finishes after correcting its mailbox call to thread_get_message/3.
+
+Decided: retain the crash receipt and plain-host reproduction for the host owner;
+do not alter global atom collection or library behavior to suppress it. The two
+full logs have258 findings, exactly257 older findings plus the attributed host
+crash; twins-selftest passes. The native fix remains outside this worktree's
+library scope. Receipts: ai-lib4-http-{backtrace,unregister-disassembly}.log,
+ai-lib4-encoding-uuid-fulltwins{,-repeat}.log and
+ai-lib4-table-destroy-{default-current,no-agc,cut-1,cut-2,cut-3}.log.

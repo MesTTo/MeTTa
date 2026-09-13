@@ -1,5 +1,5 @@
 ; Purpose: UTF-8, hex and base64, each one head in and one head out.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/30-encoding_lib.metta; commit=2b8c0afd38dcfe3994d5047dba2d035970311d0e].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/30-encoding_lib.metta; commit=WORKTREE].
 !(import! &self (library lib_encoding))
 ; lib_string is beside it for the one comparison that makes UTF-8 worth having:
 ; `string-length` counts characters where these bytes count bytes.
@@ -71,3 +71,11 @@
 !(test (hex-encode (utf8-encode "é")) "c3a9")
 !(test (if-error (catch (utf8-decode (1 two))) refused fine) refused)
 !(test (if-error (catch (hex-decode 7)) refused fine) refused)
+
+; Hex equations are callable data and compose with alternative answer streams.
+!(test (let $recipe
+         (match &self (= (hex-encode $bytes) $body) (quote (|-> ($bytes) $body)))
+         (let $format (eval $recipe) ($format (0 255)))) "00ff")
+!(test (collapse (hex-encode (superpose (() (0 255))))) ("" "00ff"))
+!(test (hex-encode (utf8-encode (string-from-codes (97 0 98)))) "610062")
+!(test (if-error (catch (hex-decode "𝟢0")) refused fine) refused)

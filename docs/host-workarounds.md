@@ -723,7 +723,7 @@ Defect: UUID names are read as Latin-1 and truncated at NUL. Non-Latin-1 names
   raise representation_error(encoding); accepted names can hash different bytes.
 Reproduction: tests/checks/host_workarounds/swi-uuid-name-encoding.pl,
   comparing ASCII, accented and embedded-NUL names with UTF-8 UUID vectors.
-Workaround: lib_uuid composes lib_encoding and lib_crypto over namespace bytes
+Workaround: lib_uuid's MeTTa name recipe composes lib_encoding and lib_crypto over namespace bytes
   and the complete UTF-8 name, then sets the RFC version and variant bits.
 Lifted when: the host produces both UTF-8/NUL vectors. Arbitrary namespace support
   still requires the byte construction unless the host also admits a UUID namespace.

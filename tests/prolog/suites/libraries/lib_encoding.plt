@@ -4,8 +4,9 @@
 % Guarantees: every encoding round-trips over generated inputs, UTF-8 is the host's
 % own bytes for the same text, hex is lower case and case-insensitive, base64 is
 % RFC 4648 in both alphabets against the host's own encoder, and a byte that is not
-% one is refused naming it [tested: lib_encoding; commit=2b8c0afd38dcfe3994d5047dba2d035970311d0e].
-% Owns resources: none; every value is a term.
+% one is refused naming it [tested: lib_encoding; commit=WORKTREE].
+% Owns resources: each memory file and stream closes on every outcome; provider
+% wrappers are removed after injection and the borrowed random state is restored.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -13,10 +14,13 @@
 :- use_module(library(apply), [maplist/2, maplist/3]).
 :- use_module(library(yall), [(>>)/3]).
 :- use_module(library(base64), [base64_encoded/3]).
-:- use_module(library(random), [random_between/3]).
-:- initialization(consult('../../lib/lib_encoding/lib_encoding.pl')).
+:- use_module(library(random), [random_between/3, getrand/1, setrand/1]).
+:- use_module(library(prolog_wrap), [wrap_predicate/4, unwrap_predicate/2]).
+:- use_module('../../../../lib/lib_encoding/lib_encoding').
+:- use_module(collection_test_support).
+:- load_collection_library(lib_encoding).
 
-:- begin_tests(lib_encoding).
+:- begin_tests(lib_encoding, [setup(getrand(State)), cleanup(setrand(State))]).
 :- meta_predicate must_throw(0, ?).
 
 must_throw(Goal, Expected) :-
@@ -41,7 +45,7 @@ test(every_encoding_round_trips) :-
     set_random(seed(20260912)),
     forall(between(1, 300, _),
            ( random_bytes(Bytes),
-             'hex-encode'(Bytes, Hex), 'hex-decode'(Hex, FromHex),
+             invoke('hex-encode'(Bytes, Hex)), invoke('hex-decode'(Hex, FromHex)),
              assertion(FromHex == Bytes),
              forall(member(Alphabet, [standard, url]),
                     ( 'base64-encode'(Alphabet, Bytes, Text),
@@ -81,16 +85,16 @@ host_utf8_bytes(Text, Bytes) :-
 % Hex is lower case out and either case in, two digits a byte, which is what a hash
 % and a wire dump are written as.
 test(hex_answers_lower_case_and_reads_either) :-
-    'hex-encode'([0, 15, 16, 255], Text),
+    invoke('hex-encode'([0, 15, 16, 255], Text)),
     assertion(Text == "000f10ff"),
-    'hex-decode'("000F10FF", Upper), assertion(Upper == [0, 15, 16, 255]),
-    'hex-decode'("000f10ff", Lower), assertion(Lower == [0, 15, 16, 255]),
+    invoke('hex-decode'("000F10FF", Upper)), assertion(Upper == [0, 15, 16, 255]),
+    invoke('hex-decode'("000f10ff", Lower)), assertion(Lower == [0, 15, 16, 255]),
     forall(between(0, 255, Byte),
-           ( 'hex-encode'([Byte], Digits),
+           ( invoke('hex-encode'([Byte], Digits)),
              string_length(Digits, 2),
-             'hex-decode'(Digits, [Byte]) )),
-    'hex-encode'([], Empty), assertion(Empty == ""),
-    'hex-decode'("", None), assertion(None == []).
+             invoke('hex-decode'(Digits, [Byte])) )),
+    invoke('hex-encode'([], Empty)), assertion(Empty == ""),
+    invoke('hex-decode'("", None)), assertion(None == []).
 
 % base64 against the host's own encoder over the same bytes, in both alphabets, and
 % the two RFC 4648 spellings where they differ.
@@ -113,6 +117,8 @@ test(base64_is_the_hosts_own_encoding) :-
     'base64-encode'(url, [255, 254, 253], Url), assertion(Url == "__79"),
     'base64-encode'(standard, [104], Padded), assertion(Padded == "aA=="),
     'base64-encode'(url, [104], Unpadded), assertion(Unpadded == "aA"),
+    'base64-decode'(url, "//79", ClassicFallback),
+    assertion(ClassicFallback == [255,254,253]),
     % Padding is what the standard alphabet has and the url one does not, so the
     % standard text of any length is a multiple of four characters.
     forall(between(0, 8, Length),
@@ -126,22 +132,23 @@ bytes_of_length(Length, Bytes) :- numlist(1, Length, Bytes).
 
 % Every refusal, and what each one names.
 test(a_value_that_is_not_a_byte_is_refused_by_name) :-
-    forall(member(Goal, ['hex-encode'([256], _), 'base64-encode'(standard, [256], _),
+    forall(member(Goal, [invoke('hex-encode'([256], _)), 'base64-encode'(standard, [256], _),
                          'utf8-decode'([256], _)]),
            must_throw(Goal, error(type_error(byte, 256), _))),
-    forall(member(Goal, ['hex-encode'([two], _), 'utf8-decode'([1, two], _)]),
+    forall(member(Goal, [invoke('hex-encode'([two], _)), 'utf8-decode'([1, two], _)]),
            must_throw(Goal, error(type_error(byte, two), _))),
-    must_throw('hex-encode'(notalist, _), error(type_error(list, notalist), _)),
-    must_throw('hex-encode'([-1], _), error(type_error(byte, -1), _)),
+    must_throw(invoke('hex-encode'(notalist, _)), error(type_error(list, notalist), _)),
+    must_throw(invoke('hex-encode'([-1], _)), error(type_error(byte, -1), _)),
     % A code point that fits in a byte IS one, which is why the two are worth
     % telling apart at all.
-    string_codes("é", Codes), 'hex-encode'(Codes, Accented),
+    string_codes("é", Codes), invoke('hex-encode'(Codes, Accented)),
     assertion(Accented == "e9").
 
 test(malformed_text_is_refused_by_name) :-
-    must_throw('hex-decode'("abc", _), error(domain_error(hex_text, "abc"), _)),
-    must_throw('hex-decode'("zz", _), error(domain_error(hex_digit, z), _)),
-    must_throw('hex-decode'("0g", _), error(domain_error(hex_digit, g), _)),
+    forall(member(Text-Invalid,["abc"-"abc","zz"-"z","0g"-"g","𝟢a"-"𝟢"]),
+           must_throw(invoke('hex-decode'(Text,_)),
+             error(metta_assertion_failed([assertEqualMsg,_,_,
+                      [quote,['hex-decode',_,Invalid]]],_,_),_))),
     must_throw('utf8-decode'([255], _), error(domain_error(utf8_bytes, [255]), _)),
     must_throw('utf8-decode'([195], _), error(domain_error(utf8_bytes, [195]), _)),
     must_throw('base64-decode'(standard, "not base64!", _),
@@ -150,7 +157,45 @@ test(malformed_text_is_refused_by_name) :-
                error(domain_error(base64_alphabet, nosuch), _)),
     catch('base64-encode'(nosuch, [1], _), error(_, context(_, Alphabets)), true),
     assertion(Alphabets == [standard, url]),
-    must_throw('hex-decode'(7, _), error(type_error(string, 7), _)),
+    invoke('hex-decode'(7, Typed)),
+    assertion(Typed == ['Error',['hex-decode',7],['BadArgType',1,'String','Number']]),
     must_throw('base64-decode'(standard, 7, _), error(type_error(string, 7), _)).
+
+test(provider_exceptions_keep_their_identity) :-
+    forall(( member(Kind,[utf8,base64]),
+             member(Injected,[encoding_cancelled,
+                              error(resource_error(stack),context(probe,resource)),
+                              error(representation_error(unrelated),context(probe,representation)),
+                              error(_,context(probe,formal)),
+                              error(representation_error(_),context(probe,kind)),
+                              error(representation_error(encoding),_)]) ),
+           ( provider(Kind,Provider,Call),
+             setup_call_cleanup(
+               wrap_predicate(Provider,encoding_test_control,_,throw(Injected)),
+               ( catch(call(Call),Observed,true),
+                 assertion(nonvar(Observed)), assertion(Observed =@= Injected) ),
+               unwrap_predicate(Provider,encoding_test_control)) )),
+    'utf8-decode'([65],"A"), 'base64-decode'(standard,"QQ==",[65]).
+
+provider(utf8,csv_codec:utf8_text(_,_),lib_encoding:'utf8-decode'([65],_)).
+provider(base64,base64:base64_encoded(_,_,_),lib_encoding:'base64-decode'(standard,"QQ==",_)).
+
+test(malformed_provider_errors_keep_named_refusals) :-
+    forall(member(Bytes,[[255],[195],[128],[192,128],[237,160,128],[244,144,128,128],
+                         [248,136,128,128,128]]),
+           must_throw('utf8-decode'(Bytes,_),error(domain_error(utf8_bytes,Bytes),_))),
+    forall((member(Alphabet,[standard,url]),member(Text,["A","!!!!","🦊"])),
+           must_throw('base64-decode'(Alphabet,Text,_),error(domain_error(base64_text,Text),_))).
+
+test(byte_boundaries_refuse_literal_code_open_tails_and_cycles) :-
+    Cyclic=[0|Cyclic],
+    forall(member(Bytes,[[1|_],Cyclic,[[+,1,2]],[true],[1.0],[_]]),
+           refused('hex-encode'(Bytes,_))).
+
+test(hex_equations_are_callable_data) :-
+    once(eval_expr([match,'&self',[=,['hex-encode',Bytes],Body],
+                    [quote,['|->',[Bytes],Body]]],Recipe)),
+    once(eval_expr([eval,Recipe],Function)),
+    once(eval_expr([Function,[quote,[0,255]]],Text)), assertion(Text == "00ff").
 
 :- end_tests(lib_encoding).

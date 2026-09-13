@@ -1614,13 +1614,13 @@ Undocumented: `dict-has`, `dict-pairs`, `dict-put`, `dict-remove`, `dict-remove-
 
 ### `base64-decode`
 
-*lib_encoding.metta:27*
+*lib_encoding.metta:15*
 
 ```metta
 (: base64-decode (-> Symbol String Expression))
 ```
 
-The bytes that base64 spells, in the named alphabet. Text the decoder rejects, which includes a character outside the alphabet and a truncated group, is refused naming the text.
+The bytes that base64 spells under the named host decoder policy. Rejected text raises a named domain error. The host URL decoder also accepts classic digits; this operation does not impose an additional canonical-spelling check.
 
 1. Alphabet
 2. Text
@@ -1629,7 +1629,7 @@ Returns: Bytes
 
 ### `base64-encode`
 
-*lib_encoding.metta:33*
+*lib_encoding.metta:21*
 
 ```metta
 (: base64-encode (-> Symbol Expression String))
@@ -1642,37 +1642,9 @@ The bytes as base64 in one of the two RFC 4648 alphabets: `standard`, padded wit
 
 Returns: Text
 
-### `hex-decode`
-
-*lib_encoding.metta:39*
-
-```metta
-(: hex-decode (-> String Expression))
-```
-
-The bytes that hexadecimal spells, in either case. An odd number of digits or a character outside 0-9a-fA-F is refused naming it, because a truncated or mistyped dump is not bytes.
-
-1. Text
-
-Returns: Bytes
-
-### `hex-encode`
-
-*lib_encoding.metta:45*
-
-```metta
-(: hex-encode (-> Expression String))
-```
-
-The bytes as hexadecimal, two lower-case digits each and nothing between them, which is how a hash, a key and a wire dump are all written.
-
-1. Bytes
-
-Returns: Text
-
 ### `utf8-decode`
 
-*lib_encoding.metta:51*
+*lib_encoding.metta:27*
 
 ```metta
 (: utf8-decode (-> Expression String))
@@ -1686,13 +1658,41 @@ Returns: Text
 
 ### `utf8-encode`
 
-*lib_encoding.metta:57*
+*lib_encoding.metta:33*
 
 ```metta
 (: utf8-encode (-> String Expression))
 ```
 
 The UTF-8 bytes of the text, as an expression of Numbers from 0 to 255. This is the length a wire format and a file both count in: an accented letter is two bytes, an emoji four, where string-length counts one character each.
+
+1. Text
+
+Returns: Bytes
+
+### `hex-encode`
+
+*lib_encoding.metta:44*
+
+```metta
+(: hex-encode (-> Expression String))
+```
+
+The bytes as hexadecimal, two lower-case digits each and nothing between them, which is how a hash, a key and a wire dump are all written.
+
+1. Bytes
+
+Returns: Text
+
+### `hex-decode`
+
+*lib_encoding.metta:52*
+
+```metta
+(: hex-decode (-> String Expression))
+```
+
+The bytes that hexadecimal spells, in either case. An odd number of digits or a character outside 0-9a-fA-F is refused naming it, because a truncated or mistyped dump is not bytes.
 
 1. Text
 
@@ -7201,23 +7201,9 @@ Returns: Absolute
 
 ## lib_uuid
 
-### `uuid-bytes`
-
-*lib_uuid.metta:12*
-
-```metta
-(: uuid-bytes (-> String Expression))
-```
-
-The 16 bytes of a UUID in network order. These compose with hex-encode, base64-encode and write-bytes!, which use the same byte expression.
-
-1. UUID
-
-Returns: Bytes
-
 ### `uuid-is`
 
-*lib_uuid.metta:18*
+*lib_uuid.metta:14*
 
 ```metta
 (: uuid-is (-> %Undefined% Bool))
@@ -7229,9 +7215,47 @@ Whether Text is a UUID String with exactly 8-4-4-4-12 hexadecimal digits, accept
 
 Returns: Valid
 
+### `uuid-random!`
+
+*lib_uuid.metta:20*
+
+```metta
+(: uuid-random! (-> String))
+```
+
+Generate a version 4 random identifier. A UUID is not a secret; use crypto-random-bytes when unpredictability is a security requirement.
+
+Returns: UUID
+
+### `uuid-time!`
+
+*lib_uuid.metta:26*
+
+```metta
+(: uuid-time! (-> String))
+```
+
+Generate a version 1 identifier using the host's OSSP provider. It contains a timestamp and may expose the host's MAC address. A host without that provider raises; uuid-random! is available independently of version 1 support.
+
+Returns: UUID
+
+### `uuid-timestamp`
+
+*lib_uuid.metta:32*
+
+```metta
+(: uuid-timestamp (-> String Number))
+```
+
+Seconds since the Unix epoch for an RFC version 1 UUID. Other layouts and versions have no answer. Malformed text raises, so absence is not a parse error.
+
+1. UUID
+
+Returns: Timestamp
+
 ### `uuid-name`
 
-*lib_uuid.metta:24*
+*lib_uuid.metta:44*
 
 ```metta
 (: uuid-name (-> Number %Undefined% String String))
@@ -7247,7 +7271,7 @@ Returns: UUID
 
 ### `uuid-namespaces`
 
-*lib_uuid.metta:30*
+*lib_uuid.metta:71*
 
 ```metta
 (: uuid-namespaces (-> Expression))
@@ -7259,7 +7283,7 @@ Returns: Namespaces
 
 ### `uuid-nil`
 
-*lib_uuid.metta:36*
+*lib_uuid.metta:78*
 
 ```metta
 (: uuid-nil (-> String))
@@ -7269,9 +7293,23 @@ The all-zero identifier, distinct from a missing answer.
 
 Returns: UUID
 
+### `uuid-bytes`
+
+*lib_uuid.metta:85*
+
+```metta
+(: uuid-bytes (-> String Expression))
+```
+
+The 16 bytes of a UUID in network order. These compose with hex-encode, base64-encode and write-bytes!, which use the same byte expression.
+
+1. UUID
+
+Returns: Bytes
+
 ### `uuid-of-bytes`
 
-*lib_uuid.metta:42*
+*lib_uuid.metta:95*
 
 ```metta
 (: uuid-of-bytes (-> Expression String))
@@ -7283,61 +7321,9 @@ Exactly 16 byte integers as a canonical lower-case UUID String. Every 128-bit va
 
 Returns: UUID
 
-### `uuid-random!`
-
-*lib_uuid.metta:48*
-
-```metta
-(: uuid-random! (-> String))
-```
-
-Generate a version 4 random identifier. A UUID is not a secret; use crypto-random-bytes when unpredictability is a security requirement.
-
-Returns: UUID
-
-### `uuid-time!`
-
-*lib_uuid.metta:54*
-
-```metta
-(: uuid-time! (-> String))
-```
-
-Generate a version 1 identifier using the host's OSSP provider. It contains a timestamp and may expose the host's MAC address. A host without that provider raises; uuid-random! is available independently of version 1 support.
-
-Returns: UUID
-
-### `uuid-timestamp`
-
-*lib_uuid.metta:60*
-
-```metta
-(: uuid-timestamp (-> String Number))
-```
-
-Seconds since the Unix epoch for an RFC version 1 UUID. Other layouts and versions have no answer. Malformed text raises, so absence is not a parse error.
-
-1. UUID
-
-Returns: Timestamp
-
-### `uuid-variant`
-
-*lib_uuid.metta:66*
-
-```metta
-(: uuid-variant (-> String Symbol))
-```
-
-The layout selected by the variant bits: ncs, rfc, microsoft or future. Versions 1, 3, 4 and 5 generated here use rfc; nil uses ncs.
-
-1. UUID
-
-Returns: Variant
-
 ### `uuid-version`
 
-*lib_uuid.metta:72*
+*lib_uuid.metta:115*
 
 ```metta
 (: uuid-version (-> String Number))
@@ -7348,6 +7334,20 @@ The four version bits as a Number from 0 to 15. Nil has zero; a bit pattern is n
 1. UUID
 
 Returns: Version
+
+### `uuid-variant`
+
+*lib_uuid.metta:122*
+
+```metta
+(: uuid-variant (-> String Symbol))
+```
+
+The layout selected by the variant bits: ncs, rfc, microsoft or future. Versions 1, 3, 4 and 5 generated here use rfc; nil uses ncs.
+
+1. UUID
+
+Returns: Variant
 
 ## lib_vector
 

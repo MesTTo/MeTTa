@@ -1,5 +1,5 @@
 ; Purpose: UUID generations, namespaces, complete names and byte round trips.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/33-uuid_lib.metta; commit=d5de00cc183b4b395b552f3aae7fca87752ef38c].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/33-uuid_lib.metta; commit=WORKTREE].
 !(import! &self (library lib_crypto))
 !(import! &self (library lib_uuid))
 !(import! &self (library lib_encoding))
@@ -65,3 +65,18 @@
 !(test (if-error (catch (uuid-name 2 dns "name")) refused fine) refused)
 !(test (if-error (catch (uuid-name 5 missing "name")) refused fine) refused)
 !(test (if-error (catch (uuid-name 5 "broken" "name")) refused fine) refused)
+
+; Fields and name derivation can be reconstructed from their stored equations.
+!(test (let $recipe
+         (match &self (= (uuid-version $id) $body) (quote (|-> ($id) $body)))
+         (let $inspect (eval $recipe) ($inspect (uuid-nil)))) 0)
+!(test (let $recipe
+         (match &self (= (uuid-name $v $ns $name) $body)
+           (quote (|-> ($v $ns $name) $body)))
+         (let $derive (eval $recipe) ($derive 5 dns "example.com")))
+       "cfbff0d1-9375-5685-968c-48ce8b15ae17")
+!(test (collapse (uuid-version (superpose
+         ("00000000-0000-0000-0000-000000000000" "ffffffff-ffff-ffff-ffff-ffffffffffff"))))
+       (0 15))
+!(test (uuid-name 3 dns (string-from-codes (97 0 98)))
+       "002a0ada-f547-375a-bab5-896a11d1927e")

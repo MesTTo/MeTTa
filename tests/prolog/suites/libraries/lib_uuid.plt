@@ -2,13 +2,15 @@
 % and validation/refusal boundaries through the public library heads.
 % Guarantees: standard ASCII names agree with the host, complete names agree with
 % CPython vectors, and each byte value occurs at each position in the round trips.
-% [tested: lib_uuid; commit=d5de00cc183b4b395b552f3aae7fca87752ef38c].
+% [tested: lib_uuid; commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 :- use_module(library(uuid), [uuid/2]).
 :- use_module(library(lists), [member/2, nth0/3]).
-:- initialization(consult('../../lib/lib_uuid/lib_uuid.pl')).
+:- use_module('../../../../lib/lib_uuid/lib_uuid').
+:- use_module(collection_test_support).
+:- load_collection_library(lib_uuid).
 
 :- begin_tests(lib_uuid).
 :- meta_predicate must_throw(0, ?).
@@ -18,12 +20,12 @@ must_throw(Goal, Expected) :-
 
 test(generated_versions_and_timestamp) :-
     forall(between(1, 32, _),
-           ( 'uuid-random!'(Random), 'uuid-version'(Random, Version),
-             'uuid-variant'(Random, Variant), 'uuid-is'(Random, Valid),
+           ( 'uuid-random!'(Random), invoke('uuid-version'(Random, Version)),
+             invoke('uuid-variant'(Random, Variant)), 'uuid-is'(Random, Valid),
              assertion(Version == 4), assertion(Variant == rfc), assertion(Valid == true),
              assertion(\+ 'uuid-timestamp'(Random, _)) )),
     get_time(Before), 'uuid-time!'(Time), get_time(After),
-    'uuid-version'(Time, TimeVersion), assertion(TimeVersion == 1),
+    invoke('uuid-version'(Time, TimeVersion)), assertion(TimeVersion == 1),
     'uuid-timestamp'(Time, Stamp), assertion(Stamp >= Before), assertion(Stamp =< After),
     'uuid-timestamp'("13814000-1dd2-11b2-8000-000000000000", Epoch),
     assertion(Epoch =:= 0),
@@ -32,12 +34,12 @@ test(generated_versions_and_timestamp) :-
     assertion(\+ 'uuid-timestamp'("13814000-1dd2-21b2-8000-000000000000", _)).
 
 test(standard_names_agree_with_ossp) :-
-    'uuid-namespaces'(Namespaces), assertion(Namespaces == [dns,url,oid,x500]),
+    invoke('uuid-namespaces'(Namespaces)), assertion(Namespaces == [dns,url,oid,x500]),
     forall((member(Version,[3,5]), member(Namespace,Namespaces),
             member(Name,["", "example.com", "1.2.840.113549", "cn=Test", "a/b?c=d"])),
            ( atom_string(Atom, Name), Option =.. [Namespace,Atom],
              uuid(ExpectedAtom,[version(Version),Option]), atom_string(ExpectedAtom,Expected),
-             'uuid-name'(Version,Namespace,Name,Actual), assertion(Actual == Expected) )).
+             invoke('uuid-name'(Version,Namespace,Name,Actual)), assertion(Actual == Expected) )).
 
 % The independent oracle is CPython 3.14's uuid3/uuid5 over complete UTF-8 names.
 % https://github.com/python/cpython/blob/v3.14.0/Lib/uuid.py#L763-L790
@@ -51,32 +53,32 @@ name_vector([0x6f22], "1f9d873c-79c5-37f3-a181-6bab16c1f1c9",
 test(complete_utf8_names_and_custom_namespaces) :-
     forall(name_vector(Codes,MD5,SHA1),
            ( string_codes(Name,Codes),
-             'uuid-name'(3,dns,Name,V3), assertion(V3 == MD5),
-             'uuid-name'(5,dns,Name,V5), assertion(V5 == SHA1) )),
-    'uuid-name'(5,"6BA7B810-9DAD-11D1-80B4-00C04FD430C8","example.com",Named),
+             invoke('uuid-name'(3,dns,Name,V3)), assertion(V3 == MD5),
+             invoke('uuid-name'(5,dns,Name,V5)), assertion(V5 == SHA1) )),
+    invoke('uuid-name'(5,"6BA7B810-9DAD-11D1-80B4-00C04FD430C8","example.com",Named)),
     assertion(Named == "cfbff0d1-9375-5685-968c-48ce8b15ae17"),
-    'uuid-name'(5,Named,"leaf",First), 'uuid-name'(5,Named,"leaf",Again),
+    invoke('uuid-name'(5,Named,"leaf",First)), invoke('uuid-name'(5,Named,"leaf",Again)),
     assertion(First == Again),
-    'uuid-name'(5,Named,"other",Other), assertion(First \== Other).
+    invoke('uuid-name'(5,Named,"other",Other)), assertion(First \== Other).
 
 test(generated_bytes_round_trip_every_position) :-
     forall(between(0,255,Seed),
            ( findall(Byte,(between(0,15,Index),Byte is (Seed+Index*17) mod 256),Bytes),
-             'uuid-of-bytes'(Bytes,UUID), 'uuid-bytes'(UUID,Again),
+             invoke('uuid-of-bytes'(Bytes,UUID)), invoke('uuid-bytes'(UUID,Again)),
              assertion(Again == Bytes), 'uuid-is'(UUID,Valid), assertion(Valid == true),
-             string_upper(UUID,Upper), 'uuid-bytes'(Upper,FromUpper),
+             string_upper(UUID,Upper), invoke('uuid-bytes'(Upper,FromUpper)),
              assertion(FromUpper == Bytes),
-             'uuid-version'(UUID,V), nth0(6,Bytes,VB), assertion(V =:= VB >> 4) )).
+             invoke('uuid-version'(UUID,V)), nth0(6,Bytes,VB), assertion(V =:= VB >> 4) )).
 
 test(nil_and_variant_boundaries) :-
-    'uuid-nil'(Nil), assertion(Nil == "00000000-0000-0000-0000-000000000000"),
-    'uuid-version'(Nil,V), assertion(V == 0),
-    'uuid-variant'(Nil,Ncs), assertion(Ncs == ncs),
+    invoke('uuid-nil'(Nil)), assertion(Nil == "00000000-0000-0000-0000-000000000000"),
+    invoke('uuid-version'(Nil,V)), assertion(V == 0),
+    invoke('uuid-variant'(Nil,Ncs)), assertion(Ncs == ncs),
     assertion(\+ 'uuid-timestamp'(Nil,_)),
     forall(member(Byte-Variant,[0-ncs,127-ncs,128-rfc,191-rfc,
                                192-microsoft,223-microsoft,224-future,255-future]),
            ( Bytes=[0,0,0,0,0,0,0,0,Byte,0,0,0,0,0,0,0],
-             'uuid-of-bytes'(Bytes,UUID), 'uuid-variant'(UUID,Actual),
+             invoke('uuid-of-bytes'(Bytes,UUID)), invoke('uuid-variant'(UUID,Actual)),
              assertion(Actual == Variant) )).
 
 test(validation_rejects_every_nonhex_mutation) :-
@@ -92,23 +94,60 @@ test(validation_rejects_every_nonhex_mutation) :-
     'uuid-is'(WithNul,False), assertion(False == false).
 
 test(delimiters_are_literal_hyphens) :-
-    'uuid-nil'(Base), string_codes(Nul,[0]),
+    invoke('uuid-nil'(Base)), string_codes(Nul,[0]),
     forall(member(Index,[8,13,18,23]),
            ( sub_string(Base,0,Index,_,Prefix), Start is Index+1,
              sub_string(Base,Start,_,0,Suffix), atomics_to_string([Prefix,Nul,Suffix],Bad),
              'uuid-is'(Bad,Valid), assertion(Valid == false),
-             must_throw('uuid-bytes'(Bad,_),error(domain_error(uuid,Bad),_)) )).
+             must_throw(invoke('uuid-bytes'(Bad,_)),
+               error(metta_assertion_failed([assertEqualMsg,_,true,
+                       [quote,['uuid-bytes',_,Bad]]],_,_),_)) )).
 
 test(refusals_name_the_invalid_input_and_repair) :-
-    forall(member(Head,['uuid-bytes','uuid-version','uuid-variant','uuid-timestamp']),
-           ( Goal=..[Head,"bad",_], must_throw(Goal,error(domain_error(uuid,"bad"),context(Head,_))) )),
+    forall(member(Head,['uuid-bytes','uuid-version','uuid-variant']),
+           ( Goal=..[Head,"bad",_],
+             must_throw(invoke(Goal),error(metta_assertion_failed(
+               [assertEqualMsg,_,true,[quote,['uuid-bytes',_,"bad"]]],_,_),_)) )),
+    must_throw('uuid-timestamp'("bad",_),
+               error(domain_error(uuid,"bad"),context('uuid-timestamp',_))),
     forall(member(Version,[1,2,4,6,3.0]),
-           must_throw('uuid-name'(Version,dns,"x",_),error(domain_error(uuid_name_version,Version),_))),
-    must_throw('uuid-name'(5,missing,"x",_),error(domain_error(uuid_namespace,missing),_)),
-    must_throw('uuid-name'(5,"bad","x",_),error(domain_error(uuid,"bad"),_)),
-    must_throw('uuid-name'(5,dns,7,_),error(type_error(string,7),_)),
-    must_throw('uuid-of-bytes'([1,2],_),error(domain_error(uuid_bytes,[1,2]),_)),
-    must_throw('uuid-of-bytes'([256],_),error(type_error(between(0,255),256),_)),
-    must_throw('uuid-of-bytes'([-1],_),error(type_error(between(0,255),-1),_)).
+           must_throw(invoke('uuid-name'(Version,dns,"x",_)),
+             error(metta_assertion_failed([assertEqualMsg,_,1,
+                    [quote,['uuid-name',_,Version]]],_,_),_))),
+    forall(member(Namespace,[missing,"bad"]),
+           must_throw(invoke('uuid-name'(5,Namespace,"x",_)),
+             error(metta_assertion_failed([assertEqualMsg,_,true,
+                    [quote,['uuid-bytes',_,Namespace]]],_,_),_))),
+    invoke('uuid-name'(5,dns,7,Typed)),
+    assertion(Typed == ['Error',['uuid-name',5,dns,7],['BadArgType',3,'String','Number']]),
+    must_throw(invoke('uuid-of-bytes'([1,2],_)),
+      error(metta_assertion_failed([assertEqualMsg,_,32,
+             [quote,['uuid-of-bytes',_,[1,2]]]],_,_),_)),
+    forall(member(Byte,[256,-1]),
+           must_throw(invoke('uuid-of-bytes'([Byte],_)),
+             error(type_error(byte,Byte),context('uuid-of-bytes',_)))).
+
+test(byte_and_field_equations_are_callable_data) :-
+    forall(member(Head,['uuid-bytes','uuid-of-bytes','uuid-version','uuid-variant']),
+           ( once(eval_expr([match,'&self',[=,[Head,Arg],Body],
+                            [quote,['|->',[Arg],Body]]],Recipe)),
+             once(eval_expr([eval,Recipe],Function)),
+             ( Head == 'uuid-of-bytes' -> length(Input,16), maplist(=(0),Input)
+             ; Input="00000000-0000-0000-0000-000000000000" ),
+             once(eval_expr([Function,[quote,Input]],Actual)),
+             Goal=..[Head,Input,Expected],invoke(Goal),assertion(Actual == Expected) )).
+
+test(generated_identifier_queries_have_data_independent_costs) :-
+    findall(UUID,(between(1,32,_),'uuid-random!'(UUID)),UUIDs),
+    forall(member(Head,['uuid-version','uuid-variant']),
+           ( UUIDs=[First|_],once(eval_expr([Head,First],_)),
+             findall(Cost,(member(UUID,UUIDs),statistics(inferences,Before),
+                           once(eval_expr([Head,UUID],_)),statistics(inferences,After),
+                           Cost is After-Before),Costs),
+             sort(Costs,Unique),assertion(Unique=[_]) )).
+
+test(unbound_versions_and_namespaces_are_refused_without_binding) :-
+    refused('uuid-name'(Version,dns,"x",_)), assertion(var(Version)),
+    refused('uuid-name'(5,Namespace,"x",_)), assertion(var(Namespace)).
 
 :- end_tests(lib_uuid).

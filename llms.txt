@@ -4975,8 +4975,11 @@ parsing, explicit-zone formatting, date records, calendar fields and addition;
 `lib_derived` the derived forms the engine keeps FUSED
 into its compiler, written out as equations; `lib_dict` a dictionary that IS a
 space, with defaulted lookup, update, merge and pop; `lib_doc` keeps the old doc import path working after
-its vocabulary moved; `lib_encoding` UTF-8, hex and base64 over the byte shape lib_file's doors use,
-base64 taking its alphabet as an argument and every malformed input refused naming
+its vocabulary moved; `lib_encoding` shares strict byte/text boundaries and
+UTF8/base64 host codecs. Hex uses one ASCII alphabet, arithmetic and segments in
+MeTTa. Base64 takes its alphabet as an argument; its host URL decoder also reads
+classic digits. Cancellation, resource errors and unrelated decoder exceptions
+propagate unchanged. Malformed input raises a boundary error or assertion naming
 what was wrong; `lib_file` text and byte files whole or through handles, publication by rename, directory creation, tree copy and removal, renaming, a link-aware walk and glob, lexical and resolved paths, entry kinds, symbolic links, scoped handles and temporary directories, queryable metadata and process streams;
 `lib_functional` derives collection operations in MeTTa: zip and unzip, drop,
 chunk and window, one-level and every-level flatten, partition, group and sort
@@ -5171,8 +5174,12 @@ ASCII, and authorities remain encoded data rather than resolved addresses;
 `lib_uuid` explicit random
 and time UUIDs, UTF-8 namespace/name identifiers for versions 3 and 5, validation,
 version/variant fields, version-1 timestamps, nil and lossless 16-byte conversion;
-custom UUID namespaces and embedded NUL names are preserved, and version 1 may
-expose the host's MAC address; `lib_vector` exact finite numeric kernels with
+custom UUID namespaces and embedded NUL names are preserved. Namespaces, names,
+nil, byte conversions and field formulas are MeTTa equations that can be
+reconstructed as functions. One field layout drives validation and formatting;
+generation, strict validation and version-1 timestamps remain native. Shape
+assertions make recording replay conservative. Version 1 may expose the host's
+MAC address; `lib_vector` exact finite numeric kernels with
 one final rounding and IEEE signs/classes; MeTTa equations derive fill from
 range, random construction from foldall/cons-atom and the core seeded draws,
 and cosine-of-normalized from dot. Complete validation precedes entropy;
