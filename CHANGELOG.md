@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Python call contracts have a native representation of parameter names,
+  kinds, annotations and defaults. Native graph edits change the contract
+  reconstructed by Python; named annotations preserve their Python species
+  through storage and digest operations.
 - Reference maps accept call patterns that select an input arity and constrain
   arguments while sharing the defining body and its declarations. Self
   references alias a space's own public definitions once. Pattern variables
