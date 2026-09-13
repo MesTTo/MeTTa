@@ -2,6 +2,8 @@
 Purpose: explain Space handles, journal-backed stores, composition, and
 external backing providers.
 Guarantees:
+  - reference call patterns preserve the defining body and its declarations
+    [tested: reference_patterns; commit=WORKTREE]
   - version 5 fast images preserve occurrence identity and resolved reader
     bindings and refuse earlier cache schemas
     [tested: test_image_collision_rule,
@@ -135,6 +137,26 @@ object is the same `Space` handle as every other backing, so query and write
 code does not depend on the persistence implementation. It is the
 event-store half of an event-sourcing page: the journal is the log, and
 subscriptions project changes into read models.
+
+## Live definition references
+
+`target.from_(home)` shares another space's public definitions. A map runs
+once per source head and may answer a new name, a call pattern, several
+targets or none. For example,
+`target.from_(home, S.rename(((S.total, S.pair_total(S.Pair(V.x, V.y))),)))`
+exposes `total` as `pair-total` for a single `Pair` argument. The pattern
+selects the input arity and unifies with the original argument before the
+shared body runs. The defining body's type declarations still apply.
+
+Each invocation gets fresh pattern variables. Repeating a variable constrains
+those positions to unify. Chained references conjoin their patterns. Equal
+patterns reached through several paths share a definition; distinct overlapping
+patterns can each produce an answer. Actual duplicate source equations retain
+their multiplicity. A reference to the receiving space itself aliases its own
+public definitions once, without repeatedly mapping its imported aliases.
+
+The [reference maps example](https://github.com/MesTTo/MeTTa-Kernel/blob/petta/examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/12-reference_maps.metta)
+and its Python twin exercise name maps, call patterns and the default map.
 
 ## A space is a Python container
 

@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Reference maps accept call patterns that select an input arity and constrain
+  arguments while sharing the defining body and its declarations. Self
+  references alias a space's own public definitions once. Pattern variables
+  are fresh on each call; overlapping distinct patterns retain both answers.
 - Python class declarations derive value, entity or prototype storage from
   the completed class. Each class owns a referenced space; entities share
   indexed field facts under occurrence-token handles, while Space subclasses

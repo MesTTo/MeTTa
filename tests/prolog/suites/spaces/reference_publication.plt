@@ -4,6 +4,8 @@
 %   [tested: reference_publication; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: declaration discovery and projection read only matching stored
 %   declarations [tested: reference_publication; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Assumes: reference roots carry their canonical argument-pattern list
+%   [source: engine/metta/references.pl:metta_reference_target/5; commit=WORKTREE].
 % Owns resources: fixtures release their spaces and remove publication tracing.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
@@ -79,7 +81,7 @@ test(metadata_projection_does_not_enumerate_a_providers_population,
     Arrow = [':', 'publication-metadata', ['->', 'Number', 'Number']],
     metta_add_atom(Home, Arrow, Token, true),
     forall(between(1, 512, N), metta_add_atom(Home, [population, N], _)),
-    Face = ['publication-metadata'/2-root(Home, 'publication-metadata', 2)],
+    Face = ['publication-metadata'/2-root(Home, 'publication-metadata', 2, [])],
     publication_pairs(Home,
         findall(Key-Row,
                 metta_engine:metta_reference_metadata(Receiver, Face, Key, Row),

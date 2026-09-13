@@ -1,5 +1,5 @@
-; Purpose: demonstrate head maps and the receiving space's default map.
-; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/12-reference_maps.metta; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+; Purpose: demonstrate name and argument-pattern maps and a space's default map.
+; [tested: examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/12-reference_maps.metta; commit=WORKTREE].
 
 ; only selects named public heads; except selects the remaining public heads.
 (from ../examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/references/maps (only (map-value)))
@@ -17,8 +17,13 @@
 !(test (module.map-value 2) 3)
 !(test (collapse (map-label)) (label))
 
-; A map may answer several symbols or none. Lambda and partial application
-; are ordinary functions here; the five map helpers have no special loader.
+; A call pattern constrains inputs while retaining the same body and arrow.
+(from ../examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/references/maps
+      (rename ((map-value (only-two 2)))))
+!(test (only-two 2) 3)
+
+; A map may answer several names or patterns, or none. Lambda and partial
+; application are ordinary functions; the five helpers have no special loader.
 (from ../examples/ch20-extending-the-engine/20-04-modules-and-the-catalog/_fixtures/references/maps
       (|-> ($h) (if (== $h map-value) (superpose (lambda-one lambda-two)) (empty))))
 !(test (lambda-one 2) 3)

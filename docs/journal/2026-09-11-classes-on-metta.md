@@ -1980,3 +1980,105 @@ lane passes both claims with equal final stores, native 2530792 and Python
 self-test pass. Evidence initially misses six references to the untracked
 test file; staging that file makes it part of the gate's test inventory.
 The focused jscpd report covers all six Python files and finds zero clones.
+
+## 2026-09-13: method entries share definitions through argument patterns
+
+Measured: a constructor-pattern forwarding equation adds repeated parameter
+checks before its shared body. In `ai-classes-c18-field-selector.py
+--let-union --atom-receiver`, 10000 native calls cost 80010 for the plain
+handwritten body and 90010 for its entry. The refined-argument entry costs
+110018 against 80010. A record argument costs 140018 at the entry and 120018
+in the shared body. Logs: `ai-tmp/ai-classes-c18-field-let-union.log`.
+
+The field selector itself is an inline disjunction of `let` constructor
+patterns followed by one body. It retains the original receiver, uses two
+fields and costs the same as matching the constructor in the head. The
+earlier tuple-returning `unify` selector invoked dynamic heads and generic
+matching; it is rejected. Returning Atom from an ordinary helper is also
+rejected: the scalar control returned `(+ 3 5)` instead of `8`.
+
+Measured: the existing native reference alias with an input unification
+costs exactly one call above the shared body for plain, refined and record
+arguments. `ai-classes-c18-field-selector.py --let-union --native-alias`
+models that native binding while retaining both declared arrows. Plain and
+refined cases cost 80010/90010, and the record case 120018/130018, shared
+body/alias over 10000 calls. Log: `ai-tmp/ai-classes-c19-pattern-alias.log`.
+Eight-inference allocation variations occur in these bridge measurements.
+The separate plunit witness compares slopes in one native process.
+
+One handwritten record clause costs 100018; the later clause and the shared
+body retain an additional result protocol and cost 120018. Compiling the first
+clause before its callee's equation metadata is forced could explain the
+difference, but this remains a hypothesis. The cheaper clause is not evidence of equal generated
+code. No compiler change follows from it without a semantic reproduction.
+
+Decided: let a FROM mapper return either a name or a full call pattern. A
+pattern selects an input arity and constrains the native alias's arguments;
+the defining body and its type declarations remain shared. Each distinct
+pattern path is a clause, so overlapping distinct patterns may answer twice.
+Alpha-equal patterns on diamond paths share one root and preserve the
+provider's actual clause multiplicity. A chain conjoins its patterns with
+fresh variables. Patterns are finite structural terms with ordinary variables.
+The existing visited-space traversal bounds cycles. A self reference reads
+its own public definitions once, which lets qualified bodies and their public
+entries live in the same class space. Its renamed declarations project just
+as declarations from another space do.
+
+The representation extends the existing reference binding because ordinary
+forwarding equations cannot share the checked entry at the required cost.
+It names no class, library or method. Rejected: suppressing helper contracts,
+cloning inherited MeTTa bodies, and a separate method registration service.
+The reference mapper previously refused every call-pattern result, including
+a `rename` result when the target name already had a body. The captured
+refusal is in `ai-tmp/ai-classes-c19-pattern-map.log`. The initial native
+suite fails all 15 cases at the missing mapping or self-reference behavior
+in `ai-tmp/ai-classes-c19-patterns-before.log`.
+
+The first validation exposes two fixture errors: `with_metta_module` requires
+the test helper's explicit module, and a withdrawn renamed binding answers
+nothing after its rollback replay. The ordinary name-only alias has the same
+answer and retires both its slot and roots, measured in
+`ai-tmp/ai-classes-c19-plain-rollback.log`. No runtime change is made for that
+expectation.
+
+The first emitted whole-list unification adds a second native call. Its
+regression fails `Assertion: 7000-5000=:=1000` for all three contracts.
+Emitting one unification per input becomes native clause instructions; all
+15 cases pass in `ai-classes-c19-patterns-inline.log`, including exact +1
+slopes for Number, Annotated and record inputs. Existing reference,
+publication, provider, loading, scope and head-property suites pass. The
+cohort initially names the head-property file under spaces; its actual
+evaluation path passes all 9 tests in the corrected log. The two Python
+reference files pass 16 tests, including lazy self aliases, source mutation,
+metadata and mapper/visibility refusals. Example and metadata checks remain
+open until their recorded commands finish.
+
+Verified: the extended pattern suite passes 16 cases, including distinct
+overlapping paths. The map example passes 12 claims. Its min-of-three fresh
+processes cost 260533 native and 270967 Python inferences. The reference rows
+and grain twins measure 144550/95712 and 2532869/14263254 respectively.
+Commands are `python extensions/python/tools/twin_coverage.py --measure
+--rounds 3` followed by the paths in the updated twin headers. Logs are
+`ai-classes-c19-map-measure.log` and `ai-classes-c19-consumer-measure.log`.
+The four-example lane proves 32 claims and equal stores; its failures are two
+old point budgets and the loading example's full-corpus protocol requirement.
+The rows budget also fails at pristine c75181adc (65601 against 66933), as
+does that protocol restriction. Its 1836 source files were checked against the
+commit objects before control execution. The grain example did not exist at
+that cut; its revised pin covers the changed publication work here.
+
+Ruff, evidence and provenance-pin-selftest pass. The clone scans cover all
+five changed Prolog files and three changed Python files and find no clones.
+Native layering passes 1252 calls under 93 contracts. Python layering reports
+14 violations in the earlier grain implementation; the pristine cut passes.
+Those imports will be repaired as a separate logical change before methods.
+The retained-reference scope witness also passes. Running engine/check.sh
+directly failed with `run: not found`; the root check.sh owns that function,
+and its layering lane supplies the actual native result.
+
+The updated reference rows, maps and grain twins pass their normal lane:
+27 claims, three equal stores and zero findings. The observed Python counts
+are 95712, 270967 and 14263252; the grain count is within the existing
+four-inference allowance of its min-of-three pin. The command is
+`python extensions/python/tools/twin_coverage.py` followed by those three
+example paths; `ai-classes-c19-reference-twins-verified.log` records the run.
