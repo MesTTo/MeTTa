@@ -5,7 +5,7 @@
 % counterpart answers over generated text, a whole parse is the prefix parse whose
 % rest is empty, the combinator laws hold over generated grammars, a grammar may
 % recurse through ref, the classes are ASCII under any locale, and every malformed
-% form is named [tested: lib_parsing; commit=WORKTREE].
+% form is named [tested: lib_parsing; commit=3c1d074a2069bc150a95cedc1946e0627a17a132].
 % Owns resources: none; every value is a term.
 
 :- use_module(collection_test_support).

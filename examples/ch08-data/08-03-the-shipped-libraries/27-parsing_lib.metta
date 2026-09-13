@@ -1,5 +1,5 @@
 ; Purpose: compose grammar values and inspect their ordinary parser functions.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/27-parsing_lib.metta; commit=3c1d074a2069bc150a95cedc1946e0627a17a132].
 !(import! &self (library lib_parsing))
 ; lib_unicode is beside it for the one primitive that takes a FUNCTION: the
 ; classes here are ASCII, and a Unicode class is (char-if f) over unicode-is.
