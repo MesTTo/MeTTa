@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Compiled Python calls accept `*args` and `**kwargs` from native callable
+  values, host mappings and native keyword spaces. Operand evaluation follows
+  Python order, and named functions, partials and streams read their current
+  native argument contracts across conversion, storage and later rewrites.
 - Native callable contract lookup preserves distinct lambda binders and live
   references to authored functions, including functions already compiled
   before conversion. Reading a contract cannot specialize the caller's body.

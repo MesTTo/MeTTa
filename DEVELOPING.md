@@ -50,8 +50,8 @@ foundations; deferred body imports reach strictly higher orders. Run
 | 3 | `_atoms` | `_errors`, `seam` |
 | 4 | `vocabularies` | `_atoms` |
 | 5 | `_catalog` | `vocabularies`, `_atoms`, `_errors`, `seam` |
-| 5 | `_compile` | `_atoms`, `_errors`, `vocabularies` |
 | 6 | `_binding` | `_catalog`, `_atoms`, `_errors`, `seam` |
+| 6 | `_compile` | `_catalog`, `_atoms`, `_errors`, `vocabularies` |
 | 6 | `doors` | `_catalog`, `vocabularies`, `_atoms`, `_layers` |
 | 7 | `_spaces` | `_binding`, `doors`, `_catalog`, `_atoms`, `_errors`, `seam`, `_version` |
 | 8 | `_declare` | `_spaces`, `_compile`, `doors`, `_catalog`, `_atoms`, `_errors`, `seam` |
