@@ -1,7 +1,7 @@
 % Purpose: verify MeTTa sample programs, numeric domains and generator ownership.
 % Guarantees: all ten moment checks and the preceding occurrence/extreme cases
 % exercise the public equations, including demand, cancellation and concurrency.
-% [tested: lib_random; commit=WORKTREE].
+% [tested: lib_random; commit=1d0b78a359f58de49f2f98bed50a6480d56cd5f6].
 % Owns resources: each test borrows and restores its host generator state;
 % concurrent/3 joins its workers and the inference-limit test closes its scope.
 

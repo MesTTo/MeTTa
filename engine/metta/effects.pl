@@ -5,11 +5,11 @@
 % effect plans while native floors and cache admission retain their policy.
 % [tested: effects_lattice:late_library_declarations_reach_effect_plans,
 % effects_lattice:late_library_profiles_bound_catalog_declarations;
-% commit=WORKTREE].
+% commit=1d0b78a359f58de49f2f98bed50a6480d56cd5f6].
 % Guarantees: a computed function head retains queued definition analysis and
 % still treats its returned callable as dynamic.
 % [tested: effects_lattice:a_computed_head_keeps_its_queued_definitions;
-% commit=WORKTREE].
+% commit=1d0b78a359f58de49f2f98bed50a6480d56cd5f6].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.

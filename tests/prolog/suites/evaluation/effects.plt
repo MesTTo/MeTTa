@@ -11,10 +11,10 @@
 % startup builtin registration or broader cache admission.
 % [tested: effects_lattice:late_library_declarations_reach_effect_plans,
 % effects_lattice:late_library_profiles_bound_catalog_declarations;
-% commit=WORKTREE].
+% commit=1d0b78a359f58de49f2f98bed50a6480d56cd5f6].
 % Guarantees: computed heads retain the effects of their definition bodies.
 % [tested: effects_lattice:a_computed_head_keeps_its_queued_definitions;
-% commit=WORKTREE].
+% commit=1d0b78a359f58de49f2f98bed50a6480d56cd5f6].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

@@ -1,5 +1,5 @@
 ; Purpose: inspect, rewrite and run sample programs through ordinary MeTTa control.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/36-random_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/36-random_lib.metta; commit=1d0b78a359f58de49f2f98bed50a6480d56cd5f6].
 !(import! &self (library lib_random))
 
 ; A sampler is code held as an expression. eval draws once; repeat owns repetition.
