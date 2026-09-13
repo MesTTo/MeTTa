@@ -1,7 +1,7 @@
 % Purpose: compare public MeTTa enumerations with independent counts and models.
 % Guarantees: order, multiplicity, exact arithmetic, literal values and streaming
 % first answers survive the derived operations.
-% [tested: lib_combinatorics_surface; commit=WORKTREE].
+% [tested: lib_combinatorics_surface; commit=e1be99ea1c08f70444c1c35cada441e089777906].
 :- use_module(collection_test_support).
 :- use_module(library(lists), [append/3,member/2,numlist/3]).
 :- use_module(library(apply), [foldl/4]).

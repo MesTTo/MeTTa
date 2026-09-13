@@ -4,11 +4,11 @@
 ; are unique ground terms and every loss uses one shared integer scale.
 ; Guarantees: all examples return exact reduced ratios in input order [tested:
 ; examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/11-weighted_subset_posterior.metta;
-; commit=WORKTREE].
+; commit=e1be99ea1c08f70444c1c35cada441e089777906].
 ; Guarantees: literal identities, alternative input laws and reconstructed
 ; equations retain their ordinary MeTTa behavior [tested:
 ; examples/ch22-a-reasoner-you-can-serve/22-02-weighted-answers/11-weighted_subset_posterior.metta;
-; commit=WORKTREE].
+; commit=e1be99ea1c08f70444c1c35cada441e089777906].
 ; Fails when: the observation has zero mass; call
 ; weighted-subset-mass-independent to distinguish impossibility before asking
 ; for a conditional posterior.

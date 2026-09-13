@@ -1,10 +1,10 @@
 % Purpose: compare derived MeTTa transformations with independent list models.
 % Guarantees: generated inputs cover slicing, flattening, stable keys, branching
 % callbacks, held controls, literal values and variable identity.
-% [tested: lib_functional; commit=WORKTREE].
+% [tested: lib_functional; commit=e1be99ea1c08f70444c1c35cada441e089777906].
 % Guarantees: held, eager, lambda and partial callbacks share the same literal
 % value application, including zero or variadic arguments.
-% [tested: lib_functional; commit=WORKTREE].
+% [tested: lib_functional; commit=e1be99ea1c08f70444c1c35cada441e089777906].
 % Owns resources: the loop fixture uses one garbage-collected state cell.
 :- use_module(collection_test_support).
 :- use_module(library(lists), [append/2,append/3,flatten/2,last/2,member/2,

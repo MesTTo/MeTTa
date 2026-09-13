@@ -3,13 +3,13 @@
 %   - equivalent exact input ratios canonicalize to the same answer and
 %     integer and float identities remain distinct [tested:
 %     weighted_subset:equivalent_input_ratios_are_canonical,
-%     weighted_subset:numeric_lookalikes_are_distinct_ids; commit=WORKTREE]
+%     weighted_subset:numeric_lookalikes_are_distinct_ids; commit=e1be99ea1c08f70444c1c35cada441e089777906]
 %   - twenty-four unit-loss choices truncated at target twelve retain thirteen
 %     cells, rather than one cell per configuration [tested:
 %     weighted_subset:repeated_unit_losses_have_target_bounded_rows;
-%     commit=WORKTREE]
+%     commit=e1be99ea1c08f70444c1c35cada441e089777906]
 %   - literal identities, caller alternatives and reconstructed equations retain
-%     their ordinary MeTTa semantics [tested: weighted_subset; commit=WORKTREE].
+%     their ordinary MeTTa semantics [tested: weighted_subset; commit=e1be99ea1c08f70444c1c35cada441e089777906].
 
 :- use_module(collection_test_support).
 :- use_module(library(lists), [last/2,max_list/2,member/2,numlist/3]).
