@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Python twins belong to their native definition space and head. Independent
+  closures and aliases retain their own clauses, clear starts a new family,
+  and compiling source alone leaves installed twins unchanged.
 - Defined functions and converted native callables preserve already computed
   atom arguments and record fields. Typed entries inspect the supplied value;
   rule-variable calls retain their staged term and ground calls still fold
