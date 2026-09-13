@@ -1,5 +1,5 @@
 ; Purpose: compose finite domains, traversal, assertions and first witnesses.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/43-testing_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/43-testing_lib.metta; commit=7fad61bab72098722b27091a94282ff69989920e].
 !(import! &self (library lib_combinatorics))
 !(import! &self (library lib_testing))
 

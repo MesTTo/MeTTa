@@ -1,7 +1,7 @@
 % Purpose: verify testing through ordinary generators, traversal and assertions.
 % Guarantees: independent products and bag models cover multiplicity, literal
 % values, binding, calling modules and generator cleanup on every exit.
-% [tested: lib_testing; commit=WORKTREE].
+% [tested: lib_testing; commit=7fad61bab72098722b27091a94282ff69989920e].
 % Owns resources: fixtures destroy message queues and release execution spaces.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
