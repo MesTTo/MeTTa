@@ -16,12 +16,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   every exit, and conversion precedes repeat selection. Help shares declaration
   validation; raw process arguments retain empty and numeric spellings. Seven
   native optparse corrections have tracked reproductions and lift conditions.
-- `lib_testing` generates finite integer, choice and list families, retaining
-  duplicate occurrences and literal terms. A counted universal assertion checks
-  complete function answer bags through the engine's existing comparison and
-  failure report. First-witness search stops at its first matching input and
-  closes the generator. Empty domains, independent variable copies and calling
-  modules have executable examples and native and Python model tests.
+- `lib_testing` imports the finite generators used by property checks. General
+  `forall` and core assertions express universal checks; `foldall` counts and
+  `once` selects the first filtered answer. Domains, traversal and verdicts vary
+  independently. The example documents literal values, explicit variable copies,
+  exact answer bags and ordinary selected bindings. Native and Python model
+  tests cover products, multiplicity, calling modules and generator cleanup.
 - `lib_database` owns independent persistent stores through opaque native engines.
   Ground native values retain order and duplicates; held queries use the core
   matcher and removal deletes one exactly equal occurrence. Directory locks

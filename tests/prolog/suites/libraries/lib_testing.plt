@@ -1,25 +1,21 @@
-% Purpose: verify finite generators, quantified bags and generator cleanup.
-% Guarantees: independent products and bag models preserve occurrence counts;
-% fixtures exercise bounds, variable copying, module context and failure exits.
-% [tested: lib_testing; commit=a283d39342d891aae0edc58949e2ccbb48911cd8].
+% Purpose: verify testing through ordinary generators, traversal and assertions.
+% Guarantees: independent products and bag models cover multiplicity, literal
+% values, binding, calling modules and generator cleanup on every exit.
+% [tested: lib_testing; commit=WORKTREE].
 % Owns resources: fixtures destroy message queues and release execution spaces.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
-:- use_module('../../../../lib/lib_testing/lib_testing').
 :- use_module(library(lists), [member/2,numlist/3]).
-:- use_module(library(aggregate), [aggregate_all/3]).
 :- initialization(testing_suite_setup).
 
 testing_suite_setup :-
-    import_prolog_functions(['test-integers','test-choices','test-lists',
-                            'test-forall','test-witness','testing-suite-owned',
-                            'testing-suite-raise','testing-suite-bag',
-                            'testing-suite-binding'],_),
+    import_prolog_functions(['testing-suite-owned','testing-suite-raise',
+                            'testing-suite-bag','testing-suite-binding'],_),
     filereader:metta_host_run_source("!(import! &self (library lib_testing))",'&self',[],_).
 
 'testing-suite-owned'(Queue,Value) :-
-    setup_call_cleanup(true,
+    call_cleanup(
         (thread_send_message(Queue,opened),between(1,3,Value),
          thread_send_message(Queue,visited(Value))),
         thread_send_message(Queue,closed)).
@@ -30,6 +26,8 @@ testing_suite_setup :-
 :- begin_tests(lib_testing).
 :- meta_predicate must_throw(0,?), with_queue(1).
 
+eval_expr(Expression,Answer) :-
+    current_metta_module(Module),eval_metta_in_module(Module,Expression,Answer).
 must_throw(Goal,Expected) :-
     catch(Goal,Error,true),assertion(nonvar(Error)),assertion(Error=Expected).
 with_queue(Goal) :-
@@ -40,128 +38,124 @@ messages(Queue,Values) :-
     -> Values=[Value|Rest],messages(Queue,Rest)
     ; Values=[] ).
 
-test(integer_intervals_match_the_native_finite_range) :-
+test(integer_domains_use_the_existing_exclusive_range) :-
     forall((between(-5,5,Low),between(-5,5,High)),
-        (findall(V,'test-integers'(Low,High,V),Values),
-         (Low=<High->numlist(Low,High,Expected);Expected=[]),assertion(Values==Expected))),
-    Big is 1<<500,High is Big+2,Middle is Big+1,
-    findall(V,'test-integers'(Big,High,V),Values),assertion(Values==[Big,Middle,High]).
+        (findall(V,eval_expr([range,Low,High],V),Values),Last is High-1,
+         (Low<High->numlist(Low,Last,Expected);Expected=[]),
+         assertion(Values==Expected))),
+    Big is 1<<500,High is Big+3,Middle is Big+1,Last is Big+2,
+    findall(V,eval_expr([range,Big,High],V),Values),
+    assertion(Values==[Big,Middle,Last]).
 
-test(integer_bounds_reject_nonintegers_and_unbounded_values) :-
-    forall(member(Low-High,[_-1,0-_,1.5-2,0-1.5,a-2,0-inf,0-1.0Inf]),
-           must_throw('test-integers'(Low,High,_),error(_,_))).
-
-test(choices_keep_occurrences_and_literal_values) :-
+test(indexing_keeps_occurrences_and_literal_values) :-
     string_codes(Nul,[97,0,98]),Items=[[],a,a,Nul,['+',1,2],1,1.0],
-    findall(V,'test-choices'(Items,V),Values),assertion(Values==Items),
-    findall(V,'test-choices'([],V),Empty),assertion(Empty==[]).
+    length(Items,Size),
+    findall(V,eval_expr(['index-atom',[quote,Items],[range,0,Size]],V),Values),
+    assertion(Values==Items),
+    findall(V,eval_expr(['index-atom',[],[range,0,0]],V),Empty),
+    assertion(Empty==[]).
 
-test(choice_variables_are_fresh_but_internal_sharing_survives) :-
-    once('test-choices'([[row,X,X]],[row,A,B])),
-    assertion(A==B),assertion(A\==X),A=bound,assertion(var(X)).
+test(copying_runtime_values_is_explicit) :-
+    eval_expr(['index-atom',[quote,[[row,X,X]]],0],Choice),
+    eval_expr([copy_term,[quote,Choice]],[row,A,B]),
+    eval_expr([copy_term,[quote,Choice]],[row,C,D]),
+    assertion(A==B),assertion(C==D),assertion(A\==C),
+    A=bound,assertion(var(C)),assertion(var(X)).
 
-test(choices_reject_variables_improper_lists_and_cycles) :-
-    Cycle=[x|Cycle],
-    forall(member(Items,[_Variable,[x|tail],Cycle,[[x,Cycle]]]),
-           must_throw('test-choices'(Items,_),error(_,_))).
-
-test(list_families_match_an_independent_product_model) :-
+test(list_lengths_and_populations_compose_as_a_product) :-
     forall((member(Pool,[[],[a],[a,a],[a,b],[a,b,c]]),
             between(0,3,Minimum),between(0,3,Maximum)),
-        (findall(L,'test-lists'(['test-choices',Pool],Minimum,Maximum,L),Actual),
+        (End is Maximum+1,
+         findall(L,eval_expr(['cartesian-power',[quote,Pool],
+                             [range,Minimum,End]],L),Actual),
          findall(L,(between(Minimum,Maximum,N),model_list(N,Pool,L)),Expected),
          assertion(Actual==Expected))).
 model_list(0,_,[]) :- !.
 model_list(N,Pool,[Value|Rest]) :-
     member(Value,Pool),Next is N-1,model_list(Next,Pool,Rest).
 
-test(list_variables_are_independent_between_positions) :-
-    once('test-lists'(['test-choices',[[row,X,X]]],2,2,[[row,A,B],[row,C,D]])),
-    assertion(A==B),assertion(C==D),assertion(A\==C),
-    A=left,assertion(var(C)),assertion(var(X)).
-
-test(zero_length_does_not_evaluate_the_element_generator) :-
-    findall(L,'test-lists'(['testing-suite-raise',unused],0,0,L),Lists),
-    assertion(Lists==[[]]),
-    findall(L,'test-lists'(['testing-suite-raise',unused],2,1,L),Reversed),
-    assertion(Reversed==[]).
-
-test(empty_populations_do_not_walk_the_requested_length_interval) :-
-    Huge is 1<<500,statistics(inferences,Before),
-    findall(L,'test-lists'(['test-choices',[]],0,Huge,L),Lists),
-    findall(L,'test-lists'(['test-choices',[]],1,Huge,L),None),
-    statistics(inferences,After),Cost is After-Before,
-    assertion(Lists==[[]]),assertion(None==[]),assertion(Cost<10000).
-
-test(list_bounds_validate_before_running_the_generator) :-
-    forall(member(Min-Max,[-1-2,0-(-1),0-1.5,a-2,_-2,0-_]),
-        must_throw('test-lists'(['testing-suite-raise',unused],Min,Max,_),error(_,_))).
-
-test(element_generator_is_snapshotted_once) :- with_queue(snapshot_case).
+test(a_collected_population_runs_its_generator_once) :- with_queue(snapshot_case).
 snapshot_case(Queue) :-
-    aggregate_all(count,'test-lists'(['testing-suite-owned',Queue],1,2,_),Count),
-    assertion(Count==12),messages(Queue,Events),
+    Expression=[let,Pool,[collapse,['testing-suite-owned',Queue]],
+                [collapse,['cartesian-power',Pool,[range,1,3]]]],
+    eval_expr(Expression,Lists),length(Lists,Count),assertion(Count==12),
+    messages(Queue,Events),
     assertion(Events==[opened,visited(1),visited(2),visited(3),closed]).
 
-test(bag_properties_match_ground_multiset_equality) :-
+test(core_bag_assertions_match_an_independent_multiset_model) :-
     Bags=[[],[a],[b],[a,a],[a,b],[b,a],[b,a,a],["π"],[[],['+',1,2]]],
     forall((member(Actual,Bags),member(Expected,Bags)),
         (msort(Actual,SortedActual),msort(Expected,SortedExpected),
-         ( 'test-witness'(['test-choices',[case]],
-                         ['testing-suite-bag',[quote,Actual]],Expected,Found)
-         -> assertion(SortedActual==SortedExpected),assertion(Found==case)
-         ; assertion(SortedActual\==SortedExpected) ))).
+         Check=['assertEqualToResult',['testing-suite-bag',[quote,Actual],case],Expected],
+         ( SortedActual==SortedExpected
+         -> eval_expr(Check,true)
+         ; must_throw(eval_expr(Check,_),error(metta_assertion_failed(_,_,_),_))
+         ))).
 
-test(universal_checks_count_every_occurrence_including_zero) :-
-    'test-forall'(['test-choices',[a,a,b]],['|->',[_],true],[true],Count),
-    assertion(Count==3),
-    'test-forall'(['test-choices',[]],['testing-suite-raise'],[true],Zero),
-    assertion(Zero==0),
-    'test-forall'(['test-integers',1,3],['|->',[_],[empty]],[],Three),
-    assertion(Three==3).
+test(forall_accepts_a_true_answer_and_foldall_counts_occurrences) :-
+    eval_expr([forall,[superpose,[a,a,b]],['|->',[_],true]],true),
+    eval_expr([forall,[superpose,[]],'testing-suite-raise'],true),
+    eval_expr([foldall,['|->',[_Value,Count],['+',Count,1]],
+               [superpose,[a,a,b]],0],3),
+    eval_expr([foldall,['|->',[_Item,Initial],['+',Initial,1]],
+               [superpose,[]],0],0),
+    eval_expr([forall,[range,0,2],['|->',[_],[superpose,[false,true]]]],true),
+    eval_expr([forall,[range,0,2],['|->',[_],[empty]]],false),
+    eval_expr([forall,[range,0,2],['|->',[_],7]],false).
 
-test(boolean_properties_require_exactly_one_true_answer) :-
+test(forall_and_an_assertion_preserve_exact_boolean_bags) :-
     forall(member(Actual,[[],[false],[true,true],[7],[true,false]]),
-        must_throw('test-forall'(['test-choices',[case]],
-                                ['testing-suite-bag',[quote,Actual]],[true],_),
+        must_throw(eval_expr([forall,[range,0,1],
+            ['|->',[X],['assertEqualToResult',
+                        ['testing-suite-bag',[quote,Actual],X],[true]]]],_),
                    error(metta_assertion_failed(_,_,_),_))).
 
-test(counterexample_reports_the_input_and_missing_and_excess_bags) :-
-    must_throw('test-forall'(['test-integers',0,3],['|->',[X],['<',X,2]],[true],_),
+test(a_failed_assertion_reports_its_actual_missing_and_excess_bags) :-
+    must_throw(eval_expr(['assertEqualToResult',[superpose,[1,1]],[1,2]],_),
         error(metta_assertion_failed(
-            ['test-forall',['test-integers',0,3],[_,[quote,2]],[true]],[true],[false]),
-            context('test-forall',_))).
+            ['assertEqualToResult',[superpose,[1,1]],[1,2]],[2],[1]),_)).
 
-test(witness_commits_to_the_first_input_and_closes_the_generator) :- with_queue(witness_case).
+test(once_commits_to_the_first_filtered_input_and_closes_the_generator) :-
+    with_queue(witness_case).
 witness_case(Queue) :-
-    findall(V,'test-witness'(['testing-suite-owned',Queue],['|->',[X],['>=',X,2]],[true],V),Values),
+    findall(V,eval_expr([once,[let,X,['testing-suite-owned',Queue],
+                              [if,['>=',X,2],X,[empty]]]],V),Values),
     assertion(Values==[2]),messages(Queue,Events),
     assertion(Events==[opened,visited(1),visited(2),closed]).
 
-test(generator_cleanup_survives_property_failure_and_exception) :-
-    with_queue(assertion_cleanup),with_queue(exception_cleanup).
+test(generator_cleanup_survives_success_failure_and_exceptions) :-
+    with_queue(success_cleanup),with_queue(assertion_cleanup),
+    with_queue(exception_cleanup).
+success_cleanup(Queue) :-
+    eval_expr([forall,['testing-suite-owned',Queue],
+               ['|->',[X],[test,['<',X,4],true]]],true),
+    messages(Queue,Events),
+    assertion(Events==[opened,visited(1),visited(2),visited(3),closed]).
 assertion_cleanup(Queue) :-
-    must_throw('test-forall'(['testing-suite-owned',Queue],['|->',[X],['<',X,2]],[true],_),
-               error(metta_assertion_failed(_,_,_),_)),
-    messages(Queue,Events),assertion(Events==[opened,visited(1),visited(2),closed]).
+    must_throw(eval_expr([forall,['testing-suite-owned',Queue],
+                          ['|->',[X],[test,['<',X,2],true]]],_),
+               error(_,_)),
+    messages(Queue,Events),
+    assertion(Events==[opened,visited(1),visited(2),closed]).
 exception_cleanup(Queue) :-
-    must_throw('test-witness'(['testing-suite-owned',Queue],'testing-suite-raise',[true],_),
-               testing_function_error(1)),
+    must_throw(eval_expr([forall,['testing-suite-owned',Queue],
+                          'testing-suite-raise'],_),testing_function_error(1)),
     messages(Queue,Events),assertion(Events==[opened,visited(1),closed]).
 
-test(quantification_does_not_bind_the_callers_generator_template) :-
-    'test-witness'(['testing-suite-binding',Original],['|->',[_],true],[true],Found),
-    assertion(Found==[row,bound]),assertion(var(Original)).
+test(once_keeps_its_selected_binding_and_forall_quantifies_it) :-
+    eval_expr([once,['testing-suite-binding',Original]],Found),
+    assertion(Found==[row,bound]),assertion(Original==bound),
+    eval_expr([forall,['testing-suite-binding',Quantified],
+               ['|->',[_],true]],true),
+    assertion(var(Quantified)).
 
-test(expected_bags_and_cyclic_calls_refuse_before_generation) :-
-    Cycle=[Cycle],
-    forall(member(Expected,[_Variable,a,[a|tail],Cycle]),
-        (must_throw('test-forall'(['testing-suite-raise',unused],f,Expected,_),error(_,_)),
-         must_throw('test-witness'(['testing-suite-raise',unused],f,Expected,_),error(_,_)))),
-    must_throw('test-forall'(Cycle,f,[],_),error(domain_error(acyclic_term,_),_)),
-    must_throw('test-witness'(['test-choices',[]],Cycle,[],_),error(domain_error(acyclic_term,_),_)).
+test(empty_and_nested_witnesses_use_ordinary_answer_streams) :-
+    findall(V,eval_expr([once,[empty]],V),None),assertion(None==[]),
+    eval_expr([forall,[range,0,3],
+        ['|->',[X],[test,[once,[let,Y,[range,0,3],
+                               [if,['==',X,Y],Y,[empty]]]],X]]],true).
 
-test(generator_and_function_names_resolve_in_each_calling_module) :-
+test(generators_and_callbacks_resolve_in_the_calling_module) :-
     setup_call_cleanup('new-space'(Left),
         setup_call_cleanup('new-space'(Right),context_case(Left,Right),
                            spaces:metta_release_space(Right)),
@@ -170,11 +164,11 @@ context_case(Left,Right) :-
     filereader:metta_host_run_source("!(import! &self (library lib_testing))\n(= (testing-local) 11)\n(= (testing-map $x) 12)",Left,[],_),
     filereader:metta_host_run_source("!(import! &self (library lib_testing))\n(= (testing-local) 21)\n(= (testing-map $x) 22)",Right,[],_),
     spaces:space_module(Left,LM),spaces:space_module(Right,RM),
-    with_metta_module(LM,'test-forall'(['testing-local'],'testing-map',[12],LC)),
-    with_metta_module(RM,'test-forall'(['testing-local'],'testing-map',[22],RC)),
-    assertion(LC==1),assertion(RC==1),
-    with_metta_module(LM,'test-witness'(['testing-local'],'testing-map',[12],LV)),
-    with_metta_module(RM,'test-witness'(['testing-local'],'testing-map',[22],RV)),
-    assertion(LV==11),assertion(RV==21).
+    eval_metta_in_module(LM,[forall,['testing-local'],
+        ['|->',[X],[test,['testing-map',X],12]]],true),
+    eval_metta_in_module(RM,[forall,['testing-local'],
+        ['|->',[Y],[test,['testing-map',Y],22]]],true),
+    eval_metta_in_module(LM,[once,['testing-local']],11),
+    eval_metta_in_module(RM,[once,['testing-local']],21).
 
 :- end_tests(lib_testing).

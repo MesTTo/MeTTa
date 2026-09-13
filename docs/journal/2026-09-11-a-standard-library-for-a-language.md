@@ -4523,3 +4523,75 @@ Measured: three serial rounds after QLF removal give example 347414 and twin
 confirms all 64 claims, equal stored contents and that exact point. Its 263
 remaining findings are the older corpus findings; twins-selftest and Ruff pass.
 Receipts: ai-lib4-cli-measure-literals.log and ai-lib4-cli-twins-literals.log.
+
+## 2026-09-13: derive library behavior through MeTTa composition
+
+Constraint changed: composition in MeTTa takes precedence over native speed.
+The native-first choice in the opening census no longer decides an operation
+already expressible through the language's existing functions and answer streams.
+The comparison is the complete behavior, including data, bindings and cleanup.
+
+Tried: existing forall with test and assertEqualToResult, once over a filtered
+generator, foldall for counting, map-atom with a branching function, and indexed
+selection with copy_term. The 26-claim scratch probe passes, including a
+two-answer function composed twice yielding (2 3 3 4), literal runnable values,
+empty products and independent variable copies. foldall passes the generated
+value before the accumulator; the original counting probe assumed the reverse
+and answered 4 instead of 7. Expression parameters evaluate, so a runnable value
+is quoted before passing it. sealed renames written syntax; copy_term copies an
+evaluated value. Those differences follow the existing language operations.
+Receipt: ai-lib4-composition-probe-complete.log.
+
+Tried: tracked-generator observations around core forall and once. Exhaustion,
+first-witness cut, failed assertion and raised callback exception all emit one
+close. once retains the selected binding; forall leaves its quantified template
+unbound. Receipt: ai-lib4-testing-composition-probe-evaluator.log, ending
+CORE COMPOSITION EXITS PASS. The deliberately caught failed assertion prints
+its existing diagnostic before the probe completes.
+
+Decided for Testing: remove test-integers, test-choices, test-lists, test-forall
+and test-witness. lib_testing becomes a MeTTa import of lib_combinatorics and
+documentation of the composition. range, superpose and cartesian-power already
+supply domains. index-atom selects held values and copy_term requests fresh
+variables explicitly. forall traverses, test or assertEqualToResult judges,
+foldall counts, and once commits to a witness. Keep normal language bindings.
+There is no separate Prolog half, generator interpreter or assertion protocol.
+The example and model suites must exercise those compositions, their empty and
+duplicate cases, literal values, module resolution and each resource exit.
+
+Rejected: retaining the five names as MeTTa wrappers, because the combined
+operations would still obscure traversal, assertion and commitment as independent
+choices. Revisit only if a distinct behavior cannot be expressed by the existing
+operations. The general library's native algorithms and other rows are reviewed
+separately; this decision does not assert that their native implementations are
+all necessary.
+
+Tried: `sh test.sh examples/ch08-data/08-03-the-shipped-libraries/43-testing_lib.metta`
+passes 37 top-level assertions plus the assertions inside ordinary traversals.
+`sh engine/test.sh tests/prolog/suites/libraries/lib_testing.plt` passes 14 tests;
+`python -m pytest extensions/python/tests/ch08_data/test_testing_lib.py -q`
+passes three tests, with 80 generated examples for each product and bag model.
+The twin passes after spelling the existing underscore name as S["copy_term"];
+attribute spelling had constructed the undefined copy-term instead. Its three
+fresh-process measurement is 82978 inferences against the example's 76856.
+The caught bag-error fixture uses repr because its payload is a native compound.
+Generated records pass and jscpd reports zero clones in the two Python files.
+Receipts: ai-lib4-testing-composition-{example-final,native,python,twin-final,
+measure,records,jscpd}.log.
+
+Tried: all 19 required library lanes pass. Full twins confirms the new example's
+37 claims, stored contents and point pin, then reports 17 Python-idiom findings
+in this twin in addition to the 263 older findings. Ordinary assignment, sorted
+bags, next and solve replace those spelled control forms. Two local rung comments
+retain the actual subjects that need the language boundary: copying variables
+inside one answer, and reading a native assertion's missing/excess report.
+The corrected twin passes with no idiom, scan, layout or retired-name findings;
+three fresh processes price it at 74003 inferences against 76856.
+Receipts: ai-lib4-testing-composition-{lanes,twins,twin-idioms-final,
+measure-idioms}.log.
+
+Verified: `sh check.sh ruff twins twins-selftest` confirms all 37 recorded
+Testing claims, equal stored contents and the exact 74003 pin. Ruff and
+twins-selftest pass; full twins returns to the same 263 older findings over
+310 twins, with 54/347 passing files and 3596 proved claims.
+Receipt: ai-lib4-testing-composition-twins-final.log.
