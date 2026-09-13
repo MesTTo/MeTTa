@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Python operations receive native callbacks with the calling program's
+  lexical context. Nested values, async calls and inverse operations retain
+  the same native lookup and observe later edits to the program.
 - Python conversion of evaluated native lambdas executes the assembled
   variadic call, including captured arguments and subsequent native edits.
 - Native union types check refinements against the value at typed calls and
