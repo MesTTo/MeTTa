@@ -1,5 +1,5 @@
 ; Purpose: persist metagraph syntax and derive queries and programs by matching.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/42-database_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/42-database_lib.metta; commit=24b9b7ee948564963a5c3455cd5b412d05afdd2c].
 ; Owns resources: each explicit handle closes below; with-database closes its
 ; callback handles. The temporary directory is removed after the final check.
 !(import! &self (library lib_file))

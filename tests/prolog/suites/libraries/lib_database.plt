@@ -1,7 +1,7 @@
 % Purpose: verify persistent multiset semantics and complete store ownership.
 % Guarantees: generated operations agree with a list model; lifecycle tests
 % exercise independent engines, aliases, cancellation, failed I/O and replay.
-% [tested: lib_database; commit=WORKTREE].
+% [tested: lib_database; commit=24b9b7ee948564963a5c3455cd5b412d05afdd2c].
 % Owns resources: fixtures close stores, join workers, release execution spaces,
 % restore wrapped predicates and delete their temporary directories.
 
