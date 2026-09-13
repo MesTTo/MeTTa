@@ -5382,3 +5382,125 @@ ai-lib4-datastructures-price-final.log,
 ai-lib4-datastructures-records-final.log,
 ai-lib4-datastructures-fulltwins-final.log and
 ai-lib4-datastructures-findings-final-diff.log.
+
+## 2026-09-13: literal code manipulation through the existing basis
+
+The concrete symbolic caller needs exact arbitrary-term replacement with root
+precedence, shared variables and every matching rule. atom-subst replaces one
+written variable; is-member unifies; is-alpha-member tests unifiability despite
+its name. Pairs already supplies exact lookup and all duplicate rows. Functional
+supplies literal flattening, so variable collection composes filtering and
+unique-atom. Python's Atom.vars, Atom.map and Atom.subs already inspect data;
+map/subs are bottom-up and subs has one replacement per key, which differs from
+this caller's topmost answer bag.
+
+Found: Strategy rejects lambda values and its metta call evaluates an eager
+callback's operand, handing3 to a rule inspecting (+ 1 2). Ordinary application
+of a bound operand preserves the original syntax for eager, held and lambda
+callbacks. Co-importing Strategy and Pairs exposes the two repeat/2 definitions:
+zero numeric repetitions exceeds an explicit100000 inference envelope.
+Receipts: ai-lib4-reflect-before.log and ai-lib4-reflect-shape.log.
+
+Decided: keep Strategy's plan algebra and derive its traversal with map-atom,
+segment positions and ordinary calls. Make sequence and choice variadic; rename
+the direct rewrite loop to strategy-repeat while retaining the held repeat plan.
+Add alltd, whose root-success stops descent, following Stratego's existing law:
+https://github.com/metaborg/stratego/blob/35009963ebc99c4fa8c93cae064309186a877d0e/strategolib/trans/strategy/traversal/simple.str2#L306-L308
+Reflect's atom-replace composes alltd with pairs-lookup over ordinary pairs.
+No new substitution interpreter or Replace record is needed. Variables are
+structural occurrences, including binder syntax; lexical capture avoidance is
+not implied. The changed condition is the supplied concrete code-as-data caller.
+
+Tried: an unquoted structural case over defined plan names. Case deliberately
+supports functional patterns: it executed seq before selecting id and lowered
+all into a partial application. The resulting example exceeded its8GiB stack.
+Quote both the case subject and its keys; a four-case probe then preserves
+literal constructor names and segment matching. An initial variadic arrow put
+the splice before a final Atom, which the final_arrow_splice rule refuses.
+One required Atom followed by a final Atom splice describes the same positive
+arity language. These are language rules, not host workarounds. Receipts:
+ai-lib4-reflect-strategy-{examples,examples-fixed,compiled}.log and
+ai-lib4-reflect-literal-case.log.
+
+Found during verification: Minimal's eval takes one equation step, so the old
+typed function frames expose a newly ordinary strategy-eval body as data.
+Derive those type queries and filters with ordinary let/match/if as well.
+Ordinary callbacks can return the explicit Empty sentinel, which Strategy
+interprets as a decline at its callback boundary. A nested equation head in a
+partial-application fixture is rejected with an atom type error; use a normal
+multi-argument equation and its partial application. The15 Reflect native cases
+already pass after quoting; Strategy's remaining failures exercise these
+integration boundaries. Receipt: ai-lib4-reflect-native-quoted.log.
+
+Verified: all13 Strategy cases,15 literal-term cases,20 engine-reflection cases,
+both Strategy examples and the extended Reflect example pass. The Python model
+passes25 cases with seed473239404 after two model corrections. Native decoding
+renames returned variables, so compare each answer together with its original
+variable context up to alpha equivalence; alpha comparison of the answer alone
+would miss broken sharing. Bind a literal Error answer before packaging it:
+an eager lambda argument propagates Error before the packaging body runs.
+Receipts: ai-lib4-reflect-native-final.log, ai-lib4-reflect-python-literal-model.log,
+ai-lib4-reflect-strategy-examples-composed.log and ai-lib4-reflect-example.log.
+
+Supersedes the Empty-sentinel choice above: the complete literal audit found
+atom-replace(a,((a Empty))) returning a. A rule's no-answer result must differ
+from a literal symbol. Removing the callback filter alone is insufficient:
+collapse-bind invokes the engine's ordinary answer collector, which prunes bare
+Empty. Collect one-element expressions and unwrap after restoring bindings.
+This follows the engine's aggregation semantics and adds no host workaround.
+Every caller that meant strategy failure now writes (empty). The new native
+regression first loses three of four replacement combinations, then passes;
+all16 literal-term and13 Strategy tests pass. Receipts:
+ai-lib4-reflect-empty-{before,layers,regression-before,fixed,boxed}.log.
+
+The phrasebook initially refuses three new Strategy declarations because its
+separate _STRATEGY_LAWS table lacks their names. Every Strategy head now has
+an @doc, so derive the explanation from that same declaration row instead of
+maintaining another registry. Render parameter splices from the arrow. The
+generator still refuses a missing description; positive and negative controls
+cover a newly declared head and a removed @desc. The existing381-row phrasebook
+denominator is unchanged. The pow-math note now describes its already-shipped
+integer-preserving behavior while retaining the existing floating example.
+
+README validation caught executable expected values and an equation-shaped let
+pattern that evaluates instead of destructuring. Quote the literal expectations
+and reconstruct a function directly in match's template, as the catalog example
+already does. The resulting13 checks pass before the Empty examples are added.
+Receipts: ai-lib4-reflect-readme{,-fixed,-literals,-final}.log.
+Ruff passes; jscpd finds0 clones across1380 lines in four Python files. These
+tools do not claim semantic clone coverage for MeTTa or Prolog.
+
+## 2026-09-14: verified literal rewriting and derived Strategy documentation
+
+Verified: 49 native tests, 26 Python model cases and 15 README claims pass.
+The three examples pass; Reflect proves59 claims and Strategy internals23.
+Fresh measurements read example1194613/twin1256535 for Reflect and
+example395582/twin389508 for Strategy. The latter supersedes the intermediate
+21-claim measurement. Full twins confirms equal claims and stored contents;
+its257 findings are exactly the preceding258 minus the renewed Strategy point,
+with no additions. Receipts: ai-lib4-reflect-native-empty-final.log,
+ai-lib4-reflect-python-empty-final.log, ai-lib4-reflect-readme-complete.log,
+ai-lib4-reflect-price-final.log, ai-lib4-reflect-strategy-price-final.log,
+ai-lib4-reflect-fulltwins.log and ai-lib4-reflect-findings-expected.log.
+
+All nineteen required lanes pass after two unused mock parameters are replaced
+with keyword capture. The new strategy-choice-tail declaration needed an
+executable caller; two internals claims supply it. The Reflect twin's binder
+fixture is an ordinary tuple containing the let symbol, which both preserves
+literal syntax and satisfies the Python notation rule. The generator's27 tests,
+fn-sync's20 tests and reference's4 tests pass. Receipts:
+ai-lib4-reflect-lanes-final.log, ai-lib4-reflect-ruff-complete.log,
+ai-lib4-reflect-phrasebook-tests-complete.log,
+ai-lib4-reflect-generated-checks.log and ai-lib4-reflect-twins-complete.log.
+
+The final documentation review found five stale unary Strategy forms beside
+the new two-argument signatures. Remove those forms and their unused metadata
+field; the executable phrasebook rows already use held plans and explicit
+terms. The source-derived Strategy table remains the authoritative inventory.
+
+Verified after that removal: the full phrasebook gate has0 findings, its27 tests
+pass, and fn-sync, reference, their24 selftests, Ruff and evidence pass.
+Receipts: ai-lib4-reflect-phrasebook-final.log,
+ai-lib4-reflect-phrasebook-tests-final.log and
+ai-lib4-reflect-generated-checks-final.log. The library code and measured
+fixtures are unchanged.

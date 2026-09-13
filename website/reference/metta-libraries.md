@@ -48,7 +48,7 @@ beside its definitions.
 | lib_process | 7 | 7 |
 | lib_random | 13 | 13 |
 | lib_redis | 2 | 0 |
-| lib_reflect | 19 | 10 |
+| lib_reflect | 21 | 12 |
 | lib_regex | 18 | 18 |
 | lib_roman | 36 | 0 |
 | lib_sets | 11 | 11 |
@@ -56,7 +56,7 @@ beside its definitions.
 | lib_soft | 9 | 1 |
 | lib_spaces | 10 | 5 |
 | lib_statistics | 29 | 29 |
-| lib_strategy | 24 | 0 |
+| lib_strategy | 26 | 26 |
 | lib_string | 34 | 34 |
 | lib_system | 8 | 8 |
 | lib_tabling | 11 | 0 |
@@ -4290,31 +4290,31 @@ Returns: Program
 
 ### `builtins`
 
-*lib_reflect.metta:33*
+*lib_reflect.metta:43*
 
 Every builtin name, one per solution
 
 ### `special-forms`
 
-*lib_reflect.metta:36*
+*lib_reflect.metta:46*
 
 Every translator special form, one per solution. These are compiled rather than called, so they are in no registry
 
 ### `functions`
 
-*lib_reflect.metta:40*
+*lib_reflect.metta:50*
 
 Every function the engine knows, builtin or not
 
 ### `user-functions`
 
-*lib_reflect.metta:43*
+*lib_reflect.metta:53*
 
 Every function this space defines itself
 
 ### `arity-of`
 
-*lib_reflect.metta:46*
+*lib_reflect.metta:56*
 
 The registered arities for a name, one per solution
 
@@ -4324,7 +4324,7 @@ Returns: an arity
 
 ### `knows?`
 
-*lib_reflect.metta:52*
+*lib_reflect.metta:62*
 
 Whether the engine knows a name at all, as True or False
 
@@ -4334,7 +4334,7 @@ Returns: True or False
 
 ### `origin-of`
 
-*lib_reflect.metta:60*
+*lib_reflect.metta:70*
 
 ```metta
 (: origin-of (-> Atom Expression))
@@ -4344,7 +4344,7 @@ The (origin space file line) rows from get-property, one per defining occurrence
 
 ### `extension-points`
 
-*lib_reflect.metta:72*
+*lib_reflect.metta:82*
 
 Every extension point the engine declares, as (name arity kind), one per solution
 
@@ -4352,7 +4352,7 @@ Returns: (name arity kind)
 
 ### `surface-counts`
 
-*lib_reflect.metta:77*
+*lib_reflect.metta:87*
 
 How many builtins, special forms, functions and user functions
 
@@ -4360,11 +4360,40 @@ Returns: ((key count) ...)
 
 ### `surface-json`
 
-*lib_reflect.metta:84*
+*lib_reflect.metta:94*
 
 The engine's whole surface as a JSON string, for external tools
 
 Returns: a JSON string
+
+### `atom-variables`
+
+*lib_reflect.metta:115*
+
+```metta
+(: atom-variables (-> Atom Expression))
+```
+
+Every written variable once, in first-appearance order, preserving its identity and sharing with the original term. Inspect literal contents, including expression heads and binder syntax. This is structural inspection, not lexical free-variable analysis.
+
+1. Term
+
+Returns: Variables
+
+### `atom-replace`
+
+*lib_reflect.metta:125*
+
+```metta
+(: atom-replace (-> Atom Atom %Undefined%))
+```
+
+Replace exact subterms through a literal (From To) relation. A matching root wins over its descendants; replacement terms are final for this pass. Preserve every matching row as an alternative, including duplicates, and form all combinations across different occurrences. Compare by identity without unifying unrelated variables. Empty relations return the original term; malformed rows and cyclic host terms raise. This does not implement lexical capture avoidance.
+
+1. Term
+2. Replacements
+
+Returns: Every simultaneously replaced term
 
 Undocumented: `engine-arity`, `engine-builtin`, `engine-extension-point`, `engine-function`, `engine-knows`, `engine-origin`, `engine-special-form`, `engine-surface-counts`, `engine-user-function`
 
@@ -5494,6 +5523,394 @@ The law of a total of Count independent draws. Count is a nonnegative integer. Z
 2. Count
 
 Returns: Total law or refusal
+
+## lib_strategy
+
+### `strategy-eval`
+
+*lib_strategy.metta:69*
+
+```metta
+(: strategy-eval (-> Atom Atom %Undefined%))
+```
+
+Apply a held rewrite plan or callable value to a literal term. Named functions, lambdas and partial applications use ordinary application. An unbound strategy declines. Preserve every answer and its bindings, including literal Empty; (empty) produces no answer.
+
+1. Strategy
+2. Term
+
+Returns: Rewritten term
+
+### `strategy-choice-tail`
+
+*lib_strategy.metta:82*
+
+```metta
+(: strategy-choice-tail (-> Atom Atom %Undefined%))
+```
+
+Apply held strategies in order until one has answers, then return that complete bag. An empty sequence declines. Shared bindings survive collapse-bind and superpose-bind.
+
+1. Strategies
+2. Term
+
+Returns: First nonempty answer bag
+
+### `strategy-all`
+
+*lib_strategy.metta:90*
+
+```metta
+(: strategy-all (-> Atom Atom %Undefined%))
+```
+
+Rewrite every immediate child, including an expression's head. A leaf and the empty expression are identities. A declining child ends that combination; branching children produce every combination.
+
+1. Strategy
+2. Term
+
+Returns: Rebuilt term
+
+### `strategy-all-tail`
+
+*lib_strategy.metta:98*
+
+```metta
+(: strategy-all-tail (-> Atom Atom %Undefined%))
+```
+
+Map a strategy over a literal expression through map-atom. Unlike strategy-all, a non-expression declines.
+
+1. Strategy
+2. Items
+
+Returns: Rebuilt expression
+
+### `strategy-one`
+
+*lib_strategy.metta:108*
+
+```metta
+(: strategy-one (-> Atom Atom %Undefined%))
+```
+
+Rewrite exactly one immediate child, answering every successful position from left to right. Preserve other children literally. Leaves, empty expressions and all-declining children have no answer.
+
+1. Strategy
+2. Term
+
+Returns: One-position rewrite
+
+### `strategy-apply`
+
+*lib_strategy.metta:116*
+
+```metta
+(: strategy-apply (-> Atom Atom %Undefined%))
+```
+
+Lower a held strategy application to strategy-eval through the ordinary translator-rule door.
+
+1. Strategy
+2. Term
+
+Returns: Every rewrite
+
+### `fail`
+
+*lib_strategy.metta:123*
+
+```metta
+(: fail (-> Atom %Undefined%))
+```
+
+Decline every term.
+
+1. Term
+
+Returns: No answer
+
+### `seq`
+
+*lib_strategy.metta:127*
+
+```metta
+(: seq (-> Atom (:seg Atom) %Undefined%))
+```
+
+Apply zero or more held strategies from left to right to the final literal term. Zero strategies is identity. A runtime plan is (seq Rule ...).
+
+1. Strategies
+2. Term
+
+Returns: Every composed rewrite
+
+### `choice`
+
+*lib_strategy.metta:134*
+
+```metta
+(: choice (-> Atom (:seg Atom) %Undefined%))
+```
+
+Use the first strategy with any answers and preserve its whole bag. Accept zero or more held strategies before the final literal term; zero strategies declines.
+
+1. Strategies
+2. Term
+
+Returns: First nonempty answer bag
+
+### `try`
+
+*lib_strategy.metta:141*
+
+```metta
+(: try (-> Atom Atom %Undefined%))
+```
+
+Apply the strategy, or return the original term when it has no answers.
+
+1. Strategy
+2. Term
+
+Returns: Rewrite or original
+
+### `gtry`
+
+*lib_strategy.metta:147*
+
+```metta
+(: gtry (-> Atom Atom %Undefined%))
+```
+
+The generic try spelling: apply a strategy or preserve the original term when it declines.
+
+1. Strategy
+2. Term
+
+Returns: Rewrite or original
+
+### `strategy-repeat`
+
+*lib_strategy.metta:153*
+
+```metta
+(: strategy-repeat (-> Atom Atom %Undefined%))
+```
+
+Repeat a rewrite until it declines, retaining every resulting normal form. A rule that always succeeds, including identity, does not terminate. The reified plan is (repeat Rule); numeric repeat remains Functional's operation.
+
+1. Strategy
+2. Term
+
+Returns: Normal form
+
+### `all`
+
+*lib_strategy.metta:159*
+
+```metta
+(: all (-> Atom Atom %Undefined%))
+```
+
+Apply a strategy to all immediate children. Leaves and empty expressions are identities.
+
+1. Strategy
+2. Term
+
+Returns: Rebuilt term
+
+### `one`
+
+*lib_strategy.metta:165*
+
+```metta
+(: one (-> Atom Atom %Undefined%))
+```
+
+Apply a strategy at exactly one child position, preserving every successful position as an answer.
+
+1. Strategy
+2. Term
+
+Returns: One-position rewrite
+
+### `topdown`
+
+*lib_strategy.metta:171*
+
+```metta
+(: topdown (-> Atom Atom %Undefined%))
+```
+
+Rewrite the root, then recursively visit the children of each result. All visited nodes must succeed; compose try for identity on a declining node. Newly introduced subterms are visited.
+
+1. Strategy
+2. Term
+
+Returns: Preorder rewrite
+
+### `bottomup`
+
+*lib_strategy.metta:177*
+
+```metta
+(: bottomup (-> Atom Atom %Undefined%))
+```
+
+Recursively rewrite children, then their rebuilt parent. All visited nodes must succeed; compose try for identity on a declining node.
+
+1. Strategy
+2. Term
+
+Returns: Postorder rewrite
+
+### `innermost`
+
+*lib_strategy.metta:183*
+
+```metta
+(: innermost (-> Atom Atom %Undefined%))
+```
+
+Rewrite children before parents and revisit every reduct until no rule applies.
+
+1. Strategy
+2. Term
+
+Returns: Normal form
+
+### `alltd`
+
+*lib_strategy.metta:189*
+
+```metta
+(: alltd (-> Atom Atom %Undefined%))
+```
+
+Return every root rewrite when the strategy has answers; otherwise descend into every child. A successful replacement is final for this pass, so root matches take precedence over descendant matches. Leaves with no match stay unchanged.
+
+1. Strategy
+2. Term
+
+Returns: Topmost rewrites
+
+### `stratego-all`
+
+*lib_strategy.metta:195*
+
+```metta
+(: stratego-all (-> Atom Atom %Undefined%))
+```
+
+The Stratego spelling of all: rewrite all immediate children, preserving leaves.
+
+1. Strategy
+2. Term
+
+Returns: Rebuilt term
+
+### `stratego-one`
+
+*lib_strategy.metta:201*
+
+```metta
+(: stratego-one (-> Atom Atom %Undefined%))
+```
+
+The Stratego spelling of one: answer every successful single-child rewrite.
+
+1. Strategy
+2. Term
+
+Returns: One-position rewrite
+
+### `TP`
+
+*lib_strategy.metta:211*
+
+```metta
+(: TP Type)
+```
+
+The type-preserving strategy scheme: accept a declared arrow with the same input and output sort.
+
+### `TU`
+
+*lib_strategy.metta:212*
+
+```metta
+(: TU (-> Type Type))
+```
+
+The type-unifying strategy scheme: accept a declared arrow whose output has the supplied sort.
+
+1. Result sort
+
+Returns: Strategy scheme
+
+### `◁`
+
+*lib_strategy.metta:224*
+
+```metta
+(: ◁ (-> Atom Type Atom %Undefined%))
+```
+
+Apply a declared strategy through TP or TU(ResultSort), filtering its input by the term's type in the current space. Unknown schemes and incompatible types decline.
+
+1. Strategy
+2. Scheme
+3. Term
+
+Returns: Typed rewrite
+
+### `strategy-typed-tp`
+
+*lib_strategy.metta:234*
+
+```metta
+(: strategy-typed-tp (-> Atom Atom %Undefined%))
+```
+
+Match a strategy's equal input and output sorts, then apply it when the term fits that sort.
+
+1. Strategy
+2. Term
+
+Returns: Typed rewrite
+
+### `strategy-typed-tu`
+
+*lib_strategy.metta:243*
+
+```metta
+(: strategy-typed-tu (-> Atom Type Atom %Undefined%))
+```
+
+Match a strategy's declared output against the requested result sort, then check its input sort and apply it.
+
+1. Strategy
+2. Result sort
+3. Term
+
+Returns: Typed rewrite
+
+### `strategy-typed-apply`
+
+*lib_strategy.metta:257*
+
+```metta
+(: strategy-typed-apply (-> Atom Type Atom %Undefined%))
+```
+
+Apply a strategy when match-types accepts the term's current-space type against the expected sort. Preserve type errors as values; an incompatible type declines.
+
+1. Strategy
+2. Expected sort
+3. Term
+
+Returns: Typed rewrite
 
 ## lib_string
 

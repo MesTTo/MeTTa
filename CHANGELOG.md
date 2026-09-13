@@ -9,6 +9,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Reflect adds `atom-variables` and `atom-replace` as MeTTa compositions over
+  Functional, Pairs and Strategy. They preserve literal code and shared variable
+  identity. Replacement uses ordinary pairs, prefers a matching root, leaves
+  replacements final and retains duplicate alternatives at every occurrence.
+  Strategy accepts lambdas and partial applications through ordinary bound-value
+  application. Variadic `seq` and `choice` remove their fixed arities; `alltd`
+  supplies topmost traversal. The direct repeat spelling is `strategy-repeat`,
+  resolving its collision with Functional's numeric `repeat`; held rewrite
+  plans keep `(repeat Rule)`. Typed selection remains an inspectable composition.
+  Strategies decline with `(empty)`; the symbol `Empty` is a literal result,
+  so code-as-data replacement has no reserved failure symbol.
 - Immutable maps and priority queues are MeTTa equations over ordered pair
   expressions. Their distinct tags retain the difference between unique keys
   and queued occurrences. Variable keys compare by identity, duplicate variable

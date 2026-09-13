@@ -4,21 +4,21 @@
 ;   through `(library lib_strategy)`.
 ; Guarantees: all 35 assertions distinguish the strategy laws from plausible
 ;   eager, right-biased, host-callback, or non-traversing implementations
-;   [tested: sh test.sh examples/ch20-extending-the-engine/20-02-metta-written-in-metta/11-strategy.metta; commit=0d37dd6b24fe916e44cdbfb4efc6a1d5ffaf74aa]
+;   [tested: sh test.sh examples/ch20-extending-the-engine/20-02-metta-written-in-metta/11-strategy.metta; commit=WORKTREE]
 
 !(import! &self (library lib_strategy))
 
-; Named rewrite strategies explicitly return Empty when they decline. A missing
+; Named rewrite strategies explicitly call empty when they decline. A missing
 ; equation is an irreducible successful term in MeTTa, not strategy failure.
 (= (strategy-step strategy-a) strategy-b)
 (= (strategy-step strategy-b) strategy-c)
-(= (strategy-step strategy-c) Empty)
-(= (strategy-step $x) Empty)
-(= (strategy-fail $x) Empty)
+(= (strategy-step strategy-c) (empty))
+(= (strategy-step $x) (empty))
+(= (strategy-fail $x) (empty))
 (= (strategy-mark $x) (marked $x))
 (= (strategy-only-a strategy-a) A)
-(= (strategy-only-a $x) Empty)
-(= (strategy-none $x) Empty)
+(= (strategy-only-a $x) (empty))
+(= (strategy-none $x) (empty))
 (= (strategy-many strategy-a) A1)
 (= (strategy-many strategy-a) A2)
 (= (strategy-right strategy-a) WRONG)
@@ -28,10 +28,10 @@
 
 ; These rewrites distinguish preorder, postorder, and innermost traversal.
 (= (strategy-cap strategy-a) A)
-(= (strategy-cap $x) Empty)
+(= (strategy-cap $x) (empty))
 (= (strategy-fold strategy-a) A)
 (= (strategy-fold (h A)) done)
-(= (strategy-fold $x) Empty)
+(= (strategy-fold $x) (empty))
 
 ; id(t) = t. The second assertion uses the translator-lowered application door.
 !(test (id strategy-a) strategy-a)
@@ -54,7 +54,7 @@
 !(test (gtry strategy-fail strategy-a) strategy-a)
 
 ; repeat(s) = choice(seq(s,repeat(s)),id), reaching the first normal form.
-!(test (repeat strategy-step strategy-a) strategy-c)
+!(test (strategy-repeat strategy-step strategy-a) strategy-c)
 
 ; all(s) rewrites every immediate child, including the written expression head.
 ; Leaves and () are identities, while one declining child fails the whole term.

@@ -5060,7 +5060,14 @@ the final scale or ratio. Numeric providers declare their effects beside their
 implementations; recording requires the same visible specialization equations
 and conservatively refuses possible assertion output;
 `lib_redis` shared spaces over Redis;
-`lib_reflect` the engine's own surface as data you can match; `lib_regex` PCRE2
+`lib_reflect` the engine's surface and literal code as data. atom-variables
+collects written variables by first-appearance identity, including binder syntax.
+atom-replace composes Strategy's topmost traversal with exact Pairs lookup:
+root matches win, replacements are final for the pass, duplicate rows and
+independent occurrences preserve their full answer bags. Runnable, Empty and Error
+expressions stay literal. This is structural replacement, not lexical capture
+avoidance. atom-subst remains the single-written-variable template operation;
+`lib_regex` PCRE2
 over strings; `lib_pairs` a collection of (Key Value) pairs read as a relation: the two
 projections, the converse, the two stable orderings, the grouping into a multimap
 and back, and a lookup that answers once per value a key has. These equations
@@ -5102,7 +5109,15 @@ separate laws. Sample quantiles interpolate; law quantiles retain support values
 First central moments are exactly zero after finite numeric validation.
 Insufficient samples, nonfinite data and invalid count domains refuse. The
 former lib_distribution import is consolidated into this library;
-`lib_strategy` a Stratego-style strategy basis whose plans are ordinary atoms;
+`lib_strategy` traversal through ordinary MeTTa equations, callable values and
+held plans. Bound terms remain literal for named functions, lambdas and partial
+applications. seq and choice accept zero or any number of strategies; choice
+returns the first nonempty complete answer bag. Failure is no answer, produced
+by (empty); literal Empty remains data. alltd stops at each successful
+root replacement; topdown, bottomup and innermost retain their distinct orders.
+strategy-repeat names direct rewriting until failure; held (repeat Rule) plans
+coexist with Functional's numeric repeat. Type selection reads current-space
+declarations and filters with match-types;
 `lib_string` text, imported when you need it; `lib_system` the environment as a relation, a read with no answer for an unset
 variable, process-wide writes, the working directory and ten platform keys, with
 no shell anywhere; `lib_tabling` expert-only tabling
