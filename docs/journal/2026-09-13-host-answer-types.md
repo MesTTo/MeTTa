@@ -69,3 +69,26 @@ subtests, in `ai-classes-c29-host-answer-A-native.log`. Layering, mypy and
 evidence pass. Ruff rejects assigning the projected declaration back to the
 loop variable with `PLW2901`; naming the candidate separately corrects that
 finding. Log: `ai-classes-c29-host-answer-A-checks.log`.
+
+## 2026-09-14: answer-type witnesses release their operation registrations
+
+Tried: running the answer-type file immediately before
+`test_compiled_vocabulary.py::test_empty_match_subject_selects_only_the_empty_branch`
+with `python -m pytest -q -n0 -p no:randomly --benchmark-disable` passes the
+sixteen answer cases, then refuses the next declaration because `absent` is
+still an operation. Log: `ai-classes-c34-answer-fixture-before.log`.
+
+Decided: each witness unregisters the operation it installs in a `finally`
+clause, before its context closes. The test owns the registration; Python
+reference collection is not its teardown protocol. A separate pristine-cut
+context-lifetime probe ends `absent`, so this is an ordered-fixture repair,
+not evidence for a new host-lifetime workaround.
+
+Verified: the ordered command passes all seventeen cases, in
+`ai-classes-c35-answer-fixture-after.log`. The broader callable/compiler
+cohort passes 1106 cases, and the four native suites pass 119 cases plus
+fifteen subtests. Logs: `ai-classes-c35-argument-series-python.log` and
+`ai-classes-c35-argument-series-native.log`. Layering, Ruff and mypy pass.
+The evidence scanner reads pytest's `-p no:randomly` option as a test name;
+the file header therefore names the two witnesses, while this journal keeps
+the complete ordered command. Log: `ai-classes-c35-argument-series-checks.log`.
