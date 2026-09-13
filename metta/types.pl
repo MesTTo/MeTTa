@@ -2,7 +2,7 @@
 % Guarantees: refined union requirements retain value constraints at runnable
 %   and compiled calls [tested:
 %   union_types:a_refined_union_member_checks_the_value_at_each_call_door;
-%   commit=WORKTREE].
+%   commit=7e2de138f59cd8137f55dce9e7f2f955906c76d1].
 % Guarantees: constructor result sorts widen through subsorts while callable
 %   result types retain their direct arrow result
 %   [tested: a_data_constructor_result_sort_is_widened,
