@@ -1,6 +1,9 @@
 % Purpose: classify compiled effects, compose the five-rank effect lattice,
 %   plan reified-world admission, and manage memoization, dependencies, and
 %   bridge cascades.
+% Guarantees: reference plans follow canonical source bodies in their own
+%   modules, including recursive aliases and wrapped unions
+%   [tested: reference_effects; commit=WORKTREE].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarantees: inspecting a produced Error is inert and cannot mask the called
@@ -1067,23 +1070,23 @@ metta_host_goal_effect_plan(Module,
     !,
     metta_effect_plan_source_complete(Module, Source, RuntimeState),
     (   RuntimeState = Roots0-_,
-        member(Name/_, Roots0),
+        member(_:Name/_, Roots0),
         translator_rules:translator_rule(Name, _, _)
     ->  metta_effect_plan_body_source_backed(
             Module, Body, RuntimeState, Roots-Direct)
     ;   Roots-Direct = RuntimeState
     ),
-    metta_effect_plan_finish(Module, Roots-Direct, Operations, Effect).
+    metta_effect_plan_finish(Roots-Direct, Operations, Effect).
 metta_host_goal_effect_plan(Module, Body, Operations, Effect) :-
     metta_effect_plan_body(Module, Body, []-[], Roots-Direct),
-    metta_effect_plan_finish(Module, Roots-Direct, Operations, Effect).
+    metta_effect_plan_finish(Roots-Direct, Operations, Effect).
 
 %A translation rule is executable Prolog. Ask the retained source for its
 %lower bound before translating a world target, so an uncovered rule cannot
 %perform compile-time work on the way to its own refusal.
 metta_host_source_effect_plan(Module, Source, Operations, Effect) :-
     metta_effect_plan_source_complete(Module, Source, Roots-Direct),
-    metta_effect_plan_finish(Module, Roots-Direct, Operations, Effect).
+    metta_effect_plan_finish(Roots-Direct, Operations, Effect).
 
 % Admission sees the candidate program, including definitions not published
 % yet. Only the source lookup changes; masks, compiler actions and the effect
@@ -1129,7 +1132,7 @@ metta_host_source_compile_effect_plan(Module, Source, Operations, Effect) :-
     metta_effect_plan_program_write(
         Module, 'add-atom', '<world-image>', Source,
         []-[], Roots-Direct),
-    metta_effect_plan_finish(Module, Roots-Direct, Operations, Effect).
+    metta_effect_plan_finish(Roots-Direct, Operations, Effect).
 
 %Saga instrumentation needs the operations the target can execute, excluding
 %compiler actions needed only to materialise it. Keeping this as the runtime
@@ -1137,10 +1140,10 @@ metta_host_source_compile_effect_plan(Module, Source, Operations, Effect) :-
 %turning compiler internals into user recovery obligations.
 metta_host_source_runtime_effect_plan(Module, Source, Operations, Effect) :-
     metta_effect_plan_source_root(Module, Source, []-[], Roots-Direct),
-    metta_effect_plan_finish(Module, Roots-Direct, Operations, Effect).
+    metta_effect_plan_finish(Roots-Direct, Operations, Effect).
 
-metta_effect_plan_finish(Module, Roots-Direct, Operations, Effect) :-
-    metta_effect_plan_walk(Module, Roots, [], Direct, RawPairs),
+metta_effect_plan_finish(Roots-Direct, Operations, Effect) :-
+    metta_effect_plan_walk(Roots, [], Direct, RawPairs),
     sort(RawPairs, Pairs),
     maplist(metta_effect_plan_row, Pairs, Operations),
     maplist(metta_effect_plan_class, Pairs, Classes),
@@ -1177,8 +1180,8 @@ metta_effect_plan_compile_source(_, Source, Queue-Effects,
                                        Effects]) :-
     \+ is_list(Source),
     !.
-metta_effect_plan_compile_source(_, [Head|Args], Queue0-Effects,
-                                 [Head/Arity|Queue0]-Effects) :-
+metta_effect_plan_compile_source(Module, [Head|Args], Queue0-Effects,
+                                 [Module:Head/Arity|Queue0]-Effects) :-
     atom(Head),
     translator_rules:translator_rule(Head, _, _),
     !,
@@ -1297,24 +1300,25 @@ metta_effect_plan_support_reachable(Node, Seen, Reachable) :-
     support_graph:supports(Node, Next),
     metta_effect_plan_support_reachable(Next, [Node|Seen], Reachable).
 
-metta_effect_plan_walk(_, [], _, Effects, Effects).
-metta_effect_plan_walk(Module, [PI|Rest], Seen, Effects0, Effects) :-
+metta_effect_plan_walk([], _, Effects, Effects).
+metta_effect_plan_walk([PI|Rest], Seen, Effects0, Effects) :-
     memberchk(PI, Seen),
     !,
-    metta_effect_plan_walk(Module, Rest, Seen, Effects0, Effects).
-metta_effect_plan_walk(Module, [Name/Arity|Rest], Seen, Effects0, Effects) :-
+    metta_effect_plan_walk(Rest, Seen, Effects0, Effects).
+metta_effect_plan_walk([Module:Name/Arity|Rest], Seen, Effects0, Effects) :-
     metta_effect_program_lookup(Module, definition(Name), Sources), !,
     ( translator_rules:translator_rule(Name, _, _)
     -> Next = Rest, Effects1 = [Name-oracleIO|Effects0]
     ; foldl(metta_effect_plan_pending_clause(Module, Arity), Sources,
             Rest-Effects0, Next-Effects1) ),
-    metta_effect_plan_walk(Module, Next, [Name/Arity|Seen], Effects1, Effects).
-metta_effect_plan_walk(Module, [Name/Arity|Rest], Seen, Effects0, Effects) :-
+    metta_effect_plan_walk(Next, [Module:Name/Arity|Seen], Effects1, Effects).
+metta_effect_plan_walk([Module:Name/Arity|Rest], Seen, Effects0, Effects) :-
     (   metta_annotated_operation_effect(Name, Declared)
     ->  DeclaredEffects = [Name-Declared|Effects0]
     ;   DeclaredEffects = Effects0
     ),
-    functor(Head, Name, Arity),
+    compiled_function_name(Name, Predicate),
+    functor(Head, Predicate, Arity),
     findall(effect_clause(Body, Source),
             catch_recover(
                 ( clause(Module:Head, Body, Ref),
@@ -1332,7 +1336,7 @@ metta_effect_plan_walk(Module, [Name/Arity|Rest], Seen, Effects0, Effects) :-
     ;   foldl(metta_effect_plan_clause(Module), Clauses,
               Rest-DeclaredEffects, Next-Effects1)
     ),
-    metta_effect_plan_walk(Module, Next, [Name/Arity|Seen], Effects1, Effects).
+    metta_effect_plan_walk(Next, [Module:Name/Arity|Seen], Effects1, Effects).
 
 metta_effect_plan_inherited_source_clauses(_, _, Clauses, Clauses) :-
     Clauses = [_|_],
@@ -1651,8 +1655,8 @@ metta_effect_plan_source_head(_, Head, _, Queue-Effects,
 %time. Its compiled goals are still walked, but the retained source cannot
 %prove which semantic heads the expansion erased, so the source half stays
 %fail-closed instead of executing the rule again during admission.
-metta_effect_plan_source_head(_, Head, Args, Queue0-Effects,
-                              [Head/Arity|Queue0]-Effects) :-
+metta_effect_plan_source_head(Module, Head, Args, Queue0-Effects,
+                              [Module:Head/Arity|Queue0]-Effects) :-
     atom(Head),
     translator_rules:translator_rule(Head, _, _),
     !,
@@ -2111,13 +2115,13 @@ metta_effect_plan_named_call(Module, Name, Arity,
                              Queue0-Effects0, Queue-Effects) :-
     functor(Head, Name, Arity),
     (   metta_effect_program_lookup(Module, definition(Name), _)
-    ->  Queue = [Name/Arity|Queue0], Effects = Effects0
+    ->  Queue = [Module:Name/Arity|Queue0], Effects = Effects0
     ;   fun(Name),
         metta_effect_plan_ensure_compiled(Module, Name),
         current_predicate(Module:Name/Arity),
         \+ predicate_property(Module:Head, imported_from(_))
-    ->  Queue = [Name/Arity|Queue0],
-        Effects = Effects0
+    ->  metta_effect_plan_enqueue(Module, Name, Arity,
+                                  Queue0-Effects0, Queue-Effects)
     ;   metta_effect_plan_transparent(Name)
     ->  Queue = Queue0,
         Effects = Effects0
@@ -2127,14 +2131,31 @@ metta_effect_plan_named_call(Module, Name, Arity,
     ;   fun(Name),
         metta_effect_plan_ensure_compiled(Module, Name),
         current_predicate(Module:Name/Arity)
-    ->  Queue = [Name/Arity|Queue0],
-        Effects = Effects0
+    ->  metta_effect_plan_enqueue(Module, Name, Arity,
+                                  Queue0-Effects0, Queue-Effects)
     ;   metta_effect_inert(Name)
     ->  Queue = Queue0,
         Effects = Effects0
     ;   Queue = Queue0,
         Effects = [Name-oracleIO|Effects0]
     ).
+
+% References already identify each physical contribution. Walking their
+% public wrappers loses the source association; walking a provider's public
+% union again would also count contributions it did not export along this
+% path. Queue the canonical bodies and retain the module in the visited key.
+metta_effect_plan_enqueue(Module, Name, Arity,
+                          Queue0-Effects0, Queue-Effects) :-
+    (   metta_reference_roots(Module, Name, Arity, Roots), Roots \== []
+    ->  findall(HomeModule:Original/Arity,
+                ( member(root(Home,Original,Arity,_), Roots),
+                  space_module(Home, HomeModule) ), Pending),
+        ( metta_annotated_operation_effect(Name, Declared)
+        -> Effects = [Name-Declared|Effects0]
+        ; Effects = Effects0 )
+    ;   Pending = [Module:Name/Arity], Effects = Effects0
+    ),
+    append(Pending, Queue0, Queue).
 
 %Compiler helpers whose source-facing operation has already been planned.
 %They inspect terms or carry control; none observes a world independently.
