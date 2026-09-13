@@ -7,6 +7,9 @@
 :- encoding(utf8).
 
 % Purpose: compile error propagation, control forms, binding forms, and special-form calls
+% Guarantees: let and chain carry checked parameter proofs through variable
+%   aliases for their continuation only [tested:
+%   run_tests(translator_parameter_aliases); commit=WORKTREE].
 % Guarantees: transactions retain their result bag across error rollback, and
 %   add-atom keeps its optional occurrence binder unbound until the write
 %   [tested: classes_transaction_results, spaces_tokens; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
@@ -1473,7 +1476,8 @@ translate_let_dl([[__metta_typed_binding__, Pattern], Value, In],
     translate_eager_argument_dl(Value, AfterPattern, AfterValue, ValueResult),
     AfterValue = [PatternValue = ValueResult|AfterUnify],
     append(TypeGoals, AfterTypes, AfterUnify),
-    translate_expr_dl(In, AfterTypes, Goals, Out).
+    with_static_parameter_aliases(PatternValue, ValueResult,
+        translate_expr_dl(In, AfterTypes, Goals, Out)).
 
 %A let binds its pattern to its value RAW, upstream PeTTa's own emission: a
 %self-containing binding is a legal rational tree, not a refusal. Measured on
@@ -1524,7 +1528,8 @@ translate_let_dl([[__metta_typed_binding__, Pattern], Value, In],
 %gap makes that difference visible: there is nothing to evaluate in `...`.
 translate_let_dl([Pattern, Value, In], AfterHead, Goals, Out) :-
     ( metta_seq_written(Pattern)
-      -> translate_eager_argument_dl(Value, AfterHead, AfterValue, ValueResult),
+      -> PatternValue = Pattern,
+         translate_eager_argument_dl(Value, AfterHead, AfterValue, ValueResult),
          metta_pattern_match_goal(Pattern, ValueResult, Decide),
          AfterValue = [Decide|AfterUnify]
        ; shares_variable(Pattern, Value)
@@ -1539,7 +1544,8 @@ translate_let_dl([Pattern, Value, In], AfterHead, Goals, Out) :-
                                      ValueResult),
          translate_expr_dl(Pattern, BeforePattern, AfterUnify,
                            PatternValue) ),
-    translate_expr_dl(In, AfterUnify, Goals, Out).
+    with_static_parameter_aliases(PatternValue, ValueResult,
+        translate_expr_dl(In, AfterUnify, Goals, Out)).
 
 
 %Rewrite every (sealed <vars> <expr>) inside a term so its named variables are

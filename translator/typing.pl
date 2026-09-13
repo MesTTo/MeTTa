@@ -1,4 +1,8 @@
 % Purpose: compile declared input and output types while preserving shared branch variables
+% Guarantees: a variable binding carries checked parameter contracts into its
+%   continuation without proving other values or sibling branches; declaration
+%   and policy edits retire those proofs [tested:
+%   run_tests(translator_parameter_aliases); commit=WORKTREE].
 % Guarantees: committing generated type checks adds no native call around
 %   intrinsic tests and preserves the caller's alternatives [tested:
 %   run_tests(translator_check_commits), run_tests(translator_typed_checks);
@@ -66,6 +70,8 @@
 % Guarded by: no lock is needed because the evidence cell belongs to one call.
 
 :- meta_predicate with_static_parameter_environment(+, +, +, +, 0).
+:- meta_predicate with_static_parameter_entries(+, 0).
+:- meta_predicate with_static_parameter_aliases(+, +, 0).
 
 %Type function call generation, returns function call plus typechecks for input and output:
 %Translate a call against every type declaration that fits it.
@@ -939,6 +945,9 @@ unchecked_parameter_type(Type) :-
 %DOI 10.1145/2628136.2628156; commit=c00341f0ff9d83d1b9338ca86ad51708eaf07ebd]
 with_static_parameter_environment(Module, Function, Arguments, Chains, Goal) :-
     static_parameter_entries(Module, Function, Arguments, Chains, Entries),
+    with_static_parameter_entries(Entries, Goal).
+
+with_static_parameter_entries(Entries, Goal) :-
     (   nb_current('$metta_static_parameter_environment', Previous)
     ->  Restore = previous(Previous)
     ;   Restore = absent
@@ -952,6 +961,26 @@ restore_static_parameter_environment(previous(Previous)) :-
     nb_linkval('$metta_static_parameter_environment', Previous).
 restore_static_parameter_environment(absent) :-
     nb_delete('$metta_static_parameter_environment').
+
+% The emitted binding establishes equality before its continuation runs.
+% Extend the existing contract environment rather than unifying source
+% variables during translation; a sibling branch may not execute this binding.
+with_static_parameter_aliases(Left, Right, Goal) :-
+    (   var(Left), var(Right), Left \== Right,
+        nb_current('$metta_static_parameter_environment', Entries),
+        convlist(static_parameter_alias(Left, Right, Entries), Entries, Aliases),
+        Aliases \== []
+    ->  append(Aliases, Entries, Extended),
+        with_static_parameter_entries(Extended, Goal)
+    ;   call(Goal)
+    ).
+
+static_parameter_alias(Left, Right, Entries,
+                       static_parameter(Known, Owner, Function, Arity, Position, Type),
+                       AliasEntry) :-
+    ( Known == Left -> Alias = Right ; Known == Right -> Alias = Left ),
+    AliasEntry = static_parameter(Alias, Owner, Function, Arity, Position, Type),
+    \+ memberchk_eq(AliasEntry, Entries).
 
 static_parameter_entries(Module, Function, Arguments, Chains, Entries) :-
     length(Arguments, Arity),
