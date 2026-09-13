@@ -1,6 +1,6 @@
 % Purpose: test String recipes through MeTTa and retained text/file predicates directly.
 % Guarantees: original String, File and JSON cases retain their exact outcomes.
-% [tested: lib_string, lib_file, lib_json; commit=WORKTREE].
+% [tested: lib_string, lib_file, lib_json; commit=118b805aedbee6de22be4f6131d97c3d6b9156de].
 %
 %   Load into user BEFORE begin_tests: begin_tests/1 switches to the plunit
 %   module, and loading the engine after it puts every builtin there instead.

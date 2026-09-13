@@ -2,10 +2,10 @@
 
 % Purpose: compare String traversal with the previous copying and host-search controls.
 % Guarantees: each timed result is checked against its complete expected value.
-% [tested: swipl --on-error=status -q -s tests/prolog/lib_string_bench.pl -g true -t halt; commit=WORKTREE].
+% [tested: swipl --on-error=status -q -s tests/prolog/lib_string_bench.pl -g true -t halt; commit=118b805aedbee6de22be4f6131d97c3d6b9156de].
 % Decides: CPU measurements are descriptive; the controls retain their actual
 % algorithms and do not use inference counts to estimate native comparisons.
-% [source: tests/prolog/lib_string_bench.pl:measure/5; commit=WORKTREE].
+% [source: tests/prolog/lib_string_bench.pl:measure/5; commit=118b805aedbee6de22be4f6131d97c3d6b9156de].
 
 :- ensure_loaded('../../engine/qlf_boot.pl').
 :- ensure_loaded('../../engine/metta.pl').
