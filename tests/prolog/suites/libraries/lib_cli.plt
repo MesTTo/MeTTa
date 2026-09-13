@@ -1,7 +1,7 @@
 % Purpose: verify typed argv parsing, declaration boundaries and decoder ownership.
 % Guarantees: independent repeat models cover defaults and retained order;
 % fixtures exercise literal tokens, refusal context and each decoder exit.
-% [tested: lib_cli; commit=WORKTREE].
+% [tested: lib_cli; commit=83b7589a6766210414ceca14dfb9846b28c2ef78].
 % Owns resources: fixtures release message queues and execution spaces.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

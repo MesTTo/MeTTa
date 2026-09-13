@@ -1,5 +1,5 @@
 % Purpose: detect printed conversion context omitted from the actual exception.
-% [tested: sh check.sh host-workarounds; commit=WORKTREE].
+% [tested: sh check.sh host-workarounds; commit=83b7589a6766210414ceca14dfb9846b28c2ef78].
 :- use_module(library(optparse), [opt_parse/5]).
 main :-
     Spec=[[opt(count),type(integer),longflags([count])]],

@@ -1,5 +1,5 @@
 ; Purpose: typed options, exact token boundaries and generated command help.
-; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/44-cli_lib.metta; commit=WORKTREE].
+; [tested: sh test.sh examples/ch08-data/08-03-the-shipped-libraries/44-cli_lib.metta; commit=83b7589a6766210414ceca14dfb9846b28c2ef78].
 !(import! &self (library lib_string))
 !(import! &self (library lib_cli))
 
