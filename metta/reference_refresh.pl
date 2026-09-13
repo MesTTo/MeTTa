@@ -5,7 +5,7 @@
 %   [tested: reference_publication; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: patterned references participate in demand, publication and
 %   rollback through their original defining home
-%   [tested: reference_patterns; commit=WORKTREE].
+%   [tested: reference_patterns; commit=a95e6c90c910db30c72311abadd58dee5349978c].
 % Guarantees: nested completion transfers mutation roots to the live parent,
 %   then reconciles bindings against rows surviving the transaction
 %   [tested: references:rollback_restores_native_links_and_nested_rollback_restores_its_parent,

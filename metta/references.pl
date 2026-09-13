@@ -18,7 +18,7 @@
 % Guarantees: a mapper's call pattern constrains the alias's inputs while
 %   retaining its provider's body and declarations; equal patterns share a
 %   source root, and each invocation receives fresh variables
-%   [tested: reference_patterns; commit=WORKTREE].
+%   [tested: reference_patterns; commit=a95e6c90c910db30c72311abadd58dee5349978c].
 % Guarantees: suspended reference queries can be destroyed: transaction discovery
 %   leaves their outer query frame unwatched [tested:
 %   reference_loading:a_suspended_background_qualified_query_survives_release;
