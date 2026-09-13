@@ -1,7 +1,7 @@
 % Purpose: verify checked parameter contracts across native variable bindings.
 % Guarantees: aliases retain the direct call's inference cost while declaration
 %   edits, policy changes and independent branches keep their runtime checks
-%   [tested: run_tests(translator_parameter_aliases); commit=WORKTREE].
+%   [tested: run_tests(translator_parameter_aliases); commit=59a1783102aa6d8d6a9b7766761b094c891fc417].
 % Owns resources: each test releases its native space through plunit cleanup.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

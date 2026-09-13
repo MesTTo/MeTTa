@@ -9,7 +9,7 @@
 % Purpose: compile error propagation, control forms, binding forms, and special-form calls
 % Guarantees: let and chain carry checked parameter proofs through variable
 %   aliases for their continuation only [tested:
-%   run_tests(translator_parameter_aliases); commit=WORKTREE].
+%   run_tests(translator_parameter_aliases); commit=59a1783102aa6d8d6a9b7766761b094c891fc417].
 % Guarantees: transactions retain their result bag across error rollback, and
 %   add-atom keeps its optional occurrence binder unbound until the write
 %   [tested: classes_transaction_results, spaces_tokens; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
