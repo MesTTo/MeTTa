@@ -275,6 +275,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Host space dropping prepares reference retirement and child cancellation
+  before its preliminary clear. Both clearing phases share ownership checks;
+  a failed preparation leaves storage available for retry.
 - Literal equation-head parameters remain readable inside compiled bodies,
   nested calls and generator clauses. Rebinding keeps the head constraint;
   unused literal parameters add no body bindings.

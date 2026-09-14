@@ -2,6 +2,10 @@
 % Guarantees: a cancelled loop publishes no answer and releases its guard;
 %   an outstanding await does not prevent cancellation [tested:
 %   run_tests(lib_thread_cancellation); commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
+% Guarantees: preliminary release waits for cancellation cleanup before
+%   clearing and tolerates repetition [tested:
+%   lib_thread_cancellation:a_preliminary_release_cancels_before_clear_and_can_repeat;
+%   commit=WORKTREE].
 % Owns resources: each test joins its workers and drops its future and queues.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
@@ -58,6 +62,18 @@ test(a_foreign_sleep_returns_before_cancellation_is_acknowledged,
     thread_cancel(Space, Stopped),
     assertion(Stopped == true),
     assertion(lib_thread:metta_future_result(Space, cancelled)),
+    findall(Answer, thread_await(Space, Answer), Answers),
+    assertion(Answers == []).
+
+test(a_preliminary_release_cancels_before_clear_and_can_repeat,
+     [ setup(message_queue_create(Ready)),
+       cleanup(sc_cancel_release(Space, Ready)) ]) :-
+    thread_spawn(['sc-cancel-loop', Ready], Space),
+    thread_get_message(Ready, ready),
+    metta_clear_space_for_release(Space),
+    assertion(thread_get_message(Ready, cleaned, [timeout(0)])),
+    assertion(lib_thread:metta_future_result(Space, cancelled)),
+    metta_clear_space_for_release(Space),
     findall(Answer, thread_await(Space, Answer), Answers),
     assertion(Answers == []).
 

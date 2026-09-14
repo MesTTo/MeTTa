@@ -26,10 +26,13 @@
 %   occurrence tokens and duplicate bags in named and parametric stores
 %   [tested: spaces_tokens:public_and_bulk_writes_preserve_tokens_and_duplicate_bags;
 %   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
-% Guarantees: release requests child cancellation before taking the execution
-%   module mutex, then publishes retirement after native teardown. Access
-%   checks also precede cache misses and allocation [tested: lib_thread_scope,
-%   test_a_rolled_back_allocation_cannot_recycle_a_revoked_name; commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
+% Guarantees: both preliminary clear and final release validate ownership and
+%   prepare dependents before taking the execution-module mutex or removing
+%   storage. Final retirement follows successful teardown [tested:
+%   release_preparation, lib_thread_cancellation; commit=WORKTREE].
+% Guarantees: access checks precede cache misses and allocation [tested:
+%   lib_thread_scope, test_a_rolled_back_allocation_cannot_recycle_a_revoked_name;
+%   commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
@@ -1493,9 +1496,15 @@ restore_metta_space_releasing(absent) :-
     nb_setval('$metta_space_releasing', false),
     nb_delete('$metta_space_releasing_module').
 
-metta_release_space(Space) :-
+% Preparation can repeat across the host's two queries or a failed release.
+% Its owners settle children and retire reference consumers before storage
+% changes; callbacks must stay outside the execution-module mutex.
+metta_prepare_space_release(Space) :-
     metta_assert_space_releasable(Space),
-    forall(seam:space_releasing(Space), true),
+    forall(seam:space_releasing(Space), true).
+
+metta_release_space(Space) :-
+    metta_prepare_space_release(Space),
     with_mutex('$metta_metta_exec',
                ( metta_assert_space_releasable(Space),
                  %The releasing flag mutes the super-user recompilation the
@@ -2592,6 +2601,7 @@ metta_host_clear_space(Space) :-
 %[measured 2026-08-31: post_gc_atom_count 20008 -> 6 at 10,000 atoms;
 %commit=57f21ba9edf94bcf28cde11f938bce2c241a3709].
 metta_clear_space_for_release(Space) :-
+    metta_prepare_space_release(Space),
     with_metta_space_releasing(Space, metta_host_clear_space(Space)).
 
 metta_host_clear_foreign_storage(Space) :-
