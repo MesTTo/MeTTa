@@ -9,6 +9,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Channel creation refuses a nonspace result before opening a handle, so an
+  unreduced native call cannot create an unrelated parametric store.
 - Source retirement restores surviving compiled and deferred function
   registrations before repairing callers. Process host functions and declared
   arrows retain their host lifetime when an importing MeTTa source leaves.
