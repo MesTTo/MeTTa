@@ -46,6 +46,10 @@
 %     local untyped equations [tested:
 %     spaces_deferred_translation:a_bulk_local_shadow_retains_no_inherited_order_types;
 %     commit=7b238053d2907cd514e3fd9a29927d43a53c5a3c].
+%   - a deferred definition becomes callable from a native caller that already
+%     encountered its absence [tested:
+%     spaces_deferred_translation:a_cached_undefined_call_is_rearmed_when_its_equation_arrives;
+%     commit=WORKTREE].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -3422,6 +3426,36 @@ test(a_deferred_function_is_reachable_through_its_predicate) :-
     Goal =.. ['dt-direct', 21, Out],
     call(Module:Goal),
     assertion(Out == 42).
+
+test(a_cached_undefined_call_is_rearmed_when_its_equation_arrives,
+     [ setup('new-space'(Space)), cleanup(metta_release_space(Space)) ]) :-
+    space_module(Space, Module),
+    setup_call_cleanup(
+        assertz(Module:('dt-late-caller'(Out) :- 'dt-late'(21, Out))),
+        ( catch(call(Module:'dt-late-caller'(_)),
+                error(existence_error(procedure, Module:'dt-late'/2), _),
+                Missing = true),
+          assertion(Missing == true),
+          metta_add_program_atoms(Space, [[=, ['dt-late', X], [+, X, 21]]]),
+          assertion(spaces:deferred_metta_function(
+                        'dt-late', Module, Space, 1, _, 1)),
+          findall(Answer, call(Module:'dt-late-caller'(Answer)), Answers),
+          assertion(Answers == [42]) ),
+        abolish(Module:'dt-late-caller'/1)).
+
+test(a_lazy_reference_home_keeps_existing_native_answers,
+     [ setup('new-space'(Space)), cleanup(metta_release_space(Space)) ]) :-
+    space_module(Space, Module),
+    setup_call_cleanup(
+        assertz(Module:'dt-kept-native'(native)),
+        ( spaces:metta_reference_lazy_equations(Space, enabled),
+          metta_add_program_atoms(Space, [[=, ['dt-kept-native'], 42]]),
+          assertion(spaces:deferred_metta_function(
+                        'dt-kept-native', Module, Space, 0, _, 1)),
+          findall(Value, call(Module:'dt-kept-native'(Value)), Values),
+          assertion(Values == [native]) ),
+        ( spaces:metta_reference_lazy_equations(Space, disabled),
+          abolish(Module:'dt-kept-native'/1) )).
 
 % The bulk door batches the work that belongs to a NAME and must not reorder
 % the atoms themselves: a space enumerates its clauses in the order they were

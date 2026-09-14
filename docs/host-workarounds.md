@@ -39,6 +39,24 @@ An entry lands with its first site and its reproduction in the same commit. A
 site the ledger does not know is refused, and so is an entry nothing uses. The
 journal keeps the history; this file holds only what is live.
 
+## swi-cached-undefined-supervisor
+Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
+  src/pl-proc.c:trapUndefined, src/pl-supervisor.c:createUndefSupervisor
+  and src/pl-vmi.c:S_UNDEF.
+Defect: an unsuccessful undefined-predicate hook installs an S_UNDEF
+  supervisor. A later compiled call can reuse it and throw directly, bypassing
+  a hook whose deferred source has become available since the first call.
+Reproduction: tests/checks/host_workarounds/swi-cached-undefined-supervisor.pl,
+  a failed call followed by an available loader and an explicitly qualified
+  compiled caller. A fresh predicate verifies that the same loader works.
+Workaround: deferred registration abolishes its native slot only when no
+  definition is visible. Reference scopes can reuse that registration body
+  while retaining existing native answers. Rearming an absent slot allocates
+  nothing and evaluates no source body.
+Lifted when: a cached undefined call consults the loader after source becomes
+  available, so the reproduction prints absent.
+Record: docs/journal/2026-09-15-deferred-definitions-rearm-undefined-calls.md.
+
 ## swi-cleanup-window
 Host: SWI-Prolog 10.1.13; `setup_call_cleanup/3` is `sig_atomic(Setup),
   '$call_cleanup'` (boot/init.pl:680-682).

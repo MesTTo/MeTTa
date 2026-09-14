@@ -275,6 +275,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Deferred definitions become callable after an earlier missing-procedure
+  lookup, including from already compiled callers. Loading still leaves
+  their bodies unevaluated until first use.
 - Host space dropping prepares reference retirement and child cancellation
   before its preliminary clear. Both clearing phases share ownership checks;
   a failed preparation leaves storage available for retry.
