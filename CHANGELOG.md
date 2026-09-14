@@ -275,6 +275,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Clearing a space withdraws its references immediately and preserves live
+  importers' links to later definitions. Cached graph state and unused
+  function indexes are released; dropping also retires the lifetime's links.
 - Copied specializations materialize their retained equations before a native
   call is emitted. Reusing a space whose earlier clauses are still retained
   no longer bypasses the loader or duplicates the copied equations.

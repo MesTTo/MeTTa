@@ -3,6 +3,12 @@
 % Guarantees: support_atomic/1 and with_support_repairs_deferred/1 restore
 %   their scoped markers on inference cuts, without changing mutex ownership
 %   [tested: reference_scopes; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: support_clear_module/1 retires cached module state and incoming
+%   edges while preserving dependencies owned by live consumers. Full module
+%   retirement removes both endpoints [tested:
+%   support_graph:clearing_a_module_preserves_its_consumers_dependencies,
+%   support_graph:clearing_a_module_prunes_only_unused_symbol_indexes;
+%   commit=WORKTREE].
 % Guarantees:
 %   - A reference face can defer dependent repairs until all its bindings and
 %     metadata are published [tested:
@@ -40,8 +46,8 @@
 % Owns resources: supports/4, support_function_module/2,
 %   support_view_module/2, support_dirty_node/2, support_value/3,
 %   support_memo_rule/4 and support_memo_changed/2 are transactional dynamic
-%   state; support_forget/1, support_forget_module/1 and support_reset/0 release
-%   their indexes, edges, dirtiness markers and retained values.
+%   state; support_clear_module/1, support_forget/1, support_forget_module/1
+%   and support_reset/0 release their owned graph state.
 % Guarded by: '$metta_support_graph' serializes graph replacement,
 %   invalidation, stabilization and cleanup; support_graph_locked/0 makes
 %   callbacks into graph cleanup re-entrant in the owning thread.
@@ -78,6 +84,7 @@
             support_invalidate/1,
             support_invalidate_many/1,
             support_forget/1,
+            support_clear_module/1,
             support_forget_module/1,
             support_prune_orphans/0,
             %The node tables and the deferral flag: engine/spaces.pl asks which
@@ -583,23 +590,29 @@ support_unindex_node_locked(function_view(Module, Name)) :-
     retractall(support_view_module(Name, Module)).
 support_unindex_node_locked(_).
 
-% A pooled execution module is a resource boundary. Releasing it must not leave
-% support roots that a later space life can observe under the recycled name.
+% An edge belongs to its consumer. Clearing a producer's contents keeps the
+% edges of other modules so the next definition still invalidates its users.
+% Retiring the module's lifetime additionally removes those outgoing edges.
+support_clear_module(Module) :-
+    must_be(atom, Module),
+    support_atomic(support_retire_module_locked(
+        Module, support_clear_module_pattern_locked, support_prune_module_indexes_locked)).
+
 support_forget_module(Module) :-
     must_be(atom, Module),
-    support_atomic(support_forget_module_locked(Module)).
+    support_atomic(support_retire_module_locked(
+        Module, support_forget_module_pattern_locked, support_forget_module_indexes_locked)).
 
-support_forget_module_locked(Module) :-
+:- meta_predicate support_retire_module_locked(+, 1, 1).
+
+support_retire_module_locked(Module, ClearNode, ClearIndexes) :-
     findall(SymbolNode,
             support_adjacent_symbol_node_locked(Module, SymbolNode),
             Adjacent0),
     sort(Adjacent0, Adjacent),
     forall(support_module_pattern(Module, Node),
-           support_forget_module_pattern_locked(Node)),
-    support_prepare_index(support_function_module(_, Module)),
-    support_prepare_index(support_view_module(_, Module)),
-    retractall(support_function_module(_, Module)),
-    retractall(support_view_module(_, Module)),
+           call(ClearNode, Node)),
+    call(ClearIndexes, Module),
     retractall(support_memo_rule(Module, _, _, _)),
     retractall(support_memo_changed(Module, _)),
     %The node-id rows hold clause references, which pin their clauses; the
@@ -611,13 +624,28 @@ support_forget_module_locked(Module) :-
 
 support_forget_module_pattern_locked(Node) :-
     support_prepare_index(supports(Node, _)),
-    support_prepare_index(supports(_, Node)),
     support_edge_retractall(Node, _),
+    support_clear_module_pattern_locked(Node).
+
+support_clear_module_pattern_locked(Node) :-
+    support_prepare_index(supports(_, Node)),
     support_edge_retractall(_, Node),
     support_prepare_index(support_dirty_node(_, Node)),
     support_prepare_index(support_value(_, Node, _)),
     support_dirty_retractall(Node),
     support_value_retractall(Node).
+
+support_forget_module_indexes_locked(Module) :-
+    support_prepare_index(support_function_module(_, Module)),
+    support_prepare_index(support_view_module(_, Module)),
+    retractall(support_function_module(_, Module)),
+    retractall(support_view_module(_, Module)).
+
+support_prune_module_indexes_locked(Module) :-
+    forall(support_function_module(Name, Module),
+           support_prune_symbol_index_locked(function(Module, Name))),
+    forall(support_view_module(Name, Module),
+           support_prune_symbol_index_locked(function_view(Module, Name))).
 
 % A normal lookup makes SWI realize the deep dynamic index before retractall/1
 % uses it. Double negation leaves the module pattern's wildcard fields unbound.

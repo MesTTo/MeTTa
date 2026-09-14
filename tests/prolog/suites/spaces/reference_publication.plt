@@ -7,6 +7,9 @@
 % Assumes: reference roots carry their canonical argument-pattern list
 %   [source: engine/metta/references.pl:metta_reference_target/5; commit=a95e6c90c910db30c72311abadd58dee5349978c].
 % Owns resources: fixtures release their spaces and remove publication tracing.
+% Guarantees: content clearing preserves dependencies owned by live importers
+%   and retires unused function indexes [tested: reference_publication;
+%   commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -116,5 +119,55 @@ publication_pairs(Home, Goal, Enumerated) :-
         ( unwrap_predicate(spaces:metta_space_pair(_, _, _, _),
                            reference_publication_pairs),
           nb_delete(reference_publication_pairs) )).
+
+test(clearing_a_provider_preserves_its_live_importers,
+     [forall(member(Initial, [[], [[=, ['publication-clear'], old]]])),
+      setup(publication_setup), cleanup(publication_cleanup)]) :-
+    publication_space(Home), publication_space(Receiver),
+    forall(member(Row, Initial), metta_add_atom(Home, Row, _)),
+    publication_from(Receiver, Home),
+    metta_host_clear_space(Home),
+    findall(Value, evalc(['publication-clear'], Receiver, Value), Cleared),
+    assertion(Cleared == [['publication-clear']]),
+    metta_add_atom(Home, [=, ['publication-clear'], new], _),
+    findall(Value, evalc(['publication-clear'], Receiver, Value), Values),
+    assertion(Values == [new]).
+
+test(clearing_an_importer_preserves_its_own_live_importers,
+     [setup(publication_setup), cleanup(publication_cleanup)]) :-
+    maplist(publication_space, [Home, Middle, Leaf]),
+    metta_add_atom(Home, [=, ['publication-clear-middle'], old], _),
+    publication_from(Middle, Home), publication_from(Leaf, Middle),
+    metta_host_clear_space(Middle),
+    findall(Value, evalc(['publication-clear-middle'], Leaf, Value), Cleared),
+    assertion(Cleared == [['publication-clear-middle']]),
+    metta_add_atom(Middle, [=, ['publication-clear-middle'], new], _),
+    findall(Value, evalc(['publication-clear-middle'], Leaf, Value), Values),
+    assertion(Values == [new]).
+
+test(rolling_back_clear_restores_the_provider_and_its_live_links,
+     [setup(publication_setup), cleanup(publication_cleanup)]) :-
+    publication_space(Home), publication_space(Receiver),
+    Old = [=, ['publication-clear-rollback'], old],
+    metta_add_atom(Home, Old, _), publication_from(Receiver, Home),
+    \+ transaction((metta_host_clear_space(Home), fail)),
+    findall(Value, evalc(['publication-clear-rollback'], Receiver, Value), Before),
+    assertion(Before == [old]),
+    metta_remove_atom(Home, Old, true),
+    metta_add_atom(Home, [=, ['publication-clear-rollback'], new], _),
+    findall(Value, evalc(['publication-clear-rollback'], Receiver, Value), After),
+    assertion(After == [new]).
+
+test(clearing_content_releases_unused_function_indexes,
+     [setup(publication_setup), cleanup(publication_cleanup)]) :-
+    publication_space(Home), space_module(Home, Module),
+    forall(between(1, 10, N),
+           ( atom_concat('publication-obsolete-', N, Name),
+             metta_add_atom(Home, [=, [Name], N], _),
+             metta_host_clear_space(Home),
+             assertion(\+ support_graph:support_function_module(_, Module)),
+             assertion(\+ support_graph:support_view_module(_, Module)),
+             assertion(\+ support_graph:support_translated_form_id(_, Module, _)),
+             assertion(\+ support_graph:support_memo_rule(Module, _, _, _)) )).
 
 :- end_tests(reference_publication).

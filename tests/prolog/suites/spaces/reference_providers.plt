@@ -4,6 +4,9 @@
 %   links and withdraw only their metadata [tested: reference_providers;
 %   commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Owns resources: fixtures release their modules and native backing stores.
+% Guarantees: clearing either a native or foreign provider preserves its live
+%   receiver's reference to later definitions [tested: reference_providers;
+%   commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -114,5 +117,23 @@ test(exact_equation_removal_keeps_the_other_equal_occurrence_and_clause,
     findall(R,evalc(['provider-equal'],Space,R),Bag), assertion(Bag == [same]),
     once(metta_remove_atom(Space,Equation,true)),
     assertion(\+ spaces:metta_space_pair(Space,Equation,_,_)).
+
+test(clearing_native_and_foreign_providers_keeps_the_live_reference,
+     [forall(member(Direction, [foreign_source, foreign_receiver])),
+      setup(provider_fixture([tokens,add,'add-token','remove-token',rules,enumerate,clear],
+                             Space, Backing, Native)),
+      cleanup(provider_cleanup(Space, Backing, Native))]) :-
+    ( Direction == foreign_source -> Home = Space, Receiver = Native
+    ; Home = Native, Receiver = Space ),
+    metta_add_atom(Home, [=, ['provider-cleared'], old], _),
+    metta_add_atom(Receiver, [from, Home], _),
+    findall(Value, evalc(['provider-cleared'], Receiver, Value), Before),
+    assertion(Before == [old]),
+    metta_host_clear_space(Home),
+    findall(Value, evalc(['provider-cleared'], Receiver, Value), Cleared),
+    assertion(Cleared == [['provider-cleared']]),
+    metta_add_atom(Home, [=, ['provider-cleared'], new], _),
+    findall(Value, evalc(['provider-cleared'], Receiver, Value), After),
+    assertion(After == [new]).
 
 :- end_tests(reference_providers).

@@ -396,7 +396,7 @@ reaches(spaces, metta, 'a space write reaches the core\'s registries, contract a
 reaches(spaces, parser, 'space refusal messages render their forms through the parser\'s writer').
 reaches(spaces, materialize, 'clearing or releasing a space retires its counted relations transactionally').
 reaches(spaces, specializer, 'a changed function invalidates the specializations built over it').
-reaches(spaces, support_graph, 'a cleared space forgets the support edges of its module').
+reaches(spaces, support_graph, 'content clear keeps live consumers and lifetime release retires the whole support module').
 reaches(spaces, translator, 'storing an equation compiles it').
 reaches(spaces, translator_rules, 'a release retires global translator registrations before clearing their owning module').
 reaches(spaces, type_rules, 'equation compilation holds the typing policy stable while installing translated clauses, and a release retires the user typing rules declared in the module it is clearing').

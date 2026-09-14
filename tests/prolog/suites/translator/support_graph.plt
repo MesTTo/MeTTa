@@ -27,6 +27,11 @@
 %     pending change markers [tested:
 %     support_graph:a_reset_releases_automatic_memo_analysis_state;
 %     commit=9e7d5dc2cad810940e5386d52636ac6946df279d].
+%   - Clearing module contents retains dependencies owned by other modules,
+%     removes cached values and prunes only unused symbol indexes [tested:
+%     support_graph:clearing_a_module_preserves_its_consumers_dependencies,
+%     support_graph:clearing_a_module_prunes_only_unused_symbol_indexes;
+%     commit=WORKTREE].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -76,7 +81,7 @@ p36_node(dispatch_view, function_view(p36_test, p31_target)).
 
 p36_cleanup :-
     forall(p36_node(_, Node), user:support_forget(Node)),
-    forall(member(Module, [p36_retired, p36_live, p36_peer]),
+    forall(member(Module, [p36_test, p36_retired, p36_live, p36_peer]),
            user:support_forget_module(Module)),
     retractall(user:p36_supported_fact(_)),
     retractall(user:p36_action_count(_, _)),
@@ -158,16 +163,18 @@ test(forgetting_a_module_releases_only_its_nodes) :-
     assertion(\+ user:supports(Base, Middle)),
     assertion(user:supports(derived(p36_other, source), Other)).
 
+p36_retired_nodes([ function(p36_retired, f),
+                   function_view(p36_retired, fv),
+                   specialization(p36_retired, s),
+                   memo(p36_retired, m, 1),
+                   compiled_function(p36_retired, c),
+                   translated_form(p36_retired, t),
+                   type_marker(p36_retired, ty),
+                   dispatch_policy(p36_retired, d, argument_mode),
+                   derived(p36_retired, value) ]).
+
 test(forgetting_a_module_covers_every_node_shape_on_both_sides) :-
-    Retired = [ function(p36_retired, f),
-                function_view(p36_retired, fv),
-                specialization(p36_retired, s),
-                memo(p36_retired, m, 1),
-                compiled_function(p36_retired, c),
-                translated_form(p36_retired, t),
-                type_marker(p36_retired, ty),
-                dispatch_policy(p36_retired, d, argument_mode),
-                derived(p36_retired, value) ],
+    p36_retired_nodes(Retired),
     forall(nth1(I, Retired, Node),
            ( support_graph:support_record(derived(p36_live, outgoing(I)), Node),
              support_graph:support_record(Node, derived(p36_live, incoming(I))) )),
@@ -185,6 +192,39 @@ test(forgetting_a_module_covers_every_node_shape_on_both_sides) :-
     assertion(\+ support_graph:support_view_module(isolated, p36_peer)),
     assertion(support_graph:support_view_module(kept, p36_peer)),
     assertion(user:supports(derived(p36_live, stable), KeptView)).
+
+test(clearing_a_module_preserves_its_consumers_dependencies) :-
+    p36_retired_nodes(Cleared),
+    forall(nth1(I, Cleared, Node),
+           ( support_graph:support_stabilize(Node, =(cached), cached),
+             support_graph:support_record(Node, derived(p36_live, input(I))),
+             support_graph:support_record(derived(p36_test, consumer(I)), Node) )),
+    support_graph:support_clear_module(p36_retired),
+    forall(nth1(I, Cleared, Node),
+           ( assertion(\+ support_graph:supports(_, Node)),
+             assertion(\+ support_graph:support_value(_, Node, _)),
+             assertion(support_graph:supports(Node, derived(p36_test, consumer(I)))) )),
+    forall(nth1(I, Cleared, Node),
+           ( support_graph:support_invalidate(Node),
+             assertion(user:p36_action_count(consumer(I), 1)) )),
+    support_graph:support_forget_module(p36_retired),
+    forall(member(Node, Cleared), assertion(\+ support_graph:supports(Node, _))).
+
+test(clearing_a_module_prunes_only_unused_symbol_indexes) :-
+    LocalKept = function_view(p36_retired, local_kept),
+    LocalGone = function_view(p36_retired, local_gone),
+    PeerKept = function_view(p36_peer, peer_kept),
+    PeerGone = function_view(p36_peer, peer_gone),
+    support_graph:support_record(derived(p36_live, kept), LocalKept),
+    support_graph:support_record(derived(p36_retired, gone), LocalGone),
+    support_graph:support_record(derived(p36_retired, gone), PeerGone),
+    support_graph:support_record(derived(p36_retired, gone), PeerKept),
+    support_graph:support_record(derived(p36_live, stable), PeerKept),
+    support_graph:support_clear_module(p36_retired),
+    assertion(support_graph:support_view_module(local_kept, p36_retired)),
+    assertion(\+ support_graph:support_view_module(local_gone, p36_retired)),
+    assertion(support_graph:support_view_module(peer_kept, p36_peer)),
+    assertion(\+ support_graph:support_view_module(peer_gone, p36_peer)).
 
 test(language_policy_roots_are_typed_and_module_qualified) :-
     TypeRoot = type_marker(p36_test, p33_late),

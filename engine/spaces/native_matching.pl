@@ -1,4 +1,7 @@
 % Purpose: plan and execute indexed native-space matches and relational conjunction joins
+% Guarantees: content clearing retires module-owned support state while keeping
+%   edges owned by live consumers [tested: reference_publication;
+%   commit=WORKTREE].
 % Guarantees: grounded_length/2 counts visible native occurrences through
 % storage metadata and requires a length owner for every foreign parent
 % [tested: run_tests(space_length_refinements); commit=d336b911f0d727b50a5660eb86f5ed44b35303b5].
@@ -600,7 +603,7 @@ clear_native_atoms_stored(Space) :-
     metta_capacity_count_cleared(Space),
     retractall(import_life(Space, _, _)),
     (   SupportModule \== none
-    ->  support_forget_module(SupportModule)
+    ->  support_graph:support_clear_module(SupportModule)
     ;   true
     ),
     forget_space_source_loads(Space).
