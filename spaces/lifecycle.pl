@@ -6,6 +6,10 @@
 %   from database snapshots [tested: lib_import_lifecycle,
 %   extensions/python/tests/ch05_equations_and_evaluation/test_reload.py; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: decode stored atoms and manage source, subscription, reaction, table, and clear lifecycles
+% Guarantees: clear publishes the surviving reference face after native or
+%   foreign storage changes and preserves live consumers; final release
+%   retires the whole support module [tested: reference_publication,
+%   reference_providers, release_preparation; commit=WORKTREE].
 % Guarantees: metta_repair_shadow_import/3 and
 %   metta_refresh_repaired_shadow_imports/1 retain a native import when its
 %   provider still wins the current base chain. Concurrent callers retain
@@ -1518,7 +1522,9 @@ metta_release_space(Space) :-
                      Space,
                      ( metta_release_owned_children(Space),
                        metta_host_clear_space(Space) )),
-                 transaction(( metta_forget_space_parent(Space),
+                 transaction(( metta_exec_module_known(Space, Module),
+                               support_forget_module(Module),
+                               metta_forget_space_parent(Space),
                                retractall(space_equation_home(Space, _)),
                                metta_forget_space_restriction(Space),
                                metta_forget_parametric_space(Space),
@@ -1802,6 +1808,7 @@ prolog:error_message(metta_native_occurrence_binder_required(Space)) -->
 :- dynamic announce_equation_arrival/2, metta_add_program_atoms/4.
 :- dynamic translate_deferred_equations/4.
 :- dynamic store_data_atoms/3, metta_remove_atom/3.
+:- dynamic metta_host_clear_space/1.
 :- dynamic metta_reference_mutation_ref/2.
 :- dynamic defer_metta_function/5, metta_reference_defer_ref/2.
 :- dynamic store_atom/3, unstore_atom/3, remove_equation/6.
@@ -1955,6 +1962,8 @@ metta_reference_observer(Space, _, metta_add_atom(Space, Row, Token, _), true,
 metta_reference_observer(Space, _, metta_remove_atom(Space, Row, _),
                          metta_engine:metta_reference_removing(Space, Row, Selected),
                          metta_engine:metta_reference_removed(Space, Selected)).
+metta_reference_observer(Space, _, metta_host_clear_space(Space), true,
+                         metta_engine:metta_reference_changed(Space)).
 metta_reference_observer(Space, _, store_atom(Space, _, _), true, true) :-
     seam:foreign_space(Space).
 metta_reference_observer(Space, _, unstore_atom(Space, _, _), true, true) :-
@@ -2539,7 +2548,7 @@ metta_host_clear_space(Space) :-
         clear_generated_predicates(Module),
         retractall(deferred_metta_function(_, Module, Space, _, _, _)),
         clear_module_translation_state(Module),
-        support_forget_module(Module),
+        support_graph:support_clear_module(Module),
         retire_type_alias_scope(Module)
     ;   metta_host_clear_foreign_storage(Space)
     ).
