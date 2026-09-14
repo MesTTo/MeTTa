@@ -3,7 +3,7 @@
 % Purpose: validate foreign-provider capabilities and route foreign and native space operations
 % Guarantees: deferred arrival rearms missing native calls while preserving
 %   existing native answers and lazy bodies [tested: spaces_deferred_translation;
-%   commit=WORKTREE].
+%   commit=2d1289dafba121b7582a5cfcd49915d780745e4b].
 % Guarantees: declaration subtraction invalidates the affected names before
 %   returning, including constructor arrows and variable removal patterns
 %   [tested: run_tests(translator_constructors); commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
