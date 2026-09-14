@@ -35,11 +35,11 @@
 %   '$metta_translation_cache' guards translation reservations, publication
 %   and invalidation. metta_source_singleflight/2 serializes misses per key;
 %   compilation runs outside the publication mutex and releases reservations
-%   on every exit [tested: translation_cache; commit=WORKTREE].
+%   on every exit [tested: translation_cache; commit=bdf3a42670d84dc9925c5db7e767415c1e8a5c19].
 %   Cached templates retain dependencies from written source, generated goals
 %   and returned functions. Retirement evicts those templates and cancels
 %   pending compilation without discarding unrelated completed templates
-%   [tested: translation_cache; commit=WORKTREE].
+%   [tested: translation_cache; commit=bdf3a42670d84dc9925c5db7e767415c1e8a5c19].
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: retained and deferred equation type groups preserve written
 %   aliases, and with_equation_types/4 restores its enclosing translation
