@@ -1,6 +1,6 @@
 % Purpose: distinguish registered namespaces from the native space species.
 % Guarantees: reflection follows the existing registration owners through
-% creation and retirement [tested: run_tests(space_registration); commit=WORKTREE].
+% creation and retirement [tested: run_tests(space_registration); commit=a8e3fc42306377adf7cae0a331f3d92fbf190304].
 % Owns resources: cleanup releases native stores and erases the foreign claim.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

@@ -1,7 +1,7 @@
 % Purpose: provide MeTTa's Prolog runtime, builtins, type system, evaluator,
 %   imports, function registration, and named-space execution context.
 % Guarantees: metta_space_registered/1 exposes existing namespace owners
-%   [tested: run_tests(space_registration); commit=WORKTREE].
+%   [tested: run_tests(space_registration); commit=a8e3fc42306377adf7cae0a331f3d92fbf190304].
 % Guarantees: both trailed context scopes are published host services
 %   [tested: reference_scopes:both_scope_doors_are_published_host_services;
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].

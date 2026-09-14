@@ -1,7 +1,7 @@
 % Purpose: propagate output bounds through conjunction matching, ordering, and best-first merge policies
 % Guarantees: metta_space_registered/1 reflects existing native and foreign
 % registrations, including bare names, without changing space species
-% [tested: run_tests(space_registration); commit=WORKTREE].
+% [tested: run_tests(space_registration); commit=a8e3fc42306377adf7cae0a331f3d92fbf190304].
 % Guarantees: metta_space_operand/1 recognizes ground names without choosing
 %   an instance for an open expression [tested:
 %   space_value_recognition:an_open_name_is_not_a_recognized_value; commit=5f3c10af0d15efa2c5acce4cc659edd4a7b83beb].
@@ -296,7 +296,7 @@ metta_match_all([X|Xs], [Y|Ys]) :-
 % classification independent of the number of providers. Parametric values
 % use their ground structural registration below.
 % [tested: space_registration:a_bare_namespace_keeps_its_symbol_species;
-% commit=WORKTREE].
+% commit=a8e3fc42306377adf7cae0a331f3d92fbf190304].
 metta_space_operand(S) :-
     atom(S),
     !,
