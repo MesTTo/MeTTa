@@ -1,4 +1,7 @@
 % Purpose: propagate output bounds through conjunction matching, ordering, and best-first merge policies
+% Guarantees: metta_space_operand/1 recognizes ground names without choosing
+%   an instance for an open expression [tested:
+%   space_value_recognition:an_open_name_is_not_a_recognized_value; commit=WORKTREE].
 % Guarantees: ordered cursors and top share one provider-bound license
 % [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
@@ -325,15 +328,14 @@ metta_space_operand(S) :-
     ->  true
     ;   native_storage_module_cache(S, _)
     ).
-%A PARAMETRIC name is always a nonempty list: metta_require_parametric_space_name/1
-%refuses anything else at the only door that asserts space_parametric/1
-%[source: engine/spaces/lifecycle.pl]. Saying so here costs nothing - both
-%tests compile inline - and stops every number, string and non-list compound
-%the matcher meets from probing the table to be told what its shape already
-%said. engine/spaces/foreign.pl:321 already guards the same table this way.
+% Registration admits only ground nonempty lists. Recognition must require
+% the same value: looking up an open expression would bind its variables to
+% a registered instance, including variables introduced by translation caching.
+% Reflection enumerates space_parametric/1 directly instead.
 metta_space_operand(S) :-
     nonvar(S),
     S = [_|_],
+    ground(S),
     space_parametric(S).
 
 

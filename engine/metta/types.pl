@@ -1,4 +1,8 @@
 % Purpose: resolve scoped declarations, type compatibility, metatypes, and typed-call introspection
+% Guarantees: native space classification does not bind an open expression
+%   to a registered instance [tested:
+%   space_value_recognition:classification_does_not_choose_a_registered_instance;
+%   commit=WORKTREE].
 % Guarantees: refined union requirements retain value constraints at runnable
 %   and compiled calls [tested:
 %   union_types:a_refined_union_member_checks_the_value_at_each_call_door;
@@ -1444,7 +1448,7 @@ get_type_candidate(X, T) :- atomic(X), \+ atom(X),
                             metta_grounded_type(X, T).
 get_type_candidate([Family|Parameters], 'SpaceType') :-
     Space = [Family|Parameters],
-    space_parametric(Space),
+    metta_space_operand(Space),
     !.
 get_type_candidate(X, T) :- get_function_type(X,T).
 %The shape test leads the negation, which is free: X is nonvar by the time
@@ -1496,7 +1500,7 @@ get_type_candidate_in(_, X, T) :- atomic(X), \+ atom(X),
                                   metta_grounded_type(X, T).
 get_type_candidate_in(_, [Family|Parameters], 'SpaceType') :-
     Space = [Family|Parameters],
-    space_parametric(Space),
+    metta_space_operand(Space),
     !.
 get_type_candidate_in(Module, X, T) :- get_function_type_in(Module, X, T).
 %Shape before negation, for the reason get_type_candidate/2's twin above
@@ -1685,7 +1689,7 @@ scoped_type_candidate(_, _, X, T) :- atomic(X), \+ atom(X),
                                      metta_grounded_type(X, T).
 scoped_type_candidate(_, _, [Family|Parameters], 'SpaceType') :-
     Space = [Family|Parameters],
-    space_parametric(Space),
+    metta_space_operand(Space),
     !.
 scoped_type_candidate(Space, Module, X, T) :-
     scoped_function_type(Space, Module, X, T).
@@ -1922,7 +1926,7 @@ metatype_of(X, 'Grounded') :- atom(X), fun(X), !.
 %shaped like a list would change its metatype.
 metatype_of([Family|Parameters], 'Grounded') :-
     Space = [Family|Parameters],
-    space_parametric(Space),
+    metta_space_operand(Space),
     !.
 metatype_of(X, 'Grounded') :- seam:host_object(X), !.
 metatype_of(X, 'Expression') :- list_shaped(X), !. % e.g., (+ 1 2), (a b)

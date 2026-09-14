@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Native space recognition leaves open expressions unbound. Type queries and
+  cached evaluation preserve each parametric sibling's identity, while the
+  space registry remains available for relational enumeration.
 - Parametric space names preserve native string, symbol and numeric identities
   across Python calls. Returned names reopen the same space, aliases share
   batch ownership, and names cannot mutate while used as registry keys.
