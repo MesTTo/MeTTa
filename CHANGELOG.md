@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Source retirement restores surviving compiled and deferred function
+  registrations before repairing callers. Process host functions and declared
+  arrows retain their host lifetime when an importing MeTTa source leaves.
 - The policy inventory distinguishes reflected Python bindings from explicit
   closed vocabularies. Host assertion families and Python's special slots
   state their ownership beside the affected lists.

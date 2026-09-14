@@ -4,6 +4,14 @@
 % Owns resources: each source owner destroys its queue on every exit; waiters
 %   recheck receipts after waking [tested: loader_singleflight; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
+% Guarantees: process Prolog registrations and declared arrows belong to their
+%   loaded host source, independently of the MeTTa source that imported them
+%   [tested: lib_import_lifecycle:host_registration_outlives_the_importing_source;
+%   commit=WORKTREE].
+% Guarantees: host adoption preserves process-owned function and arity claims
+%   when the initiating MeTTa source fails
+%   [tested: host_registration:an_adopted_operation_outlives_the_importing_source;
+%   commit=WORKTREE].
 % Assumes: engine/source_loading.pl:loading_loudly/1 collects printed failures
 %   and restores nested loader state [tested: source_loading; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 % Guarantees: declared determinism is applied to the predicate's implementation
@@ -128,12 +136,11 @@ import_prolog_function_now(N, Arity) :-
     %module: fun_here_in/2 reads that claim as "callable from every space
     %unless a space of its own claims the name", and it is the same claim
     %register_op/2 makes on the Python side.
-    metta_self_module(Self),
-    register_fun_in(Self, N),
     (   Arity == scan
-    ->  register_prolog_arities(N)
-    ;   register_arity(N, Arity)
-    ).
+    ->  findall(A, prolog_registration_arity(N, A), Arities)
+    ;   Arities = [Arity]
+    ),
+    register_process_function(N, Arities).
 
 %The file the clauses in the database RIGHT NOW came from, read off a clause
 %rather than off the predicate. predicate_property(file(F)) is the wrong
@@ -338,8 +345,7 @@ metta_host_adopt_function(Name, Tier, Kind, PredArity) :-
     %compiles the mention as a call, which needs the arity to exist. Flip
     %this order and adopt fails
     %[tested: host_registration:a_forgotten_name_reads_as_data_again].
-    ( arity(Name, PredArity) -> true ; assertz(arity(Name, PredArity)) ),
-    register_fun_in(Base, Name),
+    register_process_function(Name, [PredArity]),
     announce_function_changed(Base, Name),
     claim_function_name(Name, Tier, Kind).
 
@@ -797,8 +803,11 @@ register_declared_exports(Pending) :-
     metta_reference_prolog_context(_, _), !,
     check_and_register_declared_exports(Pending).
 register_declared_exports(Pending) :-
-    catch(check_and_register_declared_exports(Pending), Error,
-          ( undo_declared_exports(Pending), throw(Error) )).
+    % Global host clauses and their arrows have one lifetime. The reference
+    % branch above instead records its declarations in the scoped library home.
+    with_owning_source_load(none,
+        catch(check_and_register_declared_exports(Pending), Error,
+              ( undo_declared_exports(Pending), throw(Error) ))).
 
 check_and_register_declared_exports(Pending) :-
     metta_reference_prolog_context(Home, Module), !,

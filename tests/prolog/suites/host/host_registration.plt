@@ -10,6 +10,9 @@
 %     the_protected_core_refuses_naming_the_owner].
 %   - the recompile no longer rides a host's event clause
 %     [tested: the_engine_recompiles_dependents_without_a_host].
+%   - host adoption retains new and shared registration facts through a failed
+%     initiating source [tested: an_adopted_operation_outlives_the_importing_source;
+%     commit=WORKTREE].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -110,5 +113,24 @@ test(the_engine_recompiles_dependents_without_a_host) :-
     with_metta_module(Self, reduce(['zzz-watcher'], Second)),
     Second == ['zzz-moved'],
     remove_sexp('&self', [=, [['zzz-watcher']|_], _]).
+
+test(an_adopted_operation_outlives_the_importing_source,
+     [forall(member(Shared, [false, true]))]) :-
+    gensym('plunit-source-host-', Name),
+    setup_call_cleanup('new-space'(Space),
+        ( catch(filereader:with_source_load('plunit-host-registration-source', Space,
+                    plunit_host_registration:(
+                        ( Shared == true
+                        -> metta_add_atom(Space, [=, [Name], 99], true)
+                        ; true ),
+                        adopt_probe_operation(Name, 37),
+                        throw(plunit_host_registration_source_failed) )), Error, true),
+          assertion(Error == plunit_host_registration_source_failed),
+          metta_self_module(Base),
+          assertion(metta_host_function_callable_from(Base, Name)),
+          findall(R, with_metta_module(Base, eval([Name], R)), Results),
+          assertion(Results == [37]),
+          assertion(arity(Name, 1)) ),
+        ( drop_probe_operation(Name), metta_release_space(Space) )).
 
 :- end_tests(host_registration).

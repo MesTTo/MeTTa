@@ -5,6 +5,17 @@
 %   .metta file to an inert occurrence image, qcompiles it, and restores its
 %   rows on each load. Every one of those steps could silently produce or serve
 %   the wrong data, and three of them did.
+% Guarantees: clearing, releasing or rolling back an introducing source keeps
+%   surviving deferred and compiled functions callable without transferring
+%   their registrations to the retiring source
+%   [tested: lib_import_lifecycle:first_owner_retirement_keeps_other_spaces_callable,
+%   lib_import_lifecycle:failed_first_load_keeps_a_nested_import_callable,
+%   lib_import_lifecycle:retirement_inside_a_failed_load_keeps_older_registrations;
+%   commit=WORKTREE].
+% Guarantees: process Prolog registrations and their declared arrows survive
+%   MeTTa source retirement until explicit host unregistration
+%   [tested: lib_import_lifecycle:host_registration_outlives_the_importing_source;
+%   commit=WORKTREE].
 % Guarantees:
 %   - the conversion goes through the engine's own reader, so a blank line, a
 %     comment, a form spanning lines, an escaped quote and a run of spaces all
@@ -533,6 +544,132 @@ check_specialized_undo(Space, Path) :-
     findall(A, 'get-atoms'(Space, A), Atoms), assertion(Atoms == []),
     findall(R, with_metta_module(Module, eval(['import-twice', 'import-bump', 1], R)), After),
     assertion(After == [['import-twice', 'import-bump', 1]]).
+
+test(first_owner_retirement_keeps_other_spaces_callable,
+     [forall((member(Mode, [deferred, compiled]), member(Action, [clear, release])))]) :-
+    with_registry_import(check_registry_retirement(Mode, Action)).
+
+test(failed_first_load_keeps_a_nested_import_callable,
+     [forall(member(Mode, [deferred, compiled]))]) :-
+    with_registry_import(check_failed_registry_load(Mode)).
+
+test(retirement_inside_a_failed_load_keeps_older_registrations,
+     [forall(member(Mode, [deferred, compiled]))]) :-
+    with_registry_import(check_retirement_ownership(Mode)).
+
+test(host_registration_outlives_the_importing_source,
+     [forall((member(Kind, [scan, declared]),
+              member(Shared, [false, true]),
+              member(Action, [clear, release, unimport, failed])))]) :-
+    with_owned_import("", check_host_registration(Kind, Shared, Action)).
+
+check_host_registration(Kind, Shared, Action, Space, Path) :-
+    gensym('plunit-host-lifetime-', Name),
+    file_directory_name(Path, Directory),
+    directory_file_path(Directory, 'host.pl', Host),
+    setup_call_cleanup(open(Host, write, Out),
+        ( format(Out, '~q(X, Y) :- Y is X*2.~n', [Name]),
+          format(Out, '~q(X, Y, Z) :- Z is X+Y.~n', [Name]),
+          ( Kind == declared
+          -> format(Out, ':- metta_export("(: ~w (-> Number Number))").~n', [Name])
+          ; true ) ),
+        close(Out)),
+    setup_call_cleanup(open(Path, write, Source),
+        ( ( Shared == true
+          -> format(Source, '(= (~w) 99)~n(= (~w $x) $x)~n', [Name, Name])
+          ; true ),
+          format(Source, '!(import_prolog_function consult_global)~n!(let "~w" (consult_global) ())~n', [Host]),
+          ( Kind == scan -> format(Source, '!(import_prolog_function ~w)~n', [Name])
+          ; true ),
+          ( Action == failed -> format(Source, '!(+ $x $y)~n', []) ; true ) ),
+        close(Source)),
+    setup_call_cleanup(true,
+        ( ( Action == failed
+          -> catch('import!'(Space, Path, true), Error, true),
+             assertion(Error = error(metta_unsolved_arithmetic('+', unbounded_domain), _))
+          ; 'import!'(Space, Path, true),
+            ( Action == clear -> clear_native_atoms(Space)
+            ; Action == release -> metta_release_space(Space)
+            ; metta_unimport(Space, Path) ) ),
+          metta_self_module(Self),
+          assertion(metta_host_function_callable_from(Self, Name)),
+          findall(A, arity(Name, A), Arities0), sort(Arities0, Arities),
+          ( Kind == scan -> assertion(Arities == [2, 3])
+          ; assertion(Arities == [2]),
+            assertion(get_native_atom('&self', [':', Name, [->, 'Number', 'Number']])) ),
+          findall(R, with_metta_module(Self, eval([Name, 21], R)), Results),
+          assertion(Results == [42]),
+          metta_engine:forget_registered_function(Name),
+          assertion(\+ fun(Name)) ),
+        ( metta_engine:forget_registered_function(Name),
+          retractall(metta_engine:metta_file_export(_, Name)),
+          unload_file(Host) )).
+
+:- meta_predicate with_registry_import(4).
+with_registry_import(Goal) :-
+    gensym('plunit-registry-lifetime-', Name),
+    format(string(Source), "(= (~w) 17)~n(= (~w $x) (+ $x 1))~n", [Name, Name]),
+    setup_call_cleanup(
+        asserta(filereader:silent(true), Silent),
+        with_owned_import(Source, registry_import_spaces(Name, Goal)),
+        erase(Silent)).
+
+:- meta_predicate registry_import_spaces(+, 4, +, +).
+registry_import_spaces(Name, Goal, First, Path) :-
+    setup_call_cleanup('new-space'(Second),
+        call(Goal, Name, First, Second, Path),
+        metta_release_space(Second)).
+
+prepare_registry_survivor(deferred, Name, Second) :-
+    assertion(spaces:deferred_metta_function(Name, _, Second, _, _, _)).
+prepare_registry_survivor(compiled, Name, Second) :-
+    registry_survivor_answers(Name, Second).
+
+registry_survivor_answers(Name, Space) :-
+    space_module(Space, Module),
+    assertion(metta_host_function_callable_from(Module, Name)),
+    findall(R, with_metta_module(Module, eval([Name, 41], R)), Unary),
+    assertion(Unary == [42]),
+    findall(R, with_metta_module(Module, eval([Name], R)), Nullary),
+    assertion(Nullary == [17]).
+
+check_registry_retirement(Mode, Action, Name, First, Second, Path) :-
+    'import!'(First, Path, true),
+    'import!'(Second, Path, true),
+    prepare_registry_survivor(Mode, Name, Second),
+    ( Action == clear -> clear_native_atoms(First) ; metta_release_space(First) ),
+    prepare_registry_survivor(Mode, Name, Second),
+    registry_survivor_answers(Name, Second),
+    space_module(Second, Module),
+    metta_release_space(Second),
+    assertion(\+ metta_engine:fun_in(Module, Name)),
+    assertion(\+ spaces:deferred_metta_function(Name, _, _, _, _, _)),
+    assertion(\+ translator:fun_meta_clause(Module, Name, _, _)).
+
+check_failed_registry_load(Mode, Name, First, Second, Path) :-
+    read_file_to_string(Path, Source, []),
+    catch(filereader:with_source_load(Path, First,
+              plunit_lib_import_lifecycle:(
+                filereader:process_metta_string(Source, _, First),
+                'import!'(Second, Path, true),
+                prepare_registry_survivor(Mode, Name, Second),
+                throw(plunit_registry_load_failed) )), Error, true),
+    assertion(Error == plunit_registry_load_failed),
+    registry_survivor_answers(Name, Second).
+
+check_retirement_ownership(Mode, Name, First, Second, Path) :-
+    'import!'(First, Path, true),
+    'import!'(Second, Path, true),
+    prepare_registry_survivor(Mode, Name, Second),
+    setup_call_cleanup('new-space'(Enclosing),
+        ( catch(filereader:with_source_load(Path, Enclosing,
+                    plunit_lib_import_lifecycle:(
+                      metta_release_space(First),
+                      registry_survivor_answers(Name, Second),
+                      throw(plunit_registry_enclosing_failed) )), Error, true),
+          assertion(Error == plunit_registry_enclosing_failed),
+          registry_survivor_answers(Name, Second) ),
+        metta_release_space(Enclosing)).
 
 :- end_tests(lib_import_lifecycle).
 

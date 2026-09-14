@@ -1,4 +1,8 @@
 % Purpose: register function names and arities, protect callable surface, and import host and backend builtins
+% Guarantees: process registration retains exactly the names and arities it
+%   adopts, including registry facts introduced by a temporary MeTTa source
+%   [tested: lib_import_lifecycle:host_registration_outlives_the_importing_source;
+%   commit=WORKTREE].
 % Guarantees: the occurrence-output add-atom arity names its native owner
 %   [tested: builtin_facets; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
@@ -63,10 +67,13 @@ register_fun(N) :- must_be(atom, N),
 %older half-answer to the same thing: it excluded 1/2 the TERM and nothing
 %told it about 1/2 the lambda.
 register_prolog_arities(N) :-
-    forall(( current_predicate(N/Arity),
-             \+ (metta_engine_operator(N), Arity =< 2),
-             \+ (metta_engine_operator(N), imported_predicate(N, Arity)) ),
+    forall(prolog_registration_arity(N, Arity),
            register_arity(N, Arity)).
+
+prolog_registration_arity(N, Arity) :-
+    current_predicate(N/Arity),
+    \+ (metta_engine_operator(N), Arity =< 2),
+    \+ (metta_engine_operator(N), imported_predicate(N, Arity)).
 
 %%% Arities a predicate outside this tree lent a MeTTa name by accident %%%
 %
@@ -256,6 +263,20 @@ imported_predicate(N, Arity) :-
 register_arity(N, Arity) :- ( arity(N, Arity) -> true
                             ; assertz(arity(N, Arity), Ref),
                               record_source_assertion(Ref) ).
+
+% A process registration can reuse facts first asserted by a MeTTa source.
+% Retain those exact references as well as newly created facts. Unclaimed
+% arities keep their existing owner. Arity publication precedes name repair.
+register_process_function(Name, Arities) :-
+    metta_self_module(Base),
+    with_owning_source_load(none,
+        ( forall(member(Arity, Arities), register_arity(Name, Arity)),
+          register_fun_in(Base, Name) )),
+    forall(( ( Row = fun(Name)
+             ; Row = fun_in(Base, Name)
+             ; member(Arity, Arities), Row = arity(Name, Arity) ),
+             clause(Row, true, Ref) ),
+           retain_source_assertion(Ref)).
 
 %The module whose equations are in scope while a term is compiled or run. The
 %default is &self's, which is where a program that names no space writes.
