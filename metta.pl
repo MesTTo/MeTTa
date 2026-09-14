@@ -1614,7 +1614,7 @@ metta_import_shared_registries(Subsystem) :-
    ).
 
 :- consult('metta/algebra_operations.pl').
-:- ensure_loaded([parser, type_rules, translator, translator_rules,
+:- ensure_loaded([atom_index, parser, type_rules, translator, translator_rules,
                   support_graph, specializer, materialize, filereader,
                   '../lib/lib_gitimport/lib_gitimport', spaces, tracer,
                   duals, kernel, '../lib/lib_memo/lib_memo',
@@ -1626,6 +1626,12 @@ metta_import_shared_registries(Subsystem) :-
 % in each subsystem. Declared services are checked even without static callers.
 % [tested: engine_modules:every_declared_service_is_exported_to_the_host,
 % engine_modules:the_service_census_sees_a_declared_private_predicate; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
+
+% Temporary indexes retain original term values under their caller's trail.
+% [tested: atom_index; commit=WORKTREE].
+metta_engine_reexport(atom_index, metta_atom_index_new/1).
+metta_engine_reexport(atom_index, metta_atom_index_bind/4).
+metta_engine_reexport(atom_index, metta_atom_index_get/3).
 
 %engine/filereader.pl: reading and running a MeTTa source: the loader's own doors,
 %which every seat's `run this text` crossing lands on.
