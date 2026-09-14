@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Runnable translation caches track generated predicates and returned callable
+  values. Retiring generated code invalidates its cached users and pending
+  compilations while preserving unrelated completed translations.
 - Python underscore bindings preserve their identity in compiled functions,
   class constructors and methods, rule generators and type annotations.
   Nested binders use fresh native variables and discard shadowed value proofs;

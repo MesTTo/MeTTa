@@ -35,7 +35,11 @@
 %   '$metta_translation_cache' guards translation reservations, publication
 %   and invalidation. metta_source_singleflight/2 serializes misses per key;
 %   compilation runs outside the publication mutex and releases reservations
-%   on every exit [tested: translation_cache; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+%   on every exit [tested: translation_cache; commit=WORKTREE].
+%   Cached templates retain dependencies from written source, generated goals
+%   and returned functions. Retirement evicts those templates and cancels
+%   pending compilation without discarding unrelated completed templates
+%   [tested: translation_cache; commit=WORKTREE].
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: retained and deferred equation type groups preserve written
 %   aliases, and with_equation_types/4 restores its enclosing translation
@@ -1533,11 +1537,9 @@ translating_runnable :- b_getval('$metta_translating_runnable', true).
 :- thread_local runnable_import/1.
 %A translated runnable is a TEMPLATE, not an answer. The source, goals and
 %output are stored together so their variables keep the same sharing, while a
-%dynamic-clause read gives every caller a fresh copy. This is the boundary
-%Python's non-direct eval paths cross this boundary. Language-level eval/2 and source
-%runners stay uncached because interpreter-style programs feed them many
-%one-shot terms; equations also stay uncached, so compile-once paths retain
-%their prior cost.
+%dynamic-clause read gives every caller a fresh copy. eval/2 and the host's
+%cached evaluation paths share this boundary. Source runners and equation
+%translation remain outside this cache.
 %
 %The key is the specializer's operation: copy the term and number its
 %variables. The source-template variant check is still required because a
@@ -1548,11 +1550,11 @@ translating_runnable :- b_getval('$metta_translating_runnable', true).
 %translation saving while the repeated eval workloads already repeat exact
 %variants.
 %
-%The runnable dependency index contains every atom in the written form. Like
-%record_translated_supports/2's translated-form supports, it deliberately
-%over-approximates: evicting an unaffected translation is safe, retaining one
-%that compiled against an old function is not. Both function change events use
-%the same indexed first lookup.
+%The runnable dependency index contains names in the written form and in its
+%generated goals and result. A generated predicate's functor is a dependency
+%even when it never appeared in the written source. Like
+%record_translated_supports/2, this index deliberately over-approximates:
+%evicting an unaffected translation is safe, retaining stale code is not.
 :- dynamic translated_form_cache/6.
 :- dynamic translated_form_pending/3.
 :- dynamic translated_form_mention/2.
@@ -1684,16 +1686,24 @@ reserve_translated_form(Module, Key, Source, Id) :-
     install_translation_cache_hooks,
     gensym(translated_form_, Id),
     assertz(translated_form_pending(Module, Key, Id)),
-    findall(Symbol, (sub_term(Symbol, Source), atom(Symbol)), Symbols0),
+    record_translated_form_mentions(Id, Source).
+
+record_translated_form_mentions(Id, Term) :-
+    findall(Symbol,
+            (sub_term(Part, Term), nonvar(Part),
+             functor(Part, Symbol, _), atom(Symbol)), Symbols0),
     sort(Symbols0, Symbols),
     forall(member(Symbol, Symbols),
-           assertz(translated_form_mention(Symbol, Id))).
+           ( translated_form_mention(Symbol, Id)
+           -> true
+           ; assertz(translated_form_mention(Symbol, Id)) )).
 
 % A change can evict the reservation while compilation is outside the lock.
 % Return this invocation's guarded goals, but never cache that stale snapshot.
 publish_translated_form(Module, Key, Id, Source, Goals, Out) :-
     ( retract(translated_form_pending(Module, Key, Id))
-    -> assertz(translated_form_cache(Module, Key, Id, Source, Goals, Out), Ref),
+    -> record_translated_form_mentions(Id, [Goals, Out]),
+       assertz(translated_form_cache(Module, Key, Id, Source, Goals, Out), Ref),
        record_source_assertion(Ref),
        forall(clause(translated_form_mention(_, Id), true, MentionRef),
               record_source_assertion(MentionRef))
@@ -1729,7 +1739,7 @@ install_translation_cache_hooks :-
                 invalidate_translated_forms(Symbol)), ChangedRef),
     assertz(translation_cache_hook_ref(changed, ChangedRef)),
     assertz((seam:function_removed(Symbol) :-
-                invalidate_translated_forms(Symbol)), RemovedRef),
+                invalidate_retired_translations(Symbol)), RemovedRef),
     assertz(translation_cache_hook_ref(removed, RemovedRef)).
 
 translate_runnable_expr_cached(Module, Key, Source, Template, Goals, Out) :-
@@ -1758,6 +1768,19 @@ invalidate_translated_forms(Symbol) :-
     (   translated_form_mention(Symbol, _)
     ->  with_mutex('$metta_translation_cache',
                    invalidate_translated_forms_locked(Symbol))
+    ;   true
+    ).
+
+% A compiler outside the publication lock may already retain a generated
+% function whose name it has not published yet. Cancel its reservation on
+% retirement; the invocation finishes once, without caching that snapshot.
+invalidate_retired_translations(Symbol) :-
+    (   ( translated_form_mention(Symbol, _)
+        ; translated_form_pending(_, _, _) )
+    ->  with_mutex('$metta_translation_cache',
+            ( forall(retract(translated_form_pending(_, _, Id)),
+                     retractall(translated_form_mention(_, Id))),
+              invalidate_translated_forms_locked(Symbol) ))
     ;   true
     ).
 

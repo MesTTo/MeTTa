@@ -3,7 +3,10 @@
 %   compiler observer, queues, pending reservations and temporary space.
 % Guarantees: a miss compiles once outside the publication mutex; a concurrent
 %   source change or cache clear prevents stale publication
-%   [tested: translation_cache; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
+%   [tested: translation_cache; commit=WORKTREE].
+% Guarantees: retiring generated calls or returned functions evicts their
+%   cached translations and cancels incomplete dependency reservations
+%   [tested: translation_cache; commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -112,7 +115,7 @@ test(concurrent_first_use_publishes_one_template,
     assertion(translation_compile_count(1)).
 
 test(a_compiling_miss_releases_publication_and_observes_invalidation,
-     [forall((member(Change,[definition,cache,module]),member(Snapshot,[live,transaction]))),
+     [forall((member(Change,[definition,cache,module,retirement]),member(Snapshot,[live,transaction]))),
       condition(current_prolog_flag(threads,true)),
       setup(clear_translation_cache_test_state),
       cleanup(clear_translation_cache_test_state)]) :-
@@ -126,8 +129,11 @@ test(a_compiling_miss_releases_publication_and_observes_invalidation,
                           -> thread_send_message(Entered,compiled),
                              thread_get_message(Release,continue)
                           ; true))) ),
-        ( setup_call_cleanup(
-            thread_create(translate_pending_snapshot(Snapshot,Module),Worker,[]),
+        ( ( Change == retirement
+          -> Source = ['tc-pending',['|->',[Argument],Argument]]
+          ; Source = ['tc-pending',2] ),
+          setup_call_cleanup(
+            thread_create(translate_pending_snapshot(Snapshot,Module,Source),Worker,[]),
             ( thread_get_message(Entered,compiled),
               setup_call_cleanup(mutex_trylock('$metta_translation_cache'),
                                  true,mutex_unlock('$metta_translation_cache')),
@@ -142,16 +148,62 @@ test(a_compiling_miss_releases_publication_and_observes_invalidation,
           message_queue_destroy(Entered), message_queue_destroy(Release),
           metta_release_space(Space) )).
 
-translate_pending_snapshot(live,Module) :-
-    with_metta_module(Module,translate_cached_expr(['tc-pending',2],_,_)).
-translate_pending_snapshot(transaction,Module) :-
-    transaction(translate_pending_snapshot(live,Module)).
+translate_pending_snapshot(live,Module,Source) :-
+    with_metta_module(Module,translate_cached_expr(Source,_,_)).
+translate_pending_snapshot(transaction,Module,Source) :-
+    transaction(translate_pending_snapshot(live,Module,Source)).
 
 invalidate_pending_translation(definition,Space,_) :-
     metta_add_atom(Space,[=,['tc-pending',X],[+,X,1]],_).
 invalidate_pending_translation(cache,_,_) :- clear_translation_cache_test_state.
 invalidate_pending_translation(module,_,Module) :-
     translator:clear_module_translation_state(Module).
+invalidate_pending_translation(retirement,_,Module) :-
+    findall(Name,
+            (translator:translated_from(Ref,[=,[Name|_],_]),
+             clause_property(Ref,module(Module))), Names),
+    ( Names == []
+    -> % An uncommitted compiler's generated clauses are private to its
+       % transaction, just as its reservation is. Announce the same event.
+       spaces:announce_function_removed('tc-private-generated')
+    ; forall(member(Name,Names),specializer:forget_symbol(Module,Name)) ).
+
+test(a_cached_generated_call_is_rebuilt_after_its_functions_retire,
+     [forall(member(Arity,[0,1,5])),
+      setup(clear_translation_cache_test_state),
+      cleanup(clear_translation_cache_test_state)]) :-
+    gensym('&translation-artifact-',Space), space_module(Space,Module),
+    setup_call_cleanup(true,
+        with_metta_module(Module, plunit_translation_cache:
+            ( findall(N,between(1,Arity,N),Values),
+              Source = [['|->', [[':seg',Args]], [evalc,[noeval,Args],Space]]|Values],
+              findall(Value,run_translated(Source,Value),Before),
+              assertion(Before == [Values]),
+              run_translated([+,20,22],42),
+              findall(Name,
+                      (translator:translated_from(Ref,[=,[Name|_],_]),
+                       clause_property(Ref,module(Module))),Generated),
+              assertion(Generated \== []),
+              forall(member(Name,Generated),specializer:forget_symbol(Module,Name)),
+              assertion(translator:translated_form_cache(Module,_,_,[+,_,_],_,_)),
+              findall(Value,run_translated(Source,Value),After),
+              assertion(After == [Values]) )),
+        metta_release_space(Space)).
+
+test(a_cached_generated_value_is_rebuilt_after_its_function_retires,
+     [setup(clear_translation_cache_test_state),
+      cleanup(clear_translation_cache_test_state)]) :-
+    gensym('&translation-value-',Space), space_module(Space,Module),
+    setup_call_cleanup(true,
+        with_metta_module(Module, plunit_translation_cache:
+            ( Source = ['|->',[X],[+,X,1]],
+              run_translated(Source,First),
+              eval([First,2],3),
+              specializer:forget_symbol(Module,First),
+              run_translated(Source,Second),
+              assertion(First \== Second),
+              eval([Second,4],5) )),
+        metta_release_space(Space)).
 
 test(a_failed_compiler_releases_its_reservation_and_key,
      [setup(clear_translation_cache_test_state),
