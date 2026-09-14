@@ -1,4 +1,7 @@
 % Purpose: propagate output bounds through conjunction matching, ordering, and best-first merge policies
+% Guarantees: metta_space_registered/1 reflects existing native and foreign
+% registrations, including bare names, without changing space species
+% [tested: run_tests(space_registration); commit=WORKTREE].
 % Guarantees: metta_space_operand/1 recognizes ground names without choosing
 %   an instance for an open expression [tested:
 %   space_value_recognition:an_open_name_is_not_a_recognized_value; commit=5f3c10af0d15efa2c5acce4cc659edd4a7b83beb].
@@ -287,39 +290,13 @@ metta_match_all([X|Xs], [Y|Ys]) :-
     metta_match_atoms(X, Y),
     metta_match_all(Xs, Ys).
 
-%Whether an operand names a space this engine can query: a foreign
-%provider or a native storage module. Both probes are indexed lookups.
-%
-%The '&' test in front of them is the engine's OWN space-name rule, applied
-%where it is cheapest instead of only where a space is created. It is not a
-%new assumption: metta_space_name/1 refuses any other spelling at the
-%creation door [source: engine/spaces/catalog.pl, metta_space_name/1],
-%metta_require_space_name/2 refuses it at new-space and inherits [source:
-%engine/spaces/lifecycle.pl], register_provider refuses it at the Python
-%door [source: extensions/python/metta/foreign/__init__.py:583, "a space name starts with
-%&"; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e], both wire codecs refuse to decode any other spelling [source:
-%extensions/python/metta/_binding/wire.pl:242 metta_py_decode_(p, ...) and
-%extensions/node/bridge.pl; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e], MORK's own ownership test is the same prefix
-%[source: backends/mork/mork_ffi/morkspaces.pl, mork_owns_space/1], and a
-%state cell spells its handle the same way [source: engine/metta/control.pl,
-%metta_state_cell/1]. Every seam:foreign_space/1 clause in this tree names a
-%'&' atom, so the rule was already universal and this predicate was the one
-%place that paid to re-discover it.
-%
-%What it buys: an ordinary symbol - nearly every atom this engine ever tests
-%- fails here for one inference instead of paying both probes, on the nine
-%hot paths that ask [measured 2026-08-28 in the shipped Python configuration,
-%20,000 iterations against a bare loop: 8 inferences per non-space atom
-%before, 3 after; metta_match_atoms/2 asks twice per atom position].
-%
-%Limitation: seam:foreign_space/1 is an open ownership seam, so an extension
-%that adds a clause naming an atom without the prefix stops being seen as a
-%space here. That configuration is already broken upstream of this
-%predicate - neither wire codec can carry such a name - and the live-database
-%check in tests/prolog/static_checks.pl now refuses it by name rather than
-%letting it fail quietly
-%[tested: tests/prolog/static_checks.pl:every_registered_space_name_is_an_ampersand_atom;
-%commit=c530ccb8fb7d0a5b2aa53df6e9f981ada9f81be8].
+% Atomic space values have the ampersand species and a registered owner.
+% Native writes also accept bare namespaces; metta_space_registered/1 answers
+% that wider registration question. Prefix rejection keeps ordinary symbol
+% classification independent of the number of providers. Parametric values
+% use their ground structural registration below.
+% [tested: space_registration:a_bare_namespace_keeps_its_symbol_species;
+% commit=WORKTREE].
 metta_space_operand(S) :-
     atom(S),
     !,
@@ -339,16 +316,15 @@ metta_space_operand(S) :-
     space_parametric(S).
 
 
-%Every space name this engine registers: '&self' and '&metta' from load time,
-%every atomic or parametric native space that new-space made or that has been
-%written to, and every foreign provider currently bound. Naming a space never
-%registers it, only creating it, writing to it or binding one does, so this is
-%the same set metta_space_operand/1 accepts. sort/2 makes the answer stable and
-%duplicate-free.
+% A namespace may store rows without belonging to the ampersand space species.
+% This relation reflects the owners already used by space-names; it also
+% enumerates registrations, so value-only callers require a ground input.
+metta_space_registered(Name) :- native_storage_module_cache(Name, _).
+metta_space_registered(Name) :- seam:foreign_space(Name).
+
+% Every native registration and bound foreign provider, sorted without duplicates.
 metta_space_names(Names) :-
-    findall(S, native_storage_module_cache(S, _), Native),
-    findall(S, seam:foreign_space(S), Foreign),
-    append(Native, Foreign, All),
+    findall(S, metta_space_registered(S), All),
     sort(All, Names).
 
 %The C identity scan rides beside the engine as empty_prune.c, compiled to

@@ -1,6 +1,8 @@
 % Purpose: store MeTTa atoms, compile equations into per-space modules,
 %   route matching to native and foreign space providers, and validate
 %   '&metta' declarations against the self-describing catalog.
+% Guarantees: namespace registrations are published independently of space
+%   species [tested: run_tests(space_registration); commit=WORKTREE].
 % Guarantees: add-atom/4 exposes the native occurrence-output write
 %   [tested: spaces_tokens; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: metta_existing_import/3 reports an existing native import without
@@ -308,6 +310,7 @@
             metta_require_space_update_capability/2,
             metta_restricted_exec_module/2,
             metta_space_names/1,
+            metta_space_registered/1,
             native_atom_clause/4,
             native_storage_functor/2,
             native_storage_module/2,
