@@ -4,7 +4,7 @@
 % Guarantees: a fresh-call control verifies loading; an open old call keeps
 %   retired clauses observable independently of clause collection, and the
 %   final line reports present or absent [tested:
-%   sh check.sh host-workarounds; commit=WORKTREE].
+%   sh check.sh host-workarounds; commit=540eb6ad437efe08b343e6b86e89ac7dcb63ffee].
 
 :- dynamic ready/1, loaded/1.
 :- multifile user:exception/3.

@@ -3,7 +3,7 @@
 % Guarantees: a copied specialization compiles before its native call is
 %   emitted, including when an earlier definition retains erased clauses
 %   [tested: specializer_invalidation:a_copied_specialization_materializes_before_its_call;
-%   commit=WORKTREE].
+%   commit=540eb6ad437efe08b343e6b86e89ac7dcb63ffee].
 % Guarantees: a named-space specialization inherits only declarations that
 %   govern its local source function [tested:
 %   specializer_invalidation:an_untyped_local_shadow_does_not_type_its_specialization;
