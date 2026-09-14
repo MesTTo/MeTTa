@@ -29,7 +29,7 @@
 % Guarantees: both preliminary clear and final release validate ownership and
 %   prepare dependents before taking the execution-module mutex or removing
 %   storage. Final retirement follows successful teardown [tested:
-%   release_preparation, lib_thread_cancellation; commit=WORKTREE].
+%   release_preparation, lib_thread_cancellation; commit=0891c522503ca9856fb654f306364f4ae9736b22].
 % Guarantees: access checks precede cache misses and allocation [tested:
 %   lib_thread_scope, test_a_rolled_back_allocation_cannot_recycle_a_revoked_name;
 %   commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
