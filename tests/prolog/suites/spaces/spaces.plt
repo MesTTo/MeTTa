@@ -49,7 +49,7 @@
 %   - a deferred definition becomes callable from a native caller that already
 %     encountered its absence [tested:
 %     spaces_deferred_translation:a_cached_undefined_call_is_rearmed_when_its_equation_arrives;
-%     commit=WORKTREE].
+%     commit=2d1289dafba121b7582a5cfcd49915d780745e4b].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

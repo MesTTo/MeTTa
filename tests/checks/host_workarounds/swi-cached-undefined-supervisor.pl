@@ -3,7 +3,7 @@
 % Owns resources: this process owns both probe modules and their clauses.
 % Guarantees: a fresh-call control validates the loader before the last line
 %   reports whether the cached call bypasses it
-%   [tested: sh check.sh host-workarounds; commit=WORKTREE].
+%   [tested: sh check.sh host-workarounds; commit=2d1289dafba121b7582a5cfcd49915d780745e4b].
 
 :- dynamic ready/1, loaded/1.
 :- multifile user:exception/3.
