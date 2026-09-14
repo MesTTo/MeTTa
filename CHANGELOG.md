@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Named native callables select their live Python argument contracts even
+  when defaults or positional and keyword variadics change the argument count.
+  Fixed positional ports retain their native precedence; overlapping variadic
+  contracts require an explicit callable image.
 - Compiled calls and host islands retain independent positional and keyword
   frames. Literal `Kwargs` values stay in their supplied position, completed
   atom operands are held, and reflected applications remain editable. The
