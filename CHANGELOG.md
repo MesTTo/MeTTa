@@ -242,6 +242,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `TaggedAnswer.under()` no longer raises `algebra_operation_error` for
+  `tropical` and `budget`: the reinterpretation fold now starts from the first
+  alternative, as direct evaluation does, instead of handing the carrier's
+  declared zero to its combine operation. Both presets declare the symbol
+  `infinity` as that zero, deliberate carrier vocabulary that `min` never
+  receives directly, so `.under(tropical)` raised `(min infinity 0)` where
+  `under=tropical` answered.
 - A profile whose sampler took no sample answers the goal's answers instead of
   raising: SWI's own `profile/2` prints a report as the cleanup of the goal and
   that report divides by the total tick count, so a goal finishing inside one
