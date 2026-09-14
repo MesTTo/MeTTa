@@ -13,6 +13,9 @@
 % Guarantees: allocation, release and held-goal context hooks let lib_thread
 %   own scope lifetimes across host engines [tested: lib_thread_scope;
 %   commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
+% Assumes: space_releasing/1 owners tolerate repeated preparation across the
+%   preliminary clear, final release and retries [tested: release_preparation,
+%   lib_thread_cancellation; commit=WORKTREE].
 % Guarantees:
 %   - metta_apply_algebra_operation/5 exposes the native carrier operation
 %     semantics to host bindings [tested:
@@ -469,8 +472,9 @@ kind(atom_added/2, event).
 :- multifile atom_removed/2.
 kind(atom_removed/2, event).
 % Lifetime events are independent of atom writes and transaction observation.
-% Creation fires once at allocation; release first joins dependants, then
-% retires ownership after the space's own teardown succeeds.
+% Creation fires once at allocation. Release preparation joins dependants
+% before either clearing phase and may repeat on retry. Its owners must be
+% idempotent. Final retirement follows successful storage teardown.
 :- multifile space_created/1, space_releasing/1, space_released/1, space_access/1.
 kind(space_created/1, event).
 kind(space_releasing/1, event).
