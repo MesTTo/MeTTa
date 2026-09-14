@@ -1,6 +1,9 @@
 % Guarantees: resolved_equation_removal/4 honors exact source occurrence selection
 %   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: validate foreign-provider capabilities and route foreign and native space operations
+% Guarantees: deferred arrival rearms missing native calls while preserving
+%   existing native answers and lazy bodies [tested: spaces_deferred_translation;
+%   commit=WORKTREE].
 % Guarantees: declaration subtraction invalidates the affected names before
 %   returning, including constructor arrows and variable removal patterns
 %   [tested: run_tests(translator_constructors); commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
@@ -845,6 +848,16 @@ defer_metta_function(Space, Module, F, InputArity, _Count) :-
     !,
     translate_deferred_shape(Space, Module, F, InputArity).
 defer_metta_function(Space, Module, F, InputArity, Count) :-
+    % Workaround: swi-cached-undefined-supervisor - rearm the undefined native slot before deferring its definition.
+    % A compiled caller can retain S_UNDEF and bypass user:exception/3.
+    % Reference scopes also reuse this body for visible definitions, which
+    % must retain their clauses. Neither lookup autoloads or creates an import;
+    % abolish/1 is a no-op when this module has no native slot yet.
+    Arity is InputArity + 1,
+    compiled_function_name(F, Predicate),
+    ( current_predicate(Module:Predicate/Arity)
+    -> true
+    ; abolish(Module:Predicate/Arity) ),
     current_owning_source_load(Load),
     (   retract(deferred_metta_function(F, Module, Space, InputArity,
                                         Load, Sofar))
@@ -864,12 +877,12 @@ defer_metta_function(Space, Module, F, InputArity, Count) :-
 %predicate_property(m:send(_,_,_), defined) in a fresh module and then
 %asserting m:send/3 is a permission error on pce_principal's static send/3,
 %where the same assert with no probe before it succeeds; current_predicate/1
-%in the same experiment answers about the asked module alone, creates nothing,
-%and the assert after it succeeds [measured 2026-08-24]. It sees only LOCAL
-%definitions, not imports, which is the question anyway: get_type_rule/2 is
-%Self's own dynamic predicate and is found, and a name like send that only
-%XPCE's import chain would answer is not, so its equations defer and the call
-%site's forced translation asserts the shadow exactly as the eager door did.
+%in the same experiment creates nothing, and the assert after it succeeds
+%[measured 2026-08-24]. It follows existing default-module links but does not
+%search the autoload catalogue or install an import. get_type_rule/2 is Self's
+%own dynamic predicate and is found; send, available only through XPCE's
+%autoload entry in that experiment, is not. Its equations therefore defer and
+%the call site's forced translation asserts the shadow as the eager door did.
 visible_predicate_definition(Module, Predicate, Arity) :-
     default_module(Module, Inherited),
     current_predicate(Inherited:Predicate/Arity),
