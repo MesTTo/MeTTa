@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Mapping annotations reconstruct native dictionary and keyword-collector
+  results from their stored rows. Nested conversion preserves callable homes;
+  malformed rows and duplicate reconstructed keys raise instead of losing data.
 - Length refinements read native spaces through their visible inherited
   contents and foreign spaces through their owner's length promise. A
   parametric name no longer substitutes its own field count for the value.

@@ -184,3 +184,11 @@ report `EngineError: one() expected exactly one answer, got 0`. Log:
 `ai-tmp/ai-classes-c49-collector-returns-before.log`. This remains mandatory
 before completing callable support. An explicit `Atom` result instead quotes
 its body by the existing native contract and must retain that behavior.
+
+## 2026-09-15: mapping result conversion
+
+The collector result gap above is closed through the annotation-owned
+container inverse. The native body still returns its dictionary space;
+mapping annotations admit and reconstruct that value. The design and
+verification are recorded in `2026-09-14-mapping-space-results.md`.
+Ordinary and lexical signature lowering remain open.

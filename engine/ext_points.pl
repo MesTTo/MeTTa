@@ -1,5 +1,7 @@
 % Purpose: declare each engine extension seam, its direction and its cut
 %   semantics, and publish the predicates extensions and host bindings may call.
+% Guarantees: namespace registration is a published host service distinct
+%   from value species [tested: run_tests(space_registration); commit=WORKTREE].
 % Guarantees: context_reader/4 defines a scoped reader and compiles resolving
 %   calls directly to its read; malformed declarations refuse at load
 %   [tested: reference_scopes; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
@@ -1508,13 +1510,14 @@ kind(match_foreign/5, host_service).
 kind(metta_add_atoms/2, host_service).
 kind(metta_source_declarations/2, host_service).
 kind(metta_space_names/1, host_service).
+kind(metta_space_registered/1, host_service).
 % Backtrackable atom-key indexes retain the caller's original term values.
 % [tested: atom_index; commit=dfd348d37d4cbe3d42d877bd6dcf415b54f82179].
 kind(metta_atom_index_new/1, host_service).
 kind(metta_atom_index_bind/4, host_service).
 kind(metta_atom_index_get/3, host_service).
-%The same set as a TEST rather than a sorted list, and it is on this list
-%because a host CODEC needs it: the wire's `p` tag is a species tag, so an
+%The space species test is on this list because a host CODEC needs it:
+%the wire's `p` tag is a species tag, so an
 %encoder has to ask what the engine's own metatype_of/2 asks, which is this
 %[source: engine/metta/types.pl, metatype_of(X, 'Grounded') :- atom(X),
 %metta_space_operand(X)]. metta_space_name/1 below is the wider operand test
