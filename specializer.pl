@@ -4,7 +4,7 @@
 %   emitting its native call, including after an earlier definition was
 %   abolished [tested:
 %   specializer_invalidation:a_copied_specialization_materializes_before_its_call;
-%   commit=WORKTREE].
+%   commit=540eb6ad437efe08b343e6b86e89ac7dcb63ffee].
 % Guarantees: segment_specialization/4 compiles an arriving arity once and
 %   uses the existing source rollback and specialization invalidation owner
 %   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
