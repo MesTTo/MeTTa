@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Reflected callable annotations retain the subscription arity of wrappers
+  such as `Required`, `NotRequired` and `ReadOnly`, including after native
+  signature edits. Generic applications retain their constructor's own errors.
 - Compiled parameter binding reads native callable images and live signatures
   through one shared operation. Method entries share their canonical body's
   contract; positional collectors become expressions and keyword collectors
