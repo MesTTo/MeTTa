@@ -2,7 +2,7 @@
 %   route matching to native and foreign space providers, and validate
 %   '&metta' declarations against the self-describing catalog.
 % Guarantees: namespace registrations are published independently of space
-%   species [tested: run_tests(space_registration); commit=WORKTREE].
+%   species [tested: run_tests(space_registration); commit=a8e3fc42306377adf7cae0a331f3d92fbf190304].
 % Guarantees: add-atom/4 exposes the native occurrence-output write
 %   [tested: spaces_tokens; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: metta_existing_import/3 reports an existing native import without

@@ -1,7 +1,7 @@
 % Purpose: declare each engine extension seam, its direction and its cut
 %   semantics, and publish the predicates extensions and host bindings may call.
 % Guarantees: namespace registration is a published host service distinct
-%   from value species [tested: run_tests(space_registration); commit=WORKTREE].
+%   from value species [tested: run_tests(space_registration); commit=a8e3fc42306377adf7cae0a331f3d92fbf190304].
 % Guarantees: context_reader/4 defines a scoped reader and compiles resolving
 %   calls directly to its read; malformed declarations refuse at load
 %   [tested: reference_scopes; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
