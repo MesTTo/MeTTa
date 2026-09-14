@@ -1,7 +1,7 @@
 % Purpose: decide space length refinements from visible storage and owner metadata.
 % Guarantees: lengths track native rows, inheritance and foreign size promises
 % without reading a name as a list [tested: run_tests(space_length_refinements);
-% commit=WORKTREE].
+% commit=d336b911f0d727b50a5660eb86f5ed44b35303b5].
 % Owns resources: each fixture releases its explicit native names child-first.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

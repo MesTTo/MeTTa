@@ -1,7 +1,7 @@
 % Purpose: plan and execute indexed native-space matches and relational conjunction joins
 % Guarantees: grounded_length/2 counts visible native occurrences through
 % storage metadata and requires a length owner for every foreign parent
-% [tested: run_tests(space_length_refinements); commit=WORKTREE].
+% [tested: run_tests(space_length_refinements); commit=d336b911f0d727b50a5660eb86f5ed44b35303b5].
 % Guarantees: open reads enumerate expressions and scalars in named and
 %   parametric spaces [tested: spaces_tokens:public_and_bulk_writes_preserve_tokens_and_duplicate_bags;
 %   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
