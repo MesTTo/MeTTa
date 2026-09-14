@@ -8,7 +8,7 @@
 %   retirement removes both endpoints [tested:
 %   support_graph:clearing_a_module_preserves_its_consumers_dependencies,
 %   support_graph:clearing_a_module_prunes_only_unused_symbol_indexes;
-%   commit=WORKTREE].
+%   commit=901a768e17b3ad2559b19d2895a250451a88da99].
 % Guarantees:
 %   - A reference face can defer dependent repairs until all its bindings and
 %     metadata are published [tested:

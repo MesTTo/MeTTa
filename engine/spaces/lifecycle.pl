@@ -9,7 +9,7 @@
 % Guarantees: clear publishes the surviving reference face after native or
 %   foreign storage changes and preserves live consumers; final release
 %   retires the whole support module [tested: reference_publication,
-%   reference_providers, release_preparation; commit=WORKTREE].
+%   reference_providers, release_preparation; commit=901a768e17b3ad2559b19d2895a250451a88da99].
 % Guarantees: metta_repair_shadow_import/3 and
 %   metta_refresh_repaired_shadow_imports/1 retain a native import when its
 %   provider still wins the current base chain. Concurrent callers retain

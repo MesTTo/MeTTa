@@ -9,7 +9,7 @@
 % Owns resources: fixtures release their spaces and remove publication tracing.
 % Guarantees: content clearing preserves dependencies owned by live importers
 %   and retires unused function indexes [tested: reference_publication;
-%   commit=WORKTREE].
+%   commit=901a768e17b3ad2559b19d2895a250451a88da99].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
