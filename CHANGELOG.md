@@ -275,6 +275,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Literal equation-head parameters remain readable inside compiled bodies,
+  nested calls and generator clauses. Rebinding keeps the head constraint;
+  unused literal parameters add no body bindings.
 - Compiled sequences bind computed elements in source order and
   retain returned callables as elements. Unpacking follows those temporary
   bindings to preserve dictionary and segment value information.
