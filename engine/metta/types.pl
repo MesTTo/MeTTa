@@ -2,7 +2,7 @@
 % Guarantees: native space classification does not bind an open expression
 %   to a registered instance [tested:
 %   space_value_recognition:classification_does_not_choose_a_registered_instance;
-%   commit=WORKTREE].
+%   commit=5f3c10af0d15efa2c5acce4cc659edd4a7b83beb].
 % Guarantees: refined union requirements retain value constraints at runnable
 %   and compiled calls [tested:
 %   union_types:a_refined_union_member_checks_the_value_at_each_call_door;

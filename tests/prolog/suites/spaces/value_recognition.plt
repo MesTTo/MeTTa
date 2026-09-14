@@ -1,6 +1,6 @@
 % Purpose: recognize parametric space values without binding open source terms.
 % Guarantees: classification preserves variables and cached execution keeps
-% every sibling's identity [tested: run_tests(space_value_recognition); commit=WORKTREE].
+% every sibling's identity [tested: run_tests(space_value_recognition); commit=5f3c10af0d15efa2c5acce4cc659edd4a7b83beb].
 % Owns resources: plunit cleanup releases each explicit name and its query home.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

@@ -1,7 +1,7 @@
 % Purpose: propagate output bounds through conjunction matching, ordering, and best-first merge policies
 % Guarantees: metta_space_operand/1 recognizes ground names without choosing
 %   an instance for an open expression [tested:
-%   space_value_recognition:an_open_name_is_not_a_recognized_value; commit=WORKTREE].
+%   space_value_recognition:an_open_name_is_not_a_recognized_value; commit=5f3c10af0d15efa2c5acce4cc659edd4a7b83beb].
 % Guarantees: ordered cursors and top share one provider-bound license
 % [tested: run_tests(evaluation_context); commit=54cb2eee69c42c1ae685643cbe2578f8d617a265].
 % Assumes: engine/spaces.pl consults this plain file while its owning module is the load context.
