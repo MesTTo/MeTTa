@@ -7,7 +7,7 @@
 %   - extensions share the engine's console rendering and IEEE exception
 %     recovery [tested: engine_modules:every_declared_service_is_exported_to_the_host,
 %     lib_string_surface:template_uses_engine_rendering_and_host_grammar,
-%     lib_vector_surface:nonfinite_reductions; commit=WORKTREE].
+%     lib_vector_surface:nonfinite_reductions; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6].
 %   - metta_apply_algebra_operation/5 exposes the native carrier operation
 %     semantics to host bindings [tested:
 %     test_visibility_operations_share_the_native_carrier; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
