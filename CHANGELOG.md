@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Compiled storage writes propagate native `Error` results before running
+  their continuation, including generator and finally blocks. Writes preserve
+  real local variables, and false status values still allow continuation.
 - Native `let` and `chain` bindings preserve checked parameter contracts in
   their continuation. Forwarding an alias costs the same as forwarding the
   original parameter; declaration and typing-policy edits retain their checks.
