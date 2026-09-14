@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Python underscore bindings preserve their identity in compiled functions,
+  class constructors and methods, rule generators and type annotations.
+  Nested binders use fresh native variables and discard shadowed value proofs;
+  public keyword labels and explicit native anonymous patterns are preserved.
 - Declared class methods compile as native equations with an explicit receiver.
   C3 inheritance shares each defining body, while qualified and cooperative
   super calls retain their lexical provider. Class and method values carry
