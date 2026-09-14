@@ -2,7 +2,7 @@
 % Guarantees: generated operations agree with a list model; lifecycle tests
 % exercise independent engines, aliases, cancellation, failed I/O and replay.
 % Request completion interrupts a milestone wait even after early failure.
-% [tested: lib_database; commit=WORKTREE].
+% [tested: lib_database; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6].
 % Owns resources: fixtures close stores and queues, join workers, release
 % execution spaces, restore wrapped predicates and delete temporary directories.
 

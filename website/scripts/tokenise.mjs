@@ -25,7 +25,7 @@
  *
  * Guarantees: spans use Unicode code point offsets, including after astral
  * characters and across lines [tested: tests/checks/check_tokenisation_selftest.py;
- * commit=WORKTREE].
+ * commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6].
  *
  * A span is [start, end, scope) in Unicode code points of the file, holding the
  * innermost scope of a token TextMate gave more than the grammar's own

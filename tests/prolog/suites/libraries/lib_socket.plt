@@ -2,7 +2,7 @@
 % Guarantees: TCP and UDP cases use both IP families; generated datagrams exceed
 % the host's default receive buffer, and concurrent readers preserve packets.
 % Worker completion interrupts a milestone wait even after early failure.
-% [tested: lib_socket; commit=WORKTREE].
+% [tested: lib_socket; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6].
 % Owns resources: fixtures close handles, cancel and join workers, restore
 % wrapped predicates and release temporary execution spaces.
 

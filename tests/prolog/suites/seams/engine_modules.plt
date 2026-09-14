@@ -27,9 +27,9 @@
 %     spelling; plain host files fail that declaration check [tested:
 %     every_shipped_prolog_half_has_its_own_module,
 %     two_libraries_may_define_one_helper_name,
-%     a_plain_pair_still_replaces_one_helpers_clauses; commit=WORKTREE]
+%     a_plain_pair_still_replaces_one_helpers_clauses; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6]
 %   - `user` holds no definition from engine/ or lib/ except SWI's designated
-%     multifile hooks [tested: user_holds_nothing_the_engine_defines; commit=WORKTREE]
+%     multifile hooks [tested: user_holds_nothing_the_engine_defines; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6]
 %   - the engine core exports every MeTTa builtin head it implements, bar the
 %     two SWI already has in `user`
 %     [tested: every_core_builtin_head_is_exported; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
@@ -38,7 +38,7 @@
 %     provider namespaces may reuse names
 %     [tested: no_shipped_module_shadows_a_name_the_engine_owns,
 %     the_shadow_census_sees_a_planted_library_definition,
-%     the_shadow_census_respects_an_independent_provider_namespace; commit=WORKTREE]
+%     the_shadow_census_respects_an_independent_provider_namespace; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6]
 %   - the operator guards read the ENGINE's namespace, so a name a library lent
 %     the engine at one or two arguments is still told from a MeTTa call
 %     [tested: an_operator_lent_name_is_seen_in_the_engines_own_namespace; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
@@ -324,7 +324,7 @@ test(user_holds_nothing_the_engine_defines) :-
 %
 %   Exempt SWI's hooks in user. The census checks their multifile declarations
 %   and rejects every other engine or library definition in that module.
-%   [tested: engine_modules:user_holds_nothing_the_engine_defines; commit=WORKTREE]
+%   [tested: engine_modules:user_holds_nothing_the_engine_defines; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6]
 swi_hook_in_user(exception/3,
                  'SWI calls user:exception(undefined_predicate, ...) before it \c
                   reports an unknown procedure, which is how a foreign space \c

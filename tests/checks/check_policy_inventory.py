@@ -34,7 +34,7 @@ Decides:
     ``extensions/python/metta/vocabularies.py`` is generated and excluded
   - vendor directories retain third-party policy; adjacent first-party adapters
     remain checked [tested: test_vendor_ownership_does_not_exempt_local_adapters;
-    commit=WORKTREE]
+    commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6]
 Open Obligations:
   To Do: None
   Hacks: None

@@ -25,7 +25,7 @@ Assumes: a writable ai-tmp/ in this repository; the two plants that need the
 Guarantees:
   - astral characters before tokens, in strings and comments, and on preceding
     lines retain matching character offsets [tested:
-    tests/checks/check_tokenisation_selftest.py; commit=WORKTREE]
+    tests/checks/check_tokenisation_selftest.py; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6]
   - a grammar change the lexer does not carry is reported [tested:
     tests/checks/check_tokenisation_selftest.py; commit=7ba114f280ec3b132658cacb562064d0bac23f41]
   - a lexer change the grammar does not carry is reported [tested:

@@ -9,7 +9,7 @@
 %   - The engine/metta/ units compile into metta_engine in source
 %     order. Engine and library definitions stay in their owning modules;
 %     designated SWI protocol hooks live in user.
-%     [tested: engine_modules; commit=WORKTREE].
+%     [tested: engine_modules; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6].
 %   - A built-in call covered by the effects cluster whose declared operand
 %     types already conflict is refused before operand evaluation; shallow
 %     compile-time checks inspect literals and declared return types without
