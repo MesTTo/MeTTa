@@ -2205,3 +2205,624 @@ three equal stores and zero findings in `ai-classes-c21-effects-twins-final.log`
 Ruff, both layering checks and evidence pass. Layering checks 1254 calls under
 93 contracts; evidence checks 7600 claims against 13510 test names. The final
 Prolog clone scan reads 3120 lines across two files and finds no clones.
+
+## 2026-09-13: receiver equations and visible constructor projections
+
+Tried: one `rename` reference per method alias. `rename` retains unlisted
+heads, so each alias also imported the provider's whole public face. A diamond
+multiplied those paths; the existing test watchdog ended the run with
+`Timeout (0:03:00)!`. The stack was in `metta_add_atom` through method-entry
+publication. Logs: `ai-classes-c22-methods-integrated.log` and
+`ai-classes-c22-methods-stack-elevated.log`. The first unprivileged stack read
+reported `Permission Denied`; the elevated read succeeded.
+
+Decided: collect each provider's selected entries in one finite `case` mapper
+with an empty default. Native reference roots keep the method body in its
+defining class and select entries by the original receiver's constructor.
+Cooperative `super` names a lexical point in the completed C3 order. Its
+provider can arrive in a later combined class. A signature-changing override
+has a derived application adapter; it binds the selected method's defaults
+and variadic arguments. Neither an adapter nor a Python descriptor executes
+the Python method body. A compiler refusal keeps an explicit owned host
+equation and prints the reason once.
+
+Tried: the ordinary method name `call` as a public reference target. SWI
+refuses `dynamic(call/2)` with `No permission to modify static procedure
+call/2`; later tests in that process encounter the failed pending reference.
+The independent processes isolate the other failures. Class lookups now name
+qualified dispatch entries. A public short alias is also emitted when the
+head is absent from the builtin catalogs. The catalog decides this rule;
+there is no list of reserved method spellings. The qualified canonical and
+dispatch names remain ordinary source names for every method.
+
+Verified: `PYTHONPATH=extensions/python python -m pytest -q -n 0
+--benchmark-disable --randomly-seed=1125382488
+extensions/python/tests/ch09_types/test_class_methods.py` passes the first
+six cases in `ai-classes-c23-methods-source.log`. Source inspection initially
+evaluated the equation template; quoting the matched result fixes the
+arithmetic and host-operation errors. The expanded ten-case run with `-n 4`
+passes nine cases in `ai-classes-c23-methods-adapters.log`.
+
+The remaining type-query witness lacked the other class's constructor
+declaration in the query's class space. The direct query there returns
+`%Undefined%`, while the declaring space returns `QueryOther` and then
+`QueryOther, QueryRoot` after the subtype edit. The native graph already
+widens the type. The witness now imports the other constructor before
+changing the edge. No second subtype traversal is added.
+Log: `ai-classes-c23-type-query.log`. Plain `type` now has the same `Type`
+annotation as `type[T]`, and the conversion registry reconstructs a returned
+class symbol. Method generator cardinality feeds the existing loop,
+comprehension, list and delegation lowerings.
+
+Measured: after deleting `engine` and `lib` QLF files,
+`PYTHONPATH=extensions/python python ai-tmp/ai-classes-c23-projection.py`
+compares 10000 native calls with the same receiver. Before projection,
+the canonical method costs 250042 inferences and its public entry 260042;
+the handwritten constructor-pattern body costs 90010. The repeated getters
+each retain a call, a parameter-context check and result plumbing.
+
+Decided: value fields are constructor positions, as the grain declaration
+already states. Bind those positions in the visible method equation while
+retaining the complete receiver and one body. A new descendant adds a layout,
+not a body copy. A field whose annotation differs across admitted layouts
+keeps its getter at the original expression position, preserving refinement
+errors, untaken branches and earlier effects. The transformation handles
+finished helper equations, so captures and SSA bindings remain the compiler's
+own. Quoted program data is excluded. An external replacement owns a new
+occurrence; later declaration refresh cannot reclaim it.
+
+Considered: hiding field variables in the Python AST, or adding an engine
+inliner to reinterpret handwritten getter calls. The former changes closure
+capture and hides the resulting program; the latter solves a different
+optimization problem. The constructor binding is ordinary inspectable MeTTa
+source. A value field is read from its constructor position; mutable fields
+continue to read their declared fact rows.
+
+The projected probe costs 90018 for the canonical method and 100018 for the
+public entry against 90010 handwritten. Its emitted body contains constructor
+unification followed by the same three arithmetic operations. Logs:
+`ai-classes-c23-projection.log` and `ai-classes-c23-projection-lifted.log`.
+The eight-inference allocation difference still needs the native slope check;
+these totals alone do not establish an exact per-call bound. Projection,
+rollback and source-replacement witnesses are running. Method completion,
+the decorator and data-model rows, examples and final verification remain open.
+
+## 2026-09-13: callable values, cursor ownership and measured interrupt cost
+
+Refuted: the preceding section's allocation explanation for the extra eight
+inferences. All three repeated samples reported zero garbage collections.
+The native sampler in `ai-classes-c25-method-profile.log` records two calls
+each to `prolog:heartbeat/0`, `metta_py_heartbeat_tick/0` and `janus:py_call/1`.
+At 10000 invocations the canonical method and handwritten body both read
+90018, with identical arithmetic call counts; the public alias reads 100018
+and adds exactly 10000 calls. Command after deleting engine/library QLF files:
+`PYTHONPATH=extensions/python python ai-tmp/ai-classes-c24-method-costs.py`.
+The binding already supplies `metta_py_work/1`, which corrects the raw counter
+by the calibrated heartbeat charge and its recorded inference position.
+The follow-up slope measurement uses that existing door. Interrupt polling
+remains enabled.
+
+Tried: returning compiled Python lambdas as bare native tail lambdas. Native
+eta expansion correctly turned the enclosing method into a partial
+application, delaying construction. Python constructs a lambda value at that
+point, so its compiled expression now quotes the lambda and explicitly names
+its lexical evaluator. Sequence literals likewise evaluate their operands
+before quoting the resulting data. This prevents a returned callback in the
+first list position from being executed as the sequence's operator.
+
+Decided: returned callable values carry their native image and lexical home.
+Python invocation evaluates that image, and the original signature is an
+owned `@python-signature` fact in the same graph. Reading that fact through
+the occurrence relation preserves the lambda as data. Written `match` and
+`chain` variants interpret its `:seg` binder as a query gap and refuse with
+`mixed_roles`; logs `ai-classes-c24-callable-binding.log` and
+`ai-classes-c24-callable-data.log` record the failing query and passing
+replacement. No scan of Python method objects selects a returned callable.
+
+Decided: generator methods project the existing evaluation cursor and enrol
+its close operation in the existing scope resource door. The cursor closes
+even if it was never started. Scope exit joins its engines; keeping a value
+does not transfer a running engine into another scope. The explicit-close,
+unstarted and suspended-cursor witness passes in
+`ai-classes-c24-method-values-quoted.log`. The same run passes the lexical
+closure witness, including storage and use from another space. The final
+bound-callable witness passes in `ai-classes-c24-callable-data.log`, including
+defaults, keyword binding and replacement of the native method body.
+
+Measured: `PYTHONPATH=extensions/python python
+ai-tmp/ai-classes-c25-method-costs.py`, after deleting engine/library QLFs,
+uses `metta_py_work/1` with polling enabled. Every one of three samples at
+100, 1000, 10000 and 100000 calls is identical. The canonical method and
+handwritten constructor body cost `9*n + 7`; the public method costs
+`10*n + 7`. The constant seven is the common measurement bracket. The exact
+slopes are 9, 10 and 9, so the public entry costs one inference per call over
+the handwritten body. Log: `ai-classes-c25-method-costs.log`, exit 0.
+
+Tried: the broader class, compiler, conversion and evaluation cohort with
+`pytest -q -n 6 --benchmark-disable --randomly-seed=1125382488`:
+807 pass, six fail and six IPython setup cases error. The same six failures
+pass on pristine `c75181adc`; its seven-case control plus IPython records
+seven passes and the same six setup errors. IPython sees an inherited
+`VIRTUAL_ENV` for another interpreter. Setting it to the selected interpreter's
+actual environment resolves that configuration error. Logs:
+`ai-classes-c25-method-consumers.log` and
+`ai-classes-c25-method-consumer-control.log`.
+
+Decided: sequence construction retains exact native atom mentions. Unpacking
+follows the temporary bindings in the resulting value graph before asking
+which element is a dictionary. Cursor projection closes only on its own
+conversion failure; the underlying selection already preserves evaluation
+and cleanup failures together. These consumers pass 119 cases in
+`ai-classes-c25-sequence-consumers.log`. A nullable host operation still
+consumes `None` as no answer, while a compiled Python body returns it as a
+value. Host-operation arrows now describe that boundary separately; the
+shared annotation translation continues to retain `NoneType`.
+
+Tried: argument/default aliases across all three grains, returned generator
+callables and native partials. The six witnesses initially fail in
+`ai-classes-c25-method-values-before.log`. A host island received a raw
+constructor list and failed with `'list' object has no attribute 'value'`;
+the expanded method call similarly failed on attribute `score`. Container
+retention had also followed the receiver's storage grain.
+
+Decided: Python arguments borrow containers independently of the receiver's
+grain. A declared local crosses an explicit host-expression boundary through
+its class's owned reverse-conversion operation. The native callable contract
+is now one `@python-callable` fact carrying signature and answer cardinality.
+Both direct and returned callables use the existing scalar/cursor result
+doors. A serialized native partial is reconstructed as a lexical lambda over
+its existing target and captures; the printed `(partial ...)` expression
+alone is data after a wire round trip. The boundary cohort passes 78 of 80
+cases in `ai-classes-c25-method-boundaries.log`. Its two projection failures
+were metadata facts being unpacked as equations; restricting the transform
+to equality-headed source fixes both, verified in
+`ai-classes-c25-callable-metadata.log`.
+
+Open: expanded/computed call syntax still needs native application assembly
+with Python argument evaluation and failure order. Signature binding may
+construct the application; body dispatch and execution must remain native.
+The class-space name cannot be resurrected after Scope revocation: lib_thread
+deliberately tombstones the raw identity. The earlier suggestion to bypass
+the handle's live check would therefore be wrong. Reconcile declaration
+generations with that lifetime law before changing the declaration door.
+
+Plan: lower dynamic call arguments in source order. A starred operand uses
+the existing one-shot iterable materializer before the next operand runs.
+Keyword expansion builds an ordinary temporary Python dictionary of atom
+values, using its mapping protocol and duplicate checks before later keyword
+operands run. Two shared, declared operations merge keywords and bind a
+signature; the latter returns the native application for `eval` to execute.
+Their ownership is the existing operation registration of each consuming
+program. Constructors, ordinary definitions and methods link these operations
+through the same compiler dependency record. The direct positional method
+entry remains the measured equation/reference path. This uses existing host
+operation declarations, not a new engine primitive or a Python body dispatcher.
+
+## 2026-09-13: call syntax reads the native callable contract
+
+Tried: the shared application builder passes expanded calls and stored bound
+methods, including replacement of their canonical native equation.
+`pytest -q --benchmark-disable --randomly-seed=1125382488
+extensions/python/tests/ch09_types/test_class_method_values.py -k call_expansions`
+passes one case in `ai-classes-c26-expanded-call.log`. The ten-case boundary
+run passes eight and fails two in `ai-classes-c26-call-boundaries.log`.
+
+Measured: the retained dictionary passed to a typed ordinary definition is
+rejected as `(BadArgType 1 Expression dict)` on pristine `c75181adc` too.
+`PYTHONPATH=ai-tmp/ai-classes-c75181adc-control/extensions/python python
+ai-tmp/ai-classes-c26-container-contract.py` records the same result in
+`ai-classes-c26-container-contract-control.log`, exit 0. Call declarations
+now derive structural and retained alternatives from one catalog function;
+field storage selects the alternatives its grain admits. Annotation atoms
+continue to describe the Python annotation itself.
+
+Rejected: the preceding plan's immediate expansion of every starred operand.
+The operand-order witness and Python 3.14.4 disassembly show a lone starred
+operand is consumed by `CALL_FUNCTION_EX`, after keyword construction.
+Mixed positional arguments use `LIST_EXTEND` before keywords. Consecutive
+named keywords evaluate as a group before merging with previous expansions.
+The corresponding source is
+[codegen_call_helper_impl](https://github.com/python/cpython/blob/v3.14.4/Python/codegen.c#L3975-L4073).
+The four disassemblies are in `ai-classes-c26-call-order-disassembly.log`.
+
+Decided: keep those operand groups in native `chain` expressions. The
+temporary keyword dictionary uses CPython's `_PyDict_MergeEx` through
+`ctypes.pythonapi`, which retains the GIL and propagates host exceptions.
+That is the implementation behind `DICT_MERGE`, including the dict-subclass
+and keys-iterator protocol. A Python loop adds observable key hashing; copying
+each prefix is quadratic and checks non-string keys too early. The direct
+host operation does linear merge work across all groups. Source:
+[dict_merge](https://github.com/python/cpython/blob/v3.14.4/Objects/dictobject.c#L3722-L3836).
+
+Tried: a typed callable parameter evaluates its written lambda into a native
+function name before the binder sees it. Looking only for written metadata
+lost its keyword signature. Recovering the written callable through that
+compiled clause's exact `translated_from/2` association restores the existing
+native metadata; no Python method registry participates. The two corrected
+cases pass in `ai-classes-c26-call-sources.log`, using the boundary command
+with `-n 2 -k 'generic_compiled or mapping_failure'`. An earlier correction
+also passed a quoted keyword group to an Atom-masked operation; that mask
+already holds its operand, so the extra quote was data. The failing runs
+remain in `ai-classes-c26-call-corrections.log` and
+`ai-classes-c26-keyword-merge.log`.
+
+Decided: generated method roles use a colon separator. Python identifiers
+cannot spell that separator, so a method named `apply` or `score_apply` no
+longer collides with a generated application helper. Qualified authored
+method heads retain their documented `Class-method` spelling.
+
+Tried: the expanded boundary and existing annotation/keyword consumers pass
+57 of 62 cases. The two refinement failures came from distributing one
+container constraint outside the union of its physical representations.
+Grouping those representations before the constraint restores the field
+contract. Three expected source/declaration shapes now include retained
+containers or source-order bindings; the tests also exercise their behavior.
+The 51 existing consumers pass in `ai-classes-c26-call-contracts.log`.
+
+Plan: a method owns one canonical signature fact. A bound image refers to
+that fact with its captured-parameter count, so rewriting a default changes
+direct, bound, unbound and compiled calls together. The runtime binder reads
+that fact rather than the Python declaration object's initial copy. Constructor
+callable images use the same argument parser and binding publication, and
+return a native transaction around `make-Class`. Default factory expressions
+are stored in the constructor signature and evaluated inside that transaction.
+The four new witnesses initially pass two and fail two in
+`ai-classes-c26-signature-constructor-before.log`: defaults still answer the
+old value, and the prototype constructor crosses back as an integer. The
+constructor witness additionally rewrites the shared native initializer and
+requires both compiled construction and direct Python construction to see it.
+
+## 2026-09-13: call contracts are native parameter records
+
+Tried: the constructor's quoted segment callable reached
+`translate_let_dl/4` as its pattern. The wrapped `metta_seq_refuse/4` trace
+names `special_forms.pl:1528`; `ai-classes-c26-constructor-trace2.log` records
+the `mixed_roles` refusal. `chain` intentionally shares upstream's `let`
+lowering, so placing an expression first also places its written segment
+syntax in the pattern position. Decided: generated call assembly uses `let`
+with the fresh variable first. The callable then arrives as data through the
+value position. No sequence-matcher or upstream semantics change is needed.
+The earlier plan to emit these bindings as `chain` is superseded.
+
+Tried: `PYTHONPATH=extensions/python $CHECK_PY -m pytest -q -n 3
+--benchmark-disable --randomly-seed=1125382488
+extensions/python/tests/ch09_types/test_class_method_values.py` passes twelve
+cases and fails the three constructor cases after that change. The value
+constructor refused a borrowed list as `BadArgType 2 Expression list`.
+The other two cases used a string key with `Atom.subs`, which substitutes
+atoms, so the test's replacement had left the initializer body unchanged.
+`ai-classes-c27-call-bindings.log` and the before/after source printed by
+`ai-classes-c27-initializer-rewrite.py` separate the two failures.
+
+Decided: constructor inputs borrow containers independent of receiver grain.
+Field assignment applies the storage policy: a value field projects its
+snapshot, and an entity or prototype field retains its container. Generated
+and authored initializers share that field boundary. The native constructor
+entry and Python initialization read defaults from the callable contract;
+default factories execute inside the existing construction transaction.
+Complete positional applications retain their ordinary native call shape.
+
+Tried: the five class test files (`test_class_method_values`,
+`test_class_methods`, `test_class_field_values`, `test_class_construction`,
+`test_class_grains`) pass eighty cases and fail five, using the same command
+flags. `ai-classes-c27-constructor-boundaries.log` records the result. Four
+failures are digest refusals caused by storing a Grounded `inspect.Signature`.
+The fifth is a compiled call to the private constructor binder outside its
+lexical home; an explicit `evalc` keeps that entry in its class space.
+
+Rejected: an opaque Signature object in each callable fact. It made the
+ordinary constructor program depend on live host identity and hid the
+parameter contract from native matching. Decided: store one
+`(signature ((parameter name kind annotation default) ...) return)` value.
+Defaults are `()` or `(default value)`. The Python binder reconstructs
+`inspect.Signature` from those current rows. Bound images still reference the
+canonical contract and captured-parameter count. Named host annotations use
+the existing host-type/host-apply vocabulary; local declared classes use
+their catalog identity. An unnamed host annotation retains its ordinary
+Grounded identity and the existing persistence refusal applies to that leaf.
+This supersedes the earlier Grounded-Signature implementation.
+
+Measured: `context.self.builtins()` in a fresh MeTTa context reports 307 names.
+The full list is in `ai-classes-c27-builtins.log`. Reading `.type`, `.__doc__`,
+`.equations` and `(get-property name)` for fourteen relevant heads is recorded
+in `ai-classes-c27-builtin-contracts.log`. Native `match`, `get-atoms`,
+`atom-subst`, `map-atom` and `foldl-atom` supply graph reads and rewriting;
+`bind!` binds a token and `id` is the identity function. No new engine primitive
+is needed for the call contract. Both probes exit zero.
+
+Verified: all 28 focused call/constructor cases pass in
+`ai-classes-c27-native-contracts.log`, using the same pytest flags. The inputs
+are the complete method-value file, the full-signature and returned-callable
+tests from `test_class_methods.py`, both previously failing grain tests, the
+constructor factory rollback parameterization and the packed-constructor
+test. Native match/remove/add programs change constructor and method defaults
+and all Python, compiled, bound and unbound callers observe the new values.
+The initialization witness separately changes the native initializer body.
+
+Tried: nineteen ordinary annotation shapes through signature projection,
+reconstruction and native digest -> twelve pass and seven fail. The complete
+command is `PYTHONPATH=extensions/python $CHECK_PY
+ai-tmp/ai-classes-c27-annotation-contracts.py`; its matching log records the
+failures. None/NoneType lacked a portable named reference, and reconstructing
+typing aliases from their bare origin changed their exact Python species.
+Decided: discover intrinsic references from the actual builtins/types module
+namespaces and preserve a named generic alias before applying its arguments.
+Qualified reference reads use `inspect.getattr_static` so annotation lookup
+does not invoke a descriptor. The tracked native-storage roundtrip test also
+checks binding and duplicate-argument refusal for every shape.
+
+## 2026-09-14: callable parameters do not consume positional keyword-shaped data
+
+Tried: passing `(Kwargs (entry 3))` to a method's positional Atom parameter
+raises `missing a required argument: 'value'`; `(Data (entry 3))` succeeds.
+The method argument helper interpreted the last evaluated operand as syntax.
+Command: `PYTHONPATH=extensions/python $CHECK_PY
+ai-tmp/ai-classes-c34-keyword-data-probe.py`; log
+`ai-classes-c34-keyword-data-before.log`.
+
+Decided: method and constructor values use fixed native lambda parameters.
+The existing reflected signature binds one value per parameter, including
+defaults, keyword-only parameters and the collected variadics. Ordinary
+`collapse`/`py-iter-once` and `dict-space`/`py-dict-pairs` project the two
+variadic containers into their native sequence and mapping images. The
+canonical method body remains a referenced head; constructors retain their
+transaction around factory and default evaluation. Written call helpers
+already have separate positional and keyword-entry ports, so their parser
+no longer scans positional values for a distinguished spelling.
+
+The throwaway fixed-lambda probe first exposes the representation boundary:
+its variadic tuple is refused by the canonical Expression port. Adding the
+existing native collection projections answers26 for a method with positional,
+variadic, keyword-only and keyword mapping parameters. The same probe returns
+the literal Kwargs value unchanged. Logs: `ai-classes-c34-fixed-method.log`
+and `ai-classes-c34-fixed-method-normalized.log`.
+
+Rejected: another keyword packet tag or application metadata schema. Native
+fixed parameter values and the existing signature record already separate
+the argument dimensions, and the current native operators supply projection.
+
+The Atom-return control answers its unevaluated chain body, while the
+%Undefined%-return control executes that same body. This is the native
+metatype quotation policy, also recorded in the scope journal's rejection of
+an Atom-returning capture wrapper on2026-09-08. It is preserved. Command:
+`PYTHONPATH=extensions/python $CHECK_PY
+ai-tmp/ai-classes-c34-atom-result-probe.py`; log `ai-classes-c34-atom-result.log`.
+The new execution witness therefore uses Any as its result annotation.
+
+## 2026-09-14: superseding fixed method lambda parameter projection
+
+Tried: the fixed-parameter method values above pass the direct mixed-signature
+probe but fail seven of thirty-nine broader cases. Three constructor factory
+defaults produce no answer; a variadic method adds an integer to an unreduced
+tuple expression. The native lambda changes when defaults and already-native
+argument containers are evaluated. Log: `ai-classes-c34-fixed-methods.log`.
+
+Rejected: the fixed-parameter replacement. Restore the segment forwarders and
+their separate positional and keyword-entry application ports. Native data
+must remain data even when its first symbol could be evaluated as a function.
+A native `let` binding around each `noeval` frame preserves that invariant for
+both a symbol applicator and a lambda applicator; raw frames fail both controls.
+Command: `PYTHONPATH=extensions/python $CHECK_PY
+ai-tmp/ai-classes-c34-application-frame-probe.py`; log
+`ai-classes-c34-application-frame.log`.
+
+Open: connect the callable's native signature to its two-frame application
+through reflective native facts. Also distinguish explicit Atom-return
+quotation from generated Atom-field getters: the latter currently return
+their unreduced `match` body for entity and prototype grains, as observed in
+`ai-classes-c34-keyword-values-before.log`.
+
+## 2026-09-14: method template bindings and host argument identity
+
+The shared callable application now binds supplied values inside evalc.
+Propagating a quoted variable into a method template changes its shape before
+the receiver is captured. The @python-binding lookup then loses the signature,
+return conversion and generator cardinality. Keeping that variable's binding
+restores those contracts. The integration cohort changes from14failed91passed
+to3failed40passed; ai-classes-c39-method-{integration,templates}.log.
+The three remaining failures consume a positional Kwargs atom as keywords.
+
+Tried: always append an empty Kwargs packet for the Grounded callee, routing
+ordinary dynamic calls through the assembler first. Command:
+`PYTHONPATH=extensions/python $CHECK_PY
+ai-tmp/ai-classes-c40-keyword-frame-probe.py`. Identity and partial return
+['Kwargs', ['entry', 3]]; the declared class stores ("Kwargs" <list>).
+Allthree Atom preservation checks fail, while list species remains list.
+The probe exits0 and prints its observations; that exit is not a passing test.
+
+Rejected: the framing change alone. Janus's normal argument conversion still
+erases the distinction between an Atom expression and a Python container.
+The earlier nullary-partial probe preserves Atom but loses list species.
+The shared argument image must retain that distinction before conversion;
+neither callee spelling nor a class-specific adapter can reconstruct it.
+
+## 2026-09-14: native class values retain their constructor program
+
+The three remaining method failures carry the declared class itself, rather
+than an explicit Grounded class. Written calls already use its native
+constructor image. Encoding that same image preserves all four tested Atom
+payloads and passes the 51 method and grain cases in
+`ai-classes-c40-class-image-methods.log`. This closes the class-value path;
+it does not repair arbitrary host argument marshalling.
+
+Tried: keep the constructor lambda through an inner scope. Its lexical home
+survives the space traversal, but the separate ClassName-keyed deferred drop
+still runs. `ai-classes-c40-class-value-contracts.log` reports
+`No permission to access released_scope_space '&KeptClassImage'`.
+The lambda now takes the class symbol as the native `_construct` dispatch
+argument. That actual dependency also retains the existing deferred cleanup.
+Keeping only the Python class passes in `ai-classes-c41-class-retention.log`.
+
+Type reconstruction uses the existing native signature's return annotation
+and requires alpha equality with that class's canonical constructor image.
+The equality check distinguishes an ordinary factory with the same result
+type. No second class registry is needed. An extra Type fact in the class
+home did not change the root get-type result, so it was removed; the callable
+image still reports %Undefined% there. The complete reconstruction and
+retention probe exits0 in `ai-classes-c40-rebuilt-class-untyped.log`.
+
+Decided: register the class codec through encode's existing type dispatch,
+preserving an existing explicit type registration and the inherited fallback.
+Projection uses that codec for class values after explicit metaclass hooks
+and registrations. Class retirement removes the declaration the codec reads.
+Explicit Grounded remains an opaque host value.
+
+Verified: `/home/user/Dev/.venv-pypetta/bin/python -m pytest -q -n 6
+--benchmark-disable --randomly-seed=1438340450
+extensions/python/tests/ch09_types/test_class_values.py
+extensions/python/tests/ch09_types/test_class_methods.py
+extensions/python/tests/ch09_types/test_class_method_values.py
+extensions/python/tests/ch09_types/test_class_grains.py` passes64 cases.
+Log: `ai-classes-c41-class-values-after.log`. The initial fixture used the
+nonexistent `operation` door instead of `op`, and reused one revoked scoped
+name across parameter cases. Correcting those fixture identities leaves the
+separate scoped-class redeclaration defect open.
+
+## 2026-09-14: class members share a native application relation
+
+The constructor-only `_construct` relation above is superseded by
+`(_class-apply Class Member Positionals Keywords)`. An empty member selects
+construction; a symbol selects a qualified method. The class is a dispatch
+argument and retains its deferred cleanup. Unbound method values previously
+lost that cleanup dependency and raised `released_scope_space` after their
+creating scope closed, as recorded in `ai-classes-c41-unbound-retention-before.log`.
+The bound, unbound and constructor images now use this same relation and the
+existing positional and keyword-entry segments.
+
+The class reconstruction discriminator must use `alpha_eq`. Calling `alpha`
+constructs an expression and cannot establish equality. A factory with the
+same resolved class return annotation exposed this error in
+`ai-classes-c41-factory-negative-before.log`. After correction,
+`python -m pytest -q -n 6 --benchmark-disable --randomly-seed=1438340450
+extensions/python/tests/ch09_types/test_class_values.py
+extensions/python/tests/ch09_types/test_class_methods.py
+extensions/python/tests/ch09_types/test_class_method_values.py
+extensions/python/tests/ch09_types/test_class_grains.py` passes 70 cases in
+`ai-classes-c41-qualified-members-identity.log`.
+
+Python 3.14 defers annotation evaluation, so a method naming its own class
+can raise `NameError` before the class decorator returns. Its completed class
+namespace supplies that name. The shared contextual-function projection now
+resolves written annotations with the completed ancestor names and type
+parameters, preserving the defining class for private-name mangling. Class
+fields use their registered resolved types instead of reading the deferred
+annotations again. The mechanism follows the existing source annotation
+reader and Python's [annotationlib](https://docs.python.org/3.14/library/annotationlib.html)
+contract. The self-referential field regression passes in
+`ai-classes-c41-class-annotation-declarations.log`; the typed factory identity
+probe passes in `ai-classes-c41-typed-factory-identity-after.log`.
+
+The cursor ruling from 2026-09-13 still applies: a generator engine belongs to
+its execution scope. Keeping the cursor does not transfer that engine. Six
+cases cover all grains with started and unopened cursors; each closes when
+its scope exits. Those cases and two retained unbound-method cases pass in
+`ai-classes-c41-cursor-scope-contract.log`. No new cursor lifecycle mechanism
+is needed.
+
+Measured: inherited value field projection equals its handwritten body at
+`9*n+7` inferences; the public entry costs `10*n+7`. Three identical samples
+at 100, 1000 and 10000 calls are recorded in
+`ai-classes-c41-inherited-cost-before.log`. An inherited method calling
+`self.norm()` instead costs `810*n+7`, against its handwritten control's
+`12*n+7`. The generated Prolog aliases the receiver and checks its class
+again. `python ai-tmp/ai-classes-c41-inherited-cost.py` records that failure in
+`ai-classes-c41-inherited-listing.log`; the shared native binding repair is
+recorded in `2026-09-14-parameter-alias-contracts.md`.
+
+## 2026-09-14: receiver methods preserve their native program and cost
+
+Verified: one defining equation serves each method. C3-selected argument
+patterns publish its ordinary, qualified and cooperative-super entries.
+Bound methods, unbound methods and class values use the class/member
+application relation described above. Their positional and keyword-entry
+segments, annotations and defaults remain native program data. Changing a
+native body or default changes the existing Python callable's next answer.
+The original Python method remains available through `py`.
+
+The final audits cover a field getter rewritten independently of a structural
+two-field projection, refused field writes before later mutations, private
+and super values, deferred class-self annotations and captured callables.
+A captured Python callable remains a live host binding. Its native equation
+edits and later Python closure rebinding both remain observable; planning
+classifies that boundary as oracleIO. The general planner repair is recorded
+in `2026-09-14-grounded-effect-plans.md`.
+
+Rejected: redeclaring a revoked scoped class name. The scope contract in
+`2026-09-08-a-scope-owns-its-children.md` makes revocation permanent.
+The declaration refuses `released_scope_space` and leaves its registry empty.
+This settles the earlier scoped-name open item; it requires no recycled
+handle or alternate class-space identity.
+
+Tried: the combined Python cohort passed 1,899 cases and failed the expanded
+call-order test. The new class-value fixture had retained its process-wide
+`result` operation after its declaration space closed. An ordered three-case
+control reproduces `missing a required argument: '__metta_fresh_...'` in
+`ai-classes-c44-operation-order-before.log`. The fixture now unregisters its
+operation in `finally`. The ordered control passes; the documented operation
+lifetime and native name-resolution policy remain unchanged.
+
+Measured: `python ai-tmp/ai-classes-c44-method-costs.py` calls the tracked
+`test_method_entry_inferences_match_the_equivalent_native_body` fixture and
+captures its counter rows. Both 100 and 1,000 calls have three identical samples.
+The seven-inference loop overhead is included below; `n` is the call count.
+The handwritten and canonical arrows have the same Base receiver contract.
+
+| grain | canonical norm and handwritten norm | public norm | canonical report and handwritten report | public report |
+|---|---:|---:|---:|---:|
+| value | `9*n+7` | `10*n+7` | `12*n+7` | `13*n+7` |
+| entity | `69*n+7` | `70*n+7` | `72*n+7` | `73*n+7` |
+| prototype | `69*n+7` | `70*n+7` | `72*n+7` | `73*n+7` |
+
+Log: `ai-classes-c44-method-costs.log`. Mutable norm reads its getters four
+times, matching the source's four reads. The value body binds constructor
+positions. The earlier unequal-arrow comparator used Child for its native
+control and Base for the canonical method, exposing additional native
+Child-to-Base checking work. Equal arrows settle the method comparison;
+the separate subtype-forwarding cost remains open for investigation.
+
+Measured: after deleting engine and library QLF files,
+`python -m benchmarks.class_grains --sizes 1 100 1000` completes all nine
+fresh-process samples. `ai-classes-c44-grain-costs.log` records every counter,
+module byte delta and retained Python byte count.
+
+| grain | population | creation inferences | read inferences | write inferences |
+|---|---:|---:|---:|---:|
+| value | 1 | 2,030 | 1,501 | 2,030 |
+| value | 100 | 202,307 | 1,501 | 2,030 |
+| value | 1,000 | 2,023,007 | 1,501 | 2,030 |
+| entity | 1 | 3,121 | 1,463 | 2,301 |
+| entity | 100 | 311,407 | 1,463 | 2,301 |
+| entity | 1,000 | 3,114,007 | 1,463 | 2,301 |
+| prototype | 1 | 233,217 | 1,281 | 2,115 |
+| prototype | 100 | 23,304,212 | 1,281 | 2,125 |
+| prototype | 1,000 | 233,058,247 | 1,281 | 2,110 |
+
+Each read/write cell has five identical samples in its process. The value
+write is replacement construction. Reads do not grow with the population;
+creation grows linearly across these samples. A prototype still owns one
+private space per receiver, 19,664 measured private-module bytes each. An
+entity's stored program adds 1,104 bytes per receiver; values add no stored
+program. Module deltas in the full log include code collection and can be
+negative, so they are not treated as per-object allocation sizes.
+
+Verified: `sh ai-tmp/ai-classes-c44-method-verify.sh` runs the commands in
+`ai-classes-c44-method-{python,native,checks}.command`. Python passes 1,911
+cases. Thirteen native suites pass 265 tests plus 63 subtests. Layering, mypy,
+evidence and refusal-grounds pass. Ruff's final RUF043 finding was an
+unmarked test regex; marking it raw leaves its value unchanged. The affected
+refusal and ordered cleanup controls pass 4 cases, and `sh check.sh ruff`
+passes. Logs: `ai-classes-c44-method-final-{python,native,checks,controls,ruff}.log`.
+
+Clone review: jscpd's default 1,000-line limit skipped the three largest
+files. Re-running with `--format python --max-lines 10000 --max-size 1mb
+--noTips` over all 17 changed production files reads 10,659 lines and 99,974 tokens.
+The three matches are unchanged door metadata prefixes and the abstract/
+concrete `_binop_atom` signature, 21 lines in total. Each door needs its own
+declaration and the interface needs the concrete signature. Extraction would
+obscure those contracts; no method body is duplicated. The complete file
+list and matches are in `ai-classes-c44-method-clones-all/jscpd-report.json`.
+
+Open: the remaining data-model and decorator rows, five examples and their
+twins, the documentation pass and final package battery. The separately
+tracked Python `_` binding and arbitrary grounded Kwargs argument image also
+remain open; class/member segments do not settle those general boundaries.

@@ -9,6 +9,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Declared class methods compile as native equations with an explicit receiver.
+  C3 inheritance shares each defining body, while qualified and cooperative
+  super calls retain their lexical provider. Class and method values carry
+  editable native call contracts, preserve positional and keyword segments,
+  and retain their programs through native scope ownership. Python calls read
+  the live equations; `py` preserves the original method implementation.
 - Effect plans include applicable grounded heads as opaque host effects in
   written source and prepared calls. Planning uses the provider's read-only
   applicability hook; quoted calls and noncallable values stay structural.
