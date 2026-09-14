@@ -2,7 +2,7 @@
 % seeded Python wire decoders.
 % Guarantees: indexed roots agree with the seeded decoder on generated wires
 % and refuse contradictory occurrences of one name
-% [tested: shared_decode_index; commit=32650f9ff4d1c4aa0749d8eb8b153e5bb448ee5c].
+% [tested: shared_decode_index; commit=WORKTREE].
 
 :- consult('../../../../extensions/python/metta/_binding/shim.pl').
 
@@ -76,12 +76,12 @@ test(separate_roots_do_not_share_variables) :-
     assertion(A \== B).
 
 test(failed_decoding_rolls_back_the_index_and_seed_value) :-
-    ht_new(Index),
-    ht_put(Index, old, Old),
+    metta_atom_index_new(Index),
+    metta_atom_index_bind(Index, old, Old, true),
     \+ metta_py_decode_shared_([e, [[v, old], [v, new], [bad, value]]],
                               [bound,_,_], indexed([old-Old], Index), _),
     assertion(var(Old)),
-    assertion(\+ ht_get(Index, new, _)),
+    assertion(\+ metta_atom_index_get(Index, new, _)),
     metta_py_decode_shared_([v, old], Value, indexed([old-Old], Index), _),
     assertion(Value == Old).
 
@@ -95,7 +95,7 @@ test(failure_rolls_back_construction_of_the_index) :-
 
 test(a_supplied_index_contains_a_single_name) :-
     metta_py_decode_indexed([v, x], X, indexed([x-X], Index)),
-    ht_get(Index, x, Y), assertion(X == Y).
+    metta_atom_index_get(Index, x, Y), assertion(X == Y).
 
 test(malformed_nested_payload_fails,
      [forall(member(Bad, [[v, 7], [e, bad], [unknown, x], [n, "3"]])), fail]) :-

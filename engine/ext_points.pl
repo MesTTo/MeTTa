@@ -1508,6 +1508,11 @@ kind(match_foreign/5, host_service).
 kind(metta_add_atoms/2, host_service).
 kind(metta_source_declarations/2, host_service).
 kind(metta_space_names/1, host_service).
+% Backtrackable atom-key indexes retain the caller's original term values.
+% [tested: atom_index; commit=WORKTREE].
+kind(metta_atom_index_new/1, host_service).
+kind(metta_atom_index_bind/4, host_service).
+kind(metta_atom_index_get/3, host_service).
 %The same set as a TEST rather than a sorted list, and it is on this list
 %because a host CODEC needs it: the wire's `p` tag is a species tag, so an
 %encoder has to ask what the engine's own metatype_of/2 asks, which is this

@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Native variable indexes retain exact names and backtracking while bounding
+  lookups independently of hash collisions. Generated call temporaries keep
+  their distinct identities and deterministic inference counts.
 - Channel creation refuses a nonspace result before opening a handle, so an
   unreduced native call cannot create an unrelated parametric store.
 - Source retirement restores surviving compiled and deferred function
