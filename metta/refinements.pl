@@ -4,7 +4,7 @@
 % Guarantees: a recognized space's length comes from its owner, including
 % parametric values whose name is an expression [tested:
 % space_length_refinements:native_lengths_follow_mutations_instead_of_name_arity;
-% commit=WORKTREE].
+% commit=d336b911f0d727b50a5660eb86f5ed44b35303b5].
 % Guarantees: union alternatives decide their constraints on the value under
 %   one shared type assignment; whole-pair user decisions precede decomposition
 %   [tested: union_types:a_refined_union_member_checks_the_value_at_each_call_door,
