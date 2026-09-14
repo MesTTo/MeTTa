@@ -23,6 +23,9 @@ Assumes: a writable ai-tmp/ in this repository; the two plants that need the
   grammar's own tokeniser also need node and website/node_modules, and follow
   the lane's own policy when they are missing.
 Guarantees:
+  - astral characters before tokens, in strings and comments, and on preceding
+    lines retain matching character offsets [tested:
+    tests/checks/check_tokenisation_selftest.py; commit=WORKTREE]
   - a grammar change the lexer does not carry is reported [tested:
     tests/checks/check_tokenisation_selftest.py; commit=7ba114f280ec3b132658cacb562064d0bac23f41]
   - a lexer change the grammar does not carry is reported [tested:
@@ -73,7 +76,8 @@ FIXTURE = [
     (
         "selftest",
         '; a comment\n(= (f $x) "a\\nb")\n!(+ 1 2.5)\n(: Bool Type)\n'
-        "%Undefined% &self @doc 'c' (== a b)\n",
+        "%Undefined% &self @doc 'c' (== a b)\n"
+        '🙂 (= (f $x) "π🙂") ; 🦊\n!(+ 1 2)\n"🙂\n🦊" (: Bool Type)\n',
     )
 ]
 

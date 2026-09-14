@@ -1,9 +1,10 @@
 % Purpose: verify persistent multiset semantics and complete store ownership.
 % Guarantees: generated operations agree with a list model; lifecycle tests
 % exercise independent engines, aliases, cancellation, failed I/O and replay.
-% [tested: lib_database; commit=24b9b7ee948564963a5c3455cd5b412d05afdd2c].
-% Owns resources: fixtures close stores, join workers, release execution spaces,
-% restore wrapped predicates and delete their temporary directories.
+% Request completion interrupts a milestone wait even after early failure.
+% [tested: lib_database; commit=WORKTREE].
+% Owns resources: fixtures close stores and queues, join workers, release
+% execution spaces, restore wrapped predicates and delete temporary directories.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -31,7 +32,7 @@ seam:pattern_modifier([Marker],_,throw(database_query_cancelled)) :-
     nonvar(Marker),Marker==database_suite_guard.
 
 :- begin_tests(lib_database).
-:- meta_predicate must_throw(0,?), with_directory(1), with_store(+,2).
+:- meta_predicate must_throw(0,?), with_directory(1), with_store(+,2), reported_request(+,0).
 
 must_throw(Goal,Expected) :-
     catch(Goal,Error,true),assertion(nonvar(Error)),assertion(Error=Expected).
@@ -278,20 +279,39 @@ unregistered_stream(Directory,Handle) :-
 test(thread_cancellation_during_an_owned_request_releases_the_store) :-
     with_store(none,cancel_request).
 cancel_request(Directory,Handle) :-
-    store_module(Directory,Module),journal(Directory,Journal),thread_self(Main),
-    setup_call_cleanup(
-        wrap_predicate(persistency:db_open_file(Path,_,_),database_open_barrier,Wrapped,
-                       (call(Wrapped),(Path==Journal->thread_send_message(Main,opened),
-                                       thread_get_message(database_continue);true))),
-        setup_call_cleanup(thread_create('database-add!'(Handle,lost,_),Worker,[]),
-            (thread_get_message(opened),thread_signal(Handle,throw(database_thread_cancelled)),
-             thread_join(Worker,Status),assertion(Status==exception(database_thread_cancelled))),
-            reap(Worker)),
-        unwrap_predicate(persistency:db_open_file(_,_,_),database_open_barrier)),
+    store_module(Directory,Module),journal(Directory,Journal),
+    setup_call_cleanup(message_queue_create(Queue),
+        setup_call_cleanup(
+            wrap_predicate(persistency:db_open_file(Path,_,_),database_open_barrier,Wrapped,
+                           (call(Wrapped),(Path==Journal->thread_send_message(Queue,opened),
+                                           thread_get_message(database_continue);true))),
+            setup_call_cleanup(thread_create(reported_request(Queue,'database-add!'(Handle,lost,_)),Worker,[]),
+                (expect_request_event(Queue,opened),thread_signal(Handle,throw(database_thread_cancelled)),
+                 expect_request_event(Queue,finished(exception(database_thread_cancelled))),
+                 thread_join(Worker,Status),assertion(Status==exception(database_thread_cancelled))),
+                reap(Worker)),
+            unwrap_predicate(persistency:db_open_file(_,_,_),database_open_barrier)),
+        message_queue_destroy(Queue)),
     no_registration(Module,Journal),closed(Handle),reopen_rows(Directory,[]).
+reported_request(Queue,Goal) :-
+    setup_call_catcher_cleanup(true,Goal,Outcome,thread_send_message(Queue,finished(Outcome))).
+expect_request_event(Queue,Expected) :-
+    thread_get_message(Queue,Actual),
+    ( Actual=Expected -> true
+    ; throw(error(database_request_event(Expected,Actual),_)) ).
 reap(Thread) :-
     call_cleanup(catch(thread_signal(Thread,throw(database_fixture_cancelled)),error(existence_error(thread,_),_),true),
                  catch(thread_join(Thread,_),error(existence_error(thread,_),_),true)).
+
+test(request_exit_before_a_milestone_is_reported,
+     [forall(member(Goal-Outcome,[true-exit,fail-fail,
+                                 throw(database_request_failed)-exception(database_request_failed)]))]) :-
+    setup_call_cleanup(message_queue_create(Queue),
+        setup_call_cleanup(thread_create(reported_request(Queue,Goal),Worker,[]),
+            must_throw(expect_request_event(Queue,opened),
+                       error(database_request_event(opened,finished(Outcome)),_)),
+            reap(Worker)),
+        message_queue_destroy(Queue)).
 
 test(invalid_journals_are_refused_in_full_and_preserved) :- with_directory(invalid_journals).
 invalid_journals(Directory) :-

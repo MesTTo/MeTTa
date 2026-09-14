@@ -3484,7 +3484,7 @@ Returns: Value
 (: markup-parse-html (-> String Expression))
 ```
 
-One HTML document in the same shape. HTML's own rules are the host's: an omitted end tag that HTML allows is not an error, so `<p>one<p>two` parses, while a stray close tag or unparseable text is still a refusal.
+One HTML document in the same shape. HTML's own rules are the host's: an omitted end tag that HTML allows is not an error, so `<p>one<p>two` parses, while a stray close tag or unparsable text is still a refusal.
 
 1. Text
 

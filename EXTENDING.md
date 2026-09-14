@@ -704,16 +704,81 @@ each SWI dependency with `use_module/2` or `autoload/2` in the file that uses
 it. Autoload declarations belong to the declaring module too. A plain Prolog
 file still loads into the host module, `user`, through `consult_global/1`.
 
-### Derive the MeTTa face from the native declaration
+### Author a library from MeTTa equations and native boundaries
 
-For a shipped library, the module export list and typed PlDoc modes own the
-interface. Run `python extensions/python/tools/prologface.py --write` after
-editing its Prolog source. The generator reads SWI's cross-reference records
-without loading the source. It writes one native import, all declared arrow
-types and the documentation into the adjacent MeTTa file's generated region.
-The `prolog-face` lane refuses a stale region, a deleted face, incomplete
-metadata or a source syntax error. Handwritten equations remain outside the
-region and survive regeneration.
+```metta
+!(import! &self (library lib_encoding))
+!(let $recipe
+   (match &self (= (hex-encode $bytes) $body) (quote (|-> ($bytes) $body)))
+   (let $format (eval $recipe) ($format (0 255)))) ; "00ff"
+```
+
+The library stores an equation that a caller can match, reconstruct as a
+function and apply. Start with that representation when existing operations
+can express the behavior. Ask the space's `builtins()` door for its live
+callable basis; on a Python MeTTa context, use `m.self.builtins()`. Read the
+existing library cards and declared argument types before adding a head.
+`lib_builtin_types` belongs to this standard library: it declares the types
+of existing operations. `lib_string` supplies the shared text boundary.
+
+Keep derived equations, their `(: ...)` types and `(@doc ...)` rows in
+`lib/lib_x/lib_x.metta`. A library made entirely from equations needs no
+Prolog half. Shared implementation files can live under `lib/_support/`;
+import their existing operations instead of copying validators or algorithms.
+Use the same values across domains: Pairs supplies relations, Graph derives
+from adjacency pairs, and Statistics owns both sample summaries and finite
+probability laws over Measure's weighted rows. Testing imports generators;
+`forall` and `test` compose traversal and verdicts without another protocol.
+
+Choose types by evaluation behavior. `Atom` holds written syntax; an
+`Expression` input evaluates its contents. Quote runnable terms when they
+are data, including literal `Empty` and `Error` values. Preserve shared
+variables and duplicate answers through binding-aware collection and
+application. `lib_reflect` and `lib_strategy` demonstrate exact structural
+replacement through ordinary Pairs lookup and traversal; lexical
+capture-avoiding substitution is a different contract.
+
+Use `(:seg $rest)` for expression segments and `(:seg Type)` in arrows for
+variadic inputs. Accept zero arguments where the operation has an identity,
+and state the domain when it does not. Functions, lambdas and partial
+applications are values; `apply-to` builds an application from finished
+arguments. Keep alternative rewrites as answers, and use `collapse` only
+where the result is a collection. Random constructors return sample programs;
+`eval`, `repeat`, `once` and the existing seeded scope control their execution.
+These derivations can cost more inferences than a native implementation.
+Their inspectable representation and shared semantics are part of the API.
+
+Use a native half for host services, owned resources or a maintained
+algorithm or numeric representation that the library reuses. Explain that
+boundary in its source and journal. Declare the MeTTa-facing module with
+`:- set_module(base(metta_engine)).`, import host dependencies explicitly,
+and use `:- metta_requires(Capability).` for an optional platform service.
+Missing services must name their refusal and repair. Deterministic public
+predicates declare `det`; nondeterministic predicates retain every answer.
+Effects belong to the provider declaration, including libraries loaded after
+startup. A library or framework name does not belong in an engine dispatch
+case when the existing extension seam can describe it.
+
+Private host providers can keep an independent module namespace. A support
+module needs its own declaration; its name does not determine its ownership.
+Call the published engine services for shared language policies:
+`metta_console_text/2` supplies console rendering, and
+`metta_saturating_recover/4` retries a floating arithmetic exception with the
+engine's IEEE policy while restoring the caller's flags.
+
+Keep protocol alphabets and host domains beside the boundary that interprets
+them. The `policy-inventory` lane requires an adjacent reason and local source
+evidence for each closed list. It checks first-party adapters while vendored
+providers retain their upstream policy and bytes.
+
+For the native half, the module export list and typed PlDoc modes own its
+generated interface. Run `python extensions/python/tools/prologface.py --write`
+after editing its Prolog source. The generator reads SWI's cross-reference
+records without loading the source. It writes one native import, declared
+arrow types and documentation into the adjacent MeTTa file's generated
+region. The `prolog-face` lane refuses a stale region, a deleted face,
+incomplete metadata or a source syntax error. Handwritten equations, types
+and documentation stay outside the region and survive regeneration.
 
 Each public mode names and types every argument, with inputs followed by one
 result. Use `number`, `string`, `atom`, `boolean`, `list` or `any` for the
@@ -722,6 +787,12 @@ Several arities can share a head. A nondeterministic native result stays a
 stream of MeTTa answers, including duplicate answers. Adapt a host predicate
 whose arguments have another order in the Prolog library itself. Exported
 host services that are not MeTTa calls use a PlDoc `@private` explanation.
+
+On this cut, `dev-typed` checks the native PlDoc vocabulary and rejects explicit
+MeTTa type names such as `'Atom'`. The generated face and ordinary library calls
+have separate checks. The closing library census journal records the same
+annotation failure on the unchanged control; a type-vocabulary bridge remains
+an integration obligation for the development checker.
 
 An input declared `list` becomes an evaluating `Expression` parameter. Quote
 literal configuration data when its heads must remain data, as in
@@ -738,11 +809,22 @@ an operation error and a release error, `lib/_support/owned_resources.pl`
 captures the outcome before invoking the owner's cleanup. It refuses a
 nondeterministic goal; streaming readers use the native cleanup scope.
 
-`lib_datetime` is the working example. Its native modes generate its imports,
+Keep a scoped value in an argument whenever possible. On this engine cut,
+an ambient context uses one key read with `nb_current/2`; record that site
+for conversion to the trailed context primitive during integration. Do not
+open a context by asserting database rows or calling `nb_setval/2` in the
+Setup goal. A real resource acquisition, such as opening a stream, starting
+a process or acquiring a connection, belongs in Setup and keeps its cleanup
+scope. File's handle registration is ownership of a live stream, not an
+ambient configuration value. Socket's acquisition key is the scoped-value
+example; Logging carries its handler directly as an argument.
+
+`lib_datetime` is a native example. Its modes generate its imports,
 types and help text; its example calls every public head. The library card
 and `website/reference/metta-libraries.md` read those same declarations.
-Discovery follows `lib/*/*.pl`; private support and vendored provider modules
-live below that level and do not acquire public faces. `lib_regex` demonstrates
+Native-face discovery follows `lib/*/*.pl`. Sources without public export modes
+or an existing generated face are skipped, including the shared support modules;
+nested vendored providers fall outside that glob. `lib_regex` demonstrates
 a native provider with a local build recipe, immutable compiled values and
 multiple answers. The record at `lib/lib_regex/vendor/VENDOR.md` pins the
 upstream source, lists local repairs and gives the prebuild command.
@@ -754,6 +836,9 @@ declares every transitive vendor include. Pass these declared paths to
 only existing files would hide a deleted header behind a warm object. Its
 tests verify the include closure, modified and missing headers, concurrent
 builds, cancellation and execution after installation from a source archive.
+String's nine derived text recipes remain ordinary MeTTa equations outside
+that native face. Encoding and UUID demonstrate the same split for byte
+validation, codecs and inspectable formatting and name-based identifiers.
 `lib_vector` demonstrates exact numeric reduction over the host's existing
 GMP arithmetic. Its finite dot products, squared lengths and direction ratios
 retain exact stored values until the final float rounding. Public declarations
@@ -761,6 +846,8 @@ use `list(number)` for an expression of Numbers; the native predicate validates
 every component and reports dimension mismatches through the operation-error
 boundary. The source includes the pinned CPython fraction-root method and its
 license, with independent Fraction and squared-midpoint tests.
+Vector construction and normalized-dot specialization compose those kernels
+in MeTTa; the native provider does not own those equations.
 `lib_file` demonstrates the three shapes a library needs beyond one call per
 head. A NONDETERMINISTIC head is an ordinary Prolog predicate with several
 solutions: `dir-walk/2` and `dir-glob/3` answer one path per answer and their
@@ -792,6 +879,35 @@ Regenerate the page with `python extensions/python/tools/libdoc.py --write`.
 and library roster while retaining the authored library notes. Corpus lineage
 and README counts come from `python extensions/python/tools/example_origins.py
 --write`; set `METTA_UPSTREAM` to the upstream source checkout.
+
+Give each library an executable example under `examples/` and a Python twin
+that states the same claims through the Python API. Test public behavior in
+plunit, including errors, literal terms, variable sharing, alternatives and
+resource abandonment where applicable. Independent Python or native oracles
+check the result rather than restating the implementation. An example of
+reflection must actually inspect or reconstruct a recipe, not just call it.
+When a fixture waits for a worker milestone, send the worker's terminal
+outcome through the same event channel so early failure also ends the wait.
+
+After implementation, run the example and twin, measure the twin in three
+fresh processes, and run the plunit suite. Remove `.qlf` files before measuring.
+Then regenerate `prologface`, cumulative syntax, example origins, llms names
+and `libdoc`, in that order. If the callable catalog changed, also run
+`python extensions/python/tools/fngen.py --write` for the Python function
+namespace. Update the authored llms contract, changelog and
+dated journal section. Run the face, documentation, corpus, imports, evidence,
+Python checks and twins lanes before committing the implementation as A.
+Run `python tests/checks/pin_provenance.py --commit <A>` and commit its
+provenance-only result as B; `--check` must report zero pending pins.
+
+Every later provider edit requires fresh measurements of its direct and
+transitive twins, including native sibling imports. Use
+`python extensions/python/tools/twin_coverage.py --repin --rounds 3 --reason
+"the mechanism that changed the cost" <examples...>` for existing points.
+Inspect stored-content differences before accepting any changed digest.
+Inference counters supply the price; wall-clock time on a shared host does
+not. Generated roster counts come from discovery, while authored contract
+clauses explain the behavior callers can rely on.
 
 Python frameworks keep their faces in their own distributions. The existing
 `facegen.py` generator reads `Import:` declarations under both `lib/` and

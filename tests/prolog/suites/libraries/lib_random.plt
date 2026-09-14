@@ -179,7 +179,7 @@ test(engine_seed_scope_restores_completion_cut_exception_and_cancellation) :-
         (getrand(Before),
          findall(X,metta_engine:metta_with_seed(99,[],
                      plunit_lib_random:draw(['random-gamma',0.5,2],8,X),_),Values),
-         assertion(length(Values,8)),getrand(AfterAll),assertion(AfterAll == Before),
+         assertion(length(Values,8)),getrand(AfterAnswers),assertion(AfterAnswers == Before),
          once(metta_engine:metta_with_seed(99,[],
                   plunit_lib_random:draw(['random-normal',0,1],100,_),_)),
          getrand(AfterCut),assertion(AfterCut == Before),

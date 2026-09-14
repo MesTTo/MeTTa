@@ -32,6 +32,12 @@
 second
 third")
 
+>>>> astral characters before tokens and across lines
+🙂 (= (f $x) "π🙂") ; 🦊
+!(+ 1 2)
+"🙂
+🦊" (: Bool Type)
+
 >>>> a string nothing closes
 (= (open) "never closed
 

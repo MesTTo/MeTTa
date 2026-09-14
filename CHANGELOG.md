@@ -9,6 +9,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Native extensions can call the engine's console renderer and IEEE exception
+  recovery through the published service table and module exports.
+- The library authoring guide now documents MeTTa derivation, reflective
+  equations, segments, variadic inputs and shared native boundaries. The final
+  catalog includes builtin types and String, consolidates finite laws in
+  Statistics and composes Testing from generators and core assertions. Every
+  direct and transitive paired consumer of a changed library was remeasured;
+  sixteen inference points were refreshed without changing content pins.
 - Encoding derives hex from MeTTa arithmetic, segments and one ASCII alphabet;
   UUID derives seven operations from shared byte boundaries, namespace pairs,
   Crypto and one field layout. Their equations can be inspected and called as
@@ -584,6 +592,22 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The grammar reader reports Unicode code-point offsets, so astral characters
+  preserve token alignment with the Python lexer. Annotation builders retain
+  deferred dependency loading in both interpreted and compiled codecs.
+- Generator dependency discovery includes repository checker helpers. Protocol
+  list checks retain first-party adapters while preserving vendored providers;
+  generated function declarations reflect the current callable catalog.
+- The upstream removal fixture records the expanded Spaces library's exact
+  output: 26 removed atoms instead of 11, with the same removal equation and
+  all three upstream assertions passing. Further output drift still fails.
+- The library boundary checks use declared module ownership and inherited
+  namespaces, including private support providers and SWI message hooks.
+  File's socket-entry fixture works under long scratch paths by binding in
+  an owned child process's working directory.
+- Socket and Database cancellation fixtures observe worker completion through
+  their milestone channels, so an early worker failure is reported instead
+  of leaving the parent waiting for a message that cannot arrive.
 - The dependency gate derives local tool modules from their source directory
   and recognises the reference generator's development dependency. The parity
   fixture producer uses the shared process bound. The syntax introduction

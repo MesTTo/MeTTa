@@ -260,7 +260,8 @@ def _cmake_comment_spans(path: Path, text: str) -> list[tuple[int, int]]:
 
     def refuse(description: str) -> None:
         line = text.count("\n", 0, position) + 1
-        raise SystemExit(f"pin_provenance: {path}:{line}: {description}")
+        message = f"pin_provenance: {path}:{line}: {description}"
+        raise SystemExit(message)
 
     while position < len(text):
         start = position

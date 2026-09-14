@@ -494,8 +494,11 @@
    "status": "conforms"
   },
   "spaces_removeallatoms.metta": {
+   "ours": "is \"(remove-all-atoms &self)\", should \"(remove-all-atoms &self)\". ✅ \nis \"(f 42)\", should \"(f 42)\". ✅ \nis (), should (). ✅ \ntrue\n(true true true true true true true true true true true true true true true true true true true true true true true true true true)\ntrue\ntrue\ntrue\n",
+   "ours_rc": 0,
    "rc": 0,
-   "status": "conforms"
+   "status": "diverges",
+   "ruling": "The example imports each engine's own lib_spaces. The removal equation is unchanged. Five added operations contribute fifteen stored atoms: one type, equation and documentation row each. This program therefore removes 26 atoms here and 11 upstream. Every removal succeeds, all three upstream assertions pass, and both final spaces are empty. The independent census and pristine-cut comparison are recorded in the 2026-09-14 final conformance section of docs/journal/2026-09-11-a-standard-library-for-a-language.md. The upstream expected file is unchanged."
   },
   "spaces_succeedspredicate.metta": {
    "rc": 0,

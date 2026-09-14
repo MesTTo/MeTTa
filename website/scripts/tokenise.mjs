@@ -23,7 +23,11 @@
  *
  *   {"path": "a.metta", "spans": [[0, 11, "comment.line.semicolon.metta"]]}
  *
- * A span is [start, end, scope) in BYTES-as-characters of the file, holding the
+ * Guarantees: spans use Unicode code point offsets, including after astral
+ * characters and across lines [tested: tests/checks/check_tokenisation_selftest.py;
+ * commit=WORKTREE].
+ *
+ * A span is [start, end, scope) in Unicode code points of the file, holding the
  * innermost scope of a token TextMate gave more than the grammar's own
  * `source.metta`. Characters no pattern scoped are absent rather than listed,
  * because that is the one thing the two tokenisers are allowed to chunk
@@ -63,16 +67,29 @@ function spans(source) {
   let stack = INITIAL;
   let offset = 0;
   for (const line of source.split("\n")) {
+    // TextMate reports UTF-16 offsets; Python compares Unicode code points.
+    const characterOffsets = [0];
+    let units = 0;
+    let characters = 0;
+    for (const character of line) {
+      units += character.length;
+      characterOffsets[units] = ++characters;
+    }
     const result = grammar.tokenizeLine(line, stack);
     stack = result.ruleStack;
     for (const token of result.tokens) {
       const start = Math.min(token.startIndex, line.length);
       const end = Math.min(token.endIndex, line.length);
       if (start < end && token.scopes.length > 1) {
-        out.push([offset + start, offset + end, token.scopes[token.scopes.length - 1]]);
+        const first = characterOffsets[start];
+        const last = characterOffsets[end];
+        if (first === undefined || last === undefined) {
+          throw new Error("TextMate split a Unicode code point");
+        }
+        out.push([offset + first, offset + last, token.scopes[token.scopes.length - 1]]);
       }
     }
-    offset += line.length + 1;
+    offset += characters + 1;
   }
   return out;
 }

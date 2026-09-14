@@ -2,15 +2,16 @@
 % Guarantees: bytes, staged publication, renames, tree copy and removal,
 % traversal, globbing, path functions, entry kinds, links and scopes are each
 % checked against the host and against CPython's posixpath goldens
-% [tested: lib_file_surface; commit=e40ef941310bddd1f57074eb559e78aac8a263b0].
+% [tested: lib_file_surface; commit=WORKTREE].
 % Owns resources: each fixture directory is removed through setup_call_cleanup;
 % every space a test allocates is released by the suite's cleanup; a wrapped
-% host predicate is unwrapped before the test's assertions run.
+% host predicate is unwrapped before the test's assertions run. The socket
+% fixture's child closes its socket and process_create/3 waits and reaps it.
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 :- use_module(library(prolog_wrap)).
 :- use_module(library(ordsets), [ord_subtract/3]).
-:- use_module(library(socket), [unix_domain_socket/1, tcp_bind/2, tcp_close_socket/1]).
+:- use_module(library(process), [process_create/3]).
 :- initialization(consult('../../lib/lib_string/lib_string.pl')).
 :- initialization(consult('../../lib/lib_file/lib_file.pl')).
 :- initialization(file_surface_setup).
@@ -527,17 +528,21 @@ special_entry_case(Dir) :-
     directory_file_path(Dir, source, Source), make_directory(Source),
     directory_file_path(Source, 'a.txt', A), 'write-file!'(A, "a", true),
     directory_file_path(Source, 'z.sock', SocketPath),
-    setup_call_cleanup(
-        ( unix_domain_socket(Socket), tcp_bind(Socket, SocketPath) ),
-        ( 'file-kind'(SocketPath, Kind), assertion(Kind == other),
-          directory_file_path(Dir, target, Target),
-          must_throw('copy-dir!'(Source, Target, true),
-                     error('file-kind-mismatch'('copy-dir!', _, file, other), _)),
-          assertion(\+ exists_directory(Target)),
-          directory_files(Dir, Names), msort(Names, Sorted),
-          assertion(Sorted == ['.', '..', source]),
-          'delete-tree!'(SocketPath, true), assertion(\+ access_file(SocketPath, exist)) ),
-        tcp_close_socket(Socket)).
+    % Bind relative to the child's cwd: a gate's scratch prefix may exceed
+    % the Unix socket address capacity. Closing leaves the filesystem entry.
+    term_to_atom(( use_module(library(socket)),
+                   setup_call_cleanup(unix_domain_socket(Socket),
+                                      tcp_bind(Socket, 'z.sock'),
+                                      tcp_close_socket(Socket)) ), Goal),
+    process_create(prolog(self), ['-q', '-g', Goal, '-t', halt], [cwd(Source)]),
+    'file-kind'(SocketPath, Kind), assertion(Kind == other),
+    directory_file_path(Dir, target, Target),
+    must_throw('copy-dir!'(Source, Target, true),
+               error('file-kind-mismatch'('copy-dir!', _, file, other), _)),
+    assertion(\+ exists_directory(Target)),
+    directory_files(Dir, Names), msort(Names, Sorted),
+    assertion(Sorted == ['.', '..', source]),
+    'delete-tree!'(SocketPath, true), assertion(\+ access_file(SocketPath, exist)).
 
 test(delete_tree_unlinks_a_link_root_and_removes_trees) :- with_fixture(delete_tree_case).
 delete_tree_case(Dir) :-

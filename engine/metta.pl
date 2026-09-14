@@ -7,9 +7,9 @@
 %   - materialize.pl loads before source processing and shares the engine's
 %     runtime context [tested: function_free_materialization; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
 %   - The engine/metta/ units compile into metta_engine in source
-%     order. Engine and library definitions stay out of user except SWI's
-%     exception/3, thread_message_hook/3 and prolog_trace_interception/4 hooks.
-%     [tested: engine_modules; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
+%     order. Engine and library definitions stay in their owning modules;
+%     designated SWI protocol hooks live in user.
+%     [tested: engine_modules; commit=WORKTREE].
 %   - A built-in call covered by the effects cluster whose declared operand
 %     types already conflict is refused before operand evaluation; shallow
 %     compile-time checks inspect literals and declared return types without
@@ -473,6 +473,10 @@
             refuse_untypable_declaration/2,
             rethrow_metta_operation_error/2,
             throw_missing_import/1,
+            %
+            % Shared native policies: presentation and IEEE arithmetic recovery.
+            metta_console_text/2,
+            metta_saturating_recover/4,
             %
             % IMPORTS, SOURCES AND EXTENSIONS: what a MeTTa source pulls in, where a
             % host loader puts it, and the seat census behind require-extension!.

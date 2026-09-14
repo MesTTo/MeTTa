@@ -5,3 +5,38 @@
 ;nondeterministically returning integers withing range:
 ;Add only one commited option: (select)
    (let* (;; Recurse on abtraction
+`caf\x82`; offsets, CRC and the unset UTF8 flag remain intact.
+`café/π🙂`, with the CRC of the original `caf\x82` header bytes.
+@pytest.mark.parametrize("raw_name", [b"caf\x82", b"caf\xc3\xa9"])
+    placeholder = b"caf" + b"_" * (len(raw_name) - 3)
+    payload = b"\x01" + struct.pack("<I", zlib.crc32(b"caf\x82")) + "café/π🙂".encode()
+    fixture.write_bytes(fixture.read_bytes().replace(b"caf_", b"caf\x82"))
+%   Flags  may include  `g`, replacing  all occurences  of Pattern.   In
+%   be referenced by its number. The single chracters `$` and `\` can be
+        % because Flags take precedence and first occurence in Options
+  /* Some of the follwoing are for pcre2_dfa_match() or
+    % Make sure that write_pcre() works witn non-ASCII.
+  /* In the folowing code, Sfeof() call S__fillbuff() if the buffer is empty.
+ *  Copyright (C) 2011-2023, Yann Collet.
+ *  A same LZ4_stream_t can be re-used multiple times consecutively
+ *  The extra-cpu cost is likely worth it if the dictionary is re-used across multiple sessions.
+ *  This allows efficient re-use of a static dictionary multiple times.
+ *  A tracking context can be re-used multiple times.
+ *  An LZ4_streamDecode_t context can be allocated once and re-used multiple times.
+   Copyright (C) 2011-2020, Yann Collet.
+ *  This API allows for the efficient re-use of a static dictionary many times.
+%      Controls how to handle options given more than once on the commad line.
+%   Add defaults to the user speficified options.
+ * of edit sequences for a gived maximum edit distance and length
+ *    - if max is 0 the similarity can be calculated using a direct comparision,
+ *      calculated using a direct comparision aswell, since a substitution would cause
+    // when no differences are allowed a direct comparision is sufficient
+    // not sure whats faster though
+    RangeVec<InputIt> splitted;
+            splitted.emplace_back(first, second);
+    std::sort(splitted.begin(), splitted.end());
+    return SplittedSentenceView<InputIt>(splitted);
+RAPIDFUZZ_CONSTEXPR_CXX14 uint64_t addc64(uint64_t a, uint64_t b, uint64_t carryin, uint64_t* carryout)
+    a += carryin;
+    *carryout = a < carryin;
+             member(Right,["","b","ab","cba","bacab","languange","école"]),

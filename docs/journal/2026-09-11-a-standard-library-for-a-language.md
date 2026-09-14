@@ -5983,3 +5983,470 @@ crash; twins-selftest passes. The native fix remains outside this worktree's
 library scope. Receipts: ai-lib4-http-{backtrace,unregister-disassembly}.log,
 ai-lib4-encoding-uuid-fulltwins{,-repeat}.log and
 ai-lib4-table-destroy-{default-current,no-agc,cut-1,cut-2,cut-3}.log.
+
+
+## 2026-09-14: closing library census
+
+The opening thirty-six concerns are delivered through thirty-five principal
+library owners. Finite distributions and descriptive statistics share
+Statistics; the former Distribution library was removed. The complete
+catalog has sixty discovered libraries, including builtin types and String.
+Testing's one documented catalog name describes its import; it adds no
+callable assertion or generator protocol. Names/docs below are the catalog's
+carried-name and documentation counts, which include retained legacy names.
+They are not counts of newly introduced operations.
+
+A is a functional commit and B its provenance-only pin. The delivery pair
+records the original row; the final semantic pair records its last listed
+implementation revision. Later consumer price refreshes are separate evidence
+commits. The first Distribution delivery introduced no new pins; its final
+Statistics implementation has both pins. Example basenames are relative to
+examples/ch08-data/08-03-the-shipped-libraries, with paired Python files at
+the same relative path under the language-feature-examples directory. Claims
+count the example's assertion forms, all covered by its twin; a twin may
+state additional checks. Budgets are the current pinned inference points.
+
+| # | Concern and final library | State | Names/docs | Example; paired claims; twin pin | Delivery A/B | Final semantic A/B |
+|---|---|---|---|---|---|---|
+| 1 | dates and calendars: `lib_datetime` | delivered | 16/16 | `07-datetime.metta`; 25; 44390 | `9b2299344` / `0f8fa4814` | `9b2299344` / `0f8fa4814` |
+| 2 | regular expressions: `lib_regex` | delivered | 18/18 | `04-regex_lib.metta`; 26; 108199 | `7dcfe83fc` / `1ce934259` | `7dcfe83fc` / `1ce934259` |
+| 3 | JSON: `lib_json` | delivered | 13/13 | `05-json_lib.metta`; 28; 174231 | `5e212d77a` / `6dab7f8c1` | `5e212d77a` / `6dab7f8c1` |
+| 4 | hashing and cryptography: `lib_crypto` | delivered | 12/12 | `06-crypto_lib.metta`; 18; 174270 | `28c6146d8` / `e5efe36f7` | `28c6146d8` / `e5efe36f7` |
+| 5 | delimited records: `lib_csv` | delivered | 7/7 | `17-csv_lib.metta`; 22; 211951 | `bd027d8b7` / `02d05add8` | `bd027d8b7` / `02d05add8` |
+| 6 | strings and similarity: `lib_string` | delivered | 34/34 | `18-string_lib.metta`; 50; 329461 | `3aaad3435` / `f0052a29b` | `118b805ae` / `42eba5fac` |
+| 7 | numeric vectors: `lib_vector` | delivered | 13/13 | `13-vector_lib.metta`; 43; 244365 | `615e8a68d` / `8eb04b55a` | `c7bacead4` / `e289439f3` |
+| 8 | files, directories and paths: `lib_file` | delivered | 55/55 | `19-file_lib.metta`; 90; 232066 | `e40ef9413` / `fe6f99f06` | `7b42d5ee5` / `3fe9632b6` |
+| 9 | queryable spaces: `lib_spaces` | delivered | 10/5 | `20-spaces_lib.metta`; 27; 43720 | `a8b4bab6e` / `28840b419` | `a8b4bab6e` / `28840b419` |
+| 10 | mutable dictionaries: `lib_dict` | delivered | 11/4 | `12-dict_lib.metta`; 25; 189399 | `a8b4bab6e` / `28840b419` | `a8b4bab6e` / `28840b419` |
+| 11 | persistent collections: `lib_datastructures` | delivered | 48/31 | `21-datastructures_lib.metta`; 59; 3108074 | `2072899a9` / `96a7885c7` | `9c9e60542` / `1743ea9a1` |
+| 12 | combinatorial generators: `lib_combinatorics` | delivered | 14/14 | `11-combinatorics_lib.metta`; 63; 737251 | `08b21037c` / `9329b0939` | `e1be99ea1` / `1858235d4` |
+| 13 | finite distributions: `lib_statistics` | consolidated | 31/31 | `37-statistics_lib.metta`; 78; 40976038 | `0191aa2c4`; no new pins | `e1be99ea1` / `1858235d4` |
+| 14 | functional utilities: `lib_functional` | delivered | 17/17 | `22-functional_lib.metta`; 73; 1189061 | `a2a80061c` / `daf4720c9` | `e1be99ea1` / `1858235d4` |
+| 15 | sets: `lib_sets` | delivered | 11/11 | `23-sets_lib.metta`; 54; 354572 | `e3e8c8910` / `4af82ca9d` | `6471fbad3` / `0a2039fc2` |
+| 16 | pairs and grouped records: `lib_pairs` | delivered | 9/9 | `24-pairs_lib.metta`; 37; 858307 | `40b3353b9` / `605a4754a` | `6471fbad3` / `0a2039fc2` |
+| 17 | directed graphs: `lib_graph` | delivered | 15/15 | `25-graph_lib.metta`; 52; 8992545 | `a5738e939` / `b5fdbae99` | `2951a00d6` / `dfe08f913` |
+| 18 | Unicode: `lib_unicode` | delivered | 8/8 | `26-unicode_lib.metta`; 54; 152171 | `a30e0a59e` / `9bfea8a33` | `a30e0a59e` / `9bfea8a33` |
+| 19 | parsing and grammars: `lib_parsing` | delivered | 5/5 | `27-parsing_lib.metta`; 74; 4701005 | `7bdd5ace3` / `93c604b28` | `3c1d074a2` / `031f5cf5d` |
+| 20 | YAML: `lib_yaml` | delivered | 4/4 | `28-yaml_lib.metta`; 32; 201983 | `672e5be18` / `243f697ff` | `672e5be18` / `243f697ff` |
+| 21 | XML, HTML and XPath: `lib_markup` | delivered | 6/6 | `29-markup_lib.metta`; 30; 110488 | `ed976b0e7` / `99b5927dd` | `ed976b0e7` / `99b5927dd` |
+| 22 | binary encodings: `lib_encoding` | delivered | 6/6 | `30-encoding_lib.metta`; 43; 243765 | `2b8c0afd3` / `874fbc156` | `8fe20f1bd` / `76cac930b` |
+| 23 | environment and platform: `lib_system` | delivered | 8/8 | `31-system_lib.metta`; 29; 217434 | `b109f59a8` / `7e7da5628` | `b109f59a8` / `7e7da5628` |
+| 24 | child processes: `lib_process` | delivered | 7/7 | `32-process_lib.metta`; 24; 47068 | `623a2848e` / `8ca579966` | `623a2848e` / `8ca579966` |
+| 25 | identifiers: `lib_uuid` | delivered | 11/11 | `33-uuid_lib.metta`; 49; 1291086 | `d5de00cc1` / `24e630212` | `8fe20f1bd` / `76cac930b` |
+| 26 | logging: `lib_logging` | delivered | 7/7 | `34-logging_lib.metta`; 28; 54976 | `cf6b111ff` / `74c694f9a` | `cf6b111ff` / `74c694f9a` |
+| 27 | numbers and number theory: `lib_math` | delivered | 13/13 | `35-math_lib.metta`; 74; 359493 | `4d17f1af1` / `015ad4725` | `6fa571d1b` / `01af5a189` |
+| 28 | random generation: `lib_random` | delivered | 13/13 | `36-random_lib.metta`; 68; 1150796 | `505b45e1d` / `9aa2d50b2` | `1d0b78a35` / `bcc0f9841` |
+| 29 | descriptive statistics: `lib_statistics` | delivered | 31/31 | `37-statistics_lib.metta`; 78; 40976038 | `84824f5cf` / `405599d78` | `e1be99ea1` / `1858235d4` |
+| 30 | HTTP: `lib_http` | delivered | 9/9 | `38-http_lib.metta`; 41; 369064 | `0f22b69cf` / `7708f9b21` | `0f22b69cf` / `7708f9b21` |
+| 31 | URLs and URIs: `lib_uri` | delivered | 9/9 | `39-uri_lib.metta`; 55; 262887 | `24b96f8ec` / `d1ceca500` | `24b96f8ec` / `d1ceca500` |
+| 32 | sockets: `lib_socket` | delivered | 11/11 | `40-socket_lib.metta`; 53; 200969 | `781ee98e1` / `9b84d2c82` | `7b42d5ee5` / `3fe9632b6` |
+| 33 | compression and archives: `lib_compression` | delivered | 8/8 | `41-compression_lib.metta`; 54; 226243 | `7b42d5ee5` / `3fe9632b6` | `7b42d5ee5` / `3fe9632b6` |
+| 34 | persistent local storage: `lib_database` | delivered | 7/7 | `42-database_lib.metta`; 71; 248018 | `060bea319` / `a22dfce2f` | `24b9b7ee9` / `6ebf99542` |
+| 35 | assertions and generation: `lib_testing` | delivered | 1/1 | `43-testing_lib.metta`; 37; 363965 | `a283d3934` / `67fd8bd24` | `7fad61bab` / `63187332f` |
+| 36 | command-line options: `lib_cli` | delivered | 4/4 | `44-cli_lib.metta`; 64; 392348 | `83b7589a6` / `864764342` | `83b7589a6` / `864764342` |
+
+| # | Retained boundary or MeTTa derivation |
+|---|---|
+| 1 | Native calendar, clock, timezone and locale services; formatting aliases share that provider. |
+| 2 | Pinned PCRE2 adapter owns compiled values, captures and match alternatives. |
+| 3 | JSON objects use existing spaces; one codec owns graph validation, formatting and streamed publication. |
+| 4 | Host cryptography owns digest, HMAC, entropy and password standards; byte values compose with Encoding. |
+| 5 | One CSV codec supplies strings, bounded row streams and space snapshots; File publication is shared. |
+| 6 | Nine MeTTa recipes share text coercion, codepoints and maintained native search, layout and metric algorithms. |
+| 7 | MeTTa derives construction and normalized dot; one exact numeric boundary owns final IEEE rounding. |
+| 8 | Native streams and filesystem operations; one staging publisher and shared handle ownership. |
+| 9 | MeTTa compositions over existing space lookup, matching, insertion and removal. |
+| 10 | A dictionary is a space; default, update, merge and pop compose its ordinary operations. |
+| 11 | MeTTa ordered pair relations implement maps and queues; the existing functional queue and finger tree remain. |
+| 12 | MeTTa segments, folds and answer streams derive ranges, choices, permutations, products and counts. |
+| 13 | Consolidated in Statistics using Measure weight/value rows; independent products are variadic. |
+| 14 | MeTTa folds, unfolds and finished-value application preserve literal data and callback alternatives; Patrick imports them. |
+| 15 | MeTTa equations over core identity sets; variadic union and intersection subsume separate all-forms. |
+| 16 | MeTTa pair relations reuse Functional sorting and grouping and preserve duplicate alternatives. |
+| 17 | Canonical adjacency pairs derive edits, closure, reachability and topological layers through ordinary rewrites. |
+| 18 | Host Unicode data supplies normalization, categories and graphemes; variants are arguments. |
+| 19 | One MeTTa metadata relation prepares ordinary parser lambdas; segments and alternatives retain literal payloads. |
+| 20 | Host YAML maps into the existing JSON representation; file doors derive from File. |
+| 21 | Host markup and XPath standards use tagged expression DOMs, strict parsing and no external entity fetch. |
+| 22 | MeTTa hex recipes share checked bytes and one ASCII alphabet; UTF8/base64 remain host codecs. |
+| 23 | The host environment is a relation; unset values have no answer and mutation remains explicit. |
+| 24 | A program and argument vector use native process ownership; nonzero exit remains status data. |
+| 25 | Seven MeTTa recipes share Encoding, Crypto and one layout; generation, strict validation and timestamps remain native. |
+| 26 | Host message hooks receive topic/level events with explicit handlers carried as arguments. |
+| 27 | MeTTa derives arithmetic recipes and conversions; host exact roots, modular powers and numeric representations are shared. |
+| 28 | Constructors return sample programs; eval, repeat, collapse and once control draws through the existing seeded primitives. |
+| 29 | MeTTa sample summaries, finite laws and sparse exact additive conditioning share arithmetic and weighted rows. |
+| 30 | Host HTTP owns framing and transport; File owns streams and MeTTa handler equations own routing. |
+| 31 | Host URI parsing and RFC resolution use String pair relations with duplicate query keys. |
+| 32 | Native TCP/UDP and endpoint adapters share File handles; functions delimit ownership and answer lifetimes. |
+| 33 | Maintained codecs and archive readers expose byte streams and entries; File supplies checked publication. |
+| 34 | A native owner holds each journal; passive snapshots derive selection, joins and code reconstruction in MeTTa. |
+| 35 | No new callable protocol: import generators and compose core forall, test, answer-bag assertions and once. |
+| 36 | One declaration relation owns parsing, help and refusal; converters are held MeTTa functions and parse state is explicit. |
+
+Reflect and Strategy are supplemental revisions to the existing catalog.
+Their literal-code and traversal changes have A505ce25b9384e782afa26f621527d4b1fd695924
+and B34c6f40f13e2482b4fe624fd98f6b56c102111d2. Their examples prove
+59 and 23 claims. The supplied rr-* use case now maps to existing core,
+Pairs, Reflect and Strategy operations; no second term interpreter was added.
+The external example review accounts for all twenty-six top-level families
+at trueagi-io/metta-examples@799ad9dbf92987cabeede6d1eca02ac7f8abb0ad;
+no third-party implementation was copied.
+
+Measured: after Encoding/UUID B76cac930b, the import closure includes sixty
+paired consumers. It follows literal MeTTa imports, private support files,
+relative example imports and native sibling dependencies. Three fresh serial
+twin processes per consumer, followed by stored-content comparison, refreshed
+nine points and changed no divergence pins. The missed consumers were four
+Spaces examples, four Patrick/Functional examples and tabling_doors. The other
+fifty-one points remain within their declared allowances. Receipts:
+ai-lib4-final-consumers.log and ai-lib4-final-prices.log.
+
+Decided: EXTENDING now starts with a stored Encoding equation reconstructed
+as a callable. MeTTa owns derived equations, types and documentation; PlDoc
+owns only the generated native face. The guide records segment and variadic
+syntax, literal values, function arguments, answer streams, resource ownership,
+consumer pricing and the A/B procedure. The llms roster remains generated,
+with an authored paragraph explaining the consolidated domains.
+
+Source audit: no new public library opens a context by asserting or setting
+a nontrailed global in Setup. Socket writes its single acquisition key with
+b_setval in Goal after Setup=true. The CSV benchmark's existing package
+nb_linkval Setup at tests/prolog/lib_csv_stream_bench.pl:53 is separately
+listed for integration. The complete lexical inventory covers 404 occurrences;
+the integration table traces eighty assertion/global/registration sites,
+including helper calls and inherited sites, to their source commits.
+Receipts: ai-lib4-final-scopes.log and ai-lib4-final-scope-table.md.
+
+Verified: the five record generators and all nineteen required library lanes
+pass. The executable authoring block reconstructs the stored hex equation
+and returns "00ff"; builtins() reports 307 names before imports. The named
+final battery passes eight lanes and retains two failures: the controlled
+GLX BadValue in prolog-static, and 248 corpus twin findings. Exact multiset
+comparison against the preceding 257-finding scan removes only the nine
+refreshed consumer points and adds none. All 3799 claims in the seventy
+passing files are proved. Receipts: ai-lib4-final-records.log,
+ai-lib4-final-lanes.log, ai-lib4-final-authoring-check.log,
+ai-lib4-final-named-battery.log and ai-lib4-final-twin-attribution.log.
+
+The separate sixty-consumer scan had one HTTP child exit with signal 11;
+the other fifty-nine proved 1908 claims. The named full twin scan subsequently
+passed HTTP. Both outcomes remain in the receipts; the host investigation
+remains parked.
+
+The complete battery exposes two older instrumentation mechanisms through
+the expanded library corpus. A minimal effectful higher-order update returns
+10 under ordinary execution on both this branch and c75181adc, but 22 under
+METTA_VERIFY_SPECIALIZATIONS=1: engine/specializer.pl runs the specialized
+and generic calls before the actual call, repeating their writes. A separate
+PlDoc fixture proves that the development checker rejects the MeTTa type
+'Atom' on both trees while its native integer check works. The first fixture
+used facts, which mavis does not instrument; it was corrected to clauses
+and requires nonvar errors before inspecting them. Only the final corrected
+receipts support this attribution. Receipts: ai-lib4-final-verifier-*-plain.log,
+ai-lib4-final-verifier-*-checked.log and
+ai-lib4-final-typed-vocabulary-*-final.log. These are instrumentation findings,
+not failures of the corresponding ordinary library calls.
+
+Verified: a byte audit of all original and final census pairs, including the
+supplemental Reflect/Strategy pair, finds 47 distinct A/B pairs and 908 pin
+substitutions. Every B has A as its parent and changes no other bytes.
+The continuation's 242 code files have Purpose headers outside generated and
+vendor exemptions. The nine closure twin ASTs change only BUDGET; workloads,
+assertions, divergence values and allowances are identical. Receipts:
+ai-lib4-final-provenance-audit-corrected.log and ai-lib4-final-source-audit.log.
+
+## 2026-09-14: complete setup inventory for integration
+
+The closing census's initial scope audit above covered runtime engine/library
+sources and changed tests. Its test filter omitted the Crypto stream fixture's
+worker-local key. That inventory is superseded by a scan of all 432 tracked
+nonvendor Prolog sources, including plunit setup options. It finds 1506 lexical
+occurrences in 206 files and 233 assertion/global/helper candidates. The full
+location list retains resource scopes and unclassified helpers too; declarations
+and nested worker goals remain visible as lexical occurrences, not claimed as
+1506 actual scopes. Receipts: ai-lib4-final-scopes.log,
+ai-lib4-final-scope-table.md and ai-lib4-final-scope-locations.md.
+
+Four candidate sites originate in the package. Socket's acquisition key and
+the CSV benchmark counter were already listed. The third key is
+crypto_stream_queue at tests/prolog/suites/libraries/lib_crypto_surface.plt:120:
+Setup creates a thread whose body calls nb_setval, and stream_read/2 reads it
+with nb_current. The thread owns its lifetime; the integrator should include
+that callback context in the trailed-scope conversion. The fourth candidate,
+tests/prolog/suites/libraries/lib_http.plt:228, acquires a predicate wrapper
+around system:assertz/1 to interrupt stream adoption. The assertion is the
+intercepted operation; the fixture owns and removes its wrapper. The other
+229 candidates are inherited, with exact origin pins in the table.
+
+The provisioned c75181adc control has byte-identical reader, writer and both
+MORK shared objects. Its MORK source rebuild still fails because the relative
+MORK/kernel/Cargo.toml is absent; the existing backend artifacts remain loaded.
+Both trees measure the same three stale engine inference points: evaluate
+558928 against 559106, parse-prolog 3539934 against 3540184, and translate
+315275 against 315698. Each point has three identical inference samples.
+Receipts: ai-lib4-final-control-artifacts.log and ai-lib4-final-cut-gate.log.
+
+## 2026-09-14: cancellation fixtures observe worker termination
+
+The development checker rejects the held Atom argument before Database's
+append observer or Socket's acquisition callback sends its milestone. Their
+parent fixtures listened only for that milestone. The original full-battery
+processes consequently reached the repository runner's own bound. The type
+errors and the waiting tests are retained in ai-lib4-final-gate-only.log.
+
+Decided: use terminal outcomes as events. Socket's existing reported_worker/2
+now covers arbitrary acquisition and context restoration. Database owns a
+private queue shared by the store observer and requesting worker. Both event
+readers reject an unexpected outcome with the expected and actual terms.
+Each suite adds controls for normal exit, logical failure and an exception
+before the milestone. Cancellation still checks the original handles,
+registrations, restoration, journal contents and thread joins.
+
+Rejected: a timer for the milestone wait. The worker's termination provides
+the missing information directly. Rejected: bypassing the development
+checker in these cases, which would hide its type-vocabulary failure.
+The patch was applied after both original typed-suite processes exited;
+each process had already consulted its own source. Public library files and
+their sixty measured consumers are unchanged. Focused native and typed
+verification follows the ongoing full battery.
+
+## 2026-09-14: final boundary and fixture verification
+
+Verified: ai-lib4-final-fixture-check.py passes. Socket's 28 tests and two
+additional subcases and Database's 29 tests and two additional subcases pass
+under ordinary execution. Each terminal-outcome control exercises success,
+failure and an exception. The development-checker cancellation cases exit 1
+with socket_worker_event or database_request_event carrying the original
+type_error('Atom',...) instead of waiting for a milestone. Receipts:
+ai-lib4-final-fixture-check.log and ai-lib4-final-*-fixture-{native,typed}.log.
+
+The full battery also rejects two unpublished engine calls: String reaches
+metta_console_text/2 and Vector reaches metta_saturating_recover/4. These are
+shared rendering and IEEE policies already used inside the engine. Decided:
+publish them as extension services; preserve their implementations and callers.
+Duplicating those policies in library code would create a second authority.
+
+The module suite's spelling rule rejects the three support modules even though
+each declares an independent owner. The shadow census also mistakes native
+providers with a user/system base for children of metta_engine. The actual
+chains are recorded in ai-lib4-final-module-bases.log. Decided: check primary
+source ownership and the default-module chain. Existing declared/plain fixture
+pairs verify the declaration check. A planted engine-name collision remains
+visible in an inheriting module and remains private in an independent provider.
+SWI's user:message_hook/3 joins the existing explicit protocol-hook list;
+boot/messages.pl declares it multifile and calls it before printing. The
+census still rejects other user definitions and non-multifile hook declarations.
+All 21 module tests pass in ai-lib4-final-module-boundary.log.
+
+File's socket-entry fixture exceeded the Unix address capacity when its
+absolute path included the gate's scratch prefix. A child SWI process now
+binds z.sock relative to its own cwd and closes the socket; process_create/3
+waits and reaps the child. All original kind, copy refusal, partial-publication
+and deletion assertions remain. All 49 File tests pass under a scratch prefix
+longer than the socket address capacity in ai-lib4-final-file-deep-fixture.log.
+Rejected: changing the parent's cwd or shortening the gate's scratch path.
+Neither belongs to the filesystem entry contract.
+
+The pristine control's Node dependencies were installed from its unchanged
+package lock. Node binding, stranger-package integration and packed distribution
+pass. Node benchmarks retain six stale instruction/inference findings in
+ai-lib4-final-cut-node-gate.log; the original unprovisioned skips are superseded
+by this executed control.
+
+## 2026-09-14: final gate repairs
+
+The complete battery finished with 30 failed lane results. Its new findings
+include a static upward annotation import, a missing generator helper root,
+unannotated native protocol domains, stale fn output and UTF-16 token offsets.
+The complete branch and pristine-control logs are ai-lib4-final-gate-only.log
+and ai-lib4-final-cut-gate.log. The control's native artifacts match by SHA256.
+
+The earlier compiled-codec repair used a function-local static catalog import.
+It executes under mypyc but violates the declared package dependency order.
+Resolve that upward edge through lazy() at the point of use, after the Atom
+return. This is the existing atom reader's dependency mechanism. It remains
+outside the TYPE_CHECKING/else block that mypyc rejects. The compiled packaging
+test passes, exercising both typed and arrow against actual extension modules.
+Receipt: ai-lib4-final-compiled-annotations.log, one test passed.
+
+TextMate supplies UTF-16 offsets, while the Python comparison indexes Unicode
+code points. Convert offsets in one linear pass per line at the JavaScript
+producer, preserving the real Shiki grammar. Refuse a boundary inside a code
+point. Astral characters before tokens, in strings and comments, and across
+lines now join the positive fixture. All four negative controls remain.
+Tokenisation checks 651 sources and 1518163 characters with no disagreement.
+Import, layering, tokenisation, provenance and driver-lint checks all pass in
+ai-lib4-final-repair-first-gates.log.
+
+Deptry discovers first-party names from three roots: the package, its tools
+and the repository checkers used by generators. The checker root is discovery
+only, since its dependencies are outside the Python package manifest. Scanning
+that root against this manifest produced seven unrelated dependency findings
+in ai-lib4-final-deptry-roots-probe.log. No module-name allowance was introduced.
+
+The protocol inventory now excludes vendor directories as an ownership
+boundary, while positive and negative fixtures retain both Python and Prolog
+adapter checks. First-party closed lists name their protocol, host numeric
+domain or collision decision with local evidence. The selftest also runs its
+existing variable-only-list control directly. All eleven controls pass.
+Spelling exclusions retain exact upstream lines and intentionally malformed
+test strings; vendor bytes and golden data remain unchanged. Regeneration
+repairs the authored Markup spelling and the function namespace projection.
+Deptry, policy inventory, fn synchronization, their controls and spelling pass
+in ai-lib4-final-repair-second-gates.log.
+
+## 2026-09-14: final conformance ruling
+
+The imported program is part of reflective semantics. The upstream removal
+fixture imports each engine's own lib_spaces. This package adds five operations,
+each with a type, equation and documentation atom. The removal equation remains
+byte-equivalent after whitespace normalization. Both the untouched fixture and
+an independent count-before/remove/count-after program return 26 successful
+removals here and 11 on c75181adc. Both final spaces are empty, and all three
+upstream assertions pass. The pristine output equals the captured upstream
+file byte for byte. Receipt: ai-lib4-final-removal-control-final.log.
+
+Rejected: changing upstream examples or normalizing removal bags. Either would
+hide what a caller can observe in the imported metagraph. Record this one exact
+output and its cause in the existing divergence manifest; keep the upstream
+expected file unchanged. A new negative control proves that a recorded output
+cannot drift further. All five conformance controls pass, and the full lane
+reports 153 agreeing files, three exact rulings and zero blocking entries.
+Receipts: ai-lib4-final-petta-controls.log and ai-lib4-final-petta-ruling.log.
+Two scratch assertions initially assumed 23 removals from a truncated gate
+preview; complete output and the independent census establish 26.
+
+## 2026-09-14: final consumer prices and scope inventory
+
+After publishing the two native services and regenerating the callable
+projection, all sixty direct and transitive library consumers were measured
+again in three fresh serial processes. The pass exits zero and changes seven
+points; no stored-content digest or allowance changes. Reflect now reads the
+two additional service rows through its extension-point and surface queries.
+The other six movements are six inferences each. The complete receipt is
+ai-lib4-final-prices-after-repairs.log. Together with the earlier nine stale
+points, sixteen closure twins have fresh prices. These replace the corresponding
+price cells in the preceding census; the semantic A/B pins remain unchanged.
+
+| Example | Previous point | Final point |
+|---|---|---|
+| Datastructures finger tree | 319361 | 319367 |
+| Reflect | 1258064 | 1258124 |
+| Finger-tree internals | 289950 | 289956 |
+| Datastructures | 3108074 | 3108080 |
+| Parsing | 4701005 | 4701011 |
+| A library's declared types | 99859 | 99865 |
+| Tile puzzle | 31579777 | 31579783 |
+
+The expanded scope scan records 1512 lexical occurrences in 432 tracked
+nonvendor Prolog sources. The candidate table now includes host flags,
+environment, random state, locale and default I/O setters: 251 candidates,
+243 inherited and eight package sites. Three package sites hold context keys:
+Socket acquisition, CSV benchmark statistics and the Crypto worker queue.
+The other five candidates acquire assertion/counter wrappers or restore a
+native locale. They need ownership review, not automatic replacement with a
+MeTTa context. The deliverable carries every candidate and every lexical
+location, including scopes hidden behind other helpers. Receipts:
+ai-lib4-final-scopes-after-repairs.log and ai-lib4-final-scope-table.md.
+
+The source audit covers 257 changed continuation files and verifies that all
+sixteen twin ASTs differ only in BUDGET. Their assertions, stored-content pins
+and allowances are unchanged. Receipt: ai-lib4-final-source-audit-after-repairs.log.
+The closure clone scan covers seventeen Prolog files with no clones, then eight
+Python files and one JavaScript file with one existing eight-line structural
+comparison shared by _alpha and _unify. Their variable laws differ: bijective
+renaming versus one-sided binding. Retain these two local walkers; the clone
+is outside the annotation-loading change. Receipts:
+ai-lib4-final-jscpd-closure.log and ai-lib4-final-jscpd-python-js.log.
+
+## 2026-09-14: final battery control for cache age
+
+The post-repair full battery passes the complete ordinary plunit surface and
+published-library boundary checks. Its Python suite also reaches the existing
+test_a_first_library_load_is_independent_of_file_cache_age equality, which
+fails with 50438 versus 50410 inferences. The unchanged test on c75181adc,
+after removing its QLF files, fails with 50460 versus 50410. Command: from
+the control's extensions/python directory, the selected Python interpreter
+runs -m pytest tests/repository/test_twin_coverage.py::test_a_first_library_load_is_independent_of_file_cache_age
+-q --rootdir=. -c pyproject.toml, with METTA_ROOT and PYTHONPATH naming that
+control. Receipt: ai-lib4-final-cache-age-cut.log, exit 1.
+
+The fixture's equality failure is therefore inherited. The different first
+samples do not identify its cause. Keep the original assertion and pricing
+protocol; no library budget or allowance changes to absorb this observation.
+
+## 2026-09-14: closing verification
+
+The final GATE_ONLY battery completes with 170 gate results: 153 pass and
+17 fail. All nineteen required library lanes pass, as do the complete ordinary
+plunit suite and published-library boundary check. The latter checks 78
+engine-name cases and 2282 clauses, with no unpublished reach and four negative
+plants. Receipt: ai-lib4-final-gate-after-repairs.log, exit 1; its complete
+failed sections are retained separately. The provisioned pristine control is
+c75181adc, with matching reader, writer and MORK artifact bytes. Its initial
+Node skips are superseded by executed binding, package and benchmark controls.
+
+| Failed lane | Branch observation and control |
+|---|---|
+| spec-differential | Effectful Dict example returns 10 normally and 22 when verification repeats it, on both trees. |
+| engine-bench | Three identical inference differences on both trees: evaluate 558928, parse-prolog 3539934, translate 315275. |
+| prolog-static | Static checks reach the same GLX context-creation error as the control. |
+| dev-typed | Native PlDoc checker rejects MeTTa Atom vocabulary on both trees; ordinary native suites pass. |
+| c-bench | Additional term-in instruction finding; the fresh cut passes. Inferences remain 5220009 on every sample. Details below. |
+| mork-bench | Thirteen instruction findings, all present among the cut's fourteen; no added case. |
+| node-bench | Six findings on both provisioned trees, with the same three inference points. All binding tests pass. |
+| pytest | 756 pass, 51 skip, three fail: profiler worker, identity-twin pin and cache-age equality. All three failure classes reproduce on the cut. |
+| benchmarks | Six of 35 cases fail on both trees: annotated-relation, automatic tabling growth, let-heavy, py-method-call, run-source and source-load. |
+| instructions | sort-atom also fails on the cut; save-load-metta is a new below-band observation, retained separately below. |
+| memory-scale-gate | support-drop-spaces exceeds the old pin on both trees: branch 9835162, cut 9801162, pin 9053162 with allowance 452659. |
+| parity | The same three Thread examples exit differently between configurations; branch 344/347 agree, cut 316/319. |
+| twins | All 3799 claims proved; 67/347 files pass, with 251 findings. Three additional budget-only excursions are separated below. |
+| memo-advisor-selftest | Four controls encounter the same GLX error as the cut. |
+| parity-perf | 66 comparisons, 21 frozen-tree differences and 83 unmeasurable rows; cut 75, 18 and 74 respectively. Branch caseempty and datetime cross-engine excesses differ from the cut's builtin-types excess. |
+| parity-perf-selftest | Both trees reject the upstream revision: the available checkout is 43705f5d9, while recorded evidence pins ae66fa8e4. Printed negative-net cases are expected controls. |
+| door-order | Both trees report orders 0/1/2/unordered as 22/16/4/185. |
+
+The final twins scan adds Reflect +8, Strategy internals +8 and HTTP +1008
+over their serial point pins. Every claim and stored-content comparison passes.
+Fresh serial samples are Reflect 1258249/1258124/1258124, Strategy
+389508/389508/389508, and HTTP 369142/369063/369063. Their minima satisfy
+the unchanged lane budget check, including its four-inference default band.
+The scratch driver first demanded equality and incorrectly rejected HTTP's
+one-inference improvement; rechecking its captured samples through the lane's
+own budget function passes. No new workload was run by that recheck.
+Receipts: ai-lib4-final-current-price-control.log and
+ai-lib4-final-current-price-validation.log.
+
+On the pristine cut, Strategy's fresh minimum is 394704 while its full run
+reads 394712. This reproduces the eight-inference protocol difference before
+the package. The earlier journal, The Python tool lanes after the wave,
+already records that difference and an unsuccessful source-reversal control.
+Current Reflect imports Strategy; the cut's Reflect does not reproduce the
+eight-inference difference. That dependency is a possible connection, not an
+established cause. HTTP's full-run excess likewise remains unexplained.
+Receipts: ai-lib4-final-cut-both-import-prices.log and
+ai-lib4-final-post-repair-twins-compare.log. Keep all three full-run findings
+visible; do not repin or widen an allowance to hide them.
+
+The fresh C control passes term-in at 4372828110 instructions; the branch
+recheck remains outside its band at 4414110042 against 4369411444 plus 0.15%.
+Both perform 5220009 inferences, and every tracked C binding, benchmark and
+baseline byte equals the cut. The C baseline records sensitivity to the loaded
+image and QLF state, but this comparison does not establish that mechanism
+for this observation. No C pin changes. Receipts:
+ai-lib4-final-c-bench-cut-refresh.log,
+ai-lib4-final-c-bench-branch-refresh.log and
+ai-lib4-final-counter-comparison.log.
+
+The instruction lane's save-load-metta minimum is 3442669865, below the
+3490555698 pin's one-percent floor of 3455650141. Its fresh cut control
+reads 3469391095 and passes. This is an additional improvement finding, not
+a reproduced pre-existing failure. sort-atom remains above its band on both
+trees. Receipt: ai-lib4-final-instructions-cut-refresh.log.
+
+Open for integration: preserve the scoped-value conversion inventory; reconcile
+the native development checker's MeTTa vocabulary; retain the inherited corpus
+and benchmark failures and the explicitly unmatched instruction/protocol
+observations above. The package's semantic and consumer-price evidence is
+complete. A green whole-repository battery is not claimed.

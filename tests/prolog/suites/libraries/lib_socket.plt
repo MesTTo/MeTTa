@@ -1,7 +1,8 @@
 % Purpose: verify socket byte identity, endpoint metadata and resource lifetime.
 % Guarantees: TCP and UDP cases use both IP families; generated datagrams exceed
 % the host's default receive buffer, and concurrent readers preserve packets.
-% [tested: lib_socket; commit=781ee98e188c23ea7ef9298636d6e5e6c7fdc727].
+% Worker completion interrupts a milestone wait even after early failure.
+% [tested: lib_socket; commit=WORKTREE].
 % Owns resources: fixtures close handles, cancel and join workers, restore
 % wrapped predicates and release temporary execution spaces.
 
@@ -32,7 +33,7 @@ socket_suite_setup :-
     'udp-bind!'([endpoint,ipv4,"127.0.0.1",0],B),throw(socket_acquisition_failed(A,B)).
 'socket-suite-acquire-wait'(Main,_) :-
     'udp-bind!'([endpoint,ipv4,"127.0.0.1",0],Handle),thread_self(Self),
-    thread_send_message(Main,socket_acquiring(Self,Handle)),thread_get_message(socket_never).
+    thread_send_message(Main,socket_event(Self,acquiring(Handle))),thread_get_message(socket_never).
 'socket-suite-nested-acquire'(Handle) :-
     'with-socket'(['udp-bind!',[endpoint,ipv4,"127.0.0.1",0]],'socket-suite-open-more',Handle).
 'socket-suite-open-more'(_,Handle) :- 'udp-bind!'([endpoint,ipv4,"127.0.0.1",0],Handle).
@@ -196,7 +197,18 @@ reported_worker(Main,Goal) :-
     setup_call_catcher_cleanup(true,Goal,Outcome,
         (thread_self(Self),thread_send_message(Main,socket_event(Self,finished(Outcome))))).
 expect_worker_event(Worker,Expected) :-
-    thread_get_message(socket_event(Worker,Actual)),assertion(Actual=Expected),Actual=Expected.
+    thread_get_message(socket_event(Worker,Actual)),
+    ( Actual=Expected -> true
+    ; throw(error(socket_worker_event(Worker,Expected,Actual),_)) ).
+
+test(worker_exit_before_a_milestone_is_reported,
+     [forall(member(Goal-Outcome,[true-exit,fail-fail,
+                                 throw(socket_worker_failed)-exception(socket_worker_failed)]))]) :-
+    thread_self(Main),
+    setup_call_cleanup(thread_create(reported_worker(Main,Goal),Worker,[]),
+        must_throw(expect_worker_event(Worker,acquiring(_)),
+                   error(socket_worker_event(Worker,acquiring(_),finished(Outcome)),_)),
+        reap(Worker)).
 
 test(failed_acquisition_releases_every_new_socket_and_restores_context) :-
     handles(Before),lib_socket:acquisition_context(Context),
@@ -211,13 +223,16 @@ test(failed_acquisition_releases_every_new_socket_and_restores_context) :-
 test(arbitrary_acquisition_can_be_cancelled_before_returning_its_handle) :-
     handles(Before),thread_self(Main),
     setup_call_cleanup(thread_create(
-        catch('with-socket'(['socket-suite-acquire-wait',[quote,Main]],'socket-suite-answers',_),
+        reported_worker(Main,
+          catch('with-socket'(['socket-suite-acquire-wait',[quote,Main]],'socket-suite-answers',_),
               socket_cancelled,
-              (lib_socket:acquisition_context(Context),thread_send_message(Main,socket_restored(Context)))),
+              (lib_socket:acquisition_context(Context),thread_self(Self),
+               thread_send_message(Main,socket_event(Self,restored(Context)))))),
         Worker,[]),
-        (thread_get_message(socket_acquiring(Worker,Handle)),
-         thread_signal(Worker,throw(socket_cancelled)),thread_join(Worker,true),closed(Handle),
-         thread_get_message(socket_restored(Restored)),assertion(Restored==none)),
+        (expect_worker_event(Worker,acquiring(Handle)),
+         thread_signal(Worker,throw(socket_cancelled)),
+         expect_worker_event(Worker,restored(Restored)),assertion(Restored==none),
+         expect_worker_event(Worker,finished(exit)),thread_join(Worker,true),closed(Handle)),
         reap(Worker)),
     handles(After),assertion(After==Before).
 

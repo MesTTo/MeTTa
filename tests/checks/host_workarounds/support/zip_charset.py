@@ -18,7 +18,8 @@ def main():
     """Require both format controls before attributing a missing conversion."""
     library = ctypes.util.find_library("archive")
     if library is None:
-        raise RuntimeError("libarchive shared library was not found")
+        message = "libarchive shared library was not found"
+        raise RuntimeError(message)
     native = ctypes.CDLL(library)
     pointer = ctypes.c_void_p
     for name, arguments, result in [
@@ -68,13 +69,15 @@ def main():
             observed = read_name("compression-unicode-extra.zip", b"CP437")
             expected, defect = "café/π🙂", "café"
         else:
-            raise ValueError(f"unknown ZIP reproduction: {mode}")
+            message = f"unknown ZIP reproduction: {mode}"
+            raise ValueError(message)
         if observed == expected:
             print("absent")
         elif observed == defect:
             print("present")
         else:
-            raise RuntimeError(f"unexpected ZIP name: {observed!r}")
+            message = f"unexpected ZIP name: {observed!r}"
+            raise RuntimeError(message)
     finally:
         locale.setlocale(locale.LC_CTYPE, previous)
 
