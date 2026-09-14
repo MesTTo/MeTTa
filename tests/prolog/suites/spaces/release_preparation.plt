@@ -1,7 +1,7 @@
 % Purpose: verify release preparation before either native clearing phase.
 % Guarantees: preparation retires references before row deletion, remains
 %   retryable, and refuses external heirs or callback errors before storage
-%   changes [tested: release_preparation; commit=WORKTREE].
+%   changes [tested: release_preparation; commit=0891c522503ca9856fb654f306364f4ae9736b22].
 % Owns resources: fixtures release their spaces and erase callback tracing.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').

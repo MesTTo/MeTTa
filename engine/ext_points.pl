@@ -15,7 +15,7 @@
 %   commit=c6e1198c490a824b96f6fc6e1c0622a542917024].
 % Assumes: space_releasing/1 owners tolerate repeated preparation across the
 %   preliminary clear, final release and retries [tested: release_preparation,
-%   lib_thread_cancellation; commit=WORKTREE].
+%   lib_thread_cancellation; commit=0891c522503ca9856fb654f306364f4ae9736b22].
 % Guarantees:
 %   - metta_apply_algebra_operation/5 exposes the native carrier operation
 %     semantics to host bindings [tested:

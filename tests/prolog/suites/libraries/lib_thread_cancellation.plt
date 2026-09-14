@@ -5,7 +5,7 @@
 % Guarantees: preliminary release waits for cancellation cleanup before
 %   clearing and tolerates repetition [tested:
 %   lib_thread_cancellation:a_preliminary_release_cancels_before_clear_and_can_repeat;
-%   commit=WORKTREE].
+%   commit=0891c522503ca9856fb654f306364f4ae9736b22].
 % Owns resources: each test joins its workers and drops its future and queues.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
