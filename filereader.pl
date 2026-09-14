@@ -1,5 +1,9 @@
 % Purpose: read MeTTa source, split it into complete top-level forms, and
 % dispatch each parsed form to the evaluator.
+% Guarantees: retain_source_assertion/1 lets a process owner adopt an existing
+%   registry artifact without replacing its clause reference
+%   [tested: lib_import_lifecycle:host_registration_outlives_the_importing_source;
+%   commit=WORKTREE].
 % Guarantees: plain_source_declarations/3 validates splice syntax before
 %   any source effect runs [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Guarded by: import_when/4 claims one source; runnable forms run outside the
@@ -260,6 +264,7 @@
             metta_source_changed/1,
             run_with_loading_marker/2,
             record_source_assertion/1,
+            retain_source_assertion/1,
             recording_source_assertion/0,
             record_source_resource/1,
             record_source_space/1,

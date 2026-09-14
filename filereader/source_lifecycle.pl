@@ -9,6 +9,16 @@
 % Guarantees: withdraw_source_load/3 preserves equal atoms owned by other loads
 %   or the caller [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
+% Guarantees: every source retirement restores surviving function registrations
+%   before repairing callers, including deferred equations in other spaces
+%   [tested: lib_import_lifecycle:first_owner_retirement_keeps_other_spaces_callable,
+%   lib_import_lifecycle:failed_first_load_keeps_a_nested_import_callable,
+%   lib_import_lifecycle:retirement_inside_a_failed_load_keeps_older_registrations;
+%   commit=WORKTREE].
+% Guarantees: retain_source_assertion/1 relinquishes source ownership only of
+%   the artifact reference adopted by a longer-lived owner
+%   [tested: lib_import_lifecycle:host_registration_outlives_the_importing_source;
+%   commit=WORKTREE].
 % Guarantees: source atoms omit reference projections; portable program text
 %   rebuilds owned equation spaces and resolved bindings with fresh identities
 %   [tested: program_source,
@@ -1393,17 +1403,7 @@ replace_source_load(CanonPath, Space, Replaced, LoadInto, Goal) :-
 %it decodes an atom the same transaction has already taken out.
 withdraw_source_load(CanonPath, Space, Count) :-
     metta_source_load(CanonPath, Space, LoadId, _),
-    metta_engine_module(Engine),
-    findall(F,
-            ( source_load_assertion(LoadId, Kind, Ref),
-              ( Kind == stored, stored_atom_of_ref(Ref, _, [=, [F|_], _], _)
-              ; Kind == artifact,
-                clause_property(Ref, module(Engine)),
-                clause(Recorded, true, Ref), strip_module(Recorded, _, Row),
-                % policy-inventory-exempt: mechanism-internal; reason=the four artifact row shapes are this loader's own record of which clauses name a function, matched so a withdrawal takes back exactly what its load asserted; evidence=engine/filereader/source_lifecycle.pl:withdraw_source_load/3
-                member(Shape, [fun(F), arity(F,_), fun_in(_,F), fun_scoped(F)]),
-                Row = Shape ) ), Names0),
-    sort(Names0, Names),
+    source_load_function_names(LoadId, Names),
     retract(metta_source_load(CanonPath, Space, LoadId, _)),
     findall(Ref, source_load_assertion(LoadId, stored, Ref), Asserted),
     reverse(Asserted, Refs),
@@ -1411,9 +1411,24 @@ withdraw_source_load(CanonPath, Space, Count) :-
             ( member(Ref, Refs), stored_atom_of_ref(Ref, AtomSpace, Atom, _) ),
             Atoms),
     forall(member(Ref, Refs), spaces:metta_remove_atom_reference(Ref)),
-    rollback_source_load(LoadId),
-    with_owning_source_load(none, restore_surviving_source_functions(Names)),
+    with_typing_policy_stable(
+        rollback_source_load_stable(LoadId, rollback_source_owned_space, Names)),
     length(Atoms, Count).
+
+% Capture names before removing stored rows or their registration artifacts.
+% The same snapshot serves explicit withdrawal, space release and failed loads.
+source_load_function_names(LoadId, Names) :-
+    metta_engine_module(Engine),
+    findall(F,
+            ( source_load_assertion(LoadId, Kind, Ref),
+              ( Kind == stored, stored_atom_of_ref(Ref, _, [=, [F|_], _], _)
+              ; Kind == artifact,
+                clause_property(Ref, module(Engine)),
+                clause(Recorded, true, Ref), strip_module(Recorded, _, Row),
+                % policy-inventory-exempt: mechanism-internal; reason=the four artifact row shapes are this loader's own record of which clauses name a function, matched so retirement restores only affected registrations; evidence=engine/filereader/source_lifecycle.pl:source_load_function_names/2
+                member(Shape, [fun(F), arity(F,_), fun_in(_,F), fun_scoped(F)]),
+                Row = Shape ) ), Names0),
+    sort(Names0, Names).
 
 % The first source that introduced a name owns its registry references, but
 % later sources and caller equations can reuse them. Once that first source
@@ -1441,7 +1456,8 @@ forget_space_source_loads(Space) :-
            forget_translated_equation_binding(Ref)),
     forall(retract(metta_source_load(_, Space, LoadId, _)),
            ( with_typing_policy_stable(
-                 rollback_source_load_stable(LoadId, release_source_owned_space)),
+                 ( source_load_function_names(LoadId, Names),
+                   rollback_source_load_stable(LoadId, release_source_owned_space, Names) )),
              retractall(source_load_digest(LoadId, _, _)) )).
 
 %The marker is the CALLER's fact, so the caller's module has to travel with
@@ -1500,6 +1516,11 @@ record_source_assertion(Ref) :-
     ;   assertz(source_load_assertion(Load0, artifact, Ref))
     ).
 record_source_assertion(_).
+
+% A longer-lived owner has adopted this artifact. Its clause stays in place;
+% retiring a former source owner must no longer erase it by reference.
+retain_source_assertion(Ref) :-
+    retractall(source_load_assertion(_, artifact, Ref)).
 
 record_source_atom_assertion(Ref) :-
     active_source_load(Load0), !,
@@ -1675,10 +1696,11 @@ repair_stale_definitions_batch(Functions) :-
 %with it [measured 2026-08-19: it reported one atom and then failed].
 rollback_source_load(LoadId) :-
     with_typing_policy_stable(
-        rollback_source_load_stable(LoadId, rollback_source_owned_space)).
+        ( source_load_function_names(LoadId, Names),
+          rollback_source_load_stable(LoadId, rollback_source_owned_space, Names) )).
 
-:- meta_predicate rollback_source_load_stable(+, 1).
-rollback_source_load_stable(LoadId, ReleaseSpace) :-
+:- meta_predicate rollback_source_load_stable(+, 1, +).
+rollback_source_load_stable(LoadId, ReleaseSpace, Names) :-
     source_typing_policy_modules(LoadId, PolicyModules),
     findall(Module-Name,
             ( source_load_assertion(LoadId, stored, Ref),
@@ -1709,6 +1731,7 @@ rollback_source_load_stable(LoadId, ReleaseSpace) :-
     reverse(Owned0, Owned),
     forall(member(Space, Owned), call(ReleaseSpace, Space)),
     retractall(source_load_resource(LoadId, _)),
+    with_owning_source_load(none, restore_surviving_source_functions(Names)),
     forall(member(Module, PolicyModules), typing_policy_changed(Module)),
     support_prune_orphans,
     repair_after_source_rollback(Functions),
