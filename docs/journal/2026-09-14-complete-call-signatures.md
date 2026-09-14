@@ -93,3 +93,94 @@ nested positional-only parameter are reproduced in
 `python ai-tmp/ai-classes-c47-signature-probe.py` with the worktree's Python
 environment and cold engine/library QLFs. Operation declarations still
 require a separate audit against their host application boundary.
+
+## 2026-09-14: compiled parameter applications
+
+Source: `ClassDeclaration.argument_sources` already packs fixed values,
+positional segments and keyword-entry segments into canonical native slots.
+Each method nevertheless registers a Python closure capturing its class,
+signature lookup and target. Ordinary definitions would need another callback
+ownership registry to copy that arrangement.
+
+Mapped: closure conversion separates code and environment; defunctionalization
+makes the environment explicit data consumed by a shared application function.
+Danvy and Nielsen describe that transformation in section 1 of
+[Defunctionalization at Work, BRICS RS-01-23](https://www.brics.dk/RS/01/23/BRICS-RS-01-23.pdf).
+Here the environment is already a native lexical home and callable image.
+The existing parameter, binding and application relations describe its grammar.
+
+Decided: factor the existing packing algorithm and link one shared parameter
+binder. Its four native inputs are home, canonical callable image, positional
+frame and keyword-entry frame. It reads the live contract and returns source;
+the caller evaluates that source in its lexical home. Canonical method images
+own the single signature; bound and unbound entry images refer to it through
+`@python-binding`. This prevents the canonical application from re-entering
+its own argument wrapper. Constructor allocation retains its transaction and
+source defaults, while methods hold already evaluated defaults.
+
+Rejected: per-definition Python binder closures, because they duplicate an
+ownership registry and obscure the environment in a host object. Also rejected
+changing handwritten callable collectors globally: explicit native application
+relations already distinguish compiled expressions and dictionary spaces from
+borrowed host tuple and dictionary values. Revisit either decision only if a
+native image cannot express an actual callable contract or retention edge.
+
+Tried: the independent native fixture initially used noeval expressions as
+raw Atom arguments, stored a symbol through native add-atom, and declared
+an Atom result while expecting body evaluation. Those are three different
+native contracts. The corrected fixture uses let-bound inputs, a headed
+effect marker and an evaluated result. It compares variables within each
+value or stored row; separate native occurrences have separate variables.
+The initial consumer run passes93existing cases. The corrected fixture then
+exposes two actual keyword-storage failures: `(+ 1 2)` becomes3 and a scalar
+symbol with a rule becomes97. Logs:
+`ai-tmp/ai-classes-c48-parameters-{after,witness-storage}.log`.
+
+Measured: `python ai-tmp/ai-classes-c48-keyword-boundary.py` compares
+`(let $pairs (noeval DATA) (evalc (dict-space $pairs) HOME))` with
+`(evalc (let $pairs (noeval DATA) (dict-space $pairs)) HOME)` for those two
+values. The former preserves neither; the latter preserves both, here and
+at pristine `c75181adc999adf0028616ee69565e2bbfbf739f`. The control runs with
+METTA_ROOT and PYTHONPATH selecting its export. Its344engine, library and
+Python provider files match the cut's Git blobs, verified by
+`python ai-tmp/ai-classes-c48-control-sources.py`. Logs:
+`ai-tmp/ai-classes-c48-keyword-boundary-{main,c751}.log` and
+`ai-tmp/ai-classes-c48-control-sources.log`.
+
+Decided: bind dictionary entries inside their lexical evaluator. This is the
+same value boundary that `apply_sources` already preserves for scoped lambda
+bodies. Native evaluation is unchanged; the compiled packing expression must
+keep its data binding in the evaluator that consumes it.
+
+Tried: a named canonical method image otherwise receives borrowed collectors
+and reports `(BadArgType 4 Expression tuple)`. Publish its existing compiled
+application relation on the canonical image as well as the bound and unbound
+entries. The canonical-method witness passes after that relation is added.
+Log: `ai-tmp/ai-classes-c48-canonical-before.log`; the passing case appears in
+`ai-tmp/ai-classes-c48-parameters-witness-storage.log` beside the two keyword
+storage failures that motivated the packing correction.
+
+Verified: `sh ai-tmp/ai-classes-c48-parameters-verify.sh verified` passes
+2027 Python cases, 265 native tests plus 63 subtests in thirteen suites,
+and layering, Ruff, mypy, evidence and refusal grounds. The script deletes
+QLF files before each phase and runs the unchanged commands recorded in
+`ai-tmp/ai-classes-c46-{python,native,checks}.command`. Logs:
+`ai-tmp/ai-classes-c48-parameters-verified-{python,native,checks}.log`.
+
+Measured: `jscpd --min-lines 5 --min-tokens 70 --max-lines 10000 --max-size
+1mb --noTips --reporters console,json --output
+ai-tmp/ai-classes-c48-parameters-clones-final
+extensions/python/metta/_catalog/call_values.py
+extensions/python/metta/_declare/call_syntax.py
+extensions/python/metta/_declare/classes.py
+extensions/python/metta/_declare/methods.py` reports zero clones across
+2024 lines and 26274 tokens. Log:
+`ai-tmp/ai-classes-c48-parameters-clones-final.log`.
+
+Open: `python ai-tmp/ai-classes-c49-collector-returns.py` isolates a separate
+result representation gap. Typed tuple and list results return correctly;
+both a dictionary literal and a keyword collector returned as `dict[str, int]`
+report `EngineError: one() expected exactly one answer, got 0`. Log:
+`ai-tmp/ai-classes-c49-collector-returns-before.log`. This remains mandatory
+before completing callable support. An explicit `Atom` result instead quotes
+its body by the existing native contract and must retain that behavior.

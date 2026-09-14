@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Compiled parameter binding reads native callable images and live signatures
+  through one shared operation. Method entries share their canonical body's
+  contract; positional collectors become expressions and keyword collectors
+  become dictionary spaces in the callable's lexical home.
 - Named native callables select their live Python argument contracts even
   when defaults or positional and keyword variadics change the argument count.
   Fixed positional ports retain their native precedence; overlapping variadic
