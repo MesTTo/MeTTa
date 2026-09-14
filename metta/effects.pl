@@ -3,7 +3,7 @@
 %   bridge cascades.
 % Guarantees: source and compiled plans ask seam:grounded_applicable/1 before
 %   classifying grounded calls as opaque; planning does not apply them.
-%   [tested: grounded_source_effects; commit=WORKTREE]
+%   [tested: grounded_source_effects; commit=84c73d0d703be50c3520b2e08488581e77a7ce3f]
 % Guarantees: reference plans follow canonical source bodies in their own
 %   modules, including recursive aliases and wrapped unions
 %   [tested: reference_effects; commit=89084b43ff1a758f703ce77cd96b026f56510116].
@@ -1684,7 +1684,7 @@ metta_effect_plan_source_head(Module, Head, _, Queue-Effects0,
 %The provider can identify an applicable grounded head without applying it.
 %Use the same opaque effect as the compiled grounded_apply/3 path; other
 %grounded values still construct data. [tested: grounded_source_effects;
-%commit=WORKTREE]
+%commit=84c73d0d703be50c3520b2e08488581e77a7ce3f]
 metta_effect_plan_source_head(_, Head, _, Queue-Effects,
                               Queue-Next) :-
     atomic(Head), \+ atom(Head),
