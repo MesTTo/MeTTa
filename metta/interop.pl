@@ -7,11 +7,11 @@
 % Guarantees: process Prolog registrations and declared arrows belong to their
 %   loaded host source, independently of the MeTTa source that imported them
 %   [tested: lib_import_lifecycle:host_registration_outlives_the_importing_source;
-%   commit=WORKTREE].
+%   commit=b039123616aa9ec9ede3ceec146660a49f4e6709].
 % Guarantees: host adoption preserves process-owned function and arity claims
 %   when the initiating MeTTa source fails
 %   [tested: host_registration:an_adopted_operation_outlives_the_importing_source;
-%   commit=WORKTREE].
+%   commit=b039123616aa9ec9ede3ceec146660a49f4e6709].
 % Assumes: engine/source_loading.pl:loading_loudly/1 collects printed failures
 %   and restores nested loader state [tested: source_loading; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
 % Guarantees: declared determinism is applied to the predicate's implementation

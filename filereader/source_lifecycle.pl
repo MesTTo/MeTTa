@@ -14,11 +14,11 @@
 %   [tested: lib_import_lifecycle:first_owner_retirement_keeps_other_spaces_callable,
 %   lib_import_lifecycle:failed_first_load_keeps_a_nested_import_callable,
 %   lib_import_lifecycle:retirement_inside_a_failed_load_keeps_older_registrations;
-%   commit=WORKTREE].
+%   commit=b039123616aa9ec9ede3ceec146660a49f4e6709].
 % Guarantees: retain_source_assertion/1 relinquishes source ownership only of
 %   the artifact reference adopted by a longer-lived owner
 %   [tested: lib_import_lifecycle:host_registration_outlives_the_importing_source;
-%   commit=WORKTREE].
+%   commit=b039123616aa9ec9ede3ceec146660a49f4e6709].
 % Guarantees: source atoms omit reference projections; portable program text
 %   rebuilds owned equation spaces and resolved bindings with fresh identities
 %   [tested: program_source,

@@ -2,7 +2,7 @@
 % Guarantees: process registration retains exactly the names and arities it
 %   adopts, including registry facts introduced by a temporary MeTTa source
 %   [tested: lib_import_lifecycle:host_registration_outlives_the_importing_source;
-%   commit=WORKTREE].
+%   commit=b039123616aa9ec9ede3ceec146660a49f4e6709].
 % Guarantees: the occurrence-output add-atom arity names its native owner
 %   [tested: builtin_facets; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.

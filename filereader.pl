@@ -3,7 +3,7 @@
 % Guarantees: retain_source_assertion/1 lets a process owner adopt an existing
 %   registry artifact without replacing its clause reference
 %   [tested: lib_import_lifecycle:host_registration_outlives_the_importing_source;
-%   commit=WORKTREE].
+%   commit=b039123616aa9ec9ede3ceec146660a49f4e6709].
 % Guarantees: plain_source_declarations/3 validates splice syntax before
 %   any source effect runs [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
 % Guarded by: import_when/4 claims one source; runnable forms run outside the
