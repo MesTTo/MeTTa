@@ -11,13 +11,16 @@ Guarantees:
     per axis and the knob/default pair recorded in POLICY_SEAMS; the semiring
     rows also derive and validate each shipped ordering claim [tested:
     tests/checks/check_policy_inventory.py; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]
-  - unannotated Python Literal expressions and list/set membership, plus
+  - unannotated Python Literal alternatives and list/set membership, plus
     single- or multiline Prolog member/2 and memberchk/2 lists, are reported
     with path, line and values; an exemption is accepted only when immediately
     adjacent and names one of four categories plus a nonempty reason and an
     existing local source line or symbol
     [tested: test_a_planted_closed_policy_list_is_reported_by_the_inventory_lane;
-    commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3]
+    commit=WORKTREE]
+  - a Python Literal subscription to a bare variable carries its computed
+    argument bundle; explicit alternatives and membership lists remain visible
+    [tested: test_reflected_literal_arguments_preserve_explicit_policy_checks; commit=WORKTREE]
   - a Prolog list whose every element is a variable is not a policy list: it
     names no values, so it is skipped the way a partial list already is, while
     one literal element anywhere in it is still reported
@@ -411,6 +414,11 @@ def _python_candidates(text: str, filename: str) -> list[ClosedListCandidate]:
                 isinstance(owner, ast.Attribute) and owner.attr == "Literal"
             )
             if is_literal:
+                # Literal[values] accepts a tuple of arguments computed at
+                # runtime. It supplies no explicit alternatives for this scan.
+                # Literal[first, second] still writes out a fixed choice.
+                if isinstance(node.slice, ast.Name):
+                    continue
                 values = (
                     list(node.slice.elts) if isinstance(node.slice, ast.Tuple) else [node.slice]
                 )

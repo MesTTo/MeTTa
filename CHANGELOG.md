@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The policy inventory distinguishes reflected Python bindings from explicit
+  closed vocabularies. Host assertion families and Python's special slots
+  state their ownership beside the affected lists.
 - Native space recognition leaves open expressions unbound. Type queries and
   cached evaluation preserve each parametric sibling's identity, while the
   space registry remains available for relational enumeration.

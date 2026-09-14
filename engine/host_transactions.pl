@@ -40,6 +40,7 @@ install_host_transaction_workaround :-
                           host_transaction(Constrained, commit)),
     host_transaction_wrap(system:'$snapshot'(_), Snapshot,
                           host_transaction(Snapshot, discard)),
+    % policy-inventory-exempt: mechanism-internal; reason=SWI's three assertion families are the host operations whose clause references this workaround journals; evidence=engine/host_transactions.pl:install_host_assertion_workaround/1
     forall(member(Name, [assert, asserta, assertz]),
            install_host_assertion_workaround(Name)).
 

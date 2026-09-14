@@ -468,9 +468,9 @@ metta_dispatch_goal_exists(Module, Goal) :-
     current_predicate(Module:Predicate/Arity).
 
 dispatch_selection_override(Fun) :-
-    % policy-inventory-exempt: mechanism-internal; reason=these are the four axes whose nondefault values require the retained-clause interpreter instead of the compiled direct goal; evidence=engine/translator/lowering.pl:dispatch_selection_override/1
     % Query this function's indexed override rows once, then select an axis.
     metta_catalog_row(['dispatch-policy', Fun, Axis, _]),
+    % policy-inventory-exempt: mechanism-internal; reason=these are the four axes whose nondefault values require the retained-clause interpreter instead of the compiled direct goal; evidence=engine/translator/lowering.pl:dispatch_selection_override/1
     memberchk(Axis, ['EvaluationOrderEnum', 'FunctionResultEnum',
                      'ClauseFailedEnum', 'OutOfClausesEnum']),
     !.

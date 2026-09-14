@@ -18,6 +18,9 @@ Guarantees:
   - a Prolog list whose every element is a variable is skipped, and one
     literal element anywhere in it brings the finding back
     [tested: test_a_list_of_prolog_variables_carries_no_policy; commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6]
+  - computed Literal argument bundles are skipped; explicit alternatives and
+    membership lists, including builtin references, remain findings
+    [tested: test_reflected_literal_arguments_preserve_explicit_policy_checks; commit=WORKTREE]
   - semiring-claim validation rejects a missing required value, an undeclared
     semiring claim and a missing consumer seam [tested:
     tests/checks/check_policy_inventory_selftest.py; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]
@@ -201,6 +204,48 @@ def test_python_literal_and_list_set_membership_are_reported() -> None:
     ]
 
 
+def test_reflected_literal_arguments_preserve_explicit_policy_checks() -> None:
+    """A computed argument bundle differs from explicit policy alternatives."""
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        _write(
+            root,
+            "extensions/python/metta/references.py",
+            "from typing import Literal\n"
+            "Bare = Literal[values]\n"
+            "Alias = _Literal[values]\n"
+            "Qualified = typing.Literal[values]\n"
+            "Many = Literal[first, second]\n"
+            "Mixed = Literal[values, 'fixed']\n"
+            "Enum = Literal[Choice.first, Choice.second]\n"
+            "def references(value, first, second):\n"
+            "    return value in [first, second] or value not in {first, second}\n"
+            "def builtins(value):\n"
+            "    return value in {int, float}\n"
+            "def mixed(value, first):\n"
+            "    return value in [first, 'fixed']\n"
+            "def empty(value):\n"
+            "    return value in []\n",
+        )
+        findings = scan_closed_lists(root)
+    assert findings == [
+        "extensions/python/metta/references.py:5: closed policy list [first, second] "
+        "has no adjacent exemption",
+        "extensions/python/metta/references.py:6: closed policy list [values, 'fixed'] "
+        "has no adjacent exemption",
+        "extensions/python/metta/references.py:7: closed policy list [Choice.first, Choice.second] "
+        "has no adjacent exemption",
+        "extensions/python/metta/references.py:9: closed policy list [first, second] "
+        "has no adjacent exemption",
+        "extensions/python/metta/references.py:11: closed policy list [int, float] "
+        "has no adjacent exemption",
+        "extensions/python/metta/references.py:13: closed policy list [first, 'fixed'] "
+        "has no adjacent exemption",
+        "extensions/python/metta/references.py:15: closed policy list [] "
+        "has no adjacent exemption",
+    ]
+
+
 def test_evidence_must_name_an_in_range_line_or_existing_symbol() -> None:
     """A syntactically local evidence token cannot point at stale content."""
     with tempfile.TemporaryDirectory() as directory:
@@ -284,8 +329,10 @@ def main() -> int:
         test_an_exemption_without_a_reason_is_reported,
         test_an_unknown_exemption_reason_is_reported,
         test_catalog_authority_and_generated_output_are_not_findings,
+        test_a_list_of_prolog_variables_carries_no_policy,
         test_multiline_prolog_member_predicates_are_reported,
         test_python_literal_and_list_set_membership_are_reported,
+        test_reflected_literal_arguments_preserve_explicit_policy_checks,
         test_evidence_must_name_an_in_range_line_or_existing_symbol,
         test_semiring_claims_are_derived_and_validated,
     )
