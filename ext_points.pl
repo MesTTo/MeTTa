@@ -1509,7 +1509,7 @@ kind(metta_add_atoms/2, host_service).
 kind(metta_source_declarations/2, host_service).
 kind(metta_space_names/1, host_service).
 % Backtrackable atom-key indexes retain the caller's original term values.
-% [tested: atom_index; commit=WORKTREE].
+% [tested: atom_index; commit=dfd348d37d4cbe3d42d877bd6dcf415b54f82179].
 kind(metta_atom_index_new/1, host_service).
 kind(metta_atom_index_bind/4, host_service).
 kind(metta_atom_index_get/3, host_service).

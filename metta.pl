@@ -1628,7 +1628,7 @@ metta_import_shared_registries(Subsystem) :-
 % engine_modules:the_service_census_sees_a_declared_private_predicate; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]
 
 % Temporary indexes retain original term values under their caller's trail.
-% [tested: atom_index; commit=WORKTREE].
+% [tested: atom_index; commit=dfd348d37d4cbe3d42d877bd6dcf415b54f82179].
 metta_engine_reexport(atom_index, metta_atom_index_new/1).
 metta_engine_reexport(atom_index, metta_atom_index_bind/4).
 metta_engine_reexport(atom_index, metta_atom_index_get/3).

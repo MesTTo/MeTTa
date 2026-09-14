@@ -1,6 +1,6 @@
 % Purpose: own backtrackable atom-key bindings without copying their values.
 % Guarantees: bind/4 reports first insertion and otherwise unifies with the
-% original value; get/3 never inserts [tested: atom_index; commit=WORKTREE].
+% original value; get/3 never inserts [tested: atom_index; commit=dfd348d37d4cbe3d42d877bd6dcf415b54f82179].
 % Owns resources: indexes are local Prolog terms, reclaimed and rolled back
 % by their engine; the C artifact holds no index outside those terms.
 % Guarded by: an index is confined to its Prolog engine's trailed state.
@@ -25,7 +25,7 @@
 
 % Undefined-predicate checking also covers C-free builds. Create declarations
 % only there: repeating dynamic/1 on reconsult disables a foreign definition.
-% [tested: test_atom_index_reload_preserves_native_owner; commit=WORKTREE].
+% [tested: test_atom_index_reload_preserves_native_owner; commit=dfd348d37d4cbe3d42d877bd6dcf415b54f82179].
 :- ( predicate_property(metta_c_atom_index_new(_), foreign)
    -> true
    ; dynamic([metta_c_atom_index_new/1, metta_c_atom_index_bind/4,
@@ -33,7 +33,7 @@
 
 % A QLF may move to a machine without its accelerator. Select at creation,
 % and let each index's representation retain its owner afterward.
-% [tested: test_atom_index_loads_with_runtime_artifact_presence; commit=WORKTREE].
+% [tested: test_atom_index_loads_with_runtime_artifact_presence; commit=dfd348d37d4cbe3d42d877bd6dcf415b54f82179].
 metta_atom_index_new(Index) :-
     ( predicate_property(metta_c_atom_index_new(_), foreign)
     -> metta_c_atom_index_new(Index)
