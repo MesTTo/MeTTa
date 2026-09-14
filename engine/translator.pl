@@ -243,7 +243,7 @@
 %     translated_form_cache/6 and translated_form_mention/2 retain published
 %     templates until invalidation or space release. A transaction's miss
 %     remains private to the invocation [tested: translation_cache;
-%     commit=WORKTREE].
+%     commit=bdf3a42670d84dc9925c5db7e767415c1e8a5c19].
 
 %The compiler's surface: what compiles a form, what the compiled clause's
 %metadata answers, the runtime helpers a compiled body calls, and the
