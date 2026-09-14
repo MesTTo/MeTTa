@@ -1,7 +1,7 @@
 % Purpose: verify effect planning through a grounded provider's applicability.
 % Guarantees: executable grounded heads have an opaque effect; data and quoted
 %   calls retain structural effects, and planning never applies the provider.
-% [tested: grounded_source_effects; commit=WORKTREE]
+% [tested: grounded_source_effects; commit=84c73d0d703be50c3520b2e08488581e77a7ce3f]
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
