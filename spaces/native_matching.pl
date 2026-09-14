@@ -1,7 +1,7 @@
 % Purpose: plan and execute indexed native-space matches and relational conjunction joins
 % Guarantees: content clearing retires module-owned support state while keeping
 %   edges owned by live consumers [tested: reference_publication;
-%   commit=WORKTREE].
+%   commit=901a768e17b3ad2559b19d2895a250451a88da99].
 % Guarantees: grounded_length/2 counts visible native occurrences through
 % storage metadata and requires a length owner for every foreign parent
 % [tested: run_tests(space_length_refinements); commit=d336b911f0d727b50a5660eb86f5ed44b35303b5].
