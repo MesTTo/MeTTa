@@ -2,13 +2,13 @@
  * Assumes: indexes come from metta_c_atom_index_new/1 and remain in this
  * process; their routing bits describe live interned atom identifiers.
  * Guarantees: lookup retains variable identity, insertion rolls back, and
- * the C and Prolog owners agree [tested: atom_index; commit=WORKTREE].
+ * the C and Prolog owners agree [tested: atom_index; commit=dfd348d37d4cbe3d42d877bd6dcf415b54f82179].
  * Owns resources: the index owns ordinary Prolog terms, including each key
  * atom. Call-local term references are released by the foreign frame. No
  * C heap state survives a call; Prolog GC and the trail own every mutation.
  * Guarded by: each index belongs to its calling Prolog engine, like setarg/3.
  * Decides: branch bits strictly decrease, bounding each walk by the width
- * of atom_t [source: engine/atom_index.c:branch; commit=WORKTREE].
+ * of atom_t [source: engine/atom_index.c:branch; commit=dfd348d37d4cbe3d42d877bd6dcf415b54f82179].
  */
 
 #include <SWI-Prolog.h>

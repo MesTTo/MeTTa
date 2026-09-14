@@ -1,6 +1,6 @@
 % Purpose: compare native atom indexes with their backtrackable hash reference.
 % Guarantees: keys keep exact value identities through growth, failure,
-% exceptions and collection [tested: atom_index; commit=WORKTREE].
+% exceptions and collection [tested: atom_index; commit=dfd348d37d4cbe3d42d877bd6dcf415b54f82179].
 % Owns resources: every index is a local Prolog term released with the test.
 
 :- use_module('../../../../engine/atom_index').
