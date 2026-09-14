@@ -12,7 +12,7 @@
 %     [tested: the_engine_recompiles_dependents_without_a_host].
 %   - host adoption retains new and shared registration facts through a failed
 %     initiating source [tested: an_adopted_operation_outlives_the_importing_source;
-%     commit=WORKTREE].
+%     commit=b039123616aa9ec9ede3ceec146660a49f4e6709].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None

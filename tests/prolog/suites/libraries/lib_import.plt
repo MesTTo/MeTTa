@@ -11,11 +11,11 @@
 %   [tested: lib_import_lifecycle:first_owner_retirement_keeps_other_spaces_callable,
 %   lib_import_lifecycle:failed_first_load_keeps_a_nested_import_callable,
 %   lib_import_lifecycle:retirement_inside_a_failed_load_keeps_older_registrations;
-%   commit=WORKTREE].
+%   commit=b039123616aa9ec9ede3ceec146660a49f4e6709].
 % Guarantees: process Prolog registrations and their declared arrows survive
 %   MeTTa source retirement until explicit host unregistration
 %   [tested: lib_import_lifecycle:host_registration_outlives_the_importing_source;
-%   commit=WORKTREE].
+%   commit=b039123616aa9ec9ede3ceec146660a49f4e6709].
 % Guarantees:
 %   - the conversion goes through the engine's own reader, so a blank line, a
 %     comment, a form spanning lines, an escaped quote and a run of spaces all
