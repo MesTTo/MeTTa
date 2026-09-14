@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Parametric space names preserve native string, symbol and numeric identities
+  across Python calls. Returned names reopen the same space, aliases share
+  batch ownership, and names cannot mutate while used as registry keys.
 - Reflected callable annotations retain the subscription arity of wrappers
   such as `Required`, `NotRequired` and `ReadOnly`, including after native
   signature edits. Generic applications retain their constructor's own errors.
