@@ -1,4 +1,7 @@
 % Purpose: plan and execute indexed native-space matches and relational conjunction joins
+% Guarantees: grounded_length/2 counts visible native occurrences through
+% storage metadata and requires a length owner for every foreign parent
+% [tested: run_tests(space_length_refinements); commit=WORKTREE].
 % Guarantees: open reads enumerate expressions and scalars in named and
 %   parametric spaces [tested: spaces_tokens:public_and_bulk_writes_preserve_tokens_and_duplicate_bags;
 %   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
@@ -540,6 +543,23 @@ space_atom_count_uncached(Space, Count) :-
                 Counts),
         sum_list(Counts, Count)
     ;   Count = 0
+    ).
+
+% A space's length is its visible bag, while capacity counts its front store.
+% Read clause counts rather than atoms. Each foreign link must supply a length;
+% collecting only successful counts would silently omit an unsized parent.
+:- multifile seam:grounded_length/2.
+seam:grounded_length(Space, Count) :-
+    metta_space_operand(Space),
+    \+ seam:foreign_space(Space),
+    findall(Each, space_read_chain(Space, Each), Chain),
+    maplist(metta_space_link_length, Chain, Counts),
+    sum_list(Counts, Count).
+
+metta_space_link_length(Space, Count) :-
+    (   seam:foreign_space(Space)
+    ->  once(seam:grounded_length(Space, Count))
+    ;   space_atom_count(Space, Count)
     ).
 
 %A catalog clear cannot withdraw a declaration stored in another space.

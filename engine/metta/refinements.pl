@@ -1,6 +1,10 @@
 % Purpose: decide the refinements an `(Annotated Base C1 ... Cn)` type carries
 %   against a VALUE, one rule per head of the refinement vocabulary, and name
 %   the first constraint a value violates so the refusal can say which.
+% Guarantees: a recognized space's length comes from its owner, including
+% parametric values whose name is an expression [tested:
+% space_length_refinements:native_lengths_follow_mutations_instead_of_name_arity;
+% commit=WORKTREE].
 % Guarantees: union alternatives decide their constraints on the value under
 %   one shared type assignment; whole-pair user decisions precede decomposition
 %   [tested: union_types:a_refined_union_member_checks_the_value_at_each_call_door,
@@ -271,13 +275,16 @@ metta_refinement_multiple(Value, Divisor) :-
         metta_refinement_compare('<=', Remainder, 0)
     ).
 
-% Native values supply their own length. A grounded owner's length query can
+% A space owns its length even when its name has list syntax. Other native
+% values supply their own length. A grounded owner's length query can
 % avoid enumeration and admit sized values that have no structural reading.
 % Providers supplying only structure retain that route; no provider means the
 % constraint fails. An exception from a claimed length query still propagates.
 metta_refinement_length(Value, Length) :-
     (   string(Value)
     ->  string_length(Value, Length)
+    ;   metta_space_operand(Value)
+    ->  once(seam:grounded_length(Value, Length))
     ;   is_list(Value)
     ->  length(Value, Length)
     ;   once(seam:grounded_length(Value, Length))

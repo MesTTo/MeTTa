@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Length refinements read native spaces through their visible inherited
+  contents and foreign spaces through their owner's length promise. A
+  parametric name no longer substitutes its own field count for the value.
 - Native variable indexes retain exact names and backtracking while bounding
   lookups independently of hash collisions. Generated call temporaries keep
   their distinct identities and deterministic inference counts.
