@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Compiled calls and host islands retain independent positional and keyword
+  frames. Literal `Kwargs` values stay in their supplied position, completed
+  atom operands are held, and reflected applications remain editable. The
+  existing grounded-call conversion and native callable contracts are reused.
 - Runnable translation caches track generated predicates and returned callable
   values. Retiring generated code invalidates its cached users and pending
   compilations while preserving unrelated completed translations.
