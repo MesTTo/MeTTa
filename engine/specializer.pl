@@ -1,5 +1,10 @@
 % Purpose: specialize higher-order MeTTa calls and invalidate generated
 %   functions when their source equations change.
+% Guarantees: specialization_goal/4 materializes retained source before
+%   emitting its native call, including after an earlier definition was
+%   abolished [tested:
+%   specializer_invalidation:a_copied_specialization_materializes_before_its_call;
+%   commit=WORKTREE].
 % Guarantees: segment_specialization/4 compiles an arriving arity once and
 %   uses the existing source rollback and specialization invalidation owner
 %   [tested: variadic_arrows; commit=6031c83ab3002b5703cb6fcb10e70a60a89f4ad7].
@@ -486,10 +491,10 @@ specialize_call_locked(HV, _, _, _, SpecName, _, ready) :-
 %bodies re-enters here with no ho_specialization/3 row behind the name:
 %regenerating then stored the same equations a SECOND time beside the
 %copies, so a clone held every specialization twice and the copies were
-%orphans nothing would ever invalidate. The name already being a compiled
-%function of this module IS the copy's signature, so it is adopted, the
-%row recorded as if generated here, and invalidation sees the clone's
-%specializations again
+%orphans nothing would ever invalidate. A registered name identifies the
+%copy even while its source is deferred. Adoption restores its tracking row;
+%specialization_goal materializes that source before emitting a native call,
+%and invalidation sees the clone's specializations again
 %[tested: a_copied_space_adopts_its_specializations_instead_of_duplicating].
 specialize_call_locked(HV, _, _, _, SpecName, _, ready) :-
     current_metta_module(Module),
@@ -554,6 +559,10 @@ specialize_call_locked(HV, CleanBindSet, MetaList, HasDirectBenefit,
     ).
 
 specialization_goal(SpecName, AVs, Out, Goal) :-
+    % Workaround: swi-erased-definition-bypasses-loader - force retained source before emitting the native call.
+    % Ordinary call preparation uses this same door. A copied specialization
+    % can own its name before its body has been translated.
+    metta_ensure_compiled(SpecName),
     append(AVs, [Out], CallArgs),
     Spec =.. [SpecName|CallArgs],
     (   metta_verifying_specializations

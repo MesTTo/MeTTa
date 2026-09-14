@@ -1752,6 +1752,7 @@ translate_prolog_import_dl(Importer, [File, FunctionNames], Goals0, Goals, Out) 
     translate_expr_dl(File, Goals0, BeforeImport, ResolvedFile),
     Goal =.. [Importer, ResolvedFile, FunctionNames, Out],
     space_operation_capability(Importer, Capability),
+    % Workaround: swi-erased-definition-bypasses-loader - force deferred importer source before its emitted call runs.
     %The FORCE travels in the emitted goals, at run time rather than compile
     %time, because the importer is itself a MeTTa equation (lib_import.metta
     %defines it) that this special form calls directly without the dispatch

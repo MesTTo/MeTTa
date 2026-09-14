@@ -275,6 +275,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Copied specializations materialize their retained equations before a native
+  call is emitted. Reusing a space whose earlier clauses are still retained
+  no longer bypasses the loader or duplicates the copied equations.
 - Deferred definitions become callable after an earlier missing-procedure
   lookup, including from already compiled callers. Loading still leaves
   their bodies unevaluated until first use.

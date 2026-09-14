@@ -57,6 +57,25 @@ Lifted when: a cached undefined call consults the loader after source becomes
   available, so the reproduction prints absent.
 Record: docs/journal/2026-09-15-deferred-definitions-rearm-undefined-calls.md.
 
+## swi-erased-definition-bypasses-loader
+Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
+  src/pl-vmi.c:S_VIRGIN, src/pl-proc.c:resetProcedure and
+  src/pl-supervisor.c:undefSupervisor.
+Defect: abolish can leave erased clauses linked to a definition. S_VIRGIN
+  treats the nonnull first-clause pointer as a definition and skips the loader;
+  supervisor creation then sees zero live clauses and installs S_UNDEF.
+  Repeating abolish resets the supervisor but retains the same condition.
+Reproduction: tests/checks/host_workarounds/swi-erased-definition-bypasses-loader.pl,
+  a compiled call after abolish while an earlier call retains its logical
+  update view. A fresh predicate verifies the same loader independently.
+Workaround: call preparation uses metta_ensure_compiled/1 explicitly.
+  Specializations materialize retained source before emitting their native
+  call. Import forms already carry the force at runtime because their source
+  can arrive after the form was compiled. Neither path retries an evaluation.
+Lifted when: a reset predicate consults its loader despite retained erased
+  clauses, and the reproduction prints absent.
+Record: docs/journal/2026-09-15-copied-specializations-materialize-before-calls.md.
+
 ## swi-cleanup-window
 Host: SWI-Prolog 10.1.13; `setup_call_cleanup/3` is `sig_atomic(Setup),
   '$call_cleanup'` (boot/init.pl:680-682).

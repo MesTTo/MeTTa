@@ -1,5 +1,9 @@
 % Purpose: verify higher-order specialization keys, per-clause bindings, and
 %   recursive folding directly against generated Prolog clauses.
+% Guarantees: a copied specialization compiles before its native call is
+%   emitted, including when an earlier definition retains erased clauses
+%   [tested: specializer_invalidation:a_copied_specialization_materializes_before_its_call;
+%   commit=WORKTREE].
 % Guarantees: a named-space specialization inherits only declarations that
 %   govern its local source function [tested:
 %   specializer_invalidation:an_untyped_local_shadow_does_not_type_its_specialization;
@@ -658,6 +662,49 @@ test(a_copied_space_adopts_its_specializations_instead_of_duplicating,
     assertion(CloneAnswers == [6]),
     spec_equation_count(Clone, CloneSpecsAfter),
     assertion(CloneSpecsAfter == SelfSpecs).
+
+test(a_copied_specialization_materializes_before_its_call,
+     [ forall(member(History, [fresh, retired])),
+       setup(( retractall(silent(_)), assertz(silent(true)),
+               'new-space'(Source), 'new-space'(Clone) )),
+       cleanup(( metta_release_space(Clone), metta_release_space(Source),
+                 retractall(silent(_)), assertz(silent(false)) )) ]) :-
+    space_module(Source, SourceModule),
+    space_module(Clone, CloneModule),
+    metta_add_program_atoms(Source,
+                           [[=, ['plunit-lazy-copy', F, X], [F, X]]]),
+    with_metta_module(SourceModule,
+        ( translate_expr(['plunit-lazy-copy', [+, 1], 4], Goals, First),
+          translator:goals_list_to_conj(Goals, Call),
+          once(call(SourceModule:Call)) )),
+    assertion(First == 5),
+    ho_specialization(SourceModule, 'plunit-lazy-copy', SpecName),
+    findall(Row, get_native_atom(Source, Row), Rows),
+    (   History == retired
+    ->  functor(OldHead, SpecName, 3),
+        assertz(CloneModule:OldHead, OldRef),
+        assertz(CloneModule:OldHead, OtherRef),
+        % The open native choice keeps an old clause reachable through the
+        % logical update view, independently of the clause-GC schedule.
+        call(CloneModule:OldHead),
+        abolish(CloneModule:SpecName/3),
+        Retired = [OldRef, OtherRef]
+    ;   Retired = []
+    ),
+    metta_add_program_atoms(Clone, Rows),
+    assertion(spaces:deferred_metta_function(
+                  SpecName, CloneModule, Clone, 2, _, 1)),
+    atom_multiset(Clone, Before),
+    with_metta_module(CloneModule,
+        ( translate_expr(['plunit-lazy-copy', [+, 1], 8], CopiedGoals, Out),
+          translator:goals_list_to_conj(CopiedGoals, CopiedCall),
+          findall(Out, call(CloneModule:CopiedCall), Answers) )),
+    assertion(Answers == [9]),
+    atom_multiset(Clone, After),
+    assertion(After == Before),
+    assertion(ho_specialization(CloneModule, 'plunit-lazy-copy', SpecName)),
+    forall(member(Ref, Retired), assertion(clause_property(Ref, erased))),
+    !.
 
 spec_equation_count(Space, Count) :-
     findall(Name,
