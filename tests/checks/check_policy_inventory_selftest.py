@@ -20,7 +20,7 @@ Guarantees:
     [tested: test_a_list_of_prolog_variables_carries_no_policy; commit=11afdcdbad5bbbe37168b5d8528c23a21c42b4b6]
   - computed Literal argument bundles are skipped; explicit alternatives and
     membership lists, including builtin references, remain findings
-    [tested: test_reflected_literal_arguments_preserve_explicit_policy_checks; commit=WORKTREE]
+    [tested: test_reflected_literal_arguments_preserve_explicit_policy_checks; commit=5fef7004c21135210fd2c05255a2661aa7e46d5e]
   - semiring-claim validation rejects a missing required value, an undeclared
     semiring claim and a missing consumer seam [tested:
     tests/checks/check_policy_inventory_selftest.py; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]

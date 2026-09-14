@@ -17,10 +17,10 @@ Guarantees:
     adjacent and names one of four categories plus a nonempty reason and an
     existing local source line or symbol
     [tested: test_a_planted_closed_policy_list_is_reported_by_the_inventory_lane;
-    commit=WORKTREE]
+    commit=5fef7004c21135210fd2c05255a2661aa7e46d5e]
   - a Python Literal subscription to a bare variable carries its computed
     argument bundle; explicit alternatives and membership lists remain visible
-    [tested: test_reflected_literal_arguments_preserve_explicit_policy_checks; commit=WORKTREE]
+    [tested: test_reflected_literal_arguments_preserve_explicit_policy_checks; commit=5fef7004c21135210fd2c05255a2661aa7e46d5e]
   - a Prolog list whose every element is a variable is not a policy list: it
     names no values, so it is skipped the way a partial list already is, while
     one literal element anywhere in it is still reported
