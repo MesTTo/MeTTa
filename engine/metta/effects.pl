@@ -1,6 +1,9 @@
 % Purpose: classify compiled effects, compose the five-rank effect lattice,
 %   plan reified-world admission, and manage memoization, dependencies, and
 %   bridge cascades.
+% Guarantees: source and compiled plans ask seam:grounded_applicable/1 before
+%   classifying grounded calls as opaque; planning does not apply them.
+%   [tested: grounded_source_effects; commit=WORKTREE]
 % Guarantees: reference plans follow canonical source bodies in their own
 %   modules, including recursive aliases and wrapped unions
 %   [tested: reference_effects; commit=89084b43ff1a758f703ce77cd96b026f56510116].
@@ -1678,6 +1681,16 @@ metta_effect_plan_source_head(Module, Head, _, Queue-Effects0,
     !,
     metta_effect_plan_source(Module, Head, Queue-Effects0, Queue-Mid),
     metta_effect_plan_dynamic(Mid, Effects).
+%The provider can identify an applicable grounded head without applying it.
+%Use the same opaque effect as the compiled grounded_apply/3 path; other
+%grounded values still construct data. [tested: grounded_source_effects;
+%commit=WORKTREE]
+metta_effect_plan_source_head(_, Head, _, Queue-Effects,
+                              Queue-Next) :-
+    atomic(Head), \+ atom(Head),
+    seam:grounded_applicable(Head),
+    !,
+    metta_effect_plan_dynamic(Effects, Next).
 metta_effect_plan_source_head(Module, Head, _, Queue-Effects,
                               Queue-[Head-oracleIO|Effects]) :-
     atom(Head), metta_effect_program_lookup(Module, references, _), !.
@@ -2180,6 +2193,8 @@ metta_effect_plan_reduced(Module, [Head|Args], Queue-Effects0,
     ->  metta_effect_plan_named_call(Module, Head, Arity,
                                      Queue-Effects0, Queue-Effects)
     ;   var(Head)
+    ->  metta_effect_plan_dynamic(Effects0, Effects)
+    ;   atomic(Head), \+ atom(Head), seam:grounded_applicable(Head)
     ->  metta_effect_plan_dynamic(Effects0, Effects)
     ;   Effects = Effects0
     ).

@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Effect plans include applicable grounded heads as opaque host effects in
+  written source and prepared calls. Planning uses the provider's read-only
+  applicability hook; quoted calls and noncallable values stay structural.
 - Compiled storage writes propagate native `Error` results before running
   their continuation, including generator and finally blocks. Writes preserve
   real local variables, and false status values still allow continuation.
