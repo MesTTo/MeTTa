@@ -7,6 +7,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+- The door-order gate reports declared caller-implemented contracts and
+  their dependent doors as unordered without failing them. Mixed crossings,
+  recursion, registry callbacks and undeclared operations still fail; every
+  contract retains its signature and source call site in the report.
+
 - Door-order analysis follows callable values stored in source-declared
   containers, including alias writes and container copies. Type qualifiers
   preserve the declared value, and unresolved container operations remain

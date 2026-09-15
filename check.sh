@@ -803,11 +803,10 @@ run GATE closed-sets-selftest "$PY" "$HERE/tests/checks/check_closed_sets_selfte
 run GATE host-workarounds "$PY" "$HERE/tests/checks/check_host_workarounds.py"
 run GATE host-workarounds-selftest "$PY" "$HERE/tests/checks/check_host_workarounds_selftest.py"
 
-# A GATE by the 2026-09-08 layout ruling ("reports until BINDING lands and
-# gates after"): the 332 mixed, open and recursive boundaries it refuses on
-# the current door graph are the measured form of "about ten doors cross
-# where forty-six do", the debt the doors programme burns down, and the gate
-# stays red until each is resolved at its body rather than baselined.
+# A GATE by the 2026-09-08 layout ruling, refined on 2026-09-15: mixed,
+# recursive and undeclared open boundaries must be resolved at their bodies.
+# Declared caller-implemented parameters remain visibly unordered, as do
+# doors depending solely on those contracts; neither receives an integer.
 run GATE door-order "$PY" "$HERE/extensions/python/tools/doororder.py"
 door_order_witnesses() {
     bounded env CHECK_PY="$PY" sh "$HERE/extensions/python/test.sh" "$HERE/extensions/python/tests/repository/test_door_order.py"
