@@ -44,7 +44,7 @@ def __init__(
     target: object = None,
     count: Callable[..., int | None] | None = None,
     query: _QueryContext | None = None,
-    bound_source: Callable[[int, Iterable[T | _AnswerItem[T]]], Iterable[T | _AnswerItem[T]] | None] | None = None,
+    bound_source: Callable[[int, Iterable[_AnswerItem[T]]], Iterable[_AnswerItem[T]] | None] | None = None,
 ) -> None:
 ```
 

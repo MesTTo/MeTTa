@@ -251,7 +251,7 @@ No docstring is defined.
 ### `TableBridge.__arrow_c_schema__`
 
 ```python
-def __arrow_c_schema__(self):
+def __arrow_c_schema__(self) -> object:
 ```
 
 > The declared columns as an "arrow_schema" PyCapsule.
@@ -259,7 +259,7 @@ def __arrow_c_schema__(self):
 ### `TableBridge.__arrow_c_stream__`
 
 ```python
-def __arrow_c_stream__(self, requested_schema=None):
+def __arrow_c_stream__(self, requested_schema: object | None = None) -> object:
 ```
 
 > This bridge's rows as an "arrow_array_stream" PyCapsule.

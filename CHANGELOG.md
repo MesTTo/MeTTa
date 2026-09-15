@@ -9,6 +9,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Python seat's registry points, algebra presets, answer indexing, remote
+  wire envelopes and table projections carry declared types, so a downstream
+  checker reads `seam.frame` as a Point, `answers[0]` as the value kind and a
+  gateway reply as `dict[str, object]` instead of `Any`; the package's measured
+  type completeness rises from 70.99% to 73.82%.
+
 - HTTP serving accepts a context for GET and POST authorization by naming the home space already resolved by its gateway.
 
 ### Added

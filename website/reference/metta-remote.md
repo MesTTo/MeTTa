@@ -46,7 +46,7 @@ class Gateway:
 ```python
 def __init__(
     self,
-    m,
+    m: object,
     spaces: list[str] | None = None,
     *,
     cursor_idle: float = remote._defaults._CURSOR_IDLE,
@@ -61,7 +61,7 @@ No docstring is defined.
 ### `Gateway.__call__`
 
 ```python
-def __call__(self, operation: str, payload: dict) -> dict:
+def __call__(self, operation: str, payload: dict[str, object]) -> dict[str, object]:
 ```
 
 No docstring is defined.
@@ -69,7 +69,7 @@ No docstring is defined.
 ### `Gateway.health`
 
 ```python
-def health(self) -> dict:
+def health(self) -> dict[str, object]:
 ```
 
 > The transport-side spelling of GET /health, so a Gateway is a
@@ -91,7 +91,7 @@ def served(self) -> dict[str, Space]:
 ### `Gateway.openapi`
 
 ```python
-def openapi(self, *, secured: bool = False) -> dict:
+def openapi(self, *, secured: bool = False) -> dict[str, object]:
 ```
 
 > This gateway as an OpenAPI 3.1.1 document, `GET /openapi.json`.
@@ -136,7 +136,7 @@ def graphql_schema(self) -> str:
 ### `Gateway.graphql`
 
 ```python
-def graphql(self, request: dict) -> dict:
+def graphql(self, request: dict[str, object]) -> dict[str, object]:
 ```
 
 > Execute one GraphQL request, `POST /graphql`.
@@ -208,7 +208,7 @@ class OutcomeUnknown(TransportFailure):
 ### `OutcomeUnknown.__init__`
 
 ```python
-def __init__(self, operation: str, retry: Callable[[], dict] | None = None) -> None:
+def __init__(self, operation: str, retry: Callable[[], dict[str, object]] | None = None) -> None:
 ```
 
 > Retain the mutation name and its optional keyed recovery operation.
@@ -216,7 +216,7 @@ def __init__(self, operation: str, retry: Callable[[], dict] | None = None) -> N
 ### `OutcomeUnknown.retry`
 
 ```python
-def retry(self) -> dict:
+def retry(self) -> dict[str, object]:
 ```
 
 > Recover the original result without issuing a new logical write.
@@ -676,7 +676,7 @@ def connect(
     *,
     token: str | None = None,
     headers: dict[str, str] | None = None,
-    ssl_context: Any = None,
+    ssl_context: ssl.SSLContext | None = None,
 ) -> Transport:
 ```
 
@@ -697,14 +697,14 @@ def connect(
 
 ```python
 def serve(
-    m,
+    m: object,
     host: str = '127.0.0.1',
     port: int = 0,
     spaces: list[str] | None = None,
     *,
     token: str | None = None,
     authorize: Callable[[Request], bool] | None = None,
-    ssl_context: Any = None,
+    ssl_context: ssl.SSLContext | None = None,
     cursor_idle: float = remote._defaults._CURSOR_IDLE,
     cursor_limit: int = remote._defaults._CURSOR_LIMIT,
     mutation_ttl: float = remote._defaults._MUTATION_TTL,
