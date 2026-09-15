@@ -3,7 +3,7 @@
 %   restores the unique Source/Result binding graph, including raw attributes,
 %   without repeating its hooks, and holds the returned value
 %   [tested: sh engine/test.sh suites/evaluation/eval_one.plt
-%   suites/evaluation/eval_one_graph.plt; commit=WORKTREE].
+%   suites/evaluation/eval_one_graph.plt; commit=eec241dcf822db6c4c1d1ecdb6092a6a9f3c7851].
 % Guarantees: on-unwind applies a held native handler once on a non-exit SWI
 %   catcher, preserving its source module and the native exception precedence
 %   [tested: sh engine/test.sh suites/evaluation/on_unwind.plt;
@@ -1825,7 +1825,7 @@ eval(C0, Out) :-
 % Neither residual-goal projection nor saved-answer restoration calls a hook.
 % Enumeration and cleanup keep normal SWI effects; this is not WAM state replay.
 % [source: https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-attvar.c#L664;
-% commit=WORKTREE].
+% commit=eec241dcf822db6c4c1d1ecdb6092a6a9f3c7851].
 'eval-one'(Source, Out) :-
     current_metta_module(Module),
     metta_answer_graph(Source, EntryGraph),
@@ -1840,7 +1840,7 @@ eval(C0, Out) :-
             % COPY_SHARE may retain cells whose bindings are still trailed.
             % nb_setarg's duplicate, unlike nb_linkarg, keeps their values.
             % [source: https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-prims.c#L2585;
-            % commit=WORKTREE].
+            % commit=eec241dcf822db6c4c1d1ecdb6092a6a9f3c7851].
             nb_setarg(2, State, Plain),
             nb_setarg(1, State, 1),
             fail

@@ -3,7 +3,7 @@
 %   cases release engines, compiled clauses, event counters and transaction rows.
 % Assumes: the independent attributed-source cache admission repair is present.
 % [tested: sh engine/test.sh suites/evaluation/eval_one_graph.plt;
-% commit=WORKTREE].
+% commit=eec241dcf822db6c4c1d1ecdb6092a6a9f3c7851].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
