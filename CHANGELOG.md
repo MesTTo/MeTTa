@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Compiled Python operators carry their operands in one editable native frame.
+  The service accepts any operand count and evaluates source operands once in
+  order, preserving completed Atom values as data.
 - Compiled methods and constructors expose positional and ordered keyword
   collectors as native terms. Keyword dictionaries allocate inside the body,
   once per activation, so native rules can match the complete call structure.
