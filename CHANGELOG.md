@@ -7,6 +7,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+- Door-order analysis follows callable values stored in source-declared
+  containers, including alias writes and container copies. Type qualifiers
+  preserve the declared value, and unresolved container operations remain
+  findings. Literal keys and tuple fields retain their individual targets.
+
 ### Added
 
 - One door for host event listeners: `metta_listen/2` in
