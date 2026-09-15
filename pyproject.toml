@@ -12,6 +12,10 @@
 # [tested: test_every_extra_installs_packages_and_never_a_library,
 # test_minimal_version_matrix_installs_blocking_gallery_dependency;
 # commit=8bfe05c3850776543ece25a85038242f10b1d841]
+# Decides: locked CPython files are reference inputs whose exact bytes are
+# checked by protocol_source.Sources, outside authored-code linting.
+# [tested: ProtocolSourceTests.test_locked_bytes_and_complete_packs_fail_closed;
+# commit=WORKTREE]
 
 [build-system]
 requires = ["setuptools>=83"]
@@ -424,7 +428,7 @@ filterwarnings = [
 [tool.ruff]
 target-version = "py312"
 line-length = 100
-extend-exclude = ["examples/**/_common.py"]
+extend-exclude = ["examples/**/_common.py", "**/tools/protocol_sources/cpython/**"]
 
 # The library floor is py312, so Ruff must keep rejecting 3.14-only syntax
 # everywhere it could ship. The one file below is a TEST helper holding the
@@ -712,7 +716,7 @@ skips = [
 # there, `check_layering.py` says exactly: a member may name the libraries its
 # OWN pyproject declares and no other, derived from that manifest and the
 # syntax tree, which is a per-member deptry with no second manifest to read.
-extend_exclude = ["examples", "build", "bench.py", "benchmarks", "ext"]
+extend_exclude = ["examples", "build", "bench.py", "benchmarks", "ext", "tools/protocol_sources/cpython"]
 optional_dependencies_dev_groups = ["test", "checks"]
 
 # Every one of these is imported, and none of them by a statement a static

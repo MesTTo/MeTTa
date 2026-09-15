@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Python protocol source extraction derives slot roles, callable signatures,
+  aliases and syntax from a pinned CPython snapshot. Offline checks reject
+  source drift and missing reference or class-requirement identities.
 - Compiled Python operators carry their operands in one editable native frame.
   The service accepts any operand count and evaluates source operands once in
   order, preserving completed Atom values as data.
