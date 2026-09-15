@@ -807,6 +807,9 @@ run GATE host-workarounds-selftest "$PY" "$HERE/tests/checks/check_host_workarou
 # recursive and undeclared open boundaries must be resolved at their bodies.
 # Declared caller-implemented parameters remain visibly unordered, as do
 # doors depending solely on those contracts; neither receives an integer.
+# The same run refuses drift in the generated verdict table
+# extensions/python/metta/doors/_orders.py (doororder.py --write), which a
+# boot reads instead of analysing the tree.
 run GATE door-order "$PY" "$HERE/extensions/python/tools/doororder.py"
 door_order_witnesses() {
     bounded env CHECK_PY="$PY" sh "$HERE/extensions/python/test.sh" "$HERE/extensions/python/tests/repository/test_door_order.py"

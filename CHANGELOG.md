@@ -7,6 +7,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+- A boot no longer analyses the Python seat's source to publish door orders.
+  The verdict of every shipped door lives in the generated table
+  `extensions/python/metta/doors/_orders.py`, which
+  `extensions/python/tools/doororder.py --write` derives from the same
+  analysis and whose drift the `door-order` lane refuses; only a door
+  registered from a package the table does not know is analysed in the
+  running process. `Space()` plus one `run` takes 0.61s instead of 34.58s.
+
 - Door-order analysis follows literal object fields and descriptor access,
   preserves functions stored on instances, and settles caller values before
   completing missing helper declarations. Broad annotations retain returned
