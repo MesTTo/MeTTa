@@ -7,10 +7,10 @@
 % reads its clause count as zero and an older transaction still finds the rows
 % it may see after the last real clause is erased; no reader answers that clause
 % [tested: owned_records:retirement_and_writes_conflict_in_both_commit_orders;
-% commit=WORKTREE].
+% commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
 % Guarantees: @owned-record syntax is checked before native publication and
 % cannot be weakened by withdrawing its descriptive kind row
-% [source: engine/spaces/catalog.pl:metta_declaration_check; commit=WORKTREE].
+% [source: engine/spaces/catalog.pl:metta_declaration_check; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
 % Guarantees: a value's (claim ...) rows are cached per value and the cache
 % answers what the storage does: a row landing after a read beats the entry,
 % a row removed after a read stops answering through the erased-reference
@@ -390,7 +390,7 @@ metta_catalog_head('@owned-record').
 %only, and its key is a spelling no MeTTa symbol can have. On the host probe,
 %erasing every real clause by reference prints present without it and absent
 %with it [tested: owned_records:retirement_and_writes_conflict_in_both_commit_orders;
-%commit=WORKTREE]. The price is five inferences per write for the two functor/3,
+%commit=c5bdd73e06840e1d0fd0991523983c75def074f6]. The price is five inferences per write for the two functor/3,
 %the arg/3 and the indexed clause/2 probe, and one failing clause per full
 %enumeration: 1000 add-atoms plus one enumeration cost 43,157 inferences at the
 %tip before this funnel and with the owned-record checks alone, 48,162 with it,
@@ -398,7 +398,7 @@ metta_catalog_head('@owned-record').
 %MeTTa().space() then 1000 space.add(S.row(i, S.value)) and one
 %space.match(S.row(V.i, V.v)) under m.stats(), on a provisioned worktree at
 %3eb5acc22, on this tree with the three funnel sites reverted to assertz/2, and
-%on this tree; commit=WORKTREE].
+%on this tree; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
 store_native_clause(Module, Term, Ref) :-
     functor(Term, Name, Arity),
     functor(Sentinel, Name, Arity),

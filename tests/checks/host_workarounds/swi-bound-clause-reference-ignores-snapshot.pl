@@ -1,7 +1,7 @@
 % Purpose: compare clause enumeration with bound-reference reads in an old snapshot.
 % Guarantees: the last line is present only when enumeration retains the fact
 %   but clause/3 with its reference loses it after another thread erases it
-%   [tested: sh check.sh host-workarounds; commit=WORKTREE].
+%   [tested: sh check.sh host-workarounds; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
 % Owns resources: the erasing thread is joined before inspection; the fixture
 %   is removed after the outer transaction finishes.
 

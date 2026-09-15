@@ -4,7 +4,7 @@
 % Guarantees: the last line is present only when the old transaction's call
 %   and clause/3 both answer nothing while nth_clause/3 still admits every
 %   original reference, for one and for sixteen facts; mixed readings throw
-%   [tested: sh check.sh host-workarounds; commit=WORKTREE].
+%   [tested: sh check.sh host-workarounds; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
 % Owns resources: each erasing thread is joined; fixture facts are withdrawn.
 
 :- dynamic snapshot_row/1.

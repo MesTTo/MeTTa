@@ -4,7 +4,7 @@
 %   native spaces, join every worker, and remove temporary observation hooks.
 % Decides: overlapping transactions use queues to select both snapshots and
 %   commit order; no timing delay determines an expected outcome
-%   [source: tests/prolog/suites/spaces/owned_records.plt:overlap/4; commit=WORKTREE].
+%   [source: tests/prolog/suites/spaces/owned_records.plt:overlap/4; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
