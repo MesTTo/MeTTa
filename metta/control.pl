@@ -1,4 +1,9 @@
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
+% Guarantees: eval-one counts at most two answers before result unification,
+%   restores the unique Source/Result binding graph, including raw attributes,
+%   without repeating its hooks, and holds the returned value
+%   [tested: sh engine/test.sh suites/evaluation/eval_one.plt
+%   suites/evaluation/eval_one_graph.plt; commit=WORKTREE].
 % Guarantees: on-unwind applies a held native handler once on a non-exit SWI
 %   catcher, preserving its source module and the native exception precedence
 %   [tested: sh engine/test.sh suites/evaluation/on_unwind.plt;
@@ -20,6 +25,9 @@
 % Owns resources: metta_host_hold/3 owns an engine or thread-local dynamic rows
 %   until metta_host_hold_close/1; rollback discards newly held rows and thread
 %   exit releases abandoned rows. Foreign close requests run on the owner.
+%   eval-one retains one plain answer graph in a local term until observation
+%   ends; it allocates no registry, engine or transaction. Source cleanup runs
+%   before its result or refusal, in the caller's engine and transaction.
 % Guarded by: sig_atomic/1 keeps queued closes outside held-row transitions;
 %   only the owning thread accesses its rows, so no mutex is needed.
 % Guarantees: returned cursor budgets retain their private helper owner when
@@ -1809,6 +1817,58 @@ eval(C0, Out) :-
     call_goals_in_(Module, Goals),
     metta_boundary_result(C0, Produced, Out),
     Out \== 'Empty'.
+
+% Observe the original source, including a sole answer with failing alternatives.
+% Attribute payloads are part of the graph: their hidden entry variables must
+% remain shared with the caller. Save raw attributes as data, then remove the
+% restored entry attributes before rebinding and attach the saved rows directly.
+% Neither residual-goal projection nor saved-answer restoration calls a hook.
+% Enumeration and cleanup keep normal SWI effects; this is not WAM state replay.
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-attvar.c#L664;
+% commit=WORKTREE].
+'eval-one'(Source, Out) :-
+    current_metta_module(Module),
+    metta_answer_graph(Source, EntryGraph),
+    term_variables(EntryGraph, Variables),
+    State = observation(0, none),
+    once((
+        eval(Source, Produced),
+        arg(1, State, Count),
+        (   Count == 0
+        ->  metta_answer_graph(Variables-Produced, Graph),
+            copy_term_nat(Graph, Plain),
+            % COPY_SHARE may retain cells whose bindings are still trailed.
+            % nb_setarg's duplicate, unlike nb_linkarg, keeps their values.
+            % [source: https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-prims.c#L2585;
+            % commit=WORKTREE].
+            nb_setarg(2, State, Plain),
+            nb_setarg(1, State, 1),
+            fail
+        ;   nb_setarg(1, State, 2)
+        )
+    ; true )),
+    arg(1, State, Observed),
+    (   Observed == 1
+    ->  arg(2, State, (SavedVariables-Value)-Attributes),
+        maplist(del_attrs, Variables),
+        Variables = SavedVariables,
+        maplist(metta_answer_restore_attribute, Attributes),
+        Out = Value
+    ;   ( Observed == 0 -> Found = 0 ; Found = at_least(2) ),
+        throw(error(metta_cardinality_violation(Module, Source, one, Found),
+                    context('eval-one'/2,
+                            'evaluation must produce exactly one answer')))
+    ).
+
+metta_answer_graph(Term, Term-Attributes) :-
+    term_attvars(Term, Variables),
+    maplist(metta_answer_attribute, Variables, Attributes).
+
+metta_answer_attribute(Variable, Variable-Attributes) :-
+    get_attrs(Variable, Attributes).
+
+metta_answer_restore_attribute(Variable-Attributes) :-
+    put_attrs(Variable, Attributes).
 
 % Arm cleanup before Source runs. Its native callable owns capture and binding;
 % =../2 changes only the catcher's outer product, retaining the exception ball.

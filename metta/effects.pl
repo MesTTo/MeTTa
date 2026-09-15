@@ -1,6 +1,9 @@
 % Purpose: classify compiled effects, compose the five-rank effect lattice,
 %   plan reified-world admission, and manage memoization, dependencies, and
 %   bridge cascades.
+% Guarantees: eval-one plans include its held source and respect local
+%   definitions [tested: sh engine/test.sh suites/evaluation/eval_one.plt;
+%   commit=WORKTREE].
 % Guarantees: on-unwind plans include its source and applied handler, retain
 %   unresolved handler effects, and respect local definitions
 %   [tested: sh engine/test.sh suites/evaluation/on_unwind.plt;
@@ -733,6 +736,7 @@ metta_semantic_effect(unify, nondeterministicReadOnly).
 metta_semantic_effect('unify%', nondeterministicReadOnly).
 
 metta_semantic_effect(eval, writesState).
+metta_semantic_effect('eval-one', writesState).
 metta_semantic_effect('on-unwind', writesState).
 metta_semantic_effect(evalc, writesState).
 metta_semantic_effect('collapse-bind', writesState).
@@ -980,6 +984,7 @@ metta_builtin_effect_override('bind!', writesState).
 metta_builtin_effect_override('change-state!', writesState).
 metta_builtin_effect_override('collapse-bind', writesState).
 metta_builtin_effect_override(eval, writesState).
+metta_builtin_effect_override('eval-one', writesState).
 metta_builtin_effect_override('on-unwind', writesState).
 metta_builtin_effect_override(evalc, writesState).
 metta_builtin_effect_override('get-type', writesState).
@@ -1468,6 +1473,12 @@ metta_effect_plan_classify(_, Dispatch, Queue-Effects0, Queue-Effects) :-
 %classifying the evaluator helper itself as oracleIO or ignoring its payload.
 metta_effect_plan_classify(Module, metta_eval_step(Source, _),
                            State0, State) :-
+    !,
+    metta_effect_plan_source_term(Module, Source, State0, State).
+metta_effect_plan_classify(Module, 'eval-one'(Source, _),
+                           State0, State) :-
+    \+ metta_effect_program_lookup(Module, definition('eval-one'), _),
+    predicate_property(Module:'eval-one'(_, _), implementation_module(metta_engine)),
     !,
     metta_effect_plan_source_term(Module, Source, State0, State).
 metta_effect_plan_classify(Module, 'on-unwind'(Source, Handler, _),
@@ -2008,6 +2019,8 @@ metta_effect_plan_source_special_arguments(_, call, [Call],
 metta_effect_plan_source_special_arguments(_, reduce, [Expr],
                                            [metta_evaluated_source_root(Expr)]).
 metta_effect_plan_source_special_arguments(_, eval, [Source],
+                                           [metta_evaluated_source_root(Source)]).
+metta_effect_plan_source_special_arguments(_, 'eval-one', [Source],
                                            [metta_evaluated_source_root(Source)]).
 metta_effect_plan_source_special_arguments(_, 'on-unwind', [Source, Handler],
                                            [metta_evaluated_source_root(Source),
