@@ -4,7 +4,7 @@
 % Guarantees: on-unwind plans include its source and applied handler, retain
 %   unresolved handler effects, and respect local definitions
 %   [tested: sh engine/test.sh suites/evaluation/on_unwind.plt;
-%   commit=WORKTREE].
+%   commit=2d09b82e3ea1565d10fd8206e3b3cc9808ce6cb1].
 % Guarantees: source and compiled plans ask seam:grounded_applicable/1 before
 %   classifying grounded calls as opaque; planning does not apply them.
 %   [tested: grounded_source_effects; commit=84c73d0d703be50c3520b2e08488581e77a7ce3f]

@@ -2,7 +2,7 @@
 % Owns resources: every test erases its recorded event references, temporary
 %   clauses, engines and named-space rows, including after assertion failure
 %   [tested: sh engine/test.sh suites/evaluation/on_unwind.plt;
-%   commit=WORKTREE].
+%   commit=2d09b82e3ea1565d10fd8206e3b3cc9808ce6cb1].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

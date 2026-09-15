@@ -2,7 +2,7 @@
 % Guarantees: on-unwind applies a held native handler once on a non-exit SWI
 %   catcher, preserving its source module and the native exception precedence
 %   [tested: sh engine/test.sh suites/evaluation/on_unwind.plt;
-%   commit=WORKTREE].
+%   commit=2d09b82e3ea1565d10fd8206e3b3cc9808ce6cb1].
 % Guarantees: metta_with_trailed/3 restores context at each answer;
 %   metta_with_trailed_enumeration/3 retains it until enumeration finishes.
 %   Both preserve linked payloads and unwind on inference cuts
@@ -1814,7 +1814,7 @@ eval(C0, Out) :-
 % =../2 changes only the catcher's outer product, retaining the exception ball.
 % Cleanup runs once under SWI's own failure and exception-urgency rules.
 % [source: https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/boot/init.pl,
-% setup_call_catcher_cleanup/4; commit=WORKTREE].
+% setup_call_catcher_cleanup/4; commit=2d09b82e3ea1565d10fd8206e3b3cc9808ce6cb1].
 'on-unwind'(Source, Handler, Out) :-
     current_metta_module(Module),
     setup_call_catcher_cleanup(true,

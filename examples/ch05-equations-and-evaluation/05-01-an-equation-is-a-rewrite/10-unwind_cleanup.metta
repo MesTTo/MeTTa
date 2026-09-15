@@ -2,7 +2,7 @@
 ;; Guarantees: deterministic success skips cleanup; failure and caller cut
 ;;   apply it once to their native outcome [tested:
 ;;   sh test.sh examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/10-unwind_cleanup.metta;
-;;   commit=WORKTREE].
+;;   commit=2d09b82e3ea1565d10fd8206e3b3cc9808ce6cb1].
 
 (= (unwind-note $home $outcome) (add-atom $home (unwound $outcome)))
 
