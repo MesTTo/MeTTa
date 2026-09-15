@@ -81,7 +81,7 @@ def auto_image(value: Any) -> str:
 ## `build`
 
 ```python
-def build(atom: Atom, cls: Any = None) -> Any:
+def build(atom: Atom, cls: Any = None, *, space: Any = None) -> Any:
 ```
 
 > Rebuild the Python value an atom describes, optionally by annotation.

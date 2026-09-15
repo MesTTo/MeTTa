@@ -9,6 +9,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Python API references include convert.build's lexical space argument and
+  describe Defined calls as applying encoded argument values.
 - Native callable forwarding keeps its validated binder names through capture
   checks, preserving explicit contracts and later changes to native call ports.
 - Reflected Literal and Annotated records use runtime subscription, preserving

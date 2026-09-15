@@ -1158,8 +1158,8 @@ class Defined:
 
 > A function that exists twice: as MeTTa equations and as Python.
 >
-> Calling the name evaluates its application and returns every engine
-> answer; applying ``S[name]`` stages the term explicitly. The Python body
+> Calling the name applies it to encoded argument values and returns every
+> engine answer; applying ``S[name]`` stages the term explicitly. The Python body
 > stays reachable as ``.py``, with recursion inside it resolving to itself.
 > That pair is a differential oracle carried in one object: ``fact(5)``
 > against ``fact.py(5)``, for every ground input.
