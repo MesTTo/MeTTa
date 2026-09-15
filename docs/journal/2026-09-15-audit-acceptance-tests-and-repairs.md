@@ -140,3 +140,15 @@ Decided: a frozen slotted dataclass retains Row's identity equality and owns a M
 Integration: F17 remains live at _catalog/kinds.py:install. Replace the first-row sentinel with complete publication state and transactional retry of the whole owned ontology. That unassigned file and binding predicates are held for integration. Every interrupted-prefix witness is retained in the baseline bundle, with 40 failures and a passing empty-prefix control. F10's storage inventory belongs to unassigned _atoms/fields.py; enumerate MRO storage, normalize a string __slots__ to one slot, omit bookkeeping, and use static descriptor inspection.
 
 Verified: immutable mapping/metadata plus retained-namespace replacement and nested immutability checks report 11 passed in 1.14 seconds; `ai-tmp/ai-audits-f05.log`. F07's chapter reports 294 passed and 2 skipped in 9.75 seconds.
+
+### F11: construct rows through the accepted inputs
+
+Tried: five expanded witnesses all fail the original row-conversion implementation. Defaults are treated as required columns, computed storage is treated as input, InitVar is omitted, registered ordinary classes are refused, and optional mapping keys are required. `ai-tmp/ai-audits-f11-expanded-baseline.log` reports 5 failed in 0.66 seconds. Only unrelated registration and indexing repairs precede that run; constructor functions still match the cut.
+
+Decided: inspect.Signature identifies named constructor inputs and their defaults. BoundArguments.apply_defaults preserves positional-only holes and keyword-only delivery. Dataclass factory sentinels remain the generated initializer's inputs, so each construction gets its own factory value. TypedDict keeps its declared key set and required-key metadata; absent optional keys never become default values. Existing complete-constructor expression conversion retains priority.
+
+Rejected: selecting dataclasses.fields, which describes stored state, and calling every constructor with keyword arguments. The accepted-parameter model removes both mismatches. F09 must make the same binding change in held _declare/constructors.py and related classes consumers; its inherited-default, keyword-only and positional-only witnesses remain integration obligations.
+
+Verified: F05's chapter reports 295 passed and 2 skipped in 10.26 seconds.
+
+Verified: the five constructor witnesses and both existing result-door projection cases report 7 passed in 3.15 seconds; `ai-tmp/ai-audits-f11.log`. Duplication checking over seam.py and results.py reports 27 clones and 7.2 percent, all in existing result-door declarations or forwarded result methods; none intersects the constructor conversion. `ai-tmp/ai-audits-duplication-rows.log` uses `jscpd --reporters ai --format python --max-lines 10000 --max-size 1mb --no-gitignore --noTips`. The initial default-max-lines invocation scanned neither large file and supplied no useful measurement.

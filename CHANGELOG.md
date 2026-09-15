@@ -7,12 +7,6 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
-- Python seam registrations expose immutable metadata and an owned read-only
-  field mapping, so caller mutation cannot bypass registry publication.
-
-- Python extension discovery refuses competing providers with the same entry-point
-  name before loading any provider, and reports both distribution origins.
-
 ### Added
 
 - One door for host event listeners: `metta_listen/2` in
@@ -247,6 +241,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   class fails when instantiated.
 
 ### Fixed
+
+- Python row conversion uses constructor parameters and defaults for dataclasses,
+  named tuples and registered classes, and preserves absent optional TypedDict keys.
+- Python seam registrations expose immutable metadata and an owned read-only
+  field mapping, so caller mutation cannot bypass registry publication.
+- Python extension discovery refuses competing providers with the same entry-point
+  name before loading any provider, and reports both distribution origins.
 
 - Lazy Answers accepts `__index__` objects for positions and slice bounds,
   matching Python sequences while retaining bounded lazy reads.

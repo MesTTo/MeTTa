@@ -790,15 +790,13 @@ def build(self, column: str | type, cls: type | None = None) -> list:
 def into(self, cls: type) -> list:
 ```
 
-> Each row as one ``cls``, matched by field name.
+> Each row as one ``cls``, matched to named constructor inputs.
 >
-> ``match(..., into=cls)`` is sugar for this and says so: the
-> conversion was only ever reachable through that keyword, so a
-> prepared query's solve(), or any other Rows, could not ask for it
-> even though rows_into() never cared where the rows came from
-> . build(cls) is the neighbouring method and a
-> different question: it rebuilds ONE column of complete constructor
-> expressions, where this maps every column onto a field.
+> Dataclasses, NamedTuples and registered classes use their constructor
+> defaults for omitted inputs. TypedDicts preserve omitted optional
+> keys. Extra query columns are ignored. ``match(..., into=cls)`` uses
+> this conversion too. A single column of complete constructor
+> expressions rebuilds through ``build(cls)``.
 
 ### `Rows.to_dicts`
 
