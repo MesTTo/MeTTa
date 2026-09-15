@@ -15,7 +15,7 @@
 # Decides: locked CPython files are reference inputs whose exact bytes are
 # checked by protocol_source.Sources, outside authored-code linting.
 # [tested: ProtocolSourceTests.test_locked_bytes_and_complete_packs_fail_closed;
-# commit=WORKTREE]
+# commit=f88b11ae305c4e1bfafa8387d1f24e51d0d8cb92]
 
 [build-system]
 requires = ["setuptools>=83"]
