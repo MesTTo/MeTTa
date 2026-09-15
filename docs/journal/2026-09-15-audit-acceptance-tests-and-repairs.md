@@ -234,3 +234,13 @@ Decided: SpaceComplianceSuite.test_a_nested_transaction_restores_its_provider_sa
 Verified: a provider advertising savepoint but implementing only begin/commit/rollback fails the nested law; the resulting outer rollback restores its original bag. The same law passes through the native engine's nested transactions. No foreign provider support is claimed by that positive control. The compliance and occurrence-token suites report 103 passed and 77 skipped in 4.45 seconds; `ai-tmp/ai-audits-f12-compliance.log`. The complete provider chapter reports 529 passed and 93 skipped in 31.70 seconds; `ai-tmp/ai-audits-f12-compliance-chapter.log`. Ruff, reference, reference-selftest and closed-sets pass.
 
 Integration: this compliance law is the support test for the future nested provider savepoint protocol. The table-specific refusal control must also switch to successful nested rollback once the engine hook and a declaring provider implement it. A false declaration remains a failing law rather than a coverage waiver.
+
+### A3: broad sequence equality has no common hash
+
+Tried: equivalent string, bytes and range peers have different hashes from Answers on the unchanged cut; the tuple control passes. These are the three A3 failures in `ai-tmp/ai-audits-baseline-owned.log`.
+
+Decided: retain the existing broad sequence equality and remove Answers.__hash__. Python's equality override makes the class unhashable. Hashing cannot choose among the incompatible hash contracts of all its equal peers, and restricting equality would remove the established list and sequence comparisons. Python's data model states the equal-object hash requirement: https://docs.python.org/3/reference/datamodel.html#object.__hash__.
+
+Source: results.py remains unchanged on the classes branch at d362153bae6333602f3877f79f2f811848d86f6e. The repair is confined to the reserved hash symbol and its direct tests.
+
+Verified: all 95 answer-protocol and new equality/hash cases pass in 4.85 seconds; `ai-tmp/ai-audits-a3.log`. Tests retain string, bytes, range, tuple and list equality in both directions and prove hash refusal never pulls the source. Ruff passes. The first reference check reports two stale projections; after regeneration reference and reference-selftest pass in `ai-tmp/ai-audits-a3-reference-verified.log`.

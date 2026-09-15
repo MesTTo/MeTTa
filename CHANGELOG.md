@@ -246,6 +246,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Answers remains equal to equivalent sequences and is now unhashable, so
+  equality with strings, bytes and ranges cannot contradict dictionary lookup.
+
 - Remote removal delegates Symbols, Grounded values and expressions to the
   store, preserving local absence and duplicate-occurrence behavior over HTTP.
 

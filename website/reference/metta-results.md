@@ -328,14 +328,6 @@ def __eq__(self, other: object) -> bool:
 
 No docstring is defined.
 
-### `Answers.__hash__`
-
-```python
-def __hash__(self) -> int:
-```
-
-No docstring is defined.
-
 ### `Answers.__repr__`
 
 ```python
