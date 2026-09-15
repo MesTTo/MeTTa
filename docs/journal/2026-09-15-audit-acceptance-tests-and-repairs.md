@@ -174,3 +174,21 @@ Decision superseding the held-consumer obligation above: ownership now includes 
 Tried: the seam-only state passes its chapter with 308 passed and 2 skipped in 9.77 seconds, plus reference and reference-selftest, but the explicit consumer controls remain red. Those greens do not close F04; the functional commit is replaced with the complete consumer repair and retained ordinary/nested retry tests.
 
 Verified: the complete seam/consumer repair reports 34 passed in 0.16 seconds, including all four current/proposed handoff controls and retained ordinary/nested tests of repeated replacement, removal and reinsertion. `ai-tmp/ai-audits-f04-complete.log`. The operations.py diff is confined to _record_seam_undo.
+
+Verified: the complete F04 chapter reports 312 passed and 2 skipped in 9.91 seconds. Reference and reference-selftest pass; `ai-tmp/ai-audits-f04-complete-chapter.log` and `ai-tmp/ai-audits-f04-complete-reference.log`.
+
+### F08: one exit-error policy
+
+Tried: zero, body-only, cleanup-only and simultaneous failures across Answers, the engine stream, RemoteCursor, Gateway, Server and asynchronous EvaluationView. The expanded baseline reports 13 failed and 20 passed in 0.37 seconds; ten failures belong to these owned views, two to assumption cleanup and one to the asynchronous assumption wrapper. `ai-tmp/ai-audits-f08-expanded-baseline.log`.
+
+Decided: one aggregation operation accepts the body and cleanup outcomes. Successful cleanup leaves the body to normal context propagation. A lone cleanup failure is raised unchanged; simultaneous failures form a BaseExceptionGroup with the body first. Native and asynchronous exits keep their existing close, cancellation, shielding and retry mechanisms. The engine stream already follows this policy and is a passing control.
+
+Handover: _spaces/scope.py:_Assuming.__exit__ attempts all removals but omits the body from its cleanup group. Its two exact failing fixtures are in the main-checkout handoff. The unassigned aio/_views.py:_AsyncAssuming.__aexit__ forwards (None, None, None), so integration must forward the real exception triple. _AsyncBatch already forwards it. The classes-held stream requires no behavioral repair.
+
+Verified: focused exit, asynchronous worker and remote ownership tests report 154 passed in 22.59 seconds. With a source-close retry control added, the three affected chapters report 1256 passed and 85 skipped in 39.81 seconds; `ai-tmp/ai-audits-f08.log` and `ai-tmp/ai-audits-f08-chapters.log`. Reference and reference-selftest pass after regenerating the remote/results/root pages. Ruff first reported I001 and TRY301 in the new fixture; one misplaced exemption then reported RUF100. Corrected imports and exact test-body exemptions pass; `ai-tmp/ai-audits-f08-ruff-passed.log`.
+
+### F14: retain the paired record
+
+Tried: replay and slicing must preserve the original _AnswerItem, and early close must preserve both cached faces without resuming the source. The expanded baseline reports 2 failed in 0.90 seconds, both on reconstructed record identity; `ai-tmp/ai-audits-f14-expanded-baseline.log`. The original audit reported redundant representation, not an observed misalignment bug.
+
+Decided: the existing immutable _AnswerItem becomes the cache element. Every public face projects its value or row. A locked non-pulling accessor supplies the asynchronous consumer, including the same cached-prefix and error-frontier behavior.

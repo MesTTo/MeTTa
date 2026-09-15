@@ -242,6 +242,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Answer views, asynchronous evaluation views, remote cursors, gateways and
+  servers preserve body and cleanup failures together on context exit,
+  including cancellation. A single failure keeps its original identity.
+
 - Failed Python seam publication restores registry preimages and completed
   observers. Rollback attempts every action and retains failed actions for retry.
   Transaction journals retain each receipt, including retries after caught failures.

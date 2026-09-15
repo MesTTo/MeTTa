@@ -464,7 +464,12 @@ No docstring is defined.
 ### `Answers.__exit__`
 
 ```python
-def __exit__(self, *_exception: object) -> None:
+def __exit__(
+    self,
+    exc_type: type[BaseException] | None,
+    exc: BaseException | None,
+    tb: types.TracebackType | None,
+) -> None:
 ```
 
 No docstring is defined.

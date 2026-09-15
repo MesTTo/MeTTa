@@ -183,10 +183,15 @@ def __enter__(self) -> Self:
 ### `Gateway.__exit__`
 
 ```python
-def __exit__(self, *_exception: object) -> None:
+def __exit__(
+    self,
+    exc_type: type[BaseException] | None,
+    exc: BaseException | None,
+    tb: types.TracebackType | None,
+) -> None:
 ```
 
-> Release the cursors, whether the block ended well or not.
+> Release the cursors and retain every exit failure.
 
 ## `OutcomeUnknown`
 
@@ -355,7 +360,12 @@ def __enter__(self) -> Self:
 ### `RemoteCursor.__exit__`
 
 ```python
-def __exit__(self, exc_type, exc, tb) -> None:
+def __exit__(
+    self,
+    exc_type: type[BaseException] | None,
+    exc: BaseException | None,
+    tb: types.TracebackType | None,
+) -> None:
 ```
 
 > Stop the server's cursor without letting the stop displace the
@@ -633,10 +643,15 @@ def __enter__(self) -> Self:
 ### `Server.__exit__`
 
 ```python
-def __exit__(self, *_exception: object) -> None:
+def __exit__(
+    self,
+    exc_type: type[BaseException] | None,
+    exc: BaseException | None,
+    tb: types.TracebackType | None,
+) -> None:
 ```
 
-> Close on the way out, on the exception path too.
+> Close on exit and retain both body and cleanup failures.
 
 ### `Server.close`
 
