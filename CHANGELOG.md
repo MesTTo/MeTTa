@@ -242,6 +242,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Lazy Answers accepts `__index__` objects for positions and slice bounds,
+  matching Python sequences while retaining bounded lazy reads.
 - Registration rollback attempts both the external-store and seam-table
   inverses and retains simultaneous failures in an exception group.
 - Withdrawing a seam registration now has an insertion inverse, preserving

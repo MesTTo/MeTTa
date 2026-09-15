@@ -110,3 +110,11 @@ Tried: no failure, first failure, second failure and both failures, using ValueE
 Decided: attempt both actions in their existing order. Reraise one failure unchanged and group simultaneous failures with BaseExceptionGroup, preserving control exceptions. The F01 chapter reports 285 passed and 2 skipped in 14.46 seconds.
 
 Verified: `test_inverse_failures.py`, 4 passed in 0.05 seconds; `ai-tmp/ai-audits-f02.log`.
+
+### F15: lossless sequence indices
+
+Tried: six positional cases and custom indices in every slice position against the unchanged result implementation; all seven failed. Float and int-only objects remain refusal controls.
+
+Decided: normalize indices with `operator.index`, including slice bounds before lazy range comparisons. Column strings and Variable projections keep their existing dispatch. A bounded slice still stops before the next source item. The F02 chapter reports 289 passed and 2 skipped in 28.41 seconds.
+
+Verified: `test_answers_index_protocol.py`, 7 passed in 0.65 seconds; `ai-tmp/ai-audits-f15.log`.
