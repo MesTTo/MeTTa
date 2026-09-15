@@ -4,7 +4,7 @@
 %   [tested: lib_thread_scope_deferred; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarantees: native dependency queries follow explicit roots after joins,
 %   preserve cycles and retry errors [tested: lib_thread_scope_deferred;
-%   commit=WORKTREE].
+%   commit=bc30fbd0bbcbf535de217d5a9efad2910002f343].
 % Guarantees: normal exit joins children, failure stops siblings, return
 % transfers spaces and escaped names refuse [tested: lib_thread_scope;
 % commit=c6e1198c490a824b96f6fc6e1c0622a542917024].

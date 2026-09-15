@@ -5,7 +5,7 @@
 ;   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 ; Guarantees: a returned entity retains spaces reached through its current
 ;   field query [tested: examples/ch17-concurrency-and-the-loop/08-class_grains.metta;
-;   commit=WORKTREE].
+;   commit=bc30fbd0bbcbf535de217d5a9efad2910002f343].
 ; Owns resources: scope releases the class spaces, population and prototypes.
 
 !(import! &self (library lib_thread))
