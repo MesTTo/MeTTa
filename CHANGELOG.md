@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Compiled Python operators retain successful `None`, borrowed containers and
+  Atom results as values. Declared instances keep their native images, and
+  subsequent positional and keyword calls preserve borrowed tuple identity.
+  Proved native sequence operations retain their structural result images.
 - Python protocol source extraction derives slot roles, callable signatures,
   aliases and syntax from a pinned CPython snapshot. Offline checks reject
   source drift and missing reference or class-requirement identities.
