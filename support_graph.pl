@@ -13,11 +13,11 @@
 %   enumerating further retraction candidates. Its publisher owns at most one
 %   row per Module/Ref [source:
 %   engine/support_graph.pl:support_publish_memo_rule/4 and
-%   engine/support_graph.pl:support_forget_memo_rule/1; commit=WORKTREE].
+%   engine/support_graph.pl:support_forget_memo_rule/1; commit=1f0c39f637b77839b4d3dd5b038b74375449f0f2].
 %   Peer RHSs survive and transaction rollback restores the retired row
 %   [tested: support_graph:retiring_one_rhs_preserves_its_peer_and_rolls_back,
 %   support_graph:retiring_a_form_without_calls_leaves_no_memo_change;
-%   commit=WORKTREE].
+%   commit=1f0c39f637b77839b4d3dd5b038b74375449f0f2].
 % Guarantees:
 %   - A reference face can defer dependent repairs until all its bindings and
 %     metadata are published [tested:
@@ -185,7 +185,7 @@ support_edge_retractall(Support, Derived) :-
 %examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/02-twostage.metta].
 %The filereader uses this mapping to attach supports and retire native clauses
 %[source: engine/filereader.pl:set_type_alias_support_scope/2 and
-%engine/filereader.pl:forget_translated_from/3; commit=WORKTREE].
+%engine/filereader.pl:forget_translated_from/3; commit=1f0c39f637b77839b4d3dd5b038b74375449f0f2].
 :- dynamic support_translated_form_id/3.
 :- dynamic support_memo_changed/2.
 :- seam:context_reader(support_graph_locked, '$metta_support_graph_locked', value(true)).
