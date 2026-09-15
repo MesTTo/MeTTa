@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A frame library's rows reach `tables.add` through the reader it declares on
+  the seam's frame point, and the refusal for an unreadable source names that
+  declaration, so a library is never read by the spelling of its own method.
+
 - The Python seat's registry points, algebra presets, answer indexing, remote
   wire envelopes and table projections carry declared types, so a downstream
   checker reads `seam.frame` as a Point, `answers[0]` as the value kind and a

@@ -101,8 +101,18 @@ class Frame:
         return list(self.columns[name])
 
     def iter_rows(self):
-        """Rows, the way a frame library already offers them to tables.add."""
+        """Rows, the way solars' own users read them."""
         return zip(*self.columns.values(), strict=True)
+
+
+def frame_rows(source):
+    """The declared reader `tables.add` takes for a solars frame.
+
+    The core reads no library's method name, so a frame library says which
+    sources it claims and how its rows come out; anything else is not ours
+    and answers None so the next registrant, or a structural input, is tried.
+    """
+    return source.iter_rows() if isinstance(source, Frame) else None
 
 
 class Door:
@@ -276,7 +286,8 @@ DOORS = (
 def register():
     """Every row solars adds, against points the seat declared."""
     seam.frame.register(
-        "solars", module="solars", accessor=install_accessor, build=build
+        "solars", module="solars", accessor=install_accessor, build=build,
+        rows=frame_rows,
     )
     seam.sql.register("solars", claims=claims_connection, define=define)
     seam.index.register(

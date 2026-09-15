@@ -4093,8 +4093,8 @@ and `refusal(capability, **request)` to give a declined request its own reason.
 For example, an add policy reads `request["atom"]`; it runs before the write,
 including before any bulk write.
 Capabilities are declared, not guessed: `tokens`, `match`, `enumerate`, `add`, `add-many`,
-`remove`, `clear`, `subscribe`, `plan`, `rules`, `add-token`, `remove-token`, and an unsupported operation
-refuses loudly rather than degrading. They are the engine's own
+`remove`, `clear`, `subscribe`, `plan`, `rules`, `add-token`, `remove-token`, `savepoint`, and an
+unsupported operation refuses loudly rather than degrading. They are the engine's own
 `(vocabulary provider-capability ...)` row, which `metta.foreign.CAPABILITIES`
 reads rather than restates, and the row is OPEN: a seat or library that
 declares a seam hook of its own registers the word gating it with
