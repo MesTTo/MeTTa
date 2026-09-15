@@ -70,7 +70,7 @@
 #     the same call with DISPLAY unset runs; prolog-static, host-workarounds,
 #     host-workarounds-selftest and the Python examples lane failed that way
 #     on an unchanged tree and pass headless; SWI-Prolog 10.1.13;
-#     commit=WORKTREE]
+#     commit=c4e75b3206191b8fd969a1449e75e928227883b8]
 # Fails when:
 #   - no `timeout` is reachable: exit 2, naming the package that ships one.
 #   - the caller died before the signal was armed: exit 125, the same status
