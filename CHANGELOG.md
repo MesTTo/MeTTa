@@ -299,6 +299,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- TOML configuration headers participate in provenance checks and pinning.
+  Pinning preserves quoted keys and values through the standard TOML parser.
 - Clearing a space withdraws its references immediately and preserves live
   importers' links to later definitions. Cached graph state and unused
   function indexes are released; dropping also retires the lifetime's links.

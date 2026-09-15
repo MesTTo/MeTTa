@@ -94,10 +94,8 @@ metta = "metta.pytest_plugin"
 #: Pygments and is the distribution's own; Pygments loads the entry point and
 #: reads the CLASS's aliases, which mako's own declaration says out loud
 #: [source: https://github.com/sqlalchemy/mako/blob/rel_1_3_10/pyproject.toml].
-#: The tag carries no commit because nothing resolves one here: this file is
-#: outside check_evidence_tags.SOURCES, which is why `pin_provenance.py`
-#: reports it, and check.sh and the workflow cite the same way for the same
-#: reason. The module is GENERATED from
+#: The upstream reference names a release. Configuration headers participate
+#: in check_evidence_tags.PROVENANCE_SOURCES. The module is GENERATED from
 #: website/.vitepress/metta.tmLanguage.json by tools/pygmentsgen.py.
 [project.entry-points."pygments.lexers"]
 metta = "metta._pygments:MettaLexer"

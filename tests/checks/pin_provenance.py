@@ -67,6 +67,9 @@ Guarantees:
   - Rust line and block header pins resolve through the same comment rule
     as C, while bare string literals stay unchanged
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
+  - TOML substitutions preserve the parsed configuration; keys and values
+    cannot be rewritten as header comments
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
 Fails when: a pin sits somewhere the file's grammar cannot distinguish from
   code. It is reported, not rewritten, and finishing it is a human's call.
 Owns resources: none; it rewrites files in place and holds nothing open.
@@ -83,6 +86,7 @@ import ast
 import re
 import subprocess
 import sys
+import tomllib
 from functools import cache
 from pathlib import Path
 
@@ -145,6 +149,8 @@ def _grammar(path: Path) -> str | None:
         return ";"
     if path.suffix == ".json":
         return "json"
+    if path.suffix == ".toml":
+        return "toml"
     # A guide pins inside its evidence tags and discusses the placeholder in
     # prose around them; the tag brackets are the comment rule.
     if path.suffix == ".md":
@@ -253,6 +259,9 @@ def sites(path: Path, text: str) -> list[tuple[int, int, str | None]]:
     """Every placeholder in one file as (offset, line, reason it is declined)."""
     grammar = _grammar(path)
     found = []
+    # The TOML parser already knows every string form. A comment substitution
+    # leaves its data unchanged; parse_float=str also preserves NaN equality.
+    configuration = tomllib.loads(text, parse_float=str) if grammar == "toml" else None
     if grammar == "py":
         skip = _docstring_spans(text)
     elif grammar in BLOCK_GRAMMARS:
@@ -267,6 +276,15 @@ def sites(path: Path, text: str) -> list[tuple[int, int, str | None]]:
         reason: str | None = None
         if _backticked(text, at):
             reason = "a backticked mention of the placeholder, not a pin"
+        elif grammar == "toml":
+            candidate = text[:at] + "commit=PROVENANCE" + text[match.end():]
+            try:
+                comment = tomllib.loads(candidate, parse_float=str) == configuration
+            except tomllib.TOMLDecodeError:
+                # Changing a quoted key can collide with another key.
+                comment = False
+            if not comment:
+                reason = "a TOML key or value, not a comment"
         elif grammar == "py":
             if any(low <= at < high for low, high in skip):
                 reason = "a string literal that is not a docstring: this code emits or matches pins"

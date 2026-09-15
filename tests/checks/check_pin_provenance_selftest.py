@@ -36,6 +36,9 @@ Guarantees:
   - root build hooks and component shell tests resolve header pins and
     preserve code strings
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
+  - TOML comments resolve while quoted keys, all four string forms and
+    hash characters inside values stay unchanged, including beside NaN
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
 Fails when: run against a tree it did not write. It asserts on a fixture it
   generates and nothing else.
 Open Obligations:
@@ -62,6 +65,23 @@ WHEN = "2026-08-31"
 
 # (path, text, lines that must be rewritten, lines that must be declined)
 PLANTS = (
+    *(
+        (name,
+         [f"# A configuration pin [{TAG} {WHEN}: a case; {WORD}].",
+          f'basic = "# {WORD}"',
+          f"literal = '# {WORD}'",
+          'multiline_basic = """',
+          f"# {WORD}",
+          '"""',
+          "multiline_literal = '''",
+          f"# {WORD}",
+          "'''",
+          f'"{WORD}" = "a key"',
+          '"commit=PROVENANCE" = "a colliding key"',
+          f"nan = nan # A trailing pin [{TAG} {WHEN}: a case; {WORD}]."],
+         [1, 12], [2, 3, 5, 8, 10])
+        for name in ("pyproject.toml", "extensions/plant/pyproject.toml")
+    ),
     (
         "examples/ch-plant/_fixtures/nested/library.metta",
         [

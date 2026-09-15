@@ -129,6 +129,8 @@ Guarantees:
   - root build hooks and component shell tests carry checked claims and
     resolvable comment pins [tested: tests/checks/check_evidence_selftest.py,
     tests/checks/check_pin_provenance_selftest.py; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
+  - tracked TOML configuration pins resolve through the same provenance scan
+    [tested: tests/checks/check_pin_provenance_selftest.py; commit=WORKTREE]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs
@@ -394,6 +396,9 @@ CLAIM_SOURCES = (
 # blocks remain a burn-down against GUARANTEE_SOURCES, which is a different
 # obligation and is why the two lists are no longer one list.
 PROVENANCE_SOURCES = (
+    # Configuration headers carry provenance even where command citations
+    # have not joined the claim grammar.
+    "**/*.toml",
     # Provider suites qualify private engine probes and pin that boundary.
     "extensions/*/tests/*.plt",
     # Native corpus providers carry their own SWI import contracts.
