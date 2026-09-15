@@ -9,7 +9,7 @@ commit=5fe3175632a6b60b3b54ca9125b75607ac82401a]
 commit=18b1135167d60396c41e63e42ded2f66d0eb1900]
 The operator table derives every spelling and image from the shared policy
 join, and each printed expression builds its documented atom.
-[tested: test_door_documents_build_each_atom_operator; commit=WORKTREE]
+[tested: test_door_documents_build_each_atom_operator; commit=f866cc992295171a9a9e97417514f31597181e7b]
 -->
 
 # Atoms, operators, and term building
