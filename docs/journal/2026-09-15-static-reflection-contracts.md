@@ -44,3 +44,42 @@ unbacked evidence. `jscpd --reporters json --output ai-tmp/ai-classes-c56a-clone
 --no-gitignore --noTips extensions/python/metta/_catalog/annotations.py
 extensions/python/metta/_declare/field_values.py` finds no clones. Logs use
 `ai-tmp/ai-classes-c56a-{ty,mypy,python,checks,clones}.log`.
+
+## 2026-09-15: reflected annotation subscription
+
+The native record contains computed values and a Python annotation constructor.
+Literal and Annotated subscription syntax is also a static type form, so ty
+rejects those computed arguments before the runtime protocol can act.
+
+Decided: operator.getitem applies that existing runtime subscription protocol.
+CPython v3.14.4 implements it as a direct PyObject_GetItem call in
+[Modules/_operator.c:_operator_getitem_impl](https://github.com/python/cpython/blob/v3.14.4/Modules/_operator.c#L528-L542).
+The captured source is `ai-tmp/ai-classes-c56-cpython-operator.c`, SHA256
+ed0328cd2c57da1b95b23b66f8dde3baa378077bf023c69c251a95381a33bc07.
+Argument tuples, metadata identity and constructor refusals remain unchanged.
+The ordinary generic-application branch already carries a runtime constructor.
+
+Rejected: private typing alias constructors or diagnostic suppression. Public
+subscription already supplies reconstruction and validates each constructor's
+own arity; duplicating either rule would add a second annotation grammar.
+
+Verification plan: check ty and mypy on call_signatures.py; run annotation
+roundtrips, constructor refusals, live contract edits, callable ports and
+callable values; then Ruff, evidence, layering and the local clone scan.
+
+Verified: ty and mypy pass on metta/_catalog/call_signatures.py. The root
+command below passes 86 cases, including literal and metadata annotations,
+malformed constructor applications and later native contract replacement:
+
+```sh
+python -m pytest -q -n 0 --benchmark-disable --randomly-seed=1125382488 \
+  extensions/python/tests/ch03_atoms_and_expressions/test_callable_annotations.py \
+  extensions/python/tests/ch09_types/test_class_call_contracts.py \
+  extensions/python/tests/ch03_atoms_and_expressions/test_callable_ports.py \
+  extensions/python/tests/ch03_atoms_and_expressions/test_callable_values.py
+```
+
+`sh check.sh ruff evidence layering` passes with one pending pin and no
+unbacked claim. The preceding clone command with call_signatures.py and
+annotations.py as its two inputs and ai-classes-c56b-clones as its output
+finds no clones. Logs use `ai-tmp/ai-classes-c56b-{ty,mypy,python,checks,clones}.log`.
