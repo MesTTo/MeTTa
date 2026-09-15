@@ -7,6 +7,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+- Wire decoding now builds ordinary and undefined answers from one definite
+  atom decoder. Nested undefined wrappers fail before payload descent, while
+  deep expressions keep their iterative decoding.
+
 - The door-order gate reports declared caller-implemented contracts and
   their dependent doors as unordered without failing them. Mixed crossings,
   recursion, registry callbacks and undeclared operations still fail; every

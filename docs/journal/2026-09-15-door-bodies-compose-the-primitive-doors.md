@@ -38,3 +38,15 @@ Tried: all 55 planted and existing witnesses pass; configured-seat mypy passes f
 Measured: legacy mixed/open/recursive counts stay 103/168/101. The refined report identifies 167 defect-open doors and one door unordered solely by contract. The numbered distribution remains 22/15/4. Evidence: `ai-tmp/ai-doors-order-contract.json`.
 
 Tried: the final 55 witnesses and all thirteen required projection lanes with their companion selftests pass. `door-sync-selftest` completes all 69 checks in 718.58 seconds. Evidence: `ai-tmp/ai-doors-contract-final.log`, `ai-tmp/ai-doors-projections-contract.log`.
+
+### Definite wire decoding
+
+Tried: both public decoder paths raise `RecursionError: maximum recursion depth exceeded` for 5000 nested undefined wrappers; three ordinary/deep/malformed controls pass. Evidence: `ai-tmp/ai-doors-wire-before.log`.
+
+Decided: the complete-answer decoder recognizes the one outer undefined wrapper, then delegates to the definite atom decoder. That lower decoder rejects an undefined wrapper immediately. Expression decoding and leaf validation keep their existing implementation, including the dominant symbol path.
+
+Tried: all 411 tests in chapters 03 and 06 pass; Ruff passes both changed Python files. Evidence: `ai-tmp/ai-doors-wire-chapters.log`.
+
+Measured: the representative wire call remains 7/7/7 inferences with the same expression and undefined answer. The other fixed probes remain 55/55/55 for JSON rendering, 104/104/104 for matching and 437/437/437 for evaluation. The wire decoder component disappears from every cycle finding. Legacy mixed/open/recursive counts stay 103/168/101 because affected doors retain other cycles. Evidence: `ai-tmp/ai-doors-costs-before.log`, `ai-tmp/ai-doors-costs-wire-after.log`, `ai-tmp/ai-doors-order-wire.json`.
+
+Tried: the projection battery found one stale generated reference page, `website/reference/metta-convert.md`; its dependent door-sync and ledger selftests refused the same drift. Regenerated it through `doorgen.py --write`. All thirteen requested lanes and their companion selftests now pass, combining the unchanged passing lanes with the repaired door-sync, ledger and reference run. Evidence: `ai-tmp/ai-doors-projections-wire.log`, `ai-tmp/ai-doors-wire-regenerate.log`, `ai-tmp/ai-doors-projections-wire-repaired.log`.

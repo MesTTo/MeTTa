@@ -59,7 +59,7 @@ class Projected(NamedTuple):
 def atom_from_wire(wire: Any) -> Atom:
 ```
 
-> Decode a wire value where the protocol requires a definite atom.
+> Decode a definite atom, with expression depth handled iteratively.
 
 ## `auto_image`
 
@@ -180,17 +180,7 @@ def ensure_registered(cls: type) -> _Registration:
 def from_wire(wire: Any) -> Atom | Undefined:
 ```
 
-> Rebuild an atom from the tagged wire form janus delivered.
->
-> Iterative, because expression depth is data and must not meet Python's
-> recursion ceiling; strict, because a malformed payload is a boundary
-> bug that must surface rather than coerce.
->
-> One decoder, because the tag now carries the whole species decision. An
-> engine mode used to exist beside this one and re-derived a space from an
-> s payload against a Python-side registry of names Space had built, which
-> was a THIRD answer to a question the engine already answers and missed
-> every space MeTTa itself made.
+> Decode a complete evaluation answer, including its undefined truth.
 
 ## `project`
 
