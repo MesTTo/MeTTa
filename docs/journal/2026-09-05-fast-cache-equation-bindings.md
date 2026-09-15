@@ -143,3 +143,51 @@ the integrated report is `ai-tmp/ai-equation-binding-root-clones/jscpd-report.js
 Verified: `GATE_ONLY=1 sh check.sh layering evidence` passes both engine and
 Python layering checks and reports zero unbacked evidence claims in
 `ai-tmp/ai-equation-binding-root-layering.log`.
+
+Tried admission separately: `python ai-tmp/ai-equation-binding-admission-probe.py
+--output ai-tmp/ai-equation-binding-admission-before.json` records four cases.
+The identical probe at pristine c751 has identical complete observations.
+Ordinary source and ordinary `&self` pass. A token that maps the resolved home
+back to literal `&self` loses its result for both the first equation and a
+later equation of an already compiled function. Raw and rewritten terms are
+equal, while ordinary storage resolution differs. Both before commands exit
+zero with their intentional mismatches recorded as data and empty stderr.
+
+Decided: retain the ordinary admission door's raw identity and silent-mode
+conditions, then require agreement with ordinary storage resolution before
+deferring. The root home satisfies that law by identity; named homes use
+`metta_substitute_self/3`. A failing proof compiles the actual rewritten term
+through the existing eager door. The non-eager reference override retains
+its broader pure-structural policy.
+
+Rejected: remove the non-eager override and broaden ordinary admission to its
+variant-equality condition, because that would change when compilation runs.
+Revisit only with a separately established change to that admission policy.
+
+Verified: the unchanged probe after the guard passes all four cases. The
+audit `python ai-tmp/ai-equation-binding-admission-audit.py` proves both before
+records identical, both inverse-home answers repaired and both ordinary
+observations unchanged. Outputs use `ai-tmp/ai-equation-binding-admission-`,
+with the pristine control in its `c751/` directory. No failed setup is counted
+as a behavioral observation.
+
+Verified: the same six-file Python command recorded above passes 132 tests
+with `HYPOTHESIS_PROFILE=ci` and `-n 0`, exit zero, in
+`ai-tmp/ai-equation-binding-admission-python.log`. The same six-suite Prolog
+command passes 365 tests and 173 subtests, exit zero, in
+`ai-tmp/ai-equation-binding-admission-prolog.log`.
+
+Measured: repeat the same frozen 100-equation, width-32 command in five fresh
+processes, deleting QLF files before each. Admission is 44634, compilation
+95611 and total 140245 in every process. The guard adds 500 admission
+inferences to the association-only state and changes no compilation count.
+The complete counter audit is `ai-tmp/ai-equation-binding-admission-cost-audit.log`;
+source and per-process receipts are under
+`ai-tmp/ai-equation-binding-admission-cost-n100-w32/`.
+
+Verified: `GATE_ONLY=1 sh check.sh ruff evidence` and
+`GATE_ONLY=1 sh check.sh layering` pass in
+`ai-tmp/ai-equation-binding-admission-static.log` and
+`ai-tmp/ai-equation-binding-admission-layering.log`. The clone command recorded
+above again finds only the unchanged 97-token runnable clone, in
+`ai-tmp/ai-equation-binding-admission-root-clones/jscpd-report.json`.
