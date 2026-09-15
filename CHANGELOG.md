@@ -9,6 +9,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Runtime annotation refinements preserve their native alternatives while
+  satisfying the declared Python list element type under static checking.
 - Kept scoped values follow their current native field dependencies after
   children finish. Entity and prototype fields preserve reachable spaces and
   values through replacement, native edits and cycles. Dependency-query errors
