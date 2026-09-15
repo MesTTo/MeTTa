@@ -320,3 +320,9 @@ Tried: the final whole gate's `node-binding` lane failed one of 650 cases, `name
 Decided: build the roster from `Object.values(ProviderCapability)` in the generated vocabulary plus the three words `bridge.pl` registers through the catalog's `(vocabulary-member ...)` door (`bounded`, `pushdown`, `transactional`), and derive the `ProviderCapability` union the same way. The engine's row is then the one description, which is what `bridge.pl`'s own comment already said the list was.
 
 Verified: `npm run typecheck` is silent and `sh check.sh node-binding` reports 650 tests, 650 pass, 0 fail; `ai-tmp/ai-audits-node-binding.log`.
+
+### Headers for the declared frame reader
+
+Decided: `tables.py` states the new contract, that a registered frame library's rows reach ingestion through the reader it declares and an unreadable source is refused naming that declaration, and the two provider headers say `tables.add` calls their declared reader rather than only that they declare one, because their fixture changed from "the Arrow reader is not opened" to "ingestion called this row". All three cite `179bcf460`, the commit whose tree holds those tests.
+
+Verified: `sh check.sh evidence provenance-pin-selftest ruff reference reference-selftest door-sync` passes; `ai-tmp/ai-audits-evidence-3.log`, `ai-tmp/ai-audits-header-lanes.log`.
