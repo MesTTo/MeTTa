@@ -541,7 +541,7 @@ Undocumented: `soft-aggregation`, `soft-best`, `soft-fold`, `soft-match`, `soft-
 
 ### `scope`
 
-*lib_thread.metta:202*
+*lib_thread.metta:208*
 
 ```metta
 (: scope (-> Atom %Undefined%))
@@ -555,7 +555,7 @@ Returns: each body answer
 
 ### `capture`
 
-*lib_thread.metta:203*
+*lib_thread.metta:209*
 
 ```metta
 (: capture (-> Atom Atom))
@@ -569,37 +569,39 @@ Returns: (evalc expression space)
 
 ### `scope-defer`
 
-*lib_thread.metta:204*
+*lib_thread.metta:210*
 
 ```metta
-(: scope-defer (-> %Undefined% Atom Bool))
+(: scope-defer (-> %Undefined% Atom Atom Bool))
 ```
 
-Register held cleanup in the current scope; returning its value transfers cleanup to the enclosing scope; outside a scope no cleanup is registered
+Register held cleanup in the current scope; returning its value transfers cleanup and current dependencies to the enclosing scope; outside a scope no cleanup is registered. An optional held dependency query must terminate without side effects. Close evaluates it after children join; an error retains resources for retry. Cleanup runs in reverse acquisition order.
 
 1. the owned ground value
 2. the held cleanup expression in its defining space
+3. optional held query yielding current dependency values
 
 Returns: True
 
 ### `scope_defer`
 
-*lib_thread.metta:205*
+*lib_thread.metta:211*
 
 ```metta
-(: scope_defer (-> %Undefined% Atom Bool))
+(: scope_defer (-> %Undefined% Atom Atom Bool))
 ```
 
 Native spelling of scope-defer
 
 1. the owned ground value
 2. the held cleanup expression
+3. optional held query yielding current dependency values
 
 Returns: True
 
 ### `drop-space`
 
-*lib_thread.metta:206*
+*lib_thread.metta:212*
 
 ```metta
 (: drop-space (-> SpaceType Bool))
@@ -613,7 +615,7 @@ Returns: True
 
 ### `space_drop`
 
-*lib_thread.metta:207*
+*lib_thread.metta:213*
 
 ```metta
 (: space_drop (-> SpaceType Bool))

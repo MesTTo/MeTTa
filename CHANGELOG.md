@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Kept scoped values follow their current native field dependencies after
+  children finish. Entity and prototype fields preserve reachable spaces and
+  values through replacement, native edits and cycles. Dependency-query errors
+  retain resources for retry; failed scope bodies still release them.
 - Compiled-form retirement consumes its single memo-analysis row directly,
   preserving other right-hand sides and rollback while removing redundant
   native retraction searches and their variable inference cost.

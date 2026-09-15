@@ -3,6 +3,9 @@
 ;   replacement and scoped retirement
 ;   [tested: examples/ch17-concurrency-and-the-loop/08-class_grains.metta;
 ;   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+; Guarantees: a returned entity retains spaces reached through its current
+;   field query [tested: examples/ch17-concurrency-and-the-loop/08-class_grains.metta;
+;   commit=WORKTREE].
 ; Owns resources: scope releases the class spaces, population and prototypes.
 
 !(import! &self (library lib_thread))
@@ -52,7 +55,8 @@
                  (add-atom &GrainAccount (_field-owner (GrainAccount $id) $owner))
                  (add-atom &GrainAccount (_field-balance (GrainAccount $id) $balance))
                  (scope-defer (GrainAccount $id)
-                   (evalc (retire-GrainAccount (GrainAccount $id)) &GrainAccount))
+                   (evalc (retire-GrainAccount (GrainAccount $id)) &GrainAccount)
+                   (match &GrainAccount ($field (GrainAccount $id) $value) $value))
                  (GrainAccount $id)))))
 
         (add-atom &GrainAgent (: GrainAgent (-> SpaceType GrainAgent)))
@@ -137,3 +141,22 @@
          ($released-longhand (space_drop $other)))
     ($during $after $released $released-longhand))
   (True () True True))
+
+;The dependency query reads stored edges after the inner scope's work finishes.
+;Returning the token retains its current field's space in the outer scope.
+!(test
+  (scope
+    (let $store (new-space)
+      (let* (($root
+                (scope
+                  (let $child (new-space)
+                    (progn
+                      (add-atom $child (payload 9))
+                      (add-atom $store (field scoped-value $child))
+                      (scope-defer scoped-value
+                        (remove-atom $store (field scoped-value $old))
+                        (match $store (field scoped-value $current) $current))
+                      scoped-value))))
+             ($child (match $store (field $root $current) $current)))
+        (collapse (match $child (payload $value) $value)))))
+  (9))
