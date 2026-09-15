@@ -36,7 +36,7 @@
 %     and leaves an empty or already retired form without a memo change
 %     [tested: support_graph:retiring_one_rhs_preserves_its_peer_and_rolls_back,
 %     support_graph:retiring_a_form_without_calls_leaves_no_memo_change;
-%     commit=WORKTREE].
+%     commit=1f0c39f637b77839b4d3dd5b038b74375449f0f2].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
