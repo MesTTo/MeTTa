@@ -262,7 +262,8 @@ def advertised(group: str = GROUP) -> dict[str, importlib.metadata.EntryPoint]:
 >
 > Asking imports nothing, so a program can list what is installed without
 > paying for any of it. Loading is what `discover()` does explicitly and what
-> a dispatch does on demand.
+> a dispatch does on demand. A name identifies one distribution and target;
+> competing declarations refuse before that identity becomes a dictionary key.
 
 ## `alpha_eq`
 

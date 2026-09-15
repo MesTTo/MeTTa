@@ -118,3 +118,15 @@ Tried: six positional cases and custom indices in every slice position against t
 Decided: normalize indices with `operator.index`, including slice bounds before lazy range comparisons. Column strings and Variable projections keep their existing dispatch. A bounded slice still stops before the next source item. The F02 chapter reports 289 passed and 2 skipped in 28.41 seconds.
 
 Verified: `test_answers_index_protocol.py`, 7 passed in 0.65 seconds; `ai-tmp/ai-audits-f15.log`.
+
+### F07: validate ownership before collecting entry points
+
+Tried: both permutations of competing distributions silently selected the last target on the unchanged cut. F15's chapter reports 487 passed in 52.43 seconds.
+
+Decided: compare normalized distribution name, version, group, entry name and target before collecting a name-keyed mapping. Repeated metadata from one distribution deduplicates; competing origins refuse in sorted diagnostic order. No provider runs until the complete advertisement passes validation. The existing once-per-group/name loading and wait-cycle protocol remains valid because each validated group has one owner per name. Installed metadata changes require a new discovery lifecycle, as before.
+
+Rejected: enumeration precedence and Distribution object equality. Neither identifies the declared provider. Python 3.12 importlib.metadata documents that Distribution instances do not provide value equality.
+
+Verified: the focused seam/discovery battery reports 85 passed and two generated-reference failures in 230.55 seconds, `ai-tmp/ai-audits-f07.log`. Both failures report `reference: 3 stale projections: website/reference/metta-results.md, website/reference/metta-seam.md, website/reference/metta.md`. The reference generator refreshes the advertised contract and the two F15 index-signature projections omitted from that commit. No behavioral acceptance failed.
+
+Verified: `sh check.sh reference` exits 0 after regeneration; `ai-tmp/ai-audits-f07-reference.log`.

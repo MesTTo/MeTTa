@@ -101,7 +101,7 @@ def index(self, value: T, start: int = 0, stop: int | None = None) -> int:
 ### `Answers.__getitem__`
 
 ```python
-def __getitem__(self, key: int | slice | Variable | str) -> T | Answers[T] | Answers[Any]:
+def __getitem__(self, key: SupportsIndex | slice | Variable | str) -> T | Answers[T] | Answers[Any]:
 ```
 
 No docstring is defined.

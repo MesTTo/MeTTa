@@ -7,6 +7,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+- Python extension discovery refuses competing providers with the same entry-point
+  name before loading any provider, and reports both distribution origins.
+
 ### Added
 
 - One door for host event listeners: `metta_listen/2` in
