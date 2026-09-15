@@ -214,3 +214,15 @@ Measured: seven alternating runs of 10,000 two-column rows, including the ingest
 Tried: initial vocabulary generation loaded 19 stale local QLF artifacts and returned no source changes. Removing those generated artifacts and rerunning vocabgen produced both vocabulary projections. The initial benchmark omitted the optional Arrow provider and raised the exact no-arrow-registration ImportError retained in `ai-tmp/ai-audits-f12-frame-benchmark.log`; explicitly loading the installed provider made the measured run pass.
 
 Verified: 63 new controls plus both providers' tests report 77 passed in 6.78 seconds. The complete dataset chapter and both provider suites report 124 passed in 10.38 seconds. Ruff passes for every F12 Python source and test. All 14 selected lanes pass, including no-hardcoded-integration and its selftest, extension-scaffold, closed-sets and its selftest, vocab-sync and its selftest, refusals and its selftest, refusal-grounds and its selftest, door-refusals, reference and its selftest; `ai-tmp/ai-audits-f12-gates.log`.
+
+### R2/R4/R5 and MDL H.1: the store owns the atom domain
+
+Tried: Symbol and Grounded removal fail against the local store through both Gateway and HTTP. Empty and compound expressions pass. The eight controls are in `ai-tmp/ai-audits-baseline-extra-corrected.log`; the same run separately records lifecycle and ingestion findings.
+
+Decided: decode the wire atom and delegate removal to the store. The gateway's leaf refusal duplicates a false storage model. Duplicate occurrence, absent atom and malformed-wire controls stay on both transports. R2/R4/R5's existing mutation uncertainty, schema validation and cursor release laws remain independent protocol owners.
+
+Source: `git diff c75181adc..feat/classes-on-metta -- extensions/python/metta/remote` is empty at d362153bae6333602f3877f79f2f811848d86f6e. No classes repair duplicates this change.
+
+Verified: all 133 removal, remote lifecycle, mutation recovery and response-schema cases pass in 22.63 seconds; `ai-tmp/ai-audits-h1-verified.log`. The malformed HTTP mutation correctly preserves the wire refusal inside the OutcomeUnknown cause chain. Two over-specific fixture assertions expected the outer message, then its immediate cause, to be the wire refusal; the retained test follows the complete cause chain. Ruff reports three pre-existing BLE001 sites in the worker/HTTP error boundaries; their explicit boundary annotations belong to the T3 pass.
+
+Found: the broader provider chapter reported 4 fixture failures, 523 passed, 85 skipped and 8 compliance teardown errors in 35.67 seconds. The teardown errors name the newly reserved savepoint capability with no suite case. Ownership now includes testing/_providers.py to add the nested rollback law and false-declaration control; `ai-tmp/ai-audits-h1-chapter.log` retains that F12 consumer failure.

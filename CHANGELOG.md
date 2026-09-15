@@ -246,6 +246,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Remote removal delegates Symbols, Grounded values and expressions to the
+  store, preserving local absence and duplicate-occurrence behavior over HTTP.
+
 - Table ingestion owns one transaction across input reads, conversion, writes
   and iterator cleanup. Frame providers declare their native row extraction.
   Unsupported foreign stores refuse before input acquisition; nested foreign
