@@ -7,6 +7,9 @@
 :- encoding(utf8).
 
 % Purpose: implement pre-add hooks, transforms, watchers, views, digests, and purity inventories
+% Guarantees: transaction_constraint/1 prepares checks after the body and before
+%   the commit mutex; their execution uses the refreshed outer commit view
+%   [source: engine/metta/space_hooks.pl:metta_outer_transaction_prepare; commit=WORKTREE].
 % Guarantees: metta_transaction/2 rolls back Error-valued answer bags and
 %   replays their exact order and bindings after rollback
 %   [tested: classes_transaction_results; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
@@ -586,9 +589,10 @@ metta_outer_transaction_prepare(Goal, Outcome, outer(Enlisted)) :-
     catch(( setup_call_cleanup(
                 b_setval('$metta_user_tx', true),
                 materialization_transaction(
-                    Goal,
+                    ( call(Goal),
+                      findall(Check, seam:transaction_constraint(Check), Checks) ),
                     ( metta_validate_pending_type_aliases,
-                      forall(seam:transaction_constraint(Check), call(Check)) )),
+                      maplist(call, Checks) )),
                 b_setval('$metta_user_tx', false))
         ->  Outcome = committed ; Outcome = failed ),
           Error,

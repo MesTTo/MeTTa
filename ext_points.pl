@@ -993,13 +993,16 @@ kind(grounded_numeric_operation/3, ownership).
 :- multifile pure_operation/1.
 kind(pure_operation/1, declaration).
 
-% Qualified goals validated in the refreshed outer transaction commit view.
-% A provider enumerates its pending checks; every check must succeed. Failure
+% Qualified goals prepared after the complete outer transaction body and before
+% its commit mutex, then validated in the refreshed native commit view.
+% A provider enumerates its finite pending checks; every check must succeed. Failure
 % or exception aborts the transaction before any commit notification. Nested
 % savepoints leave their checks for the outer owner, and rolled-back writes
-% must leave no surviving check that could reject unrelated later work.
-% [tested: test_overlapping_transactions_cannot_publish_distinct_proxies,
-% test_a_rolled_back_proxy_check_cannot_refuse_the_outer_commit; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% must leave no surviving check that could reject unrelated later work. Checks
+% run under '$metta_materialization' and must not evaluate MeTTa, call a host,
+% yield, or invoke arbitrary user goals. Preparation may inspect native deltas.
+% [source: engine/metta/space_hooks.pl:metta_outer_transaction_prepare;
+% commit=WORKTREE].
 :- multifile transaction_constraint/1.
 kind(transaction_constraint/1, declaration).
 

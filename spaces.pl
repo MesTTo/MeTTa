@@ -1,6 +1,9 @@
 % Purpose: store MeTTa atoms, compile equations into per-space modules,
 %   route matching to native and foreign space providers, and validate
 %   '&metta' declarations against the self-describing catalog.
+% Guarantees: native owned-record declarations derive finite outer-commit
+%   checks from changed storage occurrences
+%   [source: engine/spaces/owned_records.pl:metta_prepare_owned_records; commit=WORKTREE].
 % Guarantees: namespace registrations are published independently of space
 %   species [tested: run_tests(space_registration); commit=a8e3fc42306377adf7cae0a331f3d92fbf190304].
 % Guarantees: add-atom/4 exposes the native occurrence-output write
@@ -217,6 +220,8 @@
             metta_generation_receive/1,
             metta_storage_term/4,
             metta_native_pair/4,
+            metta_prepare_owned_records/1,
+            metta_validate_owned_records/1,
             metta_space_pair/4,
             metta_require_token_read/2,
             metta_require_token_mutation/2,
@@ -446,7 +451,8 @@
 %claims with it. The gate loads the engine with the autoloader off, so a
 %library predicate a unit calls is imported here, where the umbrella owns
 %every unit's imports, or list_undefined reports it as spaces:pairs_keys_values/3.
-:- use_module(library(pairs), [pairs_keys_values/3]).
+:- use_module(library(pairs), [pairs_keys_values/3, group_pairs_by_key/2]).
+:- use_module(library(solution_sequences), [limit/2]).
 
 % Storage modules are separate from execution modules. They inherit nothing,
 % so a user predicate cannot appear as a space atom, and unknown arities fail
@@ -481,6 +487,7 @@ space_canonical_atom(Space, Encoded) :-
 :- consult('spaces/receipts.pl').
 :- consult('spaces/catalog.pl').
 :- consult('spaces/lifecycle.pl').
+:- consult('spaces/owned_records.pl').
 :- consult('spaces/arrow_products.pl').
 :- consult('spaces/foreign.pl').
 :- consult('spaces/bounded_matching.pl').
