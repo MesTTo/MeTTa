@@ -4,7 +4,7 @@
 %   joins its worker and removes its temporary predicate wrapper.
 % Guarantees: tests distinguish empty records, stored data, malformed original
 %   keys and concurrent replacement without selecting a surviving row by chance
-%   [source: tests/prolog/suites/spaces/owned_record_reads.plt; commit=WORKTREE].
+%   [source: tests/prolog/suites/spaces/owned_record_reads.plt; commit=dbb95d0bff10a93f2fef0453195b2331918f92dc].
 
 :- ensure_loaded('owned_records.plt').
 

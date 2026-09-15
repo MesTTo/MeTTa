@@ -4,7 +4,7 @@
 ;;   a transaction reads the new row; a second value for one key is refused at
 ;;   the outer commit and the record is unchanged [tested:
 ;;   sh test.sh examples/ch15-writing-transactions-and-worlds/07-owned_records.metta;
-;;   commit=WORKTREE].
+;;   commit=dbb95d0bff10a93f2fef0453195b2331918f92dc].
 
 !(bind! &ledger (new-space))
 

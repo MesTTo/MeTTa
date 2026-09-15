@@ -191,7 +191,7 @@ prelude_declaration('space-contains', [->, '%Undefined%', 'Atom', 'Bool']).
 %The rows are data: an Atom result never re-enters the evaluator, which is
 %what keeps a stored (+ 1 2) unevaluated and leaves no re-entry choicepoint
 %(the Expression-returning collapse-bind still shows one) [tested:
-%owned_record_reads:a_ground_owner_expression_is_held_as_data; commit=WORKTREE].
+%owned_record_reads:a_ground_owner_expression_is_held_as_data; commit=dbb95d0bff10a93f2fef0453195b2331918f92dc].
 prelude_declaration('owned-record-read', [->, 'Atom', 'Atom']).
 prelude_declaration('space-admission-verdict', [->, '%Undefined%', 'Atom', '%Undefined%']).
 
