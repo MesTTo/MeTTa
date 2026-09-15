@@ -242,6 +242,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The gate runs headless: `bounded.sh` unsets `DISPLAY` and `WAYLAND_DISPLAY`, so a
+  desktop run behaves as CI does. With a display set, SWI-Prolog loads xpce for a text
+  `profile/2` and a failing GLX context kills the process, which had turned prolog-static,
+  host-workarounds and the Python examples lane red on one box while the tree was unchanged.
+
 - `TaggedAnswer.under()` no longer raises `algebra_operation_error` for
   `tropical` and `budget`: the reinterpretation fold now starts from the first
   alternative, as direct evaluation does, instead of handing the carrier's

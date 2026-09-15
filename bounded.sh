@@ -61,6 +61,16 @@
 #     the command rather than running it with a signal that can never arrive
 #   - `--enforcer` names the ceiling program, so a caller that spawns many
 #     children resolves it once instead of per spawn
+#   - the command runs headless: DISPLAY and WAYLAND_DISPLAY are unset before
+#     anything starts, so a desktop run answers as the CI run does and no
+#     lane can depend on the box's X session. With a display set, SWI-Prolog
+#     loads xpce for a text profile/2 and a display whose GLX context
+#     creation fails kills the process [measured 2026-09-15: `DISPLAY=:0 swipl
+#     -g 'profile(true,[top(0)])'` exits 1 on X_GLXCreateContext BadValue and
+#     the same call with DISPLAY unset runs; prolog-static, host-workarounds,
+#     host-workarounds-selftest and the Python examples lane failed that way
+#     on an unchanged tree and pass headless; SWI-Prolog 10.1.13;
+#     commit=WORKTREE]
 # Fails when:
 #   - no `timeout` is reachable: exit 2, naming the package that ships one.
 #   - the caller died before the signal was armed: exit 125, the same status
@@ -79,6 +89,10 @@
 #   Future Enhancements: None
 
 set -u
+# Headless by construction: see the Guarantees above. The variables are
+# unset here, before either exec path, so the deadline-only rung and the
+# owner-linked rung start the command in the same environment.
+unset DISPLAY WAYLAND_DISPLAY
 
 # An absolute path to this file, because the arming rung re-enters it through
 # setpriv's execvp, which does a PATH lookup on a name with no slash in it. The
