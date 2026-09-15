@@ -35,11 +35,11 @@
 %   '$metta_translation_cache' guards translation reservations, publication
 %   and invalidation. metta_source_singleflight/2 serializes misses per key;
 %   compilation runs outside the publication mutex and releases reservations
-%   on every exit [tested: translation_cache; commit=WORKTREE].
+%   on every exit [tested: translation_cache; commit=4b61fbdba18f37f8b2857a879dd5220e9f08cb3f].
 %   Cached templates retain dependencies from written source, generated goals
 %   and returned functions. Retirement evicts those templates and cancels
 %   pending compilation without discarding unrelated completed templates
-%   [tested: translation_cache; commit=WORKTREE].
+%   [tested: translation_cache; commit=4b61fbdba18f37f8b2857a879dd5220e9f08cb3f].
 % [tested: tests/prolog/suites/translator/translator.plt, tests/prolog/static_checks.pl; commit=9a116762fb4372d55675e2ef64b7657092bc136d]
 % Guarantees: retained and deferred equation type groups preserve written
 %   aliases, and with_equation_types/4 restores its enclosing translation
@@ -49,7 +49,7 @@
 %   user predicates [tested: run_tests(tensor_shapes); commit=4eaefdd8d40e53b2613722287302a14b41704662].
 %   Constrained inputs use translate_cached_expr/3's original-source branch;
 %   their attributes never enter normalization or shared template publication
-%   [tested: translation_cache; commit=WORKTREE].
+%   [tested: translation_cache; commit=4b61fbdba18f37f8b2857a879dd5220e9f08cb3f].
 
 % Function source retained for higher-order specialization. Each equation is
 % one independently indexed fact, so compiling a new equation does not copy
@@ -1657,7 +1657,7 @@ translation_skeleton_argument(Term, Skeleton) :-
 % accepted term is already bounded, and SWI derives maxcount=0 from [] and
 % stops at its first attributed variable before following its attributes.
 % [source: https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/src/pl-prims.c#L3328;
-% commit=WORKTREE].
+% commit=4b61fbdba18f37f8b2857a879dd5220e9f08cb3f].
 translation_cacheable(Term) :-
     acyclic_term(Term),
     cache_term_budget(Term, 256, _),
