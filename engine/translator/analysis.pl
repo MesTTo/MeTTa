@@ -777,7 +777,7 @@ seam:engine_emitted(metta_run_with_fuel/3).
 %the engine, never written into a body, so it needs no protection here.
 %The corpus half of the check saw the arity-two goal unprotected on
 %examples/ch15-writing-transactions-and-worlds/01-mutex_and_transaction.metta
-%[tested: sh check.sh prolog-static; commit=WORKTREE].
+%[tested: sh check.sh prolog-static; commit=92ce65e87a73e2ee9345d94db62b806ca7883eac].
 seam:engine_emitted(metta_transaction/2).
 seam:engine_emitted(metta_with_seed/4).
 seam:engine_emitted(switch_runtime/3).
