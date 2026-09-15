@@ -7,6 +7,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- HTTP serving accepts a context for GET and POST authorization by naming the home space already resolved by its gateway.
+
 ### Added
 
 - One door for host event listeners: `metta_listen/2` in

@@ -252,3 +252,11 @@ Tried: Rows.one recommends first() for an empty result, but first() itself requi
 Decided: recommend first(default=None), retaining the cardinality behavior of both methods. The same expression works for zero rows and several rows. The one() docstring now states that its own default applies only to absence. The classes branch does not change results.py.
 
 Verified: the complete spaces and matching chapter reports 542 passed in 12.38 seconds, including both absence-remedy cardinalities and the A3 hash controls; `ai-tmp/ai-audits-a8-chapter.log`. Ruff, reference and reference-selftest pass after regenerating the results and root pages.
+
+### HTTP context resolution found during T3
+
+Tried: GET health and POST atoms with both a context and its home space. The context cases fail with `AttributeError: MeTTa has no 'name': it is a Space door, and a context is not its space`; both space controls pass. `ai-tmp/ai-audits-http-context-baseline.log` reports 2 failed and 2 passed in 4.84 seconds. The classes branch at b62a0d5e49cfd54c7685eabe1a3f01ce31de036e does not change remote/.
+
+Decided: both authorization paths use Gateway's already resolved home. Re-resolving the original receiver at each request would duplicate the construction boundary. The retained test checks the authorizer's exact operation and space, as well as each successful reply.
+
+Verified: all 87 context and existing HTTP controls pass in 22.21 seconds; `ai-tmp/ai-audits-http-context.log`.
