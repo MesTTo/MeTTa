@@ -192,3 +192,7 @@ Verified: focused exit, asynchronous worker and remote ownership tests report 15
 Tried: replay and slicing must preserve the original _AnswerItem, and early close must preserve both cached faces without resuming the source. The expanded baseline reports 2 failed in 0.90 seconds, both on reconstructed record identity; `ai-tmp/ai-audits-f14-expanded-baseline.log`. The original audit reported redundant representation, not an observed misalignment bug.
 
 Decided: the existing immutable _AnswerItem becomes the cache element. Every public face projects its value or row. A locked non-pulling accessor supplies the asynchronous consumer, including the same cached-prefix and error-frontier behavior.
+
+Verified: the five paired-record controls pass in 1.07 seconds, including reverse and negative-bound slices and a None-valued record. The spaces and concurrency chapters report 742 passed in 27.56 seconds; `ai-tmp/ai-audits-f14.log` and `ai-tmp/ai-audits-f14-chapters.log`. No production consumer reads `_row_cache`; asynchronous replay uses `_cached_item` instead of reading cache or error fields.
+
+Verified: reference and reference-selftest pass after regenerating the constructor signatures. Mypy reports three diagnostics in earlier owned repairs: seam._enlist's reconciler return type, _into_fields' TypedDict metadata access and Answers.__getitem__'s Variable/SupportsIndex overload order. The record migration adds none; these remain in the T3 annotation repair. Exact diagnostics are in `ai-tmp/ai-audits-f14-reference-mypy.log`.

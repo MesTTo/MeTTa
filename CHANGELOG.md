@@ -80,6 +80,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Evaluation answers retain each value and caller-binding row in one immutable
+  record. Replay, slicing and asynchronous projections share that record,
+  including the cached prefix retained after closing a view.
+
 - Engine call-graph checks attribute multifile calls to each clause's source
   file. Handler implementations no longer create false cross-module reaches
   or enlarge the declared dependency cycle.

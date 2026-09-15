@@ -101,14 +101,14 @@ def __init_subclass__(cls, **kwargs: Any) -> None:
 ```python
 def __init__(
     self,
-    source: Iterable[T | _AnswerItem],
+    source: Iterable[T | _AnswerItem[T]],
     *,
     columns: Iterable[str] = (),
     space: str | None = None,
     target: object = None,
     count: Callable[..., int | None] | None = None,
     query: _QueryContext | None = None,
-    bound_source: Callable[[int, Iterable[T | _AnswerItem]], Iterable[T | _AnswerItem] | None] | None = None,
+    bound_source: Callable[[int, Iterable[T | _AnswerItem[T]]], Iterable[T | _AnswerItem[T]] | None] | None = None,
 ) -> None:
 ```
 
