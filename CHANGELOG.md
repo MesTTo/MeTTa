@@ -7,6 +7,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+- Door-order analysis follows literal object fields and descriptor access,
+  preserves functions stored on instances, and settles caller values before
+  completing missing helper declarations. Broad annotations retain returned
+  callables; unresolved dynamic member names remain findings. A setter that
+  only forwards its parameters to `object.__setattr__` keeps each field
+  paired with its own value instead of every value assigned through it.
+  Declaration lookups are memoized against the store slots they read, so
+  the analysis of the shipped tree takes 17.8s instead of 41s with the same
+  report.
+
 - Wire decoding now builds ordinary and undefined answers from one definite
   atom decoder. Nested undefined wrappers fail before payload descent, while
   deep expressions keep their iterative decoding.
