@@ -772,7 +772,13 @@ seam:engine_emitted(metta_prune_empty/2).
 seam:engine_emitted(metta_prune_empty_answers/2).
 seam:engine_emitted(metta_run_named/3).
 seam:engine_emitted(metta_run_with_fuel/3).
-seam:engine_emitted(metta_transaction/1).
+%The transaction form emits the result-aware metta_transaction/2
+%(engine/translator/special_forms.pl); the arity-one service is called by
+%the engine, never written into a body, so it needs no protection here.
+%The corpus half of the check saw the arity-two goal unprotected on
+%examples/ch15-writing-transactions-and-worlds/01-mutex_and_transaction.metta
+%[tested: sh check.sh prolog-static; commit=WORKTREE].
+seam:engine_emitted(metta_transaction/2).
 seam:engine_emitted(metta_with_seed/4).
 seam:engine_emitted(switch_runtime/3).
 seam:engine_emitted(metta_evaluation_fuel/1).

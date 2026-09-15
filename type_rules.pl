@@ -87,6 +87,10 @@
             raw_registered_typing_rule/7,
             typing_policy_is_default/1,
             typing_policy_shortcuts_allowed/1,
+            % The context reader's callable form. Every call inside this
+            % module is inlined by its declaration, so the predicate is
+            % reached only from outside, where an unexported name is invisible.
+            typing_policy_snapshot/1,
             with_typing_policy_stable/1,
             typing_rule_reference_module/2,
             retire_typing_rules_in/1
