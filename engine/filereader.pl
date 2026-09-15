@@ -2,7 +2,7 @@
 % dispatch each parsed form to the evaluator.
 % Guarantees: ordinary deferral also preserves the resolved &self storage law
 %   [tested: test_equal_raw_and_resolved_source_can_still_own_a_binding;
-%   commit=WORKTREE].
+%   commit=323a89d607b656a3a238315ef111e3b23725ce83].
 % Guarantees: record_translated_from/4 retains an occurrence's resolved binding
 %   after its source rewriter leaves, including recompilation and fast restore
 %   [tested: test_fast_images_keep_withdrawn_bindings_across_generations;
