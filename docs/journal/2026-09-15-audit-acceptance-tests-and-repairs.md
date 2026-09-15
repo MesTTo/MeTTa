@@ -266,3 +266,9 @@ Verified: all 87 context and existing HTTP controls pass in 22.21 seconds; `ai-t
 Tried: `sh check.sh door-sync` on the branch tip reports stale `website/reference/python-door-contracts.md` and `llms.txt`; the drift is the Rows.one and Rows.into docstrings and the RemoteCursor.__exit__ annotations those commits changed without regenerating. `ai-tmp/ai-audits-t3-lanes.log`.
 
 Decided: regenerate through `tools/doorgen.py --write` alone; no source changes. `door-sync: 227 contracts and every projection agree`; `ai-tmp/ai-audits-t3-regenerate.log`.
+
+### The seat's Ruff lane over the acceptance tests
+
+Tried: `sh check.sh ruff` on the branch tip reports 17 findings in five acceptance tests committed earlier on this branch (`test_table_ingestion_boundary.py`, `test_entry_point_collisions.py`, `test_registration_identity.py`, `test_registration_publication.py`, `test_unregister_rollback.py`): PLR0917, B023, PERF401, ARG005, TRY003, EM101, EM102. The lane was green at the cut (`trunk-gate-efac42a31.log` line 54363). `ai-tmp/ai-audits-t3-lanes.log`.
+
+Decided: keyword-only fixture parameters, an `_advertising(entries)` closure in place of the loop-bound lambda, a list comprehension, underscore-prefixed unused listener parameters and bound exception messages. No suppression. `ruff check metta tests tools examples/language-feature-examples bench.py ext conftest.py _workspace.py`: All checks passed.
