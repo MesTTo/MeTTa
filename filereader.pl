@@ -1,5 +1,9 @@
 % Purpose: read MeTTa source, split it into complete top-level forms, and
 % dispatch each parsed form to the evaluator.
+% Guarantees: record_translated_from/4 retains an occurrence's resolved binding
+%   after its source rewriter leaves, including recompilation and fast restore
+%   [tested: test_fast_images_keep_withdrawn_bindings_across_generations;
+%   commit=WORKTREE].
 % Guarantees: retain_source_assertion/1 lets a process owner adopt an existing
 %   registry artifact without replacing its clause reference
 %   [tested: lib_import_lifecycle:host_registration_outlives_the_importing_source;
@@ -12,7 +16,7 @@
 % Owns resources: '$metta_equation_token'/4 rows link live compiled clauses to
 %   their stored occurrence; forget_translated_equation_binding/1 retires them
 %   [tested: spaces_tokens:equation_tokens_survive_recompilation_and_exact_subtraction;
-%   commit=7f00ac7932fefa6f380fc8d14ec583ea0c58eff4].
+%   commit=WORKTREE].
 %   metta_reference_source_reader/2 installs a home-scoped admission observer;
 %   metta_reference_admission_scope/3 removes it on success, failure, cancellation
 %   or home release [tested: reference_loading; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
@@ -27,7 +31,7 @@
 %     deferred reconstruction, recompilation and fast-cache relocation
 %     [tested: test_forcing_a_deferred_equation_keeps_a_resolved_sibling_once,
 %     test_fast_images_keep_pending_equations_beside_resolved_equations;
-%     commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
+%     commit=WORKTREE].
 %   - source exits and runnable prefixes materialize the arrived function-free
 %     fragment through materialize:flush_source_materialization/0
 %     [tested: function_free_materialization; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
@@ -1586,31 +1590,33 @@ record_equation_token(Ref, Name, Token) :-
 % a row that only said so was derivable state, and it was written by the
 % doors that carried a stored reference and not by the one-equation door,
 % which made "has a row" a fact about the door rather than the occurrence.
-% The guard is the batch door's own: with no token bound and no rewriter
-% registered, the rewrite IS the law and nothing is compared.
+% The stored and translated terms decide this association. A recompile or fast
+% restore can retain an old binding after the token or rewriter that supplied it
+% has left. Even equal raw and translated terms can differ from the law when a
+% token maps the resolved home back to literal &self.
 record_translated_from(Ref, Term, StoredRef, SourceRef) :-
     assertz(translated_from(Ref, Term), SourceRef),
     (   StoredRef \== none,
-        stored_atom_of_ref(StoredRef, _, [=, [Name|_], _], Token),
-        clause_property(Ref, module(TokenModule))
-    ->  assertz('$metta_equation_token'(TokenModule, Name, Ref, Token), TokenRef),
-        ( source_recompile_owners(TokenOwners)
-        -> record_recompiled_source_assertion(TokenOwners, TokenRef)
-        ; record_source_assertion(TokenRef) )
-    ;   true
-    ),
-    (   StoredRef \== none,
-        ( seam:form_rewriter(_) ; metta_engine:metta_token_claim(_, _, _, _) ),
-        stored_atom_of_ref(StoredRef, Space, Original, _),
-        (   Space == '&self'
-        ->  Law = Original
-        ;   metta_substitute_self(Space, Original, Law)
+        stored_atom_of_ref(StoredRef, Space, Original, Token)
+    ->  (   Original = [=, [Name|_], _],
+            clause_property(Ref, module(TokenModule))
+        ->  assertz('$metta_equation_token'(TokenModule, Name, Ref, Token), TokenRef),
+            ( source_recompile_owners(TokenOwners)
+            -> record_recompiled_source_assertion(TokenOwners, TokenRef)
+            ; record_source_assertion(TokenRef) )
+        ;   true
         ),
-        \+ Law =@= Term
-    ->  assertz(translated_equation_binding(Space, StoredRef, Ref), BindingRef),
-        ( source_recompile_owners(Owners)
-        -> record_recompiled_source_assertion(Owners, BindingRef)
-        ; record_source_assertion(BindingRef) )
+        (   (   Space == '&self'
+            ->  Law = Original
+            ;   metta_substitute_self(Space, Original, Law)
+            ),
+            \+ Law =@= Term
+        ->  assertz(translated_equation_binding(Space, StoredRef, Ref), BindingRef),
+            ( source_recompile_owners(Owners)
+            -> record_recompiled_source_assertion(Owners, BindingRef)
+            ; record_source_assertion(BindingRef) )
+        ;   true
+        )
     ;   true
     ),
     (   clause_property(Ref, module(Module))
