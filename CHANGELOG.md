@@ -307,6 +307,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Compiled call consumers share one type for application and iteration;
+  native validation derives its accepted words from the same declaration.
 - TOML configuration headers participate in provenance checks and pinning.
   Pinning preserves quoted keys and values through the standard TOML parser.
 - Clearing a space withdraws its references immediately and preserves live
