@@ -1,6 +1,10 @@
 % Purpose: classify compiled effects, compose the five-rank effect lattice,
 %   plan reified-world admission, and manage memoization, dependencies, and
 %   bridge cascades.
+% Guarantees: on-unwind plans include its source and applied handler, retain
+%   unresolved handler effects, and respect local definitions
+%   [tested: sh engine/test.sh suites/evaluation/on_unwind.plt;
+%   commit=WORKTREE].
 % Guarantees: source and compiled plans ask seam:grounded_applicable/1 before
 %   classifying grounded calls as opaque; planning does not apply them.
 %   [tested: grounded_source_effects; commit=84c73d0d703be50c3520b2e08488581e77a7ce3f]
@@ -729,6 +733,7 @@ metta_semantic_effect(unify, nondeterministicReadOnly).
 metta_semantic_effect('unify%', nondeterministicReadOnly).
 
 metta_semantic_effect(eval, writesState).
+metta_semantic_effect('on-unwind', writesState).
 metta_semantic_effect(evalc, writesState).
 metta_semantic_effect('collapse-bind', writesState).
 metta_semantic_effect(metta, writesState).
@@ -975,6 +980,7 @@ metta_builtin_effect_override('bind!', writesState).
 metta_builtin_effect_override('change-state!', writesState).
 metta_builtin_effect_override('collapse-bind', writesState).
 metta_builtin_effect_override(eval, writesState).
+metta_builtin_effect_override('on-unwind', writesState).
 metta_builtin_effect_override(evalc, writesState).
 metta_builtin_effect_override('get-type', writesState).
 metta_builtin_effect_override('get-type-space', writesState).
@@ -1464,6 +1470,13 @@ metta_effect_plan_classify(Module, metta_eval_step(Source, _),
                            State0, State) :-
     !,
     metta_effect_plan_source_term(Module, Source, State0, State).
+metta_effect_plan_classify(Module, 'on-unwind'(Source, Handler, _),
+                           State0, State) :-
+    \+ metta_effect_program_lookup(Module, definition('on-unwind'), _),
+    predicate_property(Module:'on-unwind'(_, _, _), implementation_module(metta_engine)),
+    !,
+    metta_effect_plan_source_term(Module, Source, State0, Mid),
+    metta_effect_plan_unwind_handler(Module, Handler, Mid, State).
 metta_effect_plan_classify(Module, metta_evalc_step(Source, _, _),
                            State0, State) :-
     !,
@@ -1586,6 +1599,10 @@ metta_effect_plan_source(Module, metta_mapped_operation(Operation),
                          State0, State) :-
     !,
     metta_effect_plan_source_root(Module, [Operation, _], State0, State).
+metta_effect_plan_source(Module, metta_unwind_handler_source(Handler),
+                         State0, State) :-
+    !,
+    metta_effect_plan_unwind_handler(Module, Handler, State0, State).
 metta_effect_plan_source(Module, Name, State0, State) :-
     atom(Name), metta_effect_program_lookup(Module, definition(Name), _), !,
     metta_effect_plan_named_call(Module, Name, 1, State0, State).
@@ -1617,6 +1634,13 @@ metta_effect_plan_source(Module, [Head|Args], State0, State) :-
 
 metta_effect_plan_dynamic_state(Queue-Effects, Queue-Next) :-
     metta_effect_plan_dynamic(Effects, Next).
+
+% The handler is applied to one held outcome. Reuse the existing applied-source
+% walk for written lambdas and partials; a symbol names the one-argument call.
+metta_effect_plan_unwind_handler(Module, Handler, State0, State) :-
+    ( atom(Handler)
+    -> metta_effect_plan_source_root(Module, [Handler, _], State0, State)
+    ; metta_effect_plan_applied_source(Module, Handler, 1, State0, State) ).
 
 metta_effect_plan_function_instruction(_, Source, State, State) :-
     var(Source),
@@ -1785,6 +1809,7 @@ metta_evaluated_roots([Entry|Entries], Roots) :-
 metta_evaluated_marker(metta_evaluated_source_root).
 metta_evaluated_marker(metta_unquoted_source).
 metta_evaluated_marker(metta_mapped_operation).
+metta_evaluated_marker(metta_unwind_handler_source).
 metta_evaluated_marker(metta_function_instruction_root).
 
 %A subterm that IS an evaluated root is skipped whole; every occurrence
@@ -1984,6 +2009,9 @@ metta_effect_plan_source_special_arguments(_, reduce, [Expr],
                                            [metta_evaluated_source_root(Expr)]).
 metta_effect_plan_source_special_arguments(_, eval, [Source],
                                            [metta_evaluated_source_root(Source)]).
+metta_effect_plan_source_special_arguments(_, 'on-unwind', [Source, Handler],
+                                           [metta_evaluated_source_root(Source),
+                                            metta_unwind_handler_source(Handler)]).
 metta_effect_plan_source_special_arguments(_, evalc, [Source, Space],
                                            [metta_evaluated_source_root(Source),
                                             metta_evaluated_source_root(Space)]).
