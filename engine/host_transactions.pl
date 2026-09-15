@@ -76,10 +76,12 @@ host_assertion_body(Clause, Ref, Assert, Original, Body) :-
         ->  Assert,
             % Workaround: swi-cleanup-window - catch an inference cut before recording the just-created reference.
             % SWI defers a cut on catch/3's call port until inside its
-            % protected goal. Retrying ownership cannot lose Ref.
-            catch(host_record_assertion(Journal, Clause, Ref),
+            % protected goal. Retrying ownership cannot lose Ref. The goal
+            % is qualified because this body runs as system's wrapper, not
+            % as a clause of this module.
+            catch(host_transactions:host_record_assertion(Journal, Clause, Ref),
                   Ball,
-                  ( host_record_assertion(Journal, Clause, Ref), throw(Ball) ))
+                  ( host_transactions:host_record_assertion(Journal, Clause, Ref), throw(Ball) ))
         ;   Original
         )).
 
