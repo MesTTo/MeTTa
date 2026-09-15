@@ -1686,7 +1686,7 @@ Return the first row, or the caller's explicit default.
 one(*, default: Any=_MISSING) -> Row | Any
 ```
 
-THE row, when the query is asserted to have exactly one answer;
+Return the sole row, using an explicit default only for absence.
 
 `rows:raise-for-errors`: `query`, returns `value`, effect `pureStructural`, determinism `det`; tiers `sync`.
 
@@ -1730,7 +1730,7 @@ Rebuild constructor atoms through the two-way translator.
 into(cls: type) -> list
 ```
 
-Each row as one ``cls``, matched by field name.
+Each row as one ``cls``, matched to named constructor inputs.
 
 `rows:to-dicts`: `query`, returns `list`, effect `pureStructural`, determinism `det`; tiers `sync`.
 
@@ -2097,7 +2097,7 @@ Enter the receiver lifetime.
 `remote-cursor:__exit__`: `lifecycle`, returns `None`, effect `oracleIO`, determinism `det`; tiers `remote`.
 
 ```python
-__exit__(exc_type, exc, tb) -> None
+__exit__(exc_type: type[BaseException] | None, exc: BaseException | None, tb: TracebackType | None) -> None
 ```
 
 Stop the server's cursor without letting the stop displace the

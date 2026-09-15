@@ -260,3 +260,9 @@ Tried: GET health and POST atoms with both a context and its home space. The con
 Decided: both authorization paths use Gateway's already resolved home. Re-resolving the original receiver at each request would duplicate the construction boundary. The retained test checks the authorizer's exact operation and space, as well as each successful reply.
 
 Verified: all 87 context and existing HTTP controls pass in 22.21 seconds; `ai-tmp/ai-audits-http-context.log`.
+
+### Door projections left stale by the F08, F11 and A8 repairs
+
+Tried: `sh check.sh door-sync` on the branch tip reports stale `website/reference/python-door-contracts.md` and `llms.txt`; the drift is the Rows.one and Rows.into docstrings and the RemoteCursor.__exit__ annotations those commits changed without regenerating. `ai-tmp/ai-audits-t3-lanes.log`.
+
+Decided: regenerate through `tools/doorgen.py --write` alone; no source changes. `door-sync: 227 contracts and every projection agree`; `ai-tmp/ai-audits-t3-regenerate.log`.
