@@ -1,5 +1,8 @@
 % Purpose: read MeTTa source, split it into complete top-level forms, and
 % dispatch each parsed form to the evaluator.
+% Guarantees: ordinary deferral also preserves the resolved &self storage law
+%   [tested: test_equal_raw_and_resolved_source_can_still_own_a_binding;
+%   commit=WORKTREE].
 % Guarantees: record_translated_from/4 retains an occurrence's resolved binding
 %   after its source rewriter leaves, including recompilation and fast restore
 %   [tested: test_fast_images_keep_withdrawn_bindings_across_generations;
@@ -2053,6 +2056,10 @@ print_runnable_form(FormStr, Goals) :-
 %Equality by ==, never head unification: Term and BoundTerm both carry
 %variables, and unifying them can succeed by BINDING across the two where
 %the rewrite in fact changed the term.
+%Equal raw and rewritten terms are insufficient: a token can change the
+%resolved home back to literal &self. The deferred reader would then apply
+%the ordinary space law again and lose that value. Keep the existing eager
+%admission boundary, but require equality with that law before deferring.
 :- dynamic store_metta_equation/6, metta_reference_lazy_ref/2.
 
 metta_reference_lazy_reader(Space, enabled) :-
@@ -2068,6 +2075,11 @@ metta_reference_lazy_reader(Space, disabled) :-
 store_metta_equation(Space, Module, Term, BoundTerm, StoredRef, _) :-
     silent(true),
     Term == BoundTerm,
+    (   Space == '&self'
+    ->  true
+    ;   metta_substitute_self(Space, Term, Expected),
+        BoundTerm =@= Expected
+    ),
     !,
     defer_metta_equation(Space, Module, Term, StoredRef).
 store_metta_equation(_, Module, _, BoundTerm, StoredRef, FormStr) :-
