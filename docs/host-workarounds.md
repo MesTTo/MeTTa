@@ -39,6 +39,22 @@ An entry lands with its first site and its reproduction in the same commit. A
 site the ledger does not know is refused, and so is an entry nothing uses. The
 journal keeps the history; this file holds only what is live.
 
+## swi-bound-clause-reference-ignores-snapshot
+Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
+  src/pl-dbref.c:PL_get_clref and src/pl-comp.c:clause.
+Defect: bound-reference clause/3 rejects the global CL_ERASED flag even when
+  enumeration in the caller's older transaction still admits that occurrence.
+  A second read can therefore lose the source or owner that the first read saw.
+Reproduction: tests/checks/host_workarounds/swi-bound-clause-reference-ignores-snapshot.pl,
+  an old transaction enumerates its original fact after an independently joined
+  eraser, then compares bound-reference reading with retained-term decompilation.
+Workaround: select the occurrence through the snapshot or native transaction
+  delta, then use '$clause'/4 to recover its original syntax. Decompilation does
+  not establish visibility or committed liveness.
+Lifted when: bound-reference clause/3 returns the same occurrence admitted by
+  enumeration in the transaction, so the reproduction prints absent.
+Record: docs/journal/2026-09-15-native-owned-records.md.
+
 ## swi-cached-undefined-supervisor
 Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
   src/pl-proc.c:trapUndefined, src/pl-supervisor.c:createUndefSupervisor
@@ -56,6 +72,25 @@ Workaround: deferred registration abolishes its native slot only when no
 Lifted when: a cached undefined call consults the loader after source becomes
   available, so the reproduction prints absent.
 Record: docs/journal/2026-09-15-deferred-definitions-rearm-undefined-calls.md.
+
+## swi-empty-indexed-snapshot
+Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
+  src/pl-index.c:first_clause_guarded.
+Defect: a call or an unbound clause/3 on a dynamic predicate whose current
+  clause count is zero returns no clause before the caller's transaction
+  generation is applied, so an older transaction loses the rows it should
+  still see once the last current clause is erased, while nth_clause/3 and
+  '$clause'/4 still admit them.
+Reproduction: tests/checks/host_workarounds/swi-empty-indexed-snapshot.pl,
+  an old transaction reads one and sixteen facts after an independently joined
+  thread erases every current clause of the predicate.
+Workaround: the first write to a native storage predicate also asserts one
+  inert clause, key '$metta_sentinel' and body fail, that no erase path
+  removes, so the count never reads zero; no reader answers it.
+Lifted when: the empty-current list is routed through the visibility-aware
+  unindexed reader, a three-line correction in first_clause_guarded, so the
+  reproduction prints absent.
+Record: docs/journal/2026-09-15-native-owned-records.md.
 
 ## swi-erased-definition-bypasses-loader
 Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;

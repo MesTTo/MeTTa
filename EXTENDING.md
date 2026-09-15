@@ -3215,13 +3215,60 @@ and write `( Condition -> Action ; true )`.
 
 ### Check a transaction before commit
 
-`seam:transaction_constraint/1` is a declaration seam. A provider enumerates
-module-qualified goals for its pending writes. The outer transaction runs every
-goal in its refreshed commit view; a failure or exception aborts before commit
-notifications. Nested savepoints leave their checks to that outer owner.
-Store the pending checks transactionally so rollback removes them with the
-writes they validate. The Python proxy provider uses this door to prevent two
-concurrent transactions from publishing different proxies for one receiver.
+`seam:transaction_constraint/1` is a declaration seam. After the complete outer
+transaction body succeeds, the engine asks providers for module-qualified
+checks. Preparation runs before the commit mutex. The engine then runs each
+check in its refreshed commit view while holding `'$metta_materialization'`
+through commit. Failure or exception aborts before commit notifications.
+Checks may inspect finite native records; they must not evaluate MeTTa, call
+Python or another host, yield, or invoke arbitrary user goals under that mutex.
+Nested savepoints leave validation to the outer owner. Derive checks from the
+final native delta, or store pending checks transactionally so rollback removes
+them with the writes they validate. The existing Python proxy provider uses
+this seam to prevent competing proxies for one receiver.
+
+Native partial-function records declare their row shape in `&metta`:
+
+```metta
+(@owned-record &objects (Item $id) &objects (_field-value (Item $id)))
+```
+
+The arguments are the fixed native home of an ownership marker, its owner
+pattern, the record storage pattern, and a nonempty row prefix with a fixed
+symbol head. The complete record adds one final value to the prefix. Owner and
+record patterns must determine each other's variables. The example permits at
+most one `(_field-value (Item 7) value)` occurrence and requires exactly one
+`(owned-by (Item 7))` occurrence when the value exists. Equal duplicate values
+remain distinct occurrences. An absent value is allowed; duplicate owner
+markers are refused. Keys must be ground, while values may contain variables
+or `Error` data. Declaration syntax is checked before publication, even if its
+descriptive `kind` row has been withdrawn.
+
+For a prototype whose storage is its identity, a per-class declaration is
+`(@owned-record &classes (Item $space) $space (_field-value))`. Existing ownership
+markers select the prototype's class; each object needs no per-field metadata.
+Such a variable storage pattern requires an allocated native storage identity.
+Preparation checks providers before the mutex; refreshed validation uses only
+native cached storage views and refuses an unresolved identity.
+The final native delta includes markers erased by retirement. Concurrent writes
+to one key conflict at outer commit; disjoint declared keys and ordinary
+multivalued relations preserve their existing behavior. Retiring an owner and
+removing its records belongs in the same transaction. If either a competing
+writer or retirement has already committed, validation rejects the transition
+that would leave a record without its owner. Callers receive the conflicting
+key and guidance to retry the outer transaction; the engine does not replay
+user code automatically.
+
+A write that observed a declaration cannot bypass it because another
+transaction withdrew that source occurrence. Equivalent duplicate declarations
+share one check, and a surviving observed occurrence still supplies the
+contract. Equal source replacement with a fresh occurrence is a source change.
+Own declaration withdrawal retains the old invariant through its commit; a
+later transaction uses ordinary relation semantics if no declaration remains.
+Declaration additions and replacements validate their newly covered records,
+including records committed after the transaction began. These checks govern
+outer engine transactions. Arbitrary unwrapped native writes remain explicit
+graph edits; they do not acquire an implicit transaction through this seam.
 
 ### The `host_service` surface
 

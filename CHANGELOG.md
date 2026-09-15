@@ -16,6 +16,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   evaluation fails, is cut or throws. The handler receives the actual outcome;
   deterministic completion leaves it untouched. Captured variables, source
   context and native cleanup exception precedence are preserved.
+- Native `@owned-record` declarations validate one value per key and its live
+  owner at outer commit. Overlapping record writes name the conflicting key;
+  ordinary relations retain their multivalued snapshot behavior.
 - Python operator syntax, imported aliases and module calls share generated
   callable identities and signatures from pinned Python sources. The same
   rows supply atom words, compiler selectors and differential test programs;
@@ -313,6 +316,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   class fails when instantiated.
 
 ### Fixed
+
+- An older transaction no longer loses a space's rows after the last atom of a
+  storage predicate is removed: every native storage predicate keeps one inert clause
+  from its first write, working around SWI-Prolog 10.1.13's zero-count shortcut in
+  `first_clause_guarded` (host workaround `swi-empty-indexed-snapshot`, with its
+  tracked reproduction).
 
 - A local annotation claim on a container value no longer filters the value away:
   `values: list = [2]; return values` answered nothing while the unannotated form answered

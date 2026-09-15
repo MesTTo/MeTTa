@@ -2,6 +2,15 @@
 % and capability catalog Assumes: engine/spaces.pl consults this plain file
 % while its owning module is the load context. Guarantees: every definition
 % retains engine/spaces.pl's implementation module and original load order.
+% Guarantees: every native storage predicate keeps one inert clause, head key
+% '$metta_sentinel' and body fail, from its first write on, so the host never
+% reads its clause count as zero and an older transaction still finds the rows
+% it may see after the last real clause is erased; no reader answers that clause
+% [tested: owned_records:retirement_and_writes_conflict_in_both_commit_orders;
+% commit=WORKTREE].
+% Guarantees: @owned-record syntax is checked before native publication and
+% cannot be weakened by withdrawing its descriptive kind row
+% [source: engine/spaces/catalog.pl:metta_declaration_check; commit=WORKTREE].
 % Guarantees: a value's (claim ...) rows are cached per value and the cache
 % answers what the storage does: a row landing after a read beats the entry,
 % a row removed after a read stops answering through the erased-reference
@@ -367,6 +376,38 @@ metta_catalog_head('dispatch-default').
 metta_catalog_head('dispatch-policy').
 metta_catalog_head(deprecated).
 metta_catalog_head(visibility).
+metta_catalog_head('@owned-record').
+
+%Workaround: swi-empty-indexed-snapshot - the first write to a storage
+%predicate also asserts one inert clause, head key '$metta_sentinel' and body
+%fail, which no erase path removes. SWI-Prolog 10.1.13's first_clause_guarded
+%returns no clause once the predicate's clause count is zero, before the
+%caller's transaction generation is applied, so an older transaction lost the
+%rows it should still see after the last real clause was erased. With the
+%inert clause the count stays above zero and the visibility-aware walk finds
+%them. The clause answers nothing: a direct call fails on it, clause/3 with
+%body true never unifies with it, the owned-record decoder reads body true
+%only, and its key is a spelling no MeTTa symbol can have. On the host probe,
+%erasing every real clause by reference prints present without it and absent
+%with it [tested: owned_records:retirement_and_writes_conflict_in_both_commit_orders;
+%commit=WORKTREE]. The price is five inferences per write for the two functor/3,
+%the arg/3 and the indexed clause/2 probe, and one failing clause per full
+%enumeration: 1000 add-atoms plus one enumeration cost 43,157 inferences at the
+%tip before this funnel and with the owned-record checks alone, 48,162 with it,
+%three identical samples each [measured 2026-09-15: command=python - with
+%MeTTa().space() then 1000 space.add(S.row(i, S.value)) and one
+%space.match(S.row(V.i, V.v)) under m.stats(), on a provisioned worktree at
+%3eb5acc22, on this tree with the three funnel sites reverted to assertz/2, and
+%on this tree; commit=WORKTREE].
+store_native_clause(Module, Term, Ref) :-
+    functor(Term, Name, Arity),
+    functor(Sentinel, Name, Arity),
+    arg(1, Sentinel, '$metta_sentinel'),
+    (   clause(Module:Sentinel, fail)
+    ->  true
+    ;   assertz(Module:(Sentinel :- fail))
+    ),
+    assertz(Module:Term, Ref).
 
 add_sexp_in(Module, Space, Atom, Ref) :-
     add_sexp_in(Module, Space, Atom, _, Ref).
@@ -379,7 +420,7 @@ add_sexp_in(Module, [Family|Parameters], Atom, Token, Ref) :-
     ( var(Token) -> flag('$metta_generation', Token, Token+1), Stored = Token
     ; metta_token_receive(Token, Stored) ),
     metta_storage_term('$metta_parametric_atom', [Rel|Args], Stored, Term),
-    assertz(Module:Term, Ref).
+    store_native_clause(Module, Term, Ref).
 % Classify the supplied shape before unifying it. A variable datum is a
 % scalar; a variable expression head is not a ':' declaration. Static import
 % previously bypassed this funnel and therefore already preserved both cases.
@@ -391,7 +432,7 @@ add_sexp_in(Module, Space, Atom, Token, Ref) :-
     ( var(Token) -> flag('$metta_generation', Token, Token+1), Stored = Token
     ; metta_token_receive(Token, Stored) ),
     metta_storage_term(Space, [Rel|Args], Stored, Term),
-    assertz(Module:Term, Ref).
+    store_native_clause(Module, Term, Ref).
 
 %A scalar or empty expression cannot be a plain Space(Term) fact, because that
 %is already the encoding of the singleton expression (Term). It gets its own
@@ -405,7 +446,7 @@ add_sexp_in(Module, Space, Atom, Token, Ref) :-
 add_sexp_in(Module, _, Atom, Token, Ref) :-
     ( var(Token) -> flag('$metta_generation', Token, Token+1), Stored = Token
     ; metta_token_receive(Token, Stored) ),
-    assertz(Module:'$metta_native_scalar'(Atom, Stored), Ref).
+    store_native_clause(Module, '$metta_native_scalar'(Atom, Stored), Ref).
 
 %Below every add_sexp_in/5 clause so the write funnel stays contiguous for
 %the source reader; the tier note itself is order-free.
@@ -451,16 +492,21 @@ self_tier_arrived(Space) :-
 %once its author declares a kind row for it. The shape is PostgreSQL's: enum
 %values are catalog rows and a write validates against the catalog, not
 %against a list compiled into the server [source: PostgreSQL documentation,
-%8.7 Enumerated Types]. Removal is monotone-conservative, the
-%metta_ctx_declared rule: a removed kind row means later adds of that head
-%pass unchecked, and remove-then-redeclare, even WIDER than the shipped
-%preset, is how a program deliberately loosens a shipped kind.
+%8.7 Enumerated Types]. Removing a kind row drops its positional checks, the
+%metta_ctx_declared rule; remove-then-redeclare, even WIDER than the shipped
+%preset, deliberately loosens a kind. Native owned-record syntax below is an
+%intrinsic storage contract rather than a replaceable positional kind check.
 %
 %Self-description bootstraps by declaration order: the presets below add the
 %vocabularies first, then (kind kind ...) while no kind row exists yet, so
 %it enters unchecked, and from that atom on every (kind ...) add is
 %validated against it, its argspecs walked by the same checker that walks
 %any other declaration.
+% Native invariant syntax is checked before publication even if its descriptive
+% kind row has been withdrawn. A commit never evaluates declaration syntax.
+metta_declaration_check(Term) :-
+    nonvar(Term), Term = [Head|_], Head == '@owned-record',
+    !, metta_check_owned_record(Term).
 metta_declaration_check(Term) :-
     Term = [Head|Args],
     atom(Head),
@@ -2546,6 +2592,7 @@ metta_catalog_preset([kind, kind, symbol, [rest, term]]).
 metta_catalog_preset([kind, 'routed-by-shape', symbol,
                       [optional, ['one-of', 'route-key']]]).
 metta_catalog_preset([kind, 'owned-by-space', symbol]).
+metta_catalog_preset([kind, '@owned-record', term, term, term, term]).
 metta_catalog_preset([kind, vocabulary, symbol, [rest, symbol]]).
 %The four rows a vocabulary carries BESIDE its members, sibling rows rather
 %than columns because the (vocabulary ...) atom is matched by ARITY by
