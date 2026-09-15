@@ -2826,3 +2826,27 @@ Open: the remaining data-model and decorator rows, five examples and their
 twins, the documentation pass and final package battery. The separately
 tracked Python `_` binding and arbitrary grounded Kwargs argument image also
 remain open; class/member segments do not settle those general boundaries.
+
+## 2026-09-15: local annotation claims read the call boundary's images
+
+Tried: `values: list = [2]; return values` on the feature branch and on pristine c75181adc
+-> no answers, the unannotated control -> `(2)` (`ai-tmp/ai-classes-c61b-containers.py`,
+two jsonl receipts). The claim compiled to `(: $v list)` from `type_atoms_for`, which a
+structural image never satisfies.
+Decided: the single-claim and source-alias readers in `_declare/define.py` call
+`_catalog/annotations.py:runtime_type_atoms`, the function call signatures already use, so a
+`list` claim compiles to `(: $v (| list Expression))`; the resolver, typed-binding emitter,
+late-alias rules and scalar proof reader are unchanged (`ai-tmp/ai-local-annotation-receipt.md`).
+Rejected: a container map of its own, and numeric proofs derived from borrowed runtime
+values: a borrowed value is not a persistent source type proof.
+Tried: the eleven authored cases, first run here -> nine failed on three expectations the
+seat's contracts contradict, none on the reader: the Python callable projects a container
+argument to its structural image and raises on zero answers, so borrowed identity and
+zero-answer refusal are properties of the MeTTa-side call (`S["local-image"](G(value))`
+keeps `value` by identity through both the call boundary and the local claim); a Python
+`object()` is typed `%Undefined%`, which MeTTa typing admits everywhere, so the refused
+value is a Number (`ai-tmp/ai-local-annotation-probe{,2,3,4}.py`). With those three
+expectations corrected, `sh extensions/python/test.sh
+tests/ch11_python_as_a_notation/test_local_annotation_images.py
+tests/ch11_python_as_a_notation/test_define.py -n 0` -> 79 passed; ruff clean
+(`ai-tmp/ai-local-annotation-root-python.log`).

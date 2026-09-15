@@ -314,6 +314,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A local annotation claim on a container value no longer filters the value away:
+  `values: list = [2]; return values` answered nothing while the unannotated form answered
+  `(2)`. The local-claim and source-alias readers now read the same runtime images as a
+  call signature (`runtime_type_atoms`), so a container's structural image satisfies its
+  claim and a borrowed container crossing a MeTTa-side call keeps its identity; scalar
+  claims and late aliases filter as before.
+
 - Evaluation preserves constrained variables and their delayed hooks by
   keeping attributed source terms out of shared translation templates.
 - Deferred compilation preserves a token's literal `&self` result instead
