@@ -1,4 +1,4 @@
-% Purpose: validate native owned-record declarations and outer-commit writes.
+% Purpose: validate native owned records at outer commit and read their rows.
 % Assumes: spaces.pl consults this unit; public declarations enter add_sexp/4.
 % Owns resources: prepared checks retain source references until their outer
 %   transaction completes; no pending registry or listener is installed.
@@ -8,6 +8,9 @@
 % Decides: declared records have at most one value and require one live owner;
 %   undeclared native relations retain ordinary snapshot semantics
 %   [source: engine/spaces/owned_records.pl:metta_owned_validate_key/2; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
+% Guarantees: owned-record-read validates original keys and occurrence counts
+%   in one database snapshot; stored values remain inside complete row envelopes
+%   [source: engine/spaces/owned_records.pl:'owned-record-read'/2; commit=WORKTREE].
 
 :- multifile seam:transaction_constraint/1.
 
@@ -300,7 +303,38 @@ metta_owned_value(View, Prefix, Ref) :-
     metta_owned_original(View, Ref, Row), append(Stored, [_], Row),
     metta_owned_ground(Stored).
 
+% The public reader holds one database snapshot across validation and row
+% extraction. A concurrently erased clause cannot disappear between them.
+'owned-record-read'(Declaration, Rows) :-
+    metta_check_owned_record(Declaration),
+    Declaration = ['@owned-record', Home, Owner, Storage, Prefix],
+    metta_owned_key(Home, Owner, Storage, Prefix, Key),
+    snapshot(metta_owned_read_rows(Key, Rows)).
+
+metta_owned_read_rows(Key, Rows) :-
+    Key = key(Home, _, Storage, _),
+    metta_owned_reader_view(Home, OwnerView),
+    metta_owned_reader_view(Storage, RecordView),
+    metta_owned_checked_key([Home-OwnerView, Storage-RecordView], Key, Owners, Values),
+    (   Owners == []
+    ->  throw(error(metta_owned_record_conflict(Key, retired_owner),
+                    context('owned-record-read'/2, 'the native owner has retired')))
+    ;   maplist(metta_owned_original(RecordView), Values, Rows)
+    ).
+
+metta_owned_reader_view(Space, View) :-
+    metta_owned_view(Space, [], View),
+    (   View == absent
+    ->  throw(error(domain_error(native_owned_record_storage, Space),
+                    context('owned-record-read'/2, 'owned records require an allocated native storage identity')))
+    ;   true
+    ).
+
 metta_owned_validate_key(Views, Key) :-
+    metta_owned_checked_key(Views, Key, _, _).
+
+% Commit checks and explicit reads share the same original-occurrence checks.
+metta_owned_checked_key(Views, Key, Owners, Values) :-
     Key = key(Home, Owner, Storage, Prefix),
     metta_owned_key_view(Home, Views, OwnerView),
     metta_owned_key_view(Storage, Views, RecordView),

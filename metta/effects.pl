@@ -279,6 +279,16 @@ metta_effect_classify(_, match_bounded(_, Space, Pattern, _, _), Queue-Reads0,
                       Queue-[read(match, Space, Pattern)|Reads0]) :- !.
 metta_effect_classify(_, 'get-atoms'(Space, Pattern), Queue-Reads0,
                       Queue-[read('get-atoms', Space, Pattern)|Reads0]) :- !.
+metta_effect_classify(_, 'owned-record-read'(Declaration, _), Queue-Reads0,
+                      Queue-Reads) :- !,
+    (   nonvar(Declaration),
+        Declaration = [Tag, Home, Owner, Storage, Prefix], Tag == '@owned-record',
+        is_list(Prefix)
+    ->  append(Prefix, [_], Row),
+        Reads = [read('owned-record-read', Home, ['owned-by', Owner]),
+                 read('owned-record-read', Storage, Row)|Reads0]
+    ;   Reads = [read('owned-record-read', _, unresolved)|Reads0]
+    ).
 %A count observes the whole space: every write to any arity moves it. The
 %'count' pattern is deliberately not a list, so a resolver that maps reads
 %to fixed storage predicates lands on its unresolved-read refusal instead
@@ -947,6 +957,7 @@ metta_builtin_effect_override(register_metta_library_path, oracleIO).
 
 metta_builtin_effect_override('context-space', readOnlyLookup).
 metta_builtin_effect_override('get-atoms', nondeterministicReadOnly).
+metta_builtin_effect_override('owned-record-read', readOnlyLookup).
 metta_builtin_effect_override('get-metatype', readOnlyLookup).
 metta_builtin_effect_override(only, nondeterministicReadOnly).
 metta_builtin_effect_override(except, pureStructural).
@@ -2042,6 +2053,7 @@ metta_effect_plan_source_special_arguments(_, 'space-atom-count', [Space],
                                            [metta_evaluated_source_root(Space)]).
 metta_effect_plan_source_special_arguments(_, 'space-contains', [Space, _],
                                            [metta_evaluated_source_root(Space)]).
+metta_effect_plan_source_special_arguments(_, 'owned-record-read', [_], []).
 metta_effect_plan_source_special_arguments(_, 'get-atoms', [Space],
                                            [metta_evaluated_source_root(Space)]).
 metta_effect_plan_source_special_arguments(_, super, [Call],
