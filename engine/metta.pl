@@ -333,6 +333,7 @@
             call_goals_in_/2,
             catch_recover/2,
             eval/2,
+            'on-unwind'/3,
             evalc/3,
             has_type/2,
             metta/4,

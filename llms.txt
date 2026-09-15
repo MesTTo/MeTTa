@@ -20,7 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 326 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 327 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 37 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
@@ -4669,6 +4669,14 @@ the ledger of which head is which, what it answers to in the minimal
 instruction set the arbiter presents, and for a derived form still fused into
 the compiler, the measurement that keeps it there.
 
+`(on-unwind Source Handler)` evaluates held Source and applies held Handler
+once when evaluation fails, is cut or throws. Handler is an ordinary native
+callable and receives the actual catcher product: `(fail)`, `(!)`,
+`(exception Ball)` or `(external_exception Ball)`. Deterministic completion
+does not evaluate Handler. Cleanup uses the caller's source context and SWI's
+exception precedence. `examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/10-unwind_cleanup.metta`
+and its Python twin exercise an editable handler equation with a captured home.
+
 ### Sequence variables: a pattern child that stands for a run
 
 A gap is an expression CHILD standing for a finite run of zero or more sibling
@@ -4852,7 +4860,7 @@ three `mork-add-atoms`, `mork-flush` and `mm2-exec` heads come from:
 `match` `match-type-or` `match-types` `max` `max-atom` `member` `metta`
 `metta-thread` `min` `min-atom` `mm2-exec` `mork-add-atoms` `mork-flush`
 `msort` `new-space` `new-state` `noeval` `nop` `noreduce-eq` `not`
-`not-provable` `once` `only` `or` `or-else` `parse` `parse-command` `pow-math`
+`not-provable` `on-unwind` `once` `only` `or` `or-else` `parse` `parse-command` `pow-math`
 `pragma!` `prefix` `pretty-atom` `println!` `prog1` `progn` `py-at` `py-atom`
 `py-call` `py-container-kind` `py-dict` `py-dict-pairs` `py-dot` `py-eq` `py-except`
 `py-format` `py-global-read` `py-global-write` `py-in` `py-iter`

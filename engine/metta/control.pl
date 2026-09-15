@@ -1,4 +1,8 @@
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
+% Guarantees: on-unwind applies a held native handler once on a non-exit SWI
+%   catcher, preserving its source module and the native exception precedence
+%   [tested: sh engine/test.sh suites/evaluation/on_unwind.plt;
+%   commit=WORKTREE].
 % Guarantees: metta_with_trailed/3 restores context at each answer;
 %   metta_with_trailed_enumeration/3 retains it until enumeration finishes.
 %   Both preserve linked payloads and unwind on inference cuts
@@ -1805,6 +1809,26 @@ eval(C0, Out) :-
     call_goals_in_(Module, Goals),
     metta_boundary_result(C0, Produced, Out),
     Out \== 'Empty'.
+
+% Arm cleanup before Source runs. Its native callable owns capture and binding;
+% =../2 changes only the catcher's outer product, retaining the exception ball.
+% Cleanup runs once under SWI's own failure and exception-urgency rules.
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.13/boot/init.pl,
+% setup_call_catcher_cleanup/4; commit=WORKTREE].
+'on-unwind'(Source, Handler, Out) :-
+    current_metta_module(Module),
+    setup_call_catcher_cleanup(true,
+                               eval(Source, Out),
+                               Catcher,
+                               metta_unwind_handler(Module, Catcher, Handler)).
+
+metta_unwind_handler(_, exit, _) :- !.
+metta_unwind_handler(Module, Catcher, Handler) :-
+    ( var(Handler) -> refuse_unbound_input('on-unwind', 2) ; true ),
+    Catcher =.. Outcome,
+    with_metta_module(Module,
+                     ( collection_operator(Handler, Operator),
+                       once(reduce([Operator, Outcome], _, _)) )).
 
 %evalc is eval in a space you name, the counterpart to context-space, which
 %reports the space eval is already running in. Naming the space is the only

@@ -1,12 +1,12 @@
 # The MeTTa standard library, in Python
 
 Every operation MeTTa's standard library declares, and what you write in Python
-instead. 148 of the 182 operations a program can call have a Python
+instead. 149 of the 183 operations a program can call have a Python
 spelling, and every runnable row below was measured on this engine and
 through the Python spelling here. A row names the equivalent unary form
 when this engine's reified strategy application has another arity.
 
-The rows carry this engine's own names and types, 381 distinct names,
+The rows carry this engine's own names and types, 382 distinct names,
 and `extensions/python/tools/phrasebook.py` runs them and fails when a
 spelling stops answering what it says it answers. A third column
 measured against a second engine until 2026-08-31; upstream PeTTa is the
@@ -23,7 +23,7 @@ Rows fall in five buckets, and the bucket is the honest part:
 
 - **dissolves** (116) &mdash; Python already has the concept, so there is no metta name at all and the spelling is Python's own syntax, protocol or standard library
 - **method** (32) &mdash; the concept is MeTTa's own, so it wears a metta name
-- **instruction** (0) &mdash; deep control that stays instruction-tier, reached by building the term with the `S[...]` form and reducing it
+- **instruction** (1) &mdash; deep control that stays instruction-tier, reached by building the term with the `S[...]` form and reducing it
 - **internal** (199) &mdash; a mechanised interpreter's own names, written in MeTTa; this engine writes its interpreter in Prolog, so these names are on neither surface
 - **absent** (34) &mdash; a user-facing operation with no Python spelling today: the residue
 
@@ -60,14 +60,14 @@ They stay separate so the coverage denominator remains exact.
 | `space.compensates(operation, recovery)` | declare the operation that semantically reverses an effectful one | `space.compensates(charge, refund)` |
 | `space.saga(receipts)` | run forward steps whose committed (did ...) receipts drive reverse recovery | `with space.saga(receipts) as saga: ⏎     saga.run(S.charge(S.order_7))` |
 
-Provenance: 381 distinct stdlib names, each with one row.
+Provenance: 382 distinct stdlib names, each with one row.
 
 ## What the Python spelling costs
 
 Section 9e claims that a structure operation on an atom already held in Python
 costs no engine crossing at all. Measured over the rows that run both sides:
-the MeTTa forms cost 38,503,561 engine inferences and the Python spellings
-cost 39,715,442, and 87 of the 133 rows cost the engine EXACTLY
+the MeTTa forms cost 38,507,295 engine inferences and the Python spellings
+cost 39,718,619, and 87 of the 134 rows cost the engine EXACTLY
 NOTHING. `e[0]`, `e[1:]`, `len(e)`, `max([...])` and `S.f(1)` each read the same
 count as an empty measurement block, so the claim holds: the work never reaches
 the engine at all.
@@ -584,6 +584,7 @@ names; `fn` is `metta.fn`, the engine's.
 |---|---|---|---|
 | `!(eval (+ 1 2))` | `m.eval(S['+'](1, 2))` | `3` | method |
 | `!(evalc (+ 1 2) &self)` | `space.eval(S['+'](1, 2))` | `3` | method |
+| `!(bind! &pb (new-space)) ⏎ !(on-unwind (superpose ()) (\|-> ($outcome) (add-atom &pb (unwound $outcome)))) ⏎ !(match &pb (unwound $result) $result)` | `space.eval(S.on_unwind(S.superpose(()), S['\|->']((V.outcome,), S['add-atom'](space, S.unwound(V.outcome))))) ⏎ [row.result for row in space[S.unwound(V.result)]]` | `(fail)` | instruction |
 | `!(metta (+ 1 2) %Undefined% &self)` | `m.eval(S['+'](1, 2))` | `3` | method |
 | `!(chain (+ 1 2) $x (foo $x))` | `x = m.eval(S['+'](1, 2))[0] ⏎ S.foo(x)` | `(foo 3)` | dissolves |
 | `!(function (return 5))` | &mdash; | &mdash; | absent |
@@ -593,6 +594,7 @@ names; `fn` is `metta.fn`, the engine's.
 
 - `eval` `(-> Atom Atom)` &mdash; ONE step. `m.eval(term)` is the same one step and answers every result, and `space.eval(term)` is `evalc`, the same step in a named space.
 - `evalc` `(-> Atom SpaceType Atom)` &mdash; One step WITH an explicit context space, which is `space.eval(term)`: the signature IS term plus space.
+- `on-unwind` `(-> Atom Atom Atom)` &mdash; Evaluate a held source and apply a held native handler once on failure, cut or exception. The handler receives the native catcher as a product, such as `(fail)` or `(exception Ball)`. Deterministic completion leaves the handler untouched; cleanup exceptions follow SWI's urgency rules.
 - `metta` `(-> Atom Type SpaceType Atom)` &mdash; The full interpreter, which is what CALLING does: a defined object called from Python evaluates, and `m.eval` on a built term is the same act.
 - `chain` `(-> Atom Variable Atom %Undefined%)` &mdash; Python assignment, and `let`'s own instruction under a second name: it runs the operand, binds the VALUE it produced once, and continues into the template, which is exactly `x = m.eval(t)[0]` followed by use of `x`.
 - `function` `(-> Atom Atom)` &mdash; The core's function frame, which `return` closes. MeTTa's compiled definitions do not go through this instruction and it is not implemented. The form is shown but not run here: this engine leaves the call unreduced.

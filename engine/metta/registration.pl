@@ -1213,6 +1213,7 @@ builtin_implementation(maplist/4, prolog(apply)).
 builtin_implementation(maplist/1, prolog(apply)).
 builtin_implementation(maplist/2, prolog(apply)).
 builtin_implementation(eval/1, prolog(engine)).
+builtin_implementation('on-unwind'/2, prolog(engine)).
 builtin_implementation(evalc/2, prolog(engine)).
 builtin_implementation(reduce/2, prolog(translator)).
 builtin_implementation(reduce/1, prolog(translator)).

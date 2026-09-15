@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `(on-unwind Source Handler)` applies an editable native handler once when
+  evaluation fails, is cut or throws. The handler receives the actual outcome;
+  deterministic completion leaves it untouched. Captured variables, source
+  context and native cleanup exception precedence are preserved.
 - Python operator syntax, imported aliases and module calls share generated
   callable identities and signatures from pinned Python sources. The same
   rows supply atom words, compiler selectors and differential test programs;
