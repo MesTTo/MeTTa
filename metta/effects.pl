@@ -3,7 +3,7 @@
 %   bridge cascades.
 % Guarantees: eval-one plans include its held source and respect local
 %   definitions [tested: sh engine/test.sh suites/evaluation/eval_one.plt;
-%   commit=WORKTREE].
+%   commit=eec241dcf822db6c4c1d1ecdb6092a6a9f3c7851].
 % Guarantees: on-unwind plans include its source and applied handler, retain
 %   unresolved handler effects, and respect local definitions
 %   [tested: sh engine/test.sh suites/evaluation/on_unwind.plt;
