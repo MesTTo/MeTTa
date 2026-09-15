@@ -3,7 +3,7 @@
 %   '&metta' declarations against the self-describing catalog.
 % Guarantees: native owned-record declarations derive finite outer-commit
 %   checks from changed storage occurrences
-%   [source: engine/spaces/owned_records.pl:metta_prepare_owned_records; commit=WORKTREE].
+%   [source: engine/spaces/owned_records.pl:metta_prepare_owned_records; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
 % Guarantees: namespace registrations are published independently of space
 %   species [tested: run_tests(space_registration); commit=a8e3fc42306377adf7cae0a331f3d92fbf190304].
 % Guarantees: add-atom/4 exposes the native occurrence-output write

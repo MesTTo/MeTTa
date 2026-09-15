@@ -4,10 +4,10 @@
 %   transaction completes; no pending registry or listener is installed.
 % Guarded by: metta_validate_owned_records/1 runs under the existing
 %   '$metta_materialization' outer commit mutex and calls native readers only
-%   [source: engine/materialize.pl:materialization_transaction/2; commit=WORKTREE].
+%   [source: engine/materialize.pl:materialization_transaction/2; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
 % Decides: declared records have at most one value and require one live owner;
 %   undeclared native relations retain ordinary snapshot semantics
-%   [source: engine/spaces/owned_records.pl:metta_owned_validate_key/2; commit=WORKTREE].
+%   [source: engine/spaces/owned_records.pl:metta_owned_validate_key/2; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
 
 :- multifile seam:transaction_constraint/1.
 
@@ -100,7 +100,7 @@ metta_owned_update(Update, Action, Ref) :-
 % The caller already selected Ref through its snapshot or native write delta.
 % This retrieves syntax, never liveness. SWI's bound-reference clause/3 rejects
 % CL_ERASED globally, while '$clause'/4 retains the reference's original term.
-% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-comp.c#L6838-L6849; commit=WORKTREE].
+% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-comp.c#L6838-L6849; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
 metta_owned_clause(Ref, Head) :- '$clause'(Head, true, Ref, _).
 
 metta_owned_cache_reference(Ref, Space, Module) :-

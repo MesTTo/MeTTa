@@ -9,7 +9,7 @@
 % Purpose: implement pre-add hooks, transforms, watchers, views, digests, and purity inventories
 % Guarantees: transaction_constraint/1 prepares checks after the body and before
 %   the commit mutex; their execution uses the refreshed outer commit view
-%   [source: engine/metta/space_hooks.pl:metta_outer_transaction_prepare; commit=WORKTREE].
+%   [source: engine/metta/space_hooks.pl:metta_outer_transaction_prepare; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
 % Guarantees: metta_transaction/2 rolls back Error-valued answer bags and
 %   replays their exact order and bindings after rollback
 %   [tested: classes_transaction_results; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
