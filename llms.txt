@@ -20,7 +20,7 @@ re-runs them.
 
 | source | what it is | kept true by |
 |---|---|---|
-| `examples/**/*.metta` | 327 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
+| `examples/**/*.metta` | 328 executable programs, the semantics documentation, in 20 chapters numbered to 22 whose order is the order a reader meets each construct. Read these BEFORE writing down what MeTTa can express | every one runs in the `examples` gate lane; `tests/data/example_skips.txt` names the five that do not, each with its reason |
 | `tests/data/syntax_introductions.txt` | the construct each example chapter introduces, so a file uses nothing it has not met | the `cumulative-syntax` gate lane, which also carries a permanent negative control it must keep catching |
 | `website/reference/metta-*.md` | 37 pages reproducing source signatures and docstrings | `extensions/python/tools/reference.py` |
 | `website/reference/metta-libraries.md` | every library's own `(@doc ...)` atoms, plus a coverage row per library counting every head it declares, defines or REGISTERS | `extensions/python/tools/libdoc.py`, which renders `metta.library.rows`, the same query a card renders |
@@ -4669,6 +4669,14 @@ the ledger of which head is which, what it answers to in the minimal
 instruction set the arbiter presents, and for a derived form still fused into
 the compiler, the measurement that keeps it there.
 
+`(eval-one Source)` requires exactly one answer and returns it as data.
+It accepts a successful answer followed by failing alternatives, counts equal
+answers separately and stops at the second answer. Zero or multiple answers
+raise `metta_cardinality_violation`. The successful source/result binding
+graph keeps sharing and constraints without repeating their hooks. Evaluation
+and cleanup stay in the caller's engine and transaction. The editable example
+is `examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/11-single_answer.metta`.
+
 `(on-unwind Source Handler)` evaluates held Source and applies held Handler
 once when evaluation fails, is cut or throws. Handler is an ordinary native
 callable and receives the actual catcher product: `(fail)`, `(!)`,
@@ -4844,7 +4852,7 @@ three `mork-add-atoms`, `mork-flush` and `mm2-exec` heads come from:
 `cons` `cons-atom` `context-space` `copy_term` `cos-math` `current-time`
 `cut` `declare-post-add!` `declare-pre-add!` `decons` `decons-atom`
 `defined-name` `dif` `documented` `documented-space` `elapsed` `empty`
-`error-payload` `eval` `evalc` `except` `exclude-item` `exists_file` `exp`
+`error-payload` `eval` `eval-one` `evalc` `except` `exclude-item` `exists_file` `exp`
 `exp-math` `explain` `filter-atom` `first` `first-from-pair` `floor-div`
 `floor-math` `foldall` `foldl` `foldl-atom` `for-each-in-atom` `forall`
 `format-args` `format-time` `function` `get-atoms` `get-doc`

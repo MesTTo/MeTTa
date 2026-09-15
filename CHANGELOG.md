@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `(eval-one Source)` requires exactly one answer and returns it as data.
+  It preserves variable sharing and constraints, counts duplicate answers,
+  accepts failing alternatives and stops before a third answer can execute.
 - `(on-unwind Source Handler)` applies an editable native handler once when
   evaluation fails, is cut or throws. The handler receives the actual outcome;
   deterministic completion leaves it untouched. Captured variables, source
