@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Compiled methods and constructors expose positional and ordered keyword
+  collectors as native terms. Keyword dictionaries allocate inside the body,
+  once per activation, so native rules can match the complete call structure.
 - Python API references include convert.build's lexical space argument and
   describe Defined calls as applying encoded argument values.
 - Native callable forwarding keeps its validated binder names through capture
