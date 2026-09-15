@@ -32,6 +32,11 @@
 %     support_graph:clearing_a_module_preserves_its_consumers_dependencies,
 %     support_graph:clearing_a_module_prunes_only_unused_symbol_indexes;
 %     commit=901a768e17b3ad2559b19d2895a250451a88da99].
+%   - Retiring one compiled RHS preserves its peers, restores it on rollback,
+%     and leaves an empty or already retired form without a memo change
+%     [tested: support_graph:retiring_one_rhs_preserves_its_peer_and_rolls_back,
+%     support_graph:retiring_a_form_without_calls_leaves_no_memo_change;
+%     commit=WORKTREE].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -347,6 +352,41 @@ test(a_reset_releases_automatic_memo_analysis_state) :-
     assertion(support_graph:support_memo_sccs(p36_reset, [])),
     assertion(\+ support_graph:support_memo_take_change(
                      p36_reset, p36_reset_fun)).
+
+test(retiring_one_rhs_preserves_its_peer_and_rolls_back,
+     [cleanup(support_graph:support_forget_module(p36_peer))]) :-
+    Fun = p36_memo_peer,
+    support_graph:support_publish_compiled_form(
+        p36_peer, Fun, p36_first_rhs, [], [Fun, [Fun]]),
+    support_graph:support_publish_compiled_form(
+        p36_peer, Fun, p36_last_rhs, [], [Fun]),
+    once(support_graph:support_translated_form_id(p36_first_rhs, p36_peer, Id)),
+    First = translated_form(p36_peer, Id),
+    once(support_graph:support_memo_take_change(p36_peer, Fun)),
+    snapshot((support_graph:support_forget(First),
+              support_graph:support_memo_sccs(p36_peer, Inner),
+              assertion(Inner == [memo_scc([Fun], true, 1)]),
+              assertion(\+ support_graph:support_translated_form_id(
+                               p36_first_rhs, p36_peer, _)),
+              once(support_graph:support_memo_take_change(p36_peer, Fun)))),
+    support_graph:support_memo_sccs(p36_peer, Restored),
+    assertion(Restored == [memo_scc([Fun], true, 2)]),
+    assertion(support_graph:support_translated_form_id(p36_first_rhs, p36_peer, Id)),
+    support_graph:support_forget(First),
+    support_graph:support_memo_sccs(p36_peer, Kept),
+    assertion(Kept == [memo_scc([Fun], true, 1)]),
+    once(support_graph:support_memo_take_change(p36_peer, Fun)),
+    support_graph:support_forget(First),
+    assertion(\+ support_graph:support_memo_take_change(p36_peer, _)).
+
+test(retiring_a_form_without_calls_leaves_no_memo_change,
+     [cleanup(support_graph:support_forget_module(p36_peer))]) :-
+    support_graph:support_publish_compiled_form(
+        p36_peer, p36_no_calls, p36_empty_rhs, [], 42),
+    once(support_graph:support_translated_form_id(p36_empty_rhs, p36_peer, Id)),
+    support_graph:support_forget(translated_form(p36_peer, Id)),
+    assertion(\+ support_graph:support_translated_form_id(p36_empty_rhs, p36_peer, _)),
+    assertion(\+ support_graph:support_memo_take_change(p36_peer, _)).
 
 % A node is a compound whose functor and first argument are the same for every
 % node of a kind in one module, so indexing the node term itself gives one

@@ -9,6 +9,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Compiled-form retirement consumes its single memo-analysis row directly,
+  preserving other right-hand sides and rollback while removing redundant
+  native retraction searches and their variable inference cost.
 - Mapping annotations reconstruct native dictionary and keyword-collector
   results from their stored rows. Nested conversion preserves callable homes;
   malformed rows and duplicate reconstructed keys raise instead of losing data.

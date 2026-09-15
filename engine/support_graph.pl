@@ -9,6 +9,15 @@
 %   support_graph:clearing_a_module_preserves_its_consumers_dependencies,
 %   support_graph:clearing_a_module_prunes_only_unused_symbol_indexes;
 %   commit=901a768e17b3ad2559b19d2895a250451a88da99].
+% Guarantees: retiring a compiled form removes its optional memo row without
+%   enumerating further retraction candidates. Its publisher owns at most one
+%   row per Module/Ref [source:
+%   engine/support_graph.pl:support_publish_memo_rule/4 and
+%   engine/support_graph.pl:support_forget_memo_rule/1; commit=WORKTREE].
+%   Peer RHSs survive and transaction rollback restores the retired row
+%   [tested: support_graph:retiring_one_rhs_preserves_its_peer_and_rolls_back,
+%   support_graph:retiring_a_form_without_calls_leaves_no_memo_change;
+%   commit=WORKTREE].
 % Guarantees:
 %   - A reference face can defer dependent repairs until all its bindings and
 %     metadata are published [tested:
@@ -174,8 +183,9 @@ support_edge_retractall(Support, Derived) :-
 %measure [measured 2026-08-30: variant_hash of the visited node differed
 %across two otherwise identical runs, ai-tmp trace over
 %examples/ch05-equations-and-evaluation/05-01-an-equation-is-a-rewrite/02-twostage.metta].
-%The reference stays the key of support_memo_rule/4, which is first-argument
-%indexed and never hashed; this mapping is how the two meet.
+%The filereader uses this mapping to attach supports and retire native clauses
+%[source: engine/filereader.pl:set_type_alias_support_scope/2 and
+%engine/filereader.pl:forget_translated_from/3; commit=WORKTREE].
 :- dynamic support_translated_form_id/3.
 :- dynamic support_memo_changed/2.
 :- seam:context_reader(support_graph_locked, '$metta_support_graph_locked', value(true)).
@@ -576,8 +586,10 @@ support_forget_memo_rule(translated_form(Module, N)) :-
     !,
     (   support_translated_form_id(Ref, Module, N)
     ->  retractall(support_translated_form_id(Ref, Module, N)),
-        findall(Fun, retract(support_memo_rule(Module, Ref, Fun, _)), Funs),
-        forall(member(Fun, Funs), support_memo_mark_changed(Module, Fun))
+        (   retract(support_memo_rule(Module, Ref, Fun, _))
+        ->  support_memo_mark_changed(Module, Fun)
+        ;   true
+        )
     ;   true
     ).
 support_forget_memo_rule(_).
