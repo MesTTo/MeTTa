@@ -83,3 +83,48 @@ python -m pytest -q -n 0 --benchmark-disable --randomly-seed=1125382488 \
 unbacked claim. The preceding clone command with call_signatures.py and
 annotations.py as its two inputs and ai-classes-c56b-clones as its output
 finds no clones. Logs use `ai-tmp/ai-classes-c56b-{ty,mypy,python,checks,clones}.log`.
+
+## 2026-09-15: retain validated forwarding binders
+
+Found: _forwarded first verifies that every binder is a distinct Variable,
+then later reads each binder's name. Static checking does not carry the all()
+predicate's element narrowing to that later comprehension. Variable equality
+is exactly name equality in `_atoms/model.py:Variable.__eq__`.
+
+Decided: collect the names of variable binders once. Equal cardinality with
+the original binder tuple proves that every binder is a variable and no name
+repeats. The segment result extends that same set. Capture exclusion consumes
+the retained names directly. This keeps the existing eta-contraction rule and
+linear binder processing while avoiding another tuple and name-set rebuild.
+The GHC side condition and original design remain recorded in
+`2026-09-14-expanded-call-values.md`.
+
+Rejected: another traversal through _variables for the binders. Its general
+atom walk deduplicates through a list, so distinct flat binders would acquire
+quadratic name comparisons. A cast would carry a static assertion but leave
+the repeated runtime construction intact. The existing guard already supplies
+the useful name set when verification and construction share one pass.
+
+Verification plan: run callable values, ports, frames, expanded applications,
+parameter binding and class contracts; run the full ty and mypy lanes, Ruff,
+evidence and layering; review clones and finish the series' provenance checks.
+
+Verified: `sh check.sh ty mypy ruff evidence layering` passes. Ty reports no
+diagnostics; mypy passes the 185-file core and the separate one-, three- and
+one-file public typing checks. Evidence has two pending pins and no unbacked
+claims. The following command passes 139 existing callable cases:
+
+```sh
+python -m pytest -q -n 0 --benchmark-disable --randomly-seed=1125382488 \
+  extensions/python/tests/ch03_atoms_and_expressions/test_callable_values.py \
+  extensions/python/tests/ch03_atoms_and_expressions/test_callable_ports.py \
+  extensions/python/tests/ch03_atoms_and_expressions/test_callable_applications.py \
+  extensions/python/tests/ch03_atoms_and_expressions/test_compiled_parameters.py \
+  extensions/python/tests/ch11_python_as_a_notation/test_expanded_call_values.py \
+  extensions/python/tests/ch09_types/test_class_call_contracts.py
+```
+
+The local clone command with call_values.py as its input and
+ai-classes-c56c-clones as its output finds none. Logs are
+`ai-tmp/ai-classes-c56c-{checks,python,clones}.log`. All three static reflection
+repairs are verified independently on their own functional trees.

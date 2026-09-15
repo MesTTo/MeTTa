@@ -9,6 +9,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Native callable forwarding keeps its validated binder names through capture
+  checks, preserving explicit contracts and later changes to native call ports.
 - Reflected Literal and Annotated records use runtime subscription, preserving
   their original annotation constructors while passing static checking.
 - Runtime annotation refinements preserve their native alternatives while
