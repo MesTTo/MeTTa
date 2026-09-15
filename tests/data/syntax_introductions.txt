@@ -252,6 +252,7 @@ has-declared-type                 15-00-04
 space-admission-verdict           15-00-04
 declare-post-add!                 15-00-05
 undeclare-post-add!               15-00-05
+owned-record-read                 15-00-07
 atomically                        17-00-04
 call                              17-00-04
 test-no-answer                    17-00-04

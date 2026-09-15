@@ -188,6 +188,11 @@ prelude_declaration(intersection, [->, 'Atom', 'Atom', '%Undefined%']).
 prelude_declaration(subtraction, [->, 'Atom', 'Atom', '%Undefined%']).
 prelude_declaration('has-declared-type', [->, 'Atom', '%Undefined%', 'Bool']).
 prelude_declaration('space-contains', [->, '%Undefined%', 'Atom', 'Bool']).
+%The rows are data: an Atom result never re-enters the evaluator, which is
+%what keeps a stored (+ 1 2) unevaluated and leaves no re-entry choicepoint
+%(the Expression-returning collapse-bind still shows one) [tested:
+%owned_record_reads:a_ground_owner_expression_is_held_as_data; commit=WORKTREE].
+prelude_declaration('owned-record-read', [->, 'Atom', 'Atom']).
 prelude_declaration('space-admission-verdict', [->, '%Undefined%', 'Atom', '%Undefined%']).
 
 %The documents get-doc's first tier answers from, so (help! type-cast)
@@ -201,6 +206,7 @@ prelude_document(prefix, ['@doc', prefix, ['@desc', "Concatenates a prefix and a
 prelude_document(rename, ['@doc', rename, ['@desc', "Uses the first matching (old new) pair, or keeps the head; partial application is a from map"]]).
 prelude_document(qualified, ['@doc', qualified, ['@desc', "Builds a prefix map using the library name and a dot"]]).
 prelude_document('get-property', ['@doc', 'get-property', ['@desc', "Answers visibility, defining origins and declared effect, cost, deprecation and documentation properties, one per answer"]]).
+prelude_document('owned-record-read', ['@doc', 'owned-record-read', ['@desc', "Validates a ground @owned-record key and returns zero or one complete native value rows in an expression; retired owners and malformed occurrences are refused"], ['@params', [['@param', "Ground @owned-record declaration, held as data"]]], ['@return', "Expression containing zero or one complete value rows"]]).
 prelude_document('assert-answers', ['@doc', 'assert-answers', ['@desc', "Asserts a verdict about two answer bags; a false verdict reports the call as written and the two directed bag differences, what was missing and what was in excess"], ['@params', [['@param', "Verdict, evaluated"], ['@param', "Call to report, as written"], ['@param', "Answers produced"], ['@param', "Answers expected"]]], ['@return', "unit"]]).
 prelude_document('assert-includes-answers', ['@doc', 'assert-includes-answers', ['@desc', "assert-answers for a containment: a false verdict reports the call as written and only the answers missing from the expectation, because an answer in excess of it is legal under this relation"], ['@params', [['@param', "Verdict, evaluated"], ['@param', "Call to report, as written"], ['@param', "Answers produced"], ['@param', "Answers expected to be included"]]], ['@return', "unit"]]).
 prelude_document(assertEqual, ['@doc', assertEqual, ['@desc', "Compares the result sets of two expressions; passes silently or raises a failed assertion naming the expression and the answers missing from and in excess of the expectation"], ['@params', [['@param', "First expression, not evaluated on the way in"], ['@param', "Second expression, not evaluated on the way in"]]], ['@return', "unit"]]).

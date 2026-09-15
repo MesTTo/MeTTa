@@ -1799,6 +1799,7 @@ metta_engine_reexport(kernel, 'has-declared-type'/3).
 metta_engine_reexport(kernel, 'space-contains'/3).
 metta_engine_reexport(parser, swrite_pretty/2).
 metta_engine_reexport(spaces, 'get-atoms'/2).
+metta_engine_reexport(spaces, 'owned-record-read'/2).
 metta_engine_reexport(spaces, add_sexp/3).
 metta_engine_reexport(spaces, add_sexp/4).
 metta_engine_reexport(spaces, metta_add_atom/4).

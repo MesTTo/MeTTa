@@ -9,7 +9,7 @@ beside its definitions.
 
 | library | names | documented |
 |---|---|---|
-| lib_builtin_types | 193 | 0 |
+| lib_builtin_types | 195 | 0 |
 | lib_combinatorics | 8 | 0 |
 | lib_conformance | 2 | 0 |
 | lib_constraints | 5 | 0 |

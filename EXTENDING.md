@@ -3270,6 +3270,24 @@ including records committed after the transaction began. These checks govern
 outer engine transactions. Arbitrary unwrapped native writes remain explicit
 graph edits; they do not acquire an implicit transaction through this seam.
 
+`(owned-record-read (@owned-record Home Owner Storage Prefix))` reads a ground
+record key. It returns one expression containing zero or one complete value
+rows, so a stored `Error` stays inside its row. An empty live record returns
+`()`. A retired owner, duplicate value or owner occurrences, an original
+nonground key, or unresolved or foreign storage is refused. The key is held as
+data; expressions inside it are not evaluated. The supplied key need not itself
+be a stored declaration, so the same native check is available during allocation
+and after an explicit declaration withdrawal.
+
+The reader uses one database snapshot and the commit validator's bounded
+occurrence checks. It rereads values by their original clause references,
+preventing query unification from concealing a variable stored key. Native
+effect analysis reports both the owner-marker and value-prefix reads. Programs
+can distinguish an uninitialized binding from a value by the returned row bag;
+callers choose the language-level uninitialized-binding error. The reader does
+not allocate, publish declarations, invoke a foreign storage reader, or acquire
+the materialization mutex.
+
 ### The `host_service` surface
 
 The other half of the host contract is the engine predicates a host BINDING's

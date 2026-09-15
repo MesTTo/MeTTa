@@ -9,6 +9,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- `(owned-record-read (@owned-record Home Owner Storage Prefix))` reads a native owned
+  record as data: zero or one complete rows, a stored expression left unevaluated, one
+  database snapshot across validation and extraction; a retired owner, a second value or
+  an unresolved storage refuses. Example
+  `examples/ch15-writing-transactions-and-worlds/07-owned_records.metta` with its Python
+  twin, and a phrasebook row.
+
 - `(eval-one Source)` requires exactly one answer and returns it as data.
   It preserves variable sharing and constraints, counts duplicate answers,
   accepts failing alternatives and stops before a third answer can execute.

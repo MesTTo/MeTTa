@@ -1,12 +1,12 @@
 # The MeTTa standard library, in Python
 
 Every operation MeTTa's standard library declares, and what you write in Python
-instead. 150 of the 184 operations a program can call have a Python
+instead. 151 of the 185 operations a program can call have a Python
 spelling, and every runnable row below was measured on this engine and
 through the Python spelling here. A row names the equivalent unary form
 when this engine's reified strategy application has another arity.
 
-The rows carry this engine's own names and types, 383 distinct names,
+The rows carry this engine's own names and types, 384 distinct names,
 and `extensions/python/tools/phrasebook.py` runs them and fails when a
 spelling stops answering what it says it answers. A third column
 measured against a second engine until 2026-08-31; upstream PeTTa is the
@@ -23,7 +23,7 @@ Rows fall in five buckets, and the bucket is the honest part:
 
 - **dissolves** (116) &mdash; Python already has the concept, so there is no metta name at all and the spelling is Python's own syntax, protocol or standard library
 - **method** (32) &mdash; the concept is MeTTa's own, so it wears a metta name
-- **instruction** (2) &mdash; deep control that stays instruction-tier, reached by building the term with the `S[...]` form and reducing it
+- **instruction** (3) &mdash; deep control that stays instruction-tier, reached by building the term with the `S[...]` form and reducing it
 - **internal** (199) &mdash; a mechanised interpreter's own names, written in MeTTa; this engine writes its interpreter in Prolog, so these names are on neither surface
 - **absent** (34) &mdash; a user-facing operation with no Python spelling today: the residue
 
@@ -60,14 +60,14 @@ They stay separate so the coverage denominator remains exact.
 | `space.compensates(operation, recovery)` | declare the operation that semantically reverses an effectful one | `space.compensates(charge, refund)` |
 | `space.saga(receipts)` | run forward steps whose committed (did ...) receipts drive reverse recovery | `with space.saga(receipts) as saga: ⏎     saga.run(S.charge(S.order_7))` |
 
-Provenance: 383 distinct stdlib names, each with one row.
+Provenance: 384 distinct stdlib names, each with one row.
 
 ## What the Python spelling costs
 
 Section 9e claims that a structure operation on an atom already held in Python
 costs no engine crossing at all. Measured over the rows that run both sides:
-the MeTTa forms cost 38,508,314 engine inferences and the Python spellings
-cost 39,718,914, and 87 of the 135 rows cost the engine EXACTLY
+the MeTTa forms cost 38,511,739 engine inferences and the Python spellings
+cost 39,720,760, and 87 of the 136 rows cost the engine EXACTLY
 NOTHING. `e[0]`, `e[1:]`, `len(e)`, `max([...])` and `S.f(1)` each read the same
 count as an empty measurement block, so the claim holds: the work never reaches
 the engine at all.
@@ -304,6 +304,7 @@ Python side does not move. Within one run the counts are exact: three fresh
 | `!(bind! &pb (new-space)) ⏎ !(add-reducts &pb ((total (+ 1 2)) (total (+ 2 2)))) ⏎ !(get-atoms &pb)` | `for term in [S['+'](1, 2), S['+'](2, 2)]: ⏎     space += S.total(m.eval(term)[0]) ⏎ space.atoms()` | `(total 3), (total 4)` | dissolves |
 | `!(bind! &pb (new-space)) ⏎ !(add-atom &pb (f 1)) ⏎ !(remove-atom &pb (f 1)) ⏎ !(get-atoms &pb)` | `space += S.f(1) ⏎ del space[S.f(1)] ⏎ space.atoms()` | `(no answer)` | dissolves |
 | `!(bind! &pb (new-space)) ⏎ !(add-atom &pb (f 1)) ⏎ !(add-atom &pb (f 1)) ⏎ !(subtract-atom &pb (f 1)) ⏎ !(get-atoms &pb)` | `space += S.f(1) ⏎ space += S.f(1) ⏎ space -= S.f(1) ⏎ space.atoms()` | `(f 1)` | dissolves |
+| `!(bind! &pb (new-space)) ⏎ !(add-atom &metta (@owned-record &pb $a &pb (balance $a))) ⏎ !(add-atom &pb (owned-by (Account 1))) ⏎ !(add-atom &pb (balance (Account 1) 12)) ⏎ !(owned-record-read (@owned-record &pb (Account 1) &pb (balance (Account 1))))` | `metta.space('&metta').add(S['@owned-record'](space, V.a, space, S.balance(V.a))) ⏎ space += S.owned_by(S.Account(1)) ⏎ space += S.balance(S.Account(1), 12) ⏎ m.eval(S.owned_record_read(S['@owned-record'](space, S.Account(1), space, S.balance(S.Account(1)))))` | `((balance (Account 1) 12))` | instruction |
 | `!(bind! &pb (new-space)) ⏎ !(add-atom &pb (f 1)) ⏎ !(get-atoms &pb)` | `space += S.f(1) ⏎ list(space)` | `(f 1)` | method |
 | `!(bind! &pb (new-space)) ⏎ !(add-atom &pb (f 1)) ⏎ !(match &pb (f $x) $x)` | `space += S.f(1) ⏎ assert space.match(S.f(V.x), under=metta.counting).one().annotation == 1 ⏎ space.run('(= (phrasebook-call) yes)') ⏎ assert space.answers(S.phrasebook_call(), under=metta.counting).one().annotation == 1 ⏎ with metta.under(metta.prov): ⏎     annotated = space.match(S.f(V.x)).one() ⏎ assert annotated.annotation == S.one ⏎ assert annotated.under(metta.counting).annotation == 1 ⏎ assert annotated.why() ⏎ declared = metta.algebra(S.phrasebook_max_plus, plus=max, times=lambda a, b: a + b, zero=-100, one=0, order='descending') ⏎ assert declared.name == 'phrasebook-max-plus' ⏎ [row['x'] for row in space[S.f(V.x)]]` | `1` | method |
 | `!(bind! &pb (new-space)) ⏎ !(match% &pb (f $x) $x)` | &mdash; | &mdash; | absent |
@@ -321,6 +322,7 @@ Python side does not move. Within one run the counts are exact: three fresh
 - `add-reducts` `(-> SpaceType %Undefined% (->))` &mdash; The plural of the same composition: evaluate, then write the answers. Where they differ: This engine stores both forms UNREDUCED where the Python composition store `(total 3)` and `(total 4)`, the same non-reduction as `add-reduct`.
 - `remove-atom` `(-> SpaceType Atom Bool)` &mdash; Drains every atom that unifies and answers True either way. `del space[pattern]` is this operation, and raises when the pattern matches nothing as Python's `del` does; `subtract-atom` is the one-occurrence grain beside it, which `space -= atom` and `space.remove(atom)` both spell.
 - `subtract-atom` `(-> SpaceType Atom Bool)` &mdash; Takes ONE unifying occurrence and answers whether one was there, the multiset subtraction `remove-atom` gave up when it took upstream's draining law. `space -= atom` is this operation, because Python's in-place difference over a multiset is `collections.Counter`'s, which subtracts the multiplicity given rather than clearing the key, and `space.remove(atom)` is the same grain reporting what it found. An unbound atom is refused by name rather than read as every atom at once.
+- `owned-record-read` `(-> Atom Atom)` &mdash; Read a native owned record as data: the held `@owned-record` key names the home, the owner, the storage and the row prefix; the answer is the record's zero or one complete rows, with a stored expression left unevaluated. A retired owner or a second value refuses.
 - `get-atoms` `(-> SpaceType Atom)` &mdash; `space.atoms()`, or `for atom in space` when you want to walk them.
 - `match` `(-> SpaceType Atom Atom %Undefined%)` &mdash; `space[pattern]` is the subscript form and `space.match(pattern)` the named method; the TEMPLATE is built in Python from the answer's bindings. `under=counting|tropical|prov|ranked` changes the annotation algebra; `answers(call, under=...)` is its call twin, `with metta.under(...)` scopes the default, and an annotated answer exposes `.annotation`, `.why()` and `.under(other)` without a re-query. `metta.algebra(...)` constructs arbitrary carriers while remaining their namespace.
 - `match%` `(-> SpaceType Atom Atom %Undefined%)` &mdash; the error-transparent twin of `match`. The form is shown but not run here: this engine leaves the call unreduced.

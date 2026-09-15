@@ -1992,6 +1992,7 @@ metta_grounded_token('fuzzy-match').
 metta_grounded_token('fuzzy-match-space').
 metta_grounded_token('fuzzy-match-context').
 metta_grounded_token('get-atoms').
+metta_grounded_token('owned-record-read').
 metta_grounded_token('get-metatype').
 metta_grounded_token('get-state').
 metta_grounded_token('get-type').

@@ -103,3 +103,34 @@ samples each (`ai-tmp/ai-owned-record-cost-probe.py`): 43,157 inferences on the 
 worktree at 3eb5acc22, 43,157 on this tree with the three funnel sites reverted to
 `assertz/2`, 48,162 with the funnel, so the owned-record checks add nothing to this
 workload and the inert clause costs five inferences per write.
+
+## 2026-09-15, later: strict reads through one public door
+
+Decided: `(owned-record-read (@owned-record Home Owner Storage Prefix))` holds its key as data,
+requires it ground, resolves both storage identities through the native storage cache and the
+`(owned-by Owner)` marker exactly once, and answers one expression of zero or one complete
+rows inside one `snapshot/1` spanning validation and extraction, so a concurrent replacement
+cannot erase the checked occurrence between them; the bounded collector
+`metta_owned_checked_key/4` serves the reader and the outer-commit validator alike, with no
+getter registry, foreign reader or new mutex. A stored declaration is not needed to read a
+concrete key; declarations govern writes (`ai-tmp/ai-owned-record-reader-handoff.md`).
+Decided: the result type is `Atom`, not `Expression`: an Atom result never re-enters the
+evaluator, which is what keeps a stored `(+ 1 2)` in a row unevaluated and leaves no
+re-entry choicepoint. Measured with `call_cleanup(Goal, Det = true)` around each stage
+(`ai-tmp/ai-owned-record-read-det-probe{,2,3,4,5,6,7}.pl`): the direct Prolog read is
+deterministic in and out of transactions and snapshots; through the evaluator the
+`Expression`-declared read left a choicepoint for a plain and for an evaluable owner, as the
+`Expression`-declared `collapse-bind` still does, while `get-metatype`, `quote`, `car-atom`,
+`collapse`, `add-atom`, `remove-atom` and `new-space` are deterministic; with `Atom` the
+evaluated read is deterministic and the stored `(+ 1 2)` reads back unevaluated either way.
+Open: the re-entry choicepoint of `Expression`-declared grounded results is the evaluator's,
+observed on `collapse-bind`, and is not repaired here.
+Tried: `sh engine/test.sh suites/spaces/owned_records.plt suites/spaces/owned_record_reads.plt`
+-> 28 + 74 and 39 + 88 checks pass, exit 0, no choicepoint (`ai-tmp/ai-owned-record-reader-root-native.log`).
+Tried: the corpus example `examples/ch15-writing-transactions-and-worlds/07-owned_records.metta`
+-> five assertions pass; its twin proves 5/5 claims with an equal store at 6051 twin against 9285
+native inferences, three identical rounds (`ai-tmp/ai-owned-record-twin-{measure,lane}.log`);
+the phrasebook row answers `((balance (Account 1) 12))` on both surfaces at 3425 native and
+1846 Python inferences, two byte-identical runs (`ai-tmp/ai-owned-record-phrasebook-measure-{1,2}.json`).
+The test form evaluates its expected side, so the example writes `(noeval (+ 5 5))` there;
+the refused second value is asserted through `(if-error (catch (transaction ...)) refused committed)`.
