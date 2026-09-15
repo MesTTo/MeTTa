@@ -242,6 +242,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Registration listeners retain exact point and registrant identities, including
+  quotes and names containing ` registration `.
 - `TaggedAnswer.under()` no longer raises `algebra_operation_error` for
   `tropical` and `budget`: the reinterpretation fold now starts from the first
   alternative, as direct evaluation does, instead of handing the carrier's
