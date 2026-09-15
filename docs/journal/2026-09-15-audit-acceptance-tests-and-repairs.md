@@ -94,3 +94,11 @@ Tried: five names, with a point itself containing ` registration `, all failed t
 Decided: pass point and name directly through `_enlist`. `_record_seam_undo` already accepts that structure and renders descriptions only for diagnostics. No consumer change is needed.
 
 Verified: `test_registration_identity.py`, 5 passed in 0.02 seconds; `ai-tmp/ai-audits-f03.log`.
+
+### F01: deletion restores by insertion
+
+Tried: removal and rollback at every position in registries of sizes 0, 1, 2 and 5. Every nonempty registry lost a row because replacement overwrote the successor or ignored the last position.
+
+Decided: keep replacement's inverse and deletion's inverse distinct. `_reinsert` uses the saved row object and position; `_restore` remains the replacement inverse. No list snapshot can erase another registration as a side effect of restoring one.
+
+Verified: the identity and deletion acceptance files report 9 passed in 0.02 seconds; `ai-tmp/ai-audits-f01.log`. The F03 chapter run passed; later chapter receipts accompany each mutation repair.

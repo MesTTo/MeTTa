@@ -242,6 +242,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Withdrawing a seam registration now has an insertion inverse, preserving
+  every surviving row and the original order when registration is rolled back.
 - Registration listeners retain exact point and registrant identities, including
   quotes and names containing ` registration `.
 - `TaggedAnswer.under()` no longer raises `algebra_operation_error` for
