@@ -246,6 +246,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Table ingestion owns one transaction across input reads, conversion, writes
+  and iterator cleanup. Frame providers declare their native row extraction.
+  Unsupported foreign stores refuse before input acquisition; nested foreign
+  ingestion requires the reserved `savepoint` provider capability.
+
 - Answer views, asynchronous evaluation views, remote cursors, gateways and
   servers preserve body and cleanup failures together on context exit,
   including cancellation. A single failure keeps its original identity.
