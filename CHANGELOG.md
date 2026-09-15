@@ -246,6 +246,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Rows.one recommends the executable `first(default=None)` expression when
+  the result has no row or several rows.
+
 - Answers remains equal to equivalent sequences and is now unhashable, so
   equality with strings, bytes and ranges cannot contradict dictionary lookup.
 

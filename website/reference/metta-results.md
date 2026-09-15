@@ -710,9 +710,9 @@ def first(self, *, default: Any = _MISSING) -> Row | Any:
 def one(self, *, default: Any = _MISSING) -> Row | Any:
 ```
 
-> THE row, when the query is asserted to have exactly one answer;
-> none or several raise naming the count, so a lookup that silently
-> picked an arbitrary row cannot hide.
+> Return the sole row, using an explicit default only for absence.
+>
+> Several rows always raise with their count.
 
 ### `Rows.raise_for_errors`
 

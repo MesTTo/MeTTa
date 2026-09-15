@@ -244,3 +244,11 @@ Decided: retain the existing broad sequence equality and remove Answers.__hash__
 Source: results.py remains unchanged on the classes branch at d362153bae6333602f3877f79f2f811848d86f6e. The repair is confined to the reserved hash symbol and its direct tests.
 
 Verified: all 95 answer-protocol and new equality/hash cases pass in 4.85 seconds; `ai-tmp/ai-audits-a3.log`. Tests retain string, bytes, range, tuple and list equality in both directions and prove hash refusal never pulls the source. Ruff passes. The first reference check reports two stale projections; after regeneration reference and reference-selftest pass in `ai-tmp/ai-audits-a3-reference-verified.log`.
+
+### A8: the suggested absence expression runs
+
+Tried: Rows.one recommends first() for an empty result, but first() itself requires an explicit default. The A8 unchanged-cut witness fails in `ai-tmp/ai-audits-baseline-owned.log`.
+
+Decided: recommend first(default=None), retaining the cardinality behavior of both methods. The same expression works for zero rows and several rows. The one() docstring now states that its own default applies only to absence. The classes branch does not change results.py.
+
+Verified: the complete spaces and matching chapter reports 542 passed in 12.38 seconds, including both absence-remedy cardinalities and the A3 hash controls; `ai-tmp/ai-audits-a8-chapter.log`. Ruff, reference and reference-selftest pass after regenerating the results and root pages.
