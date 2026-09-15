@@ -3,13 +3,18 @@
 %   compiler observer, queues, pending reservations and temporary space.
 % Guarantees: a miss compiles once outside the publication mutex; a concurrent
 %   source change or cache clear prevents stale publication
-%   [tested: translation_cache; commit=bdf3a42670d84dc9925c5db7e767415c1e8a5c19].
+%   [tested: translation_cache; commit=WORKTREE].
 % Guarantees: retiring generated calls or returned functions evicts their
 %   cached translations and cancels incomplete dependency reservations
-%   [tested: translation_cache; commit=bdf3a42670d84dc9925c5db7e767415c1e8a5c19].
+%   [tested: translation_cache; commit=WORKTREE].
+
+% Guarantees: ordinary eval preserves attributed-variable identity, sharing,
+%   delayed hook counts and binding-time exceptions, including after a plain
+%   template is warm [tested: translation_cache; commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
+:- use_module(library(when)).
 
 :- begin_tests(translation_cache).
 
@@ -80,6 +85,84 @@ test(a_numbervars_literal_cannot_alias_a_real_variable_key,
     aggregate_all(count,
                   translator:translated_form_cache(_, _, _, _, _, _),
                   2).
+
+test(ordinary_eval_preserves_nested_shared_dif_constraints,
+     [ setup(clear_translation_cache_test_state),
+       cleanup(clear_translation_cache_test_state) ]) :-
+    dif(Left, Right),
+    Source = [noeval, [pair, Left, Left, Right]],
+    eval(Source, Result),
+    assertion(Result == [pair, Left, Left, Right]),
+    Result = [pair, First, Repeated, Last],
+    First = admitted,
+    assertion(Repeated == admitted),
+    assertion(Left == admitted),
+    assertion(\+ Last = admitted),
+    Last = distinct,
+    assertion(Right == distinct),
+    assertion(\+ translator:translated_form_cache(_, _, _, _, _, _)),
+    assertion(\+ translator:translated_form_pending(_, _, _)).
+
+test(ordinary_eval_preserves_when_wakeup_count,
+     [ setup(clear_translation_cache_test_state),
+       cleanup(clear_translation_cache_test_state) ]) :-
+    Counter = count(0),
+    when(nonvar(Variable), increment_attribute_wakeup(Counter)),
+    eval([noeval, Variable], First),
+    eval([noeval, Variable], Second),
+    assertion(First == Variable),
+    assertion(Second == Variable),
+    assertion(Counter == count(0)),
+    First = admitted,
+    assertion(Second == admitted),
+    assertion(Counter == count(1)),
+    assertion(\+ translator:translated_form_cache(_, _, _, _, _, _)).
+
+test(ordinary_eval_preserves_a_hidden_when_reference,
+     [ setup(clear_translation_cache_test_state),
+       cleanup(clear_translation_cache_test_state) ]) :-
+    Counter = count(0),
+    when((nonvar(Variable);nonvar(Hidden)), increment_attribute_wakeup(Counter)),
+    eval([noeval, Variable], Result),
+    assertion(Result == Variable),
+    assertion(Counter == count(0)),
+    Hidden = activated,
+    assertion(Counter == count(1)),
+    assertion(var(Variable)),
+    Result = later,
+    assertion(Counter == count(1)).
+
+test(a_warmed_plain_template_does_not_admit_constraint_hooks,
+     [ setup((clear_translation_cache_test_state, install_translation_compile_counter)),
+       cleanup((remove_translation_compile_counter, clear_translation_cache_test_state)) ]) :-
+    eval([noeval, Plain], PlainResult),
+    assertion(PlainResult == Plain),
+    assertion(translation_compile_count(1)),
+    Counter = count(0),
+    when(nonvar(Variable), increment_attribute_wakeup(Counter)),
+    eval([noeval, Variable], First),
+    eval([noeval, Variable], Second),
+    assertion(translation_compile_count(3)),
+    aggregate_all(count, translator:translated_form_cache(_, _, _, _, _, _), 1),
+    assertion(First == Variable),
+    assertion(Second == Variable),
+    assertion(var(Plain)),
+    assertion(Counter == count(0)),
+    Variable = admitted,
+    assertion(Counter == count(1)).
+
+test(a_when_exception_occurs_only_at_the_original_binding,
+     [ setup(clear_translation_cache_test_state),
+       cleanup(clear_translation_cache_test_state),
+       throws(attribute_wakeup_error) ]) :-
+    when(nonvar(Variable), throw(attribute_wakeup_error)),
+    catch(eval([noeval, Variable], Result), Early,
+          throw(unexpected_evaluation_wakeup(Early))),
+    assertion(Result == Variable),
+    Result = admitted.
+
+increment_attribute_wakeup(Counter) :-
+    arg(1, Counter, Before), After is Before + 1, nb_setarg(1, Counter, After).
 
 test(a_function_change_evicts_only_templates_that_mention_its_name,
      [ setup(clear_translation_cache_test_state),

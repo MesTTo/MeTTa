@@ -307,6 +307,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Evaluation preserves constrained variables and their delayed hooks by
+  keeping attributed source terms out of shared translation templates.
 - Deferred compilation preserves a token's literal `&self` result instead
   of substituting the equation's home when rebuilding its source.
 - Compiled equations retain resolved source bindings after their token or
