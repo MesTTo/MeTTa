@@ -3,7 +3,7 @@
 % Guarantees: record_translated_from/4 retains an occurrence's resolved binding
 %   after its source rewriter leaves, including recompilation and fast restore
 %   [tested: test_fast_images_keep_withdrawn_bindings_across_generations;
-%   commit=WORKTREE].
+%   commit=717bc55f36a78559e84bd5c7ab099eb10e0ab31a].
 % Guarantees: retain_source_assertion/1 lets a process owner adopt an existing
 %   registry artifact without replacing its clause reference
 %   [tested: lib_import_lifecycle:host_registration_outlives_the_importing_source;
@@ -16,7 +16,7 @@
 % Owns resources: '$metta_equation_token'/4 rows link live compiled clauses to
 %   their stored occurrence; forget_translated_equation_binding/1 retires them
 %   [tested: spaces_tokens:equation_tokens_survive_recompilation_and_exact_subtraction;
-%   commit=WORKTREE].
+%   commit=717bc55f36a78559e84bd5c7ab099eb10e0ab31a].
 %   metta_reference_source_reader/2 installs a home-scoped admission observer;
 %   metta_reference_admission_scope/3 removes it on success, failure, cancellation
 %   or home release [tested: reference_loading; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427].
@@ -31,7 +31,7 @@
 %     deferred reconstruction, recompilation and fast-cache relocation
 %     [tested: test_forcing_a_deferred_equation_keeps_a_resolved_sibling_once,
 %     test_fast_images_keep_pending_equations_beside_resolved_equations;
-%     commit=WORKTREE].
+%     commit=717bc55f36a78559e84bd5c7ab099eb10e0ab31a].
 %   - source exits and runnable prefixes materialize the arrived function-free
 %     fragment through materialize:flush_source_materialization/0
 %     [tested: function_free_materialization; commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
