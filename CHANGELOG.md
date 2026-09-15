@@ -307,6 +307,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Compiled equations retain resolved source bindings after their token or
+  rewriter leaves. Recompilation and successive fast images preserve both
+  the original source spelling and the resolved answers.
 - Compiled call consumers share one type for application and iteration;
   native validation derives its accepted words from the same declaration.
 - TOML configuration headers participate in provenance checks and pinning.

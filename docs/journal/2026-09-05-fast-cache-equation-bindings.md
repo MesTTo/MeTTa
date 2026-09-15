@@ -56,3 +56,90 @@ Found while there: `restored.save(path)` over a path `restored` had loaded, then
 Verified so far: `sh engine/test.sh` green three times on the edited tree (before and after the probe); `sh extensions/python/test.sh` 4544 passed with two reds, `test_builtin_discovery_is_cached` (passes alone, the intermittent the every-intermittent branch closes) and the pydocstyle ceiling (a `noqa` on the new removal test, replaced by a docstring); `sh check.sh layering mypy` green; `ruff` green once the torch twin's stale `PLC0415` suppression went; `an_unbound_deferred_equation_reads_the_space_it_is_stored_in` and `test_removing_an_equation_that_names_its_own_space_retires_its_clause` fail on `039974720f` and pass here.
 
 Found: thread_linda read 427720 in all 25 re-observation rounds, and the lane refused the envelope it wrote, `minimum < maximum`. Decided: an envelope may have zero spread. Every observation agreeing is the claim, keyed to its protocol and re-observed rather than re-pinned; Google Benchmark's max statistic equals its min when repetitions agree. The parser refuses only an inverted pair now (`test_an_empirical_envelope_may_have_zero_spread`). Rejected: converting the twin to a point budget, because one day's agreement is not evidence the scheduler stopped mattering, and the allowance a point budget carries is not the claim.
+
+## 2026-09-15
+
+Tried: `python ai-tmp/ai-source-binding-retention-probe-v4.py --output
+ai-tmp/ai-source-binding-v4-feature/ai-before.json` and the identical probe at
+pristine `c75181adc999adf0028616ee69565e2bbfbf739f` both retain all five live
+answers. After the rewriting claim leaves, the first provider arrival drops
+the stored binding association. The last two restored images then return the
+written `AiBound` instead of resolved `AiCanonical`. Both processes exit zero;
+their complete outputs are under `ai-tmp/ai-source-binding-v4-{feature,c751}/`.
+
+Decided: compare the actual retained equation with the stored occurrence's
+ordinary `&self` resolution. Current token and rewriter registries cannot prove
+where a previously compiled equation came from. Share the stored-occurrence
+read with its existing equation-token link and preserve the existing source
+owners, rollback and image codec. This supersedes the 2026-09-08 ambient-table
+guard, while retaining sparse associations for differences beyond `&self`.
+
+Tried: the identical V4 after this association repair retains every live and
+restored answer, with one binding and no token claims or form rewriters in
+the final phases. The output is `ai-tmp/ai-source-binding-v4-after/ai-after.json`,
+exit zero, empty stderr, peak RSS 244588 KiB.
+
+Tried: five fresh processes, each preceded by deletion of engine and library
+QLF files, run `python ai-tmp/ai-equation-binding-cost.py --equations 100
+--width 32 --sample N --output DIRECTORY/sample-N.json`. The named-home host
+reader admits identical source and forces all 100 equations. Before counts
+are admission 44131, compilation 95511, total 139642. The association-only
+repair reads 44134, 95611 and 139745. Every digit repeats across all five
+processes, and every stderr is empty. The independent audits are
+`ai-tmp/ai-equation-binding-cost-{before,after}-audit.log`; per-process commands,
+source, counters and resource receipts are in the corresponding
+`ai-tmp/ai-equation-binding-cost-{before,after}-n100-w32/` directories.
+
+Tried: `python -m pytest extensions/python/tests/ch18_performance/test_fast_bindings.py
+-q -n 0` passes 27 cases, including three successive restored generations with
+and without recompilation. The new inverted-home control fails with
+`AssertionError: assert ['&pyspace_2'] == ['&self']`; the complete result is
+`ai-tmp/ai-equation-binding-root-native.log`, seed 29967648, exit one.
+
+Found: a token can map the resolved home back to literal `&self`, making raw
+and resolved terms equal while differing from ordinary storage resolution.
+The normal admission door defers on raw equality and subsequently reconstructs
+the wrong term. The non-eager reference reader already compares against the
+storage law, under its separate pure-structural admission policy. Preserve
+that timing distinction when correcting the ordinary door.
+
+Rejected: raw-term equality as proof that a binding is unnecessary, because
+the inverted-home case falsifies it. Revisit only if the source semantics can
+no longer produce equal raw and resolved terms that differ from the law.
+
+Open: verify the admission correction, repeat the final cost measurement,
+run the affected native suites and complete their provenance pins.
+
+Decided: keep association retention and the newly exposed admission defect
+in separate commits. The inverted-home test belongs with the admission
+correction; its original bytes remain in `ai-tmp/ai-equation-binding.patch`.
+
+Verified association retention: `HYPOTHESIS_PROFILE=ci python -m pytest
+extensions/python/tests/ch18_performance/test_fast_bindings.py
+extensions/python/tests/ch18_performance/test_fast_io.py
+extensions/python/tests/ch18_performance/test_materialization.py
+extensions/python/tests/ch18_performance/test_metadata_projection.py
+extensions/python/tests/ch05_equations_and_evaluation/test_reload.py
+extensions/python/tests/ch15_writing_transactions_and_worlds/test_transaction.py
+-q -n 0` passes 130 tests, exit zero, peak RSS 916664 KiB, in
+`ai-tmp/ai-equation-binding-root-python.log`.
+
+Verified: `sh engine/test.sh suites/reader/filereader.plt
+suites/spaces/spaces.plt suites/spaces/tokens.plt
+suites/spaces/reference_providers.plt suites/reader/reference_loading.plt
+suites/reader/loader_singleflight.plt` passes 365 tests and 173 subtests,
+exit zero, peak RSS 81900 KiB, in `ai-tmp/ai-equation-binding-root-prolog.log`.
+This covers source rollback and reload, deferred compilation, token ownership,
+provider equation occurrences, reference loading and loader concurrency.
+
+Verified: `GATE_ONLY=1 sh check.sh ruff mypy ty closed-sets policy-inventory
+evidence` passes all selected lanes in
+`ai-tmp/ai-equation-binding-root-static.log`. A clone scan of the two code
+files finds only the same pre-existing 97-token direct/loader runnable clone
+as the unchanged baseline; no changed line intersects it. Its exact command
+and baseline comparison are in `ai-tmp/ai-equation-binding-receipt.md`, and
+the integrated report is `ai-tmp/ai-equation-binding-root-clones/jscpd-report.json`.
+
+Verified: `GATE_ONLY=1 sh check.sh layering evidence` passes both engine and
+Python layering checks and reports zero unbacked evidence claims in
+`ai-tmp/ai-equation-binding-root-layering.log`.
