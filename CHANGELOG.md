@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Python operator syntax, imported aliases and module calls share generated
+  callable identities and signatures from pinned Python sources. The same
+  rows supply atom words, compiler selectors and differential test programs;
+  source or generated-output drift fails the protocol check.
 - Compiled Python operators retain successful `None`, borrowed containers and
   Atom results as values. Declared instances keep their native images, and
   subsequent positional and keyword calls preserve borrowed tuple identity.

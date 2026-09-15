@@ -2564,22 +2564,103 @@ def format_spec(self) -> str:
 class OperatorLowering(NamedTuple):
 ```
 
-> One stable Python spelling and every form that one operator denotes.
->
-> `dunder` is Python's protocol name and `syntax` how an author writes it.
-> `kind` and `form` are what the atom surface builds; `method` is the atom
-> method a `taken` spelling keeps for itself. `node` is the `ast` class the
-> compiler dispatches on, `native` the MeTTa head an exactly-numeric operand
-> pair may use instead of the protocol path, and `word` whether the
-> `operator`-module name is a public door.
->
-> `word_head` is the head that door reaches when it is NOT the form, which
-> is one row: `x != y` on atoms builds `(not (== x y))`, because Python's
-> `!=` has to answer a bool, while `S.ne` names the engine's own `!=` head.
-> Every other door reaches its row's form, so nothing spells it twice.
->
-> The selector and the augmented selector are DERIVED, by `selector()` and
-> `augmented()`, because Python derives them the same way.
+> A source operation and its atom policy, exposed through derived views.
+
+### `OperatorLowering.dunder`
+
+```python
+def dunder(self) -> str:
+```
+
+> Python's special method for the source operation.
+
+### `OperatorLowering.reflected`
+
+```python
+def reflected(self) -> str | None:
+```
+
+> The right operand's paired method, when the protocol has one.
+
+### `OperatorLowering.syntax`
+
+```python
+def syntax(self) -> str:
+```
+
+> The Python source form recorded by the inventory.
+
+### `OperatorLowering.arity`
+
+```python
+def arity(self) -> int:
+```
+
+> The operand count of the atom image's source form.
+
+### `OperatorLowering.node`
+
+```python
+def node(self) -> str | None:
+```
+
+> The AST operator class name, when syntax has a dedicated node.
+
+### `OperatorLowering.augmented`
+
+```python
+def augmented(self) -> bool:
+```
+
+> Whether the source operation has an in-place counterpart.
+
+### `OperatorLowering.kind`
+
+```python
+def kind(self) -> LoweringKind:
+```
+
+> The existing atom emitter shape selected by MeTTa policy.
+
+### `OperatorLowering.form`
+
+```python
+def form(self) -> LoweringForm:
+```
+
+> The native head or expression template built by the atom surface.
+
+### `OperatorLowering.method`
+
+```python
+def method(self) -> str | None:
+```
+
+> The reserved atom method used by a taken Python spelling.
+
+### `OperatorLowering.native`
+
+```python
+def native(self) -> str | None:
+```
+
+> The native head admitted for operands proven exactly numeric.
+
+### `OperatorLowering.word`
+
+```python
+def word(self) -> bool:
+```
+
+> Whether the operation supplies a public symbol-factory word.
+
+### `OperatorLowering.word_head`
+
+```python
+def word_head(self) -> str | None:
+```
+
+> The public word's head when it differs from the atom image.
 
 ## `Symbol`
 
