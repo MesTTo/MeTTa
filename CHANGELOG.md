@@ -9,6 +9,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Node seat's provider-capability roster is the engine's own vocabulary row
+  plus the three words its bridge registers, rather than a second list written
+  out beside it; the written list had gone stale the moment the row gained
+  `savepoint`.
+
 - A frame library's rows reach `tables.add` through the reader it declares on
   the seam's frame point, and the refusal for an unreadable source names that
   declaration, so a library is never read by the spelling of its own method.
