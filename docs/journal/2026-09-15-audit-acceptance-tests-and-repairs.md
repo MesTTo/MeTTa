@@ -130,3 +130,13 @@ Rejected: enumeration precedence and Distribution object equality. Neither ident
 Verified: the focused seam/discovery battery reports 85 passed and two generated-reference failures in 230.55 seconds, `ai-tmp/ai-audits-f07.log`. Both failures report `reference: 3 stale projections: website/reference/metta-results.md, website/reference/metta-seam.md, website/reference/metta.md`. The reference generator refreshes the advertised contract and the two F15 index-signature projections omitted from that commit. No behavioral acceptance failed.
 
 Verified: `sh check.sh reference` exits 0 after regeneration; `ai-tmp/ai-audits-f07-reference.log`.
+
+### F05: immutable registry records
+
+Tried: a caller could mutate the registered field mapping without changing the row identity observed by the cached door snapshot. Mutating the original input mapping was already harmless because Row copied it.
+
+Decided: a frozen slotted dataclass retains Row's identity equality and owns a MappingProxyType over that copy. Registration metadata is immutable; the seam does not acquire or freeze field payloads. Replacement remains the sole way to publish a changed registration. This matches the immutable Door tuple already required by doors.validate_registration and removes the stale-snapshot path without a generation counter.
+
+Integration: F17 remains live at _catalog/kinds.py:install. Replace the first-row sentinel with complete publication state and transactional retry of the whole owned ontology. That unassigned file and binding predicates are held for integration. Every interrupted-prefix witness is retained in the baseline bundle, with 40 failures and a passing empty-prefix control. F10's storage inventory belongs to unassigned _atoms/fields.py; enumerate MRO storage, normalize a string __slots__ to one slot, omit bookkeeping, and use static descriptor inspection.
+
+Verified: immutable mapping/metadata plus retained-namespace replacement and nested immutability checks report 11 passed in 1.14 seconds; `ai-tmp/ai-audits-f05.log`. F07's chapter reports 294 passed and 2 skipped in 9.75 seconds.

@@ -7,6 +7,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+- Python seam registrations expose immutable metadata and an owned read-only
+  field mapping, so caller mutation cannot bypass registry publication.
+
 - Python extension discovery refuses competing providers with the same entry-point
   name before loading any provider, and reports both distribution origins.
 
