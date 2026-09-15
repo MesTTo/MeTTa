@@ -48,9 +48,8 @@ Source: `extensions/python/metta/seam.py`.
 > is what keeps it true.
 >
 > Owns:
->   - _POINTS and _ROWS hold the process-wide seam; a registration made inside an
->     integration's transaction frame is undone with it, through the same
->     registry-undo the operation registry uses
+>   - _POINTS and _ROWS hold the process-wide seam; each _Inverse retains its
+>     failed actions until a caller retries it successfully
 
 The entries below reproduce the source signatures and docstrings.
 
@@ -384,10 +383,10 @@ def module(name: str, guidance: str) -> Any:
 ## `on_registration`
 
 ```python
-def on_registration(callback: Callable[[str, str, Callable[[], None]], None]) -> None:
+def on_registration(callback: _RegistrationListener) -> None:
 ```
 
-> Hear every registration, with the inverse that withdraws it.
+> Publish each registration, retaining its inverse when needed.
 >
 > The direction is deliberate. A registration made inside an integration's
 > installer has to be undone when that installer fails, and the frame that
@@ -395,6 +394,15 @@ def on_registration(callback: Callable[[str, str, Callable[[], None]], None]) ->
 > a seam that imported it would drag metta._errors.errors up the stack with it. So
 > the OWNER of the frame subscribes, the way metta._catalog.kinds subscribes to
 > the conversion registry's own listener list.
+>
+> A stateful listener returns a callable that restores its own preimage.
+> Returning None declares a projection that reconciles from the registry
+> when called again after rollback. A listener that raises must leave its
+> own state unchanged. Transaction journals retain each supplied inverse
+> independently and return a compensator that removes that exact record.
+>
+> Publication runs under the reentrant seam lock. Listeners may read the
+> seam on this thread; they must not wait for another thread to mutate it.
 
 ## `optional_module`
 

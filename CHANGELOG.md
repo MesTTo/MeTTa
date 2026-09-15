@@ -242,6 +242,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Failed Python seam publication restores registry preimages and completed
+  observers. Rollback attempts every action and retains failed actions for retry.
+  Transaction journals retain each receipt, including retries after caught failures.
+
 - Python row conversion uses constructor parameters and defaults for dataclasses,
   named tuples and registered classes, and preserves absent optional TypedDict keys.
 - Python seam registrations expose immutable metadata and an owned read-only

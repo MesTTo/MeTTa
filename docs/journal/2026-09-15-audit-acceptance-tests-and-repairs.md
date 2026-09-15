@@ -152,3 +152,25 @@ Rejected: selecting dataclasses.fields, which describes stored state, and callin
 Verified: F05's chapter reports 295 passed and 2 skipped in 10.26 seconds.
 
 Verified: the five constructor witnesses and both existing result-door projection cases report 7 passed in 3.15 seconds; `ai-tmp/ai-audits-f11.log`. Duplication checking over seam.py and results.py reports 27 clones and 7.2 percent, all in existing result-door declarations or forwarded result methods; none intersects the constructor conversion. `ai-tmp/ai-audits-duplication-rows.log` uses `jscpd --reporters ai --format python --max-lines 10000 --max-size 1mb --no-gitignore --noTips`. The initial default-max-lines invocation scanned neither large file and supplied no useful measurement.
+
+### F04: publication owns its inverse and observer compensations
+
+Tried: insertion, replacement and removal each fail at every listener position; additional witnesses cover observer reconciliation, inverse failures and compensation order. The first expanded fixture incorrectly combined a validator and external adder; point() already refuses that combination with `ValueError: a validated point owns its rows in the seam registry`. It is retained as an unchanged passing control. The corrected baseline log is `ai-tmp/ai-audits-f04-corrected-baseline.log`.
+
+Decided: mutation, publication and inverse execution share the reentrant seam lock. Each inverse owns ordered actions, consumes successes and retains failed actions for retry. External and local preimages restore before completed observers compensate in reverse order. A stateful observer returns its compensation; a None observer rereads the restored registry. A failing observer must undo its own partial work before raising. Catching an arbitrary callback failure cannot manufacture that callback's missing preimage.
+
+Rejected: a one-shot undo flag with the existing transaction consumer. A caught publication failure would consume the first receipt while its coalescing key suppresses a later valid registration's inverse. The held _declare/operations.py:_record_seam_undo must record every supplied inverse and return compensation removing the exact journal record from its captured frames. The executable proposed replacement and both consumer controls are in the main-checkout handoff. This consumer remains an integration obligation; the seam must not reach into a higher layer's ContextVar to repair it.
+
+Handover: integrate.py:_add_type discards replacement preimages by returning unregister_type alone. Doors accepted its repair and the corresponding repr/reflector adder checks. The seam relies on each adder's returned inverse to restore the state that adder owns.
+
+Verified: F11's chapter reports 492 passed in 11.79 seconds; reference and reference-selftest pass. Further gates unset DISPLAY and WAYLAND_DISPLAY after the integrator isolated the unchanged-cut SWI/GLX artifact; no source workaround is added here.
+
+Verified: corrected F04 baseline, 12 failed and 1 passed in 0.14 seconds. Publication plus the existing identity/deletion/inverse witnesses now report 26 passed in 0.04 seconds, `ai-tmp/ai-audits-f04.log`. The held-consumer control reports 1 failed and 1 passed in 0.22 seconds: the current callback leaves `Row(audit-caught-retry held: value)` after outer rollback, while the proposed compensating callback restores the empty registry. `ai-tmp/ai-audits-f04-held-consumer.log` is an explicit integration red, not a passing branch gate.
+
+Verified: expanding the consumer control to nested frames reports 2 failed and 2 passed in 0.24 seconds, with the same current/proposed split; `ai-tmp/ai-audits-f04-held-consumer-nested.log`. The exact replacement is supplied to the integrator for coordination with the classes work.
+
+Decision superseding the held-consumer obligation above: ownership now includes only _declare/operations.py:_record_seam_undo, after the classes branch diff established that function is untouched there. The seam and consumer repair land together. Each seam inverse is recorded without the (point, name) coalescing key; compensation removes that exact _RegistryUndo record from its captured frames; None is returned only when no frame exists. This function remains a known classes-merge site carrying that contract.
+
+Tried: the seam-only state passes its chapter with 308 passed and 2 skipped in 9.77 seconds, plus reference and reference-selftest, but the explicit consumer controls remain red. Those greens do not close F04; the functional commit is replaced with the complete consumer repair and retained ordinary/nested retry tests.
+
+Verified: the complete seam/consumer repair reports 34 passed in 0.16 seconds, including all four current/proposed handoff controls and retained ordinary/nested tests of repeated replacement, removal and reinsertion. `ai-tmp/ai-audits-f04-complete.log`. The operations.py diff is confined to _record_seam_undo.
