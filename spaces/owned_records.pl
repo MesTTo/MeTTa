@@ -10,7 +10,7 @@
 %   [source: engine/spaces/owned_records.pl:metta_owned_validate_key/2; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
 % Guarantees: owned-record-read validates original keys and occurrence counts
 %   in one database snapshot; stored values remain inside complete row envelopes
-%   [source: engine/spaces/owned_records.pl:'owned-record-read'/2; commit=WORKTREE].
+%   [source: engine/spaces/owned_records.pl:'owned-record-read'/2; commit=dbb95d0bff10a93f2fef0453195b2331918f92dc].
 
 :- multifile seam:transaction_constraint/1.
 
