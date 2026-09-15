@@ -102,3 +102,11 @@ Tried: removal and rollback at every position in registries of sizes 0, 1, 2 and
 Decided: keep replacement's inverse and deletion's inverse distinct. `_reinsert` uses the saved row object and position; `_restore` remains the replacement inverse. No list snapshot can erase another registration as a side effect of restoring one.
 
 Verified: the identity and deletion acceptance files report 9 passed in 0.02 seconds; `ai-tmp/ai-audits-f01.log`. The F03 chapter run passed; later chapter receipts accompany each mutation repair.
+
+### F02: all inverse actions remain observable
+
+Tried: no failure, first failure, second failure and both failures, using ValueError and KeyboardInterrupt. A failure in the first action skipped the table inverse on the cut.
+
+Decided: attempt both actions in their existing order. Reraise one failure unchanged and group simultaneous failures with BaseExceptionGroup, preserving control exceptions. The F01 chapter reports 285 passed and 2 skipped in 14.46 seconds.
+
+Verified: `test_inverse_failures.py`, 4 passed in 0.05 seconds; `ai-tmp/ai-audits-f02.log`.

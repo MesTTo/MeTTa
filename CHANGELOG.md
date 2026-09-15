@@ -242,6 +242,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Registration rollback attempts both the external-store and seam-table
+  inverses and retains simultaneous failures in an exception group.
 - Withdrawing a seam registration now has an insertion inverse, preserving
   every surviving row and the original order when registration is rolled back.
 - Registration listeners retain exact point and registrant identities, including
