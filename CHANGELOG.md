@@ -253,6 +253,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   and iterator cleanup. Frame providers declare their native row extraction.
   Unsupported foreign stores refuse before input acquisition; nested foreign
   ingestion requires the reserved `savepoint` provider capability.
+- Provider compliance checks the `savepoint` declaration against a caught
+  nested failure and a successful outer commit. Outer-only transactions fail
+  that law; undeclared savepoints receive the suite's explicit skip.
 
 - Answer views, asynchronous evaluation views, remote cursors, gateways and
   servers preserve body and cleanup failures together on context exit,
