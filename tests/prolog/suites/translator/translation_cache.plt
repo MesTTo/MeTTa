@@ -3,14 +3,14 @@
 %   compiler observer, queues, pending reservations and temporary space.
 % Guarantees: a miss compiles once outside the publication mutex; a concurrent
 %   source change or cache clear prevents stale publication
-%   [tested: translation_cache; commit=WORKTREE].
+%   [tested: translation_cache; commit=4b61fbdba18f37f8b2857a879dd5220e9f08cb3f].
 % Guarantees: retiring generated calls or returned functions evicts their
 %   cached translations and cancels incomplete dependency reservations
-%   [tested: translation_cache; commit=WORKTREE].
+%   [tested: translation_cache; commit=4b61fbdba18f37f8b2857a879dd5220e9f08cb3f].
 
 % Guarantees: ordinary eval preserves attributed-variable identity, sharing,
 %   delayed hook counts and binding-time exceptions, including after a plain
-%   template is warm [tested: translation_cache; commit=WORKTREE].
+%   template is warm [tested: translation_cache; commit=4b61fbdba18f37f8b2857a879dd5220e9f08cb3f].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
