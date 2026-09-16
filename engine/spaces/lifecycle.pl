@@ -867,16 +867,6 @@ refuse_autoload_into_exec_modules :-
     ;   assertz(Clause)
     ).
 
-%Workaround: swi-ugraphs-implicit-append - import lists:append/2 into ugraphs at boot.
-%library(ugraphs) declares its lists dependency as append/3 alone and its
-%top_sort/2 calls append/2 (ugraphs.pl:460), which only the library index
-%supplies; with autoload off (run.sh NO_AUTOLOAD=1, the engine's no-autoload
-%gate) the release plan (metta_space_release_plan/2) met `Unknown procedure:
-%ugraphs:append/2` at examples/ch20-extending-the-engine/20-03-prolog-underneath/05-the-module-doors.metta.
-import_ugraphs_implicit_dependency :-
-    use_module(library(ugraphs)),
-    ugraphs:use_module(library(lists), [append/2]).
-
 protect_metta_exec_modules :-
     metta_engine_module(Engine),
     refuse_unreachable_engine_emitted(Engine),

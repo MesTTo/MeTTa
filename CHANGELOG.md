@@ -408,6 +408,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - Abolishing an imported predicate no longer races auto-import into wiping the
   provider on the patched host (`swi-concurrent-import-removal-resets-provider`);
   the shadow repair's retained-import guard stays for the churn it avoids.
+- `library(ugraphs)` declares `append/2` on the patched host
+  (`swi-ugraphs-implicit-append`), so the engine's boot import of it into
+  that library is gone.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull

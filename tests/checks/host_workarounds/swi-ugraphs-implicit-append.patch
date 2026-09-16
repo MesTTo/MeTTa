@@ -1,0 +1,13 @@
+diff --git a/library/ugraphs.pl b/library/ugraphs.pl
+index 9becfc1..aad18e8 100644
+--- a/library/ugraphs.pl
++++ b/library/ugraphs.pl
+@@ -76,7 +76,7 @@ Ported from YAP 5.0.1 to SWI-Prolog by Jan Wielemaker.
+ @license BSD-2 or Artistic 2.0
+ */
+ 
+-:- autoload(library(lists),[append/3]).
++:- autoload(library(lists),[append/2,append/3]).
+ :- autoload(library(ordsets),
+ 	    [ord_subtract/3,ord_union/3,ord_add_element/3,ord_union/4]).
+ :- autoload(library(error), [instantiation_error/1]).

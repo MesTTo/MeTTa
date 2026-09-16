@@ -225,7 +225,7 @@ Record: docs/journal/2026-09-17-host-patches.md; docs/journal/2026-09-11-classes
   transaction existence does not enumerate ancestors;
   docs/journal/2026-09-05-function-free-materialization.md.
 ## swi-ugraphs-implicit-append
-Host: SWI-Prolog 10.1.13, library/ugraphs.pl:460 (`top_sort/2`); the same
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped, this tree running on 10.1.14 built with the patch below;, library/ugraphs.pl:460 (`top_sort/2`); the same
   line at swipl-devel V10.1.14.
 Defect: the library declares its lists dependency as `append/3` alone and
   `top_sort/2` calls `append/2`, which only the library index supplies. With
@@ -236,11 +236,12 @@ Defect: the library declares its lists dependency as `append/3` alone and
 Reproduction: tests/checks/host_workarounds/swi-ugraphs-implicit-append.pl,
   `top_sort/2` with autoload off; `present` when it raises the existence
   error.
-Workaround: import `lists:append/2` into `ugraphs` at engine boot
-  (engine/spaces/lifecycle.pl, `import_ugraphs_implicit_dependency/0`).
-Lifted when: ugraphs.pl declares `append/2` in its
-  `:- autoload(library(lists), ...)` or imports it; the reproduction then
-  answers `absent`.
+Patch: tests/checks/host_workarounds/swi-ugraphs-implicit-append.patch, against
+  swipl-devel V10.1.14 library/ugraphs.pl: the lists dependency declares
+  `append/2` beside `append/3`, so `top_sort/2` resolves it with autoload off.
+  The reproduction answers absent.
+Lifted when: ugraphs.pl as shipped declares `append/2`; the reproduction then answers
+  `absent` and the patch and the entry go together.
 Record: docs/journal/2026-09-16-exec-modules-never-autoload.md.
 
 ## swi-wrapper-roundtrip-merges-closures
