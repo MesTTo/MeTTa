@@ -338,7 +338,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `janus-callback-exception-leak`: janus-swi 1.5.3's `check_error` never
   released the references `PyErr_Fetch` handed it, so every exception a Python
   callback raised into the engine, with its traceback and every frame and
-  local below the callback, lived for the process.
+  local below the callback, lived for the process. The second is
+  `swi-cleanup-window`: SWI-Prolog raised the inference limit inside
+  `sig_atomic/1`'s critical region, so a limit that tripped at the call port
+  after `setup_call_cleanup/3`'s Setup left Setup's effects in place with no
+  cleanup owed; the patched 10.1.14 defers the limit past the region the way
+  it defers a signal, and the 19 sites that keep scoped state as trailed
+  writes stay marked until each is lifted.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull

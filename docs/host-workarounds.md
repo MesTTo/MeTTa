@@ -49,7 +49,8 @@ defect as shipped, so a fresh environment learns what its host must carry.
 
 ## janus-callback-exception-leak
 Host: janus-swi 1.5.3 (janus/janus.c `check_error`, the same code at upstream
-  packages-swipy master b0356a162, 2026-07-28) on SWI-Prolog 10.1.13.
+  packages-swipy master b0356a162, 2026-07-28, and in swipl-devel V10.1.14's
+  packages/swipy) on SWI-Prolog 10.1.13 and 10.1.14.
 Defect: when a Python callback raises, `check_error` fetches the exception's
   type, value and traceback with `PyErr_Fetch` to build the
   `python_error(Class, Obj)` ball, and returns without releasing the three
@@ -63,10 +64,14 @@ Reproduction: tests/checks/host_workarounds/janus-callback-exception-leak.sh,
   a Prolog-to-Python call to drain the deferred releases and a Python
   collection; `present` when an instance survives.
 Patch: tests/checks/host_workarounds/janus-callback-exception-leak.patch,
-  applied to the janus-swi 1.5.3 source and installed into the seat's
-  interpreter (`uv pip install --reinstall --no-deps <patched source>` with
-  `SWIPL` naming the interpreter); it releases the fetched references on every
-  exit of `check_error`.
+  applied to swipl-devel's packages/swipy at the tag the seat runs (V10.1.14),
+  built there against the patched SWI-Prolog (`rm -rf build; SWIPL=<its swipl>
+  uv build --wheel --no-build-isolation`, a stale `build/` keeps a `_swipl`
+  linked to another libswipl) and installed into the seat's interpreter with
+  `uv pip install --reinstall --no-deps`; it releases the fetched references on
+  every exit of `check_error`. The interpreter's `swipl` and its janus must
+  resolve to that one build, or the janus reproduction answers for a host the
+  engine does not run on.
 Lifted when: janus-swi releases what `PyErr_Fetch` handed `check_error`; the
   entry and the patch go together once the installed janus carries that.
 Record: docs/journal/2026-09-16-reclamation-counts.md, the retention bisection
@@ -145,22 +150,42 @@ Lifted when: a reset predicate consults its loader despite retained erased
 Record: docs/journal/2026-09-15-copied-specializations-materialize-before-calls.md.
 
 ## swi-cleanup-window
-Host: SWI-Prolog 10.1.13; `setup_call_cleanup/3` is `sig_atomic(Setup),
-  '$call_cleanup'` (boot/init.pl:680-682).
-Defect: one call port lies between Setup returning and the cleanup being
-  registered. An inference limit that trips at that port unwinds with Setup's
-  effects in place and no cleanup owed, and a cleanup of several goals can be
-  cut between its goals the same way. A signal cannot do this, because
-  `sig_atomic/1` defers it; an inference limit is not a signal.
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; `setup_call_cleanup/3` is
+  `sig_atomic(Setup), '$call_cleanup'` (boot/init.pl:680-682). This tree
+  runs on 10.1.14 built with the patch below.
+Defect: `raiseInferenceLimitException()` (src/pl-prims.c) raises inside
+  `sig_atomic/1`'s critical region, so an inference limit that trips at the
+  call port of Setup's own goal is delivered when the region ends, between
+  Setup's effects and the cleanup's registration in `I_CALLCLEANUP`, and no
+  cleanup is owed; a cleanup of several goals can be cut between its goals
+  the same way. A signal cannot do this, because `sig_atomic/1` defers it;
+  the inference check did not.
 Reproduction: tests/checks/host_workarounds/swi-cleanup-window.pl, a budget
-  sweep over an asserted guard; budget 4 of 64 leaks on 10.1.13.
-Workaround: state that must not outlive its scope is a trailed write,
-  `b_setval/2` on entry, `nb_setval/2` on the ordinary exit and `b_getval/2`
-  to read; unwinding the exception unwinds the trail, so the cleanup is the
-  fast ordinary exit rather than the thing correctness rests on.
-Lifted when: the cleanup is registered before the call port that follows
-  Setup, or the inference check honours the atomic region.
-Record: docs/journal/2026-09-07-every-intermittent-root-caused.md, the
+  sweep over an asserted guard; budget 4 of 64 leaks on 10.1.13 and 10.1.14
+  as shipped, none with the patch.
+Patch: tests/checks/host_workarounds/swi-cleanup-window.patch, against
+  swipl-devel V10.1.14 src/pl-prims.c: `raiseInferenceLimitException()`
+  returns without raising while `LD->critical` is set, so the limit is
+  honoured the way a signal is, at the first call port after the region. A
+  region is one indivisible step to the limit: a limited goal whose last step
+  is a region completes with `!`, as one whose last step is a long foreign
+  call already does, and a cleanup handler, which `callCleanupHandler()` runs
+  between `startCritical()` and `endCritical()`, is never cut between its
+  goals. SWI's own suite passes on the build (87 of 88, `pldoc:man_links`
+  needs the documentation the build omits; `tests/core_lang/test_inflimit.pl`
+  among the passes).
+Workaround: the sites still marked `swi-cleanup-window` keep state that
+  must not outlive its scope as a trailed write (`b_setval/2` on entry,
+  `nb_setval/2` on the ordinary exit, `b_getval/2` to read); each is lifted
+  in its own commit now that the host owes the cleanup, and the marker goes
+  with it.
+Lifted when: SWI-Prolog as shipped registers the cleanup before the call port
+  that follows Setup, or its inference check honours the atomic region as the
+  patch makes it; the patch and the entry go together then. The Workaround
+  field goes with the last lifted site.
+Record: docs/journal/2026-09-17-host-patches.md, the budget sweep and the
+  traced run that placed the exception inside `asserta/2`;
+  docs/journal/2026-09-07-every-intermittent-root-caused.md, the
   20,000-budget sweep; docs/journal/2026-09-10-every-host-workaround-is-commented.md.
 
 ## swi-transaction-enumerator-repeats-parent

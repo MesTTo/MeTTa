@@ -1,0 +1,19 @@
+diff --git a/src/pl-prims.c b/src/pl-prims.c
+index 70a4d7d..6b5452f 100644
+--- a/src/pl-prims.c
++++ b/src/pl-prims.c
+@@ -5681,6 +5681,14 @@ raiseInferenceLimitException(void)
+   int i;
+ 
+   if ( LD->exception.processing )
++    return;
++  /* Inside a critical region (sig_atomic/1, a cleanup handler) the limit
++     is honoured the way a signal is: the exception is not raised here but
++     at the first inference after the region ends.  Raising it inside the
++     region delivered it at the region's exit, which for
++     setup_call_cleanup/3 lies between Setup's effects and the cleanup's
++     registration, so the cleanup was never owed. */
++  if ( LD->critical )
+     return;
+ 					/* Do not throw here */
+   olimit = LD->inference_limit.limit;

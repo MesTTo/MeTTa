@@ -11,6 +11,10 @@
 %     [measured 2026-09-10: budget 4 leaks and every other budget is clean;
 %     command=sh check.sh host-workarounds; fixture=SWI-Prolog 10.1.13;
 %     commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
+%     [measured 2026-09-17: present on SWI-Prolog 10.1.14 as shipped, absent on
+%     10.1.14 built with tests/checks/host_workarounds/swi-cleanup-window.patch;
+%     command=sh check.sh host-workarounds;
+%     fixture=SWI-Prolog 10.1.14 with swi-cleanup-window.patch; commit=WORKTREE]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
