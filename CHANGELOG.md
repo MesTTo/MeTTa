@@ -285,6 +285,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   artifact aside (`metta_qlf_boot:qlf_compile_claimed/0`), so a measured child
   never pays a library half's compile after an engine source edit, which read
   as a few tens of inferences of drift in the first child of a lane.
+- Class withdrawal is two phases around the native outcome. Dropping a space
+  that declares or borrows classes prepares the withdrawal first
+  (`classes.prepare_withdrawal`): the dependency closure over the standing
+  base and reference edges, its retiring plans' catalog rows withdrawn inside
+  the caller's transaction, and the class homes those plans take along
+  (`&ClassName` spaces) retired in the same native outcome, in one engine
+  transaction opened for the drop when none is open. Python instrumentation,
+  registrations and `_DECLARATIONS` change only afterwards
+  (`classes.reconcile_withdrawal`), for the homes the outcome retired, and
+  the survivors refresh their projections once; an abort restores homes,
+  rows and records together, a commit the engine refused (a write committed
+  into a class home since the withdrawal) likewise. A retirement the engine
+  performs on its own reconciles through the lease hook. A reconciliation
+  that fails leaves its receipt pending; the hook or the next `drop()`
+  finishes the plans not yet done. `classes.release` is gone.
 - A space release changes physical engine state only once the retirement is
   durable. The generated predicates behind a released space's equations, and
   the reference bindings it holds and its receivers hold on it (imports and
@@ -297,6 +312,25 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   predicate first removes its wrappers and every import of it in any module,
   which closes two segfaults when class homes sharing definitions retired in
   one transaction. Untabling still precedes the clause removal.
+- Nothing of a Python handle crosses the engine at a drop or a transaction. The
+  drop's completion and the transaction's body are named by integer tickets the
+  binding resolves on the Python side (`drop_completed`, `transaction_body`),
+  where a crossed bound method or closure was held by its blob until atom GC
+  and the next Prolog-to-Python call, and with it the handle, its lease cell
+  and what the closure held. An anonymous name returns to the pool when its
+  life ends, whichever handle dropped it (`Cell.ephemeral`), and a dropped
+  minted handle leaves its context's registry. The engine boundary under a
+  classified error keeps the ball's message and the Python exception the ball
+  named as `.original`, and releases janus's Prolog record of the ball: the
+  record pinned the blob, the blob the exception, the exception the boundary,
+  a cycle neither collector could close, so every exception a callback raised
+  lived for the process with its frames and the handles they held.
+  `test_reclamation.py` counts lease rows, storage caches, exec modules,
+  reference sight and slots, retirement witnesses, release bookkeeping,
+  pending shadow repairs, lease cells, admissions and pending withdrawals
+  across thousands of handles, temporary spaces, aborted births, committed
+  retirements, alias releases, a failed close retried, crossed objects and
+  callback exceptions, each at the reclamation barrier's fixpoint.
 - The host ledger has a patched state. A `docs/host-workarounds.md` entry may
   carry `Patch:`, the tracked patch the host this tree runs on is built with;
   it needs no site, its reproduction must answer `absent`, and `present` fails

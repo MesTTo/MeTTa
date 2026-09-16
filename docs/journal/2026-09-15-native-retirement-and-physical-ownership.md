@@ -406,3 +406,50 @@ Open: whether the additional homes are dropped through their own handles
 (`metta_space_release_plan/2` closes owned children, not class homes);
 the plan uses handles, since each home's completion is what records its
 outcome.
+
+### R5 class withdrawal producer, results
+
+Decided: `plan_withdrawal` (pure closure), `prepare_withdrawal` (plan plus
+the retiring plans' row withdrawal, rows stored in a retiring home left to
+its storage) and `reconcile_withdrawal` (instrumentation, registrations,
+`_DECLARATIONS`, borrowers of the retired homes, one projection refresh)
+replace `release`; `ClassWithdrawal` carries the requested homes, the homes
+taken along, the retired candidates, the survivors, a `completed` set and a
+`retired` set. The consumer is the handle's drop: `plan_withdrawal` decides
+whether class homes go along; when they do and no transaction is open the
+drop opens one, so `begin_withdrawal` (prepare, held pending for every home
+it covers), the homes' own drops and this space's retirement share one
+outcome; each home's completion records itself retired on the receipt, the
+requesting home's completion reconciles against that set and only then
+drops the pending entries, so a failed reconciliation keeps the receipt for
+a retry; a restored outcome abandons it. The lease hook calls
+`home_retired` for every retirement, so a native-origin one reconciles too,
+and a Python-origin one meets a receipt already reconciled or nothing
+involved. This is the outbox shape: intent recorded before the outcome,
+per-participant outcomes recorded by their own completions, one idempotent
+reconciliation keyed on a completed set.
+Tried: dropping the homes taken along before reconciling in the standalone
+path -> 100 reds across the class suites: a home's own drop comes back
+through `home_retired`, found its plan still declared and withdrew rows
+already gone. Decided: reconcile first; a restored plan has left
+`_DECLARATIONS`, so the return is a no-op.
+Measured: the retry control found the lease hook retrying a reconciliation
+that failed in the host completion, since the hook fires after it and the
+receipt is still pending; the second attempt completed the plan exactly
+once (attempts == 1). Kept, and the control states it.
+Measured: class suites 159 (construction, field values, values, grains,
+owned records, mapping spaces) unchanged in behaviour on the producer pair;
+withdrawal controls 9: preparation leaves Python records in place, retry
+after a failed reconciliation, a live borrower survives, a drop outside a
+transaction retires the homes in one outcome, a rolled-back drop keeps
+classes and rows, a committed drop reconciles after the outcome, a drop
+refused at commit by the retirement validator keeps the classes, a native
+retirement reconciles through the lease hook, a failed reconciliation is
+finished by the hook or the next drop.
+Open: the contract's "retained class provider snapshot" and "nested
+transfer" controls are not written; nested transfer follows from the
+completion's own transfer (R1) and is covered by the retirement suite's
+nested cases, but a class-specific control would pin it.
+The rollback control exposed the release's physical work running before the
+outcome (the abolish, then the reference bindings); that thread is
+`2026-09-16-release-phases-and-reference-bindings.md`.
