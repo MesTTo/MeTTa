@@ -271,6 +271,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Dropping a space inside a transaction is transactional. The engine retires
+  the space's storage, models and ownership with the transaction and runs
+  `seam:space_released/1`, the lifetime scope's record retirement and the
+  Python handle's own cleanup only after the outer outcome and its foreign
+  participants: a commit finishes them, an abort leaves rows, cache, scope
+  record and handle exactly as they were. A handle whose drop is pending
+  refuses other operations until the outcome; `dropped` reports the durable
+  state. `metta_release_space/2` takes a completion goal called with `retired`
+  or `restored`; `metta_py_drop_space/2` carries the handle's callback.
 - `seam:form_rewriter/1` callables take four arguments, `Term, Origins,
   Rewritten, RewrittenOrigins`. An origin tree is `source`, `value` or
   `children(Origins)`, aligned with the term, and a shape-changing rewriter

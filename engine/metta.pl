@@ -1734,6 +1734,7 @@ metta_engine_reexport(spaces, metta_host_stored/2).
 metta_engine_reexport(spaces, metta_module_space/2).
 metta_engine_reexport(spaces, metta_ordered_match_limit/6).
 metta_engine_reexport(spaces, metta_release_space/1).
+metta_engine_reexport(spaces, metta_release_space/2).
 metta_engine_reexport(spaces, metta_remove_atom/3).
 metta_engine_reexport(spaces, metta_require_algebra_value/3).
 metta_engine_reexport(spaces, metta_require_foreign_capability/2).

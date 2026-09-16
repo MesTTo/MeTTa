@@ -730,6 +730,12 @@ async def drop(self) -> None:
 > If later cleanup fails, call drop() again to finish it. The handle
 > refuses other operations in that state and retains its anonymous name
 > until cleanup succeeds; retrying does not repeat engine teardown.
+>
+> Inside a transaction the engine retires the space with the transaction
+> and this handle's cleanup waits for the outer outcome: a commit
+> finishes it, an abort restores the space and the handle, and until
+> then the handle refuses other operations. Outside a transaction the
+> drop completes before returning.
 
 ### `AsyncMeTTa.profile`
 

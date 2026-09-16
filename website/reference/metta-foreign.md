@@ -419,10 +419,11 @@ class Transactional(Protocol):
 > A provider that participates in the engine's transactions.
 >
 > Declared with (writes &lt;ctx> transactional) or ``space.writes``: the
-> engine calls begin() at the provider's first write inside the
-> outermost transaction, then exactly one of commit() or rollback()
-> when it finishes, alongside the engine's own database rollback, so a
-> MeTTa (transaction ...) is atomic across both stores.
+> engine captures begin(), commit() and rollback() before the first write
+> by each registration. A successful begin receives commit or rollback on
+> that same provider even if its registration or methods change. Capture
+> and begin failures own their recovery. Provider commits follow the native
+> commit, so a refusing provider can leave a partial durable outcome.
 
 ### `Transactional.begin`
 

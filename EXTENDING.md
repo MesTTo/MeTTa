@@ -2755,7 +2755,11 @@ lib/lib_thread/lib_thread.pl, scope keep; commit=50e34286f66c938d89d5d367c6370ad
 
 The events around them are the lifetime seams. `seam:space_created/1` fires
 when a space is minted, `seam:space_releasing/1` before a space is released
-and `seam:space_released/1` after, and `seam:space_access/1` runs on every
+and `seam:space_released/1` after it (after the outer transaction's outcome
+when the release ran inside one, and never for a release that was aborted;
+a host that owns resources for the space passes its own completion goal to
+`metta_release_space/2` and is called with `retired` or `restored` before
+those hooks), and `seam:space_access/1` runs on every
 door that reaches a space by name, which is where a scope refuses a name it
 has revoked; `seam:host_engine_created/1` and `seam:host_engine_released/1`
 bracket a host engine's life the same way. All six are event seams: every

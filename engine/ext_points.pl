@@ -473,7 +473,9 @@ kind(atom_removed/2, event).
 % Lifetime events are independent of atom writes and transaction observation.
 % Creation fires once at allocation. Release preparation joins dependants
 % before either clearing phase and may repeat on retry. Its owners must be
-% idempotent. Final retirement follows successful storage teardown.
+% idempotent. Final retirement follows successful storage teardown; inside a
+% transaction it waits for the outer native outcome and the captured foreign
+% participants, and an aborted retirement never fires it.
 :- multifile space_created/1, space_releasing/1, space_released/1, space_access/1.
 kind(space_created/1, event).
 kind(space_releasing/1, event).

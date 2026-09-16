@@ -1290,6 +1290,12 @@ Implementation failures propagate, including failures from callees and providers
 > If later cleanup fails, call drop() again to finish it. The handle
 > refuses other operations in that state and retains its anonymous name
 > until cleanup succeeds; retrying does not repeat engine teardown.
+>
+> Inside a transaction the engine retires the space with the transaction
+> and this handle's cleanup waits for the outer outcome: a commit
+> finishes it, an abort restores the space and the handle, and until
+> then the handle refuses other operations. Outside a transaction the
+> drop completes before returning.
 
 Evidence: `extensions/python/ext/metta-arrays/tests/test_arrays.py::test_dropping_the_space_retires_its_installation_row`, `extensions/python/tests/ch04_spaces_and_matching/test_algebra_lifecycle.py::test_drop_retires_algebra_before_redeclaration`, `extensions/python/tests/ch04_spaces_and_matching/test_drop_recovery.py::test_backing_close_failure_keeps_the_name_and_cleanup_retryable`.
 
@@ -1315,6 +1321,9 @@ Guarantees result type `Bool` with the answer shape, effect, and determinism abo
 Implementation failures propagate, including failures from callees and providers.
 
 > Whether :meth:`drop` has released this handle's space.
+>
+> A drop pending inside an open transaction reports False until that
+> transaction's outcome finishes or restores it.
 
 Evidence: `extensions/python/tests/repository/test_door_rows.py::test_space_identity_doors_follow_the_handle_lifetime`.
 

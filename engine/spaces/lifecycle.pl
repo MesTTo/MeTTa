@@ -1,3 +1,12 @@
+% Guarantees: metta_release_space/2 retires a space's storage, models and
+%   ownership inside the caller's transaction and runs seam:space_released/1
+%   and the host's completion only after the outer outcome, reporting retired
+%   or restored; an aborted release leaves rows, cache and scope records as
+%   they were, and a failing host completion still fires the hooks
+%   [tested: space_retirement,
+%   extensions/python/tests/ch15_writing_transactions_and_worlds/test_space_retirement.py,
+%   extensions/python/tests/ch17_concurrency_and_the_loop/test_scopes.py::test_cleanup_failure_revokes_aliases_attempts_all_and_can_retry;
+%   commit=WORKTREE].
 % Guarantees: metta_remove_atom_reference/1 preserves other owners of equal atoms
 %   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Owns resources: native_removal_reference/1 reads a per-thread control context,
@@ -1507,8 +1516,40 @@ metta_prepare_space_release(Space) :-
     metta_assert_space_releasable(Space),
     forall(seam:space_releasing(Space), true).
 
+%A release is two phases with the transaction's outcome between them. Inside
+%the caller's transaction the space loses its storage, models and ownership
+%and a witness clause records the retirement; the witness rolls back with an
+%abort. The seam:space_released/1 hooks and the host's own cleanup run only
+%after the outer native outcome and the captured foreign participants, and
+%only when the witness survived, the way Django runs transaction.on_commit
+%callbacks after the outermost commit and discards them on rollback
+%(https://docs.djangoproject.com/en/5.1/topics/db/transactions/#performing-actions-after-commit).
+%Outside a transaction both phases run before this returns. A space already
+%retired in the current transaction is left to its pending completion; a
+%caller who wants that completion reported must have been the one to retire it.
+:- dynamic metta_space_retired/2.
+:- meta_predicate metta_release_space(+, 1), metta_space_release_complete(+, +, 1).
+
 metta_release_space(Space) :-
+    (   metta_space_retired(Space, _)
+    ->  true
+    ;   metta_release_space_(Space, spaces:metta_release_unobserved)
+    ).
+
+metta_release_space(Space, Host) :-
+    (   metta_space_retired(Space, _)
+    ->  throw(error(permission_error(release, pending_retirement, Space),
+                    context(metta_release_space/2,
+                            'this space is already being retired in the current \c
+                             transaction; its pending completion reports the outcome')))
+    ;   metta_release_space_(Space, Host)
+    ).
+
+metta_release_unobserved(_).
+
+metta_release_space_(Space, Host) :-
     metta_prepare_space_release(Space),
+    flag('$metta_space_retirement', Token, Token+1),
     with_mutex('$metta_metta_exec',
                ( metta_assert_space_releasable(Space),
                  %The releasing flag mutes the super-user recompilation the
@@ -1531,9 +1572,32 @@ metta_release_space(Space) :-
                                metta_forget_world_coverage(Space),
                                metta_forget_exec_module_parent(Space),
                                retractall(metta_exec_module_known(Space, _)),
-                               retractall(native_storage_module_cache(Space, _)) ))
+                               retractall(native_storage_module_cache(Space, _)),
+                               assertz(metta_space_retired(Space, Token)) ))
                )),
-    forall(seam:space_released(Space), true).
+    metta_engine:metta_after_foreign(
+        space_retirement(Space, Token),
+        spaces:metta_space_release_complete(Space, Token, Host)).
+
+%Read after the outcome, the witness is the durable decision: present means
+%the retirement committed, absent means the abort restored the space. The
+%host goal is called with that outcome as its last argument, and it runs
+%before the seam hooks: a lifetime scope's hook revokes the name, and the
+%host's cleanup still reaches the name through ordinary doors. The hooks run
+%whatever the host's cleanup did, so a failed backing close still revokes
+%the name and the host retries its own half through another drop.
+metta_space_release_complete(Space, Token, Host) :-
+    (   retract(metta_space_retired(Space, Token))
+    ->  Outcome = retired
+    ;   Outcome = restored
+    ),
+    setup_call_cleanup(
+        true,
+        call(Host, Outcome),
+        (   Outcome == retired
+        ->  forall(seam:space_released(Space), true)
+        ;   true
+        )).
 
 metta_forget_exec_module_parent(Space) :-
     (   metta_exec_module_known(Space, Module)
