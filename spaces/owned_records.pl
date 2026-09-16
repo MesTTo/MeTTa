@@ -106,11 +106,10 @@ metta_owned_update(Update, Action, Ref) :-
     ( Kind == erased -> Action = removed
     ; (Kind == asserta ; Kind == assertz), Action = added ).
 
-% Workaround: swi-bound-clause-reference-ignores-snapshot - decompile an admitted occurrence even after another transaction erases it.
-% The caller already selected Ref through its snapshot or native write delta.
-% This retrieves syntax, never liveness. SWI's bound-reference clause/3 rejects
-% CL_ERASED globally, while '$clause'/4 retains the reference's original term.
-% [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-comp.c#L6838-L6849; commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
+% The caller selected Ref through its snapshot or native write delta and
+% wants its syntax, not its liveness: a removed-contract check reads the row
+% the transaction itself has just erased, which no generation admits, so the
+% decompiler is asked directly rather than clause/3.
 metta_owned_clause(Ref, Head) :- '$clause'(Head, true, Ref, _).
 
 metta_owned_cache_reference(Ref, Space, Module) :-
