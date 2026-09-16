@@ -172,3 +172,50 @@ Tried: `sh engine/test.sh suites/spaces/owned_records.plt suites/spaces/owned_re
 -> 29 + 75 and 42 + 91 pass (`ai-tmp/ai-owned-record-remedy-native2.log`); the twin re-pins 6051
 to 6058 and the native side moves 9285 to 9292, the problem-term answer and the per-change
 admission check (`ai-tmp/ai-owned-record-remedy-twin-repin.log`).
+
+## 2026-09-16: class fields and proxies are owned records
+
+Decided: one immutable descriptor, `OwnedRecord(owner_home, owner, storage, prefix)` in
+`extensions/python/metta/_declare/owned_records.py`, derives the declaration, the owner row,
+a value row, a read with a caller-supplied empty binding, the dependency envelope, a write
+that validates, evaluates the supplied source once and replaces the value inside the existing
+native transaction, and a delete that keeps the owner; held values cross as `(noeval Value)`
+and dependencies return the complete row so a stored Error is not mistaken for a failed
+dependency query. Every mutable class publishes one field pattern per stored field and one
+proxy pattern into `&metta` with exact occurrence tokens, and `release` withdraws them; the
+prototype's field storage stays its receiver space. `_binding/lifecycle.pl` keeps the proxy
+insertion door and loses the thread-local pending registry, validator and error renderer;
+`provides/declaration.pl` loses that provision and `provides_host_user.pl` is its regenerated
+projection (`ai-tmp/ai-owned-record-consumer-handoff.md`).
+Rejected: a runtime identity or registry for the descriptor, and per-instance field schemas,
+because the class pattern already determines every key.
+Open: class retirement rollback. `lib_thread:scope_drop_space/1` can release recorded lifetime
+state before the outer transaction commits and `SpaceHandle.drop` changes Python lifetime
+flags, which database rollback alone does not restore; the prepared
+`ai-tmp/ai-owned-record-retirement-probe.py` (12 sequential cases, four controlled overlaps)
+is to be run alone and compared with pristine c75181adc before the commit-order repair is
+chosen. This unit changes no generated `retire-Class`, prototype `drop`, Scope state,
+SpaceHandle flag or release callback, and does not claim retirement rollback fixed.
+Tried: ruff over the four changed Python files -> clean; jscpd over them at 10 lines / 80
+tokens -> 0 clones in 4 files (`ai-tmp/ai-owned-record-consumer-root-clones/`); `sh check.sh
+binding binding-selftest layer-sync layer-sync-selftest closed-sets policy-inventory` -> ok,
+so the patched host-user projection is byte-equal to the generator's
+(`ai-tmp/ai-owned-record-consumer-root-binding-lanes.log`).
+Tried: `sh extensions/python/test.sh tests/ch09_types -n 0` -> 724 passed, 9 failed in three groups
+(`ai-tmp/ai-owned-record-consumer-root-python.log`). (1) `test_space_length_refinements` x2: the
+inert clause in the atom count, fixed above. (2) `test_class_grains::
+test_a_retired_receiver_cannot_regain_fields_through_a_native_writer`: the descriptor's writer
+let the reader's `retired_owner` refusal escape as an exception where the class contract answers
+an `Error` atom naming the retirement; the writer now catches the read and answers the caught
+refusal through `if-error` before evaluating its source, so the home's digest is unchanged.
+(3) six `test_generated_reads_refuse_malformed_original_native_records` cases: the test's
+`finally` restored the record with `Space.remove`, which removes one occurrence, so a duplicate
+survived the repair and the final read refused. The repair now drains with `del space[pattern]`
+inside one transaction, which the removal rule above admits for a nonground key, and every case
+asserts the reader's remedy text.
+Rejected: restating those six cases as write-time refusals, because a plain `Space.add` runs no
+commit check (measured above): the writes land and the reads refuse, as the original controls
+said.
+Tried: the three files serially -> 50 passed
+(`ai-tmp/ai-owned-record-consumer-root-python-remedy2.log`); `sh extensions/python/test.sh
+tests/ch09_types` -> 733 passed (`ai-tmp/ai-owned-record-consumer-root-ch09-parallel.log`).

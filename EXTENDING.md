@@ -3224,8 +3224,9 @@ Checks may inspect finite native records; they must not evaluate MeTTa, call
 Python or another host, yield, or invoke arbitrary user goals under that mutex.
 Nested savepoints leave validation to the outer owner. Derive checks from the
 final native delta, or store pending checks transactionally so rollback removes
-them with the writes they validate. The existing Python proxy provider uses
-this seam to prevent competing proxies for one receiver.
+them with the writes they validate. Python class fields and proxies use the
+native owned-record provider below. Each class program owns its exact catalog
+declaration occurrences; object allocation does not duplicate those patterns.
 
 Native partial-function records declare their row shape in `&metta`:
 

@@ -247,6 +247,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Mutable Python classes keep each stored field and their proxy as native owned records:
+  every mutable class publishes one `@owned-record` pattern per field and one proxy pattern
+  into `&metta`, the generated getters, writers and proxy reconstruction go through one
+  immutable `OwnedRecord` descriptor (`_declare/owned_records.py`), and the thread-local
+  pending proxy registry, its validator and its error renderer in `_binding/lifecycle.pl`
+  are gone; the outer commit validates one value and one live owner per key instead.
+
 - The evidence, provenance-pin and spec-status gates read the set git tracks
   for the root they scan, keyed by that root, so a selftest's planted tree is
   a repository and a stale build copy under an ignored directory is never a
