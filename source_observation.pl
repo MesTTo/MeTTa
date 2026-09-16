@@ -24,7 +24,7 @@
 %   is reported without ending the observation [tested:
 %   source_observation:ordinary_other_thread_execution_does_not_enter_observation,
 %   source_observation:a_throwing_exit_hook_is_reported_and_the_observation_completes;
-%   commit=WORKTREE].
+%   commit=0c878d61a57754db5bc292e6f5baa2a2c48a8778].
 % Guarantees: an engine that never runs observe-source loads none of this and
 %   pays nothing for it. Loading it at boot cost 3,696 inferences, and its
 %   resident prolog:prolog_exception_hook/5 clause cost another 119 on the
