@@ -15,7 +15,7 @@
 %   transactions share them and speculation owns a separate capture list.
 % Guarantees: capture selects every completion operation before begin, and
 %   unregistering or replacing a name does not redirect completion
-%   [source: engine/metta/space_hooks.pl:metta_enlist_foreign/1; commit=WORKTREE].
+%   [source: engine/metta/space_hooks.pl:metta_enlist_foreign/1; commit=05fae56ad5b23baa140cb4e6454cb7b304c06f4f].
 % Guarantees: metta_transaction/2 rolls back Error-valued answer bags and
 %   replays their exact order and bindings after rollback
 %   [tested: classes_transaction_results; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
@@ -866,7 +866,7 @@ metta_enlist_foreign(Space) :-
         % Linking preserves this cell when a capture or begin enlists another
         % provider. Copying the list would leave the caller updating an old cell.
         % Workaround: swi-cleanup-window - register cleanup before linking the attempt and repeat only idempotent state retirement after an inference cut.
-        % [source: engine/host_transactions.pl:host_transaction/2; commit=WORKTREE].
+        % [source: engine/host_transactions.pl:host_transaction/2; commit=05fae56ad5b23baa140cb4e6454cb7b304c06f4f].
         setup_call_catcher_cleanup(
             true,
             ( nb_linkval('$metta_tx_enlisted', [Participant|Enlisted]),

@@ -2,7 +2,7 @@
 % Assumes: owned_record_reads.plt supplies the layouts and snapshot fixtures.
 % Owns resources: fixtures release their spaces; the concurrent test joins
 %   its worker and removes its temporary wrapper.
-% [source: engine/spaces/owned_records.pl:metta_owned_record_occurrences/3; commit=WORKTREE]
+% [source: engine/spaces/owned_records.pl:metta_owned_record_occurrences/3; commit=05fae56ad5b23baa140cb4e6454cb7b304c06f4f]
 
 :- ensure_loaded('owned_record_reads.plt').
 

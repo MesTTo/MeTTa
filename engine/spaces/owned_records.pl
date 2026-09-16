@@ -17,7 +17,7 @@
 %   metta_owned_record_occurrences/3 exposes those same checked references to
 %   native allocation producers, including the zero-owner/zero-value state,
 %   and refuses under its own name
-%   [source: engine/spaces/owned_records.pl:metta_owned_read_references/5; commit=WORKTREE].
+%   [source: engine/spaces/owned_records.pl:metta_owned_read_references/5; commit=05fae56ad5b23baa140cb4e6454cb7b304c06f4f].
 
 :- multifile seam:transaction_constraint/1.
 

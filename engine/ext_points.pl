@@ -601,7 +601,7 @@ kind(foreign_space/1, ownership).
 % retaining that provider. Capture runs once, outside locks, before Begin at
 % the first write for Space/Identity. Completion never resolves Space again.
 % A replacement registration has another identity, even under the same name.
-% [source: engine/metta/space_hooks.pl:metta_enlist_foreign/1; commit=WORKTREE]
+% [source: engine/metta/space_hooks.pl:metta_enlist_foreign/1; commit=05fae56ad5b23baa140cb4e6454cb7b304c06f4f]
 :- multifile foreign_participant/3.
 kind(foreign_match/3, ownership).
 kind(foreign_erring/5, ownership).

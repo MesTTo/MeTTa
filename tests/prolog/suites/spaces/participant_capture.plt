@@ -2,7 +2,7 @@
 % Assumes: the engine owns enlistment and completes foreign work after its
 %   native transaction; fixture logs are engine-local and survive rollback.
 % Owns resources: each test removes its provider rows and callback log.
-% [source: engine/metta/space_hooks.pl:metta_enlist_foreign/1; commit=WORKTREE]
+% [source: engine/metta/space_hooks.pl:metta_enlist_foreign/1; commit=05fae56ad5b23baa140cb4e6454cb7b304c06f4f]
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
