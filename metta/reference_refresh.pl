@@ -11,6 +11,11 @@
 %   [tested: references:rollback_restores_native_links_and_nested_rollback_restores_its_parent,
 %   references:inner_failure_transfers_one_watch_and_outer_completion_retires_it;
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: a completion inside a source program or definition batch queues
+%   its spaces and leaves publication to the program's flush [tested:
+%   test_class_method_costs:test_a_class_definition_publishes_its_references_once,
+%   extensions/python/tests/ch15_writing_transactions_and_worlds/test_transaction.py;
+%   commit=WORKTREE].
 % Guarantees: inference cuts cannot abandon a registered reference frame or
 %   its reconciliation [tested:
 %   references:an_inference_cut_cannot_abandon_reference_completion;
@@ -36,9 +41,16 @@ support_graph:support_invalidation_action(derived(Module, reference_face)) :-
     metta_reference_seen_space(Space, Module),
     metta_reference_queue(Space).
 
+% The queue and the frame roots below are stored as copies, never linked: a
+% set linked from inside a findall or a failing branch is reclaimed with that
+% context and reads back as unbound cells. A stored copy is read back by
+% reference, so the sets still grow in place.
 metta_reference_queue(Space) :-
-    ( nb_current('$metta_reference_pending', Pending) -> true
-    ; empty_nb_set(Pending), nb_linkval('$metta_reference_pending', Pending) ),
+    (   nb_current('$metta_reference_pending', Pending)
+    ->  true
+    ;   empty_nb_set(Fresh), nb_setval('$metta_reference_pending', Fresh),
+        nb_getval('$metta_reference_pending', Pending)
+    ),
     add_nb_set(Space, Pending),
     metta_reference_source_queued(Space).
 
@@ -53,7 +65,7 @@ metta_reference_consumed(Spaces) :-
     ( Remaining == [] -> nb_delete('$metta_reference_pending')
     ; empty_nb_set(Pending),
       forall(member(Space, Remaining), add_nb_set(Space, Pending)),
-      nb_linkval('$metta_reference_pending', Pending) ).
+      nb_setval('$metta_reference_pending', Pending) ).
 
 metta_reference_changed(Space) :-
     (   metta_reference_refreshing
@@ -108,7 +120,7 @@ metta_reference_refresh_now :-
                  metta_reference_refresh_grades(Space) )),
         findall(Space-Module-Face,
                 ( member(Space-Module, Spaces),
-                  metta_reference_local_face(Space, [], Face) ), Faces),
+                  metta_reference_provider_face(Space, [], Face) ), Faces),
         metta_reference_binding_context(Faces, Context),
         findall(Space-Plan,
                 ( member(Space-_-Face, Faces),
@@ -147,7 +159,7 @@ metta_reference_binding_context(Faces, Context) :-
     sort(Homes0, Homes),
     findall(Home-Module-Face,
             ( member(Home, Homes), metta_reference_seen_space(Home, Module),
-              metta_reference_local_face(Home, [], Face) ), Extra),
+              metta_reference_provider_face(Home, [], Face) ), Extra),
     append(Faces, Extra, Context).
 
 metta_reference_demand_names(Spaces, Names) :-
@@ -213,12 +225,16 @@ metta_reference_track_frames(Frame, Spaces) :-
                              system:'$snapshot'/1]),
         \+ metta_reference_finishing(Frame)
     ->  metta_reference_frame_entries(Frames),
-        ( memberchk(frame(Frame, Roots), Frames) -> true
-        ; empty_nb_set(Roots),
-          % Register retirement before publishing an untrailed frame.
-          host_transactions:host_transaction_on_exit(
-              metta_engine:metta_reference_finish_frame(Frame)),
-          nb_linkval('$metta_reference_frames', [frame(Frame, Roots)|Frames]) ),
+        (   memberchk(frame(Frame, _), Frames)
+        ->  true
+        ;   empty_nb_set(Fresh),
+            % Register retirement before publishing an untrailed frame.
+            host_transactions:host_transaction_on_exit(
+                metta_engine:metta_reference_finish_frame(Frame)),
+            nb_setval('$metta_reference_frames', [frame(Frame, Fresh)|Frames])
+        ),
+        metta_reference_frame_entries(Stored),
+        memberchk(frame(Frame, Roots), Stored),
         forall(member(Space, Spaces), add_nb_set(Space, Roots))
     ; prolog_frame_attribute(Frame, parent, Parent),
       metta_reference_track_frames(Parent, Spaces) ).
@@ -227,17 +243,19 @@ metta_reference_finish_frame(Frame) :-
     metta_reference_frame_entries(Frames),
     (   memberchk(frame(Frame, Roots), Frames)
     ->  nb_set_to_list(Roots, Spaces),
+        % A completion inside a source program or definition batch queues
+        % its spaces as a change does; the program's next flush publishes.
         metta_with_trailed_push('$metta_reference_finishing', Frame,
             ( metta_reference_track_transaction(Spaces),
               metta_reference_invalidate(Spaces),
-              metta_reference_refresh,
+              ( filereader:active_source_program(_) -> true ; metta_reference_refresh ),
               with_typing_policy_stable(metta_reference_demand_wrapper) )),
         % Keep the roots until reconciliation succeeds so a cleanup retry
         % can repeat it. Transferring roots may have registered a new parent.
         metta_reference_frame_entries(Current),
         selectchk(frame(Frame, _), Current, Remaining),
         ( Remaining == [] -> nb_delete('$metta_reference_frames')
-        ; nb_linkval('$metta_reference_frames', Remaining) )
+        ; nb_setval('$metta_reference_frames', Remaining) )
     ;   true
     ).
 

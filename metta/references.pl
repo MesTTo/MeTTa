@@ -7,6 +7,11 @@
 %   subsorts without making their subjects callable
 %   [tested: references:constructor_declarations_travel_without_callable_heads;
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: a provider face is computed once per home and blocked path set
+%   while the rows stand, and a clean node answers its retained face [tested:
+%   references, reference_publication, reference_patterns,
+%   reference_source_origins, reference_scopes, reference_providers;
+%   commit=WORKTREE].
 % Guarantees: a kept importing space retains its scoped FROM providers
 %   [tested: lib_thread_scope_deferred:a_kept_cleanup_retains_its_captured_space_and_reference_provider;
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
@@ -59,6 +64,7 @@
 %   traversal bounds cycles, including cycles whose maps change names.
 
 :- use_module(library(varnumbers), [varnumbers/2]).
+:- use_module(library(ordsets), [ord_intersection/3]).
 
 :- dynamic metta_reference_row/4, metta_reference_map/3.
 :- dynamic metta_occurrence_grade/4, metta_reference_projection/4.
@@ -255,7 +261,70 @@ metta_reference_source_face(Space, Space, _, Face) :- !,
     findall(Name/Arity-root(Space, Name, Arity, []),
             metta_reference_own_head(Space, Name, Arity), Face).
 metta_reference_source_face(Space, Home, Visited, Face) :-
-    metta_reference_face(Home, [Space|Visited], Face).
+    metta_with_under(visibility,
+        ( metta_reference_provider_face(Home, [Space|Visited], Local),
+          include(metta_reference_public_entry(Home), Local, Face) )).
+
+% A provider's face depends on the path that reached it only through the
+% spaces of that path it can reach again: a from row back into the path is cut
+% there, so two paths with the same blocked set compute the same face. Faces
+% are remembered by home and blocked set while the rows stand (the reference
+% epoch, which every row change advances, and the two row retirements below
+% forget them), and a clean node's retained face serves when nothing it
+% reaches is blocked, which is what its publication computed.
+:- thread_local metta_reference_face_memo/3, metta_reference_reach_memo/2,
+                metta_reference_memo_epoch/1.
+
+metta_reference_provider_face(Home, Visited, Local) :-
+    (   memberchk(Home, Visited)
+    ->  Local = []
+    ;   metta_reference_memo_current,
+        metta_reference_reach(Home, Reach),
+        sort(Visited, Path), ord_intersection(Path, Reach, Blocked),
+        (   metta_reference_face_memo(Home, Blocked, Local)
+        ->  true
+        ;   Blocked == [], metta_reference_retained_face(Home, Local)
+        ->  true
+        ;   metta_reference_local_face(Home, Visited, Local),
+            assertz(metta_reference_face_memo(Home, Blocked, Local))
+        )
+    ).
+
+metta_reference_retained_face(Home, Local) :-
+    space_module(Home, Module),
+    support_graph:support_retained(derived(Module, reference_face), Local).
+
+metta_reference_memo_current :-
+    flag('$metta_reference_epoch', Epoch, Epoch),
+    (   metta_reference_memo_epoch(Epoch)
+    ->  true
+    ;   metta_reference_forget_faces,
+        assertz(metta_reference_memo_epoch(Epoch))
+    ).
+
+metta_reference_forget_faces :-
+    retractall(metta_reference_memo_epoch(_)),
+    retractall(metta_reference_face_memo(_, _, _)),
+    retractall(metta_reference_reach_memo(_, _)).
+
+% The spaces a face can reach through from rows, by breadth-first walk; a
+% space that a cycle returns to is among them.
+metta_reference_reach(Space, Reach) :-
+    (   metta_reference_reach_memo(Space, Reach)
+    ->  true
+    ;   metta_reference_reach_walk([Space], [], Reached),
+        sort(Reached, Reach),
+        assertz(metta_reference_reach_memo(Space, Reach))
+    ).
+
+metta_reference_reach_walk([], Seen, Seen).
+metta_reference_reach_walk([Space|Queue], Seen, Reach) :-
+    findall(Home, ( metta_reference_row(Space, _, Home, _), Home \== Space,
+                    \+ memberchk(Home, Seen), \+ memberchk(Home, Queue) ), Homes0),
+    sort(Homes0, Homes),
+    append(Queue, Homes, Queue1),
+    append(Homes, Seen, Seen1),
+    metta_reference_reach_walk(Queue1, Seen1, Reach).
 
 % A symbol retains every arity. A full head selects its input arity and adds
 % a structural constraint. Numbered variables make the path key independent
@@ -351,11 +420,17 @@ user:exception(undefined_predicate, Module:Predicate/Arity, retry) :-
 
 metta_reference_retire_rows(Space) :-
     space_module(Space, Module),
-    forall(( metta_reference_row(Space, Token, _, _),
-             \+ spaces:metta_space_pair(Space, [from|_], Token, _) ),
-           ( retractall(metta_reference_row(Space, Token, _, _)),
-             retractall(metta_reference_map(Token, _, _)),
-             support_graph:support_forget(derived(Module, reference_row(Token))) )).
+    findall(Token,
+            ( metta_reference_row(Space, Token, _, _),
+              \+ spaces:metta_space_pair(Space, [from|_], Token, _) ), Tokens),
+    (   Tokens == []
+    ->  true
+    ;   forall(member(Token, Tokens),
+               ( retractall(metta_reference_row(Space, Token, _, _)),
+                 retractall(metta_reference_map(Token, _, _)),
+                 support_graph:support_forget(derived(Module, reference_row(Token))) )),
+        metta_reference_forget_faces
+    ).
 
 metta_reference_publish_face(Space, Module, Face, Faces) :-
     findall(derived(Module, reference_row(Token)),
@@ -618,6 +693,7 @@ metta_reference_release(Space) :-
                ( retractall(metta_reference_map(Token, _, _)),
                  space_module(Receiver, ReceiverModule),
                  support_graph:support_forget(derived(ReceiverModule, reference_row(Token))) )),
+        metta_reference_forget_faces,
         (   current_transaction(_)
         ->  Deferred = Receivers
         ;   metta_reference_refresh, Deferred = []
