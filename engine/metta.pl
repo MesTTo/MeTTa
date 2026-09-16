@@ -2300,7 +2300,7 @@ prolog:error_message(metta_extension_required(Name, Cause)) -->
 %A MeTTa head in an error context is the program's name for the operation, an
 %atom or an expression, never a predicate indicator. SWI-Prolog 10.1.14 renders
 %every callable context as Name/Arity, so the engine renders its own
-%[tested: tests/prolog/suites/evaluation/metta.plt; commit=WORKTREE].
+%[tested: tests/prolog/suites/evaluation/metta.plt; commit=c17a00e9c97d830aaca08f48dced515f14d4553a].
 :- multifile prolog:message_location//1.
 prolog:message_location(context(Head, _)) -->
     { metta_context_head(Head) },
