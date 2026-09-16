@@ -496,6 +496,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- An error raised with a MeTTa head as its context renders as `head: message`
+  on every SWI-Prolog version: the engine renders its own contexts through
+  `prolog:message_location//1`, where 10.1.14 would print `head/0: message`.
 - A call to a MeTTa function not yet defined no longer imports a Prolog library
   predicate of the same name and arity into the space's module. SWI resolved the
   undefined procedure against its library index before the engine's
