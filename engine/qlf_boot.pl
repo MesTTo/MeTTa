@@ -168,6 +168,20 @@ qlf_source_newest(Here, Newest) :-
 %answer is a claim (an ownership seam, engine/ext_points.pl): a process that
 %never loaded this file has no clause and claims nothing, so it loads every
 %runtime source from source and writes no artifact the stamp would not know.
+%Every governed Prolog source's artifact brought up to date, aside, from one
+%booted process: what a measurement lane runs once before its first measured
+%child, so no child pays a library half's compile or the aside check for it.
+%The boot's own child regenerates the engine set; a library half otherwise
+%compiles at its first import, inside whichever process that is
+%[tested: extensions/python/tests/repository/test_twin_coverage.py::test_a_measurement_warms_stale_artifacts_once_per_process;
+%commit=WORKTREE].
+qlf_compile_claimed :-
+    qlf_boot_directory(Here),
+    forall(( qlf_pattern(prolog, Pattern),
+             qlf_glob_files(Here, Pattern, Files),
+             qlf_member(File, Files) ),
+           qlf_compile_aside(File)).
+
 qlf_governed_source(File) :-
     qlf_boot_directory(Here),
     atom_concat(Here, '/..', Parent),

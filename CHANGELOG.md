@@ -280,6 +280,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   refuses other operations until the outcome; `dropped` reports the durable
   state. `metta_release_space/2` takes a completion goal called with `retired`
   or `restored`; `metta_py_drop_space/2` carries the handle's callback.
+- The twin coverage lane warms the tree's Prolog artifacts before its first
+  measurement: one child per process compiles every governed source's stale
+  artifact aside (`metta_qlf_boot:qlf_compile_claimed/0`), so a measured child
+  never pays a library half's compile after an engine source edit, which read
+  as a few tens of inferences of drift in the first child of a lane.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull
