@@ -954,9 +954,14 @@ seam:space_dependency(Home, Space) :-
 % The journal records native allocations, including ones whose equation home
 % is elsewhere. A Scope may already have retired one before its source closes.
 source_owned_space(Home, Space) :-
-    metta_source_load(_, Home, Load, _),
-    source_load_resource(Load, owned_space(Space)),
+    source_owns_space(Home, Space),
     spaces:native_storage_module_cache(Space, _).
+
+% The ownership relation alone. A retirement's commit validation asks it in
+% the refreshed view, where the allocation it would otherwise require is gone.
+source_owns_space(Home, Space) :-
+    metta_source_load(_, Home, Load, _),
+    source_load_resource(Load, owned_space(Space)).
 
 source_owned_release_plan(Home, Plan) :-
     findall(Space, source_owned_space(Home, Space), Spaces),

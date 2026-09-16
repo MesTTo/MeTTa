@@ -239,3 +239,75 @@ foreign-backed space (it should not; a provider's rows are not native
 clauses), and whether a retirement of a space with tabled equations leaves
 table clauses the residue count must ignore (untable/1 runs before the
 outcome, so none are expected).
+
+### R3 commit validation, results
+
+Verified: the two SWI facts the plan rests on, in a throwaway probe
+(ai-tmp/probe/ai-r3-swi-probe.pl): a nested transaction's asserts are in the
+outer constraint's `transaction_updates/1`, and a clause reference erased
+by another thread's committed transaction fails a bound-reference
+`clause/3` inside the refreshed constraint view, discarding the writer.
+Tried: counting every clause of the retired storage module ->
+`occurrences(1)` on a solo retirement: the storage funnel keeps an inert
+sentinel clause with body fail (`native_storage_sentinel/2`, catalog.pl).
+Decided: the residue reader enumerates with body true, as every row reader
+does.
+Tried: `native_storage_module/2` for the retired space's module -> no
+residue for parametric spaces, whose mapping needs the registration the
+retirement withdrew, so the owned-record validator answered instead and a
+retirement of an unowned parametric space would have committed over a
+concurrent write. Decided: preparation takes the storage module from the
+cache clause the retirement erased, through `metta_owned_cache_reference/3`,
+the owned records' own recovery of a retired identity.
+Decided: the retirement validator's clause loads before the owned records'
+(spaces.pl consults lifecycle.pl first), so a write racing an owned record's
+storage retirement is refused with the space-level root cause; the owned
+records suite's four prototype-drop cases expect
+`metta_retirement_conflict` with the same retry remedy.
+Measured: space_retirement 24 (fifteen new overlap controls: both commit
+orders, removal, equal-valued replacement both ways, a definition, an
+equation-home child, an heir, an empty allocation both ways, a nested
+commit, an inner abort, a snapshot, disjoint and multivalued writes);
+owned_records 29 with 75 subtests on the shared harness; Python
+test_commit_validation 3 and test_class_owned_records 33 on the `overlap`
+fixture.
+
+### R4 provider admission intervals, plan
+
+Goal: a provider's registration is held for the whole of every operation
+that uses it, iterator pulls included; a close stops new admission, waits
+for admitted uses, then runs its callbacks outside the bookkeeping locks;
+an older snapshot cannot invoke a closed provider; a callback that retires
+its own admitted provider does not wait on itself.
+Found: `metta.foreign.PROVIDERS` is a read-only view over the engine's
+`@python-provider` owned-record rows (one crossing per lookup); every
+`foreign_*` door looks the provider up once at entry and streams through
+`guarded/2` with no admission held, so `unregister_provider` can remove the
+row and a backing can close while a pull is mid-flight. The remote gateway
+already has the shape wanted (`_gateway.py:close`: stop accepting, stop the
+worker, release cursors last, refuse to close itself), and
+test_remote_close_waits_for_worker_detach is its control.
+Prior art: RCU/SRCU read-side sections with a grace period; Go's WaitGroup
+behind a closed flag; Python's Executor.shutdown(wait=True); asyncio
+Server.wait_closed. The shape is a per-registration admission record:
+count, closing flag, condition; admit at every door entry (refuse with the
+provider's own closing error once closing), release when the door returns
+or its generator finishes, closes or is collected (release in the
+guarded stream's finally); close sets closing, waits for count 0, then
+removes the engine row and calls the provider's close outside the lock.
+Decided (plan): the record lives beside the provider in the binding's
+Python registry rather than in the engine, because pulls never cross the
+engine; the engine row remains the authority for WHICH provider a name
+has, and the admission decides WHEN it may be used. A close requested from
+inside an admitted use of the same provider (self-retirement) marks closing
+and hands the physical close to the deferred queue, reporting pending
+rather than deadlocking; a close from another engine thread waits.
+Controls: a provider callback and an iterator held open in another engine
+while close is requested (close waits, new admission refused); an older
+snapshot holding the provider name cannot invoke it after close; failure,
+cut and cursor close as release paths; self-retirement from a callback
+completes after the callback exits; the two-resource prefix fixture.
+Open: whether the engine's `seam:foreign_*` clauses should ask admission
+before `py_iter` (one more crossing per operation) or Python's doors alone
+carry it; the plan is Python-only, since every use enters through a door.
+

@@ -2,23 +2,30 @@
 % Guarantees: rows, storage cache and ownership return after an abort, the
 %   hooks and the host completion run once after a commit, and the completion
 %   reports retired or restored [tested: space_retirement; commit=f9ef614a03bce1a1878d9b43fb7618df57ccfa21].
+% Guarantees: a write and a retirement overlapping through
+%   tests/prolog/overlap_transactions.pl are decided at the outer commit in
+%   both orders, for removals, equal-valued replacements, definitions,
+%   children, empty allocations, nested and snapshot entries, with disjoint
+%   and multivalued writes as the positive controls [tested: space_retirement;
+%   commit=WORKTREE].
 % Owns resources: every test releases its generated spaces and erases its notes.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 
 :- begin_tests(space_retirement).
+:- use_module('../../overlap_transactions').
 
 retire_setup :-
     metta_host_set_silent(true),
-    nb_setval(space_retirement_notes, []),
+    forall(recorded(space_retirement_notes, _, Ref), erase(Ref)),
     nb_setval(space_retirement_spaces, []).
 retire_cleanup :-
     nb_getval(space_retirement_spaces, Spaces),
     forall(member(Space, Spaces),
            ( spaces:native_storage_module_cache(Space, _) -> metta_release_space(Space) ; true )),
     nb_delete(space_retirement_spaces),
-    nb_delete(space_retirement_notes),
+    forall(recorded(space_retirement_notes, _, Ref), erase(Ref)),
     metta_host_set_silent(false).
 
 retire_space(Space) :-
@@ -27,12 +34,13 @@ retire_space(Space) :-
     nb_getval(space_retirement_spaces, Before),
     nb_setval(space_retirement_spaces, [Space|Before]).
 
-% The host completion the engine calls with the outcome.
+% The host completion the engine calls with the outcome, recorded rather
+% than held in a global variable so a completion in a worker thread is read
+% by the test thread.
 retire_note(Outcome) :-
-    nb_getval(space_retirement_notes, Before),
-    nb_setval(space_retirement_notes, [Outcome|Before]).
+    recordz(space_retirement_notes, Outcome).
 retire_notes(Notes) :-
-    nb_getval(space_retirement_notes, Reversed), reverse(Reversed, Notes).
+    findall(Outcome, recorded(space_retirement_notes, Outcome), Notes).
 
 retired(Space) :-
     \+ spaces:native_storage_module_cache(Space, _),
@@ -129,5 +137,183 @@ test(owned_children_follow_their_parent_through_abort_and_commit,
     retire_notes(After), assertion(After == [restored, retired]),
     assertion(retired(Parent)), assertion(retired(Child)),
     assertion(\+ spaces:space_equation_home(Child, _)).
+
+% Commit validation. Two transactions overlap through
+% tests/prolog/overlap_transactions.pl; the caller names who commits first,
+% and the loser is refused at its own commit.
+conflict(threw(error(metta_retirement_conflict(Party, Problem), _)), Party, Problem).
+
+retire_empty_space(Space) :-
+    gensym('&space-retirement-', Space), space_module(Space, _),
+    ensure_native_storage_module(Space, _),
+    nb_getval(space_retirement_spaces, Before),
+    nb_setval(space_retirement_spaces, [Space|Before]).
+
+rows(Space, Rows) :-
+    findall(Row, get_native_atom(Space, Row), Unsorted), msort(Unsorted, Rows).
+
+test(a_write_loses_to_a_retirement_that_committed_first,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Space),
+    overlap(metta_add_atom(Space, [written, 1], _),
+            metta_release_space(Space, plunit_space_retirement:retire_note),
+            second, [first-Writer, second-Retirer]),
+    assertion(Retirer == committed),
+    assertion(conflict(Writer, writer(Space), retired)),
+    retire_notes(Notes), assertion(Notes == [retired]),
+    assertion(retired(Space)).
+
+test(a_retirement_loses_to_a_write_that_committed_first,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Space),
+    overlap(metta_add_atom(Space, [written, 1], _),
+            metta_release_space(Space, plunit_space_retirement:retire_note),
+            first, [first-Writer, second-Retirer]),
+    assertion(Writer == committed),
+    assertion(conflict(Retirer, retirement(Space), occurrences(1))),
+    retire_notes(Notes), assertion(Notes == [restored]),
+    assertion(spaces:native_storage_module_cache(Space, _)),
+    assertion(\+ spaces:metta_space_retired(Space, _)),
+    rows(Space, Rows), assertion(Rows == [[retained, 7], [written, 1]]).
+
+test(a_removal_loses_to_a_retirement_that_committed_first,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Space),
+    overlap(metta_remove_atom(Space, [retained, 7], _),
+            metta_release_space(Space),
+            second, [first-Remover, second-Retirer]),
+    assertion(Retirer == committed),
+    assertion(conflict(Remover, writer(Space), retired)),
+    assertion(retired(Space)).
+
+test(an_equal_valued_replacement_committed_first_survives_the_retirement,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Space),
+    overlap(( metta_remove_atom(Space, [retained, 7], _),
+              metta_add_atom(Space, [retained, 7], _) ),
+            metta_release_space(Space),
+            first, [first-Writer, second-Retirer]),
+    assertion(Writer == committed),
+    assertion(conflict(Retirer, retirement(Space), occurrences(1))),
+    rows(Space, Rows), assertion(Rows == [[retained, 7]]).
+
+test(an_equal_valued_replacement_loses_to_a_retirement_that_committed_first,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Space),
+    overlap(( metta_remove_atom(Space, [retained, 7], _),
+              metta_add_atom(Space, [retained, 7], _) ),
+            metta_release_space(Space),
+            second, [first-Writer, second-Retirer]),
+    assertion(Retirer == committed),
+    assertion(conflict(Writer, writer(Space), retired)),
+    assertion(retired(Space)).
+
+test(a_definition_published_after_the_withdrawal_refuses_the_retirement,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Space),
+    overlap(metta_add_atom(Space, [=, [defined], 1], _),
+            metta_release_space(Space),
+            first, [first-Definer, second-Retirer]),
+    assertion(Definer == committed),
+    assertion(conflict(Retirer, retirement(Space), occurrences(1))),
+    assertion(spaces:native_storage_module_cache(Space, _)).
+
+test(a_child_reading_the_equations_declared_after_the_withdrawal_refuses_the_retirement,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Parent),
+    gensym('&space-retirement-', Child),
+    nb_getval(space_retirement_spaces, Before),
+    nb_setval(space_retirement_spaces, [Child|Before]),
+    overlap(( metta_declare_space_equation_home(Child, Parent),
+              metta_add_atom(Child, [kept, 1], _) ),
+            metta_release_space(Parent),
+            first, [first-Declarer, second-Retirer]),
+    assertion(Declarer == committed),
+    assertion(conflict(Retirer, retirement(Parent), children(1))),
+    assertion(spaces:space_equation_home(Child, Parent)),
+    assertion(spaces:native_storage_module_cache(Parent, _)).
+
+test(an_heir_declared_after_the_withdrawal_refuses_the_retirement,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Parent),
+    gensym('&space-retirement-', Heir),
+    nb_getval(space_retirement_spaces, Before),
+    nb_setval(space_retirement_spaces, [Heir|Before]),
+    overlap(( metta_declare_space_parent(Heir, Parent),
+              metta_add_atom(Heir, [kept, 1], _) ),
+            metta_release_space(Parent),
+            first, [first-Declarer, second-Retirer]),
+    assertion(Declarer == committed),
+    assertion(conflict(Retirer, retirement(Parent), children(1))),
+    assertion(spaces:space_parent(Heir, Parent)).
+
+test(an_empty_allocation_written_after_the_withdrawal_refuses_the_retirement,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_empty_space(Space),
+    overlap(metta_add_atom(Space, [first, 1], _),
+            metta_release_space(Space),
+            first, [first-Writer, second-Retirer]),
+    assertion(Writer == committed),
+    assertion(conflict(Retirer, retirement(Space), occurrences(1))),
+    rows(Space, Rows), assertion(Rows == [[first, 1]]).
+
+test(a_first_write_loses_to_the_retirement_of_its_empty_allocation,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_empty_space(Space),
+    overlap(metta_add_atom(Space, [first, 1], _),
+            metta_release_space(Space),
+            second, [first-Writer, second-Retirer]),
+    assertion(Retirer == committed),
+    assertion(conflict(Writer, writer(Space), retired)),
+    assertion(retired(Space)).
+
+test(a_nested_commit_of_the_write_is_validated_at_the_outer_boundary,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Space),
+    overlap(metta_transaction(metta_add_atom(Space, [written, 1], _)),
+            metta_release_space(Space),
+            second, [first-Writer, second-Retirer]),
+    assertion(Retirer == committed),
+    assertion(conflict(Writer, writer(Space), retired)),
+    assertion(retired(Space)).
+
+test(an_inner_abort_leaves_the_outer_commit_nothing_to_validate,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Space),
+    overlap(\+ metta_transaction(( metta_add_atom(Space, [written, 1], _), fail )),
+            metta_release_space(Space),
+            second, [first-Writer, second-Retirer]),
+    assertion(Retirer == committed),
+    assertion(Writer == committed),
+    assertion(retired(Space)).
+
+test(a_snapshot_write_leaves_the_outer_commit_nothing_to_validate,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Space),
+    overlap(snapshot(metta_add_atom(Space, [written, 1], _)),
+            metta_release_space(Space),
+            second, [first-Writer, second-Retirer]),
+    assertion(Retirer == committed),
+    assertion(Writer == committed),
+    assertion(retired(Space)).
+
+test(disjoint_writes_commit_in_either_order,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(A), retire_space(B),
+    overlap(metta_add_atom(A, [written, 1], _),
+            metta_add_atom(B, [written, 2], _),
+            second, [first-First, second-Second]),
+    assertion(First == committed), assertion(Second == committed),
+    rows(A, RowsA), assertion(RowsA == [[retained, 7], [written, 1]]),
+    rows(B, RowsB), assertion(RowsB == [[retained, 7], [written, 2]]).
+
+test(multivalued_writes_into_one_space_commit_in_either_order,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Space),
+    overlap(metta_add_atom(Space, [written, 1], _),
+            metta_add_atom(Space, [written, 2], _),
+            second, [first-First, second-Second]),
+    assertion(First == committed), assertion(Second == committed),
+    rows(Space, Rows), assertion(Rows == [[retained, 7], [written, 1], [written, 2]]).
 
 :- end_tests(space_retirement).

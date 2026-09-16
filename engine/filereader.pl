@@ -283,6 +283,7 @@
             record_source_resource/1,
             record_source_space/1,
             source_owned_space/2,
+            source_owns_space/2,
             source_owned_release_plan/2,
             record_source_atom_assertion/1,
             source_load_assertion/3,

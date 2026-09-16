@@ -15,6 +15,7 @@
 seam:foreign_space(Space) :- user:owned_record_foreign_space(Space).
 
 :- begin_tests(owned_records).
+:- use_module('../../overlap_transactions').
 
 layout(entity, Home, Id, ['Entity', Id], Home, [field, ['Entity', Id]]).
 layout(prototype, _, Id, ['Prototype', Id], Id, [field]).
@@ -77,10 +78,6 @@ withdraw(Record) :-
 
 declare(record(_, _, _, _, Schema)) :- metta_add_atom('&metta', Schema, true).
 
-outcome(Goal, Outcome) :-
-    catch(( call(Goal) -> Outcome = committed ; Outcome = failed ),
-          Error, Outcome = threw(Error)).
-
 conflict(threw(error(metta_owned_record_conflict(_, Problem), _)), Problem).
 
 assert_conflict(Outcome, Problem) :-
@@ -88,55 +85,13 @@ assert_conflict(Outcome, Problem) :-
     Outcome = threw(Error), message_to_string(Error, Message),
     assertion(sub_string(Message, _, _, _, "retry the outer transaction")).
 
-% Both workers open their snapshots before either body writes. The parent
-% receives an early failure instead of waiting for a stage that cannot occur.
-worker(Tag, Goal, Commands, Events) :-
-    outcome(metta_transaction(
-                ( thread_send_message(Events, event(Tag, opened)),
-                  thread_get_message(Commands, begin), call(Goal),
-                  thread_send_message(Events, event(Tag, written)),
-                  thread_get_message(Commands, commit) )), Result),
-    thread_send_message(Events, event(Tag, done(Result))).
-
-stage(Events, Tag, Expected) :-
-    thread_get_message(Events, event(Tag, Actual)),
-    ( Actual == Expected -> true
-    ; throw(error(owned_record_worker_stage(Tag, Expected, Actual), none)) ).
-
-worker_cleanup(Finished, Thread) :-
-    ( var(Thread) -> true
-    ; Finished == true
-    -> thread_join(Thread, Status), assertion(Status == true)
-    ; catch(( thread_property(Thread, status(running))
-            -> thread_signal(Thread, throw(owned_record_test_abandoned))
-            ; true ), error(existence_error(thread, _), _), true),
-      catch(thread_join(Thread, _), error(existence_error(thread, _), _), true) ).
-
-with_queues([], Goal) :- call(Goal).
-with_queues([Queue|Queues], Goal) :-
-    setup_call_cleanup(message_queue_create(Queue), with_queues(Queues, Goal),
-                       message_queue_destroy(Queue)).
-
-overlap(FirstGoal, SecondGoal, FirstCommit, Results) :-
-    with_queues([Events, First, Second],
-        setup_call_cleanup(
-            true,
-            ( thread_create(worker(first, FirstGoal, First, Events), A, []),
-              thread_create(worker(second, SecondGoal, Second, Events), B, []),
-              stage(Events, first, opened), stage(Events, second, opened),
-              thread_send_message(First, begin), stage(Events, first, written),
-              thread_send_message(Second, begin), stage(Events, second, written),
-              ( FirstCommit == first
-              -> Ahead = first-First, Behind = second-Second
-              ; Ahead = second-Second, Behind = first-First ),
-              Ahead = AheadTag-AheadQueue, Behind = BehindTag-BehindQueue,
-              thread_send_message(AheadQueue, commit),
-              thread_get_message(Events, event(AheadTag, done(AheadResult))),
-              thread_send_message(BehindQueue, commit),
-              thread_get_message(Events, event(BehindTag, done(BehindResult))),
-              keysort([AheadTag-AheadResult, BehindTag-BehindResult], Results),
-              Finished = true ),
-            ( worker_cleanup(Finished, A), worker_cleanup(Finished, B) ))).
+% A retirement racing the record's storage is refused by the space-level
+% validator (engine/spaces/lifecycle.pl) before the record's own, naming the
+% root cause, with the same remedy.
+assert_retirement_conflict(Outcome, Party) :-
+    assertion(Outcome = threw(error(metta_retirement_conflict(Party, _), _))),
+    Outcome = threw(Error), message_to_string(Error, Message),
+    assertion(sub_string(Message, _, _, _, "retry the outer transaction")).
 
 test(one_writer_commits_per_key,
      [forall((member(Kind, [entity, prototype, cell, proxy]),
@@ -255,12 +210,18 @@ test(retirement_and_writes_conflict_in_both_commit_orders,
       setup(fixture(Kind, Species, Initial, yes, Record)), cleanup(cleanup_record(Record))]) :-
     overlap(write_value(Record, 1), retire(Record, Action), Order,
             [first-Writer, second-Retirer]),
-    Record = record(Home, Owner, _, _, _),
+    Record = record(Home, Owner, Storage, _, _),
     ( Order == first
-    -> assertion(Writer == committed), assert_conflict(Retirer, retired_owner),
+    -> assertion(Writer == committed),
+       ( Action == drop
+       -> assert_retirement_conflict(Retirer, retirement(Storage))
+       ; assert_conflict(Retirer, retired_owner) ),
        values(Record, Values), assertion(Values == [1]),
        assertion(spaces:metta_native_pair(Home, ['owned-by', Owner], _, _))
-    ; assertion(Retirer == committed), assert_conflict(Writer, retired_owner),
+    ; assertion(Retirer == committed),
+      ( Action == drop
+      -> assert_retirement_conflict(Writer, writer(Storage))
+      ; assert_conflict(Writer, retired_owner) ),
       values(Record, Values), assertion(Values == []),
       assertion(\+ spaces:metta_native_pair(Home, ['owned-by', Owner], _, _)) ).
 
