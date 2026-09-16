@@ -22,7 +22,7 @@
 %   the module receives no library predicate in place of the engine's deferred
 %   definition or reference demand, and the process's autoload flag is untouched
 %   [tested: spaces:an_undefined_function_named_like_a_library_export_is_not_autoloaded;
-%   commit=WORKTREE].
+%   commit=b7d85e1d7e2ce7ea6d56a4a67ac7344ef2826750].
 % Guarantees: a write and a retirement that raced each other are decided at
 %   the outer commit in the refreshed view: a writer whose allocation another
 %   transaction retired since its snapshot is refused, and a retirement whose
@@ -893,7 +893,7 @@ prolog:error_message(metta_engine_export_collision(Name, Arity, Space, Engine)) 
 %user_or_explicit` left plunit_spaces_cycles:end_tests/1 unknown and
 %ugraphs:append/2 unknown under top_sort/2] [tested:
 %spaces:an_undefined_function_named_like_a_library_export_is_not_autoloaded;
-%commit=WORKTREE].
+%commit=b7d85e1d7e2ce7ea6d56a4a67ac7344ef2826750].
 refuse_autoload_into_exec_modules :-
     Clause = (user:exception(undefined_predicate, Module:_, error) :-
                   spaces:metta_exec_module_known(_, Module)),
