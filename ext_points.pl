@@ -999,8 +999,8 @@ kind(pure_operation/1, declaration).
 % must leave no surviving check that could reject unrelated later work. Checks
 % run under '$metta_materialization' and must not evaluate MeTTa, call a host,
 % yield, or invoke arbitrary user goals. Preparation may inspect native deltas.
-% [source: engine/metta/space_hooks.pl:metta_outer_transaction_prepare;
-% commit=c5bdd73e06840e1d0fd0991523983c75def074f6].
+% [source: engine/metta/space_hooks.pl:metta_native_transaction/3;
+% commit=WORKTREE].
 :- multifile transaction_constraint/1.
 kind(transaction_constraint/1, declaration).
 
@@ -1555,6 +1555,8 @@ kind(metta_speculate/1, host_service).
 kind(metta_transaction/1, host_service).
 kind(metta_transaction/2, host_service).
 kind(metta_transaction_notified/3, host_service).
+kind(metta_after_foreign/2, host_service).
+kind(metta_foreign_completion/2, host_service).
 kind(metta_world_effect_coverage/2, host_service).
 kind(metta_effect_covered/2, host_service).
 kind(metta_compensation/2, host_service).
