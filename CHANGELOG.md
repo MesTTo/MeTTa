@@ -422,6 +422,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 - The default encoding of a process started under the C or POSIX locale is
   UTF-8 on the patched host (`swi-locale-default-encoding`), so the boot's
   encoding pin is the seat's own choice for every locale rather than a repair.
+- A file-search cache entry stays a hit while its file still satisfies its
+  conditions on the patched host, and the sweep removes only old entries whose
+  file is gone (`swi-file-search-cache-sweep`), so a library load after the
+  cache's timeout costs what a warm one costs; the twin-coverage harness keeps
+  its cache-lifetime setting as protocol rather than as a repair.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull

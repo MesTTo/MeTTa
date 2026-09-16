@@ -1,0 +1,39 @@
+diff --git a/boot/init.pl b/boot/init.pl
+index a275c47..09b838e 100644
+--- a/boot/init.pl
++++ b/boot/init.pl
+@@ -1489,6 +1489,15 @@ user:prolog_file_type(dylib,    executable) :-
+ 
+ %!  '$chk_alias_file'(+Spec, +Exts, +Cond, +Cache, +CWD,
+ %!                    -FullFile) is nondet.
++%
++%   A cached path is used as long as the file still satisfies the
++%   conditions; the key carries the expanded search path, so a changed
++%   path is a different key.  The flag `file_search_cache_time` disables
++%   the cache at 0 and otherwise paces the sweep, which removes only
++%   entries that are old and whose file is gone.  Age alone evicts
++%   nothing, so a lookup costs the same inferences whatever the clock
++%   says; a file that appears earlier in an unchanged search path is seen
++%   after the cache is cleared or the process restarts.
+ 
+ :- dynamic
+     '$search_path_file_cache'/3,    % SHA1, Time, Path
+@@ -1509,8 +1518,8 @@ user:prolog_file_type(dylib,    executable) :-
+     variant_sha1(Spec+Cache, SHA1),
+     get_time(Now),
+     current_prolog_flag(file_search_cache_time, TimeOut),
+-    (   '$search_path_file_cache'(SHA1, CachedTime, FullFile),
+-	CachedTime > Now - TimeOut,
++    (   TimeOut =\= 0,
++	'$search_path_file_cache'(SHA1, _CachedTime, FullFile),
+ 	'$file_conditions'(Cond, FullFile)
+     ->  '$search_message'(file_search(cache(Spec, Cond), FullFile))
+     ;   '$member'(Expanded, Expansions),
+@@ -1556,6 +1565,7 @@ user:prolog_file_type(dylib,    executable) :-
+     Before is Now - TimeOut,
+     (   '$search_path_file_cache'(SHA1, Cached, FullFile),
+ 	Cached < Before,
++	\+ access_file(FullFile, exist),
+ 	retractall('$search_path_file_cache'(SHA1, Cached, FullFile)),
+ 	fail
+     ;   true

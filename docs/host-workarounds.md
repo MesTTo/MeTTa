@@ -435,8 +435,8 @@ Lifted when: the reproduction prints absent because collection after a
   not evidence that the host condition has been repaired.
 Record: docs/journal/2026-09-10-the-observed-equation-loses-its-arithmetic.md.
 ## swi-file-search-cache-sweep
-Host: SWI-Prolog 10.1.13; boot/init.pl:1531-1564,
-  https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/init.pl#L1531-L1564.
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; boot/init.pl's file-search
+  cache. This tree runs on 10.1.14 built with the patch below.
 Defect: the first library load after the file-search cache expires runs
   gc_file_search_cache/1, removing other expired lookup entries. The next
   lookup pays resolution and insertion work instead of the warm-cache cost;
@@ -445,12 +445,18 @@ Defect: the first library load after the file-search cache expires runs
 Reproduction: tests/checks/host_workarounds/swi-file-search-cache-sweep.pl,
   ages cache and sweep timestamps under a positive timeout, loads a previously
   unloaded library, and compares the next lookup with two warm lookups.
-Workaround: extensions/python/tools/twin_coverage.py sets
-  file_search_cache_time to 9223372036854775807 before MeTTa boot, so every
-  measured child and its inherited engines keep the cache live for the lane.
-Lifted when: the aged load's next lookup costs the same inferences as a warm
-  lookup; the reproduction then answers absent instead of the current 818
-  against 680. Unequal warm controls or a reversed difference are broken.
+Patch: tests/checks/host_workarounds/swi-file-search-cache-sweep.patch, against
+  swipl-devel V10.1.14 boot/init.pl: a cached path stays a hit while its file
+  still satisfies the conditions, whatever its age, and the sweep removes
+  only entries that are old and whose file is gone; the flag disables the
+  cache at 0 and otherwise paces the sweep. The key carries the expanded
+  search path, so a changed path is a new key; a file that appears earlier in
+  an unchanged path is seen after the cache is cleared or the process
+  restarts, as Python's import cache does for a directory it has already
+  listed. The reproduction answers absent and SWI's core, files, library,
+  load and save groups pass.
+Lifted when: an aged lookup as shipped costs what a warm one costs; the reproduction
+  then answers absent and the patch and the entry go together.
 Record: docs/journal/2026-09-07-merged-tree-reconciliations.md, the cache-age
   controls and the 2026-09-10 host-reproduction section.
 
