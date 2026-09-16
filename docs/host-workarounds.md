@@ -177,6 +177,25 @@ Lifted when: successful redo advances the parent pointer and the reproduction
 Record: docs/journal/2026-09-11-classes-on-metta.md, transaction existence does
   not enumerate ancestors; docs/journal/2026-09-05-function-free-materialization.md.
 
+## swi-ugraphs-implicit-append
+Host: SWI-Prolog 10.1.13, library/ugraphs.pl:460 (`top_sort/2`); the same
+  line at swipl-devel V10.1.14.
+Defect: the library declares its lists dependency as `append/3` alone and
+  `top_sort/2` calls `append/2`, which only the library index supplies. With
+  autoload off (run.sh `NO_AUTOLOAD=1`, the engine's `no-autoload` gate) the
+  first `top_sort/2`, which the engine's release plan
+  (`metta_space_release_plan/2`) calls, raises
+  `existence_error(procedure, ugraphs:append/2)`.
+Reproduction: tests/checks/host_workarounds/swi-ugraphs-implicit-append.pl,
+  `top_sort/2` with autoload off; `present` when it raises the existence
+  error.
+Workaround: import `lists:append/2` into `ugraphs` at engine boot
+  (engine/spaces/lifecycle.pl, `import_ugraphs_implicit_dependency/0`).
+Lifted when: ugraphs.pl declares `append/2` in its
+  `:- autoload(library(lists), ...)` or imports it; the reproduction then
+  answers `absent`.
+Record: docs/journal/2026-09-16-exec-modules-never-autoload.md.
+
 ## swi-wrapper-roundtrip-merges-closures
 Host: SWI-Prolog 10.1.13; `library/prolog_wrap.pl:body_closure/3` at
   fc7ef84b949378b729052c3ade79c90ce5416abb.

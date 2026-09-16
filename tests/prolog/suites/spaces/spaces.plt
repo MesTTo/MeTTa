@@ -6,6 +6,11 @@
 %     [tested: space_handle_type; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 %   - Native storage modules do not inherit user predicates, while execution
 %     modules keep undefined calls loud [tested: spaces_storage_modules].
+%   - an undefined name in an execution module is never resolved against SWI's
+%     library index: the call is an existence error and the module imports no
+%     library predicate, while the process's autoload flag stays true [tested:
+%     spaces_execution_modules:an_undefined_function_named_like_a_library_export_is_not_autoloaded;
+%     commit=WORKTREE].
 %   - Every seam:engine_emitted/1 declaration is protected from capture in
 %     a space [tested: test_every_engine_emitted_name_is_protected_by_derivation;
 %     commit=dcfc20be4933c19140ccb5759291401d13058301].
@@ -624,6 +629,26 @@ test(every_space_compiles_into_a_module_of_its_own) :-
     assertion(Self \== Engine),
     assertion(Self \== user),
     assertion(A \== '&plunit_exec_a').
+
+%SWI resolves an undefined procedure against the library index when no
+%user:exception/3 clause answers, so an undefined name in a space's module
+%that some library exports at that arity was imported there in place of the
+%engine's deferred definition or reference demand: a channel's `send` before
+%its lib_thread face stood pulled xpce's send/3 into the space, and xpce
+%opened the display. The engine's boot asserts the hook's last clause
+%(spaces:refuse_autoload_into_exec_modules/0), `error` for every exec module,
+%so a direct call of such a name in a space's module is an existence error
+%that leaves the module without the library predicate, while the process's
+%autoload flag stays as it was. library(base32) is the probe: indexed,
+%imported by no engine module, and harmless when it is called.
+test(an_undefined_function_named_like_a_library_export_is_not_autoloaded,
+     [cleanup(catch(metta_release_space('&plunit_autoload_probe'), _, true))]) :-
+    assertion(current_prolog_flag(autoload, true)),
+    space_module('&plunit_autoload_probe', Module),
+    catch(call(Module:base32(abc, _)), error(Formal, _), true),
+    assertion(Formal == existence_error(procedure, Module:base32/2)),
+    assertion(\+ current_predicate(Module:base32/2)),
+    assertion(\+ predicate_property(Module:base32(_, _), imported_from(base32))).
 
 % system -> engine -> &self's module -> every other space's. Read off SWI with
 % import_module/2 rather than believed: SWI decides an implicitly created

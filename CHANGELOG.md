@@ -481,6 +481,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A call to a MeTTa function not yet defined no longer imports a Prolog library
+  predicate of the same name and arity into the space's module. SWI resolved the
+  undefined procedure against its library index before the engine's
+  undefined-procedure hooks ran, so `(send ...)` in a space whose lib_thread
+  face was still deferred imported xpce's `send/3` and loaded xpce, which opens
+  the display, and any name a library exports at the compiled arity (`last`,
+  `sum_list`, ...) was open to the same capture. SWI asks `user:exception/3`
+  before its index, so the engine's boot asserts that hook's last clause: an
+  undefined name in any exec module answers `error`, the existence error the
+  name would have raised had no library carried it, and nothing is imported.
+  The process's autoload flag is untouched, so host goals in `user` and the
+  modules libraries make for themselves (plunit's units) keep the index.
 - A resource limit landing on a transaction's nesting check, or on the negation,
   bridge-depth, answer-continuation and hook-grant reads, is no longer swallowed by
   a catch-all around the global read. It used to lift the limit for the rest of the

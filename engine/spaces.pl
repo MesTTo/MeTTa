@@ -387,6 +387,8 @@
             metta_policy_members/3,
             protect_engine_emitted/1,
             protect_metta_exec_modules/0,
+            refuse_autoload_into_exec_modules/0,
+            import_ugraphs_implicit_dependency/0,
             %Shared tables engine/metta.pl reads and writes: the execution
             %module parent chain and four caches the contract vocabulary keeps.
             metta_exec_module_parent/2,
