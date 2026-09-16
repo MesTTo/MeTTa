@@ -5,7 +5,7 @@
 % Guarantees: tests distinguish empty records, stored data, malformed original
 %   keys, the reader's own refusal remedies and concurrent replacement without
 %   selecting a surviving row by chance
-%   [source: tests/prolog/suites/spaces/owned_record_reads.plt; commit=WORKTREE].
+%   [source: tests/prolog/suites/spaces/owned_record_reads.plt; commit=e4fdf699f9dedb73f1fe0de7446334b60bd8dc36].
 
 :- ensure_loaded('owned_records.plt').
 

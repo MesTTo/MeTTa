@@ -13,7 +13,7 @@
 %   [source: engine/spaces/owned_records.pl:'owned-record-read'/2; commit=dbb95d0bff10a93f2fef0453195b2331918f92dc].
 %   A read refusal names 'owned-record-read'/2 and its repair; only the outer
 %   commit validator asks for a retry
-%   [tested: owned_record_reads:read_refusals_name_the_reader_and_the_repair; commit=WORKTREE].
+%   [tested: owned_record_reads:read_refusals_name_the_reader_and_the_repair; commit=e4fdf699f9dedb73f1fe0de7446334b60bd8dc36].
 
 :- multifile seam:transaction_constraint/1.
 
