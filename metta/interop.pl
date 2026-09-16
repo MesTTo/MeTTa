@@ -1125,14 +1125,17 @@ ensure_loaded_global(File) :- refuse_unloadable_source_file(File),
 %catalog's vocabulary seed and metta_ensure_source_observation/0 all load
 %through it.
 %
-%SWI decides by the SPEC. boot/init.pl's '$qlf_file'/5 compiles from source
-%whenever the spec names its extension, whatever qcompile option travels
-%with it, and applies the artifact rule (load when fresh and compatible,
-%recompile when stale and the directory is writable, source otherwise) only
-%to a bare stem. So a claimed source is loaded by its stem; the observation
-%of 2026-09-05 that "qcompile(auto) reaches the files a loaded file loads and
-%not the file the goal names" was this rule seen from a spec that carried
-%its .pl.
+%SWI decides by the spec unless the call says otherwise. boot/init.pl's
+%'$qlf_file'/5 loads a spec that names its .pl extension from source when
+%only the process-wide qcompile flag is on, which keeps that flag from
+%writing an artifact beside every file a program names by its path, and
+%applies the artifact rule (load when fresh and compatible, recompile when
+%stale and the directory is writable, source otherwise) to a stem and to a
+%call that carries its own qcompile option (host ledger,
+%swi-qlf-extension-spec). So a claimed source is loaded by its resolved
+%path with the option; the observation of 2026-09-05 that "qcompile(auto)
+%reaches the files a loaded file loads and not the file the goal names" was
+%the flag seen from a spec that carried its .pl.
 %
 %Which sources may leave an artifact is the boot's decision, asked through
 %seam:compiled_source/1: engine/qlf_boot.pl claims the sources whose
