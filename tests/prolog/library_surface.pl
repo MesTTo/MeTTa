@@ -14,8 +14,10 @@
 %     - compares answer bags, output and raised errors for every reused engine
 %       name; a missing case refuses and planted changed meanings are detected
 %       [tested: planted_library_meaning_change_is_named,
-%       planted_library_shadow_is_named, library_lazy_import_differential;
-%       commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
+%       planted_library_shadow_is_named; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
+%     - an execution module resolves no name against SWI's library index, so a
+%       deprecated library alias stays undefined in a space
+%       [tested: library_lazy_import_differential; commit=WORKTREE]
 % Owns resources: each meaning arm releases its scratch space and restores
 %     prelude translator registrations, including on failure.
 % Fails when:
@@ -230,23 +232,22 @@ planted_library_shadow_is_named :-
 engine_meaning_reason(defined_label(_)).
 engine_meaning_reason(functional_pattern).
 
-% Run before any library is consulted. implementation_module/1 only guards;
-% imported_from/1 in the repair must load backcomp before import/1 uses it.
-% The expected bag comes from the already loaded sum_list/2 implementation.
+% Run before any library is consulted. An execution module never resolves a
+% name against SWI's library index (refuse_autoload_into_exec_modules/0), so
+% the deprecated alias sumlist/2, which the index would supply from
+% library(backcomp), stays undefined in a space: the shadow repair imports
+% nothing for it and a call raises the existence error, while the library
+% itself is never loaded.
 library_lazy_import_differential :-
     Space = '&library-lazy-import',
     setup_call_cleanup(space_module(Space, Module),
         ( functor(Head, sumlist, 2),
           assertion(\+ current_predicate(backward_compatibility:sumlist/2)),
-          assertion(predicate_property(Module:Head,
-                                       implementation_module(backward_compatibility))),
-          assertion(\+ current_predicate(backward_compatibility:sumlist/2)),
-          findall(Sum, sum_list([1,2,3], Sum), Expected),
           spaces:metta_restore_inherited_predicate(Module, sumlist, 2),
-          assertion(predicate_property(Module:Head,
-                                       imported_from(backward_compatibility))),
-          findall(Sum, Module:sumlist([1,2,3], Sum), Actual),
-          assertion(prelude_spec_bag_equal(Expected, Actual)) ),
+          assertion(\+ predicate_property(Module:Head, imported_from(_))),
+          catch(Module:sumlist([1,2,3], _), error(Formal, _), true),
+          assertion(Formal == existence_error(procedure, Module:sumlist/2)),
+          assertion(\+ current_predicate(backward_compatibility:sumlist/2)) ),
         metta_release_space(Space)).
 
 report([], Examined) :-

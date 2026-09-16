@@ -372,6 +372,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   the patched host (`swi-transaction-enumerator-repeats-parent`, the fifth
   patched ledger entry); the two engine sites that asked for existence with
   `once/1` keep that shape as their stated intent and lose the marker.
+- The shadow repair after a removed equation restores only what a space can
+  inherit: an explicit import through its default chain. It no longer probes
+  SWI's library index for a shadowed library predicate, since an execution
+  module never resolves a name there, and the library-surface gate asserts that
+  contract for a deprecated alias instead of a lazy import.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull
