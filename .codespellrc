@@ -12,7 +12,11 @@
 # has run `npm install` there carries them. _runtime/ is a COPY of engine/
 # and lib/, so scanning it reads this tree's own prose twice, and browser/ is
 # a minified bundle, which is where a dictionary invents words.
-skip = *.lock,*.pyc,*.svg,package-lock.json,.git,node_modules,__pycache__,build,dist,_runtime,browser,target,repos,ai-*,pymetta.egg-info
+# cpython is the pinned CPython snapshot under extensions/python/tools/
+# protocol_sources that the protocol inventories are derived from; its text is
+# upstream's (asend in _collections_abc.py is a method name) and the manifest
+# beside it, not the dictionary, says which revision it is.
+skip = *.lock,*.pyc,*.svg,package-lock.json,.git,node_modules,__pycache__,build,dist,_runtime,browser,target,repos,ai-*,pymetta.egg-info,cpython
 # intensional: NARS distinguishes intensional from extensional inheritance,
 #   so every hit in lib_nars.metta is the correct term.
 # DOut, SourceE: Prolog variable names in translator.pl and shim.pl.
