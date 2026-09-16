@@ -11,6 +11,9 @@
 % Guarantees: owned-record-read validates original keys and occurrence counts
 %   in one database snapshot; stored values remain inside complete row envelopes
 %   [source: engine/spaces/owned_records.pl:'owned-record-read'/2; commit=dbb95d0bff10a93f2fef0453195b2331918f92dc].
+%   A read refusal names 'owned-record-read'/2 and its repair; only the outer
+%   commit validator asks for a retry
+%   [tested: owned_record_reads:read_refusals_name_the_reader_and_the_repair; commit=WORKTREE].
 
 :- multifile seam:transaction_constraint/1.
 
@@ -139,12 +142,20 @@ metta_owned_key_view(Space, Views, View) :-
     -> View = Prepared
     ; metta_owned_view(Space, [], View) ).
 
-metta_owned_change(change(_, Space, Row, _), row(Space, Prefix)) :-
-    is_list(Row), append(Prefix, [_], Row), Prefix \== [].
-metta_owned_change(change(_, Space, Row, _), owner(Space, Owner)) :-
-    nonvar(Row), Row = [Head, Owner], Head == 'owned-by'.
+metta_owned_change(change(Action, Space, Row, _), row(Space, Prefix)) :-
+    is_list(Row), append(Prefix, [_], Row), Prefix \== [],
+    metta_owned_change_admits(Action, Prefix).
+metta_owned_change(change(Action, Space, Row, _), owner(Space, Owner)) :-
+    nonvar(Row), Row = [Head, Owner], Head == 'owned-by',
+    metta_owned_change_admits(Action, Owner).
 metta_owned_change(change(_, '&metta', Row, _), declaration(Row)) :-
     metta_owned_declaration_row(Row).
+
+% An occurrence whose key is not ground never came through a commit, and it
+% has to be able to leave through one: its removal derives no key, so it
+% contributes no check. Adding one still refuses in metta_owned_ground/1.
+metta_owned_change_admits(added, _).
+metta_owned_change_admits(removed, Key) :- ground(Key).
 
 metta_owned_declaration_row(Row) :-
     nonvar(Row), Row = [Head|_], Head == '@owned-record'.
@@ -228,11 +239,12 @@ metta_owned_owner_observed(Home, Owner, Changes, Views) :-
 metta_owned_key(Home, Owner, Storage, Prefix, key(Home, Owner, Storage, Prefix)) :-
     metta_owned_ground([Home, Owner, Storage, Prefix]).
 
+% Preparation, validation and the reader all reach this; the context names no
+% phase, so a refusal never blames a predicate that did not run.
 metta_owned_ground(Key) :-
     ( ground(Key), acyclic_term(Key) -> true
     ; throw(error(domain_error(ground_owned_record_key, Key),
-                  context(metta_prepare_owned_records/1,
-                          'owned record keys must be ground; stored values may contain variables'))) ).
+                  context(_, 'owned record keys must be ground; stored values may contain variables'))) ).
 
 % This phase sees the current committed store combined with this transaction.
 % New declarations are already syntax-checked by their publication door.
@@ -315,12 +327,24 @@ metta_owned_read_rows(Key, Rows) :-
     Key = key(Home, _, Storage, _),
     metta_owned_reader_view(Home, OwnerView),
     metta_owned_reader_view(Storage, RecordView),
-    metta_owned_checked_key([Home-OwnerView, Storage-RecordView], Key, Owners, Values),
-    (   Owners == []
-    ->  throw(error(metta_owned_record_conflict(Key, retired_owner),
-                    context('owned-record-read'/2, 'the native owner has retired')))
+    metta_owned_key_problem([Home-OwnerView, Storage-RecordView], Key, Owners, Values, Problem),
+    (   Problem \== none
+    ->  metta_owned_read_refusal(Key, Problem)
+    ;   Owners == []
+    ->  metta_owned_read_refusal(Key, retired_owner)
     ;   maplist(metta_owned_original(RecordView), Values, Rows)
     ).
+
+% A read meets the store as it is. Nothing is retried; a surplus occurrence is
+% removed by the caller, so the remedy is the reader's, not the validator's.
+metta_owned_read_refusal(key(Home, Owner, Storage, Prefix), Problem) :-
+    metta_owned_read_remedy(Problem, Remedy),
+    throw(error(metta_owned_record_conflict(record(Home, Owner, Storage, Prefix), Problem),
+                context('owned-record-read'/2, Remedy))).
+
+metta_owned_read_remedy(retired_owner, 'the native owner has retired').
+metta_owned_read_remedy(multiple_values, 'remove the surplus value rows').
+metta_owned_read_remedy(multiple_owners, 'remove the surplus owner rows').
 
 metta_owned_reader_view(Space, View) :-
     metta_owned_view(Space, [], View),
@@ -331,10 +355,17 @@ metta_owned_reader_view(Space, View) :-
     ).
 
 metta_owned_validate_key(Views, Key) :-
-    metta_owned_checked_key(Views, Key, _, _).
+    metta_owned_key_problem(Views, Key, _, _, Problem),
+    (   Problem == none
+    ->  true
+    ;   Key = key(Home, Owner, Storage, Prefix),
+        throw(error(metta_owned_record_conflict(record(Home, Owner, Storage, Prefix), Problem),
+                    context(metta_validate_owned_records/1, 'retry the outer transaction')))
+    ).
 
-% Commit checks and explicit reads share the same original-occurrence checks.
-metta_owned_checked_key(Views, Key, Owners, Values) :-
+% Commit checks and explicit reads share the same original-occurrence checks;
+% each names its own remedy.
+metta_owned_key_problem(Views, Key, Owners, Values, Problem) :-
     Key = key(Home, Owner, Storage, Prefix),
     metta_owned_key_view(Home, Views, OwnerView),
     metta_owned_key_view(Storage, Views, RecordView),
@@ -347,14 +378,8 @@ metta_owned_checked_key(Views, Key, Owners, Values) :-
     ;   Values = [_], Owners == []
     ->  Problem = retired_owner
     ;   Problem = none
-    ),
-    (   Problem == none
-    ->  true
-    ;   throw(error(metta_owned_record_conflict(record(Home, Owner, Storage, Prefix), Problem),
-                    context(metta_validate_owned_records/1,
-                            'native owned-record conflict; retry the outer transaction')))
     ).
 
 :- multifile prolog:error_message//1.
 prolog:error_message(metta_owned_record_conflict(Key, Problem)) -->
-    ['native owned-record conflict ~q for ~q; retry the outer transaction'-[Problem, Key]].
+    ['native owned-record conflict ~q for ~q'-[Problem, Key]].
