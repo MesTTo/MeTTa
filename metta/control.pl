@@ -987,7 +987,7 @@ metta_run_with_fuel(Value, Answer, Goal) :-
 %list belongs. The close writes are the cleanup's, owed once Setup has run
 %(host ledger, swi-cleanup-window), and non-backtrackable so a completed
 %scope stays closed
-%[tested: tests/prolog/suites/evaluation/fuel.plt; commit=WORKTREE].
+%[tested: tests/prolog/suites/evaluation/fuel.plt; commit=3d4f181d3a31b1739973d595b93d17fed28db72f].
 metta_open_fuel_scope :-
     b_setval('$metta_fuel_scope', []),
     b_setval('$metta_fuel_remaining', unstarted).
