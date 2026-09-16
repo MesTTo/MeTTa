@@ -27,6 +27,11 @@
 
 :- module(host_transactions, [host_transaction_on_exit/1, host_transaction_on_exit/2]).
 :- use_module(library(prolog_wrap), [wrap_predicate/4]).
+% Declared, not left to the library index: the engine runs with autoload off
+% (engine/check.sh lib-autoload and no-autoload), where an undeclared foldl/4
+% or reverse/2 is an existence error at the first transaction that finalizes.
+:- autoload(library(apply), [foldl/4]).
+:- autoload(library(lists), [reverse/2]).
 :- meta_predicate host_transaction_on_exit(0), host_transaction_on_exit(0, ?).
 
 % Workaround: swi-nested-retract-loses-outer-assert - retain assertion ownership outside SWI's transaction table.
