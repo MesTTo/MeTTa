@@ -9,7 +9,7 @@
 %   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
 %   absent on 10.1.14 built with tests/checks/host_workarounds/swi-gc-in-frame-finished-listener-clears-a-live-slot.patch;
 %   command=sh check.sh host-workarounds;
-%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE]
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=0c878d61a57754db5bc292e6f5baa2a2c48a8778]
 :- set_prolog_flag(optimise, true).
 :- use_module(library(lists), [append/3]).
 
