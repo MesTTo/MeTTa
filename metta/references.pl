@@ -485,15 +485,13 @@ metta_reference_own_closure(Module, Head, Closure) :-
     ->  clause(Module:WrappedHead, Body, Ref),
         Head =.. [_|Args], WrappedHead =.. [_|Args],
         wrap_predicate(Module:Head, metta_reference_union, Closure, Body)
-    ;   setup_call_cleanup(
-            true,
+    ;   % The capture wrapper exists only to hand out the closure: Setup
+        % installs it and the cleanup removes it again.
+        setup_call_cleanup(
             wrap_predicate(Module:Head, metta_reference_capture, Closure,
                            call(Closure)),
-            % Workaround: swi-cleanup-window - register capture cleanup before mutation and retry retirement if cleanup is cut.
-            catch(ignore(unwrap_predicate(Module:Head, metta_reference_capture)),
-                  Ball,
-                  ( ignore(unwrap_predicate(Module:Head, metta_reference_capture)),
-                    throw(Ball) )))
+            true,
+            ignore(unwrap_predicate(Module:Head, metta_reference_capture)))
     ).
 
 metta_reference_disjunction([], fail).

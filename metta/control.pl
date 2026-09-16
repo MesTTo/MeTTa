@@ -856,14 +856,14 @@ metta_with_trailed_push(Key, Item, Goal) :-
 %existence_error(variable,'$metta_fuel_errors');
 %tested: fuel:a_nested_run_inside_an_unbounded_scope_keeps_the_outer_error_list].
 %
-%THE ERROR LIST'S EXISTENCE ANSWERED IT NEXT, AND THAT LEAKED. A cleanup is
-%not a guarantee: setup_call_cleanup/3 is `sig_atomic(Setup), '$call_cleanup'`
-%[source: SWI-Prolog 10.1.13 boot/init.pl, setup_call_cleanup/3], so an
-%asynchronous limit delivered in the one call port BETWEEN those two goals
-%leaves Setup's writes standing with no cleanup registered to undo them. The
-%scope then stayed open for the life of the process and every later runnable
-%took the reentrant branch, which answers ordinary solutions and never replays
-%a branch that ran out of fuel: `!(p122-fact 5)` under `(pragma! max-stack-depth
+%THE ERROR LIST'S EXISTENCE ANSWERED IT NEXT, AND THAT LEAKED on the host as
+%shipped: setup_call_cleanup/3 is `sig_atomic(Setup), '$call_cleanup'`
+%[source: SWI-Prolog 10.1.13 boot/init.pl, setup_call_cleanup/3], and an
+%inference limit delivered in the one call port BETWEEN those two goals left
+%Setup's writes standing with no cleanup registered to undo them. The scope
+%then stayed open for the life of the process and every later runnable took
+%the reentrant branch, which answers ordinary solutions and never replays a
+%branch that ran out of fuel: `!(p122-fact 5)` under `(pragma! max-stack-depth
 %20)` answered `120` alone where it answers `[120, (Error -3 StackOverflow)]`,
 %and the same leak turned `!(with-pragma! ((max-stack-depth 20)) (vocab-spin 5))`
 %into no answer at all
@@ -872,12 +872,9 @@ metta_with_trailed_push(Key, Item, Goal) :-
 %setup_call_cleanup(Marker, spin(300), Restore);
 %tested: fuel:an_interrupted_scope_does_not_stay_open,
 %test_a_stack_depth_pragma_bounds_evaluation_instead_of_overflowing].
-%
-%A trailed write needs no cleanup to be undone: unwinding an exception unwinds
-%the trail, so `$metta_fuel_scope` returns to `closed` on every abandonment
-%path there is, and metta_close_fuel_scope/0 is the fast ordinary exit rather
-%than the thing correctness rests on. This is the same rule the pragma scope
-%above states for its restores and the reason it arms before it writes.
+%The host this tree runs on defers the limit past Setup and past the cleanup
+%(host ledger, swi-cleanup-window), so the cleanup is owed; the open writes
+%stay trailed for the trail-order reason recorded at metta_open_fuel_scope/0.
 %The records written INSIDE the scope stay non-backtrackable, because a branch
 %records its culprit and then FAILS, and the open writes the empty list, so a
 %record left behind by an abandoned scope is never read.
@@ -961,12 +958,13 @@ metta_run_with_fuel(Value, Answer, Goal) :-
 %with the shape it replaces, 266,802 with a separate marker whose close does
 %not delete, and 267,402 with a separate marker and the delete kept].
 %
-%The OPEN write is trailed and the close write is not, which is the whole
-%correctness of it: unwinding past the open restores `closed` with no cleanup
-%involved, and a record written inside the scope survives the failure-driven
-%backtracking a branch that ran out of fuel does on its way out. `[]` is
-%atomic, so the one backtrackable value never puts a global-stack term where a
-%later nb_getval/2 could read it after backtracking has reclaimed it
+%The OPEN write is trailed and the close write is not: backtracking out of
+%an abandoned runnable undoes the scope's trailed writes newest first, so the
+%open's own undo comes last and leaves `closed`, and a record written inside
+%the scope survives the failure-driven backtracking a branch that ran out of
+%fuel does on its way out. `[]` is atomic, so the one backtrackable value
+%never puts a global-stack term where a later nb_getval/2 could read it after
+%backtracking has reclaimed it
 %[source: SWI-Prolog 10.1 Reference Manual section 4.33, b_setval/2].
 :- thread_initialization(nb_setval('$metta_fuel_scope', closed)).
 
@@ -978,20 +976,18 @@ metta_run_with_fuel(Value, Answer, Goal) :-
 %out and each nondeterministic branch carries only its own contamination.
 :- thread_initialization(nb_setval('$metta_masked_escape', false)).
 
-%BOTH writes are trailed, so the whole scope is stack-scoped state: an
-%abandoned runnable leaves the scope `closed` and the balance `off`, with no
-%cleanup involved. The balance has to unwind as well as the scope, and not
-%only for tidiness: a balance left at `unstarted` outside any scope makes the
-%next charge read the pragma table and spend, and a branch that then ran out
-%would record its culprit into a scope value that is the atom `closed`,
-%leaving `[Culprit|closed]` where a list belongs. That is the same leak one
-%level down. setup_call_cleanup/3 runs Setup inside sig_atomic/1, so the two
-%writes here happen together or not at all
-%[source: SWI-Prolog 10.1.13 boot/init.pl, setup_call_cleanup/3;
-%tested: fuel:an_interrupted_scope_leaves_the_balance_off].
-%Workaround: swi-cleanup-window - the marker and the balance are trailed
-%writes, so a limit that trips at the call port after Setup unwinds them
-%with no cleanup owed.
+%BOTH open writes are trailed, and not for the cleanup's sake: the charges
+%inside the scope are trailed writes too, and backtracking out of an abandoned
+%runnable undoes them newest first, so the open write's own undo comes last
+%and leaves the values from before the scope, `closed` and `off`, rather than
+%the `unstarted` balance the first charge overwrote. A balance left at
+%`unstarted` outside any scope makes the next charge read the pragma table
+%and spend, and a branch that then ran out would record its culprit into a
+%scope value that is the atom `closed`, leaving `[Culprit|closed]` where a
+%list belongs. The close writes are the cleanup's, owed once Setup has run
+%(host ledger, swi-cleanup-window), and non-backtrackable so a completed
+%scope stays closed
+%[tested: tests/prolog/suites/evaluation/fuel.plt; commit=WORKTREE].
 metta_open_fuel_scope :-
     b_setval('$metta_fuel_scope', []),
     b_setval('$metta_fuel_remaining', unstarted).
