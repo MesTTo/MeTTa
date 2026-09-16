@@ -6,7 +6,7 @@
 %   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
 %   absent on 10.1.14 built with tests/checks/host_workarounds/swi-concurrent-import-removal-resets-provider.patch;
 %   command=sh check.sh host-workarounds;
-%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=ca22f73782c1cc9ef159e18eeb2036e8bb6045b7].
 % Owns resources: two finite worker threads, joined before inspecting metadata.
 :- module(import_removal_probe, [main/0, sample/1]).
 :- meta_predicate sample(0).
