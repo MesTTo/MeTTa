@@ -15,7 +15,7 @@
 %   its spaces and leaves publication to the program's flush [tested:
 %   test_class_method_costs:test_a_class_definition_publishes_its_references_once,
 %   extensions/python/tests/ch15_writing_transactions_and_worlds/test_transaction.py;
-%   commit=WORKTREE].
+%   commit=a8b3ad6e372c077945b36da93ed631f0a45d11fb].
 % Guarantees: inference cuts cannot abandon a registered reference frame or
 %   its reconciliation [tested:
 %   references:an_inference_cut_cannot_abandon_reference_completion;

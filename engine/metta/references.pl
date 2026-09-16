@@ -11,7 +11,7 @@
 %   while the rows stand, and a clean node answers its retained face [tested:
 %   references, reference_publication, reference_patterns,
 %   reference_source_origins, reference_scopes, reference_providers;
-%   commit=WORKTREE].
+%   commit=a8b3ad6e372c077945b36da93ed631f0a45d11fb].
 % Guarantees: a kept importing space retains its scoped FROM providers
 %   [tested: lib_thread_scope_deferred:a_kept_cleanup_retains_its_captured_space_and_reference_provider;
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].

@@ -8,7 +8,7 @@
 %   dependent recompilation to the batch's first evaluating door or its end,
 %   and drops a repair filed for a module released before the drain [tested:
 %   test_class_method_costs:test_a_class_definition_publishes_its_references_once,
-%   extensions/python/tests/ch09_types/test_class_withdrawal.py; commit=WORKTREE].
+%   extensions/python/tests/ch09_types/test_class_withdrawal.py; commit=a8b3ad6e372c077945b36da93ed631f0a45d11fb].
 % Guarantees: ordinary deferral also preserves the resolved &self storage law
 %   [tested: test_equal_raw_and_resolved_source_can_still_own_a_binding;
 %   commit=323a89d607b656a3a238315ef111e3b23725ce83].
