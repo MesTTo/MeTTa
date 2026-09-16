@@ -528,13 +528,14 @@ metta_reference_note(Module, Name, Reason) :-
 metta_reference_metadata(Space, Face, Key, Row) :-
     member(Name/_-root(Home, Original, _, _), Face),
     \+ ( Home == Space, Name == Original ),
+    metta_reference_metadata_origin(Home, Original, Name, Key, Row).
+
+metta_reference_metadata_origin(Home, Original, Name, Key, Row) :-
     metta_reference_metadata_row(OriginalRow, Original, Name, Row),
     spaces:metta_space_pair(Home, OriginalRow, Token, _),
     \+ metta_reference_projection(Home, _, Token, _),
     Key = origin(Home, Token, Name).
-metta_reference_metadata(Space, Face, Key, Row) :-
-    member(Name/_-root(Home, Original, _, _), Face),
-    \+ ( Home == Space, Name == Original ),
+metta_reference_metadata_origin(Home, Original, Name, Key, Row) :-
     metta_reference_manifest_row(Home, OriginalRow),
     metta_reference_metadata_row(OriginalRow, Original, Name, Row),
     \+ spaces:metta_space_pair(Home, OriginalRow, _, _),
@@ -570,6 +571,7 @@ metta_reference_release(Space) :-
     (   metta_reference_seen_space(Space, Module)
     ->  metta_reference_demand_names([Space-Module], Demanded),
         metta_reference_invalidate([Space]),
+        metta_reference_source_clear(Space),
         retract(metta_reference_seen_space(Space, Module)),
         metta_reference_release_loader(Space),
         spaces:metta_reference_mutation_scope(Space, disabled),

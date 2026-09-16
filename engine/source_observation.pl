@@ -8,6 +8,15 @@
 %   and the starting thread's gc flag are restored.
 % Guarded by: an observation mutex serializes compiler wrapper installation;
 %   source maps and execution buffers are thread-local.
+% Guarantees: resolved equations retain their stored source occurrence; a
+%   subtree a form rewriter returns unchanged at its position keeps its
+%   coordinates, and every node above a change reports a generated site at the
+%   whole form instead of the span it displaced [tested:
+%   reference_source_origins:source_observation_keeps_the_canonical_answer_and_original_coordinates,
+%   reference_source_origins:equal_shape_does_not_fabricate_coordinates_for_a_rewritten_body,
+%   reference_source_origins:a_rebuilding_rewriter_keeps_every_unchanged_coordinate,
+%   reference_source_origins:a_rewritten_leaf_marks_its_own_path_and_keeps_its_siblings;
+%   commit=WORKTREE].
 % Guarantees: compiler observation emits no runtime goals and changes no atom
 %   representation [tested: source_observation:compiled_goals_are_unchanged;
 %   commit=6f634f6705fc1e40e0c2e3970d4156ee574ab70d].
@@ -48,14 +57,21 @@
 :- meta_predicate with_source(+, +, +, 0).
 :- meta_predicate compile_clause(+, -, 0).
 :- meta_predicate compile_expression(+, ?, ?, 0).
+:- meta_predicate observe_equation(+, +, +, +, 0).
+:- meta_predicate observe_rewriter(+, ?, 0).
+:- meta_predicate observe_rewritten(+, ?, 0).
+:- meta_predicate observe_positioned_form(+, +, ?, +, +, ?, 0).
 
-:- thread_local source_document/3, source_equation/5, clause_source/4,
+:- thread_local source_document/3, source_equation/6, clause_source/4,
                 clause_location/5, unavailable_location/4, unavailable_function/1.
 
 % PEP 657 keeps source locations in code metadata rather than data values.
 % https://peps.python.org/pep-0657/
 % Compiler wrappers exist only inside the explicit observation operation.
 install_compiler_observers :-
+    wrap_predicate(filereader:store_metta_equation(_, Module, Raw, Bound, StoredRef, _),
+                   source_map, OriginalStore,
+                   source_observation:observe_equation(Module, Raw, Bound, StoredRef, OriginalStore)),
     wrap_predicate(translator:translate_clause_impl(Input, Clause, _C, _A),
                    source_map, OriginalClause,
                    source_observation:compile_clause(Input, Clause, OriginalClause)),
@@ -65,6 +81,7 @@ install_compiler_observers :-
                                                          OriginalExpression)).
 
 remove_compiler_observers :-
+    remove_wrapper(filereader:store_metta_equation/6, source_map),
     remove_wrapper(translator:translate_clause_impl/4, source_map),
     remove_wrapper(translator:translate_expr_dl/4, source_map).
 
@@ -99,7 +116,7 @@ source_label(Label) :-
 
 source_queues([], [], Queues, Queues).
 source_queues([Form|Forms], [positioned(_,_,_,_,Tree)|Trees], Q0, Q) :-
-    ( Form = parsed(function, _, Term)
+    ( filereader:source_form(Form, parsed(function, _, Term))
     -> variant_sha1(Term, Key),
        ( get_assoc(Key, Q0, Existing) -> true ; Existing = [] ),
        append(Existing, [origin(Term, Tree)], Values),
@@ -117,15 +134,85 @@ record_stored(Ref) :-
       Original =@= Term
     -> put_assoc(Key, Queues, Rest, Remaining),
        nb_linkarg(3, Context, Remaining),
-       assertz(source_equation(Key, Module, Ref, Id, Tree))
+       assertz(source_equation(Key, Module, Ref, Id, Term, Tree))
+    ; true ).
+
+% The store already carries the raw term, resolved term and exact occurrence.
+% Retain that association in the existing observation row before compilation,
+% including when the store defers compilation to a later source form.
+observe_equation(Module, Raw, Bound, StoredRef, Goal) :-
+    ( source_equation(Key, Module, StoredRef, Id, _, Tree),
+      spaces:stored_atom_of_ref(StoredRef, _, Written, _), Written =@= Raw
+    -> observe_bound_tree(Tree, BoundTree),
+       variant_sha1(Bound, BoundKey),
+       retractall(source_equation(Key, Module, StoredRef, _, _, _)),
+       assertz(source_equation(BoundKey, Module, StoredRef, Id, Bound, BoundTree))
+    ; true ),
+    call(Goal).
+
+% Extensions receive source terms as values. A rewritten node keeps its
+% coordinates only where the rewriter returned the written subterm at that
+% position; every node above a change is generated. recast reprints a
+% transformed AST the same way, reusing the original text of subtrees that
+% are deep-equal in place and printing only the changed ones:
+% https://github.com/benjamn/recast/blob/v0.23.9/lib/patcher.ts (findChildReprints)
+observe_rewriter(Term, Bound, Goal) :-
+    ( nb_current('$metta_observed_form', Context)
+    -> copy_term(Term, Before), call(Goal),
+       arg(1, Context, Tree),
+       ( Before =@= Term
+       -> align_rewritten(Term, Bound, Tree, Aligned, Verdict)
+       ; Tree = node(Span, _), Aligned = node(Span, generated('form-rewriter')),
+         Verdict = changed ),
+       ( Verdict == same -> true ; nb_setarg(2, Context, aligned(Aligned)) )
+    ; call(Goal) ).
+
+% Leaves compare by ==, so a rebuilt list holding the same atoms is the
+% written list and two variables correspond only when they are one variable.
+% A list of another length, or a leaf where a list stood, has no known
+% children; a token constructor's list value is a leaf in the written tree.
+align_rewritten(Original, Rewritten, Tree, Aligned, Verdict) :-
+    Tree = node(Span, Children),
+    (   Children == []
+    ->  ( Original == Rewritten -> Aligned = Tree, Verdict = same
+        ; Aligned = node(Span, generated('form-rewriter')), Verdict = changed )
+    ;   is_list(Children), is_list(Original), is_list(Rewritten),
+        same_length(Original, Children), same_length(Rewritten, Children)
+    ->  align_rewritten_children(Original, Rewritten, Children, AlignedChildren,
+                                 same, Verdict),
+        ( Verdict == same -> Aligned = Tree
+        ; Aligned = node(Span, generated('form-rewriter', AlignedChildren)) )
+    ;   Aligned = node(Span, generated('form-rewriter')), Verdict = changed
+    ).
+
+align_rewritten_children([], [], [], [], Verdict, Verdict).
+align_rewritten_children([Original|Originals], [Rewritten|Rewrittens], [Tree|Trees],
+                         [Aligned|Aligneds], Verdict0, Verdict) :-
+    align_rewritten(Original, Rewritten, Tree, Aligned, Child),
+    ( Child == same -> Verdict1 = Verdict0 ; Verdict1 = changed ),
+    align_rewritten_children(Originals, Rewrittens, Trees, Aligneds, Verdict1, Verdict).
+
+observe_bound_tree(_, Aligned) :-
+    nb_current('$metta_observed_form', observed(_, aligned(Aligned))), !.
+observe_bound_tree(Tree, Tree).
+
+observe_rewritten(Origin, Bound, Goal) :-
+    call(Goal),
+    ( Origin = origin(runnable, _),
+      nb_current('$metta_compile_locations', Context),
+      Context = compiling(_, Tree, _),
+      nb_current('$metta_observed_runnable', Runnable)
+    -> observe_bound_tree(Tree, BoundTree),
+       nb_linkarg(1, Context, Bound), nb_linkarg(2, Context, BoundTree),
+       nb_linkarg(3, Runnable, BoundTree)
     ; true ).
 
 source_for_clause(Input, StoredRef, Id, Tree) :-
     variant_sha1(Input, Key),
     current_metta_module(Module),
-    source_equation(Key, Module, StoredRef, Id, Tree),
-    spaces:stored_atom_of_ref(StoredRef, _, Original, _),
-    Original =@= Input,
+    source_equation(Key, Module, StoredRef, Id, Expected, Tree),
+    Expected =@= Input,
+    spaces:stored_atom_of_ref(StoredRef, _, _, _),
     \+ ( clause_source(Compiled, StoredRef, _, _),
          \+ clause_property(Compiled, erased) ),
     !.
@@ -154,17 +241,31 @@ compile_expression(Expression, Start, End, Goal) :-
       Context = compiling(Input, Tree, Records),
       source_subterm(Input, Tree, Expression, Span, Kind)
     -> Expression=[Name|_],
-       ( Kind==token -> Construct=token(Name) ; Construct=Name ),
+       observed_construct(Kind, Name, Construct),
        nb_linkarg(3, Context, [emitted(Span, Construct, Start, End)|Records])
     ; true ).
 
+observed_construct(token, Name, token(Name)).
+observed_construct(generated(Reason), _, generated(Reason)).
+observed_construct(source, Name, Name).
+
 source_subterm(Term, node(Span,Children), Wanted, Span, Kind) :-
     same_term(Term, Wanted), !,
-    ( Children==[], Term=[_|_] -> Kind=token ; Kind=source ).
-source_subterm(Term, node(_,Trees), Wanted, Span, Kind) :-
-    is_list(Term),
+    ( generated_children(Children, Reason) -> Kind = generated(Reason)
+    ; Children==[], Term=[_|_] -> Kind=token
+    ; Kind=source ).
+source_subterm(Term, node(_,Children), Wanted, Span, Kind) :-
+    is_list(Term), aligned_children(Children, Trees),
     same_length(Term, Trees),
     source_subterms(Term, Trees, Wanted, Span, Kind).
+
+% A node's second argument is the list of written subterm nodes, or
+% generated(Reason) when nothing below the span is known, or
+% generated(Reason, Nodes) when the node was rewritten but its children align.
+generated_children(generated(Reason), Reason).
+generated_children(generated(Reason, _), Reason).
+aligned_children(generated(_, Trees), Trees) :- !.
+aligned_children(Trees, Trees) :- is_list(Trees).
 source_subterms([Term|_], [Tree|_], Wanted, Span, Kind) :-
     source_subterm(Term, Tree, Wanted, Span, Kind), !.
 source_subterms([_|Terms], [_|Trees], Wanted, Span, Kind) :-
@@ -177,22 +278,38 @@ publish_clause(Ref, Clause) :-
     ( nb_current('$metta_pending_source_maps', Pending),
       select_pending(Clause, Pending, Entry, Rest)
     -> nb_linkval('$metta_pending_source_maps', Rest),
-       Entry = pending(_, StoredRef, Id, node(ClauseSpan,_), Records),
+       Entry = pending(_, StoredRef, Id, node(ClauseSpan,Children), Records),
        assertz(clause_source(Ref, StoredRef, Id, ClauseSpan)),
-       publish_locations(Ref, Clause, Id, Records)
+       ( generated_children(Children, Reason)
+       -> assertz(unavailable_location(Id, ClauseSpan, Reason, Ref))
+       ; true ),
+       publish_locations(Ref, Clause, Id, ClauseSpan, Records)
     ; true ).
 
-publish_locations(Ref, Clause, Id, Records) :-
+publish_locations(Ref, Clause, Id, ClauseSpan, Records) :-
     forall(( clause_shape_matches(Ref,Clause),
              goal_path(Clause, [], Path, Goal),
              most_specific_span(Goal, Records, Span, Construct) ),
-           ( goal_attribution(Goal, Construct, Attribution),
-             assertz(clause_location(Ref, Path, Id, Span, Attribution)) )),
-    forall(( member(emitted(Span, _, Start, End), Records),
+           publish_location(Ref, Path, Id, ClauseSpan, Span, Construct, Goal)),
+    forall(( member(emitted(Span, Emitted, Start, End), Records),
              \+ same_term(Start, End),
              \+ clause_location(Ref, _, Id, Span, _),
-             containing_construct(Span, Ref, Construct) ),
+             \+ unavailable_location(Id, Span, _, Ref),
+             ( Emitted = generated(Construct) -> true
+             ; containing_construct(Span, Ref, Construct) ) ),
            assertz(unavailable_location(Id, Span, Construct, Ref))).
+
+% Code a rewriter generated is located at the whole form, the nearest span the
+% written source still vouches for, and the span it displaced reports its
+% coverage unavailable; SWI likewise reports a generated closure by its
+% parent's construct (goal_attribution/3 below).
+publish_location(Ref, Path, Id, ClauseSpan, Span, generated(Reason), _) :- !,
+    assertz(clause_location(Ref, Path, Id, ClauseSpan, ['generated-by', Reason])),
+    ( unavailable_location(Id, Span, Reason, Ref) -> true
+    ; assertz(unavailable_location(Id, Span, Reason, Ref)) ).
+publish_location(Ref, Path, Id, _, Span, Construct, Goal) :-
+    goal_attribution(Goal, Construct, Attribution),
+    assertz(clause_location(Ref, Path, Id, Span, Attribution)).
 
 % Validate the complete normalized compiler tree against SWI's actual clause.
 % Unknown VM simplifications invalidate attribution rather than shifting a
@@ -429,7 +546,7 @@ install_exception_observers(Owner, GC) :-
     assertz(installed_hook(TraceReference)).
 
 %Total, like remove_wrapper/2 below, because this runs in the cleanup that
-%also takes the eleven wrappers off: a raise here would strand them, and a
+%also removes the compiler and runtime wrappers: a raise here would strand them, and a
 %hook clause outlives the whole rest of the process. Nothing hides behind the
 %catch, because the_observer_holds_no_hook_outside_an_observation asks the
 %database whether the clauses are actually gone.
@@ -466,20 +583,29 @@ observation_hit(Buffer, Key) :-
 
 observe_form(Space, Form, Answers, Goal) :-
     ( nb_current('$metta_observation', _),
-      Form=parsed(runnable,_,Term,_),
+      filereader:source_form(Form, ParsedForm),
+      filereader:parsed_form_parts(ParsedForm, Kind, _, Term),
       nb_current('$metta_source_context',context(_,Id,_,Pairs)),
       member(PairForm-positioned(_,_,_,_,Tree),Pairs),
-      same_term(Form,PairForm)
-    -> save_context('$metta_compile_locations', Previous),
-       save_context('$metta_observed_runnable', PreviousRunnable),
-       Context=compiling(Term,Tree,[]),
+      same_term(ParsedForm,PairForm)
+    -> save_context('$metta_observed_form', Previous),
        setup_call_cleanup(
-           ( nb_linkval('$metta_compile_locations',Context),
-             nb_linkval('$metta_observed_runnable',runnable(Space,Id,Tree,Context)) ),
-           (call(Goal),record_answers(Id,Answers)),
-           ( restore_context('$metta_compile_locations',Previous),
-             restore_context('$metta_observed_runnable',PreviousRunnable) ))
+           nb_linkval('$metta_observed_form', observed(Tree, none)),
+           observe_positioned_form(Kind, Space, Term, Id, Tree, Answers, Goal),
+           restore_context('$metta_observed_form', Previous))
     ; call(Goal) ).
+
+observe_positioned_form(runnable, Space, Term, Id, Tree, Answers, Goal) :- !,
+    save_context('$metta_compile_locations', Previous),
+    save_context('$metta_observed_runnable', PreviousRunnable),
+    Context=compiling(Term,Tree,[]),
+    setup_call_cleanup(
+        ( nb_linkval('$metta_compile_locations',Context),
+          nb_linkval('$metta_observed_runnable',runnable(Space,Id,Tree,Context)) ),
+        (call(Goal),record_answers(Id,Answers)),
+        ( restore_context('$metta_compile_locations',Previous),
+          restore_context('$metta_observed_runnable',PreviousRunnable) )).
+observe_positioned_form(_, _, _, _, _, _, Goal) :- call(Goal).
 
 observe_goals(Module, Goals, Original) :-
     ( nb_current('$metta_observed_runnable', runnable(_,Id,Tree,Context))
@@ -500,7 +626,7 @@ execute_observed_goals(Module,Goals,Id,node(Span,_),Context) :-
         assertz(Module:Clause,Ref),
         ( assertz(clause_source(Ref,temporary,Id,Span)),
           arg(3,Context,Records),
-          publish_locations(Ref,Clause,Id,Records),
+          publish_locations(Ref,Clause,Id,Span,Records),
           forall((goal_path(Clause,[],Path,_),\+ clause_location(Ref,Path,_,_,_)),
                  assertz(clause_location(Ref,Path,Id,Span,['generated-by',execution]))),
           call(Module:Head) ),
@@ -516,11 +642,14 @@ source_input(Source,Goal) :-
 source_forms(Parsed,Space,Goal) :-
     ( nb_current('$metta_source_input',Pending), Pending=pending(Source,new)
     -> nb_linkarg(2,Pending,consumed),
-       with_source(Source,Parsed,Space,Goal)
+       maplist(filereader:source_form, Parsed, Forms),
+       with_source(Source,Forms,Space,Goal)
     ; call(Goal) ).
 
 install_runtime_observers(Owner, GC) :-
     install_exception_observers(Owner, GC),
+    wrap_predicate(filereader:rewrite_source_form(_, Input, _, Bound, _), source_observer,
+                   Rewriter, source_observation:observe_rewriter(Input, Bound, Rewriter)),
     wrap_predicate(filereader:metta_host_run_source(Source,_,_,_), source_observer,
                    Host, source_observation:source_input(Source,Host)),
     wrap_predicate(filereader:process_direct_metta_string(Source,_,_), source_observer,
@@ -540,19 +669,23 @@ install_runtime_observers(Owner, GC) :-
     wrap_predicate(filereader:process_loader_form(Space,Form,LoaderAnswers), source_observer,
                    OriginalLoader, source_observation:observe_form(Space,Form,LoaderAnswers,OriginalLoader)),
     metta_engine_module(Engine),
+    % wrap_predicate/4 takes the most general head; the origin's kind is read inside.
+    wrap_predicate(Engine:rewrite_parsed_form(_, Origin, _, _, Rewritten), source_observer,
+                   ParsedRewrite, source_observation:observe_rewritten(Origin, Rewritten, ParsedRewrite)),
     wrap_predicate(Engine:call_goals_in(Module,Goals), source_observer,
                    OriginalGoals, source_observation:observe_goals(Module,Goals,OriginalGoals)).
 
 remove_runtime_observers :-
     remove_exception_observers,
-    % policy-inventory-exempt: mechanism-internal; reason=the eight loader predicates this observer wraps at install, listed so removal unwraps exactly the set installation wrapped; evidence=engine/source_observation.pl:remove_wrapper/2
+    % policy-inventory-exempt: mechanism-internal; reason=the loader predicates this observer wraps at install, listed so removal unwraps exactly the set installation wrapped; evidence=engine/source_observation.pl:remove_wrapper/2
     forall(member(PI,[metta_host_run_source/4,process_direct_metta_string/3,
                       process_loader_string/3,metta_host_process_groups/3,
                       process_forms/4,record_source_atom_assertion/1,
-                      process_form/3,process_loader_form/3]),
+                      process_form/3,process_loader_form/3,rewrite_source_form/5]),
            remove_wrapper(filereader:PI,source_observer)),
     remove_wrapper(spaces:assert_function_clause/3,source_observer),
     metta_engine_module(Engine),
+    remove_wrapper(Engine:rewrite_parsed_form/5,source_observer),
     remove_wrapper(Engine:call_goals_in/2,source_observer).
 
 remove_wrapper(PI,Name) :-
@@ -613,7 +746,7 @@ observe_source_locked(Space,Label,Source,Atoms) :-
           set_prolog_flag(last_call_optimisation,LCO),
           remove_runtime_observers, remove_compiler_observers,
           retractall(source_document(_,_,_)),
-          retractall(source_equation(_,_,_,_,_)),
+          retractall(source_equation(_,_,_,_,_,_)),
           retractall(clause_source(_,_,_,_)),
           retractall(clause_location(_,_,_,_,_)),
           retractall(unavailable_location(_,_,_,_)),
@@ -635,13 +768,17 @@ collect_observation(Buffer, _Groups, Error, Atoms) :-
               Span=span(_,_,L,C,EL,EC),
               location_hits(Hits,Id,Span,Count) ), Coverage),
     error_atoms(Errors,0,ErrorAtoms),
+    % A location at the same span attributed to the same construct anchors the
+    % frames of generated code there; it is not a coverage claim for the span.
     findall(['source-coverage-unavailable',Label,L,C,EL,EC,['generated-by',Construct]],
             ( unavailable_location(Id,Span,Construct,_),
-              \+ clause_location(_,_,Id,Span,_),
+              \+ ( clause_location(_,_,Id,Span,Attribution),
+                   Attribution \== ['generated-by',Construct] ),
               Span=span(_,_,L,C,EL,EC),
               source_document(Id,Label,_) ), Unavailable0),
     findall(['source-coverage-unavailable',Label,L,C,EL,EC,'not-compiled'],
-            ( source_equation(_,_,Stored,Id,node(_,[_,_,node(span(_,_,L,C,EL,EC),_)])),
+            ( source_equation(_,_,Stored,Id,_,node(_,Children)),
+              aligned_children(Children, [_,_,node(span(_,_,L,C,EL,EC),_)]),
               \+ clause_source(_,Stored,_,_), source_document(Id,Label,_) ),
             Deferred),
     append(Unavailable0,Deferred,Unavailable1),
@@ -654,7 +791,7 @@ observed_location(Id,Span) :-
     findall(Id0-Span0,
             ( clause_location(_,_,Id0,Span0,_)
             ; clause_source(_,_,Id0,Span0)
-            ; source_equation(_,_,_,Id0,node(Span0,_)) ),
+            ; source_equation(_,_,_,Id0,_,node(Span0,_)) ),
             Locations),
     sort(Locations,Pairs), member(Id-Span,Pairs).
 

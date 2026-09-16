@@ -764,6 +764,7 @@ metta_transaction_scope_results(Scope, Outcome, Notice, NativeResult, Observatio
     % The value form rolls its Error-valued answers back through its own
     % signal; that decision reaches the caller as Outcome, not as an error.
     ( Returned = threw('$metta_transaction_error_answers'(_)) -> NativeResult = ok
+    % policy-inventory-exempt: mechanism-internal; reason=the host's own transaction verdicts under which a failed native goal is a completion failure rather than the rollback signal, not a MeTTa policy value; evidence=engine/metta/space_hooks.pl:metta_transaction_decision/3
     ; Returned == failed, memberchk(Outcome, [committed, discarded])
     -> NativeResult = threw(error(metta_completion_failed(native_transaction(Outcome)), none))
     ; Returned == failed -> NativeResult = ok
