@@ -7,7 +7,7 @@
 %   absent on 10.1.14 built with
 %   tests/checks/host_workarounds/swi-transaction-enumerator-repeats-parent.patch;
 %   command=sh check.sh host-workarounds;
-%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=0d35a802f4dcec1185798fd017db744ab3a3d66f].
 % Owns resources: both empty transactions finish before the result is printed.
 
 main :-
