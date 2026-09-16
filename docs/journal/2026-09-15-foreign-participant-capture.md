@@ -80,3 +80,16 @@ Tried: `ai-tmp/ai-participant-bare-rollback-witness.pl` -> `observed(silently_fa
 [original-capture, original-begin, other-capture, other-begin, other-rollback])`: the original's
 rollback is never attempted and the body's exception is lost when another participant's
 rollback fails, as the completion unit expects to repair.
+
+## 2026-09-16, later: a parametric name reads as absent
+
+Tried: the transaction-heavy Python chapters after the capture landed -> 32 tests in the
+space-name transport, parametric space, mapping space, length refinement and channel creation
+files raised `atom_string/2: Type error: string expected, found ['transport-space', ...]`. The
+provider table's own normaliser accepted atoms and strings only, and `PROVIDERS` is consulted
+for every space operand, parametric lists included; the Python dictionary it replaced had
+answered False for those.
+Decided: the lookup, registration and unregistration doors use the binding's
+`metta_py_space_atom/2`, which turns a string into an atom and passes any other name through, so
+a parametric name finds no row and reads as absent. The unit's own battery had not covered those
+chapters; the transaction-heavy chapters are part of the next units' verification.
