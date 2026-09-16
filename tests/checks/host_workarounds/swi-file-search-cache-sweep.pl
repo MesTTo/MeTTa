@@ -7,7 +7,7 @@
 %   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
 %   absent on 10.1.14 built with tests/checks/host_workarounds/swi-file-search-cache-sweep.patch;
 %   command=sh check.sh host-workarounds;
-%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=c01a874d38c31236c22dbe2f30fab689ec5bc510].
 % Owns resources: this fresh process's cache timestamps and loaded libraries;
 %   neither survives process exit.
 
