@@ -389,6 +389,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   ledger entries, one patch); the specializer's and the import form's forced
   materialisation and the reader's direct provider call stay for their own
   reasons and lose the marker.
+- A compiled call that once met a name undefined consults the loader again on
+  the patched host: SWI-Prolog's cached undefined supervisor asks
+  `user:exception/3` once more before it raises (`swi-cached-undefined-supervisor`,
+  the ninth patched ledger entry), so deferring a definition records it without
+  rearming a native slot.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull

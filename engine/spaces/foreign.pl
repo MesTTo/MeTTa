@@ -848,16 +848,11 @@ defer_metta_function(Space, Module, F, InputArity, _Count) :-
     !,
     translate_deferred_shape(Space, Module, F, InputArity).
 defer_metta_function(Space, Module, F, InputArity, Count) :-
-    % Workaround: swi-cached-undefined-supervisor - rearm the undefined native slot before deferring its definition.
-    % A compiled caller can retain S_UNDEF and bypass user:exception/3.
-    % Reference scopes also reuse this body for visible definitions, which
-    % must retain their clauses. Neither lookup autoloads or creates an import;
-    % abolish/1 is a no-op when this module has no native slot yet.
-    Arity is InputArity + 1,
-    compiled_function_name(F, Predicate),
-    ( current_predicate(Module:Predicate/Arity)
-    -> true
-    ; abolish(Module:Predicate/Arity) ),
+    % A compiled caller that already met the name undefined consults
+    % user:exception/3 again on its next call (host ledger,
+    % swi-cached-undefined-supervisor), so deferring the definition records
+    % it and touches no native slot; reference scopes reuse this body for
+    % visible definitions, whose clauses stay untouched.
     current_owning_source_load(Load),
     (   retract(deferred_metta_function(F, Module, Space, InputArity,
                                         Load, Sofar))

@@ -1,34 +1,3 @@
-diff --git a/src/pl-vmi.c b/src/pl-vmi.c
-index f64f4e1..2658c7f 100644
---- a/src/pl-vmi.c
-+++ b/src/pl-vmi.c
-@@ -2507,7 +2507,7 @@ VMI(I_LCALL, 0, 1, (CA1_LPROC))
-       THROW_EXCEPTION;
-   }
- 
--  if ( !DEF->impl.any.defined && isoff(DEF, PROC_DEFINED) )
-+  if ( undefinedForCall(DEF) )
-   { SAVE_REGISTERS(QID);
-     DEF = getProcDefinedDefinition(DEF);
-     LOAD_REGISTERS(QID);
-@@ -3244,7 +3244,7 @@ this supervisor (see resetProcedure()). The task of this is to
- VMI(S_VIRGIN, 0, 0, ())
- { lTop = (LocalFrame)argFrameP(FR, FR->predicate->functor->arity);
- 
--  if ( !DEF->impl.any.defined && isoff(DEF, PROC_DEFINED) )
-+  if ( undefinedForCall(DEF) )
-   { SAVE_REGISTERS(QID);
-     DEF = getProcDefinedDefinition(DEF);
-     LOAD_REGISTERS(QID);
-@@ -3255,7 +3255,7 @@ VMI(S_VIRGIN, 0, 0, ())
-     if ( FR->prof_node )
-       profSetHandle(FR->prof_node, DEF);
- #endif
--    if ( DEF->impl.any.defined )
-+    if ( !undefinedForCall(DEF) )
-       VMH_GOTO(depart_or_retry_continue);
- #ifdef O_PLMT
-   } else if ( ison(DEF, P_THREAD_LOCAL) )
 diff --git a/src/pl-wam.c b/src/pl-wam.c
 index 1cc1aa7..1f41182 100644
 --- a/src/pl-wam.c
@@ -62,3 +31,34 @@ index 1cc1aa7..1f41182 100644
      def = trapUndefined(def);
  
  #ifdef O_PLMT
+diff --git a/src/pl-vmi.c b/src/pl-vmi.c
+index f64f4e1..b077402 100644
+--- a/src/pl-vmi.c
++++ b/src/pl-vmi.c
+@@ -2507,7 +2507,7 @@ VMI(I_LCALL, 0, 1, (CA1_LPROC))
+       THROW_EXCEPTION;
+   }
+ 
+-  if ( !DEF->impl.any.defined && isoff(DEF, PROC_DEFINED) )
++  if ( undefinedForCall(DEF) )
+   { SAVE_REGISTERS(QID);
+     DEF = getProcDefinedDefinition(DEF);
+     LOAD_REGISTERS(QID);
+@@ -3244,7 +3244,7 @@ this supervisor (see resetProcedure()). The task of this is to
+ VMI(S_VIRGIN, 0, 0, ())
+ { lTop = (LocalFrame)argFrameP(FR, FR->predicate->functor->arity);
+ 
+-  if ( !DEF->impl.any.defined && isoff(DEF, PROC_DEFINED) )
++  if ( undefinedForCall(DEF) )
+   { SAVE_REGISTERS(QID);
+     DEF = getProcDefinedDefinition(DEF);
+     LOAD_REGISTERS(QID);
+@@ -3255,7 +3255,7 @@ VMI(S_VIRGIN, 0, 0, ())
+     if ( FR->prof_node )
+       profSetHandle(FR->prof_node, DEF);
+ #endif
+-    if ( DEF->impl.any.defined )
++    if ( !undefinedForCall(DEF) )
+       VMH_GOTO(depart_or_retry_continue);
+ #ifdef O_PLMT
+   } else if ( ison(DEF, P_THREAD_LOCAL) )

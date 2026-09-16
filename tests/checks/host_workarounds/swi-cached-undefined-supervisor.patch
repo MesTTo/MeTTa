@@ -1,0 +1,32 @@
+diff --git a/src/pl-vmi.c b/src/pl-vmi.c
+index f64f4e1..b077402 100644
+--- a/src/pl-vmi.c
++++ b/src/pl-vmi.c
+@@ -3289,6 +3289,27 @@ VMI(S_UNDEF, 0, 0, ())
+     { fid_t fid;
+       Definition caller;
+ 
++      /* The cached undefined supervisor consults the loader once more
++	 before raising: an exception/3 hook whose deferred source has
++	 become available since the supervisor was installed defines the
++	 predicate now, where the cache used to raise past it. */
++      if ( truePrologFlag(PLFLAG_AUTOLOAD) && !GD->bootsession )
++      { Definition ndef;
++
++	lTop = (LocalFrame)argFrameP(FR, DEF->functor->arity);
++	SAVE_REGISTERS(QID);
++	ndef = trapUndefined(DEF);
++	LOAD_REGISTERS(QID);
++	if ( exception_term )
++	  THROW_EXCEPTION;
++	if ( !undefinedForCall(ndef) )
++	{ DEF = ndef;
++	  setFramePredicate(FR, DEF);
++	  setGenerationFrame(FR);
++	  VMH_GOTO(depart_or_retry_continue);
++	}
++      }
++
+       if ( FR->parent )
+ 	caller = FR->parent->predicate;
+       else

@@ -94,23 +94,29 @@ Lifted when: bound-reference clause/3 returns the same occurrence admitted by
 Record: docs/journal/2026-09-15-native-owned-records.md.
 
 ## swi-cached-undefined-supervisor
-Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
-  src/pl-proc.c:trapUndefined, src/pl-supervisor.c:createUndefSupervisor
-  and src/pl-vmi.c:S_UNDEF.
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; src/pl-proc.c:trapUndefined,
+  src/pl-supervisor.c:createUndefSupervisor and src/pl-vmi.c:S_UNDEF. This
+  tree runs on 10.1.14 built with the patch below.
 Defect: an unsuccessful undefined-predicate hook installs an S_UNDEF
   supervisor. A later compiled call can reuse it and throw directly, bypassing
   a hook whose deferred source has become available since the first call.
 Reproduction: tests/checks/host_workarounds/swi-cached-undefined-supervisor.pl,
   a failed call followed by an available loader and an explicitly qualified
   compiled caller. A fresh predicate verifies that the same loader works.
-Workaround: deferred registration abolishes its native slot only when no
-  definition is visible. Reference scopes can reuse that registration body
-  while retaining existing native answers. Rearming an absent slot allocates
-  nothing and evaluates no source body.
-Lifted when: a cached undefined call consults the loader after source becomes
-  available, so the reproduction prints absent.
-Record: docs/journal/2026-09-15-deferred-definitions-rearm-undefined-calls.md.
-
+Patch: tests/checks/host_workarounds/swi-cached-undefined-supervisor.patch,
+  against swipl-devel V10.1.14 src/pl-vmi.c on top of
+  swi-erased-definition-bypasses-loader.patch: S_UNDEF's error case consults
+  the loader once more (`trapUndefined()`) before raising, when autoloading is
+  on and the system has booted, and continues into the definition it yields;
+  a loader that defines nothing still raises, and the `unknown` flag's fail
+  and warning cases keep their cached answer. The reproduction answers absent
+  and SWI's core, db, transaction, tabling, save, files, compile, attvar and
+  engines groups pass on the build.
+Lifted when: SWI-Prolog as shipped consults the loader from a cached undefined
+  call, so the reproduction prints absent; the patch and the entry go together
+  then.
+Record: docs/journal/2026-09-17-host-patches.md;
+  docs/journal/2026-09-15-deferred-definitions-rearm-undefined-calls.md.
 ## swi-empty-indexed-snapshot
 Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; src/pl-index.c,
   first_clause_guarded. This tree runs on 10.1.14 built with the patch below.
