@@ -7,6 +7,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+- Door-order analysis reads the structure the source declares: a generic
+  annotation keeps its element, key, position or class type and admits only
+  that type's own operations; a door's public contract is its overloads'
+  when it has them, and an `Any` alternative stays a value of unknown
+  structure; a declared parameter or return type settles a value the source
+  cannot type; `*args` and `**kwargs` bind as the tuple and mapping Python
+  makes; a `__slots__` descriptor taken from a class namespace and a
+  `UserList` base reach their fields; `callable()` tests and early exits
+  narrow as a type checker does. Which standard-library calls invoke a
+  supplied callback is read from mypy's typeshed into the generated table
+  `extensions/python/metta/doors/_invocations.py`, so `sorted(key=)` and
+  `atexit.register` run their callback and `callable(fn)` does not. A value
+  the standard library made is host work; what a supplied callable answers
+  keeps its contract instead of becoming a defect.
+
 - A boot no longer analyses the Python seat's source to publish door orders.
   The verdict of every shipped door lives in the generated table
   `extensions/python/metta/doors/_orders.py`, which
