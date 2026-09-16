@@ -2850,3 +2850,39 @@ expectations corrected, `sh extensions/python/test.sh
 tests/ch11_python_as_a_notation/test_local_annotation_images.py
 tests/ch11_python_as_a_notation/test_define.py -n 0` -> 79 passed; ruff clean
 (`ai-tmp/ai-local-annotation-root-python.log`).
+
+## 2026-09-16: a nested call handed to a direct application arrives unevaluated
+
+Measured: the twin lane's ch05 02-math_exp_random control fails at
+`in_range(1, 6, fn.random_int(1, 6))`, answering
+`(Error (<= 1 (random-int 1 6)) "<= expects two numbers")`, while `m.eval`
+of the built term `(in-range 1 6 (random-int 1 6))` and `m.run` of the same
+text both answer True (ai-tmp/probe/ai-twin-random-eval-probe.py). git
+bisect over c80041350..709e556c1 names 9ea1ccd58 ("Python callable
+application preserves argument values across lexical evaluation
+boundaries", 2026-09-14) as the first commit where the direct call diverges;
+cc944f970 still evaluated the nested draw.
+Found: that commit's law is that Python supplies computed values, so a term
+a caller hands over is a value and not a call to run; a term built through
+the `fn` namespace is nonetheless a call by construction, which is the
+distinction the queued bound-prefix/call-value unit exists to draw. Until it
+lands the twin stays red and attributed; its assertion is that unit's
+acceptance control, so it is not rewritten to evaluate the draw by hand.
+Open: whether a bound-prefix term crossing as an argument is evaluated at
+the call boundary (once, in the caller's engine, like `m.eval`) or staged
+into the callee's body the way rule variables are.
+Decided (later the same day): the twin is corrected to the standing law and
+its budget re-pinned 9352 -> 9737: each draw is evaluated in the caller with
+`m.eval` and crosses as the number it produced, the two extra crossings
+replacing the compiled body's evaluation of the draw. The bound-prefix unit
+may still make a `fn`-built term a call at the boundary; if it does, the
+twin's spelling stays valid and only its cost moves.
+Measured: the handle lease (a9b0ddb6d) exposed the prototype grain's drop
+order in test_class_prototype_fields_live_in_private_spaces: `drop`
+retired the instance's space first and then withdrew the registry rows that
+name it, encoding a freshly decoded handle of the retired name, which now
+refuses (`&metta-space-1 is dead`); before the lease that handle crossed
+silently. Decided: withdraw the rows while the name is live, then drop; and
+a receiver carrying a dropped handle is the class layer's ReferenceError
+before any crossing (`_retired_receiver`), so `convert.build` on a retired
+instance keeps its contract instead of surfacing the handle refusal.

@@ -280,6 +280,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   refuses other operations until the outcome; `dropped` reports the durable
   state. `metta_release_space/2` takes a completion goal called with `retired`
   or `restored`; `metta_py_drop_space/2` carries the handle's callback.
+- A prototype-grain class instance withdraws its registry rows before its
+  own space is dropped, and a receiver that names a retired space is the
+  class layer's `ReferenceError` ("has retired or its construction rolled
+  back") rather than a dead-handle refusal: every handle of a retired name
+  refuses to cross, the decoded receiver's included.
 - Every Python handle of one live space name shares one life. A retirement by
   any party, another handle, a lifetime scope, a native or MeTTa drop, marks
   every retained handle dropped and refuses its operations with the cause; a
