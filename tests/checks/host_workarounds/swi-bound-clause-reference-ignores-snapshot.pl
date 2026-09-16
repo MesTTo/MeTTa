@@ -5,7 +5,7 @@
 %   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
 %   absent on 10.1.14 built with tests/checks/host_workarounds/swi-bound-clause-reference-ignores-snapshot.patch;
 %   command=sh check.sh host-workarounds;
-%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=d25b44011fc1649f0bf1b1c2b079598468d9db72].
 % Owns resources: the erasing thread is joined before inspection; the fixture
 %   is removed after the outer transaction finishes.
 
