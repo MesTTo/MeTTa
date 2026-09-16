@@ -72,7 +72,7 @@ DISPLAY set, and that one is not an exec module: SWI's library(check) walk
 profiler hook library(prolog_profile) references, so xpce initialises the
 display from inside SWI's own checker. The lane passes with DISPLAY unset,
 and structurally on a host built without xpce, which the host-patch track's
-/home/user/Dev/swipl-patched is (`-DSWIPL_PACKAGES_X=OFF`).
+~/Dev/swipl-patched is (`-DSWIPL_PACKAGES_X=OFF`).
 
 Found (the `no-autoload` corpus gate, run further than before once
 host_transactions declared its names): examples/ch20-extending-the-engine/

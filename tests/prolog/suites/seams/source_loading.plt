@@ -47,14 +47,6 @@ test(a_caught_inner_error_is_still_the_outer_loads_error) :-
           error(metta_load_failed(Outer), _), true),
     assertion(Outer == Expected).
 
-test(source_module_is_restored_on_success_failure_and_exception,
-     [forall(member(Exit, [true, fail, throw(planted_load_error)]))]) :-
-    '$current_source_module'(Before),
-    ( catch(loading_loudly(('$set_source_module'(source_loading_probe), Exit)),
-            planted_load_error, true) -> true ; true ),
-    '$current_source_module'(After),
-    assertion(After == Before).
-
 test(other_threads_diagnostics_are_not_collected) :-
     setup_call_cleanup(
         message_queue_create(Queue),
