@@ -2297,6 +2297,18 @@ prolog:error_message(metta_extension_required(Name, Cause)) -->
     { metta_extension_cause_text([Name], Name, Cause, Text) },
     [ 'extension ~w is required and not loaded: ~w'-[Name, Text] ].
 
+%A MeTTa head in an error context is the program's name for the operation, an
+%atom or an expression, never a predicate indicator. SWI-Prolog 10.1.14 renders
+%every callable context as Name/Arity, so the engine renders its own
+%[tested: tests/prolog/suites/evaluation/metta.plt; commit=WORKTREE].
+:- multifile prolog:message_location//1.
+prolog:message_location(context(Head, _)) -->
+    { metta_context_head(Head) },
+    [ '~p: '-[Head] ].
+
+metta_context_head(Head) :- atom(Head), !.
+metta_context_head(Head) :- is_list(Head).
+
 %The MeTTa spelling. It answers the unit `[]` like every other builtin whose
 %point is what it lets the rest of the file assume, and its first argument is
 %guarded because a declared Symbol position is [tested:
