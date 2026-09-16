@@ -559,9 +559,9 @@ specialize_call_locked(HV, CleanBindSet, MetaList, HasDirectBenefit,
     ).
 
 specialization_goal(SpecName, AVs, Out, Goal) :-
-    % Workaround: swi-erased-definition-bypasses-loader - force retained source before emitting the native call.
-    % Ordinary call preparation uses this same door. A copied specialization
-    % can own its name before its body has been translated.
+    % Ordinary call preparation uses this same door: a copied specialization
+    % can own its name before its body has been translated, and the force
+    % materializes the retained source before the native call is emitted.
     metta_ensure_compiled(SpecName),
     append(AVs, [Out], CallArgs),
     Spec =.. [SpecName|CallArgs],

@@ -1752,15 +1752,12 @@ translate_prolog_import_dl(Importer, [File, FunctionNames], Goals0, Goals, Out) 
     translate_expr_dl(File, Goals0, BeforeImport, ResolvedFile),
     Goal =.. [Importer, ResolvedFile, FunctionNames, Out],
     space_operation_capability(Importer, Capability),
-    % Workaround: swi-erased-definition-bypasses-loader - force deferred importer source before its emitted call runs.
+    %The importer's source is forced at run time, in the emitted goals.
     %The FORCE travels in the emitted goals, at run time rather than compile
     %time, because the importer is itself a MeTTa equation (lib_import.metta
     %defines it) that this special form calls directly without the dispatch
     %analysis whose door would otherwise force it. Compile-time forcing is
-    %not enough: the form can compile before the equation arrives, and the
-    %undefined-predicate net cannot catch the miss on a POOLED space, where
-    %SWI does not consult the hook again for a name that was defined and
-    %abolished in an earlier life.
+    %not enough: the form can compile before the equation arrives.
     translate_restricted_guard_dl(
         metta_require_current_capability(Importer, Capability),
         [metta_ensure_compiled(Importer), Goal|Goals],
