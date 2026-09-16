@@ -2,12 +2,12 @@
 % Assumes: reference_refresh.pl supplies one checked face epoch and the reader
 %   supplies parallel source origins [source:
 %   engine/metta/reference_refresh.pl:metta_reference_refresh_now/0;
-%   commit=WORKTREE].
+%   commit=1a8c00f93ae6c63ccabd41d39fed3f967dadd3a9].
 % Guarantees: local source roots and current callable roots precede imported
 %   data names; ambiguous origins refuse on use [tested:
 %   reference_source_origins:declarations_introduce_names_but_nested_declarations_and_equations_are_uses,
 %   reference_source_origins:callable_union_and_withdrawal_use_standing_roots,
-%   reference_source_origins:distinct_origins_refuse_only_the_ambiguous_use; commit=WORKTREE].
+%   reference_source_origins:distinct_origins_refuse_only_the_ambiguous_use; commit=1a8c00f93ae6c63ccabd41d39fed3f967dadd3a9].
 % Owns resources: metta_reference_source_reader/3 owns exact derived clause
 %   references. Refresh replaces them and home release erases them. Their
 %   transaction state follows the source rows and existing frame reconciliation.

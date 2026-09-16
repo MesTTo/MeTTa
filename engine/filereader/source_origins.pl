@@ -1,11 +1,11 @@
 % Purpose: carry source origins beside supplied values through reader rewrites.
 % Assumes: parsed kinds describe executed forms, while source/value/children
 %   origins describe subterms independently [source:
-%   engine/filereader.pl:metta_host_run_source/4; commit=WORKTREE].
+%   engine/filereader.pl:metta_host_run_source/4; commit=1a8c00f93ae6c63ccabd41d39fed3f967dadd3a9].
 % Guarantees: supplied and token-returned values never acquire FROM meanings
 %   [tested: reference_source_origins:explicit_atom_values_keep_their_origins_inside_nested_source,
 %   reference_source_origins:data_doors_keep_their_existing_token_difference_and_share_from_resolution,
-%   test_supplied_atoms_keep_their_heads_inside_fresh_source; commit=WORKTREE].
+%   test_supplied_atoms_keep_their_heads_inside_fresh_source; commit=1a8c00f93ae6c63ccabd41d39fed3f967dadd3a9].
 % Decides: introduction positions shadow imported names within their form.
 
 :- use_module(library(assoc), [get_assoc/3]).

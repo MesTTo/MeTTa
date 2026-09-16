@@ -1,14 +1,14 @@
 % Purpose: verify FROM source elaboration, supplied values and reader ownership.
 % Assumes: ordinary global tokens and callable reference unions retain their
 %   existing meaning [source: engine/metta/control.pl:register_metta_token/2,
-%   engine/metta/references.pl:metta_reference_binding/6; commit=WORKTREE].
+%   engine/metta/references.pl:metta_reference_binding/6; commit=1a8c00f93ae6c63ccabd41d39fed3f967dadd3a9].
 % Owns resources: every test releases its generated homes in reverse order;
 %   callback and observation controls withdraw their exact installed clauses.
 % Guarantees: the controls cover both data doors, supplied values,
 %   shape-changing and malformed rewriters, mapper cycles, callable unions,
 %   withdrawal, diamonds, ambiguity, rollback, type aliases and observation
 %   alignment, each in four fresh homes released afterwards
-%   [tested: reference_source_origins; commit=WORKTREE].
+%   [tested: reference_source_origins; commit=1a8c00f93ae6c63ccabd41d39fed3f967dadd3a9].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

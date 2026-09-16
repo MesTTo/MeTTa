@@ -3,7 +3,7 @@
 % Assumes: source_origins.pl keeps supplied-value origins beside parsed terms;
 %   reference_sources.pl owns the receiving home's source-name projection
 %   [source: engine/filereader/source_origins.pl:source_bound_names/5;
-%   commit=WORKTREE].
+%   commit=1a8c00f93ae6c63ccabd41d39fed3f967dadd3a9].
 % Guarantees: ordinary deferral also preserves the resolved &self storage law
 %   [tested: test_equal_raw_and_resolved_source_can_still_own_a_binding;
 %   commit=323a89d607b656a3a238315ef111e3b23725ce83].
