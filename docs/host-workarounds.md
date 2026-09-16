@@ -136,9 +136,10 @@ Lifted when: SWI-Prolog as shipped routes the empty-current list through the
 Record: docs/journal/2026-09-17-host-patches.md, the walk and the inert
   clause it retires; docs/journal/2026-09-15-native-owned-records.md.
 ## swi-erased-definition-bypasses-loader
-Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
-  src/pl-vmi.c:S_VIRGIN, src/pl-proc.c:resetProcedure and
-  src/pl-supervisor.c:undefSupervisor.
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; src/pl-vmi.c:S_VIRGIN,
+  src/pl-wam.c:getProcDefinedDefinition, src/pl-proc.c:resetProcedure and
+  src/pl-supervisor.c:undefSupervisor. This tree runs on 10.1.14 built with
+  the patch below.
 Defect: abolish can leave erased clauses linked to a definition. S_VIRGIN
   treats the nonnull first-clause pointer as a definition and skips the loader;
   supervisor creation then sees zero live clauses and installs S_UNDEF.
@@ -146,14 +147,21 @@ Defect: abolish can leave erased clauses linked to a definition. S_VIRGIN
 Reproduction: tests/checks/host_workarounds/swi-erased-definition-bypasses-loader.pl,
   a compiled call after abolish while an earlier call retains its logical
   update view. A fresh predicate verifies the same loader independently.
-Workaround: call preparation uses metta_ensure_compiled/1 explicitly.
-  Specializations materialize retained source before emitting their native
-  call. Import forms already carry the force at runtime because their source
-  can arrive after the form was compiled. Neither path retries an evaluation.
-Lifted when: a reset predicate consults its loader despite retained erased
-  clauses, and the reproduction prints absent.
-Record: docs/journal/2026-09-15-copied-specializations-materialize-before-calls.md.
-
+Patch: tests/checks/host_workarounds/swi-erased-definition-bypasses-loader.patch,
+  against swipl-devel V10.1.14 src/pl-wam.c and src/pl-vmi.c: one test,
+  `undefinedForCall()`, says a call must resolve its definition first when the
+  predicate is not declared and either has no definition or is a clause
+  predicate with no live clause, whatever erased clauses it still links; the
+  VM's call sites and `getProcDefinedDefinition()` use it in place of the raw
+  first-clause pointer, so the loader (exception/3, autoload) is consulted for
+  a reset predicate and a loader that defines nothing still ends in the
+  undefined supervisor. The reproduction answers absent; SWI's core, db,
+  transaction, tabling, save, files and compile groups pass on the build.
+Lifted when: SWI-Prolog as shipped consults the loader for a reset predicate
+  despite retained erased clauses, so the reproduction prints absent; the
+  patch and the entry go together then.
+Record: docs/journal/2026-09-17-host-patches.md;
+  docs/journal/2026-09-15-copied-specializations-materialize-before-calls.md.
 ## swi-cleanup-window
 Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; `setup_call_cleanup/3` is
   `sig_atomic(Setup), '$call_cleanup'` (boot/init.pl:680-682). This tree
@@ -434,8 +442,8 @@ Record: docs/journal/2026-09-07-merged-tree-reconciliations.md, immediate cursor
   retirement and the 2026-09-10 host-reproduction section.
 
 ## swi-inherited-empty-predicate-retry
-Host: SWI-Prolog 10.1.13; S_VIRGIN in src/pl-vmi.c:3244-3270,
-  https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/src/pl-vmi.c#L3244-L3270.
+Host: SWI-Prolog 10.1.13 and 10.1.14 as shipped; S_VIRGIN in src/pl-vmi.c.
+  This tree runs on 10.1.14 built with the patch below.
 Defect: resolving a first inherited call retries and increments inferences
   when the provider's first-clause pointer is nonnull, even when every clause
   is retired. Clause collection clears that pointer and removes the retry,
@@ -443,16 +451,17 @@ Defect: resolving a first inherited call retries and increments inferences
 Reproduction: tests/checks/host_workarounds/swi-inherited-empty-predicate-retry.pl,
   compares inherited first/warm calls with retained and collected clauses in
   fresh plain-SWI processes, with direct provider calls controlling both arms.
-Workaround: translator:runnable_head_awaits_its_definition/1 calls
-  filereader:source_pending_definition/2 explicitly. The reader remains the
-  same unique provider; no collection or counter adjustment enters the path.
-Lifted when: inherited first-call counts agree in both states; the reproduction
-  then answers absent. Currently retained reads4/3 and collected3/3, while
-  direct calls read3/3 in both states. Inconsistent warm or direct controls,
-  reversed costs and child failures are broken reproductions.
-Record: docs/journal/2026-09-07-merged-tree-reconciliations.md, the 2026-09-11
+Patch: tests/checks/host_workarounds/swi-erased-definition-bypasses-loader.patch,
+  the same change: S_VIRGIN decides whether a call must resolve its definition
+  by `undefinedForCall()`, a clause predicate's live clause count rather than
+  its first-clause pointer, so a provider whose clauses are all retired reads
+  the same whether or not clause collection has run; inherited first-call
+  counts agree in both states and the reproduction answers absent.
+Lifted when: SWI-Prolog as shipped reads the live count there, so the
+  reproduction prints absent; the patch and the entry go together then.
+Record: docs/journal/2026-09-17-host-patches.md;
+  docs/journal/2026-09-07-merged-tree-reconciliations.md, the 2026-09-11
   buffered VM trace and unchanged-body foldall controls.
-
 ## swi-concurrent-import-removal-resets-provider
 Host: SWI-Prolog 10.1.13 at fc7ef84b949378b729052c3ade79c90ce5416abb;
   src/pl-proc.c:388-416, 1510-1544 and 2871-2935.

@@ -3,7 +3,12 @@
 %   diagnostic process compares retained and explicitly collected clauses.
 % Guarantees: first/warm inherited and direct calls run in separate fresh
 %   processes; unequal controls and child failures refuse a verdict [tested:
-%   sh check.sh host-workarounds host-workarounds-selftest; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
+%   sh check.sh host-workarounds host-workarounds-selftest; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
+%   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
+%   absent on 10.1.14 built with
+%   tests/checks/host_workarounds/swi-erased-definition-bypasses-loader.patch;
+%   command=sh check.sh host-workarounds;
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
 % Owns resources: children own their clauses and collector policy; the parent
 %   closes each output stream and joins the child, including on read errors.
 

@@ -1338,10 +1338,8 @@ translate_expr_dl([H|T], Goals0, Goals, Out) :-
 runnable_head_awaits_its_definition(Fun) :-
     translating_runnable,
     active_source_program(Id), !,
-    % Workaround: swi-inherited-empty-predicate-retry - call the reader's provider directly.
-    % S_VIRGIN retries an inherited first call when a retired ClauseRef still
-    % supplies its defined pointer; collection changes the counter by one.
-    % SWI fc7ef84b949378b729052c3ade79c90ce5416abb, src/pl-vmi.c:3244-3270.
+    % The reader is the one provider of pending definitions, so the call is
+    % direct rather than inherited.
     filereader:source_pending_definition(Id, Fun),
     current_metta_module(Module),
     \+ current_predicate(Module:Fun/_).

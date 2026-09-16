@@ -382,6 +382,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   procedure in its loader (`swi-qlf-failed-include-source-module`, the sixth
   patched ledger entry), so the loud loader collects diagnostics without
   restoring the module itself.
+- A reset predicate consults its loader again on the patched host: SWI-Prolog's
+  VM now asks whether a clause predicate has a live clause, not whether it links
+  any clause, before it resolves a call (`swi-erased-definition-bypasses-loader`
+  and `swi-inherited-empty-predicate-retry`, the seventh and eighth patched
+  ledger entries, one patch); the specializer's and the import form's forced
+  materialisation and the reader's direct provider call stay for their own
+  reasons and lose the marker.
 - A Python provider is held for the whole of every use: each `metta.foreign`
   door admits its use of the registration at entry and releases it when the
   use ends, a streamed match, enumeration or token stream at its last pull

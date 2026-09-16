@@ -4,7 +4,12 @@
 % Guarantees: a fresh-call control verifies loading; an open old call keeps
 %   retired clauses observable independently of clause collection, and the
 %   final line reports present or absent [tested:
-%   sh check.sh host-workarounds; commit=540eb6ad437efe08b343e6b86e89ac7dcb63ffee].
+%   sh check.sh host-workarounds; commit=540eb6ad437efe08b343e6b86e89ac7dcb63ffee]
+%   [measured 2026-09-17: present on SWI-Prolog 10.1.13 and 10.1.14 as shipped,
+%   absent on 10.1.14 built with
+%   tests/checks/host_workarounds/swi-erased-definition-bypasses-loader.patch;
+%   command=sh check.sh host-workarounds;
+%   fixture=SWI-Prolog 10.1.14 with the patch; commit=WORKTREE].
 
 :- dynamic ready/1, loaded/1.
 :- multifile user:exception/3.
