@@ -164,7 +164,7 @@ def fact(n: int) -> int:
     return n * fact(n - 1)
 
 assert str(fact.head) == "(fact $n)"
-assert str(fact.body) == "(if (py-truthy (py-operator eq $n 0)) 1 (* $n (fact (- $n 1))))"
+assert str(fact.body) == "(if (py-truthy (py-operator eq (noeval ($n 0)))) 1 (* $n (fact (- $n 1))))"
 assert fact(5) == [120]
 ```
 
